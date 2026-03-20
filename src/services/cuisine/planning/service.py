@@ -270,12 +270,24 @@ class ServicePlanning(
                     # Récupérer les extras (entrée/dessert)
                     extras = (repas_extras or {}).get(slot_key, {})
 
+                    # Construire les notes (avec info réchauffé si applicable)
+                    rechauffe_de = extras.get("_rechauffe_de")
+                    if rechauffe_de:
+                        import json as _json
+
+                        notes_val = _json.dumps(
+                            {"est_rechauffe": True, "rechauffe_de": rechauffe_de},
+                            ensure_ascii=False,
+                        )
+                    else:
+                        notes_val = f"{type_db.capitalize()} du {jour_name}"
+
                     repas = Repas(
                         planning_id=planning.id,
                         recette_id=recette.id,
                         date_repas=date_jour,
                         type_repas=type_db,
-                        notes=f"{type_db.capitalize()} du {jour_name}",
+                        notes=notes_val,
                         entree=extras.get("entree"),
                         dessert=extras.get("dessert"),
                         dessert_jules=extras.get("dessert_jules"),

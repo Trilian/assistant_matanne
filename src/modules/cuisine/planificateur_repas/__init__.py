@@ -64,6 +64,7 @@ def _sauvegarder_planning_db(
         # Construire la sélection de recettes
         recettes_selection = {}
         repas_extras = {}  # {slot_key: {entree, dessert, dessert_jules}}
+        gouters_a_sauvegarder = []  # [(jour_idx, jour_date, gouter_dict)]
         echecs = []
 
         # Calculer les jours réels entre date_debut et date_fin
@@ -92,9 +93,40 @@ def _sauvegarder_planning_db(
                     echecs.append(f"{jour_nom} {type_repas}")
                     continue
 
-                # Sauter les repas réchauffés — pas de recette à créer
+                # Réchauffé : trouver la recette source par nom et réutiliser son ID
                 if recette_info.get("est_rechauffe"):
-                    _logger.debug(f"{jour_nom} {type_repas}: réchauffé, skip")
+                    nom_rechauffe = recette_info.get("nom", "")
+                    rechauffe_de = recette_info.get("rechauffe_de", "")
+                    recette_id = recette_info.get("id")
+
+                    # Chercher l'ID de la recette source dans le planning
+                    if not recette_id and nom_rechauffe:
+                        for _j, _repas in planning_data.items():
+                            for _slot in ["midi", "soir"]:
+                                _m = _repas.get(_slot)
+                                if (
+                                    _m
+                                    and isinstance(_m, dict)
+                                    and _m.get("nom") == nom_rechauffe
+                                    and not _m.get("est_rechauffe")
+                                    and _m.get("id")
+                                ):
+                                    recette_id = _m["id"]
+                                    break
+                            if recette_id:
+                                break
+
+                    if recette_id:
+                        slot_key = f"jour_{i}_{type_repas}"
+                        recettes_selection[slot_key] = recette_id
+                        repas_extras[slot_key] = {
+                            "entree": recette_info.get("entree"),
+                            "dessert": recette_info.get("dessert"),
+                            "dessert_jules": recette_info.get("dessert_jules"),
+                            "_rechauffe_de": rechauffe_de,
+                        }
+                    else:
+                        _logger.debug(f"{jour_nom} {type_repas}: réchauffé sans recette source")
                     continue
 
                 recette_id = recette_info.get("id")
@@ -122,6 +154,11 @@ def _sauvegarder_planning_db(
                         "dessert_jules": recette_info.get("dessert_jules"),
                     }
 
+            # Collecter le goûter
+            gouter_data = jour_data.get("gouter")
+            if gouter_data and isinstance(gouter_data, dict):
+                gouters_a_sauvegarder.append((i, jour_date, gouter_data))
+
         _logger.info(
             f"Planning: {len(recettes_selection)} recettes mappées, {len(echecs)} échecs: {echecs}"
         )
@@ -134,6 +171,37 @@ def _sauvegarder_planning_db(
                 genere_par_ia=genere_par_ia,
             )
             if planning is not None:
+                # Sauvegarder les goûters comme Repas supplémentaires
+                if gouters_a_sauvegarder:
+                    try:
+                        from src.core.db.session import obtenir_contexte_db
+                        from src.core.models.planning import Repas
+
+                        with obtenir_contexte_db() as db:
+                            for _g_idx, _g_date, _g_data in gouters_a_sauvegarder:
+                                gouter_notes = json.dumps(
+                                    {
+                                        "nom": _g_data.get("nom", "Goûter"),
+                                        "temps_minutes": _g_data.get("temps_minutes"),
+                                        "jules_adaptation": _g_data.get("jules_adaptation"),
+                                    },
+                                    ensure_ascii=False,
+                                )
+                                repas_gouter = Repas(
+                                    planning_id=planning.id,
+                                    recette_id=None,
+                                    date_repas=_g_date,
+                                    type_repas="goûter",
+                                    notes=gouter_notes,
+                                )
+                                db.add(repas_gouter)
+                            db.commit()
+                            _logger.info(
+                                f"{len(gouters_a_sauvegarder)} goûter(s) sauvegardé(s)"
+                            )
+                    except Exception as e:
+                        _logger.warning(f"Erreur sauvegarde goûters: {e}")
+
                 # Persister les métadonnées (suggestions bio, conseils batch) dans notes
                 try:
                     meta = {
@@ -210,6 +278,18 @@ def _charger_planning_actif_db(
                 if jour_nom not in repas_par_jour:
                     repas_par_jour[jour_nom] = {}
 
+                # Goûter : stocké comme JSON dans notes, pas de recette associée
+                if repas.type_repas == "goûter":
+                    gouter_data = {}
+                    try:
+                        gouter_data = json.loads(repas.notes) if repas.notes else {}
+                    except (json.JSONDecodeError, TypeError):
+                        gouter_data = {"nom": repas.notes or "Goûter"}
+                    if not isinstance(gouter_data, dict):
+                        gouter_data = {"nom": str(gouter_data)}
+                    repas_par_jour[jour_nom]["gouter"] = gouter_data
+                    continue
+
                 # Déterminer le slot (midi/soir)
                 slot = "midi" if repas.type_repas == "déjeuner" else "soir"
 
@@ -221,6 +301,15 @@ def _charger_planning_actif_db(
                     "dessert_jules": repas.dessert_jules,
                     "notes": repas.notes or "",
                 }
+
+                # Détecter réchauffé depuis les notes JSON
+                try:
+                    notes_data = json.loads(repas.notes) if repas.notes else {}
+                    if isinstance(notes_data, dict) and notes_data.get("est_rechauffe"):
+                        meal_data["est_rechauffe"] = True
+                        meal_data["rechauffe_de"] = notes_data.get("rechauffe_de", "")
+                except (json.JSONDecodeError, TypeError):
+                    pass
 
                 # Enrichir avec les infos de la recette si disponible
                 if repas.recette:

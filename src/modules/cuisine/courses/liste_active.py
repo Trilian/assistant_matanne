@@ -108,18 +108,40 @@ def afficher_liste_active():
         # Actions rapides
         col1, col2, col3 = st.columns(3)
         with col1:
-            if st.button("➕ Ajouter article", use_container_width=True):
+            if st.button(
+                "➕ Ajouter article",
+                use_container_width=True,
+                help="Ajouter un article manuellement à votre liste",
+            ):
                 st.session_state.new_article_mode = True
                 rerun()
         with col2:
-            if st.button("📄 Imprimer liste", use_container_width=True):
+            if st.button(
+                "📄 Imprimer liste",
+                use_container_width=True,
+                help="Afficher la liste dans un format imprimable",
+            ):
                 afficher_print_view(liste_filtree)
         with col3:
-            if st.button("🗑️ Vider (achetés)", use_container_width=True):
-                if service.get_liste_courses(achetes=True):
-                    st.warning("⚠️ Suppression des articles achetés...")
+            if st.button(
+                "🗑️ Vider (achetés)",
+                use_container_width=True,
+                help="Supprimer tous les articles déjà marqués comme achetés",
+            ):
+                achetes = service.get_liste_courses(achetes=True)
+                if achetes:
+                    nb_suppr = 0
+                    for art in achetes:
+                        try:
+                            if service.delete(art["id"]):
+                                nb_suppr += 1
+                        except Exception:
+                            logger.error(f"Erreur suppression article {art['id']}")
+                    st.success(f"✅ {nb_suppr} article(s) acheté(s) supprimé(s)")
                     st.session_state[SK.COURSES_REFRESH] += 1
                     rerun()
+                else:
+                    st.info("Aucun article acheté à supprimer")
 
         # Formulaire ajout article
         if st.session_state.new_article_mode:

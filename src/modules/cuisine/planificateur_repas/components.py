@@ -190,15 +190,21 @@ def afficher_carte_recette_suggestion(
 
     with st.container(border=True):
         # ── Badge réchauffé ──
-        if suggestion.get("est_rechauffe"):
+        est_rechauffe = suggestion.get("est_rechauffe")
+        if est_rechauffe:
             rechauffe_source = suggestion.get("rechauffe_de", "")
-            st.caption(f"🔄 **Réchauffé** du {rechauffe_source} — *juste à réchauffer !*")
-            return  # Pas d'actions pour les réchauffés
+            st.markdown(
+                f"🔄 **Réchauffé** du {rechauffe_source} — *juste à réchauffer !*"
+            )
 
         # ── Entrée (si présente) ──
         entree = suggestion.get("entree")
         if entree:
-            st.caption(f"🥗 {entree}")
+            st.markdown(
+                f'<div style="background:#f0f7f0; padding:4px 10px; border-radius:6px; '
+                f'margin-bottom:4px; font-size:0.9em;">🥗 <b>Entrée</b> · {entree}</div>',
+                unsafe_allow_html=True,
+            )
 
         # ── Plat principal ──
         complexite = suggestion.get("complexite", "")
@@ -224,12 +230,20 @@ def afficher_carte_recette_suggestion(
         dessert = suggestion.get("dessert")
         dessert_jules = suggestion.get("dessert_jules")
         if dessert or dessert_jules:
-            parts = []
+            parts_html = []
             if dessert:
-                parts.append(f"🍰 {dessert}")
+                parts_html.append(f"🍰 {dessert}")
             if dessert_jules:
-                parts.append(f"👶 {dessert_jules}")
-            st.caption(" · ".join(parts))
+                parts_html.append(f"👶 {dessert_jules}")
+            st.markdown(
+                f'<div style="background:#fff8f0; padding:4px 10px; border-radius:6px; '
+                f'margin-top:4px; font-size:0.9em;">{" · ".join(parts_html)}</div>',
+                unsafe_allow_html=True,
+            )
+
+        # ── Réchauffé : pas d'actions supplémentaires ──
+        if est_rechauffe:
+            return
 
         # ── Actions : ligne compacte de 5 boutons ──
         col1, col2, col3, col4, col5 = st.columns(5)
@@ -475,6 +489,10 @@ IMPORTANT:
         )
 
         if not details or not isinstance(details, dict):
+            _logger.error(
+                f"Régénération: réponse IA invalide pour {recette.nom} "
+                f"(type={type(details).__name__}, val={str(details)[:200]})"
+            )
             return False
 
         # Mise à jour des champs de la recette
@@ -503,8 +521,8 @@ IMPORTANT:
         ingredients_raw = details.get("ingredients", [])
         etapes_raw = details.get("etapes", [])
 
-        if ingredients_raw and len(ingredients_raw) > 1:
-            with obtenir_contexte_db() as db:
+        with obtenir_contexte_db() as db:
+            if ingredients_raw and len(ingredients_raw) > 1:
                 # Supprimer les anciens ingrédients
                 db.query(RecetteIngredient).filter(
                     RecetteIngredient.recette_id == recette_id
@@ -534,10 +552,7 @@ IMPORTANT:
                     )
                     db.add(ri)
 
-                db.commit()
-
-        if etapes_raw and len(etapes_raw) > 1:
-            with obtenir_contexte_db() as db:
+            if etapes_raw and len(etapes_raw) > 1:
                 # Supprimer les anciennes étapes
                 db.query(EtapeRecette).filter(EtapeRecette.recette_id == recette_id).delete()
 
@@ -551,13 +566,13 @@ IMPORTANT:
                     )
                     db.add(e)
 
-                db.commit()
+            db.commit()
 
         _logger.info(f"✅ Détails régénérés pour recette {recette_id}: {recette.nom}")
         return True
 
     except Exception as e:
-        _logger.error(f"Erreur régénération détails recette {recette_id}: {e}")
+        _logger.error(f"Erreur régénération détails recette {recette_id}: {e}", exc_info=True)
         return False
 
 

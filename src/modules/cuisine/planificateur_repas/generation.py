@@ -164,22 +164,80 @@ def sauvegarder_recette_ia(recette_dict: dict, type_repas_slot: str) -> int | No
         difficulte = _DIFFICULTE_MAP.get(difficulte_raw, "moyen")
         jules_adaptation = recette_dict.get("jules_adaptation", "")
 
-        # Générer les détails complets (description, ingrédients, étapes, temps, portions) via IA
+        # Utiliser les ingrédients/étapes déjà présents dans le dict IA si disponibles
         description = ""
         ingredients = []
         etapes = []
         temps_cuisson = 0
         portions_ia = 4
 
+        # Vérifier si le dict IA contient déjà des données substantielles
+        _ingredients_ia = recette_dict.get("ingredients", [])
+        _etapes_ia = recette_dict.get("etapes", [])
+        _has_good_data = (
+            isinstance(_ingredients_ia, list)
+            and len(_ingredients_ia) >= 2
+            and isinstance(_etapes_ia, list)
+            and len(_etapes_ia) >= 2
+        )
+
+        if _has_good_data:
+            # Utiliser directement les données du prompt IA — pas besoin d'un 2e appel
+            import re as _re
+
+            for ing in _ingredients_ia:
+                if not isinstance(ing, dict):
+                    continue
+                q = ing.get("quantite", 0)
+                unite = ing.get("unite", "")
+                try:
+                    if isinstance(q, str):
+                        match = _re.search(r"(\d+([.,]\d+)?)", q.replace(",", "."))
+                        if match:
+                            q = float(match.group(1))
+                        else:
+                            if not unite:
+                                unite = str(q)
+                            q = 0.01
+                    else:
+                        q = float(q)
+                except (ValueError, TypeError):
+                    q = 0.01
+                if q <= 0:
+                    q = 0.01
+                ing["quantite"] = q
+                ing["unite"] = unite
+                ingredients.append(ing)
+
+            if _etapes_ia and isinstance(_etapes_ia[0], str):
+                etapes = [
+                    {"description": e, "ordre": i + 1} for i, e in enumerate(_etapes_ia)
+                ]
+            else:
+                etapes = _etapes_ia
+
+            # Description de base
+            description_parts = [f"Plat à base de {proteine or 'ingrédients variés'}."]
+            if jules_adaptation:
+                description_parts.append(f"Version Jules : {jules_adaptation}")
+            description = " ".join(description_parts)
+
+            logger.info(
+                f"Données IA directes pour '{nom}': "
+                f"{len(ingredients)} ingrédients, {len(etapes)} étapes"
+            )
+
         robot_context = ""
         if robot:
             robot_label = robot.replace("_", " ").title()
             robot_context = f"\nCette recette est préparée avec un {robot_label}. Adapte les étapes pour utiliser ce robot (temps, modes, réglages spécifiques)."
 
-        try:
-            client = obtenir_client_ia()
-            if client:
-                prompt_details = f"""Génère les détails complets pour la recette : "{nom}".
+        # Appel IA secondaire uniquement si on n'a pas déjà les données du prompt
+        if not _has_good_data:
+            try:
+                client = obtenir_client_ia()
+                if client:
+                    prompt_details = f"""Génère les détails complets pour la recette : "{nom}".
 Contexte : famille de 2 adultes + 1 bébé de 19 mois.
 Protéine principale : {proteine or "non spécifiée"}.{robot_context}
 
@@ -205,92 +263,83 @@ IMPORTANT:
 - Détaille TOUTES les étapes de préparation (minimum 3-4 étapes), claires et précises.
 - Les temps doivent être réalistes pour cette recette.
 - Les quantités en grammes, cl, pièces, cuillères à soupe, etc."""
-                details = client.generer_json(
-                    prompt_details,
-                    system_prompt="Tu es un chef cuisinier expert en cuisine familiale. Tu donnes des recettes détaillées et précises.",
-                    max_tokens=2000,
-                )
-                if details and isinstance(details, dict):
-                    # Extraire description IA
-                    desc_ia = details.get("description", "")
-                    if desc_ia and not any(
-                        x in desc_ia.lower() for x in ("généré", "ia", "planificateur")
-                    ):
-                        description = desc_ia
-                        if jules_adaptation:
-                            description += f" Version Jules : {jules_adaptation}"
+                    details = client.generer_json(
+                        prompt_details,
+                        system_prompt="Tu es un chef cuisinier expert en cuisine familiale. Tu donnes des recettes détaillées et précises.",
+                        max_tokens=2000,
+                    )
+                    if details and isinstance(details, dict):
+                        # Extraire description IA
+                        desc_ia = details.get("description", "")
+                        if desc_ia and not any(
+                            x in desc_ia.lower() for x in ("généré", "ia", "planificateur")
+                        ):
+                            description = desc_ia
+                            if jules_adaptation:
+                                description += f" Version Jules : {jules_adaptation}"
 
-                    # Extraire temps de cuisson et portions
-                    temps_cuisson_ia = details.get("temps_cuisson")
-                    if (
-                        temps_cuisson_ia
-                        and isinstance(temps_cuisson_ia, int | float)
-                        and temps_cuisson_ia > 0
-                    ):
-                        temps_cuisson = int(temps_cuisson_ia)
+                        # Extraire temps de cuisson et portions
+                        temps_cuisson_ia = details.get("temps_cuisson")
+                        if (
+                            temps_cuisson_ia
+                            and isinstance(temps_cuisson_ia, int | float)
+                            and temps_cuisson_ia > 0
+                        ):
+                            temps_cuisson = int(temps_cuisson_ia)
 
-                    temps_prep_ia = details.get("temps_preparation")
-                    if (
-                        temps_prep_ia
-                        and isinstance(temps_prep_ia, int | float)
-                        and temps_prep_ia > 0
-                    ):
-                        temps = int(temps_prep_ia)
+                        temps_prep_ia = details.get("temps_preparation")
+                        if (
+                            temps_prep_ia
+                            and isinstance(temps_prep_ia, int | float)
+                            and temps_prep_ia > 0
+                        ):
+                            temps = int(temps_prep_ia)
 
-                    portions_detail = details.get("portions")
-                    if (
-                        portions_detail
-                        and isinstance(portions_detail, int | float)
-                        and portions_detail > 0
-                    ):
-                        portions_ia = int(min(portions_detail, 20))
+                        portions_detail = details.get("portions")
+                        if (
+                            portions_detail
+                            and isinstance(portions_detail, int | float)
+                            and portions_detail > 0
+                        ):
+                            portions_ia = int(min(portions_detail, 20))
 
-                    ingredients_raw = details.get("ingredients", [])
-                    # Sanitization ingredients (conversion quantité en float obligatoire)
-                    ingredients = []
-                    import re
+                        ingredients_raw = details.get("ingredients", [])
+                        ingredients = []
+                        import re
 
-                    for ing in ingredients_raw:
-                        q = ing.get("quantite", 0)
-                        unite = ing.get("unite", "")
-                        try:
-                            if isinstance(q, str):
-                                # Si c'est du texte comme "à votre goût", on met 0
-                                # Sinon on essaie d'extraire un nombre (ex: "100g")
-                                match = re.search(r"(\d+([.,]\d+)?)", q.replace(",", "."))
-                                if match:
-                                    q = float(match.group(1))
+                        for ing in ingredients_raw:
+                            q = ing.get("quantite", 0)
+                            unite = ing.get("unite", "")
+                            try:
+                                if isinstance(q, str):
+                                    match = re.search(r"(\d+([.,]\d+)?)", q.replace(",", "."))
+                                    if match:
+                                        q = float(match.group(1))
+                                    else:
+                                        if not unite:
+                                            unite = str(q)
+                                        q = 0.01
                                 else:
-                                    # Cas "sel, poivre", "à votre goût" -> quantité minime, et on met l'info dans l'unité si vide
-                                    if not unite:
-                                        unite = str(q)
-                                    q = 0.01  # Minimum requis par validation (>0)
-                            else:
-                                q = float(q)
-                        except (ValueError, TypeError):
-                            q = 0.01
+                                    q = float(q)
+                            except (ValueError, TypeError):
+                                q = 0.01
 
-                        if q <= 0:
-                            q = 0.01
+                            if q <= 0:
+                                q = 0.01
 
-                        ing["quantite"] = q
-                        ing["unite"] = unite
-                        ingredients.append(ing)
+                            ing["quantite"] = q
+                            ing["unite"] = unite
+                            ingredients.append(ing)
 
-                    etapes_raw = details.get("etapes", [])
-                    # Convertir étapes en format dict si nécessaire ou garder liste strings
-                    # Le service attend souvent list[dict] ou list[str]. On va supposer list[dict] pour ingredients
-                    # Pour étapes, ServiceRecettes.create_complete attend indexé ?
-                    # Vérifions models/recettes.py, mais en général simple liste strings passe pour création simple
-                    # ou liste de dicts avec "description".
-                    if etapes_raw and isinstance(etapes_raw[0], str):
-                        etapes = [
-                            {"description": e, "ordre": i + 1} for i, e in enumerate(etapes_raw)
-                        ]
-                    else:
-                        etapes = etapes_raw
-        except Exception as e:
-            logger.warning(f"Impossible de générer les détails pour {nom}: {e}")
+                        etapes_raw = details.get("etapes", [])
+                        if etapes_raw and isinstance(etapes_raw[0], str):
+                            etapes = [
+                                {"description": e, "ordre": i + 1} for i, e in enumerate(etapes_raw)
+                            ]
+                        else:
+                            etapes = etapes_raw
+            except Exception as e:
+                logger.warning(f"Impossible de générer les détails pour {nom}: {e}")
 
         # Fallback description si l'IA n'a pas pu en générer
         if not description:
