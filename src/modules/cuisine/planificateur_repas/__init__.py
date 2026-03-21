@@ -800,6 +800,53 @@ def app():
                                     # Goûter (inchangé)
                                     planning[jour]["gouter"] = jour_data.get("gouter")
 
+                                # Corriger les sources de réchauffé pour éviter les incohérences
+                                # (ex: "Réchauffé du Dimanche soir" alors que le plat source est ailleurs)
+                                slots_ordonnes: list[tuple[str, str, dict]] = []
+                                for _jour, _repas_jour in planning.items():
+                                    for _slot in ["midi", "soir"]:
+                                        _slot_data = _repas_jour.get(_slot)
+                                        if _slot_data and isinstance(_slot_data, dict):
+                                            slots_ordonnes.append((_jour, _slot, _slot_data))
+
+                                index_par_slot = {
+                                    f"{jour} {slot}": idx
+                                    for idx, (jour, slot, _data) in enumerate(slots_ordonnes)
+                                }
+
+                                sources_par_nom: dict[str, list[str]] = {}
+                                for _jour, _slot, _data in slots_ordonnes:
+                                    if _data.get("est_rechauffe"):
+                                        continue
+                                    _nom = (_data.get("nom") or "").strip().lower()
+                                    if not _nom:
+                                        continue
+                                    sources_par_nom.setdefault(_nom, []).append(f"{_jour} {_slot}")
+
+                                for _jour, _slot, _data in slots_ordonnes:
+                                    if not _data.get("est_rechauffe"):
+                                        continue
+                                    _nom = (_data.get("nom") or "").strip().lower()
+                                    if not _nom:
+                                        continue
+                                    _sources = sources_par_nom.get(_nom, [])
+                                    if not _sources:
+                                        continue
+
+                                    _courant = f"{_jour} {_slot}"
+                                    _idx_courant = index_par_slot.get(_courant, -1)
+                                    _sources_avant = [
+                                        s
+                                        for s in _sources
+                                        if index_par_slot.get(s, -1) < _idx_courant
+                                    ]
+
+                                    # Priorité à la source la plus proche avant ce réchauffé
+                                    _source_resolue = (
+                                        _sources_avant[-1] if _sources_avant else _sources[0]
+                                    )
+                                    _data["rechauffe_de"] = _source_resolue
+
                                 st.session_state[SK.PLANNING_DATA] = planning
                                 st.session_state[SK.PLANNING_CONSEILS] = result.get(
                                     "conseils_batch", ""
