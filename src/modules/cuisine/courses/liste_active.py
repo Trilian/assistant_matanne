@@ -19,6 +19,10 @@ logger = logging.getLogger(__name__)
 from .liste_utils import (
     filtrer_liste,
     formater_article_label,
+    generer_texte_impression,
+    grouper_par_magasin,
+    grouper_par_magasin_personnalise,
+    obtenir_mapping_magasins_par_defaut,
     grouper_par_rayon,
 )
 
@@ -329,29 +333,83 @@ def afficher_ajouter_article():
 
 def afficher_print_view(liste):
     """Vue d'impression optimisée"""
-    st.subheader("🖨️ Liste à imprimer")
+    st.subheader("🖨️ Liste à emporter")
+    st.caption("Vue simple type Bring, avec regroupement au choix.")
 
-    # Grouper par rayon
-    rayons = {}
-    for article in liste:
-        rayon = article.get("rayon_magasin", "Autre")
-        if rayon not in rayons:
-            rayons[rayon] = []
-        rayons[rayon].append(article)
+    mode = st.radio(
+        "Organisation",
+        options=["Simple", "Par rayon", "Par magasin"],
+        horizontal=True,
+        key="courses_print_mode",
+    )
 
-    print_text = "📋 LISTE DE COURSES\n"
-    print_text += f"📅 {datetime.now().strftime('%d/%m/%Y %H:%M')}\n"
-    print_text += "=" * 40 + "\n\n"
+    mapping_custom: dict[str, str] | None = None
 
-    for rayon in sorted(rayons.keys()):
-        print_text += f"🏷️ {rayon}\n"
-        for article in rayons[rayon]:
-            checkbox = "☑"
-            qty = f"{article.get('quantite_necessaire')} {article.get('unite')}"
-            print_text += f"  {checkbox} {article.get('ingredient_nom')} ({qty})\n"
-        print_text += "\n"
+    if mode == "Par magasin":
+        if "courses_store_map" not in st.session_state:
+            st.session_state["courses_store_map"] = obtenir_mapping_magasins_par_defaut()
 
-    st.text_area("Copier/Coller la liste:", value=print_text, height=400, disabled=True)
+        with st.expander("⚙️ Personnaliser les magasins", expanded=False):
+            st.caption("Choisis le magasin cible pour chaque rayon.")
+            mapping_edit = dict(st.session_state.get("courses_store_map", {}))
+            rayons_presents = sorted({a.get("rayon_magasin") or "Autre" for a in liste})
+
+            for rayon in rayons_presents:
+                default_val = mapping_edit.get(rayon, "Autre magasin")
+                new_val = st.text_input(
+                    f"{rayon}",
+                    value=default_val,
+                    key=f"store_map_{rayon}",
+                    placeholder="Nom du magasin",
+                )
+                mapping_edit[rayon] = (new_val or "Autre magasin").strip() or "Autre magasin"
+
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("💾 Appliquer", use_container_width=True, key="store_map_apply"):
+                    st.session_state["courses_store_map"] = mapping_edit
+                    st.success("Mapping magasins mis à jour")
+            with c2:
+                if st.button("↩️ Réinitialiser", use_container_width=True, key="store_map_reset"):
+                    st.session_state["courses_store_map"] = obtenir_mapping_magasins_par_defaut()
+                    st.success("Mapping magasins réinitialisé")
+                    rerun()
+
+        mapping_custom = st.session_state.get("courses_store_map", {})
+        groupes = grouper_par_magasin_personnalise(liste, mapping_custom)
+        group_key = "magasin"
+    elif mode == "Par rayon":
+        groupes = grouper_par_rayon(liste)
+        group_key = "rayon"
+    else:
+        groupes = {"Liste rapide": sorted(liste, key=lambda a: a.get("ingredient_nom", "").lower())}
+        group_key = "simple"
+
+    # Affichage visuel clair, sans zone grisée
+    for groupe in sorted(groupes.keys()):
+        with st.expander(f"🧺 {groupe} ({len(groupes[groupe])})", expanded=True):
+            for article in groupes[groupe]:
+                quantite = article.get("quantite_necessaire", 1)
+                unite = (article.get("unite") or "").strip()
+                qty = f"{quantite} {unite}".strip()
+                st.markdown(f"- ☐ **{article.get('ingredient_nom', 'Article')}** ({qty})")
+
+    print_text = generer_texte_impression(
+        liste,
+        titre="LISTE DE COURSES",
+        group_by=group_key,
+        mapping_rayon_magasin=mapping_custom,
+    )
+
+    st.download_button(
+        "📥 Télécharger (.txt)",
+        data=print_text,
+        file_name=f"liste_courses_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
+        mime="text/plain",
+        use_container_width=True,
+    )
+
+    st.code(print_text, language="text")
 
 
 __all__ = [

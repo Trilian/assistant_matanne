@@ -2,18 +2,46 @@
 Routes API pour les courses.
 """
 
+import time
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
+
+# ─── Idempotency cache (TTL 5 min, single-instance) ───────────────────────────
+_IDEMPOTENCY_CACHE: dict[str, tuple[float, Any]] = {}
+_IDEMPOTENCY_TTL = 300  # secondes
+
+
+def _check_idempotency(key: str | None) -> Any | None:
+    """Retourne le résultat mis en cache si la clé a déjà été traitée récemment."""
+    if not key:
+        return None
+    now = time.time()
+    expired = [k for k, (ts, _) in _IDEMPOTENCY_CACHE.items() if now - ts > _IDEMPOTENCY_TTL]
+    for k in expired:
+        del _IDEMPOTENCY_CACHE[k]
+    entry = _IDEMPOTENCY_CACHE.get(key)
+    return entry[1] if entry else None
+
+
+def _store_idempotency(key: str | None, result: Any) -> None:
+    """Enregistre un résultat pour éviter les doublons d'idempotency."""
+    if key:
+        _IDEMPOTENCY_CACHE[key] = (time.time(), result)
+
 
 from src.api.dependencies import require_auth
 from src.api.schemas import (
     CourseItemBase,
     CourseListCreate,
+    CheckoutCoursesResponse,
+    CheckoutCoursesRequest,
     ListeCoursesResponse,
     ListeCoursesResume,
     MessageResponse,
     ReponsePaginee,
+    ScanBarcodeCheckoutRequest,
+    ScanBarcodeCheckoutResponse,
 )
 from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
@@ -270,6 +298,64 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
     return await executer_async(_get)
 
 
+@router.get("/{liste_id}/export")
+@gerer_exception_api
+async def exporter_liste_texte(
+    liste_id: int,
+    group_by: str = Query(
+        "categorie",
+        pattern="^(categorie|simple)$",
+        description="Regroupement du texte exporté",
+    ),
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Exporte une liste de courses en texte brut (optimisé mobile/partage)."""
+    from datetime import datetime
+
+    from src.core.models import ListeCourses
+
+    def _export():
+        with executer_avec_session() as session:
+            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+            if not liste:
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
+
+            articles = [a for a in (liste.articles or []) if not a.achete]
+
+            lignes = [
+                f"LISTE DE COURSES - {liste.nom}",
+                f"Generee le {datetime.now().strftime('%d/%m/%Y %H:%M')}",
+                "",
+            ]
+
+            if group_by == "simple":
+                for a in sorted(articles, key=lambda x: (x.ingredient.nom if x.ingredient else "")):
+                    nom = a.ingredient.nom if a.ingredient else "Article"
+                    unite = (a.ingredient.unite if a.ingredient else "") or ""
+                    qty = f"{a.quantite_necessaire:g} {unite}".strip()
+                    lignes.append(f"- [ ] {nom} ({qty})")
+            else:
+                groupes: dict[str, list] = {}
+                for a in articles:
+                    categorie = a.rayon_magasin or "Autre"
+                    groupes.setdefault(categorie, []).append(a)
+
+                for categorie in sorted(groupes.keys()):
+                    lignes.append(f"\n[{categorie}]")
+                    for a in sorted(
+                        groupes[categorie], key=lambda x: (x.ingredient.nom if x.ingredient else "")
+                    ):
+                        nom = a.ingredient.nom if a.ingredient else "Article"
+                        unite = (a.ingredient.unite if a.ingredient else "") or ""
+                        qty = f"{a.quantite_necessaire:g} {unite}".strip()
+                        lignes.append(f"- [ ] {nom} ({qty})")
+
+            contenu = "\n".join(lignes).strip() + "\n"
+            return Response(content=contenu, media_type="text/plain; charset=utf-8")
+
+    return await executer_async(_export)
+
+
 @router.put("/{liste_id}", response_model=MessageResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_liste(
@@ -375,6 +461,275 @@ async def modifier_article(
             return MessageResponse(message="Article mis à jour", id=item_id)
 
     return await executer_async(_update)
+
+
+@router.post(
+    "/{liste_id}/checkout-items",
+    response_model=CheckoutCoursesResponse,
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def checkout_articles(
+    liste_id: int,
+    payload: CheckoutCoursesRequest,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Checkout batch: marque des articles courses comme achetés et met à jour l'inventaire.
+
+    Transaction unique par requête:
+    - coche l'article de courses (achete=True, achete_le)
+    - incrémente (ou crée) la ligne inventaire associée à l'ingrédient
+    - enregistre l'historique inventaire
+    """
+    # Idempotency: même clé = même réponse (anti double-scan)
+    cached = _check_idempotency(payload.idempotency_key)
+    if cached is not None:
+        return cached
+
+    from datetime import datetime
+
+    from src.core.models import (
+        ArticleCourses,
+        ArticleInventaire,
+        HistoriqueInventaire,
+        ListeCourses,
+    )
+
+    def _checkout():
+        with executer_avec_session() as session:
+            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+            if not liste:
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
+
+            results: list[dict[str, Any]] = []
+            total_maj = 0
+
+            for requested in payload.articles:
+                item_id = requested.item_id
+                article = (
+                    session.query(ArticleCourses)
+                    .filter(ArticleCourses.id == item_id, ArticleCourses.liste_id == liste_id)
+                    .first()
+                )
+
+                if not article:
+                    results.append(
+                        {
+                            "item_id": item_id,
+                            "ingredient_nom": "Inconnu",
+                            "statut": "non_trouve",
+                            "quantite_ajoutee": 0,
+                            "inventaire_article_id": None,
+                            "coche": False,
+                        }
+                    )
+                    continue
+
+                ingredient_nom = article.ingredient.nom if article.ingredient else "Article"
+
+                if article.achete:
+                    results.append(
+                        {
+                            "item_id": item_id,
+                            "ingredient_nom": ingredient_nom,
+                            "statut": "deja_achete",
+                            "quantite_ajoutee": 0,
+                            "inventaire_article_id": None,
+                            "coche": True,
+                        }
+                    )
+                    continue
+
+                quantite_checkout = requested.quantite_achetee or article.quantite_necessaire or 1.0
+
+                # 1) Coche l'article courses
+                article.achete = True
+                article.achete_le = datetime.now()
+
+                # 2) Met à jour l'inventaire
+                inv = (
+                    session.query(ArticleInventaire)
+                    .filter(ArticleInventaire.ingredient_id == article.ingredient_id)
+                    .first()
+                )
+
+                if inv:
+                    quantite_avant = inv.quantite
+                    inv.quantite = float(inv.quantite or 0) + float(quantite_checkout)
+                    if not inv.emplacement and payload.emplacement_defaut:
+                        inv.emplacement = payload.emplacement_defaut
+
+                    session.add(
+                        HistoriqueInventaire(
+                            article_id=inv.id,
+                            ingredient_id=inv.ingredient_id,
+                            type_modification="modification",
+                            quantite_avant=quantite_avant,
+                            quantite_apres=inv.quantite,
+                            notes=f"Checkout courses liste {liste_id}",
+                        )
+                    )
+                    inv_id = inv.id
+                else:
+                    inv = ArticleInventaire(
+                        ingredient_id=article.ingredient_id,
+                        quantite=float(quantite_checkout),
+                        quantite_min=1.0,
+                        emplacement=payload.emplacement_defaut,
+                    )
+                    session.add(inv)
+                    session.flush()
+
+                    session.add(
+                        HistoriqueInventaire(
+                            article_id=inv.id,
+                            ingredient_id=inv.ingredient_id,
+                            type_modification="ajout",
+                            quantite_avant=0,
+                            quantite_apres=inv.quantite,
+                            notes=f"Checkout courses liste {liste_id}",
+                        )
+                    )
+                    inv_id = inv.id
+
+                total_maj += 1
+                results.append(
+                    {
+                        "item_id": item_id,
+                        "ingredient_nom": ingredient_nom,
+                        "statut": "traite",
+                        "quantite_ajoutee": float(quantite_checkout),
+                        "inventaire_article_id": inv_id,
+                        "coche": True,
+                    }
+                )
+
+            session.commit()
+
+            return {
+                "liste_id": liste_id,
+                "total_demandes": len(payload.articles),
+                "total_traites": len([r for r in results if r["statut"] == "traite"]),
+                "total_inventaire_maj": total_maj,
+                "articles": results,
+            }
+
+    result = await executer_async(_checkout)
+    _store_idempotency(payload.idempotency_key, result)
+    return result
+
+
+@router.post(
+    "/{liste_id}/scan-barcode-checkout",
+    response_model=ScanBarcodeCheckoutResponse,
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def scan_barcode_checkout(
+    liste_id: int,
+    payload: ScanBarcodeCheckoutRequest,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Checkout rapide en magasin via code-barres.
+
+    Workflow:
+    - résout le code-barres vers un article inventaire (ingredient_id)
+    - trouve l'article courses non acheté correspondant dans la liste
+    - coche l'article et incrémente l'inventaire
+    """
+    # Idempotency: même clé = même réponse (anti double-scan)
+    cached = _check_idempotency(payload.idempotency_key)
+    if cached is not None:
+        return cached
+
+    from datetime import datetime
+
+    from src.core.models import (
+        ArticleCourses,
+        ArticleInventaire,
+        HistoriqueInventaire,
+        ListeCourses,
+    )
+
+    def _scan_checkout():
+        with executer_avec_session() as session:
+            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+            if not liste:
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
+
+            inventaire = (
+                session.query(ArticleInventaire)
+                .filter(ArticleInventaire.code_barres == payload.barcode)
+                .first()
+            )
+            if not inventaire:
+                return {
+                    "liste_id": liste_id,
+                    "barcode": payload.barcode,
+                    "item_id": None,
+                    "ingredient_nom": None,
+                    "statut": "barcode_inconnu",
+                    "quantite_ajoutee": 0,
+                    "inventaire_article_id": None,
+                }
+
+            article_courses = (
+                session.query(ArticleCourses)
+                .filter(
+                    ArticleCourses.liste_id == liste_id,
+                    ArticleCourses.ingredient_id == inventaire.ingredient_id,
+                    ArticleCourses.achete.is_(False),
+                )
+                .order_by(ArticleCourses.id.asc())
+                .first()
+            )
+
+            ingredient_nom = inventaire.ingredient.nom if inventaire.ingredient else "Article"
+
+            if not article_courses:
+                return {
+                    "liste_id": liste_id,
+                    "barcode": payload.barcode,
+                    "item_id": None,
+                    "ingredient_nom": ingredient_nom,
+                    "statut": "hors_liste",
+                    "quantite_ajoutee": 0,
+                    "inventaire_article_id": inventaire.id,
+                }
+
+            # Checkout + stock
+            article_courses.achete = True
+            article_courses.achete_le = datetime.now()
+
+            quantite_avant = inventaire.quantite
+            inventaire.quantite = float(inventaire.quantite or 0) + float(payload.quantite_achetee)
+
+            session.add(
+                HistoriqueInventaire(
+                    article_id=inventaire.id,
+                    ingredient_id=inventaire.ingredient_id,
+                    type_modification="modification",
+                    quantite_avant=quantite_avant,
+                    quantite_apres=inventaire.quantite,
+                    notes=f"Scan checkout liste {liste_id} ({payload.barcode})",
+                )
+            )
+
+            session.commit()
+
+            return {
+                "liste_id": liste_id,
+                "barcode": payload.barcode,
+                "item_id": article_courses.id,
+                "ingredient_nom": ingredient_nom,
+                "statut": "traite",
+                "quantite_ajoutee": float(payload.quantite_achetee),
+                "inventaire_article_id": inventaire.id,
+            }
+
+    result = await executer_async(_scan_checkout)
+    _store_idempotency(payload.idempotency_key, result)
+    return result
 
 
 @router.delete("/{liste_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)

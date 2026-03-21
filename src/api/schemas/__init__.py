@@ -29,10 +29,16 @@ from .common import (
 # Courses
 from .courses import (
     ArticleResponse,
+    CheckoutArticleRequest,
+    CheckoutArticleResult,
+    CheckoutCoursesRequest,
+    CheckoutCoursesResponse,
     CourseItemBase,
     CourseListCreate,
     ListeCoursesResponse,
     ListeCoursesResume,
+    ScanBarcodeCheckoutRequest,
+    ScanBarcodeCheckoutResponse,
 )
 
 # Error responses OpenAPI
@@ -145,6 +151,12 @@ __all__ = [
     "ListeCoursesResume",
     "ArticleResponse",
     "ListeCoursesResponse",
+    "CheckoutArticleRequest",
+    "CheckoutCoursesRequest",
+    "CheckoutArticleResult",
+    "CheckoutCoursesResponse",
+    "ScanBarcodeCheckoutRequest",
+    "ScanBarcodeCheckoutResponse",
     # Planning
     "RepasBase",
     "RepasCreate",

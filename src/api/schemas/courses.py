@@ -52,3 +52,59 @@ class ListeCoursesResponse(BaseModel):
     archivee: bool = False
     created_at: datetime | None = None
     items: list[ArticleResponse] = Field(default_factory=list)
+
+
+class CheckoutArticleRequest(BaseModel):
+    """Article à traiter dans un checkout courses -> inventaire."""
+
+    item_id: int = Field(..., ge=1)
+    quantite_achetee: float | None = Field(None, gt=0)
+
+
+class CheckoutCoursesRequest(BaseModel):
+    """Payload batch pour marquer des articles achetés et pousser en inventaire."""
+
+    articles: list[CheckoutArticleRequest] = Field(..., min_length=1)
+    emplacement_defaut: str | None = None
+    idempotency_key: str | None = Field(None, max_length=128)
+
+
+class CheckoutArticleResult(BaseModel):
+    """Résultat de traitement d'un article checkout."""
+
+    item_id: int
+    ingredient_nom: str
+    statut: str
+    quantite_ajoutee: float = 0
+    inventaire_article_id: int | None = None
+    coche: bool = False
+
+
+class CheckoutCoursesResponse(BaseModel):
+    """Résultat global d'un checkout batch courses -> inventaire."""
+
+    liste_id: int
+    total_demandes: int
+    total_traites: int
+    total_inventaire_maj: int
+    articles: list[CheckoutArticleResult] = Field(default_factory=list)
+
+
+class ScanBarcodeCheckoutRequest(BaseModel):
+    """Payload d'un scan code-barres pour checkout magasin."""
+
+    barcode: str = Field(..., min_length=8)
+    quantite_achetee: float = Field(1.0, gt=0)
+    idempotency_key: str | None = Field(None, max_length=128)
+
+
+class ScanBarcodeCheckoutResponse(BaseModel):
+    """Résultat du scan checkout (courses + inventaire)."""
+
+    liste_id: int
+    barcode: str
+    item_id: int | None = None
+    ingredient_nom: str | None = None
+    statut: str
+    quantite_ajoutee: float = 0
+    inventaire_article_id: int | None = None

@@ -23,12 +23,22 @@ _NORMALISATIONS_INGREDIENTS: dict[str, str] = {
     "yaourts": "yaourt nature",
     "petit suisse": "petit-suisse",
     "petits suisses": "petit-suisse",
+    "kirino": "kiri",
+    "kiri no": "kiri",
 }
 
 
 def _normaliser_ingredient(nom: str) -> str:
     """Normalise un nom d'ingrédient pour améliorer la déduplication."""
     key = nom.lower().strip()
+    # Nettoyage de ponctuation/bruit fréquent sur les champs texte
+    key = _re.sub(r"[,:;.!?()\[\]\{\}]", " ", key)
+    key = _re.sub(r"\s+", " ", key).strip()
+
+    # "kiri no..." ou variantes typo -> "kiri"
+    if key.startswith("kiri no") or key.startswith("kirino"):
+        key = "kiri"
+
     if key in _NORMALISATIONS_INGREDIENTS:
         return _NORMALISATIONS_INGREDIENTS[key]
     # Retirer " cuit(e)(s)" en fin
@@ -94,6 +104,18 @@ def _parser_texte_courses(texte: str, source_label: str) -> list[tuple[str, floa
                 results.append((_normaliser_ingredient(base), qty, source_label))
             results.append(("compote", qty, source_label))
             continue
+
+        # "X au/aux Y" (ex: "Clafoutis aux cerises") -> extraire l'ingrédient Y
+        # pour éviter d'ajouter un nom de plat complet dans la liste de courses.
+        au_m = _re.match(r".+\s+aux?\s+(.+)", part, _re.IGNORECASE)
+        if au_m:
+            y = au_m.group(1).strip()
+            # Retirer qualificatifs courants non-ingrédients
+            y = _re.sub(r"\b(maison|express|facile|rapide)\b", "", y, flags=_re.IGNORECASE).strip()
+            # Gérer "cerises" ou "pommes de terre"
+            if y:
+                results.append((_normaliser_ingredient(y), qty, source_label))
+                continue
 
         # "X nature" / "X naturé" → garder tel quel (ex: yaourt nature)
         nom_clean = _normaliser_ingredient(part)
@@ -236,7 +258,9 @@ class ServiceCoursesIntelligentes(BaseAIService):
             _ajouter_ingredients_recette(getattr(repas, "dessert_jules_recette", None))
 
             # Entrées/desserts texte (non liées à une recette) → articles directs (parsés)
-            _source_repas = repas.recette.nom if repas.recette else "planning"
+            # Source volontairement neutre (date + type repas) pour éviter un lien trompeur
+            # avec le plat principal.
+            _source_repas = f"{repas.date_repas.strftime('%d/%m')} {repas.type_repas}"
             for champ, label in [
                 ("entree", "Entrée"),
                 ("dessert", "Dessert"),
@@ -249,9 +273,13 @@ class ServiceCoursesIntelligentes(BaseAIService):
                     else getattr(repas, "dessert_jules_recette_id", None)
                 )
                 if texte and not fk:
-                    source_label = f"Depuis planning: {_source_repas}"
+                    source_label = f"Depuis planning: {_source_repas} ({label.lower()} texte)"
                     for nom_item, qty, src in _parser_texte_courses(texte, source_label):
                         if not nom_item:
+                            continue
+                        # Sécurité bébé: le miel ne doit pas apparaître depuis dessert_jules en texte libre.
+                        if champ == "dessert_jules" and nom_item == "miel":
+                            logger.warning("Ingredient ignore (dessert_jules): miel")
                             continue
                         agregat[nom_item]["quantite"] += qty
                         if not agregat[nom_item]["unite"]:

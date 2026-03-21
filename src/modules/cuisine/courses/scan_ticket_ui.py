@@ -69,6 +69,7 @@ def _analyser_photo(uploaded_file) -> None:
     with st.spinner("🤖 Pixtral analyse le ticket..."):
         ticket = scanner_ticket_vision(image_b64)
 
+    st.session_state[_keys("ticket_resultat")] = ticket
     _afficher_resultat_ticket(ticket)
 
 
@@ -93,6 +94,7 @@ def _afficher_mode_texte() -> None:
             with st.spinner("Analyse du texte..."):
                 ticket = scanner_ticket_texte(texte)
 
+            st.session_state[_keys("ticket_resultat")] = ticket
             _afficher_resultat_ticket(ticket)
 
 
@@ -116,10 +118,10 @@ def _afficher_resultat_ticket(ticket) -> None:
     df = pd.DataFrame(
         [
             {
-                "Article": l.nom,
+                "Article": l.article,
                 "Quantité": l.quantite or 1,
-                "Prix unit.": f"{l.prix_unitaire:.2f} €" if l.prix_unitaire else "-",
-                "Total": f"{l.prix_total:.2f} €",
+                "Prix unit.": f"{l.prix:.2f} €" if l.prix else "-",
+                "Total": f"{l.prix * (l.quantite or 1):.2f} €",
             }
             for l in ticket.lignes
         ]
@@ -135,14 +137,124 @@ def _afficher_resultat_ticket(ticket) -> None:
             try:
                 from src.services.integrations.ticket_caisse import ticket_vers_depenses
 
-                depenses = ticket_vers_depenses(ticket, magasin=ticket.magasin)
+                ticket_vers_depenses(ticket, magasin=ticket.magasin)
                 st.success(f"✅ Dépense de {ticket.total_calcule:.2f} € enregistrée !")
             except Exception as e:
                 st.error(f"❌ Erreur: {e}")
 
     with col2:
         if st.button("🛒 Ajouter au stock", key=_keys("ajouter_stock")):
-            st.info("🔜 Fonctionnalité à venir : ajout automatique à l'inventaire")
+            st.session_state[_keys("show_checkout")] = True
+            st.rerun()
+
+    # Confirmation checkout (visible après clic)
+    if st.session_state.get(_keys("show_checkout")):
+        _afficher_checkout_confirmation(ticket)
+
+
+def _afficher_checkout_confirmation(ticket) -> None:
+    """Sélection des articles du ticket à ajouter au stock."""
+    st.divider()
+    st.subheader("📦 Sélectionner les articles à ajouter au stock")
+
+    selected_lines = {}
+    for i, ligne in enumerate(ticket.lignes):
+        label = f"{ligne.article}  ×{ligne.quantite or 1}"
+        checked = st.checkbox(label, value=True, key=_keys(f"checkout_ligne_{i}"))
+        if checked:
+            selected_lines[i] = ligne
+
+    col_ok, col_cancel = st.columns(2)
+    with col_ok:
+        if st.button("✅ Confirmer l'ajout", key=_keys("confirmer_checkout"), type="primary"):
+            if selected_lines:
+                _executer_checkout_ticket(list(selected_lines.values()))
+            else:
+                st.warning("Sélectionnez au moins un article.")
+    with col_cancel:
+        if st.button("❌ Annuler", key=_keys("annuler_checkout")):
+            st.session_state[_keys("show_checkout")] = False
+            st.rerun()
+
+
+def _executer_checkout_ticket(lignes: list) -> None:
+    """Écrit les lignes sélectionnées dans l'inventaire (matching par nom d'ingrédient)."""
+    from src.core.db import obtenir_contexte_db
+    from src.core.models import ArticleInventaire, HistoriqueInventaire, Ingredient
+
+    ajoutes: list[str] = []
+    non_trouves: list[str] = []
+
+    try:
+        with obtenir_contexte_db() as session:
+            for ligne in lignes:
+                nom = ligne.article.strip()
+                ingredient = (
+                    session.query(Ingredient)
+                    .filter(Ingredient.nom.ilike(f"%{nom}%"))
+                    .first()
+                )
+
+                if not ingredient:
+                    non_trouves.append(nom)
+                    continue
+
+                quantite = float(ligne.quantite or 1)
+                inv = (
+                    session.query(ArticleInventaire)
+                    .filter(ArticleInventaire.ingredient_id == ingredient.id)
+                    .first()
+                )
+
+                if inv:
+                    quantite_avant = float(inv.quantite or 0)
+                    inv.quantite = quantite_avant + quantite
+                    session.add(
+                        HistoriqueInventaire(
+                            article_id=inv.id,
+                            ingredient_id=ingredient.id,
+                            type_modification="modification",
+                            quantite_avant=quantite_avant,
+                            quantite_apres=inv.quantite,
+                            notes="Ajout depuis scan ticket caisse",
+                        )
+                    )
+                else:
+                    inv = ArticleInventaire(
+                        ingredient_id=ingredient.id,
+                        quantite=quantite,
+                        quantite_min=1.0,
+                    )
+                    session.add(inv)
+                    session.flush()
+                    session.add(
+                        HistoriqueInventaire(
+                            article_id=inv.id,
+                            ingredient_id=ingredient.id,
+                            type_modification="ajout",
+                            quantite_avant=0,
+                            quantite_apres=quantite,
+                            notes="Ajout depuis scan ticket caisse",
+                        )
+                    )
+
+                ajoutes.append(ingredient.nom)
+
+            session.commit()
+
+        if ajoutes:
+            st.success(f"✅ {len(ajoutes)} article(s) ajouté(s) au stock : {', '.join(ajoutes)}")
+        if non_trouves:
+            st.warning(
+                f"⚠️ {len(non_trouves)} article(s) non trouvé(s) dans l'inventaire "
+                f"(introuvables par nom) : {', '.join(non_trouves)}"
+            )
+
+        st.session_state[_keys("show_checkout")] = False
+
+    except Exception as e:
+        logger.error("Erreur checkout ticket: %s", e)
+        st.error(f"❌ Erreur lors de la mise à jour du stock : {e}")
 
 
 __all__ = ["afficher_scan_ticket"]

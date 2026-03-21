@@ -22,12 +22,13 @@
     'use strict';
 
     const DB_NAME = 'matanne-offline-db';
-    const DB_VERSION = 2; // Upgraded from v1
+    const DB_VERSION = 3; // v3: added checkout_pending store
     const STORES = {
         SHOPPING: 'shopping_list',
         PENDING: 'pending_changes',
         INVENTAIRE: 'inventaire_cache',
         META: 'sync_meta',
+        CHECKOUT_PENDING: 'checkout_pending',
     };
 
     // ═══════════════════════════════════════════════════
@@ -75,6 +76,16 @@
                     db.createObjectStore(STORES.META, {
                         keyPath: 'key',
                     });
+                }
+
+                // Checkout events queue (offline → inventory on reconnect)
+                if (!db.objectStoreNames.contains(STORES.CHECKOUT_PENDING)) {
+                    const checkoutStore = db.createObjectStore(STORES.CHECKOUT_PENDING, {
+                        keyPath: 'id',
+                        autoIncrement: true,
+                    });
+                    checkoutStore.createIndex('liste_id', 'liste_id', { unique: false });
+                    checkoutStore.createIndex('timestamp', 'timestamp', { unique: false });
                 }
             };
         });
@@ -173,6 +184,45 @@
         return modifierArticle(id, { coche: true });
     }
 
+    /**
+     * Coche un article en mode hors-ligne: mise à jour optimiste locale +
+     * mise en file du checkout vers l'inventaire pour la prochaine synchro.
+     *
+     * @param {number} liste_id  - ID de la liste de courses côté serveur
+     * @param {number} item_id   - ID de l'ArticleCourses côté serveur
+     * @param {number} [quantite=1.0] - Quantité achetée
+     */
+    async function cocherArticleOffline(liste_id, item_id, quantite = 1.0) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(
+                [STORES.SHOPPING, STORES.CHECKOUT_PENDING],
+                'readwrite'
+            );
+
+            // Mise à jour optimiste dans la liste locale
+            const shopStore = tx.objectStore(STORES.SHOPPING);
+            const getReq = shopStore.get(item_id);
+            getReq.onsuccess = () => {
+                const item = getReq.result;
+                if (item) {
+                    shopStore.put({ ...item, coche: true, synced: false });
+                }
+            };
+
+            // Mise en file pour sync ultérieure
+            tx.objectStore(STORES.CHECKOUT_PENDING).add({
+                liste_id,
+                item_id,
+                quantite,
+                timestamp: Date.now(),
+            });
+
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error);
+        });
+    }
+
     async function obtenirListe(filtreCategorie) {
         const db = await openDB();
         return new Promise((resolve, reject) => {
@@ -208,6 +258,7 @@
             success: true,
             uploaded: 0,
             downloaded: 0,
+            checkouts_synced: 0,
             conflicts: 0,
             errors: [],
         };
@@ -217,6 +268,11 @@
             const pushResult = await pushChanges();
             result.uploaded = pushResult.count;
             result.errors.push(...pushResult.errors);
+
+            // Phase 1.5: Push queued checkouts to inventory
+            const checkoutResult = await synchroniserCheckouts();
+            result.checkouts_synced = checkoutResult.count;
+            result.errors.push(...checkoutResult.errors);
 
             // Phase 2: Pull server state
             const pullResult = await pullFromServer();
@@ -245,6 +301,72 @@
         }
 
         return result;
+    }
+
+    // ═══════════════════════════════════════════════════
+    // Checkout Sync (courses → inventaire en arrière-plan)
+    // ═══════════════════════════════════════════════════
+
+    /**
+     * Regroupe les checkout en attente par liste_id et les pousse vers
+     * POST /api/v1/courses/{liste_id}/checkout-items dès que le réseau revient.
+     */
+    async function synchroniserCheckouts() {
+        const db = await openDB();
+        const pending = await new Promise((resolve, reject) => {
+            const tx = db.transaction(STORES.CHECKOUT_PENDING, 'readonly');
+            const req = tx.objectStore(STORES.CHECKOUT_PENDING).getAll();
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+
+        if (pending.length === 0) return { count: 0, errors: [] };
+
+        // Regrouper par liste_id
+        const parListe = {};
+        for (const c of pending) {
+            if (!parListe[c.liste_id]) parListe[c.liste_id] = [];
+            parListe[c.liste_id].push(c);
+        }
+
+        let count = 0;
+        const errors = [];
+
+        for (const [liste_id, items] of Object.entries(parListe)) {
+            try {
+                const response = await fetch(
+                    `/api/v1/courses/${liste_id}/checkout-items`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            articles: items.map((i) => ({
+                                item_id: i.item_id,
+                                quantite_achetee: i.quantite,
+                            })),
+                        }),
+                    }
+                );
+
+                if (response.ok) {
+                    // Supprimer les éléments traités de la file
+                    const delDb = await openDB();
+                    const delTx = delDb.transaction(STORES.CHECKOUT_PENDING, 'readwrite');
+                    for (const item of items) {
+                        delTx.objectStore(STORES.CHECKOUT_PENDING).delete(item.id);
+                    }
+                    count += items.length;
+                } else {
+                    errors.push(
+                        `Checkout liste ${liste_id}: HTTP ${response.status}`
+                    );
+                }
+            } catch (e) {
+                errors.push(`Checkout liste ${liste_id}: ${e.message}`);
+            }
+        }
+
+        return { count, errors };
     }
 
     async function pushChanges() {
@@ -484,6 +606,8 @@
         modifierArticle,
         supprimerArticle,
         cocherArticle,
+        cocherArticleOffline,
+        synchroniserCheckouts,
         obtenirListe,
         synchroniser,
         estEnLigne,

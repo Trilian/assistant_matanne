@@ -6,6 +6,20 @@ Ces fonctions n'ont pas de dépendance Streamlit et sont facilement testables.
 from datetime import datetime
 from typing import Any
 
+
+DEFAULT_RAYON_VERS_MAGASIN: dict[str, str] = {
+    "Fruits & Légumes": "Marché / Primeur",
+    "Boulangerie": "Boulangerie",
+    "Boucherie": "Boucher / Poissonnier",
+    "Charcuterie": "Boucher / Poissonnier",
+    "Poissonnerie": "Boucher / Poissonnier",
+    "Crèmerie": "Supermarché",
+    "Fromage": "Supermarché",
+    "Épicerie": "Supermarché",
+    "Surgelés": "Supermarché",
+    "Boissons": "Supermarché",
+}
+
 # -----------------------------------------------------------
 # FILTRAGE ET TRANSFORMATION
 # -----------------------------------------------------------
@@ -65,6 +79,43 @@ def grouper_par_rayon(liste: list[dict[str, Any]]) -> dict[str, list[dict[str, A
         rayons[rayon].append(article)
 
     return rayons
+
+
+def grouper_par_magasin(liste: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    """Regroupe les articles par type de magasin cible."""
+    rayon_vers_magasin = DEFAULT_RAYON_VERS_MAGASIN
+
+    magasins: dict[str, list[dict[str, Any]]] = {}
+    for article in liste:
+        rayon = article.get("rayon_magasin") or "Autre"
+        magasin = rayon_vers_magasin.get(rayon, "Autre magasin")
+        if magasin not in magasins:
+            magasins[magasin] = []
+        magasins[magasin].append(article)
+
+    return magasins
+
+
+def obtenir_mapping_magasins_par_defaut() -> dict[str, str]:
+    """Retourne une copie du mapping rayon -> magasin par défaut."""
+    return DEFAULT_RAYON_VERS_MAGASIN.copy()
+
+
+def grouper_par_magasin_personnalise(
+    liste: list[dict[str, Any]], mapping_rayon_magasin: dict[str, str] | None = None
+) -> dict[str, list[dict[str, Any]]]:
+    """Regroupe les articles par magasin avec mapping personnalisable."""
+    mapping = mapping_rayon_magasin or DEFAULT_RAYON_VERS_MAGASIN
+
+    magasins: dict[str, list[dict[str, Any]]] = {}
+    for article in liste:
+        rayon = article.get("rayon_magasin") or "Autre"
+        magasin = (mapping.get(rayon) or "Autre magasin").strip() or "Autre magasin"
+        if magasin not in magasins:
+            magasins[magasin] = []
+        magasins[magasin].append(article)
+
+    return magasins
 
 
 def calculer_statistiques_liste(
@@ -145,6 +196,8 @@ def generer_texte_impression(
     liste: list[dict[str, Any]],
     titre: str = "LISTE DE COURSES",
     date_format: str = "%d/%m/%Y %H:%M",
+    group_by: str = "rayon",
+    mapping_rayon_magasin: dict[str, str] | None = None,
 ) -> str:
     """
     Génère le texte formaté pour l'impression de la liste.
@@ -157,7 +210,12 @@ def generer_texte_impression(
     Returns:
         Texte formaté pour impression
     """
-    rayons = grouper_par_rayon(liste)
+    if group_by == "magasin":
+        groupes = grouper_par_magasin_personnalise(liste, mapping_rayon_magasin)
+    elif group_by == "simple":
+        groupes = {"Liste rapide": liste}
+    else:
+        groupes = grouper_par_rayon(liste)
 
     lignes = [
         f"📋 {titre}",
@@ -166,11 +224,13 @@ def generer_texte_impression(
         "",
     ]
 
-    for rayon in sorted(rayons.keys()):
-        lignes.append(f"🏪 {rayon}")
-        for article in rayons[rayon]:
+    for groupe in sorted(groupes.keys()):
+        lignes.append(f"🏪 {groupe}")
+        for article in groupes[groupe]:
             checkbox = "☐"
-            qty = f"{article.get('quantite_necessaire')} {article.get('unite')}"
+            quantite = article.get("quantite_necessaire", 1)
+            unite = (article.get("unite") or "").strip()
+            qty = f"{quantite} {unite}".strip()
             lignes.append(f"  {checkbox} {article.get('ingredient_nom')} ({qty})")
         lignes.append("")
 
@@ -222,6 +282,9 @@ def extraire_rayons_uniques(liste: list[dict[str, Any]]) -> list[str]:
 __all__ = [
     "filtrer_liste",
     "grouper_par_rayon",
+    "grouper_par_magasin",
+    "grouper_par_magasin_personnalise",
+    "obtenir_mapping_magasins_par_defaut",
     "calculer_statistiques_liste",
     "formater_article_label",
     "generer_texte_impression",
