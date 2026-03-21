@@ -434,6 +434,47 @@ def generer_alternative_ia(
         contraintes_equilibre=contraintes,
     )
 
+    def _extraire_alternative(payload: dict) -> dict | None:
+        """Extrait une alternative depuis différents formats de réponse IA."""
+        if not payload or not isinstance(payload, dict):
+            return None
+
+        candidates = payload.get("alternatives", [])
+        if not isinstance(candidates, list):
+            candidates = []
+
+        # Compatibilité: certains modèles renvoient directement un objet recette
+        if not candidates and payload.get("nom"):
+            candidates = [payload]
+
+        if not candidates:
+            return None
+
+        nom_courant = (recette_actuelle.get("nom") or "").strip().lower()
+        selection = None
+        for candidate in candidates:
+            if not isinstance(candidate, dict):
+                continue
+            nom_candidate = (candidate.get("nom") or "").strip().lower()
+            if nom_candidate and nom_candidate != nom_courant:
+                selection = candidate
+                break
+
+        if not selection:
+            selection = candidates[0] if isinstance(candidates[0], dict) else None
+
+        if not selection:
+            return None
+
+        return {
+            "nom": selection.get("nom", ""),
+            "proteine": selection.get("proteine", ""),
+            "temps_minutes": selection.get("temps_minutes", 30),
+            "robot": selection.get("robot"),
+            "difficulte": selection.get("difficulte", "facile"),
+            "jules_adaptation": selection.get("jules_adaptation", ""),
+        }
+
     try:
         client = obtenir_client_ia()
         if not client:
@@ -446,18 +487,37 @@ def generer_alternative_ia(
         )
 
         if response and isinstance(response, dict):
-            alternatives = response.get("alternatives", [])
-            if alternatives:
-                # Prendre la première alternative et la formater
-                alt = alternatives[0]
-                return {
-                    "nom": alt.get("nom", ""),
-                    "proteine": alt.get("proteine", ""),
-                    "temps_minutes": alt.get("temps_minutes", 30),
-                    "robot": alt.get("robot"),
-                    "difficulte": alt.get("difficulte", "facile"),
-                    "jules_adaptation": alt.get("jules_adaptation", ""),
-                }
+            alt = _extraire_alternative(response)
+            if alt:
+                return alt
+
+        # Fallback: si generer_json renvoie une string brute, tenter un parse manuel.
+        if response and isinstance(response, str):
+            import json
+            import re
+
+            try:
+                from src.core.ai.parser import AnalyseurIA
+
+                json_str = AnalyseurIA._extraire_objet_json(response)
+                json_str = AnalyseurIA._reparer_intelligemment(json_str)
+                parsed = json.loads(json_str)
+                if isinstance(parsed, dict):
+                    alt = _extraire_alternative(parsed)
+                    if alt:
+                        return alt
+            except Exception:
+                try:
+                    cleaned = re.sub(r",\s*([}\]])", r"\1", response)
+                    match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+                    if match:
+                        parsed = json.loads(match.group(0))
+                        if isinstance(parsed, dict):
+                            alt = _extraire_alternative(parsed)
+                            if alt:
+                                return alt
+                except Exception:
+                    pass
 
     except Exception as e:
         logger.error(f"Erreur génération alternative IA: {e}")

@@ -823,29 +823,45 @@ def app():
                                         continue
                                     sources_par_nom.setdefault(_nom, []).append(f"{_jour} {_slot}")
 
+                                plat_par_slot: dict[str, str] = {
+                                    f"{jour} {slot}": (data.get("nom") or "").strip()
+                                    for jour, slot, data in slots_ordonnes
+                                    if isinstance(data, dict)
+                                    and not data.get("est_rechauffe")
+                                    and (data.get("nom") or "").strip()
+                                }
+
                                 for _jour, _slot, _data in slots_ordonnes:
                                     if not _data.get("est_rechauffe"):
                                         continue
-                                    _nom = (_data.get("nom") or "").strip().lower()
-                                    if not _nom:
-                                        continue
-                                    _sources = sources_par_nom.get(_nom, [])
-                                    if not _sources:
-                                        continue
-
                                     _courant = f"{_jour} {_slot}"
                                     _idx_courant = index_par_slot.get(_courant, -1)
+                                    _source_directe = (_data.get("rechauffe_de") or "").strip()
+
+                                    # 1) Priorité: source explicite valide (et antérieure)
+                                    if _source_directe in plat_par_slot and index_par_slot.get(
+                                        _source_directe, -1
+                                    ) < _idx_courant:
+                                        _data["rechauffe_de"] = _source_directe
+                                        _data["nom"] = plat_par_slot[_source_directe]
+                                        continue
+
+                                    # 2) Sinon: chercher une source par même nom de plat
+                                    _nom = (_data.get("nom") or "").strip().lower()
+                                    _sources = sources_par_nom.get(_nom, []) if _nom else []
                                     _sources_avant = [
                                         s
                                         for s in _sources
                                         if index_par_slot.get(s, -1) < _idx_courant
                                     ]
+                                    if _sources_avant:
+                                        _source_resolue = _sources_avant[-1]
+                                        _data["rechauffe_de"] = _source_resolue
+                                        continue
 
-                                    # Priorité à la source la plus proche avant ce réchauffé
-                                    _source_resolue = (
-                                        _sources_avant[-1] if _sources_avant else _sources[0]
-                                    )
-                                    _data["rechauffe_de"] = _source_resolue
+                                    # 3) Aucune source réelle -> ce n'est pas un vrai réchauffé
+                                    _data["est_rechauffe"] = False
+                                    _data.pop("rechauffe_de", None)
 
                                 st.session_state[SK.PLANNING_DATA] = planning
                                 st.session_state[SK.PLANNING_CONSEILS] = result.get(
