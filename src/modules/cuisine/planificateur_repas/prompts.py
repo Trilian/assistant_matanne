@@ -188,11 +188,23 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 - Même avec des ingrédients en commun, les RECETTES doivent être différentes (ex: courgettes → gratin de courgettes ET ratatouille, pas 2 gratins).
 - Les réchauffés reprennent le même plat = c'est normal, mais la recette source ne doit apparaître QU'UNE seule fois comme dîner cuisiné.
 
+🥦 ÉQUILIBRE DANS CHAQUE PLAT (OBLIGATOIRE):
+- Chaque plat principal midi/soir doit contenir à la fois des LÉGUMES ET des FÉCULENTS. Ne propose JAMAIS un plat composé seulement de viande + féculent, ni seulement de protéine + sauce.
+- Cible de composition par assiette: soit environ 50% légumes / 50% féculents, soit environ 2/3 légumes et 1/3 féculents.
+- Les légumes doivent être VISIBLES et identifiables dans le nom, les ingrédients ou les étapes du plat. Évite les plats où les légumes sont anecdotiques.
+- Les féculents peuvent être: pommes de terre, riz, pâtes, semoule, polenta, quinoa, boulgour, patate douce, lentilles, pois chiches, haricots blancs, etc.
+- Pour les réchauffés, la recette source doit déjà respecter cette règle légumes + féculents.
+- Privilégier des plats familiaux complets du type: poulet courgettes-riz, poisson carottes-pommes de terre, pâtes aux légumes, hachis avec légumes, curry légumes-riz, etc.
+
 {section_bases}
 {section_recettes_imposees}
 {section_recettes_db}
 
 👶 ADAPTATIONS JULES — RÈGLES STRICTES (à respecter dans "jules_adaptation" de CHAQUE plat):
+- PORTIONS JULES: adapter chaque plat pour une portion bébé claire et réaliste.
+- MIDI: prévoir pour Jules environ 200 g au total de légumes + féculents, ET 20 g de protéines maximum (poisson, viande, oeuf ou légumineuses).
+- SOIR: prévoir pour Jules environ 200 g au total de légumes + féculents, SANS protéine ajoutée le soir.
+- La "jules_adaptation" doit mentionner explicitement la portion prévue pour Jules, en distinguant bien midi et soir.
 - SEL / POIVRE / ÉPICES: TOUJOURS prélever la portion Jules AVANT d'assaisonner le plat familial.
 - ALCOOL (vin rouge, vin blanc, cidre, bière, cognac): STRICTEMENT INTERDIT. "jules_adaptation" DOIT dire "Prélever 80-100g pour Jules AVANT d'ajouter [l'alcool]". Ne JAMAIS mettre d'alcool dans la portion Jules.
 - THON EN CONSERVE (riche en mercure): déconseillé avant 3 ans. "jules_adaptation" DOIT proposer une alternative: "Remplacer le thon par du cabillaud ou colin émietté pour Jules."
@@ -222,10 +234,15 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
   INTERDIT: noix entières, bonbons, gâteaux industriels sucrés, miel, crudités crues.
 
 Chaque repas (midi/soir) DOIT contenir:
-1. "entree": entrée simple (texte libre ou null)
+1. "entree": entrée simple pour LES ADULTES uniquement (texte libre ou null). Cette entrée n'a pas besoin d'être adaptée à Jules.
 2. "plat": objet complet (voir ci-dessous)
 3. "dessert": dessert famille (texte libre)
 4. "dessert_jules": dessert adapté Jules {preferences.jules_age_mois} mois — DOIT comporter un LAITAGE (petit-suisse ×2, fromage blanc, yaourt nature, kiri, babybel ou autre fromage enfant) ET un PRODUIT FRUITIER (compote, fruit écrasé, purée de fruit). Format: "Petit-suisse + compote poire" ou "Yaourt nature + purée de banane".
+
+RÈGLES SUR LES ENTRÉES:
+- L'entrée concerne uniquement les adultes. Ne te limite PAS à cause de Jules pour l'entrée.
+- Tu peux proposer des crudités, salades ou autres entrées froides pour les adultes si elles sont cohérentes avec le repas.
+- En revanche, le plat principal doit toujours rester compatible avec l'adaptation Jules décrite dans "jules_adaptation".
 
 Pour le plat, fournis:
 1. "nom": Nom du plat
@@ -255,7 +272,7 @@ FORMAT DE RÉPONSE (JSON strict):
           "difficulte": "facile",
           "complexite": "simple",
           "est_rechauffe": false,
-          "jules_adaptation": "Mixer les pâtes, couper le jambon en petits morceaux.",
+          "jules_adaptation": "Midi Jules: servir environ 200g de pâtes et légumes fondants avec 20g maximum de jambon très finement coupé ou mixé, sans sel ajouté.",
           "ingredients": [
             {{"nom": "pâtes penne", "quantite": 300, "unite": "g"}},
             {{"nom": "pesto vert", "quantite": 3, "unite": "c.s."}},
@@ -282,7 +299,7 @@ FORMAT DE RÉPONSE (JSON strict):
           "difficulte": "facile",
           "complexite": "simple",
           "est_rechauffe": false,
-          "jules_adaptation": "Prélever 80g avant sel. Écraser les morceaux de poulet.",
+          "jules_adaptation": "Soir Jules: servir environ 200g de courgettes et riz bien fondants, sans sel, et sans ajouter de protéine dans sa portion du soir.",
           "ingredients": [
             {{"nom": "blancs de poulet", "quantite": 400, "unite": "g"}},
             {{"nom": "courgettes", "quantite": 2, "unite": "pièce"}},
