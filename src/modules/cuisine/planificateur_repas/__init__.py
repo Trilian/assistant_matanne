@@ -557,8 +557,8 @@ def app():
         if planning_db:
             st.session_state[SK.PLANNING_DATA] = planning_db
             st.session_state[SK.PLANNING_VALIDE] = True
-            # Ne restaurer les dates que si le planning est encore actuel (pas dans le passé)
-            if date_db and date_db >= date.today() - timedelta(days=date.today().weekday()):
+            # Ne restaurer les dates que si le planning démarre aujourd'hui ou plus tard
+            if date_db and date_db >= date.today():
                 st.session_state[SK.PLANNING_DATE_DEBUT] = date_db
             if conseils_db:
                 st.session_state[SK.PLANNING_CONSEILS] = conseils_db
@@ -568,19 +568,19 @@ def app():
             st.session_state[SK.PLANNING_DATA] = {}
 
     if SK.PLANNING_DATE_DEBUT not in st.session_state:
-        # Par défaut: prochain jour de début de semaine selon les préférences
-        today = date.today()
-        prefs_init = charger_preferences()
-        _jour_debut_wd = jour_debut_from_nom(prefs_init.jour_debut_semaine)
-        days_until_start = (_jour_debut_wd - today.weekday()) % 7
-        if days_until_start == 0:
-            # On est le jour de début, rester à aujourd'hui
-            st.session_state[SK.PLANNING_DATE_DEBUT] = today
-        else:
-            st.session_state[SK.PLANNING_DATE_DEBUT] = today + timedelta(days=days_until_start)
+        # Par défaut: démarrer aujourd'hui
+        st.session_state[SK.PLANNING_DATE_DEBUT] = date.today()
+
+    # Si une ancienne date est restée en session, ne jamais proposer une date passée
+    if st.session_state[SK.PLANNING_DATE_DEBUT] < date.today():
+        st.session_state[SK.PLANNING_DATE_DEBUT] = date.today()
 
     if SK.PLANNING_DATE_FIN not in st.session_state:
         # Par défaut: 6 jours après le début (semaine complète)
+        debut = st.session_state[SK.PLANNING_DATE_DEBUT]
+        st.session_state[SK.PLANNING_DATE_FIN] = debut + timedelta(days=6)
+    elif st.session_state[SK.PLANNING_DATE_FIN] < st.session_state[SK.PLANNING_DATE_DEBUT]:
+        # Garder une période valide si la date début a été corrigée
         debut = st.session_state[SK.PLANNING_DATE_DEBUT]
         st.session_state[SK.PLANNING_DATE_FIN] = debut + timedelta(days=6)
 
