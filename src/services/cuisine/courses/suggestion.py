@@ -5,8 +5,102 @@ Generation de liste de courses depuis le planning repas avec comparaison inventa
 """
 
 import logging
+import re as _re
 from collections import defaultdict
 from datetime import date
+
+
+# Normalisations de noms d'ingrédients pour la déduplication
+_NORMALISATIONS_INGREDIENTS: dict[str, str] = {
+    "blancs de poulet cuits": "blancs de poulet",
+    "blanc de poulet cuit": "blancs de poulet",
+    "filets de poulet cuits": "filets de poulet",
+    "filet de poulet cuit": "filets de poulet",
+    "poulet cuit": "blancs de poulet",
+    "fromage blanc sucré": "fromage blanc",
+    "fromage blanc naturé": "fromage blanc",
+    "yaourts nature": "yaourt nature",
+    "yaourts": "yaourt nature",
+    "petit suisse": "petit-suisse",
+    "petits suisses": "petit-suisse",
+}
+
+
+def _normaliser_ingredient(nom: str) -> str:
+    """Normalise un nom d'ingrédient pour améliorer la déduplication."""
+    key = nom.lower().strip()
+    if key in _NORMALISATIONS_INGREDIENTS:
+        return _NORMALISATIONS_INGREDIENTS[key]
+    # Retirer " cuit(e)(s)" en fin
+    key = _re.sub(r"\s+cuit[e]?s?\s*$", "", key)
+    # Retirer " surgelé(e)(s)" en fin
+    key = _re.sub(r"\s+surgel[\u00e9èe][e]?s?\s*$", "", key)
+    return key.strip()
+
+
+def _parser_texte_courses(texte: str, source_label: str) -> list[tuple[str, float, str]]:
+    """Parse un texte de dessert/entrée en items achetables individuels.
+
+    Ex: "Petit-suisse \u00d72 + compote poire" → [("petit-suisse", 2.0, source), ("compote", 1.0, source)]
+    Ex: "Yaourt nature + purée de banane" → [("yaourt nature", 1.0, source), ("banane", 1.0, source)]
+    Ex: "Fromage blanc sucré à la compote" → [("fromage blanc", 1.0, source), ("compote", 1.0, source)]
+    Ex: "Compote pomme-coing maison" → [("pomme", 1.0, source), ("coing", 1.0, source)]
+
+    Returns list of (nom_normalise, quantite, source_label)
+    """
+    from functools import reduce
+
+    results: list[tuple[str, float, str]] = []
+    # Séparer sur +, / et " et "
+    parts = _re.split(r"\s*[+/]\s*|\s+et\s+", texte, flags=_re.IGNORECASE)
+
+    for part in parts:
+        part = part.strip()
+        if not part or len(part) < 2:
+            continue
+
+        # Extraire quantité : ×2, x2, *2
+        qty = 1.0
+        qty_match = _re.search(r"[\u00d7x\*](\d+)", part, _re.IGNORECASE)
+        if qty_match:
+            qty = float(qty_match.group(1))
+            part = _re.sub(r"\s*[\u00d7x\*]\d+", "", part).strip()
+
+        # "purée de X" → "X"
+        puree_m = _re.match(r"pur[\u00e9eée][e]?\s+d[e'u]?\s*(.+)", part, _re.IGNORECASE)
+        if puree_m:
+            results.append((_normaliser_ingredient(puree_m.group(1).strip()), qty, source_label))
+            continue
+
+        # "compote X-Y maison" ou "compote X maison" → ingrédients fruit(s) + sucre
+        compote_m = _re.match(r"compote\s+(.+?)\s*(?:maison)?\s*$", part, _re.IGNORECASE)
+        if compote_m:
+            fruits_str = compote_m.group(1).strip()
+            # Retirer "maison" si présent dans les fruits
+            fruits_str = _re.sub(r"\bmaison\b", "", fruits_str, flags=_re.IGNORECASE).strip()
+            # Fruits séparés par - ou espace
+            fruits = [f.strip() for f in _re.split(r"[-\s]", fruits_str) if f.strip() and len(f.strip()) > 2]
+            if fruits:
+                for fruit in fruits:
+                    results.append((fruit.lower(), qty, source_label))
+            else:
+                results.append(("compote", qty, source_label))
+            continue
+
+        # "fromage blanc sucré à la compote" → fromage blanc + compote
+        if "sucré" in part.lower() and "compote" in part.lower():
+            base = _re.sub(r"sucr[\u00e9e].+", "", part, flags=_re.IGNORECASE).strip()
+            if base:
+                results.append((_normaliser_ingredient(base), qty, source_label))
+            results.append(("compote", qty, source_label))
+            continue
+
+        # "X nature" / "X naturé" → garder tel quel (ex: yaourt nature)
+        nom_clean = _normaliser_ingredient(part)
+        if nom_clean:
+            results.append((nom_clean, qty, source_label))
+
+    return results if results else [(_normaliser_ingredient(texte.strip()), 1.0, source_label)]
 
 from sqlalchemy.orm import Session, selectinload
 
@@ -121,9 +215,10 @@ class ServiceCoursesIntelligentes(BaseAIService):
             for ing_recette in recette.ingredients:
                 if not ing_recette.ingredient:
                     continue
-                nom = ing_recette.ingredient.nom.lower()
+                nom = _normaliser_ingredient(ing_recette.ingredient.nom)
                 agregat[nom]["quantite"] += float(ing_recette.quantite or 1)
-                agregat[nom]["unite"] = ing_recette.unite or ""
+                if not agregat[nom]["unite"]:
+                    agregat[nom]["unite"] = ing_recette.unite or ""
                 agregat[nom]["recettes"].add(recette.nom)
 
         for repas in planning.repas:
@@ -140,7 +235,8 @@ class ServiceCoursesIntelligentes(BaseAIService):
             # Dessert Jules (si lié à une recette)
             _ajouter_ingredients_recette(getattr(repas, "dessert_jules_recette", None))
 
-            # Entrées/desserts texte (non liées à une recette) → article direct
+            # Entrées/desserts texte (non liées à une recette) → articles directs (parsés)
+            _source_repas = repas.recette.nom if repas.recette else "planning"
             for champ, label in [
                 ("entree", "Entrée"),
                 ("dessert", "Dessert"),
@@ -153,10 +249,14 @@ class ServiceCoursesIntelligentes(BaseAIService):
                     else getattr(repas, "dessert_jules_recette_id", None)
                 )
                 if texte and not fk:
-                    nom = texte.strip().lower()
-                    agregat[nom]["quantite"] += 1
-                    agregat[nom]["unite"] = ""
-                    agregat[nom]["recettes"].add(f"{label}: {texte.strip()}")
+                    source_label = f"Depuis planning: {_source_repas}"
+                    for nom_item, qty, src in _parser_texte_courses(texte, source_label):
+                        if not nom_item:
+                            continue
+                        agregat[nom_item]["quantite"] += qty
+                        if not agregat[nom_item]["unite"]:
+                            agregat[nom_item]["unite"] = "unité"
+                        agregat[nom_item]["recettes"].add(src)
 
         # Construire la liste d'articles
         articles: list[ArticleCourse] = []

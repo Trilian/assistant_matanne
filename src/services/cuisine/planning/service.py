@@ -211,15 +211,16 @@ class ServicePlanning(
 
         semaine_fin = semaine_debut + timedelta(days=6)
 
-        # 1. Désactiver les anciens plannings pour cette semaine
+        # 1. Supprimer les anciens plannings pour cette semaine (remplacement réel)
         anciens_plannings = (
             db.query(Planning)
-            .filter(Planning.semaine_debut == semaine_debut, Planning.actif == True)
+            .filter(Planning.semaine_debut == semaine_debut)
             .all()
         )
         for p in anciens_plannings:
-            p.actif = False
-            logger.info(f"Planning {p.id} désactivé (remplacé par nouveau)")
+            db.delete(p)
+            logger.info(f"Planning {p.id} supprimé (remplacé par nouveau)")
+        db.flush()
 
         # 2. Créer le nouveau planning
         planning = Planning(

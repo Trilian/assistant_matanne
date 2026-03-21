@@ -192,6 +192,15 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 {section_recettes_imposees}
 {section_recettes_db}
 
+👶 ADAPTATIONS JULES — RÈGLES STRICTES (à respecter dans "jules_adaptation" de CHAQUE plat):
+- SEL / POIVRE / ÉPICES: TOUJOURS prélever la portion Jules AVANT d'assaisonner le plat familial.
+- ALCOOL (vin rouge, vin blanc, cidre, bière, cognac): STRICTEMENT INTERDIT. "jules_adaptation" DOIT dire "Prélever 80-100g pour Jules AVANT d'ajouter [l'alcool]". Ne JAMAIS mettre d'alcool dans la portion Jules.
+- THON EN CONSERVE (riche en mercure): déconseillé avant 3 ans. "jules_adaptation" DOIT proposer une alternative: "Remplacer le thon par du cabillaud ou colin émietté pour Jules."
+- ÉPICES FORTES (curry, piment, harissa, paprika fort): INTERDIT. "jules_adaptation" DOIT dire "Cuire la portion Jules à part dans le jus SANS les épices, assaisonner uniquement la part adulte."
+- CREVETTES: allergène potentiel. "jules_adaptation" DOIT dire "Servir Jules sans crevettes, remplacer par [poulet/poisson blanc émietté]."
+- POISSON FUMÉ (saumon fumé, truite fumée): trop salé. "jules_adaptation": "Utiliser du saumon cuit vapeur pour Jules, pas fumé."
+- NB: Ces restrictions ne changent PAS la liste d'ingrédients du plat principal (la famille mange normalement) — seule la portion Jules est adaptée.
+
 ⚡ MIX SIMPLE / ÉLABORÉ:
 - La MAJORITÉ des repas (8-10 sur 14) doivent être SIMPLES et RAPIDES (≤ 25 min, "difficulte": "facile").
   Exemples: omelette, pâtes au pesto, steak haché-purée, croque-monsieur, wrap, salade composée, soupe, gratin simple.
@@ -206,15 +215,17 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 - "midi": un repas complet (JAMAIS null, JAMAIS absent)
 - "soir": un repas complet (JAMAIS null, JAMAIS absent)
 - "gouter": goûter adapté à Jules ({preferences.jules_age_mois} mois). OBLIGATOIRE.
-  ⚠️ Le goûter est pour un BÉBÉ de {preferences.jules_age_mois} mois. Uniquement des aliments adaptés à son âge:
-  EXEMPLES ADAPTÉS: compote maison, yaourt nature, petit-suisse, madeleine maison, banane écrasée, biscuit bébé, galette de riz, pain + beurre, fromage frais.
-  INTERDIT: crudités crues (risque d'étouffement), noix entières, bonbons, gâteaux industriels, miel.
+  ⚠️ Le goûter est pour un BÉBÉ de {preferences.jules_age_mois} mois. Il DOIT comporter 3 éléments :
+  1. PRODUIT CÉRÉALIER (gâteau): petit biscuit bébé, madeleine maison, galette de riz soufflé, pain beurre, boudoir, pain de mie, sablé maison.
+  2. FRUIT ou COMPOTE: compote maison (pomme, poire, banane), purée de fruit, bout de banane écrasée, tranche de poire bien mûre.
+  3. LAITAGE: yaourt nature, petit-suisse nature, fromage blanc lisse (sans sucre ajouté).
+  INTERDIT: noix entières, bonbons, gâteaux industriels sucrés, miel, crudités crues.
 
 Chaque repas (midi/soir) DOIT contenir:
 1. "entree": entrée simple (texte libre ou null)
 2. "plat": objet complet (voir ci-dessous)
 3. "dessert": dessert famille (texte libre)
-4. "dessert_jules": dessert adapté Jules {preferences.jules_age_mois} mois
+4. "dessert_jules": dessert adapté Jules {preferences.jules_age_mois} mois — DOIT comporter un LAITAGE (petit-suisse ×2, fromage blanc, yaourt nature, kiri, babybel ou autre fromage enfant) ET un PRODUIT FRUITIER (compote, fruit écrasé, purée de fruit). Format: "Petit-suisse + compote poire" ou "Yaourt nature + purée de banane".
 
 Pour le plat, fournis:
 1. "nom": Nom du plat
@@ -259,7 +270,7 @@ FORMAT DE RÉPONSE (JSON strict):
           ]
         }},
         "dessert": "Yaourt nature",
-        "dessert_jules": "Compote pomme-banane"
+        "dessert_jules": "Petit-suisse ×2 + compote pomme-banane"
       }},
       "soir": {{
         "entree": "Salade verte",
@@ -287,12 +298,12 @@ FORMAT DE RÉPONSE (JSON strict):
           ]
         }},
         "dessert": "Fruit frais",
-        "dessert_jules": "Petit-suisse nature"
+        "dessert_jules": "Yaourt nature + purée de banane"
       }},
       "gouter": {{
-        "nom": "Compote pomme-banane maison",
-        "temps_minutes": 10,
-        "jules_adaptation": "Mixer lisse, servir tiède. Parfait pour {preferences.jules_age_mois} mois."
+        "nom": "Galette de riz + compote poire + petit-suisse",
+        "temps_minutes": 5,
+        "jules_adaptation": "Galette de riz soufflé (produit céréalier) + compote poire maison (fruit) + petit-suisse nature (laitage). Parfait pour {preferences.jules_age_mois} mois."
       }}
     }}
   ],
@@ -328,6 +339,7 @@ IMPORTANT:
 - Pour les plats réchauffés (est_rechauffe: true), mettre les mêmes ingrédients/étapes que le plat source, et "temps_minutes": 5.
 - Privilégie des recettes familiales SIMPLES et rapides pour les soirs de semaine.
 - Les plats plus élaborés sont pour le weekend ou un soir calme.
+- NOMMAGE DES INGRÉDIENTS: toujours utiliser la forme brute (ex: "blancs de poulet", PAS "blancs de poulet cuits"). Utiliser le même nom pour le même ingrédient dans toute la semaine (ex: toujours "blancs de poulet", pas parfois "filets de poulet").
 - RÉUTILISE les mêmes légumes/féculents dans plusieurs repas pour faciliter le batch.
 - Propose des recettes VARIÉES et ORIGINALES. Évite les classiques trop courants (pâtes bolo, poulet riz).
 - Les noms des plats réchauffés doivent être IDENTIQUES au plat source (ex: "Émincés de poulet aux courgettes"). NE JAMAIS nommer un plat "Réchauffé : X" ou "Restes de X". Le champ "est_rechauffe": true suffit à indiquer que c'est un réchauffé.
