@@ -101,8 +101,8 @@ def _charger_et_afficher() -> None:
         with obtenir_contexte_db() as session:
             liste = (
                 session.query(ListeCourses)
-                .filter(ListeCourses.statut == "active")
-                .order_by(ListeCourses.date_creation.desc())
+                .filter(ListeCourses.archivee == False)  # noqa: E712
+                .order_by(ListeCourses.cree_le.desc())
                 .first()
             )
 

@@ -55,7 +55,7 @@ def _afficher_resume_budget() -> None:
     with col1:
         st.metric(
             "Dépensé cette semaine",
-            f"{budget.depense_actuelle:.0f} €",
+            f"{budget.depenses_reelles:.0f} €",
             delta=None,
         )
     with col2:
@@ -70,8 +70,8 @@ def _afficher_resume_budget() -> None:
         )
 
     # Barre de progression
-    ratio = min(budget.depense_actuelle / max(budget.budget_hebdo, 1), 1.0)
-    st.progress(ratio, text=f"{budget.depense_actuelle:.0f} / {budget.budget_hebdo:.0f} €")
+    ratio = min(float(budget.depenses_reelles) / max(float(budget.budget_prevu), 1), 1.0)
+    st.progress(ratio, text=f"{budget.depenses_reelles:.0f} / {budget.budget_prevu:.0f} €")
 
 
 def _afficher_tendance() -> None:
@@ -80,16 +80,17 @@ def _afficher_tendance() -> None:
 
     tendance = obtenir_tendance(nb_semaines=4)
 
-    if not tendance.historique:
+    if not tendance.semaines:
         st.info("Pas assez de données pour afficher la tendance.")
         return
 
     import pandas as pd
 
+    historique = [float(s.depenses_reelles) for s in reversed(tendance.semaines)]
     df = pd.DataFrame(
         {
-            "Semaine": [f"S{i + 1}" for i in range(len(tendance.historique))],
-            "Dépenses (€)": tendance.historique,
+            "Semaine": [f"S{i + 1}" for i in range(len(historique))],
+            "Dépenses (€)": historique,
         }
     )
 
@@ -99,7 +100,7 @@ def _afficher_tendance() -> None:
         "stable": "➡️",
     }.get(tendance.tendance, "")
 
-    st.markdown(f"**Tendance {tendance_emoji}** — Moyenne: {tendance.moyenne:.0f} €/sem")
+    st.markdown(f"**Tendance {tendance_emoji}** — Moyenne: {tendance.moyenne_hebdo:.0f} €/sem")
 
     st.bar_chart(df.set_index("Semaine"))
 

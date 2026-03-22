@@ -59,8 +59,88 @@ def _parser_texte_courses(texte: str, source_label: str) -> list[tuple[str, floa
     Returns list of (nom_normalise, quantite, source_label)
     """
     from functools import reduce
+    from src.services.cuisine.courses.constantes import MAPPING_RAYONS
 
     results: list[tuple[str, float, str]] = []
+
+    # Mots-clés d'ingrédients connus (pour éviter de garder un nom de plat complet)
+    mots_ingredients = {
+        _normaliser_ingredient(k)
+        for k in MAPPING_RAYONS.keys()
+        if isinstance(k, str) and len(k.strip()) >= 3
+    }
+
+    def _normaliser_token(token: str) -> str:
+        t = _normaliser_ingredient(token)
+        t = _re.sub(r"\b(maison|frais|fraiche|fraîche|cuit|cuite|rapide|express)\b", "", t)
+        t = _re.sub(r"\s+", " ", t).strip()
+        return t
+
+    def _token_est_ingredient(token: str) -> bool:
+        t = _normaliser_token(token)
+        if len(t) < 3:
+            return False
+        if t in mots_ingredients:
+            return True
+        # Gestion simple singulier/pluriel
+        if t.endswith("s") and t[:-1] in mots_ingredients:
+            return True
+        if (t + "s") in mots_ingredients:
+            return True
+        return False
+
+    def _extraire_depuis_nom_plat(part: str) -> list[str]:
+        """Extrait des ingrédients depuis un libellé de plat texte."""
+        p = _normaliser_token(part)
+        if not p:
+            return []
+
+        # Formes fréquentes: soupe/velouté/mousse/salade de X
+        base_m = _re.match(
+            r"(?:soupe|veloute|veloutee|veloute|velouté|mousse|salade)\s+d(?:e|')\s+(.+)$",
+            p,
+            _re.IGNORECASE,
+        )
+        if base_m:
+            p = _normaliser_token(base_m.group(1))
+
+        # Retirer compléments de style "à la ...", "au ...", "aux ..."
+        p = _re.sub(r"\s+a\s+l[ae]\s+.+$", "", p, flags=_re.IGNORECASE)
+        p = _re.sub(r"\s+aux?\s+.+$", "", p, flags=_re.IGNORECASE)
+
+        # Préserver quelques expressions multi-mots avant split
+        p = p.replace("pommes de terre", "pommes_de_terre")
+        p = p.replace("fromage blanc", "fromage_blanc")
+        p = p.replace("petit suisse", "petit_suisse")
+        p = p.replace("petit-suisse", "petit_suisse")
+
+        tokens = [
+            _normaliser_token(t.replace("_", " "))
+            for t in _re.split(r"\s*[,+/]\s*|\s+et\s+|\s+-\s+|\s+", p)
+            if t.strip()
+        ]
+
+        # Recombiner en bigrammes pour détecter des ingrédients composés
+        extraits: list[str] = []
+        i = 0
+        while i < len(tokens):
+            if i + 1 < len(tokens):
+                bigram = f"{tokens[i]} {tokens[i + 1]}".strip()
+                if _token_est_ingredient(bigram):
+                    extraits.append(bigram)
+                    i += 2
+                    continue
+            if _token_est_ingredient(tokens[i]):
+                extraits.append(tokens[i])
+            i += 1
+
+        # Cas "avocat crevettes" : 2 ingrédients collés sans séparateur
+        if not extraits and len(tokens) == 2:
+            if _token_est_ingredient(tokens[0]) and _token_est_ingredient(tokens[1]):
+                extraits = [tokens[0], tokens[1]]
+
+        return [e for e in extraits if e and len(e) >= 3]
+
     # Séparer sur +, / et " et "
     parts = _re.split(r"\s*[+/]\s*|\s+et\s+", texte, flags=_re.IGNORECASE)
 
@@ -120,7 +200,13 @@ def _parser_texte_courses(texte: str, source_label: str) -> list[tuple[str, floa
         # "X nature" / "X naturé" → garder tel quel (ex: yaourt nature)
         nom_clean = _normaliser_ingredient(part)
         if nom_clean:
-            results.append((nom_clean, qty, source_label))
+            # Dernier recours: si c'est un nom de plat, extraire des ingrédients pertinents.
+            extraits_plat = _extraire_depuis_nom_plat(nom_clean)
+            if extraits_plat:
+                for item in extraits_plat:
+                    results.append((item, qty, source_label))
+            else:
+                results.append((nom_clean, qty, source_label))
 
     return results if results else [(_normaliser_ingredient(texte.strip()), 1.0, source_label)]
 
@@ -260,7 +346,14 @@ class ServiceCoursesIntelligentes(BaseAIService):
             # Entrées/desserts texte (non liées à une recette) → articles directs (parsés)
             # Source volontairement neutre (date + type repas) pour éviter un lien trompeur
             # avec le plat principal.
-            _source_repas = f"{repas.date_repas.strftime('%d/%m')} {repas.type_repas}"
+            _type_repas_ui = {
+                "déjeuner": "midi",
+                "dejeuner": "midi",
+                "dîner": "soir",
+                "diner": "soir",
+                "goûter": "goûter",
+                "gouter": "goûter",
+            }.get((repas.type_repas or "").lower(), repas.type_repas)
             for champ, label in [
                 ("entree", "Entrée"),
                 ("dessert", "Dessert"),
@@ -273,7 +366,7 @@ class ServiceCoursesIntelligentes(BaseAIService):
                     else getattr(repas, "dessert_jules_recette_id", None)
                 )
                 if texte and not fk:
-                    source_label = f"Depuis planning: {_source_repas} ({label.lower()} texte)"
+                    source_label = f"{label.lower()} {_type_repas_ui} {repas.date_repas.strftime('%d/%m')}"
                     for nom_item, qty, src in _parser_texte_courses(texte, source_label):
                         if not nom_item:
                             continue
@@ -449,7 +542,15 @@ class ServiceCoursesIntelligentes(BaseAIService):
                         article.priorite, "moyenne"
                     ),
                     rayon_magasin=article.rayon,
-                    notes=f"Depuis planning: {', '.join(article.recettes_source[:2])}",
+                    notes=(
+                        "Depuis planning: "
+                        + ", ".join(
+                            [
+                                s.replace("Depuis planning:", "").strip()
+                                for s in article.recettes_source[:2]
+                            ]
+                        )
+                    ),
                     achete=False,
                     suggere_par_ia=True,
                 )

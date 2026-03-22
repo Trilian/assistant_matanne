@@ -6,6 +6,11 @@ import logging
 import re
 from datetime import date, datetime, timedelta
 from io import BytesIO
+import unicodedata
+
+import streamlit as st
+
+from src.core.session_keys import SK
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +72,103 @@ def _t(text: str) -> str:
     return _EMOJI_RE.sub("", str(text)).strip()
 
 
+def _normaliser_texte(texte: str) -> str:
+    """Normalise en minuscules ASCII pour matching souple."""
+    ascii_text = unicodedata.normalize("NFKD", str(texte or ""))
+    ascii_text = ascii_text.encode("ascii", "ignore").decode("ascii")
+    return ascii_text.lower().strip()
+
+
+def _obtenir_nom_foyer() -> str:
+    """Retourne le nom de foyer configuré, avec fallback sûr."""
+    try:
+        cfg = st.session_state.get(SK.FOYER_CONFIG, {}) or {}
+        if isinstance(cfg, dict):
+            nom_foyer = str(cfg.get("nom_foyer", "")).strip()
+            if nom_foyer:
+                return nom_foyer
+            nom_utilisateur = str(cfg.get("nom_utilisateur", "")).strip()
+            if nom_utilisateur:
+                return f"Foyer de {nom_utilisateur}"
+    except Exception:
+        pass
+    return "Famille"
+
+
+def _adapter_suggestions_bio_au_planning(
+    planning_data: dict,
+    suggestions_bio: list[str] | None,
+) -> list[str]:
+    """Filtre/complète les suggestions bio selon les repas réellement planifiés."""
+    suggestions = [str(s).strip() for s in (suggestions_bio or []) if str(s).strip()]
+
+    mots_cles: set[str] = set()
+    proteines: set[str] = set()
+    for repas_jour in planning_data.values():
+        if not isinstance(repas_jour, dict):
+            continue
+        for slot in ["midi", "soir"]:
+            meal = repas_jour.get(slot)
+            if not isinstance(meal, dict):
+                continue
+
+            prot = _normaliser_texte(meal.get("proteine", ""))
+            if prot:
+                proteines.add(prot)
+                mots_cles.add(prot)
+
+            for ing in meal.get("ingredients", []) or []:
+                if isinstance(ing, dict):
+                    nom = _normaliser_texte(ing.get("nom", ""))
+                    if nom:
+                        mots_cles.add(nom)
+
+    if suggestions and mots_cles:
+        suggestions_filtrees = [
+            s
+            for s in suggestions
+            if any(mot in _normaliser_texte(s) for mot in mots_cles)
+        ]
+    else:
+        suggestions_filtrees = []
+
+    suggestions_finales: list[str] = suggestions_filtrees[:8]
+
+    catalogue = {
+        "poulet": "Filets de poulet fermier bio ou Label Rouge (meilleure qualité gustative)",
+        "dinde": "Dinde fermière locale (souvent plus tendre et moins transformée)",
+        "boeuf": "Boeuf Label Rouge ou local (traçabilité et meilleure maturation)",
+        "porc": "Porc fermier local (viande plus goûteuse pour mijotés)",
+        "agneau": "Agneau local de saison (origine claire et fraîcheur)",
+        "cabillaud": "Cabillaud certifié pêche durable (MSC) ou Label Rouge",
+        "colin": "Colin sauvage certifié MSC (poisson durable)",
+        "merlu": "Merlu de pêche durable (meilleur rapport qualité/prix)",
+        "saumon": "Saumon Label Rouge ou bio (chair plus ferme et moins grasse)",
+        "thon": "Thon en conserve label pêche responsable (MSC)",
+        "sardine": "Sardines en boîte artisanales à l'huile d'olive vierge",
+        "maquereau": "Filets de maquereau pêchés en Atlantique Nord-Est",
+        "crevettes": "Crevettes certifiées ASC/MSC (origine et traçabilité)",
+        "oeufs": "Oeufs plein air Label Rouge (meilleure qualité nutritionnelle)",
+        "tofu": "Tofu bio français (filière soja locale)",
+        "legumineuses": "Légumineuses bio en vrac (lentilles/pois chiches) pour réduire le coût",
+    }
+
+    for prot in sorted(proteines):
+        cle_trouvee = None
+        for cle in catalogue:
+            if cle in prot or prot in cle:
+                cle_trouvee = cle
+                break
+        if cle_trouvee:
+            proposition = catalogue[cle_trouvee]
+            if proposition not in suggestions_finales:
+                suggestions_finales.append(proposition)
+        if len(suggestions_finales) >= 8:
+            break
+
+    return suggestions_finales[:8]
+
+
 def generer_pdf_planning_session(
     planning_data: dict, date_debut: date, conseils: str = "", suggestions_bio: list = None
 ) -> BytesIO | None:
@@ -87,6 +189,8 @@ def generer_pdf_planning_session(
         )
 
         buffer = BytesIO()
+        nom_foyer = _t(_obtenir_nom_foyer())
+
         doc = SimpleDocTemplate(
             buffer,
             pagesize=A4,
@@ -94,7 +198,7 @@ def generer_pdf_planning_session(
             leftMargin=1.8 * cm,
             topMargin=2 * cm,
             bottomMargin=2 * cm,
-            title="Planning Repas Famille Matanne",
+            title=f"Planning Repas {nom_foyer}",
         )
 
         styles = getSampleStyleSheet()
@@ -104,9 +208,9 @@ def generer_pdf_planning_session(
             "Title",
             parent=styles["Normal"],
             fontName="Helvetica-Bold",
-            fontSize=22,
+            fontSize=20,
             textColor=colors.HexColor(_VERT),
-            spaceAfter=4,
+            spaceAfter=10,
             alignment=TA_CENTER,
         )
         s_subtitle = ParagraphStyle(
@@ -115,6 +219,7 @@ def generer_pdf_planning_session(
             fontName="Helvetica",
             fontSize=11,
             textColor=colors.HexColor(_GRIS),
+            spaceBefore=0,
             spaceAfter=16,
             alignment=TA_CENTER,
         )
@@ -179,7 +284,7 @@ def generer_pdf_planning_session(
 
         # â”€â”€ En-tête â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         date_fin = date_debut + timedelta(days=len(planning_data) - 1)
-        elements.append(Paragraph("Planning Repas — Famille Matanne", s_title))
+        elements.append(Paragraph(f"Planning Repas — {nom_foyer}", s_title))
         elements.append(
             Paragraph(
                 f"Du {date_debut.strftime('%d/%m/%Y')} au {date_fin.strftime('%d/%m/%Y')}",
@@ -221,7 +326,7 @@ def generer_pdf_planning_session(
             rows = []
             row_colors = []
 
-            for j, type_repas in enumerate(["midi", "soir", "gouter"]):
+            for j, type_repas in enumerate(["midi", "gouter", "soir"]):
                 r = repas.get(type_repas)
                 if not r:
                     continue
@@ -284,10 +389,14 @@ def generer_pdf_planning_session(
             elements.append(Paragraph(_t(conseils), s_normal))
 
         # â”€â”€ Suggestions bio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        if suggestions_bio:
+        suggestions_contextualisees = _adapter_suggestions_bio_au_planning(
+            planning_data=planning_data,
+            suggestions_bio=suggestions_bio,
+        )
+        if suggestions_contextualisees:
             elements.append(Spacer(1, 8))
             elements.append(Paragraph("Suggestions Bio / Local", s_section))
-            for sug in suggestions_bio:
+            for sug in suggestions_contextualisees:
                 elements.append(Paragraph(f"• {_t(sug)}", s_normal))
 
         # â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

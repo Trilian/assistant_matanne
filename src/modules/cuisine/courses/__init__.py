@@ -75,7 +75,7 @@ def app():
         "⏰ Suggestions IA",
         "📋 Historique",
         "📄 Modèles",
-        "� Budget",
+        "💰 Budget",
         "⚡ Mode Rapide",
         "🧾 Scan Ticket",
         "🚗 Export Drive",

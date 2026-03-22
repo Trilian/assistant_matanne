@@ -59,7 +59,7 @@ def _afficher_contenu() -> None:
         from src.core.models.courses import ArticleCourses, ListeCourses
 
         with obtenir_contexte_db() as session:
-            liste = session.query(ListeCourses).filter(ListeCourses.statut == "active").first()
+            liste = session.query(ListeCourses).filter(ListeCourses.archivee == False).first()  # noqa: E712
 
             if not liste:
                 st.info("Aucune liste de courses active.")

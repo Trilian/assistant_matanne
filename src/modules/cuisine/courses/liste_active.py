@@ -35,6 +35,8 @@ def afficher_liste_active():
 
     if "new_article_mode" not in st.session_state:
         st.session_state.new_article_mode = False
+    if "courses_print_open" not in st.session_state:
+        st.session_state["courses_print_open"] = False
 
     if service is None:
         st.error("❌ Service courses indisponible")
@@ -125,7 +127,8 @@ def afficher_liste_active():
                 use_container_width=True,
                 help="Afficher la liste dans un format imprimable",
             ):
-                afficher_print_view(liste_filtree)
+                st.session_state["courses_print_open"] = True
+                rerun()
         with col3:
             if st.button(
                 "🗑️ Vider (achetés)",
@@ -151,6 +154,11 @@ def afficher_liste_active():
         if st.session_state.new_article_mode:
             st.divider()
             afficher_ajouter_article()
+
+        # Vue impression persistante (reste ouverte au changement d'option)
+        if st.session_state.get("courses_print_open"):
+            st.divider()
+            afficher_print_view(liste_filtree)
 
     except Exception as e:
         st.error(f"❌ Erreur: {str(e)}")
@@ -336,6 +344,12 @@ def afficher_print_view(liste):
     st.subheader("🖨️ Liste à emporter")
     st.caption("Vue simple type Bring, avec regroupement au choix.")
 
+    col_close, _ = st.columns([1, 4])
+    with col_close:
+        if st.button("❌ Fermer", key="courses_print_close", use_container_width=True):
+            st.session_state["courses_print_open"] = False
+            rerun()
+
     mode = st.radio(
         "Organisation",
         options=["Simple", "Par rayon", "Par magasin"],
@@ -392,7 +406,19 @@ def afficher_print_view(liste):
                 quantite = article.get("quantite_necessaire", 1)
                 unite = (article.get("unite") or "").strip()
                 qty = f"{quantite} {unite}".strip()
-                st.markdown(f"- ☐ **{article.get('ingredient_nom', 'Article')}** ({qty})")
+                article_id = article.get("id")
+                nom = article.get("ingredient_nom", "Article")
+                if article_id is None:
+                    st.markdown(f"- ☐ **{nom}** ({qty})")
+                    continue
+
+                checked = st.checkbox(
+                    f"{nom} ({qty})",
+                    key=f"print_check_{article_id}",
+                    value=False,
+                )
+                if checked:
+                    st.caption(f"~~{nom} ({qty})~~")
 
     print_text = generer_texte_impression(
         liste,

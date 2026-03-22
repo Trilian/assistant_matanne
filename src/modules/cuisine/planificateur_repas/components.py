@@ -3,9 +3,11 @@ Module Planificateur de Repas - Composants UI
 """
 
 from datetime import date
+import unicodedata
 
 import streamlit as st
 
+from src.core.constants import TYPES_PROTEINES
 from src.core.session_keys import SK
 from src.core.state import rerun
 from src.ui.keys import KeyNamespace
@@ -241,101 +243,53 @@ def afficher_carte_recette_suggestion(
                 unsafe_allow_html=True,
             )
 
-        # ── Réchauffé : pas d'actions supplémentaires ──
-        if est_rechauffe:
-            return
+        # ── Actions : uniquement pour les plats cuisinés (pas réchauffé, pas goûter) ──
+        if not est_rechauffe and type_repas != "gouter":
+            col1, col2, col3, col4 = st.columns(4)
 
-        # ── Goûter : affichage simplifié (collation, pas une recette complète) ──
-        if type_repas == "gouter":
-            adapt = suggestion.get("jules_adaptation", "")
-            if adapt:
-                st.caption(f"👶 {adapt}")
-            return
-
-        # ── Actions : ligne compacte de 5 boutons ──
-        col1, col2, col3, col4, col5 = st.columns(5)
-
-        with col1:
-            if st.button("👍", key=f"{key_prefix}_like", help="J'aime", use_container_width=True):
-                ajouter_feedback(recette_nom=suggestion.get("nom", ""), feedback="like")
-                st.toast("👍 Noté !")
-
-        with col2:
-            if st.button(
-                "👎", key=f"{key_prefix}_dislike", help="Pas aimé", use_container_width=True
-            ):
-                ajouter_feedback(recette_nom=suggestion.get("nom", ""), feedback="dislike")
-                st.toast("👎 Noté !")
-
-        with col3:
-            if st.button(
-                "🔄", key=f"{key_prefix}_change", help="Autre suggestion", use_container_width=True
-            ):
-                from .generation import generer_alternative_ia
-
-                with st.spinner("🤖"):
-                    alt = generer_alternative_ia(suggestion, jour, type_repas)
-                if alt:
-                    planning = st.session_state.get(SK.PLANNING_DATA, {})
-                    if jour in planning:
-                        old = planning[jour].get(type_repas, {})
-                        if old and isinstance(old, dict):
-                            for k in ("entree", "dessert", "dessert_jules"):
-                                if k not in alt and old.get(k):
-                                    alt[k] = old[k]
-                        planning[jour][type_repas] = alt
-                        st.session_state[SK.PLANNING_DATA] = planning
-                        st.toast(f"✅ {alt.get('nom', 'nouvelle recette')}")
+            with col1:
+                if st.button("👍", key=f"{key_prefix}_like", help="J'aime", use_container_width=True):
+                    ajouter_feedback(recette_nom=suggestion.get("nom", ""), feedback="like")
+                    st.toast("👍 Noté !")
                     rerun()
-                else:
-                    st.warning("⚠️ Aucune alternative")
 
-        with col4:
-            if st.button(
-                "📝", key=f"{key_prefix}_manual", help="Modifier", use_container_width=True
-            ):
-                st.session_state[f"_manual_edit_{key_prefix}"] = True
-                rerun()
-
-        with col5:
-            nom_recette = suggestion.get("nom", "")
-            sauvegardees: set = st.session_state.get(SK.RECETTES_IA_SAUVEGARDEES, set())
-
-            # Vérifier aussi la DB (pas juste la session)
-            if nom_recette and nom_recette not in sauvegardees:
-                try:
-                    from src.services.cuisine.recettes import obtenir_service_recettes
-
-                    _svc = obtenir_service_recettes()
-                    if _svc and _svc.find_existing_recette(nom_recette):
-                        sauvegardees.add(nom_recette)
-                        st.session_state[SK.RECETTES_IA_SAUVEGARDEES] = sauvegardees
-                except Exception:
-                    pass
-
-            if nom_recette in sauvegardees:
-                st.button(
-                    "✅",
-                    key=f"{key_prefix}_saved",
-                    disabled=True,
-                    use_container_width=True,
-                    help="Sauvegardée",
-                )
-            else:
+            with col2:
                 if st.button(
-                    "💾", key=f"{key_prefix}_save", help="Sauvegarder", use_container_width=True
+                    "👎", key=f"{key_prefix}_dislike", help="J'aime pas", use_container_width=True
                 ):
-                    from .generation import sauvegarder_recette_ia
+                    ajouter_feedback(recette_nom=suggestion.get("nom", ""), feedback="dislike")
+                    st.toast("👎 Noté !")
+                    rerun()
 
-                    with st.spinner("💾"):
-                        recette_id = sauvegarder_recette_ia(suggestion, type_repas)
-                    if recette_id:
-                        sauvegardees.add(nom_recette)
-                        st.session_state[SK.RECETTES_IA_SAUVEGARDEES] = sauvegardees
-                        st.toast(f"✅ '{nom_recette}' sauvegardée !")
+            with col3:
+                if st.button(
+                    "🔄", key=f"{key_prefix}_change", help="Autre suggestion", use_container_width=True
+                ):
+                    from .generation import generer_alternative_ia
+
+                    with st.spinner("🤖"):
+                        alt = generer_alternative_ia(suggestion, jour, type_repas)
+                    if alt:
+                        planning = st.session_state.get(SK.PLANNING_DATA, {})
+                        if jour in planning:
+                            old = planning[jour].get(type_repas, {})
+                            if old and isinstance(old, dict):
+                                for k in ("entree", "dessert", "dessert_jules"):
+                                    if k not in alt and old.get(k):
+                                        alt[k] = old[k]
+                            planning[jour][type_repas] = alt
+                            st.session_state[SK.PLANNING_DATA] = planning
+                            st.toast(f"✅ {alt.get('nom', 'nouvelle recette')}")
                         rerun()
                     else:
-                        st.toast("❌ Échec", icon="❌")
+                        st.warning("⚠️ Aucune alternative")
+
+            with col4:
+                if st.button(
+                    "📝", key=f"{key_prefix}_manual", help="Modifier", use_container_width=True
+                ):
+                    st.session_state[f"_manual_edit_{key_prefix}"] = True
+                    rerun()
 
         # ── Jules ──
         if suggestion.get("jules_adaptation"):
@@ -852,15 +806,59 @@ def afficher_resume_equilibre(planning_data: dict):
         "vegan": "vegetarien",
     }
 
+    def _normaliser_texte(texte: str) -> str:
+        """Normalise un texte en minuscules ASCII pour un matching robuste."""
+        ascii_text = unicodedata.normalize("NFKD", texte)
+        ascii_text = ascii_text.encode("ascii", "ignore").decode("ascii")
+        return ascii_text.lower().strip()
+
+    def _detecter_categorie_proteine(proteine_brute: str) -> str | None:
+        """Détecte la catégorie nutritionnelle depuis un libellé de protéine libre."""
+        prot = _normaliser_texte(str(proteine_brute or ""))
+        if not prot:
+            return None
+
+        # Match exact sur la clé historique (ex: "cabillaud", "poulet").
+        if prot in PROTEINES:
+            return _CAT_MAPPING.get(PROTEINES[prot].get("categorie", ""))
+
+        # Poisson: vérifier gras/blanc avant la catégorie générique.
+        for mot in TYPES_PROTEINES.get("poisson_gras", []):
+            if _normaliser_texte(mot) in prot:
+                return "poisson_gras"
+
+        for mot in TYPES_PROTEINES.get("poisson_blanc", []):
+            if _normaliser_texte(mot) in prot:
+                return "poisson_blanc"
+
+        for mot in TYPES_PROTEINES.get("poisson", []):
+            if _normaliser_texte(mot) in prot:
+                return "poisson_blanc"
+
+        for mot in TYPES_PROTEINES.get("viande_rouge", []):
+            if _normaliser_texte(mot) in prot:
+                return "viande_rouge"
+
+        for mot in TYPES_PROTEINES.get("volaille", []):
+            if _normaliser_texte(mot) in prot:
+                return "volaille"
+
+        for mot in TYPES_PROTEINES.get("vegetarien", []):
+            if _normaliser_texte(mot) in prot:
+                return "vegetarien"
+
+        if "vegan" in prot or "vege" in prot or "vegetar" in prot:
+            return "vegetarien"
+
+        return None
+
     for jour, repas in planning_data.items():
         for type_repas in ["midi", "soir"]:
             if repas.get(type_repas) and repas[type_repas].get("proteine"):
                 prot = repas[type_repas]["proteine"]
-                if prot in PROTEINES:
-                    cat = PROTEINES[prot]["categorie"]
-                    eq_key = _CAT_MAPPING.get(cat)
-                    if eq_key:
-                        equilibre[eq_key] += 1
+                eq_key = _detecter_categorie_proteine(str(prot))
+                if eq_key:
+                    equilibre[eq_key] += 1
 
     prefs = charger_preferences()
 
