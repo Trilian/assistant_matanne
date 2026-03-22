@@ -23,6 +23,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # ─── Service ───
     "ServiceBatchCooking": (".service", "ServiceBatchCooking"),
     "obtenir_service_batch_cooking": (".service", "obtenir_service_batch_cooking"),
+    "get_batch_cooking_service": (".service", "get_batch_cooking_service"),
     # ─── Mixins ───
     "BatchCookingIAMixin": (".batch_cooking_ia", "BatchCookingIAMixin"),
     "BatchCookingStatsMixin": (".batch_cooking_stats", "BatchCookingStatsMixin"),
@@ -30,6 +31,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "EtapeBatchIA": (".types", "EtapeBatchIA"),
     "SessionBatchIA": (".types", "SessionBatchIA"),
     "PreparationIA": (".types", "PreparationIA"),
+    "PlanBatchDetailIA": (".types", "PlanBatchDetailIA"),
+    "RecetteDetailIA": (".types", "RecetteDetailIA"),
     # ─── Constantes ───
     "JOURS_SEMAINE": (".constantes", "JOURS_SEMAINE"),
     "ROBOTS_DISPONIBLES": (".constantes", "ROBOTS_DISPONIBLES"),

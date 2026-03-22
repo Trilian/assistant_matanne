@@ -645,83 +645,88 @@ class TestRenderFinitionJourJ:
 class TestGenererBatchIA:
     """Tests pour generer_batch_ia."""
 
-    @patch("src.modules.cuisine.batch_cooking_detaille.generation.obtenir_client_ia")
+    @patch("src.modules.cuisine.batch_cooking_detaille.generation.get_batch_cooking_service")
     def test_generer_batch_ia_succes(
-        self, mock_obtenir_client, mock_st, sample_planning_data, sample_batch_data
+        self, mock_get_service, mock_st, sample_planning_data, sample_batch_data
     ):
         """Teste la génération réussie des instructions batch."""
         from src.modules.cuisine.batch_cooking_detaille import generer_batch_ia
 
-        mock_client = MagicMock()
-        mock_client.generer_json.return_value = sample_batch_data
-        mock_obtenir_client.return_value = mock_client
+        mock_service = MagicMock()
+        mock_service.generer_plan_depuis_planning.return_value = sample_batch_data
+        mock_get_service.return_value = mock_service
 
         result = generer_batch_ia(sample_planning_data, "dimanche", True)
 
         assert result == sample_batch_data
-        mock_client.generer_json.assert_called_once()
+        mock_service.generer_plan_depuis_planning.assert_called_once_with(
+            planning_data=sample_planning_data,
+            type_session="dimanche",
+            avec_jules=True,
+            robots_user=None,
+        )
 
-    @patch("src.modules.cuisine.batch_cooking_detaille.generation.obtenir_client_ia")
-    def test_generer_batch_ia_client_none(self, mock_obtenir_client, mock_st, sample_planning_data):
-        """Teste quand le client IA n'est pas disponible."""
+    @patch("src.modules.cuisine.batch_cooking_detaille.generation.get_batch_cooking_service")
+    def test_generer_batch_ia_client_none(self, mock_get_service, mock_st, sample_planning_data):
+        """Teste quand le service retourne un résultat vide."""
         from src.modules.cuisine.batch_cooking_detaille import generer_batch_ia
 
-        mock_obtenir_client.return_value = None
+        mock_service = MagicMock()
+        mock_service.generer_plan_depuis_planning.return_value = {}
+        mock_get_service.return_value = mock_service
 
         result = generer_batch_ia(sample_planning_data, "dimanche", True)
 
         assert result == {}
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.batch_cooking_detaille.generation.obtenir_client_ia")
+    @patch("src.modules.cuisine.batch_cooking_detaille.generation.get_batch_cooking_service")
     def test_generer_batch_ia_retourne_string_json(
-        self, mock_obtenir_client, mock_st, sample_planning_data, sample_batch_data
+        self, mock_get_service, mock_st, sample_planning_data, sample_batch_data
     ):
-        """Teste quand l'IA retourne une chaîne JSON."""
-        import json
-
+        """Teste quand le service retourne un résultat valide."""
         from src.modules.cuisine.batch_cooking_detaille import generer_batch_ia
 
-        mock_client = MagicMock()
-        mock_client.generer_json.return_value = json.dumps(sample_batch_data)
-        mock_obtenir_client.return_value = mock_client
+        mock_service = MagicMock()
+        mock_service.generer_plan_depuis_planning.return_value = sample_batch_data
+        mock_get_service.return_value = mock_service
 
         result = generer_batch_ia(sample_planning_data, "dimanche", True)
 
         assert result == sample_batch_data
 
-    @patch("src.modules.cuisine.batch_cooking_detaille.generation.obtenir_client_ia")
-    def test_generer_batch_ia_erreur(self, mock_obtenir_client, mock_st, sample_planning_data):
+    @patch("src.modules.cuisine.batch_cooking_detaille.generation.get_batch_cooking_service")
+    def test_generer_batch_ia_erreur(self, mock_get_service, mock_st, sample_planning_data):
         """Teste la gestion des erreurs IA."""
         from src.modules.cuisine.batch_cooking_detaille import generer_batch_ia
 
-        mock_client = MagicMock()
-        mock_client.generer_json.side_effect = Exception("Erreur API")
-        mock_obtenir_client.return_value = mock_client
+        mock_get_service.side_effect = Exception("Erreur API")
 
         result = generer_batch_ia(sample_planning_data, "dimanche", True)
 
         assert result == {}
         mock_st.error.assert_called()
 
-    @patch("src.modules.cuisine.batch_cooking_detaille.generation.obtenir_client_ia")
+    @patch("src.modules.cuisine.batch_cooking_detaille.generation.get_batch_cooking_service")
     def test_generer_batch_ia_session_mercredi(
-        self, mock_obtenir_client, mock_st, sample_planning_data, sample_batch_data
+        self, mock_get_service, mock_st, sample_planning_data, sample_batch_data
     ):
         """Teste la génération pour une session mercredi (solo)."""
         from src.modules.cuisine.batch_cooking_detaille import generer_batch_ia
 
-        mock_client = MagicMock()
-        mock_client.generer_json.return_value = sample_batch_data
-        mock_obtenir_client.return_value = mock_client
+        mock_service = MagicMock()
+        mock_service.generer_plan_depuis_planning.return_value = sample_batch_data
+        mock_get_service.return_value = mock_service
 
         result = generer_batch_ia(sample_planning_data, "mercredi", False)
 
         assert result == sample_batch_data
-        # Vérifie que le prompt mentionne "solo" pour mercredi
-        call_args = mock_client.generer_json.call_args
-        prompt = call_args.kwargs.get("prompt") or call_args[1].get("prompt") or call_args[0][0]
-        assert "solo" in prompt.lower() or "MERCREDI" in prompt
+        mock_service.generer_plan_depuis_planning.assert_called_once_with(
+            planning_data=sample_planning_data,
+            type_session="mercredi",
+            avec_jules=False,
+            robots_user=None,
+        )
 
 
 # =============================================================================
