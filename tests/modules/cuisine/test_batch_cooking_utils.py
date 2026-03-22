@@ -6,20 +6,24 @@ Tests complets pour atteindre ≥80% de couverture.
 
 from datetime import date, time, timedelta
 
-from src.modules.cuisine.batch_cooking_utils import (
+from src.modules.cuisine.batch_cooking_etapes import (
+    detecter_conflits_robots,
+    optimiser_ordre_etapes,
+)
+from src.modules.cuisine.batch_cooking_portions import (
+    calculer_historique_batch,
+    calculer_statistiques_session,
+    filtrer_etapes_bruyantes,
+    generer_planning_jules,
+    identifier_moments_jules,
+)
+from src.modules.cuisine.batch_cooking_temps import (
     JOURS_EMOJI,
     LOCALISATIONS,
     ROBOTS_INFO,
     calculer_duree_totale_optimisee,
-    calculer_historique_batch,
-    calculer_statistiques_session,
-    detecter_conflits_robots,
     estimer_heure_fin,
-    filtrer_etapes_bruyantes,
     formater_duree,
-    generer_planning_jules,
-    identifier_moments_jules,
-    optimiser_ordre_etapes,
     valider_preparation,
     valider_session_batch,
 )

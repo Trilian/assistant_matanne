@@ -9,7 +9,7 @@ from src.core.monitoring.rerun_profiler import profiler_rerun
 from src.core.session_keys import SK
 from src.core.state import rerun
 from src.modules._framework import avec_gestion_erreurs_ui, error_boundary
-from src.modules.cuisine.batch_cooking_utils import estimer_heure_fin, formater_duree
+from src.modules.cuisine.batch_cooking_temps import estimer_heure_fin, formater_duree
 from src.ui import etat_vide
 from src.ui.keys import KeyNamespace
 from src.ui.state.url import tabs_with_url
@@ -109,10 +109,10 @@ def app():
 
     # Initialiser la session
     if SK.BATCH_TYPE not in st.session_state:
-        st.session_state.batch_type = "dimanche"
+        st.session_state[SK.BATCH_TYPE] = "dimanche"
 
     if SK.BATCH_DATA not in st.session_state:
-        st.session_state.batch_data = {}
+        st.session_state[SK.BATCH_DATA] = {}
 
     # Récupérer le planning (depuis le planificateur de repas)
     planning_data = st.session_state.get(SK.PLANNING_DATA, {})
@@ -140,7 +140,7 @@ def app():
             st.divider()
 
             # Infos session
-            type_info = TYPES_SESSION.get(st.session_state.batch_type, {})
+            type_info = TYPES_SESSION.get(st.session_state[SK.BATCH_TYPE], {})
 
             col1, col2, col3 = st.columns(3)
 
@@ -176,8 +176,8 @@ def app():
                     value=type_info.get("heure_defaut", time(10, 0)),
                 )
 
-            st.session_state.batch_date = date_batch
-            st.session_state.batch_heure = heure_batch
+            st.session_state[SK.BATCH_DATE] = date_batch
+            st.session_state[SK.BATCH_HEURE] = heure_batch
 
             st.divider()
 
@@ -273,16 +273,19 @@ def app():
 
                         with st.spinner("🤖 L'IA génère vos instructions détaillées..."):
                             result = generer_batch_ia(
-                                filtered_data, st.session_state.batch_type, avec_jules,
+                                filtered_data, st.session_state[SK.BATCH_TYPE], avec_jules,
                                 robots_user=_get_user_robots(),
                             )
 
                             if result:
-                                st.session_state.batch_data = result
+                                st.session_state[SK.BATCH_DATA] = result
                                 st.success("✅ Instructions générées!")
                                 rerun()
                             else:
-                                st.error("❌ Impossible de générer les instructions")
+                                st.error(
+                                    "❌ Impossible de générer les instructions. "
+                                    "Réessaie ou réduis à 2-3 recettes."
+                                )
                 else:
                     col_gen1, col_gen2 = st.columns(2)
                     j1 = st.session_state.get(SK.BATCH_JOUR_SESSION_1, "dimanche")
@@ -298,7 +301,7 @@ def app():
 
                             with st.spinner(f"🤖 Génération session 1 ({j1})..."):
                                 result = generer_batch_ia(
-                                    filtered_s1, st.session_state.batch_type, avec_jules,
+                                    filtered_s1, st.session_state[SK.BATCH_TYPE], avec_jules,
                                     robots_user=_get_user_robots(),
                                 )
                                 if result:
@@ -309,11 +312,14 @@ def app():
                                     ):
                                         batch_data_all = {}
                                     batch_data_all["session_1"] = result
-                                    st.session_state.batch_data = batch_data_all
+                                    st.session_state[SK.BATCH_DATA] = batch_data_all
                                     st.success("✅ Session 1 générée!")
                                     rerun()
                                 else:
-                                    st.error("❌ Impossible de générer la session 1")
+                                    st.error(
+                                        "❌ Impossible de générer la session 1. "
+                                        "Réessaie ou réduis le nombre de recettes."
+                                    )
 
                     with col_gen2:
                         if st.button(
@@ -326,7 +332,7 @@ def app():
 
                             with st.spinner(f"🤖 Génération session 2 ({j2})..."):
                                 result = generer_batch_ia(
-                                    filtered_s2, st.session_state.batch_type, avec_jules,
+                                    filtered_s2, st.session_state[SK.BATCH_TYPE], avec_jules,
                                     robots_user=_get_user_robots(),
                                 )
                                 if result:
@@ -337,11 +343,14 @@ def app():
                                     ):
                                         batch_data_all = {}
                                     batch_data_all["session_2"] = result
-                                    st.session_state.batch_data = batch_data_all
+                                    st.session_state[SK.BATCH_DATA] = batch_data_all
                                     st.success("✅ Session 2 générée!")
                                     rerun()
                                 else:
-                                    st.error("❌ Impossible de générer la session 2")
+                                    st.error(
+                                        "❌ Impossible de générer la session 2. "
+                                        "Réessaie ou réduis le nombre de recettes."
+                                    )
 
     # ═══════════════════════════════════════════════════════
     # TAB: SESSION BATCH

@@ -295,8 +295,13 @@ class EtapeRecette(Base):
     Attributes:
         recette_id: ID de la recette
         ordre: Numéro d'ordre de l'étape
-        description: Description de l'étape
+        titre: Titre court optionnel (ex: "Cuisson au Cookeo")
+        description: Description détaillée de l'étape
         duree: Durée estimée en minutes
+        robots_optionnels: Robots utilisables pour cette étape (JSON list)
+        temperature: Température requise en °C (optionnel)
+        est_supervision: Étape de surveillance passive (ex: cuisson four)
+        groupe_parallele: Groupe pour parallélisation (même groupe = simultané)
     """
 
     __tablename__ = "etapes_recette"
@@ -306,13 +311,25 @@ class EtapeRecette(Base):
         ForeignKey("recettes.id", ondelete="CASCADE"), nullable=False, index=True
     )
     ordre: Mapped[int] = mapped_column(Integer, nullable=False)
+    titre: Mapped[str | None] = mapped_column(String(200))
     description: Mapped[str] = mapped_column(Text, nullable=False)
     duree: Mapped[int | None] = mapped_column(Integer)
+
+    # Équipement et caractéristiques (aligné avec EtapeBatchCooking)
+    robots_optionnels: Mapped[list[str] | None] = mapped_column(JSONB)
+    temperature: Mapped[int | None] = mapped_column(Integer)
+    est_supervision: Mapped[bool] = mapped_column(Boolean, default=False)
+    groupe_parallele: Mapped[int] = mapped_column(Integer, default=0)
 
     # Relations
     recette: Mapped["Recette"] = relationship(back_populates="etapes")
 
     __table_args__ = (CheckConstraint("ordre > 0", name="ck_ordre_positif"),)
+
+    @property
+    def robots_liste(self) -> list[str]:
+        """Retourne la liste des robots optionnels."""
+        return self.robots_optionnels or []
 
     def __repr__(self) -> str:
         return f"<EtapeRecette(recette={self.recette_id}, ordre={self.ordre})>"

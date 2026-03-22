@@ -208,7 +208,25 @@ def afficher_detail_recette(recette):
     if recette.etapes:
         st.markdown("### 👨‍🍳 Étapes de préparation")
         for etape in sorted(recette.etapes, key=lambda e: e.ordre or 0):
-            st.markdown(f"**Étape {etape.ordre}:** {etape.description}")
+            # Titre ou numéro d'étape
+            titre = etape.titre or f"Étape {etape.ordre}"
+            badges = ""
+            # Robots optionnels
+            if etape.robots_optionnels:
+                robots_icons = {"cookeo": "🍲", "four": "♨️", "airfryer": "🌀", "monsieur_cuisine": "🤖", "plaques": "🔥", "mixeur": "🔪", "robot_patissier": "🎂"}
+                robots_str = " ".join(robots_icons.get(r, f"🔧 {r}") for r in etape.robots_optionnels)
+                badges += f" {robots_str}"
+            # Température
+            if etape.temperature:
+                badges += f" 🌡️ {etape.temperature}°C"
+            # Supervision passive
+            if etape.est_supervision:
+                badges += " 👀 supervision"
+            # Durée
+            if etape.duree:
+                badges += f" ⏱️ {etape.duree} min"
+
+            st.markdown(f"**{titre}:**{badges}\n\n{etape.description}")
 
     # Bouton régénérer si données fallback (1 ingrédient générique, 1 étape générique)
     _is_fallback = (len(recette.ingredients) <= 1 and len(recette.etapes) <= 1) or (

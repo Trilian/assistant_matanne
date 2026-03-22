@@ -73,8 +73,13 @@ class EtapeRecetteDTO(BaseDTO):
     """Étape de préparation d'une recette."""
 
     numero: int
+    titre: str | None = None
     description: str
     duree_minutes: int | None = None
+    robots_optionnels: list[str] | None = None
+    temperature: int | None = None
+    est_supervision: bool = False
+    groupe_parallele: int = 0
 
 
 class RecetteDTO(RecetteResumeDTO):

@@ -5,7 +5,7 @@ Ces tests sont simples car les fonctions sont pures (pas de dépendance Streamli
 
 import pytest
 
-from src.modules.cuisine.courses.liste_utils import (
+from src.modules.cuisine.courses.utils import (
     calculer_statistiques_liste,
     extraire_rayons_uniques,
     filtrer_liste,

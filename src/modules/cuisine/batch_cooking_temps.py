@@ -8,6 +8,7 @@ import logging
 from datetime import date, datetime, time, timedelta
 
 from src.core.date_utils import formater_temps
+from src.services.cuisine.batch_cooking.constantes import ROBOTS_INFO
 
 logger = logging.getLogger(__name__)
 
@@ -24,63 +25,6 @@ JOURS_EMOJI = {
     4: "⚫",  # Vendredi
     5: "🔴",  # Samedi
     6: "🟢",  # Dimanche
-}
-
-ROBOTS_INFO = {
-    "cookeo": {
-        "nom": "Cookeo",
-        "emoji": "🍲",
-        "peut_parallele": True,
-        "description": "Cuiseur multi-fonction",
-    },
-    "monsieur_cuisine": {
-        "nom": "Monsieur Cuisine",
-        "emoji": "🤖",
-        "peut_parallele": True,
-        "description": "Robot cuiseur",
-    },
-    "airfryer": {
-        "nom": "Airfryer",
-        "emoji": "🍟",
-        "peut_parallele": True,
-        "description": "Friteuse sans huile",
-    },
-    "multicooker": {
-        "nom": "Multicooker",
-        "emoji": "♨️",
-        "peut_parallele": True,
-        "description": "Cuiseur polyvalent",
-    },
-    "four": {
-        "nom": "Four",
-        "emoji": "🔥",
-        "peut_parallele": True,
-        "description": "Four traditionnel",
-    },
-    "plaques": {
-        "nom": "Plaques",
-        "emoji": "🍳",
-        "peut_parallele": False,
-        "description": "Plaques de cuisson",
-    },
-    "robot_patissier": {
-        "nom": "Robot Pâtissier",
-        "emoji": "🎂",
-        "peut_parallele": True,
-        "description": "Pour pâtisserie",
-    },
-    "mixeur": {
-        "nom": "Mixeur",
-        "emoji": "🥤",
-        "peut_parallele": False,
-        "description": "Mixeur/blender",
-    },
-    "hachoir": {
-        "nom": "Hachoir",
-        "emoji": "🔪",
-        "peut_parallele": False,
-        "description": "Hachoir electrique",
-    },
 }
 
 LOCALISATIONS = {

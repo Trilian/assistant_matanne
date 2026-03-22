@@ -242,8 +242,13 @@ class ServiceRecettes(
             etape = EtapeRecette(
                 recette_id=recette.id,
                 ordre=idx + 1,
+                titre=getattr(etape_data, "titre", None),
                 description=etape_data.description,
                 duree=etape_data.duree,
+                robots_optionnels=getattr(etape_data, "robots_optionnels", None),
+                temperature=getattr(etape_data, "temperature", None),
+                est_supervision=getattr(etape_data, "est_supervision", False),
+                groupe_parallele=getattr(etape_data, "groupe_parallele", 0),
             )
             db.add(etape)
 

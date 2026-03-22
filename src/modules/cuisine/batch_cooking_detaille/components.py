@@ -6,7 +6,7 @@ import streamlit as st
 
 from src.core.session_keys import SK
 from src.core.state import rerun
-from src.modules.cuisine.batch_cooking_utils import ROBOTS_INFO
+from src.modules.cuisine.batch_cooking_temps import ROBOTS_INFO
 from src.ui import etat_vide
 
 from .constants import TYPES_DECOUPE
@@ -26,7 +26,7 @@ def afficher_selecteur_session():
             use_container_width=True,
             type="primary" if st.session_state.get(SK.BATCH_TYPE) == "dimanche" else "secondary",
         ):
-            st.session_state.batch_type = "dimanche"
+            st.session_state[SK.BATCH_TYPE] = "dimanche"
             rerun()
 
     with col2:
@@ -36,7 +36,7 @@ def afficher_selecteur_session():
             use_container_width=True,
             type="primary" if st.session_state.get(SK.BATCH_TYPE) == "mercredi" else "secondary",
         ):
-            st.session_state.batch_type = "mercredi"
+            st.session_state[SK.BATCH_TYPE] = "mercredi"
             rerun()
 
 

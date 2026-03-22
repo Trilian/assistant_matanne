@@ -326,38 +326,37 @@ class ServicePlanning(
     ) -> list[dict]:
         """Agrège les ingrédients de toutes les recettes du planning.
 
-        Retourne une liste d'ingrédients uniques avec quantités totales.
+        Traite le plat principal, les entrées, desserts et desserts Jules
+        (FK recettes + texte libre). Aligné avec ServiceCoursesIntelligentes.
 
         Args:
             planning_id: ID du planning
             db: Database session
 
         Returns:
-            List de dicts {ingredient, quantite, unite, rayon, priorite}
+            List de dicts {nom, quantite, unite, rayon, priorite, repas_count}
         """
         from src.core.models import Planning, Recette
 
-        # Récupérer le planning avec tous ses repas et recettes
         planning = db.query(Planning).filter(Planning.id == planning_id).first()
 
         if not planning or not planning.repas:
             logger.warning(f"⚠️ Planning {planning_id} pas trouvé ou pas de repas")
             return []
 
-        # Agréger les ingrédients
-        ingredients_aggregated = {}  # {nom: {quantite: 0, unite, rayon, priorite}}
+        ingredients_aggregated = {}  # {nom: {quantite, unite, rayon, priorite, repas_count}}
+        recettes_traitees: set[int] = set()
 
-        for repas in planning.repas:
-            if not repas.recette_id:
-                continue
+        def _ajouter_ingredients_recette(recette_id: int | None) -> None:
+            """Charge et agrège les ingrédients d'une recette."""
+            if not recette_id or recette_id in recettes_traitees:
+                return
+            recettes_traitees.add(recette_id)
 
-            # Charger la recette avec ses ingrédients
-            recette = db.query(Recette).filter(Recette.id == repas.recette_id).first()
-
+            recette = db.query(Recette).filter(Recette.id == recette_id).first()
             if not recette or not recette.ingredients:
-                continue
+                return
 
-            # Parcourir les ingrédients de cette recette
             for recette_ingredient in recette.ingredients:
                 ingredient = recette_ingredient.ingredient
                 if not ingredient:
@@ -368,23 +367,53 @@ class ServicePlanning(
                 unite = recette_ingredient.unite or ingredient.unite or "pcs"
                 rayon = ingredient.categorie or "autre"
 
-                # Agréger
                 if nom not in ingredients_aggregated:
                     ingredients_aggregated[nom] = {
                         "nom": nom,
                         "quantite": quantite,
                         "unite": unite,
                         "rayon": rayon,
-                        "priorite": "moyenne",  # Par défaut
+                        "priorite": "moyenne",
                         "repas_count": 1,
                     }
                 else:
-                    # Augmenter la quantité (même unité supposée)
                     if ingredients_aggregated[nom]["unite"] == unite:
                         ingredients_aggregated[nom]["quantite"] += quantite
                     ingredients_aggregated[nom]["repas_count"] += 1
 
-        # Trier par priorité (rayon) et quantité
+        for repas in planning.repas:
+            # Sauter les réchauffés
+            if repas.recette and repas.recette.nom and repas.recette.nom.lower().startswith("réchauffé"):
+                continue
+
+            # Plat principal
+            _ajouter_ingredients_recette(repas.recette_id)
+            # Entrée (FK recette)
+            _ajouter_ingredients_recette(getattr(repas, "entree_recette_id", None))
+            # Dessert (FK recette)
+            _ajouter_ingredients_recette(getattr(repas, "dessert_recette_id", None))
+            # Dessert Jules (FK recette)
+            _ajouter_ingredients_recette(getattr(repas, "dessert_jules_recette_id", None))
+
+            # Texte libre entrées/desserts → articles directs
+            for champ in ("entree", "dessert", "dessert_jules"):
+                texte = getattr(repas, champ, None)
+                fk_field = f"{champ}_recette_id" if champ != "dessert_jules" else "dessert_jules_recette_id"
+                fk = getattr(repas, fk_field, None)
+                if texte and not fk:
+                    nom = texte.strip()
+                    if nom and nom not in ingredients_aggregated:
+                        ingredients_aggregated[nom] = {
+                            "nom": nom,
+                            "quantite": 1,
+                            "unite": "pcs",
+                            "rayon": "autre",
+                            "priorite": "basse",
+                            "repas_count": 1,
+                        }
+                    elif nom:
+                        ingredients_aggregated[nom]["repas_count"] += 1
+
         courses_list = sorted(
             ingredients_aggregated.values(), key=lambda x: (x["rayon"], -x["quantite"])
         )

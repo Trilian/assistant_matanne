@@ -1270,8 +1270,13 @@ CREATE TABLE etapes_recette (
     id SERIAL PRIMARY KEY,
     recette_id INTEGER NOT NULL,
     ordre INTEGER NOT NULL,
+    titre VARCHAR(200),
     description TEXT NOT NULL,
     duree INTEGER,
+    robots_optionnels JSONB,
+    temperature INTEGER,
+    est_supervision BOOLEAN DEFAULT FALSE,
+    groupe_parallele INTEGER DEFAULT 0,
     CONSTRAINT fk_etapes_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE CASCADE,
     CONSTRAINT ck_ordre_positif CHECK (ordre > 0)
 );

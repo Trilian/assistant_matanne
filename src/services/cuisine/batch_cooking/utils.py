@@ -5,7 +5,7 @@ Ces fonctions ne dépendent pas de la base de données et peuvent être
 testées unitairement sans mocking.
 """
 
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, timedelta
 
 from .constantes import JOURS_SEMAINE, ROBOTS_DISPONIBLES
 
@@ -79,21 +79,6 @@ def calculer_duree_reelle(heure_debut: datetime, heure_fin: datetime) -> int:
     return int(delta.total_seconds() / 60)
 
 
-def estimer_heure_fin(heure_debut: time, duree_minutes: int) -> time:
-    """Estime l'heure de fin à partir de l'heure de début et la durée.
-
-    Args:
-        heure_debut: Heure de début
-        duree_minutes: Durée estimée en minutes
-
-    Returns:
-        Heure de fin estimée
-    """
-    debut_dt = datetime.combine(date.today(), heure_debut)
-    fin_dt = debut_dt + timedelta(minutes=duree_minutes)
-    return fin_dt.time()
-
-
 # ═══════════════════════════════════════════════════════════
 # ROBOTS ET ÉQUIPEMENTS
 # ═══════════════════════════════════════════════════════════
@@ -108,7 +93,7 @@ def obtenir_info_robot(robot_id: str) -> dict:
     Returns:
         Dictionnaire avec nom, emoji, parallele
     """
-    return ROBOTS_DISPONIBLES.get(robot_id, {"nom": robot_id, "emoji": "🔧", "parallele": True})
+    return ROBOTS_DISPONIBLES.get(robot_id, {"nom": robot_id, "emoji": "🔧", "peut_parallele": True})
 
 
 def obtenir_nom_robot(robot_id: str) -> str:
@@ -147,7 +132,7 @@ def est_robot_parallele(robot_id: str) -> bool:
         True si parallélisable
     """
     info = obtenir_info_robot(robot_id)
-    return info.get("parallele", True)
+    return info.get("peut_parallele", True)
 
 
 def formater_liste_robots(robot_ids: list[str]) -> str:

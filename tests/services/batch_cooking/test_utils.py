@@ -346,7 +346,7 @@ class TestCalculsDuree:
 
     def test_estimer_heure_fin(self):
         """estimer_heure_fin calcule l'heure de fin."""
-        from src.services.cuisine.batch_cooking import estimer_heure_fin
+        from src.modules.cuisine.batch_cooking_temps import estimer_heure_fin
 
         heure_debut = time(10, 0)
         duree = 90
@@ -382,7 +382,7 @@ class TestRobotsEquipements:
 
         assert result["nom"] == "robot_inconnu"
         assert result["emoji"] == "🔧"
-        assert result["parallele"] is True
+        assert result["peut_parallele"] is True
 
     def test_obtenir_nom_robot(self):
         """obtenir_nom_robot retourne le nom d'affichage."""

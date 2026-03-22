@@ -526,11 +526,29 @@ IMPORTANT:
 
                 # Créer les nouvelles
                 for idx, etape in enumerate(etapes_raw):
-                    desc = etape if isinstance(etape, str) else etape.get("description", "")
+                    if isinstance(etape, str):
+                        desc = etape
+                        titre = None
+                        robots = None
+                        temperature = None
+                        est_supervision = False
+                        groupe_parallele = 0
+                    else:
+                        desc = etape.get("description", "")
+                        titre = etape.get("titre")
+                        robots = etape.get("robots_optionnels")
+                        temperature = etape.get("temperature")
+                        est_supervision = etape.get("est_supervision", False)
+                        groupe_parallele = etape.get("groupe_parallele", 0)
                     e = EtapeRecette(
                         recette_id=recette_id,
                         ordre=idx + 1,
+                        titre=titre,
                         description=desc,
+                        robots_optionnels=robots,
+                        temperature=temperature,
+                        est_supervision=est_supervision,
+                        groupe_parallele=groupe_parallele,
                     )
                     db.add(e)
 

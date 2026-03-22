@@ -48,16 +48,28 @@ class EtapeInput(BaseModel):
     Attributes:
         numero: Numéro de l'étape (alias: ordre)
         ordre: Ordre de l'étape (alias de numero)
+        titre: Titre court optionnel
         description: Description de l'étape
         duree: Durée en minutes (optionnelle)
+        robots_optionnels: Robots utilisables pour cette étape
+        temperature: Température en °C
+        est_supervision: Étape de surveillance passive
+        groupe_parallele: Groupe pour parallélisation
     """
 
     numero: int | None = Field(None, ge=1, le=MAX_ETAPES, description="Numéro de l'étape")
     ordre: int | None = Field(
         None, ge=1, le=MAX_ETAPES, description="Ordre de l'étape (alias de numero)"
     )
+    titre: str | None = Field(None, max_length=200, description="Titre court de l'étape")
     description: str = Field(..., min_length=1, max_length=MAX_LENGTH_LONG)
     duree: int | None = Field(None, ge=0, le=MAX_TEMPS_CUISSON)
+    robots_optionnels: list[str] | None = Field(
+        None, description="Robots utilisables (ex: ['cookeo', 'four'])"
+    )
+    temperature: int | None = Field(None, ge=0, le=500, description="Température en °C")
+    est_supervision: bool = Field(False, description="Étape de surveillance passive")
+    groupe_parallele: int = Field(0, ge=0, description="Groupe pour parallélisation")
 
     model_config = {"populate_by_name": True}
 

@@ -59,14 +59,14 @@ def executer_batch_cooking_live(batch_data: dict) -> bool:
         return False
 
     # Initialiser l'état de progression si nécessaire
-    if "batch_etape_courante" not in st.session_state:
-        st.session_state.batch_etape_courante = 0
-    if "batch_heure_debut" not in st.session_state:
-        st.session_state.batch_heure_debut = datetime.now()
+    if SK.BATCH_ETAPE_COURANTE not in st.session_state:
+        st.session_state[SK.BATCH_ETAPE_COURANTE] = 0
+    if SK.BATCH_HEURE_DEBUT not in st.session_state:
+        st.session_state[SK.BATCH_HEURE_DEBUT] = datetime.now()
 
-    etape_courante = st.session_state.batch_etape_courante
+    etape_courante = st.session_state[SK.BATCH_ETAPE_COURANTE]
     total_etapes = len(toutes_etapes)
-    heure_debut = st.session_state.batch_heure_debut
+    heure_debut = st.session_state[SK.BATCH_HEURE_DEBUT]
 
     # ── Progression globale ──
     progress_pct = int((etape_courante / total_etapes) * 100) if total_etapes else 0
@@ -118,7 +118,7 @@ def executer_batch_cooking_live(batch_data: dict) -> bool:
         with col_prev:
             if etape_courante > 0:
                 if st.button("⬅️ Précédent", use_container_width=True):
-                    st.session_state.batch_etape_courante -= 1
+                    st.session_state[SK.BATCH_ETAPE_COURANTE] -= 1
                     st.rerun()
         with col_next:
             if st.button(
@@ -128,7 +128,7 @@ def executer_batch_cooking_live(batch_data: dict) -> bool:
                 type="primary",
                 use_container_width=True,
             ):
-                st.session_state.batch_etape_courante += 1
+                st.session_state[SK.BATCH_ETAPE_COURANTE] += 1
                 st.rerun()
 
         return False  # Pas encore terminé
@@ -156,8 +156,8 @@ def executer_batch_cooking_live(batch_data: dict) -> bool:
     )
 
     # Nettoyer l'état
-    del st.session_state["batch_etape_courante"]
-    del st.session_state["batch_heure_debut"]
+    del st.session_state[SK.BATCH_ETAPE_COURANTE]
+    del st.session_state[SK.BATCH_HEURE_DEBUT]
 
     return True
 
@@ -217,33 +217,33 @@ def afficher_execution_live():
     st.divider()
 
     # État de l'exécution
-    if "batch_en_cours" not in st.session_state:
-        st.session_state.batch_en_cours = False
+    if SK.BATCH_EN_COURS not in st.session_state:
+        st.session_state[SK.BATCH_EN_COURS] = False
 
-    if "batch_termine" not in st.session_state:
-        st.session_state.batch_termine = False
+    if SK.BATCH_TERMINE not in st.session_state:
+        st.session_state[SK.BATCH_TERMINE] = False
 
     # Bouton de démarrage
-    if not st.session_state.batch_en_cours and not st.session_state.batch_termine:
+    if not st.session_state[SK.BATCH_EN_COURS] and not st.session_state[SK.BATCH_TERMINE]:
         if st.button("▶️ Démarrer le Batch Cooking", type="primary", use_container_width=True):
-            st.session_state.batch_en_cours = True
+            st.session_state[SK.BATCH_EN_COURS] = True
             # Initialiser la progression
-            st.session_state.batch_etape_courante = 0
-            st.session_state.batch_heure_debut = datetime.now()
+            st.session_state[SK.BATCH_ETAPE_COURANTE] = 0
+            st.session_state[SK.BATCH_HEURE_DEBUT] = datetime.now()
             st.rerun()
 
     # Exécution étape par étape
-    if st.session_state.batch_en_cours:
+    if st.session_state[SK.BATCH_EN_COURS]:
         success = executer_batch_cooking_live(active_data)
         if success:
-            st.session_state.batch_en_cours = False
-            st.session_state.batch_termine = True
+            st.session_state[SK.BATCH_EN_COURS] = False
+            st.session_state[SK.BATCH_TERMINE] = True
 
     # Terminé
-    if st.session_state.batch_termine:
+    if st.session_state[SK.BATCH_TERMINE]:
         if st.button("🔄 Recommencer", use_container_width=True):
-            st.session_state.batch_termine = False
-            for key in ["batch_etape_courante", "batch_heure_debut"]:
+            st.session_state[SK.BATCH_TERMINE] = False
+            for key in [SK.BATCH_ETAPE_COURANTE, SK.BATCH_HEURE_DEBUT]:
                 st.session_state.pop(key, None)
             st.rerun()
 

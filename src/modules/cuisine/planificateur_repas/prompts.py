@@ -146,7 +146,9 @@ CONTEXTE FAMILLE:
   Indique le robot le mieux adapté dans le champ "robot" de chaque plat.
 
 CONTRAINTES:
-- Temps de cuisine en semaine: {preferences.temps_semaine} ({TEMPS_CATEGORIES[preferences.temps_semaine]["label"]})
+- Temps de cuisine en semaine (lundi-vendredi): {preferences.temps_semaine} ({TEMPS_CATEGORIES[preferences.temps_semaine]["label"]})
+- Temps de cuisine le weekend (samedi-dimanche): {preferences.temps_weekend} ({TEMPS_CATEGORIES[preferences.temps_weekend]["label"]})
+  ⚠️ Le weekend, tu peux proposer des recettes plus élaborées si le temps le permet.
 - Aliments à ÉVITER absolument: {", ".join(preferences.aliments_exclus) if preferences.aliments_exclus else "aucun"}
 - Aliments favoris: {", ".join(preferences.aliments_favoris) if preferences.aliments_favoris else "variés"}
 
@@ -159,6 +161,15 @@ CONTRAINTES:
   Les repas avec oeufs ou poisson NE comptent PAS comme végétariens — seuls les repas avec tofu, légumineuses ou sans aucune protéine animale comptent.
 - Viande rouge (boeuf, agneau, veau): maximum {preferences.viande_rouge_max} repas
 - Le RESTE des repas: privilégier VOLAILLE (poulet, dinde) et un peu de porc. Pas trop de porc.
+
+🔀 VARIÉTÉ INTRA-CATÉGORIE (BATCH-FRIENDLY):
+- Si une catégorie de protéine apparaît 1 seule fois dans la semaine → pas de contrainte (1x poulet OK, 1x saumon OK).
+- Si une catégorie apparaît ≥2 fois → varier les sources: max 2x la même protéine exacte.
+  Exemples: 3x poulet dans la semaine = INTERDIT → remplacer au moins 1 par dinde ou canard.
+  2x poulet + 1x dinde = OK. 2x boeuf = INTERDIT si viande rouge ≥2 → 1x boeuf + 1x agneau.
+- Volaille ≥3x/semaine: max 2x poulet, proposer dinde/canard pour le reste.
+- Végétarien ≥2x/semaine: varier les bases (lentilles, pois chiches, tofu, haricots blancs...).
+- Pâtes ou riz: max 3x par semaine au total.
 
 APPRENTISSAGE (base sur l'historique):
 - La famille a aimé: {", ".join(recettes_aimees) if recettes_aimees else "pas encore assez de données"}
@@ -196,6 +207,19 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 - Pour les réchauffés, la recette source doit déjà respecter cette règle légumes + féculents.
 - Privilégier des plats familiaux complets du type: poulet courgettes-riz, poisson carottes-pommes de terre, pâtes aux légumes, hachis avec légumes, curry légumes-riz, etc.
 
+🥕 VARIÉTÉ LÉGUMES — BATCH-FRIENDLY (OBLIGATOIRE):
+- Utiliser 4 à 5 légumes MAXIMUM dans la semaine, réutilisés dans plusieurs repas.
+  Exemple: courgettes (3 repas), carottes (2 repas), poireaux (2 repas), brocolis (2 repas) = seulement 4 légumes à éplucher.
+- Chaque légume doit apparaître dans au minimum 2 repas pour mutualiser les préparations (batch).
+- Minimum 3 légumes différents dans la semaine pour garder un minimum de variété.
+- BONUS: proposer des légumes communs entre midi et soir du même jour (une seule préparation).
+- NE PAS proposer un légume différent par repas (= trop de préparation, impossible en batch cooking).
+
+🍚 VARIÉTÉ FÉCULENTS — BATCH-FRIENDLY:
+- Utiliser 2 à 3 féculents MAXIMUM dans la semaine, réutilisés dans plusieurs repas.
+- Pâtes: max 3 repas par semaine. Riz: max 3 repas par semaine.
+- Varier entre: pâtes, riz, pommes de terre, semoule, quinoa, boulgour, lentilles, patate douce.
+
 {section_bases}
 {section_recettes_imposees}
 {section_recettes_db}
@@ -212,6 +236,8 @@ JOURS À PLANIFIER: {", ".join(jours_a_planifier)}
 - CREVETTES: allergène potentiel. "jules_adaptation" DOIT dire "Servir Jules sans crevettes, remplacer par [poulet/poisson blanc émietté]."
 - POISSON FUMÉ (saumon fumé, truite fumée): trop salé. "jules_adaptation": "Utiliser du saumon cuit vapeur pour Jules, pas fumé."
 - NB: Ces restrictions ne changent PAS la liste d'ingrédients du plat principal (la famille mange normalement) — seule la portion Jules est adaptée.
+- FER POUR JULES: S'assurer qu'au moins 3-4 repas midi contiennent une source de fer (viande rouge, volaille foncée, poisson, lentilles, épinards). Le midi est le moment idéal pour les protéines de Jules.
+- CALCIUM POUR JULES: Les desserts Jules doivent inclure au moins 2-3 laitages par semaine (yaourt, fromage blanc, petit-suisse). Compote seule ne suffit pas.
 
 ⚡ MIX SIMPLE / ÉLABORÉ:
 - La MAJORITÉ des repas (8-10 sur 14) doivent être SIMPLES et RAPIDES (≤ 25 min, "difficulte": "facile").

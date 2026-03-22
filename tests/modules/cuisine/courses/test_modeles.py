@@ -23,7 +23,7 @@ class TestRenderModeles:
 
     def test_import(self):
         """Test import réussi."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         assert afficher_modeles is not None
 
@@ -32,7 +32,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_empty(self, mock_st, mock_service, mock_etat_vide):
         """Test sans modèles."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         svc = MagicMock()
         svc.get_modeles.return_value = []
@@ -55,7 +55,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_with_modeles(self, mock_st, mock_service):
         """Test avec modèles existants."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         modele = {
             "id": 1,
@@ -106,7 +106,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_with_modele_notes(self, mock_st, mock_service):
         """Test avec modèles ayant des notes."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         modele = {
             "id": 2,
@@ -157,7 +157,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_load_modele(self, mock_st, mock_service):
         """Test charger modèle."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         modele = {
             "id": 2,
@@ -201,7 +201,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_load_empty_result(self, mock_st, mock_service):
         """Test charger modèle sans articles."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         modele = {
             "id": 3,
@@ -244,7 +244,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_delete_modele(self, mock_st, mock_service):
         """Test supprimer modèle."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         modele = {
             "id": 4,
@@ -287,7 +287,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_delete_error(self, mock_st, mock_service):
         """Test erreur suppression modèle."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         modele = {
             "id": 5,
@@ -330,7 +330,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_create_empty_name(self, mock_st, mock_service):
         """Test création modèle nom vide."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         svc = MagicMock()
         svc.get_modeles.return_value = []
@@ -368,7 +368,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_create_success(self, mock_st, mock_service):
         """Test création modèle réussie."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         svc = MagicMock()
         svc.get_modeles.return_value = []
@@ -410,7 +410,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.logger")
     def test_render_modeles_create_error(self, mock_logger, mock_st, mock_service):
         """Test erreur création modèle."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         svc = MagicMock()
         svc.get_modeles.return_value = []
@@ -450,7 +450,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_new_tab_empty_list(self, mock_st, mock_service):
         """Test onglet nouveau avec liste vide."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         svc = MagicMock()
         svc.get_modeles.return_value = []
@@ -473,7 +473,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.logger")
     def test_render_modeles_global_exception(self, mock_logger, mock_st, mock_service):
         """Test exception globale."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         mock_service.return_value.get_modeles.side_effect = Exception("Service error")
 
@@ -486,7 +486,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_load_error_with_traceback(self, mock_st, mock_service):
         """Test charger modèle avec erreur et traceback."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         modele = {
             "id": 5,
@@ -529,7 +529,7 @@ class TestRenderModeles:
     @patch("src.modules.cuisine.courses.modeles.st")
     def test_render_modeles_articles_all_priorities(self, mock_st, mock_service):
         """Test affichage articles avec toutes priorités."""
-        from src.modules.cuisine.courses.modeles import afficher_modeles
+        from src.modules.cuisine.courses.historique import afficher_historique_et_modeles as afficher_modeles
 
         modele = {
             "id": 6,

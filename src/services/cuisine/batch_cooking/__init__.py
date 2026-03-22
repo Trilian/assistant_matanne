@@ -38,7 +38,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "calculer_duree_totale_etapes": (".utils", "calculer_duree_totale_etapes"),
     "calculer_duree_parallele": (".utils", "calculer_duree_parallele"),
     "calculer_duree_reelle": (".utils", "calculer_duree_reelle"),
-    "estimer_heure_fin": (".utils", "estimer_heure_fin"),
     # ─── Utilitaires Robots ───
     "obtenir_info_robot": (".utils", "obtenir_info_robot"),
     "obtenir_nom_robot": (".utils", "obtenir_nom_robot"),

@@ -28,7 +28,7 @@ class TestRenderSuggestionsIA:
 
     def test_import(self):
         """Test import réussi."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         assert afficher_suggestions_ia is not None
 
@@ -38,7 +38,7 @@ class TestRenderSuggestionsIA:
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_tabs(self, mock_st, mock_courses, mock_inv, mock_recettes):
         """Test affichage des onglets."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -68,7 +68,7 @@ class TestRenderSuggestionsIA:
         self, mock_st, mock_courses, mock_inv, mock_recettes, mock_etat_vide
     ):
         """Test inventaire sans suggestions."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         svc = MagicMock()
         svc.generer_suggestions_ia_depuis_inventaire.return_value = []
@@ -99,7 +99,7 @@ class TestRenderSuggestionsIA:
         self, mock_pd, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test inventaire avec suggestions."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         suggestion = MagicMock()
         suggestion.nom = "Lait"
@@ -143,7 +143,7 @@ class TestRenderSuggestionsIA:
         self, mock_time, mock_pd, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test ajout toutes suggestions."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         suggestion = MagicMock()
         suggestion.nom = "Pain"
@@ -189,7 +189,7 @@ class TestRenderSuggestionsIA:
         self, mock_time, mock_pd, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test ajout nouvel ingrédient."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         suggestion = MagicMock()
         suggestion.nom = "Nouveau"
@@ -230,7 +230,7 @@ class TestRenderSuggestionsIA:
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_inventaire_exception(self, mock_st, mock_courses, mock_inv, mock_recettes):
         """Test gestion exception inventaire."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         svc = MagicMock()
         svc.generer_suggestions_ia_depuis_inventaire.side_effect = Exception("IA Error")
@@ -260,7 +260,7 @@ class TestRenderSuggestionsIA:
         self, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test service recettes indisponible."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -288,7 +288,7 @@ class TestRenderSuggestionsIA:
         self, mock_st, mock_courses, mock_inv, mock_recettes, mock_etat_vide
     ):
         """Test aucune recette disponible."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -315,7 +315,7 @@ class TestRenderSuggestionsIA:
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_recettes_with_data(self, mock_st, mock_courses, mock_inv, mock_recettes):
         """Test avec recettes disponibles."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -351,7 +351,7 @@ class TestRenderSuggestionsIA:
         self, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test ajout ingrédients depuis recette."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         courses_svc = MagicMock()
         courses_svc.ajouter_ingredients_recette.return_value = 1
@@ -396,7 +396,7 @@ class TestRenderSuggestionsIA:
     @patch("src.modules.cuisine.courses.suggestions_ia.st")
     def test_render_recette_no_ingredients(self, mock_st, mock_courses, mock_inv, mock_recettes):
         """Test recette sans ingrédients."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -435,7 +435,7 @@ class TestRenderSuggestionsIA:
         self, mock_logger, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test exception onglet recettes."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         mock_courses.return_value = MagicMock()
         mock_inv.return_value = MagicMock()
@@ -464,7 +464,7 @@ class TestRenderSuggestionsIA:
         self, mock_logger, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test erreur ajout ingrédients."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         courses_svc = MagicMock()
         courses_svc.ajouter_ingredients_recette.side_effect = Exception("DB Error")
@@ -511,7 +511,7 @@ class TestRenderSuggestionsIA:
         self, mock_time, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test ingrédient avec nom direct (sans .ingredient)."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         courses_svc = MagicMock()
         courses_svc.ajouter_ingredients_recette.return_value = 1
@@ -558,7 +558,7 @@ class TestRenderSuggestionsIA:
         self, mock_time, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test ingrédient avec nom vide est ignoré."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         courses_svc = MagicMock()
         # Only 1 valid ingredient should be added (empty one skipped by service)
@@ -615,7 +615,7 @@ class TestRenderSuggestionsIA:
         self, mock_time, mock_st, mock_courses, mock_inv, mock_recettes
     ):
         """Test création nouvel ingrédient depuis recette."""
-        from src.modules.cuisine.courses.suggestions_ia import afficher_suggestions_ia
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_suggestions_ia
 
         courses_svc = MagicMock()
         courses_svc.ajouter_ingredients_recette.return_value = 1
@@ -661,6 +661,6 @@ class TestSuggestionsIAModule:
 
     def test_all_exports(self):
         """Test __all__ exports."""
-        from src.modules.cuisine.courses import suggestions_ia
+        from src.modules.cuisine.courses import generation as suggestions_ia
 
         assert "afficher_suggestions_ia" in suggestions_ia.__all__

@@ -30,6 +30,7 @@ def calculer_score_recette(
     feedbacks: list[FeedbackRecette],
     equilibre_actuel: dict[str, int],
     stock_disponible: list[str],
+    jour: str | None = None,
 ) -> tuple[float, str]:
     """
     Calcule un score de pertinence pour une recette.
@@ -106,12 +107,14 @@ def calculer_score_recette(
             score += 15
             raison = f"Utilise {nb_en_stock} ingredients de votre stock"
 
-    # 6. Temps de preparation
+    # 6. Temps de preparation (utilise temps_weekend pour samedi/dimanche)
     temps_total = 0
     if hasattr(recette, "temps_preparation"):
         temps_total = recette.temps_preparation + (recette.temps_cuisson or 0)
 
-    temps_max = TEMPS_CATEGORIES.get(preferences.temps_semaine, {}).get("max_minutes", 40)
+    _est_weekend = jour and jour.lower() in ("samedi", "dimanche")
+    _temps_pref = preferences.temps_weekend if _est_weekend else preferences.temps_semaine
+    temps_max = TEMPS_CATEGORIES.get(_temps_pref, {}).get("max_minutes", 40)
     if temps_total > temps_max:
         score -= 10
         raison = f"Temps de preparation long ({temps_total} min)"
@@ -275,6 +278,17 @@ def valider_equilibre_semaine(
     # Verifier repas planifies
     if planning.nb_repas_planifies < 10:  # Au moins 10 repas sur 14 possibles
         alertes.append(f"⚠️ Seulement {planning.nb_repas_planifies} repas planifies sur 14")
+
+    # Jules: vérifier sources de fer (si Jules est présent)
+    if preferences.jules_present:
+        _sources_fer = {"viande_rouge", "volaille", "poisson"}
+        _fer_count = sum(equilibre.get(cat, 0) for cat in _sources_fer)
+        # Ajouter les repas végé avec légumineuses (approximation: on vérifie juste le total)
+        if _fer_count < 3:
+            alertes.append(
+                f"⚠️ Jules: peu de sources de fer cette semaine ({_fer_count} repas avec protéine animale). "
+                "Ajouter viande rouge, volaille foncée ou légumineuses (lentilles, épinards)."
+            )
 
     est_valide = len(alertes) == 0
 

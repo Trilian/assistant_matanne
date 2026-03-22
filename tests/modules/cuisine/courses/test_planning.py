@@ -41,7 +41,7 @@ class TestRenderCoursesDepuisPlanning:
 
     def test_import(self):
         """Test import réussi."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         assert afficher_courses_depuis_planning is not None
 
@@ -49,7 +49,7 @@ class TestRenderCoursesDepuisPlanning:
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_no_planning(self, mock_st, mock_service):
         """Test sans planning actif."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         svc = MagicMock()
         svc.obtenir_planning_actif.return_value = None
@@ -67,7 +67,7 @@ class TestRenderCoursesDepuisPlanning:
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_no_planning_navigate(self, mock_st, mock_service, mock_naviguer):
         """Test navigation vers planning."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         svc = MagicMock()
         svc.obtenir_planning_actif.return_value = None
@@ -85,7 +85,7 @@ class TestRenderCoursesDepuisPlanning:
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_with_planning(self, mock_st, mock_service):
         """Test avec planning actif."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Semaine 5"
@@ -110,7 +110,7 @@ class TestRenderCoursesDepuisPlanning:
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_generate_list(self, mock_st, mock_service):
         """Test génération liste."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -143,7 +143,7 @@ class TestRenderCoursesDepuisPlanning:
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_with_result_articles(self, mock_st, mock_service):
         """Test affichage résultat avec articles."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -187,7 +187,7 @@ class TestRenderCoursesDepuisPlanning:
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_add_articles(self, mock_st, mock_service):
         """Test ajout articles à la liste."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -238,7 +238,7 @@ class TestRenderCoursesDepuisPlanning:
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_regenerate(self, mock_st, mock_service, mock_rerun):
         """Test régénération liste."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -286,7 +286,7 @@ class TestRenderCoursesDepuisPlanning:
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_alertes_types(self, mock_st, mock_service):
         """Test différents types d'alertes."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -333,7 +333,7 @@ class TestRenderCoursesDepuisPlanning:
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_uncheck_article(self, mock_st, mock_service):
         """Test désélection article."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -382,7 +382,7 @@ class TestRenderCoursesDepuisPlanning:
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_instructions(self, mock_st, mock_service):
         """Test affichage instructions."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"
@@ -406,7 +406,7 @@ class TestRenderCoursesDepuisPlanning:
     @patch("src.modules.cuisine.courses.planning.st")
     def test_render_multiple_rayons(self, mock_st, mock_service):
         """Test plusieurs rayons."""
-        from src.modules.cuisine.courses.planning import afficher_courses_depuis_planning
+        from src.modules.cuisine.courses.generation import afficher_generation as afficher_courses_depuis_planning
 
         mock_planning = MagicMock()
         mock_planning.nom = "Test"

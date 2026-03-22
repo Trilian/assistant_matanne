@@ -13,18 +13,19 @@ from src.services.cuisine.courses import obtenir_service_courses
 from src.services.inventaire import obtenir_service_inventaire
 from src.ui.fragments import ui_fragment
 
-from .utils import PRIORITY_EMOJIS, RAYONS_DEFAULT
-
-logger = logging.getLogger(__name__)
-from .liste_utils import (
+from .utils import (
+    PRIORITY_EMOJIS,
+    RAYONS_DEFAULT,
     filtrer_liste,
     formater_article_label,
     generer_texte_impression,
     grouper_par_magasin,
     grouper_par_magasin_personnalise,
-    obtenir_mapping_magasins_par_defaut,
     grouper_par_rayon,
+    obtenir_mapping_magasins_par_defaut,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @ui_fragment
@@ -43,6 +44,11 @@ def afficher_liste_active():
         return
 
     try:
+        # ── Zone d'ajout rapide (style Bring!) ──
+        _afficher_ajout_rapide(service)
+
+        st.divider()
+
         # Récupérer la liste
         liste = service.get_liste_courses(achetes=False)
 
@@ -436,6 +442,58 @@ def afficher_print_view(liste):
     )
 
     st.code(print_text, language="text")
+
+
+# ═══════════════════════════════════════════════════════════
+# AJOUT RAPIDE (ex-mode_rapide_ui)
+# ═══════════════════════════════════════════════════════════
+
+
+def _afficher_ajout_rapide(service) -> None:
+    """Zone d'ajout rapide en tête de liste — un champ, un bouton."""
+    col_input, col_btn = st.columns([5, 1])
+    with col_input:
+        nom = st.text_input(
+            "ajout_rapide",
+            key="quick_add_nom",
+            label_visibility="collapsed",
+            placeholder="🛒  lait, pain, tomates… (appuyez sur Entrée)",
+        )
+    with col_btn:
+        ajouter = st.button(
+            "➕",
+            key="quick_add_btn",
+            use_container_width=True,
+            type="primary",
+            help="Ajouter à la liste",
+        )
+
+    if ajouter and nom and nom.strip():
+        _ajouter_article_rapide(service, nom.strip())
+
+
+def _ajouter_article_rapide(service, nom: str) -> None:
+    """Ajoute un article rapidement via le service courses."""
+    try:
+        ingredient_id = service.obtenir_ou_creer_ingredient(nom=nom, unite="pièce")
+        if ingredient_id:
+            service.create(
+                {
+                    "ingredient_id": ingredient_id,
+                    "quantite_necessaire": 1,
+                    "priorite": "moyenne",
+                    "rayon_magasin": "Autre",
+                }
+            )
+            st.toast(f"✅ {nom} ajouté !", icon="✅")
+            st.session_state["quick_add_nom"] = ""
+            st.session_state[SK.COURSES_REFRESH] += 1
+            rerun()
+        else:
+            st.toast("❌ Erreur création article", icon="❌")
+    except Exception as e:
+        st.toast(f"❌ Erreur: {e}", icon="❌")
+        logger.error(f"Erreur ajout rapide: {e}")
 
 
 __all__ = [

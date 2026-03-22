@@ -5,16 +5,18 @@ Tests pour batch_cooking_logic.py - Fonctions pures de batch cooking
 from datetime import date, time, timedelta
 
 from src.core.constants import JOURS_SEMAINE
-from src.modules.cuisine.batch_cooking_utils import (
+from src.modules.cuisine.batch_cooking_etapes import (
+    detecter_conflits_robots,
+    optimiser_ordre_etapes,
+)
+from src.modules.cuisine.batch_cooking_portions import filtrer_etapes_bruyantes
+from src.modules.cuisine.batch_cooking_temps import (
     JOURS_EMOJI,
     LOCALISATIONS,
     ROBOTS_INFO,
     calculer_duree_totale_optimisee,
-    detecter_conflits_robots,
     estimer_heure_fin,
-    filtrer_etapes_bruyantes,
     formater_duree,
-    optimiser_ordre_etapes,
     valider_preparation,
     valider_session_batch,
 )

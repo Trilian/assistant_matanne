@@ -175,7 +175,73 @@ def is_balanced_week(
     if balance["vegetarien"] < 1:
         issues.append("Pas de repas végétarien")
 
+    # Variété intra-catégorie (batch-friendly: seulement si ≥2x dans la catégorie)
+    variety_issues = check_intra_category_variety(repas_list)
+    issues.extend(variety_issues)
+
     return len(issues) == 0, issues
+
+
+def check_intra_category_variety(repas_list: list[dict]) -> list[str]:
+    """Vérifie la variété au sein de chaque catégorie de protéines.
+
+    Règles batch-friendly:
+    - Si catégorie n'apparaît qu'1x → pas de contrainte
+    - Si catégorie apparaît ≥2x → max 2x la même source (ex: 2 poulet + 1 dinde OK, 3 poulet KO)
+
+    Args:
+        repas_list: Liste de dicts avec type_proteines
+
+    Returns:
+        Liste de messages d'alerte
+    """
+    from collections import Counter
+
+    issues = []
+    # Grouper les sources brutes par catégorie
+    category_sources: dict[str, list[str]] = {}
+
+    for repas in repas_list:
+        protein = repas.get("type_proteines", "")
+        if not protein:
+            continue
+        protein_lower = protein.lower()
+
+        # Déterminer la catégorie
+        category = "autre"
+        for cat_name, keywords in TYPES_PROTEINES.items():
+            if any(kw in protein_lower for kw in keywords):
+                category = cat_name
+                break
+
+        if category == "autre":
+            continue
+
+        if category not in category_sources:
+            category_sources[category] = []
+        category_sources[category].append(protein_lower)
+
+    # Vérifier chaque catégorie
+    _labels = {
+        "volaille": "volaille",
+        "viande_rouge": "viande rouge",
+        "poisson_blanc": "poisson blanc",
+        "poisson_gras": "poisson gras",
+        "vegetarien": "végétarien",
+    }
+    for category, sources in category_sources.items():
+        if len(sources) < 2:
+            continue  # Pas de contrainte si 1 seul repas
+
+        counts = Counter(sources)
+        for source, count in counts.items():
+            if count > 2:
+                label = _labels.get(category, category)
+                issues.append(
+                    f"Trop de {source} ({count}x) dans la catégorie {label} — varier les sources"
+                )
+
+    return issues
 
 
 __all__ = [
@@ -183,4 +249,5 @@ __all__ = [
     "get_default_protein_schedule",
     "calculate_week_balance",
     "is_balanced_week",
+    "check_intra_category_variety",
 ]
