@@ -361,6 +361,106 @@ async def statistiques_paris(
     return await executer_async(_query)
 
 
+@router.post("/paris", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_pari(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée un nouveau pari sportif."""
+    from decimal import Decimal
+
+    from src.core.models import Match, PariSportif
+
+    def _query():
+        with executer_avec_session() as session:
+            match = session.query(Match).filter(Match.id == payload["match_id"]).first()
+            if not match:
+                raise HTTPException(status_code=404, detail="Match non trouvé")
+
+            pari = PariSportif(
+                match_id=payload["match_id"],
+                type_pari=payload.get("type_pari", "1N2"),
+                prediction=payload["prediction"],
+                cote=payload["cote"],
+                mise=Decimal(str(payload.get("mise", 0))),
+                est_virtuel=payload.get("est_virtuel", True),
+                notes=payload.get("notes"),
+            )
+            session.add(pari)
+            session.commit()
+            session.refresh(pari)
+            return {
+                "id": pari.id,
+                "match_id": pari.match_id,
+                "prediction": pari.prediction,
+                "cote": pari.cote,
+                "mise": float(pari.mise),
+                "est_virtuel": pari.est_virtuel,
+                "statut": pari.statut,
+            }
+
+    return await executer_async(_query)
+
+
+@router.patch("/paris/{pari_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def modifier_pari(
+    pari_id: int,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour un pari (statut, gain, etc.)."""
+    from decimal import Decimal
+
+    from src.core.models import PariSportif
+
+    def _query():
+        with executer_avec_session() as session:
+            pari = session.query(PariSportif).filter(PariSportif.id == pari_id).first()
+            if not pari:
+                raise HTTPException(status_code=404, detail="Pari non trouvé")
+
+            if "statut" in payload:
+                pari.statut = payload["statut"]
+            if "gain" in payload:
+                pari.gain = Decimal(str(payload["gain"]))
+            if "notes" in payload:
+                pari.notes = payload["notes"]
+
+            session.commit()
+            session.refresh(pari)
+            return {
+                "id": pari.id,
+                "statut": pari.statut,
+                "gain": float(pari.gain) if pari.gain else None,
+                "mise": float(pari.mise),
+            }
+
+    return await executer_async(_query)
+
+
+@router.delete("/paris/{pari_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_pari(
+    pari_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime un pari."""
+    from src.core.models import PariSportif
+
+    def _query():
+        with executer_avec_session() as session:
+            pari = session.query(PariSportif).filter(PariSportif.id == pari_id).first()
+            if not pari:
+                raise HTTPException(status_code=404, detail="Pari non trouvé")
+            session.delete(pari)
+            session.commit()
+            return MessageResponse(message="Pari supprimé")
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # LOTO
 # ═══════════════════════════════════════════════════════════

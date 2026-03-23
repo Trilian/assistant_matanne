@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -12,9 +14,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { listerParis, obtenirStatsParis, listerMatchs } from "@/lib/api/jeux";
+import { Plus, Trash2 } from "lucide-react";
+import { utiliserRequete, utiliserMutation } from "@/hooks/utiliser-api";
+import { useQueryClient } from "@tanstack/react-query";
+import { listerParis, obtenirStatsParis, listerMatchs, creerPari, supprimerPari } from "@/lib/api/jeux";
 import dynamic from "next/dynamic";
 import type { PariSportif, StatsParis, MatchJeu } from "@/types/jeux";
 
@@ -40,6 +58,39 @@ function couleurStatut(statut: string) {
 
 export default function ParisPage() {
   const [filtreStatut, setFiltreStatut] = useState("tous");
+  const [dialogOuvert, setDialogOuvert] = useState(false);
+  const [matchId, setMatchId] = useState("");
+  const [typePari, setTypePari] = useState("1X2");
+  const [prediction, setPrediction] = useState("");
+  const [cote, setCote] = useState("");
+  const [mise, setMise] = useState("");
+
+  const queryClient = useQueryClient();
+
+  const mutationCreer = utiliserMutation(
+    (data: { match_id: number; type_pari: string; prediction: string; cote: number; mise: number }) =>
+      creerPari(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["jeux", "paris"] });
+        setDialogOuvert(false);
+        setMatchId("");
+        setTypePari("1X2");
+        setPrediction("");
+        setCote("");
+        setMise("");
+      },
+    }
+  );
+
+  const mutationSupprimer = utiliserMutation(
+    (id: number) => supprimerPari(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["jeux", "paris"] });
+      },
+    }
+  );
 
   const { data: stats, isLoading: chargementStats } = utiliserRequete<StatsParis>(
     ["jeux", "paris", "stats"],
@@ -60,7 +111,84 @@ export default function ParisPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">🏟️ Paris Sportifs</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">🏟️ Paris Sportifs</h1>
+        <Dialog open={dialogOuvert} onOpenChange={setDialogOuvert}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-1" /> Nouveau pari
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Nouveau pari</DialogTitle>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!matchId || !prediction || !cote || !mise) return;
+                mutationCreer.mutate({
+                  match_id: parseInt(matchId),
+                  type_pari: typePari,
+                  prediction,
+                  cote: parseFloat(cote),
+                  mise: parseFloat(mise),
+                });
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <Label>Match</Label>
+                <Select value={matchId} onValueChange={setMatchId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un match" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {matchs.map((m) => (
+                      <SelectItem key={m.id} value={String(m.id)}>
+                        {m.equipe_domicile ?? "?"} vs {m.equipe_exterieur ?? "?"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Type de pari</Label>
+                <Select value={typePari} onValueChange={setTypePari}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1X2">1X2</SelectItem>
+                    <SelectItem value="over_under">Over/Under</SelectItem>
+                    <SelectItem value="score_exact">Score exact</SelectItem>
+                    <SelectItem value="buteur">Buteur</SelectItem>
+                    <SelectItem value="mi_temps">Mi-temps</SelectItem>
+                    <SelectItem value="autre">Autre</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Prédiction</Label>
+                <Input value={prediction} onChange={(e) => setPrediction(e.target.value)} required placeholder="ex: Victoire domicile" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Cote</Label>
+                  <Input type="number" step="0.01" value={cote} onChange={(e) => setCote(e.target.value)} required />
+                </div>
+                <div>
+                  <Label>Mise (€)</Label>
+                  <Input type="number" step="0.01" value={mise} onChange={(e) => setMise(e.target.value)} required />
+                </div>
+              </div>
+              <Button type="submit" className="w-full" disabled={mutationCreer.isPending}>
+                {mutationCreer.isPending ? "Enregistrement…" : "Enregistrer le pari"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* Statistiques */}
       {chargementStats ? (
@@ -192,6 +320,7 @@ export default function ParisPage() {
                   <TableHead className="text-right">Mise</TableHead>
                   <TableHead className="text-right">Gain</TableHead>
                   <TableHead>Statut</TableHead>
+                  <TableHead className="w-10"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -215,6 +344,16 @@ export default function ParisPage() {
                         <Badge variant={couleurStatut(p.statut)}>
                           {p.statut}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive"
+                          onClick={() => mutationSupprimer.mutate(p.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
                   );

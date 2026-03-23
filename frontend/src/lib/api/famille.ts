@@ -35,13 +35,22 @@ export async function listerJalons(categorie?: string): Promise<JalonJules[]> {
 
 /** Ajouter un jalon */
 export async function ajouterJalon(
-  jalon: Omit<JalonJules, "id">
+  jalon: Omit<JalonJules, "id">,
+  enfantId: number = 1
 ): Promise<JalonJules> {
   const { data } = await clientApi.post<JalonJules>(
-    "/famille/jules/jalons",
+    `/famille/enfants/${enfantId}/jalons`,
     jalon
   );
   return data;
+}
+
+/** Supprimer un jalon */
+export async function supprimerJalon(
+  jalonId: number,
+  enfantId: number = 1
+): Promise<void> {
+  await clientApi.delete(`/famille/enfants/${enfantId}/jalons/${jalonId}`);
 }
 
 // ─── Activités ────────────────────────────────────────────
@@ -70,6 +79,23 @@ export async function creerActivite(
     activite
   );
   return data;
+}
+
+/** Modifier une activité */
+export async function modifierActivite(
+  id: number,
+  activite: Partial<Activite>
+): Promise<Activite> {
+  const { data } = await clientApi.patch<Activite>(
+    `/famille/activites/${id}`,
+    activite
+  );
+  return data;
+}
+
+/** Supprimer une activité */
+export async function supprimerActivite(id: number): Promise<void> {
+  await clientApi.delete(`/famille/activites/${id}`);
 }
 
 // ─── Routines ─────────────────────────────────────────────
@@ -135,4 +161,20 @@ export async function listerDepenses(
 export async function obtenirStatsBudget(): Promise<StatsBudget> {
   const { data } = await clientApi.get<StatsBudget>("/famille/budget/stats");
   return data;
+}
+
+/** Ajouter une dépense */
+export async function ajouterDepense(
+  depense: Omit<DepenseBudget, "id">
+): Promise<DepenseBudget> {
+  const { data } = await clientApi.post<DepenseBudget>(
+    "/famille/budget",
+    depense
+  );
+  return data;
+}
+
+/** Supprimer une dépense */
+export async function supprimerDepense(id: number): Promise<void> {
+  await clientApi.delete(`/famille/budget/${id}`);
 }

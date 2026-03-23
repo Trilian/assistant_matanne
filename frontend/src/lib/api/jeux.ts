@@ -40,6 +40,28 @@ export async function obtenirStatsParis(): Promise<StatsParis> {
   return data;
 }
 
+/** Créer un pari */
+export async function creerPari(
+  pari: Omit<PariSportif, "id" | "statut" | "gain">
+): Promise<PariSportif> {
+  const { data } = await clientApi.post<PariSportif>("/jeux/paris", pari);
+  return data;
+}
+
+/** Modifier un pari (statut, gain) */
+export async function modifierPari(
+  id: number,
+  pari: Partial<PariSportif>
+): Promise<PariSportif> {
+  const { data } = await clientApi.patch<PariSportif>(`/jeux/paris/${id}`, pari);
+  return data;
+}
+
+/** Supprimer un pari */
+export async function supprimerPari(id: number): Promise<void> {
+  await clientApi.delete(`/jeux/paris/${id}`);
+}
+
 // ─── Loto ─────────────────────────────────────────────────
 
 export async function listerTirages(): Promise<TirageLoto[]> {

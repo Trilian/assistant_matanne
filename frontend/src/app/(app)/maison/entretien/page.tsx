@@ -4,7 +4,8 @@
 
 "use client";
 
-import { SprayCan, AlertTriangle, CheckCircle2, Activity, Clock } from "lucide-react";
+import { useState } from "react";
+import { SprayCan, AlertTriangle, CheckCircle2, Activity, Clock, Plus, Trash2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -13,12 +14,60 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { listerTachesEntretien, obtenirSanteAppareils } from "@/lib/api/maison";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { utiliserRequete, utiliserMutation } from "@/hooks/utiliser-api";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  listerTachesEntretien,
+  obtenirSanteAppareils,
+  creerTacheEntretien,
+  supprimerTacheEntretien,
+} from "@/lib/api/maison";
 
 export default function PageEntretien() {
+  const [dialogOuvert, setDialogOuvert] = useState(false);
+  const [nom, setNom] = useState("");
+  const [categorie, setCategorie] = useState("");
+  const [piece, setPiece] = useState("");
+  const [frequence, setFrequence] = useState("");
+
+  const queryClient = useQueryClient();
+
+  const mutationCreer = utiliserMutation(
+    (data: { nom: string; categorie?: string; piece?: string; frequence_jours?: number }) =>
+      creerTacheEntretien(data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["maison", "entretien"] });
+        setDialogOuvert(false);
+        setNom("");
+        setCategorie("");
+        setPiece("");
+        setFrequence("");
+      },
+    }
+  );
+
+  const mutationSupprimer = utiliserMutation(
+    (id: number) => supprimerTacheEntretien(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["maison", "entretien"] });
+      },
+    }
+  );
+
   const { data: taches, isLoading: chargementTaches } = utiliserRequete(
     ["maison", "entretien", "taches"],
     () => listerTachesEntretien()
@@ -59,6 +108,54 @@ export default function PageEntretien() {
 
         {/* ─── Onglet Tâches ─────────────────────────── */}
         <TabsContent value="taches" className="space-y-4 mt-4">
+          <div className="flex justify-end">
+            <Dialog open={dialogOuvert} onOpenChange={setDialogOuvert}>
+              <DialogTrigger asChild>
+                <Button size="sm">
+                  <Plus className="h-4 w-4 mr-1" /> Ajouter
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Nouvelle tâche d&apos;entretien</DialogTitle>
+                </DialogHeader>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!nom) return;
+                    mutationCreer.mutate({
+                      nom,
+                      categorie: categorie || undefined,
+                      piece: piece || undefined,
+                      frequence_jours: frequence ? parseInt(frequence) : undefined,
+                    });
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <Label>Nom</Label>
+                    <Input value={nom} onChange={(e) => setNom(e.target.value)} required />
+                  </div>
+                  <div>
+                    <Label>Catégorie</Label>
+                    <Input value={categorie} onChange={(e) => setCategorie(e.target.value)} placeholder="ex: ménage, plomberie…" />
+                  </div>
+                  <div>
+                    <Label>Pièce</Label>
+                    <Input value={piece} onChange={(e) => setPiece(e.target.value)} placeholder="ex: cuisine, salle de bain…" />
+                  </div>
+                  <div>
+                    <Label>Fréquence (jours)</Label>
+                    <Input type="number" value={frequence} onChange={(e) => setFrequence(e.target.value)} placeholder="ex: 30" />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={mutationCreer.isPending}>
+                    {mutationCreer.isPending ? "Ajout…" : "Ajouter la tâche"}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
           {chargementTaches ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
@@ -98,9 +195,19 @@ export default function PageEntretien() {
                               )}
                             </div>
                           </div>
-                          <Badge variant="destructive" className="text-xs">
-                            En retard
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="destructive" className="text-xs">
+                              En retard
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive"
+                              onClick={() => mutationSupprimer.mutate(t.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
@@ -133,15 +240,25 @@ export default function PageEntretien() {
                               )}
                             </div>
                           </div>
-                          {t.fait ? (
-                            <Badge className="bg-green-500/10 text-green-600 text-xs">
-                              Fait
-                            </Badge>
-                          ) : t.prochaine_fois ? (
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(t.prochaine_fois).toLocaleDateString("fr-FR")}
-                            </span>
-                          ) : null}
+                          <div className="flex items-center gap-2">
+                            {t.fait ? (
+                              <Badge className="bg-green-500/10 text-green-600 text-xs">
+                                Fait
+                              </Badge>
+                            ) : t.prochaine_fois ? (
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(t.prochaine_fois).toLocaleDateString("fr-FR")}
+                              </span>
+                            ) : null}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive"
+                              onClick={() => mutationSupprimer.mutate(t.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
