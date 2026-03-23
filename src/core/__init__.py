@@ -107,9 +107,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "exiger_plage": (".exceptions", "exiger_plage"),
     "exiger_positif": (".exceptions", "exiger_positif"),
     "valider_type": (".exceptions", "valider_type"),
-    # Lazy Loader
-    "ChargeurModuleDiffere": (".lazy_loader", "ChargeurModuleDiffere"),
-    "afficher_stats_chargement_differe": (".lazy_loader", "afficher_stats_chargement_differe"),
     # Logging
     "GestionnaireLog": (".logging", "GestionnaireLog"),
     "obtenir_logger": (".logging", "obtenir_logger"),
@@ -121,21 +118,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "enregistrer_metrique": (".monitoring", "enregistrer_metrique"),
     "obtenir_snapshot": (".monitoring", "obtenir_snapshot"),
     "verifier_sante_globale": (".monitoring", "verifier_sante_globale"),
-    # State
-    "EtatApp": (".state", "EtatApp"),
-    "EtatNavigation": (".state", "EtatNavigation"),
-    "EtatCuisine": (".state", "EtatCuisine"),
-    "EtatUI": (".state", "EtatUI"),
-    "GestionnaireEtat": (".state", "GestionnaireEtat"),
-    "naviguer": (".state", "naviguer"),
-    "obtenir_etat": (".state", "obtenir_etat"),
-    "revenir": (".state", "revenir"),
-    # Storage
-    "MemorySessionStorage": (".storage", "MemorySessionStorage"),
-    "SessionStorage": (".storage", "SessionStorage"),
-    "StreamlitSessionStorage": (".storage", "StreamlitSessionStorage"),
-    "configurer_storage": (".storage", "configurer_storage"),
-    "obtenir_storage": (".storage", "obtenir_storage"),
     # Validation
     "EntreeJournalInput": (".validation", "EntreeJournalInput"),
     "EtapeInput": (".validation", "EtapeInput"),

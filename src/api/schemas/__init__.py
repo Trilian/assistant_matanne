@@ -102,6 +102,66 @@ from .suggestions import (
     SuggestionsRecettesResponse,
 )
 
+# Anti-Gaspillage
+from .anti_gaspillage import (
+    ArticlePerissable,
+    ReponseAntiGaspillage,
+    ScoreAntiGaspillage,
+)
+
+# Batch Cooking
+from .batch_cooking import (
+    ConfigBatchResponse,
+    EtapeBatchResponse,
+    PreparationBatchResponse,
+    SessionBatchCreate,
+    SessionBatchPatch,
+    SessionBatchResponse,
+)
+
+# Dashboard
+from .dashboard import (
+    DonneesTableauBord,
+    ResumeBudget,
+    StatistiquesRapides,
+)
+
+# Documents
+from .documents import (
+    DocumentCreate,
+    DocumentPatch,
+    DocumentResponse,
+)
+
+# Préférences
+from .preferences import (
+    PreferencesCreate,
+    PreferencesPatch,
+    PreferencesResponse,
+)
+
+# Utilitaires
+from .utilitaires import (
+    ContactCreate,
+    ContactPatch,
+    ContactResponse,
+    EnergieCreate,
+    EnergiePatch,
+    EnergieResponse,
+    JournalCreate,
+    JournalPatch,
+    JournalResponse,
+    LienCreate,
+    LienPatch,
+    LienResponse,
+    MotDePasseCreate,
+    MotDePassePatch,
+    MotDePasseResponse,
+    NoteCreate,
+    NotePatch,
+    NoteResponse,
+)
+
 __all__ = [
     # Base
     "NomValidatorMixin",
@@ -172,4 +232,46 @@ __all__ = [
     "SuggestionRecetteItem",
     "SuggestionsRecettesResponse",
     "SuggestionsPlanningResponse",
+    # Anti-Gaspillage
+    "ArticlePerissable",
+    "ScoreAntiGaspillage",
+    "ReponseAntiGaspillage",
+    # Batch Cooking
+    "SessionBatchCreate",
+    "SessionBatchPatch",
+    "SessionBatchResponse",
+    "EtapeBatchResponse",
+    "PreparationBatchResponse",
+    "ConfigBatchResponse",
+    # Dashboard
+    "StatistiquesRapides",
+    "ResumeBudget",
+    "DonneesTableauBord",
+    # Documents
+    "DocumentCreate",
+    "DocumentPatch",
+    "DocumentResponse",
+    # Préférences
+    "PreferencesCreate",
+    "PreferencesPatch",
+    "PreferencesResponse",
+    # Utilitaires
+    "NoteCreate",
+    "NotePatch",
+    "NoteResponse",
+    "JournalCreate",
+    "JournalPatch",
+    "JournalResponse",
+    "ContactCreate",
+    "ContactPatch",
+    "ContactResponse",
+    "LienCreate",
+    "LienPatch",
+    "LienResponse",
+    "MotDePasseCreate",
+    "MotDePassePatch",
+    "MotDePasseResponse",
+    "EnergieCreate",
+    "EnergiePatch",
+    "EnergieResponse",
 ]

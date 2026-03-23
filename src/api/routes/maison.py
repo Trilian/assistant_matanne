@@ -436,3 +436,164 @@ async def lister_meubles(
             }
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# CALENDRIER DES SEMIS (JARDIN INTELLIGENT)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/jardin/calendrier-semis", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_calendrier_semis(
+    mois: int | None = Query(None, ge=1, le=12, description="Mois (1-12), défaut: mois courant"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Retourne le calendrier des semis pour le mois donné.
+
+    Utilise le catalogue de plantes (data/plantes_catalogue.json) pour
+    déterminer quoi semer, planter et récolter selon la saison.
+    """
+    import json
+    from pathlib import Path
+
+    mois_courant = mois or date.today().month
+
+    NOMS_MOIS = [
+        "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+    ]
+
+    # Charger le catalogue de plantes
+    catalogue_path = Path("data/plantes_catalogue.json")
+    if not catalogue_path.exists():
+        return {
+            "mois": mois_courant,
+            "mois_nom": NOMS_MOIS[mois_courant],
+            "a_semer": [],
+            "a_planter": [],
+            "a_recolter": [],
+            "conseils": [],
+        }
+
+    with open(catalogue_path, encoding="utf-8") as f:
+        catalogue = json.load(f)
+
+    plantes = catalogue if isinstance(catalogue, list) else catalogue.get("plantes", [])
+
+    a_semer = []
+    a_planter = []
+    a_recolter = []
+
+    for plante in plantes:
+        nom = plante.get("nom", "")
+        semis = plante.get("mois_semis", plante.get("semis", []))
+        plantation = plante.get("mois_plantation", plante.get("plantation", []))
+        recolte = plante.get("mois_recolte", plante.get("recolte", []))
+
+        if mois_courant in semis:
+            a_semer.append({"nom": nom, "type": plante.get("type", ""), "details": plante.get("notes_semis", "")})
+        if mois_courant in plantation:
+            a_planter.append({"nom": nom, "type": plante.get("type", ""), "details": plante.get("notes_plantation", "")})
+        if mois_courant in recolte:
+            a_recolter.append({"nom": nom, "type": plante.get("type", ""), "details": plante.get("notes_recolte", "")})
+
+    return {
+        "mois": mois_courant,
+        "mois_nom": NOMS_MOIS[mois_courant],
+        "a_semer": a_semer,
+        "a_planter": a_planter,
+        "a_recolter": a_recolter,
+        "conseils": [],
+    }
+
+
+# ═══════════════════════════════════════════════════════════
+# SANTÉ DES APPAREILS (ENTRETIEN INTELLIGENT)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/entretien/sante-appareils", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_sante_appareils(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Dashboard santé des appareils.
+
+    Agrège les tâches d'entretien pour calculer un score de santé
+    par appareil/zone, et identifie les actions urgentes.
+    """
+    from src.core.models import TacheEntretien
+
+    def _query():
+        with executer_avec_session() as session:
+            aujourd_hui = date.today()
+
+            taches = session.query(TacheEntretien).all()
+
+            # Grouper par pièce/catégorie
+            par_zone: dict[str, dict[str, Any]] = {}
+            actions_urgentes = []
+
+            for t in taches:
+                zone = t.piece or t.categorie or "Général"
+
+                if zone not in par_zone:
+                    par_zone[zone] = {
+                        "zone": zone,
+                        "total_taches": 0,
+                        "taches_a_jour": 0,
+                        "taches_en_retard": 0,
+                        "score_sante": 100,
+                    }
+
+                par_zone[zone]["total_taches"] += 1
+
+                en_retard = (
+                    t.prochaine_fois is not None
+                    and t.prochaine_fois < aujourd_hui
+                    and not t.fait
+                )
+
+                if en_retard:
+                    par_zone[zone]["taches_en_retard"] += 1
+                    jours_retard = (aujourd_hui - t.prochaine_fois).days
+                    actions_urgentes.append(
+                        {
+                            "tache": t.nom,
+                            "zone": zone,
+                            "jours_retard": jours_retard,
+                            "priorite": t.priorite,
+                        }
+                    )
+                else:
+                    par_zone[zone]["taches_a_jour"] += 1
+
+            # Calculer score par zone
+            for zone_data in par_zone.values():
+                total = zone_data["total_taches"]
+                if total > 0:
+                    zone_data["score_sante"] = round(
+                        (zone_data["taches_a_jour"] / total) * 100
+                    )
+
+            # Score global
+            total_taches = sum(z["total_taches"] for z in par_zone.values())
+            total_a_jour = sum(z["taches_a_jour"] for z in par_zone.values())
+            score_global = round((total_a_jour / total_taches) * 100) if total_taches > 0 else 100
+
+            # Trier les actions urgentes par jours de retard
+            actions_urgentes.sort(key=lambda x: x["jours_retard"], reverse=True)
+
+            return {
+                "score_global": score_global,
+                "total_taches": total_taches,
+                "taches_a_jour": total_a_jour,
+                "taches_en_retard": total_taches - total_a_jour,
+                "zones": list(par_zone.values()),
+                "actions_urgentes": actions_urgentes[:10],
+            }
+
+    return await executer_async(_query)

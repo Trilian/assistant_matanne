@@ -25,7 +25,7 @@ from src.services.rapports.types import (
     DonneesPlanningPDF,
     DonneesRecettePDF,  # Alias compat
 )
-from src.ui.tokens import Couleur
+from src.services.rapports._couleurs import Couleur
 
 logger = logging.getLogger(__name__)
 

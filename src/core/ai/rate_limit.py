@@ -6,17 +6,19 @@ Ce module gère le rate limiting spécifique aux appels IA :
 - Reset automatique
 - Statistiques d'utilisation
 
-Utilise ``SessionStorage`` pour le stockage des compteurs,
-ce qui permet de tester sans Streamlit.
+Utilise un dict en mémoire pour le stockage des compteurs.
 """
 
 import logging
 from datetime import datetime
+from typing import Any
 
 from ..constants import AI_RATE_LIMIT_DAILY, AI_RATE_LIMIT_HOURLY
-from ..storage import obtenir_storage
 
 logger = logging.getLogger(__name__)
+
+# Stockage en mémoire pour les compteurs de rate limiting
+_rate_limit_store: dict[str, Any] = {}
 
 
 class RateLimitIA:
@@ -24,34 +26,30 @@ class RateLimitIA:
     Rate limiting spécifique pour les appels IA.
 
     Gère les quotas API Mistral avec reset automatique.
-    Découplé de ``st.session_state`` via ``SessionStorage``.
     """
 
     CLE_RATE_LIMIT = "rate_limit_ia"
-    """Clé session state."""
+    """Clé de stockage."""
 
     @staticmethod
     def _obtenir_storage():
         """Retourne le backend de stockage."""
-        return obtenir_storage()
+        return _rate_limit_store
 
     @staticmethod
     def _initialiser():
         """Initialise les compteurs dans le storage."""
         storage = RateLimitIA._obtenir_storage()
-        if not storage.contains(RateLimitIA.CLE_RATE_LIMIT):
-            storage.set(
-                RateLimitIA.CLE_RATE_LIMIT,
-                {
-                    "appels_jour": 0,
-                    "appels_heure": 0,
-                    "dernier_reset_jour": datetime.now().date(),
-                    "dernier_reset_heure": datetime.now().replace(
-                        minute=0, second=0, microsecond=0
-                    ),
-                    "historique": [],
-                },
-            )
+        if RateLimitIA.CLE_RATE_LIMIT not in storage:
+            storage[RateLimitIA.CLE_RATE_LIMIT] = {
+                "appels_jour": 0,
+                "appels_heure": 0,
+                "dernier_reset_jour": datetime.now().date(),
+                "dernier_reset_heure": datetime.now().replace(
+                    minute=0, second=0, microsecond=0
+                ),
+                "historique": [],
+            }
 
     @staticmethod
     def _obtenir_data() -> dict:
@@ -63,7 +61,7 @@ class RateLimitIA:
     def _sauvegarder_data(data: dict):
         """Sauvegarde les données de rate limiting."""
         storage = RateLimitIA._obtenir_storage()
-        storage.set(RateLimitIA.CLE_RATE_LIMIT, data)
+        storage[RateLimitIA.CLE_RATE_LIMIT] = data
 
     @staticmethod
     def peut_appeler() -> tuple[bool, str]:

@@ -1,0 +1,60 @@
+# ═══════════════════════════════════════════════════════════
+# .dockerignore — Exclure du contexte Docker
+# ═══════════════════════════════════════════════════════════
+
+# Frontend Next.js (déployé séparément sur Vercel)
+frontend/
+
+# Tests & dev
+tests/
+htmlcov/
+.coverage
+.pytest_cache/
+pytest.ini
+
+# Documentation
+docs/
+reports/
+README.md
+ROADMAP.md
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Environnements locaux
+.env
+.env.local
+.venv/
+venv/
+
+# Scripts dev obsolètes
+scripts/
+manage.py
+
+# Static Streamlit (non utilisé par l'API)
+static/
+
+# Fichiers temporaires & backups
+backups/
+*.log
+*.tmp
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml

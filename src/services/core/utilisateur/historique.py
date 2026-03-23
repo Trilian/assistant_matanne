@@ -295,16 +295,15 @@ def get_action_history_service() -> ActionHistoryService:
     return obtenir_service_historique_actions()
 
 
-# Ré-exports UI — fonctions view rétrocompatibles
-from src.ui.views.historique import (
-    afficher_activite_utilisateur as afficher_user_activity,
-)
-from src.ui.views.historique import (
-    afficher_statistiques_activite as afficher_activity_stats,
-)
-from src.ui.views.historique import (
-    afficher_timeline_activite as afficher_activity_timeline,
-)
+# Streamlit UI supprimé — stubs rétrocompatibles
+def afficher_user_activity(*args, **kwargs) -> None:
+    pass
+
+def afficher_activity_stats(*args, **kwargs) -> None:
+    pass
+
+def afficher_activity_timeline(*args, **kwargs) -> None:
+    pass
 
 __all__ = [
     "ActionHistoryService",
@@ -314,7 +313,6 @@ __all__ = [
     "ActionEntry",
     "ActionFilter",
     "ActionStats",
-    # UI rétrocompat — réexportées depuis src.ui.views.historique
     "afficher_activity_timeline",
     "afficher_user_activity",
     "afficher_activity_stats",

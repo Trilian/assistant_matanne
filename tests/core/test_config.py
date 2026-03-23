@@ -9,7 +9,7 @@ Tests couvrant:
 """
 
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -18,8 +18,6 @@ from src.core.config import (
     obtenir_parametres,
 )
 from src.core.config.loader import (
-    _get_mistral_api_key_from_secrets,
-    _read_st_secret,
     _reload_env_files,
 )
 
@@ -36,27 +34,7 @@ class TestConfigHelpers:
         """Test que _reload_env_files existe et est callable."""
         assert callable(_reload_env_files)
 
-    def test_read_st_secret_with_no_secrets(self):
-        """Test _read_st_secret quand st.secrets n'existe pas."""
-        with patch("streamlit.secrets", None):
-            # Quand secrets n'est pas disponible, retourne None
-            result = _read_st_secret("test_section")
-            assert result is None
 
-    def test_read_st_secret_success(self):
-        """Test _read_st_secret avec un secret valide."""
-        mock_secrets = {"test_section": "test_value"}
-        with patch("streamlit.secrets", mock_secrets):
-            result = _read_st_secret("test_section")
-            # Peut être None ou la valeur selon l'implémentation
-            assert result is None or result == "test_value"
-
-    def test_read_st_secret_missing_section(self):
-        """Test _read_st_secret avec une section manquante."""
-        mock_secrets = {}
-        with patch("streamlit.secrets", mock_secrets):
-            result = _read_st_secret("nonexistent")
-            assert result is None
 
 
 # ═══════════════════════════════════════════════════════════
@@ -438,21 +416,19 @@ class TestProprietesConfig:
             "DATABASE_URL": "",  # Clear pour forcer construction depuis composants
         }
         with patch.dict(os.environ, env_vars, clear=False):
-            with patch("src.core.config.settings._read_st_secret", return_value=None):
-                params = Parametres()
-                db_url = params.DATABASE_URL
-                assert "localhost" in db_url
-                assert "test_user" in db_url
+            params = Parametres()
+            db_url = params.DATABASE_URL
+            assert "localhost" in db_url
+            assert "test_user" in db_url
 
     def test_database_url_adds_sslmode_for_supabase(self):
         """Test que sslmode est ajouté pour Supabase."""
         supabase_url = "postgresql://user:pass@xyz.supabase.co/postgres"
         with patch.dict(os.environ, {"DATABASE_URL": supabase_url}, clear=False):
-            with patch("src.core.config.settings._read_st_secret", return_value=None):
-                params = Parametres()
-                db_url = params.DATABASE_URL
-                # Devrait contenir sslmode
-                assert "sslmode" in db_url or "supabase" in db_url
+            params = Parametres()
+            db_url = params.DATABASE_URL
+            # Devrait contenir sslmode
+            assert "sslmode" in db_url or "supabase" in db_url
 
     def test_mistral_api_key_from_env(self):
         """Test MISTRAL_API_KEY depuis variable env."""
@@ -461,13 +437,6 @@ class TestProprietesConfig:
             params = Parametres()
             key = params.MISTRAL_API_KEY
             assert key == test_key
-
-    def test_get_mistral_api_key_from_secrets_returns_none_if_no_secrets(self):
-        """Test _get_mistral_api_key_from_secrets retourne None sans secrets."""
-        with patch("streamlit.secrets", None):
-            result = _get_mistral_api_key_from_secrets()
-            # Devrait retourner None sans lever d'exception
-            assert result is None or isinstance(result, str)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -479,36 +448,17 @@ class TestProprietesConfig:
 class TestProprietesAvancees:
     """Tests avancés pour les propriétés de configuration."""
 
-    def test_database_url_from_st_secrets(self):
-        """Test DATABASE_URL depuis st.secrets."""
-        mock_db = {
-            "user": "testuser",
-            "password": "testpass",
-            "host": "testhost",
-            "port": "5432",
-            "name": "testdb",
-        }
-
-        with patch("src.core.config.settings._read_st_secret", return_value=mock_db):
-            with patch.dict(os.environ, {}, clear=False):
-                params = Parametres()
-                db_url = params.DATABASE_URL
-
-                assert "testuser" in db_url
-                assert "testhost" in db_url
-
     def test_database_url_error_message(self):
         """Test message d'erreur DATABASE_URL détaillé."""
-        with patch("src.core.config.settings._read_st_secret", return_value=None):
-            with patch.dict(os.environ, {"DATABASE_URL": "", "DB_HOST": ""}, clear=True):
-                params = Parametres()
+        with patch.dict(os.environ, {"DATABASE_URL": "", "DB_HOST": ""}, clear=True):
+            params = Parametres()
 
-                with pytest.raises(ValueError) as exc_info:
-                    _ = params.DATABASE_URL
+            with pytest.raises(ValueError) as exc_info:
+                _ = params.DATABASE_URL
 
-                assert "Configuration DB manquante" in str(exc_info.value) or "Configure" in str(
-                    exc_info.value
-                )
+            assert "Configuration DB manquante" in str(exc_info.value) or "Configure" in str(
+                exc_info.value
+            )
 
     def test_mistral_api_key_from_streamlit_secrets_env(self):
         """Test MISTRAL_API_KEY depuis STREAMLIT_SECRETS_MISTRAL_API_KEY."""
@@ -531,24 +481,22 @@ class TestProprietesAvancees:
             {"MISTRAL_API_KEY": "", "STREAMLIT_SECRETS_MISTRAL_API_KEY": ""},
             clear=False,
         ):
-            with patch("src.core.config.settings.charger_secrets_streamlit", return_value=None):
-                params = Parametres()
+            params = Parametres()
 
-                with pytest.raises(ValueError) as exc_info:
-                    _ = params.MISTRAL_API_KEY
+            with pytest.raises(ValueError) as exc_info:
+                _ = params.MISTRAL_API_KEY
 
-                assert "Clé API Mistral manquante" in str(exc_info.value)
+            assert "Clé API Mistral manquante" in str(exc_info.value)
 
     def test_mistral_api_key_ignores_dummy_key(self):
         """Test que la clé dummy est ignorée."""
         with patch.dict(
             os.environ, {"MISTRAL_API_KEY": "sk-test-dummy-key-replace-with-real-key"}, clear=False
         ):
-            with patch("src.core.config.settings.charger_secrets_streamlit", return_value=None):
-                params = Parametres()
+            params = Parametres()
 
-                with pytest.raises(ValueError):
-                    _ = params.MISTRAL_API_KEY
+            with pytest.raises(ValueError):
+                _ = params.MISTRAL_API_KEY
 
     def test_football_data_api_key_from_env(self):
         """Test FOOTBALL_DATA_API_KEY depuis env."""
@@ -685,10 +633,9 @@ class TestMethodesHelpers:
     def test_verifier_db_configuree_false(self):
         """Test _verifier_db_configuree retourne False."""
         with patch.dict(os.environ, {"DATABASE_URL": ""}, clear=True):
-            with patch("src.core.config.settings._read_st_secret", return_value=None):
-                params = Parametres()
+            params = Parametres()
 
-                assert params._verifier_db_configuree() is False
+            assert params._verifier_db_configuree() is False
 
     def test_verifier_mistral_configure_true(self):
         """Test _verifier_mistral_configure retourne True."""
@@ -700,10 +647,9 @@ class TestMethodesHelpers:
     def test_verifier_mistral_configure_false(self):
         """Test _verifier_mistral_configure retourne False."""
         with patch.dict(os.environ, {"MISTRAL_API_KEY": ""}, clear=False):
-            with patch("src.core.config.settings.charger_secrets_streamlit", return_value=None):
-                params = Parametres()
+            params = Parametres()
 
-                assert params._verifier_mistral_configure() is False
+            assert params._verifier_mistral_configure() is False
 
 
 # ═══════════════════════════════════════════════════════════
@@ -776,40 +722,7 @@ class TestReloadEnvFiles:
 
 
 # ═══════════════════════════════════════════════════════════
-# SECTION 13: TESTS GET MISTRAL API KEY FROM SECRETS
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestGetMistralApiKeyFromSecrets:
-    """Tests pour _get_mistral_api_key_from_secrets."""
-
-    def test_get_from_secrets_dict_access(self):
-        """Test accès dict st.secrets."""
-        mock_secrets = MagicMock()
-        mock_secrets.get.return_value = {"api_key": "sk-from-secrets"}
-        mock_secrets.__contains__ = MagicMock(return_value=True)
-        mock_secrets.__getitem__ = MagicMock(return_value={"api_key": "sk-from-secrets"})
-
-        with patch("streamlit.secrets", mock_secrets):
-            result = _get_mistral_api_key_from_secrets()
-
-            # Devrait essayer d'accéder aux secrets
-            assert result is None or isinstance(result, str)
-
-    def test_get_from_secrets_exception_handling(self):
-        """Test gestion exception."""
-        with patch("streamlit.secrets") as mock_secrets:
-            mock_secrets.get.side_effect = Exception("No secrets")
-
-            result = _get_mistral_api_key_from_secrets()
-
-            # Devrait retourner None sans crash
-            assert result is None
-
-
-# ═══════════════════════════════════════════════════════════
-# SECTION 14: TESTS OBTENIR PARAMETRES
+# SECTION 13: TESTS OBTENIR PARAMETRES
 # ═══════════════════════════════════════════════════════════
 
 
@@ -890,43 +803,4 @@ class TestObtenirParametresAvance:
         settings_mod._parametres = None
 
 
-# ═══════════════════════════════════════════════════════════
-# SECTION 15: TESTS READ ST SECRET
-# ═══════════════════════════════════════════════════════════
 
-
-@pytest.mark.unit
-class TestReadStSecret:
-    """Tests pour _read_st_secret."""
-
-    def test_read_st_secret_no_streamlit(self):
-        """Test sans module streamlit."""
-        import streamlit as st
-
-        original_secrets = getattr(st, "secrets", None)
-        try:
-            if hasattr(st, "secrets"):
-                delattr(st, "secrets")
-            result = _read_st_secret("section")
-            assert result is None
-        finally:
-            if original_secrets is not None:
-                st.secrets = original_secrets
-
-    def test_read_st_secret_exception(self):
-        """Test avec exception."""
-        mock_secrets = MagicMock()
-        mock_secrets.get.side_effect = Exception("Error")
-        with patch("streamlit.secrets", mock_secrets):
-            result = _read_st_secret("section")
-
-            assert result is None
-
-    def test_read_st_secret_success(self):
-        """Test lecture réussie."""
-        mock_secrets = MagicMock()
-        mock_secrets.get.return_value = {"key": "value"}
-        with patch("streamlit.secrets", mock_secrets):
-            result = _read_st_secret("section")
-
-            assert result == {"key": "value"}

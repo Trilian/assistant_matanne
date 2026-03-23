@@ -385,10 +385,10 @@ class ServiceConflits:
     def _charger_evenements_semaine(self, date_debut: date) -> dict[date, list[dict]]:
         """Charge les événements d'une semaine depuis le calendrier."""
         try:
-            from src.modules.planning.calendrier.aggregation import (
+            from src.services.planning.calendrier.aggregation import (
                 construire_semaine_calendrier,
             )
-            from src.modules.planning.calendrier.data import charger_donnees_semaine
+            from src.services.planning.calendrier.data import charger_donnees_semaine
 
             donnees = charger_donnees_semaine(date_debut)
             semaine = construire_semaine_calendrier(

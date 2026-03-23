@@ -159,16 +159,8 @@ def afficher_erreurs_validation(erreurs: list[str]) -> None:
     if not erreurs:
         return
 
-    try:
-        import streamlit as st
-
-        with st.expander("❌ Erreurs de validation", expanded=True):
-            for erreur in erreurs:
-                st.error(erreur)
-    except Exception:
-        # Mode dégradé: logging pur (tests, CLI, sans Streamlit)
-        for erreur in erreurs:
-            logger.error(f"Validation: {erreur}")
+    for erreur in erreurs:
+        logger.error(f"Validation: {erreur}")
 
 
 def valider_entree(schema: dict | None = None, nettoyer_tout: bool = True):

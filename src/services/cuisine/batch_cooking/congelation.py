@@ -263,27 +263,18 @@ __all__ = [
 # ═══════════════════════════════════════════════════════════
 
 _KEY_CONGELATEUR = "congelateur_stock"
+_CONGELATEUR_STORE: list[ArticleCongele] = []
 
 
 def _obtenir_stock() -> list[ArticleCongele]:
-    """Récupère le stock congélateur depuis session_state."""
-    try:
-        import streamlit as st
-
-        raw = st.session_state.get(_KEY_CONGELATEUR, [])
-        return [a for a in raw if isinstance(a, ArticleCongele)]
-    except Exception:
-        return []
+    """Récupère le stock congélateur depuis le store en mémoire."""
+    return list(_CONGELATEUR_STORE)
 
 
 def _sauvegarder_stock(stock: list[ArticleCongele]) -> None:
-    """Persiste le stock congélateur dans session_state."""
-    try:
-        import streamlit as st
-
-        st.session_state[_KEY_CONGELATEUR] = stock
-    except Exception:
-        pass
+    """Persiste le stock congélateur dans le store en mémoire."""
+    _CONGELATEUR_STORE.clear()
+    _CONGELATEUR_STORE.extend(stock)
 
 
 def lister_articles_congeles() -> list[ArticleCongele]:

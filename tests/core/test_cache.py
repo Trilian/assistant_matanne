@@ -280,7 +280,6 @@ class TestCacheNettoyerExpires:
 
 # ═══════════════════════════════════════════════════════════
 # TESTS LIMITE DEBIT (RATE LIMIT)
-# via MemorySessionStorage (plus de mock st.session_state)
 # ═══════════════════════════════════════════════════════════
 
 
@@ -288,21 +287,21 @@ class TestLimiteDebitBase:
     """Tests de base pour RateLimitIA."""
 
     @pytest.fixture(autouse=True)
-    def setup_memory_storage(self):
-        from src.core.storage import MemorySessionStorage, configurer_storage
+    def setup_store(self):
+        from src.core.ai.rate_limit import _rate_limit_store
 
-        self._storage = MemorySessionStorage()
-        configurer_storage(self._storage)
+        _rate_limit_store.clear()
         yield
-        configurer_storage(MemorySessionStorage())
+        _rate_limit_store.clear()
 
     def test_initialise_creates_structures(self):
         """Test initialisation crée les structures."""
         from src.core.ai import RateLimitIA
+        from src.core.ai.rate_limit import _rate_limit_store
 
         RateLimitIA._initialiser()
 
-        data = self._storage.get("rate_limit_ia")
+        data = _rate_limit_store.get("rate_limit_ia")
         assert data is not None
         assert "appels_jour" in data
         assert "appels_heure" in data
@@ -312,13 +311,12 @@ class TestLimiteDebitPeutAppeler:
     """Tests pour RateLimitIA.peut_appeler()."""
 
     @pytest.fixture(autouse=True)
-    def setup_memory_storage(self):
-        from src.core.storage import MemorySessionStorage, configurer_storage
+    def setup_store(self):
+        from src.core.ai.rate_limit import _rate_limit_store
 
-        self._storage = MemorySessionStorage()
-        configurer_storage(self._storage)
+        _rate_limit_store.clear()
         yield
-        configurer_storage(MemorySessionStorage())
+        _rate_limit_store.clear()
 
     def test_peut_appeler_returns_true_initially(self):
         """Test peut_appeler retourne True au départ."""
@@ -332,12 +330,12 @@ class TestLimiteDebitPeutAppeler:
     def test_peut_appeler_false_when_daily_limit_reached(self):
         """Test peut_appeler retourne False si limite jour atteinte."""
         from src.core.ai import RateLimitIA
+        from src.core.ai.rate_limit import _rate_limit_store
         from src.core.constants import AI_RATE_LIMIT_DAILY
 
         RateLimitIA._initialiser()
-        data = self._storage.get("rate_limit_ia")
+        data = _rate_limit_store["rate_limit_ia"]
         data["appels_jour"] = AI_RATE_LIMIT_DAILY
-        self._storage.set("rate_limit_ia", data)
 
         autorise, erreur = RateLimitIA.peut_appeler()
 
@@ -347,12 +345,12 @@ class TestLimiteDebitPeutAppeler:
     def test_peut_appeler_false_when_hourly_limit_reached(self):
         """Test peut_appeler retourne False si limite heure atteinte."""
         from src.core.ai import RateLimitIA
+        from src.core.ai.rate_limit import _rate_limit_store
         from src.core.constants import AI_RATE_LIMIT_HOURLY
 
         RateLimitIA._initialiser()
-        data = self._storage.get("rate_limit_ia")
+        data = _rate_limit_store["rate_limit_ia"]
         data["appels_heure"] = AI_RATE_LIMIT_HOURLY
-        self._storage.set("rate_limit_ia", data)
 
         autorise, erreur = RateLimitIA.peut_appeler()
 
@@ -364,26 +362,26 @@ class TestLimiteDebitEnregistrer:
     """Tests pour RateLimitIA.enregistrer_appel()."""
 
     @pytest.fixture(autouse=True)
-    def setup_memory_storage(self):
-        from src.core.storage import MemorySessionStorage, configurer_storage
+    def setup_store(self):
+        from src.core.ai.rate_limit import _rate_limit_store
 
-        self._storage = MemorySessionStorage()
-        configurer_storage(self._storage)
+        _rate_limit_store.clear()
         yield
-        configurer_storage(MemorySessionStorage())
+        _rate_limit_store.clear()
 
     def test_enregistrer_appel_increments_counters(self):
         """Test enregistrer_appel incrémente les compteurs."""
         from src.core.ai import RateLimitIA
+        from src.core.ai.rate_limit import _rate_limit_store
 
         RateLimitIA._initialiser()
-        data = self._storage.get("rate_limit_ia")
+        data = _rate_limit_store["rate_limit_ia"]
         initial_jour = data["appels_jour"]
         initial_heure = data["appels_heure"]
 
         RateLimitIA.enregistrer_appel()
 
-        data = self._storage.get("rate_limit_ia")
+        data = _rate_limit_store["rate_limit_ia"]
         assert data["appels_jour"] == initial_jour + 1
         assert data["appels_heure"] == initial_heure + 1
 
@@ -392,13 +390,12 @@ class TestLimiteDebitStatistiques:
     """Tests pour RateLimitIA.obtenir_statistiques()."""
 
     @pytest.fixture(autouse=True)
-    def setup_memory_storage(self):
-        from src.core.storage import MemorySessionStorage, configurer_storage
+    def setup_store(self):
+        from src.core.ai.rate_limit import _rate_limit_store
 
-        self._storage = MemorySessionStorage()
-        configurer_storage(self._storage)
+        _rate_limit_store.clear()
         yield
-        configurer_storage(MemorySessionStorage())
+        _rate_limit_store.clear()
 
     def test_obtenir_statistiques_returns_dict(self):
         """Test statistiques retourne dict complet."""
@@ -419,30 +416,29 @@ class TestLimiteDebitReset:
     """Tests pour le reset automatique des compteurs."""
 
     @pytest.fixture(autouse=True)
-    def setup_memory_storage(self):
-        from src.core.storage import MemorySessionStorage, configurer_storage
+    def setup_store(self):
+        from src.core.ai.rate_limit import _rate_limit_store
 
-        self._storage = MemorySessionStorage()
-        configurer_storage(self._storage)
+        _rate_limit_store.clear()
         yield
-        configurer_storage(MemorySessionStorage())
+        _rate_limit_store.clear()
 
     def test_reset_daily_on_new_day(self):
         """Test reset journalier au changement de jour."""
         from datetime import date
 
         from src.core.ai import RateLimitIA
+        from src.core.ai.rate_limit import _rate_limit_store
 
         RateLimitIA._initialiser()
-        data = self._storage.get("rate_limit_ia")
+        data = _rate_limit_store["rate_limit_ia"]
         data["appels_jour"] = 50
         data["dernier_reset_jour"] = date(2024, 1, 1)
-        self._storage.set("rate_limit_ia", data)
 
         # peut_appeler() devrait reset le compteur
         RateLimitIA.peut_appeler()
 
-        data = self._storage.get("rate_limit_ia")
+        data = _rate_limit_store["rate_limit_ia"]
         assert data["appels_jour"] == 0
 
 

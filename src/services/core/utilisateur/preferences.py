@@ -9,16 +9,84 @@ Remplace st.session_state par persistance PostgreSQL.
 """
 
 import logging
+from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
-from src.modules.cuisine.schemas import (
-    FeedbackRecette,
-    PreferencesUtilisateur,
-)
+
+
+@dataclass
+class PreferencesUtilisateur:
+    """Préférences alimentaires et contraintes de l'utilisateur."""
+
+    nb_adultes: int = 2
+    jules_present: bool = True
+    jules_age_mois: int = 19
+    temps_semaine: str = "normal"
+    temps_weekend: str = "long"
+    aliments_exclus: list[str] = field(default_factory=list)
+    aliments_favoris: list[str] = field(default_factory=list)
+    poisson_blanc_par_semaine: int = 1
+    poisson_gras_par_semaine: int = 1
+    vegetarien_par_semaine: int = 2
+    viande_rouge_max: int = 2
+    robots: list[str] = field(default_factory=lambda: ["four", "poele"])
+    magasins_preferes: list[str] = field(
+        default_factory=lambda: ["Carrefour", "Bio Coop", "Grand Frais"]
+    )
+    budget_semaine: float | None = None
+    jour_debut_semaine: str = "vendredi"
+
+    @property
+    def poisson_par_semaine(self) -> int:
+        """Total poisson (blanc + gras) pour compatibilité."""
+        return self.poisson_blanc_par_semaine + self.poisson_gras_par_semaine
+
+    def to_dict(self) -> dict:
+        return {
+            "nb_adultes": self.nb_adultes,
+            "jules_present": self.jules_present,
+            "jules_age_mois": self.jules_age_mois,
+            "temps_semaine": self.temps_semaine,
+            "temps_weekend": self.temps_weekend,
+            "aliments_exclus": self.aliments_exclus,
+            "aliments_favoris": self.aliments_favoris,
+            "poisson_blanc_par_semaine": self.poisson_blanc_par_semaine,
+            "poisson_gras_par_semaine": self.poisson_gras_par_semaine,
+            "vegetarien_par_semaine": self.vegetarien_par_semaine,
+            "viande_rouge_max": self.viande_rouge_max,
+            "robots": self.robots,
+            "magasins_preferes": self.magasins_preferes,
+            "budget_semaine": self.budget_semaine,
+            "jour_debut_semaine": self.jour_debut_semaine,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "PreferencesUtilisateur":
+        if "poisson_par_semaine" in data and "poisson_blanc_par_semaine" not in data:
+            total = data.pop("poisson_par_semaine")
+            data["poisson_blanc_par_semaine"] = max(1, total // 2)
+            data["poisson_gras_par_semaine"] = total - data["poisson_blanc_par_semaine"]
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class FeedbackRecette:
+    """Feedback utilisateur sur une recette (apprentissage)."""
+
+    recette_id: int
+    recette_nom: str
+    feedback: str  # "like", "dislike", "neutral"
+    date_feedback: date | None = field(default_factory=date.today)
+    contexte: str | None = None
+
+    @property
+    def score(self) -> int:
+        """Score numérique pour l'apprentissage."""
+        return {"like": 1, "neutral": 0, "dislike": -1}.get(self.feedback, 0)
 
 logger = logging.getLogger(__name__)
 
@@ -232,17 +300,22 @@ class UserPreferenceService:
 
     def _get_default_preferences(self) -> PreferencesUtilisateur:
         """Retourne les préférences par défaut pour la famille Matanne."""
-        from src.modules.famille.age_utils import get_age_jules_mois
+        from datetime import date
+
+        from src.core.constants import JULES_NAISSANCE
+
+        jules_age_mois = (date.today() - JULES_NAISSANCE).days // 30
 
         return PreferencesUtilisateur(
             nb_adultes=2,
             jules_present=True,
-            jules_age_mois=get_age_jules_mois(),
+            jules_age_mois=jules_age_mois,
             temps_semaine="normal",
             temps_weekend="long",
             aliments_exclus=[],
             aliments_favoris=["poulet", "pâtes", "gratins", "soupes"],
-            poisson_par_semaine=2,
+            poisson_blanc_par_semaine=1,
+            poisson_gras_par_semaine=1,
             vegetarien_par_semaine=1,
             viande_rouge_max=2,
             robots=["monsieur_cuisine", "cookeo", "four"],
@@ -251,6 +324,7 @@ class UserPreferenceService:
 
     def _db_to_dataclass(self, db_pref: "PreferenceUtilisateur") -> PreferencesUtilisateur:
         """Convertit PreferenceUtilisateur (DB) → PreferencesUtilisateur (dataclass)."""
+        total_poisson = getattr(db_pref, 'poisson_par_semaine', 2) or 2
         return PreferencesUtilisateur(
             nb_adultes=db_pref.nb_adultes,
             jules_present=db_pref.jules_present,
@@ -259,7 +333,8 @@ class UserPreferenceService:
             temps_weekend=db_pref.temps_weekend,
             aliments_exclus=db_pref.aliments_exclus or [],
             aliments_favoris=db_pref.aliments_favoris or [],
-            poisson_par_semaine=db_pref.poisson_par_semaine,
+            poisson_blanc_par_semaine=max(1, total_poisson // 2),
+            poisson_gras_par_semaine=total_poisson - max(1, total_poisson // 2),
             vegetarien_par_semaine=db_pref.vegetarien_par_semaine,
             viande_rouge_max=db_pref.viande_rouge_max,
             robots=db_pref.robots or [],
@@ -279,7 +354,7 @@ class UserPreferenceService:
             temps_weekend=prefs.temps_weekend,
             aliments_exclus=prefs.aliments_exclus,
             aliments_favoris=prefs.aliments_favoris,
-            poisson_par_semaine=prefs.poisson_par_semaine,
+            poisson_par_semaine=prefs.poisson_par_semaine,  # property: blanc + gras
             vegetarien_par_semaine=prefs.vegetarien_par_semaine,
             viande_rouge_max=prefs.viande_rouge_max,
             robots=prefs.robots,

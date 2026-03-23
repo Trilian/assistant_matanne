@@ -5,11 +5,7 @@ Fonctions pour:
 - Créer l'engine PostgreSQL avec retry automatique
 - Obtenir l'engine de façon sécurisée
 
-Stratégie de cache (Audit §10.4):
-    En contexte Streamlit, ``@st.cache_resource`` est utilisé pour le
-    connection pool (meilleure intégration lifecycle Streamlit).
-    En contexte hors-Streamlit (tests, CLI, APScheduler), le singleton
-    thread-safe avec ``threading.Lock`` est conservé comme fallback.
+Utilise un singleton thread-safe avec ``threading.Lock``.
 """
 
 import logging
@@ -27,28 +23,9 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["obtenir_moteur", "reinitialiser_moteur", "obtenir_moteur_securise"]
 
-# Cache thread-safe pour singleton d'engine (fallback hors-Streamlit)
+# Singleton thread-safe pour l'engine
 _engine_lock = threading.Lock()
 _engine_instance = None
-
-# Drapeau pour savoir si st.cache_resource est disponible
-_streamlit_cache_disponible: bool | None = None
-
-
-def _est_streamlit_actif() -> bool:
-    """Détecte si Streamlit est actif (runtime en cours)."""
-    global _streamlit_cache_disponible
-    if _streamlit_cache_disponible is not None:
-        return _streamlit_cache_disponible
-    try:
-        import streamlit as st
-        from streamlit.runtime.scriptrunner import get_script_run_ctx
-
-        ctx = get_script_run_ctx()
-        _streamlit_cache_disponible = ctx is not None
-    except Exception:
-        _streamlit_cache_disponible = False
-    return _streamlit_cache_disponible
 
 
 def _creer_engine_impl(
@@ -123,45 +100,11 @@ def _creer_engine_impl(
     )
 
 
-def _obtenir_moteur_streamlit(
-    nombre_tentatives: int = DB_CONNECTION_RETRY,
-    delai_tentative: int = 2,
-) -> Engine:
-    """Crée l'engine via @st.cache_resource (lifecycle Streamlit natif).
-
-    Le décorateur est appliqué dynamiquement pour éviter un import
-    hard de Streamlit au niveau du module.
-    """
-    import streamlit as st
-
-    @st.cache_resource(show_spinner="Connexion à la base de données...")
-    def _cached_engine(
-        url: str,
-        debug: bool,
-        sslmode: str,
-        _tentatives: int,
-        _delai: int,
-    ) -> Engine:
-        return _creer_engine_impl(url, debug, sslmode, _tentatives, _delai)
-
-    parametres = obtenir_parametres()
-    sslmode = getattr(parametres, "DB_SSLMODE", "require")
-    return _cached_engine(
-        parametres.DATABASE_URL,
-        parametres.DEBUG,
-        sslmode,
-        nombre_tentatives,
-        delai_tentative,
-    )
-
-
 def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative: int = 2):
     """
     Crée l'engine PostgreSQL avec retry automatique.
 
-    Utilise ``@st.cache_resource`` en contexte Streamlit pour un meilleur
-    lifecycle management, et un singleton thread-safe en fallback
-    (tests, CLI, APScheduler).
+    Utilise un singleton thread-safe avec double-check locking.
 
     Args:
         nombre_tentatives: Nombre de tentatives de reconnexion
@@ -173,11 +116,6 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
     Raises:
         ErreurBaseDeDonnees: Si connexion impossible après toutes les tentatives
     """
-    # Stratégie 1: @st.cache_resource (préféré en contexte Streamlit)
-    if _est_streamlit_actif():
-        return _obtenir_moteur_streamlit(nombre_tentatives, delai_tentative)
-
-    # Stratégie 2: Singleton thread-safe (hors-Streamlit)
     global _engine_instance
 
     if _engine_instance is not None:
@@ -203,11 +141,8 @@ def obtenir_moteur(nombre_tentatives: int = DB_CONNECTION_RETRY, delai_tentative
 
 
 def reinitialiser_moteur() -> None:
-    """Réinitialise le cache du moteur (utile pour les tests).
-
-    Nettoie le singleton thread-safe ET le cache Streamlit si disponible.
-    """
-    global _engine_instance, _streamlit_cache_disponible
+    """Réinitialise le cache du moteur (utile pour les tests)."""
+    global _engine_instance
     with _engine_lock:
         if _engine_instance is not None:
             try:
@@ -215,18 +150,6 @@ def reinitialiser_moteur() -> None:
             except Exception:
                 pass
             _engine_instance = None
-
-    # Réinitialiser aussi le cache Streamlit si actif
-    if _streamlit_cache_disponible:
-        try:
-            import streamlit as st
-
-            st.cache_resource.clear()
-        except Exception:
-            pass
-
-    # Forcer la re-détection au prochain appel
-    _streamlit_cache_disponible = None
 
 
 def obtenir_moteur_securise() -> "Engine | None":

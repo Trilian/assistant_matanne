@@ -7,7 +7,7 @@ Ce fichier contient les utilitaires communs, fixtures, et builders pour tests.
 
 Usage:
     from tests.core.helpers import (
-        MockSessionBuilder, StreamlitMockContext,
+        MockBuilder, mock_database_session,
         create_mock_model, create_test_db
     )
 """
@@ -107,10 +107,9 @@ class MockBuilder:
 
 @contextmanager
 def mock_streamlit_session():
-    """Context manager pour mocker session_state Streamlit."""
+    """Context manager pour simuler un storage session."""
     mock_session = MagicMock()
-    with patch("streamlit.session_state", mock_session):
-        yield mock_session
+    yield mock_session
 
 
 @contextmanager
@@ -397,7 +396,7 @@ def mock_logger():
 
 @pytest.fixture
 def streamlit_session():
-    """Fixture pour mock Streamlit session_state."""
+    """Fixture pour mock storage session."""
     with mock_streamlit_session() as session:
         yield session
 

@@ -21,7 +21,7 @@ from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import ArticleInventaire
 from src.core.monitoring import chronometre
 from src.services.rapports.types import RapportBudget
-from src.ui.tokens import Couleur
+from src.services.rapports._couleurs import Couleur
 
 logger = logging.getLogger(__name__)
 

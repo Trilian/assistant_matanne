@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, os.path.abspath("."))
 #!/usr/bin/env python3
 """
-Script de gestion - Remplace le Makefile pour Streamlit Cloud
+Script de gestion - Assistant MaTanne
 Usage: python manage.py <command>
 """
 import subprocess
@@ -26,9 +26,9 @@ def run_cmd(cmd: str, shell: bool = False):
 
 
 def run():
-    """Lance l'application Streamlit"""
-    print("[RUN] DÃ©marrage de l'application...")
-    run_cmd("streamlit run src/app.py")
+    """Lance le serveur FastAPI"""
+    print("[RUN] D\u00e9marrage du serveur FastAPI...")
+    run_cmd("uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000")
 
 
 def test():
@@ -226,7 +226,7 @@ def help_cmd():
 🤖 Assistant MaTanne v2 - Commandes disponibles
 
 Développement:
-  run                  Lance l'application Streamlit
+  run                  Lance le serveur FastAPI (uvicorn)
   test                 Lance les tests
   coverage             Tests avec couverture
   format               Formate le code (black)
@@ -246,11 +246,6 @@ Tests avancés:
   test-quick           Tests rapides sans couverture
   test-core            Tests du core uniquement
   audit-tests          Audit de couverture des tests
-
-Tests visuels (Playwright):
-  test-visual          Lance les tests de régression visuelle
-  visual-update        Met à jour les snapshots de référence
-  playwright-install   Installe Playwright + navigateurs
 
 Déploiement:
   requirements         Génère requirements.txt
@@ -276,9 +271,6 @@ COMMANDS = {
     "seed-demo": seed_demo,
     "test-quick": test_quick,
     "test-core": test_core,
-    "test-visual": test_visual,
-    "visual-update": test_visual_update,
-    "playwright-install": playwright_install,
     "audit-tests": audit_tests,
     "requirements": generate_requirements,
     "clean": clean,

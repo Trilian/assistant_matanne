@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from src.modules.cuisine.schemas import (
+from src.services.core.utilisateur.preferences import (
     FeedbackRecette,
     PreferencesUtilisateur,
 )
@@ -86,7 +86,8 @@ def preferences_dataclass():
         temps_weekend="long",
         aliments_exclus=[],
         aliments_favoris=["poulet", "pâtes"],
-        poisson_par_semaine=2,
+        poisson_blanc_par_semaine=1,
+        poisson_gras_par_semaine=1,
         vegetarien_par_semaine=1,
         viande_rouge_max=2,
         robots=["four", "monsieur_cuisine"],
@@ -417,15 +418,18 @@ class TestConversionHelpers:
 
     def test_get_default_preferences(self):
         """Récupère les préférences par défaut."""
-        from src.modules.famille.age_utils import get_age_jules_mois
+        from datetime import date
+
+        from src.core.constants import JULES_NAISSANCE
 
         service = UserPreferenceService()
         result = service._get_default_preferences()
 
+        expected_age_mois = (date.today() - JULES_NAISSANCE).days // 30
         assert isinstance(result, PreferencesUtilisateur)
         assert result.nb_adultes == 2
         assert result.jules_present is True
-        assert result.jules_age_mois == get_age_jules_mois()
+        assert result.jules_age_mois == expected_age_mois
         assert "poulet" in result.aliments_favoris
         assert "monsieur_cuisine" in result.robots
 

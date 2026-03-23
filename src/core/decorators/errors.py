@@ -1,4 +1,4 @@
-"""Décorateur: gestion centralisée d'erreurs avec affichage UI Streamlit."""
+"""Décorateur: gestion centralisée d'erreurs avec logging."""
 
 import logging
 import traceback
@@ -23,16 +23,13 @@ def avec_gestion_erreurs(
 
     Gère intelligemment les exceptions métier (``ExceptionApp``) et génériques:
 
-    - **Exceptions métier** : affichage typé dans l'UI (icônes par type),
-      log au bon niveau, puis relancées (ou fallback selon ``relancer_metier``).
-    - **Exceptions génériques** : loguées, affichées si demandé, puis
-      retournent ``default_return``.
-    - **Mode debug** : affiche automatiquement la stack trace dans un
-      expander Streamlit.
+    - **Exceptions métier** : log au bon niveau, puis relancées
+      (ou fallback selon ``relancer_metier``).
+    - **Exceptions génériques** : loguées, puis retournent ``default_return``.
 
     Usage::
 
-        @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
+        @avec_gestion_erreurs(default_return=None)
         def operation_risquee(data: dict) -> dict:
             # Code qui peut lever des exceptions
             return resultat
@@ -40,7 +37,6 @@ def avec_gestion_erreurs(
         # Avec gestion fine des erreurs métier
         @avec_gestion_erreurs(
             default_return=[],
-            afficher_erreur=True,
             relancer_metier=False,  # Retourne default_return même pour ExceptionApp
         )
         def charger_recettes() -> list:
@@ -49,10 +45,10 @@ def avec_gestion_erreurs(
     Args:
         default_return: Valeur retournée en cas d'erreur
         log_level: Niveau de log ("DEBUG", "INFO", "WARNING", "ERROR")
-        afficher_erreur: Afficher l'erreur dans Streamlit
+        afficher_erreur: Log l'erreur (conservé pour rétrocompatibilité).
         relancer_metier: Re-raise les ExceptionApp (défaut True pour backward compat).
             Si False, retourne ``default_return`` pour toutes les erreurs.
-        afficher_details_debug: Affiche la stack trace en mode debug (défaut True)
+        afficher_details_debug: Log la stack trace en mode debug (défaut True)
 
     Returns:
         Résultat de la fonction ou default_return
@@ -92,9 +88,9 @@ def avec_gestion_erreurs(
                 log_msg = f"Erreur dans {func.__name__}: {e}"
                 getattr(logger, effective_level, logger.error)(log_msg)
 
-                # ── Affichage UI intelligent par type d'erreur ──
-                if afficher_erreur:
-                    _afficher_erreur_ui(e, func.__name__, afficher_details_debug)
+                # ── Log détaillé si demandé ──
+                if afficher_erreur and afficher_details_debug:
+                    logger.debug("Stack trace:\n%s", traceback.format_exc())
 
                 # ── Relancer ou fallback ──
                 if isinstance(e, ExceptionApp) and relancer_metier:
@@ -105,57 +101,3 @@ def avec_gestion_erreurs(
         return wrapper  # type: ignore
 
     return decorator
-
-
-def _afficher_erreur_ui(
-    erreur: Exception,
-    nom_fonction: str,
-    afficher_details_debug: bool = True,
-) -> None:
-    """Affiche une erreur dans Streamlit avec formatage intelligent par type."""
-    try:
-        import streamlit as st
-    except Exception:
-        return
-
-    from src.core.exceptions import (
-        ErreurBaseDeDonnees,
-        ErreurLimiteDebit,
-        ErreurNonTrouve,
-        ErreurServiceExterne,
-        ErreurServiceIA,
-        ErreurValidation,
-        ExceptionApp,
-    )
-
-    try:
-        if isinstance(erreur, ExceptionApp):
-            _UI_MAP: dict[type, tuple[Any, str]] = {
-                ErreurValidation: (st.error, "[ERROR]"),
-                ErreurNonTrouve: (st.warning, "[!]"),
-                ErreurBaseDeDonnees: (st.error, "\U0001f4be"),  # 💾
-                ErreurServiceIA: (st.error, "\U0001f916"),  # 🤖
-                ErreurLimiteDebit: (st.warning, "\u23f3"),  # ⏳
-                ErreurServiceExterne: (st.error, "\U0001f310"),  # 🌐
-            }
-            afficher_fn, prefix = _UI_MAP.get(type(erreur), (st.error, "[ERROR]"))
-            afficher_fn(f"{prefix} {erreur.message_utilisateur}")
-        else:
-            st.error("[ERROR] Une erreur inattendue s'est produite")
-    except Exception:
-        # Streamlit non initialisé ou contexte invalide
-        return
-
-    # Stack trace en mode debug
-    if afficher_details_debug:
-        try:
-            import os
-
-            is_debug = os.environ.get("DEBUG", "").lower() in ("1", "true")
-            if not is_debug:
-                is_debug = st.session_state.get("debug_mode", False)
-            if is_debug:
-                with st.expander("\U0001f41b Stack trace"):  # 🐛
-                    st.code(traceback.format_exc())
-        except Exception:
-            pass

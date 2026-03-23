@@ -69,10 +69,7 @@ class SessionMixin:
         if user:
             return user
 
-        # Import paresseux — ne pas charger Streamlit au niveau module
-        from src.ui.views.authentification import afficher_formulaire_connexion
-
-        afficher_formulaire_connexion()
+        # Streamlit UI supprimé
         return None
 
     # -----------------------------------------------------------

@@ -17,15 +17,23 @@ from src.api.dependencies import require_role
 from src.api.prometheus import prometheus_router
 from src.api.rate_limiting import MiddlewareLimitationDebit
 from src.api.routes import (
+    anti_gaspillage_router,
+    batch_cooking_router,
     calendriers_router,
     courses_router,
+    dashboard_router,
+    documents_router,
+    export_router,
     famille_router,
     inventaire_router,
     jeux_router,
     maison_router,
     planning_router,
+    preferences_router,
     recettes_router,
     suggestions_router,
+    upload_router,
+    utilitaires_router,
 )
 from src.api.routes.auth import router as auth_router
 from src.api.routes.push import router as push_router
@@ -107,6 +115,38 @@ tags_metadata = [
         "name": "Webhooks",
         "description": "Gestion des webhooks sortants pour notifications externes",
     },
+    {
+        "name": "Tableau de bord",
+        "description": "Dashboard agrégé avec métriques familiales",
+    },
+    {
+        "name": "Batch Cooking",
+        "description": "Sessions de batch cooking et préparations",
+    },
+    {
+        "name": "Préférences",
+        "description": "Préférences utilisateur (alimentation, robots, magasins)",
+    },
+    {
+        "name": "Anti-Gaspillage",
+        "description": "Score anti-gaspillage et recettes de sauvetage",
+    },
+    {
+        "name": "Export",
+        "description": "Export PDF de données (courses, planning, recettes, budget)",
+    },
+    {
+        "name": "Utilitaires",
+        "description": "Notes, journal, contacts, liens, mots de passe, énergie",
+    },
+    {
+        "name": "Documents",
+        "description": "Documents familiaux (carnet de santé, assurance, etc.)",
+    },
+    {
+        "name": "Upload",
+        "description": "Upload de fichiers vers Supabase Storage",
+    },
 ]
 
 app = FastAPI(
@@ -151,13 +191,15 @@ Les endpoints sont protégés par une limitation de débit:
 )
 
 # CORS sécurisé
-_cors_origins = os.getenv("CORS_ORIGINS", "").split(",") if os.getenv("CORS_ORIGINS") else []
+# En production, définir CORS_ORIGINS avec l'URL Vercel (ex: https://assistant-matanne.vercel.app)
+_cors_origins = [
+    o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()
+]
 _default_origins = [
-    "http://localhost:8501",  # Streamlit local
+    "http://localhost:3000",  # Next.js dev
     "http://localhost:8000",  # API local
-    "http://127.0.0.1:8501",
+    "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
-    "https://matanne.streamlit.app",  # Production Streamlit Cloud
 ]
 _allowed_origins = _cors_origins if _cors_origins else _default_origins
 
@@ -364,6 +406,16 @@ app.include_router(famille_router)
 app.include_router(maison_router)
 app.include_router(jeux_router)
 app.include_router(calendriers_router)
+
+# Nouveaux routers - Phase 2
+app.include_router(dashboard_router)
+app.include_router(batch_cooking_router)
+app.include_router(preferences_router)
+app.include_router(anti_gaspillage_router)
+app.include_router(export_router)
+app.include_router(utilitaires_router)
+app.include_router(documents_router)
+app.include_router(upload_router)
 
 # Prometheus et WebSocket
 app.include_router(prometheus_router)
