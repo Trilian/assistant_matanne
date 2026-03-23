@@ -1,7 +1,7 @@
 """
 Events - Bus d'événements domaine pour découplage inter-services.
 
-Bus synchrone in-process adapté à une app Streamlit mono-processus.
+Bus synchrone in-process.
 Les services publient des événements au lieu de s'appeler entre eux.
 
 Architecture:

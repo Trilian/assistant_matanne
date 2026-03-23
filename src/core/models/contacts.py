@@ -3,6 +3,11 @@ Modèles pour les contacts familiaux.
 
 Contient :
 - ContactFamille : Carnet de contacts famille (médecin, nounou, école, urgences)
+
+NOTE: Le système de contacts principal est ContactUtile dans models/utilitaires.py,
+exposé via les routes /api/v1/utilitaires/contacts.
+ContactFamille est conservé pour compléments (champs enrichis: prenom, ville,
+code_postal, lien_maps, est_urgence). Migration prévue vers un modèle unifié.
 """
 
 from sqlalchemy import Boolean, String, Text

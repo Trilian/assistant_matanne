@@ -1,12 +1,12 @@
 """
-Errors Base - Exceptions pures sans dépendances UI/Streamlit.
+Errors Base - Exceptions pures sans dépendances UI.
 
 Ce module centralise UNIQUEMENT :
 - Les classes d'exceptions métier
 - Les types d'erreurs
 - Les détails d'erreur
 
-[!] IMPORTANT: Ne doit JAMAIS importer streamlit ou éléments UI
+[!] IMPORTANT: Ne doit JAMAIS importer d'éléments UI
 
 Exemples:
     # Backend/services

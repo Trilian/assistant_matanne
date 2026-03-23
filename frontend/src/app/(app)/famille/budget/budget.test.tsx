@@ -1,6 +1,17 @@
 ﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React from "react";
 import BudgetPage from "@/app/(app)/famille/budget/page";
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return React.createElement(QueryClientProvider, { client: queryClient }, children);
+  };
+}
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
@@ -57,28 +68,28 @@ describe("BudgetPage", () => {
   });
 
   it("affiche le titre Budget", () => {
-    render(<BudgetPage />);
+    render(<BudgetPage />, { wrapper: createWrapper() });
     expect(screen.getByText(/Budget/)).toBeInTheDocument();
   });
 
   it("affiche la carte Total du mois", () => {
-    render(<BudgetPage />);
+    render(<BudgetPage />, { wrapper: createWrapper() });
     expect(screen.getByText("Total du mois")).toBeInTheDocument();
   });
 
   it("affiche la section Répartition par catégorie", () => {
-    render(<BudgetPage />);
+    render(<BudgetPage />, { wrapper: createWrapper() });
     expect(screen.getByText("Répartition par catégorie")).toBeInTheDocument();
   });
 
   it("affiche les dépenses listées", () => {
-    render(<BudgetPage />);
+    render(<BudgetPage />, { wrapper: createWrapper() });
     expect(screen.getByText("Courses Carrefour")).toBeInTheDocument();
     expect(screen.getByText("Essence")).toBeInTheDocument();
   });
 
   it("affiche le filtre catégorie", () => {
-    render(<BudgetPage />);
+    render(<BudgetPage />, { wrapper: createWrapper() });
     expect(screen.getByText(/Dépenses/)).toBeInTheDocument();
   });
 });

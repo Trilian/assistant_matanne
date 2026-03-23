@@ -18,7 +18,7 @@ class CacheSessionN2:
     """
     Cache L2 basé sur un dict mémoire partagé au niveau du processus.
 
-    Remplace l'ancien cache L2 basé sur st.session_state.
+    Remplace l'ancien cache L2 basé sur le stockage session.
     """
 
     CACHE_KEY = "_cache_l2_data"

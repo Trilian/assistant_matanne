@@ -44,7 +44,7 @@ function couleurPiece(piece: PieceMaison): string {
   for (const [nom, couleur] of Object.entries(COULEURS_DEFAUT)) {
     if (piece.nom.toLowerCase().includes(nom.toLowerCase())) return couleur;
   }
-  return "#e0e7ff";
+  return "var(--color-primary)";
 }
 
 export default function PageVisualisation() {

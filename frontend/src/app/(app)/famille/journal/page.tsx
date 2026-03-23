@@ -1,11 +1,19 @@
 // ═══════════════════════════════════════════════════════════
-// Journal — Journal familial
+// Journal — Journal familial (connecté API)
 // ═══════════════════════════════════════════════════════════
 
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Plus, Calendar, Smile, Meh, Frown } from "lucide-react";
+import {
+  BookOpen,
+  Plus,
+  Calendar,
+  Smile,
+  Meh,
+  Frown,
+  Trash2,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -23,14 +31,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
-interface EntreeJournal {
-  id: number;
-  titre: string;
-  contenu: string;
-  date: string;
-  humeur: "bien" | "neutre" | "difficile";
-}
+import {
+  utiliserRequete,
+  utiliserMutation,
+  utiliserInvalidation,
+} from "@/crochets/utiliser-api";
+import {
+  listerJournal,
+  creerEntreeJournal,
+  supprimerEntreeJournal,
+  type EntreeJournal,
+} from "@/bibliotheque/api/utilitaires";
 
 const HUMEURS = [
   { value: "bien" as const, label: "Bien", icone: Smile, couleur: "text-green-500" },
@@ -39,37 +50,34 @@ const HUMEURS = [
 ];
 
 export default function PageJournal() {
-  const [entrees, setEntrees] = useState<EntreeJournal[]>([
-    {
-      id: 1,
-      titre: "Premier jour de crèche",
-      contenu:
-        "Jules a passé sa première journée complète à la crèche. Il a bien mangé et fait une sieste.",
-      date: new Date().toISOString().split("T")[0],
-      humeur: "bien",
-    },
-  ]);
   const [ouvert, setOuvert] = useState(false);
-  const [titre, setTitre] = useState("");
-  const [contenu, setContenu] = useState("");
-  const [humeur, setHumeur] = useState<EntreeJournal["humeur"]>("bien");
+  const [humeur, setHumeur] = useState("bien");
 
-  function ajouterEntree() {
-    if (!titre.trim() || !contenu.trim()) return;
-    setEntrees((prev) => [
-      {
-        id: Date.now(),
-        titre: titre.trim(),
-        contenu: contenu.trim(),
-        date: new Date().toISOString().split("T")[0],
-        humeur,
-      },
-      ...prev,
-    ]);
-    setTitre("");
-    setContenu("");
-    setHumeur("bien");
-    setOuvert(false);
+  const invalider = utiliserInvalidation();
+  const { data: entrees = [], isLoading } = utiliserRequete(
+    ["journal"],
+    () => listerJournal()
+  );
+
+  const mutCreer = utiliserMutation(
+    (e: Omit<EntreeJournal, "id" | "cree_le">) => creerEntreeJournal(e),
+    { onSuccess: () => { invalider(["journal"]); setOuvert(false); } }
+  );
+  const mutSupprimer = utiliserMutation(
+    (id: number) => supprimerEntreeJournal(id),
+    { onSuccess: () => invalider(["journal"]) }
+  );
+
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    mutCreer.mutate({
+      date_entree: new Date().toISOString().split("T")[0],
+      contenu: fd.get("contenu") as string,
+      humeur,
+      gratitudes: [],
+      tags: [],
+    });
   }
 
   return (
@@ -94,16 +102,11 @@ export default function PageJournal() {
             <DialogHeader>
               <DialogTitle>Ajouter une entrée</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 pt-2">
-              <Input
-                placeholder="Titre"
-                value={titre}
-                onChange={(e) => setTitre(e.target.value)}
-              />
+            <form onSubmit={onSubmit} className="space-y-4 pt-2">
               <Textarea
+                name="contenu"
                 placeholder="Racontez votre journée..."
-                value={contenu}
-                onChange={(e) => setContenu(e.target.value)}
+                required
                 rows={4}
               />
               <div>
@@ -129,16 +132,29 @@ export default function PageJournal() {
                   })}
                 </div>
               </div>
-              <Button onClick={ajouterEntree} className="w-full">
+              <Button type="submit" className="w-full" disabled={mutCreer.isPending}>
                 Enregistrer
               </Button>
-            </div>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
 
       {/* Timeline */}
-      {entrees.length === 0 ? (
+      {isLoading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader className="pb-2">
+                <div className="h-5 w-40 animate-pulse rounded bg-muted" />
+              </CardHeader>
+              <CardContent>
+                <div className="h-4 w-full animate-pulse rounded bg-muted" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : entrees.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-2 py-10 text-muted-foreground">
             <BookOpen className="h-8 w-8 opacity-50" />
@@ -154,18 +170,28 @@ export default function PageJournal() {
               <Card key={entree.id}>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">{entree.titre}</CardTitle>
+                    <CardTitle className="text-base">
+                      {entree.date_entree}
+                    </CardTitle>
                     <div className="flex items-center gap-2">
                       <HumeurIcone
-                        className={`h-4 w-4 ${humeurInfo?.couleur}`}
+                        className={`h-4 w-4 ${humeurInfo?.couleur ?? ""}`}
                       />
                       <Badge variant="secondary" className="text-xs">
                         <Calendar className="mr-1 h-3 w-3" />
-                        {new Date(entree.date).toLocaleDateString("fr-FR", {
-                          day: "numeric",
-                          month: "short",
-                        })}
+                        {new Date(entree.date_entree).toLocaleDateString(
+                          "fr-FR",
+                          { day: "numeric", month: "short" }
+                        )}
                       </Badge>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive"
+                        onClick={() => mutSupprimer.mutate(entree.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -173,6 +199,15 @@ export default function PageJournal() {
                   <p className="text-sm text-muted-foreground whitespace-pre-line">
                     {entree.contenu}
                   </p>
+                  {entree.tags.length > 0 && (
+                    <div className="mt-2 flex gap-1">
+                      {entree.tags.map((t) => (
+                        <Badge key={t} variant="outline" className="text-xs">
+                          {t}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );

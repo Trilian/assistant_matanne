@@ -26,11 +26,11 @@ npm run dev                   # http://localhost:3000
 
 ## 📋 Modules
 
-| Module | Description | Routes |
+| Module | Description | Pages |
 |---|---|---|
 | 🍽️ **Cuisine** | Recettes, planning repas, courses, inventaire, batch cooking, anti-gaspi | 7 |
-| 👨‍👩‍👦 **Famille** | Suivi Jules, activités, routines, budget, weekend, album, documents | 11 |
-| 🏡 **Maison** | Projets, jardin, entretien, charges, dépenses, énergie, stocks | 8 |
+| 👨‍👩‍👦 **Famille** | Suivi Jules, activités, routines, budget, weekend, album, anniversaires, contacts, documents, journal | 11 |
+| 🏡 **Maison** | Projets, jardin, entretien, charges, dépenses, énergie, stocks, visualisation | 9 |
 | 📅 **Planning** | Calendrier semaine, timeline | 2 |
 | 🎮 **Jeux** | Paris sportifs, loto, euromillions | 4 |
 | 🛠️ **Outils** | Chat IA, notes, météo, minuteur, convertisseur | 6 |
@@ -41,12 +41,12 @@ npm run dev                   # http://localhost:3000
 ```
 assistant_matanne/
 ├── frontend/               # Next.js 16 (React/TypeScript)
-│   ├── src/app/(app)/      # Routes par module (~42 pages)
+│   ├── src/app/(app)/      # Routes par module (~52 pages)
 │   ├── src/components/     # Composants shadcn/ui (21+)
 │   ├── src/composants/     # Layout (sidebar, header, nav)
-│   ├── src/lib/api/        # Clients API par domaine
-│   ├── src/hooks/          # Custom hooks React
-│   ├── src/stores/         # Zustand stores
+│   ├── src/bibliotheque/api/ # Clients API par domaine
+│   ├── src/crochets/       # Custom hooks React
+│   ├── src/magasins/       # Zustand stores
 │   ├── src/types/          # Interfaces TypeScript
 │   └── src/fournisseurs/   # Providers (auth, query, theme)
 ├── src/                    # Backend Python (FastAPI)

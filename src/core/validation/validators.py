@@ -3,13 +3,13 @@ Validators - Helpers et décorateurs de validation.
 
 Fonctions pour:
 - Valider des modèles Pydantic
-- Valider des formulaires Streamlit
+- Valider des formulaires (dict → erreurs + nettoyage)
 - Décorateurs de validation automatique
 """
 
 __all__ = [
     "valider_modele",
-    "valider_formulaire_streamlit",
+    "valider_formulaire",
     "valider_et_nettoyer_formulaire",
     "afficher_erreurs_validation",
     "valider_entree",
@@ -57,11 +57,11 @@ def valider_modele(
         return False, str(e), None
 
 
-def valider_formulaire_streamlit(
+def valider_formulaire(
     donnees_formulaire: dict, schema: dict
 ) -> tuple[bool, list[str], dict]:
     """
-    Valide un formulaire Streamlit.
+    Valide un formulaire selon un schéma dict.
 
     Args:
         donnees_formulaire: Données du formulaire
@@ -107,7 +107,7 @@ def valider_et_nettoyer_formulaire(
     Helper pour valider un formulaire selon le module.
 
     Retourne les erreurs au lieu de les afficher — l'appelant décide
-    de l'affichage (Streamlit, CLI, tests…).
+    de l'affichage (API, CLI, tests…).
 
     Args:
         nom_module: Nom du module (recettes, inventaire, courses)
@@ -141,17 +141,16 @@ def valider_et_nettoyer_formulaire(
                 nettoye[cle] = valeur
         return True, [], nettoye
 
-    est_valide, erreurs, nettoye = valider_formulaire_streamlit(donnees_formulaire, schema)
+    est_valide, erreurs, nettoye = valider_formulaire(donnees_formulaire, schema)
 
     return est_valide, erreurs, nettoye
 
 
 def afficher_erreurs_validation(erreurs: list[str]) -> None:
     """
-    Affiche les erreurs de validation dans Streamlit.
+    Affiche les erreurs de validation.
 
-    Utilise un import lazy de Streamlit pour rester découplé.
-    Fonctionne en mode dégradé (logging) quand Streamlit n'est pas disponible.
+    Fonctionne en mode dégradé (logging uniquement).
 
     Args:
         erreurs: Liste des messages d'erreur
@@ -220,3 +219,7 @@ def valider_entree(schema: dict | None = None, nettoyer_tout: bool = True):
         return wrapper
 
     return decorateur
+
+
+# Alias rétrocompatible (ancien nom)
+valider_formulaire_streamlit = valider_formulaire

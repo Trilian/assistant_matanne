@@ -148,11 +148,11 @@ describe("API Calendriers", () => {
   it("listerEvenements appelle GET /calendriers/evenements", async () => {
     mockedApi.get.mockResolvedValueOnce({ data: [] });
 
-    const result = await listerEvenements("2025-01-01", "2025-01-31");
+    const result = await listerEvenements({ date_debut: "2025-01-01", date_fin: "2025-01-31" });
 
-    expect(mockedApi.get).toHaveBeenCalledWith("/calendriers/evenements", {
-      params: { debut: "2025-01-01", fin: "2025-01-31" },
-    });
+    expect(mockedApi.get).toHaveBeenCalledWith(
+      "/calendriers/evenements?date_debut=2025-01-01&date_fin=2025-01-31"
+    );
     expect(result).toEqual([]);
   });
 

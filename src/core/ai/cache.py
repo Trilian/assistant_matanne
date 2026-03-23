@@ -215,4 +215,4 @@ class CacheIA:
 
 
 # ═══════════════════════════════════════════════════════════
-# HELPERS POUR STREAMLIT
+# HELPERS

@@ -105,8 +105,8 @@ class RealtimeSyncService:
         """Initialise le service de synchronisation.
 
         Args:
-            storage: Stockage clé-valeur mutable (défaut: st.session_state).
-            on_rerun: Callback pour déclencher un rerun (défaut: st.rerun).
+            storage: Stockage clé-valeur mutable.
+            on_rerun: Callback pour déclencher un rafraîchissement.
         """
         self._storage = storage if storage is not None else {}
         self._on_rerun = on_rerun if on_rerun is not None else (lambda: None)
@@ -352,7 +352,7 @@ class RealtimeSyncService:
                 except Exception as e:
                     logger.error(f"Erreur callback: {e}")
 
-            # Déclencher un rerun Streamlit
+            # Déclencher un rafraîchissement
             self._on_rerun()
 
         except Exception as e:

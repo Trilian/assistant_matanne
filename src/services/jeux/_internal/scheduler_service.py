@@ -11,7 +11,7 @@ Usage:
     scheduler.arreter()   # Arrête proprement
 
 Note: Le scheduler utilise BackgroundScheduler qui s'exécute dans un thread séparé.
-Compatible avec Streamlit (pas de blocage de l'UI).
+Compatible avec FastAPI (pas de blocage de l'API).
 """
 
 import logging

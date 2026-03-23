@@ -1,7 +1,7 @@
 """
 Module d'authentification JWT autonome pour l'API FastAPI.
 
-Fonctionne sans dépendance à Streamlit. Permet:
+Module d'authentification JWT autonome. Permet:
 - Validation de tokens JWT Supabase (avec ou sans vérification de signature)
 - Génération de tokens JWT API (pour l'endpoint /auth/login)
 - Extraction sécurisée des infos utilisateur depuis le payload JWT

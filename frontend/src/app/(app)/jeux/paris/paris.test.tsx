@@ -1,6 +1,17 @@
 ﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React from "react";
 import ParisPage from "@/app/(app)/jeux/paris/page";
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return React.createElement(QueryClientProvider, { client: queryClient }, children);
+  };
+}
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
@@ -68,12 +79,12 @@ describe("ParisPage", () => {
   });
 
   it("affiche le titre Paris Sportifs", () => {
-    render(<ParisPage />);
+    render(<ParisPage />, { wrapper: createWrapper() });
     expect(screen.getByText(/Paris Sportifs/)).toBeInTheDocument();
   });
 
   it("affiche les 4 cartes statistiques", () => {
-    render(<ParisPage />);
+    render(<ParisPage />, { wrapper: createWrapper() });
     expect(screen.getByText("Total paris")).toBeInTheDocument();
     expect(screen.getByText("Mises totales")).toBeInTheDocument();
     expect(screen.getByText("Bénéfice")).toBeInTheDocument();
@@ -81,18 +92,18 @@ describe("ParisPage", () => {
   });
 
   it("affiche les boutons de filtre", () => {
-    render(<ParisPage />);
+    render(<ParisPage />, { wrapper: createWrapper() });
     expect(screen.getByText("Tous")).toBeInTheDocument();
   });
 
   it("affiche l'historique des paris avec noms de matchs", () => {
-    render(<ParisPage />);
+    render(<ParisPage />, { wrapper: createWrapper() });
     expect(screen.getByText("PSG vs OM")).toBeInTheDocument();
     expect(screen.getByText("Lyon vs Monaco")).toBeInTheDocument();
   });
 
   it("affiche le tableau Historique des paris", () => {
-    render(<ParisPage />);
+    render(<ParisPage />, { wrapper: createWrapper() });
     expect(screen.getByText("Historique des paris")).toBeInTheDocument();
   });
 });

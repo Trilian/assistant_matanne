@@ -1,4 +1,4 @@
-"""Décorateurs: cache multi-niveaux et cache UI Streamlit."""
+"""Décorateurs: cache multi-niveaux."""
 
 import hashlib
 import inspect

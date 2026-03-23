@@ -7,7 +7,7 @@ Fonctions pour:
 - Initialisation et maintenance
 - Health checks
 
-Découplé de Streamlit — cache géré via @avec_cache.
+Cache géré via @avec_cache.
 """
 
 import logging

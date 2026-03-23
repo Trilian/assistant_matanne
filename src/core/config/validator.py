@@ -242,7 +242,7 @@ def creer_validateur_defaut() -> ValidateurConfiguration:
         "database_url",
         NiveauValidation.CRITIQUE,
         _verifier_database_url,
-        "DATABASE_URL non configurée dans .env.local ou secrets Streamlit",
+        "DATABASE_URL non configurée dans .env.local",
     )
 
     validateur.ajouter(

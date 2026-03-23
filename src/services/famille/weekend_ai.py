@@ -81,7 +81,7 @@ Privilégie les activités:
         region: str = "Île-de-France",
         nb_suggestions: int = 3,
     ):
-        """Version streaming de suggerer_activites pour st.write_stream()."""
+        """Version streaming de suggerer_activites."""
         prompt = f"""Suggère {nb_suggestions} activités pour un weekend en famille avec:
 - Enfant de {age_enfant_mois} mois
 - Météo prévue: {meteo}

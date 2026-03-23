@@ -136,7 +136,7 @@ def avec_resilience(
         fallback: Valeur retournée en cas d'échec final (None = relève l'exception)
         circuit: Nom du circuit breaker (None = pas de circuit breaker)
         log_level: Niveau de log pour les erreurs ('debug', 'info', 'warning', 'error')
-        afficher_ui: Afficher l'erreur dans Streamlit UI
+        afficher_ui: Afficher l'erreur dans l'UI
 
     Returns:
         Décorateur de fonction

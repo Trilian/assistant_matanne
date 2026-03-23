@@ -1,538 +1,306 @@
 # Référence des Composants UI
 
-Guide complet des composants UI réutilisables de l'application.
-Tous les noms suivent la convention française : `afficher_*`, `obtenir_*`, `definir_*`.
+Guide des composants UI du frontend Next.js (shadcn/ui + composants layout).
 
 ## Architecture
 
 ```
-src/ui/
-├── __init__.py          # Point d'entrée unifié (~90 exports)
-├── components/          # Composants UI réutilisables (27 exports)
-│   ├── atoms.py         # Badge, état vide, carte métrique, etc.
-│   ├── alertes.py       # Alertes stock
-│   ├── charts.py        # Graphiques Plotly
-│   ├── data.py          # Pagination, tableaux, export
-│   ├── dynamic.py       # Modale
-│   ├── forms.py         # Formulaires, recherche, filtres
-│   ├── layouts.py       # Grilles, cartes
-│   ├── metrics.py       # Cartes métriques avancées
-│   └── system.py        # Santé système, timeline
-├── feedback/            # Notifications, spinners (10 exports)
-│   ├── spinners.py      # Indicateurs chargement
-│   ├── progress.py      # Suivi progression
-│   └── toasts.py        # Notifications temporaires
-├── layout/              # Header, sidebar, footer (6 exports, app-level)
-│   ├── header.py        # En-tête application
-│   ├── sidebar.py       # Barre latérale + menu
-│   ├── footer.py        # Pied de page
-│   ├── styles.py        # Injection CSS
-│   └── init.py          # Initialisation app
-├── tablet/              # Mode tablette/cuisine (13 exports)
-│   ├── config.py        # ModeTablette enum
-│   ├── styles.py        # CSS tablette
-│   ├── widgets.py       # Boutons tactiles
-│   └── kitchen.py       # Vue recette cuisine
-├── views/               # Vues extraites des services (21 exports)
-│   ├── authentification.py  # Connexion, profil, rôles
-│   ├── historique.py        # Timeline activité
-│   ├── import_recettes.py   # Import URL/PDF
-│   ├── jeux.py              # Notifications jeux/paris
-│   ├── meteo.py             # Météo jardin
-│   ├── notifications.py     # Push notifications
-│   ├── pwa.py               # Meta tags PWA
-│   ├── sauvegarde.py        # Backup/restauration
-│   └── synchronisation.py   # Présence, frappe, PWA install
-└── integrations/        # Intégrations externes (6 exports)
-    └── google_calendar.py
+frontend/src/
+├── components/ui/           # Composants shadcn/ui (21 fichiers)
+│   ├── avatar.tsx           # Avatar utilisateur
+│   ├── badge.tsx            # Badge statut/tag
+│   ├── button.tsx           # Bouton (variants: default, outline, ghost, destructive)
+│   ├── card.tsx             # Card, CardHeader, CardContent, CardFooter, CardTitle
+│   ├── command.tsx          # Command palette (recherche)
+│   ├── dialog.tsx           # Dialog modal (Dialog, DialogTrigger, DialogContent)
+│   ├── dropdown-menu.tsx    # Menu déroulant contextuel
+│   ├── input-group.tsx      # Groupe d'inputs avec icône
+│   ├── input.tsx            # Champ texte
+│   ├── label.tsx            # Label formulaire
+│   ├── scroll-area.tsx      # Zone scrollable
+│   ├── select.tsx           # Select dropdown
+│   ├── separator.tsx        # Séparateur horizontal
+│   ├── sheet.tsx            # Panneau latéral (Sheet/Drawer)
+│   ├── sidebar.tsx          # Sidebar navigation complète
+│   ├── skeleton.tsx         # Skeleton loader
+│   ├── sonner.tsx           # Toasts (notifications via Sonner)
+│   ├── table.tsx            # Table, TableHeader, TableBody, TableRow, TableCell
+│   ├── tabs.tsx             # Onglets (Tabs, TabsList, TabsTrigger, TabsContent)
+│   ├── textarea.tsx         # Zone de texte multilignes
+│   └── tooltip.tsx          # Tooltip au survol
+├── composants/disposition/  # Composants layout app (5 fichiers)
+│   ├── coquille-app.tsx     # Shell principal (sidebar + content)
+│   ├── barre-laterale.tsx   # Sidebar avec navigation modules
+│   ├── en-tete.tsx          # Header avec breadcrumbs + actions
+│   ├── fil-ariane.tsx       # Breadcrumbs
+│   └── nav-mobile.tsx       # Bottom navigation bar mobile
+├── fournisseurs/            # Providers React
+│   ├── fournisseur-query.tsx   # TanStack Query provider
+│   ├── fournisseur-auth.tsx    # Protection routes authentifiées
+│   └── fournisseur-theme.tsx   # Thème clair/sombre (next-themes)
+├── crochets/                # Hooks React personnalisés
+│   ├── utiliser-api.ts      # utiliserRequete, utiliserMutation, utiliserInvalidation
+│   ├── utiliser-auth.ts     # utiliserAuth (user, login, logout)
+│   ├── utiliser-delai.ts    # Debounce de valeurs
+│   └── use-mobile.ts        # Détection mobile
+└── magasins/                # Zustand stores
+    ├── store-auth.ts        # État auth (utilisateur, estConnecte)
+    ├── store-ui.ts          # État UI (sidebar, recherche)
+    └── store-notifications.ts # File de notifications
 ```
 
 ---
 
-## Composants de Base (atoms.py)
+## Composants shadcn/ui
 
-### `badge(texte, couleur)`
+Tous les composants UI de base proviennent de [shadcn/ui](https://ui.shadcn.com/) et sont dans `frontend/src/components/ui/`. Ils utilisent Tailwind CSS v4 avec les tokens CSS du thème.
 
-Badge coloré pour statuts, tags.
+### Button
 
-```python
-from src.ui.components import badge
+```tsx
+import { Button } from "@/components/ui/button"
 
-badge("Actif", "#4CAF50")          # Vert
-badge("En attente", "#FF9800")    # Orange
-badge("Terminé", "#2196F3")       # Bleu
+<Button>Défaut</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="destructive">Supprimer</Button>
+<Button size="sm">Petit</Button>
+<Button size="lg">Grand</Button>
 ```
 
-### `etat_vide(message, icone, sous_texte)`
+### Card
 
-Affichage état vide centré.
+```tsx
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 
-```python
-from src.ui.components import etat_vide
-
-etat_vide("Aucune recette", "🍽️", "Ajoutez-en une")
+<Card>
+  <CardHeader><CardTitle>Titre</CardTitle></CardHeader>
+  <CardContent>Contenu</CardContent>
+  <CardFooter>Actions</CardFooter>
+</Card>
 ```
 
-### `carte_metrique(label, valeur, delta, couleur)`
+### Dialog
 
-Carte métrique simple. Pour version avancée, voir `carte_metrique_avancee`.
+```tsx
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
-```python
-from src.ui.components import carte_metrique
-
-carte_metrique("Total", "42", "+5", "#f0f0f0")
+<Dialog open={ouvert} onOpenChange={setOuvert}>
+  <DialogTrigger asChild><Button>Ouvrir</Button></DialogTrigger>
+  <DialogContent>
+    <DialogHeader><DialogTitle>Titre</DialogTitle></DialogHeader>
+    {/* Formulaire */}
+    <DialogFooter><Button onClick={sauvegarder}>Sauvegarder</Button></DialogFooter>
+  </DialogContent>
+</Dialog>
 ```
 
-### Notifications (via `GestionnaireNotifications`)
+### Tabs
 
-Les notifications passent désormais par `GestionnaireNotifications` dans `src/ui/feedback/toasts.py`.
-Utilise `st.toast()` avec déduplication automatique (fenêtre de 3s).
+```tsx
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
-```python
-from src.ui.feedback.toasts import GestionnaireNotifications
-
-GestionnaireNotifications.afficher("Sauvegardé", "success")   # st.toast avec ✅
-GestionnaireNotifications.afficher("Erreur!", "error")          # st.toast avec ❌
-GestionnaireNotifications.afficher("Attention", "warning")      # st.toast avec ⚠️
-GestionnaireNotifications.afficher("Info", "info")              # st.toast avec ℹ️
+<Tabs defaultValue="tab1">
+  <TabsList>
+    <TabsTrigger value="tab1">Onglet 1</TabsTrigger>
+    <TabsTrigger value="tab2">Onglet 2</TabsTrigger>
+  </TabsList>
+  <TabsContent value="tab1">Contenu 1</TabsContent>
+  <TabsContent value="tab2">Contenu 2</TabsContent>
+</Tabs>
 ```
 
-### `separateur(texte)`
+### Table
 
-Séparateur horizontal avec texte optionnel.
+```tsx
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
 
-```python
-from src.ui.components import separateur
-
-separateur()        # Simple ligne
-separateur("OU")    # Avec texte
+<Table>
+  <TableHeader>
+    <TableRow><TableHead>Nom</TableHead><TableHead>Statut</TableHead></TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow><TableCell>Item</TableCell><TableCell>Actif</TableCell></TableRow>
+  </TableBody>
+</Table>
 ```
 
-### `boite_info(titre, contenu, icone)`
+### Skeleton (chargement)
 
-Boîte d'information stylée.
+```tsx
+import { Skeleton } from "@/components/ui/skeleton"
 
-```python
-from src.ui.components import boite_info
+<Skeleton className="h-8 w-full" />        {/* Ligne */}
+<Skeleton className="h-32 w-full" />       {/* Carte */}
+<Skeleton className="h-4 w-[200px]" />     {/* Texte court */}
+```
 
-boite_info("Astuce", "Utilisez Ctrl+S pour sauvegarder", "💡")
+### Autres composants
+
+| Composant | Usage |
+|-----------|-------|
+| `Badge` | Tags statut (couleur via `variant`) |
+| `Input` | Champ texte avec `placeholder` |
+| `Textarea` | Zone texte multiligne |
+| `Select` | Dropdown sélection |
+| `Label` | Label pour formulaire |
+| `Separator` | Ligne séparatrice |
+| `Avatar` | Photo/initiales utilisateur |
+| `Tooltip` | Info-bulle au survol |
+| `Sheet` | Panneau latéral (mobile) |
+| `ScrollArea` | Zone scrollable personnalisée |
+| `DropdownMenu` | Menu contextuel |
+| `Sonner` | Notifications toast |
+
+---
+
+## Composants Layout
+
+### CoquilleApp (coquille-app.tsx)
+
+Wrapper principal de l'application : sidebar + zone de contenu.
+
+```tsx
+import { CoquilleApp } from "@/composants/disposition/coquille-app"
+
+<CoquilleApp>{children}</CoquilleApp>
+```
+
+### BarreLaterale (barre-laterale.tsx)
+
+Navigation principale : modules Cuisine, Famille, Maison, Jeux, Outils, Paramètres. Repliable sur desktop, sheet sur mobile.
+
+### EnTete (en-tete.tsx)
+
+Header avec fil d'ariane et actions (recherche, notifications).
+
+### NavMobile (nav-mobile.tsx)
+
+Bottom bar mobile avec 5 icônes de navigation rapide.
+
+---
+
+## Hooks personnalisés
+
+### utiliserRequete / utiliserMutation / utiliserInvalidation
+
+```tsx
+import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api"
+
+// Requête
+const { data, isLoading, error } = utiliserRequete(["recettes"], listerRecettes)
+
+// Mutation
+const mutation = utiliserMutation(creerRecette, {
+  onSuccess: () => invalider(["recettes"])
+})
+
+// Invalidation
+const invalider = utiliserInvalidation()
+invalider(["recettes"])  // Rafraîchit les requêtes recettes
+```
+
+### utiliserAuth
+
+```tsx
+import { utiliserAuth } from "@/crochets/utiliser-auth"
+
+const { utilisateur, estConnecte, connexion, deconnexion } = utiliserAuth()
 ```
 
 ---
 
-## Alertes (alertes.py)
+## Stores Zustand
 
-### `alerte_stock(...)`
+### store-auth
 
-Alerte pour stock bas.
+```tsx
+import { utiliserStoreAuth } from "@/magasins/store-auth"
 
-```python
-from src.ui.components import alerte_stock
+const { utilisateur, estConnecte, definirUtilisateur, reinitialiser } = utiliserStoreAuth()
+```
 
-alerte_stock(produit="Lait", quantite=1, seuil=3)
+### store-ui
+
+```tsx
+import { utiliserStoreUI } from "@/magasins/store-ui"
+
+const { sidebarOuverte, basculerSidebar, rechercheOuverte, basculerRecherche } = utiliserStoreUI()
 ```
 
 ---
 
-## Graphiques (charts.py)
+## Pattern CRUD typique (page)
 
-Tous les graphiques utilisent Plotly et sont cachés avec `@st.cache_data(ttl=300)`.
+Chaque page avec CRUD suit ce pattern :
 
-### `graphique_repartition_repas(data)`
+```tsx
+'use client'
 
-Graphique circulaire des types de repas.
+import { useState } from "react"
+import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api"
+import { listerItems, creerItem, supprimerItem } from "@/bibliotheque/api/mon-domaine"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 
-```python
-from src.ui.components import graphique_repartition_repas
+export default function MonModulePage() {
+  const [dialogOuvert, setDialogOuvert] = useState(false)
+  const invalider = utiliserInvalidation()
 
-data = [
-    {"type": "Petit-déjeuner", "count": 7},
-    {"type": "Déjeuner", "count": 7},
-    {"type": "Dîner", "count": 7},
-]
-graphique_repartition_repas(data)
-```
+  const { data: items, isLoading } = utiliserRequete(["items"], listerItems)
 
-### `graphique_inventaire_categories(data)`
+  const mutationCreer = utiliserMutation(creerItem, {
+    onSuccess: () => { invalider(["items"]); setDialogOuvert(false) }
+  })
 
-Barres horizontales par catégorie d'inventaire.
+  if (isLoading) return <Skeleton className="h-32 w-full" />
 
-```python
-from src.ui.components import graphique_inventaire_categories
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Mon Module</h1>
+        <Button onClick={() => setDialogOuvert(true)}>Ajouter</Button>
+      </div>
 
-data = [
-    {"categorie": "Fruits", "quantite": 15},
-    {"categorie": "Légumes", "quantite": 20},
-]
-graphique_inventaire_categories(data)
-```
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {items?.map(item => (
+          <Card key={item.id}>
+            <CardHeader><CardTitle>{item.nom}</CardTitle></CardHeader>
+            <CardContent>{/* Détails */}</CardContent>
+          </Card>
+        ))}
+      </div>
 
----
-
-## Métriques Avancées (metrics.py)
-
-### `carte_metrique_avancee(...)`
-
-Carte métrique complète avec icône, delta, gradient et lien optionnel.
-Cachée avec `@st.cache_data(ttl=60)`.
-
-```python
-from src.ui.components import carte_metrique_avancee
-
-carte_metrique_avancee(
-    titre="Recettes",
-    valeur="42",
-    icone="🍽️",
-    delta="+5 cette semaine",
-    delta_positif=True,
-    sous_titre="Dernière: Tarte aux pommes",
-    couleur="#4CAF50",
-    lien_module="recettes"  # Navigation auto
-)
-```
-
-### `widget_jules_apercu()`
-
-Widget d'aperçu pour Jules (enfant).
-
-```python
-from src.ui.components import widget_jules_apercu
-
-widget_jules_apercu()
-```
-
-### `widget_meteo_jour()`
-
-Widget météo du jour.
-
-```python
-from src.ui.components import widget_meteo_jour
-
-widget_meteo_jour()
-```
-
----
-
-## Système (system.py)
-
-### `indicateur_sante_systeme()`
-
-Retourne les données de santé système.
-
-```python
-from src.ui.components import indicateur_sante_systeme
-
-donnees = indicateur_sante_systeme()
-# {"status": "ok", "db": "connected", "cache": "active", ...}
-```
-
-### `afficher_sante_systeme()`
-
-Affiche le dashboard de santé système.
-
-```python
-from src.ui.components import afficher_sante_systeme
-
-afficher_sante_systeme()
-```
-
-### `afficher_timeline_activites(activites)`
-
-Timeline verticale d'activités.
-
-```python
-from src.ui.components import afficher_timeline_activites
-
-activites = [
-    {"heure": "08:00", "titre": "Réveil", "icone": "☀️"},
-    {"heure": "09:00", "titre": "Sport", "icone": "🏃"},
-]
-afficher_timeline_activites(activites)
-```
-
----
-
-## Formulaires (forms.py)
-
-### `champ_formulaire(label, type, **kwargs)`
-
-Champ de formulaire générique.
-
-```python
-from src.ui.components import champ_formulaire
-
-valeur = champ_formulaire("Nom", "text", placeholder="Entrez le nom")
-valeur = champ_formulaire("Quantité", "number", min_value=0, max_value=100)
-valeur = champ_formulaire("Date", "date")
-```
-
-### `barre_recherche(texte_indicatif, cle)`
-
-Barre de recherche avec icône.
-
-```python
-from src.ui.components import barre_recherche
-
-terme = barre_recherche("Rechercher recettes...", "search_recettes")
-```
-
-### `panneau_filtres(config, prefixe_cle)`
-
-Panneau de filtres dynamique.
-
-```python
-from src.ui.components import panneau_filtres
-
-config = {
-    "categorie": ["Entrée", "Plat", "Dessert"],
-    "difficulte": ["Facile", "Moyen", "Difficile"],
+      <Dialog open={dialogOuvert} onOpenChange={setDialogOuvert}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Nouvel item</DialogTitle></DialogHeader>
+          {/* Formulaire */}
+          <DialogFooter>
+            <Button onClick={() => mutationCreer.mutate(formData)}>
+              Créer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
 }
-filtres = panneau_filtres(config, "recettes")
-# {"categorie": "Plat", "difficulte": "Facile"}
-```
-
-### `filtres_rapides(options, cle)`
-
-Boutons de filtres rapides.
-
-```python
-from src.ui.components import filtres_rapides
-
-selection = filtres_rapides(["Tous", "Favoris", "Récents"], "filtre_recettes")
 ```
 
 ---
 
-## Données (data.py)
+## Icônes
 
-### `pagination(total, par_page, key)`
+L'application utilise [lucide-react](https://lucide.dev/) pour les icônes :
 
-Contrôles de pagination.
+```tsx
+import { Plus, Pencil, Trash2, Search, Star, Calendar, Home } from "lucide-react"
 
-```python
-from src.ui.components import pagination
-
-page_actuelle, total_pages = pagination(100, 20, "pagination_recettes")
-```
-
-### `ligne_metriques(stats)`
-
-Ligne de métriques horizontale.
-
-```python
-from src.ui.components import ligne_metriques
-
-stats = [
-    {"label": "Total", "value": 42},
-    {"label": "Actifs", "value": 30},
-    {"label": "Archivés", "value": 12},
-]
-ligne_metriques(stats)
-```
-
-### `boutons_export(data, nom_fichier, formats, cle)`
-
-Boutons d'export CSV/JSON.
-
-```python
-from src.ui.components import boutons_export
-
-boutons_export(
-    data=liste_recettes,
-    nom_fichier="recettes_export",
-    formats=["csv", "json"],
-    cle="export_recettes"
-)
-```
-
-### `tableau_donnees(data, colonnes)`
-
-Tableau de données stylé.
-
-```python
-from src.ui.components import tableau_donnees
-
-tableau_donnees(
-    data=recettes_df,
-    colonnes=["nom", "categorie", "temps_preparation"]
-)
-```
-
-### `barre_progression(valeur, maximum, label)`
-
-Barre de progression.
-
-```python
-from src.ui.components import barre_progression
-
-barre_progression(75, 100, "Progression")
-```
-
----
-
-## Layouts (layouts.py)
-
-### `disposition_grille(items, colonnes_par_ligne, rendu_carte, cle)`
-
-Grille responsive.
-
-```python
-from src.ui.components import disposition_grille
-
-def rendu_recette(recette, key):
-    st.write(recette["nom"])
-
-disposition_grille(recettes, colonnes_par_ligne=3, rendu_carte=rendu_recette)
-```
-
-### `carte_item(titre, metadonnees, statut, ...)`
-
-Carte d'item générique.
-
-```python
-from src.ui.components import carte_item
-
-carte_item(
-    titre="Tarte aux pommes",
-    metadonnees=["30 min", "Facile"],
-    statut="favori",
-    couleur_statut="#FFD700",
-    url_image="https://...",
-    actions=[("Voir", lambda: ...)]
-)
-```
-
----
-
-## Composants Dynamiques (dynamic.py)
-
-### `Modale`
-
-Modale popup.
-
-```python
-from src.ui.components import Modale
-
-modale = Modale("Confirmation")
-if modale.ouvrir():
-    st.write("Êtes-vous sûr?")
-    if st.button("Confirmer"):
-        modale.fermer()
-```
-
----
-
-## Feedback (feedback/)
-
-### Toasts (notifications temporaires)
-
-```python
-from src.ui.feedback import afficher_succes, afficher_erreur, afficher_avertissement, afficher_info
-
-afficher_succes("Sauvegardé!")           # 3 sec
-afficher_erreur("Échec de connexion")    # 5 sec
-afficher_avertissement("Stock bas")      # 4 sec
-afficher_info("Mise à jour disponible")  # 3 sec
-```
-
-### Spinners
-
-```python
-from src.ui.feedback import spinner_intelligent, indicateur_chargement, chargeur_squelette
-
-with spinner_intelligent("Chargement..."):
-    # Opération longue
-    pass
-
-indicateur_chargement()  # Spinner animé
-
-chargeur_squelette(lignes=5)  # Skeleton loader
-```
-
-### Classes
-
-```python
-from src.ui.feedback import SuiviProgression, EtatChargement, GestionnaireNotifications
-
-# Progression
-progress = SuiviProgression(total=100)
-progress.mettre_a_jour(50)
-
-# État chargement
-etat = EtatChargement()
-etat.demarrer("Chargement recettes")
-etat.terminer()
-
-# Notifications (file avec expiration)
-GestionnaireNotifications.afficher("Message", "success", duree=3)
-GestionnaireNotifications.rendre()  # Dans le main
-```
-
----
-
-## Mode Tablette (tablet/)
-
-### Configuration
-
-```python
-from src.ui.tablet import ModeTablette, obtenir_mode_tablette, definir_mode_tablette
-
-# Modes: NORMAL, TABLETTE, CUISINE
-mode = obtenir_mode_tablette()
-definir_mode_tablette(ModeTablette.CUISINE)
-```
-
-### Styles
-
-```python
-from src.ui.tablet import CSS_TABLETTE, CSS_MODE_CUISINE, appliquer_mode_tablette, fermer_mode_tablette
-
-appliquer_mode_tablette()    # Active le CSS tablette
-fermer_mode_tablette()       # Remet en mode normal
-```
-
-### Widgets Tactiles
-
-```python
-from src.ui.tablet import bouton_tablette, grille_selection_tablette, saisie_nombre_tablette, liste_cases_tablette
-
-# Bouton large tactile
-if bouton_tablette("Valider", icon="✓", key="btn_valider"):
-    # Action
-    pass
-
-# Grille de sélection (3 colonnes par défaut)
-selection = grille_selection_tablette(
-    options=[{"label": "Entrée"}, {"label": "Plat"}, {"label": "Dessert"}],
-    key="select_type"
-)
-
-# Input numérique avec boutons +/-
-quantite = saisie_nombre_tablette(
-    label="Quantité",
-    key="qty",
-    min_value=1,
-    max_value=20,
-    default=4
-)
-
-# Checklist tactile
-selections = liste_cases_tablette(
-    items=["Œufs", "Lait", "Farine"],
-    key="ingredients"
-)
-```
-
-### Vue Cuisine
-
-```python
-from src.ui.tablet import afficher_vue_recette_cuisine, afficher_selecteur_mode
-
-# Sélecteur de mode UI (dans la sidebar)
-afficher_selecteur_mode()
-
-# Vue recette format cuisine (step-by-step, navigation tactile)
-afficher_vue_recette_cuisine(recette, cle="kitchen_recipe")
+<Plus className="h-4 w-4" />
+<Button><Pencil className="mr-2 h-4 w-4" /> Modifier</Button>
 ```
 
 ---

@@ -79,14 +79,14 @@ class Parametres(BaseSettings):
         None,
         validation_alias=AliasChoices("DATABASE_URL", "db_url"),
     )
-    """URL complète de la base de données (résolue depuis env, st.secrets ou composants)."""
+    """URL complète de la base de données (résolue depuis env vars ou composants)."""
 
     @property
     def DATABASE_URL(self) -> str:
         """
         URL de connexion PostgreSQL validée par Pydantic.
 
-        La résolution depuis les env vars et st.secrets est effectuée
+        La résolution depuis les env vars est effectuée
         une seule fois au démarrage via ``_resoudre_secrets``.
 
         Returns:
@@ -114,14 +114,14 @@ class Parametres(BaseSettings):
         None,
         validation_alias=AliasChoices("MISTRAL_API_KEY", "mistral_key"),
     )
-    """Clé API Mistral résolue (depuis env ou st.secrets)."""
+    """Clé API Mistral résolue (depuis env vars)."""
 
     @property
     def MISTRAL_API_KEY(self) -> str:
         """
         Clé API Mistral validée par Pydantic.
 
-        La résolution depuis les env vars et st.secrets est effectuée
+        La résolution depuis les env vars est effectuée
         une seule fois au démarrage via ``_resoudre_secrets``.
 
         Returns:
@@ -246,12 +246,6 @@ class Parametres(BaseSettings):
 
     def _resoudre_mistral(self) -> None:
         """Résout MISTRAL_API_KEY depuis les env vars."""
-        dummy = "sk-test-dummy-key-replace-with-real-key"
-
-        if not self.mistral_key or self.mistral_key == dummy:
-            if self.streamlit_secrets_mistral_key:
-                self.mistral_key = self.streamlit_secrets_mistral_key
-
         if not self.MISTRAL_MODEL:
             self.MISTRAL_MODEL = "mistral-small-latest"
 

@@ -1,11 +1,9 @@
 """
-Génération et injection PWA - Orchestration et intégration Streamlit.
+Génération PWA - Orchestration de la génération des fichiers PWA.
 
 Ce module contient:
 - generate_pwa_files(): Orchestrateur de génération de tous les fichiers PWA
-- is_pwa_installed(): Vérification d'installation PWA
-- inject_pwa_meta(): Injection des meta tags PWA dans Streamlit
-- afficher_install_prompt(): Affichage du bouton d'installation PWA
+- is_pwa_installed(): Vérification d'installation PWA (stub côté client)
 """
 
 import logging
@@ -49,31 +47,25 @@ def generate_pwa_files(output_path: str | Path = "static") -> dict[str, Path]:
     return files
 
 
-# ═══════════════════════════════════════════════════════════
-# INJECTION DANS STREAMLIT
-# ═══════════════════════════════════════════════════════════
-
-
 def is_pwa_installed() -> bool:
     """
     Vérifie si l'app est installée en PWA.
 
     Note: Ne fonctionne que côté client via JavaScript.
     """
-    # Cette vérification doit être faite côté client
     return False
 
 
 # ═══════════════════════════════════════════════════════════
-# RE-EXPORTS UI (rétrocompatibilité)
+# STUBS DEPRECATED (rétrocompatibilité)
 # ═══════════════════════════════════════════════════════════
 
 
 def inject_pwa_meta() -> None:
-    # Streamlit UI supprimé
+    """DEPRECATED — plus nécessaire avec Next.js."""
     pass
 
 
 def afficher_install_prompt() -> None:
-    # Streamlit UI supprimé
+    """DEPRECATED — plus nécessaire avec Next.js."""
     pass

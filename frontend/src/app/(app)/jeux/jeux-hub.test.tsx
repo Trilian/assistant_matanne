@@ -15,7 +15,7 @@ vi.mock("next/link", () => ({
 
 vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: () => ({
-    data: { paris_actifs: 5, gain_total: 120.5, taux_reussite: 68 },
+    data: { total_paris: 5, benefice: 120.5, taux_reussite: 68 },
     isLoading: false,
     error: null,
   }),
@@ -38,8 +38,8 @@ describe("PageJeux (Hub)", () => {
 
   it("affiche les stats paris", () => {
     render(<PageJeux />);
-    expect(screen.getByText("Paris actifs")).toBeInTheDocument();
-    expect(screen.getByText("Gains totaux")).toBeInTheDocument();
+    expect(screen.getByText("Total paris")).toBeInTheDocument();
+    expect(screen.getByText("Bénéfice")).toBeInTheDocument();
     expect(screen.getByText("Taux de réussite")).toBeInTheDocument();
   });
 

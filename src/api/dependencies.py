@@ -2,7 +2,7 @@
 Dépendances FastAPI centralisées.
 
 Contient les dépendances communes pour l'authentification et l'autorisation.
-Utilise le module auth autonome (sans dépendance Streamlit).
+Utilise le module auth autonome (JWT Bearer tokens).
 """
 
 import logging

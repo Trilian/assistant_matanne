@@ -28,7 +28,7 @@ class AIStreamingMixin:
         Appel IA avec streaming — retourne un async generator.
 
         Utile pour afficher progressivement les réponses longues (suggestions,
-        analyses, etc.) dans Streamlit via st.write_stream() ou un container
+        analyses, etc.) via streaming SSE ou un container
         personnalisé.
 
         Le cache est IGNORÉ en streaming (UX temps réel prioritaire).
@@ -43,9 +43,10 @@ class AIStreamingMixin:
         Yields:
             str: Chunks de texte au fur et à mesure qu'ils arrivent
 
-        Usage dans Streamlit:
-            # Option 1: st.write_stream() (Streamlit >= 1.31)
-            st.write_stream(service.call_with_streaming_sync(prompt))
+        Usage:
+            # Via générateur sync
+            for chunk in service.call_with_streaming_sync(prompt):
+                print(chunk, end="")
 
             # Option 2: Container manuel
             container = st.empty()
@@ -95,18 +96,14 @@ class AIStreamingMixin:
         max_tokens: int = 1000,
     ):
         """
-        Version synchrone du streaming pour Streamlit.
+        Version synchrone du streaming.
 
-        Retourne un générateur synchrone qui peut être passé directement
-        à st.write_stream() ou itéré dans une boucle.
+        Retourne un générateur synchrone qui peut être itéré
+        dans une boucle ou passé à un endpoint SSE.
 
         Usage:
-            # Avec st.write_stream()
-            st.write_stream(service.call_with_streaming_sync("Génère une recette"))
-
-            # Avec boucle manuelle
             for chunk in service.call_with_streaming_sync("Génère une recette"):
-                st.write(chunk)
+                print(chunk, end="")
         """
         import asyncio
         import concurrent.futures
@@ -135,5 +132,5 @@ class AIStreamingMixin:
         else:
             chunks = asyncio.run(collect_chunks())
 
-        # Yield les chunks un par un (pour st.write_stream)
+        # Yield les chunks un par un
         yield from chunks

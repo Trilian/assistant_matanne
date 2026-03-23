@@ -43,7 +43,7 @@ from .health import (
     verifier_sante_globale,
     verifier_startup,
 )
-from .rerun_profiler import (
+from .rerun_profiler import (  # DEPRECATED — stubs conservés pour rétrocompatibilité
     RerunProfiler,
     RerunRecord,
     obtenir_stats_rerun,

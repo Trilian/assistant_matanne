@@ -2,7 +2,7 @@
 Utilitaires async/sync pour les services.
 
 Fournit des helpers pour convertir des méthodes async en méthodes sync,
-utile pour l'intégration avec Streamlit qui ne supporte pas nativement async.
+utile pour l'intégration dans des contextes ne supportant pas nativement async.
 
 Features:
 - sync_wrapper: Décorateur pour créer une version sync d'une méthode async
@@ -52,7 +52,7 @@ def sync_wrapper(async_method: Callable[P, Awaitable[T]]) -> Callable[P, T]:
     Décorateur qui crée automatiquement une version synchrone d'une méthode async.
 
     Gère intelligemment les cas où une boucle d'événements est déjà en cours
-    (comme dans certains contextes Streamlit) en utilisant un ThreadPoolExecutor.
+    (comme dans certains contextes sync) en utilisant un ThreadPoolExecutor.
 
     Args:
         async_method: La méthode async à wrapper
@@ -148,7 +148,7 @@ class ServiceMeta(type):
         service = MonService()
         # Appel async (dans contexte async)
         result = await service.generer_suggestions("test")
-        # Appel sync (dans Streamlit)
+        # Appel sync
         result = service.generer_suggestions_sync("test")
 
     Note:
@@ -192,7 +192,7 @@ class ServiceMeta(type):
             sync_method.__doc__ = (
                 f"{original_doc}\n\n"
                 f"[Auto-generated sync version of {method_name}()]\n"
-                f"Safe to call from Streamlit or any synchronous context."
+                f"Safe to call from any synchronous context."
             )
 
             namespace[sync_name] = sync_method
@@ -275,7 +275,7 @@ def run_sync(coro: Awaitable[T]) -> T:
         async def fetch_data():
             return await api.get("/data")
 
-        # Dans Streamlit:
+        # Dans un contexte sync:
         data = run_sync(fetch_data())
     """
     try:

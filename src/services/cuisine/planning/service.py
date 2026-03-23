@@ -4,7 +4,7 @@ Service Planning de Base (REFACTORING PHASE 2)
 ✅ Utilise @avec_session_db et @avec_cache (Phase 1)
 ✅ Validation Pydantic centralisée
 ✅ Type hints complets pour meilleur IDE support
-✅ Services testables sans Streamlit
+✅ Services testables
 """
 
 import logging

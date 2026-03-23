@@ -53,7 +53,7 @@ from .validators import (
     afficher_erreurs_validation,
     valider_entree,
     valider_et_nettoyer_formulaire,
-    valider_formulaire_streamlit,
+    valider_formulaire,
     valider_modele,
 )
 
@@ -99,7 +99,7 @@ __all__ = [
     "SCHEMA_COURSES",
     # Validators
     "valider_modele",
-    "valider_formulaire_streamlit",
+    "valider_formulaire",
     "valider_et_nettoyer_formulaire",
     "afficher_erreurs_validation",
     "valider_entree",

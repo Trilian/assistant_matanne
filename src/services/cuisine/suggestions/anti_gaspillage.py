@@ -220,6 +220,7 @@ def calculer_score_mensuel(*, mois: date | None = None, db) -> ScoreMensuelAntiG
     Basé sur le ratio produits consommés à temps vs produits expirés.
     """
     from src.core.models.inventaire import HistoriqueInventaire
+    from src.core.models.recettes import HistoriqueRecette
 
     if mois is None:
         mois = date.today().replace(day=1)
@@ -250,6 +251,16 @@ def calculer_score_mensuel(*, mois: date | None = None, db) -> ScoreMensuelAntiG
     )
     supprimes = sum(1 for h in historique if h.type_modification == "suppression")
 
+    # Compter les recettes cuisinées ce mois (chaque cuisson contribue à réduire le gaspillage)
+    nb_recettes = (
+        db.query(HistoriqueRecette)
+        .filter(
+            HistoriqueRecette.date_cuisson >= debut_mois,
+            HistoriqueRecette.date_cuisson < fin_mois,
+        )
+        .count()
+    )
+
     total = consommes + supprimes
     taux = (consommes / total * 100) if total > 0 else 100.0
 
@@ -270,7 +281,7 @@ def calculer_score_mensuel(*, mois: date | None = None, db) -> ScoreMensuelAntiG
     return ScoreMensuelAntiGaspi(
         mois=mois_str,
         kg_sauves_estime=round(kg_sauves, 1),
-        nb_recettes_antigaspi=0,  # TODO: tracker les recettes anti-gaspi cuisinées
+        nb_recettes_antigaspi=nb_recettes,
         nb_produits_expires=supprimes,
         nb_produits_consommes_a_temps=consommes,
         taux_reussite=round(taux, 1),

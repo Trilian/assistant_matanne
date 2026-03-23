@@ -206,7 +206,7 @@ export default function NotesPage() {
               className="relative overflow-hidden"
               style={{
                 borderLeftWidth: 4,
-                borderLeftColor: n.couleur ?? "#e5e7eb",
+                borderLeftColor: n.couleur ?? "var(--color-border)",
               }}
             >
               <CardHeader className="pb-2">

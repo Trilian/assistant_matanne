@@ -67,7 +67,7 @@ describe("utiliserMutation", () => {
     result.current.mutate("test-input");
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(fn).toHaveBeenCalledWith("test-input");
+    expect(fn).toHaveBeenCalledWith("test-input", expect.anything());
     expect(result.current.data).toEqual({ id: 1 });
   });
 

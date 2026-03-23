@@ -65,7 +65,7 @@ class BudgetAlertesMixin:
                     }
                 )
 
-        # Stocker les alertes (sans dépendance Streamlit)
+        # Stocker les alertes
         self._derniers_alertes = alertes
         return alertes
 

@@ -40,10 +40,10 @@ logger = logging.getLogger(__name__)
 
 
 def _get_api_key(key_name: str) -> str | None:
-    """Charge une clé API via obtenir_parametres() (cascade .env.local → .env → st.secrets).
+    """Charge une clé API via obtenir_parametres() (cascade .env.local → .env).
 
     Centralise la résolution en passant par le système de configuration
-    du projet plutôt qu'importer directement Streamlit.
+    du projet plutôt qu'accéder directement aux variables d'environnement.
     """
     try:
         from src.core.config import obtenir_parametres
@@ -81,7 +81,7 @@ if UNSPLASH_API_KEY:
     logger.info("Clé Unsplash chargée")
 else:
     logger.warning(
-        "Clé Unsplash non trouvée - vérifiez st.secrets['unsplash']['api_key'] ou UNSPLASH_API_KEY"
+        "Clé Unsplash non trouvée - vérifiez UNSPLASH_API_KEY dans .env.local"
     )
 
 

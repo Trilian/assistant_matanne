@@ -1,69 +1,193 @@
 // ═══════════════════════════════════════════════════════════
-// Contacts — Répertoire familial
+// Contacts — Répertoire familial (connecté API)
 // ═══════════════════════════════════════════════════════════
 
 "use client";
 
 import { useState } from "react";
-import { Users, Phone, Mail, Search, MapPin } from "lucide-react";
 import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+  Users,
+  Phone,
+  Mail,
+  Search,
+  MapPin,
+  Plus,
+  Star,
+  Trash2,
+  Pencil,
+  Clock,
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  utiliserRequete,
+  utiliserMutation,
+  utiliserInvalidation,
+} from "@/crochets/utiliser-api";
+import {
+  listerContacts,
+  creerContact,
+  modifierContact,
+  supprimerContact,
+  type ContactUtile,
+} from "@/bibliotheque/api/utilitaires";
 
-interface Contact {
-  nom: string;
-  telephone?: string;
-  email?: string;
-  ville?: string;
-  categorie: string;
-}
-
-// Données statiques de démarrage — à connecter au backend plus tard
-const CONTACTS: Contact[] = [
-  {
-    nom: "Pédiatre — Dr Martin",
-    telephone: "01 23 45 67 89",
-    categorie: "Santé",
-  },
-  {
-    nom: "Crèche Les Petits Loups",
-    telephone: "01 98 76 54 32",
-    email: "creche@example.com",
-    ville: "Paris",
-    categorie: "Garde",
-  },
-  {
-    nom: "Mamie Françoise",
-    telephone: "06 12 34 56 78",
-    ville: "Lyon",
-    categorie: "Famille",
-  },
+const CATEGORIES = [
+  "Tous",
+  "famille",
+  "sante",
+  "garde",
+  "ecole",
+  "pro",
+  "ami",
+  "autre",
 ];
-
-const CATEGORIES = ["Tous", "Famille", "Santé", "Garde", "Amis", "Pro"];
+const LABELS_CAT: Record<string, string> = {
+  Tous: "Tous",
+  famille: "Famille",
+  sante: "Santé",
+  garde: "Garde",
+  ecole: "École",
+  pro: "Pro",
+  ami: "Amis",
+  autre: "Autre",
+};
 
 export default function PageContacts() {
   const [recherche, setRecherche] = useState("");
   const [categorie, setCategorie] = useState("Tous");
+  const [ouvert, setOuvert] = useState(false);
+  const [edition, setEdition] = useState<ContactUtile | null>(null);
 
-  const contactsFiltres = CONTACTS.filter((c) => {
-    const matchRecherche =
-      !recherche || c.nom.toLowerCase().includes(recherche.toLowerCase());
-    const matchCategorie =
-      categorie === "Tous" || c.categorie === categorie;
-    return matchRecherche && matchCategorie;
-  });
+  const invalider = utiliserInvalidation();
+  const { data: contacts = [], isLoading } = utiliserRequete(
+    ["contacts", categorie, recherche],
+    () =>
+      listerContacts({
+        categorie: categorie === "Tous" ? undefined : categorie,
+        search: recherche || undefined,
+      })
+  );
+
+  const mutCreer = utiliserMutation(
+    (c: Omit<ContactUtile, "id">) => creerContact(c),
+    { onSuccess: () => { invalider(["contacts"]); setOuvert(false); } }
+  );
+  const mutModifier = utiliserMutation(
+    ({ id, patch }: { id: number; patch: Partial<ContactUtile> }) =>
+      modifierContact(id, patch),
+    { onSuccess: () => { invalider(["contacts"]); setEdition(null); setOuvert(false); } }
+  );
+  const mutSupprimer = utiliserMutation(
+    (id: number) => supprimerContact(id),
+    { onSuccess: () => invalider(["contacts"]) }
+  );
+
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      nom: fd.get("nom") as string,
+      categorie: fd.get("categorie") as string,
+      specialite: (fd.get("specialite") as string) || undefined,
+      telephone: (fd.get("telephone") as string) || undefined,
+      email: (fd.get("email") as string) || undefined,
+      adresse: (fd.get("adresse") as string) || undefined,
+      horaires: (fd.get("horaires") as string) || undefined,
+      favori: false,
+    };
+    if (edition) {
+      mutModifier.mutate({ id: edition.id, patch: payload });
+    } else {
+      mutCreer.mutate(payload);
+    }
+  }
+
+  function ouvrir(contact?: ContactUtile) {
+    setEdition(contact ?? null);
+    setOuvert(true);
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">📇 Contacts</h1>
-        <p className="text-muted-foreground">
-          Répertoire familial et contacts utiles
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">📇 Contacts</h1>
+          <p className="text-muted-foreground">
+            Répertoire familial et contacts utiles
+          </p>
+        </div>
+        <Dialog open={ouvert} onOpenChange={(o) => { setOuvert(o); if (!o) setEdition(null); }}>
+          <DialogTrigger asChild>
+            <Button onClick={() => ouvrir()}>
+              <Plus className="mr-2 h-4 w-4" />
+              Ajouter
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {edition ? "Modifier le contact" : "Nouveau contact"}
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={onSubmit} className="space-y-3 pt-2">
+              <div>
+                <Label htmlFor="nom">Nom *</Label>
+                <Input id="nom" name="nom" required defaultValue={edition?.nom ?? ""} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="categorie">Catégorie</Label>
+                  <select
+                    id="categorie"
+                    name="categorie"
+                    defaultValue={edition?.categorie ?? "autre"}
+                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  >
+                    {CATEGORIES.filter((c) => c !== "Tous").map((c) => (
+                      <option key={c} value={c}>{LABELS_CAT[c]}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="specialite">Spécialité</Label>
+                  <Input id="specialite" name="specialite" defaultValue={edition?.specialite ?? ""} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="telephone">Téléphone</Label>
+                  <Input id="telephone" name="telephone" defaultValue={edition?.telephone ?? ""} />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" name="email" type="email" defaultValue={edition?.email ?? ""} />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="adresse">Adresse</Label>
+                <Input id="adresse" name="adresse" defaultValue={edition?.adresse ?? ""} />
+              </div>
+              <div>
+                <Label htmlFor="horaires">Horaires</Label>
+                <Input id="horaires" name="horaires" defaultValue={edition?.horaires ?? ""} />
+              </div>
+              <Button type="submit" className="w-full">
+                {edition ? "Enregistrer" : "Ajouter"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Filtres */}
@@ -85,7 +209,7 @@ export default function PageContacts() {
               className="cursor-pointer"
               onClick={() => setCategorie(cat)}
             >
-              {cat}
+              {LABELS_CAT[cat]}
             </Badge>
           ))}
         </div>
@@ -93,7 +217,18 @@ export default function PageContacts() {
 
       {/* Liste */}
       <div className="space-y-3">
-        {contactsFiltres.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="py-4">
+                  <div className="h-5 w-48 animate-pulse rounded bg-muted" />
+                  <div className="mt-2 h-4 w-32 animate-pulse rounded bg-muted" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : contacts.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
               <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -101,11 +236,21 @@ export default function PageContacts() {
             </CardContent>
           </Card>
         ) : (
-          contactsFiltres.map((contact) => (
-            <Card key={contact.nom}>
+          contacts.map((contact) => (
+            <Card key={contact.id}>
               <CardContent className="flex items-start justify-between py-4">
                 <div className="space-y-1">
-                  <p className="font-medium">{contact.nom}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{contact.nom}</p>
+                    {contact.favori && (
+                      <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                    )}
+                  </div>
+                  {contact.specialite && (
+                    <p className="text-xs text-muted-foreground">
+                      {contact.specialite}
+                    </p>
+                  )}
                   <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
                     {contact.telephone && (
                       <span className="flex items-center gap-1">
@@ -119,15 +264,41 @@ export default function PageContacts() {
                         {contact.email}
                       </span>
                     )}
-                    {contact.ville && (
+                    {contact.adresse && (
                       <span className="flex items-center gap-1">
                         <MapPin className="h-3.5 w-3.5" />
-                        {contact.ville}
+                        {contact.adresse}
+                      </span>
+                    )}
+                    {contact.horaires && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" />
+                        {contact.horaires}
                       </span>
                     )}
                   </div>
                 </div>
-                <Badge variant="secondary">{contact.categorie}</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">
+                    {LABELS_CAT[contact.categorie] ?? contact.categorie}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => ouvrir(contact)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive"
+                    onClick={() => mutSupprimer.mutate(contact.id)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))

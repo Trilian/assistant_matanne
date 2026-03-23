@@ -2,7 +2,7 @@
 Bus d'événements domaine — Pub/Sub synchrone in-process.
 
 Bus d'événements léger pour découpler les services entre eux.
-Synchrone (pas besoin de message broker pour une app Streamlit).
+Synchrone (pas besoin de message broker pour cette app).
 Thread-safe via threading.Lock.
 
 Fonctionnalités:

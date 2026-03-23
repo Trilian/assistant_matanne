@@ -19,9 +19,16 @@ from src.api.pagination import appliquer_cursor_filter, construire_reponse_curso
 from src.api.schemas.common import MessageResponse, ReponsePaginee
 from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
+    REPONSES_CRUD_ECRITURE,
     REPONSES_CRUD_LECTURE,
     REPONSES_CRUD_SUPPRESSION,
     REPONSES_LISTE,
+)
+from src.api.schemas.famille import (
+    AnniversaireCreate,
+    AnniversairePatch,
+    EvenementFamilialCreate,
+    EvenementFamilialPatch,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
@@ -792,5 +799,283 @@ async def supprimer_routine(
             session.delete(routine)
             session.commit()
             return MessageResponse(message=f"Routine '{routine.nom}' supprimée")
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# ANNIVERSAIRES
+# ═══════════════════════════════════════════════════════════
+
+
+def _serialiser_anniversaire(a) -> dict:  # noqa: ANN001
+    return {
+        "id": a.id,
+        "nom_personne": a.nom_personne,
+        "date_naissance": a.date_naissance.isoformat() if a.date_naissance else None,
+        "relation": a.relation,
+        "rappel_jours_avant": a.rappel_jours_avant or [7, 1, 0],
+        "idees_cadeaux": a.idees_cadeaux,
+        "historique_cadeaux": a.historique_cadeaux,
+        "notes": a.notes,
+        "actif": a.actif,
+        "age": a.age,
+        "jours_restants": a.jours_restants,
+        "cree_le": a.cree_le.isoformat() if a.cree_le else None,
+    }
+
+
+@router.get("/anniversaires", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_anniversaires(
+    relation: str | None = Query(None),
+    actif: bool = Query(True),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Liste les anniversaires familiaux, triés par jours restants."""
+    from src.core.models import AnniversaireFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            query = session.query(AnniversaireFamille).filter(
+                AnniversaireFamille.actif == actif
+            )
+            if relation:
+                query = query.filter(AnniversaireFamille.relation == relation)
+
+            items = query.order_by(AnniversaireFamille.date_naissance).all()
+            serialized = [_serialiser_anniversaire(a) for a in items]
+            serialized.sort(key=lambda x: x.get("jours_restants", 999))
+            return {"items": serialized}
+
+    return await executer_async(_query)
+
+
+@router.get("/anniversaires/{anniversaire_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_anniversaire(
+    anniversaire_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Récupère un anniversaire par son ID."""
+    from src.core.models import AnniversaireFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            a = session.query(AnniversaireFamille).filter(
+                AnniversaireFamille.id == anniversaire_id
+            ).first()
+            if not a:
+                raise HTTPException(status_code=404, detail="Anniversaire non trouvé")
+            return _serialiser_anniversaire(a)
+
+    return await executer_async(_query)
+
+
+@router.post("/anniversaires", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_anniversaire(
+    donnees: AnniversaireCreate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée un anniversaire familial."""
+    from src.core.models import AnniversaireFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            a = AnniversaireFamille(
+                nom_personne=donnees.nom_personne,
+                date_naissance=date.fromisoformat(donnees.date_naissance),
+                relation=donnees.relation,
+                rappel_jours_avant=donnees.rappel_jours_avant,
+                idees_cadeaux=donnees.idees_cadeaux,
+                notes=donnees.notes,
+            )
+            session.add(a)
+            session.commit()
+            session.refresh(a)
+            return _serialiser_anniversaire(a)
+
+    return await executer_async(_query)
+
+
+@router.patch("/anniversaires/{anniversaire_id}", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def modifier_anniversaire(
+    anniversaire_id: int,
+    donnees: AnniversairePatch,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour un anniversaire."""
+    from src.core.models import AnniversaireFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            a = session.query(AnniversaireFamille).filter(
+                AnniversaireFamille.id == anniversaire_id
+            ).first()
+            if not a:
+                raise HTTPException(status_code=404, detail="Anniversaire non trouvé")
+
+            for champ, valeur in donnees.model_dump(exclude_unset=True).items():
+                if champ == "date_naissance" and valeur:
+                    setattr(a, champ, date.fromisoformat(valeur))
+                else:
+                    setattr(a, champ, valeur)
+
+            session.commit()
+            session.refresh(a)
+            return _serialiser_anniversaire(a)
+
+    return await executer_async(_query)
+
+
+@router.delete("/anniversaires/{anniversaire_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_anniversaire(
+    anniversaire_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime un anniversaire."""
+    from src.core.models import AnniversaireFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            a = session.query(AnniversaireFamille).filter(
+                AnniversaireFamille.id == anniversaire_id
+            ).first()
+            if not a:
+                raise HTTPException(status_code=404, detail="Anniversaire non trouvé")
+
+            session.delete(a)
+            session.commit()
+            return MessageResponse(message=f"Anniversaire '{a.nom_personne}' supprimé")
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# ÉVÉNEMENTS FAMILIAUX
+# ═══════════════════════════════════════════════════════════
+
+
+def _serialiser_evenement(e) -> dict:  # noqa: ANN001
+    return {
+        "id": e.id,
+        "titre": e.titre,
+        "date_evenement": e.date_evenement.isoformat() if e.date_evenement else None,
+        "type_evenement": e.type_evenement,
+        "recurrence": e.recurrence,
+        "rappel_jours_avant": e.rappel_jours_avant,
+        "notes": e.notes,
+        "participants": e.participants,
+        "actif": e.actif,
+        "cree_le": e.cree_le.isoformat() if e.cree_le else None,
+    }
+
+
+@router.get("/evenements", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_evenements_familiaux(
+    type_evenement: str | None = Query(None),
+    actif: bool = Query(True),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Liste les événements familiaux."""
+    from src.core.models import EvenementFamilial
+
+    def _query():
+        with executer_avec_session() as session:
+            query = session.query(EvenementFamilial).filter(
+                EvenementFamilial.actif == actif
+            )
+            if type_evenement:
+                query = query.filter(EvenementFamilial.type_evenement == type_evenement)
+
+            items = query.order_by(EvenementFamilial.date_evenement.desc()).all()
+            return {"items": [_serialiser_evenement(e) for e in items]}
+
+    return await executer_async(_query)
+
+
+@router.post("/evenements", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_evenement_familial(
+    donnees: EvenementFamilialCreate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée un événement familial."""
+    from src.core.models import EvenementFamilial
+
+    def _query():
+        with executer_avec_session() as session:
+            e = EvenementFamilial(
+                titre=donnees.titre,
+                date_evenement=date.fromisoformat(donnees.date_evenement),
+                type_evenement=donnees.type_evenement,
+                recurrence=donnees.recurrence,
+                rappel_jours_avant=donnees.rappel_jours_avant,
+                notes=donnees.notes,
+                participants=donnees.participants,
+            )
+            session.add(e)
+            session.commit()
+            session.refresh(e)
+            return _serialiser_evenement(e)
+
+    return await executer_async(_query)
+
+
+@router.patch("/evenements/{evenement_id}", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def modifier_evenement_familial(
+    evenement_id: int,
+    donnees: EvenementFamilialPatch,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour un événement familial."""
+    from src.core.models import EvenementFamilial
+
+    def _query():
+        with executer_avec_session() as session:
+            e = session.query(EvenementFamilial).filter(
+                EvenementFamilial.id == evenement_id
+            ).first()
+            if not e:
+                raise HTTPException(status_code=404, detail="Événement non trouvé")
+
+            for champ, valeur in donnees.model_dump(exclude_unset=True).items():
+                if champ == "date_evenement" and valeur:
+                    setattr(e, champ, date.fromisoformat(valeur))
+                else:
+                    setattr(e, champ, valeur)
+
+            session.commit()
+            session.refresh(e)
+            return _serialiser_evenement(e)
+
+    return await executer_async(_query)
+
+
+@router.delete("/evenements/{evenement_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_evenement_familial(
+    evenement_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime un événement familial."""
+    from src.core.models import EvenementFamilial
+
+    def _query():
+        with executer_avec_session() as session:
+            e = session.query(EvenementFamilial).filter(
+                EvenementFamilial.id == evenement_id
+            ).first()
+            if not e:
+                raise HTTPException(status_code=404, detail="Événement non trouvé")
+
+            session.delete(e)
+            session.commit()
+            return MessageResponse(message=f"Événement '{e.titre}' supprimé")
 
     return await executer_async(_query)

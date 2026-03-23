@@ -7,7 +7,6 @@ Gère les notifications et alertes pour:
 - Alertes programmées
 
 Intégration avec:
-- Streamlit session state (notifications UI)
 - Base de données (historique alertes)
 - Scheduler (alertes programmées)
 """
@@ -96,7 +95,7 @@ class NotificationJeuxService:
     """
     Service de gestion des notifications jeux.
 
-    Stocke les notifications en session Streamlit et
+    Stocke les notifications et
     peut les persister en base de données.
     """
 
@@ -394,12 +393,12 @@ class NotificationJeuxService:
 
 
 def afficher_badge_notifications(service: "NotificationJeuxService | None" = None) -> None:
-    # Streamlit UI supprimé
+    # UI supprimée — stub rétrocompatible
     pass
 
 
 def afficher_notification(notification: "NotificationJeux") -> None:
-    # Streamlit UI supprimé
+    # UI supprimée — stub rétrocompatible
     pass
 
 
@@ -408,7 +407,7 @@ def afficher_liste_notifications(
     limite: int = 10,
     type_jeu: str | None = None,
 ) -> None:
-    # Streamlit UI supprimé
+    # UI supprimée — stub rétrocompatible
     pass
 
 

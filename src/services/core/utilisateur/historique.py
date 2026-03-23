@@ -295,7 +295,7 @@ def get_action_history_service() -> ActionHistoryService:
     return obtenir_service_historique_actions()
 
 
-# Streamlit UI supprimé — stubs rétrocompatibles
+# UI supprimée — stubs rétrocompatibles
 def afficher_user_activity(*args, **kwargs) -> None:
     pass
 

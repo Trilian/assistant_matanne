@@ -40,7 +40,7 @@ except ImportError:
     # asyncpg/aiosqlite non installé
     pass
 
-# st.connection Supabase (lazy import pour éviter dépendance Streamlit en tests)
+# Connection Supabase (lazy import pour éviter dépendance en tests)
 try:
     from .connection import (
         SupabaseConnection,

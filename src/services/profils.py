@@ -175,7 +175,7 @@ class ProfilService:
 
     @staticmethod
     def changer_profil_actif(username: str) -> bool:
-        """Change le profil actif (log seulement, plus d'état Streamlit)."""
+        """Change le profil actif (log seulement)."""
         profil = ProfilService.obtenir_profil(username)
         if not profil:
             logger.warning("Profil introuvable: %s", username)

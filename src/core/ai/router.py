@@ -612,7 +612,7 @@ class RouteurIA:
     ) -> str:
         """Appel synchrone avec routage.
 
-        Wrapper pour les contextes non-async (Streamlit UI).
+        Wrapper pour les contextes non-async.
         """
         from src.core.async_utils import executer_async
 

@@ -4,7 +4,7 @@ Base AI Service - Service IA Générique avec Rate Limiting Auto.
 Compose 4 mixins (streaming, safe, diagnostics, prompts) pour garder
 chaque fichier à taille raisonnable tout en conservant la même API publique.
 
-[!] Ce module N'IMPORTE PAS streamlit — découplé de l'UI.
+[!] Ce module N'IMPORTE PAS d'éléments UI — découplé de l'UI.
     Les erreurs sont loguées et propagées, l'affichage est géré
     par la couche UI via l'Event Bus.
 """

@@ -44,7 +44,7 @@ class StreamingMixin:
         """
         Appel API avec streaming — retourne un async generator.
 
-        Permet d'afficher la réponse progressivement dans Streamlit.
+        Permet d'afficher la réponse progressivement via streaming SSE.
         Le rate limiting est vérifié au début, le cache est IGNORÉ
         (streaming = pas de cache pour UX en temps réel).
 

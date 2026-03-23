@@ -2,7 +2,7 @@
 Mixin de gestion des sessions d'authentification.
 
 Gère la persistance de la session utilisateur dans un stockage
-clé-valeur mutable (par défaut ``st.session_state``).
+clé-valeur mutable (dictionnaire ou stockage externe).
 
 Dépendances attendues sur ``self``
 -----------------------------------
@@ -69,7 +69,7 @@ class SessionMixin:
         if user:
             return user
 
-        # Streamlit UI supprimé
+        # UI supprimée
         return None
 
     # -----------------------------------------------------------

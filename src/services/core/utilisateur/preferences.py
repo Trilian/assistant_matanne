@@ -5,7 +5,7 @@ Gère:
 - PreferenceUtilisateur: Préférences familiales persistantes
 - RetourRecette: Feedbacks 👍/👎 pour apprentissage IA
 
-Remplace st.session_state par persistance PostgreSQL.
+Remplace le stockage session par persistance PostgreSQL.
 """
 
 import logging

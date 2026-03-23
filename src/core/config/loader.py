@@ -31,7 +31,7 @@ def _reload_env_files():
 
 
 def _read_env_secret(section: str) -> str | None:
-    """Lit une variable d'environnement (remplacement de st.secrets).
+    """Lit une variable d'environnement.
 
     Args:
         section: Nom de la variable d'environnement (case-insensitive).

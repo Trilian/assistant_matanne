@@ -249,6 +249,6 @@ Variables d'environnement:
 
 ## 📝 Notes
 
-- L'API utilise la même base de données que l'application Streamlit
+- L'API utilise la même base de données que l'application frontend
 - Les modifications sont reflétées en temps réel
 - Utilisez les endpoints de suggestions pour des recommandations intelligentes basées sur votre historique

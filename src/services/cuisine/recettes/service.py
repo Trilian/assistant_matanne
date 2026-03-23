@@ -4,7 +4,7 @@ Service Recettes Unifié (REFACTORING PHASE 3)
 ✅ Utilise @avec_session_db et @avec_cache (Phase 1)
 ✅ Validation Pydantic centralisée (RecetteInput, etc.)
 ✅ Type hints complets pour meilleur IDE support
-✅ Services testables sans Streamlit
+✅ Services testables
 ✅ Mixins extraits pour réduire LOC (Phase 3)
 
 Service complet pour les recettes fusionnant :

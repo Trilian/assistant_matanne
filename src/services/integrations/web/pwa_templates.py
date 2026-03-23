@@ -164,7 +164,7 @@ self.addEventListener('fetch', (event) => {
     // Ignorer les requêtes non-GET
     if (event.request.method !== 'GET') return;
 
-    // Ignorer les WebSockets (Streamlit)
+    // Ignorer les WebSockets
     if (event.request.url.includes('_stcore')) return;
 
     event.respondWith(

@@ -217,7 +217,7 @@ def _generer_via_leonardo(
     Génère une image via Leonardo.AI (meilleur pour la cuisine, gratuit avec compte).
     Leonardo.AI est spécialisé dans la génération d'images culinaires de haute qualité.
 
-    Nécessite : LEONARDO_API_KEY et LEONARDO_MODEL_ID dans .env ou st.secrets
+    Nécessite : LEONARDO_API_KEY et LEONARDO_MODEL_ID dans .env.local
     Obtenir une clé gratuitement sur: https://app.leonardo.ai
     """
     api_key = os.getenv("LEONARDO_API_KEY") or os.getenv("LEONARDO_TOKEN")

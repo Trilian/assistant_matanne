@@ -89,10 +89,10 @@ Jouets sûrs, éducatifs et adaptés à cet âge."""
             max_tokens=600,
         )
 
-    # ── Méthodes streaming (pour st.write_stream) ──
+    # ── Méthodes streaming ──
 
     def stream_activites(self, age_mois: int, meteo: str = "intérieur", nb: int = 3):
-        """Streaming de suggestions d'activités pour st.write_stream()."""
+        """Streaming de suggestions d'activités."""
         prompt = f"""Pour un enfant de {age_mois} mois, suggère {nb} activités {meteo}.
 
 Format pour chaque activité:
@@ -110,7 +110,7 @@ Activités adaptées à cet âge, stimulantes et réalisables à la maison."""
         )
 
     def stream_conseil(self, age_mois: int, theme: str):
-        """Streaming de conseils développement pour st.write_stream()."""
+        """Streaming de conseils développement."""
         themes_detail = {
             "proprete": "l'apprentissage de la propreté et du pot",
             "sommeil": "le sommeil et les routines du coucher",
@@ -138,7 +138,7 @@ Ton bienveillant, rassurant et pratique."""
         )
 
     def stream_jouets(self, age_mois: int, budget: int = 30):
-        """Streaming de suggestions jouets pour st.write_stream()."""
+        """Streaming de suggestions jouets."""
         prompt = f"""Pour un enfant de {age_mois} mois, suggère 5 jouets éducatifs avec un budget de {budget}€ max par jouet.
 
 Format:
