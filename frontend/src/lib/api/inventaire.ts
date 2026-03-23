@@ -1,0 +1,40 @@
+// ═══════════════════════════════════════════════════════════
+// API Inventaire
+// ═══════════════════════════════════════════════════════════
+
+import { clientApi } from "./client";
+import type { ArticleInventaire, CreerArticleInventaireDTO } from "@/types/inventaire";
+
+/** Lister les articles de l'inventaire */
+export async function listerInventaire(): Promise<ArticleInventaire[]> {
+  const { data } = await clientApi.get<ArticleInventaire[]>("/inventaire");
+  return data;
+}
+
+/** Ajouter un article à l'inventaire */
+export async function ajouterArticleInventaire(
+  dto: CreerArticleInventaireDTO
+): Promise<ArticleInventaire> {
+  const { data } = await clientApi.post<ArticleInventaire>("/inventaire", dto);
+  return data;
+}
+
+/** Mettre à jour un article */
+export async function modifierArticleInventaire(
+  id: number,
+  dto: Partial<CreerArticleInventaireDTO>
+): Promise<ArticleInventaire> {
+  const { data } = await clientApi.put<ArticleInventaire>(`/inventaire/${id}`, dto);
+  return data;
+}
+
+/** Supprimer un article */
+export async function supprimerArticleInventaire(id: number): Promise<void> {
+  await clientApi.delete(`/inventaire/${id}`);
+}
+
+/** Articles en alerte (stock bas ou périmés bientôt) */
+export async function obtenirAlertes(): Promise<ArticleInventaire[]> {
+  const { data } = await clientApi.get<ArticleInventaire[]>("/inventaire/alertes");
+  return data;
+}

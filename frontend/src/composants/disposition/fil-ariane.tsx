@@ -1,0 +1,79 @@
+// ═══════════════════════════════════════════════════════════
+// Fil d'ariane — Breadcrumbs sous-pages
+// ═══════════════════════════════════════════════════════════
+
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ChevronRight, Home } from "lucide-react";
+
+/** Traduit un segment d'URL en libellé français */
+function traduireSegment(segment: string): string {
+  const traductions: Record<string, string> = {
+    cuisine: "Cuisine",
+    recettes: "Recettes",
+    planning: "Planning",
+    courses: "Courses",
+    inventaire: "Inventaire",
+    "batch-cooking": "Batch Cooking",
+    "anti-gaspillage": "Anti-Gaspillage",
+    famille: "Famille",
+    jules: "Jules",
+    activites: "Activités",
+    routines: "Routines",
+    budget: "Budget",
+    weekend: "Weekend",
+    maison: "Maison",
+    projets: "Projets",
+    jardin: "Jardin",
+    entretien: "Entretien",
+    charges: "Charges",
+    jeux: "Jeux",
+    paris: "Paris",
+    loto: "Loto",
+    outils: "Outils",
+    parametres: "Paramètres",
+    nouveau: "Nouveau",
+    timeline: "Timeline",
+  };
+  return traductions[segment] ?? segment;
+}
+
+export function FilAriane() {
+  const pathname = usePathname();
+  const segments = pathname.split("/").filter(Boolean);
+
+  // Pas de fil d'ariane sur l'accueil
+  if (segments.length === 0) return null;
+
+  return (
+    <nav className="flex items-center gap-1 text-sm text-muted-foreground px-4 md:px-6 py-2">
+      <Link href="/" className="hover:text-foreground transition-colors">
+        <Home className="h-4 w-4" />
+      </Link>
+      {segments.map((segment, index) => {
+        const chemin = "/" + segments.slice(0, index + 1).join("/");
+        const estDernier = index === segments.length - 1;
+
+        return (
+          <span key={chemin} className="flex items-center gap-1">
+            <ChevronRight className="h-3 w-3" />
+            {estDernier ? (
+              <span className="font-medium text-foreground">
+                {traduireSegment(segment)}
+              </span>
+            ) : (
+              <Link
+                href={chemin}
+                className="hover:text-foreground transition-colors"
+              >
+                {traduireSegment(segment)}
+              </Link>
+            )}
+          </span>
+        );
+      })}
+    </nav>
+  );
+}
