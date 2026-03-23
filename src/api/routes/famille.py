@@ -17,7 +17,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from src.api.dependencies import require_auth
 from src.api.pagination import appliquer_cursor_filter, construire_reponse_cursor, decoder_cursor
 from src.api.schemas.common import MessageResponse, ReponsePaginee
-from src.api.schemas.errors import REPONSES_CRUD_LECTURE, REPONSES_LISTE
+from src.api.schemas.errors import (
+    REPONSES_CRUD_CREATION,
+    REPONSES_CRUD_LECTURE,
+    REPONSES_CRUD_SUPPRESSION,
+    REPONSES_LISTE,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/famille", tags=["Famille"])
@@ -146,6 +151,73 @@ async def lister_jalons_enfant(
     return await executer_async(_query)
 
 
+@router.post("/enfants/{enfant_id}/jalons", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_jalon(
+    enfant_id: int,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Ajoute un jalon de développement pour un enfant."""
+    from src.core.models import Jalon, ProfilEnfant
+
+    def _query():
+        with executer_avec_session() as session:
+            enfant = session.query(ProfilEnfant).filter(ProfilEnfant.id == enfant_id).first()
+            if not enfant:
+                raise HTTPException(status_code=404, detail="Enfant non trouvé")
+
+            jalon = Jalon(
+                child_id=enfant_id,
+                titre=payload["titre"],
+                description=payload.get("description"),
+                categorie=payload.get("categorie", "autre"),
+                date_atteint=payload.get("date_atteint", date.today().isoformat()),
+                photo_url=payload.get("photo_url"),
+                notes=payload.get("notes"),
+                lieu=payload.get("lieu"),
+                emotion_parents=payload.get("emotion_parents"),
+            )
+            session.add(jalon)
+            session.commit()
+            session.refresh(jalon)
+            return {
+                "id": jalon.id,
+                "titre": jalon.titre,
+                "categorie": jalon.categorie,
+                "date_atteint": jalon.date_atteint.isoformat(),
+                "enfant_id": enfant_id,
+            }
+
+    return await executer_async(_query)
+
+
+@router.delete("/enfants/{enfant_id}/jalons/{jalon_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_jalon(
+    enfant_id: int,
+    jalon_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime un jalon de développement."""
+    from src.core.models import Jalon
+
+    def _query():
+        with executer_avec_session() as session:
+            jalon = (
+                session.query(Jalon)
+                .filter(Jalon.id == jalon_id, Jalon.child_id == enfant_id)
+                .first()
+            )
+            if not jalon:
+                raise HTTPException(status_code=404, detail="Jalon non trouvé")
+            session.delete(jalon)
+            session.commit()
+            return MessageResponse(message=f"Jalon '{jalon.titre}' supprimé")
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # ACTIVITÉS FAMILIALES
 # ═══════════════════════════════════════════════════════════
@@ -261,6 +333,102 @@ async def obtenir_activite(activite_id: int, user: dict[str, Any] = Depends(requ
     return await executer_async(_query)
 
 
+@router.post("/activites", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_activite(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée une nouvelle activité familiale."""
+    from src.core.models import ActiviteFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            activite = ActiviteFamille(
+                titre=payload["titre"],
+                description=payload.get("description"),
+                type_activite=payload.get("type_activite", "sortie"),
+                date_prevue=payload["date_prevue"],
+                duree_heures=payload.get("duree_heures"),
+                lieu=payload.get("lieu"),
+                qui_participe=payload.get("qui_participe"),
+                cout_estime=payload.get("cout_estime"),
+                statut=payload.get("statut", "planifié"),
+                notes=payload.get("notes"),
+            )
+            session.add(activite)
+            session.commit()
+            session.refresh(activite)
+            return {
+                "id": activite.id,
+                "titre": activite.titre,
+                "type_activite": activite.type_activite,
+                "date_prevue": activite.date_prevue.isoformat(),
+                "statut": activite.statut,
+            }
+
+    return await executer_async(_query)
+
+
+@router.patch("/activites/{activite_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def modifier_activite(
+    activite_id: int,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour une activité familiale."""
+    from src.core.models import ActiviteFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            activite = (
+                session.query(ActiviteFamille).filter(ActiviteFamille.id == activite_id).first()
+            )
+            if not activite:
+                raise HTTPException(status_code=404, detail="Activité non trouvée")
+
+            for champ in ("titre", "description", "type_activite", "date_prevue",
+                          "duree_heures", "lieu", "qui_participe", "cout_estime",
+                          "cout_reel", "statut", "notes"):
+                if champ in payload:
+                    setattr(activite, champ, payload[champ])
+
+            session.commit()
+            session.refresh(activite)
+            return {
+                "id": activite.id,
+                "titre": activite.titre,
+                "statut": activite.statut,
+                "date_prevue": activite.date_prevue.isoformat(),
+            }
+
+    return await executer_async(_query)
+
+
+@router.delete("/activites/{activite_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_activite(
+    activite_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime une activité familiale."""
+    from src.core.models import ActiviteFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            activite = (
+                session.query(ActiviteFamille).filter(ActiviteFamille.id == activite_id).first()
+            )
+            if not activite:
+                raise HTTPException(status_code=404, detail="Activité non trouvée")
+            session.delete(activite)
+            session.commit()
+            return MessageResponse(message=f"Activité '{activite.titre}' supprimée")
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # BUDGET FAMILIAL
 # ═══════════════════════════════════════════════════════════
@@ -364,6 +532,63 @@ async def statistiques_budget(
                 "par_categorie": {cat: float(montant) for cat, montant in par_categorie},
                 "periode": {"mois": mois, "annee": annee},
             }
+
+    return await executer_async(_query)
+
+
+@router.post("/budget", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_depense(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Ajoute une dépense au budget familial."""
+    from src.core.models import BudgetFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            depense = BudgetFamille(
+                date=payload.get("date", date.today().isoformat()),
+                categorie=payload["categorie"],
+                description=payload.get("description"),
+                montant=payload["montant"],
+                magasin=payload.get("magasin"),
+                est_recurrent=payload.get("est_recurrent", False),
+                frequence_recurrence=payload.get("frequence_recurrence"),
+                notes=payload.get("notes"),
+            )
+            session.add(depense)
+            session.commit()
+            session.refresh(depense)
+            return {
+                "id": depense.id,
+                "date": depense.date.isoformat(),
+                "categorie": depense.categorie,
+                "montant": depense.montant,
+            }
+
+    return await executer_async(_query)
+
+
+@router.delete("/budget/{depense_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_depense(
+    depense_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime une dépense du budget."""
+    from src.core.models import BudgetFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            depense = (
+                session.query(BudgetFamille).filter(BudgetFamille.id == depense_id).first()
+            )
+            if not depense:
+                raise HTTPException(status_code=404, detail="Dépense non trouvée")
+            session.delete(depense)
+            session.commit()
+            return MessageResponse(message="Dépense supprimée")
 
     return await executer_async(_query)
 

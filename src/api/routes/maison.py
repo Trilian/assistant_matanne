@@ -17,7 +17,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.schemas.common import MessageResponse
-from src.api.schemas.errors import REPONSES_CRUD_LECTURE, REPONSES_LISTE
+from src.api.schemas.errors import (
+    REPONSES_CRUD_CREATION,
+    REPONSES_CRUD_LECTURE,
+    REPONSES_CRUD_SUPPRESSION,
+    REPONSES_LISTE,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/maison", tags=["Maison"])
@@ -122,6 +127,91 @@ async def obtenir_projet(projet_id: int, user: dict[str, Any] = Depends(require_
                     for t in (projet.tasks or [])
                 ],
             }
+
+    return await executer_async(_query)
+
+
+@router.post("/projets", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_projet(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée un nouveau projet domestique."""
+    from src.core.models import Projet
+
+    def _query():
+        with executer_avec_session() as session:
+            projet = Projet(
+                nom=payload["nom"],
+                description=payload.get("description"),
+                statut=payload.get("statut", "en_cours"),
+                priorite=payload.get("priorite", "moyenne"),
+                date_debut=payload.get("date_debut"),
+                date_fin_prevue=payload.get("date_fin_prevue"),
+            )
+            session.add(projet)
+            session.commit()
+            session.refresh(projet)
+            return {
+                "id": projet.id,
+                "nom": projet.nom,
+                "statut": projet.statut,
+                "priorite": projet.priorite,
+            }
+
+    return await executer_async(_query)
+
+
+@router.patch("/projets/{projet_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def modifier_projet(
+    projet_id: int,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour un projet domestique."""
+    from src.core.models import Projet
+
+    def _query():
+        with executer_avec_session() as session:
+            projet = session.query(Projet).filter(Projet.id == projet_id).first()
+            if not projet:
+                raise HTTPException(status_code=404, detail="Projet non trouvé")
+
+            for champ in ("nom", "description", "statut", "priorite", "date_debut", "date_fin_prevue", "date_fin_reelle"):
+                if champ in payload:
+                    setattr(projet, champ, payload[champ])
+
+            session.commit()
+            session.refresh(projet)
+            return {
+                "id": projet.id,
+                "nom": projet.nom,
+                "statut": projet.statut,
+                "priorite": projet.priorite,
+            }
+
+    return await executer_async(_query)
+
+
+@router.delete("/projets/{projet_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_projet(
+    projet_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime un projet et ses tâches."""
+    from src.core.models import Projet
+
+    def _query():
+        with executer_avec_session() as session:
+            projet = session.query(Projet).filter(Projet.id == projet_id).first()
+            if not projet:
+                raise HTTPException(status_code=404, detail="Projet non trouvé")
+            session.delete(projet)
+            session.commit()
+            return MessageResponse(message=f"Projet '{projet.nom}' supprimé")
 
     return await executer_async(_query)
 
@@ -258,6 +348,106 @@ async def lister_taches_entretien(
     return await executer_async(_query)
 
 
+@router.post("/entretien", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_tache_entretien(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée une nouvelle tâche d'entretien."""
+    from src.core.models import TacheEntretien
+
+    def _query():
+        with executer_avec_session() as session:
+            tache = TacheEntretien(
+                nom=payload["nom"],
+                description=payload.get("description"),
+                categorie=payload.get("categorie", "entretien"),
+                piece=payload.get("piece"),
+                frequence_jours=payload.get("frequence_jours"),
+                prochaine_fois=payload.get("prochaine_fois"),
+                duree_minutes=payload.get("duree_minutes", 30),
+                responsable=payload.get("responsable"),
+                priorite=payload.get("priorite", "normale"),
+            )
+            session.add(tache)
+            session.commit()
+            session.refresh(tache)
+            return {
+                "id": tache.id,
+                "nom": tache.nom,
+                "categorie": tache.categorie,
+                "piece": tache.piece,
+                "priorite": tache.priorite,
+                "fait": tache.fait,
+            }
+
+    return await executer_async(_query)
+
+
+@router.patch("/entretien/{tache_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def modifier_tache_entretien(
+    tache_id: int,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour une tâche d'entretien (ou la marque comme faite)."""
+    from src.core.models import TacheEntretien
+
+    def _query():
+        with executer_avec_session() as session:
+            tache = session.query(TacheEntretien).filter(TacheEntretien.id == tache_id).first()
+            if not tache:
+                raise HTTPException(status_code=404, detail="Tâche non trouvée")
+
+            for champ in ("nom", "description", "categorie", "piece", "frequence_jours",
+                          "prochaine_fois", "duree_minutes", "responsable", "priorite", "fait"):
+                if champ in payload:
+                    setattr(tache, champ, payload[champ])
+
+            # Si marqué comme fait, mettre à jour derniere_fois
+            if payload.get("fait") is True:
+                tache.derniere_fois = date.today()
+                if tache.frequence_jours:
+                    from datetime import timedelta
+                    tache.prochaine_fois = date.today() + timedelta(days=tache.frequence_jours)
+                    tache.fait = False  # Reset pour la prochaine occurrence
+
+            session.commit()
+            session.refresh(tache)
+            return {
+                "id": tache.id,
+                "nom": tache.nom,
+                "fait": tache.fait,
+                "derniere_fois": tache.derniere_fois.isoformat() if tache.derniere_fois else None,
+                "prochaine_fois": tache.prochaine_fois.isoformat() if tache.prochaine_fois else None,
+            }
+
+    return await executer_async(_query)
+
+
+@router.delete("/entretien/{tache_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_tache_entretien(
+    tache_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime une tâche d'entretien."""
+    from src.core.models import TacheEntretien
+
+    def _query():
+        with executer_avec_session() as session:
+            tache = session.query(TacheEntretien).filter(TacheEntretien.id == tache_id).first()
+            if not tache:
+                raise HTTPException(status_code=404, detail="Tâche non trouvée")
+            session.delete(tache)
+            session.commit()
+            return MessageResponse(message=f"Tâche '{tache.nom}' supprimée")
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # JARDIN
 # ═══════════════════════════════════════════════════════════
@@ -340,6 +530,93 @@ async def obtenir_journal_jardin(
     return await executer_async(_query)
 
 
+@router.post("/jardin", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_element_jardin(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Ajoute un élément au jardin."""
+    from src.core.models import ElementJardin
+
+    def _query():
+        with executer_avec_session() as session:
+            element = ElementJardin(
+                nom=payload["nom"],
+                type=payload.get("type", "plante"),
+                location=payload.get("location"),
+                statut=payload.get("statut", "actif"),
+                date_plantation=payload.get("date_plantation"),
+                date_recolte_prevue=payload.get("date_recolte_prevue"),
+                notes=payload.get("notes"),
+            )
+            session.add(element)
+            session.commit()
+            session.refresh(element)
+            return {
+                "id": element.id,
+                "nom": element.nom,
+                "type": element.type,
+                "statut": element.statut,
+            }
+
+    return await executer_async(_query)
+
+
+@router.patch("/jardin/{element_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def modifier_element_jardin(
+    element_id: int,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour un élément du jardin."""
+    from src.core.models import ElementJardin
+
+    def _query():
+        with executer_avec_session() as session:
+            element = session.query(ElementJardin).filter(ElementJardin.id == element_id).first()
+            if not element:
+                raise HTTPException(status_code=404, detail="Élément non trouvé")
+
+            for champ in ("nom", "type", "location", "statut", "date_plantation",
+                          "date_recolte_prevue", "notes"):
+                if champ in payload:
+                    setattr(element, champ, payload[champ])
+
+            session.commit()
+            session.refresh(element)
+            return {
+                "id": element.id,
+                "nom": element.nom,
+                "type": element.type,
+                "statut": element.statut,
+            }
+
+    return await executer_async(_query)
+
+
+@router.delete("/jardin/{element_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_element_jardin(
+    element_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime un élément du jardin."""
+    from src.core.models import ElementJardin
+
+    def _query():
+        with executer_avec_session() as session:
+            element = session.query(ElementJardin).filter(ElementJardin.id == element_id).first()
+            if not element:
+                raise HTTPException(status_code=404, detail="Élément non trouvé")
+            session.delete(element)
+            session.commit()
+            return MessageResponse(message=f"Élément '{element.nom}' supprimé")
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # STOCKS MAISON
 # ═══════════════════════════════════════════════════════════
@@ -382,6 +659,93 @@ async def lister_stocks_maison(
                     for s in stocks
                 ],
             }
+
+    return await executer_async(_query)
+
+
+@router.post("/stocks", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_stock(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Ajoute un stock de consommable maison."""
+    from src.core.models import StockMaison
+
+    def _query():
+        with executer_avec_session() as session:
+            stock = StockMaison(
+                nom=payload["nom"],
+                categorie=payload.get("categorie", "autre"),
+                quantite=payload.get("quantite", 0),
+                unite=payload.get("unite", "unité"),
+                seuil_alerte=payload.get("seuil_alerte", 1),
+                emplacement=payload.get("emplacement"),
+                prix_unitaire=payload.get("prix_unitaire"),
+            )
+            session.add(stock)
+            session.commit()
+            session.refresh(stock)
+            return {
+                "id": stock.id,
+                "nom": stock.nom,
+                "categorie": stock.categorie,
+                "quantite": stock.quantite,
+            }
+
+    return await executer_async(_query)
+
+
+@router.patch("/stocks/{stock_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def modifier_stock(
+    stock_id: int,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour un stock (quantité, seuil, etc.)."""
+    from src.core.models import StockMaison
+
+    def _query():
+        with executer_avec_session() as session:
+            stock = session.query(StockMaison).filter(StockMaison.id == stock_id).first()
+            if not stock:
+                raise HTTPException(status_code=404, detail="Stock non trouvé")
+
+            for champ in ("nom", "categorie", "quantite", "unite", "seuil_alerte",
+                          "emplacement", "prix_unitaire"):
+                if champ in payload:
+                    setattr(stock, champ, payload[champ])
+
+            session.commit()
+            session.refresh(stock)
+            return {
+                "id": stock.id,
+                "nom": stock.nom,
+                "quantite": stock.quantite,
+                "en_alerte": stock.quantite <= stock.seuil_alerte,
+            }
+
+    return await executer_async(_query)
+
+
+@router.delete("/stocks/{stock_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_stock(
+    stock_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime un stock."""
+    from src.core.models import StockMaison
+
+    def _query():
+        with executer_avec_session() as session:
+            stock = session.query(StockMaison).filter(StockMaison.id == stock_id).first()
+            if not stock:
+                raise HTTPException(status_code=404, detail="Stock non trouvé")
+            session.delete(stock)
+            session.commit()
+            return MessageResponse(message=f"Stock '{stock.nom}' supprimé")
 
     return await executer_async(_query)
 
