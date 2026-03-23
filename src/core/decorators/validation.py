@@ -5,8 +5,6 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Any, TypeVar
 
-from .errors import _afficher_erreur_ui
-
 logger = logging.getLogger(__name__)
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -201,10 +199,6 @@ def avec_resilience(
                 # Logger
                 log_fn = getattr(logger, log_level.lower(), logger.error)
                 log_fn(f"Erreur dans {func.__name__}: {e}")
-
-                # Afficher dans l'UI (réutilise le helper unifié)
-                if afficher_ui:
-                    _afficher_erreur_ui(e, func.__name__)
 
                 # Fallback ou re-raise
                 if _fallback is not _NO_FALLBACK:

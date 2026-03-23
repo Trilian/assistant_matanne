@@ -70,18 +70,10 @@ def is_pwa_installed() -> bool:
 
 
 def inject_pwa_meta() -> None:
-    """Injecte les meta tags PWA (délègue à src.ui.views.pwa)."""
-    from src.ui.views.pwa import injecter_meta_pwa
-
-    injecter_meta_pwa()
+    # Streamlit UI supprimé
+    pass
 
 
 def afficher_install_prompt() -> None:
-    """Affiche le bouton d'installation PWA.
-
-    Délègue à ``src.ui.views.pwa.afficher_invite_installation_pwa``
-    pour respecter la séparation services/UI.
-    """
-    from src.ui.views.pwa import afficher_invite_installation_pwa
-
-    afficher_invite_installation_pwa()
+    # Streamlit UI supprimé
+    pass

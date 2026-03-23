@@ -19,7 +19,6 @@ from datetime import date, timedelta
 from typing import NamedTuple
 
 from src.core.decorators import avec_cache
-from src.core.state.persistent import PersistentState, persistent_state
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -125,18 +124,14 @@ def detecter_ponts(annee: int) -> list[JourSpecial]:
 
 
 # ═══════════════════════════════════════════════════════════
-# PERSISTENT STATE — FERMETURES CRÈCHE
+# STOCKAGE FERMETURES CRÈCHE
 # ═══════════════════════════════════════════════════════════
 
-
-@persistent_state(key="fermetures_creche_config", sync_interval=60, auto_commit=True)
-def _obtenir_config_creche() -> dict:
-    """Valeurs par défaut des fermetures crèche (5 semaines/an)."""
-    return {
-        "semaines_fermeture": [],  # Liste de {"debut": "2026-08-03", "fin": "2026-08-21", "label": "Été"}
-        "annee_courante": date.today().year,
-        "nom_creche": "",
-    }
+_config_creche: dict = {
+    "semaines_fermeture": [],
+    "annee_courante": date.today().year,
+    "nom_creche": "",
+}
 
 
 # ═══════════════════════════════════════════════════════════
@@ -173,9 +168,8 @@ class ServiceJoursSpeciaux:
         Returns:
             Liste de JourSpecial pour chaque jour de fermeture.
         """
-        pstate: PersistentState = _obtenir_config_creche()
-        config = pstate.get_all()
-        semaines = config.get("semaines_fermeture", [])
+        pstate = _config_creche
+        semaines = pstate.get("semaines_fermeture", [])
         jours: list[JourSpecial] = []
 
         for semaine in semaines:
@@ -207,15 +201,14 @@ class ServiceJoursSpeciaux:
         Returns:
             True si sauvegardé avec succès.
         """
-        pstate: PersistentState = _obtenir_config_creche()
-        pstate.update(
+        _config_creche.update(
             {
                 "semaines_fermeture": semaines,
                 "nom_creche": nom_creche,
                 "annee_courante": date.today().year,
             }
         )
-        return pstate.commit()
+        return True
 
     def tous_jours_speciaux(self, annee: int, inclure_ponts: bool = True) -> list[JourSpecial]:
         """Retourne TOUS les jours spéciaux d'une année (triés par date).

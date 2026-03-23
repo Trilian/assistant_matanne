@@ -26,7 +26,7 @@ from src.core.models import (
     Repas,
 )
 from src.services.rapports.types import RapportPlanning
-from src.ui.tokens import Couleur
+from src.services.rapports._couleurs import Couleur
 
 logger = logging.getLogger(__name__)
 

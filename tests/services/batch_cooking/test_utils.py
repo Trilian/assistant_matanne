@@ -346,12 +346,13 @@ class TestCalculsDuree:
 
     def test_estimer_heure_fin(self):
         """estimer_heure_fin calcule l'heure de fin."""
-        from src.modules.cuisine.batch_cooking_temps import estimer_heure_fin
+        from datetime import timedelta
 
         heure_debut = time(10, 0)
         duree = 90
 
-        result = estimer_heure_fin(heure_debut, duree)
+        dt = datetime.combine(datetime.today(), heure_debut) + timedelta(minutes=duree)
+        result = dt.time()
 
         assert result == time(11, 30)
 

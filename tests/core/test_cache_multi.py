@@ -21,10 +21,11 @@ import pytest
 
 @pytest.fixture
 def mock_session_state():
-    """Mock streamlit session_state."""
-    state = {}
-    with patch("streamlit.session_state", state):
-        yield state
+    """Fixture d'isolation pour le cache session L2."""
+    from src.core.caching.session import _STORE
+    _STORE.clear()
+    yield {}
+    _STORE.clear()
 
 
 @pytest.fixture
@@ -502,7 +503,7 @@ class TestCacheEdgeCases:
 
 
 class TestCacheSessionN2:
-    """Tests pour le cache L2 basé sur session Streamlit."""
+    """Tests pour le cache L2 session (dict mémoire par processus)."""
 
     @pytest.fixture
     def l2_cache(self, mock_session_state):

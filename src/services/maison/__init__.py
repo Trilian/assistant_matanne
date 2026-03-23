@@ -33,9 +33,6 @@ _SERVICES = {
     "obtenir_service_jardin": "jardin_service",
     "obtenir_service_entretien": "entretien_service",
     "obtenir_service_projets": "projets_service",
-    # Constantes gamification
-    "BADGES_JARDIN": "jardin_gamification_mixin",
-    "BADGES_ENTRETIEN": "entretien_gamification_mixin",
     # CRUD services
     "DepensesCrudService": "depenses_crud_service",
     "get_depenses_crud_service": "depenses_crud_service",
@@ -190,9 +187,6 @@ __all__ = [
     "ProjetEstimation",
     "ZoneJardinCreate",
     "PlanteCreate",
-    # Constantes
-    "BADGES_JARDIN",
-    "BADGES_ENTRETIEN",
     # CRUD services
     "DepensesCrudService",
     "get_depenses_crud_service",

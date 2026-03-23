@@ -1,0 +1,29 @@
+# ═══════════════════════════════════════════════════════════
+# render.yaml — Configuration déploiement Render
+# ═══════════════════════════════════════════════════════════
+# Render détecte ce fichier et propose la config automatiquement.
+# Doc: https://docs.render.com/blueprint-spec
+
+services:
+  - type: web
+    name: assistant-matanne-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: frankfurt  # EU, proche France
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false  # À configurer manuellement dans le dashboard Render
+      - key: MISTRAL_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false  # URL Vercel frontend, ex: https://assistant-matanne.vercel.app
+      - key: PYTHON_ENV
+        value: production

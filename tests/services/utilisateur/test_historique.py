@@ -248,16 +248,10 @@ class TestActionStats:
 class TestActionHistoryServiceInit:
     """Tests pour l'initialisation d'ActionHistoryService."""
 
-    def test_init_no_session(self):
-        """Initialisation sans session."""
+    def test_init_no_args(self):
+        """Initialisation sans arguments."""
         service = ActionHistoryService()
-        assert service._session is None
-
-    def test_init_with_session(self):
-        """Initialisation avec session."""
-        mock_session = Mock()
-        service = ActionHistoryService(session=mock_session)
-        assert service._session == mock_session
+        assert service is not None
 
     def test_class_cache_attributes(self):
         """Vérifie les attributs de cache de classe."""
@@ -851,113 +845,6 @@ class TestFactory:
 
 
 # ═══════════════════════════════════════════════════════════
-# TESTS UI COMPONENTS (WITH MOCKED STREAMLIT)
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestUIComponents:
-    """Tests pour les composants UI avec Streamlit mocké."""
-
-    @patch("src.ui.views.historique.st")
-    @patch("src.ui.views.historique.get_action_history_service")
-    def test_render_activity_timeline_empty(self, mock_service, mock_st):
-        """Timeline vide affiche message info."""
-        from src.services.core.utilisateur.historique import afficher_activity_timeline
-
-        mock_service.return_value.get_recent_actions.return_value = []
-
-        afficher_activity_timeline(limit=10)
-
-        mock_st.info.assert_called_once()
-
-    @patch("src.ui.views.historique.st")
-    @patch("src.ui.views.historique.get_action_history_service")
-    def test_render_activity_timeline_with_actions(self, mock_service, mock_st):
-        """Timeline avec actions."""
-        from src.services.core.utilisateur.historique import afficher_activity_timeline
-
-        mock_action = Mock()
-        mock_action.entity_type = "recette"
-        mock_action.description = "Test action"
-        mock_action.user_name = "Test User"
-        mock_action.cree_le = datetime.now()
-
-        mock_service.return_value.get_recent_actions.return_value = [mock_action]
-        mock_st.columns.return_value = [MagicMock(), MagicMock()]
-
-        afficher_activity_timeline(limit=10)
-
-        mock_st.markdown.assert_called()
-
-    @patch("src.ui.views.historique.st")
-    @patch("src.ui.views.historique.get_action_history_service")
-    def test_render_user_activity_empty(self, mock_service, mock_st):
-        """Activité utilisateur vide."""
-        from src.services.core.utilisateur.historique import afficher_user_activity
-
-        mock_service.return_value.get_user_history.return_value = []
-
-        afficher_user_activity("user123")
-
-        mock_st.info.assert_called()
-
-    @patch("src.ui.views.historique.st")
-    @patch("src.ui.views.historique.get_action_history_service")
-    def test_render_user_activity_with_actions(self, mock_service, mock_st):
-        """Activité utilisateur avec actions."""
-        from src.services.core.utilisateur.historique import afficher_user_activity
-
-        mock_action = Mock()
-        mock_action.description = "Test action"
-        mock_action.cree_le = datetime.now()
-        mock_action.details = {"key": "value"}
-
-        mock_service.return_value.get_user_history.return_value = [mock_action]
-        mock_st.expander.return_value.__enter__ = Mock(return_value=Mock())
-        mock_st.expander.return_value.__exit__ = Mock(return_value=False)
-
-        afficher_user_activity("user123")
-
-        mock_st.markdown.assert_called()
-
-    @patch("src.ui.views.historique.st")
-    @patch("src.ui.views.historique.get_action_history_service")
-    def test_render_activity_stats(self, mock_service, mock_st):
-        """Statistiques d'activité."""
-        from src.services.core.utilisateur.historique import afficher_activity_stats
-
-        mock_stats = ActionStats(
-            total_actions=100,
-            actions_today=10,
-            actions_this_week=50,
-            most_active_users=[{"name": "Anne", "count": 30}],
-        )
-        mock_service.return_value.get_stats.return_value = mock_stats
-        mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
-
-        afficher_activity_stats()
-
-        mock_st.markdown.assert_called()
-        mock_st.metric.assert_called()
-
-    @patch("src.ui.views.historique.st")
-    @patch("src.ui.views.historique.get_action_history_service")
-    def test_render_activity_stats_no_users(self, mock_service, mock_st):
-        """Statistiques sans utilisateurs actifs."""
-        from src.services.core.utilisateur.historique import afficher_activity_stats
-
-        mock_stats = ActionStats(
-            total_actions=0, actions_today=0, actions_this_week=0, most_active_users=[]
-        )
-        mock_service.return_value.get_stats.return_value = mock_stats
-        mock_st.columns.return_value = [MagicMock(), MagicMock(), MagicMock()]
-
-        afficher_activity_stats()
-
-        mock_st.metric.assert_called()
-
-
 # ═══════════════════════════════════════════════════════════
 # TESTS ADDITIONAL EDGE CASES
 # ═══════════════════════════════════════════════════════════

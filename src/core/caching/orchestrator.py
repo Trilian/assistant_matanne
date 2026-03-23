@@ -1,12 +1,12 @@
 """
 Orchestrator - Cache multi-niveaux unifié.
 
-Combine L1 (mémoire), L2 (session), L3 (fichier) et Redis optionnel
+Combine L1 (mémoire), L2 (mémoire partagée), L3 (fichier) et Redis optionnel
 pour une performance optimale avec persistance.
 
 Architecture:
 - L1: Mémoire locale (dict) - Ultra rapide, volatile
-- L2: Session Streamlit - Persistant par session
+- L2: Mémoire partagée (dict processus) - Persistant par processus
 - L3: Fichier local - Persistant entre sessions
 - Redis (optionnel): Cache distribué multi-instances
 

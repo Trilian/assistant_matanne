@@ -22,7 +22,7 @@ from src.services.core.base import BaseAIService
 from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
-from .entretien_gamification_mixin import EntretienGamificationMixin
+from .entretien_taches_mixin import EntretienTachesMixin
 from .schemas import (
     RoutineSuggestionIA,
 )
@@ -64,7 +64,7 @@ FREQUENCES = {
 # ═══════════════════════════════════════════════════════════
 
 
-class EntretienService(EntretienGamificationMixin, BaseAIService):
+class EntretienService(EntretienTachesMixin, BaseAIService):
     """Service IA pour la gestion des routines ménage.
 
     Hérite de BaseAIService pour les appels IA. Les opérations CRUD DB
@@ -78,14 +78,13 @@ class EntretienService(EntretienGamificationMixin, BaseAIService):
     - Optimisation répartition hebdomadaire
     - Détection automatique de périodicité
     - Adaptation aux contraintes météo
-    - Gamification: badges, streaks, score propreté
+    - Score de propreté dynamique
     - Génération automatique des tâches d'entretien
 
     Example:
         >>> service = get_entretien_service()
         >>> taches = service.generer_taches(mes_objets, historique)
         >>> stats = service.calculer_stats_globales(objets, historique)
-        >>> badges = service.obtenir_badges(stats)
     """
 
     def __init__(self, client: ClientIA | None = None):

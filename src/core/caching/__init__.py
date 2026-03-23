@@ -3,7 +3,7 @@ Caching - Module de cache multi-niveaux.
 
 Architecture à 3 niveaux + option Redis:
 - L1: Mémoire (dict Python) - Ultra rapide, volatile
-- L2: Session Streamlit - Persistant pendant la session
+- L2: Mémoire partagée (dict processus) - Persistant par processus
 - L3: Fichier local (pickle) - Persistant entre sessions
 - Redis (optionnel): Cache distribué pour multi-instances
 

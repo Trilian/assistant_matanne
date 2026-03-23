@@ -205,17 +205,8 @@ def profiler_rerun(module_name: str) -> Callable[[F], F]:
 
 
 def _capture_state_keys() -> set[str]:
-    """Capture les clés actuelles de st.session_state.
-
-    Retourne un set vide si Streamlit n'est pas actif
-    (ex: pendant les tests).
-    """
-    try:
-        import streamlit as st
-
-        return set(st.session_state.keys())
-    except Exception:
-        return set()
+    """Capture les clés actuelles de l'état (stub, plus de Streamlit)."""
+    return set()
 
 
 def obtenir_stats_rerun() -> dict[str, Any]:

@@ -115,11 +115,4 @@ def mock_ia_service():
         yield mock
 
 
-@pytest.fixture
-def mock_streamlit_state():
-    """Mock pour st.session_state."""
-    with patch("streamlit.session_state") as mock:
-        mock.__setitem__ = MagicMock()
-        mock.__getitem__ = MagicMock(return_value=None)
-        mock.get = MagicMock(return_value=None)
-        yield mock
+

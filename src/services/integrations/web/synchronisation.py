@@ -108,10 +108,8 @@ class RealtimeSyncService:
             storage: Stockage clé-valeur mutable (défaut: st.session_state).
             on_rerun: Callback pour déclencher un rerun (défaut: st.rerun).
         """
-        from src.core.storage import obtenir_rerun_callback, obtenir_session_state
-
-        self._storage = storage if storage is not None else obtenir_session_state()
-        self._on_rerun = on_rerun if on_rerun is not None else obtenir_rerun_callback()
+        self._storage = storage if storage is not None else {}
+        self._on_rerun = on_rerun if on_rerun is not None else (lambda: None)
         self._client = None
         self._channel = None
         self._callbacks: dict[SyncEventType, list[Callable]] = {}

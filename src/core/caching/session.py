@@ -1,9 +1,7 @@
 """
-Session - Cache L2 basé sur Streamlit session_state.
+Session - Cache L2 basé sur un dict mémoire (par processus).
 
-Cache persistant pendant la session utilisateur:
-- Partagé entre reruns Streamlit
-- Plus lent que L1 mais plus stable
+Cache persistant pendant la durée de vie du processus.
 """
 
 import logging
@@ -12,14 +10,15 @@ from .base import EntreeCache
 
 logger = logging.getLogger(__name__)
 
+# Store partagé au niveau du module (même processus)
+_STORE: dict[str, dict] = {}
+
 
 class CacheSessionN2:
     """
-    Cache L2 basé sur Streamlit session_state.
+    Cache L2 basé sur un dict mémoire partagé au niveau du processus.
 
-    - Persistant pendant la session utilisateur
-    - Partagé entre reruns Streamlit
-    - Plus lent que L1 mais plus stable
+    Remplace l'ancien cache L2 basé sur st.session_state.
     """
 
     CACHE_KEY = "_cache_l2_data"
@@ -28,33 +27,18 @@ class CacheSessionN2:
         self._ensure_initialized()
 
     def _ensure_initialized(self) -> None:
-        """Initialise le cache dans session_state."""
-        try:
-            import streamlit as st
-
-            if self.CACHE_KEY not in st.session_state:
-                st.session_state[self.CACHE_KEY] = {}
-        except Exception:
-            pass  # Pas en contexte Streamlit
+        """Initialise le store."""
+        if self.CACHE_KEY not in _STORE:
+            _STORE[self.CACHE_KEY] = {}
 
     def _get_store(self) -> dict:
         """Retourne le store de cache."""
-        try:
-            import streamlit as st
-
-            self._ensure_initialized()
-            return st.session_state.get(self.CACHE_KEY, {})
-        except Exception:
-            return {}
+        self._ensure_initialized()
+        return _STORE.get(self.CACHE_KEY, {})
 
     def _set_store(self, store: dict) -> None:
         """Met à jour le store."""
-        try:
-            import streamlit as st
-
-            st.session_state[self.CACHE_KEY] = store
-        except Exception:
-            pass
+        _STORE[self.CACHE_KEY] = store
 
     def get(self, key: str) -> EntreeCache | None:
         """Récupère une entrée du cache L2."""

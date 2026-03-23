@@ -175,18 +175,12 @@ class ProfilService:
 
     @staticmethod
     def changer_profil_actif(username: str) -> bool:
-        """Change le profil actif dans l'état global."""
-        from src.core.state import obtenir_etat
-
+        """Change le profil actif (log seulement, plus d'état Streamlit)."""
         profil = ProfilService.obtenir_profil(username)
         if not profil:
             logger.warning("Profil introuvable: %s", username)
             return False
 
-        etat = obtenir_etat()
-        etat.nom_utilisateur = profil.display_name
-        etat.user_id = profil.id
-        etat.profil_charge = True
         logger.info("Profil actif changé: %s (id=%s)", username, profil.id)
         return True
 

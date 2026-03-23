@@ -4,7 +4,7 @@ Service Jardin - Gestion intelligente du jardin avec IA.
 Facade mince combinant les mixins spécialisés:
 - JardinIAMixin: Conseils IA, diagnostic plantes, alertes météo
 - JardinCrudMixin: CRUD plantes, zones, stats, logs
-- JardinGamificationMixin: Badges, streaks, autonomie alimentaire
+- JardinPlanningMixin: Autonomie alimentaire, planning, prévisions
 
 Chaque mixin est dans son propre fichier < 500 LOC.
 Le fichier principal (facade) reste léger (~120 LOC).
@@ -20,8 +20,8 @@ from src.services.core.service_health import ServiceHealthCheck, ServiceHealthMi
 from src.services.core.service_metrics import ServiceMetricsMixin
 
 from .jardin_crud_mixin import JardinCrudMixin
-from .jardin_gamification_mixin import BADGES_JARDIN, JardinGamificationMixin  # noqa: F401
 from .jardin_ia_mixin import JardinIAMixin
+from .jardin_planning_mixin import JardinPlanningMixin
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 class JardinService(
     JardinIAMixin,
     JardinCrudMixin,
-    JardinGamificationMixin,
+    JardinPlanningMixin,
     ServiceHealthMixin,
     ServiceMetricsMixin,
     EventBusMixin,
@@ -45,9 +45,9 @@ class JardinService(
     Facade combinant les mixins spécialisés:
     - JardinIAMixin: Conseils saisonniers, diagnostic, arrosage IA, alertes météo
     - JardinCrudMixin: CRUD plantes, zones, stats, logs
-    - JardinGamificationMixin: Badges, streaks, autonomie alimentaire
-    - JardinTachesMixin: Génération automatique des tâches (via gamification)
-    - JardinCatalogueMixin: Catalogue de plantes (via gamification)
+    - JardinPlanningMixin: Autonomie alimentaire, planning, prévisions
+    - JardinTachesMixin: Génération automatique des tâches
+    - JardinCatalogueMixin: Catalogue de plantes
 
     Hérite aussi de:
     - ServiceHealthMixin: Health checks granulaires
@@ -59,7 +59,6 @@ class JardinService(
         >>> conseils = await service.generer_conseils_saison("printemps")
         >>> taches = service.generer_taches(mes_plantes, meteo)
         >>> stats = service.calculer_stats(plantes, recoltes)
-        >>> badges = service.obtenir_badges(stats)
     """
 
     _event_source = "jardin"

@@ -10,7 +10,7 @@ Ce module fournit un cache dédié aux réponses IA avec :
 Utilise ``CacheMultiNiveau`` directement (sans la façade ``Cache``).
 """
 
-__all__ = ["CacheIA", "afficher_statistiques_cache_ia"]
+__all__ = ["CacheIA"]
 
 import hashlib
 import json
@@ -18,7 +18,6 @@ import logging
 from typing import Any
 
 from ..constants import CACHE_TTL_IA
-from ..state import rerun
 
 logger = logging.getLogger(__name__)
 
@@ -217,43 +216,3 @@ class CacheIA:
 
 # ═══════════════════════════════════════════════════════════
 # HELPERS POUR STREAMLIT
-# ═══════════════════════════════════════════════════════════
-
-
-def afficher_statistiques_cache_ia():
-    """
-    Widget Streamlit pour afficher les stats cache IA.
-
-    Example:
-        >>> with st.sidebar:
-        >>>     afficher_statistiques_cache_ia()
-    """
-    import streamlit as st
-
-    stats = CacheIA.obtenir_statistiques()
-
-    with st.expander("🤖 Cache IA"):
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.metric(
-                "Réponses cachées", stats["entrees_ia"], help="Nombre de réponses IA en cache"
-            )
-
-        with col2:
-            st.metric("TTL défaut", f"{stats['ttl_defaut']}s", help="Durée de vie par défaut")
-
-        # Actions
-        col3, col4 = st.columns(2)
-
-        with col3:
-            if st.button("🧹 Nettoyer", key="cache_ia_nettoyer", use_container_width=True):
-                CacheIA.nettoyer_expires()
-                st.success("Nettoyage effectué!")
-                rerun()
-
-        with col4:
-            if st.button("🗑️ Vider", key="cache_ia_vider", use_container_width=True):
-                CacheIA.invalider_tout()
-                st.success("Cache IA vidé!")
-                rerun()

@@ -767,44 +767,25 @@ class TestAvecCacheKeyFuncFallback:
 
 
 @pytest.mark.unit
-class TestAvecGestionErreursStreamlit:
-    """Tests pour afficher_erreur dans Streamlit."""
+class TestAvecGestionErreursAffichage:
+    """Tests pour afficher_erreur (log uniquement, Streamlit supprimé)."""
 
-    @patch("streamlit.error")
-    def test_afficher_erreur_calls_st_error(self, mock_st_error):
-        """Test que st.error est appelé quand afficher_erreur=True."""
+    def test_afficher_erreur_true_returns_default(self):
+        """Test que afficher_erreur=True retourne le default sans erreur."""
 
         @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
         def ui_failing_func():
             raise ValueError("Erreur visible UI")
 
         result = ui_failing_func()
-
         assert result is None
-        # Vérifier que st.error a été appelé
-        mock_st_error.assert_called_once()
-        call_args = mock_st_error.call_args[0][0]
-        assert "[ERROR]" in call_args
 
-    def test_afficher_erreur_false_no_streamlit_call(self):
-        """Test que st.error n'est pas appelé quand afficher_erreur=False."""
+    def test_afficher_erreur_false_returns_default(self):
+        """Test que afficher_erreur=False retourne le default."""
 
         @avec_gestion_erreurs(default_return=None, afficher_erreur=False)
         def silent_failing_func():
             raise ValueError("Erreur silencieuse")
 
-        # Ne devrait pas lever d'erreur même si Streamlit n'est pas initialisé
         result = silent_failing_func()
         assert result is None
-
-    @patch("streamlit.error", side_effect=Exception("Streamlit not initialized"))
-    def test_afficher_erreur_handles_streamlit_not_available(self, mock_st_error):
-        """Test que l'erreur est gérée si Streamlit n'est pas disponible."""
-
-        @avec_gestion_erreurs(default_return="fallback", afficher_erreur=True)
-        def func_when_st_unavailable():
-            raise ValueError("Some error")
-
-        # Ne devrait pas lever d'exception même si Streamlit fail
-        result = func_when_st_unavailable()
-        assert result == "fallback"

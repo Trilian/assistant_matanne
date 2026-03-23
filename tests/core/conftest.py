@@ -8,7 +8,7 @@ Fixtures partagées pour tous les tests du répertoire tests/core/.
 Auto-découverte: pytest charge automatiquement ce fichier.
 """
 
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock
 
 import pytest
 from sqlalchemy import String, create_engine, event
@@ -165,36 +165,6 @@ def mock_redis() -> Mock:
 def mock_logger() -> MagicMock:
     """Mock Logger."""
     return MagicMock()
-
-
-# ═════════════════════════════════════════════════════════════════════
-# SECTION 4: STREAMLIT FIXTURES
-# ═════════════════════════════════════════════════════════════════════
-
-
-@pytest.fixture
-def streamlit_session() -> MagicMock:
-    """Mock Streamlit session_state.
-
-    Usage:
-        def test_something(streamlit_session):
-            streamlit_session['key'] = 'value'
-            assert streamlit_session['key'] == 'value'
-    """
-    with patch("streamlit.session_state", MagicMock()) as mock:
-        yield mock
-
-
-@pytest.fixture
-def streamlit_session_with_data() -> MagicMock:
-    """Mock Streamlit session_state avec données initiales."""
-    session_data = {
-        "user_id": "test_user",
-        "user_name": "Test User",
-        "session_state": "initialized",
-    }
-    with patch("streamlit.session_state", session_data) as mock:
-        yield mock
 
 
 # ═════════════════════════════════════════════════════════════════════

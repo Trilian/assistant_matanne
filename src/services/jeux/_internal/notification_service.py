@@ -107,11 +107,9 @@ class NotificationJeuxService:
         """Initialise le service.
 
         Args:
-            storage: Stockage clé-valeur mutable (défaut: st.session_state).
+            storage: Stockage clé-valeur mutable (défaut: dict en mémoire).
         """
-        from src.core.storage import obtenir_session_state
-
-        self._storage = storage if storage is not None else obtenir_session_state()
+        self._storage = storage if storage is not None else {}
         self._init_session()
 
     def _init_session(self):
@@ -396,17 +394,13 @@ class NotificationJeuxService:
 
 
 def afficher_badge_notifications(service: "NotificationJeuxService | None" = None) -> None:
-    """Rétrocompat — délègue à src.ui.views.jeux."""
-    from src.ui.views.jeux import afficher_badge_notifications_jeux
-
-    afficher_badge_notifications_jeux(service)
+    # Streamlit UI supprimé
+    pass
 
 
 def afficher_notification(notification: "NotificationJeux") -> None:
-    """Rétrocompat — délègue à src.ui.views.jeux."""
-    from src.ui.views.jeux import afficher_notification_jeux
-
-    afficher_notification_jeux(notification)
+    # Streamlit UI supprimé
+    pass
 
 
 def afficher_liste_notifications(
@@ -414,10 +408,8 @@ def afficher_liste_notifications(
     limite: int = 10,
     type_jeu: str | None = None,
 ) -> None:
-    """Rétrocompat — délègue à src.ui.views.jeux."""
-    from src.ui.views.jeux import afficher_liste_notifications_jeux
-
-    afficher_liste_notifications_jeux(service, limite, type_jeu)
+    # Streamlit UI supprimé
+    pass
 
 
 # ═══════════════════════════════════════════════════════════

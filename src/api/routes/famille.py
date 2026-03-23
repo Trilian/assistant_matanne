@@ -414,3 +414,158 @@ async def lister_shopping(
             }
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# ROUTINES FAMILIALES
+# ═══════════════════════════════════════════════════════════
+
+
+def _serialiser_routine(routine) -> dict[str, Any]:
+    """Sérialise une routine avec ses tâches."""
+    return {
+        "id": routine.id,
+        "nom": routine.nom,
+        "type": routine.categorie or "journee",
+        "est_active": routine.actif,
+        "etapes": [
+            {
+                "id": t.id,
+                "titre": t.nom,
+                "duree_minutes": None,
+                "ordre": t.ordre,
+                "est_terminee": t.fait_le is not None,
+            }
+            for t in sorted(routine.tasks, key=lambda x: x.ordre)
+        ],
+    }
+
+
+@router.get("/routines", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_routines(
+    actif: bool | None = Query(None, description="Filtrer par statut actif"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Liste les routines familiales avec leurs étapes."""
+    from src.core.models import Routine
+
+    def _query():
+        with executer_avec_session() as session:
+            query = session.query(Routine)
+
+            if actif is not None:
+                query = query.filter(Routine.actif == actif)
+
+            routines = query.order_by(Routine.nom).all()
+
+            return {
+                "items": [_serialiser_routine(r) for r in routines],
+            }
+
+    return await executer_async(_query)
+
+
+@router.get("/routines/{routine_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_routine(
+    routine_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Récupère une routine avec ses étapes."""
+    from src.core.models import Routine
+
+    def _query():
+        with executer_avec_session() as session:
+            routine = session.query(Routine).filter(Routine.id == routine_id).first()
+            if not routine:
+                raise HTTPException(status_code=404, detail="Routine non trouvée")
+            return _serialiser_routine(routine)
+
+    return await executer_async(_query)
+
+
+@router.post("/routines", status_code=201, responses=REPONSES_LISTE)
+@gerer_exception_api
+async def creer_routine(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée une nouvelle routine."""
+    from src.core.models import Routine, TacheRoutine
+
+    def _query():
+        with executer_avec_session() as session:
+            routine = Routine(
+                nom=payload["nom"],
+                categorie=payload.get("type", "journee"),
+                actif=payload.get("est_active", True),
+            )
+            session.add(routine)
+            session.flush()
+
+            for i, etape in enumerate(payload.get("etapes", []), start=1):
+                tache = TacheRoutine(
+                    routine_id=routine.id,
+                    nom=etape["titre"],
+                    ordre=etape.get("ordre", i),
+                )
+                session.add(tache)
+
+            session.commit()
+            session.refresh(routine)
+            return _serialiser_routine(routine)
+
+    return await executer_async(_query)
+
+
+@router.patch("/routines/{routine_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def modifier_routine(
+    routine_id: int,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour une routine existante."""
+    from src.core.models import Routine
+
+    def _query():
+        with executer_avec_session() as session:
+            routine = session.query(Routine).filter(Routine.id == routine_id).first()
+            if not routine:
+                raise HTTPException(status_code=404, detail="Routine non trouvée")
+
+            if "nom" in payload:
+                routine.nom = payload["nom"]
+            if "type" in payload:
+                routine.categorie = payload["type"]
+            if "est_active" in payload:
+                routine.actif = payload["est_active"]
+
+            session.commit()
+            session.refresh(routine)
+            return _serialiser_routine(routine)
+
+    return await executer_async(_query)
+
+
+@router.delete("/routines/{routine_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def supprimer_routine(
+    routine_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime une routine et ses tâches."""
+    from src.core.models import Routine
+
+    def _query():
+        with executer_avec_session() as session:
+            routine = session.query(Routine).filter(Routine.id == routine_id).first()
+            if not routine:
+                raise HTTPException(status_code=404, detail="Routine non trouvée")
+
+            session.delete(routine)
+            session.commit()
+            return MessageResponse(message=f"Routine '{routine.nom}' supprimée")
+
+    return await executer_async(_query)

@@ -12,8 +12,6 @@ car le module shim a été supprimé (dead code). Les exceptions sont
 maintenant importées directement depuis exceptions.py.
 """
 
-from unittest.mock import Mock, patch
-
 import pytest
 
 from src.core.exceptions import (
@@ -158,8 +156,7 @@ class TestExceptionClasses:
 class TestAvecGestionErreurs:
     """Tests pour @avec_gestion_erreurs."""
 
-    @patch("streamlit.error")
-    def test_avec_gestion_erreurs_erreur_validation(self, mock_error):
+    def test_avec_gestion_erreurs_erreur_validation(self):
         """Test gestion spécifique ErreurValidation."""
         from src.core.decorators import avec_gestion_erreurs
 
@@ -172,8 +169,7 @@ class TestAvecGestionErreurs:
         result = validation_fail()
         assert result == "fallback"
 
-    @patch("streamlit.warning")
-    def test_avec_gestion_erreurs_erreur_non_trouve(self, mock_warning):
+    def test_avec_gestion_erreurs_erreur_non_trouve(self):
         """Test gestion spécifique ErreurNonTrouve."""
         from src.core.decorators import avec_gestion_erreurs
 
@@ -182,11 +178,9 @@ class TestAvecGestionErreurs:
             raise ErreurNonTrouve("Recette 42", message_utilisateur="Non trouvé")
 
         result = not_found()
-        mock_warning.assert_called_once()
         assert result is None
 
-    @patch("streamlit.error")
-    def test_avec_gestion_erreurs_erreur_base_donnees(self, mock_error):
+    def test_avec_gestion_erreurs_erreur_base_donnees(self):
         """Test gestion spécifique ErreurBaseDeDonnees."""
         from src.core.decorators import avec_gestion_erreurs
 
@@ -195,11 +189,9 @@ class TestAvecGestionErreurs:
             raise ErreurBaseDeDonnees("connexion perdue")
 
         result = db_error()
-        mock_error.assert_called_once()
         assert result == []
 
-    @patch("streamlit.error")
-    def test_avec_gestion_erreurs_erreur_service_ia(self, mock_error):
+    def test_avec_gestion_erreurs_erreur_service_ia(self):
         """Test gestion spécifique ErreurServiceIA."""
         from src.core.decorators import avec_gestion_erreurs
 
@@ -208,11 +200,9 @@ class TestAvecGestionErreurs:
             raise ErreurServiceIA("API Mistral down")
 
         result = ia_error()
-        mock_error.assert_called_once()
         assert result == {}
 
-    @patch("streamlit.warning")
-    def test_avec_gestion_erreurs_erreur_limite_debit(self, mock_warning):
+    def test_avec_gestion_erreurs_erreur_limite_debit(self):
         """Test gestion spécifique ErreurLimiteDebit."""
         from src.core.decorators import avec_gestion_erreurs
 
@@ -223,11 +213,9 @@ class TestAvecGestionErreurs:
             raise ErreurLimiteDebit("10/min atteint")
 
         result = rate_limit()
-        mock_warning.assert_called_once()
         assert result == "rate_limited"
 
-    @patch("streamlit.error")
-    def test_avec_gestion_erreurs_erreur_service_externe(self, mock_error):
+    def test_avec_gestion_erreurs_erreur_service_externe(self):
         """Test gestion spécifique ErreurServiceExterne."""
         from src.core.decorators import avec_gestion_erreurs
 
@@ -238,7 +226,6 @@ class TestAvecGestionErreurs:
             raise ErreurServiceExterne("OpenFood API down")
 
         result = external_error()
-        mock_error.assert_called_once()
         assert result == "external_error"
 
     def test_avec_gestion_erreurs_relancer_true(self):
@@ -252,17 +239,9 @@ class TestAvecGestionErreurs:
         with pytest.raises(ErreurValidation):
             will_raise()
 
-    @patch("streamlit.error")
-    @patch("streamlit.expander")
-    @patch("streamlit.code")
-    def test_avec_gestion_erreurs_debug_mode_shows_stacktrace(
-        self, mock_code, mock_expander, mock_error
-    ):
-        """Test que le mode debug affiche la stack trace."""
+    def test_avec_gestion_erreurs_debug_mode_returns_default(self):
+        """Test que le mode debug retourne le default."""
         from src.core.decorators import avec_gestion_erreurs
-
-        mock_expander.return_value.__enter__ = Mock(return_value=None)
-        mock_expander.return_value.__exit__ = Mock(return_value=False)
 
         @avec_gestion_erreurs(default_return=None, afficher_erreur=True, relancer_metier=False)
         def unexpected_error():

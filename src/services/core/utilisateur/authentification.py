@@ -54,11 +54,9 @@ class AuthService(PermissionsMixin, SessionMixin, TokenValidationMixin, ProfileM
         """Initialise le service avec le client Supabase.
 
         Args:
-            storage: Stockage clé-valeur mutable (défaut: st.session_state).
+            storage: Stockage clé-valeur mutable (défaut: dict en mémoire).
         """
-        from src.core.storage import obtenir_session_state
-
-        self._storage = storage if storage is not None else obtenir_session_state()
+        self._storage = storage if storage is not None else {}
         self._client = None
         self._init_client()
 

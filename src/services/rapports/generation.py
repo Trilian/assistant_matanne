@@ -29,7 +29,7 @@ from src.services.rapports.planning_pdf import PlanningReportMixin
 from src.services.rapports.rapports_budget import BudgetReportMixin
 from src.services.rapports.rapports_gaspillage import GaspillageReportMixin
 from src.services.rapports.types import RapportStocks
-from src.ui.tokens import Couleur
+from src.services.rapports._couleurs import Couleur
 
 logger = logging.getLogger(__name__)
 

@@ -1,37 +1,10 @@
 """
-Tests pour src/core/ai/cache.py - Cache IA avec mocks Streamlit.
+Tests pour src/core/ai/cache.py - Cache IA.
 """
 
 from unittest.mock import MagicMock, patch
 
 import pytest
-
-
-@pytest.fixture
-def mock_session_state():
-    """Mock st.session_state pour tests isolés."""
-    mock_state = {}
-
-    def getitem(key):
-        return mock_state[key]
-
-    def setitem(key, value):
-        mock_state[key] = value
-
-    def contains(key):
-        return key in mock_state
-
-    def delitem(key):
-        del mock_state[key]
-
-    mock = MagicMock()
-    mock.__getitem__ = MagicMock(side_effect=getitem)
-    mock.__setitem__ = MagicMock(side_effect=setitem)
-    mock.__contains__ = MagicMock(side_effect=contains)
-    mock.__delitem__ = MagicMock(side_effect=delitem)
-    mock._mock_state = mock_state
-
-    return mock
 
 
 # ═══════════════════════════════════════════════════════════
@@ -105,39 +78,28 @@ class TestCacheIAGenererCle:
 class TestCacheIAObtenir:
     """Tests pour CacheIA.obtenir()."""
 
-    def test_obtenir_returns_none_if_not_cached(self, mock_session_state):
+    def test_obtenir_returns_none_if_not_cached(self):
         """Test obtenir retourne None si non caché."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import CacheIA
+        from src.core.ai.cache import CacheIA
 
-            result = CacheIA.obtenir("prompt_inexistant")
+        result = CacheIA.obtenir("prompt_inexistant")
+        assert result is None
 
-            assert result is None
-
-    def test_obtenir_returns_cached_value(self, mock_session_state):
+    def test_obtenir_returns_cached_value(self):
         """Test obtenir retourne valeur cachée."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import CacheIA
+        from src.core.ai.cache import CacheIA
 
-            # Définir d'abord
-            CacheIA.definir("mon prompt", "réponse IA", "system", 0.7, "mistral")
+        CacheIA.definir("mon prompt", "réponse IA", "system", 0.7, "mistral")
+        result = CacheIA.obtenir("mon prompt", "system", 0.7, "mistral")
+        assert result == "réponse IA"
 
-            # Obtenir
-            result = CacheIA.obtenir("mon prompt", "system", 0.7, "mistral")
-
-            assert result == "réponse IA"
-
-    def test_obtenir_with_custom_ttl(self, mock_session_state):
+    def test_obtenir_with_custom_ttl(self):
         """Test obtenir avec TTL personnalisé."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import CacheIA
+        from src.core.ai.cache import CacheIA
 
-            CacheIA.definir("prompt", "réponse")
-
-            # Devrait retourner avec TTL court
-            result = CacheIA.obtenir("prompt", ttl=3600)
-
-            assert result == "réponse"
+        CacheIA.definir("prompt", "réponse")
+        result = CacheIA.obtenir("prompt", ttl=3600)
+        assert result == "réponse"
 
 
 # ═══════════════════════════════════════════════════════════
@@ -148,39 +110,33 @@ class TestCacheIAObtenir:
 class TestCacheIADefinir:
     """Tests pour CacheIA.definir()."""
 
-    def test_definir_stores_value(self, mock_session_state):
+    def test_definir_stores_value(self):
         """Test definir stocke la valeur."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import CacheIA
+        from src.core.ai.cache import CacheIA
 
-            CacheIA.definir("prompt", "réponse IA")
+        CacheIA.definir("prompt", "réponse IA")
+        result = CacheIA.obtenir("prompt")
+        assert result == "réponse IA"
 
-            # Vérifier via obtenir
-            result = CacheIA.obtenir("prompt")
-            assert result == "réponse IA"
-
-    def test_definir_with_all_params(self, mock_session_state):
+    def test_definir_with_all_params(self):
         """Test definir avec tous les paramètres."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import CacheIA
+        from src.core.ai.cache import CacheIA
 
-            CacheIA.definir(
-                prompt="Génère une recette",
-                reponse="Voici une recette...",
-                systeme="Tu es un chef",
-                temperature=0.8,
-                modele="mistral-large",
-            )
+        CacheIA.definir(
+            prompt="Génère une recette",
+            reponse="Voici une recette...",
+            systeme="Tu es un chef",
+            temperature=0.8,
+            modele="mistral-large",
+        )
 
-            # Vérifier via obtenir avec mêmes params
-            result = CacheIA.obtenir(
-                prompt="Génère une recette",
-                systeme="Tu es un chef",
-                temperature=0.8,
-                modele="mistral-large",
-            )
-
-            assert result == "Voici une recette..."
+        result = CacheIA.obtenir(
+            prompt="Génère une recette",
+            systeme="Tu es un chef",
+            temperature=0.8,
+            modele="mistral-large",
+        )
+        assert result == "Voici une recette..."
 
 
 # ═══════════════════════════════════════════════════════════
@@ -191,21 +147,17 @@ class TestCacheIADefinir:
 class TestCacheIAInvalider:
     """Tests pour CacheIA.invalider_tout()."""
 
-    def test_invalider_tout_clears_ia_cache(self, mock_session_state):
+    def test_invalider_tout_clears_ia_cache(self):
         """Test invalider_tout efface le cache IA."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import CacheIA
+        from src.core.ai.cache import CacheIA
 
-            # Ajouter des entrées
-            CacheIA.definir("prompt1", "réponse1")
-            CacheIA.definir("prompt2", "réponse2")
+        CacheIA.definir("prompt1", "réponse1")
+        CacheIA.definir("prompt2", "réponse2")
 
-            # Invalider
-            CacheIA.invalider_tout()
+        CacheIA.invalider_tout()
 
-            # Vérifier suppression
-            assert CacheIA.obtenir("prompt1") is None
-            assert CacheIA.obtenir("prompt2") is None
+        assert CacheIA.obtenir("prompt1") is None
+        assert CacheIA.obtenir("prompt2") is None
 
 
 # ═══════════════════════════════════════════════════════════
@@ -216,24 +168,19 @@ class TestCacheIAInvalider:
 class TestCacheIAStatistiques:
     """Tests pour CacheIA.obtenir_statistiques()."""
 
-    def test_statistiques_returns_dict(self, mock_session_state):
+    def test_statistiques_returns_dict(self):
         """Test statistiques retourne dict."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import CacheIA
+        from src.core.ai.cache import CacheIA
 
-            stats = CacheIA.obtenir_statistiques()
+        stats = CacheIA.obtenir_statistiques()
+        assert isinstance(stats, dict)
 
-            assert isinstance(stats, dict)
-
-    def test_statistiques_contains_expected_keys(self, mock_session_state):
+    def test_statistiques_contains_expected_keys(self):
         """Test statistiques contient les clés attendues."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import CacheIA
+        from src.core.ai.cache import CacheIA
 
-            stats = CacheIA.obtenir_statistiques()
-
-            # Le cache IA a ses propres clés
-            assert "entrees_ia" in stats or "taux_hit" in stats or len(stats) > 0
+        stats = CacheIA.obtenir_statistiques()
+        assert "entrees_ia" in stats or "taux_hit" in stats or len(stats) > 0
 
 
 # ═══════════════════════════════════════════════════════════
@@ -267,135 +214,37 @@ class TestCacheIAConstants:
 class TestCacheIANettoyerExpires:
     """Tests pour CacheIA.nettoyer_expires()."""
 
-    def test_nettoyer_expires_calls_cache_nettoyer(self, mock_session_state):
+    def test_nettoyer_expires_calls_cache_nettoyer(self):
         """Test nettoyer_expires appelle le nettoyage du cache L1."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import CacheIA
+        from src.core.ai.cache import CacheIA
 
-            with patch("src.core.ai.cache._cache") as mock_cache_fn:
-                mock_l1 = MagicMock()
-                mock_cache_fn.return_value.l1 = mock_l1
-                CacheIA.nettoyer_expires()
-                mock_l1.cleanup_expired.assert_called_once()
+        with patch("src.core.ai.cache._cache") as mock_cache_fn:
+            mock_l1 = MagicMock()
+            mock_cache_fn.return_value.l1 = mock_l1
+            CacheIA.nettoyer_expires()
+            mock_l1.cleanup_expired.assert_called_once()
 
-    def test_nettoyer_expires_with_custom_age(self, mock_session_state):
+    def test_nettoyer_expires_with_custom_age(self):
         """Test nettoyer_expires avec âge personnalisé."""
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import CacheIA
+        from src.core.ai.cache import CacheIA
 
-            age_custom = 3600
-            with patch("src.core.ai.cache._cache") as mock_cache_fn:
-                mock_l1 = MagicMock()
-                mock_cache_fn.return_value.l1 = mock_l1
-                CacheIA.nettoyer_expires(age_max_secondes=age_custom)
-                mock_l1.cleanup_expired.assert_called_once()
+        age_custom = 3600
+        with patch("src.core.ai.cache._cache") as mock_cache_fn:
+            mock_l1 = MagicMock()
+            mock_cache_fn.return_value.l1 = mock_l1
+            CacheIA.nettoyer_expires(age_max_secondes=age_custom)
+            mock_l1.cleanup_expired.assert_called_once()
 
-    def test_nettoyer_expires_logs_info(self, mock_session_state, caplog):
+    def test_nettoyer_expires_logs_info(self, caplog):
         """Test nettoyer_expires écrit dans les logs."""
         import logging
 
-        with patch("streamlit.session_state", mock_session_state):
-            from src.core.ai.cache import CacheIA
+        from src.core.ai.cache import CacheIA
 
-            with patch("src.core.ai.cache._cache") as mock_cache_fn:
-                mock_l1 = MagicMock()
-                mock_cache_fn.return_value.l1 = mock_l1
-                with caplog.at_level(logging.INFO):
-                    CacheIA.nettoyer_expires(age_max_secondes=1800)
+        with patch("src.core.ai.cache._cache") as mock_cache_fn:
+            mock_l1 = MagicMock()
+            mock_cache_fn.return_value.l1 = mock_l1
+            with caplog.at_level(logging.INFO):
+                CacheIA.nettoyer_expires(age_max_secondes=1800)
 
-                assert any("Nettoyage cache IA" in record.message for record in caplog.records)
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS WIDGET STREAMLIT AFFICHER STATISTIQUES
-# ═══════════════════════════════════════════════════════════
-
-
-class TestAfficherStatistiquesCacheIA:
-    """Tests pour afficher_statistiques_cache_ia() - Widget Streamlit."""
-
-    def test_afficher_statistiques_calls_streamlit(self, mock_session_state):
-        """Test que le widget appelle les composants Streamlit."""
-        with patch("streamlit.session_state", mock_session_state):
-            import streamlit as st
-
-            from src.core.ai.cache import afficher_statistiques_cache_ia
-
-            # Mock tous les composants Streamlit
-            with patch.object(st, "expander") as mock_expander:
-                with patch.object(st, "columns") as mock_columns:
-                    with patch.object(st, "metric") as mock_metric:
-                        with patch.object(st, "button", return_value=False) as mock_button:
-                            # Configurer le context manager
-                            mock_expander.return_value.__enter__ = MagicMock(return_value=None)
-                            mock_expander.return_value.__exit__ = MagicMock(return_value=None)
-
-                            # Configurer les colonnes
-                            mock_col = MagicMock()
-                            mock_col.__enter__ = MagicMock(return_value=None)
-                            mock_col.__exit__ = MagicMock(return_value=None)
-                            mock_columns.return_value = [mock_col, mock_col]
-
-                            afficher_statistiques_cache_ia()
-
-                            # Vérifier que expander est appelé
-                            mock_expander.assert_called_once()
-                            assert "Cache IA" in mock_expander.call_args[0][0]
-
-    def test_afficher_statistiques_button_nettoyer(self, mock_session_state):
-        """Test bouton nettoyer dans le widget."""
-        with patch("streamlit.session_state", mock_session_state):
-            import streamlit as st
-
-            from src.core.ai.cache import CacheIA, afficher_statistiques_cache_ia
-
-            # Mock tous les composants avec bouton nettoyer cliqué
-            with patch.object(st, "expander") as mock_expander:
-                with patch.object(st, "columns") as mock_columns:
-                    with patch.object(st, "metric"):
-                        # Premier bouton (nettoyer) retourne True, second (vider) False
-                        with patch.object(st, "button", side_effect=[True, False]) as mock_button:
-                            with patch.object(st, "success"):
-                                with patch.object(st, "rerun"):
-                                    with patch.object(CacheIA, "nettoyer_expires") as mock_nettoyer:
-                                        # Configuration des mocks
-                                        mock_expander.return_value.__enter__ = MagicMock()
-                                        mock_expander.return_value.__exit__ = MagicMock()
-                                        mock_col = MagicMock()
-                                        mock_col.__enter__ = MagicMock()
-                                        mock_col.__exit__ = MagicMock()
-                                        mock_columns.return_value = [mock_col, mock_col]
-
-                                        afficher_statistiques_cache_ia()
-
-                                        # Nettoyer doit être appelé
-                                        mock_nettoyer.assert_called_once()
-
-    def test_afficher_statistiques_button_vider(self, mock_session_state):
-        """Test bouton vider dans le widget."""
-        with patch("streamlit.session_state", mock_session_state):
-            import streamlit as st
-
-            from src.core.ai.cache import CacheIA, afficher_statistiques_cache_ia
-
-            # Mock tous les composants avec bouton vider cliqué
-            with patch.object(st, "expander") as mock_expander:
-                with patch.object(st, "columns") as mock_columns:
-                    with patch.object(st, "metric"):
-                        # Premier bouton False, second (vider) True
-                        with patch.object(st, "button", side_effect=[False, True]) as mock_button:
-                            with patch.object(st, "success"):
-                                with patch.object(st, "rerun"):
-                                    with patch.object(CacheIA, "invalider_tout") as mock_invalider:
-                                        # Configuration des mocks
-                                        mock_expander.return_value.__enter__ = MagicMock()
-                                        mock_expander.return_value.__exit__ = MagicMock()
-                                        mock_col = MagicMock()
-                                        mock_col.__enter__ = MagicMock()
-                                        mock_col.__exit__ = MagicMock()
-                                        mock_columns.return_value = [mock_col, mock_col]
-
-                                        afficher_statistiques_cache_ia()
-
-                                        # Invalider doit être appelé
-                                        mock_invalider.assert_called_once()
+            assert any("Nettoyage cache IA" in record.message for record in caplog.records)

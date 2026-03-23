@@ -1,14 +1,10 @@
-"""
-Settings - Configuration Pydantic centralisée.
+"""Settings - Configuration Pydantic centralisée.
 
 Classe Parametres avec auto-détection des sources:
-1. st.secrets (Streamlit Cloud)
-2. Variables d'environnement (via pydantic-settings)
-3. Valeurs par défaut
+1. Variables d'environnement (via pydantic-settings / .env.local)
+2. Valeurs par défaut
 
-Toutes les valeurs passent par la validation Pydantic. Les secrets
-Streamlit sont résolus une seule fois au démarrage via
-``@model_validator(mode='after')``.
+Toutes les valeurs passent par la validation Pydantic.
 """
 
 from __future__ import annotations
@@ -26,12 +22,7 @@ from ..constants import (
     LOG_LEVEL_PRODUCTION,
     SEUIL_PAGE_LENTE,
 )
-from .loader import (
-    _is_streamlit_cloud,
-    _read_st_secret,
-    _reload_env_files,
-    charger_secrets_streamlit,
-)
+from .loader import _reload_env_files
 
 logger = logging.getLogger(__name__)
 
@@ -159,16 +150,10 @@ class Parametres(BaseSettings):
         dummy = "sk-test-dummy-key-replace-with-real-key"
         if self.mistral_key and self.mistral_key != dummy:
             return self.mistral_key
-        is_cloud = _is_streamlit_cloud()
-        env_info = "Streamlit Cloud" if is_cloud else "Dev Local"
         raise ValueError(
-            f"[ERROR] Clé API Mistral manquante ({env_info})!\n\n"
-            "Configure l'une de ces options:\n"
-            "1. Fichier .env.local (Dev local):\n"
-            "   MISTRAL_API_KEY='sk-xxx' ou autre format\n\n"
-            "2. Streamlit Secrets (Cloud):\n"
-            "   [mistral]\n"
-            "   api_key = 'sk-xxx' ou autre format"
+            "[ERROR] Clé API Mistral manquante!\n\n"
+            "Configure dans .env.local:\n"
+            "   MISTRAL_API_KEY='sk-xxx'"
         )
 
     MISTRAL_MODEL: str = "mistral-small-latest"
@@ -194,7 +179,7 @@ class Parametres(BaseSettings):
     """Client Secret OAuth2 Google Calendar."""
 
     GOOGLE_REDIRECT_URI: str = ""
-    """URI de redirection OAuth2 Google (local: http://localhost:8501/callback/google, cloud: https://<app>.streamlit.app/callback/google)."""
+    """URI de redirection OAuth2 Google."""
 
     # ═══════════════════════════════════════════════════════════
     # RATE LIMITING
@@ -242,49 +227,33 @@ class Parametres(BaseSettings):
     VACANCES_ALERT_DAYS: int = 14
     """Seuil en jours pour afficher l'alerte/preview 'Vacances' dans le hub famille (défaut: 14 jours)."""
 
-    # ═════════════════════════════════════════════════════════════    # RÉSOLUTION DES SECRETS (st.secrets en fallback des env vars)
+    # ═════════════════════════════════════════════════════════════
+    # RÉSOLUTION DES SECRETS (env vars uniquement)
     # ═══════════════════════════════════════════════════════════
 
     @model_validator(mode="after")
     def _resoudre_secrets(self) -> Parametres:
-        """Complète les valeurs depuis st.secrets en fallback des env vars.
+        """Complète les valeurs depuis les variables d'environnement.
 
         Appelé une seule fois au démarrage. Les valeurs sont ensuite
         stockées dans les champs Pydantic validés.
         """
         self._resoudre_database_url()
         self._resoudre_mistral()
-        self._resoudre_apis_externes()
         return self
 
     def _resoudre_database_url(self) -> None:
-        """Résout DATABASE_URL avec la même priorité que l'original.
+        """Résout DATABASE_URL.
 
         Ordre de priorité:
-        1. st.secrets["db"] (prioritaire en production)
-        2. DATABASE_URL env var (déjà chargé dans db_url par pydantic-settings)
-        3. Composants individuels DB_HOST/DB_USER/... (pydantic-settings)
+        1. DATABASE_URL env var (déjà chargé dans db_url par pydantic-settings)
+        2. Composants individuels DB_HOST/DB_USER/... (pydantic-settings)
         """
-        # 1. st.secrets (prioritaire en production) — toujours vérifier
-        db = _read_st_secret("db")
-        if db:
-            try:
-                self.db_url = (
-                    f"postgresql://{db['user']}:{db['password']}"
-                    f"@{db['host']}:{db['port']}/{db['name']}"
-                    f"?sslmode=require"
-                )
-                return
-            except Exception:
-                logger.debug("st.secrets['db'] présente mais format inattendu")
-
-        # 2. DATABASE_URL env var (déjà dans db_url via pydantic-settings)
         if self.db_url:
             if "sslmode" not in self.db_url and "supabase" in self.db_url:
                 self.db_url += "?sslmode=require"
             return
 
-        # 3. Composants individuels (chargés par pydantic-settings)
         if all([self.DB_HOST, self.DB_USER, self.DB_PASSWORD, self.DB_NAME]):
             self.db_url = (
                 f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}"
@@ -293,62 +262,15 @@ class Parametres(BaseSettings):
             )
 
     def _resoudre_mistral(self) -> None:
-        """Résout MISTRAL_API_KEY et MISTRAL_MODEL depuis st.secrets si absent."""
+        """Résout MISTRAL_API_KEY depuis les env vars."""
         dummy = "sk-test-dummy-key-replace-with-real-key"
 
         if not self.mistral_key or self.mistral_key == dummy:
-            # Edge case: variable STREAMLIT_SECRETS_MISTRAL_API_KEY
             if self.streamlit_secrets_mistral_key:
                 self.mistral_key = self.streamlit_secrets_mistral_key
-            else:
-                # Fallback st.secrets
-                api_key = charger_secrets_streamlit()
-                if api_key and api_key.strip() and api_key != dummy:
-                    self.mistral_key = api_key
 
-        # MISTRAL_MODEL depuis st.secrets (si non overridé par env)
-        if not self.MISTRAL_MODEL or self.MISTRAL_MODEL == "mistral-small-latest":
-            mistral_sec = _read_st_secret("mistral")
-            if mistral_sec and hasattr(mistral_sec, "get"):
-                model = mistral_sec.get("model")
-                if model:
-                    self.MISTRAL_MODEL = model
-            # Restaurer le défaut si vide
-            if not self.MISTRAL_MODEL:
-                self.MISTRAL_MODEL = "mistral-small-latest"
-
-    def _resoudre_apis_externes(self) -> None:
-        """Résout les clés API optionnelles depuis st.secrets si absentes."""
-        # FOOTBALL_DATA_API_KEY
-        if not self.FOOTBALL_DATA_API_KEY:
-            try:
-                import streamlit as st
-
-                cle = st.secrets.get("FOOTBALL_DATA_API_KEY")
-                if cle and cle.strip():
-                    self.FOOTBALL_DATA_API_KEY = cle
-                else:
-                    cle = st.secrets.get("football_data", {}).get("api_key")
-                    if cle and cle.strip():
-                        self.FOOTBALL_DATA_API_KEY = cle
-            except Exception:
-                pass
-
-        # GOOGLE Calendar
-        google = _read_st_secret("google")
-        if google and hasattr(google, "get"):
-            if not self.GOOGLE_CLIENT_ID:
-                cid = google.get("client_id")
-                if cid and cid.strip():
-                    self.GOOGLE_CLIENT_ID = cid
-            if not self.GOOGLE_CLIENT_SECRET:
-                csec = google.get("client_secret")
-                if csec and csec.strip():
-                    self.GOOGLE_CLIENT_SECRET = csec
-            if not self.GOOGLE_REDIRECT_URI:
-                ruri = google.get("redirect_uri")
-                if ruri and ruri.strip():
-                    self.GOOGLE_REDIRECT_URI = ruri
+        if not self.MISTRAL_MODEL:
+            self.MISTRAL_MODEL = "mistral-small-latest"
 
     # ═══════════════════════════════════════════════════════════
     # MÉTHODES HELPERS
@@ -421,8 +343,8 @@ def obtenir_parametres() -> Parametres:
     """
     Récupère l'instance Parametres (thread-safe).
 
-    Utilise un singleton avec rechargement des .env au premier appel
-    du cycle Streamlit. Le logging n'est configuré qu'une seule fois.
+    Utilise un singleton avec rechargement des .env au premier appel.
+    Le logging n'est configuré qu'une seule fois.
 
     Returns:
         Instance Parametres configurée
