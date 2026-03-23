@@ -18,14 +18,21 @@ export interface DonneesInscription {
 
 /** Connexion → retourne JWT */
 export async function connecter(donnees: DonneesConnexion): Promise<ReponseToken> {
-  const { data } = await clientApi.post<ReponseToken>("/auth/login", donnees);
+  const { data } = await clientApi.post<ReponseToken>("/auth/login", {
+    email: donnees.email,
+    password: donnees.mot_de_passe,
+  });
   localStorage.setItem("access_token", data.access_token);
   return data;
 }
 
 /** Inscription */
 export async function inscrire(donnees: DonneesInscription): Promise<ReponseToken> {
-  const { data } = await clientApi.post<ReponseToken>("/auth/register", donnees);
+  const { data } = await clientApi.post<ReponseToken>("/auth/register", {
+    email: donnees.email,
+    password: donnees.mot_de_passe,
+    nom: donnees.nom,
+  });
   localStorage.setItem("access_token", data.access_token);
   return data;
 }

@@ -8,6 +8,7 @@ Centralise tous les schémas de validation et sérialisation.
 # Auth
 from .auth import (
     LoginRequest,
+    RegisterRequest,
     UserInfoResponse,
 )
 from .base import (
@@ -194,6 +195,7 @@ __all__ = [
     "combiner_reponses",
     # Auth
     "LoginRequest",
+    "RegisterRequest",
     "UserInfoResponse",
     # Recettes
     "RecetteBase",

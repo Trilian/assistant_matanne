@@ -21,7 +21,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from src.api.auth import TokenResponse, creer_token_acces
 from src.api.dependencies import get_current_user
 from src.api.rate_limiting import _stockage
-from src.api.schemas import LoginRequest, UserInfoResponse
+from src.api.schemas import LoginRequest, RegisterRequest, UserInfoResponse
 from src.api.schemas.errors import REPONSES_AUTH, REPONSES_AUTH_LOGIN
 from src.api.utils import gerer_exception_api
 
@@ -123,6 +123,65 @@ async def connexion(request: LoginRequest, raw_request: Request):
     except Exception as e:
         logger.error(f"Erreur login: {e}")
         raise HTTPException(status_code=401, detail="Identifiants invalides") from e
+
+
+@router.post(
+    "/register",
+    response_model=TokenResponse,
+    status_code=201,
+    summary="Inscription",
+    description="Crée un nouveau compte via Supabase et retourne un token JWT.",
+)
+@gerer_exception_api
+async def inscription(request: RegisterRequest):
+    """Crée un compte utilisateur via Supabase Auth."""
+    try:
+        from supabase import create_client
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="Service d'authentification Supabase non disponible",
+        )
+
+    import os
+
+    supabase_url = os.getenv("SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_ANON_KEY")
+
+    if not supabase_url or not supabase_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Supabase non configuré",
+        )
+
+    try:
+        client = create_client(supabase_url, supabase_key)
+        response = client.auth.sign_up(
+            {
+                "email": request.email,
+                "password": request.password,
+                "options": {"data": {"nom": request.nom, "role": "membre"}},
+            }
+        )
+
+        if not response.user:
+            raise HTTPException(status_code=400, detail="Impossible de créer le compte")
+
+        token = creer_token_acces(
+            user_id=response.user.id,
+            email=response.user.email or request.email,
+            role="membre",
+        )
+
+        return TokenResponse(access_token=token)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erreur inscription: {e}")
+        raise HTTPException(
+            status_code=400, detail="Impossible de créer le compte"
+        ) from e
 
 
 @router.post(
