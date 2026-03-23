@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Tableau de bord — Page d'accueil
 // ═══════════════════════════════════════════════════════════
 
@@ -11,6 +11,8 @@ import {
   AlertTriangle,
   Sparkles,
   ArrowRight,
+  Zap,
+  Euro,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -22,13 +24,15 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { obtenirTableauBord } from "@/lib/api/tableau-bord";
-import { utiliserAuth } from "@/hooks/utiliser-auth";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { obtenirTableauBord } from "@/bibliotheque/api/tableau-bord";
+import { statsDepensesMaison } from "@/bibliotheque/api/maison";
+import { utiliserAuth } from "@/crochets/utiliser-auth";
 
 export default function PageAccueil() {
   const { utilisateur } = utiliserAuth();
   const { data, isLoading } = utiliserRequete(["tableau-bord"], obtenirTableauBord);
+  const { data: statsDepenses } = utiliserRequete(["depenses", "stats"], statsDepensesMaison);
 
   return (
     <div className="space-y-6">
@@ -128,6 +132,73 @@ export default function PageAccueil() {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {/* Aperçu financier */}
+      {statsDepenses && (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Euro className="h-5 w-5" />
+                Dépenses du mois
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">
+                {statsDepenses.total_mois?.toFixed(0) ?? "0"} €
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {statsDepenses.delta_mois_precedent != null && (
+                  <span className={statsDepenses.delta_mois_precedent > 0 ? "text-destructive" : "text-green-600"}>
+                    {statsDepenses.delta_mois_precedent > 0 ? "+" : ""}
+                    {statsDepenses.delta_mois_precedent.toFixed(0)} € vs mois précédent
+                  </span>
+                )}
+              </p>
+              {statsDepenses.par_categorie && (
+                <div className="mt-3 space-y-1">
+                  {Object.entries(statsDepenses.par_categorie as Record<string, number>)
+                    .sort(([, a], [, b]) => b - a)
+                    .slice(0, 3)
+                    .map(([cat, montant]) => (
+                      <div key={cat} className="flex justify-between text-sm">
+                        <span className="text-muted-foreground capitalize">{cat}</span>
+                        <span className="font-medium">{montant.toFixed(0)} €</span>
+                      </div>
+                    ))}
+                </div>
+              )}
+              <Button variant="ghost" size="sm" asChild className="mt-2 -ml-2">
+                <Link href="/maison/depenses" className="flex items-center gap-1">
+                  Détails <ArrowRight className="h-3 w-3" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Zap className="h-5 w-5" />
+                Budget annuel
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">
+                {statsDepenses.total_annee?.toFixed(0) ?? "0"} €
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Moyenne mensuelle : {statsDepenses.moyenne_mensuelle?.toFixed(0) ?? "0"} €/mois
+              </p>
+              <Button variant="ghost" size="sm" asChild className="mt-2 -ml-2">
+                <Link href="/maison/depenses" className="flex items-center gap-1">
+                  Voir tout <ArrowRight className="h-3 w-3" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

@@ -35,6 +35,8 @@ from typing import Any
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
+from src.api.utils import executer_async, executer_avec_session
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/ws", tags=["WebSocket"])
@@ -267,8 +269,8 @@ async def websocket_courses(
                 }
                 await _manager.broadcast(liste_id, message, exclude_user=user_id)
 
-                # TODO: Persister les changements en base de données
-                # await _persist_change(liste_id, action, data)
+                # Persister les changements en base de données
+                await _persist_change(liste_id, action, data)
 
             else:
                 await _manager.send_personal(
@@ -284,6 +286,109 @@ async def websocket_courses(
     except Exception as e:
         logger.error(f"Erreur WebSocket courses: {e}")
         await _manager.disconnect(liste_id, user_id)
+
+
+# ═══════════════════════════════════════════════════════════
+# PERSISTANCE EN BASE
+# ═══════════════════════════════════════════════════════════
+
+
+async def _persist_change(liste_id: int, action: str, data: dict[str, Any]) -> None:
+    """Persiste un changement WebSocket en base de données."""
+    from src.core.models import ArticleCourses, Ingredient, ListeCourses
+
+    try:
+        if action == WSMessageType.ITEM_CHECKED:
+            item_id = data.get("item_id")
+            checked = data.get("checked", False)
+
+            def _toggle():
+                with executer_avec_session() as session:
+                    article = session.query(ArticleCourses).filter(ArticleCourses.id == item_id).first()
+                    if article:
+                        article.achete = checked
+                        article.achete_le = datetime.now(UTC) if checked else None
+                        session.commit()
+
+            await executer_async(_toggle)
+
+        elif action == WSMessageType.ITEM_REMOVED:
+            item_id = data.get("item_id")
+
+            def _remove():
+                with executer_avec_session() as session:
+                    article = session.query(ArticleCourses).filter(
+                        ArticleCourses.id == item_id,
+                        ArticleCourses.liste_id == liste_id,
+                    ).first()
+                    if article:
+                        session.delete(article)
+                        session.commit()
+
+            await executer_async(_remove)
+
+        elif action == WSMessageType.ITEM_ADDED:
+            item = data.get("item", {})
+            nom = item.get("nom", "")
+            quantite = item.get("quantite", 1.0)
+            unite = item.get("unite", "pièce")
+            categorie = item.get("categorie")
+
+            def _add():
+                with executer_avec_session() as session:
+                    ingredient = session.query(Ingredient).filter(Ingredient.nom == nom).first()
+                    if not ingredient:
+                        ingredient = Ingredient(nom=nom, unite=unite)
+                        session.add(ingredient)
+                        session.flush()
+                    article = ArticleCourses(
+                        liste_id=liste_id,
+                        ingredient_id=ingredient.id,
+                        quantite_necessaire=quantite,
+                        rayon_magasin=categorie,
+                    )
+                    session.add(article)
+                    session.commit()
+
+            await executer_async(_add)
+
+        elif action == WSMessageType.ITEM_UPDATED:
+            item_id = data.get("item_id")
+            updates = data.get("updates", {})
+
+            def _update():
+                with executer_avec_session() as session:
+                    article = session.query(ArticleCourses).filter(
+                        ArticleCourses.id == item_id,
+                        ArticleCourses.liste_id == liste_id,
+                    ).first()
+                    if article:
+                        if "quantite" in updates:
+                            article.quantite_necessaire = updates["quantite"]
+                        if "priorite" in updates:
+                            article.priorite = updates["priorite"]
+                        if "categorie" in updates:
+                            article.rayon_magasin = updates["categorie"]
+                        if "notes" in updates:
+                            article.notes = updates["notes"]
+                        session.commit()
+
+            await executer_async(_update)
+
+        elif action == WSMessageType.LIST_RENAMED:
+            new_name = data.get("new_name", "")
+
+            def _rename():
+                with executer_avec_session() as session:
+                    liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+                    if liste and new_name:
+                        liste.nom = new_name
+                        session.commit()
+
+            await executer_async(_rename)
+
+    except Exception as e:
+        logger.error(f"Erreur persistance WS action={action} liste={liste_id}: {e}")
 
 
 # ═══════════════════════════════════════════════════════════

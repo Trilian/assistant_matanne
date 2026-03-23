@@ -124,3 +124,87 @@ async def upload_fichier(
             status_code=500,
             detail="Erreur lors de l'upload du fichier",
         )
+
+
+# ─── Album photos (Supabase Storage) ──────────────────────
+
+
+def _get_supabase_client():
+    """Crée et retourne un client Supabase, ou lève 503."""
+    try:
+        from supabase import create_client
+    except ImportError:
+        raise HTTPException(status_code=503, detail="SDK Supabase non disponible")
+
+    supabase_url = os.getenv("SUPABASE_URL")
+    supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
+    if not supabase_url or not supabase_key:
+        raise HTTPException(status_code=503, detail="Supabase Storage non configuré")
+    return create_client(supabase_url, supabase_key)
+
+
+@router.get(
+    "/photos",
+    responses=REPONSES_AUTH,
+    summary="Lister les photos de l'album famille",
+)
+@gerer_exception_api
+async def lister_photos(
+    categorie: str | None = None,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Liste les photos uploadées dans le bucket photos pour l'utilisateur."""
+    try:
+        client = _get_supabase_client()
+        prefix = f"{user['id']}/"
+        if categorie:
+            prefix = f"{user['id']}/{categorie}/"
+
+        result = client.storage.from_("photos").list(prefix)
+        photos = []
+        for item in result or []:
+            name = item.get("name", "")
+            if not name or name.startswith("."):
+                continue
+            path = f"{prefix}{name}"
+            photos.append({
+                "id": name,
+                "nom": name,
+                "url": client.storage.from_("photos").get_public_url(path),
+                "path": path,
+                "taille": item.get("metadata", {}).get("size", 0),
+                "date_upload": item.get("created_at", ""),
+            })
+        return {"items": photos, "total": len(photos)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erreur listing photos: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors du listing des photos")
+
+
+@router.delete(
+    "/photos/{path:path}",
+    responses=REPONSES_AUTH,
+    summary="Supprimer une photo de l'album",
+)
+@gerer_exception_api
+async def supprimer_photo(
+    path: str,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, str]:
+    """Supprime une photo du bucket Supabase Storage."""
+    # Sécurité: vérifier que le path appartient à l'utilisateur
+    if not path.startswith(f"{user['id']}/"):
+        raise HTTPException(status_code=403, detail="Accès refusé")
+
+    try:
+        client = _get_supabase_client()
+        client.storage.from_("photos").remove([path])
+        logger.info(f"Photo supprimée: photos/{path}")
+        return {"message": "Photo supprimée"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erreur suppression photo: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la suppression")

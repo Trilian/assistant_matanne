@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Budget Famille — Dépenses et statistiques
 // ═══════════════════════════════════════════════════════════
 
@@ -39,9 +39,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import dynamic from "next/dynamic";
-import { utiliserRequete, utiliserMutation } from "@/hooks/utiliser-api";
+import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
-import { listerDepenses, obtenirStatsBudget, ajouterDepense, supprimerDepense } from "@/lib/api/famille";
+import { listerDepenses, obtenirStatsBudget, ajouterDepense, supprimerDepense } from "@/bibliotheque/api/famille";
 
 const CamembertBudget = dynamic(
   () => import("@/composants/graphiques/camembert-budget").then((m) => m.CamembertBudget),
@@ -72,7 +72,13 @@ export default function PageBudget() {
 
   const mutationAjouter = utiliserMutation(
     (data: { montant: number; categorie: string; description: string; magasin?: string }) =>
-      ajouterDepense(data),
+      ajouterDepense({
+        libelle: data.description,
+        montant: data.montant,
+        categorie: data.categorie,
+        date: new Date().toISOString().slice(0, 10),
+        notes: data.magasin ? `Magasin: ${data.magasin}` : undefined,
+      }),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["famille", "budget"] });

@@ -578,7 +578,7 @@ def main():
     print("  â€¢ 4 notifications")
     print()
     print("ðŸš€ Tu peux maintenant lancer l'application !")
-    print("   poetry run streamlit run src/app.py")
+    print("   uvicorn src.api.main:app --reload")
     print()
 
 

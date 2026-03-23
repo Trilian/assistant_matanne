@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { utiliserMutation } from "@/hooks/utiliser-api";
-import { obtenirSuggestionsRecettes } from "@/lib/api/outils";
+import { utiliserMutation } from "@/crochets/utiliser-api";
+import { obtenirSuggestionsRecettes } from "@/bibliotheque/api/outils";
 import type { MessageChat } from "@/types/outils";
 
 export default function ChatIAPage() {

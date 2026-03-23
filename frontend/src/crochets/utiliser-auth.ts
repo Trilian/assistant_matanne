@@ -1,12 +1,12 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Hook useAuth — Authentification
 // ═══════════════════════════════════════════════════════════
 
 "use client";
 
 import { useCallback, useEffect } from "react";
-import { utiliserStoreAuth } from "@/stores/store-auth";
-import { obtenirProfil, deconnecter as apiDeconnecter } from "@/lib/api/auth";
+import { utiliserStoreAuth } from "@/magasins/store-auth";
+import { obtenirProfil, deconnecter as apiDeconnecter } from "@/bibliotheque/api/auth";
 
 export function utiliserAuth() {
   const { utilisateur, estConnecte, estChargement, definirUtilisateur, reinitialiser } =

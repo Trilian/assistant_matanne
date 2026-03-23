@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Activités familiales
 // ═══════════════════════════════════════════════════════════
 
@@ -44,8 +44,8 @@ import {
   utiliserRequete,
   utiliserMutation,
   utiliserInvalidation,
-} from "@/hooks/utiliser-api";
-import { listerActivites, creerActivite } from "@/lib/api/famille";
+} from "@/crochets/utiliser-api";
+import { listerActivites, creerActivite } from "@/bibliotheque/api/famille";
 import type { Activite } from "@/types/famille";
 
 const TYPES_ACTIVITE = [

@@ -1,6 +1,6 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 27 février 2026
+> Dernière mise à jour: 1 mars 2026
 
 ---
 
@@ -1168,3 +1168,128 @@ Variables critiques :
 ---
 
 _Note: Cette roadmap remplace tous les fichiers TODO/PLANNING précédents._
+
+---
+
+## ✅ Sprint 7 — Câblage services Maison & harmonisation frontend
+
+**Objectif**: Connecter les 10 services maison existants (CRUD complet) à l'API REST et au frontend Next.js. Harmoniser le nommage des dossiers frontend en français.
+
+### ✅ Réalisé
+
+**Phase A — Nettoyage dépendances**
+- Suppression de 3 dépendances Streamlit de `requirements.txt` (streamlit, streamlit-option-menu, streamlit-lottie)
+- Ajout de `python-multipart` dans `requirements.txt`
+- Ajout de `poetry.lock` dans `.dockerignore` (gardé pour dev, exclu du build prod)
+
+**Phase B — Renommage frontend français**
+- `frontend/src/hooks/` → `frontend/src/crochets/` (6 fichiers)
+- `frontend/src/stores/` → `frontend/src/magasins/` (3 fichiers)
+- `frontend/src/lib/` → `frontend/src/bibliotheque/` (4 items dont api/)
+- `frontend/src/components/enregistrement-sw.tsx` → `frontend/src/composants/enregistrement-sw.tsx`
+- Mise à jour des imports dans ~59 fichiers .ts/.tsx
+- Mise à jour de `components.json` (aliases shadcn/ui)
+
+**Phase C — Routes API backend (81 nouveaux endpoints)**
+- `src/api/routes/maison.py` : 111 endpoints total (30 existants + 81 nouveaux)
+- Domaines couverts : cellier (9), meubles CRUD (4), artisans+interventions (9), contrats (7), garanties+SAV (10), diagnostics (6), estimations (4), éco-tips (5), dépenses (9), nuisibles (5), devis (6), entretien saisonnier (6), relevés (3), visualisation plan (5), hub stats (1)
+- Correction des factory names dans `src/services/maison/__init__.py` (lazy loading + TYPE_CHECKING + __all__)
+
+**Phase E — Types TypeScript + API client**
+- `frontend/src/types/maison.ts` : 25+ nouvelles interfaces (Meuble, ArticleCellier, Artisan, Contrat, Garantie, DiagnosticImmobilier, etc.)
+- `frontend/src/bibliotheque/api/maison.ts` : 60+ nouvelles fonctions API client
+
+**Phase F — Pages frontend (6 nouvelles pages + hub enrichi)**
+- Hub maison enrichi : 13 sections (était 7)
+- Nouvelles pages : cellier, artisans, contrats, garanties, diagnostics, éco-tips
+- Chaque page : statistiques, alertes, liste filtrable, formulaire d'ajout
+
+**Phase 8 — Vérification build**
+- `npx next build` : ✅ compilation + type-check OK (42+ pages)
+- Backend routes : ✅ 111 routes chargées sans erreur
+- Corrections type errors pré-existants : `projets/page.tsx` (+statut), `entretien/page.tsx` (+fait), `famille/budget/page.tsx` (mapping DepenseBudget)
+- Corrections imports stale : `cuisine/recettes/[id]/page.tsx` et `modifier/page.tsx` (@/lib→@/bibliotheque, @/hooks→@/crochets)
+- Résolution collision barrel export : `listerDepenses` → `listerDepensesMaison` (7 fonctions renommées dans maison.ts)
+
+---
+
+## ✅ Sprint 8 — Qualité, tests, schemas Pydantic & formulaires CRUD
+
+**Objectif**: Compléter la qualité du codebase — schemas Pydantic API maison, tests unitaires backend, formulaires CRUD complets, sidebar enrichie, middleware auth, purge Streamlit.
+
+### ✅ Réalisé (15 items)
+
+**Schemas Pydantic API-layer**
+- `src/api/schemas/maison.py` : 40+ schemas (Create/Update/Response) pour tous les domaines maison
+- Validation entrantes complète : projets, entretien, jardin, stocks, cellier, artisans, contrats, garanties, diagnostics, éco-tips, dépenses, meubles, nuisibles, devis
+
+**Tests unitaires backend**
+- `tests/api/test_routes_maison.py` : 200+ tests — existence endpoints (81 parametrize), schemas Pydantic, CRUD routes, hub stats
+- `tests/api/test_routes_push.py`, `tests/api/test_routes_courses.py` : tests complets
+
+**Formulaires CRUD complets**
+- Toutes les pages maison avec DialogueFormulaire complet (create/edit/delete)
+- 52 routes frontend fonctionnelles
+
+**Sidebar navigation enrichie**
+- Sous-modules maison : cellier, artisans, contrats, garanties, diagnostics, éco-tips dans la sidebar
+
+**Build vérifié**
+- `npx next build` : ✅ compilation + type-check OK (52+ pages)
+- Backend : 111 routes chargées sans erreur
+
+---
+
+## ✅ Sprint 9 — Pages complètes, API clients, persistence WS, tests & UX
+
+**Objectif**: Finaliser les placeholder pages, ajouter les API clients manquants, corriger la persistence WebSocket courses, enrichir le dashboard, améliorer PWA, ajouter des tests frontend/backend.
+
+### ✅ Réalisé (15 items)
+
+**Pages frontend complètes (3 rewrites)**
+- `maison/depenses/page.tsx` : CRUD complet avec stats (total mois/année), bar chart par catégorie, filtres, DialogueFormulaire
+- `maison/energie/page.tsx` : Suivi compteurs (électricité/eau/gaz), calcul consommation inter-relevés, historique avec delete
+- `famille/album/page.tsx` : Upload photos, galerie grid responsive, lightbox viewer avec delete
+
+**Page Paramètres connectée (6 onglets)**
+- Onglets : Profil, Cuisine, Notifications, Affichage, IA, Données
+- Cuisine : préférences alimentaires (adultes, Jules, temps, exclusions, robots, magasins) → API preferences
+- Notifications : activation/désactivation push Web Push → API push subscribe/unsubscribe
+
+**API clients frontend créés (4 fichiers)**
+- `bibliotheque/api/preferences.ts` : GET/PUT/PATCH préférences utilisateur
+- `bibliotheque/api/push.ts` : subscribe/unsubscribe/status notifications push
+- `bibliotheque/api/calendriers.ts` : calendriers externes, événements, aujourd'hui, semaine
+- `bibliotheque/api/album.ts` : lister/uploader/supprimer photos
+
+**Backend routes album**
+- `GET /api/v1/upload/photos` : lister photos Supabase Storage (filtrable par catégorie)
+- `DELETE /api/v1/upload/photos/{path}` : supprimer photo avec vérification ownership
+
+**Fix WebSocket persistence courses**
+- `src/api/websocket_courses.py` : implémentation `_persist_change()` pour 5 actions (item_added, item_removed, item_checked, item_updated, list_renamed)
+- Persistance DB via `executer_avec_session()` pour chaque action
+
+**Error boundaries + Loading skeletons (8 fichiers)**
+- `error.tsx` par module : cuisine, famille, maison, jeux
+- `loading.tsx` par module : cuisine, famille, maison, jeux (skeletons adaptés)
+
+**Tests frontend Vitest (2 fichiers)**
+- `__tests__/api-clients.test.ts` : 9 tests — preferences, push, calendriers
+- `__tests__/hooks.test.ts` : 5 tests — utiliserRequete, utiliserMutation, utiliserInvalidation
+
+**Tests backend (1 fichier)**
+- `tests/api/test_sprint9.py` : dépenses CRUD détaillé, relevés énergie, WebSocket persistance, upload photos
+
+**PWA amélioré**
+- Service Worker avec stale-while-revalidate, cache API, liste offline enrichie
+
+**Dashboard enrichi**
+- Widgets tendance dépenses et consommation énergie
+
+**Pagination backward**
+- Curseur backward dans `src/api/pagination.py`
+
+**Documentation mise à jour**
+- `ROADMAP.md` : Sprints 8 et 9 documentés
+- `ARCHITECTURE.md` : Streamlit supprimé, stack Next.js documentée

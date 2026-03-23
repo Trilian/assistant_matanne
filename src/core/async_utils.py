@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 """
-Utilitaire async pour Streamlit.
+Utilitaire async pour FastAPI.
 
-Streamlit tourne dans un event loop existant. L'utilisation directe de
-``asyncio.run()`` ou ``asyncio.new_event_loop()`` provoque des conflits.
+Dans certains contextes (tâches synchrones appelées depuis un event loop
+FastAPI), l'utilisation directe de ``asyncio.run()`` provoque des conflits.
 Ce module fournit un wrapper sûr qui fonctionne dans tous les contextes.
 """
 
@@ -28,9 +28,9 @@ atexit.register(_EXECUTOR.shutdown, wait=False)
 
 
 def executer_async(coro: Coroutine[object, object, T]) -> T:
-    """Exécute une coroutine de manière sûre, compatible Streamlit.
+    """Exécute une coroutine de manière sûre, compatible FastAPI.
 
-    - S'il existe déjà un event loop running (Streamlit), utilise un thread
+    - S'il existe déjà un event loop running (FastAPI), utilise un thread
       dédié pour éviter les deadlocks.
     - Sinon, crée un loop temporaire.
 
@@ -55,7 +55,7 @@ def executer_async(coro: Coroutine[object, object, T]) -> T:
         loop = None
 
     if loop and loop.is_running():
-        # Streamlit tourne déjà un loop — on exécute dans un thread séparé
+        # Un event loop tourne déjà — on exécute dans un thread séparé
         future = _EXECUTOR.submit(asyncio.run, coro)
         return future.result(timeout=120)
     else:

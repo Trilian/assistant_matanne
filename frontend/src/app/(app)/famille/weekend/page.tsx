@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Weekend — Idées et planning du week-end
 // ═══════════════════════════════════════════════════════════
 
@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { listerActivites } from "@/lib/api/famille";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { listerActivites } from "@/bibliotheque/api/famille";
 
 export default function PageWeekend() {
   // Charger les activités de type sortie/weekend

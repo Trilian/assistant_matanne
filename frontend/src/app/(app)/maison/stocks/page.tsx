@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Stocks — Stocks non-alimentaires
 // ═══════════════════════════════════════════════════════════
 
@@ -15,8 +15,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { listerStocks } from "@/lib/api/maison";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { listerStocks } from "@/bibliotheque/api/maison";
 
 export default function PageStocks() {
   const [alerteOnly, setAlerteOnly] = useState(false);

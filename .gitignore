@@ -33,7 +33,6 @@ cov_*.txt
 # Environnement et secrets
 .env
 .env.local
-.streamlit/secrets.toml
 
 # Base de données locale
 *.db
@@ -49,8 +48,6 @@ logs/
 Thumbs.db
 *.swp
 
-# Streamlit
-.streamlit/secrets.toml
 
 # Backups
 data/backups/

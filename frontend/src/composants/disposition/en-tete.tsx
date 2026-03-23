@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // En-tête — Barre supérieure avec recherche + profil
 // ═══════════════════════════════════════════════════════════
 
@@ -7,8 +7,8 @@
 import { Search, Moon, Sun, LogOut, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { utiliserStoreUI } from "@/stores/store-ui";
-import { utiliserAuth } from "@/hooks/utiliser-auth";
+import { utiliserStoreUI } from "@/magasins/store-ui";
+import { utiliserAuth } from "@/crochets/utiliser-auth";
 import {
   DropdownMenu,
   DropdownMenuContent,

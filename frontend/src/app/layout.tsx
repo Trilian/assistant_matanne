@@ -1,11 +1,11 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { FournisseurQuery } from "@/fournisseurs/fournisseur-query";
 import { FournisseurAuth } from "@/fournisseurs/fournisseur-auth";
 import { FournisseurTheme } from "@/fournisseurs/fournisseur-theme";
 import { Toaster } from "@/components/ui/sonner";
-import { EnregistrementSW } from "@/components/enregistrement-sw";
+import { EnregistrementSW } from "@/composants/enregistrement-sw";
 import "./globals.css";
 
 const geistSans = Geist({

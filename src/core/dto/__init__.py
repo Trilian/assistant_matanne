@@ -2,7 +2,7 @@
 DTO (Data Transfer Objects) — Couche de transfert entre services et modules.
 
 Les DTOs sont des Pydantic models immuables qui découplent la couche ORM
-(SQLAlchemy) de la couche présentation (Streamlit modules).
+(SQLAlchemy) de la couche présentation (API routes).
 
 Avantages:
 - Pas de ``DetachedInstanceError`` (objets plain dict-like, pas lazy-loaded)

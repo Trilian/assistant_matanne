@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Jardin — Plantes et calendrier des semis
 // ═══════════════════════════════════════════════════════════
 
@@ -23,8 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { listerElementsJardin, obtenirCalendrierSemis } from "@/lib/api/maison";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { listerElementsJardin, obtenirCalendrierSemis } from "@/bibliotheque/api/maison";
 
 const NOMS_MOIS = [
   "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",

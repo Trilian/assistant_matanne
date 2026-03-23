@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Inventaire — Stock alimentaire et alertes
 // ═══════════════════════════════════════════════════════════
 
@@ -44,17 +44,17 @@ import {
   utiliserRequete,
   utiliserMutation,
   utiliserInvalidation,
-} from "@/hooks/utiliser-api";
+} from "@/crochets/utiliser-api";
 import {
   listerInventaire,
   ajouterArticleInventaire,
   supprimerArticleInventaire,
   obtenirAlertes,
-} from "@/lib/api/inventaire";
+} from "@/bibliotheque/api/inventaire";
 import {
   schemaArticleInventaire,
   type DonneesArticleInventaire,
-} from "@/lib/validateurs";
+} from "@/bibliotheque/validateurs";
 import type { ArticleInventaire } from "@/types/inventaire";
 
 const CATEGORIES = [

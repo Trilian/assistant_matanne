@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import BudgetPage from "@/app/(app)/famille/budget/page";
 
@@ -40,7 +40,7 @@ const mockDepenses = [
   },
 ];
 
-vi.mock("@/hooks/utiliser-api", () => ({
+vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: vi.fn().mockImplementation((key: string[]) => {
     if (key.includes("stats")) {
       return { data: mockStats, isLoading: false, error: null };

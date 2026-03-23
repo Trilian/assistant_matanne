@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Projets Maison — Travaux et améliorations
 // ═══════════════════════════════════════════════════════════
 
@@ -32,9 +32,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { utiliserRequete, utiliserMutation } from "@/hooks/utiliser-api";
+import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
-import { listerProjets, creerProjet, supprimerProjet } from "@/lib/api/maison";
+import { listerProjets, creerProjet, supprimerProjet } from "@/bibliotheque/api/maison";
 
 const STATUTS = [
   { value: "tous", label: "Tous" },
@@ -103,7 +103,7 @@ export default function PageProjets() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                creer({ nom: nomProjet, description: descProjet || undefined, priorite: prioriteProjet });
+                creer({ nom: nomProjet, description: descProjet || undefined, priorite: prioriteProjet, statut: 'planifié' });
               }}
               className="space-y-4"
             >

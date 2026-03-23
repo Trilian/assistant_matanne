@@ -40,8 +40,8 @@ def service():
 def mock_cache():
     """Cache mocké."""
     cache = Mock()
-    cache.obtenir.return_value = None
-    cache.definir = Mock()
+    cache.get.return_value = None
+    cache.set = Mock()
     return cache
 
 
@@ -230,14 +230,14 @@ class TestRechercherProduit:
     def test_recherche_cache_hit(self, service, mock_cache):
         """Test recherche avec cache hit."""
         cached_produit = ProduitOpenFoodFacts(code_barres="3017620422003", nom="Nutella (cached)")
-        mock_cache.obtenir.return_value = cached_produit
+        mock_cache.get.return_value = cached_produit
 
         with patch.object(service, "cache", mock_cache):
             result = service.rechercher_produit("3017620422003")
 
             assert result is not None
             assert result.nom == "Nutella (cached)"
-            mock_cache.obtenir.assert_called_once()
+            mock_cache.get.assert_called_once()
 
     def test_recherche_succes(self, service, api_response_nutella):
         """Test recherche réussie."""

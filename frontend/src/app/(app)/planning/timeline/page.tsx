@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Timeline — Vue chronologique de la semaine
 // ═══════════════════════════════════════════════════════════
 
@@ -15,8 +15,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { obtenirPlanningSemaine } from "@/lib/api/planning";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { obtenirPlanningSemaine } from "@/bibliotheque/api/planning";
 import type { TypeRepas } from "@/types/planning";
 
 const LABELS_REPAS: Record<TypeRepas, string> = {

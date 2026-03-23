@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Fournisseur Auth — Protège les routes authentifiées
 // ═══════════════════════════════════════════════════════════
 
@@ -6,7 +6,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { utiliserAuth } from "@/hooks/utiliser-auth";
+import { utiliserAuth } from "@/crochets/utiliser-auth";
 
 const ROUTES_PUBLIQUES = ["/connexion", "/inscription"];
 

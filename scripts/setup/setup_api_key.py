@@ -52,8 +52,8 @@ def ajouter_cle_api():
 
     print(f"âœ… ClÃ© API ajoutÃ©e Ã  {env_local}")
     print()
-    print("ðŸš€ Maintenant, redÃ©marrer Streamlit:")
-    print("   streamlit run src/app.py")
+    print("ðŸš€ Maintenant, redÃ©marrer le serveur:")
+    print("   uvicorn src.api.main:app --reload")
     print()
 
     return True

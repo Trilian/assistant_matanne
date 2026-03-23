@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Formulaire Recette — Composant partagé création/édition
 // ═══════════════════════════════════════════════════════════
 
@@ -25,9 +25,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { schemaRecette, type DonneesRecette } from "@/lib/validateurs";
-import { utiliserMutation, utiliserInvalidation } from "@/hooks/utiliser-api";
-import { creerRecette, modifierRecette } from "@/lib/api/recettes";
+import { schemaRecette, type DonneesRecette } from "@/bibliotheque/validateurs";
+import { utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
+import { creerRecette, modifierRecette } from "@/bibliotheque/api/recettes";
 import type { Recette } from "@/types/recettes";
 
 interface PropsFormulaireRecette {

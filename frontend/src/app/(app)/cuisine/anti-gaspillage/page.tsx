@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Anti-Gaspillage — Score, alertes et recettes rescue
 // ═══════════════════════════════════════════════════════════
 
@@ -24,8 +24,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { obtenirAntiGaspillage } from "@/lib/api/anti-gaspillage";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { obtenirAntiGaspillage } from "@/bibliotheque/api/anti-gaspillage";
 
 function couleurScore(score: number): string {
   if (score >= 80) return "text-green-600 dark:text-green-400";

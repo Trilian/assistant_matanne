@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Routines familiales — Matin / Soir / Journée
 // ═══════════════════════════════════════════════════════════
 
@@ -44,12 +44,12 @@ import {
   utiliserRequete,
   utiliserMutation,
   utiliserInvalidation,
-} from "@/hooks/utiliser-api";
+} from "@/crochets/utiliser-api";
 import {
   listerRoutines,
   creerRoutine,
   supprimerRoutine,
-} from "@/lib/api/famille";
+} from "@/bibliotheque/api/famille";
 import type { Routine, EtapeRoutine } from "@/types/famille";
 
 const TYPES_ROUTINE = [

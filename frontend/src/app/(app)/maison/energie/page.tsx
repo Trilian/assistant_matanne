@@ -1,10 +1,11 @@
 // ═══════════════════════════════════════════════════════════
-// Énergie — Consommation énergétique
+// Énergie — Consommation énergétique (CRUD relevés)
 // ═══════════════════════════════════════════════════════════
 
 "use client";
 
-import { Zap, Droplets, Flame, Gauge } from "lucide-react";
+import { useState } from "react";
+import { Zap, Droplets, Flame, Gauge, Plus, Trash2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,89 +13,271 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
+import { useQueryClient } from "@tanstack/react-query";
+import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
+import {
+  listerReleves,
+  creerReleve,
+  supprimerReleve,
+  historiqueEnergie,
+} from "@/bibliotheque/api/maison";
+import type { ReleveCompteur } from "@/types/maison";
 
-// Page placeholder — pas d'endpoint backend dédié encore
-const COMPTEURS = [
-  {
-    nom: "Électricité",
-    icone: Zap,
-    unite: "kWh",
-    couleur: "text-yellow-500",
-    description: "Consommation électrique",
-  },
-  {
-    nom: "Eau",
-    icone: Droplets,
-    unite: "m³",
-    couleur: "text-blue-500",
-    description: "Consommation eau froide/chaude",
-  },
-  {
-    nom: "Gaz",
-    icone: Flame,
-    unite: "m³",
-    couleur: "text-orange-500",
-    description: "Consommation gaz naturel",
-  },
+type TypeCompteur = "electricite" | "eau" | "gaz";
+
+const COMPTEURS: { cle: TypeCompteur; nom: string; Icone: typeof Zap; unite: string; couleur: string }[] = [
+  { cle: "electricite", nom: "Électricité", Icone: Zap, unite: "kWh", couleur: "text-yellow-500" },
+  { cle: "eau", nom: "Eau", Icone: Droplets, unite: "m³", couleur: "text-blue-500" },
+  { cle: "gaz", nom: "Gaz", Icone: Flame, unite: "m³", couleur: "text-orange-500" },
 ];
 
 export default function PageEnergie() {
+  const [typeActif, setTypeActif] = useState<TypeCompteur>("electricite");
+  const [dialogOuvert, setDialogOuvert] = useState(false);
+  const [form, setForm] = useState({ type_compteur: "electricite", valeur: "", date_releve: new Date().toISOString().slice(0, 10), notes: "" });
+  const queryClient = useQueryClient();
+
+  const { data: releves, isLoading } = utiliserRequete(
+    ["maison", "releves"],
+    listerReleves
+  );
+
+  const { data: histoElec } = utiliserRequete(
+    ["maison", "energie", "electricite"],
+    () => historiqueEnergie("electricite", 12),
+    { enabled: typeActif === "electricite" }
+  );
+  const { data: histoEau } = utiliserRequete(
+    ["maison", "energie", "eau"],
+    () => historiqueEnergie("eau", 12),
+    { enabled: typeActif === "eau" }
+  );
+  const { data: histoGaz } = utiliserRequete(
+    ["maison", "energie", "gaz"],
+    () => historiqueEnergie("gaz", 12),
+    { enabled: typeActif === "gaz" }
+  );
+
+  const invalider = () =>
+    queryClient.invalidateQueries({ queryKey: ["maison"] });
+
+  const { mutate: creer, isPending: enCreation } = utiliserMutation(
+    (data: Omit<ReleveCompteur, "id">) => creerReleve(data),
+    { onSuccess: () => { invalider(); setDialogOuvert(false); } }
+  );
+
+  const { mutate: supprimer } = utiliserMutation(supprimerReleve, {
+    onSuccess: invalider,
+  });
+
+  const ouvrirAjout = () => {
+    setForm({
+      type_compteur: typeActif,
+      valeur: "",
+      date_releve: new Date().toISOString().slice(0, 10),
+      notes: "",
+    });
+    setDialogOuvert(true);
+  };
+
+  const soumettre = () => {
+    creer({
+      type_compteur: form.type_compteur,
+      valeur: Number(form.valeur),
+      date_releve: form.date_releve,
+      notes: form.notes || undefined,
+    });
+  };
+
+  // Dernier relevé par type
+  const dernierReleve = (type: string) => {
+    const filtres = releves?.filter((r) => r.type_compteur === type).sort(
+      (a, b) => b.date_releve.localeCompare(a.date_releve)
+    );
+    return filtres?.[0];
+  };
+
+  const relevesFiltres = releves
+    ?.filter((r) => r.type_compteur === typeActif)
+    .sort((a, b) => b.date_releve.localeCompare(a.date_releve));
+
+  const compteurActif = COMPTEURS.find((c) => c.cle === typeActif)!;
+
+  // Calculer consommation entre relevés consécutifs
+  const consommations = relevesFiltres && relevesFiltres.length >= 2
+    ? relevesFiltres.slice(0, -1).map((r, i) => ({
+        date: r.date_releve,
+        delta: r.valeur - relevesFiltres[i + 1].valeur,
+      }))
+    : [];
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">⚡ Énergie</h1>
-        <p className="text-muted-foreground">
-          Suivi de la consommation énergétique du foyer
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">⚡ Énergie</h1>
+          <p className="text-muted-foreground">
+            Suivi de la consommation énergétique du foyer
+          </p>
+        </div>
+        <Button size="sm" onClick={ouvrirAjout}>
+          <Plus className="mr-2 h-4 w-4" />
+          Saisir un relevé
+        </Button>
       </div>
 
-      {/* Compteurs */}
+      {/* Compteurs résumé */}
       <div className="grid gap-4 sm:grid-cols-3">
         {COMPTEURS.map((c) => {
-          const Icone = c.icone;
+          const dernier = dernierReleve(c.cle);
           return (
-            <Card key={c.nom}>
+            <Card
+              key={c.cle}
+              className={`cursor-pointer transition-colors ${typeActif === c.cle ? "border-primary" : "hover:bg-accent/50"}`}
+              onClick={() => setTypeActif(c.cle)}
+            >
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Icone className={`h-5 w-5 ${c.couleur}`} />
+                  <c.Icone className={`h-5 w-5 ${c.couleur}`} />
                   {c.nom}
                 </CardTitle>
-                <CardDescription className="text-xs">
-                  {c.description}
-                </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">— {c.unite}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Aucun relevé enregistré
-                </p>
+                {dernier ? (
+                  <>
+                    <p className="text-2xl font-bold">
+                      {dernier.valeur.toLocaleString("fr-FR")} {c.unite}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Relevé du {dernier.date_releve}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-2xl font-bold">— {c.unite}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Aucun relevé
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
           );
         })}
       </div>
 
-      {/* Graphiques placeholder */}
+      {/* Consommation inter-relevés */}
+      {consommations.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Gauge className="h-4 w-4" />
+              Consommation entre relevés — {compteurActif.nom}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {consommations.slice(0, 6).map((c, i) => (
+                <div key={i} className="flex items-center justify-between text-sm">
+                  <span>{c.date}</span>
+                  <Badge variant={c.delta > 0 ? "secondary" : "destructive"}>
+                    {c.delta > 0 ? "+" : ""}{c.delta.toLocaleString("fr-FR")} {compteurActif.unite}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Historique des relevés */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Gauge className="h-5 w-5" />
-            Évolution mensuelle
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">
+            Historique {compteurActif.nom}
           </CardTitle>
-          <CardDescription>
-            Graphiques de consommation — Recharts à intégrer
+          <CardDescription className="text-xs">
+            {relevesFiltres?.length ?? 0} relevés enregistrés
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-center py-10 text-muted-foreground">
-          <div className="text-center">
-            <Zap className="h-10 w-10 mx-auto mb-3 opacity-30" />
-            <p className="text-sm">Saisissez vos relevés pour voir l&apos;évolution</p>
-            <p className="text-xs mt-1">
-              Endpoint API énergie à venir
-            </p>
-          </div>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-10" />)}
+            </div>
+          ) : !relevesFiltres?.length ? (
+            <div className="py-8 text-center text-muted-foreground">
+              <compteurActif.Icone className="h-8 w-8 mx-auto mb-2 opacity-30" />
+              <p className="text-sm">Aucun relevé pour {compteurActif.nom.toLowerCase()}</p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {relevesFiltres.map((r) => (
+                <div key={r.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                  <div>
+                    <p className="text-sm font-medium">
+                      {r.valeur.toLocaleString("fr-FR")} {compteurActif.unite}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{r.date_releve}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {r.notes && (
+                      <span className="text-xs text-muted-foreground max-w-32 truncate">{r.notes}</span>
+                    )}
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(r.id)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Dialog ajout relevé */}
+      <DialogueFormulaire
+        ouvert={dialogOuvert}
+        onClose={() => setDialogOuvert(false)}
+        titre="Nouveau relevé compteur"
+        onSubmit={soumettre}
+        enCours={enCreation}
+      >
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label>Type de compteur</Label>
+            <select
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+              value={form.type_compteur}
+              onChange={(e) => setForm({ ...form, type_compteur: e.target.value })}
+            >
+              {COMPTEURS.map((c) => (
+                <option key={c.cle} value={c.cle}>{c.nom} ({c.unite})</option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Valeur *</Label>
+              <Input type="number" step="0.01" min="0" value={form.valeur} onChange={(e) => setForm({ ...form, valeur: e.target.value })} />
+            </div>
+            <div className="space-y-1">
+              <Label>Date *</Label>
+              <Input type="date" value={form.date_releve} onChange={(e) => setForm({ ...form, date_releve: e.target.value })} />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label>Notes</Label>
+            <Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+          </div>
+        </div>
+      </DialogueFormulaire>
     </div>
   );
 }

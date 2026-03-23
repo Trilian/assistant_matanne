@@ -28,8 +28,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/hooks/utiliser-api";
-import { obtenirRecette, supprimerRecette } from "@/lib/api/recettes";
+import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
+import { obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
 
 export default function PageDetailRecette({
   params,

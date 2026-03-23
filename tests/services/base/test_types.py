@@ -665,7 +665,7 @@ class TestBaseServiceHelpers:
 
     def test_invalider_cache(self, base_service):
         """Test _invalider_cache."""
-        with patch("src.core.caching.cache.Cache.invalider") as mock_invalider:
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate") as mock_invalider:
             base_service._invalider_cache()
 
             mock_invalider.assert_called_once_with(pattern="mockmodel")
@@ -769,7 +769,7 @@ class TestBaseServiceIntegration:
 
     def test_create_entity(self, integration_service, integration_db):
         """Test création réelle."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             result = integration_service.create(
                 data={"nom": "Test Item", "statut": "actif", "prix": 10.5}, db=integration_db
             )
@@ -781,14 +781,14 @@ class TestBaseServiceIntegration:
     def test_get_by_id_found(self, integration_service, integration_db):
         """Test get_by_id avec entité existante."""
         # Créer d'abord
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             entity = integration_service.create(
                 data={"nom": "GetTest", "statut": "actif"}, db=integration_db
             )
 
         # Récupérer
-        with patch("src.core.caching.cache.Cache.obtenir", return_value=None):
-            with patch("src.core.caching.cache.Cache.definir"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.get", return_value=None):
+            with patch("src.core.caching.orchestrator.CacheMultiNiveau.set"):
                 result = integration_service.get_by_id(entity.id, db=integration_db)
 
         assert result is not None
@@ -796,7 +796,7 @@ class TestBaseServiceIntegration:
 
     def test_get_by_id_not_found(self, integration_service, integration_db):
         """Test get_by_id avec ID inexistant."""
-        with patch("src.core.caching.cache.Cache.obtenir", return_value=None):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.get", return_value=None):
             result = integration_service.get_by_id(999, db=integration_db)
 
         assert result is None
@@ -805,7 +805,7 @@ class TestBaseServiceIntegration:
         """Test get_by_id avec cache hit."""
         cached_entity = ItemModel(id=1, nom="Cached")
 
-        with patch("src.core.caching.cache.Cache.obtenir", return_value=cached_entity):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.get", return_value=cached_entity):
             result = integration_service.get_by_id(1, db=integration_db)
 
         assert result == cached_entity
@@ -819,7 +819,7 @@ class TestBaseServiceIntegration:
     def test_get_all_with_data(self, integration_service, integration_db):
         """Test get_all avec données."""
         # Créer des items
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "Item1"}, db=integration_db)
             integration_service.create({"nom": "Item2"}, db=integration_db)
 
@@ -829,7 +829,7 @@ class TestBaseServiceIntegration:
 
     def test_get_all_with_skip_limit(self, integration_service, integration_db):
         """Test pagination."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             for i in range(5):
                 integration_service.create({"nom": f"Item{i}"}, db=integration_db)
 
@@ -839,7 +839,7 @@ class TestBaseServiceIntegration:
 
     def test_get_all_with_filters(self, integration_service, integration_db):
         """Test filtres."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "Active", "actif": True}, db=integration_db)
             integration_service.create({"nom": "Inactive", "actif": False}, db=integration_db)
 
@@ -850,7 +850,7 @@ class TestBaseServiceIntegration:
 
     def test_get_all_with_order(self, integration_service, integration_db):
         """Test tri."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "B"}, db=integration_db)
             integration_service.create({"nom": "A"}, db=integration_db)
             integration_service.create({"nom": "C"}, db=integration_db)
@@ -862,7 +862,7 @@ class TestBaseServiceIntegration:
 
     def test_get_all_desc_order(self, integration_service, integration_db):
         """Test tri descendant."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "B"}, db=integration_db)
             integration_service.create({"nom": "A"}, db=integration_db)
 
@@ -872,7 +872,7 @@ class TestBaseServiceIntegration:
 
     def test_update_success(self, integration_service, integration_db):
         """Test mise à jour réussie."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             entity = integration_service.create({"nom": "Original"}, db=integration_db)
 
             result = integration_service.update(entity.id, {"nom": "Updated"}, db=integration_db)
@@ -884,13 +884,13 @@ class TestBaseServiceIntegration:
         """Test mise à jour entité non trouvée lève ErreurNonTrouve."""
         from src.core.exceptions import ErreurNonTrouve
 
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             with pytest.raises(ErreurNonTrouve):
                 integration_service.update(999, {"nom": "Test"}, db=integration_db)
 
     def test_delete_success(self, integration_service, integration_db):
         """Test suppression réussie."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             entity = integration_service.create({"nom": "ToDelete"}, db=integration_db)
 
             result = integration_service.delete(entity.id, db=integration_db)
@@ -899,14 +899,14 @@ class TestBaseServiceIntegration:
 
     def test_delete_not_found(self, integration_service, integration_db):
         """Test suppression entité non trouvée."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             result = integration_service.delete(999, db=integration_db)
 
         assert result is False
 
     def test_count(self, integration_service, integration_db):
         """Test comptage."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "A"}, db=integration_db)
             integration_service.create({"nom": "B"}, db=integration_db)
 
@@ -916,7 +916,7 @@ class TestBaseServiceIntegration:
 
     def test_count_with_filters(self, integration_service, integration_db):
         """Test comptage avec filtres."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "A", "actif": True}, db=integration_db)
             integration_service.create({"nom": "B", "actif": False}, db=integration_db)
 
@@ -931,7 +931,7 @@ class TestBaseServiceAdvancedSearchIntegration:
 
     def test_search_with_term(self, integration_service, integration_db):
         """Test recherche textuelle."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "Pommes"}, db=integration_db)
             integration_service.create({"nom": "Oranges"}, db=integration_db)
             integration_service.create({"nom": "Pommes vertes"}, db=integration_db)
@@ -944,7 +944,7 @@ class TestBaseServiceAdvancedSearchIntegration:
 
     def test_search_with_filters_and_sort(self, integration_service, integration_db):
         """Test recherche avec filtres et tri."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "Z", "actif": True}, db=integration_db)
             integration_service.create({"nom": "A", "actif": True}, db=integration_db)
             integration_service.create({"nom": "B", "actif": False}, db=integration_db)
@@ -958,7 +958,7 @@ class TestBaseServiceAdvancedSearchIntegration:
 
     def test_search_invalid_field(self, integration_service, integration_db):
         """Test recherche avec champ invalide."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "Test"}, db=integration_db)
 
         # Ne doit pas lever d'erreur
@@ -975,7 +975,7 @@ class TestBaseServiceBulkIntegration:
 
     def test_bulk_create_with_merge_new(self, integration_service, integration_db):
         """Test création en masse de nouveaux items."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             items = [
                 {"nom": "Item1", "prix": 10},
                 {"nom": "Item2", "prix": 20},
@@ -993,7 +993,7 @@ class TestBaseServiceBulkIntegration:
 
     def test_bulk_create_with_merge_existing(self, integration_service, integration_db):
         """Test mise à jour en masse d'items existants."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             # Créer d'abord
             integration_service.create({"nom": "Existing", "prix": 10}, db=integration_db)
 
@@ -1012,7 +1012,7 @@ class TestBaseServiceBulkIntegration:
 
     def test_bulk_create_skip_no_key(self, integration_service, integration_db):
         """Test skip items sans clé de fusion."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             items = [
                 {"nom": "Valid", "prix": 10},
                 {"prix": 20},  # Pas de nom
@@ -1034,7 +1034,7 @@ class TestBaseServiceStatsIntegration:
 
     def test_get_stats_total(self, integration_service, integration_db):
         """Test statistiques - total."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             for i in range(5):
                 integration_service.create({"nom": f"Item{i}"}, db=integration_db)
 
@@ -1044,7 +1044,7 @@ class TestBaseServiceStatsIntegration:
 
     def test_get_stats_grouped(self, integration_service, integration_db):
         """Test statistiques groupées."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "A", "statut": "actif"}, db=integration_db)
             integration_service.create({"nom": "B", "statut": "actif"}, db=integration_db)
             integration_service.create({"nom": "C", "statut": "inactif"}, db=integration_db)
@@ -1057,7 +1057,7 @@ class TestBaseServiceStatsIntegration:
 
     def test_get_stats_count_filters_simple(self, integration_service, integration_db):
         """Test compteurs conditionnels simples."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "A", "actif": True}, db=integration_db)
             integration_service.create({"nom": "B", "actif": True}, db=integration_db)
             integration_service.create({"nom": "C", "actif": False}, db=integration_db)
@@ -1070,7 +1070,7 @@ class TestBaseServiceStatsIntegration:
 
     def test_get_stats_count_filters_operators(self, integration_service, integration_db):
         """Test compteurs avec opérateurs."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "A", "prix": 50}, db=integration_db)
             integration_service.create({"nom": "B", "prix": 100}, db=integration_db)
             integration_service.create({"nom": "C", "prix": 150}, db=integration_db)
@@ -1093,7 +1093,7 @@ class TestBaseServiceFiltersIntegration:
 
     def test_filter_gte(self, integration_service, integration_db):
         """Test filtre gte."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "A", "prix": 50}, db=integration_db)
             integration_service.create({"nom": "B", "prix": 100}, db=integration_db)
 
@@ -1104,7 +1104,7 @@ class TestBaseServiceFiltersIntegration:
 
     def test_filter_lte(self, integration_service, integration_db):
         """Test filtre lte."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "A", "prix": 50}, db=integration_db)
             integration_service.create({"nom": "B", "prix": 100}, db=integration_db)
 
@@ -1115,7 +1115,7 @@ class TestBaseServiceFiltersIntegration:
 
     def test_filter_in(self, integration_service, integration_db):
         """Test filtre in."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "A", "statut": "actif"}, db=integration_db)
             integration_service.create({"nom": "B", "statut": "inactif"}, db=integration_db)
             integration_service.create({"nom": "C", "statut": "archive"}, db=integration_db)
@@ -1128,7 +1128,7 @@ class TestBaseServiceFiltersIntegration:
 
     def test_filter_like(self, integration_service, integration_db):
         """Test filtre like."""
-        with patch("src.core.caching.cache.Cache.invalider"):
+        with patch("src.core.caching.orchestrator.CacheMultiNiveau.invalidate"):
             integration_service.create({"nom": "Pommes rouges"}, db=integration_db)
             integration_service.create({"nom": "Pommes vertes"}, db=integration_db)
             integration_service.create({"nom": "Oranges"}, db=integration_db)

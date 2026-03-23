@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Planning — Calendrier repas de la semaine
 // ═══════════════════════════════════════════════════════════
 
@@ -39,13 +39,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/hooks/utiliser-api";
+import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import {
   obtenirPlanningSemaine,
   definirRepas,
   supprimerRepas,
   genererPlanningSemaine,
-} from "@/lib/api/planning";
+} from "@/bibliotheque/api/planning";
 import type { TypeRepas, CreerRepasPlanningDTO, RepasPlanning } from "@/types/planning";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];

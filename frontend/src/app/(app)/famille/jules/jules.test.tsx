@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import JulesPage from "@/app/(app)/famille/jules/page";
 
@@ -37,7 +37,7 @@ const mockProfil = {
   prenom: "Jules",
 };
 
-vi.mock("@/hooks/utiliser-api", () => ({
+vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: vi.fn().mockImplementation((key: string[]) => {
     if (key.includes("profil")) {
       return { data: mockProfil, isLoading: false, error: null };

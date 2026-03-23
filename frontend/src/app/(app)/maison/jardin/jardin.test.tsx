@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import JardinPage from "@/app/(app)/maison/jardin/page";
 
@@ -38,7 +38,7 @@ const mockCalendrier = {
   a_recolter: [],
 };
 
-vi.mock("@/hooks/utiliser-api", () => ({
+vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: vi.fn().mockImplementation((key: string[]) => {
     if (key.includes("semis")) {
       return { data: mockCalendrier, isLoading: false, error: null };

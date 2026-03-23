@@ -1,9 +1,9 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Client API typé — Instance axios avec intercepteurs JWT
 // ═══════════════════════════════════════════════════════════
 
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
-import { URL_API, PREFIXE_API } from "@/lib/constantes";
+import { URL_API, PREFIXE_API } from "@/bibliotheque/constantes";
 import type { ErreurAPI } from "@/types/api";
 
 /** Instance axios configurée pour le backend FastAPI */

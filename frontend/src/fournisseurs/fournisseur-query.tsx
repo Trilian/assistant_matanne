@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Fournisseur TanStack Query
 // ═══════════════════════════════════════════════════════════
 
@@ -6,7 +6,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
-import { DUREE_CACHE_MS } from "@/lib/constantes";
+import { DUREE_CACHE_MS } from "@/bibliotheque/constantes";
 
 export function FournisseurQuery({ children }: { children: ReactNode }) {
   const [queryClient] = useState(

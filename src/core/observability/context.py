@@ -31,7 +31,7 @@ class ContexteExecution:
         correlation_id: ID unique pour tracer la requête (8 chars)
         operation: Nom de l'opération en cours
         utilisateur: Nom de l'utilisateur (optionnel)
-        module: Module Streamlit (optionnel)
+        module: Module applicatif (optionnel)
         debut: Timestamp de début
         metadata: Métadonnées additionnelles libres
         parent_id: ID du contexte parent pour traçage hiérarchique

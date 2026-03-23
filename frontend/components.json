@@ -14,10 +14,10 @@
   "rtl": false,
   "aliases": {
     "components": "@/components",
-    "utils": "@/lib/utils",
+    "utils": "@/bibliotheque/utils",
     "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
+    "lib": "@/bibliotheque",
+    "hooks": "@/crochets"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

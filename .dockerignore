@@ -46,7 +46,6 @@ venv/
 scripts/
 manage.py
 
-# Static Streamlit (non utilisé par l'API)
 static/
 
 # Fichiers temporaires & backups
@@ -58,3 +57,6 @@ backups/
 Dockerfile
 .dockerignore
 docker-compose*.yml
+
+# Poetry (prod utilise pip + requirements.txt)
+poetry.lock

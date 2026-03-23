@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Batch Cooking — Sessions de cuisine en lot
 // ═══════════════════════════════════════════════════════════
 
@@ -38,12 +38,12 @@ import {
   utiliserRequete,
   utiliserMutation,
   utiliserInvalidation,
-} from "@/hooks/utiliser-api";
+} from "@/crochets/utiliser-api";
 import {
   listerSessionsBatch,
   creerSessionBatch,
   supprimerSessionBatch,
-} from "@/lib/api/batch-cooking";
+} from "@/bibliotheque/api/batch-cooking";
 import type { SessionBatchCooking } from "@/types/batch-cooking";
 
 const BADGES_STATUT: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {

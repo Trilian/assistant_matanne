@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import DashboardPage from "@/app/(app)/page";
 
@@ -21,11 +21,11 @@ const mockDashboardData = {
   suggestion_diner: "Poulet rôti aux légumes",
 };
 
-vi.mock("@/hooks/utiliser-auth", () => ({
+vi.mock("@/crochets/utiliser-auth", () => ({
   utiliserAuth: () => ({ utilisateur: { nom: "Anne" }, isAuthenticated: true }),
 }));
 
-vi.mock("@/hooks/utiliser-api", () => ({
+vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: () => ({
     data: mockDashboardData,
     isLoading: false,

@@ -48,35 +48,45 @@ _SERVICES = {
     "EcoTipsCrudService": "eco_tips_crud_service",
     "get_eco_tips_crud_service": "eco_tips_crud_service",
     "obtenir_service_eco_tips_crud": "eco_tips_crud_service",
-    # NEW: Contrats CRUD service
+    # Contrats CRUD service
     "ContratsCrudService": "contrats_crud_service",
-    "get_contrats_service": "contrats_crud_service",
-    # NEW: Artisans CRUD service
+    "get_contrats_crud_service": "contrats_crud_service",
+    "obtenir_service_contrats_crud": "contrats_crud_service",
+    # Artisans CRUD service
     "ArtisansCrudService": "artisans_crud_service",
-    "get_artisans_service": "artisans_crud_service",
-    # NEW: Garanties CRUD service
+    "get_artisans_crud_service": "artisans_crud_service",
+    "obtenir_service_artisans_crud": "artisans_crud_service",
+    # Garanties CRUD service
     "GarantiesCrudService": "garanties_crud_service",
-    "get_garanties_service": "garanties_crud_service",
-    # NEW: Cellier CRUD service
+    "get_garanties_crud_service": "garanties_crud_service",
+    "obtenir_service_garanties_crud": "garanties_crud_service",
+    # Cellier CRUD service
     "CellierCrudService": "cellier_crud_service",
-    "get_cellier_service": "cellier_crud_service",
-    # NEW: Checklists CRUD service
+    "get_cellier_crud_service": "cellier_crud_service",
+    "obtenir_service_cellier_crud": "cellier_crud_service",
+    # Checklists CRUD service
     "ChecklistsCrudService": "checklists_crud_service",
     "get_checklists_service": "checklists_crud_service",
-    # NEW: Diagnostics & Estimations CRUD services
+    # Diagnostics & Estimations CRUD services
     "DiagnosticsCrudService": "diagnostics_crud_service",
-    "get_diagnostics_service": "diagnostics_crud_service",
+    "get_diagnostics_crud_service": "diagnostics_crud_service",
+    "obtenir_service_diagnostics_crud": "diagnostics_crud_service",
     "EstimationsCrudService": "diagnostics_crud_service",
-    "get_estimations_service": "diagnostics_crud_service",
-    # NEW: Extensions CRUD services (nuisibles, devis, entretien saisonnier, relevés)
+    "get_estimations_crud_service": "diagnostics_crud_service",
+    "obtenir_service_estimations_crud": "diagnostics_crud_service",
+    # Extensions CRUD services (nuisibles, devis, entretien saisonnier, relevés)
     "NuisiblesCrudService": "extensions_crud_service",
-    "get_nuisibles_service": "extensions_crud_service",
+    "get_nuisibles_crud_service": "extensions_crud_service",
     "DevisCrudService": "extensions_crud_service",
-    "get_devis_service": "extensions_crud_service",
+    "get_devis_crud_service": "extensions_crud_service",
     "EntretienSaisonnierCrudService": "extensions_crud_service",
-    "get_entretien_saisonnier_service": "extensions_crud_service",
+    "get_entretien_saisonnier_crud_service": "extensions_crud_service",
     "RelevesCrudService": "extensions_crud_service",
-    "get_releves_service": "extensions_crud_service",
+    "get_releves_crud_service": "extensions_crud_service",
+    # Visualisation service
+    "VisualisationService": "visualisation_service",
+    "get_visualisation_service": "visualisation_service",
+    "obtenir_service_visualisation": "visualisation_service",
 }
 
 _SCHEMAS = {
@@ -115,15 +125,15 @@ def __dir__():
 
 # Type hints pour IDE sans charger les modules
 if TYPE_CHECKING:
-    from .artisans_crud_service import ArtisansCrudService, get_artisans_service
-    from .cellier_crud_service import CellierCrudService, get_cellier_service
+    from .artisans_crud_service import ArtisansCrudService, get_artisans_crud_service
+    from .cellier_crud_service import CellierCrudService, get_cellier_crud_service
     from .checklists_crud_service import ChecklistsCrudService, get_checklists_service
-    from .contrats_crud_service import ContratsCrudService, get_contrats_service
+    from .contrats_crud_service import ContratsCrudService, get_contrats_crud_service
     from .diagnostics_crud_service import (
         DiagnosticsCrudService,
         EstimationsCrudService,
-        get_diagnostics_service,
-        get_estimations_service,
+        get_diagnostics_crud_service,
+        get_estimations_crud_service,
     )
     from .eco_tips_crud_service import (
         EcoTipsCrudService,
@@ -140,11 +150,12 @@ if TYPE_CHECKING:
         EntretienSaisonnierCrudService,
         NuisiblesCrudService,
         RelevesCrudService,
-        get_devis_service,
-        get_entretien_saisonnier_service,
-        get_nuisibles_service,
-        get_releves_service,
+        get_devis_crud_service,
+        get_entretien_saisonnier_crud_service,
+        get_nuisibles_crud_service,
+        get_releves_crud_service,
     )
+    from .garanties_crud_service import GarantiesCrudService, get_garanties_crud_service
     from .jardin_service import JardinService, get_jardin_service, obtenir_service_jardin
     from .meubles_crud_service import (
         MeublesCrudService,
@@ -152,6 +163,7 @@ if TYPE_CHECKING:
         obtenir_service_meubles_crud,
     )
     from .projets_service import ProjetsService, get_projets_service, obtenir_service_projets
+    from .visualisation_service import VisualisationService, get_visualisation_service
     from .schemas import (
         AlerteMaison,
         BriefingMaison,
@@ -204,27 +216,30 @@ __all__ = [
     "obtenir_service_eco_tips_crud",
     # NEW: Contrats, Artisans, Garanties, Cellier, Checklists
     "ContratsCrudService",
-    "get_contrats_service",
+    "get_contrats_crud_service",
     "ArtisansCrudService",
-    "get_artisans_service",
+    "get_artisans_crud_service",
     "GarantiesCrudService",
-    "get_garanties_service",
+    "get_garanties_crud_service",
     "CellierCrudService",
-    "get_cellier_service",
+    "get_cellier_crud_service",
     "ChecklistsCrudService",
     "get_checklists_service",
     # NEW: Diagnostics & Estimations
     "DiagnosticsCrudService",
-    "get_diagnostics_service",
+    "get_diagnostics_crud_service",
     "EstimationsCrudService",
-    "get_estimations_service",
+    "get_estimations_crud_service",
     # NEW: Extensions (nuisibles, devis, entretien saisonnier, releves)
     "NuisiblesCrudService",
-    "get_nuisibles_service",
+    "get_nuisibles_crud_service",
     "DevisCrudService",
-    "get_devis_service",
+    "get_devis_crud_service",
     "EntretienSaisonnierCrudService",
-    "get_entretien_saisonnier_service",
+    "get_entretien_saisonnier_crud_service",
     "RelevesCrudService",
-    "get_releves_service",
+    "get_releves_crud_service",
+    # Visualisation
+    "VisualisationService",
+    "get_visualisation_service",
 ]

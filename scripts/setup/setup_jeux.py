@@ -140,7 +140,7 @@ def setup_module():
 📌 Prochaines étapes:
 
 1. Accéder à l'app:
-   $ streamlit run src/app.py
+   $ uvicorn src.api.main:app --reload
 
 2. Naviguer vers: 🎲 Jeux (sidebar)
    → ⚽ Paris Sportifs

@@ -1,22 +1,30 @@
 ﻿# 🏗️ Architecture Technique - Assistant Matanne
 
-> **Dernière mise à jour**: 25 Juin 2025
+> **Dernière mise à jour**: 1 mars 2026
 
 ## Vue d'ensemble
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        STREAMLIT UI                              │
+│                     NEXT.JS 16 FRONTEND                          │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
-│  │ Accueil  │ │ Cuisine  │ │ Famille  │ │ Maison   │ ...       │
+│  │Dashboard │ │ Cuisine  │ │ Famille  │ │ Maison   │ ...       │
 │  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘           │
 │       │            │            │            │                   │
 │       └────────────┴─────┬──────┴────────────┘                  │
 │                          │                                       │
-│              st.navigation() + ChargeurModuleDiffere            │
+│        App Router + TanStack Query + Zustand + shadcn/ui        │
 └──────────────────────────┼───────────────────────────────────────┘
-                           │
+                           │  REST API (HTTP/WS)
 ┌──────────────────────────┼───────────────────────────────────────┐
+│                      FASTAPI BACKEND                             │
+│  ┌─────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐            │
+│  │  Auth   │ │  Routes  │ │ Schemas  │ │Middleware│            │
+│  │  JWT    │ │  (20+)   │ │ Pydantic │ │(CORS,RL)│            │
+│  └────┬────┘ └────┬─────┘ └────┬─────┘ └────┬────┘            │
+└───────┼───────────┼────────────┼────────────┼────────────────────┘
+        │           │            │            │
+┌───────┼───────────┼────────────┼────────────┼────────────────────┐
 │                     SERVICES LAYER                               │
 │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐   │
 │  │  Cuisine   │ │  Famille   │ │  Maison    │ │  Jeux      │   │
@@ -68,7 +76,7 @@ src/core/
 ├── decorators/      # Package: cache.py, db.py, errors.py, validation.py
 ├── middleware/      # Pipeline de middlewares composables (base, builtin, pipeline)
 ├── models/          # 19 modèles SQLAlchemy ORM
-├── monitoring/      # Collecteur métriques, health checks, RerunProfiler
+├── monitoring/      # Collecteur métriques, health checks
 ├── observability/   # Contexte d'observabilité (spans, traces)
 ├── resilience/      # Politiques de résilience composables (retry, timeout, bulkhead)
 ├── result/          # Result Monad (Ok/Err) — gestion d'erreurs style Rust
@@ -85,7 +93,7 @@ src/core/
 ├── repository.py    # Repository générique CRUD typé
 ├── session_keys.py  # Clés de session typées (KeyNamespace)
 ├── specifications.py # Specification Pattern — critères composables
-├── storage.py       # SessionStorage Protocol (découplage Streamlit)
+├── storage.py       # SessionStorage Protocol
 ├── unit_of_work.py  # Transaction atomique avec rollback automatique
 └── py.typed         # Marqueur PEP 561 pour typing
 ```
@@ -99,7 +107,7 @@ from src.core.config import obtenir_parametres
 config = obtenir_parametres()
 ```
 
-Fichiers: `settings.py` (Parametres), `loader.py` (chargement .env, secrets Streamlit), `validator.py` (ValidateurConfiguration)
+Fichiers: `settings.py` (Parametres), `loader.py` (chargement .env), `validator.py` (ValidateurConfiguration)
 
 ### db/ — Base de données
 
@@ -221,13 +229,13 @@ Fichiers: `base.py`, `builtin.py` (middlewares built-in), `pipeline.py`
 ### monitoring/ — Métriques & Performance
 
 ```python
-from src.core.monitoring import RerunProfiler, CollecteurMetriques
+from src.core.monitoring import CollecteurMetriques
 
-# Profilage des reruns Streamlit
-profiler = RerunProfiler()
+# Métriques de performance et health checks
+collecteur = CollecteurMetriques()
 ```
 
-Fichiers: `collector.py`, `decorators.py`, `health.py`, `rerun_profiler.py`
+Fichiers: `collector.py`, `decorators.py`, `health.py`
 
 ### bootstrap.py — Initialisation
 
@@ -267,7 +275,6 @@ recette = repo.creer({"nom": "Tarte", "categorie": "dessert"})
 ```python
 from src.core.storage import obtenir_storage, MemorySessionStorage
 
-# Production: StreamlitSessionStorage (st.session_state)
 # Tests/CLI: MemorySessionStorage (dict)
 storage = obtenir_storage()
 storage["clé"] = valeur

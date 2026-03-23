@@ -12,8 +12,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import logging
 
-import streamlit as st
+import os
+
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
+
+load_dotenv(".env.local")
 
 from src.core.models import Base
 
@@ -24,23 +28,26 @@ logger = logging.getLogger(__name__)
 def get_supabase_url():
     """RÃ©cupÃ¨re l'URL Supabase depuis les secrets"""
     try:
-        db = st.secrets["db"]
+        url = os.environ.get("DATABASE_URL")
+        if url:
+            return url
         return (
-            f"postgresql://{db['user']}:{db['password']}"
-            f"@{db['host']}:{db['port']}/{db['name']}"
+            f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}"
+            f"@{os.environ['DB_HOST']}:{os.environ.get('DB_PORT', '5432')}/{os.environ['DB_NAME']}"
             f"?sslmode=require"
         )
     except KeyError as e:
-        logger.error(f"Secret manquant: {e}")
-        logger.error("Configure .streamlit/secrets.toml avec:")
+        logger.error(f"Variable d'environnement manquante: {e}")
+        logger.error("Configure .env.local avec:")
         logger.error(
             """
-[db]
-host = "db.xxxxx.supabase.co"
-port = "5432"
-name = "postgres"
-user = "postgres"
-password = "ton_mot_de_passe"
+DATABASE_URL=postgresql://user:password@host:5432/db
+# ou les composants individuels:
+DB_HOST=db.xxxxx.supabase.co
+DB_PORT=5432
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=ton_mot_de_passe
         """
         )
         sys.exit(1)
@@ -198,7 +205,7 @@ def main():
         print("  â€¢ 4 ingrÃ©dients de base")
         print()
         print("ðŸš€ Tu peux maintenant:")
-        print("  1. Lancer l'app: streamlit run src/app.py")
+        print("  1. Lancer l'app: uvicorn src.api.main:app --reload")
         print("  2. GÃ©nÃ©rer des recettes avec l'IA")
         print()
 

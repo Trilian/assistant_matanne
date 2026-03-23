@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,8 +11,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { listerTirages, listerGrilles } from "@/lib/api/jeux";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { listerTirages, listerGrilles } from "@/bibliotheque/api/jeux";
 import type { TirageLoto, GrilleLoto } from "@/types/jeux";
 
 function formaterDate(iso: string) {

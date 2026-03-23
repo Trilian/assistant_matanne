@@ -235,6 +235,7 @@ class TestLoginRateLimiting:
         assert stockage.est_bloque(cle) is True
 
 
+@pytest.mark.skip(reason="Module src.ui supprimé lors de la migration vers Next.js")
 class TestAccessibilityHelpers:
     """Tests pour les utilitaires d'accessibilité."""
 

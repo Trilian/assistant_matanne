@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,9 +30,9 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Trash2 } from "lucide-react";
-import { utiliserRequete, utiliserMutation } from "@/hooks/utiliser-api";
+import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
-import { listerParis, obtenirStatsParis, listerMatchs, creerPari, supprimerPari } from "@/lib/api/jeux";
+import { listerParis, obtenirStatsParis, listerMatchs, creerPari, supprimerPari } from "@/bibliotheque/api/jeux";
 import dynamic from "next/dynamic";
 import type { PariSportif, StatsParis, MatchJeu } from "@/types/jeux";
 

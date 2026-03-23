@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Suivi Jules — Développement enfant
 // ═══════════════════════════════════════════════════════════
 
@@ -45,12 +45,12 @@ import {
   utiliserRequete,
   utiliserMutation,
   utiliserInvalidation,
-} from "@/hooks/utiliser-api";
+} from "@/crochets/utiliser-api";
 import {
   obtenirProfilJules,
   listerJalons,
   ajouterJalon,
-} from "@/lib/api/famille";
+} from "@/bibliotheque/api/famille";
 import dynamic from "next/dynamic";
 import type { JalonJules } from "@/types/famille";
 

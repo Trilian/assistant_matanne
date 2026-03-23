@@ -1,11 +1,9 @@
 """
-Rerun Profiler — Analyse des reruns Streamlit et de leurs déclencheurs.
+Rerun Profiler — DEPRECATED (ancien module Streamlit, non utilisé).
 
-Streamlit re-exécute le script entier à chaque interaction widget.
-Ce profiler trace les reruns, mesure leur durée et identifie les
-déclencheurs (changements de session_state, interactions widget).
-
-Intégré au ``CollecteurMetriques`` existant pour une observabilité unifiée.
+Ce module profilait les reruns Streamlit. Depuis la migration vers
+FastAPI + Next.js, il n'est plus utilisé. Conservé pour référence.
+Les stubs retournent des valeurs vides.
 
 Usage::
 

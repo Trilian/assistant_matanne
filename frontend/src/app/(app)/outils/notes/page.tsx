@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,8 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/hooks/utiliser-api";
-import { listerNotes, creerNote, modifierNote, supprimerNote } from "@/lib/api/outils";
+import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
+import { listerNotes, creerNote, modifierNote, supprimerNote } from "@/bibliotheque/api/outils";
 import type { Note, NoteCreate } from "@/types/outils";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";

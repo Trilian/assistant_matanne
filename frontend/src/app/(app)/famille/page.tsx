@@ -1,6 +1,8 @@
 // ═══════════════════════════════════════════════════════════
-// Hub Famille
+// Hub Famille — avec stats en temps réel
 // ═══════════════════════════════════════════════════════════
+
+"use client";
 
 import Link from "next/link";
 import {
@@ -17,10 +19,13 @@ import {
 } from "lucide-react";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { obtenirStatsBudget, listerRoutines } from "@/bibliotheque/api/famille";
 
 const SECTIONS = [
   { titre: "Jules", description: "Suivi développement", chemin: "/famille/jules", Icone: Baby },
@@ -36,6 +41,9 @@ const SECTIONS = [
 ];
 
 export default function PageFamille() {
+  const { data: budget } = utiliserRequete(["famille", "stats-budget"], obtenirStatsBudget);
+  const { data: routines } = utiliserRequete(["famille", "routines"], listerRoutines);
+
   return (
     <div className="space-y-6">
       <div>
@@ -44,6 +52,18 @@ export default function PageFamille() {
           Suivi de Jules, activités, routines et vie familiale
         </p>
       </div>
+
+      {/* Stats rapides */}
+      {(budget || routines) && (
+        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
+          {budget && (
+            <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{budget.total_mois?.toFixed(0) ?? "—"} €</p><p className="text-xs text-muted-foreground">Budget du mois</p></CardContent></Card>
+          )}
+          {routines && (
+            <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{routines.length}</p><p className="text-xs text-muted-foreground">Routines actives</p></CardContent></Card>
+          )}
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map(({ titre, description, chemin, Icone }) => (

@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Page Inscription
 // ═══════════════════════════════════════════════════════════
 
@@ -9,9 +9,9 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { inscrire } from "@/lib/api/auth";
-import { utiliserStoreAuth } from "@/stores/store-auth";
-import { obtenirProfil } from "@/lib/api/auth";
+import { inscrire } from "@/bibliotheque/api/auth";
+import { utiliserStoreAuth } from "@/magasins/store-auth";
+import { obtenirProfil } from "@/bibliotheque/api/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

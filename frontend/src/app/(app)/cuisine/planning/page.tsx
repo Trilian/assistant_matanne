@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Planning Repas — Grille hebdomadaire
 // ═══════════════════════════════════════════════════════════
 
@@ -42,12 +42,12 @@ import {
   utiliserRequete,
   utiliserMutation,
   utiliserInvalidation,
-} from "@/hooks/utiliser-api";
+} from "@/crochets/utiliser-api";
 import {
   obtenirPlanningSemaine,
   definirRepas,
   supprimerRepas,
-} from "@/lib/api/planning";
+} from "@/bibliotheque/api/planning";
 import type { TypeRepas, RepasPlanning } from "@/types/planning";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];

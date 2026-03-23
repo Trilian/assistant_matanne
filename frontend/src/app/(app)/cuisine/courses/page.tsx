@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Courses — Gestion des listes de courses
 // ═══════════════════════════════════════════════════════════
 
@@ -36,7 +36,7 @@ import {
   utiliserRequete,
   utiliserMutation,
   utiliserInvalidation,
-} from "@/hooks/utiliser-api";
+} from "@/crochets/utiliser-api";
 import {
   listerListesCourses,
   obtenirListeCourses,
@@ -44,8 +44,8 @@ import {
   ajouterArticle,
   cocherArticle,
   supprimerArticle,
-} from "@/lib/api/courses";
-import { schemaArticleCourses, type DonneesArticleCourses } from "@/lib/validateurs";
+} from "@/bibliotheque/api/courses";
+import { schemaArticleCourses, type DonneesArticleCourses } from "@/bibliotheque/validateurs";
 import type { ListeCourses } from "@/types/courses";
 
 export default function PageCourses() {

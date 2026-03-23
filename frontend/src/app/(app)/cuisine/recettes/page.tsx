@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Recettes — Liste avec recherche, filtres et pagination
 // ═══════════════════════════════════════════════════════════
 
@@ -27,9 +27,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { utiliserDelai } from "@/hooks/utiliser-delai";
-import { listerRecettes } from "@/lib/api/recettes";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { utiliserDelai } from "@/crochets/utiliser-delai";
+import { listerRecettes } from "@/bibliotheque/api/recettes";
 
 const CATEGORIES = [
   "Toutes",

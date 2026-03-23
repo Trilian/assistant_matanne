@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Charges — Factures et abonnements
 // ═══════════════════════════════════════════════════════════
 
@@ -21,8 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { listerCharges } from "@/lib/api/maison";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { listerCharges } from "@/bibliotheque/api/maison";
 
 const ANNEE_COURANTE = new Date().getFullYear();
 const ANNEES = [ANNEE_COURANTE, ANNEE_COURANTE - 1, ANNEE_COURANTE - 2];

@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Hook useApi — Helpers TanStack Query
 // ═══════════════════════════════════════════════════════════
 
@@ -11,7 +11,7 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query";
-import { DUREE_CACHE_MS } from "@/lib/constantes";
+import { DUREE_CACHE_MS } from "@/bibliotheque/constantes";
 
 /**
  * Query wrapper avec cache par défaut de 5 minutes.

@@ -181,6 +181,7 @@ def construire_reponse_cursor(
     cursor_field: str = "id",
     secondary_field: str | None = "cree_le",
     serializer: type | None = None,
+    direction: str = "forward",
 ) -> dict[str, Any]:
     """
     Construit une réponse paginée par curseur.
@@ -194,39 +195,61 @@ def construire_reponse_cursor(
         cursor_field: Champ principal pour le curseur (généralement "id")
         secondary_field: Champ secondaire optionnel (pour tri multi-colonnes)
         serializer: Schéma Pydantic optionnel pour sérialiser les items
+        direction: Direction de pagination ("forward" ou "backward")
 
     Returns:
         Dict compatible avec ReponseCursorPaginee
-
-    Example:
-        # Dans la route:
-        items = query.limit(limit + 1).all()
-        return construire_reponse_cursor(items, limit)
     """
     has_more = len(items) > limit
-    result_items = items[:limit]  # Retirer l'élément supplémentaire
+    result_items = items[:limit]
+
+    # Pour backward, inverser l'ordre pour l'affichage naturel
+    if direction == "backward":
+        result_items = list(reversed(result_items))
 
     # Sérialiser si demandé
     if serializer and result_items:
         result_items = [serializer.model_validate(item).model_dump() for item in result_items]
 
-    # Construire le curseur suivant
+    # Construire les curseurs
     next_cursor = None
-    if has_more and result_items:
-        last_item = items[limit - 1]  # Dernier élément retourné (pas le +1)
-        cursor_values = {cursor_field: _get_attr(last_item, cursor_field)}
-        if secondary_field:
-            secondary_value = _get_attr(last_item, secondary_field)
-            if secondary_value is not None:
-                cursor_values[secondary_field] = secondary_value
-        next_cursor = encoder_cursor(cursor_values, "forward")
+    prev_cursor = None
+
+    if result_items:
+        # Curseur suivant (forward)
+        if (direction == "forward" and has_more) or direction == "backward":
+            last_item = result_items[-1]
+            cursor_values = {cursor_field: _get_attr(last_item, cursor_field)}
+            if secondary_field:
+                secondary_value = _get_attr(last_item, secondary_field)
+                if secondary_value is not None:
+                    cursor_values[secondary_field] = secondary_value
+            next_cursor = encoder_cursor(cursor_values, "forward")
+
+        # Curseur précédent (backward)
+        if direction == "forward":
+            first_item = result_items[0]
+            cursor_values = {cursor_field: _get_attr(first_item, cursor_field)}
+            if secondary_field:
+                secondary_value = _get_attr(first_item, secondary_field)
+                if secondary_value is not None:
+                    cursor_values[secondary_field] = secondary_value
+            prev_cursor = encoder_cursor(cursor_values, "backward")
+        elif direction == "backward" and has_more:
+            first_item = result_items[0]
+            cursor_values = {cursor_field: _get_attr(first_item, cursor_field)}
+            if secondary_field:
+                secondary_value = _get_attr(first_item, secondary_field)
+                if secondary_value is not None:
+                    cursor_values[secondary_field] = secondary_value
+            prev_cursor = encoder_cursor(cursor_values, "backward")
 
     return {
         "items": result_items,
         "cursor": {
             "next_cursor": next_cursor,
-            "prev_cursor": None,  # TODO: Implémenter pagination arrière si nécessaire
-            "has_more": has_more,
+            "prev_cursor": prev_cursor,
+            "has_more": has_more if direction == "forward" else True,
         },
         "limit": limit,
     }

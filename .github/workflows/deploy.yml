@@ -1,19 +1,37 @@
-name: Deploy to Streamlit Cloud
+name: CI
 
 on:
   push:
     branches: [main]
-  workflow_dispatch:
+  pull_request:
+    branches: [main]
 
 jobs:
-  # Pre-check: ensure tests pass before deployment
-  quality-gate:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Lint with ruff
+        run: ruff check src/ --output-format=github
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
@@ -21,54 +39,25 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest ruff
+          pip install pytest
 
-      - name: Lint with ruff
-        run: ruff check src/ --output-format=github
-
-      - name: Run critical tests
-        run: |
-          pytest tests/ -v --tb=short -m "unit" -x --ignore=tests/integration/
+      - name: Run tests
+        run: pytest tests/ -x
         env:
           PYTHONDONTWRITEBYTECODE: 1
 
-  deploy:
-    needs: quality-gate
+  build-frontend:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate Streamlit configuration
-        run: |
-          echo "✅ Validating .streamlit/config.toml exists..."
-          test -f .streamlit/config.toml && echo "Config found" || echo "Warning: No config.toml"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-          echo "✅ Validating src/app.py exists..."
-          test -f src/app.py && echo "Entry point found" || exit 1
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
 
-      - name: Create deployment marker
-        run: |
-          echo "Deployment triggered at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> .deploy-timestamp
-          echo "Commit: ${{ github.sha }}" >> .deploy-timestamp
-
-      # Streamlit Cloud auto-deploys from GitHub repo
-      # This step just confirms successful pipeline completion
-      - name: Deployment ready
-        run: |
-          echo "🚀 Code validated and ready for Streamlit Cloud auto-deploy"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
-          echo "Author: ${{ github.actor }}"
-
-  notify-failure:
-    needs: [quality-gate, deploy]
-    runs-on: ubuntu-latest
-    if: failure()
-
-    steps:
-      - name: Report failure
-        run: |
-          echo "❌ Deployment pipeline failed"
-          echo "Check the workflow logs for details"
+      - name: Build frontend
+        run: cd frontend && npm run build

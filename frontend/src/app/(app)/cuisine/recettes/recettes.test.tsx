@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import RecettesPage from "@/app/(app)/cuisine/recettes/page";
 
@@ -13,7 +13,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@/hooks/utiliser-delai", () => ({
+vi.mock("@/crochets/utiliser-delai", () => ({
   utiliserDelai: (value: string) => value,
 }));
 
@@ -45,7 +45,7 @@ const mockRecettes = {
   pages: 1,
 };
 
-vi.mock("@/hooks/utiliser-api", () => ({
+vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: () => ({
     data: mockRecettes,
     isLoading: false,

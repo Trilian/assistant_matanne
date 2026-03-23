@@ -31,12 +31,11 @@ class Parametres(BaseSettings):
     """
     Configuration centralisée avec auto-détection.
 
-    Toutes les valeurs passent par la validation Pydantic. Les secrets
-    Streamlit sont résolus une seule fois au démarrage (``@model_validator``).
+    Toutes les valeurs passent par la validation Pydantic.
 
     Ordre de priorité pour chaque paramètre :
     1. Variables d'environnement (via pydantic-settings)
-    2. st.secrets (résolu au démarrage par ``_resoudre_secrets``)
+    2. Fichier .env.local
     3. Valeur par défaut
     """
 
@@ -101,16 +100,9 @@ class Parametres(BaseSettings):
         raise ValueError(
             "[ERROR] Configuration DB manquante!\n\n"
             "Configure l'une de ces options:\n"
-            "1. Streamlit Secrets (.streamlit/secrets.toml):\n"
-            "   [db]\n"
-            "   host = 'xxx.supabase.co'\n"
-            "   port = '5432'\n"
-            "   name = 'postgres'\n"
-            "   user = 'postgres'\n"
-            "   password = 'xxx'\n\n"
-            "2. Variables d'environnement:\n"
+            "1. Variables d'environnement (.env.local):\n"
             "   DB_HOST, DB_USER, DB_PASSWORD, DB_NAME\n\n"
-            "3. Variable DATABASE_URL:\n"
+            "2. Variable DATABASE_URL:\n"
             "   DATABASE_URL='postgresql://user:pass@host/db'"
         )
 
@@ -123,15 +115,6 @@ class Parametres(BaseSettings):
         validation_alias=AliasChoices("MISTRAL_API_KEY", "mistral_key"),
     )
     """Clé API Mistral résolue (depuis env ou st.secrets)."""
-
-    streamlit_secrets_mistral_key: str | None = Field(
-        None,
-        validation_alias=AliasChoices(
-            "STREAMLIT_SECRETS_MISTRAL_API_KEY",
-            "streamlit_secrets_mistral_key",
-        ),
-    )
-    """Edge case: clé Mistral via variable STREAMLIT_SECRETS_MISTRAL_API_KEY."""
 
     @property
     def MISTRAL_API_KEY(self) -> str:

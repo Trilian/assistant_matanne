@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Navigation mobile — Bottom bar (5 icônes)
 // ═══════════════════════════════════════════════════════════
 
@@ -7,7 +7,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, ChefHat, Users, House, Menu } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/bibliotheque/utils";
 
 const ITEMS = [
   { nom: "Accueil", chemin: "/", Icone: Home },

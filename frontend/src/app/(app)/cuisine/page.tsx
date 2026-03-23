@@ -1,6 +1,8 @@
 // ═══════════════════════════════════════════════════════════
-// Hub Cuisine
+// Hub Cuisine — avec stats en temps réel
 // ═══════════════════════════════════════════════════════════
+
+"use client";
 
 import Link from "next/link";
 import {
@@ -13,10 +15,13 @@ import {
 } from "lucide-react";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { obtenirTableauBord } from "@/bibliotheque/api/tableau-bord";
 
 const SECTIONS = [
   {
@@ -58,6 +63,8 @@ const SECTIONS = [
 ];
 
 export default function PageCuisine() {
+  const { data: dashboard } = utiliserRequete(["tableau-bord"], obtenirTableauBord);
+
   return (
     <div className="space-y-6">
       <div>
@@ -66,6 +73,15 @@ export default function PageCuisine() {
           Recettes, planning repas, courses et inventaire
         </p>
       </div>
+
+      {/* Stats rapides */}
+      {dashboard && (
+        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{dashboard.repas_aujourd_hui?.length ?? 0}</p><p className="text-xs text-muted-foreground">Repas aujourd'hui</p></CardContent></Card>
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{dashboard.articles_courses_restants ?? 0}</p><p className="text-xs text-muted-foreground">Articles à acheter</p></CardContent></Card>
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{dashboard.alertes_inventaire ?? 0}</p><p className="text-xs text-muted-foreground">Alertes inventaire</p></CardContent></Card>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map(({ titre, description, chemin, Icone }) => (

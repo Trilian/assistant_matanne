@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Entretien — Tâches ménagères et santé appareils
 // ═══════════════════════════════════════════════════════════
 
@@ -26,14 +26,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { utiliserRequete, utiliserMutation } from "@/hooks/utiliser-api";
+import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   listerTachesEntretien,
   obtenirSanteAppareils,
   creerTacheEntretien,
   supprimerTacheEntretien,
-} from "@/lib/api/maison";
+} from "@/bibliotheque/api/maison";
 
 export default function PageEntretien() {
   const [dialogOuvert, setDialogOuvert] = useState(false);
@@ -46,7 +46,7 @@ export default function PageEntretien() {
 
   const mutationCreer = utiliserMutation(
     (data: { nom: string; categorie?: string; piece?: string; frequence_jours?: number }) =>
-      creerTacheEntretien(data),
+      creerTacheEntretien({ ...data, fait: false }),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["maison", "entretien"] });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import ParisPage from "@/app/(app)/jeux/paris/page";
 
@@ -48,7 +48,7 @@ const mockMatchs = [
   { id: 11, equipe_domicile: "Lyon", equipe_exterieur: "Monaco" },
 ];
 
-vi.mock("@/hooks/utiliser-api", () => ({
+vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: vi.fn().mockImplementation((key: string[]) => {
     if (key.includes("stats")) {
       return { data: mockStats, isLoading: false, error: null };

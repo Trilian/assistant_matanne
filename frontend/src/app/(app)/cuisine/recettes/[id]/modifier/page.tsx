@@ -6,8 +6,8 @@
 
 import { use } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { utiliserRequete } from "@/hooks/utiliser-api";
-import { obtenirRecette } from "@/lib/api/recettes";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { obtenirRecette } from "@/bibliotheque/api/recettes";
 import { FormulaireRecette } from "@/composants/cuisine/formulaire-recette";
 
 export default function PageModifierRecette({
