@@ -51,6 +51,7 @@ import {
   supprimerRoutine,
 } from "@/bibliotheque/api/famille";
 import type { Routine, EtapeRoutine } from "@/types/famille";
+import { toast } from "sonner";
 
 const TYPES_ROUTINE = [
   { valeur: "matin", label: "Matin", Icone: Sun },
@@ -81,13 +82,18 @@ export default function PageRoutines() {
         setDialogueCreation(false);
         setNom("");
         setEtapes([{ titre: "" }]);
+        toast.success("Routine créée");
       },
+      onError: () => toast.error("Erreur lors de la création"),
     }
   );
 
   const { mutate: supprimer } = utiliserMutation(
     (id: number) => supprimerRoutine(id),
-    { onSuccess: () => invalider(["famille", "routines"]) }
+    {
+      onSuccess: () => { invalider(["famille", "routines"]); toast.success("Routine supprimée"); },
+      onError: () => toast.error("Erreur lors de la suppression"),
+    }
   );
 
   const ajouterEtape = () => setEtapes([...etapes, { titre: "" }]);

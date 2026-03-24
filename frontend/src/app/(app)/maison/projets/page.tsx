@@ -35,6 +35,7 @@ import {
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { listerProjets, creerProjet, supprimerProjet } from "@/bibliotheque/api/maison";
+import { toast } from "sonner";
 
 const STATUTS = [
   { value: "tous", label: "Tous" },
@@ -76,11 +77,14 @@ export default function PageProjets() {
       setNomProjet("");
       setDescProjet("");
       setPrioriteProjet("moyenne");
+      toast.success("Projet créé");
     },
+    onError: () => toast.error("Erreur lors de la création"),
   });
 
   const { mutate: supprimer } = utiliserMutation(supprimerProjet, {
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["maison", "projets"] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["maison", "projets"] }); toast.success("Projet supprimé"); },
+    onError: () => toast.error("Erreur lors de la suppression"),
   });
 
   return (

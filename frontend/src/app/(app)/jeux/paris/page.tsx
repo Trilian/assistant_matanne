@@ -35,6 +35,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { listerParis, obtenirStatsParis, listerMatchs, creerPari, supprimerPari } from "@/bibliotheque/api/jeux";
 import dynamic from "next/dynamic";
 import type { PariSportif, StatsParis, MatchJeu } from "@/types/jeux";
+import { toast } from "sonner";
 
 const GraphiqueROI = dynamic(
   () => import("@/composants/graphiques/graphique-roi").then((m) => m.GraphiqueROI),
@@ -79,7 +80,9 @@ export default function ParisPage() {
         setPrediction("");
         setCote("");
         setMise("");
+        toast.success("Pari ajouté");
       },
+      onError: () => toast.error("Erreur lors de l'ajout"),
     }
   );
 
@@ -88,7 +91,9 @@ export default function ParisPage() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["jeux", "paris"] });
+        toast.success("Pari supprimé");
       },
+      onError: () => toast.error("Erreur lors de la suppression"),
     }
   );
 

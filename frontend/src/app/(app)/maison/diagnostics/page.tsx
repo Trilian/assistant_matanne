@@ -30,6 +30,7 @@ import {
   supprimerDiagnostic,
 } from "@/bibliotheque/api/maison";
 import type { DiagnosticImmobilier } from "@/types/maison";
+import { toast } from "sonner";
 
 export default function PageDiagnostics() {
   const [dialogOuvert, setDialogOuvert] = useState(false);
@@ -61,15 +62,24 @@ export default function PageDiagnostics() {
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
     (data: Record<string, unknown>) => creerDiagnostic(data as Omit<DiagnosticImmobilier, "id">),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    {
+      onSuccess: () => { invalider(); fermerDialog(); toast.success("Diagnostic ajouté"); },
+      onError: () => toast.error("Erreur lors de l'ajout"),
+    }
   );
 
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
     ({ id, data }: { id: number; data: Partial<DiagnosticImmobilier> }) => modifierDiagnostic(id, data),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    {
+      onSuccess: () => { invalider(); fermerDialog(); toast.success("Diagnostic modifié"); },
+      onError: () => toast.error("Erreur lors de la modification"),
+    }
   );
 
-  const { mutate: supprimer } = utiliserMutation(supprimerDiagnostic, { onSuccess: invalider });
+  const { mutate: supprimer } = utiliserMutation(supprimerDiagnostic, {
+    onSuccess: () => { invalider(); toast.success("Diagnostic supprimé"); },
+    onError: () => toast.error("Erreur lors de la suppression"),
+  });
 
   const ouvrirCreation = () => {
     setEnEdition(null);

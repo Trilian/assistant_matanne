@@ -42,6 +42,7 @@ import {
   supprimerEntreeJournal,
   type EntreeJournal,
 } from "@/bibliotheque/api/utilitaires";
+import { toast } from "sonner";
 
 const HUMEURS = [
   { value: "bien" as const, label: "Bien", icone: Smile, couleur: "text-green-500" },
@@ -61,11 +62,17 @@ export default function PageJournal() {
 
   const mutCreer = utiliserMutation(
     (e: Omit<EntreeJournal, "id" | "cree_le">) => creerEntreeJournal(e),
-    { onSuccess: () => { invalider(["journal"]); setOuvert(false); } }
+    {
+      onSuccess: () => { invalider(["journal"]); setOuvert(false); toast.success("Entrée ajoutée"); },
+      onError: () => toast.error("Erreur lors de l'ajout"),
+    }
   );
   const mutSupprimer = utiliserMutation(
     (id: number) => supprimerEntreeJournal(id),
-    { onSuccess: () => invalider(["journal"]) }
+    {
+      onSuccess: () => { invalider(["journal"]); toast.success("Entrée supprimée"); },
+      onError: () => toast.error("Erreur lors de la suppression"),
+    }
   );
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {

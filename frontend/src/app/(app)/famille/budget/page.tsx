@@ -42,6 +42,7 @@ import dynamic from "next/dynamic";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { listerDepenses, obtenirStatsBudget, ajouterDepense, supprimerDepense } from "@/bibliotheque/api/famille";
+import { toast } from "sonner";
 
 const CamembertBudget = dynamic(
   () => import("@/composants/graphiques/camembert-budget").then((m) => m.CamembertBudget),
@@ -87,7 +88,9 @@ export default function PageBudget() {
         setCategorie("alimentation");
         setDescription("");
         setMagasin("");
+        toast.success("Dépense ajoutée");
       },
+      onError: () => toast.error("Erreur lors de l'ajout"),
     }
   );
 
@@ -96,7 +99,9 @@ export default function PageBudget() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["famille", "budget"] });
+        toast.success("Dépense supprimée");
       },
+      onError: () => toast.error("Erreur lors de la suppression"),
     }
   );
 

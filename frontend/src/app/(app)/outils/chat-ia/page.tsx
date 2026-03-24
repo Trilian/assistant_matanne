@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { utiliserMutation } from "@/crochets/utiliser-api";
 import { obtenirSuggestionsRecettes } from "@/bibliotheque/api/outils";
 import type { MessageChat } from "@/types/outils";
+import { toast } from "sonner";
 
 export default function ChatIAPage() {
   const [messages, setMessages] = useState<MessageChat[]>([]);
@@ -35,6 +36,7 @@ export default function ChatIAPage() {
           },
         ]);
       },
+      onError: () => toast.error("Erreur lors de l'envoi"),
     }
   );
 

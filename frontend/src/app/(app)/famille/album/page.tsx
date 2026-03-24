@@ -22,6 +22,7 @@ import {
   supprimerPhoto,
 } from "@/bibliotheque/api/album";
 import type { PhotoAlbum } from "@/bibliotheque/api/album";
+import { toast } from "sonner";
 
 export default function PageAlbum() {
   const [photoSelectionnee, setPhotoSelectionnee] = useState<PhotoAlbum | null>(null);
@@ -38,7 +39,10 @@ export default function PageAlbum() {
 
   const { mutate: uploader, isPending: enUpload } = utiliserMutation(
     (file: File) => uploaderPhoto(file),
-    { onSuccess: invalider }
+    {
+      onSuccess: () => { invalider(); toast.success("Photo uploadée"); },
+      onError: () => toast.error("Erreur lors de l'upload"),
+    }
   );
 
   const { mutate: supprimer } = utiliserMutation(
@@ -47,7 +51,9 @@ export default function PageAlbum() {
       onSuccess: () => {
         invalider();
         setPhotoSelectionnee(null);
+        toast.success("Photo supprimée");
       },
+      onError: () => toast.error("Erreur lors de la suppression"),
     }
   );
 

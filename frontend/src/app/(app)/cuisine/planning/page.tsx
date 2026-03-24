@@ -48,6 +48,7 @@ import {
   definirRepas,
   supprimerRepas,
 } from "@/bibliotheque/api/planning";
+import { toast } from "sonner";
 import type { TypeRepas, RepasPlanning } from "@/types/planning";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
@@ -103,12 +104,15 @@ export default function PagePlanning() {
         invalider(["planning"]);
         setDialogueOuvert(false);
         setNotesRepas("");
+        toast.success("Repas ajouté");
       },
+      onError: () => toast.error("Erreur lors de l'ajout"),
     }
   );
 
   const { mutate: retirerRepas } = utiliserMutation(supprimerRepas, {
-    onSuccess: () => invalider(["planning"]),
+    onSuccess: () => { invalider(["planning"]); toast.success("Repas retiré"); },
+    onError: () => toast.error("Erreur lors de la suppression"),
   });
 
   function trouverRepas(date: string, type: TypeRepas): RepasPlanning | undefined {

@@ -55,6 +55,7 @@ import {
   schemaArticleInventaire,
   type DonneesArticleInventaire,
 } from "@/bibliotheque/validateurs";
+import { toast } from "sonner";
 import type { ArticleInventaire } from "@/types/inventaire";
 
 const CATEGORIES = [
@@ -102,13 +103,18 @@ export default function PageInventaire() {
         invalider(["inventaire"]);
         setDialogueAjout(false);
         reset();
+        toast.success("Article ajouté à l'inventaire");
       },
+      onError: () => toast.error("Erreur lors de l'ajout"),
     }
   );
 
   const { mutate: supprimer } = utiliserMutation(
     (id: number) => supprimerArticleInventaire(id),
-    { onSuccess: () => invalider(["inventaire"]) }
+    {
+      onSuccess: () => { invalider(["inventaire"]); toast.success("Article supprimé"); },
+      onError: () => toast.error("Erreur lors de la suppression"),
+    }
   );
 
   const {

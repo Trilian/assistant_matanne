@@ -47,6 +47,7 @@ import {
 } from "@/crochets/utiliser-api";
 import { listerActivites, creerActivite } from "@/bibliotheque/api/famille";
 import type { Activite } from "@/types/famille";
+import { toast } from "sonner";
 
 const TYPES_ACTIVITE = [
   "tous",
@@ -90,7 +91,9 @@ export default function PageActivites() {
         setLieu("");
         setDuree("");
         setDescription("");
+        toast.success("Activité créée");
       },
+      onError: () => toast.error("Erreur lors de la création"),
     }
   );
 

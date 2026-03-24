@@ -30,6 +30,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
+import { toast } from "sonner";
 
 export default function PageDetailRecette({
   params,
@@ -50,8 +51,10 @@ export default function PageDetailRecette({
     {
       onSuccess: () => {
         invalider(["recettes"]);
+        toast.success("Recette supprimée");
         router.push("/cuisine/recettes");
       },
+      onError: () => toast.error("Erreur lors de la suppression"),
     }
   );
 

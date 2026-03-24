@@ -28,6 +28,7 @@ import {
   historiqueEnergie,
 } from "@/bibliotheque/api/maison";
 import type { ReleveCompteur } from "@/types/maison";
+import { toast } from "sonner";
 
 type TypeCompteur = "electricite" | "eau" | "gaz";
 
@@ -69,11 +70,15 @@ export default function PageEnergie() {
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
     (data: Omit<ReleveCompteur, "id">) => creerReleve(data),
-    { onSuccess: () => { invalider(); setDialogOuvert(false); } }
+    {
+      onSuccess: () => { invalider(); setDialogOuvert(false); toast.success("Relevé ajouté"); },
+      onError: () => toast.error("Erreur lors de l'ajout"),
+    }
   );
 
   const { mutate: supprimer } = utiliserMutation(supprimerReleve, {
-    onSuccess: invalider,
+    onSuccess: () => { invalider(); toast.success("Relevé supprimé"); },
+    onError: () => toast.error("Erreur lors de la suppression"),
   });
 
   const ouvrirAjout = () => {

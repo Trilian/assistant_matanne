@@ -34,6 +34,7 @@ import {
   creerTacheEntretien,
   supprimerTacheEntretien,
 } from "@/bibliotheque/api/maison";
+import { toast } from "sonner";
 
 export default function PageEntretien() {
   const [dialogOuvert, setDialogOuvert] = useState(false);
@@ -55,7 +56,9 @@ export default function PageEntretien() {
         setCategorie("");
         setPiece("");
         setFrequence("");
+        toast.success("Tâche créée");
       },
+      onError: () => toast.error("Erreur lors de la création"),
     }
   );
 
@@ -64,7 +67,9 @@ export default function PageEntretien() {
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["maison", "entretien"] });
+        toast.success("Tâche supprimée");
       },
+      onError: () => toast.error("Erreur lors de la suppression"),
     }
   );
 

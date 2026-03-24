@@ -29,6 +29,7 @@ import {
   supprimerGarantie,
 } from "@/bibliotheque/api/maison";
 import type { Garantie } from "@/types/maison";
+import { toast } from "sonner";
 
 export default function PageGaranties() {
   const [dialogOuvert, setDialogOuvert] = useState(false);
@@ -55,15 +56,24 @@ export default function PageGaranties() {
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
     (data: Record<string, unknown>) => creerGarantie(data as Omit<Garantie, "id">),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    {
+      onSuccess: () => { invalider(); fermerDialog(); toast.success("Garantie ajoutée"); },
+      onError: () => toast.error("Erreur lors de l'ajout"),
+    }
   );
 
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
     ({ id, data }: { id: number; data: Partial<Garantie> }) => modifierGarantie(id, data),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    {
+      onSuccess: () => { invalider(); fermerDialog(); toast.success("Garantie modifiée"); },
+      onError: () => toast.error("Erreur lors de la modification"),
+    }
   );
 
-  const { mutate: supprimer } = utiliserMutation(supprimerGarantie, { onSuccess: invalider });
+  const { mutate: supprimer } = utiliserMutation(supprimerGarantie, {
+    onSuccess: () => { invalider(); toast.success("Garantie supprimée"); },
+    onError: () => toast.error("Erreur lors de la suppression"),
+  });
 
   const ouvrirCreation = () => {
     setEnEdition(null);

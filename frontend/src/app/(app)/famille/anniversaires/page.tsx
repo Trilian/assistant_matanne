@@ -35,6 +35,7 @@ import {
   supprimerAnniversaire,
   type Anniversaire,
 } from "@/bibliotheque/api/famille";
+import { toast } from "sonner";
 
 const RELATIONS = [
   "enfant",
@@ -67,16 +68,25 @@ export default function PageAnniversaires() {
 
   const mutCreer = utiliserMutation(
     (a: Parameters<typeof creerAnniversaire>[0]) => creerAnniversaire(a),
-    { onSuccess: () => { invalider(["anniversaires"]); setOuvert(false); } }
+    {
+      onSuccess: () => { invalider(["anniversaires"]); setOuvert(false); toast.success("Anniversaire ajouté"); },
+      onError: () => toast.error("Erreur lors de l'ajout"),
+    }
   );
   const mutModifier = utiliserMutation(
     ({ id, patch }: { id: number; patch: Partial<Anniversaire> }) =>
       modifierAnniversaire(id, patch),
-    { onSuccess: () => { invalider(["anniversaires"]); setEdition(null); setOuvert(false); } }
+    {
+      onSuccess: () => { invalider(["anniversaires"]); setEdition(null); setOuvert(false); toast.success("Anniversaire modifié"); },
+      onError: () => toast.error("Erreur lors de la modification"),
+    }
   );
   const mutSupprimer = utiliserMutation(
     (id: number) => supprimerAnniversaire(id),
-    { onSuccess: () => invalider(["anniversaires"]) }
+    {
+      onSuccess: () => { invalider(["anniversaires"]); toast.success("Anniversaire supprimé"); },
+      onError: () => toast.error("Erreur lors de la suppression"),
+    }
   );
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {

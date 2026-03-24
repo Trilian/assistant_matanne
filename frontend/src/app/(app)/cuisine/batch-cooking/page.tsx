@@ -44,6 +44,7 @@ import {
   creerSessionBatch,
   supprimerSessionBatch,
 } from "@/bibliotheque/api/batch-cooking";
+import { toast } from "sonner";
 import type { SessionBatchCooking } from "@/types/batch-cooking";
 
 const BADGES_STATUT: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -80,13 +81,18 @@ export default function PageBatchCooking() {
         setNomSession("");
         setDateSession("");
         setDureeEstimee("");
+        toast.success("Session créée");
       },
+      onError: () => toast.error("Erreur lors de la création"),
     }
   );
 
   const { mutate: supprimer } = utiliserMutation(
     (id: number) => supprimerSessionBatch(id),
-    { onSuccess: () => invalider(["batch-cooking"]) }
+    {
+      onSuccess: () => { invalider(["batch-cooking"]); toast.success("Session supprimée"); },
+      onError: () => toast.error("Erreur lors de la suppression"),
+    }
   );
 
   const sessions = donnees?.items ?? [];

@@ -47,6 +47,7 @@ import {
   genererPlanningSemaine,
 } from "@/bibliotheque/api/planning";
 import type { TypeRepas, CreerRepasPlanningDTO, RepasPlanning } from "@/types/planning";
+import { toast } from "sonner";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
@@ -93,21 +94,25 @@ export default function PagePlanning() {
         invalider(["planning", "semaine", dateDebut]);
         setDialogOuvert(false);
         setNotesRepas("");
+        toast.success("Repas ajouté");
       },
+      onError: () => toast.error("Erreur lors de l'ajout"),
     }
   );
 
   const mutationSupprimer = utiliserMutation(
     (id: number) => supprimerRepas(id),
     {
-      onSuccess: () => invalider(["planning", "semaine", dateDebut]),
+      onSuccess: () => { invalider(["planning", "semaine", dateDebut]); toast.success("Repas retiré"); },
+      onError: () => toast.error("Erreur lors de la suppression"),
     }
   );
 
   const mutationGenerer = utiliserMutation(
     (_: void) => genererPlanningSemaine(),
     {
-      onSuccess: () => invalider(["planning", "semaine", dateDebut]),
+      onSuccess: () => { invalider(["planning", "semaine", dateDebut]); toast.success("Planning généré"); },
+      onError: () => toast.error("Erreur lors de la génération"),
     }
   );
 

@@ -46,6 +46,7 @@ import {
   supprimerArticle,
 } from "@/bibliotheque/api/courses";
 import { schemaArticleCourses, type DonneesArticleCourses } from "@/bibliotheque/validateurs";
+import { toast } from "sonner";
 import type { ListeCourses } from "@/types/courses";
 
 export default function PageCourses() {
@@ -76,7 +77,9 @@ export default function PageCourses() {
         invalider(["courses"]);
         setListeSelectionnee(liste.id);
         setNomNouvelleListe("");
+        toast.success("Liste créée");
       },
+      onError: () => toast.error("Erreur lors de la création"),
     }
   );
 
@@ -88,19 +91,27 @@ export default function PageCourses() {
         invalider(["courses"]);
         setDialogueArticle(false);
         resetArticle();
+        toast.success("Article ajouté");
       },
+      onError: () => toast.error("Erreur lors de l'ajout"),
     }
   );
 
   const { mutate: cocher } = utiliserMutation(
     ({ articleId, coche }: { articleId: number; coche: boolean }) =>
       cocherArticle(listeSelectionnee!, articleId, coche),
-    { onSuccess: () => invalider(["courses"]) }
+    {
+      onSuccess: () => invalider(["courses"]),
+      onError: () => toast.error("Erreur lors de la mise à jour"),
+    }
   );
 
   const { mutate: supprimer } = utiliserMutation(
     (articleId: number) => supprimerArticle(listeSelectionnee!, articleId),
-    { onSuccess: () => invalider(["courses"]) }
+    {
+      onSuccess: () => { invalider(["courses"]); toast.success("Article supprimé"); },
+      onError: () => toast.error("Erreur lors de la suppression"),
+    }
   );
 
   // Formulaire article

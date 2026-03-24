@@ -41,6 +41,7 @@ import {
   supprimerContact,
   type ContactUtile,
 } from "@/bibliotheque/api/utilitaires";
+import { toast } from "sonner";
 
 const CATEGORIES = [
   "Tous",
@@ -81,16 +82,25 @@ export default function PageContacts() {
 
   const mutCreer = utiliserMutation(
     (c: Omit<ContactUtile, "id">) => creerContact(c),
-    { onSuccess: () => { invalider(["contacts"]); setOuvert(false); } }
+    {
+      onSuccess: () => { invalider(["contacts"]); setOuvert(false); toast.success("Contact créé"); },
+      onError: () => toast.error("Erreur lors de la création"),
+    }
   );
   const mutModifier = utiliserMutation(
     ({ id, patch }: { id: number; patch: Partial<ContactUtile> }) =>
       modifierContact(id, patch),
-    { onSuccess: () => { invalider(["contacts"]); setEdition(null); setOuvert(false); } }
+    {
+      onSuccess: () => { invalider(["contacts"]); setEdition(null); setOuvert(false); toast.success("Contact modifié"); },
+      onError: () => toast.error("Erreur lors de la modification"),
+    }
   );
   const mutSupprimer = utiliserMutation(
     (id: number) => supprimerContact(id),
-    { onSuccess: () => invalider(["contacts"]) }
+    {
+      onSuccess: () => { invalider(["contacts"]); toast.success("Contact supprimé"); },
+      onError: () => toast.error("Erreur lors de la suppression"),
+    }
   );
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {

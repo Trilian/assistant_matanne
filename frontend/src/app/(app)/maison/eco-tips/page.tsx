@@ -22,6 +22,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import { listerEcoTips, creerEcoTip, modifierEcoTip, supprimerEcoTip } from "@/bibliotheque/api/maison";
 import type { ActionEcologique } from "@/types/maison";
+import { toast } from "sonner";
 
 export default function PageEcoTips() {
   const [actifOnly, setActifOnly] = useState(false);
@@ -41,15 +42,24 @@ export default function PageEcoTips() {
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
     (data: Record<string, unknown>) => creerEcoTip(data as Omit<ActionEcologique, "id">),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    {
+      onSuccess: () => { invalider(); fermerDialog(); toast.success("Éco-geste ajouté"); },
+      onError: () => toast.error("Erreur lors de l'ajout"),
+    }
   );
 
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
     ({ id, data }: { id: number; data: Partial<ActionEcologique> }) => modifierEcoTip(id, data),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    {
+      onSuccess: () => { invalider(); fermerDialog(); toast.success("Éco-geste modifié"); },
+      onError: () => toast.error("Erreur lors de la modification"),
+    }
   );
 
-  const { mutate: supprimer } = utiliserMutation(supprimerEcoTip, { onSuccess: invalider });
+  const { mutate: supprimer } = utiliserMutation(supprimerEcoTip, {
+    onSuccess: () => { invalider(); toast.success("Éco-geste supprimé"); },
+    onError: () => toast.error("Erreur lors de la suppression"),
+  });
 
   const ouvrirCreation = () => {
     setEnEdition(null);

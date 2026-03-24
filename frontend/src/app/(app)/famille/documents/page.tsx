@@ -41,6 +41,7 @@ import {
 } from "@/bibliotheque/api/documents";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const CATEGORIES = [
   { value: "administratif", label: "Administratif", icone: Shield },
@@ -74,18 +75,27 @@ export default function PageDocuments() {
 
   const mutationCreer = utiliserMutation(
     (dto: CreerDocumentDTO) => creerDocument(dto),
-    { onSuccess: () => { invalider(["documents"]); fermerDialog(); } }
+    {
+      onSuccess: () => { invalider(["documents"]); fermerDialog(); toast.success("Document créé"); },
+      onError: () => toast.error("Erreur lors de la création"),
+    }
   );
 
   const mutationModifier = utiliserMutation(
     ({ id, dto }: { id: number; dto: Partial<CreerDocumentDTO> }) =>
       modifierDocument(id, dto),
-    { onSuccess: () => { invalider(["documents"]); fermerDialog(); } }
+    {
+      onSuccess: () => { invalider(["documents"]); fermerDialog(); toast.success("Document modifié"); },
+      onError: () => toast.error("Erreur lors de la modification"),
+    }
   );
 
   const mutationSupprimer = utiliserMutation(
     (id: number) => supprimerDocument(id),
-    { onSuccess: () => invalider(["documents"]) }
+    {
+      onSuccess: () => { invalider(["documents"]); toast.success("Document supprimé"); },
+      onError: () => toast.error("Erreur lors de la suppression"),
+    }
   );
 
   function ouvrirCreation() {

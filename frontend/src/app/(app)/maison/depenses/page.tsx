@@ -36,6 +36,7 @@ import {
   statsDepensesMaison,
 } from "@/bibliotheque/api/maison";
 import type { DepenseMaison } from "@/types/maison";
+import { toast } from "sonner";
 
 const CATEGORIES = ["Courses", "Travaux", "Équipement", "Énergie", "Abonnements", "Divers"];
 
@@ -70,17 +71,24 @@ export default function PageDepenses() {
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
     (data: Record<string, unknown>) =>
       creerDepenseMaison(data as Omit<DepenseMaison, "id">),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    {
+      onSuccess: () => { invalider(); fermerDialog(); toast.success("Dépense ajoutée"); },
+      onError: () => toast.error("Erreur lors de l'ajout"),
+    }
   );
 
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
     ({ id, data }: { id: number; data: Partial<DepenseMaison> }) =>
       modifierDepenseMaison(id, data),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    {
+      onSuccess: () => { invalider(); fermerDialog(); toast.success("Dépense modifiée"); },
+      onError: () => toast.error("Erreur lors de la modification"),
+    }
   );
 
   const { mutate: supprimer } = utiliserMutation(supprimerDepenseMaison, {
-    onSuccess: invalider,
+    onSuccess: () => { invalider(); toast.success("Dépense supprimée"); },
+    onError: () => toast.error("Erreur lors de la suppression"),
   });
 
   const ouvrirCreation = () => {

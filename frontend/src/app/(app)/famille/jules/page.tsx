@@ -53,6 +53,7 @@ import {
 } from "@/bibliotheque/api/famille";
 import dynamic from "next/dynamic";
 import type { JalonJules } from "@/types/famille";
+import { toast } from "sonner";
 
 const GraphiqueJalons = dynamic(
   () => import("@/composants/graphiques/graphique-jalons").then((m) => m.GraphiqueJalons),
@@ -104,7 +105,9 @@ export default function PageJules() {
         setTitre("");
         setDescription("");
         setDateObs("");
+        toast.success("Jalon ajouté");
       },
+      onError: () => toast.error("Erreur lors de l'ajout"),
     }
   );
 

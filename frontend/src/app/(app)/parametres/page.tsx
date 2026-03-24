@@ -45,6 +45,7 @@ import {
   desabonnerPush,
 } from "@/bibliotheque/api/push";
 import type { Preferences } from "@/bibliotheque/api/preferences";
+import { toast } from "sonner";
 
 export default function PageParametres() {
   const { utilisateur } = utiliserAuth();
@@ -125,7 +126,10 @@ function OngletProfil({
 
   const { mutate: sauvegarder, isPending } = utiliserMutation(
     (_: void) => clientApi.put("/auth/me", { nom }),
-    { onSuccess: () => invalider(["auth", "profil"]) }
+    {
+      onSuccess: () => { invalider(["auth", "profil"]); toast.success("Profil sauvegardé"); },
+      onError: () => toast.error("Erreur lors de la sauvegarde"),
+    }
   );
 
   return (
@@ -316,7 +320,7 @@ function OngletCuisine() {
         robots: form.robots.split(",").map((s) => s.trim()).filter(Boolean),
         magasins_preferes: form.magasins_preferes.split(",").map((s) => s.trim()).filter(Boolean),
       }),
-    { onSuccess: () => invalider(["preferences"]) }
+    { onSuccess: () => { invalider(["preferences"]); toast.success("Préférences sauvegardées"); }, onError: () => toast.error("Erreur lors de la sauvegarde") }
   );
 
   if (isLoading) return <Card><CardContent className="py-8 text-center text-muted-foreground">Chargement…</CardContent></Card>;
@@ -420,7 +424,7 @@ function OngletNotifications() {
         },
       });
     },
-    { onSuccess: () => invalider(["push", "status"]) }
+    { onSuccess: () => { invalider(["push", "status"]); toast.success("Notifications activées"); }, onError: () => toast.error("Erreur lors de l'activation") }
   );
 
   const { mutate: desactiver, isPending: enDesactivation } = utiliserMutation(
@@ -432,7 +436,7 @@ function OngletNotifications() {
         await subscription.unsubscribe();
       }
     },
-    { onSuccess: () => invalider(["push", "status"]) }
+    { onSuccess: () => { invalider(["push", "status"]); toast.success("Notifications désactivées"); }, onError: () => toast.error("Erreur lors de la désactivation") }
   );
 
   const pushSupporte = typeof window !== "undefined" && "PushManager" in window;
