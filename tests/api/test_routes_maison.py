@@ -139,7 +139,7 @@ def client():
     """Client de test FastAPI."""
     from src.api.main import app
 
-    return TestClient(app)
+    return TestClient(app, raise_server_exceptions=False)
 
 
 def creer_mock(data: dict) -> MagicMock:

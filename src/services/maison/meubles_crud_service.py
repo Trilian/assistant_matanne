@@ -178,7 +178,7 @@ class MeublesCrudService(EventBusMixin, BaseService[Meuble]):
             total_estime += prix_e
             total_max += prix_m
 
-            piece = getattr(m, "piece", "autre")
+            piece = str(getattr(m, "piece", None) or "autre")
             if piece not in par_piece:
                 par_piece[piece] = {"count": 0, "total_estime": 0.0, "total_max": 0.0}
             par_piece[piece]["count"] += 1

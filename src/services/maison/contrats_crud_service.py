@@ -149,7 +149,7 @@ class ContratsCrudService(EventBusMixin, BaseService[Contrat]):
         )
         par_type: dict = {}
         for c in contrats:
-            t = c.type_contrat
+            t = str(c.type_contrat or "inconnu")
             if t not in par_type:
                 par_type[t] = {"count": 0, "total_mensuel": 0.0}
             par_type[t]["count"] += 1

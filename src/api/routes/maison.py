@@ -1918,6 +1918,28 @@ async def supprimer_eco_tip(
 
 
 # ═══════════════════════════════════════════════════════════
+# CHARGES RÉCURRENTES
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/charges", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_charges(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Liste les charges récurrentes (contrats et abonnements actifs)."""
+    from src.services.maison import get_contrats_crud_service
+
+    def _query():
+        service = get_contrats_crud_service()
+        contrats = service.get_all_contrats(statut="actif")
+        items = contrats if isinstance(contrats, list) else []
+        return {"items": [str(c) for c in items], "total": len(items)}
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
 # DÉPENSES MAISON
 # ═══════════════════════════════════════════════════════════
 

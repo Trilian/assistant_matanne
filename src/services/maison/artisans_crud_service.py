@@ -153,7 +153,8 @@ class ArtisansCrudService(EventBusMixin, BaseService[Artisan]):
         total_depense = sum(float(i.montant_facture or 0) for i in interventions)
         par_metier: dict = {}
         for a in artisans:
-            par_metier[a.metier] = par_metier.get(a.metier, 0) + 1
+            k = str(a.metier or "inconnu")
+            par_metier[k] = par_metier.get(k, 0) + 1
         return {
             "nb_artisans": len(artisans),
             "nb_interventions": len(interventions),

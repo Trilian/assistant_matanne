@@ -24,6 +24,7 @@ from src.services.rapports.types import (
     DonneesCoursesPDF,
     DonneesPlanningPDF,
     DonneesRecettePDF,  # Alias compat
+    RapportBudget,
 )
 from src.services.rapports._couleurs import Couleur
 
