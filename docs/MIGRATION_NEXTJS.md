@@ -1,5 +1,7 @@
 # Migration Streamlit → Next.js
 
+> **⚠️ Référence historique** — Ce document retrace la migration effectuée de Streamlit vers Next.js. Le frontend est désormais entièrement Next.js 16.
+
 ## Vue d'ensemble
 
 Migration de l'interface frontend de **Streamlit** (Python) vers **Next.js 16** (React/TypeScript) tout en conservant le backend Python (FastAPI) et la base de données Supabase PostgreSQL.

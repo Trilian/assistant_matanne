@@ -55,7 +55,7 @@ Les commandes vocales permettent de:
 
 ## 🎙️ Comment ça marche
 
-### Avec microphone (Streamlit 1.40+)
+### Avec microphone (Web Speech API)
 
 1. Cliquez sur le bouton **🎤 Cliquez et parlez**
 2. Autorisez l'accès au microphone

@@ -25,7 +25,7 @@ Le scanner de codes-barres permet de:
 #### Dépendances requises
 
 ```bash
-pip install streamlit-webrtc opencv-python-headless pyzbar
+pip install opencv-python-headless pyzbar
 ```
 
 ### 2. Scanner Photo

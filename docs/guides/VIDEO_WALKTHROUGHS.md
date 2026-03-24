@@ -154,7 +154,7 @@ with st.status("🍳 Batch Cooking en cours...", expanded=True) as status:
 
 - **OBS Studio**: Enregistrement écran gratuit
 - **Loom**: Enregistrement + partage rapide
-- **Streamlit screen recording**: Via navigateur
+- **Screen recording navigateur**: Via DevTools
 
 ### Paramètres suggérés
 

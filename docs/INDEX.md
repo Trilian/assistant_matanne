@@ -78,7 +78,7 @@ cd frontend && npm test           # Frontend (Vitest)
 | `FONCTIONNALITES.md`          | Fonctionnalités détaillées                       |
 | `SQLALCHEMY_SESSION_GUIDE.md` | Guide sessions DB                                |
 | `ERD_SCHEMA.md`               | Schéma entité-relation                           |
-| `UI_COMPONENTS.md`            | Composants UI Streamlit                          |
+| `UI_COMPONENTS.md`            | Composants UI (Next.js / shadcn)                 |
 
 ### 📊 Données (data/)
 

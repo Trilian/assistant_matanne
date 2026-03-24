@@ -106,13 +106,6 @@ class MockBuilder:
 
 
 @contextmanager
-def mock_streamlit_session():
-    """Context manager pour simuler un storage session."""
-    mock_session = MagicMock()
-    yield mock_session
-
-
-@contextmanager
 def mock_redis_connection(available: bool = True):
     """Context manager pour mocker Redis connection."""
     if available:
@@ -392,13 +385,6 @@ def mock_redis():
 def mock_logger():
     """Fixture pour mock Logger."""
     return MagicMock()
-
-
-@pytest.fixture
-def streamlit_session():
-    """Fixture pour mock storage session."""
-    with mock_streamlit_session() as session:
-        yield session
 
 
 @pytest.fixture

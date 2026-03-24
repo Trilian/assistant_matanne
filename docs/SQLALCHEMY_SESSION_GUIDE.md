@@ -2,7 +2,7 @@
 
 ## 🎯 Objectif
 
-Éviter les erreurs `"Parent instance not bound to a Session"` en gérant correctement les sessions SQLAlchemy dans Streamlit.
+Éviter les erreurs `"Parent instance not bound to a Session"` en gérant correctement les sessions SQLAlchemy.
 
 ## ⚡ Les Deux Patterns Principaux
 
@@ -63,31 +63,33 @@ repas = db.query(Repas).first()
 # db reste ouvert ou se ferme de façon imprévisible
 ```
 
-## 🔄 Flux Recommandé pour une Fonction Streamlit
+## 🔄 Flux Recommandé pour une Route FastAPI
 
 ```python
-def render_planning():
+@router.get("/{planning_id}")
+@gerer_exception_api
+async def obtenir_planning(planning_id: int, user: dict = Depends(require_auth)):
     """Modèle recommandé"""
 
-    # 1️⃣ Récupérer données avec EAGER LOADING
-    service = get_planning_service()
-    planning = service.get_planning()  # Retourne avec repas pré-chargés
+    def _query():
+        with executer_avec_session() as session:
+            # 1️⃣ Récupérer données avec EAGER LOADING
+            planning = (
+                session.query(Planning)
+                .options(joinedload(Planning.repas).joinedload(Repas.recette))
+                .filter(Planning.id == planning_id)
+                .first()
+            )
+            if not planning:
+                raise HTTPException(status_code=404, detail="Planning non trouvé")
 
-    if not planning:
-        st.warning("No planning")
-        return
+            # 2️⃣ Sérialiser dans la session (relations déjà chargées)
+            return {
+                "id": planning.id,
+                "repas": [{"id": r.id, "recette": r.recette.nom} for r in planning.repas],
+            }
 
-    # 2️⃣ Utiliser les relations chargées (safe)
-    st.metric("📊 Repas", len(planning.repas))  # ✅ OK
-
-    # 3️⃣ Pour les modifications, utiliser context manager SÉPARÉ
-    if st.button("Marquer préparé"):
-        with obtenir_contexte_db() as db:
-            repas = db.query(Repas).filter_by(id=id_repas).first()
-            if repas:
-                repas.prepare = True
-                db.commit()
-        st.rerun()
+    return await executer_async(_query)
 ```
 
 ## 🎨 Checklist: Nouveaux Services

@@ -15,6 +15,7 @@ from src.api.dependencies import require_auth
 from src.api.pagination import appliquer_cursor_filter, construire_reponse_cursor, decoder_cursor
 from src.api.schemas.errors import REPONSES_CRUD_LECTURE, REPONSES_LISTE
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
+from src.core.models import CalendrierExterne, EvenementCalendrier
 
 router = APIRouter(prefix="/api/v1/calendriers", tags=["Calendriers"])
 
@@ -34,7 +35,6 @@ async def lister_calendriers(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les calendriers externes synchronisés."""
-    from src.core.models import CalendrierExterne
 
     def _query():
         with executer_avec_session() as session:
@@ -73,7 +73,6 @@ async def obtenir_calendrier(
     user: dict[str, Any] = Depends(require_auth),
 ):
     """Récupère un calendrier externe par son ID."""
-    from src.core.models import CalendrierExterne
 
     def _query():
         with executer_avec_session() as session:
@@ -123,7 +122,6 @@ async def lister_evenements(
 
     Supporte pagination offset ou cursor-based pour grandes collections.
     """
-    from src.core.models import EvenementCalendrier
 
     def _query():
         with executer_avec_session() as session:
@@ -184,7 +182,6 @@ async def obtenir_evenement(
     user: dict[str, Any] = Depends(require_auth),
 ):
     """Récupère un événement par son ID."""
-    from src.core.models import EvenementCalendrier
 
     def _query():
         with executer_avec_session() as session:
@@ -221,12 +218,10 @@ async def evenements_aujourdhui(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Récupère les événements du jour."""
-    from datetime import timedelta
-
-    from src.core.models import EvenementCalendrier
-
     def _query():
         with executer_avec_session() as session:
+            from datetime import timedelta
+
             now = datetime.now()
             debut_jour = now.replace(hour=0, minute=0, second=0, microsecond=0)
             fin_jour = debut_jour + timedelta(days=1)
@@ -266,12 +261,11 @@ async def evenements_semaine(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Récupère les événements de la semaine."""
-    from datetime import timedelta
-
-    from src.core.models import EvenementCalendrier
 
     def _query():
         with executer_avec_session() as session:
+            from datetime import timedelta
+
             if not date_debut:
                 now = datetime.now()
                 debut = now - timedelta(days=now.weekday())

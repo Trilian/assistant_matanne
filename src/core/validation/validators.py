@@ -221,5 +221,3 @@ def valider_entree(schema: dict | None = None, nettoyer_tout: bool = True):
     return decorateur
 
 
-# Alias rétrocompatible (ancien nom)
-valider_formulaire_streamlit = valider_formulaire

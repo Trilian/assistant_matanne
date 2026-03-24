@@ -11,6 +11,7 @@ import {
   type UseQueryOptions,
   type UseMutationOptions,
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { DUREE_CACHE_MS } from "@/bibliotheque/constantes";
 
 /**
@@ -40,6 +41,7 @@ export function utiliserMutation<TData, TVariables>(
 ) {
   return useMutation<TData, Error, TVariables>({
     mutationFn: fn,
+    onError: (error) => toast.error(error.message || "Une erreur est survenue"),
     ...options,
   });
 }

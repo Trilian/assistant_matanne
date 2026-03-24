@@ -324,9 +324,8 @@ class TestAvecGestionErreurs:
         result = warn_error()
         assert result is None
 
-    @patch("streamlit.error")
-    def test_afficher_erreur_option(self, mock_st_error):
-        """Test l'option afficher_erreur"""
+    def test_afficher_erreur_option(self):
+        """Test l'option afficher_erreur retourne le default"""
 
         @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
         def ui_error():
@@ -582,15 +581,14 @@ class TestAvecGestionErreursAdvanced:
         result = info_error()
         assert result is None
 
-    def test_afficher_erreur_streamlit_not_initialized(self):
-        """Test afficher_erreur quand Streamlit non initialisé."""
+    def test_afficher_erreur_returns_fallback(self):
+        """Test afficher_erreur retourne la valeur par défaut."""
 
         @avec_gestion_erreurs(default_return=42, afficher_erreur=True)
-        def streamlit_error():
-            raise ValueError("Should not crash even if st fails")
+        def failing_func():
+            raise ValueError("Should return default")
 
-        # Should not raise exception even if st.error fails
-        result = streamlit_error()
+        result = failing_func()
         assert result == 42
 
 
@@ -762,13 +760,13 @@ class TestAvecCacheKeyFuncFallback:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# SECTION 10: TESTS AFFICHER ERREUR STREAMLIT
+# SECTION 10: TESTS AFFICHER ERREUR
 # ═══════════════════════════════════════════════════════════════════════════
 
 
 @pytest.mark.unit
 class TestAvecGestionErreursAffichage:
-    """Tests pour afficher_erreur (log uniquement, Streamlit supprimé)."""
+    """Tests pour afficher_erreur (log uniquement)."""
 
     def test_afficher_erreur_true_returns_default(self):
         """Test que afficher_erreur=True retourne le default sans erreur."""

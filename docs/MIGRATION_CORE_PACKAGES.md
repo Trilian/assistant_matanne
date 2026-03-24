@@ -1,5 +1,7 @@
 # 🔄 Guide de Migration — Core Packages
 
+> **⚠️ Référence historique** — Ce document retrace la migration des imports core. Le frontend est désormais Next.js.
+
 > **Dernière mise à jour**: 19 Février 2026
 
 ## Résumé

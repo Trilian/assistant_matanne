@@ -599,7 +599,7 @@ class TestRerunDecorateur:
         assert stats["total_reruns"] == 1
 
     def test_profiler_rerun_capture_state(self):
-        """Test que le profiler ne crash pas sans Streamlit."""
+        """Test que le profiler ne crash pas."""
         from src.core.monitoring.rerun_profiler import (
             profiler_rerun,
             reset_profiler,
@@ -611,7 +611,7 @@ class TestRerunDecorateur:
         def app():
             pass
 
-        # Ne doit pas lever d'exception même sans Streamlit
+        # Ne doit pas lever d'exception
         app()
 
 

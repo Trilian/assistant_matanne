@@ -1,395 +1,681 @@
-# 📡 API Reference - Assistant Matanne
+# 📡 API Reference — Assistant Matanne
 
-Documentation complète de l'API REST FastAPI.
+Documentation complète de l'API REST FastAPI — **242 endpoints** répartis en 20 modules.
 
 ## Vue d'ensemble
 
-| Attribut             | Valeur                              |
-| -------------------- | ----------------------------------- |
-| **Base URL**         | `http://localhost:8000`             |
-| **Documentation**    | `/docs` (Swagger), `/redoc` (ReDoc) |
-| **Version**          | 1.0.0                               |
-| **Authentification** | JWT Bearer Token                    |
+| Attribut             | Valeur                                            |
+| -------------------- | ------------------------------------------------- |
+| **Base URL**         | `http://localhost:8000`                           |
+| **Documentation**    | `/docs` (Swagger), `/redoc` (ReDoc)               |
+| **Version**          | v1 (`/api/v1/...`)                                |
+| **Authentification** | JWT Bearer Token (`Authorization: Bearer <token>`) |
+| **Rate Limiting**    | 60 req/min standard, 10 req/min IA                |
+| **Pagination**       | Offset (`page`, `page_size`) + Cursor (`cursor`)  |
 
-## 🔐 Authentification
+### Réponses communes
 
-```bash
-# Header requis
-Authorization: Bearer <token>
+| Code | Description |
+|------|-------------|
+| 200  | Succès |
+| 201  | Création réussie |
+| 401  | Non authentifié |
+| 403  | Accès refusé |
+| 404  | Ressource introuvable |
+| 422  | Erreur de validation |
+| 429  | Rate limit dépassé |
+| 500  | Erreur serveur |
 
-# Mode développement (sans token)
-# Utilisateur par défaut automatique
-```
-
-## 📖 Endpoints
-
-### Santé & Informations
-
-#### `GET /`
-
-Informations sur l'API.
-
-**Réponse:**
+### Pagination standard
 
 ```json
 {
-  "nom": "Assistant Matanne API",
-  "version": "1.0.0",
-  "status": "active"
-}
-```
-
-#### `GET /health`
-
-Vérifie l'état de l'API et de la base de données.
-
-**Réponse:**
-
-```json
-{
-  "status": "healthy",
-  "database": true,
-  "timestamp": "2025-01-18T10:00:00"
-}
-```
-
----
-
-### 🍽️ Recettes
-
-#### `GET /api/v1/recettes`
-
-Liste paginée des recettes.
-
-| Paramètre   | Type | Défaut | Description               |
-| ----------- | ---- | ------ | ------------------------- |
-| `page`      | int  | 1      | Numéro de page            |
-| `page_size` | int  | 20     | Taille de page (max: 100) |
-| `categorie` | str  | -      | Filtrer par catégorie     |
-| `search`    | str  | -      | Recherche par nom         |
-
-**Réponse:**
-
-```json
-{
-  "items": [
-    {
-      "id": 1,
-      "nom": "Tarte aux pommes",
-      "temps_preparation": 30,
-      "temps_cuisson": 45,
-      "portions": 8,
-      "categorie": "dessert"
-    }
-  ],
-  "total": 100,
+  "items": [...],
+  "total": 42,
   "page": 1,
   "page_size": 20,
-  "pages": 5
-}
-```
-
-#### `GET /api/v1/recettes/{id}`
-
-Détails d'une recette avec ingrédients et instructions.
-
-**Réponse:**
-
-```json
-{
-  "id": 1,
-  "nom": "Tarte aux pommes",
-  "description": "Délicieuse tarte traditionnelle",
-  "temps_preparation": 30,
-  "temps_cuisson": 45,
-  "portions": 8,
-  "categorie": "dessert",
-  "ingredients": [{ "nom": "Pommes", "quantite": 6, "unite": "pièces" }],
-  "instructions": ["Préchauffer le four...", "..."]
-}
-```
-
-#### `POST /api/v1/recettes`
-
-Créer une nouvelle recette.
-
-**Corps de requête:**
-
-```json
-{
-  "nom": "Ma recette",
-  "temps_preparation": 20,
-  "temps_cuisson": 30,
-  "portions": 4,
-  "categorie": "plat",
-  "ingredients": [{ "nom": "Ingrédient", "quantite": 100, "unite": "g" }],
-  "instructions": ["Étape 1", "Étape 2"]
-}
-```
-
-#### `PUT /api/v1/recettes/{id}`
-
-Mettre à jour une recette existante (remplacement complet).
-
-#### `PATCH /api/v1/recettes/{id}`
-
-Mise à jour partielle d'une recette. Seuls les champs fournis sont modifiés.
-
-**Corps de requête (exemple):**
-
-```json
-{
-  "nom": "Nouveau nom",
-  "temps_cuisson": 60
-}
-```
-
-**Note:** Tous les champs sont optionnels. Utilisez `PUT` pour un remplacement complet.
-
-#### `DELETE /api/v1/recettes/{id}`
-
-Supprimer une recette.
-
----
-
-### 📦 Inventaire
-
-#### `GET /api/v1/inventaire`
-
-Liste de l'inventaire.
-
-| Paramètre       | Type | Description                            |
-| --------------- | ---- | -------------------------------------- |
-| `expiring_soon` | bool | Filtrer articles expirant dans 7 jours |
-
-**Réponse:**
-
-```json
-{
-  "items": [
-    {
-      "id": 1,
-      "nom": "Lait",
-      "quantite": 2,
-      "unite": "L",
-      "code_barres": "3017760000000",
-      "date_peremption": "2025-01-25"
-    }
-  ],
-  "total": 50
-}
-```
-
-#### `POST /api/v1/inventaire`
-
-Ajouter un article à l'inventaire.
-
-**Corps de requête:**
-
-```json
-{
-  "nom": "Yaourts",
-  "quantite": 4,
-  "unite": "pièces",
-  "code_barres": "3017760000123",
-  "date_peremption": "2025-02-01"
-}
-```
-
-#### `GET /api/v1/inventaire/barcode/{code}`
-
-Rechercher un article par code-barres.
-
-**Réponse (trouvé):**
-
-```json
-{
-  "found": true,
-  "id": 42,
-  "nom": "Nutella",
-  "quantite": 1,
-  "date_peremption": "2025-06-15"
-}
-```
-
-**Réponse (non trouvé):**
-
-```json
-{
-  "found": false,
-  "code": "3017760000999"
+  "total_pages": 3
 }
 ```
 
 ---
 
-### 🛒 Courses
+## Santé & Informations
 
-#### `GET /api/v1/courses`
-
-Liste des listes de courses.
-
-**Réponse:**
-
-```json
-{
-  "items": [
-    {
-      "id": 1,
-      "nom": "Courses de la semaine",
-      "date_creation": "2025-01-18",
-      "nb_articles": 15,
-      "nb_faits": 8
-    }
-  ]
-}
-```
-
-#### `POST /api/v1/courses`
-
-Créer une nouvelle liste de courses.
-
-**Corps de requête:**
-
-```json
-{
-  "nom": "Courses samedi"
-}
-```
-
-#### `POST /api/v1/courses/{id}/items`
-
-Ajouter un article à une liste.
-
-**Corps de requête:**
-
-```json
-{
-  "nom": "Pain",
-  "quantite": 2,
-  "categorie": "boulangerie"
-}
-```
+| Méthode | Path | Description |
+|---------|------|-------------|
+| GET | `/` | Informations sur l'API (nom, version, status) |
+| GET | `/health` | État de l'API et de la base de données |
 
 ---
 
-### 📅 Planning
+## 🔐 Auth — `/api/v1/auth` (4 endpoints)
 
-#### `GET /api/v1/planning/semaine`
+Authentification via Supabase Auth + JWT.
 
-Planning de la semaine.
+| Méthode | Path | Description |
+|---------|------|-------------|
+| POST | `/auth/login` | Connexion (email, password) → `TokenResponse` |
+| POST | `/auth/register` | Inscription (email, password, nom) → `TokenResponse` (201) |
+| POST | `/auth/refresh` | Rafraîchit le token JWT |
+| GET | `/auth/me` | Profil de l'utilisateur connecté → `UserInfoResponse` |
 
-| Paramètre    | Type | Description                                       |
-| ------------ | ---- | ------------------------------------------------- |
-| `date_debut` | str  | Date de début (YYYY-MM-DD), défaut: lundi courant |
+> **Mode dev** : `ENVIRONMENT=development` active l'auto-auth sans token.
 
-**Réponse:**
-
-```json
-{
-  "semaine": "2025-W03",
-  "date_debut": "2025-01-13",
-  "date_fin": "2025-01-19",
-  "repas": [
-    {
-      "date": "2025-01-13",
-      "type": "diner",
-      "recette_id": 42,
-      "recette_nom": "Lasagnes"
-    }
-  ]
-}
-```
-
-#### `POST /api/v1/planning/repas`
-
-Ajouter un repas au planning.
-
-**Corps de requête:**
-
-```json
-{
-  "date": "2025-01-20",
-  "type": "diner",
-  "recette_id": 15
-}
-```
-
----
-
-### 🤖 Suggestions IA
-
-#### `GET /api/v1/suggestions/recettes`
-
-Obtenir des suggestions de recettes intelligentes basées sur l'inventaire et l'historique.
-
-| Paramètre    | Type | Description                                     |
-| ------------ | ---- | ----------------------------------------------- |
-| `type_repas` | str  | "petit-dejeuner", "dejeuner", "diner", "gouter" |
-| `personnes`  | int  | Nombre de personnes                             |
-| `temps_max`  | int  | Temps de préparation max (minutes)              |
-
-**Réponse:**
-
-```json
-{
-  "suggestions": [
-    {
-      "id": 12,
-      "nom": "Omelette aux champignons",
-      "score": 0.95,
-      "raison": "Ingrédients disponibles, rapide"
-    }
-  ]
-}
-```
-
----
-
-## 📦 Codes de réponse
-
-| Code  | Description                   |
-| ----- | ----------------------------- |
-| `200` | Succès                        |
-| `201` | Créé avec succès              |
-| `400` | Requête invalide              |
-| `401` | Non authentifié               |
-| `403` | Non autorisé                  |
-| `404` | Ressource non trouvée         |
-| `422` | Erreur de validation          |
-| `429` | Trop de requêtes (rate limit) |
-| `500` | Erreur serveur                |
-
-## 🔒 Rate Limiting
-
-L'API implémente une limitation de débit:
-
-| Type            | Limite       |
-| --------------- | ------------ |
-| Par IP          | 100 req/min  |
-| Par utilisateur | 1000 req/min |
-| Endpoints IA    | 20 req/min   |
-
-**Headers de réponse:**
-
-```http
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 95
-X-RateLimit-Reset: 1705579200
-```
-
-## 🧪 Tests
+### Login
 
 ```bash
-# Tests API complets
-pytest tests/api/ -v
-
-# Avec couverture
-pytest tests/api/ --cov=src/api --cov-report=html
+curl -X POST /api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "secret"}'
 ```
 
-## 📚 Voir aussi
+```json
+{
+  "access_token": "eyJ...",
+  "refresh_token": "eyJ...",
+  "token_type": "bearer"
+}
+```
 
-- [README API](../src/api/README.md) - Documentation rapide
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - Architecture technique
-- [FONCTIONNALITES.md](./FONCTIONNALITES.md) - Fonctionnalités complètes
+---
+
+## 🍽️ Recettes — `/api/v1/recettes` (6 endpoints)
+
+CRUD complet des recettes.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/recettes` | `page`, `page_size`, `categorie?`, `search?` | Liste paginée avec filtres |
+| GET | `/recettes/{id}` | — | Détail d'une recette |
+| POST | `/recettes` | Body: `RecetteCreate` | Crée une recette |
+| PUT | `/recettes/{id}` | Body: `RecetteCreate` | Remplacement complet |
+| PATCH | `/recettes/{id}` | Body: `RecettePatch` | Mise à jour partielle |
+| DELETE | `/recettes/{id}` | — | Supprime une recette |
+
+---
+
+## 🛒 Courses — `/api/v1/courses` (11 endpoints)
+
+Listes de courses avec collaboration WebSocket.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/courses` | `page`, `page_size`, `active_only=True` | Liste des listes de courses |
+| POST | `/courses` | Body: `CourseListCreate` | Crée une liste (201) |
+| GET | `/courses/{id}` | — | Détail avec articles |
+| PUT | `/courses/{id}` | Body: `CourseListCreate` | Met à jour le nom |
+| DELETE | `/courses/{id}` | — | Supprime liste + articles |
+| POST | `/courses/{id}/items` | Body: `CourseItemBase` | Ajoute un article (201) |
+| PUT | `/courses/{id}/items/{item_id}` | Body: `CourseItemBase` | Met à jour un article |
+| DELETE | `/courses/{id}/items/{item_id}` | — | Supprime un article |
+| GET | `/courses/{id}/export` | `group_by=categorie` | Export texte brut |
+| POST | `/courses/{id}/checkout-items` | Body: `CheckoutCoursesRequest` | Checkout batch → maj inventaire |
+| POST | `/courses/{id}/scan-barcode-checkout` | Body: `ScanBarcodeCheckoutRequest` | Checkout via code-barres |
+
+---
+
+## 📦 Inventaire — `/api/v1/inventaire` (6 endpoints)
+
+Gestion des stocks alimentaires.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/inventaire` | `page`, `page_size=50`, `categorie?`, `emplacement?`, `stock_bas?`, `peremption_proche?` | Liste avec filtres avancés |
+| POST | `/inventaire` | Body: `InventaireItemCreate` | Crée un article |
+| GET | `/inventaire/barcode/{code}` | — | Recherche par code-barres |
+| GET | `/inventaire/{id}` | — | Détail article |
+| PUT | `/inventaire/{id}` | Body: `InventaireItemUpdate` | Met à jour (partiel via exclude_unset) |
+| DELETE | `/inventaire/{id}` | — | Supprime |
+
+---
+
+## 📅 Planning — `/api/v1/planning` (4 endpoints)
+
+Planification des repas de la semaine.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/planning/semaine` | `date_debut?` (ISO datetime) | Planning de la semaine |
+| POST | `/planning/repas` | Body: `RepasCreate` | Planifie un repas (upsert) |
+| PUT | `/planning/repas/{id}` | Body: `RepasCreate` | Met à jour un repas |
+| DELETE | `/planning/repas/{id}` | — | Supprime un repas |
+
+---
+
+## 🤖 Suggestions IA — `/api/v1/suggestions` (2 endpoints)
+
+Suggestions via Mistral AI (rate limité : 10 req/min).
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/suggestions/recettes` | `contexte="repas équilibré"`, `nombre=3` (1-10) | Suggestions recettes |
+| GET | `/suggestions/planning` | `jours=7` (1-14), `personnes=4` (1-20) | Planning complet IA |
+
+---
+
+## 👨‍👩‍👧‍👦 Famille — `/api/v1/famille` (29 endpoints)
+
+### Enfants & Jalons (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/famille/enfants` | `page`, `page_size`, `actif=True` | Liste profils enfants |
+| GET | `/famille/enfants/{id}` | — | Détail enfant |
+| GET | `/famille/enfants/{id}/jalons` | `categorie?` | Jalons de développement |
+| POST | `/famille/enfants/{id}/jalons` | Body: titre, description, categorie, date_atteint | Ajoute un jalon (201) |
+| DELETE | `/famille/enfants/{id}/jalons/{jalon_id}` | — | Supprime un jalon |
+
+### Activités (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/famille/activites` | `page`, `page_size`, `type_activite?`, `statut?`, `date_debut?`, `date_fin?`, `cursor?` | Liste (offset + cursor) |
+| GET | `/famille/activites/{id}` | — | Détail activité |
+| POST | `/famille/activites` | Body: titre, type_activite, date_prevue... | Crée (201) |
+| PATCH | `/famille/activites/{id}` | Body: champs partiels | Met à jour |
+| DELETE | `/famille/activites/{id}` | — | Supprime |
+
+### Budget familial (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/famille/budget` | `page`, `page_size=50`, `categorie?`, `date_debut?`, `date_fin?` | Dépenses familiales |
+| GET | `/famille/budget/stats` | `mois?` (1-12), `annee?` (2020-2030) | Statistiques budget |
+| POST | `/famille/budget` | Body: date, categorie, montant, magasin... | Ajoute dépense (201) |
+| DELETE | `/famille/budget/{id}` | — | Supprime |
+
+### Shopping (1)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/famille/shopping` | `liste?`, `categorie?`, `actif=True` | Articles shopping familial |
+
+### Routines familiales (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/famille/routines` | `actif?` | Routines avec étapes |
+| GET | `/famille/routines/{id}` | — | Détail routine |
+| POST | `/famille/routines` | Body: nom, type, est_active, etapes[] | Crée (201) |
+| PATCH | `/famille/routines/{id}` | Body: nom, type, est_active | Met à jour |
+| DELETE | `/famille/routines/{id}` | — | Supprime |
+
+### Anniversaires (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/famille/anniversaires` | `relation?`, `actif=True` | Triés par jours restants |
+| GET | `/famille/anniversaires/{id}` | — | Détail |
+| POST | `/famille/anniversaires` | Body: `AnniversaireCreate` | Crée (201) |
+| PATCH | `/famille/anniversaires/{id}` | Body: `AnniversairePatch` | Met à jour |
+| DELETE | `/famille/anniversaires/{id}` | — | Supprime |
+
+### Événements familiaux (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/famille/evenements` | `type_evenement?`, `actif=True` | Liste événements |
+| POST | `/famille/evenements` | Body: `EvenementFamilialCreate` | Crée (201) |
+| PATCH | `/famille/evenements/{id}` | Body: `EvenementFamilialPatch` | Met à jour |
+| DELETE | `/famille/evenements/{id}` | — | Supprime |
+
+---
+
+## 🏡 Maison — `/api/v1/maison` (111 endpoints)
+
+Module le plus vaste — gestion complète du foyer.
+
+### Projets domestiques (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/projets` | `page`, `page_size`, `statut?`, `priorite?` | Liste projets |
+| GET | `/maison/projets/{id}` | — | Détail avec tâches |
+| POST | `/maison/projets` | Body: dict | Crée (201) |
+| PATCH | `/maison/projets/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/projets/{id}` | — | Supprime |
+
+### Routines maison (2)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/routines` | `categorie?`, `actif=True` | Liste routines |
+| GET | `/maison/routines/{id}` | — | Détail avec tâches |
+
+### Entretien (4 + 1 dashboard)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/entretien` | `categorie?`, `piece?`, `fait?` | Tâches d'entretien |
+| POST | `/maison/entretien` | Body: dict | Crée (201) |
+| PATCH | `/maison/entretien/{id}` | Body: dict | Met à jour / marque faite |
+| DELETE | `/maison/entretien/{id}` | — | Supprime |
+| GET | `/maison/entretien/sante-appareils` | — | Dashboard santé appareils |
+
+### Jardin (6)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/jardin` | `type_element?`, `statut?` | Éléments du jardin |
+| GET | `/maison/jardin/{id}/journal` | — | Journal d'entretien |
+| POST | `/maison/jardin` | Body: dict | Ajoute élément (201) |
+| PATCH | `/maison/jardin/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/jardin/{id}` | — | Supprime |
+| GET | `/maison/jardin/calendrier-semis` | `mois?` (1-12) | Calendrier des semis |
+
+### Stocks consommables (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/stocks` | `categorie?`, `alerte_stock=False` | Stocks maison |
+| POST | `/maison/stocks` | Body: dict | Crée (201) |
+| PATCH | `/maison/stocks/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/stocks/{id}` | — | Supprime |
+
+### Meubles / Wishlist (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/meubles` | `piece?`, `statut?`, `priorite?` | Wishlist meubles |
+| POST | `/maison/meubles` | Body: dict | Crée (201) |
+| PATCH | `/maison/meubles/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/meubles/{id}` | — | Supprime |
+| GET | `/maison/meubles/budget` | — | Résumé budget meubles |
+
+### Cellier (9)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/cellier` | `categorie?`, `emplacement?` | Articles du cellier |
+| GET | `/maison/cellier/alertes/peremption` | `jours=14` (1-90) | Alertes péremption |
+| GET | `/maison/cellier/alertes/stock` | — | Alertes stock bas |
+| GET | `/maison/cellier/stats` | — | Statistiques cellier |
+| GET | `/maison/cellier/{id}` | — | Détail article |
+| POST | `/maison/cellier` | Body: dict | Ajoute (201) |
+| PATCH | `/maison/cellier/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/cellier/{id}` | — | Supprime |
+| PATCH | `/maison/cellier/{id}/quantite` | Body: `{delta: int}` | Ajuste quantité +/- |
+
+### Artisans (9)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/artisans` | `metier?` | Carnet d'adresses |
+| GET | `/maison/artisans/stats` | — | Stats artisans |
+| GET | `/maison/artisans/{id}` | — | Détail |
+| POST | `/maison/artisans` | Body: dict | Crée (201) |
+| PATCH | `/maison/artisans/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/artisans/{id}` | — | Supprime |
+| GET | `/maison/artisans/{id}/interventions` | — | Historique interventions |
+| POST | `/maison/artisans/{id}/interventions` | Body: dict | Enregistre intervention (201) |
+| DELETE | `/maison/artisans/interventions/{id}` | — | Supprime intervention |
+
+### Contrats (7)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/contrats` | `type_contrat?`, `statut?` | Liste contrats |
+| GET | `/maison/contrats/alertes` | `jours=60` (1-365) | Renouvellements à venir |
+| GET | `/maison/contrats/resume-financier` | — | Résumé financier |
+| GET | `/maison/contrats/{id}` | — | Détail |
+| POST | `/maison/contrats` | Body: dict | Crée (201) |
+| PATCH | `/maison/contrats/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/contrats/{id}` | — | Supprime |
+
+### Garanties (10)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/garanties` | `statut?`, `piece?` | Liste garanties |
+| GET | `/maison/garanties/alertes` | `jours=60` (1-365) | Garanties expirant |
+| GET | `/maison/garanties/stats` | — | Stats garanties |
+| GET | `/maison/garanties/{id}` | — | Détail |
+| POST | `/maison/garanties` | Body: dict | Enregistre (201) |
+| PATCH | `/maison/garanties/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/garanties/{id}` | — | Supprime |
+| GET | `/maison/garanties/{id}/incidents` | — | Incidents SAV |
+| POST | `/maison/garanties/{id}/incidents` | Body: dict | Enregistre incident (201) |
+| PATCH | `/maison/garanties/incidents/{id}` | Body: dict | Met à jour incident |
+
+### Diagnostics immobiliers (6)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/diagnostics` | — | Diagnostics immobiliers |
+| GET | `/maison/diagnostics/alertes` | `jours=90` (1-365) | Validité expirant |
+| GET | `/maison/diagnostics/validite-types` | — | Durées validité par type |
+| POST | `/maison/diagnostics` | Body: dict | Enregistre (201) |
+| PATCH | `/maison/diagnostics/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/diagnostics/{id}` | — | Supprime |
+
+### Estimations immobilières (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/estimations` | — | Estimations |
+| GET | `/maison/estimations/derniere` | — | Dernière estimation |
+| POST | `/maison/estimations` | Body: dict | Enregistre (201) |
+| DELETE | `/maison/estimations/{id}` | — | Supprime |
+
+### Éco-Tips (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/eco-tips` | `actif_only=False` | Actions écologiques |
+| GET | `/maison/eco-tips/{id}` | — | Détail |
+| POST | `/maison/eco-tips` | Body: dict | Crée (201) |
+| PATCH | `/maison/eco-tips/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/eco-tips/{id}` | — | Supprime |
+
+### Dépenses maison (8)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/depenses` | `mois?` (1-12), `annee?` | Dépenses maison |
+| GET | `/maison/depenses/stats` | — | Stats globales |
+| GET | `/maison/depenses/historique/{categorie}` | `nb_mois=12` (1-36) | Historique par catégorie |
+| GET | `/maison/depenses/energie/{type_energie}` | `nb_mois=12` (1-36) | Conso énergie |
+| GET | `/maison/depenses/{id}` | — | Détail |
+| POST | `/maison/depenses` | Body: dict | Enregistre (201) |
+| PATCH | `/maison/depenses/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/depenses/{id}` | — | Supprime |
+
+### Nuisibles (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/nuisibles` | — | Traitements anti-nuisibles |
+| GET | `/maison/nuisibles/prochains` | `jours=30` (1-180) | Prochains traitements |
+| POST | `/maison/nuisibles` | Body: dict | Enregistre (201) |
+| PATCH | `/maison/nuisibles/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/nuisibles/{id}` | — | Supprime |
+
+### Devis comparatifs (6)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/devis` | `projet_id?` | Devis |
+| POST | `/maison/devis` | Body: dict | Crée (201) |
+| PATCH | `/maison/devis/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/devis/{id}` | — | Supprime |
+| POST | `/maison/devis/{id}/lignes` | Body: dict | Ajoute une ligne (201) |
+| POST | `/maison/devis/{id}/choisir` | — | Accepte un devis |
+
+### Entretien saisonnier (6)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/entretien-saisonnier` | — | Tâches saisonnières |
+| GET | `/maison/entretien-saisonnier/alertes` | — | Tâches à faire ce mois |
+| POST | `/maison/entretien-saisonnier` | Body: dict | Crée (201) |
+| DELETE | `/maison/entretien-saisonnier/{id}` | — | Supprime |
+| PATCH | `/maison/entretien-saisonnier/{id}/fait` | — | Marque fait |
+| POST | `/maison/entretien-saisonnier/reset` | — | Reset annuel checklist |
+
+### Relevés compteurs (3)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/releves` | — | Relevés compteurs |
+| POST | `/maison/releves` | Body: dict | Enregistre (201) |
+| DELETE | `/maison/releves/{id}` | — | Supprime |
+
+### Visualisation maison (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/visualisation/pieces` | `etage?` | Pièces avec détails |
+| GET | `/maison/visualisation/etages` | — | Étages disponibles |
+| GET | `/maison/visualisation/pieces/{id}/historique` | — | Historique travaux |
+| GET | `/maison/visualisation/pieces/{id}/objets` | — | Objets dans une pièce |
+| POST | `/maison/visualisation/positions` | Body: `{pieces: [...]}` | Sauvegarde layout drag-and-drop |
+
+### Hub maison (1)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/maison/hub/stats` | — | Stats dashboard maison |
+
+---
+
+## 🎮 Jeux — `/api/v1/jeux` (11 endpoints)
+
+Paris sportifs et loterie.
+
+### Équipes (2)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/jeux/equipes` | `championnat?`, `search?` | Équipes football |
+| GET | `/jeux/equipes/{id}` | — | Détail équipe |
+
+### Matchs (2)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/jeux/matchs` | `page`, `page_size`, `championnat?`, `joue?`, `date_debut?`, `date_fin?`, `cursor?` | Liste (offset + cursor) |
+| GET | `/jeux/matchs/{id}` | — | Détail avec paris |
+
+### Paris sportifs (5)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/jeux/paris` | `page`, `page_size=50`, `statut?`, `est_virtuel?` | Liste paris |
+| GET | `/jeux/paris/stats` | `est_virtuel?` | Statistiques |
+| POST | `/jeux/paris` | Body: match_id, prediction, cote, mise... | Crée (201) |
+| PATCH | `/jeux/paris/{id}` | Body: statut, gain, notes | Met à jour |
+| DELETE | `/jeux/paris/{id}` | — | Supprime |
+
+### Loto (2)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/jeux/loto/tirages` | `page`, `page_size=50` | Tirages loto |
+| GET | `/jeux/loto/grilles` | `est_virtuelle?` | Grilles jouées |
+
+---
+
+## 📊 Dashboard — `/api/v1/dashboard` (1 endpoint)
+
+| Méthode | Path | Description |
+|---------|------|-------------|
+| GET | `/dashboard` | Données agrégées : stats, budget mois, activités, alertes |
+
+---
+
+## 🍳 Batch Cooking — `/api/v1/batch-cooking` (7 endpoints)
+
+Sessions de préparation en lot.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/batch-cooking` | `page`, `page_size`, `statut?` | Liste sessions |
+| GET | `/batch-cooking/{id}` | — | Détail avec étapes |
+| POST | `/batch-cooking` | Body: `SessionBatchCreate` | Crée session |
+| PATCH | `/batch-cooking/{id}` | Body: `SessionBatchPatch` | Met à jour |
+| DELETE | `/batch-cooking/{id}` | — | Supprime |
+| GET | `/batch-cooking/preparations` | `consomme?` | Préparations en stock |
+| GET | `/batch-cooking/config` | — | Configuration batch |
+
+---
+
+## ♻️ Anti-Gaspillage — `/api/v1/anti-gaspillage` (1 endpoint)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/anti-gaspillage` | `jours=7` (1-30) | Score, articles urgents, recettes rescue |
+
+---
+
+## ⚙️ Préférences — `/api/v1/preferences` (3 endpoints)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/preferences` | — | Préférences utilisateur |
+| PUT | `/preferences` | Body: `PreferencesCreate` | Upsert complet |
+| PATCH | `/preferences` | Body: `PreferencesPatch` | Mise à jour partielle |
+
+---
+
+## 📄 Export PDF — `/api/v1/export` (1 endpoint)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| POST | `/export/pdf` | `type_export` (courses, planning, recette, budget), `id_ressource?` | Génère PDF (StreamingResponse) |
+
+> `id_ressource` requis pour `type_export=recette` et `type_export=planning`.
+
+---
+
+## 📆 Calendriers — `/api/v1/calendriers` (6 endpoints)
+
+Calendriers externes synchronisés.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/calendriers` | `provider?`, `enabled?` | Liste calendriers |
+| GET | `/calendriers/{id}` | — | Détail |
+| GET | `/calendriers/evenements` | `page`, `page_size=50`, `calendrier_id?`, `date_debut?`, `date_fin?`, `all_day?`, `cursor?` | Événements (offset + cursor) |
+| GET | `/calendriers/evenements/{id}` | — | Détail événement |
+| GET | `/calendriers/evenements/aujourd-hui` | — | Événements du jour |
+| GET | `/calendriers/evenements/semaine` | `date_debut?` | Événements semaine groupés par jour |
+
+---
+
+## 📑 Documents — `/api/v1/documents` (5 endpoints)
+
+Documents familiaux (passeports, assurances, etc.).
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/documents` | `categorie?`, `membre?`, `expire?`, `search?`, `page`, `page_size` | Liste avec filtres |
+| GET | `/documents/{id}` | — | Détail |
+| POST | `/documents` | Body: `DocumentCreate` | Crée (201) |
+| PATCH | `/documents/{id}` | Body: `DocumentPatch` | Met à jour |
+| DELETE | `/documents/{id}` | — | Soft delete (actif=False) |
+
+---
+
+## 🔧 Utilitaires — `/api/v1/utilitaires` (24 endpoints)
+
+### Notes mémo (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/utilitaires/notes` | `categorie?`, `epingle?`, `archive=False`, `search?` | Notes |
+| POST | `/utilitaires/notes` | Body: `NoteCreate` | Crée |
+| PATCH | `/utilitaires/notes/{id}` | Body: `NotePatch` | Met à jour |
+| DELETE | `/utilitaires/notes/{id}` | — | Supprime |
+
+### Journal de bord (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/utilitaires/journal` | `humeur?`, `limit=30` (1-365) | Entrées journal |
+| POST | `/utilitaires/journal` | Body: `JournalCreate` | Crée |
+| PATCH | `/utilitaires/journal/{id}` | Body: `JournalPatch` | Met à jour |
+| DELETE | `/utilitaires/journal/{id}` | — | Supprime |
+
+### Contacts utiles (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/utilitaires/contacts` | `categorie?`, `favori?`, `search?` | Contacts |
+| POST | `/utilitaires/contacts` | Body: `ContactCreate` | Crée |
+| PATCH | `/utilitaires/contacts/{id}` | Body: `ContactPatch` | Met à jour |
+| DELETE | `/utilitaires/contacts/{id}` | — | Supprime |
+
+### Liens favoris (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/utilitaires/liens` | `categorie?`, `favori?` | Liens |
+| POST | `/utilitaires/liens` | Body: `LienCreate` | Crée |
+| PATCH | `/utilitaires/liens/{id}` | Body: `LienPatch` | Met à jour |
+| DELETE | `/utilitaires/liens/{id}` | — | Supprime |
+
+### Mots de passe maison (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/utilitaires/passwords` | `categorie?` | Mots de passe (chiffrés) |
+| POST | `/utilitaires/passwords` | Body: `MotDePasseCreate` | Crée |
+| PATCH | `/utilitaires/passwords/{id}` | Body: `MotDePassePatch` | Met à jour |
+| DELETE | `/utilitaires/passwords/{id}` | — | Supprime |
+
+### Énergie (4)
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/utilitaires/energie` | `type_energie?` (electricite/gaz/eau), `annee?` | Relevés énergie |
+| POST | `/utilitaires/energie` | Body: `EnergieCreate` | Crée |
+| PATCH | `/utilitaires/energie/{id}` | Body: `EnergiePatch` | Met à jour |
+| DELETE | `/utilitaires/energie/{id}` | — | Supprime |
+
+---
+
+## 🔔 Push Notifications — `/api/v1/push` (3 endpoints)
+
+Web Push via service worker.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| POST | `/push/subscribe` | Body: `PushSubscriptionRequest` | Enregistre abonnement |
+| DELETE | `/push/unsubscribe` | Body: `PushUnsubscribeRequest` | Supprime abonnement |
+| GET | `/push/status` | — | Statut notifications |
+
+---
+
+## 🔗 Webhooks — `/api/v1/webhooks` (6 endpoints)
+
+Webhooks sortants avec signature HMAC.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| POST | `/webhooks` | Body: `WebhookCreate` | Crée (secret HMAC auto-généré) (201) |
+| GET | `/webhooks` | — | Liste mes webhooks |
+| GET | `/webhooks/{id}` | — | Détail |
+| PUT | `/webhooks/{id}` | Body: `WebhookUpdate` | Met à jour |
+| DELETE | `/webhooks/{id}` | — | Supprime (204) |
+| POST | `/webhooks/{id}/test` | — | Ping de test |
+
+---
+
+## 📁 Upload — `/api/v1/upload` (3 endpoints)
+
+Upload vers Supabase Storage.
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| POST | `/upload` | `bucket="documents"`, Body: `UploadFile` (multipart, 10MB max) | Upload fichier |
+| GET | `/upload/photos` | `categorie?` | Liste photos album famille |
+| DELETE | `/upload/photos/{path}` | — | Supprime une photo |
+
+---
+
+## Résumé par module
+
+| Module | Préfixe | Endpoints |
+|--------|---------|-----------|
+| Auth | `/api/v1/auth` | 4 |
+| Recettes | `/api/v1/recettes` | 6 |
+| Courses | `/api/v1/courses` | 11 |
+| Inventaire | `/api/v1/inventaire` | 6 |
+| Planning | `/api/v1/planning` | 4 |
+| Suggestions IA | `/api/v1/suggestions` | 2 |
+| Famille | `/api/v1/famille` | 29 |
+| Maison | `/api/v1/maison` | 111 |
+| Jeux | `/api/v1/jeux` | 11 |
+| Dashboard | `/api/v1/dashboard` | 1 |
+| Batch Cooking | `/api/v1/batch-cooking` | 7 |
+| Anti-Gaspillage | `/api/v1/anti-gaspillage` | 1 |
+| Préférences | `/api/v1/preferences` | 3 |
+| Export PDF | `/api/v1/export` | 1 |
+| Calendriers | `/api/v1/calendriers` | 6 |
+| Documents | `/api/v1/documents` | 5 |
+| Utilitaires | `/api/v1/utilitaires` | 24 |
+| Push | `/api/v1/push` | 3 |
+| Webhooks | `/api/v1/webhooks` | 6 |
+| Upload | `/api/v1/upload` | 3 |
+| **Total** | | **242** |

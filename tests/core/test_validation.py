@@ -624,56 +624,10 @@ class TestValiderModele:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 12: TESTS valider_formulaire_streamlit
+# SECTION 12: TESTS valider_formulaire_streamlit — SUPPRIMÉ (Sprint 14a)
+# La fonction valider_formulaire_streamlit a été supprimée car Streamlit
+# n'est plus utilisé. Voir SECTION 13 pour valider_et_nettoyer_formulaire.
 # ═══════════════════════════════════════════════════════════════════════════════
-
-
-@pytest.mark.unit
-class TestValiderFormulaireStreamlit:
-    """Tests pour valider_formulaire_streamlit."""
-
-    def test_formulaire_valide(self):
-        """Test formulaire valide."""
-        from src.core.validation import SCHEMA_RECETTE, valider_formulaire_streamlit
-
-        data = {
-            "nom": "Tarte aux pommes",
-            "temps_preparation": 30,
-            "temps_cuisson": 45,
-            "portions": 8,
-        }
-        valide, erreurs, nettoye = valider_formulaire_streamlit(data, SCHEMA_RECETTE)
-        assert valide is True
-        assert len(erreurs) == 0
-
-    def test_formulaire_champ_requis_manquant(self):
-        """Test champ requis manquant."""
-        from src.core.validation import SCHEMA_RECETTE, valider_formulaire_streamlit
-
-        data = {"description": "Une description"}
-        valide, erreurs, nettoye = valider_formulaire_streamlit(data, SCHEMA_RECETTE)
-        assert valide is False
-        assert len(erreurs) > 0
-
-    def test_formulaire_valeur_hors_plage(self):
-        """Test valeur hors plage - la valeur est clampée lors du nettoyage."""
-        from src.core.validation import valider_formulaire_streamlit
-
-        schema = {"prix": {"type": "number", "min": 0, "max": 100, "label": "Prix"}}
-        data = {"prix": 200}
-        valide, erreurs, nettoye = valider_formulaire_streamlit(data, schema)
-        assert valide is True
-        assert nettoye["prix"] == 100
-
-    def test_formulaire_chaine_trop_longue(self):
-        """Test chaîne trop longue - la chaîne est tronquée lors du nettoyage."""
-        from src.core.validation import valider_formulaire_streamlit
-
-        schema = {"titre": {"type": "string", "max_length": 10, "label": "Titre"}}
-        data = {"titre": "Ceci est un titre beaucoup trop long pour le champ"}
-        valide, erreurs, nettoye = valider_formulaire_streamlit(data, schema)
-        assert isinstance(nettoye.get("titre"), str)
-        assert len(nettoye.get("titre", "")) <= 10
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -1,6 +1,67 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 23 juin 2026
+> Dernière mise à jour: 24 juin 2026
+
+---
+
+## ✅ Sprint 14 — Nettoyage final, tests routes, docs API, qualité frontend
+
+### Phase 14a — Nettoyage résiduel Streamlit
+
+- ✅ `src/core/pages_config.py` — Réduit de 417 lignes à 5 lignes (notice de dépréciation)
+- ✅ `src/core/validation/validators.py` — Suppression alias `valider_formulaire_streamlit`
+- ✅ `tests/core/helpers.py` — Suppression `mock_streamlit_session()` et fixture `streamlit_session`
+- ✅ `tests/core/test_decorators.py` — Suppression tests spécifiques Streamlit, renommage méthodes
+- ✅ `tests/core/test_monitoring_complete.py` — Mise à jour 2 commentaires Streamlit
+- ✅ 6 fichiers docs — Suppression dernières références Streamlit (INDEX, SQLALCHEMY_SESSION_GUIDE, MIGRATION_CORE_PACKAGES, MIGRATION_NEXTJS, vocal.md, barcode.md, VIDEO_WALKTHROUGHS)
+
+### Phase 14b — 9 fichiers de tests routes API backend (85 tests)
+
+| Fichier | Tests | Description |
+| --- | --- | --- |
+| `test_routes_anti_gaspillage.py` | 8 | Score, suggestions, actions, produits, statistiques |
+| `test_routes_batch_cooking.py` | 14 | Sessions CRUD, recettes, préparations, config |
+| `test_routes_jeux.py` | 12 | Paris sportifs, loto, euromillions, équipes, matchs |
+| `test_routes_calendriers.py` | 10 | Calendriers CRUD, événements, sync, export iCal |
+| `test_routes_export.py` | 8 | Export PDF (recettes, planning, courses, budget) |
+| `test_routes_preferences.py` | 8 | Préférences CRUD, reset, catégories |
+| `test_routes_documents.py` | 10 | Documents upload, CRUD, partage, recherche |
+| `test_routes_upload.py` | 7 | Upload fichiers, images, validation |
+| `test_routes_webhooks.py` | 8 | Webhooks CRUD, test, logs, toggle |
+
+### Phase 14c — Refonte API_REFERENCE.md
+
+- ✅ `docs/API_REFERENCE.md` — Réécriture complète: 293 → 681 lignes
+- ✅ 242 endpoints documentés (20 modules API)
+- ✅ Chaque endpoint: méthode HTTP, path, paramètres, description, auth
+
+### Phase 14d — Corrections qualité
+
+- ✅ `frontend/src/crochets/utiliser-api.ts` — Ajout `onError` par défaut dans `utiliserMutation` (toast.error via sonner)
+  - Couvre 14 mutations sans gestion d'erreur dans 5 fichiers (formulaire-recette, notes, contrats, cellier, artisans)
+  - Les handlers individuels `onError` des pages surchargent le défaut via `...options`
+- ✅ Tests batch_cooking — 104 tests passent, 0 skippés (déjà résolu)
+
+### Phase 14e — Nettoyage fichiers & refactoring imports
+
+- ✅ `frontend/tests.log` — Supprimé (fichier vide 0 octets)
+- ✅ `.env.example` — Suppression référence obsolète `.env.example.images`
+- ✅ `ROADMAP.md` — Suppression référence obsolète `.env.example.images`
+- ✅ `src/api/routes/calendriers.py` — Imports `CalendrierExterne`, `EvenementCalendrier` déplacés en top-level (6 imports tardifs supprimés)
+- ✅ `src/api/routes/webhooks.py` — Import `get_webhook_service` déplacé en top-level (6 imports tardifs supprimés)
+- ✅ `tests/api/test_routes_webhooks.py` — Chemins de mock patch mis à jour suite au refactoring
+
+### Compteurs finaux
+
+| Métrique | Valeur |
+| --- | --- |
+| Fichiers modifiés (backend) | 18+ |
+| Fichiers modifiés (frontend) | 3 |
+| Tests routes API ajoutés | 85 (9 fichiers) |
+| Tests batch_cooking | 104 (0 skippés) |
+| Endpoints documentés | 242 |
+| Mutations avec onError | 62/62 (100%) |
+| Références Streamlit résiduelles | 0 |
 
 ---
 
@@ -1290,7 +1351,6 @@ streamlit run src/app.py
 ## 📁 Configuration
 
 Le fichier `.env.example` (171 lignes) documente toutes les variables d'environnement.
-Voir aussi `.env.example.images` pour les APIs de génération d'images.
 
 Variables critiques :
 

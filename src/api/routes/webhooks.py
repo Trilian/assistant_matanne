@@ -32,6 +32,7 @@ from src.api.schemas.webhooks import (
     WebhookUpdate,
 )
 from src.api.utils import gerer_exception_api
+from src.services.webhooks import get_webhook_service
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +61,6 @@ async def creer_webhook(
     current_user: dict = Depends(require_auth),
 ):
     """Crée un webhook et retourne les données incluant le secret."""
-    from src.services.webhooks import get_webhook_service
-
     service = get_webhook_service()
     result = service.creer_webhook(
         url=str(data.url),
@@ -85,8 +84,6 @@ async def lister_webhooks(
     current_user: dict = Depends(require_auth),
 ):
     """Liste les webhooks de l'utilisateur courant."""
-    from src.services.webhooks import get_webhook_service
-
     service = get_webhook_service()
     items = service.lister_webhooks(user_id=current_user.get("id"))
 
@@ -106,8 +103,6 @@ async def obtenir_webhook(
     current_user: dict = Depends(require_auth),
 ):
     """Récupère un webhook par son ID."""
-    from src.services.webhooks import get_webhook_service
-
     service = get_webhook_service()
     webhook = service.obtenir_webhook(webhook_id)
 
@@ -131,8 +126,6 @@ async def modifier_webhook(
     current_user: dict = Depends(require_auth),
 ):
     """Modifie un webhook existant."""
-    from src.services.webhooks import get_webhook_service
-
     update_data = data.model_dump(exclude_unset=True)
     if not update_data:
         raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour fourni")
@@ -163,8 +156,6 @@ async def supprimer_webhook(
     current_user: dict = Depends(require_auth),
 ):
     """Supprime un webhook."""
-    from src.services.webhooks import get_webhook_service
-
     service = get_webhook_service()
     deleted = service.supprimer_webhook(webhook_id)
 
@@ -187,8 +178,6 @@ async def tester_webhook(
     current_user: dict = Depends(require_auth),
 ):
     """Envoie un payload de test au webhook."""
-    from src.services.webhooks import get_webhook_service
-
     service = get_webhook_service()
     result = service.tester_webhook(webhook_id)
 
