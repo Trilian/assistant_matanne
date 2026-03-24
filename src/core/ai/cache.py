@@ -179,8 +179,8 @@ class CacheIA:
             cache = _cache()
             entrees_l1 = cache.l1._cache
             entrees_ia = sum(1 for cle in entrees_l1.keys() if cle.startswith(CacheIA.PREFIXE))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Impossible de compter entrées IA cache: {e}")
 
         hits = (
             stats_globales.get("l1_hits", 0)

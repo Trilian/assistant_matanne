@@ -58,8 +58,9 @@ def chronometre(
             try:
                 result = func(*args, **kwargs)
                 return result
-            except Exception:
+            except Exception as e:
                 collecteur.incrementer(f"{nom}.erreurs", labels=labels)
+                logger.debug(f"Erreur dans {nom}: {e}")
                 raise
             finally:
                 duree_ms = (time.perf_counter() - start) * 1000

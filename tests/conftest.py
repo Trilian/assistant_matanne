@@ -33,6 +33,7 @@ from src.core.models import (  # noqa: E402
     Planning,
     Recette,
     RetourRecette,  # Nécessaire pour résoudre la relation Recette.feedbacks
+    charger_tous_modeles,
 )
 from src.services.cuisine.courses import ServiceCourses  # noqa: E402
 from src.services.cuisine.planning import ServicePlanning  # noqa: E402
@@ -91,7 +92,8 @@ def engine(test_db_url):
             pass
         cursor.close()
 
-    # Create all tables
+    # Create all tables (charger tous les modèles d'abord pour résoudre les FK)
+    charger_tous_modeles()
     Base.metadata.create_all(engine)
 
     yield engine

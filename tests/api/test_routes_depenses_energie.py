@@ -1,5 +1,5 @@
 """
-Tests pour les nouvelles routes Sprint 9.
+Tests pour les routes dépenses et énergie.
 
 Tests des endpoints dépenses (CRUD complet), relevés énergie,
 et persistance WebSocket courses.

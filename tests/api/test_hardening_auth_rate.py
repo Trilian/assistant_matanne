@@ -1,11 +1,11 @@
 """
-Tests Phase 5 — Production Hardening.
+Tests — Production Hardening (auth, rate limiting, patch).
 
 Tests pour:
 - Auth hardening (fail-fast secret, dev bypass guard)
 - Redis rate limiting storage
 - RecettePatch partial update endpoint
-- Accessibilité (aria-label)
+- Login rate limiting
 """
 
 import os

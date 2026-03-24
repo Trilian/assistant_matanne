@@ -55,7 +55,8 @@ class CacheSessionN2:
                 return None
             entry.hits += 1
             return entry
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Erreur désérialisation cache session key={key}: {e}")
             return None
 
     def set(self, key: str, entry: EntreeCache) -> None:

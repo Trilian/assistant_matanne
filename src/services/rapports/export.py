@@ -480,6 +480,235 @@ class ServiceExportPDF:
         return buffer
 
     # ═══════════════════════════════════════════════════════════
+    # EXPORT BUDGET
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_gestion_erreurs()
+    def exporter_budget(self, periode_jours: int = 30) -> BytesIO:
+        """
+        Exporte un résumé budget en PDF.
+
+        Args:
+            periode_jours: Nombre de jours à analyser (défaut: 30)
+
+        Returns:
+            BytesIO contenant le PDF
+        """
+        from datetime import date, timedelta
+        from decimal import Decimal
+        from src.core.models.finances import Depense
+
+        date_fin = date.today()
+        date_debut = date_fin - timedelta(days=periode_jours)
+
+        with obtenir_contexte_db() as db:
+            # Récupérer toutes les dépenses de la période
+            depenses = (
+                db.query(Depense)
+                .filter(Depense.date >= date_debut)
+                .filter(Depense.date <= date_fin)
+                .order_by(Depense.date.desc())
+                .all()
+            )
+
+            # Calculer totaux et grouper par catégorie
+            depenses_par_categorie = {}
+            total_depenses = Decimal("0")
+            liste_depenses = []
+
+            for depense in depenses:
+                montant = depense.montant
+                total_depenses += montant
+
+                # Grouper par catégorie
+                categorie = depense.categorie or "autre"
+                if categorie not in depenses_par_categorie:
+                    depenses_par_categorie[categorie] = Decimal("0")
+                depenses_par_categorie[categorie] += montant
+
+                # Ajouter à la liste détaillée
+                liste_depenses.append(
+                    {
+                        "date": depense.date.strftime("%d/%m/%Y"),
+                        "description": depense.description or "Sans description",
+                        "categorie": categorie,
+                        "montant": float(montant),
+                    }
+                )
+
+            # Trier les dépenses par montant décroissant pour les "top dépenses"
+            top_depenses = sorted(liste_depenses, key=lambda x: x["montant"], reverse=True)[:10]
+
+            # Préparer les données pour le PDF
+            data = RapportBudget(
+                periode_jours=periode_jours,
+                depenses_total=float(total_depenses),
+                depenses_par_categorie={
+                    cat: float(montant) for cat, montant in depenses_par_categorie.items()
+                },
+                articles_couteux=top_depenses,
+            )
+
+            return self._generer_pdf_budget(data)
+
+    def _generer_pdf_budget(self, data: RapportBudget) -> BytesIO:
+        """Génère le PDF du rapport budget."""
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2 * cm, bottomMargin=2 * cm)
+        story = []
+
+        # Titre
+        story.append(Paragraph("💰 Rapport Budget Familial", self.styles["TitreRecette"]))
+        story.append(
+            Paragraph(
+                f"Période: {data.periode_jours} derniers jours - Généré le {data.date_rapport.strftime('%d/%m/%Y')}",
+                ParagraphStyle(
+                    name="Date",
+                    parent=self.styles["Normal"],
+                    alignment=TA_CENTER,
+                    fontSize=10,
+                    textColor=colors.grey,
+                ),
+            )
+        )
+        story.append(Spacer(1, 20))
+
+        # Total des dépenses
+        story.append(Paragraph("📊 Résumé Financier", self.styles["SousTitre"]))
+        total_table = Table(
+            [
+                ["Total des dépenses:", f"{data.depenses_total:.2f} €"],
+                ["Dépense moyenne/jour:", f"{data.depenses_total / data.periode_jours:.2f} €"],
+            ],
+            colWidths=[10 * cm, 5 * cm],
+        )
+        total_table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (0, -1), colors.HexColor(Couleur.BG_LIGHT_GREEN)),
+                    ("BACKGROUND", (1, 0), (1, -1), colors.HexColor(Couleur.BG_LIGHT_BLUE)),
+                    ("FONTNAME", (1, 0), (1, -1), "Helvetica-Bold"),
+                    ("FONTSIZE", (0, 0), (-1, -1), 11),
+                    ("ALIGN", (1, 0), (1, -1), "RIGHT"),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                    ("TOPPADDING", (0, 0), (-1, -1), 8),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+                ]
+            )
+        )
+        story.append(total_table)
+        story.append(Spacer(1, 20))
+
+        # Dépenses par catégorie
+        if data.depenses_par_categorie:
+            story.append(Paragraph("📂 Répartition par Catégorie", self.styles["SousTitre"]))
+
+            # Emojis par catégorie
+            emojis_categories = {
+                "alimentation": "🥗",
+                "transport": "🚗",
+                "logement": "🏠",
+                "sante": "⚕️",
+                "loisirs": "🎮",
+                "vetements": "👕",
+                "education": "📚",
+                "cadeaux": "🎁",
+                "abonnements": "📱",
+                "restaurant": "🍽️",
+                "vacances": "✈️",
+                "bebe": "👶",
+                "autre": "📦",
+            }
+
+            # Trier les catégories par montant décroissant
+            categories_triees = sorted(
+                data.depenses_par_categorie.items(), key=lambda x: x[1], reverse=True
+            )
+
+            cat_data = [["Catégorie", "Montant", "% du total"]]
+            for categorie, montant in categories_triees:
+                emoji = emojis_categories.get(categorie, "📦")
+                pourcentage = (montant / data.depenses_total * 100) if data.depenses_total > 0 else 0
+                cat_data.append(
+                    [
+                        f"{emoji} {categorie.capitalize()}",
+                        f"{montant:.2f} €",
+                        f"{pourcentage:.1f}%",
+                    ]
+                )
+
+            cat_table = Table(cat_data, colWidths=[8 * cm, 4 * cm, 3 * cm])
+            cat_table.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.JULES_PRIMARY)),
+                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                        ("FONTSIZE", (0, 0), (-1, -1), 10),
+                        ("ALIGN", (1, 1), (2, -1), "RIGHT"),
+                        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+                        ("TOPPADDING", (0, 0), (-1, -1), 6),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                    ]
+                )
+            )
+            story.append(cat_table)
+            story.append(Spacer(1, 20))
+
+        # Top dépenses
+        if data.articles_couteux:
+            story.append(Paragraph("💸 Top 10 Dépenses", self.styles["SousTitre"]))
+
+            top_data = [["Date", "Description", "Catégorie", "Montant"]]
+            for item in data.articles_couteux[:10]:
+                top_data.append(
+                    [
+                        item["date"],
+                        item["description"][:40] + ("..." if len(item["description"]) > 40 else ""),
+                        item["categorie"].capitalize(),
+                        f"{item['montant']:.2f} €",
+                    ]
+                )
+
+            top_table = Table(top_data, colWidths=[2.5 * cm, 7 * cm, 3 * cm, 2.5 * cm])
+            top_table.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor(Couleur.RED_700)),
+                        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                        ("FONTSIZE", (0, 0), (-1, -1), 9),
+                        ("ALIGN", (3, 1), (3, -1), "RIGHT"),
+                        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+                        ("TOPPADDING", (0, 0), (-1, -1), 5),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                    ]
+                )
+            )
+            story.append(top_table)
+
+        # Pied de page
+        story.append(Spacer(1, 30))
+        story.append(
+            Paragraph(
+                f"Assistant Matanne - Rapport généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}",
+                ParagraphStyle(
+                    name="Footer",
+                    parent=self.styles["Normal"],
+                    fontSize=8,
+                    textColor=colors.grey,
+                    alignment=TA_CENTER,
+                ),
+            )
+        )
+
+        doc.build(story)
+        buffer.seek(0)
+        return buffer
+
+    # ═══════════════════════════════════════════════════════════
     # ALIAS MÉTHODES RÉTROCOMPATIBILITÉ
     # ═══════════════════════════════════════════════════════════
 

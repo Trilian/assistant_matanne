@@ -67,7 +67,7 @@ class TestIngredient:
 
         assert ingredient.unite == "pcs"  # Défaut
         assert ingredient.cree_le is not None
-        assert ingredient.categorie is None  # Optionnel
+        assert ingredient.categorie == "Autre"  # Défaut
 
     def test_ingredient_str_representation(self, db: Session):
         """Test la représentation string."""

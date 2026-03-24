@@ -592,7 +592,8 @@ class RouteurIA:
                             content = choices[0].get("delta", {}).get("content", "")
                             if content:
                                 yield content
-                    except Exception:
+                    except Exception as e:
+                        logger.debug(f"Échec parsing chunk streaming: {e}")
                         continue
 
         latence = (time.time() - debut) * 1000
@@ -673,7 +674,8 @@ class RouteurIA:
                 )
                 resultats[config.nom.value] = True
                 self._health[f].enregistrer_succes(0)
-            except Exception:
+            except Exception as e:
+                logger.debug(f"Ping {config.nom.value} échoué: {e}")
                 resultats[config.nom.value] = False
                 self._health[f].enregistrer_erreur()
 

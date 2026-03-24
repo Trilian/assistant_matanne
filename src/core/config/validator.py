@@ -186,7 +186,8 @@ def _verifier_database_url() -> bool:
         from . import obtenir_parametres
 
         return bool(obtenir_parametres().DATABASE_URL)
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Vérification DATABASE_URL échouée: {e}")
         return False
 
 
@@ -197,7 +198,8 @@ def _verifier_mistral_key() -> bool:
 
         key = obtenir_parametres().MISTRAL_API_KEY
         return bool(key and len(key) > 10)
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Vérification MISTRAL_API_KEY échouée: {e}")
         return False
 
 
@@ -208,7 +210,8 @@ def _tester_connexion_db() -> bool:
 
         ok, _ = verifier_connexion()
         return ok
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Test connexion DB échoué: {e}")
         return False
 
 
@@ -221,7 +224,8 @@ def _verifier_dossier_cache() -> bool:
         if not cache_dir.exists():
             cache_dir.mkdir(parents=True, exist_ok=True)
         return cache_dir.is_dir()
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Vérification dossier cache échouée: {e}")
         return False
 
 

@@ -352,7 +352,8 @@ def verifier_startup() -> dict[str, Any]:
 
         params = obtenir_parametres()
         details["config"] = params is not None
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Vérification config health échouée: {e}")
         details["config"] = False
 
     # DB accessible ?
@@ -361,7 +362,8 @@ def verifier_startup() -> dict[str, Any]:
 
         ok, _ = verifier_connexion()
         details["database"] = ok
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Vérification DB health échouée: {e}")
         details["database"] = False
 
     return {

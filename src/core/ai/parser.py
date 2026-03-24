@@ -288,8 +288,8 @@ class AnalyseurIA:
                             resultat[champ] = json.loads(chaine_valeur)
                         else:
                             resultat[champ] = json.loads(chaine_valeur)
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug(f"Impossible parser champ {champ}: {e}")
 
             if resultat:
                 logger.info(f"Parse partiel: {len(resultat)} champs extraits")
@@ -386,8 +386,8 @@ def analyser_liste_reponse(
         logger.warning(f"Utilisation fallback avec {len(items_secours)} items")
         try:
             return [modele_item(**item) for item in items_secours]
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Échec instantiation items_secours: {e}")
 
     logger.error(f"[ERROR] Impossible de parser liste pour {modele_item.__name__}")
     return []

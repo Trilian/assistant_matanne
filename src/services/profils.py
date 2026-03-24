@@ -306,6 +306,8 @@ class ProfilService:
         if "version" not in data or "profil" not in data:
             return False, "Format de fichier invalide (version ou profil manquant)"
 
+        from src.core.models.users import ProfilUtilisateur
+
         profil = db.query(ProfilUtilisateur).filter_by(username=username).first()
         if not profil:
             return False, f"Profil introuvable: {username}"

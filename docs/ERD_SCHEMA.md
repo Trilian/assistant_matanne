@@ -422,14 +422,27 @@ erDiagram
     %% MEUBLES & DÉPENSES
     %% ═══════════════════════════════════════════════════
 
-    Furniture {
+    Meuble {
         int id PK
         string nom
+        text description
         string piece
+        string categorie
+        decimal prix_estime
+        decimal prix_max
+        decimal prix_reel
         string statut
+        string priorite
+        string magasin
+        string url
+        string reference
+        int largeur_cm
+        int hauteur_cm
+        int profondeur_cm
+        date date_souhait
         date date_achat
-        float prix
-        string marque
+        datetime created_at
+        datetime updated_at
     }
 
     HouseExpense {
@@ -458,6 +471,178 @@ erDiagram
         boolean realise
         date date_realisation
     }
+
+    %% ═══════════════════════════════════════════════════
+    %% DIAGNOSTICS & ESTIMATION IMMOBILIÈRE
+    %% ═══════════════════════════════════════════════════
+
+    DiagnosticMaison {
+        int id PK
+        string type_diagnostic
+        string resultat
+        text resultat_detail
+        string diagnostiqueur
+        string numero_certification
+        date date_realisation
+        date date_validite
+        int duree_validite_ans
+        string score_energie
+        string score_ges
+        float consommation_kwh_m2
+        float emission_co2_m2
+        float surface_m2
+        string document_path
+        boolean alerte_active
+        int alerte_jours_avant
+        text recommandations
+        text notes
+        datetime created_at
+        datetime updated_at
+    }
+
+    EstimationImmobiliere {
+        int id PK
+        string source
+        date date_estimation
+        decimal valeur_basse
+        decimal valeur_moyenne
+        decimal valeur_haute
+        decimal prix_m2
+        float surface_m2
+        int nb_pieces
+        string code_postal
+        string commune
+        int nb_transactions_comparees
+        decimal prix_m2_quartier
+        float evolution_annuelle_pct
+        decimal investissement_travaux
+        decimal plus_value_estimee
+        text notes
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% ═══════════════════════════════════════════════════
+    %% CONTRATS MAISON
+    %% ═══════════════════════════════════════════════════
+
+    Contrat {
+        int id PK
+        string nom
+        string type_contrat
+        string fournisseur
+        string numero_contrat
+        string numero_client
+        date date_debut
+        date date_fin
+        date date_renouvellement
+        int duree_engagement_mois
+        boolean tacite_reconduction
+        int preavis_resiliation_jours
+        date date_limite_resiliation
+        decimal montant_mensuel
+        decimal montant_annuel
+        string telephone
+        string email
+        string espace_client_url
+        string statut
+        int alerte_jours_avant
+        boolean alerte_active
+        text notes
+        string document_path
+        datetime created_at
+        datetime updated_at
+    }
+
+    %% ═══════════════════════════════════════════════════
+    %% ARTISANS & INTERVENTIONS
+    %% ═══════════════════════════════════════════════════
+
+    Artisan {
+        int id PK
+        string nom
+        string entreprise
+        string metier
+        string specialite
+        string telephone
+        string telephone2
+        string email
+        text adresse
+        string zone_intervention
+        int note
+        boolean recommande
+        string site_web
+        string siret
+        boolean assurance_decennale
+        text qualifications
+        text notes
+        datetime created_at
+        datetime updated_at
+    }
+
+    InterventionArtisan {
+        int id PK
+        int artisan_id FK
+        date date_intervention
+        text description
+        string piece
+        decimal montant_devis
+        decimal montant_facture
+        boolean paye
+        int satisfaction
+        text commentaire
+        string facture_path
+        datetime created_at
+        datetime updated_at
+    }
+
+    Artisan ||--o{ InterventionArtisan : "interventions"
+
+    %% ═══════════════════════════════════════════════════
+    %% GARANTIES & SAV
+    %% ═══════════════════════════════════════════════════
+
+    Garantie {
+        int id PK
+        string nom_appareil
+        string marque
+        string modele
+        string numero_serie
+        string piece
+        date date_achat
+        string lieu_achat
+        decimal prix_achat
+        string preuve_achat_path
+        int duree_garantie_mois
+        date date_fin_garantie
+        boolean garantie_etendue
+        date date_fin_garantie_etendue
+        string statut
+        int alerte_jours_avant
+        boolean alerte_active
+        decimal cout_remplacement
+        text notes
+        datetime created_at
+        datetime updated_at
+    }
+
+    IncidentSAV {
+        int id PK
+        int garantie_id FK
+        date date_incident
+        text description
+        boolean sous_garantie
+        date date_resolution
+        string reparateur
+        int artisan_id FK
+        decimal cout_reparation
+        boolean pris_en_charge
+        datetime created_at
+        datetime updated_at
+    }
+
+    Garantie ||--o{ IncidentSAV : "incidents"
+    Artisan ||--o{ IncidentSAV : "réparations"
 ```
 
 ## Notifications & Intégrations
@@ -656,7 +841,7 @@ erDiagram
 | **Batch Cooking** | 4       | 4         |
 | **Famille**       | 6       | 1         |
 | **Utilisateurs**  | 5       | 4         |
-| **Maison**        | 9       | 3         |
+| **Maison**        | 18      | 7         |
 | **Notifications** | 4       | 1         |
 | **Jeux**          | 7       | 4         |
-| **Total**         | **~50** | **~27**   |
+| **Total**         | **58**  | **31**    |

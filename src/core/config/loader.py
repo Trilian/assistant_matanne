@@ -4,10 +4,13 @@ Loader - Chargement des fichiers de configuration.
 Fonctions pour charger les fichiers .env et .env.local (via python-dotenv).
 """
 
+import logging
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 
 def _reload_env_files():
@@ -26,8 +29,8 @@ def _reload_env_files():
             load_dotenv(env_path, override=True)
         if env_local_path.exists():
             load_dotenv(env_local_path, override=True)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Échec chargement fichiers .env: {e}")
 
 
 def _read_env_secret(section: str) -> str | None:

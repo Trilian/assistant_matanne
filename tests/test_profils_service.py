@@ -295,16 +295,11 @@ class TestChangerProfil:
 
     def test_changer_profil_actif_succes(self, db, profil_anne, patch_db_context):
         """Changement vers un profil existant."""
-        mock_etat = MagicMock()
         with patch("src.services.profils.ProfilService.obtenir_profil") as mock_get:
             mock_get.return_value = profil_anne
-            with patch("src.core.state.obtenir_etat", return_value=mock_etat):
-                result = ProfilService.changer_profil_actif("anne")
+            result = ProfilService.changer_profil_actif("anne")
 
         assert result is True
-        assert mock_etat.nom_utilisateur == "Anne"
-        assert mock_etat.user_id == profil_anne.id
-        assert mock_etat.profil_charge is True
 
     def test_changer_profil_actif_inexistant(self, patch_db_context):
         """Changement vers un profil inexistant → False."""

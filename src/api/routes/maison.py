@@ -37,6 +37,7 @@ from src.api.schemas.errors import (
     REPONSES_LISTE,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
+from src.services.core.backup.utils_serialization import model_to_dict
 
 router = APIRouter(prefix="/api/v1/maison", tags=["Maison"])
 
@@ -992,7 +993,7 @@ async def creer_meuble(
 
     def _query():
         service = get_meubles_crud_service()
-        return service.create_meuble(payload)
+        return model_to_dict(service.create_meuble(payload))
 
     return await executer_async(_query)
 
@@ -1009,7 +1010,7 @@ async def modifier_meuble(
 
     def _query():
         service = get_meubles_crud_service()
-        return service.update_meuble(meuble_id, payload)
+        return model_to_dict(service.update_meuble(meuble_id, payload))
 
     return await executer_async(_query)
 
@@ -1132,7 +1133,7 @@ async def obtenir_article_cellier(
         result = service.get_article_by_id(article_id)
         if not result:
             raise HTTPException(status_code=404, detail="Article non trouvé")
-        return result
+        return model_to_dict(result)
 
     return await executer_async(_query)
 
@@ -1148,7 +1149,7 @@ async def creer_article_cellier(
 
     def _query():
         service = get_cellier_crud_service()
-        return service.create_article(payload)
+        return model_to_dict(service.create_article(payload))
 
     return await executer_async(_query)
 
@@ -1165,7 +1166,7 @@ async def modifier_article_cellier(
 
     def _query():
         service = get_cellier_crud_service()
-        return service.update_article(article_id, payload)
+        return model_to_dict(service.update_article(article_id, payload))
 
     return await executer_async(_query)
 
@@ -1256,7 +1257,7 @@ async def obtenir_artisan(
         result = service.get_artisan_by_id(artisan_id)
         if not result:
             raise HTTPException(status_code=404, detail="Artisan non trouvé")
-        return result
+        return model_to_dict(result)
 
     return await executer_async(_query)
 
@@ -1272,7 +1273,7 @@ async def creer_artisan(
 
     def _query():
         service = get_artisans_crud_service()
-        return service.create_artisan(payload)
+        return model_to_dict(service.create_artisan(payload))
 
     return await executer_async(_query)
 
@@ -1289,7 +1290,7 @@ async def modifier_artisan(
 
     def _query():
         service = get_artisans_crud_service()
-        return service.update_artisan(artisan_id, payload)
+        return model_to_dict(service.update_artisan(artisan_id, payload))
 
     return await executer_async(_query)
 
@@ -1341,7 +1342,7 @@ async def creer_intervention(
 
     def _query():
         service = get_artisans_crud_service()
-        return service.create_intervention(payload)
+        return model_to_dict(service.create_intervention(payload))
 
     return await executer_async(_query)
 
@@ -1430,7 +1431,7 @@ async def obtenir_contrat(
         result = service.get_contrat_by_id(contrat_id)
         if not result:
             raise HTTPException(status_code=404, detail="Contrat non trouvé")
-        return result
+        return model_to_dict(result)
 
     return await executer_async(_query)
 
@@ -1446,7 +1447,7 @@ async def creer_contrat(
 
     def _query():
         service = get_contrats_crud_service()
-        return service.create_contrat(payload)
+        return model_to_dict(service.create_contrat(payload))
 
     return await executer_async(_query)
 
@@ -1463,7 +1464,7 @@ async def modifier_contrat(
 
     def _query():
         service = get_contrats_crud_service()
-        return service.update_contrat(contrat_id, payload)
+        return model_to_dict(service.update_contrat(contrat_id, payload))
 
     return await executer_async(_query)
 
@@ -1552,7 +1553,7 @@ async def obtenir_garantie(
         result = service.get_garantie_by_id(garantie_id)
         if not result:
             raise HTTPException(status_code=404, detail="Garantie non trouvée")
-        return result
+        return model_to_dict(result)
 
     return await executer_async(_query)
 
@@ -1568,7 +1569,7 @@ async def creer_garantie(
 
     def _query():
         service = get_garanties_crud_service()
-        return service.create_garantie(payload)
+        return model_to_dict(service.create_garantie(payload))
 
     return await executer_async(_query)
 
@@ -1585,7 +1586,7 @@ async def modifier_garantie(
 
     def _query():
         service = get_garanties_crud_service()
-        return service.update_garantie(garantie_id, payload)
+        return model_to_dict(service.update_garantie(garantie_id, payload))
 
     return await executer_async(_query)
 
@@ -1637,7 +1638,7 @@ async def creer_incident_garantie(
 
     def _query():
         service = get_garanties_crud_service()
-        return service.create_incident(payload)
+        return model_to_dict(service.create_incident(payload))
 
     return await executer_async(_query)
 
@@ -1654,7 +1655,7 @@ async def modifier_incident_garantie(
 
     def _query():
         service = get_garanties_crud_service()
-        return service.update_incident(incident_id, payload)
+        return model_to_dict(service.update_incident(incident_id, payload))
 
     return await executer_async(_query)
 
@@ -1721,7 +1722,7 @@ async def creer_diagnostic(
 
     def _query():
         service = get_diagnostics_crud_service()
-        return service.create(payload)
+        return model_to_dict(service.create(payload))
 
     return await executer_async(_query)
 
@@ -1738,7 +1739,7 @@ async def modifier_diagnostic(
 
     def _query():
         service = get_diagnostics_crud_service()
-        return service.update(diagnostic_id, payload)
+        return model_to_dict(service.update(diagnostic_id, payload))
 
     return await executer_async(_query)
 
@@ -1861,7 +1862,7 @@ async def obtenir_eco_tip(
         result = service.get_action_by_id(action_id)
         if not result:
             raise HTTPException(status_code=404, detail="Action non trouvée")
-        return result
+        return model_to_dict(result)
 
     return await executer_async(_query)
 
@@ -1877,7 +1878,7 @@ async def creer_eco_tip(
 
     def _query():
         service = get_eco_tips_crud_service()
-        return service.create_action(payload)
+        return model_to_dict(service.create_action(payload))
 
     return await executer_async(_query)
 
@@ -1894,7 +1895,7 @@ async def modifier_eco_tip(
 
     def _query():
         service = get_eco_tips_crud_service()
-        return service.update_action(action_id, payload)
+        return model_to_dict(service.update_action(action_id, payload))
 
     return await executer_async(_query)
 
@@ -2007,7 +2008,7 @@ async def obtenir_depense(
         result = service.get_depense_by_id(depense_id)
         if not result:
             raise HTTPException(status_code=404, detail="Dépense non trouvée")
-        return result
+        return model_to_dict(result)
 
     return await executer_async(_query)
 
@@ -2023,7 +2024,7 @@ async def creer_depense(
 
     def _query():
         service = get_depenses_crud_service()
-        return service.create_depense(payload)
+        return model_to_dict(service.create_depense(payload))
 
     return await executer_async(_query)
 
@@ -2040,7 +2041,7 @@ async def modifier_depense(
 
     def _query():
         service = get_depenses_crud_service()
-        return service.update_depense(depense_id, payload)
+        return model_to_dict(service.update_depense(depense_id, payload))
 
     return await executer_async(_query)
 

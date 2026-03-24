@@ -34,9 +34,9 @@ async def exporter_pdf(
 
     Types supportés:
     - courses: Liste de courses active
-    - planning: Planning de la semaine
-    - recette: Fiche recette détaillée
-    - budget: Résumé budget mensuel
+    - planning: Planning de la semaine (id_ressource requis)
+    - recette: Fiche recette détaillée (id_ressource requis)
+    - budget: Résumé budget mensuel (id_ressource = période en jours, défaut: 30)
     """
     if type_export not in TYPES_EXPORT:
         raise HTTPException(
@@ -63,10 +63,8 @@ async def exporter_pdf(
             return service.exporter_recette(id_ressource), "recette"
 
         elif type_export == "budget":
-            raise HTTPException(
-                status_code=501,
-                detail="Export budget PDF pas encore implémenté",
-            )
+            periode = id_ressource if id_ressource else 30  # Période en jours (défaut: 30)
+            return service.exporter_budget(periode), "budget_familial"
 
     buffer, nom_fichier = await executer_async(_generate)
     buffer.seek(0)

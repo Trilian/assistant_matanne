@@ -347,8 +347,9 @@ def obtenir_parametres() -> Parametres:
 
                 configure_logging(instance.LOG_LEVEL)
                 _logging_configured = True
-            except Exception:
-                pass
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).debug(f"Configuration logging échouée: {e}")
 
         _parametres = instance
 

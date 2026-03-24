@@ -45,8 +45,8 @@ def est_redis_disponible() -> bool:
             from src.core.config import obtenir_parametres
 
             redis_url = obtenir_parametres().REDIS_URL
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Impossible charger REDIS_URL depuis config: {e}")
     if not redis_url:
         return False
 

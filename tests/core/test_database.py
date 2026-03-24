@@ -260,8 +260,6 @@ class TestDatabaseVerifications:
         # Le test est implémenté en vérifiant que la fonction retourne bien un tuple
         with patch("src.core.db.utils.obtenir_moteur_securise") as mock_moteur:
             mock_moteur.return_value = None
-            # La fonction est cachée par Streamlit, donc on vérifie juste la signature
-            # Le vrai test serait fait sans le cache
             assert callable(verifier_connexion)
 
 
@@ -394,12 +392,10 @@ class TestDatabaseInfos:
 
     def test_obtenir_infos_db_returns_dict(self):
         """Test que obtenir_infos_db retourne un dictionnaire."""
-        # La fonction est cachée par Streamlit, on vérifie juste qu'elle existe
         assert callable(obtenir_infos_db)
 
     def test_obtenir_infos_db_has_statut_key(self):
         """Test que obtenir_infos_db contient la clé 'statut'."""
-        # Pas de cache Streamlit, on teste directement la structure
         with patch("src.core.db.utils.obtenir_moteur") as mock_moteur:
             mock_moteur.side_effect = Exception("Test error")
             result = obtenir_infos_db()

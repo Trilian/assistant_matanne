@@ -328,11 +328,11 @@ class TestSchemasMaison:
         from src.api.schemas.maison import TacheEntretienCreate
 
         t = TacheEntretienCreate(
-            tache="Nettoyer VMC",
-            appareil="VMC",
+            nom="Nettoyer VMC",
+            description="VMC",
             categorie="ventilation",
         )
-        assert t.tache == "Nettoyer VMC"
+        assert t.nom == "Nettoyer VMC"
 
     def test_element_jardin_create(self):
         from src.api.schemas.maison import ElementJardinCreate
@@ -388,7 +388,7 @@ class TestSchemasMaison:
     def test_releve_compteur_create(self):
         from src.api.schemas.maison import ReleveCompteurCreate
 
-        r = ReleveCompteurCreate(type_compteur="électricité", valeur=12345.0, date="2026-03-01")
+        r = ReleveCompteurCreate(type_compteur="électricité", valeur=12345.0, date_releve="2026-03-01")
         assert r.valeur == 12345.0
 
 

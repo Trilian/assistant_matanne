@@ -10,7 +10,7 @@ Tests couvrant:
 - Classe NettoyeurEntrees et sanitization
 - Modèles Pydantic (IngredientInput, EtapeInput, RecetteInput, etc.)
 - Schémas de validation
-- Fonctions de validation (valider_modele, valider_formulaire_streamlit, etc.)
+- Fonctions de validation (valider_modele, valider_et_nettoyer_formulaire, etc.)
 - Protection XSS et injections
 - Constantes et alias
 """

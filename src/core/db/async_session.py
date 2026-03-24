@@ -219,8 +219,8 @@ async def reinitialiser_moteur_async() -> None:
         if _async_engine_instance is not None:
             try:
                 await _async_engine_instance.dispose()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Échec dispose moteur async: {e}")
             _async_engine_instance = None
         _async_session_factory = None
 
@@ -290,7 +290,8 @@ async def obtenir_contexte_db_async() -> AsyncGenerator[AsyncSession, None]:
 
         ctx = obtenir_contexte()
         cid = ctx.correlation_id
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Contexte observabilité indisponible: {e}")
         cid = "--------"
 
     try:

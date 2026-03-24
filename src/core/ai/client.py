@@ -322,7 +322,8 @@ class ClientIA(VisionMixin, StreamingMixin):
                     extracted = AnalyseurIA._extraire_objet_json(cleaned)
                     extracted = AnalyseurIA._reparer_intelligemment(extracted)
                     return json.loads(extracted)
-                except Exception:
+                except Exception as e:
+                    logger.debug(f"AnalyseurIA extraction JSON échouée: {e}")
                     # Fallback regex simple si AnalyseurIA échoue
                     try:
                         match = re.search(r"(\{.*\}|\[.*\])", cleaned, re.DOTALL)

@@ -122,15 +122,17 @@ class TestObtenirParametres:
         assert result1.APP_NAME == result2.APP_NAME
 
     def test_obtenir_parametres_has_database_url(self):
-        """Test que les paramètres ont DATABASE_URL."""
+        """Test que les paramètres ont la propriété DATABASE_URL."""
         params = obtenir_parametres()
-        assert hasattr(params, "DATABASE_URL")
+        # DATABASE_URL est une @property, on vérifie qu'elle existe dans la classe
+        assert "DATABASE_URL" in dir(params)
 
     def test_obtenir_parametres_database_url_not_empty(self):
-        """Test que DATABASE_URL n'est pas vide."""
-        params = obtenir_parametres()
-        assert params.DATABASE_URL
-        assert isinstance(params.DATABASE_URL, str)
+        """Test que DATABASE_URL n'est pas vide quand config DB est présente."""
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://test:test@localhost/test"}):
+            params = Parametres()
+            assert params.DATABASE_URL
+            assert isinstance(params.DATABASE_URL, str)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -212,13 +214,14 @@ class TestConfigIntegration:
 
     def test_full_config_load_cycle(self):
         """Test le cycle complet de chargement de configuration."""
-        params = obtenir_parametres()
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://test:test@localhost/test"}):
+            params = Parametres()
 
-        # Vérifier les propriétés principales
-        assert params.APP_NAME
-        assert params.DEBUG is not None
-        assert params.ENV
-        assert params.DATABASE_URL
+            # Vérifier les propriétés principales
+            assert params.APP_NAME
+            assert params.DEBUG is not None
+            assert params.ENV
+            assert params.DATABASE_URL
 
     def test_config_with_custom_env(self):
         """Test la configuration avec des variables env personnalisées."""
@@ -460,20 +463,6 @@ class TestProprietesAvancees:
                 exc_info.value
             )
 
-    def test_mistral_api_key_from_streamlit_secrets_env(self):
-        """Test MISTRAL_API_KEY depuis STREAMLIT_SECRETS_MISTRAL_API_KEY."""
-        test_key = "sk-from-streamlit-secrets"
-
-        with patch.dict(
-            os.environ,
-            {"MISTRAL_API_KEY": "", "STREAMLIT_SECRETS_MISTRAL_API_KEY": test_key},
-            clear=False,
-        ):
-            params = Parametres()
-            key = params.MISTRAL_API_KEY
-
-            assert key == test_key
-
     def test_mistral_api_key_error_message(self):
         """Test message d'erreur MISTRAL_API_KEY."""
         with patch.dict(
@@ -508,41 +497,21 @@ class TestProprietesAvancees:
 
             assert key == test_key
 
-    def test_football_data_api_key_from_st_secrets_flat(self):
-        """Test FOOTBALL_DATA_API_KEY depuis st.secrets format plat."""
-        test_key = "football-from-secrets"
-
-        with patch.dict(os.environ, {"FOOTBALL_DATA_API_KEY": ""}, clear=False):
-            with patch("streamlit.secrets") as mock_secrets:
-                mock_secrets.get.return_value = test_key
-
-                params = Parametres()
-                key = params.FOOTBALL_DATA_API_KEY
-
-                # Peut être test_key ou None selon l'implémentation exacte
-                assert key is None or key == test_key
-
     def test_mistral_model_from_env(self):
         """Test MISTRAL_MODEL depuis variable d'env."""
         with patch.dict(os.environ, {"MISTRAL_MODEL": "mistral-large"}, clear=False):
-            with patch("streamlit.secrets") as mock_secrets:
-                mock_secrets.get.side_effect = Exception("No secrets")
+            params = Parametres()
+            model = params.MISTRAL_MODEL
 
-                params = Parametres()
-                model = params.MISTRAL_MODEL
-
-                assert model == "mistral-large"
+            assert model == "mistral-large"
 
     def test_mistral_model_default(self):
         """Test MISTRAL_MODEL valeur par défaut."""
         with patch.dict(os.environ, {"MISTRAL_MODEL": ""}, clear=False):
-            with patch("streamlit.secrets") as mock_secrets:
-                mock_secrets.get.return_value = {}
+            params = Parametres()
+            model = params.MISTRAL_MODEL
 
-                params = Parametres()
-                model = params.MISTRAL_MODEL
-
-                assert "mistral" in model.lower()
+            assert "mistral" in model.lower()
 
 
 # ═══════════════════════════════════════════════════════════

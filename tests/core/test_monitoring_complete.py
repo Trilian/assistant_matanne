@@ -89,7 +89,7 @@ class TestVerifierCache:
 
         mock_cache = MagicMock()
         mock_cache.obtenir_statistiques.return_value = {
-            "hit_rate": 0.85,
+            "hit_rate": 85,  # Pourcentage 0-100 (pas ratio 0-1)
             "total_requetes": 200,
         }
 
@@ -106,7 +106,7 @@ class TestVerifierCache:
 
         mock_cache = MagicMock()
         mock_cache.obtenir_statistiques.return_value = {
-            "hit_rate": 0.15,  # < 0.3 = dégradé
+            "hit_rate": 15,  # < 30 = dégradé (pourcentage 0-100)
             "total_requetes": 200,  # > 100
         }
 
@@ -508,7 +508,7 @@ class TestRerunProfiler:
     """Tests pour RerunProfiler."""
 
     def test_rerun_profiler_enregistrer(self):
-        """Test enregistrement d'un rerun."""
+        """Test enregistrement d'un rerun (stub deprecated — no-op)."""
         from src.core.monitoring.rerun_profiler import (
             RerunProfiler,
             RerunRecord,
@@ -525,13 +525,14 @@ class TestRerunProfiler:
             state_changes=["key1", "key2"],
         )
 
+        # Stub deprecated: enregistrer est un no-op
         profiler.enregistrer(record)
         stats = profiler.stats()
 
-        assert stats["total_reruns"] == 1
-        assert stats["duree_moyenne_ms"] == 150.0
-        assert stats["dernier_rerun"]["module"] == "test_module"
-        assert stats["reruns_par_module"]["test_module"] == 1
+        assert stats["total_reruns"] == 0
+        assert stats["duree_moyenne_ms"] == 0.0
+        assert stats["dernier_rerun"] is None
+        assert stats["reruns_par_module"] == {}
 
     def test_rerun_profiler_stats_vide(self):
         """Test stats sur profiler vide."""
@@ -547,31 +548,28 @@ class TestRerunProfiler:
         assert stats["reruns_lents"] == 0
 
     def test_rerun_profiler_reruns_lents(self):
-        """Test comptage des reruns lents (>500ms)."""
+        """Test comptage des reruns lents (stub deprecated — toujours 0)."""
         from src.core.monitoring.rerun_profiler import RerunProfiler, RerunRecord
 
         profiler = RerunProfiler()
 
-        # Ajouter un rerun rapide
         profiler.enregistrer(RerunRecord(module="fast", timestamp=time.time(), duree_ms=100.0))
-
-        # Ajouter un rerun lent
         profiler.enregistrer(RerunRecord(module="slow", timestamp=time.time(), duree_ms=600.0))
 
         stats = profiler.stats()
-        assert stats["reruns_lents"] == 1
+        assert stats["reruns_lents"] == 0  # Stub deprecated
 
     def test_rerun_profiler_reset(self):
-        """Test reset du profiler."""
+        """Test reset du profiler (stub deprecated — toujours 0)."""
         from src.core.monitoring.rerun_profiler import RerunProfiler, RerunRecord
 
         profiler = RerunProfiler()
         profiler.enregistrer(RerunRecord(module="test", timestamp=time.time(), duree_ms=100.0))
 
-        assert profiler.stats()["total_reruns"] == 1
+        # Stub deprecated: stats toujours à zéro
+        assert profiler.stats()["total_reruns"] == 0
 
         profiler.reset()
-
         assert profiler.stats()["total_reruns"] == 0
 
 
@@ -579,7 +577,7 @@ class TestRerunDecorateur:
     """Tests pour le décorateur @profiler_rerun."""
 
     def test_profiler_rerun_decor(self):
-        """Test décorateur profiler_rerun."""
+        """Test décorateur profiler_rerun (stub deprecated — passthrough)."""
         from src.core.monitoring.rerun_profiler import (
             obtenir_stats_rerun,
             profiler_rerun,
@@ -596,7 +594,7 @@ class TestRerunDecorateur:
 
         assert result == "done"
         stats = obtenir_stats_rerun()
-        assert stats["total_reruns"] == 1
+        assert stats["total_reruns"] == 0  # Stub deprecated — passthrough
 
     def test_profiler_rerun_capture_state(self):
         """Test que le profiler ne crash pas."""
@@ -1232,7 +1230,7 @@ class TestRerunProfilerEdgeCases:
     """Tests pour cas limites du rerun profiler."""
 
     def test_profiler_rerun_warning_lent(self, caplog):
-        """Test que les reruns lents sont loggés."""
+        """Test que le stub deprecated ne logue rien."""
         import logging
 
         from src.core.monitoring.rerun_profiler import RerunProfiler, RerunRecord
@@ -1240,7 +1238,6 @@ class TestRerunProfilerEdgeCases:
         profiler = RerunProfiler()
 
         with caplog.at_level(logging.WARNING):
-            # Enregistrer un rerun lent (>500ms)
             record = RerunRecord(
                 module="slow_module",
                 timestamp=time.time(),
@@ -1249,5 +1246,5 @@ class TestRerunProfilerEdgeCases:
             )
             profiler.enregistrer(record)
 
-        assert "Rerun lent" in caplog.text
-        assert "slow_module" in caplog.text
+        # Stub deprecated: enregistrer est un no-op, aucun log émis
+        assert "Rerun lent" not in caplog.text

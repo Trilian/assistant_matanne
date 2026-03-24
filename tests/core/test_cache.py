@@ -11,7 +11,7 @@ import pytest
 def _reset_cache_singleton():
     """Réinitialise le singleton CacheMultiNiveau entre chaque test.
 
-    L2 (session Streamlit) et L3 (fichier) sont désactivés pour isoler
+    L2 et L3 (fichier) sont désactivés pour isoler
     les tests sur la logique pure du cache (L1 mémoire uniquement).
     """
     from src.core.caching.orchestrator import obtenir_cache, reinitialiser_cache

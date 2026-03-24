@@ -128,7 +128,7 @@ class TestSyncWrapperWithRunningLoop:
         # sync_wrapper doit utiliser ThreadPoolExecutor
 
         # Note: On appelle la version sync depuis un contexte async
-        # Cela simule le cas Streamlit où une boucle peut être active
+        # Cela simule le cas où une boucle événementielle peut être active
         import concurrent.futures
 
         with concurrent.futures.ThreadPoolExecutor() as pool:

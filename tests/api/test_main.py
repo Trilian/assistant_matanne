@@ -8,6 +8,14 @@ Tests des endpoints de santé, racine et intégration.
 import pytest
 from fastapi.testclient import TestClient
 
+
+@pytest.fixture
+def client(app):
+    """Client HTTP synchrone (override du client async conftest)."""
+    with TestClient(app) as c:
+        yield c
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # DONNÉES DE TEST RÉELLES
 # ═══════════════════════════════════════════════════════════════════════
@@ -414,6 +422,7 @@ class TestRecettesModification:
                 "temps_preparation": 25,
                 "temps_cuisson": 35,
                 "portions": 6,
+                "categorie": "plats",
             },
         )
 

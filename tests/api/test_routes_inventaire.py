@@ -10,6 +10,14 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
+
+@pytest.fixture
+def client(app):
+    """Client HTTP synchrone (override du client async conftest)."""
+    with TestClient(app) as c:
+        yield c
+
+
 # ═══════════════════════════════════════════════════════════
 # DONNÉES DE TEST RÉELLES
 # ═══════════════════════════════════════════════════════════
