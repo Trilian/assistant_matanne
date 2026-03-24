@@ -1,15 +1,15 @@
 """
 Tests for src/services/suggestions/predictions.py
 
-PredictionService - ML predictions for inventory.
+InventairePredictionService - ML predictions for inventory.
 """
 
 import pytest
 
 from src.services.cuisine.suggestions.predictions import (
     AnalysePrediction,
+    InventairePredictionService,
     PredictionArticle,
-    PredictionService,
     obtenir_service_predictions,
 )
 
@@ -86,13 +86,13 @@ class TestAnalysePrediction:
         assert analyse.nb_articles_croissance == 0
 
 
-class TestPredictionService:
-    """Tests for PredictionService."""
+class TestInventairePredictionService:
+    """Tests for InventairePredictionService."""
 
     @pytest.fixture
     def service(self):
         """Fixture service."""
-        return PredictionService()
+        return InventairePredictionService()
 
     def test_init(self, service):
         """Test initialisation."""
@@ -647,4 +647,4 @@ class TestSingleton:
         service1 = obtenir_service_predictions()
         service2 = obtenir_service_predictions()
         assert service1 is service2
-        assert isinstance(service1, PredictionService)
+        assert isinstance(service1, InventairePredictionService)

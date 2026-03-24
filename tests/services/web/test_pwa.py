@@ -122,41 +122,9 @@ class TestGeneratePwaFiles:
         assert icons_path.is_dir()
 
 
-class TestInjectPwaMeta:
-    """Tests pour inject_pwa_meta."""
-
-    @patch("src.ui.views.pwa.components")
-    def test_inject_meta_calls_components(self, mock_components):
-        """Test appel de components.html."""
-        from src.services.integrations.web.pwa import inject_pwa_meta
-
-        inject_pwa_meta()
-
-        mock_components.html.assert_called_once()
-        call_args = mock_components.html.call_args
-        html_content = call_args[0][0]
-
-        assert "manifest.json" in html_content
-        assert "theme-color" in html_content
-        assert "serviceWorker" in html_content
-
-
-class TestRenderInstallPrompt:
-    """Tests pour afficher_install_prompt."""
-
-    @patch("src.ui.views.pwa.components")
-    def test_render_install_calls_components(self, mock_components):
-        """Test appel de components.html via délégation UI."""
-        from src.services.integrations.web.pwa import afficher_install_prompt
-
-        afficher_install_prompt()
-
-        mock_components.html.assert_called_once()
-        call_args = mock_components.html.call_args
-        html_content = call_args[0][0]
-
-        assert "pwa-install" in html_content
-        assert "installPWA" in html_content
+# Les tests pour inject_pwa_meta et afficher_install_prompt ont été supprimés
+# car ces fonctions étaient des stubs deprecated (DEPRECATED — plus nécessaire avec Next.js)
+# et ont été retirées du code source.
 
 
 class TestIsPwaInstalled:

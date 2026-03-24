@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
+import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { toast } from "sonner";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
@@ -33,9 +34,13 @@ import type { ArticleCellier } from "@/types/maison";
 
 export default function PageCellier() {
   const [categorie, setCategorie] = useState<string | undefined>();
-  const [dialogOuvert, setDialogOuvert] = useState(false);
-  const [enEdition, setEnEdition] = useState<ArticleCellier | null>(null);
-  const [form, setForm] = useState({ nom: "", categorie: "", quantite: "1", unite: "", emplacement: "", date_peremption: "", prix_unitaire: "" });
+  const formsVide = { nom: "", categorie: "", quantite: "1", unite: "", emplacement: "", date_peremption: "", prix_unitaire: "" };
+  const [form, setForm] = useState(formsVide);
+  const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
+    utiliserDialogCrud<ArticleCellier>({
+      onOuvrirCreation: () => setForm(formsVide),
+      onOuvrirEdition: (a) => setForm({ nom: a.nom, categorie: a.categorie ?? "", quantite: String(a.quantite), unite: a.unite ?? "", emplacement: a.emplacement ?? "", date_peremption: a.date_peremption ?? "", prix_unitaire: a.prix_unitaire ? String(a.prix_unitaire) : "" }),
+    });
   const queryClient = useQueryClient();
 
   const { data: articles, isLoading } = utiliserRequete(
@@ -69,30 +74,7 @@ export default function PageCellier() {
     onSuccess: () => { invalider(); toast.success("Article supprimé"); },
   });
 
-  const ouvrirCreation = () => {
-    setEnEdition(null);
-    setForm({ nom: "", categorie: "", quantite: "1", unite: "", emplacement: "", date_peremption: "", prix_unitaire: "" });
-    setDialogOuvert(true);
-  };
 
-  const ouvrirEdition = (a: ArticleCellier) => {
-    setEnEdition(a);
-    setForm({
-      nom: a.nom,
-      categorie: a.categorie ?? "",
-      quantite: String(a.quantite),
-      unite: a.unite ?? "",
-      emplacement: a.emplacement ?? "",
-      date_peremption: a.date_peremption ?? "",
-      prix_unitaire: a.prix_unitaire ? String(a.prix_unitaire) : "",
-    });
-    setDialogOuvert(true);
-  };
-
-  const fermerDialog = () => {
-    setDialogOuvert(false);
-    setEnEdition(null);
-  };
 
   const soumettre = () => {
     const payload = {

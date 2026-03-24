@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
+import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { toast } from "sonner";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
@@ -32,9 +33,13 @@ import {
 import type { Contrat } from "@/types/maison";
 
 export default function PageContrats() {
-  const [dialogOuvert, setDialogOuvert] = useState(false);
-  const [enEdition, setEnEdition] = useState<Contrat | null>(null);
-  const [form, setForm] = useState({ nom: "", type_contrat: "", fournisseur: "", montant_mensuel: "", date_debut: "", date_fin: "", statut: "actif" });
+  const formsVide = { nom: "", type_contrat: "", fournisseur: "", montant_mensuel: "", date_debut: "", date_fin: "", statut: "actif" };
+  const [form, setForm] = useState(formsVide);
+  const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
+    utiliserDialogCrud<Contrat>({
+      onOuvrirCreation: () => setForm(formsVide),
+      onOuvrirEdition: (c) => setForm({ nom: c.nom, type_contrat: c.type_contrat, fournisseur: c.fournisseur ?? "", montant_mensuel: c.montant_mensuel != null ? String(c.montant_mensuel) : "", date_debut: c.date_debut ?? "", date_fin: c.date_fin ?? "", statut: c.statut ?? "actif" }),
+    });
   const queryClient = useQueryClient();
 
   const { data: contrats, isLoading } = utiliserRequete(
@@ -66,27 +71,7 @@ export default function PageContrats() {
 
   const { mutate: supprimer } = utiliserMutation(supprimerContrat, { onSuccess: () => { invalider(); toast.success("Contrat supprimé"); } });
 
-  const ouvrirCreation = () => {
-    setEnEdition(null);
-    setForm({ nom: "", type_contrat: "", fournisseur: "", montant_mensuel: "", date_debut: "", date_fin: "", statut: "actif" });
-    setDialogOuvert(true);
-  };
 
-  const ouvrirEdition = (c: Contrat) => {
-    setEnEdition(c);
-    setForm({
-      nom: c.nom,
-      type_contrat: c.type_contrat,
-      fournisseur: c.fournisseur ?? "",
-      montant_mensuel: c.montant_mensuel != null ? String(c.montant_mensuel) : "",
-      date_debut: c.date_debut ?? "",
-      date_fin: c.date_fin ?? "",
-      statut: c.statut ?? "actif",
-    });
-    setDialogOuvert(true);
-  };
-
-  const fermerDialog = () => { setDialogOuvert(false); setEnEdition(null); };
 
   const soumettre = () => {
     const payload = {

@@ -71,7 +71,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # ─── Prédictions ML ───
     "PredictionArticle": (".predictions", "PredictionArticle"),
     "AnalysePrediction": (".predictions", "AnalysePrediction"),
-    "PredictionService": (".predictions", "PredictionService"),
+    "InventairePredictionService": (".predictions", "InventairePredictionService"),
     "obtenir_service_predictions": (".predictions", "obtenir_service_predictions"),
 }
 

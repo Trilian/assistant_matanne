@@ -355,7 +355,3 @@ def obtenir_service_predictions() -> InventairePredictionService:
 def get_predictions_service() -> InventairePredictionService:
     """Factory for predictions service (English alias)."""
     return obtenir_service_predictions()
-
-
-# Alias rétrocompatible (Deprecated)
-PredictionService = InventairePredictionService

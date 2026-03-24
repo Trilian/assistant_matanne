@@ -101,7 +101,7 @@ class PredictionServiceJeux:
     Service de prédiction des résultats de matchs sportifs.
 
     Renommé en PredictionServiceJeux pour éviter la confusion avec
-    cuisine.suggestions.predictions.PredictionService (ML inventaire).
+    cuisine.suggestions.predictions.InventairePredictionService (ML inventaire).
     """
 
     def __init__(self):
@@ -521,14 +521,6 @@ def get_prediction_service() -> PredictionServiceJeux:
 def obtenir_service_predictions_jeux() -> PredictionServiceJeux:
     """Alias français pour get_prediction_service (singleton via registre)."""
     return get_prediction_service()
-
-
-# ═══════════════════════════════════════════════════════════
-# ALIAS RÉTRO-COMPATIBILITÉ
-# ═══════════════════════════════════════════════════════════
-
-# Alias pour rétro-compatibilité
-PredictionService = PredictionServiceJeux
 
 
 # ═══════════════════════════════════════════════════════════

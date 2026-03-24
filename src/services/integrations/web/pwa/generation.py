@@ -54,18 +54,3 @@ def is_pwa_installed() -> bool:
     Note: Ne fonctionne que côté client via JavaScript.
     """
     return False
-
-
-# ═══════════════════════════════════════════════════════════
-# STUBS DEPRECATED (rétrocompatibilité)
-# ═══════════════════════════════════════════════════════════
-
-
-def inject_pwa_meta() -> None:
-    """DEPRECATED — plus nécessaire avec Next.js."""
-    pass
-
-
-def afficher_install_prompt() -> None:
-    """DEPRECATED — plus nécessaire avec Next.js."""
-    pass

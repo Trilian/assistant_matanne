@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
+import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import { listerEcoTips, creerEcoTip, modifierEcoTip, supprimerEcoTip } from "@/bibliotheque/api/maison";
 import type { ActionEcologique } from "@/types/maison";
@@ -26,10 +27,22 @@ import { toast } from "sonner";
 
 export default function PageEcoTips() {
   const [actifOnly, setActifOnly] = useState(false);
-  const [dialogOuvert, setDialogOuvert] = useState(false);
-  const [enEdition, setEnEdition] = useState<ActionEcologique | null>(null);
-  const [form, setForm] = useState({ titre: "", description: "", categorie: "", impact: "", economie_estimee: "", actif: true });
+  const formsVide = { titre: "", description: "", categorie: "", impact: "", economie_estimee: "", actif: true };
+  const [form, setForm] = useState(formsVide);
   const queryClient = useQueryClient();
+
+  const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
+    utiliserDialogCrud<ActionEcologique>({
+      onOuvrirCreation: () => setForm(formsVide),
+      onOuvrirEdition: (a) => setForm({
+        titre: a.titre,
+        description: a.description ?? "",
+        categorie: a.categorie ?? "",
+        impact: a.impact ?? "",
+        economie_estimee: a.economie_estimee != null ? String(a.economie_estimee) : "",
+        actif: a.actif,
+      }),
+    });
 
   const { data: actions, isLoading } = utiliserRequete(
     ["maison", "eco-tips", String(actifOnly)],
@@ -60,27 +73,6 @@ export default function PageEcoTips() {
     onSuccess: () => { invalider(); toast.success("Éco-geste supprimé"); },
     onError: () => toast.error("Erreur lors de la suppression"),
   });
-
-  const ouvrirCreation = () => {
-    setEnEdition(null);
-    setForm({ titre: "", description: "", categorie: "", impact: "", economie_estimee: "", actif: true });
-    setDialogOuvert(true);
-  };
-
-  const ouvrirEdition = (a: ActionEcologique) => {
-    setEnEdition(a);
-    setForm({
-      titre: a.titre,
-      description: a.description ?? "",
-      categorie: a.categorie ?? "",
-      impact: a.impact ?? "",
-      economie_estimee: a.economie_estimee != null ? String(a.economie_estimee) : "",
-      actif: a.actif,
-    });
-    setDialogOuvert(true);
-  };
-
-  const fermerDialog = () => { setDialogOuvert(false); setEnEdition(null); };
 
   const soumettre = () => {
     const payload = {

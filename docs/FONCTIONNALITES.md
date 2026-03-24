@@ -169,9 +169,9 @@ CREATE INDEX idx_inventaire_stock_bas ON inventaire(quantite, quantite_min);
 ### Prédictions de rupture
 
 ```python
-from src.services.predictions import PredictionService
+from src.services.cuisine.suggestions import InventairePredictionService
 
-service = PredictionService()
+service = InventairePredictionService()
 prediction = service.predire_rupture_stock(article_id)
 
 print(f"Rupture estimée dans {prediction.jours_avant_rupture} jours")

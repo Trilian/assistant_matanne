@@ -95,13 +95,5 @@ class TestIsPwaInstalled:
         assert isinstance(is_pwa_installed(), bool)
 
 
-class TestInjectPwaMeta:
-    """Tests pour inject_pwa_meta()."""
-
-    @patch("src.services.integrations.web.pwa.generation.inject_pwa_meta")
-    def test_delegue_a_ui_view(self, mock_inject):
-        """Vérifie que la fonction délègue correctement."""
-        from src.services.integrations.web.pwa.generation import inject_pwa_meta
-
-        # La fonction ne devrait pas lever d'erreur
-        inject_pwa_meta()
+# Les tests pour inject_pwa_meta ont été supprimés car la fonction était un stub
+# deprecated (DEPRECATED — plus nécessaire avec Next.js) et a été retirée.

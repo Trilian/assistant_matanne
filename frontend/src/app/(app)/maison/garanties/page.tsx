@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
+import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
   listerGaranties,
@@ -32,9 +33,13 @@ import type { Garantie } from "@/types/maison";
 import { toast } from "sonner";
 
 export default function PageGaranties() {
-  const [dialogOuvert, setDialogOuvert] = useState(false);
-  const [enEdition, setEnEdition] = useState<Garantie | null>(null);
-  const [form, setForm] = useState({ appareil: "", marque: "", date_achat: "", date_fin_garantie: "", piece: "", magasin: "", prix_achat: "" });
+  const formsVide = { appareil: "", marque: "", date_achat: "", date_fin_garantie: "", piece: "", magasin: "", prix_achat: "" };
+  const [form, setForm] = useState(formsVide);
+  const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
+    utiliserDialogCrud<Garantie>({
+      onOuvrirCreation: () => setForm(formsVide),
+      onOuvrirEdition: (g) => setForm({ appareil: g.appareil, marque: g.marque ?? "", date_achat: g.date_achat ?? "", date_fin_garantie: g.date_fin_garantie ?? "", piece: g.piece ?? "", magasin: g.magasin ?? "", prix_achat: g.prix_achat != null ? String(g.prix_achat) : "" }),
+    });
   const queryClient = useQueryClient();
 
   const { data: garanties, isLoading } = utiliserRequete(
@@ -75,27 +80,7 @@ export default function PageGaranties() {
     onError: () => toast.error("Erreur lors de la suppression"),
   });
 
-  const ouvrirCreation = () => {
-    setEnEdition(null);
-    setForm({ appareil: "", marque: "", date_achat: "", date_fin_garantie: "", piece: "", magasin: "", prix_achat: "" });
-    setDialogOuvert(true);
-  };
 
-  const ouvrirEdition = (g: Garantie) => {
-    setEnEdition(g);
-    setForm({
-      appareil: g.appareil,
-      marque: g.marque ?? "",
-      date_achat: g.date_achat ?? "",
-      date_fin_garantie: g.date_fin_garantie ?? "",
-      piece: g.piece ?? "",
-      magasin: g.magasin ?? "",
-      prix_achat: g.prix_achat != null ? String(g.prix_achat) : "",
-    });
-    setDialogOuvert(true);
-  };
-
-  const fermerDialog = () => { setDialogOuvert(false); setEnEdition(null); };
 
   const soumettre = () => {
     const payload = {

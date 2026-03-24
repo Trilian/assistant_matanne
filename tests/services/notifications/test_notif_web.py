@@ -1,4 +1,4 @@
-"""Tests pour src/services/notifications/notif_web.py - ServiceWebPush.
+"""Tests pour src/services/notifications/notif_web_core.py - ServiceWebPush.
 
 Couverture des fonctionnalités:
 - Gestion des abonnements push
@@ -12,8 +12,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.services.core.notifications.notif_web import (
+from src.services.core.notifications.notif_web_core import (
     ServiceWebPush,
+    get_push_notification_service,
     obtenir_service_webpush,
 )
 from src.services.core.notifications.types import (
@@ -515,7 +516,7 @@ class TestGetSupabaseClient:
     def test_get_supabase_client_not_configured(self, service):
         """Retourne None si Supabase non configuré."""
         with patch(
-            "src.services.core.notifications.notif_web.ServiceWebPush._get_supabase_client"
+            "src.services.core.notifications.notif_web_core.ServiceWebPush._get_supabase_client"
         ) as mock:
             mock.return_value = None
             result = service._get_supabase_client()
@@ -529,7 +530,7 @@ class TestGetSupabaseClient:
             type(service), "_get_supabase_client", side_effect=Exception("Test error")
         ):
             # Appeler via le module
-            from src.services.core.notifications.notif_web import ServiceWebPush
+            from src.services.core.notifications.notif_web_core import ServiceWebPush
 
             svc = ServiceWebPush()
             # La vraie méthode doit capturer les exceptions

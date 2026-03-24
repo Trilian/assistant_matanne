@@ -54,7 +54,7 @@ async def souscrire_push(
     Le frontend doit envoyer l'objet AbonnementPush.toJSON() obtenu
     après navigator.serviceWorker.pushManager.subscribe().
     """
-    from src.services.core.notifications.notif_web import get_push_notification_service
+    from src.services.core.notifications.notif_web_core import get_push_notification_service
 
     service = get_push_notification_service()
 
@@ -94,7 +94,7 @@ async def desabonner_push(
     """
     Supprime un abonnement push pour l'utilisateur authentifié.
     """
-    from src.services.core.notifications.notif_web import get_push_notification_service
+    from src.services.core.notifications.notif_web_core import get_push_notification_service
 
     service = get_push_notification_service()
     user_id = current_user["id"]
@@ -125,7 +125,7 @@ async def obtenir_statut_push(
     """
     Retourne le statut des notifications push pour l'utilisateur authentifié.
     """
-    from src.services.core.notifications.notif_web import get_push_notification_service
+    from src.services.core.notifications.notif_web_core import get_push_notification_service
 
     service = get_push_notification_service()
     user_id = current_user["id"]

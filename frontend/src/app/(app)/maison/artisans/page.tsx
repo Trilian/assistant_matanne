@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
   listerArtisans,
@@ -32,10 +33,22 @@ import type { Artisan } from "@/types/maison";
 
 export default function PageArtisans() {
   const [metier, setMetier] = useState<string | undefined>();
-  const [dialogOuvert, setDialogOuvert] = useState(false);
-  const [enEdition, setEnEdition] = useState<Artisan | null>(null);
-  const [form, setForm] = useState({ nom: "", metier: "", telephone: "", email: "", adresse: "", note_satisfaction: "" });
+  const formsVide = { nom: "", metier: "", telephone: "", email: "", adresse: "", note_satisfaction: "" };
+  const [form, setForm] = useState(formsVide);
   const queryClient = useQueryClient();
+
+  const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
+    utiliserDialogCrud<Artisan>({
+      onOuvrirCreation: () => setForm(formsVide),
+      onOuvrirEdition: (a) => setForm({
+        nom: a.nom,
+        metier: a.metier,
+        telephone: a.telephone ?? "",
+        email: a.email ?? "",
+        adresse: a.adresse ?? "",
+        note_satisfaction: a.note_satisfaction != null ? String(a.note_satisfaction) : "",
+      }),
+    });
 
   const { data: artisans, isLoading } = utiliserRequete(
     ["maison", "artisans", metier ?? "all"],
@@ -60,27 +73,6 @@ export default function PageArtisans() {
   );
 
   const { mutate: supprimer } = utiliserMutation(supprimerArtisan, { onSuccess: () => { invalider(); toast.success("Artisan supprimé"); } });
-
-  const ouvrirCreation = () => {
-    setEnEdition(null);
-    setForm({ nom: "", metier: "", telephone: "", email: "", adresse: "", note_satisfaction: "" });
-    setDialogOuvert(true);
-  };
-
-  const ouvrirEdition = (a: Artisan) => {
-    setEnEdition(a);
-    setForm({
-      nom: a.nom,
-      metier: a.metier,
-      telephone: a.telephone ?? "",
-      email: a.email ?? "",
-      adresse: a.adresse ?? "",
-      note_satisfaction: a.note_satisfaction != null ? String(a.note_satisfaction) : "",
-    });
-    setDialogOuvert(true);
-  };
-
-  const fermerDialog = () => { setDialogOuvert(false); setEnEdition(null); };
 
   const soumettre = () => {
     const payload = {

@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
+import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
   listerDepensesMaison,
@@ -42,17 +43,13 @@ const CATEGORIES = ["Courses", "Travaux", "Équipement", "Énergie", "Abonnement
 
 export default function PageDepenses() {
   const [categorie, setCategorie] = useState<string | undefined>();
-  const [dialogOuvert, setDialogOuvert] = useState(false);
-  const [enEdition, setEnEdition] = useState<DepenseMaison | null>(null);
-  const [form, setForm] = useState({
-    libelle: "",
-    montant: "",
-    categorie: "",
-    date: new Date().toISOString().slice(0, 10),
-    fournisseur: "",
-    recurrence: "",
-    notes: "",
-  });
+  const formsVide = { libelle: "", montant: "", categorie: "", date: new Date().toISOString().slice(0, 10), fournisseur: "", recurrence: "", notes: "" };
+  const [form, setForm] = useState(formsVide);
+  const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
+    utiliserDialogCrud<DepenseMaison>({
+      onOuvrirCreation: () => setForm({ ...formsVide, date: new Date().toISOString().slice(0, 10) }),
+      onOuvrirEdition: (d) => setForm({ libelle: d.libelle, montant: String(d.montant), categorie: d.categorie, date: d.date, fournisseur: d.fournisseur ?? "", recurrence: d.recurrence ?? "", notes: d.notes ?? "" }),
+    });
   const queryClient = useQueryClient();
 
   const { data: depenses, isLoading } = utiliserRequete(
@@ -91,38 +88,7 @@ export default function PageDepenses() {
     onError: () => toast.error("Erreur lors de la suppression"),
   });
 
-  const ouvrirCreation = () => {
-    setEnEdition(null);
-    setForm({
-      libelle: "",
-      montant: "",
-      categorie: "",
-      date: new Date().toISOString().slice(0, 10),
-      fournisseur: "",
-      recurrence: "",
-      notes: "",
-    });
-    setDialogOuvert(true);
-  };
 
-  const ouvrirEdition = (d: DepenseMaison) => {
-    setEnEdition(d);
-    setForm({
-      libelle: d.libelle,
-      montant: String(d.montant),
-      categorie: d.categorie,
-      date: d.date,
-      fournisseur: d.fournisseur ?? "",
-      recurrence: d.recurrence ?? "",
-      notes: d.notes ?? "",
-    });
-    setDialogOuvert(true);
-  };
-
-  const fermerDialog = () => {
-    setDialogOuvert(false);
-    setEnEdition(null);
-  };
 
   const soumettre = () => {
     const payload = {

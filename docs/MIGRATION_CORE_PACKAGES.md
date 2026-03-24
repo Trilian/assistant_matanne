@@ -1,8 +1,8 @@
 # 🔄 Guide de Migration — Core Packages
 
-> **⚠️ Référence historique** — Ce document retrace la migration des imports core. Le frontend est désormais Next.js.
+> **⚠️ Référence historique** — Ce document retrace la migration des imports core. Le frontend est désormais Next.js, le backend utilise les sous-packages modulaires.
 
-> **Dernière mise à jour**: 19 Février 2026
+> **Dernière mise à jour**: 19 Février 2026 — Migration terminée, aucun shim restant.
 
 ## Résumé
 
@@ -33,9 +33,9 @@ Le module `src/core/` a été réorganisé en **7 sous-packages modulaires** pou
 
 ```
 src/core/config/
-├── __init__.py     # Re-exports: obtenir_parametres, Parametres, charger_secrets_streamlit
+├── __init__.py     # Re-exports: obtenir_parametres, Parametres
 ├── settings.py     # Classe Parametres (Pydantic BaseSettings)
-└── loader.py       # Chargement .env, secrets Streamlit, détection cloud
+└── loader.py       # Chargement .env, variables d'environnement
 ```
 
 > **Note**: Les fonctions privées (`_get_mistral_api_key_from_secrets`, etc.) ne sont **pas** re-exportées
@@ -60,7 +60,6 @@ src/core/caching/
 ├── base.py          # EntreeCache, StatistiquesCache (types)
 ├── cache.py         # Cache, cached() — décorateur typé avec ParamSpec
 ├── memory.py        # CacheMemoireN1 (L1: dict Python)
-├── session.py       # CacheSessionN2 (L2: st.session_state)
 ├── file.py          # CacheFichierN3 (L3: pickle sur disque)
 └── orchestrator.py  # CacheMultiNiveau, avec_cache_multi() — typé ParamSpec
 ```
@@ -157,9 +156,6 @@ Les fichiers shims suivants ont été **supprimés**. Tous les imports doivent u
 | `src.core.database.create_engine`                   | `src.core.db.engine.create_engine`                         |
 | `src.core.database.st`                              | `src.core.db.engine.st` ou `src.core.db.utils.st`          |
 | `src.core.config._get_mistral_api_key_from_secrets` | `src.core.config.loader._get_mistral_api_key_from_secrets` |
-| `src.core.config._read_st_secret`                   | `src.core.config.settings._read_st_secret`                 |
-| `src.core.config._reload_env_files`                 | `src.core.config.settings._reload_env_files`               |
-| `src.core.config.charger_secrets_streamlit`         | `src.core.config.settings.charger_secrets_streamlit`       |
 | `src.core.config.configure_logging`                 | `src.core.logging.configure_logging`                       |
 | `src.core.performance.ProfileurFonction`            | `src.core.monitoring.profiler.ProfileurFonction`           |
 | `src.core.performance.st`                           | `src.core.monitoring.{profiler,memory,sql,dashboard}.st`   |

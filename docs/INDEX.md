@@ -18,7 +18,6 @@
 | [MIGRATION_CORE_PACKAGES.md](./MIGRATION_CORE_PACKAGES.md) | Guide migration imports core |
 | [UI_COMPONENTS.md](./UI_COMPONENTS.md) | Composants UI Next.js / shadcn |
 | [PATTERNS.md](./PATTERNS.md) | Patterns de code récurrents |
-| [MIGRATION_NEXTJS.md](./MIGRATION_NEXTJS.md) | Historique migration Streamlit → Next.js |
 | [REDIS_SETUP.md](./REDIS_SETUP.md) | Configuration Redis (optionnel) |
 
 ## 📁 Structure
@@ -36,7 +35,6 @@ docs/
 ├── MIGRATION_CORE_PACKAGES.md   ← Guide migration imports
 ├── UI_COMPONENTS.md             ← Composants UI Next.js
 ├── PATTERNS.md                  ← Patterns de code
-├── MIGRATION_NEXTJS.md          ← Historique migration
 ├── REDIS_SETUP.md               ← Setup Redis
 └── guides/                      ← Guides spécifiques
     ├── cuisine/batch_cooking.md

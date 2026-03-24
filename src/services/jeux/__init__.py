@@ -81,7 +81,6 @@ _LAZY_IMPORTS: dict[str, str] = {
     "get_notification_jeux_service": "notification_service",
     "obtenir_service_notifications_jeux": "notification_service",
     # ── Prédictions ──
-    "PredictionService": "prediction_service",
     "PredictionServiceJeux": "prediction_service",
     "ConseilPari": "prediction_service",
     "CotesMatch": "prediction_service",
@@ -238,7 +237,6 @@ if TYPE_CHECKING:
         H2HData,
         PredictionOverUnder,
         PredictionResultat,
-        PredictionService,
         PredictionServiceJeux,
         generer_conseil_pari,
         generer_conseils_avances,

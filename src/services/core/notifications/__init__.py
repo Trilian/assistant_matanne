@@ -26,8 +26,9 @@ from src.services.core.notifications.notif_ntfy import (
     obtenir_planificateur_ntfy,
     obtenir_service_ntfy,
 )
-from src.services.core.notifications.notif_web import (
+from src.services.core.notifications.notif_web_core import (
     ServiceWebPush,
+    get_push_notification_service,
     obtenir_service_webpush,
 )
 from src.services.core.notifications.types import (

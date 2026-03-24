@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
+import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
   listerDiagnostics,
@@ -33,9 +34,13 @@ import type { DiagnosticImmobilier } from "@/types/maison";
 import { toast } from "sonner";
 
 export default function PageDiagnostics() {
-  const [dialogOuvert, setDialogOuvert] = useState(false);
-  const [enEdition, setEnEdition] = useState<DiagnosticImmobilier | null>(null);
-  const [form, setForm] = useState({ type_diagnostic: "", date_realisation: "", date_expiration: "", resultat: "", diagnostiqueur: "" });
+  const formsVide = { type_diagnostic: "", date_realisation: "", date_expiration: "", resultat: "", diagnostiqueur: "" };
+  const [form, setForm] = useState(formsVide);
+  const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
+    utiliserDialogCrud<DiagnosticImmobilier>({
+      onOuvrirCreation: () => setForm(formsVide),
+      onOuvrirEdition: (d) => setForm({ type_diagnostic: d.type_diagnostic, date_realisation: d.date_realisation ?? "", date_expiration: d.date_expiration ?? "", resultat: d.resultat ?? "", diagnostiqueur: d.diagnostiqueur ?? "" }),
+    });
   const queryClient = useQueryClient();
 
   const { data: diagnostics, isLoading } = utiliserRequete(
@@ -81,25 +86,7 @@ export default function PageDiagnostics() {
     onError: () => toast.error("Erreur lors de la suppression"),
   });
 
-  const ouvrirCreation = () => {
-    setEnEdition(null);
-    setForm({ type_diagnostic: "", date_realisation: "", date_expiration: "", resultat: "", diagnostiqueur: "" });
-    setDialogOuvert(true);
-  };
 
-  const ouvrirEdition = (d: DiagnosticImmobilier) => {
-    setEnEdition(d);
-    setForm({
-      type_diagnostic: d.type_diagnostic,
-      date_realisation: d.date_realisation ?? "",
-      date_expiration: d.date_expiration ?? "",
-      resultat: d.resultat ?? "",
-      diagnostiqueur: d.diagnostiqueur ?? "",
-    });
-    setDialogOuvert(true);
-  };
-
-  const fermerDialog = () => { setDialogOuvert(false); setEnEdition(null); };
 
   const soumettre = () => {
     const payload = {
