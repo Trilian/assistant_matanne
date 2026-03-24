@@ -4,9 +4,12 @@ Tests unitaires pour courses.py
 Module: src.core.models.courses
 """
 
-
-# TODO: Ajuster l'import selon la structure
-# from src.core.models.courses import ...
+from src.core.models.courses import (
+    ListeCourses,
+    ArticleCourses,
+    ModeleCourses,
+    ArticleModele,
+)
 
 
 class TestCourses:
@@ -16,50 +19,58 @@ class TestCourses:
         """Tests pour la classe ListeCourses."""
 
         def test_listecourses_creation(self):
-            """Test de création de ListeCourses."""
-            # TODO: Implémenter
-            pass
+            liste = ListeCourses(nom="Courses semaine")
+            assert liste.nom == "Courses semaine"
 
-        def test_listecourses_methode_principale(self):
-            """Test de la méthode principale."""
-            # TODO: Implémenter
-            pass
+        def test_listecourses_tablename(self):
+            assert ListeCourses.__tablename__ == "listes_courses"
 
     class TestArticleCourses:
         """Tests pour la classe ArticleCourses."""
 
         def test_articlecourses_creation(self):
-            """Test de création de ArticleCourses."""
-            # TODO: Implémenter
-            pass
+            article = ArticleCourses(
+                liste_id=1,
+                ingredient_id=10,
+                quantite_necessaire=2.0,
+                priorite="normale",
+            )
+            assert article.liste_id == 1
+            assert article.ingredient_id == 10
+            assert article.quantite_necessaire == 2.0
 
-        def test_articlecourses_methode_principale(self):
-            """Test de la méthode principale."""
-            # TODO: Implémenter
-            pass
+        def test_articlecourses_tablename(self):
+            assert ArticleCourses.__tablename__ == "liste_courses"
 
     class TestModeleCourses:
         """Tests pour la classe ModeleCourses."""
 
         def test_modelecourses_creation(self):
-            """Test de création de ModeleCourses."""
-            # TODO: Implémenter
-            pass
+            modele = ModeleCourses(
+                nom="Courses hebdo",
+                description="Liste standard de la semaine",
+            )
+            assert modele.nom == "Courses hebdo"
 
-        def test_modelecourses_methode_principale(self):
-            """Test de la méthode principale."""
-            # TODO: Implémenter
-            pass
+        def test_modelecourses_tablename(self):
+            assert ModeleCourses.__tablename__ == "modeles_courses"
 
     class TestArticleModele:
         """Tests pour la classe ArticleModele."""
 
         def test_articlemodele_creation(self):
-            """Test de création de ArticleModele."""
-            # TODO: Implémenter
-            pass
+            art = ArticleModele(
+                modele_id=1,
+                nom_article="Lait",
+                quantite=2.0,
+                unite="L",
+                rayon_magasin="Frais",
+                priorite="normale",
+                ordre=1,
+            )
+            assert art.nom_article == "Lait"
+            assert art.quantite == 2.0
+            assert art.unite == "L"
 
-        def test_articlemodele_methode_principale(self):
-            """Test de la méthode principale."""
-            # TODO: Implémenter
-            pass
+        def test_articlemodele_tablename(self):
+            assert ArticleModele.__tablename__ == "articles_modeles"

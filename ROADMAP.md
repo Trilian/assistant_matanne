@@ -1,6 +1,81 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 22 juin 2026
+> Dernière mise à jour: 23 juin 2026
+
+---
+
+## ✅ Sprint 13 — Tests massifs, docs cleanup, PDF export, env
+
+### Tests frontend — 23 nouveaux fichiers de test
+
+| Fichier | Tests | Description |
+| --- | --- | --- |
+| `parametres/parametres.test.tsx` | 3 | Titre, onglets profil/cuisine/notif/affich/IA |
+| `planning/planning.test.tsx` | 3 | Titre, jours semaine, navigation |
+| `cuisine/inventaire/inventaire.test.tsx` | 3 | Titre, articles, bouton Ajouter |
+| `cuisine/courses/courses.test.tsx` | 3 | Titre, listes, bouton Nouvelle liste |
+| `cuisine/batch-cooking/batch-cooking.test.tsx` | 3 | Titre, sessions, bouton |
+| `cuisine/anti-gaspillage/anti-gaspillage.test.tsx` | 3 | Titre, score, produits |
+| `cuisine/planning/planning-repas.test.tsx` | 3 | Titre, grille semaine, navigation |
+| `cuisine/recettes/nouveau/nouveau.test.tsx` | 2 | Titre, formulaire |
+| `cuisine/recettes/[id]/detail.test.tsx` | 3 | Titre, ingrédients, étapes |
+| `cuisine/recettes/[id]/modifier/modifier.test.tsx` | 2 | Titre, formulaire |
+| `famille/weekend/weekend.test.tsx` | 3 | Titre, activités, bouton |
+| `famille/routines/routines.test.tsx` | 3 | Titre, onglets matin/soir, routines |
+| `famille/album/album.test.tsx` | 3 | Titre, photos, bouton upload |
+| `famille/activites/activites.test.tsx` | 3 | Titre, activités, bouton |
+| `maison/visualisation/visualisation.test.tsx` | 3 | Titre, plan, pièces |
+| `maison/stocks/stocks.test.tsx` | 3 | Titre, articles, bouton |
+| `maison/projets/projets.test.tsx` | 3 | Titre, projets, bouton |
+| `maison/entretien/entretien.test.tsx` | 3 | Titre, tâches, bouton |
+| `maison/energie/energie.test.tsx` | 3 | Titre, compteurs, consommation |
+| `maison/depenses/depenses.test.tsx` | 3 | Titre, dépenses, bouton |
+| `maison/charges/charges.test.tsx` | 3 | Titre, factures, bouton |
+| `jeux/loto/loto.test.tsx` | 3 | Titre, tirages, grilles |
+| `outils/meteo/meteo.test.tsx` | 3 | Titre, météo, recherche |
+
+### Tests backend — 7 fichiers modèles complétés
+
+| Fichier | Tests | Description |
+| --- | --- | --- |
+| `test_user_preferences.py` | 4 | TypeRetour, PreferenceUtilisateur, RetourRecette, OpenFoodFactsCache |
+| `test_users.py` | 7 | Enums achat, ProfilUtilisateur, GarminToken, ActiviteWeekend, AchatFamille |
+| `test_inventaire.py` | 3 | ArticleInventaire, HistoriqueInventaire, tablename |
+| `test_courses.py` | 4 | ListeCourses, ArticleCourses, ModeleCourses, ArticleModele |
+| `test_planning.py` | 5 | Planning, Repas, EvenementPlanning, TemplateSemaine, ElementTemplate |
+| `test_sante.py` | 3 | RoutineSante, ObjectifSante, EntreeSante |
+| `test_jeux.py` | 9 | 4 enums, Equipe, Match, PariSportif, TirageLoto, GrilleLoto |
+
+### Documentation nettoyée (15 corrections Streamlit)
+
+- ✅ `docs/GUIDE_UTILISATEUR.md` — 3 refs Streamlit → Next.js + FastAPI
+- ✅ `docs/PATTERNS.md` — 4 refs Streamlit + section Mock Streamlit supprimée
+- ✅ `docs/REDIS_SETUP.md` — 2 refs Streamlit + section `st.secrets` supprimée
+- ✅ `docs/SERVICES_REFERENCE.md` — 3 refs Streamlit (diagramme, sync_wrapper, bullets)
+
+### Export PDF branché
+
+- ✅ `src/api/routes/export.py` — Route `/api/v1/export/pdf` connectée à `ServiceExportPDF`
+  - `type_export=recette` → `exporter_recette()` (reportlab PDF)
+  - `type_export=planning` → `exporter_planning_semaine()` (reportlab PDF)
+  - `type_export=courses` → `exporter_liste_courses()` (reportlab PDF)
+  - `type_export=budget` → HTTP 501 (pas encore implémenté)
+
+### Environnement
+
+- ✅ `frontend/.env.example` — Ajout `NEXT_PUBLIC_WS_URL`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+- ✅ `.env.example` — Fix redirect URI Google Calendar `8501` → `3000`
+
+### Compteurs finaux
+
+| Métrique | Valeur |
+| --- | --- |
+| Fichiers de test Vitest | 56+ |
+| Tests Vitest totaux | ~225+ |
+| Tests backend pytest modèles | 35+ |
+| Export PDF | ✅ branché |
+| Refs Streamlit docs | 0 |
+| `next build` | ✅ |
 
 ---
 

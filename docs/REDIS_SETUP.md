@@ -9,7 +9,7 @@
 
 ### 1. Variable d'environnement
 
-Ajouter `REDIS_URL` dans `.env.local` ou les secrets Streamlit :
+Ajouter `REDIS_URL` dans `.env.local` :
 
 ```bash
 # .env.local
@@ -22,14 +22,7 @@ REDIS_URL=redis://:password@redis-host:6379/0
 REDIS_URL=rediss://:password@redis-host:6380/0
 ```
 
-### 2. Ou via `st.secrets` (Streamlit Cloud)
-
-```toml
-# .streamlit/secrets.toml
-REDIS_URL = "redis://:password@redis-host:6379/0"
-```
-
-### 3. Ou via la config Pydantic
+### 2. Via la config Pydantic
 
 Le paramètre `REDIS_URL` est déclaré dans `Parametres` (src/core/config/settings.py).
 

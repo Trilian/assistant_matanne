@@ -19,7 +19,7 @@ Ce document présente les patterns **actifs** utilisés dans le core de l'applic
 
 **Fichiers**: `src/core/state/`
 
-État applicatif découpé par domaine, découplé de Streamlit.
+État applicatif découpé par domaine, découplé de l'UI.
 
 ### Slices disponibles
 
@@ -164,9 +164,9 @@ Cache.invalider(pattern="charger_")
 
 | Couche | Décorateur | Raison |
 |--------|-----------|--------|
-| Services/métier | `@avec_cache` | Multi-niveaux, testable sans Streamlit |
-| Composants UI (graphiques) | `@st.cache_data` | Retourne objets Streamlit/Plotly |
-| Données UI (dict/list) | `@cache_ui` | Bridge `st.cache_data` + fallback tests |
+| Services/métier | `@avec_cache` | Multi-niveaux, testable indépendamment |
+| Frontend | TanStack Query | Cache côté client (staleTime, gcTime) |
+| HTTP | Middleware ETag | Cache navigateur automatique |
 
 ---
 
@@ -361,16 +361,6 @@ def test_afficher_courses(mock_factory):
     mock_service.lister_articles.assert_called_once()
 ```
 
-### Mock Streamlit
-
-```python
-@patch("src.modules.accueil.dashboard.st")
-def test_dashboard(mock_st):
-    mock_st.session_state = {}
-    app()
-    mock_st.title.assert_called()
-```
-
 ### Fixtures DB (conftest.py)
 
 ```python
@@ -391,7 +381,7 @@ def test_db():
 
 ## Patterns supprimés
 
-Les patterns suivants ont été évalués et supprimés du codebase (dead code, inutiles pour une app Streamlit single-user):
+Les patterns suivants ont été évalués et supprimés du codebase (dead code, inutiles pour cette application):
 
 | Pattern | Raison de suppression |
 |---------|----------------------|
@@ -402,7 +392,7 @@ Les patterns suivants ont été évalués et supprimés du codebase (dead code, 
 | **IoC Container** (`src/core/container.py`) | Zero callers en production. `@service_factory` + registre suffisent. |
 | **Middleware Pipeline** (`src/core/middleware/`) | Zero callers. Le décorateur `@avec_resilience` remplace ce besoin. |
 | **CQRS** (`src/services/core/cqrs/`) | Zero callers. Pas de séparation lecture/écriture pour une app single-user. |
-| **UI v2.0** (DialogBuilder, FormBuilder, URL State) | Zero callers. Streamlit natif `st.dialog()`, `st.form()` suffisent. |
+| **UI v2.0** (DialogBuilder, FormBuilder, URL State) | Zero callers. Migré vers Next.js + shadcn/ui. |
 
 ---
 

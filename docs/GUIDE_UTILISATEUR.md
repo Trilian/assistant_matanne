@@ -1,7 +1,7 @@
 # 📖 Guide Utilisateur — MaTanne
 
 > Hub de gestion familial pour Anne & Mathieu (et le petit Jules !)
-> Application Streamlit accessible depuis le navigateur.
+> Application web accessible depuis le navigateur (Next.js + FastAPI).
 
 ---
 
@@ -29,10 +29,14 @@
 ### Lancer l'application
 
 ```bash
-streamlit run src/app.py
+# Backend
+uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
+
+# Frontend (dans un autre terminal)
+cd frontend && npm run dev
 ```
 
-L'application s'ouvre dans votre navigateur (par défaut `http://localhost:8501`).
+L'application s'ouvre dans votre navigateur (par défaut `http://localhost:3000`).
 
 ### Navigation
 
@@ -565,7 +569,7 @@ Aperçu de tous les composants UI disponibles dans l'application (pour les déve
 
 1. Vérifiez que l'environnement virtuel est activé : `.venv\Scripts\Activate.ps1`
 2. Installez les dépendances : `pip install -r requirements.txt`
-3. Lancez : `streamlit run src/app.py`
+3. Lancez le backend : `uvicorn src.api.main:app --reload` et le frontend : `cd frontend && npm run dev`
 
 ### La base de données ne se connecte pas
 

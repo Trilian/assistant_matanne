@@ -108,7 +108,7 @@ class TestDepense:
         # Vérifier la présence des colonnes avec default
         colonnes = Depense.__table__.columns
         assert colonnes["categorie"].default is not None
-        assert colonnes["created_at"].default is not None
+        assert colonnes["cree_le"].default is not None
 
     def test_est_recurrente_property(self):
         """Test de la propriété est_recurrente."""

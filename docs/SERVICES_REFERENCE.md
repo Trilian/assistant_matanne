@@ -8,7 +8,7 @@ L'architecture des services suit un modèle en couches:
 
 ```text
 ┌─────────────────────────────────────────────────────────┐
-│                    UI (Streamlit)                        │
+│              UI (Next.js / React)                        │
 └─────────────────────────┬───────────────────────────────┘
                           │
 ┌─────────────────────────▼───────────────────────────────┐
@@ -417,7 +417,7 @@ class MonService(BaseAIService):
 ### sync_wrapper (Utilitaire Async/Sync)
 
 Décorateur pour convertir automatiquement des méthodes async en méthodes sync.
-Utile pour l'intégration avec Streamlit qui ne supporte pas nativement async.
+Utile pour l'intégration synchrone dans les routes FastAPI.
 
 ```python
 from src.services.base import sync_wrapper
@@ -459,8 +459,7 @@ ma_methode_synchrone = make_sync_alias(ma_methode_async, suffix="_synchrone")
 
 **Quand utiliser sync_wrapper:**
 
-- ✅ Méthodes async appelées depuis Streamlit
-- ✅ Services IA avec appels réseau async
+- ✅ Services IA avec appels réseau async appelés depuis du code sync
 - ✅ Éviter duplication de code async/sync
 - ❌ Code déjà synchrone
 - ❌ Contextes purement async (utiliser `await` directement)

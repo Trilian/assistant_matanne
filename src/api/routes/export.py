@@ -1,10 +1,9 @@
 """
 Routes API pour l'export PDF.
 
-Génération de documents PDF via le service backend.
+Génération de documents PDF via le service ServiceExportPDF.
 """
 
-import io
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -12,9 +11,12 @@ from fastapi.responses import StreamingResponse
 
 from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_CRUD_LECTURE
-from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
+from src.api.utils import executer_async, gerer_exception_api
+from src.services.rapports.export import obtenir_service_export_pdf
 
 router = APIRouter(prefix="/api/v1/export", tags=["Export"])
+
+TYPES_EXPORT = {"courses", "planning", "recette", "budget"}
 
 
 @router.post("/pdf", responses=REPONSES_CRUD_LECTURE)
@@ -36,58 +38,43 @@ async def exporter_pdf(
     - recette: Fiche recette détaillée
     - budget: Résumé budget mensuel
     """
-    from src.api.utils import executer_avec_session
+    if type_export not in TYPES_EXPORT:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Type d'export non supporté: {type_export}",
+        )
+
+    if type_export in ("recette", "planning") and not id_ressource:
+        raise HTTPException(
+            status_code=422,
+            detail=f"id_ressource requis pour {type_export}",
+        )
 
     def _generate():
-        with executer_avec_session() as session:
-            # Pour chaque type, on génère un contenu texte simple
-            # Le vrai PDF sera implémenté quand le ServiceRapportsPDF sera connecté
-            if type_export == "courses":
-                from src.core.models import ListeCourses
+        service = obtenir_service_export_pdf()
 
-                if not id_ressource:
-                    raise HTTPException(status_code=422, detail="id_ressource requis pour courses")
-                liste = session.query(ListeCourses).filter(ListeCourses.id == id_ressource).first()
-                if not liste:
-                    raise HTTPException(status_code=404, detail="Liste non trouvée")
-                titre = f"Liste de courses: {liste.nom}"
-                contenu = titre
+        if type_export == "courses":
+            return service.exporter_liste_courses(), "liste_courses"
 
-            elif type_export == "planning":
-                titre = "Planning de la semaine"
-                contenu = titre
+        elif type_export == "planning":
+            return service.exporter_planning_semaine(id_ressource), "planning_semaine"
 
-            elif type_export == "recette":
-                from src.core.models import Recette
+        elif type_export == "recette":
+            return service.exporter_recette(id_ressource), "recette"
 
-                if not id_ressource:
-                    raise HTTPException(status_code=422, detail="id_ressource requis pour recette")
-                recette = session.query(Recette).filter(Recette.id == id_ressource).first()
-                if not recette:
-                    raise HTTPException(status_code=404, detail="Recette non trouvée")
-                titre = f"Recette: {recette.nom}"
-                contenu = titre
+        elif type_export == "budget":
+            raise HTTPException(
+                status_code=501,
+                detail="Export budget PDF pas encore implémenté",
+            )
 
-            elif type_export == "budget":
-                titre = "Budget mensuel"
-                contenu = titre
+    buffer, nom_fichier = await executer_async(_generate)
+    buffer.seek(0)
 
-            else:
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"Type d'export non supporté: {type_export}",
-                )
-
-            return contenu, titre
-
-    contenu, titre = await executer_async(_generate)
-
-    # Retourner comme texte pour l'instant (ServiceRapportsPDF sera branché plus tard)
-    buffer = io.BytesIO(contenu.encode("utf-8"))
     return StreamingResponse(
         buffer,
-        media_type="text/plain",
+        media_type="application/pdf",
         headers={
-            "Content-Disposition": f'attachment; filename="{titre}.txt"',
+            "Content-Disposition": f'attachment; filename="{nom_fichier}.pdf"',
         },
     )
