@@ -156,6 +156,54 @@ Inclus le temps estimé pour chaque tâche."""
             max_tokens=700,
         )
 
+    async def suggerer_materiaux(
+        self, nom_projet: str, description: str, categorie: str = "travaux"
+    ) -> list[MaterielProjet]:
+        """Suggère les matériaux nécessaires pour un projet.
+
+        Args:
+            nom_projet: Nom du projet
+            description: Description du projet
+            categorie: Catégorie du projet
+
+        Returns:
+            Liste de MaterielProjet suggérés par l'IA
+        """
+        prompt = f"""Pour le projet "{nom_projet}" ({categorie}): {description}
+
+Liste les matériaux nécessaires avec quantités et prix estimés (France 2026).
+Format JSON:
+[
+    {{"nom": "Peinture blanche 10L", "quantite": 2, "unite": "pot", "prix": 35, "magasin": "Leroy Merlin", "alternatif": "Marque distributeur 25€"}},
+    ...
+]"""
+
+        try:
+            import json
+
+            response = await self.call_with_cache(
+                prompt=prompt,
+                system_prompt="Tu es expert en matériaux de bricolage et rénovation. Donne des estimations réalistes.",
+                max_tokens=800,
+            )
+            data = json.loads(response)
+
+            return [
+                MaterielProjet(
+                    nom=m.get("nom", "Matériel"),
+                    quantite=m.get("quantite", 1),
+                    unite=m.get("unite", "unité"),
+                    prix_estime=Decimal(str(m["prix"])) if m.get("prix") else None,
+                    magasin_suggere=m.get("magasin"),
+                    alternatif_eco=m.get("alternatif"),
+                )
+                for m in data
+                if isinstance(m, dict)
+            ]
+        except Exception as e:
+            logger.warning(f"Suggestion matériaux IA échouée: {e}")
+            return []
+
     # ─────────────────────────────────────────────────────────
     # ESTIMATION BUDGET
     # ─────────────────────────────────────────────────────────

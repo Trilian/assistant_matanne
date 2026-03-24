@@ -8,7 +8,6 @@ Ce fichier vise à augmenter la couverture des méthodes non testées:
 - attribuer_preparations_planning (workflow complet)
 """
 
-from contextlib import contextmanager
 from datetime import date, time, timedelta
 from unittest.mock import Mock, patch
 
@@ -30,20 +29,8 @@ from src.services.cuisine.batch_cooking import (
 )
 
 # ═══════════════════════════════════════════════════════════
-# FIXTURE POUR DB CONTEXT PATCH
+# FIXTURE DANS conftest.py (patched_db_context)
 # ═══════════════════════════════════════════════════════════
-
-
-@pytest.fixture
-def patched_db_context(test_db):
-    """Fixture qui patch obtenir_contexte_db pour retourner test_db."""
-
-    @contextmanager
-    def mock_context():
-        yield test_db
-
-    with patch("src.core.db.obtenir_contexte_db", mock_context):
-        yield test_db
 
 
 # ═══════════════════════════════════════════════════════════

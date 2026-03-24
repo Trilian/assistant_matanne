@@ -308,6 +308,48 @@ async def obtenir_routine(routine_id: int, user: dict[str, Any] = Depends(requir
     return await executer_async(_query)
 
 
+@router.post(
+    "/routines/{routine_id}/repetitions",
+    responses=REPONSES_CRUD_CREATION,
+)
+@gerer_exception_api
+async def enregistrer_repetition(
+    routine_id: int,
+    tache_ids: list[int] | None = None,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Enregistre une répétition (toutes ou certaines tâches faites aujourd'hui)."""
+    from src.core.models import Routine, TacheRoutine
+
+    def _query():
+        with executer_avec_session() as session:
+            routine = session.query(Routine).filter(Routine.id == routine_id).first()
+            if not routine:
+                raise HTTPException(status_code=404, detail="Routine non trouvée")
+
+            query = session.query(TacheRoutine).filter(
+                TacheRoutine.routine_id == routine_id
+            )
+            if tache_ids:
+                query = query.filter(TacheRoutine.id.in_(tache_ids))
+
+            today = date.today()
+            updated = 0
+            for tache in query.all():
+                tache.fait_le = today
+                updated += 1
+
+            session.commit()
+
+            return {
+                "routine_id": routine_id,
+                "date": today.isoformat(),
+                "taches_completees": updated,
+            }
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # TÂCHES D'ENTRETIEN
 # ═══════════════════════════════════════════════════════════

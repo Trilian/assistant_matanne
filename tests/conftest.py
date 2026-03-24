@@ -119,7 +119,11 @@ def db(engine):
     yield session
 
     session.close()
-    transaction.rollback()
+    try:
+        if transaction.is_active:
+            transaction.rollback()
+    except Exception:
+        pass
     connection.close()
 
 

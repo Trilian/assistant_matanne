@@ -185,7 +185,91 @@ Documentation interactive après démarrage du backend :
 
 ---
 
-## 📚 Documentation
+## � Déploiement
+
+L'application est déployée sur **3 services** :
+
+| Service | Plateforme | URL |
+|---|---|---|
+| Backend API | [Railway](https://railway.app) (Docker) | `https://assistant-matanne-api.up.railway.app` |
+| Frontend | [Vercel](https://vercel.com) (Next.js) | `https://assistant-matanne.vercel.app` |
+| Base de données | [Supabase](https://supabase.com) (PostgreSQL) | Dashboard Supabase |
+
+### 1. Supabase (Base de données)
+
+1. Créer un projet sur [supabase.com](https://supabase.com)
+2. Exécuter `sql/INIT_COMPLET.sql` dans le **SQL Editor** (schéma complet ~130 tables, RLS, triggers)
+3. Récupérer depuis **Settings > Database** :
+   - `DATABASE_URL` (Connection string → URI)
+   - `SUPABASE_JWT_SECRET` (Settings > API > JWT Secret)
+   - `NEXT_PUBLIC_SUPABASE_URL` (Settings > API > URL)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Settings > API > anon key)
+
+### 2. Railway (Backend API)
+
+1. Connecter le repo GitHub sur [railway.app](https://railway.app)
+2. Railway détecte automatiquement le `Dockerfile` à la racine
+3. Configurer les **variables d'environnement** dans Railway :
+
+| Variable | Requis | Description |
+|---|---|---|
+| `DATABASE_URL` | ✅ | URI PostgreSQL Supabase |
+| `MISTRAL_API_KEY` | ✅ | Clé API Mistral AI |
+| `API_SECRET_KEY` | ✅ | Secret pour tokens JWT API (`openssl rand -hex 32`) |
+| `SUPABASE_JWT_SECRET` | ✅ | JWT Secret de Supabase |
+| `CORS_ORIGINS` | ✅ | URL frontend Vercel (ex: `https://assistant-matanne.vercel.app`) |
+| `ENVIRONMENT` | ✅ | `production` |
+| `PORT` | ⬜ | Railway le fournit automatiquement (défaut: 8000) |
+| `REDIS_URL` | ⬜ | Optionnel — cache Redis |
+| `SENTRY_DSN` | ⬜ | Optionnel — monitoring erreurs |
+
+4. Railway déploie automatiquement à chaque push sur `main`
+5. Health check : `GET /health`
+6. **Après le premier déploiement**, appliquer les migrations SQL :
+   ```bash
+   # Via Railway CLI ou shell
+   python manage.py migrate
+   # Ou exécuter sql/INIT_COMPLET.sql directement dans Supabase SQL Editor
+   ```
+
+### 3. Vercel (Frontend)
+
+1. Importer le repo sur [vercel.com](https://vercel.com), **Root Directory** = `frontend`
+2. **Region** : `cdg1` (Paris) — configuré dans `vercel.json`
+3. Variables d'environnement Vercel :
+
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | URL Railway (ex: `https://assistant-matanne-api.up.railway.app`) |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL Supabase (ex: `https://xxx.supabase.co`) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clé anon Supabase |
+
+4. Vercel déploie automatiquement à chaque push sur `main`
+
+### CI/CD
+
+Les workflows GitHub Actions (`.github/workflows/`) s'exécutent sur chaque push/PR :
+
+- **deploy.yml** : Lint (ruff) + tests (pytest) + build frontend — gate avant déploiement
+- **tests.yml** : Tests complets (unit, integration, type-check, encoding, sécurité)
+- **dependabot.yml** : Mises à jour automatiques des dépendances (hebdomadaire)
+
+### Vérification post-déploiement
+
+```bash
+# Backend health
+curl https://assistant-matanne-api.up.railway.app/health
+
+# API docs
+# https://assistant-matanne-api.up.railway.app/docs
+
+# Frontend
+# https://assistant-matanne.vercel.app
+```
+
+---
+
+## �📚 Documentation
 
 | Document | Description |
 |---|---|

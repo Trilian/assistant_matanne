@@ -121,11 +121,43 @@ class TestProjetsServiceEstimation:
 class TestProjetsServiceMateriaux:
     """Tests des suggestions de matériaux."""
 
-    @pytest.mark.skip(reason="Méthode suggerer_materiaux() non implémentée dans ProjetsService")
     @pytest.mark.asyncio
     async def test_suggerer_materiaux(self, mock_client_ia):
         """Suggère les matériaux nécessaires."""
-        pass
+        mock_response = json.dumps(
+            [
+                {
+                    "nom": "Peinture blanche 10L",
+                    "quantite": 2,
+                    "unite": "pot",
+                    "prix": 35,
+                    "magasin": "Leroy Merlin",
+                    "alternatif": "Marque distributeur 25€",
+                },
+                {
+                    "nom": "Rouleau mousse",
+                    "quantite": 3,
+                    "unite": "unité",
+                    "prix": 8,
+                    "magasin": "Castorama",
+                },
+            ]
+        )
+
+        service = ProjetsService(client=mock_client_ia)
+        service.call_with_cache = AsyncMock(return_value=mock_response)
+
+        materiels = await service.suggerer_materiaux(
+            nom_projet="Peinture garage",
+            description="Repeindre les murs du garage 20m²",
+            categorie="peinture",
+        )
+
+        assert len(materiels) == 2
+        assert materiels[0].nom == "Peinture blanche 10L"
+        assert materiels[0].quantite == 2
+        assert materiels[0].prix_estime is not None
+        assert materiels[1].nom == "Rouleau mousse"
 
     @pytest.mark.asyncio
     async def test_suggerer_alternatives_eco(self, mock_client_ia):

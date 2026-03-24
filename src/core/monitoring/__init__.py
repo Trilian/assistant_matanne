@@ -43,13 +43,6 @@ from .health import (
     verifier_sante_globale,
     verifier_startup,
 )
-from .rerun_profiler import (  # DEPRECATED — stubs conservés pour rétrocompatibilité
-    RerunProfiler,
-    RerunRecord,
-    obtenir_stats_rerun,
-    profiler_rerun,
-    reset_profiler,
-)
 from .sentry import (
     ajouter_breadcrumb,
     capturer_exception,
@@ -74,12 +67,6 @@ __all__ = [
     "verifier_readiness",
     "verifier_sante_globale",
     "verifier_startup",
-    # Rerun Profiler
-    "RerunProfiler",
-    "RerunRecord",
-    "obtenir_stats_rerun",
-    "profiler_rerun",
-    "reset_profiler",
     # Sentry
     "ajouter_breadcrumb",
     "capturer_exception",

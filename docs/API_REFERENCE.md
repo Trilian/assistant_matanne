@@ -113,6 +113,46 @@ Listes de courses avec collaboration WebSocket.
 | POST | `/courses/{id}/checkout-items` | Body: `CheckoutCoursesRequest` | Checkout batch → maj inventaire |
 | POST | `/courses/{id}/scan-barcode-checkout` | Body: `ScanBarcodeCheckoutRequest` | Checkout via code-barres |
 
+### WebSocket — `/api/v1/ws/courses/{liste_id}`
+
+Collaboration temps réel sur les listes de courses.
+
+**Connexion:**
+```
+ws://localhost:8000/api/v1/ws/courses/{liste_id}?user_id=abc123&username=Anne
+```
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `liste_id` | `int` (path) | ID de la liste de courses |
+| `user_id` | `str` (query, requis) | Identifiant utilisateur |
+| `username` | `str` (query, défaut: "Anonyme") | Nom affiché |
+
+**Messages Client → Serveur** (JSON, champ `action`) :
+
+| Action | Champs | Description |
+|--------|--------|-------------|
+| `item_added` | `item: {nom, quantite, unite}` | Article ajouté |
+| `item_removed` | `item_id: int` | Article supprimé |
+| `item_checked` | `item_id: int, checked: bool` | Article coché/décoché |
+| `item_updated` | `item_id: int, updates: {...}` | Article modifié |
+| `list_renamed` | `new_name: str` | Liste renommée |
+| `user_typing` | `typing: bool` | Indicateur de saisie |
+| `ping` | — | Keep-alive |
+
+**Messages Serveur → Clients** (JSON, champ `type`) :
+
+| Type | Champs | Description |
+|------|--------|-------------|
+| `sync` | `action, user_id, username, timestamp, ...data` | Broadcast d'une modification |
+| `user_joined` | `user_id, username, timestamp` | Nouvel utilisateur connecté |
+| `user_left` | `user_id, username, timestamp` | Utilisateur déconnecté |
+| `users_list` | `users: [{user_id, username, connected_at}]` | Liste des connectés (envoyé à la connexion) |
+| `error` | `message: str` | Erreur (action inconnue) |
+| `pong` | — | Réponse au ping |
+
+Les modifications `item_added`, `item_removed`, `item_checked` et `list_renamed` sont persistées en base de données.
+
 ---
 
 ## 📦 Inventaire — `/api/v1/inventaire` (6 endpoints)

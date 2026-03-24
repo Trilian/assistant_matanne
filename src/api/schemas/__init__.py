@@ -163,6 +163,42 @@ from .utilitaires import (
     NoteResponse,
 )
 
+# Calendriers
+from .calendriers import (
+    CalendrierDetailResponse,
+    CalendrierResponse,
+    EvenementDetailResponse,
+    EvenementJourResponse,
+    EvenementResponse,
+    EvenementsAujourdhuiResponse,
+    EvenementsSemaineResponse,
+)
+
+# Export
+from .export import (
+    ExportPDFRequest,
+    ExportPDFResponse,
+    TYPES_EXPORT_VALIDES,
+)
+
+# Jeux
+from .jeux import (
+    CotesMatch,
+    EquipeDetailResponse,
+    EquipeResponse,
+    GrilleLotoResponse,
+    MatchDetailResponse,
+    MatchEquipeRef,
+    MatchResponse,
+    PariCreate,
+    PariPatch,
+    PariResume,
+    PariResponse,
+    PredictionMatch,
+    StatistiquesParis,
+    TirageLotoResponse,
+)
+
 # Maison
 from .maison import (
     ActionEcoCreate,
@@ -224,6 +260,7 @@ from .maison import (
     ReleveCompteurPatch,
     ReleveCompteurResponse,
     ResumeFinancierContratsResponse,
+    StatsArtisansResponse,
     StatsCellierResponse,
     StatsDepensesResponse,
     StatsGarantiesResponse,
@@ -426,4 +463,31 @@ __all__ = [
     "ObjetPatch",
     "ObjetResponse",
     "StatsHubMaisonResponse",
+    # Calendriers
+    "CalendrierResponse",
+    "CalendrierDetailResponse",
+    "EvenementResponse",
+    "EvenementDetailResponse",
+    "EvenementJourResponse",
+    "EvenementsAujourdhuiResponse",
+    "EvenementsSemaineResponse",
+    # Export
+    "ExportPDFRequest",
+    "ExportPDFResponse",
+    "TYPES_EXPORT_VALIDES",
+    # Jeux
+    "EquipeResponse",
+    "EquipeDetailResponse",
+    "MatchResponse",
+    "MatchDetailResponse",
+    "MatchEquipeRef",
+    "CotesMatch",
+    "PredictionMatch",
+    "PariResume",
+    "PariCreate",
+    "PariPatch",
+    "PariResponse",
+    "StatistiquesParis",
+    "TirageLotoResponse",
+    "GrilleLotoResponse",
 ]

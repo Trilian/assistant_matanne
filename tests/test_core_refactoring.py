@@ -4,7 +4,6 @@ Tests pour les modules core refactorés.
 Couvre:
 - Resilience policies
 - Observability (correlation ID)
-- Query builder
 - Config validator
 - Bootstrap
 """
@@ -176,82 +175,6 @@ class TestObservability:
             )
             assert handler.filters[0].filter(record)
             assert record.correlation_id == ctx.correlation_id  # type: ignore
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS QUERY BUILDER
-# ═══════════════════════════════════════════════════════════
-
-
-@pytest.mark.skip(reason="Module src.core.query non encore implémenté")
-class TestQueryBuilder:
-    """Tests pour le Query Builder fluent."""
-
-    def test_requete_creation(self):
-        """Requete peut être créée avec un modèle."""
-        from src.core.query import Requete
-
-        # Mock model
-        class FakeModel:
-            __name__ = "FakeModel"
-
-        query = Requete(FakeModel)
-        assert query.model == FakeModel
-
-    def test_requete_et_conditions(self):
-        """et() ajoute des conditions AND."""
-        from src.core.query import Requete
-
-        class FakeModel:
-            __name__ = "FakeModel"
-            actif = True
-
-        query = Requete(FakeModel).et(actif=True)
-        assert len(query._conditions) == 1
-
-    def test_requete_chaining(self):
-        """Les méthodes sont chaînables."""
-        from src.core.query import Requete
-
-        class FakeModel:
-            __name__ = "FakeModel"
-            actif = True
-            nom = "test"
-
-        # Test la chaînabilité - trier_par ignore les colonnes non-SQLAlchemy
-        query = Requete(FakeModel).et(actif=True).limite(10).trier_par("-nom")
-
-        assert query._limit == 10
-        # trier_par ignore silencieusement les colonnes non-SQLAlchemy (pas de .desc/.asc)
-        assert len(query._ordre) == 0  # FakeModel.nom n'a pas .desc()
-        assert len(query._conditions) == 1  # La condition actif=True est présente
-
-    def test_requete_paginer(self):
-        """paginer() calcule offset correctement."""
-        from src.core.query import Requete
-
-        class FakeModel:
-            __name__ = "FakeModel"
-
-        query = Requete(FakeModel).paginer(page=3, taille=20)
-
-        assert query._limit == 20
-        assert query._offset == 40  # (3-1) * 20
-
-    def test_requete_repr(self):
-        """__repr__ est informatif."""
-        from src.core.query import Requete
-
-        class FakeModel:
-            __name__ = "FakeModel"
-            actif = True
-
-        query = Requete(FakeModel).et(actif=True).limite(10)
-        repr_str = repr(query)
-
-        assert "FakeModel" in repr_str
-        assert "conditions=1" in repr_str
-        assert "limit=10" in repr_str
 
 
 # ═══════════════════════════════════════════════════════════

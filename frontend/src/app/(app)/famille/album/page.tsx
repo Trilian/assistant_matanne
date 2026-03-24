@@ -124,8 +124,12 @@ export default function PageAlbum() {
           {photos.map((photo) => (
             <div
               key={photo.id}
-              className="group relative aspect-square rounded-lg overflow-hidden border cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+              role="button"
+              tabIndex={0}
+              aria-label={`Voir la photo ${photo.nom}`}
+              className="group relative aspect-square rounded-lg overflow-hidden border cursor-pointer hover:ring-2 hover:ring-primary focus-visible:ring-2 focus-visible:ring-primary transition-all outline-none"
               onClick={() => setPhotoSelectionnee(photo)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPhotoSelectionnee(photo); } }}
             >
               <img
                 src={photo.url}
@@ -142,8 +146,12 @@ export default function PageAlbum() {
       {/* Lightbox */}
       {photoSelectionnee && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Photo : ${photoSelectionnee.nom}`}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
           onClick={() => setPhotoSelectionnee(null)}
+          onKeyDown={(e) => { if (e.key === 'Escape') setPhotoSelectionnee(null); }}
         >
           <div
             className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center"
@@ -170,6 +178,7 @@ export default function PageAlbum() {
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Fermer la photo"
               className="absolute top-0 right-0 text-white hover:bg-white/20"
               onClick={() => setPhotoSelectionnee(null)}
             >

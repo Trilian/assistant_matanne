@@ -34,10 +34,10 @@ from src.api.routes import (
     suggestions_router,
     upload_router,
     utilitaires_router,
+    webhooks_router,
 )
 from src.api.routes.auth import router as auth_router
 from src.api.routes.push import router as push_router
-from src.api.routes.webhooks import router as webhooks_router
 from src.api.schemas.errors import REPONSE_500, REPONSES_AUTH_ADMIN
 from src.api.utils import (
     ETagMiddleware,

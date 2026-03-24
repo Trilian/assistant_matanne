@@ -127,6 +127,24 @@
   --planning: oklch(0.68 0.14 35);
   --spacing-page: 1.5rem;
   --spacing-section: 1rem;
+
+  /* Couleurs pièces maison */
+  --room-salon: #93c5fd;
+  --room-cuisine: #fcd34d;
+  --room-chambre: #c4b5fd;
+  --room-sdb: #6ee7b7;
+  --room-bureau: #fdba74;
+  --room-entree: #d1d5db;
+  --room-couloir: #e5e7eb;
+  --room-garage: #a1a1aa;
+  --room-jardin: #86efac;
+
+  /* Couleurs notes */
+  --note-jaune: #fef08a;
+  --note-vert: #bbf7d0;
+  --note-bleu: #bfdbfe;
+  --note-rouge: #fecaca;
+  --note-violet: #e9d5ff;
 }
 
 .dark {
@@ -136,6 +154,22 @@
   --jeux: oklch(0.78 0.15 265);
   --outils: oklch(0.72 0.08 230);
   --planning: oklch(0.76 0.11 35);
+
+  --room-salon: #60a5fa;
+  --room-cuisine: #fbbf24;
+  --room-chambre: #a78bfa;
+  --room-sdb: #34d399;
+  --room-bureau: #fb923c;
+  --room-entree: #9ca3af;
+  --room-couloir: #d1d5db;
+  --room-garage: #71717a;
+  --room-jardin: #4ade80;
+
+  --note-jaune: #fde047;
+  --note-vert: #86efac;
+  --note-bleu: #93c5fd;
+  --note-rouge: #fca5a5;
+  --note-violet: #d8b4fe;
 }
 
 @layer base {

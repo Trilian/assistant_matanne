@@ -76,7 +76,7 @@ export default function ChatIAPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4 py-4">
+              <div className="space-y-4 py-4" role="log" aria-live="polite" aria-label="Messages du chat">
                 {messages.map((m, i) => (
                   <div
                     key={i}

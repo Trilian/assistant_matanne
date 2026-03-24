@@ -26,17 +26,17 @@ import { utiliserRequete } from "@/crochets/utiliser-api";
 import { listerPieces, listerEtages } from "@/bibliotheque/api/maison";
 import type { PieceMaison } from "@/types/maison";
 
-// Couleurs par défaut pour les pièces
+// Couleurs par défaut pour les pièces (CSS custom properties)
 const COULEURS_DEFAUT: Record<string, string> = {
-  Salon: "#93c5fd",
-  Cuisine: "#fcd34d",
-  Chambre: "#c4b5fd",
-  "Salle de bain": "#6ee7b7",
-  Bureau: "#fdba74",
-  Entrée: "#d1d5db",
-  Couloir: "#e5e7eb",
-  Garage: "#a1a1aa",
-  Jardin: "#86efac",
+  Salon: "var(--room-salon)",
+  Cuisine: "var(--room-cuisine)",
+  Chambre: "var(--room-chambre)",
+  "Salle de bain": "var(--room-sdb)",
+  Bureau: "var(--room-bureau)",
+  Entrée: "var(--room-entree)",
+  Couloir: "var(--room-couloir)",
+  Garage: "var(--room-garage)",
+  Jardin: "var(--room-jardin)",
 };
 
 function couleurPiece(piece: PieceMaison): string {

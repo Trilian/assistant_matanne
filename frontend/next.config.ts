@@ -37,7 +37,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://*.supabase.co",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co ws://localhost:8000 wss://localhost:8000 " + (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"),
+              "connect-src 'self' https://*.supabase.co " + (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_API_URL.replace(/^https?:/, "wss:")}` : "http://localhost:8000 ws://localhost:8000 wss://localhost:8000"),
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

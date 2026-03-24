@@ -23,6 +23,7 @@ from .recettes import router as recettes_router
 from .suggestions import router as suggestions_router
 from .upload import router as upload_router
 from .utilitaires import router as utilitaires_router
+from .webhooks import router as webhooks_router
 
 __all__ = [
     "anti_gaspillage_router",
@@ -45,4 +46,5 @@ __all__ = [
     "suggestions_router",
     "upload_router",
     "utilitaires_router",
+    "webhooks_router",
 ]
