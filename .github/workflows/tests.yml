@@ -52,7 +52,7 @@ jobs:
 
     - name: Archive coverage reports
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: coverage-report-${{ matrix.python-version }}
         path: htmlcov/
@@ -143,7 +143,7 @@ jobs:
 
     - name: Upload security reports
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: security-reports
         path: bandit-report.json
@@ -206,7 +206,7 @@ jobs:
 
     - name: Upload Playwright report
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: playwright-report
         path: frontend/playwright-report/
