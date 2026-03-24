@@ -52,3 +52,44 @@ export function utiliserInvalidation() {
   const queryClient = useQueryClient();
   return (cle: string[]) => queryClient.invalidateQueries({ queryKey: cle });
 }
+
+/**
+ * Mutation avec invalidation automatique après succès.
+ * Usage: `utiliserMutationAvecInvalidation(creerRecette, ["recettes"])`
+ */
+export function utiliserMutationAvecInvalidation<TData, TVariables>(
+  fn: (variables: TVariables) => Promise<TData>,
+  clesAInvalider: string[][],
+  options?: Partial<UseMutationOptions<TData, Error, TVariables>>
+) {
+  const queryClient = useQueryClient();
+  return useMutation<TData, Error, TVariables>({
+    mutationFn: fn,
+    onSuccess: (...args) => {
+      for (const cle of clesAInvalider) {
+        queryClient.invalidateQueries({ queryKey: cle });
+      }
+      options?.onSuccess?.(...args);
+    },
+    ...options,
+    // Ré-appliquer onSuccess après spread pour ne pas l'écraser
+  });
+}
+
+/**
+ * Query paginée avec paramètres de page.
+ * Usage: `utiliserRequetePaginee(["recettes"], (p) => listerRecettes(p), page)`
+ */
+export function utiliserRequetePaginee<T>(
+  cleBase: string[],
+  fn: (page: number) => Promise<T>,
+  page: number,
+  options?: Partial<UseQueryOptions<T>>
+) {
+  return useQuery<T>({
+    queryKey: [...cleBase, page],
+    queryFn: () => fn(page),
+    staleTime: DUREE_CACHE_MS,
+    ...options,
+  });
+}

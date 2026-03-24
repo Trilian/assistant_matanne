@@ -75,3 +75,31 @@ export interface ArticleWeekend {
   lieu?: string;
   est_planifie: boolean;
 }
+
+export interface Anniversaire {
+  id: number;
+  nom_personne: string;
+  date_naissance: string;
+  relation: string;
+  rappel_jours_avant: number[];
+  idees_cadeaux?: string;
+  historique_cadeaux?: string[];
+  notes?: string;
+  actif: boolean;
+  age?: number;
+  jours_restants?: number;
+  cree_le: string;
+}
+
+export interface EvenementFamilial {
+  id: number;
+  titre: string;
+  date_evenement: string;
+  type_evenement: string;
+  recurrence: string;
+  rappel_jours_avant: number;
+  notes?: string;
+  participants?: string[];
+  actif: boolean;
+  cree_le: string;
+}

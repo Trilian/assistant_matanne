@@ -1,6 +1,6 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 1 mars 2026
+> Dernière mise à jour: 2 mars 2026
 
 ---
 
@@ -1293,3 +1293,59 @@ _Note: Cette roadmap remplace tous les fichiers TODO/PLANNING précédents._
 **Documentation mise à jour**
 - `ROADMAP.md` : Sprints 8 et 9 documentés
 - `ARCHITECTURE.md` : Streamlit supprimé, stack Next.js documentée
+
+---
+
+## ✅ Sprint 10 — Dernières pages API, cleanup Streamlit, qualité & docs
+
+**Objectif**: Connecter les 3 dernières pages hardcodées à l'API, créer les routes backend manquantes, nettoyer tous les vestiges Streamlit du codebase, enrichir les tests et la documentation.
+
+### ✅ Réalisé (15 items)
+
+**Pages frontend connectées à l'API (3 rewrites)**
+- `famille/contacts/page.tsx` : CRUD complet — Dialog create/edit, delete, recherche, filtre 8 catégories, favoris étoile
+- `famille/journal/page.tsx` : API-connected avec sélecteur humeur, tags, loading skeletons
+- `famille/anniversaires/page.tsx` : CRUD avec Dialog, labels relation, affichage âge, idées cadeaux, "prochain anniversaire" highlight
+
+**Routes API backend (10 nouveaux endpoints)**
+- `src/api/routes/famille.py` : +5 routes anniversaires (CRUD + prochain), +5 routes événements familiaux (CRUD + filtres date)
+- `src/api/schemas/famille.py` : Schemas Pydantic Anniversaire + EvenementFamilial (Base/Create/Patch/Response)
+- `frontend/src/bibliotheque/api/famille.ts` : +8 fonctions API (anniversaires + événements)
+
+**API client utilitaires**
+- `frontend/src/bibliotheque/api/utilitaires.ts` : Types ContactUtile + EntreeJournal, 8 fonctions CRUD
+
+**Unification modèles Contact**
+- `ContactUtile` (utilitaires) marqué comme canonical, `ContactFamille` deprecated
+
+**Anti-gaspillage tracker**
+- `src/services/cuisine/suggestions/anti_gaspillage.py` : Remplacement du TODO hardcodé par requête `HistoriqueRecette` comptant les recettes anti-gaspi cuisinées dans le mois
+
+**Tests Vitest corrigés (5 fichiers, 85/85 tests verts)**
+- `api-clients.test.ts` : Signature `listerEvenements` corrigée (object params)
+- `hooks.test.ts` : Assertion mutation TanStack Query v5 (context arg)
+- `jeux-hub.test.tsx` : Clés mock data et labels attendus alignés
+- `budget.test.tsx` + `paris.test.tsx` : QueryClientProvider wrapper ajouté
+
+**Tests E2E Playwright enrichis**
+- `e2e/interactions.spec.ts` : ~120 lignes — Convertisseur, Minuteur, Euromillions, accessibilité, navigation clavier
+
+**Documentation rafraîchie**
+- `docs/UI_COMPONENTS.md` : Réécriture complète pour Next.js/shadcn/ui (21 composants, 5 layout, hooks, stores, patterns)
+- `README.md` : Chemins corrigés (bibliotheque/api, crochets, magasins), compteur pages ~52
+
+**Design tokens**
+- 2 couleurs hex fallback remplacées par CSS variables (`var(--color-border)`, `var(--color-primary)`)
+
+**Services transversaux vérifiés**
+- `file_attente.py` (350+ LOC) et `analytics.py` (340+ LOC) : déjà pleinement implémentés avec factories `@service_factory`
+- Event subscribers : déjà complets (pattern `except ImportError: pass` correct)
+
+**Cleanup Streamlit (~35 fichiers nettoyés)**
+- `src/core/monitoring/rerun_profiler.py` : Remplacé par stubs minimaux (était 220 LOC)
+- `src/core/ai/client.py` : Suppression détection Streamlit Cloud (SF_PARTNER, is_cloud, force reload)
+- `src/core/config/settings.py` : Suppression fallback `streamlit_secrets_mistral_key` mort
+- `valider_formulaire_streamlit` → `valider_formulaire` (alias rétrocompatible conservé)
+- PWA `generation.py` : Stubs `inject_pwa_meta()` / `afficher_install_prompt()` marqués DEPRECATED
+- ~25 docstrings/commentaires mis à jour dans 20+ fichiers : "st.secrets" → "env vars", "Streamlit" → "FastAPI/Next.js", "st.write_stream()" → "streaming SSE", "st.session_state" → "stockage session"
+- Vérification : 0 référence Streamlit restante dans `src/` (hors alias rétrocompat)

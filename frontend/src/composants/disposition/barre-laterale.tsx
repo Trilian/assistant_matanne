@@ -46,6 +46,9 @@ import {
   CloudSun,
   Timer,
   StickyNote,
+  Cake,
+  Contact,
+  Image,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -95,6 +98,10 @@ const LIENS: LienNav[] = [
       { nom: "Routines", chemin: "/famille/routines", Icone: RotateCw },
       { nom: "Budget", chemin: "/famille/budget", Icone: Wallet },
       { nom: "Weekend", chemin: "/famille/weekend", Icone: Calendar },
+      { nom: "Anniversaires", chemin: "/famille/anniversaires", Icone: Cake },
+      { nom: "Contacts", chemin: "/famille/contacts", Icone: Contact },
+      { nom: "Journal", chemin: "/famille/journal", Icone: BookOpen },
+      { nom: "Album", chemin: "/famille/album", Icone: Image },
       { nom: "Documents", chemin: "/famille/documents", Icone: FileText },
     ],
   },

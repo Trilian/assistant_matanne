@@ -48,7 +48,6 @@ logs/
 Thumbs.db
 *.swp
 
-
 # Backups
 data/backups/
 
@@ -61,14 +60,6 @@ media/
 *.key
 credentials.json
 token.json
-
-# Fichiers temporaires de test
-test_*.txt
-test_*.xml
-pytest_collect.txt
-_test_*.txt
-_test_*.py
-_run_*.py
 
 # Playwright - résultats de tests (screenshots d'échec)
 tests/test-results/

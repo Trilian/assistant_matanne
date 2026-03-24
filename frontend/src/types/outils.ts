@@ -44,3 +44,38 @@ export interface MessageChat {
   contenu: string;
   horodatage: string;
 }
+
+export interface Contact {
+  id: number;
+  nom: string;
+  categorie: string;
+  specialite?: string;
+  telephone?: string;
+  email?: string;
+  adresse?: string;
+  horaires?: string;
+  favori: boolean;
+  cree_le?: string;
+}
+
+export interface JournalEntree {
+  id: number;
+  date_entree: string;
+  contenu: string;
+  humeur?: string;
+  energie?: number;
+  gratitudes: string[];
+  tags: string[];
+  cree_le?: string;
+}
+
+export interface ReleveEnergie {
+  id: number;
+  type_energie: string;
+  mois: number;
+  annee: number;
+  consommation: number;
+  cout?: number;
+  notes?: string;
+  cree_le?: string;
+}

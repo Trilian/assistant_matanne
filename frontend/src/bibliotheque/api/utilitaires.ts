@@ -112,3 +112,34 @@ export async function modifierEntreeJournal(
 export async function supprimerEntreeJournal(id: number): Promise<void> {
   await clientApi.delete(`/utilitaires/journal/${id}`);
 }
+
+// ═══════════════════════════════════════════════════════════
+// Énergie
+// ═══════════════════════════════════════════════════════════
+
+export async function listerEnergie(params?: {
+  page?: number;
+  type_energie?: string;
+}) {
+  const { data } = await clientApi.get("/utilitaires/energie", { params });
+  return data;
+}
+
+export async function creerReleveEnergie(
+  donnees: Record<string, unknown>
+) {
+  const { data } = await clientApi.post("/utilitaires/energie", donnees);
+  return data;
+}
+
+export async function modifierReleveEnergie(
+  id: number,
+  donnees: Record<string, unknown>
+) {
+  const { data } = await clientApi.patch(`/utilitaires/energie/${id}`, donnees);
+  return data;
+}
+
+export async function supprimerReleveEnergie(id: number): Promise<void> {
+  await clientApi.delete(`/utilitaires/energie/${id}`);
+}

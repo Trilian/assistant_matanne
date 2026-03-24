@@ -8,8 +8,9 @@ Auto-découverte par pytest.
 
 from unittest.mock import MagicMock, Mock
 
+import httpx
 import pytest
-from fastapi.testclient import TestClient
+import pytest_asyncio
 
 # ═════════════════════════════════════════════════════════════════════
 # SECTION 1: PYTEST CONFIGURATION
@@ -101,32 +102,35 @@ def app(monkeypatch, db):
     fastapi_app.dependency_overrides.clear()
 
 
-@pytest.fixture
-def client(app, db) -> TestClient:
-    """Fixture TestClient standard avec DB de test."""
-    # La DB est déjà propre par le fixture conftest principal
-    return TestClient(app)
+@pytest_asyncio.fixture
+async def client(app, db) -> httpx.AsyncClient:
+    """Fixture AsyncClient standard avec DB de test."""
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
+        yield c
 
 
-@pytest.fixture
-def authenticated_client(app) -> TestClient:
-    """Fixture TestClient avec authentification."""
-    client = TestClient(app)
-    client.headers = {"Authorization": "Bearer test-token"}
-    return client
+@pytest_asyncio.fixture
+async def authenticated_client(app) -> httpx.AsyncClient:
+    """Fixture AsyncClient avec authentification."""
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
+        c.headers = {"Authorization": "Bearer test-token"}
+        yield c
 
 
-@pytest.fixture
-def client_with_headers(app) -> TestClient:
-    """Fixture TestClient avec headers personnalisés."""
-    client = TestClient(app)
-    client.headers.update(
-        {
-            "Content-Type": "application/json",
-            "X-Request-ID": "test-request-123",
-        }
-    )
-    return client
+@pytest_asyncio.fixture
+async def client_with_headers(app) -> httpx.AsyncClient:
+    """Fixture AsyncClient avec headers personnalisés."""
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
+        c.headers.update(
+            {
+                "Content-Type": "application/json",
+                "X-Request-ID": "test-request-123",
+            }
+        )
+        yield c
 
 
 # ═════════════════════════════════════════════════════════════════════
