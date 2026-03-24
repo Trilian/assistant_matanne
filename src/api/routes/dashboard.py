@@ -35,7 +35,7 @@ async def obtenir_tableau_bord(
                 ArticleInventaire,
                 BudgetFamille,
                 Recette,
-                RepasPlanning,
+                Repas,
                 StockMaison,
                 TacheEntretien,
             )
@@ -49,10 +49,10 @@ async def obtenir_tableau_bord(
             recettes_total = session.query(func.count(Recette.id)).scalar() or 0
 
             repas_semaine = (
-                session.query(func.count(RepasPlanning.id))
+                session.query(func.count(Repas.id))
                 .filter(
-                    RepasPlanning.date >= debut_semaine,
-                    RepasPlanning.date <= fin_semaine,
+                    Repas.date_repas >= debut_semaine,
+                    Repas.date_repas <= fin_semaine,
                 )
                 .scalar()
                 or 0

@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
   listerArticlesCellier,
@@ -56,16 +57,16 @@ export default function PageCellier() {
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
     (data: Record<string, unknown>) => creerArticleCellier(data as Omit<ArticleCellier, "id">),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    { onSuccess: () => { invalider(); fermerDialog(); toast.success("Article ajouté"); } }
   );
 
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
     ({ id, data }: { id: number; data: Partial<ArticleCellier> }) => modifierArticleCellier(id, data),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    { onSuccess: () => { invalider(); fermerDialog(); toast.success("Article modifié"); } }
   );
 
   const { mutate: supprimer } = utiliserMutation(supprimerArticleCellier, {
-    onSuccess: invalider,
+    onSuccess: () => { invalider(); toast.success("Article supprimé"); },
   });
 
   const ouvrirCreation = () => {

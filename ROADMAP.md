@@ -1,6 +1,72 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 2 mars 2026
+> Dernière mise à jour: 22 juin 2026
+
+---
+
+## ✅ Sprint 12 — Couverture tests frontend, UX polish, nettoyage
+
+### Tests frontend — 14 nouveaux fichiers de test (48 tests)
+
+| Fichier | Tests | Description |
+| --- | --- | --- |
+| `maison/cellier/cellier.test.tsx` | 3 | Titre, articles, bouton Ajouter |
+| `maison/artisans/artisans.test.tsx` | 3 | Titre, artisans, bouton Ajouter |
+| `maison/contrats/contrats.test.tsx` | 3 | Titre, contrats, bouton Ajouter |
+| `maison/garanties/garanties.test.tsx` | 3 | Titre, garanties, bouton Ajouter |
+| `maison/diagnostics/diagnostics.test.tsx` | 3 | Titre, diagnostics, bouton Ajouter |
+| `maison/eco-tips/eco-tips.test.tsx` | 4 | Titre, actions, nb actives, bouton |
+| `famille/contacts/contacts.test.tsx` | 4 | Titre, contacts, bouton, filtres |
+| `famille/journal/journal.test.tsx` | 3 | Titre, entrées, bouton Nouvelle entrée |
+| `famille/anniversaires/anniversaires.test.tsx` | 3 | Titre, anniversaires, bouton |
+| `famille/documents/documents.test.tsx` | 3 | Titre, documents, bouton |
+| `outils/notes/notes.test.tsx` | 4 | Titre, notes, bouton, recherche |
+| `outils/chat-ia/chat-ia.test.tsx` | 4 | Titre, accueil, saisie, envoi |
+| `planning/timeline/timeline.test.tsx` | 3 | Titre, repas groupés, lien retour |
+| `magasins/store-notifications.test.ts` | 5 | ajouter, retirer, vider, auto-5s, multi |
+
+### Bug fix
+
+- ✅ Fix `RepasPlanning` → `Repas` dans `dashboard.py` (modèle inexistant, champ `date` → `date_repas`)
+- ✅ Un-skip test dashboard (14/14 pass, 0 skip)
+
+### UX améliorations
+
+- ✅ Toasts sonner sur CRUD artisans, cellier, contrats (ajouté/modifié/supprimé)
+- ✅ Zod + `zodResolver` wired dans notes page (validation formulaire avec messages d'erreur)
+- ✅ Page 404 custom (déjà existante)
+
+### Nettoyage
+
+- ✅ API barrel export complet (`index.ts` : +10 re-exports manquants)
+- ✅ Sidebar sous-liens et indicateur actif (déjà existants)
+
+### Compteurs finaux
+
+| Métrique | Valeur |
+| --- | --- |
+| Fichiers de test Vitest | 33+ |
+| Tests Vitest totaux | 157+ |
+| Tests backend pytest | 98+ |
+| `next build` | ✅ |
+
+---
+
+## ✅ Sprint 11 — Tests Vitest frontend, schemas Zod, build fix
+
+### Tests frontend — 19 fichiers de test (109 tests)
+
+Session de mise en place de la couverture de tests Vitest pour le frontend Next.js 16.
+
+- Tests pages : dashboard, cuisine (6), famille (4), maison (2), jeux (2), planning, outils
+- Tests stores : store-auth (5), store-ui (7)
+- Tests validateurs : validateurs Zod Sprint 11 (26)
+- Schémas Zod ajoutés dans `bibliotheque/validateurs.ts` (miroir Pydantic)
+
+### Fix build
+
+- Résolution erreurs TypeScript pour `next build` propre
+- Fix imports, types manquants, composants async
 
 ---
 

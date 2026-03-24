@@ -154,7 +154,6 @@ class TestEndpointsJeux:
 class TestFormatDashboard:
     """Vérifie le format de la réponse dashboard."""
 
-    @pytest.mark.skip(reason="RepasPlanning model not yet defined in src.core.models")
     @patch("src.api.routes.dashboard.executer_avec_session")
     @patch("src.api.routes.dashboard.executer_async")
     async def test_dashboard_format_complet(self, mock_exec, mock_session, client):

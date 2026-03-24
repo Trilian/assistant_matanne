@@ -26,7 +26,9 @@ import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/croch
 import { listerNotes, creerNote, modifierNote, supprimerNote } from "@/bibliotheque/api/outils";
 import type { Note, NoteCreate } from "@/types/outils";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { schemaNote, type DonneesNote } from "@/bibliotheque/validateurs";
 
 const CATEGORIES = ["general", "travail", "personnel", "course", "idee"] as const;
 const COULEURS = [
@@ -54,12 +56,13 @@ export default function NotesPage() {
       })
   );
 
-  const { register, handleSubmit, reset, setValue, watch } = useForm<NoteCreate>({
-    defaultValues: { titre: "", contenu: "", categorie: "general", couleur: "#fef08a", tags: [] },
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm({
+    resolver: zodResolver(schemaNote),
+    defaultValues: { titre: "", contenu: "", categorie: "general", couleur: "#fef08a", tags: [] as string[] },
   });
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
-    (data: NoteCreate) => creerNote(data),
+    (data: DonneesNote) => creerNote(data as unknown as NoteCreate),
     {
       onSuccess: () => {
         toast.success("Note créée");
@@ -116,7 +119,8 @@ export default function NotesPage() {
             <form onSubmit={handleSubmit((d) => creer(d))} className="space-y-4">
               <div>
                 <Label>Titre</Label>
-                <Input {...register("titre", { required: true })} placeholder="Ma note" />
+                <Input {...register("titre")} placeholder="Ma note" />
+                {errors.titre && <p className="text-sm text-destructive mt-1">{errors.titre.message}</p>}
               </div>
               <div>
                 <Label>Contenu</Label>

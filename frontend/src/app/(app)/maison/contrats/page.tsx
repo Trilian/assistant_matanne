@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
   listerContrats,
@@ -55,15 +56,15 @@ export default function PageContrats() {
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
     (data: Record<string, unknown>) => creerContrat(data as Omit<Contrat, "id">),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    { onSuccess: () => { invalider(); fermerDialog(); toast.success("Contrat ajouté"); } }
   );
 
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
     ({ id, data }: { id: number; data: Partial<Contrat> }) => modifierContrat(id, data),
-    { onSuccess: () => { invalider(); fermerDialog(); } }
+    { onSuccess: () => { invalider(); fermerDialog(); toast.success("Contrat modifié"); } }
   );
 
-  const { mutate: supprimer } = utiliserMutation(supprimerContrat, { onSuccess: invalider });
+  const { mutate: supprimer } = utiliserMutation(supprimerContrat, { onSuccess: () => { invalider(); toast.success("Contrat supprimé"); } });
 
   const ouvrirCreation = () => {
     setEnEdition(null);
