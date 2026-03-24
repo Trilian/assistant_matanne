@@ -235,91 +235,35 @@ class TestLoginRateLimiting:
         assert stockage.est_bloque(cle) is True
 
 
-@pytest.mark.skip(reason="Module src.ui supprimé lors de la migration vers Next.js")
-class TestAccessibilityHelpers:
-    """Tests pour les utilitaires d'accessibilité."""
-
-    def test_a11y_attrs_generation(self):
-        """A11y.attrs() génère des attributs ARIA corrects."""
-        from src.ui.a11y import A11y
-
-        attrs = A11y.attrs(role="navigation", label="Menu principal")
-        assert 'role="navigation"' in attrs
-        assert 'aria-label="Menu principal"' in attrs
-
-    def test_a11y_attrs_expanded_state(self):
-        """A11y.attrs() gère aria-expanded correctement."""
-        from src.ui.a11y import A11y
-
-        attrs_expanded = A11y.attrs(expanded=True)
-        assert 'aria-expanded="true"' in attrs_expanded
-
-        attrs_collapsed = A11y.attrs(expanded=False)
-        assert 'aria-expanded="false"' in attrs_collapsed
-
-    def test_a11y_contrast_ratio_calculation(self):
-        """ratio_contraste() calcule correctement le ratio WCAG."""
-        from src.ui.a11y import A11y
-
-        # Blanc sur noir = ratio max ~21:1
-        ratio_max = A11y.ratio_contraste("#ffffff", "#000000")
-        assert ratio_max > 20
-
-        # Même couleur = ratio 1:1
-        ratio_min = A11y.ratio_contraste("#808080", "#808080")
-        assert ratio_min == 1.0
-
-    def test_a11y_wcag_aa_conformance(self):
-        """est_conforme_aa() valide correctement le contraste."""
-        from src.ui.a11y import A11y
-
-        # Bon contraste (noir sur blanc)
-        assert A11y.est_conforme_aa("#000000", "#ffffff") is True
-
-        # Mauvais contraste (gris clair sur blanc)
-        assert A11y.est_conforme_aa("#cccccc", "#ffffff") is False
-
-    def test_a11y_sr_only_html(self):
-        """sr_only_html() génère le HTML correct."""
-        from src.ui.a11y import A11y
-
-        html = A11y.sr_only_html("Message caché")
-        assert 'class="sr-only"' in html
-        assert "Message caché" in html
-
-
 class TestPWAServiceWorker:
     """Tests pour le Service Worker PWA."""
 
-    def test_sw_cache_version_incremented(self):
-        """Le fichier sw.js doit avoir une version incrémentée."""
+    def test_sw_has_cache_name(self):
+        """Le fichier sw.js doit définir un CACHE_NAME."""
         import re
         from pathlib import Path
 
-        sw_path = Path("static/sw.js")
+        sw_path = Path("frontend/public/sw.js")
         if sw_path.exists():
             content = sw_path.read_text()
-            match = re.search(r"CACHE_VERSION\s*=\s*(\d+)", content)
-            assert match is not None, "CACHE_VERSION non trouvée"
-            version = int(match.group(1))
-            assert version >= 3, f"Version devrait être >= 3, trouvé {version}"
+            assert "CACHE_NAME" in content, "CACHE_NAME non trouvé"
 
     def test_sw_has_offline_url(self):
         """Le SW doit définir OFFLINE_URL."""
         from pathlib import Path
 
-        sw_path = Path("static/sw.js")
+        sw_path = Path("frontend/public/sw.js")
         if sw_path.exists():
             content = sw_path.read_text()
             assert "OFFLINE_URL" in content
             assert "offline.html" in content
 
-    def test_sw_has_sync_with_retry(self):
-        """Le SW doit avoir une fonction syncWithRetry."""
+    def test_sw_has_push_handler(self):
+        """Le SW doit avoir un gestionnaire push."""
         from pathlib import Path
 
-        sw_path = Path("static/sw.js")
+        sw_path = Path("frontend/public/sw.js")
         if sw_path.exists():
             content = sw_path.read_text()
-            assert "syncWithRetry" in content
-            assert "maxRetries" in content
+            assert '"push"' in content
+            assert "showNotification" in content

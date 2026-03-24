@@ -18,8 +18,13 @@ interface DonneeCategorie {
   montant: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function renderLabel(entry: any) {
+interface LabelEntry {
+  nom?: string;
+  name?: string;
+  percent?: number;
+}
+
+function renderLabel(entry: LabelEntry) {
   const name = entry.nom ?? entry.name ?? "";
   const pct = typeof entry.percent === "number" ? (entry.percent * 100).toFixed(0) : "0";
   return `${name} ${pct}%`;

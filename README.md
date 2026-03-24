@@ -1,4 +1,4 @@
-# 🏠 Assistant Matanne
+# 🏠 Assistant MaTanne
 
 > Hub de gestion familiale intelligent propulsé par l'IA
 
@@ -7,22 +7,42 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16.2-black.svg)](https://nextjs.org)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green.svg)](https://supabase.com)
 
+---
+
 ## 🚀 Démarrage rapide
 
+### Prérequis
+
+- Python 3.13+
+- Node.js 20+
+- Compte [Supabase](https://supabase.com) (PostgreSQL)
+- Clé API [Mistral AI](https://console.mistral.ai) (optionnel, pour les suggestions IA)
+
+### Installation
+
 ```bash
-# 1. Cloner et installer le backend
+# Backend
 git clone <repo>
 cd assistant_matanne
 pip install -r requirements.txt
+cp .env.example .env.local          # Configurer les variables
 
-# 2. Lancer le backend FastAPI
-python manage.py run          # http://localhost:8000
-
-# 3. Installer et lancer le frontend Next.js
+# Frontend
 cd frontend
 npm install
-npm run dev                   # http://localhost:3000
 ```
+
+### Lancer l'application
+
+```bash
+# Terminal 1 — Backend FastAPI
+python manage.py run                 # http://localhost:8000
+
+# Terminal 2 — Frontend Next.js
+cd frontend && npm run dev           # http://localhost:3000
+```
+
+---
 
 ## 📋 Modules
 
@@ -30,45 +50,54 @@ npm run dev                   # http://localhost:3000
 |---|---|---|
 | 🍽️ **Cuisine** | Recettes, planning repas, courses, inventaire, batch cooking, anti-gaspi | 7 |
 | 👨‍👩‍👦 **Famille** | Suivi Jules, activités, routines, budget, weekend, album, anniversaires, contacts, documents, journal | 11 |
-| 🏡 **Maison** | Projets, jardin, entretien, charges, dépenses, énergie, stocks, visualisation | 9 |
+| 🏡 **Maison** | Projets, jardin, entretien, charges, dépenses, énergie, stocks, contrats | 9 |
 | 📅 **Planning** | Calendrier semaine, timeline | 2 |
 | 🎮 **Jeux** | Paris sportifs, loto, euromillions | 4 |
 | 🛠️ **Outils** | Chat IA, notes, météo, minuteur, convertisseur | 6 |
 | ⚙️ **Paramètres** | Configuration multi-onglets | 1 |
 
+> **~50 pages** au total, toutes connectées à l'API backend.
+
+---
+
 ## 🏗️ Architecture
 
 ```
 assistant_matanne/
-├── frontend/               # Next.js 16 (React/TypeScript)
-│   ├── src/app/(app)/      # Routes par module (~52 pages)
-│   ├── src/components/     # Composants shadcn/ui (21+)
-│   ├── src/composants/     # Layout (sidebar, header, nav)
-│   ├── src/bibliotheque/api/ # Clients API par domaine
-│   ├── src/crochets/       # Custom hooks React
-│   ├── src/magasins/       # Zustand stores
-│   ├── src/types/          # Interfaces TypeScript
-│   └── src/fournisseurs/   # Providers (auth, query, theme)
-├── src/                    # Backend Python (FastAPI)
-│   ├── api/                # API REST (20 routers, schemas, middleware)
-│   ├── core/               # Noyau (config, DB, models, AI, cache)
-│   └── services/           # Logique métier (@service_factory)
-├── sql/                    # Schéma DB + migrations
-├── tests/                  # Tests Python (pytest)
-├── data/                   # Données statiques (JSON, CSV)
-└── docs/                   # Documentation
+├── frontend/                  # Next.js 16 — SPA React/TypeScript
+│   ├── src/app/(app)/         #   Routes par module (~50 pages)
+│   ├── src/components/ui/     #   Composants shadcn/ui (21+)
+│   ├── src/composants/        #   Layout (sidebar, header, nav)
+│   ├── src/bibliotheque/api/  #   Clients API par domaine
+│   ├── src/crochets/          #   Custom hooks React
+│   ├── src/magasins/          #   Zustand stores
+│   ├── src/types/             #   Interfaces TypeScript
+│   └── src/fournisseurs/      #   Providers (auth, query, theme)
+│
+├── src/                       # Backend Python — FastAPI
+│   ├── api/                   #   API REST (20 routers, schemas, middleware)
+│   ├── core/                  #   Noyau (config, DB, models, AI, cache)
+│   └── services/              #   Logique métier (80+ services)
+│
+├── sql/INIT_COMPLET.sql       # Schéma DB complet (~130 tables)
+├── tests/                     # Tests Python (pytest, 82+ fichiers)
+├── data/                      # Données statiques (JSON, CSV)
+└── docs/                      # Documentation technique
 ```
 
 ### Stack technique
 
 | Couche | Technologies |
 |---|---|
-| **Backend** | FastAPI, SQLAlchemy 2.0, Pydantic v2, Mistral AI |
-| **Frontend** | Next.js 16.2.1, TypeScript 5, Tailwind CSS v4, shadcn/ui |
+| **Backend** | FastAPI, SQLAlchemy 2.0 ORM, Pydantic v2, Mistral AI |
+| **Frontend** | Next.js 16.2, TypeScript 5, Tailwind CSS v4, shadcn/ui |
 | **Data Fetching** | TanStack Query v5, Axios |
-| **State** | Zustand 5, react-hook-form 7.72, Zod 4.3.6 |
-| **Base de données** | Supabase PostgreSQL, migrations SQL-file |
+| **State** | Zustand 5, react-hook-form, Zod v4 |
+| **Base de données** | Supabase PostgreSQL (~130 tables, RLS activé) |
 | **Auth** | JWT Bearer (Supabase Auth + tokens API) |
+| **IA** | Mistral AI (suggestions recettes, analyse paris, aide famille) |
+
+---
 
 ## ⚙️ Configuration
 
@@ -81,7 +110,7 @@ DATABASE_URL=postgresql://user:password@host:5432/db
 # IA Mistral
 MISTRAL_API_KEY=your_key_here
 
-# Environnement (development|production)
+# Environnement (development | production)
 ENVIRONMENT=development
 
 # Frontend
@@ -91,93 +120,88 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 REDIS_URL=redis://localhost:6379
 VAPID_PRIVATE_KEY=your_vapid_key
 CORS_ORIGINS=http://localhost:3000
+FOOTBALL_DATA_API_KEY=your_football_api_key
 ```
 
-### Fichiers de configuration
+> En mode `development`, l'authentification est automatique (auto-auth).
 
-| Fichier | Usage |
-|---|---|
-| `.env.local` | Variables d'environnement locales (prioritaire) |
-| `.env` | Variables par défaut |
-| `pyproject.toml` | Dépendances Python, config tests/lint |
-| `frontend/package.json` | Dépendances frontend, scripts npm |
+---
 
 ## 🗄️ Base de données
 
+Le schéma complet est dans un unique fichier `sql/INIT_COMPLET.sql` (v3.0, ~130 tables).
+
 ```bash
-# Initialisation complète : exécuter sql/INIT_COMPLET.sql dans Supabase SQL Editor
-
-# Créer une migration SQL
-python manage.py create-migration
-
-# Appliquer les migrations en attente
-python manage.py migrate
+# Initialisation : exécuter sql/INIT_COMPLET.sql dans Supabase SQL Editor ou psql
+# Inclut : tables, RLS, triggers, vues, données de référence
 ```
 
-Les fichiers SQL dans `sql/migrations/` sont numérotés (`001_xxx.sql`, `002_xxx.sql`, ...) et appliqués automatiquement dans l'ordre par `GestionnaireMigrations`.
+---
 
 ## 🧪 Tests
 
 ```bash
 # Backend — tous les tests avec couverture
 python manage.py test_coverage
+# → pytest --cov=src --cov-report=html --cov-report=term
 
 # Backend — tests spécifiques
-pytest tests/test_recettes.py -v
+pytest tests/api/test_routes_recettes.py -v
 
-# Backend — un seul test
-pytest tests/test_recettes.py::test_method -v
-
-# Frontend — Vitest
+# Frontend — Vitest (33 fichiers, 157+ tests)
 cd frontend && npm test
 
 # Frontend — E2E Playwright
 cd frontend && npx playwright test
 ```
 
+---
+
 ## 📝 Commandes utiles
 
 ```bash
-# Lancer le backend FastAPI
-python manage.py run
+python manage.py run                  # Lancer le backend (port 8000)
+cd frontend && npm run dev            # Lancer le frontend (port 3000)
 
-# Lancer le frontend Next.js
-cd frontend && npm run dev
+python manage.py format_code          # Formater (black)
+python manage.py lint                 # Linter (ruff)
+cd frontend && npm run lint           # Linter frontend (ESLint)
+cd frontend && npx next build         # Build de vérification
 
-# Formater le code Python
-python manage.py format_code
-
-# Linter Python (ruff)
-python manage.py lint
-
-# Linter Frontend (ESLint)
-cd frontend && npm run lint
-
-# Build frontend
-cd frontend && npx next build
-
-# Générer requirements.txt
-python manage.py generate_requirements
+python manage.py generate_requirements  # Sync requirements.txt
 ```
+
+---
 
 ## 🔗 API
 
-Documentation interactive disponible après démarrage du backend:
+Documentation interactive après démarrage du backend :
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **Health check**: http://localhost:8000/
+- **Swagger UI** : http://localhost:8000/docs
+- **ReDoc** : http://localhost:8000/redoc
+- **Health check** : http://localhost:8000/
 
-20 routeurs API organisés par domaine: auth, recettes, courses, inventaire, planning, suggestions IA, famille, maison, jeux, dashboard, batch-cooking, anti-gaspillage, préférences, export PDF, calendriers, documents, utilitaires, push, webhooks, upload.
+**20 routeurs** organisés par domaine : auth, recettes, courses, inventaire, planning, suggestions IA, famille, maison, jeux, dashboard, batch-cooking, anti-gaspillage, préférences, export, calendriers, documents, utilitaires, push, webhooks, upload.
 
-## 📚 Documentation complémentaire
+---
 
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md) — Architecture détaillée
-- [API_REFERENCE.md](docs/API_REFERENCE.md) — Référence API
-- [SERVICES_REFERENCE.md](docs/SERVICES_REFERENCE.md) — Référence services
-- [frontend/README.md](frontend/README.md) — Documentation frontend Next.js
-- [ROADMAP.md](ROADMAP.md) — Roadmap et TODO
-- [.github/copilot-instructions.md](.github/copilot-instructions.md) — Guide développeur Copilot
+## 📚 Documentation
+
+| Document | Description |
+|---|---|
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture technique détaillée |
+| [API_REFERENCE.md](docs/API_REFERENCE.md) | Référence complète de l'API REST |
+| [SERVICES_REFERENCE.md](docs/SERVICES_REFERENCE.md) | Documentation des services backend |
+| [FONCTIONNALITES.md](docs/FONCTIONNALITES.md) | Fonctionnalités détaillées par module |
+| [ERD_SCHEMA.md](docs/ERD_SCHEMA.md) | Schéma entité-relation de la DB |
+| [SQLALCHEMY_SESSION_GUIDE.md](docs/SQLALCHEMY_SESSION_GUIDE.md) | Guide sessions DB |
+| [MIGRATION_CORE_PACKAGES.md](docs/MIGRATION_CORE_PACKAGES.md) | Guide migration imports core |
+| [UI_COMPONENTS.md](docs/UI_COMPONENTS.md) | Composants UI Next.js / shadcn |
+| [PATTERNS.md](docs/PATTERNS.md) | Patterns de code récurrents |
+| [frontend/README.md](frontend/README.md) | Documentation frontend Next.js |
+| [ROADMAP.md](ROADMAP.md) | Roadmap et historique des sprints |
+
+---
 
 ## 📄 Licence
 

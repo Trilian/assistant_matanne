@@ -1,123 +1,61 @@
-# 📚 Documentation Index - MaTanne v2
+# 📚 Documentation Index — MaTanne
 
-> **Dernière mise à jour**: 26 Février 2026
+> **Dernière mise à jour** : Mars 2026
 
-## 🎯 Documents Essentiels
+## 🎯 Documents
 
-| Fichier                                                          | Description                            |
-| ---------------------------------------------------------------- | -------------------------------------- |
-| **README.md**                                                    | Documentation principale du projet     |
-| **[GUIDE_UTILISATEUR.md](./GUIDE_UTILISATEUR.md)**               | **Guide utilisateur complet**          |
-| **ROADMAP.md**                                                   | Plan de développement & roadmap        |
-| **[API_REFERENCE.md](./API_REFERENCE.md)**                       | **Référence complète de l'API REST**   |
-| **[SERVICES_REFERENCE.md](./SERVICES_REFERENCE.md)**             | **Documentation des services backend** |
-| **[ARCHITECTURE.md](./ARCHITECTURE.md)**                         | Architecture technique                 |
-| **[MIGRATION_CORE_PACKAGES.md](./MIGRATION_CORE_PACKAGES.md)**   | **Guide migration imports core**       |
-| **[FONCTIONNALITES.md](./FONCTIONNALITES.md)**                   | Fonctionnalités détaillées             |
-| **[SQLALCHEMY_SESSION_GUIDE.md](./SQLALCHEMY_SESSION_GUIDE.md)** | Guide sessions DB                      |
-| **[ERD_SCHEMA.md](./ERD_SCHEMA.md)**                             | Schéma entité-relation                 |
-| **[UI_COMPONENTS.md](./UI_COMPONENTS.md)**                       | Composants UI Streamlit                |
+| Fichier | Description |
+|---|---|
+| [README.md](../README.md) | Documentation principale du projet |
+| [ROADMAP.md](../ROADMAP.md) | Roadmap et historique des sprints |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Architecture technique (FastAPI + Next.js) |
+| [API_REFERENCE.md](./API_REFERENCE.md) | Référence complète de l'API REST |
+| [SERVICES_REFERENCE.md](./SERVICES_REFERENCE.md) | Documentation des services backend |
+| [FONCTIONNALITES.md](./FONCTIONNALITES.md) | Fonctionnalités détaillées par module |
+| [GUIDE_UTILISATEUR.md](./GUIDE_UTILISATEUR.md) | Guide utilisateur complet |
+| [ERD_SCHEMA.md](./ERD_SCHEMA.md) | Schéma entité-relation de la DB |
+| [SQLALCHEMY_SESSION_GUIDE.md](./SQLALCHEMY_SESSION_GUIDE.md) | Guide sessions DB |
+| [MIGRATION_CORE_PACKAGES.md](./MIGRATION_CORE_PACKAGES.md) | Guide migration imports core |
+| [UI_COMPONENTS.md](./UI_COMPONENTS.md) | Composants UI Next.js / shadcn |
+| [PATTERNS.md](./PATTERNS.md) | Patterns de code récurrents |
+| [MIGRATION_NEXTJS.md](./MIGRATION_NEXTJS.md) | Historique migration Streamlit → Next.js |
+| [REDIS_SETUP.md](./REDIS_SETUP.md) | Configuration Redis (optionnel) |
 
-## 📁 Structure des Dossiers
+## 📁 Structure
 
-### `/docs/` - Documentation Complète
-
-```text
-docs/
-├── INDEX.md                          ← Vous êtes ici
-├── GUIDE_UTILISATEUR.md              ← Guide utilisateur complet
-├── ARCHITECTURE.md                   ← Architecture technique
-├── API_REFERENCE.md                  ← Documentation API REST
-├── SERVICES_REFERENCE.md             ← Documentation Services
-├── MIGRATION_CORE_PACKAGES.md        ← Guide migration imports core
-├── FONCTIONNALITES.md                ← Fonctionnalités
-├── SQLALCHEMY_SESSION_GUIDE.md       ← Guide sessions DB
-├── ERD_SCHEMA.md                     ← Schéma ERD
-├── UI_COMPONENTS.md                  ← Composants UI
-├── PLAN_DIVISION_FICHIERS.md         ← Plan de découpage
-└── SERVICES_RESTRUCTURATION.md       ← Historique restructuration services
 ```
-
-### `/scripts/` - Scripts & Outils
-
-```text
-scripts/
-├── __init__.py                       ← Package Python
-├── db/                               ← Opérations base de données
-│   ├── deploy_supabase.py           ← Déployer schéma SQL
-│   ├── import_recettes.py           ← Import recettes JSON
-│   ├── init_db.py                   ← Initialisation BD
-│   ├── reset_supabase.py            ← Reset complet Supabase
-│   └── seed_data.py                 ← Données démo
-├── test/                            ← Outils de test
-│   ├── audit_tests.py               ← Audit couverture
-│   ├── audit_tests_fast.py          ← Audit rapide
-│   ├── generate_skeletons.py        ← Générer tests
-│   ├── summary_tests.py             ← Résumé couverture
-│   └── test_manager.py              ← Gestionnaire tests
-├── analysis/                        ← Analyse de code
-│   └── analyze_api.py               ← Analyser API
-├── setup/                           ← Configuration
-│   ├── convert_utf8.py              ← Fix encodage
-│   ├── generate_vapid.py            ← Clés VAPID
-│   ├── setup_api_key.py             ← Config API Football
-│   └── setup_jeux.py                ← Setup module Jeux
-├── fix_encoding.py                  ← Script fix encoding (pre-commit hook)
-├── convert_to_utf8.py               ← Conversion batch UTF-8
-└── run_api.py                       ← Lancer l'API FastAPI
+docs/
+├── INDEX.md                     ← Vous êtes ici
+├── ARCHITECTURE.md              ← Architecture technique
+├── API_REFERENCE.md             ← Documentation API REST
+├── SERVICES_REFERENCE.md        ← Documentation Services
+├── FONCTIONNALITES.md           ← Fonctionnalités
+├── GUIDE_UTILISATEUR.md         ← Guide utilisateur
+├── ERD_SCHEMA.md                ← Schéma ERD
+├── SQLALCHEMY_SESSION_GUIDE.md  ← Guide sessions DB
+├── MIGRATION_CORE_PACKAGES.md   ← Guide migration imports
+├── UI_COMPONENTS.md             ← Composants UI Next.js
+├── PATTERNS.md                  ← Patterns de code
+├── MIGRATION_NEXTJS.md          ← Historique migration
+├── REDIS_SETUP.md               ← Setup Redis
+└── guides/                      ← Guides spécifiques
+    ├── cuisine/batch_cooking.md
+    └── utilitaires/
 ```
 
 ## 🚀 Démarrage rapide
 
-### Lancer l'application
-
 ```bash
-streamlit run src/app.py
+# Backend FastAPI
+python manage.py run              # http://localhost:8000
+
+# Frontend Next.js
+cd frontend && npm run dev        # http://localhost:3000
+
+# Tests
+python manage.py test_coverage    # Backend (pytest)
+cd frontend && npm test           # Frontend (Vitest)
 ```
-
-### Lancer l'API REST
-
-```bash
-uvicorn src.api.main:app --reload --port 8000
-# Documentation: http://localhost:8000/docs
-```
-
-### Tests
-
-```bash
-# Tous les tests
-pytest tests/ -v
-
-# Avec couverture
-pytest tests/ --cov=src --cov-report=html
-```
-
-### Phase 3 (Complète ✅)
-
-- **Tests créés:** 170 (P1: 51, P2: 36, P3: 83)
-- **Tests passants:** 158/164 (96.3%)
-- **Couverture phase:** 11.06%
-- **Couverture estimée:** 33-35%
-- **Direction:** 40% ✅
-
-### Structure Finale
-
-- ✅ Tests organisés dans `tests/` (core, modules, services, api, e2e)
-- ✅ Documentation maintenue à jour dans `docs/`
-- ✅ Outils centralisés dans `scripts/`
-- ✅ Racine propre
-
-## 📌 Fichiers par Catégorie
-
-### 🔧 Configuration (Racine)
-
-- `pyproject.toml` - Dépendances Poetry
-- `requirements.txt` - Dépendances pip
-- `alembic.ini` - Config migrations
-- `pytest.ini` - Config pytest
-- `.env.local` - Config locale
-- `.gitignore` - Git ignore rules
-- `.pre-commit-config.yaml` - Hooks pre-commit
 
 ### 🏗️ Infrastructure (Racine)
 
