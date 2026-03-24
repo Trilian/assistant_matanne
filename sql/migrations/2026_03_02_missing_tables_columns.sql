@@ -1,1 +1,0 @@
-1 Vérifier le réfrigérateur et les placards ■ 2 Consulter le planning repas de la semaine ■ 3 Compléter la liste de courses ■ 4 Vérifier les promotions en cours ■ 5 Préparer les sacs réutilisables ■ 6 Courses (priorité frais en dernier) ■ 7 Rangement et stockage ■
