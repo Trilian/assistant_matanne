@@ -453,3 +453,139 @@ async def deplanifier_recette_semaine(
             return MessageResponse(message=f"Recette {recette_id} retirée de cette semaine")
 
     return await executer_async(_clear)
+
+
+# ═══════════════════════════════════════════════════════════
+# IMPORT DE RECETTES
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/import-url", response_model=RecetteResponse, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def importer_recette_url(
+    url: str = Query(..., description="URL de la recette à importer"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Importe une recette depuis une URL.
+    
+    Supporte les sites populaires (Marmiton, CuisineAZ, etc.) ainsi que
+    les pages génériques via extraction IA.
+    
+    Args:
+        url: URL complète de la recette
+        user: Utilisateur authentifié
+    
+    Returns:
+        Recette créée avec données importées
+    
+    Raises:
+        HTTPException 422: URL invalide ou recette non trouvée
+        HTTPException 500: Erreur lors de l'import
+    """
+    from src.core.models import Recette, Ingredient, EtapeRecette
+    from src.services.cuisine.recettes.import_url import get_recipe_import_service
+    
+    def _import():
+        # Import via service
+        import_service = get_recipe_import_service()
+        result = import_service.import_from_url(url, use_ai_fallback=True)
+        
+        if not result.success:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Impossible d'importer la recette: {result.error}"
+            )
+        
+        recipe_data = result.recipe
+        
+        # Créer la recette en DB
+        with executer_avec_session() as session:
+            user_id = user.get("sub", user.get("id", "dev"))
+            
+            # Créer recette principale
+            recette = Recette(
+                nom=recipe_data.nom,
+                description=recipe_data.description,
+                temps_preparation=recipe_data.temps_preparation,
+                temps_cuisson=recipe_data.temps_cuisson,
+                temps_total=recipe_data.temps_total,
+                portions=recipe_data.portions or 4,
+                niveau=recipe_data.niveau or "moyen",
+                categorie=recipe_data.categorie or "plat",
+                saison="toutes_saisons",
+                tags=recipe_data.tags or [],
+                url_source=url,
+                cree_par=user_id,
+            )
+            session.add(recette)
+            session.flush()  # Get ID
+            
+            # Ajouter ingrédients
+            for idx, ing_data in enumerate(recipe_data.ingredients or [], start=1):
+                ingredient = Ingredient(
+                    recette_id=recette.id,
+                    ordre=idx,
+                    quantite=ing_data.quantite,
+                    unite=ing_data.unite,
+                    nom=ing_data.nom,
+                )
+                session.add(ingredient)
+            
+            # Ajouter étapes
+            for idx, step in enumerate(recipe_data.etapes or [], start=1):
+                etape = EtapeRecette(
+                    recette_id=recette.id,
+                    ordre=idx,
+                    description=step,
+                )
+                session.add(etape)
+            
+            session.commit()
+            session.refresh(recette)
+            
+            return {
+                "id": recette.id,
+                "nom": recette.nom,
+                "description": recette.description,
+                "temps_preparation": recette.temps_preparation,
+                "temps_cuisson": recette.temps_cuisson,
+                "portions": recette.portions,
+                "categorie": recette.categorie,
+                "url_source": recette.url_source,
+            }
+    
+    return await executer_async(_import)
+
+
+@router.post("/import-pdf", response_model=RecetteResponse, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def importer_recette_pdf(
+    file: "UploadFile",
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Importe une recette depuis un fichier PDF.
+    
+    Utilise l'OCR et l'IA pour extraire le contenu du PDF et créer une recette.
+    
+    Args:
+        file: Fichier PDF uploadé
+        user: Utilisateur authentifié
+    
+    Returns:
+        Recette créée avec données extraites
+    
+    Raises:
+        HTTPException 422: Fichier invalide
+        HTTPException 500: Erreur lors de l'extraction OCR
+    """
+    from fastapi import UploadFile
+    
+    # Import PDF non implémenté dans le service actuellement
+    # Placeholder pour future implémentation
+    raise HTTPException(
+        status_code=501,
+        detail="Import PDF pas encore implémenté. Utilisez import-url pour le moment."
+    )
+

@@ -37,6 +37,7 @@ import {
   planifierRecetteSemaine,
   deplanifierRecetteSemaine,
 } from "@/bibliotheque/api/recettes";
+import { DialogueImportRecette } from "@/composants/cuisine/dialogue-import-recette";
 
 const CATEGORIES = [
   "Toutes",
@@ -99,12 +100,15 @@ export default function PageRecettes() {
             {data?.total ?? 0} recettes dans votre collection
           </p>
         </div>
-        <Button asChild>
-          <Link href="/cuisine/recettes/nouveau">
-            <Plus className="mr-2 h-4 w-4" />
-            Nouvelle recette
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <DialogueImportRecette />
+          <Button asChild>
+            <Link href="/cuisine/recettes/nouveau">
+              <Plus className="mr-2 h-4 w-4" />
+              Nouvelle recette
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Barre de recherche + filtres */}

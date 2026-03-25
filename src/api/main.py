@@ -31,6 +31,7 @@ from src.api.routes import (
     planning_router,
     preferences_router,
     recettes_router,
+    recherche_router,
     suggestions_router,
     upload_router,
     utilitaires_router,
@@ -138,6 +139,10 @@ tags_metadata = [
     {
         "name": "Utilitaires",
         "description": "Notes, journal, contacts, liens, mots de passe, énergie",
+    },
+    {
+        "name": "Recherche",
+        "description": "Recherche globale multi-entités (recettes, projets, activités, notes, contacts)",
     },
     {
         "name": "Documents",
@@ -432,6 +437,7 @@ app.include_router(preferences_router)
 app.include_router(anti_gaspillage_router)
 app.include_router(export_router)
 app.include_router(utilitaires_router)
+app.include_router(recherche_router)
 app.include_router(documents_router)
 app.include_router(upload_router)
 

@@ -1,0 +1,61 @@
+name: Frontend Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-tests.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: frontend
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run linter (ESLint)
+        run: npm run lint
+      
+      - name: Run type check (TypeScript)
+        run: npx tsc --noEmit
+      
+      - name: Run unit tests (Vitest)
+        run: npm test
+      
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+      
+      - name: Run E2E tests (Playwright)
+        run: npx playwright test
+        continue-on-error: true  # E2E tests peuvent échouer sans bloquer
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            frontend/coverage/
+            frontend/playwright-report/
+          retention-days: 7

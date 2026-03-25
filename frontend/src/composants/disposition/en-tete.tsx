@@ -4,7 +4,7 @@
 
 "use client";
 
-import { Search, Moon, Sun, LogOut, User } from "lucide-react";
+import { Search, Moon, Sun, LogOut, User, BookOpen } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/composants/ui/button";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -17,6 +17,12 @@ import {
   DropdownMenuTrigger,
 } from "@/composants/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/composants/ui/avatar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/composants/ui/tooltip";
 
 /**
  * Barre supérieure de l'application — recherche globale, bascule de thème, menu profil.
@@ -63,16 +69,38 @@ export function EnTete() {
         <Search className="h-5 w-5" />
       </Button>
 
-      {/* Toggle thème */}
+      {/* Lien vers guide utilisateur */}
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        asChild
+        title="Guide utilisateur"
       >
-        <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        <span className="sr-only">Changer le thème</span>
+        <a href="https://github.com/votreorg/assistant-matanne/blob/main/docs/user-guide/README.md" target="_blank" rel="noopener noreferrer">
+          <BookOpen className="h-5 w-5" />
+          <span className="sr-only">Guide utilisateur</span>
+        </a>
       </Button>
+
+      {/* Toggle thème */}
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            >
+              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Changer le thème</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Changer le thème (Clair/Sombre)</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       {/* Menu profil */}
       <DropdownMenu>

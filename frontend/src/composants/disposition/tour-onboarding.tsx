@@ -1,0 +1,385 @@
+/**
+ * Tour d'onboarding pour les nouveaux utilisateurs
+ * 
+ * Présente les fonctionnalités principales de l'application lors de la première connexion.
+ */
+
+'use client'
+
+import * as React from 'react'
+import { useRouter } from 'next/navigation'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/composants/ui/dialog'
+import { Button } from '@/composants/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
+import {
+  ChefHat,
+  ShoppingCart,
+  Calendar,
+  Users,
+  Home,
+  Gamepad2,
+  Wrench,
+  ArrowRight,
+  ArrowLeft,
+  X,
+} from 'lucide-react'
+
+const STORAGE_KEY = 'matanne-onboarding-complete'
+
+/**
+ * Étapes du tour d'onboarding
+ */
+const ETAPES_TOUR = [
+  {
+    titre: 'Bienvenue dans Assistant Matanne ! 🏠',
+    description: 'Votre hub de gestion familiale tout-en-un',
+    icone: Home,
+    lien: undefined,
+    contenu: (
+      <div className="space-y-3">
+        <p className="text-sm">
+          Assistant Matanne vous aide à gérer votre quotidien familial avec des outils
+          pour la cuisine, les activités, la maison et bien plus.
+        </p>
+        <p className="text-sm font-medium">Découvrons les principales fonctionnalités :</p>
+      </div>
+    ),
+  },
+  {
+    titre: 'Cuisine & Repas 🍽️',
+    description: 'Recettes, planning des repas et courses',
+    icone: ChefHat,
+    lien: '/cuisine',
+    contenu: (
+      <div className="space-y-2">
+        <div className="flex items-start gap-3">
+          <ChefHat className="size-5 text-orange-500 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Recettes</p>
+            <p className="text-xs text-muted-foreground">
+              Créez, importez et organisez vos recettes préférées. Import depuis URL ou PDF.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <Calendar className="size-5 text-blue-500 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Planning des repas</p>
+            <p className="text-xs text-muted-foreground">
+              Planifiez vos repas de la semaine avec suggestions IA personnalisées.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <ShoppingCart className="size-5 text-green-500 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Liste de courses</p>
+            <p className="text-xs text-muted-foreground">
+              Générez automatiquement vos courses depuis votre planning.
+            </p>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    titre: 'Famille & Activités 👨‍👩‍👦',
+    description: 'Suivi enfant, budget et activités',
+    icone: Users,
+    lien: '/famille',
+    contenu: (
+      <div className="space-y-2">
+        <div className="flex items-start gap-3">
+          <Users className="size-5 text-purple-500 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Suivi de développement</p>
+            <p className="text-xs text-muted-foreground">
+              Jalons, activités et journal pour suivre l'évolution de Jules.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <Calendar className="size-5 text-pink-500 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Activités & Weekend</p>
+            <p className="text-xs text-muted-foreground">
+              Planifiez vos activités familiales et weekends avec suggestions IA.
+            </p>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    titre: 'Maison & Projets 🏡',
+    description: 'Projets, entretien et énergie',
+    icone: Home,
+    lien: '/maison',
+    contenu: (
+      <div className="space-y-2">
+        <div className="flex items-start gap-3">
+          <Wrench className="size-5 text-yellow-500 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Projets & Entretien</p>
+            <p className="text-xs text-muted-foreground">
+              Gérez vos projets de rénovation et l'entretien régulier de votre maison.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <Home className="size-5 text-teal-500 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Jardin & Stocks</p>
+            <p className="text-xs text-muted-foreground">
+              Suivez votre potager et gérez vos stocks de produits ménagers.
+            </p>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    titre: 'Jeux & Outils 🎮',
+    description: 'Paris sportifs, loto et utilitaires',
+    icone: Gamepad2,
+    lien: '/jeux',
+    contenu: (
+      <div className="space-y-2">
+        <div className="flex items-start gap-3">
+          <Gamepad2 className="size-5 text-red-500 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Jeux</p>
+            <p className="text-xs text-muted-foreground">
+              Gérez vos paris sportifs et tirages Loto/EuroMillions.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3">
+          <Wrench className="size-5 text-gray-500 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Outils</p>
+            <p className="text-xs text-muted-foreground">
+              Chat IA, convertisseur, météo, notes et minuteur.
+            </p>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    titre: 'Astuces & Raccourcis ⌨️',
+    description: 'Gagnez du temps avec ces raccourcis',
+    icone: ArrowRight,
+    lien: undefined,
+    contenu: (
+      <div className="space-y-3">
+        <div className="rounded-lg bg-muted p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm">Recherche globale</span>
+            <kbd className="px-2 py-1 text-xs font-mono bg-background border rounded">
+              Ctrl+K
+            </kbd>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Recherchez n'importe quoi dans l'application (recettes, projets, notes, etc.)
+          </p>
+        </div>
+        <div className="rounded-lg bg-muted p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm">Guide utilisateur</span>
+            <span className="text-xs text-muted-foreground">Icône 📖 dans le header</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Documentation complète avec FAQ et guides détaillés
+          </p>
+        </div>
+        <div className="rounded-lg bg-muted p-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm">Thème clair/sombre</span>
+            <span className="text-xs text-muted-foreground">Bouton ☀️/🌙 dans le header</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Personnalisez l'apparence depuis le header ou les paramètres
+          </p>
+        </div>
+      </div>
+    ),
+  },
+] as const
+
+interface TourOnboardingProps {
+  /**
+   * Forcer l'affichage du tour (pour le bouton "Rejouer" dans les paramètres)
+   */
+  forcer?: boolean
+  /**
+   * Callback appelé quand le tour est terminé ou fermé
+   */
+  onTerminer?: () => void
+}
+
+export function TourOnboarding({ forcer = false, onTerminer }: TourOnboardingProps) {
+  const router = useRouter()
+  const [ouvert, setOuvert] = React.useState(false)
+  const [etapeActuelle, setEtapeActuelle] = React.useState(0)
+
+  const estPremiereFois = typeof window !== 'undefined' && !localStorage.getItem(STORAGE_KEY)
+  const etape = ETAPES_TOUR[etapeActuelle]
+  const estDerniereEtape = etapeActuelle === ETAPES_TOUR.length - 1
+  const Icone = etape.icone
+
+  /**
+   * Initialise le tour au premier chargement
+   */
+  React.useEffect(() => {
+    if (forcer || estPremiereFois) {
+      setOuvert(true)
+    }
+  }, [forcer, estPremiereFois])
+
+  /**
+   * Passe à l'étape suivante
+   */
+  const etapeSuivante = () => {
+    if (estDerniereEtape) {
+      terminer()
+    } else {
+      setEtapeActuelle((prev) => Math.min(prev + 1, ETAPES_TOUR.length - 1))
+    }
+  }
+
+  /**
+   * Retour à l'étape précédente
+   */
+  const etapePrecedente = () => {
+    setEtapeActuelle((prev) => Math.max(prev - 1, 0))
+  }
+
+  /**
+   * Termine le tour
+   */
+  const terminer = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, 'true')
+    }
+    setOuvert(false)
+    setEtapeActuelle(0)
+    onTerminer?.()
+  }
+
+  /**
+   * Ferme et marque comme complété
+   */
+  const fermer = () => {
+    terminer()
+  }
+
+  /**
+   * Visite un module
+   */
+  const visiterModule = () => {
+    if (etape.lien) {
+      terminer()
+      router.push(etape.lien)
+    } else {
+      etapeSuivante()
+    }
+  }
+
+  return (
+    <Dialog open={ouvert} onOpenChange={(open) => !open && fermer()}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-primary/10 p-2">
+              <Icone className="size-6 text-primary" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl">{etape.titre}</DialogTitle>
+              <DialogDescription>{etape.description}</DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="py-4">
+          <Card className="border-none shadow-none">
+            <CardContent className="pt-0">{etape.contenu}</CardContent>
+          </Card>
+        </div>
+
+        <DialogFooter className="flex-col gap-3 sm:flex-row sm:justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">
+              Étape {etapeActuelle + 1} / {ETAPES_TOUR.length}
+            </span>
+            <div className="flex gap-1">
+              {ETAPES_TOUR.map((_, index) => (
+                <div
+                  key={index}
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    index === etapeActuelle ? 'bg-primary' : 'bg-muted'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-2 justify-end">
+            <Button variant="ghost" size="sm" onClick={fermer}>
+              <X className="size-4 mr-1" />
+              Passer
+            </Button>
+            {etapeActuelle > 0 && (
+              <Button variant="outline" size="sm" onClick={etapePrecedente}>
+                <ArrowLeft className="size-4 mr-1" />
+                Précédent
+              </Button>
+            )}
+            {etape.lien ? (
+              <Button size="sm" onClick={visiterModule}>
+                Visiter
+                <ArrowRight className="size-4 ml-1" />
+              </Button>
+            ) : (
+              <Button size="sm" onClick={etapeSuivante}>
+                {estDerniereEtape ? 'Terminer' : 'Suivant'}
+                <ArrowRight className="size-4 ml-1" />
+              </Button>
+            )}
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+/**
+ * Hook pour vérifier si l'onboarding a été complété
+ */
+export function useOnboardingComplete() {
+  const [complete, setComplete] = React.useState(false)
+
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setComplete(!!localStorage.getItem(STORAGE_KEY))
+    }
+  }, [])
+
+  return complete
+}
+
+/**
+ * Fonction pour réinitialiser l'onboarding (utile pour le bouton "Rejouer")
+ */
+export function resetOnboarding() {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(STORAGE_KEY)
+  }
+}

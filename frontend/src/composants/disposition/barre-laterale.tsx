@@ -48,7 +48,7 @@ import {
   StickyNote,
   Cake,
   Contact,
-  Image,
+  Layers,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -101,7 +101,6 @@ const LIENS: LienNav[] = [
       { nom: "Anniversaires", chemin: "/famille/anniversaires", Icone: Cake },
       { nom: "Contacts", chemin: "/famille/contacts", Icone: Contact },
       { nom: "Journal", chemin: "/famille/journal", Icone: BookOpen },
-      { nom: "Album", chemin: "/famille/album", Icone: Image },
       { nom: "Documents", chemin: "/famille/documents", Icone: FileText },
     ],
   },
@@ -123,6 +122,7 @@ const LIENS: LienNav[] = [
       { nom: "Contrats", chemin: "/maison/contrats", Icone: FileText },
       { nom: "Garanties", chemin: "/maison/garanties", Icone: ShieldCheck },
       { nom: "Diagnostics", chemin: "/maison/diagnostics", Icone: ClipboardCheck },
+      { nom: "Visualisation", chemin: "/maison/visualisation", Icone: Layers },
       { nom: "Éco-Tips", chemin: "/maison/eco-tips", Icone: Leaf },
     ],
   },

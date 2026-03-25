@@ -6,6 +6,8 @@ import { BarreLaterale } from "./barre-laterale";
 import { NavMobile } from "./nav-mobile";
 import { EnTete } from "./en-tete";
 import { FilAriane } from "./fil-ariane";
+import { RechercheGlobale } from "./recherche-globale";
+import { TourOnboarding } from "./tour-onboarding";
 
 /**
  * Conteneur principal de l'application — assemble la sidebar desktop, l'en-tête,
@@ -30,6 +32,12 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
         {/* Bottom nav mobile */}
         <NavMobile />
       </div>
+
+      {/* Recherche globale (Ctrl+K) */}
+      <RechercheGlobale />
+
+      {/* Tour d'onboarding pour nouveaux utilisateurs */}
+      <TourOnboarding />
     </div>
   );
 }

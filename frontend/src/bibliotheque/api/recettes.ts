@@ -72,3 +72,26 @@ export async function planifierRecetteSemaine(id: number): Promise<void> {
 export async function deplanifierRecetteSemaine(id: number): Promise<void> {
   await clientApi.delete(`/recettes/${id}/planifier-semaine`);
 }
+
+// ─── Import de recettes ──────────────────────────────────
+
+/** Importer une recette depuis une URL */
+export async function importerRecetteURL(url: string): Promise<Recette> {
+  const { data } = await clientApi.post<Recette>("/recettes/import-url", null, {
+    params: { url },
+  });
+  return data;
+}
+
+/** Importer une recette depuis un fichier PDF */
+export async function importerRecettePDF(file: File): Promise<Recette> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await clientApi.post<Recette>("/recettes/import-pdf", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return data;
+}
+
