@@ -8,7 +8,12 @@ Centralise tous les schémas de validation et sérialisation.
 # Auth
 from .auth import (
     LoginRequest,
+    LoginResponse,
     RegisterRequest,
+    TwoFactorEnableResponse,
+    TwoFactorLoginRequest,
+    TwoFactorStatusResponse,
+    TwoFactorVerifyRequest,
     UserInfoResponse,
 )
 from .base import (

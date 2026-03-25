@@ -121,6 +121,11 @@ class ProfilUtilisateur(TimestampMixin, Base):
     pin_hash: Mapped[str | None] = mapped_column(String(255))
     sections_protegees: Mapped[list | None] = mapped_column(JSONB)
 
+    # 2FA (TOTP)
+    two_factor_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    two_factor_secret: Mapped[str | None] = mapped_column(String(255))
+    backup_codes: Mapped[list | None] = mapped_column(JSONB)
+
     # Préférences avancées
     preferences_modules: Mapped[dict | None] = mapped_column(JSONB)
     theme_prefere: Mapped[str] = mapped_column(String(20), default="auto")

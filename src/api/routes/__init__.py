@@ -4,6 +4,7 @@ Routes API - Package.
 Contient tous les routeurs FastAPI organisés par domaine.
 """
 
+from .admin import router as admin_router
 from .anti_gaspillage import router as anti_gaspillage_router
 from .auth import router as auth_router
 from .batch_cooking import router as batch_cooking_router
@@ -27,6 +28,7 @@ from .utilitaires import router as utilitaires_router
 from .webhooks import router as webhooks_router
 
 __all__ = [
+    "admin_router",
     "anti_gaspillage_router",
     "auth_router",
     "batch_cooking_router",

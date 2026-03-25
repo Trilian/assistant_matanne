@@ -1,5 +1,5 @@
 ﻿// ═══════════════════════════════════════════════════════════
-// Page Connexion
+// Page Connexion (avec support 2FA)
 // ═══════════════════════════════════════════════════════════
 
 "use client";
@@ -9,9 +9,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { connecter } from "@/bibliotheque/api/auth";
+import { connecter, login2FA, obtenirProfil } from "@/bibliotheque/api/auth";
 import { utiliserStoreAuth } from "@/magasins/store-auth";
-import { obtenirProfil } from "@/bibliotheque/api/auth";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
@@ -24,6 +23,7 @@ import {
   CardTitle,
 } from "@/composants/ui/card";
 import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
 
 const schemaConnexion = z.object({
   email: z.string().email("Email invalide"),
@@ -36,6 +36,10 @@ export default function PageConnexion() {
   const router = useRouter();
   const { definirUtilisateur } = utiliserStoreAuth();
   const [erreur, setErreur] = useState<string | null>(null);
+  const [etape2FA, setEtape2FA] = useState(false);
+  const [tempToken, setTempToken] = useState("");
+  const [code2FA, setCode2FA] = useState("");
+  const [enVerification, setEnVerification] = useState(false);
 
   const {
     register,
@@ -48,7 +52,14 @@ export default function PageConnexion() {
   async function onSubmit(donnees: DonneesFormulaire) {
     setErreur(null);
     try {
-      await connecter(donnees);
+      const reponse = await connecter(donnees);
+
+      if (reponse.requires_2fa && reponse.temp_token) {
+        setTempToken(reponse.temp_token);
+        setEtape2FA(true);
+        return;
+      }
+
       const profil = await obtenirProfil();
       definirUtilisateur(profil);
       router.push("/");
@@ -57,6 +68,79 @@ export default function PageConnexion() {
     }
   }
 
+  async function onVerifier2FA() {
+    setErreur(null);
+    setEnVerification(true);
+    try {
+      await login2FA(tempToken, code2FA);
+      const profil = await obtenirProfil();
+      definirUtilisateur(profil);
+      router.push("/");
+    } catch {
+      setErreur("Code 2FA invalide");
+    } finally {
+      setEnVerification(false);
+    }
+  }
+
+  // ─── Étape 2FA ───
+  if (etape2FA) {
+    return (
+      <Card>
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <ShieldCheck className="h-6 w-6 text-primary" />
+          </div>
+          <CardTitle className="text-2xl">Vérification 2FA</CardTitle>
+          <CardDescription>
+            Entrez le code à 6 chiffres de votre application d&apos;authentification
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {erreur && (
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              {erreur}
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="code-2fa">Code de vérification</Label>
+            <Input
+              id="code-2fa"
+              type="text"
+              inputMode="numeric"
+              placeholder="000000"
+              maxLength={8}
+              value={code2FA}
+              onChange={(e) => setCode2FA(e.target.value.replace(/\D/g, ""))}
+              autoFocus
+              className="text-center text-2xl tracking-widest"
+            />
+            <p className="text-xs text-muted-foreground">
+              Vous pouvez aussi utiliser un code de récupération
+            </p>
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col gap-3">
+          <Button
+            className="w-full"
+            disabled={code2FA.length < 6 || enVerification}
+            onClick={onVerifier2FA}
+          >
+            {enVerification ? "Vérification..." : "Vérifier"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { setEtape2FA(false); setCode2FA(""); setErreur(null); }}
+          >
+            Retour à la connexion
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  // ─── Formulaire login classique ───
   return (
     <Card>
       <CardHeader className="text-center">

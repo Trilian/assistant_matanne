@@ -49,9 +49,11 @@ import {
   Cake,
   Contact,
   Layers,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
+import { utiliserAuth } from "@/crochets/utiliser-auth";
 import { Button } from "@/composants/ui/button";
 import { Separator } from "@/composants/ui/separator";
 import {
@@ -157,6 +159,8 @@ const LIENS: LienNav[] = [
 export function BarreLaterale() {
   const pathname = usePathname();
   const { sidebarOuverte, basculerSidebar } = utiliserStoreUI();
+  const { utilisateur } = utiliserAuth();
+  const estAdmin = utilisateur?.role === "admin";
   const [sectionsOuvertes, setSectionsOuvertes] = useState<Set<string>>(() => {
     // Ouvrir automatiquement la section active
     const initial = new Set<string>();
@@ -292,7 +296,21 @@ export function BarreLaterale() {
 
       {/* Paramètres en bas */}
       <Separator />
-      <div className="p-2">
+      <div className="p-2 space-y-0.5">
+        {estAdmin && (
+          <Link
+            href="/admin"
+            className={cn(
+              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              pathname.startsWith("/admin")
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
+            )}
+          >
+            <Shield className="h-5 w-5 shrink-0" />
+            {sidebarOuverte && <span>Admin</span>}
+          </Link>
+        )}
         <Link
           href="/parametres"
           className={cn(

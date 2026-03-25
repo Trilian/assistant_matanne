@@ -25,6 +25,9 @@ python-multipart = ">=0.0.6"
 # Authentication
 supabase = "^2.3.0"
 PyJWT = "^2.8.0"
+# 2FA (TOTP)
+pyotp = "^2.9.0"
+qrcode = {version = "^8.0", extras = ["pil"]}
 # Barcode scanning
 pyzbar = {version = "^0.1.9", optional = true}
 opencv-python-headless = {version = "^4.9.0", optional = true}

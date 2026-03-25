@@ -13,10 +13,33 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+# ═══════════════════════════════════════════════════════════
+# SENTRY (Error Tracking)
+# ═══════════════════════════════════════════════════════════
+
+_sentry_dsn = os.getenv("SENTRY_DSN")
+if _sentry_dsn:
+    try:
+        import sentry_sdk
+
+        sentry_sdk.init(
+            dsn=_sentry_dsn,
+            environment=os.getenv("ENVIRONMENT", "development"),
+            traces_sample_rate=0.1,
+            profiles_sample_rate=0.1,
+        )
+        logging.info("Sentry initialized: error tracking enabled")
+    except ImportError:
+        logging.warning("Sentry DSN configured but sentry-sdk not installed")
+else:
+    logging.info("Sentry DSN not configured, skipping error tracking")
+
+
 from src.api.dependencies import require_role
 from src.api.prometheus import prometheus_router
 from src.api.rate_limiting import MiddlewareLimitationDebit
 from src.api.routes import (
+    admin_router,
     anti_gaspillage_router,
     batch_cooking_router,
     calendriers_router,
@@ -444,3 +467,4 @@ app.include_router(upload_router)
 # Prometheus et WebSocket
 app.include_router(prometheus_router)
 app.include_router(websocket_router)
+app.include_router(admin_router)
