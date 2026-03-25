@@ -8,8 +8,6 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
-import { Checkbox } from "@/composants/ui/checkbox";
-import { Progress } from "@/composants/ui/progress";
 
 const COULEUR_CATEGORIE: Record<string, string> = {
   quotidien: "bg-amber-100 text-amber-800",
@@ -116,7 +114,9 @@ export function CarteRoutine({
         {/* Barre de progression */}
         {total > 0 && (
           <div className="mt-2 space-y-1">
-            <Progress value={pourcentage} className="h-1.5" />
+            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+              <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pourcentage}%` }} />
+            </div>
             {pourcentage === 100 && (
               <p className="text-xs text-green-600 font-medium">✓ Routine complète !</p>
             )}
@@ -137,11 +137,13 @@ export function CarteRoutine({
                     estFaite ? "opacity-50" : "hover:bg-muted/50"
                   }`}
                 >
-                  <Checkbox
+                  <input
+                    type="checkbox"
                     checked={estFaite}
-                    onCheckedChange={() => onToggleTache?.(routineId, tache.nom)}
+                    onChange={() => onToggleTache?.(routineId, tache.nom)}
                     id={`${routineId}-${i}`}
                     disabled={!onToggleTache}
+                    className="h-4 w-4 rounded border-border cursor-pointer disabled:cursor-not-allowed"
                   />
                   <label
                     htmlFor={`${routineId}-${i}`}

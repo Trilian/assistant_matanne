@@ -13,7 +13,6 @@ import {
 } from "@/composants/ui/sheet";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
-import { Progress } from "@/composants/ui/progress";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirProjet, listerTachesProjet } from "@/bibliotheque/api/maison";
 
@@ -102,7 +101,9 @@ export function DrawerProjet({ projetId, ouvert, onFermer }: DrawerProjetProps) 
                     <span className="text-muted-foreground">Progression</span>
                     <span className="font-medium">{tachesTerminees}/{totalTaches} tâches</span>
                   </div>
-                  <Progress value={progression} className="h-2" />
+                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progression}%` }} />
+                  </div>
                   <p className="text-xs text-muted-foreground">{progression}% complété</p>
                 </div>
               )}

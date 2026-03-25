@@ -6,7 +6,7 @@ import { BarreLaterale } from "./barre-laterale";
 import { NavMobile } from "./nav-mobile";
 import { EnTete } from "./en-tete";
 import { FilAriane } from "./fil-ariane";
-import { RechercheGlobale } from "./recherche-globale";
+import { MenuCommandes } from "./menu-commandes";
 import { TourOnboarding } from "./tour-onboarding";
 import { InstallPrompt } from "@/composants/pwa/install-prompt";
 
@@ -34,8 +34,8 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
         <NavMobile />
       </div>
 
-      {/* Recherche globale (Ctrl+K) */}
-      <RechercheGlobale />
+      {/* Menu commandes avec navigation rapide (Ctrl+K) */}
+      <MenuCommandes />
 
       {/* Tour d'onboarding pour nouveaux utilisateurs */}
       <TourOnboarding />

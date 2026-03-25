@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
-import { Checkbox } from "@/composants/ui/checkbox";
 import {
   obtenirTachesJourMaison,
   obtenirPlanningSemaine,
@@ -47,10 +46,12 @@ function TacheJourItem({
   const id = tache.id ?? tache.nom;
   return (
     <div className={`flex items-center gap-3 p-3 rounded-lg border transition-opacity ${fait ? "opacity-50" : ""}`}>
-      <Checkbox
+      <input
+        type="checkbox"
         checked={fait}
-        onCheckedChange={() => onToggle(String(id))}
+        onChange={() => onToggle(String(id))}
         id={`tache-${id}`}
+        className="h-4 w-4 rounded border-border cursor-pointer"
       />
       <label htmlFor={`tache-${id}`} className="flex-1 cursor-pointer">
         <p className={`text-sm font-medium ${fait ? "line-through text-muted-foreground" : ""}`}>
@@ -278,11 +279,12 @@ export default function MenagePage() {
     obtenirPlanningSemaine
   );
 
-  const tachesArray = Array.isArray(tachesJour)
-    ? tachesJour
-    : (tachesJour as { items?: unknown[] } | undefined)?.items ?? [];
+  type TacheItem = { id?: string; nom?: string; categorie?: string; duree_estimee_min?: number };
+  const tachesArray: TacheItem[] = Array.isArray(tachesJour)
+    ? (tachesJour as TacheItem[])
+    : ((tachesJour as { items?: TacheItem[] } | undefined)?.items ?? []);
 
-  const tachesTermineesAujourdHui = tachesArray.filter((t: { id?: string; nom?: string }) =>
+  const tachesTermineesAujourdHui = tachesArray.filter((t) =>
     tachesTerminees.includes(String(t.id ?? t.nom))
   ).length;
 

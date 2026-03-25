@@ -12,6 +12,7 @@ import {
   Package,
   CookingPot,
   Leaf,
+  CalendarCheck,
 } from "lucide-react";
 import {
   Card,
@@ -24,6 +25,12 @@ import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirTableauBord } from "@/bibliotheque/api/tableau-bord";
 
 const SECTIONS = [
+  {
+    titre: "Ma Semaine",
+    description: "Assistant planning + courses en 4 étapes",
+    chemin: "/cuisine/ma-semaine",
+    Icone: CalendarCheck,
+  },
   {
     titre: "Recettes",
     description: "Gérer et rechercher vos recettes",

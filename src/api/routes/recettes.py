@@ -653,6 +653,11 @@ async def importer_recette_url(
     """
     from src.core.models import Recette
     from src.services.cuisine.recettes.import_url import get_recipe_import_service
+    from src.services.cuisine.recettes.enrichers import (
+        ImportedIngredient,
+        ImportedRecipe,
+        get_recipe_enricher,
+    )
     
     def _import():
         # Import via service
@@ -667,9 +672,32 @@ async def importer_recette_url(
         
         recipe_data = result.recipe
         
+        # Convertir en ImportedRecipe pour enrichissement
+        imported_recipe = ImportedRecipe(
+            nom=recipe_data.nom,
+            description=recipe_data.description or "",
+            temps_preparation=recipe_data.temps_preparation or 0,
+            temps_cuisson=recipe_data.temps_cuisson or 0,
+            portions=recipe_data.portions or 4,
+            ingredients=[
+                ImportedIngredient(
+                    nom=ing.nom,
+                    quantite=ing.quantite,
+                    unite=ing.unite,
+                )
+                for ing in (recipe_data.ingredients or [])
+                if ing.nom
+            ],
+            etapes=recipe_data.etapes or [],
+        )
+        
+        # Enrichir automatiquement
+        enricher = get_recipe_enricher()
+        enrichment = enricher.enrich(imported_recipe)
+        
         # Créer la recette en DB
         with executer_avec_session() as session:
-            # Créer recette principale (uniquement les colonnes existantes)
+            # Créer recette principale avec enrichissement
             recette = Recette(
                 nom=recipe_data.nom,
                 description=recipe_data.description,
@@ -680,6 +708,23 @@ async def importer_recette_url(
                 categorie=recipe_data.categorie or "plat",
                 saison="toute_année",
                 genere_par_ia=True,
+                # Enrichissement nutrition
+                calories=enrichment.calories,
+                proteines=enrichment.proteines,
+                lipides=enrichment.lipides,
+                glucides=enrichment.glucides,
+                # Tags bio/local
+                est_bio=enrichment.est_bio,
+                est_local=enrichment.est_local,
+                # Tags auto
+                est_rapide=enrichment.est_rapide,
+                compatible_batch=enrichment.compatible_batch,
+                congelable=enrichment.congelable,
+                compatible_bebe=enrichment.compatible_bebe,
+                # Robots
+                compatible_cookeo=enrichment.compatible_cookeo,
+                compatible_airfryer=enrichment.compatible_airfryer,
+                compatible_monsieur_cuisine=enrichment.compatible_monsieur_cuisine,
             )
             session.add(recette)
             session.flush()
@@ -718,27 +763,151 @@ async def importer_recette_pdf(
     """
     Importe une recette depuis un fichier PDF.
     
-    Utilise l'OCR et l'IA pour extraire le contenu du PDF et créer une recette.
+    Utilise PyPDF2 pour extraire le texte et l'enrichit automatiquement
+    (nutrition, bio/local, classification, robots).
     
     Args:
         file: Fichier PDF uploadé
         user: Utilisateur authentifié
     
     Returns:
-        Recette créée avec données extraites
+        Recette créée avec données extraites et enrichies
     
     Raises:
-        HTTPException 422: Fichier invalide
-        HTTPException 500: Erreur lors de l'extraction OCR
+        HTTPException 422: Fichier invalide ou non PDF
+        HTTPException 500: Erreur lors de l'extraction
     """
+    import tempfile
+    from pathlib import Path
+    
     from fastapi import UploadFile
     
-    # Import PDF non implémenté dans le service actuellement
-    # Placeholder pour future implémentation
-    raise HTTPException(
-        status_code=501,
-        detail="Import PDF pas encore implémenté. Utilisez import-url pour le moment."
+    from src.core.models import Recette
+    from src.services.cuisine.recettes.importer import RecipeImporter
+    from src.services.cuisine.recettes.enrichers import (
+        ImportedIngredient,
+        ImportedRecipe,
+        get_recipe_enricher,
     )
+    
+    def _import():
+        # Vérifier type de fichier
+        if not file.filename.lower().endswith('.pdf'):
+            raise HTTPException(
+                status_code=422,
+                detail="Seuls les fichiers PDF sont acceptés"
+            )
+        
+        # Sauvegarder temporairement le fichier
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp:
+            tmp.write(file.file.read())
+            tmp_path = tmp.name
+        
+        try:
+            # Extraire avec PyPDF2
+            raw_data = RecipeImporter.from_pdf(tmp_path)
+            
+            if not raw_data or not raw_data.get("nom"):
+                raise HTTPException(
+                    status_code=422,
+                    detail="Impossible d'extraire une recette du PDF"
+                )
+            
+            # Convertir en ImportedRecipe pour l'enrichissement
+            # Les ingrédients sont des strings simples, on parse basiquement
+            imported_ingredients = []
+            for ing_str in raw_data.get("ingredients", []):
+                # Pattern simple: "250g farine" -> 250, g, farine
+                import re
+                match = re.match(r'(\d+(?:\.\d+)?)\s*([a-z]+)?\s*(.+)', ing_str.strip())
+                if match:
+                    qty, unit, name = match.groups()
+                    imported_ingredients.append(
+                        ImportedIngredient(
+                            nom=name.strip(),
+                            quantite=float(qty),
+                            unite=unit or "pièce",
+                        )
+                    )
+                else:
+                    # Pas de quantité détectée, juste le nom
+                    imported_ingredients.append(
+                        ImportedIngredient(nom=ing_str.strip())
+                    )
+            
+            recipe = ImportedRecipe(
+                nom=raw_data.get("nom", "Recette PDF"),
+                description=raw_data.get("description", ""),
+                temps_preparation=raw_data.get("temps_preparation", 0),
+                temps_cuisson=raw_data.get("temps_cuisson", 0),
+                portions=raw_data.get("portions", 4),
+                ingredients=imported_ingredients,
+                etapes=raw_data.get("etapes", []),
+            )
+            
+            # Enrichir la recette
+            enricher = get_recipe_enricher()
+            enrichment = enricher.enrich(recipe)
+            
+            # Créer en DB
+            with executer_avec_session() as session:
+                recette = Recette(
+                    nom=recipe.nom,
+                    description=recipe.description,
+                    temps_preparation=recipe.temps_preparation,
+                    temps_cuisson=recipe.temps_cuisson,
+                    portions=recipe.portions,
+                    difficulte="moyen",
+                    categorie="plat",
+                    saison="toute_année",
+                    genere_par_ia=False,
+                    # Enrichissement nutrition
+                    calories=enrichment.calories,
+                    proteines=enrichment.proteines,
+                    lipides=enrichment.lipides,
+                    glucides=enrichment.glucides,
+                    # Tags bio/local
+                    est_bio=enrichment.est_bio,
+                    est_local=enrichment.est_local,
+                    # Tags auto
+                    est_rapide=enrichment.est_rapide,
+                    compatible_batch=enrichment.compatible_batch,
+                    congelable=enrichment.congelable,
+                    compatible_bebe=enrichment.compatible_bebe,
+                    # Robots
+                    compatible_cookeo=enrichment.compatible_cookeo,
+                    compatible_airfryer=enrichment.compatible_airfryer,
+                    compatible_monsieur_cuisine=enrichment.compatible_monsieur_cuisine,
+                )
+                session.add(recette)
+                session.flush()
+                
+                # Ingrédients
+                from src.api.schemas.recettes import IngredientItem
+                
+                ing_items = [
+                    IngredientItem(
+                        nom=ing.nom,
+                        quantite=ing.quantite or 1,
+                        unite=ing.unite or "pièce",
+                    )
+                    for ing in recipe.ingredients
+                ]
+                _sauvegarder_ingredients(session, recette.id, ing_items)
+                
+                # Étapes
+                _sauvegarder_etapes(session, recette.id, recipe.etapes)
+                
+                session.commit()
+                session.refresh(recette)
+                
+                return _serialiser_recette(recette, session, user)
+                
+        finally:
+            # Nettoyer le fichier temporaire
+            Path(tmp_path).unlink(missing_ok=True)
+    
+    return await executer_async(_import)
 
 
 # ═══════════════════════════════════════════════════════════

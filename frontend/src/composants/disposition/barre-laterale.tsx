@@ -66,6 +66,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/composants/ui/tooltip";
+import { FavorisRapides } from "./favoris-rapides";
 
 interface SousLien {
   nom: string;
@@ -220,6 +221,10 @@ export function BarreLaterale() {
           )}
         </Button>
       </div>
+
+      {/* Favoris rapides */}
+      <FavorisRapides collapsed={!sidebarOuverte} />
+      {sidebarOuverte && <Separator className="mx-3" />}
 
       {/* Navigation */}
       <nav aria-label="Navigation principale" className="flex-1 overflow-y-auto space-y-1 p-2">

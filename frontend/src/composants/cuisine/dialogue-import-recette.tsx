@@ -4,11 +4,11 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Upload, Link2, Loader2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { importerRecetteURL } from "@/bibliotheque/api/recettes";
+import { importerRecetteURL, importerRecettePDF } from "@/bibliotheque/api/recettes";
 import { Button } from "@/composants/ui/button";
 import {
   Dialog,
@@ -35,6 +35,8 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [ongletActif, setOngletActif] = useState<"url" | "pdf">("url");
+  const [fichierPDF, setFichierPDF] = useState<File | null>(null);
+  const inputFileRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   // Mutation pour import URL
@@ -51,6 +53,24 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
       toast.error(
         error.response?.data?.detail ||
           "Impossible d'importer la recette. Vérifiez l'URL."
+      );
+    },
+  });
+
+  // Mutation pour import PDF
+  const mutationPDF = useMutation({
+    mutationFn: importerRecettePDF,
+    onSuccess: (data) => {
+      toast.success(`✅ "${data.nom}" importée depuis PDF avec succès !`);
+      queryClient.invalidateQueries({ queryKey: ["recettes"] });
+      setOpen(false);
+      setFichierPDF(null);
+      onSuccess?.();
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.detail ||
+          "Impossible d'extraire la recette du PDF."
       );
     },
   });
@@ -73,7 +93,23 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
   };
 
   const handleImportPDF = () => {
-    toast.info("L'import PDF sera disponible prochainement.");
+    if (!fichierPDF) {
+      toast.error("Veuillez sélectionner un fichier PDF.");
+      return;
+    }
+
+    mutationPDF.mutate(fichierPDF);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.name.toLowerCase().endsWith('.pdf')) {
+        toast.error("Seuls les fichiers PDF sont acceptés.");
+        return;
+      }
+      setFichierPDF(file);
+    }
   };
 
   return (
@@ -99,9 +135,9 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
               <Link2 className="h-4 w-4 mr-2" />
               URL
             </TabsTrigger>
-            <TabsTrigger value="pdf" disabled>
+            <TabsTrigger value="pdf">
               <Upload className="h-4 w-4 mr-2" />
-              PDF (bientôt)
+              PDF
             </TabsTrigger>
           </TabsList>
 
@@ -135,15 +171,54 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
           </TabsContent>
 
           <TabsContent value="pdf" className="space-y-4 pt-4">
-            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+            <div 
+              className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => inputFileRef.current?.click()}
+            >
               <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground mb-2">
-                Glissez-déposez un fichier PDF ici
-              </p>
-              <p className="text-xs text-muted-foreground">
-                ou cliquez pour sélectionner
-              </p>
+              {fichierPDF ? (
+                <div>
+                  <p className="text-sm font-medium mb-2">{fichierPDF.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(fichierPDF.size / 1024).toFixed(2)} KB
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFichierPDF(null);
+                    }}
+                  >
+                    Changer de fichier
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Cliquez pour sélectionner un fichier PDF
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    ou glissez-déposez ici
+                  </p>
+                </div>
+              )}
             </div>
+            <input
+              ref={inputFileRef}
+              type="file"
+              accept=".pdf"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+
+            {mutationPDF.isPending && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Extraction de la recette du PDF...</span>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
@@ -151,15 +226,20 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
-            disabled={mutationURL.isPending}
+            disabled={mutationURL.isPending || mutationPDF.isPending}
           >
             Annuler
           </Button>
           <Button
             onClick={ongletActif === "url" ? handleImportURL : handleImportPDF}
-            disabled={mutationURL.isPending || (ongletActif === "url" && !url.trim())}
+            disabled={
+              mutationURL.isPending || 
+              mutationPDF.isPending || 
+              (ongletActif === "url" && !url.trim()) ||
+              (ongletActif === "pdf" && !fichierPDF)
+            }
           >
-            {mutationURL.isPending ? (
+            {(mutationURL.isPending || mutationPDF.isPending) ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Importation...

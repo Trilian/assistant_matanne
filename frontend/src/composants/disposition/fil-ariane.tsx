@@ -7,6 +7,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight, Home } from "lucide-react";
+import { BoutonEpingler } from "./bouton-epingler";
+import { TooltipProvider } from "@/composants/ui/tooltip";
 
 /** Traduit un segment d'URL en libellé français */
 function traduireSegment(segment: string): string {
