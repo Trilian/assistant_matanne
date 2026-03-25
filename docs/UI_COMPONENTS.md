@@ -353,14 +353,14 @@ afficher_menu_utilisateur()
 # Page paramètres profil
 afficher_parametres_profil()
 
-# Décorateurs de protection
-@require_authenticated
-def page_protegee():
-    st.write("Contenu protégé")
+# Décorateurs de protection (backend FastAPI)
+@router.get("/protege")
+async def page_protegee(user: dict = Depends(require_auth)):
+    return {"message": "Contenu protégé"}
 
-@require_role(Role.ADMIN)
-def page_admin():
-    st.write("Admin uniquement")
+@router.get("/admin")
+async def page_admin(user: dict = Depends(require_role("admin"))):
+    return {"message": "Admin uniquement"}
 ```
 
 ### Historique (historique.py)
@@ -486,31 +486,30 @@ from src.ui.components.atoms import etat_vide  # re-exporté via _common.py
 from src.ui.components.atoms import badge  # Préférer from src.ui import badge
 ```
 
-### Motif `etat_vide`
+### Motif état vide
 
-Utiliser `etat_vide()` au lieu de `st.info("Aucun ...")` pour les états vides :
+Utiliser le composant `EtatVide` (frontend) pour les états vides :
 
-```python
-from src.ui import etat_vide
-
-# ✅ Composant unifié
-etat_vide("Aucune recette trouvée", "🍽️", "Ajoutez votre première recette")
-
-# ❌ Ancien style
-st.info("Aucune recette trouvée")
+```tsx
+// Composant React unifié
+<EtatVide
+  titre="Aucune recette trouvée"
+  icone="🍽️"
+  description="Ajoutez votre première recette"
+/>
 ```
 
 ### Cache
 
-Les composants avec calculs coûteux utilisent `@st.cache_data`:
+Les calculs coûteux utilisent `@avec_cache` (décorateur multi-niveaux) :
 
 - Graphiques: `ttl=300` (5 min)
 - Métriques: `ttl=60` (1 min)
 
 ### Performance
 
-Pour le chargement différé des modules, voir `src/core/lazy_loader.py`.
-Chaque module métier (`src/modules/`) exporte une fonction `app()` comme point d'entrée.
+Pour le chargement différé des modules, les services utilisent `@service_factory` (singleton via registre).
+Chaque domaine expose ses routes dans `src/api/routes/` et ses pages dans `frontend/src/app/(app)/`.
 
 ### Nommage
 

@@ -295,7 +295,7 @@ class TestChangerProfil:
 
     def test_changer_profil_actif_succes(self, db, profil_anne, patch_db_context):
         """Changement vers un profil existant."""
-        with patch("src.services.profils.ProfilService.obtenir_profil") as mock_get:
+        with patch("src.services.core.utilisateur.profils.ProfilService.obtenir_profil") as mock_get:
             mock_get.return_value = profil_anne
             result = ProfilService.changer_profil_actif("anne")
 
@@ -303,7 +303,7 @@ class TestChangerProfil:
 
     def test_changer_profil_actif_inexistant(self, patch_db_context):
         """Changement vers un profil inexistant → False."""
-        with patch("src.services.profils.ProfilService.obtenir_profil", return_value=None):
+        with patch("src.services.core.utilisateur.profils.ProfilService.obtenir_profil", return_value=None):
             result = ProfilService.changer_profil_actif("inconnu")
         assert result is False
 

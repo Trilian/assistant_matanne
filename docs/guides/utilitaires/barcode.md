@@ -17,16 +17,12 @@ Le scanner de codes-barres permet de:
 
 **Le plus fluide** - Scan en temps réel via la webcam.
 
-1. Allez dans **🛠️ Utilitaires > 📷 Scanner**
+1. Allez dans **Outils > Scanner** (`/outils/scanner`)
 2. Autorisez l'accès à la caméra
 3. Approchez le code-barres de la webcam
 4. Le code est détecté automatiquement
 
-#### Dépendances requises
-
-```bash
-pip install opencv-python-headless pyzbar
-```
+> Le scan WebRTC s'exécute entièrement dans le navigateur (aucune dépendance Python).
 
 ### 2. Scanner Photo
 
@@ -152,6 +148,5 @@ Le scanner fonctionne sur mobile:
 
 ## 🔗 Liens utiles
 
-- [Guide Inventaire](../cuisine/inventaire.md)
-- [Guide Courses](../cuisine/courses.md)
+- [Guide Cuisine](../cuisine/README.md) (inventaire, courses)
 - [Guide Commandes Vocales](vocal.md)

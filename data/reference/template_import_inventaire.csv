@@ -1,0 +1,11 @@
+Nom,Quantité,Unité,Seuil Min,Emplacement,Catégorie,Date Péremption
+Tomate,5,kg,2,Frigo,Légumes,2026-02-15
+Poulet,2,pièce,1,Congélateur,Protéines,2026-01-25
+Lait,3,litre,1,Frigo,Laitier,2026-01-22
+Pomme,8,pièce,3,Placard,Fruits,2026-02-01
+Riz,1,kg,0.5,Placard,Féculents,
+Fromage,0.5,kg,0.2,Frigo,Laitier,2026-02-10
+Oeufs,12,pièce,6,Frigo,Laitier,2026-02-05
+Carotte,4,kg,2,Frigo,Légumes,2026-01-28
+Beurre,0.5,kg,0.2,Frigo,Laitier,2026-02-08
+Poisson,1.5,kg,0.5,Congélateur,Protéines,2026-01-30

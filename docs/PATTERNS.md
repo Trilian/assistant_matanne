@@ -186,19 +186,19 @@ from src.services.core.registry import obtenir_registre
 service = obtenir_registre().obtenir("recettes")
 ```
 
-### Lazy-load dans les modules
+### Lazy-load dans les routes
 
 ```python
-# src/modules/cuisine/recettes/__init__.py
-def app():
-    """Point d'entrée module — imports dans la fonction pour lazy loading"""
-    from src.services.cuisine.recettes import get_recette_service
+# src/api/routes/recettes.py
+from src.services.cuisine.recettes import get_recette_service
 
-    service = get_recette_service()
-    suggestions = service.suggest_recipes("Dîner rapide")
+@router.get("")
+async def lister_recettes(user: dict = Depends(require_auth)):
+    service = get_recette_service()  # Singleton via @service_factory
+    ...
 ```
 
-> **Important**: Garder les imports des services DANS `app()`, pas au niveau du module.
+> **Important**: Les services sont des singletons instanciés au premier appel via `@service_factory`.
 
 ---
 
@@ -338,4 +338,4 @@ Les patterns suivants ont été évalués et supprimés du codebase (dead code, 
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — Vue d'ensemble
 - [API_REFERENCE.md](API_REFERENCE.md) — Référence API
-- [MIGRATION_CORE_PACKAGES.md](MIGRATION_CORE_PACKAGES.md) — Guide de migration
+- [SERVICES_REFERENCE.md](SERVICES_REFERENCE.md) — Référence services backend

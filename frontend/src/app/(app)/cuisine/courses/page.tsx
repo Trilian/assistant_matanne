@@ -257,8 +257,8 @@ export default function PageCourses() {
                         onSwipeLeft={() => supprimer(a.id)}
                         labelDroit="Cocher"
                         labelGauche="Supprimer"
-                        iconDroit={<Check className="h-4 w-4" />}
-                        iconGauche={<Trash2 className="h-4 w-4" />}
+                        iconeDroit={<Check className="h-4 w-4" />}
+                        iconeGauche={<Trash2 className="h-4 w-4" />}
                       >
                         <div className="flex items-center gap-3 rounded-md px-2 py-1.5 bg-background">
                           <Button

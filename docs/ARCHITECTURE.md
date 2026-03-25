@@ -102,7 +102,7 @@ src/core/
 
 ```python
 # Pydantic BaseSettings avec chargement en cascade:
-# .env.local → .env → st.secrets → constantes
+# .env.local → .env → variables d'environnement → constantes
 from src.core.config import obtenir_parametres
 config = obtenir_parametres()
 ```
@@ -366,67 +366,52 @@ Fichiers clés: `ai_service.py`, `ai_mixins.py`, `ai_prompts.py`, `ai_streaming.
 
 Chaque service domaine exporte une fonction factory `get_{service_name}_service()`.
 
-## Lazy Loading (st.navigation + ChargeurModuleDiffere)
+## Routing
 
-Le routage multi-pages utilise `st.navigation()` configuré dans `src/core/navigation.py` via `construire_pages()`.
-Le chargement différé des modules est géré par `ChargeurModuleDiffere` dans `src/core/lazy_loader.py`.
+Le routage est géré par FastAPI côté backend (20 routers dans `src/api/routes/`) et Next.js App Router côté frontend (`frontend/src/app/(app)/`).
 
 ```python
-# src/core/navigation.py — construire_pages() enregistre chaque module comme st.Page()
-# Chaque module exporte app() comme point d'entrée
-def app():
-    """Point d'entrée module"""
-    st.title("Mon Module")
+# src/api/routes/recettes.py
+router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
+
+@router.get("")
+async def lister_recettes(user: dict = Depends(require_auth)):
+    ...
 ```
 
-**Performance**: ~60% d'accélération au démarrage grâce au chargement différé
+**Performance**: ~60% d'accélération au démarrage grâce au chargement différé des routes.
 
-**Bootstrap**: `src/app.py` appelle `demarrer_application()` (IoC) puis `st.navigation()` charge le module sélectionné.
+**Bootstrap**: `src/api/main.py` initialise l'application FastAPI avec middlewares et routers.
 
-## Modules Métier (src/modules/)
+## Modules Métier
 
-Chaque module est un sous-package avec `__init__.py` exportant `app()`:
+Les modules sont organisés en 3 couches : routes API (`src/api/routes/`), services (`src/services/`), modèles ORM (`src/core/models/`).
 
-| Module         | Sous-modules                                                                                                                 | Description                               |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `_framework/`  | `base_module.py`, `error_boundary.py`, `fragments.py`, `state_manager.py`                                                    | Framework de base pour modules            |
-| `accueil/`     | `dashboard.py`                                                                                                               | Tableau de bord, métriques, alertes       |
-| `cuisine/`     | `recettes/`, `courses/`, `inventaire/`, `planificateur_repas/`, `batch_cooking_detaille.py`                                  | Recettes, courses, stocks, planning repas |
-| `famille/`     | `activites.py`, `routines.py`, `jules/`, `jules_planning.py`, `suivi_perso/`, `achats_famille/`, `weekend/`, `hub_famille.py`, `age_utils.py` | Vie familiale, suivi enfant, santé        |
-| `maison/`      | `entretien/`, `charges/`, `depenses/`, `jardin/`, `hub/`                                                                     | Habitat, entretien, dépenses              |
-| `jeux/`        | `loto/`, `paris/`, `scraper_loto.py`, `utils.py`                                                                             | Loto, paris sportifs                      |
-| `planning/`    | `calendrier/`, `components/`, `timeline_ui.py`, `templates_ui.py`                                                            | Calendrier, timeline                      |
-| `parametres/`  | `about.py`, `affichage.py`, `budget.py`, `cache.py`, `database.py`, `foyer.py`, `ia.py`, `utils.py`                          | Réglages applicatifs                      |
-| `utilitaires/` | `barcode/`, `barcode_utils.py`, `rapports.py`, `rapports_utils.py`, `notifications_push.py`, `scan_factures.py`, `recherche_produits.py` | Outils transversaux                       |
+| Module | Routes API | Services | Description |
+|---|---|---|---|
+| Cuisine | `recettes.py`, `courses.py`, `inventaire.py`, `planning.py`, `batch_cooking.py`, `anti_gaspillage.py` | `cuisine/`, `planning/` | Recettes, courses, stocks, planning repas |
+| Famille | `famille.py` | `famille/` | Vie familiale, suivi enfant Jules, budget |
+| Maison | `maison.py` | `maison/` | Habitat, entretien, jardin, dépenses |
+| Jeux | `jeux.py` | `jeux/` | Paris sportifs, loto, euromillions |
+| Planning | `planning.py`, `calendriers.py` | `planning/` | Calendrier, timeline |
+| Dashboard | `dashboard.py` | `dashboard/` | Tableau de bord, métriques |
+| Outils | `utilitaires.py`, `suggestions.py`, `export.py` | `utilitaires/`, `rapports/` | Chat IA, export PDF, outils divers |
 
-## Composants UI (src/ui/)
+## Frontend (frontend/src/)
 
 ```
-src/ui/
-├── components/      # Widgets réutilisables (alertes, atoms, charts, data, filters, forms,
-│                    #   layouts, metrics, metrics_row, streaming, system, dynamic)
-├── dialogs.py       # DialogBuilder — modales fluides
-├── engine/          # Moteur CSS
-├── feedback/        # smart_spinner, show_success, show_error, show_warning
-├── forms/           # FormBuilder — formulaires déclaratifs (builder, fields, rendering, types)
-├── fragments.py     # @ui_fragment, @auto_refresh, FragmentGroup
-├── integrations/    # google_calendar.py
-├── keys.py          # Clés UI typées
-├── layout/          # Header, footer, sidebar, styles, initialisation
-├── layouts/         # Row, Grid, Stack composables
-├── registry.py      # Registre de composants
-├── state/           # URL State — deep linking (url.py)
-├── system/          # Composants système
-├── tablet/          # UI tablette (config, kitchen, styles, timer, widgets)
-├── testing/         # Régression visuelle
-├── theme.py         # Thème et tokens
-├── tokens.py        # Design tokens primitifs
-├── tokens_semantic.py # Design tokens sémantiques
-├── views/           # Vues spécifiques (auth, historique, import, jeux, météo,
-│                    #   notifications, PWA, sauvegarde, synchronisation)
-├── a11y.py          # Accessibilité
-├── animations.py    # Animations UI
-└── utils.py         # Utilitaires UI
+frontend/src/
+├── app/(app)/          # Routes Next.js par module (~50 pages)
+├── app/(auth)/         # Pages connexion/inscription
+├── composants/
+│   ├── disposition/    # Layout (sidebar, header, nav-mobile, fil d'ariane)
+│   └── ui/             # Composants shadcn/ui (button, card, dialog, table, etc.)
+├── bibliotheque/api/   # Clients API par domaine (Axios)
+├── crochets/           # Custom hooks React (auth, api, stockage-local, debounce)
+├── magasins/           # Zustand stores (auth, ui, notifications)
+├── types/              # Interfaces TypeScript par domaine
+├── fournisseurs/       # Providers (TanStack Query, auth, thème)
+└── middleware.ts       # Next.js middleware (auth route protection)
 ```
 
 ## Sécurité
@@ -494,7 +479,7 @@ Modules de logique pure extraits pour testabilité:
 | `age_utils.py`       | `get_age_jules()`, `_obtenir_date_naissance()` — calcul d'âge centralisé |
 | `activites_utils.py` | Constantes (TYPES_ACTIVITE, LIEUX), filtrage, stats, recommandations |
 | `routines_utils.py`  | Constantes (JOURS_SEMAINE, MOMENTS_JOURNEE), gestion du temps, stats |
-| `utils.py`           | Helpers partagés avec `@st.cache_data`                               |
+| `utils.py`           | Helpers partagés avec `@avec_cache`                                  |
 
 ## Conventions
 

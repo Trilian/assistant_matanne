@@ -1089,6 +1089,37 @@ CREATE TABLE preferences_notifications (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_notification_prefs_user ON preferences_notifications(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
+-- 3.42b WEBHOOKS_ABONNEMENTS
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS webhooks_abonnements (
+    id BIGSERIAL PRIMARY KEY,
+    url TEXT NOT NULL,
+    evenements JSONB NOT NULL DEFAULT '[]'::jsonb,
+    secret VARCHAR(128) NOT NULL,
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
+    description TEXT,
+    derniere_livraison TIMESTAMP WITH TIME ZONE,
+    nb_echecs_consecutifs INTEGER NOT NULL DEFAULT 0,
+    user_id UUID,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_webhooks_user ON webhooks_abonnements(user_id);
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 3.42c ETATS_PERSISTANTS
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS etats_persistants (
+    id SERIAL PRIMARY KEY,
+    namespace VARCHAR(100) NOT NULL,
+    user_id VARCHAR(100) NOT NULL DEFAULT 'default',
+    data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT uq_pstate_namespace_user UNIQUE (namespace, user_id)
+);
+CREATE INDEX IF NOT EXISTS ix_pstate_namespace ON etats_persistants(namespace);
+CREATE INDEX IF NOT EXISTS ix_pstate_user ON etats_persistants(user_id);
+-- ─────────────────────────────────────────────────────────────────────────────
 -- 3.43 EXTERNAL_CALENDAR_CONFIGS
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE configs_calendriers_externes (
@@ -3421,103 +3452,147 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 -- PARTIE 9 : ROW LEVEL SECURITY (RLS)
 -- ============================================================================
--- Activer RLS sur TOUTES les tables
+-- Stratégie RLS :
+--   service_role  : Accès complet (backend FastAPI via DATABASE_URL)
+--   authenticated : Filtrage par user_id sur les tables avec user_id
+--                   Accès complet sur les tables partagées (sans user_id)
+--   anon          : Aucun accès (PostgREST avec clé anonyme bloqué)
+--
+-- IMPORTANT : Les tables avec une colonne user_id filtrent par auth.uid().
+--             Les tables sans user_id sont accessibles à tous les authentifiés.
+--             Les tables de configuration/référence sont en lecture seule pour authenticated.
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 9.1 Tables avec user_id UUID → filtrage par auth.uid()
+-- ─────────────────────────────────────────────────────────────────────────────
 DO $$
 DECLARE t TEXT;
-all_tables TEXT [] := ARRAY [
-        -- Système
-        'schema_migrations', 'historique_actions', 'sauvegardes',
-        'abonnements_push', 'preferences_notifications',
-        -- Cuisine
-        'ingredients', 'recettes', 'recette_ingredients', 'etapes_recette',
-        'versions_recette', 'historique_recettes', 'retours_recettes',
-        -- Batch Cooking
-        'repas_batch', 'config_batch_cooking', 'sessions_batch_cooking',
-        'etapes_batch_cooking', 'preparations_batch',
-        -- Inventaire & Courses
-        'inventaire', 'historique_inventaire', 'listes_courses', 'liste_courses',
-        'modeles_courses', 'articles_modeles', 'articles_achats_famille',
-        -- Planning & Calendrier
-        'plannings', 'repas', 'evenements_planning', 'templates_semaine', 'elements_templates',
-        'calendriers_externes', 'evenements_calendrier', 'configs_calendriers_externes',
-        -- Famille
-        'profils_enfants', 'entrees_bien_etre', 'jalons',
-        'activites_famille', 'budgets_famille', 'achats_famille',
-        'activites_weekend',
-        -- Santé & Fitness
-        'profils_utilisateurs', 'routines_sante', 'objectifs_sante', 'entrees_sante',
-        'journaux_alimentaires', 'garmin_tokens', 'activites_garmin', 'resumes_quotidiens_garmin',
-        -- Finances
-        'depenses', 'budgets_mensuels', 'depenses_maison',
-        -- Habitat
-        'meubles', 'stocks_maison', 'taches_entretien', 'actions_ecologiques',
-        -- Maison
-        'projets', 'taches_projets', 'routines', 'taches_routines',
-        'elements_jardin', 'journaux_jardin',
-        -- Jeux (base)
-        'jeux_equipes', 'jeux_matchs', 'jeux_paris_sportifs',
-        'jeux_tirages_loto', 'jeux_grilles_loto', 'jeux_stats_loto',
-        'jeux_historique', 'jeux_series', 'jeux_alertes', 'jeux_configuration',
-        -- Jeux extensions (Euromillions, cotes, mise responsable)
-        'jeux_tirages_euromillions', 'jeux_grilles_euromillions', 'jeux_stats_euromillions',
-        'jeux_cotes_historique', 'jeux_mise_responsable',
-        -- Jardin & Météo
-        'alertes_meteo', 'config_meteo',
-        -- Temps Entretien
-        'plans_jardin', 'zones_jardin', 'plantes_jardin', 'actions_plantes',
-        'pieces_maison', 'objets_maison', 'sessions_travail',
-        'versions_pieces', 'couts_travaux', 'logs_statut_objets',
-        -- Préférences
-        'preferences_utilisateurs', 'openfoodfacts_cache',
-        -- Maison (migration 020)
-        'preferences_home', 'taches_home', 'stats_home',
-        'plantes_catalogue', 'recoltes', 'objectifs_autonomie',
-        'contrats', 'factures', 'comparatifs', 'depenses_home', 'budgets_home',
-        -- Maison extensions (migration 037)
-        'contrats_maison', 'artisans', 'interventions_artisans', 'garanties',
-        'incidents_sav', 'articles_cellier', 'diagnostics_maison',
-        'estimations_immobilieres', 'checklists_vacances', 'items_checklist',
-        'traitements_nuisibles', 'devis_comparatifs', 'lignes_devis',
-        'entretiens_saisonniers', 'releves_compteurs',
-        -- Utilitaires
-        'notes_memos', 'journal_bord', 'contacts_utiles', 'liens_favoris',
-        'mots_de_passe_maison', 'presse_papier_entrees', 'releves_energie',
-        -- Tables anciennement updated_at (colonnes renommées modifie_le)
-        'listes_courses', 'meubles', 'taches_entretien', 'stocks_maison',
-        'preferences_utilisateurs', 'depenses', 'budgets_mensuels', 'config_meteo',
-        'calendriers_externes', 'preferences_notifications',
-        'configs_calendriers_externes', 'evenements_calendrier',
-        'plans_jardin', 'zones_jardin', 'plantes_jardin',
-        'pieces_maison', 'objets_maison',
-        'preferences_home', 'taches_home', 'objectifs_autonomie',
-        'contrats', 'budgets_home'
-    ];
-BEGIN FOREACH t IN ARRAY all_tables LOOP EXECUTE format(
-    'ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY',
-    t
-);
--- Politique authenticated
-EXECUTE format(
-    'DROP POLICY IF EXISTS "authenticated_access_%s" ON public.%I',
-    t,
-    t
-);
-EXECUTE format(
-    'CREATE POLICY "authenticated_access_%s" ON public.%I FOR ALL TO authenticated USING (true) WITH CHECK (true)',
-    t,
-    t
-);
--- Politique service_role
-EXECUTE format(
-    'DROP POLICY IF EXISTS "service_role_access_%s" ON public.%I',
-    t,
-    t
-);
-EXECUTE format(
-    'CREATE POLICY "service_role_access_%s" ON public.%I FOR ALL TO service_role USING (true) WITH CHECK (true)',
-    t,
-    t
-);
+user_id_tables TEXT[] := ARRAY[
+    'calendriers_externes', 'evenements_calendrier',
+    'depenses', 'budgets_mensuels',
+    'alertes_meteo', 'config_meteo',
+    'sauvegardes',
+    'abonnements_push', 'preferences_notifications',
+    'webhooks_abonnements'
+];
+BEGIN FOREACH t IN ARRAY user_id_tables LOOP
+    EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
+    -- service_role : accès complet
+    EXECUTE format('DROP POLICY IF EXISTS "service_role_access_%s" ON public.%I', t, t);
+    EXECUTE format('CREATE POLICY "service_role_access_%s" ON public.%I FOR ALL TO service_role USING (true) WITH CHECK (true)', t, t);
+    -- authenticated : filtrage par user_id = auth.uid()
+    EXECUTE format('DROP POLICY IF EXISTS "authenticated_access_%s" ON public.%I', t, t);
+    EXECUTE format('CREATE POLICY "authenticated_access_%s" ON public.%I FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid())', t, t);
+END LOOP;
+END $$;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 9.2 Tables avec user_id VARCHAR → filtrage par auth.uid()::text
+-- ─────────────────────────────────────────────────────────────────────────────
+DO $$
+DECLARE t TEXT;
+user_id_varchar_tables TEXT[] := ARRAY[
+    'preferences_utilisateurs', 'retours_recettes',
+    'configs_calendriers_externes', 'etats_persistants',
+    'historique_actions'
+];
+BEGIN FOREACH t IN ARRAY user_id_varchar_tables LOOP
+    EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
+    EXECUTE format('DROP POLICY IF EXISTS "service_role_access_%s" ON public.%I', t, t);
+    EXECUTE format('CREATE POLICY "service_role_access_%s" ON public.%I FOR ALL TO service_role USING (true) WITH CHECK (true)', t, t);
+    EXECUTE format('DROP POLICY IF EXISTS "authenticated_access_%s" ON public.%I', t, t);
+    EXECUTE format('CREATE POLICY "authenticated_access_%s" ON public.%I FOR ALL TO authenticated USING (user_id = auth.uid()::text) WITH CHECK (user_id = auth.uid()::text)', t, t);
+END LOOP;
+END $$;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 9.3 Tables partagées (sans user_id) → accès complet authenticated
+--     Données familiales partagées entre tous les utilisateurs du foyer
+-- ─────────────────────────────────────────────────────────────────────────────
+DO $$
+DECLARE t TEXT;
+shared_tables TEXT[] := ARRAY[
+    -- Cuisine
+    'ingredients', 'recettes', 'recette_ingredients', 'etapes_recette',
+    'versions_recette', 'historique_recettes',
+    -- Batch Cooking
+    'repas_batch', 'config_batch_cooking', 'sessions_batch_cooking',
+    'etapes_batch_cooking', 'preparations_batch',
+    -- Inventaire & Courses
+    'inventaire', 'historique_inventaire', 'listes_courses', 'liste_courses',
+    'modeles_courses', 'articles_modeles', 'articles_achats_famille',
+    -- Planning & Calendrier
+    'plannings', 'repas', 'evenements_planning', 'templates_semaine', 'elements_templates',
+    -- Famille
+    'profils_enfants', 'entrees_bien_etre', 'jalons',
+    'activites_famille', 'budgets_famille', 'achats_famille',
+    'activites_weekend', 'anniversaires_famille', 'evenements_familiaux',
+    'albums_famille', 'souvenirs_famille', 'contacts_famille', 'documents_famille',
+    -- Santé & Fitness
+    'profils_utilisateurs', 'routines_sante', 'objectifs_sante', 'entrees_sante',
+    'journaux_alimentaires', 'garmin_tokens', 'activites_garmin', 'resumes_quotidiens_garmin',
+    'vaccins', 'rendez_vous_medicaux', 'mesures_croissance',
+    -- Finances
+    'depenses_maison',
+    -- Habitat
+    'meubles', 'stocks_maison', 'taches_entretien', 'actions_ecologiques',
+    -- Maison
+    'projets', 'taches_projets', 'routines', 'taches_routines',
+    'elements_jardin', 'journaux_jardin',
+    -- Jeux
+    'jeux_equipes', 'jeux_matchs', 'jeux_paris_sportifs',
+    'jeux_tirages_loto', 'jeux_grilles_loto', 'jeux_stats_loto',
+    'jeux_historique', 'jeux_series', 'jeux_alertes', 'jeux_configuration',
+    'jeux_tirages_euromillions', 'jeux_grilles_euromillions', 'jeux_stats_euromillions',
+    'jeux_cotes_historique', 'jeux_mise_responsable',
+    -- Temps Entretien & Jardin
+    'plans_jardin', 'zones_jardin', 'plantes_jardin', 'actions_plantes',
+    'pieces_maison', 'objets_maison', 'sessions_travail',
+    'versions_pieces', 'couts_travaux', 'logs_statut_objets',
+    'recoltes', 'objectifs_autonomie',
+    -- Maison extensions
+    'contrats_maison', 'artisans', 'interventions_artisans', 'garanties',
+    'incidents_sav', 'articles_cellier', 'diagnostics_maison',
+    'estimations_immobilieres', 'checklists_vacances', 'items_checklist',
+    'traitements_nuisibles', 'devis_comparatifs', 'lignes_devis',
+    'entretiens_saisonniers', 'releves_compteurs',
+    -- Utilitaires
+    'notes_memos', 'journal_bord', 'contacts_utiles', 'liens_favoris',
+    'mots_de_passe_maison', 'presse_papier_entrees', 'releves_energie',
+    -- Voyages
+    'voyages', 'checklists_voyage', 'templates_checklist',
+    -- OpenFoodFacts cache
+    'openfoodfacts_cache'
+];
+BEGIN FOREACH t IN ARRAY shared_tables LOOP
+    EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
+    EXECUTE format('DROP POLICY IF EXISTS "service_role_access_%s" ON public.%I', t, t);
+    EXECUTE format('CREATE POLICY "service_role_access_%s" ON public.%I FOR ALL TO service_role USING (true) WITH CHECK (true)', t, t);
+    EXECUTE format('DROP POLICY IF EXISTS "authenticated_access_%s" ON public.%I', t, t);
+    EXECUTE format('CREATE POLICY "authenticated_access_%s" ON public.%I FOR ALL TO authenticated USING (true) WITH CHECK (true)', t, t);
+END LOOP;
+END $$;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 9.4 Tables système/référence → lecture seule pour authenticated
+-- ─────────────────────────────────────────────────────────────────────────────
+DO $$
+DECLARE t TEXT;
+readonly_tables TEXT[] := ARRAY[
+    'schema_migrations',
+    'normes_oms', 'plantes_catalogue',
+    -- Legacy migration tables (read-only, données historiques)
+    'preferences_home', 'taches_home', 'stats_home',
+    'contrats', 'factures', 'comparatifs', 'depenses_home', 'budgets_home'
+];
+BEGIN FOREACH t IN ARRAY readonly_tables LOOP
+    EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
+    EXECUTE format('DROP POLICY IF EXISTS "service_role_access_%s" ON public.%I', t, t);
+    EXECUTE format('CREATE POLICY "service_role_access_%s" ON public.%I FOR ALL TO service_role USING (true) WITH CHECK (true)', t, t);
+    EXECUTE format('DROP POLICY IF EXISTS "authenticated_read_%s" ON public.%I', t, t);
+    EXECUTE format('CREATE POLICY "authenticated_read_%s" ON public.%I FOR SELECT TO authenticated USING (true)', t, t);
+    -- Drop any old full-access policy
+    EXECUTE format('DROP POLICY IF EXISTS "authenticated_access_%s" ON public.%I', t, t);
 END LOOP;
 END $$;
 -- ============================================================================
@@ -4118,9 +4193,11 @@ COMMIT;
 --   - 30 entretiens saisonniers prédéfinis
 --
 -- Stratégie RLS:
---   service_role : Accès complet (Streamlit backend via DATABASE_URL)
---   authenticated: Accès complet (future auth Supabase)
---   anon         : Pas d'accès (PostgREST avec clé anonyme bloqué)
+--   service_role  : Accès complet (backend FastAPI via DATABASE_URL)
+--   authenticated : Filtré par auth.uid() sur tables avec user_id,
+--                   accès complet sur tables partagées (foyer),
+--                   lecture seule sur tables système/référence
+--   anon          : Aucun accès
 --
 -- ============================================================================
 -- ============================================================================

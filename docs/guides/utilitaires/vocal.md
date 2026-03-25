@@ -15,7 +15,7 @@ Les commandes vocales permettent de:
 
 ## 🚀 Accès
 
-1. Allez dans **🛠️ Utilitaires > 🎤 Commandes Vocales**
+1. Allez dans **Outils > Commandes Vocales** (`/outils/vocal`)
 2. Ou utilisez le bouton 🎤 dans la barre latérale
 
 ## 📋 Commandes supportées
@@ -152,6 +152,5 @@ Les commandes vocales s'intègrent avec:
 
 ## 🔗 Liens utiles
 
-- [Guide Courses](../cuisine/courses.md)
-- [Guide Inventaire](../cuisine/inventaire.md)
+- [Guide Cuisine](../cuisine/README.md) (courses, inventaire)
 - [Guide Scanner Codes-barres](barcode.md)

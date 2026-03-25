@@ -1,25 +1,29 @@
-# 🔧 Services Reference - Assistant Matanne
+﻿# 🔧 Services Reference — Assistant MaTanne
 
-Documentation des services backend et de leurs APIs internes.
+> Documentation des services backend, leur architecture et leurs APIs internes.
 
-## Vue d'ensemble
+---
 
-L'architecture des services suit un modèle en couches:
+## Architecture des services
 
 ```text
 ┌─────────────────────────────────────────────────────────┐
-│              UI (Next.js / React)                        │
+│              Frontend (Next.js / React)                  │
+└─────────────────────────┬───────────────────────────────┘
+                          │ HTTP / WebSocket
+┌─────────────────────────▼───────────────────────────────┐
+│              Routes API (src/api/routes/)                │
+│       20 routeurs FastAPI — auth, CRUD, IA              │
 └─────────────────────────┬───────────────────────────────┘
                           │
 ┌─────────────────────────▼───────────────────────────────┐
 │                  Services Layer                          │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │ Recettes │ │  Budget  │ │ Weather  │ │  Backup  │   │
+│  │ Cuisine  │ │ Famille  │ │  Maison  │ │   Jeux   │   │
 │  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘   │
 │       └────────────┴─────┬──────┴────────────┘          │
-│                          │                               │
 │                   BaseAIService                          │
-│                (rate limit, cache)                       │
+│            (rate limit, cache, parsing)                  │
 └──────────────────────────┬───────────────────────────────┘
                           │
 ┌─────────────────────────▼───────────────────────────────┐
@@ -28,502 +32,212 @@ L'architecture des services suit un modèle en couches:
 └─────────────────────────────────────────────────────────┘
 ```
 
-## 📦 Services disponibles
+### Pattern singleton — `@service_factory`
 
-### Recettes (`src/services/recettes/`)
-
-**Service principal de gestion des recettes.**
+Tous les services exposent une fonction factory décorée `@service_factory` qui garantit un singleton via le registre :
 
 ```python
-from src.services.recettes import get_recette_service
+from src.services.core.registry import service_factory
+
+@service_factory("recettes", tags={"cuisine"})
+def get_recette_service() -> RecetteService:
+    return RecetteService()
+```
+
+### BaseAIService
+
+Les services nécessitant l'IA héritent de `BaseAIService` (`src/services/core/base/ai_service.py`) qui fournit automatiquement :
+
+- Limitation de débit (quotidien + horaire)
+- Cache sémantique des requêtes
+- Parsing JSON/Pydantic des réponses
+- Gestion d'erreurs et fallback
+
+---
+
+## Services par domaine
+
+### Recettes — `src/services/cuisine/`
+
+| Fichier | Classe | Factory | Description |
+|---------|--------|---------|-------------|
+| `service.py` | `RecetteService` | `get_recette_service()` | CRUD recettes + suggestions IA |
+| `importer.py` | `ImporterRecette` | — | Import depuis URL / PDF |
+| `suggestions.py` | `ServiceSuggestions(BaseAIService)` | `get_suggestions_service()` | Suggestions IA (repas, recettes) |
+
+```python
+from src.services.cuisine import get_recette_service
 
 service = get_recette_service()
-
-# CRUD
 recette = service.creer_recette(data)
-recettes = service.lister_recettes(categorie="dessert")
-service.mettre_a_jour_recette(id, data)
-service.supprimer_recette(id)
-
-# Suggestions IA
-suggestions = service.suggerer_recettes(
-    type_repas="diner",
-    personnes=4,
-    temps_max=30
-)
-
-# Import URL
+suggestions = service.suggerer_recettes(type_repas="diner", personnes=4)
 recette = service.importer_depuis_url("https://...")
 ```
 
-| Méthode                           | Description                |
-| --------------------------------- | -------------------------- |
-| `creer_recette(data)`             | Créer une nouvelle recette |
-| `lister_recettes()`               | Liste paginée avec filtres |
-| `obtenir_recette(id)`             | Détails d'une recette      |
-| `mettre_a_jour_recette(id, data)` | Modifier une recette       |
-| `supprimer_recette(id)`           | Supprimer une recette      |
-| `suggerer_recettes()`             | Suggestions IA             |
-| `importer_depuis_url(url)`        | Import depuis URL          |
-
 ---
 
-### Courses (`src/services/courses/`)
+### Courses — `src/services/cuisine/` (via routes)
 
-**Gestion des listes de courses.**
+Gestion des listes de courses. Collaboration temps réel via WebSocket (`src/api/websocket_courses.py`).
 
 ```python
-from src.services.courses import get_courses_service
-
-service = get_courses_service()
-
-# Listes
-liste = service.creer_liste("Courses semaine")
-listes = service.lister_listes()
-service.supprimer_liste(id)
-
-# Articles
-service.ajouter_article(liste_id, "Pain", quantite=2)
-service.marquer_fait(article_id)
-service.generer_depuis_planning(semaine="2025-W03")
+# Endpoints API principaux
+GET  /api/v1/courses          # Lister les listes
+POST /api/v1/courses          # Créer une liste
+POST /api/v1/courses/{id}/articles  # Ajouter article
+WS   /ws/courses/{liste_id}   # Collaboration temp réel
 ```
-
-| Méthode                     | Description                    |
-| --------------------------- | ------------------------------ |
-| `creer_liste(nom)`          | Nouvelle liste                 |
-| `lister_listes()`           | Toutes les listes              |
-| `ajouter_article()`         | Ajouter un article             |
-| `marquer_fait(id, fait)`    | Toggle article fait            |
-| `generer_depuis_planning()` | Générer depuis repas planifiés |
-| `suggerer_articles()`       | Suggestions IA                 |
 
 ---
 
-### Inventaire (`src/services/inventaire/`)
+### Inventaire — `src/services/inventaire/`
 
-**Gestion du stock alimentaire.**
+| Fichier | Classe | Factory | Description |
+|---------|--------|---------|-------------|
+| `service.py` | `InventaireService` | `get_inventaire_service()` | Stock alimentaire, code-barres, alertes péremption |
 
 ```python
 from src.services.inventaire import get_inventaire_service
 
 service = get_inventaire_service()
-
-# Stock
 articles = service.lister_articles()
-article = service.ajouter_article(nom="Lait", quantite=2)
-service.consommer(id, quantite=1)
-
-# Code-barres
-article = service.rechercher_barcode("3017760000123")
-info = service.obtenir_info_produit("3017760000123")
-
-# Alertes
+article = service.rechercher_barcode("3017760000123")  # OpenFoodFacts
 expirant = service.articles_expirant_bientot(jours=7)
 ```
 
-| Méthode                       | Description               |
-| ----------------------------- | ------------------------- |
-| `lister_articles()`           | Inventaire complet        |
-| `ajouter_article()`           | Ajouter au stock          |
-| `consommer(id, qte)`          | Décrémenter quantité      |
-| `rechercher_barcode()`        | Recherche par code-barres |
-| `obtenir_info_produit()`      | Info OpenFoodFacts        |
-| `articles_expirant_bientot()` | Alertes péremption        |
-
 ---
 
-### Budget (`src/services/budget/`)
+### Planning — `src/services/planning/`
 
-**Suivi des dépenses familiales.**
+Service modulaire divisé en sous-modules :
 
-```python
-from src.services.budget import get_budget_service
-
-service = get_budget_service()
-
-# Dépenses
-depense = service.ajouter_depense(
-    montant=45.50,
-    categorie="courses",
-    description="Supermarché"
-)
-depenses = service.lister_depenses(mois="2025-01")
-total = service.total_mois("2025-01")
-
-# Budget
-budget = service.definir_budget_mensuel(montant=500, categorie="courses")
-reste = service.budget_restant("courses", "2025-01")
-
-# Analyse IA
-analyse = service.analyser_depenses_ia(mois="2025-01")
-```
-
-| Méthode                    | Description        |
-| -------------------------- | ------------------ |
-| `ajouter_depense()`        | Nouvelle dépense   |
-| `lister_depenses()`        | Liste avec filtres |
-| `total_mois()`             | Total mensuel      |
-| `definir_budget_mensuel()` | Définir un budget  |
-| `budget_restant()`         | Calcul reste       |
-| `analyser_depenses_ia()`   | Analyse IA         |
-
----
-
-### Planning (`src/services/planning/`)
-
-**Planification des repas et activités.**
+| Fichier | Description |
+|---------|-------------|
+| `service.py` | Service principal (planning semaine, repas, suggestions IA) |
+| `nutrition.py` | Équilibre nutritionnel |
+| `agregation.py` | Agrégation liste courses depuis planning |
+| `formatters.py` | Formatage pour l'API |
+| `validators.py` | Validation des plannings |
+| `prompts.py` | Génération prompts IA |
 
 ```python
 from src.services.planning import get_planning_service
 
 service = get_planning_service()
-
-# Repas
-repas = service.ajouter_repas(
-    date="2025-01-20",
-    type_repas="diner",
-    recette_id=42
-)
-semaine = service.planning_semaine("2025-W03")
-service.supprimer_repas(id)
-
-# Suggestions IA
+semaine = service.planning_semaine("2026-W13")
 suggestions = service.suggerer_repas_semaine()
 ```
 
-| Méthode                    | Description           |
-| -------------------------- | --------------------- |
-| `ajouter_repas()`          | Planifier un repas    |
-| `planning_semaine()`       | Récupérer la semaine  |
-| `supprimer_repas()`        | Retirer un repas      |
-| `suggerer_repas_semaine()` | Suggestions IA        |
-| `generer_liste_courses()`  | Liste depuis planning |
+---
+
+### Famille — `src/services/famille/`
+
+| Fichier | Classe | Factory | Description |
+|---------|--------|---------|-------------|
+| `service.py` | `FamilleService` | `get_famille_service()` | CRUD enfants, activités, routines, budget |
+| `jules_ai.py` | `JulesAIService(BaseAIService)` | `get_jules_ai_service()` | Suggestions développement Jules (streaming) |
+| `weekend_ai.py` | `WeekendAIService(BaseAIService)` | `get_weekend_ai_service()` | Suggestions activités weekend IA |
 
 ---
 
-### Calendrier (`src/services/calendrier/`)
+### Maison — `src/services/maison/`
 
-**Synchronisation calendriers externes.**
+| Fichier | Classe | Factory | Description |
+|---------|--------|---------|-------------|
+| `service.py` | `MaisonService` | `get_maison_service()` | Projets, entretien, jardin, énergie, stocks |
 
-```python
-from src.services.calendrier import get_calendrier_service
-
-service = get_calendrier_service()
-
-# iCal
-url = service.generer_ical_url()
-events = service.exporter_ical(type="repas")
-
-# Sync externe
-service.sync_google_calendar(token)
-service.sync_apple_calendar(subscription_url)
-```
-
-| Méthode                  | Description   |
-| ------------------------ | ------------- |
-| `generer_ical_url()`     | URL flux iCal |
-| `exporter_ical()`        | Export iCal   |
-| `sync_google_calendar()` | Sync Google   |
-| `sync_apple_calendar()`  | Sync Apple    |
+Sous-modules mixins (façade pattern) :
+- `jardin_ia_mixin.py` / `jardin_crud_mixin.py` — Jardin IA + CRUD
+- `projets_ia_mixin.py` / `projets_crud_mixin.py` — Projets IA + CRUD
 
 ---
 
-### Weather (`src/services/weather/`)
+### Jeux — `src/services/jeux/`
 
-**Alertes météo pour le jardin.**
-
-```python
-from src.services.weather import get_weather_service
-
-service = get_weather_service()
-
-# Météo
-meteo = service.obtenir_meteo_actuelle()
-previsions = service.previsions_7j()
-
-# Alertes jardin
-alertes = service.alertes_jardin()
-# Ex: ["⚠️ Gel prévu cette nuit", "🌧️ Pluie demain"]
-```
-
-| Méthode                    | Description            |
-| -------------------------- | ---------------------- |
-| `obtenir_meteo_actuelle()` | Conditions actuelles   |
-| `previsions_7j()`          | Prévisions semaine     |
-| `alertes_jardin()`         | Alertes pour jardinier |
+| Fichier | Classe | Factory | Description |
+|---------|--------|---------|-------------|
+| `service.py` | `JeuxService` | `get_jeux_service()` | Paris sportifs, Loto, EuroMillions |
 
 ---
 
-### Backup (`src/services/backup/`)
+### Dashboard — `src/services/dashboard/`
 
-**Sauvegarde et restauration.**
-
-```python
-from src.services.backup import get_backup_service
-
-service = get_backup_service()
-
-# Sauvegarde
-backup = service.creer_sauvegarde(tables=["recettes", "inventaire"])
-# Retourne: {"id": "...", "fichier": "backup_2025-01-18.json"}
-
-# Restauration
-service.restaurer(backup_id)
-
-# Historique
-backups = service.lister_sauvegardes()
-```
-
-| Méthode                | Description              |
-| ---------------------- | ------------------------ |
-| `creer_sauvegarde()`   | Nouvelle sauvegarde      |
-| `restaurer(id)`        | Restaurer une sauvegarde |
-| `lister_sauvegardes()` | Historique               |
-| `supprimer_anciens()`  | Nettoyage                |
+| Fichier | Classe | Factory | Description |
+|---------|--------|---------|-------------|
+| `service.py` | `DashboardService` | `get_dashboard_service()` | Agrégation métriques pour tableau de bord |
 
 ---
 
-### Notifications (`src/services/notifications/`)
+### Utilitaires — `src/services/utilitaires/`
 
-**Notifications push et in-app.**
-
-```python
-from src.services.notifications import get_notification_service
-
-service = get_notification_service()
-
-# Abonnement
-service.enregistrer_souscription(endpoint, keys)
-service.retirer_souscription(endpoint)
-
-# Envoi
-service.envoyer_notification(
-    titre="Rappel",
-    corps="Yaourts expirent demain",
-    type="inventaire"
-)
-
-# Notifications in-app
-notifs = service.lister_notifications(non_lues=True)
-service.marquer_lue(id)
-```
-
-| Méthode                      | Description          |
-| ---------------------------- | -------------------- |
-| `enregistrer_souscription()` | Web Push subscribe   |
-| `envoyer_notification()`     | Envoyer push         |
-| `lister_notifications()`     | In-app notifications |
-| `marquer_lue()`              | Marquer comme lue    |
+| Fichier | Classe | Factory | Description |
+|---------|--------|---------|-------------|
+| `service.py` | `UtilitairesService` | `get_utilitaires_service()` | Chat IA, notes, outils divers |
 
 ---
 
-### Suggestions (`src/services/suggestions/`)
+### Rapports — `src/services/rapports/`
 
-**Engine de suggestions IA.**
-
-```python
-from src.services.suggestions import get_suggestions_service
-
-service = get_suggestions_service()
-
-# Recettes
-recettes = service.suggerer_recettes(
-    ingredients_disponibles=["poulet", "riz"],
-    type_repas="diner",
-    temps_max=45
-)
-
-# Prédictions
-predictions = service.predire_courses_semaine()
-# Basé sur historique et habitudes
-```
-
-| Méthode                     | Description          |
-| --------------------------- | -------------------- |
-| `suggerer_recettes()`       | Suggestions recettes |
-| `predire_courses_semaine()` | Prédiction courses   |
-| `analyser_habitudes()`      | Analyse patterns     |
+| Fichier | Classe | Factory | Description |
+|---------|--------|---------|-------------|
+| `export.py` | `ServiceExportPDF` | `get_export_service()` | Export PDF (recettes, planning, courses, budget) |
 
 ---
 
-### Garmin (`src/services/garmin/`)
+### Intégrations — `src/services/integrations/`
 
-**Intégration tracker fitness Garmin.**
-
-```python
-from src.services.garmin import get_garmin_service
-
-service = get_garmin_service()
-
-# Données
-activites = service.obtenir_activites(jours=7)
-stats = service.statistiques_semaine()
-
-# Sync
-service.synchroniser()
-```
+| Fichier | Description |
+|---------|-------------|
+| `multimodal.py` | IA images (analyse, OCR) |
+| `webhooks.py` | Envoi webhooks HTTP POST sur événements métier |
+| `weather/` | Service météo (agrégation APIs, fallback) |
 
 ---
 
-### Batch Cooking (`src/services/batch_cooking/`)
+## Services transversaux (core)
 
-**Planification batch cooking.**
+### Registre — `src/services/core/registry.py`
 
-```python
-from src.services.batch_cooking import get_batch_cooking_service
+Registre singleton avec décorateur `@service_factory`. Permet le lookup par nom et tags.
 
-service = get_batch_cooking_service()
+### Bus d'événements — `src/services/core/events/`
 
-# Planification
-plan = service.generer_plan_batch(
-    portions_semaine=20,
-    temps_disponible=3  # heures
-)
+Bus pub/sub avec wildcards pour le découplage inter-services. 14 événements typés.
 
-# Liste courses
-liste = service.generer_liste_courses_batch(plan_id)
-```
+### Audit — `src/services/core/audit.py`
 
----
+Trail d'audit transversal : souscription wildcard bus, buffer mémoire, persistence DB.
 
-## 🔧 Base Services
+### Utilisateur — `src/services/core/utilisateur/profils.py`
 
-### BaseAIService
-
-Classe de base pour les services utilisant l'IA.
-
-```python
-from src.services.base import BaseAIService
-
-class MonService(BaseAIService):
-    def ma_methode_ia(self, prompt: str):
-        # Utilise automatiquement:
-        # - Rate limiting
-        # - Cache sémantique
-        # - Retry logic
-        return self.call_with_list_parsing_sync(
-            prompt=prompt,
-            item_model=MonSchema,
-            system_prompt="Tu es un expert..."
-        )
-```
-
-**Méthodes disponibles:**
-
-- `call_ai_sync(prompt)` - Appel simple
-- `call_with_json_parsing_sync(prompt, model)` - Parsing JSON
-- `call_with_list_parsing_sync(prompt, item_model)` - Parsing liste
-
-### sync_wrapper (Utilitaire Async/Sync)
-
-Décorateur pour convertir automatiquement des méthodes async en méthodes sync.
-Utile pour l'intégration synchrone dans les routes FastAPI.
-
-```python
-from src.services.base import sync_wrapper
-
-class MonService:
-    async def appel_api(self, prompt: str) -> str:
-        """Méthode async originale."""
-        response = await self.client.call(prompt)
-        return response
-
-    # Crée automatiquement la version synchrone
-    appel_api_sync = sync_wrapper(appel_api)
-
-# Usage
-service = MonService()
-result = service.appel_api_sync("Mon prompt")  # Appel synchrone!
-```
-
-**Caractéristiques:**
-
-| Fonctionnalité | Description |
-|----------------|-------------|
-| Event loop actif | Utilise `ThreadPoolExecutor` automatiquement |
-| Pas d'event loop | Utilise `asyncio.run()` directement |
-| Préservation nom | `__name__` et `__qualname__` conservés |
-| Propagation erreurs | Les exceptions async sont propagées |
-
-**Variante avec suffixe personnalisé:**
-
-```python
-from src.services.base import make_sync_alias
-
-# Ajoute le suffixe par défaut "_sync"
-ma_methode_sync = make_sync_alias(ma_methode_async)
-
-# Suffixe personnalisé
-ma_methode_synchrone = make_sync_alias(ma_methode_async, suffix="_synchrone")
-```
-
-**Quand utiliser sync_wrapper:**
-
-- ✅ Services IA avec appels réseau async appelés depuis du code sync
-- ✅ Éviter duplication de code async/sync
-- ❌ Code déjà synchrone
-- ❌ Contextes purement async (utiliser `await` directement)
-
-### ServiceIOBase
-
-Classe de base pour les opérations I/O (import/export).
-
-```python
-from src.ui.core import ServiceIOBase, ConfigurationIO
-
-class MonService(ServiceIOBase):
-    def exporter_donnees(self):
-        return self.exporter_json(data, "export.json")
-
-    def importer_donnees(self, fichier):
-        return self.importer_json(fichier)
-```
+CRUD profils utilisateurs.
 
 ---
 
-## 📚 Conventions
-
-### Factory Pattern
-
-Tous les services exportent une fonction factory:
+## Référence rapide factories
 
 ```python
-# Correct
-from src.services.recettes import get_recette_service
-service = get_recette_service()
+# Cuisine
+from src.services.cuisine import get_recette_service
+from src.services.inventaire import get_inventaire_service
+from src.services.planning import get_planning_service
 
-# Éviter
-from src.services.recettes.service import RecetteService
+# Famille
+from src.services.famille import get_famille_service
+
+# Maison
+from src.services.maison import get_maison_service
+
+# Jeux
+from src.services.jeux import get_jeux_service
+
+# Dashboard
+from src.services.dashboard import get_dashboard_service
+
+# Utilitaires
+from src.services.utilitaires import get_utilitaires_service
+
+# Rapports
+from src.services.rapports import get_export_service
 ```
 
-### Injection de session DB
-
-```python
-from src.core.decorators import with_db_session
-
-@with_db_session
-def ma_fonction(data, db: Session):
-    # Session injectée automatiquement
-    return db.query(Model).all()
-```
-
-### Gestion d'erreurs
-
-```python
-from src.core.errors import ErreurBaseDeDonnees, ErreurValidation
-
-try:
-    result = service.operation()
-except ErreurValidation as e:
-    st.error(f"Données invalides: {e}")
-except ErreurBaseDeDonnees as e:
-    st.error(f"Erreur base de données: {e}")
-```
-
----
-
-## 📚 Voir aussi
-
-- [API_REFERENCE.md](./API_REFERENCE.md) - API REST
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - Architecture technique
-- [SQLALCHEMY_SESSION_GUIDE.md](./SQLALCHEMY_SESSION_GUIDE.md) - Guide sessions DB

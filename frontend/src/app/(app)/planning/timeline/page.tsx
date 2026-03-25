@@ -39,7 +39,7 @@ export default function PageTimeline() {
   // Trier les repas par date puis par type
   const repasOrdre: TypeRepas[] = ["petit_dejeuner", "dejeuner", "gouter", "diner"];
   const repasTries = [...(planning?.repas ?? [])].sort((a, b) => {
-    const dateCompare = a.date.localeCompare(b.date);
+    const dateCompare = (a.date ?? "").localeCompare(b.date ?? "");
     if (dateCompare !== 0) return dateCompare;
     return repasOrdre.indexOf(a.type_repas) - repasOrdre.indexOf(b.type_repas);
   });
@@ -47,7 +47,7 @@ export default function PageTimeline() {
   // Grouper par date
   const parDate: Record<string, typeof repasTries> = {};
   for (const repas of repasTries) {
-    const key = repas.date.split("T")[0];
+    const key = (repas.date ?? "").split("T")[0];
     if (!parDate[key]) parDate[key] = [];
     parDate[key].push(repas);
   }

@@ -276,14 +276,13 @@ curl https://assistant-matanne-api.up.railway.app/health
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture technique détaillée |
 | [API_REFERENCE.md](docs/API_REFERENCE.md) | Référence complète de l'API REST |
 | [SERVICES_REFERENCE.md](docs/SERVICES_REFERENCE.md) | Documentation des services backend |
-| [FONCTIONNALITES.md](docs/FONCTIONNALITES.md) | Fonctionnalités détaillées par module |
+| [MODULES.md](docs/MODULES.md) | Fonctionnalités détaillées par module |
 | [ERD_SCHEMA.md](docs/ERD_SCHEMA.md) | Schéma entité-relation de la DB |
 | [SQLALCHEMY_SESSION_GUIDE.md](docs/SQLALCHEMY_SESSION_GUIDE.md) | Guide sessions DB |
-| [MIGRATION_CORE_PACKAGES.md](docs/MIGRATION_CORE_PACKAGES.md) | Guide migration imports core |
 | [UI_COMPONENTS.md](docs/UI_COMPONENTS.md) | Composants UI Next.js / shadcn |
 | [PATTERNS.md](docs/PATTERNS.md) | Patterns de code récurrents |
 | [frontend/README.md](frontend/README.md) | Documentation frontend Next.js |
-| [ROADMAP.md](ROADMAP.md) | Roadmap et historique des sprints |
+| [ROADMAP.md](ROADMAP.md) | Roadmap du projet |
 
 ---
 

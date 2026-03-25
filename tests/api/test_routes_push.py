@@ -91,7 +91,7 @@ class TestPushSchemas:
 class TestPushSubscribe:
     """Tests pour POST /api/v1/push/subscribe."""
 
-    @patch("src.services.core.notifications.notif_web.get_push_notification_service")
+    @patch("src.services.core.notifications.notif_web_core.get_push_notification_service")
     @patch("src.api.dependencies.get_current_user")
     def test_subscribe_success(
         self,
