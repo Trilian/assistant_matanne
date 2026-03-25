@@ -747,3 +747,69 @@ class StatsHubMaisonResponse(BaseModel):
     stocks_en_alerte: int = 0
     articles_perimes: int = 0
     diagnostics_expirant: int = 0
+
+# Briefing Maison (contexte quotidien)
+
+class AlerteMaisonResponse(BaseModel):
+    type: str
+    niveau: str
+    titre: str
+    message: str
+    action_suggeree: str | None = None
+    date_limite: _dt.date | None = None
+    metadata: dict = Field(default_factory=dict)
+
+class TacheJourResponse(BaseModel):
+    nom: str
+    categorie: str = "entretien"
+    duree_estimee_min: int | None = None
+    priorite: str = "moyenne"
+    source: str = ""
+    fait: bool = False
+    id_source: int | None = None
+
+class MeteoResumeResponse(BaseModel):
+    temperature_min: float | None = None
+    temperature_max: float | None = None
+    description: str = ""
+    precipitation_mm: float = 0
+    impact_jardin: str | None = None
+    impact_menage: str | None = None
+
+class BriefingMaisonResponse(BaseModel):
+    date: _dt.date
+    resume: str = ""
+    taches_jour: list[str] = Field(default_factory=list)
+    taches_jour_detail: list[TacheJourResponse] = Field(default_factory=list)
+    alertes: list[AlerteMaisonResponse] = Field(default_factory=list)
+    meteo_impact: str | None = None
+    meteo: MeteoResumeResponse | None = None
+    projets_actifs: list[str] = Field(default_factory=list)
+    priorites: list[str] = Field(default_factory=list)
+    eco_score_jour: int | None = None
+    entretiens_saisonniers: list[dict] = Field(default_factory=list)
+    jardin: list[dict] = Field(default_factory=list)
+    cellier_alertes: list[dict] = Field(default_factory=list)
+    energie_anomalies: list[dict] = Field(default_factory=list)
+
+class PreferencesMenageRequest(BaseModel):
+    jours_off: list[str] = Field(default_factory=list)
+    creneau_horaire: str | None = None
+    intensite: str = Field("normal", pattern="^(leger|normal|intensif)$")
+    responsables: list[str] = Field(default_factory=list)
+
+class PlanningSemaineResponse(BaseModel):
+    date_debut: _dt.date
+    jours: dict[str, list[TacheJourResponse]] = Field(default_factory=dict)
+    duree_totale_min: int = 0
+
+class FicheTacheResponse(BaseModel):
+    nom: str
+    categorie: str = ""
+    duree_estimee_min: int | None = None
+    difficulte: str | None = None
+    etapes: list[str] = Field(default_factory=list)
+    produits: list[dict] = Field(default_factory=list)
+    outils: list[str] = Field(default_factory=list)
+    astuce_connectee: str | None = None
+    video_recherche: str | None = None

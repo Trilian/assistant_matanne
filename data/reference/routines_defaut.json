@@ -1,0 +1,73 @@
+{
+  "version": "1.0",
+  "description": "Routines maison par défaut — matin, soir, hebdomadaire",
+  "routines": [
+    {
+      "nom": "Routine du matin",
+      "frequence": "quotidien",
+      "categorie": "quotidien",
+      "moment_journee": "matin",
+      "heure_debut": "07:00",
+      "heure_fin": "09:00",
+      "couleur": "amber",
+      "taches": [
+        { "nom": "Préparer le petit-déjeuner", "duree_min": 15, "ordre": 1, "categorie": "cuisine" },
+        { "nom": "Faire la vaisselle du matin", "duree_min": 10, "ordre": 2, "categorie": "cuisine" },
+        { "nom": "Faire les lits", "duree_min": 5, "ordre": 3, "categorie": "chambre" },
+        { "nom": "Nettoyer la salle de bain rapidement", "duree_min": 5, "ordre": 4, "categorie": "salle_de_bain" },
+        { "nom": "Ramasser les affaires du salon", "duree_min": 5, "ordre": 5, "categorie": "salon" }
+      ]
+    },
+    {
+      "nom": "Routine du soir",
+      "frequence": "quotidien",
+      "categorie": "quotidien",
+      "moment_journee": "soir",
+      "heure_debut": "20:00",
+      "heure_fin": "21:00",
+      "couleur": "blue",
+      "taches": [
+        { "nom": "Débarrasser et nettoyer la table", "duree_min": 10, "ordre": 1, "categorie": "cuisine" },
+        { "nom": "Faire la vaisselle ou lancer le lave-vaisselle", "duree_min": 15, "ordre": 2, "categorie": "cuisine" },
+        { "nom": "Essuyer les plans de travail", "duree_min": 3, "ordre": 3, "categorie": "cuisine" },
+        { "nom": "Sortir les poubelles si nécessaire", "duree_min": 5, "ordre": 4, "categorie": "general" },
+        { "nom": "Préparer les affaires pour le lendemain (enfant)", "duree_min": 10, "ordre": 5, "categorie": "organisation" }
+      ]
+    },
+    {
+      "nom": "Grand ménage du week-end",
+      "frequence": "hebdomadaire",
+      "categorie": "hebdomadaire",
+      "moment_journee": "matin",
+      "jour_semaine": 5,
+      "heure_debut": "09:00",
+      "heure_fin": "12:00",
+      "couleur": "green",
+      "taches": [
+        { "nom": "Aspirateur toutes les pièces", "duree_min": 30, "ordre": 1, "categorie": "sol" },
+        { "nom": "Serpillère cuisine et salle de bain", "duree_min": 15, "ordre": 2, "categorie": "sol" },
+        { "nom": "Nettoyage complet salle de bain (WC, lavabo, douche/bain)", "duree_min": 25, "ordre": 3, "categorie": "salle_de_bain" },
+        { "nom": "Dépoussiérer meubles et étagères", "duree_min": 15, "ordre": 4, "categorie": "general" },
+        { "nom": "Changer les draps", "duree_min": 15, "ordre": 5, "categorie": "chambre" },
+        { "nom": "Nettoyer les surfaces cuisine (plaque, micro-ondes extérieur)", "duree_min": 15, "ordre": 6, "categorie": "cuisine" },
+        { "nom": "Passer les courses alimentaires", "duree_min": 60, "ordre": 7, "categorie": "courses" },
+        { "nom": "Vider et trier le courrier de la semaine", "duree_min": 10, "ordre": 8, "categorie": "organisation" }
+      ]
+    },
+    {
+      "nom": "Entretien mensuel",
+      "frequence": "mensuel",
+      "categorie": "mensuel",
+      "moment_journee": "flexible",
+      "couleur": "purple",
+      "taches": [
+        { "nom": "Nettoyer filtre lave-linge", "duree_min": 15, "ordre": 1, "categorie": "electromenager" },
+        { "nom": "Cycle nettoyage lave-vaisselle", "duree_min": 60, "ordre": 2, "categorie": "electromenager" },
+        { "nom": "Nettoyer hotte (filtre métal)", "duree_min": 20, "ordre": 3, "categorie": "cuisine" },
+        { "nom": "Dépoussiérer grilles de ventilation", "duree_min": 10, "ordre": 4, "categorie": "general" },
+        { "nom": "Vérifier stocks produits entretien", "duree_min": 5, "ordre": 5, "categorie": "stocks" },
+        { "nom": "Nettoyer réfrigérateur (étagères, bac légumes)", "duree_min": 20, "ordre": 6, "categorie": "cuisine" }
+      ]
+    }
+  ]
+}

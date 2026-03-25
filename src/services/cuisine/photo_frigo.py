@@ -41,11 +41,24 @@ class RecetteSuggestion(BaseModel):
     ingredients_manquants: list[str] = Field(default_factory=list)
 
 
+class RecetteBD(BaseModel):
+    """Recette depuis la base de données (match ingrédients)."""
+
+    id: int
+    nom: str
+    description: str | None = None
+    nb_ingredients_matches: int = 0
+    pourcentage_match: float = 0.0
+    ingredients_utilises: list[str] = Field(default_factory=list)
+
+
 class ResultatPhotoFrigo(BaseModel):
     """Résultat complet de l'analyse photo frigo."""
 
     ingredients_detectes: list[IngredientDetecte] = Field(default_factory=list)
     recettes_suggerees: list[RecetteSuggestion] = Field(default_factory=list)
+    recettes_db: list[RecetteBD] = Field(default_factory=list)
+    sync_possible: bool = False
 
 
 # ═══════════════════════════════════════════════════════════
@@ -107,33 +120,116 @@ class PhotoFrigoService:
             self._multimodal = get_multimodal_service()
         return self._multimodal
 
-    async def analyser_photo_frigo(self, image_bytes: bytes) -> ResultatPhotoFrigo:
+    async def analyser_photo_frigo(
+        self, image_bytes: bytes, zone: str = "frigo"
+    ) -> ResultatPhotoFrigo:
         """Analyse une photo du frigo et suggère des recettes.
 
         1. Détecte les ingrédients dans l'image
-        2. Suggère des recettes à partir des ingrédients détectés
+        2. Cherche des recettes DB correspondantes
+        3. Suggère des recettes supplémentaires via IA
         """
         # Étape 1 : Détection des ingrédients
-        ingredients = await self._detecter_ingredients(image_bytes)
+        ingredients = await self._detecter_ingredients(image_bytes, zone)
 
         if not ingredients:
             return ResultatPhotoFrigo()
 
-        # Étape 2 : Suggestion de recettes
-        recettes = await self._suggerer_recettes(ingredients)
+        noms_ingredients = [i.nom for i in ingredients]
+
+        # Étape 2 : Recettes DB (synchrone)
+        recettes_db = self.trouver_recettes_db(noms_ingredients)
+
+        # Étape 3 : Suggestion de recettes IA
+        recettes_ia = await self._suggerer_recettes(ingredients)
 
         return ResultatPhotoFrigo(
             ingredients_detectes=ingredients,
-            recettes_suggerees=recettes,
+            recettes_suggerees=recettes_ia,
+            recettes_db=recettes_db,
+            sync_possible=len(ingredients) > 0,
         )
 
-    async def _detecter_ingredients(self, image_bytes: bytes) -> list[IngredientDetecte]:
+    def trouver_recettes_db(self, noms_ingredients: list[str]) -> list[RecetteBD]:
+        """Cherche les recettes DB qui matchent les ingrédients détectés."""
+        if not noms_ingredients:
+            return []
+
+        try:
+            from sqlalchemy import func
+
+            from src.api.utils import executer_avec_session
+            from src.core.models import Ingredient, Recette, RecetteIngredient
+
+            def _query():
+                with executer_avec_session() as session:
+                    # Trouver les IDs d'ingrédients matchant les noms détectés
+                    ingredient_ids = [
+                        row.id
+                        for nom in noms_ingredients
+                        for row in session.query(Ingredient.id).filter(
+                            func.lower(Ingredient.nom).contains(nom.lower()[:8])
+                        ).all()
+                    ]
+
+                    if not ingredient_ids:
+                        return []
+
+                    # Trouver les recettes avec le plus de matches
+                    rows = (
+                        session.query(
+                            Recette.id,
+                            Recette.nom,
+                            Recette.description,
+                            func.count(RecetteIngredient.ingredient_id.distinct()).label("nb_match"),
+                            func.array_agg(Ingredient.nom.distinct()).label("ing_noms"),
+                        )
+                        .join(RecetteIngredient, RecetteIngredient.recette_id == Recette.id)
+                        .join(Ingredient, Ingredient.id == RecetteIngredient.ingredient_id)
+                        .filter(RecetteIngredient.ingredient_id.in_(ingredient_ids))
+                        .group_by(Recette.id, Recette.nom, Recette.description)
+                        .order_by(func.count(RecetteIngredient.ingredient_id.distinct()).desc())
+                        .limit(5)
+                        .all()
+                    )
+
+                    result = []
+                    for row in rows:
+                        # Compter total ingrédients de la recette pour le %
+                        total = session.query(func.count(RecetteIngredient.id)).filter(
+                            RecetteIngredient.recette_id == row.id
+                        ).scalar() or 1
+                        result.append(RecetteBD(
+                            id=row.id,
+                            nom=row.nom,
+                            description=row.description,
+                            nb_ingredients_matches=row.nb_match,
+                            pourcentage_match=round(row.nb_match / total * 100),
+                            ingredients_utilises=list(row.ing_noms or []),
+                        ))
+                    return result
+
+            return _query()
+        except Exception as e:
+            logger.warning("trouver_recettes_db échoué: %s", e)
+            return []
+
+    async def _detecter_ingredients(
+        self, image_bytes: bytes, zone: str = "frigo"
+    ) -> list[IngredientDetecte]:
         """Détecte les ingrédients dans une photo via IA vision."""
+        zone_labels = {
+            "frigo": "frigo (produits frais, laitiers, légumes)",
+            "placard": "placard (épicerie sèche, conserves, pâtes, riz)",
+            "congelateur": "congélateur (surgelés, plats congelés)",
+        }
+        zone_label = zone_labels.get(zone, "réfrigérateur")
+        prompt = f"Identifie tous les ingrédients visibles dans cette photo de {zone_label}."
         image_b64 = self.multimodal._encode_image(image_bytes)
 
         result = await self.multimodal._call_vision_model(
             image_b64=image_b64,
-            prompt="Identifie tous les ingrédients visibles dans cette photo de frigo.",
+            prompt=prompt,
             system_prompt=SYSTEM_PROMPT_DETECTION,
         )
 

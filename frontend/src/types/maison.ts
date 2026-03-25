@@ -417,3 +417,52 @@ export interface StatsHubMaison {
   articles_perimes: number;
   diagnostics_expirant: number;
 }
+
+// ═══════════════════════════════════════════════════════════
+// Types Briefing Maison (contexte quotidien)
+// ═══════════════════════════════════════════════════════════
+
+export interface TacheJourMaison {
+  nom: string;
+  categorie?: string;
+  duree_estimee_min?: number;
+  priorite?: string;
+  source?: string;
+  fait: boolean;
+  id_source?: number;
+}
+
+export interface MeteoResumeMaison {
+  temperature_min?: number;
+  temperature_max?: number;
+  description?: string;
+  precipitation_mm?: number;
+  impact_jardin?: string;
+  impact_menage?: string;
+  alertes_meteo: string[];
+}
+
+export interface AlerteMaison {
+  type: string;
+  niveau: string;
+  titre: string;
+  message: string;
+  action_url?: string;
+  date_echeance?: string;
+  entite_id?: number;
+}
+
+export interface BriefingMaison {
+  date: string;
+  resume: string;
+  taches_jour: string[];
+  taches_jour_detail: TacheJourMaison[];
+  meteo?: MeteoResumeMaison;
+  alertes: AlerteMaison[];
+  projets_actifs: { id: number; nom: string; priorite?: string; avancement?: number }[];
+  entretiens_saisonniers: { nom: string; description?: string; mois: number[] }[];
+  jardin: { type: string; nom: string; urgence?: string; action?: string }[];
+  cellier_alertes: { nom: string; jours_restants: number; quantite?: number }[];
+  energie_anomalies: { type: string; message: string }[];
+  eco_score_jour?: number;
+}

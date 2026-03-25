@@ -1,0 +1,241 @@
+{
+  "version": "1.0",
+  "description": "Astuces et appareils domotique pour la maison connectée",
+  "categories": [
+    {
+      "id": "prises_connectees",
+      "nom": "Prises connectées",
+      "icone": "🔌",
+      "appareils": [
+        {
+          "id": "tapo_p110",
+          "nom": "TP-Link Tapo P110",
+          "prix_estime": 15,
+          "difficulte_installation": "facile",
+          "temps_installation_min": 10,
+          "compatible_avec": ["Tapo App", "Google Home", "Amazon Alexa"],
+          "avantages": [
+            "Mesure la consommation électrique en temps réel (Watts)",
+            "Programmation horaire (heure creuse = tarif réduit)",
+            "Détection de surconsommation (alerte si > seuil)",
+            "Contrôle à distance depuis l'application"
+          ],
+          "cas_usage": [
+            "Lave-linge : démarrage automatique la nuit (22h-6h heures creuses)",
+            "Lave-vaisselle : pareil, économise 20-30% sur le coût",
+            "Chauffage d'appoint : extinction automatique si oublié",
+            "TV / appareils en veille : coupure totale la nuit (antiparasitage)"
+          ],
+          "lien_achat_type": "Amazon, Boulanger, Fnac"
+        }
+      ]
+    },
+    {
+      "id": "thermostat",
+      "nom": "Thermostats programmables",
+      "icone": "🌡️",
+      "appareils": [
+        {
+          "id": "netatmo_thermostat",
+          "nom": "Netatmo Thermostat Connecté",
+          "prix_estime": 150,
+          "difficulte_installation": "moyen",
+          "temps_installation_min": 30,
+          "compatible_avec": ["Apple HomeKit", "Google Home", "Amazon Alexa", "Siri"],
+          "avantages": [
+            "Détection de présence : chauffe uniquement quand c'est nécessaire",
+            "Apprentissage des habitudes sur 2 semaines",
+            "Économie estimée : 37% sur la facture de chauffage",
+            "Contrôle par zone si plusieurs têtes thermostats"
+          ],
+          "cas_usage": [
+            "Confort optimal : toujours la bonne température au bon moment",
+            "Mode absence automatique si vous quittez la maison",
+            "Programmation vacances longue durée"
+          ],
+          "lien_achat_type": "Darty, Boulanger, Amazon"
+        },
+        {
+          "id": "tado_thermostat",
+          "nom": "Tado Thermostat Intelligent",
+          "prix_estime": 100,
+          "difficulte_installation": "moyen",
+          "temps_installation_min": 30,
+          "compatible_avec": ["Apple HomeKit", "Google Home", "Amazon Alexa"],
+          "avantages": [
+            "Géolocalisation : chauffe selon votre position GPS réelle",
+            "Rapport mensuel de consommation avec conseils",
+            "Compatible radiateurs à eau (compatible boilers)"
+          ],
+          "cas_usage": [
+            "Idéal si horaires irréguliers (geofencing = toujours à bonne T°)",
+            "Combiné avec têtes thermostats TRV = contrôle pièce par pièce"
+          ],
+          "lien_achat_type": "Amazon, Fnac"
+        }
+      ]
+    },
+    {
+      "id": "eclairage",
+      "nom": "Éclairage intelligent",
+      "icone": "💡",
+      "appareils": [
+        {
+          "id": "philips_hue_starter",
+          "nom": "Philips Hue Starter Kit (3 ampoules + pont)",
+          "prix_estime": 80,
+          "difficulte_installation": "facile",
+          "temps_installation_min": 20,
+          "compatible_avec": ["Apple HomeKit", "Google Home", "Alexa", "Matter"],
+          "avantages": [
+            "16 millions de couleurs et variations de blanc chaud/froid",
+            "Scènes automatiques (lever, coucher, film...)",
+            "Minuterie : extinction automatique si oublié",
+            "Simulation de présence depuis l'appli quand absent"
+          ],
+          "cas_usage": [
+            "Chambre de Jules : éclairage doux le matin pour réveil progressif",
+            "Soirée : ambiance lumineuse adaptée automatiquement",
+            "Sécurité : simulation de présence en vacances"
+          ],
+          "lien_achat_type": "Fnac, Darty, Amazon"
+        },
+        {
+          "id": "ikea_tradfri",
+          "nom": "IKEA TRÅDFRI",
+          "prix_estime": 9,
+          "difficulte_installation": "facile",
+          "temps_installation_min": 5,
+          "compatible_avec": ["Apple HomeKit", "Google Home", "Alexa", "Matter (via hub DIRIGERA)"],
+          "avantages": [
+            "Rapport qualité/prix excellent",
+            "Ampoules variées (E27, GU10, E14)",
+            "Compatible Matter avec le hub DIRIGERA"
+          ],
+          "cas_usage": [
+            "Ampoules simples dimmer pour salon ou cuisine",
+            "Alternative économique aux Philips Hue"
+          ],
+          "lien_achat_type": "IKEA"
+        }
+      ]
+    },
+    {
+      "id": "arrosage",
+      "nom": "Arrosage automatique",
+      "icone": "🌿",
+      "appareils": [
+        {
+          "id": "gardena_start_set",
+          "nom": "Gardena Micro-Drip Starterset",
+          "prix_estime": 60,
+          "difficulte_installation": "moyen",
+          "temps_installation_min": 90,
+          "compatible_avec": ["Gardena Smart App (avec passerelle)", "IKEA DIRIGERA"],
+          "avantages": [
+            "Économie d'eau : 70% par rapport à l'arrosoir",
+            "Arrosage à la racine = pas de maladies foliaires",
+            "Programmation horaire et par météo",
+            "Détecteur de pluie intégré : s'arrête automatiquement si pluie"
+          ],
+          "cas_usage": [
+            "Jardin potager ou bacs : arrosage tôt le matin automatique",
+            "Absence vacances : plus de plantes mortes",
+            "Pelouse : économie substantielle sur consommation eau"
+          ],
+          "lien_achat_type": "Leroy Merlin, Amazon"
+        }
+      ]
+    },
+    {
+      "id": "securite",
+      "nom": "Sécurité et détection",
+      "icone": "🔒",
+      "appareils": [
+        {
+          "id": "aqara_door_sensor",
+          "nom": "Aqara Capteur Porte/Fenêtre",
+          "prix_estime": 18,
+          "difficulte_installation": "facile",
+          "temps_installation_min": 5,
+          "compatible_avec": ["Apple HomeKit", "Google Home", "Alexa", "Zigbee"],
+          "avantages": [
+            "Alerte push si porte/fenêtre ouverte > X minutes",
+            "Automatisation : lumière s'allume quand porte s'ouvre",
+            "Batterie 2 ans"
+          ],
+          "cas_usage": [
+            "Porte clé de la maison : notification si ouverte",
+            "Cave : alerte si quelqu'un entre",
+            "Fenêtre oubliée ouverte : rappel avant pluie"
+          ],
+          "lien_achat_type": "Amazon, AliExpress"
+        },
+        {
+          "id": "aqara_motion_sensor",
+          "nom": "Aqara Capteur de Mouvement",
+          "prix_estime": 25,
+          "difficulte_installation": "facile",
+          "temps_installation_min": 5,
+          "compatible_avec": ["Apple HomeKit", "Google Home", "Alexa", "Zigbee"],
+          "avantages": [
+            "Détection de présence précise",
+            "Lumière automatique dans les couloirs/toilettes",
+            "Alerte si mouvement détecté en absence"
+          ],
+          "cas_usage": [
+            "Couloirs et toilettes : lumière automatique sans interrupteur",
+            "Alarme simple en mode absence",
+            "Économie d'éclairage (lumière s'éteint si plus de mouvement)"
+          ],
+          "lien_achat_type": "Amazon, AliExpress"
+        }
+      ]
+    },
+    {
+      "id": "electromenager_connecte",
+      "nom": "Électroménager connecté",
+      "icone": "🏠",
+      "appareils": [
+        {
+          "id": "robot_aspirateur",
+          "nom": "Robot Aspirateur (iRobot j7+ ou Dreame)",
+          "prix_estime": 400,
+          "difficulte_installation": "facile",
+          "temps_installation_min": 15,
+          "compatible_avec": ["Alexa", "Google Home"],
+          "avantages": [
+            "Aspiration automatique programmable (pendant la nuit ou l'absence)",
+            "Cartographie de la maison : zones interdites, pièces sélectionnables",
+            "Base avec vidage automatique sur certains modèles",
+            "Économie de 2-3h/semaine de ménage"
+          ],
+          "cas_usage": [
+            "Combiné avec capteur de présence : aspire quand vous quittez la maison",
+            "Programmation quotidienne dans la cuisine (chutes de miettes)",
+            "Mode 'Zone Jules' : aspiration ciblée chambre enfant"
+          ],
+          "lien_achat_type": "Darty, Boulanger, Amazon"
+        }
+      ]
+    }
+  ],
+  "conseils_generaux": [
+    {
+      "titre": "Commencer par les prises connectées",
+      "detail": "Investissement minimal (15€/prise), impact immédiat sur la facture — mesurez la consommation réelle de chaque appareil"
+    },
+    {
+      "titre": "Priorité au protocole Matter",
+      "detail": "Préférez les appareils compatibles Matter 2024 — interopérabilité totale entre écosystèmes (Apple, Google, Amazon)"
+    },
+    {
+      "titre": "Hub centralisé recommandé",
+      "detail": "Un hub Zigbee/Z-Wave (Aqara Hub M2, IKEA DIRIGERA) offre fiabilité locale sans dépendre du cloud"
+    },
+    {
+      "titre": "ROI moyen",
+      "detail": "Thermostat connecté : ROI en 1-2 ans. Prises EDF heures creuses : ROI en 3-6 mois. Arrosage connecté : ROI en 2-3 ans (eau économisée)"
+    }
+  ]
+}

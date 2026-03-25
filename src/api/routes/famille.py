@@ -26,10 +26,18 @@ from src.api.schemas.errors import (
     REPONSES_LISTE,
 )
 from src.api.schemas.famille import (
+    AchatCreate,
+    AchatPatch,
     AnniversaireCreate,
     AnniversairePatch,
     EvenementFamilialCreate,
     EvenementFamilialPatch,
+    MarquerAchetePayload,
+    ResumeSemaineRequest,
+    RetrospectiveRequest,
+    SuggestionsActivitesSimpleRequest,
+    SuggestionsSoireeRequest,
+    SuggestionsWeekendRequest,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
@@ -1454,3 +1462,406 @@ async def obtenir_resume_hebdomadaire(
         return resume.model_dump() if hasattr(resume, "model_dump") else resume
 
     return await executer_async(_generate)
+
+
+# ═══════════════════════════════════════════════════════════
+# CONTEXTE FAMILIAL (Phase M)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/contexte", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_contexte_familial(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne le contexte familial complet (météo, anniversaires, jules, etc.)."""
+    from src.services.famille.contexte import obtenir_service_contexte_familial
+
+    def _query():
+        service = obtenir_service_contexte_familial()
+        return service.obtenir_contexte()
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# SUGGESTIONS IA (Phase M3)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/weekend/suggestions-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggestions_weekend_ia(
+    payload: SuggestionsWeekendRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Suggestions d'activités weekend avec météo et âge Jules auto-injectés."""
+    from src.services.famille.jules import obtenir_service_jules
+    from src.services.famille.weekend_ai import obtenir_weekend_ai_service
+    from src.services.integrations.weather.service import obtenir_service_meteo
+
+    async def _query():
+        # Auto-inject météo
+        meteo_service = obtenir_service_meteo()
+        previsions = meteo_service.get_previsions(nb_jours=3)
+        meteo_desc = "variable"
+        if previsions:
+            conditions = [p.condition for p in previsions[:3] if p.condition]
+            meteo_desc = ", ".join(conditions[:2]) if conditions else "variable"
+
+        # Auto-inject âge Jules
+        jules_service = obtenir_service_jules()
+        date_naissance = jules_service.get_date_naissance_jules()
+        age_mois = 19
+        if date_naissance:
+            age_mois = (date.today() - date_naissance).days // 30
+
+        service = obtenir_weekend_ai_service()
+        resultat = await service.suggerer_activites(
+            meteo=meteo_desc,
+            age_enfant_mois=age_mois,
+            budget=payload.budget,
+            region=payload.region,
+            nb_suggestions=payload.nb_suggestions,
+        )
+        return {"suggestions": resultat}
+
+    return await _query()
+
+
+@router.post("/journal/resume-semaine", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def resume_semaine_ia(
+    payload: ResumeSemaineRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère un résumé narratif de la semaine familiale via IA."""
+    from src.services.famille.journal_ia import obtenir_service_journal_ia
+
+    async def _query():
+        service = obtenir_service_journal_ia()
+        resultat = await service.generer_resume_semaine(
+            evenements=payload.evenements,
+            jalons=payload.jalons,
+            humeur_famille=payload.humeur_famille,
+        )
+        return {"resume": resultat}
+
+    return await _query()
+
+
+@router.post("/journal/retrospective", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def retrospective_mensuelle_ia(
+    payload: RetrospectiveRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère une rétrospective mensuelle via IA."""
+    from src.services.famille.journal_ia import obtenir_service_journal_ia
+
+    async def _query():
+        service = obtenir_service_journal_ia()
+        resultat = await service.generer_retrospective_mensuelle(
+            mois=payload.mois,
+            resumes_semaines=payload.resumes_semaines,
+            nb_evenements=payload.nb_evenements,
+            nb_jalons=payload.nb_jalons,
+        )
+        return {"retrospective": resultat}
+
+    return await _query()
+
+
+@router.post("/soiree/suggestions-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggestions_soiree_ia(
+    payload: SuggestionsSoireeRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Suggestions de soirées en couple via IA."""
+    from src.services.famille.soiree_ai import obtenir_service_soiree_ai
+
+    async def _query():
+        service = obtenir_service_soiree_ai()
+        resultat = await service.suggerer_soirees(
+            budget=payload.budget,
+            duree_heures=payload.duree_heures,
+            type_soiree=payload.type_soiree,
+            region=payload.region,
+        )
+        return {"suggestions": resultat}
+
+    return await _query()
+
+
+# ═══════════════════════════════════════════════════════════
+# ACHATS FAMILLE CRUD (Phase M4)
+# ═══════════════════════════════════════════════════════════
+
+
+def _serialiser_achat(a) -> dict:  # noqa: ANN001
+    return {
+        "id": a.id,
+        "nom": a.nom,
+        "categorie": a.categorie,
+        "priorite": a.priorite,
+        "prix_estime": a.prix_estime,
+        "prix_reel": a.prix_reel,
+        "taille": a.taille,
+        "magasin": a.magasin,
+        "url": a.url,
+        "description": a.description,
+        "age_recommande_mois": a.age_recommande_mois,
+        "suggere_par": a.suggere_par,
+        "achete": a.achete,
+        "date_achat": a.date_achat.isoformat() if a.date_achat else None,
+    }
+
+
+@router.post("/achats", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_achat(
+    payload: AchatCreate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée un nouvel achat familial."""
+    from src.services.famille.achats import obtenir_service_achats_famille
+
+    def _query():
+        service = obtenir_service_achats_famille()
+        achat = service.ajouter_achat(
+            nom=payload.nom,
+            categorie=payload.categorie,
+            priorite=payload.priorite,
+            prix_estime=payload.prix_estime,
+            taille=payload.taille,
+            magasin=payload.magasin,
+            url=payload.url,
+            description=payload.description,
+            age_recommande_mois=payload.age_recommande_mois,
+            suggere_par=payload.suggere_par,
+        )
+        if not achat:
+            raise HTTPException(status_code=500, detail="Erreur lors de la création de l'achat")
+        return _serialiser_achat(achat)
+
+    return await executer_async(_query)
+
+
+@router.patch("/achats/{achat_id}", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def modifier_achat(
+    achat_id: int,
+    payload: AchatPatch,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Modifie un achat familial existant."""
+    from src.core.models import AchatFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            achat = session.query(AchatFamille).filter(AchatFamille.id == achat_id).first()
+            if not achat:
+                raise HTTPException(status_code=404, detail="Achat non trouvé")
+
+            updates = payload.model_dump(exclude_unset=True)
+            for field, value in updates.items():
+                setattr(achat, field, value)
+
+            session.commit()
+            session.refresh(achat)
+            return _serialiser_achat(achat)
+
+    return await executer_async(_query)
+
+
+@router.post("/achats/{achat_id}/achete", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def marquer_achat_achete(
+    achat_id: int,
+    payload: MarquerAchetePayload,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Marque un achat comme acheté."""
+    from src.services.famille.achats import obtenir_service_achats_famille
+
+    def _query():
+        service = obtenir_service_achats_famille()
+        success = service.marquer_achete(achat_id, prix_reel=payload.prix_reel)
+        if not success:
+            raise HTTPException(status_code=404, detail="Achat non trouvé")
+        return MessageResponse(message="Achat marqué comme acheté")
+
+    return await executer_async(_query)
+
+
+@router.delete("/achats/{achat_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_achat(
+    achat_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime un achat familial."""
+    from src.core.models import AchatFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            achat = session.query(AchatFamille).filter(AchatFamille.id == achat_id).first()
+            if not achat:
+                raise HTTPException(status_code=404, detail="Achat non trouvé")
+            session.delete(achat)
+            session.commit()
+            return MessageResponse(message="Achat supprimé")
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# RAPPELS FAMILLE (Phase Q)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/rappels/evaluer", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def evaluer_rappels_famille(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Évalue et retourne les rappels pertinents du jour."""
+    from src.services.famille.rappels import obtenir_service_rappels_famille
+
+    def _query():
+        service = obtenir_service_rappels_famille()
+        rappels = service.evaluer_rappels()
+        return {
+            "rappels": [r if isinstance(r, dict) else r for r in rappels],
+            "total": len(rappels),
+        }
+
+    return await executer_async(_query)
+
+
+@router.post("/rappels/envoyer", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def envoyer_rappels_famille(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Déclenche l'envoi push des rappels du jour."""
+    from src.services.famille.rappels import obtenir_service_rappels_famille
+
+    def _query():
+        service = obtenir_service_rappels_famille()
+        nb_envoyes = service.envoyer_rappels_du_jour()
+        return {"envoyes": nb_envoyes, "message": f"{nb_envoyes} rappel(s) envoyé(s)"}
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# CROISSANCE OMS (Phase R)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/jules/croissance", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_croissance_jules(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les normes OMS de croissance pour l'âge de Jules."""
+    from src.services.famille.contexte import obtenir_service_contexte_familial
+    from src.services.famille.jules import obtenir_service_jules
+
+    def _query():
+        jules_service = obtenir_service_jules()
+        date_naissance = jules_service.get_date_naissance_jules()
+        if not date_naissance:
+            raise HTTPException(status_code=404, detail="Profil Jules non trouvé")
+
+        age_mois = (date.today() - date_naissance).days // 30
+
+        contexte_service = obtenir_service_contexte_familial()
+        normes = contexte_service.obtenir_croissance_oms(age_mois, sexe="M")
+
+        return {
+            "age_mois": age_mois,
+            "normes": normes,
+        }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# SUGGESTIONS ACTIVITÉS SIMPLIFIÉES (Phase O)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/activites/suggestions-ia-auto", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggestions_activites_auto(
+    payload: SuggestionsActivitesSimpleRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Suggestions d'activités avec météo et âge auto-injectés (sans saisie manuelle)."""
+    from src.services.famille.activites import obtenir_service_activites
+    from src.services.famille.jours_speciaux import obtenir_service_jours_speciaux
+    from src.services.famille.jules import obtenir_service_jules
+    from src.services.integrations.weather.service import obtenir_service_meteo
+
+    async def _query():
+        # Auto-inject météo
+        meteo_service = obtenir_service_meteo()
+        previsions = meteo_service.get_previsions(nb_jours=3)
+        meteo_txt = "variable"
+        if previsions:
+            meteo_txt = previsions[0].condition or "variable"
+
+        # Force intérieur si pluie
+        type_effectif = payload.type_prefere
+        if previsions and previsions[0].precipitation_mm > 5 and type_effectif == "les_deux":
+            type_effectif = "interieur"
+
+        # Auto-inject âge Jules
+        jules_service = obtenir_service_jules()
+        date_naissance = jules_service.get_date_naissance_jules()
+        age_mois = 19
+        if date_naissance:
+            age_mois = (date.today() - date_naissance).days // 30
+
+        # Détecter journée libre (férié + crèche fermée dans les 3 prochains jours)
+        jours_service = obtenir_service_jours_speciaux()
+        prochains = jours_service.prochains_jours_speciaux(nb=5)
+        from datetime import timedelta
+
+        journee_libre = any(
+            j.date_jour <= date.today() + timedelta(days=3)
+            and j.type in ("ferie", "creche")
+            for j in prochains
+        )
+
+        # Construire le prompt enrichi
+        prompt_extra = ""
+        if journee_libre:
+            prompt_extra = " C'est une journée libre (férié ou crèche fermée), propose des activités pour une journée complète."
+
+        # Appel au service IA activités existant
+        service = obtenir_service_activites()
+        if hasattr(service, "suggerer_activites_ia"):
+            resultat = service.suggerer_activites_ia(
+                age_mois=age_mois,
+                meteo=meteo_txt,
+                budget_max=payload.budget_max,
+            )
+            return {"suggestions": resultat, "meteo": meteo_txt, "journee_libre": journee_libre}
+
+        # Fallback: utiliser le service weekend IA
+        from src.services.famille.weekend_ai import obtenir_weekend_ai_service
+
+        weekend_service = obtenir_weekend_ai_service()
+        resultat = await weekend_service.suggerer_activites(
+            meteo=meteo_txt + (" " + type_effectif if type_effectif != "les_deux" else ""),
+            age_enfant_mois=age_mois,
+            budget=int(payload.budget_max),
+            nb_suggestions=5,
+        )
+        return {"suggestions": resultat, "meteo": meteo_txt, "journee_libre": journee_libre}
+
+    return await _query()

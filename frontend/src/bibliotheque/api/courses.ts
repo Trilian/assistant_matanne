@@ -55,3 +55,35 @@ export async function supprimerArticle(
 ): Promise<void> {
   await clientApi.delete(`/courses/${listeId}/articles/${articleId}`);
 }
+
+/** Résultat de la génération de courses depuis planning */
+export interface GenererCoursesResult {
+  liste_id: number;
+  nom: string;
+  total_articles: number;
+  articles_en_stock: number;
+  articles: Array<{
+    nom: string;
+    quantite: number;
+    unite: string;
+    rayon: string;
+    en_stock: number;
+  }>;
+  par_rayon: Record<string, number>;
+}
+
+/** Générer une liste de courses depuis le planning de la semaine */
+export async function genererCoursesDepuisPlanning(
+  semaineDebut: string,
+  options?: { soustraireStock?: boolean; nomListe?: string }
+): Promise<GenererCoursesResult> {
+  const { data } = await clientApi.post<GenererCoursesResult>(
+    "/courses/generer-depuis-planning",
+    {
+      semaine_debut: semaineDebut,
+      soustraire_stock: options?.soustraireStock ?? true,
+      nom_liste: options?.nomListe ?? "Courses de la semaine",
+    }
+  );
+  return data;
+}

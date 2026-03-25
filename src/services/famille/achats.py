@@ -330,6 +330,34 @@ class ServiceAchatsFamille(BaseService[AchatFamille]):
         logger.warning("Achat non trouvé pour suppression: id=%d", purchase_id)
         return False
 
+    @avec_gestion_erreurs(default_return=False)
+    @avec_session_db
+    def suggestion_existe_deja(
+        self, titre: str, categorie: str, db: Session | None = None
+    ) -> bool:
+        """Vérifie si une suggestion IA existe déjà (dédoublonnage).
+
+        Args:
+            titre: Titre de la suggestion.
+            categorie: Catégorie de l'achat.
+            db: Session DB (injectée automatiquement).
+
+        Returns:
+            True si un achat similaire existe déjà.
+        """
+        if db is None:
+            raise ValueError("Session DB requise")
+        exists = (
+            db.query(AchatFamille)
+            .filter(
+                AchatFamille.nom == titre,
+                AchatFamille.categorie == categorie,
+                AchatFamille.achete == False,  # noqa: E712
+            )
+            .first()
+        )
+        return exists is not None
+
 
 # ═══════════════════════════════════════════════════════════
 # FACTORY

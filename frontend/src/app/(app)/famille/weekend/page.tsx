@@ -1,14 +1,18 @@
 ﻿// ═══════════════════════════════════════════════════════════
-// Weekend — Idées et planning du week-end
+// Weekend — Suggestions IA méteo-intelligentes (Phase O2)
 // ═══════════════════════════════════════════════════════════
 
 "use client";
 
+import { useState } from "react";
 import {
   Palmtree,
-  MapPin,
-  Calendar,
   Sparkles,
+  Loader2,
+  CloudRain,
+  Sun,
+  Cloud,
+  Calendar,
 } from "lucide-react";
 import {
   Card,
@@ -17,107 +21,135 @@ import {
   CardTitle,
   CardDescription,
 } from "@/composants/ui/card";
+import { Button } from "@/composants/ui/button";
 import { Badge } from "@/composants/ui/badge";
-import { Skeleton } from "@/composants/ui/skeleton";
-import { utiliserRequete } from "@/crochets/utiliser-api";
-import { listerActivites } from "@/bibliotheque/api/famille";
+import { obtenirSuggestionsWeekend } from "@/bibliotheque/api/famille";
+import { toast } from "sonner";
 
 export default function PageWeekend() {
-  // Charger les activités de type sortie/weekend
-  const { data: activites, isLoading } = utiliserRequete(
-    ["famille", "weekend"],
-    () => listerActivites("sortie")
-  );
+  const [suggestions, setSuggestions] = useState<string>("");
+  const [meteoInfo, setMeteoInfo] = useState<string>("");
+  const [enChargement, setEnChargement] = useState(false);
+
+  const isWeekendApproaching = new Date().getDay() >= 4; // Jeudi ou plus
+
+  const genererSuggestions = async () => {
+    setEnChargement(true);
+    try {
+      const resultat = await obtenirSuggestionsWeekend();
+      setSuggestions(resultat.suggestions);
+      setMeteoInfo(resultat.meteo);
+      toast.success("Suggestions générées avec la météo du weekend !");
+    } catch {
+      toast.error("Erreur lors de la génération des suggestions");
+    } finally {
+      setEnChargement(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">🌴 Weekend</h1>
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <Palmtree className="h-6 w-6" />
+          Weekend
+        </h1>
         <p className="text-muted-foreground">
-          Idées et planification des week-ends
+          Suggestions d'activités adaptées à Jules et à la météo du weekend
         </p>
       </div>
 
-      {/* Prochain weekend */}
-      <Card className="border-primary/30 bg-primary/5">
+      {/* Section génération IA */}
+      <Card className="bg-gradient-to-br from-purple-50/50 to-indigo-50/50 dark:from-purple-950/20 dark:to-indigo-950/20">
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            Ce week-end
-          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-purple-500" />
+            <CardTitle className="text-base">Suggestions IA</CardTitle>
+          </div>
           <CardDescription>
-            Activités prévues pour le prochain week-end
+            L'IA analyse la météo du weekend et l'âge de Jules pour générer 3-5 suggestions
+            personnalisées
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 2 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
-              ))}
+        <CardContent className="space-y-4">
+          {!isWeekendApproaching && !suggestions && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-100/50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 text-sm">
+              <Calendar className="h-4 w-4 shrink-0" />
+              <span>
+                Les suggestions weekend sont optimales à partir du jeudi. Revenez plus tard !
+              </span>
             </div>
-          ) : !activites?.length ? (
-            <p className="text-sm text-muted-foreground">
-              Rien de prévu — planifiez quelque chose !
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {activites.slice(0, 5).map((a) => (
-                <div
-                  key={a.id}
-                  className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-accent transition-colors"
-                >
-                  <div>
-                    <p className="text-sm font-medium">{a.titre}</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(a.date).toLocaleDateString("fr-FR", {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </span>
-                      {a.lieu && (
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {a.lieu}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <Badge variant="outline" className="text-xs capitalize">
-                    {a.type}
-                  </Badge>
-                </div>
-              ))}
+          )}
+
+          <Button
+            onClick={genererSuggestions}
+            disabled={enChargement}
+            className="w-full"
+            size="lg"
+          >
+            {enChargement ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Génération en cours...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-5 w-5" />
+                Générer les suggestions du weekend
+              </>
+            )}
+          </Button>
+
+          {meteoInfo && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-100/50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-sm">
+              <Cloud className="h-4 w-4 shrink-0" />
+              <span>{meteoInfo}</span>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Idées catégories */}
-      <div>
-        <h2 className="text-lg font-semibold mb-3">Catégories d&apos;idées</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            { label: "Nature & Parcs", emoji: "🌿" },
-            { label: "Musées & Culture", emoji: "🎨" },
-            { label: "Sport & Aventure", emoji: "⛰️" },
-            { label: "Gastronomie", emoji: "🍽️" },
-            { label: "Jeux & Détente", emoji: "🎲" },
-            { label: "Famille & Amis", emoji: "👨‍👩‍👦" },
-          ].map(({ label, emoji }) => (
-            <Card
-              key={label}
-              className="hover:bg-accent/50 cursor-pointer transition-colors"
-            >
-              <CardContent className="flex items-center gap-3 py-4">
-                <span className="text-2xl">{emoji}</span>
-                <span className="text-sm font-medium">{label}</span>
-              </CardContent>
-            </Card>
-          ))}
+      {/* Résultats suggestions */}
+      {suggestions && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Suggestions générées</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
+              {suggestions}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Infos supplémentaires */}
+      {!suggestions && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Comment ça marche ?</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
+            <p>
+              Le générateur de suggestions weekend utilise l'IA pour proposer des activités
+              adaptées à votre situation :
+            </p>
+            <ul className="list-disc list-inside space-y-1 pl-2">
+              <li>Météo du samedi et dimanche (récupération automatique)</li>
+              <li>Âge de Jules en mois</li>
+              <li>Détection de longs weekends (férié lundi, crèche fermée vendredi)</li>
+              <li>Suggestions raisonnables selon le budget et la durée</li>
+            </ul>
+            <p className="pt-2">
+              Les suggestions sont optimales à partir du jeudi, lorsque la météo du weekend
+              devient plus fiable.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
         </div>
       </div>
     </div>

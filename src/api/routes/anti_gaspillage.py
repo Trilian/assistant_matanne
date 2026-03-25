@@ -81,26 +81,47 @@ async def obtenir_anti_gaspillage(
             articles_sauves = max(0, len(articles_urgents) - articles_perimes_mois)
             score = max(0, 100 - (articles_perimes_mois * 10))
 
-            # Recettes rescue: trouver des recettes qui utilisent les ingrédients urgents
+            # Recettes rescue: trouver des recettes dont les ingrédients
+            # correspondent à ceux qui sont bientôt périmés
             recettes_rescue = []
             if noms_urgents:
-                recettes = session.query(Recette).limit(100).all()
-                for r in recettes:
-                    # Vérifie si le nom de la recette ou sa description contient
-                    # un ingrédient urgent (recherche simple)
-                    nom_lower = (r.nom or "").lower()
-                    desc_lower = (r.description or "").lower()
-                    ingredients_utilises = [
-                        n
-                        for n in noms_urgents
-                        if n in nom_lower or n in desc_lower
-                    ]
-                    if ingredients_utilises:
+                from src.core.models.recettes import Ingredient, RecetteIngredient
+
+                # Trouver les IDs d'ingrédients correspondant aux articles urgents
+                ingredients_urgents = (
+                    session.query(Ingredient.id, Ingredient.nom)
+                    .filter(
+                        func.lower(Ingredient.nom).in_(noms_urgents)
+                    )
+                    .all()
+                )
+                ingredient_ids = [i.id for i in ingredients_urgents]
+                ingredient_noms = {i.id: i.nom for i in ingredients_urgents}
+
+                if ingredient_ids:
+                    # Trouver les recettes qui utilisent ces ingrédients (JOIN proper)
+                    from sqlalchemy import distinct
+
+                    recettes_avec_urgents = (
+                        session.query(
+                            Recette,
+                            func.array_agg(distinct(Ingredient.nom)).label("noms_ingredients"),
+                        )
+                        .join(RecetteIngredient, RecetteIngredient.recette_id == Recette.id)
+                        .join(Ingredient, Ingredient.id == RecetteIngredient.ingredient_id)
+                        .filter(RecetteIngredient.ingredient_id.in_(ingredient_ids))
+                        .group_by(Recette.id)
+                        .order_by(func.count(RecetteIngredient.ingredient_id).desc())
+                        .limit(5)
+                        .all()
+                    )
+
+                    for r, noms in recettes_avec_urgents:
                         recettes_rescue.append(
                             {
                                 "id": r.id,
                                 "nom": r.nom,
-                                "ingredients_utilises": ingredients_utilises,
+                                "ingredients_utilises": [n for n in noms if n],
                                 "temps_total": (
                                     (r.temps_preparation or 0) + (r.temps_cuisson or 0)
                                 )
@@ -108,8 +129,6 @@ async def obtenir_anti_gaspillage(
                                 "difficulte": r.difficulte,
                             }
                         )
-                    if len(recettes_rescue) >= 5:
-                        break
 
             return {
                 "score": {

@@ -79,6 +79,9 @@ def creer_mock_article(data: dict) -> MagicMock:
     mock = MagicMock()
     for key, value in data.items():
         setattr(mock, key, value)
+    # Champs optionnels attendus par le schéma — ne pas laisser en MagicMock
+    for champ in ("nutriscore", "ecoscore", "nova_group"):
+        mock.configure_mock(**{champ: None})
     return mock
 
 

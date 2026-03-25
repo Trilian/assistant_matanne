@@ -26,6 +26,26 @@ class SessionBatchCreate(SessionBatchBase):
     planning_id: int | None = None
 
 
+class GenererSessionDepuisPlanningRequest(BaseModel):
+    """Requête pour générer une session depuis un planning."""
+
+    planning_id: int = Field(..., description="ID du planning source")
+    date_session: date = Field(..., description="Date de la session batch")
+    nom: str | None = Field(None, description="Nom personnalisé (sinon auto-généré)")
+    avec_jules: bool = Field(False, description="Jules participe ?")
+
+
+class GenererSessionDepuisPlanningResponse(BaseModel):
+    """Résultat de la génération."""
+
+    session_id: int
+    nom: str
+    nb_recettes: int
+    recettes: list[dict[str, str | int]]  # [{id, nom, portions}]
+    duree_estimee: int
+    robots_utilises: list[str]
+
+
 class SessionBatchPatch(BaseModel):
     """Mise à jour partielle d'une session."""
 

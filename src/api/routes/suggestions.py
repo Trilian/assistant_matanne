@@ -128,13 +128,19 @@ async def suggest_planning(
         }
         ```
     """
+    from datetime import date, timedelta
+
     from src.services.cuisine.planning import obtenir_service_planning
 
     service = obtenir_service_planning()
 
+    # Calculer le lundi de la semaine courante
+    today = date.today()
+    semaine_debut = today - timedelta(days=today.weekday())
+
     planning = service.generer_planning_ia(
-        nombre_jours=jours,
-        nombre_personnes=personnes,
+        semaine_debut=semaine_debut,
+        preferences={"nombre_personnes": personnes, "nombre_jours": jours},
     )
 
     return {
@@ -148,6 +154,7 @@ async def suggest_planning(
 @gerer_exception_api
 async def analyser_photo_frigo(
     file: UploadFile = File(..., description="Photo du frigo (JPEG/PNG, max 10MB)"),
+    zone: str = Query("frigo", pattern="^(frigo|placard|congelateur)$", description="Zone analysée"),
     user: dict = Depends(require_auth),
     _rate_check: dict = Depends(verifier_limite_debit_ia),
 ):
@@ -167,7 +174,7 @@ async def analyser_photo_frigo(
     from src.services.cuisine.photo_frigo import get_photo_frigo_service
 
     service = get_photo_frigo_service()
-    resultat = await service.analyser_photo_frigo(image_bytes)
+    resultat = await service.analyser_photo_frigo(image_bytes, zone=zone)
 
     return resultat.model_dump()
 
@@ -211,3 +218,34 @@ async def statut_predictions(
 
     service = obtenir_ml_predictions()
     return {"modeles": service.statut_modeles()}
+
+
+@router.get("/saison")
+@gerer_exception_api
+async def produits_de_saison(
+    mois: int = Query(0, ge=0, le=12, description="Mois (1-12). 0 = mois courant"),
+    user: dict = Depends(require_auth),
+):
+    """Retourne les fruits et légumes de saison pour le mois donné."""
+    import json
+    from datetime import date
+    from pathlib import Path
+
+    mois_cible = mois if mois > 0 else date.today().month
+    fichier = Path(__file__).resolve().parents[3] / "data" / "reference" / "produits_de_saison.json"
+
+    if not fichier.exists():
+        raise HTTPException(status_code=404, detail="Catalogue saisonnier introuvable")
+
+    data = json.loads(fichier.read_text(encoding="utf-8"))
+    produits = data.get("produits", [])
+
+    fruits = [p["nom"] for p in produits if mois_cible in p.get("mois", []) and p.get("categorie") == "fruit"]
+    legumes = [p["nom"] for p in produits if mois_cible in p.get("mois", []) and p.get("categorie") == "legume"]
+
+    return {
+        "mois": mois_cible,
+        "fruits": sorted(fruits),
+        "legumes": sorted(legumes),
+        "total": len(fruits) + len(legumes),
+    }

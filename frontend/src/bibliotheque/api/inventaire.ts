@@ -38,3 +38,26 @@ export async function obtenirAlertes(): Promise<ArticleInventaire[]> {
   const { data } = await clientApi.get<ArticleInventaire[]>("/inventaire/alertes");
   return data;
 }
+
+export interface ArticleBulk {
+  nom: string;
+  quantite?: number;
+  categorie?: string;
+  unite?: string;
+}
+
+export interface ResultatBulk {
+  message: string;
+}
+
+/** Ajouter plusieurs articles en masse (depuis photo-frigo) */
+export async function ajouterArticlesBulk(
+  articles: ArticleBulk[],
+  emplacement = "frigo"
+): Promise<ResultatBulk> {
+  const { data } = await clientApi.post<ResultatBulk>(
+    `/inventaire/bulk?emplacement=${encodeURIComponent(emplacement)}`,
+    articles
+  );
+  return data;
+}

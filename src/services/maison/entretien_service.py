@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from src.core.ai import ClientIA, obtenir_client_ia
 from src.core.decorators import avec_cache, avec_session_db
-from src.core.models import Routine, TacheRoutine
+from src.core.models import Routine, TacheRoutine, TacheEntretien
 from src.core.monitoring import chronometre
 from src.services.core.base import BaseAIService
 from src.services.core.events import obtenir_bus
@@ -584,6 +584,146 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
             logger.error(f"Erreur désactivation routine: {e}")
             db.rollback()
             return False
+
+    # ─────────────────────────────────────────────────────────
+    # PLANNING SEMAINE
+    # ─────────────────────────────────────────────────────────
+
+    @avec_cache(ttl=86400)  # 24h
+    @avec_session_db
+    def generer_planning_semaine(
+        self,
+        preferences: dict | None = None,
+        db: Session | None = None,
+    ) -> dict[str, list[dict]]:
+        """Génère un planning ménage équilibré pour la semaine.
+
+        Args:
+            preferences: Préférences utilisateur (jours_off, intensite, créneau)
+            db: Session DB (injectée par @avec_session_db)
+
+        Returns:
+            Dict {jour: [{"nom": str, "duree_min": int, "categorie": str}]}
+        """
+        preferences = preferences or {}
+        jours_off = set(preferences.get("jours_off", []))
+
+        # Collecter tâches récurrentes dues cette semaine
+        today = date.today()
+        taches_db = (
+            db.query(TacheEntretien)
+            .filter(
+                TacheEntretien.fait.is_(False),
+            TacheEntretien.prochaine_fois <= today + timedelta(days=7),
+            )
+            .order_by(TacheEntretien.prochaine_fois)
+            .limit(30)
+            .all()
+        )
+
+        noms_taches = [
+            f"{t.nom} ({t.duree_minutes or 15}min)" for t in taches_db
+        ]
+
+        contraintes = {"jours_off": list(jours_off)} if jours_off else None
+
+        # Optimisation via IA (async → fallback sync)
+        import asyncio
+
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                planning_str = self._repartition_simple(noms_taches)
+            else:
+                planning_str = loop.run_until_complete(
+                    self.optimiser_semaine(noms_taches, contraintes)
+                )
+        except Exception:
+            planning_str = self._repartition_simple(noms_taches)
+
+        # Convertir en format structuré
+        tache_map = {f"{t.nom} ({t.duree_minutes or 15}min)": t for t in taches_db}
+        planning: dict[str, list[dict]] = {}
+
+        for jour, noms in planning_str.items():
+            if jour in jours_off:
+                continue
+            planning[jour] = []
+            for nom in noms:
+                if nom in tache_map:
+                    t = tache_map[nom]
+                    planning[jour].append({
+                        "id": t.id,
+                        "nom": t.nom,
+                        "duree_min": t.duree_minutes or 15,
+                        "categorie": t.categorie or "ménage",
+                        "priorite": t.priorite or "BASSE",
+                    })
+                else:
+                    planning[jour].append({
+                        "id": None,
+                        "nom": nom,
+                        "duree_min": 15,
+                        "categorie": "ménage",
+                        "priorite": "BASSE",
+                    })
+
+        return planning
+
+    @avec_session_db
+    def initialiser_routines_defaut(self, db: Session | None = None) -> int:
+        """Crée les 3 routines par défaut depuis routines_defaut.json.
+
+        Returns:
+            Nombre de routines créées
+        """
+        import json
+        from pathlib import Path
+
+        json_path = Path(__file__).parents[3] / "data" / "reference" / "routines_defaut.json"
+        if not json_path.exists():
+            logger.warning("routines_defaut.json introuvable")
+            return 0
+
+        with open(json_path, encoding="utf-8") as f:
+            donnees = json.load(f)
+
+        crees = 0
+        for r in donnees.get("routines", []):
+            # Vérifier si routine avec même nom existe déjà
+            existante = db.query(Routine).filter(Routine.nom == r["nom"]).first()
+            if existante:
+                continue
+
+            routine = Routine(
+                nom=r["nom"],
+                frequence=r.get("frequence", "quotidien"),
+                categorie=r.get("categorie"),
+                actif=True,
+            )
+            db.add(routine)
+            db.flush()
+
+            for tache_data in r.get("taches", []):
+                tache = TacheRoutine(
+                    routine_id=routine.id,
+                    nom=tache_data["nom"],
+                    duree_min=tache_data.get("duree_min", 5),
+                    ordre=tache_data.get("ordre", 0),
+                )
+                db.add(tache)
+
+            crees += 1
+
+        try:
+            db.commit()
+            logger.info(f"✅ {crees} routines par défaut créées")
+        except Exception as e:
+            logger.error(f"Erreur init routines: {e}")
+            db.rollback()
+            crees = 0
+
+        return crees
 
 
 # ═══════════════════════════════════════════════════════════

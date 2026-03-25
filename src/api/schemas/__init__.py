@@ -34,6 +34,7 @@ from .common import (
 
 # Courses
 from .courses import (
+    ArticleGenereResume,
     ArticleResponse,
     CheckoutArticleRequest,
     CheckoutArticleResult,
@@ -41,6 +42,8 @@ from .courses import (
     CheckoutCoursesResponse,
     CourseItemBase,
     CourseListCreate,
+    GenererCoursesRequest,
+    GenererCoursesResponse,
     ListeCoursesResponse,
     ListeCoursesResume,
     ScanBarcodeCheckoutRequest,
@@ -78,9 +81,11 @@ from .inventaire import (
 
 # Planning
 from .planning import (
+    GenererPlanningRequest,
     PlanningSemaineResponse,
     RepasBase,
     RepasCreate,
+    RepasRapideSuggestion,
     RepasResponse,
 )
 
@@ -119,6 +124,8 @@ from .anti_gaspillage import (
 from .batch_cooking import (
     ConfigBatchResponse,
     EtapeBatchResponse,
+    GenererSessionDepuisPlanningRequest,
+    GenererSessionDepuisPlanningResponse,
     PreparationBatchResponse,
     SessionBatchCreate,
     SessionBatchPatch,
@@ -338,8 +345,10 @@ __all__ = [
     "ScanBarcodeCheckoutRequest",
     "ScanBarcodeCheckoutResponse",
     # Planning
+    "GenererPlanningRequest",
     "RepasBase",
     "RepasCreate",
+    "RepasRapideSuggestion",
     "RepasResponse",
     "PlanningSemaineResponse",
     # Push

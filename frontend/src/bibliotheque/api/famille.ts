@@ -393,3 +393,155 @@ export async function supprimerEvenementFamilial(
 ): Promise<void> {
   await clientApi.delete(`/famille/evenements/${id}`);
 }
+
+// ─── Contexte Familial (Phase M) ─────────────────────────
+
+import type {
+  ContexteFamilial,
+  AchatFamille,
+  RappelFamille,
+  CroissanceData,
+} from "@/types/famille";
+
+/** Obtenir le contexte familial complet (1 seul appel) */
+export async function obtenirContexteFamilial(): Promise<ContexteFamilial> {
+  const { data } = await clientApi.get<ContexteFamilial>("/famille/contexte");
+  return data;
+}
+
+// ─── Suggestions IA (Phase M3) ───────────────────────────
+
+/** Suggestions weekend avec météo auto-injectée */
+export async function obtenirSuggestionsWeekend(params?: {
+  budget?: number;
+  region?: string;
+  nb_suggestions?: number;
+}): Promise<{ suggestions: string }> {
+  const { data } = await clientApi.post("/famille/weekend/suggestions-ia", params ?? {});
+  return data;
+}
+
+/** Résumé hebdomadaire IA */
+export async function obtenirResumeSemaine(params?: {
+  evenements?: string[];
+  jalons?: string[];
+  humeur_famille?: string;
+}): Promise<{ resume: string }> {
+  const { data } = await clientApi.post("/famille/journal/resume-semaine", params ?? { evenements: [] });
+  return data;
+}
+
+/** Rétrospective mensuelle IA */
+export async function obtenirRetrospective(params?: {
+  mois?: string;
+  resumes_semaines?: string[];
+  nb_evenements?: number;
+  nb_jalons?: number;
+}): Promise<{ retrospective: string }> {
+  const defaultMois = new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+  const { data } = await clientApi.post("/famille/journal/retrospective", {
+    mois: params?.mois ?? defaultMois,
+    resumes_semaines: params?.resumes_semaines ?? [],
+    nb_evenements: params?.nb_evenements,
+    nb_jalons: params?.nb_jalons,
+  });
+  return data;
+}
+
+/** Suggestions soirée couple IA */
+export async function obtenirSuggestionsSoiree(params?: {
+  budget?: number;
+  duree_heures?: number;
+  type_soiree?: string;
+  region?: string;
+}): Promise<{ suggestions: string }> {
+  const { data } = await clientApi.post("/famille/soiree/suggestions-ia", params ?? {});
+  return data;
+}
+
+/** Suggestions activités avec météo auto (Phase O) */
+export async function obtenirSuggestionsActivitesAuto(params?: {
+  budget_max?: number;
+  duree_max_heures?: number;
+  type_prefere?: string;
+}): Promise<{ suggestions: string; meteo: string; journee_libre: boolean }> {
+  const { data } = await clientApi.post("/famille/activites/suggestions-ia-auto", params ?? {});
+  return data;
+}
+
+// ─── Achats Famille CRUD (Phase M4/P) ────────────────────
+
+/** Lister les achats (via shopping existant) */
+export async function listerAchats(params?: {
+  categorie?: string;
+  actif?: boolean;
+}): Promise<AchatFamille[]> {
+  const { data } = await clientApi.get<{ items: AchatFamille[] }>(
+    "/famille/shopping",
+    { params }
+  );
+  return data.items;
+}
+
+/** Créer un achat */
+export async function creerAchat(
+  achat: Omit<AchatFamille, "id" | "achete" | "date_achat" | "prix_reel">
+): Promise<AchatFamille> {
+  const { data } = await clientApi.post<AchatFamille>("/famille/achats", achat);
+  return data;
+}
+
+/** Modifier un achat */
+export async function modifierAchat(
+  id: number,
+  patch: Partial<AchatFamille>
+): Promise<AchatFamille> {
+  const { data } = await clientApi.patch<AchatFamille>(
+    `/famille/achats/${id}`,
+    patch
+  );
+  return data;
+}
+
+/** Marquer un achat comme acheté */
+export async function marquerAchatAchete(
+  id: number,
+  prix_reel?: number
+): Promise<void> {
+  await clientApi.post(`/famille/achats/${id}/achete`, { prix_reel });
+}
+
+/** Supprimer un achat */
+export async function supprimerAchat(id: number): Promise<void> {
+  await clientApi.delete(`/famille/achats/${id}`);
+}
+
+// ─── Rappels (Phase Q) ──────────────────────────────────
+
+/** Évaluer les rappels du jour */
+export async function evaluerRappels(): Promise<{
+  rappels: RappelFamille[];
+  total: number;
+}> {
+  const { data } = await clientApi.get("/famille/rappels/evaluer");
+  return data;
+}
+
+/** Envoyer les rappels push */
+export async function envoyerRappels(): Promise<{
+  envoyes: number;
+  message: string;
+}> {
+  const { data } = await clientApi.post("/famille/rappels/envoyer");
+  return data;
+}
+
+// ─── Croissance OMS (Phase R) ───────────────────────────
+
+/** Obtenir les données de croissance Jules + normes OMS */
+export async function obtenirCroissanceJules(): Promise<CroissanceData> {
+  const { data } = await clientApi.get<CroissanceData>(
+    "/famille/jules/croissance"
+  );
+  return data;
+}

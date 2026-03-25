@@ -10,6 +10,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.schemas.batch_cooking import (
+    GenererSessionDepuisPlanningRequest,
+    GenererSessionDepuisPlanningResponse,
     SessionBatchCreate,
     SessionBatchPatch,
     SessionBatchResponse,
@@ -88,6 +90,114 @@ async def lister_sessions(
             }
 
     return await executer_async(_query)
+
+
+@router.post(
+    "/generer-depuis-planning",
+    response_model=GenererSessionDepuisPlanningResponse,
+    responses=REPONSES_CRUD_CREATION,
+)
+@gerer_exception_api
+async def generer_session_depuis_planning(
+    donnees: GenererSessionDepuisPlanningRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère une session batch à partir d'un planning hebdomadaire.
+
+    Collecte toutes les recettes du planning, filtre celles compatibles avec batch cooking,
+    calcule durée totale, identifie robots compatibles.
+    """
+    from src.core.models import Planning, Recette, Repas, SessionBatchCooking
+
+    def _generate():
+        with executer_avec_session() as session:
+            # Vérifier planning existe
+            planning = session.query(Planning).filter(Planning.id == donnees.planning_id).first()
+            if not planning:
+                raise HTTPException(status_code=404, detail="Planning non trouvé")
+
+            # Collecter tous les repas avec recette_id
+            repas_list = (
+                session.query(Repas)
+                .filter(
+                    Repas.planning_id == donnees.planning_id,
+                    Repas.recette_id.isnot(None),
+                )
+                .all()
+            )
+
+            # Collecter tous les ID de recettes (plat + entrée + dessert + dessert_jules)
+            recette_ids = set()
+            for r in repas_list:
+                if r.recette_id:
+                    recette_ids.add(r.recette_id)
+                if r.entree_recette_id:
+                    recette_ids.add(r.entree_recette_id)
+                if r.dessert_recette_id:
+                    recette_ids.add(r.dessert_recette_id)
+                if r.dessert_jules_recette_id:
+                    recette_ids.add(r.dessert_jules_recette_id)
+
+            if not recette_ids:
+                raise HTTPException(
+                    status_code=422, detail="Aucune recette trouvée dans le planning"
+                )
+
+            # Charger les recettes
+            recettes_objs = session.query(Recette).filter(Recette.id.in_(recette_ids)).all()
+
+            # Filtrer celles compatibles batch cooking (ou toutes si aucune marquée)
+            recettes_batch = [r for r in recettes_objs if r.compatible_batch]
+            if not recettes_batch:
+                # Fallback: toutes les recettes
+                recettes_batch = recettes_objs
+
+            # Calculer durée totale (temps_preparation + temps_cuisson)
+            duree_estimee = sum(r.temps_preparation + (r.temps_cuisson or 0) for r in recettes_batch)
+
+            # Identifier robots compatibles (au moins une recette)
+            robots_utilises = []
+            for r in recettes_batch:
+                if r.compatible_cookeo and "Cookeo" not in robots_utilises:
+                    robots_utilises.append("Cookeo")
+                if r.compatible_monsieur_cuisine and "Monsieur Cuisine" not in robots_utilises:
+                    robots_utilises.append("Monsieur Cuisine")
+                if r.compatible_airfryer and "Airfryer" not in robots_utilises:
+                    robots_utilises.append("Airfryer")
+                if r.compatible_multicooker and "Multicooker" not in robots_utilises:
+                    robots_utilises.append("Multicooker")
+
+            # Nom auto-généré si non fourni
+            nom = donnees.nom or f"Batch {planning.nom} ({donnees.date_session.strftime('%d/%m')})"
+
+            # Créer la session
+            nouvelle = SessionBatchCooking(
+                nom=nom,
+                date_session=donnees.date_session,
+                duree_estimee=duree_estimee,
+                avec_jules=donnees.avec_jules,
+                planning_id=donnees.planning_id,
+                recettes_selectionnees=[r.id for r in recettes_batch],
+                robots_utilises=robots_utilises,
+                statut="planifiee",
+                genere_par_ia=False,
+            )
+            session.add(nouvelle)
+            session.commit()
+            session.refresh(nouvelle)
+
+            return {
+                "session_id": nouvelle.id,
+                "nom": nouvelle.nom,
+                "nb_recettes": len(recettes_batch),
+                "recettes": [
+                    {"id": r.id, "nom": r.nom, "portions": r.portions} for r in recettes_batch
+                ],
+                "duree_estimee": duree_estimee,
+                "robots_utilises": robots_utilises,
+            }
+
+    return await executer_async(_generate)
 
 
 @router.get("/{session_id}", response_model=SessionBatchResponse, responses=REPONSES_CRUD_LECTURE)

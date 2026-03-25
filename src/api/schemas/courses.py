@@ -2,7 +2,7 @@
 Schémas Pydantic pour les courses.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, Field
 
@@ -108,3 +108,32 @@ class ScanBarcodeCheckoutResponse(BaseModel):
     statut: str
     quantite_ajoutee: float = 0
     inventaire_article_id: int | None = None
+
+
+class GenererCoursesRequest(BaseModel):
+    """Requête pour générer une liste de courses depuis le planning."""
+
+    semaine_debut: date
+    soustraire_stock: bool = Field(True, description="Soustraire les quantités en stock")
+    nom_liste: str = Field("Courses de la semaine", min_length=1, max_length=200)
+
+
+class ArticleGenereResume(BaseModel):
+    """Résumé d'un article généré."""
+
+    nom: str
+    quantite: float
+    unite: str = ""
+    rayon: str = "Autre"
+    en_stock: float = 0
+
+
+class GenererCoursesResponse(BaseModel):
+    """Réponse de la génération de courses depuis planning."""
+
+    liste_id: int
+    nom: str
+    total_articles: int
+    articles_en_stock: int
+    articles: list[ArticleGenereResume] = Field(default_factory=list)
+    par_rayon: dict[str, int] = Field(default_factory=dict)

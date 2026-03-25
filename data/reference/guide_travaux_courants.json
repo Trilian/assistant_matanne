@@ -1,0 +1,281 @@
+{
+  "version": "1.0",
+  "description": "Guide travaux courants maison : réparations, installations, entretien",
+  "travaux": [
+    {
+      "id": 1,
+      "nom": "Réparer un carreau de faïence fissuré",
+      "categorie": "carrelage",
+      "duree_min": 60,
+      "difficulte": "moyen",
+      "cout_estime": 15,
+      "etapes": [
+        "Protéger la zone autour avec du ruban de masquage",
+        "Casser délicatement l'ancien carreau avec burin et marteau",
+        "Gratter les restes de colle et ragréer le support",
+        "Appliquer la colle à carrelage au dos du nouveau carreau (peigne)",
+        "Poser le carreau, tapoter pour bonne adhérence, vérifier l'niveau",
+        "Laisser sécher 24h minimum",
+        "Appliquer le joint de carrelage de couleur assortie",
+        "Lisser le joint avec le doigt humide ou une éponge",
+        "Laisser sécher 2h puis nettoyer les traces"
+      ],
+      "materiaux": [
+        { "nom": "Carreau de remplacement", "quantite": "1", "prix_estime": 5 },
+        { "nom": "Colle carrelage C1", "quantite": "petit sac", "prix_estime": 4 },
+        { "nom": "Joint de carrelage (couleur assortie)", "quantite": "1 sachet", "prix_estime": 3 },
+        { "nom": "Croisillons de joint", "quantite": "quelques uns", "prix_estime": 1 }
+      ],
+      "outils": ["Burin", "Marteau", "Spatule crantée", "Éponge"],
+      "difficulte_detail": "Attention à ne pas abîmer les carreaux adjacents lors du cassage"
+    },
+    {
+      "id": 2,
+      "nom": "Réparer un joint de silicone (douche, baignoire)",
+      "categorie": "sanitaire",
+      "duree_min": 90,
+      "difficulte": "facile",
+      "cout_estime": 8,
+      "etapes": [
+        "Éliminer tous les anciens joints avec un cutter ou outil spécial joint",
+        "Nettoyer et dégraisser la surface avec alcool à 90°",
+        "Sécher complètement — ne pas appliquer sur surface humide",
+        "Poser le ruban de masquage de chaque côté du joint (2-3mm d'espace)",
+        "Appliquer le silicone en un cordon régulier et continu",
+        "Lisser immédiatement avec le doigt humide ou une spatule à joint",
+        "Retirer le ruban de masquage immédiatement",
+        "Laisser sécher 24h avant utilisation de la douche"
+      ],
+      "materiaux": [
+        { "nom": "Silicone sanitaire anti-moisissures", "quantite": "1 tube", "prix_estime": 5 },
+        { "nom": "Ruban de masquage", "quantite": "1 rouleau", "prix_estime": 2 }
+      ],
+      "outils": ["Cutter ou outil à gratter joint", "Pistolet à silicone"],
+      "astuce_connectee": "Vaporiser de l'eau savonneuse sur le joint frais pour le lisser parfaitement"
+    },
+    {
+      "id": 3,
+      "nom": "Faire un trou dans un mur (cheville + vis)",
+      "categorie": "fixation",
+      "duree_min": 20,
+      "difficulte": "facile",
+      "cout_estime": 5,
+      "etapes": [
+        "Détecter les câbles électriques avec un détecteur de métaux",
+        "Marquer l'emplacement au crayon",
+        "Choisir le foret selon le mur : béton = foret SDS, placo = foret standard",
+        "Percer à vitesse lente dans le béton (mode percussion), rapide dans le placo",
+        "Nettoyer la poussière du trou",
+        "Insérer la cheville adaptée (PVC pour plein, métal pour creux)",
+        "Visser sans dépasser la profondeur de la cheville"
+      ],
+      "materiaux": [
+        { "nom": "Chevilles + vis adaptées", "quantite": "selon besoin", "prix_estime": 3 }
+      ],
+      "outils": ["Perceuse", "Foret adapté", "Détecteur de câbles"],
+      "attention": "Toujours vérifier l'absence de câbles avant de percer !"
+    },
+    {
+      "id": 4,
+      "nom": "Déboucher un évier ou lavabo",
+      "categorie": "plomberie",
+      "duree_min": 30,
+      "difficulte": "facile",
+      "cout_estime": 3,
+      "etapes": [
+        "Essayer d'abord avec la ventouse : 10-15 coups énergiques",
+        "Si inefficace : verser 1 verre de bicarbonate + 1 verre de vinaigre, laisser 15 min",
+        "Rincer avec de l'eau bouillante",
+        "Si toujours bouché : dévisser le siphon sous l'évier (mettre un seau dessous)",
+        "Nettoyer le siphon et le tuyau, retirer les cheveux / débris",
+        "Revisser le siphon sans trop serrer (risque de crack)",
+        "Tester avec l'eau"
+      ],
+      "materiaux": [
+        { "nom": "Bicarbonate de soude", "quantite": "100g", "prix_estime": 0.5 },
+        { "nom": "Vinaigre blanc", "quantite": "100ml", "prix_estime": 0.3 }
+      ],
+      "outils": ["Ventouse", "Clé à molette ou pince multiprise"],
+      "astuce_connectee": "La spirale WC mécanique (~8€) débloque 95% des cas sans produit chimique"
+    },
+    {
+      "id": 5,
+      "nom": "Réparer une fuite robinet (joint usé)",
+      "categorie": "plomberie",
+      "duree_min": 45,
+      "difficulte": "moyen",
+      "cout_estime": 5,
+      "etapes": [
+        "Couper l'eau du robinet (vanne sous l'évier ou compteur général)",
+        "Ouvrir le robinet pour vider la pression",
+        "Démonter la tête de robinet (écrou sous la poignée)",
+        "Identifier le joint usé (caoutchouc noir ou torique)",
+        "Remplacer le joint avec un joint neuf de même diamètre",
+        "Remonter dans l'ordre inverse",
+        "Revissez progressivement, rouvrir l'eau, vérifier l'absence de fuite"
+      ],
+      "materiaux": [
+        { "nom": "Jeu de joints (assortiment)", "quantite": "1", "prix_estime": 3 },
+        { "nom": "Téflon (si joint fileté)", "quantite": "1 rouleau", "prix_estime": 1.5 }
+      ],
+      "outils": ["Clé à molette", "Tournevis cruciforme"]
+    },
+    {
+      "id": 6,
+      "nom": "Recharger climatiseur / vérifier fluide",
+      "categorie": "electromenager",
+      "duree_min": 45,
+      "difficulte": "difficile",
+      "cout_estime": 80,
+      "etapes": [
+        "Vérifier si la clim chauffe (signe de manque de fluide)",
+        "Nettoyer les filtres intérieur et extérieur (à faire tous les mois)",
+        "ATTENTION : La recharge de fluide frigorigène est RÉGLEMENTÉE — nécessite une attestation professionnelle",
+        "Contacter un technicien agréé (chercher dans vos artisans)",
+        "Lui comuniquer l'age et le modèle de l'appareil"
+      ],
+      "materiaux": [],
+      "outils": ["Nettoyage filtre uniquement pour le DIY"],
+      "attention": "La recharge de fluide est INTERDITE sans certification — risque d'amende et danger"
+    },
+    {
+      "id": 7,
+      "nom": "Nettoyer lave-vaisselle odeurs / calcaire",
+      "categorie": "electromenager",
+      "duree_min": 60,
+      "difficulte": "facile",
+      "cout_estime": 4,
+      "etapes": [
+        "Vider complètement l'appareil",
+        "Retirer et nettoyer le filtre sous la cuve (hebdomadaire)",
+        "Nettoyer les bras de lavage: déboucher les petits trous avec cure-dent",
+        "Nettoyer le joint de porte avec une éponge",
+        "Lance un cycle à vide avec 200ml de vinaigre blanc dans un bol sur la grille du bas",
+        "Si traces de calcaire : passer un cycle avec 1 sachet d'acide citrique"
+      ],
+      "materiaux": [
+        { "nom": "Vinaigre blanc", "quantite": "200ml", "prix_estime": 0.3 },
+        { "nom": "Acide citrique (si calcaire)", "quantite": "1 sachet 100g", "prix_estime": 1.5 }
+      ],
+      "outils": ["Éponge", "Cure-dent"],
+      "astuce_connectee": "Prise intelligente Tapo P110 : programmer le démarrage heure creuse (22h-6h)"
+    },
+    {
+      "id": 8,
+      "nom": "Nettoyer lave-linge (moisissures, mauvaise odeur)",
+      "categorie": "electromenager",
+      "duree_min": 120,
+      "difficulte": "facile",
+      "cout_estime": 3,
+      "etapes": [
+        "Nettoyer le bac à lessive (tremper dans l'eau chaude, brosser)",
+        "Nettoyer le joint hublot avec chiffon + vinaigre blanc",
+        "Nettoyer le filtre (sous petite trappe en bas à droite) — mettre un seau !",
+        "Lancer un cycle à vide 60°C avec 500ml de vinaigre dans le bac à lessive",
+        "Deuxième cycle à vide avec 100g de bicarbonate dans le tambour",
+        "Laisser le hublot entrouvert après chaque utilisation"
+      ],
+      "materiaux": [
+        { "nom": "Vinaigre blanc", "quantite": "500ml", "prix_estime": 0.5 },
+        { "nom": "Bicarbonate de soude", "quantite": "100g", "prix_estime": 0.3 }
+      ],
+      "outils": ["Chiffon", "Petite brosse"],
+      "frequence_recommandee_mois": 2,
+      "astuce_connectee": "Prise Tapo P110 : mesurer la consommation réelle et programmer heure creuse"
+    },
+    {
+      "id": 9,
+      "nom": "Peindre un mur (débutant)",
+      "categorie": "peinture",
+      "duree_min": 240,
+      "difficulte": "moyen",
+      "cout_estime": 45,
+      "etapes": [
+        "Déplacer les meubles, protéger le sol avec plastique",
+        "Masquer les bords (prises, fenêtres, plinthes) avec ruban de masquage",
+        "Reboucher les trous et irrégularités avec enduit, poncer une fois sec",
+        "Si mur neuf ou très poreux : passer une couche d'impression (primaire)",
+        "Première couche de peinture au rouleau (de bas en haut, sans traces)",
+        "Laisser sécher 2-4h selon la peinture",
+        "Deuxième couche (obligatoire pour un résultat propre)",
+        "Retirer le ruban avant séchage complet (pour ne pas arracher la peinture)"
+      ],
+      "materiaux": [
+        { "nom": "Peinture murs (4L pour 25-30m²)", "quantite": "selon surface", "prix_estime": 25 },
+        { "nom": "Enduit de rebouchage", "quantite": "1 pot 400g", "prix_estime": 5 },
+        { "nom": "Ruban de masquage", "quantite": "2 rouleaux", "prix_estime": 5 }
+      ],
+      "outils": ["Rouleau 22cm", "Bac à rouleau", "Pinceau pour les angles", "Papier de verre fin"]
+    },
+    {
+      "id": 10,
+      "nom": "Poser une étagère murale",
+      "categorie": "fixation",
+      "duree_min": 60,
+      "difficulte": "facile",
+      "cout_estime": 20,
+      "etapes": [
+        "Mesurer et marquer les emplacements des fixations au crayon",
+        "Vérifier l'horizontalité avec un niveau à bulle",
+        "Vérifier l'absence de câbles (détecteur de métaux)",
+        "Percer les trous aux marquages (foret adapté au mur)",
+        "Insérer les chevilles adaptées",
+        "Fixer les supports ou la crémaillère",
+        "Poser le plateau et visser si nécessaire",
+        "Tester la solidité avec quelques kg"
+      ],
+      "materiaux": [
+        { "nom": "Chevilles + vis", "quantite": "selon support", "prix_estime": 3 },
+        { "nom": "Étagère au choix", "quantite": "1", "prix_estime": 15 }
+      ],
+      "outils": ["Perceuse", "Niveau à bulle", "Mètre ruban", "Détecteur de câbles"]
+    },
+    {
+      "id": 11,
+      "nom": "Changer un interrupteur électrique",
+      "categorie": "electricite",
+      "duree_min": 30,
+      "difficulte": "moyen",
+      "cout_estime": 10,
+      "etapes": [
+        "COUPEZ LE DISJONCTEUR correspondant au tableau électrique",
+        "Vérifier l'absence de tension avec un testeur",
+        "Démonter le cache de l'interrupteur (vis ou clips)",
+        "Dévisser l'interrupteur de la boîte encastrée",
+        "Photographier le câblage AVANT de déconnecter quoi que ce soit",
+        "Connecter les fils de la même façon sur le nouvel interrupteur",
+        "Remonter dans l'ordre inverse",
+        "Remettre le disjoncteur et tester"
+      ],
+      "materiaux": [
+        { "nom": "Interrupteur de remplacement", "quantite": "1", "prix_estime": 8 }
+      ],
+      "outils": ["Tournevis plat + cruciforme", "Testeur de tension"],
+      "attention": "Ne jamais intervenir sans couper le disjoncteur — risque électrocution"
+    },
+    {
+      "id": 12,
+      "nom": "Coller du papier peint",
+      "categorie": "decoration",
+      "duree_min": 180,
+      "difficulte": "difficile",
+      "cout_estime": 40,
+      "etapes": [
+        "Préparer le mur : enduire les irrégularités, poncer, nettoyer",
+        "Passer une couche d'impression (évite que le mur absorbe la colle)",
+        "Tracer un trait vertical parfaitement droit avec un niveau",
+        "Découper les lés en laissant 5-10cm de marge en haut et en bas",
+        "Encoller le lé ou le mur selon le type de papier (lire la notice)",
+        "Laisser imbiber le temps requis (si encollage du papier)",
+        "Coller en partant du coin, aligner sur le trait vertical",
+        "Chasser les bulles du centre vers les bords avec une raclette",
+        "Couper l'excédent en haut et en bas avec cutter et règle"
+      ],
+      "materiaux": [
+        { "nom": "Papier peint (quantité selon surface)", "quantite": "selon calcul", "prix_estime": 25 },
+        { "nom": "Colle à papier peint", "quantite": "1 boîte", "prix_estime": 8 }
+      ],
+      "outils": ["Table d'encollage", "Raclette/brosse à poser", "Cutter", "Niveau"]
+    }
+  ]
+}

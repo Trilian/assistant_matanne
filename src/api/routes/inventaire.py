@@ -81,6 +81,7 @@ async def lister_inventaire(
     from sqlalchemy.orm import joinedload
 
     from src.core.models import ArticleInventaire, Ingredient
+    from src.core.models.user_preferences import OpenFoodFactsCache
 
     def _query():
         with executer_avec_session() as session:
@@ -110,8 +111,29 @@ async def lister_inventaire(
                 .all()
             )
 
+            # Enrichir avec données OpenFoodFacts si code-barres présent
+            codes = [i.code_barres for i in items if i.code_barres]
+            off_map: dict[str, OpenFoodFactsCache] = {}
+            if codes:
+                off_rows = (
+                    session.query(OpenFoodFactsCache)
+                    .filter(OpenFoodFactsCache.code_barres.in_(codes))
+                    .all()
+                )
+                off_map = {r.code_barres: r for r in off_rows}
+
+            result_items = []
+            for i in items:
+                data = InventaireItemResponse.model_validate(i).model_dump()
+                off = off_map.get(i.code_barres) if i.code_barres else None
+                if off:
+                    data["nutriscore"] = off.nutriscore
+                    data["ecoscore"] = off.ecoscore
+                    data["nova_group"] = off.nova_group
+                result_items.append(data)
+
             return {
-                "items": [InventaireItemResponse.model_validate(i) for i in items],
+                "items": result_items,
                 "total": total,
                 "page": page,
                 "page_size": page_size,
@@ -431,3 +453,76 @@ async def supprimer_article_inventaire(item_id: int, user: dict[str, Any] = Depe
             return MessageResponse(message="Article supprimé", id=item_id)
 
     return await executer_async(_delete)
+
+
+@router.post(
+    "/bulk",
+    response_model=MessageResponse,
+    status_code=201,
+    responses=REPONSES_CRUD_CREATION,
+)
+@gerer_exception_api
+async def ajouter_articles_bulk(
+    articles: list[dict[str, Any]],
+    emplacement: str = Query("frigo", description="Emplacement par défaut"),
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Ajoute plusieurs articles à l'inventaire en une seule requête (import photo-frigo).
+
+    Chaque article doit avoir au minimum: nom (str), quantite (float).
+    Champs optionnels: unite (str), categorie (str).
+    Si l'ingrédient existe déjà, la quantité est cumulée.
+    """
+    from src.core.models import ArticleInventaire, Ingredient
+
+    if not articles:
+        raise HTTPException(status_code=422, detail="Liste d'articles vide")
+
+    def _bulk():
+        with executer_avec_session() as session:
+            crees = 0
+            maj = 0
+            for art in articles[:50]:  # Limiter à 50 par appel
+                nom = (art.get("nom") or "").strip()
+                if not nom:
+                    continue
+                quantite = float(art.get("quantite") or 1.0)
+
+                # Trouver ou créer l'ingrédient
+                ingredient = session.query(Ingredient).filter(
+                    Ingredient.nom == nom
+                ).first()
+                if not ingredient:
+                    ingredient = Ingredient(
+                        nom=nom,
+                        categorie=art.get("categorie", "Autre"),
+                        unite=art.get("unite", "pcs") or "pcs",
+                    )
+                    session.add(ingredient)
+                    session.flush()
+
+                # Trouver ou créer l'article inventaire
+                inv = session.query(ArticleInventaire).filter(
+                    ArticleInventaire.ingredient_id == ingredient.id
+                ).first()
+                if inv:
+                    inv.quantite = float(inv.quantite or 0) + quantite
+                    if emplacement and not inv.emplacement:
+                        inv.emplacement = emplacement
+                    maj += 1
+                else:
+                    session.add(ArticleInventaire(
+                        ingredient_id=ingredient.id,
+                        quantite=quantite,
+                        quantite_min=1.0,
+                        emplacement=emplacement,
+                    ))
+                    crees += 1
+
+            session.commit()
+            return MessageResponse(
+                message=f"{crees} créés, {maj} mis à jour",
+                id=0,
+            )
+
+    return await executer_async(_bulk)

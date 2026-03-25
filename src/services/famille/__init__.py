@@ -46,6 +46,9 @@ __all__ = [
     "album",
     "soiree_ai",
     "journal_ia",
+    "contexte",
+    "rappels",
+    "achats_ia",
 ]
 
 
@@ -129,4 +132,16 @@ def __getattr__(name: str):
         from src.services.famille.journal_ia import obtenir_service_journal_ia
 
         return obtenir_service_journal_ia
+    if name in ("obtenir_service_contexte_familial", "get_contexte_familial_service"):
+        from src.services.famille.contexte import obtenir_service_contexte_familial
+
+        return obtenir_service_contexte_familial
+    if name in ("obtenir_service_rappels_famille", "get_rappels_famille_service"):
+        from src.services.famille.rappels import obtenir_service_rappels_famille
+
+        return obtenir_service_rappels_famille
+    if name in ("obtenir_service_achats_ia", "get_achats_ia_service"):
+        from src.services.famille.achats_ia import obtenir_service_achats_ia
+
+        return obtenir_service_achats_ia
     raise AttributeError(f"module 'src.services.famille' has no attribute '{name}'")

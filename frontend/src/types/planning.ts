@@ -29,3 +29,17 @@ export interface CreerRepasPlanningDTO {
   notes?: string;
   portions?: number;
 }
+
+export interface SuggestionRecette {
+  id: number;
+  nom: string;
+  description?: string;
+  temps_total: number;
+  categorie?: string;
+}
+
+export interface GenererPlanningParams {
+  date_debut?: string;
+  nb_personnes?: number;
+  preferences?: Record<string, unknown>;
+}

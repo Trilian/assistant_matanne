@@ -83,6 +83,13 @@ def creer_mock_recette(data: dict) -> MagicMock:
     mock = MagicMock()
     for key, value in data.items():
         setattr(mock, key, value)
+    # Relations par défaut (nécessaires pour _serialiser_recette)
+    if "ingredients" not in data:
+        mock.ingredients = []
+    if "etapes" not in data:
+        mock.etapes = []
+    if "url_source" not in data:
+        mock.url_source = None
     return mock
 
 
@@ -231,10 +238,24 @@ class TestRoutesRecettesAvecMock:
 
         mock_recette = creer_mock_recette(RECETTES_TEST[0])
 
+        # Query chain: .query(Recette).options(...).filter(...).first()
         mock_query = MagicMock()
+        mock_query.options.return_value = mock_query
         mock_query.filter.return_value = mock_query
         mock_query.first.return_value = mock_recette
-        mock_session.query.return_value = mock_query
+        # RetourRecette/HistoriqueRecette queries → .first()=None, .scalar()=None
+        mock_secondary = MagicMock()
+        mock_secondary.filter.return_value = mock_secondary
+        mock_secondary.first.return_value = None
+        mock_secondary.scalar.return_value = None
+
+        def route_query(model):
+            from src.core.models import Recette
+            if model is Recette:
+                return mock_query
+            return mock_secondary
+
+        mock_session.query.side_effect = route_query
 
         with patch("src.core.db.obtenir_contexte_db", return_value=mock_context):
             from src.api.main import app
@@ -248,6 +269,8 @@ class TestRoutesRecettesAvecMock:
 
         assert data["nom"] == "Tarte aux pommes"
         assert data["categorie"] == "Dessert"
+        assert data["ingredients"] == []
+        assert data["etapes"] == []
 
     def test_obtenir_recette_non_trouvee(self):
         """GET /api/v1/recettes/{id} retourne 404 si inexistante."""
@@ -257,6 +280,7 @@ class TestRoutesRecettesAvecMock:
         mock_context.__exit__ = MagicMock(return_value=None)
 
         mock_query = MagicMock()
+        mock_query.options.return_value = mock_query
         mock_query.filter.return_value = mock_query
         mock_query.first.return_value = None
         mock_session.query.return_value = mock_query
@@ -287,13 +311,32 @@ class TestRoutesRecettesAvecMock:
         )
 
         def fake_refresh(obj):
+            # Copier les attributs du mock vers l'objet refreshé
             obj.id = 4
+            obj.nom = mock_recette.nom
+            obj.description = mock_recette.description
+            obj.temps_preparation = mock_recette.temps_preparation
+            obj.temps_cuisson = mock_recette.temps_cuisson
+            obj.portions = mock_recette.portions
+            obj.difficulte = mock_recette.difficulte
+            obj.categorie = mock_recette.categorie
+            obj.ingredients = []
+            obj.etapes = []
+            obj.url_source = None
             obj.cree_le = datetime.now()
             obj.modifie_le = None
 
         mock_session.add.return_value = None
+        mock_session.flush.return_value = None
         mock_session.commit.return_value = None
         mock_session.refresh.side_effect = fake_refresh
+
+        # Secondary queries for _serialiser_recette (RetourRecette, HistoriqueRecette)
+        mock_secondary = MagicMock()
+        mock_secondary.filter.return_value = mock_secondary
+        mock_secondary.first.return_value = None
+        mock_secondary.scalar.return_value = None
+        mock_session.query.return_value = mock_secondary
 
         with patch("src.core.db.obtenir_contexte_db", return_value=mock_context):
             from src.api.main import app

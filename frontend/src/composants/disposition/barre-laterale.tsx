@@ -41,6 +41,7 @@ import {
   ClipboardCheck,
   Trophy,
   Dices,
+  TrendingUp,
   MessageSquare,
   ArrowLeftRight,
   CloudSun,
@@ -53,6 +54,7 @@ import {
   Camera,
   Apple,
   Link2,
+  Wifi,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -110,15 +112,16 @@ const LIENS: LienNav[] = [
       { nom: "Documents", chemin: "/famille/documents", Icone: FileText },
     ],
   },
-  { nom: "Planning", chemin: "/planning", Icone: Calendar },
   {
     nom: "Maison",
     chemin: "/maison",
     Icone: House,
     sousLiens: [
       { nom: "Projets", chemin: "/maison/projets", Icone: Hammer },
+      { nom: "Ménage", chemin: "/maison/menage", Icone: SprayCan },
       { nom: "Jardin", chemin: "/maison/jardin", Icone: Sprout },
       { nom: "Entretien", chemin: "/maison/entretien", Icone: SprayCan },
+      { nom: "Domotique", chemin: "/maison/domotique", Icone: Wifi },
       { nom: "Charges", chemin: "/maison/charges", Icone: Receipt },
       { nom: "Dépenses", chemin: "/maison/depenses", Icone: Banknote },
       { nom: "Énergie", chemin: "/maison/energie", Icone: Zap },
@@ -140,6 +143,8 @@ const LIENS: LienNav[] = [
       { nom: "Paris", chemin: "/jeux/paris", Icone: Trophy },
       { nom: "Loto", chemin: "/jeux/loto", Icone: Dices },
       { nom: "EuroMillions", chemin: "/jeux/euromillions", Icone: Dices },
+      { nom: "Performance", chemin: "/jeux/performance", Icone: TrendingUp },
+      { nom: "Jeu responsable", chemin: "/jeux/responsable", Icone: Shield },
     ],
   },
   {

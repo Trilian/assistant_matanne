@@ -2558,6 +2558,239 @@ async def sauvegarder_positions(
 
 
 # ═══════════════════════════════════════════════════════════
+# BRIEFING MAISON (contexte quotidien)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/briefing", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def briefing_maison(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Briefing quotidien contextuel avec tâches, alertes, météo, projets."""
+    from src.services.maison import get_contexte_maison_service
+
+    def _query():
+        service = get_contexte_maison_service()
+        briefing = service.obtenir_briefing()
+        if briefing is None:
+            return {}
+        return briefing.model_dump(mode="json")
+
+    return await executer_async(_query)
+
+
+@router.get("/alertes", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def alertes_maison(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Toutes les alertes maison triées par urgence."""
+    from src.services.maison import get_contexte_maison_service
+
+    def _query():
+        service = get_contexte_maison_service()
+        alertes = service.obtenir_toutes_alertes()
+        return {"items": [a.model_dump(mode="json") for a in alertes]}
+
+    return await executer_async(_query)
+
+
+@router.get("/taches-jour", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def taches_jour_maison(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Tâches du jour avec statut et détails."""
+    from src.services.maison import get_contexte_maison_service
+
+    def _query():
+        service = get_contexte_maison_service()
+        taches = service.obtenir_taches_jour()
+        return {"items": [t.model_dump(mode="json") for t in taches]}
+
+    return await executer_async(_query)
+
+
+@router.post("/entretien/sync-catalogue", status_code=200, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def sync_catalogue_entretien(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Force la synchronisation catalogue → tâches d'entretien."""
+    from src.services.maison import get_catalogue_entretien_service
+
+    def _query():
+        service = get_catalogue_entretien_service()
+        result = service.sync_catalogue()
+        if result is None:
+            return {"message": "Sync échouée"}
+        return result.model_dump()
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# RAPPELS MAISON (notifications push)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/rappels/envoyer", status_code=200, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def envoyer_rappels_maison(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Évalue et envoie les rappels push maison (garanties, contrats, entretien, gel, cellier)."""
+    from src.services.maison import get_notifications_maison_service
+
+    def _query():
+        service = get_notifications_maison_service()
+        result = service.evaluer_et_envoyer_rappels()
+        if result is None:
+            return {"rappels_envoyes": 0, "rappels_ignores": 0, "erreurs": ["Service indisponible"]}
+        return result.model_dump()
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# MÉNAGE — Planning semaine & préférences
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/menage/planning-semaine", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def planning_semaine_menage(
+    date_debut: date | None = Query(None, description="Date début semaine (lundi)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Planning ménage hebdomadaire optimisé par l'IA."""
+    from src.services.maison import get_entretien_service
+
+    def _query():
+        service = get_entretien_service()
+        planning = service.generer_planning_semaine()
+        if planning is None:
+            return {"planning": {}}
+        return {"planning": planning, "date_debut": str(date_debut or date.today())}
+
+    return await executer_async(_query)
+
+
+@router.post("/menage/preferences", status_code=200, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def sauvegarder_preferences_menage(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Sauvegarde les préférences ménage utilisateur."""
+    # Stockage simple dans cache applicatif (remplacement complet)
+    from src.core.caching import obtenir_cache
+
+    cache = obtenir_cache()
+    cle = f"preferences_menage_{user.get('sub', 'default')}"
+    cache.set(cle, payload, ttl=365 * 24 * 3600)
+    return {"message": "Préférences sauvegardées", "preferences": payload}
+
+
+# ═══════════════════════════════════════════════════════════
+# FICHE TÂCHE ASSISTÉE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/fiche-tache", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_fiche_tache(
+    type: str = Query(..., description="Type: entretien, travaux, jardin, lessive"),
+    id: int | None = Query(None, description="ID de la tâche (si entretien)"),
+    nom: str | None = Query(None, description="Nom de la tâche (recherche catalogue)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Fiche tâche assistée : étapes, produits, durée, astuce connectée."""
+    from src.services.maison import get_fiche_tache_service
+
+    def _query():
+        service = get_fiche_tache_service()
+        fiche = service.obtenir_fiche(type_tache=type, id_tache=id, nom_tache=nom)
+        if fiche is None:
+            return {"message": "Tâche non trouvée dans le catalogue"}
+        return fiche.model_dump() if hasattr(fiche, "model_dump") else fiche
+
+    return await executer_async(_query)
+
+
+@router.post("/fiche-tache-ia", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def generer_fiche_tache_ia(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère une fiche tâche personnalisée via IA Mistral."""
+    from src.services.maison import get_fiche_tache_service
+
+    def _query():
+        service = get_fiche_tache_service()
+        nom_tache = payload.get("nom", "")
+        contexte = payload.get("contexte", "")
+        fiche = service.generer_fiche_ia(nom_tache=nom_tache, contexte=contexte)
+        return fiche.model_dump() if hasattr(fiche, "model_dump") else fiche
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# GUIDE LESSIVE & ÉLECTROMÉNAGER
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/guide", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def guide_pratique(
+    type: str = Query(..., description="Type: lessive, electromenager, travaux"),
+    tache: str | None = Query(None, description="Tache ou problème (ex: vin, odeurs)"),
+    tissu: str | None = Query(None, description="Type tissu pour lessive"),
+    appareil: str | None = Query(None, description="Appareil électroménager"),
+    probleme: str | None = Query(None, description="Problème constaté"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Guide pratique : lessive anti-taches, dépannage électroménager, travaux."""
+    from src.services.maison import get_fiche_tache_service
+
+    def _query():
+        service = get_fiche_tache_service()
+        return service.consulter_guide(
+            type_guide=type,
+            tache=tache,
+            tissu=tissu,
+            appareil=appareil,
+            probleme=probleme,
+        )
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# ROUTINES PAR DÉFAUT
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/routines/initialiser-defaut", status_code=200, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def initialiser_routines_defaut(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée les 3 routines par défaut (matin, soir, weekly) depuis le JSON de référence."""
+    from src.services.maison import get_entretien_service
+
+    def _query():
+        service = get_entretien_service()
+        nb = service.initialiser_routines_defaut()
+        return {"routines_creees": nb, "message": f"{nb} routine(s) créée(s)"}
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
 # HUB DATA (stats dashboard)
 # ═══════════════════════════════════════════════════════════
 
@@ -2575,3 +2808,34 @@ async def stats_hub_maison(
         return service.obtenir_stats_db()
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# DOMOTIQUE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/domotique/astuces", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def astuces_domotique(
+    categorie: str | None = None,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les astuces et appareils domotique du catalogue."""
+    import json
+    from pathlib import Path
+
+    def _query():
+        chemin = Path("data/reference/astuces_domotique.json")
+        if not chemin.exists():
+            return {"categories": [], "conseils_generaux": []}
+        with open(chemin, encoding="utf-8") as f:
+            data = json.load(f)
+        if categorie:
+            data["categories"] = [
+                c for c in data.get("categories", []) if c.get("id") == categorie
+            ]
+        return data
+
+    return await executer_async(_query)
+

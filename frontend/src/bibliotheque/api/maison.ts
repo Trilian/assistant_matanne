@@ -39,6 +39,8 @@ import type {
   PieceMaison,
   ObjetMaison,
   StatsHubMaison,
+  BriefingMaison,
+  AlerteMaison,
 } from "@/types/maison";
 
 // ─── Projets ──────────────────────────────────────────────
@@ -76,6 +78,20 @@ export async function modifierProjet(
 /** Supprimer un projet */
 export async function supprimerProjet(id: number): Promise<void> {
   await clientApi.delete(`/maison/projets/${id}`);
+}
+
+/** Obtenir un projet par ID */
+export async function obtenirProjet(id: number): Promise<ProjetMaison> {
+  const { data } = await clientApi.get<ProjetMaison>(`/maison/projets/${id}`);
+  return data;
+}
+
+/** Lister les tâches d'un projet */
+export async function listerTachesProjet(
+  projetId: number
+): Promise<Array<{ id: number; nom: string; statut?: string; fait?: boolean; priorite?: string }>> {
+  const { data } = await clientApi.get(`/maison/projets/${projetId}/taches`);
+  return data.items ?? data;
 }
 
 // ─── Entretien ────────────────────────────────────────────
@@ -810,5 +826,126 @@ export async function sauvegarderPositions(
 
 export async function statsHubMaison(): Promise<StatsHubMaison> {
   const { data } = await clientApi.get<StatsHubMaison>("/maison/hub/stats");
+  return data;
+}
+// ─── Briefing & Alertes ────────────────────────────
+
+/** Briefing quotidien contextuel de la maison */
+export async function obtenirBriefingMaison(): Promise<BriefingMaison> {
+  const { data } = await clientApi.get<BriefingMaison>("/maison/briefing");
+  return data;
+}
+
+/** Liste toutes les alertes actives maison */
+export async function obtenirAlertesMaison(): Promise<AlerteMaison[]> {
+  const { data } = await clientApi.get<AlerteMaison[]>("/maison/alertes");
+  return Array.isArray(data) ? data : (data as { items?: AlerteMaison[] }).items ?? [];
+}
+
+/** Tâches du jour avec statut */
+export async function obtenirTachesJourMaison(): Promise<BriefingMaison["taches_jour_detail"]> {
+  const { data } = await clientApi.get<{ items: BriefingMaison["taches_jour_detail"] }>("/maison/taches-jour");
+  return data.items ?? (data as unknown as BriefingMaison["taches_jour_detail"]);
+}
+
+/** Déclenche l'évaluation et l'envoi des rappels push maison */
+export async function envoyerRappelsMaison(): Promise<{ rappels_envoyes: number; rappels_ignores: number; erreurs: string[] }> {
+  const { data } = await clientApi.post("/maison/rappels/envoyer", {});
+  return data;
+}
+
+// ─── Fiche tâche & Guide ────────────────────────────
+
+export interface FicheTache {
+  nom: string;
+  type_tache: string;
+  duree_estimee_min: number;
+  difficulte: string;
+  etapes: string[];
+  produits: string[];
+  outils: string[];
+  astuce_connectee?: string;
+  source?: string;
+}
+
+/** Obtenir la fiche détaillée d'une tâche */
+export async function obtenirFicheTache(params: {
+  type_tache: string;
+  id_tache?: string | number;
+  nom_tache?: string;
+}): Promise<FicheTache> {
+  const { data } = await clientApi.get<FicheTache>("/maison/fiche-tache", { params });
+  return data;
+}
+
+/** Obtenir la fiche via IA si non trouvée en catalogue */
+export async function genererFicheTacheIA(nomTache: string, contexte?: string): Promise<FicheTache> {
+  const { data } = await clientApi.post<FicheTache>("/maison/fiche-tache-ia", {
+    nom_tache: nomTache,
+    contexte,
+  });
+  return data;
+}
+
+/** Consulter un guide (lessive, travaux, etc.) */
+export async function consulterGuide(params: {
+  type_guide: string;
+  tache?: string;
+  tissu?: string;
+  appareil?: string;
+  probleme?: string;
+}): Promise<Record<string, unknown>> {
+  const { data } = await clientApi.get<Record<string, unknown>>("/maison/guide", { params });
+  return data;
+}
+
+// ─── Planning ménage ────────────────────────────
+
+export interface PlanningSemaine {
+  lundi: FicheTache[];
+  mardi: FicheTache[];
+  mercredi: FicheTache[];
+  jeudi: FicheTache[];
+  vendredi: FicheTache[];
+  samedi: FicheTache[];
+  dimanche: FicheTache[];
+}
+
+/** Obtenir le planning ménage de la semaine */
+export async function obtenirPlanningSemaine(): Promise<PlanningSemaine> {
+  const { data } = await clientApi.get<PlanningSemaine>("/maison/menage/planning-semaine");
+  return data;
+}
+
+/** Initialiser les routines par défaut */
+export async function initialiserRoutinesDefaut(): Promise<{ creees: number }> {
+  const { data } = await clientApi.post<{ creees: number }>("/maison/routines/initialiser-defaut", {});
+  return data;
+}
+
+// ─── Domotique ────────────────────────────
+
+export interface CategoriesDomotique {
+  categories: {
+    id: string;
+    nom: string;
+    icone: string;
+    appareils: {
+      id: string;
+      nom: string;
+      prix_estime: number;
+      difficulte_installation: string;
+      compatible_avec: string[];
+      avantages: string[];
+      cas_usage: string[];
+    }[];
+  }[];
+  conseils_generaux: { titre: string; detail: string }[];
+}
+
+/** Catalogue domotique avec filtrage par catégorie */
+export async function obtenirAstucesDomotique(categorie?: string): Promise<CategoriesDomotique> {
+  const params = categorie ? { categorie } : undefined;
+  const { data } = await clientApi.get<CategoriesDomotique>("/maison/domotique/astuces", { params });
   return data;
 }

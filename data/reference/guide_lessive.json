@@ -1,0 +1,8 @@
+{
+  "version": "1.0",
+  "description": "Guide anti-taches et entretien textile",
+  "taches": {
+    "vin_rouge": {
+      "nom": "Tache de vin rouge",
+      "duree_min": 15,
+      "etapes": [

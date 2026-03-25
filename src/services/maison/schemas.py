@@ -60,17 +60,48 @@ class ActionPrioritaire(BaseModel):
     lien: str | None = None  # Lien vers le module
 
 
+class TacheJour(BaseModel):
+    """Tâche du jour avec métadonnées."""
+
+    nom: str
+    categorie: str = "entretien"  # entretien, jardin, menage, projet
+    duree_estimee_min: int | None = None
+    priorite: NiveauUrgence = NiveauUrgence.MOYENNE
+    source: str = ""  # routine, catalogue, saisonnier
+    fait: bool = False
+    id_source: int | None = None  # ID de la tâche source
+
+
+class MeteoResume(BaseModel):
+    """Résumé météo compact pour le briefing."""
+
+    temperature_min: float | None = None
+    temperature_max: float | None = None
+    description: str = ""
+    precipitation_mm: float = 0
+    impact_jardin: str | None = None
+    impact_menage: str | None = None
+    alertes_meteo: list[AlerteMaison] = Field(default_factory=list)
+
+
 class BriefingMaison(BaseModel):
     """Briefing quotidien maison généré par l'IA."""
 
     date: date_type = Field(default_factory=date_type.today)
     resume: str = ""
     taches_jour: list[str] = Field(default_factory=list)
+    taches_jour_detail: list[TacheJour] = Field(default_factory=list)
     alertes: list[AlerteMaison] = Field(default_factory=list)
     meteo_impact: str | None = None
+    meteo: MeteoResume | None = None
     projets_actifs: list[str] = Field(default_factory=list)
     priorites: list[str] = Field(default_factory=list)
     eco_score_jour: int | None = None
+    # Sections contextuelles (vides = invisibles dans le hub)
+    entretiens_saisonniers: list[dict[str, Any]] = Field(default_factory=list)
+    jardin: list[dict[str, Any]] = Field(default_factory=list)
+    cellier_alertes: list[dict[str, Any]] = Field(default_factory=list)
+    energie_anomalies: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ═══════════════════════════════════════════════════════════

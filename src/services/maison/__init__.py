@@ -87,12 +87,30 @@ _SERVICES = {
     "VisualisationService": "visualisation_service",
     "get_visualisation_service": "visualisation_service",
     "obtenir_service_visualisation": "visualisation_service",
+    # Contexte Maison service (briefing quotidien)
+    "ContexteMaisonService": "contexte_maison_service",
+    "get_contexte_maison_service": "contexte_maison_service",
+    "obtenir_service_contexte_maison": "contexte_maison_service",
+    # Catalogue Entretien service (sync JSON → tâches DB)
+    "CatalogueEntretienService": "catalogue_entretien_service",
+    "get_catalogue_entretien_service": "catalogue_entretien_service",
+    "obtenir_service_catalogue_entretien": "catalogue_entretien_service",
+    # Notifications Maison service (rappels push)
+    "NotificationsMaisonService": "notifications_maison",
+    "get_notifications_maison_service": "notifications_maison",
+    "obtenir_service_notifications_maison": "notifications_maison",
+    # Fiche Tâche service (catalogue + IA fallback)
+    "FicheTacheService": "fiche_tache_service",
+    "get_fiche_tache_service": "fiche_tache_service",
+    "obtenir_service_fiche_tache": "fiche_tache_service",
 }
 
 _SCHEMAS = {
     # Schemas Pydantic
     "BriefingMaison": "schemas",
     "AlerteMaison": "schemas",
+    "TacheJour": "schemas",
+    "MeteoResume": "schemas",
     "ConseilJardin": "schemas",
     "PlanArrosage": "schemas",
     "RoutineCreate": "schemas",

@@ -45,3 +45,30 @@ export async function creerSessionBatch(
 export async function supprimerSessionBatch(id: number): Promise<void> {
   await clientApi.delete(`/batch-cooking/${id}`);
 }
+
+export interface GenererSessionDepuisPlanningOptions {
+  planning_id: number;
+  date_session: string;
+  nom?: string;
+  avec_jules?: boolean;
+}
+
+export interface GenererSessionDepuisPlanningResult {
+  session_id: number;
+  nom: string;
+  nb_recettes: number;
+  recettes: { id: number; nom: string; portions: number }[];
+  duree_estimee: number;
+  robots_utilises: string[];
+}
+
+/** Générer une session batch depuis un planning */
+export async function genererSessionDepuisPlanning(
+  options: GenererSessionDepuisPlanningOptions
+): Promise<GenererSessionDepuisPlanningResult> {
+  const { data } = await clientApi.post<GenererSessionDepuisPlanningResult>(
+    "/batch-cooking/generer-depuis-planning",
+    options
+  );
+  return data;
+}

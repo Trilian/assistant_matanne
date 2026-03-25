@@ -57,8 +57,7 @@ import {
   utiliserMutation,
   utiliserInvalidation,
 } from "@/crochets/utiliser-api";
-import { listerActivites, creerActivite, obtenirSuggestionsActivites } from "@/bibliotheque/api/famille";
-import type { SuggestionActivite } from "@/bibliotheque/api/famille";
+import { listerActivites, creerActivite, obtenirSuggestionsActivitesAuto } from "@/bibliotheque/api/famille";
 import type { Activite } from "@/types/famille";
 import { toast } from "sonner";
 
@@ -77,6 +76,9 @@ export default function PageActivites() {
   const [typeFiltre, setTypeFiltre] = useState("tous");
   const [dialogueCreation, setDialogueCreation] = useState(false);
   const [dialogueSuggestions, setDialogueSuggestions] = useState(false);
+  const [suggestionsIA, setSuggestionsIA] = useState<string>("");
+  const [typePrefere, setTypePrefere] = useState<string>("mixte");
+  const [enChargementIA, setEnChargementIA] = useState(false);
 
   // Form state
   const [titre, setTitre] = useState("");
@@ -111,6 +113,25 @@ export default function PageActivites() {
     }
   );
 
+  const genererSuggestionsIA = async () => {
+    setEnChargementIA(true);
+    try {
+      const resultat = await obtenirSuggestionsActivitesAuto({
+        type_prefere: typePrefere === "mixte" ? undefined : typePrefere,
+      });
+      setSuggestionsIA(resultat.suggestions);
+      toast.success(
+        resultat.journee_libre
+          ? "Journée libre détectée ! Voici les suggestions"
+          : "Suggestions générées avec météo réelle"
+      );
+    } catch {
+      toast.error("Erreur lors de la génération des suggestions");
+    } finally {
+      setEnChargementIA(false);
+    }
+  };
+
   const activitesAVenir = (activites ?? []).filter((a) => !a.est_terminee);
   const activitesPassees = (activites ?? []).filter((a) => a.est_terminee);
 
@@ -126,8 +147,16 @@ export default function PageActivites() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setDialogueSuggestions(true)}>
-            <Sparkles className="mr-1 h-4 w-4" />
+          <Button
+            variant="outline"
+            onClick={() => setDialogueSuggestions(true)}
+            disabled={enChargementIA}
+          >
+            {enChargementIA ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="mr-1 h-4 w-4" />
+            )}
             Suggestions IA
           </Button>
           <Button onClick={() => setDialogueCreation(true)}>
@@ -310,11 +339,74 @@ export default function PageActivites() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialogue suggestions IA */}
-      <DialogueSuggestionsIA
-        ouvert={dialogueSuggestions}
-        onOpenChange={setDialogueSuggestions}
-      />
+      {/* Dialogue suggestions IA (simplifié — Phase O) */}
+      <Dialog open={dialogueSuggestions} onOpenChange={setDialogueSuggestions}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Suggestions d'activités IA
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              L'IA génère des suggestions avec la météo réelle et l'âge de Jules automatiquement.
+            </p>
+
+            {/* Filtre type simple */}
+            <div className="space-y-2">
+              <Label>Type d'activité</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "mixte", label: "Tout", icone: Cloud },
+                  { value: "interieur", label: "Intérieur", icone: Home },
+                  { value: "exterieur", label: "Extérieur", icone: TreePine },
+                ].map(({ value, label, icone: Icone }) => (
+                  <Button
+                    key={value}
+                    variant={typePrefere === value ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setTypePrefere(value)}
+                  >
+                    <Icone className="mr-1 h-4 w-4" />
+                    {label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Bouton générer */}
+            <Button
+              onClick={genererSuggestionsIA}
+              disabled={enChargementIA}
+              className="w-full"
+            >
+              {enChargementIA ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Génération en cours...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Générer des suggestions
+                </>
+              )}
+            </Button>
+
+            {/* Résultats */}
+            {suggestionsIA && (
+              <Card className="mt-4">
+                <CardContent className="pt-5">
+                  <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
+                    {suggestionsIA}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

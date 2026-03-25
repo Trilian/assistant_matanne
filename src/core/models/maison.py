@@ -126,6 +126,8 @@ class Routine(CreeLeMixin, Base):
     categorie: Mapped[str | None] = mapped_column(String(100), index=True)
     frequence: Mapped[str] = mapped_column(String(50), nullable=False, default="quotidien")
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    moment_journee: Mapped[str] = mapped_column(String(20), default="flexible", server_default="flexible")
+    jour_semaine: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Relations
     tasks: Mapped[list["TacheRoutine"]] = relationship(

@@ -345,10 +345,11 @@ class TestSuggestionsPlanning:
                 "/api/v1/suggestions/planning",
                 params={"jours": 5, "personnes": 2},
             )
-            mock_planning_service.generer_planning_ia.assert_called_once_with(
-                nombre_jours=5,
-                nombre_personnes=2,
-            )
+            # Le service reçoit semaine_debut (lundi courant) + preferences
+            call_args = mock_planning_service.generer_planning_ia.call_args
+            assert call_args.kwargs["preferences"]["nombre_jours"] == 5
+            assert call_args.kwargs["preferences"]["nombre_personnes"] == 2
+            assert "semaine_debut" in call_args.kwargs
 
     def test_service_exception_handled(self, client):
         """Les exceptions du service planning sont gérées proprement."""

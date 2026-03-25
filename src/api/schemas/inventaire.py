@@ -119,4 +119,9 @@ class InventaireItemResponse(BaseModel):
     unite: str | None = None
     categorie: str | None = None
 
+    # Données OpenFoodFacts (si code_barres enrichi)
+    nutriscore: str | None = None
+    ecoscore: str | None = None
+    nova_group: int | None = None
+
     model_config = {"from_attributes": True}

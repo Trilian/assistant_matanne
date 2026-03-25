@@ -3,7 +3,13 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";
-import type { PlanningSemaine, RepasPlanning, CreerRepasPlanningDTO } from "@/types/planning";
+import type {
+  PlanningSemaine,
+  RepasPlanning,
+  CreerRepasPlanningDTO,
+  SuggestionRecette,
+  GenererPlanningParams,
+} from "@/types/planning";
 
 /** Obtenir le planning de la semaine courante ou spécifiée */
 export async function obtenirPlanningSemaine(dateDebut?: string): Promise<PlanningSemaine> {
@@ -25,12 +31,21 @@ export async function supprimerRepas(id: number): Promise<void> {
 
 /** Générer un planning IA pour la semaine */
 export async function genererPlanningSemaine(
-  preferences?: string
+  params?: GenererPlanningParams
 ): Promise<PlanningSemaine> {
-  const { data } = await clientApi.post<PlanningSemaine>("/planning/generer", {
-    preferences,
-  });
+  const { data } = await clientApi.post<PlanningSemaine>("/planning/generer", params ?? {});
   return data;
+}
+
+/** Obtenir des suggestions rapides de recettes pour un créneau */
+export async function obtenirSuggestionsRapides(
+  typeRepas = "diner",
+  nombre = 6
+): Promise<SuggestionRecette[]> {
+  const { data } = await clientApi.get<{ suggestions: SuggestionRecette[] }>(
+    `/planning/suggestions-rapides?type_repas=${typeRepas}&nombre=${nombre}`
+  );
+  return data.suggestions;
 }
 
 /** Exporter le planning en iCalendar (.ics) et déclencher le téléchargement */

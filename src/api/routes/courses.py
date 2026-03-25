@@ -36,6 +36,8 @@ from src.api.schemas import (
     CourseListCreate,
     CheckoutCoursesResponse,
     CheckoutCoursesRequest,
+    GenererCoursesRequest,
+    GenererCoursesResponse,
     ListeCoursesResponse,
     ListeCoursesResume,
     MessageResponse,
@@ -730,6 +732,194 @@ async def scan_barcode_checkout(
     result = await executer_async(_scan_checkout)
     _store_idempotency(payload.idempotency_key, result)
     return result
+
+
+@router.post(
+    "/generer-depuis-planning",
+    response_model=GenererCoursesResponse,
+    status_code=201,
+    responses=REPONSES_CRUD_CREATION,
+)
+@gerer_exception_api
+async def generer_depuis_planning(
+    data: GenererCoursesRequest,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Génère une liste de courses depuis le planning de la semaine.
+
+    1. Récupère tous les Repas de la semaine avec recette_id
+    2. Extrait et agrège les ingrédients via RecetteIngredient
+    3. Soustrait le stock existant si demandé
+    4. Crée une ListeCourses avec les ArticleCourses
+    """
+    from datetime import timedelta
+
+    from sqlalchemy import func
+
+    from src.core.models import (
+        ArticleCourses,
+        ArticleInventaire,
+        Ingredient,
+        ListeCourses,
+        Recette,
+        RecetteIngredient,
+    )
+    from src.core.models.planning import Repas
+    from src.services.cuisine.planning.agregation import (
+        aggregate_ingredients,
+        sort_ingredients_by_rayon,
+    )
+
+    semaine_debut = data.semaine_debut
+    semaine_fin = semaine_debut + timedelta(days=6)
+
+    def _generate():
+        with executer_avec_session() as session:
+            # 1) Récupérer tous les repas de la semaine avec une recette liée
+            repas_list = (
+                session.query(Repas)
+                .filter(
+                    Repas.date_repas >= semaine_debut,
+                    Repas.date_repas <= semaine_fin,
+                    Repas.recette_id.isnot(None),
+                )
+                .all()
+            )
+
+            if not repas_list:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Aucun repas avec recette trouvé pour cette semaine",
+                )
+
+            # Collecter tous les recette_ids (plat + entrée + desserts)
+            recette_ids: set[int] = set()
+            for r in repas_list:
+                if r.recette_id:
+                    recette_ids.add(r.recette_id)
+                if r.entree_recette_id:
+                    recette_ids.add(r.entree_recette_id)
+                if r.dessert_recette_id:
+                    recette_ids.add(r.dessert_recette_id)
+                if r.dessert_jules_recette_id:
+                    recette_ids.add(r.dessert_jules_recette_id)
+
+            # 2) Extraire les ingrédients de toutes les recettes
+            rows = (
+                session.query(
+                    Ingredient.nom,
+                    func.sum(RecetteIngredient.quantite).label("total_qty"),
+                    RecetteIngredient.unite,
+                    Ingredient.categorie,
+                )
+                .join(RecetteIngredient, RecetteIngredient.ingredient_id == Ingredient.id)
+                .filter(RecetteIngredient.recette_id.in_(recette_ids))
+                .group_by(Ingredient.nom, RecetteIngredient.unite, Ingredient.categorie)
+                .all()
+            )
+
+            ingredients_list = [
+                {
+                    "nom": row.nom,
+                    "quantite": float(row.total_qty or 1),
+                    "unite": row.unite or "",
+                    "rayon": row.categorie or "Autre",
+                }
+                for row in rows
+            ]
+
+            # 3) Agréger les ingrédients identiques
+            aggregated = aggregate_ingredients(ingredients_list)
+            sorted_ings = sort_ingredients_by_rayon(aggregated)
+
+            # 4) Soustraire le stock
+            articles_en_stock = 0
+            articles_a_acheter = []
+
+            for ing in sorted_ings:
+                nom = ing["nom"]
+                besoin = ing["quantite"]
+                en_stock = 0.0
+
+                if data.soustraire_stock:
+                    inv = (
+                        session.query(ArticleInventaire)
+                        .join(Ingredient, Ingredient.id == ArticleInventaire.ingredient_id)
+                        .filter(func.lower(Ingredient.nom) == func.lower(nom))
+                        .first()
+                    )
+                    if inv and inv.quantite:
+                        en_stock = float(inv.quantite)
+
+                if en_stock >= besoin:
+                    articles_en_stock += 1
+                    continue
+
+                quantite_a_acheter = besoin - en_stock
+                articles_a_acheter.append({
+                    **ing,
+                    "quantite": quantite_a_acheter,
+                    "en_stock": en_stock,
+                })
+
+            # 5) Créer la ListeCourses + ArticleCourses
+            liste = ListeCourses(nom=data.nom_liste, archivee=False)
+            session.add(liste)
+            session.flush()
+
+            for art in articles_a_acheter:
+                ingredient = (
+                    session.query(Ingredient)
+                    .filter(func.lower(Ingredient.nom) == func.lower(art["nom"]))
+                    .first()
+                )
+                if not ingredient:
+                    ingredient = Ingredient(
+                        nom=art["nom"],
+                        categorie=art.get("rayon", "Autre"),
+                        unite=art.get("unite", "pcs") or "pcs",
+                    )
+                    session.add(ingredient)
+                    session.flush()
+
+                session.add(
+                    ArticleCourses(
+                        liste_id=liste.id,
+                        ingredient_id=ingredient.id,
+                        quantite_necessaire=art["quantite"],
+                        rayon_magasin=art.get("rayon", "Autre"),
+                        priorite="moyenne",
+                        suggere_par_ia=False,
+                    )
+                )
+
+            session.commit()
+
+            # Compter par rayon
+            par_rayon: dict[str, int] = {}
+            for art in articles_a_acheter:
+                rayon = art.get("rayon", "Autre")
+                par_rayon[rayon] = par_rayon.get(rayon, 0) + 1
+
+            return {
+                "liste_id": liste.id,
+                "nom": liste.nom,
+                "total_articles": len(articles_a_acheter),
+                "articles_en_stock": articles_en_stock,
+                "articles": [
+                    {
+                        "nom": a["nom"],
+                        "quantite": a["quantite"],
+                        "unite": a.get("unite", ""),
+                        "rayon": a.get("rayon", "Autre"),
+                        "en_stock": a.get("en_stock", 0),
+                    }
+                    for a in articles_a_acheter
+                ],
+                "par_rayon": par_rayon,
+            }
+
+    return await executer_async(_generate)
 
 
 @router.delete("/{liste_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)

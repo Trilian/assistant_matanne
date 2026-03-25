@@ -28,13 +28,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/composants/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/composants/ui/sheet";
 import { Skeleton } from "@/composants/ui/skeleton";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, TrendingUp, AlertTriangle } from "lucide-react";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
-import { listerParis, obtenirStatsParis, listerMatchs, creerPari, supprimerPari } from "@/bibliotheque/api/jeux";
+import {
+  listerParis,
+  obtenirStatsParis,
+  listerMatchs,
+  creerPari,
+  supprimerPari,
+  obtenirValueBets,
+  obtenirSeriesActives,
+  obtenirPredictionMatch,
+  obtenirAnalyseIA,
+  verifierMise,
+  enregistrerMise,
+} from "@/bibliotheque/api/jeux";
 import dynamic from "next/dynamic";
-import type { PariSportif, StatsParis, MatchJeu } from "@/types/jeux";
+import type { PariSportif, StatsParis, MatchJeu, ValueBet, SerieJeux, PredictionMatch, AnalyseIA } from "@/types/jeux";
 import { toast } from "sonner";
 
 const GraphiqueROI = dynamic(
@@ -46,16 +64,135 @@ const FILTRES_STATUT = ["tous", "gagne", "perdu", "en_cours", "annule"] as const
 
 function couleurStatut(statut: string) {
   switch (statut) {
-    case "gagne":
-      return "default";
-    case "perdu":
-      return "destructive";
-    case "en_cours":
-      return "secondary";
-    default:
-      return "outline";
+    case "gagne": return "default";
+    case "perdu": return "destructive";
+    case "en_cours": return "secondary";
+    default: return "outline";
   }
 }
+
+function couleurConfiance(confiance: number) {
+  if (confiance >= 0.7) return "text-green-600";
+  if (confiance >= 0.5) return "text-yellow-600";
+  return "text-red-600";
+}
+
+function BadgePrediction({ prediction, confiance }: { prediction: string; confiance: number }) {
+  const emoji = prediction.toLowerCase().includes("dom") ? "🏠" :
+                prediction.toLowerCase().includes("ext") ? "✈️" : "🤝";
+  return (
+    <span className={`text-xs font-medium ${couleurConfiance(confiance)}`}>
+      {emoji} {prediction} {(confiance * 100).toFixed(0)}%
+    </span>
+  );
+}
+
+// ─── Drawer détail match ─────────────────────────────────
+
+function DrawerMatchDetail({
+  matchId,
+  open,
+  onClose,
+  onParier,
+}: {
+  matchId: number | null;
+  open: boolean;
+  onClose: () => void;
+  onParier: (matchId: number, prediction: string, cote: number) => void;
+}) {
+  const { data: pred, isLoading: chPred } = utiliserRequete<PredictionMatch>(
+    ["jeux", "prediction", matchId],
+    () => obtenirPredictionMatch(matchId!),
+    { enabled: !!matchId }
+  );
+
+  const { data: analyseIA, isLoading: chIA } = utiliserRequete<AnalyseIA>(
+    ["jeux", "analyse-ia-match", matchId],
+    () => obtenirAnalyseIA("paris", { match_id: matchId }),
+    { enabled: !!matchId }
+  );
+
+  return (
+    <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
+      <SheetContent className="overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>
+            {pred ? `${pred.equipe_domicile ?? "?"} vs ${pred.equipe_exterieur ?? "?"}` : "Détail match"}
+          </SheetTitle>
+        </SheetHeader>
+
+        {chPred ? (
+          <div className="space-y-3 mt-4">
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-3/4" />
+          </div>
+        ) : pred ? (
+          <div className="space-y-4 mt-4">
+            {/* Probas */}
+            <div>
+              <p className="text-sm font-semibold mb-2">Probabilités estimées</p>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                {Object.entries(pred.probas).map(([k, v]) => (
+                  <div key={k} className="rounded-lg bg-muted p-2">
+                    <p className="text-lg font-bold">{(v * 100).toFixed(0)}%</p>
+                    <p className="text-xs text-muted-foreground capitalize">{k}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Confiance */}
+            <div className="flex items-center gap-2">
+              <Badge variant={pred.confiance >= 0.6 ? "default" : "secondary"}>
+                Confiance : {(pred.confiance * 100).toFixed(0)}%
+              </Badge>
+              <span className="text-xs text-muted-foreground">{pred.niveau_confiance}</span>
+            </div>
+
+            {/* Raisons */}
+            {pred.raisons.length > 0 && (
+              <div>
+                <p className="text-sm font-semibold mb-1">Raisons</p>
+                <ul className="text-sm list-disc pl-5 space-y-1">
+                  {pred.raisons.map((r, i) => <li key={i}>{r}</li>)}
+                </ul>
+              </div>
+            )}
+
+            {/* Conseil */}
+            <p className="text-sm bg-muted p-3 rounded-lg">{pred.conseil}</p>
+
+            {/* Bouton parier */}
+            <Button className="w-full" onClick={() => onParier(pred.match_id, pred.resultat, 0)}>
+              📝 Parier sur ce match
+            </Button>
+          </div>
+        ) : null}
+
+        {/* Analyse IA */}
+        {chIA ? (
+          <Skeleton className="h-20 mt-4" />
+        ) : analyseIA ? (
+          <div className="mt-4 space-y-2 border-t pt-4">
+            <p className="text-sm font-semibold">🤖 Analyse IA</p>
+            <p className="text-sm">{analyseIA.resume}</p>
+            {analyseIA.recommandations.length > 0 && (
+              <ul className="text-sm list-disc pl-5">
+                {analyseIA.recommandations.map((r, i) => <li key={i}>{r}</li>)}
+              </ul>
+            )}
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" />
+              {analyseIA.avertissement}
+            </p>
+          </div>
+        ) : null}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+// ─── Page principale ─────────────────────────────────────
 
 export default function ParisPage() {
   const [filtreStatut, setFiltreStatut] = useState("tous");
@@ -65,24 +202,42 @@ export default function ParisPage() {
   const [prediction, setPrediction] = useState("");
   const [cote, setCote] = useState("");
   const [mise, setMise] = useState("");
+  const [drawerMatch, setDrawerMatch] = useState<number | null>(null);
+  const [showSeries, setShowSeries] = useState(false);
 
   const queryClient = useQueryClient();
 
+  // ─── Value Bets ────────────────────────────
+  const { data: valueBets = [], isLoading: chVB } = utiliserRequete<ValueBet[]>(
+    ["jeux", "value-bets"],
+    () => obtenirValueBets(5.0)
+  );
+
+  // ─── Séries actives ────────────────────────
+  const { data: series = [] } = utiliserRequete<SerieJeux[]>(
+    ["jeux", "series-paris"],
+    () => obtenirSeriesActives("paris", 2.0)
+  );
+
+  // ─── Mutations ─────────────────────────────
   const mutationCreer = utiliserMutation(
-    (data: { match_id: number; type_pari: string; prediction: string; cote: number; mise: number }) =>
-      creerPari(data),
+    async (data: { match_id: number; type_pari: string; prediction: string; cote: number; mise: number }) => {
+      // Vérifier budget avant de parier
+      const check = await verifierMise(data.mise);
+      if (!check.autorise) {
+        throw new Error(check.raison ?? "Budget mensuel atteint");
+      }
+      const result = await creerPari(data);
+      await enregistrerMise(data.mise, "paris");
+      return result;
+    },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["jeux", "paris"] });
+        queryClient.invalidateQueries({ queryKey: ["jeux"] });
         setDialogOuvert(false);
-        setMatchId("");
-        setTypePari("1X2");
-        setPrediction("");
-        setCote("");
-        setMise("");
+        resetForm();
         toast.success("Pari ajouté");
       },
-      onError: () => toast.error("Erreur lors de l'ajout"),
     }
   );
 
@@ -93,9 +248,24 @@ export default function ParisPage() {
         queryClient.invalidateQueries({ queryKey: ["jeux", "paris"] });
         toast.success("Pari supprimé");
       },
-      onError: () => toast.error("Erreur lors de la suppression"),
     }
   );
+
+  function resetForm() {
+    setMatchId("");
+    setTypePari("1X2");
+    setPrediction("");
+    setCote("");
+    setMise("");
+  }
+
+  function preRemplirPari(mId: number, pred: string, c: number) {
+    setMatchId(String(mId));
+    setPrediction(pred);
+    if (c > 0) setCote(String(c));
+    setDialogOuvert(true);
+    setDrawerMatch(null);
+  }
 
   const { data: stats, isLoading: chargementStats } = utiliserRequete<StatsParis>(
     ["jeux", "paris", "stats"],
@@ -120,14 +290,10 @@ export default function ParisPage() {
         <h1 className="text-3xl font-bold">🏟️ Paris Sportifs</h1>
         <Dialog open={dialogOuvert} onOpenChange={setDialogOuvert}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-1" /> Nouveau pari
-            </Button>
+            <Button><Plus className="h-4 w-4 mr-1" /> Nouveau pari</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Nouveau pari</DialogTitle>
-            </DialogHeader>
+            <DialogHeader><DialogTitle>Nouveau pari</DialogTitle></DialogHeader>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -145,9 +311,7 @@ export default function ParisPage() {
               <div>
                 <Label>Match</Label>
                 <Select value={matchId} onValueChange={setMatchId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un match" />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Sélectionner un match" /></SelectTrigger>
                   <SelectContent>
                     {matchs.map((m) => (
                       <SelectItem key={m.id} value={String(m.id)}>
@@ -160,9 +324,7 @@ export default function ParisPage() {
               <div>
                 <Label>Type de pari</Label>
                 <Select value={typePari} onValueChange={setTypePari}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="1X2">1X2</SelectItem>
                     <SelectItem value="over_under">Over/Under</SelectItem>
@@ -178,14 +340,8 @@ export default function ParisPage() {
                 <Input value={prediction} onChange={(e) => setPrediction(e.target.value)} required placeholder="ex: Victoire domicile" />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Cote</Label>
-                  <Input type="number" step="0.01" value={cote} onChange={(e) => setCote(e.target.value)} required />
-                </div>
-                <div>
-                  <Label>Mise (€)</Label>
-                  <Input type="number" step="0.01" value={mise} onChange={(e) => setMise(e.target.value)} required />
-                </div>
+                <div><Label>Cote</Label><Input type="number" step="0.01" value={cote} onChange={(e) => setCote(e.target.value)} required /></div>
+                <div><Label>Mise (€)</Label><Input type="number" step="0.01" value={mise} onChange={(e) => setMise(e.target.value)} required /></div>
               </div>
               <Button type="submit" className="w-full" disabled={mutationCreer.isPending}>
                 {mutationCreer.isPending ? "Enregistrement…" : "Enregistrer le pari"}
@@ -195,104 +351,107 @@ export default function ParisPage() {
         </Dialog>
       </div>
 
+      {/* Value Bets */}
+      {chVB ? (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28" />)}
+        </div>
+      ) : valueBets.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-green-600" /> Value Bets
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {valueBets.map((vb) => (
+              <Card key={vb.match_id} className="hover:bg-accent/50 transition-colors">
+                <CardContent className="pt-4 space-y-2">
+                  <p className="font-medium text-sm truncate">
+                    {vb.equipe_domicile} vs {vb.equipe_exterieur}
+                  </p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="default">💰 +{vb.edge_pct.toFixed(1)}%</Badge>
+                    <span className="text-xs text-muted-foreground">cote {vb.cote_bookmaker.toFixed(2)}</span>
+                    <BadgePrediction prediction={vb.prediction} confiance={vb.proba_estimee} />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setDrawerMatch(vb.match_id)}>
+                      Détail
+                    </Button>
+                    <Button size="sm" onClick={() => preRemplirPari(vb.match_id, vb.prediction, vb.cote_bookmaker)}>
+                      Parier
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Statistiques */}
       {chargementStats ? (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 rounded-xl" />
-          ))}
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
       ) : stats ? (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">
-                Total paris
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{stats.total_paris}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">
-                Mises totales
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{stats.total_mise.toFixed(2)} €</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">
-                Bénéfice
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p
-                className={`text-2xl font-bold ${
-                  stats.benefice >= 0 ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {stats.benefice >= 0 ? "+" : ""}
-                {stats.benefice.toFixed(2)} €
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground">
-                Taux réussite
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">
-                {(stats.taux_reussite * 100).toFixed(1)}%
-              </p>
-            </CardContent>
-          </Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Total paris</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{stats.total_paris}</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Mises totales</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{stats.total_mise.toFixed(2)} €</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Bénéfice</CardTitle></CardHeader><CardContent><p className={`text-2xl font-bold ${stats.benefice >= 0 ? "text-green-600" : "text-red-600"}`}>{stats.benefice >= 0 ? "+" : ""}{stats.benefice.toFixed(2)} €</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Taux réussite</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{(stats.taux_reussite * 100).toFixed(1)}%</p></CardContent></Card>
         </div>
       ) : null}
 
-      {/* Graphique ROI cumulé */}
+      {/* Graphique ROI */}
       {paris.length >= 2 && (
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Évolution gains/pertes</CardTitle>
-          </CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-base">Évolution gains/pertes</CardTitle></CardHeader>
           <CardContent>
             <GraphiqueROI
               donnees={paris
                 .filter((p) => p.statut === "gagne" || p.statut === "perdu")
-                .reduce<{ index: number; label: string; cumul: number }[]>(
-                  (acc, p, i) => {
-                    const prev = acc.length > 0 ? acc[acc.length - 1].cumul : 0;
-                    const gain = p.gain != null ? p.gain - p.mise : -p.mise;
-                    acc.push({
-                      index: i + 1,
-                      label: `#${i + 1}`,
-                      cumul: Math.round((prev + gain) * 100) / 100,
-                    });
-                    return acc;
-                  },
-                  []
-                )}
+                .reduce<{ index: number; label: string; cumul: number }[]>((acc, p, i) => {
+                  const prev = acc.length > 0 ? acc[acc.length - 1].cumul : 0;
+                  const gain = p.gain != null ? p.gain - p.mise : -p.mise;
+                  acc.push({ index: i + 1, label: `#${i + 1}`, cumul: Math.round((prev + gain) * 100) / 100 });
+                  return acc;
+                }, [])}
             />
           </CardContent>
         </Card>
       )}
 
+      {/* Séries actives */}
+      {series.length > 0 && (
+        <div>
+          <Button variant="ghost" size="sm" onClick={() => setShowSeries(!showSeries)} className="mb-2">
+            🔥 Séries actives ({series.length}) {showSeries ? "▲" : "▼"}
+          </Button>
+          {showSeries && (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {series.sort((a, b) => b.value - a.value).map((s) => (
+                <Card key={s.id}>
+                  <CardContent className="pt-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{s.marche}</p>
+                      <p className="text-xs text-muted-foreground">{s.championnat ?? s.type_jeu}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">Série {s.serie_actuelle}</Badge>
+                      <span className="text-sm font-bold">{s.value.toFixed(1)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Filtres */}
       <div className="flex flex-wrap gap-2">
         {FILTRES_STATUT.map((s) => (
-          <Button
-            key={s}
-            variant={filtreStatut === s ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFiltreStatut(s)}
-          >
+          <Button key={s} variant={filtreStatut === s ? "default" : "outline"} size="sm" onClick={() => setFiltreStatut(s)}>
             {s === "tous" ? "Tous" : s.replace("_", " ")}
           </Button>
         ))}
@@ -300,20 +459,14 @@ export default function ParisPage() {
 
       {/* Tableau des paris */}
       <Card>
-        <CardHeader>
-          <CardTitle>Historique des paris</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>Historique des paris</CardTitle></CardHeader>
         <CardContent>
           {chargementParis ? (
             <div className="space-y-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-10 w-full" />
-              ))}
+              {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
           ) : paris.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">
-              Aucun pari trouvé
-            </p>
+            <p className="text-center py-8 text-muted-foreground">Aucun pari trouvé</p>
           ) : (
             <Table>
               <TableHeader>
@@ -332,30 +485,22 @@ export default function ParisPage() {
                 {paris.map((p) => {
                   const match = p.match_id ? matchParId.get(p.match_id) : undefined;
                   return (
-                    <TableRow key={p.id}>
+                    <TableRow key={p.id} className="cursor-pointer" onClick={() => p.match_id && setDrawerMatch(p.match_id)}>
                       <TableCell className="font-medium">
-                        {match
-                          ? `${match.equipe_domicile ?? "?"} vs ${match.equipe_exterieur ?? "?"}`
-                          : `#${p.match_id ?? "-"}`}
+                        {match ? `${match.equipe_domicile ?? "?"} vs ${match.equipe_exterieur ?? "?"}` : `#${p.match_id ?? "-"}`}
                       </TableCell>
                       <TableCell>{p.type_pari}</TableCell>
                       <TableCell>{p.prediction ?? "-"}</TableCell>
                       <TableCell className="text-right">{p.cote.toFixed(2)}</TableCell>
                       <TableCell className="text-right">{p.mise.toFixed(2)} €</TableCell>
-                      <TableCell className="text-right">
-                        {p.gain != null ? `${p.gain.toFixed(2)} €` : "-"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={couleurStatut(p.statut)}>
-                          {p.statut}
-                        </Badge>
-                      </TableCell>
+                      <TableCell className="text-right">{p.gain != null ? `${p.gain.toFixed(2)} €` : "-"}</TableCell>
+                      <TableCell><Badge variant={couleurStatut(p.statut)}>{p.statut}</Badge></TableCell>
                       <TableCell>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-destructive"
-                          onClick={() => mutationSupprimer.mutate(p.id)}
+                          onClick={(e) => { e.stopPropagation(); mutationSupprimer.mutate(p.id); }}
                           aria-label="Supprimer le pari"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -369,6 +514,14 @@ export default function ParisPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Drawer détail match */}
+      <DrawerMatchDetail
+        matchId={drawerMatch}
+        open={drawerMatch !== null}
+        onClose={() => setDrawerMatch(null)}
+        onParier={preRemplirPari}
+      />
     </div>
   );
 }
