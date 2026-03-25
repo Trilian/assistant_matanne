@@ -192,10 +192,10 @@ export default function PageGaranties() {
                     >
                       {g.statut}
                     </Badge>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(g)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(g)} aria-label="Modifier la garantie">
                       <Pencil className="h-3 w-3" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(g.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(g.id)} aria-label="Supprimer la garantie">
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>

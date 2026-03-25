@@ -356,6 +356,7 @@ export default function ParisPage() {
                           size="icon"
                           className="h-7 w-7 text-destructive"
                           onClick={() => mutationSupprimer.mutate(p.id)}
+                          aria-label="Supprimer le pari"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

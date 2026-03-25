@@ -278,6 +278,7 @@ export function FormulaireRecette({ recetteExistante }: PropsFormulaireRecette) 
                     size="icon"
                     onClick={() => fields.length > 1 && remove(index)}
                     disabled={fields.length <= 1}
+                    aria-label="Retirer l'ingrédient"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

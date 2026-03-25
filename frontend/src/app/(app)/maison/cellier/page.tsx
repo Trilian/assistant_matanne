@@ -212,10 +212,10 @@ export default function PageCellier() {
                         {article.categorie}
                       </Badge>
                     )}
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(article)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(article)} aria-label="Modifier l'article">
                       <Pencil className="h-3 w-3" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(article.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(article.id)} aria-label="Supprimer l'article">
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>

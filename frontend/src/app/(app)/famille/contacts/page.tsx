@@ -297,6 +297,7 @@ export default function PageContacts() {
                     size="icon"
                     className="h-8 w-8"
                     onClick={() => ouvrir(contact)}
+                    aria-label="Modifier le contact"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
@@ -305,6 +306,7 @@ export default function PageContacts() {
                     size="icon"
                     className="h-8 w-8 text-destructive"
                     onClick={() => mutSupprimer.mutate(contact.id)}
+                    aria-label="Supprimer le contact"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>

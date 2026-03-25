@@ -14,6 +14,18 @@ import {
   Loader2,
   Check,
   Filter,
+  Sparkles,
+  CloudRain,
+  Sun,
+  Cloud,
+  Home,
+  TreePine,
+  Euro,
+  Timer,
+  Dumbbell,
+  Puzzle,
+  Palette,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
@@ -45,7 +57,8 @@ import {
   utiliserMutation,
   utiliserInvalidation,
 } from "@/crochets/utiliser-api";
-import { listerActivites, creerActivite } from "@/bibliotheque/api/famille";
+import { listerActivites, creerActivite, obtenirSuggestionsActivites } from "@/bibliotheque/api/famille";
+import type { SuggestionActivite } from "@/bibliotheque/api/famille";
 import type { Activite } from "@/types/famille";
 import { toast } from "sonner";
 
@@ -63,6 +76,7 @@ const TYPES_ACTIVITE = [
 export default function PageActivites() {
   const [typeFiltre, setTypeFiltre] = useState("tous");
   const [dialogueCreation, setDialogueCreation] = useState(false);
+  const [dialogueSuggestions, setDialogueSuggestions] = useState(false);
 
   // Form state
   const [titre, setTitre] = useState("");
@@ -111,10 +125,16 @@ export default function PageActivites() {
             Activités familiales et sorties
           </p>
         </div>
-        <Button onClick={() => setDialogueCreation(true)}>
-          <Plus className="mr-1 h-4 w-4" />
-          Nouvelle activité
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setDialogueSuggestions(true)}>
+            <Sparkles className="mr-1 h-4 w-4" />
+            Suggestions IA
+          </Button>
+          <Button onClick={() => setDialogueCreation(true)}>
+            <Plus className="mr-1 h-4 w-4" />
+            Nouvelle activité
+          </Button>
+        </div>
       </div>
 
       {/* Filtre type */}
@@ -289,6 +309,12 @@ export default function PageActivites() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Dialogue suggestions IA */}
+      <DialogueSuggestionsIA
+        ouvert={dialogueSuggestions}
+        onOpenChange={setDialogueSuggestions}
+      />
     </div>
   );
 }
@@ -341,6 +367,247 @@ function ActiviteCard({ activite: a }: { activite: Activite }) {
             <Users className="h-3 w-3" />
             {a.participants.length}
           </span>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Dialogue Suggestions IA ──────────────────────────────
+
+const METEO_OPTIONS = [
+  { value: "soleil", label: "Soleil", icone: Sun },
+  { value: "pluie", label: "Pluie", icone: CloudRain },
+  { value: "nuageux", label: "Nuageux", icone: Cloud },
+  { value: "interieur", label: "Intérieur", icone: Home },
+  { value: "exterieur", label: "Extérieur", icone: TreePine },
+] as const;
+
+const PREFERENCES_OPTIONS = [
+  { value: "creatif", label: "Créatif", icone: Palette },
+  { value: "sportif", label: "Sportif", icone: Dumbbell },
+  { value: "educatif", label: "Éducatif", icone: BookOpen },
+  { value: "sensoriel", label: "Sensoriel", icone: Puzzle },
+] as const;
+
+function DialogueSuggestionsIA({
+  ouvert,
+  onOpenChange,
+}: {
+  ouvert: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [ageMois, setAgeMois] = useState("36");
+  const [meteo, setMeteo] = useState("mixte");
+  const [budgetMax, setBudgetMax] = useState("50");
+  const [dureeMin, setDureeMin] = useState("30");
+  const [dureeMax, setDureeMax] = useState("120");
+  const [preferences, setPreferences] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestionActivite[]>([]);
+  const [enChargement, setEnChargement] = useState(false);
+
+  const togglePreference = (pref: string) => {
+    setPreferences((prev) =>
+      prev.includes(pref) ? prev.filter((p) => p !== pref) : [...prev, pref]
+    );
+  };
+
+  const genererSuggestions = async () => {
+    setEnChargement(true);
+    try {
+      const resultat = await obtenirSuggestionsActivites({
+        age_mois: Number(ageMois),
+        meteo,
+        budget_max: Number(budgetMax),
+        duree_min: Number(dureeMin),
+        duree_max: Number(dureeMax),
+        preferences: preferences.length > 0 ? preferences : undefined,
+        nb_suggestions: 5,
+      });
+      setSuggestions(resultat.suggestions);
+      toast.success(`${resultat.total} suggestions générées`);
+    } catch {
+      toast.error("Erreur lors de la génération des suggestions");
+    } finally {
+      setEnChargement(false);
+    }
+  };
+
+  return (
+    <Dialog open={ouvert} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Suggestions d&apos;activités IA
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Paramètres */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="ia-age">Âge de l&apos;enfant (mois)</Label>
+              <Input
+                id="ia-age"
+                type="number"
+                min={0}
+                max={72}
+                value={ageMois}
+                onChange={(e) => setAgeMois(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Budget max (€)</Label>
+              <Input
+                type="number"
+                min={0}
+                max={500}
+                value={budgetMax}
+                onChange={(e) => setBudgetMax(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Durée min (min)</Label>
+              <Input
+                type="number"
+                min={5}
+                max={300}
+                value={dureeMin}
+                onChange={(e) => setDureeMin(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Durée max (min)</Label>
+              <Input
+                type="number"
+                min={10}
+                max={360}
+                value={dureeMax}
+                onChange={(e) => setDureeMax(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Météo */}
+          <div className="space-y-2">
+            <Label>Météo / Lieu</Label>
+            <div className="flex flex-wrap gap-2">
+              {METEO_OPTIONS.map(({ value, label, icone: Icone }) => (
+                <Button
+                  key={value}
+                  variant={meteo === value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setMeteo(value)}
+                >
+                  <Icone className="mr-1 h-4 w-4" />
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Préférences */}
+          <div className="space-y-2">
+            <Label>Préférences</Label>
+            <div className="flex flex-wrap gap-2">
+              {PREFERENCES_OPTIONS.map(({ value, label, icone: Icone }) => (
+                <Button
+                  key={value}
+                  variant={preferences.includes(value) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => togglePreference(value)}
+                >
+                  <Icone className="mr-1 h-4 w-4" />
+                  {label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Bouton générer */}
+          <Button
+            onClick={genererSuggestions}
+            disabled={enChargement}
+            className="w-full"
+          >
+            {enChargement ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Génération en cours...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Générer des suggestions
+              </>
+            )}
+          </Button>
+
+          {/* Résultats */}
+          {suggestions.length > 0 && (
+            <div className="space-y-3 pt-2 border-t">
+              <h3 className="font-semibold">
+                {suggestions.length} activités suggérées
+              </h3>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {suggestions.map((s, i) => (
+                  <SuggestionCard key={i} suggestion={s} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function SuggestionCard({ suggestion: s }: { suggestion: SuggestionActivite }) {
+  const lieuIcone = s.lieu === "interieur" ? Home : s.lieu === "exterieur" ? TreePine : Cloud;
+  const LieuIcone = lieuIcone;
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm">{s.nom}</CardTitle>
+        <CardDescription className="text-xs">{s.description}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <div className="flex flex-wrap gap-2 text-xs">
+          <Badge variant="outline" className="gap-1">
+            <Timer className="h-3 w-3" />
+            {s.duree_minutes} min
+          </Badge>
+          <Badge variant="outline" className="gap-1">
+            <Euro className="h-3 w-3" />
+            {s.budget === 0 ? "Gratuit" : `${s.budget}€`}
+          </Badge>
+          <Badge variant="outline" className="gap-1 capitalize">
+            <LieuIcone className="h-3 w-3" />
+            {s.lieu}
+          </Badge>
+          <Badge variant="outline" className="gap-1 capitalize">
+            <Dumbbell className="h-3 w-3" />
+            {s.niveau_effort}
+          </Badge>
+        </div>
+        {s.competences.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {s.competences.map((c) => (
+              <Badge key={c} variant="secondary" className="text-xs">
+                {c}
+              </Badge>
+            ))}
+          </div>
+        )}
+        {s.materiel.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Matériel: {s.materiel.join(", ")}
+          </p>
         )}
       </CardContent>
     </Card>

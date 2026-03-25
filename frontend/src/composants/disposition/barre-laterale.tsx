@@ -197,6 +197,7 @@ export function BarreLaterale() {
           size="icon"
           className="ml-auto h-8 w-8"
           onClick={basculerSidebar}
+          aria-label={sidebarOuverte ? "Réduire la barre latérale" : "Ouvrir la barre latérale"}
         >
           {sidebarOuverte ? (
             <PanelLeftClose className="h-4 w-4" />
@@ -207,7 +208,7 @@ export function BarreLaterale() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto space-y-1 p-2">
+      <nav aria-label="Navigation principale" className="flex-1 overflow-y-auto space-y-1 p-2">
         {LIENS.map((lien) => {
           const estActif =
             lien.chemin === "/"

@@ -266,6 +266,7 @@ export default function PageRoutines() {
                         variant="ghost"
                         size="icon"
                         onClick={() => retirerEtape(i)}
+                        aria-label="Retirer l'étape"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -326,6 +327,7 @@ function RoutineCard({
             size="icon"
             className="h-7 w-7 shrink-0"
             onClick={onSupprimer}
+            aria-label="Supprimer la routine"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>

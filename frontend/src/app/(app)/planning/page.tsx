@@ -200,6 +200,7 @@ export default function PagePlanning() {
           variant="ghost"
           size="icon"
           onClick={() => setSemaineOffset((o) => o - 1)}
+          aria-label="Semaine précédente"
         >
           <ChevronLeft className="h-5 w-5" />
         </Button>
@@ -229,6 +230,7 @@ export default function PagePlanning() {
           variant="ghost"
           size="icon"
           onClick={() => setSemaineOffset((o) => o + 1)}
+          aria-label="Semaine suivante"
         >
           <ChevronRight className="h-5 w-5" />
         </Button>

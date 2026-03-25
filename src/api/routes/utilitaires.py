@@ -5,9 +5,10 @@ CRUD pour: notes, journal de bord, contacts utiles, liens favoris,
 mots de passe maison, relevés énergie.
 """
 
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
 from src.api.schemas.common import MessageResponse
@@ -35,6 +36,66 @@ from src.api.schemas.utilitaires import (
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/utilitaires", tags=["Utilitaires"])
+
+
+# ═══════════════════════════════════════════════════════════
+# CHAT IA MULTI-CONTEXTE
+# ═══════════════════════════════════════════════════════════
+
+
+class MessageChatRequest(BaseModel):
+    """Requête de message chat."""
+
+    message: str = Field(..., min_length=1, max_length=2000, description="Message de l'utilisateur")
+    contexte: Literal["cuisine", "famille", "maison", "budget", "general"] = Field(
+        default="general", description="Contexte du chat"
+    )
+    historique: list[dict[str, str]] = Field(
+        default_factory=list, description="Messages précédents [{role, contenu}]"
+    )
+
+
+@router.post("/chat/message")
+@gerer_exception_api
+async def envoyer_message_chat(
+    payload: MessageChatRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Envoie un message au chat IA et retourne la réponse."""
+    from src.services.utilitaires.chat_ai import get_chat_ai_service
+
+    def _query():
+        service = get_chat_ai_service()
+        reponse = service.envoyer_message(
+            message=payload.message,
+            contexte=payload.contexte,
+            historique=payload.historique if payload.historique else None,
+        )
+        return reponse
+
+    reponse = await executer_async(_query)
+
+    return {
+        "reponse": reponse or "Désolé, je n'ai pas pu générer de réponse. Réessayez.",
+        "contexte": payload.contexte,
+    }
+
+
+@router.get("/chat/actions-rapides")
+@gerer_exception_api
+async def obtenir_actions_rapides_chat(
+    contexte: Literal["cuisine", "famille", "maison", "budget", "general"] = Query(
+        "general", description="Contexte du chat"
+    ),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les suggestions d'actions rapides pour un contexte."""
+    from src.services.utilitaires.chat_ai import get_chat_ai_service
+
+    service = get_chat_ai_service()
+    actions = service.obtenir_actions_rapides(contexte)
+
+    return {"contexte": contexte, "actions": actions}
 
 
 # ═══════════════════════════════════════════════════════════

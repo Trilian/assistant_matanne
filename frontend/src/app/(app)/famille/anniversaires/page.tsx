@@ -287,6 +287,7 @@ export default function PageAnniversaires() {
                       size="icon"
                       className="h-7 w-7"
                       onClick={() => ouvrir(a)}
+                      aria-label="Modifier l'anniversaire"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
@@ -295,6 +296,7 @@ export default function PageAnniversaires() {
                       size="icon"
                       className="h-7 w-7 text-destructive"
                       onClick={() => mutSupprimer.mutate(a.id)}
+                      aria-label="Supprimer l'anniversaire"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>

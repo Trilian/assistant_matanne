@@ -137,10 +137,10 @@ export default function PageEcoTips() {
                     <Badge variant={action.actif ? "default" : "secondary"}>
                       {action.actif ? "Active" : "Inactive"}
                     </Badge>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(action)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(action)} aria-label="Modifier l'action">
                       <Pencil className="h-3 w-3" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(action.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(action.id)} aria-label="Supprimer l'action">
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>

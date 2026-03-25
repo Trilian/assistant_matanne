@@ -25,7 +25,7 @@ export function NavMobile() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden border-t bg-background">
+    <nav aria-label="Navigation mobile" className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden border-t bg-background">
       {ITEMS.map(({ nom, chemin, Icone }) => {
         const estActif =
           chemin === "/" ? pathname === "/" : pathname.startsWith(chemin);

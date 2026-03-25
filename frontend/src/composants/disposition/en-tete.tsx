@@ -65,6 +65,7 @@ export function EnTete() {
         size="icon"
         className="ml-auto md:hidden"
         onClick={basculerRecherche}
+        aria-label="Rechercher"
       >
         <Search className="h-5 w-5" />
       </Button>
@@ -105,7 +106,7 @@ export function EnTete() {
       {/* Menu profil */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="rounded-full">
+          <Button variant="ghost" size="icon" className="rounded-full" aria-label="Mon profil">
             <Avatar className="h-8 w-8">
               <AvatarFallback className="text-xs">
                 {initialesUtilisateur}

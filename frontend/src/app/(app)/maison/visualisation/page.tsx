@@ -90,6 +90,7 @@ export default function PageVisualisation() {
             className="h-8 w-8"
             disabled={etageActif <= etageMin}
             onClick={() => setEtageActif((e) => e - 1)}
+            aria-label="Étage précédent"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -106,6 +107,7 @@ export default function PageVisualisation() {
             className="h-8 w-8"
             disabled={etageActif >= etageMax}
             onClick={() => setEtageActif((e) => e + 1)}
+            aria-label="Étage suivant"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

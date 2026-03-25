@@ -194,10 +194,10 @@ export default function PageDiagnostics() {
                       {diag.resultat && (
                         <Badge variant="outline">{diag.resultat}</Badge>
                       )}
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(diag)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(diag)} aria-label="Modifier le diagnostic">
                         <Pencil className="h-3 w-3" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(diag.id)}>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(diag.id)} aria-label="Supprimer le diagnostic">
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>

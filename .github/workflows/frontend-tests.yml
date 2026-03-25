@@ -46,8 +46,11 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: http://localhost:8000
       
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
       - name: Run E2E tests (Playwright)
-        run: npx playwright test
+        run: npx playwright test --project=chromium
         continue-on-error: true  # E2E tests peuvent échouer sans bloquer
       
       - name: Upload test results
@@ -58,4 +61,5 @@ jobs:
           path: |
             frontend/coverage/
             frontend/playwright-report/
+            frontend/test-results/
           retention-days: 7

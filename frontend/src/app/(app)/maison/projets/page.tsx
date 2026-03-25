@@ -224,6 +224,7 @@ export default function PageProjets() {
                   size="icon"
                   className="h-8 w-8 text-muted-foreground hover:text-destructive"
                   onClick={() => supprimer(projet.id)}
+                  aria-label="Supprimer le projet"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

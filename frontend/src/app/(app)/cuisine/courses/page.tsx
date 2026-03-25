@@ -160,6 +160,7 @@ export default function PageCourses() {
                 type="submit"
                 size="icon"
                 disabled={enCreationListe || !nomNouvelleListe.trim()}
+                aria-label="Créer la liste"
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -289,6 +290,7 @@ export default function PageCourses() {
                             size="icon"
                             className="h-6 w-6 shrink-0"
                             onClick={() => supprimer(a.id)}
+                            aria-label="Supprimer l'article"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>

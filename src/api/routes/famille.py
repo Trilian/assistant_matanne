@@ -12,7 +12,8 @@ Endpoints pour la gestion familiale:
 from datetime import date
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
+from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
 from src.api.pagination import appliquer_cursor_filter, construire_reponse_cursor, decoder_cursor
@@ -33,6 +34,30 @@ from src.api.schemas.famille import (
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/famille", tags=["Famille"])
+
+
+# ═══════════════════════════════════════════════════════════
+# SCHEMAS PYDANTIC LOCAUX
+# ═══════════════════════════════════════════════════════════
+
+
+class ParamsSuggestionsActivites(BaseModel):
+    """Paramètres pour suggestions d'activités IA"""
+
+    age_mois: int = Field(..., ge=0, le=72, description="Âge de l'enfant en mois (0-72 mois)")
+    meteo: str = Field(
+        default="mixte",
+        description="Type de météo: pluie, soleil, nuageux, mixte, interieur, exterieur",
+    )
+    budget_max: float = Field(default=50.0, ge=0, le=500, description="Budget maximum par activité")
+    duree_min: int = Field(default=30, ge=5, le=300, description="Durée minimum en minutes")
+    duree_max: int = Field(default=120, ge=10, le=360, description="Durée maximum en minutes")
+    preferences: list[str] | None = Field(
+        default=None, description="Tags de préférences (creatif, sportif, educatif, sensoriel, etc.)"
+    )
+    nb_suggestions: int = Field(
+        default=5, ge=1, le=10, description="Nombre de suggestions souhaitées"
+    )
 
 
 # ═══════════════════════════════════════════════════════════
@@ -340,6 +365,53 @@ async def obtenir_activite(activite_id: int, user: dict[str, Any] = Depends(requ
     return await executer_async(_query)
 
 
+@router.post("/activites/suggestions-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggerer_activites_ia(
+    params: ParamsSuggestionsActivites,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Génère des suggestions d'activités personnalisées via IA.
+    
+    Utilise JulesAIService avec parsing structuré pour retourner des activités
+    adaptées à l'âge de l'enfant, la météo, le budget et les préférences.
+    
+    **Paramètres**:
+    - age_mois: Âge de l'enfant en mois (utilisé pour adapter les suggestions)
+    - meteo: Type de météo ou lieu (pluie/soleil/mixte/interieur/exterieur)
+    - budget_max: Budget maximum par activité en euros
+    - duree_min/duree_max: Fourchette de durée souhaitée
+    - preferences: Tags optionnels (creatif, sportif, educatif, sensoriel, etc.)
+    - nb_suggestions: Nombre de suggestions (1-10)
+    
+    **Retour**: Liste structurée d'activités avec nom, description, durée, budget, 
+    lieu, compétences, matériel nécessaire, niveau d'effort.
+    """
+    from src.services.famille.jules_ai import get_jules_ai_service
+
+    def _query():
+        service = get_jules_ai_service()
+        suggestions = service.suggerer_activites_enrichies(
+            age_mois=params.age_mois,
+            meteo=params.meteo,
+            budget_max=params.budget_max,
+            duree_min=params.duree_min,
+            duree_max=params.duree_max,
+            preferences=params.preferences,
+            nb_suggestions=params.nb_suggestions,
+        )
+        
+        # Convertir Pydantic models en dicts pour JSON response
+        return {
+            "total": len(suggestions),
+            "suggestions": [s.model_dump() for s in suggestions],
+            "params": params.model_dump(),
+        }
+
+    return await executer_async(_query)
+
+
 @router.post("/activites", status_code=201, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_activite(
@@ -598,6 +670,282 @@ async def supprimer_depense(
             return MessageResponse(message="Dépense supprimée")
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# BUDGET IA — Prédictions, Anomalies, Économies
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/budget/analyse-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def analyse_budget_ia(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Analyse complète du budget avec prédictions, anomalies et suggestions."""
+    from datetime import datetime
+
+    from sqlalchemy import func
+
+    from src.core.models import BudgetFamille
+    from src.services.famille.budget_ai import get_budget_ai_service
+
+    def _query():
+        with executer_avec_session() as session:
+            aujourd_hui = datetime.now()
+            mois_courant = aujourd_hui.month
+            annee_courante = aujourd_hui.year
+
+            # Historique 6 derniers mois
+            historique = []
+            for i in range(6):
+                m = mois_courant - i
+                a = annee_courante
+                if m <= 0:
+                    m += 12
+                    a -= 1
+
+                depenses_mois = (
+                    session.query(
+                        BudgetFamille.categorie,
+                        func.sum(BudgetFamille.montant).label("total"),
+                    )
+                    .filter(
+                        func.extract("month", BudgetFamille.date) == m,
+                        func.extract("year", BudgetFamille.date) == a,
+                    )
+                    .group_by(BudgetFamille.categorie)
+                    .all()
+                )
+
+                par_cat = {cat: float(total) for cat, total in depenses_mois}
+                total = sum(par_cat.values())
+
+                historique.append({
+                    "mois": m,
+                    "annee": a,
+                    "total": total,
+                    "par_categorie": par_cat,
+                })
+
+            # Inverser (du plus ancien au plus récent)
+            historique.reverse()
+
+            # Dépenses mois courant et moyennes
+            depenses_courant = historique[-1]["par_categorie"] if historique else {}
+            if len(historique) > 1:
+                moyennes = {}
+                for h in historique[:-1]:
+                    for cat, m in h.get("par_categorie", {}).items():
+                        moyennes[cat] = moyennes.get(cat, 0) + m
+                nb_mois_prec = len(historique) - 1
+                moyennes = {cat: v / nb_mois_prec for cat, v in moyennes.items()}
+            else:
+                moyennes = {}
+
+            total_moyen = sum(moyennes.values()) if moyennes else 0
+
+            return {
+                "historique": historique,
+                "depenses_courant": depenses_courant,
+                "moyennes": moyennes,
+                "total_moyen": total_moyen,
+            }
+
+    donnees = await executer_async(_query)
+
+    service = get_budget_ai_service()
+    predictions = service.predire_budget_mensuel(donnees["historique"])
+    anomalies = service.detecter_anomalies(
+        donnees["depenses_courant"], donnees["moyennes"]
+    )
+    suggestions = service.suggerer_economies(
+        donnees["moyennes"], donnees["total_moyen"]
+    )
+
+    return {
+        "predictions": predictions.model_dump() if predictions else None,
+        "anomalies": [a.model_dump() for a in anomalies],
+        "suggestions": [s.model_dump() for s in suggestions],
+        "historique": donnees["historique"],
+    }
+
+
+@router.get("/budget/predictions", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def predictions_budget(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Prédictions du budget pour le mois prochain."""
+    from datetime import datetime
+
+    from sqlalchemy import func
+
+    from src.core.models import BudgetFamille
+    from src.services.famille.budget_ai import get_budget_ai_service
+
+    def _query():
+        with executer_avec_session() as session:
+            aujourd_hui = datetime.now()
+            mois_courant = aujourd_hui.month
+            annee_courante = aujourd_hui.year
+
+            historique = []
+            for i in range(6):
+                m = mois_courant - i
+                a = annee_courante
+                if m <= 0:
+                    m += 12
+                    a -= 1
+
+                depenses_mois = (
+                    session.query(
+                        BudgetFamille.categorie,
+                        func.sum(BudgetFamille.montant).label("total"),
+                    )
+                    .filter(
+                        func.extract("month", BudgetFamille.date) == m,
+                        func.extract("year", BudgetFamille.date) == a,
+                    )
+                    .group_by(BudgetFamille.categorie)
+                    .all()
+                )
+
+                par_cat = {cat: float(total) for cat, total in depenses_mois}
+                total = sum(par_cat.values())
+                historique.append({"mois": m, "annee": a, "total": total, "par_categorie": par_cat})
+
+            historique.reverse()
+            return historique
+
+    historique = await executer_async(_query)
+    service = get_budget_ai_service()
+    predictions = service.predire_budget_mensuel(historique)
+
+    return {
+        "predictions": predictions.model_dump() if predictions else None,
+        "historique": historique,
+    }
+
+
+@router.get("/budget/anomalies", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def anomalies_budget(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Détecte les anomalies dans les dépenses du mois courant."""
+    from datetime import datetime
+
+    from sqlalchemy import func
+
+    from src.core.models import BudgetFamille
+    from src.services.famille.budget_ai import get_budget_ai_service
+
+    def _query():
+        with executer_avec_session() as session:
+            aujourd_hui = datetime.now()
+            mois_courant = aujourd_hui.month
+            annee_courante = aujourd_hui.year
+
+            # Mois courant
+            courant = (
+                session.query(
+                    BudgetFamille.categorie,
+                    func.sum(BudgetFamille.montant).label("total"),
+                )
+                .filter(
+                    func.extract("month", BudgetFamille.date) == mois_courant,
+                    func.extract("year", BudgetFamille.date) == annee_courante,
+                )
+                .group_by(BudgetFamille.categorie)
+                .all()
+            )
+            depenses_courant = {cat: float(total) for cat, total in courant}
+
+            # Moyennes 5 mois précédents
+            moyennes = {}
+            for i in range(1, 6):
+                m = mois_courant - i
+                a = annee_courante
+                if m <= 0:
+                    m += 12
+                    a -= 1
+                deps = (
+                    session.query(
+                        BudgetFamille.categorie,
+                        func.sum(BudgetFamille.montant).label("total"),
+                    )
+                    .filter(
+                        func.extract("month", BudgetFamille.date) == m,
+                        func.extract("year", BudgetFamille.date) == a,
+                    )
+                    .group_by(BudgetFamille.categorie)
+                    .all()
+                )
+                for cat, total in deps:
+                    moyennes[cat] = moyennes.get(cat, 0) + float(total)
+
+            moyennes = {cat: v / 5 for cat, v in moyennes.items()}
+
+            return {"depenses_courant": depenses_courant, "moyennes": moyennes}
+
+    donnees = await executer_async(_query)
+    service = get_budget_ai_service()
+    anomalies = service.detecter_anomalies(
+        donnees["depenses_courant"], donnees["moyennes"]
+    )
+
+    return {"anomalies": [a.model_dump() for a in anomalies]}
+
+
+@router.post("/budget/ocr-ticket", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def analyser_ticket_ocr(
+    file: UploadFile,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Analyse un ticket/facture par OCR IA et extrait les données."""
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Le fichier doit être une image (JPEG, PNG)")
+
+    contenu = await file.read()
+    if len(contenu) > 10 * 1024 * 1024:  # 10 MB
+        raise HTTPException(status_code=400, detail="Fichier trop volumineux (max 10 Mo)")
+
+    from src.services.integrations.multimodal import get_multimodal_service
+
+    service = get_multimodal_service()
+    resultat = service.extraire_facture_sync(contenu)
+
+    if not resultat:
+        return {
+            "success": False,
+            "message": "Impossible d'extraire les données du ticket. Essayez avec une image plus nette.",
+            "donnees": None,
+        }
+
+    return {
+        "success": True,
+        "message": "Ticket analysé avec succès",
+        "donnees": {
+            "magasin": resultat.magasin,
+            "date": resultat.date,
+            "articles": [
+                {
+                    "description": ligne.description,
+                    "quantite": ligne.quantite,
+                    "prix_unitaire": ligne.prix_unitaire,
+                    "prix_total": ligne.prix_total,
+                }
+                for ligne in resultat.lignes
+            ],
+            "sous_total": resultat.sous_total,
+            "tva": resultat.tva,
+            "total": resultat.total,
+            "mode_paiement": resultat.mode_paiement,
+            "categorie_suggeree": "alimentation",
+        },
+    }
 
 
 # ═══════════════════════════════════════════════════════════

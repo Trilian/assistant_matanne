@@ -145,6 +145,7 @@ export default function PagePlanning() {
             variant="outline"
             size="icon"
             onClick={() => setOffsetSemaine((o) => o - 1)}
+            aria-label="Semaine précédente"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -159,6 +160,7 @@ export default function PagePlanning() {
             variant="outline"
             size="icon"
             onClick={() => setOffsetSemaine((o) => o + 1)}
+            aria-label="Semaine suivante"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -225,6 +227,7 @@ export default function PagePlanning() {
                                 size="icon"
                                 className="h-5 w-5 shrink-0"
                                 onClick={() => retirerRepas(repas.id)}
+                                aria-label="Retirer le repas"
                               >
                                 <X className="h-3 w-3" />
                               </Button>

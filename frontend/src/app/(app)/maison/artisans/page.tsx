@@ -177,10 +177,10 @@ export default function PageArtisans() {
                   <CardTitle className="text-sm">{artisan.nom}</CardTitle>
                   <div className="flex items-center gap-1">
                     <Badge variant="outline">{artisan.metier}</Badge>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(artisan)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(artisan)} aria-label="Modifier l'artisan">
                       <Pencil className="h-3 w-3" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(artisan.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(artisan.id)} aria-label="Supprimer l'artisan">
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>

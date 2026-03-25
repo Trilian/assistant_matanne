@@ -50,3 +50,45 @@ export async function obtenirSuggestionsRecettes(
   const { data } = await clientApi.get(`/suggestions/recettes${qs ? `?${qs}` : ""}`);
   return data.suggestions ?? data;
 }
+
+// ─── Chat IA Multi-contexte ─────────────────────────────────────
+
+export type ContexteChat = "cuisine" | "famille" | "maison" | "budget" | "general";
+
+export interface MessageChatRequest {
+  message: string;
+  contexte: ContexteChat;
+  historique: Array<{ role: "user" | "assistant"; contenu: string }>;
+}
+
+export interface ReponseChatIA {
+  reponse: string;
+  contexte: ContexteChat;
+}
+
+export interface ActionRapide {
+  label: string;
+  message: string;
+}
+
+/** Envoyer un message au chat IA */
+export async function envoyerMessageChat(
+  payload: MessageChatRequest
+): Promise<ReponseChatIA> {
+  const { data } = await clientApi.post<ReponseChatIA>(
+    "/utilitaires/chat/message",
+    payload
+  );
+  return data;
+}
+
+/** Obtenir les actions rapides pour un contexte */
+export async function obtenirActionsRapides(
+  contexte: ContexteChat = "general"
+): Promise<{ actions: ActionRapide[]; contexte: ContexteChat }> {
+  const { data } = await clientApi.get("/utilitaires/chat/actions-rapides", {
+    params: { contexte },
+  });
+  return data;
+}
+

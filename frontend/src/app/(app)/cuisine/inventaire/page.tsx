@@ -272,6 +272,7 @@ export default function PageInventaire() {
                           size="icon"
                           className="h-7 w-7"
                           onClick={() => supprimer(a.id)}
+                          aria-label="Supprimer l'article"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>

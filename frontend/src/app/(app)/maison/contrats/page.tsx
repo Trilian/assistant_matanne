@@ -176,10 +176,10 @@ export default function PageContrats() {
                   <CardTitle className="text-sm">{contrat.nom}</CardTitle>
                   <div className="flex items-center gap-1">
                     <Badge variant="outline">{contrat.type_contrat}</Badge>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(contrat)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(contrat)} aria-label="Modifier le contrat">
                       <Pencil className="h-3 w-3" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(contrat.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(contrat.id)} aria-label="Supprimer le contrat">
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>

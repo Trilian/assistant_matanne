@@ -318,6 +318,7 @@ export default function PageDocuments() {
                     size="icon"
                     className="h-8 w-8"
                     onClick={() => ouvrirEdition(doc)}
+                    aria-label="Modifier le document"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
@@ -326,6 +327,7 @@ export default function PageDocuments() {
                     size="icon"
                     className="h-8 w-8 text-destructive"
                     onClick={() => mutationSupprimer.mutate(doc.id)}
+                    aria-label="Supprimer le document"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>

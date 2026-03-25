@@ -76,6 +76,7 @@ export default function PageAccueil() {
           size="icon"
           onClick={() => setConfigOuverte((v: boolean) => !v)}
           title="Personnaliser le tableau de bord"
+          aria-label="Personnaliser le tableau de bord"
         >
           <Settings2 className="h-5 w-5" />
         </Button>

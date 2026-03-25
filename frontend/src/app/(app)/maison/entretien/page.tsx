@@ -209,6 +209,7 @@ export default function PageEntretien() {
                               size="icon"
                               className="h-7 w-7 text-destructive"
                               onClick={() => mutationSupprimer.mutate(t.id)}
+                              aria-label="Supprimer la tâche"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -260,6 +261,7 @@ export default function PageEntretien() {
                               size="icon"
                               className="h-7 w-7 text-destructive"
                               onClick={() => mutationSupprimer.mutate(t.id)}
+                              aria-label="Supprimer la tâche"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

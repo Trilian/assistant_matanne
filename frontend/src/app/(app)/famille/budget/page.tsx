@@ -11,6 +11,7 @@ import {
   Filter,
   Plus,
   Trash2,
+  ScanLine,
 } from "lucide-react";
 import {
   Card,
@@ -43,6 +44,8 @@ import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { listerDepenses, obtenirStatsBudget, ajouterDepense, supprimerDepense } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
+import { BudgetInsightsIA } from "@/composants/famille/budget-insights";
+import { UploadTicket } from "@/composants/famille/upload-ticket";
 
 const CamembertBudget = dynamic(
   () => import("@/composants/graphiques/camembert-budget").then((m) => m.CamembertBudget),
@@ -64,6 +67,7 @@ const CATEGORIES_BUDGET = [
 export default function PageBudget() {
   const [categorieFiltre, setCategorieFiltre] = useState("tous");
   const [dialogOuvert, setDialogOuvert] = useState(false);
+  const [dialogScanner, setDialogScanner] = useState(false);
   const [montant, setMontant] = useState("");
   const [categorie, setCategorie] = useState("alimentation");
   const [description, setDescription] = useState("");
@@ -126,12 +130,26 @@ export default function PageBudget() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">💰 Budget</h1>
-        <p className="text-muted-foreground">
-          Suivi des dépenses familiales
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">💰 Budget</h1>
+          <p className="text-muted-foreground">
+            Suivi des dépenses familiales
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setDialogScanner(true)}>
+          <ScanLine className="h-4 w-4 mr-1" />
+          Scanner ticket
+        </Button>
       </div>
+
+      <UploadTicket
+        ouvert={dialogScanner}
+        onFermer={() => setDialogScanner(false)}
+        onCreerDepense={(dep) => {
+          mutationAjouter.mutate(dep);
+        }}
+      />
 
       {/* Résumé mensuel */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -313,6 +331,7 @@ export default function PageBudget() {
                         size="icon"
                         className="h-7 w-7 text-destructive"
                         onClick={() => mutationSupprimer.mutate(d.id)}
+                        aria-label="Supprimer la dépense"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -324,6 +343,9 @@ export default function PageBudget() {
           </Card>
         )}
       </div>
+
+      {/* Insights IA */}
+      <BudgetInsightsIA />
     </div>
   );
 }

@@ -72,8 +72,8 @@ export function FilAriane() {
   if (segments.length === 0) return null;
 
   return (
-    <nav className="flex items-center gap-1 text-sm text-muted-foreground px-4 md:px-6 py-2">
-      <Link href="/" className="hover:text-foreground transition-colors">
+    <nav aria-label="Fil d'Ariane" className="flex items-center gap-1 text-sm text-muted-foreground px-4 md:px-6 py-2">
+      <Link href="/" className="hover:text-foreground transition-colors" aria-label="Accueil">
         <Home className="h-4 w-4" />
       </Link>
       {segments.map((segment, index) => {

@@ -255,10 +255,10 @@ export default function PageDepenses() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-bold">{fmt(d.montant)}</span>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(d)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(d)} aria-label="Modifier la dépense">
                     <Pencil className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(d.id)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(d.id)} aria-label="Supprimer la dépense">
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>

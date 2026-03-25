@@ -98,6 +98,50 @@ export async function supprimerActivite(id: number): Promise<void> {
   await clientApi.delete(`/famille/activites/${id}`);
 }
 
+// ─── Suggestions IA Activités ─────────────────────────────
+
+/** Paramètres pour les suggestions d'activités IA */
+export interface ParamsSuggestionsActivites {
+  age_mois: number
+  meteo?: string
+  budget_max?: number
+  duree_min?: number
+  duree_max?: number
+  preferences?: string[]
+  nb_suggestions?: number
+}
+
+/** Suggestion d'activité retournée par l'IA */
+export interface SuggestionActivite {
+  nom: string
+  description: string
+  duree_minutes: number
+  budget: number
+  lieu: 'interieur' | 'exterieur' | 'mixte'
+  competences: string[]
+  materiel: string[]
+  niveau_effort: 'faible' | 'moyen' | 'eleve'
+  adapte_pour: number[]
+}
+
+/** Réponse de l'API suggestions */
+export interface ReponseSuggestionsActivites {
+  total: number
+  suggestions: SuggestionActivite[]
+  params: ParamsSuggestionsActivites
+}
+
+/** Obtenir des suggestions d'activités via IA */
+export async function obtenirSuggestionsActivites(
+  params: ParamsSuggestionsActivites
+): Promise<ReponseSuggestionsActivites> {
+  const { data } = await clientApi.post<ReponseSuggestionsActivites>(
+    "/famille/activites/suggestions-ia",
+    params
+  );
+  return data;
+}
+
 // ─── Routines ─────────────────────────────────────────────
 
 /** Lister les routines */
@@ -177,6 +221,63 @@ export async function ajouterDepense(
 /** Supprimer une dépense */
 export async function supprimerDepense(id: number): Promise<void> {
   await clientApi.delete(`/famille/budget/${id}`);
+}
+
+// ─── Budget IA — Analyse, Prédictions, Anomalies ──────────
+
+export interface PredictionCategorie {
+  categorie: string;
+  montant_prevu: number;
+  tendance: "hausse" | "baisse" | "stable";
+  explication: string;
+}
+
+export interface PredictionBudget {
+  total_prevu: number;
+  par_categorie: PredictionCategorie[];
+  confiance: number;
+  resume: string;
+}
+
+export interface AnomalieBudget {
+  type: "pic" | "baisse" | "nouvelle_categorie" | "irregularite";
+  categorie: string;
+  ecart_pourcent: number;
+  severite: "info" | "warning" | "danger";
+  description: string;
+}
+
+export interface SuggestionEconomie {
+  titre: string;
+  description: string;
+  economie_estimee: number;
+  categorie: string;
+  difficulte: "facile" | "moyen" | "difficile";
+}
+
+export interface AnalyseBudgetIA {
+  predictions: PredictionBudget | null;
+  anomalies: AnomalieBudget[];
+  suggestions: SuggestionEconomie[];
+  historique: Array<{ mois: number; annee: number; total: number; par_categorie: Record<string, number> }>;
+}
+
+/** Analyse IA complète du budget (prédictions + anomalies + suggestions) */
+export async function obtenirAnalyseBudgetIA(): Promise<AnalyseBudgetIA> {
+  const { data } = await clientApi.get<AnalyseBudgetIA>("/famille/budget/analyse-ia");
+  return data;
+}
+
+/** Prédictions seules */
+export async function obtenirPredictionsBudget(): Promise<{ predictions: PredictionBudget | null; historique: AnalyseBudgetIA["historique"] }> {
+  const { data } = await clientApi.get("/famille/budget/predictions");
+  return data;
+}
+
+/** Anomalies seules */
+export async function obtenirAnomaliesBudget(): Promise<{ anomalies: AnomalieBudget[] }> {
+  const { data } = await clientApi.get("/famille/budget/anomalies");
+  return data;
 }
 
 // ─── Anniversaires ────────────────────────────────────────

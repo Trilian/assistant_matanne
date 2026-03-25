@@ -235,7 +235,7 @@ export default function PageEnergie() {
                     {r.notes && (
                       <span className="text-xs text-muted-foreground max-w-32 truncate">{r.notes}</span>
                     )}
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(r.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => supprimer(r.id)} aria-label="Supprimer le relevé">
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>

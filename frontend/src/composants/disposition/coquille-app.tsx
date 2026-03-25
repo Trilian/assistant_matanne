@@ -8,6 +8,7 @@ import { EnTete } from "./en-tete";
 import { FilAriane } from "./fil-ariane";
 import { RechercheGlobale } from "./recherche-globale";
 import { TourOnboarding } from "./tour-onboarding";
+import { InstallPrompt } from "@/composants/pwa/install-prompt";
 
 /**
  * Conteneur principal de l'application — assemble la sidebar desktop, l'en-tête,
@@ -38,6 +39,9 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
 
       {/* Tour d'onboarding pour nouveaux utilisateurs */}
       <TourOnboarding />
+
+      {/* Bannière d'installation PWA */}
+      <InstallPrompt />
     </div>
   );
 }
