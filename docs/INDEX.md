@@ -19,7 +19,6 @@
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Guide de déploiement (local, Docker, Railway, Vercel, Supabase) |
 | [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) | Guide migration stack technique |
 | [REDIS_SETUP.md](./REDIS_SETUP.md) | Configuration Redis (optionnel) |
-| [TEMPLATE_IMPORT.csv](./TEMPLATE_IMPORT.csv) | Template CSV pour import inventaire |
 
 ## Guides par module
 
@@ -32,8 +31,7 @@
 | [guides/jeux/README.md](./guides/jeux/README.md) | Jeux | Paris sportifs, Loto, EuroMillions |
 | [guides/outils/README.md](./guides/outils/README.md) | Outils | Chat IA, météo, convertisseur, minuteur, notes |
 | [guides/dashboard/README.md](./guides/dashboard/README.md) | Dashboard | Tableau de bord, métriques agrégées |
-| [guides/utilitaires/barcode.md](./guides/utilitaires/barcode.md) | Utilitaires | Scan code-barres |
-| [guides/utilitaires/vocal.md](./guides/utilitaires/vocal.md) | Utilitaires | Commandes vocales |
+| [guides/utilitaires/README.md](./guides/utilitaires/README.md) | Utilitaires | Scanner codes-barres, commandes vocales |
 
 ## Structure
 
@@ -51,7 +49,6 @@ docs/
 ├── DEPLOYMENT.md                ← Guide déploiement
 ├── MIGRATION_GUIDE.md           ← Guide migration
 ├── REDIS_SETUP.md               ← Setup Redis
-├── TEMPLATE_IMPORT.csv          ← Template import inventaire
 └── guides/
     ├── cuisine/README.md        ← Cuisine complet
     ├── famille/README.md        ← Famille complet
@@ -61,6 +58,7 @@ docs/
     ├── outils/README.md         ← Outils complet
     ├── dashboard/README.md      ← Dashboard
     └── utilitaires/
+        ├── README.md            ← Hub utilitaires
         ├── barcode.md           ← Scan code-barres
         └── vocal.md             ← Commandes vocales
 ```

@@ -400,7 +400,7 @@ def sample_suggestions():
 
 
 @pytest.fixture
-def courses_service_instance(db_session):
+def courses_service_instance(db):
     """Get or create ServiceCourses instance for tests"""
     return ServiceCourses()
 

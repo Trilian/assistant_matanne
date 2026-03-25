@@ -69,32 +69,24 @@ Le core est organisé en **10 sous-packages** + fichiers utilitaires:
 ```
 src/core/
 ├── ai/              # Client Mistral, cache sémantique, rate limiting, circuit breaker
-├── caching/         # Cache multi-niveaux L1/L2/L3 (décorateur unifié @avec_cache)
+├── ai/              # Client Mistral, analyseur, cache sémantique, rate limiting, circuit breaker
+├── caching/         # Cache multi-niveaux L1/L3 (décorateur unifié @avec_cache)
 ├── config/          # Pydantic BaseSettings, chargement .env, validateur
 ├── date_utils/      # Package utilitaires de dates (4 modules)
 ├── db/              # Engine, sessions, migrations SQL-file
 ├── decorators/      # Package: cache.py, db.py, errors.py, validation.py
-├── middleware/      # Pipeline de middlewares composables (base, builtin, pipeline)
-├── models/          # 22 modèles SQLAlchemy ORM
+├── dto/             # Data Transfer Objects
+├── models/          # 22+ modèles SQLAlchemy ORM
 ├── monitoring/      # Collecteur métriques, health checks
 ├── observability/   # Contexte d'observabilité (spans, traces)
 ├── resilience/      # Politiques de résilience composables (retry, timeout, bulkhead)
-├── result/          # Result Monad (Ok/Err) — gestion d'erreurs style Rust
-├── state/           # Package: manager.py, shortcuts.py, slices.py
+├── utils/           # Utilitaires partagés
 ├── validation/      # Schemas Pydantic (7 domaines), sanitizer
 ├── async_utils.py   # Utilitaires asynchrones
 ├── bootstrap.py     # demarrer_application() — initialisation IoC
 ├── constants.py     # Constantes globales
-├── container.py     # IoC Container — injection de dépendances typée
-├── errors.py        # Classes d'erreurs métier (UI)
-├── exceptions.py   # Classe de base ExceptionApp + guards (→ sera renommé exceptions.py)
-├── lazy_loader.py   # ChargeurModuleDiffere (chargement différé des modules)
+├── exceptions.py    # Exceptions métier (ErreurBaseDeDonnees, etc.)
 ├── logging.py       # Configuration logging
-├── repository.py    # Repository générique CRUD typé
-├── session_keys.py  # Clés de session typées (KeyNamespace)
-├── specifications.py # Specification Pattern — critères composables
-├── storage.py       # SessionStorage Protocol
-├── unit_of_work.py  # Transaction atomique avec rollback automatique
 └── py.typed         # Marqueur PEP 561 pour typing
 ```
 
@@ -179,33 +171,6 @@ from src.core.decorators import avec_session_db, avec_cache, avec_gestion_erreur
 @avec_validation      # Validation Pydantic automatique (src/core/decorators/validation.py)
 ```
 
-### state/ — État applicatif (package)
-
-```python
-from src.core.state import GestionnaireEtat, obtenir_etat, naviguer, revenir
-from src.core.state import EtatNavigation, EtatCuisine, EtatUI
-
-etat = obtenir_etat()
-etat.navigation.module_actuel  # "cuisine.recettes"
-etat.cuisine.id_recette_visualisation  # 42
-```
-
-Fichiers: `manager.py` (GestionnaireEtat), `shortcuts.py` (naviguer, revenir), `slices.py` (EtatNavigation, EtatCuisine, EtatUI)
-
-### result/ — Result Monad
-
-```python
-from src.core.result import Ok, Err, Result, failure, ErrorCode
-
-def charger_recette(id: int) -> Result[Recette, ErrorInfo]:
-    recette = db.get(id)
-    if not recette:
-        return failure(ErrorCode.NOT_FOUND, f"Recette #{id} introuvable")
-    return Ok(recette)
-```
-
-Fichiers: `base.py` (Ok, Err, Result), `codes.py` (ErrorCode), `combinators.py`, `decorators.py` (@result_api), `helpers.py`
-
 ### resilience/ — Politiques de résilience
 
 ```python
@@ -214,17 +179,6 @@ from src.core.resilience import RetryPolicy, TimeoutPolicy, politique_ia
 politique = RetryPolicy(3) + TimeoutPolicy(30)
 result = politique.executer(lambda: appel_risque())
 ```
-
-### middleware/ — Pipeline composable
-
-```python
-from src.core.middleware import Pipeline
-
-pipeline = Pipeline().utiliser(LogMiddleware()).utiliser(RetryMiddleware(max_retries=3))
-result = pipeline.executer(lambda ctx: operation(ctx))
-```
-
-Fichiers: `base.py`, `builtin.py` (middlewares built-in), `pipeline.py`
 
 ### monitoring/ — Métriques & Performance
 
@@ -242,7 +196,7 @@ Fichiers: `collector.py`, `decorators.py`, `health.py`
 ```python
 from src.core.bootstrap import demarrer_application
 
-# Appelé au démarrage dans src/app.py — initialise l'IoC container
+# Appelé au démarrage dans src/api/main.py
 demarrer_application()
 ```
 
@@ -258,27 +212,6 @@ bus.emettre("recette.creee", {"nom": "Tarte"})
 
 > **Note**: Le bus d'événements est dans `src/services/core/events/` (pas dans core/).
 > Support wildcards (`*`, `**`), priorités, isolation d'erreurs.
-
-### repository.py — Repository générique
-
-```python
-from src.core.repository import Repository
-from src.core.models import Recette
-
-repo = Repository(Recette, session)
-recettes = repo.lister(filtres={"categorie": "dessert"}, limite=10)
-recette = repo.creer({"nom": "Tarte", "categorie": "dessert"})
-```
-
-### storage.py — Abstraction SessionStorage
-
-```python
-from src.core.storage import obtenir_storage, MemorySessionStorage
-
-# Tests/CLI: MemorySessionStorage (dict)
-storage = obtenir_storage()
-storage["clé"] = valeur
-```
 
 ### models/ — SQLAlchemy 2.0 ORM (22 fichiers)
 
@@ -332,21 +265,21 @@ src/services/
 ├── core/               # Services transversaux
 │   ├── base/           # BaseAIService, mixins IA, streaming, protocols, pipeline
 │   ├── backup/         # Backup/restore système complet
-│   ├── cqrs/           # Commands, Queries, Dispatcher (CQRS pattern)
 │   ├── events/         # Bus d'événements (bus.py, events.py, subscribers.py)
-│   ├── middleware/      # Middlewares service-level
 │   ├── notifications/  # Web push, NTFY, templates, persistance
 │   ├── observability/  # Health checks, métriques, spans
-│   ├── specifications/ # Specs domaine (inventaire.py, recettes.py)
 │   ├── utilisateur/    # Préférences, historique
-│   └── registry.py     # Registre de services
-├── cuisine/            # Recettes, courses, planning repas
-├── famille/            # Services famille
+│   └── registry.py     # Registre de services (@service_factory)
+├── cuisine/            # Recettes, courses
+├── dashboard/          # Données tableau de bord
+├── famille/            # Services famille (Jules IA, weekend IA)
 ├── integrations/       # APIs externes (codes-barres, factures, Garmin, météo, images)
 ├── inventaire/         # Gestion des stocks
 ├── jeux/               # Loto, paris sportifs
 ├── maison/             # Entretien, dépenses, jardin, projets
-└── rapports/           # Export PDF, rapports budget/gaspillage
+├── planning/           # Planning repas (nutrition, agrégation, prompts, validators)
+├── rapports/           # Export PDF, rapports budget/gaspillage
+└── utilitaires/        # Services utilitaires divers
 ```
 
 ### BaseAIService (src/services/core/base/)

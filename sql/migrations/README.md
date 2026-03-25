@@ -6,9 +6,7 @@
 V{numero}_{description}.sql
 ```
 
-Exemples :
-- `V001_rls_security_fix.sql`
-- `V002_user_id_uuid_standardization.sql`
+Exemple : `V003_ajout_table_xxx.sql`
 
 ## Workflow
 

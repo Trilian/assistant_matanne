@@ -56,7 +56,7 @@ Le module **Jeux** permet de suivre et gérer les activités de jeux de hasard e
 ### Import CSV
 
 ```bash
-# Format attendu : docs/TEMPLATE_IMPORT.csv
+# Import depuis le fichier seed CSV
 python scripts/db/import_recettes.py --file data/seed/paris_sportifs.csv --type paris
 ```
 

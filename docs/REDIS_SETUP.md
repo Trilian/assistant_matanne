@@ -1,5 +1,7 @@
 # Redis — Activation & Configuration en Production
 
+> ⚠️ **Redis est optionnel.** Le MVP fonctionne avec le cache L1 mémoire + L3 fichier. Redis n'est nécessaire que pour le scaling en production (cache L2 partagé entre workers).
+
 ## Prérequis
 
 - Redis 7.x+ installé ou un service managé (Upstash, Railway, Redis Cloud)

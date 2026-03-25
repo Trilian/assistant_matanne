@@ -6,7 +6,7 @@ Scripts utilitaires pour le développement, le déploiement et la maintenance d'
 
 ---
 
-## analysis/
+## analysis/ *(outils ad-hoc, exécution manuelle)*
 
 ### `analyze_api.py`
 Analyse les routes FastAPI dans `src/api/`, détecte les patterns, et suggère des améliorations (endpoints manquants, conventions non respectées).
@@ -24,12 +24,14 @@ python scripts/analysis/audit_metrics.py
 
 ---
 
-## db/
+## db/ *(intégrés à `manage.py`)*
 
 ### `check_db.py`
 Vérifie la connexion à la base de données en lançant un `SELECT 1`. Affiche les détails d'erreur si la connexion échoue.
 
 ```bash
+python manage.py check-db
+# ou directement :
 python scripts/db/check_db.py
 ```
 
@@ -37,6 +39,8 @@ python scripts/db/check_db.py
 Déploie le schéma SQL vers Supabase via `psycopg2`. Supporte plusieurs modes :
 
 ```bash
+python manage.py deploy-schema
+# ou directement :
 python scripts/db/deploy_supabase.py --check      # Vérifie les migrations en attente
 python scripts/db/deploy_supabase.py --deploy     # Applique les migrations
 python scripts/db/deploy_supabase.py --status     # Affiche l'état des migrations
@@ -47,6 +51,8 @@ python scripts/db/deploy_supabase.py --rollback   # Annule la dernière migratio
 Importe les recettes standard depuis `data/seed/recettes_standard.json` dans la base de données (modèles `Recette`, `Ingredient`, `Etape`).
 
 ```bash
+python manage.py seed-recipes
+# ou directement :
 python scripts/db/import_recettes.py
 ```
 
@@ -54,6 +60,8 @@ python scripts/db/import_recettes.py
 **⚠️ DESTRUCTIF** — Supprime et recrée le schéma complet Supabase. Toutes les données sont perdues.
 
 ```bash
+python manage.py reset-supabase
+# ou directement :
 python scripts/db/reset_supabase.py
 ```
 
@@ -61,14 +69,16 @@ python scripts/db/reset_supabase.py
 Génère des données de démonstration réalistes : jardin, bien-être, planning, ingrédients, inventaire.
 
 ```bash
+python manage.py seed-demo
+# ou directement :
 python scripts/db/seed_data.py
 ```
 
 ---
 
-## setup/
+## setup/ *(configuration initiale, exécution ponctuelle)*
 
-### `convert_to_utf8.py`
+### `convert_to_utf8.py` *(utilisé en CI/CD)*
 Détecte et supprime les BOM UTF-8 (`\xef\xbb\xbf`) des fichiers Python.
 
 ```bash
@@ -93,12 +103,14 @@ python scripts/setup/setup_api_key.py
 
 ---
 
-## test/
+## test/ *(intégrés à `manage.py`)*
 
 ### `audit_tests_fast.py`
 Audit rapide des tests : mapping source → fichier de test, détection des patterns inefficaces (hasattr-only, import-only, mocking excessif), score qualité 0-100. Génère un rapport CSV.
 
 ```bash
+python manage.py audit-tests
+# ou directement :
 python scripts/test/audit_tests_fast.py
 ```
 
@@ -106,6 +118,9 @@ python scripts/test/audit_tests_fast.py
 Orchestrateur principal des tests avec interface CLI. Génère des rapports HTML.
 
 ```bash
+python manage.py test-quick                      # Tests rapides
+python manage.py test-core                       # Tests core
+# ou directement :
 python scripts/test/test_manager.py all          # Tous les tests
 python scripts/test/test_manager.py coverage     # Avec couverture
 python scripts/test/test_manager.py core         # Tests core uniquement
@@ -115,10 +130,3 @@ python scripts/test/test_manager.py quick        # Tests rapides (sans benchmark
 ```
 
 > Voir aussi : `python manage.py test_coverage` qui lance `pytest --cov` directement.
-
-### `write_test.py`
-Génère des fichiers de tests pour les routes de planning (`tests/api/test_routes_planning.py`).
-
-```bash
-python scripts/test/write_test.py
-```
