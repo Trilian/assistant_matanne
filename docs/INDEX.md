@@ -8,6 +8,8 @@
 
 | Document | Description |
 |----------|-------------|
+| [../STATUS_PHASES.md](../STATUS_PHASES.md) | **État des 28 phases** (A-AC) — Audit complet de l'implémentation |
+| [../ROADMAP.md](../ROADMAP.md) | **Feuille de route** — Priorités court/moyen/long terme + mapping phases |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Architecture technique (FastAPI + Next.js) |
 | [API_REFERENCE.md](./API_REFERENCE.md) | Référence complète de l'API REST (242 endpoints) |
 | [MODULES.md](./MODULES.md) | Carte des modules : fonctionnalités, routes, services, modèles |

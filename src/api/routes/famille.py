@@ -30,6 +30,7 @@ from src.api.schemas.famille import (
     AchatPatch,
     AnniversaireCreate,
     AnniversairePatch,
+    ContexteFamilialResponse,
     EvenementFamilialCreate,
     EvenementFamilialPatch,
     MarquerAchetePayload,
@@ -66,6 +67,41 @@ class ParamsSuggestionsActivites(BaseModel):
     nb_suggestions: int = Field(
         default=5, ge=1, le=10, description="Nombre de suggestions souhaitées"
     )
+
+
+# ═══════════════════════════════════════════════════════════
+# CONTEXTE FAMILIAL (Phase M)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/contexte", response_model=ContexteFamilialResponse, responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_contexte_familial(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Obtient le contexte familial complet.
+    
+    Agrège toutes les données contextuelles:
+    - Météo actuelle + prévisions 7j
+    - Jours fériés/ponts/crèche (10 prochains jours)
+    - Anniversaires (14 prochains jours)
+    - Profil Jules + prochains jalons OMS
+    - Documents expirant (30 jours)
+    - Routines du moment (matin/soir)
+    - Activités à venir (7 jours)
+    - Achats urgents (top 5)
+    
+    Returns:
+        Contexte familial complet
+    """
+    from src.services.famille.contexte import obtenir_service_contexte_familial
+
+    def _query():
+        service = obtenir_service_contexte_familial()
+        return service.obtenir_contexte()
+
+    return await executer_async(_query)
 
 
 # ═══════════════════════════════════════════════════════════

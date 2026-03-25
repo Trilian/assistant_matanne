@@ -74,32 +74,42 @@ export function FilAriane() {
   if (segments.length === 0) return null;
 
   return (
-    <nav aria-label="Fil d'Ariane" className="flex items-center gap-1 text-sm text-muted-foreground px-4 md:px-6 py-2">
-      <Link href="/" className="hover:text-foreground transition-colors" aria-label="Accueil">
-        <Home className="h-4 w-4" />
-      </Link>
-      {segments.map((segment, index) => {
-        const chemin = "/" + segments.slice(0, index + 1).join("/");
-        const estDernier = index === segments.length - 1;
+    <TooltipProvider>
+      <nav aria-label="Fil d'Ariane" className="flex items-center gap-1 text-sm text-muted-foreground px-4 md:px-6 py-2">
+        <Link href="/" className="hover:text-foreground transition-colors" aria-label="Accueil">
+          <Home className="h-4 w-4" />
+        </Link>
+        {segments.map((segment, index) => {
+          const chemin = "/" + segments.slice(0, index + 1).join("/");
+          const estDernier = index === segments.length - 1;
 
-        return (
-          <span key={chemin} className="flex items-center gap-1">
-            <ChevronRight className="h-3 w-3" />
-            {estDernier ? (
-              <span className="font-medium text-foreground">
-                {traduireSegment(segment)}
-              </span>
-            ) : (
-              <Link
-                href={chemin}
-                className="hover:text-foreground transition-colors"
-              >
-                {traduireSegment(segment)}
-              </Link>
-            )}
-          </span>
-        );
-      })}
+          return (
+            <span key={chemin} className="flex items-center gap-1">
+              <ChevronRight className="h-3 w-3" />
+              {estDernier ? (
+                <span className="font-medium text-foreground">
+                  {traduireSegment(segment)}
+                </span>
+              ) : (
+                <Link
+                  href={chemin}
+                  className="hover:text-foreground transition-colors"
+                >
+                  {traduireSegment(segment)}
+                </Link>
+              )}
+            </span>
+          );
+        })}
+        
+        {/* Bouton épingler page */}
+        <div className="ml-auto">
+          <BoutonEpingler />
+        </div>
+      </nav>
+    </TooltipProvider>
+  );
+}
     </nav>
   );
 }

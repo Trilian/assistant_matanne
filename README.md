@@ -271,6 +271,15 @@ curl https://assistant-matanne-api.up.railway.app/health
 
 ## �📚 Documentation
 
+### Vue d'ensemble du projet
+
+| Document | Description |
+|---|---|
+| [STATUS_PHASES.md](STATUS_PHASES.md) | **État des 28 phases (A-AC)** — Audit complet de l'implémentation par module |
+| [ROADMAP.md](ROADMAP.md) | **Feuille de route** — Priorités court/moyen/long terme + mapping phases |
+
+### Documentation technique
+
 | Document | Description |
 |---|---|
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture technique détaillée |
@@ -282,7 +291,6 @@ curl https://assistant-matanne-api.up.railway.app/health
 | [UI_COMPONENTS.md](docs/UI_COMPONENTS.md) | Composants UI Next.js / shadcn |
 | [PATTERNS.md](docs/PATTERNS.md) | Patterns de code récurrents |
 | [frontend/README.md](frontend/README.md) | Documentation frontend Next.js |
-| [ROADMAP.md](ROADMAP.md) | Roadmap du projet |
 
 ---
 

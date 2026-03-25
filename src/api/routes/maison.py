@@ -38,8 +38,69 @@ from src.api.schemas.errors import (
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 from src.services.core.backup.utils_serialization import model_to_dict
+from src.services.maison.schemas import AlerteMaison, BriefingMaison, TacheJour
 
 router = APIRouter(prefix="/api/v1/maison", tags=["Maison"])
+
+
+# ═══════════════════════════════════════════════════════════
+# CONTEXTE MAISON (Phase X)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/briefing", response_model=BriefingMaison, responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_briefing_maison(
+    date_cible: date | None = Query(None, description="Date du briefing (défaut: aujourd'hui)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> BriefingMaison:
+    """
+    Obtient le briefing quotidien maison.
+    
+    Agrège 6 sources de données:
+    - Alertes (garanties, contrats, diagnostics, entretien)
+    - Tâches du jour (ménage, entretien, projets, jardin)
+    - Météo (impact jardin & ménage)
+    - Projets actifs
+    - Jardin contextuel
+    - Cellier & énergie (anomalies)
+    
+    Returns:
+        Briefing maison contextuel
+    """
+    from src.services.maison.contexte_maison_service import obtenir_service_contexte_maison
+
+    def _query():
+        service = obtenir_service_contexte_maison()
+        return service.obtenir_briefing(date_cible=date_cible)
+
+    return await executer_async(_query)
+
+
+@router.get("/alertes", response_model=list[AlerteMaison], responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_alertes_maison(
+    user: dict[str, Any] = Depends(require_auth),
+) -> list[AlerteMaison]:
+    """
+    Obtient toutes les alertes maison.
+    
+    Retourne toutes les alertes (pas juste le top 8 du briefing):
+    - Garanties expirant
+    - Contrats (assurance, énergie, internet)
+    - Diagnostics immobiliers
+    - Entretien saisonnier
+    
+    Returns:
+        Liste complète des alertes triées par urgence
+    """
+    from src.services.maison.contexte_maison_service import obtenir_service_contexte_maison
+
+    def _query():
+        service = obtenir_service_contexte_maison()
+        return service.obtenir_toutes_alertes()
+
+    return await executer_async(_query)
 
 
 # ═══════════════════════════════════════════════════════════
