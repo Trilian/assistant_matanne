@@ -30,56 +30,63 @@
 
 ## Variables d'environnement
 
-### Backend (`.env.local` à la racine)
+> **Important** : Les fichiers `.env*` ne servent qu'au **développement local**.
+> En production, les variables sont configurées dans les dashboards **Vercel** (frontend) et **Railway** (backend).
+
+### Fichier unique : `.env.local` (à la racine)
+
+Le projet utilise un **seul fichier** `.env.local` à la racine pour toutes les variables (backend + frontend).
+Next.js n'expose côté navigateur que les variables préfixées `NEXT_PUBLIC_` — le reste est ignoré par le frontend.
 
 ```env
-# ─── BASE DE DONNÉES ───
+# ─── BACKEND ───
 DATABASE_URL=postgresql://user:password@host:5432/database
-
-# ─── SUPABASE ───
 SUPABASE_URL=https://xxxxxxxxxxxxxxxx.supabase.co
 SUPABASE_ANON_KEY=eyJxxxxxxxxxxxxxxxxxxxxx
 SUPABASE_SERVICE_ROLE_KEY=eyJxxxxxxxxxxxxxxxxxxxxx
-
-# ─── AUTHENTIFICATION JWT ───
 JWT_SECRET_KEY=votre_secret_jwt_tres_long_et_aleatoire
-JWT_ALGORITHM=HS256
-JWT_ACCESS_TOKEN_EXPIRE_MINUTES=60
-JWT_REFRESH_TOKEN_EXPIRE_DAYS=30
-
-# ─── IA MISTRAL ───
 MISTRAL_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-MISTRAL_MODEL=mistral-small-latest
-AI_RATE_LIMIT_DAILY=100
-AI_RATE_LIMIT_HOURLY=20
+ENVIRONMENT=development
+CORS_ORIGINS=http://localhost:3000
 
-# ─── APPLICATION ───
-ENVIRONMENT=production       # development | production
-DEBUG=false
-LOG_LEVEL=INFO
-CORS_ORIGINS=https://votre-domaine.vercel.app
-
-# ─── NOTIFICATIONS PUSH ───
-VAPID_PUBLIC_KEY=xxxxxxxxxxxx
-VAPID_PRIVATE_KEY=xxxxxxxxxxxx
-VAPID_SUBJECT=mailto:contact@exemple.com
-
-# ─── REDIS (optionnel — cache L2) ───
-REDIS_URL=redis://localhost:6379/0
-```
-
-### Frontend (`.env.local` dans `frontend/`)
-
-```env
-# URL de l'API backend
-NEXT_PUBLIC_API_URL=https://votre-backend.railway.app
-
-# Supabase (côté client — clé anon publique uniquement)
+# ─── FRONTEND (NEXT_PUBLIC_*) ───
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_WS_URL=ws://localhost:8000
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxxxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxxxxxxxxxxxxxxxxxxxx
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=
 ```
 
-> ⚠️ Ne jamais committer les fichiers `.env.local`. Ils sont dans `.gitignore`.
+Copier le template : `cp .env.example .env.local` puis remplir avec vos valeurs.
+
+> ⚠️ Ne jamais committer `.env.local`. Il est dans `.gitignore`.
+
+### Variables Vercel (production frontend)
+
+Dans le dashboard Vercel → Settings → Environment Variables :
+
+| Variable | Exemple | Description |
+|----------|---------|-------------|
+| `NEXT_PUBLIC_API_URL` | `https://votre-backend.railway.app` | URL du backend Railway |
+| `NEXT_PUBLIC_WS_URL` | `wss://votre-backend.railway.app` | WebSocket backend |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://xxxx.supabase.co` | Instance Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJxxx...` | Clé anon Supabase |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | `BIxxx...` | Push notifications |
+
+### Variables Railway (production backend)
+
+Dans le dashboard Railway → Variables :
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | URL PostgreSQL Supabase |
+| `SUPABASE_URL` | Instance Supabase |
+| `SUPABASE_ANON_KEY` | Clé anon |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clé service role |
+| `JWT_SECRET_KEY` | Secret pour tokens JWT |
+| `MISTRAL_API_KEY` | Clé API Mistral |
+| `ENVIRONMENT` | `production` |
+| `CORS_ORIGINS` | `https://votre-frontend.vercel.app` |
 
 ---
 
@@ -120,11 +127,8 @@ cd frontend
 # 1. Installer les dépendances
 npm install
 
-# 2. Configurer les variables d'environnement
-cp .env.example .env.local
-# Éditer frontend/.env.local
-
-# 3. Lancer le serveur de développement
+# 2. Lancer le serveur de développement
+# (lit automatiquement ../.env.local via --env-file dans package.json)
 npm run dev
 # → http://localhost:3000
 ```
@@ -189,9 +193,12 @@ Toutes les variables dans `.env.local` sont passées avec `--env-file`. En produ
 3. **Variables d'environnement** (dans Settings → Environment Variables) :
    ```
    NEXT_PUBLIC_API_URL = https://votre-backend.railway.app
+   NEXT_PUBLIC_WS_URL = wss://votre-backend.railway.app
    NEXT_PUBLIC_SUPABASE_URL = https://xxxxxx.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY = eyJxxx...
+   NEXT_PUBLIC_VAPID_PUBLIC_KEY = BIxxx...
    ```
+   > Les fichiers `.env*` du repo ne sont **PAS** utilisés par Vercel. Seules les variables du dashboard comptent.
 
 4. **Déploiement** : automatique sur chaque push `main`
 

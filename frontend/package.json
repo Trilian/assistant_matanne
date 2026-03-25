@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --env-file ../.env.local",
     "build": "next build",
-    "start": "next start",
+    "build:local": "next build --env-file ../.env.local",
+    "start": "next start --env-file ../.env.local",
     "lint": "eslint",
     "test": "vitest",
     "test:run": "vitest run",
     "test:e2e": "playwright test",
-    "analyze": "ANALYZE=true next build"
+    "analyze": "ANALYZE=true next build --env-file ../.env.local"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

@@ -1,9 +1,10 @@
 """
-Pytest Configuration & Central Fixtures
+Pytest Configuration & Fixtures for tests/core/
 ════════════════════════════════════════════════════════════════════
 
 Fixtures partagées pour tous les tests du répertoire tests/core/.
-Élimine la duplication de setup à travers les fichiers de test.
+REMARQUE: La majorité des fixtures viennent de tests/conftest.py root.
+Ce fichier ne fournit que les fixtures core-spécifiques.
 
 Auto-découverte: pytest charge automatiquement ce fichier.
 """
@@ -11,8 +12,6 @@ Auto-découverte: pytest charge automatiquement ce fichier.
 from unittest.mock import MagicMock, Mock
 
 import pytest
-from sqlalchemy import String, create_engine, event
-from sqlalchemy.orm import Session, sessionmaker
 
 # ═════════════════════════════════════════════════════════════════════
 # CHARGEMENT ANTICIPÉ DE TOUS LES MODÈLES
@@ -25,76 +24,6 @@ try:
     charger_tous_modeles()
 except (ImportError, Exception):
     pass
-
-# ═════════════════════════════════════════════════════════════════════
-# SECTION 1: PYTEST CONFIGURATION
-# ═════════════════════════════════════════════════════════════════════
-
-
-def pytest_configure(config):
-    """Configure pytest avec markers personnalisés."""
-    config.addinivalue_line("markers", "unit: Unit tests (fast)")
-    config.addinivalue_line("markers", "integration: Integration tests (slower)")
-    config.addinivalue_line("markers", "slow: Slow tests (require optimization)")
-    config.addinivalue_line("markers", "requires_db: Require database")
-    config.addinivalue_line("markers", "requires_redis: Require Redis")
-
-
-# ═════════════════════════════════════════════════════════════════════
-# SECTION 2: DATABASE FIXTURES
-# ═════════════════════════════════════════════════════════════════════
-
-
-@pytest.fixture(scope="function")
-def test_db() -> Session:
-    """Fixture BD SQLite en mémoire pour tests isolés.
-
-    Chaque test obtient sa propre BD fraîche.
-    Auto-cleanup après le test.
-    """
-    from sqlalchemy import Text
-    from sqlalchemy.ext.compiler import compiles
-
-    # Adapter les types PostgreSQL pour SQLite
-    try:
-        from sqlalchemy.dialects.postgresql import ARRAY, JSONB
-
-        @compiles(JSONB, "sqlite")
-        def _compile_jsonb_sqlite(element, compiler, **kw):
-            return "TEXT"
-
-        @compiles(ARRAY, "sqlite")
-        def _compile_array_sqlite(element, compiler, **kw):
-            return "TEXT"
-    except ImportError:
-        pass
-
-    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
-
-    # Créer tables si modèles disponibles
-    try:
-        from src.core.models import Base
-
-        Base.metadata.create_all(engine)
-    except (ImportError, Exception):
-        # Models pas disponibles en test mode
-        pass
-
-    SessionLocal = sessionmaker(bind=engine)
-    session = SessionLocal()
-
-    yield session
-
-    # Cleanup
-    session.close()
-    engine.dispose()
-
-
-@pytest.fixture(scope="function")
-def test_db_with_sample_data(test_db: Session) -> Session:
-    """Fixture BD avec données de test pré-chargées."""
-    # Peut être étendu avec données de setup
-    yield test_db
 
 
 # ═════════════════════════════════════════════════════════════════════
@@ -168,7 +97,7 @@ def mock_logger() -> MagicMock:
 
 
 # ═════════════════════════════════════════════════════════════════════
-# SECTION 5: TEST DATA FIXTURES
+# SECTION 4: TEST DATA FIXTURES
 # ═════════════════════════════════════════════════════════════════════
 
 
@@ -202,200 +131,3 @@ def test_cache_entry() -> dict:
         "ttl": 3600,
         "tags": ["tag1", "tag2"],
     }
-
-
-@pytest.fixture
-def test_query_info() -> dict:
-    """Données query info test."""
-    return {
-        "sql": "SELECT * FROM users",
-        "operation": "SELECT",
-        "table": "users",
-        "duration_ms": 10,
-    }
-
-
-# ═════════════════════════════════════════════════════════════════════
-# SECTION 6: CLEANUP FIXTURES
-# ═════════════════════════════════════════════════════════════════════
-
-
-@pytest.fixture(autouse=True)
-def cleanup():
-    """Cleanup automatique après chaque test."""
-    yield
-    # Cleanup code ici si nécessaire
-
-
-@pytest.fixture
-def temp_env_vars():
-    """Context manager pour variables d'environnement temporaires.
-
-    Usage:
-        def test_something(temp_env_vars):
-            temp_env_vars['MY_VAR'] = 'value'
-            # test code
-    """
-    import os
-
-    env_backup = os.environ.copy()
-
-    yield os.environ
-
-    # Restore
-    os.environ.clear()
-    os.environ.update(env_backup)
-
-
-# ═════════════════════════════════════════════════════════════════════
-# SECTION 7: CONTEXT MANAGER FIXTURES
-# ═════════════════════════════════════════════════════════════════════
-
-
-@pytest.fixture
-def mock_database():
-    """Context manager pour mock database."""
-    from tests.core.helpers import mock_database_session
-
-    with mock_database_session() as (session, query):
-        yield session, query
-
-
-@pytest.fixture
-def mock_redis_connection():
-    """Context manager pour mock redis."""
-    from tests.core.helpers import mock_redis_connection
-
-    with mock_redis_connection(available=True) as redis:
-        yield redis
-
-
-# ═════════════════════════════════════════════════════════════════════
-# SECTION 8: HELPER FIXTURES
-# ═════════════════════════════════════════════════════════════════════
-
-
-@pytest.fixture
-def mock_builder():
-    """Fixture pour accéder à MockBuilder."""
-    from tests.core.helpers import MockBuilder
-
-    return MockBuilder
-
-
-@pytest.fixture
-def assertion_helpers():
-    """Fixture pour accéder aux assertion helpers."""
-    from tests.core.helpers import AssertionHelpers
-
-    return AssertionHelpers
-
-
-@pytest.fixture
-def parametrize_helpers():
-    """Fixture pour accéder aux parametrize helpers."""
-    from tests.core.helpers import ParametrizeHelpers
-
-    return ParametrizeHelpers
-
-
-@pytest.fixture
-def test_patterns():
-    """Fixture pour accéder aux test patterns."""
-    from tests.core.helpers import TestPatterns
-
-    return TestPatterns
-
-
-@pytest.fixture
-def test_utils():
-    """Fixture pour accéder aux test utils."""
-    from tests.core.helpers import TestUtils
-
-    return TestUtils
-
-
-# ═════════════════════════════════════════════════════════════════════
-# SECTION 9: PYTEST PLUGINS & HOOKS
-# ═════════════════════════════════════════════════════════════════════
-
-
-def pytest_collection_modifyitems(config, items):
-    """Modifie items collectés pour ajouter defaults."""
-    for item in items:
-        # Marquer tous les tests sans marker comme "unit"
-        if not any(
-            marker.name in ["unit", "integration", "slow"] for marker in item.iter_markers()
-        ):
-            item.add_marker(pytest.mark.unit)
-
-
-def pytest_runtest_logreport(report):
-    """Hook pour logging des résultats de test."""
-    if report.when == "call":
-        if report.failed:
-            # Log failures
-            pass
-        elif report.passed:
-            # Log passes
-            pass
-
-
-# ═════════════════════════════════════════════════════════════════════
-# SECTION 10: FIXTURES SCOPE
-# ═════════════════════════════════════════════════════════════════════
-
-
-@pytest.fixture(scope="session")
-def session_data():
-    """Données au niveau session (partagées entre tests).
-
-    Utilisé pour données lourdes à setup une seule fois.
-    """
-    return {
-        "initialized": True,
-        "timestamp": __import__("datetime").datetime.now(),
-    }
-
-
-@pytest.fixture(scope="module")
-def module_db():
-    """BD partagée au niveau module (attention: isoler les données!)."""
-    engine = create_engine("sqlite:///:memory:")
-    try:
-        from src.core.models import Base
-
-        Base.metadata.create_all(engine)
-    except (ImportError, Exception):
-        pass
-
-    SessionLocal = sessionmaker(bind=engine)
-    session = SessionLocal()
-
-    yield session
-
-    session.close()
-    engine.dispose()
-
-
-# ═════════════════════════════════════════════════════════════════════
-# SECTION 11: PYTEST INI CONFIGURATION
-# ═════════════════════════════════════════════════════════════════════
-
-"""
-pytest.ini content (should be in root):
-
-[pytest]
-minversion = 7.0
-testpaths = tests
-python_files = test_*.py
-python_classes = Test*
-python_functions = test_*
-markers =
-    unit: Unit tests
-    integration: Integration tests
-    slow: Slow tests
-    requires_db: Requires database
-    requires_redis: Requires Redis
-addopts = -v --tb=short --strict-markers
-"""

@@ -381,11 +381,13 @@ suggestions = service.suggest_recipes("Dîner rapide")
 ### Sources de configuration (en cascade)
 
 1. Variables d'environnement système (plus haute priorité)
-2. Fichier `.env.local` (racine du projet)
+2. Fichier `.env.local` (racine du projet — utilisé par backend ET frontend)
 3. Fichier `.env` (fallback)
 4. Valeurs par défaut codées en dur dans `src/core/constants.py`
 
-Importer via: `from src.core.config import obtenir_parametres()`
+> **Configuration unifiée** : Un seul `.env.local` à la racine pour tout le monorepo.
+> Le frontend le lit via `--env-file ../.env.local` (configuré dans `package.json`).
+> En production, Vercel et Railway injectent les variables via leurs dashboards respectifs.
 
 ---
 
@@ -605,7 +607,7 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 
 - Vérifier que le backend tourne sur `http://localhost:8000`
 - Vérifier les CORS dans `src/api/main.py` (localhost:3000 autorisé par défaut)
-- Vérifier `NEXT_PUBLIC_API_URL` dans `frontend/.env.local`
+- Vérifier `NEXT_PUBLIC_API_URL` dans `.env.local` (racine du projet)
 - Inspecter l'onglet Network du navigateur pour les erreurs 401/403/CORS
 
 **Auth échoue?**

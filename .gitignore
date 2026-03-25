@@ -1,4 +1,6 @@
+﻿# ===================================
 # Python
+# ===================================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -6,18 +8,12 @@ __pycache__/
 .Python
 *.egg-info/
 dist/
-build/
 
 # Virtual Environment
 .venv/
 venv/
 ENV/
 env/
-
-# IDEs
-.vscode/
-.idea/
-*.iml
 
 # Pytest
 .pytest_cache/
@@ -30,49 +26,102 @@ cov_*.txt
 # Mypy
 .mypy_cache/
 
-# Environnement et secrets
-.env
-.env.local
+# ===================================
+# Node.js / Frontend
+# ===================================
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# Base de données locale
+# Next.js
+.next/
+out/
+
+# Vercel
+.vercel
+
+# TypeScript build
+*.tsbuildinfo
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ===================================
+# Environnement et secrets (tous)
+# ===================================
+.env*
+!.env.example
+
+# ===================================
+# IDEs
+# ===================================
+.vscode/
+.idea/
+*.iml
+
+# ===================================
+# Base de donnees locale
+# ===================================
 *.db
 *.sqlite
 *.sqlite3
 
+# ===================================
+# Build / production
+# ===================================
+build/
+
+# ===================================
 # Logs
+# ===================================
 logs/
 *.log
 
+# ===================================
 # OS
+# ===================================
 .DS_Store
 Thumbs.db
 *.swp
 
-# Backups
+# ===================================
+# Backups / Uploads
+# ===================================
 data/backups/
-
-# Uploads
 uploads/
 media/
 
-# Secrets et clés
+# ===================================
+# Secrets et cles
+# ===================================
 *.pem
 *.key
 credentials.json
 token.json
 
-# Playwright - résultats de tests (screenshots d'échec)
+# ===================================
+# Tests
+# ===================================
 tests/test-results/
 test-results/
 playwright-report/
-
-# Fichiers de r\u00e9sultats de tests
 test_results*.txt
 test_detail.txt
 tests/reports/
-# Fichiers supprimés (stubs vidés, à supprimer localement)
+/coverage
+
+# ===================================
+# Fichiers supprimes (stubs vides)
+# ===================================
 docs/TEMPLATE_IMPORT.csv
 docs/GUIDE_UTILISATEUR.md
 docs/MIGRATION_CORE_PACKAGES.md
 docs/guides/cuisine/batch_cooking.md
-docs/📋 MaTanne v2 - Document Fonctionnel & Technique.pdf
