@@ -22,6 +22,7 @@ from .preferences import router as preferences_router
 from .push import router as push_router
 from .recettes import router as recettes_router
 from .recherche import router as recherche_router
+from .rgpd import router as rgpd_router
 from .suggestions import router as suggestions_router
 from .upload import router as upload_router
 from .utilitaires import router as utilitaires_router
@@ -47,6 +48,7 @@ __all__ = [
     "push_router",
     "recettes_router",
     "recherche_router",
+    "rgpd_router",
     "suggestions_router",
     "upload_router",
     "utilitaires_router",

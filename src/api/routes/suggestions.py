@@ -7,7 +7,7 @@ avec limitation de débit intégrée et cache sémantique.
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
@@ -142,3 +142,72 @@ async def suggest_planning(
         "jours": jours,
         "personnes": personnes,
     }
+
+
+@router.post("/photo-frigo", responses=REPONSES_IA)
+@gerer_exception_api
+async def analyser_photo_frigo(
+    file: UploadFile = File(..., description="Photo du frigo (JPEG/PNG, max 10MB)"),
+    user: dict = Depends(require_auth),
+    _rate_check: dict = Depends(verifier_limite_debit_ia),
+):
+    """
+    Analyse une photo du frigo et suggère des recettes.
+
+    Envoie une photo du frigo pour détecter les ingrédients visibles
+    et obtenir des suggestions de recettes réalisables.
+    """
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Le fichier doit être une image")
+
+    image_bytes = await file.read()
+    if len(image_bytes) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="L'image ne doit pas dépasser 10 MB")
+
+    from src.services.cuisine.photo_frigo import get_photo_frigo_service
+
+    service = get_photo_frigo_service()
+    resultat = await service.analyser_photo_frigo(image_bytes)
+
+    return resultat.model_dump()
+
+
+# ═══════════════════════════════════════════════════════════
+# PRÉDICTIONS ML
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/predictions/courses")
+@gerer_exception_api
+async def predictions_courses(
+    articles: str = Query(
+        ...,
+        description="Articles à prédire (séparés par virgule)",
+    ),
+    horizon: int = Query(7, ge=1, le=30, description="Horizon de prédiction en jours"),
+    user: dict = Depends(require_auth),
+):
+    """Prédit la consommation d'articles sur un horizon donné."""
+    from src.services.cuisine.suggestions.ml_predictions import obtenir_ml_predictions
+
+    service = obtenir_ml_predictions()
+    noms = [a.strip() for a in articles.split(",") if a.strip()]
+
+    predictions = []
+    for article in noms:
+        pred = service.consommation.predire(article, horizon_jours=horizon)
+        predictions.append(pred.model_dump() if hasattr(pred, "model_dump") else pred.__dict__)
+
+    return {"predictions": predictions, "horizon_jours": horizon}
+
+
+@router.get("/predictions/statut")
+@gerer_exception_api
+async def statut_predictions(
+    user: dict = Depends(require_auth),
+):
+    """Retourne le statut des modèles ML (entraînés ou non)."""
+    from src.services.cuisine.suggestions.ml_predictions import obtenir_ml_predictions
+
+    service = obtenir_ml_predictions()
+    return {"modeles": service.statut_modeles()}

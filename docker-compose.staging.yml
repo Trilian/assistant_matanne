@@ -1,0 +1,68 @@
+# ═══════════════════════════════════════════════════════════
+# Docker Compose — Environnement Staging Local
+# ═══════════════════════════════════════════════════════════
+# Usage:
+#   python manage.py staging start    # ou docker compose -f docker-compose.staging.yml up -d
+#   python manage.py staging stop     # ou docker compose -f docker-compose.staging.yml down
+#   python manage.py staging logs     # ou docker compose -f docker-compose.staging.yml logs -f
+#   python manage.py staging reset    # down -v + up --build
+
+services:
+  # ─── Base de données PostgreSQL ───
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: assistant_matanne_staging
+      POSTGRES_USER: matanne
+      POSTGRES_PASSWORD: matanne_staging_2026
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata_staging:/var/lib/postgresql/data
+      - ./sql/INIT_COMPLET.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U matanne -d assistant_matanne_staging"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ─── Backend FastAPI ───
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.staging
+    environment:
+      DATABASE_URL: postgresql://matanne:matanne_staging_2026@db:5432/assistant_matanne_staging
+      ENVIRONMENT: staging
+      CORS_ORIGINS: http://localhost:3001,http://frontend:3000
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
+
+  # ─── Frontend Next.js ───
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.staging
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8001
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8001
+    ports:
+      - "3001:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata_staging:

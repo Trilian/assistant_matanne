@@ -77,7 +77,7 @@ export default function PageAdmin() {
   const invalider = utiliserInvalidation();
 
   const { data: logs, isLoading } = utiliserRequete(
-    ["admin", "audit-logs", page, filtreAction, filtreEntite],
+    ["admin", "audit-logs", String(page), filtreAction, filtreEntite],
     async (): Promise<ReponseAuditLogs> => {
       const params = new URLSearchParams({ page: String(page), par_page: "25" });
       if (filtreAction) params.append("action", filtreAction);

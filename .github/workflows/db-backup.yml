@@ -1,0 +1,55 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Tous les jours à 2h du matin (UTC)
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: "Uploader vers Supabase Storage"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+jobs:
+  backup:
+    name: Backup PostgreSQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create backup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          UPLOAD_FLAG=""
+          if [ "${{ inputs.upload || 'true' }}" = "true" ]; then
+            UPLOAD_FLAG="--upload"
+          fi
+          python scripts/db/backup_database.py --keep 30 backup $UPLOAD_FLAG
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: sauvegardes/backup_*.json.gz
+          retention-days: 30
+          if-no-files-found: error

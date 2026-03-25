@@ -31,3 +31,28 @@ class SuggestionsPlanningResponse(BaseModel):
     planning: dict[str, Any] = Field(description="Planning structuré par jour")
     jours: int = Field(description="Nombre de jours planifiés")
     personnes: int = Field(description="Nombre de personnes")
+
+
+class IngredientDetecteResponse(BaseModel):
+    """Ingrédient détecté dans une photo."""
+
+    nom: str = Field(description="Nom de l'ingrédient")
+    quantite_estimee: str | None = Field(None, description="Quantité estimée")
+    confiance: float = Field(description="Score de confiance 0-1")
+
+
+class RecetteSuggestionResponse(BaseModel):
+    """Recette suggérée à partir d'ingrédients."""
+
+    nom: str = Field(description="Nom de la recette")
+    description: str = Field(description="Description courte")
+    temps_preparation: int | None = Field(None, description="Temps en minutes")
+    ingredients_utilises: list[str] = Field(default_factory=list)
+    ingredients_manquants: list[str] = Field(default_factory=list)
+
+
+class PhotoFrigoResponse(BaseModel):
+    """Réponse de l'analyse photo frigo."""
+
+    ingredients_detectes: list[IngredientDetecteResponse] = Field(default_factory=list)
+    recettes_suggerees: list[RecetteSuggestionResponse] = Field(default_factory=list)

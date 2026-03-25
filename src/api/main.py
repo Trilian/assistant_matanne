@@ -55,6 +55,7 @@ from src.api.routes import (
     preferences_router,
     recettes_router,
     recherche_router,
+    rgpd_router,
     suggestions_router,
     upload_router,
     utilitaires_router,
@@ -70,6 +71,7 @@ from src.api.utils import (
     get_metrics,
 )
 from src.api.versioning import VersionMiddleware
+from src.api.websocket import ws_notes_router, ws_planning_router, ws_projets_router
 from src.api.websocket_courses import router as websocket_router
 from src.core.monitoring.health import StatutSante, verifier_sante_globale
 
@@ -136,6 +138,18 @@ tags_metadata = [
         "description": "Collaboration temps réel sur les listes de courses",
     },
     {
+        "name": "WebSocket Planning",
+        "description": "Collaboration temps réel sur le planning repas",
+    },
+    {
+        "name": "WebSocket Notes",
+        "description": "Édition collaborative de notes en temps réel",
+    },
+    {
+        "name": "WebSocket Projets",
+        "description": "Collaboration temps réel sur les projets Kanban",
+    },
+    {
         "name": "Webhooks",
         "description": "Gestion des webhooks sortants pour notifications externes",
     },
@@ -174,6 +188,10 @@ tags_metadata = [
     {
         "name": "Upload",
         "description": "Upload de fichiers vers Supabase Storage",
+    },
+    {
+        "name": "RGPD",
+        "description": "Export de données personnelles et suppression de compte (RGPD)",
     },
 ]
 
@@ -463,8 +481,12 @@ app.include_router(utilitaires_router)
 app.include_router(recherche_router)
 app.include_router(documents_router)
 app.include_router(upload_router)
+app.include_router(rgpd_router)
 
 # Prometheus et WebSocket
 app.include_router(prometheus_router)
 app.include_router(websocket_router)
+app.include_router(ws_planning_router)
+app.include_router(ws_notes_router)
+app.include_router(ws_projets_router)
 app.include_router(admin_router)

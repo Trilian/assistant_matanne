@@ -6,11 +6,15 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 
 const nextConfig: NextConfig = {
+  // Standalone output pour Docker staging
+  output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
   // Permettre les images depuis le backend et Supabase
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.supabase.co" },
     ],
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 2592000, // 30 jours
   },
   // Headers de sécurité
   async headers() {
@@ -27,7 +31,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(self), payment=()",
+            value: "camera=(self), microphone=(self), geolocation=(self), payment=()",
           },
           {
             key: "Content-Security-Policy",
@@ -37,7 +41,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://*.supabase.co",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co " + (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_API_URL.replace(/^https?:/, "wss:")}` : "http://localhost:8000 ws://localhost:8000 wss://localhost:8000"),
+              "connect-src 'self' https://*.supabase.co https://*.sentry.io " + (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_API_URL.replace(/^https?:/, "wss:")}` : "http://localhost:8000 ws://localhost:8000 wss://localhost:8000"),
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
@@ -50,4 +54,21 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+let config = withBundleAnalyzer(nextConfig);
+
+// Wrap with Sentry if @sentry/nextjs is available and configured
+if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+  try {
+    // Dynamic import not possible in config, use require
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { withSentryConfig } = require("@sentry/nextjs");
+    config = withSentryConfig(config, {
+      silent: true,
+      hideSourceMaps: true,
+    });
+  } catch {
+    // @sentry/nextjs not installed — skip
+  }
+}
+
+export default config;

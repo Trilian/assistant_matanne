@@ -158,6 +158,27 @@ def deploy_schema():
     run_cmd("python scripts/db/deploy_supabase.py --deploy")
 
 
+def backup_db():
+    """Crée un backup de la base de données"""
+    print("[DB] Création backup...")
+    run_cmd("python scripts/db/backup_database.py backup")
+
+
+def restore_db():
+    """Restaure la base depuis un backup"""
+    if len(sys.argv) < 3:
+        print("[ERROR] Usage: python manage.py restore <chemin_backup>")
+        sys.exit(1)
+    fichier = sys.argv[2]
+    print(f"[DB] Restauration depuis {fichier}...")
+    run_cmd(f"python scripts/db/backup_database.py restore {fichier}")
+
+
+def list_backups():
+    """Liste les backups disponibles"""
+    run_cmd("python scripts/db/backup_database.py list")
+
+
 def check_db():
     """Vérifie la connexion Supabase"""
     print("[DB] Vérification connexion...")
@@ -219,6 +240,41 @@ def audit_tests():
     run_cmd("python scripts/test/audit_tests_fast.py")
 
 
+def staging():
+    """Gère l'environnement staging Docker Compose"""
+    if len(sys.argv) < 3:
+        print("Usage: python manage.py staging <start|stop|reset|logs|status>")
+        sys.exit(1)
+
+    action = sys.argv[2]
+    compose_file = "docker-compose.staging.yml"
+    base_cmd = f"docker compose -f {compose_file}"
+
+    if action == "start":
+        print("[STAGING] Démarrage de l'environnement staging...")
+        run_cmd(f"{base_cmd} up -d --build", shell=True)
+        print("[OK] Staging démarré:")
+        print("  Backend:  http://localhost:8001")
+        print("  Frontend: http://localhost:3001")
+        print("  DB:       localhost:5433")
+    elif action == "stop":
+        print("[STAGING] Arrêt de l'environnement staging...")
+        run_cmd(f"{base_cmd} down", shell=True)
+    elif action == "reset":
+        print("[STAGING] Reset complet (volumes inclus)...")
+        run_cmd(f"{base_cmd} down -v", shell=True)
+        run_cmd(f"{base_cmd} up -d --build", shell=True)
+        print("[OK] Staging reset et redémarré")
+    elif action == "logs":
+        run_cmd(f"{base_cmd} logs -f", shell=True)
+    elif action == "status":
+        run_cmd(f"{base_cmd} ps", shell=True)
+    else:
+        print(f"[ERROR] Action inconnue: {action}")
+        print("Actions: start, stop, reset, logs, status")
+        sys.exit(1)
+
+
 def help_cmd():
     """Affiche l'aide"""
     print(
@@ -241,11 +297,21 @@ Base de données:
   check-db             Vérifie la connexion Supabase
   seed-recipes         Importe les recettes standard
   seed-demo            Charge les données de démo
+  backup               Crée un backup de la base de données
+  restore <fichier>    Restaure depuis un backup
+  list-backups         Liste les backups disponibles
 
 Tests avancés:
   test-quick           Tests rapides sans couverture
   test-core            Tests du core uniquement
   audit-tests          Audit de couverture des tests
+
+Staging:
+  staging start        Démarre l'environnement staging Docker
+  staging stop         Arrête le staging
+  staging reset        Reset complet (volumes + rebuild)
+  staging logs         Affiche les logs en continu
+  staging status       Statut des containers
 
 Déploiement:
   requirements         Génère requirements.txt
@@ -269,10 +335,14 @@ COMMANDS = {
     "check-db": check_db,
     "seed-recipes": seed_recipes,
     "seed-demo": seed_demo,
+    "backup": backup_db,
+    "restore": restore_db,
+    "list-backups": list_backups,
     "test-quick": test_quick,
     "test-core": test_core,
     "audit-tests": audit_tests,
     "requirements": generate_requirements,
+    "staging": staging,
     "clean": clean,
     "help": help_cmd,
 }

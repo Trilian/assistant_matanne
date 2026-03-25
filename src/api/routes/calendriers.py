@@ -310,3 +310,133 @@ async def evenements_semaine(
             }
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# GOOGLE CALENDAR — OAuth & Sync
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/google/auth-url")
+@gerer_exception_api
+async def obtenir_url_auth_google(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, str]:
+    """Génère l'URL d'autorisation OAuth2 Google Calendar."""
+    from src.core.config import obtenir_parametres
+    from src.services.famille.calendrier import get_calendar_sync_service
+
+    def _gen():
+        params = obtenir_parametres()
+        redirect_uri = params.GOOGLE_REDIRECT_URI
+        if not redirect_uri:
+            raise HTTPException(status_code=500, detail="GOOGLE_REDIRECT_URI non configuré")
+        service = get_calendar_sync_service()
+        url = service.get_google_auth_url(str(user["id"]), redirect_uri)
+        return {"auth_url": url}
+
+    return await executer_async(_gen)
+
+
+@router.get("/google/callback")
+@gerer_exception_api
+async def callback_google(
+    code: str = Query(..., description="Code d'autorisation OAuth2"),
+    state: str = Query(..., description="User ID passé via state"),
+) -> dict[str, Any]:
+    """Callback OAuth2 Google — échange le code contre des tokens."""
+    from src.core.config import obtenir_parametres
+    from src.services.famille.calendrier import get_calendar_sync_service
+
+    def _exchange():
+        params = obtenir_parametres()
+        redirect_uri = params.GOOGLE_REDIRECT_URI
+        service = get_calendar_sync_service()
+        config = service.handle_google_callback(state, code, redirect_uri)
+        if not config:
+            raise HTTPException(status_code=400, detail="Échec de l'authentification Google")
+        return {
+            "status": "connected",
+            "provider": "google",
+            "name": config.name,
+        }
+
+    return await executer_async(_exchange)
+
+
+@router.post("/google/sync")
+@gerer_exception_api
+async def synchroniser_google(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Déclenche une synchronisation manuelle avec Google Calendar."""
+    from src.services.famille.calendrier import get_calendar_sync_service
+
+    def _sync():
+        service = get_calendar_sync_service()
+        result = service.sync_google_calendar(str(user["id"]))
+        return {
+            "status": "success",
+            "events_imported": result.imported if result else 0,
+            "events_exported": result.exported if result else 0,
+            "errors": result.errors if result else [],
+        }
+
+    return await executer_async(_sync)
+
+
+@router.get("/google/status")
+@gerer_exception_api
+async def statut_google(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Vérifie l'état de la connexion Google Calendar."""
+    from src.core.models import CalendrierExterne
+
+    def _query():
+        with executer_avec_session() as session:
+            cal = (
+                session.query(CalendrierExterne)
+                .filter(
+                    CalendrierExterne.user_id == user["id"],
+                    CalendrierExterne.provider == "google",
+                )
+                .first()
+            )
+            if not cal:
+                return {"connected": False}
+            return {
+                "connected": True,
+                "nom": cal.nom,
+                "last_sync": cal.last_sync.isoformat() if cal.last_sync else None,
+                "enabled": cal.enabled,
+                "sync_direction": cal.sync_direction,
+            }
+
+    return await executer_async(_query)
+
+
+@router.delete("/google/disconnect")
+@gerer_exception_api
+async def deconnecter_google(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, str]:
+    """Déconnecte Google Calendar et supprime les tokens."""
+    from src.core.models import CalendrierExterne
+
+    def _delete():
+        with executer_avec_session() as session:
+            deleted = (
+                session.query(CalendrierExterne)
+                .filter(
+                    CalendrierExterne.user_id == user["id"],
+                    CalendrierExterne.provider == "google",
+                )
+                .delete()
+            )
+            session.commit()
+            if not deleted:
+                raise HTTPException(status_code=404, detail="Aucune connexion Google trouvée")
+            return {"status": "disconnected"}
+
+    return await executer_async(_delete)

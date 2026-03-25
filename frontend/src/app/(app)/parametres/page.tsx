@@ -554,7 +554,53 @@ function OngletNotifications() {
 
 function OngletDonnees() {
   const [confirmation, setConfirmation] = useState(false);
+  const [texteConfirmation, setTexteConfirmation] = useState("");
+  const [motifSuppression, setMotifSuppression] = useState("");
+  const [suppressionOuverte, setSuppressionOuverte] = useState(false);
   const invalider = utiliserInvalidation();
+
+  const { data: resume, isLoading: chargementResume } = utiliserRequete(
+    ["rgpd", "resume"],
+    async () => {
+      const { obtenirResumeDonnees } = await import("@/bibliotheque/api/rgpd");
+      return obtenirResumeDonnees();
+    }
+  );
+
+  const exportMutation = utiliserMutation(
+    async () => {
+      const { exporterDonnees } = await import("@/bibliotheque/api/rgpd");
+      return exporterDonnees();
+    },
+    {
+      onSuccess: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `mes-donnees-${new Date().toISOString().slice(0, 10)}.zip`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success("Export téléchargé avec succès");
+      },
+      onError: () => toast.error("Erreur lors de l'export des données"),
+    }
+  );
+
+  const suppressionMutation = utiliserMutation(
+    async () => {
+      const { supprimerCompte } = await import("@/bibliotheque/api/rgpd");
+      return supprimerCompte(texteConfirmation, motifSuppression || undefined);
+    },
+    {
+      onSuccess: () => {
+        toast.success("Compte supprimé. Déconnexion...");
+        setTimeout(() => {
+          window.location.href = "/connexion";
+        }, 2000);
+      },
+      onError: () => toast.error("Erreur lors de la suppression du compte"),
+    }
+  );
 
   const viderCache = () => {
     // Invalide tous les caches TanStack Query
@@ -597,6 +643,110 @@ function OngletDonnees() {
               ? `${(JSON.stringify(localStorage).length / 1024).toFixed(1)} KB`
               : "—"}
           </Badge>
+        </div>
+
+        {/* ─── RGPD — Export des données ─── */}
+        <div className="border-t pt-6 space-y-2">
+          <Label className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Export de vos données (RGPD)
+          </Label>
+          <p className="text-sm text-muted-foreground">
+            Téléchargez une archive ZIP contenant toutes vos données personnelles.
+          </p>
+          {resume && !chargementResume && (
+            <p className="text-xs text-muted-foreground">
+              {resume.total_elements} éléments répartis sur{" "}
+              {resume.categories.length} catégories
+            </p>
+          )}
+          <Button
+            variant="outline"
+            onClick={() => exportMutation.mutate(undefined)}
+            disabled={exportMutation.isPending}
+          >
+            {exportMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Export en cours...
+              </>
+            ) : (
+              <>
+                <Download className="mr-2 h-4 w-4" />
+                Télécharger mes données
+              </>
+            )}
+          </Button>
+        </div>
+
+        {/* ─── RGPD — Suppression du compte ─── */}
+        <div className="border-t pt-6 space-y-4">
+          <Label className="flex items-center gap-2 text-destructive">
+            <Trash2 className="h-4 w-4" />
+            Supprimer mon compte
+          </Label>
+          <p className="text-sm text-muted-foreground">
+            Cette action est irréversible. Toutes vos données seront définitivement supprimées.
+          </p>
+          {!suppressionOuverte ? (
+            <Button
+              variant="destructive"
+              onClick={() => setSuppressionOuverte(true)}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Supprimer mon compte
+            </Button>
+          ) : (
+            <div className="space-y-3 rounded-lg border border-destructive/50 p-4">
+              <div className="space-y-2">
+                <Label>Motif (optionnel)</Label>
+                <Input
+                  value={motifSuppression}
+                  onChange={(e) => setMotifSuppression(e.target.value)}
+                  placeholder="Pourquoi souhaitez-vous supprimer votre compte ?"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>
+                  Tapez <strong>SUPPRIMER MON COMPTE</strong> pour confirmer
+                </Label>
+                <Input
+                  value={texteConfirmation}
+                  onChange={(e) => setTexteConfirmation(e.target.value)}
+                  placeholder="SUPPRIMER MON COMPTE"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="destructive"
+                  disabled={
+                    texteConfirmation !== "SUPPRIMER MON COMPTE" ||
+                    suppressionMutation.isPending
+                  }
+                  onClick={() => suppressionMutation.mutate(undefined)}
+                >
+                  {suppressionMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Suppression...
+                    </>
+                  ) : (
+                    "Confirmer la suppression"
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSuppressionOuverte(false);
+                    setTexteConfirmation("");
+                    setMotifSuppression("");
+                  }}
+                >
+                  Annuler
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

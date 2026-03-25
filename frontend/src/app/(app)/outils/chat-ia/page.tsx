@@ -34,6 +34,7 @@ import type {
 import type { MessageChat } from "@/types/outils";
 import { toast } from "sonner";
 import { utiliserRequete } from "@/crochets/utiliser-api";
+import { BoutonVocal } from "@/composants/ui/bouton-vocal";
 
 const CONTEXTES: { id: ContexteChat; label: string; icon: typeof Bot; color: string }[] = [
   { id: "general", label: "Général", icon: Bot, color: "bg-primary/10 text-primary" },
@@ -244,6 +245,10 @@ export default function ChatIAPage() {
           )}
 
           <form onSubmit={gererEnvoi} className="flex gap-2 p-4 border-t">
+            <BoutonVocal
+              onResultat={(texte) => setSaisie((prev) => prev ? `${prev} ${texte}` : texte)}
+              placeholder="Dicter votre message"
+            />
             <Input
               value={saisie}
               onChange={(e) => setSaisie(e.target.value)}

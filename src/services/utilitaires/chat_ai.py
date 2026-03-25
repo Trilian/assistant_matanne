@@ -18,13 +18,21 @@ from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
-ContexteChat = Literal["cuisine", "famille", "maison", "budget", "general"]
+ContexteChat = Literal["cuisine", "famille", "maison", "budget", "general", "nutrition"]
 
 SYSTEM_PROMPTS: dict[str, str] = {
     "cuisine": """Tu es un assistant culinaire expert pour une famille française.
 Tu aides avec: recettes, planification des repas, courses, conseils nutritionnels, batch cooking.
 Tu connais bien la cuisine française, méditerranéenne et les plats familiaux.
 Sois concret, donne des quantités et temps précis.""",
+    "nutrition": """Tu es un(e) nutritionniste diététicien(ne) expert(e) en nutrition française.
+Tu aides à analyser les repas, évaluer l'équilibre nutritionnel et proposer des améliorations concrètes.
+Tu maîtrises: macronutriments, micronutriments, alimentation de la petite enfance, allergies alimentaires.
+Tu connais les recommandations PNNS (Programme National Nutrition Santé) et ANSES française.
+Tu peux analyser un planning de repas, calculer des apports caloriques approximatifs,
+identifier les carences ou excès, et proposer des alternatives saines sans sacrifier le plaisir.
+Sois bienveillant(e), pratique et basé(e) sur des données scientifiques.
+Précise toujours qu'il faut consulter un professionnel de santé pour un suivi personnalisé.""",
     "famille": """Tu es un assistant familial bienveillant.
 Tu aides avec: activités pour enfants (Jules, ~3 ans), développement, routines, sorties weekend.
 Tu connais les étapes de développement de la petite enfance et les activités Montessori.
@@ -68,6 +76,12 @@ ACTIONS_RAPIDES: dict[str, list[dict[str, str]]] = {
         {"label": "Organiser ma semaine", "message": "Aide-moi à organiser ma semaine efficacement"},
         {"label": "Idées sortie famille", "message": "Propose des sorties en famille pas chères"},
         {"label": "Conseils quotidien", "message": "Donne un conseil du jour pour une famille épanouie"},
+    ],
+    "nutrition": [
+        {"label": "Analyser mon repas", "message": "Analyse la valeur nutritionnelle de ce repas pour moi"},
+        {"label": "Équilibre de la semaine", "message": "Comment équilibrer mon planning repas cette semaine ?"},
+        {"label": "Astuces pour Jules", "message": "Conseils nutrition pour un enfant de 3 ans qui refuse les légumes"},
+        {"label": "Réduire sucre ajouté", "message": "Comment réduire le sucre dans mes recettes familiales ?"},
     ],
 }
 

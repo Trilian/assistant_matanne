@@ -50,6 +50,9 @@ import {
   Contact,
   Layers,
   Shield,
+  Camera,
+  Apple,
+  Link2,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -88,6 +91,7 @@ const LIENS: LienNav[] = [
       { nom: "Inventaire", chemin: "/cuisine/inventaire", Icone: Package },
       { nom: "Batch Cooking", chemin: "/cuisine/batch-cooking", Icone: CookingPot },
       { nom: "Anti-Gaspi", chemin: "/cuisine/anti-gaspillage", Icone: Leaf },
+      { nom: "Photo Frigo", chemin: "/cuisine/photo-frigo", Icone: Camera },
     ],
   },
   {
@@ -148,6 +152,7 @@ const LIENS: LienNav[] = [
       { nom: "Météo", chemin: "/outils/meteo", Icone: CloudSun },
       { nom: "Minuteur", chemin: "/outils/minuteur", Icone: Timer },
       { nom: "Notes", chemin: "/outils/notes", Icone: StickyNote },
+      { nom: "Nutritionniste", chemin: "/outils/nutritionniste", Icone: Apple },
     ],
   },
 ];
@@ -322,6 +327,18 @@ export function BarreLaterale() {
         >
           <Settings className="h-5 w-5 shrink-0" />
           {sidebarOuverte && <span>Paramètres</span>}
+        </Link>
+        <Link
+          href="/parametres/integrations"
+          className={cn(
+            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+            pathname === "/parametres/integrations"
+              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
+          )}
+        >
+          <Link2 className="h-5 w-5 shrink-0" />
+          {sidebarOuverte && <span>Intégrations</span>}
         </Link>
       </div>
     </aside>

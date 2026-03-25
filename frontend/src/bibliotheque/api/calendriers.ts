@@ -71,3 +71,42 @@ export async function evenementsSemaine(): Promise<EvenementCalendrier[]> {
   const { data } = await clientApi.get("/calendriers/evenements/semaine");
   return data.items ?? data;
 }
+
+// ═══════════════════════════════════════════════════════════
+// GOOGLE CALENDAR
+// ═══════════════════════════════════════════════════════════
+
+export interface StatutGoogle {
+  connected: boolean;
+  nom?: string;
+  last_sync?: string;
+  enabled?: boolean;
+  sync_direction?: string;
+}
+
+export interface ResultatSync {
+  status: string;
+  events_imported: number;
+  events_exported: number;
+  errors: string[];
+}
+
+export async function obtenirUrlAuthGoogle(): Promise<{ auth_url: string }> {
+  const { data } = await clientApi.get("/calendriers/google/auth-url");
+  return data;
+}
+
+export async function synchroniserGoogle(): Promise<ResultatSync> {
+  const { data } = await clientApi.post("/calendriers/google/sync");
+  return data;
+}
+
+export async function statutGoogle(): Promise<StatutGoogle> {
+  const { data } = await clientApi.get("/calendriers/google/status");
+  return data;
+}
+
+export async function deconnecterGoogle(): Promise<{ status: string }> {
+  const { data } = await clientApi.delete("/calendriers/google/disconnect");
+  return data;
+}
