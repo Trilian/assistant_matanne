@@ -2,19 +2,27 @@
 Schémas Pydantic pour le planning.
 """
 
-from datetime import datetime
+from datetime import date as DateType
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 from .base import IdentifiedResponse, TypeRepasValidator
 
 
 class RepasBase(BaseModel, TypeRepasValidator):
-    """Schéma de base pour un repas."""
+    """Schéma de base pour un repas.
+
+    Le champ ``date`` utilise l'alias ``date_repas`` pour la sérialisation
+    depuis les objets ORM (modèle ``Repas.date_repas``).  Les clients API
+    peuvent envoyer le champ sous les deux noms (``date`` ou ``date_repas``)
+    grâce à ``populate_by_name=True``.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
 
     type_repas: str
-    date: datetime
+    date: DateType = Field(alias="date_repas")
     recette_id: int | None = None
     notes: str | None = None
 

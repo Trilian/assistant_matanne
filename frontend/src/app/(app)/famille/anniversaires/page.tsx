@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Anniversaires — Dates importantes (connecté API)
 // ═══════════════════════════════════════════════════════════
 
@@ -11,18 +11,18 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
+import { Button } from "@/composants/ui/button";
+import { Input } from "@/composants/ui/input";
+import { Label } from "@/composants/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/composants/ui/dialog";
 import {
   utiliserRequete,
   utiliserMutation,

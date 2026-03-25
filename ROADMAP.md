@@ -1,6 +1,48 @@
 # 🗺️ ROADMAP - Assistant Matanne
 
-> Dernière mise à jour: 9 janvier 2025
+> Dernière mise à jour: 25 mars 2026
+
+---
+
+## ✅ Sprint 16 — Audit qualité, corrections bugs, organisation
+
+> Date: 25 mars 2026
+
+### Phase 16a — Bug fix: Planning schema (date_repas)
+
+- ✅ `src/api/schemas/planning.py` — Champ `date: datetime` → `date: date`, type corrigé + alias `date_repas` pour la sérialisation ORM, `populate_by_name=True`
+- ✅ `src/api/routes/planning.py` — Simplification `date_repas = repas.date` (plus de conversion `.date()`)
+- ✅ `frontend/src/types/planning.ts` — `RepasPlanning.date_repas` exposé comme champ principal, `date` gardé comme alias
+
+### Phase 16b — Documentation: nettoyage Streamlit dans PATTERNS.md
+
+- ✅ `docs/PATTERNS.md` — Suppression section "State Slices" (Streamlit state management obsolète)
+- ✅ `docs/PATTERNS.md` — Nettoyage Best Practice #2 (`@st.cache_data` → `@avec_cache` uniquement)
+- ✅ `docs/PATTERNS.md` — Suppression Best Practice #4 (Navigation GestionnaireEtat + `st.rerun()`)
+- ✅ `docs/PATTERNS.md` — Mock service factory example mis à jour (pattern FastAPI route test)
+- ✅ Table des matières mise à jour (8 → 7 sections)
+
+### Phase 16c — Organisation fichiers
+
+- ✅ `scripts/` — 5 scripts racine déplacés vers sous-dossiers (`setup/`, `db/`, `analysis/`)
+  - `run_api.py` → `scripts/setup/`
+  - `verify_connection_simple.py` → `scripts/setup/`
+  - `convert_to_utf8.py` → `scripts/setup/`
+  - `check_db.py` → `scripts/db/`
+  - `audit_metrics.py` → `scripts/analysis/`
+- ✅ `frontend/src/__tests__/validateurs-sprint11.test.ts` → `validateurs-zod.test.ts`
+- ✅ `.gitignore` — Ajout exclusion `test_results*.txt`, `test_detail.txt`, `tests/reports/`
+- ✅ `tests/reports/` — Dossier créé pour les futurs rapports de tests
+
+### Compteurs Sprint 16
+
+| Métrique | Valeur |
+| --- | --- |
+| Bugs corrigés | 1 (Planning date type mismatch) |
+| Fichiers doc nettoyés | 1 (PATTERNS.md — 8 refs Streamlit supprimées) |
+| Scripts reorganisés | 5 fichiers déplacés |
+| Tests renommés | 1 fichier |
+| Entrées .gitignore | 3 ajoutées |
 
 ---
 

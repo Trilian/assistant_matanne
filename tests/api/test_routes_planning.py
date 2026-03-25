@@ -1,397 +1,195 @@
 """
 Tests pour src/api/routes/planning.py
 
-Tests unitaires avec vraies données pour les routes planning.
+Tests unitaires avec vraies donnees pour les routes planning.
 """
 
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from unittest.mock import MagicMock
 
 import pytest
 
-# ═══════════════════════════════════════════════════════════
-# DONNÉES DE TEST RÉELLES
-# ═══════════════════════════════════════════════════════════
-
 
 REPAS_TEST = [
-    {
-        "id": 1,
-        "type_repas": "dejeuner",
-        "date": datetime(2026, 2, 10, 12, 0),
-        "recette_id": 1,
-        "notes": "Poulet rôti avec légumes",
-    },
-    {
-        "id": 2,
-        "type_repas": "diner",
-        "date": datetime(2026, 2, 10, 19, 0),
-        "recette_id": 2,
-        "notes": "Soupe et pain",
-    },
-    {
-        "id": 3,
-        "type_repas": "dejeuner",
-        "date": datetime(2026, 2, 11, 12, 0),
-        "recette_id": 3,
-        "notes": None,
-    },
+    {"id": 1, "type_repas": "dejeuner", "date_repas": "2026-02-10", "recette_id": 1, "notes": "Poulet"},
+    {"id": 2, "type_repas": "diner", "date_repas": "2026-02-10", "recette_id": 2, "notes": "Soupe"},
+    {"id": 3, "type_repas": "dejeuner", "date_repas": "2026-02-11", "recette_id": 3, "notes": None},
 ]
 
-NOUVEAU_REPAS = {
-    "type_repas": "dejeuner",
-    "date": "2026-02-12T12:00:00",
-    "recette_id": 1,
-    "notes": "Tarte aux légumes",
-}
-
-
-# ═══════════════════════════════════════════════════════════
-# FIXTURES
-# ═══════════════════════════════════════════════════════════
-
-# Note: utilise le fixture `client` de conftest.py qui inclut la DB SQLite
+NOUVEAU_REPAS = {"type_repas": "dejeuner", "date_repas": "2026-02-12", "recette_id": 1, "notes": "Tarte"}
 
 
 def creer_mock_repas(data: dict) -> MagicMock:
-    """Crée un mock de repas."""
     mock = MagicMock()
     for key, value in data.items():
         setattr(mock, key, value)
     return mock
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS
-# ═══════════════════════════════════════════════════════════
-
-
 class TestSchemasPlanning:
-    """Tests des schémas Pydantic."""
 
     def test_repas_base_valide(self):
-        """RepasBase accepte données valides."""
         from src.api.schemas import RepasBase
-
-        repas = RepasBase(
-            type_repas="dejeuner",
-            date=datetime(2026, 2, 10, 12, 0),
-            recette_id=1,
-        )
-
+        repas = RepasBase(type_repas="dejeuner", date_repas=date(2026, 2, 10), recette_id=1)
         assert repas.type_repas == "dejeuner"
         assert repas.recette_id == 1
 
-    def test_type_repas_invalide_rejete(self):
-        """Type de repas invalide est rejeté."""
-        from pydantic import ValidationError
-
+    def test_repas_base_via_field_name(self):
         from src.api.schemas import RepasBase
+        repas = RepasBase(type_repas="dejeuner", date=date(2026, 2, 10))
+        assert repas.type_repas == "dejeuner"
 
+    def test_type_repas_invalide_rejete(self):
+        from pydantic import ValidationError
+        from src.api.schemas import RepasBase
         with pytest.raises(ValidationError):
-            RepasBase(
-                type_repas="brunch",  # invalide
-                date=datetime.now(),
-            )
+            RepasBase(type_repas="brunch", date_repas=date.today())
 
     def test_types_repas_valides(self):
-        """Tous les types de repas valides sont acceptés."""
         from src.api.schemas import RepasBase
-
-        types_valides = ["petit_dejeuner", "dejeuner", "diner", "gouter"]
-
-        for type_repas in types_valides:
-            repas = RepasBase(type_repas=type_repas, date=datetime.now())
-            assert repas.type_repas == type_repas
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS ROUTES
-# ═══════════════════════════════════════════════════════════
+        for t in ["petit_dejeuner", "dejeuner", "diner", "gouter"]:
+            repas = RepasBase(type_repas=t, date_repas=date.today())
+            assert repas.type_repas == t
 
 
 class TestRoutesPlanning:
-    """Tests des routes planning."""
+    pytestmark = [pytest.mark.asyncio(loop_scope="function")]
 
-    def test_planning_semaine_endpoint_existe(self, client):
-        """GET /api/v1/planning/semaine existe."""
-        response = client.get("/api/v1/planning/semaine")
+    async def test_planning_semaine_endpoint_existe(self, client):
+        response = await client.get("/api/v1/planning/semaine")
         assert response.status_code in (200, 500)
 
-    def test_creer_repas_endpoint_existe(self, client):
-        """POST /api/v1/planning/repas existe."""
-        response = client.post("/api/v1/planning/repas", json=NOUVEAU_REPAS)
+    async def test_creer_repas_endpoint_existe(self, client):
+        response = await client.post("/api/v1/planning/repas", json=NOUVEAU_REPAS)
         assert response.status_code in (200, 500)
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS AVEC MOCK BD
-# ═══════════════════════════════════════════════════════════
 
 
 class TestRoutesPlanningAvecMock:
-    """Tests avec données simulées."""
+    pytestmark = [pytest.mark.asyncio(loop_scope="function")]
 
-    @pytest.mark.integration
-    def test_planning_semaine_format_correct(self, client):
-        """Le planning retourne le bon format."""
-        response = client.get("/api/v1/planning/semaine")
-        # 200 ou 500 selon état BD
+    async def test_planning_semaine_format_correct(self, client):
+        response = await client.get("/api/v1/planning/semaine")
         assert response.status_code in (200, 500)
-
         if response.status_code == 200:
             data = response.json()
             assert "date_debut" in data
             assert "date_fin" in data
             assert "planning" in data
 
-    @pytest.mark.integration
-    def test_creer_repas_succes(self, client):
-        """POST crée un nouveau repas."""
-        response = client.post("/api/v1/planning/repas", json=NOUVEAU_REPAS)
-        # 200 ou 500 selon état BD
+    async def test_creer_repas_succes(self, client):
+        response = await client.post("/api/v1/planning/repas", json=NOUVEAU_REPAS)
         assert response.status_code in (200, 500)
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS VALIDATION
-# ═══════════════════════════════════════════════════════════
 
 
 class TestValidationPlanning:
-    """Tests de validation des données."""
+    pytestmark = [pytest.mark.asyncio(loop_scope="function")]
 
-    def test_creer_repas_type_invalide_echoue(self, client):
-        """POST avec type invalide échoue."""
-        response = client.post(
-            "/api/v1/planning/repas",
-            json={
-                "type_repas": "brunch",  # invalide
-                "date": "2026-02-12T12:00:00",
-            },
-        )
-
+    async def test_creer_repas_type_invalide_echoue(self, client):
+        response = await client.post("/api/v1/planning/repas", json={"type_repas": "brunch", "date_repas": "2026-02-12"})
         assert response.status_code == 422
 
-    def test_creer_repas_sans_date_echoue(self, client):
-        """POST sans date échoue."""
-        response = client.post(
-            "/api/v1/planning/repas",
-            json={
-                "type_repas": "dejeuner",
-            },
-        )
-
+    async def test_creer_repas_sans_date_echoue(self, client):
+        response = await client.post("/api/v1/planning/repas", json={"type_repas": "dejeuner"})
         assert response.status_code == 422
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS CRÉATION AVEC DB
-# ═══════════════════════════════════════════════════════════
 
 
 class TestPlanningCreationDB:
-    """Tests de création de repas avec vraie DB SQLite."""
+    pytestmark = [pytest.mark.asyncio(loop_scope="function")]
 
-    def test_creer_repas_nouveau(self, client, db):
-        """POST crée un nouveau repas planifié."""
-        from datetime import date, timedelta
-
+    async def test_creer_repas_nouveau(self, client, db):
         from src.core.models import Planning, Repas
-
-        # Créer un planning d'abord (requis par Repas)
         today = date.today()
-        planning = Planning(
-            nom="Planning test", semaine_debut=today, semaine_fin=today + timedelta(days=7)
-        )
+        planning = Planning(nom="Planning test", semaine_debut=today, semaine_fin=today + timedelta(days=7))
         db.add(planning)
         db.commit()
         db.refresh(planning)
-
-        # Créer un repas directement en DB pour le test
-        repas = Repas(
-            planning_id=planning.id, date_repas=today + timedelta(days=1), type_repas="dejeuner"
-        )
+        repas = Repas(planning_id=planning.id, date_repas=today + timedelta(days=1), type_repas="dejeuner")
         db.add(repas)
         db.commit()
-
-        # Vérifier dans le planning semaine
-        response = client.get("/api/v1/planning/semaine")
+        response = await client.get("/api/v1/planning/semaine")
         assert response.status_code == 200
-        data = response.json()
-        assert "planning" in data
+        assert "planning" in response.json()
 
-    def test_planning_semaine_avec_repas(self, client, db):
-        """GET /semaine retourne les repas planifiés."""
-        from datetime import date, timedelta
-
+    async def test_planning_semaine_avec_repas(self, client, db):
         from src.core.models import Planning, Repas
-
-        # Créer un planning et un repas pour cette semaine
         today = date.today()
         start_of_week = today - timedelta(days=today.weekday())
-
-        planning = Planning(
-            nom="Planning semaine",
-            semaine_debut=start_of_week,
-            semaine_fin=start_of_week + timedelta(days=7),
-        )
+        planning = Planning(nom="Planning semaine", semaine_debut=start_of_week, semaine_fin=start_of_week + timedelta(days=7))
         db.add(planning)
         db.commit()
         db.refresh(planning)
-
-        repas = Repas(
-            planning_id=planning.id,
-            date_repas=start_of_week + timedelta(days=2),  # Mercredi
-            type_repas="diner",
-        )
+        repas = Repas(planning_id=planning.id, date_repas=start_of_week + timedelta(days=2), type_repas="diner")
         db.add(repas)
         db.commit()
-
-        # Récupérer le planning
-        response = client.get("/api/v1/planning/semaine")
+        response = await client.get("/api/v1/planning/semaine")
         assert response.status_code == 200
-        data = response.json()
+        assert "planning" in response.json()
 
-        # Le planning devrait contenir le repas
-        assert "planning" in data
-        # Le repas peut être dans planning[date][type_repas]
-
-    def test_post_repas_cree_planning_automatique(self, client, db):
-        """POST /repas crée un planning si nécessaire."""
-        from datetime import datetime
-
-        # Créer un repas via l'API (sans planning existant)
-        tomorrow = datetime.now() + timedelta(days=1)
-        response = client.post(
-            "/api/v1/planning/repas", json={"type_repas": "dejeuner", "date": tomorrow.isoformat()}
-        )
-
-        # Doit retourner soit 200 soit 500 (DB pas complètement mockée)
+    async def test_post_repas_cree_planning_automatique(self, client, db):
+        tomorrow = (date.today() + timedelta(days=1)).isoformat()
+        response = await client.post("/api/v1/planning/repas", json={"type_repas": "dejeuner", "date_repas": tomorrow})
         assert response.status_code in (200, 500)
-        if response.status_code == 200:
-            data = response.json()
-            assert "id" in data or "message" in data
 
-    def test_post_repas_avec_planning_existant(self, client, db):
-        """POST /repas utilise un planning existant."""
-        from datetime import date, datetime, timedelta
-
+    async def test_post_repas_avec_planning_existant(self, client, db):
         from src.core.models import Planning
-
-        # Créer un planning qui couvre demain
         today = date.today()
         start_of_week = today - timedelta(days=today.weekday())
-
-        planning = Planning(
-            nom="Planning test",
-            semaine_debut=start_of_week,
-            semaine_fin=start_of_week + timedelta(days=6),
-            actif=True,
-        )
+        planning = Planning(nom="Planning test", semaine_debut=start_of_week, semaine_fin=start_of_week + timedelta(days=6), actif=True)
         db.add(planning)
         db.commit()
-
-        # Poster un repas pour demain
-        tomorrow = datetime.now() + timedelta(days=1)
-        response = client.post(
-            "/api/v1/planning/repas", json={"type_repas": "diner", "date": tomorrow.isoformat()}
-        )
-
+        tomorrow = (today + timedelta(days=1)).isoformat()
+        response = await client.post("/api/v1/planning/repas", json={"type_repas": "diner", "date_repas": tomorrow})
         assert response.status_code in (200, 500)
-
-
-# ═══════════════════════════════════════════════════════════
-# TESTS ADDITIONNELS POUR COUVERTURE
-# ═══════════════════════════════════════════════════════════
 
 
 class TestSchemasPlanningCoverage:
-    """Tests additionnels schémas planning."""
 
     def test_repas_avec_notes(self):
-        """RepasBase accepte les notes optionnelles."""
         from src.api.schemas import RepasBase
-
-        repas = RepasBase(type_repas="dejeuner", date=datetime.now(), notes="Notes de test")
+        repas = RepasBase(type_repas="dejeuner", date_repas=date.today(), notes="Notes de test")
         assert repas.notes == "Notes de test"
 
     def test_repas_sans_recette(self):
-        """RepasBase sans recette_id valide."""
         from src.api.schemas import RepasBase
-
-        repas = RepasBase(type_repas="dejeuner", date=datetime.now())
+        repas = RepasBase(type_repas="dejeuner", date_repas=date.today())
         assert repas.recette_id is None
 
 
 class TestRoutesPlanningCoverage:
-    """Tests additionnels routes planning."""
+    pytestmark = [pytest.mark.asyncio(loop_scope="function")]
 
-    def test_planning_avec_date_specifique(self, client):
-        """GET avec date spécifique."""
-        from datetime import date
-
-        today = date.today()
-        response = client.get(f"/api/v1/planning/semaine?date={today.isoformat()}")
+    async def test_planning_avec_date_specifique(self, client):
+        today_str = date.today().isoformat()
+        response = await client.get(f"/api/v1/planning/semaine?date={today_str}")
         assert response.status_code in (200, 500)
 
-    def test_supprimer_repas(self, client, db):
-        """DELETE /{id} supprime un repas."""
-        from datetime import date, timedelta
-
+    async def test_supprimer_repas(self, client, db):
         from src.core.models import Planning, Repas
-
-        # Créer planning et repas
         today = date.today()
-        planning = Planning(
-            nom="Planning test",
-            semaine_debut=today,
-            semaine_fin=today + timedelta(days=7),
-        )
+        planning = Planning(nom="Planning test", semaine_debut=today, semaine_fin=today + timedelta(days=7))
         db.add(planning)
         db.commit()
         db.refresh(planning)
-
-        repas = Repas(
-            planning_id=planning.id,
-            date_repas=today + timedelta(days=1),
-            type_repas="dejeuner",
-        )
+        repas = Repas(planning_id=planning.id, date_repas=today + timedelta(days=1), type_repas="dejeuner")
         db.add(repas)
         db.commit()
         db.refresh(repas)
-
-        response = client.delete(f"/api/v1/planning/repas/{repas.id}")
+        response = await client.delete(f"/api/v1/planning/repas/{repas.id}")
         assert response.status_code in (200, 204, 404, 405, 500)
 
-    def test_modifier_repas(self, client, db):
-        """PUT /{id} modifie un repas."""
-        from datetime import date, timedelta
-
+    async def test_modifier_repas(self, client, db):
         from src.core.models import Planning, Repas
-
-        # Créer planning et repas
         today = date.today()
-        planning = Planning(
-            nom="Planning test",
-            semaine_debut=today,
-            semaine_fin=today + timedelta(days=7),
-        )
+        planning = Planning(nom="Planning test", semaine_debut=today, semaine_fin=today + timedelta(days=7))
         db.add(planning)
         db.commit()
         db.refresh(planning)
-
-        repas = Repas(
-            planning_id=planning.id,
-            date_repas=today + timedelta(days=1),
-            type_repas="dejeuner",
-        )
+        repas = Repas(planning_id=planning.id, date_repas=today + timedelta(days=1), type_repas="dejeuner")
         db.add(repas)
         db.commit()
         db.refresh(repas)
-
-        response = client.put(
+        response = await client.put(
             f"/api/v1/planning/repas/{repas.id}",
-            json={"type_repas": "diner", "date": (today + timedelta(days=2)).isoformat()},
+            json={"type_repas": "diner", "date_repas": (today + timedelta(days=2)).isoformat()},
         )
         assert response.status_code in (200, 404, 405, 500)

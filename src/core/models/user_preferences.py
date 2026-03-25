@@ -21,6 +21,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    func,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -136,6 +137,10 @@ class RetourRecette(CreeLeMixin, Base):
     )
     contexte: Mapped[str | None] = mapped_column(String(200))
     notes: Mapped[str | None] = mapped_column(Text)
+
+    # Planification semaine courante
+    planifie_cette_semaine: Mapped[bool] = mapped_column(Boolean, default=False)
+    date_planifie: Mapped[datetime | None] = mapped_column(DateTime)
 
     # Contraintes
     __table_args__ = (

@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Button } from "@/composants/ui/button";
+import { Input } from "@/composants/ui/input";
+import { Skeleton } from "@/composants/ui/skeleton";
 
 interface DonneesMeteo {
   ville: string;

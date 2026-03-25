@@ -138,3 +138,28 @@ async def obtenir_statut_push(
         subscription_count=len(subscriptions),
         notifications_enabled=preferences.global_enabled if preferences else True,
     )
+
+
+@router.get(
+    "/rappels/evaluer",
+    responses=REPONSES_AUTH,
+    summary="Évaluer les rappels intelligents",
+    description=(
+        "Analyse les données de l'application et retourne les rappels "
+        "contextuels actifs : garanties expirant bientôt, stocks bas, "
+        "tâches d'entretien en retard."
+    ),
+)
+@gerer_exception_api
+async def evaluer_rappels(
+    current_user: dict = Depends(require_auth),
+):
+    """Retourne la liste consolidée des rappels intelligents."""
+    from src.services.core.rappels_intelligents import get_rappels_intelligents_service
+    from src.api.utils import executer_async
+
+    service = get_rappels_intelligents_service()
+
+    rappels = await executer_async(service.evaluer_rappels)
+
+    return {"rappels": rappels, "total": len(rappels)}

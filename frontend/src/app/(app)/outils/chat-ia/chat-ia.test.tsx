@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -17,7 +17,7 @@ vi.mock("@/bibliotheque/api/outils", () => ({
   obtenirSuggestionsRecettes: vi.fn(),
 }));
 
-vi.mock("@/components/ui/scroll-area", () => ({
+vi.mock("@/composants/ui/scroll-area", () => ({
   ScrollArea: React.forwardRef(({ children, className }: { children: React.ReactNode; className?: string }, ref: React.Ref<HTMLDivElement>) => {
     const internalRef = React.useRef<HTMLDivElement>(null);
     React.useImperativeHandle(ref, () => {

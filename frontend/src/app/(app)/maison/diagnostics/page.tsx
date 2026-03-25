@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Diagnostics — Diagnostics immobiliers et estimations
 // ═══════════════════════════════════════════════════════════
 
@@ -11,12 +11,12 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
+import { Skeleton } from "@/composants/ui/skeleton";
+import { Button } from "@/composants/ui/button";
+import { Input } from "@/composants/ui/input";
+import { Label } from "@/composants/ui/label";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { utiliserDialogCrud } from "@/crochets/utiliser-crud";

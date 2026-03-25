@@ -55,6 +55,10 @@ from .preferences import (
     get_user_preference_service,
     obtenir_service_preferences_utilisateur,
 )
+from .profils import (
+    ProfilService,
+    get_profil_service,
+)
 
 __all__ = [
     # Auth
@@ -77,4 +81,7 @@ __all__ = [
     "UserPreferenceService",
     "get_user_preference_service",
     "obtenir_service_preferences_utilisateur",
+    # Profils
+    "ProfilService",
+    "get_profil_service",
 ]

@@ -12,9 +12,9 @@ import { z } from "zod";
 import { inscrire } from "@/bibliotheque/api/auth";
 import { utiliserStoreAuth } from "@/magasins/store-auth";
 import { obtenirProfil } from "@/bibliotheque/api/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/composants/ui/button";
+import { Input } from "@/composants/ui/input";
+import { Label } from "@/composants/ui/label";
 import {
   Card,
   CardContent,
@@ -22,7 +22,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/composants/ui/card";
 import Link from "next/link";
 
 const schemaInscription = z

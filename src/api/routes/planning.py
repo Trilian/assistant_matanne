@@ -9,6 +9,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
 
 from src.api.dependencies import require_auth
 from src.api.schemas import (
@@ -143,7 +144,8 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
     def _create():
         with executer_avec_session() as session:
             # Récupérer ou créer un planning par défaut
-            date_repas = repas.date.date() if hasattr(repas.date, "date") else repas.date
+            # repas.date est un objet date (plus datetime) depuis le schéma corrigé
+            date_repas = repas.date
 
             # Chercher un planning existant pour cette date
             planning = (
@@ -302,3 +304,122 @@ async def supprimer_repas(repas_id: int, user: dict[str, Any] = Depends(require_
             return MessageResponse(message="Repas supprimé", id=repas_id)
 
     return await executer_async(_delete)
+
+
+# ─────────────────────────────────────────────────────────
+# EXPORT iCAL
+# ─────────────────────────────────────────────────────────
+
+
+@router.get("/export/ical")
+@gerer_exception_api
+async def exporter_planning_ical(
+    semaines: int = Query(2, ge=1, le=8, description="Nombre de semaines à exporter (1-8)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> Response:
+    """
+    Exporte le planning de repas au format iCalendar (.ics).
+
+    Compatible Google Calendar, Apple Calendar, Outlook.
+
+    Args:
+        semaines: Nombre de semaines à inclure (défaut: 2, max: 8)
+
+    Returns:
+        Fichier .ics téléchargeable
+
+    Example:
+        ```
+        GET /api/v1/planning/export/ical?semaines=4
+        Authorization: Bearer <token>
+        ```
+    """
+    from src.core.models import Repas
+
+    def _build_ical():
+        with executer_avec_session() as session:
+            date_debut = datetime.now(UTC).replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
+            # Reculer au lundi de la semaine courante
+            date_debut -= timedelta(days=date_debut.weekday())
+            date_fin = date_debut + timedelta(weeks=semaines)
+
+            repas_liste = (
+                session.query(Repas)
+                .filter(
+                    Repas.date_repas >= date_debut.date(),
+                    Repas.date_repas < date_fin.date(),
+                )
+                .order_by(Repas.date_repas)
+                .all()
+            )
+
+            # Construire le calendrier iCal
+            lignes = [
+                "BEGIN:VCALENDAR",
+                "VERSION:2.0",
+                "PRODID:-//Assistant Matanne//Planning Repas//FR",
+                "CALSCALE:GREGORIAN",
+                "METHOD:PUBLISH",
+                "X-WR-CALNAME:Planning Repas Matanne",
+                "X-WR-TIMEZONE:Europe/Paris",
+            ]
+
+            TYPES_REPAS_HEURES = {
+                "petit_déjeuner": "070000",
+                "déjeuner": "120000",
+                "goûter": "160000",
+                "dîner": "190000",
+            }
+
+            for repas in repas_liste:
+                heure = TYPES_REPAS_HEURES.get(repas.type_repas, "120000")
+                dt_debut = f"{repas.date_repas.strftime('%Y%m%d')}T{heure}"
+                # Durée par défaut 30 min
+                heure_fin = str(int(heure[:2]) * 10000 + int(heure[2:4]) * 100 + 3000).zfill(6)
+                dt_fin = f"{repas.date_repas.strftime('%Y%m%d')}T{heure_fin}"
+
+                # Titre : recette ou type de repas
+                nom_recette = "Repas à planifier"
+                if repas.recette:
+                    nom_recette = repas.recette.nom
+
+                type_label = repas.type_repas.replace("_", " ").capitalize()
+                summary = f"{type_label} – {nom_recette}"
+
+                description_parts = []
+                if repas.entree:
+                    description_parts.append(f"Entrée: {repas.entree}")
+                if repas.dessert:
+                    description_parts.append(f"Dessert: {repas.dessert}")
+                if repas.notes:
+                    description_parts.append(repas.notes)
+                description = "\\n".join(description_parts)
+
+                uid = f"repas-{repas.id}@matanne"
+                now = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+
+                lignes += [
+                    "BEGIN:VEVENT",
+                    f"UID:{uid}",
+                    f"DTSTAMP:{now}",
+                    f"DTSTART:{dt_debut}",
+                    f"DTEND:{dt_fin}",
+                    f"SUMMARY:{summary}",
+                ]
+                if description:
+                    lignes.append(f"DESCRIPTION:{description}")
+                lignes.append("END:VEVENT")
+
+            lignes.append("END:VCALENDAR")
+            return "\r\n".join(lignes)
+
+    contenu = await executer_async(_build_ical)
+    return Response(
+        content=contenu,
+        media_type="text/calendar; charset=utf-8",
+        headers={
+            "Content-Disposition": "attachment; filename=planning-repas.ics",
+        },
+    )

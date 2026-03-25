@@ -17,6 +17,10 @@ const ITEMS = [
   { nom: "Plus", chemin: "/outils", Icone: Menu },
 ] as const;
 
+/**
+ * Bottom navigation bar mobile — visible uniquement sur petits écrans (< md).
+ * Affiche 5 raccourcis: Accueil, Cuisine, Famille, Maison, Plus.
+ */
 export function NavMobile() {
   const pathname = usePathname();
 

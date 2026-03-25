@@ -13,6 +13,7 @@ import {
   Trash2,
   Sparkles,
   Clock,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -20,31 +21,32 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/composants/ui/card";
+import { Button } from "@/composants/ui/button";
+import { Badge } from "@/composants/ui/badge";
+import { Skeleton } from "@/composants/ui/skeleton";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+} from "@/composants/ui/dialog";
+import { Input } from "@/composants/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/composants/ui/select";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import {
   obtenirPlanningSemaine,
   definirRepas,
   supprimerRepas,
   genererPlanningSemaine,
+  exporterPlanningIcal,
 } from "@/bibliotheque/api/planning";
 import type { TypeRepas, CreerRepasPlanningDTO, RepasPlanning } from "@/types/planning";
 import { toast } from "sonner";
@@ -173,6 +175,15 @@ export default function PagePlanning() {
           >
             <Sparkles className="mr-2 h-4 w-4" />
             {mutationGenerer.isPending ? "Génération..." : "IA"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exporterPlanningIcal(2).catch(() => toast.error("Erreur d'export"))}
+            title="Exporter le planning en iCalendar (Google Calendar, Apple Calendar...)"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            iCal
           </Button>
         </div>
       </div>

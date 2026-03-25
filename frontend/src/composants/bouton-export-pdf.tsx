@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Bouton Export PDF — Composant réutilisable
 // ═══════════════════════════════════════════════════════════
 
@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/composants/ui/button";
 import { exporterPdf, type TypeExport } from "@/bibliotheque/api/export";
 
 interface PropsBoutonExportPdf {

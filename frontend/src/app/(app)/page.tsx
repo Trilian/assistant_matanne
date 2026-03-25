@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Zap,
   Euro,
+  Bell,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -21,18 +22,20 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/composants/ui/card";
+import { Button } from "@/composants/ui/button";
+import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirTableauBord } from "@/bibliotheque/api/tableau-bord";
 import { statsDepensesMaison } from "@/bibliotheque/api/maison";
+import { evaluerRappels, type RappelItem } from "@/bibliotheque/api/push";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
 
 export default function PageAccueil() {
   const { utilisateur } = utiliserAuth();
   const { data, isLoading } = utiliserRequete(["tableau-bord"], obtenirTableauBord);
   const { data: statsDepenses } = utiliserRequete(["depenses", "stats"], statsDepensesMaison);
+  const { data: rappelsData } = utiliserRequete(["rappels"], evaluerRappels);
 
   return (
     <div className="space-y-6">
@@ -130,6 +133,28 @@ export default function PageAccueil() {
                 Voir les recettes <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Rappels intelligents */}
+      {rappelsData && rappelsData.total > 0 && (
+        <Card className="border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Bell className="h-5 w-5 text-orange-500" />
+              Rappels ({rappelsData.total})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {rappelsData.rappels.slice(0, 4).map((rappel, i) => (
+              <RappelCard key={i} rappel={rappel} />
+            ))}
+            {rappelsData.total > 4 && (
+              <p className="text-xs text-muted-foreground pt-1">
+                + {rappelsData.total - 4} autre(s) rappel(s)
+              </p>
+            )}
           </CardContent>
         </Card>
       )}
@@ -240,4 +265,29 @@ function CarteMetrique({
       </Card>
     </Link>
   );
+}
+
+const PRIORITE_COULEURS: Record<string, string> = {
+  urgente: "text-red-600 dark:text-red-400",
+  haute: "text-orange-600 dark:text-orange-400",
+  normale: "text-yellow-600 dark:text-yellow-400",
+  basse: "text-muted-foreground",
+};
+
+function RappelCard({ rappel }: { rappel: RappelItem }) {
+  const couleur = PRIORITE_COULEURS[rappel.priorite] ?? PRIORITE_COULEURS.normale;
+  const contenu = (
+    <div className="flex items-start gap-2 rounded-md p-2 hover:bg-accent/50 transition-colors">
+      <AlertTriangle className={`h-4 w-4 mt-0.5 shrink-0 ${couleur}`} />
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-medium ${couleur}`}>{rappel.titre}</p>
+        <p className="text-xs text-muted-foreground line-clamp-2">{rappel.description}</p>
+      </div>
+    </div>
+  );
+
+  if (rappel.lien) {
+    return <Link href={rappel.lien}>{contenu}</Link>;
+  }
+  return contenu;
 }

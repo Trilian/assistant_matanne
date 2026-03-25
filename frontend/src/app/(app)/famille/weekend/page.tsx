@@ -16,9 +16,9 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
+import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { listerActivites } from "@/bibliotheque/api/famille";
 

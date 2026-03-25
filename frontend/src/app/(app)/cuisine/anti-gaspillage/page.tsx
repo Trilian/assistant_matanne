@@ -20,10 +20,10 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
+import { Button } from "@/composants/ui/button";
+import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirAntiGaspillage } from "@/bibliotheque/api/anti-gaspillage";
 

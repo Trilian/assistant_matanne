@@ -75,6 +75,14 @@ from .weather import (
     ServiceMeteo,
     obtenir_service_meteo,
 )
+from .multimodal import (
+    MultiModalAIService,
+    get_multimodal_service,
+)
+from .webhooks import (
+    WebhookService,
+    get_webhook_service,
+)
 
 # ═══════════════════════════════════════════════════════════
 # EXPORTS
@@ -112,4 +120,10 @@ __all__ = [
     "AlerteMeteo",
     "ConseilJardin",
     "PlanArrosage",
+    # Multimodal
+    "MultiModalAIService",
+    "get_multimodal_service",
+    # Webhooks
+    "WebhookService",
+    "get_webhook_service",
 ]

@@ -1,17 +1,17 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Input } from "@/composants/ui/input";
+import { Label } from "@/composants/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/composants/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 
 // ─── Masse ──────────────────────────────────────────────────────
 

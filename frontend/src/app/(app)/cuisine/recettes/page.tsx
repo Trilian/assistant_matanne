@@ -14,22 +14,29 @@ import {
   Star,
   Filter,
   Heart,
+  CalendarDays,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { Button } from "@/composants/ui/button";
+import { Input } from "@/composants/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
+import { Skeleton } from "@/composants/ui/skeleton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { utiliserRequete } from "@/crochets/utiliser-api";
+} from "@/composants/ui/select";
+import { utiliserRequete, utiliserMutationAvecInvalidation } from "@/crochets/utiliser-api";
 import { utiliserDelai } from "@/crochets/utiliser-delai";
-import { listerRecettes } from "@/bibliotheque/api/recettes";
+import {
+  listerRecettes,
+  listerRecettesSemaine,
+  planifierRecetteSemaine,
+  deplanifierRecetteSemaine,
+} from "@/bibliotheque/api/recettes";
 
 const CATEGORIES = [
   "Toutes",
@@ -59,6 +66,24 @@ export default function PageRecettes() {
   const { data, isLoading } = utiliserRequete(
     ["recettes", String(page), rechercheDelayee, categorie],
     () => listerRecettes(page, 20, rechercheDelayee || undefined)
+  );
+
+  const { data: planifiees } = utiliserRequete(
+    ["recettes", "semaine"],
+    listerRecettesSemaine
+  );
+  const idsPlanifies = new Set((planifiees ?? []).map((r) => r.id));
+
+  const mutationPlanifier = utiliserMutationAvecInvalidation(
+    (id: number) => planifierRecetteSemaine(id),
+    [["recettes", "semaine"]],
+    { onSuccess: () => toast.success("Recette ajoutée au menu de la semaine") }
+  );
+
+  const mutationDeplanifier = utiliserMutationAvecInvalidation(
+    (id: number) => deplanifierRecetteSemaine(id),
+    [["recettes", "semaine"]],
+    { onSuccess: () => toast.success("Recette retirée du menu de la semaine") }
   );
 
   const recettes = data?.items ?? [];
@@ -157,23 +182,52 @@ export default function PageRecettes() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {recettes.map((recette) => (
-            <Link key={recette.id} href={`/cuisine/recettes/${recette.id}`}>
-              <Card className="hover:bg-accent/50 transition-colors h-full">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-base line-clamp-1">
-                      {recette.nom}
-                    </CardTitle>
-                    {recette.est_favori && (
-                      <Heart className="h-4 w-4 text-red-500 fill-red-500 shrink-0" />
+            <div key={recette.id} className="relative">
+              <Link href={`/cuisine/recettes/${recette.id}`}>
+                <Card className="hover:bg-accent/50 transition-colors h-full">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <CardTitle className="text-base line-clamp-1">
+                        {recette.nom}
+                      </CardTitle>
+                      <div className="flex shrink-0 items-center gap-1">
+                        {recette.est_favori && (
+                          <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (idsPlanifies.has(recette.id)) {
+                              mutationDeplanifier.mutate(recette.id);
+                            } else {
+                              mutationPlanifier.mutate(recette.id);
+                            }
+                          }}
+                          title={
+                            idsPlanifies.has(recette.id)
+                              ? "Retirer du menu de la semaine"
+                              : "Ajouter au menu de la semaine"
+                          }
+                          className="rounded p-0.5 hover:bg-accent"
+                        >
+                          <CalendarDays
+                            className={`h-4 w-4 transition-colors ${
+                              idsPlanifies.has(recette.id)
+                                ? "text-blue-500 fill-blue-100"
+                                : "text-muted-foreground"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                    {recette.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {recette.description}
+                      </p>
                     )}
-                  </div>
-                  {recette.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {recette.description}
-                    </p>
-                  )}
-                </CardHeader>
+                  </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {recette.categorie && (
@@ -215,6 +269,7 @@ export default function PageRecettes() {
                 </CardContent>
               </Card>
             </Link>
+          </div>
           ))}
         </div>
       )}

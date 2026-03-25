@@ -17,17 +17,17 @@ import {
   Star,
   Heart,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/composants/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
+import { Separator } from "@/composants/ui/separator";
+import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
 import { toast } from "sonner";

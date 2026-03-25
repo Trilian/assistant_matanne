@@ -65,3 +65,9 @@ token.json
 tests/test-results/
 test-results/
 playwright-report/
+
+# Fichiers de r\u00e9sultats de tests
+test_results*.txt
+test_detail.txt
+tests/reports/
+

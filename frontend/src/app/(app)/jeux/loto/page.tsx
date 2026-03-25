@@ -1,7 +1,7 @@
 ﻿"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
 import {
   Table,
   TableBody,
@@ -9,8 +9,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/composants/ui/table";
+import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { listerTirages, listerGrilles } from "@/bibliotheque/api/jeux";
 import type { TirageLoto, GrilleLoto } from "@/types/jeux";

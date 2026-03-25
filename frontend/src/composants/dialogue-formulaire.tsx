@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // DialogueFormulaire — Composant réutilisable CRUD dialog
 // ═══════════════════════════════════════════════════════════
 
@@ -10,8 +10,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "@/composants/ui/dialog";
+import { Button } from "@/composants/ui/button";
 
 interface DialogueFormulaireProps {
   ouvert: boolean;

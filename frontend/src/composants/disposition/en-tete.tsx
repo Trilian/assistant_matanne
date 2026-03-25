@@ -6,7 +6,7 @@
 
 import { Search, Moon, Sun, LogOut, User } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/composants/ui/button";
 import { utiliserStoreUI } from "@/magasins/store-ui";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
 import {
@@ -15,9 +15,12 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+} from "@/composants/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/composants/ui/avatar";
 
+/**
+ * Barre supérieure de l'application — recherche globale, bascule de thème, menu profil.
+ */
 export function EnTete() {
   const { theme, setTheme } = useTheme();
   const { basculerRecherche } = utiliserStoreUI();

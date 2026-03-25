@@ -361,3 +361,95 @@ async def supprimer_recette(recette_id: int, user: dict[str, Any] = Depends(requ
             return MessageResponse(message=f"Recette {recette_id} supprimée", id=recette_id)
 
     return await executer_async(_delete)
+
+
+# ─────────────────────────────────────────────────────────
+# PLANIFICATION "CETTE SEMAINE"
+# ─────────────────────────────────────────────────────────
+
+
+@router.get("/planifiees-semaine", response_model=list[RecetteResponse])
+@gerer_exception_api
+async def lister_recettes_semaine(user: dict[str, Any] = Depends(require_auth)):
+    """Liste les recettes marquées 'à faire cette semaine'."""
+    from src.core.models import Recette
+    from src.core.models.user_preferences import RetourRecette
+
+    def _query():
+        with executer_avec_session() as session:
+            user_id = user.get("sub", user.get("id", "dev"))
+            rows = (
+                session.query(Recette)
+                .join(RetourRecette, RetourRecette.recette_id == Recette.id)
+                .filter(
+                    RetourRecette.user_id == user_id,
+                    RetourRecette.planifie_cette_semaine.is_(True),
+                )
+                .all()
+            )
+            return [RecetteResponse.model_validate(r) for r in rows]
+
+    return await executer_async(_query)
+
+
+@router.post("/{recette_id}/planifier-semaine", response_model=MessageResponse)
+@gerer_exception_api
+async def planifier_recette_semaine(recette_id: int, user: dict[str, Any] = Depends(require_auth)):
+    """Marque une recette comme 'à faire cette semaine'."""
+    from datetime import datetime
+
+    from src.core.models import Recette
+    from src.core.models.user_preferences import RetourRecette
+
+    def _upsert():
+        with executer_avec_session() as session:
+            recette = session.query(Recette).filter(Recette.id == recette_id).first()
+            if not recette:
+                raise HTTPException(status_code=404, detail="Recette non trouvée")
+
+            user_id = user.get("sub", user.get("id", "dev"))
+            retour = (
+                session.query(RetourRecette)
+                .filter(RetourRecette.user_id == user_id, RetourRecette.recette_id == recette_id)
+                .first()
+            )
+            if retour:
+                retour.planifie_cette_semaine = True
+                retour.date_planifie = datetime.utcnow()
+            else:
+                retour = RetourRecette(
+                    user_id=user_id,
+                    recette_id=recette_id,
+                    planifie_cette_semaine=True,
+                    date_planifie=datetime.utcnow(),
+                )
+                session.add(retour)
+            session.commit()
+            return MessageResponse(message=f"Recette {recette_id} planifiée cette semaine")
+
+    return await executer_async(_upsert)
+
+
+@router.delete("/{recette_id}/planifier-semaine", response_model=MessageResponse)
+@gerer_exception_api
+async def deplanifier_recette_semaine(
+    recette_id: int, user: dict[str, Any] = Depends(require_auth)
+):
+    """Retire une recette de la liste 'cette semaine'."""
+    from src.core.models.user_preferences import RetourRecette
+
+    def _clear():
+        with executer_avec_session() as session:
+            user_id = user.get("sub", user.get("id", "dev"))
+            retour = (
+                session.query(RetourRecette)
+                .filter(RetourRecette.user_id == user_id, RetourRecette.recette_id == recette_id)
+                .first()
+            )
+            if retour:
+                retour.planifie_cette_semaine = False
+                retour.date_planifie = None
+                session.commit()
+            return MessageResponse(message=f"Recette {recette_id} retirée de cette semaine")
+
+    return await executer_async(_clear)

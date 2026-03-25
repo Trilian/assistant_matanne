@@ -32,7 +32,7 @@ from src.api.schemas.webhooks import (
     WebhookUpdate,
 )
 from src.api.utils import gerer_exception_api
-from src.services.webhooks import get_webhook_service
+from src.services.integrations.webhooks import get_webhook_service
 
 logger = logging.getLogger(__name__)
 

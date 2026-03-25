@@ -52,13 +52,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/composants/ui/button";
+import { Separator } from "@/composants/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/composants/ui/tooltip";
 
 interface SousLien {
   nom: string;
@@ -150,6 +150,10 @@ const LIENS: LienNav[] = [
   },
 ];
 
+/**
+ * Barre latérale de navigation desktop — rétractable, avec sous-menus accordéon.
+ * La section active est automatiquement ouverte au chargement.
+ */
 export function BarreLaterale() {
   const pathname = usePathname();
   const { sidebarOuverte, basculerSidebar } = utiliserStoreUI();

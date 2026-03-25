@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
 
 const NUMEROS_PRINCIPAUX = 50;
 const ETOILES = 12;
@@ -25,7 +25,7 @@ function genererGrilleAleatoire() {
 }
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/composants/ui/button";
 
 export default function EuromillionsPage() {
   const [grille, setGrille] = useState(genererGrilleAleatoire);

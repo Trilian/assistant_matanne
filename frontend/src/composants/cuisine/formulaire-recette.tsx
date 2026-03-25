@@ -9,22 +9,22 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Plus, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/composants/ui/button";
+import { Input } from "@/composants/ui/input";
+import { Label } from "@/composants/ui/label";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/composants/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/composants/ui/select";
 import { schemaRecette, type DonneesRecette } from "@/bibliotheque/validateurs";
 import { utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { creerRecette, modifierRecette } from "@/bibliotheque/api/recettes";

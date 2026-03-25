@@ -32,3 +32,18 @@ export async function genererPlanningSemaine(
   });
   return data;
 }
+
+/** Exporter le planning en iCalendar (.ics) et déclencher le téléchargement */
+export async function exporterPlanningIcal(semaines = 2): Promise<void> {
+  const response = await clientApi.get(`/planning/export/ical?semaines=${semaines}`, {
+    responseType: "blob",
+  });
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "planning-repas.ics";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}

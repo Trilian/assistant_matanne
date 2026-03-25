@@ -33,4 +33,16 @@ Importez directement depuis les sous-packages:
 
     # Web (PWA, synchronisation)
     from src.services.integrations.web import RealtimeSyncService
+
+    # Multimodal (IA images)
+    from src.services.integrations.multimodal import MultiModalAIService, get_multimodal_service
+
+    # Webhooks
+    from src.services.integrations.webhooks import WebhookService, get_webhook_service
+
+    # Profils utilisateurs
+    from src.services.core.utilisateur.profils import ProfilService, get_profil_service
+
+    # Dashboard / Accueil
+    from src.services.dashboard import AccueilDataService, get_accueil_data_service
 """

@@ -8,6 +8,10 @@ import { useCallback, useEffect } from "react";
 import { utiliserStoreAuth } from "@/magasins/store-auth";
 import { obtenirProfil, deconnecter as apiDeconnecter } from "@/bibliotheque/api/auth";
 
+/**
+ * Hook d'authentification — charge le profil JWT au montage et expose les actions de session.
+ * @returns {{ utilisateur, estConnecte, estChargement, deconnecter }}
+ */
 export function utiliserAuth() {
   const { utilisateur, estConnecte, estChargement, definirUtilisateur, reinitialiser } =
     utiliserStoreAuth();

@@ -11,16 +11,16 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
+import { Skeleton } from "@/composants/ui/skeleton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/composants/ui/select";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { listerCharges } from "@/bibliotheque/api/maison";
 

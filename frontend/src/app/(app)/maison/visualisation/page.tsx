@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Visualisation Plan Maison — Vue interactive des pièces
 // ═══════════════════════════════════════════════════════════
 
@@ -18,10 +18,10 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/composants/ui/card";
+import { Button } from "@/composants/ui/button";
+import { Badge } from "@/composants/ui/badge";
+import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { listerPieces, listerEtages } from "@/bibliotheque/api/maison";
 import type { PieceMaison } from "@/types/maison";

@@ -243,6 +243,24 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
+try:
+    from fastapi.exceptions import ResponseValidationError
+
+    @app.exception_handler(ResponseValidationError)
+    async def response_validation_error_handler(request: Request, exc: ResponseValidationError):
+        """Capture les erreurs de sérialisation de réponse (ORM non sérialisé, etc.)"""
+        logger.error(
+            f"Erreur de validation de réponse sur {request.method} {request.url.path}: {exc}",
+            exc_info=True,
+        )
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Erreur de sérialisation de la réponse."},
+        )
+except ImportError:
+    pass
+
+
 # ═══════════════════════════════════════════════════════════
 # SCHÉMAS COMMUNS
 # ═══════════════════════════════════════════════════════════

@@ -1,8 +1,8 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Loading global — Skeleton pendant le chargement
 // ═══════════════════════════════════════════════════════════
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/composants/ui/skeleton";
 
 export default function Loading() {
   return (

@@ -30,11 +30,11 @@ Hub de gestion familiale en production avec modules pour:
 assistant_matanne/
 ├── frontend/               # Next.js 16 (React/TypeScript)
 │   ├── src/app/(app)/      # Routes par module (~42 pages)
-│   ├── src/components/     # Composants shadcn/ui (21+)
-│   ├── src/composants/     # Composants layout (sidebar, header, nav)
-│   ├── src/lib/api/        # Clients API par domaine
-│   ├── src/hooks/          # Custom hooks React
-│   ├── src/stores/         # Zustand stores
+│   ├── src/composants/ui/  # Composants shadcn/ui (21+)
+│   ├── src/composants/     # Composants layout + spécifiques
+│   ├── src/bibliotheque/api/  # Clients API par domaine
+│   ├── src/crochets/       # Custom hooks React
+│   ├── src/magasins/       # Zustand stores
 │   ├── src/types/          # Interfaces TypeScript
 │   └── src/fournisseurs/   # Providers (auth, query, theme)
 ├── src/                    # Backend Python (FastAPI)
@@ -108,8 +108,9 @@ Le core est organisé en **10 sous-packages** + fichiers utilitaires.
 - **jeux/**, **maison/**: Services spécifiques au domaine
 - **rapports/**: Génération PDF
 - **utilitaires/**: Services utilitaires divers
-- **integrations/**: Intégrations externes
-- **webhooks.py**, **multimodal.py**, **profils.py**: Services support
+- **integrations/**: Intégrations externes — dont `multimodal.py` (IA images) et `webhooks.py`
+- **dashboard/**: Service de données pour la page d'accueil (`service.py`)
+- **core/utilisateur/**: Services liés à l'utilisateur — dont `profils.py` (CRUD profils)
 - Tous exportent des fonctions factory `get_{service_name}_service()` décorées avec `@service_factory` pour le singleton via registre
 
 ### Frontend Next.js (frontend/)
@@ -124,14 +125,14 @@ Le core est organisé en **10 sous-packages** + fichiers utilitaires.
   - `jeux/`: Hub + paris, loto, euromillions
   - `outils/`: Hub + chat-ia, convertisseur, meteo, minuteur, notes
   - `parametres/`: Page paramètres
-- **Composants** (`src/components/ui/`): 21+ composants shadcn/ui (button, card, input, dialog, tabs, table, sidebar, etc.)
+- **Composants** (`src/composants/ui/`): 21+ composants shadcn/ui (button, card, input, dialog, tabs, table, sidebar, etc.)
 - **Layout** (`src/composants/disposition/`): `coquille-app.tsx` (wrapper principal), `barre-laterale.tsx` (sidebar), `en-tete.tsx` (header), `nav-mobile.tsx` (bottom bar), `fil-ariane.tsx` (breadcrumbs)
-- **API Clients** (`src/lib/api/`): Un client par domaine (`recettes.ts`, `courses.ts`, `inventaire.ts`, `planning.ts`, `famille.ts`, `maison.ts`, `jeux.ts`, `auth.ts`, `tableau-bord.ts`) + `client.ts` (instance Axios avec intercepteurs JWT)
-- **Hooks** (`src/hooks/`): `utiliser-auth.ts`, `utiliser-api.ts` (wrappers TanStack Query), `utiliser-stockage-local.ts`, `utiliser-delai.ts`, `use-mobile.ts`
-- **Stores** (`src/stores/`): Zustand — `store-auth.ts` (user/login), `store-ui.ts` (sidebar/search), `store-notifications.ts` (toasts)
+- **API Clients** (`src/bibliotheque/api/`): Un client par domaine (`recettes.ts`, `courses.ts`, `inventaire.ts`, `planning.ts`, `famille.ts`, `maison.ts`, `jeux.ts`, `auth.ts`, `tableau-bord.ts`) + `client.ts` (instance Axios avec intercepteurs JWT)
+- **Hooks** (`src/crochets/`): `utiliser-auth.ts`, `utiliser-api.ts` (wrappers TanStack Query), `utiliser-stockage-local.ts`, `utiliser-delai.ts`, `use-mobile.ts`
+- **Stores** (`src/magasins/`): Zustand — `store-auth.ts` (user/login), `store-ui.ts` (sidebar/search), `store-notifications.ts` (toasts)
 - **Types** (`src/types/`): Interfaces TypeScript par domaine (`api.ts`, `recettes.ts`, `courses.ts`, `inventaire.ts`, `planning.ts`, `famille.ts`, `maison.ts`, `jeux.ts`)
 - **Providers** (`src/fournisseurs/`): `fournisseur-query.tsx` (TanStack Query), `fournisseur-auth.tsx` (route protection), `fournisseur-theme.tsx` (next-themes)
-- **Validation**: Zod 4.3.6 (`src/lib/validateurs.ts`)
+- **Validation**: Zod 4.3.6 (`src/bibliotheque/validateurs.ts`)
 - **Stack**: TanStack Query v5 (data fetching), Zustand 5 (state), react-hook-form 7.72 (forms), Zod (validation), Tailwind CSS v4
 
 ---
@@ -310,7 +311,7 @@ Clé: Dans les routes FastAPI, utiliser `executer_avec_session()`. Dans les serv
 ### Authentification
 
 - **Backend**: JWT Bearer tokens via `src/api/auth.py` et `src/api/dependencies.py`
-- **Frontend**: Intercepteurs Axios dans `src/lib/api/client.ts` ajoutent le token automatiquement
+- **Frontend**: Intercepteurs Axios dans `src/bibliotheque/api/client.ts` ajoutent le token automatiquement
 - **Protection de routes**: `Depends(require_auth)` sur chaque endpoint, `fournisseur-auth.tsx` côté frontend
 - **Mode dev**: Auto-auth avec utilisateur dev si `ENVIRONMENT=development`
 
@@ -371,8 +372,8 @@ suggestions = service.suggest_recipes("Dîner rapide")
 
 ### Communication Frontend ↔ Backend
 
-- **API Clients**: Chaque domaine a son client dans `frontend/src/lib/api/` utilisant l'instance Axios centralisée avec intercepteurs JWT
-- **Data Fetching**: TanStack Query v5 pour le fetching et le cache côté client via les hooks dans `frontend/src/hooks/utiliser-api.ts`
+- **API Clients**: Chaque domaine a son client dans `frontend/src/bibliotheque/api/` utilisant l'instance Axios centralisée avec intercepteurs JWT
+- **Data Fetching**: TanStack Query v5 pour le fetching et le cache côté client via les hooks dans `frontend/src/crochets/utiliser-api.ts`
 - **State Management**: Zustand stores pour l'état local (auth, UI, notifications)
 - **Validation**: Zod côté frontend, Pydantic côté backend — schémas miroir
 - **WebSocket**: Collaboration temps réel sur les courses via `src/api/websocket_courses.py`
@@ -459,7 +460,7 @@ Importer via: `from src.core.config import obtenir_parametres()`
    }
    ```
 
-2. Ajouter le client API dans `frontend/src/lib/api/monmodule.ts`:
+2. Ajouter le client API dans `frontend/src/bibliotheque/api/monmodule.ts`:
    ```typescript
    import { apiClient } from './client'
 
@@ -560,15 +561,15 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 | --- | --- |
 | `frontend/src/app/(app)/layout.tsx` | Layout app avec sidebar/nav |
 | `frontend/src/app/(app)/page.tsx` | Dashboard principal |
-| `frontend/src/lib/api/client.ts` | Instance Axios + intercepteurs JWT |
-| `frontend/src/lib/api/` | Clients API par domaine |
-| `frontend/src/hooks/` | Custom hooks React (auth, api, etc.) |
-| `frontend/src/stores/` | Zustand stores (auth, UI, notifications) |
+| `frontend/src/bibliotheque/api/client.ts` | Instance Axios + intercepteurs JWT |
+| `frontend/src/bibliotheque/api/` | Clients API par domaine |
+| `frontend/src/crochets/` | Custom hooks React (auth, api, etc.) |
+| `frontend/src/magasins/` | Zustand stores (auth, UI, notifications) |
 | `frontend/src/types/` | Interfaces TypeScript par domaine |
 | `frontend/src/composants/disposition/` | Layout components (sidebar, header, nav) |
-| `frontend/src/components/ui/` | Composants shadcn/ui (21+) |
+| `frontend/src/composants/ui/` | Composants shadcn/ui (21+) |
 | `frontend/src/fournisseurs/` | Providers (TanStack Query, auth, theme) |
-| `frontend/src/lib/validateurs.ts` | Schémas de validation Zod |
+| `frontend/src/bibliotheque/validateurs.ts` | Schémas de validation Zod |
 | `frontend/package.json` | Dépendances frontend, scripts npm |
 
 ---

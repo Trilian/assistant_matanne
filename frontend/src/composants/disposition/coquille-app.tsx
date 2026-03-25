@@ -7,6 +7,10 @@ import { NavMobile } from "./nav-mobile";
 import { EnTete } from "./en-tete";
 import { FilAriane } from "./fil-ariane";
 
+/**
+ * Conteneur principal de l'application — assemble la sidebar desktop, l'en-tête,
+ * le fil d'ariane, la zone de contenu scrollable et la navigation mobile.
+ */
 export function CoquilleApp({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden">

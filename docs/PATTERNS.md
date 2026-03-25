@@ -4,60 +4,13 @@ Ce document présente les patterns **actifs** utilisés dans le core de l'applic
 
 ## Table des matières
 
-1. [State Slices](#state-slices)
-2. [Resilience Policies](#resilience-policies)
-3. [Cache Multi-Niveaux](#cache-multi-niveaux)
-4. [Circuit Breaker](#circuit-breaker)
-5. [Service Factory Pattern](#service-factory-pattern)
-6. [Event Bus](#event-bus)
-7. [Best Practices](#best-practices)
-8. [Test Patterns](#test-patterns)
-
----
-
-## State Slices
-
-**Fichiers**: `src/core/state/`
-
-État applicatif découpé par domaine, découplé de l'UI.
-
-### Slices disponibles
-
-```python
-from src.core.state import EtatNavigation, EtatCuisine, EtatUI, EtatApp
-
-# Navigation
-etat.navigation.module_actuel  # "cuisine.recettes"
-etat.navigation.historique_navigation  # ["accueil", "cuisine.recettes"]
-
-# Cuisine
-etat.cuisine.id_recette_visualisation  # 42
-etat.cuisine.semaine_actuelle  # date(2024, 2, 19)
-
-# UI
-etat.ui.afficher_formulaire_ajout  # True
-etat.ui.reinitialiser()  # Reset tous les flags
-```
-
-### Raccourcis
-
-```python
-from src.core.state import obtenir_etat, naviguer, revenir
-
-etat = obtenir_etat()
-naviguer("cuisine.recettes")  # + st.rerun() auto
-revenir()  # Retour arrière
-```
-
-### Gestionnaire complet
-
-```python
-from src.core.state import GestionnaireEtat
-
-GestionnaireEtat.definir_recette_visualisation(42)
-GestionnaireEtat.nettoyer_etats_ui()
-GestionnaireEtat.reset_complet()
-```
+1. [Resilience Policies](#resilience-policies)
+2. [Cache Multi-Niveaux](#cache-multi-niveaux)
+3. [Circuit Breaker](#circuit-breaker)
+4. [Service Factory Pattern](#service-factory-pattern)
+5. [Event Bus](#event-bus)
+6. [Best Practices](#best-practices)
+7. [Test Patterns](#test-patterns)
 
 ---
 
@@ -288,15 +241,13 @@ def fetch_api():
 ### 2. Unifier la stratégie de cache
 
 ```python
-# ❌ Mauvais (dans un service avec st.cache_data)
-@st.cache_data(ttl=300)
-def charger_donnees():
-    return service.get_all()
-
 # ✅ Bon (dans le service avec avec_cache)
 @avec_cache(ttl=300)
 def charger_donnees():
     return db.query(Recette).all()
+
+# ✅ Invalider manuellement par tag
+cache.invalider_par_tag("recettes")
 ```
 
 ### 3. Utiliser @service_factory pour les singletons
@@ -314,18 +265,6 @@ def get_service():
 @service_factory("mon_service")
 def get_service():
     return MyService()
-```
-
-### 4. Navigation via GestionnaireEtat
-
-```python
-# ❌ Mauvais — contourne le système de navigation
-st.session_state.current_page = "cuisine.recettes"
-st.rerun()
-
-# ✅ Bon — utilise le raccourci
-from src.core.state import naviguer
-naviguer("cuisine.recettes")  # gère rerun automatiquement
 ```
 
 ---
@@ -346,18 +285,17 @@ def test_create_recipe(test_db: Session):
 
 ### Mock service factory
 
-Pour les modules UI qui utilisent `get_*_service()`:
+Pour les routes FastAPI qui utilisent `get_*_service()` :
 
 ```python
-@patch("src.modules.cuisine.courses.get_courses_service")
-def test_afficher_courses(mock_factory):
+@patch("src.api.routes.courses.get_courses_service")
+async def test_lister_articles(mock_factory, client):
     mock_service = MagicMock()
     mock_service.lister_articles.return_value = [article]
     mock_factory.return_value = mock_service
 
-    from src.modules.cuisine.courses import app
-    app()
-
+    response = await client.get("/api/v1/courses")
+    assert response.status_code == 200
     mock_service.lister_articles.assert_called_once()
 ```
 

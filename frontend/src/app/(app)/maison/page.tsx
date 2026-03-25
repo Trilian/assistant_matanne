@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Hub Maison — avec stats en temps réel
 // ═══════════════════════════════════════════════════════════
 
@@ -26,8 +26,8 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { statsHubMaison } from "@/bibliotheque/api/maison";
 

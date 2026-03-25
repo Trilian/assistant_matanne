@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Album — Galerie photos famille
 // ═══════════════════════════════════════════════════════════
 
@@ -6,14 +6,14 @@
 
 import { useState, useRef } from "react";
 import { Camera, Upload, Trash2, Image as ImageIcon, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/composants/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/composants/ui/card";
+import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
 import {

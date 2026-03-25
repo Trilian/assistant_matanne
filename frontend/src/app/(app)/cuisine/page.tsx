@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Hub Cuisine — avec stats en temps réel
 // ═══════════════════════════════════════════════════════════
 
@@ -19,7 +19,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/composants/ui/card";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirTableauBord } from "@/bibliotheque/api/tableau-bord";
 

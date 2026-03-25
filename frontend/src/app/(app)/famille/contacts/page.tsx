@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Contacts — Répertoire familial (connecté API)
 // ═══════════════════════════════════════════════════════════
 
@@ -17,18 +17,18 @@ import {
   Pencil,
   Clock,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/composants/ui/card";
+import { Input } from "@/composants/ui/input";
+import { Badge } from "@/composants/ui/badge";
+import { Button } from "@/composants/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+} from "@/composants/ui/dialog";
+import { Label } from "@/composants/ui/label";
 import {
   utiliserRequete,
   utiliserMutation,

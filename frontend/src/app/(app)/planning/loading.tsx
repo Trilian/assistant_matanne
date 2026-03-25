@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+﻿import { Skeleton } from "@/composants/ui/skeleton";
 
 export default function PlanningLoading() {
   return (

@@ -54,3 +54,21 @@ export async function obtenirSuggestions(contexte: string): Promise<SuggestionRe
   });
   return data;
 }
+
+// ─── Planification "cette semaine" ───────────────────────
+
+/** Lister les recettes planifiées pour cette semaine */
+export async function listerRecettesSemaine(): Promise<Recette[]> {
+  const { data } = await clientApi.get<Recette[]>("/recettes/planifiees-semaine");
+  return data;
+}
+
+/** Marquer une recette "à faire cette semaine" */
+export async function planifierRecetteSemaine(id: number): Promise<void> {
+  await clientApi.post(`/recettes/${id}/planifier-semaine`);
+}
+
+/** Retirer une recette de "cette semaine" */
+export async function deplanifierRecetteSemaine(id: number): Promise<void> {
+  await clientApi.delete(`/recettes/${id}/planifier-semaine`);
+}

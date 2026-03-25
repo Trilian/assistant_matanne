@@ -14,24 +14,24 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/composants/ui/button";
+import { Input } from "@/composants/ui/input";
+import { Label } from "@/composants/ui/label";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
+import { Skeleton } from "@/composants/ui/skeleton";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/composants/ui/dialog";
 import {
   utiliserRequete,
   utiliserMutation,
@@ -48,6 +48,7 @@ import {
 import { schemaArticleCourses, type DonneesArticleCourses } from "@/bibliotheque/validateurs";
 import { toast } from "sonner";
 import type { ListeCourses } from "@/types/courses";
+import { SwipeableItem } from "@/composants/swipeable-item";
 
 export default function PageCourses() {
   const [listeSelectionnee, setListeSelectionnee] = useState<number | null>(null);
@@ -250,42 +251,49 @@ export default function PageCourses() {
                 {articlesNonCoches.length > 0 && (
                   <div className="space-y-1">
                     {articlesNonCoches.map((a) => (
-                      <div
+                      <SwipeableItem
                         key={a.id}
-                        className="flex items-center gap-3 rounded-md px-2 py-1.5 hover:bg-accent transition-colors"
+                        onSwipeRight={() => cocher({ articleId: a.id, coche: true })}
+                        onSwipeLeft={() => supprimer(a.id)}
+                        labelDroit="Cocher"
+                        labelGauche="Supprimer"
+                        iconDroit={<Check className="h-4 w-4" />}
+                        iconGauche={<Trash2 className="h-4 w-4" />}
                       >
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-6 w-6 shrink-0 rounded-full"
-                          onClick={() =>
-                            cocher({ articleId: a.id, coche: true })
-                          }
-                        >
-                          <span className="sr-only">Cocher</span>
-                        </Button>
-                        <div className="flex-1 min-w-0">
-                          <span className="text-sm font-medium">
-                            {a.nom}
-                          </span>
-                          {(a.quantite || a.categorie) && (
-                            <span className="text-xs text-muted-foreground ml-2">
-                              {a.quantite
-                                ? `${a.quantite}${a.unite ? " " + a.unite : ""}`
-                                : ""}
-                              {a.categorie ? ` · ${a.categorie}` : ""}
+                        <div className="flex items-center gap-3 rounded-md px-2 py-1.5 bg-background">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-6 w-6 shrink-0 rounded-full"
+                            onClick={() =>
+                              cocher({ articleId: a.id, coche: true })
+                            }
+                          >
+                            <span className="sr-only">Cocher</span>
+                          </Button>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-sm font-medium">
+                              {a.nom}
                             </span>
-                          )}
+                            {(a.quantite || a.categorie) && (
+                              <span className="text-xs text-muted-foreground ml-2">
+                                {a.quantite
+                                  ? `${a.quantite}${a.unite ? " " + a.unite : ""}`
+                                  : ""}
+                                {a.categorie ? ` · ${a.categorie}` : ""}
+                              </span>
+                            )}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 shrink-0"
+                            onClick={() => supprimer(a.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 shrink-0"
-                          onClick={() => supprimer(a.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
+                      </SwipeableItem>
                     ))}
                   </div>
                 )}

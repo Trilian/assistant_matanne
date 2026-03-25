@@ -1,17 +1,17 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Error boundary global
 // ═══════════════════════════════════════════════════════════
 
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/composants/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/composants/ui/card";
 
 export default function Error({
   error,

@@ -41,3 +41,25 @@ export async function statutPush(): Promise<PushStatus> {
   const { data } = await clientApi.get<PushStatus>("/push/status");
   return data;
 }
+
+// ─── Rappels intelligents ───────────────────────────────────
+
+export interface RappelItem {
+  type: "garantie" | "inventaire" | "entretien" | string;
+  titre: string;
+  description: string;
+  priorite: "urgente" | "haute" | "normale" | "basse";
+  date_echeance: string | null;
+  lien: string | null;
+}
+
+export interface EvaluationRappels {
+  rappels: RappelItem[];
+  total: number;
+}
+
+/** Évaluer et récupérer les rappels intelligents contextuels */
+export async function evaluerRappels(): Promise<EvaluationRappels> {
+  const { data } = await clientApi.get<EvaluationRappels>("/push/rappels/evaluer");
+  return data;
+}

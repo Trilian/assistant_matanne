@@ -19,6 +19,7 @@
 | [UI_COMPONENTS.md](./UI_COMPONENTS.md) | Composants UI Next.js / shadcn |
 | [PATTERNS.md](./PATTERNS.md) | Patterns de code récurrents |
 | [REDIS_SETUP.md](./REDIS_SETUP.md) | Configuration Redis (optionnel) |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | Guide de déploiement (local, Docker, Railway, Vercel, Supabase) |
 
 ## 📁 Structure
 
@@ -36,8 +37,14 @@ docs/
 ├── UI_COMPONENTS.md             ← Composants UI Next.js
 ├── PATTERNS.md                  ← Patterns de code
 ├── REDIS_SETUP.md               ← Setup Redis
+├── DEPLOYMENT.md                ← Guide déploiement
 └── guides/                      ← Guides spécifiques
     ├── cuisine/batch_cooking.md
+    ├── famille/README.md
+    ├── jeux/README.md
+    ├── maison/README.md
+    ├── outils/README.md
+    ├── planning/README.md
     └── utilitaires/
 ```
 

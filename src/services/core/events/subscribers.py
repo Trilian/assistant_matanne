@@ -407,7 +407,7 @@ def _livrer_webhooks(event: EvenementDomaine) -> None:
     La livraison effective est déléguée au thread pool du WebhookService.
     """
     try:
-        from src.services.webhooks import get_webhook_service
+        from src.services.integrations.webhooks import get_webhook_service
 
         service = get_webhook_service()
         service.livrer_evenement(event.type, event.data)

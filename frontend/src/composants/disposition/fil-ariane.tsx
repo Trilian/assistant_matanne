@@ -60,6 +60,10 @@ function traduireSegment(segment: string): string {
   return traductions[segment] ?? segment;
 }
 
+/**
+ * Fil d'ariane généré automatiquement depuis l'URL courante.
+ * Masqué sur la page d'accueil. Chaque segment est traduit en français via `traduireSegment`.
+ */
 export function FilAriane() {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);

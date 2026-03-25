@@ -14,30 +14,30 @@ import {
   Loader2,
   CalendarDays,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/composants/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
+} from "@/composants/ui/card";
+import { Skeleton } from "@/composants/ui/skeleton";
+import { Badge } from "@/composants/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/composants/ui/dialog";
+import { Input } from "@/composants/ui/input";
+import { Label } from "@/composants/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/composants/ui/select";
 import {
   utiliserRequete,
   utiliserMutation,

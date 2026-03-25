@@ -5,7 +5,7 @@
 "use client";
 
 import { use } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirRecette } from "@/bibliotheque/api/recettes";
 import { FormulaireRecette } from "@/composants/cuisine/formulaire-recette";

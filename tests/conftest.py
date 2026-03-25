@@ -96,10 +96,26 @@ def engine(test_db_url):
     charger_tous_modeles()
     Base.metadata.create_all(engine)
 
+    # Remplacer les singletons de production par le moteur de test.
+    # Ceci garantit que TOUTES les opérations DB (y compris via TestClient)
+    # utilisent la base SQLite de test au lieu de la base PostgreSQL.
+    import src.core.db.engine as engine_mod
+    import src.core.db.session as session_mod
+
+    engine_mod._engine_instance = engine
+    session_mod._session_factory = sessionmaker(
+        bind=engine,
+        autocommit=False,
+        autoflush=False,
+        expire_on_commit=False,
+    )
+
     yield engine
 
     # Cleanup
     Base.metadata.drop_all(engine)
+    engine_mod._engine_instance = None
+    session_mod._session_factory = None
 
 
 @pytest.fixture(scope="function")
@@ -394,6 +410,17 @@ def courses_service_instance(db_session):
 # ═══════════════════════════════════════════════════════════
 
 
+@pytest.fixture(autouse=True, scope="session")
+def _init_test_engine(engine):
+    """Force l'initialisation du moteur de test pour toute la session.
+
+    Ceci garantit que les singletons DB de production sont remplacés
+    par le moteur SQLite de test AVANT tout test, y compris les tests
+    TestClient qui n'utilisent pas explicitement le fixture 'db'.
+    """
+    yield
+
+
 def pytest_configure(config):
     """Configure pytest with custom markers."""
     config.addinivalue_line("markers", "unit: mark test as a unit test")
@@ -461,9 +488,9 @@ def patch_db_context(db):
         """Returns the test session instead of production."""
         yield db
 
-    # Patch both French and English function names
+    # Patch le context manager DB dans le module source et le re-export
     with patch("src.core.db.obtenir_contexte_db", mock_db_context):
-        with patch("src.core.db.obtenir_contexte_db", mock_db_context):
+        with patch("src.core.db.session.obtenir_contexte_db", mock_db_context):
             yield db
 
 

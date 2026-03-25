@@ -11,10 +11,10 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+} from "@/composants/ui/card";
+import { Badge } from "@/composants/ui/badge";
+import { Skeleton } from "@/composants/ui/skeleton";
+import { Button } from "@/composants/ui/button";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { listerStocks } from "@/bibliotheque/api/maison";
 

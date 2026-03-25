@@ -1,27 +1,27 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Button } from "@/composants/ui/button";
+import { Input } from "@/composants/ui/input";
+import { Textarea } from "@/composants/ui/textarea";
+import { Badge } from "@/composants/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/composants/ui/dialog";
+import { Label } from "@/composants/ui/label";
+import { Skeleton } from "@/composants/ui/skeleton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/composants/ui/select";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { listerNotes, creerNote, modifierNote, supprimerNote } from "@/bibliotheque/api/outils";
 import type { Note, NoteCreate } from "@/types/outils";
