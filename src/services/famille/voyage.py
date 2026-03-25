@@ -237,7 +237,7 @@ class ServiceVoyage(BaseService[Voyage]):
 
     def charger_templates_defaut(self) -> list[dict[str, Any]]:
         """Charge les templates par défaut depuis le fichier JSON."""
-        chemin = DATA_DIR / "templates_checklist_voyage.json"
+        chemin = DATA_DIR / "reference" / "templates_checklist_voyage.json"
         if not chemin.exists():
             logger.warning("Fichier templates voyage non trouvé: %s", chemin)
             return []

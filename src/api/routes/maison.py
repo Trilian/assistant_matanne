@@ -886,7 +886,7 @@ async def obtenir_calendrier_semis(
     ]
 
     # Charger le catalogue de plantes
-    catalogue_path = Path("data/plantes_catalogue.json")
+    catalogue_path = Path("data/reference/plantes_catalogue.json")
     if not catalogue_path.exists():
         return {
             "mois": mois_courant,

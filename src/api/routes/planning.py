@@ -423,3 +423,119 @@ async def exporter_planning_ical(
             "Content-Disposition": "attachment; filename=planning-repas.ics",
         },
     )
+
+
+@router.get(
+    "/nutrition-hebdo",
+    responses=REPONSES_LISTE,
+    summary="Analyse nutritionnelle hebdomadaire",
+    description="Agrège les données nutritionnelles des repas planifiés pour une semaine donnée.",
+)
+@gerer_exception_api
+async def nutrition_hebdomadaire(
+    semaine: str | None = Query(
+        None,
+        description="Date de début de semaine ISO 8601 (YYYY-MM-DD). Défaut: semaine courante.",
+    ),
+    user: dict = Depends(require_auth),
+) -> dict:
+    """
+    Retourne l'analyse nutritionnelle agrégée de la semaine :
+    - Totaux calories / protéines / lipides / glucides
+    - Répartition par jour
+    - Nombre de repas sans données nutritionnelles
+    """
+    from datetime import date
+    from src.core.models.planning import Repas
+    from src.core.models.recettes import Recette
+
+    def _query() -> dict:
+        import datetime as dt
+
+        # Calculer la semaine
+        if semaine:
+            debut = dt.date.fromisoformat(semaine)
+        else:
+            aujourd_hui = dt.date.today()
+            debut = aujourd_hui - dt.timedelta(days=aujourd_hui.weekday())
+        fin = debut + dt.timedelta(days=6)
+
+        with executer_avec_session() as session:
+            repas_liste = (
+                session.query(Repas)
+                .join(Recette, Repas.recette_id == Recette.id, isouter=True)
+                .filter(
+                    Repas.date_repas >= debut,
+                    Repas.date_repas <= fin,
+                )
+                .all()
+            )
+
+            totaux = {"calories": 0, "proteines": 0.0, "lipides": 0.0, "glucides": 0.0}
+            par_jour: dict[str, dict] = {}
+            sans_donnees = 0
+
+            for repas in repas_liste:
+                jour = repas.date_repas.isoformat()
+                if jour not in par_jour:
+                    par_jour[jour] = {
+                        "calories": 0,
+                        "proteines": 0.0,
+                        "lipides": 0.0,
+                        "glucides": 0.0,
+                        "repas": [],
+                    }
+
+                recette = repas.recette
+                if recette and recette.calories is not None:
+                    portions = repas.portion_ajustee or (recette.portions or 1)
+                    # Valeur nutritionnelle = par portion × nombre de portions / portions standard
+                    facteur = portions / (recette.portions or 1) if recette.portions else 1
+                    cal = int((recette.calories or 0) * facteur)
+                    prot = round((recette.proteines or 0.0) * facteur, 1)
+                    lip = round((recette.lipides or 0.0) * facteur, 1)
+                    gluc = round((recette.glucides or 0.0) * facteur, 1)
+
+                    totaux["calories"] += cal
+                    totaux["proteines"] += prot
+                    totaux["lipides"] += lip
+                    totaux["glucides"] += gluc
+                    par_jour[jour]["calories"] += cal
+                    par_jour[jour]["proteines"] += prot
+                    par_jour[jour]["lipides"] += lip
+                    par_jour[jour]["glucides"] += gluc
+                else:
+                    sans_donnees += 1
+
+                par_jour[jour]["repas"].append({
+                    "id": repas.id,
+                    "type": repas.type_repas,
+                    "nom_recette": recette.nom if recette else None,
+                    "calories": int((recette.calories or 0) * facteur) if recette and recette.calories else None,
+                })
+
+            # Arrondis finaux
+            totaux["proteines"] = round(totaux["proteines"], 1)
+            totaux["lipides"] = round(totaux["lipides"], 1)
+            totaux["glucides"] = round(totaux["glucides"], 1)
+
+            nb_jours_avec_donnees = sum(
+                1 for j in par_jour.values() if j["calories"] > 0
+            )
+            moyenne_calories = (
+                round(totaux["calories"] / nb_jours_avec_donnees)
+                if nb_jours_avec_donnees > 0
+                else 0
+            )
+
+            return {
+                "semaine_debut": debut.isoformat(),
+                "semaine_fin": fin.isoformat(),
+                "totaux": totaux,
+                "moyenne_calories_par_jour": moyenne_calories,
+                "par_jour": par_jour,
+                "nb_repas_sans_donnees": sans_donnees,
+                "nb_repas_total": len(repas_liste),
+            }
+
+    return await executer_async(_query)

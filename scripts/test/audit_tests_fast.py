@@ -8,7 +8,7 @@ Ce script analyse rapidement:
 3. GÃ©nÃ¨re un rapport actionnable
 
 Usage:
-    python scripts/audit_tests_fast.py
+    python scripts/test/audit_tests_fast.py
 """
 
 import csv

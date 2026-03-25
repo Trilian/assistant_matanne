@@ -90,7 +90,7 @@ jobs:
         python-version: '3.13'
 
     - name: Verifier encodage UTF-8 sans BOM
-      run: python scripts/convert_to_utf8.py --check
+      run: python scripts/setup/convert_to_utf8.py --check
 
   lint:
     runs-on: ubuntu-latest

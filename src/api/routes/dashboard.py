@@ -189,3 +189,29 @@ async def obtenir_tableau_bord(
             }
 
     return await executer_async(_query)
+
+
+@router.get(
+    "/bilan-mensuel",
+    responses=REPONSES_LISTE,
+    summary="Bilan mensuel IA",
+    description=(
+        "Génère un bilan mensuel enrichi par l'IA : dépenses, repas planifiés, "
+        "activités et entretien, avec une synthèse narrative."
+    ),
+)
+@gerer_exception_api
+async def bilan_mensuel(
+    mois: str | None = None,
+    user: dict = Depends(require_auth),
+) -> dict:
+    """
+    Retourne les données agrégées du mois + synthèse IA.
+
+    Le paramètre `mois` est au format YYYY-MM (ex: 2025-06).
+    Si absent, utilise le mois courant.
+    """
+    from src.services.rapports.bilan_mensuel import get_bilan_mensuel_service
+
+    service = get_bilan_mensuel_service()
+    return await service.generer_bilan(mois=mois)

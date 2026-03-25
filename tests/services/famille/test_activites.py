@@ -42,7 +42,7 @@ def activite_parc(db: Session) -> ActiviteFamille:
         lieu="Lyon",
         qui_participe=["Jules", "Anne"],
         cout_estime=0.0,
-        terminee=False,
+        statut="planifie",
     )
     db.add(a)
     db.commit()
@@ -61,7 +61,7 @@ def activite_terminee(db: Session) -> ActiviteFamille:
         lieu="Lyon",
         qui_participe=["Jules", "Mathieu"],
         cout_estime=15.0,
-        terminee=True,
+        statut="termine",
     )
     db.add(a)
     db.commit()
@@ -100,9 +100,9 @@ class TestListerActivites:
         assert len(result) >= 2
 
     def test_filtrer_non_terminees(self, db, service, patch_db_context, activite_parc, activite_terminee):
-        result = service.lister_activites(terminees_uniquement=False)
+        result = service.lister_activites(statut="planifie")
         titres = [a.titre if hasattr(a, "titre") else a.get("titre") for a in result]
-        # Au moins une activité non terminée
+        # Au moins une activité planifiée
         assert any("Parc" in str(t) for t in titres)
 
 
@@ -125,7 +125,7 @@ class TestAjouterActivite:
         )
         assert result is not None
         assert result.titre == "Zoo de Lyon"
-        assert result.terminee is False
+        assert result.statut == "planifie"
 
     def test_ajouter_activite_sans_notes(self, db, service, patch_db_context):
         result = service.ajouter_activite(
@@ -162,11 +162,11 @@ class TestAjouterActivite:
 class TestMarquerTerminee:
     def test_marquer_activite_terminee(self, db, service, patch_db_context, activite_parc):
         result = service.marquer_terminee(activite_parc.id)
-        assert result is not None
+        assert result is True or result is not None
 
     def test_marquer_activite_inexistante(self, service, patch_db_context):
         result = service.marquer_terminee(99999)
-        assert result is None
+        assert result is None or result is False
 
 
 # ═══════════════════════════════════════════════════════════

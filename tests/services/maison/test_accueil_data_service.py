@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from src.core.models import TacheEntretien
-from src.services.accueil_data_service import (
+from src.services.dashboard.service import (
     AccueilDataService,
     get_accueil_data_service,
 )

@@ -18,3 +18,25 @@ export async function obtenirTableauBord(): Promise<DonneesTableauBord> {
   const { data } = await clientApi.get<DonneesTableauBord>("/dashboard");
   return data;
 }
+
+// ─── Bilan mensuel IA ───────────────────────────────────────
+
+export interface BilanMensuelDonnees {
+  depenses: { total: number; nb_transactions: number; par_categorie: Record<string, number> };
+  repas: { total_planifies: number; repartition: Record<string, number> };
+  activites: { total: number; noms: string[] };
+  entretien: { taches_completees: number; taches_en_retard: number };
+}
+
+export interface BilanMensuel {
+  mois: string;
+  donnees: BilanMensuelDonnees;
+  synthese_ia: string;
+}
+
+/** Obtenir le bilan mensuel IA (mois au format YYYY-MM, défaut = mois courant) */
+export async function obtenirBilanMensuel(mois?: string): Promise<BilanMensuel> {
+  const params = mois ? `?mois=${mois}` : "";
+  const { data } = await clientApi.get<BilanMensuel>(`/dashboard/bilan-mensuel${params}`);
+  return data;
+}

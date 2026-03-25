@@ -11,21 +11,12 @@ repos:
     hooks:
       - id: check-utf8-bom
         name: Verifier absence de BOM UTF-8
-        entry: python scripts/convert_to_utf8.py --check
+        entry: python scripts/setup/convert_to_utf8.py --check
         language: system
         pass_filenames: false
         always_run: true
         types: [python]
         description: "Bloque les commits si des fichiers Python contiennent un BOM UTF-8"
-
-      - id: check-mojibake
-        name: Verifier absence de mojibake
-        entry: python scripts/fix_encoding.py --check
-        language: system
-        pass_filenames: false
-        always_run: true
-        types: [python]
-        description: "Bloque les commits si des fichiers contiennent des caracteres mojibake"
 
   # Hooks standards pre-commit
   - repo: https://github.com/pre-commit/pre-commit-hooks

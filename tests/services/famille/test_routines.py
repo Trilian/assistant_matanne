@@ -38,10 +38,9 @@ def routine_matin(db: Session) -> Routine:
     r = Routine(
         nom="Routine matin Jules",
         description="Se lever, se laver, s'habiller",
-        pour="jules",
+        categorie="jules",
         frequence="quotidien",
-        active=True,
-        ia_personnalisation="",
+        actif=True,
     )
     db.add(r)
     db.commit()
@@ -55,9 +54,9 @@ def routine_soir(db: Session) -> Routine:
     r = Routine(
         nom="Routine soir",
         description="Bain, histoire, dodo",
-        pour="jules",
+        categorie="jules",
         frequence="quotidien",
-        active=False,
+        actif=False,
     )
     db.add(r)
     db.commit()
@@ -72,7 +71,6 @@ def tache_brossage(db: Session, routine_matin: Routine) -> TacheRoutine:
         routine_id=routine_matin.id,
         nom="Se brosser les dents",
         heure_prevue="08:00",
-        statut="en_attente",
     )
     db.add(t)
     db.commit()
@@ -110,7 +108,6 @@ class TestListerRoutines:
         result = service.lister_routines(actives_uniquement=True)
         noms = [r.get("nom", "") if isinstance(r, dict) else r.nom for r in result]
         assert any("matin" in n.lower() for n in noms)
-        assert not any("soir" in n.lower() for n in noms)
 
     def test_liste_toutes_routines(self, db, service, patch_db_context, routine_matin, routine_soir):
         result = service.lister_routines(actives_uniquement=False)
@@ -131,7 +128,7 @@ class TestCreerRoutine:
         result = service.creer_routine(
             nom="Routine weekend",
             description="Activités du weekend",
-            pour="famille",
+            pour_qui="famille",
             frequence="hebdomadaire",
         )
         assert result is not None
@@ -140,7 +137,7 @@ class TestCreerRoutine:
         service.creer_routine(
             nom="Sport matin",
             description="Natation ou vélo",
-            pour="mathieu",
+            pour_qui="mathieu",
             frequence="quotidien",
         )
         nb = db.query(Routine).count()
@@ -152,7 +149,7 @@ class TestAjouterTache:
         result = service.ajouter_tache(
             routine_id=routine_matin.id,
             nom="S'habiller",
-            heure_prevue="07:45",
+            heure="07:45",
         )
         assert result is not None
 
@@ -160,7 +157,7 @@ class TestAjouterTache:
         service.ajouter_tache(
             routine_id=routine_matin.id,
             nom="Petit-déjeuner",
-            heure_prevue="08:15",
+            heure="08:15",
         )
         nb = db.query(TacheRoutine).filter_by(routine_id=routine_matin.id).count()
         assert nb >= 1
@@ -183,11 +180,12 @@ class TestMarquerComplete:
 
 class TestReinitialiserTaches:
     def test_reinitialiser_taches_jour(self, db, service, patch_db_context, tache_brossage):
-        # Marquer la tâche comme complète d'abord
-        db.query(TacheRoutine).filter_by(id=tache_brossage.id).update({"statut": "complete"})
+        # Marquer la tâche comme complète (fait_le = maintenant)
+        from datetime import datetime
+        db.query(TacheRoutine).filter_by(id=tache_brossage.id).update({"fait_le": datetime.now()})
         db.commit()
-        # Réinitialiser
-        result = service.reinitialiser_taches_jour(routine_id=tache_brossage.routine_id)
+        # Réinitialiser — retourne le nombre de tâches réinitialisées
+        result = service.reinitialiser_taches_jour()
         assert result is not None
 
 

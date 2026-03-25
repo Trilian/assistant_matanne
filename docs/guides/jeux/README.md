@@ -33,7 +33,7 @@ Le module **Jeux** permet de suivre et gérer les activités de jeux de hasard e
 - Tableau de bord financier (total misé, total gagné, ROI)
 - Historique filtrable par sport, statut, période
 - Statistiques : taux de réussite, mise moyenne, meilleure cote
-- Import CSV depuis le fichier `data/parisSportifs - Recapitulatif.csv`
+- Import CSV depuis le fichier `data/seed/paris_sportifs.csv`
 
 ### Usage
 
@@ -56,8 +56,8 @@ Le module **Jeux** permet de suivre et gérer les activités de jeux de hasard e
 ### Import CSV
 
 ```bash
-# Format attendu : data/TEMPLATE_IMPORT.csv
-python scripts/db/import_recettes.py --file data/parisSportifs\ -\ Recapitulatif.csv --type paris
+# Format attendu : docs/TEMPLATE_IMPORT.csv
+python scripts/db/import_recettes.py --file data/seed/paris_sportifs.csv --type paris
 ```
 
 ---

@@ -44,20 +44,11 @@ python scripts/db/deploy_supabase.py --rollback   # Annule la dernière migratio
 ```
 
 ### `import_recettes.py`
-Importe les recettes standard depuis `data/recettes_standard.json` dans la base de données (modèles `Recette`, `Ingredient`, `Etape`).
+Importe les recettes standard depuis `data/seed/recettes_standard.json` dans la base de données (modèles `Recette`, `Ingredient`, `Etape`).
 
 ```bash
 python scripts/db/import_recettes.py
 ```
-
-### `init_db.py`
-Initialise la base de données à partir des modèles SQLAlchemy (`Base.metadata.create_all`). Contient aussi `drop_all_tables()` pour réinitialisation complète.
-
-```bash
-python scripts/db/init_db.py
-```
-
-> ⚠️ Utiliser `sql/INIT_COMPLET.sql` en priorité pour Supabase (inclut RLS, triggers, vues).
 
 ### `reset_supabase.py`
 **⚠️ DESTRUCTIF** — Supprime et recrée le schéma complet Supabase. Toutes les données sont perdues.
@@ -100,26 +91,12 @@ Configuration interactive de la clé API Football-Data.org (statistiques sportiv
 python scripts/setup/setup_api_key.py
 ```
 
-### `verify_connection_simple.py`
-Teste la connexion SQLAlchemy avec affichage visuel (bannière + détails). Alternative plus bavarde à `check_db.py`.
-
-```bash
-python scripts/setup/verify_connection_simple.py
-```
-
 ---
 
 ## test/
 
-### `audit_tests.py`
-Audit complet de la couverture de tests : mappe les fichiers source → fichiers de test, calcule le taux de couverture, détecte les tests inefficaces (hasattr-only, import-only). Génère un rapport CSV.
-
-```bash
-python scripts/test/audit_tests.py
-```
-
 ### `audit_tests_fast.py`
-Version rapide de l'audit (sans calcul de couverture). Idéal pour un aperçu rapide.
+Audit rapide des tests : mapping source → fichier de test, détection des patterns inefficaces (hasattr-only, import-only, mocking excessif), score qualité 0-100. Génère un rapport CSV.
 
 ```bash
 python scripts/test/audit_tests_fast.py
@@ -138,3 +115,10 @@ python scripts/test/test_manager.py quick        # Tests rapides (sans benchmark
 ```
 
 > Voir aussi : `python manage.py test_coverage` qui lance `pytest --cov` directement.
+
+### `write_test.py`
+Génère des fichiers de tests pour les routes de planning (`tests/api/test_routes_planning.py`).
+
+```bash
+python scripts/test/write_test.py
+```

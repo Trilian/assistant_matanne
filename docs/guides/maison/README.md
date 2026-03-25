@@ -86,7 +86,7 @@ suggestions = service.suggerer_projets_ia(budget=5000)
 
 ### Catalogue des tâches types
 
-Le fichier `data/entretien_catalogue.json` contient 50+ tâches d'entretien classiques avec fréquences suggérées.
+Le fichier `data/reference/entretien_catalogue.json` contient 50+ tâches d'entretien classiques avec fréquences suggérées.
 
 ```python
 from src.services.maison.entretien_service import EntretienService
@@ -115,7 +115,7 @@ taches_urgentes = service.get_taches_urgentes(horizon_jours=30)
 ### Intégrations
 
 - **Météo** : `src/services/integrations/weather/` — ajustement automatique des arrosages
-- **Catalogue plantes** : `data/plantes_catalogue.json` — 200+ espèces documentées
+- **Catalogue plantes** : `data/reference/plantes_catalogue.json` — 200+ espèces documentées
 
 ### Services
 

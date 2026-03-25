@@ -48,8 +48,8 @@ Le module **Famille** centralise le suivi du développement de l'enfant et la vi
 
 ### Données de référence
 
-- `data/normes_oms.json` — normes de croissance OMS (0-5 ans)
-- `data/calendrier_vaccinal_fr.json` — calendrier vaccinal France 2026
+- `data/reference/normes_oms.json` — normes de croissance OMS (0-5 ans)
+- `data/reference/calendrier_vaccinal_fr.json` — calendrier vaccinal France 2026
 
 ### Services IA
 

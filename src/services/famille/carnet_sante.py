@@ -69,7 +69,7 @@ class ServiceCarnetSante(BaseService[Vaccin]):
     def _charger_calendrier_vaccinal(self) -> list[dict[str, Any]]:
         """Charge le calendrier vaccinal français depuis le fichier JSON."""
         if self._calendrier_vaccinal is None:
-            chemin = DATA_DIR / "calendrier_vaccinal_fr.json"
+            chemin = DATA_DIR / "reference" / "calendrier_vaccinal_fr.json"
             if chemin.exists():
                 with open(chemin, encoding="utf-8") as f:
                     data = json.load(f)
@@ -82,7 +82,7 @@ class ServiceCarnetSante(BaseService[Vaccin]):
     def _charger_normes_oms(self) -> dict[str, Any]:
         """Charge les normes OMS depuis le fichier JSON."""
         if self._normes_oms is None:
-            chemin = DATA_DIR / "normes_oms.json"
+            chemin = DATA_DIR / "reference" / "normes_oms.json"
             if chemin.exists():
                 with open(chemin, encoding="utf-8") as f:
                     self._normes_oms = json.load(f)

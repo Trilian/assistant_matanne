@@ -33,7 +33,7 @@ class EntretienTachesMixin:
             return self._catalogue_cache
 
         try:
-            chemin = Path(__file__).parent.parent.parent / "data" / "entretien_catalogue.json"
+            chemin = Path(__file__).parent.parent.parent / "data" / "reference" / "entretien_catalogue.json"
             if chemin.exists():
                 with open(chemin, encoding="utf-8") as f:
                     self._catalogue_cache = json.load(f)

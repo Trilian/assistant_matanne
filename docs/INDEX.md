@@ -87,11 +87,14 @@ cd frontend && npm test           # Frontend (Vitest)
 
 ### 📊 Données (data/)
 
-- `recettes_standard.json` - Recettes de base
-- `entretien_catalogue.json` - Catalogue entretien maison
-- `plantes_catalogue.json` - Catalogue plantes jardin
-- `TEMPLATE_IMPORT.csv` - Template import
-- `parisSportifs - Recapitulatif.csv` - Données paris
+- `reference/calendrier_vaccinal_fr.json` - Calendrier vaccinal France
+- `reference/normes_oms.json` - Normes de croissance OMS
+- `reference/entretien_catalogue.json` - Catalogue entretien maison
+- `reference/plantes_catalogue.json` - Catalogue plantes jardin
+- `reference/templates_checklist_voyage.json` - Templates checklists voyage
+- `seed/recettes_standard.json` - Recettes de base (seeding DB)
+- `seed/paris_sportifs.csv` - Données paris sportifs (import)
+- `TEMPLATE_IMPORT.csv` - Template import (voir `docs/TEMPLATE_IMPORT.csv`)
 
 ## ✨ Nettoyage Effectué
 

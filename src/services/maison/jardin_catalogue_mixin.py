@@ -29,7 +29,7 @@ class JardinCatalogueMixin:
 
         try:
             catalogue_path = (
-                Path(__file__).parent.parent.parent.parent / "data" / "catalogue_jardin.json"
+                Path(__file__).parent.parent.parent.parent / "data" / "reference" / "plantes_catalogue.json"
             )
             if catalogue_path.exists():
                 with open(catalogue_path, encoding="utf-8") as f:

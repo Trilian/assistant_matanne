@@ -11,7 +11,7 @@ et sont exclus des tests unitaires. Focus sur la structure et la validation.
 
 import pytest
 
-from src.services.multimodal import (
+from src.services.integrations.multimodal import (
     AnalyseNutritionnelle,
     FactureExtraite,
     IngredientExtrait,

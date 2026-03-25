@@ -1079,3 +1079,30 @@ async def supprimer_evenement_familial(
             return MessageResponse(message=f"Événement '{e.titre}' supprimé")
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# RÉSUMÉ HEBDOMADAIRE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/resume-hebdo", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_resume_hebdomadaire(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Génère un résumé hebdomadaire de la famille via IA.
+
+    Collecte les données de la semaine écoulée (repas, budget,
+    activités, tâches) et génère un résumé narratif avec
+    recommandations pour la semaine suivante.
+    """
+    from src.services.famille.resume_hebdo import obtenir_service_resume_hebdo
+
+    def _generate():
+        service = obtenir_service_resume_hebdo()
+        resume = service.generer_resume_semaine_sync()
+        return resume.model_dump() if hasattr(resume, "model_dump") else resume
+
+    return await executer_async(_generate)

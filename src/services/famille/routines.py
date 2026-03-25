@@ -10,7 +10,7 @@ Opérations:
 """
 
 import logging
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, TypedDict
 
 from sqlalchemy.orm import Session, selectinload
@@ -83,25 +83,20 @@ class ServiceRoutines(BaseService[Routine]):
             raise ValueError("Session DB requise")
         query = db.query(Routine).options(selectinload(Routine.tasks))
         if actives_uniquement:
-            query = query.filter(Routine.is_active)
+            query = query.filter(Routine.actif == True)  # noqa: E712
 
         routines = query.order_by(Routine.cree_le.desc()).all()
         result = []
         for r in routines:
-            child_name = "Famille"
-            if r.child_id:
-                child = db.query(ProfilEnfant).get(r.child_id)
-                if child:
-                    child_name = child.name
             result.append(
                 {
                     "id": r.id,
-                    "nom": r.name,
+                    "nom": r.nom,
                     "description": r.description or "",
-                    "pour": child_name,
-                    "frequence": r.frequency,
-                    "active": r.is_active,
-                    "ia": "–" if r.ai_suggested else "",
+                    "pour": r.categorie or "Famille",
+                    "frequence": r.frequence,
+                    "active": r.actif,
+                    "ia": "",
                     "nb_taches": len(r.tasks),
                 }
             )
@@ -126,16 +121,16 @@ class ServiceRoutines(BaseService[Routine]):
         tasks = (
             db.query(TacheRoutine)
             .filter(TacheRoutine.routine_id == routine_id)
-            .order_by(TacheRoutine.scheduled_time)
+            .order_by(TacheRoutine.heure_prevue)
             .all()
         )
         return [
             {
                 "id": t.id,
-                "nom": t.task_name,
-                "heure": t.scheduled_time or "—",
-                "statut": t.status,
-                "completed_at": t.completed_at,
+                "nom": t.nom,
+                "heure": t.heure_prevue or "—",
+                "statut": "fait" if t.fait_le else "à faire",
+                "completed_at": t.fait_le,
             }
             for t in tasks
         ]
@@ -182,19 +177,12 @@ class ServiceRoutines(BaseService[Routine]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        child_id = None
-        if pour_qui != "Famille":
-            child = db.query(ProfilEnfant).filter(ProfilEnfant.name == pour_qui).first()
-            if child:
-                child_id = child.id
-
         routine = Routine(
-            name=nom,
+            nom=nom,
             description=description,
-            child_id=child_id,
-            frequency=frequence,
-            is_active=True,
-            ai_suggested=False,
+            categorie=pour_qui,
+            frequence=frequence,
+            actif=True,
         )
         db.add(routine)
         db.commit()
@@ -228,9 +216,8 @@ class ServiceRoutines(BaseService[Routine]):
             raise ValueError("Session DB requise")
         task = TacheRoutine(
             routine_id=routine_id,
-            task_name=nom,
-            scheduled_time=heure,
-            status="à faire",
+            nom=nom,
+            heure_prevue=heure,
         )
         db.add(task)
         db.commit()
@@ -258,8 +245,7 @@ class ServiceRoutines(BaseService[Routine]):
             raise ValueError("Session DB requise")
         task = db.query(TacheRoutine).filter(TacheRoutine.id == task_id).first()
         if task:
-            task.status = "termine"
-            task.completed_at = datetime.now()
+            task.fait_le = date.today()
             db.commit()
             obtenir_bus().emettre(
                 "routines.tache_complete", {"id": task_id}, source="ServiceRoutines"
@@ -277,10 +263,9 @@ class ServiceRoutines(BaseService[Routine]):
         """
         if db is None:
             raise ValueError("Session DB requise")
-        tasks = db.query(TacheRoutine).filter(TacheRoutine.status == "termine").all()
+        tasks = db.query(TacheRoutine).filter(TacheRoutine.fait_le.isnot(None)).all()
         for task in tasks:
-            task.status = "à faire"
-            task.completed_at = None
+            task.fait_le = None
         db.commit()
         logger.info("Réinitialisation: %d tâches", len(tasks))
         return len(tasks)
@@ -323,7 +308,7 @@ class ServiceRoutines(BaseService[Routine]):
             raise ValueError("Session DB requise")
         routine = db.query(Routine).get(routine_id)
         if routine:
-            routine.is_active = False
+            routine.actif = False
             db.commit()
             obtenir_bus().emettre(
                 "routines.desactivee", {"id": routine_id}, source="ServiceRoutines"
@@ -354,22 +339,22 @@ class ServiceRoutines(BaseService[Routine]):
             db.query(TacheRoutine, Routine)
             .join(Routine, TacheRoutine.routine_id == Routine.id)
             .filter(
-                TacheRoutine.status == "à faire",
-                TacheRoutine.scheduled_time.isnot(None),
-                Routine.is_active,
+                TacheRoutine.fait_le.is_(None),
+                TacheRoutine.heure_prevue.isnot(None),
+                Routine.actif == True,  # noqa: E712
             )
             .all()
         )
 
         for task, routine in tasks:
             try:
-                heure = datetime.strptime(task.scheduled_time, "%H:%M").time()
+                heure = datetime.strptime(task.heure_prevue, "%H:%M").time()
                 if heure < now:
                     taches_retard.append(
                         {
-                            "routine": routine.name,
-                            "tache": task.task_name,
-                            "heure": task.scheduled_time,
+                            "routine": routine.nom,
+                            "tache": task.nom,
+                            "heure": task.heure_prevue,
                             "id": task.id,
                         }
                     )
@@ -392,14 +377,14 @@ class ServiceRoutines(BaseService[Routine]):
         tasks = (
             db.query(TacheRoutine, Routine)
             .join(Routine, TacheRoutine.routine_id == Routine.id)
-            .filter(TacheRoutine.status == "à faire", Routine.is_active == True)  # noqa: E712
+            .filter(TacheRoutine.fait_le.is_(None), Routine.actif == True)  # noqa: E712
             .all()
         )
         return [
             {
-                "nom": routine.name,
-                "heure": task.scheduled_time or "—",
-                "tache": task.task_name,
+                "nom": routine.nom,
+                "heure": task.heure_prevue or "—",
+                "tache": task.nom,
             }
             for task, routine in tasks
         ]
@@ -417,7 +402,7 @@ class ServiceRoutines(BaseService[Routine]):
             raise ValueError("Session DB requise")
         return (
             db.query(TacheRoutine)
-            .filter(TacheRoutine.completed_at >= datetime.now().replace(hour=0, minute=0))
+            .filter(TacheRoutine.fait_le == date.today())
             .count()
         )
 

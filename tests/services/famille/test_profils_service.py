@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 
 from src.core.models.notifications import PreferenceNotification
 from src.core.models.users import ProfilUtilisateur
-from src.services.profils import (
+from src.services.core.utilisateur.profils import (
     AVATARS_DISPONIBLES,
     NOTIFICATIONS_MODULES_DEFAUT,
     PREFERENCES_MODULES_DEFAUT,

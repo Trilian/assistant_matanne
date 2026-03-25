@@ -43,7 +43,7 @@
 │                          CORE LAYER                              │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
 │  │ Database │  │ Models   │  │   AI     │  │  Cache   │        │
-│  │ (Pool)   │  │ (ORM 19) │  │ (Mistral)│  │ (3 niv.) │        │
+│  │ (Pool)   │  │ (ORM 22) │  │ (Mistral)│  │ (3 niv.) │        │
 │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘        │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
 │  │ Result   │  │Resilience│  │Middleware│  │  State   │        │
@@ -64,7 +64,7 @@
 
 ## Modules Core (src/core/)
 
-Le core est organisé en **14 sous-packages** + fichiers utilitaires:
+Le core est organisé en **10 sous-packages** + fichiers utilitaires:
 
 ```
 src/core/
@@ -75,7 +75,7 @@ src/core/
 ├── db/              # Engine, sessions, migrations SQL-file
 ├── decorators/      # Package: cache.py, db.py, errors.py, validation.py
 ├── middleware/      # Pipeline de middlewares composables (base, builtin, pipeline)
-├── models/          # 19 modèles SQLAlchemy ORM
+├── models/          # 22 modèles SQLAlchemy ORM
 ├── monitoring/      # Collecteur métriques, health checks
 ├── observability/   # Contexte d'observabilité (spans, traces)
 ├── resilience/      # Politiques de résilience composables (retry, timeout, bulkhead)
@@ -280,7 +280,7 @@ storage = obtenir_storage()
 storage["clé"] = valeur
 ```
 
-### models/ — SQLAlchemy 2.0 ORM (19 fichiers)
+### models/ — SQLAlchemy 2.0 ORM (22 fichiers)
 
 | Fichier               | Domaine                                               |
 | --------------------- | ----------------------------------------------------- |

@@ -214,9 +214,9 @@ def test_core():
 
 
 def audit_tests():
-    """Audit de couverture des tests"""
-    print("[AUDIT] Audit couverture...")
-    run_cmd("python scripts/test/audit_tests.py")
+    """Audit rapide des tests (mapping source/test, patterns inefficaces)"""
+    print("[AUDIT] Audit tests...")
+    run_cmd("python scripts/test/audit_tests_fast.py")
 
 
 def help_cmd():

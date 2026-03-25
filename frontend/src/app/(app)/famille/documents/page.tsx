@@ -17,6 +17,7 @@ import {
   Trash2,
   Search,
   AlertTriangle,
+  ScanLine,
 } from "lucide-react";
 import {
   Card,
@@ -36,6 +37,7 @@ import {
   creerDocument,
   modifierDocument,
   supprimerDocument,
+  extraireDocumentOCR,
   type DocumentFamille,
   type CreerDocumentDTO,
 } from "@/bibliotheque/api/documents";
@@ -64,6 +66,8 @@ export default function PageDocuments() {
   const [dialogOuvert, setDialogOuvert] = useState(false);
   const [enEdition, setEnEdition] = useState<DocumentFamille | null>(null);
   const [form, setForm] = useState<CreerDocumentDTO>(FORM_INITIAL);
+  const [scanEnCours, setScanEnCours] = useState(false);
+  const [resultatsOCR, setResultatsOCR] = useState<Record<string, unknown> | null>(null);
 
   const queryClient = useQueryClient();
   const invalider = utiliserInvalidation();
@@ -122,6 +126,20 @@ export default function PageDocuments() {
     setEnEdition(null);
   }
 
+  async function scannerDocument(fichier: File) {
+    setScanEnCours(true);
+    setResultatsOCR(null);
+    try {
+      const res = await extraireDocumentOCR(fichier);
+      setResultatsOCR(res.donnees);
+      toast.success("Document scanné avec succès");
+    } catch {
+      toast.error("Erreur lors du scan du document");
+    } finally {
+      setScanEnCours(false);
+    }
+  }
+
   function soumettre() {
     if (enEdition) {
       mutationModifier.mutate({ id: enEdition.id, dto: form });
@@ -148,11 +166,49 @@ export default function PageDocuments() {
             Stockage et gestion des documents familiaux
           </p>
         </div>
-        <Button onClick={ouvrirCreation}>
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => document.getElementById("ocr-input")?.click()}
+            disabled={scanEnCours}
+            title="Scanner un document via OCR"
+          >
+            <ScanLine className="h-4 w-4 mr-2" />
+            {scanEnCours ? "Scan..." : "Scanner"}
+          </Button>
+          <input
+            id="ocr-input"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) scannerDocument(f); e.target.value = ""; }}
+          />
+          <Button onClick={ouvrirCreation}>
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter
+          </Button>
+        </div>
       </div>
+
+      {/* Résultats OCR */}
+      {resultatsOCR && (
+        <Card className="border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <ScanLine className="h-4 w-4 text-blue-500" />
+              Résultats de scan
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="text-xs font-mono whitespace-pre-wrap overflow-auto max-h-48 rounded bg-background/80 p-2">
+              {JSON.stringify(resultatsOCR, null, 2)}
+            </pre>
+            <Button variant="ghost" size="sm" className="mt-2" onClick={() => setResultatsOCR(null)}>
+              Fermer
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Alertes expiration */}
       {documentsExpires.length > 0 && (

@@ -57,3 +57,29 @@ export async function modifierDocument(
 export async function supprimerDocument(id: number): Promise<void> {
   await clientApi.delete(`/documents/${id}`);
 }
+
+// ─── OCR ────────────────────────────────────────────────────
+
+export interface ResultatOCR {
+  type_document: string;
+  donnees: Record<string, unknown>;
+}
+
+/**
+ * Envoie une image au backend pour extraction OCR.
+ * @param file - Fichier image (JPEG/PNG/WebP)
+ * @param typeDocument - "facture" (défaut) ou "generique"
+ */
+export async function extraireDocumentOCR(
+  file: File,
+  typeDocument = "facture"
+): Promise<ResultatOCR> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await clientApi.post<ResultatOCR>(
+    `/upload/ocr-document?type_document=${typeDocument}`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data;
+}

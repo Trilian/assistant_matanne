@@ -47,3 +47,30 @@ export async function exporterPlanningIcal(semaines = 2): Promise<void> {
   a.remove();
   window.URL.revokeObjectURL(url);
 }
+
+// ─── Nutrition hebdomadaire ─────────────────────────────────
+
+export interface NutritionJour {
+  calories: number;
+  proteines: number;
+  lipides: number;
+  glucides: number;
+  repas: { id: number; type: string; nom_recette: string | null; calories: number | null }[];
+}
+
+export interface NutritionHebdo {
+  semaine_debut: string;
+  semaine_fin: string;
+  totaux: { calories: number; proteines: number; lipides: number; glucides: number };
+  moyenne_calories_par_jour: number;
+  par_jour: Record<string, NutritionJour>;
+  nb_repas_sans_donnees: number;
+  nb_repas_total: number;
+}
+
+/** Obtenir l'analyse nutritionnelle d'une semaine */
+export async function obtenirNutritionHebdo(semaine?: string): Promise<NutritionHebdo> {
+  const params = semaine ? `?semaine=${semaine}` : "";
+  const { data } = await clientApi.get<NutritionHebdo>(`/planning/nutrition-hebdo${params}`);
+  return data;
+}

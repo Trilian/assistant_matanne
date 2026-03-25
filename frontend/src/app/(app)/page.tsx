@@ -14,6 +14,7 @@ import {
   Zap,
   Euro,
   Bell,
+  Settings2,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -29,27 +30,86 @@ import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirTableauBord } from "@/bibliotheque/api/tableau-bord";
 import { statsDepensesMaison } from "@/bibliotheque/api/maison";
 import { evaluerRappels, type RappelItem } from "@/bibliotheque/api/push";
+import { obtenirBilanMensuel } from "@/bibliotheque/api/tableau-bord";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
+import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
+
+const WIDGETS_DEFAUT = {
+  metriques: true,
+  actions_rapides: true,
+  lecture_ia: true,
+  rappels: true,
+  depenses: true,
+  bilan_mensuel: true,
+};
+
+type ClesWidget = keyof typeof WIDGETS_DEFAUT;
 
 export default function PageAccueil() {
   const { utilisateur } = utiliserAuth();
   const { data, isLoading } = utiliserRequete(["tableau-bord"], obtenirTableauBord);
   const { data: statsDepenses } = utiliserRequete(["depenses", "stats"], statsDepensesMaison);
   const { data: rappelsData } = utiliserRequete(["rappels"], evaluerRappels);
+  const { data: bilanMensuel } = utiliserRequete(["bilan-mensuel"], obtenirBilanMensuel);
+
+  const [widgets, setWidgets] = utiliserStockageLocal("dashboard-widgets", WIDGETS_DEFAUT);
+  const [configOuverte, setConfigOuverte] = utiliserStockageLocal("dashboard-config-open", false);
+
+  function basculerWidget(cle: ClesWidget) {
+    setWidgets((prev) => ({ ...prev, [cle]: !prev[cle] }));
+  }
 
   return (
     <div className="space-y-6">
       {/* Salutation */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Bonjour {utilisateur?.nom ?? ""} 👋
-        </h1>
-        <p className="text-muted-foreground">
-          Voici le résumé de votre journée
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Bonjour {utilisateur?.nom ?? ""} 👋
+          </h1>
+          <p className="text-muted-foreground">
+            Voici le résumé de votre journée
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setConfigOuverte((v: boolean) => !v)}
+          title="Personnaliser le tableau de bord"
+        >
+          <Settings2 className="h-5 w-5" />
+        </Button>
       </div>
 
+      {/* Panneau personnalisation */}
+      {configOuverte && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Settings2 className="h-4 w-4" />
+              Personnaliser le tableau de bord
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.keys(WIDGETS_DEFAUT) as ClesWidget[]).map((cle) => (
+                <label key={cle} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={widgets[cle]}
+                    onChange={() => basculerWidget(cle)}
+                    className="rounded"
+                  />
+                  <span className="capitalize">{cle.replace(/_/g, " ")}</span>
+                </label>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Cartes métriques */}
+      {widgets.metriques && (
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <CarteMetrique
           titre="Repas aujourd'hui"
@@ -81,8 +141,10 @@ export default function PageAccueil() {
           alerte={(data?.taches_entretien_urgentes ?? 0) > 0}
         />
       </div>
+      )}
 
       {/* Actions rapides */}
+      {widgets.actions_rapides && (
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Actions rapides</CardTitle>
@@ -116,9 +178,10 @@ export default function PageAccueil() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       {/* Suggestion dîner IA */}
-      {data?.suggestion_diner && (
+      {widgets.lecture_ia && data?.suggestion_diner && (
         <Card className="border-primary/20 bg-primary/5">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -138,7 +201,7 @@ export default function PageAccueil() {
       )}
 
       {/* Rappels intelligents */}
-      {rappelsData && rappelsData.total > 0 && (
+      {widgets.rappels && rappelsData && rappelsData.total > 0 && (
         <Card className="border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -160,7 +223,7 @@ export default function PageAccueil() {
       )}
 
       {/* Aperçu financier */}
-      {statsDepenses && (
+      {widgets.depenses && statsDepenses && (
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           <Card>
             <CardHeader className="pb-2">
@@ -224,6 +287,28 @@ export default function PageAccueil() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {/* Bilan mensuel IA */}
+      {widgets.bilan_mensuel && bilanMensuel?.synthese_ia && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Bilan du mois
+            </CardTitle>
+            <CardDescription>
+              {bilanMensuel.donnees.depenses.total.toFixed(0)} € dépensés ·{" "}
+              {bilanMensuel.donnees.repas.total_planifies} repas planifiés ·{" "}
+              {bilanMensuel.donnees.activites.total} activité(s)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-foreground/80 whitespace-pre-line">
+              {bilanMensuel.synthese_ia}
+            </p>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

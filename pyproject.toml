@@ -96,5 +96,4 @@ reportOptionalSubscript = "warning"
 
 [tool.poetry.scripts]
 # Helper scripts for local development (convenience only)
-check-db = "python scripts/check_db.py"
-run-checks = "powershell -File scripts/run_checks.ps1"
+check-db = "python scripts/db/check_db.py"
