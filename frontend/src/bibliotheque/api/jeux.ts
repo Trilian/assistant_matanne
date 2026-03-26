@@ -27,6 +27,7 @@ import type {
   AnalyseIA,
   BacktestResultat,
   NotificationJeux,
+  ResultatTicketOCRJeux,
 } from "@/types/jeux";
 
 // ─── Dashboard ────────────────────────────────────────────
@@ -285,4 +286,17 @@ export async function obtenirNotifications(): Promise<{
 
 export async function marquerNotificationLue(id: string): Promise<void> {
   await clientApi.post(`/jeux/notifications/${id}/lue`);
+}
+
+// ─── OCR Ticket Jeux ─────────────────────────────────────
+
+export async function analyserTicketJeuxOCR(file: File): Promise<ResultatTicketOCRJeux> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await clientApi.post<ResultatTicketOCRJeux>(
+    "/jeux/ocr-ticket",
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data;
 }

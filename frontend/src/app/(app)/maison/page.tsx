@@ -40,8 +40,9 @@ import {
   statsHubMaison,
   obtenirBriefingMaison,
   envoyerRappelsMaison,
+  alertesPredictivesGaranties,
 } from "@/bibliotheque/api/maison";
-import type { AlerteMaison, TacheJourMaison } from "@/types/maison";
+import type { AlerteMaison, TacheJourMaison, AlertePredictiveGarantie } from "@/types/maison";
 
 const SECTIONS = [
   { titre: "Projets", description: "Travaux et améliorations", chemin: "/maison/projets", Icone: Hammer, statKey: "projets_en_cours" as const },
@@ -122,9 +123,28 @@ function CarteTache({ tache }: { tache: TacheJourMaison }) {
   );
 }
 
+function CartePredictive({ item }: { item: AlertePredictiveGarantie }) {
+  const variant = item.niveau === "CRITIQUE" || item.niveau === "HAUTE" ? "destructive" : "secondary";
+  return (
+    <Link href={item.action_url} className="block">
+      <div className="flex items-start gap-2 py-2">
+        <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-500" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium leading-tight">{item.nom_appareil}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{item.action_recommandee}</p>
+        </div>
+        <Badge variant={variant} className="text-xs shrink-0">
+          {item.mois_restants_estimes <= 0 ? "Fin de vie" : `${item.mois_restants_estimes} mois`}
+        </Badge>
+      </div>
+    </Link>
+  );
+}
+
 export default function PageMaison() {
   const { data: stats } = utiliserRequete(["maison", "hub", "stats"], statsHubMaison);
   const { data: briefing } = utiliserRequete(["maison", "briefing"], obtenirBriefingMaison);
+  const { data: predictives } = utiliserRequete(["maison", "garanties", "predictives"], () => alertesPredictivesGaranties(12));
 
   const { mutate: envoyerRappels, isPending: envoi } = utiliserMutation(
     envoyerRappelsMaison
@@ -318,6 +338,26 @@ export default function PageMaison() {
                   <p className="text-sm">{item.message}</p>
                 </div>
               </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Garanties — prédiction fin de vie */}
+      {predictives && predictives.length > 0 && (
+        <Card className="border-orange-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-orange-600" />
+              Garanties &amp; durée de vie prévisionnelle
+            </CardTitle>
+            <CardDescription>
+              Appareils approchant leur fin de cycle théorique
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="divide-y">
+            {predictives.slice(0, 4).map((item) => (
+              <CartePredictive key={item.garantie_id} item={item} />
             ))}
           </CardContent>
         </Card>

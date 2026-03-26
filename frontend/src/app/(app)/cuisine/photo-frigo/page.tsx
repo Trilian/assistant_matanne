@@ -92,9 +92,10 @@ export default function PhotoFrigoPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [fichier, setFichier] = useState<File | null>(null);
   const [resultat, setResultat] = useState<ResultatPhotoFrigo | null>(null);
-  const [zone, setZone] = useState<Zone>("frigo");
+  const [zonesSelectionnees, setZonesSelectionnees] = useState<Zone[]>(["frigo"]);
   const [historique, setHistorique] = useState<AnalyseHistorique[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const zonePrincipale = zonesSelectionnees[0] ?? "frigo";
 
   useEffect(() => {
     setHistorique(chargerHistorique());
@@ -105,8 +106,10 @@ export default function PhotoFrigoPage() {
       if (!fichier) throw new Error("Aucun fichier sélectionné");
       const formData = new FormData();
       formData.append("file", fichier);
+      const params = new URLSearchParams();
+      zonesSelectionnees.forEach((z) => params.append("zones", z));
       const { data } = await clientApi.post(
-        `/api/v1/suggestions/photo-frigo?zone=${zone}`,
+        `/api/v1/suggestions/photo-frigo?${params.toString()}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -117,7 +120,7 @@ export default function PhotoFrigoPage() {
         setResultat(data);
         const entry: AnalyseHistorique = {
           date: new Date().toISOString(),
-          zone,
+          zone: zonePrincipale,
           nb_ingredients: data.ingredients_detectes.length,
           nb_recettes: data.recettes_suggerees.length + data.recettes_db.length,
         };
@@ -138,7 +141,7 @@ export default function PhotoFrigoPage() {
         nom: ing.nom,
         quantite: ing.quantite_estimee ? parseFloat(ing.quantite_estimee) || 1 : 1,
       }));
-      return ajouterArticlesBulk(articles, zone);
+      return ajouterArticlesBulk(articles, zonePrincipale);
     },
     {
       onSuccess: (data) => toast.success(data.message),
@@ -148,7 +151,7 @@ export default function PhotoFrigoPage() {
 
   const ajouterUnMutation = utiliserMutation(
     async (nom: string) => {
-      return ajouterArticlesBulk([{ nom, quantite: 1 }], zone);
+      return ajouterArticlesBulk([{ nom, quantite: 1 }], zonePrincipale);
     },
     {
       onSuccess: (data) => toast.success(data.message),
@@ -177,6 +180,18 @@ export default function PhotoFrigoPage() {
     if (inputRef.current) inputRef.current.value = "";
   };
 
+  const basculerZone = (zone: Zone) => {
+    setZonesSelectionnees((precedentes) => {
+      if (precedentes.includes(zone)) {
+        if (precedentes.length === 1) {
+          return precedentes;
+        }
+        return precedentes.filter((z) => z !== zone);
+      }
+      return [...precedentes, zone];
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -198,9 +213,9 @@ export default function PhotoFrigoPage() {
             {ZONES.map((z) => (
               <button
                 key={z.value}
-                onClick={() => setZone(z.value)}
+                onClick={() => basculerZone(z.value)}
                 className={`flex flex-col items-center gap-1 rounded-lg border-2 px-4 py-3 text-sm font-medium transition-colors ${
-                  zone === z.value
+                  zonesSelectionnees.includes(z.value)
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border hover:border-primary/50 hover:bg-muted/50"
                 }`}
@@ -210,6 +225,9 @@ export default function PhotoFrigoPage() {
               </button>
             ))}
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Sélection multiple activée: {zonesSelectionnees.length} zone(s) analysée(s).
+          </p>
         </CardContent>
       </Card>
 
@@ -218,7 +236,9 @@ export default function PhotoFrigoPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            Photo du {ZONES.find((z) => z.value === zone)?.label.toLowerCase()}
+            {zonesSelectionnees.length === 1
+              ? `Photo du ${ZONES.find((z) => z.value === zonePrincipale)?.label.toLowerCase()}`
+              : `Photo multi-zones (${zonesSelectionnees.length})`}
           </CardTitle>
           <CardDescription>
             Prenez une photo ou importez une image de vos ingrédients

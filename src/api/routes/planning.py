@@ -730,3 +730,151 @@ async def nutrition_hebdomadaire(
             }
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# SEMAINE UNIFIÉE — Vue trans-modules (AC1)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/semaine-unifiee", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_semaine_unifiee(
+    date_debut: str | None = Query(
+        None,
+        description="Date de début de semaine ISO (YYYY-MM-DD). Défaut: lundi courant.",
+    ),
+    user: dict = Depends(require_auth),
+) -> dict:
+    """
+    Vue unifiée de la semaine trans-modules : repas, tâches maison, activités famille, matchs.
+
+    Agrège en une seule réponse :
+    - `repas` : planning repas (déjeuner/dîner par jour)
+    - `taches_maison` : tâches ménage/entretien du jour
+    - `activites_famille` : activités Jules et famille de la semaine
+    - `matchs` : paris sportifs prévus cette semaine
+    - `meta` : dates de début/fin de semaine
+    """
+    import datetime as dt
+
+    from src.core.models.planning import Repas
+    from src.core.models.recettes import Recette
+
+    if date_debut:
+        debut = dt.date.fromisoformat(date_debut)
+    else:
+        aujourd_hui = dt.date.today()
+        debut = aujourd_hui - dt.timedelta(days=aujourd_hui.weekday())
+    fin = debut + dt.timedelta(days=6)
+
+    def _query() -> dict:
+        with executer_avec_session() as session:
+            # ── Repas ────────────────────────────────────────────────
+            repas_liste = (
+                session.query(Repas)
+                .join(Recette, Repas.recette_id == Recette.id, isouter=True)
+                .filter(
+                    Repas.date_repas >= debut,
+                    Repas.date_repas <= fin,
+                )
+                .order_by(Repas.date_repas)
+                .all()
+            )
+            repas_par_jour: dict[str, list[dict]] = {}
+            for r in repas_liste:
+                jour = r.date_repas.isoformat()
+                repas_par_jour.setdefault(jour, []).append(
+                    {
+                        "id": r.id,
+                        "type": r.type_repas,
+                        "recette_id": r.recette_id,
+                        "nom_recette": r.recette.nom if r.recette else None,
+                    }
+                )
+
+            # ── Activités famille ─────────────────────────────────────
+            activites: list[dict] = []
+            try:
+                from src.core.models.famille import ActiviteFamille
+
+                acts = (
+                    session.query(ActiviteFamille)
+                    .filter(
+                        ActiviteFamille.date >= debut,
+                        ActiviteFamille.date <= fin,
+                    )
+                    .order_by(ActiviteFamille.date)
+                    .all()
+                )
+                activites = [
+                    {
+                        "id": a.id,
+                        "date": a.date.isoformat() if a.date else None,
+                        "titre": a.titre,
+                        "type": getattr(a, "type_activite", None) or getattr(a, "type", None),
+                    }
+                    for a in acts
+                ]
+            except Exception:
+                pass
+
+            # ── Matchs / Paris jeux ───────────────────────────────────
+            matchs: list[dict] = []
+            try:
+                from src.core.models.jeux import Match
+
+                ms = (
+                    session.query(Match)
+                    .filter(
+                        Match.date_match >= debut,
+                        Match.date_match <= fin,
+                    )
+                    .order_by(Match.date_match)
+                    .all()
+                )
+                matchs = [
+                    {
+                        "id": m.id,
+                        "date": m.date_match.isoformat() if m.date_match else None,
+                        "equipe_domicile": getattr(m, "equipe_domicile", None),
+                        "equipe_exterieur": getattr(m, "equipe_exterieur", None),
+                        "competition": getattr(m, "competition", None),
+                    }
+                    for m in ms
+                ]
+            except Exception:
+                pass
+
+            # ── Tâches maison du jour ──────────────────────────────────
+            taches_maison: list[dict] = []
+            try:
+                from src.services.maison import get_service_menage
+
+                service_menage = get_service_menage()
+                taches_raw = service_menage.obtenir_taches_jour()
+                taches_maison = [
+                    {
+                        "nom": t.get("nom") or getattr(t, "nom", ""),
+                        "categorie": t.get("categorie") or getattr(t, "categorie", None),
+                        "duree_estimee_min": t.get("duree_estimee_min")
+                        or getattr(t, "duree_estimee_min", None),
+                    }
+                    for t in (taches_raw or [])
+                ]
+            except Exception:
+                pass
+
+            return {
+                "meta": {
+                    "semaine_debut": debut.isoformat(),
+                    "semaine_fin": fin.isoformat(),
+                },
+                "repas": repas_par_jour,
+                "activites_famille": activites,
+                "matchs": matchs,
+                "taches_maison": taches_maison,
+            }
+
+    return await executer_async(_query)
+

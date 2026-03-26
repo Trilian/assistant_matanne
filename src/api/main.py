@@ -6,6 +6,7 @@ Point d'entrée principal de l'API avec les middlewares et routers.
 
 import logging
 import os
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 
 from fastapi import Depends, FastAPI, Request
@@ -76,6 +77,34 @@ from src.api.websocket_courses import router as websocket_router
 from src.core.monitoring.health import StatutSante, verifier_sante_globale
 
 logger = logging.getLogger(__name__)
+
+
+# ═══════════════════════════════════════════════════════════
+# LIFESPAN — démarrage/arrêt propre (cron, etc.)
+# ═══════════════════════════════════════════════════════════
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):  # noqa: ARG001
+    """Gère le démarrage et l'arrêt de l'application FastAPI."""
+    # ── Démarrage ───────────────────────────────────────────
+    try:
+        from src.services.core.cron import demarrer_scheduler
+
+        demarrer_scheduler()
+    except Exception:
+        logger.warning("Scheduler cron non démarré (module indisponible)", exc_info=True)
+
+    yield
+
+    # ── Arrêt ────────────────────────────────────────────────
+    try:
+        from src.services.core.cron import arreter_scheduler
+
+        arreter_scheduler()
+    except Exception:
+        logger.debug("Scheduler cron déjà arrêté ou non initialisé")
+
 
 
 # ═══════════════════════════════════════════════════════════
@@ -197,6 +226,7 @@ tags_metadata = [
 
 app = FastAPI(
     title="Assistant Matanne API",
+    lifespan=lifespan,
     description="""
 ## API REST pour la gestion familiale
 

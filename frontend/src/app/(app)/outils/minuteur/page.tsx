@@ -6,6 +6,8 @@ import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 
+const CLE_MINUTEUR = "outils-minuteur-global";
+
 function formaterTemps(ms: number) {
   const totalSecondes = Math.floor(ms / 1000);
   const heures = Math.floor(totalSecondes / 3600);
@@ -85,6 +87,12 @@ function ComposantMinuteur() {
     refFin.current = Date.now() + msFin;
     setRestant(msFin);
     setEnMarche(true);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(
+        CLE_MINUTEUR,
+        JSON.stringify({ actif: true, finMs: refFin.current })
+      );
+    }
 
     refIntervalle.current = setInterval(() => {
       const r = refFin.current - Date.now();
@@ -92,6 +100,9 @@ function ComposantMinuteur() {
         if (refIntervalle.current) clearInterval(refIntervalle.current);
         setRestant(0);
         setEnMarche(false);
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem(CLE_MINUTEUR);
+        }
         if (typeof window !== "undefined" && "Notification" in window) {
           Notification.requestPermission().then((p) => {
             if (p === "granted") new Notification("⏰ Minuteur terminé !");
@@ -106,12 +117,18 @@ function ComposantMinuteur() {
   const arreter = useCallback(() => {
     if (refIntervalle.current) clearInterval(refIntervalle.current);
     setEnMarche(false);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(CLE_MINUTEUR);
+    }
   }, []);
 
   const reinitialiser = useCallback(() => {
     if (refIntervalle.current) clearInterval(refIntervalle.current);
     setEnMarche(false);
     setRestant(0);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(CLE_MINUTEUR);
+    }
   }, []);
 
   useEffect(() => {

@@ -16,6 +16,7 @@ function createWrapper() {
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   usePathname: () => "/jeux/paris",
+  useSearchParams: () => ({ get: () => null }),
 }));
 
 vi.mock("next/link", () => ({

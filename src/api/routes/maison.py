@@ -1642,6 +1642,81 @@ async def stats_garanties(
     return await executer_async(_query)
 
 
+@router.get("/garanties/alertes-predictives", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def alertes_predictives_garanties(
+    horizon_mois: int = Query(12, ge=1, le=36, description="Horizon prédictif en mois"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Retourne les appareils approchant leur fin de vie théorique.
+
+    Croise les garanties avec le catalogue d'entretien pour estimer :
+    - l'âge actuel de l'appareil
+    - les mois restants estimés
+    - l'action recommandée (SAV, remplacement, surveillance)
+    """
+    from src.services.maison import get_garanties_crud_service, obtenir_service_catalogue_entretien
+
+    def _query():
+        from datetime import date
+
+        service = get_garanties_crud_service()
+        catalogue = obtenir_service_catalogue_entretien()
+        garanties = service.get_all_garanties()
+
+        items: list[dict[str, Any]] = []
+        for g in garanties:
+            type_objet = (getattr(g, "type_objet", None) or getattr(g, "nom_appareil", "")).strip()
+            if not type_objet:
+                continue
+
+            duree_vie_ans = catalogue.obtenir_duree_vie(type_objet)
+            if not duree_vie_ans:
+                continue
+
+            date_achat = getattr(g, "date_achat", None)
+            if not date_achat:
+                continue
+
+            age_mois = (date.today().year - date_achat.year) * 12 + (date.today().month - date_achat.month)
+            restant_mois = int(duree_vie_ans * 12 - age_mois)
+
+            if restant_mois > horizon_mois:
+                continue
+
+            if restant_mois <= 0:
+                niveau = "CRITIQUE"
+                action = "Prévoir remplacement et vérifier extension/prise en charge SAV"
+            elif restant_mois <= 3:
+                niveau = "HAUTE"
+                action = "Anticiper SAV ou devis de remplacement"
+            else:
+                niveau = "MOYENNE"
+                action = "Surveiller la performance et planifier l'entretien"
+
+            items.append(
+                {
+                    "garantie_id": g.id,
+                    "nom_appareil": getattr(g, "nom_appareil", type_objet),
+                    "piece": getattr(g, "piece", None),
+                    "date_achat": date_achat,
+                    "duree_vie_ans": duree_vie_ans,
+                    "age_mois": age_mois,
+                    "mois_restants_estimes": restant_mois,
+                    "niveau": niveau,
+                    "action_recommandee": action,
+                    "action_url": f"/maison/garanties/{g.id}",
+                }
+            )
+
+        ordre = {"CRITIQUE": 0, "HAUTE": 1, "MOYENNE": 2, "BASSE": 3}
+        items.sort(key=lambda x: (ordre.get(x["niveau"], 9), x["mois_restants_estimes"]))
+        return {"items": items}
+
+    return await executer_async(_query)
+
+
 @router.get("/garanties/{garantie_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_garantie(

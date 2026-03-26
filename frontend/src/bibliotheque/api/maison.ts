@@ -25,6 +25,7 @@ import type {
   Garantie,
   IncidentSAV,
   AlerteGarantie,
+  AlertePredictiveGarantie,
   StatsGaranties,
   DiagnosticImmobilier,
   EstimationImmobiliere,
@@ -464,6 +465,13 @@ export async function alertesGaranties(jours = 60): Promise<AlerteGarantie[]> {
 export async function statsGaranties(): Promise<StatsGaranties> {
   const { data } = await clientApi.get<StatsGaranties>("/maison/garanties/stats");
   return data;
+}
+
+export async function alertesPredictivesGaranties(horizonMois = 12): Promise<AlertePredictiveGarantie[]> {
+  const { data } = await clientApi.get<{ items: AlertePredictiveGarantie[] }>(
+    `/maison/garanties/alertes-predictives?horizon_mois=${horizonMois}`
+  );
+  return data.items ?? [];
 }
 
 export async function listerIncidents(garantieId: number): Promise<IncidentSAV[]> {

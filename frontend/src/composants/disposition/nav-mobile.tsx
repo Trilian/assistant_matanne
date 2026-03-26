@@ -6,7 +6,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ChefHat, Users, House, Menu } from "lucide-react";
+import { Home, ChefHat, Users, House, CalendarRange } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 
 const ITEMS = [
@@ -14,7 +14,7 @@ const ITEMS = [
   { nom: "Cuisine", chemin: "/cuisine", Icone: ChefHat },
   { nom: "Famille", chemin: "/famille", Icone: Users },
   { nom: "Maison", chemin: "/maison", Icone: House },
-  { nom: "Plus", chemin: "/outils", Icone: Menu },
+  { nom: "Semaine", chemin: "/ma-semaine", Icone: CalendarRange },
 ] as const;
 
 /**

@@ -1,6 +1,6 @@
 # 🗺️ ROADMAP — Assistant Matanne
 
-> Dernière mise à jour : 25 mars 2026
+> Dernière mise à jour : 26 mars 2026
 
 ---
 
@@ -25,72 +25,79 @@
 
 **Vue d'ensemble** : 28 phases organisées par module pour structurer la refonte complète de l'application.
 
-### État global (25 mars 2026)
+### État global (26 mars 2026) — après P0+P1+P2 + priorités AC2/AC3/AA
 
 | Statut | Nombre | Pourcentage | Description |
 |--------|--------|-------------|-------------|
-| ✅ **COMPLÈTES** | **1/28** | **4%** | Tous éléments implémentés et fonctionnels |
-| 🔄 **PARTIELLES** | **21/28** | **75%** | Infrastructure backend + frontend basique |
-| ❌ **NON IMPLÉMENTÉES** | **6/28** | **21%** | Aucun élément trouvé |
+| ✅ **COMPLÈTES** | **11/28** | **39%** | Tous éléments implémentés et fonctionnels |
+| 🔄 **PARTIELLES** | **15/28** | **54%** | Infrastructure backend + frontend amélioré |
+| ❌ **NON IMPLÉMENTÉES** | **2/28** | **7%** | Aucun élément trouvé |
 
-### Par module
+### Par module (après session P0+P1+P2)
 
-- **🍽️ Cuisine (A-L)** : 0/12 complètes, 6/12 partielles, 6/12 non implémentées
-- **👨‍👩‍👦 Famille (M-R)** : 0/6 complètes, 4/6 partielles, 2/6 non implémentées  
-- **🎮 Jeux (S-W)** : 0/5 complètes, 5/5 partielles, 0/5 non implémentées
-- **🏡 Maison (X-AB)** : 0/5 complètes, 3/5 partielles, 2/5 non implémentées
-- **🧭 Navigation (AC)** : 1/5 complètes, 0/5 partielles, 4/5 non implémentées
+- **🍽️ Cuisine (A-L)** : 1/12 complète (B Planning→Courses), 9 partielles, 2 non implémentées
+- **👨‍👩‍👦 Famille (M-R)** : 2/6 complètes (M Contexte, N Hub), 4 partielles
+- **🎮 Jeux (S-W)** : 1/5 complète (S Dashboard), 4 partielles
+- **🏡 Maison (X-AB)** : 3/5 complètes (X Contexte, Y Hub, Z Planning), 2 partielles (AA, AB)
+- **🧭 Navigation (AC)** : 4/5 complètes (AC1 Ma Semaine, AC3 Paramètres discrets, AC4 Sidebar, AC5 Menu commandes), 1 partielle (AC2)
 
-### Phases prioritaires
+---
 
-#### 🚀 P0 — Impact Immédiat (Débloquants)
+### ✅ P0 — COMPLÈTES (Impact Immédiat)
 
-1. **Exposer les moteurs contextuels** (Phases M, X)
-   - `GET /api/v1/famille/contexte` — ContexteFamilialService prêt
-   - `GET /api/v1/maison/briefing` — ContexteMaisonService prêt
-   - **Impact** : Débloque toutes les phases Famille/Maison
+1. ✅ `GET /api/v1/famille/contexte` — ContexteFamilialService exposé
+2. ✅ `GET /api/v1/maison/briefing` + `GET /api/v1/maison/alertes` — ContexteMaisonService exposé
+3. ✅ `POST /api/v1/weekend/suggestions-ia` — déjà existant
+4. ✅ `GET /api/v1/jeux/dashboard` + séries + value-bets + predictions — déjà existants
+5. ✅ `POST /api/v1/anti-gaspillage/suggestions-ia` — créé
+6. ✅ `POST /api/v1/courses/generer-depuis-planning` — déjà existant
 
-2. **Exposer les services IA** (Phases M, S, J)
-   - `POST /api/v1/weekend/suggestions-ia` — WeekendAIService prêt
-   - `POST /api/v1/jeux/dashboard` — SeriesService + ValueBets prêts
-   - `POST /api/v1/anti-gaspillage/suggestions-ia` — Service prêt
-   - **Impact** : Valeur utilisateur immédiate
+### ✅ P1 — COMPLÈTES (Refonte UX)
 
-3. **Flux Planning→Courses** (Phase B)
-   - `POST /api/v1/courses/generer-depuis-planning` avec soustraction inventaire
-   - **Impact** : Débloque flux cuisine complet
+4. ✅ Hub Famille contextuel (page.tsx refondre, CarteAnniversaire, BandeauMeteo, etc.)
+5. ✅ Hub Maison contextuel (briefing quotidien, alertes, tâches du jour)
+6. ✅ Dashboard Jeux (budget, value-bets, séries, KPIs)
+7. ✅ Planning Maison — `/menage/planning-semaine` endpoint + page complète
 
-#### 📊 P1 — Refonte UX (Visible)
+### ✅ P2 — COMPLÈTES (Finalisation)
 
-4. **Refondre les hubs** (Phases N, Y, S)
-   - Hub Famille contextuel (CarteAnniversaire, CarteMeteoActivites, CarteSuggestionAchats)
-   - Hub Maison contextuel (CarteGaranties, CarteEntretien, CarteJardin)
-   - Dashboard Jeux opportunités (CarteValueBets, CarteSeries, CartePredictions)
-   - **Impact** : UX transformée — "ça pop que quand c'est utile"
+8. ✅ **Jobs cron** — `src/services/core/cron/jobs.py` + APScheduler dans lifespan FastAPI
+   - 07h00 : rappels famille (anniversaires, documents, jalons Jules)
+   - 08h00 : rappels maison (garanties, contrats, entretien)
+   - 08h30 : rappels intelligents généraux
+   - lundi 06h00 : entretien saisonnier
+9. ✅ **Ma Semaine trans-modules** — `GET /api/v1/planning/semaine-unifiee` + page `/ma-semaine`
+   - Vue unifiée : repas + activités famille + matchs + tâches maison
+   - Navigation semaine (← →) + liens directs modules
+10. ✅ **FAB chat IA flottant** — `FabChatIA` component dans coquille-app
+    - Mini-chat popout avec envoi vers `/utilitaires/chat/message`
+    - Masqué sur `/outils/chat-ia`, lien vers chat complet
+11. ✅ **Sidebar simplifiée** — Outils retirés, "Ma Semaine" ajouté
+    - Desktop sidebar : Accueil + Ma Semaine + 4 modules (Cuisine, Famille, Maison, Jeux)
+    - Nav mobile : Accueil + Cuisine + Famille + Maison + Ma Semaine
 
-5. **Finaliser Phase Z** (Planning Maison)
-   - Planning semaine IA (répartition intelligente tâches ménage/entretien/jardin)
-   - **Impact** : 60% déjà fait (page ménage bien implémentée)
+### ✅ Avancées complémentaires livrées
 
-#### 🔧 P2 — Finalisation (Polissage)
-
-6. **Automatisation**
-   - Jobs cron (push notifications, alertes, entretien saisonnier)
-   - Déclencheurs IA (anniversaires J-14, jalons bébé, saison jardin)
-
-7. **Phase AC** (Navigation unifiée)
-   - Ma Semaine trans-modules (repas + tâches maison + activités famille + matchs jeux)
-   - Outils contextuels (FAB chat IA, minuteur flottant, convertisseur inline)
-   - Sidebar simplifiée (4 modules uniquement)
-
-### Constat clé
-
-**Backend MASSIF** (5000+ LOC services jeux, 2 moteurs contextuels complets, 35+ tables maison, catalogues JSON riches) mais **sous-exploité** :
-- 60% des endpoints API manquants (services prêts mais pas exposés)
-- 70% pages frontend statiques (grilles CRUD au lieu de hubs contextuels)
-- 80% IA backend non exploitée
-
-**L'effort principal doit porter sur l'exposition API et la refonte UX contextuelle** — le backend est déjà prêt à 90%.
+12. ✅ **AC2** : Minuteur flottant global
+  - Barre persistante lorsque le minuteur est actif
+  - Synchronisation via localStorage entre page minuteur et coquille app
+13. ✅ **AC3** : Paramètres discrets
+  - Paramètres + intégrations déplacés dans le menu avatar
+  - Liens paramètres retirés de la sidebar
+14. ✅ **AA (partiel fort)** : Alertes prédictives garanties
+  - Endpoint `GET /api/v1/maison/garanties/alertes-predictives`
+  - Carte dédiée sur le hub maison avec action recommandée
+15. ✅ **O (partiel fort)** : Activités météo-intelligentes côté UX
+  - Affichage météo détectée et journée libre dans suggestions IA
+16. ✅ **Jeux** : OCR ticket loto/euromillions
+  - Endpoint `POST /api/v1/jeux/ocr-ticket`
+  - Extraction IA des lignes, total et point de vente
+17. ✅ **Jeux** : Backtest euromillions exposé
+  - Endpoint `GET /api/v1/jeux/backtest?type_jeu=euromillions`
+  - Normalisation des tirages euromillions vers moteur de backtest
+18. ✅ **Photo-frigo** : Multi-zone (frigo/placard/congélateur)
+  - API `POST /api/v1/suggestions/photo-frigo?zones=...`
+  - UI multi-sélection dans `/cuisine/photo-frigo`
 
 ---
 

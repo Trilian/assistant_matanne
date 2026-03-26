@@ -155,6 +155,10 @@ async def suggest_planning(
 async def analyser_photo_frigo(
     file: UploadFile = File(..., description="Photo du frigo (JPEG/PNG, max 10MB)"),
     zone: str = Query("frigo", pattern="^(frigo|placard|congelateur)$", description="Zone analysée"),
+    zones: list[str] | None = Query(
+        None,
+        description="Zones à analyser en multi-zone (frigo, placard, congelateur)",
+    ),
     user: dict = Depends(require_auth),
     _rate_check: dict = Depends(verifier_limite_debit_ia),
 ):
@@ -174,7 +178,18 @@ async def analyser_photo_frigo(
     from src.services.cuisine.photo_frigo import get_photo_frigo_service
 
     service = get_photo_frigo_service()
-    resultat = await service.analyser_photo_frigo(image_bytes, zone=zone)
+    zones_valides = {"frigo", "placard", "congelateur"}
+
+    if zones:
+        zones_filtres = [z for z in zones if z in zones_valides]
+        if not zones_filtres:
+            raise HTTPException(
+                status_code=400,
+                detail="Paramètre zones invalide. Valeurs autorisées: frigo, placard, congelateur",
+            )
+        resultat = await service.analyser_photo_frigo_multi_zone(image_bytes, zones_filtres)
+    else:
+        resultat = await service.analyser_photo_frigo(image_bytes, zone=zone)
 
     return resultat.model_dump()
 

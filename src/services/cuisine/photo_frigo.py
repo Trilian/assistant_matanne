@@ -61,6 +61,17 @@ class ResultatPhotoFrigo(BaseModel):
     sync_possible: bool = False
 
 
+class ResultatPhotoFrigoMultiZone(BaseModel):
+    """Résultat agrégé d'une analyse sur plusieurs zones."""
+
+    zones_analysees: list[str] = Field(default_factory=list)
+    ingredients_detectes: list[IngredientDetecte] = Field(default_factory=list)
+    recettes_suggerees: list[RecetteSuggestion] = Field(default_factory=list)
+    recettes_db: list[RecetteBD] = Field(default_factory=list)
+    par_zone: dict[str, ResultatPhotoFrigo] = Field(default_factory=dict)
+    sync_possible: bool = False
+
+
 # ═══════════════════════════════════════════════════════════
 # SERVICE
 # ═══════════════════════════════════════════════════════════
@@ -148,6 +159,54 @@ class PhotoFrigoService:
             recettes_suggerees=recettes_ia,
             recettes_db=recettes_db,
             sync_possible=len(ingredients) > 0,
+        )
+
+    async def analyser_photo_frigo_multi_zone(
+        self,
+        image_bytes: bytes,
+        zones: list[str],
+    ) -> ResultatPhotoFrigoMultiZone:
+        """Analyse une même photo sur plusieurs contextes de zones.
+
+        Permet d'améliorer la détection en appliquant des prompts adaptés à
+        chaque zone (frigo, placard, congélateur), puis fusionne les résultats.
+        """
+        zones_uniques = [z for z in dict.fromkeys(zones) if z in {"frigo", "placard", "congelateur"}]
+        if not zones_uniques:
+            zones_uniques = ["frigo"]
+
+        resultats_par_zone: dict[str, ResultatPhotoFrigo] = {}
+        for zone in zones_uniques:
+            resultats_par_zone[zone] = await self.analyser_photo_frigo(image_bytes, zone=zone)
+
+        ingredients_map: dict[str, IngredientDetecte] = {}
+        recettes_ia_map: dict[str, RecetteSuggestion] = {}
+        recettes_db_map: dict[int, RecetteBD] = {}
+
+        for resultat in resultats_par_zone.values():
+            for ingredient in resultat.ingredients_detectes:
+                cle = ingredient.nom.strip().lower()
+                existant = ingredients_map.get(cle)
+                if existant is None or ingredient.confiance > existant.confiance:
+                    ingredients_map[cle] = ingredient
+
+            for recette in resultat.recettes_suggerees:
+                cle = recette.nom.strip().lower()
+                if cle not in recettes_ia_map:
+                    recettes_ia_map[cle] = recette
+
+            for recette_db in resultat.recettes_db:
+                existante = recettes_db_map.get(recette_db.id)
+                if existante is None or recette_db.pourcentage_match > existante.pourcentage_match:
+                    recettes_db_map[recette_db.id] = recette_db
+
+        return ResultatPhotoFrigoMultiZone(
+            zones_analysees=zones_uniques,
+            ingredients_detectes=list(ingredients_map.values()),
+            recettes_suggerees=list(recettes_ia_map.values()),
+            recettes_db=list(recettes_db_map.values()),
+            par_zone=resultats_par_zone,
+            sync_possible=bool(ingredients_map),
         )
 
     def trouver_recettes_db(self, noms_ingredients: list[str]) -> list[RecetteBD]:

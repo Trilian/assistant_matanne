@@ -89,3 +89,21 @@ export async function obtenirNutritionHebdo(semaine?: string): Promise<Nutrition
   const { data } = await clientApi.get<NutritionHebdo>(`/planning/nutrition-hebdo${params}`);
   return data;
 }
+
+// ─── Semaine unifiée trans-modules (AC1) ─────────────────────
+
+export interface SemaineUnifiee {
+  meta: { semaine_debut: string; semaine_fin: string };
+  repas: Record<string, { id: number; type: string; recette_id: number | null; nom_recette: string | null }[]>;
+  activites_famille: { id: number; date: string | null; titre: string; type: string | null }[];
+  matchs: { id: number; date: string | null; equipe_domicile: string | null; equipe_exterieur: string | null; competition: string | null }[];
+  taches_maison: { nom: string; categorie: string | null; duree_estimee_min: number | null }[];
+}
+
+/** Vue unifiée de la semaine (repas + activités famille + matchs + tâches maison) */
+export async function obtenirSemaineUnifiee(dateDebut?: string): Promise<SemaineUnifiee> {
+  const params = dateDebut ? `?date_debut=${dateDebut}` : "";
+  const { data } = await clientApi.get<SemaineUnifiee>(`/planning/semaine-unifiee${params}`);
+  return data;
+}
+

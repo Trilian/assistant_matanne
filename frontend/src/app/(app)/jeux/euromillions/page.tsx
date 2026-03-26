@@ -1,6 +1,8 @@
-﻿"use client";
+"use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
@@ -13,7 +15,7 @@ import {
   TableRow,
 } from "@/composants/ui/table";
 import { Skeleton } from "@/composants/ui/skeleton";
-import { utiliserRequete } from "@/crochets/utiliser-api";
+import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
 import {
   obtenirTiragesEuromillions,
   obtenirGrillesEuromillions,
@@ -21,19 +23,52 @@ import {
   obtenirNumerosRetard,
   genererGrilleEuromillions,
   obtenirBacktest,
+  creerGrilleEuromillions,
 } from "@/bibliotheque/api/jeux";
-import type { TirageEuromillions, GrilleEuromillions, StatsEuromillions, NumeroRetard, BacktestResultat } from "@/types/jeux";
+import type {
+  TirageEuromillions,
+  GrilleEuromillions,
+  StatsEuromillions,
+  NumeroRetard,
+  BacktestResultat,
+} from "@/types/jeux";
 import { HeatmapNumeros } from "@/composants/jeux/heatmap-numeros";
 import { GenerateurGrille } from "@/composants/jeux/generateur-grille";
 import { BacktestResultatCard } from "@/composants/jeux/backtest-resultat";
+import { BacktestEuromillionsVue } from "@/composants/jeux/backtest-euromillions-vue";
 import { TooltipProvider } from "@/composants/ui/tooltip";
 
 function formaterDate(iso: string) {
-  return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+  return new Date(iso).toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function parseListeNumeros(raw: string | null, min: number, max: number, attendu: number): number[] {
+  if (!raw) return [];
+  const nums = raw
+    .split(",")
+    .map((v) => Number(v.trim()))
+    .filter((n) => Number.isInteger(n) && n >= min && n <= max);
+  const uniq = Array.from(new Set(nums)).sort((a, b) => a - b);
+  return uniq.length === attendu ? uniq : [];
 }
 
 export default function EuromillionsPage() {
   const [showBacktest, setShowBacktest] = useState(false);
+  const search = useSearchParams();
+
+  const numerosPrefill = useMemo(
+    () => parseListeNumeros(search.get("numeros"), 1, 50, 5),
+    [search]
+  );
+  const etoilesPrefill = useMemo(
+    () => parseListeNumeros(search.get("etoiles"), 1, 12, 2),
+    [search]
+  );
+  const prefillDisponible = numerosPrefill.length === 5 && etoilesPrefill.length === 2;
 
   const { data: tirages = [], isLoading: chTirages } = utiliserRequete<TirageEuromillions[]>(
     ["jeux", "euromillions", "tirages"],
@@ -50,7 +85,7 @@ export default function EuromillionsPage() {
     obtenirStatsEuromillions
   );
 
-  const { data: retard = [], isLoading: chRetard } = utiliserRequete<NumeroRetard[]>(
+  const { data: retard = [] } = utiliserRequete<NumeroRetard[]>(
     ["jeux", "euromillions", "retard"],
     () => obtenirNumerosRetard(2.0)
   );
@@ -61,6 +96,14 @@ export default function EuromillionsPage() {
     { enabled: showBacktest }
   );
 
+  const mutationEnregistrer = utiliserMutation(
+    () => creerGrilleEuromillions(numerosPrefill, etoilesPrefill, true),
+    {
+      onSuccess: () => toast.success("Grille OCR enregistrée"),
+      onError: () => toast.error("Impossible d'enregistrer la grille OCR"),
+    }
+  );
+
   const retardNumeros = retard.filter((n) => n.type_numero === "principal");
   const retardEtoiles = retard.filter((n) => n.type_numero === "etoile");
 
@@ -69,7 +112,7 @@ export default function EuromillionsPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">⭐ Euromillions</h1>
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-2 mt-2 flex-wrap">
             <Badge>Mardi</Badge>
             <Badge>Vendredi</Badge>
             <Badge variant="outline">2,50 € / grille</Badge>
@@ -77,7 +120,32 @@ export default function EuromillionsPage() {
           </div>
         </div>
 
-        {/* Heatmap numéros principaux */}
+        {prefillDisponible && (
+          <Card className="border-emerald-300">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Pré-remplissage depuis OCR ticket</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap gap-1 items-center">
+                {numerosPrefill.map((n) => (
+                  <span key={n} className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                    {n}
+                  </span>
+                ))}
+                <span className="mx-2 text-muted-foreground">|</span>
+                {etoilesPrefill.map((n) => (
+                  <span key={`e-${n}`} className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-yellow-500 text-white text-sm font-bold">
+                    {n}
+                  </span>
+                ))}
+              </div>
+              <Button size="sm" onClick={() => mutationEnregistrer.mutate(undefined)} disabled={mutationEnregistrer.isPending}>
+                {mutationEnregistrer.isPending ? "Enregistrement..." : "Enregistrer cette grille"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Fréquences — Numéros 1-50</CardTitle>
@@ -99,7 +167,6 @@ export default function EuromillionsPage() {
           </CardContent>
         </Card>
 
-        {/* Heatmap étoiles */}
         {stats && (
           <Card>
             <CardHeader className="pb-2">
@@ -117,62 +184,24 @@ export default function EuromillionsPage() {
           </Card>
         )}
 
-        {/* Numéros en retard */}
-        {(retardNumeros.length > 0 || retardEtoiles.length > 0) && (
-          <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-base">Numéros en retard</CardTitle></CardHeader>
-            <CardContent className="space-y-3">
-              {retardNumeros.length > 0 && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">Numéros principaux</p>
-                  <div className="flex flex-wrap gap-2">
-                    {retardNumeros.slice(0, 8).map((n) => (
-                      <div key={n.numero} className="flex flex-col items-center gap-0.5">
-                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
-                          {n.numero}
-                          {n.value >= 2.0 && <span className="text-[8px]">🔥</span>}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{n.value.toFixed(1)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {retardEtoiles.length > 0 && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">Étoiles</p>
-                  <div className="flex flex-wrap gap-2">
-                    {retardEtoiles.map((n) => (
-                      <div key={n.numero} className="flex flex-col items-center gap-0.5">
-                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-yellow-500 text-white text-sm font-bold">
-                          ⭐{n.numero}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{n.value.toFixed(1)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Générateur */}
         <GenerateurGrille
           typeJeu="euromillions"
           genererFn={genererGrilleEuromillions}
           labelSpecial="Étoiles"
         />
 
-        {/* Backtest */}
         <div>
           <Button variant="outline" size="sm" onClick={() => setShowBacktest(!showBacktest)} className="mb-3">
-            📊 Backtest {showBacktest ? "▲" : "▼"}
+            📊 Backtest Euromillions {showBacktest ? "▲" : "▼"}
           </Button>
-          {showBacktest && <BacktestResultatCard data={backtest} isLoading={chBacktest} />}
+          {showBacktest && (
+            <div className="space-y-3">
+              <BacktestResultatCard data={backtest} isLoading={chBacktest} />
+              <BacktestEuromillionsVue data={backtest} />
+            </div>
+          )}
         </div>
 
-        {/* Tirages */}
         <Card>
           <CardHeader><CardTitle>Derniers tirages</CardTitle></CardHeader>
           <CardContent>
@@ -225,7 +254,6 @@ export default function EuromillionsPage() {
           </CardContent>
         </Card>
 
-        {/* Mes grilles */}
         <Card>
           <CardHeader><CardTitle>Mes grilles</CardTitle></CardHeader>
           <CardContent>
@@ -244,8 +272,6 @@ export default function EuromillionsPage() {
                     <TableHead>Source</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead className="text-right">Mise</TableHead>
-                    <TableHead className="text-right">Gain</TableHead>
-                    <TableHead>Rang</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -276,8 +302,6 @@ export default function EuromillionsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">{g.mise.toFixed(2)} €</TableCell>
-                      <TableCell className="text-right">{g.gain != null ? `${g.gain.toFixed(2)} €` : "-"}</TableCell>
-                      <TableCell>{g.rang != null ? `Rang ${g.rang}` : "-"}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -287,106 +311,5 @@ export default function EuromillionsPage() {
         </Card>
       </div>
     </TooltipProvider>
-  );
-}
-
-function genererGrilleAleatoire() {
-  const nums: number[] = [];
-  while (nums.length < 5) {
-    const n = Math.floor(Math.random() * NUMEROS_PRINCIPAUX) + 1;
-    if (!nums.includes(n)) nums.push(n);
-  }
-  nums.sort((a, b) => a - b);
-
-  const etoiles: number[] = [];
-  while (etoiles.length < 2) {
-    const e = Math.floor(Math.random() * ETOILES) + 1;
-    if (!etoiles.includes(e)) etoiles.push(e);
-  }
-  etoiles.sort((a, b) => a - b);
-
-  return { numeros: nums, etoiles };
-}
-
-import { useState } from "react";
-import { Button } from "@/composants/ui/button";
-
-export default function EuromillionsPage() {
-  const [grille, setGrille] = useState(genererGrilleAleatoire);
-
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">⭐ Euromillions</h1>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Générateur de grille</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div>
-            <p className="text-sm text-muted-foreground mb-3">
-              5 numéros (1-{NUMEROS_PRINCIPAUX})
-            </p>
-            <div className="flex gap-2">
-              {grille.numeros.map((n, i) => (
-                <span
-                  key={i}
-                  className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg font-bold"
-                >
-                  {n}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className="text-sm text-muted-foreground mb-3">
-              2 étoiles (1-{ETOILES})
-            </p>
-            <div className="flex gap-2">
-              {grille.etoiles.map((e, i) => (
-                <span
-                  key={i}
-                  className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-yellow-500 text-white text-lg font-bold"
-                >
-                  ⭐ {e}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <Button onClick={() => setGrille(genererGrilleAleatoire())}>
-            🎲 Nouvelle grille
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Informations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="text-center p-4 rounded-lg bg-muted">
-              <p className="text-3xl font-bold text-primary">5 + 2</p>
-              <p className="text-sm text-muted-foreground mt-1">Numéros à choisir</p>
-            </div>
-            <div className="text-center p-4 rounded-lg bg-muted">
-              <p className="text-3xl font-bold text-primary">1/139M</p>
-              <p className="text-sm text-muted-foreground mt-1">Probabilité jackpot</p>
-            </div>
-            <div className="text-center p-4 rounded-lg bg-muted">
-              <p className="text-3xl font-bold text-primary">13</p>
-              <p className="text-sm text-muted-foreground mt-1">Rangs de gains</p>
-            </div>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Badge>Mardi</Badge>
-            <Badge>Vendredi</Badge>
-            <Badge variant="outline">2,50 € / grille</Badge>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
   );
 }

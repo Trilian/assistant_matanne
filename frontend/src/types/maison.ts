@@ -258,6 +258,19 @@ export interface StatsGaranties {
   valeur_totale: number;
 }
 
+export interface AlertePredictiveGarantie {
+  garantie_id: number;
+  nom_appareil: string;
+  piece?: string;
+  date_achat: string;
+  duree_vie_ans: number;
+  age_mois: number;
+  mois_restants_estimes: number;
+  niveau: "CRITIQUE" | "HAUTE" | "MOYENNE" | "BASSE";
+  action_recommandee: string;
+  action_url: string;
+}
+
 // ═══════════════════════════════════════════════════════════
 // Types Diagnostics & Estimations
 // ═══════════════════════════════════════════════════════════

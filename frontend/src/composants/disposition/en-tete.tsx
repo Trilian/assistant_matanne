@@ -4,7 +4,7 @@
 
 "use client";
 
-import { Search, Moon, Sun, LogOut, User, BookOpen } from "lucide-react";
+import { Search, Moon, Sun, LogOut, User, BookOpen, Link2, SlidersHorizontal } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/composants/ui/button";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -124,6 +124,18 @@ export function EnTete() {
             <a href="/parametres" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               Paramètres
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <a href="/parametres/integrations" className="flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              Intégrations
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <a href="/parametres?onglet=preferences" className="flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4" />
+              Préférences rapides
             </a>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

@@ -77,6 +77,8 @@ export default function PageActivites() {
   const [dialogueCreation, setDialogueCreation] = useState(false);
   const [dialogueSuggestions, setDialogueSuggestions] = useState(false);
   const [suggestionsIA, setSuggestionsIA] = useState<string>("");
+  const [meteoDetectee, setMeteoDetectee] = useState<string | null>(null);
+  const [journeeLibreDetectee, setJourneeLibreDetectee] = useState(false);
   const [typePrefere, setTypePrefere] = useState<string>("mixte");
   const [enChargementIA, setEnChargementIA] = useState(false);
 
@@ -120,6 +122,8 @@ export default function PageActivites() {
         type_prefere: typePrefere === "mixte" ? undefined : typePrefere,
       });
       setSuggestionsIA(resultat.suggestions);
+      setMeteoDetectee(resultat.meteo ?? null);
+      setJourneeLibreDetectee(Boolean(resultat.journee_libre));
       toast.success(
         resultat.journee_libre
           ? "Journée libre détectée ! Voici les suggestions"
@@ -398,6 +402,18 @@ export default function PageActivites() {
             {suggestionsIA && (
               <Card className="mt-4">
                 <CardContent className="pt-5">
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    {meteoDetectee && (
+                      <Badge variant="outline" className="text-xs">
+                        Météo détectée: {meteoDetectee}
+                      </Badge>
+                    )}
+                    {journeeLibreDetectee && (
+                      <Badge variant="secondary" className="text-xs">
+                        Journée libre détectée
+                      </Badge>
+                    )}
+                  </div>
                   <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
                     {suggestionsIA}
                   </div>

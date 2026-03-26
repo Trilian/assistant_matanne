@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
@@ -195,6 +196,7 @@ function DrawerMatchDetail({
 // ─── Page principale ─────────────────────────────────────
 
 export default function ParisPage() {
+  const searchParams = useSearchParams();
   const [filtreStatut, setFiltreStatut] = useState("tous");
   const [dialogOuvert, setDialogOuvert] = useState(false);
   const [matchId, setMatchId] = useState("");
@@ -204,6 +206,8 @@ export default function ParisPage() {
   const [mise, setMise] = useState("");
   const [drawerMatch, setDrawerMatch] = useState<number | null>(null);
   const [showSeries, setShowSeries] = useState(false);
+
+  const sourceOCR = useMemo(() => searchParams.get("source_ocr") === "1", [searchParams]);
 
   const queryClient = useQueryClient();
 
@@ -282,6 +286,24 @@ export default function ParisPage() {
     () => listerMatchs()
   );
 
+  useEffect(() => {
+    if (!sourceOCR) return;
+
+    const typePariParam = searchParams.get("type_pari");
+    const predictionParam = searchParams.get("prediction");
+    const coteParam = searchParams.get("cote");
+    const miseParam = searchParams.get("mise");
+    const matchParam = searchParams.get("match_id");
+
+    if (typePariParam) setTypePari(typePariParam);
+    if (predictionParam) setPrediction(predictionParam);
+    if (coteParam) setCote(coteParam);
+    if (miseParam) setMise(miseParam);
+    if (matchParam) setMatchId(matchParam);
+
+    setDialogOuvert(true);
+  }, [sourceOCR, searchParams]);
+
   const matchParId = new Map(matchs.map((m) => [m.id, m]));
 
   return (
@@ -294,6 +316,11 @@ export default function ParisPage() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Nouveau pari</DialogTitle></DialogHeader>
+            {sourceOCR && (
+              <div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+                Pré-remplissage OCR appliqué. Vérifiez le match, la cote et la mise avant validation.
+              </div>
+            )}
             <form
               onSubmit={(e) => {
                 e.preventDefault();

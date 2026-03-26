@@ -8,6 +8,8 @@ import { EnTete } from "./en-tete";
 import { FilAriane } from "./fil-ariane";
 import { MenuCommandes } from "./menu-commandes";
 import { TourOnboarding } from "./tour-onboarding";
+import { FabChatIA } from "./fab-chat-ia";
+import { MinuteurFlottant } from "./minuteur-flottant";
 import { InstallPrompt } from "@/composants/pwa/install-prompt";
 
 /**
@@ -36,6 +38,12 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
 
       {/* Menu commandes avec navigation rapide (Ctrl+K) */}
       <MenuCommandes />
+
+      {/* FAB chat IA flottant (AC2) */}
+      <FabChatIA />
+
+      {/* Minuteur flottant (AC2) */}
+      <MinuteurFlottant />
 
       {/* Tour d'onboarding pour nouveaux utilisateurs */}
       <TourOnboarding />

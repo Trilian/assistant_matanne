@@ -15,7 +15,6 @@ import {
   House,
   Gamepad2,
   Wrench,
-  Settings,
   PanelLeftClose,
   PanelLeft,
   ChevronDown,
@@ -42,19 +41,13 @@ import {
   Trophy,
   Dices,
   TrendingUp,
-  MessageSquare,
-  ArrowLeftRight,
-  CloudSun,
-  Timer,
-  StickyNote,
   Cake,
   Contact,
   Layers,
   Shield,
   Camera,
-  Apple,
-  Link2,
   Wifi,
+  CalendarRange,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -83,6 +76,7 @@ interface LienNav {
 
 const LIENS: LienNav[] = [
   { nom: "Accueil", chemin: "/", Icone: Home },
+  { nom: "Ma Semaine", chemin: "/ma-semaine", Icone: CalendarRange },
   {
     nom: "Cuisine",
     chemin: "/cuisine",
@@ -146,19 +140,6 @@ const LIENS: LienNav[] = [
       { nom: "EuroMillions", chemin: "/jeux/euromillions", Icone: Dices },
       { nom: "Performance", chemin: "/jeux/performance", Icone: TrendingUp },
       { nom: "Jeu responsable", chemin: "/jeux/responsable", Icone: Shield },
-    ],
-  },
-  {
-    nom: "Outils",
-    chemin: "/outils",
-    Icone: Wrench,
-    sousLiens: [
-      { nom: "Chat IA", chemin: "/outils/chat-ia", Icone: MessageSquare },
-      { nom: "Convertisseur", chemin: "/outils/convertisseur", Icone: ArrowLeftRight },
-      { nom: "Météo", chemin: "/outils/meteo", Icone: CloudSun },
-      { nom: "Minuteur", chemin: "/outils/minuteur", Icone: Timer },
-      { nom: "Notes", chemin: "/outils/notes", Icone: StickyNote },
-      { nom: "Nutritionniste", chemin: "/outils/nutritionniste", Icone: Apple },
     ],
   },
 ];
@@ -326,30 +307,6 @@ export function BarreLaterale() {
             {sidebarOuverte && <span>Admin</span>}
           </Link>
         )}
-        <Link
-          href="/parametres"
-          className={cn(
-            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-            pathname === "/parametres"
-              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
-          )}
-        >
-          <Settings className="h-5 w-5 shrink-0" />
-          {sidebarOuverte && <span>Paramètres</span>}
-        </Link>
-        <Link
-          href="/parametres/integrations"
-          className={cn(
-            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-            pathname === "/parametres/integrations"
-              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-              : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
-          )}
-        >
-          <Link2 className="h-5 w-5 shrink-0" />
-          {sidebarOuverte && <span>Intégrations</span>}
-        </Link>
       </div>
     </aside>
   );

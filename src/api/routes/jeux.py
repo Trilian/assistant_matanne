@@ -21,7 +21,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 
 from src.api.dependencies import require_auth
 from src.api.pagination import appliquer_cursor_filter, construire_reponse_cursor, decoder_cursor
@@ -1637,6 +1637,53 @@ async def historique_limites(
 # ═══════════════════════════════════════════════════════════
 
 
+@router.post("/ocr-ticket", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def analyser_ticket_ocr_jeux(
+    file: UploadFile = File(..., description="Photo du ticket de jeu (JPEG/PNG/WebP)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Analyse OCR d'un ticket loto/euromillions via IA vision."""
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Le fichier doit être une image (JPEG, PNG, WebP)")
+
+    contenu = await file.read()
+    if len(contenu) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Fichier trop volumineux (max 10 Mo)")
+
+    from src.services.integrations.multimodal import get_multimodal_service
+
+    service = get_multimodal_service()
+    resultat = service.extraire_facture_sync(contenu)
+
+    if not resultat:
+        return {
+            "success": False,
+            "message": "Analyse OCR impossible. Essayez une photo plus nette et bien cadrée.",
+            "donnees": None,
+        }
+
+    return {
+        "success": True,
+        "message": "Ticket analysé avec succès",
+        "donnees": {
+            "point_vente": resultat.magasin,
+            "date_achat": resultat.date,
+            "lignes": [
+                {
+                    "description": ligne.description,
+                    "quantite": ligne.quantite,
+                    "prix_unitaire": ligne.prix_unitaire,
+                    "prix_total": ligne.prix_total,
+                }
+                for ligne in resultat.lignes
+            ],
+            "total": resultat.total,
+            "mode_paiement": resultat.mode_paiement,
+        },
+    }
+
+
 @router.post("/analyse-ia", responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def analyse_ia(
@@ -1680,13 +1727,17 @@ async def analyse_ia(
 @router.get("/backtest", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def backtest_jeux(
-    type_jeu: str = Query("loto", description="loto ou paris"),
+    type_jeu: str = Query("loto", description="loto, euromillions ou paris"),
     seuil_value: float = Query(2.0, ge=0),
     nb_tirages: int = Query(100, ge=10, le=1000),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Backtest des stratégies sur les données historiques."""
-    from src.services.jeux import get_backtest_service, get_loto_crud_service
+    from src.services.jeux import (
+        get_backtest_service,
+        get_euromillions_crud_service,
+        get_loto_crud_service,
+    )
 
     def _query():
         backtest_svc = get_backtest_service()
@@ -1695,6 +1746,17 @@ async def backtest_jeux(
             loto_svc = get_loto_crud_service()
             tirages = loto_svc.charger_tirages(limite=nb_tirages)
             result = backtest_svc.backtester_loto(tirages, seuil_value=seuil_value)
+        elif type_jeu == "euromillions":
+            euro_svc = get_euromillions_crud_service()
+            tirages_euro = euro_svc.obtenir_tirages(limite=nb_tirages)
+            tirages_normalises = [
+                {
+                    "numeros": t.get("numeros", []),
+                    "date": t.get("date_tirage"),
+                }
+                for t in tirages_euro
+            ]
+            result = backtest_svc.backtester_loto(tirages_normalises, seuil_value=seuil_value)
         else:
             result = backtest_svc.backtester_paris([], marche="1x2", seuil_value=seuil_value)
 
