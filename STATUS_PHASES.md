@@ -464,7 +464,7 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 ### Phase T : Paris Sportifs Intelligents ✅ COMPLÈTE
 
-**Objectif** : Prédictions inline, value bets, OCR tickets, analytics championnat/confiance
+**Objectif** : Prédictions inline, value bets, OCR tickets, analytics championnat/confiance, heatmap cotes
 
 **Ce qui existe** :
 - ✅ Page `/jeux/paris` avec CRUD paris
@@ -475,17 +475,15 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Section value bets affichée (page hub jeux + page paris)
 - ✅ Endpoint `POST /api/v1/jeux/ocr-ticket` (Pixtral) exposé
 - ✅ Analytics par championnat/confiance UI (breakdown graphiques page performance)
+- ✅ **NOUVEAU** Heatmap cotes bookmakers (`CoteHistorique` model + endpoint `/paris/cotes-historique/{match_id}` + composant `HeatmapCotes`)
 
-**Ce qui manque** :
-- ❌ Heatmap cotes bookmakers absente (feature avancée non prioritaire)
-
-**Impact** : Phase T quasi-complète — OCR + intelligence inline + analytics opérationnels
+**Impact** : Phase T COMPLÈTE À 100% — toutes fonctionnalités intelligentes paris opérationnelles
 
 ---
 
 ### Phase U : Loto & Euromillions IA ✅ COMPLÈTE
 
-**Objectif** : Heatmap fréquences, grilles IA pondérées séries, backtest
+**Objectif** : Heatmap fréquences, grilles IA pondérées séries, backtest, analyse grilles
 
 **Ce qui existe** :
 - ✅ Pages `/jeux/loto` et `/jeux/euromillions` avec formulaires
@@ -494,12 +492,10 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Heatmap fréquences numéros présente (`HeatmapNumeros` utilisé dans loto/euromillions pages)
 - ✅ Endpoint backtest simulation exposé (`GET /api/v1/jeux/backtest?type_jeu=loto|euromillions|paris`)
 - ✅ Générateur grilles basique (`POST /api/v1/jeux/loto/generer-grille`, `/euromillions/generer-grille`)
+- ✅ **NOUVEAU** Générateur grilles IA pondéré Mistral (`JeuxAIService.generer_grille_ia_ponderee()` + endpoint `/loto/generer-grille-ia-ponderee` + composant `GrilleIAPonderee`)
+- ✅ **NOUVEAU** Analyse IA grilles joueur (`JeuxAIService.analyser_grille_joueur()` + endpoint `/loto/analyser-grille` + intégré dans `GrilleIAPonderee`)
 
-**Ce qui manque** :
-- ❌ Générateur grilles IA pondéré par séries (raffinement IA générative)
-- ❌ Analyse IA grilles joueur absente (critique player grids avec Mistral)
-
-**Impact** : Fonctionnalités essentielles loto/euromillions complètes, enrichissement IA en bonus
+**Impact** : Phase U COMPLÈTE À 100% — générateur IA avancé + critique grilles Mistral opérationnels
 
 ---
 
@@ -532,16 +528,18 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Page `/jeux/responsable` avec limites
 - ✅ Service `ResponsableGamingService` complet
 - ✅ Modèle `LimiteJeu` avec tracking
-- ✅ **NOUVEAU** Middleware `BudgetGuardMiddleware` actif (bloque POST `/jeux/paris` si limite atteinte)
+- ✅ Middleware `BudgetGuardMiddleware` actif (bloque POST `/jeux/paris` si limite atteinte)
 - ✅ Auto-exclusion UI complète (dialog choix durées + bannière blocage active)
 - ✅ Alertes série dangereuse affichées (bannière orange si 5+ défaites consécutives)
 - ✅ Notifications système via `NotificationJeuxService` (séries détectées, résultats, opportunités)
 - ✅ Endpoints notifications (`GET /jeux/notifications`, `POST /jeux/notifications/{id}/lue`)
+- ✅ **NOUVEAU** Notifications Web Push résultats jeux :
+  - Templates backend : `notifier_pari_gagne()`, `notifier_pari_perdu()`, `notifier_resultat_loto()`
+  - Types notification : `RESULTAT_PARI_GAGNE`, `RESULTAT_PARI_PERDU`, `RESULTAT_LOTO`, `RESULTAT_LOTO_GAIN`
+  - Hook frontend `useNotificationsJeux()` écoute service worker et affiche toasts sonner
+  - Fonction `demanderPermissionNotificationsJeux()` pour demande permission navigateur
 
-**Ce qui manque** :
-- ❌ Notifications push Web Push séries/résultats (nécessite intégration `/api/v1/push/notifier-metier` + subscriptions frontend)
-
-**Impact** : Jeu responsable armé — garde-fous budget actifs, auto-exclusion enforced, alertes visibles. Push notifications en TODO séparé.
+**Impact** : Phase W COMPLÈTE À 100% — jeu responsable armé + notifications push résultats opérationnelles
 
 ---
 
