@@ -55,7 +55,7 @@ export function FabChatIA() {
   }
 
   return (
-    <div className="fixed bottom-20 right-4 md:bottom-6 z-40 flex flex-col items-end gap-2">
+    <div className="fixed bottom-[5.5rem] right-4 md:bottom-6 z-40 flex flex-col items-end gap-2">
       {/* Mini-chat popout */}
       {ouvert && (
         <Card className="w-80 shadow-xl border animate-in slide-in-from-bottom-4">

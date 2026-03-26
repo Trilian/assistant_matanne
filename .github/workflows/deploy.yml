@@ -65,5 +65,10 @@ jobs:
       - name: Lint frontend
         run: cd frontend && npm run lint
 
+      - name: Test frontend
+        run: cd frontend && npx vitest run
+        env:
+          CI: true
+
       - name: Build frontend
         run: cd frontend && npm run build

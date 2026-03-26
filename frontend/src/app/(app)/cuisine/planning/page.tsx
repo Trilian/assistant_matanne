@@ -70,6 +70,7 @@ import type {
   CreerRepasPlanningDTO,
   SuggestionRecette,
 } from "@/types/planning";
+import { BadgeNutriscore } from "@/composants/cuisine/badge-nutriscore";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
@@ -381,9 +382,14 @@ export default function PagePlanning() {
                           </div>
                           {repas ? (
                             <div className="flex items-center justify-between gap-1">
-                              <span className="font-medium text-foreground truncate">
-                                {repas.recette_nom || repas.notes || "—"}
-                              </span>
+                              <div className="flex items-center gap-1 min-w-0">
+                                <span className="font-medium text-foreground truncate">
+                                  {repas.recette_nom || repas.notes || "—"}
+                                </span>
+                                {repas.nutri_score && (
+                                  <BadgeNutriscore grade={repas.nutri_score} />
+                                )}
+                              </div>
                               <Button
                                 variant="ghost"
                                 size="icon"

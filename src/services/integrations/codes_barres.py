@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.exceptions import ErreurNonTrouve, ErreurValidation
 from src.core.models import ArticleInventaire
+from src.core.models.recettes import Ingredient
 from src.services.core.base import BaseService
 from src.services.core.events import obtenir_bus
 
@@ -267,22 +268,27 @@ class BarcodeService(BaseService[ArticleInventaire]):
         if existant:
             raise ErreurValidation(f"Ce code-barres est déjà assigné: {existant.nom}")
 
-        # Créer article
+        # Créer/obtenir ingrédient
+        ingredient = session.query(Ingredient).filter(Ingredient.nom == nom).first()
+        if not ingredient:
+            ingredient = Ingredient(nom=nom, unite=unite, categorie=categorie)
+            session.add(ingredient)
+            session.flush()  # Obtenir l'ID sans commit
+
+        # Créer article inventaire
         from datetime import timedelta
 
         article = ArticleInventaire(
-            nom=nom,
+            ingredient_id=ingredient.id,
             quantite=quantite,
-            unite=unite,
             quantite_min=0,
-            categorie=categorie,
             emplacement=emplacement,
             code_barres=code,
             prix_unitaire=prix_unitaire,
         )
 
         if date_peremption_jours:
-            article.date_peremption = datetime.now() + timedelta(days=date_peremption_jours)
+            article.date_peremption = datetime.now().date() + timedelta(days=date_peremption_jours)
 
         session.add(article)
         session.commit()

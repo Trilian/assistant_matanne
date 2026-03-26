@@ -190,6 +190,9 @@ class Parametres(BaseSettings):
     REDIS_URL: str = ""
     """URL Redis pour cache distribué (ex: redis://localhost:6379/0). Vide = désactivé."""
 
+    SENTRY_DSN: str = ""
+    """DSN Sentry pour le error tracking (ex: https://xxx@sentry.io/yyy). Vide = désactivé."""
+
     # ═══════════════════════════════════════════════════════════
     # LOGGING
     # ═══════════════════════════════════════════════════════════

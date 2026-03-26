@@ -87,3 +87,54 @@ export async function genererCoursesDepuisPlanning(
   );
   return data;
 }
+
+// ─── OCR Ticket de caisse ─────────────────────────────────
+
+export interface ArticleImporteOCR {
+  nom: string;
+  quantite: number;
+  article_id: number;
+}
+
+export interface ArticleOCRBrut {
+  description: string;
+  quantite: number;
+  prix_unitaire: number | null;
+  prix_total: number;
+}
+
+export interface ResultatOCRTicket {
+  success: boolean;
+  message: string;
+  donnees_ocr: {
+    magasin: string | null;
+    date: string | null;
+    articles: ArticleOCRBrut[];
+    sous_total: number | null;
+    tva: number | null;
+    total: number | null;
+    mode_paiement: string | null;
+  } | null;
+  articles_importes: ArticleImporteOCR[];
+  articles_non_importes: ArticleOCRBrut[];
+  liste_id: number | null;
+}
+
+/**
+ * Analyse un ticket de caisse par OCR.
+ * Si `listeId` est fourni, importe les articles dans la liste.
+ */
+export async function analyserTicketCaisse(
+  file: File,
+  listeId?: number
+): Promise<ResultatOCRTicket> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const params = listeId != null ? `?liste_id=${listeId}` : "";
+  const { data } = await clientApi.post<ResultatOCRTicket>(
+    `/courses/ocr-ticket-caisse${params}`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data;
+}

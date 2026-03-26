@@ -1,7 +1,30 @@
 # 📊 État d'Implémentation des 28 Phases — Assistant Matanne
 
-> **Dernière mise à jour** : 26 mars 2026  
+> **Dernière mise à jour** : 26 mars 2026 (session infrastructure & qualité)  
 > **Audit réalisé** : Scan complet du codebase (backend routes, services, modèles + frontend pages, composants, API clients)
+
+---
+
+## 🏗️ Infrastructure & Qualité Technique
+
+> Ces items ne correspondent pas aux phases A-AC (features applicatives) mais sont trackés ici pour visibilité globale.
+
+| Item | Statut | Notes |
+|------|--------|-------|
+| **Sentry backend** | ✅ Configuré | `FastApiIntegration` + `SqlalchemyIntegration` + `LoggingIntegration` — activer `SENTRY_DSN` sur Railway |
+| **Sentry frontend** | ✅ Configuré | `sentry.client.config.ts` prêt — activer `NEXT_PUBLIC_SENTRY_DSN` sur Vercel |
+| **CI/CD GitHub Actions** | ✅ Opérationnel | 8 workflows, Vitest ajouté au gate `deploy.yml` |
+| **PWA offline mode** | ✅ Opérationnel | `sw.js` v3 stale-while-revalidate, `EnregistrementSW` dans root layout |
+| **Tests E2E Playwright** | ✅ Opérationnel | 10 specs : auth, recettes, courses, planning-ia, jules, projets, navigation |
+| **Cache Redis L2** | ✅ Prêt | Auto-détecté via `REDIS_URL` — recommandé : Upstash (free tier Railway) |
+| **Prometheus / Grafana** | ✅ Configuré | `docker-compose.monitoring.yml` + `prometheus.yml` + dashboard JSON auto-provisionné |
+| **Tests de charge k6** | ✅ Créé | `tests/load/k6_baseline.js` — 4 scénarios, seuils p95 < 500ms / 8s IA |
+| **Migration V002 user_id** | ✅ Créé | `sql/migrations/002_standardize_user_id_uuid.sql` — application manuelle Supabase |
+| **Audit sécurité** | ✅ Validé | CORS, rate limiting (60/min + 10/min IA), `NettoyeurEntrees`, `SecurityHeadersMiddleware` |
+| **Responsive mobile** | 🔄 À faire | Audit Chrome DevTools (sidebar, formulaires, tableaux) |
+| **Accessibilité ARIA** | 🔄 À faire | `jest-axe`, focus-trap modals, `aria-label`, contrastes 4.5:1 |
+| **Migration Alembic** | ❌ Won't do | Système SQL-file maison conservé (`GestionnaireMigrations`) |
+| **Multi-famille** | ❌ Won't do | Hors scope définitif |
 
 ---
 
@@ -692,18 +715,22 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 | Statut | Nombre | Pourcentage | Description |
 |--------|--------|-------------|-------------|
 | ✅ **COMPLÈTES** | **11/28** | **39%** | Tous éléments implémentés et fonctionnels |
+| � **QUASI-COMPLÈTES (≥80%)** | **3** *(inclus dans partielles)* | *(+11%)* | D, L, AA — 1 feature finale restante chacune |
 | 🔄 **PARTIELLES** | **15/28** | **54%** | Infrastructure backend ou UX encore à finaliser |
 | ❌ **NON IMPLÉMENTÉES** | **2/28** | **7%** | Aucun élément trouvé |
+
+> **Couverture fonctionnelle pondérée** : ~70%  
+> *(11 complètes × 1,0) + (3 quasi × 0,85) + (12 partielles × 0,5) = 19,55 / 28*
 
 ### Par module
 
 | Module | Complètes | Partielles | Non implémentées | Taux complétion |
 |--------|-----------|------------|------------------|-----------------|
-| **🍽️ Cuisine (A-L)** | 1/12 | 9/12 | 2/12 | 83% couvert |
-| **👨‍👩‍👦 Famille (M-R)** | 2/6 | 4/6 | 0/6 | 100% couvert |
-| **🎮 Jeux (S-W)** | 1/5 | 4/5 | 0/5 | 100% couvert |
-| **🏡 Maison (X-AB)** | 3/5 | 2/5 | 0/5 | 100% couvert |
-| **🧭 Navigation (AC)** | 4/5 | 1/5 | 0/5 | 100% couvert |
+| **🍽️ Cuisine (A-L)** | 1/12 | 9/12 dont 2 quasi | 2/12 | ~65% fonctionnel |
+| **👨‍👩‍👦 Famille (M-R)** | 2/6 | 4/6 | 0/6 | ~71% fonctionnel |
+| **🎮 Jeux (S-W)** | 1/5 | 4/5 | 0/5 | ~60% fonctionnel |
+| **🏡 Maison (X-AB)** | 3/5 | 2/5 dont 1 quasi | 0/5 | ~82% fonctionnel |
+| **🧭 Navigation (AC)** | 4/5 | 1/5 | 0/5 | ~90% fonctionnel |
 
 *Note: Phase G absorbée par Phase Y ne compte pas dans les totaux*
 
@@ -740,31 +767,24 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 ### ❌ Gaps principaux
 
-1. **Endpoints API manquants (60%)** :
-   - Phases M, X : Moteurs contextuels non exposés
-   - Phases S, T, U : Services jeux non exposés
-   - Phase B : Génération courses depuis planning absente
-   - Phases O, P, Q, R : Services IA famille non exposés
+1. **Automatisation IA achats/rappels à finaliser** :
+   - Phase P : déclencheurs automatiques cadeaux/achats (anniversaire J-14, jalons, saison)
+   - Phase Q : endpoint d'évaluation des rappels + badges urgence consolidés
 
-2. **Câblage Backend→Frontend (70%)** :
-   - Services riches existent mais frontend ne les consomme pas
-   - Pages statiques (grilles CRUD) alors que données contextuelles existent
-   - IA backend sous-exploitée
+2. **Flux intelligents encore incomplets** :
+   - Phase K : synchronisation auto OCR photo-frigo vers inventaire
+   - Phase AC2 : convertisseur inline recettes manquant
 
-3. **Refonte UI (80%)** :
-   - Hubs modules = grilles statiques (Famille, Maison, Jeux)
-   - Pas de contextualisation ("ça pop que quand c'est utile")
-   - Composants contextuels absents (CarteAnniversaire, CarteGaranties, CarteValueBets)
+3. **Jeux: profondeur analytique et garde-fous** :
+   - Phases T/V : analytics avancés (championnat, confiance, breakdown ROI)
+   - Phase W : middleware budget bloquant + auto-exclusion et alertes série
 
-4. **Navigation unifiée (80%)** :
-   - Pas de vue transversale "Ma Semaine"
-   - Outils pas contextuels
-   - Sidebar chargée (8 sections)
+4. **Nutrition & diététique** :
+   - Phase H reste majoritairement non exploitée côté UI (profil, dashboard, Nutri-Score)
 
-5. **Automatisation (90%)** :
-   - Push notifications non déclenchées
-   - Jobs cron absents (entretien saisonnier, rappels, alertes)
-   - Déclencheurs IA absents (anniversaires, jalons, saison)
+5. **Qualité continue** :
+   - Couverture tests à étendre sur routes restantes et parcours critiques
+   - Validation CI/CD et durcissement production (sécurité/monitoring)
 
 ---
 
@@ -772,77 +792,75 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 ### 🚀 P0 — Impact Immédiat (Débloquants)
 
-1. **Exposer les moteurs contextuels** (Phases M, X) :
-   - `GET /api/v1/famille/contexte`
-   - `GET /api/v1/maison/briefing`
-   - `GET /api/v1/maison/alertes`
-   - **Impact** : Débloque toutes les phases Famille/Maison
+1. **Automatiser Achats & Rappels** (Phases P, Q) :
+   - Exposer/fiabiliser déclencheurs IA achats famille
+   - Ajouter endpoint d'évaluation des rappels + badges urgence unifiés
+   - **Impact** : transforme les modules famille en assistant proactif
 
-2. **Exposer les services IA** (Phases M, S, J) :
-   - `POST /api/v1/weekend/suggestions-ia`
-   - `POST /api/v1/jeux/dashboard`
-   - `POST /api/v1/anti-gaspillage/suggestions-ia`
-   - **Impact** : Valeur utilisateur immédiate
+2. **Finaliser flux OCR utiles au quotidien** (Phases K, AC2) :
+   - Auto-sync photo-frigo → inventaire
+   - Convertisseur inline dans les flux recettes/planning
+   - **Impact** : gain de temps immédiat sur les parcours cuisine
 
-3. **Flux Planning→Courses** (Phase B) :
-   - `POST /api/v1/courses/generer-depuis-planning`
-   - **Impact** : Débloque flux cuisine complet
+3. **Renforcer jeu responsable** (Phase W) :
+   - Guard budget côté API lors de création pari
+   - Alertes série dangereuse + auto-exclusion effective
+   - **Impact** : sécurité d'usage avant enrichissements analytiques
 
 ---
 
 ### 📊 P1 — Refonte UX (Visible)
 
-4. **Refondre les hubs** (Phases N, Y, S) :
-   - Hub Famille contextuel
-   - Hub Maison contextuel
-   - Dashboard Jeux opportunités
-   - **Impact** : UX transformée, "ça pop que quand c'est utile"
+4. **Approfondir l'intelligence Jeux** (Phases T, U, V) :
+   - Analytics championnat/confiance
+   - Visualisation backtest avancée et trajectoire bankroll
+   - Prédictions inline plus prescriptives dans les formulaires
+   - **Impact** : passe de "tableau" à "assistant décisionnel"
 
-5. **Finaliser Phase Z** (Planning Maison) :
-   - Planning semaine IA
-   - Fiches tâches complètes
-   - **Impact** : 60% déjà fait, finir
+5. **Consolider les expériences déjà refondues** (Phases D, N, Y, AC) :
+   - Polir les parcours multi-modules (Ma Semaine, hubs contextuels, OCR)
+   - Compléter les CTA/action handlers manquants
+   - **Impact** : UX homogène et sans impasses
 
 ---
 
 ### 🔧 P2 — Finalisation (Polissage)
 
-6. **Automatisation** :
-   - Jobs cron (push, alertes, entretien saisonnier)
-   - Déclencheurs IA (anniversaires, jalons)
+6. **Nutrition & recommandations** (Phases H, L) :
+   - Dashboard nutrition hebdo + Nutri-Score
+   - Enrichissement saison/météo mieux exploité dans les suggestions
 
-7. **Phase AC** (Navigation unifiée) :
-   - Ma Semaine trans-modules
-   - Outils contextuels (FAB chat, minuteur flottant)
-   - Sidebar simplifiée
+7. **Maison analytique** (Phase AB) :
+   - Tendances énergie mensuelles/annuelles
+   - Suggestions jardin saisonnières enrichies IA
 
-8. **Features avancées** :
-   - ✅ OCR tickets jeux (Pixtral)
-   - ✅ Graphiques croissance OMS
-   - ✅ Backtest loto/euromillions
-   - ✅ Multi-zone photo frigo
+8. **Qualité/ops** :
+   - Campagnes de tests complémentaires backend/frontend
+   - Observabilité et alerting production (Sentry/Prometheus)
 
 ---
 
 ## 📝 NOTES
 
-### Phases complétées cette session (25 mars 2026)
+### Phases complétées cette session (26 mars 2026)
 
 - **Phase D** : Page `/cuisine/ma-semaine` stepper 4 étapes ✅
-- **Phase L** : Service enrichissement complet + import PDF ✅
-- **Phase AC5** : Menu commandes + favoris ✅
+- **Phase M/X** : endpoints contextuels exposés + briefings hubs branchés ✅
+- **Phase AC** : FAB chat + minuteur flottant + sidebar simplifiée + commandes/favoris ✅
+- **Jeux/K** : OCR ticket, backtest euromillions et photo-frigo multi-zone ✅
 
 ### Phases quasi-complètes (>80%)
 
-- **Phase Z** : Planning Maison Universel (ménage bien implémenté, planning IA manquant)
-- **Phase E** : Recettes CRUD (juste favoris/notation à exposer)
+- **Phase D** : Flux unifié Ma Semaine (reste onboarding/dashboard cuisine)
+- **Phase L** : Enrichissement import (reste profondeur nutrition/saison)
+- **Phase AA** : Alertes prédictives garanties (reste workflow SAV 1-clic)
 
 ### Phases bloquantes
 
-- **Phase B** : Planning→Courses (flux cassé)
-- **Phases N, Y** : Hubs (UX statique)
-- **Phases M, X** : Moteurs contextuels (backend 100% prêt, endpoints absents)
+- **Phase P** : IA achats famille encore peu proactive
+- **Phase W** : garde-fous jeu responsable incomplets
+- **Phase H** : nutrition non déployée en parcours utilisateur
 
 ---
 
-**Conclusion** : L'application a une **infrastructure backend EXCEPTIONNELLE** (services, modèles, catalogues) mais **sous-exploitée côté frontend** (endpoints manquants, hubs statiques). L'effort principal doit porter sur l'**exposition API** et la **refonte UX contextuelle** — le backend est déjà prêt à 90%.
+**Conclusion** : L'application a franchi le cap de l'**exposition API critique** et de la **refonte contextuelle des hubs/navigation**. Le prochain levier majeur est l'**automatisation proactive** (achats/rappels/jeu responsable), puis la **profondeur analytique** (jeux/énergie/nutrition) avec une montée continue de la qualité test/ops.

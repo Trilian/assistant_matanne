@@ -401,6 +401,26 @@ async def generer_planning_ia(
                 }
                 if r.recette_id and hasattr(r, "recette") and r.recette:
                     entry["recette_nom"] = r.recette.nom
+                    # Nutri-Score simplifié dérivé des macros (heuristique)
+                    rec = r.recette
+                    cal = rec.calories or 0
+                    prot = rec.proteines or 0
+                    glu = rec.glucides or 0
+                    lip = rec.lipides or 0
+                    if cal > 0 or prot > 0:
+                        score = 0
+                        if cal > 600:
+                            score += 2
+                        elif cal > 400:
+                            score += 1
+                        if lip and lip > 20:
+                            score += 2
+                        elif lip and lip > 10:
+                            score += 1
+                        if prot > 20:
+                            score -= 1
+                        grade = ["a", "a", "b", "c", "d", "e"][min(score, 5)]
+                        entry["nutri_score"] = grade
 
                 planning_dict[jour][r.type_repas] = entry
 

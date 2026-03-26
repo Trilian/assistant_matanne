@@ -27,8 +27,8 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
         <EnTete />
         <FilAriane />
 
-        {/* Contenu scrollable */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
+        {/* Contenu scrollable — pb-safe-area pour nav mobile + 4rem de sécurité */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6" id="contenu-principal">
           {children}
         </main>
 

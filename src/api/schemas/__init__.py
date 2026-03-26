@@ -73,10 +73,13 @@ from .errors import (
 
 # Inventaire
 from .inventaire import (
+    ArticleBatchTrouve,
     InventaireItemBase,
     InventaireItemCreate,
     InventaireItemResponse,
     InventaireItemUpdate,
+    ScanBatchRequest,
+    ScanBatchResponse,
 )
 
 # Planning
@@ -328,10 +331,13 @@ __all__ = [
     "RecettePatch",
     "RecetteResponse",
     # Inventaire
+    "ArticleBatchTrouve",
     "InventaireItemBase",
     "InventaireItemCreate",
     "InventaireItemResponse",
     "InventaireItemUpdate",
+    "ScanBatchRequest",
+    "ScanBatchResponse",
     # Courses
     "CourseItemBase",
     "CourseListCreate",

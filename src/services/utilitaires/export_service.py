@@ -190,6 +190,74 @@ class ExportService:
         with obtenir_contexte_db() as db:
             return db.query(model_class).count()
 
+    # ────────────────────────────────────────────────────────
+    # Chiffrement (Fernet + PBKDF2)
+    # ────────────────────────────────────────────────────────
+
+    def exporter_json_chiffre(self, domaines: list[str], mot_de_passe: str) -> bytes:
+        """
+        Exporte les domaines en JSON puis chiffre le résultat.
+
+        Format binaire : SALT (16 octets) | TOKEN FERNET (variable)
+        Le sel aléatoire garantit qu'un même mot de passe génère un fichier
+        différent à chaque export.
+        """
+        import base64
+        import os
+
+        from cryptography.fernet import Fernet
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+        json_bytes = self.exporter_json(domaines).encode("utf-8")
+
+        salt = os.urandom(16)
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=480_000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(mot_de_passe.encode("utf-8")))
+        token = Fernet(key).encrypt(json_bytes)
+
+        return salt + token
+
+    @staticmethod
+    def dechiffrer_json(donnees: bytes, mot_de_passe: str) -> str:
+        """
+        Déchiffre un fichier produit par ``exporter_json_chiffre``.
+
+        Raises:
+            ValueError: Mot de passe incorrect ou fichier corrompu.
+        """
+        import base64
+
+        from cryptography.fernet import Fernet, InvalidToken
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
+        if len(donnees) <= 16:  # noqa: PLR2004
+            raise ValueError("Fichier invalide ou trop court")
+
+        salt = donnees[:16]
+        token = donnees[16:]
+
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=480_000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(mot_de_passe.encode("utf-8")))
+
+        try:
+            plaintext = Fernet(key).decrypt(token)
+        except InvalidToken as exc:
+            raise ValueError("Mot de passe incorrect ou fichier corrompu") from exc
+
+        return plaintext.decode("utf-8")
+
 
 @service_factory("export_service", tags={"utilitaires", "donnees"})
 def get_export_service() -> ExportService:

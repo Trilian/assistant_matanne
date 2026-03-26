@@ -58,7 +58,7 @@ describe("EuromillionsPage", () => {
   it("affiche le pré-remplissage OCR quand query params présents", () => {
     render(<EuromillionsPage />);
 
-    expect(screen.getByText(/Euromillions/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: /Euromillions/i })).toBeInTheDocument();
     expect(screen.getByText(/Pré-remplissage depuis OCR ticket/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Enregistrer cette grille/i })).toBeInTheDocument();
   });

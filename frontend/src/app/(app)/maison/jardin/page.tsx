@@ -5,7 +5,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sprout, Flower2, Calendar, Leaf, Sun } from "lucide-react";
+import { Sprout, Flower2, Calendar, Leaf, Sun, Sparkles, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -14,6 +14,7 @@ import {
   CardDescription,
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
+import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import {
@@ -24,7 +25,11 @@ import {
   SelectValue,
 } from "@/composants/ui/select";
 import { utiliserRequete } from "@/crochets/utiliser-api";
-import { listerElementsJardin, obtenirCalendrierSemis } from "@/bibliotheque/api/maison";
+import {
+  listerElementsJardin,
+  obtenirCalendrierSemis,
+  obtenirSuggestionsIAJardin,
+} from "@/bibliotheque/api/maison";
 
 const NOMS_MOIS = [
   "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
@@ -45,6 +50,13 @@ export default function PageJardin() {
     () => obtenirCalendrierSemis(Number(moisSemis))
   );
 
+  const [chargerIA, setChargerIA] = useState(false);
+  const { data: suggestionsIA, isLoading: chargementIA } = utiliserRequete(
+    ["maison", "jardin", "suggestions-ia"],
+    obtenirSuggestionsIAJardin,
+    { enabled: chargerIA }
+  );
+
   return (
     <div className="space-y-6">
       <div>
@@ -53,6 +65,48 @@ export default function PageJardin() {
           Plantes, calendrier des semis et suivi du potager
         </p>
       </div>
+
+      {/* Tâches du moment — IA saisonnière */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-emerald-500" />
+            Tâches du moment
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Conseils jardin générés par IA pour la saison en cours
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!chargerIA ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setChargerIA(true)}
+              className="text-emerald-600 border-emerald-300"
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              Obtenir les conseils IA
+            </Button>
+          ) : chargementIA ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Génération des conseils en cours…
+            </div>
+          ) : suggestionsIA?.taches.length ? (
+            <ul className="space-y-2">
+              {suggestionsIA.taches.map((t, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  {t.tache}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-muted-foreground">Aucune suggestion disponible</p>
+          )}
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="plantes">
         <TabsList>
@@ -65,8 +119,6 @@ export default function PageJardin() {
             Calendrier semis
           </TabsTrigger>
         </TabsList>
-
-        {/* ─── Onglet Plantes ─────────────────────────── */}
         <TabsContent value="plantes" className="space-y-4 mt-4">
           {chargementElements ? (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

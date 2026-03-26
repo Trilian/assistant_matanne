@@ -15,6 +15,9 @@ import {
   BookUser,
   FileText,
   Sparkles,
+  Bell,
+  AlertTriangle,
+  Info,
 } from "lucide-react";
 import {
   Card,
@@ -30,9 +33,9 @@ import { CarteDocumentExpire } from "@/composants/famille/carte-document-expire"
 import { CarteJourSpecial } from "@/composants/famille/carte-jour-special";
 import { CarteSuggestionIA } from "@/composants/famille/carte-suggestion-ia";
 import { utiliserRequete } from "@/crochets/utiliser-api";
-import { obtenirContexteFamilial } from "@/bibliotheque/api/famille";
+import { obtenirContexteFamilial, evaluerRappels } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
-import type { ContexteFamilial } from "@/types/famille";
+import type { ContexteFamilial, RappelFamille } from "@/types/famille";
 
 const MODULES = [
   { titre: "Jules", chemin: "/famille/jules", Icone: Baby },
@@ -50,6 +53,13 @@ export default function PageFamille() {
     obtenirContexteFamilial,
     { staleTime: 5 * 60 * 1000 }
   );
+
+  const { data: rappelsData } = utiliserRequete<{ rappels: RappelFamille[]; total: number }>(
+    ["famille", "rappels", "evaluer"],
+    evaluerRappels,
+    { staleTime: 5 * 60 * 1000 }
+  );
+  const rappelsUrgents = rappelsData?.rappels?.filter((r) => r.priorite === "danger" || r.priorite === "warning") ?? [];
 
   const [hasShownToast, setHasShownToast] = useState(false);
 
@@ -107,7 +117,42 @@ export default function PageFamille() {
         </p>
       </div>
 
-      {/* Section 1: Aujourd'hui */}
+      {/* Section 0: Rappels urgents */}
+      {rappelsUrgents.length > 0 && (
+        <section>
+          <Card className="border-orange-200 bg-orange-50/50 dark:border-orange-800 dark:bg-orange-950/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Bell className="h-4 w-4 text-orange-500" />
+                Rappels du moment
+                <Badge variant="secondary" className="ml-auto">{rappelsUrgents.length}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-1.5">
+                {rappelsUrgents.map((r, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm">
+                    {r.priorite === "danger" ? (
+                      <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+                    ) : (
+                      <Info className="h-4 w-4 text-orange-400 mt-0.5 shrink-0" />
+                    )}
+                    <span className={r.priorite === "danger" ? "font-medium" : ""}>{r.message}</span>
+                    {r.jours_restants !== undefined && (
+                      <Badge
+                        variant={r.priorite === "danger" ? "destructive" : "outline"}
+                        className="ml-auto shrink-0 text-xs"
+                      >
+                        J-{r.jours_restants}
+                      </Badge>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </section>
+      )}
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Aujourd'hui</h2>
 

@@ -245,8 +245,8 @@ class TestRechercherProduit:
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_nutella
 
-        with patch.object(service.cache, "obtenir", return_value=None):
-            with patch.object(service.cache, "definir") as mock_definir:
+        with patch.object(service.cache, "get", return_value=None):
+            with patch.object(service.cache, "set") as mock_set:
                 with patch("httpx.Client") as mock_client:
                     mock_client.return_value.__enter__ = Mock(
                         return_value=Mock(get=Mock(return_value=mock_response))
@@ -266,7 +266,7 @@ class TestRechercherProduit:
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_not_found
 
-        with patch.object(service.cache, "obtenir", return_value=None):
+        with patch.object(service.cache, "get", return_value=None):
             with patch("httpx.Client") as mock_client:
                 mock_client.return_value.__enter__ = Mock(
                     return_value=Mock(get=Mock(return_value=mock_response))
@@ -282,7 +282,7 @@ class TestRechercherProduit:
         mock_response = Mock()
         mock_response.status_code = 500
 
-        with patch.object(service.cache, "obtenir", return_value=None):
+        with patch.object(service.cache, "get", return_value=None):
             with patch("httpx.Client") as mock_client:
                 mock_client.return_value.__enter__ = Mock(
                     return_value=Mock(get=Mock(return_value=mock_response))
@@ -295,7 +295,7 @@ class TestRechercherProduit:
 
     def test_recherche_timeout(self, service):
         """Test recherche avec timeout."""
-        with patch.object(service.cache, "obtenir", return_value=None):
+        with patch.object(service.cache, "get", return_value=None):
             with patch("httpx.Client") as mock_client:
                 mock_client.return_value.__enter__ = Mock(
                     return_value=Mock(get=Mock(side_effect=httpx.TimeoutException("Timeout")))
@@ -308,7 +308,7 @@ class TestRechercherProduit:
 
     def test_recherche_exception(self, service):
         """Test recherche avec exception générale."""
-        with patch.object(service.cache, "obtenir", return_value=None):
+        with patch.object(service.cache, "get", return_value=None):
             with patch("httpx.Client") as mock_client:
                 mock_client.return_value.__enter__ = Mock(
                     return_value=Mock(get=Mock(side_effect=Exception("Network error")))
@@ -626,8 +626,8 @@ class TestCacheIntegration:
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_nutella
 
-        with patch.object(service.cache, "obtenir", return_value=None):
-            with patch.object(service.cache, "definir") as mock_definir:
+        with patch.object(service.cache, "get", return_value=None):
+            with patch.object(service.cache, "set") as mock_set:
                 with patch("httpx.Client") as mock_client:
                     mock_client.return_value.__enter__ = Mock(
                         return_value=Mock(get=Mock(return_value=mock_response))
@@ -637,8 +637,8 @@ class TestCacheIntegration:
                     result = service.rechercher_produit("3017620422003")
 
                     # Vérifier que le cache a été mis à jour
-                    mock_definir.assert_called_once()
-                    cache_key = mock_definir.call_args[0][0]
+                    mock_set.assert_called_once()
+                    cache_key = mock_set.call_args[0][0]
                     assert "3017620422003" in cache_key
 
     def test_cache_not_set_on_not_found(self, service, api_response_not_found):
@@ -647,8 +647,8 @@ class TestCacheIntegration:
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_not_found
 
-        with patch.object(service.cache, "obtenir", return_value=None):
-            with patch.object(service.cache, "definir") as mock_definir:
+        with patch.object(service.cache, "get", return_value=None):
+            with patch.object(service.cache, "set") as mock_set:
                 with patch("httpx.Client") as mock_client:
                     mock_client.return_value.__enter__ = Mock(
                         return_value=Mock(get=Mock(return_value=mock_response))
@@ -658,4 +658,4 @@ class TestCacheIntegration:
                     result = service.rechercher_produit("0000000000000")
 
                     # Le cache ne doit pas être mis à jour pour un produit non trouvé
-                    mock_definir.assert_not_called()
+                    mock_set.assert_not_called()

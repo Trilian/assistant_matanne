@@ -8,7 +8,7 @@ alertes de stock bas et recherche par code-barres.
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 
 from src.api.dependencies import require_auth
 from src.api.schemas import (
@@ -17,6 +17,8 @@ from src.api.schemas import (
     InventaireItemUpdate,
     MessageResponse,
     ReponsePaginee,
+    ScanBatchRequest,
+    ScanBatchResponse,
 )
 from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
@@ -275,6 +277,76 @@ async def obtenir_par_code_barres(code: str, user: dict[str, Any] = Depends(requ
     return await executer_async(_query)
 
 
+@router.post(
+    "/barcode/batch",
+    response_model=ScanBatchResponse,
+    responses=REPONSES_CRUD_LECTURE,
+)
+@gerer_exception_api
+async def scanner_codes_batch(
+    request: ScanBatchRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Résout un lot de codes-barres en articles d'inventaire.
+
+    Utilisé par le scanner multi-codes : une seule requête pour identifier
+    plusieurs articles scannés en une passe caméra.
+
+    Args:
+        request: Liste de codes-barres (à scanner, max 50)
+
+    Returns:
+        ``trouves``: articles trouvés avec leur détail
+        ``inconnus``: codes-barres sans article correspondant
+
+    Example:
+        ```
+        POST /api/v1/inventaire/barcode/batch
+        {"codes": ["3017620422003", "9999999999999"]}
+
+        Response:
+        {
+            "trouves": [{"code": "3017620422003", "article": {...}}],
+            "inconnus": ["9999999999999"]
+        }
+        ```
+    """
+    from sqlalchemy.orm import joinedload
+
+    from src.core.models import ArticleInventaire
+
+    def _query():
+        with executer_avec_session() as session:
+            articles = (
+                session.query(ArticleInventaire)
+                .options(joinedload(ArticleInventaire.ingredient))
+                .filter(ArticleInventaire.code_barres.in_(request.codes))
+                .all()
+            )
+
+            code_map = {a.code_barres: a for a in articles if a.code_barres}
+
+            trouves = []
+            inconnus = []
+            vus = set()
+            for code in request.codes:
+                if code in vus:
+                    continue
+                vus.add(code)
+                if code in code_map:
+                    trouves.append({
+                        "code": code,
+                        "article": InventaireItemResponse.model_validate(code_map[code]),
+                    })
+                else:
+                    inconnus.append(code)
+
+            return {"trouves": trouves, "inconnus": inconnus}
+
+    return await executer_async(_query)
+
+
 @router.get("/{item_id}", response_model=InventaireItemResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_article_inventaire(item_id: int, user: dict[str, Any] = Depends(require_auth)):
@@ -524,5 +596,79 @@ async def ajouter_articles_bulk(
                 message=f"{crees} créés, {maj} mis à jour",
                 id=0,
             )
+
+    return await executer_async(_bulk)
+
+
+@router.post("/ocr-photo-frigo", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def ocr_photo_frigo(
+    photo: UploadFile = File(..., description="Photo du réfrigérateur (jpg/png, max 10 Mo)"),
+    emplacement: str = Query("frigo", description="Emplacement par défaut pour les articles créés"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Analyse une photo de frigo via IA vision et importe les aliments détectés dans l'inventaire.
+
+    Retourne la liste des articles créés/mis à jour.
+    """
+    # Valider le type de fichier
+    if photo.content_type not in ("image/jpeg", "image/png", "image/webp"):
+        raise HTTPException(status_code=422, detail="Seuls les formats JPEG, PNG et WebP sont acceptés")
+
+    # Lire les bytes (limite 10 Mo)
+    image_bytes = await photo.read()
+    if len(image_bytes) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Image trop volumineuse (max 10 Mo)")
+
+    from src.services.integrations.multimodal import get_multimodal_service
+
+    service = get_multimodal_service()
+    articles_detectes = await service.analyser_frigo(image_bytes)
+
+    if not articles_detectes:
+        return {"articles": [], "total": 0, "message": "Aucun aliment détecté dans la photo"}
+
+    # Importer dans l'inventaire via le bulk
+    from src.core.models import ArticleInventaire, Ingredient
+
+    def _bulk():
+        with executer_avec_session() as session:
+            crees = 0
+            maj = 0
+            for art in articles_detectes[:50]:
+                nom = art.get("nom", "").strip()
+                if not nom:
+                    continue
+                quantite = float(art.get("quantite") or 1.0)
+
+                ingredient = session.query(Ingredient).filter(Ingredient.nom == nom).first()
+                if not ingredient:
+                    ingredient = Ingredient(
+                        nom=nom,
+                        categorie=art.get("categorie", "Autre"),
+                        unite=art.get("unite", "pcs") or "pcs",
+                    )
+                    session.add(ingredient)
+                    session.flush()
+
+                inv = session.query(ArticleInventaire).filter(
+                    ArticleInventaire.ingredient_id == ingredient.id
+                ).first()
+                if inv:
+                    inv.quantite = float(inv.quantite or 0) + quantite
+                    if emplacement and not inv.emplacement:
+                        inv.emplacement = emplacement
+                    maj += 1
+                else:
+                    session.add(ArticleInventaire(
+                        ingredient_id=ingredient.id,
+                        quantite=quantite,
+                        quantite_min=1.0,
+                        emplacement=emplacement,
+                    ))
+                    crees += 1
+
+            session.commit()
+            return {"articles": articles_detectes, "total": len(articles_detectes), "crees": crees, "mis_a_jour": maj}
 
     return await executer_async(_bulk)

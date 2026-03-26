@@ -61,3 +61,60 @@ export async function ajouterArticlesBulk(
   );
   return data;
 }
+
+export interface ResultatOCRFrigo {
+  articles: ArticleBulk[];
+  total: number;
+  crees: number;
+  mis_a_jour: number;
+  message?: string;
+}
+
+/** Analyse une photo de frigo via IA et importe les aliments dans l'inventaire */
+export async function ocrPhotoFrigo(
+  file: File,
+  emplacement = "frigo"
+): Promise<ResultatOCRFrigo> {
+  const fd = new FormData();
+  fd.append("photo", file);
+  const { data } = await clientApi.post<ResultatOCRFrigo>(
+    `/inventaire/ocr-photo-frigo?emplacement=${encodeURIComponent(emplacement)}`,
+    fd,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data;
+}
+
+// ─── Scan multi-codes ─────────────────────────────────────────────────
+
+export interface ArticleBarcode {
+  code: string;
+  article: {
+    id: number;
+    nom: string;
+    quantite: number;
+    unite?: string;
+    categorie?: string;
+    emplacement?: string;
+    code_barres?: string;
+  };
+}
+
+export interface ResultatScanBatch {
+  trouves: ArticleBarcode[];
+  inconnus: string[];
+}
+
+/**
+ * Résout un lot de codes-barres en articles d'inventaire.
+ * Utilisé par le composant ScanneurMultiCodes.
+ */
+export async function scannerCodesBatch(
+  codes: string[]
+): Promise<ResultatScanBatch> {
+  const { data } = await clientApi.post<ResultatScanBatch>(
+    "/inventaire/barcode/batch",
+    { codes }
+  );
+  return data;
+}

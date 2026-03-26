@@ -12,6 +12,7 @@ import {
   Trash2,
   Loader2,
   Search,
+  Camera,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -50,6 +51,8 @@ import {
   ajouterArticleInventaire,
   supprimerArticleInventaire,
   obtenirAlertes,
+  ocrPhotoFrigo,
+  type ResultatOCRFrigo,
 } from "@/bibliotheque/api/inventaire";
 import {
   schemaArticleInventaire,
@@ -83,6 +86,7 @@ export default function PageInventaire() {
   const [categorie, setCategorie] = useState("Tous");
   const [filtreEtat, setFiltreEtat] = useState("tous");
   const [dialogueAjout, setDialogueAjout] = useState(false);
+  const [ocrResultat, setOcrResultat] = useState<ResultatOCRFrigo | null>(null);
 
   const invalider = utiliserInvalidation();
 
@@ -117,6 +121,33 @@ export default function PageInventaire() {
     }
   );
 
+  const { mutate: lancerOCR, isPending: ocrEnCours } = utiliserMutation(
+    (fichier: File) => ocrPhotoFrigo(fichier),
+    {
+      onSuccess: (res) => {
+        invalider(["inventaire"]);
+        setOcrResultat(res);
+        if (res.total > 0) {
+          toast.success(`📷 ${res.total} aliment(s) détecté(s) et importés`);
+        } else {
+          toast.info("Aucun aliment détecté dans la photo");
+        }
+      },
+      onError: () => toast.error("Erreur lors de l'analyse photo"),
+    }
+  );
+
+  function ouvrirSelecteurPhoto() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/webp";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) lancerOCR(file);
+    };
+    input.click();
+  }
+
   const {
     register,
     handleSubmit,
@@ -146,11 +177,49 @@ export default function PageInventaire() {
           <h1 className="text-2xl font-bold tracking-tight">📦 Inventaire</h1>
           <p className="text-muted-foreground">Stock alimentaire et alertes</p>
         </div>
-        <Button onClick={() => setDialogueAjout(true)}>
-          <Plus className="mr-1 h-4 w-4" />
-          Ajouter
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={ouvrirSelecteurPhoto} disabled={ocrEnCours}>
+            {ocrEnCours ? (
+              <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+            ) : (
+              <Camera className="mr-1 h-4 w-4" />
+            )}
+            Photo frigo
+          </Button>
+          <Button onClick={() => setDialogueAjout(true)}>
+            <Plus className="mr-1 h-4 w-4" />
+            Ajouter
+          </Button>
+        </div>
       </div>
+
+      {/* Résultat OCR photo-frigo */}
+      {ocrResultat && ocrResultat.total > 0 && (
+        <Card className="border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950">
+          <CardContent className="pt-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                  <Camera className="h-4 w-4" />
+                  Photo analysée — {ocrResultat.total} aliment(s) détecté(s)
+                </p>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">
+                  {ocrResultat.crees} créé(s) · {ocrResultat.mis_a_jour} mis à jour
+                </p>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {ocrResultat.articles.slice(0, 8).map((a, i) => (
+                    <Badge key={i} variant="secondary" className="text-xs">{a.nom}</Badge>
+                  ))}
+                  {ocrResultat.articles.length > 8 && (
+                    <Badge variant="secondary" className="text-xs">+{ocrResultat.articles.length - 8}</Badge>
+                  )}
+                </div>
+              </div>
+              <Button size="sm" variant="ghost" onClick={() => setOcrResultat(null)} aria-label="Fermer">×</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Alertes résumé */}
       {nbAlertes > 0 && (

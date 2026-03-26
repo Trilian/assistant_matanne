@@ -388,9 +388,21 @@ async def creer_pari(
     from decimal import Decimal
 
     from src.core.models import Match, PariSportif
+    from src.services.jeux import get_responsable_gaming_service
 
     def _query():
         with executer_avec_session() as session:
+            # Garde-fou budget responsable
+            mise = Decimal(str(payload.get("mise", 0)))
+            if mise > 0 and not payload.get("est_virtuel", True):
+                svc_resp = get_responsable_gaming_service()
+                check = svc_resp.verifier_mise_autorisee(mise)
+                if not check.get("autorisee", True):
+                    raise HTTPException(
+                        status_code=402,
+                        detail=check.get("raison") or "Limite de mise mensuelle atteinte",
+                    )
+
             match = session.query(Match).filter(Match.id == payload["match_id"]).first()
             if not match:
                 raise HTTPException(status_code=404, detail="Match non trouvé")
@@ -400,7 +412,7 @@ async def creer_pari(
                 type_pari=payload.get("type_pari", "1N2"),
                 prediction=payload["prediction"],
                 cote=payload["cote"],
-                mise=Decimal(str(payload.get("mise", 0))),
+                mise=mise,
                 est_virtuel=payload.get("est_virtuel", True),
                 notes=payload.get("notes"),
             )
@@ -1328,7 +1340,7 @@ async def performance_jeux(
     """Performance globale avec analytics par mois, championnat, type de pari."""
     from sqlalchemy import extract, func
 
-    from src.core.models import PariSportif
+    from src.core.models import Match, PariSportif
 
     nb_mois = mois or 6
 
@@ -1405,19 +1417,131 @@ async def performance_jeux(
                 max_win = max(max_win, cur_win)
                 max_lose = max(max_lose, cur_lose)
 
+            # Par championnat (jointure PariSportif → Match)
+            par_champ_raw = (
+                session.query(
+                    Match.championnat,
+                    func.count(PariSportif.id),
+                    func.sum(func.case((PariSportif.statut == "gagne", 1), else_=0)),
+                    func.sum(PariSportif.mise),
+                    func.sum(func.case((PariSportif.statut == "gagne", PariSportif.gain), else_=0)),
+                )
+                .join(PariSportif, PariSportif.match_id == Match.id)
+                .filter(PariSportif.cree_le >= date_debut)
+                .group_by(Match.championnat)
+                .all()
+            )
+            par_championnat = {}
+            for champ, nb_c, gag_c, mise_c, gain_c in par_champ_raw:
+                mise_f = float(mise_c or 0)
+                gain_f = float(gain_c or 0)
+                par_championnat[str(champ)] = {
+                    "nb": nb_c,
+                    "gagnes": int(gag_c or 0),
+                    "taux": round(int(gag_c or 0) / nb_c * 100, 1) if nb_c > 0 else 0.0,
+                    "roi": round((gain_f - mise_f) / mise_f * 100, 1) if mise_f > 0 else 0.0,
+                }
+
+            # Par type_pari
+            par_type_raw = (
+                base_q.with_entities(
+                    PariSportif.type_pari,
+                    func.count(PariSportif.id),
+                    func.sum(func.case((PariSportif.statut == "gagne", 1), else_=0)),
+                )
+                .filter(PariSportif.statut.in_(["gagne", "perdu"]))
+                .group_by(PariSportif.type_pari)
+                .all()
+            )
+            par_type_pari = {}
+            for type_p, nb_t, gag_t in par_type_raw:
+                par_type_pari[str(type_p)] = {
+                    "nb": nb_t,
+                    "gagnes": int(gag_t or 0),
+                    "taux": round(int(gag_t or 0) / nb_t * 100, 1) if nb_t > 0 else 0.0,
+                }
+
             return {
                 "roi": round(roi, 1),
                 "taux_reussite": round(taux, 1),
                 "benefice": round(total_gain - total_mise, 2),
                 "nb_paris": total,
                 "par_mois": par_mois,
-                "par_championnat": {},
-                "par_type_pari": {},
+                "par_championnat": par_championnat,
+                "par_type_pari": par_type_pari,
                 "meilleur_mois": best_mois,
                 "pire_mois": worst_mois,
                 "serie_gagnante_max": max_win,
                 "serie_perdante_max": max_lose,
             }
+
+    return await executer_async(_query)
+
+
+@router.get("/performance/confiance", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def performance_par_confiance(
+    mois: int | None = Query(None, ge=1, le=24, description="Nombre de mois à analyser (défaut: 6)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Distribution taux de réussite par tranche de confiance IA (0-25%, 25-50%, 50-75%, 75-100%)."""
+    from sqlalchemy import func
+
+    from src.core.models import PariSportif
+
+    nb_mois = mois or 6
+
+    def _query():
+        with executer_avec_session() as session:
+            today = date.today()
+            date_debut = today.replace(day=1)
+            for _ in range(nb_mois - 1):
+                date_debut = (date_debut - __import__("datetime").timedelta(days=1)).replace(day=1)
+
+            paris = (
+                session.query(PariSportif)
+                .filter(
+                    PariSportif.cree_le >= date_debut,
+                    PariSportif.statut.in_(["gagne", "perdu"]),
+                    PariSportif.confiance_prediction.isnot(None),
+                )
+                .with_entities(PariSportif.confiance_prediction, PariSportif.statut)
+                .all()
+            )
+
+            tranches = {
+                "0-25": {"nb": 0, "gagnes": 0},
+                "25-50": {"nb": 0, "gagnes": 0},
+                "50-75": {"nb": 0, "gagnes": 0},
+                "75-100": {"nb": 0, "gagnes": 0},
+            }
+            for conf, statut in paris:
+                if conf is None:
+                    continue
+                c = float(conf) * 100 if float(conf) <= 1.0 else float(conf)
+                if c < 25:
+                    k = "0-25"
+                elif c < 50:
+                    k = "25-50"
+                elif c < 75:
+                    k = "50-75"
+                else:
+                    k = "75-100"
+                tranches[k]["nb"] += 1
+                if statut == "gagne":
+                    tranches[k]["gagnes"] += 1
+
+            result = []
+            for tranche, vals in tranches.items():
+                nb = vals["nb"]
+                gag = vals["gagnes"]
+                result.append({
+                    "tranche": tranche,
+                    "nb": nb,
+                    "gagnes": gag,
+                    "taux": round(gag / nb * 100, 1) if nb > 0 else 0.0,
+                })
+            return {"tranches": result, "total": sum(t["nb"] for t in result)}
 
     return await executer_async(_query)
 
@@ -1518,12 +1642,37 @@ async def resume_mensuel(
 async def suivi_responsable(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Suivi mensuel du budget jeu responsable."""
+    """Suivi mensuel du budget jeu responsable avec série actuelle."""
+    from datetime import date
+
+    from src.core.models import PariSportif
     from src.services.jeux import get_responsable_gaming_service
 
     def _query():
         svc = get_responsable_gaming_service()
         raw = svc.obtenir_suivi_mensuel()
+
+        # Calculer la série actuelle (pertes/gains consécutifs récents)
+        with executer_avec_session() as session:
+            paris_recents = (
+                session.query(PariSportif.statut)
+                .filter(PariSportif.statut.in_(["gagne", "perdu"]))
+                .order_by(PariSportif.cree_le.desc())
+                .limit(20)
+                .all()
+            )
+
+        serie_nb = 0
+        serie_type = None
+        for (statut,) in paris_recents:
+            if serie_type is None:
+                serie_type = statut
+                serie_nb = 1
+            elif statut == serie_type:
+                serie_nb += 1
+            else:
+                break
+
         return {
             "limite": raw.get("limite_mensuelle", 50.0),
             "mises_cumulees": raw.get("mises_cumulees", 0.0),
@@ -1534,6 +1683,11 @@ async def suivi_responsable(
             "auto_exclusion_jusqu_a": str(raw["auto_exclusion"])
             if raw.get("auto_exclusion")
             else None,
+            "serie_actuelle": {
+                "type": serie_type,
+                "nb": serie_nb,
+                "alerte_active": serie_type == "perdu" and serie_nb >= 5,
+            } if serie_type else None,
         }
 
     return await executer_async(_query)

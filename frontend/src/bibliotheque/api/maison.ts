@@ -799,6 +799,46 @@ export async function supprimerReleve(id: number): Promise<void> {
   await clientApi.delete(`/maison/releves/${id}`);
 }
 
+// ─── Tendances énergie ────────────────────────────────────
+
+export interface PointTendanceEnergie {
+  mois: string;
+  conso: number;
+  anomalie: boolean;
+  ecart_pct: number;
+}
+export interface TendancesEnergie {
+  type: string;
+  points: PointTendanceEnergie[];
+  moyenne: number;
+  total: number;
+}
+
+export async function obtenirTendancesEnergie(
+  typeCompteur: "electricite" | "eau" | "gaz" = "electricite",
+  nbMois = 12
+): Promise<TendancesEnergie> {
+  const { data } = await clientApi.get<TendancesEnergie>(
+    `/maison/energie/tendances?type_compteur=${typeCompteur}&nb_mois=${nbMois}`
+  );
+  return data;
+}
+
+// ─── Suggestions IA jardin ────────────────────────────────
+
+export interface TacheJardinIA {
+  tache: string;
+  saison: string;
+}
+
+export async function obtenirSuggestionsIAJardin(): Promise<{
+  taches: TacheJardinIA[];
+  total: number;
+}> {
+  const { data } = await clientApi.get("/maison/jardin/suggestions-ia");
+  return data;
+}
+
 // ─── Visualisation Plan ───────────────────────────────────
 
 export async function listerPieces(etage?: number): Promise<PieceMaison[]> {

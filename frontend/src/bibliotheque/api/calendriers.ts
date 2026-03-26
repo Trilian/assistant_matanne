@@ -110,3 +110,30 @@ export async function deconnecterGoogle(): Promise<{ status: string }> {
   const { data } = await clientApi.delete("/calendriers/google/disconnect");
   return data;
 }
+
+// ═══════════════════════════════════════════════════════════
+// CALENDRIERS iCAL
+// ═══════════════════════════════════════════════════════════
+
+export interface CreerCalendrierIcalDto {
+  nom: string;
+  url: string;
+  sync_interval_minutes?: number;
+}
+
+/** Ajoute un calendrier iCal externe par URL */
+export async function ajouterCalendrierIcal(
+  dto: CreerCalendrierIcalDto
+): Promise<CalendrierExterne> {
+  const { data } = await clientApi.post<CalendrierExterne>("/calendriers", {
+    ...dto,
+    provider: "ical_url",
+    sync_direction: "import",
+  });
+  return data;
+}
+
+/** Supprime un calendrier externe */
+export async function supprimerCalendrier(id: number): Promise<void> {
+  await clientApi.delete(`/calendriers/${id}`);
+}

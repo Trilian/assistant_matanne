@@ -22,18 +22,30 @@ _sentry_dsn = os.getenv("SENTRY_DSN")
 if _sentry_dsn:
     try:
         import sentry_sdk
+        from sentry_sdk.integrations.fastapi import FastApiIntegration
+        from sentry_sdk.integrations.logging import LoggingIntegration
+        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+        from sentry_sdk.integrations.starlette import StarletteIntegration
 
         sentry_sdk.init(
             dsn=_sentry_dsn,
             environment=os.getenv("ENVIRONMENT", "development"),
             traces_sample_rate=0.1,
             profiles_sample_rate=0.1,
+            integrations=[
+                StarletteIntegration(transaction_style="url"),
+                FastApiIntegration(transaction_style="url"),
+                SqlalchemyIntegration(),
+                LoggingIntegration(level=logging.INFO, event_level=logging.ERROR),
+            ],
+            # Ne pas envoyer les données personnelles
+            send_default_pii=False,
         )
-        logging.info("Sentry initialized: error tracking enabled")
+        logging.info("Sentry initialized: FastAPI + SQLAlchemy + Logging integrations actives")
     except ImportError:
-        logging.warning("Sentry DSN configured but sentry-sdk not installed")
+        logging.warning("Sentry DSN configuré mais sentry-sdk[fastapi] non installé")
 else:
-    logging.info("Sentry DSN not configured, skipping error tracking")
+    logging.info("Sentry DSN non configuré, error tracking désactivé")
 
 
 from src.api.dependencies import require_role

@@ -68,6 +68,18 @@ vi.mock("@/crochets/utiliser-api", () => ({
     if (key.includes("matchs")) {
       return { data: mockMatchs, isLoading: false, error: null };
     }
+    if (key.includes("value-bets")) {
+      return { data: [], isLoading: false, error: null };
+    }
+    if (key.includes("series-actives")) {
+      return { data: [], isLoading: false, error: null };
+    }
+    if (key.includes("prediction")) {
+      return { data: undefined, isLoading: false, error: null };
+    }
+    if (key.includes("analyse-ia-match")) {
+      return { data: undefined, isLoading: false, error: null };
+    }
     return { data: mockParis, isLoading: false, error: null };
   }),
   utiliserMutation: () => ({ mutate: vi.fn() }),

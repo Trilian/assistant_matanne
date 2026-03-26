@@ -734,6 +734,32 @@ async def supprimer_element_jardin(
     return await executer_async(_query)
 
 
+@router.get("/jardin/suggestions-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggestions_ia_jardin(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Tâches saisonnières du jardin générées par IA (conseils pratiques pour la saison en cours)."""
+    from src.services.maison.jardin_service import get_jardin_service
+    import asyncio
+
+    service = get_jardin_service()
+    conseils_bruts = await service.generer_conseils_saison()
+
+    # Transformer la réponse texte en liste structurée de tâches
+    lignes = [l.strip() for l in conseils_bruts.splitlines() if l.strip()]
+    taches = []
+    for ligne in lignes:
+        # Nettoyer les puces/numéros en début de ligne
+        for prefix in ("- ", "• ", "* "):
+            if ligne.startswith(prefix):
+                ligne = ligne[len(prefix):]
+        if ligne and not ligne.endswith(":"):
+            taches.append({"tache": ligne, "saison": service.obtenir_saison_actuelle()})
+
+    return {"taches": taches, "total": len(taches)}
+
+
 # ═══════════════════════════════════════════════════════════
 # STOCKS MAISON
 # ═══════════════════════════════════════════════════════════
@@ -2190,6 +2216,56 @@ async def historique_energie(
     def _query():
         service = get_depenses_crud_service()
         return service.charger_historique_energie(type_energie, nb_mois=nb_mois)
+
+    return await executer_async(_query)
+
+
+@router.get("/energie/tendances", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def tendances_energie(
+    type_compteur: str = Query("electricite", description="electricite | eau | gaz"),
+    nb_mois: int = Query(12, ge=2, le=36, description="Nombre de mois à analyser"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Tendances de consommation mensuelle avec détection d'anomalies (écart > 20 % vs moyenne)."""
+    from src.core.models.maison_extensions import ReleveCompteur
+    from sqlalchemy import func
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            rows = (
+                session.query(
+                    func.date_trunc("month", ReleveCompteur.date_releve).label("mois"),
+                    func.sum(ReleveCompteur.consommation_periode).label("conso"),
+                )
+                .filter(ReleveCompteur.type_compteur == type_compteur)
+                .filter(ReleveCompteur.consommation_periode.isnot(None))
+                .group_by(func.date_trunc("month", ReleveCompteur.date_releve))
+                .order_by(func.date_trunc("month", ReleveCompteur.date_releve))
+                .limit(nb_mois)
+                .all()
+            )
+
+            points = [
+                {"mois": str(r.mois)[:7], "conso": float(r.conso or 0)}
+                for r in rows
+            ]
+
+            if points:
+                moyenne = sum(p["conso"] for p in points) / len(points)
+                for p in points:
+                    ecart_pct = ((p["conso"] - moyenne) / moyenne * 100) if moyenne else 0
+                    p["anomalie"] = abs(ecart_pct) > 20
+                    p["ecart_pct"] = round(ecart_pct, 1)
+            else:
+                moyenne = 0.0
+
+            return {
+                "type": type_compteur,
+                "points": points,
+                "moyenne": round(moyenne, 2),
+                "total": len(points),
+            }
 
     return await executer_async(_query)
 

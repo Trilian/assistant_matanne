@@ -213,6 +213,11 @@ export interface SuiviResponsable {
   alertes: Record<string, boolean>;
   cooldown_actif: boolean;
   auto_exclusion_jusqu_a?: string;
+  serie_actuelle?: {
+    type: "gagne" | "perdu";
+    nb: number;
+    alerte_active: boolean;
+  } | null;
 }
 
 export interface VerificationMise {

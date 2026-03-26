@@ -207,6 +207,19 @@ export async function obtenirResumeMensuel(mois?: string): Promise<ResumeMensuel
   return data;
 }
 
+export interface TrancheConfiance {
+  tranche: string;
+  nb: number;
+  gagnes: number;
+  taux: number;
+}
+
+export async function obtenirPerformanceConfiance(mois?: number): Promise<{ tranches: TrancheConfiance[]; total: number }> {
+  const params = mois ? `?mois=${mois}` : "";
+  const { data } = await clientApi.get<{ tranches: TrancheConfiance[]; total: number }>(`/jeux/performance/confiance${params}`);
+  return data;
+}
+
 // ─── Jeu Responsable ─────────────────────────────────────
 
 export async function obtenirSuiviResponsable(): Promise<SuiviResponsable> {

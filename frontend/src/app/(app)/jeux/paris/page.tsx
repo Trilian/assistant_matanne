@@ -51,9 +51,10 @@ import {
   obtenirAnalyseIA,
   verifierMise,
   enregistrerMise,
+  obtenirSuiviResponsable,
 } from "@/bibliotheque/api/jeux";
 import dynamic from "next/dynamic";
-import type { PariSportif, StatsParis, MatchJeu, ValueBet, SerieJeux, PredictionMatch, AnalyseIA } from "@/types/jeux";
+import type { PariSportif, StatsParis, MatchJeu, ValueBet, SerieJeux, PredictionMatch, AnalyseIA, SuiviResponsable } from "@/types/jeux";
 import { toast } from "sonner";
 
 const GraphiqueROI = dynamic(
@@ -223,6 +224,13 @@ export default function ParisPage() {
     () => obtenirSeriesActives("paris", 2.0)
   );
 
+  // ─── Suivi responsable (pour alerte série) ─
+  const { data: suiviResp } = utiliserRequete<SuiviResponsable>(
+    ["jeux", "suivi-responsable"],
+    obtenirSuiviResponsable,
+    { staleTime: 5 * 60 * 1000 }
+  );
+
   // ─── Mutations ─────────────────────────────
   const mutationCreer = utiliserMutation(
     async (data: { match_id: number; type_pari: string; prediction: string; cote: number; mise: number }) => {
@@ -316,6 +324,15 @@ export default function ParisPage() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Nouveau pari</DialogTitle></DialogHeader>
+            {suiviResp?.serie_actuelle?.alerte_active && (
+              <div className="rounded-md border border-orange-400 bg-orange-50 dark:bg-orange-950 px-3 py-2 text-sm text-orange-700 dark:text-orange-300 flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>
+                  <strong>{suiviResp.serie_actuelle.nb} défaites consécutives.</strong> Prenez une pause avant de jouer.{" "}
+                  <span className="text-xs">Joueurs Info Service : 09 74 75 13 13</span>
+                </span>
+              </div>
+            )}
             {sourceOCR && (
               <div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
                 Pré-remplissage OCR appliqué. Vérifiez le match, la cote et la mise avant validation.
@@ -396,15 +413,15 @@ export default function ParisPage() {
                     {vb.equipe_domicile} vs {vb.equipe_exterieur}
                   </p>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="default">💰 +{vb.edge_pct.toFixed(1)}%</Badge>
-                    <span className="text-xs text-muted-foreground">cote {vb.cote_bookmaker.toFixed(2)}</span>
-                    <BadgePrediction prediction={vb.prediction} confiance={vb.proba_estimee} />
+                    <Badge variant="default">💰 +{Number(vb.edge_pct ?? 0).toFixed(1)}%</Badge>
+                    <span className="text-xs text-muted-foreground">cote {Number(vb.cote_bookmaker ?? 0).toFixed(2)}</span>
+                    <BadgePrediction prediction={vb.prediction ?? "N/A"} confiance={Number(vb.proba_estimee ?? 0)} />
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" onClick={() => setDrawerMatch(vb.match_id)}>
                       Détail
                     </Button>
-                    <Button size="sm" onClick={() => preRemplirPari(vb.match_id, vb.prediction, vb.cote_bookmaker)}>
+                    <Button size="sm" onClick={() => preRemplirPari(vb.match_id, vb.prediction ?? "N/A", Number(vb.cote_bookmaker ?? 0))}>
                       Parier
                     </Button>
                   </div>

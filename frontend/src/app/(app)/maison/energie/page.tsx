@@ -5,7 +5,7 @@
 "use client";
 
 import { useState } from "react";
-import { Zap, Droplets, Flame, Gauge, Plus, Trash2 } from "lucide-react";
+import { Zap, Droplets, Flame, Gauge, Plus, Trash2, TrendingUp, AlertTriangle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -26,9 +26,20 @@ import {
   creerReleve,
   supprimerReleve,
   historiqueEnergie,
+  obtenirTendancesEnergie,
 } from "@/bibliotheque/api/maison";
 import type { ReleveCompteur } from "@/types/maison";
 import { toast } from "sonner";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Dot,
+} from "recharts";
 
 type TypeCompteur = "electricite" | "eau" | "gaz";
 
@@ -63,6 +74,11 @@ export default function PageEnergie() {
     ["maison", "energie", "gaz"],
     () => historiqueEnergie("gaz", 12),
     { enabled: typeActif === "gaz" }
+  );
+
+  const { data: tendances, isLoading: chargementTendances } = utiliserRequete(
+    ["maison", "energie", "tendances", typeActif],
+    () => obtenirTendancesEnergie(typeActif, 12)
   );
 
   const invalider = () =>
@@ -200,6 +216,72 @@ export default function PageEnergie() {
           </CardContent>
         </Card>
       )}
+
+      {/* Tendances mensuelles Recharts */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Tendance mensuelle — {compteurActif.nom}
+            {tendances && (
+              <span className="ml-auto text-xs font-normal text-muted-foreground">
+                moy. {tendances.moyenne.toLocaleString("fr-FR")} {compteurActif.unite}
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {chargementTendances ? (
+            <Skeleton className="h-48 w-full" />
+          ) : !tendances?.points.length ? (
+            <p className="text-xs text-muted-foreground py-8 text-center">
+              Ajoutez des relevés avec la consommation de la période pour voir les tendances
+            </p>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={tendances.points} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis
+                  dataKey="mois"
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(v: string) => v.slice(5)}
+                />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip
+                  contentStyle={{ fontSize: 12 }}
+                  formatter={(value: number) => [`${value.toLocaleString("fr-FR")} ${compteurActif.unite}`, "Conso"]}
+                  labelFormatter={(label: string) => `Mois ${label}`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="conso"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  dot={(props) => {
+                    const { cx, cy, payload } = props as { cx: number; cy: number; payload: { anomalie: boolean } };
+                    return (
+                      <Dot
+                        key={`dot-${cx}-${cy}`}
+                        cx={cx}
+                        cy={cy}
+                        r={payload.anomalie ? 6 : 3}
+                        fill={payload.anomalie ? "hsl(var(--destructive))" : "hsl(var(--primary))"}
+                        stroke="none"
+                      />
+                    );
+                  }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+          {tendances?.points.some((p) => p.anomalie) && (
+            <div className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
+              <AlertTriangle className="h-3 w-3" />
+              Les points rouges indiquent une anomalie (écart &gt; 20 % vs la moyenne)
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Historique des relevés */}
       <Card>

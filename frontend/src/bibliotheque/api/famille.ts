@@ -516,6 +516,29 @@ export async function supprimerAchat(id: number): Promise<void> {
   await clientApi.delete(`/famille/achats/${id}`);
 }
 
+/** Suggestions IA achats/cadeaux (Phase P) */
+export interface SuggestionAchat {
+  titre: string;
+  description: string;
+  fourchette_prix?: string | null;
+  ou_acheter?: string | null;
+  pertinence?: string | null;
+}
+export async function obtenirSuggestionsAchatsIA(params: {
+  type: "anniversaire" | "jalon" | "saison";
+  nom?: string;
+  age?: number;
+  relation?: string;
+  budget_max?: number;
+  historique_cadeaux?: string[];
+  prochains_jalons?: string[];
+  saison?: string;
+  tailles?: Record<string, string>;
+}): Promise<{ suggestions: SuggestionAchat[]; total: number; type: string }> {
+  const { data } = await clientApi.post("/famille/achats/suggestions-ia", params);
+  return data;
+}
+
 // ─── Rappels (Phase Q) ──────────────────────────────────
 
 /** Évaluer les rappels du jour */

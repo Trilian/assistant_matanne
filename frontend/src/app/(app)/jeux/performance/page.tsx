@@ -9,7 +9,7 @@ import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { AlertTriangle } from "lucide-react";
 import { utiliserRequete } from "@/crochets/utiliser-api";
-import { obtenirPerformance, obtenirResumeMensuel } from "@/bibliotheque/api/jeux";
+import { obtenirPerformance, obtenirResumeMensuel, obtenirPerformanceConfiance } from "@/bibliotheque/api/jeux";
 import type { PerformanceJeux, ResumeMensuel } from "@/types/jeux";
 import dynamic from "next/dynamic";
 
@@ -61,6 +61,11 @@ export default function PerformancePage() {
   const { data: perf, isLoading: chPerf } = utiliserRequete<PerformanceJeux>(
     ["jeux", "performance"],
     () => obtenirPerformance()
+  );
+
+  const { data: confiance } = utiliserRequete(
+    ["jeux", "performance-confiance"],
+    () => obtenirPerformanceConfiance()
   );
 
   const today = new Date();
@@ -197,6 +202,28 @@ export default function PerformancePage() {
           </Card>
         )}
       </div>
+
+      {/* Taux de réussite par confiance IA */}
+      {confiance && confiance.total > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Taux de réussite par confiance IA</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {confiance.tranches.map((t) => (
+                <div key={t.tranche} className="text-center rounded-md border p-3">
+                  <p className="text-lg font-bold" style={{ color: t.taux >= 60 ? "hsl(142,70%,45%)" : t.taux >= 40 ? "hsl(45,80%,50%)" : "hsl(0,70%,50%)" }}>
+                    {t.taux}%
+                  </p>
+                  <p className="text-xs text-muted-foreground font-medium">Confiance {t.tranche}</p>
+                  <p className="text-xs text-muted-foreground">{t.gagnes}/{t.nb} paris</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Résumé IA mensuel (fin de mois uniquement) */}
       {afficherResume && (

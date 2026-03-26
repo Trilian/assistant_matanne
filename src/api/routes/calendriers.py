@@ -13,7 +13,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.pagination import appliquer_cursor_filter, construire_reponse_cursor, decoder_cursor
-from src.api.schemas.errors import REPONSES_CRUD_LECTURE, REPONSES_LISTE
+from src.api.schemas import MessageResponse
+from src.api.schemas.errors import (
+    REPONSES_CRUD_CREATION,
+    REPONSES_CRUD_LECTURE,
+    REPONSES_CRUD_SUPPRESSION,
+    REPONSES_LISTE,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 from src.core.models import CalendrierExterne, EvenementCalendrier
 

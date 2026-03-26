@@ -5,7 +5,7 @@
 "use client";
 
 import { useState } from "react";
-import { Cake, Gift, Calendar, Plus, Trash2, Pencil } from "lucide-react";
+import { Cake, Gift, Calendar, Plus, Trash2, Pencil, Sparkles, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -33,7 +33,9 @@ import {
   creerAnniversaire,
   modifierAnniversaire,
   supprimerAnniversaire,
+  obtenirSuggestionsAchatsIA,
   type Anniversaire,
+  type SuggestionAchat,
 } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 
@@ -59,6 +61,9 @@ const LABELS_REL: Record<string, string> = {
 export default function PageAnniversaires() {
   const [ouvert, setOuvert] = useState(false);
   const [edition, setEdition] = useState<Anniversaire | null>(null);
+  const [suggestionsOuvert, setSuggestionsOuvert] = useState(false);
+  const [suggestions, setSuggestions] = useState<SuggestionAchat[]>([]);
+  const [anniversairePourSuggestion, setAnniversairePourSuggestion] = useState<Anniversaire | null>(null);
 
   const invalider = utiliserInvalidation();
   const { data: anniversaires = [], isLoading } = utiliserRequete(
@@ -111,6 +116,25 @@ export default function PageAnniversaires() {
     setEdition(a ?? null);
     setOuvert(true);
   }
+
+  const mutSuggestions = utiliserMutation(
+    (a: Anniversaire) =>
+      obtenirSuggestionsAchatsIA({
+        type: "anniversaire",
+        nom: a.nom_personne,
+        age: a.age ?? undefined,
+        relation: a.relation,
+        budget_max: 50,
+      }),
+    {
+      onSuccess: (data, a) => {
+        setSuggestions(data.suggestions);
+        setAnniversairePourSuggestion(a);
+        setSuggestionsOuvert(true);
+      },
+      onError: () => toast.error("Impossible de générer les suggestions"),
+    }
+  );
 
   const prochain = anniversaires[0];
 
@@ -218,13 +242,61 @@ export default function PageAnniversaires() {
                   {prochain.age != null && ` — ${prochain.age} ans`}
                 </p>
               </div>
-              <Badge className="text-sm">
-                Dans {prochain.jours_restants ?? "?"} jours
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge className="text-sm">
+                  Dans {prochain.jours_restants ?? "?"} jours
+                </Badge>
+                {(prochain.jours_restants ?? 999) <= 14 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => mutSuggestions.mutate(prochain)}
+                    disabled={mutSuggestions.isPending}
+                  >
+                    {mutSuggestions.isPending ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                    ) : (
+                      <Sparkles className="h-3.5 w-3.5 mr-1" />
+                    )}
+                    Idées cadeaux IA
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
       )}
+
+      {/* Dialog suggestions IA */}
+      <Dialog open={suggestionsOuvert} onOpenChange={setSuggestionsOuvert}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              🎁 Idées cadeaux pour {anniversairePourSuggestion?.nom_personne}
+            </DialogTitle>
+          </DialogHeader>
+          {suggestions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Aucune suggestion générée.</p>
+          ) : (
+            <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+              {suggestions.map((s, i) => (
+                <div key={i} className="rounded-md border p-3 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium text-sm">{s.titre}</p>
+                    {s.fourchette_prix && (
+                      <Badge variant="secondary" className="text-xs">{s.fourchette_prix}</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{s.description}</p>
+                  {s.ou_acheter && (
+                    <p className="text-xs text-muted-foreground">📍 {s.ou_acheter}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Liste */}
       <div className="space-y-3">

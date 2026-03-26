@@ -110,6 +110,24 @@ export default function ResponsablePage() {
         </div>
       </div>
 
+      {/* Alerte série dangereuse */}
+      {suivi?.serie_actuelle?.alerte_active && (
+        <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950">
+          <CardContent className="pt-4">
+            <p className="font-semibold text-orange-700 dark:text-orange-300 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              ⚠️ {suivi.serie_actuelle.nb} défaites consécutives détectées
+            </p>
+            <p className="text-sm text-orange-600 dark:text-orange-400 mt-1">
+              Une série de pertes peut être émotionnellement difficile. Faites une pause avant de continuer à jouer.
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              📞 Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé)
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Auto-exclusion active — bannière */}
       {suivi?.auto_exclusion_jusqu_a && countdown && countdown > 0 && (
         <Card className="border-red-500 bg-red-50 dark:bg-red-950">

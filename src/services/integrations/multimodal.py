@@ -372,6 +372,62 @@ Base tes estimations sur les portions visibles. Sois réaliste."""
             logger.error(f"Erreur description image: {e}")
             return None
 
+    async def analyser_frigo(
+        self,
+        image: "bytes | str | Path",
+    ) -> list[dict]:
+        """Analyse une photo de frigo et liste les aliments détectés.
+
+        Retourne une liste d'articles pour import dans l'inventaire:
+        [{"nom": "lait", "quantite": 1.0, "unite": "L", "categorie": "Produits laitiers"}, ...]
+
+        Args:
+            image: Photo du frigo (bytes, chemin ou base64)
+
+        Returns:
+            Liste de dicts avec nom, quantite, unite, categorie
+        """
+        image_b64 = self._encode_image(image)
+
+        prompt = """Analyse cette photo de frigo/réfrigérateur.
+
+Liste TOUS les aliments et produits visibles, même partiellement.
+
+Réponds UNIQUEMENT avec un JSON valide : une liste d'objets avec ces champs :
+- nom : nom de l'aliment (en français, minuscules)
+- quantite : estimation numérique (float, ex: 1.0, 0.5, 2.0)
+- unite : "pcs", "L", "kg", "g", "ml", ou unité appropriée
+- categorie : "Fruits & Légumes", "Produits laitiers", "Viandes & Poissons", "Boissons", "Condiments & Sauces", "Oeufs", "Charcuterie", "Autre"
+
+Exemple : [{"nom": "lait demi-écrémé", "quantite": 1.0, "unite": "L", "categorie": "Boissons"}]
+
+Si l'image n'est pas un frigo ou n'est pas lisible, retourne une liste vide [].
+"""
+
+        result = await self._call_vision_model(
+            image_b64=image_b64,
+            prompt=prompt,
+            system_prompt="Tu analyses des photos de réfrigérateurs pour identifier les aliments. Réponds UNIQUEMENT avec du JSON valide.",
+            return_json=True,
+        )
+
+        if not result:
+            return []
+
+        if isinstance(result, list):
+            return [
+                {
+                    "nom": str(item.get("nom", "")).strip(),
+                    "quantite": float(item.get("quantite") or 1.0),
+                    "unite": str(item.get("unite") or "pcs"),
+                    "categorie": str(item.get("categorie") or "Autre"),
+                }
+                for item in result
+                if isinstance(item, dict) and item.get("nom")
+            ]
+
+        return []
+
     async def _call_vision_model(
         self,
         image_b64: str,
@@ -506,3 +562,16 @@ def decrire_image(
     """
     service = get_multimodal_service()
     return service.decrire_image_sync(image, contexte=contexte)
+
+
+async def analyser_frigo(image: bytes | str | Path) -> list[dict]:
+    """Helper async: analyse une photo de frigo et retourne les articles détectés.
+
+    Args:
+        image: Photo du réfrigérateur
+
+    Returns:
+        Liste de dicts {nom, quantite, unite, categorie}
+    """
+    service = get_multimodal_service()
+    return await service.analyser_frigo(image)

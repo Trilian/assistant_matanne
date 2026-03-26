@@ -36,6 +36,7 @@ from src.api.schemas.famille import (
     MarquerAchetePayload,
     ResumeSemaineRequest,
     RetrospectiveRequest,
+    SuggestionAchatResponse,
     SuggestionsActivitesSimpleRequest,
     SuggestionsSoireeRequest,
     SuggestionsWeekendRequest,
@@ -1750,6 +1751,66 @@ async def supprimer_achat(
             return MessageResponse(message="Achat supprimé")
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# SUGGESTIONS IA ACHATS (Phase P)
+# ═══════════════════════════════════════════════════════════
+
+
+class SuggestionsAchatsRequest(BaseModel):
+    """Demande de suggestions d'achats/cadeaux IA."""
+    type: str = Field(..., description="'anniversaire' | 'jalon' | 'saison'")
+    nom: str | None = Field(None, description="Prénom de la personne (pour anniversaire)")
+    age: int | None = Field(None, ge=0, description="Âge en années (anniversaire) ou mois (jalon/saison)")
+    relation: str | None = Field(None, description="parent, ami, etc. (pour anniversaire)")
+    budget_max: float = Field(default=50.0, ge=5, le=500)
+    historique_cadeaux: list[str] | None = None
+    prochains_jalons: list[str] | None = None
+    saison: str | None = None
+    tailles: dict | None = None
+
+
+@router.post("/achats/suggestions-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggestions_achats_ia(
+    payload: SuggestionsAchatsRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère des suggestions d'achats ou cadeaux via IA (Mistral)."""
+    from src.services.famille.achats_ia import obtenir_service_achats_ia
+
+    service = obtenir_service_achats_ia()
+
+    if payload.type == "anniversaire":
+        if not payload.nom or payload.age is None:
+            raise HTTPException(status_code=422, detail="'nom' et 'age' requis pour les suggestions d'anniversaire")
+        suggestions = await service.suggerer_cadeaux_anniversaire(
+            nom=payload.nom,
+            age=payload.age,
+            relation=payload.relation or "ami(e)",
+            budget_max=payload.budget_max,
+            historique_cadeaux=payload.historique_cadeaux,
+        )
+    elif payload.type == "jalon":
+        if payload.age is None or not payload.prochains_jalons:
+            raise HTTPException(status_code=422, detail="'age' (en mois) et 'prochains_jalons' requis")
+        suggestions = await service.suggerer_achats_jalon(
+            age_mois=payload.age,
+            prochains_jalons=payload.prochains_jalons,
+        )
+    elif payload.type == "saison":
+        if payload.age is None or not payload.saison:
+            raise HTTPException(status_code=422, detail="'age' (en mois) et 'saison' requis")
+        suggestions = await service.suggerer_achats_saison(
+            age_enfant_mois=payload.age,
+            saison=payload.saison,
+            tailles=payload.tailles,
+        )
+    else:
+        raise HTTPException(status_code=422, detail="type doit être 'anniversaire', 'jalon' ou 'saison'")
+
+    return {"suggestions": suggestions, "total": len(suggestions), "type": payload.type}
 
 
 # ═══════════════════════════════════════════════════════════

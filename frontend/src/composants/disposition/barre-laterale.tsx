@@ -52,6 +52,9 @@ import {
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+import { evaluerRappels } from "@/bibliotheque/api/famille";
+import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Separator } from "@/composants/ui/separator";
 import {
@@ -60,6 +63,7 @@ import {
   TooltipTrigger,
 } from "@/composants/ui/tooltip";
 import { FavorisRapides } from "./favoris-rapides";
+import type { RappelFamille } from "@/types/famille";
 
 interface SousLien {
   nom: string;
@@ -153,6 +157,14 @@ export function BarreLaterale() {
   const { sidebarOuverte, basculerSidebar } = utiliserStoreUI();
   const { utilisateur } = utiliserAuth();
   const estAdmin = utilisateur?.role === "admin";
+
+  const { data: rappelsData } = utiliserRequete<{ rappels: RappelFamille[]; total: number }>(
+    ["famille", "rappels", "badge"],
+    evaluerRappels,
+    { staleTime: 5 * 60 * 1000, refetchInterval: 10 * 60 * 1000 }
+  );
+  const nbRappelsDanger = rappelsData?.rappels?.filter((r) => r.priorite === "danger").length ?? 0;
+
   const [sectionsOuvertes, setSectionsOuvertes] = useState<Set<string>>(() => {
     // Ouvrir automatiquement la section active
     const initial = new Set<string>();
@@ -181,8 +193,8 @@ export function BarreLaterale() {
       )}
     >
       {/* Logo / Titre */}
-      <div className="flex h-14 items-center gap-2 border-b px-4">
-        <span className="text-lg">🏠</span>
+            <div className="flex h-14 items-center gap-2 border-b px-4">
+        <span className="text-lg" role="img" aria-label="Accueil">🏠</span>
         {sidebarOuverte && (
           <span className="font-semibold text-sm truncate">
             Assistant Matanne
@@ -229,7 +241,12 @@ export function BarreLaterale() {
                 )}
               >
                 <lien.Icone className="h-5 w-5 shrink-0" />
-                {sidebarOuverte && <span className="truncate">{lien.nom}</span>}
+                {sidebarOuverte && <span className="truncate" title={lien.nom}>{lien.nom}</span>}
+                {sidebarOuverte && lien.chemin === "/famille" && nbRappelsDanger > 0 && (
+                  <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1 text-xs flex items-center justify-center shrink-0">
+                    {nbRappelsDanger}
+                  </Badge>
+                )}
               </Link>
               {sidebarOuverte && aSousliens && (
                 <button
@@ -238,6 +255,8 @@ export function BarreLaterale() {
                     basculerSection(lien.chemin);
                   }}
                   className="p-1 rounded hover:bg-sidebar-accent/50 text-sidebar-foreground/50"
+                  aria-label={estOuverte ? `Fermer le sous-menu ${lien.nom}` : `Ouvrir le sous-menu ${lien.nom}`}
+                  aria-expanded={estOuverte ? "true" : "false"}
                 >
                   <ChevronDown
                     className={cn(
@@ -271,6 +290,7 @@ export function BarreLaterale() {
                       <Link
                         key={sous.chemin}
                         href={sous.chemin}
+                        aria-label={sous.nom}
                         className={cn(
                           "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
                           sousActif

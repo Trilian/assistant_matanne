@@ -77,7 +77,7 @@ describe("OCRTicketJeuxPage", () => {
     fireEvent.change(slider, { target: { value: "95" } });
 
     await waitFor(() => {
-      expect(screen.getByText(/1 \/ 2 grilles proposées/i)).toBeInTheDocument();
+      expect(screen.getByText(/1 \/ \d+ grilles proposées après filtrage/i)).toBeInTheDocument();
     });
   });
 });

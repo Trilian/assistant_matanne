@@ -125,3 +125,33 @@ class InventaireItemResponse(BaseModel):
     nova_group: int | None = None
 
     model_config = {"from_attributes": True}
+
+
+# ═══════════════════════════════════════════════════════════
+# SCAN BATCH
+# ═══════════════════════════════════════════════════════════
+
+
+class ScanBatchRequest(BaseModel):
+    """Requête pour résoudre plusieurs codes-barres en une passe."""
+
+    codes: list[str] = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description="Liste de codes-barres (max 50)",
+    )
+
+
+class ArticleBatchTrouve(BaseModel):
+    """Article d'inventaire trouvé pour un code-barres donné."""
+
+    code: str
+    article: InventaireItemResponse
+
+
+class ScanBatchResponse(BaseModel):
+    """Résultat d'un scan multi-codes."""
+
+    trouves: list[ArticleBatchTrouve]
+    inconnus: list[str]

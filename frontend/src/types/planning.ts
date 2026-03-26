@@ -13,6 +13,7 @@ export interface RepasPlanning {
   recette_nom?: string;
   notes?: string;
   portions?: number;
+  nutri_score?: string | null;
 }
 
 export interface PlanningSemaine {

@@ -30,6 +30,7 @@ import { Separator } from "@/composants/ui/separator";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
+import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 import { toast } from "sonner";
 
 export default function PageDetailRecette({
@@ -213,7 +214,7 @@ export default function PageDetailRecette({
               {recette.ingredients.map((ing, i) => (
                 <li key={ing.id ?? i} className="flex items-center gap-2 text-sm">
                   <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                  <span>
+                  <span className="flex-1">
                     {ing.quantite && (
                       <span className="font-medium">
                         {ing.quantite}
@@ -222,6 +223,12 @@ export default function PageDetailRecette({
                     )}
                     {ing.nom}
                   </span>
+                  {ing.quantite && ing.unite && (
+                    <ConvertisseurInline
+                      valeurInitiale={ing.quantite}
+                      uniteInitiale={ing.unite}
+                    />
+                  )}
                 </li>
               ))}
             </ul>
