@@ -1,7 +1,7 @@
-import { apiClient } from './client'
+import { clientApi } from './client'
 
 export async function exporterDonnees(): Promise<Blob> {
-  const { data } = await apiClient.get('/api/v1/rgpd/export', {
+  const { data } = await clientApi.get('/api/v1/rgpd/export', {
     responseType: 'blob',
   })
   return data
@@ -14,7 +14,7 @@ export interface ResumeDonnees {
 }
 
 export async function obtenirResumeDonnees(): Promise<ResumeDonnees> {
-  const { data } = await apiClient.get('/api/v1/rgpd/data-summary')
+  const { data } = await clientApi.get('/api/v1/rgpd/data-summary')
   return data
 }
 
@@ -28,7 +28,7 @@ export async function supprimerCompte(
   confirmation: string,
   motif?: string
 ): Promise<SuppressionResponse> {
-  const { data } = await apiClient.post('/api/v1/rgpd/delete-account', {
+  const { data } = await clientApi.post('/api/v1/rgpd/delete-account', {
     confirmation,
     motif,
   })

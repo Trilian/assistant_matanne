@@ -150,8 +150,3 @@ export default function PageWeekend() {
     </div>
   );
 }
-        </div>
-      </div>
-    </div>
-  );
-}

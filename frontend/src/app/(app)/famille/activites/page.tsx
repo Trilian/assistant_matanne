@@ -57,7 +57,13 @@ import {
   utiliserMutation,
   utiliserInvalidation,
 } from "@/crochets/utiliser-api";
-import { listerActivites, creerActivite, obtenirSuggestionsActivitesAuto } from "@/bibliotheque/api/famille";
+import {
+  listerActivites,
+  creerActivite,
+  obtenirSuggestionsActivites,
+  obtenirSuggestionsActivitesAuto,
+} from "@/bibliotheque/api/famille";
+import type { SuggestionActivite } from "@/bibliotheque/api/famille";
 import type { Activite } from "@/types/famille";
 import { toast } from "sonner";
 

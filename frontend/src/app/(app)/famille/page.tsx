@@ -18,6 +18,7 @@ import {
   Bell,
   AlertTriangle,
   Info,
+    Calendar,
 } from "lucide-react";
 import {
   Card,
@@ -44,6 +45,7 @@ const MODULES = [
   { titre: "Album", chemin: "/famille/album", Icone: Camera },
   { titre: "Contacts", chemin: "/famille/contacts", Icone: BookUser },
   { titre: "Documents", chemin: "/famille/documents", Icone: FileText },
+  { titre: "Calendriers", chemin: "/famille/calendriers", Icone: Calendar },
 ];
 
 export default function PageFamille() {

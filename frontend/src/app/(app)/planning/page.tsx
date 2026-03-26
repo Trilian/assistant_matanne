@@ -4,5 +4,3 @@ import { redirect } from "next/navigation";
 export default function PagePlanningRedirect() {
   redirect("/cuisine/planning");
 }
-  );
-}

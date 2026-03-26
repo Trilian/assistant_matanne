@@ -110,6 +110,3 @@ export function FilAriane() {
     </TooltipProvider>
   );
 }
-    </nav>
-  );
-}

@@ -554,6 +554,9 @@ function OngletNotifications() {
 
 function OngletDonnees() {
   const [confirmation, setConfirmation] = useState(false);
+  const [motDePasseBackup, setMotDePasseBackup] = useState("");
+  const [fichierImport, setFichierImport] = useState<File | null>(null);
+  const [motDePasseImport, setMotDePasseImport] = useState("");
   const [texteConfirmation, setTexteConfirmation] = useState("");
   const [motifSuppression, setMotifSuppression] = useState("");
   const [suppressionOuverte, setSuppressionOuverte] = useState(false);
@@ -646,6 +649,87 @@ function OngletDonnees() {
         </div>
 
         {/* ─── RGPD — Export des données ─── */}
+                {/* ─── Backup JSON chiffré ─── */}
+                <div className="border-t pt-6 space-y-3">
+                  <Label className="flex items-center gap-2">
+                    <Download className="h-4 w-4" />
+                    Backup données (JSON)
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Exportez toutes vos données en JSON. Ajoutez un mot de passe pour chiffrer le fichier (AES-256).
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="password"
+                      placeholder="Mot de passe (optionnel)"
+                      value={motDePasseBackup}
+                      onChange={(e) => setMotDePasseBackup(e.target.value)}
+                      className="max-w-xs"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      const { telechargerBackupJson, DOMAINES_DEFAUT } = await import(
+                        "@/bibliotheque/api/export"
+                      );
+                      try {
+                        await telechargerBackupJson(
+                          [...DOMAINES_DEFAUT],
+                          motDePasseBackup || undefined
+                        );
+                        toast.success(
+                          motDePasseBackup ? "Backup chiffré téléchargé" : "Backup téléchargé"
+                        );
+                      } catch {
+                        toast.error("Erreur lors du téléchargement du backup");
+                      }
+                    }}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    {motDePasseBackup ? "Télécharger (.json.enc)" : "Télécharger (.json)"}
+                  </Button>
+                  <div className="space-y-2 pt-2">
+                    <Label>Restaurer depuis un backup</Label>
+                    <Input
+                      type="file"
+                      accept=".json,.json.enc"
+                      onChange={(e) => setFichierImport(e.target.files?.[0] ?? null)}
+                    />
+                    {fichierImport?.name.endsWith(".enc") && (
+                      <Input
+                        type="password"
+                        placeholder="Mot de passe du fichier chiffré"
+                        value={motDePasseImport}
+                        onChange={(e) => setMotDePasseImport(e.target.value)}
+                      />
+                    )}
+                    {fichierImport && (
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          const { restaurerDepuisJson } = await import(
+                            "@/bibliotheque/api/export"
+                          );
+                          try {
+                            await restaurerDepuisJson(fichierImport, {
+                              motDePasse: motDePasseImport || undefined,
+                            });
+                            toast.success("Données restaurées avec succès");
+                            setFichierImport(null);
+                            setMotDePasseImport("");
+                          } catch {
+                            toast.error("Erreur lors de la restauration");
+                          }
+                        }}
+                      >
+                        Restaurer
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* ─── RGPD — Export des données ─── */}
         <div className="border-t pt-6 space-y-2">
           <Label className="flex items-center gap-2">
             <Download className="h-4 w-4" />

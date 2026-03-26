@@ -184,6 +184,9 @@ export default function PagePlanning() {
   const { mutate: genererBatch, isPending: enGenerationBatch } = utiliserMutation(
     () => {
       if (!planning) throw new Error("Pas de planning");
+      if (!planning.planning_id) {
+        throw new Error("Planning sans identifiant. Générez d'abord un planning persistant.");
+      }
       // Date session = dimanche de cette semaine
       const dimanche = new Date(dateDebut);
       dimanche.setDate(dimanche.getDate() + 6);
@@ -292,7 +295,7 @@ export default function PagePlanning() {
           <Button
             variant="default"
             size="sm"
-            onClick={() => genererIA()}
+            onClick={() => genererIA(undefined)}
             disabled={enGeneration}
           >
             <Sparkles className="mr-2 h-4 w-4" />
@@ -310,7 +313,7 @@ export default function PagePlanning() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => genererCourses()}
+            onClick={() => genererCourses(undefined)}
             disabled={enGenerationCourses}
             title="Générer la liste de courses depuis le planning"
           >
@@ -320,7 +323,7 @@ export default function PagePlanning() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => genererBatch()}
+            onClick={() => genererBatch(undefined)}
             disabled={enGenerationBatch || !planning}
             title="Créer une session batch cooking depuis le planning"
           >

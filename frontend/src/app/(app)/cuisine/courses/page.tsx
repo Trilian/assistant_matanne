@@ -11,6 +11,7 @@ import {
   Check,
   Trash2,
   Loader2,
+  ScanLine,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,11 +50,14 @@ import { schemaArticleCourses, type DonneesArticleCourses } from "@/bibliotheque
 import { toast } from "sonner";
 import type { ListeCourses } from "@/types/courses";
 import { SwipeableItem } from "@/composants/swipeable-item";
+import { ScanneurMultiCodes } from "@/composants/scanneur-multi-codes";
+import type { ArticleBarcode } from "@/bibliotheque/api/inventaire";
 
 export default function PageCourses() {
   const [listeSelectionnee, setListeSelectionnee] = useState<number | null>(null);
   const [nomNouvelleListe, setNomNouvelleListe] = useState("");
   const [dialogueArticle, setDialogueArticle] = useState(false);
+  const [scanneurOuvert, setScanneurOuvert] = useState(false);
 
   const invalider = utiliserInvalidation();
 
@@ -128,6 +132,32 @@ export default function PageCourses() {
   const articles = detailListe?.articles ?? [];
   const articlesNonCoches = articles.filter((a) => !a.est_coche);
   const articlesCoches = articles.filter((a) => a.est_coche);
+
+  // Callback scanner : coche les articles trouvés dans la liste courante
+  const importerDepuisScanner = async (
+    trouves: ArticleBarcode[],
+    inconnus: string[]
+  ) => {
+    if (!listeSelectionnee) return;
+    let importes = 0;
+    for (const t of trouves) {
+      const nom = t.article.nom;
+      if (!nom) continue;
+      await ajouterArticle(listeSelectionnee, {
+        nom,
+        quantite: 1,
+        categorie: t.article.categorie ?? undefined,
+      }).catch(() => null);
+      importes++;
+    }
+    if (importes > 0) {
+      invalider(["courses"]);
+      toast.success(`${importes} article(s) ajouté(s) à la liste`);
+    }
+    if (inconnus.length > 0) {
+      toast.warning(`${inconnus.length} code(s) non reconnu(s) dans l'inventaire`);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -218,6 +248,17 @@ export default function PageCourses() {
               <Button size="sm" onClick={() => setDialogueArticle(true)}>
                 <Plus className="mr-1 h-4 w-4" />
                 Article
+              </Button>
+            )}
+            {listeSelectionnee && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setScanneurOuvert(true)}
+                aria-label="Scanner plusieurs codes-barres"
+              >
+                <ScanLine className="mr-1 h-4 w-4" />
+                Scanner
               </Button>
             )}
           </CardHeader>
@@ -401,6 +442,14 @@ export default function PageCourses() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Scanner multi-codes */}
+      <ScanneurMultiCodes
+        ouvert={scanneurOuvert}
+        onFermer={() => setScanneurOuvert(false)}
+        onImporter={importerDepuisScanner}
+        labelImporter="Ajouter à la liste"
+      />
     </div>
   );
 }

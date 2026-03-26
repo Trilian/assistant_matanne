@@ -17,6 +17,7 @@ export interface RepasPlanning {
 }
 
 export interface PlanningSemaine {
+  planning_id?: number;
   semaine: string;
   debut: string;
   fin: string;
@@ -41,6 +42,7 @@ export interface SuggestionRecette {
 
 export interface GenererPlanningParams {
   date_debut?: string;
+  nb_jours?: number;
   nb_personnes?: number;
   preferences?: Record<string, unknown>;
 }

@@ -134,6 +134,9 @@ export default function MaSemainePage() {
   const { mutate: genererBatch, isPending: enGenerationBatch } = utiliserMutation(
     () => {
       if (!planning) throw new Error("Pas de planning");
+      if (!planning.planning_id) {
+        throw new Error("Planning sans identifiant. Générez d'abord un planning persistant.");
+      }
       const dimanche = new Date(dateDebut);
       dimanche.setDate(dimanche.getDate() + 6);
       return genererSessionDepuisPlanning({
@@ -278,16 +281,30 @@ export default function MaSemainePage() {
                     <div className="grid grid-cols-3 gap-2 text-sm">
                       <div className="rounded-lg border p-2">
                         <p className="text-muted-foreground">Calories moy.</p>
-                        <p className="font-medium">{Math.round(nutrition.calories_moyenne)} kcal</p>
+                        <p className="font-medium">{Math.round(nutrition.moyenne_calories_par_jour)} kcal</p>
                       </div>
                       <div className="rounded-lg border p-2">
                         <p className="text-muted-foreground">Protéines</p>
-                        <p className="font-medium">{Math.round(nutrition.proteines_total)}g</p>
+                        <p className="font-medium">{Math.round(nutrition.totaux.proteines)}g</p>
                       </div>
                       <div className="rounded-lg border p-2">
                         <p className="text-muted-foreground">Équilibre</p>
-                        <Badge variant={nutrition.score_equilibre > 70 ? "default" : "secondary"}>
-                          {nutrition.score_equilibre}%
+                        <Badge
+                          variant={
+                            ((nutrition.nb_repas_total - nutrition.nb_repas_sans_donnees) /
+                              Math.max(1, nutrition.nb_repas_total)) *
+                              100 >
+                            70
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {Math.round(
+                            ((nutrition.nb_repas_total - nutrition.nb_repas_sans_donnees) /
+                              Math.max(1, nutrition.nb_repas_total)) *
+                              100
+                          )}
+                          %
                         </Badge>
                       </div>
                     </div>
@@ -304,7 +321,7 @@ export default function MaSemainePage() {
                   </div>
                   <div className="flex gap-2 justify-center">
                     <Button
-                      onClick={() => genererPlanning()}
+                      onClick={() => genererPlanning(undefined)}
                       disabled={enGenerationPlanning}
                     >
                       {enGenerationPlanning ? (
@@ -392,7 +409,7 @@ export default function MaSemainePage() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => genererCourses()}
+                    onClick={() => genererCourses(undefined)}
                     disabled={enGenerationCourses || nbRepas === 0}
                   >
                     {enGenerationCourses ? (
@@ -457,7 +474,7 @@ export default function MaSemainePage() {
                   <Button
                     variant="outline"
                     className="w-full justify-start"
-                    onClick={() => genererBatch()}
+                    onClick={() => genererBatch(undefined)}
                     disabled={enGenerationBatch || !planning}
                   >
                     {enGenerationBatch ? (

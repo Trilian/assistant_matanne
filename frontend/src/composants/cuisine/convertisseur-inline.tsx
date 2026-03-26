@@ -8,7 +8,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/composants/ui/popover";
+} from "../ui/popover";
 import {
   Select,
   SelectContent,

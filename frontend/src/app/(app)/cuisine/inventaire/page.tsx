@@ -13,6 +13,7 @@ import {
   Loader2,
   Search,
   Camera,
+  ScanLine,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,6 +50,7 @@ import {
 import {
   listerInventaire,
   ajouterArticleInventaire,
+  modifierArticleInventaire,
   supprimerArticleInventaire,
   obtenirAlertes,
   ocrPhotoFrigo,
@@ -60,6 +62,8 @@ import {
 } from "@/bibliotheque/validateurs";
 import { toast } from "sonner";
 import type { ArticleInventaire } from "@/types/inventaire";
+import { ScanneurMultiCodes } from "@/composants/scanneur-multi-codes";
+import type { ArticleBarcode } from "@/bibliotheque/api/inventaire";
 
 const CATEGORIES = [
   "Tous",
@@ -87,6 +91,7 @@ export default function PageInventaire() {
   const [filtreEtat, setFiltreEtat] = useState("tous");
   const [dialogueAjout, setDialogueAjout] = useState(false);
   const [ocrResultat, setOcrResultat] = useState<ResultatOCRFrigo | null>(null);
+  const [scanneurOuvert, setScanneurOuvert] = useState(false);
 
   const invalider = utiliserInvalidation();
 
@@ -137,6 +142,30 @@ export default function PageInventaire() {
     }
   );
 
+  async function importerStockDepuisScanner(
+    trouves: ArticleBarcode[],
+    inconnus: string[]
+  ) {
+    let misAJour = 0;
+    for (const t of trouves) {
+      try {
+        await modifierArticleInventaire(t.article.id, {
+          quantite: (t.article.quantite ?? 0) + 1,
+        });
+        misAJour++;
+      } catch {
+        // Ignore individual failures
+      }
+    }
+    if (misAJour > 0) {
+      invalider(["inventaire"]);
+      toast.success(`${misAJour} article(s) mis à jour`);
+    }
+    if (inconnus.length > 0) {
+      toast.info(`${inconnus.length} code(s) non reconnu(s)`);
+    }
+  }
+
   function ouvrirSelecteurPhoto() {
     const input = document.createElement("input");
     input.type = "file";
@@ -178,6 +207,14 @@ export default function PageInventaire() {
           <p className="text-muted-foreground">Stock alimentaire et alertes</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setScanneurOuvert(true)}
+            aria-label="Scanner plusieurs codes-barres"
+          >
+            <ScanLine className="mr-1 h-4 w-4" />
+            Scanner
+          </Button>
           <Button variant="outline" onClick={ouvrirSelecteurPhoto} disabled={ocrEnCours}>
             {ocrEnCours ? (
               <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -436,6 +473,13 @@ export default function PageInventaire() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ScanneurMultiCodes
+        ouvert={scanneurOuvert}
+        onFermer={() => setScanneurOuvert(false)}
+        onImporter={importerStockDepuisScanner}
+        labelImporter="Mettre à jour stock"
+      />
     </div>
   );
 }

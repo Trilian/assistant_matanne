@@ -106,6 +106,77 @@ async def obtenir_calendrier(
     return await executer_async(_query)
 
 
+@router.post("", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_calendrier(
+    nom: str = Query(..., description="Nom du calendrier"),
+    provider: str = Query(..., description="Provider (ical_url)"),
+    url: str | None = Query(None, description="URL iCal si provider=ical_url"),
+    sync_interval_minutes: int = Query(60, description="Intervalle de sync en minutes"),
+    sync_direction: str = Query("import", description="Direction sync: import, export, bidirectional"),
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Crée un nouveau calendrier externe (iCal par URL)."""
+
+    if provider not in ("ical_url", "google", "apple", "outlook"):
+        raise HTTPException(status_code=422, detail=f"Provider non supporté: {provider}")
+
+    if provider == "ical_url" and not url:
+        raise HTTPException(status_code=422, detail="url requis pour provider=ical_url")
+
+    def _create():
+        with executer_avec_session() as session:
+            calendrier = CalendrierExterne(
+                user_id=user["id"],
+                provider=provider,
+                nom=nom,
+                url=url,
+                enabled=True,
+                sync_interval_minutes=sync_interval_minutes,
+                sync_direction=sync_direction,
+            )
+            session.add(calendrier)
+            session.commit()
+            return {
+                "id": calendrier.id,
+                "provider": calendrier.provider,
+                "nom": calendrier.nom,
+                "url": calendrier.url,
+                "enabled": calendrier.enabled,
+                "sync_interval_minutes": calendrier.sync_interval_minutes,
+                "sync_direction": calendrier.sync_direction,
+                "last_sync": calendrier.last_sync.isoformat() if calendrier.last_sync else None,
+            }
+
+    return await executer_async(_create)
+
+
+@router.delete("/{calendrier_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_calendrier(
+    calendrier_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Supprime un calendrier externe."""
+
+    def _delete():
+        with executer_avec_session() as session:
+            deleted = (
+                session.query(CalendrierExterne)
+                .filter(
+                    CalendrierExterne.id == calendrier_id,
+                    CalendrierExterne.user_id == user["id"],
+                )
+                .delete()
+            )
+            session.commit()
+            if not deleted:
+                raise HTTPException(status_code=404, detail="Calendrier non trouvé")
+            return MessageResponse(message="Calendrier supprimé", id=calendrier_id)
+
+    return await executer_async(_delete)
+
+
 # ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS
 # ═══════════════════════════════════════════════════════════
