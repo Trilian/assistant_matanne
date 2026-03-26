@@ -66,6 +66,57 @@ def _job_rappels_generaux() -> None:
         logger.exception("Erreur lors des rappels intelligents")
 
 
+def _job_push_quotidien() -> None:
+    """Envoie les alertes urgentes du jour via Web Push (VAPID) à tous les abonnés.
+
+    Complète les notifications ntfy.sh avec des push navigateur pour :
+    - Rappels intelligents urgents (garanties, péremptions)
+    - Alertes jeux responsable (série de défaites ≥ 5)
+    - Alertes prédictives maison
+    """
+    try:
+        from src.services.core.notifications.notif_web_core import get_push_notification_service
+        from src.services.core.rappels_intelligents import get_rappels_intelligents_service
+
+        push_service = get_push_notification_service()
+        # Pas d'abonnés → sortir tôt
+        if not push_service._subscriptions:
+            logger.debug("Push quotidien : aucun abonné, job ignoré")
+            return
+
+        # ── Rappels intelligents ──
+        rappels_service = get_rappels_intelligents_service()
+        rappels = rappels_service.evaluer_rappels()
+        urgents = [r for r in rappels if getattr(r, "priorite", "normale") in ("haute", "critique")]
+
+        for rappel in urgents[:5]:  # limiter à 5 push par run
+            titre = getattr(rappel, "titre", "Rappel")
+            message = getattr(rappel, "message", "")
+            nb_envoyes = push_service.envoyer_a_tous(
+                push_service.creer_notification_generique(titre, message)
+            ) if hasattr(push_service, "creer_notification_generique") else 0
+            if nb_envoyes:
+                logger.info("Push urgent '%s' → %d utilisateur(s)", titre, nb_envoyes)
+
+        # ── Alertes jeux responsable ──
+        try:
+            from src.services.jeux import get_responsable_gaming_service
+            jeux_service = get_responsable_gaming_service()
+            suivi = jeux_service.obtenir_suivi() if hasattr(jeux_service, "obtenir_suivi") else None
+            if suivi and getattr(suivi, "serie_type", None) == "perdu":
+                nb_series = int(getattr(suivi, "serie_nb", 0))
+                if nb_series >= 5:
+                    for user_id in list(push_service._subscriptions.keys()):
+                        push_service.notifier_alerte_serie_jeux(user_id, nb_series)
+                    logger.info("Alerte série jeux (%d défaites) envoyée", nb_series)
+        except Exception:
+            logger.debug("Alerte jeux responsable : service indisponible")
+
+        logger.info("Push quotidien terminé")
+    except Exception:
+        logger.exception("Erreur lors du push quotidien")
+
+
 def _job_entretien_saisonnier() -> None:
     """Vérifie si des tâches d'entretien saisonnières doivent être créées cette semaine."""
     try:
@@ -118,6 +169,12 @@ class DémarreurCron:
             CronTrigger(day_of_week="mon", hour=6, minute=0),
             id="entretien_saisonnier",
             name="Entretien saisonnier hebdomadaire",
+                self._scheduler.add_job(
+                    _job_push_quotidien,
+                    CronTrigger(hour=9, minute=0),
+                    id="push_quotidien",
+                    name="Notifications Web Push quotidiennes (alertes urgentes)",
+                )
         )
 
     def demarrer(self) -> None:

@@ -104,6 +104,57 @@ class NotificationTemplatesMixin:
         )
         return self.envoyer_notification(user_id, notification)
 
+    def notifier_rappel_famille(self, user_id: str, titre: str, message: str, url: str = "/?module=famille"):
+        """Notifie un rappel famille (activité, jalon, rendez-vous médical...)."""
+        notification = NotificationPush(
+            title=f"👨‍👩‍👧 {titre}",
+            body=message,
+            notification_type=TypeNotification.RAPPEL_FAMILLE,
+            url=url,
+            tag=f"famille_{titre[:20].replace(' ', '_')}",
+            actions=[
+                {"action": "view", "title": "Voir"},
+                {"action": "dismiss", "title": "Ignorer"},
+            ],
+        )
+        return self.envoyer_notification(user_id, notification)
+
+    def notifier_alerte_serie_jeux(self, user_id: str, nb_defaites: int, mise_max: float = 0.0):
+        """Alerte jeu responsable — série de défaites consécutives."""
+        notification = NotificationPush(
+            title="⚠️ Alerte jeu responsable",
+            body=(
+                f"{nb_defaites} défaites consécutives détectées. "
+                + (f"Mise maximale recommandée : {mise_max:.0f} €. " if mise_max else "")
+                + "Pensez à faire une pause."
+            ),
+            notification_type=TypeNotification.ALERTE_SERIE_DEFAITES,
+            url="/?module=jeux.responsable",
+            tag="jeux_serie_defaites",
+            require_interaction=True,
+            actions=[
+                {"action": "view", "title": "Voir le bilan"},
+                {"action": "pause", "title": "Pause 24h"},
+            ],
+        )
+        return self.envoyer_notification(user_id, notification)
+
+    def notifier_alerte_predictive_maison(self, user_id: str, titre: str, message: str, url: str = "/?module=maison"):
+        """Alerte prédictive maison (garantie expirant, entretien préventif, énergie anormale...)."""
+        notification = NotificationPush(
+            title=f"🏠 {titre}",
+            body=message,
+            notification_type=TypeNotification.ALERTE_PREDICTIVE_MAISON,
+            url=url,
+            tag=f"maison_pred_{titre[:20].replace(' ', '_')}",
+            require_interaction=False,
+            actions=[
+                {"action": "view", "title": "Détails"},
+                {"action": "dismiss", "title": "Compris"},
+            ],
+        )
+        return self.envoyer_notification(user_id, notification)
+
     # ═══════════════════════════════════════════════════════════
     # ALIAS RÉTROCOMPATIBILITÉ
     # ═══════════════════════════════════════════════════════════

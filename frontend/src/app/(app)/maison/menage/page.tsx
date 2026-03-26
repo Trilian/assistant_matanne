@@ -11,7 +11,7 @@ import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import {
   obtenirTachesJourMaison,
-  obtenirPlanningSemaine,
+  obtenirPlanningMenageSemaine,
   consulterGuide,
   type PlanningSemaine,
   type FicheTache,
@@ -276,7 +276,7 @@ export default function MenagePage() {
   // Planning de la semaine
   const { data: planning, isLoading: chargPlanning } = utiliserRequete(
     ["planning-semaine-menage"],
-    obtenirPlanningSemaine
+    obtenirPlanningMenageSemaine
   );
 
   type TacheItem = { id?: string; nom?: string; categorie?: string; duree_estimee_min?: number };

@@ -53,7 +53,7 @@ import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
 import { utiliserRequete } from "@/crochets/utiliser-api";
-import { evaluerRappels } from "@/bibliotheque/api/famille";
+import { evaluerRappelsFamille } from "@/bibliotheque/api/famille";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Separator } from "@/composants/ui/separator";
@@ -160,7 +160,7 @@ export function BarreLaterale() {
 
   const { data: rappelsData } = utiliserRequete<{ rappels: RappelFamille[]; total: number }>(
     ["famille", "rappels", "badge"],
-    evaluerRappels,
+    evaluerRappelsFamille,
     { staleTime: 5 * 60 * 1000, refetchInterval: 10 * 60 * 1000 }
   );
   const nbRappelsDanger = rappelsData?.rappels?.filter((r) => r.priorite === "danger").length ?? 0;

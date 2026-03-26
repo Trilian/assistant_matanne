@@ -38,7 +38,7 @@ export default function PageWeekend() {
     try {
       const resultat = await obtenirSuggestionsWeekend();
       setSuggestions(resultat.suggestions);
-      setMeteoInfo(resultat.meteo);
+      setMeteoInfo(resultat.meteo ?? "");
       toast.success("Suggestions générées avec la météo du weekend !");
     } catch {
       toast.error("Erreur lors de la génération des suggestions");

@@ -35,6 +35,7 @@ import {
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
+import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import {
   statsHubMaison,
@@ -45,21 +46,21 @@ import {
 import type { AlerteMaison, TacheJourMaison, AlertePredictiveGarantie } from "@/types/maison";
 
 const SECTIONS = [
-  { titre: "Projets", description: "Travaux et améliorations", chemin: "/maison/projets", Icone: Hammer, statKey: "projets_en_cours" as const },
-  { titre: "Jardin", description: "Plantes et calendrier semis", chemin: "/maison/jardin", Icone: Sprout, statKey: null },
-  { titre: "Ménage", description: "Planning et guides ménage", chemin: "/maison/menage", Icone: SprayCan, statKey: null },
-  { titre: "Entretien", description: "Tâches ménagères et appareils", chemin: "/maison/entretien", Icone: SprayCan, statKey: "taches_en_retard" as const },
-  { titre: "Charges", description: "Factures et abonnements", chemin: "/maison/charges", Icone: Receipt, statKey: null },
-  { titre: "Dépenses", description: "Suivi des dépenses maison", chemin: "/maison/depenses", Icone: Banknote, statKey: "depenses_mois" as const },
-  { titre: "Énergie", description: "Consommation énergétique", chemin: "/maison/energie", Icone: Zap, statKey: null },
-  { titre: "Domotique", description: "Maison connectée", chemin: "/maison/domotique", Icone: Wifi, statKey: null },
-  { titre: "Stocks", description: "Stocks non-alimentaires", chemin: "/maison/stocks", Icone: Package, statKey: "stocks_en_alerte" as const },
-  { titre: "Cellier", description: "Cave et garde-manger", chemin: "/maison/cellier", Icone: Wine, statKey: null },
-  { titre: "Artisans", description: "Carnet d'adresses et interventions", chemin: "/maison/artisans", Icone: Wrench, statKey: null },
-  { titre: "Contrats", description: "Assurances, énergie, abonnements", chemin: "/maison/contrats", Icone: FileText, statKey: "contrats_a_renouveler" as const },
-  { titre: "Garanties", description: "Appareils et SAV", chemin: "/maison/garanties", Icone: ShieldCheck, statKey: "garanties_expirant" as const },
-  { titre: "Diagnostics", description: "Diagnostics immobiliers", chemin: "/maison/diagnostics", Icone: ClipboardCheck, statKey: "diagnostics_expirant" as const },
-  { titre: "Éco-Tips", description: "Actions écologiques", chemin: "/maison/eco-tips", Icone: Leaf, statKey: null },
+  { id: "projets", titre: "Projets", description: "Travaux et améliorations", chemin: "/maison/projets", Icone: Hammer, statKey: "projets_en_cours" as const },
+  { id: "jardin", titre: "Jardin", description: "Plantes et calendrier semis", chemin: "/maison/jardin", Icone: Sprout, statKey: null },
+  { id: "menage", titre: "Ménage", description: "Planning et guides ménage", chemin: "/maison/menage", Icone: SprayCan, statKey: null },
+  { id: "entretien", titre: "Entretien", description: "Tâches ménagères et appareils", chemin: "/maison/entretien", Icone: SprayCan, statKey: "taches_en_retard" as const },
+  { id: "charges", titre: "Charges", description: "Factures et abonnements", chemin: "/maison/charges", Icone: Receipt, statKey: null },
+  { id: "depenses", titre: "Dépenses", description: "Suivi des dépenses maison", chemin: "/maison/depenses", Icone: Banknote, statKey: "depenses_mois" as const },
+  { id: "energie", titre: "Énergie", description: "Consommation énergétique", chemin: "/maison/energie", Icone: Zap, statKey: null },
+  { id: "domotique", titre: "Domotique", description: "Maison connectée", chemin: "/maison/domotique", Icone: Wifi, statKey: null },
+  { id: "stocks", titre: "Stocks", description: "Stocks non-alimentaires", chemin: "/maison/stocks", Icone: Package, statKey: "stocks_en_alerte" as const },
+  { id: "cellier", titre: "Cellier", description: "Cave et garde-manger", chemin: "/maison/cellier", Icone: Wine, statKey: null },
+  { id: "artisans", titre: "Artisans", description: "Carnet d'adresses et interventions", chemin: "/maison/artisans", Icone: Wrench, statKey: null },
+  { id: "contrats", titre: "Contrats", description: "Assurances, énergie, abonnements", chemin: "/maison/contrats", Icone: FileText, statKey: "contrats_a_renouveler" as const },
+  { id: "garanties", titre: "Garanties", description: "Appareils et SAV", chemin: "/maison/garanties", Icone: ShieldCheck, statKey: "garanties_expirant" as const },
+  { id: "diagnostics", titre: "Diagnostics", description: "Diagnostics immobiliers", chemin: "/maison/diagnostics", Icone: ClipboardCheck, statKey: "diagnostics_expirant" as const },
+  { id: "eco", titre: "Éco-Tips", description: "Actions écologiques", chemin: "/maison/eco-tips", Icone: Leaf, statKey: null },
 ];
 
 type StatsKeys = "projets_en_cours" | "taches_en_retard" | "depenses_mois" | "stocks_en_alerte" | "contrats_a_renouveler" | "garanties_expirant" | "diagnostics_expirant";
@@ -364,8 +365,12 @@ export default function PageMaison() {
       )}
 
       {/* Grille des modules */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {SECTIONS.map(({ titre, description, chemin, Icone, statKey }) => (
+      <GrilleWidgets
+        stockageCle="widgets:hub:maison"
+        items={SECTIONS}
+        classeGrille="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        titre="Modules"
+        renderItem={({ titre, description, chemin, Icone, statKey }) => (
           <Link key={chemin} href={chemin}>
             <Card className="hover:bg-accent/50 transition-colors h-full">
               <CardHeader>
@@ -388,8 +393,8 @@ export default function PageMaison() {
               </CardHeader>
             </Card>
           </Link>
-        ))}
-      </div>
+        )}
+      />
     </div>
   );
 }

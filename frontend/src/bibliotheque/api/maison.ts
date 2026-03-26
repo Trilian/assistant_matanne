@@ -824,6 +824,27 @@ export async function obtenirTendancesEnergie(
   return data;
 }
 
+export interface PrevisionsEnergie {
+  type: string;
+  mois_prochain: string | null;
+  consommation_prevue: number | null;
+  tendance: "hausse" | "baisse" | "stable" | "insuffisant";
+  confiance: number;
+  pente_mensuelle?: number;
+  nb_mois_analyses?: number;
+  message?: string;
+}
+
+export async function obtenirPrevisionsEnergie(
+  typeCompteur: "electricite" | "eau" | "gaz" = "electricite",
+  nbMois = 6
+): Promise<PrevisionsEnergie> {
+  const { data } = await clientApi.get<PrevisionsEnergie>(
+    `/maison/energie/previsions-ia?type_compteur=${typeCompteur}&nb_mois=${nbMois}`
+  );
+  return data;
+}
+
 // ─── Suggestions IA jardin ────────────────────────────────
 
 export interface TacheJardinIA {
@@ -960,7 +981,7 @@ export interface PlanningSemaine {
 }
 
 /** Obtenir le planning ménage de la semaine */
-export async function obtenirPlanningSemaine(): Promise<PlanningSemaine> {
+export async function obtenirPlanningMenageSemaine(): Promise<PlanningSemaine> {
   const { data } = await clientApi.get<PlanningSemaine>("/maison/menage/planning-semaine");
   return data;
 }

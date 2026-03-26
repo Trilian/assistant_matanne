@@ -1,6 +1,18 @@
 # 🗺️ ROADMAP — Assistant Matanne
 
-> Dernière mise à jour : 26 mars 2026 (session infrastructure & qualité)
+> Dernière mise à jour : 26 mars 2026 (audit backlog — scan multi-codes, export chiffré, calendriers externes)
+
+---
+
+## ✅ Mise à jour implémentation (26 mars 2026 — session exécution)
+
+- [x] **Routes énergie consolidées** : ajout `GET /api/v1/maison/energie/previsions-ia` (régression linéaire simple, tendance, confiance)
+- [x] **UI énergie** : carte "Prévisions IA" ajoutée dans la page énergie maison
+- [x] **Push métier** : ajout `POST /api/v1/push/notifier-metier` + templates Web Push famille/jeux/maison
+- [x] **Cron push** : job `push_quotidien` ajouté à 09h00 (alertes urgentes Web Push)
+- [x] **Planning IA enrichi** : génération hebdo enrichie par historique recettes et objectifs nutritionnels dynamiques
+- [x] **Dashboards DnD persistants** : hubs Famille, Maison, Jeux réordonnables avec sauvegarde `localStorage`
+- [x] **E2E collaboration courses** : spec multi-contextes ajoutée (`frontend/e2e/courses-collaboration.spec.ts`)
 
 ---
 
@@ -136,6 +148,14 @@
 19. ✅ **OCR tickets de caisse** : Reconnaissance photo ticket → import automatique liste de courses
   - Endpoint `POST /api/v1/courses/ocr-ticket-caisse`
   - Page `/cuisine/courses/scan-ticket` avec sélection et confirmation des articles
+20. ✅ **Scan multi-codes simultané** : composant `ScanneurMultiCodes` (ZXing, caméra live, déduplication `Set`) + endpoint `POST /api/v1/inventaire/barcode/batch` (ScanBatchRequest/ScanBatchResponse) → intégré courses ET inventaire
+21. ✅ **Export/import données chiffré** : backup JSON avec Fernet+PBKDF2 optionnel
+  - `GET /api/v1/export/json?mot_de_passe=...` → fichier `.json.enc`
+  - `POST /api/v1/export/restaurer` déchiffrement automatique selon l'extension du fichier
+22. ✅ **Intégration calendrier externe** : Google OAuth complet + iCal URL + multi-provider
+  - Endpoints : `GET /api/v1/calendriers/google/auth-url`, `/google/callback`, `/google/sync`, `/google/status`
+  - Providers supportés : `google`, `ical_url`, `apple`, `outlook` avec `sync_direction` bidirectionnel
+  - Page UI : `/famille/calendriers` créée
 
 ---
 
@@ -198,10 +218,15 @@
 
 ## Backlog
 
-- [ ] **Scan multi-codes simultané** — composant `ScanneurMultiCodes` (caméra live + déduplication) + endpoint `POST /api/v1/inventaire/barcode/batch` → intégré courses ET inventaire
+> **5/5 items complétés** ✅ — Backlog soldé au 26 mars 2026
+
+- [x] **Scan multi-codes simultané** — ✅ voir *Avancées complémentaires livrées* item 20  
+  → `ScanneurMultiCodes` (ZXing, caméra live, déduplication) + `POST /api/v1/inventaire/barcode/batch` opérationnel
 - [x] **OCR tickets de caisse** — ✅ voir *Avancées complémentaires livrées* item 19
-- [ ] **Export/import données complet** — backup JSON avec chiffrement Fernet+PBKDF2 optionnel (paramètre `mot_de_passe` sur `/export/json` et `/export/restaurer`)
-- [ ] **Intégration calendrier externe** — page UI `/famille/calendriers` à créer (backend Google OAuth + iCal entièrement opérationnel)
+- [x] **Export/import données complet** — ✅ voir *Avancées complémentaires livrées* item 21  
+  → Fernet+PBKDF2 optionnel sur `GET /export/json` et `POST /export/restaurer`
+- [x] **Intégration calendrier externe** — ✅ voir *Avancées complémentaires livrées* item 22  
+  → Google OAuth + iCal + page UI `/famille/calendriers` opérationnelle
 - [x] **Mode hors-ligne complet** — ✅ voir *Infrastructure & qualité* (`sw.js` v3 + IndexedDB sync queue)
 
 ---

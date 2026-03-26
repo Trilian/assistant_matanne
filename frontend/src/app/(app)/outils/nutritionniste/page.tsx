@@ -42,12 +42,17 @@ export default function NutritionistePage() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { mutate: envoyer, isPending } = utiliserMutation(
-    (message: string) => envoyerMessageChat(message, "nutrition", messages),
+    (message: string) =>
+      envoyerMessageChat({
+        message,
+        contexte: "cuisine",
+        historique: messages,
+      }),
     {
       onSuccess: (data: { reponse: string }) => {
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: data.reponse },
+          { role: "assistant", contenu: data.reponse, horodatage: new Date().toISOString() },
         ]);
       },
       onError: () => toast.error("Erreur lors de la communication avec le nutritionniste IA"),
@@ -62,13 +67,13 @@ export default function NutritionistePage() {
     e.preventDefault();
     if (!saisie.trim() || isPending) return;
     const message = saisie.trim();
-    setMessages((prev) => [...prev, { role: "user", content: message }]);
+    setMessages((prev) => [...prev, { role: "user", contenu: message, horodatage: new Date().toISOString() }]);
     setSaisie("");
     envoyer(message);
   }
 
   function gererActionRapide(msg: string) {
-    setMessages((prev) => [...prev, { role: "user", content: msg }]);
+    setMessages((prev) => [...prev, { role: "user", contenu: msg, horodatage: new Date().toISOString() }]);
     envoyer(msg);
   }
 
@@ -138,7 +143,7 @@ export default function NutritionistePage() {
                         : "bg-muted"
                     }`}
                   >
-                    {msg.content}
+                    {msg.contenu}
                   </div>
                 </div>
               ))}

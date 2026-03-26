@@ -19,6 +19,7 @@ import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirDashboardJeux } from "@/bibliotheque/api/jeux";
 import type { DashboardJeux, ValueBet, SerieJeux, NumeroRetard } from "@/types/jeux";
 import { useRouter } from "next/navigation";
+import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
 
 function couleurBudget(pct: number) {
   if (pct >= 90) return "bg-red-500";
@@ -160,6 +161,12 @@ function SectionIA({ analyse }: { analyse?: DashboardJeux["analyse_ia"] }) {
 
 export default function PageJeux() {
   const router = useRouter();
+  const widgets = [
+    { id: "budget", titre: "Budget" },
+    { id: "opportunites", titre: "Opportunites" },
+    { id: "ia", titre: "IA" },
+    { id: "kpis", titre: "KPIs" },
+  ] as const;
   const { data: dashboard, isLoading } = utiliserRequete<DashboardJeux>(
     ["jeux", "dashboard"],
     obtenirDashboardJeux
@@ -210,55 +217,68 @@ export default function PageJeux() {
       {/* Bandeau budget */}
       {dashboard?.budget && <BandeauBudget budget={dashboard.budget} />}
 
-      {/* Opportunités du jour */}
-      {dashboard && (
-        <SectionOpportunites
-          valueBets={dashboard.value_bets ?? []}
-          series={dashboard.opportunites ?? []}
-          lotoRetard={dashboard.loto_retard ?? []}
-        />
-      )}
-
-      {/* Section IA */}
-      <SectionIA analyse={dashboard?.analyse_ia} />
-
-      {/* KPIs compacts */}
-      {dashboard?.kpis && (
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-          <Card>
-            <CardContent className="pt-4 text-center">
-              <p className={`text-2xl font-bold ${dashboard.kpis.roi_mois >= 0 ? "text-green-600" : "text-red-600"}`}>
-                {dashboard.kpis.roi_mois >= 0 ? "+" : ""}
-                {dashboard.kpis.roi_mois.toFixed(1)}%
-              </p>
-              <p className="text-xs text-muted-foreground">ROI ce mois</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 text-center">
-              <p className="text-2xl font-bold">
-                {(dashboard.kpis.taux_reussite_mois * 100).toFixed(0)}%
-              </p>
-              <p className="text-xs text-muted-foreground">Taux réussite</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 text-center">
-              <p className={`text-2xl font-bold ${dashboard.kpis.benefice_mois >= 0 ? "text-green-600" : "text-red-600"}`}>
-                {dashboard.kpis.benefice_mois >= 0 ? "+" : ""}
-                {dashboard.kpis.benefice_mois.toFixed(0)}€
-              </p>
-              <p className="text-xs text-muted-foreground">Bénéfice</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 text-center">
-              <p className="text-2xl font-bold">{dashboard.kpis.paris_actifs}</p>
-              <p className="text-xs text-muted-foreground">Paris actifs</p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <GrilleWidgets
+        stockageCle="widgets:hub:jeux"
+        titre="Widgets"
+        items={widgets as unknown as { id: string; titre: string }[]}
+        classeGrille="grid gap-4 md:grid-cols-2"
+        renderItem={(item) => {
+          if (item.id === "budget") {
+            return dashboard?.budget ? <BandeauBudget budget={dashboard.budget} /> : <Card><CardContent className="py-6 text-sm text-muted-foreground">Budget indisponible</CardContent></Card>;
+          }
+          if (item.id === "opportunites") {
+            return dashboard ? (
+              <SectionOpportunites
+                valueBets={dashboard.value_bets ?? []}
+                series={dashboard.opportunites ?? []}
+                lotoRetard={dashboard.loto_retard ?? []}
+              />
+            ) : (
+              <Card><CardContent className="py-6 text-sm text-muted-foreground">Aucune donnée opportunité</CardContent></Card>
+            );
+          }
+          if (item.id === "ia") {
+            return <SectionIA analyse={dashboard?.analyse_ia} /> ?? <Card><CardContent className="py-6 text-sm text-muted-foreground">Analyse IA indisponible</CardContent></Card>;
+          }
+          if (item.id === "kpis") {
+            return dashboard?.kpis ? (
+              <div className="grid gap-3 grid-cols-2 md:grid-cols-2">
+                <Card>
+                  <CardContent className="pt-4 text-center">
+                    <p className={`text-2xl font-bold ${dashboard.kpis.roi_mois >= 0 ? "text-green-600" : "text-red-600"}`}>
+                      {dashboard.kpis.roi_mois >= 0 ? "+" : ""}
+                      {dashboard.kpis.roi_mois.toFixed(1)}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">ROI ce mois</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-4 text-center">
+                    <p className="text-2xl font-bold">{(dashboard.kpis.taux_reussite_mois * 100).toFixed(0)}%</p>
+                    <p className="text-xs text-muted-foreground">Taux réussite</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-4 text-center">
+                    <p className={`text-2xl font-bold ${dashboard.kpis.benefice_mois >= 0 ? "text-green-600" : "text-red-600"}`}>
+                      {dashboard.kpis.benefice_mois >= 0 ? "+" : ""}
+                      {dashboard.kpis.benefice_mois.toFixed(0)}€
+                    </p>
+                    <p className="text-xs text-muted-foreground">Bénéfice</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-4 text-center">
+                    <p className="text-2xl font-bold">{dashboard.kpis.paris_actifs}</p>
+                    <p className="text-xs text-muted-foreground">Paris actifs</p>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : <Card><CardContent className="py-6 text-sm text-muted-foreground">KPIs indisponibles</CardContent></Card>;
+          }
+          return null;
+        }}
+      />
 
       {/* Navigation par onglets */}
       <Tabs defaultValue="paris" onValueChange={(v) => router.push(`/jeux/${v}`)}>

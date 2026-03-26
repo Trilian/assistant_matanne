@@ -416,7 +416,7 @@ export async function obtenirSuggestionsWeekend(params?: {
   budget?: number;
   region?: string;
   nb_suggestions?: number;
-}): Promise<{ suggestions: string }> {
+}): Promise<{ suggestions: string; meteo?: string }> {
   const { data } = await clientApi.post("/famille/weekend/suggestions-ia", params ?? {});
   return data;
 }
@@ -542,7 +542,7 @@ export async function obtenirSuggestionsAchatsIA(params: {
 // ─── Rappels (Phase Q) ──────────────────────────────────
 
 /** Évaluer les rappels du jour */
-export async function evaluerRappels(): Promise<{
+export async function evaluerRappelsFamille(): Promise<{
   rappels: RappelFamille[];
   total: number;
 }> {

@@ -113,7 +113,7 @@ export async function obtenirSeriesActives(
   return data.items ?? data;
 }
 
-export async function obtenirAlertes(typeJeu?: string): Promise<AlerteJeux[]> {
+export async function obtenirAlertesJeux(typeJeu?: string): Promise<AlerteJeux[]> {
   const params = typeJeu ? `?type_jeu=${typeJeu}` : "";
   const { data } = await clientApi.get(`/jeux/alertes${params}`);
   return data.items ?? data;

@@ -7,7 +7,7 @@ import type {
   PlanningSemaine,
   RepasPlanning,
   CreerRepasPlanningDTO,
-  SuggestionRecette,
+  SuggestionRecettePlanning,
   GenererPlanningParams,
 } from "@/types/planning";
 
@@ -41,8 +41,8 @@ export async function genererPlanningSemaine(
 export async function obtenirSuggestionsRapides(
   typeRepas = "diner",
   nombre = 6
-): Promise<SuggestionRecette[]> {
-  const { data } = await clientApi.get<{ suggestions: SuggestionRecette[] }>(
+): Promise<SuggestionRecettePlanning[]> {
+  const { data } = await clientApi.get<{ suggestions: SuggestionRecettePlanning[] }>(
     `/planning/suggestions-rapides?type_repas=${typeRepas}&nombre=${nombre}`
   );
   return data.suggestions;

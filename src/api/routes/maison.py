@@ -2270,6 +2270,86 @@ async def tendances_energie(
     return await executer_async(_query)
 
 
+@router.get("/energie/previsions-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def previsions_energie_ia(
+    type_compteur: str = Query("electricite", description="electricite | eau | gaz"),
+    nb_mois: int = Query(6, ge=3, le=24, description="Nombre de mois pour la régression"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Prévision de consommation du mois prochain par régression linéaire."""
+    from datetime import date
+
+    from sqlalchemy import func
+
+    from src.core.models.maison_extensions import ReleveCompteur
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            rows = (
+                session.query(
+                    func.date_trunc("month", ReleveCompteur.date_releve).label("mois"),
+                    func.sum(ReleveCompteur.consommation_periode).label("conso"),
+                )
+                .filter(ReleveCompteur.type_compteur == type_compteur)
+                .filter(ReleveCompteur.consommation_periode.isnot(None))
+                .group_by(func.date_trunc("month", ReleveCompteur.date_releve))
+                .order_by(func.date_trunc("month", ReleveCompteur.date_releve))
+                .limit(nb_mois)
+                .all()
+            )
+
+            points = [float(r.conso or 0) for r in rows]
+            n = len(points)
+
+            if n < 3:
+                return {
+                    "type": type_compteur,
+                    "mois_prochain": None,
+                    "consommation_prevue": None,
+                    "tendance": "insuffisant",
+                    "confiance": 0.0,
+                    "message": f"Seulement {n} mois disponible(s) — il faut au moins 3 relevés mensuels.",
+                }
+
+            x_vals = list(range(n))
+            x_bar = sum(x_vals) / n
+            y_bar = sum(points) / n
+            ss_xy = sum((x_vals[i] - x_bar) * (points[i] - y_bar) for i in range(n))
+            ss_xx = sum((x_vals[i] - x_bar) ** 2 for i in range(n))
+            a = ss_xy / ss_xx if ss_xx else 0.0
+            b = y_bar - a * x_bar
+            conso_prevue = max(0.0, a * n + b)
+
+            ss_res = sum((points[i] - (a * x_vals[i] + b)) ** 2 for i in range(n))
+            ss_tot = sum((points[i] - y_bar) ** 2 for i in range(n))
+            r_squared = 1 - (ss_res / ss_tot) if ss_tot else 0.0
+            confiance = round(max(0.0, min(1.0, r_squared)), 2)
+
+            variation_pct = (a / y_bar * 100) if y_bar else 0.0
+            if variation_pct > 5:
+                tendance = "hausse"
+            elif variation_pct < -5:
+                tendance = "baisse"
+            else:
+                tendance = "stable"
+
+            today = date.today()
+            mois_label = f"{today.year + 1}-01" if today.month == 12 else f"{today.year}-{today.month + 1:02d}"
+
+            return {
+                "type": type_compteur,
+                "mois_prochain": mois_label,
+                "consommation_prevue": round(conso_prevue, 1),
+                "tendance": tendance,
+                "confiance": confiance,
+                "pente_mensuelle": round(a, 2),
+                "nb_mois_analyses": n,
+            }
+
+    return await executer_async(_query)
+
+
 @router.get("/depenses/{depense_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_depense(

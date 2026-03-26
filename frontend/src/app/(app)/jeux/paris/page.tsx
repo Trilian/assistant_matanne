@@ -102,14 +102,16 @@ function DrawerMatchDetail({
   onClose: () => void;
   onParier: (matchId: number, prediction: string, cote: number) => void;
 }) {
+  const matchKey = matchId != null ? String(matchId) : "none";
+
   const { data: pred, isLoading: chPred } = utiliserRequete<PredictionMatch>(
-    ["jeux", "prediction", matchId],
+    ["jeux", "prediction", matchKey],
     () => obtenirPredictionMatch(matchId!),
     { enabled: !!matchId }
   );
 
   const { data: analyseIA, isLoading: chIA } = utiliserRequete<AnalyseIA>(
-    ["jeux", "analyse-ia-match", matchId],
+    ["jeux", "analyse-ia-match", matchKey],
     () => obtenirAnalyseIA("paris", { match_id: matchId }),
     { enabled: !!matchId }
   );

@@ -5,6 +5,20 @@
 
 ---
 
+## ✅ Avancées session exécution (26 mars 2026)
+
+- **Push métier** : endpoint `POST /api/v1/push/notifier-metier` implémenté (famille, jeux, maison + fallback générique)
+- **Templates Web Push** : nouvelles méthodes `notifier_rappel_famille`, `notifier_alerte_serie_jeux`, `notifier_alerte_predictive_maison`
+- **Types notifications** : ajout types dédiés famille/jeux responsable/maison prédictive
+- **Cron** : ajout job `push_quotidien` (09h00) pour notifier les alertes urgentes via Web Push
+- **Maison énergie** : ajout endpoint `GET /api/v1/maison/energie/previsions-ia` (prévision mois prochain, tendance, confiance)
+- **Frontend énergie** : bloc "Prévision IA" intégré à la page énergie
+- **Planning IA** : enrichissement de la génération hebdo avec historique recettes + objectifs nutritionnels calculés
+- **Hubs configurables** : DnD + persistance localStorage sur les hubs Famille, Maison, Jeux
+- **E2E courses** : scénario multi-utilisateurs (multi-contextes Playwright) ajouté
+
+---
+
 ## 🏗️ Infrastructure & Qualité Technique
 
 > Ces items ne correspondent pas aux phases A-AC (features applicatives) mais sont trackés ici pour visibilité globale.

@@ -34,18 +34,19 @@ import { CarteDocumentExpire } from "@/composants/famille/carte-document-expire"
 import { CarteJourSpecial } from "@/composants/famille/carte-jour-special";
 import { CarteSuggestionIA } from "@/composants/famille/carte-suggestion-ia";
 import { utiliserRequete } from "@/crochets/utiliser-api";
-import { obtenirContexteFamilial, evaluerRappels } from "@/bibliotheque/api/famille";
+import { obtenirContexteFamilial, evaluerRappelsFamille } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
+import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
 import type { ContexteFamilial, RappelFamille } from "@/types/famille";
 
 const MODULES = [
-  { titre: "Jules", chemin: "/famille/jules", Icone: Baby },
-  { titre: "Budget", chemin: "/famille/budget", Icone: Wallet },
-  { titre: "Routines", chemin: "/famille/routines", Icone: ListChecks },
-  { titre: "Album", chemin: "/famille/album", Icone: Camera },
-  { titre: "Contacts", chemin: "/famille/contacts", Icone: BookUser },
-  { titre: "Documents", chemin: "/famille/documents", Icone: FileText },
-  { titre: "Calendriers", chemin: "/famille/calendriers", Icone: Calendar },
+  { id: "jules", titre: "Jules", chemin: "/famille/jules", Icone: Baby },
+  { id: "budget", titre: "Budget", chemin: "/famille/budget", Icone: Wallet },
+  { id: "routines", titre: "Routines", chemin: "/famille/routines", Icone: ListChecks },
+  { id: "album", titre: "Album", chemin: "/famille/album", Icone: Camera },
+  { id: "contacts", titre: "Contacts", chemin: "/famille/contacts", Icone: BookUser },
+  { id: "documents", titre: "Documents", chemin: "/famille/documents", Icone: FileText },
+  { id: "calendriers", titre: "Calendriers", chemin: "/famille/calendriers", Icone: Calendar },
 ];
 
 export default function PageFamille() {
@@ -58,7 +59,7 @@ export default function PageFamille() {
 
   const { data: rappelsData } = utiliserRequete<{ rappels: RappelFamille[]; total: number }>(
     ["famille", "rappels", "evaluer"],
-    evaluerRappels,
+    evaluerRappelsFamille,
     { staleTime: 5 * 60 * 1000 }
   );
   const rappelsUrgents = rappelsData?.rappels?.filter((r) => r.priorite === "danger" || r.priorite === "warning") ?? [];
@@ -263,25 +264,26 @@ export default function PageFamille() {
       </section>
 
       {/* Section 4: Modules (grille compacte) */}
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Modules</h2>
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
-          {MODULES.map(({ titre, chemin, Icone }) => (
-            <Link key={chemin} href={chemin}>
-              <Card className="hover:bg-accent/50 transition-colors h-full">
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex flex-col items-center gap-2 text-center">
-                    <div className="rounded-lg bg-primary/10 p-2.5">
-                      <Icone className="h-5 w-5 text-primary" />
-                    </div>
-                    <p className="text-sm font-medium">{titre}</p>
+      <GrilleWidgets
+        stockageCle="widgets:hub:famille"
+        titre="Modules"
+        items={MODULES}
+        classeGrille="grid gap-3 grid-cols-2 sm:grid-cols-3"
+        renderItem={({ titre, chemin, Icone }) => (
+          <Link key={chemin} href={chemin}>
+            <Card className="hover:bg-accent/50 transition-colors h-full">
+              <CardContent className="pt-5 pb-4">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <div className="rounded-lg bg-primary/10 p-2.5">
+                    <Icone className="h-5 w-5 text-primary" />
                   </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </section>
+                  <p className="text-sm font-medium">{titre}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        )}
+      />
 
       {/* Jules context rapide */}
       {contexte?.jules && (

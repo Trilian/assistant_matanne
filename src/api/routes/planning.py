@@ -361,10 +361,58 @@ async def generer_planning_ia(
         semaine_debut = today - timedelta(days=today.weekday())
 
     def _generate():
+        from sqlalchemy import func
+        from src.core.models import Recette
+        from src.core.models.recettes import HistoriqueRecette
+
+        # Enrichir les préférences avec signaux historiques + nutrition
+        preferences_base = getattr(body, "preferences", None) or {}
+        preferences_enrichies = dict(preferences_base)
+        with executer_avec_session() as session:
+            top_recettes = (
+                session.query(Recette.nom, func.count(HistoriqueRecette.id).label("nb"))
+                .join(HistoriqueRecette, HistoriqueRecette.recette_id == Recette.id)
+                .group_by(Recette.id, Recette.nom)
+                .order_by(func.count(HistoriqueRecette.id).desc())
+                .limit(8)
+                .all()
+            )
+
+            if top_recettes:
+                preferences_enrichies["recettes_favorites"] = [
+                    {"nom": r.nom, "frequence": int(r.nb or 0)} for r in top_recettes
+                ]
+
+            stats_nutri = (
+                session.query(
+                    func.avg(Recette.calories).label("avg_cal"),
+                    func.avg(Recette.proteines).label("avg_prot"),
+                    func.avg(Recette.lipides).label("avg_lip"),
+                    func.avg(Recette.glucides).label("avg_glu"),
+                )
+                .filter(Recette.calories.isnot(None))
+                .first()
+            )
+
+            avg_cal = float(getattr(stats_nutri, "avg_cal", 900) or 900)
+            avg_prot = float(getattr(stats_nutri, "avg_prot", 25) or 25)
+            avg_lip = float(getattr(stats_nutri, "avg_lip", 20) or 20)
+            avg_glu = float(getattr(stats_nutri, "avg_glu", 55) or 55)
+
+            cal_cible = int(avg_cal * 2)
+            cal_cible = max(1500, min(2800, cal_cible))
+
+            preferences_enrichies["objectif_nutrition"] = {
+                "calories_jour_cible": cal_cible,
+                "proteines_min_jour": round(avg_prot * 2, 1),
+                "lipides_max_jour": round(avg_lip * 2.2, 1),
+                "glucides_cible_jour": round(avg_glu * 2, 1),
+            }
+
         service = obtenir_service_planning()
         planning_obj = service.generer_planning_ia(
             semaine_debut=semaine_debut,
-            preferences=body.preferences,
+            preferences=preferences_enrichies,
         )
 
         if not planning_obj:

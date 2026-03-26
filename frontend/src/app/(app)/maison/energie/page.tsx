@@ -5,7 +5,7 @@
 "use client";
 
 import { useState } from "react";
-import { Zap, Droplets, Flame, Gauge, Plus, Trash2, TrendingUp, AlertTriangle } from "lucide-react";
+import { Zap, Droplets, Flame, Gauge, Plus, Trash2, TrendingUp, TrendingDown, Minus, AlertTriangle, Sparkles } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ import {
   supprimerReleve,
   historiqueEnergie,
   obtenirTendancesEnergie,
+  obtenirPrevisionsEnergie,
 } from "@/bibliotheque/api/maison";
 import type { ReleveCompteur } from "@/types/maison";
 import { toast } from "sonner";
@@ -79,6 +80,11 @@ export default function PageEnergie() {
   const { data: tendances, isLoading: chargementTendances } = utiliserRequete(
     ["maison", "energie", "tendances", typeActif],
     () => obtenirTendancesEnergie(typeActif, 12)
+  );
+
+  const { data: previsions } = utiliserRequete(
+    ["maison", "energie", "previsions", typeActif],
+    () => obtenirPrevisionsEnergie(typeActif, 6)
   );
 
   const invalider = () =>
@@ -249,8 +255,11 @@ export default function PageEnergie() {
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip
                   contentStyle={{ fontSize: 12 }}
-                  formatter={(value: number) => [`${value.toLocaleString("fr-FR")} ${compteurActif.unite}`, "Conso"]}
-                  labelFormatter={(label: string) => `Mois ${label}`}
+                  formatter={(value) => {
+                    const v = typeof value === "number" ? value : Number(value ?? 0);
+                    return [`${v.toLocaleString("fr-FR")} ${compteurActif.unite}`, "Conso"];
+                  }}
+                  labelFormatter={(label) => `Mois ${String(label ?? "")}`}
                 />
                 <Line
                   type="monotone"
@@ -282,6 +291,40 @@ export default function PageEnergie() {
           )}
         </CardContent>
       </Card>
+
+      {/* Prévisions IA */}
+      {previsions && previsions.tendance !== "insuffisant" && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-purple-500" />
+              Prévision {compteurActif.nom} — {previsions.mois_prochain}
+              <Badge variant="outline" className="ml-auto text-xs font-normal">
+                confiance {Math.round((previsions.confiance ?? 0) * 100)} %
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center gap-4">
+            <div>
+              <p className="text-2xl font-bold">
+                {(previsions.consommation_prevue ?? 0).toLocaleString("fr-FR")} {compteurActif.unite}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Consommation estimée pour le mois prochain
+              </p>
+            </div>
+            <Badge
+              variant={previsions.tendance === "hausse" ? "destructive" : previsions.tendance === "baisse" ? "default" : "secondary"}
+              className="flex items-center gap-1"
+            >
+              {previsions.tendance === "hausse" && <TrendingUp className="h-3 w-3" />}
+              {previsions.tendance === "baisse" && <TrendingDown className="h-3 w-3" />}
+              {previsions.tendance === "stable" && <Minus className="h-3 w-3" />}
+              {previsions.tendance}
+            </Badge>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Historique des relevés */}
       <Card>

@@ -68,7 +68,7 @@ import type {
   TypeRepas,
   RepasPlanning,
   CreerRepasPlanningDTO,
-  SuggestionRecette,
+  SuggestionRecettePlanning,
 } from "@/types/planning";
 import { BadgeNutriscore } from "@/composants/cuisine/badge-nutriscore";
 
@@ -231,7 +231,7 @@ export default function PagePlanning() {
   }
 
   const choisirRecette = useCallback(
-    (recette: SuggestionRecette) => {
+    (recette: SuggestionRecettePlanning) => {
       if (!repasEnCours) return;
       ajouterRepas({
         date: repasEnCours.date,

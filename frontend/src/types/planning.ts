@@ -32,7 +32,7 @@ export interface CreerRepasPlanningDTO {
   portions?: number;
 }
 
-export interface SuggestionRecette {
+export interface SuggestionRecettePlanning {
   id: number;
   nom: string;
   description?: string;

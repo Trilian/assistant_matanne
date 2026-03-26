@@ -49,6 +49,15 @@ class TypeNotification(StrEnum):
     # Famille
     RAPPEL_JALON = "milestone_reminder"
     RAPPEL_SANTE = "health_check_reminder"
+    RAPPEL_FAMILLE = "famille_reminder"
+
+    # Jeux responsable
+    ALERTE_SERIE_DEFAITES = "jeux_serie_defaites"
+    ALERTE_BUDGET_JEUX = "jeux_budget_alerte"
+
+    # Maison prédictive
+    ALERTE_PREDICTIVE_MAISON = "maison_alerte_predictive"
+    ALERTE_GARANTIE = "maison_garantie_alerte"
 
     # Système
     MISE_A_JOUR_SYSTEME = "system_update"
