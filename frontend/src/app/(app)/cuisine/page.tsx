@@ -91,25 +91,48 @@ export default function PageCuisine() {
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {SECTIONS.map(({ titre, description, chemin, Icone }) => (
-          <Link key={chemin} href={chemin}>
-            <Card className="hover:bg-accent/50 transition-colors h-full">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-primary/10 p-2">
-                    <Icone className="h-5 w-5 text-primary" />
+        {SECTIONS.map(({ titre, description, chemin, Icone }) => {
+          const estMaSemaine = chemin === "/cuisine/ma-semaine";
+          const nbRepasAujourdhui = dashboard?.repas_aujourd_hui?.length ?? 0;
+          const nbRepasHebdo = (dashboard as Record<string, unknown> | undefined)?.repas_semaine_count as number | undefined;
+
+          return (
+            <Link key={chemin} href={chemin}>
+              <Card className="hover:bg-accent/50 transition-colors h-full">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-primary/10 p-2">
+                      <Icone className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base">{titre}</CardTitle>
+                      <CardDescription className="text-sm">
+                        {description}
+                      </CardDescription>
+                    </div>
+                    {estMaSemaine && nbRepasAujourdhui > 0 && (
+                      <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                        {nbRepasAujourdhui} repas
+                      </span>
+                    )}
                   </div>
-                  <div>
-                    <CardTitle className="text-base">{titre}</CardTitle>
-                    <CardDescription className="text-sm">
-                      {description}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          </Link>
-        ))}
+                  {estMaSemaine && dashboard && (
+                    <div className="mt-2 flex gap-3 text-xs text-muted-foreground">
+                      <span>
+                        📅 Aujourd&apos;hui : <strong>{nbRepasAujourdhui}</strong> repas prévus
+                      </span>
+                      {typeof nbRepasHebdo === "number" && (
+                        <span>
+                          · Semaine : <strong>{nbRepasHebdo}</strong>
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </CardHeader>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

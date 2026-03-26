@@ -409,6 +409,24 @@ async def generer_planning_ia(
                 "glucides_cible_jour": round(avg_glu * 2, 1),
             }
 
+        # Enrichir avec les produits de saison du mois en cours
+        try:
+            import json
+            from pathlib import Path
+
+            saison_path = Path(__file__).parent.parent.parent.parent / "data" / "reference" / "produits_de_saison.json"
+            if saison_path.exists():
+                saison_data = json.loads(saison_path.read_text(encoding="utf-8"))
+                mois_actuel = today.month
+                produits_saison = [
+                    p["nom"] for p in saison_data.get("produits", [])
+                    if mois_actuel in p.get("mois", [])
+                ]
+                if produits_saison:
+                    preferences_enrichies["produits_de_saison"] = produits_saison[:20]
+        except Exception:
+            pass  # Enrichissement saisonnier optionnel, ne bloque pas la génération
+
         service = obtenir_service_planning()
         planning_obj = service.generer_planning_ia(
             semaine_debut=semaine_debut,

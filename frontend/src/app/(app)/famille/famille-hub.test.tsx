@@ -29,18 +29,15 @@ describe("PageFamille (Hub)", () => {
     expect(screen.getByText(/Famille/)).toBeInTheDocument();
   });
 
-  it("affiche les 10 sections", () => {
+  it("affiche les modules de navigation", () => {
     render(<PageFamille />);
     expect(screen.getByText("Jules")).toBeInTheDocument();
-    expect(screen.getByText("Activités")).toBeInTheDocument();
-    expect(screen.getByText("Routines")).toBeInTheDocument();
     expect(screen.getByText("Budget")).toBeInTheDocument();
-    expect(screen.getByText("Weekend")).toBeInTheDocument();
+    expect(screen.getByText("Routines")).toBeInTheDocument();
     expect(screen.getByText("Album")).toBeInTheDocument();
-    expect(screen.getByText("Anniversaires")).toBeInTheDocument();
     expect(screen.getByText("Contacts")).toBeInTheDocument();
     expect(screen.getByText("Documents")).toBeInTheDocument();
-    expect(screen.getByText("Journal")).toBeInTheDocument();
+    expect(screen.getByText("Calendriers")).toBeInTheDocument();
   });
 
   it("rend les liens corrects", () => {

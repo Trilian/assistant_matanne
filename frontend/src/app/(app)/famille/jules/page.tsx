@@ -51,12 +51,10 @@ import {
   obtenirProfilJules,
   listerJalons,
   ajouterJalon,
-  obtenirCroissanceJules,
 } from "@/bibliotheque/api/famille";
 import dynamic from "next/dynamic";
-import type { JalonJules, CroissanceData } from "@/types/famille";
+import type { JalonJules } from "@/types/famille";
 import { toast } from "sonner";
-import { GraphiqueCroissance } from "@/composants/famille/graphique-croissance";
 
 const GraphiqueJalons = dynamic(
   () => import("@/composants/graphiques/graphique-jalons").then((m) => m.GraphiqueJalons),
@@ -97,11 +95,6 @@ export default function PageJules() {
     ["famille", "jules", "jalons", categorieFiltre],
     () =>
       listerJalons(categorieFiltre !== "tous" ? categorieFiltre : undefined)
-  );
-
-  const { data: croissanceOMS } = utiliserRequete<CroissanceData>(
-    ["famille", "jules", "croissance-oms"],
-    () => obtenirCroissanceJules()
   );
 
   const { mutate: ajouter, isPending: enAjout } = utiliserMutation(
@@ -268,21 +261,7 @@ export default function PageJules() {
         </div>
       )}
 
-      {/* Courbes de croissance OMS (Phase R3) */}
-      {croissanceOMS && croissanceOMS.normes && (
-        <div className="pt-6">
-          <h2 className="text-lg font-semibold mb-3">Courbes de croissance OMS</h2>
-          <GraphiqueCroissance
-            age_mois={croissanceOMS.age_mois}
-            normes={croissanceOMS.normes}
-            mesures={[]}
-          />
-          <p className="text-xs text-muted-foreground mt-2 text-center">
-            Comparaison avec les normes OMS (percentiles P3, P15, P50, P85, P97). 
-            Ajoutez les mesures de Jules pour voir son évolution.
-          </p>
-        </div>
-      )}
+
 
       {/* Dialogue ajout jalon */}
       <Dialog open={dialogueAjout} onOpenChange={setDialogueAjout}>

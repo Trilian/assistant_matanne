@@ -93,6 +93,37 @@ Réponse: { suggestions: string, suggestions_struct: [{titre, description, type,
 
 ---
 
+## Achats famille — Phase P
+
+### Fonctionnalités
+
+- Liste des achats prévus (cadeaux, vêtements, jouets, équipements) distincts des courses alimentaires
+- Groupés par catégorie (cadeau, vêtement, jouet, livre, équipement, autre)
+- Marquer un achat comme effectué avec prix réel
+- **Suggestions IA proactives** : `POST /famille/achats/suggestions` infère les achats pertinents (anniversaires proches, jalons, saison)
+
+### Usage
+
+```
+/famille/achats
+```
+
+### Suggestions IA proactives (Phase P)
+
+Le bouton **"Générer des suggestions proactives"** appelle l'API qui :
+1. Détecte les anniversaires dans les 30 prochains jours
+2. Identifie les jalons récents de Jules
+3. Tient compte de la saison courante
+4. Retourne une liste de suggestions avec source + fourchette de prix
+
+```
+POST /api/v1/famille/achats/suggestions
+Body: {}
+Réponse: { suggestions: [{titre, description, source, fourchette_prix?, ou_acheter?, pertinence?}], total }
+```
+
+---
+
 ## Budget familial
 
 ### Fonctionnalités
@@ -215,11 +246,22 @@ Le sélecteur **"Lier les uploads à un jalon"** dans l'en-tête préfixe le nom
 - Entrées associées à une date et un auteur
 - Recherche dans les entrées passées
 - Synthèse hebdomadaire générée par IA
+- **Phase R — Résumés IA sauvegardés** : les entrées avec tag `resume-ia` sont affichées dans une section dédiée "Résumés IA récents" en haut de la timeline
 
 ### Usage
 
 ```
 /famille/journal
+```
+
+### Résumés IA (Phase R)
+
+Le bouton "Résumé IA semaine" appelle `POST /famille/journal/ia-semaine` (ou l'alias `resumer-semaine`). Le résumé est **automatiquement sauvegardé** comme entrée journal avec tag `resume-ia` + humeur `bien`. Il apparaît dans la section "Résumés IA récents" (max 3 derniers affichés).
+
+```
+POST /api/v1/famille/journal/resumer-semaine
+Body: { date_debut?: "YYYY-MM-DD", style?: "narratif"|"bullet" }
+Réponse: { resume: string, date_debut: string, date_fin: string }
 ```
 
 ---

@@ -1,6 +1,53 @@
 # 🗺️ ROADMAP — Assistant Matanne
 
-> Dernière mise à jour : 27 mars 2026 (finalisation module Famille M-R + corrections routes/cron)
+> Dernière mise à jour : 29 mars 2026 (module Cuisine A-L finalisé — dialog mode prépa, congélateur view, dashboard nutrition, saisonnalité, planning IA saisonnier)
+
+---
+
+## ✅ Mise à jour implémentation (29 mars 2026 — Module Cuisine A-L Complément)
+
+**Nouvelles implémentations :**
+- [x] **Phase C — Dialog choix mode** : Bouton "Préparation" dans toolbar planning ouvre un dialog avec 2 cartes — "Batch Cooking" (génère session) vs "Jour par jour" (→ `/cuisine/ma-semaine`)
+- [x] **Phase F — Vue préparations en stock** : Section "Préparations en stock" dans `/cuisine/batch-cooking` — cards tri-colonnes avec portions restantes, date péremption, alertes orange, badge localisation
+  - Interface `PreparationBatch` + `listerPreparations()` dans `bibliotheque/api/batch-cooking.ts`
+  - Endpoint `GET /api/v1/batch-cooking/preparations?consomme=false` déjà existant
+- [x] **Phase H — Dashboard nutrition** : Section dashboard dans `/outils/nutritionniste`
+  - 4 KPIs macros : calories (Kcal/jour), protéines (g/j), lipides (g/j), glucides (g/j)
+  - Histogramme calories par jour de la semaine (7 barres proportionnelles)
+  - Warning si nb_repas_sans_donnees > 0
+  - Import `obtenirNutritionHebdo()` depuis `bibliotheque/api/planning.ts`
+- [x] **Phase I — Badge saisonnalité** : Badge 🌱 dans colonne Qualité de l'inventaire
+  - Table statique `PRODUITS_SAISON` (12 mois, ~100 correspondances) dans `inventaire/page.tsx`
+  - Fonction `estProduitSaisonnier(nom)` — matching nom article vs liste mensuelle
+- [x] **Phase L — Enrichissement saisonnier planning IA** : Injection `produits_de_saison` dans `preferences_enrichies` avant génération Mistral
+  - Lecture `data/reference/produits_de_saison.json` (65 produits) dans `planning.py`
+  - Filtre par mois courant → max 20 produits injectés dans les préférences IA
+
+**✅ MODULE CUISINE : Phases A/E/K complètes, C/F/H/I/J/L quasi-complètes — couverture ~94%**
+
+---
+
+## ✅ Mise à jour implémentation (28 mars 2026 — Module Cuisine A-L)
+
+**Fonctionnalités confirmées existantes (corrigées dans STATUS_PHASES) :**
+- [x] **Phase A** : Dialog sélecteur recettes, suggestions-rapides, redirect `/planning` → tous confirmés existants
+- [x] **Phase C** : Endpoint `POST /batch-cooking/generer-depuis-planning` (ligne 96), dialog batch dans planning → confirmés existants
+- [x] **Phase E** : Endpoints `POST /{id}/favori`, `DELETE /{id}/favori`, `POST /{id}/noter` → confirmés existants (lignes 918/950/972 recettes.py)
+- [x] **Phase K** : `ajouterArticlesBulk` + bouton "Ajouter tout" dans photo-frigo → confirmé existant
+
+**Nouvelles implémentations :**
+- [x] **Phase A — 🎲 Surprise du chef** : Bouton dans le dialog suggestions du planning — choisit une recette aléatoire dans les suggestions IA
+- [x] **Phase F — Page détail session** : `frontend/src/app/(app)/cuisine/batch-cooking/[id]/page.tsx` — affiche étapes, progression, robots, statut de chaque étape
+- [x] **Phase I — Badges OpenFoodFacts** : Colonne "Qualité" dans table inventaire avec badges colorés Nutri-Score (N-A..E), Éco-Score (E-A..E), NOVA groupe (G1..G4)
+  - Type `ArticleInventaire` enrichi (`nutriscore?`, `ecoscore?`, `nova_group?`)
+  - Composant `BadgesOFF` avec code couleur (vert=A, rouge=E)
+- [x] **Phase J — Historique gaspillage complet** :
+  - Backend : `GET /api/v1/anti-gaspillage/historique?semaines=4` — calcul dynamique par semaine, 6 badges (premier_pas, sauveur, guerrier_eco, semaine_parfaite, eco_heros, zero_dechet)
+  - Frontend : section historique avec jauges colorées par semaine + grille trophées
+  - Types : `SemaineGaspillage`, `BadgeGaspillage`, `HistoriqueGaspillage`
+- [x] **Phase D — Widget Ma Semaine** : Hub cuisine enrichi avec nb repas aujourd'hui + badge inline sur la carte "Ma Semaine"
+
+**✅ MODULE CUISINE : Phases A/E/K complètes, C/F/J quasi-complètes, I améliorée — couverture ~92%**
 
 ---
 

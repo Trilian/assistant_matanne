@@ -72,3 +72,30 @@ export async function genererSessionDepuisPlanning(
   );
   return data;
 }
+
+export interface PreparationBatch {
+  id: number;
+  nom: string;
+  portions_initiales?: number;
+  portions_restantes?: number;
+  date_preparation?: string;
+  date_peremption?: string;
+  localisation?: string;
+  container?: string;
+  consomme: boolean;
+  jours_avant_peremption?: number | null;
+  alerte_peremption?: boolean;
+}
+
+/** Lister les préparations en stock (congélateur/frigo) */
+export async function listerPreparations(
+  consomme?: boolean
+): Promise<{ items: PreparationBatch[] }> {
+  const params: Record<string, string> = {};
+  if (consomme !== undefined) params.consomme = String(consomme);
+  const { data } = await clientApi.get<{ items: PreparationBatch[] }>(
+    "/batch-cooking/preparations",
+    { params }
+  );
+  return data;
+}

@@ -15,6 +15,8 @@ import {
   ChevronRight,
   CheckCircle2,
   PlayCircle,
+  Snowflake,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
@@ -43,6 +45,7 @@ import {
   listerSessionsBatch,
   creerSessionBatch,
   supprimerSessionBatch,
+  listerPreparations,
 } from "@/bibliotheque/api/batch-cooking";
 import { toast } from "sonner";
 import type { SessionBatchCooking } from "@/types/batch-cooking";
@@ -97,6 +100,13 @@ export default function PageBatchCooking() {
 
   const sessions = donnees?.items ?? [];
 
+  const { data: preparationsDonnees } = utiliserRequete(
+    ["batch-cooking", "preparations"],
+    () => listerPreparations(false)
+  );
+
+  const preparations = preparationsDonnees?.items ?? [];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -145,6 +155,49 @@ export default function PageBatchCooking() {
               onSupprimer={() => supprimer(s.id)}
             />
           ))}
+        </div>
+      )}
+
+      {/* Préparations en stock */}
+      {preparations.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            <Snowflake className="h-5 w-5 text-blue-500" />
+            Préparations en stock ({preparations.length})
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {preparations.map((p) => (
+              <Card key={p.id} className={p.alerte_peremption ? "border-orange-300" : ""}>
+                <CardContent className="pt-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{p.nom}</p>
+                      {p.localisation && (
+                        <p className="text-xs text-muted-foreground">{p.localisation}</p>
+                      )}
+                    </div>
+                    {p.alerte_peremption && (
+                      <AlertTriangle className="h-4 w-4 text-orange-500 shrink-0" />
+                    )}
+                  </div>
+                  <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                    {p.portions_restantes != null && (
+                      <span>
+                        🍽️ {p.portions_restantes}
+                        {p.portions_initiales ? `/${p.portions_initiales}` : ""} portions
+                      </span>
+                    )}
+                    {p.date_peremption && (
+                      <span className={p.alerte_peremption ? "text-orange-600 font-medium" : ""}>
+                        📅 Expire {new Date(p.date_peremption).toLocaleDateString("fr-FR")}
+                        {p.jours_avant_peremption != null && ` (${p.jours_avant_peremption}j)`}
+                      </span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
 

@@ -13,6 +13,8 @@ import {
   Euro,
   ChefHat,
   Loader2,
+  Trophy,
+  BarChart2,
 } from "lucide-react";
 import {
   Card,
@@ -25,7 +27,7 @@ import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete } from "@/crochets/utiliser-api";
-import { obtenirAntiGaspillage } from "@/bibliotheque/api/anti-gaspillage";
+import { obtenirAntiGaspillage, obtenirHistoriqueGaspillage } from "@/bibliotheque/api/anti-gaspillage";
 
 function couleurScore(score: number): string {
   if (score >= 80) return "text-green-600 dark:text-green-400";
@@ -57,6 +59,11 @@ export default function PageAntiGaspillage() {
   const { data, isLoading } = utiliserRequete(
     ["anti-gaspillage"],
     () => obtenirAntiGaspillage()
+  );
+
+  const { data: historique } = utiliserRequete(
+    ["anti-gaspillage", "historique"],
+    () => obtenirHistoriqueGaspillage()
   );
 
   if (isLoading) {
@@ -250,6 +257,104 @@ export default function PageAntiGaspillage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Historique hebdomadaire */}
+      {historique && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <BarChart2 className="h-5 w-5 text-primary" />
+              Historique (4 dernières semaines)
+            </CardTitle>
+            <CardDescription>
+              Score moyen : <strong>{historique.score_moyen_4s}/100</strong>
+              {" · "}Tendance :{" "}
+              <span
+                className={
+                  historique.tendance === "baisse"
+                    ? "text-green-600"
+                    : historique.tendance === "hausse"
+                    ? "text-red-500"
+                    : "text-muted-foreground"
+                }
+              >
+                {historique.tendance === "baisse"
+                  ? "↓ En amélioration"
+                  : historique.tendance === "hausse"
+                  ? "↑ À surveiller"
+                  : "→ Stable"}
+              </span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {historique.semaines.map((s, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground w-24 shrink-0">
+                    {new Date(s.debut).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                  </span>
+                  <div className="flex-1 h-5 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        s.score >= 80
+                          ? "bg-green-500"
+                          : s.score >= 50
+                          ? "bg-orange-400"
+                          : "bg-red-500"
+                      }`}
+                      style={{ width: `${s.score}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-medium w-10 text-right">{s.score}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Badges */}
+      {historique && historique.badges.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              Trophées anti-gaspillage
+            </CardTitle>
+            <CardDescription>
+              {historique.badges.filter((b) => b.obtenu).length} / {historique.badges.length} obtenus
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {historique.badges.map((b) => (
+                <div
+                  key={b.id}
+                  className={`flex items-start gap-3 rounded-lg border p-3 transition-opacity ${
+                    b.obtenu ? "" : "opacity-40 grayscale"
+                  }`}
+                >
+                  <span className="text-2xl">{b.emoji}</span>
+                  <div>
+                    <p className="text-sm font-semibold">{b.nom}</p>
+                    <p className="text-xs text-muted-foreground">{b.description}</p>
+                    {!b.obtenu && b.condition_valeur && (
+                      <p className="text-xs text-primary mt-1">
+                        {b.valeur_actuelle ?? 0} / {b.condition_valeur}
+                      </p>
+                    )}
+                  </div>
+                  {b.obtenu && (
+                    <Badge className="ml-auto shrink-0 text-xs bg-yellow-500 hover:bg-yellow-600">
+                      ✓
+                    </Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

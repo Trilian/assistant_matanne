@@ -347,6 +347,9 @@ export default function PageInventaire() {
                       Péremption
                     </th>
                     <th className="text-left p-3 font-medium">État</th>
+                    <th className="text-left p-3 font-medium hidden lg:table-cell">
+                      Qualité
+                    </th>
                     <th className="p-3" />
                   </tr>
                 </thead>
@@ -371,6 +374,9 @@ export default function PageInventaire() {
                       </td>
                       <td className="p-3">
                         <EtatBadge article={a} />
+                      </td>
+                      <td className="p-3 hidden lg:table-cell">
+                        <BadgesOFF article={a} />
                       </td>
                       <td className="p-3">
                         <Button
@@ -502,4 +508,102 @@ function EtatBadge({ article }: { article: ArticleInventaire }) {
       OK
     </Badge>
   );
+}
+
+const NUTRISCORE_COLORS: Record<string, string> = {
+  a: "bg-green-500",
+  b: "bg-lime-500",
+  c: "bg-yellow-400",
+  d: "bg-orange-500",
+  e: "bg-red-500",
+};
+
+const NOVA_COLORS: Record<number, string> = {
+  1: "bg-green-500",
+  2: "bg-lime-500",
+  3: "bg-yellow-400",
+  4: "bg-red-500",
+};
+
+// Produits de saison par mois (source: data/reference/produits_de_saison.json)
+const PRODUITS_SAISON: Record<number, string[]> = {
+  1: ["endive","mâche","céleri","poireau","topinambour","chou","betterave","carotte","navet","panais","pomme","poire","kiwi","clémentine","orange"],
+  2: ["endive","mâche","céleri","poireau","chou","carotte","navet","panais","pomme","poire","kiwi","orange"],
+  3: ["épinard","radis","asperge","ail","oignon","carotte","chou","pomme","poire","kiwi"],
+  4: ["asperge","épinard","radis","oseille","chou","carotte","pomme","fraise"],
+  5: ["asperge","artichaut","fève","petit pois","épinard","radis","fraise","cerise","rhubarbe"],
+  6: ["artichaut","courgette","concombre","tomate","haricot vert","petit pois","fraise","cerise","abricot","melon","framboise"],
+  7: ["courgette","tomate","poivron","aubergine","concombre","haricot vert","abricot","melon","pêche","nectarine","fraise","cerise","framboise","myrtille"],
+  8: ["courgette","tomate","poivron","aubergine","haricot vert","melon","pêche","nectarine","figue","mirabelle","prune","framboise","myrtille","mûre"],
+  9: ["poivron","tomate","courgette","aubergine","champignon","potiron","courge","pêche","poire","pomme","raisin","figue","prune","mûre"],
+  10: ["potiron","courge","champignon","chou","betterave","carotte","poireau","pomme","poire","raisin","châtaigne"],
+  11: ["potiron","chou","poireau","carotte","céleri","betterave","endive","pomme","poire","kiwi","châtaigne","clémentine"],
+  12: ["endive","chou","poireau","carotte","céleri","navet","topinambour","pomme","poire","kiwi","clémentine","orange"],
+};
+
+function estProduitSaisonnier(nom: string): boolean {
+  const mois = new Date().getMonth() + 1;
+  const produits = PRODUITS_SAISON[mois] ?? [];
+  const nomLower = nom.toLowerCase();
+  return produits.some((p) => nomLower.includes(p));
+}
+
+function BadgesOFF({ article }: { article: ArticleInventaire }) {
+  const badges: React.ReactNode[] = [];
+
+  if (estProduitSaisonnier(article.nom)) {
+    badges.push(
+      <span
+        key="saison"
+        title="Produit de saison"
+        className="inline-flex items-center rounded px-1.5 py-0.5 text-xs font-bold text-white bg-green-600"
+      >
+        🌱
+      </span>
+    );
+  }
+
+  if (article.nutriscore) {
+    const grade = article.nutriscore.toLowerCase();
+    const color = NUTRISCORE_COLORS[grade] ?? "bg-gray-400";
+    badges.push(
+      <span
+        key="nutri"
+        title={`Nutri-Score ${grade.toUpperCase()}`}
+        className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-bold text-white ${color}`}
+      >
+        N-{grade.toUpperCase()}
+      </span>
+    );
+  }
+
+  if (article.ecoscore) {
+    const grade = article.ecoscore.toLowerCase();
+    const color = NUTRISCORE_COLORS[grade] ?? "bg-gray-400";
+    badges.push(
+      <span
+        key="eco"
+        title={`Éco-Score ${grade.toUpperCase()}`}
+        className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-bold text-white ${color}`}
+      >
+        E-{grade.toUpperCase()}
+      </span>
+    );
+  }
+
+  if (article.nova_group) {
+    const color = NOVA_COLORS[article.nova_group] ?? "bg-gray-400";
+    badges.push(
+      <span
+        key="nova"
+        title={`Groupe NOVA ${article.nova_group} (${article.nova_group === 1 ? "non transformé" : article.nova_group === 4 ? "ultra-transformé" : "transformé"})`}
+        className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-bold text-white ${color}`}
+      >
+        G{article.nova_group}
+      </span>
+    );
+  }
+
+  if (badges.length === 0) return <span className="text-xs text-muted-foreground">—</span>;
+  return <div className="flex flex-wrap gap-1">{badges}</div>;
 }

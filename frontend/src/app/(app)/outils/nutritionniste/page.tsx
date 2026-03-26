@@ -18,6 +18,11 @@ import {
   Send,
   Loader2,
   AlertCircle,
+  TrendingUp,
+  Flame,
+  Beef,
+  Droplets,
+  Wheat,
 } from "lucide-react";
 import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
 import {
@@ -25,6 +30,7 @@ import {
   obtenirActionsRapides,
 } from "@/bibliotheque/api/outils";
 import type { ActionRapide } from "@/bibliotheque/api/outils";
+import { obtenirNutritionHebdo } from "@/bibliotheque/api/planning";
 import type { MessageChat } from "@/types/outils";
 import { toast } from "sonner";
 import { BoutonVocal } from "@/composants/ui/bouton-vocal";
@@ -40,6 +46,11 @@ export default function NutritionistePage() {
   const [messages, setMessages] = useState<MessageChat[]>([]);
   const [saisie, setSaisie] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { data: nutrition, isLoading: chargementNutri } = utiliserRequete(
+    ["planning", "nutrition-hebdo"],
+    () => obtenirNutritionHebdo()
+  );
 
   const { mutate: envoyer, isPending } = utiliserMutation(
     (message: string) =>
@@ -94,6 +105,101 @@ export default function NutritionistePage() {
           Cet assistant fournit des informations générales. Pour un suivi médical personnalisé, consultez un diététicien-nutritionniste.
         </span>
       </div>
+
+      {/* Dashboard nutrition semaine en cours */}
+      {chargementNutri ? (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}><CardContent className="pt-4"><Skeleton className="h-12 w-full" /></CardContent></Card>
+          ))}
+        </div>
+      ) : nutrition ? (
+        <div className="space-y-3">
+          <h2 className="text-base font-semibold flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-green-500" />
+            Semaine en cours — moyennes journalières
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2">
+                  <Flame className="h-4 w-4 text-orange-500" />
+                  <p className="text-xs text-muted-foreground">Calories</p>
+                </div>
+                <p className="text-2xl font-bold mt-1">
+                  {Math.round(nutrition.moyenne_calories_par_jour ?? 0)}
+                </p>
+                <p className="text-xs text-muted-foreground">kcal/jour</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2">
+                  <Beef className="h-4 w-4 text-red-500" />
+                  <p className="text-xs text-muted-foreground">Protéines</p>
+                </div>
+                <p className="text-2xl font-bold mt-1">
+                  {Math.round((nutrition.totaux?.proteines ?? 0) / 7)}
+                </p>
+                <p className="text-xs text-muted-foreground">g/jour</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2">
+                  <Droplets className="h-4 w-4 text-yellow-500" />
+                  <p className="text-xs text-muted-foreground">Lipides</p>
+                </div>
+                <p className="text-2xl font-bold mt-1">
+                  {Math.round((nutrition.totaux?.lipides ?? 0) / 7)}
+                </p>
+                <p className="text-xs text-muted-foreground">g/jour</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2">
+                  <Wheat className="h-4 w-4 text-amber-500" />
+                  <p className="text-xs text-muted-foreground">Glucides</p>
+                </div>
+                <p className="text-2xl font-bold mt-1">
+                  {Math.round((nutrition.totaux?.glucides ?? 0) / 7)}
+                </p>
+                <p className="text-xs text-muted-foreground">g/jour</p>
+              </CardContent>
+            </Card>
+          </div>
+          {nutrition.nb_repas_sans_donnees != null && nutrition.nb_repas_sans_donnees > 0 && (
+            <p className="text-xs text-muted-foreground">
+              ⚠️ {nutrition.nb_repas_sans_donnees} repas sans données nutritionnelles cette semaine.
+            </p>
+          )}
+          {/* Répartition par jour */}
+          {nutrition.par_jour && Object.keys(nutrition.par_jour).length > 0 && (
+            <div className="grid grid-cols-7 gap-1">
+              {["lun", "mar", "mer", "jeu", "ven", "sam", "dim"].map((jour, idx) => {
+                const jours = Object.entries(nutrition.par_jour);
+                const entry = jours[idx];
+                const cal = entry ? Math.round((entry[1] as { calories?: number }).calories ?? 0) : 0;
+                const maxCal = 2500;
+                const pct = Math.min(100, Math.round((cal / maxCal) * 100));
+                return (
+                  <div key={jour} className="flex flex-col items-center gap-1">
+                    <div className="w-full bg-muted rounded-full overflow-hidden h-16 flex items-end">
+                      <div
+                        className="w-full bg-orange-400 rounded-t"
+                        style={{ height: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground">{jour}</span>
+                    <span className="text-xs font-medium">{cal > 0 ? cal : "—"}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ) : null}
 
       <Card className="flex flex-col" style={{ height: "65vh" }}>
         <CardHeader className="pb-2">

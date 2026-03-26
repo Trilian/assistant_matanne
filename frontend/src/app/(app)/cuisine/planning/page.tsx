@@ -17,6 +17,7 @@ import {
   Clock,
   ShoppingCart,
   CookingPot,
+  CalendarDays,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -115,6 +116,7 @@ export default function PagePlanning() {
   const [coursesResultat, setCoursesResultat] = useState<GenererCoursesResult | null>(null);
   const [batchDialogue, setBatchDialogue] = useState(false);
   const [batchResultat, setBatchResultat] = useState<GenererSessionDepuisPlanningResult | null>(null);
+  const [choixModePrepa, setChoixModePrepa] = useState(false);
 
   const invalider = utiliserInvalidation();
   const dateDebut = getLundiDeSemaine(offsetSemaine);
@@ -324,12 +326,12 @@ export default function PagePlanning() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => genererBatch(undefined)}
-            disabled={enGenerationBatch || !planning}
-            title="Créer une session batch cooking depuis le planning"
+            onClick={() => setChoixModePrepa(true)}
+            disabled={!planning}
+            title="Mode préparation — batch cooking ou jour par jour"
           >
             <CookingPot className="mr-2 h-4 w-4" />
-            {enGenerationBatch ? "Création..." : "Batch"}
+            Préparation
           </Button>
         </div>
       </div>
@@ -495,11 +497,27 @@ export default function PagePlanning() {
 
             {/* ─── Onglet suggestions de recettes ─── */}
             <TabsContent value="suggestions" className="space-y-3 mt-3">
-              <Input
-                placeholder="Rechercher une recette..."
-                value={rechercheRecette}
-                onChange={(e) => setRechercheRecette(e.target.value)}
-              />
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Rechercher une recette..."
+                  value={rechercheRecette}
+                  onChange={(e) => setRechercheRecette(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  title="Surprise du chef — choisit une recette au hasard"
+                  disabled={!suggestions || suggestions.length === 0 || enAjout}
+                  onClick={() => {
+                    if (!suggestions || suggestions.length === 0) return;
+                    const idx = Math.floor(Math.random() * suggestions.length);
+                    choisirRecette(suggestions[idx]);
+                  }}
+                >
+                  🎲
+                </Button>
+              </div>
               <div className="max-h-64 overflow-y-auto space-y-1.5">
                 {chargeSuggestions ? (
                   Array.from({ length: 4 }).map((_, i) => (
@@ -685,6 +703,68 @@ export default function PagePlanning() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+      {/* ─── Dialog choix mode préparation ─── */}
+      <Dialog open={choixModePrepa} onOpenChange={setChoixModePrepa}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>🍳 Mode de préparation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <p className="text-sm text-muted-foreground">
+              Choisissez comment vous souhaitez préparer les repas de cette semaine.
+            </p>
+
+            {/* Option 1 : Batch cooking */}
+            <button
+              className="w-full text-left rounded-lg border p-4 hover:bg-accent transition-colors group"
+              onClick={() => {
+                setChoixModePrepa(false);
+                genererBatch(undefined);
+              }}
+              disabled={enGenerationBatch}
+            >
+              <div className="flex items-start gap-3">
+                <div className="rounded-md bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors shrink-0">
+                  <CookingPot className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Batch Cooking</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Préparez tout en une seule session le week-end. Idéal pour gagner du temps en semaine.
+                  </p>
+                  {enGenerationBatch && (
+                    <p className="text-xs text-primary mt-1 flex items-center gap-1">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Génération en cours…
+                    </p>
+                  )}
+                </div>
+              </div>
+            </button>
+
+            {/* Option 2 : Jour par jour */}
+            <button
+              className="w-full text-left rounded-lg border p-4 hover:bg-accent transition-colors group"
+              onClick={() => {
+                setChoixModePrepa(false);
+                window.location.href = "/cuisine/ma-semaine";
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <div className="rounded-md bg-orange-100 dark:bg-orange-900/30 p-2 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/50 transition-colors shrink-0">
+                  <CalendarDays className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Jour par jour</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Suivez le wizard "Ma Semaine" pour préparer chaque jour avec flexibilité.
+                  </p>
+                </div>
+              </div>
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
