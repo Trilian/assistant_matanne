@@ -42,6 +42,7 @@ import {
   obtenirBriefingMaison,
   envoyerRappelsMaison,
   alertesPredictivesGaranties,
+  ouvrirDossierSAV,
 } from "@/bibliotheque/api/maison";
 import type { AlerteMaison, TacheJourMaison, AlertePredictiveGarantie } from "@/types/maison";
 
@@ -126,19 +127,35 @@ function CarteTache({ tache }: { tache: TacheJourMaison }) {
 
 function CartePredictive({ item }: { item: AlertePredictiveGarantie }) {
   const variant = item.niveau === "CRITIQUE" || item.niveau === "HAUTE" ? "destructive" : "secondary";
+  const { mutate: ouvrirSAV, isPending: ouvertureSAV } = utiliserMutation(
+    () => ouvrirDossierSAV(item.garantie_id, item.action_recommandee, "hub_predictif")
+  );
   return (
-    <Link href={item.action_url} className="block">
-      <div className="flex items-start gap-2 py-2">
+    <div className="flex items-start gap-2 py-2">
+      <Link href={item.action_url} className="flex items-start gap-2 flex-1 min-w-0">
         <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-500" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium leading-tight">{item.nom_appareil}</p>
           <p className="text-xs text-muted-foreground mt-0.5">{item.action_recommandee}</p>
         </div>
-        <Badge variant={variant} className="text-xs shrink-0">
+      </Link>
+      <div className="flex items-center gap-1.5 shrink-0">
+        <Badge variant={variant} className="text-xs">
           {item.mois_restants_estimes <= 0 ? "Fin de vie" : `${item.mois_restants_estimes} mois`}
         </Badge>
+        {(item.niveau === "CRITIQUE" || item.niveau === "HAUTE") && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-6 px-2 text-xs"
+            disabled={ouvertureSAV}
+            onClick={(e) => { e.stopPropagation(); ouvrirSAV(); }}
+          >
+            SAV
+          </Button>
+        )}
       </div>
-    </Link>
+    </div>
   );
 }
 

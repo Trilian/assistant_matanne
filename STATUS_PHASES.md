@@ -609,7 +609,7 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 ---
 
-### Phase AA : Entretien Prédictif & Garanties 🔄 PARTIELLE ⚡ **AVANCÉE CETTE SESSION**
+### Phase AA : Entretien Prédictif & Garanties ✅ COMPLÈTE
 
 **Objectif** : Entretien saisonnier auto, alertes durée de vie appareils, actions intelligentes garanties
 
@@ -623,15 +623,14 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Endpoint `GET /api/v1/maison/garanties/alertes-predictives`
 - ✅ Carte hub maison "Garanties & durée de vie prévisionnelle"
 - ✅ Actions intelligentes via redirection vers la fiche garantie
+- ✅ Endpoint `POST /garanties/{id}/actions/ouvrir-dossier-sav` — workflow SAV 1-clic
+- ✅ Bouton SAV 1-clic sur hub maison (alertes CRITIQUE/HAUTE) et page garanties
 
-**Ce qui manque** :
-- ❌ Workflow complet "faire jouer garantie" / "contacter SAV" en 1 clic avec action backend dédiée
-
-**Impact** : Prédictif opérationnel, reste le flux d'action SAV totalement guidé
+**Impact** : Prédictif opérationnel avec flux d'action SAV totalement guidé
 
 ---
 
-### Phase AB : Jardin & Énergie Contextuels ✅ COMPLÈTE
+### Phase AB : Jardin & Énergie Contextuels 🔄 PARTIELLE
 
 **Objectif** : Jardin contextuel hub (saison plantes), énergie anomalies, cellier intelligent
 
@@ -650,7 +649,7 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 **Ce qui manque** :
 - ❌ Suggestions jardin saisonnières enrichies IA (au-delà des règles catalogues)
 
-**Impact** : Module jardin complet, énergie analytique exposée via endpoints (historique, tendances, prévisions IA)
+**Impact** : Module jardin complet, énergie analytique exposée — reste approfondissement IA jardin
 
 ---
 
@@ -777,7 +776,7 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 | **🍽️ Cuisine (A-L)** | 2/12 | 8/12 dont 2 quasi | 2/12 | ~68% fonctionnel |
 | **👨‍👩‍👦 Famille (M-R)** | 6/6 | 0/6 | 0/6 | ~100% fonctionnel ✅ |
 | **🎮 Jeux (S-W)** | 5/5 | 0/5 | 0/5 | ~100% fonctionnel ✅ |
-| **🏡 Maison (X-AB)** | 5/5 | 0/5 | 0/5 | ~100% fonctionnel ✅ |
+| **🏡 Maison (X-AB)** | 4/5 | 1/5 | 0/5 | ~95% fonctionnel |
 | **🧭 Navigation (AC)** | 5/5 | 0/5 | 0/5 | ~100% fonctionnel ✅ |
 
 *Note: Phase G absorbée par Phase Y ne compte pas dans les totaux*
@@ -893,7 +892,7 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 - **Phase D** : Flux unifié Ma Semaine (reste onboarding/dashboard cuisine)
 - **Phase L** : Enrichissement import (reste profondeur nutrition/saison)
-- **Phase AA** : Alertes prédictives garanties (reste workflow SAV 1-clic)
+- **Phase AA** : Entretien prédictif & workflow SAV 1-clic ✅ COMPLÈTE
 
 ### Phases bloquantes
 

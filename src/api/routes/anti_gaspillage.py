@@ -222,3 +222,150 @@ async def suggestions_ia_anti_gaspillage(
         "nb_produits": len(produits_data),
     }
 
+
+@router.get("/historique", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_historique_gaspillage(
+    semaines: int = Query(4, ge=1, le=12, description="Nombre de semaines d'historique"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Retourne l'historique anti-gaspillage et les badges de gamification.
+
+    Calcule un score hebdomadaire basé sur les articles périmés détectés
+    dans l'inventaire, et attribue des badges selon les performances.
+    """
+
+    def _query():
+        with executer_avec_session() as session:
+            from sqlalchemy import func
+
+            from src.core.models import ArticleInventaire
+
+            aujourd_hui = date.today()
+            historique_semaines = []
+
+            for i in range(semaines):
+                fin_sem = aujourd_hui - timedelta(days=aujourd_hui.weekday() + 7 * i)
+                debut_sem = fin_sem - timedelta(days=7)
+
+                # Articles dont la date de péremption tombe dans cette semaine ET sont déjà périmés
+                perimes = (
+                    session.query(func.count(ArticleInventaire.id))
+                    .filter(
+                        ArticleInventaire.date_peremption.isnot(None),
+                        ArticleInventaire.date_peremption >= debut_sem,
+                        ArticleInventaire.date_peremption < fin_sem,
+                        ArticleInventaire.date_peremption < aujourd_hui,
+                    )
+                    .scalar()
+                    or 0
+                )
+
+                # Articles dont la péremption tombe dans la fenêtre élargie (+3j) — proches mais sans certitude
+                a_utiliser = (
+                    session.query(func.count(ArticleInventaire.id))
+                    .filter(
+                        ArticleInventaire.date_peremption.isnot(None),
+                        ArticleInventaire.date_peremption >= debut_sem,
+                        ArticleInventaire.date_peremption < fin_sem + timedelta(days=3),
+                    )
+                    .scalar()
+                    or 0
+                )
+                sauves = max(0, a_utiliser - perimes)
+                score_sem = max(0, 100 - (perimes * 10))
+
+                historique_semaines.append({
+                    "debut": debut_sem.isoformat(),
+                    "fin": fin_sem.isoformat(),
+                    "score": score_sem,
+                    "articles_perimes": perimes,
+                    "articles_sauves": sauves,
+                    "economie": round(sauves * 3.5, 2),
+                })
+
+            scores = [s["score"] for s in historique_semaines]
+            score_moyen = round(sum(scores) / len(scores)) if scores else 0
+
+            tendance: str
+            if len(scores) >= 2:
+                if scores[0] > scores[-1]:
+                    tendance = "hausse"
+                elif scores[0] < scores[-1]:
+                    tendance = "baisse"
+                else:
+                    tendance = "stable"
+            else:
+                tendance = "stable"
+
+            total_sauves = sum(s["articles_sauves"] for s in historique_semaines)
+            total_perimes = sum(s["articles_perimes"] for s in historique_semaines)
+            semaines_parfaites = sum(1 for s in historique_semaines if s["score"] >= 80)
+
+            badges = [
+                {
+                    "id": "premier_pas",
+                    "nom": "Premier pas",
+                    "description": "Commencer à suivre le gaspillage",
+                    "emoji": "🌱",
+                    "obtenu": True,
+                    "condition_valeur": 1,
+                    "valeur_actuelle": 1,
+                },
+                {
+                    "id": "sauveur",
+                    "nom": "Sauveur",
+                    "description": "Sauver 5 articles de la poubelle",
+                    "emoji": "🦸",
+                    "obtenu": total_sauves >= 5,
+                    "condition_valeur": 5,
+                    "valeur_actuelle": total_sauves,
+                },
+                {
+                    "id": "guerrier_eco",
+                    "nom": "Guerrier Éco",
+                    "description": "Sauver 20 articles de la poubelle",
+                    "emoji": "♻️",
+                    "obtenu": total_sauves >= 20,
+                    "condition_valeur": 20,
+                    "valeur_actuelle": total_sauves,
+                },
+                {
+                    "id": "semaine_parfaite",
+                    "nom": "Semaine parfaite",
+                    "description": "Score ≥80 pendant 1 semaine",
+                    "emoji": "⭐",
+                    "obtenu": semaines_parfaites >= 1,
+                    "condition_valeur": 1,
+                    "valeur_actuelle": semaines_parfaites,
+                },
+                {
+                    "id": "eco_heros",
+                    "nom": "Éco-héros",
+                    "description": "Score ≥80 pendant 4 semaines consécutives",
+                    "emoji": "🏆",
+                    "obtenu": semaines_parfaites >= 4,
+                    "condition_valeur": 4,
+                    "valeur_actuelle": semaines_parfaites,
+                },
+                {
+                    "id": "zero_dechet",
+                    "nom": "Zéro déchet",
+                    "description": "Aucun article périmé sur 4 semaines",
+                    "emoji": "🌍",
+                    "obtenu": total_perimes == 0 and len(historique_semaines) >= 4,
+                    "condition_valeur": 0,
+                    "valeur_actuelle": total_perimes,
+                },
+            ]
+
+            return {
+                "semaines": historique_semaines,
+                "badges": badges,
+                "score_moyen_4s": score_moyen,
+                "tendance": tendance,
+            }
+
+    return await executer_async(_query)
+

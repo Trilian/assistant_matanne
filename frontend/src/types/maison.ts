@@ -271,6 +271,13 @@ export interface AlertePredictiveGarantie {
   action_url: string;
 }
 
+export interface ResultatDossierSAV {
+  incident_id: number;
+  message: string;
+  prochaine_action: string;
+  action_url: string;
+}
+
 // ═══════════════════════════════════════════════════════════
 // Types Diagnostics & Estimations
 // ═══════════════════════════════════════════════════════════

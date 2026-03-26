@@ -5,7 +5,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldCheck, AlertTriangle, Plus, Clock, Pencil, Trash2 } from "lucide-react";
+import { ShieldCheck, AlertTriangle, Plus, Clock, Pencil, Trash2, Headset } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -28,6 +28,7 @@ import {
   creerGarantie,
   modifierGarantie,
   supprimerGarantie,
+  ouvrirDossierSAV,
 } from "@/bibliotheque/api/maison";
 import type { Garantie } from "@/types/maison";
 import { toast } from "sonner";
@@ -79,6 +80,14 @@ export default function PageGaranties() {
     onSuccess: () => { invalider(); toast.success("Garantie supprimée"); },
     onError: () => toast.error("Erreur lors de la suppression"),
   });
+
+  const { mutate: ouvrirSAV } = utiliserMutation(
+    (garantieId: number) => ouvrirDossierSAV(garantieId, undefined, "page_garanties"),
+    {
+      onSuccess: () => { invalider(); toast.success("Dossier SAV ouvert"); },
+      onError: () => toast.error("Erreur lors de l'ouverture du dossier SAV"),
+    }
+  );
 
 
 
@@ -192,6 +201,9 @@ export default function PageGaranties() {
                     >
                       {g.statut}
                     </Badge>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirSAV(g.id)} aria-label="Ouvrir dossier SAV">
+                      <Headset className="h-3 w-3" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(g)} aria-label="Modifier la garantie">
                       <Pencil className="h-3 w-3" />
                     </Button>

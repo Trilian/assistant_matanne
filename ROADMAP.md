@@ -157,7 +157,7 @@
 - **🍽️ Cuisine (A-L)** : 2/12 complètes, 8 partielles, 2 non implémentées
 - **👨‍👩‍👦 Famille (M-R)** : **6/6 complètes** ✅ **MODULE COMPLET**
 - **🎮 Jeux (S-W)** : **5/5 complètes** ✅ **MODULE COMPLET**
-- **🏡 Maison (X-AB)** : **5/5 complètes** ✅ **MODULE COMPLET**
+- **🏡 Maison (X-AB)** : **4/5 complètes**, 1 partielle (AB — suggestions jardin IA)
 - **🧭 Navigation (AC)** : **5/5 complètes** ✅ **MODULE COMPLET**
 
 ---

@@ -77,6 +77,13 @@ Assistant Matanne est une application web moderne qui centralise la gestion fami
 - **Analyse nutritionnelle** automatique
 - **Optimisation anti-gaspillage**
 
+### Navigation rapide
+- **`Ctrl+K` (ou `Cmd+K`)** : Palette de commandes — recherchez et accédez instantanément à n'importe quelle page sans cliquer dans les menus. Affiche aussi les 5 dernières pages visitées.
+- **★ Favoris** : Épingle tes pages les plus utilisées via le bouton ★ dans le fil d'ariane. Elles apparaîssent en haut de la sidebar.
+- **Ma Semaine** (`/ma-semaine`) : Vue trans-modules de la semaine en cours — repas planifiés, activités famille, matchs du jour et tâches ménage sur un seul écran.
+- **Chat IA flottant** (bouton 🤖 en bas à droite) : Mini-chat accessible depuis n'importe quelle page sans quitter son contexte. Sur mobile, redirige vers la page Chat IA complète.
+- **Minuteur flottant** : Lance un minuteur depuis la page Outils → Minuteur — une barre discrète reste visible dans toute l'application tant que le minuteur tourne.
+
 ### Collaboration
 - **Partage en temps réel** des listes de courses (WebSocket)
 - **Export PDF** (planning, courses, recettes, budget)
@@ -84,7 +91,7 @@ Assistant Matanne est une application web moderne qui centralise la gestion fami
 
 ### Mobile-First
 - Interface responsive optimisée mobile
-- Navigation bottom bar sur petits écrans
+- Navigation bottom bar sur petits écrans (Accueil, Cuisine, Famille, Maison, Ma Semaine)
 - Gestes tactiles intuitifs
 
 ### Sécurité
@@ -99,8 +106,9 @@ Assistant Matanne est une application web moderne qui centralise la gestion fami
 
 1. **[Créer un compte](./getting-started.md#inscription)** — Inscription rapide en 2 minutes
 2. **[Explorer le dashboard](./getting-started.md#dashboard)** — Vue d'ensemble de vos données
-3. **[Ajouter votre première recette](./getting-started.md#recettes)** — Commencez à construire votre bibliothèque
-4. **[Générer un planning IA](./getting-started.md#planning-ia)** — Laissez l'IA planifier vos repas
+3. **[Ouvrir “Ma Semaine”](./FAQ.md#navigation)** — Vue unifiée de toute la semaine
+4. **[Ajouter votre première recette](./getting-started.md#recettes)** — Commencez à construire votre bibliothèque
+5. **[Générer un planning IA](./getting-started.md#planning-ia)** — Laissez l'IA planifier vos repas
 
 ---
 

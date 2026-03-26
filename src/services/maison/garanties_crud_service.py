@@ -139,6 +139,56 @@ class GarantiesCrudService(EventBusMixin, BaseService[Garantie]):
         db.refresh(incident)
         return incident
 
+    @avec_session_db
+    @avec_gestion_erreurs(default_return=None)
+    def ouvrir_dossier_sav_rapide(
+        self,
+        garantie_id: int,
+        description: str | None = None,
+        source: str = "inconnu",
+        db: Session | None = None,
+    ) -> dict | None:
+        """Crée un incident SAV pré-rempli depuis une garantie (action 1-clic)."""
+        garantie = db.query(Garantie).filter(Garantie.id == garantie_id).first()
+        if garantie is None:
+            return None
+
+        sous_garantie = garantie.date_fin_garantie >= date.today()
+        desc = description or f"Ouverture dossier SAV rapide ({source})"
+
+        incident = IncidentSAV(
+            garantie_id=garantie.id,
+            date_incident=date.today(),
+            description=f"{desc} — {garantie.nom_appareil}",
+            sous_garantie=sous_garantie,
+            statut="ouvert",
+            notes=f"Action déclenchée depuis: {source}",
+        )
+        db.add(incident)
+        db.commit()
+        db.refresh(incident)
+
+        self._emettre_evenement(
+            "garanties.incident_cree",
+            {
+                "garantie_id": garantie.id,
+                "incident_id": incident.id,
+                "source": source,
+                "sous_garantie": sous_garantie,
+            },
+        )
+
+        return {
+            "garantie_id": garantie.id,
+            "incident_id": incident.id,
+            "nom_appareil": garantie.nom_appareil,
+            "sous_garantie": sous_garantie,
+            "statut_incident": incident.statut,
+            "message": "Dossier SAV ouvert avec succès",
+            "prochaine_action": "Contacter le SAV avec les références de l'appareil",
+            "action_url": "/maison/garanties",
+        }
+
     # ── Alertes ──
 
     @avec_cache(ttl=300)

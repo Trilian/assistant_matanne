@@ -206,6 +206,7 @@ class TestEndpointsExistent:
             ("GET", "/api/v1/maison/garanties/1"),
             ("PATCH", "/api/v1/maison/garanties/1"),
             ("DELETE", "/api/v1/maison/garanties/1"),
+            ("POST", "/api/v1/maison/garanties/1/actions/ouvrir-dossier-sav"),
             # Diagnostics
             ("GET", "/api/v1/maison/diagnostics"),
             ("POST", "/api/v1/maison/diagnostics"),
@@ -577,6 +578,13 @@ class TestRoutesGaranties:
     def test_stats_garanties(self, client):
         response = client.get("/api/v1/maison/garanties/stats")
         assert response.status_code in (200, 500)
+
+    def test_ouvrir_dossier_sav(self, client):
+        response = client.post(
+            "/api/v1/maison/garanties/1/actions/ouvrir-dossier-sav",
+            json={"description": "Panne subite", "source": "test"},
+        )
+        assert response.status_code in (201, 404, 500)
 
 
 class TestRoutesDiagnostics:

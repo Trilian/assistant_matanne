@@ -7,6 +7,7 @@ Réponses aux questions les plus courantes sur Assistant Matanne.
 ## 📚 Table des matières
 
 - [Général](#général)
+- [Navigation](#navigation)
 - [Compte et sécurité](#compte-et-sécurité)
 - [Module Cuisine](#module-cuisine)
 - [Module Famille](#module-famille)
@@ -43,6 +44,53 @@ Une application mobile native est prévue pour 2027.
 ### L'application fonctionne-t-elle hors ligne ?
 
 Non, une connexion internet est requise actuellement. Le mode hors ligne (PWA) est en développement.
+
+---
+
+## Navigation
+
+### Comment naviguer vite sans chercher dans les menus ?
+
+Appuie sur **`Ctrl+K`** (ou `Cmd+K` sur Mac) depuis n'importe quelle page.
+Une palette de recherche s'ouvre avec toutes les pages de l'application.
+Tape les premiers mots du module ou de la page (« rec », « planning », « jul »…) et appuie sur `Entrée`.
+Les 5 dernières pages visitées s'affichent en haut pour un accès encore plus rapide.
+
+### À quoi sert “Ma Semaine” ?
+
+C'est une vue calendaire transversale accessible depuis la sidebar ou via `Ctrl+K` → «Ma Semaine».
+Elle regroupe sur 7 jours :
+- 🍽️ Les **repas planifiés** (liés au planning cuisine)
+- 👶 Les **activités famille** (Jules, sorties…)
+- 🏆 Les **matchs** du calendrier jeux
+- 🧹 Les **tâches ménage** du jour
+
+Navigue entre les semaines avec les flèches `‹` / `›`.
+
+### Comment utiliser le chat IA sans quitter la page ?
+
+Clique sur le bouton **🤖** (en bas à droite de l'écran) pour ouvrir un mini-chat flottant.
+Tu peux poser une question à l'assistant sans changer de page.
+Appuie sur `Entrée` pour envoyer, `Maj+Entrée` pour un saut de ligne.
+Pour une conversation plus longue, clique sur « Ouvrir le chat IA » en bas du popout.
+
+### Comment lancer un minuteur et continuer à naviguer ?
+
+1. Outils → Minuteur → Lance le compte à rebours
+2. Une petite **barre de minuteur** apparaît en haut de l'écran dans toute l'application
+3. Clique sur **« Ouvrir »** dans cette barre pour revenir au minuteur à tout moment
+Le minuteur reste actif même si tu navigues vers d'autres pages.
+
+### Comment épingler une page dans les favoris ?
+
+Ouvre la page que tu veux épingler, puis clique sur l'étoile **★** qui apparaît dans le fil d'ariane (en haut).
+La page s'ajoute en haut de la sidebar dans la section **Favoris** (accessible dès l'ouverture de l'app).
+Clique à nouveau sur l'étoile pour désépingler. Maximum 10 favoris recommandés.
+
+### Je ne vois pas le bouton étoile ★, pourquoi ?
+
+Le bouton ★ n'apparaît que sur les pages statiques principales (hubs, listes…).
+Il ne s'affiche pas sur les pages dynamiques comme une fiche recette ou un détail de projet.
 
 ---
 

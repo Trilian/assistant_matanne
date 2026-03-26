@@ -27,6 +27,7 @@ import type {
   AlerteGarantie,
   AlertePredictiveGarantie,
   StatsGaranties,
+  ResultatDossierSAV,
   DiagnosticImmobilier,
   EstimationImmobiliere,
   ActionEcologique,
@@ -497,6 +498,20 @@ export async function modifierIncident(
   const { data } = await clientApi.patch<IncidentSAV>(
     `/maison/garanties/incidents/${id}`,
     incident
+  );
+  return data;
+}
+
+// ─── Action SAV 1-clic ────────────────────────────────────
+
+export async function ouvrirDossierSAV(
+  garantieId: number,
+  description?: string,
+  source: string = "frontend"
+): Promise<ResultatDossierSAV> {
+  const { data } = await clientApi.post<ResultatDossierSAV>(
+    `/maison/garanties/${garantieId}/actions/ouvrir-dossier-sav`,
+    { description, source }
   );
   return data;
 }

@@ -1864,6 +1864,31 @@ async def modifier_incident_garantie(
     return await executer_async(_query)
 
 
+@router.post(
+    "/garanties/{garantie_id}/actions/ouvrir-dossier-sav",
+    status_code=201,
+    responses=REPONSES_CRUD_CREATION,
+)
+@gerer_exception_api
+async def ouvrir_dossier_sav(
+    garantie_id: int,
+    payload: dict[str, Any] = {},
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Ouvre un dossier SAV en 1 clic avec pré-remplissage depuis la garantie."""
+    from src.services.maison import get_garanties_crud_service
+
+    def _query():
+        service = get_garanties_crud_service()
+        return service.ouvrir_dossier_sav_rapide(
+            garantie_id=garantie_id,
+            description=payload.get("description"),
+            source=payload.get("source", "api"),
+        )
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # DIAGNOSTICS IMMOBILIERS & ESTIMATIONS
 # ═══════════════════════════════════════════════════════════
@@ -2851,57 +2876,9 @@ async def sauvegarder_positions(
 
 # ═══════════════════════════════════════════════════════════
 # BRIEFING MAISON (contexte quotidien)
+# NOTE: Routes canoniques /briefing, /alertes, /taches-jour
+# définies en haut du fichier (section CONTEXTE MAISON Phase X).
 # ═══════════════════════════════════════════════════════════
-
-
-@router.get("/briefing", responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def briefing_maison(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Briefing quotidien contextuel avec tâches, alertes, météo, projets."""
-    from src.services.maison import get_contexte_maison_service
-
-    def _query():
-        service = get_contexte_maison_service()
-        briefing = service.obtenir_briefing()
-        if briefing is None:
-            return {}
-        return briefing.model_dump(mode="json")
-
-    return await executer_async(_query)
-
-
-@router.get("/alertes", responses=REPONSES_LISTE)
-@gerer_exception_api
-async def alertes_maison(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Toutes les alertes maison triées par urgence."""
-    from src.services.maison import get_contexte_maison_service
-
-    def _query():
-        service = get_contexte_maison_service()
-        alertes = service.obtenir_toutes_alertes()
-        return {"items": [a.model_dump(mode="json") for a in alertes]}
-
-    return await executer_async(_query)
-
-
-@router.get("/taches-jour", responses=REPONSES_LISTE)
-@gerer_exception_api
-async def taches_jour_maison(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Tâches du jour avec statut et détails."""
-    from src.services.maison import get_contexte_maison_service
-
-    def _query():
-        service = get_contexte_maison_service()
-        taches = service.obtenir_taches_jour()
-        return {"items": [t.model_dump(mode="json") for t in taches]}
-
-    return await executer_async(_query)
 
 
 @router.post("/entretien/sync-catalogue", status_code=200, responses=REPONSES_CRUD_CREATION)

@@ -1625,7 +1625,7 @@ def _serialiser_achat(a) -> dict:  # noqa: ANN001
 @gerer_exception_api
 async def lister_achats_famille(
     categorie: str | None = Query(None, description="Filtrer par catégorie"),
-    achete: bool = Query(False, description="Inclure les achats déjà effectués"),
+    achete: bool | None = Query(None, description="Filtrer sur l'état acheté (true/false)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les achats famille (route canonique)."""
@@ -1633,10 +1633,17 @@ async def lister_achats_famille(
 
     def _query():
         service = obtenir_service_achats_famille()
-        if categorie:
+        if categorie and achete is not None:
             items = service.lister_par_categorie(categorie=categorie, achete=achete)
-        else:
+        elif categorie:
+            items = [
+                *service.lister_par_categorie(categorie=categorie, achete=False),
+                *service.lister_par_categorie(categorie=categorie, achete=True),
+            ]
+        elif achete is not None:
             items = service.lister_achats(achete=achete)
+        else:
+            items = [*service.lister_achats(achete=False), *service.lister_achats(achete=True)]
         return {
             "items": [_serialiser_achat(a) for a in items],
             "total": len(items),

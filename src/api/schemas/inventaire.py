@@ -7,7 +7,7 @@ Aligné avec le modèle ORM ``ArticleInventaire`` qui utilise
 
 from datetime import datetime
 
-from pydantic import BaseModel, computed_field, field_validator
+from pydantic import BaseModel, Field, computed_field, field_validator
 
 from .base import IdentifiedResponse, QuantiteStricteValidatorMixin
 

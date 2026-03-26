@@ -70,11 +70,25 @@ analyse = service.analyser_developpement(age_mois=18, jalons_atteints=[...])
 - Catégorisation (sport, culture, plein-air, créatif…)
 - Association à des membres de la famille
 - Vue calendrier des activités planifiées
+- **Phase O — Suggestions IA avec pré-remplissage** : `POST /famille/activites/suggestions-ia-auto` retourne `suggestions_struct` (liste d'objets pré-remplissables) pour injecter directement dans le formulaire de création
 
 ### Usage
 
 ```
 /famille/activites
+```
+
+### Pré-remplissage rapide (Phase O)
+
+Le bouton **"Suggestions IA"** dans l'en-tête ouvre un dialogue :
+1. L'API détecte la météo locale automatiquement
+2. Retourne `suggestions_struct` : liste d'objets `{titre, description, type, duree_minutes, lieu}`
+3. Cards de pré-remplissage rapide — clic sur "Utiliser cette suggestion" injecte les données dans le formulaire
+
+```
+POST /api/v1/famille/activites/suggestions-ia-auto
+Body: { type_prefere?: "mixte"|"interieur"|"exterieur", nb_suggestions?: 4 }
+Réponse: { suggestions: string, suggestions_struct: [{titre, description, type, duree_minutes, lieu}], meteo_detectee?: string, age_jules_mois?: number }
 ```
 
 ---
@@ -161,12 +175,18 @@ suggestions = service.suggerer_activites_weekend(
 - Upload d'images (Supabase Storage)
 - Légendes et commentaires
 - Vue chronologique / vue mosaïque
+- **Phase R — Liaison jalons** : les photos peuvent être liées à un jalon de développement via le sélecteur en en-tête ; badge "Jalon #N" affiché sur chaque photo liée ; lien de navigation Jules ↔ Album
 
 ### Usage
 
 ```
 /famille/album
+/famille/album?jalon_id=5   ← filtrage des photos liées au jalon 5
 ```
+
+### Liaison jalons (Phase R)
+
+Le sélecteur **"Lier les uploads à un jalon"** dans l'en-tête préfixe le nom du fichier (`jalon-{id}_{fichier}`) au moment de l'upload. Depuis Jules, chaque jalon affiche un lien "Voir les photos liées à ce jalon" qui filtre l'album par `jalon_id`.
 
 ---
 

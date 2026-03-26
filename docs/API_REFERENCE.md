@@ -194,7 +194,13 @@ Suggestions via Mistral AI (rate limité : 10 req/min).
 
 ---
 
-## 👨‍👩‍👧‍👦 Famille — `/api/v1/famille` (29 endpoints)
+## 👨‍👩‍👧‍👦 Famille — `/api/v1/famille` (37 endpoints)
+
+### Contexte familial (1) — Phase M
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/famille/contexte` | — | Contexte familial global (jalons prochains, rappels, suggestions achats urgents, météo) |
 
 ### Enfants & Jalons (5)
 
@@ -206,7 +212,7 @@ Suggestions via Mistral AI (rate limité : 10 req/min).
 | POST | `/famille/enfants/{id}/jalons` | Body: titre, description, categorie, date_atteint | Ajoute un jalon (201) |
 | DELETE | `/famille/enfants/{id}/jalons/{jalon_id}` | — | Supprime un jalon |
 
-### Activités (5)
+### Activités (6) — Phase O : `suggestions_struct` pour pré-remplissage
 
 | Méthode | Path | Params | Description |
 |---------|------|--------|-------------|
@@ -215,6 +221,7 @@ Suggestions via Mistral AI (rate limité : 10 req/min).
 | POST | `/famille/activites` | Body: titre, type_activite, date_prevue... | Crée (201) |
 | PATCH | `/famille/activites/{id}` | Body: champs partiels | Met à jour |
 | DELETE | `/famille/activites/{id}` | — | Supprime |
+| POST | `/famille/activites/suggestions-ia-auto` | Body: `{type_prefere?, nb_suggestions?}` | Suggestions IA météo-adaptées ; retourne `suggestions` (texte) + `suggestions_struct` (liste d'objets pré-remplissables) |
 
 ### Budget familial (4)
 
@@ -225,11 +232,21 @@ Suggestions via Mistral AI (rate limité : 10 req/min).
 | POST | `/famille/budget` | Body: date, categorie, montant, magasin... | Ajoute dépense (201) |
 | DELETE | `/famille/budget/{id}` | — | Supprime |
 
+### Achats famille (3) — Phase P
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| GET | `/famille/achats` | `page`, `page_size`, `categorie?`, `priorite?` | Liste des achats famille (non achetés en priorité) |
+| POST | `/famille/achats` | Body: nom, categorie, priorite, description?, suggere_par? | Crée un achat (201) |
+| POST | `/famille/achats/suggestions` | Body: `{}` (contexte inféré automatiquement) | Génère des suggestions d'achats proactives IA (anniversaires, jalons, saison) |
+
+> **Réponse `/achats/suggestions`** : `{ suggestions: [{titre, description, source, fourchette_prix?, ou_acheter?, pertinence?}], total }` — source ∈ `"anniversaire" | "jalon" | "saison"`
+
 ### Shopping (1)
 
 | Méthode | Path | Params | Description |
 |---------|------|--------|-------------|
-| GET | `/famille/shopping` | `liste?`, `categorie?`, `actif=True` | Articles shopping familial |
+| GET | `/famille/shopping` | `liste?`, `categorie?`, `actif=True` | Articles shopping familial (liste générale) |
 
 ### Routines familiales (5)
 
@@ -259,6 +276,14 @@ Suggestions via Mistral AI (rate limité : 10 req/min).
 | POST | `/famille/evenements` | Body: `EvenementFamilialCreate` | Crée (201) |
 | PATCH | `/famille/evenements/{id}` | Body: `EvenementFamilialPatch` | Met à jour |
 | DELETE | `/famille/evenements/{id}` | — | Supprime |
+
+### Journal familial (3) — Phase R
+
+| Méthode | Path | Params | Description |
+|---------|------|--------|-------------|
+| POST | `/famille/journal/resumer-semaine` | Body: `{date_debut?, style?}` | Génère un résumé IA de la semaine (alias de `POST /famille/journal/ia-semaine`) |
+| POST | `/famille/journal/ia-semaine` | Body: `{date_debut?, style?}` | Génère un résumé IA et le sauvegarde avec tag `resume-ia` |
+| POST | `/famille/journal/retrospective` | Body: `{periode?}` | Rétrospective IA longue période |
 
 ---
 

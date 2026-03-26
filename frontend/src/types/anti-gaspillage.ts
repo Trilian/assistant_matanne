@@ -31,3 +31,29 @@ export interface DonneesAntiGaspillage {
   articles_urgents: ArticleUrgent[];
   recettes_rescue: RecetteRescue[];
 }
+
+export interface SemaineGaspillage {
+  debut: string;
+  fin: string;
+  score: number;
+  articles_perimes: number;
+  articles_sauves: number;
+  economie: number;
+}
+
+export interface BadgeGaspillage {
+  id: string;
+  nom: string;
+  description: string;
+  emoji: string;
+  obtenu: boolean;
+  condition_valeur: number;
+  valeur_actuelle: number;
+}
+
+export interface HistoriqueGaspillage {
+  semaines: SemaineGaspillage[];
+  badges: BadgeGaspillage[];
+  score_moyen_4s: number;
+  tendance: "hausse" | "baisse" | "stable";
+}
