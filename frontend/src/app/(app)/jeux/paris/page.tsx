@@ -52,10 +52,12 @@ import {
   verifierMise,
   enregistrerMise,
   obtenirSuiviResponsable,
+  obtenirHistoriqueCotes,
 } from "@/bibliotheque/api/jeux";
 import dynamic from "next/dynamic";
 import type { PariSportif, StatsParis, MatchJeu, ValueBet, SerieJeux, PredictionMatch, AnalyseIA, SuiviResponsable } from "@/types/jeux";
 import { toast } from "sonner";
+import { HeatmapCotes } from "@/composants/jeux/heatmap-cotes";
 
 const GraphiqueROI = dynamic(
   () => import("@/composants/graphiques/graphique-roi").then((m) => m.GraphiqueROI),
@@ -113,6 +115,12 @@ function DrawerMatchDetail({
   const { data: analyseIA, isLoading: chIA } = utiliserRequete<AnalyseIA>(
     ["jeux", "analyse-ia-match", matchKey],
     () => obtenirAnalyseIA("paris", { match_id: matchId }),
+    { enabled: !!matchId }
+  );
+
+  const { data: historiqueCotes, isLoading: chCotes } = utiliserRequete(
+    ["jeux", "cotes-historique", matchKey],
+    () => obtenirHistoriqueCotes(matchId!),
     { enabled: !!matchId }
   );
 
@@ -188,6 +196,22 @@ function DrawerMatchDetail({
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <AlertTriangle className="h-3 w-3" />
               {analyseIA.avertissement}
+            </p>
+          </div>
+        ) : null}
+
+        {/* Évolution des cotes (Phase T) */}
+        {chCotes ? (
+          <Skeleton className="h-40 mt-4" />
+        ) : historiqueCotes && historiqueCotes.nb_points > 0 ? (
+          <div className="mt-4 space-y-2 border-t pt-4">
+            <p className="text-sm font-semibold">📊 Évolution des cotes</p>
+            <HeatmapCotes
+              points={historiqueCotes.points}
+              matchInfo={pred ? `${pred.equipe_domicile} vs ${pred.equipe_exterieur}` : undefined}
+            />
+            <p className="text-xs text-muted-foreground">
+              {historiqueCotes.nb_points} relevés — {historiqueCotes.points[0]?.bookmaker ?? "Bookmaker"}
             </p>
           </div>
         ) : null}

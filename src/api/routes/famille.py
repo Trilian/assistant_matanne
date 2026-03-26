@@ -71,41 +71,6 @@ class ParamsSuggestionsActivites(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# CONTEXTE FAMILIAL (Phase M)
-# ═══════════════════════════════════════════════════════════
-
-
-@router.get("/contexte", response_model=ContexteFamilialResponse, responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def obtenir_contexte_familial(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """
-    Obtient le contexte familial complet.
-    
-    Agrège toutes les données contextuelles:
-    - Météo actuelle + prévisions 7j
-    - Jours fériés/ponts/crèche (10 prochains jours)
-    - Anniversaires (14 prochains jours)
-    - Profil Jules + prochains jalons OMS
-    - Documents expirant (30 jours)
-    - Routines du moment (matin/soir)
-    - Activités à venir (7 jours)
-    - Achats urgents (top 5)
-    
-    Returns:
-        Contexte familial complet
-    """
-    from src.services.famille.contexte import obtenir_service_contexte_familial
-
-    def _query():
-        service = obtenir_service_contexte_familial()
-        return service.obtenir_contexte()
-
-    return await executer_async(_query)
-
-
-# ═══════════════════════════════════════════════════════════
 # PROFILS ENFANTS
 # ═══════════════════════════════════════════════════════════
 
@@ -1506,7 +1471,7 @@ async def obtenir_resume_hebdomadaire(
 # ═══════════════════════════════════════════════════════════
 
 
-@router.get("/contexte", responses=REPONSES_CRUD_LECTURE)
+@router.get("/contexte", response_model=ContexteFamilialResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_contexte_familial(
     user: dict[str, Any] = Depends(require_auth),
@@ -1567,6 +1532,7 @@ async def suggestions_weekend_ia(
 
 
 @router.post("/journal/resume-semaine", responses=REPONSES_CRUD_LECTURE)
+@router.post("/journal/resumer-semaine", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def resume_semaine_ia(
     payload: ResumeSemaineRequest,
@@ -1653,6 +1619,30 @@ def _serialiser_achat(a) -> dict:  # noqa: ANN001
         "achete": a.achete,
         "date_achat": a.date_achat.isoformat() if a.date_achat else None,
     }
+
+
+@router.get("/achats", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_achats_famille(
+    categorie: str | None = Query(None, description="Filtrer par catégorie"),
+    achete: bool = Query(False, description="Inclure les achats déjà effectués"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Liste les achats famille (route canonique)."""
+    from src.services.famille.achats import obtenir_service_achats_famille
+
+    def _query():
+        service = obtenir_service_achats_famille()
+        if categorie:
+            items = service.lister_par_categorie(categorie=categorie, achete=achete)
+        else:
+            items = service.lister_achats(achete=achete)
+        return {
+            "items": [_serialiser_achat(a) for a in items],
+            "total": len(items),
+        }
+
+    return await executer_async(_query)
 
 
 @router.post("/achats", status_code=201, responses=REPONSES_CRUD_CREATION)
@@ -1771,6 +1761,24 @@ class SuggestionsAchatsRequest(BaseModel):
     tailles: dict | None = None
 
 
+class SuggestionsAchatsAutoRequest(BaseModel):
+    """Demande auto pour suggestions achats proactives (anniversaires/jalons/saison)."""
+
+    budget_max: float = Field(default=60.0, ge=5, le=500)
+    relation_defaut: str = Field(default="famille")
+
+
+def _saison_actuelle() -> str:
+    mois = date.today().month
+    if mois in (12, 1, 2):
+        return "hiver"
+    if mois in (3, 4, 5):
+        return "printemps"
+    if mois in (6, 7, 8):
+        return "ete"
+    return "automne"
+
+
 @router.post("/achats/suggestions-ia", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def suggestions_achats_ia(
@@ -1811,6 +1819,75 @@ async def suggestions_achats_ia(
         raise HTTPException(status_code=422, detail="type doit être 'anniversaire', 'jalon' ou 'saison'")
 
     return {"suggestions": suggestions, "total": len(suggestions), "type": payload.type}
+
+
+@router.post("/achats/suggestions", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggestions_achats_auto(
+    payload: SuggestionsAchatsAutoRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère automatiquement des suggestions d'achats proactives.
+
+    Déclencheurs:
+    - Anniversaires proches (J-14)
+    - Prochains jalons de Jules
+    - Saison en cours
+    """
+    from src.services.famille.achats_ia import obtenir_service_achats_ia
+    from src.services.famille.contexte import obtenir_service_contexte_familial
+
+    async def _query() -> dict[str, Any]:
+        service_ia = obtenir_service_achats_ia()
+        contexte_service = obtenir_service_contexte_familial()
+        contexte = contexte_service.obtenir_contexte()
+
+        suggestions_anniversaire: list[dict[str, Any]] = []
+        suggestions_jalons: list[dict[str, Any]] = []
+        suggestions_saison: list[dict[str, Any]] = []
+
+        anniversaires = (contexte.get("anniversaires_proches") or [])
+        anniversaire_cible = next((a for a in anniversaires if (a.get("jours_restants") or 99) <= 14), None)
+        if anniversaire_cible:
+            suggestions_anniversaire = await service_ia.suggerer_cadeaux_anniversaire(
+                nom=anniversaire_cible.get("nom_personne", "Proche"),
+                age=anniversaire_cible.get("age") or 3,
+                relation=anniversaire_cible.get("relation") or payload.relation_defaut,
+                budget_max=payload.budget_max,
+            )
+
+        jules = contexte.get("jules") or {}
+        prochains_jalons = jules.get("prochains_jalons") or []
+        age_mois = jules.get("age_mois") or 24
+        if prochains_jalons:
+            suggestions_jalons = await service_ia.suggerer_achats_jalon(
+                age_mois=age_mois,
+                prochains_jalons=prochains_jalons,
+            )
+
+        suggestions_saison = await service_ia.suggerer_achats_saison(
+            age_enfant_mois=age_mois,
+            saison=_saison_actuelle(),
+            tailles=None,
+        )
+
+        toutes = [
+            *[{**s, "source": "anniversaire"} for s in suggestions_anniversaire],
+            *[{**s, "source": "jalon"} for s in suggestions_jalons],
+            *[{**s, "source": "saison"} for s in suggestions_saison],
+        ]
+
+        return {
+            "suggestions": toutes,
+            "groupes": {
+                "anniversaire": suggestions_anniversaire,
+                "jalon": suggestions_jalons,
+                "saison": suggestions_saison,
+            },
+            "total": len(toutes),
+        }
+
+    return await _query()
 
 
 # ═══════════════════════════════════════════════════════════
@@ -1903,6 +1980,54 @@ async def suggestions_activites_auto(
     from src.services.famille.jules import obtenir_service_jules
     from src.services.integrations.weather.service import obtenir_service_meteo
 
+    def _structurer_suggestions_texte(texte: str) -> list[dict[str, Any]]:
+        """Convertit le texte IA en suggestions structurées pour pré-remplissage UI."""
+        suggestions: list[dict[str, Any]] = []
+        if not texte:
+            return suggestions
+
+        blocs = [b.strip() for b in texte.split("🎯") if b.strip()]
+        for bloc in blocs:
+            lignes = [l.strip() for l in bloc.splitlines() if l.strip()]
+            titre = lignes[0] if lignes else "Activité familiale"
+            description = ""
+            duree_minutes = 90
+            type_activite = "autre"
+            lieu = "interieur"
+
+            for ligne in lignes[1:]:
+                low = ligne.lower()
+                if "description" in low:
+                    description = ligne.split(":", 1)[-1].strip()
+                elif "dur" in low and any(c.isdigit() for c in ligne):
+                    chiffres = "".join(c if c.isdigit() else " " for c in ligne).split()
+                    if chiffres:
+                        duree_minutes = int(chiffres[0]) * 60 if "heure" in low else int(chiffres[0])
+                elif "météo" in low or "meteo" in low:
+                    lieu = "exterieur" if "extérieur" in low or "exterieur" in low else "interieur"
+
+            titre_low = titre.lower()
+            if "parc" in titre_low or "balade" in titre_low:
+                type_activite = "sortie"
+            elif "sport" in titre_low:
+                type_activite = "sport"
+            elif "atelier" in titre_low or "dessin" in titre_low:
+                type_activite = "culture"
+            elif "jeu" in titre_low:
+                type_activite = "jeu"
+
+            suggestions.append(
+                {
+                    "titre": titre,
+                    "description": description or "Suggestion IA adaptée au contexte du jour.",
+                    "type": type_activite,
+                    "duree_minutes": duree_minutes,
+                    "lieu": lieu,
+                }
+            )
+
+        return suggestions
+
     async def _query():
         # Auto-inject météo
         meteo_service = obtenir_service_meteo()
@@ -1947,7 +2072,12 @@ async def suggestions_activites_auto(
                 meteo=meteo_txt,
                 budget_max=payload.budget_max,
             )
-            return {"suggestions": resultat, "meteo": meteo_txt, "journee_libre": journee_libre}
+            return {
+                "suggestions": resultat,
+                "suggestions_struct": _structurer_suggestions_texte(str(resultat)),
+                "meteo": meteo_txt,
+                "journee_libre": journee_libre,
+            }
 
         # Fallback: utiliser le service weekend IA
         from src.services.famille.weekend_ai import obtenir_weekend_ai_service
@@ -1959,6 +2089,11 @@ async def suggestions_activites_auto(
             budget=int(payload.budget_max),
             nb_suggestions=5,
         )
-        return {"suggestions": resultat, "meteo": meteo_txt, "journee_libre": journee_libre}
+        return {
+            "suggestions": resultat,
+            "suggestions_struct": _structurer_suggestions_texte(str(resultat)),
+            "meteo": meteo_txt,
+            "journee_libre": journee_libre,
+        }
 
     return await _query()

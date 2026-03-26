@@ -5,6 +5,8 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Camera, Upload, Trash2, Image as ImageIcon, X } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -21,17 +23,26 @@ import {
   uploaderPhoto,
   supprimerPhoto,
 } from "@/bibliotheque/api/album";
+import { listerJalons } from "@/bibliotheque/api/famille";
 import type { PhotoAlbum } from "@/bibliotheque/api/album";
 import { toast } from "sonner";
 
 export default function PageAlbum() {
+  const searchParams = useSearchParams();
+  const jalonDepuisUrl = searchParams.get("jalon_id");
   const [photoSelectionnee, setPhotoSelectionnee] = useState<PhotoAlbum | null>(null);
+  const [jalonLie, setJalonLie] = useState<string>(jalonDepuisUrl ?? "");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   const { data: photos, isLoading } = utiliserRequete(
     ["famille", "album"],
     () => listerPhotos()
+  );
+
+  const { data: jalons = [] } = utiliserRequete(
+    ["famille", "jules", "jalons", "album-lien"],
+    () => listerJalons()
   );
 
   const invalider = () =>
@@ -60,9 +71,24 @@ export default function PageAlbum() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    Array.from(files).forEach((file) => uploader(file));
+    Array.from(files).forEach((file) => {
+      const nomAvecJalon = jalonLie
+        ? `jalon-${jalonLie}_${file.name}`
+        : file.name;
+      const fichierLie = new File([file], nomAvecJalon, { type: file.type });
+      uploader(fichierLie);
+    });
     e.target.value = "";
   };
+
+  const extraireJalonId = (nom: string) => {
+    const match = /^jalon-(\d+)_/.exec(nom);
+    return match ? match[1] : null;
+  };
+
+  const photosFiltrees = jalonLie
+    ? (photos ?? []).filter((p) => extraireJalonId(p.nom) === jalonLie)
+    : (photos ?? []);
 
   const formatTaille = (bytes: number) => {
     if (bytes < 1024) return `${bytes} o`;
@@ -76,13 +102,27 @@ export default function PageAlbum() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">📸 Album</h1>
           <p className="text-muted-foreground">
-            Galerie photos familiale — {photos?.length ?? 0} photos
+            Galerie photos familiale — {photosFiltrees.length} photo(s)
           </p>
         </div>
-        <div>
+        <div className="flex items-center gap-2">
+          <select
+            title="Lier les uploads à un jalon"
+            value={jalonLie}
+            onChange={(e) => setJalonLie(e.target.value)}
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="">Aucun jalon</option>
+            {jalons.map((j) => (
+              <option key={j.id} value={String(j.id)}>
+                #{j.id} - {j.titre}
+              </option>
+            ))}
+          </select>
           <input
             ref={fileInputRef}
             type="file"
+            title="Sélectionner des photos à uploader"
             accept="image/jpeg,image/png,image/webp,image/gif"
             multiple
             className="hidden"
@@ -106,7 +146,7 @@ export default function PageAlbum() {
             <Skeleton key={i} className="aspect-square rounded-lg" />
           ))}
         </div>
-      ) : !photos?.length ? (
+      ) : !photosFiltrees.length ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-4 py-16">
             <Camera className="h-16 w-16 text-muted-foreground" />
@@ -121,7 +161,7 @@ export default function PageAlbum() {
         </Card>
       ) : (
         <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-          {photos.map((photo) => (
+          {photosFiltrees.map((photo) => (
             <div
               key={photo.id}
               role="button"
@@ -138,6 +178,11 @@ export default function PageAlbum() {
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+              {extraireJalonId(photo.nom) && (
+                <div className="absolute left-2 top-2 rounded bg-black/70 px-2 py-0.5 text-[10px] text-white">
+                  Jalon #{extraireJalonId(photo.nom)}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -166,6 +211,14 @@ export default function PageAlbum() {
               <span className="text-white text-sm">
                 {photoSelectionnee.nom} · {formatTaille(photoSelectionnee.taille)}
               </span>
+              {extraireJalonId(photoSelectionnee.nom) && (
+                <Link
+                  href={`/famille/jules?jalon_id=${extraireJalonId(photoSelectionnee.nom)}`}
+                  className="text-xs text-white underline"
+                >
+                  Voir le jalon lié
+                </Link>
+              )}
               <Button
                 variant="destructive"
                 size="sm"

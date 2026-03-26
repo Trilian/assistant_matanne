@@ -31,13 +31,23 @@ import {
   creerAchat,
   marquerAchatAchete,
   supprimerAchat,
+  obtenirSuggestionsAchatsAuto,
 } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
-import type { AchatFamille, SuggestionAchat } from "@/types/famille";
+import type { AchatFamille } from "@/types/famille";
 
 export default function PageAchats() {
   const [openDialogue, setOpenDialogue] = useState(false);
   const [nouveauAchat, setNouveauAchat] = useState({ nom: "", categorie: "autre", priorite: "moyenne", description: "" });
+  const [chargementSuggestions, setChargementSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<Array<{
+    titre: string;
+    description: string;
+    fourchette_prix?: string | null;
+    ou_acheter?: string | null;
+    pertinence?: string | null;
+    source: "anniversaire" | "jalon" | "saison";
+  }>>([]);
 
   const { data: achats = [], refetch } = utiliserRequete<AchatFamille[]>(
     ["famille", "achats"],
@@ -90,6 +100,33 @@ export default function PageAchats() {
     });
   };
 
+  const chargerSuggestionsIA = async () => {
+    setChargementSuggestions(true);
+    try {
+      const resultat = await obtenirSuggestionsAchatsAuto({});
+      setSuggestions(resultat.suggestions);
+      toast.success(`${resultat.total} suggestion(s) IA générée(s)`);
+    } catch {
+      toast.error("Erreur lors du chargement des suggestions IA");
+    } finally {
+      setChargementSuggestions(false);
+    }
+  };
+
+  const ajouterSuggestion = async (suggestion: {
+    titre: string;
+    description: string;
+    source: "anniversaire" | "jalon" | "saison";
+  }) => {
+    await creer({
+      nom: suggestion.titre,
+      categorie: suggestion.source === "anniversaire" ? "cadeau" : suggestion.source,
+      priorite: suggestion.source === "anniversaire" ? "haute" : "moyenne",
+      description: suggestion.description,
+      suggere_par: "ia",
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* En-tête */}
@@ -128,6 +165,7 @@ export default function PageAchats() {
                 <Label htmlFor="categorie">Catégorie</Label>
                 <select
                   id="categorie"
+                  title="Catégorie"
                   value={nouveauAchat.categorie}
                   onChange={(e) => setNouveauAchat({ ...nouveauAchat, categorie: e.target.value })}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -144,6 +182,7 @@ export default function PageAchats() {
                 <Label htmlFor="priorite">Priorité</Label>
                 <select
                   id="priorite"
+                  title="Priorité"
                   value={nouveauAchat.priorite}
                   onChange={(e) => setNouveauAchat({ ...nouveauAchat, priorite: e.target.value })}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -171,7 +210,7 @@ export default function PageAchats() {
         </Dialog>
       </div>
 
-      {/* Section suggestions IA (placeholder pour phase P backend) */}
+      {/* Section suggestions IA (Phase P) */}
       <Card className="bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-950/20 dark:to-pink-950/20">
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -183,10 +222,43 @@ export default function PageAchats() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-4">
-            Fonctionnalité IA à venir — suggestions automatiques de cadeaux et achats pertinents
-          </p>
-          {/* TODO Phase P: afficher suggestions_cadeaux, suggestions_saison, suggestions_jalons */}
+          <div className="space-y-3">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={chargerSuggestionsIA}
+              disabled={chargementSuggestions}
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              {chargementSuggestions ? "Génération en cours..." : "Générer des suggestions proactives"}
+            </Button>
+
+            {suggestions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-2">
+                Lancez la génération pour obtenir des idées cadeaux/achats basées sur anniversaire, jalons et saison.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {suggestions.slice(0, 6).map((s, idx) => (
+                  <div key={`${s.titre}-${idx}`} className="rounded-lg border bg-card p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium">{s.titre}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          <Badge variant="outline" className="text-xs">{s.source}</Badge>
+                          {s.fourchette_prix && <Badge variant="secondary" className="text-xs">{s.fourchette_prix}</Badge>}
+                        </div>
+                      </div>
+                      <Button size="sm" onClick={() => ajouterSuggestion(s)}>
+                        Ajouter
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 

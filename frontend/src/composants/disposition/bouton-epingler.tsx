@@ -18,6 +18,7 @@ import { cn } from "@/bibliotheque/utils";
 // Map des chemins vers leurs noms lisibles
 const NOMS_PAGES: Record<string, string> = {
   "/": "Accueil",
+  "/ma-semaine": "Ma Semaine",
   "/cuisine": "Cuisine",
   "/cuisine/recettes": "Recettes",
   "/cuisine/planning": "Planning Repas",
@@ -37,6 +38,7 @@ const NOMS_PAGES: Record<string, string> = {
   "/famille/contacts": "Contacts",
   "/famille/journal": "Journal",
   "/famille/documents": "Documents",
+  "/famille/calendriers": "Calendriers",
   "/maison": "Maison",
   "/maison/projets": "Projets",
   "/maison/menage": "Ménage",

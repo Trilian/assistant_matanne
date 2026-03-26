@@ -73,6 +73,7 @@ interface Page {
 const PAGES: Page[] = [
   // Dashboard
   { nom: "Accueil", chemin: "/", categorie: "Principal", icone: Home },
+  { nom: "Ma Semaine", chemin: "/ma-semaine", categorie: "Principal", icone: CalendarCheck, keywords: ["semaine", "planning", "vue globale", "repas", "activites", "matchs"] },
 
   // Cuisine
   { nom: "Cuisine", chemin: "/cuisine", categorie: "Cuisine", icone: ChefHat },
@@ -96,6 +97,7 @@ const PAGES: Page[] = [
   { nom: "Contacts", chemin: "/famille/contacts", categorie: "Famille", icone: Contact, keywords: ["annuaire", "telephone"] },
   { nom: "Journal", chemin: "/famille/journal", categorie: "Famille", icone: BookOpen, keywords: ["memoires", "notes"] },
   { nom: "Documents", chemin: "/famille/documents", categorie: "Famille", icone: FileText, keywords: ["fichiers", "papiers"] },
+  { nom: "Calendriers", chemin: "/famille/calendriers", categorie: "Famille", icone: CalendarDays, keywords: ["google", "ical", "sync", "agenda"] },
 
   // Maison - Gestion & Entretien
   { nom: "Maison", chemin: "/maison", categorie: "Maison", icone: House },

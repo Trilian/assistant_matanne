@@ -48,7 +48,7 @@ export default function PageMaSemaine() {
   const [offsetSemaine, setOffsetSemaine] = useState(0);
   const dateDebut = lundi(offsetSemaine);
 
-  const { data, isLoading } = utiliserRequete(
+  const { data, isLoading, isError } = utiliserRequete(
     ["planning", "semaine-unifiee", dateDebut],
     () => obtenirSemaineUnifiee(dateDebut),
     { staleTime: 5 * 60 * 1000 }
@@ -97,6 +97,13 @@ export default function PageMaSemaine() {
           </Button>
         </div>
       </div>
+
+      {/* État d'erreur */}
+      {isError && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          Impossible de charger la semaine. Vérifie ta connexion ou réessaie.
+        </div>
+      )}
 
       {/* Grille jours × colonnes */}
       {isLoading ? (

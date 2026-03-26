@@ -254,6 +254,16 @@ export default function PageFamille() {
             />
           )}
 
+          {contexte?.achats_urgents && contexte.achats_urgents.length > 0 && (
+            <CarteSuggestionIA
+              titre="Achats à anticiper"
+              description={`${contexte.achats_urgents.length} achat(s) urgent(s) identifié(s) pour la famille`}
+              source="achats"
+              actionLabel="Ouvrir les achats"
+              onAction={() => router.push("/famille/achats")}
+            />
+          )}
+
           {/* Fallback si aucune suggestion */}
           {!isWeekendApproaching && !contexte?.anniversaires_proches?.length && (
             <p className="text-sm text-muted-foreground text-center py-4">

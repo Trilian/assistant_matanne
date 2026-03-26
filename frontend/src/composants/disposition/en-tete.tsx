@@ -4,7 +4,7 @@
 
 "use client";
 
-import { Search, Moon, Sun, LogOut, User, BookOpen, Link2, SlidersHorizontal } from "lucide-react";
+import { Search, Moon, Sun, LogOut, User, Link2, SlidersHorizontal } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/composants/ui/button";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -68,19 +68,6 @@ export function EnTete() {
         aria-label="Rechercher"
       >
         <Search className="h-5 w-5" />
-      </Button>
-
-      {/* Lien vers guide utilisateur */}
-      <Button
-        variant="ghost"
-        size="icon"
-        asChild
-        aria-label="Guide utilisateur"
-      >
-        <a href="https://github.com/votreorg/assistant-matanne/blob/main/docs/user-guide/README.md" target="_blank" rel="noopener noreferrer">
-          <BookOpen className="h-5 w-5" />
-          <span className="sr-only">Guide utilisateur</span>
-        </a>
       </Button>
 
       {/* Toggle thème */}

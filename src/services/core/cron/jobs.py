@@ -169,12 +169,12 @@ class DémarreurCron:
             CronTrigger(day_of_week="mon", hour=6, minute=0),
             id="entretien_saisonnier",
             name="Entretien saisonnier hebdomadaire",
-                self._scheduler.add_job(
-                    _job_push_quotidien,
-                    CronTrigger(hour=9, minute=0),
-                    id="push_quotidien",
-                    name="Notifications Web Push quotidiennes (alertes urgentes)",
-                )
+        )
+        self._scheduler.add_job(
+            _job_push_quotidien,
+            CronTrigger(hour=9, minute=0),
+            id="push_quotidien",
+            name="Notifications Web Push quotidiennes (alertes urgentes)",
         )
 
     def demarrer(self) -> None:

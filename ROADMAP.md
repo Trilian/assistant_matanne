@@ -1,6 +1,66 @@
 # 🗺️ ROADMAP — Assistant Matanne
 
-> Dernière mise à jour : 26 mars 2026 (Phase AC Navigation — module complet)
+> Dernière mise à jour : 27 mars 2026 (finalisation module Famille M-R + corrections routes/cron)
+
+---
+
+## ✅ Mise à jour implémentation (27 mars 2026 — module Famille M-R)
+
+- [x] **Phase O (Activités météo-intelligentes)** : pré-remplissage inline depuis suggestions IA (`suggestions_struct` + action "Utiliser cette suggestion")
+- [x] **Phase P (Achats & cadeaux auto-suggérés)** :
+  - Endpoint canonique `GET /api/v1/famille/achats`
+  - Endpoint proactif `POST /api/v1/famille/achats/suggestions`
+  - Page `/famille/achats` branchée sur suggestions IA actionnables (ajout en 1 clic)
+  - Suggestion achats inline ajoutée au hub `/famille`
+- [x] **Phase Q (Rappels intelligents)** : endpoint `GET /api/v1/famille/rappels/evaluer` exploité sur hub + sidebar, cron push quotidien fiabilisé
+- [x] **Phase R (Journal IA & album jalons)** :
+  - Alias API ajouté `POST /api/v1/famille/journal/resumer-semaine`
+  - Résumés IA sauvegardés affichés dans `/famille/journal`
+  - Lien album↔jalons exploité via upload lié (`jalon-<id>_`) + navigation croisée Jules/Album
+- [x] **Stabilisation backend** : déduplication route `/famille/contexte`, correction enregistrement job `push_quotidien` APScheduler
+
+**✅ MODULE FAMILLE : 6/6 phases complètes (M-R)**
+
+---
+
+## ✅ Mise à jour implémentation (27 mars 2026 — module Jeux 100% FINALISÉ)
+
+**🎮 Phases T/U/V/W — 4 fonctionnalités manquantes implémentées :**
+
+- [x] **Phase T — Heatmap cotes bookmakers** :
+  - Modèle `CoteHistorique` + endpoint `GET /paris/cotes-historique/{match_id}`
+  - Composant `HeatmapCotes` (LineChart Recharts multi-lignes)
+  - Migration SQL `003_add_cotes_historique.sql`
+- [x] **Phase U — Générateur grilles IA pondéré** :
+  - `JeuxAIService.generer_grille_ia_ponderee()` (Mistral AI, modes chauds/froids/equilibre)
+  - Endpoint `POST /loto/generer-grille-ia-ponderee`
+  - Composant `GrilleIAPonderee` (UI génération + analyse intégrée)
+- [x] **Phase U — Analyse IA grilles joueur** :
+  - `JeuxAIService.analyser_grille_joueur()` (critique Mistral avec note 0-10)
+  - Endpoint `POST /loto/analyser-grille`
+  - Intégré dans `GrilleIAPonderee` (bouton "Analyser cette grille")
+- [x] **Phase W — Notifications Web Push résultats** :
+  - Templates backend : `notifier_pari_gagne()`, `notifier_pari_perdu()`, `notifier_resultat_loto()`
+  - Types notifications : `RESULTAT_PARI_GAGNE`, `RESULTAT_PARI_PERDU`, `RESULTAT_LOTO`, `RESULTAT_LOTO_GAIN`
+  - Hook frontend `useNotificationsJeux()` (écoute service worker + toasts sonner)
+  - Fonction `demanderPermissionNotificationsJeux()`
+
+**✅ INTÉGRATION UI COMPLÈTE (27 mars 2026 — session après-midi) :**
+
+- ✅ **Loto** : `GrilleIAPonderee` intégré dans `/jeux/loto` (après générateur basique)
+  - Callbacks `genererGrilleIAPonderee()` + `analyserGrilleJoueur()` câblés
+  - UI complète : sélecteur mode → génération IA → analyse critique
+- ✅ **Paris** : `HeatmapCotes` affiché dans drawer détail match
+  - Graphique évolution cotes (1/N/2, over/under 2.5) visible pour chaque match
+  - Fetching automatique via `obtenirHistoriqueCotes(matchId)`
+- ✅ **Notifications** : `useNotificationsJeux()` activé dans `CoquilleApp`
+  - Écoute service worker au niveau racine
+  - Toasts automatiques pour paris gagnés/perdus, résultats loto, séries
+- ✅ **Paramètres** : Bouton "Activer les notifications jeux" dans onglet Notifications
+  - Appelle `demanderPermissionNotificationsJeux()` → permission navigateur
+  - Section dédiée 🎮 sous les notifications push générales
+
+**✅ MODULE JEUX : 5/5 phases complètes (S-W) — 100% fonctionnel BACKEND + FRONTEND + UI**
 
 ---
 
@@ -12,16 +72,6 @@
 - [x] **AC4 Sidebar simplifiée** : 4 modules + Ma Semaine, Outils retirés de la nav principale
 - [x] **AC5 Menu commandes** : Ctrl+K — 60+ pages indexées, favoris localStorage, `BoutonEpingler`, `FavorisRapides`
 - [x] **Module Navigation (AC)** : 5/5 sous-phases complètes ✅
-
----
-
-## ✅ Mise à jour implémentation (27 mars 2026 — module Jeux finalisé)
-
-- [x] **Résumé mensuel IA** : génération via Mistral avec analyse points forts/faibles/recommandations (`JeuxAIService.generer_resume_mensuel()`)
-- [x] **Graphique bankroll cumulée** : LineChart Recharts évolution mensuelle dans page performance
-- [x] **Middleware guard budget** : `BudgetGuardMiddleware` bloque POST paris si limite atteinte ou auto-exclusion active
-- [x] **Analytics jeux complètes** : breakdown par championnat/type/confiance avec graphiques, séries/records affichés
-- [x] **Module Jeux (S-W)** : 5/5 phases complètes ✅
 
 ---
 
@@ -39,17 +89,19 @@
 
 ## 🗓️ Priorités — 2 prochaines semaines (27 mars → 10 avril 2026)
 
-> Focus : automatisation proactive + qualité test. Module Jeux finalisé, prochaine priorité = automatisation cuisine/famille/maison.
+> Focus : automatisation cuisine + qualité test + synchronisation inventaire. **Modules Famille et Jeux finalisés**.
 
 | # | Tâche | Phase | Effort | Impact |
 |---|-------|-------|--------|--------|
-| 1 | Endpoint évaluation rappels + badges urgence hub famille | Q Rappels | M | 🔴 Proactif |
-| 2 | Auto-sync OCR photo-frigo → inventaire (1 endpoint + bouton UI) | K Photo-frigo | S | 🟠 Quotidien |
-| 3 | Déclencheurs IA achats famille (anniversaire J-14, jalons) | P Achats | M | 🟠 Proactif |
-| 4 | Tests backend routes restantes (admin/recherche/rgpd) | — Qualité | M | 🟡 Stabilité |
-| 5 | Notifications push Web Push séries/résultats jeux | W Jeu responsable | M | 🟡 UX |
+| 1 | Auto-sync OCR photo-frigo → inventaire (1 endpoint + bouton UI) | K Photo-frigo | S | 🟠 Quotidien |
+| 2 | Tests backend routes restantes (admin/recherche/rgpd) | — Qualité | M | 🔴 Stabilité |
+| 3 | Renforcer couverture tests famille (achats/rappels/journal/album) | M-R Famille | M | 🟠 Fiabilité |
+| 4 | Optimiser flux Ma Semaine cuisine (onboarding + widget dashboard) | D Cuisine | M | 🟡 UX |
+| 5 | Convertisseur inline flux recettes | AC2 Outils | S | 🟡 UX |
 
 *Effort : S = ½ journée, M = 1–2 jours. Impact : 🔴 bloquant/sécurité, 🟠 valeur utilisateur directe, 🟡 qualité/UX.*
+
+**Note** : Items Famille Q/P (rappels + achats proactifs) déplacés en livré dans la session du 27 mars.
 
 ---
 
@@ -89,24 +141,24 @@
 
 **Vue d'ensemble** : 28 phases organisées par module pour structurer la refonte complète de l'application.
 
-### État global (26 mars 2026) — après P0+P1+P2 + priorités AC2/AC3/AA
+### État global (27 mars 2026) — après finalisation Jeux (S-W) + Famille (M-R)
 
 | Statut | Nombre | Pourcentage | Description |
 |--------|--------|-------------|-------------|
-| ✅ **COMPLÈTES** | **12/28** | **43%** | Tous éléments implémentés et fonctionnels |
-| 🔶 **QUASI-COMPLÈTES (≥80%)** | **3** *(dans partielles)* | *(+11%)* | D, L, AA — 1 feature finale restante |
-| 🔄 **PARTIELLES** | **14/28** | **50%** | Infrastructure backend + frontend amélioré |
+| ✅ **COMPLÈTES** | **23/28** | **82%** | Tous éléments implémentés et fonctionnels |
+| 🔶 **QUASI-COMPLÈTES (≥80%)** | **2** *(dans partielles)* | *(+7%)* | D, L |
+| 🔄 **PARTIELLES** | **3/28** | **11%** | Fonctionnalités avancées ou UX restantes |
 | ❌ **NON IMPLÉMENTÉES** | **2/28** | **7%** | Aucun élément trouvé |
 
-> **Couverture fonctionnelle pondérée** : ~73% — 12 complètes + 3×0,85 quasi + 11×0,5 partielles sur 28 phases.
+> **Couverture fonctionnelle pondérée** : ~89% — 23 complètes + 2×0,85 quasi + 1×0,5 partielle sur 28 phases.
 
-### Par module (après session P0+P1+P2)
+### Par module (après session 27 mars)
 
-- **🍽️ Cuisine (A-L)** : 1/12 complète (B Planning→Courses), 9 partielles, 2 non implémentées
-- **👨‍👩‍👦 Famille (M-R)** : 2/6 complètes (M Contexte, N Hub), 4 partielles
-- **🎮 Jeux (S-W)** : 1/5 complète (S Dashboard), 4 partielles
-- **🏡 Maison (X-AB)** : 3/5 complètes (X Contexte, Y Hub, Z Planning), 2 partielles (AA, AB)
-- **🧭 Navigation (AC)** : **5/5 complètes** (AC1 Ma Semaine, AC2 Outils, AC3 Paramètres, AC4 Sidebar, AC5 Commandes) ✅ **MODULE COMPLET**
+- **🍽️ Cuisine (A-L)** : 2/12 complètes, 8 partielles, 2 non implémentées
+- **👨‍👩‍👦 Famille (M-R)** : **6/6 complètes** ✅ **MODULE COMPLET**
+- **🎮 Jeux (S-W)** : **5/5 complètes** ✅ **MODULE COMPLET**
+- **🏡 Maison (X-AB)** : **5/5 complètes** ✅ **MODULE COMPLET**
+- **🧭 Navigation (AC)** : **5/5 complètes** ✅ **MODULE COMPLET**
 
 ---
 

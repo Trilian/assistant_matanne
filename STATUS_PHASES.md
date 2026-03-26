@@ -1,7 +1,7 @@
 # 📊 État d'Implémentation des 28 Phases — Assistant Matanne
 
-> **Dernière mise à jour** : **27 mars 2026** (finalisation module Jeux — Phases T/U/V/W)  
-> **Couverture fonctionnelle globale** : **~82%** pondérée (19/28 complètes + 2 quasi + 7 partielles)
+> **Dernière mise à jour** : **27 mars 2026** (finalisation module Famille M-R + corrections routes/cron)  
+> **Couverture fonctionnelle globale** : **~89%** pondérée (23/28 complètes + 2 quasi + 3 partielles)
 
 ---
 
@@ -70,9 +70,9 @@
 
 ## 🎯 Vue d'ensemble
 
-**Progrès global** : **19/28 phases complètes (68%)**, 7/28 partielles (25%), 2/28 non implémentées (7%)
+**Progrès global** : **23/28 phases complètes (82%)**, 3/28 partielles (11%), 2/28 non implémentées (7%)
 
-> **SESSION 27 MARS 2026** : Finalisation module Jeux (4 phases T/U/V/W) — résumé mensuel IA, graphique bankroll, middleware budget guard, analytics complètes. **Module Jeux 100% finalisé ✅**
+> **SESSION 27 MARS 2026** : Finalisation module Famille (Phases O/P/Q/R) + stabilisation backend (déduplication routes famille, cron push quotidien). **Module Famille 100% finalisé ✅**
 
 Les 28 phases correspondent au plan de refonte complet de l'application, organisé par module :
 - **Cuisine (A-L)** : 12 phases — Flux repas, batch cooking, nutrition, anti-gaspi
@@ -365,7 +365,7 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 ---
 
-### Phase O : Activités Météo-Intelligentes 🔄 PARTIELLE ⚡ **AVANCÉE CETTE SESSION**
+### Phase O : Activités Météo-Intelligentes ✅ COMPLÈTE ⚡ **FINALISÉE CETTE SESSION**
 
 **Objectif** : Auto-injection météo dans activités, détection journée libre, suggestions IA contextualised
 
@@ -374,15 +374,14 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Endpoint `POST /api/v1/weekend/suggestions-ia` exposé
 - ✅ Page `/famille/activites` avec dialogue IA contextuel
 - ✅ Affichage explicite du contexte détecté (météo + journée libre) dans l'UI
+- ✅ Suggestions structurées retournées par l'API (`suggestions_struct`) pour usage frontend
+- ✅ Pré-remplissage inline du formulaire de création (`Utiliser cette suggestion`)
 
-**Ce qui manque** :
-- ❌ Suggestions inline directement dans le formulaire de création (pré-remplissage auto)
-
-**Impact** : Suggestions activités réellement contextuelles, reste le pré-remplissage direct
+**Impact** : Flux complet contextuel → suggestion IA → création activité pré-remplie
 
 ---
 
-### Phase P : Achats & Cadeaux Auto-Suggérés 🔄 PARTIELLE
+### Phase P : Achats & Cadeaux Auto-Suggérés ✅ COMPLÈTE ⚡ **FINALISÉE CETTE SESSION**
 
 **Objectif** : Suggestions IA achats (anniversaires, saison, jalons), déclencheurs automatiques
 
@@ -390,21 +389,18 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Page `/famille/achats` avec liste + filtres
 - ✅ Modèle `AchatFamille` complet (categorie, priorite, destinataire_id, jalon_id, date_limite)
 - ✅ CRUD achats fonctionnel
+- ✅ Service `AchatsIAService` opérationnel
+- ✅ Endpoint `GET /api/v1/famille/achats` (route canonique)
+- ✅ Endpoint `POST /api/v1/famille/achats/suggestions-ia` (manuel par type)
+- ✅ Endpoint `POST /api/v1/famille/achats/suggestions` (proactif: anniversaire J-14, jalons, saison)
+- ✅ Suggestions IA actionnables sur `/famille/achats` (ajout en 1 clic)
+- ✅ Suggestion inline achats ajoutée au hub `/famille`
 
-**Ce qui manque** :
-- ❌ Service `AchatsIAService` absent
-- ❌ Déclencheurs automatiques (anniversaire J-14, jalon bébé, saison)
-- ❌ Endpoints API achats famille :
-  - `POST /api/v1/famille/achats/suggestions` (IA)
-  - `GET /api/v1/famille/achats`
-  - `POST /api/v1/famille/achats`
-- ❌ Suggestions inline hub famille
-
-**Impact** : Page existe, pas d'IA
+**Impact** : Achats famille pilotés par IA contextuelle et injectables directement dans la liste
 
 ---
 
-### Phase Q : Rappels Intelligents 🔄 PARTIELLE
+### Phase Q : Rappels Intelligents ✅ COMPLÈTE ⚡ **FINALISÉE CETTE SESSION**
 
 **Objectif** : Affichage badges urgence hub, notifications push automatiques
 
@@ -412,17 +408,16 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Service `ServiceRappelsFamille` opérationnel
 - ✅ Infrastructure ntfy.sh fonctionnelle
 - ✅ Modèles riches (documents, budgets, activités, crèche)
+- ✅ Endpoint `GET /api/v1/famille/rappels/evaluer` exposé
+- ✅ Badges urgences sur hub famille et sidebar
+- ✅ Push automatiques déclenchés via cron APScheduler (`push_quotidien`)
+- ✅ Job cron push corrigé/fiabilisé
 
-**Ce qui manque** :
-- ❌ Endpoint `GET /api/v1/famille/rappels/evaluer` absent
-- ❌ Badges urgence hub famille absents
-- ❌ Push automatiques non déclenchés (job cron manquant)
-
-**Impact** : Backend prêt, pas affiché UI
+**Impact** : Rappels intelligents pleinement visibles + automatisation push active
 
 ---
 
-### Phase R : Journal IA & Album Jalons 🔄 PARTIELLE
+### Phase R : Journal IA & Album Jalons ✅ COMPLÈTE ⚡ **FINALISÉE CETTE SESSION**
 
 **Objectif** : Résumé hebdo IA, lien album↔jalons, graphique croissance OMS
 
@@ -431,14 +426,13 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Page `/famille/album` avec photos
 - ✅ Modèle `SouvenirFamille.jalon_id` FK existe
 - ✅ Service Jules avec jalons détaillés
-
-**Ce qui manque** :
-- ❌ Endpoint `POST /api/v1/famille/journal/resumer-semaine` (IA) absent
-- ❌ Lien album↔jalons non exploité frontend
 - ✅ Graphique croissance OMS (courbes percentiles) présent sur `/famille/jules`
-- ❌ Résumés hebdo IA non affichés
+- ✅ Endpoint `POST /api/v1/famille/journal/resume-semaine` exposé
+- ✅ Alias de compatibilité `POST /api/v1/famille/journal/resumer-semaine`
+- ✅ Résumés hebdo IA affichés et historisés dans le journal
+- ✅ Lien album↔jalons exploité côté frontend (upload lié + navigation croisée Jules ↔ Album)
 
-**Impact** : Pages existent, features avancées absentes
+**Impact** : Journal IA et album jalons réellement connectés dans les parcours utilisateur
 
 ---
 
@@ -476,8 +470,9 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Endpoint `POST /api/v1/jeux/ocr-ticket` (Pixtral) exposé
 - ✅ Analytics par championnat/confiance UI (breakdown graphiques page performance)
 - ✅ **NOUVEAU** Heatmap cotes bookmakers (`CoteHistorique` model + endpoint `/paris/cotes-historique/{match_id}` + composant `HeatmapCotes`)
+- ✅ **INTÉGRATION UI** (27 mars) : `HeatmapCotes` affiché dans drawer détail match (graphique évolution visible lors de consultation match)
 
-**Impact** : Phase T COMPLÈTE À 100% — toutes fonctionnalités intelligentes paris opérationnelles
+**Impact** : Phase T COMPLÈTE À 100% — toutes fonctionnalités intelligentes paris opérationnelles + visibles UI
 
 ---
 
@@ -494,8 +489,9 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Générateur grilles basique (`POST /api/v1/jeux/loto/generer-grille`, `/euromillions/generer-grille`)
 - ✅ **NOUVEAU** Générateur grilles IA pondéré Mistral (`JeuxAIService.generer_grille_ia_ponderee()` + endpoint `/loto/generer-grille-ia-ponderee` + composant `GrilleIAPonderee`)
 - ✅ **NOUVEAU** Analyse IA grilles joueur (`JeuxAIService.analyser_grille_joueur()` + endpoint `/loto/analyser-grille` + intégré dans `GrilleIAPonderee`)
+- ✅ **INTÉGRATION UI** (27 mars) : `GrilleIAPonderee` intégré dans `/jeux/loto` avec callbacks API, sélecteur de mode, génération IA, analyse critique affichée (note + points forts/faibles + recommandations)
 
-**Impact** : Phase U COMPLÈTE À 100% — générateur IA avancé + critique grilles Mistral opérationnels
+**Impact** : Phase U COMPLÈTE À 100% — générateur IA avancé + critique grilles Mistral opérationnels + accessibles dans l'interface utilisateur
 
 ---
 
@@ -538,8 +534,12 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
   - Types notification : `RESULTAT_PARI_GAGNE`, `RESULTAT_PARI_PERDU`, `RESULTAT_LOTO`, `RESULTAT_LOTO_GAIN`
   - Hook frontend `useNotificationsJeux()` écoute service worker et affiche toasts sonner
   - Fonction `demanderPermissionNotificationsJeux()` pour demande permission navigateur
+- ✅ **INTÉGRATION UI** (27 mars) : 
+  - `useNotificationsJeux()` activé dans `CoquilleApp` (layout racine)
+  - Bouton "Activer les notifications jeux" ajouté dans `/parametres` onglet Notifications
+  - Toasts automatiques lors réception messages service worker (pari gagné/perdu, loto, séries)
 
-**Impact** : Phase W COMPLÈTE À 100% — jeu responsable armé + notifications push résultats opérationnelles
+**Impact** : Phase W COMPLÈTE À 100% — jeu responsable armé + notifications push résultats opérationnelles + UI activation utilisateur fonctionnelle
 
 ---
 
@@ -762,22 +762,22 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 | Statut | Nombre | Pourcentage | Description |
 |--------|--------|-------------|-------------|
-| ✅ **COMPLÈTES** | **12/28** | **43%** | Tous éléments implémentés et fonctionnels |
-| 🔶 **QUASI-COMPLÈTES (≥80%)** | **3** *(inclus dans partielles)* | *(+11%)* | D, L, AA — 1 feature finale restante chacune |
-| 🔄 **PARTIELLES** | **14/28** | **50%** | Infrastructure backend ou UX encore à finaliser |
+| ✅ **COMPLÈTES** | **23/28** | **82%** | Tous éléments implémentés et fonctionnels |
+| 🔶 **QUASI-COMPLÈTES (≥80%)** | **2** *(inclus dans partielles)* | *(+7%)* | D, L |
+| 🔄 **PARTIELLES** | **3/28** | **11%** | Infrastructure backend ou UX encore à finaliser |
 | ❌ **NON IMPLÉMENTÉES** | **2/28** | **7%** | Aucun élément trouvé |
 
-> **Couverture fonctionnelle pondérée** : ~73%  
-> *(12 complètes × 1,0) + (3 quasi × 0,85) + (11 partielles × 0,5) = 20,05 / 28*
+> **Couverture fonctionnelle pondérée** : ~89%  
+> *(23 complètes × 1,0) + (2 quasi × 0,85) + (1 partielle × 0,5) = 24,95 / 28*
 
 ### Par module
 
 | Module | Complètes | Partielles | Non implémentées | Taux complétion |
 |--------|-----------|------------|------------------|-----------------|
-| **🍽️ Cuisine (A-L)** | 1/12 | 9/12 dont 2 quasi | 2/12 | ~65% fonctionnel |
-| **👨‍👩‍👦 Famille (M-R)** | 2/6 | 4/6 | 0/6 | ~71% fonctionnel |
-| **🎮 Jeux (S-W)** | 1/5 | 4/5 | 0/5 | ~60% fonctionnel |
-| **🏡 Maison (X-AB)** | 3/5 | 2/5 dont 1 quasi | 0/5 | ~82% fonctionnel |
+| **🍽️ Cuisine (A-L)** | 2/12 | 8/12 dont 2 quasi | 2/12 | ~68% fonctionnel |
+| **👨‍👩‍👦 Famille (M-R)** | 6/6 | 0/6 | 0/6 | ~100% fonctionnel ✅ |
+| **🎮 Jeux (S-W)** | 5/5 | 0/5 | 0/5 | ~100% fonctionnel ✅ |
+| **🏡 Maison (X-AB)** | 5/5 | 0/5 | 0/5 | ~100% fonctionnel ✅ |
 | **🧭 Navigation (AC)** | 5/5 | 0/5 | 0/5 | ~100% fonctionnel ✅ |
 
 *Note: Phase G absorbée par Phase Y ne compte pas dans les totaux*
@@ -815,22 +815,17 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 ### ❌ Gaps principaux
 
-1. **Automatisation IA achats/rappels à finaliser** :
-   - Phase P : déclencheurs automatiques cadeaux/achats (anniversaire J-14, jalons, saison)
-   - Phase Q : endpoint d'évaluation des rappels + badges urgence consolidés
-
-2. **Flux intelligents encore incomplets** :
+1. **Automatisation cuisine encore incomplète** :
    - Phase K : synchronisation auto OCR photo-frigo vers inventaire
-   - ~~Phase AC2 : convertisseur inline recettes manquant~~ ✅ COMPLÈTE
+   - Phase D : onboarding/widget dashboard pour Ma Semaine
 
-3. **Jeux: profondeur analytique et garde-fous** :
-   - Phases T/V : analytics avancés (championnat, confiance, breakdown ROI)
-   - Phase W : middleware budget bloquant + auto-exclusion et alertes série
-
-4. **Nutrition & diététique** :
+2. **Nutrition & diététique** :
    - Phase H reste majoritairement non exploitée côté UI (profil, dashboard, Nutri-Score)
 
-5. **Qualité continue** :
+3. **Uniformisation documentaire** :
+   - Vérifier systématiquement les incohérences entre roadmap, statut phases et état réel du code
+
+4. **Qualité continue** :
    - Couverture tests à étendre sur routes restantes et parcours critiques
    - Validation CI/CD et durcissement production (sécurité/monitoring)
 
@@ -840,20 +835,17 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 ### 🚀 P0 — Impact Immédiat (Débloquants)
 
-1. **Automatiser Achats & Rappels** (Phases P, Q) :
-   - Exposer/fiabiliser déclencheurs IA achats famille
-   - Ajouter endpoint d'évaluation des rappels + badges urgence unifiés
-   - **Impact** : transforme les modules famille en assistant proactif
-
-2. **Finaliser flux OCR utiles au quotidien** (Phase K) :
+1. **Finaliser flux OCR utiles au quotidien** (Phase K) :
    - Auto-sync photo-frigo → inventaire
-   - ~~Convertisseur inline dans les flux recettes/planning~~ ✅ AC2 COMPLÈTE
    - **Impact** : gain de temps immédiat sur les parcours cuisine
 
-3. **Renforcer jeu responsable** (Phase W) :
-   - Guard budget côté API lors de création pari
-   - Alertes série dangereuse + auto-exclusion effective
-   - **Impact** : sécurité d'usage avant enrichissements analytiques
+2. **Renforcer la couverture de tests** (backend + frontend famille/cuisine) :
+   - Consolider les parcours critiques post-finalisation M-R
+   - **Impact** : réduction des régressions en production
+
+3. **Finaliser nutrition UI** (Phase H) :
+   - Profil diététique + tableau de bord + badges Nutri-Score
+   - **Impact** : valeur santé visible pour le foyer
 
 ---
 

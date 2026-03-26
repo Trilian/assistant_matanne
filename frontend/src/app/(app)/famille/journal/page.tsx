@@ -131,6 +131,10 @@ export default function PageJournal() {
     }
   );
 
+  const resumesSauvegardes = (entrees ?? [])
+    .filter((e) => Array.isArray(e.tags) && e.tags.includes("resume-ia"))
+    .slice(0, 3);
+
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
@@ -308,6 +312,22 @@ export default function PageJournal() {
       )}
 
       {/* Timeline */}
+      {resumesSauvegardes.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Résumés IA récents</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {resumesSauvegardes.map((resume) => (
+              <div key={resume.id} className="rounded-lg border p-3">
+                <p className="text-xs text-muted-foreground mb-1">{resume.date_entree}</p>
+                <p className="text-sm whitespace-pre-wrap line-clamp-4">{resume.contenu}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {isLoading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (

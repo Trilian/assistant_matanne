@@ -83,6 +83,15 @@ export default function PageActivites() {
   const [dialogueCreation, setDialogueCreation] = useState(false);
   const [dialogueSuggestions, setDialogueSuggestions] = useState(false);
   const [suggestionsIA, setSuggestionsIA] = useState<string>("");
+  const [suggestionsStruct, setSuggestionsStruct] = useState<
+    Array<{
+      titre: string;
+      description: string;
+      type: string;
+      duree_minutes: number;
+      lieu: string;
+    }>
+  >([]);
   const [meteoDetectee, setMeteoDetectee] = useState<string | null>(null);
   const [journeeLibreDetectee, setJourneeLibreDetectee] = useState(false);
   const [typePrefere, setTypePrefere] = useState<string>("mixte");
@@ -128,6 +137,7 @@ export default function PageActivites() {
         type_prefere: typePrefere === "mixte" ? undefined : typePrefere,
       });
       setSuggestionsIA(resultat.suggestions);
+      setSuggestionsStruct(resultat.suggestions_struct ?? []);
       setMeteoDetectee(resultat.meteo ?? null);
       setJourneeLibreDetectee(Boolean(resultat.journee_libre));
       toast.success(
@@ -144,6 +154,23 @@ export default function PageActivites() {
 
   const activitesAVenir = (activites ?? []).filter((a) => !a.est_terminee);
   const activitesPassees = (activites ?? []).filter((a) => a.est_terminee);
+
+  const appliquerSuggestion = (suggestion: {
+    titre: string;
+    description: string;
+    type: string;
+    duree_minutes: number;
+    lieu: string;
+  }) => {
+    setTitre(suggestion.titre);
+    setType(suggestion.type || "autre");
+    setDescription(suggestion.description || "");
+    setDuree(String(suggestion.duree_minutes || 60));
+    setLieu(suggestion.lieu || "");
+    setDialogueSuggestions(false);
+    setDialogueCreation(true);
+    toast.success("Suggestion injectée dans le formulaire");
+  };
 
   return (
     <div className="space-y-6">
@@ -423,6 +450,32 @@ export default function PageActivites() {
                   <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
                     {suggestionsIA}
                   </div>
+
+                  {suggestionsStruct.length > 0 && (
+                    <div className="mt-4 space-y-2 border-t pt-3">
+                      <p className="text-xs font-medium text-muted-foreground">
+                        Pré-remplissage rapide
+                      </p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {suggestionsStruct.slice(0, 4).map((s, idx) => (
+                          <Card key={`${s.titre}-${idx}`}>
+                            <CardContent className="pt-3 space-y-2">
+                              <p className="text-sm font-medium line-clamp-1">{s.titre}</p>
+                              <p className="text-xs text-muted-foreground line-clamp-2">{s.description}</p>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full"
+                                onClick={() => appliquerSuggestion(s)}
+                              >
+                                Utiliser cette suggestion
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}

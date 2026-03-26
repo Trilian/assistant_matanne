@@ -464,20 +464,31 @@ export async function obtenirSuggestionsActivitesAuto(params?: {
   budget_max?: number;
   duree_max_heures?: number;
   type_prefere?: string;
-}): Promise<{ suggestions: string; meteo: string; journee_libre: boolean }> {
+}): Promise<{
+  suggestions: string;
+  suggestions_struct?: Array<{
+    titre: string;
+    description: string;
+    type: string;
+    duree_minutes: number;
+    lieu: string;
+  }>;
+  meteo: string;
+  journee_libre: boolean;
+}> {
   const { data } = await clientApi.post("/famille/activites/suggestions-ia-auto", params ?? {});
   return data;
 }
 
 // ─── Achats Famille CRUD (Phase M4/P) ────────────────────
 
-/** Lister les achats (via shopping existant) */
+/** Lister les achats (route canonique) */
 export async function listerAchats(params?: {
   categorie?: string;
-  actif?: boolean;
+  achete?: boolean;
 }): Promise<AchatFamille[]> {
   const { data } = await clientApi.get<{ items: AchatFamille[] }>(
-    "/famille/shopping",
+    "/famille/achats",
     { params }
   );
   return data.items;
@@ -536,6 +547,23 @@ export async function obtenirSuggestionsAchatsIA(params: {
   tailles?: Record<string, string>;
 }): Promise<{ suggestions: SuggestionAchat[]; total: number; type: string }> {
   const { data } = await clientApi.post("/famille/achats/suggestions-ia", params);
+  return data;
+}
+
+/** Suggestions IA proactives (anniversaires, jalons, saison) */
+export async function obtenirSuggestionsAchatsAuto(params?: {
+  budget_max?: number;
+  relation_defaut?: string;
+}): Promise<{
+  suggestions: Array<SuggestionAchat & { source: "anniversaire" | "jalon" | "saison" }>;
+  groupes: {
+    anniversaire: SuggestionAchat[];
+    jalon: SuggestionAchat[];
+    saison: SuggestionAchat[];
+  };
+  total: number;
+}> {
+  const { data } = await clientApi.post("/famille/achats/suggestions", params ?? {});
   return data;
 }
 

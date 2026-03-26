@@ -48,6 +48,7 @@ import {
   souscrirePush,
   desabonnerPush,
 } from "@/bibliotheque/api/push";
+import { demanderPermissionNotificationsJeux } from "@/crochets/utiliser-notifications-jeux";
 import type { Preferences } from "@/bibliotheque/api/preferences";
 import { toast } from "sonner";
 import { resetOnboarding, TourOnboarding } from "@/composants/disposition/tour-onboarding";
@@ -543,6 +544,35 @@ function OngletNotifications() {
                 Activer les notifications
               </Button>
             )}
+
+            {/* Notifications Jeux (Phase W) */}
+            <div className="border-t pt-4 space-y-3">
+              <div>
+                <p className="font-medium text-sm">🎮 Notifications Jeux</p>
+                <p className="text-xs text-muted-foreground">
+                  Recevez des alertes pour les résultats de paris et tirages loto
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const granted = await demanderPermissionNotificationsJeux();
+                    if (granted) {
+                      toast.success("Notifications jeux activées");
+                    } else {
+                      toast.error("Permission refusée");
+                    }
+                  } catch (error) {
+                    toast.error("Erreur lors de l'activation");
+                  }
+                }}
+              >
+                <Bell className="mr-2 h-4 w-4" />
+                Activer les notifications jeux
+              </Button>
+            </div>
           </>
         )}
       </CardContent>

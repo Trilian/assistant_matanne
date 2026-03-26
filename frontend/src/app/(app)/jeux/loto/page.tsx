@@ -23,10 +23,13 @@ import {
   obtenirNumerosRetard,
   genererGrilleLoto,
   obtenirBacktest,
+  genererGrilleIAPonderee,
+  analyserGrilleJoueur,
 } from "@/bibliotheque/api/jeux";
 import type { TirageLoto, GrilleLoto, StatsLoto, NumeroRetard, BacktestResultat } from "@/types/jeux";
 import { HeatmapNumeros } from "@/composants/jeux/heatmap-numeros";
 import { GenerateurGrille } from "@/composants/jeux/generateur-grille";
+import { GrilleIAPonderee } from "@/composants/jeux/grille-ia-ponderee";
 import { BacktestResultatCard } from "@/composants/jeux/backtest-resultat";
 import { TooltipProvider } from "@/composants/ui/tooltip";
 
@@ -174,6 +177,25 @@ export default function LotoPage() {
         </Card>
 
         <GenerateurGrille typeJeu="loto" genererFn={genererGrilleLoto} />
+
+        <GrilleIAPonderee
+          onGenerer={async (mode, sauvegarder) => {
+            try {
+              return await genererGrilleIAPonderee(mode, sauvegarder);
+            } catch (error) {
+              toast.error("Erreur lors de la génération IA");
+              throw error;
+            }
+          }}
+          onAnalyser={async (numeros, numeroChance) => {
+            try {
+              return await analyserGrilleJoueur(numeros, numeroChance);
+            } catch (error) {
+              toast.error("Erreur lors de l'analyse");
+              throw error;
+            }
+          }}
+        />
 
         <div>
           <Button variant="outline" size="sm" onClick={() => setShowBacktest(!showBacktest)} className="mb-3">
