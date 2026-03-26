@@ -32,6 +32,8 @@ import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/croch
 import { obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 import { toast } from "sonner";
+import { useEffect } from "react";
+import { utiliserStoreUI } from "@/magasins/store-ui";
 
 export default function PageDetailRecette({
   params,
@@ -41,11 +43,17 @@ export default function PageDetailRecette({
   const { id } = use(params);
   const router = useRouter();
   const invalider = utiliserInvalidation();
+  const { definirTitrePage } = utiliserStoreUI();
 
   const { data: recette, isLoading } = utiliserRequete(
     ["recette", id],
     () => obtenirRecette(Number(id))
   );
+
+  useEffect(() => {
+    if (recette?.nom) definirTitrePage(recette.nom);
+    return () => definirTitrePage(null);
+  }, [recette?.nom]);
 
   const { mutate: supprimer, isPending: enSuppression } = utiliserMutation(
     (_: void) => supprimerRecette(Number(id)),

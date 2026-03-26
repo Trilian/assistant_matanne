@@ -5,6 +5,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   ArrowLeft,
   ChefHat,
@@ -27,6 +28,7 @@ import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirSessionBatch } from "@/bibliotheque/api/batch-cooking";
+import { utiliserStoreUI } from "@/magasins/store-ui";
 
 const STATUT_LABELS: Record<string, string> = {
   planifie: "Planifiée",
@@ -46,12 +48,18 @@ export default function PageDetailBatch() {
   const params = useParams();
   const router = useRouter();
   const id = Number(params.id);
+  const { definirTitrePage } = utiliserStoreUI();
 
   const { data: session, isLoading } = utiliserRequete(
     ["batch-cooking", String(id)],
     () => obtenirSessionBatch(id),
     { enabled: !isNaN(id) }
   );
+
+  useEffect(() => {
+    if (session?.nom) definirTitrePage(session.nom);
+    return () => definirTitrePage(null);
+  }, [session?.nom]);
 
   if (isLoading) {
     return (

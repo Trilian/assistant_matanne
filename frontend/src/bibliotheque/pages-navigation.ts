@@ -1,0 +1,136 @@
+// ═══════════════════════════════════════════════════════════
+// Pages Navigation — Source unique de toutes les pages de l'app
+// Utilisé par : MenuCommandes (Ctrl+K), BoutonEpingler (étoile),
+//              BarreLaterale (section Récents)
+// ═══════════════════════════════════════════════════════════
+
+import type { ElementType } from "react";
+import {
+  Home,
+  ChefHat,
+  Users,
+  House,
+  Gamepad2,
+  Wrench,
+  BookOpen,
+  CalendarDays,
+  ShoppingCart,
+  Package,
+  CookingPot,
+  Leaf,
+  Baby,
+  ClipboardList,
+  RotateCw,
+  Wallet,
+  Hammer,
+  Sprout,
+  SprayCan,
+  Receipt,
+  Banknote,
+  Zap,
+  Wine,
+  FileText,
+  ShieldCheck,
+  ClipboardCheck,
+  Trophy,
+  Dices,
+  TrendingUp,
+  MessageSquare,
+  ArrowLeftRight,
+  CloudSun,
+  Timer,
+  StickyNote,
+  Cake,
+  Contact,
+  Layers,
+  Shield,
+  Camera,
+  Apple,
+  CalendarCheck,
+  Wifi,
+  CalendarRange,
+  Settings,
+} from "lucide-react";
+
+export interface PageNavigation {
+  nom: string;
+  chemin: string;
+  categorie: string;
+  Icone: ElementType;
+  keywords?: string[];
+}
+
+export const PAGES_NAVIGATION: PageNavigation[] = [
+  // Principal
+  { nom: "Accueil", chemin: "/", categorie: "Principal", Icone: Home },
+  { nom: "Ma Semaine", chemin: "/ma-semaine", categorie: "Principal", Icone: CalendarCheck, keywords: ["semaine", "planning", "vue globale", "repas", "activites", "matchs"] },
+
+  // Cuisine
+  { nom: "Cuisine", chemin: "/cuisine", categorie: "Cuisine", Icone: ChefHat },
+  { nom: "Recettes", chemin: "/cuisine/recettes", categorie: "Cuisine", Icone: BookOpen, keywords: ["plats", "repas"] },
+  { nom: "Planning Repas", chemin: "/cuisine/planning", categorie: "Cuisine", Icone: CalendarDays, keywords: ["semaine", "menu"] },
+  { nom: "Ma Semaine", chemin: "/cuisine/ma-semaine", categorie: "Cuisine", Icone: CalendarCheck, keywords: ["planning", "hebdo"] },
+  { nom: "Courses", chemin: "/cuisine/courses", categorie: "Cuisine", Icone: ShoppingCart, keywords: ["achats", "liste"] },
+  { nom: "Inventaire", chemin: "/cuisine/inventaire", categorie: "Cuisine", Icone: Package, keywords: ["stock", "frigo"] },
+  { nom: "Batch Cooking", chemin: "/cuisine/batch-cooking", categorie: "Cuisine", Icone: CookingPot, keywords: ["preparation", "avance"] },
+  { nom: "Anti-Gaspillage", chemin: "/cuisine/anti-gaspillage", categorie: "Cuisine", Icone: Leaf, keywords: ["restes", "eco"] },
+  { nom: "Photo Frigo", chemin: "/cuisine/photo-frigo", categorie: "Cuisine", Icone: Camera, keywords: ["scan"] },
+
+  // Famille
+  { nom: "Famille", chemin: "/famille", categorie: "Famille", Icone: Users },
+  { nom: "Jules", chemin: "/famille/jules", categorie: "Famille", Icone: Baby, keywords: ["enfant", "bebe", "developpement"] },
+  { nom: "Activités", chemin: "/famille/activites", categorie: "Famille", Icone: ClipboardList, keywords: ["sortie", "loisirs"] },
+  { nom: "Routines", chemin: "/famille/routines", categorie: "Famille", Icone: RotateCw, keywords: ["habitudes", "quotidien"] },
+  { nom: "Budget Famille", chemin: "/famille/budget", categorie: "Famille", Icone: Wallet, keywords: ["argent", "finances"] },
+  { nom: "Weekend", chemin: "/famille/weekend", categorie: "Famille", Icone: CalendarDays, keywords: ["sortie", "we"] },
+  { nom: "Anniversaires", chemin: "/famille/anniversaires", categorie: "Famille", Icone: Cake, keywords: ["fetes", "dates"] },
+  { nom: "Contacts", chemin: "/famille/contacts", categorie: "Famille", Icone: Contact, keywords: ["annuaire", "telephone"] },
+  { nom: "Journal", chemin: "/famille/journal", categorie: "Famille", Icone: BookOpen, keywords: ["memoires", "notes"] },
+  { nom: "Documents", chemin: "/famille/documents", categorie: "Famille", Icone: FileText, keywords: ["fichiers", "papiers"] },
+  { nom: "Calendriers", chemin: "/famille/calendriers", categorie: "Famille", Icone: CalendarDays, keywords: ["google", "ical", "sync", "agenda"] },
+
+  // Maison - Gestion
+  { nom: "Maison", chemin: "/maison", categorie: "Maison", Icone: House },
+  { nom: "Projets Maison", chemin: "/maison/projets", categorie: "Maison - Gestion", Icone: Hammer, keywords: ["travaux", "renovation"] },
+  { nom: "Ménage", chemin: "/maison/menage", categorie: "Maison - Entretien", Icone: SprayCan, keywords: ["nettoyage", "proprete"] },
+  { nom: "Jardin", chemin: "/maison/jardin", categorie: "Maison - Jardin", Icone: Sprout, keywords: ["plantes", "potager"] },
+  { nom: "Entretien", chemin: "/maison/entretien", categorie: "Maison - Entretien", Icone: SprayCan, keywords: ["maintenance", "reparation"] },
+  { nom: "Domotique", chemin: "/maison/domotique", categorie: "Maison - Tech", Icone: Wifi, keywords: ["smart", "connecte"] },
+  { nom: "Charges", chemin: "/maison/charges", categorie: "Maison - Finances", Icone: Receipt, keywords: ["factures", "mensuel"] },
+  { nom: "Dépenses", chemin: "/maison/depenses", categorie: "Maison - Finances", Icone: Banknote, keywords: ["budget", "argent"] },
+  { nom: "Énergie", chemin: "/maison/energie", categorie: "Maison - Finances", Icone: Zap, keywords: ["electricite", "consommation"] },
+  { nom: "Stocks", chemin: "/maison/stocks", categorie: "Maison - Stocks", Icone: Package, keywords: ["reserve", "cave"] },
+  { nom: "Cellier", chemin: "/maison/cellier", categorie: "Maison - Stocks", Icone: Wine, keywords: ["vin", "bouteilles"] },
+  { nom: "Artisans", chemin: "/maison/artisans", categorie: "Maison - Admin", Icone: Wrench, keywords: ["contacts", "pro"] },
+  { nom: "Contrats", chemin: "/maison/contrats", categorie: "Maison - Admin", Icone: FileText, keywords: ["assurance", "abonnement"] },
+  { nom: "Garanties", chemin: "/maison/garanties", categorie: "Maison - Admin", Icone: ShieldCheck, keywords: ["sav", "protection"] },
+  { nom: "Diagnostics", chemin: "/maison/diagnostics", categorie: "Maison - Admin", Icone: ClipboardCheck, keywords: ["dpe", "controle"] },
+  { nom: "Visualisation Maison", chemin: "/maison/visualisation", categorie: "Maison - Vue", Icone: Layers, keywords: ["plan", "vue"] },
+  { nom: "Éco-Tips", chemin: "/maison/eco-tips", categorie: "Maison - Écologie", Icone: Leaf, keywords: ["economie", "energie"] },
+
+  // Jeux
+  { nom: "Jeux", chemin: "/jeux", categorie: "Jeux", Icone: Gamepad2 },
+  { nom: "Paris Sportifs", chemin: "/jeux/paris", categorie: "Jeux", Icone: Trophy, keywords: ["pari", "sport"] },
+  { nom: "Loto", chemin: "/jeux/loto", categorie: "Jeux", Icone: Dices, keywords: ["tirage", "fdj"] },
+  { nom: "EuroMillions", chemin: "/jeux/euromillions", categorie: "Jeux", Icone: Dices, keywords: ["euro", "tirage"] },
+  { nom: "Performance Jeux", chemin: "/jeux/performance", categorie: "Jeux", Icone: TrendingUp, keywords: ["stats", "resultats"] },
+  { nom: "Jeu Responsable", chemin: "/jeux/responsable", categorie: "Jeux", Icone: Shield, keywords: ["limites", "controle"] },
+
+  // Outils
+  { nom: "Outils", chemin: "/outils", categorie: "Outils", Icone: Wrench },
+  { nom: "Chat IA", chemin: "/outils/chat-ia", categorie: "Outils", Icone: MessageSquare, keywords: ["assistant", "question"] },
+  { nom: "Convertisseur", chemin: "/outils/convertisseur", categorie: "Outils", Icone: ArrowLeftRight, keywords: ["unite", "mesure"] },
+  { nom: "Météo", chemin: "/outils/meteo", categorie: "Outils", Icone: CloudSun, keywords: ["previsions", "temps"] },
+  { nom: "Minuteur", chemin: "/outils/minuteur", categorie: "Outils", Icone: Timer, keywords: ["chrono", "cuisson"] },
+  { nom: "Notes", chemin: "/outils/notes", categorie: "Outils", Icone: StickyNote, keywords: ["memo", "pense-bete"] },
+  { nom: "Nutritionniste", chemin: "/outils/nutritionniste", categorie: "Outils", Icone: Apple, keywords: ["sante", "calories"] },
+
+  // Configuration
+  { nom: "Paramètres", chemin: "/parametres", categorie: "Configuration", Icone: Settings },
+  { nom: "Planning", chemin: "/planning", categorie: "Configuration", Icone: CalendarRange },
+];
+
+/** Map chemin → nom lisible — dérivée automatiquement de PAGES_NAVIGATION */
+export const NOMS_PAGES: Record<string, string> = Object.fromEntries(
+  PAGES_NAVIGATION.map((p) => [p.chemin, p.nom])
+);

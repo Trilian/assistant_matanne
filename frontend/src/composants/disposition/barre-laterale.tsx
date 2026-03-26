@@ -4,9 +4,11 @@
 
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
+import { PAGES_NAVIGATION, type PageNavigation } from "@/bibliotheque/pages-navigation";
 import {
   Home,
   ChefHat,
@@ -166,8 +168,18 @@ export function BarreLaterale() {
   const nbRappelsDanger = rappelsData?.rappels?.filter((r) => r.priorite === "danger").length ?? 0;
 
   const [sectionsOuvertes, setSectionsOuvertes] = useState<Set<string>>(() => {
-    // Ouvrir automatiquement la section active
-    const initial = new Set<string>();
+    // Charger les sections sauvegardées depuis localStorage
+    const saved: string[] = (() => {
+      try {
+        return typeof window !== "undefined"
+          ? (JSON.parse(window.localStorage.getItem("nav-sections-ouvertes") ?? "[]") as string[])
+          : [];
+      } catch {
+        return [];
+      }
+    })();
+    const initial = new Set<string>(saved);
+    // Toujours ouvrir la section active courante
     for (const lien of LIENS) {
       if (lien.sousLiens && pathname.startsWith(lien.chemin) && lien.chemin !== "/") {
         initial.add(lien.chemin);
@@ -181,9 +193,22 @@ export function BarreLaterale() {
       const next = new Set(prev);
       if (next.has(chemin)) next.delete(chemin);
       else next.add(chemin);
+      // Persister dans localStorage
+      try {
+        window.localStorage.setItem("nav-sections-ouvertes", JSON.stringify([...next]));
+      } catch {}
       return next;
     });
   };
+
+  // Section Récents : top 3 depuis l'historique Ctrl+K
+  const [historiqueChemins] = utiliserStockageLocal<string[]>("command-history", []);
+  const recents = useMemo((): PageNavigation[] => {
+    return historiqueChemins
+      .map((chemin) => PAGES_NAVIGATION.find((p) => p.chemin === chemin))
+      .filter((p): p is PageNavigation => p !== undefined)
+      .slice(0, 3);
+  }, [historiqueChemins]);
 
   return (
     <aside
@@ -217,7 +242,37 @@ export function BarreLaterale() {
 
       {/* Favoris rapides */}
       <FavorisRapides collapsed={!sidebarOuverte} />
-      {sidebarOuverte && <Separator className="mx-3" />}
+
+      {/* Récents (Idée C) — visible uniquement quand la sidebar est élargie */}
+      {sidebarOuverte && recents.length > 0 && (
+        <>
+          <Separator className="mx-3" />
+          <div className="px-3 py-2 space-y-1">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+              Récents
+            </p>
+            {recents.map((page) => {
+              const estActif = pathname === page.chemin;
+              return (
+                <Link
+                  key={page.chemin}
+                  href={page.chemin}
+                  className={cn(
+                    "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+                    estActif
+                      ? "bg-accent text-accent-foreground"
+                      : "hover:bg-accent/50 text-foreground/70"
+                  )}
+                >
+                  <page.Icone className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="truncate">{page.nom}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </>
+      )}
+      {sidebarOuverte && recents.length === 0 && <Separator className="mx-3" />}
 
       {/* Navigation */}
       <nav aria-label="Navigation principale" className="flex-1 overflow-y-auto space-y-1 p-2">

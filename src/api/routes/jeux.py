@@ -267,6 +267,244 @@ async def obtenir_match(match_id: int, user: dict[str, Any] = Depends(require_au
     return await executer_async(_query)
 
 
+@router.get("/paris/matchs", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_matchs_expert(
+    league: str | None = Query(None, description="Filtrer par championnat"),
+    date_min: date | None = Query(None, description="Date minimum"),
+    date_max: date | None = Query(None, description="Date maximum"),
+    ev_min: float | None = Query(None, description="Expected Value minimum (0-1)"),
+    confidence_min: float | None = Query(None, description="Confiance IA minimum (0-1)"),
+    pattern: str | None = Query(None, description="Pattern statistique détecté"),
+    search: str | None = Query(None, description="Recherche équipe"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Liste les matchs avec filtres avancés pour la vue Expert.
+    
+    Filtre par championnat, dates, EV, confiance IA, patterns statistiques.
+    Retourne toutes les données nécessaires pour l'analyse experte.
+    """
+    from src.core.models import Match, Equipe
+    from sqlalchemy import or_, and_, func
+
+    def _query():
+        with executer_avec_session() as session:
+            # Query de base sur Match
+            query = session.query(Match)
+
+            # Filtre par championnat (mapping league -> championnat)
+            if league:
+                league_mapping = {
+                    "ligue_1": "Ligue 1",
+                    "premier_league": "Premier League",
+                    "la_liga": "La Liga",
+                    "bundesliga": "Bundesliga",
+                    "serie_a": "Serie A",
+                }
+                championnat = league_mapping.get(league, league)
+                query = query.filter(Match.championnat == championnat)
+
+            # Filtre par dates
+            if date_min:
+                query = query.filter(Match.date_match >= date_min)
+            if date_max:
+                query = query.filter(Match.date_match <= date_max)
+
+            # Filtres uniquement sur matchs non joués avec prédictions
+            query = query.filter(Match.joue == False)
+            query = query.filter(Match.prediction_resultat.isnot(None))
+
+            # Filtre par confiance IA
+            if confidence_min is not None:
+                query = query.filter(Match.prediction_confiance >= confidence_min)
+
+            # Filtre par Expected Value (calculé: meilleure_proba * meilleure_cote - 1)
+            if ev_min is not None:
+                # Filtre approximatif - le calcul exact EV nécessite de déterminer meilleure cote/proba
+                # On utilise la confiance comme proxy pour filtrage initial
+                query = query.filter(Match.prediction_confiance >= (ev_min / 0.20 + 0.5))
+
+            # Filtre par recherche équipe
+            if search:
+                safe_search = search.replace("%", "\\%").replace("_", "\\_")
+                query = query.filter(
+                    or_(
+                        Match.equipe_domicile.has(Equipe.nom.ilike(f"%{safe_search}%")),
+                        Match.equipe_exterieur.has(Equipe.nom.ilike(f"%{safe_search}%")),
+                    )
+                )
+
+            # Ordre par date (prochains matchs d'abord)
+            query = query.order_by(Match.date_match.asc())
+
+            total = query.count()
+            items = query.offset((page - 1) * page_size).limit(page_size).all()
+
+            # Construction des résultats avec calcul EV
+            matchs_data = []
+            for m in items:
+                # Calcul Expected Value
+                ev = None
+                if m.prediction_proba_dom and m.cote_domicile:
+                    ev_dom = m.prediction_proba_dom * m.cote_domicile - 1
+                    ev = ev_dom
+                if m.prediction_proba_nul and m.cote_nul:
+                    ev_nul = m.prediction_proba_nul * m.cote_nul - 1
+                    if ev is None or ev_nul > ev:
+                        ev = ev_nul
+                if m.prediction_proba_ext and m.cote_exterieur:
+                    ev_ext = m.prediction_proba_ext * m.cote_exterieur - 1
+                    if ev is None or ev_ext > ev:
+                        ev = ev_ext
+
+                # Filtre final par EV (après calcul exact)
+                if ev_min is not None and (ev is None or ev < ev_min):
+                    total -= 1
+                    continue
+
+                # Pattern détecté (placeholder - sera implémenté par SeriesStatistiquesService)
+                pattern_detecte = None
+                if ev and ev > 0.10:
+                    pattern_detecte = "high_ev"
+                # TODO: intégrer détection patterns réels (hot hand, regression, etc.)
+
+                matchs_data.append({
+                    "id": m.id,
+                    "equipe_domicile": m.equipe_domicile.nom if m.equipe_domicile else "?",
+                    "equipe_exterieur": m.equipe_exterieur.nom if m.equipe_exterieur else "?",
+                    "date_match": m.date_match.isoformat(),
+                    "championnat": m.championnat,
+                    "cote_domicile": float(m.cote_domicile) if m.cote_domicile else None,
+                    "cote_nul": float(m.cote_nul) if m.cote_nul else None,
+                    "cote_exterieur": float(m.cote_exterieur) if m.cote_exterieur else None,
+                    "ev": float(ev) if ev is not None else None,
+                    "prediction_ia": m.prediction_resultat,
+                    "proba_ia": (
+                        float(m.prediction_proba_dom)
+                        if m.prediction_resultat == "domicile"
+                        else float(m.prediction_proba_nul)
+                        if m.prediction_resultat == "nul"
+                        else float(m.prediction_proba_ext)
+                        if m.prediction_resultat == "exterieur"
+                        else None
+                    ) if m.prediction_resultat else None,
+                    "confiance_ia": float(m.prediction_confiance) if m.prediction_confiance else None,
+                    "pattern_detecte": pattern_detecte,
+                    "forme_domicile": m.equipe_domicile.forme_recente if m.equipe_domicile else None,
+                    "forme_exterieur": m.equipe_exterieur.forme_recente if m.equipe_exterieur else None,
+                })
+
+            return {
+                "items": matchs_data,
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+                "pages": (total + page_size - 1) // page_size if total > 0 else 0,
+            }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# BANKROLL & MONEY MANAGEMENT
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/bankroll/{user_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_bankroll(
+    user_id: int,
+    bankroll_initiale: float = Query(1000, description="Bankroll de départ"),
+    jours: int = Query(30, description="Historique sur N jours"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Obtient la bankroll actuelle et l'historique."""
+    from src.services.jeux.bankroll_manager import get_bankroll_manager
+
+    def _query():
+        manager = get_bankroll_manager()
+        
+        # Calculer bankroll actuelle
+        bankroll_actuelle = manager.calculer_bankroll_actuelle(
+            user_id=user_id,
+            bankroll_initiale=bankroll_initiale
+        )
+        
+        # Obtenir historique
+        historique = manager.obtenir_historique_bankroll(
+            user_id=user_id,
+            bankroll_initiale=bankroll_initiale,
+            jours=jours
+        )
+        
+        # Calculer variation et ROI
+        variation_totale = bankroll_actuelle - bankroll_initiale
+        
+        # Calculer ROI depuis les paris
+        with executer_avec_session() as session:
+            from src.core.models import PariSportif
+            from sqlalchemy import func
+            
+            total_mises = session.query(func.coalesce(func.sum(PariSportif.mise), 0)).filter(
+                PariSportif.user_id == user_id
+            ).scalar() or 0
+            
+            total_gains = session.query(func.coalesce(func.sum(PariSportif.gain), 0)).filter(
+                PariSportif.user_id == user_id,
+                PariSportif.statut == "gagne"
+            ).scalar() or 0
+            
+            roi = manager.calculer_roi(total_mises, total_gains)
+        
+        return {
+            "bankroll_actuelle": bankroll_actuelle,
+            "bankroll_initiale": bankroll_initiale,
+            "variation_totale": variation_totale,
+            "roi": roi,
+            "historique": historique
+        }
+
+    return await executer_async(_query)
+
+
+@router.get("/bankroll/suggestion-mise", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def suggerer_mise_kelly(
+    bankroll: float = Query(..., description="Bankroll actuelle"),
+    edge: float = Query(..., description="Expected value (EV)"),
+    cote: float = Query(..., description="Cote décimale"),
+    confiance_ia: float = Query(70, description="Confiance de l'IA (0-100)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Suggère une mise optimale selon le critère de Kelly fractionnaire."""
+    from src.services.jeux.bankroll_manager import get_bankroll_manager
+
+    def _query():
+        manager = get_bankroll_manager()
+        
+        suggestion = manager.suggerer_mise(
+            bankroll=bankroll,
+            edge=edge,
+            cote=cote,
+            confiance_ia=confiance_ia
+        )
+        
+        return {
+            "mise_suggeree": suggestion.mise_suggeree,
+            "mise_kelly_complete": suggestion.mise_kelly_complete,
+            "fraction_utilisee": suggestion.fraction_utilisee,
+            "edge": suggestion.edge,
+            "pourcentage_bankroll": suggestion.pourcentage_bankroll,
+            "confiance": suggestion.confiance,
+            "message": suggestion.message
+        }
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # PARIS SPORTIFS
 # ═══════════════════════════════════════════════════════════
@@ -374,6 +612,66 @@ async def statistiques_paris(
                 "taux_reussite": round(taux_reussite, 1),
                 "par_statut": {stat: count for stat, count in par_statut},
             }
+
+    return await executer_async(_query)
+
+
+@router.get("/paris/analyse-patterns/{user_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def analyser_patterns_utilisateur(
+    user_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Analyse les patterns de paris de l'utilisateur pour détecter les biais cognitifs.
+    
+    Retourne:
+    - regression_moyenne: Alerte si série exceptionnelle (hot/cold streak)
+    - hot_hand: Alerte si clustering de victoires (illusion main chaude)
+    - gamblers_fallacy: Alerte si augmentation mise après perte (erreur du parieur)
+    """
+    from src.services.jeux.series_statistiques import SeriesStatistiquesService
+
+    def _query():
+        service = SeriesStatistiquesService()
+        
+        # Analyser les patterns
+        resultats = service.analyser_patterns_utilisateur(user_id)
+        
+        # Formater pour le frontend
+        response = {}
+        
+        if resultats.get("regression_moyenne"):
+            r = resultats["regression_moyenne"]
+            response["regression_moyenne"] = {
+                "alerte": r.alerte,
+                "severite": r.severite,
+                "message": r.message,
+                "details": r.details,
+                "type_pattern": r.type_pattern
+            }
+        
+        if resultats.get("hot_hand"):
+            r = resultats["hot_hand"]
+            response["hot_hand"] = {
+                "alerte": r.alerte,
+                "severite": r.severite,
+                "message": r.message,
+                "details": r.details,
+                "type_pattern": r.type_pattern
+            }
+        
+        if resultats.get("gamblers_fallacy"):
+            r = resultats["gamblers_fallacy"]
+            response["gamblers_fallacy"] = {
+                "alerte": r.alerte,
+                "severite": r.severite,
+                "message": r.message,
+                "details": r.details,
+                "type_pattern": r.type_pattern
+            }
+        
+        return response
 
     return await executer_async(_query)
 

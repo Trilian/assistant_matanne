@@ -9,6 +9,12 @@ import { usePathname } from "next/navigation";
 import { ChevronRight, Home } from "lucide-react";
 import { BoutonEpingler } from "./bouton-epingler";
 import { TooltipProvider } from "@/composants/ui/tooltip";
+import { utiliserStoreUI } from "@/magasins/store-ui";
+
+/** Retourne true si le segment ressemble à un ID dynamique (numérique ou UUID) */
+function estSegmentDynamique(segment: string): boolean {
+  return /^\d+$/.test(segment) || /^[0-9a-f]{8}-[0-9a-f-]{27}$/.test(segment);
+}
 
 /** Traduit un segment d'URL en libellé français */
 function traduireSegment(segment: string): string {
@@ -69,6 +75,7 @@ function traduireSegment(segment: string): string {
 export function FilAriane() {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
+  const { titrePage } = utiliserStoreUI();
 
   // Pas de fil d'ariane sur l'accueil
   if (segments.length === 0) return null;
@@ -88,7 +95,9 @@ export function FilAriane() {
               <ChevronRight className="h-3 w-3" />
               {estDernier ? (
                 <span className="font-medium text-foreground">
-                  {traduireSegment(segment)}
+                  {estSegmentDynamique(segment) && titrePage
+                    ? titrePage
+                    : traduireSegment(segment)}
                 </span>
               ) : (
                 <Link

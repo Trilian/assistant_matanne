@@ -100,6 +100,11 @@ export async function obtenirValueBets(seuilEv = 5.0): Promise<ValueBet[]> {
   return data.items ?? data;
 }
 
+export async function obtenirAnalysePatterns(userId: number): Promise<any> {
+  const { data } = await clientApi.get(`/jeux/paris/analyse-patterns/${userId}`);
+  return data;
+}
+
 // ─── Séries & Alertes ─────────────────────────────────────
 
 export async function obtenirSeriesActives(

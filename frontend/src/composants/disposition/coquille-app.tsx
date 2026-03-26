@@ -10,6 +10,8 @@ import { MenuCommandes } from "./menu-commandes";
 import { TourOnboarding } from "./tour-onboarding";
 import { FabChatIA } from "./fab-chat-ia";
 import { MinuteurFlottant } from "./minuteur-flottant";
+import { BarreProgression } from "./barre-progression";
+import { ContenuPrincipal } from "./contenu-principal";
 import { InstallPrompt } from "@/composants/pwa/install-prompt";
 import { useNotificationsJeux } from "@/crochets/utiliser-notifications-jeux";
 
@@ -23,6 +25,9 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen overflow-hidden">
+      {/* Barre de progression de navigation (Idée B) */}
+      <BarreProgression />
+
       {/* Sidebar desktop */}
       <BarreLaterale />
 
@@ -31,10 +36,10 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
         <EnTete />
         <FilAriane />
 
-        {/* Contenu scrollable — pb-safe-area pour nav mobile + 4rem de sécurité */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6" id="contenu-principal">
+        {/* Contenu scrollable avec fade-in (Idée E) */}
+        <ContenuPrincipal>
           {children}
-        </main>
+        </ContenuPrincipal>
 
         {/* Bottom nav mobile */}
         <NavMobile />

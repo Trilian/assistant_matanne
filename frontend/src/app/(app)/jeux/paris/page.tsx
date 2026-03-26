@@ -49,6 +49,7 @@ import {
   obtenirSeriesActives,
   obtenirPredictionMatch,
   obtenirAnalyseIA,
+  obtenirAnalysePatterns,
   verifierMise,
   enregistrerMise,
   obtenirSuiviResponsable,
@@ -58,6 +59,11 @@ import dynamic from "next/dynamic";
 import type { PariSportif, StatsParis, MatchJeu, ValueBet, SerieJeux, PredictionMatch, AnalyseIA, SuiviResponsable } from "@/types/jeux";
 import { toast } from "sonner";
 import { HeatmapCotes } from "@/composants/jeux/heatmap-cotes";
+import { TableauMatchsExpert } from "@/composants/jeux/tableau-matchs-expert";
+import { BankrollWidget } from "@/composants/jeux/bankroll-widget";
+import { DetectionPatternModal } from "@/composants/jeux/detection-pattern-modal";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
+import { utiliserAuth } from "@/crochets/utiliser-auth";
 
 const GraphiqueROI = dynamic(
   () => import("@/composants/graphiques/graphique-roi").then((m) => m.GraphiqueROI),
@@ -223,6 +229,7 @@ function DrawerMatchDetail({
 // ─── Page principale ─────────────────────────────────────
 
 export default function ParisPage() {
+  const { user } = utiliserAuth();
   const searchParams = useSearchParams();
   const [filtreStatut, setFiltreStatut] = useState("tous");
   const [dialogOuvert, setDialogOuvert] = useState(false);
@@ -233,6 +240,7 @@ export default function ParisPage() {
   const [mise, setMise] = useState("");
   const [drawerMatch, setDrawerMatch] = useState<number | null>(null);
   const [showSeries, setShowSeries] = useState(false);
+  const [modeVue, setModeVue] = useState<"simple" | "expert">("simple");
 
   const sourceOCR = useMemo(() => searchParams.get("source_ocr") === "1", [searchParams]);
 
@@ -421,7 +429,45 @@ export default function ParisPage() {
         </Dialog>
       </div>
 
-      {/* Value Bets */}
+      {/* Widget Bankroll & Money Management */}
+      {user && (
+        <BankrollWidget
+          userId={user.id}
+          cote={cote ? parseFloat(cote) : undefined}
+          edge={undefined}
+          confianceIA={undefined}
+          compact={false}
+        />
+      )}
+
+      {/* Toggle Simple / Expert */}
+      <div className="flex items-center gap-2 border-b pb-2">
+        <Button
+          variant={modeVue === "simple" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setModeVue("simple")}
+        >
+          🎯 Simple
+        </Button>
+        <Button
+          variant={modeVue === "expert" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setModeVue("expert")}
+        >
+          📊 Expert
+        </Button>
+      </div>
+
+      {/* Vue Expert */}
+      {modeVue === "expert" ? (
+        <TableauMatchsExpert
+          onCreerPari={preRemplirPari}
+          onVoirDetails={setDrawerMatch}
+        />
+      ) : (
+        <>
+          {/* Vue Simple (contenu existant) */}
+          {/* Value Bets */}
       {chVB ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28" />)}
@@ -585,6 +631,9 @@ export default function ParisPage() {
         </CardContent>
       </Card>
 
+        </>
+      )}
+
       {/* Drawer détail match */}
       <DrawerMatchDetail
         matchId={drawerMatch}
@@ -592,6 +641,16 @@ export default function ParisPage() {
         onClose={() => setDrawerMatch(null)}
         onParier={preRemplirPari}
       />
+
+      {/* Modal détection patterns cognitifs */}
+      {user && patternsData && (
+        <DetectionPatternModal
+          open={modalPatternsOuvert}
+          onClose={() => setModalPatternsOuvert(false)}
+          alerts={patternsData}
+          userId={user.id}
+        />
+      )}
     </div>
   );
 }
