@@ -1388,12 +1388,21 @@ async def performance_jeux(
             par_mois = []
             best_roi, worst_roi = None, None
             best_mois, worst_mois = None, None
+            cumul_bankroll = 0.0
             for annee, mois_num, nb, mise_m, gain_m in par_mois_raw:
                 mise_f = float(mise_m or 0)
                 gain_f = float(gain_m or 0)
+                benefice_m = gain_f - mise_f
+                cumul_bankroll += benefice_m
                 roi_m = ((gain_f - mise_f) / mise_f * 100) if mise_f > 0 else 0.0
                 label = f"{int(annee)}-{int(mois_num):02d}"
-                par_mois.append({"mois": label, "roi": round(roi_m, 1), "nb_paris": nb, "benefice": round(gain_f - mise_f, 2)})
+                par_mois.append({
+                    "mois": label,
+                    "roi": round(roi_m, 1),
+                    "nb_paris": nb,
+                    "benefice": round(benefice_m, 2),
+                    "bankroll_cumul": round(cumul_bankroll, 2),
+                })
                 if best_roi is None or roi_m > best_roi:
                     best_roi, best_mois = roi_m, label
                 if worst_roi is None or roi_m < worst_roi:
@@ -1557,10 +1566,11 @@ async def resume_mensuel(
     mois: str | None = Query(None, description="Format YYYY-MM (défaut: mois courant)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Résumé mensuel IA avec analyse et recommandations."""
+    """Résumé mensuel IA avec analyse Mistral enrichie."""
     from sqlalchemy import func
 
     from src.core.models import PariSportif
+    from src.services.jeux import get_jeux_ai_service
 
     def _query():
         today = date.today()
@@ -1601,33 +1611,41 @@ async def resume_mensuel(
                 "taux_reussite_mois": round(taux, 1),
                 "benefice_mois": round(gain - mise, 2),
                 "paris_actifs": q.filter(PariSportif.statut == "en_attente").count(),
+                "nb_paris_total": total,
             }
 
-            # Simple generated summary (no IA call to keep it fast)
-            points_forts = []
-            points_faibles = []
-            if roi > 0:
-                points_forts.append(f"ROI positif de {roi:.1f}%")
-            else:
-                points_faibles.append(f"ROI négatif de {roi:.1f}%")
-            if taux >= 50:
-                points_forts.append(f"Taux de réussite de {taux:.1f}%")
-            elif resolus > 0:
-                points_faibles.append(f"Taux de réussite bas: {taux:.1f}%")
+            mois_str = f"{annee}-{mois_num:02d}"
 
-            recommandations = [
-                "Continuez à privilégier les value bets avec edge > 5%",
-                "Respectez votre budget mensuel de jeu responsable",
-            ]
+            # Générer le résumé IA enrichi
+            try:
+                ai_svc = get_jeux_ai_service()
+                resume = ai_svc.generer_resume_mensuel(mois_str, kpis)
+                return resume
+            except Exception as e:
+                logger.warning(f"Erreur IA résumé mensuel, fallback: {e}")
+                # Fallback simple si IA échoue
+                points_forts = []
+                points_faibles = []
+                if roi > 0:
+                    points_forts.append(f"ROI positif de {roi:.1f}%")
+                else:
+                    points_faibles.append(f"ROI négatif de {roi:.1f}%")
+                if taux >= 50:
+                    points_forts.append(f"Taux de réussite de {taux:.1f}%")
+                elif resolus > 0:
+                    points_faibles.append(f"Taux de réussite bas: {taux:.1f}%")
 
-            return {
-                "mois": f"{annee}-{mois_num:02d}",
-                "analyse": f"En {mois_num:02d}/{annee}, vous avez placé {total} paris pour un ROI de {roi:.1f}%.",
-                "points_forts": points_forts,
-                "points_faibles": points_faibles,
-                "recommandations": recommandations,
-                "kpis": kpis,
-            }
+                return {
+                    "mois": mois_str,
+                    "analyse": f"En {mois_num:02d}/{annee}, vous avez placé {total} paris pour un ROI de {roi:.1f}%.",
+                    "points_forts": points_forts or ["Aucun point fort ce mois"],
+                    "points_faibles": points_faibles or ["Performances à améliorer"],
+                    "recommandations": [
+                        "Continuez à privilégier les value bets avec edge > 5%",
+                        "Respectez votre budget mensuel de jeu responsable",
+                    ],
+                    "kpis": kpis,
+                }
 
     return await executer_async(_query)
 
@@ -1869,6 +1887,171 @@ async def analyse_ia(
             "confiance": result.confiance,
             "genere_le": result.genere_le.isoformat() if result.genere_le else None,
         }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# GÉNÉRATION & ANALYSE IA AVANCÉE (Phase U)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/loto/generer-grille-ia-ponderee", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def generer_grille_ia_ponderee(
+    mode: str = Query("equilibre", regex="^(chauds|froids|equilibre)$"),
+    sauvegarder: bool = Query(False),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Génère une grille Loto intelligente avec Mistral IA.
+    
+    Modes:
+    - chauds: privilégie les numéros sortis récemment (fréquents)
+    - froids: privilégie les numéros en retard (écart élevé)
+    - equilibre: mix des deux stratégies (recommandé)
+    """
+    from src.services.jeux import get_jeux_ai_service, get_loto_crud_service, get_loto_data_service
+
+    def _query():
+        # Récupérer les statistiques
+        data_svc = get_loto_data_service()
+        stats_obj = data_svc.calculer_toutes_statistiques()
+
+        if not stats_obj or not stats_obj.numeros_principaux:
+            raise HTTPException(
+                status_code=400,
+                detail="Aucune statistique disponible. Importez des tirages d'abord.",
+            )
+
+        # Formater pour l'IA
+        stats_dict = {}
+        for num, stat in stats_obj.numeros_principaux.items():
+            stats_dict[num] = {
+                "freq": stat.frequence,
+                "ecart": stat.dernier_ecart,
+                "dernier": stat.dernier_tirage.isoformat() if stat.dernier_tirage else None,
+            }
+
+        # Générer avec IA
+        ai_svc = get_jeux_ai_service()
+        grille = ai_svc.generer_grille_ia_ponderee(stats_dict, mode)
+
+        # Sauvegarder si demandé
+        if sauvegarder:
+            loto_svc = get_loto_crud_service()
+            loto_svc.sauvegarder_grille(
+                numeros=grille["numeros"],
+                numero_chance=grille["numero_chance"],
+                strategie=f"ia_{mode}",
+            )
+
+        return {
+            "numeros": grille["numeros"],
+            "numero_chance": grille["numero_chance"],
+            "mode": mode,
+            "analyse": grille.get("analyse", "Grille générée par IA"),
+            "confiance": grille.get("confiance", 0.5),
+            "sauvegardee": sauvegarder,
+        }
+
+    return await executer_async(_query)
+
+
+@router.post("/loto/analyser-grille", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def analyser_grille_joueur(
+    numeros: list[int] = Query(..., description="5 numéros de 1 à 49"),
+    numero_chance: int = Query(..., ge=1, le=10),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Analyse une grille Loto avec critique IA Mistral."""
+    from src.services.jeux import get_jeux_ai_service, get_loto_data_service
+
+    # Validation
+    if len(numeros) != 5:
+        raise HTTPException(status_code=400, detail="Exactement 5 numéros requis")
+    if any(n < 1 or n > 49 for n in numeros):
+        raise HTTPException(status_code=400, detail="Numéros doivent être entre 1 et 49")
+    if len(set(numeros)) != 5:
+        raise HTTPException(status_code=400, detail="Pas de numéros en double")
+
+    def _query():
+        # Stats
+        data_svc = get_loto_data_service()
+        stats_obj = data_svc.calculer_toutes_statistiques()
+
+        stats_dict = {}
+        if stats_obj and stats_obj.numeros_principaux:
+            for num, stat in stats_obj.numeros_principaux.items():
+                stats_dict[num] = {
+                    "freq": stat.frequence,
+                    "ecart": stat.dernier_ecart,
+                }
+
+        # Analyse IA
+        ai_svc = get_jeux_ai_service()
+        analyse = ai_svc.analyser_grille_joueur(numeros, numero_chance, stats_dict)
+
+        return {
+            "grille": {"numeros": sorted(numeros), "numero_chance": numero_chance},
+            "note": analyse.get("note", 5),
+            "points_forts": analyse.get("points_forts", []),
+            "points_faibles": analyse.get("points_faibles", []),
+            "recommandations": analyse.get("recommandations", []),
+            "appreciation": analyse.get("appreciation", "Grille analysée."),
+        }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# HISTORIQUE COTES (Phase T - Heatmap)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/paris/cotes-historique/{match_id}", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_historique_cotes(
+    match_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Récupère l'historique des cotes d'un match pour heatmap."""
+    from src.core.models import CoteHistorique
+
+    def _query():
+        with executer_avec_session() as session:
+            historique = (
+                session.query(CoteHistorique)
+                .filter(CoteHistorique.match_id == match_id)
+                .order_by(CoteHistorique.date_capture)
+                .all()
+            )
+
+            if not historique:
+                return {
+                    "match_id": match_id,
+                    "nb_points": 0,
+                    "points": [],
+                    "message": "Aucun historique disponible pour ce match",
+                }
+
+            return {
+                "match_id": match_id,
+                "nb_points": len(historique),
+                "points": [
+                    {
+                        "timestamp": h.date_capture.isoformat(),
+                        "cote_domicile": h.cote_domicile,
+                        "cote_nul": h.cote_nul,
+                        "cote_exterieur": h.cote_exterieur,
+                        "cote_over_25": h.cote_over_25,
+                        "cote_under_25": h.cote_under_25,
+                        "bookmaker": h.bookmaker,
+                    }
+                    for h in historique
+                ],
+            }
 
     return await executer_async(_query)
 

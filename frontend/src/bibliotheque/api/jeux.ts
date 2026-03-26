@@ -152,6 +152,48 @@ export async function genererGrilleLoto(
   return data;
 }
 
+/** Générer grille Loto avec IA pondérée (Phase U) */
+export async function genererGrilleIAPonderee(
+  mode: "chauds" | "froids" | "equilibre" = "equilibre",
+  sauvegarder = false
+): Promise<{
+  numeros: number[];
+  numero_chance: number;
+  mode: string;
+  analyse: string;
+  confiance: number;
+  sauvegardee: boolean;
+}> {
+  const { data } = await clientApi.post(
+    `/jeux/loto/generer-grille-ia-ponderee?mode=${mode}&sauvegarder=${sauvegarder}`,
+    {}
+  );
+  return data;
+}
+
+/** Analyser une grille Loto joueur avec IA (Phase U) */
+export async function analyserGrilleJoueur(
+  numeros: number[],
+  numeroChance: number
+): Promise<{
+  grille: { numeros: number[]; numero_chance: number };
+  note: number;
+  points_forts: string[];
+  points_faibles: string[];
+  recommandations: string[];
+  appreciation: string;
+}> {
+  const params = new URLSearchParams();
+  numeros.forEach((n) => params.append("numeros", String(n)));
+  params.set("numero_chance", String(numeroChance));
+
+  const { data } = await clientApi.post(
+    `/jeux/loto/analyser-grille?${params.toString()}`,
+    {}
+  );
+  return data;
+}
+
 // ─── Euromillions ─────────────────────────────────────────
 
 export async function obtenirTiragesEuromillions(): Promise<TirageEuromillions[]> {
@@ -299,6 +341,26 @@ export async function obtenirNotifications(): Promise<{
 
 export async function marquerNotificationLue(id: string): Promise<void> {
   await clientApi.post(`/jeux/notifications/${id}/lue`);
+}
+
+// ─── Historique cotes (Phase T - Heatmap) ────────────────
+
+export async function obtenirHistoriqueCotes(matchId: number): Promise<{
+  match_id: number;
+  nb_points: number;
+  points: Array<{
+    timestamp: string;
+    cote_domicile: number | null;
+    cote_nul: number | null;
+    cote_exterieur: number | null;
+    cote_over_25?: number | null;
+    cote_under_25?: number | null;
+    bookmaker: string;
+  }>;
+  message?: string;
+}> {
+  const { data } = await clientApi.get(`/jeux/paris/cotes-historique/${matchId}`);
+  return data;
 }
 
 // ─── OCR Ticket Jeux ─────────────────────────────────────

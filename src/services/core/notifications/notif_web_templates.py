@@ -155,6 +155,76 @@ class NotificationTemplatesMixin:
         )
         return self.envoyer_notification(user_id, notification)
 
+    def notifier_pari_gagne(self, user_id: str, match_info: str, gain: float, cote: float):
+        """Notifie un pari sportif gagné (Phase W)."""
+        notification = NotificationPush(
+            title="🎉 Pari gagné!",
+            body=f"{match_info} — Gain: {gain:.2f}€ (cote {cote:.2f})",
+            notification_type=TypeNotification.RESULTAT_PARI_GAGNE,
+            url="/?module=jeux.paris",
+            tag=f"pari_gagne_{int(gain*100)}",
+            badge="+1",
+            actions=[
+                {"action": "view", "title": "Voir le bilan"},
+                {"action": "dismiss", "title": "Super!"},
+            ],
+        )
+        return self.envoyer_notification(user_id, notification)
+
+    def notifier_pari_perdu(self, user_id: str, match_info: str, mise: float):
+        """Notifie un pari sportif perdu (Phase W)."""
+        notification = NotificationPush(
+            title="❌ Pari perdu",
+            body=f"{match_info} — Mise perdue: {mise:.2f}€",
+            notification_type=TypeNotification.RESULTAT_PARI_PERDU,
+            url="/?module=jeux.performance",
+            tag=f"pari_perdu_{int(mise*100)}",
+            actions=[
+                {"action": "view", "title": "Voir l'analyse"},
+                {"action": "dismiss", "title": "OK"},
+            ],
+        )
+        return self.envoyer_notification(user_id, notification)
+
+    def notifier_resultat_loto(
+        self, user_id: str, nb_numeros_trouves: int, chance_trouvee: bool, gain: float | None = None
+    ):
+        """Notifie le résultat d'une grille Loto (Phase W)."""
+        if nb_numeros_trouves >= 4 or (nb_numeros_trouves >= 3 and chance_trouvee):
+            # Gain potentiel
+            title = "🎰 Tirage Loto — Résultat intéressant!"
+            if gain and gain > 0:
+                body = f"{nb_numeros_trouves} numéros trouvés{' + chance' if chance_trouvee else ''} — Gain: {gain:.2f}€"
+            else:
+                body = f"{nb_numeros_trouves} numéros trouvés{' + chance' if chance_trouvee else ''}"
+            notif_type = TypeNotification.RESULTAT_LOTO_GAIN
+            tag = "loto_gain"
+        elif nb_numeros_trouves >= 2:
+            # Résultat moyen
+            title = "🎰 Tirage Loto"
+            body = f"{nb_numeros_trouves} numéros trouvés{' + chance' if chance_trouvee else ''}"
+            notif_type = TypeNotification.RESULTAT_LOTO
+            tag = "loto_resultat"
+        else:
+            # Échec
+            title = "🎰 Tirage Loto"
+            body = f"Aucun numéro trouvé cette fois{' (chance trouvée)' if chance_trouvee else ''}"
+            notif_type = TypeNotification.RESULTAT_LOTO
+            tag = "loto_echec"
+
+        notification = NotificationPush(
+            title=title,
+            body=body,
+            notification_type=notif_type,
+            url="/?module=jeux.loto",
+            tag=tag,
+            actions=[
+                {"action": "view", "title": "Voir les détails"},
+                {"action": "dismiss", "title": "OK"},
+            ],
+        )
+        return self.envoyer_notification(user_id, notification)
+
     # ═══════════════════════════════════════════════════════════
     # ALIAS RÉTROCOMPATIBILITÉ
     # ═══════════════════════════════════════════════════════════

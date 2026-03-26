@@ -54,6 +54,10 @@ class TypeNotification(StrEnum):
     # Jeux responsable
     ALERTE_SERIE_DEFAITES = "jeux_serie_defaites"
     ALERTE_BUDGET_JEUX = "jeux_budget_alerte"
+    RESULTAT_PARI_GAGNE = "jeux_pari_gagne"
+    RESULTAT_PARI_PERDU = "jeux_pari_perdu"
+    RESULTAT_LOTO = "jeux_loto_resultat"
+    RESULTAT_LOTO_GAIN = "jeux_loto_gain"
 
     # Maison prédictive
     ALERTE_PREDICTIVE_MAISON = "maison_alerte_predictive"

@@ -37,6 +37,28 @@ const ComposedChart = dynamic(
   { ssr: false }
 );
 
+const LineChart = dynamic(
+  () => import("recharts").then((m) => {
+    const { LineChart: LC, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } = m;
+    return function GraphiqueBankroll({ data }: { data: { mois: string; bankroll_cumul: number }[] }) {
+      if (data.length === 0) return <p className="text-sm text-muted-foreground text-center py-4">Aucune donnée</p>;
+      return (
+        <ResponsiveContainer width="100%" height={240}>
+          <LC data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 90%)" />
+            <XAxis dataKey="mois" tick={{ fontSize: 11 }} />
+            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}€`} />
+            <Tooltip formatter={(val) => [`${Number(val).toFixed(2)}€`, "Bankroll"]} />
+            <ReferenceLine y={0} stroke="hsl(0, 0%, 50%)" strokeDasharray="3 3" />
+            <Line type="monotone" dataKey="bankroll_cumul" stroke="hsl(142, 70%, 45%)" strokeWidth={2} dot={{ r: 4 }} name="Bankroll cumul" />
+          </LC>
+        </ResponsiveContainer>
+      );
+    };
+  }),
+  { ssr: false }
+);
+
 const BarChartHorizontal = dynamic(
   () => import("recharts").then((m) => {
     const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } = m;
@@ -179,6 +201,18 @@ export default function PerformancePage() {
           <CardHeader className="pb-2"><CardTitle className="text-base">ROI mensuel</CardTitle></CardHeader>
           <CardContent>
             <ComposedChart data={perf.par_mois} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Graphique Bankroll cumulée */}
+      {perf?.par_mois && perf.par_mois.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Évolution Bankroll (cumulée)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <LineChart data={perf.par_mois} />
           </CardContent>
         </Card>
       )}

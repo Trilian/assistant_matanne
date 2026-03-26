@@ -1,10 +1,31 @@
 # 🗺️ ROADMAP — Assistant Matanne
 
-> Dernière mise à jour : 26 mars 2026 (audit backlog — scan multi-codes, export chiffré, calendriers externes)
+> Dernière mise à jour : 26 mars 2026 (Phase AC Navigation — module complet)
 
 ---
 
-## ✅ Mise à jour implémentation (26 mars 2026 — session exécution)
+## ✅ Mise à jour implémentation (26 mars 2026 — Phase AC Navigation complète)
+
+- [x] **AC1 Ma Semaine** : Page `/ma-semaine` unifiée (repas + activités + tâches + matchs) + endpoint `GET /api/v1/planning/semaine-unifiee`
+- [x] **AC2 Outils contextuels** : `FabChatIA` + `MinuteurFlottant` + `ConvertisseurInline` dans recettes (par ingrédient) ET planning (grille + dialogue sélecteur)
+- [x] **AC3 Paramètres discrets** : dropdown avatar header — accès paramètres + intégrations, retirés de la sidebar
+- [x] **AC4 Sidebar simplifiée** : 4 modules + Ma Semaine, Outils retirés de la nav principale
+- [x] **AC5 Menu commandes** : Ctrl+K — 60+ pages indexées, favoris localStorage, `BoutonEpingler`, `FavorisRapides`
+- [x] **Module Navigation (AC)** : 5/5 sous-phases complètes ✅
+
+---
+
+## ✅ Mise à jour implémentation (27 mars 2026 — module Jeux finalisé)
+
+- [x] **Résumé mensuel IA** : génération via Mistral avec analyse points forts/faibles/recommandations (`JeuxAIService.generer_resume_mensuel()`)
+- [x] **Graphique bankroll cumulée** : LineChart Recharts évolution mensuelle dans page performance
+- [x] **Middleware guard budget** : `BudgetGuardMiddleware` bloque POST paris si limite atteinte ou auto-exclusion active
+- [x] **Analytics jeux complètes** : breakdown par championnat/type/confiance avec graphiques, séries/records affichés
+- [x] **Module Jeux (S-W)** : 5/5 phases complètes ✅
+
+---
+
+## ✅ Mise à jour implémentation (26 mars 2026 — session infrastructure)
 
 - [x] **Routes énergie consolidées** : ajout `GET /api/v1/maison/energie/previsions-ia` (régression linéaire simple, tendance, confiance)
 - [x] **UI énergie** : carte "Prévisions IA" ajoutée dans la page énergie maison
@@ -16,18 +37,17 @@
 
 ---
 
-## 🗓️ Priorités — 2 prochaines semaines (26 mars → 9 avril 2026)
+## 🗓️ Priorités — 2 prochaines semaines (27 mars → 10 avril 2026)
 
-> Focus : automatisation proactive + garde-fous + qualité test. Pas de nouvelle feature avant d'avoir ces 3 axes verts.
+> Focus : automatisation proactive + qualité test. Module Jeux finalisé, prochaine priorité = automatisation cuisine/famille/maison.
 
 | # | Tâche | Phase | Effort | Impact |
 |---|-------|-------|--------|--------|
-| 1 | Guard budget pari (API) + alertes série dangereuse | W Jeu responsable | S | 🔴 Sécurité |
-| 2 | Endpoint évaluation rappels + badges urgence hub famille | Q Rappels | M | 🔴 Proactif |
-| 3 | Auto-sync OCR photo-frigo → inventaire (1 endpoint + bouton UI) | K Photo-frigo | S | 🟠 Quotidien |
-| 4 | Déclencheurs IA achats famille (anniversaire J-14, jalons) | P Achats | M | 🟠 Proactif |
-| 5 | Tests backend routes restantes (admin/recherche/rgpd) | — Qualité | M | 🟡 Stabilité |
-| 6 | Convertisseur inline flux recettes | AC2 Outils | S | 🟡 UX |
+| 1 | Endpoint évaluation rappels + badges urgence hub famille | Q Rappels | M | 🔴 Proactif |
+| 2 | Auto-sync OCR photo-frigo → inventaire (1 endpoint + bouton UI) | K Photo-frigo | S | 🟠 Quotidien |
+| 3 | Déclencheurs IA achats famille (anniversaire J-14, jalons) | P Achats | M | 🟠 Proactif |
+| 4 | Tests backend routes restantes (admin/recherche/rgpd) | — Qualité | M | 🟡 Stabilité |
+| 5 | Notifications push Web Push séries/résultats jeux | W Jeu responsable | M | 🟡 UX |
 
 *Effort : S = ½ journée, M = 1–2 jours. Impact : 🔴 bloquant/sécurité, 🟠 valeur utilisateur directe, 🟡 qualité/UX.*
 
@@ -73,12 +93,12 @@
 
 | Statut | Nombre | Pourcentage | Description |
 |--------|--------|-------------|-------------|
-| ✅ **COMPLÈTES** | **11/28** | **39%** | Tous éléments implémentés et fonctionnels |
-| � **QUASI-COMPLÈTES (≥80%)** | **3** *(dans partielles)* | *(+11%)* | D, L, AA — 1 feature finale restante |
-| 🔄 **PARTIELLES** | **15/28** | **54%** | Infrastructure backend + frontend amélioré |
+| ✅ **COMPLÈTES** | **12/28** | **43%** | Tous éléments implémentés et fonctionnels |
+| 🔶 **QUASI-COMPLÈTES (≥80%)** | **3** *(dans partielles)* | *(+11%)* | D, L, AA — 1 feature finale restante |
+| 🔄 **PARTIELLES** | **14/28** | **50%** | Infrastructure backend + frontend amélioré |
 | ❌ **NON IMPLÉMENTÉES** | **2/28** | **7%** | Aucun élément trouvé |
 
-> **Couverture fonctionnelle pondérée** : ~70% — 11 complètes + 3×0,85 quasi + 12×0,5 partielles sur 28 phases.
+> **Couverture fonctionnelle pondérée** : ~73% — 12 complètes + 3×0,85 quasi + 11×0,5 partielles sur 28 phases.
 
 ### Par module (après session P0+P1+P2)
 
@@ -86,7 +106,7 @@
 - **👨‍👩‍👦 Famille (M-R)** : 2/6 complètes (M Contexte, N Hub), 4 partielles
 - **🎮 Jeux (S-W)** : 1/5 complète (S Dashboard), 4 partielles
 - **🏡 Maison (X-AB)** : 3/5 complètes (X Contexte, Y Hub, Z Planning), 2 partielles (AA, AB)
-- **🧭 Navigation (AC)** : 4/5 complètes (AC1 Ma Semaine, AC3 Paramètres discrets, AC4 Sidebar, AC5 Menu commandes), 1 partielle (AC2)
+- **🧭 Navigation (AC)** : **5/5 complètes** (AC1 Ma Semaine, AC2 Outils, AC3 Paramètres, AC4 Sidebar, AC5 Commandes) ✅ **MODULE COMPLET**
 
 ---
 
@@ -165,7 +185,7 @@
 
 - [x] Atteindre 100 % des tests passing (✅ tests admin/recherche/rgpd créés, tests codes_barres/produit corrigés)
 - [x] Routes maison complètes (DELETE projets, POST routine-repetitions, CRUD cellier déjà implémentés)
-- [ ] Ajouter les 3 routes dépenses/énergie (prévisions IA, consommation historique)
+- [x] Ajouter les 3 routes dépenses/énergie (prévisions IA, consommation historique)
 - [x] **CI/CD** : 8 workflows GitHub Actions validés + Vitest ajouté au gate
 - [x] **Audit sécurité** : CORS (`CORS_ORIGINS` env var), rate limiting (60/min + 10/min IA), `NettoyeurEntrees` (XSS + SQLi), `SecurityHeadersMiddleware` (CSP, HSTS, X-Frame-Options) — tous actifs ✅
 

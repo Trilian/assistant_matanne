@@ -71,6 +71,7 @@ import type {
   SuggestionRecettePlanning,
 } from "@/types/planning";
 import { BadgeNutriscore } from "@/composants/cuisine/badge-nutriscore";
+import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
@@ -393,15 +394,18 @@ export default function PagePlanning() {
                                   <BadgeNutriscore grade={repas.nutri_score} />
                                 )}
                               </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-5 w-5 shrink-0"
-                                onClick={() => retirerRepas(repas.id)}
-                                aria-label="Retirer le repas"
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
+                              <div className="flex items-center gap-0.5 shrink-0">
+                                <ConvertisseurInline className="h-5 px-1" />
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-5 w-5"
+                                  onClick={() => retirerRepas(repas.id)}
+                                  aria-label="Retirer le repas"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
                             </div>
                           ) : (
                             <Button
@@ -521,12 +525,15 @@ export default function PagePlanning() {
                           </Badge>
                         )}
                       </div>
-                      {recette.temps_total > 0 && (
-                        <span className="text-xs text-muted-foreground flex items-center gap-1 shrink-0 ml-2">
-                          <Clock className="h-3 w-3" />
-                          {recette.temps_total} min
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                        {recette.temps_total > 0 && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {recette.temps_total} min
+                          </span>
+                        )}
+                        <ConvertisseurInline />
+                      </div>
                     </button>
                   ))
                 )}

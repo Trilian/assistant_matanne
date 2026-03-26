@@ -205,6 +205,36 @@ class Match(TimestampMixin, Base):
         return f"<Match {self.date_match}: DOM vs EXT>"
 
 
+class CoteHistorique(TimestampMixin, Base):
+    """Historique des cotes bookmaker dans le temps pour heatmap"""
+
+    __tablename__ = "jeux_cotes_historique"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    match_id: Mapped[int] = mapped_column(Integer, ForeignKey("jeux_matchs.id"), nullable=False)
+
+    # Timestamp de capture
+    date_capture: Mapped[datetime] = mapped_column(DateTime, default=utc_now, nullable=False)
+
+    # Cotes principales (1N2)
+    cote_domicile: Mapped[float | None] = mapped_column(Float, nullable=True)
+    cote_nul: Mapped[float | None] = mapped_column(Float, nullable=True)
+    cote_exterieur: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    # Cotes over/under (optionnel)
+    cote_over_25: Mapped[float | None] = mapped_column(Float, nullable=True)
+    cote_under_25: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    # Bookmaker source
+    bookmaker: Mapped[str] = mapped_column(String(50), default="betclic")
+
+    # Relation
+    match: Mapped["Match"] = relationship("Match", foreign_keys=[match_id])
+
+    def __repr__(self) -> str:
+        return f"<CoteHistorique Match#{self.match_id} {self.date_capture.strftime('%Y-%m-%d %H:%M')}>"
+
+
 class PariSportif(CreeLeMixin, Base):
     """Pari sportif enregistré (réel ou virtuel)"""
 

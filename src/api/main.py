@@ -49,6 +49,7 @@ else:
 
 
 from src.api.dependencies import require_role
+from src.api.middleware.budget_guard import BudgetGuardMiddleware
 from src.api.prometheus import prometheus_router
 from src.api.rate_limiting import MiddlewareLimitationDebit
 from src.api.routes import (
@@ -300,6 +301,9 @@ app.add_middleware(
 )
 
 app.add_middleware(MiddlewareLimitationDebit)
+
+# Middleware Budget Guard (bloque paris si limite atteinte)
+app.add_middleware(BudgetGuardMiddleware)
 
 # Middleware API Versioning
 app.add_middleware(VersionMiddleware)
