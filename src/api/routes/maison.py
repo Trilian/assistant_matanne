@@ -2445,6 +2445,69 @@ async def supprimer_depense(
 
 
 # ═══════════════════════════════════════════════════════════
+# CONSEILLER IA MAISON
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/conseiller/conseil", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_conseil_ia(
+    section: str = Query("default", description="Section maison (travaux, finances, provisions, jardin, documents, equipements)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne 3 à 5 conseils IA contextuels pour la section demandée."""
+    from src.services.maison.conseiller_service import get_conseiller_maison_service
+
+    def _query():
+        service = get_conseiller_maison_service()
+        conseil = service.obtenir_conseil(section)
+        if conseil is None:
+            return {"section": section, "conseils": [], "message": "Aucun conseil disponible"}
+        return conseil
+
+    return await executer_async(_query)
+
+
+@router.get("/conseils-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_conseils_hub_ia(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne 4-6 conseils structurés pour le hub maison, triés par urgence."""
+    from src.services.maison.conseiller_service import get_conseiller_maison_service
+
+    def _query():
+        service = get_conseiller_maison_service()
+        conseils = service.obtenir_conseils_hub() or []
+        return {"items": conseils}
+
+    return await executer_async(_query)
+
+
+@router.post("/assistant/chat", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def chat_assistant_maison(
+    body: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Chat libre avec l'assistant IA maison."""
+    from src.services.maison.conseiller_service import get_conseiller_maison_service
+
+    message = body.get("message", "").strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="Le message ne peut pas être vide")
+
+    contexte = body.get("contexte", "maison")
+
+    def _query():
+        service = get_conseiller_maison_service()
+        reponse = service.chat_assistant(message, contexte)
+        return {"reponse": reponse, "message": message}
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
 # NUISIBLES (traitements)
 # ═══════════════════════════════════════════════════════════
 
@@ -3055,6 +3118,95 @@ async def initialiser_routines_defaut(
         service = get_entretien_service()
         nb = service.initialiser_routines_defaut()
         return {"routines_creees": nb, "message": f"{nb} routine(s) créée(s)"}
+
+    return await executer_async(_query)
+
+
+@router.post("/routines", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_routine(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée une nouvelle routine."""
+    from src.core.models import Routine
+
+    def _query():
+        with executer_avec_session() as session:
+            routine = Routine(
+                nom=payload["nom"],
+                description=payload.get("description"),
+                categorie=payload.get("categorie", "menage"),
+                frequence=payload.get("frequence", "quotidien"),
+                actif=payload.get("actif", True),
+                moment_journee=payload.get("moment_journee", "flexible"),
+                jour_semaine=payload.get("jour_semaine"),
+            )
+            session.add(routine)
+            session.commit()
+            session.refresh(routine)
+            return {
+                "id": routine.id,
+                "nom": routine.nom,
+                "description": routine.description,
+                "categorie": routine.categorie,
+                "frequence": routine.frequence,
+                "actif": routine.actif,
+                "taches_count": 0,
+            }
+
+    return await executer_async(_query)
+
+
+@router.patch("/routines/{routine_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def modifier_routine(
+    routine_id: int,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Modifie une routine existante (y compris activation/désactivation)."""
+    from src.core.models import Routine
+
+    def _query():
+        with executer_avec_session() as session:
+            routine = session.query(Routine).filter(Routine.id == routine_id).first()
+            if not routine:
+                raise HTTPException(status_code=404, detail="Routine non trouvée")
+            for champ in ("nom", "description", "categorie", "frequence", "actif", "moment_journee", "jour_semaine"):
+                if champ in payload:
+                    setattr(routine, champ, payload[champ])
+            session.commit()
+            return {
+                "id": routine.id,
+                "nom": routine.nom,
+                "description": routine.description,
+                "categorie": routine.categorie,
+                "frequence": routine.frequence,
+                "actif": routine.actif,
+                "taches_count": len(routine.tasks) if routine.tasks else 0,
+            }
+
+    return await executer_async(_query)
+
+
+@router.delete("/routines/{routine_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_routine(
+    routine_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Supprime une routine et ses tâches."""
+    from src.core.models import Routine
+
+    def _query():
+        with executer_avec_session() as session:
+            routine = session.query(Routine).filter(Routine.id == routine_id).first()
+            if not routine:
+                raise HTTPException(status_code=404, detail="Routine non trouvée")
+            session.delete(routine)
+            session.commit()
+            return {"message": "Routine supprimée"}
 
     return await executer_async(_query)
 

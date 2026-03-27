@@ -102,6 +102,20 @@ class PreferenceUtilisateur(TimestampMixin, Base):
     robots: Mapped[list[str]] = mapped_column(JSONB, default=list)
     magasins_preferes: Mapped[list[str]] = mapped_column(JSONB, default=list)
 
+    # Style et tailles vêtements
+    taille_vetements_anne: Mapped[dict] = mapped_column(JSONB, default=dict)
+    taille_vetements_mathieu: Mapped[dict] = mapped_column(JSONB, default=dict)
+    style_achats_anne: Mapped[dict] = mapped_column(JSONB, default=dict)
+    style_achats_mathieu: Mapped[dict] = mapped_column(JSONB, default=dict)
+
+    # Intérêts et loisirs
+    interets_gaming: Mapped[list] = mapped_column(JSONB, default=list)
+    interets_culture: Mapped[list] = mapped_column(JSONB, default=list)
+    equipement_activites: Mapped[dict] = mapped_column(JSONB, default=dict)
+
+    # Configuration garde crèche
+    config_garde: Mapped[dict] = mapped_column(JSONB, default=dict)
+
     def __repr__(self) -> str:
         return f"<PreferenceUtilisateur(user_id='{self.user_id}', adultes={self.nb_adultes})>"
 

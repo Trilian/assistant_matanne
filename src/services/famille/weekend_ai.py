@@ -108,6 +108,71 @@ Privilégie les activités:
             max_tokens=800,
         )
 
+    async def suggerer_activites_sejour(
+        self,
+        destination: str,
+        nb_jours: int,
+        age_enfant_mois: int = 19,
+        nb_suggestions: int = 4,
+    ) -> str:
+        """Suggestions d'activités pour un séjour/vacances.
+
+        Optimisé pour les vacances planifiées vs weekend spontané.
+        """
+        prompt = f"""Suggère {nb_suggestions} activités/sorties pour un séjour de {nb_jours} jours à {destination} avec un enfant de {age_enfant_mois} mois.
+
+Pour chaque activité:
+🌍 [Lieu/Activité]
+📝 Type: [parc/plage/visite/balade]
+⏱️ Durée: X heures
+💰 Budget: X€ famille
+👶 Accessibility bébé {age_enfant_mois} mois: OUI/Adapté/NON + conseil
+📝 Pourquoi le faire: 2 phrases
+💡 Conseil pratique: 1 phrase (parking, réservation, meilleur moment)
+
+Vétéments adaptés, équipements bébé requis si pertinent."""
+
+        return await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es expert en voyages familiaux avec jeunes enfants. Réponds en français.",
+            max_tokens=900,
+        )
+
+    async def suggerer_activites_jules_creche(
+        self,
+        age_mois: int = 19,
+        jours_disponibles: list[str] | None = None,
+        meteo: str | None = None,
+        nb_suggestions: int = 3,
+    ) -> str:
+        """Suggestions d'activités Jules pour les jours sans crèche.
+
+        Utilisé dans le hub quand Jules est disponible (crèche fermée).
+        """
+        jours_str = ", ".join(jours_disponibles) if jours_disponibles else "la journée"
+        meteo_str = f"Météo: {meteo}" if meteo else ""
+
+        prompt = f"""Suggère {nb_suggestions} activités pour passer une journée avec Jules ({age_mois} mois), crèche fermée.
+
+Disponibilité: {jours_str}
+{meteo_str}
+
+Pour chaque activité:
+👶 [Nom]
+⏱️ Durée: X heures
+🌤️ Intérieur/Extérieur
+💰 Budget: X€ (0€ si gratuit)
+📝 Pourquoi c'est bien pour {age_mois} mois
+💡 Conseil logistique (repas, sieste, matériel)
+
+Privilégier: activités sensorielles, sociales, sportives adaptées au stade de développement."""
+
+        return await self.call_with_cache(
+            prompt=prompt,
+            system_prompt="Tu es expert en activités parentales avec jeunes enfants. Réponds en français.",
+            max_tokens=800,
+        )
+
 
 @service_factory("weekend_ai", tags={"famille", "ia", "weekend"})
 def obtenir_weekend_ai_service() -> WeekendAIService:

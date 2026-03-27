@@ -43,6 +43,7 @@ import type {
   StatsHubMaison,
   BriefingMaison,
   AlerteMaison,
+  ConseilMaisonHub,
 } from "@/types/maison";
 
 // ─── Projets ──────────────────────────────────────────────
@@ -1007,6 +1008,41 @@ export async function initialiserRoutinesDefaut(): Promise<{ creees: number }> {
   return data;
 }
 
+export interface RoutineMaison {
+  id: number;
+  nom: string;
+  description?: string;
+  categorie?: string;
+  frequence: string;
+  actif: boolean;
+  moment_journee?: string;
+  taches_count?: number;
+}
+
+export async function listerRoutinesMaison(): Promise<RoutineMaison[]> {
+  const { data } = await clientApi.get<{ items: RoutineMaison[] }>("/maison/routines");
+  return data.items ?? [];
+}
+
+export async function creerRoutineMaison(
+  payload: Omit<RoutineMaison, "id" | "taches_count">
+): Promise<RoutineMaison> {
+  const { data } = await clientApi.post<RoutineMaison>("/maison/routines", payload);
+  return data;
+}
+
+export async function modifierRoutineMaison(
+  id: number,
+  payload: Partial<Omit<RoutineMaison, "id" | "taches_count">>
+): Promise<RoutineMaison> {
+  const { data } = await clientApi.patch<RoutineMaison>(`/maison/routines/${id}`, payload);
+  return data;
+}
+
+export async function supprimerRoutineMaison(id: number): Promise<void> {
+  await clientApi.delete(`/maison/routines/${id}`);
+}
+
 // ─── Domotique ────────────────────────────
 
 export interface CategoriesDomotique {
@@ -1032,4 +1068,25 @@ export async function obtenirAstucesDomotique(categorie?: string): Promise<Categ
   const params = categorie ? { categorie } : undefined;
   const { data } = await clientApi.get<CategoriesDomotique>("/maison/domotique/astuces", { params });
   return data;
+}
+
+// ─── Assistant IA Maison ──────────────────────────────────
+
+export interface ConseilIA {
+  conseil?: string;
+  message?: string;
+  conseils?: string[];
+  section: string;
+}
+
+/** Obtenir un conseil IA contextuel pour une section Maison */
+export async function obtenirConseilIA(section: string): Promise<ConseilIA> {
+  const { data } = await clientApi.get<ConseilIA>(`/maison/conseiller/conseil?section=${encodeURIComponent(section)}`);
+  return data;
+}
+
+/** Obtenir les conseils structurés IA pour le hub Maison (cache 2h) */
+export async function obtenirConseilsIA(): Promise<ConseilMaisonHub[]> {
+  const { data } = await clientApi.get<{ items: ConseilMaisonHub[] }>("/maison/conseils-ia");
+  return data.items ?? [];
 }

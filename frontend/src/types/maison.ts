@@ -2,6 +2,21 @@
 // Types Maison
 // ═══════════════════════════════════════════════════════════
 
+export interface ConseilMaisonHub {
+  titre: string;
+  description: string;
+  niveau: "info" | "warning" | "urgent";
+  module_source: string;
+  action_type: "voir" | "planifier_entretien" | "acheter";
+  action_payload: {
+    chemin?: string;
+    nom?: string;
+    categorie?: string;
+    [key: string]: unknown;
+  };
+  icone?: string;
+}
+
 export interface ProjetMaison {
   id: number;
   nom: string;

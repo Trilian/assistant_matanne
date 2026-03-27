@@ -206,6 +206,10 @@ export interface AchatFamille {
   suggere_par?: string;
   achete: boolean;
   date_achat?: string;
+  pour_qui: string;
+  a_revendre: boolean;
+  prix_revente_estime?: number;
+  vendu_le?: string;
 }
 
 export interface SuggestionAchat {

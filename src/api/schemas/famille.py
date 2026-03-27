@@ -190,6 +190,9 @@ class AchatCreate(BaseModel):
     description: str | None = None
     age_recommande_mois: int | None = None
     suggere_par: str | None = None
+    pour_qui: str = Field(default="famille", description="famille, jules, anne, mathieu")
+    a_revendre: bool = False
+    prix_revente_estime: float | None = None
 
 
 class AchatPatch(BaseModel):
@@ -202,6 +205,9 @@ class AchatPatch(BaseModel):
     url: str | None = None
     description: str | None = None
     age_recommande_mois: int | None = None
+    pour_qui: str | None = None
+    a_revendre: bool | None = None
+    prix_revente_estime: float | None = None
 
 
 class AchatResponse(BaseModel):
@@ -219,6 +225,10 @@ class AchatResponse(BaseModel):
     suggere_par: str | None = None
     achete: bool = False
     date_achat: str | None = None
+    pour_qui: str = "famille"
+    a_revendre: bool = False
+    prix_revente_estime: float | None = None
+    vendu_le: str | None = None
 
 
 class MarquerAchetePayload(BaseModel):
@@ -303,3 +313,107 @@ class CroissanceResponse(BaseModel):
         default_factory=dict,
         description="Normes OMS par mesure (poids, taille, perimetre_cranien)",
     )
+
+
+# ═══════════════════════════════════════════════════════════
+# CONFIG GARDE (Phase Famille Refonte)
+# ═══════════════════════════════════════════════════════════
+
+
+class SemainesFermetureCreche(BaseModel):
+    debut: str = Field(..., description="Date de début YYYY-MM-DD")
+    fin: str = Field(..., description="Date de fin YYYY-MM-DD")
+    label: str = Field(default="", description="Libellé (ex: Vacances Toussaint)")
+
+
+class ConfigGardeRequest(BaseModel):
+    semaines_fermeture: list[SemainesFermetureCreche] = Field(default_factory=list)
+    nom_creche: str = Field(default="")
+    zone_academique: str = Field(default="B", description="Zone A, B ou C")
+
+
+class ConfigGardeResponse(BaseModel):
+    semaines_fermeture: list[dict] = Field(default_factory=list)
+    nom_creche: str = ""
+    zone_academique: str = "B"
+    annee_courante: int | None = None
+
+
+class PreferencesFamilleRequest(BaseModel):
+    """Préférences personnelles des adultes (tailles, style, intérêts)."""
+
+    taille_vetements_anne: dict = Field(default_factory=dict, description="Ex: {tee_shirt: 'M', pantalon: '38', pointure: '39'}")
+    taille_vetements_mathieu: dict = Field(default_factory=dict)
+    style_achats_anne: dict = Field(default_factory=dict, description="Ex: {prefere_made_france: true, prefere_qualite: true, budget_piece_max: 80}")
+    style_achats_mathieu: dict = Field(default_factory=dict)
+    interets_gaming: list[str] = Field(default_factory=list, description="Ex: ['Nintendo Switch', 'jeux de société']")
+    interets_culture: list[str] = Field(default_factory=list, description="Ex: ['cinéma', 'expositions', 'concerts']")
+    equipement_activites: dict = Field(default_factory=dict, description="Équipements sportifs disponibles")
+
+
+class PreferencesFamilleResponse(PreferencesFamilleRequest):
+    pass
+
+
+# ═══════════════════════════════════════════════════════════
+# SUGGESTIONS ACHATS ENRICHIES (Phase Famille Refonte)
+# ═══════════════════════════════════════════════════════════
+
+
+class SuggestionsAchatsEnrichiesRequest(BaseModel):
+    pour_qui: str | None = Field(None, description="famille, jules, anne, mathieu")
+    triggers: list[str] = Field(
+        default_factory=list,
+        description="liste de contextes: vetements_qualite, sejour, culture, gaming, etc.",
+    )
+    age_jules_mois: int | None = None
+    destination: str | None = None
+    ville: str | None = None
+    budget: float | None = None
+
+
+class AnnonceIBCRequest(BaseModel):
+    nom: str = Field(..., min_length=1, max_length=200)
+    description: str = Field(default="")
+    etat_usage: str = Field(default="bon", description="neuf, excellent, bon, correct, usage")
+    prix_cible: float | None = None
+
+
+class AnnonceIBCResponse(BaseModel):
+    annonce: str = Field(..., description="Texte de l'annonce LBC en markdown")
+
+
+# ═══════════════════════════════════════════════════════════
+# JOURS SANS CRECHE (Phase Famille Refonte)
+# ═══════════════════════════════════════════════════════════
+
+
+class JourSansCrecheResponse(BaseModel):
+    date: str
+    label: str | None = None
+    suggestions_activites: str | None = None
+
+
+# ═══════════════════════════════════════════════════════════
+# SEJOUR (Phase Famille Refonte)
+# ═══════════════════════════════════════════════════════════
+
+
+class SuggestionsSejourRequest(BaseModel):
+    destination: str = Field(..., min_length=1)
+    nb_jours: int = Field(default=7, ge=1, le=30)
+    age_jules_mois: int | None = Field(None, ge=0, le=72)
+    nb_suggestions: int = Field(default=4, ge=1, le=10)
+
+
+# ═══════════════════════════════════════════════════════════
+# BUDGET RÉSUMÉ (Phase Famille Refonte)
+# ═══════════════════════════════════════════════════════════
+
+
+class ResumeBudgetMoisResponse(BaseModel):
+    mois_courant: str
+    total_courant: float
+    total_precedent: float | None = None
+    variation_pct: float | None = None
+    achats_par_categorie: dict[str, float] = Field(default_factory=dict)

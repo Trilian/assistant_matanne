@@ -191,24 +191,62 @@ class ServiceJoursSpeciaux:
 
         return sorted(jours, key=lambda j: j.date_jour)
 
-    def sauvegarder_fermetures_creche(self, semaines: list[dict], nom_creche: str = "") -> bool:
-        """Sauvegarde les semaines de fermeture crèche.
+    def sauvegarder_fermetures_creche(
+        self, semaines: list[dict], nom_creche: str = "", zone_academique: str = "B"
+    ) -> bool:
+        """Sauvegarde les semaines de fermeture crèche en mémoire ET en base.
 
         Args:
             semaines: Liste de {"debut": "YYYY-MM-DD", "fin": "YYYY-MM-DD", "label": "..."}
             nom_creche: Nom de la crèche (optionnel).
+            zone_academique: Zone académique A/B/C.
 
         Returns:
             True si sauvegardé avec succès.
         """
-        _config_creche.update(
-            {
-                "semaines_fermeture": semaines,
-                "nom_creche": nom_creche,
-                "annee_courante": date.today().year,
-            }
-        )
+        nouvelle_config = {
+            "semaines_fermeture": semaines,
+            "nom_creche": nom_creche,
+            "zone_academique": zone_academique,
+            "annee_courante": date.today().year,
+        }
+        _config_creche.update(nouvelle_config)
+
+        # Persister en base si possible
+        try:
+            from src.api.utils import executer_avec_session  # import tardif
+
+            with executer_avec_session() as session:
+                from src.core.models.user_preferences import PreferenceUtilisateur
+
+                pref = session.query(PreferenceUtilisateur).first()
+                if pref is not None:
+                    pref.config_garde = nouvelle_config
+                    session.commit()
+        except Exception as e:
+            logger.warning("Impossible de persister config_garde en DB: %s", e)
+
         return True
+
+    def charger_config_depuis_db(self) -> bool:
+        """Charge la configuration crèche depuis la base de données.
+
+        Returns:
+            True si chargé avec succès, False si DB non disponible.
+        """
+        try:
+            from src.api.utils import executer_avec_session
+
+            with executer_avec_session() as session:
+                from src.core.models.user_preferences import PreferenceUtilisateur
+
+                pref = session.query(PreferenceUtilisateur).first()
+                if pref is not None and pref.config_garde:
+                    _config_creche.update(pref.config_garde)
+                    return True
+        except Exception as e:
+            logger.debug("Config garde non chargée depuis DB: %s", e)
+        return False
 
     def tous_jours_speciaux(self, annee: int, inclure_ponts: bool = True) -> list[JourSpecial]:
         """Retourne TOUS les jours spéciaux d'une année (triés par date).

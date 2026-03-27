@@ -4,27 +4,26 @@
 
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   Hammer,
   Sprout,
   SprayCan,
-  Receipt,
   Banknote,
-  Zap,
   Package,
-  Wine,
   Wrench,
   FileText,
   ShieldCheck,
-  ClipboardCheck,
-  Leaf,
-  Wifi,
+  Boxes,
+  Layers,
   AlertTriangle,
   CheckCircle2,
   Clock,
   CloudRain,
   Bell,
+  Wine,
+  Zap,
 } from "lucide-react";
 import {
   Card,
@@ -45,23 +44,20 @@ import {
   ouvrirDossierSAV,
 } from "@/bibliotheque/api/maison";
 import type { AlerteMaison, TacheJourMaison, AlertePredictiveGarantie } from "@/types/maison";
+import { BandeauIA } from "@/composants/maison/bandeau-ia";
+import { CarteConseil, estDismissed } from "@/composants/maison/carte-conseil";
+import { obtenirConseilsIA } from "@/bibliotheque/api/maison";
 
+// Sections consolidées — 8 modules
 const SECTIONS = [
-  { id: "projets", titre: "Projets", description: "Travaux et améliorations", chemin: "/maison/projets", Icone: Hammer, statKey: "projets_en_cours" as const },
-  { id: "jardin", titre: "Jardin", description: "Plantes et calendrier semis", chemin: "/maison/jardin", Icone: Sprout, statKey: null },
+  { id: "visualisation", titre: "Visualisation", description: "Plan 2D/3D de la maison", chemin: "/maison/visualisation", Icone: Layers, statKey: null },
   { id: "menage", titre: "Ménage", description: "Planning et guides ménage", chemin: "/maison/menage", Icone: SprayCan, statKey: null },
-  { id: "entretien", titre: "Entretien", description: "Tâches ménagères et appareils", chemin: "/maison/entretien", Icone: SprayCan, statKey: "taches_en_retard" as const },
-  { id: "charges", titre: "Charges", description: "Factures et abonnements", chemin: "/maison/charges", Icone: Receipt, statKey: null },
-  { id: "depenses", titre: "Dépenses", description: "Suivi des dépenses maison", chemin: "/maison/depenses", Icone: Banknote, statKey: "depenses_mois" as const },
-  { id: "energie", titre: "Énergie", description: "Consommation énergétique", chemin: "/maison/energie", Icone: Zap, statKey: null },
-  { id: "domotique", titre: "Domotique", description: "Maison connectée", chemin: "/maison/domotique", Icone: Wifi, statKey: null },
-  { id: "stocks", titre: "Stocks", description: "Stocks non-alimentaires", chemin: "/maison/stocks", Icone: Package, statKey: "stocks_en_alerte" as const },
-  { id: "cellier", titre: "Cellier", description: "Cave et garde-manger", chemin: "/maison/cellier", Icone: Wine, statKey: null },
-  { id: "artisans", titre: "Artisans", description: "Carnet d'adresses et interventions", chemin: "/maison/artisans", Icone: Wrench, statKey: null },
-  { id: "contrats", titre: "Contrats", description: "Assurances, énergie, abonnements", chemin: "/maison/contrats", Icone: FileText, statKey: "contrats_a_renouveler" as const },
-  { id: "garanties", titre: "Garanties", description: "Appareils et SAV", chemin: "/maison/garanties", Icone: ShieldCheck, statKey: "garanties_expirant" as const },
-  { id: "diagnostics", titre: "Diagnostics", description: "Diagnostics immobiliers", chemin: "/maison/diagnostics", Icone: ClipboardCheck, statKey: "diagnostics_expirant" as const },
-  { id: "eco", titre: "Éco-Tips", description: "Actions écologiques", chemin: "/maison/eco-tips", Icone: Leaf, statKey: null },
+  { id: "jardin", titre: "Jardin", description: "Plantes, semis et éco-gestes", chemin: "/maison/jardin", Icone: Sprout, statKey: null },
+  { id: "travaux", titre: "Travaux", description: "Projets, entretien et artisans", chemin: "/maison/travaux", Icone: Hammer, statKey: "projets_en_cours" as const },
+  { id: "equipements", titre: "Équipements", description: "Inventaire, garanties et domotique", chemin: "/maison/equipements", Icone: Boxes, statKey: "garanties_expirant" as const },
+  { id: "finances", titre: "Finances", description: "Charges, dépenses et énergie", chemin: "/maison/finances", Icone: Banknote, statKey: "depenses_mois" as const },
+  { id: "provisions", titre: "Provisions", description: "Stocks et cellier", chemin: "/maison/provisions", Icone: Package, statKey: "stocks_en_alerte" as const },
+  { id: "documents", titre: "Documents", description: "Contrats et diagnostics", chemin: "/maison/documents", Icone: FileText, statKey: "contrats_a_renouveler" as const },
 ];
 
 type StatsKeys = "projets_en_cours" | "taches_en_retard" | "depenses_mois" | "stocks_en_alerte" | "contrats_a_renouveler" | "garanties_expirant" | "diagnostics_expirant";
@@ -163,6 +159,13 @@ export default function PageMaison() {
   const { data: stats } = utiliserRequete(["maison", "hub", "stats"], statsHubMaison);
   const { data: briefing } = utiliserRequete(["maison", "briefing"], obtenirBriefingMaison);
   const { data: predictives } = utiliserRequete(["maison", "garanties", "predictives"], () => alertesPredictivesGaranties(12));
+  const { data: conseilsIA } = utiliserRequete(
+    ["maison", "conseils-ia"],
+    obtenirConseilsIA,
+    { staleTime: 2 * 60 * 60 * 1000 }
+  );
+
+  const [dismisses, setDismisses] = useState(0); // incrémenté pour forcer un re-render après dismiss
 
   const { mutate: envoyerRappels, isPending: envoi } = utiliserMutation(
     envoyerRappelsMaison
@@ -195,6 +198,9 @@ export default function PageMaison() {
           {envoi ? "Envoi…" : "Rappels push"}
         </Button>
       </div>
+
+      {/* Bandeau IA */}
+      <BandeauIA section="general" />
 
       {/* Stats rapides */}
       {stats && (
@@ -379,6 +385,29 @@ export default function PageMaison() {
             ))}
           </CardContent>
         </Card>
+      )}
+
+      {/* Conseils IA hub */}
+      {conseilsIA && conseilsIA.filter(c => !estDismissed(c)).length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold flex items-center gap-2">
+              <span>💡</span> Conseils du moment
+            </h2>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {conseilsIA
+              .filter(c => !estDismissed(c))
+              .slice(0, 4)
+              .map((conseil, i) => (
+                <CarteConseil
+                  key={i}
+                  conseil={conseil}
+                  onDismiss={() => setDismisses(d => d + 1)}
+                />
+              ))}
+          </div>
+        </div>
       )}
 
       {/* Grille des modules */}

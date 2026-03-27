@@ -1,11 +1,12 @@
 ﻿// ═══════════════════════════════════════════════════════════
-// Jardin — Plantes et calendrier des semis
+// Jardin — Plantes, calendrier des semis et éco-gestes
 // ═══════════════════════════════════════════════════════════
 
 "use client";
 
-import { useState } from "react";
-import { Sprout, Flower2, Calendar, Leaf, Sun, Sparkles, Loader2 } from "lucide-react";
+import { Suspense, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Sprout, Flower2, Calendar, Leaf, Sun, Sparkles, Loader2, Recycle, Plus, Pencil, Trash2, Euro } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -16,6 +17,7 @@ import {
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { Switch } from "@/composants/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import {
   Select,
@@ -24,19 +26,258 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/composants/ui/select";
-import { utiliserRequete } from "@/crochets/utiliser-api";
+import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
+import { useQueryClient } from "@tanstack/react-query";
+import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
+import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
   listerElementsJardin,
   obtenirCalendrierSemis,
   obtenirSuggestionsIAJardin,
+  listerEcoTips,
+  creerEcoTip,
+  modifierEcoTip,
+  supprimerEcoTip,
 } from "@/bibliotheque/api/maison";
+import type { ActionEcologique } from "@/types/maison";
+import { toast } from "sonner";
+import { BoutonAchat } from "@/composants/bouton-achat";
 
 const NOMS_MOIS = [
   "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
   "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
 ];
 
-export default function PageJardin() {
+// ─── Onglet Éco-Gestes ────────────────────────────────────────
+function OngletEco() {
+  const queryClient = useQueryClient();
+  const [actifOnly, setActifOnly] = useState(false);
+
+  const formVide: Omit<ActionEcologique, "id"> = {
+    titre: "",
+    description: "",
+    categorie: "",
+    impact: "",
+    economie_estimee: undefined,
+    actif: true,
+  };
+  const [form, setForm] = useState(formVide);
+
+  const { data: ecoTips, isLoading } = utiliserRequete(
+    ["maison", "eco-tips", actifOnly],
+    () => listerEcoTips(actifOnly)
+  );
+
+  const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
+    utiliserDialogCrud<ActionEcologique>({
+      onOuvrirCreation: () => setForm(formVide),
+      onOuvrirEdition: (item) =>
+        setForm({
+          titre: item.titre,
+          description: item.description ?? "",
+          categorie: item.categorie ?? "",
+          impact: item.impact ?? "",
+          economie_estimee: item.economie_estimee,
+          actif: item.actif,
+        }),
+    });
+
+  const { mutate: creer, isPending: creation } = utiliserMutation(
+    () => creerEcoTip(form),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["maison", "eco-tips"] });
+        fermerDialog();
+        toast.success("Action éco ajoutée");
+      },
+    }
+  );
+
+  const { mutate: modifier, isPending: modification } = utiliserMutation(
+    () => modifierEcoTip(enEdition!.id, form),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["maison", "eco-tips"] });
+        fermerDialog();
+        toast.success("Action éco modifiée");
+      },
+    }
+  );
+
+  const { mutate: supprimer } = utiliserMutation(
+    (id: number) => supprimerEcoTip(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["maison", "eco-tips"] });
+        toast.success("Action éco supprimée");
+      },
+    }
+  );
+
+  const { mutate: toggleActif } = utiliserMutation(
+    ({ id, actif }: { id: number; actif: boolean }) => modifierEcoTip(id, { actif }),
+    {
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: ["maison", "eco-tips"] }),
+    }
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Switch
+            checked={actifOnly}
+            onCheckedChange={setActifOnly}
+            id="actif-only"
+          />
+          <label htmlFor="actif-only">Actions actives seulement</label>
+        </div>
+        <Button size="sm" onClick={ouvrirCreation}>
+          <Plus className="h-4 w-4 mr-1.5" />
+          Ajouter
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20" />)}
+        </div>
+      ) : !ecoTips?.length ? (
+        <Card>
+          <CardContent className="py-10 text-center text-muted-foreground">
+            <Recycle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            Aucune action éco enregistrée
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {ecoTips.map((tip) => (
+            <Card key={tip.id} className={tip.actif ? "" : "opacity-60"}>
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-sm">{tip.titre}</CardTitle>
+                    {tip.categorie && (
+                      <CardDescription className="text-xs mt-0.5">{tip.categorie}</CardDescription>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Switch
+                      checked={tip.actif}
+                      onCheckedChange={(actif) => toggleActif({ id: tip.id, actif })}
+                    />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {tip.description && (
+                  <p className="text-xs text-muted-foreground">{tip.description}</p>
+                )}
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap gap-2">
+                    {tip.impact && (
+                      <Badge variant="secondary" className="text-xs">
+                        <Leaf className="h-3 w-3 mr-1" />
+                        {tip.impact}
+                      </Badge>
+                    )}
+                    {tip.economie_estimee != null && (
+                      <Badge variant="outline" className="text-xs">
+                        <Euro className="h-3 w-3 mr-1" />
+                        {tip.economie_estimee} €/an
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => ouvrirEdition(tip)}>
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                      onClick={() => supprimer(tip.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <DialogueFormulaire
+        ouvert={dialogOuvert}
+        onOuvertChange={setDialogOuvert}
+        titre={enEdition ? "Modifier l'action éco" : "Nouvelle action éco"}
+        description="Documentez vos gestes écologiques quotidiens"
+        onSubmit={() => (enEdition ? modifier() : creer())}
+        enChargement={enEdition ? modification : creation}
+      >
+        <div className="space-y-3">
+          <div>
+            <label className="text-sm font-medium">Titre *</label>
+            <input
+              className="w-full mt-1 rounded-md border px-3 py-2 text-sm"
+              value={form.titre}
+              onChange={(e) => setForm({ ...form, titre: e.target.value })}
+              placeholder="Ex: Compostage des déchets alimentaires"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Description</label>
+            <textarea
+              className="w-full mt-1 rounded-md border px-3 py-2 text-sm"
+              rows={2}
+              value={form.description ?? ""}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Décrivez l'action et son bénéfice"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-medium">Catégorie</label>
+              <input
+                className="w-full mt-1 rounded-md border px-3 py-2 text-sm"
+                value={form.categorie ?? ""}
+                onChange={(e) => setForm({ ...form, categorie: e.target.value })}
+                placeholder="Ex: Alimentation, Énergie"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Économie estimée (€/an)</label>
+              <input
+                type="number"
+                className="w-full mt-1 rounded-md border px-3 py-2 text-sm"
+                value={form.economie_estimee ?? ""}
+                onChange={(e) => setForm({ ...form, economie_estimee: e.target.value ? Number(e.target.value) : undefined })}
+                placeholder="Ex: 120"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium">Impact</label>
+            <input
+              className="w-full mt-1 rounded-md border px-3 py-2 text-sm"
+              value={form.impact ?? ""}
+              onChange={(e) => setForm({ ...form, impact: e.target.value })}
+              placeholder="Ex: -30kg CO₂/an"
+            />
+          </div>
+        </div>
+      </DialogueFormulaire>
+    </div>
+  );
+}
+
+// ─── Page principale (avec URL sync) ─────────────────────────
+function ContenuJardin() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const ongletActif = searchParams.get("tab") ?? "plantes";
+
   const moisCourant = new Date().getMonth() + 1;
   const [moisSemis, setMoisSemis] = useState(String(moisCourant));
 
@@ -62,7 +303,7 @@ export default function PageJardin() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">🌱 Jardin</h1>
         <p className="text-muted-foreground">
-          Plantes, calendrier des semis et suivi du potager
+          Plantes, calendrier des semis et éco-gestes
         </p>
       </div>
 
@@ -108,7 +349,10 @@ export default function PageJardin() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="plantes">
+      <Tabs
+        value={ongletActif}
+        onValueChange={(val) => router.replace(`?tab=${val}`)}
+      >
         <TabsList>
           <TabsTrigger value="plantes">
             <Sprout className="mr-2 h-4 w-4" />
@@ -117,6 +361,10 @@ export default function PageJardin() {
           <TabsTrigger value="semis">
             <Calendar className="mr-2 h-4 w-4" />
             Calendrier semis
+          </TabsTrigger>
+          <TabsTrigger value="eco">
+            <Recycle className="mr-2 h-4 w-4" />
+            Éco-gestes
           </TabsTrigger>
         </TabsList>
         <TabsContent value="plantes" className="space-y-4 mt-4">
@@ -172,6 +420,9 @@ export default function PageJardin() {
                         {el.notes}
                       </p>
                     )}
+                    <div className="mt-2">
+                      <BoutonAchat article={{ nom: el.nom }} taille="xs" />
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -293,7 +544,20 @@ export default function PageJardin() {
             </div>
           ) : null}
         </TabsContent>
+
+        {/* ─── Onglet Éco-Gestes ────────────────── */}
+        <TabsContent value="eco" className="space-y-4 mt-4">
+          <OngletEco />
+        </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+export default function PageJardin() {
+  return (
+    <Suspense>
+      <ContenuJardin />
+    </Suspense>
   );
 }

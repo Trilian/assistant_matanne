@@ -486,6 +486,8 @@ export async function obtenirSuggestionsActivitesAuto(params?: {
 export async function listerAchats(params?: {
   categorie?: string;
   achete?: boolean;
+  pour_qui?: string;
+  a_revendre?: boolean;
 }): Promise<AchatFamille[]> {
   const { data } = await clientApi.get<{ items: AchatFamille[] }>(
     "/famille/achats",
@@ -527,6 +529,114 @@ export async function supprimerAchat(id: number): Promise<void> {
   await clientApi.delete(`/famille/achats/${id}`);
 }
 
+/** Marquer un achat comme vendu */
+export async function marquerAchatVendu(id: number): Promise<void> {
+  await clientApi.post(`/famille/achats/${id}/vendu`);
+}
+
+/** Générer une annonce LBC pour un article */
+export async function genererAnnonceLBC(
+  id: number,
+  payload: { nom: string; description?: string; etat_usage?: string; prix_cible?: number }
+): Promise<{ annonce: string }> {
+  const { data } = await clientApi.post<{ annonce: string }>(
+    `/famille/achats/${id}/annonce-lbc`,
+    payload
+  );
+  return data;
+}
+
+/** Marquer une routine comme complétée aujourd'hui */
+export async function completerRoutine(
+  id: number
+): Promise<{ id: number; nom: string; derniere_completion: string }> {
+  const { data } = await clientApi.patch<{ id: number; nom: string; derniere_completion: string }>(
+    `/famille/routines/${id}/completer`
+  );
+  return data;
+}
+
+/** Résumé budget du mois courant vs précédent */
+export async function obtenirResumeBudgetMois(): Promise<{
+  mois_courant: string;
+  total_courant: number;
+  total_precedent: number | null;
+  variation_pct: number | null;
+  achats_par_categorie: Record<string, number>;
+}> {
+  const { data } = await clientApi.get("/famille/budget/resume-mois");
+  return data;
+}
+
+/** Lire la configuration garde/crèche */
+export async function lireConfigGarde(): Promise<{
+  semaines_fermeture: Array<{ debut: string; fin: string; label: string }>;
+  nom_creche: string;
+  zone_academique: string;
+  annee_courante: number | null;
+}> {
+  const { data } = await clientApi.get("/famille/config/garde");
+  return data;
+}
+
+/** Sauvegarder la configuration garde/crèche */
+export async function sauvegarderConfigGarde(payload: {
+  semaines_fermeture: Array<{ debut: string; fin: string; label: string }>;
+  nom_creche: string;
+  zone_academique: string;
+}): Promise<void> {
+  await clientApi.put("/famille/config/garde", payload);
+}
+
+/** Lire les préférences familiales (tailles, style, intérêts) */
+export async function lirePreferencesFamille(): Promise<{
+  taille_vetements_anne: Record<string, string>;
+  taille_vetements_mathieu: Record<string, string>;
+  style_achats_anne: Record<string, unknown>;
+  style_achats_mathieu: Record<string, unknown>;
+  interets_gaming: string[];
+  interets_culture: string[];
+  equipement_activites: Record<string, unknown>;
+}> {
+  const { data } = await clientApi.get("/famille/config/preferences");
+  return data;
+}
+
+/** Sauvegarder les préférences familiales */
+export async function sauvegarderPreferencesFamille(payload: {
+  taille_vetements_anne: Record<string, string>;
+  taille_vetements_mathieu: Record<string, string>;
+  style_achats_anne: Record<string, unknown>;
+  style_achats_mathieu: Record<string, unknown>;
+  interets_gaming: string[];
+  interets_culture: string[];
+  equipement_activites: Record<string, unknown>;
+}): Promise<void> {
+  await clientApi.put("/famille/config/preferences", payload);
+}
+
+/** Jours sans crèche pour un mois */
+export async function joursSansCReche(mois?: string): Promise<{
+  mois: string;
+  jours: Array<{ date: string; label: string | null }>;
+  total: number;
+}> {
+  const { data } = await clientApi.get("/famille/planning/jours-sans-creche", {
+    params: mois ? { mois } : undefined,
+  });
+  return data;
+}
+
+/** Suggestions IA pour un séjour */
+export async function obtenirSuggestionsSejourIA(payload: {
+  destination: string;
+  nb_jours?: number;
+  age_jules_mois?: number;
+}): Promise<{ suggestions: string; destination: string }> {
+  const { data } = await clientApi.post("/famille/weekend/suggestions-sejour", payload);
+  return data;
+}
+
 /** Suggestions IA achats/cadeaux (Phase P) */
 export interface SuggestionAchat {
   titre: string;
@@ -564,6 +674,29 @@ export async function obtenirSuggestionsAchatsAuto(params?: {
   total: number;
 }> {
   const { data } = await clientApi.post("/famille/achats/suggestions", params ?? {});
+  return data;
+}
+
+/** Suggestions IA enrichies avec 6 triggers configurables */
+export async function obtenirSuggestionsAchatsEnrichies(payload: {
+  triggers: string[];
+  pour_qui?: string;
+  destination?: string;
+  ville?: string;
+  budget?: number;
+  age_jules_mois?: number;
+}): Promise<{
+  items: Array<{
+    titre: string;
+    description: string;
+    fourchette_prix?: string | null;
+    ou_acheter?: string | null;
+    pertinence?: string | null;
+    source?: string;
+  }>;
+  total: number;
+}> {
+  const { data } = await clientApi.post("/famille/achats/suggestions-ia-enrichies", payload);
   return data;
 }
 

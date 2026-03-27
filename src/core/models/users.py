@@ -545,6 +545,12 @@ class AchatFamille(TimestampMixin, Base):
     # Qui a suggéré
     suggere_par: Mapped[str | None] = mapped_column(String(50))  # anne, mathieu, ia
 
+    # Destinataire & revente
+    pour_qui: Mapped[str] = mapped_column(String(50), default="famille", index=True)
+    a_revendre: Mapped[bool] = mapped_column(Boolean, default=False)
+    prix_revente_estime: Mapped[float | None] = mapped_column(Float)
+    vendu_le: Mapped[date | None] = mapped_column(Date)
+
     notes: Mapped[str | None] = mapped_column(Text)
 
     def __repr__(self) -> str:

@@ -1,11 +1,23 @@
 // ═══════════════════════════════════════════════════════════
-// Page Achats Famille — Phase P
+// Page Achats Famille — Phase Refonte
 // ═══════════════════════════════════════════════════════════
 
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, Check, Sparkles, ShoppingCart } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Plus,
+  Trash2,
+  Check,
+  Sparkles,
+  ShoppingCart,
+  Tag,
+  Copy,
+  ChevronDown,
+  ChevronUp,
+  Repeat,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -25,249 +37,314 @@ import {
   DialogTrigger,
 } from "@/composants/ui/dialog";
 import { Label } from "@/composants/ui/label";
-import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import {
   listerAchats,
   creerAchat,
   marquerAchatAchete,
   supprimerAchat,
-  obtenirSuggestionsAchatsAuto,
+  marquerAchatVendu,
+  genererAnnonceLBC,
+  obtenirSuggestionsAchatsEnrichies,
 } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 import type { AchatFamille } from "@/types/famille";
 
+const ONGLETS_POUR_QUI = [
+  { id: "tout", label: "Tout" },
+  { id: "jules", label: "Jules" },
+  { id: "anne", label: "Anne" },
+  { id: "mathieu", label: "Mathieu" },
+  { id: "famille", label: "Famille" },
+] as const;
+
+const CHIPS_CATEGORIES = [
+  "vetements", "jouets", "livres", "equipement", "gaming", "maison", "cadeau", "autre",
+];
+
+const LABELS_PRIORITE: Record<string, string> = {
+  urgent: "Urgent", haute: "Haute", moyenne: "Moyenne", basse: "Basse", optionnel: "Optionnel",
+};
+
+const TRIGGERS_IA = [
+  { id: "vetements_qualite", label: "Vetements" },
+  { id: "sejour", label: "Sejour" },
+  { id: "culture", label: "Culture" },
+  { id: "gaming", label: "Gaming" },
+  { id: "anniversaire", label: "Anniversaire" },
+  { id: "maison", label: "Maison" },
+] as const;
+
 export default function PageAchats() {
+  const queryClient = useQueryClient();
+  const [ongletActif, setOngletActif] = useState<string>("tout");
+  const [filtreCategorie, setFiltreCategorie] = useState<string | null>(null);
+  const [accordeonIAOuvert, setAccordeonIAOuvert] = useState(false);
   const [openDialogue, setOpenDialogue] = useState(false);
-  const [nouveauAchat, setNouveauAchat] = useState({ nom: "", categorie: "autre", priorite: "moyenne", description: "" });
-  const [chargementSuggestions, setChargementSuggestions] = useState(false);
+  const [nouveauAchat, setNouveauAchat] = useState({
+    nom: "", categorie: "autre", priorite: "moyenne", description: "",
+    pour_qui: "famille", a_revendre: false, prix_estime: "",
+  });
+  const [lbcItem, setLbcItem] = useState<AchatFamille | null>(null);
+  const [lbcTexte, setLbcTexte] = useState<string | null>(null);
+  const [lbcChargement, setLbcChargement] = useState(false);
+
+  const { data: achats = [] } = useQuery({
+    queryKey: ["famille", "achats", "page"],
+    queryFn: () => listerAchats(),
+  });
+
   const [suggestions, setSuggestions] = useState<Array<{
-    titre: string;
-    description: string;
-    fourchette_prix?: string | null;
-    ou_acheter?: string | null;
-    pertinence?: string | null;
-    source: "anniversaire" | "jalon" | "saison";
+    titre: string; description: string;
+    fourchette_prix?: string | null; ou_acheter?: string | null;
+    pertinence?: string | null; source?: string;
   }>>([]);
+  const [chargementSuggestions, setChargementSuggestions] = useState(false);
+  const [triggerActif, setTriggerActif] = useState<string | null>(null);
 
-  const { data: achats = [], refetch } = utiliserRequete<AchatFamille[]>(
-    ["famille", "achats"],
-    () => listerAchats()
-  );
-
-  const { mutateAsync: creer } = utiliserMutation(creerAchat, {
+  const mutCreer = useMutation({
+    mutationFn: creerAchat,
     onSuccess: () => {
-      refetch();
-      toast.success("Achat ajouté");
+      queryClient.invalidateQueries({ queryKey: ["famille", "achats"] });
+      toast.success("Achat ajoute");
       setOpenDialogue(false);
-      setNouveauAchat({ nom: "", categorie: "autre", priorite: "moyenne", description: "" });
+      setNouveauAchat({ nom: "", categorie: "autre", priorite: "moyenne", description: "", pour_qui: "famille", a_revendre: false, prix_estime: "" });
     },
+    onError: () => toast.error("Erreur lors de la creation"),
   });
 
-  const { mutateAsync: marquer } = utiliserMutation(
-    ({ id, prix_reel }: { id: number; prix_reel?: number }) =>
-      marquerAchatAchete(id, prix_reel),
-    { onSuccess: () => { refetch(); toast.success("Achat marqué acheté"); } }
-  );
-
-  const { mutateAsync: supprimer } = utiliserMutation(supprimerAchat, {
-    onSuccess: () => { refetch(); toast.success("Achat supprimé"); },
+  const mutMarquer = useMutation({
+    mutationFn: ({ id, prix_reel }: { id: number; prix_reel?: number }) => marquerAchatAchete(id, prix_reel),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["famille", "achats"] }); toast.success("Achete !"); },
   });
 
-  // Grouper par catégorie
+  const mutSupprimer = useMutation({
+    mutationFn: supprimerAchat,
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["famille", "achats"] }); toast.success("Supprime"); },
+  });
+
+  const mutVendu = useMutation({
+    mutationFn: marquerAchatVendu,
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["famille", "achats"] }); toast.success("Marque comme vendu"); },
+  });
+
   const achatsNonAchetes = achats.filter((a) => !a.achete);
-  const achatsParCategorie = achatsNonAchetes.reduce(
-    (acc, achat) => {
-      const cat = achat.categorie ?? "autre";
-      if (!acc[cat]) acc[cat] = [];
-      acc[cat].push(achat);
-      return acc;
-    },
-    {} as Record<string, AchatFamille[]>
-  );
-
+  const achatsFiltres = achatsNonAchetes.filter((a) => {
+    const matchPourQui = ongletActif === "tout" || a.pour_qui === ongletActif;
+    const matchCat = !filtreCategorie || a.categorie === filtreCategorie;
+    return matchPourQui && matchCat;
+  });
+  const achatsARevendre = achats.filter((a) => a.a_revendre && !a.vendu_le);
+  const achatsParCategorie = achatsFiltres.reduce((acc, a) => {
+    const cat = a.categorie ?? "autre";
+    acc[cat] = acc[cat] ?? [];
+    acc[cat].push(a);
+    return acc;
+  }, {} as Record<string, AchatFamille[]>);
   const categories = Object.keys(achatsParCategorie).sort();
 
-  const handleCreerAchat = async () => {
-    if (!nouveauAchat.nom.trim()) {
-      toast.error("Le nom est requis");
-      return;
-    }
-    await creer({
-      nom: nouveauAchat.nom,
-      categorie: nouveauAchat.categorie,
-      priorite: nouveauAchat.priorite,
-      description: nouveauAchat.description || undefined,
+  const handleCreerAchat = () => {
+    if (!nouveauAchat.nom.trim()) { toast.error("Le nom est requis"); return; }
+    mutCreer.mutate({
+      nom: nouveauAchat.nom, categorie: nouveauAchat.categorie, priorite: nouveauAchat.priorite,
+      description: nouveauAchat.description || undefined, pour_qui: nouveauAchat.pour_qui,
+      a_revendre: nouveauAchat.a_revendre,
+      prix_estime: nouveauAchat.prix_estime ? parseFloat(nouveauAchat.prix_estime) : undefined,
+      suggere_par: "manuel",
     });
   };
 
-  const chargerSuggestionsIA = async () => {
+  const chargerSuggestionsIA = async (trigger: string) => {
+    setTriggerActif(trigger);
     setChargementSuggestions(true);
     try {
-      const resultat = await obtenirSuggestionsAchatsAuto({});
-      setSuggestions(resultat.suggestions);
-      toast.success(`${resultat.total} suggestion(s) IA générée(s)`);
-    } catch {
-      toast.error("Erreur lors du chargement des suggestions IA");
-    } finally {
-      setChargementSuggestions(false);
-    }
+      const resultat = await obtenirSuggestionsAchatsEnrichies({
+        triggers: [trigger],
+        pour_qui: ongletActif !== "tout" ? ongletActif : "famille",
+      });
+      setSuggestions(resultat.items);
+      toast.success(resultat.total + " suggestion(s) generee(s)");
+    } catch { toast.error("Erreur IA"); } finally { setChargementSuggestions(false); }
   };
 
-  const ajouterSuggestion = async (suggestion: {
-    titre: string;
-    description: string;
-    source: "anniversaire" | "jalon" | "saison";
-  }) => {
-    await creer({
-      nom: suggestion.titre,
-      categorie: suggestion.source === "anniversaire" ? "cadeau" : suggestion.source,
-      priorite: suggestion.source === "anniversaire" ? "haute" : "moyenne",
-      description: suggestion.description,
-      suggere_par: "ia",
+  const ajouterSuggestion = (s: { titre: string; description: string; source?: string }) => {
+    mutCreer.mutate({
+      nom: s.titre, categorie: s.source ?? "autre", priorite: "moyenne",
+      description: s.description, suggere_par: "ia",
+      pour_qui: ongletActif !== "tout" ? ongletActif : "famille", a_revendre: false,
     });
   };
+
+  const ouvrirDialogueLBC = async (item: AchatFamille) => {
+    setLbcItem(item); setLbcTexte(null); setLbcChargement(true);
+    try {
+      const result = await genererAnnonceLBC(item.id, {
+        nom: item.nom, description: item.description ?? "", etat_usage: "bon",
+        prix_cible: item.prix_revente_estime ?? item.prix_reel ?? undefined,
+      });
+      setLbcTexte(result.annonce);
+    } catch { toast.error("Impossible de generer l annonce"); } finally { setLbcChargement(false); }
+  };
+
+  const copierLBC = () => { if (lbcTexte) { navigator.clipboard.writeText(lbcTexte); toast.success("Copie !"); } };
 
   return (
     <div className="space-y-6">
-      {/* En-tête */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <ShoppingCart className="h-6 w-6" />
-            Achats Famille
+            <ShoppingCart className="h-6 w-6" />Achats Famille
           </h1>
-          <p className="text-muted-foreground">
-            Suggestions IA et liste d'achats à prévoir
-          </p>
+          <p className="text-muted-foreground">Suggestions IA et liste d achats</p>
         </div>
         <Dialog open={openDialogue} onOpenChange={setOpenDialogue}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Ajouter un achat
-            </Button>
+            <Button><Plus className="h-4 w-4 mr-2" />Ajouter</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Nouvel achat</DialogTitle>
-            </DialogHeader>
+            <DialogHeader><DialogTitle>Nouvel achat</DialogTitle></DialogHeader>
             <div className="space-y-4 pt-2">
               <div>
                 <Label htmlFor="nom">Nom *</Label>
-                <Input
-                  id="nom"
-                  value={nouveauAchat.nom}
+                <Input id="nom" value={nouveauAchat.nom}
                   onChange={(e) => setNouveauAchat({ ...nouveauAchat, nom: e.target.value })}
-                  placeholder="Ex: Livre d'éveil pour Jules"
-                />
+                  placeholder="Ex: Livre pour Jules" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="pour_qui">Pour qui</Label>
+                  <select id="pour_qui" title="Pour qui" value={nouveauAchat.pour_qui}
+                    onChange={(e) => setNouveauAchat({ ...nouveauAchat, pour_qui: e.target.value })}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                    <option value="famille">Famille</option>
+                    <option value="jules">Jules</option>
+                    <option value="anne">Anne</option>
+                    <option value="mathieu">Mathieu</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="categorie">Categorie</Label>
+                  <select id="categorie" title="Categorie" value={nouveauAchat.categorie}
+                    onChange={(e) => setNouveauAchat({ ...nouveauAchat, categorie: e.target.value })}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                    {CHIPS_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="priorite">Priorite</Label>
+                  <select id="priorite" title="Priorite" value={nouveauAchat.priorite}
+                    onChange={(e) => setNouveauAchat({ ...nouveauAchat, priorite: e.target.value })}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                    <option value="urgent">Urgent</option>
+                    <option value="haute">Haute</option>
+                    <option value="moyenne">Moyenne</option>
+                    <option value="basse">Basse</option>
+                    <option value="optionnel">Optionnel</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="prix">Prix (euros)</Label>
+                  <Input id="prix" type="number" min="0" step="0.5" value={nouveauAchat.prix_estime}
+                    onChange={(e) => setNouveauAchat({ ...nouveauAchat, prix_estime: e.target.value })}
+                    placeholder="0.00" />
+                </div>
               </div>
               <div>
-                <Label htmlFor="categorie">Catégorie</Label>
-                <select
-                  id="categorie"
-                  title="Catégorie"
-                  value={nouveauAchat.categorie}
-                  onChange={(e) => setNouveauAchat({ ...nouveauAchat, categorie: e.target.value })}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="cadeau">Cadeau</option>
-                  <option value="vetement">Vêtement</option>
-                  <option value="jouet">Jouet</option>
-                  <option value="livre">Livre</option>
-                  <option value="equipement">Équipement</option>
-                  <option value="autre">Autre</option>
-                </select>
-              </div>
-              <div>
-                <Label htmlFor="priorite">Priorité</Label>
-                <select
-                  id="priorite"
-                  title="Priorité"
-                  value={nouveauAchat.priorite}
-                  onChange={(e) => setNouveauAchat({ ...nouveauAchat, priorite: e.target.value })}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="haute">Haute</option>
-                  <option value="moyenne">Moyenne</option>
-                  <option value="basse">Basse</option>
-                </select>
-              </div>
-              <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                  id="description"
-                  value={nouveauAchat.description}
+                <Label htmlFor="description">Description</Label>
+                <Textarea id="description" value={nouveauAchat.description}
                   onChange={(e) => setNouveauAchat({ ...nouveauAchat, description: e.target.value })}
-                  placeholder="Description supplémentaire..."
-                  rows={3}
-                />
+                  placeholder="Taille, couleur, lien..." rows={2} />
               </div>
-              <Button onClick={handleCreerAchat} className="w-full">
-                Créer
-              </Button>
+              <div className="flex items-center gap-2">
+                <input id="a_revendre" type="checkbox" checked={nouveauAchat.a_revendre}
+                  onChange={(e) => setNouveauAchat({ ...nouveauAchat, a_revendre: e.target.checked })}
+                  className="rounded" />
+                <Label htmlFor="a_revendre" className="cursor-pointer">
+                  <Repeat className="h-3.5 w-3.5 inline mr-1" />A revendre ensuite
+                </Label>
+              </div>
+              <Button onClick={handleCreerAchat} className="w-full" disabled={mutCreer.isPending}>Creer</Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Section suggestions IA (Phase P) */}
-      <Card className="bg-gradient-to-br from-purple-50/50 to-pink-50/50 dark:from-purple-950/20 dark:to-pink-950/20">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-purple-500" />
-            <CardTitle className="text-base">Suggestions IA</CardTitle>
-          </div>
-          <CardDescription>
-            L'IA suggère des achats selon les événements (anniversaires, saison, jalons)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={chargerSuggestionsIA}
-              disabled={chargementSuggestions}
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              {chargementSuggestions ? "Génération en cours..." : "Générer des suggestions proactives"}
-            </Button>
+      <div className="flex gap-2 flex-wrap">
+        {ONGLETS_POUR_QUI.map((o) => (
+          <Button key={o.id} variant={ongletActif === o.id ? "default" : "outline"} size="sm" onClick={() => setOngletActif(o.id)}>
+            {o.label}
+            {o.id !== "tout" && (
+              <Badge variant="secondary" className="ml-1.5 text-xs">
+                {achatsNonAchetes.filter((a) => a.pour_qui === o.id).length}
+              </Badge>
+            )}
+          </Button>
+        ))}
+      </div>
 
+      <div className="flex gap-2 flex-wrap">
+        <Button variant={filtreCategorie === null ? "secondary" : "ghost"} size="sm" onClick={() => setFiltreCategorie(null)}>
+          <Tag className="h-3.5 w-3.5 mr-1" />Toutes
+        </Button>
+        {CHIPS_CATEGORIES.map((cat) => (
+          <Button key={cat} variant={filtreCategorie === cat ? "secondary" : "ghost"} size="sm"
+            onClick={() => setFiltreCategorie(filtreCategorie === cat ? null : cat)}>
+            {cat}
+          </Button>
+        ))}
+      </div>
+
+      <Card className="border-purple-200/50">
+        <CardHeader className="pb-2 cursor-pointer select-none" onClick={() => setAccordeonIAOuvert((o) => !o)}>
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-purple-500" />
+            Suggestions IA contextuelles
+            {accordeonIAOuvert ? <ChevronUp className="h-4 w-4 ml-auto text-muted-foreground" /> : <ChevronDown className="h-4 w-4 ml-auto text-muted-foreground" />}
+          </CardTitle>
+          <CardDescription className="text-xs">Anniversaires, saison, jalons, sejour, gaming, culture</CardDescription>
+        </CardHeader>
+        {accordeonIAOuvert && (
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-3 gap-2">
+              {TRIGGERS_IA.map((t) => (
+                <Button key={t.id} variant={triggerActif === t.id ? "default" : "outline"} size="sm"
+                  className="text-xs h-9" onClick={() => chargerSuggestionsIA(t.id)} disabled={chargementSuggestions}>
+                  {chargementSuggestions && triggerActif === t.id ? <span className="animate-pulse">...</span> : t.label}
+                </Button>
+              ))}
+            </div>
             {suggestions.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-2">
-                Lancez la génération pour obtenir des idées cadeaux/achats basées sur anniversaire, jalons et saison.
-              </p>
+              <p className="text-sm text-muted-foreground text-center py-2">Choisissez un theme pour obtenir des idees.</p>
             ) : (
               <div className="space-y-2">
-                {suggestions.slice(0, 6).map((s, idx) => (
-                  <div key={`${s.titre}-${idx}`} className="rounded-lg border bg-card p-3">
+                {suggestions.slice(0, 8).map((s, idx) => (
+                  <div key={s.titre + idx} className="rounded-lg border bg-card p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="text-sm font-medium">{s.titre}</p>
                         <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
                         <div className="flex flex-wrap gap-1 mt-2">
-                          <Badge variant="outline" className="text-xs">{s.source}</Badge>
+                          {s.source && <Badge variant="outline" className="text-xs">{s.source}</Badge>}
                           {s.fourchette_prix && <Badge variant="secondary" className="text-xs">{s.fourchette_prix}</Badge>}
+                          {s.ou_acheter && <Badge variant="outline" className="text-xs text-muted-foreground">{s.ou_acheter}</Badge>}
                         </div>
                       </div>
-                      <Button size="sm" onClick={() => ajouterSuggestion(s)}>
-                        Ajouter
-                      </Button>
+                      <Button size="sm" onClick={() => ajouterSuggestion(s)}>Ajouter</Button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
 
-      {/* Liste des achats groupés par catégorie */}
       {categories.length === 0 ? (
         <Card>
           <CardContent className="pt-6 pb-6 text-center">
             <p className="text-muted-foreground text-sm">
-              Aucun achat en attente. Ajoutez-en un avec le bouton "Ajouter".
+              {ongletActif === "tout" ? "Aucun achat en attente." : "Aucun achat en attente pour ce filtre."}
             </p>
           </CardContent>
         </Card>
@@ -283,46 +360,29 @@ export default function PageAchats() {
               </CardHeader>
               <CardContent className="space-y-2">
                 {achatsParCategorie[cat].map((achat) => (
-                  <div
-                    key={achat.id}
-                    className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:shadow-sm transition-shadow"
-                  >
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => marquer({ id: achat.id })}
-                      className="shrink-0"
-                    >
+                  <div key={achat.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+                    <Button size="sm" variant="ghost" onClick={() => mutMarquer.mutate({ id: achat.id })} className="shrink-0" title="Marquer achete">
                       <Check className="h-4 w-4" />
                     </Button>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">{achat.nom}</p>
-                      {achat.description && (
-                        <p className="text-xs text-muted-foreground truncate">{achat.description}</p>
-                      )}
-                      {achat.prix_estime && (
-                        <p className="text-xs text-muted-foreground">Prix estimé : {achat.prix_estime} €</p>
-                      )}
+                      {achat.description && <p className="text-xs text-muted-foreground truncate">{achat.description}</p>}
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {achat.pour_qui && achat.pour_qui !== "famille" && <Badge variant="outline" className="text-xs">{achat.pour_qui}</Badge>}
+                        {achat.prix_estime && <span className="text-xs text-muted-foreground">~{achat.prix_estime} euros</span>}
+                        {achat.a_revendre && (
+                          <Badge variant="secondary" className="text-xs">
+                            <Repeat className="h-3 w-3 mr-1" />a revendre
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                     {achat.priorite && (
-                      <Badge
-                        variant={
-                          achat.priorite === "haute"
-                            ? "destructive"
-                            : achat.priorite === "moyenne"
-                              ? "default"
-                              : "outline"
-                        }
-                      >
-                        {achat.priorite}
+                      <Badge variant={achat.priorite === "urgent" || achat.priorite === "haute" ? "destructive" : achat.priorite === "moyenne" ? "default" : "outline"} className="shrink-0 text-xs">
+                        {LABELS_PRIORITE[achat.priorite] ?? achat.priorite}
                       </Badge>
                     )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => supprimer(achat.id)}
-                      className="shrink-0"
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => mutSupprimer.mutate(achat.id)} className="shrink-0" title="Supprimer">
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
@@ -333,28 +393,45 @@ export default function PageAchats() {
         </div>
       )}
 
-      {/* Historique achats achetés */}
-      {achats.filter((a) => a.achete).length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Achats effectués récemment</CardTitle>
+      {achatsARevendre.length > 0 && (
+        <Card className="border-green-200/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Repeat className="h-4 w-4 text-green-500" />A revendre ({achatsARevendre.length})
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ul className="space-y-1 text-sm text-muted-foreground">
-              {achats
-                .filter((a) => a.achete)
-                .slice(0, 5)
-                .map((a) => (
-                  <li key={a.id} className="flex items-center gap-2">
-                    <Check className="h-3 w-3 text-green-500" />
-                    <span className="line-through">{a.nom}</span>
-                    {a.prix_reel && <span className="text-xs">({a.prix_reel} €)</span>}
-                  </li>
-                ))}
-            </ul>
+          <CardContent className="space-y-2">
+            {achatsARevendre.map((a) => (
+              <div key={a.id} className="flex items-center gap-3 p-2 rounded border bg-card text-sm">
+                <span className="flex-1 font-medium">{a.nom}</span>
+                {a.prix_revente_estime && <span className="text-xs text-muted-foreground">~{a.prix_revente_estime} euros</span>}
+                <Button size="sm" variant="outline" onClick={() => ouvrirDialogueLBC(a)} className="text-xs h-7">Annonce LBC</Button>
+                <Button size="sm" variant="ghost" onClick={() => mutVendu.mutate(a.id)} title="Marquer vendu">
+                  <Check className="h-4 w-4 text-green-600" />
+                </Button>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={!!lbcItem} onOpenChange={(o) => { if (!o) { setLbcItem(null); setLbcTexte(null); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Annonce LeBonCoin - {lbcItem?.nom}</DialogTitle></DialogHeader>
+          {lbcChargement ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">Generation en cours...</p>
+          ) : lbcTexte ? (
+            <div className="space-y-3">
+              <Textarea value={lbcTexte} readOnly rows={10} className="font-mono text-xs resize-none" />
+              <Button onClick={copierLBC} className="w-full">
+                <Copy className="h-4 w-4 mr-2" />Copier l annonce
+              </Button>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground py-4 text-center">Annonce non disponible</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

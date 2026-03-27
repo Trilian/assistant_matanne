@@ -12,7 +12,7 @@ Contient :
 - EvenementFamilial : Événements familiaux récurrents
 """
 
-from datetime import date, datetime
+from datetime import date, datetime, time
 from typing import Optional
 
 from sqlalchemy import (
@@ -25,6 +25,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    Time,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -196,6 +197,7 @@ class ActiviteFamille(CreeLeMixin, Base):
     description: Mapped[str | None] = mapped_column(Text)
     type_activite: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     date_prevue: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    heure_debut: Mapped[time | None] = mapped_column(Time)
     duree_heures: Mapped[float | None] = mapped_column(Float)
     lieu: Mapped[str | None] = mapped_column(String(200))
     qui_participe: Mapped[list[str] | None] = mapped_column(JSONB)

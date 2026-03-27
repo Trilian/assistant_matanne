@@ -28,17 +28,23 @@ from src.api.schemas.errors import (
 from src.api.schemas.famille import (
     AchatCreate,
     AchatPatch,
+    AnnonceIBCRequest,
     AnniversaireCreate,
     AnniversairePatch,
+    ConfigGardeRequest,
     ContexteFamilialResponse,
     EvenementFamilialCreate,
     EvenementFamilialPatch,
     MarquerAchetePayload,
+    PreferencesFamilleRequest,
+    PreferencesFamilleResponse,
     ResumeSemaineRequest,
     RetrospectiveRequest,
     SuggestionAchatResponse,
     SuggestionsActivitesSimpleRequest,
+    SuggestionsAchatsEnrichiesRequest,
     SuggestionsSoireeRequest,
+    SuggestionsSejourRequest,
     SuggestionsWeekendRequest,
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
@@ -1618,6 +1624,10 @@ def _serialiser_achat(a) -> dict:  # noqa: ANN001
         "suggere_par": a.suggere_par,
         "achete": a.achete,
         "date_achat": a.date_achat.isoformat() if a.date_achat else None,
+        "pour_qui": getattr(a, "pour_qui", "famille"),
+        "a_revendre": getattr(a, "a_revendre", False),
+        "prix_revente_estime": getattr(a, "prix_revente_estime", None),
+        "vendu_le": a.vendu_le.isoformat() if getattr(a, "vendu_le", None) else None,
     }
 
 
@@ -1626,6 +1636,8 @@ def _serialiser_achat(a) -> dict:  # noqa: ANN001
 async def lister_achats_famille(
     categorie: str | None = Query(None, description="Filtrer par catégorie"),
     achete: bool | None = Query(None, description="Filtrer sur l'état acheté (true/false)"),
+    pour_qui: str | None = Query(None, description="Filtrer par destinataire: famille, jules, anne, mathieu"),
+    a_revendre: bool | None = Query(None, description="Filtrer sur les articles à revendre"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les achats famille (route canonique)."""
@@ -1633,7 +1645,11 @@ async def lister_achats_famille(
 
     def _query():
         service = obtenir_service_achats_famille()
-        if categorie and achete is not None:
+        if pour_qui is not None:
+            items = service.lister_par_personne(pour_qui=pour_qui, achete=achete)
+        elif a_revendre is True:
+            items = service.lister_a_revendre()
+        elif categorie and achete is not None:
             items = service.lister_par_categorie(categorie=categorie, achete=achete)
         elif categorie:
             items = [
@@ -1674,6 +1690,9 @@ async def creer_achat(
             description=payload.description,
             age_recommande_mois=payload.age_recommande_mois,
             suggere_par=payload.suggere_par,
+            pour_qui=payload.pour_qui,
+            a_revendre=payload.a_revendre,
+            prix_revente_estime=payload.prix_revente_estime,
         )
         if not achat:
             raise HTTPException(status_code=500, detail="Erreur lors de la création de l'achat")
@@ -1746,6 +1765,383 @@ async def supprimer_achat(
             session.delete(achat)
             session.commit()
             return MessageResponse(message="Achat supprimé")
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# ACHATS — ENDPOINTS PHASE REFONTE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/achats/suggestions-ia-enrichies", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggestions_achats_enrichies(
+    payload: SuggestionsAchatsEnrichiesRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère des suggestions d'achats IA selon les triggers fournis."""
+    from src.services.famille.achats_ia import obtenir_service_achats_ia
+
+    def _query():
+        service = obtenir_service_achats_ia()
+        resultats: list[dict] = []
+
+        for trigger in payload.triggers:
+            if trigger == "vetements_qualite" and payload.pour_qui:
+                items = service.suggerer_vetements_qualite(
+                    pour_qui=payload.pour_qui, saison="courante"
+                )
+                resultats.extend(items)
+            elif trigger == "sejour" and payload.destination:
+                items = service.suggerer_achats_sejour(
+                    destination=payload.destination,
+                    duree_jours=7,
+                    age_jules_mois=payload.age_jules_mois or 0,
+                )
+                resultats.extend(items)
+            elif trigger == "culture" and payload.ville:
+                items = service.suggerer_sorties_culture(
+                    ville=payload.ville,
+                    age_jules_mois=payload.age_jules_mois or 0,
+                    budget=payload.budget or 50,
+                    interets=[],
+                )
+                resultats.extend(items)
+            else:
+                suggestions = service.suggerer_achats(payload.pour_qui or "famille")
+                resultats.extend(suggestions if isinstance(suggestions, list) else [])
+
+        return {"items": resultats, "total": len(resultats)}
+
+    return await executer_async(_query)
+
+
+@router.post("/achats/{achat_id}/annonce-lbc", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def generer_annonce_lbc(
+    achat_id: int,
+    payload: AnnonceIBCRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère une annonce LeBonCoin pour un article à revendre."""
+    from src.services.famille.achats_ia import obtenir_service_achats_ia
+
+    def _query():
+        service = obtenir_service_achats_ia()
+        texte = service.generer_annonce_lbc(
+            nom=payload.nom,
+            description=payload.description,
+            etat_usage=payload.etat_usage,
+            prix_cible=payload.prix_cible,
+        )
+        return {"annonce": texte}
+
+    return await executer_async(_query)
+
+
+@router.post("/achats/{achat_id}/vendu", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def marquer_achat_vendu(
+    achat_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Marque un achat comme vendu (met à jour vendu_le)."""
+    from src.services.famille.achats import obtenir_service_achats_famille
+
+    def _query():
+        service = obtenir_service_achats_famille()
+        success = service.marquer_vendu(achat_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Achat non trouvé")
+        return MessageResponse(message="Achat marqué comme vendu")
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# ROUTINES — COMPLÉTION
+# ═══════════════════════════════════════════════════════════
+
+
+@router.patch("/routines/{routine_id}/completer", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def completer_routine(
+    routine_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Marque une routine comme complétée aujourd'hui."""
+    from src.core.models.maison import Routine
+
+    def _query():
+        with executer_avec_session() as session:
+            routine = session.query(Routine).filter(Routine.id == routine_id).first()
+            if not routine:
+                raise HTTPException(status_code=404, detail="Routine non trouvée")
+            routine.derniere_completion = date.today()
+            session.commit()
+            return {
+                "id": routine.id,
+                "nom": routine.nom,
+                "derniere_completion": routine.derniere_completion.isoformat(),
+            }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# BUDGET — RÉSUMÉ MENSUEL
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/budget/resume-mois", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def resume_budget_mois(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne le résumé des achats du mois courant vs précédent."""
+    from src.core.models import AchatFamille
+
+    def _query():
+        today = date.today()
+        with executer_avec_session() as session:
+            # Mois courant
+            debut_courant = today.replace(day=1)
+            achats_courant = (
+                session.query(AchatFamille)
+                .filter(
+                    AchatFamille.achete == True,  # noqa: E712
+                    AchatFamille.date_achat >= debut_courant,
+                )
+                .all()
+            )
+            total_courant = sum(
+                (a.prix_reel or a.prix_estime or 0) for a in achats_courant
+            )
+
+            # Calcul début du mois précédent
+            if today.month == 1:
+                debut_prec = today.replace(year=today.year - 1, month=12, day=1)
+                fin_prec = today.replace(day=1)
+            else:
+                debut_prec = today.replace(month=today.month - 1, day=1)
+                fin_prec = debut_courant
+
+            achats_prec = (
+                session.query(AchatFamille)
+                .filter(
+                    AchatFamille.achete == True,  # noqa: E712
+                    AchatFamille.date_achat >= debut_prec,
+                    AchatFamille.date_achat < fin_prec,
+                )
+                .all()
+            )
+            total_prec = sum(
+                (a.prix_reel or a.prix_estime or 0) for a in achats_prec
+            )
+
+            variation = None
+            if total_prec and total_prec > 0:
+                variation = round((total_courant - total_prec) / total_prec * 100, 1)
+
+            par_categorie: dict[str, float] = {}
+            for a in achats_courant:
+                par_categorie[a.categorie] = par_categorie.get(a.categorie, 0) + (
+                    a.prix_reel or a.prix_estime or 0
+                )
+
+            return {
+                "mois_courant": debut_courant.strftime("%Y-%m"),
+                "total_courant": total_courant,
+                "total_precedent": total_prec if total_prec else None,
+                "variation_pct": variation,
+                "achats_par_categorie": par_categorie,
+            }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# CONFIG GARDE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/config/garde", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def lire_config_garde(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne la configuration de garde / crèche."""
+    from src.services.famille.jours_speciaux import obtenir_service_jours_speciaux
+
+    def _query():
+        service = obtenir_service_jours_speciaux()
+        service.charger_config_depuis_db()
+        from src.services.famille import jours_speciaux as _mod
+
+        cfg = dict(_mod._config_creche)
+        return {
+            "semaines_fermeture": cfg.get("semaines_fermeture", []),
+            "nom_creche": cfg.get("nom_creche", ""),
+            "zone_academique": cfg.get("zone_academique", "B"),
+            "annee_courante": cfg.get("annee_courante"),
+        }
+
+    return await executer_async(_query)
+
+
+@router.put("/config/garde", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def sauvegarder_config_garde(
+    payload: ConfigGardeRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Sauvegarde la configuration crèche."""
+    from src.services.famille.jours_speciaux import obtenir_service_jours_speciaux
+
+    def _query():
+        service = obtenir_service_jours_speciaux()
+        semaines = [s.model_dump() for s in payload.semaines_fermeture]
+        service.sauvegarder_fermetures_creche(
+            semaines=semaines,
+            nom_creche=payload.nom_creche,
+            zone_academique=payload.zone_academique,
+        )
+        return MessageResponse(message="Configuration crèche sauvegardée")
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# CONFIG — PRÉFÉRENCES FAMILIALES
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/config/preferences", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def lire_preferences_famille(
+    user: dict[str, Any] = Depends(require_auth),
+) -> PreferencesFamilleResponse:
+    """Lit les préférences familiales (tailles, style achats, intérêts)."""
+
+    def _query():
+        from src.core.models.user_preferences import PreferenceUtilisateur
+        from sqlalchemy import select as sa_select
+
+        with executer_avec_session() as session:
+            pref = session.execute(
+                sa_select(PreferenceUtilisateur)
+            ).scalar_one_or_none()
+            if pref is None:
+                return PreferencesFamilleResponse()
+            return PreferencesFamilleResponse(
+                taille_vetements_anne=pref.taille_vetements_anne or {},
+                taille_vetements_mathieu=pref.taille_vetements_mathieu or {},
+                style_achats_anne=pref.style_achats_anne or {},
+                style_achats_mathieu=pref.style_achats_mathieu or {},
+                interets_gaming=pref.interets_gaming or [],
+                interets_culture=pref.interets_culture or [],
+                equipement_activites=pref.equipement_activites or {},
+            )
+
+    return await executer_async(_query)
+
+
+@router.put("/config/preferences", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def sauvegarder_preferences_famille(
+    payload: PreferencesFamilleRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Sauvegarde les préférences familiales (tailles, style achats, intérêts)."""
+
+    def _query():
+        from src.core.models.user_preferences import PreferenceUtilisateur
+        from sqlalchemy import select as sa_select
+
+        with executer_avec_session() as session:
+            pref = session.execute(
+                sa_select(PreferenceUtilisateur)
+            ).scalar_one_or_none()
+            if pref is None:
+                pref = PreferenceUtilisateur(user_id="matanne")
+                session.add(pref)
+            pref.taille_vetements_anne = payload.taille_vetements_anne
+            pref.taille_vetements_mathieu = payload.taille_vetements_mathieu
+            pref.style_achats_anne = payload.style_achats_anne
+            pref.style_achats_mathieu = payload.style_achats_mathieu
+            pref.interets_gaming = payload.interets_gaming
+            pref.interets_culture = payload.interets_culture
+            pref.equipement_activites = payload.equipement_activites
+            session.commit()
+        return MessageResponse(message="Préférences familiales sauvegardées")
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# PLANNING — JOURS SANS CRÈCHE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/planning/jours-sans-creche", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def jours_sans_creche(
+    mois: str | None = Query(None, description="Mois YYYY-MM. Par défaut: mois courant"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Liste les jours sans crèche pour un mois donné."""
+    from src.services.famille.jours_speciaux import obtenir_service_jours_speciaux
+
+    def _query():
+        service = obtenir_service_jours_speciaux()
+        service.charger_config_depuis_db()
+
+        if mois:
+            try:
+                annee, mo = int(mois[:4]), int(mois[5:7])
+            except (ValueError, IndexError):
+                raise HTTPException(status_code=422, detail="Format mois invalide, attendu YYYY-MM")
+        else:
+            annee, mo = date.today().year, date.today().month
+
+        tous_jours = service.fermetures_creche(annee=annee)
+        jours_du_mois = [j for j in tous_jours if j.date_jour.month == mo]
+        return {
+            "mois": f"{annee:04d}-{mo:02d}",
+            "jours": [
+                {"date": j.date_jour.isoformat(), "label": j.nom}
+                for j in jours_du_mois
+            ],
+            "total": len(jours_du_mois),
+        }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# WEEKEND — SUGGESTIONS SÉJOUR
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/weekend/suggestions-sejour", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggestions_sejour(
+    payload: SuggestionsSejourRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère des suggestions d'activités pour un séjour."""
+    from src.services.famille.weekend_ai import obtenir_service_weekend_ia
+
+    def _query():
+        service = obtenir_service_weekend_ia()
+        texte = service.suggerer_activites_sejour(
+            destination=payload.destination,
+            nb_jours=payload.nb_jours,
+            age_enfant_mois=payload.age_jules_mois or 0,
+            nb_suggestions=payload.nb_suggestions,
+        )
+        return {"suggestions": texte, "destination": payload.destination}
 
     return await executer_async(_query)
 

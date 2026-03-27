@@ -440,6 +440,9 @@ CREATE TABLE routines (
     jours JSONB DEFAULT '[]',
     heure_debut VARCHAR(10),
     actif BOOLEAN NOT NULL DEFAULT TRUE,
+    moment_journee VARCHAR(20) NOT NULL DEFAULT 'flexible',
+    jour_semaine INTEGER,
+    derniere_completion DATE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_routines_type ON routines(type_routine);
@@ -643,6 +646,10 @@ CREATE TABLE achats_famille (
     achete BOOLEAN NOT NULL DEFAULT FALSE,
     date_achat DATE,
     suggere_par VARCHAR(50),
+    pour_qui VARCHAR(50) NOT NULL DEFAULT 'famille',
+    a_revendre BOOLEAN NOT NULL DEFAULT FALSE,
+    prix_revente_estime FLOAT,
+    vendu_le DATE,
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
@@ -650,6 +657,7 @@ CREATE TABLE achats_famille (
 CREATE INDEX IF NOT EXISTS ix_family_purchases_categorie ON achats_famille(categorie);
 CREATE INDEX IF NOT EXISTS ix_family_purchases_priorite ON achats_famille(priorite);
 CREATE INDEX IF NOT EXISTS ix_family_purchases_achete ON achats_famille(achete);
+CREATE INDEX IF NOT EXISTS ix_achats_famille_pour_qui ON achats_famille(pour_qui);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.23 FAMILY_ACTIVITIES
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -659,6 +667,7 @@ CREATE TABLE activites_famille (
     description TEXT,
     type_activite VARCHAR(100) NOT NULL,
     date_prevue DATE NOT NULL,
+    heure_debut TIME,
     duree_heures FLOAT,
     lieu VARCHAR(200),
     qui_participe JSONB,
@@ -880,6 +889,14 @@ CREATE TABLE preferences_utilisateurs (
     viande_rouge_max INTEGER NOT NULL DEFAULT 2,
     robots JSONB NOT NULL DEFAULT '[]',
     magasins_preferes JSONB NOT NULL DEFAULT '[]',
+    taille_vetements_anne JSONB NOT NULL DEFAULT '{}',
+    taille_vetements_mathieu JSONB NOT NULL DEFAULT '{}',
+    style_achats_anne JSONB NOT NULL DEFAULT '{}',
+    style_achats_mathieu JSONB NOT NULL DEFAULT '{}',
+    interets_gaming JSONB NOT NULL DEFAULT '[]',
+    interets_culture JSONB NOT NULL DEFAULT '[]',
+    equipement_activites JSONB NOT NULL DEFAULT '{}',
+    config_garde JSONB NOT NULL DEFAULT '{}',
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );

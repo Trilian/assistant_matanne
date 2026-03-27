@@ -205,6 +205,9 @@ class ServiceAchatsFamille(BaseService[AchatFamille]):
         description: str | None = None,
         age_recommande_mois: int | None = None,
         suggere_par: str | None = None,
+        pour_qui: str = "famille",
+        a_revendre: bool = False,
+        prix_revente_estime: float | None = None,
         db: Session | None = None,
     ) -> AchatFamille:
         """Ajoute un nouvel achat à la liste.
@@ -220,6 +223,9 @@ class ServiceAchatsFamille(BaseService[AchatFamille]):
             description: Description détaillée.
             age_recommande_mois: Âge recommandé en mois (pour jouets).
             suggere_par: Qui a suggéré ('anne', 'mathieu', 'ia').
+            pour_qui: Destinataire ('famille', 'jules', 'anne', 'mathieu').
+            a_revendre: Si l'article est prévu pour être revendu ensuite.
+            prix_revente_estime: Prix de revente estimé en euros.
             db: Session DB (injectée automatiquement).
 
         Returns:
@@ -238,6 +244,9 @@ class ServiceAchatsFamille(BaseService[AchatFamille]):
             description=description,
             age_recommande_mois=age_recommande_mois,
             suggere_par=suggere_par,
+            pour_qui=pour_qui,
+            a_revendre=a_revendre,
+            prix_revente_estime=prix_revente_estime,
             achete=False,
         )
         db.add(achat)
@@ -357,6 +366,74 @@ class ServiceAchatsFamille(BaseService[AchatFamille]):
             .first()
         )
         return exists is not None
+
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
+    def lister_par_personne(
+        self, pour_qui: str, achete: bool = False, db: Session | None = None
+    ) -> list[AchatFamille]:
+        """Liste les achats filtrés par destinataire.
+
+        Args:
+            pour_qui: Destinataire (jules/anne/mathieu/famille).
+            achete: Inclure les articles déjà achetés.
+            db: Session DB (injectée automatiquement).
+
+        Returns:
+            Liste d'achats pour ce destinataire.
+        """
+        if db is None:
+            raise ValueError("Session DB requise")
+        query = db.query(AchatFamille).filter(AchatFamille.pour_qui == pour_qui)
+        if not achete:
+            query = query.filter(AchatFamille.achete == False)  # noqa: E712
+        return query.order_by(AchatFamille.priorite, AchatFamille.cree_le.desc()).all()
+
+    @avec_gestion_erreurs(default_return=[])
+    @avec_session_db
+    def lister_a_revendre(self, db: Session | None = None) -> list[AchatFamille]:
+        """Liste les articles à revendre (non encore vendus).
+
+        Returns:
+            Liste des achats marqués à revendre et non vendus.
+        """
+        if db is None:
+            raise ValueError("Session DB requise")
+        return (
+            db.query(AchatFamille)
+            .filter(
+                AchatFamille.a_revendre == True,  # noqa: E712
+                AchatFamille.vendu_le == None,  # noqa: E711
+            )
+            .order_by(AchatFamille.cree_le.desc())
+            .all()
+        )
+
+    @avec_gestion_erreurs(default_return=False)
+    @avec_session_db
+    def marquer_vendu(
+        self, achat_id: int, db: Session | None = None
+    ) -> bool:
+        """Marque un article comme vendu (date du jour).
+
+        Args:
+            achat_id: ID de l'achat.
+            db: Session DB.
+
+        Returns:
+            True si mis à jour, False si non trouvé.
+        """
+        if db is None:
+            raise ValueError("Session DB requise")
+        from datetime import date
+
+        achat = db.get(AchatFamille, achat_id)
+        if achat is None:
+            return False
+        achat.vendu_le = date.today()
+        db.commit()
+        logger.info("Achat marqué vendu: id=%d, nom=%s", achat_id, achat.nom)
+        return True
 
 
 # ═══════════════════════════════════════════════════════════
