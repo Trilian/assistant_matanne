@@ -28,6 +28,7 @@ import {
   Minus,
   Clock,
   MapPin,
+  Loader2,
 } from "lucide-react";
 import {
   Card,
@@ -59,6 +60,7 @@ import {
   completerRoutine,
   obtenirSuggestionsWeekend,
   joursSansCReche,
+  obtenirSuggestionsAchatsEnrichies,
 } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
@@ -74,6 +76,14 @@ const MODULES = [
   { id: "calendriers", titre: "Calendriers", chemin: "/famille/calendriers", Icone: Calendar },
   { id: "config", titre: "Config", chemin: "/famille/config", Icone: Settings },
 ];
+
+// Mapping module id → mots-clés de types de rappels
+const MODULES_RAPPELS_MAPPING: Record<string, string[]> = {
+  documents: ["document"],
+  budget: ["budget"],
+  jules: ["jalon", "sante"],
+  achats: ["achat", "anniversaire"],
+};
 
 const LABELS_POUR_QUI: Record<string, string> = {
   jules: "👶 Jules",
@@ -143,6 +153,13 @@ export default function PageFamille() {
     rappelsData?.rappels?.filter((r) => r.priorite === "danger" || r.priorite === "warning") ?? [];
 
   const [hasShownToast, setHasShownToast] = useState(false);
+  const [suggestionsIAHub, setSuggestionsIAHub] = useState<Array<{ titre: string; description: string; source?: string }>>([]);
+
+  const mutationSuggestionsAchatsHub = useMutation({
+    mutationFn: () => obtenirSuggestionsAchatsEnrichies({ triggers: ["hub_rapide"] }),
+    onSuccess: (data) => setSuggestionsIAHub((data.items ?? []).slice(0, 2)),
+    onError: () => toast.error("Impossible de charger les suggestions IA."),
+  });
 
   useEffect(() => {
     if (!hasShownToast && contexte) {
@@ -382,6 +399,37 @@ export default function PageFamille() {
               {Object.keys(achatsPourQui).length === 0 && (
                 <p className="text-xs text-muted-foreground">Liste vide 🎉</p>
               )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full h-7 text-xs mt-1 text-purple-600"
+                onClick={() => mutationSuggestionsAchatsHub.mutate()}
+                disabled={mutationSuggestionsAchatsHub.isPending}
+              >
+                {mutationSuggestionsAchatsHub.isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                ) : (
+                  <Sparkles className="h-3 w-3 mr-1" />
+                )}
+                Suggestions IA
+              </Button>
+              {suggestionsIAHub.length > 0 && (
+                <div className="space-y-1 mt-1">
+                  {suggestionsIAHub.map((s, i) => (
+                    <div key={i} className="flex items-center justify-between gap-1 text-xs">
+                      <span className="truncate flex-1">{s.titre}</span>
+                      <Badge variant="outline" className="text-[9px] shrink-0">
+                        {s.source ?? "ia"}
+                      </Badge>
+                      <Link href="/famille/achats">
+                        <Button variant="ghost" size="sm" className="h-5 text-[9px] px-1">
+                          +
+                        </Button>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
               <Link href="/famille/achats" className="block">
                 <Button variant="ghost" size="sm" className="w-full h-7 text-xs mt-1">
                   Voir tout →
@@ -538,20 +586,36 @@ export default function PageFamille() {
         titre="Modules"
         items={MODULES}
         classeGrille="grid gap-3 grid-cols-2 sm:grid-cols-4"
-        renderItem={({ titre, chemin, Icone }) => (
-          <Link key={chemin} href={chemin}>
-            <Card className="hover:bg-accent/50 transition-colors h-full">
-              <CardContent className="pt-5 pb-4">
-                <div className="flex flex-col items-center gap-2 text-center">
-                  <div className="rounded-lg bg-primary/10 p-2.5">
-                    <Icone className="h-5 w-5 text-primary" />
-                  </div>
-                  <p className="text-sm font-medium">{titre}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        )}
+        renderItem={({ id, titre, chemin, Icone }) => {
+          const types = MODULES_RAPPELS_MAPPING[id as string] ?? [];
+          const nbUrgences = types.length > 0
+            ? rappelsUrgents.filter((r) => types.some((t) => r.type?.includes(t))).length
+            : 0;
+          return (
+            <Link key={chemin} href={chemin}>
+              <div className="relative h-full">
+                {nbUrgences > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -top-1 -right-1 h-4 w-4 p-0 text-[10px] flex items-center justify-center z-10"
+                  >
+                    {nbUrgences}
+                  </Badge>
+                )}
+                <Card className="hover:bg-accent/50 transition-colors h-full">
+                  <CardContent className="pt-5 pb-4">
+                    <div className="flex flex-col items-center gap-2 text-center">
+                      <div className="rounded-lg bg-primary/10 p-2.5">
+                        <Icone className="h-5 w-5 text-primary" />
+                      </div>
+                      <p className="text-sm font-medium">{titre}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </Link>
+          );
+        }}
       />
 
       {/* Dialog Suggestions Weekend IA */}

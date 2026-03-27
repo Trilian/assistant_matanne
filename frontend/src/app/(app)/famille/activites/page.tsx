@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   CalendarHeart,
@@ -96,6 +96,7 @@ export default function PageActivites() {
   const [journeeLibreDetectee, setJourneeLibreDetectee] = useState(false);
   const [typePrefere, setTypePrefere] = useState<string>("mixte");
   const [enChargementIA, setEnChargementIA] = useState(false);
+  const [bannierePreRemplie, setBannierePreRemplie] = useState(false);
 
   // Form state
   const [titre, setTitre] = useState("");
@@ -171,6 +172,19 @@ export default function PageActivites() {
     setDialogueCreation(true);
     toast.success("Suggestion injectée dans le formulaire");
   };
+
+  // Auto-prefill à l'ouverture du dialog si suggestions disponibles et contexte détecté
+  useEffect(() => {
+    if (
+      dialogueCreation &&
+      suggestionsStruct.length > 0 &&
+      (meteoDetectee !== null || journeeLibreDetectee)
+    ) {
+      appliquerSuggestion(suggestionsStruct[0]);
+      setBannierePreRemplie(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dialogueCreation]);
 
   return (
     <div className="space-y-6">
@@ -292,6 +306,25 @@ export default function PageActivites() {
               });
             }}
           >
+            {bannierePreRemplie && (
+              <div className="flex items-center gap-2 rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 px-3 py-2 text-xs text-blue-700 dark:text-blue-300">
+                <span className="flex-1">💡 Pré-rempli automatiquement selon la météo/journée libre</span>
+                <button
+                  type="button"
+                  className="text-blue-500 hover:text-blue-700 font-bold shrink-0"
+                  onClick={() => setBannierePreRemplie(false)}
+                >
+                  ×
+                </button>
+                <button
+                  type="button"
+                  className="text-blue-600 underline shrink-0 hover:text-blue-800"
+                  onClick={() => { setDialogueCreation(false); setDialogueSuggestions(true); }}
+                >
+                  Changer →
+                </button>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="act-titre">Titre *</Label>
               <Input

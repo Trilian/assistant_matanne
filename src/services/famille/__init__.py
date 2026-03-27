@@ -1,5 +1,5 @@
 """Package famille - Services calendrier, budget, routines, activités, achats, weekend, suivi perso, jules, santé,
-carnet_sante, contacts, anniversaires, evenements, voyage, documents, album, soiree_ai, journal_ia.
+carnet_sante, contacts, anniversaires, evenements, voyage, documents, soiree_ai.
 
 Imports paresseux pour éviter les imports circulaires.
 Importez directement depuis les sous-packages:
@@ -19,9 +19,7 @@ Importez directement depuis les sous-packages:
     from src.services.famille.evenements import obtenir_service_evenements
     from src.services.famille.voyage import obtenir_service_voyage
     from src.services.famille.documents import obtenir_service_documents
-    from src.services.famille.album import obtenir_service_album
     from src.services.famille.soiree_ai import obtenir_service_soiree_ai
-    from src.services.famille.journal_ia import obtenir_service_journal_ia
 """
 
 __all__ = [
@@ -43,9 +41,7 @@ __all__ = [
     "evenements",
     "voyage",
     "documents",
-    "album",
     "soiree_ai",
-    "journal_ia",
     "contexte",
     "rappels",
     "achats_ia",
@@ -121,18 +117,10 @@ def __getattr__(name: str):
         from src.services.famille.documents import obtenir_service_documents
 
         return obtenir_service_documents
-    if name in ("obtenir_service_album", "get_album_service"):
-        from src.services.famille.album import obtenir_service_album
-
-        return obtenir_service_album
     if name in ("obtenir_service_soiree_ai", "get_soiree_ai_service"):
         from src.services.famille.soiree_ai import obtenir_service_soiree_ai
 
         return obtenir_service_soiree_ai
-    if name in ("obtenir_service_journal_ia", "get_journal_ia_service"):
-        from src.services.famille.journal_ia import obtenir_service_journal_ia
-
-        return obtenir_service_journal_ia
     if name in ("obtenir_service_contexte_familial", "get_contexte_familial_service"):
         from src.services.famille.contexte import obtenir_service_contexte_familial
 

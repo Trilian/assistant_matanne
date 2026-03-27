@@ -43,8 +43,6 @@ from src.api.schemas.famille import (
     PreferencesFamilleRequest,
     PreferencesFamilleResponse,
     PrefillReventeResponse,
-    ResumeSemaineRequest,
-    RetrospectiveRequest,
     SuggestionAchatResponse,
     SuggestionsActivitesSimpleRequest,
     SuggestionsAchatsEnrichiesRequest,
@@ -1692,50 +1690,6 @@ async def suggestions_weekend_ia(
             nb_suggestions=payload.nb_suggestions,
         )
         return {"suggestions": resultat}
-
-    return await _query()
-
-
-@router.post("/journal/resume-semaine", responses=REPONSES_CRUD_LECTURE)
-@router.post("/journal/resumer-semaine", responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def resume_semaine_ia(
-    payload: ResumeSemaineRequest,
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Génère un résumé narratif de la semaine familiale via IA."""
-    from src.services.famille.journal_ia import obtenir_service_journal_ia
-
-    async def _query():
-        service = obtenir_service_journal_ia()
-        resultat = await service.generer_resume_semaine(
-            evenements=payload.evenements,
-            jalons=payload.jalons,
-            humeur_famille=payload.humeur_famille,
-        )
-        return {"resume": resultat}
-
-    return await _query()
-
-
-@router.post("/journal/retrospective", responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def retrospective_mensuelle_ia(
-    payload: RetrospectiveRequest,
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Génère une rétrospective mensuelle via IA."""
-    from src.services.famille.journal_ia import obtenir_service_journal_ia
-
-    async def _query():
-        service = obtenir_service_journal_ia()
-        resultat = await service.generer_retrospective_mensuelle(
-            mois=payload.mois,
-            resumes_semaines=payload.resumes_semaines,
-            nb_evenements=payload.nb_evenements,
-            nb_jalons=payload.nb_jalons,
-        )
-        return {"retrospective": resultat}
 
     return await _query()
 

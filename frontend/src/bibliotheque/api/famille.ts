@@ -592,33 +592,6 @@ export async function obtenirSuggestionsWeekend(params?: {
   return data;
 }
 
-/** Résumé hebdomadaire IA */
-export async function obtenirResumeSemaine(params?: {
-  evenements?: string[];
-  jalons?: string[];
-  humeur_famille?: string;
-}): Promise<{ resume: string }> {
-  const { data } = await clientApi.post("/famille/journal/resume-semaine", params ?? { evenements: [] });
-  return data;
-}
-
-/** Rétrospective mensuelle IA */
-export async function obtenirRetrospective(params?: {
-  mois?: string;
-  resumes_semaines?: string[];
-  nb_evenements?: number;
-  nb_jalons?: number;
-}): Promise<{ retrospective: string }> {
-  const defaultMois = new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
-  const { data } = await clientApi.post("/famille/journal/retrospective", {
-    mois: params?.mois ?? defaultMois,
-    resumes_semaines: params?.resumes_semaines ?? [],
-    nb_evenements: params?.nb_evenements,
-    nb_jalons: params?.nb_jalons,
-  });
-  return data;
-}
-
 /** Suggestions soirée couple IA */
 export async function obtenirSuggestionsSoiree(params?: {
   budget?: number;
