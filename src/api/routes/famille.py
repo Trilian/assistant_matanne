@@ -696,97 +696,112 @@ async def supprimer_depense(
 # ═══════════════════════════════════════════════════════════
 
 
+def _charger_historique_budget_6_mois(session: Any) -> list[dict[str, Any]]:
+    """Charge l'historique des dépenses familiales sur les 6 derniers mois.
+
+    Retourne une liste de 6 entrées (du plus ancien au plus récent),
+    chacune avec: mois, annee, total, par_categorie.
+    """
+    from datetime import datetime
+
+    from sqlalchemy import func
+
+    from src.core.models import BudgetFamille
+
+    aujourd_hui = datetime.now()
+    mois_courant = aujourd_hui.month
+    annee_courante = aujourd_hui.year
+
+    historique = []
+    for i in range(6):
+        m = mois_courant - i
+        a = annee_courante
+        if m <= 0:
+            m += 12
+            a -= 1
+
+        depenses_mois = (
+            session.query(
+                BudgetFamille.categorie,
+                func.sum(BudgetFamille.montant).label("total"),
+            )
+            .filter(
+                func.extract("month", BudgetFamille.date) == m,
+                func.extract("year", BudgetFamille.date) == a,
+            )
+            .group_by(BudgetFamille.categorie)
+            .all()
+        )
+
+        par_cat = {cat: float(total) for cat, total in depenses_mois}
+        historique.append({"mois": m, "annee": a, "total": sum(par_cat.values()), "par_categorie": par_cat})
+
+    historique.reverse()
+    return historique
+
+
 @router.get("/budget/analyse-ia", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def analyse_budget_ia(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Analyse complète du budget avec prédictions, anomalies et suggestions."""
-    from datetime import datetime
-
-    from sqlalchemy import func
-
-    from src.core.models import BudgetFamille
     from src.services.famille.budget_ai import get_budget_ai_service
 
     def _query():
         with executer_avec_session() as session:
-            aujourd_hui = datetime.now()
-            mois_courant = aujourd_hui.month
-            annee_courante = aujourd_hui.year
+            historique = _charger_historique_budget_6_mois(session)
 
-            # Historique 6 derniers mois
-            historique = []
-            for i in range(6):
-                m = mois_courant - i
-                a = annee_courante
-                if m <= 0:
-                    m += 12
-                    a -= 1
-
-                depenses_mois = (
-                    session.query(
-                        BudgetFamille.categorie,
-                        func.sum(BudgetFamille.montant).label("total"),
-                    )
-                    .filter(
-                        func.extract("month", BudgetFamille.date) == m,
-                        func.extract("year", BudgetFamille.date) == a,
-                    )
-                    .group_by(BudgetFamille.categorie)
-                    .all()
-                )
-
-                par_cat = {cat: float(total) for cat, total in depenses_mois}
-                total = sum(par_cat.values())
-
-                historique.append({
-                    "mois": m,
-                    "annee": a,
-                    "total": total,
-                    "par_categorie": par_cat,
-                })
-
-            # Inverser (du plus ancien au plus récent)
-            historique.reverse()
-
-            # Dépenses mois courant et moyennes
             depenses_courant = historique[-1]["par_categorie"] if historique else {}
             if len(historique) > 1:
-                moyennes = {}
+                moyennes: dict[str, float] = {}
                 for h in historique[:-1]:
-                    for cat, m in h.get("par_categorie", {}).items():
-                        moyennes[cat] = moyennes.get(cat, 0) + m
+                    for cat, v in h.get("par_categorie", {}).items():
+                        moyennes[cat] = moyennes.get(cat, 0) + v
                 nb_mois_prec = len(historique) - 1
                 moyennes = {cat: v / nb_mois_prec for cat, v in moyennes.items()}
             else:
                 moyennes = {}
 
-            total_moyen = sum(moyennes.values()) if moyennes else 0
-
             return {
                 "historique": historique,
                 "depenses_courant": depenses_courant,
                 "moyennes": moyennes,
-                "total_moyen": total_moyen,
+                "total_moyen": sum(moyennes.values()),
             }
 
     donnees = await executer_async(_query)
 
+    # Enrichir avec les dépenses maison (vue consolidée)
+    depenses_maison: dict[str, float] = {}
+    try:
+        from src.services.maison import get_depenses_crud_service
+
+        from datetime import datetime as _dt
+
+        svc_maison = get_depenses_crud_service()
+        deps = svc_maison.get_depenses_mois(_dt.now().month, _dt.now().year)
+        for d in deps or []:
+            cat_key = f"maison:{d.categorie}"
+            depenses_maison[cat_key] = depenses_maison.get(cat_key, 0) + float(d.montant)
+    except Exception:
+        pass
+
     service = get_budget_ai_service()
     predictions = service.predire_budget_mensuel(donnees["historique"])
-    anomalies = service.detecter_anomalies(
-        donnees["depenses_courant"], donnees["moyennes"]
-    )
-    suggestions = service.suggerer_economies(
-        donnees["moyennes"], donnees["total_moyen"]
-    )
+    anomalies = service.detecter_anomalies(donnees["depenses_courant"], donnees["moyennes"])
+    suggestions = service.suggerer_economies(donnees["moyennes"], donnees["total_moyen"])
+
+    total_famille = sum(donnees["depenses_courant"].values())
+    total_maison = sum(depenses_maison.values())
 
     return {
         "predictions": predictions.model_dump() if predictions else None,
         "anomalies": [a.model_dump() for a in anomalies],
         "suggestions": [s.model_dump() for s in suggestions],
         "historique": donnees["historique"],
+        "depenses_maison_mois": depenses_maison,
+        "total_consolide": total_famille + total_maison,
     }
 
 
@@ -796,46 +811,11 @@ async def predictions_budget(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Prédictions du budget pour le mois prochain."""
-    from datetime import datetime
-
-    from sqlalchemy import func
-
-    from src.core.models import BudgetFamille
     from src.services.famille.budget_ai import get_budget_ai_service
 
     def _query():
         with executer_avec_session() as session:
-            aujourd_hui = datetime.now()
-            mois_courant = aujourd_hui.month
-            annee_courante = aujourd_hui.year
-
-            historique = []
-            for i in range(6):
-                m = mois_courant - i
-                a = annee_courante
-                if m <= 0:
-                    m += 12
-                    a -= 1
-
-                depenses_mois = (
-                    session.query(
-                        BudgetFamille.categorie,
-                        func.sum(BudgetFamille.montant).label("total"),
-                    )
-                    .filter(
-                        func.extract("month", BudgetFamille.date) == m,
-                        func.extract("year", BudgetFamille.date) == a,
-                    )
-                    .group_by(BudgetFamille.categorie)
-                    .all()
-                )
-
-                par_cat = {cat: float(total) for cat, total in depenses_mois}
-                total = sum(par_cat.values())
-                historique.append({"mois": m, "annee": a, "total": total, "par_categorie": par_cat})
-
-            historique.reverse()
-            return historique
+            return _charger_historique_budget_6_mois(session)
 
     historique = await executer_async(_query)
     service = get_budget_ai_service()
@@ -1676,10 +1656,7 @@ async def suggestions_weekend_ia(
 
         # Auto-inject âge Jules
         jules_service = obtenir_service_jules()
-        date_naissance = jules_service.get_date_naissance_jules()
-        age_mois = 19
-        if date_naissance:
-            age_mois = (date.today() - date_naissance).days // 30
+        age_mois = jules_service.get_age_mois(default=19)
 
         service = obtenir_weekend_ai_service()
         resultat = await service.suggerer_activites(
@@ -2578,11 +2555,9 @@ async def obtenir_croissance_jules(
 
     def _query():
         jules_service = obtenir_service_jules()
-        date_naissance = jules_service.get_date_naissance_jules()
-        if not date_naissance:
+        if not jules_service.get_date_naissance_jules():
             raise HTTPException(status_code=404, detail="Profil Jules non trouvé")
-
-        age_mois = (date.today() - date_naissance).days // 30
+        age_mois = jules_service.get_age_mois()
 
         contexte_service = obtenir_service_contexte_familial()
         normes = contexte_service.obtenir_croissance_oms(age_mois, sexe="M")
@@ -2675,10 +2650,7 @@ async def suggestions_activites_auto(
 
         # Auto-inject âge Jules
         jules_service = obtenir_service_jules()
-        date_naissance = jules_service.get_date_naissance_jules()
-        age_mois = 19
-        if date_naissance:
-            age_mois = (date.today() - date_naissance).days // 30
+        age_mois = jules_service.get_age_mois(default=19)
 
         # Détecter journée libre (férié + crèche fermée dans les 3 prochains jours)
         jours_service = obtenir_service_jours_speciaux()
@@ -2691,10 +2663,28 @@ async def suggestions_activites_auto(
             for j in prochains
         )
 
+        # Collecter les actions jardin (plantes à arroser, récoltes proches)
+        jardin_activites: list[dict] = []
+        try:
+            from src.services.maison import get_jardin_service
+
+            jardin_svc = get_jardin_service()
+            beau_temps = bool(previsions and previsions[0].precipitation_mm < 5)
+            if beau_temps:
+                for p in jardin_svc.obtenir_plantes_a_arroser():
+                    jardin_activites.append({"type": "arrosage", "nom": getattr(p, "nom", str(p))})
+                for p in jardin_svc.obtenir_recoltes_proches():
+                    jardin_activites.append({"type": "recolte", "nom": getattr(p, "nom", str(p))})
+        except Exception:
+            pass
+
         # Construire le prompt enrichi
         prompt_extra = ""
         if journee_libre:
             prompt_extra = " C'est une journée libre (férié ou crèche fermée), propose des activités pour une journée complète."
+        if jardin_activites and type_effectif != "interieur":
+            noms_jardin = ", ".join(a["nom"] for a in jardin_activites[:3])
+            prompt_extra += f" Le jardin a des tâches à faire ({noms_jardin}) : inclure 1 activité jardin avec Jules."
 
         # Appel au service IA activités existant
         service = obtenir_service_activites()
@@ -2709,14 +2699,16 @@ async def suggestions_activites_auto(
                 "suggestions_struct": _structurer_suggestions_texte(str(resultat)),
                 "meteo": meteo_txt,
                 "journee_libre": journee_libre,
+                "jardin_activites": jardin_activites,
             }
 
         # Fallback: utiliser le service weekend IA
         from src.services.famille.weekend_ai import obtenir_weekend_ai_service
 
+        meteo_enrichi = meteo_txt + (" " + type_effectif if type_effectif != "les_deux" else "") + prompt_extra
         weekend_service = obtenir_weekend_ai_service()
         resultat = await weekend_service.suggerer_activites(
-            meteo=meteo_txt + (" " + type_effectif if type_effectif != "les_deux" else ""),
+            meteo=meteo_enrichi,
             age_enfant_mois=age_mois,
             budget=int(payload.budget_max),
             nb_suggestions=5,
@@ -2726,6 +2718,7 @@ async def suggestions_activites_auto(
             "suggestions_struct": _structurer_suggestions_texte(str(resultat)),
             "meteo": meteo_txt,
             "journee_libre": journee_libre,
+            "jardin_activites": jardin_activites,
         }
 
     return await _query()

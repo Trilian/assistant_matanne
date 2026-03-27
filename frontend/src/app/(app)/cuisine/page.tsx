@@ -22,7 +22,7 @@ import {
   CardTitle,
 } from "@/composants/ui/card";
 import { utiliserRequete } from "@/crochets/utiliser-api";
-import { obtenirTableauBord } from "@/bibliotheque/api/tableau-bord";
+import { obtenirDashboardCuisine } from "@/bibliotheque/api/tableau-bord";
 
 const SECTIONS = [
   {
@@ -70,7 +70,7 @@ const SECTIONS = [
 ];
 
 export default function PageCuisine() {
-  const { data: dashboard } = utiliserRequete(["tableau-bord"], obtenirTableauBord);
+  const { data: dashboard } = utiliserRequete(["dashboard-cuisine"], obtenirDashboardCuisine);
 
   return (
     <div className="space-y-6">
@@ -84,17 +84,18 @@ export default function PageCuisine() {
       {/* Stats rapides */}
       {dashboard && (
         <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{dashboard.repas_aujourd_hui?.length ?? 0}</p><p className="text-xs text-muted-foreground">Repas aujourd'hui</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{dashboard.articles_courses_restants ?? 0}</p><p className="text-xs text-muted-foreground">Articles à acheter</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{dashboard.alertes_inventaire ?? 0}</p><p className="text-xs text-muted-foreground">Alertes inventaire</p></CardContent></Card>
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{dashboard.repas_aujourd_hui.length}</p><p className="text-xs text-muted-foreground">Repas aujourd'hui</p></CardContent></Card>
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{dashboard.articles_courses_restants}</p><p className="text-xs text-muted-foreground">Articles à acheter</p></CardContent></Card>
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{dashboard.alertes_inventaire}</p><p className="text-xs text-muted-foreground">Alertes inventaire</p></CardContent></Card>
         </div>
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map(({ titre, description, chemin, Icone }) => {
           const estMaSemaine = chemin === "/cuisine/ma-semaine";
+          const estBatchCooking = chemin === "/cuisine/batch-cooking";
           const nbRepasAujourdhui = dashboard?.repas_aujourd_hui?.length ?? 0;
-          const nbRepasHebdo = (dashboard as Record<string, unknown> | undefined)?.repas_semaine_count as number | undefined;
+          const nbRepasHebdo = dashboard?.repas_semaine_count;
 
           return (
             <Link key={chemin} href={chemin}>
@@ -113,6 +114,11 @@ export default function PageCuisine() {
                     {estMaSemaine && nbRepasAujourdhui > 0 && (
                       <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
                         {nbRepasAujourdhui} repas
+                      </span>
+                    )}
+                    {estBatchCooking && dashboard?.batch_en_cours && (
+                      <span className="shrink-0 rounded-full bg-orange-500/10 px-2 py-0.5 text-xs font-semibold text-orange-600">
+                        En cours
                       </span>
                     )}
                   </div>

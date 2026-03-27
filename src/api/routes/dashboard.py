@@ -191,6 +191,109 @@ async def obtenir_tableau_bord(
     return await executer_async(_query)
 
 
+@router.get("/cuisine", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_dashboard_cuisine(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Dashboard agrégé spécifique au module cuisine.
+
+    Retourne: repas du jour, compteur semaine, recettes totales,
+    articles courses restants, alertes inventaire, état batch cooking.
+    """
+
+    def _query():
+        with executer_avec_session() as session:
+            from src.core.models import ArticleInventaire, Recette, Repas
+            from src.core.models.batch_cooking import SessionBatchCooking
+            from src.core.models.courses import ArticleCourses, ListeCourses
+
+            aujourd_hui = date.today()
+            debut_semaine = aujourd_hui - timedelta(days=aujourd_hui.weekday())
+            fin_semaine = debut_semaine + timedelta(days=6)
+
+            # Repas du jour avec nom de recette
+            repas_jour = (
+                session.query(Repas)
+                .filter(Repas.date_repas == aujourd_hui)
+                .all()
+            )
+            repas_aujourd_hui = [
+                {
+                    "type_repas": r.type_repas,
+                    "recette_nom": r.recette.nom if r.recette else r.notes,
+                }
+                for r in repas_jour
+            ]
+
+            # Nombre de repas planifiés dans la semaine
+            repas_semaine_count = (
+                session.query(func.count(Repas.id))
+                .filter(
+                    Repas.date_repas >= debut_semaine,
+                    Repas.date_repas <= fin_semaine,
+                )
+                .scalar()
+                or 0
+            )
+
+            # Nombre total de recettes
+            nb_recettes = session.query(func.count(Recette.id)).scalar() or 0
+
+            # Articles à acheter (non achetés, listes non archivées)
+            articles_courses_restants = (
+                session.query(func.count(ArticleCourses.id))
+                .join(ListeCourses)
+                .filter(
+                    ArticleCourses.achete == False,  # noqa: E712
+                    ListeCourses.archivee == False,  # noqa: E712
+                )
+                .scalar()
+                or 0
+            )
+
+            # Alertes inventaire: stock bas OU péremption dans 7 jours
+            alertes_inventaire = 0
+            try:
+                alertes_inventaire = (
+                    session.query(func.count(ArticleInventaire.id))
+                    .filter(
+                        (ArticleInventaire.quantite <= ArticleInventaire.quantite_min)
+                        | (
+                            ArticleInventaire.date_peremption.isnot(None)
+                            & (
+                                ArticleInventaire.date_peremption
+                                <= aujourd_hui + timedelta(days=7)
+                            )
+                        )
+                    )
+                    .scalar()
+                    or 0
+                )
+            except Exception:
+                pass
+
+            # Session batch cooking en cours
+            batch_session = (
+                session.query(SessionBatchCooking)
+                .filter(SessionBatchCooking.statut == "en_cours")
+                .first()
+            )
+
+            return {
+                "repas_aujourd_hui": repas_aujourd_hui,
+                "repas_semaine_count": int(repas_semaine_count),
+                "nb_recettes": int(nb_recettes),
+                "articles_courses_restants": int(articles_courses_restants),
+                "alertes_inventaire": int(alertes_inventaire),
+                "batch_en_cours": batch_session is not None,
+                "batch_session_id": batch_session.id if batch_session else None,
+            }
+
+    return await executer_async(_query)
+
+
 @router.get(
     "/bilan-mensuel",
     responses=REPONSES_LISTE,

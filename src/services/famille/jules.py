@@ -170,6 +170,20 @@ class ServiceJules:
             logger.debug("Erreur récupération date naissance Jules")
         return None
 
+    def get_age_mois(self, default: int = 0) -> int:
+        """Calcule l'âge de Jules en mois entiers.
+
+        Args:
+            default: Valeur retournée si la date de naissance est introuvable.
+
+        Returns:
+            Âge en mois (ex: 21 pour 21 mois).
+        """
+        date_naissance = self.get_date_naissance_jules()
+        if not date_naissance:
+            return default
+        return (date_type.today() - date_naissance).days // 30
+
 
 # ═══════════════════════════════════════════════════════════
 # FACTORY

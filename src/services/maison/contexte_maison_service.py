@@ -74,6 +74,7 @@ class ContexteMaisonService(BaseAIService):
         projets = self._collecter_projets()
         jardin = self._collecter_jardin()
         cellier_energie = self._collecter_cellier_energie()
+        contexte_famille = self._collecter_contexte_famille()
 
         # Trier alertes par urgence, garder top N
         alertes_triees = sorted(alertes, key=lambda a: _URGENCE_ORDRE.get(a.niveau, 9))
@@ -114,6 +115,7 @@ class ContexteMaisonService(BaseAIService):
             jardin=jardin,
             cellier_alertes=cellier_energie.get("cellier", []),
             energie_anomalies=cellier_energie.get("energie", []),
+            contexte_famille=contexte_famille,
         )
 
     @avec_cache(ttl=300)
@@ -592,6 +594,49 @@ class ContexteMaisonService(BaseAIService):
             logger.warning(f"Évaluation durée vie appareils échouée: {e}")
 
         return alertes
+
+
+    @avec_gestion_erreurs(default_return={})
+    def _collecter_contexte_famille(self) -> dict:
+        """Collecte le contexte familial pertinent pour le briefing maison.
+
+        Extrait depuis ContexteFamilialService:
+        - Anniversaires dans les 7 prochains jours
+        - Crèche fermée aujourd'hui (bool)
+        - Activités familiales prévues aujourd'hui
+        """
+        try:
+            from src.services.famille.contexte import obtenir_service_contexte_familial
+
+            contexte = obtenir_service_contexte_familial().obtenir_contexte()
+            result: dict = {}
+
+            # Anniversaires J-7
+            anniversaires = [
+                a for a in (contexte.get("anniversaires_proches") or [])
+                if (a.get("jours_restants") or 99) <= 7
+            ]
+            if anniversaires:
+                result["anniversaires_proches"] = anniversaires
+
+            # Crèche fermée aujourd'hui
+            jours_speciaux = contexte.get("jours_speciaux") or []
+            if any(j.get("type") == "creche" and j.get("jours_restants") == 0 for j in jours_speciaux):
+                result["creche_fermee_auj"] = True
+
+            # Activités prévues aujourd'hui
+            auj = date.today().isoformat()
+            activites_auj = [
+                a for a in (contexte.get("activites_a_venir") or [])
+                if a.get("date") == auj
+            ]
+            if activites_auj:
+                result["activites_auj"] = activites_auj
+
+            return result
+        except Exception as e:
+            logger.warning(f"Collecte contexte famille échouée: {e}")
+            return {}
 
 
 # ═══════════════════════════════════════════════════════════

@@ -3938,3 +3938,91 @@ async def prioriser_projets_ia(
 
     return await executer_async(_query)
 
+
+# ═══════════════════════════════════════════════════════════
+# SYNC TÂCHES MAISON → PLANNING FAMILIAL
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/planning/sync-famille", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def synchroniser_taches_vers_planning(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Synchronise des tâches/projets maison vers le planning familial.
+
+    Crée des événements dans le calendrier famille pour les tâches et projets
+    maison sélectionnés (par IDs). Permet de visualiser les travaux maison
+    dans le planning familial.
+
+    Body:
+        taches_ids: list[int] — IDs de TacheEntretien à synchroniser
+        projets_ids: list[int] — IDs de ProjetMaison à synchroniser
+    """
+    from datetime import time
+
+    from src.core.models import ProjetMaison, TacheEntretien
+    from src.services.famille.calendrier_planning import obtenir_service_calendrier_planning
+
+    taches_ids = payload.get("taches_ids", [])
+    projets_ids = payload.get("projets_ids", [])
+
+    if not taches_ids and not projets_ids:
+        return {"succes": True, "evenements_crees": 0, "message": "Aucun élément à synchroniser"}
+
+    def _query():
+        planning_svc = obtenir_service_calendrier_planning()
+        crees = 0
+        conflits: list[str] = []
+
+        with executer_avec_session() as session:
+            # Synchroniser les tâches d'entretien
+            if taches_ids:
+                taches = (
+                    session.query(TacheEntretien)
+                    .filter(TacheEntretien.id.in_(taches_ids))
+                    .all()
+                )
+                for t in taches:
+                    date_cible = t.prochaine_fois or date.today()
+                    try:
+                        planning_svc.creer_event_calendrier(
+                            titre=f"🔧 {t.nom}",
+                            date_event=date_cible,
+                            type_event="entretien_maison",
+                            description=f"Tâche entretien maison (durée ~{t.duree_minutes or 30}min)",
+                        )
+                        crees += 1
+                    except Exception as e:
+                        conflits.append(f"Tâche {t.nom}: {e}")
+
+            # Synchroniser les projets
+            if projets_ids:
+                projets = (
+                    session.query(ProjetMaison)
+                    .filter(ProjetMaison.id.in_(projets_ids))
+                    .all()
+                )
+                for p in projets:
+                    date_cible = p.date_fin_prevue or date.today()
+                    try:
+                        planning_svc.creer_event_calendrier(
+                            titre=f"🏠 {p.nom}",
+                            date_event=date_cible,
+                            type_event="projet_maison",
+                            description=f"Projet maison — {p.statut or 'planifié'}",
+                        )
+                        crees += 1
+                    except Exception as e:
+                        conflits.append(f"Projet {p.nom}: {e}")
+
+        return {
+            "succes": True,
+            "evenements_crees": crees,
+            "conflits_detectes": conflits,
+            "message": f"{crees} événement(s) créé(s) dans le planning familial",
+        }
+
+    return await executer_async(_query)
+

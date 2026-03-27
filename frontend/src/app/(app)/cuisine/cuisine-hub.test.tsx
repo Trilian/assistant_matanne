@@ -16,9 +16,13 @@ vi.mock("next/link", () => ({
 vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: () => ({
     data: {
-      repas_aujourd_hui: ["Déjeuner"],
+      repas_aujourd_hui: [{ type_repas: "déjeuner", recette_nom: "Pâtes" }],
+      repas_semaine_count: 5,
+      nb_recettes: 42,
       articles_courses_restants: 3,
-      nombre_recettes: 42,
+      alertes_inventaire: 1,
+      batch_en_cours: false,
+      batch_session_id: null,
     },
     isLoading: false,
     error: null,

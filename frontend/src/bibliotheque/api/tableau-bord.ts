@@ -19,6 +19,24 @@ export async function obtenirTableauBord(): Promise<DonneesTableauBord> {
   return data;
 }
 
+// ─── Dashboard cuisine ──────────────────────────────────────
+
+export interface DonneesTableauBordCuisine {
+  repas_aujourd_hui: { type_repas: string; recette_nom?: string | null }[];
+  repas_semaine_count: number;
+  nb_recettes: number;
+  articles_courses_restants: number;
+  alertes_inventaire: number;
+  batch_en_cours: boolean;
+  batch_session_id: number | null;
+}
+
+/** Obtenir le dashboard agrégé du module cuisine */
+export async function obtenirDashboardCuisine(): Promise<DonneesTableauBordCuisine> {
+  const { data } = await clientApi.get<DonneesTableauBordCuisine>("/dashboard/cuisine");
+  return data;
+}
+
 // ─── Bilan mensuel IA ───────────────────────────────────────
 
 export interface BilanMensuelDonnees {

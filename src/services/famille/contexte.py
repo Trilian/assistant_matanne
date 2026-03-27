@@ -179,8 +179,7 @@ class ContexteFamilialService:
             if not date_naissance:
                 return None
 
-            age_jours = (aujourd_hui - date_naissance).days
-            age_mois = age_jours // 30
+            age_mois = service.get_age_mois()
 
             # Prochains jalons OMS attendus
             prochains_jalons = self._prochains_jalons_oms(age_mois)

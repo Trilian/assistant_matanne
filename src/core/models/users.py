@@ -493,71 +493,6 @@ class ActiviteWeekend(TimestampMixin, Base):
 
 
 # ═══════════════════════════════════════════════════════════
-# ACHATS FAMILLE (WISHLIST)
-# ═══════════════════════════════════════════════════════════
-
-
-class AchatFamille(TimestampMixin, Base):
-    """Article à acheter pour la famille (wishlist).
-
-    Attributes:
-        nom: Nom de l'article
-        categorie: Catégorie (jules_vetements, jules_jouets, nous_jeux, etc.)
-        priorite: Priorité (urgent, haute, moyenne, basse, optionnel)
-        prix_estime: Prix estimé
-        url: Lien vers l'article
-        taille: Taille (pour vêtements)
-        age_recommande: Âge recommandé (pour jouets)
-        achete: Si acheté
-        date_achat: Date d'achat
-        prix_reel: Prix réel
-    """
-
-    __tablename__ = "achats_famille"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-
-    # Infos article
-    nom: Mapped[str] = mapped_column(String(200), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text)
-    categorie: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
-    priorite: Mapped[str] = mapped_column(String(50), default="moyenne", index=True)
-
-    # Prix
-    prix_estime: Mapped[float | None] = mapped_column(Float)
-    prix_reel: Mapped[float | None] = mapped_column(Float)
-
-    # Infos supplémentaires
-    url: Mapped[str | None] = mapped_column(String(500))
-    image_url: Mapped[str | None] = mapped_column(String(500))
-    magasin: Mapped[str | None] = mapped_column(String(200))
-
-    # Pour vêtements
-    taille: Mapped[str | None] = mapped_column(String(50))
-
-    # Pour jouets
-    age_recommande_mois: Mapped[int | None] = mapped_column(Integer)
-
-    # Statut
-    achete: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
-    date_achat: Mapped[date | None] = mapped_column(Date)
-
-    # Qui a suggéré
-    suggere_par: Mapped[str | None] = mapped_column(String(50))  # anne, mathieu, ia
-
-    # Destinataire & revente
-    pour_qui: Mapped[str] = mapped_column(String(50), default="famille", index=True)
-    a_revendre: Mapped[bool] = mapped_column(Boolean, default=False)
-    prix_revente_estime: Mapped[float | None] = mapped_column(Float)
-    vendu_le: Mapped[date | None] = mapped_column(Date)
-
-    notes: Mapped[str | None] = mapped_column(Text)
-
-    def __repr__(self) -> str:
-        return f"<AchatFamille(id={self.id}, nom='{self.nom}', categorie='{self.categorie}')>"
-
-
-# ═══════════════════════════════════════════════════════════
 # EXPORTS
 # ═══════════════════════════════════════════════════════════
 
@@ -573,5 +508,5 @@ __all__ = [
     "ResumeQuotidienGarmin",
     "JournalAlimentaire",
     "ActiviteWeekend",
-    "AchatFamille",
+    # AchatFamille is defined in famille.py (canonical Phase P version)
 ]

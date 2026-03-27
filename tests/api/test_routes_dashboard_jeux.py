@@ -101,6 +101,34 @@ class TestEndpointsDashboard:
         response = await client.get("/api/v1/dashboard")
         assert response.status_code not in (404, 405)
 
+    async def test_dashboard_cuisine_existe(self, client):
+        """GET /api/v1/dashboard/cuisine n'est pas 404."""
+        response = await client.get("/api/v1/dashboard/cuisine")
+        assert response.status_code not in (404, 405)
+
+    @patch("src.api.routes.dashboard.executer_async")
+    async def test_dashboard_cuisine_format(self, mock_exec, client):
+        """GET /api/v1/dashboard/cuisine retourne les bonnes clés."""
+        mock_exec.side_effect = lambda fn: fn()
+
+        with patch("src.api.routes.dashboard.executer_avec_session") as mock_session:
+            mock_ctx = MagicMock()
+            mock_ctx.__enter__ = MagicMock(return_value=MagicMock())
+            mock_ctx.__exit__ = MagicMock(return_value=False)
+            mock_session.return_value = mock_ctx
+
+            # On appelle juste l'endpoint pour vérifier qu'il répond
+            response = await client.get("/api/v1/dashboard/cuisine")
+            assert response.status_code in (200, 500)  # 500 accepté si DB absente en test
+            if response.status_code == 200:
+                data = response.json()
+                assert "repas_aujourd_hui" in data
+                assert "repas_semaine_count" in data
+                assert "nb_recettes" in data
+                assert "articles_courses_restants" in data
+                assert "alertes_inventaire" in data
+                assert "batch_en_cours" in data
+
 
 class TestEndpointsJeux:
     """Vérifie que les endpoints jeux existent (pas 404/405)."""

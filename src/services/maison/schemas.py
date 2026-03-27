@@ -102,6 +102,8 @@ class BriefingMaison(BaseModel):
     jardin: list[dict[str, Any]] = Field(default_factory=list)
     cellier_alertes: list[dict[str, Any]] = Field(default_factory=list)
     energie_anomalies: list[dict[str, Any]] = Field(default_factory=list)
+    # Contexte famille croisé (anniversaires J-7, crèche fermée, activités du jour)
+    contexte_famille: dict[str, Any] = Field(default_factory=dict)
 
 
 # ═══════════════════════════════════════════════════════════

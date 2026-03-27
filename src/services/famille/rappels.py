@@ -38,6 +38,7 @@ class ServiceRappelsFamille:
         rappels.extend(self._rappels_creche(aujourd_hui))
         rappels.extend(self._rappels_feries(aujourd_hui))
         rappels.extend(self._rappels_jalons_jules(aujourd_hui))
+        rappels.extend(self._rappels_maison())
 
         # Trier par priorité (danger > warning > info)
         priorite_ordre = {"danger": 0, "warning": 1, "info": 2}
@@ -197,11 +198,9 @@ class ServiceRappelsFamille:
             from src.services.famille.jules import obtenir_service_jules
 
             jules_service = obtenir_service_jules()
-            date_naissance = jules_service.get_date_naissance_jules()
-            if not date_naissance:
+            age_mois = jules_service.get_age_mois()
+            if not age_mois and not jules_service.get_date_naissance_jules():
                 return []
-
-            age_mois = (aujourd_hui - date_naissance).days // 30
 
             contexte_service = obtenir_service_contexte_familial()
             jalons = contexte_service._prochains_jalons_oms(age_mois)
@@ -219,6 +218,43 @@ class ServiceRappelsFamille:
         except Exception as e:
             logger.warning("Erreur rappels jalons Jules: %s", e)
             return []
+
+    def _rappels_maison(self) -> list[dict[str, Any]]:
+        """Rappels maison agrégés (garanties, contrats, entretien en retard, cellier)."""
+        rappels: list[dict[str, Any]] = []
+        try:
+            from src.services.maison.contexte_maison_service import get_contexte_maison_service
+
+            briefing = get_contexte_maison_service().obtenir_briefing()
+            if not briefing:
+                return []
+
+            # Alertes maison critiques/hautes → rappels
+            for alerte in briefing.alertes:
+                if alerte.niveau.value in ("critique", "haute"):
+                    rappels.append({
+                        "type": "maison",
+                        "message": f"🏠 {alerte.titre}",
+                        "priorite": "danger" if alerte.niveau.value == "critique" else "warning",
+                        "date_cible": alerte.date_limite.isoformat() if alerte.date_limite else None,
+                        "jours_restants": None,
+                        "click_url": "/maison",
+                    })
+
+            # Tâches maison du jour → rappels info
+            for tache in briefing.taches_jour_detail[:3]:
+                rappels.append({
+                    "type": "maison_tache",
+                    "message": f"🔧 {tache.nom}",
+                    "priorite": "info",
+                    "date_cible": None,
+                    "jours_restants": None,
+                    "click_url": "/maison",
+                })
+        except Exception as e:
+            logger.warning("Erreur rappels maison: %s", e)
+
+        return rappels
 
     # ═══════════════════════════════════════════════════════════
     # HELPER PUSH

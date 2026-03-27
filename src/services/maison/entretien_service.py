@@ -386,12 +386,17 @@ Sois spécifique et actionnable. Inclus des techniques de pros."""
         return self.obtenir_taches_du_jour(db)
 
     def _query_taches_jour(self, db: Session, jour_semaine: int) -> list[TacheRoutine]:
-        """Query interne pour tâches du jour."""
-        # Récupérer routines actives du jour
+        """Query interne pour tâches du jour (routines maison uniquement)."""
+        # Catégories réservées aux routines famille — exclues du briefing maison
+        _CATEGORIES_FAMILLE = ("matin", "soir", "journee", "famille")
+
         routines = (
             db.query(Routine)
             .options(selectinload(Routine.tasks))
-            .filter(Routine.actif.is_(True))
+            .filter(
+                Routine.actif.is_(True),
+                ~Routine.categorie.in_(_CATEGORIES_FAMILLE),
+            )
             .all()
         )
         taches = []

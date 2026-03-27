@@ -200,3 +200,33 @@ class ArticleModele(CreeLeMixin, Base):
 
     def __repr__(self) -> str:
         return f"<ArticleModele(modele={self.modele_id}, article={self.nom_article})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# HISTORIQUE ACHATS (apprentissage IA)
+# ═══════════════════════════════════════════════════════════
+
+
+class HistoriqueAchats(Base):
+    """Historique des achats pour l'apprentissage de la fréquence.
+
+    L'IA utilise ces données pour suggérer automatiquement les articles
+    récurrents (yaourts tous les 3 semaines, etc.).
+    """
+
+    __tablename__ = "historique_achats"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    article_nom: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    categorie: Mapped[str | None] = mapped_column(String(100), index=True)
+    rayon_magasin: Mapped[str | None] = mapped_column(String(100))
+    derniere_achat: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    frequence_jours: Mapped[int | None] = mapped_column(Integer)
+    nb_achats: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+    __table_args__ = (
+        Index("ix_historique_achats_nom_date", "article_nom", "derniere_achat"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<HistoriqueAchats(article={self.article_nom}, freq={self.frequence_jours}j)>"
