@@ -1,11 +1,25 @@
 ﻿# 📊 État d'Implémentation des 28 Phases — Assistant Matanne
 
-> **Dernière mise à jour** : **29 mars 2026** (module Cuisine A-L finalisé — dialog mode prépa, congelateur view, dashboard nutrition, saisonnalité, planning IA saisonnier)  
-> **Couverture fonctionnelle globale** : **~94%** pondérée (24/28 complètes + 3 quasi + 1 partielle)
+> **Dernière mise à jour** : **30 mars 2026** (Sprint 2 Interactions Intelligentes Famille — 3 subscribers ntfy/cache, hub weekend IA dialog, hub crèche branché API)  
+> **Couverture fonctionnelle globale** : **~95%** pondérée (24/28 complètes + 3 quasi + 1 partielle)
 
 ---
 
-## ✅ Nouveautés Session 29 Mars 2026 — Module Cuisine A-L Finalisé (complément) ✅
+## ✅ Nouveautés Session 30 Mars 2026 — Sprint 2 Interactions Intelligentes Famille ✅
+
+**Sprint 2 entièrement complété** :
+- ✅ **Subscriber `budget.contrainte`** : Invalide le cache `suggestions_*` quand le budget est "serré" — les suggestions IA seront filtrées aux items essentiels au prochain recalcul
+- ✅ **Subscriber `document.echeance_proche`** (J-30) : Envoie notification ntfy.sh avec priorité adaptive (P4 si J-7, P3 sinon) + lien `/famille/documents`
+- ✅ **Subscriber `jalon.ajoute`** : Invalide cache suggestions activités + notification ntfy avec résumé du jalon et lien `/famille/jules`
+- ✅ **Hub Weekend IA → vraie API** : Bouton "Suggestions weekend IA" appelle `POST /api/v1/weekend/suggestions-ia` via `useMutation`, affiche résultat dans `Dialog` shadcn/ui
+- ✅ **Hub Crèche → vraie API** : Card "Jules sans crèche ce mois" chargée via `GET /api/v1/famille/planning/jours-sans-creche` avec `useQuery` (staleTime 1h)
+- ✅ **Tests** : 64/64 tests verts — aucune régression
+
+**Impact** : Sprint 2 Interactions Intelligentes **100% complet** — hub famille pleinement réactif aux données réelles
+
+---
+
+
 
 **Phases C/F/H/I/L finalisées** :
 - ✅ **Phase C finalisée** : **Dialog choix mode** Batch vs Jour par jour dans page planning — bouton « Préparation » ouvre modal avec 2 cartes

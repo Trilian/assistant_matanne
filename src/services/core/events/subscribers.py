@@ -459,6 +459,123 @@ def _invalider_cache_documents_expires(event: EvenementDomaine) -> None:
         logger.warning("Échec invalidation cache documents expirés: %s", e)
 
 
+# ═══════════════════════════════════════════════════════════
+# SPRINT 2 — INTERACTIONS INTELLIGENTES
+# ═══════════════════════════════════════════════════════════
+
+
+def _filtrer_suggestions_budget_serre(event: EvenementDomaine) -> None:
+    """Invalide le cache des suggestions achats quand le budget est marqué comme 'serré'.
+
+    Les suggestions seront recalculées au prochain appel en ne retenant
+    que les items de priorité 'essentiel'.
+    Déclencheur : budget.contrainte avec niveau in (serre, critique, depasse).
+    """
+    try:
+        niveau = event.data.get("niveau", "")
+        if niveau not in ("serre", "critique", "depasse"):
+            return
+
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="suggestions_")
+        nb += cache.invalidate(pattern="suggestions_achats")
+        nb += cache.invalidate(pattern="achats_ia")
+        logger.info(
+            "Cache suggestions invalidé suite à budget '%s' (%d entrées, event=%s)",
+            niveau,
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec filtrage suggestions budget serré: %s", e)
+
+
+def _notifier_document_echeance_proche(event: EvenementDomaine) -> None:
+    """Envoie une notification ntfy.sh quand un document expire dans les 30 jours.
+
+    Déclencheur : document.echeance_proche avec jours_restants <= 30 dans event.data.
+    Tolère les pannes — n'échoue jamais.
+    """
+    try:
+        jours = event.data.get("jours_restants")
+        titre_doc = event.data.get("titre") or event.data.get("nom", "Document")
+        if jours is None or int(jours) > 30:
+            return
+
+        from src.services.core.notifications.notif_ntfy import ServiceNtfy
+        from src.services.core.notifications.types import NotificationNtfy
+
+        service = ServiceNtfy()
+        notification = NotificationNtfy(
+            titre=f"📄 Document expirant bientôt — J-{jours}",
+            message=(
+                f"{titre_doc} expire dans {jours} jour(s).\n"
+                "Pensez à le renouveler avant l'échéance."
+            ),
+            priorite=4 if int(jours) <= 7 else 3,
+            tags=["warning", "page_facing_up"],
+            click_url="/famille/documents",
+        )
+        service.envoyer_sync(notification)
+        logger.info(
+            "Notification ntfy envoyée pour document expirant (titre=%s, J-%s)",
+            titre_doc,
+            jours,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec notification document échéance proche: %s", e)
+
+
+def _notifier_jalon_ajoute_avec_activites(event: EvenementDomaine) -> None:
+    """Suggère des activités adaptées à l'âge et pousse une notification ntfy
+    quand un jalon Jules est ajouté.
+
+    Invalide le cache des suggestions d'activités et envoie une notification ntfy
+    invitant l'utilisateur à consulter les nouvelles suggestions générées.
+    Déclencheur : jalon.ajoute avec nom et age_mois dans event.data.
+    Tolère les pannes — n'échoue jamais.
+    """
+    try:
+        jalon_nom = event.data.get("nom", "Nouveau jalon")
+        age_mois = event.data.get("age_mois")
+        user_id = event.data.get("user_id")
+
+        # Invalider le cache pour forcer recalcul des suggestions
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        cache.invalidate(pattern="suggestions_activites")
+        cache.invalidate(pattern="activites_ia")
+
+        # Notification ntfy avec résumé
+        from src.services.core.notifications.notif_ntfy import ServiceNtfy
+        from src.services.core.notifications.types import NotificationNtfy
+
+        age_str = f" ({age_mois} mois)" if age_mois else ""
+        service = ServiceNtfy()
+        notification = NotificationNtfy(
+            titre=f"🎯 Nouveau jalon Jules — {jalon_nom}",
+            message=(
+                f"Jules vient d'atteindre le jalon « {jalon_nom} »{age_str}.\n"
+                "Des suggestions d'activités adaptées à son âge sont disponibles."
+            ),
+            priorite=3,
+            tags=["baby", "sparkles"],
+            click_url="/famille/jules",
+        )
+        service.envoyer_sync(notification)
+        logger.info(
+            "Notification jalon envoyée (jalon=%s, age_mois=%s, user_id=%s)",
+            jalon_nom,
+            age_mois,
+            user_id,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec notification jalon ajouté: %s", e)
+
+
 
 
 def _enregistrer_metrique_evenement(event: EvenementDomaine) -> None:
@@ -636,6 +753,20 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("documents.proche_expiration", _invalider_cache_documents_expires, priority=90)
     compteur += 1
 
+    # ── Sprint 2 — Interactions intelligentes ──
+
+    # Budget serré → filtrer suggestions (invalider cache suggestions_*)
+    bus.souscrire("budget.contrainte", _filtrer_suggestions_budget_serre, priority=85)
+    compteur += 1
+
+    # Document échéance proche J-30 → notification ntfy
+    bus.souscrire("document.echeance_proche", _notifier_document_echeance_proche, priority=80)
+    compteur += 1
+
+    # Jalon Jules ajouté → suggestions activités + notification ntfy
+    bus.souscrire("jalon.ajoute", _notifier_jalon_ajoute_avec_activites, priority=75)
+    compteur += 1
+
     # ── Métriques (priorité moyenne) ──
     bus.souscrire("*", _enregistrer_metrique_evenement, priority=50)
     compteur += 1
@@ -655,4 +786,9 @@ def enregistrer_subscribers() -> int:
     return compteur
 
 
-__all__ = ["enregistrer_subscribers"]
+__all__ = [
+    "enregistrer_subscribers",
+    "_filtrer_suggestions_budget_serre",
+    "_notifier_document_echeance_proche",
+    "_notifier_jalon_ajoute_avec_activites",
+]
