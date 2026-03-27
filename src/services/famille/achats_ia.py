@@ -134,10 +134,7 @@ Réponds UNIQUEMENT avec le JSON."""
             return suggestions
 
         from src.services.famille.scoring import obtenir_service_scoring
-
-        scoring = obtenir_service_scoring()
-        enrichies = [scoring.scorer_suggestion(s, contexte) for s in suggestions]
-        return sorted(enrichies, key=lambda x: x.get("score_pertinence", 0.5), reverse=True)
+        return obtenir_service_scoring().scorer_et_trier(suggestions, contexte)
 
     def _parse_suggestions(self, raw_result: str) -> list[dict]:
         """Parse le résultat IA en liste de suggestions."""
