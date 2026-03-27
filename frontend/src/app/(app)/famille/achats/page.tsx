@@ -100,6 +100,7 @@ export default function PageAchats() {
     titre: string; description: string;
     fourchette_prix?: string | null; ou_acheter?: string | null;
     pertinence?: string | null; source?: string;
+    raison_suggestion?: string; score_pertinence?: number;
   }>>([]);
   const [chargementSuggestions, setChargementSuggestions] = useState(false);
   const [triggerActif, setTriggerActif] = useState<string | null>(null);
@@ -359,15 +360,14 @@ export default function PageAchats() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
+                          {s.score_pertinence !== undefined && s.score_pertinence > 0.7 && (
+                            <Badge variant="secondary" className="text-[10px] mr-1.5">✨ Top</Badge>
+                          )}
                           <p className="text-sm font-medium">{s.titre}</p>
-                          {(s as { score_pertinence?: number }).score_pertinence !== undefined &&
-                            (s as { score_pertinence?: number }).score_pertinence! > 0.7 && (
-                              <Badge variant="secondary" className="text-[10px]">✨ Très pertinent</Badge>
-                            )}
                         </div>
-                        {(s as { raison_suggestion?: string }).raison_suggestion && (
+                        {s.raison_suggestion && (
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            {(s as { raison_suggestion?: string }).raison_suggestion}
+                            {s.raison_suggestion}
                           </p>
                         )}
                         <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
