@@ -298,7 +298,6 @@ class ArticleAchat(Base):
 # ACHATS FAMILLE (table principale Phase P)
 # ═══════════════════════════════════════════════════════════
 
-
 class AchatFamille(Base):
     """Achat familial enrichi (liste d'achats Phase P).
 

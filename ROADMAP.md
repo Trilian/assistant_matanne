@@ -70,7 +70,7 @@
 - [x] **Phase O (Activités météo-intelligentes)** ✅ COMPLÈTE : auto-prefill à l'ouverture du formulaire activité (pré-remplissage automatique + bannière info avec bouton Changer)
 - [x] **Phase P (Achats & cadeaux auto-suggérés)** ✅ COMPLÈTE : widget hub + scoring pertinence (raison_suggestion, score_pertinence, tri par score)
 - [x] **Phase Q (Rappels intelligents)** ✅ COMPLÈTE : badges urgence sur cartes modules dans le hub famille
-- [x] **Phase R (Album et Journal)** : Album et Journal supprimés — fonctionnalités intégrées dans le Hub contextuel
+- [x] **Phase R : Album & Journal** ~~supprimés~~ — fonctionnalités intégrées dans le Hub contextuel ✅
 - [x] **Sprint 3 — Scoring/Explainability** ✅ COMPLÈTE :
   - `ScoringPertinenceService` dans `src/services/famille/scoring.py` (scoring déterministe 0.0–1.0, 5 facteurs)
   - Intégration dans `AchatsIAService` (3 méthodes de suggestion enrichies + tri par score)

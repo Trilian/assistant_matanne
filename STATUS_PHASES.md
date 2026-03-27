@@ -492,7 +492,7 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 ---
 
-### Phase R : Album et Journal supprimés — fonctionnalités intégrées dans le Hub contextuel
+### Phase R : Album & Journal ~~supprimés~~ — fonctionnalités intégrées dans le Hub contextuel ✅
 
 **Décision** : Album (`/famille/album`) et Journal (`/famille/journal`) supprimés — les fonctionnalités pertinentes (résumé semaine, contexte visuel) sont désormais intégrées dans le hub famille contextuel.
 

@@ -96,7 +96,7 @@ export default function PageActivites() {
   const [journeeLibreDetectee, setJourneeLibreDetectee] = useState(false);
   const [typePrefere, setTypePrefere] = useState<string>("mixte");
   const [enChargementIA, setEnChargementIA] = useState(false);
-  const [bannierePreRemplie, setBannierePreRemplie] = useState(false);
+  const [banniereIAVisible, setBanniereIAVisible] = useState(false);
 
   // Form state
   const [titre, setTitre] = useState("");
@@ -181,7 +181,9 @@ export default function PageActivites() {
       (meteoDetectee !== null || journeeLibreDetectee)
     ) {
       appliquerSuggestion(suggestionsStruct[0]);
-      setBannierePreRemplie(true);
+      setBanniereIAVisible(true);
+    } else if (!dialogueCreation) {
+      setBanniereIAVisible(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogueCreation]);
@@ -306,23 +308,11 @@ export default function PageActivites() {
               });
             }}
           >
-            {bannierePreRemplie && (
-              <div className="flex items-center gap-2 rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 px-3 py-2 text-xs text-blue-700 dark:text-blue-300">
-                <span className="flex-1">💡 Pré-rempli automatiquement selon la météo/journée libre</span>
-                <button
-                  type="button"
-                  className="text-blue-500 hover:text-blue-700 font-bold shrink-0"
-                  onClick={() => setBannierePreRemplie(false)}
-                >
-                  ×
-                </button>
-                <button
-                  type="button"
-                  className="text-blue-600 underline shrink-0 hover:text-blue-800"
-                  onClick={() => { setDialogueCreation(false); setDialogueSuggestions(true); }}
-                >
-                  Changer →
-                </button>
+            {banniereIAVisible && (
+              <div className="flex items-center gap-2 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-3 py-2 text-xs text-amber-800 dark:text-amber-200 mb-3">
+                <Sparkles className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                <span>Pré-rempli selon la météo / journée libre</span>
+                <button onClick={() => setBanniereIAVisible(false)} className="ml-auto text-amber-600 hover:text-amber-800 dark:text-amber-400">✕</button>
               </div>
             )}
             <div className="space-y-2">
