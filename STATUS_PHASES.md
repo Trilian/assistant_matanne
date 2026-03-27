@@ -477,14 +477,15 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 **Ce qui existe** :
 - ✅ Page `/famille/achats` avec liste + filtres
 - ✅ Modèle `AchatFamille` SQLAlchemy complet (table `achats_famille`)
+- ✅ AchatFamille ORM model créé (classe Python manquante corrigée — table achats_famille mappée)
 - ✅ CRUD achats fonctionnel
 - ✅ Service `AchatsIAService` avec scoring intégré
 - ✅ Endpoint `GET /api/v1/famille/achats` (route canonique)
 - ✅ Endpoint `POST /api/v1/famille/achats/suggestions-ia` (manuel par type)
 - ✅ Endpoint `POST /api/v1/famille/achats/suggestions` (proactif: anniversaire J-14, jalons, saison)
 - ✅ Suggestions IA actionnables sur `/famille/achats` (ajout en 1 clic)
-- ✅ Widget achats hub `/famille` avec bouton "✨ Suggestions IA" et mini-liste (2 suggestions max)
-- ✅ `raison_suggestion` et badge "✨ Très pertinent" affichés dans les cartes suggestions
+- ✅ Widget hub suggestions IA + scoring pertinence
+- ✅ `raison_suggestion` et badge "✨ Pertinent" affichés dans les cartes suggestions
 
 **Impact** : Achats famille pilotés par IA contextuelle avec scoring de pertinence expliqué
 
