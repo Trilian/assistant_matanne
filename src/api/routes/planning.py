@@ -515,10 +515,25 @@ async def obtenir_suggestions_rapides(
     """
     Suggestions rapides de recettes pour le sélecteur de repas.
 
-    Retourne des recettes adaptées au type de repas et à la saison,
+    Retourne des recettes adaptées au type de repas, à la saison et à la météo,
     en excluant celles déjà planifiées cette semaine.
     """
     from src.core.models import Recette, Repas
+
+    # Récupérer la météo (non bloquant — fallback si échec)
+    meteo_ctx: dict[str, Any] = {}
+    try:
+        from src.services.utilitaires.meteo_service import get_meteo_service
+
+        meteo = get_meteo_service().obtenir_meteo()
+        if meteo.actuelle:
+            meteo_ctx = {
+                "temperature": meteo.actuelle.temperature,
+                "description": meteo.actuelle.description,
+                "emoji": meteo.actuelle.emoji,
+            }
+    except Exception:
+        pass
 
     def _query():
         with executer_avec_session() as session:
@@ -553,20 +568,43 @@ async def obtenir_suggestions_rapides(
                     Recette.categorie.in_(["Petit-déjeuner", "Dessert", "Goûter", "Snack"])
                 )
 
+            # Adaptation météo : favoriser catégories selon température
+            categories_favorites: list[str] = []
+            temp = meteo_ctx.get("temperature")
+            if temp is not None:
+                if temp < 10:
+                    categories_favorites = ["Soupe", "Plat mijoté", "Gratin", "Plat"]
+                elif temp > 25:
+                    categories_favorites = ["Salade", "Entrée froide", "Smoothie"]
+
             # Trier par popularité (nombre d'historiques) et varier
-            from sqlalchemy import func
+            from sqlalchemy import func, case
             from src.core.models.recettes import HistoriqueRecette
 
             query = query.outerjoin(
                 HistoriqueRecette, HistoriqueRecette.recette_id == Recette.id
-            ).group_by(Recette.id).order_by(
-                func.count(HistoriqueRecette.id).desc(),
-                func.random(),
-            )
+            ).group_by(Recette.id)
+
+            if categories_favorites:
+                # Boost les catégories adaptées à la météo
+                meteo_boost = case(
+                    (Recette.categorie.in_(categories_favorites), 1),
+                    else_=0,
+                )
+                query = query.order_by(
+                    meteo_boost.desc(),
+                    func.count(HistoriqueRecette.id).desc(),
+                    func.random(),
+                )
+            else:
+                query = query.order_by(
+                    func.count(HistoriqueRecette.id).desc(),
+                    func.random(),
+                )
 
             recettes = query.limit(nombre).all()
 
-            return {
+            result: dict[str, Any] = {
                 "suggestions": [
                     {
                         "id": r.id,
@@ -579,6 +617,9 @@ async def obtenir_suggestions_rapides(
                 ],
                 "type_repas": type_repas,
             }
+            if meteo_ctx:
+                result["meteo"] = meteo_ctx
+            return result
 
     return await executer_async(_query)
 

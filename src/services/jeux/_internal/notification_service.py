@@ -20,6 +20,7 @@ from typing import Any
 
 from src.core.db import obtenir_contexte_db
 from src.core.models import AlerteJeux
+from src.services.core.events import EvenementDomaine, obtenir_bus
 from src.services.core.registry import service_factory
 from src.services.jeux._internal.series_service import SEUIL_VALUE_ALERTE, SEUIL_VALUE_HAUTE
 
@@ -110,6 +111,44 @@ class NotificationJeuxService:
         """
         self._storage = storage if storage is not None else {}
         self._init_session()
+        self._bus_souscrit = False
+        self._souscrire_bus()
+
+    def _souscrire_bus(self) -> None:
+        """Souscrit aux evenements jeux pour creer des notifications."""
+        if self._bus_souscrit:
+            return
+        bus = obtenir_bus()
+        bus.souscrire("responsable.alerte", self._on_responsable_alerte, priority=70)
+        bus.souscrire("responsable.auto_exclusion", self._on_responsable_auto_exclusion, priority=70)
+        self._bus_souscrit = True
+
+    def _on_responsable_alerte(self, event: EvenementDomaine) -> None:
+        """Transforme une alerte budget jeux en notification utilisateur."""
+        data = event.data or {}
+        pct = float(data.get("pourcentage") or 0)
+        alertes = data.get("alertes") or []
+        urgence = NiveauUrgence.HAUTE if pct >= 90 else NiveauUrgence.MOYENNE
+        self.creer_notification(
+            type=TypeNotification.ALERTE,
+            titre="Budget jeux: seuil franchi",
+            message=f"Seuils déclenchés: {', '.join(alertes)} ({pct:.0f}% utilisé)",
+            urgence=urgence,
+            type_jeu=str(data.get("type_jeu") or "paris"),
+            metadata={"pourcentage": pct, "alertes": alertes},
+        )
+
+    def _on_responsable_auto_exclusion(self, event: EvenementDomaine) -> None:
+        """Notification lors d'une activation d'auto-exclusion."""
+        data = event.data or {}
+        self.creer_notification(
+            type=TypeNotification.ALERTE,
+            titre="Auto-exclusion activée",
+            message=f"Session bloquée pendant {data.get('nb_jours', '?')} jours (jusqu'au {data.get('fin', 'N/A')}).",
+            urgence=NiveauUrgence.HAUTE,
+            type_jeu="global",
+            metadata=data,
+        )
 
     def _init_session(self):
         """Initialise le stockage session."""

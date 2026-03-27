@@ -16,6 +16,7 @@ Les analyses/prévisions et alertes/factures sont dans des mixins séparés:
 import logging
 from datetime import date as date_type
 from decimal import Decimal
+from typing import Any
 
 from sqlalchemy import extract
 from sqlalchemy.orm import Session
@@ -23,6 +24,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.models import BudgetFamille, BudgetMensuelDB
 from src.services.core.base import BaseService
+from src.services.core.events import EvenementDomaine
 from src.services.core.events import obtenir_bus
 
 from .budget_alertes import BudgetAlertesMixin
@@ -68,6 +70,55 @@ class BudgetService(BaseService[BudgetFamille], BudgetAnalysesMixin, BudgetAlert
         """Initialise le service."""
         super().__init__(model=BudgetFamille, cache_ttl=300)
         self._depenses_cache: dict[str, list[Depense]] = {}
+        self._abonnements_events = False
+        self._souscrire_evenements_famille()
+
+    def _souscrire_evenements_famille(self) -> None:
+        """Souscrit aux evenements familles utiles au budget."""
+        if self._abonnements_events:
+            return
+        bus = obtenir_bus()
+        bus.souscrire("achats.achete", self._on_achat_achete, priority=80)
+        self._abonnements_events = True
+
+    def _map_categorie_achat_vers_budget(self, categorie_achat: str | None) -> CategorieDepense:
+        """Mappe une categorie achat vers categorie budget standard."""
+        cat = (categorie_achat or "").lower()
+        if "vetement" in cat:
+            return CategorieDepense.VETEMENTS
+        if "jules" in cat or "enfant" in cat or "jouet" in cat:
+            return CategorieDepense.ENFANT
+        if "jeu" in cat or "loisir" in cat:
+            return CategorieDepense.LOISIRS
+        if "maison" in cat:
+            return CategorieDepense.MAISON
+        return CategorieDepense.AUTRE
+
+    def _on_achat_achete(self, event: EvenementDomaine) -> None:
+        """Convertit un achat effectue en depense budget si montant disponible."""
+        data: dict[str, Any] = event.data or {}
+        montant = data.get("prix_reel")
+        if montant is None:
+            montant = data.get("prix_estime")
+        try:
+            montant_float = float(montant)
+        except (TypeError, ValueError):
+            return
+
+        if montant_float <= 0:
+            return
+
+        categorie = self._map_categorie_achat_vers_budget(str(data.get("categorie") or ""))
+        nom = str(data.get("nom") or "Achat famille")
+
+        depense = Depense(
+            date=date_type.today(),
+            montant=montant_float,
+            categorie=categorie,
+            description=f"Achat validé: {nom}",
+            magasin="",
+        )
+        self.ajouter_depense(depense)
 
     # ═══════════════════════════════════════════════════════════
     # GESTION DES DÉPENSES

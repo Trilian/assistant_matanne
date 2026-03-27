@@ -17,6 +17,8 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
+from src.services.core.budget_seuils import evaluer_seuils_budget
+from src.services.core.events import obtenir_bus
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
@@ -182,7 +184,12 @@ class ResponsableGamingService:
             db.add(suivi)
 
         suivi.mises_cumulees += montant
-        pct = suivi.pourcentage_utilise
+        etat_budget = evaluer_seuils_budget(
+            float(suivi.mises_cumulees),
+            float(suivi.limite_mensuelle),
+            seuils=(SEUIL_ALERTE_50, SEUIL_ALERTE_75, SEUIL_ALERTE_90, SEUIL_ALERTE_100),
+        )
+        pct = etat_budget.pourcentage
 
         alertes = []
         if pct >= SEUIL_ALERTE_50 and not suivi.alerte_50_pct:
@@ -202,6 +209,18 @@ class ResponsableGamingService:
             suivi.cooldown_fin = date.today() + timedelta(days=COOLDOWN_JOURS_DEFAUT)
 
         db.commit()
+
+        if alertes:
+            obtenir_bus().emettre(
+                "responsable.alerte",
+                {
+                    "alertes": alertes,
+                    "pourcentage": pct,
+                    "reste_disponible": float(suivi.reste_disponible),
+                    "type_jeu": type_jeu,
+                },
+                source="responsable_gaming",
+            )
 
         logger.info(
             f"Mise {montant}€ ({type_jeu}) enregistrée. "
@@ -260,6 +279,12 @@ class ResponsableGamingService:
         fin = date.today() + timedelta(days=nb_jours)
         suivi.auto_exclusion_jusqu_a = fin
         db.commit()
+
+        obtenir_bus().emettre(
+            "responsable.auto_exclusion",
+            {"fin": fin.isoformat(), "nb_jours": nb_jours},
+            source="responsable_gaming",
+        )
 
         logger.info(f"Auto-exclusion activée jusqu'au {fin}")
         return fin

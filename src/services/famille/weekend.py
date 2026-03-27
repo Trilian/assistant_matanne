@@ -16,7 +16,7 @@ from typing import TypedDict
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models import ActiviteWeekend
+from src.core.models import ActiviteFamille, ActiviteWeekend
 from src.core.monitoring import chronometre
 from src.services.core.base import BaseService
 from src.services.core.events import obtenir_bus
@@ -286,6 +286,64 @@ class ServiceWeekend(BaseService[ActiviteWeekend]):
 
             return True
         return False
+
+    @avec_gestion_erreurs(default_return=None)
+    @avec_session_db
+    def convertir_en_activite_famille(
+        self,
+        activity_id: int,
+        db: Session | None = None,
+    ) -> int | None:
+        """Convertit une activite weekend en activite famille persistante.
+
+        Returns:
+            ID de l'activite famille creee, ou None si deja convertie/introuvable.
+        """
+        if db is None:
+            raise ValueError("Session DB requise")
+
+        activite_weekend = db.get(ActiviteWeekend, activity_id)
+        if activite_weekend is None:
+            return None
+
+        # Eviter les doublons de conversion (titre + date)
+        existante = (
+            db.query(ActiviteFamille)
+            .filter(
+                ActiviteFamille.titre == activite_weekend.titre,
+                ActiviteFamille.date_prevue == activite_weekend.date_prevue,
+            )
+            .first()
+        )
+        if existante is not None:
+            return existante.id
+
+        activite_famille = ActiviteFamille(
+            titre=activite_weekend.titre,
+            type_activite=activite_weekend.type_activite,
+            date_prevue=activite_weekend.date_prevue,
+            duree_heures=activite_weekend.duree_estimee_h,
+            lieu=activite_weekend.lieu,
+            qui_participe=activite_weekend.participants or ["Famille"],
+            cout_estime=activite_weekend.cout_estime,
+            statut="planifie",
+            notes=activite_weekend.description or "Convertie depuis Weekend",
+        )
+        db.add(activite_famille)
+        db.commit()
+        db.refresh(activite_famille)
+
+        obtenir_bus().emettre(
+            "activites.convertie_depuis_weekend",
+            {
+                "weekend_id": activite_weekend.id,
+                "activite_id": activite_famille.id,
+                "titre": activite_famille.titre,
+            },
+            source="ServiceWeekend",
+        )
+
+        return activite_famille.id
 
     @avec_gestion_erreurs(default_return=None)
     @avec_session_db

@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_session_db
 from src.core.models import PariSportif
 from src.core.exceptions import ErreurValidation
+from src.services.core.analytics import obtenir_analytics
 
 
 @dataclass
@@ -324,11 +325,7 @@ class BankrollManager:
         Returns:
             ROI en pourcentage
         """
-        if total_mises == 0:
-            return 0.0
-        
-        roi = ((total_gains - total_mises) / total_mises) * 100
-        return round(roi, 2)
+        return obtenir_analytics().calculer_roi(total_mises, total_gains)
 
 
 # Factory pour le service

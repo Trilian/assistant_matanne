@@ -99,3 +99,14 @@ export async function listerPreparations(
   );
   return data;
 }
+
+/** Consommer des portions d'une préparation */
+export async function consommerPreparation(
+  id: number,
+  portions = 1
+): Promise<{ id: number; nom: string; portions_restantes: number; consomme: boolean }> {
+  const { data } = await clientApi.post(`/batch-cooking/preparations/${id}/consommer`, null, {
+    params: { portions },
+  });
+  return data;
+}

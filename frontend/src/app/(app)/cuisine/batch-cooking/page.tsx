@@ -46,6 +46,7 @@ import {
   creerSessionBatch,
   supprimerSessionBatch,
   listerPreparations,
+  consommerPreparation,
 } from "@/bibliotheque/api/batch-cooking";
 import { toast } from "sonner";
 import type { SessionBatchCooking } from "@/types/batch-cooking";
@@ -57,11 +58,20 @@ const BADGES_STATUT: Record<string, { label: string; variant: "default" | "secon
   annule: { label: "Annulé", variant: "destructive" },
 };
 
+type FiltreLocalisation = "tout" | "frigo" | "congelateur";
+
+const FILTRES_LOCALISATION: { valeur: FiltreLocalisation; label: string }[] = [
+  { valeur: "tout", label: "Tout" },
+  { valeur: "frigo", label: "🧊 Frigo" },
+  { valeur: "congelateur", label: "❄️ Congélateur" },
+];
+
 export default function PageBatchCooking() {
   const [dialogueCreation, setDialogueCreation] = useState(false);
   const [nomSession, setNomSession] = useState("");
   const [dateSession, setDateSession] = useState("");
   const [dureeEstimee, setDureeEstimee] = useState("");
+  const [filtreLocalisation, setFiltreLocalisation] = useState<FiltreLocalisation>("tout");
 
   const invalider = utiliserInvalidation();
 

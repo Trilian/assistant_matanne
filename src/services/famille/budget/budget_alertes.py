@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_session_db
 from src.core.models import BudgetFamille
+from src.services.core.budget_seuils import evaluer_seuils_budget
 from src.services.core.event_bus_mixin import emettre_evenement_simple
 
 from .schemas import (
@@ -44,7 +45,8 @@ class BudgetAlertesMixin:
 
         for cat, budget in budgets.items():
             depense = totaux.get(cat, 0)
-            pourcentage = (depense / budget * 100) if budget > 0 else 0
+            etat_budget = evaluer_seuils_budget(float(depense), float(budget), seuils=(80, 100))
+            pourcentage = etat_budget.pourcentage
 
             if pourcentage >= 100:
                 alertes.append(

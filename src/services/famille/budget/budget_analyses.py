@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from src.core.db import obtenir_contexte_db
 from src.core.decorators import avec_cache, avec_session_db
+from src.services.core.analytics import obtenir_analytics
 
 from .schemas import (
     BudgetMensuel,
@@ -191,7 +192,7 @@ class BudgetAnalysesMixin:
 
             # Moyenne simple pondérée (plus récent = plus de poids)
             poids = [1, 1.2, 1.4, 1.6, 1.8, 2.0][: len(valeurs)]
-            moyenne_ponderee = sum(v * p for v, p in zip(valeurs, poids, strict=False)) / sum(poids)
+            moyenne_ponderee = obtenir_analytics().moyenne_ponderee(valeurs, poids)
 
             # Tendance (croissance ou décroissance)
             if len(valeurs) >= 3:

@@ -14,6 +14,8 @@ from sqlalchemy.orm import Session
 from src.core.decorators import avec_session_db
 from src.core.exceptions import ErreurService
 from src.core.models.jeux import PariSportif, GrilleLoto, GrilleEuromillions
+from src.services.core.analytics import obtenir_analytics
+from src.services.jeux.bankroll_manager import get_bankroll_manager
 
 logger = logging.getLogger(__name__)
 
@@ -91,10 +93,7 @@ class StatsPersonnellesService:
             gains_totaux = gains_paris + gains_loto + gains_euro
             mises_totales = mises_paris + mises_loto + mises_euro
             
-            if mises_totales == 0:
-                roi = 0.0
-            else:
-                roi = ((gains_totaux - mises_totales) / mises_totales) * 100
+            roi = get_bankroll_manager().calculer_roi(mises_totales, gains_totaux)
             
             benefice_net = gains_totaux - mises_totales
             
@@ -412,7 +411,7 @@ class StatsPersonnellesService:
                 gains_total = gains_paris + gains_loto + gains_euro
                 mises_total = mises_paris + mises_loto + mises_euro
                 
-                roi = ((gains_total - mises_total) / mises_total * 100) if mises_total > 0 else 0.0
+                roi = obtenir_analytics().calculer_roi(mises_total, gains_total)
                 benefice = gains_total - mises_total
                 
                 evolution.append({

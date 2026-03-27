@@ -299,7 +299,14 @@ class ServiceAchatsFamille(BaseService[AchatFamille]):
             # Emit event after successful commit
             obtenir_bus().emettre(
                 "achats.achete",
-                {"id": purchase_id, "nom": achat.nom, "prix_reel": prix_reel},
+                {
+                    "id": purchase_id,
+                    "nom": achat.nom,
+                    "prix_reel": prix_reel,
+                    "prix_estime": achat.prix_estime,
+                    "categorie": achat.categorie,
+                    "pour_qui": achat.pour_qui,
+                },
                 source="ServiceAchatsFamille",
             )
 

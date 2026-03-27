@@ -5,9 +5,8 @@ Calcul déterministe (sans IA) d'un score de pertinence pour chaque suggestion
 en fonction du contexte familial courant.
 """
 
-from typing import TypedDict
-
 from src.services.core.registry import service_factory
+from src.services.core.scoring import BaseScoringService
 
 
 from dataclasses import dataclass, field
@@ -20,7 +19,7 @@ class SuggestionScoree:
     sources_score: list[str] = field(default_factory=list)
 
 
-class ScoringPertinenceService:
+class ScoringPertinenceService(BaseScoringService):
     """Score la pertinence des suggestions selon le contexte familial."""
 
     FACTEURS = {
@@ -81,10 +80,12 @@ class ScoringPertinenceService:
             score += self.FACTEURS["age_jules_adapte"]
             sources.append("adapté à l'âge de Jules")
 
-        score = min(score, 1.0)
-        raison = ", ".join(sources) if sources else "Suggestion générale"
-
-        return SuggestionScoree(score_pertinence=round(score, 2), raison_suggestion=raison, sources_score=sources)
+        score_construit = self.construire_score(score, sources)
+        return SuggestionScoree(
+            score_pertinence=score_construit.score,
+            raison_suggestion=score_construit.raison,
+            sources_score=score_construit.sources,
+        )
 
     def scorer_et_trier(self, suggestions: list[dict], contexte: dict | None = None) -> list[dict]:
         """Score toutes les suggestions et les trie par pertinence décroissante."""

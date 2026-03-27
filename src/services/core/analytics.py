@@ -212,6 +212,31 @@ class ServiceAnalytics:
         """
         return MesureTemps(self, cible)
 
+    # ─── Helpers transverses (ROI / series) ───
+
+    @staticmethod
+    def calculer_roi(mises: float, gains: float) -> float:
+        """Calcule un ROI en pourcentage de facon uniforme."""
+        if mises <= 0:
+            return 0.0
+        return round(((gains - mises) / mises) * 100, 2)
+
+    @staticmethod
+    def moyenne_ponderee(valeurs: list[float], poids: list[float] | None = None) -> float:
+        """Calcule une moyenne ponderee robuste (fallback sur moyenne simple)."""
+        if not valeurs:
+            return 0.0
+        if not poids:
+            return sum(valeurs) / len(valeurs)
+
+        taille = min(len(valeurs), len(poids))
+        valeurs_utiles = valeurs[-taille:]
+        poids_utiles = poids[-taille:]
+        somme_poids = sum(poids_utiles)
+        if somme_poids <= 0:
+            return sum(valeurs_utiles) / len(valeurs_utiles)
+        return sum(v * p for v, p in zip(valeurs_utiles, poids_utiles, strict=False)) / somme_poids
+
     # ─── API publique : Consultation ───
 
     def top_pages(self, limite: int = 10) -> list[dict[str, Any]]:
