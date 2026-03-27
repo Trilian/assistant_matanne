@@ -1,0 +1,8 @@
+{
+  "description": "Calendrier des soldes et promotions en France",
+  "soldes": [
+    {"nom": "Soldes d'hiver", "debut": "janvier", "duree_semaines": 4},
+    {"nom": "Soldes d'été", "debut": "juin", "duree_semaines": 4},
+    {"nom": "Black Friday", "debut": "novembre", "periode": "dernier vendredi"}
+  ]
+}

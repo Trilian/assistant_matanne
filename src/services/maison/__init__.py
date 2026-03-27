@@ -103,6 +103,9 @@ _SERVICES = {
     "FicheTacheService": "fiche_tache_service",
     "get_fiche_tache_service": "fiche_tache_service",
     "obtenir_service_fiche_tache": "fiche_tache_service",
+    # Catalogue Enrichissement service (IA enrichissement JSON)
+    "CatalogueEnrichissementService": "catalogue_enrichissement_service",
+    "get_catalogue_enrichissement_service": "catalogue_enrichissement_service",
 }
 
 _SCHEMAS = {
@@ -182,6 +185,10 @@ if TYPE_CHECKING:
     )
     from .projets_service import ProjetsService, get_projets_service, obtenir_service_projets
     from .visualisation_service import VisualisationService, get_visualisation_service
+    from .catalogue_enrichissement_service import (
+        CatalogueEnrichissementService,
+        get_catalogue_enrichissement_service,
+    )
     from .schemas import (
         AlerteMaison,
         BriefingMaison,

@@ -1,0 +1,7 @@
+{
+  "description": "Guide de nettoyage par type de surface",
+  "surfaces": [
+    {"type": "Carrelage", "produit_recommande": "Savon noir", "frequence": "hebdomadaire", "technique": "Balai microfibre humide"},
+    {"type": "Parquet", "produit_recommande": "Huile savonneuse", "frequence": "mensuel", "technique": "Serpillière légèrement humide"}
+  ]
+}
