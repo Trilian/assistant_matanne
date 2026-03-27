@@ -1460,6 +1460,133 @@ async def stats_euromillions(
     return await executer_async(_query)
 
 
+@router.get("/euromillions/grilles-expert", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_grilles_expert_euromillions(
+    strategie: str | None = Query(None, description="equilibree, frequences, retards, ia_creative"),
+    qualite_min: float | None = Query(None, ge=0, le=100, description="Seuil de qualité"),
+    date_min: str | None = Query(None, description="Date min YYYY-MM-DD"),
+    date_max: str | None = Query(None, description="Date max YYYY-MM-DD"),
+    search: str | None = Query(None, description="Recherche texte"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Liste les grilles Euromillions avec analyse expert.
+    
+    Retourne qualité, distribution, backtest pour chaque grille.
+    """
+    from src.core.models.jeux import GrilleEuromillions
+    from datetime import datetime
+
+    def _query():
+        with executer_avec_session() as session:
+            query = session.query(GrilleEuromillions)
+            
+            # Filtres
+            if strategie:
+                query = query.filter(GrilleEuromillions.strategie == strategie)
+            
+            if qualite_min is not None:
+                query = query.filter(GrilleEuromillions.qualite >= qualite_min)
+            
+            if date_min:
+                date_obj = datetime.fromisoformat(date_min)
+                query = query.filter(GrilleEuromillions.date_tirage >= date_obj)
+            
+            if date_max:
+                date_obj = datetime.fromisoformat(date_max)
+                query = query.filter(GrilleEuromillions.date_tirage <= date_obj)
+            
+            if search:
+                safe_search = search.replace("%", "\\%").replace("_", "\\_")
+                # Recherche dans explication ou strategie
+                query = query.filter(
+                    (GrilleEuromillions.explication.ilike(f"%{safe_search}%")) |
+                    (GrilleEuromillions.strategie.ilike(f"%{safe_search}%"))
+                )
+            
+            total = query.count()
+            grilles = (
+                query.order_by(GrilleEuromillions.date_tirage.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+                .all()
+            )
+            
+            items = []
+            for g in grilles:
+                items.append({
+                    "id": g.id,
+                    "numeros": g.numeros,
+                    "etoiles": g.etoiles,
+                    "date_tirage": g.date_tirage.isoformat() if g.date_tirage else None,
+                    "strategie": g.strategie or "inconnue",
+                    "qualite": g.qualite or 0,
+                    "explication": g.explication or "",
+                    "distribution": g.distribution or {},
+                    "backtest": g.backtest if hasattr(g, "backtest") else None,
+                    "statut": g.statut if hasattr(g, "statut") else "en_attente"
+                })
+            
+            return {
+                "items": items,
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+                "pages": (total + page_size - 1) // page_size if total > 0 else 0
+            }
+
+    return await executer_async(_query)
+
+
+@router.post("/euromillions/generer-grille-ia", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def generer_grille_ia_euromillions(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Génère une grille Euromillions avec IA.
+    
+    Stratégies disponibles:
+    - equilibree: Mix fréquences + retards (défaut)
+    - frequences: Numéros chauds
+    - retards: Numéros en retard
+    - ia_creative: Génération créative par Mistral
+    """
+    from src.services.jeux.euromillions_ia import get_euromillions_ia_service
+
+    def _query():
+        service = get_euromillions_ia_service()
+        strategie = payload.get("strategie", "equilibree")
+        
+        # Calculer stats une seule fois
+        stats = service.calculer_statistiques(jours=365)
+        
+        # Générer selon stratégie
+        if strategie == "frequences":
+            grille = service.generer_grille_frequences(stats)
+        elif strategie == "retards":
+            grille = service.generer_grille_retards(stats)
+        elif strategie == "ia_creative":
+            grille = service.generer_grille_ia_creative(stats)
+        else:  # equilibree par défaut
+            grille = service.generer_grille_equilibree(stats)
+        
+        return {
+            "numeros": grille.numeros,
+            "etoiles": grille.etoiles,
+            "qualite": grille.qualite,
+            "strategie": grille.strategie,
+            "explication": grille.explication,
+            "distribution": grille.distribution
+        }
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # GÉNÉRATION DE GRILLES
 # ═══════════════════════════════════════════════════════════
@@ -1540,6 +1667,43 @@ async def generer_grille_loto(
 
         return result
 
+    return await executer_async(_query)
+
+
+@router.get("/stats/personnelles/{user_id}")
+@gerer_exception_api
+async def obtenir_stats_personnelles(
+    user_id: int,
+    periode: int = Query(30, description="Période en jours"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Récupère les statistiques personnelles d'un utilisateur.
+    
+    Retourne:
+    - ROI global
+    - Win rate par type
+    - Meilleurs patterns
+    - Évolution mensuelle
+    """
+    
+    def _query():
+        from src.services.jeux.stats_personnelles import StatsPersonnellesService
+        
+        service = StatsPersonnellesService()
+        
+        roi_data = service.calculer_roi_global(user_id, jours=periode)
+        winrate_data = service.calculer_win_rate(user_id, jours=periode)
+        patterns_data = service.analyser_patterns_gagnants(user_id, jours=periode * 3)  # 3× période pour patterns
+        evolution_data = service.obtenir_evolution_mensuelle(user_id, mois=6)
+        
+        return {
+            "roi": roi_data,
+            "win_rate": winrate_data,
+            "patterns": patterns_data,
+            "evolution": evolution_data["evolution"]
+        }
+    
     return await executer_async(_query)
 
 

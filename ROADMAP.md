@@ -111,6 +111,28 @@
 
 ---
 
+## ✅ Mise à jour implémentation (26-27 mars 2026 — Navigation UX : Fix 1-5 + Idées A/B/C/E)
+
+**9 améliorations de fluidité sur le système de navigation :**
+
+- [x] **Fix 1 — Persistance sidebar** : Zustand `persist` middleware sur `store-ui.ts` — état ouvert/fermé survit au rechargement (`ui-preferences` localStorage)
+- [x] **Fix 2 — Persistance accordéon** : sections de la sidebar réouvrent à l'identique après navigation (`nav-sections-ouvertes` localStorage)
+- [x] **Fix 3 — Source unique pages** : `frontend/src/bibliotheque/pages-navigation.ts` — 67+ pages avec nom/chemin/icône/keywords exportées via `PAGES_NAVIGATION` et `NOMS_PAGES`; `menu-commandes.tsx` et `bouton-epingler.tsx` en importent, plus de duplication
+- [x] **Fix 4 — Fil d'ariane dynamique** : `estSegmentDynamique()` dans `fil-ariane.tsx` détecte les segments numériques/UUID; champ `titrePage` + action `definirTitrePage()` dans le store; 3 pages de détail appellent `definirTitrePage()` au chargement :
+  - `/cuisine/recettes/[id]` → `recette.nom`
+  - `/cuisine/recettes/[id]/modifier` → `Modifier — recette.nom`
+  - `/cuisine/batch-cooking/[id]` → `session.nom`
+- [x] **Fix 5 — Drawer mobile "Plus"** : `nav-mobile.tsx` passe de 5 onglets fixes à 4 + drawer Sheet (shadcn/ui) — Ma Semaine, Jeux, Outils, Paramètres accessibles depuis mobile
+- [x] **Idée A — Badge alerte Famille** : point rouge sur l'onglet Famille mobile quand `nbRappelsDanger > 0` (requête `evaluerRappelsFamille`)
+- [x] **Idée B — Barre de progression** : `barre-progression.tsx` (next-nprogress-bar) — barre 3px `hsl(--primary)` à chaque changement de route
+- [x] **Idée C — Section Récents** : sidebar affiche top 3 pages récentes depuis `command-history` localStorage (seulement si sidebar dépliée)
+- [x] **Idée E — Fade-in pages** : `contenu-principal.tsx` wrappant `{children}` avec `key={pathname}` + `animate-in fade-in duration-150`
+
+**🧩 Fichiers créés** : `pages-navigation.ts`, `barre-progression.tsx`, `contenu-principal.tsx`
+**📦 Package ajouté** : `next-nprogress-bar`
+
+---
+
 ## ✅ Mise à jour implémentation (26 mars 2026 — Phase AC Navigation complète)
 
 - [x] **AC1 Ma Semaine** : Page `/ma-semaine` unifiée (repas + activités + tâches + matchs) + endpoint `GET /api/v1/planning/semaine-unifiee`

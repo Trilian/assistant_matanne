@@ -62,6 +62,7 @@ import { HeatmapCotes } from "@/composants/jeux/heatmap-cotes";
 import { TableauMatchsExpert } from "@/composants/jeux/tableau-matchs-expert";
 import { BankrollWidget } from "@/composants/jeux/bankroll-widget";
 import { DetectionPatternModal } from "@/composants/jeux/detection-pattern-modal";
+import { StatsPersonnelles } from "@/composants/jeux/stats-personnelles";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
 
@@ -241,10 +242,18 @@ export default function ParisPage() {
   const [drawerMatch, setDrawerMatch] = useState<number | null>(null);
   const [showSeries, setShowSeries] = useState(false);
   const [modeVue, setModeVue] = useState<"simple" | "expert">("simple");
+  const [modalPatternsOuvert, setModalPatternsOuvert] = useState(false);
 
   const sourceOCR = useMemo(() => searchParams.get("source_ocr") === "1", [searchParams]);
 
   const queryClient = useQueryClient();
+
+  // ─── Patterns analysis ─────────────────────
+  const { data: patternsData } = utiliserRequete(
+    ["jeux", "patterns-analysis", user?.id],
+    () => obtenirAnalysePatterns(user!.id),
+    { enabled: !!user?.id, staleTime: 10 * 60 * 1000 }
+  );
 
   // ─── Value Bets ────────────────────────────
   const { data: valueBets = [], isLoading: chVB } = utiliserRequete<ValueBet[]>(
@@ -432,33 +441,41 @@ export default function ParisPage() {
       {/* Widget Bankroll & Money Management */}
       {user && (
         <BankrollWidget
-          userId={user.id}
-          cote={cote ? parseFloat(cote) : undefined}
-          edge={undefined}
-          confianceIA={undefined}
-          compact={false}
-        />
-      )}
+          uabs: Paris / Stats */}
+      <Tabs defaultValue="paris">
+        <TabsList>
+          <TabsTrigger value="paris">💰 Paris</TabsTrigger>
+          <TabsTrigger value="stats">📊 Mes Stats</TabsTrigger>
+        </TabsList>
 
-      {/* Toggle Simple / Expert */}
-      <div className="flex items-center gap-2 border-b pb-2">
-        <Button
-          variant={modeVue === "simple" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setModeVue("simple")}
-        >
-          🎯 Simple
-        </Button>
-        <Button
-          variant={modeVue === "expert" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setModeVue("expert")}
-        >
-          📊 Expert
-        </Button>
-      </div>
+        <TabsContent value="paris" className="space-y-6 mt-6">
+          {/* Toggle Simple / Expert */}
+          <div className="flex items-center gap-2 border-b pb-2">
+            <Button
+              variant={modeVue === "simple" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setModeVue("simple")}
+            >
+              🎯 Simple
+            </Button>
+            <Button
+              variant={modeVue === "expert" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setModeVue("expert")}
+            >
+              📊 Expert
+            </Button>
+          </div>
 
-      {/* Vue Expert */}
+          {/* Vue Expert */}
+          {modeVue === "expert" ? (
+            <TableauMatchsExpert
+              onCreerPari={preRemplirPari}
+              onVoirDetails={setDrawerMatch}
+            />
+          ) : (
+            <>
+          {/* Vue Expert */}
       {modeVue === "expert" ? (
         <TableauMatchsExpert
           onCreerPari={preRemplirPari}
@@ -623,8 +640,14 @@ export default function ParisPage() {
                         </Button>
                       </TableCell>
                     </TableRow>
-                  );
-                })}
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="stats" className="mt-6">
+          {user && <StatsPersonnelles userId={user.id} />}
+        </TabsContent>
+      </Tabs>        })}
               </TableBody>
             </Table>
           )}

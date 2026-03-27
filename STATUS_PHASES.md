@@ -1,4 +1,4 @@
-# 📊 État d'Implémentation des 28 Phases — Assistant Matanne
+﻿# 📊 État d'Implémentation des 28 Phases — Assistant Matanne
 
 > **Dernière mise à jour** : **29 mars 2026** (module Cuisine A-L finalisé — dialog mode prépa, congelateur view, dashboard nutrition, saisonnalité, planning IA saisonnier)  
 > **Couverture fonctionnelle globale** : **~94%** pondérée (24/28 complètes + 3 quasi + 1 partielle)
@@ -922,6 +922,18 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 ---
 
 ## 📝 NOTES
+
+### Navigation UX (26-27 mars 2026)
+
+- **Fix 1** : Sidebar état persisté via Zustand `persist` ✅
+- **Fix 2** : Accordéon sections sidebar persistées (`nav-sections-ouvertes`) ✅
+- **Fix 3** : Source unique pages — `pages-navigation.ts` (67+ entrées, plus de duplication) ✅
+- **Fix 4** : Fil d'ariane dynamique — `titrePage` dans store + intégration sur 3 pages détail ✅
+- **Fix 5** : Mobile drawer "Plus" (Ma Semaine, Jeux, Outils, Paramètres) ✅
+- **Idée A** : Badge rouge Famille sur nav mobile ✅
+- **Idée B** : Barre de progression route (next-nprogress-bar) ✅
+- **Idée C** : Section Récents dans sidebar (top 3 from command-history) ✅
+- **Idée E** : Fade-in 150ms au changement de page ✅
 
 ### Phases complétées cette session (26 mars 2026)
 

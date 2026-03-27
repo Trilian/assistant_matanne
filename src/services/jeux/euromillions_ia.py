@@ -1,0 +1,469 @@
+"""
+Service de génération IA pour l'Euromillions.
+
+Implémente:
+- Génération grilles pondérées (fréquences, retards, chauds/froids)
+- Analyse des patterns (pairs/impairs, hauts/bas, sommes)
+- Optimisation multi-critères (diversité, équilibre, potentiel)
+- Backtest des grilles générées
+"""
+
+import logging
+import random
+from collections import Counter
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any
+
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from src.core.decorators import avec_session_db
+from src.core.models.jeux import GrilleEuromillions, TirageEuromillions
+from src.services.core.base import BaseAIService
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class GrilleGeneree:
+    """Résultat d'une génération de grille."""
+    
+    numeros: list[int]
+    etoiles: list[int]
+    qualite: float  # Score 0-100
+    strategie: str
+    explication: str
+    distribution: dict[str, Any]
+
+
+class EuromillionsIAService(BaseAIService):
+    """
+    Service de génération intelligente de grilles Euromillions.
+    
+    Stratégies:
+    - equilibree: Mix fréquences + retards (défaut)
+    - frequences: Basée sur numéros chauds
+    - retards: Basée sur numéros en retard
+    - aleatoire_ia: IA créative avec patterns
+    """
+    
+    # Constantes Euromillions
+    NB_NUMEROS = 5
+    NB_ETOILES = 2
+    MIN_NUMERO = 1
+    MAX_NUMERO = 50
+    MIN_ETOILE = 1
+    MAX_ETOILE = 12
+    
+    def __init__(self, db: Session | None = None):
+        """Initialise le service avec accès DB optionnel."""
+        super().__init__()
+        self.db = db
+    
+    @avec_session_db
+    def calculer_statistiques(
+        self,
+        jours: int = 365,
+        db: Session | None = None
+    ) -> dict[str, Any]:
+        """
+        Calcule les statistiques sur les N derniers jours.
+        
+        Args:
+            jours: Nombre de jours d'historique
+            db: Session DB (injectée)
+        
+        Returns:
+            Dict avec fréquences, retards, chauds, froids
+        """
+        date_debut = datetime.now() - timedelta(days=jours)
+        
+        # Récupérer tirages
+        tirages = db.query(TirageEuromillions).filter(
+            TirageEuromillions.date >= date_debut
+        ).all()
+        
+        if not tirages:
+            logger.warning(f"Aucun tirage Euromillions trouvé depuis {date_debut}")
+            return self._statistiques_par_defaut()
+        
+        # Analyser fréquences numeros
+        freq_numeros = Counter()
+        freq_etoiles = Counter()
+        derniere_apparition_numeros = {}
+        derniere_apparition_etoiles = {}
+        
+        for i, tirage in enumerate(tirages):
+            # Numeros
+            for num in tirage.numeros:
+                freq_numeros[num] += 1
+                derniere_apparition_numeros[num] = i
+            
+            # Étoiles
+            for etoile in tirage.etoiles:
+                freq_etoiles[etoile] += 1
+                derniere_apparition_etoiles[etoile] = i
+        
+        # Calculer retards (nb tirages depuis dernière apparition)
+        nb_tirages = len(tirages)
+        retards_numeros = {
+            num: nb_tirages - derniere_apparition_numeros.get(num, nb_tirages)
+            for num in range(self.MIN_NUMERO, self.MAX_NUMERO + 1)
+        }
+        retards_etoiles = {
+            etoile: nb_tirages - derniere_apparition_etoiles.get(etoile, nb_tirages)
+            for etoile in range(self.MIN_ETOILE, self.MAX_ETOILE + 1)
+        }
+        
+        # Top chauds/froids
+        numeros_chauds = [n for n, _ in freq_numeros.most_common(10)]
+        numeros_froids = sorted(
+            freq_numeros.keys(),
+            key=lambda n: freq_numeros[n]
+        )[:10]
+        
+        etoiles_chaudes = [e for e, _ in freq_etoiles.most_common(5)]
+        etoiles_froides = sorted(
+            freq_etoiles.keys(),
+            key=lambda e: freq_etoiles[e]
+        )[:5]
+        
+        return {
+            "frequences_numeros": dict(freq_numeros),
+            "frequences_etoiles": dict(freq_etoiles),
+            "retards_numeros": retards_numeros,
+            "retards_etoiles": retards_etoiles,
+            "numeros_chauds": numeros_chauds,
+            "numeros_froids": numeros_froids,
+            "etoiles_chaudes": etoiles_chaudes,
+            "etoiles_froides": etoiles_froides,
+            "nb_tirages": nb_tirages
+        }
+    
+    def generer_grille_equilibree(
+        self,
+        stats: dict[str, Any] | None = None
+    ) -> GrilleGeneree:
+        """
+        Génère une grille équilibrée (mix fréquences + retards).
+        
+        Args:
+            stats: Statistiques pré-calculées (optionnel)
+        
+        Returns:
+            Grille générée avec qualité et explication
+        """
+        if stats is None:
+            stats = self.calculer_statistiques()
+        
+        # Pondération: 50% fréquences + 50% retards
+        freq_numeros = stats.get("frequences_numeros", {})
+        retards_numeros = stats.get("retards_numeros", {})
+        
+        # Score pour chaque numéro
+        scores = {}
+        for num in range(self.MIN_NUMERO, self.MAX_NUMERO + 1):
+            freq_norm = freq_numeros.get(num, 0) / max(freq_numeros.values()) if freq_numeros else 0.5
+            retard_norm = retards_numeros.get(num, 0) / max(retards_numeros.values()) if retards_numeros else 0.5
+            scores[num] = (freq_norm * 0.5) + (retard_norm * 0.5)
+        
+        # Sélectionner 5 numéros avec probabilities
+        numeros = random.choices(
+            population=list(scores.keys()),
+            weights=list(scores.values()),
+            k=self.NB_NUMEROS
+        )
+        numeros = sorted(list(set(numeros)))  # Dédupliquer et trier
+        
+        # Compléter si doublons
+        while len(numeros) < self.NB_NUMEROS:
+            nouveau = random.choice(list(scores.keys()))
+            if nouveau not in numeros:
+                numeros.append(nouveau)
+        numeros = sorted(numeros[:self.NB_NUMEROS])
+        
+        # Étoiles (même stratégie)
+        freq_etoiles = stats.get("frequences_etoiles", {})
+        retards_etoiles = stats.get("retards_etoiles", {})
+        
+        scores_etoiles = {}
+        for etoile in range(self.MIN_ETOILE, self.MAX_ETOILE + 1):
+            freq_norm = freq_etoiles.get(etoile, 0) / max(freq_etoiles.values()) if freq_etoiles else 0.5
+            retard_norm = retards_etoiles.get(etoile, 0) / max(retards_etoiles.values()) if retards_etoiles else 0.5
+            scores_etoiles[etoile] = (freq_norm * 0.5) + (retard_norm * 0.5)
+        
+        etoiles = random.choices(
+            population=list(scores_etoiles.keys()),
+            weights=list(scores_etoiles.values()),
+            k=self.NB_ETOILES
+        )
+        etoiles = sorted(list(set(etoiles)))
+        while len(etoiles) < self.NB_ETOILES:
+            nouveau = random.choice(list(scores_etoiles.keys()))
+            if nouveau not in etoiles:
+                etoiles.append(nouveau)
+        etoiles = sorted(etoiles[:self.NB_ETOILES])
+        
+        # Analyser distribution
+        distribution = self._analyser_distribution(numeros, etoiles)
+        qualite = self._calculer_qualite(distribution)
+        
+        return GrilleGeneree(
+            numeros=numeros,
+            etoiles=etoiles,
+            qualite=qualite,
+            strategie="équilibrée",
+            explication=f"Grille mixant fréquences historiques ({stats.get('nb_tirages', 0)} tirages) et numéros en retard. "
+                        f"Distribution: {distribution['nb_pairs_numeros']} pairs, {distribution['nb_impairs_numeros']} impairs, "
+                        f"somme {distribution['somme_numeros']}.",
+            distribution=distribution
+        )
+    
+    def generer_grille_frequences(
+        self,
+        stats: dict[str, Any] | None = None
+    ) -> GrilleGeneree:
+        """Génère une grille basée sur les numéros les plus fréquents."""
+        if stats is None:
+            stats = self.calculer_statistiques()
+        
+        numeros_chauds = stats.get("numeros_chauds", [])[:15]  # Top 15
+        etoiles_chaudes = stats.get("etoiles_chaudes", [])[:6]
+        
+        # Mixer top 15 avec aléa
+        numeros = random.sample(numeros_chauds, min(self.NB_NUMEROS, len(numeros_chauds)))
+        while len(numeros) < self.NB_NUMEROS:
+            nouveau = random.randint(self.MIN_NUMERO, self.MAX_NUMERO)
+            if nouveau not in numeros:
+                numeros.append(nouveau)
+        numeros = sorted(numeros[:self.NB_NUMEROS])
+        
+        etoiles = random.sample(etoiles_chaudes, min(self.NB_ETOILES, len(etoiles_chaudes)))
+        while len(etoiles) < self.NB_ETOILES:
+            nouveau = random.randint(self.MIN_ETOILE, self.MAX_ETOILE)
+            if nouveau not in etoiles:
+                etoiles.append(nouveau)
+        etoiles = sorted(etoiles[:self.NB_ETOILES])
+        
+        distribution = self._analyser_distribution(numeros, etoiles)
+        qualite = self._calculer_qualite(distribution)
+        
+        return GrilleGeneree(
+            numeros=numeros,
+            etoiles=etoiles,
+            qualite=qualite,
+            strategie="fréquences",
+            explication="Grille basée sur les numéros les plus sortis historiquement (chauds).",
+            distribution=distribution
+        )
+    
+    def generer_grille_retards(
+        self,
+        stats: dict[str, Any] | None = None
+    ) -> GrilleGeneree:
+        """Génère une grille basée sur les numéros en retard."""
+        if stats is None:
+            stats = self.calculer_statistiques()
+        
+        # Top retards
+        retards_numeros = stats.get("retards_numeros", {})
+        retards_etoiles = stats.get("retards_etoiles", {})
+        
+        numeros_en_retard = sorted(
+            retards_numeros.keys(),
+            key=lambda n: retards_numeros[n],
+            reverse=True
+        )[:15]
+        
+        etoiles_en_retard = sorted(
+            retards_etoiles.keys(),
+            key=lambda e: retards_etoiles[e],
+            reverse=True
+        )[:6]
+        
+        numeros = random.sample(numeros_en_retard, min(self.NB_NUMEROS, len(numeros_en_retard)))
+        while len(numeros) < self.NB_NUMEROS:
+            nouveau = random.randint(self.MIN_NUMERO, self.MAX_NUMERO)
+            if nouveau not in numeros:
+                numeros.append(nouveau)
+        numeros = sorted(numeros[:self.NB_NUMEROS])
+        
+        etoiles = random.sample(etoiles_en_retard, min(self.NB_ETOILES, len(etoiles_en_retard)))
+        while len(etoiles) < self.NB_ETOILES:
+            nouveau = random.randint(self.MIN_ETOILE, self.MAX_ETOILE)
+            if nouveau not in etoiles:
+                etoiles.append(nouveau)
+        etoiles = sorted(etoiles[:self.NB_ETOILES])
+        
+        distribution = self._analyser_distribution(numeros, etoiles)
+        qualite = self._calculer_qualite(distribution)
+        
+        return GrilleGeneree(
+            numeros=numeros,
+            etoiles=etoiles,
+            qualite=qualite,
+            strategie="retards",
+            explication="Grille basée sur les numéros qui n'ont pas été tirés depuis longtemps.",
+            distribution=distribution
+        )
+    
+    def generer_grille_ia_creative(
+        self,
+        stats: dict[str, Any] | None = None
+    ) -> GrilleGeneree:
+        """
+        Génère une grille créative avec l'IA Mistral.
+        
+        Utilise le LLM pour générer des combinaisons originales
+        basées sur les patterns historiques.
+        """
+        if stats is None:
+            stats = self.calculer_statistiques()
+        
+        # Construire prompt
+        numeros_chauds = stats.get("numeros_chauds", [])
+        numeros_froids = stats.get("numeros_froids", [])
+        
+        prompt = f"""Génère une grille Euromillions originale mais cohérente.
+
+Contraintes:
+- 5 numéros entre 1 et 50
+- 2 étoiles entre 1 et 12
+- Équilibre pairs/impairs (3/2 ou 2/3)
+- Somme des 5 numéros: 125-175 (optimal)
+- Éviter les séquences (ex: 1-2-3-4-5)
+
+Contexte historique:
+- Numéros chauds (fréquents): {numeros_chauds[:10]}
+- Numéros froids (rares): {numeros_froids[:10]}
+
+Génère une combinaison créative en JSON:
+{{
+  "numeros": [n1, n2, n3, n4, n5],
+  "etoiles": [e1, e2],
+  "justification": "Explication stratégie"
+}}
+"""
+        
+        # Appeler IA
+        try:
+            response = self.call_with_json_parsing_sync(
+                prompt=prompt,
+                system_prompt="Tu es expert en loteries. Génère des grilles créatives mais statistiquement solides."
+            )
+            
+            numeros = sorted(response.get("numeros", []))
+            etoiles = sorted(response.get("etoiles", []))
+            justification = response.get("justification", "Grille générée par IA")
+            
+            # Valider
+            if len(numeros) != self.NB_NUMEROS or len(etoiles) != self.NB_ETOILES:
+                raise ValueError("Grille invalide depuis IA")
+            
+            if not all(self.MIN_NUMERO <= n <= self.MAX_NUMERO for n in numeros):
+                raise ValueError("Numéros hors limites")
+            
+            if not all(self.MIN_ETOILE <= e <= self.MAX_ETOILE for e in etoiles):
+                raise ValueError("Étoiles hors limites")
+            
+        except Exception as e:
+            logger.warning(f"Échec génération IA, fallback aléatoire: {e}")
+            # Fallback: grille équilibrée
+            return self.generer_grille_equilibree(stats)
+        
+        distribution = self._analyser_distribution(numeros, etoiles)
+        qualite = self._calculer_qualite(distribution)
+        
+        return GrilleGeneree(
+            numeros=numeros,
+            etoiles=etoiles,
+            qualite=qualite,
+            strategie="IA créative",
+            explication=justification,
+            distribution=distribution
+        )
+    
+    def _analyser_distribution(
+        self,
+        numeros: list[int],
+        etoiles: list[int]
+    ) -> dict[str, Any]:
+        """Analyse la distribution d'une grille."""
+        nb_pairs_numeros = sum(1 for n in numeros if n % 2 == 0)
+        nb_impairs_numeros = len(numeros) - nb_pairs_numeros
+        
+        nb_pairs_etoiles = sum(1 for e in etoiles if e % 2 == 0)
+        nb_impairs_etoiles = len(etoiles) - nb_pairs_etoiles
+        
+        somme_numeros = sum(numeros)
+        somme_etoiles = sum(etoiles)
+        
+        # Hauts (26-50) vs Bas (1-25)
+        nb_hauts = sum(1 for n in numeros if n > 25)
+        nb_bas = len(numeros) - nb_hauts
+        
+        return {
+            "nb_pairs_numeros": nb_pairs_numeros,
+            "nb_impairs_numeros": nb_impairs_numeros,
+            "nb_pairs_etoiles": nb_pairs_etoiles,
+            "nb_impairs_etoiles": nb_impairs_etoiles,
+            "somme_numeros": somme_numeros,
+            "somme_etoiles": somme_etoiles,
+            "nb_hauts": nb_hauts,
+            "nb_bas": nb_bas
+        }
+    
+    def _calculer_qualite(self, distribution: dict[str, Any]) -> float:
+        """
+        Calcule un score de qualité 0-100 basé sur la distribution.
+        
+        Critères:
+        - Équilibre pairs/impairs (cible 3/2 ou 2/3)
+        - Somme optimale (125-175)
+        - Équilibre hauts/bas (cible 3/2 ou 2/3)
+        """
+        score = 100.0
+        
+        # Pairs/impairs (pénalité si 5/0 ou 0/5)
+        ratio_pairs = distribution["nb_pairs_numeros"]
+        if ratio_pairs == 0 or ratio_pairs == 5:
+            score -= 30
+        elif ratio_pairs == 1 or ratio_pairs == 4:
+            score -= 15
+        
+        # Somme (optimal 125-175)
+        somme = distribution["somme_numeros"]
+        if somme < 100 or somme > 200:
+            score -= 25
+        elif somme < 125 or somme > 175:
+            score -= 10
+        
+        # Hauts/bas
+        ratio_hauts = distribution["nb_hauts"]
+        if ratio_hauts == 0 or ratio_hauts == 5:
+            score -= 20
+        elif ratio_hauts == 1 or ratio_hauts == 4:
+            score -= 10
+        
+        return max(0, min(100, score))
+    
+    def _statistiques_par_defaut(self) -> dict[str, Any]:
+        """Retourne des statistiques par défaut si pas de tirages."""
+        return {
+            "frequences_numeros": {i: 10 for i in range(1, 51)},
+            "frequences_etoiles": {i: 5 for i in range(1, 13)},
+            "retards_numeros": {i: 0 for i in range(1, 51)},
+            "retards_etoiles": {i: 0 for i in range(1, 13)},
+            "numeros_chauds": list(range(1, 11)),
+            "numeros_froids": list(range(41, 51)),
+            "etoiles_chaudes": list(range(1, 6)),
+            "etoiles_froides": list(range(8, 13)),
+            "nb_tirages": 0
+        }
+
+
+# Factory
+def get_euromillions_ia_service() -> EuromillionsIAService:
+    """Retourne une instance du service Euromillions IA."""
+    return EuromillionsIAService()

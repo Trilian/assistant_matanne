@@ -31,7 +31,11 @@ import { HeatmapNumeros } from "@/composants/jeux/heatmap-numeros";
 import { GenerateurGrille } from "@/composants/jeux/generateur-grille";
 import { GrilleIAPonderee } from "@/composants/jeux/grille-ia-ponderee";
 import { BacktestResultatCard } from "@/composants/jeux/backtest-resultat";
+import { TableauLotoExpert } from "@/composants/jeux/tableau-loto-expert";
+import { StatsPersonnelles } from "@/composants/jeux/stats-personnelles";
 import { TooltipProvider } from "@/composants/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
+import { utiliserAuth } from "@/crochets/utiliser-auth";
 
 function formaterDate(iso: string) {
   return new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" });
@@ -49,6 +53,8 @@ function parseListeNumeros(raw: string | null, min: number, max: number, attendu
 
 export default function LotoPage() {
   const [showBacktest, setShowBacktest] = useState(false);
+  const [modeVue, setModeVue] = useState<"simple" | "expert">("simple");
+  const { user } = utiliserAuth();
   const search = useSearchParams();
 
   const numerosPrefill = useMemo(
@@ -90,7 +96,37 @@ export default function LotoPage() {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold">🎱 Loto</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">🎱 Loto</h1>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={modeVue === "simple" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setModeVue("simple")}
+            >
+              🎯 Simple
+            </Button>
+            <Button
+              variant={modeVue === "expert" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setModeVue("expert")}
+            >
+              📊 Expert
+            </Button>
+          </div>
+        </div>
+
+        <Tabs defaultValue="grilles">
+          <TabsList>
+            <TabsTrigger value="grilles">🎱 Grilles</TabsTrigger>
+            <TabsTrigger value="stats">📊 Mes Stats</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="grilles" className="space-y-6 mt-6">
+            {modeVue === "expert" ? (
+              <TableauLotoExpert />
+            ) : (
+              <>
 
         {numerosPrefill.length === 5 && (
           <Card className="border-emerald-300">
@@ -317,6 +353,14 @@ export default function LotoPage() {
             )}
           </CardContent>
         </Card>
+              </>
+            )}
+          </TabsContent>
+
+          <TabsContent value="stats" className="mt-6">
+            {user && <StatsPersonnelles userId={user.id} />}
+          </TabsContent>
+        </Tabs>
       </div>
     </TooltipProvider>
   );
