@@ -153,8 +153,8 @@ export default function PageVisualisation() {
 
   // Mutation planification tâche ménage rapide
   const { mutate: planifierTache, isPending: planifEnCours } = utiliserMutation(
-    (nom: string) =>
-      creerTacheEntretien({ nom, piece: pieceSelectionnee?.nom, fait: false }),
+    ({ nom, pieceNom }: { nom: string; pieceNom: string | undefined }) =>
+      creerTacheEntretien({ nom, piece: pieceNom, fait: false }),
     { onSuccess: () => toast.success("Tâche planifiée") }
   );
 
@@ -551,7 +551,7 @@ export default function PageVisualisation() {
                         variant="outline"
                         className="h-6 text-[10px] px-2 shrink-0"
                         disabled={planifEnCours}
-                        onClick={() => planifierTache(tache)}
+                        onClick={() => planifierTache({ nom: tache, pieceNom: pieceSelectionnee?.nom })}
                       >
                         {planifEnCours ? <Loader2 className="h-3 w-3 animate-spin" /> : "+ Planifier"}
                       </Button>
