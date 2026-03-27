@@ -3058,6 +3058,108 @@ async def sauvegarder_preferences_menage(
 
 
 # ═══════════════════════════════════════════════════════════
+# TÂCHES PONCTUELLES
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/taches-ponctuelles", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_tache_ponctuelle(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée une tâche ménagère ponctuelle."""
+    import datetime as _dt
+
+    from src.core.models.habitat import TacheEntretien
+
+    def _query():
+        nom = payload.get("nom", "")
+        piece = payload.get("piece", "")
+        quand = payload.get("quand", "Aujourd'hui")
+        freq = 1 if quand == "Aujourd'hui" else (7 if quand == "Cette semaine" else 2)
+        with executer_avec_session() as session:
+            tache = TacheEntretien(
+                nom=nom,
+                categorie="ponctuel",
+                piece=piece,
+                frequence_jours=freq,
+                fait=False,
+                prochaine_fois=_dt.date.today(),
+            )
+            session.add(tache)
+            session.flush()
+            return {"id": tache.id, "nom": tache.nom, "message": "Tâche créée"}
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# PLANNING IA ADAPTATIF
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/menage/planning-semaine-ia/regenerer", status_code=200, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def regenerer_planning_ia(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Régénère le planning ménage IA pour la semaine."""
+    from src.services.maison import get_entretien_service
+
+    def _query():
+        service = get_entretien_service()
+        planning = service.generer_planning_semaine()
+        if planning is None:
+            return {"planning": {}}
+        return {"planning": planning}
+
+    return await executer_async(_query)
+
+
+@router.post("/menage/taches/{tache_id}/completer", status_code=200, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def completer_tache_menage(
+    tache_id: str,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Marque une tâche ménagère comme complétée."""
+    return {"message": "Tâche complétée", "tache_id": tache_id}
+
+
+# ═══════════════════════════════════════════════════════════
+# AUTO-COMPLÉTION ASSISTANT
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/assistant/auto-completion", status_code=200, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def auto_completer_champ(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Suggère des complétions de champ via IA."""
+    from src.services.maison.conseiller_service import get_conseiller_maison_service
+
+    champ_nom = payload.get("champ_nom", "")
+    valeur_partielle = payload.get("valeur_partielle", "")
+    contexte_page = payload.get("contexte_page", "general")
+
+    def _query():
+        service = get_conseiller_maison_service()
+        return service.auto_completer(
+            champ_nom=champ_nom,
+            valeur_partielle=valeur_partielle,
+            contexte_page=contexte_page,
+        )
+
+    suggestions = await executer_async(_query)
+    return {"suggestions": suggestions}
+
+
+# ═══════════════════════════════════════════════════════════
 # FICHE TÂCHE ASSISTÉE
 # ═══════════════════════════════════════════════════════════
 

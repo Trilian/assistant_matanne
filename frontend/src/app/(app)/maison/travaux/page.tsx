@@ -202,11 +202,17 @@ function OngletProjets() {
   );
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(creerProjet, {
-    onSuccess: () => {
+    onSuccess: (nouveauProjet) => {
       queryClient.invalidateQueries({ queryKey: ["maison", "projets"] });
       setDialogOuvert(false);
       setNomProjet(""); setDescProjet(""); setPrioriteProjet("moyenne");
       toast.success("Projet créé");
+      toast("💡 Estimer ce projet avec l'IA ?", {
+        action: {
+          label: "Estimer",
+          onClick: () => setEstimationProjetId(nouveauProjet.id),
+        },
+      });
     },
     onError: () => toast.error("Erreur lors de la création"),
   });

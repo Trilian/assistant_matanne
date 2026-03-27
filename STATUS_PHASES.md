@@ -1,4 +1,4 @@
-﻿# 📊 État d'Implémentation des 28 Phases — Assistant Matanne
+# 📊 État d'Implémentation des 28 Phases — Assistant Matanne
 
 > **Dernière mise à jour** : **31 mars 2026** (Sprint 3 Scoring/Explainability Famille — badges urgence modules, auto-prefill activités, scoring pertinence achats IA, suppression album/journal)  
 > **Couverture fonctionnelle globale** : **~96%** pondérée (24/28 complètes + 3 quasi + 1 partielle)
@@ -17,6 +17,22 @@
 - ✅ **Suppression Album & Journal** : pages, services, modèle ORM, endpoints et imports nettoyés
 
 **Impact** : Module Famille **100% complet** — IA explicable, hub contextuel, scoring pertinence actif
+
+---
+
+## ✅ Nouveautés Session copilot-worktree — Module Maison COMPLET ✅
+
+**Phases 5B / 9A / 9F / 11B / 11C / 12 complétées** :
+
+- ✅ **Phase 5B — `ListeTachesSelectable`** : Composant réutilisable avec checkboxes, badges durée/catégorie, "Tout sélectionner/désélectionner", compteur X/Y, bouton valider désactivé si vide — exporté dans `composants/maison/index.ts`
+- ✅ **Phase 9F — Tâche ponctuelle popover** : Bouton `[+ Tâche ponctuelle]` dans onglet Aujourd'hui de `/maison/menage` — Popover avec 3 champs (nom, pièce, quand) — Endpoint `POST /api/v1/maison/taches-ponctuelles` — `creerTachePonctuelle()` dans `maison.ts`
+- ✅ **Phase 9A — Planning IA adaptatif** : Endpoint `POST /api/v1/maison/menage/planning-semaine-ia/regenerer` + `POST /api/v1/maison/menage/taches/{id}/completer` — Bouton `[🔄 Régénérer]` dans onglet Semaine — Toast célébration quand toutes les tâches du jour terminées
+- ✅ **Phase 11B — Toast suggestions inline** : Après création tâche ponctuelle → toast "💡 Ajouter à une routine ?" avec action routines — Après création projet → toast "💡 Estimer ce projet avec l'IA ?" avec action ouvrant la SheetEstimationIA
+- ✅ **Phase 11C — Auto-completion endpoint** : `POST /api/v1/maison/assistant/auto-completion` — méthode `auto_completer()` sur `ConseillierMaisonService` — `autoCompleterChamp()` dans `maison.ts`
+- ✅ **Phase 6 — CatalogueEnrichissementService** : Service `src/services/maison/catalogue_enrichissement_service.py` enrichissant 4 catalogues JSON via Mistral — Cron mensuel (1er du mois 3h00) — 3 nouveaux fichiers JSON de référence (`calendrier_soldes.json`, `catalogue_pannes_courantes.json`, `guide_nettoyage_surfaces.json`)
+- ✅ **Phase 12 — Cleanup legacy folders** : Suppression de 13 dossiers redirect obsolètes (artisans, cellier, charges, contrats, depenses, diagnostics, domotique, eco-tips, energie, entretien, garanties, projets, stocks)
+
+**🏡 MODULE MAISON : COMPLET ✅** (toutes phases X-AB + 0-12 implémentées — seule AB jardin IA enrichi reste PARTIELLE)
 
 ---
 

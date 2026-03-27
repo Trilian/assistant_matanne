@@ -224,6 +224,43 @@ class ConseillierMaisonService(BaseAIService):
             logger.warning("Erreur IA chat_assistant: %s", exc)
             return "Désolé, je ne peux pas répondre pour le moment. Veuillez réessayer."
 
+    def auto_completer(
+        self, champ_nom: str, valeur_partielle: str, contexte_page: str = "general"
+    ) -> dict[str, Any]:
+        """Suggère des complétions contextuelles pour un champ de formulaire.
+
+        Args:
+            champ_nom: Nom du champ (ex: nom, description, categorie)
+            valeur_partielle: Valeur partielle saisie par l'utilisateur
+            contexte_page: Page de contexte (ex: travaux, menage, jardin)
+
+        Returns:
+            dict avec suggestions: {categorie, description, tags}
+        """
+        import json as _json
+
+        prompt = (
+            f"Pour un champ '{champ_nom}' sur la page '{contexte_page}' d'une application de gestion de maison, "
+            f"l'utilisateur a saisi: '{valeur_partielle}'. "
+            f"Suggère une catégorie, une description courte et 3 tags pertinents. "
+            f"Réponds UNIQUEMENT en JSON: "
+            f'{{\"categorie\": \"...\", \"description\": \"...\", \"tags\": [\"...\", \"...\", \"...\"]}}'
+        )
+        try:
+            reponse = self.chat_assistant(prompt, contexte="auto-completion")
+            debut = reponse.find("{")
+            fin = reponse.rfind("}") + 1
+            if debut >= 0 and fin > debut:
+                parsed = _json.loads(reponse[debut:fin])
+                return {
+                    "categorie": parsed.get("categorie"),
+                    "description": parsed.get("description"),
+                    "tags": parsed.get("tags", []),
+                }
+        except Exception as exc:
+            logger.warning("Erreur auto_completer: %s", exc)
+        return {"categorie": None, "description": None, "tags": []}
+
 
 def _conseils_hub_fallback() -> list[dict]:
     """Conseils de secours structurés pour le hub en cas de panne IA."""

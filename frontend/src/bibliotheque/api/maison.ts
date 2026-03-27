@@ -1256,3 +1256,49 @@ export async function prioriserProjetsIA(): Promise<{ priorites: Array<{ id: num
   const { data } = await clientApi.get("/maison/projets/prioriser-ia");
   return data;
 }
+
+// ─── Tâches ponctuelles ───────────────────────────────────
+
+/** Créer une tâche ménagère ponctuelle */
+export async function creerTachePonctuelle(data: {
+  nom: string;
+  piece: string;
+  quand: string;
+}): Promise<{ id: number | null; nom: string; message: string }> {
+  const { data: res } = await clientApi.post("/maison/taches-ponctuelles", data);
+  return res;
+}
+
+// ─── Planning IA ──────────────────────────────────────────
+
+/** Régénérer le planning ménage IA */
+export async function regenererPlanningIA(forcer = false): Promise<PlanningSemaine> {
+  const { data } = await clientApi.post<{ planning: PlanningSemaine }>("/maison/menage/planning-semaine-ia/regenerer", { forcer });
+  return data.planning ?? (data as unknown as PlanningSemaine);
+}
+
+/** Compléter une tâche ménagère */
+export async function completerTacheMenage(
+  tacheId: number | string,
+  heureCompletion?: string
+): Promise<void> {
+  await clientApi.post(`/maison/menage/taches/${tacheId}/completer`, {
+    heure_completion: heureCompletion,
+  });
+}
+
+// ─── Auto-complétion ──────────────────────────────────────
+
+/** Suggestions de complétion de champ via IA */
+export async function autoCompleterChamp(
+  champ: string,
+  valeur: string,
+  contexte?: string
+): Promise<{ suggestions: { categorie: string | null; description: string | null; tags: string[] } }> {
+  const { data } = await clientApi.post("/maison/assistant/auto-completion", {
+    champ_nom: champ,
+    valeur_partielle: valeur,
+    contexte_page: contexte ?? "general",
+  });
+  return data;
+}

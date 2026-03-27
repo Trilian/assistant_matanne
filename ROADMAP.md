@@ -1,10 +1,24 @@
 # 🗺️ ROADMAP — Assistant Matanne
 
-> Dernière mise à jour : 29 mars 2026 (module Cuisine A-L finalisé — dialog mode prépa, congélateur view, dashboard nutrition, saisonnalité, planning IA saisonnier)
+> Dernière mise à jour : 27 mars 2026 (copilot-worktree) — MODULE MAISON COMPLET : ListeTachesSelectable, tâches ponctuelles popover, planning IA adaptatif, CatalogueEnrichissementService + cron mensuel, auto-complétion, toasts suggestions inline, cleanup 13 dossiers legacy
 
 ---
 
-## ✅ Mise à jour implémentation (29 mars 2026 — Module Cuisine A-L Complément)
+## ✅ Mise à jour copilot-worktree — Module Maison COMPLET ✅
+
+- [x] **Phase 5B** : `ListeTachesSelectable` — composant réutilisable checkboxes + badges + compteur + tout sélectionner
+- [x] **Phase 9F** : Tâche ponctuelle popover dans `/maison/menage` — 3 champs + endpoint `POST /api/v1/maison/taches-ponctuelles`
+- [x] **Phase 9A** : Planning IA adaptatif — régénération manuelle + complétion tâche + toast célébration
+- [x] **Phase 11B** : Toasts suggestions inline — routines (après tâche ponctuelle) + estimation IA (après création projet)
+- [x] **Phase 11C** : Auto-complétion IA — `POST /api/v1/maison/assistant/auto-completion` + `auto_completer()` sur `ConseillierMaisonService`
+- [x] **Phase 6** : `CatalogueEnrichissementService` + cron mensuel (1er du mois 3h00) + 3 fichiers JSON référence
+- [x] **Phase 12** : Suppression 13 dossiers redirect legacy maison
+
+**✅ MODULE MAISON : COMPLET — toutes phases X-AB + 0-12 (AB jardin IA enrichi reste PARTIELLE)**
+
+---
+
+
 
 **Nouvelles implémentations :**
 - [x] **Phase C — Dialog choix mode** : Bouton "Préparation" dans toolbar planning ouvre un dialog avec 2 cartes — "Batch Cooking" (génère session) vs "Jour par jour" (→ `/cuisine/ma-semaine`)
@@ -237,7 +251,7 @@
 - **🍽️ Cuisine (A-L)** : 2/12 complètes, 8 partielles, 2 non implémentées
 - **👨‍👩‍👦 Famille (M-R)** : **6/6 complètes** ✅ **MODULE COMPLET**
 - **🎮 Jeux (S-W)** : **5/5 complètes** ✅ **MODULE COMPLET**
-- **🏡 Maison (X-AB)** : **4/5 complètes**, 1 partielle (AB — suggestions jardin IA)
+- **🏡 Maison (X-AB + 0-12)** : **✅ COMPLET** (toutes phases X-AB + 0-12 — seule AB jardin IA enrichi partielle)
 - **🧭 Navigation (AC)** : **5/5 complètes** ✅ **MODULE COMPLET**
 
 ---

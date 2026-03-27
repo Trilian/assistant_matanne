@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
@@ -13,6 +13,7 @@ import { Button } from "@/composants/ui/button";
 import { Switch } from "@/composants/ui/switch";
 import { Input } from "@/composants/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/composants/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/composants/ui/select";
 import { RefreshCw, Plus, Pencil, Trash2, Copy, ChevronDown, ChevronRight } from "lucide-react";
 import {
   obtenirTachesJourMaison,
@@ -28,6 +29,8 @@ import {
   ajouterTacheRoutine,
   supprimerTacheRoutine,
   creerRoutineIA,
+  creerTachePonctuelle,
+  regenererPlanningIA,
   type PlanningSemaine,
   type FicheTache,
   type RoutineMaison,
@@ -446,10 +449,42 @@ function ContenuMenage() {
   const onglet = searchParams.get("tab") ?? "aujourd-hui";
 
   const { tachesTerminees, basculerTache } = utiliserStoreMaison();
+  const queryClient = useQueryClient();
   const [ficheOuverte, setFicheOuverte] = useState<{
     typeTache: string;
     nomTache: string;
   } | null>(null);
+  const [popoverOuvert, setPopoverOuvert] = useState(false);
+  const [nomPonctuel, setNomPonctuel] = useState("");
+  const [piecePonctuelle, setPiecePonctuelle] = useState("Salon");
+  const [quandPonctuel, setQuandPonctuel] = useState("Aujourd'hui");
+
+  const { mutate: creerPonctuelle, isPending: enCreationPonctuelle } = utiliserMutation(
+    creerTachePonctuelle,
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["taches-jour-maison"] });
+        setPopoverOuvert(false);
+        setNomPonctuel("");
+        toast.success("Tâche ajoutée");
+        toast("💡 Ajouter à une routine ?", {
+          action: { label: "Oui", onClick: () => router.push("?tab=routines") },
+        });
+      },
+      onError: () => toast.error("Erreur lors de la création"),
+    }
+  );
+
+  const { mutate: regenererPlanning, isPending: enRegeneration } = utiliserMutation(
+    () => regenererPlanningIA(true),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["planning-semaine-menage"] });
+        toast.success("Planning régénéré");
+      },
+      onError: () => toast.error("Erreur lors de la régénération"),
+    }
+  );
 
   // TÃ¢ches du jour
   const { data: tachesJour, isLoading: chargTaches } = utiliserRequete(
@@ -471,6 +506,13 @@ function ContenuMenage() {
   const tachesTermineesAujourdHui = tachesArray.filter((t) =>
     tachesTerminees.includes(String(t.id ?? t.nom))
   ).length;
+
+  // Toast célébration quand toutes les tâches sont faites
+  useEffect(() => {
+    if (tachesArray.length > 0 && tachesTermineesAujourdHui === tachesArray.length) {
+      toast("🎉 Toutes les tâches du jour terminées !");
+    }
+  }, [tachesTermineesAujourdHui, tachesArray.length]);
 
   return (
     <div className="space-y-6 p-4 max-w-5xl mx-auto">
@@ -528,10 +570,65 @@ function ContenuMenage() {
                   />
                 ))}
               </div>
+              {/* Tâche ponctuelle */}
+              <div className="mt-3">
+                <Popover open={popoverOuvert} onOpenChange={setPopoverOuvert}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="w-full gap-1.5">
+                      <Plus className="h-3.5 w-3.5" />
+                      Tâche ponctuelle
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 space-y-3 p-4">
+                    <p className="text-sm font-semibold">Nouvelle tâche ponctuelle</p>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Nom</label>
+                      <Input
+                        value={nomPonctuel}
+                        onChange={(e) => setNomPonctuel(e.target.value)}
+                        placeholder="Ex: Réparation carreau de douche"
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Pièce</label>
+                      <Select value={piecePonctuelle} onValueChange={setPiecePonctuelle}>
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["Salon", "Cuisine", "Chambre", "Salle de bain", "Bureau", "Buanderie", "Extérieur", "Autre"].map((p) => (
+                            <SelectItem key={p} value={p}>{p}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">Quand</label>
+                      <Select value={quandPonctuel} onValueChange={setQuandPonctuel}>
+                        <SelectTrigger className="h-8 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["Aujourd'hui", "Demain", "Cette semaine"].map((q) => (
+                            <SelectItem key={q} value={q}>{q}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Button
+                      size="sm"
+                      className="w-full"
+                      disabled={!nomPonctuel.trim() || enCreationPonctuelle}
+                      onClick={() => creerPonctuelle({ nom: nomPonctuel.trim(), piece: piecePonctuelle, quand: quandPonctuel })}
+                    >
+                      ✓ Créer
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+              </div>
             </CardContent>
           </Card>
-
-          {/* Timers */}
           <Card>
             <CardContent className="pt-4">
               <SectionTimers />
@@ -541,6 +638,12 @@ function ContenuMenage() {
 
         {/* â”€â”€ Onglet Semaine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <TabsContent value="semaine" className="mt-4">
+          <div className="flex justify-end mb-3">
+            <Button variant="outline" size="sm" onClick={() => regenererPlanning()} disabled={enRegeneration} className="gap-1.5">
+              <RefreshCw className={`h-3.5 w-3.5 ${enRegeneration ? "animate-spin" : ""}`} />
+              Régénérer
+            </Button>
+          </div>
           {chargPlanning && <p className="text-sm text-muted-foreground">Chargement...</p>}
           {planning && (
             <div className="overflow-x-auto">
