@@ -2952,6 +2952,50 @@ async def objets_piece(
     return await executer_async(_query)
 
 
+@router.get("/pieces/{piece_id}/detail", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def detail_piece(
+    piece_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Détail d'une pièce avec ses objets et stats entretien."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            from src.core.models.temps_entretien import ObjetMaison, PieceMaison
+
+            piece = session.get(PieceMaison, piece_id)
+            if piece is None:
+                raise HTTPException(status_code=404, detail="Pièce introuvable")
+            objets = (
+                session.query(ObjetMaison)
+                .filter(ObjetMaison.piece_id == piece_id)
+                .order_by(ObjetMaison.nom)
+                .all()
+            )
+            return {
+                "piece": {
+                    "id": piece.id,
+                    "nom": piece.nom,
+                    "etage": piece.etage,
+                    "surface_m2": float(piece.superficie_m2) if piece.superficie_m2 else None,
+                    "type_piece": piece.type_piece,
+                },
+                "objets": [
+                    {
+                        "id": o.id,
+                        "nom": o.nom,
+                        "statut": o.statut,
+                        "categorie": o.categorie,
+                    }
+                    for o in objets
+                ],
+                "nb_taches_retard": 0,
+            }
+
+    return await executer_async(_query)
+
+
 @router.post("/visualisation/positions", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def sauvegarder_positions(

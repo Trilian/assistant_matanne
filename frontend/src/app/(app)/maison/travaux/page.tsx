@@ -44,6 +44,7 @@ import type { Artisan } from "@/types/maison";
 import { toast } from "sonner";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
 import { BoutonAchat } from "@/composants/maison/bouton-achat";
+import { utiliserAutoCompletionMaison } from "@/crochets/utiliser-auto-completion-maison";
 
 // ─── Couleurs ────────────────────────────────────────────────
 const COULEURS_STATUT: Record<string, string> = {
@@ -193,8 +194,10 @@ function OngletProjets() {
   const [nomProjet, setNomProjet] = useState("");
   const [descProjet, setDescProjet] = useState("");
   const [prioriteProjet, setPrioriteProjet] = useState("moyenne");
+  const [categorieProjet, setCategorieProjet] = useState("");
   const [estimationProjetId, setEstimationProjetId] = useState<number | null>(null);
   const queryClient = useQueryClient();
+  const { autoCompleter } = utiliserAutoCompletionMaison("travaux_projets");
 
   const { data: projets, isLoading } = utiliserRequete(
     ["maison", "projets", statut],
@@ -205,7 +208,7 @@ function OngletProjets() {
     onSuccess: (nouveauProjet) => {
       queryClient.invalidateQueries({ queryKey: ["maison", "projets"] });
       setDialogOuvert(false);
-      setNomProjet(""); setDescProjet(""); setPrioriteProjet("moyenne");
+      setNomProjet(""); setDescProjet(""); setPrioriteProjet("moyenne"); setCategorieProjet("");
       toast.success("Projet créé");
       toast("💡 Estimer ce projet avec l'IA ?", {
         action: {
@@ -240,8 +243,20 @@ function OngletProjets() {
           <DialogContent>
             <DialogHeader><DialogTitle>Nouveau projet</DialogTitle></DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); creer({ nom: nomProjet, description: descProjet || undefined, priorite: prioriteProjet, statut: "planifié" }); }} className="space-y-4">
-              <div className="space-y-2"><Label>Nom</Label><Input value={nomProjet} onChange={(e) => setNomProjet(e.target.value)} required /></div>
+              <div className="space-y-2">
+                <Label>Nom</Label>
+                <Input
+                  value={nomProjet}
+                  onChange={(e) => setNomProjet(e.target.value)}
+                  onBlur={(e) => autoCompleter("nom_projet", e.target.value, (v) => { if (!categorieProjet) setCategorieProjet(v); })}
+                  required
+                />
+              </div>
               <div className="space-y-2"><Label>Description</Label><Input value={descProjet} onChange={(e) => setDescProjet(e.target.value)} /></div>
+              <div className="space-y-2">
+                <Label>Catégorie <span className="text-xs text-muted-foreground">(suggestion IA)</span></Label>
+                <Input value={categorieProjet} onChange={(e) => setCategorieProjet(e.target.value)} placeholder="Auto-rempli après saisie du nom…" />
+              </div>
               <div className="space-y-2">
                 <Label>Priorité</Label>
                 <Select value={prioriteProjet} onValueChange={setPrioriteProjet}>

@@ -936,6 +936,15 @@ export async function objetsPiece(pieceId: number): Promise<ObjetMaison[]> {
   return data.items ?? data;
 }
 
+export async function obtenirDetailPiece(pieceId: number): Promise<{
+  piece: { id: number; nom: string; etage: number; surface_m2: number | null; type_piece: string | null };
+  objets: { id: number; nom: string; statut: string | null; categorie: string | null }[];
+  nb_taches_retard: number;
+}> {
+  const { data } = await clientApi.get(`/maison/pieces/${pieceId}/detail`);
+  return data;
+}
+
 export async function sauvegarderPositions(
   pieces: { id: number; position_x: number; position_y: number }[]
 ): Promise<void> {
