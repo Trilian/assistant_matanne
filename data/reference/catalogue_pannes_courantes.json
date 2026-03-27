@@ -1,0 +1,7 @@
+{
+  "description": "Catalogue des pannes courantes et diagnostics",
+  "pannes": [
+    {"appareil": "Lave-linge", "symptome": "Ne démarre pas", "causes_possibles": ["Porte mal fermée", "Fusible sauté"], "difficulte": "facile"},
+    {"appareil": "Chauffe-eau", "symptome": "Eau froide", "causes_possibles": ["Résistance grillée", "Thermostat défectueux"], "difficulte": "moyen"}
+  ]
+}

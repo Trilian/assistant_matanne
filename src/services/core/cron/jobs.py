@@ -132,6 +132,26 @@ def _job_entretien_saisonnier() -> None:
         logger.exception("Erreur lors de la vérification saisonnière")
 
 
+def _job_enrichissement_catalogues() -> None:
+    """Enrichit les catalogues de référence via l'IA (1er du mois à 3h00)."""
+    try:
+        from src.services.maison.catalogue_enrichissement_service import (
+            get_catalogue_enrichissement_service,
+        )
+
+        service = get_catalogue_enrichissement_service()
+        resultats = service.enrichir_tout()
+        logger.info(
+            "Enrichissement catalogues terminé: lessive=%d, domotique=%d, routines=%d, plantes=%d",
+            resultats.get("lessive", 0),
+            resultats.get("domotique", 0),
+            resultats.get("routines", 0),
+            resultats.get("plantes", 0),
+        )
+    except Exception:
+        logger.exception("Erreur lors de l'enrichissement des catalogues")
+
+
 # ─── Orchestrateur ────────────────────────────────────────────────────────────
 
 
@@ -175,6 +195,12 @@ class DémarreurCron:
             CronTrigger(hour=9, minute=0),
             id="push_quotidien",
             name="Notifications Web Push quotidiennes (alertes urgentes)",
+        )
+        self._scheduler.add_job(
+            _job_enrichissement_catalogues,
+            CronTrigger(day=1, hour=3, minute=0),
+            id="enrichissement_catalogues",
+            name="Enrichissement mensuel catalogues IA",
         )
 
     def demarrer(self) -> None:
