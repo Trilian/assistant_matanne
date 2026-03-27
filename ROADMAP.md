@@ -81,14 +81,11 @@
 
 ## ✅ Mise à jour implémentation (27 mars 2026 — module Famille M-R)
 
-- [x] **Phase O (Activités météo-intelligentes)** ✅ COMPLÈTE : auto-prefill à l'ouverture du formulaire activité (pré-remplissage automatique + bannière info avec bouton Changer)
-- [x] **Phase P (Achats & cadeaux auto-suggérés)** ✅ COMPLÈTE : widget hub + scoring pertinence (raison_suggestion, score_pertinence, tri par score)
-- [x] **Phase Q (Rappels intelligents)** ✅ COMPLÈTE : badges urgence sur cartes modules dans le hub famille
-- [x] **Phase R : Album & Journal** ~~supprimés~~ — fonctionnalités intégrées dans le Hub contextuel ✅
-- [x] **Sprint 3 — Scoring/Explainability** ✅ COMPLÈTE :
-  - `ScoringPertinenceService` dans `src/services/famille/scoring.py` (scoring déterministe 0.0–1.0, 5 facteurs)
-  - Intégration dans `AchatsIAService` (3 méthodes de suggestion enrichies + tri par score)
-  - Affichage `raison_suggestion` et badge "✨ Très pertinent" dans `/famille/achats`
+- [x] **Phase O (Activités météo-intelligentes)** ✅ COMPLÈTE : pré-remplissage automatique à l'ouverture du formulaire activité
+- [x] **Phase P (Achats & cadeaux auto-suggérés)** ✅ COMPLÈTE : widget hub suggestions IA + scoring pertinence
+- [x] **Phase Q (Rappels intelligents)** ✅ COMPLÈTE : badges urgence sur cartes modules
+- [x] **Phase R : Album & Journal** 🗑️ SUPPRIMÉE — Album et Journal supprimés volontairement. Fonctionnalités intégrées dans le Hub contextuel.
+- [x] **Sprint 3 — COMPLÈTE** : Service ScoringPertinenceService (scoring déterministe), raison_suggestion dans suggestions achats
 - [x] **Stabilisation backend** : déduplication route `/famille/contexte`, correction enregistrement job `push_quotidien` APScheduler
 
 **✅ MODULE FAMILLE : 6/6 phases complètes (M-R) + Sprint 3 scoring**
