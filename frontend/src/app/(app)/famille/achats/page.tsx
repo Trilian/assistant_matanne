@@ -368,7 +368,7 @@ export default function PageAchats() {
                           </p>
                         </div>
                         {s.raison_suggestion && (
-                          <p className="text-xs text-muted-foreground mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                             {s.raison_suggestion}
                           </p>
                         )}
