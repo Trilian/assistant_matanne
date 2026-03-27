@@ -20,13 +20,7 @@ import { obtenirDashboardJeux } from "@/bibliotheque/api/jeux";
 import type { DashboardJeux, ValueBet, SerieJeux, NumeroRetard } from "@/types/jeux";
 import { useRouter } from "next/navigation";
 import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
-
-function couleurBudget(pct: number) {
-  if (pct >= 90) return "bg-red-500";
-  if (pct >= 75) return "bg-orange-400";
-  if (pct >= 50) return "bg-yellow-400";
-  return "bg-green-500";
-}
+import { couleurBarreBudget } from "@/bibliotheque/utils";
 
 function BandeauBudget({ budget }: { budget: DashboardJeux["budget"] }) {
   const pct = Math.min(budget.pourcentage_utilise, 100);
@@ -41,7 +35,7 @@ function BandeauBudget({ budget }: { budget: DashboardJeux["budget"] }) {
         </div>
         <div className="h-3 rounded-full bg-muted overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all ${couleurBudget(pct)}`}
+            className={`h-full rounded-full transition-all ${couleurBarreBudget(pct)}`}
             style={{ width: `${pct}%` }}
           />
         </div>

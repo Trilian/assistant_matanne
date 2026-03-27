@@ -2278,17 +2278,16 @@ async def analyser_ticket_ocr_jeux(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Analyse OCR d'un ticket loto/euromillions via IA vision."""
-    if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Le fichier doit être une image (JPEG, PNG, WebP)")
-
     contenu = await file.read()
-    if len(contenu) > 10 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="Fichier trop volumineux (max 10 Mo)")
+    from src.services.utilitaires.ocr_service import get_ocr_service
 
-    from src.services.integrations.multimodal import get_multimodal_service
+    service = get_ocr_service()
+    try:
+        service.valider_upload_image(file.content_type, contenu, "JPEG, PNG, WebP")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    service = get_multimodal_service()
-    resultat = service.extraire_facture_sync(contenu)
+    resultat = service.extraire_ticket(contenu)
 
     if not resultat:
         return {
@@ -2300,21 +2299,7 @@ async def analyser_ticket_ocr_jeux(
     return {
         "success": True,
         "message": "Ticket analysé avec succès",
-        "donnees": {
-            "point_vente": resultat.magasin,
-            "date_achat": resultat.date,
-            "lignes": [
-                {
-                    "description": ligne.description,
-                    "quantite": ligne.quantite,
-                    "prix_unitaire": ligne.prix_unitaire,
-                    "prix_total": ligne.prix_total,
-                }
-                for ligne in resultat.lignes
-            ],
-            "total": resultat.total,
-            "mode_paiement": resultat.mode_paiement,
-        },
+        "donnees": service.formater_donnees_jeux(resultat),
     }
 
 

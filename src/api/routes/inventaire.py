@@ -347,6 +347,78 @@ async def scanner_codes_batch(
     return await executer_async(_query)
 
 
+@router.post(
+    "/barcode/{code}/enrichir",
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def enrichir_par_code_barres(
+    code: str,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Enrichit un article d'inventaire via OpenFoodFacts à partir de son code-barres.
+
+    Récupère nom, nutrition (nutriscore, ecoscore, nova), marque, catégories
+    et met à jour l'article en base.
+
+    Args:
+        code: Code-barres (EAN-13, UPC, etc.)
+
+    Returns:
+        Données enrichies du produit
+    """
+    from src.core.models import ArticleInventaire
+    from src.services.integrations.produit import OpenFoodFactsService
+
+    off_service = OpenFoodFactsService()
+    produit = off_service.rechercher_produit(code)
+
+    if not produit:
+        raise HTTPException(status_code=404, detail="Produit non trouvé sur OpenFoodFacts")
+
+    def _update():
+        with executer_avec_session() as session:
+            article = (
+                session.query(ArticleInventaire)
+                .filter(ArticleInventaire.code_barres == code)
+                .first()
+            )
+
+            enrichment = {
+                "nom_produit": produit.nom,
+                "marque": produit.marque,
+                "categories": produit.categories,
+                "image_url": produit.image_url,
+                "labels": produit.labels,
+            }
+
+            if produit.nutrition:
+                enrichment["nutriscore"] = produit.nutrition.nutriscore
+                enrichment["ecoscore"] = produit.nutrition.ecoscore
+                enrichment["nova_group"] = produit.nutrition.nova_group
+                enrichment["calories_100g"] = produit.nutrition.energie_kcal
+                enrichment["proteines_100g"] = produit.nutrition.proteines_g
+                enrichment["glucides_100g"] = produit.nutrition.glucides_g
+                enrichment["lipides_100g"] = produit.nutrition.lipides_g
+
+            if article:
+                # Mettre à jour les champs disponibles sur le modèle
+                for attr in ("nutriscore", "ecoscore", "nova_group"):
+                    if hasattr(article, attr) and enrichment.get(attr):
+                        setattr(article, attr, enrichment[attr])
+                session.commit()
+                enrichment["article_id"] = article.id
+                enrichment["article_mis_a_jour"] = True
+            else:
+                enrichment["article_id"] = None
+                enrichment["article_mis_a_jour"] = False
+
+            return enrichment
+
+    return await executer_async(_update)
+
+
 @router.get("/{item_id}", response_model=InventaireItemResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_article_inventaire(item_id: int, user: dict[str, Any] = Depends(require_auth)):

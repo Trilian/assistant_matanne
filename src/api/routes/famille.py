@@ -904,17 +904,16 @@ async def analyser_ticket_ocr(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Analyse un ticket/facture par OCR IA et extrait les données."""
-    if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Le fichier doit être une image (JPEG, PNG)")
-
     contenu = await file.read()
-    if len(contenu) > 10 * 1024 * 1024:  # 10 MB
-        raise HTTPException(status_code=400, detail="Fichier trop volumineux (max 10 Mo)")
+    from src.services.utilitaires.ocr_service import get_ocr_service
 
-    from src.services.integrations.multimodal import get_multimodal_service
+    service = get_ocr_service()
+    try:
+        service.valider_upload_image(file.content_type, contenu, "JPEG, PNG")
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    service = get_multimodal_service()
-    resultat = service.extraire_facture_sync(contenu)
+    resultat = service.extraire_ticket(contenu)
 
     if not resultat:
         return {
@@ -926,24 +925,7 @@ async def analyser_ticket_ocr(
     return {
         "success": True,
         "message": "Ticket analysé avec succès",
-        "donnees": {
-            "magasin": resultat.magasin,
-            "date": resultat.date,
-            "articles": [
-                {
-                    "description": ligne.description,
-                    "quantite": ligne.quantite,
-                    "prix_unitaire": ligne.prix_unitaire,
-                    "prix_total": ligne.prix_total,
-                }
-                for ligne in resultat.lignes
-            ],
-            "sous_total": resultat.sous_total,
-            "tva": resultat.tva,
-            "total": resultat.total,
-            "mode_paiement": resultat.mode_paiement,
-            "categorie_suggeree": "alimentation",
-        },
+        "donnees": service.formater_donnees_budget(resultat),
     }
 
 

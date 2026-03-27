@@ -37,14 +37,7 @@ import {
 } from "@/bibliotheque/api/jeux";
 import type { SuiviResponsable } from "@/types/jeux";
 import { toast } from "sonner";
-
-function couleurBudget(pct: number) {
-  if (pct >= 100) return "bg-red-600";
-  if (pct >= 90) return "bg-red-500";
-  if (pct >= 75) return "bg-orange-400";
-  if (pct >= 50) return "bg-yellow-400";
-  return "bg-green-500";
-}
+import { couleurBarreBudget } from "@/bibliotheque/utils";
 
 function badgeSeuil(suivi: SuiviResponsable) {
   const pct = suivi.pourcentage_utilise;
@@ -163,7 +156,7 @@ export default function ResponsablePage() {
               </div>
               <div className="h-5 rounded-full bg-muted overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all ${couleurBudget(suivi.pourcentage_utilise)}`}
+                  className={`h-full rounded-full transition-all ${couleurBarreBudget(suivi.pourcentage_utilise, true)}`}
                   style={{ width: `${Math.min(suivi.pourcentage_utilise, 100)}%` }}
                 />
               </div>

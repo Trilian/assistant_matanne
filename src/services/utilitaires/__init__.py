@@ -16,6 +16,7 @@ from src.services.utilitaires.service import (
     get_notes_service,
     get_presse_papiers_service,
 )
+from src.services.utilitaires.ocr_service import OCRService, get_ocr_service
 
 __all__ = [
     "NotesService",
@@ -25,6 +26,7 @@ __all__ = [
     "MotsDePasseService",
     "PressePapiersService",
     "EnergieService",
+    "OCRService",
     "get_notes_service",
     "get_journal_service",
     "get_contacts_service",
@@ -32,4 +34,5 @@ __all__ = [
     "get_mots_de_passe_service",
     "get_presse_papiers_service",
     "get_energie_service",
+    "get_ocr_service",
 ]

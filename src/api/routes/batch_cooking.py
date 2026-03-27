@@ -374,6 +374,40 @@ async def lister_preparations(
     return await executer_async(_query)
 
 
+@router.post(
+    "/preparations/{preparation_id}/consommer",
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def consommer_preparation(
+    preparation_id: int,
+    portions: int = Query(1, ge=1, description="Nombre de portions à consommer"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Consomme des portions d'une préparation stockée."""
+    from src.core.models import PreparationBatch
+
+    def _query():
+        with executer_avec_session() as session:
+            prep = session.query(PreparationBatch).filter_by(id=preparation_id).first()
+            if not prep:
+                raise HTTPException(status_code=404, detail="Préparation non trouvée")
+            if prep.consomme:
+                raise HTTPException(status_code=400, detail="Préparation déjà entièrement consommée")
+
+            restant = prep.consommer_portion(portions)
+            session.commit()
+
+            return {
+                "id": prep.id,
+                "nom": prep.nom,
+                "portions_restantes": restant,
+                "consomme": prep.consomme,
+            }
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # CONFIG BATCH COOKING
 # ═══════════════════════════════════════════════════════════
