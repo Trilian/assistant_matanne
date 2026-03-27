@@ -291,6 +291,38 @@ async def supprimer_projet(
     return await executer_async(_query)
 
 
+@router.post("/projets/{projet_id}/estimer-ia", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def estimer_projet_ia(
+    projet_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère une estimation IA complète pour un projet (budget, tâches, matériaux)."""
+    from src.core.models import Projet
+    from src.services.maison import get_projets_service
+
+    def _get_projet():
+        with executer_avec_session() as session:
+            projet = session.query(Projet).filter(Projet.id == projet_id).first()
+            if not projet:
+                raise HTTPException(status_code=404, detail="Projet non trouvé")
+            return {
+                "nom": projet.nom,
+                "description": projet.description or "",
+                "categorie": projet.categorie or "travaux",
+            }
+
+    projet_data = await executer_async(_get_projet)
+
+    service = get_projets_service()
+    estimation = await service.estimer_projet(
+        nom=projet_data["nom"],
+        description=projet_data["description"],
+        categorie=projet_data["categorie"],
+    )
+    return estimation.model_dump(mode="json")
+
+
 # ═══════════════════════════════════════════════════════════
 # ROUTINES
 # ═══════════════════════════════════════════════════════════

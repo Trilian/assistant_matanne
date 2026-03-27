@@ -10,7 +10,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import {
   Hammer, SprayCan, Wrench, Plus, Trash2, Pencil,
   AlertTriangle, CheckCircle2, Activity, Clock,
-  Phone, Mail,
+  Phone, Mail, BotMessageSquare,
 } from "lucide-react";
 import {
   Card, CardContent, CardHeader, CardTitle, CardDescription,
@@ -25,6 +25,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/composants/ui/dialog";
 import {
+  Sheet, SheetContent, SheetHeader, SheetTitle,
+} from "@/composants/ui/sheet";
+import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/composants/ui/select";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
@@ -32,13 +35,15 @@ import { useQueryClient } from "@tanstack/react-query";
 import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
-  listerProjets, creerProjet, supprimerProjet,
+  listerProjets, creerProjet, supprimerProjet, estimerProjetIA,
   listerTachesEntretien, obtenirSanteAppareils, creerTacheEntretien, supprimerTacheEntretien,
   listerArtisans, creerArtisan, modifierArtisan, supprimerArtisan, statsArtisans,
+  type EstimationProjet,
 } from "@/bibliotheque/api/maison";
 import type { Artisan } from "@/types/maison";
 import { toast } from "sonner";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
+import { BoutonAchat } from "@/composants/maison/bouton-achat";
 
 // ─── Couleurs ────────────────────────────────────────────────
 const COULEURS_STATUT: Record<string, string> = {
@@ -53,6 +58,134 @@ const COULEURS_PRIORITE: Record<string, "default" | "secondary" | "destructive">
   basse: "secondary",
 };
 
+// ─── Sheet Estimation IA ──────────────────────────────────────
+function SheetEstimationIA({
+  projetId,
+  ouvert,
+  onFermer,
+}: {
+  projetId: number | null;
+  ouvert: boolean;
+  onFermer: () => void;
+}) {
+  const { data: estimation, isLoading, error } = utiliserRequete(
+    ["maison", "projets", projetId, "estimation-ia"],
+    () => estimerProjetIA(projetId!),
+    { enabled: ouvert && projetId !== null, staleTime: 30 * 60 * 1000 }
+  );
+
+  return (
+    <Sheet open={ouvert} onOpenChange={(o) => !o && onFermer()}>
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
+            <BotMessageSquare className="h-5 w-5 text-primary" />
+            Estimation IA
+          </SheetTitle>
+        </SheetHeader>
+
+        {isLoading && (
+          <div className="mt-6 space-y-3">
+            <Skeleton className="h-16" />
+            <Skeleton className="h-24" />
+            <Skeleton className="h-32" />
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-6 text-sm text-destructive">
+            Impossible de générer l&apos;estimation. Vérifiez que le projet a une description.
+          </div>
+        )}
+
+        {estimation && (
+          <div className="mt-6 space-y-6">
+            {/* Budget */}
+            <div className="rounded-lg border bg-muted/30 p-4 space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground uppercase">Budget estimé</p>
+              <p className="text-2xl font-bold">
+                {estimation.budget_estime_min.toLocaleString("fr-FR")} €
+                {" – "}
+                {estimation.budget_estime_max.toLocaleString("fr-FR")} €
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Durée estimée : {estimation.duree_estimee_jours} jour{estimation.duree_estimee_jours > 1 ? "s" : ""}
+              </p>
+            </div>
+
+            {/* Tâches */}
+            {estimation.taches_suggerees.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Étapes suggérées</p>
+                <ol className="space-y-2">
+                  {estimation.taches_suggerees.map((t, i) => (
+                    <li key={i} className="flex gap-2 text-sm">
+                      <span className="font-bold text-primary shrink-0">{i + 1}.</span>
+                      <span className="flex-1">{t.nom}
+                        {t.duree_estimee_min && <span className="text-muted-foreground text-xs ml-1">({t.duree_estimee_min} min)</span>}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            {/* Matériaux */}
+            {estimation.materiels_necessaires.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Matériaux nécessaires</p>
+                <div className="space-y-2">
+                  {estimation.materiels_necessaires.map((m, i) => (
+                    <div key={i} className="flex items-center justify-between gap-2 text-sm rounded-md border p-2">
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{m.nom} × {m.quantite}</p>
+                        {m.magasin_suggere && <p className="text-xs text-muted-foreground">{m.magasin_suggere}</p>}
+                        {m.alternatif_eco && <p className="text-xs text-green-600">💡 {m.alternatif_eco}</p>}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {m.prix_estime && <span className="text-xs font-semibold">{m.prix_estime} €</span>}
+                        <BoutonAchat article={{ nom: m.nom, magasin: m.magasin_suggere }} taille="xs" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Risques */}
+            {estimation.risques_identifies.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Points de vigilance</p>
+                <ul className="space-y-1">
+                  {estimation.risques_identifies.map((r, i) => (
+                    <li key={i} className="flex gap-2 text-sm text-amber-700">
+                      <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />{r}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Conseils */}
+            {estimation.conseils_ia.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Conseils</p>
+                <ul className="space-y-1">
+                  {estimation.conseils_ia.map((c, i) => (
+                    <li key={i} className="flex gap-2 text-sm">
+                      <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 shrink-0 text-green-600" />{c}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 // ─── Onglet Projets ───────────────────────────────────────────
 function OngletProjets() {
   const [statut, setStatut] = useState("tous");
@@ -60,6 +193,7 @@ function OngletProjets() {
   const [nomProjet, setNomProjet] = useState("");
   const [descProjet, setDescProjet] = useState("");
   const [prioriteProjet, setPrioriteProjet] = useState("moyenne");
+  const [estimationProjetId, setEstimationProjetId] = useState<number | null>(null);
   const queryClient = useQueryClient();
 
   const { data: projets, isLoading } = utiliserRequete(
@@ -137,11 +271,28 @@ function OngletProjets() {
                   {p.priorite && <Badge variant={COULEURS_PRIORITE[p.priorite] ?? "outline"} className="text-xs">{p.priorite}</Badge>}
                 </div>
               </CardHeader>
-              {p.description && <CardContent className="pt-0"><p className="text-xs text-muted-foreground line-clamp-2">{p.description}</p></CardContent>}
+              {p.description && <CardContent className="pt-0 pb-2"><p className="text-xs text-muted-foreground line-clamp-2">{p.description}</p></CardContent>}
+              <CardContent className="pt-0 pb-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs h-7 gap-1"
+                  onClick={() => setEstimationProjetId(p.id)}
+                >
+                  <BotMessageSquare className="h-3.5 w-3.5" />
+                  Estimer avec l&apos;IA
+                </Button>
+              </CardContent>
             </Card>
           ))}
         </div>
       )}
+
+      <SheetEstimationIA
+        projetId={estimationProjetId}
+        ouvert={estimationProjetId !== null}
+        onFermer={() => setEstimationProjetId(null)}
+      />
     </div>
   );
 }

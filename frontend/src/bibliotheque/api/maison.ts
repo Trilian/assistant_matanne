@@ -89,6 +89,32 @@ export async function obtenirProjet(id: number): Promise<ProjetMaison> {
   return data;
 }
 
+export interface MaterielProjet {
+  nom: string;
+  quantite: number;
+  prix_estime?: number;
+  magasin_suggere?: string;
+  alternatif_eco?: string;
+}
+
+export interface EstimationProjet {
+  nom_projet: string;
+  description_analysee: string;
+  budget_estime_min: number;
+  budget_estime_max: number;
+  duree_estimee_jours: number;
+  taches_suggerees: Array<{ nom: string; ordre: number; duree_estimee_min?: number; materiels_requis?: string[] }>;
+  materiels_necessaires: MaterielProjet[];
+  risques_identifies: string[];
+  conseils_ia: string[];
+}
+
+/** Estimer un projet avec l'IA (budget, tâches, matériaux) */
+export async function estimerProjetIA(id: number): Promise<EstimationProjet> {
+  const { data } = await clientApi.post<EstimationProjet>(`/maison/projets/${id}/estimer-ia`);
+  return data;
+}
+
 /** Lister les tâches d'un projet */
 export async function listerTachesProjet(
   projetId: number
