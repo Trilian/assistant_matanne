@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
   Home, Layers, Square, Info, ChevronLeft, ChevronRight, Pencil, Save, GripVertical, Box,
-  ChevronDown, X, Loader2,
+  ChevronDown, Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
