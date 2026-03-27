@@ -260,6 +260,15 @@ export async function listerCharges(annee?: number): Promise<ChargesMaison[]> {
 
 // ─── Meubles ──────────────────────────────────────────────
 
+export async function listerMeubles(statut?: string, piece?: string): Promise<Meuble[]> {
+  const params = new URLSearchParams();
+  if (statut) params.set("statut", statut);
+  if (piece) params.set("piece", piece);
+  const qs = params.toString();
+  const { data } = await clientApi.get(`/maison/meubles${qs ? `?${qs}` : ""}`);
+  return data.items ?? data;
+}
+
 export async function creerMeuble(meuble: Omit<Meuble, "id">): Promise<Meuble> {
   const { data } = await clientApi.post<Meuble>("/maison/meubles", meuble);
   return data;
@@ -1115,4 +1124,135 @@ export async function obtenirConseilIA(section: string): Promise<ConseilIA> {
 export async function obtenirConseilsIA(): Promise<ConseilMaisonHub[]> {
   const { data } = await clientApi.get<{ items: ConseilMaisonHub[] }>("/maison/conseils-ia");
   return data.items ?? [];
+}
+
+// ─── Liens d'achat ─────────────────────────────────────────
+
+export interface LienAchat {
+  magasin: string;
+  url: string;
+}
+
+export interface LiensAchatResult {
+  produit: string;
+  categorie: string;
+  liens: LienAchat[];
+  categories_disponibles: string[];
+}
+
+/** Obtenir des liens d'achat pour un produit selon sa catégorie */
+export async function obtenirLiensAchat(produit: string, categorie = "default"): Promise<LiensAchatResult> {
+  const { data } = await clientApi.get<LiensAchatResult>("/maison/liens-achat", { params: { produit, categorie } });
+  return data;
+}
+
+// ─── Inventaire pièces avec objets ─────────────────────────
+
+export interface ObjetInventaire {
+  id: number;
+  nom: string;
+  categorie?: string;
+  statut?: string;
+  marque?: string;
+  modele?: string;
+  date_achat?: string;
+  prix_achat?: number;
+  prix_remplacement_estime?: number;
+  notes?: string;
+}
+
+export interface PieceAvecObjets {
+  piece: string;
+  objets: ObjetInventaire[];
+}
+
+/** Lister les pièces avec leurs équipements/objets inventoriés */
+export async function obtenirPiecesAvecObjets(piece?: string): Promise<{ pieces: PieceAvecObjets[]; total: number }> {
+  const params = piece ? { piece } : undefined;
+  const { data } = await clientApi.get<{ pieces: PieceAvecObjets[]; total: number }>("/maison/pieces-avec-objets", { params });
+  return data;
+}
+
+/** Obtenir les suggestions de renouvellement (objets en fin de vie) */
+export async function obtenirSuggestionsRenouvellement(): Promise<{ suggestions: ObjetInventaire[]; total: number }> {
+  const { data } = await clientApi.get<{ suggestions: ObjetInventaire[]; total: number }>("/maison/suggestions-renouvellement");
+  return data;
+}
+
+// ─── Fin de vie garantie ────────────────────────────────────
+
+export interface FinVieGarantie {
+  garantie_id: number;
+  nom?: string;
+  ratio: number;
+  jours_restants: number | null;
+  date_fin?: string;
+  alerte?: boolean;
+}
+
+/** Évaluer la fin de vie d'une garantie (ratio 0.0 → 1.0) */
+export async function evaluerFinVieGarantie(garantieId: number): Promise<FinVieGarantie> {
+  const { data } = await clientApi.get<FinVieGarantie>(`/maison/garanties/${garantieId}/fin-vie`);
+  return data;
+}
+
+// ─── Routines — extensions ─────────────────────────────────
+
+export interface TacheRoutine {
+  id: number;
+  routine_id: number;
+  routine_nom?: string;
+  nom: string;
+  description?: string;
+  ordre?: number;
+  heure_prevue?: string;
+  fait_le?: string;
+  notes?: string;
+}
+
+/** Lister toutes les tâches de toutes les routines */
+export async function listerToutesLesTachesRoutines(): Promise<TacheRoutine[]> {
+  const { data } = await clientApi.get<{ items: TacheRoutine[] }>("/maison/routines/taches");
+  return data.items ?? [];
+}
+
+/** Lister les tâches d'une routine */
+export async function listerTachesRoutine(routineId: number): Promise<TacheRoutine[]> {
+  const { data } = await clientApi.get<{ items: TacheRoutine[] }>(`/maison/routines/${routineId}/taches`);
+  return data.items ?? [];
+}
+
+/** Ajouter une tâche à une routine */
+export async function ajouterTacheRoutine(routineId: number, nom: string, description?: string): Promise<TacheRoutine> {
+  const { data } = await clientApi.post<TacheRoutine>(`/maison/routines/${routineId}/taches`, { nom, description });
+  return data;
+}
+
+/** Supprimer une tâche d'une routine */
+export async function supprimerTacheRoutine(routineId: number, tacheId: number): Promise<void> {
+  await clientApi.delete(`/maison/routines/${routineId}/taches/${tacheId}`);
+}
+
+/** Dupliquer une routine existante */
+export async function dupliquerRoutine(routineId: number): Promise<RoutineMaison> {
+  const { data } = await clientApi.post<RoutineMaison>(`/maison/routines/${routineId}/dupliquer`, {});
+  return data;
+}
+
+/** Créer une routine via l'IA */
+export async function creerRoutineIA(nom: string, description?: string): Promise<RoutineMaison> {
+  const { data } = await clientApi.post<RoutineMaison>("/maison/routines/creer-ia", { nom, description });
+  return data;
+}
+
+/** Associer un objet/équipement à une tâche de routine */
+export async function associerRoutineObjet(objetId: number, tacheRoutineId: number | null): Promise<{ id: number; nom: string; tache_routine_id: number | null }> {
+  const { data } = await clientApi.patch(`/maison/objets/${objetId}/associer-routine`, { tache_routine_id: tacheRoutineId });
+  return data;
+}
+
+/** Prioriser les projets via l'IA */
+export async function prioriserProjetsIA(): Promise<{ priorites: Array<{ id: number; nom: string; statut: string; priorite: string }>; conseil: string }> {
+  const { data } = await clientApi.get("/maison/projets/prioriser-ia");
+  return data;
 }

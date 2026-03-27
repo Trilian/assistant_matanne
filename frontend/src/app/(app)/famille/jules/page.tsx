@@ -130,10 +130,18 @@ export default function PageJules() {
             {ageMois !== null && ` — ${ageMois} mois`}
           </p>
         </div>
-        <Button onClick={() => setDialogueAjout(true)}>
-          <Plus className="mr-1 h-4 w-4" />
-          Nouveau jalon
-        </Button>
+        <div className="flex gap-2">
+          <Link href="/famille/activites?pour_qui=jules">
+            <Button variant="outline" size="sm">
+              <Calendar className="mr-1 h-4 w-4" />
+              Activités Jules
+            </Button>
+          </Link>
+          <Button onClick={() => setDialogueAjout(true)}>
+            <Plus className="mr-1 h-4 w-4" />
+            Nouveau jalon
+          </Button>
+        </div>
       </div>
 
       {/* Résumé catégories */}

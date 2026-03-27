@@ -49,6 +49,7 @@ __all__ = [
     "contexte",
     "rappels",
     "achats_ia",
+    "checklists_anniversaire",
 ]
 
 
@@ -144,4 +145,10 @@ def __getattr__(name: str):
         from src.services.famille.achats_ia import obtenir_service_achats_ia
 
         return obtenir_service_achats_ia
+    if name in ("obtenir_service_checklists_anniversaire", "get_checklists_anniversaire_service"):
+        from src.services.famille.checklists_anniversaire import (
+            obtenir_service_checklists_anniversaire,
+        )
+
+        return obtenir_service_checklists_anniversaire
     raise AttributeError(f"module 'src.services.famille' has no attribute '{name}'")

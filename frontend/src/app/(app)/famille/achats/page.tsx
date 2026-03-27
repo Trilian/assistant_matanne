@@ -5,6 +5,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Plus,
@@ -44,6 +45,7 @@ import {
   supprimerAchat,
   marquerAchatVendu,
   genererAnnonceLBC,
+  genererAnnonceVinted,
   obtenirSuggestionsAchatsEnrichies,
 } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
@@ -84,9 +86,10 @@ export default function PageAchats() {
     nom: "", categorie: "autre", priorite: "moyenne", description: "",
     pour_qui: "famille", a_revendre: false, prix_estime: "",
   });
-  const [lbcItem, setLbcItem] = useState<AchatFamille | null>(null);
-  const [lbcTexte, setLbcTexte] = useState<string | null>(null);
-  const [lbcChargement, setLbcChargement] = useState(false);
+  const [annonceItem, setAnnonceItem] = useState<AchatFamille | null>(null);
+  const [annonceTexte, setAnnonceTexte] = useState<string | null>(null);
+  const [annonceChargement, setAnnonceChargement] = useState(false);
+  const [plateformeAnnonce, setPlateformeAnnonce] = useState<"lbc" | "vinted">("lbc");
 
   const { data: achats = [] } = useQuery({
     queryKey: ["famille", "achats", "page"],
@@ -174,18 +177,43 @@ export default function PageAchats() {
     });
   };
 
-  const ouvrirDialogueLBC = async (item: AchatFamille) => {
-    setLbcItem(item); setLbcTexte(null); setLbcChargement(true);
-    try {
-      const result = await genererAnnonceLBC(item.id, {
-        nom: item.nom, description: item.description ?? "", etat_usage: "bon",
-        prix_cible: item.prix_revente_estime ?? item.prix_reel ?? undefined,
-      });
-      setLbcTexte(result.annonce);
-    } catch { toast.error("Impossible de generer l annonce"); } finally { setLbcChargement(false); }
+  const plateformeRecommandee = (item: AchatFamille): "lbc" | "vinted" => {
+    const categorie = (item.categorie ?? "").toLowerCase();
+    if (["vetements", "jouets", "livres"].includes(categorie)) {
+      return "vinted";
+    }
+    return "lbc";
   };
 
-  const copierLBC = () => { if (lbcTexte) { navigator.clipboard.writeText(lbcTexte); toast.success("Copie !"); } };
+  const ouvrirDialogueAnnonce = async (item: AchatFamille, plateforme: "lbc" | "vinted") => {
+    setPlateformeAnnonce(plateforme);
+    setAnnonceItem(item);
+    setAnnonceTexte(null);
+    setAnnonceChargement(true);
+    try {
+      if (plateforme === "vinted") {
+        const result = await genererAnnonceVinted(item.id, {
+          nom: item.nom,
+          description: item.description ?? "",
+          etat_usage: "bon",
+          prix_cible: item.prix_revente_estime ?? item.prix_reel ?? undefined,
+          taille: item.taille,
+          categorie_vinted: item.categorie,
+        });
+        setAnnonceTexte(result.annonce);
+      } else {
+        const result = await genererAnnonceLBC(item.id, {
+          nom: item.nom,
+          description: item.description ?? "",
+          etat_usage: "bon",
+          prix_cible: item.prix_revente_estime ?? item.prix_reel ?? undefined,
+        });
+        setAnnonceTexte(result.annonce);
+      }
+    } catch { toast.error("Impossible de generer l annonce"); } finally { setAnnonceChargement(false); }
+  };
+
+  const copierAnnonce = () => { if (annonceTexte) { navigator.clipboard.writeText(annonceTexte); toast.success("Copie !"); } };
 
   return (
     <div className="space-y-6">
@@ -196,10 +224,17 @@ export default function PageAchats() {
           </h1>
           <p className="text-muted-foreground">Suggestions IA et liste d achats</p>
         </div>
-        <Dialog open={openDialogue} onOpenChange={setOpenDialogue}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />Ajouter</Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Link href="/famille/budget">
+            <Button variant="outline" size="sm">Budget</Button>
+          </Link>
+          <Link href="/famille/activites">
+            <Button variant="outline" size="sm">Activités</Button>
+          </Link>
+          <Dialog open={openDialogue} onOpenChange={setOpenDialogue}>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4 mr-2" />Ajouter</Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Nouvel achat</DialogTitle></DialogHeader>
             <div className="space-y-4 pt-2">
@@ -257,7 +292,7 @@ export default function PageAchats() {
                   placeholder="Taille, couleur, lien..." rows={2} />
               </div>
               <div className="flex items-center gap-2">
-                <input id="a_revendre" type="checkbox" checked={nouveauAchat.a_revendre}
+                <input id="a_revendre" type="checkbox" title="A revendre ensuite" checked={nouveauAchat.a_revendre}
                   onChange={(e) => setNouveauAchat({ ...nouveauAchat, a_revendre: e.target.checked })}
                   className="rounded" />
                 <Label htmlFor="a_revendre" className="cursor-pointer">
@@ -267,7 +302,8 @@ export default function PageAchats() {
               <Button onClick={handleCreerAchat} className="w-full" disabled={mutCreer.isPending}>Creer</Button>
             </div>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -405,7 +441,11 @@ export default function PageAchats() {
               <div key={a.id} className="flex items-center gap-3 p-2 rounded border bg-card text-sm">
                 <span className="flex-1 font-medium">{a.nom}</span>
                 {a.prix_revente_estime && <span className="text-xs text-muted-foreground">~{a.prix_revente_estime} euros</span>}
-                <Button size="sm" variant="outline" onClick={() => ouvrirDialogueLBC(a)} className="text-xs h-7">Annonce LBC</Button>
+                <Badge variant="outline" className="text-xs">
+                  Reco: {plateformeRecommandee(a) === "vinted" ? "Vinted" : "LBC"}
+                </Badge>
+                <Button size="sm" variant="outline" onClick={() => ouvrirDialogueAnnonce(a, "lbc")} className="text-xs h-7">Annonce LBC</Button>
+                <Button size="sm" variant="outline" onClick={() => ouvrirDialogueAnnonce(a, "vinted")} className="text-xs h-7">Annonce Vinted</Button>
                 <Button size="sm" variant="ghost" onClick={() => mutVendu.mutate(a.id)} title="Marquer vendu">
                   <Check className="h-4 w-4 text-green-600" />
                 </Button>
@@ -415,15 +455,15 @@ export default function PageAchats() {
         </Card>
       )}
 
-      <Dialog open={!!lbcItem} onOpenChange={(o) => { if (!o) { setLbcItem(null); setLbcTexte(null); } }}>
+      <Dialog open={!!annonceItem} onOpenChange={(o) => { if (!o) { setAnnonceItem(null); setAnnonceTexte(null); } }}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Annonce LeBonCoin - {lbcItem?.nom}</DialogTitle></DialogHeader>
-          {lbcChargement ? (
+          <DialogHeader><DialogTitle>Annonce {plateformeAnnonce === "vinted" ? "Vinted" : "LeBonCoin"} - {annonceItem?.nom}</DialogTitle></DialogHeader>
+          {annonceChargement ? (
             <p className="text-sm text-muted-foreground py-4 text-center">Generation en cours...</p>
-          ) : lbcTexte ? (
+          ) : annonceTexte ? (
             <div className="space-y-3">
-              <Textarea value={lbcTexte} readOnly rows={10} className="font-mono text-xs resize-none" />
-              <Button onClick={copierLBC} className="w-full">
+              <Textarea value={annonceTexte} readOnly rows={10} className="font-mono text-xs resize-none" />
+              <Button onClick={copierAnnonce} className="w-full">
                 <Copy className="h-4 w-4 mr-2" />Copier l annonce
               </Button>
             </div>

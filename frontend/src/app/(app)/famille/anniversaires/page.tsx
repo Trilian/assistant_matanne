@@ -34,6 +34,10 @@ import {
   modifierAnniversaire,
   supprimerAnniversaire,
   obtenirSuggestionsAchatsIA,
+  obtenirChecklistAnniversaireAuto,
+  synchroniserChecklistAnniversaireAuto,
+  type ChecklistAnniversaire,
+  type ChecklistAnniversairePreview,
   type Anniversaire,
   type SuggestionAchat,
 } from "@/bibliotheque/api/famille";
@@ -64,6 +68,8 @@ export default function PageAnniversaires() {
   const [suggestionsOuvert, setSuggestionsOuvert] = useState(false);
   const [suggestions, setSuggestions] = useState<SuggestionAchat[]>([]);
   const [anniversairePourSuggestion, setAnniversairePourSuggestion] = useState<Anniversaire | null>(null);
+  const [checklistPreview, setChecklistPreview] = useState<ChecklistAnniversairePreview | null>(null);
+  const [checklistActive, setChecklistActive] = useState<ChecklistAnniversaire | null>(null);
 
   const invalider = utiliserInvalidation();
   const { data: anniversaires = [], isLoading } = utiliserRequete(
@@ -133,6 +139,28 @@ export default function PageAnniversaires() {
         setSuggestionsOuvert(true);
       },
       onError: () => toast.error("Impossible de générer les suggestions"),
+    }
+  );
+
+  const mutChecklistPreview = utiliserMutation(
+    (a: Anniversaire) => obtenirChecklistAnniversaireAuto(a.id),
+    {
+      onSuccess: (data) => {
+        setChecklistPreview(data);
+        toast.success("Aperçu checklist généré");
+      },
+      onError: () => toast.error("Impossible de générer l'aperçu checklist"),
+    }
+  );
+
+  const mutChecklistSync = utiliserMutation(
+    (a: Anniversaire) => synchroniserChecklistAnniversaireAuto(a.id),
+    {
+      onSuccess: (data) => {
+        setChecklistActive(data);
+        toast.success("Checklist synchronisée (auto + manuel)");
+      },
+      onError: () => toast.error("Impossible de synchroniser la checklist"),
     }
   );
 
@@ -246,6 +274,32 @@ export default function PageAnniversaires() {
                 <Badge className="text-sm">
                   Dans {prochain.jours_restants ?? "?"} jours
                 </Badge>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => mutChecklistPreview.mutate(prochain)}
+                  disabled={mutChecklistPreview.isPending}
+                >
+                  {mutChecklistPreview.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5 mr-1" />
+                  )}
+                  Aperçu checklist
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => mutChecklistSync.mutate(prochain)}
+                  disabled={mutChecklistSync.isPending}
+                >
+                  {mutChecklistSync.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                  ) : (
+                    <Gift className="h-3.5 w-3.5 mr-1" />
+                  )}
+                  Synchroniser checklist
+                </Button>
                 {(prochain.jours_restants ?? 999) <= 14 && (
                   <Button
                     size="sm"
@@ -263,6 +317,51 @@ export default function PageAnniversaires() {
                 )}
               </div>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {(checklistPreview || checklistActive) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Gift className="h-5 w-5 text-primary" />
+              Checklist anniversaire intelligente
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {checklistPreview && (
+              <div className="rounded-md border p-3 bg-muted/30">
+                <p className="text-sm font-medium">Aperçu auto ({checklistPreview.profil})</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Budget suggéré: {checklistPreview.budget_total_suggere.toFixed(0)} €
+                </p>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {Array.from(new Set(checklistPreview.items_auto.map((i) => i.categorie))).map((cat) => (
+                    <Badge key={cat} variant="secondary" className="text-xs">{cat}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {checklistActive && (
+              <div className="rounded-md border p-3">
+                <p className="text-sm font-medium">{checklistActive.nom}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Progression: {checklistActive.items_faits}/{checklistActive.items_total} ({checklistActive.taux_completion}%)
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Budget: {checklistActive.budget_depense.toFixed(0)} € / {(checklistActive.budget_total ?? 0).toFixed(0)} €
+                </p>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {Object.keys(checklistActive.items_par_categorie).map((cat) => (
+                    <Badge key={cat} variant="outline" className="text-xs">
+                      {cat} ({checklistActive.items_par_categorie[cat].length})
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

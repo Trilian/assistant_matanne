@@ -335,9 +335,73 @@ def _invalider_cache_paris(event: EvenementDomaine) -> None:
         logger.warning("Échec invalidation cache paris: %s", e)
 
 
-# ═══════════════════════════════════════════════════════════
-# MÉTRIQUES
-# ═══════════════════════════════════════════════════════════
+def _invalider_cache_anniversaires(event: EvenementDomaine) -> None:
+    """Invalide le cache anniversaires quand les données changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="anniversaires")
+        nb += cache.invalidate(pattern="checklists_anniversaire")
+        logger.debug(
+            "Cache anniversaires invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache anniversaires: %s", e)
+
+
+def _proposer_checklist_anniversaire_proche(event: EvenementDomaine) -> None:
+    """Synchronise automatiquement la checklist quand un anniversaire est proche (J-30/J-14/J-7).
+
+    Déclencheur : événement anniversaire.proche ou anniversaire.rappel avec
+    jours_restants dans la liste [30, 14, 7].
+    Tolère les pannes et n'échoue jamais.
+    """
+    try:
+        jours = event.data.get("jours_restants")
+        anniversaire_id = event.data.get("anniversaire_id") or event.data.get("id")
+        if jours not in (30, 14, 7, 1) or not anniversaire_id:
+            return
+
+        from src.services.famille.checklists_anniversaire import (
+            obtenir_service_checklists_anniversaire,
+        )
+
+        service = obtenir_service_checklists_anniversaire()
+        service.synchroniser_checklist_auto(
+            anniversaire_id=int(anniversaire_id),
+            user_id=event.data.get("user_id"),
+            force_recalcul_budget=False,
+        )
+        logger.info(
+            "Checklist anniversaire synchronisée automatiquement (id=%s, J-%s)",
+            anniversaire_id,
+            jours,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec sync checklist anniversaire proche: %s", e)
+
+
+def _invalider_cache_suggestions_achats(event: EvenementDomaine) -> None:
+    """Invalide les caches de suggestions achats quand les préférences changent."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="achats_famille")
+        nb += cache.invalidate(pattern="suggestions_achats")
+        nb += cache.invalidate(pattern="achats_ia")
+        logger.debug(
+            "Cache suggestions achats invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache suggestions achats: %s", e)
+
+
 
 
 def _enregistrer_metrique_evenement(event: EvenementDomaine) -> None:
@@ -479,6 +543,22 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("loto.*", _invalider_cache_loto, priority=100)
     compteur += 1
     bus.souscrire("paris.*", _invalider_cache_paris, priority=100)
+    compteur += 1
+
+    # ── Anniversaires (invalidation + sync checklist proche) ──
+    bus.souscrire("anniversaires.*", _invalider_cache_anniversaires, priority=100)
+    compteur += 1
+    bus.souscrire("anniversaire.*", _invalider_cache_anniversaires, priority=100)
+    compteur += 1
+    bus.souscrire("anniversaire.proche", _proposer_checklist_anniversaire_proche, priority=80)
+    compteur += 1
+    bus.souscrire("anniversaire.rappel", _proposer_checklist_anniversaire_proche, priority=80)
+    compteur += 1
+
+    # ── Préférences — invalider suggestions achats ──
+    bus.souscrire("preferences.mise_a_jour", _invalider_cache_suggestions_achats, priority=90)
+    compteur += 1
+    bus.souscrire("preferences.*", _invalider_cache_suggestions_achats, priority=90)
     compteur += 1
 
     # ── Métriques (priorité moyenne) ──

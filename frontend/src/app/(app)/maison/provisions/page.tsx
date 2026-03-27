@@ -24,11 +24,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
-  listerStocks,
+  listerStocks, creerStock, modifierStock, supprimerStock,
   listerArticlesCellier, creerArticleCellier, modifierArticleCellier, supprimerArticleCellier,
   alertesPeremptionCellier, statsCellier,
 } from "@/bibliotheque/api/maison";
-import type { ArticleCellier } from "@/types/maison";
+import type { ArticleCellier, StockMaison } from "@/types/maison";
 import { toast } from "sonner";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
 import { BoutonAchat } from "@/composants/bouton-achat";
@@ -36,17 +36,67 @@ import { BoutonAchat } from "@/composants/bouton-achat";
 // ─── Onglet Stocks ────────────────────────────────────────────
 function OngletStocks() {
   const [alerteUniquement, setAlerteUniquement] = useState(false);
+  const queryClient = useQueryClient();
+  const formsVide = { nom: "", categorie: "", quantite: "", seuil_alerte: "", emplacement: "", unite: "" };
+  const [form, setForm] = useState(formsVide);
+
+  const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
+    utiliserDialogCrud<StockMaison>({
+      onOuvrirCreation: () => setForm(formsVide),
+      onOuvrirEdition: (s) => setForm({
+        nom: s.nom,
+        categorie: s.categorie ?? "",
+        quantite: String(s.quantite ?? ""),
+        seuil_alerte: s.seuil_alerte != null ? String(s.seuil_alerte) : "",
+        emplacement: s.emplacement ?? "",
+        unite: (s as Record<string, unknown>).unite as string ?? "",
+      }),
+    });
 
   const { data: stocks, isLoading } = utiliserRequete(
     ["maison", "stocks", alerteUniquement],
     () => listerStocks(undefined, alerteUniquement)
   );
+  const invalider = () => queryClient.invalidateQueries({ queryKey: ["maison", "stocks"] });
+
+  const { mutate: creer, isPending: enCreation } = utiliserMutation(
+    (data: Record<string, unknown>) => creerStock(data as Omit<StockMaison, "id" | "en_alerte">),
+    { onSuccess: () => { invalider(); fermerDialog(); toast.success("Stock créé"); } }
+  );
+  const { mutate: modifier, isPending: enModif } = utiliserMutation(
+    ({ id, data }: { id: number; data: Partial<StockMaison> }) => modifierStock(id, data),
+    { onSuccess: () => { invalider(); fermerDialog(); toast.success("Stock modifié"); } }
+  );
+  const { mutate: supprimer } = utiliserMutation(supprimerStock, { onSuccess: () => { invalider(); toast.success("Stock supprimé"); } });
+
+  const soumettre = () => {
+    const payload = {
+      nom: form.nom,
+      categorie: form.categorie || undefined,
+      quantite: form.quantite ? Number(form.quantite) : 0,
+      seuil_alerte: form.seuil_alerte ? Number(form.seuil_alerte) : undefined,
+      emplacement: form.emplacement || undefined,
+    };
+    if (enEdition) modifier({ id: enEdition.id, data: payload });
+    else creer(payload as Record<string, unknown>);
+  };
+
+  const champs = [
+    { id: "nom", label: "Produit", type: "text" as const, value: form.nom, onChange: (v: string) => setForm(f => ({ ...f, nom: v })), required: true },
+    { id: "categorie", label: "Catégorie", type: "text" as const, value: form.categorie, onChange: (v: string) => setForm(f => ({ ...f, categorie: v })) },
+    { id: "quantite", label: "Quantité", type: "number" as const, value: form.quantite, onChange: (v: string) => setForm(f => ({ ...f, quantite: v })) },
+    { id: "seuil_alerte", label: "Seuil d'alerte", type: "number" as const, value: form.seuil_alerte, onChange: (v: string) => setForm(f => ({ ...f, seuil_alerte: v })) },
+    { id: "emplacement", label: "Emplacement", type: "text" as const, value: form.emplacement, onChange: (v: string) => setForm(f => ({ ...f, emplacement: v })) },
+  ];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 justify-end">
-        <Label htmlFor="alerte-toggle" className="text-sm">Alertes seulement</Label>
-        <Switch id="alerte-toggle" checked={alerteUniquement} onCheckedChange={setAlerteUniquement} />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Label htmlFor="alerte-toggle" className="text-sm">Alertes seulement</Label>
+          <Switch id="alerte-toggle" checked={alerteUniquement} onCheckedChange={setAlerteUniquement} />
+        </div>
+        <Button size="sm" onClick={ouvrirCreation}><Plus className="mr-1.5 h-4 w-4" />Ajouter</Button>
       </div>
 
       {isLoading ? (
@@ -58,14 +108,18 @@ function OngletStocks() {
         </CardContent></Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {stocks.map((s: { id: number; nom: string; quantite: number; seuil_alerte?: number; categorie?: string; emplacement?: string }) => {
+          {stocks.map((s: StockMaison) => {
             const enAlerte = s.seuil_alerte != null && s.quantite <= s.seuil_alerte;
             return (
               <Card key={s.id} className={enAlerte ? "border-amber-300" : ""}>
                 <CardHeader className="pb-1">
                   <div className="flex items-start justify-between gap-2">
                     <CardTitle className="text-sm">{s.nom}</CardTitle>
-                    {enAlerte && <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />}
+                    <div className="flex items-center gap-1">
+                      {enAlerte && <BoutonAchat article={{ nom: s.nom }} taille="xs" />}
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => ouvrirEdition(s)}><Pencil className="h-3 w-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6 hover:text-destructive" onClick={() => supprimer(s.id)}><Trash2 className="h-3 w-3" /></Button>
+                    </div>
                   </div>
                   <div className="flex gap-1.5 flex-wrap">
                     {s.categorie && <Badge variant="secondary" className="text-xs">{s.categorie}</Badge>}
@@ -77,12 +131,22 @@ function OngletStocks() {
                     <span className={`font-semibold ${enAlerte ? "text-amber-600" : ""}`}>{s.quantite}</span>
                     {s.seuil_alerte != null && <span className="text-xs text-muted-foreground"> / seuil {s.seuil_alerte}</span>}
                   </p>
+                  {enAlerte && <p className="text-xs text-amber-600 flex items-center gap-1 mt-1"><AlertTriangle className="h-3 w-3" />À réapprovisionner</p>}
                 </CardContent>
               </Card>
             );
           })}
         </div>
       )}
+
+      <DialogueFormulaire
+        ouvert={dialogOuvert}
+        onChangerOuvert={setDialogOuvert}
+        titre={enEdition ? "Modifier le stock" : "Nouveau stock"}
+        champs={champs}
+        onSoumettre={soumettre}
+        enChargement={enCreation || enModif}
+      />
     </div>
   );
 }

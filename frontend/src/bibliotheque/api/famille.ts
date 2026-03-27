@@ -296,6 +296,63 @@ export interface Anniversaire {
   jours_restants?: number;
 }
 
+export interface ItemChecklistAnniversaire {
+  id: number;
+  checklist_id: number;
+  categorie: string;
+  libelle: string;
+  budget_estime?: number;
+  budget_reel?: number;
+  fait: boolean;
+  priorite: string;
+  responsable?: string;
+  quand?: string;
+  source: "auto" | "manuel";
+  score_pertinence?: number;
+  raison_suggestion?: string;
+  ordre: number;
+  notes?: string;
+  cree_le?: string;
+}
+
+export interface ChecklistAnniversaire {
+  id: number;
+  anniversaire_id: number;
+  nom: string;
+  budget_total?: number;
+  budget_depense: number;
+  budget_restant: number;
+  date_limite?: string;
+  completee: boolean;
+  maj_auto_le?: string;
+  items_total: number;
+  items_faits: number;
+  taux_completion: number;
+  items_par_categorie: Record<string, ItemChecklistAnniversaire[]>;
+  cree_le?: string;
+}
+
+export interface ChecklistAnniversairePreview {
+  anniversaire_id: number;
+  nom_personne: string;
+  age: number;
+  jours_restants: number;
+  profil: string;
+  budget_total_suggere: number;
+  items_auto: Array<{
+    categorie: string;
+    libelle: string;
+    budget_estime?: number;
+    priorite: string;
+    quand?: string;
+    source: "auto";
+    score_pertinence?: number;
+    raison_suggestion?: string;
+    ordre: number;
+  }>;
+  genere_le: string;
+}
+
 /** Lister les anniversaires */
 export async function listerAnniversaires(
   relation?: string
@@ -335,6 +392,79 @@ export async function modifierAnniversaire(
 /** Supprimer un anniversaire */
 export async function supprimerAnniversaire(id: number): Promise<void> {
   await clientApi.delete(`/famille/anniversaires/${id}`);
+}
+
+/** Aperçu dynamique checklist anniversaire (sans persistance) */
+export async function obtenirChecklistAnniversaireAuto(
+  anniversaireId: number
+): Promise<ChecklistAnniversairePreview> {
+  const { data } = await clientApi.get<ChecklistAnniversairePreview>(
+    `/famille/anniversaires/${anniversaireId}/checklist-auto`
+  );
+  return data;
+}
+
+/** Synchronise la checklist auto et retourne la checklist active */
+export async function synchroniserChecklistAnniversaireAuto(
+  anniversaireId: number,
+  forceRecalculBudget = false
+): Promise<ChecklistAnniversaire> {
+  const { data } = await clientApi.post<ChecklistAnniversaire>(
+    `/famille/anniversaires/${anniversaireId}/checklist-auto/synchroniser`,
+    { force_recalcul_budget: forceRecalculBudget }
+  );
+  return data;
+}
+
+/** Liste les checklists d'un anniversaire */
+export async function listerChecklistsAnniversaire(
+  anniversaireId: number
+): Promise<ChecklistAnniversaire[]> {
+  const { data } = await clientApi.get<{ items: ChecklistAnniversaire[] }>(
+    `/famille/anniversaires/${anniversaireId}/checklists`
+  );
+  return data.items;
+}
+
+/** Ajoute un item manuel dans une checklist anniversaire */
+export async function ajouterItemChecklistAnniversaire(
+  anniversaireId: number,
+  checklistId: number,
+  payload: {
+    categorie: string;
+    libelle: string;
+    budget_estime?: number;
+    priorite?: string;
+    responsable?: string;
+    quand?: string;
+    ordre?: number;
+    notes?: string;
+  }
+): Promise<ItemChecklistAnniversaire> {
+  const { data } = await clientApi.post<ItemChecklistAnniversaire>(
+    `/famille/anniversaires/${anniversaireId}/checklists/${checklistId}/items`,
+    payload
+  );
+  return data;
+}
+
+/** Met à jour un item checklist anniversaire */
+export async function modifierItemChecklistAnniversaire(
+  anniversaireId: number,
+  checklistId: number,
+  itemId: number,
+  patch: Partial<
+    Pick<
+      ItemChecklistAnniversaire,
+      "fait" | "budget_reel" | "budget_estime" | "priorite" | "responsable" | "quand" | "notes" | "libelle" | "categorie"
+    >
+  >
+): Promise<ItemChecklistAnniversaire> {
+  const { data } = await clientApi.patch<ItemChecklistAnniversaire>(
+    `/famille/anniversaires/${anniversaireId}/checklists/${checklistId}/items/${itemId}`,
+    patch
+  );
+  return data;
 }
 
 // ─── Événements familiaux ─────────────────────────────────
@@ -541,6 +671,26 @@ export async function genererAnnonceLBC(
 ): Promise<{ annonce: string }> {
   const { data } = await clientApi.post<{ annonce: string }>(
     `/famille/achats/${id}/annonce-lbc`,
+    payload
+  );
+  return data;
+}
+
+/** Générer une annonce Vinted pour un article */
+export async function genererAnnonceVinted(
+  id: number,
+  payload: {
+    nom: string;
+    description?: string;
+    etat_usage?: string;
+    prix_cible?: number;
+    marque?: string;
+    taille?: string;
+    categorie_vinted?: string;
+  }
+): Promise<{ annonce: string }> {
+  const { data } = await clientApi.post<{ annonce: string }>(
+    `/famille/achats/${id}/annonce-vinted`,
     payload
   );
   return data;

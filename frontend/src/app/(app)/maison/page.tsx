@@ -24,6 +24,7 @@ import {
   Bell,
   Wine,
   Zap,
+  Sofa,
 } from "lucide-react";
 import {
   Card,
@@ -48,7 +49,7 @@ import { BandeauIA } from "@/composants/maison/bandeau-ia";
 import { CarteConseil, estDismissed } from "@/composants/maison/carte-conseil";
 import { obtenirConseilsIA } from "@/bibliotheque/api/maison";
 
-// Sections consolidées — 8 modules
+// Sections consolidées — 9 modules
 const SECTIONS = [
   { id: "visualisation", titre: "Visualisation", description: "Plan 2D/3D de la maison", chemin: "/maison/visualisation", Icone: Layers, statKey: null },
   { id: "menage", titre: "Ménage", description: "Planning et guides ménage", chemin: "/maison/menage", Icone: SprayCan, statKey: null },
@@ -57,6 +58,7 @@ const SECTIONS = [
   { id: "equipements", titre: "Équipements", description: "Inventaire, garanties et domotique", chemin: "/maison/equipements", Icone: Boxes, statKey: "garanties_expirant" as const },
   { id: "finances", titre: "Finances", description: "Charges, dépenses et énergie", chemin: "/maison/finances", Icone: Banknote, statKey: "depenses_mois" as const },
   { id: "provisions", titre: "Provisions", description: "Stocks et cellier", chemin: "/maison/provisions", Icone: Package, statKey: "stocks_en_alerte" as const },
+  { id: "meubles", titre: "Meubles", description: "Wishlist et achats mobilier", chemin: "/maison/meubles", Icone: Sofa, statKey: null },
   { id: "documents", titre: "Documents", description: "Contrats et diagnostics", chemin: "/maison/documents", Icone: FileText, statKey: "contrats_a_renouveler" as const },
 ];
 

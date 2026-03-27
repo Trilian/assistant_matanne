@@ -11,7 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Switch } from "@/composants/ui/switch";
-import { RefreshCw, Plus, Pencil, Trash2 } from "lucide-react";
+import { Input } from "@/composants/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/composants/ui/popover";
+import { RefreshCw, Plus, Pencil, Trash2, Copy, ChevronDown, ChevronRight } from "lucide-react";
 import {
   obtenirTachesJourMaison,
   obtenirPlanningMenageSemaine,
@@ -21,6 +23,11 @@ import {
   creerRoutineMaison,
   modifierRoutineMaison,
   supprimerRoutineMaison,
+  dupliquerRoutine,
+  listerTachesRoutine,
+  ajouterTacheRoutine,
+  supprimerTacheRoutine,
+  creerRoutineIA,
   type PlanningSemaine,
   type FicheTache,
   type RoutineMaison,

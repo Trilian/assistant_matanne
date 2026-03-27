@@ -29,7 +29,11 @@ from src.api.schemas.famille import (
     AchatCreate,
     AchatPatch,
     AnnonceIBCRequest,
+    AnnonceVintedRequest,
     AnniversaireCreate,
+    ChecklistAnniversaireItemCreate,
+    ChecklistAnniversaireItemPatch,
+    ChecklistAnniversaireSyncRequest,
     AnniversairePatch,
     ConfigGardeRequest,
     ContexteFamilialResponse,
@@ -38,6 +42,7 @@ from src.api.schemas.famille import (
     MarquerAchetePayload,
     PreferencesFamilleRequest,
     PreferencesFamilleResponse,
+    PrefillReventeResponse,
     ResumeSemaineRequest,
     RetrospectiveRequest,
     SuggestionAchatResponse,
@@ -1318,6 +1323,160 @@ async def supprimer_anniversaire(
     return await executer_async(_query)
 
 
+@router.get("/anniversaires/{anniversaire_id}/checklist-auto", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def apercu_checklist_auto_anniversaire(
+    anniversaire_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne un aperçu dynamique de checklist (sans persistance)."""
+    from src.services.famille.checklists_anniversaire import obtenir_service_checklists_anniversaire
+
+    def _query():
+        service = obtenir_service_checklists_anniversaire()
+        preview = service.generer_apercu_auto(anniversaire_id=anniversaire_id, user_id=user.get("id"))
+        if not preview:
+            raise HTTPException(status_code=404, detail="Anniversaire non trouvé")
+        return preview
+
+    return await executer_async(_query)
+
+
+@router.post(
+    "/anniversaires/{anniversaire_id}/checklist-auto/synchroniser",
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def synchroniser_checklist_auto_anniversaire(
+    anniversaire_id: int,
+    payload: ChecklistAnniversaireSyncRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Synchronise les items auto de checklist sans écraser les items manuels."""
+    from src.services.famille.checklists_anniversaire import obtenir_service_checklists_anniversaire
+
+    def _query():
+        service = obtenir_service_checklists_anniversaire()
+        data = service.synchroniser_checklist_auto(
+            anniversaire_id=anniversaire_id,
+            user_id=user.get("id"),
+            force_recalcul_budget=payload.force_recalcul_budget,
+        )
+        if not data:
+            raise HTTPException(status_code=404, detail="Anniversaire non trouvé")
+        return data
+
+    return await executer_async(_query)
+
+
+@router.get("/anniversaires/{anniversaire_id}/checklists", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_checklists_anniversaire(
+    anniversaire_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Liste les checklists existantes d'un anniversaire."""
+    from src.services.famille.checklists_anniversaire import obtenir_service_checklists_anniversaire
+
+    def _query():
+        service = obtenir_service_checklists_anniversaire()
+        items = service.lister_checklists(anniversaire_id=anniversaire_id)
+        return {"items": items}
+
+    return await executer_async(_query)
+
+
+@router.post(
+    "/anniversaires/{anniversaire_id}/checklists/{checklist_id}/items",
+    status_code=201,
+    responses=REPONSES_CRUD_CREATION,
+)
+@gerer_exception_api
+async def ajouter_item_checklist_anniversaire(
+    anniversaire_id: int,
+    checklist_id: int,
+    payload: ChecklistAnniversaireItemCreate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Ajoute un item manuel à une checklist anniversaire."""
+    from src.services.famille.checklists_anniversaire import obtenir_service_checklists_anniversaire
+
+    def _query():
+        service = obtenir_service_checklists_anniversaire()
+        data = service.ajouter_item_manuel(
+            checklist_id=checklist_id,
+            payload=payload.model_dump(),
+        )
+        if not data:
+            raise HTTPException(status_code=404, detail="Checklist non trouvée")
+        return data
+
+    return await executer_async(_query)
+
+
+@router.post(
+    "/anniversaires/{anniversaire_id}/checklists/{checklist_id}/items/{item_id}/vers-achats",
+    status_code=201,
+    responses=REPONSES_CRUD_CREATION,
+)
+@gerer_exception_api
+async def envoyer_item_checklist_vers_achats(
+    anniversaire_id: int,
+    checklist_id: int,
+    item_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée un achat pré-rempli (nom/catégorie/prix/pour_qui) depuis un item de checklist."""
+    from src.services.famille.achats import obtenir_service_achats_famille
+    from src.services.famille.checklists_anniversaire import obtenir_service_checklists_anniversaire
+
+    def _query():
+        svc_cl = obtenir_service_checklists_anniversaire()
+        prefill = svc_cl.item_vers_achat_prefill(item_id=item_id)
+        if not prefill:
+            raise HTTPException(status_code=404, detail="Item de checklist non trouvé")
+
+        svc_achats = obtenir_service_achats_famille()
+        achat = svc_achats.ajouter_achat(
+            nom=prefill["nom"],
+            categorie=prefill["categorie"],
+            prix_estime=prefill.get("prix_estime"),
+            pour_qui=prefill.get("pour_qui", "famille"),
+            description=prefill.get("description"),
+            suggere_par="checklist_anniversaire",
+        )
+        if not achat:
+            raise HTTPException(status_code=500, detail="Erreur lors de la création de l'achat")
+        return {**_serialiser_achat(achat), "source_item_id": item_id}
+
+    return await executer_async(_query)
+
+
+@router.patch(
+    "/anniversaires/{anniversaire_id}/checklists/{checklist_id}/items/{item_id}",
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def modifier_item_checklist_anniversaire(
+    anniversaire_id: int,
+    checklist_id: int,
+    item_id: int,
+    payload: ChecklistAnniversaireItemPatch,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Modifie un item de checklist (fait, budget réel, contenu)."""
+    from src.services.famille.checklists_anniversaire import obtenir_service_checklists_anniversaire
+
+    def _query():
+        service = obtenir_service_checklists_anniversaire()
+        data = service.modifier_item(item_id=item_id, patch=payload.model_dump(exclude_unset=True))
+        if not data:
+            raise HTTPException(status_code=404, detail="Item non trouvé")
+        return data
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS FAMILIAUX
 # ═══════════════════════════════════════════════════════════
@@ -1827,17 +1986,37 @@ async def generer_annonce_lbc(
     """Génère une annonce LeBonCoin pour un article à revendre."""
     from src.services.famille.achats_ia import obtenir_service_achats_ia
 
-    def _query():
-        service = obtenir_service_achats_ia()
-        texte = service.generer_annonce_lbc(
-            nom=payload.nom,
-            description=payload.description,
-            etat_usage=payload.etat_usage,
-            prix_cible=payload.prix_cible,
-        )
-        return {"annonce": texte}
+    service = obtenir_service_achats_ia()
+    texte = await service.generer_annonce_lbc(
+        nom=payload.nom,
+        description=payload.description,
+        etat_usage=payload.etat_usage,
+        prix_cible=payload.prix_cible,
+    )
+    return {"annonce": texte}
 
-    return await executer_async(_query)
+
+@router.post("/achats/{achat_id}/annonce-vinted", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def generer_annonce_vinted(
+    achat_id: int,
+    payload: AnnonceVintedRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère une annonce Vinted pour un article à revendre."""
+    from src.services.famille.achats_ia import obtenir_service_achats_ia
+
+    service = obtenir_service_achats_ia()
+    texte = await service.generer_annonce_vinted(
+        nom=payload.nom,
+        description=payload.description,
+        etat_usage=payload.etat_usage,
+        prix_cible=payload.prix_cible,
+        marque=payload.marque,
+        taille=payload.taille,
+        categorie_vinted=payload.categorie_vinted,
+    )
+    return {"annonce": texte}
 
 
 @router.post("/achats/{achat_id}/vendu", responses=REPONSES_CRUD_ECRITURE)
@@ -1859,9 +2038,105 @@ async def marquer_achat_vendu(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# ROUTINES — COMPLÉTION
-# ═══════════════════════════════════════════════════════════
+# ─── Catégories orientées Vinted ──────────────────────────
+_CATEGORIES_VINTED = frozenset({
+    "jules_vetements", "nous_vetements", "vetements", "chaussures",
+    "jouets", "jules_jouets", "livres", "livres_jouets",
+})
+
+
+@router.get("/achats/{achat_id}/prefill-revente", response_model=PrefillReventeResponse, responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def prefill_revente_achat(
+    achat_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les données pré-remplies pour l'annonce de revente d'un achat.
+
+    Déduit:
+    - plateforme recommandée (Vinted pour vêtements/jouets/livres, LBC sinon)
+    - marque/taille depuis les préférences famille ou l'achat lui-même
+    - prix conseillé (40% du prix d'achat par défaut)
+    """
+    from src.core.models import AchatFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            achat = session.query(AchatFamille).filter(AchatFamille.id == achat_id).first()
+            if not achat:
+                raise HTTPException(status_code=404, detail="Achat non trouvé")
+
+            categorie = achat.categorie or ""
+            pour_qui = getattr(achat, "pour_qui", "famille") or "famille"
+            plateforme = "vinted" if categorie in _CATEGORIES_VINTED else "lbc"
+            plateforme_libelle = "Vinted" if plateforme == "vinted" else "LeBonCoin"
+
+            # Prefill taille depuis les préférences famille ou l'achat
+            taille = achat.taille
+            raisons: list[str] = []
+
+            try:
+                from src.core.models.user_preferences import PreferenceUtilisateur
+
+                prefs_row = session.query(PreferenceUtilisateur).first()
+                if prefs_row:
+                    prefs_data = prefs_row.preferences or {}
+                    if pour_qui == "anne":
+                        tailles_prefs = prefs_data.get("taille_vetements_anne", {})
+                    elif pour_qui == "mathieu":
+                        tailles_prefs = prefs_data.get("taille_vetements_mathieu", {})
+                    elif pour_qui == "jules":
+                        tailles_prefs = prefs_data.get("taille_vetements_jules", {})
+                    else:
+                        tailles_prefs = {}
+
+                    if not taille and tailles_prefs:
+                        if "chaussures" in categorie:
+                            taille = str(tailles_prefs.get("pointure", "") or prefs_data.get("pointure_jules", ""))
+                        else:
+                            taille = (
+                                tailles_prefs.get("haut")
+                                or tailles_prefs.get("tee_shirt")
+                                or tailles_prefs.get("s")
+                                or ""
+                            )
+                        if taille:
+                            raisons.append(f"Taille '{taille}' issue des préférences famille")
+            except Exception:  # noqa: BLE001
+                pass  # Préférences optionnelles
+
+            # Raison choix plateforme
+            if plateforme == "vinted":
+                raisons.append(
+                    f"Catégorie '{categorie}' → Vinted recommandée (vêtements, jouets, livres)"
+                )
+            else:
+                raisons.append(
+                    f"Catégorie '{categorie}' → LeBonCoin recommandé (divers, électronique, mobilier)"
+                )
+
+            # Prix conseillé
+            base_prix = achat.prix_reel or achat.prix_estime
+            prix_suggere = (
+                round(float(base_prix) * 0.4, 2) if base_prix else None
+            )
+            if prix_suggere:
+                raisons.append(f"Prix conseillé : {prix_suggere}€ (40% du prix d'achat)")
+
+            return {
+                "achat_id": achat_id,
+                "plateforme": plateforme,
+                "plateforme_libelle": plateforme_libelle,
+                "marque": achat.magasin,
+                "taille": taille or achat.taille,
+                "prix_suggere": prix_suggere,
+                "pour_qui": pour_qui,
+                "raisons": raisons,
+            }
+
+    return await executer_async(_query)
+
+
 
 
 @router.patch("/routines/{routine_id}/completer", responses=REPONSES_CRUD_ECRITURE)

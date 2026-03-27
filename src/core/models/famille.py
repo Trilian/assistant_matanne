@@ -343,6 +343,12 @@ class AnniversaireFamille(CreeLeMixin, Base):
     notes: Mapped[str | None] = mapped_column(Text)
     actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
+    # Relations
+    checklists: Mapped[list["ChecklistAnniversaire"]] = relationship(
+        back_populates="anniversaire",
+        cascade="all, delete-orphan",
+    )
+
     @property
     def age(self) -> int:
         """Calcule l'âge actuel de la personne."""
@@ -409,3 +415,68 @@ class EvenementFamilial(CreeLeMixin, Base):
             f"<EvenementFamilial(id={self.id}, titre='{self.titre}', "
             f"date={self.date_evenement}, type='{self.type_evenement}')>"
         )
+
+
+# ═══════════════════════════════════════════════════════════
+# CHECKLISTS ANNIVERSAIRES
+# ═══════════════════════════════════════════════════════════
+
+
+class ChecklistAnniversaire(CreeLeMixin, Base):
+    """Checklist de préparation pour un anniversaire donné."""
+
+    __tablename__ = "checklists_anniversaire"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    anniversaire_id: Mapped[int] = mapped_column(
+        ForeignKey("anniversaires_famille.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    nom: Mapped[str] = mapped_column(String(200), nullable=False)
+    budget_total: Mapped[float | None] = mapped_column(Float)
+    date_limite: Mapped[date | None] = mapped_column(Date)
+    completee: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    notes: Mapped[str | None] = mapped_column(Text)
+    maj_auto_le: Mapped[datetime | None] = mapped_column(DateTime)
+
+    anniversaire: Mapped["AnniversaireFamille"] = relationship(back_populates="checklists")
+    items: Mapped[list["ItemChecklistAnniversaire"]] = relationship(
+        back_populates="checklist",
+        cascade="all, delete-orphan",
+        order_by="ItemChecklistAnniversaire.ordre",
+    )
+
+    def __repr__(self) -> str:
+        return f"<ChecklistAnniversaire(id={self.id}, anniv={self.anniversaire_id}, nom='{self.nom}')>"
+
+
+class ItemChecklistAnniversaire(CreeLeMixin, Base):
+    """Item d'une checklist anniversaire, manuel ou auto-suggéré."""
+
+    __tablename__ = "items_checklist_anniversaire"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    checklist_id: Mapped[int] = mapped_column(
+        ForeignKey("checklists_anniversaire.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    categorie: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    libelle: Mapped[str] = mapped_column(String(300), nullable=False)
+    budget_estime: Mapped[float | None] = mapped_column(Float)
+    budget_reel: Mapped[float | None] = mapped_column(Float)
+    fait: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    priorite: Mapped[str] = mapped_column(String(20), default="moyenne", index=True)
+    responsable: Mapped[str | None] = mapped_column(String(50))
+    quand: Mapped[str | None] = mapped_column(String(20))
+    source: Mapped[str] = mapped_column(String(20), default="manuel", index=True)
+    score_pertinence: Mapped[float | None] = mapped_column(Float)
+    raison_suggestion: Mapped[str | None] = mapped_column(Text)
+    ordre: Mapped[int] = mapped_column(Integer, default=0)
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    checklist: Mapped["ChecklistAnniversaire"] = relationship(back_populates="items")
+
+    def __repr__(self) -> str:
+        return f"<ItemChecklistAnniversaire(id={self.id}, cat='{self.categorie}', source='{self.source}')>"

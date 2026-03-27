@@ -91,6 +91,42 @@ export interface Anniversaire {
   cree_le: string;
 }
 
+export interface ItemChecklistAnniversaire {
+  id: number;
+  checklist_id: number;
+  categorie: string;
+  libelle: string;
+  budget_estime?: number;
+  budget_reel?: number;
+  fait: boolean;
+  priorite: string;
+  responsable?: string;
+  quand?: string;
+  source: "auto" | "manuel";
+  score_pertinence?: number;
+  raison_suggestion?: string;
+  ordre: number;
+  notes?: string;
+  cree_le?: string;
+}
+
+export interface ChecklistAnniversaire {
+  id: number;
+  anniversaire_id: number;
+  nom: string;
+  budget_total?: number;
+  budget_depense: number;
+  budget_restant: number;
+  date_limite?: string;
+  completee: boolean;
+  maj_auto_le?: string;
+  items_total: number;
+  items_faits: number;
+  taux_completion: number;
+  items_par_categorie: Record<string, ItemChecklistAnniversaire[]>;
+  cree_le?: string;
+}
+
 export interface EvenementFamilial {
   id: number;
   titre: string;

@@ -52,6 +52,33 @@ class AnniversaireResponse(BaseModel):
     cree_le: str | None = None
 
 
+class ChecklistAnniversaireSyncRequest(BaseModel):
+    force_recalcul_budget: bool = False
+
+
+class ChecklistAnniversaireItemCreate(BaseModel):
+    categorie: str = Field(..., min_length=1, max_length=50)
+    libelle: str = Field(..., min_length=1, max_length=300)
+    budget_estime: float | None = Field(default=None, ge=0)
+    priorite: str = Field(default="moyenne")
+    responsable: str | None = Field(default=None, max_length=50)
+    quand: str | None = Field(default=None, max_length=20)
+    ordre: int = Field(default=1000, ge=0)
+    notes: str | None = None
+
+
+class ChecklistAnniversaireItemPatch(BaseModel):
+    fait: bool | None = None
+    budget_reel: float | None = Field(default=None, ge=0)
+    budget_estime: float | None = Field(default=None, ge=0)
+    priorite: str | None = None
+    responsable: str | None = Field(default=None, max_length=50)
+    quand: str | None = Field(default=None, max_length=20)
+    notes: str | None = None
+    libelle: str | None = Field(default=None, min_length=1, max_length=300)
+    categorie: str | None = Field(default=None, min_length=1, max_length=50)
+
+
 # ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS FAMILIAUX
 # ═══════════════════════════════════════════════════════════
@@ -381,6 +408,33 @@ class AnnonceIBCRequest(BaseModel):
 
 class AnnonceIBCResponse(BaseModel):
     annonce: str = Field(..., description="Texte de l'annonce LBC en markdown")
+
+
+class AnnonceVintedRequest(BaseModel):
+    nom: str = Field(..., min_length=1, max_length=200)
+    description: str = Field(default="")
+    etat_usage: str = Field(default="bon", description="neuf, excellent, bon, correct, usage")
+    prix_cible: float | None = None
+    marque: str | None = Field(default=None, max_length=80)
+    taille: str | None = Field(default=None, max_length=40)
+    categorie_vinted: str | None = Field(default=None, max_length=80)
+
+
+class AnnonceVintedResponse(BaseModel):
+    annonce: str = Field(..., description="Texte de l'annonce Vinted en markdown")
+
+
+class PrefillReventeResponse(BaseModel):
+    """Données pré-remplies pour l'annonce de revente d'un achat."""
+
+    achat_id: int
+    plateforme: str = Field(..., description="vinted ou lbc")
+    plateforme_libelle: str = Field(..., description="Vinted ou LeBonCoin")
+    marque: str | None = None
+    taille: str | None = None
+    prix_suggere: float | None = None
+    pour_qui: str = "famille"
+    raisons: list[str] = Field(default_factory=list, description="Explications du choix de plateforme et des préfills")
 
 
 # ═══════════════════════════════════════════════════════════

@@ -5,6 +5,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Wallet,
   TrendingUp,
@@ -137,10 +138,18 @@ export default function PageBudget() {
             Suivi des dépenses familiales
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setDialogScanner(true)}>
-          <ScanLine className="h-4 w-4 mr-1" />
-          Scanner ticket
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link href="/famille/achats">
+            <Button variant="outline" size="sm">Voir achats</Button>
+          </Link>
+          <Link href="/famille/activites">
+            <Button variant="outline" size="sm">Voir activités</Button>
+          </Link>
+          <Button variant="outline" size="sm" onClick={() => setDialogScanner(true)}>
+            <ScanLine className="h-4 w-4 mr-1" />
+            Scanner ticket
+          </Button>
+        </div>
       </div>
 
       <UploadTicket

@@ -3292,3 +3292,503 @@ async def astuces_domotique(
 
     return await executer_async(_query)
 
+
+# ═══════════════════════════════════════════════════════════
+# LIENS ACHAT
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/liens-achat", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def liens_achat(
+    produit: str = Query(..., description="Nom du produit"),
+    categorie: str = Query("default", description="Catégorie (bricolage, meubles, etc.)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère des liens d'achat vers les marchands spécialisés par catégorie."""
+    from src.core.liens_achat import generer_liens_achat, categories_disponibles
+
+    def _query():
+        liens = generer_liens_achat(produit, categorie)
+        return {"produit": produit, "categorie": categorie, "liens": liens, "categories_disponibles": categories_disponibles()}
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# PIÈCES AVEC OBJETS (inventaire équipements)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/pieces-avec-objets", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def pieces_avec_objets(
+    piece: str | None = Query(None, description="Filtrer par pièce"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les pièces de la maison avec leurs objets/équipements inventoriés."""
+    from src.core.models.temps_entretien import ObjetMaison
+    from src.api.utils import executer_avec_session
+
+    def _query():
+        with executer_avec_session() as session:
+            query = session.query(ObjetMaison)
+            if piece:
+                query = query.filter(ObjetMaison.piece_id == piece)
+            objets = query.order_by(ObjetMaison.nom).all()
+            # Grouper par pièce
+            par_piece: dict[str, list[dict[str, Any]]] = {}
+            for o in objets:
+                p = str(o.piece_id or "Non classé")
+                if p not in par_piece:
+                    par_piece[p] = []
+                par_piece[p].append({
+                    "id": o.id,
+                    "nom": o.nom,
+                    "categorie": o.categorie,
+                    "statut": o.statut,
+                    "marque": o.marque,
+                    "modele": o.modele,
+                    "date_achat": str(o.date_achat) if o.date_achat else None,
+                    "prix_achat": float(o.prix_achat) if o.prix_achat else None,
+                    "prix_remplacement_estime": float(o.prix_remplacement_estime) if o.prix_remplacement_estime else None,
+                    "notes": o.notes,
+                })
+            return {"pieces": [{"piece": k, "objets": v} for k, v in par_piece.items()], "total": len(objets)}
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# SUGGESTIONS RENOUVELLEMENT
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/suggestions-renouvellement", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def suggestions_renouvellement(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les objets en fin de vie ou à remplacer."""
+    from src.core.models.temps_entretien import ObjetMaison
+    from src.api.utils import executer_avec_session
+
+    def _query():
+        with executer_avec_session() as session:
+            objets = (
+                session.query(ObjetMaison)
+                .filter(ObjetMaison.statut.in_(["a_remplacer", "hors_service", "a_surveiller"]))
+                .order_by(ObjetMaison.statut)
+                .all()
+            )
+            return {
+                "suggestions": [
+                    {
+                        "id": o.id,
+                        "nom": o.nom,
+                        "statut": o.statut,
+                        "categorie": o.categorie,
+                        "piece_id": o.piece_id,
+                        "prix_remplacement_estime": float(o.prix_remplacement_estime) if o.prix_remplacement_estime else None,
+                        "marque": o.marque,
+                        "modele": o.modele,
+                    }
+                    for o in objets
+                ],
+                "total": len(objets),
+            }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# FIN DE VIE GARANTIE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/garanties/{garantie_id}/fin-vie", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def fin_vie_garantie(
+    garantie_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Calcule le ratio de fin de vie d'une garantie (0.0 → 1.0)."""
+    from src.core.models.temps_entretien import Garantie
+    from src.api.utils import executer_avec_session
+    from datetime import datetime
+
+    def _query():
+        with executer_avec_session() as session:
+            g = session.get(Garantie, garantie_id)
+            if not g:
+                raise HTTPException(status_code=404, detail="Garantie introuvable")
+            now = date.today()
+            if not g.date_debut or not g.date_fin:
+                return {"garantie_id": garantie_id, "ratio": 0.0, "jours_restants": None}
+            total = (g.date_fin - g.date_debut).days
+            if total <= 0:
+                return {"garantie_id": garantie_id, "ratio": 1.0, "jours_restants": 0}
+            ecoule = (now - g.date_debut).days
+            ratio = min(1.0, max(0.0, ecoule / total))
+            jours_restants = max(0, (g.date_fin - now).days)
+            return {
+                "garantie_id": garantie_id,
+                "nom": g.nom,
+                "ratio": round(ratio, 3),
+                "jours_restants": jours_restants,
+                "date_fin": str(g.date_fin),
+                "alerte": ratio > 0.85,
+            }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# ROUTINES — EXTENSIONS (tâches inline, dupliquer, IA)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/routines/taches", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_toutes_taches_routines(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Liste toutes les tâches de toutes les routines (pour associer à un objet)."""
+    from src.core.models.maison import TacheRoutine, Routine
+    from src.api.utils import executer_avec_session
+
+    def _query():
+        with executer_avec_session() as session:
+            taches = (
+                session.query(TacheRoutine)
+                .join(Routine, TacheRoutine.routine_id == Routine.id)
+                .order_by(Routine.nom, TacheRoutine.ordre)
+                .all()
+            )
+            return {
+                "items": [
+                    {
+                        "id": t.id,
+                        "routine_id": t.routine_id,
+                        "routine_nom": t.routine.nom if t.routine else None,
+                        "nom": t.nom,
+                        "description": t.description,
+                        "ordre": t.ordre,
+                        "heure_prevue": t.heure_prevue,
+                    }
+                    for t in taches
+                ],
+                "total": len(taches),
+            }
+
+    return await executer_async(_query)
+
+
+@router.post("/routines/creer-ia", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_routine_ia(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère et crée une routine personnalisée via l'IA."""
+    from src.services.maison.conseiller_service import get_conseiller_maison_service
+    from src.core.models.maison import Routine, TacheRoutine
+    from src.api.utils import executer_avec_session
+    import json
+
+    nom = payload.get("nom", "")
+    description = payload.get("description", "")
+    if not nom:
+        raise HTTPException(status_code=422, detail="Le nom de la routine est requis")
+
+    def _query():
+        service = get_conseiller_maison_service()
+        prompt = (
+            f"Génère une routine ménagère nommée '{nom}' avec la description suivante : {description}. "
+            "Retourne un JSON avec les champs: frequence (quotidien/hebdomadaire/mensuel), "
+            "moment_journee (matin/soir/flexible), categorie (menage/cuisine/rangement/entretien), "
+            "taches (liste de {{nom, ordre, duree_min}} max 8 tâches)."
+        )
+        try:
+            conseil = service.obtenir_conseil("menage")
+            taches_ia: list[dict[str, Any]] = []
+            frequence = "hebdomadaire"
+            moment = "flexible"
+            categorie = "menage"
+            # Parsing basique si l'IA renvoie du JSON structuré
+            if isinstance(conseil, dict) and "data" in conseil:
+                raw = conseil["data"]
+                if isinstance(raw, str):
+                    try:
+                        parsed = json.loads(raw)
+                        frequence = parsed.get("frequence", frequence)
+                        moment = parsed.get("moment_journee", moment)
+                        categorie = parsed.get("categorie", categorie)
+                        taches_ia = parsed.get("taches", [])
+                    except Exception:
+                        pass
+        except Exception:
+            frequence = "hebdomadaire"
+            moment = "flexible"
+            categorie = "menage"
+            taches_ia = []
+
+        with executer_avec_session() as session:
+            routine = Routine(
+                nom=nom,
+                description=description or None,
+                frequence=frequence,
+                moment_journee=moment,
+                categorie=categorie,
+                actif=True,
+            )
+            session.add(routine)
+            session.flush()
+            for i, t in enumerate(taches_ia[:8]):
+                tache = TacheRoutine(
+                    routine_id=routine.id,
+                    nom=t.get("nom", f"Tâche {i+1}"),
+                    ordre=t.get("ordre", i + 1),
+                )
+                session.add(tache)
+            session.commit()
+            return {
+                "id": routine.id,
+                "nom": routine.nom,
+                "frequence": routine.frequence,
+                "actif": routine.actif,
+                "taches_generees": len(taches_ia),
+            }
+
+    return await executer_async(_query)
+
+
+@router.post("/routines/{routine_id}/dupliquer", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def dupliquer_routine(
+    routine_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Duplique une routine existante et toutes ses tâches."""
+    from src.core.models.maison import Routine, TacheRoutine
+    from src.api.utils import executer_avec_session
+
+    def _query():
+        with executer_avec_session() as session:
+            source = session.get(Routine, routine_id)
+            if not source:
+                raise HTTPException(status_code=404, detail="Routine introuvable")
+            nouvelle = Routine(
+                nom=f"{source.nom} (copie)",
+                description=source.description,
+                frequence=source.frequence,
+                moment_journee=source.moment_journee,
+                categorie=source.categorie,
+                actif=False,
+            )
+            session.add(nouvelle)
+            session.flush()
+            taches_source = session.query(TacheRoutine).filter(TacheRoutine.routine_id == routine_id).all()
+            for t in taches_source:
+                session.add(TacheRoutine(
+                    routine_id=nouvelle.id,
+                    nom=t.nom,
+                    description=t.description,
+                    ordre=t.ordre,
+                    heure_prevue=t.heure_prevue,
+                ))
+            session.commit()
+            return {
+                "id": nouvelle.id,
+                "nom": nouvelle.nom,
+                "frequence": nouvelle.frequence,
+                "actif": nouvelle.actif,
+                "taches_copiees": len(taches_source),
+            }
+
+    return await executer_async(_query)
+
+
+@router.get("/routines/{routine_id}/taches", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_taches_routine(
+    routine_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Liste les tâches d'une routine."""
+    from src.core.models.maison import TacheRoutine
+    from src.api.utils import executer_avec_session
+
+    def _query():
+        with executer_avec_session() as session:
+            taches = (
+                session.query(TacheRoutine)
+                .filter(TacheRoutine.routine_id == routine_id)
+                .order_by(TacheRoutine.ordre)
+                .all()
+            )
+            return {
+                "items": [
+                    {
+                        "id": t.id,
+                        "nom": t.nom,
+                        "description": t.description,
+                        "ordre": t.ordre,
+                        "heure_prevue": t.heure_prevue,
+                        "fait_le": str(t.fait_le) if t.fait_le else None,
+                        "notes": t.notes,
+                    }
+                    for t in taches
+                ],
+                "total": len(taches),
+            }
+
+    return await executer_async(_query)
+
+
+@router.post("/routines/{routine_id}/taches", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def ajouter_tache_routine(
+    routine_id: int,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Ajoute une tâche à une routine existante."""
+    from src.core.models.maison import Routine, TacheRoutine
+    from src.api.utils import executer_avec_session
+
+    nom = payload.get("nom", "").strip()
+    if not nom:
+        raise HTTPException(status_code=422, detail="Le nom de la tâche est requis")
+
+    def _query():
+        with executer_avec_session() as session:
+            routine = session.get(Routine, routine_id)
+            if not routine:
+                raise HTTPException(status_code=404, detail="Routine introuvable")
+            # Calculer le prochain ordre
+            count = session.query(TacheRoutine).filter(TacheRoutine.routine_id == routine_id).count()
+            tache = TacheRoutine(
+                routine_id=routine_id,
+                nom=nom,
+                description=payload.get("description"),
+                ordre=count + 1,
+                heure_prevue=payload.get("heure_prevue"),
+            )
+            session.add(tache)
+            session.commit()
+            session.refresh(tache)
+            return {"id": tache.id, "nom": tache.nom, "ordre": tache.ordre, "routine_id": routine_id}
+
+    return await executer_async(_query)
+
+
+@router.delete("/routines/{routine_id}/taches/{tache_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_tache_routine(
+    routine_id: int,
+    tache_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Supprime une tâche d'une routine."""
+    from src.core.models.maison import TacheRoutine
+    from src.api.utils import executer_avec_session
+
+    def _query():
+        with executer_avec_session() as session:
+            tache = session.query(TacheRoutine).filter(
+                TacheRoutine.id == tache_id,
+                TacheRoutine.routine_id == routine_id,
+            ).first()
+            if not tache:
+                raise HTTPException(status_code=404, detail="Tâche introuvable")
+            session.delete(tache)
+            session.commit()
+            return {"message": "Tâche supprimée"}
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# OBJETS — ASSOCIER ROUTINE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.patch("/objets/{objet_id}/associer-routine", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def associer_routine_objet(
+    objet_id: int,
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Associe un objet/équipement à une tâche de routine (via notes)."""
+    from src.core.models.temps_entretien import ObjetMaison
+    from src.api.utils import executer_avec_session
+
+    tache_routine_id = payload.get("tache_routine_id")
+
+    def _query():
+        with executer_avec_session() as session:
+            objet = session.get(ObjetMaison, objet_id)
+            if not objet:
+                raise HTTPException(status_code=404, detail="Objet introuvable")
+            note_routine = f"routine_tache:{tache_routine_id}" if tache_routine_id else None
+            notes_actuelles = objet.notes or ""
+            # Remplacer ou ajouter la référence de routine
+            import re
+            if re.search(r"routine_tache:\d+", notes_actuelles):
+                objet.notes = re.sub(r"routine_tache:\d+", note_routine or "", notes_actuelles).strip()
+            elif note_routine:
+                objet.notes = f"{notes_actuelles} {note_routine}".strip()
+            session.commit()
+            return {"id": objet.id, "nom": objet.nom, "tache_routine_id": tache_routine_id}
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# PROJETS — PRIORISER IA
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/projets/prioriser-ia", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def prioriser_projets_ia(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Suggère un ordre de priorité pour les projets en cours via l'IA."""
+    from src.core.models.maison import ProjetMaison
+    from src.services.maison.conseiller_service import get_conseiller_maison_service
+    from src.api.utils import executer_avec_session
+
+    def _query():
+        with executer_avec_session() as session:
+            projets = (
+                session.query(ProjetMaison)
+                .filter(ProjetMaison.statut.in_(["en_cours", "planifie", "en_attente"]))
+                .order_by(ProjetMaison.priorite.desc())
+                .limit(10)
+                .all()
+            )
+            if not projets:
+                return {"priorites": [], "conseil": "Aucun projet actif à prioriser."}
+
+            service = get_conseiller_maison_service()
+            noms = ", ".join(p.nom for p in projets)
+            try:
+                conseil = service.obtenir_conseil("travaux")
+                message = conseil.get("conseils", ["Priorisez selon l'urgence et le budget disponible."])[0] if isinstance(conseil.get("conseils"), list) else "Priorisez selon l'urgence et le budget."
+            except Exception:
+                message = "Priorisez selon l'urgence et le budget disponible."
+
+            return {
+                "priorites": [
+                    {"id": p.id, "nom": p.nom, "statut": p.statut, "priorite": p.priorite}
+                    for p in projets
+                ],
+                "conseil": message,
+                "projets_analyses": noms,
+            }
+
+    return await executer_async(_query)
+

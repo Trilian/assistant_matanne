@@ -4372,3 +4372,45 @@ COMMIT;
 -- ============================================================================
 -- FIN DES MIGRATIONS AJOUTÉES LE 2026-03-06
 -- ============================================================================
+
+-- ============================================================================
+-- CHECKLISTS ANNIVERSAIRES (Phase 2026-03-27)
+-- ============================================================================
+BEGIN;
+CREATE TABLE IF NOT EXISTS checklists_anniversaire (
+    id SERIAL PRIMARY KEY,
+    anniversaire_id INTEGER NOT NULL REFERENCES anniversaires_famille(id) ON DELETE CASCADE,
+    nom VARCHAR(200) NOT NULL,
+    budget_total FLOAT,
+    date_limite DATE,
+    completee BOOLEAN NOT NULL DEFAULT FALSE,
+    notes TEXT,
+    maj_auto_le TIMESTAMP,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_anniversaire_id ON checklists_anniversaire(anniversaire_id);
+CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_completee ON checklists_anniversaire(completee);
+
+CREATE TABLE IF NOT EXISTS items_checklist_anniversaire (
+    id SERIAL PRIMARY KEY,
+    checklist_id INTEGER NOT NULL REFERENCES checklists_anniversaire(id) ON DELETE CASCADE,
+    categorie VARCHAR(50) NOT NULL,
+    libelle VARCHAR(300) NOT NULL,
+    budget_estime FLOAT,
+    budget_reel FLOAT,
+    fait BOOLEAN NOT NULL DEFAULT FALSE,
+    priorite VARCHAR(20) NOT NULL DEFAULT 'moyenne',
+    responsable VARCHAR(50),
+    quand VARCHAR(20),
+    source VARCHAR(20) NOT NULL DEFAULT 'manuel',
+    score_pertinence FLOAT,
+    raison_suggestion TEXT,
+    ordre INTEGER NOT NULL DEFAULT 0,
+    notes TEXT,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_checklist_id ON items_checklist_anniversaire(checklist_id);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_categorie ON items_checklist_anniversaire(categorie);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_fait ON items_checklist_anniversaire(fait);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_checklist_anniversaire(source);
+COMMIT;
