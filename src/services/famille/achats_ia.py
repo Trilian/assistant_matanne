@@ -34,6 +34,7 @@ class AchatsIAService(BaseAIService):
         relation: str,
         budget_max: float = 50.0,
         historique_cadeaux: list[str] | None = None,
+        contexte: dict | None = None,
     ) -> list[dict]:
         """Suggère des idées cadeaux pour un anniversaire."""
         historique_txt = ""
@@ -58,13 +59,15 @@ Réponds UNIQUEMENT avec le JSON, pas de texte autour."""
             max_tokens=800,
         )
 
-        return self._parse_suggestions(result)
+        suggestions = self._parse_suggestions(result)
+        return self._appliquer_scoring(suggestions, contexte)
 
     async def suggerer_achats_saison(
         self,
         age_enfant_mois: int,
         saison: str,
         tailles: dict | None = None,
+        contexte: dict | None = None,
     ) -> list[dict]:
         """Suggère des achats saisonniers pour l'enfant."""
         tailles_txt = ""
@@ -90,12 +93,14 @@ Réponds UNIQUEMENT avec le JSON."""
             max_tokens=800,
         )
 
-        return self._parse_suggestions(result)
+        suggestions = self._parse_suggestions(result)
+        return self._appliquer_scoring(suggestions, contexte)
 
     async def suggerer_achats_jalon(
         self,
         age_mois: int,
         prochains_jalons: list[str],
+        contexte: dict | None = None,
     ) -> list[dict]:
         """Suggère des achats liés aux prochains jalons de développement."""
         jalons_txt = "\n".join(f"- {j}" for j in prochains_jalons)
@@ -120,7 +125,19 @@ Réponds UNIQUEMENT avec le JSON."""
             max_tokens=600,
         )
 
-        return self._parse_suggestions(result)
+        suggestions = self._parse_suggestions(result)
+        return self._appliquer_scoring(suggestions, contexte)
+
+    def _appliquer_scoring(self, suggestions: list[dict], contexte: dict | None) -> list[dict]:
+        """Enrichit chaque suggestion avec un score de pertinence et trie par score décroissant."""
+        if not suggestions:
+            return suggestions
+
+        from src.services.famille.scoring import obtenir_service_scoring
+
+        scoring = obtenir_service_scoring()
+        enrichies = [scoring.scorer_suggestion(s, contexte) for s in suggestions]
+        return sorted(enrichies, key=lambda x: x.get("score_pertinence", 0.5), reverse=True)
 
     def _parse_suggestions(self, raw_result: str) -> list[dict]:
         """Parse le résultat IA en liste de suggestions."""

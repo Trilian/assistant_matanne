@@ -81,20 +81,17 @@
 
 ## ✅ Mise à jour implémentation (27 mars 2026 — module Famille M-R)
 
-- [x] **Phase O (Activités météo-intelligentes)** : pré-remplissage inline depuis suggestions IA (`suggestions_struct` + action "Utiliser cette suggestion")
-- [x] **Phase P (Achats & cadeaux auto-suggérés)** :
-  - Endpoint canonique `GET /api/v1/famille/achats`
-  - Endpoint proactif `POST /api/v1/famille/achats/suggestions`
-  - Page `/famille/achats` branchée sur suggestions IA actionnables (ajout en 1 clic)
-  - Suggestion achats inline ajoutée au hub `/famille`
-- [x] **Phase Q (Rappels intelligents)** : endpoint `GET /api/v1/famille/rappels/evaluer` exploité sur hub + sidebar, cron push quotidien fiabilisé
-- [x] **Phase R (Journal IA & album jalons)** :
-  - Alias API ajouté `POST /api/v1/famille/journal/resumer-semaine`
-  - Résumés IA sauvegardés affichés dans `/famille/journal`
-  - Lien album↔jalons exploité via upload lié (`jalon-<id>_`) + navigation croisée Jules/Album
+- [x] **Phase O (Activités météo-intelligentes)** ✅ COMPLÈTE : auto-prefill à l'ouverture du formulaire activité (pré-remplissage automatique + bannière info avec bouton Changer)
+- [x] **Phase P (Achats & cadeaux auto-suggérés)** ✅ COMPLÈTE : widget hub + scoring pertinence (raison_suggestion, score_pertinence, tri par score)
+- [x] **Phase Q (Rappels intelligents)** ✅ COMPLÈTE : badges urgence sur cartes modules dans le hub famille
+- [x] **Phase R : Album & Journal** ~~supprimés~~ — fonctionnalités intégrées dans le Hub contextuel ✅
+- [x] **Sprint 3 — Scoring/Explainability** ✅ COMPLÈTE :
+  - `ScoringPertinenceService` dans `src/services/famille/scoring.py` (scoring déterministe 0.0–1.0, 5 facteurs)
+  - Intégration dans `AchatsIAService` (3 méthodes de suggestion enrichies + tri par score)
+  - Affichage `raison_suggestion` et badge "✨ Très pertinent" dans `/famille/achats`
 - [x] **Stabilisation backend** : déduplication route `/famille/contexte`, correction enregistrement job `push_quotidien` APScheduler
 
-**✅ MODULE FAMILLE : 6/6 phases complètes (M-R)**
+**✅ MODULE FAMILLE : 6/6 phases complètes (M-R) + Sprint 3 scoring**
 
 ---
 

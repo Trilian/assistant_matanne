@@ -1,7 +1,22 @@
 # 📊 État d'Implémentation des 28 Phases — Assistant Matanne
 
-> **Dernière mise à jour** : **27 mars 2026 (copilot-worktree)** — Module Maison (X-AB + phases 0-12) complété : `ListeTachesSelectable`, tâches ponctuelles, planning IA adaptatif, `CatalogueEnrichissementService`, cron enrichissement, auto-complétion, cleanup 13 dossiers legacy  
-> **Couverture fonctionnelle globale** : **~96%** pondérée (25/28 complètes + 2 quasi + 1 partielle)
+> **Dernière mise à jour** : **31 mars 2026** (Sprint 3 Scoring/Explainability Famille — badges urgence modules, auto-prefill activités, scoring pertinence achats IA, suppression album/journal)  
+> **Couverture fonctionnelle globale** : **~96%** pondérée (24/28 complètes + 3 quasi + 1 partielle)
+
+---
+
+## ✅ Nouveautés Sprint 3 — Scoring/Explainability Famille ✅
+
+**Sprint 3 entièrement complété** :
+- ✅ **`ScoringPertinenceService`** : Nouveau service `src/services/famille/scoring.py` — scoring déterministe 0.0–1.0 sur 5 facteurs (anniversaire proche, jalon Jules, météo adaptée, budget disponible, âge Jules)
+- ✅ **Scoring intégré dans `AchatsIAService`** : 3 méthodes enrichies (`suggerer_cadeaux_anniversaire`, `suggerer_achats_saison`, `suggerer_achats_jalon`) avec `score_pertinence`, `raison_suggestion`, `sources_score` + tri décroissant
+- ✅ **Affichage `raison_suggestion`** dans `/famille/achats` — texte explicatif sous chaque suggestion + badge "✨ Très pertinent" si score > 0.7
+- ✅ **Badges urgence sur cartes modules** : overlay destructive sur documents/budget/jules/achats selon les rappels urgents du jour
+- ✅ **Auto-prefill formulaire activité** : ouverture automatique du premier résultat si contexte détecté (météo ou journée libre) + bannière info dismissable
+- ✅ **Suggestions IA dans widget Achats** : bouton "✨ Suggestions IA" dans le widget hub famille, mini-liste 2 suggestions avec lien → `/famille/achats`
+- ✅ **Suppression Album & Journal** : pages, services, modèle ORM, endpoints et imports nettoyés
+
+**Impact** : Module Famille **100% complet** — IA explicable, hub contextuel, scoring pertinence actif
 
 ---
 
@@ -437,9 +452,9 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 ---
 
-### Phase O : Activités Météo-Intelligentes ✅ COMPLÈTE ⚡ **FINALISÉE CETTE SESSION**
+### Phase O : Activités Météo-Intelligentes ✅ COMPLÈTE
 
-**Objectif** : Auto-injection météo dans activités, détection journée libre, suggestions IA contextualised
+**Objectif** : Auto-injection météo dans activités, détection journée libre, suggestions IA contextualisées
 
 **Ce qui existe** :
 - ✅ Endpoint `POST /api/v1/famille/activites/suggestions-ia-auto` (météo + âge + journée libre auto)
@@ -448,31 +463,34 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Affichage explicite du contexte détecté (météo + journée libre) dans l'UI
 - ✅ Suggestions structurées retournées par l'API (`suggestions_struct`) pour usage frontend
 - ✅ Pré-remplissage inline du formulaire de création (`Utiliser cette suggestion`)
+- ✅ **Auto-prefill à l'ouverture** : `useEffect` pré-remplit automatiquement le premier résultat si contexte météo/journée libre détecté
+- ✅ **Bannière info** : `"💡 Pré-rempli automatiquement selon la météo/journée libre"` avec bouton ×  et lien `Changer →`
 
-**Impact** : Flux complet contextuel → suggestion IA → création activité pré-remplie
+**Impact** : Flux complet contextuel → suggestion IA → création activité pré-remplie automatiquement
 
 ---
 
-### Phase P : Achats & Cadeaux Auto-Suggérés ✅ COMPLÈTE ⚡ **FINALISÉE CETTE SESSION**
+### Phase P : Achats & Cadeaux Auto-Suggérés ✅ COMPLÈTE
 
-**Objectif** : Suggestions IA achats (anniversaires, saison, jalons), déclencheurs automatiques
+**Objectif** : Suggestions IA achats (anniversaires, saison, jalons), déclencheurs automatiques, scoring
 
 **Ce qui existe** :
 - ✅ Page `/famille/achats` avec liste + filtres
-- ✅ Modèle `AchatFamille` complet (categorie, priorite, destinataire_id, jalon_id, date_limite)
+- ✅ Modèle `AchatFamille` SQLAlchemy complet (table `achats_famille`)
 - ✅ CRUD achats fonctionnel
-- ✅ Service `AchatsIAService` opérationnel
+- ✅ Service `AchatsIAService` avec scoring intégré
 - ✅ Endpoint `GET /api/v1/famille/achats` (route canonique)
 - ✅ Endpoint `POST /api/v1/famille/achats/suggestions-ia` (manuel par type)
 - ✅ Endpoint `POST /api/v1/famille/achats/suggestions` (proactif: anniversaire J-14, jalons, saison)
 - ✅ Suggestions IA actionnables sur `/famille/achats` (ajout en 1 clic)
-- ✅ Suggestion inline achats ajoutée au hub `/famille`
+- ✅ Widget achats hub `/famille` avec bouton "✨ Suggestions IA" et mini-liste (2 suggestions max)
+- ✅ `raison_suggestion` et badge "✨ Très pertinent" affichés dans les cartes suggestions
 
-**Impact** : Achats famille pilotés par IA contextuelle et injectables directement dans la liste
+**Impact** : Achats famille pilotés par IA contextuelle avec scoring de pertinence expliqué
 
 ---
 
-### Phase Q : Rappels Intelligents ✅ COMPLÈTE ⚡ **FINALISÉE CETTE SESSION**
+### Phase Q : Rappels Intelligents ✅ COMPLÈTE
 
 **Objectif** : Affichage badges urgence hub, notifications push automatiques
 
@@ -482,29 +500,26 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Modèles riches (documents, budgets, activités, crèche)
 - ✅ Endpoint `GET /api/v1/famille/rappels/evaluer` exposé
 - ✅ Badges urgences sur hub famille et sidebar
+- ✅ **Badges sur cartes modules** : overlay `<Badge variant="destructive">` sur les cartes modules avec mapping type rappel → module (documents, budget, jules, achats)
 - ✅ Push automatiques déclenchés via cron APScheduler (`push_quotidien`)
 - ✅ Job cron push corrigé/fiabilisé
 
-**Impact** : Rappels intelligents pleinement visibles + automatisation push active
+**Impact** : Rappels intelligents pleinement visibles sur chaque module + automatisation push active
 
 ---
 
-### Phase R : Journal IA & Album Jalons ✅ COMPLÈTE ⚡ **FINALISÉE CETTE SESSION**
+### Phase R : Album & Journal ~~supprimés~~ — fonctionnalités intégrées dans le Hub contextuel ✅
 
-**Objectif** : Résumé hebdo IA, lien album↔jalons, graphique croissance OMS
+**Décision** : Album (`/famille/album`) et Journal (`/famille/journal`) supprimés — les fonctionnalités pertinentes (résumé semaine, contexte visuel) sont désormais intégrées dans le hub famille contextuel.
 
-**Ce qui existe** :
-- ✅ Page `/famille/journal` avec entrées quotidiennes
-- ✅ Page `/famille/album` avec photos
-- ✅ Modèle `SouvenirFamille.jalon_id` FK existe
-- ✅ Service Jules avec jalons détaillés
-- ✅ Graphique croissance OMS (courbes percentiles) présent sur `/famille/jules`
-- ✅ Endpoint `POST /api/v1/famille/journal/resume-semaine` exposé
-- ✅ Alias de compatibilité `POST /api/v1/famille/journal/resumer-semaine`
-- ✅ Résumés hebdo IA affichés et historisés dans le journal
-- ✅ Lien album↔jalons exploité côté frontend (upload lié + navigation croisée Jules ↔ Album)
-
-**Impact** : Journal IA et album jalons réellement connectés dans les parcours utilisateur
+**Supprimé** :
+- ✅ `frontend/src/app/(app)/famille/album/page.tsx` et tests
+- ✅ `frontend/src/app/(app)/famille/journal/page.tsx` et tests
+- ✅ `src/services/famille/album.py`
+- ✅ `src/services/famille/journal_ia.py`
+- ✅ `src/core/models/album.py`
+- ✅ Endpoints `POST /journal/resume-semaine`, `POST /journal/resumer-semaine`, `POST /journal/retrospective`
+- ✅ Imports nettoyés dans `__init__.py` et `routes/famille.py`
 
 ---
 

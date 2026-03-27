@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   CalendarHeart,
@@ -82,6 +82,9 @@ export default function PageActivites() {
   const [typeFiltre, setTypeFiltre] = useState("tous");
   const [dialogueCreation, setDialogueCreation] = useState(false);
   const [dialogueSuggestions, setDialogueSuggestions] = useState(false);
+  // PHASE C — Auto-prefill states
+  const [infoPrefill, setInfoPrefill] = useState<string | null>(null);
+  const [prefillDismiss, setPrefillDismiss] = useState(false);
   const [suggestionsIA, setSuggestionsIA] = useState<string>("");
   const [suggestionsStruct, setSuggestionsStruct] = useState<
     Array<{
@@ -96,6 +99,7 @@ export default function PageActivites() {
   const [journeeLibreDetectee, setJourneeLibreDetectee] = useState(false);
   const [typePrefere, setTypePrefere] = useState<string>("mixte");
   const [enChargementIA, setEnChargementIA] = useState(false);
+  const [banniereIAVisible, setBanniereIAVisible] = useState(false);
 
   // Form state
   const [titre, setTitre] = useState("");
@@ -171,6 +175,24 @@ export default function PageActivites() {
     setDialogueCreation(true);
     toast.success("Suggestion injectée dans le formulaire");
   };
+
+  // PHASE C — Auto-prefill à l'ouverture du dialog si suggestions disponibles et contexte détecté
+  useEffect(() => {
+    if (
+      dialogueCreation &&
+      !prefillDismiss &&
+      suggestionsStruct.length > 0 &&
+      (meteoDetectee !== null || journeeLibreDetectee)
+    ) {
+      appliquerSuggestion(suggestionsStruct[0]);
+      const raisons = [meteoDetectee && `météo ${meteoDetectee}`, journeeLibreDetectee && 'journée libre'].filter(Boolean).join(', ');
+      setInfoPrefill(raisons);
+    }
+    if (!dialogueCreation) {
+      setPrefillDismiss(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dialogueCreation]);
 
   return (
     <div className="space-y-6">
@@ -292,6 +314,29 @@ export default function PageActivites() {
               });
             }}
           >
+            {/* PHASE C — Info banner auto-prefill */}
+            {infoPrefill && !prefillDismiss && (
+              <div className="flex items-center justify-between rounded-md bg-blue-50 dark:bg-blue-950/30 px-3 py-2 text-xs text-blue-700 dark:text-blue-300 mb-3">
+                <span>💡 Pré-rempli automatiquement ({infoPrefill})</span>
+                <div className="flex gap-2 ml-2 shrink-0">
+                  <button 
+                    type="button" 
+                    className="underline" 
+                    onClick={() => setDialogueSuggestions(true)}
+                  >
+                    Changer
+                  </button>
+                  <button type="button" onClick={() => setPrefillDismiss(true)}>×</button>
+                </div>
+              </div>
+            )}
+            {banniereIAVisible && (
+              <div className="flex items-center gap-2 rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-3 py-2 text-xs text-amber-800 dark:text-amber-200 mb-3">
+                <Sparkles className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                <span>Pré-rempli selon la météo / journée libre</span>
+                <button onClick={() => setBanniereIAVisible(false)} className="ml-auto text-amber-600 hover:text-amber-800 dark:text-amber-400">✕</button>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="act-titre">Titre *</Label>
               <Input

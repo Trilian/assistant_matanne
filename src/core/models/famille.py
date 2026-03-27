@@ -295,6 +295,67 @@ class ArticleAchat(Base):
 
 
 # ═══════════════════════════════════════════════════════════
+# ACHATS FAMILLE (table principale Phase P)
+# ═══════════════════════════════════════════════════════════
+
+class AchatFamille(Base):
+    """Achat familial enrichi (liste d'achats Phase P).
+
+    Attributes:
+        nom: Nom de l'article
+        description: Description libre
+        categorie: Catégorie (vêtements, jouets, livres, etc.)
+        priorite: Priorité (urgent, haute, moyenne, basse, optionnel)
+        prix_estime: Prix estimé
+        prix_reel: Prix réel payé
+        url: Lien produit
+        image_url: URL image
+        magasin: Magasin suggéré
+        taille: Taille (pour vêtements)
+        age_recommande_mois: Âge recommandé en mois
+        achete: Si déjà acheté
+        date_achat: Date d'achat
+        suggere_par: Source (ia, manuel, anniversaire, jalon...)
+        pour_qui: Destinataire (jules, anne, mathieu, famille)
+        a_revendre: Marquer pour revente future
+        prix_revente_estime: Prix estimé de revente
+        vendu_le: Date de vente
+        notes: Notes libres
+        cree_le: Date de création
+        modifie_le: Date de modification
+    """
+
+    __tablename__ = "achats_famille"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nom: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    description: Mapped[str | None] = mapped_column(Text)
+    categorie: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    priorite: Mapped[str] = mapped_column(String(50), nullable=False, default="moyenne", index=True)
+    prix_estime: Mapped[float | None] = mapped_column(Float)
+    prix_reel: Mapped[float | None] = mapped_column(Float)
+    url: Mapped[str | None] = mapped_column(String(500))
+    image_url: Mapped[str | None] = mapped_column(String(500))
+    magasin: Mapped[str | None] = mapped_column(String(200))
+    taille: Mapped[str | None] = mapped_column(String(50))
+    age_recommande_mois: Mapped[int | None] = mapped_column(Integer)
+    achete: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, index=True)
+    date_achat: Mapped[date | None] = mapped_column(Date)
+    suggere_par: Mapped[str | None] = mapped_column(String(50))
+    pour_qui: Mapped[str] = mapped_column(String(50), nullable=False, default="famille", index=True)
+    a_revendre: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    prix_revente_estime: Mapped[float | None] = mapped_column(Float)
+    vendu_le: Mapped[date | None] = mapped_column(Date)
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    modifie_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
+
+    def __repr__(self) -> str:
+        return f"<AchatFamille(nom={self.nom}, categorie={self.categorie}, pour_qui={self.pour_qui}, achete={self.achete})>"
+
+
+# ═══════════════════════════════════════════════════════════
 # ANNIVERSAIRES ET ÉVÉNEMENTS
 # ═══════════════════════════════════════════════════════════
 
