@@ -38,6 +38,13 @@ import {
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/composants/ui/dialog";
 import { BandeauMeteo } from "@/composants/famille/bandeau-meteo";
 import { CarteAnniversaire } from "@/composants/famille/carte-anniversaire";
 import { CarteDocumentExpire } from "@/composants/famille/carte-document-expire";
@@ -50,6 +57,8 @@ import {
   listerAchats,
   obtenirResumeBudgetMois,
   completerRoutine,
+  obtenirSuggestionsWeekend,
+  joursSansCReche,
 } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
@@ -108,6 +117,26 @@ export default function PageFamille() {
       queryClient.invalidateQueries({ queryKey: ["famille", "contexte"] });
     },
     onError: () => toast.error("Impossible de marquer la routine."),
+  });
+
+  // Jours sans crèche ce mois (Task 4)
+  const { data: joursSansCreche } = utiliserRequete(
+    ["famille", "planning", "jours-sans-creche"],
+    () => joursSansCReche(),
+    { staleTime: 60 * 60 * 1000 }
+  );
+
+  // État dialog suggestions weekend (Task 3)
+  const [dialogWeekendOuvert, setDialogWeekendOuvert] = useState(false);
+  const [suggestionsWeekend, setSuggestionsWeekend] = useState<string | null>(null);
+
+  const mutationSuggestionsWeekend = useMutation({
+    mutationFn: () => obtenirSuggestionsWeekend({ nb_suggestions: 5 }),
+    onSuccess: (data) => {
+      setSuggestionsWeekend(data.suggestions);
+      setDialogWeekendOuvert(true);
+    },
+    onError: () => toast.error("Impossible de charger les suggestions weekend."),
   });
 
   const rappelsUrgents =
@@ -426,8 +455,8 @@ export default function PageFamille() {
               titre="Idées pour le weekend"
               description="Activités adaptées à Jules, avec la météo du weekend"
               source="weekend"
-              actionLabel="Voir les suggestions"
-              onAction={() => router.push("/famille/weekend")}
+              actionLabel={mutationSuggestionsWeekend.isPending ? "Chargement…" : "Suggestions weekend IA"}
+              onAction={() => mutationSuggestionsWeekend.mutate()}
             />
           )}
 
@@ -442,13 +471,11 @@ export default function PageFamille() {
             />
           )}
 
-          {/* Crèche fermée dans les 7 prochains jours */}
-          {contexte?.jours_speciaux?.some(
-            (j) => j.jours_restants !== undefined && j.jours_restants <= 7
-          ) && (
+          {/* Crèche fermée dans les 7 prochains jours (données API jours-sans-crèche) */}
+          {(joursSansCreche?.total ?? 0) > 0 && (
             <CarteSuggestionIA
-              titre="Crèche fermée bientôt"
-              description={`Jules sans crèche dans ${contexte.jours_speciaux.find((j) => (j.jours_restants ?? 999) <= 7)?.jours_restants}j — idées d'activités`}
+              titre="Jules sans crèche ce mois"
+              description={`${joursSansCreche!.total} jour(s) sans crèche en ${joursSansCreche!.mois} — planifiez des activités`}
               source="achats"
               actionLabel="Planifier les activités"
               onAction={() => router.push("/famille/activites")}
@@ -526,6 +553,29 @@ export default function PageFamille() {
           </Link>
         )}
       />
+
+      {/* Dialog Suggestions Weekend IA */}
+      <Dialog open={dialogWeekendOuvert} onOpenChange={setDialogWeekendOuvert}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-purple-500" />
+              Suggestions weekend IA
+            </DialogTitle>
+            <DialogDescription>
+              Idées d'activités pour le weekend, adaptées à Jules et à la météo
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 text-sm whitespace-pre-wrap leading-relaxed">
+            {suggestionsWeekend ?? "Chargement…"}
+          </div>
+          <div className="mt-4 flex justify-end">
+            <Button variant="outline" size="sm" onClick={() => router.push("/famille/weekend")}>
+              Voir plus sur la page Weekend
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -5,7 +5,7 @@
 "use client";
 
 import { useState } from "react";
-import { Cake, Gift, Calendar, Plus, Trash2, Pencil, Sparkles, Loader2 } from "lucide-react";
+import { Cake, Gift, Calendar, Plus, Trash2, Pencil, Sparkles, Loader2, ShoppingCart, Check } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -36,10 +36,13 @@ import {
   obtenirSuggestionsAchatsIA,
   obtenirChecklistAnniversaireAuto,
   synchroniserChecklistAnniversaireAuto,
+  mettreAJourItemChecklist,
+  itemChecklistVersAchat,
   type ChecklistAnniversaire,
   type ChecklistAnniversairePreview,
   type Anniversaire,
   type SuggestionAchat,
+  type ItemChecklistAnniversaire,
 } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 
@@ -161,6 +164,46 @@ export default function PageAnniversaires() {
         toast.success("Checklist synchronisée (auto + manuel)");
       },
       onError: () => toast.error("Impossible de synchroniser la checklist"),
+    }
+  );
+
+  const mutToggleItem = utiliserMutation(
+    ({ checklistId, itemId, fait }: { checklistId: number; itemId: number; fait: boolean }) =>
+      mettreAJourItemChecklist(checklistId, itemId, fait),
+    {
+      onSuccess: (updatedItem) => {
+        setChecklistActive((prev) => {
+          if (!prev) return prev;
+          const updated = { ...prev };
+          const cat = updatedItem.categorie;
+          if (updated.items_par_categorie[cat]) {
+            updated.items_par_categorie = {
+              ...updated.items_par_categorie,
+              [cat]: updated.items_par_categorie[cat].map((it) =>
+                it.id === updatedItem.id ? updatedItem : it
+              ),
+            };
+          }
+          const tousLesItems = Object.values(updated.items_par_categorie).flat();
+          updated.items_faits = tousLesItems.filter((it) => it.fait).length;
+          updated.items_total = tousLesItems.length;
+          updated.taux_completion =
+            updated.items_total > 0
+              ? Math.round((updated.items_faits / updated.items_total) * 100)
+              : 0;
+          return updated;
+        });
+      },
+      onError: () => toast.error("Impossible de mettre à jour l'item"),
+    }
+  );
+
+  const mutVersAchat = utiliserMutation(
+    ({ checklistId, itemId }: { checklistId: number; itemId: number }) =>
+      itemChecklistVersAchat(checklistId, itemId),
+    {
+      onSuccess: () => toast.success("Item envoyé vers les achats ✓"),
+      onError: () => toast.error("Impossible d'envoyer vers les achats"),
     }
   );
 
@@ -345,21 +388,110 @@ export default function PageAnniversaires() {
             )}
 
             {checklistActive && (
-              <div className="rounded-md border p-3">
-                <p className="text-sm font-medium">{checklistActive.nom}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Progression: {checklistActive.items_faits}/{checklistActive.items_total} ({checklistActive.taux_completion}%)
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Budget: {checklistActive.budget_depense.toFixed(0)} € / {(checklistActive.budget_total ?? 0).toFixed(0)} €
-                </p>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {Object.keys(checklistActive.items_par_categorie).map((cat) => (
-                    <Badge key={cat} variant="outline" className="text-xs">
-                      {cat} ({checklistActive.items_par_categorie[cat].length})
-                    </Badge>
-                  ))}
+              <div className="rounded-md border p-3 space-y-4">
+                <div>
+                  <p className="text-sm font-medium">{checklistActive.nom}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Budget: {checklistActive.budget_depense.toFixed(0)} € / {(checklistActive.budget_total ?? 0).toFixed(0)} €
+                  </p>
+                  {/* Barre de progression globale */}
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                      <span>Progression globale</span>
+                      <span>{checklistActive.items_faits}/{checklistActive.items_total} ({checklistActive.taux_completion}%)</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all"
+                        style={{ width: `${checklistActive.taux_completion}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
+
+                {/* Items par catégorie */}
+                {Object.entries(checklistActive.items_par_categorie).map(([categorie, items]) => {
+                  const itemsFaits = items.filter((it) => it.fait).length;
+                  const pctCat = items.length > 0 ? Math.round((itemsFaits / items.length) * 100) : 0;
+                  return (
+                    <div key={categorie} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="secondary" className="text-xs capitalize">{categorie}</Badge>
+                        <span className="text-xs text-muted-foreground">{itemsFaits}/{items.length}</span>
+                      </div>
+                      {/* Barre de progression par catégorie */}
+                      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full bg-primary/70 rounded-full transition-all"
+                          style={{ width: `${pctCat}%` }}
+                        />
+                      </div>
+                      {/* Liste des items */}
+                      <div className="space-y-1.5 pl-1">
+                        {items.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center gap-2 rounded p-1.5 hover:bg-muted/40 transition-colors"
+                          >
+                            {/* Checkbox */}
+                            <button
+                              type="button"
+                              aria-label={item.fait ? "Marquer comme non fait" : "Marquer comme fait"}
+                              className={`flex-shrink-0 h-4 w-4 rounded border flex items-center justify-center transition-colors ${
+                                item.fait ? "bg-primary border-primary" : "border-muted-foreground/40"
+                              }`}
+                              onClick={() =>
+                                mutToggleItem.mutate({
+                                  checklistId: checklistActive.id,
+                                  itemId: item.id,
+                                  fait: !item.fait,
+                                })
+                              }
+                            >
+                              {item.fait && <Check className="h-2.5 w-2.5 text-primary-foreground" />}
+                            </button>
+                            {/* Nom + infos */}
+                            <div className="flex-1 min-w-0">
+                              <span className={`text-sm ${item.fait ? "line-through text-muted-foreground" : ""}`}>
+                                {item.libelle}
+                              </span>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {item.budget_estime != null && (
+                                  <span className="text-xs text-muted-foreground">~{item.budget_estime.toFixed(0)} €</span>
+                                )}
+                                <Badge
+                                  variant={item.source === "auto" ? "secondary" : "outline"}
+                                  className="text-xs py-0 h-4"
+                                >
+                                  {item.source === "auto" ? "auto" : "manuel"}
+                                </Badge>
+                              </div>
+                            </div>
+                            {/* Bouton → Achats */}
+                            {!item.fait && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 px-2 text-xs flex-shrink-0"
+                                aria-label="Envoyer vers les achats"
+                                disabled={mutVersAchat.isPending}
+                                onClick={() =>
+                                  mutVersAchat.mutate({
+                                    checklistId: checklistActive.id,
+                                    itemId: item.id,
+                                  })
+                                }
+                              >
+                                <ShoppingCart className="h-3 w-3 mr-1" />
+                                → Achats
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CardContent>

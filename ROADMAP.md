@@ -51,6 +51,20 @@
 
 ---
 
+## ✅ Mise à jour implémentation (30 mars 2026 — Sprint 2 Interactions Intelligentes Famille)
+
+- [x] **Sprint 2 — Subscribers intelligents (3 nouveaux)**:
+  - `budget.contrainte` → invalide le cache `suggestions_*` (filtre items essentiels uniquement)
+  - `document.echeance_proche` (J-30) → notification ntfy.sh avec titre + délai + lien `/famille/documents`
+  - `jalon.ajoute` → invalide cache activités + notification ntfy avec résumé du jalon + lien `/famille/jules`
+- [x] **Hub Weekend IA branché sur vraie API** : bouton "Suggestions weekend IA" appelle `POST /api/v1/weekend/suggestions-ia` et affiche le résultat dans un dialog shadcn/ui
+- [x] **Hub Crèche branché sur vraie API** : card "Jules sans crèche ce mois" chargée via `GET /api/v1/famille/planning/jours-sans-creche` (TanStack Query, stale 1h)
+- [x] **Test AchatCreate** : confirmé passant (64 tests verts — `a_revendre: bool = False` déjà correct)
+
+**✅ SPRINT 2 INTERACTIONS INTELLIGENTES : COMPLET**
+
+---
+
 ## ✅ Mise à jour implémentation (27 mars 2026 — module Famille M-R)
 
 - [x] **Phase O (Activités météo-intelligentes)** : pré-remplissage inline depuis suggestions IA (`suggestions_struct` + action "Utiliser cette suggestion")
