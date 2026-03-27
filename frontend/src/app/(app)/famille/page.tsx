@@ -152,6 +152,14 @@ export default function PageFamille() {
   const rappelsUrgents =
     rappelsData?.rappels?.filter((r) => r.priorite === "danger" || r.priorite === "warning") ?? [];
 
+  // PHASE B1 — Mapping urgences par module
+  const urgencesParModule: Record<string, number> = {
+    jules: rappelsUrgents.filter(r => ['jalon', 'sante', 'croissance', 'vaccin'].some(t => r.type?.toLowerCase().includes(t))).length,
+    budget: rappelsUrgents.filter(r => ['budget', 'depense', 'depassement'].some(t => r.type?.toLowerCase().includes(t))).length,
+    documents: rappelsUrgents.filter(r => ['document', 'expir', 'passeport', 'carte'].some(t => r.type?.toLowerCase().includes(t))).length,
+    achats: rappelsUrgents.filter(r => ['achat', 'anniversaire', 'cadeau'].some(t => r.type?.toLowerCase().includes(t))).length,
+  };
+
   const urgencesPourModule = (moduleId: string): number => {
     const types = MODULES_RAPPELS_MAPPING[moduleId] ?? [];
     if (types.length === 0) return 0;
@@ -160,6 +168,11 @@ export default function PageFamille() {
 
   const [hasShownToast, setHasShownToast] = useState(false);
   const [suggestionsAchatsIA, setSuggestionsAchatsIA] = useState<{ titre: string; raison_suggestion?: string; priorite?: string }[]>([]);
+
+  // PHASE B2 — Suggestions IA Achats (nouveau hook)
+  const mutationSuggestionsAchats = useMutation({
+    mutationFn: () => obtenirSuggestionsAchatsEnrichies({ trigger: 'hub_rapide', limite: 2 }),
+  });
 
   const mutationSuggestionsAchatsIA = useMutation({
     mutationFn: () => obtenirSuggestionsAchatsEnrichies({ triggers: ["hub_rapide"] }),
@@ -405,29 +418,23 @@ export default function PageFamille() {
               {Object.keys(achatsPourQui).length === 0 && (
                 <p className="text-xs text-muted-foreground">Liste vide 🎉</p>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full h-7 text-xs"
-                onClick={() => mutationSuggestionsAchatsIA.mutate()}
-                disabled={mutationSuggestionsAchatsIA.isPending}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="w-full h-7 text-xs mt-1 gap-1"
+                onClick={() => mutationSuggestionsAchats.mutate()}
+                disabled={mutationSuggestionsAchats.isPending}
               >
-                {mutationSuggestionsAchatsIA.isPending ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  "✨ Suggestions IA"
-                )}
+                {mutationSuggestionsAchats.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                Suggestions IA
               </Button>
-              {suggestionsAchatsIA.length > 0 && (
-                <div className="space-y-1 mt-1">
-                  {suggestionsAchatsIA.map((s, i) => (
-                    <div key={i} className="text-xs flex items-center gap-1.5 text-muted-foreground">
-                      <Sparkles className="h-3 w-3 text-amber-500" />
-                      <span>{s.titre}</span>
-                    </div>
-                  ))}
+              {mutationSuggestionsAchats.data?.suggestions?.slice(0,2).map((s, i) => (
+                <div key={i} className="text-xs p-1.5 rounded bg-muted/50 mt-1">
+                  <p className="font-medium truncate">{s.titre || s.nom}</p>
+                  {s.raison_suggestion && <p className="text-muted-foreground truncate">{s.raison_suggestion}</p>}
+                  <Link href="/famille/achats" className="text-primary text-[10px]">Voir dans Achats →</Link>
                 </div>
-              )}
+              ))}
               <Link href="/famille/achats" className="block">
                 <Button variant="ghost" size="sm" className="w-full h-7 text-xs mt-1">
                   Voir tout →
