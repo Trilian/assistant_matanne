@@ -1,24 +1,19 @@
-"""
-Module API REST FastAPI.
+"""Module API REST FastAPI.
 
-Ce package fournit une API REST pour l'accès programmatique
-aux fonctionnalités de l'Assistant Matanne.
-
-Lancer le serveur:
-    uvicorn src.api.main:app --reload --port 8000
-
-Documentation:
-    - Swagger UI: http://localhost:8000/docs
-    - ReDoc: http://localhost:8000/redoc
-
-Endpoints principaux:
-    - GET /api/v1/recettes - Liste des recettes
-    - GET /api/v1/inventaire - Inventaire
-    - GET /api/v1/courses - Listes de courses
-    - GET /api/v1/planning/semaine - Planning hebdomadaire
-    - GET /api/v1/suggestions/recettes - Suggestions IA
+Le package expose ``app`` pour les integrations externes, mais l'import de
+``src.api`` ne doit pas forcer le chargement complet de l'application. Plusieurs
+tests et sous-modules importent ``src.api.*`` sans avoir besoin d'initialiser
+tous les routeurs.
 """
 
-from .main import app
+from __future__ import annotations
 
 __all__ = ["app"]
+
+
+def __getattr__(name: str):
+    if name == "app":
+        from .main import app
+
+        return app
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

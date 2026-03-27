@@ -1,32 +1,10 @@
-"""
-Routes API - Package.
+"""Routes API - Package.
 
-Contient tous les routeurs FastAPI organisés par domaine.
+Les routeurs sont exposes de facon lazy pour eviter de charger tout le graphe
+FastAPI lors de l'import d'un seul sous-module de routes.
 """
 
-from .admin import router as admin_router
-from .anti_gaspillage import router as anti_gaspillage_router
-from .auth import router as auth_router
-from .batch_cooking import router as batch_cooking_router
-from .calendriers import router as calendriers_router
-from .courses import router as courses_router
-from .dashboard import router as dashboard_router
-from .documents import router as documents_router
-from .export import router as export_router
-from .famille import router as famille_router
-from .inventaire import router as inventaire_router
-from .jeux import router as jeux_router
-from .maison import router as maison_router
-from .planning import router as planning_router
-from .preferences import router as preferences_router
-from .push import router as push_router
-from .recettes import router as recettes_router
-from .recherche import router as recherche_router
-from .rgpd import router as rgpd_router
-from .suggestions import router as suggestions_router
-from .upload import router as upload_router
-from .utilitaires import router as utilitaires_router
-from .webhooks import router as webhooks_router
+from __future__ import annotations
 
 __all__ = [
     "admin_router",
@@ -54,3 +32,39 @@ __all__ = [
     "utilitaires_router",
     "webhooks_router",
 ]
+
+
+_MODULES = {
+    "admin_router": ".admin",
+    "anti_gaspillage_router": ".anti_gaspillage",
+    "auth_router": ".auth",
+    "batch_cooking_router": ".batch_cooking",
+    "calendriers_router": ".calendriers",
+    "courses_router": ".courses",
+    "dashboard_router": ".dashboard",
+    "documents_router": ".documents",
+    "export_router": ".export",
+    "famille_router": ".famille",
+    "inventaire_router": ".inventaire",
+    "jeux_router": ".jeux",
+    "maison_router": ".maison",
+    "planning_router": ".planning",
+    "preferences_router": ".preferences",
+    "push_router": ".push",
+    "recettes_router": ".recettes",
+    "recherche_router": ".recherche",
+    "rgpd_router": ".rgpd",
+    "suggestions_router": ".suggestions",
+    "upload_router": ".upload",
+    "utilitaires_router": ".utilitaires",
+    "webhooks_router": ".webhooks",
+}
+
+
+def __getattr__(name: str):
+    if name in _MODULES:
+        from importlib import import_module
+
+        module = import_module(_MODULES[name], __name__)
+        return module.router
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
