@@ -23,6 +23,9 @@ import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
+import { Input } from "@/composants/ui/input";
+import { Label } from "@/composants/ui/label";
+import { utiliserAutoCompletionMaison } from "@/crochets/utiliser-auto-completion-maison";
 import { toast } from "sonner";
 import {
   listerGaranties, creerGarantie, modifierGarantie, supprimerGarantie,
@@ -140,6 +143,7 @@ function OngletGaranties() {
   const queryClient = useQueryClient();
   const formsVide = { nom: "", fournisseur: "", date_debut: "", date_fin: "", numero: "", notes: "" };
   const [form, setForm] = useState(formsVide);
+  const { autoCompleter } = utiliserAutoCompletionMaison("equipements_garanties");
 
   const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
     utiliserDialogCrud<Garantie>({
@@ -170,13 +174,6 @@ function OngletGaranties() {
     else creer(payload as Record<string, unknown>);
   };
 
-  const champs = [
-    { id: "nom", label: "Appareil / Produit", type: "text" as const, value: form.nom, onChange: (v: string) => setForm(f => ({ ...f, nom: v })), required: true },
-    { id: "fournisseur", label: "Fournisseur / SAV", type: "text" as const, value: form.fournisseur, onChange: (v: string) => setForm(f => ({ ...f, fournisseur: v })) },
-    { id: "date_debut", label: "Date d'achat", type: "date" as const, value: form.date_debut, onChange: (v: string) => setForm(f => ({ ...f, date_debut: v })) },
-    { id: "date_fin", label: "Fin de garantie", type: "date" as const, value: form.date_fin, onChange: (v: string) => setForm(f => ({ ...f, date_fin: v })) },
-  ];
-
   if (isLoading) return <Skeleton className="h-48" />;
 
   return (
@@ -205,12 +202,35 @@ function OngletGaranties() {
 
       <DialogueFormulaire
         ouvert={dialogOuvert}
-        onChangerOuvert={setDialogOuvert}
+        onClose={fermerDialog}
         titre={enEdition ? "Modifier la garantie" : "Nouvelle garantie"}
-        champs={champs}
-        onSoumettre={soumettre}
-        enChargement={enCreation || enModif}
-      />
+        onSubmit={soumettre}
+        enCours={enCreation || enModif}
+      >
+        <div className="space-y-2">
+          <Label>Appareil / Produit</Label>
+          <Input
+            value={form.nom}
+            onChange={(e) => setForm(f => ({ ...f, nom: e.target.value }))}
+            onBlur={(e) => autoCompleter("nom_objet", e.target.value, (v) => { if (!form.fournisseur) setForm(f => ({ ...f, fournisseur: v })); })}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Fournisseur / SAV <span className="text-xs text-muted-foreground">(suggestion IA)</span></Label>
+          <Input value={form.fournisseur} onChange={(e) => setForm(f => ({ ...f, fournisseur: e.target.value }))} placeholder="Auto-rempli après saisie du nom…" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label>Date d&apos;achat</Label>
+            <Input type="date" value={form.date_debut} onChange={(e) => setForm(f => ({ ...f, date_debut: e.target.value }))} />
+          </div>
+          <div className="space-y-2">
+            <Label>Fin de garantie</Label>
+            <Input type="date" value={form.date_fin} onChange={(e) => setForm(f => ({ ...f, date_fin: e.target.value }))} />
+          </div>
+        </div>
+      </DialogueFormulaire>
     </div>
   );
 }
