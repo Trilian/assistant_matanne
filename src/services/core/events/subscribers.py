@@ -402,6 +402,63 @@ def _invalider_cache_suggestions_achats(event: EvenementDomaine) -> None:
         logger.warning("Échec invalidation cache suggestions achats: %s", e)
 
 
+def _proposer_activites_sur_jalon(event: EvenementDomaine) -> None:
+    """Suggère des activités adaptées quand un jalon Jules est ajouté.
+    Déclencheur: jalons.ajoute avec user_id et age_mois dans event.data.
+    Tolère les pannes."""
+    try:
+        jalon_nom = event.data.get("nom", "")
+        user_id = event.data.get("user_id")
+        if not user_id:
+            return
+        from src.core.caching import obtenir_cache
+        cache = obtenir_cache()
+        # Invalide les suggestions d'activités pour forcer un recalcul
+        cache.invalidate(pattern="suggestions_activites")
+        cache.invalidate(pattern="activites_ia")
+        logger.info(
+            "Cache activités invalidé suite au jalon '%s' (user_id=%s)",
+            jalon_nom, user_id,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec suggestion activités sur jalon: %s", e)
+
+
+def _invalider_cache_achats_sur_achat_effectue(event: EvenementDomaine) -> None:
+    """Invalide le cache budget et achats quand un achat est marqué effectué.
+    Déclencheur: achats.achete ou achat.achete.
+    """
+    try:
+        from src.core.caching import obtenir_cache
+        cache = obtenir_cache()
+        cache.invalidate(pattern="budget_famille")
+        cache.invalidate(pattern="achats_famille")
+        cache.invalidate(pattern="contexte_familial")
+        logger.info(
+            "Cache budget+achats invalidé suite à un achat effectué (event=%s)",
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache budget sur achat: %s", e)
+
+
+def _invalider_cache_documents_expires(event: EvenementDomaine) -> None:
+    """Invalide le cache rappels et contexte familial quand un document expire.
+    Déclencheur: documents.expire ou documents.proche_expiration.
+    """
+    try:
+        from src.core.caching import obtenir_cache
+        cache = obtenir_cache()
+        cache.invalidate(pattern="rappels_famille")
+        cache.invalidate(pattern="contexte_familial")
+        logger.info(
+            "Cache rappels invalidé suite à expiration document (event=%s)",
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache documents expirés: %s", e)
+
+
 
 
 def _enregistrer_metrique_evenement(event: EvenementDomaine) -> None:
@@ -559,6 +616,24 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("preferences.mise_a_jour", _invalider_cache_suggestions_achats, priority=90)
     compteur += 1
     bus.souscrire("preferences.*", _invalider_cache_suggestions_achats, priority=90)
+    compteur += 1
+
+    # ── Jalons Jules → invalider suggestions activités ──
+    bus.souscrire("jalons.ajoute", _proposer_activites_sur_jalon, priority=70)
+    compteur += 1
+    bus.souscrire("jalons.*", _proposer_activites_sur_jalon, priority=70)
+    compteur += 1
+
+    # ── Achat effectué → invalider budget ──
+    bus.souscrire("achats.achete", _invalider_cache_achats_sur_achat_effectue, priority=90)
+    compteur += 1
+    bus.souscrire("achat.achete", _invalider_cache_achats_sur_achat_effectue, priority=90)
+    compteur += 1
+
+    # ── Documents expirés → invalider rappels ──
+    bus.souscrire("documents.expire", _invalider_cache_documents_expires, priority=90)
+    compteur += 1
+    bus.souscrire("documents.proche_expiration", _invalider_cache_documents_expires, priority=90)
     compteur += 1
 
     # ── Métriques (priorité moyenne) ──

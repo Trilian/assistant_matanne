@@ -467,6 +467,47 @@ export async function modifierItemChecklistAnniversaire(
   return data;
 }
 
+/** Obtenir les items d'une checklist anniversaire (avec filtre catégorie optionnel) */
+export async function obtenirChecklistAnniversaireItems(
+  checklistId: number,
+  categorie?: string
+): Promise<ItemChecklistAnniversaire[]> {
+  const params: Record<string, string> = {};
+  if (categorie) params.categorie = categorie;
+  const { data } = await clientApi.get<{ items: ItemChecklistAnniversaire[] }>(
+    `/famille/checklists-anniversaire/${checklistId}/items`,
+    { params }
+  );
+  return data.items ?? data as unknown as ItemChecklistAnniversaire[];
+}
+
+/** Met à jour l'état fait/non-fait d'un item checklist anniversaire */
+export async function mettreAJourItemChecklist(
+  checklistId: number,
+  itemId: number,
+  fait: boolean,
+  prixReel?: number
+): Promise<ItemChecklistAnniversaire> {
+  const payload: Record<string, unknown> = { fait };
+  if (prixReel !== undefined) payload.prix_reel = prixReel;
+  const { data } = await clientApi.patch<ItemChecklistAnniversaire>(
+    `/famille/checklists-anniversaire/${checklistId}/items/${itemId}`,
+    payload
+  );
+  return data;
+}
+
+/** Envoie un item checklist anniversaire vers les achats */
+export async function itemChecklistVersAchat(
+  checklistId: number,
+  itemId: number
+): Promise<{ achat_id: number }> {
+  const { data } = await clientApi.post<{ achat_id: number }>(
+    `/famille/checklists-anniversaire/${checklistId}/items/${itemId}/vers-achats`
+  );
+  return data;
+}
+
 // ─── Événements familiaux ─────────────────────────────────
 
 export interface EvenementFamilial {
