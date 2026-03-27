@@ -360,13 +360,15 @@ export default function PageAchats() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          {s.score_pertinence !== undefined && s.score_pertinence > 0.7 && (
-                            <Badge variant="secondary" className="text-[10px] mr-1.5">✨ Top</Badge>
-                          )}
-                          <p className="text-sm font-medium">{s.titre}</p>
+                          <p className="text-sm font-medium flex items-center">
+                            {s.titre}
+                            {(s.score_pertinence ?? 0) > 0.7 && (
+                              <Badge variant="secondary" className="text-[10px] ml-1">✨ Pertinent</Badge>
+                            )}
+                          </p>
                         </div>
                         {s.raison_suggestion && (
-                          <p className="text-xs text-muted-foreground mt-0.5">
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                             {s.raison_suggestion}
                           </p>
                         )}

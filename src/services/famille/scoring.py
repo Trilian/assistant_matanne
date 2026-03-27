@@ -10,116 +10,102 @@ from typing import TypedDict
 from src.services.core.registry import service_factory
 
 
-class SuggestionScoree(TypedDict):
-    """Champs de scoring ajoutés à une suggestion enrichie."""
+from dataclasses import dataclass, field
 
-    score_pertinence: float
-    raison_suggestion: str
-    sources_score: list[str]
+@dataclass
+class SuggestionScoree:
+    """Suggestion enrichie avec score de pertinence."""
+    score_pertinence: float = 0.5
+    raison_suggestion: str = "Suggestion générale"
+    sources_score: list[str] = field(default_factory=list)
 
 
 class ScoringPertinenceService:
-    """Service de scoring déterministe pour les suggestions familiales.
+    """Score la pertinence des suggestions selon le contexte familial."""
 
-    Score chaque suggestion de 0.0 à 1.0 selon plusieurs facteurs additifs.
-    """
+    FACTEURS = {
+        "anniversaire_proche": 0.30,
+        "jalon_recent": 0.20,
+        "meteo_adaptee": 0.20,
+        "budget_disponible": 0.15,
+        "age_jules_adapte": 0.15,
+    }
 
-    def scorer_suggestion(self, suggestion: dict, contexte: dict | None = None) -> dict:
-        """Score une suggestion selon le contexte familial.
-
-        Args:
-            suggestion: Dictionnaire représentant la suggestion à scorer.
-            contexte: Contexte familial (anniversaires, jalons, météo, budget, âge Jules…).
-
-        Returns:
-            La suggestion enrichie avec :
-              - score_pertinence (float 0.0–1.0)
-              - raison_suggestion (str)
-              - sources_score (list[str])
-        """
+    def scorer_suggestion(self, suggestion: dict, contexte: dict | None = None) -> SuggestionScoree:
+        """Score une suggestion selon le contexte. Retourne SuggestionScoree avec score 0.0–1.0."""
         if contexte is None:
-            enrichie = dict(suggestion)
-            enrichie["score_pertinence"] = 0.5
-            enrichie["raison_suggestion"] = "Suggestion générale"
-            enrichie["sources_score"] = []
-            return enrichie
+            return SuggestionScoree()
 
         score = 0.0
         sources: list[str] = []
 
-        # +0.30 — anniversaire proche (≤ 14 jours)
+        # Anniversaire proche (J-14)
         anniversaires = contexte.get("anniversaires") or []
-        for anniv in anniversaires:
-            jours = anniv.get("jours_restants")
-            if jours is not None and jours <= 14:
-                score += 0.30
-                sources.append("anniversaire proche (J-14)")
-                break
+        if any(int(a.get("jours_restants", 99)) <= 14 for a in anniversaires if isinstance(a, dict)):
+            score += self.FACTEURS["anniversaire_proche"]
+            sources.append("anniversaire proche")
 
-        # +0.20 — jalon Jules récent
-        jalons_recents = contexte.get("jalons_recents") or []
+        # Jalon Jules récent
+        jalons_recents = contexte.get("jalons_recents") or contexte.get("jalons") or []
         if jalons_recents:
-            score += 0.20
+            score += self.FACTEURS["jalon_recent"]
             sources.append("jalon Jules récent")
 
-        # +0.20 — météo adaptée au type de suggestion
-        type_suggestion = suggestion.get("type") or ""
-        meteo = contexte.get("meteo")
-        if type_suggestion and isinstance(meteo, dict):
-            icone = meteo.get("icone") or ""
-            est_ext = "exterieur" in type_suggestion or "plein_air" in type_suggestion
-            est_int = "interieur" in type_suggestion or "maison" in type_suggestion
-            meteo_ext = icone in ("☀️", "⛅")
-            meteo_int = icone in ("🌧️", "❄️")
-            if (est_ext and meteo_ext) or (est_int and meteo_int):
-                score += 0.20
+        # Météo adaptée
+        meteo = contexte.get("meteo") or {}
+        type_activite = suggestion.get("type_activite") or suggestion.get("type") or ""
+        if meteo and type_activite:
+            temps = str(meteo.get("description") or meteo.get("temps") or "").lower()
+            exterieur = any(k in type_activite.lower() for k in ["extérieur", "exterieur", "plein_air", "sport"])
+            interieur = any(k in type_activite.lower() for k in ["intérieur", "interieur", "maison", "culture"])
+            pluie = any(k in temps for k in ["pluie", "orage", "nuage"])
+            beau = any(k in temps for k in ["soleil", "clair", "beau"])
+            if (exterieur and beau) or (interieur and pluie):
+                score += self.FACTEURS["meteo_adaptee"]
                 sources.append("météo adaptée")
 
-        # +0.15 — budget disponible
-        budget = contexte.get("budget")
-        prix_estime = suggestion.get("prix_estime")
-        if isinstance(budget, dict):
-            solde = budget.get("solde") or 0.0
-            if solde > 0 and isinstance(prix_estime, (int, float)) and prix_estime <= solde * 0.3:
-                score += 0.15
-                sources.append("budget disponible")
+        # Budget disponible
+        budget = contexte.get("budget") or {}
+        solde = float(budget.get("solde") or budget.get("disponible") or 0)
+        prix = float(suggestion.get("prix_estime") or suggestion.get("fourchette_prix_min") or 0)
+        if solde > 0 and (prix == 0 or prix <= solde * 0.25):
+            score += self.FACTEURS["budget_disponible"]
+            sources.append("budget disponible")
 
-        # +0.15 — âge Jules adapté
-        jules_age_mois = contexte.get("jules_age_mois")
-        age_min = suggestion.get("age_min_mois")
-        age_max = suggestion.get("age_max_mois")
-        if (
-            jules_age_mois is not None
-            and age_min is not None
-            and age_max is not None
-            and age_min <= jules_age_mois <= age_max
-        ):
-            score += 0.15
+        # Âge Jules adapté
+        jules = contexte.get("jules") or contexte.get("profil_enfant") or {}
+        age_mois = int(jules.get("age_mois") or 0)
+        age_min = int(suggestion.get("age_min_mois") or 0)
+        age_max = int(suggestion.get("age_max_mois") or 999)
+        if age_mois > 0 and age_min <= age_mois <= age_max:
+            score += self.FACTEURS["age_jules_adapte"]
             sources.append("adapté à l'âge de Jules")
 
+        score = min(score, 1.0)
         raison = ", ".join(sources) if sources else "Suggestion générale"
 
-        enrichie = dict(suggestion)
-        enrichie["score_pertinence"] = round(min(score, 1.0), 2)
-        enrichie["raison_suggestion"] = raison
-        enrichie["sources_score"] = sources
-        return enrichie
+        return SuggestionScoree(score_pertinence=round(score, 2), raison_suggestion=raison, sources_score=sources)
 
-    def scorer_liste(self, suggestions: list[dict], contexte: dict | None = None) -> list[dict]:
-        """Score une liste de suggestions et la trie par score décroissant.
+    def scorer_et_trier(self, suggestions: list[dict], contexte: dict | None = None) -> list[dict]:
+        """Score toutes les suggestions et les trie par pertinence décroissante."""
+        resultats = []
+        for s in suggestions:
+            try:
+                scored = self.scorer_suggestion(s, contexte)
+                resultats.append({
+                    **s,
+                    "score_pertinence": scored.score_pertinence,
+                    "raison_suggestion": scored.raison_suggestion,
+                    "sources_score": scored.sources_score,
+                })
+            except Exception as exc:  # noqa: BLE001
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning("Scoring échoué pour suggestion '%s': %s", s.get("titre", "?"), exc)
+                resultats.append({**s, "score_pertinence": 0.5, "raison_suggestion": "Suggestion générale", "sources_score": []})
+        return sorted(resultats, key=lambda x: x.get("score_pertinence", 0), reverse=True)
 
-        Args:
-            suggestions: Liste de suggestions à scorer.
-            contexte: Contexte familial partagé.
 
-        Returns:
-            Liste enrichie et triée par score_pertinence décroissant.
-        """
-        enrichies = [self.scorer_suggestion(s, contexte) for s in suggestions]
-        return sorted(enrichies, key=lambda x: x.get("score_pertinence", 0.5), reverse=True)
-
-
-@service_factory("scoring_famille")
 def obtenir_service_scoring() -> ScoringPertinenceService:
-    """Factory singleton du service de scoring pertinence."""
+    """Factory — retourne le service de scoring pertinence."""
     return ScoringPertinenceService()
