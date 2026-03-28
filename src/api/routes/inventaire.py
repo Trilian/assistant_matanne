@@ -781,10 +781,12 @@ async def ajouter_articles_bulk(
 async def ocr_photo_frigo(
     photo: UploadFile = File(..., description="Photo du réfrigérateur (jpg/png, max 10 Mo)"),
     emplacement: str = Query("frigo", description="Emplacement par défaut pour les articles créés"),
+    importer: bool = Query(True, alias="import", description="Si False, détecte sans importer (mode preview)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Analyse une photo de frigo via IA vision et importe les aliments détectés dans l'inventaire.
 
+    Avec `import=false`, retourne les articles détectés sans les sauvegarder (mode preview pour checkboxes).
     Retourne la liste des articles créés/mis à jour.
     """
     # Valider le type de fichier
@@ -802,7 +804,17 @@ async def ocr_photo_frigo(
     articles_detectes = await service.analyser_frigo(image_bytes)
 
     if not articles_detectes:
-        return {"articles": [], "total": 0, "message": "Aucun aliment détecté dans la photo"}
+        return {"articles": [], "total": 0, "crees": 0, "mis_a_jour": 0, "message": "Aucun aliment détecté dans la photo"}
+
+    # Mode preview : retourner les articles détectés sans importer
+    if not importer:
+        return {
+            "articles": articles_detectes,
+            "total": len(articles_detectes),
+            "crees": 0,
+            "mis_a_jour": 0,
+            "message": f"{len(articles_detectes)} aliment(s) détecté(s) — en attente de confirmation",
+        }
 
     # Importer dans l'inventaire via le bulk
     from src.core.models import ArticleInventaire, Ingredient

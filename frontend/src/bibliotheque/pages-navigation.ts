@@ -39,6 +39,7 @@ import {
   ArrowLeftRight,
   CloudSun,
   Timer,
+  Mic,
   StickyNote,
   Cake,
   Contact,
@@ -119,6 +120,7 @@ export const PAGES_NAVIGATION: PageNavigation[] = [
   // Outils
   { nom: "Outils", chemin: "/outils", categorie: "Outils", Icone: Wrench },
   { nom: "Chat IA", chemin: "/outils/chat-ia", categorie: "Outils", Icone: MessageSquare, keywords: ["assistant", "question"] },
+  { nom: "Assistant vocal", chemin: "/outils/assistant-vocal", categorie: "Outils", Icone: Mic, keywords: ["micro", "voix", "commande"] },
   { nom: "Convertisseur", chemin: "/outils/convertisseur", categorie: "Outils", Icone: ArrowLeftRight, keywords: ["unite", "mesure"] },
   { nom: "Météo", chemin: "/outils/meteo", categorie: "Outils", Icone: CloudSun, keywords: ["previsions", "temps"] },
   { nom: "Minuteur", chemin: "/outils/minuteur", categorie: "Outils", Icone: Timer, keywords: ["chrono", "cuisson"] },

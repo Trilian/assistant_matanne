@@ -125,3 +125,48 @@ export async function obtenirPointsFamille(): Promise<PointsFamille> {
   const { data } = await clientApi.get<PointsFamille>("/dashboard/points-famille");
   return data;
 }
+
+// ─── Score bien-être global (MT-03) ─────────────────────────────────
+
+export interface ScoreBienEtre {
+  score_global: number;
+  diversite_alimentaire: number;
+  score_nutri: number;
+  activites_sport: number;
+  trend_semaine_precedente: number;
+  periode: { debut: string; fin: string };
+}
+
+export interface AnomalieFinanciere {
+  module: "famille" | "maison" | "jeux";
+  categorie: string;
+  valeur_courante: number;
+  moyenne_reference: number;
+  ecart_pourcentage: number;
+  gravite: "faible" | "moyenne" | "haute";
+  message: string;
+}
+
+export interface AnomaliesFinancieresResponse {
+  items: AnomalieFinanciere[];
+  total: number;
+  synthese: {
+    depenses_famille_mois: number;
+    depenses_maison_mois: number;
+    net_jeux_mois: number;
+  };
+}
+
+/** Obtenir le score bien-être hebdomadaire (alimentation + nutrition + activités) */
+export async function obtenirScoreBienEtre(): Promise<ScoreBienEtre> {
+  const { data } = await clientApi.get<ScoreBienEtre>("/dashboard/score-bienetre");
+  return data;
+}
+
+/** Obtenir les anomalies financières cross-modules (famille + maison + jeux). */
+export async function obtenirAnomaliesFinancieres(): Promise<AnomaliesFinancieresResponse> {
+  const { data } = await clientApi.get<AnomaliesFinancieresResponse>(
+    "/dashboard/anomalies-financieres"
+  );
+  return data;
+}

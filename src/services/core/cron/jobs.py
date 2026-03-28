@@ -12,6 +12,7 @@ import logging
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from sqlalchemy import func
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +26,24 @@ def _job_rappels_famille() -> None:
     """Évalue et envoie les rappels famille du jour (anniversaires, documents, crèche, jalons)."""
     try:
         from src.services.famille.rappels import ServiceRappelsFamille
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
         service = ServiceRappelsFamille()
         nb = service.envoyer_rappels_du_jour()
         logger.info("Rappels famille : %d envoyé(s)", nb)
+
+        # Sprint 9 (MT-02): rappel proactif WhatsApp pour les rappels famille.
+        if nb > 0:
+            dispatcher = get_dispatcher_notifications()
+            dispatcher.envoyer(
+                user_id="matanne",
+                message=(
+                    f"{nb} rappel(s) famille aujourd'hui (anniversaires, documents, crèche, jalons). "
+                    "Ouvre l'application pour le détail."
+                ),
+                canaux=["whatsapp"],
+                titre="Rappels famille",
+            )
     except Exception:
         logger.exception("Erreur lors des rappels famille")
 
@@ -188,9 +203,10 @@ def _job_rappel_courses_ntfy() -> None:
     """Envoie un rappel ntfy.sh pour les articles de courses en attente à 18h."""
     try:
         from src.core.db import obtenir_contexte_db
-        from src.core.models.courses import LisCourse  # noqa: F401 — import for query
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
         nb_articles = 0
+        noms_articles: list[str] = []
         try:
             with obtenir_contexte_db() as session:
                 # Compter les articles non achetés dans les listes actives
@@ -203,6 +219,18 @@ def _job_rappel_courses_ntfy() -> None:
                     )
                 )
                 nb_articles = result.scalar() or 0
+
+                top_rows = session.execute(
+                    text(
+                        "SELECT i.nom "
+                        "FROM liste_courses lc "
+                        "JOIN ingredients i ON i.id = lc.ingredient_id "
+                        "JOIN listes_courses ls ON ls.id = lc.liste_id "
+                        "WHERE lc.achete = FALSE AND ls.statut IN ('active', 'en_cours') "
+                        "ORDER BY lc.id ASC LIMIT 8"
+                    )
+                )
+                noms_articles = [str(r[0]) for r in top_rows.fetchall() if r and r[0]]
         except Exception:
             logger.debug("Impossible de compter les articles en attente, rappel annulé")
             return
@@ -222,6 +250,18 @@ def _job_rappel_courses_ntfy() -> None:
         resultat = asyncio.run(_envoyer())
         if resultat.succes:
             logger.info("Rappel courses ntfy envoyé (%d articles)", nb_articles)
+
+            # Sprint 9 (MT-02): partage WhatsApp de la liste active.
+            dispatcher = get_dispatcher_notifications()
+            dispatcher.envoyer(
+                user_id="matanne",
+                message=f"{nb_articles} article(s) en attente sur la liste.",
+                canaux=["whatsapp"],
+                type_whatsapp="liste_courses",
+                articles=noms_articles or [f"{nb_articles} article(s) en attente"],
+                nom_liste="Courses en attente",
+                titre="Courses",
+            )
         else:
             logger.warning("Rappel courses ntfy échoué : %s", resultat.message)
     except Exception:
@@ -315,8 +355,8 @@ def _job_resume_hebdo() -> None:
         )
 
         dispatcher = get_dispatcher_notifications()
-        # ntfy toujours tenté; email seulement si adresse fournie en env
-        canaux = ["ntfy", "email"]
+        # ntfy toujours tenté; email et whatsapp si configurés
+        canaux = ["ntfy", "email", "whatsapp"]
         import os
 
         email_dest = os.getenv("EMAIL_RESUME_HEBDO")
@@ -335,7 +375,10 @@ def _job_resume_hebdo() -> None:
         if email_dest:
             kwargs["email"] = email_dest
         else:
-            canaux = ["ntfy"]
+            canaux = ["ntfy", "whatsapp"]
+
+        # Canal WhatsApp: résumé compact dédié.
+        kwargs["type_whatsapp"] = "rapport_hebdo"
 
         resultats = dispatcher.envoyer(
             user_id="matanne",
@@ -346,6 +389,428 @@ def _job_resume_hebdo() -> None:
         logger.info("Résumé hebdo envoyé: %s", resultats)
     except Exception:
         logger.exception("Erreur lors du résumé hebdomadaire")
+
+
+def _job_planning_semaine_si_vide() -> None:
+    """J-03: vérifie le planning de la semaine prochaine et alerte s'il est vide."""
+    try:
+        from datetime import date, timedelta
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Planning
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        lundi_prochain = aujourd_hui + timedelta(days=(7 - aujourd_hui.weekday()))
+        dimanche_prochain = lundi_prochain + timedelta(days=6)
+
+        with obtenir_contexte_db() as session:
+            planning = (
+                session.query(Planning)
+                .filter(
+                    Planning.semaine_debut <= dimanche_prochain,
+                    Planning.semaine_fin >= lundi_prochain,
+                    Planning.statut == "actif",
+                )
+                .first()
+            )
+
+        if planning is not None:
+            logger.info("J-03: planning déjà actif pour la semaine du %s", lundi_prochain)
+            return
+
+        message = (
+            f"Aucun planning actif pour la semaine du {lundi_prochain:%d/%m}. "
+            "Pense à générer le menu hebdo."
+        )
+        dispatcher = get_dispatcher_notifications()
+        res = dispatcher.envoyer(
+            user_id="matanne",
+            message=message,
+            canaux=["ntfy", "whatsapp"],
+            titre="Planning semaine à générer",
+        )
+        logger.info("J-03 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur job J-03")
+
+
+def _job_alertes_peremption_48h() -> None:
+    """J-04: envoie les alertes de péremption à J+48h."""
+    try:
+        from datetime import date, timedelta
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        seuil = aujourd_hui + timedelta(days=2)
+
+        with obtenir_contexte_db() as session:
+            articles = (
+                session.query(ArticleInventaire)
+                .filter(
+                    ArticleInventaire.date_peremption.isnot(None),
+                    ArticleInventaire.date_peremption >= aujourd_hui,
+                    ArticleInventaire.date_peremption <= seuil,
+                    ArticleInventaire.quantite > 0,
+                )
+                .order_by(ArticleInventaire.date_peremption.asc())
+                .limit(10)
+                .all()
+            )
+
+        if not articles:
+            logger.info("J-04: aucune péremption critique à 48h")
+            return
+
+        lignes = [
+            f"- {a.nom} ({a.date_peremption:%d/%m})"
+            for a in articles
+            if getattr(a, "date_peremption", None)
+        ]
+        message = "Produits à consommer sous 48h:\n" + "\n".join(lignes)
+
+        dispatcher = get_dispatcher_notifications()
+        res = dispatcher.envoyer(
+            user_id="matanne",
+            message=message,
+            canaux=["ntfy", "whatsapp"],
+            titre="Alerte péremption 48h",
+        )
+        logger.info("J-04 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur job J-04")
+
+
+def _job_rapport_mensuel_budget() -> None:
+    """J-07: envoie un rapport mensuel consolidé famille + maison + jeux."""
+    try:
+        from datetime import date, timedelta
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import BudgetFamille, DepenseMaison, PariSportif
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        mois_ref = (aujourd_hui.replace(day=1) - timedelta(days=1))
+        mois = mois_ref.month
+        annee = mois_ref.year
+
+        with obtenir_contexte_db() as session:
+            total_famille = (
+                session.query(func.sum(BudgetFamille.montant))
+                .filter(
+                    func.extract("month", BudgetFamille.date) == mois,
+                    func.extract("year", BudgetFamille.date) == annee,
+                )
+                .scalar()
+                or 0
+            )
+            total_maison = (
+                session.query(func.sum(DepenseMaison.montant))
+                .filter(DepenseMaison.mois == mois, DepenseMaison.annee == annee)
+                .scalar()
+                or 0
+            )
+            mises = (
+                session.query(func.sum(PariSportif.mise))
+                .filter(
+                    func.extract("month", PariSportif.cree_le) == mois,
+                    func.extract("year", PariSportif.cree_le) == annee,
+                )
+                .scalar()
+                or 0
+            )
+            gains = (
+                session.query(func.sum(PariSportif.gain))
+                .filter(
+                    func.extract("month", PariSportif.cree_le) == mois,
+                    func.extract("year", PariSportif.cree_le) == annee,
+                )
+                .scalar()
+                or 0
+            )
+
+        net_jeux = float(gains) - float(mises)
+        total_global = float(total_famille) + float(total_maison)
+        message = (
+            f"Rapport mensuel {mois:02d}/{annee}: "
+            f"Famille {float(total_famille):.2f} EUR, "
+            f"Maison {float(total_maison):.2f} EUR, "
+            f"Jeux net {net_jeux:.2f} EUR. "
+            f"Total dépenses hors jeux: {total_global:.2f} EUR."
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        res = dispatcher.envoyer(
+            user_id="matanne",
+            message=message,
+            canaux=["ntfy", "email", "whatsapp"],
+            titre=f"Rapport mensuel {mois:02d}/{annee}",
+            type_email="rapport_mensuel",
+            rapport={
+                "mois": f"{mois:02d}/{annee}",
+                "depenses_famille": float(total_famille),
+                "depenses_maison": float(total_maison),
+                "mises_jeux": float(mises),
+                "gains_jeux": float(gains),
+                "net_jeux": net_jeux,
+                "total_global": total_global,
+            },
+            type_whatsapp="rapport_hebdo",
+        )
+        logger.info("J-07 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur job J-07")
+
+
+def _job_score_weekend() -> None:
+    """J-08: calcule un score weekend basé sur activités + météo + contexte Jules."""
+    try:
+        from datetime import date, timedelta
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ActiviteFamille
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.integrations.weather import obtenir_service_meteo
+
+        aujourd_hui = date.today()
+        samedi = aujourd_hui + timedelta(days=(5 - aujourd_hui.weekday()) % 7)
+        dimanche = samedi + timedelta(days=1)
+
+        with obtenir_contexte_db() as session:
+            activites = (
+                session.query(ActiviteFamille)
+                .filter(ActiviteFamille.date_prevue >= samedi, ActiviteFamille.date_prevue <= dimanche)
+                .all()
+            )
+
+        bonus_meteo = 0
+        meteo_resume = "indisponible"
+        try:
+            service_meteo = obtenir_service_meteo()
+            previsions = service_meteo.get_previsions(nb_jours=3)
+            if previsions:
+                p = previsions[-1]
+                cond = (getattr(p, "condition", "") or "").lower()
+                meteo_resume = f"{getattr(p, 'condition', 'variable')}"
+                if "soleil" in cond or "clair" in cond:
+                    bonus_meteo = 15
+                elif "pluie" in cond or "orage" in cond:
+                    bonus_meteo = -10
+        except Exception:
+            pass
+
+        nb_activites = len(activites)
+        bonus_jules = 10 if nb_activites > 0 else 0
+        score = max(0, min(100, 45 + nb_activites * 12 + bonus_meteo + bonus_jules))
+
+        message = (
+            f"Score weekend: {score}/100. "
+            f"Activités prévues: {nb_activites}. Météo: {meteo_resume}."
+        )
+        dispatcher = get_dispatcher_notifications()
+        res = dispatcher.envoyer(
+            user_id="matanne",
+            message=message,
+            canaux=["ntfy", "whatsapp"],
+            titre="Score weekend",
+        )
+        logger.info("J-08 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur job J-08")
+
+
+def _job_controle_contrats_garanties() -> None:
+    """J-09: contrôle des contrats/garanties expirant dans 3 mois."""
+    try:
+        from datetime import date, timedelta
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Contrat, Garantie
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        horizon = aujourd_hui + timedelta(days=90)
+
+        with obtenir_contexte_db() as session:
+            contrats = (
+                session.query(Contrat)
+                .filter(
+                    Contrat.statut == "actif",
+                    (
+                        ((Contrat.date_renouvellement.isnot(None)) & (Contrat.date_renouvellement >= aujourd_hui) & (Contrat.date_renouvellement <= horizon))
+                        | ((Contrat.date_fin.isnot(None)) & (Contrat.date_fin >= aujourd_hui) & (Contrat.date_fin <= horizon))
+                    ),
+                )
+                .all()
+            )
+            garanties = (
+                session.query(Garantie)
+                .filter(
+                    Garantie.statut == "active",
+                    Garantie.date_fin_garantie >= aujourd_hui,
+                    Garantie.date_fin_garantie <= horizon,
+                )
+                .all()
+            )
+
+        if not contrats and not garanties:
+            logger.info("J-09: aucun contrat/garantie à échéance sur 3 mois")
+            return
+
+        message = (
+            f"Échéances 3 mois: {len(contrats)} contrat(s), {len(garanties)} garantie(s). "
+            "Vérifie les renouvellements et options de résiliation."
+        )
+        dispatcher = get_dispatcher_notifications()
+        res = dispatcher.envoyer(
+            user_id="matanne",
+            message=message,
+            canaux=["ntfy", "whatsapp"],
+            titre="Contrats & garanties à surveiller",
+        )
+        logger.info("J-09 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur job J-09")
+
+
+def _job_rapport_jardin() -> None:
+    """J-10: rapport jardin hebdomadaire (arrosage + récoltes/semis)."""
+    try:
+        from datetime import date, timedelta
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ElementJardin, JournalJardin
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        horizon = aujourd_hui + timedelta(days=7)
+        debut = aujourd_hui - timedelta(days=7)
+
+        with obtenir_contexte_db() as session:
+            actifs = session.query(ElementJardin).filter(ElementJardin.statut == "actif").all()
+            recoltes_proches = (
+                session.query(ElementJardin)
+                .filter(
+                    ElementJardin.date_recolte_prevue.isnot(None),
+                    ElementJardin.date_recolte_prevue >= aujourd_hui,
+                    ElementJardin.date_recolte_prevue <= horizon,
+                )
+                .all()
+            )
+            actions = (
+                session.query(JournalJardin.action, func.count(JournalJardin.id))
+                .filter(JournalJardin.date >= debut, JournalJardin.date <= aujourd_hui)
+                .group_by(JournalJardin.action)
+                .all()
+            )
+
+        action_txt = ", ".join(f"{a}:{n}" for a, n in actions[:4]) if actions else "aucune action loggée"
+        message = (
+            f"Jardin: {len(actifs)} élément(s) actifs, {len(recoltes_proches)} récolte(s) prévues sous 7 jours. "
+            f"Journal 7j: {action_txt}."
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        res = dispatcher.envoyer(
+            user_id="matanne",
+            message=message,
+            canaux=["ntfy", "whatsapp"],
+            titre="Rapport jardin hebdo",
+        )
+        logger.info("J-10 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur job J-10")
+
+
+def _job_score_bien_etre_hebdo() -> None:
+    """J-11: calcule le score bien-être hebdo et alerte en cas de dérive."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.dashboard.score_bienetre import get_score_bien_etre_service
+
+        service = get_score_bien_etre_service()
+        score = service.calculer_score()
+        score_global = int(score.get("score_global", 0))
+        trend = float(score.get("trend_semaine_precedente", 0.0))
+
+        niveau = "normal"
+        if score_global < 60:
+            niveau = "alerte"
+        elif score_global < 75:
+            niveau = "attention"
+
+        message = (
+            f"Score bien-être hebdo: {score_global}/100 "
+            f"({trend:+.0f} pts vs semaine précédente) - niveau {niveau}."
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        canaux = ["ntfy", "whatsapp"] if niveau != "normal" else ["ntfy"]
+        res = dispatcher.envoyer(
+            user_id="matanne",
+            message=message,
+            canaux=canaux,
+            titre="Score bien-être hebdo",
+        )
+        logger.info("J-11 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur job J-11")
+
+
+def _job_garmin_sync_matinal() -> None:
+    """Synchronise les données Garmin de tous les profils connectés (LT-01)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ProfilUtilisateur
+        from src.services.integrations.garmin.service import get_garmin_service
+
+        nb_profils = 0
+        with obtenir_contexte_db() as session:
+            profils = (
+                session.query(ProfilUtilisateur)
+                .filter(ProfilUtilisateur.garmin_connected == True)  # noqa: E712
+                .all()
+            )
+            service = get_garmin_service()
+            for profil in profils:
+                try:
+                    service.sync_user_data(user_id=profil.id, days_back=2, db=session)
+                    nb_profils += 1
+                except Exception:
+                    logger.exception("Sync Garmin échouée pour le profil %s", profil.id)
+        logger.info("Sync Garmin matinale terminée (%d profil(s))", nb_profils)
+    except Exception:
+        logger.exception("Erreur lors de la sync Garmin matinale")
+
+
+def _job_automations() -> None:
+    """Exécute périodiquement les règles d'automation actives (LT-04)."""
+    try:
+        from src.services.utilitaires.automations_engine import get_moteur_automations_service
+
+        result = get_moteur_automations_service().executer_automations_actives()
+        logger.info(
+            "Automations exécutées: %s sur %s règle(s)",
+            result.get("executed", 0),
+            result.get("total", 0),
+        )
+    except Exception:
+        logger.exception("Erreur lors de l'exécution des automations")
+
+
+def _job_points_famille_hebdo() -> None:
+    """Calcule les points famille hebdo (LT-02, dim 20h00)."""
+    try:
+        from src.services.dashboard.points_famille import get_points_famille_service
+
+        points = get_points_famille_service().calculer_points()
+        logger.info("Points famille hebdo recalculés: %s", points.get("total_points", 0))
+    except Exception:
+        logger.exception("Erreur lors du calcul des points famille hebdo")
 
 
 # ─── Orchestrateur ────────────────────────────────────────────────────────────
@@ -425,6 +890,76 @@ class DémarreurCron:
             id="resume_hebdo",
             replace_existing=True,
             name="Résumé hebdomadaire (lundi 07h30)",
+        )
+        self._scheduler.add_job(
+            _job_planning_semaine_si_vide,
+            CronTrigger(day_of_week="sun", hour=20, minute=0),
+            id="planning_semaine_si_vide",
+            replace_existing=True,
+            name="J-03 Vérification planning semaine suivante",
+        )
+        self._scheduler.add_job(
+            _job_alertes_peremption_48h,
+            CronTrigger(hour=6, minute=0),
+            id="alertes_peremption_48h",
+            replace_existing=True,
+            name="J-04 Alertes péremption 48h",
+        )
+        self._scheduler.add_job(
+            _job_rapport_mensuel_budget,
+            CronTrigger(day=1, hour=8, minute=15),
+            id="rapport_mensuel_budget",
+            replace_existing=True,
+            name="J-07 Rapport mensuel budget",
+        )
+        self._scheduler.add_job(
+            _job_score_weekend,
+            CronTrigger(day_of_week="fri", hour=17, minute=0),
+            id="score_weekend",
+            replace_existing=True,
+            name="J-08 Score weekend",
+        )
+        self._scheduler.add_job(
+            _job_controle_contrats_garanties,
+            CronTrigger(day=1, hour=9, minute=0),
+            id="controle_contrats_garanties",
+            replace_existing=True,
+            name="J-09 Contrats et garanties",
+        )
+        self._scheduler.add_job(
+            _job_rapport_jardin,
+            CronTrigger(day_of_week="wed", hour=20, minute=0),
+            id="rapport_jardin",
+            replace_existing=True,
+            name="J-10 Rapport jardin hebdo",
+        )
+        self._scheduler.add_job(
+            _job_score_bien_etre_hebdo,
+            CronTrigger(day_of_week="sun", hour=20, minute=0),
+            id="score_bien_etre_hebdo",
+            replace_existing=True,
+            name="J-11 Score bien-être hebdo",
+        )
+        self._scheduler.add_job(
+            _job_garmin_sync_matinal,
+            CronTrigger(hour=6, minute=0),
+            id="garmin_sync_matinal",
+            replace_existing=True,
+            name="Sync Garmin automatique matinale",
+        )
+        self._scheduler.add_job(
+            _job_automations,
+            CronTrigger(minute="*/5"),
+            id="automations_runner",
+            replace_existing=True,
+            name="Exécution des automations (toutes les 5 min)",
+        )
+        self._scheduler.add_job(
+            _job_points_famille_hebdo,
+            CronTrigger(day_of_week="sun", hour=20, minute=0),
+            id="points_famille_hebdo",
+            replace_existing=True,
+            name="Calcul points famille hebdomadaire",
         )
 
     def demarrer(self) -> None:

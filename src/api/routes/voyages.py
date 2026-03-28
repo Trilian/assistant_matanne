@@ -185,8 +185,13 @@ async def planifier_voyage_ia(
         ]
 
         checklists_creees = []
+        nb_participants = max(len(participants), 1)
         for template in templates_eligibles[:4]:
-            checklist = service.creer_checklist_depuis_template(voyage.id, template.id)
+            checklist = service.creer_checklist_depuis_template(
+                voyage.id,
+                template.id,
+                nb_participants=nb_participants,
+            )
             if checklist is not None:
                 checklists_creees.append({"id": checklist.id, "nom": checklist.nom})
 
@@ -198,6 +203,31 @@ async def planifier_voyage_ia(
             "imported_templates": imported,
             "checklists": checklists_creees,
             "suggestions": suggestions,
+        }
+
+    return await executer_async(_query)
+
+
+@router.post("/{voyage_id}/generer-courses", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def generer_courses_depuis_voyage(
+    voyage_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère des articles de courses depuis les checklists du voyage (LT-03)."""
+    from src.services.famille.voyage import obtenir_service_voyage
+
+    def _query():
+        service = obtenir_service_voyage()
+        voyage = service.obtenir_voyage(voyage_id)
+        if voyage is None:
+            raise HTTPException(status_code=404, detail="Voyage introuvable")
+
+        nb = service.generer_courses_depuis_checklists(voyage_id)
+        return {
+            "message": "Courses générées depuis les checklists voyage",
+            "voyage_id": voyage_id,
+            "articles_ajoutes": nb,
         }
 
     return await executer_async(_query)

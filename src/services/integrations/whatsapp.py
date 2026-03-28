@@ -154,3 +154,59 @@ async def envoyer_alerte_peremption(articles: list[dict]) -> bool:
     message = f"⚠️ *Alerte péremption*\n\n{chr(10).join(lignes)}\n\nPense à les utiliser !"
 
     return await envoyer_message_whatsapp(destinataire, message)
+
+
+async def envoyer_rappel_creche(message_creche: str) -> bool:
+    """Envoie un rappel lié à la crèche (fermeture, jours sans crèche, rappel RDV).
+
+    Args:
+        message_creche: Texte du rappel (ex: «Crèche fermée lundi — prévenir la famille»)
+    """
+    settings = obtenir_parametres()
+    destinataire = settings.WHATSAPP_USER_NUMBER
+
+    if not destinataire:
+        return False
+
+    message = f"👶 *Rappel crèche*\n\n{message_creche}"
+    return await envoyer_message_whatsapp(destinataire, message)
+
+
+async def envoyer_liste_courses_partagee(articles: list[str], nom_liste: str = "Courses") -> bool:
+    """Envoie la liste de courses active via WhatsApp.
+
+    Args:
+        articles: Liste des noms d'articles à acheter
+        nom_liste: Nom de la liste de courses
+    """
+    settings = obtenir_parametres()
+    destinataire = settings.WHATSAPP_USER_NUMBER
+
+    if not destinataire or not articles:
+        return False
+
+    lignes = "\n".join(f"☐ {a}" for a in articles[:30])
+    message = f"🛒 *{nom_liste}*\n\n{lignes}"
+    return await envoyer_message_whatsapp(destinataire, message)
+
+
+async def envoyer_rapport_hebdo_whatsapp(texte_resume: str) -> bool:
+    """Envoie le rapport hebdomadaire compact via WhatsApp.
+
+    Complément du canal email/ntfy — version courte pour WhatsApp.
+    """
+    settings = obtenir_parametres()
+    destinataire = settings.WHATSAPP_USER_NUMBER
+
+    if not destinataire:
+        return False
+
+    message = f"📋 *Résumé de la semaine*\n\n{texte_resume}"
+    return await envoyer_message_interactif(
+        destinataire=destinataire,
+        corps=message,
+        boutons=[
+            {"id": "resume_vu", "title": "👍 Vu !"},
+            {"id": "resume_detail", "title": "📊 Détail"},
+        ],
+    )

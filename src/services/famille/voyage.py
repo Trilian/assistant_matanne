@@ -105,6 +105,18 @@ class ServiceVoyage(BaseService[Voyage]):
             if hasattr(voyage, key):
                 setattr(voyage, key, value)
         db.commit()
+
+        if data.get("statut") == "en_cours":
+            obtenir_bus().emettre(
+                "voyage.en_cours",
+                {
+                    "voyage_id": voyage.id,
+                    "titre": voyage.titre,
+                    "suspendre_arrosage": True,
+                    "planning_cuisine_allege": True,
+                },
+                source="ServiceVoyage",
+            )
         return True
 
     @avec_gestion_erreurs(default_return=False)
@@ -166,6 +178,7 @@ class ServiceVoyage(BaseService[Voyage]):
         self,
         voyage_id: int,
         template_id: int,
+        nb_participants: int = 2,
         *,
         db: Session | None = None,
     ) -> ChecklistVoyage | None:
@@ -177,10 +190,16 @@ class ServiceVoyage(BaseService[Voyage]):
             logger.warning("Template %d non trouvé", template_id)
             return None
 
-        # Copier les articles du template avec statut non-coché
+        ratio = max(nb_participants, 1) / 2.0
+
+        # Copier les articles du template avec statut non-coché + scaling quantités.
         articles = []
         for article in template.articles or []:
-            articles.append({**article, "fait": False})
+            article_copy = {**article, "fait": False}
+            quantite = article_copy.get("quantite")
+            if isinstance(quantite, (int, float)):
+                article_copy["quantite"] = max(1, round(float(quantite) * ratio, 1))
+            articles.append(article_copy)
 
         checklist = ChecklistVoyage(
             voyage_id=voyage_id,
@@ -197,6 +216,77 @@ class ServiceVoyage(BaseService[Voyage]):
             voyage_id,
         )
         return checklist
+
+    @avec_gestion_erreurs(default_return=0)
+    @avec_session_db
+    def generer_courses_depuis_checklists(
+        self,
+        voyage_id: int,
+        *,
+        db: Session | None = None,
+    ) -> int:
+        """Crée des articles de courses à partir des checklists d'un voyage."""
+        if db is None:
+            return 0
+
+        from src.core.models import ArticleCourses, Ingredient, ListeCourses
+
+        voyage = db.query(Voyage).get(voyage_id)
+        if voyage is None:
+            return 0
+
+        liste = (
+            db.query(ListeCourses)
+            .filter(ListeCourses.archivee == False)  # noqa: E712
+            .order_by(ListeCourses.id.asc())
+            .first()
+        )
+        if liste is None:
+            liste = ListeCourses(nom=f"Voyage {voyage.destination}", archivee=False)
+            db.add(liste)
+            db.flush()
+
+        checklists = db.query(ChecklistVoyage).filter_by(voyage_id=voyage_id).all()
+        ajoutes = 0
+        for checklist in checklists:
+            for article in checklist.articles or []:
+                nom = (article.get("nom") or "").strip()
+                if not nom:
+                    continue
+
+                ingredient = db.query(Ingredient).filter(Ingredient.nom.ilike(nom)).first()
+                if ingredient is None:
+                    continue
+
+                existe = (
+                    db.query(ArticleCourses)
+                    .filter(
+                        ArticleCourses.liste_id == liste.id,
+                        ArticleCourses.ingredient_id == ingredient.id,
+                        ArticleCourses.achete == False,  # noqa: E712
+                    )
+                    .first()
+                )
+                if existe is not None:
+                    continue
+
+                quantite = article.get("quantite")
+                qte = float(quantite) if isinstance(quantite, (int, float)) else 1.0
+                db.add(
+                    ArticleCourses(
+                        liste_id=liste.id,
+                        ingredient_id=ingredient.id,
+                        quantite_necessaire=max(0.1, qte),
+                        priorite="moyenne",
+                        achete=False,
+                        suggere_par_ia=True,
+                        notes=f"Import voyage #{voyage_id}",
+                    )
+                )
+                ajoutes += 1
+
+        db.commit()
+        return ajoutes
 
     @avec_gestion_erreurs(default_return=False)
     @avec_session_db

@@ -62,6 +62,8 @@ class DispatcherNotifications:
                     resultats[canal] = self._envoyer_push(user_id, message, **kwargs)
                 elif canal == "email":
                     resultats[canal] = self._envoyer_email(user_id, message, **kwargs)
+                elif canal == "whatsapp":
+                    resultats[canal] = self._envoyer_whatsapp(message, **kwargs)
                 else:
                     logger.warning("Canal de notification inconnu : %s", canal)
                     resultats[canal] = False
@@ -119,10 +121,45 @@ class DispatcherNotifications:
             logger.error("Erreur push web : %s", e)
             return False
 
+    # ─── Canal WhatsApp ─────────────────────────────────────────────────────────
+
+    def _envoyer_whatsapp(self, message: str, **kwargs: Any) -> bool:
+        """Envoie via WhatsApp Meta Cloud API."""
+        try:
+            import asyncio
+            from src.services.integrations.whatsapp import (
+                envoyer_message_whatsapp,
+                envoyer_liste_courses_partagee,
+                envoyer_rapport_hebdo_whatsapp,
+            )
+            from src.core.config import obtenir_parametres
+
+            settings = obtenir_parametres()
+            destinataire = getattr(settings, "WHATSAPP_USER_NUMBER", None)
+            if not destinataire:
+                logger.debug("WhatsApp : WHATSAPP_USER_NUMBER non configuré, canal ignoré")
+                return False
+
+            type_wa = kwargs.get("type_whatsapp", "texte")
+
+            async def _send() -> bool:
+                if type_wa == "liste_courses":
+                    articles = kwargs.get("articles", [message])
+                    nom_liste = kwargs.get("nom_liste", "Courses")
+                    return await envoyer_liste_courses_partagee(articles, nom_liste)
+                elif type_wa == "rapport_hebdo":
+                    return await envoyer_rapport_hebdo_whatsapp(message)
+                else:
+                    return await envoyer_message_whatsapp(destinataire, message)
+
+            return asyncio.run(_send())
+        except Exception as e:
+            logger.error("Erreur WhatsApp : %s", e)
+            return False
+
     # ─── Canal email ────────────────────────────────────────────────────────────
 
     def _envoyer_email(self, user_id: str, message: str, **kwargs: Any) -> bool:
-        """Envoie par email."""
         email = kwargs.get("email")
         if not email:
             # Essayer de récupérer l'email depuis la DB

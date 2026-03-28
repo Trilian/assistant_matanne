@@ -87,6 +87,9 @@ DROP TABLE IF EXISTS garmin_tokens CASCADE;
 DROP TABLE IF EXISTS activites_garmin CASCADE;
 DROP TABLE IF EXISTS resumes_quotidiens_garmin CASCADE;
 DROP TABLE IF EXISTS journaux_alimentaires CASCADE;
+DROP TABLE IF EXISTS badges_utilisateurs CASCADE;
+DROP TABLE IF EXISTS points_utilisateurs CASCADE;
+DROP TABLE IF EXISTS automations CASCADE;
 DROP TABLE IF EXISTS evenements_calendrier CASCADE;
 DROP TABLE IF EXISTS depenses_home CASCADE;
 DROP TABLE IF EXISTS comparatifs CASCADE;
@@ -1319,6 +1322,59 @@ CREATE TABLE journaux_alimentaires (
 CREATE INDEX IF NOT EXISTS ix_food_logs_user ON journaux_alimentaires(user_id);
 CREATE INDEX IF NOT EXISTS ix_food_logs_date ON journaux_alimentaires(date);
 -- ─────────────────────────────────────────────────────────────────────────────
+-- 4.04B GAMIFICATION_POINTS (→ profils_utilisateurs)
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE points_utilisateurs (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    semaine_debut DATE NOT NULL,
+    points_sport INTEGER NOT NULL DEFAULT 0,
+    points_alimentation INTEGER NOT NULL DEFAULT 0,
+    points_anti_gaspi INTEGER NOT NULL DEFAULT 0,
+    total_points INTEGER NOT NULL DEFAULT 0,
+    details JSONB,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_points_utilisateur_user FOREIGN KEY (user_id) REFERENCES profils_utilisateurs(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_points_user_semaine ON points_utilisateurs(user_id, semaine_debut);
+CREATE INDEX IF NOT EXISTS ix_points_utilisateurs_user ON points_utilisateurs(user_id);
+CREATE INDEX IF NOT EXISTS ix_points_utilisateurs_semaine ON points_utilisateurs(semaine_debut);
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 4.04C GAMIFICATION_BADGES (→ profils_utilisateurs)
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE badges_utilisateurs (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    badge_type VARCHAR(100) NOT NULL,
+    badge_label VARCHAR(150) NOT NULL,
+    acquis_le DATE NOT NULL DEFAULT CURRENT_DATE,
+    meta JSONB,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_badges_utilisateur_user FOREIGN KEY (user_id) REFERENCES profils_utilisateurs(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_badges_user_type_date ON badges_utilisateurs(user_id, badge_type, acquis_le);
+CREATE INDEX IF NOT EXISTS ix_badges_utilisateurs_user ON badges_utilisateurs(user_id);
+CREATE INDEX IF NOT EXISTS ix_badges_utilisateurs_type ON badges_utilisateurs(badge_type);
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 4.04D AUTOMATIONS (→ profils_utilisateurs)
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE automations (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    nom VARCHAR(150) NOT NULL,
+    declencheur JSONB NOT NULL,
+    action JSONB NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    derniere_execution TIMESTAMP WITH TIME ZONE,
+    execution_count INTEGER NOT NULL DEFAULT 0,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_automations_user FOREIGN KEY (user_id) REFERENCES profils_utilisateurs(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS ix_automations_user ON automations(user_id);
+CREATE INDEX IF NOT EXISTS ix_automations_active ON automations(active);
+-- ─────────────────────────────────────────────────────────────────────────────
 -- 4.05 RECETTE_INGREDIENTS (→ recettes, ingredients)
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE recette_ingredients (
@@ -1334,6 +1390,7 @@ CREATE TABLE recette_ingredients (
 );
 CREATE INDEX IF NOT EXISTS ix_recette_ingredients_recette ON recette_ingredients(recette_id);
 CREATE INDEX IF NOT EXISTS ix_recette_ingredients_ingredient ON recette_ingredients(ingredient_id);
+CREATE INDEX IF NOT EXISTS idx_recette_ingredients_ingredient_id ON recette_ingredients(ingredient_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.06 ETAPES_RECETTE (→ recettes)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1571,6 +1628,7 @@ CREATE TABLE repas (
         )
 );
 CREATE INDEX IF NOT EXISTS ix_repas_planning ON repas(planning_id);
+CREATE INDEX IF NOT EXISTS idx_repas_planning_id ON repas(planning_id);
 CREATE INDEX IF NOT EXISTS ix_repas_recette ON repas(recette_id);
 CREATE INDEX IF NOT EXISTS ix_repas_date ON repas(date_repas);
 CREATE INDEX IF NOT EXISTS ix_repas_type ON repas(type_repas);
@@ -3348,7 +3406,7 @@ tables_modifie_le TEXT [] := ARRAY [
         'profils_utilisateurs', 'garmin_tokens', 'recettes', 'activites_weekend',
         'achats_famille', 'jeux_equipes', 'jeux_matchs', 'config_batch_cooking',
         'sessions_batch_cooking', 'preparations_batch', 'plannings',
-        'modeles_courses', 'templates_semaine',
+    'modeles_courses', 'templates_semaine', 'points_utilisateurs', 'automations',
         'contacts_famille', 'anniversaires_famille', 'evenements_familiaux',
         'voyages', 'checklists_voyage', 'documents_famille', 'albums_famille',
         -- Jeux extensions
@@ -3632,6 +3690,7 @@ shared_tables TEXT[] := ARRAY[
     -- Santé & Fitness
     'profils_utilisateurs', 'routines_sante', 'objectifs_sante', 'entrees_sante',
     'journaux_alimentaires', 'garmin_tokens', 'activites_garmin', 'resumes_quotidiens_garmin',
+    'points_utilisateurs', 'badges_utilisateurs', 'automations',
     'vaccins', 'rendez_vous_medicaux', 'mesures_croissance',
     -- Finances
     'depenses_maison',

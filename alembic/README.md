@@ -1,23 +1,17 @@
 # Alembic migrations — Assistant Matanne (ARCHIVÉ)
 
-> **⚠️ Sprint 1 — 2026-03-28** : Alembic est **désactivé**. Les versions Alembic ont été absorbées
-> dans `sql/INIT_COMPLET.sql` (source de vérité unique). `alembic.ini` a été renommé en
-> `alembic.ini.bak`. Le workflow actif est `INIT_COMPLET.sql` + `GestionnaireMigrations`.
+> **⚠️ Sprint 7 — 2026-03-28** : Alembic est **désactivé**.
+>
+> - Les migrations Alembic ont été absorbées dans `sql/INIT_COMPLET.sql`.
+> - `alembic.ini` a été archivé en `alembic.ini.bak`.
+> - Les artefacts techniques Alembic (`env.py`, `script.py.mako`, `versions/`) ont été retirés.
 
+## Workflow actif
 
+- Source de vérité schéma DB : `sql/INIT_COMPLET.sql`
+- Application des changements : SQL direct + `GestionnaireMigrations`
 
-```bash
-# Générer une migration depuis les changements de modèles
-alembic revision --autogenerate -m "ajout_table_taches"
-
-# Appliquer toutes les migrations en attente
-alembic upgrade head
-
-# Appliquer une migration spécifique
-alembic upgrade +1
-
-# Revenir en arrière d'une version
-alembic downgrade -1
+Voir `docs/MIGRATION_GUIDE.md` pour les instructions à jour.
 
 # Voir l'historique
 alembic history --verbose

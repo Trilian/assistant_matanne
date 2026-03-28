@@ -16,6 +16,7 @@ import {
   Euro,
   Bell,
   Settings2,
+  Heart,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -33,6 +34,7 @@ import {
   obtenirAlertesContextuelles,
   obtenirConfigDashboard,
   obtenirPointsFamille,
+  obtenirScoreBienEtre,
   obtenirTableauBord,
   sauvegarderConfigDashboard,
 } from "@/bibliotheque/api/tableau-bord";
@@ -53,6 +55,7 @@ const WIDGETS_DEFAUT = {
   histoire_famille: true,
   alertes_contextuelles: true,
   points_famille: true,
+  score_bienetre: true,
 };
 
 type ClesWidget = keyof typeof WIDGETS_DEFAUT;
@@ -98,6 +101,10 @@ export default function PageAccueil() {
   const { data: pointsFamille } = utiliserRequete(
     ["dashboard", "points-famille"],
     obtenirPointsFamille
+  );
+  const { data: scoreBienEtre } = utiliserRequete(
+    ["dashboard", "score-bienetre"],
+    obtenirScoreBienEtre
   );
 
   const [widgetsStockes, setWidgetsStockes] = utiliserStockageLocal("dashboard-widgets", WIDGETS_DEFAUT);
@@ -300,6 +307,43 @@ export default function PageAccueil() {
                 ))}
               </div>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {widgets.score_bienetre && scoreBienEtre && (
+        <Card className="border-purple-300/50 bg-purple-50/50 dark:border-purple-900/40 dark:bg-purple-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Heart className="h-4 w-4 text-purple-500" />
+              Score bien-être
+            </CardTitle>
+            <CardDescription>
+              Semaine du {new Date(scoreBienEtre.periode.debut).toLocaleDateString("fr-FR")} ·{" "}
+              {scoreBienEtre.trend_semaine_precedente >= 0 ? "+" : ""}
+              {Math.round(scoreBienEtre.trend_semaine_precedente)} pts vs semaine précédente
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-4xl font-bold text-purple-600 dark:text-purple-400">
+                  {scoreBienEtre.score_global}
+                  <span className="text-lg text-muted-foreground">/100</span>
+                </p>
+              </div>
+              <div className="text-right text-xs text-muted-foreground space-y-1">
+                <p>🥗 Diversité: {scoreBienEtre.diversite_alimentaire}%</p>
+                <p>🏷️ Nutri-score: {scoreBienEtre.score_nutri}%</p>
+                <p>🏃 Sport: {scoreBienEtre.activites_sport}%</p>
+              </div>
+            </div>
+            <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full bg-purple-500 transition-all"
+                style={{ width: `${Math.min(100, scoreBienEtre.score_global)}%` }}
+              />
+            </div>
           </CardContent>
         </Card>
       )}

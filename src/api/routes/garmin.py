@@ -131,3 +131,60 @@ async def deconnecter_garmin(user: dict[str, Any] = Depends(require_auth)) -> di
             return {"success": succes}
 
     return await executer_async(_query)
+
+
+@router.get("/recommandation-diner", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def recommander_diner_selon_activite(
+    calories_brulees: int = Query(0, ge=0, le=3000),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Propose un dîner adapté au niveau de dépense énergétique Garmin."""
+
+    def _query():
+        with executer_avec_session() as session:
+            from src.core.models import Recette
+
+            if calories_brulees >= 600:
+                cible_max = 850
+                strategie = "recharge"
+            elif calories_brulees >= 350:
+                cible_max = 700
+                strategie = "equilibre"
+            else:
+                cible_max = 550
+                strategie = "leger"
+
+            recettes = (
+                session.query(Recette)
+                .filter(Recette.calories.isnot(None), Recette.calories <= cible_max)
+                .order_by(Recette.calories.desc())
+                .limit(5)
+                .all()
+            )
+
+            if not recettes:
+                return {
+                    "strategie": strategie,
+                    "calories_brulees": calories_brulees,
+                    "message": "Aucune recette calorique adaptée trouvée",
+                    "items": [],
+                }
+
+            return {
+                "strategie": strategie,
+                "calories_brulees": calories_brulees,
+                "message": "Suggestions de dîner adaptées à la dépense du jour",
+                "items": [
+                    {
+                        "id": r.id,
+                        "nom": r.nom,
+                        "calories": r.calories,
+                        "categorie": r.categorie,
+                        "temps_preparation": r.temps_preparation,
+                    }
+                    for r in recettes
+                ],
+            }
+
+    return await executer_async(_query)

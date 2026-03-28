@@ -57,3 +57,55 @@ class TestSchemaCoherence:
             f"absente de sql/INIT_COMPLET.sql\n"
             f"Tables SQL disponibles : {sorted(sql_tables)}"
         )
+
+
+# CT-10 — Tables SQL sans modèle ORM (orphelines connues)
+# Audit Sprint 7 : ces tables existent dans INIT_COMPLET.sql mais n'ont pas de modèle ORM.
+# Chaque table est documentée avec sa catégorie :
+#   - infrastructure : tables système (schema_migrations…)
+#   - reference      : catalogues statiques lus par des services sans ORM
+#   - legacy         : anciens noms remplacés par une table ORM correctement nommée
+_TABLES_SQL_SANS_ORM: dict[str, str] = {
+    "schema_migrations": "infrastructure — tracking des migrations appliquées",
+    "albums_famille": "reference — album photo famille, accès direct via service",
+    "budgets_home": "legacy — remplacé par budgets_maison (ORM BudgetMaison)",
+    "comparatifs": "reference — comparatifs produits/contrats, pas d'ORM requis",
+    "contrats": "legacy — remplacé par contrats_maison (ORM ContratMaison)",
+    "depenses_home": "legacy — remplacé par depenses_maison (ORM DepenseMaison)",
+    "factures": "reference — factures maison, accès direct via service",
+    "objectifs_autonomie": "reference — objectifs autonomie Jules, accès direct via service",
+    "plantes_catalogue": "reference — catalogue plantes jardin (ref JSON), pas d'ORM requis",
+    "preferences_home": "legacy — remplacé par preferences_utilisateurs",
+    "recoltes": "reference — récoltes jardin, accès direct via service",
+    "souvenirs_famille": "reference — album souvenirs famille, accès direct via service",
+    "stats_home": "legacy — stats calculées, pas d'ORM requis",
+    "taches_home": "legacy — remplacé par taches_maison (ORM TacheMaison)",
+}
+
+
+class TestOrphanSQLTables:
+    """CT-10 — Tables SQL sans modèle ORM (orphelines connues)."""
+
+    def test_nombre_tables_orphelines_stable(self):
+        """Le nombre de tables SQL sans ORM ne doit pas augmenter silencieusement."""
+        from src.core.models import Base, charger_tous_modeles  # noqa: PLC0415
+
+        charger_tous_modeles()
+        sql_tables = _sql_tables()
+        orm_tables = {m.class_.__tablename__ for m in Base.registry.mappers}
+        orphans = sql_tables - orm_tables - set(_TABLES_SQL_SANS_ORM.keys())
+        assert not orphans, (
+            f"Nouvelles tables SQL sans modèle ORM détectées (Sprint 7 — CT-10) :\n"
+            f"{sorted(orphans)}\n"
+            f"→ Ajouter un modèle ORM ou documenter dans _TABLES_SQL_SANS_ORM."
+        )
+
+    def test_tables_orphelines_documentees_existent_encore_dans_sql(self):
+        """Toutes les tables documentées comme orphelines doivent exister dans le SQL."""
+        sql_tables = _sql_tables()
+        tables_disparues = set(_TABLES_SQL_SANS_ORM) - sql_tables
+        assert not tables_disparues, (
+            f"Tables documentées comme orphelines mais absentes de SQL :\n"
+            f"{sorted(tables_disparues)}\n"
+            f"→ Retirer ces entrées de _TABLES_SQL_SANS_ORM."
+        )

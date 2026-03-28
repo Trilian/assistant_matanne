@@ -185,6 +185,40 @@ export async function obtenirRecurrentsSuggeres(): Promise<{
   return data;
 }
 
+export interface OptimisationBudgetCourses {
+  liste_id: number;
+  nom_liste: string;
+  budget_cible: number;
+  estimation_totale: number;
+  economie_potentielle: number;
+  niveau_alerte: "ok" | "attention" | "critique";
+  substitutions: Array<{
+    ingredient_original: string;
+    suggestion: string;
+    raison: string;
+    economie_estimee?: number | null;
+  }>;
+  priorites: Array<{
+    nom: string;
+    rayon: string;
+    quantite: number;
+    cout_estime: number;
+    indispensable: boolean;
+  }>;
+  message: string;
+}
+
+/** Optimiser une liste de courses selon un budget cible (IA + heuristiques). */
+export async function optimiserBudgetCoursesIA(
+  budgetCible?: number
+): Promise<OptimisationBudgetCourses> {
+  const params = budgetCible != null ? `?budget_cible=${budgetCible}` : "";
+  const { data } = await clientApi.get<OptimisationBudgetCourses>(
+    `/courses/optimiser-budget-ia${params}`
+  );
+  return data;
+}
+
 /** Récupérer un QR PNG de partage de liste */
 export async function obtenirQrPartageListe(
   listeId: number,

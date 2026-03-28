@@ -49,6 +49,7 @@ class ScoreBienEtreService:
 
     def _calculer_periode(self, debut: date, fin: date, db: Session) -> dict[str, Any]:
         from src.core.models import ActiviteFamille, Repas
+        from src.core.models.users import ActiviteGarmin, ResumeQuotidienGarmin
 
         # Diversite alimentaire = nombre de categories distinctes sur 7 jours
         repas = (
@@ -103,7 +104,29 @@ class ScoreBienEtreService:
                 for k in ("sport", "plein-air", "piscine", "velo", "randonnee")
             )
         ]
-        score_activites = round(min(len(sports) / 5.0, 1.0) * 100)
+
+        garmin_activites = (
+            db.query(ActiviteGarmin)
+            .filter(
+                ActiviteGarmin.date_debut >= debut,
+                ActiviteGarmin.date_debut <= fin,
+            )
+            .all()
+        )
+        garmin_summaries = (
+            db.query(ResumeQuotidienGarmin)
+            .filter(
+                ResumeQuotidienGarmin.date >= debut,
+                ResumeQuotidienGarmin.date <= fin,
+            )
+            .all()
+        )
+
+        base_sport = min(len(sports) / 5.0, 1.0)
+        bonus_activites = min(len(garmin_activites) / 6.0, 1.0)
+        total_calories = sum(int(s.calories_actives or 0) for s in garmin_summaries)
+        bonus_calories = min(total_calories / 2500.0, 1.0)
+        score_activites = round(min((base_sport * 0.5) + (bonus_activites * 0.25) + (bonus_calories * 0.25), 1.0) * 100)
 
         score_global = round(
             (score_diversite * 0.40)
@@ -119,6 +142,8 @@ class ScoreBienEtreService:
             "details": {
                 "categories_alimentaires_distinctes": sorted(categories),
                 "nb_activites_sportives": len(sports),
+                "nb_activites_garmin": len(garmin_activites),
+                "calories_actives_garmin": total_calories,
                 "nb_repas_analyses": len(repas),
             },
         }

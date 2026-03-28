@@ -59,9 +59,11 @@ import {
   modifierArticleInventaire,
   supprimerArticleInventaire,
   obtenirAlertes,
-  ocrPhotoFrigo,
+  detecterPhotoFrigoSansImport,
+  ajouterArticlesBulk,
   enrichirParCodeBarres,
   type ResultatOCRFrigo,
+  type ArticleBulk,
 } from "@/bibliotheque/api/inventaire";
 import {
   schemaArticleInventaire,
@@ -109,6 +111,7 @@ export default function PageInventaire() {
   const [filtreEtat, setFiltreEtat] = useState("tous");
   const [dialogueAjout, setDialogueAjout] = useState(false);
   const [ocrResultat, setOcrResultat] = useState<ResultatOCRFrigo | null>(null);
+  const [ocrSelectionnes, setOcrSelectionnes] = useState<Set<number>>(new Set());
   const [scanneurOuvert, setScanneurOuvert] = useState(false);
   const [qrArticle, setQrArticle] = useState<ArticleInventaire | null>(null);
 
@@ -146,13 +149,14 @@ export default function PageInventaire() {
   );
 
   const { mutate: lancerOCR, isPending: ocrEnCours } = utiliserMutation(
-    (fichier: File) => ocrPhotoFrigo(fichier),
+    (fichier: File) => detecterPhotoFrigoSansImport(fichier),
     {
       onSuccess: (res) => {
-        invalider(["inventaire"]);
-        setOcrResultat(res);
         if (res.total > 0) {
-          toast.success(`📷 ${res.total} aliment(s) détecté(s) et importés`);
+          setOcrResultat(res);
+          // Par défaut, tout est sélectionné
+          setOcrSelectionnes(new Set(res.articles.map((_, i) => i)));
+          toast.success(`📷 ${res.total} aliment(s) détecté(s) — sélectionnez ceux à importer`);
         } else {
           toast.info("Aucun aliment détecté dans la photo");
         }
@@ -160,6 +164,47 @@ export default function PageInventaire() {
       onError: () => toast.error("Erreur lors de l'analyse photo"),
     }
   );
+
+  const { mutate: importerSelectionnes, isPending: importEnCours } = utiliserMutation(
+    (articles: ArticleBulk[]) => ajouterArticlesBulk(articles, ongletActif),
+    {
+      onSuccess: (res) => {
+        invalider(["inventaire"]);
+        setOcrResultat(null);
+        setOcrSelectionnes(new Set());
+        toast.success(`✅ ${res.message}`);
+      },
+      onError: () => toast.error("Erreur lors de l'import des articles"),
+    }
+  );
+
+  function importerArticlesSelectionnes() {
+    if (!ocrResultat) return;
+    const articlesAImporter = ocrResultat.articles.filter((_, i) => ocrSelectionnes.has(i));
+    if (articlesAImporter.length === 0) {
+      toast.warning("Sélectionnez au moins un article");
+      return;
+    }
+    importerSelectionnes(articlesAImporter);
+  }
+
+  function basculerSelectionOCR(index: number) {
+    setOcrSelectionnes((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  }
+
+  function toutSelectionner() {
+    if (!ocrResultat) return;
+    if (ocrSelectionnes.size === ocrResultat.articles.length) {
+      setOcrSelectionnes(new Set());
+    } else {
+      setOcrSelectionnes(new Set(ocrResultat.articles.map((_, i) => i)));
+    }
+  }
 
   async function importerStockDepuisScanner(
     trouves: ArticleBarcode[],
@@ -265,7 +310,7 @@ export default function PageInventaire() {
       {/* Résultat OCR photo-frigo */}
       {ocrResultat && ocrResultat.total > 0 && (
         <Card className="border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950">
-          <CardContent className="pt-4">
+          <CardContent className="pt-4 space-y-3">
             <div className="flex items-start justify-between">
               <div>
                 <p className="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
@@ -273,18 +318,47 @@ export default function PageInventaire() {
                   Photo analysée — {ocrResultat.total} aliment(s) détecté(s)
                 </p>
                 <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">
-                  {ocrResultat.crees} créé(s) · {ocrResultat.mis_a_jour} mis à jour
+                  Sélectionnez les articles à ajouter à l&apos;inventaire
                 </p>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {ocrResultat.articles.slice(0, 8).map((a, i) => (
-                    <Badge key={i} variant="secondary" className="text-xs">{a.nom}</Badge>
-                  ))}
-                  {ocrResultat.articles.length > 8 && (
-                    <Badge variant="secondary" className="text-xs">+{ocrResultat.articles.length - 8}</Badge>
-                  )}
-                </div>
               </div>
-              <Button size="sm" variant="ghost" onClick={() => setOcrResultat(null)} aria-label="Fermer">×</Button>
+              <Button size="sm" variant="ghost" onClick={() => { setOcrResultat(null); setOcrSelectionnes(new Set()); }} aria-label="Fermer">×</Button>
+            </div>
+            <div className="space-y-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-xs h-7 px-2"
+                onClick={toutSelectionner}
+              >
+                {ocrSelectionnes.size === ocrResultat.articles.length ? "Tout désélectionner" : "Tout sélectionner"}
+              </Button>
+              <div className="grid grid-cols-2 gap-1 sm:grid-cols-3">
+                {ocrResultat.articles.map((article, i) => (
+                  <label key={i} className="flex items-center gap-2 rounded-md border bg-background/70 px-2 py-1.5 cursor-pointer hover:bg-accent/50">
+                    <input
+                      type="checkbox"
+                      checked={ocrSelectionnes.has(i)}
+                      onChange={() => basculerSelectionOCR(i)}
+                      className="rounded"
+                    />
+                    <span className="text-xs truncate">{article.nom}</span>
+                    {article.quantite && (
+                      <span className="text-xs text-muted-foreground ml-auto">×{article.quantite}</span>
+                    )}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <p className="text-xs text-muted-foreground">{ocrSelectionnes.size} article(s) sélectionné(s)</p>
+              <Button
+                size="sm"
+                onClick={importerArticlesSelectionnes}
+                disabled={importEnCours || ocrSelectionnes.size === 0}
+              >
+                {importEnCours ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                Tout ajouter à l&apos;inventaire
+              </Button>
             </div>
           </CardContent>
         </Card>

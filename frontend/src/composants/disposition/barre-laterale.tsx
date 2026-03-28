@@ -105,6 +105,7 @@ const LIENS: LienNav[] = [
       { nom: "Documents", chemin: "/famille/documents", Icone: FileText },
       { nom: "Voyages", chemin: "/famille/voyages", Icone: Plane },
       { nom: "Garmin", chemin: "/famille/garmin", Icone: Activity },
+      { nom: "Gamification", chemin: "/famille/gamification", Icone: Trophy },
       { nom: "Config", chemin: "/famille/config", Icone: Settings },
     ],
   },

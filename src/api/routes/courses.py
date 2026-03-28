@@ -1312,6 +1312,136 @@ async def obtenir_recurrents_suggeres(
     return await executer_async(_recurrents)
 
 
+@router.get(
+    "/optimiser-budget-ia",
+    responses=REPONSES_LISTE,
+    summary="Optimiser le budget courses avec l'IA",
+)
+@gerer_exception_api
+async def optimiser_budget_courses_ia(
+    budget_cible: float = Query(120.0, ge=10, le=2000, description="Budget cible de la liste"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Analyse la liste active et propose des optimisations budget (IA + heuristiques)."""
+    from src.core.models import ArticleCourses, ListeCourses
+
+    estimation_par_rayon = {
+        "fruits": 2.4,
+        "légumes": 2.1,
+        "legumes": 2.1,
+        "viandes": 6.5,
+        "poissons": 7.0,
+        "produits laitiers": 2.2,
+        "boissons": 1.8,
+        "épicerie": 2.7,
+        "epicerie": 2.7,
+        "boulangerie": 1.6,
+        "autre": 2.5,
+    }
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            liste = (
+                session.query(ListeCourses)
+                .filter(ListeCourses.archivee.is_(False))
+                .order_by(ListeCourses.cree_le.desc())
+                .first()
+            )
+            if liste is None:
+                raise HTTPException(status_code=404, detail="Aucune liste de courses active")
+
+            articles = (
+                session.query(ArticleCourses)
+                .filter(ArticleCourses.liste_id == liste.id, ArticleCourses.achete.is_(False))
+                .all()
+            )
+
+            priorites: list[dict[str, Any]] = []
+            articles_ia: list[dict[str, Any]] = []
+            estimation_totale = 0.0
+
+            for article in articles:
+                nom = article.ingredient.nom if getattr(article, "ingredient", None) else "Article"
+                rayon = (article.rayon_magasin or getattr(article.ingredient, "categorie", "Autre") or "Autre")
+                rayon_key = str(rayon).lower()
+                cout_unitaire = estimation_par_rayon.get(rayon_key, estimation_par_rayon["autre"])
+                quantite = float(article.quantite_necessaire or 1.0)
+                cout_estime = round(cout_unitaire * max(quantite, 0.25), 2)
+                estimation_totale += cout_estime
+
+                priorite_txt = (article.priorite or "moyenne").lower()
+                priorite_int = {"haute": 1, "moyenne": 2, "basse": 3}.get(priorite_txt, 2)
+
+                priorites.append(
+                    {
+                        "nom": nom,
+                        "rayon": rayon,
+                        "quantite": quantite,
+                        "cout_estime": cout_estime,
+                        "indispensable": priorite_int == 1,
+                    }
+                )
+
+                articles_ia.append(
+                    {
+                        "nom": nom,
+                        "quantite": quantite,
+                        "unite": getattr(article.ingredient, "unite", "pcs") or "pcs",
+                        "rayon": rayon,
+                        "priorite": priorite_int,
+                    }
+                )
+
+            priorites.sort(key=lambda i: (not i["indispensable"], -i["cout_estime"]))
+
+            return {
+                "liste_id": liste.id,
+                "nom_liste": liste.nom,
+                "priorites": priorites,
+                "articles_ia": articles_ia,
+                "estimation_totale": round(estimation_totale, 2),
+            }
+
+    donnees = await executer_async(_query)
+
+    substitutions: list[dict[str, Any]] = []
+    try:
+        from src.services.cuisine.courses.suggestion import obtenir_service_courses_intelligentes
+        from src.services.cuisine.courses.types import ArticleCourse
+
+        service = obtenir_service_courses_intelligentes()
+        articles_service = [ArticleCourse(**a) for a in donnees["articles_ia"]]
+        suggestions = await service.suggerer_substitutions(articles_service)
+        substitutions = [s.model_dump() for s in suggestions]
+    except Exception:
+        substitutions = []
+
+    estimation = float(donnees["estimation_totale"])
+    economie_potentielle = round(max(0.0, estimation - budget_cible), 2)
+
+    if estimation <= budget_cible:
+        niveau_alerte = "ok"
+        message = "Votre liste est dans le budget cible."
+    elif estimation <= budget_cible * 1.15:
+        niveau_alerte = "attention"
+        message = "Budget légèrement dépassé, appliquez 1 ou 2 substitutions."
+    else:
+        niveau_alerte = "critique"
+        message = "Budget nettement dépassé, priorisez les indispensables et substitutions IA."
+
+    return {
+        "liste_id": donnees["liste_id"],
+        "nom_liste": donnees["nom_liste"],
+        "budget_cible": round(budget_cible, 2),
+        "estimation_totale": estimation,
+        "economie_potentielle": economie_potentielle,
+        "niveau_alerte": niveau_alerte,
+        "substitutions": substitutions,
+        "priorites": donnees["priorites"][:20],
+        "message": message,
+    }
+
+
 # ═══════════════════════════════════════════════════════════
 # OCR TICKET DE CAISSE → IMPORT COURSES
 # ═══════════════════════════════════════════════════════════

@@ -593,6 +593,38 @@ export async function validiteTypesDiagnostics(): Promise<
   return data;
 }
 
+export interface DiagnosticPhotoMaison {
+  piece: string;
+  urgence_globale: "faible" | "moyenne" | "haute";
+  resume: string;
+  problemes_detectes: Array<{
+    type: string;
+    gravite: "faible" | "moyenne" | "haute";
+    description: string;
+    recommandations: string[];
+  }>;
+  estimation_cout_min: number;
+  estimation_cout_max: number;
+  actions_48h: string[];
+}
+
+/** Analyse une photo de pièce et retourne un diagnostic maison assisté IA. */
+export async function diagnostiquerMaisonPhoto(
+  fichier: File,
+  piece = "maison"
+): Promise<DiagnosticPhotoMaison> {
+  const formData = new FormData();
+  formData.append("photo", fichier);
+
+  const { data } = await clientApi.post<DiagnosticPhotoMaison>(
+    `/maison/diagnostics/ia-photo?piece=${encodeURIComponent(piece)}`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+
+  return data;
+}
+
 export async function listerEstimations(): Promise<EstimationImmobiliere[]> {
   const { data } = await clientApi.get("/maison/estimations");
   return data.items ?? data;

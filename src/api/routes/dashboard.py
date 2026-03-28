@@ -520,6 +520,165 @@ async def obtenir_alertes_contextuelles(
 
 
 @router.get(
+    "/anomalies-financieres",
+    responses=REPONSES_LISTE,
+    summary="Anomalies financières cross-modules",
+)
+@gerer_exception_api
+async def obtenir_anomalies_financieres(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Détecte les anomalies de dépenses entre famille, maison et jeux."""
+    from datetime import date
+
+    from src.core.models import BudgetFamille, DepenseMaison, PariSportif
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            aujourd_hui = date.today()
+            mois = aujourd_hui.month
+            annee = aujourd_hui.year
+
+            # Famille - dépenses du mois courant par catégorie
+            depenses_famille = (
+                session.query(BudgetFamille.categorie, func.sum(BudgetFamille.montant).label("total"))
+                .filter(
+                    func.extract("month", BudgetFamille.date) == mois,
+                    func.extract("year", BudgetFamille.date) == annee,
+                )
+                .group_by(BudgetFamille.categorie)
+                .all()
+            )
+
+            # Référence famille = moyenne des 3 mois précédents
+            moyennes_famille: dict[str, float] = {}
+            for i in range(1, 4):
+                m = mois - i
+                a = annee
+                if m <= 0:
+                    m += 12
+                    a -= 1
+                rows = (
+                    session.query(BudgetFamille.categorie, func.sum(BudgetFamille.montant).label("total"))
+                    .filter(
+                        func.extract("month", BudgetFamille.date) == m,
+                        func.extract("year", BudgetFamille.date) == a,
+                    )
+                    .group_by(BudgetFamille.categorie)
+                    .all()
+                )
+                for cat, total in rows:
+                    moyennes_famille[cat] = moyennes_famille.get(cat, 0.0) + float(total or 0.0)
+
+            moyennes_famille = {cat: total / 3 for cat, total in moyennes_famille.items()}
+
+            # Maison - dépenses du mois courant par catégorie
+            depenses_maison = (
+                session.query(DepenseMaison.categorie, func.sum(DepenseMaison.montant).label("total"))
+                .filter(DepenseMaison.mois == mois, DepenseMaison.annee == annee)
+                .group_by(DepenseMaison.categorie)
+                .all()
+            )
+
+            moyennes_maison: dict[str, float] = {}
+            for i in range(1, 4):
+                m = mois - i
+                a = annee
+                if m <= 0:
+                    m += 12
+                    a -= 1
+                rows = (
+                    session.query(DepenseMaison.categorie, func.sum(DepenseMaison.montant).label("total"))
+                    .filter(DepenseMaison.mois == m, DepenseMaison.annee == a)
+                    .group_by(DepenseMaison.categorie)
+                    .all()
+                )
+                for cat, total in rows:
+                    moyennes_maison[cat] = moyennes_maison.get(cat, 0.0) + float(total or 0.0)
+
+            moyennes_maison = {cat: total / 3 for cat, total in moyennes_maison.items()}
+
+            # Jeux - net mensuel
+            mises_jeux = (
+                session.query(func.sum(PariSportif.mise))
+                .filter(
+                    func.extract("month", PariSportif.cree_le) == mois,
+                    func.extract("year", PariSportif.cree_le) == annee,
+                )
+                .scalar()
+                or 0
+            )
+            gains_jeux = (
+                session.query(func.sum(PariSportif.gain))
+                .filter(
+                    func.extract("month", PariSportif.cree_le) == mois,
+                    func.extract("year", PariSportif.cree_le) == annee,
+                )
+                .scalar()
+                or 0
+            )
+
+            items: list[dict[str, Any]] = []
+
+            def _ajouter_anomalie(module: str, categorie: str, courant: float, moyenne: float) -> None:
+                if moyenne <= 0:
+                    return
+                ecart = ((courant - moyenne) / moyenne) * 100
+                if ecart < 20:
+                    return
+                gravite = "haute" if ecart >= 50 else ("moyenne" if ecart >= 30 else "faible")
+                items.append(
+                    {
+                        "module": module,
+                        "categorie": categorie,
+                        "valeur_courante": round(courant, 2),
+                        "moyenne_reference": round(moyenne, 2),
+                        "ecart_pourcentage": round(ecart, 1),
+                        "gravite": gravite,
+                        "message": f"{module.capitalize()} / {categorie}: +{ecart:.1f}% vs moyenne 3 mois.",
+                    }
+                )
+
+            for cat, total in depenses_famille:
+                _ajouter_anomalie("famille", cat, float(total or 0), moyennes_famille.get(cat, 0.0))
+
+            for cat, total in depenses_maison:
+                _ajouter_anomalie("maison", cat, float(total or 0), moyennes_maison.get(cat, 0.0))
+
+            net_jeux = float(gains_jeux) - float(mises_jeux)
+            if float(mises_jeux) >= 80 and net_jeux < -20:
+                pertes_pct = (abs(net_jeux) / float(mises_jeux)) * 100 if float(mises_jeux) else 0
+                items.append(
+                    {
+                        "module": "jeux",
+                        "categorie": "bankroll",
+                        "valeur_courante": round(net_jeux, 2),
+                        "moyenne_reference": 0.0,
+                        "ecart_pourcentage": round(pertes_pct, 1),
+                        "gravite": "haute" if pertes_pct >= 40 else "moyenne",
+                        "message": f"Jeux: perte nette mensuelle de {abs(net_jeux):.2f} EUR.",
+                    }
+                )
+
+            items.sort(key=lambda x: {"haute": 3, "moyenne": 2, "faible": 1}.get(x["gravite"], 0), reverse=True)
+
+            total_famille = float(sum(float(v or 0) for _, v in depenses_famille))
+            total_maison = float(sum(float(v or 0) for _, v in depenses_maison))
+
+            return {
+                "items": items,
+                "total": len(items),
+                "synthese": {
+                    "depenses_famille_mois": round(total_famille, 2),
+                    "depenses_maison_mois": round(total_maison, 2),
+                    "net_jeux_mois": round(net_jeux, 2),
+                },
+            }
+
+    return await executer_async(_query)
+
+
+@router.get(
     "/points-famille",
     responses=REPONSES_LISTE,
     summary="Points famille gamification",

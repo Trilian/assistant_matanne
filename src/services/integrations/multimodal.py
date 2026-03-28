@@ -48,6 +48,7 @@ __all__ = [
     "extraire_facture",
     "analyser_plat",
     "decrire_image",
+    "diagnostiquer_photo_maison",
 ]
 
 
@@ -111,6 +112,27 @@ class AnalyseNutritionnelle(BaseModel):
     ingredients_detectes: list[str] = Field(default_factory=list)
     equilibre: str | None = Field(default=None, description="Verdict équilibre")
     conseils: list[str] = Field(default_factory=list)
+
+
+class ProblemeMaisonDetecte(BaseModel):
+    """Problème détecté sur une photo de maison."""
+
+    type: str = Field(description="Type de problème (humidité, fissure, moisissure, etc.)")
+    gravite: str = Field(default="moyenne", description="faible|moyenne|haute")
+    description: str = Field(description="Description concise")
+    recommandations: list[str] = Field(default_factory=list)
+
+
+class DiagnosticMaisonPhoto(BaseModel):
+    """Diagnostic IA sur photo d'une pièce/zone de la maison."""
+
+    piece: str = Field(default="maison")
+    urgence_globale: str = Field(default="faible", description="faible|moyenne|haute")
+    resume: str = Field(default="Aucun problème majeur détecté")
+    problemes_detectes: list[ProblemeMaisonDetecte] = Field(default_factory=list)
+    estimation_cout_min: float = Field(default=0)
+    estimation_cout_max: float = Field(default=0)
+    actions_48h: list[str] = Field(default_factory=list)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -428,6 +450,60 @@ Si l'image n'est pas un frigo ou n'est pas lisible, retourne une liste vide [].
 
         return []
 
+    async def diagnostiquer_photo_maison(
+        self,
+        image: bytes | str | Path,
+        *,
+        piece: str = "maison",
+    ) -> DiagnosticMaisonPhoto | None:
+        """Analyse une photo de pièce pour détecter d'éventuels problèmes maison.
+
+        Exemples: humidité, fissures, moisissures, usure, fuite visible.
+        """
+        image_b64 = self._encode_image(image)
+
+        prompt = f"""Analyse cette photo de {piece} et détecte les problèmes potentiels de la maison.
+
+Retourne UNIQUEMENT du JSON valide au format:
+{{
+  "piece": "{piece}",
+  "urgence_globale": "faible|moyenne|haute",
+  "resume": "résumé en une phrase",
+  "problemes_detectes": [
+    {{
+      "type": "humidité|fissure|moisissure|fuite|usure|autre",
+      "gravite": "faible|moyenne|haute",
+      "description": "description courte",
+      "recommandations": ["action 1", "action 2"]
+    }}
+  ],
+  "estimation_cout_min": 0,
+  "estimation_cout_max": 0,
+  "actions_48h": ["action prioritaire 1", "action prioritaire 2"]
+}}
+
+Si aucun problème visible, retourne problemes_detectes vide avec urgence_globale "faible".
+"""
+
+        try:
+            result = await self._call_vision_model(
+                image_b64=image_b64,
+                prompt=prompt,
+                system_prompt=(
+                    "Tu es un expert bâtiment prudent. Évite les diagnostics médicaux. "
+                    "Reste factuel et propose des recommandations concrètes. "
+                    "Réponds UNIQUEMENT avec du JSON valide."
+                ),
+                return_json=True,
+            )
+
+            if result and isinstance(result, dict):
+                return DiagnosticMaisonPhoto.model_validate(result)
+            return None
+        except Exception as e:
+            logger.error(f"Erreur diagnostic photo maison: {e}")
+            return None
+
     async def _call_vision_model(
         self,
         image_b64: str,
@@ -562,6 +638,24 @@ def decrire_image(
     """
     service = get_multimodal_service()
     return service.decrire_image_sync(image, contexte=contexte)
+
+
+def diagnostiquer_photo_maison(
+    image: bytes | str | Path,
+    *,
+    piece: str = "maison",
+) -> DiagnosticMaisonPhoto | None:
+    """Helper: diagnostic maison via photo.
+
+    Args:
+        image: Photo de la pièce
+        piece: Nom de la pièce (cuisine, salle de bain, etc.)
+
+    Returns:
+        DiagnosticMaisonPhoto ou None
+    """
+    service = get_multimodal_service()
+    return service.diagnostiquer_photo_maison_sync(image, piece=piece)
 
 
 async def analyser_frigo(image: bytes | str | Path) -> list[dict]:

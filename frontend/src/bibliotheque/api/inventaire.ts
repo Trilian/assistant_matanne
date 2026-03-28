@@ -19,6 +19,25 @@ export async function listerEmplacements(): Promise<string[]> {
   return data;
 }
 
+// ─── Vue consolidée Cellier ↔ Inventaire (MT-01) ───────────────────────
+
+export interface ArticleConsolide {
+  nom: string;
+  nom_normalise: string;
+  quantite_totale: number;
+  unite: string;
+  categories: string[];
+  emplacements: string[];
+  sources: string[];  // "cuisine" | "cellier"
+  details_sources: Record<string, unknown>[];
+}
+
+/** Retourne la vue unifiée des stocks cuisine + cellier (évite les doublons dans les courses) */
+export async function listerInventaireConsolide(): Promise<ArticleConsolide[]> {
+  const { data } = await clientApi.get<ArticleConsolide[]>("/inventaire/consolide");
+  return data;
+}
+
 /** Ajouter un article à l'inventaire */
 export async function ajouterArticleInventaire(
   dto: CreerArticleInventaireDTO
@@ -87,6 +106,21 @@ export async function ocrPhotoFrigo(
   fd.append("photo", file);
   const { data } = await clientApi.post<ResultatOCRFrigo>(
     `/inventaire/ocr-photo-frigo?emplacement=${encodeURIComponent(emplacement)}`,
+    fd,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data;
+}
+
+/** Détecte les aliments dans une photo de frigo SANS importer (mode preview pour checkboxes) */
+export async function detecterPhotoFrigoSansImport(
+  file: File,
+  emplacement = "frigo"
+): Promise<ResultatOCRFrigo> {
+  const fd = new FormData();
+  fd.append("photo", file);
+  const { data } = await clientApi.post<ResultatOCRFrigo>(
+    `/inventaire/ocr-photo-frigo?emplacement=${encodeURIComponent(emplacement)}&import=false`,
     fd,
     { headers: { "Content-Type": "multipart/form-data" } }
   );

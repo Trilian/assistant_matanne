@@ -26,7 +26,7 @@ Endpoints pour la gestion de la maison:
 from datetime import date
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 
 from src.api.dependencies import require_auth
 from src.api.schemas.common import MessageResponse
@@ -1970,6 +1970,44 @@ async def validite_types_diagnostics(
         return service.get_validite_par_type()
 
     return await executer_async(_query)
+
+
+@router.post("/diagnostics/ia-photo", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def diagnostic_photo_ia(
+    photo: UploadFile = File(..., description="Photo de la pièce à diagnostiquer"),
+    piece: str = Query("maison", description="Nom de la pièce (cuisine, salle de bain, etc.)"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Analyse une photo de maison et propose un diagnostic IA (Pixtral)."""
+    TYPES_AUTORISES = {"image/jpeg", "image/png", "image/webp"}
+    if photo.content_type not in TYPES_AUTORISES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Type non supporté: {photo.content_type}. Utilisez JPEG, PNG ou WebP.",
+        )
+
+    contenu = await photo.read()
+    if len(contenu) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Fichier trop volumineux (max 10 Mo)")
+
+    from src.services.integrations.multimodal import get_multimodal_service
+
+    service = get_multimodal_service()
+    diagnostic = await service.diagnostiquer_photo_maison(contenu, piece=piece)
+
+    if not diagnostic:
+        return {
+            "piece": piece,
+            "urgence_globale": "faible",
+            "resume": "Aucune analyse exploitable (photo peu lisible ou hors contexte).",
+            "problemes_detectes": [],
+            "estimation_cout_min": 0,
+            "estimation_cout_max": 0,
+            "actions_48h": ["Refaire une photo nette de la zone concernée."],
+        }
+
+    return diagnostic.model_dump()
 
 
 @router.post("/diagnostics", status_code=201, responses=REPONSES_CRUD_CREATION)

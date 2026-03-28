@@ -22,6 +22,7 @@ class PointsFamilleService:
             return {}
 
         from src.core.models import ArticleInventaire
+        from src.core.models import BadgeUtilisateur, PointsUtilisateur, ProfilUtilisateur
         from src.core.models.users import ActiviteGarmin, ResumeQuotidienGarmin
         from src.services.dashboard.score_bienetre import get_score_bien_etre_service
 
@@ -67,6 +68,27 @@ class PointsFamilleService:
         if points_anti_gaspi >= 170:
             badges.append("Zéro gaspi")
 
+        # LT-02: persister un snapshot hebdomadaire par utilisateur.
+        self._sauvegarder_points_hebdo(
+            db=db,
+            semaine_debut=debut,
+            points_sport=int(points_sport),
+            points_alimentation=int(points_alimentation),
+            points_anti_gaspi=int(points_anti_gaspi),
+            total=int(total),
+            badges=badges,
+            details={
+                "activites_garmin": len(activites),
+                "total_pas": total_pas,
+                "total_calories": total_calories,
+                "score_bien_etre": score_global,
+                "articles_a_risque": int(articles_risque),
+            },
+            profils=db.query(ProfilUtilisateur).all(),
+            points_model=PointsUtilisateur,
+            badge_model=BadgeUtilisateur,
+        )
+
         return {
             "total_points": total,
             "sport": points_sport,
@@ -81,6 +103,65 @@ class PointsFamilleService:
                 "articles_a_risque": int(articles_risque),
             },
         }
+
+    def _sauvegarder_points_hebdo(
+        self,
+        *,
+        db: Session,
+        semaine_debut: date,
+        points_sport: int,
+        points_alimentation: int,
+        points_anti_gaspi: int,
+        total: int,
+        badges: list[str],
+        details: dict[str, Any],
+        profils: list,
+        points_model,
+        badge_model,
+    ) -> None:
+        if not profils:
+            return
+
+        for profil in profils:
+            snapshot = (
+                db.query(points_model)
+                .filter(
+                    points_model.user_id == profil.id,
+                    points_model.semaine_debut == semaine_debut,
+                )
+                .first()
+            )
+            if snapshot is None:
+                snapshot = points_model(user_id=profil.id, semaine_debut=semaine_debut)
+                db.add(snapshot)
+
+            snapshot.points_sport = points_sport
+            snapshot.points_alimentation = points_alimentation
+            snapshot.points_anti_gaspi = points_anti_gaspi
+            snapshot.total_points = total
+            snapshot.details = details
+
+            for badge in badges:
+                deja = (
+                    db.query(badge_model)
+                    .filter(
+                        badge_model.user_id == profil.id,
+                        badge_model.badge_type == badge.lower().replace(" ", "_"),
+                        badge_model.acquis_le == date.today(),
+                    )
+                    .first()
+                )
+                if deja is None:
+                    db.add(
+                        badge_model(
+                            user_id=profil.id,
+                            badge_type=badge.lower().replace(" ", "_"),
+                            badge_label=badge,
+                            acquis_le=date.today(),
+                        )
+                    )
+
+        db.commit()
 
 
 @service_factory("points_famille", tags={"dashboard", "gamification", "famille"})
