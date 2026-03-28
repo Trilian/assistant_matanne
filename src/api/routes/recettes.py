@@ -5,6 +5,7 @@ CRUD complet pour les recettes avec pagination, filtres par catégorie,
 recherche par nom et documentation OpenAPI enrichie.
 """
 
+from datetime import date
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
@@ -134,6 +135,15 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
         .scalar()
     )
 
+    derniere_cuisson = (
+        session.query(func.max(HistoriqueRecette.date_cuisson))
+        .filter(HistoriqueRecette.recette_id == db_recette.id)
+        .scalar()
+    )
+    jours_depuis_derniere_cuisson = None
+    if derniere_cuisson:
+        jours_depuis_derniere_cuisson = (date.today() - derniere_cuisson).days
+
     return RecetteResponse(
         id=db_recette.id,
         nom=db_recette.nom,
@@ -148,6 +158,7 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
         est_favori=est_favori,
         note_moyenne=round(note_avg, 1) if note_avg else None,
         url_source=getattr(db_recette, "url_source", None),
+        jours_depuis_derniere_cuisson=jours_depuis_derniere_cuisson,
     )
 
 
@@ -191,7 +202,10 @@ async def lister_recettes(
         }
         ```
     """
+    from sqlalchemy import func
+
     from src.core.models import Recette
+    from src.core.models.recettes import HistoriqueRecette
 
     def _query():
         with executer_avec_session() as session:
@@ -210,6 +224,19 @@ async def lister_recettes(
                 query.order_by(Recette.nom).offset((page - 1) * page_size).limit(page_size).all()
             )
 
+            historiques = (
+                session.query(
+                    HistoriqueRecette.recette_id,
+                    func.max(HistoriqueRecette.date_cuisson).label("derniere_cuisson"),
+                )
+                .group_by(HistoriqueRecette.recette_id)
+                .all()
+            )
+            historique_par_recette = {
+                recette_id: derniere_cuisson
+                for recette_id, derniere_cuisson in historiques
+            }
+
             # Sérialisation basique (sans relations) pour la liste
             items_dicts = [
                 {
@@ -221,6 +248,11 @@ async def lister_recettes(
                     "portions": r.portions,
                     "difficulte": r.difficulte,
                     "categorie": r.categorie,
+                    "jours_depuis_derniere_cuisson": (
+                        (date.today() - historique_par_recette[r.id]).days
+                        if historique_par_recette.get(r.id)
+                        else None
+                    ),
                 }
                 for r in items
             ]

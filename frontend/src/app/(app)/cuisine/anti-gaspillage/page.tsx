@@ -15,6 +15,7 @@ import {
   Loader2,
   Trophy,
   BarChart2,
+  ImageDown,
 } from "lucide-react";
 import {
   Card,
@@ -89,15 +90,69 @@ export default function PageAntiGaspillage() {
   const articlesUrgents = data?.articles_urgents ?? [];
   const recettesRescue = data?.recettes_rescue ?? [];
 
+  function telechargerImageScore() {
+    if (!score) {
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 1200;
+    canvas.height = 630;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return;
+    }
+
+    const gradient = ctx.createLinearGradient(0, 0, 1200, 630);
+    gradient.addColorStop(0, "#0f766e");
+    gradient.addColorStop(1, "#15803d");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 1200, 630);
+
+    ctx.fillStyle = "rgba(255,255,255,0.12)";
+    ctx.beginPath();
+    ctx.arc(980, 120, 180, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 54px Arial";
+    ctx.fillText("Score Anti-Gaspillage", 80, 120);
+    ctx.font = "700 190px Arial";
+    ctx.fillText(String(score.score), 80, 330);
+    ctx.font = "500 54px Arial";
+    ctx.fillText("/100", 360, 330);
+
+    ctx.font = "400 40px Arial";
+    ctx.fillText(`Articles sauvés ce mois: ${score.articles_sauves_mois}`, 80, 430);
+    ctx.fillText(`Économie estimée: ${score.economie_estimee.toFixed(0)} EUR`, 80, 490);
+
+    ctx.font = "400 30px Arial";
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.fillText("assistant-matanne • Objectif: réduire le gaspillage chaque semaine", 80, 570);
+
+    const lien = document.createElement("a");
+    lien.href = canvas.toDataURL("image/png");
+    lien.download = "score-anti-gaspillage.png";
+    document.body.appendChild(lien);
+    lien.click();
+    document.body.removeChild(lien);
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          🌱 Anti-Gaspillage
-        </h1>
-        <p className="text-muted-foreground">
-          Réduisez le gaspillage et économisez
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            🌱 Anti-Gaspillage
+          </h1>
+          <p className="text-muted-foreground">
+            Réduisez le gaspillage et économisez
+          </p>
+        </div>
+        <Button variant="outline" onClick={telechargerImageScore} disabled={!score}>
+          <ImageDown className="mr-2 h-4 w-4" />
+          Image partageable
+        </Button>
       </div>
 
       {/* Métriques score */}

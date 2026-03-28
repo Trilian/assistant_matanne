@@ -60,9 +60,29 @@ export interface BilanMensuel {
   synthese_ia: string;
 }
 
+export interface ConfigDashboard {
+  config_dashboard: Record<string, boolean>;
+}
+
 /** Obtenir le bilan mensuel IA (mois au format YYYY-MM, défaut = mois courant) */
 export async function obtenirBilanMensuel(mois?: string): Promise<BilanMensuel> {
   const params = mois ? `?mois=${mois}` : "";
   const { data } = await clientApi.get<BilanMensuel>(`/dashboard/bilan-mensuel${params}`);
+  return data;
+}
+
+/** Lire la configuration personnalisée des widgets dashboard */
+export async function obtenirConfigDashboard(): Promise<ConfigDashboard> {
+  const { data } = await clientApi.get<ConfigDashboard>("/dashboard/config");
+  return data;
+}
+
+/** Sauvegarder la configuration personnalisée des widgets dashboard */
+export async function sauvegarderConfigDashboard(
+  configDashboard: Record<string, boolean>
+): Promise<ConfigDashboard> {
+  const { data } = await clientApi.put<ConfigDashboard>("/dashboard/config", {
+    config_dashboard: configDashboard,
+  });
   return data;
 }

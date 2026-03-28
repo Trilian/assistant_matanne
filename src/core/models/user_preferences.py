@@ -116,6 +116,7 @@ class PreferenceUtilisateur(TimestampMixin, Base):
 
     # Configuration garde crèche
     config_garde: Mapped[dict] = mapped_column(JSONB, default=dict)
+    config_dashboard: Mapped[dict] = mapped_column(JSONB, default=dict)
 
     def __repr__(self) -> str:
         return f"<PreferenceUtilisateur(user_id='{self.user_id}', adultes={self.nb_adultes})>"

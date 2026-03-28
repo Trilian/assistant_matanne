@@ -792,18 +792,18 @@ async def webhook_whatsapp(request: Request):
 - [ ] QW-03 — Partage liste courses QR
 
 ### Sprint 6 — Cron jobs + SQL avancé
-- [ ] CT-03 — Job J-02 push contextuel soir
-- [ ] CT-04 — Job J-01 résumé hebdo
-- [ ] CT-08 — Index manquants SQL
-- [ ] CT-10 — Audit tables orphelines ORM ↔ SQL
+- [x] CT-03 — Job J-02 push contextuel soir
+- [x] CT-04 — Job J-01 résumé hebdo
+- [x] CT-08 — Index manquants SQL
+- [x] CT-10 — Audit tables orphelines ORM ↔ SQL
 - [ ] QW-10 — Score anti-gaspi partageable
 
 ### Sprint 7 — Inter-modules + Dashboard
-- [ ] MT-01 — Cellier ↔ Inventaire cuisine
-- [ ] MT-03 — Score bien-être (IA-09)
+- [x] MT-01 — Cellier ↔ Inventaire cuisine
+- [x] MT-03 — Score bien-être (IA-09)
 - [ ] MT-06 — Widgets dashboard configurables
-- [ ] MT-08 — Timeline vie familiale
-- [ ] MT-09 — OCR photo-frigo auto-sync
+- [x] MT-08 — Timeline vie familiale
+- [x] MT-09 — OCR photo-frigo auto-sync
 - [ ] QW-01 — Widget météo dashboard
 - [ ] QW-06 — Aujourd'hui dans l'histoire
 

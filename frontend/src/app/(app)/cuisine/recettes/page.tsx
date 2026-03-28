@@ -330,6 +330,14 @@ export default function PageRecettes() {
                       </p>
                     )}
 
+                    {recette.jours_depuis_derniere_cuisson != null && (
+                      <div>
+                        <Badge variant="outline" className="text-[10px]">
+                          Dernière fois il y a {recette.jours_depuis_derniere_cuisson}j
+                        </Badge>
+                      </div>
+                    )}
+
                     {/* Métadonnées */}
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       {tempsTotal(recette) > 0 && (

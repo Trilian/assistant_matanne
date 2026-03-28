@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 
 from src.api.dependencies import require_auth
 from src.api.schemas import (
+    ArticleConsolideResponse,
     InventaireItemCreate,
     InventaireItemResponse,
     InventaireItemUpdate,
@@ -38,6 +39,101 @@ async def lister_emplacements() -> list[str]:
     from src.core.constants import EMPLACEMENTS_INVENTAIRE
 
     return EMPLACEMENTS_INVENTAIRE
+
+
+@router.get("/consolide", response_model=list[ArticleConsolideResponse], responses=REPONSES_LISTE)
+@gerer_exception_api
+async def inventaire_consolide(
+    user: dict[str, Any] = Depends(require_auth),
+) -> list[dict[str, Any]]:
+    """Fusionne inventaire cuisine + cellier en vue unifiée."""
+
+    def _normaliser_nom(nom: str) -> str:
+        n = (nom or "").strip().lower()
+        for old, new in (("é", "e"), ("è", "e"), ("ê", "e"), ("à", "a"), ("ù", "u")):
+            n = n.replace(old, new)
+        return " ".join(n.split())
+
+    def _query():
+        from src.core.models import ArticleInventaire
+        from src.core.models.maison_extensions import ArticleCellier
+
+        with executer_avec_session() as session:
+            fusion: dict[str, dict[str, Any]] = {}
+
+            # Source cuisine (inventaire)
+            rows_cuisine = session.query(ArticleInventaire).all()
+            for a in rows_cuisine:
+                nom = a.nom or f"ingredient_{a.ingredient_id}"
+                cle = _normaliser_nom(nom)
+                unite = a.unite or "pcs"
+                entree = fusion.setdefault(
+                    cle,
+                    {
+                        "nom": nom,
+                        "nom_normalise": cle,
+                        "quantite_totale": 0.0,
+                        "unite": unite,
+                        "categories": [],
+                        "emplacements": [],
+                        "sources": [],
+                        "details_sources": [],
+                    },
+                )
+                entree["quantite_totale"] += float(a.quantite or 0)
+                if a.categorie and a.categorie not in entree["categories"]:
+                    entree["categories"].append(a.categorie)
+                if a.emplacement and a.emplacement not in entree["emplacements"]:
+                    entree["emplacements"].append(a.emplacement)
+                if "cuisine" not in entree["sources"]:
+                    entree["sources"].append("cuisine")
+                entree["details_sources"].append(
+                    {
+                        "source": "cuisine",
+                        "id": a.id,
+                        "quantite": float(a.quantite or 0),
+                        "unite": unite,
+                    }
+                )
+
+            # Source cellier (maison)
+            rows_cellier = session.query(ArticleCellier).all()
+            for a in rows_cellier:
+                nom = a.nom or f"cellier_{a.id}"
+                cle = _normaliser_nom(nom)
+                unite = a.unite or "unité"
+                entree = fusion.setdefault(
+                    cle,
+                    {
+                        "nom": nom,
+                        "nom_normalise": cle,
+                        "quantite_totale": 0.0,
+                        "unite": unite,
+                        "categories": [],
+                        "emplacements": [],
+                        "sources": [],
+                        "details_sources": [],
+                    },
+                )
+                entree["quantite_totale"] += float(a.quantite or 0)
+                if a.categorie and a.categorie not in entree["categories"]:
+                    entree["categories"].append(a.categorie)
+                if a.emplacement and a.emplacement not in entree["emplacements"]:
+                    entree["emplacements"].append(a.emplacement)
+                if "cellier" not in entree["sources"]:
+                    entree["sources"].append("cellier")
+                entree["details_sources"].append(
+                    {
+                        "source": "cellier",
+                        "id": a.id,
+                        "quantite": float(a.quantite or 0),
+                        "unite": unite,
+                    }
+                )
+
+            return sorted(fusion.values(), key=lambda x: x["nom_normalise"])
+
+    return await executer_async(_query)
 
 
 @router.get("", response_model=ReponsePaginee[InventaireItemResponse], responses=REPONSES_LISTE)

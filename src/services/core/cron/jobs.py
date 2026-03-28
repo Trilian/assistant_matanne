@@ -228,6 +228,126 @@ def _job_rappel_courses_ntfy() -> None:
         logger.exception("Erreur lors du rappel courses ntfy")
 
 
+def _job_push_contextuel_soir() -> None:
+    """Envoie un push contextuel du soir (planning de demain + météo)."""
+    try:
+        from datetime import date, timedelta
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire, Repas
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.integrations.weather import obtenir_service_meteo
+
+        demain = date.today() + timedelta(days=1)
+
+        # 1) Planning du lendemain
+        plats = []
+        try:
+            with obtenir_contexte_db() as session:
+                repas_demain = session.query(Repas).filter(Repas.date_repas == demain).all()
+                for r in repas_demain:
+                    nom = r.recette.nom if getattr(r, "recette", None) else (r.notes or "Repas")
+                    plats.append(f"{r.type_repas}: {nom}")
+        except Exception:
+            logger.debug("Push contextuel: planning indisponible")
+
+        # 2) Météo du lendemain
+        meteo_txt = "météo indisponible"
+        try:
+            service_meteo = obtenir_service_meteo()
+            previsions = service_meteo.get_previsions(nb_jours=2)
+            if previsions:
+                prevision = previsions[1] if len(previsions) > 1 else previsions[0]
+                meteo_txt = (
+                    f"{prevision.condition}, {prevision.temperature_min:.0f}–"
+                    f"{prevision.temperature_max:.0f}°C"
+                )
+        except Exception:
+            logger.debug("Push contextuel: météo indisponible")
+
+        # 3) Produits à décongeler (heuristique sur emplacement congélateur)
+        a_decongeler = []
+        try:
+            with obtenir_contexte_db() as session:
+                rows = (
+                    session.query(ArticleInventaire)
+                    .filter(ArticleInventaire.emplacement.ilike("%congel%"))
+                    .limit(3)
+                    .all()
+                )
+                a_decongeler = [a.nom or "Article" for a in rows]
+        except Exception:
+            logger.debug("Push contextuel: impossible de charger les articles congelés")
+
+        repas_msg = " ; ".join(plats) if plats else "Aucun repas planifié"
+        decongel_msg = (
+            f"Pense à décongeler: {', '.join(a_decongeler)}."
+            if a_decongeler
+            else ""
+        )
+        message = (
+            f"Demain ({demain.isoformat()}) -> {repas_msg}. "
+            f"Météo: {meteo_txt}. {decongel_msg}"
+        ).strip()
+
+        dispatcher = get_dispatcher_notifications()
+        resultats = dispatcher.envoyer(
+            user_id="matanne",
+            message=message,
+            canaux=["ntfy", "push"],
+            titre="Préparation de demain",
+        )
+        logger.info("Push contextuel soir envoyé: %s", resultats)
+    except Exception:
+        logger.exception("Erreur lors du push contextuel soir")
+
+
+def _job_resume_hebdo() -> None:
+    """Génère le résumé hebdomadaire et l'envoie via ntfy/email."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.famille.resume_hebdo import obtenir_service_resume_hebdo
+
+        service = obtenir_service_resume_hebdo()
+        resume = service.generer_resume_semaine_sync()
+        texte = resume.resume_narratif or (
+            f"Résumé semaine {resume.semaine}: score {resume.score_semaine}/100"
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        # ntfy toujours tenté; email seulement si adresse fournie en env
+        canaux = ["ntfy", "email"]
+        import os
+
+        email_dest = os.getenv("EMAIL_RESUME_HEBDO")
+        kwargs = {
+            "titre": f"Résumé hebdomadaire {resume.semaine}",
+            "type_email": "resume_hebdo",
+            "resume": {
+                "semaine": resume.semaine,
+                "recettes_cuisinees": resume.repas.nb_repas_realises,
+                "budget_depense": resume.budget.total_depenses,
+                "activites_jules": resume.activites.nb_activites,
+                "taches_maison": resume.taches.nb_taches_realisees,
+                "resume_ia": resume.resume_narratif,
+            },
+        }
+        if email_dest:
+            kwargs["email"] = email_dest
+        else:
+            canaux = ["ntfy"]
+
+        resultats = dispatcher.envoyer(
+            user_id="matanne",
+            message=texte,
+            canaux=canaux,
+            **kwargs,
+        )
+        logger.info("Résumé hebdo envoyé: %s", resultats)
+    except Exception:
+        logger.exception("Erreur lors du résumé hebdomadaire")
+
+
 # ─── Orchestrateur ────────────────────────────────────────────────────────────
 
 
@@ -291,6 +411,20 @@ class DémarreurCron:
             id="rappel_courses",
             replace_existing=True,
             name="Rappel courses ntfy.sh (articles en attente)",
+        )
+        self._scheduler.add_job(
+            _job_push_contextuel_soir,
+            CronTrigger(hour=18, minute=0),
+            id="push_contextuel_soir",
+            replace_existing=True,
+            name="Push contextuel soir (planning + météo)",
+        )
+        self._scheduler.add_job(
+            _job_resume_hebdo,
+            CronTrigger(day_of_week="mon", hour=7, minute=30),
+            id="resume_hebdo",
+            replace_existing=True,
+            name="Résumé hebdomadaire (lundi 07h30)",
         )
 
     def demarrer(self) -> None:

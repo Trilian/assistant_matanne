@@ -2830,3 +2830,217 @@ async def obtenir_coaching_hebdo_jules(
         }
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# TIMELINE VIE FAMILIALE (MT-08)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/timeline", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_timeline_famille(
+    categorie: str | None = Query(None, description="Filtre: jules | maison | famille | jeux"),
+    limite: int = Query(200, ge=1, le=500),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Agrège les événements familiaux multi-modules en timeline chronologique."""
+
+    def _query() -> dict[str, Any]:
+        from src.core.models.famille import EvenementFamilial, Jalon
+        from src.core.models.jeux import PariSportif
+        from src.core.models.maison import Projet
+
+        with executer_avec_session() as session:
+            elements: list[dict[str, Any]] = []
+
+            # 1) Jalons Jules
+            jalons = session.query(Jalon).order_by(Jalon.date_atteint.desc()).limit(limite).all()
+            for j in jalons:
+                elements.append(
+                    {
+                        "id": f"jalon-{j.id}",
+                        "categorie": "jules",
+                        "date": j.date_atteint.isoformat(),
+                        "titre": j.titre,
+                        "description": j.description,
+                        "meta": {
+                            "type": j.categorie,
+                            "lieu": j.lieu,
+                            "age_mois": j.age_mois_atteint,
+                        },
+                    }
+                )
+
+            # 2) Événements familiaux
+            evenements = (
+                session.query(EvenementFamilial)
+                .filter(EvenementFamilial.actif.is_(True))
+                .order_by(EvenementFamilial.date_evenement.desc())
+                .limit(limite)
+                .all()
+            )
+            for e in evenements:
+                elements.append(
+                    {
+                        "id": f"famille-{e.id}",
+                        "categorie": "famille",
+                        "date": e.date_evenement.isoformat(),
+                        "titre": e.titre,
+                        "description": e.notes,
+                        "meta": {
+                            "type": e.type_evenement,
+                            "participants": e.participants or [],
+                        },
+                    }
+                )
+
+            # 3) Projets maison terminés
+            projets = (
+                session.query(Projet)
+                .filter(Projet.statut.in_(["terminé", "termine", "complete", "complet"]))
+                .order_by(Projet.date_fin_reelle.desc(), Projet.date_fin_prevue.desc())
+                .limit(limite)
+                .all()
+            )
+            for p in projets:
+                dt = p.date_fin_reelle or p.date_fin_prevue or p.date_debut
+                if not dt:
+                    continue
+                elements.append(
+                    {
+                        "id": f"maison-{p.id}",
+                        "categorie": "maison",
+                        "date": dt.isoformat(),
+                        "titre": p.nom,
+                        "description": p.description,
+                        "meta": {
+                            "priorite": p.priorite,
+                            "statut": p.statut,
+                        },
+                    }
+                )
+
+            # 4) Matchs mémorables (ROI >= 30% ou gain >= 50)
+            paris = session.query(PariSportif).order_by(PariSportif.cree_le.desc()).limit(limite).all()
+            for p in paris:
+                mise = float(p.mise or 0)
+                gain = float(p.gain or 0)
+                if mise <= 0:
+                    continue
+                roi = ((gain - mise) / mise) * 100
+                if roi < 30 and gain < 50:
+                    continue
+                elements.append(
+                    {
+                        "id": f"jeux-{p.id}",
+                        "categorie": "jeux",
+                        "date": p.cree_le.date().isoformat() if p.cree_le else date.today().isoformat(),
+                        "titre": f"Pari {p.type_pari} ({p.prediction})",
+                        "description": p.notes,
+                        "meta": {
+                            "cote": p.cote,
+                            "mise": mise,
+                            "gain": gain,
+                            "roi": round(roi, 1),
+                        },
+                    }
+                )
+
+            if categorie:
+                cat = categorie.lower().strip()
+                elements = [e for e in elements if e["categorie"] == cat]
+
+            elements.sort(key=lambda x: x["date"], reverse=True)
+            elements = elements[:limite]
+
+            return {
+                "items": elements,
+                "total": len(elements),
+                "filtres": {
+                    "categorie": categorie,
+                    "limite": limite,
+                },
+            }
+
+    return await executer_async(_query)
+
+
+@router.get("/aujourd-hui-histoire", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_aujourd_hui_histoire(
+    limite: int = Query(8, ge=1, le=30),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les souvenirs familiaux correspondant au jour/mois actuel."""
+
+    def _query() -> dict[str, Any]:
+        from sqlalchemy import extract
+
+        from src.core.models.famille import EvenementFamilial, Jalon
+
+        aujourd_hui = date.today()
+        mois = aujourd_hui.month
+        jour = aujourd_hui.day
+
+        with executer_avec_session() as session:
+            elements: list[dict[str, Any]] = []
+
+            jalons = (
+                session.query(Jalon)
+                .filter(
+                    extract("month", Jalon.date_atteint) == mois,
+                    extract("day", Jalon.date_atteint) == jour,
+                )
+                .order_by(Jalon.date_atteint.desc())
+                .limit(limite)
+                .all()
+            )
+            for j in jalons:
+                elements.append(
+                    {
+                        "id": f"jalon-{j.id}",
+                        "type": "jalon",
+                        "date_source": j.date_atteint.isoformat(),
+                        "titre": j.titre,
+                        "description": j.description,
+                        "annees_depuis": max(0, aujourd_hui.year - j.date_atteint.year),
+                    }
+                )
+
+            evenements = (
+                session.query(EvenementFamilial)
+                .filter(
+                    EvenementFamilial.actif.is_(True),
+                    extract("month", EvenementFamilial.date_evenement) == mois,
+                    extract("day", EvenementFamilial.date_evenement) == jour,
+                )
+                .order_by(EvenementFamilial.date_evenement.desc())
+                .limit(limite)
+                .all()
+            )
+            for e in evenements:
+                elements.append(
+                    {
+                        "id": f"event-{e.id}",
+                        "type": "evenement",
+                        "date_source": e.date_evenement.isoformat(),
+                        "titre": e.titre,
+                        "description": e.notes,
+                        "annees_depuis": max(0, aujourd_hui.year - e.date_evenement.year),
+                    }
+                )
+
+            elements.sort(
+                key=lambda item: (item["annees_depuis"], item["date_source"]),
+                reverse=True,
+            )
+            elements = elements[:limite]
+
+            return {
+                "date": aujourd_hui.isoformat(),
+                "items": elements,
+                "total": len(elements),
+            }
+
+    return await executer_async(_query)

@@ -184,3 +184,15 @@ export async function obtenirRecurrentsSuggeres(): Promise<{
   const { data } = await clientApi.get("/courses/recurrents-suggeres");
   return data;
 }
+
+/** Récupérer un QR PNG de partage de liste */
+export async function obtenirQrPartageListe(
+  listeId: number,
+  options?: { includeChecked?: boolean }
+): Promise<Blob> {
+  const { data } = await clientApi.get(`/courses/${listeId}/share-qr`, {
+    params: { include_checked: options?.includeChecked ?? false },
+    responseType: "blob",
+  });
+  return data as Blob;
+}

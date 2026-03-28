@@ -8,6 +8,7 @@ from datetime import date, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel, Field
 from sqlalchemy import func
 
 from src.api.dependencies import require_auth
@@ -15,6 +16,12 @@ from src.api.schemas.errors import REPONSES_LISTE
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["Tableau de bord"])
+
+
+class DashboardConfigRequest(BaseModel):
+    """Configuration personnalisée des widgets dashboard."""
+
+    config_dashboard: dict[str, Any] = Field(default_factory=dict)
 
 
 @router.get("", responses=REPONSES_LISTE)
@@ -352,3 +359,77 @@ async def bilan_mensuel(
 
     service = get_bilan_mensuel_service()
     return await service.generer_bilan(mois=mois)
+
+
+@router.get(
+    "/score-bienetre",
+    responses=REPONSES_LISTE,
+    summary="Score bien-etre global",
+    description="Calcule le score bien-etre hebdomadaire (alimentation + nutrition + activités).",
+)
+@gerer_exception_api
+async def obtenir_score_bien_etre(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne le score bien-etre pour la semaine courante."""
+
+    def _query():
+        from src.services.dashboard.score_bienetre import get_score_bien_etre_service
+
+        service = get_score_bien_etre_service()
+        return service.calculer_score()
+
+    return await executer_async(_query)
+
+
+@router.get(
+    "/config",
+    responses=REPONSES_LISTE,
+    summary="Lire la config dashboard",
+)
+@gerer_exception_api
+async def lire_config_dashboard(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne la configuration widgets enregistrée pour l'utilisateur."""
+
+    def _query():
+        from src.core.models.user_preferences import PreferenceUtilisateur
+
+        with executer_avec_session() as session:
+            pref = session.query(PreferenceUtilisateur).first()
+            if not pref:
+                return {"config_dashboard": {}}
+            return {"config_dashboard": pref.config_dashboard or {}}
+
+    return await executer_async(_query)
+
+
+@router.put(
+    "/config",
+    responses=REPONSES_LISTE,
+    summary="Mettre à jour la config dashboard",
+)
+@gerer_exception_api
+async def sauvegarder_config_dashboard(
+    payload: DashboardConfigRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Sauvegarde la configuration personnalisée du dashboard."""
+
+    def _query():
+        from src.core.models.user_preferences import PreferenceUtilisateur
+
+        with executer_avec_session() as session:
+            pref = session.query(PreferenceUtilisateur).first()
+            if pref is None:
+                pref = PreferenceUtilisateur(user_id="matanne")
+                session.add(pref)
+            pref.config_dashboard = payload.config_dashboard
+            session.commit()
+            return {
+                "message": "Configuration dashboard sauvegardée",
+                "config_dashboard": pref.config_dashboard,
+            }
+
+    return await executer_async(_query)

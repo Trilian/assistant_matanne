@@ -132,6 +132,7 @@ class RecetteResponse(RecetteBase, IdentifiedResponse):
     compatible_cookeo: bool = False
     compatible_monsieur_cuisine: bool = False
     compatible_airfryer: bool = False
+    jours_depuis_derniere_cuisson: int | None = None
 
 
 class VersionRecetteResponse(BaseModel):

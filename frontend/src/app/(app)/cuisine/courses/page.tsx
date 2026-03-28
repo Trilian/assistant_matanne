@@ -15,6 +15,8 @@ import {
   Leaf,
   RotateCcw,
   CheckCircle2,
+  QrCode,
+  Download,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,6 +53,7 @@ import {
   validerCourses,
   obtenirSuggestionsBioLocal,
   obtenirRecurrentsSuggeres,
+  obtenirQrPartageListe,
 } from "@/bibliotheque/api/courses";
 import { schemaArticleCourses, type DonneesArticleCourses } from "@/bibliotheque/validateurs";
 import { toast } from "sonner";
@@ -75,8 +78,39 @@ export default function PageCourses() {
   const [dialogueArticle, setDialogueArticle] = useState(false);
   const [scanneurOuvert, setScanneurOuvert] = useState(false);
   const [panneauBio, setPanneauBio] = useState(false);
+  const [dialogueQr, setDialogueQr] = useState(false);
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [chargementQr, setChargementQr] = useState(false);
 
   const invalider = utiliserInvalidation();
+
+  async function ouvrirQrPartage() {
+    if (!listeSelectionnee) return;
+    setDialogueQr(true);
+    setChargementQr(true);
+    try {
+      const blob = await obtenirQrPartageListe(listeSelectionnee);
+      const url = URL.createObjectURL(blob);
+      setQrUrl((precedent) => {
+        if (precedent) URL.revokeObjectURL(precedent);
+        return url;
+      });
+    } catch {
+      toast.error("Impossible de générer le QR de partage");
+    } finally {
+      setChargementQr(false);
+    }
+  }
+
+  function telechargerQr() {
+    if (!qrUrl || !detailListe) return;
+    const a = document.createElement("a");
+    a.href = qrUrl;
+    a.download = `courses-${detailListe.nom.replace(/\s+/g, "-").toLowerCase()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 
   // Listes
   const { data: listes, isLoading: chargementListes } = utiliserRequete(
@@ -214,6 +248,10 @@ export default function PageCourses() {
         </div>
         {listeSelectionnee && (
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={ouvrirQrPartage}>
+              <QrCode className="mr-1 h-4 w-4" />
+              QR partage
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -537,6 +575,45 @@ export default function PageCourses() {
         onImporter={importerDepuisScanner}
         labelImporter="Ajouter à la liste"
       />
+
+      <Dialog
+        open={dialogueQr}
+        onOpenChange={(ouvert) => {
+          setDialogueQr(ouvert);
+          if (!ouvert) {
+            setQrUrl((precedent) => {
+              if (precedent) URL.revokeObjectURL(precedent);
+              return null;
+            });
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>QR de partage</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Scannez ce QR pour ouvrir la version texte de votre liste de courses.
+            </p>
+            <div className="flex justify-center rounded-lg border p-4 min-h-48 items-center">
+              {chargementQr ? (
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              ) : qrUrl ? (
+                <img src={qrUrl} alt="QR liste de courses" className="h-52 w-52" />
+              ) : (
+                <p className="text-sm text-muted-foreground">QR indisponible</p>
+              )}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={telechargerQr} disabled={!qrUrl}>
+                <Download className="mr-1 h-4 w-4" />
+                Télécharger
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

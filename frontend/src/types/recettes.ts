@@ -18,6 +18,7 @@ export interface Recette {
   ingredients: IngredientRecette[];
   note_moyenne?: number;
   est_favori?: boolean;
+  jours_depuis_derniere_cuisson?: number;
   compatible_cookeo?: boolean;
   compatible_monsieur_cuisine?: boolean;
   compatible_airfryer?: boolean;

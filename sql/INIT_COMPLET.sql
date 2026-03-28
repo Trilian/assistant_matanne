@@ -917,6 +917,7 @@ CREATE TABLE preferences_utilisateurs (
     interets_culture JSONB NOT NULL DEFAULT '[]',
     equipement_activites JSONB NOT NULL DEFAULT '{}',
     config_garde JSONB NOT NULL DEFAULT '{}',
+    config_dashboard JSONB NOT NULL DEFAULT '{}',
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
@@ -1480,6 +1481,7 @@ CREATE TABLE historique_inventaire (
     CONSTRAINT fk_hist_inv_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_article ON historique_inventaire(article_id);
+CREATE INDEX IF NOT EXISTS idx_historique_inventaire_article_id ON historique_inventaire(article_id);
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_ingredient ON historique_inventaire(ingredient_id);
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_type ON historique_inventaire(type_modification);
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_date ON historique_inventaire(date_modification);
@@ -1504,6 +1506,7 @@ CREATE TABLE liste_courses (
     CONSTRAINT ck_quantite_courses_positive CHECK (quantite_necessaire > 0)
 );
 CREATE INDEX IF NOT EXISTS ix_liste_courses_liste ON liste_courses(liste_id);
+CREATE INDEX IF NOT EXISTS idx_articles_courses_liste_id ON liste_courses(liste_id);
 CREATE INDEX IF NOT EXISTS ix_liste_courses_ingredient ON liste_courses(ingredient_id);
 CREATE INDEX IF NOT EXISTS ix_liste_courses_priorite ON liste_courses(priorite);
 CREATE INDEX IF NOT EXISTS ix_liste_courses_achete ON liste_courses(achete);
@@ -1629,6 +1632,7 @@ CREATE TABLE jalons (
     CONSTRAINT fk_milestones_child FOREIGN KEY (child_id) REFERENCES profils_enfants(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS ix_milestones_child ON jalons(child_id);
+CREATE INDEX IF NOT EXISTS idx_jalons_profil_id ON jalons(child_id);
 CREATE INDEX IF NOT EXISTS ix_milestones_categorie ON jalons(categorie);
 CREATE INDEX IF NOT EXISTS ix_milestones_date ON jalons(date_atteint);
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -1760,6 +1764,10 @@ CREATE TABLE jeux_paris_sportifs (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_jeux_paris_match FOREIGN KEY (match_id) REFERENCES jeux_matchs(id)
 );
+CREATE INDEX IF NOT EXISTS ix_jeux_paris_match_id ON jeux_paris_sportifs(match_id);
+CREATE INDEX IF NOT EXISTS ix_jeux_paris_statut ON jeux_paris_sportifs(statut);
+CREATE INDEX IF NOT EXISTS ix_jeux_paris_cree_le ON jeux_paris_sportifs(cree_le);
+CREATE INDEX IF NOT EXISTS idx_paris_match_date ON jeux_paris_sportifs(match_id, cree_le);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.25 JEUX_GRILLES_LOTO (→ jeux_tirages_loto)
 -- ─────────────────────────────────────────────────────────────────────────────

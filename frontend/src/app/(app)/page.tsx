@@ -4,6 +4,7 @@
 
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import {
   ChefHat,
   ShoppingCart,
@@ -26,13 +27,18 @@ import {
 } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
-import { utiliserRequete } from "@/crochets/utiliser-api";
-import { obtenirTableauBord } from "@/bibliotheque/api/tableau-bord";
+import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
+import {
+  obtenirBilanMensuel,
+  obtenirConfigDashboard,
+  obtenirTableauBord,
+  sauvegarderConfigDashboard,
+} from "@/bibliotheque/api/tableau-bord";
 import { statsDepensesMaison } from "@/bibliotheque/api/maison";
 import { evaluerRappels, type RappelItem } from "@/bibliotheque/api/push";
-import { obtenirBilanMensuel } from "@/bibliotheque/api/tableau-bord";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
 import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
+import { clientApi } from "@/bibliotheque/api/client";
 
 const WIDGETS_DEFAUT = {
   metriques: true,
@@ -41,9 +47,31 @@ const WIDGETS_DEFAUT = {
   rappels: true,
   depenses: true,
   bilan_mensuel: true,
+  meteo: true,
+  histoire_famille: true,
 };
 
 type ClesWidget = keyof typeof WIDGETS_DEFAUT;
+
+type MeteoWidget = {
+  ville: string;
+  temperature: number;
+  description: string;
+  humidite: number;
+  vent: number;
+};
+
+type HistoireFamille = {
+  date: string;
+  total: number;
+  items: Array<{
+    id: string;
+    type: string;
+    titre: string;
+    description?: string;
+    annees_depuis: number;
+  }>;
+};
 
 export default function PageAccueil() {
   const { utilisateur } = utiliserAuth();
@@ -51,12 +79,75 @@ export default function PageAccueil() {
   const { data: statsDepenses } = utiliserRequete(["depenses", "stats"], statsDepensesMaison);
   const { data: rappelsData } = utiliserRequete(["rappels"], evaluerRappels);
   const { data: bilanMensuel } = utiliserRequete(["bilan-mensuel"], obtenirBilanMensuel);
+  const { data: configDashboard } = utiliserRequete(["dashboard", "config"], obtenirConfigDashboard);
+  const { data: histoireFamille } = utiliserRequete(
+    ["famille", "aujourd-hui-histoire"],
+    async () => {
+      const { data } = await clientApi.get<HistoireFamille>("/famille/aujourd-hui-histoire");
+      return data;
+    }
+  );
 
-  const [widgets, setWidgets] = utiliserStockageLocal("dashboard-widgets", WIDGETS_DEFAUT);
+  const [widgetsStockes, setWidgetsStockes] = utiliserStockageLocal("dashboard-widgets", WIDGETS_DEFAUT);
   const [configOuverte, setConfigOuverte] = utiliserStockageLocal("dashboard-config-open", false);
+  const [widgets, setWidgets] = useState(WIDGETS_DEFAUT);
+  const [meteo, setMeteo] = useState<MeteoWidget | null>(null);
+
+  const configFusionnee = useMemo(
+    () => ({
+      ...WIDGETS_DEFAUT,
+      ...widgetsStockes,
+      ...(configDashboard?.config_dashboard ?? {}),
+    }),
+    [configDashboard?.config_dashboard, widgetsStockes]
+  );
+
+  const { mutate: sauvegarderWidgets } = utiliserMutation(
+    (config: Record<string, boolean>) => sauvegarderConfigDashboard(config),
+    {
+      onError: () => {
+        // Fallback localStorage conservé si l'API dashboard échoue.
+      },
+    }
+  );
+
+  useEffect(() => {
+    setWidgets(configFusionnee);
+  }, [configFusionnee]);
+
+  useEffect(() => {
+    let annule = false;
+
+    async function chargerMeteo() {
+      try {
+        const res = await fetch("https://wttr.in/Paris?format=j1");
+        if (!res.ok) return;
+        const json = await res.json();
+        const actuel = json.current_condition?.[0];
+        if (!actuel || annule) return;
+        setMeteo({
+          ville: json.nearest_area?.[0]?.areaName?.[0]?.value ?? "Paris",
+          temperature: Number(actuel.temp_C ?? 0),
+          description: actuel.weatherDesc?.[0]?.value ?? "",
+          humidite: Number(actuel.humidity ?? 0),
+          vent: Number(actuel.windspeedKmph ?? 0),
+        });
+      } catch {
+        if (!annule) setMeteo(null);
+      }
+    }
+
+    chargerMeteo();
+    return () => {
+      annule = true;
+    };
+  }, []);
 
   function basculerWidget(cle: ClesWidget) {
-    setWidgets((prev) => ({ ...prev, [cle]: !prev[cle] }));
+    const prochain = { ...widgets, [cle]: !widgets[cle] };
+    setWidgets(prochain);
+    setWidgetsStockes(prochain);
+    sauvegarderWidgets(prochain);
   }
 
   return (
@@ -105,6 +196,48 @@ export default function PageAccueil() {
                 </label>
               ))}
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {widgets.meteo && meteo && (
+        <Card className="border-blue-300/50 bg-blue-50/50 dark:border-blue-800/40 dark:bg-blue-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Météo rapide</CardTitle>
+            <CardDescription>{meteo.ville}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-3xl font-bold">{meteo.temperature}°C</p>
+                <p className="text-sm text-muted-foreground">{meteo.description}</p>
+              </div>
+              <div className="text-right text-xs text-muted-foreground">
+                <p>💧 {meteo.humidite}%</p>
+                <p>💨 {meteo.vent} km/h</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {widgets.histoire_famille && histoireFamille && histoireFamille.total > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Aujourd&apos;hui dans notre histoire</CardTitle>
+            <CardDescription>
+              {histoireFamille.total} souvenir(s) pour cette date
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {histoireFamille.items.slice(0, 3).map((item) => (
+              <div key={item.id} className="rounded-md border px-3 py-2">
+                <p className="text-sm font-medium">{item.titre}</p>
+                <p className="text-xs text-muted-foreground">
+                  Il y a {item.annees_depuis} an(s)
+                </p>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}

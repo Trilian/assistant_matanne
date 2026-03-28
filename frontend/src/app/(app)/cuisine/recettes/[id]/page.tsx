@@ -16,6 +16,7 @@ import {
   Trash2,
   Star,
   Heart,
+  Printer,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -96,9 +97,9 @@ export default function PageDetailRecette({
     (recette.temps_preparation ?? 0) + (recette.temps_cuisson ?? 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 print:space-y-3">
       {/* Navigation */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 print:hidden">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/cuisine/recettes">
             <ArrowLeft className="mr-1 h-4 w-4" />
@@ -133,7 +134,11 @@ export default function PageDetailRecette({
             ))}
           </div>
         </div>
-        <div className="flex gap-2 shrink-0">
+        <div className="flex gap-2 shrink-0 print:hidden">
+          <Button variant="outline" size="sm" onClick={() => window.print()}>
+            <Printer className="mr-1 h-4 w-4" />
+            Imprimer
+          </Button>
           <Button variant="outline" size="sm" asChild>
             <Link href={`/cuisine/recettes/${id}/modifier`}>
               <Edit className="mr-1 h-4 w-4" />
@@ -264,6 +269,17 @@ export default function PageDetailRecette({
           </CardContent>
         </Card>
       </div>
+
+      <style jsx global>{`
+        @media print {
+          .prose {
+            max-width: 100% !important;
+          }
+          .print\:hidden {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -149,6 +149,19 @@ class InventaireItemResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ArticleConsolideResponse(BaseModel):
+    """Vue consolidée des stocks cuisine + cellier."""
+
+    nom: str
+    nom_normalise: str
+    quantite_totale: float
+    unite: str
+    categories: list[str] = Field(default_factory=list)
+    emplacements: list[str] = Field(default_factory=list)
+    sources: list[str] = Field(default_factory=list)  # cuisine | cellier
+    details_sources: list[dict] = Field(default_factory=list)
+
+
 # ═══════════════════════════════════════════════════════════
 # SCAN BATCH
 # ═══════════════════════════════════════════════════════════

@@ -358,6 +358,52 @@ async def exporter_liste_texte(
     return await executer_async(_export)
 
 
+@router.get("/{liste_id}/share-qr")
+@gerer_exception_api
+async def generer_qr_partage_liste(
+    liste_id: int,
+    include_checked: bool = Query(False, description="Inclure les articles déjà cochés"),
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Génère un QR code PNG contenant une version texte de la liste."""
+    from io import BytesIO
+
+    import qrcode
+
+    from src.core.models import ListeCourses
+
+    def _build_payload() -> str:
+        with executer_avec_session() as session:
+            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+            if not liste:
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
+
+            articles = [
+                a
+                for a in (liste.articles or [])
+                if include_checked or not a.achete
+            ]
+            lignes = [f"Courses - {liste.nom}"]
+            for article in articles:
+                nom = article.ingredient.nom if article.ingredient else "Article"
+                unite = (article.ingredient.unite if article.ingredient else "") or ""
+                qty = f"{article.quantite_necessaire:g} {unite}".strip()
+                lignes.append(f"- {nom} ({qty})")
+            return "\n".join(lignes)
+
+    contenu = await executer_async(_build_payload)
+
+    qr = qrcode.QRCode(version=1, box_size=8, border=2)
+    qr.add_data(contenu)
+    qr.make(fit=True)
+
+    image = qr.make_image(fill_color="black", back_color="white")
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+
+    return Response(content=buffer.getvalue(), media_type="image/png")
+
+
 @router.put("/{liste_id}", response_model=MessageResponse, responses=REPONSES_CRUD_ECRITURE)
 @gerer_exception_api
 async def modifier_liste(

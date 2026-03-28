@@ -73,6 +73,7 @@ from .errors import (
 
 # Inventaire
 from .inventaire import (
+    ArticleConsolideResponse,
     ArticleBatchTrouve,
     InventaireItemBase,
     InventaireItemCreate,
@@ -331,6 +332,7 @@ __all__ = [
     "RecettePatch",
     "RecetteResponse",
     # Inventaire
+    "ArticleConsolideResponse",
     "ArticleBatchTrouve",
     "InventaireItemBase",
     "InventaireItemCreate",

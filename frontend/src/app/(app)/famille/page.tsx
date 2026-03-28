@@ -74,6 +74,7 @@ const MODULES = [
   { id: "contacts", titre: "Contacts", chemin: "/famille/contacts", Icone: BookUser },
   { id: "documents", titre: "Documents", chemin: "/famille/documents", Icone: FileText },
   { id: "calendriers", titre: "Calendriers", chemin: "/famille/calendriers", Icone: Calendar },
+  { id: "timeline", titre: "Timeline", chemin: "/famille/timeline", Icone: Clock },
   { id: "config", titre: "Config", chemin: "/famille/config", Icone: Settings },
 ];
 
