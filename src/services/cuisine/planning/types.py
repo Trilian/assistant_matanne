@@ -9,7 +9,7 @@ Centralise tous les modèles de validation pour:
 
 from datetime import date
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 # ═══════════════════════════════════════════════════════════
 # SCHÉMAS PLANNING DE BASE
@@ -50,6 +50,23 @@ class ParametresEquilibre(BaseModel):
     pates_riz_count: int = Field(default=3, ge=1, le=5)  # Combien de fois pâtes/riz
     ingredients_exclus: list[str] = Field(default_factory=list)  # Allergies, phobies
     preferences_extras: dict = Field(default_factory=dict)  # Autres contraintes
+
+    @model_validator(mode="before")
+    @classmethod
+    def _mapper_poisson_jours_legacy(cls, data):
+        """Compatibilité avec l'ancien champ `poisson_jours` utilisé par les tests."""
+        if not isinstance(data, dict):
+            return data
+
+        poisson_jours = data.get("poisson_jours")
+        if poisson_jours and "poisson_blanc_jours" not in data and "poisson_gras_jours" not in data:
+            if len(poisson_jours) == 1:
+                data["poisson_blanc_jours"] = list(poisson_jours)
+                data["poisson_gras_jours"] = []
+            else:
+                data["poisson_blanc_jours"] = [poisson_jours[0]]
+                data["poisson_gras_jours"] = list(poisson_jours[1:])
+        return data
 
     @property
     def poisson_jours(self) -> list[str]:

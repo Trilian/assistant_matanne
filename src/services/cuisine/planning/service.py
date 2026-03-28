@@ -27,6 +27,16 @@ from .types import JourPlanning, ParametresEquilibre
 logger = logging.getLogger(__name__)
 
 
+class Cache:
+    """Compatibilité tests legacy patchant `...planning.service.Cache`."""
+
+    @staticmethod
+    def invalider(pattern: str | None = None) -> None:
+        from src.core.caching import obtenir_cache
+
+        obtenir_cache().invalider(pattern=pattern)
+
+
 # ═══════════════════════════════════════════════════════════
 # SERVICE PLANNING
 # ═══════════════════════════════════════════════════════════

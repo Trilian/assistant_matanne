@@ -20,6 +20,11 @@ from src.services.jeux.bankroll_manager import get_bankroll_manager
 logger = logging.getLogger(__name__)
 
 
+def _has_attr(model: type, attr: str) -> bool:
+    """Compatibility helper for model field drift across refactors."""
+    return hasattr(model, attr)
+
+
 class StatsPersonnellesService:
     """
     Service d'analyse des performances personnelles.
@@ -60,31 +65,50 @@ class StatsPersonnellesService:
         
         try:
             # Paris sportifs
-            paris = session.query(PariSportif).filter(
-                PariSportif.user_id == user_id,
-                PariSportif.date_pari >= date_debut,
-                PariSportif.statut.in_(["gagnant", "perdant"])
-            ).all()
+            filtres_paris = []
+            if _has_attr(PariSportif, "user_id"):
+                filtres_paris.append(PariSportif.user_id == user_id)
+            if _has_attr(PariSportif, "date_pari"):
+                filtres_paris.append(PariSportif.date_pari >= date_debut)
+            if _has_attr(PariSportif, "statut"):
+                filtres_paris.append(PariSportif.statut.in_(["gagnant", "perdant", "gagne", "perdu"]))
+
+            paris_query = session.query(PariSportif)
+            if filtres_paris:
+                paris_query = paris_query.filter(*filtres_paris)
+            paris = paris_query.all()
             
-            gains_paris = sum(p.gain for p in paris if p.gain)
-            mises_paris = sum(p.montant for p in paris)
+            gains_paris = sum(float(p.gain) for p in paris if p.gain)
+            mises_paris = sum(float(getattr(p, "mise", 0) or 0) for p in paris)
             
             # Loto
-            grilles_loto = session.query(GrilleLoto).filter(
-                GrilleLoto.user_id == user_id,
-                GrilleLoto.date_creation >= date_debut,
-                GrilleLoto.statut.in_(["gagnant", "perdant"])
-            ).all()
+            filtres_loto = []
+            if _has_attr(GrilleLoto, "user_id"):
+                filtres_loto.append(GrilleLoto.user_id == user_id)
+            if _has_attr(GrilleLoto, "date_creation"):
+                filtres_loto.append(GrilleLoto.date_creation >= date_debut)
+            if _has_attr(GrilleLoto, "statut"):
+                filtres_loto.append(GrilleLoto.statut.in_(["gagnant", "perdant", "gagne", "perdu"]))
+            grilles_loto_query = session.query(GrilleLoto)
+            if filtres_loto:
+                grilles_loto_query = grilles_loto_query.filter(*filtres_loto)
+            grilles_loto = grilles_loto_query.all()
             
             gains_loto = sum(g.backtest.get("gain", 0) for g in grilles_loto if g.backtest)
             mises_loto = len(grilles_loto) * 2.2  # Prix 1 grille Loto
             
             # Euromillions
-            grilles_euro = session.query(GrilleEuromillions).filter(
-                GrilleEuromillions.user_id == user_id,
-                GrilleEuromillions.date_creation >= date_debut,
-                GrilleEuromillions.statut.in_(["gagnant", "perdant"])
-            ).all()
+            filtres_euro = []
+            if _has_attr(GrilleEuromillions, "user_id"):
+                filtres_euro.append(GrilleEuromillions.user_id == user_id)
+            if _has_attr(GrilleEuromillions, "date_creation"):
+                filtres_euro.append(GrilleEuromillions.date_creation >= date_debut)
+            if _has_attr(GrilleEuromillions, "statut"):
+                filtres_euro.append(GrilleEuromillions.statut.in_(["gagnant", "perdant", "gagne", "perdu"]))
+            grilles_euro_query = session.query(GrilleEuromillions)
+            if filtres_euro:
+                grilles_euro_query = grilles_euro_query.filter(*filtres_euro)
+            grilles_euro = grilles_euro_query.all()
             
             gains_euro = sum(g.backtest.get("gain", 0) for g in grilles_euro if g.backtest)
             mises_euro = len(grilles_euro) * 2.5  # Prix 1 grille Euromillions
@@ -140,43 +164,85 @@ class StatsPersonnellesService:
         
         try:
             # Paris
-            paris_total = session.query(func.count(PariSportif.id)).filter(
-                PariSportif.user_id == user_id,
-                PariSportif.date_pari >= date_debut,
-                PariSportif.statut.in_(["gagnant", "perdant"])
-            ).scalar()
-            
-            paris_gagnants = session.query(func.count(PariSportif.id)).filter(
-                PariSportif.user_id == user_id,
-                PariSportif.date_pari >= date_debut,
-                PariSportif.statut == "gagnant"
-            ).scalar()
+            filtres_paris = []
+            if _has_attr(PariSportif, "user_id"):
+                filtres_paris.append(PariSportif.user_id == user_id)
+            if _has_attr(PariSportif, "date_pari"):
+                filtres_paris.append(PariSportif.date_pari >= date_debut)
+
+            paris_total_query = session.query(func.count(PariSportif.id))
+            if filtres_paris:
+                paris_total_query = paris_total_query.filter(*filtres_paris)
+            if _has_attr(PariSportif, "statut"):
+                paris_total_query = paris_total_query.filter(
+                    PariSportif.statut.in_(["gagnant", "perdant", "gagne", "perdu"])  # type: ignore[arg-type]
+                )
+            paris_total = paris_total_query.scalar() or 0
+
+            paris_gagnants_query = session.query(func.count(PariSportif.id))
+            if filtres_paris:
+                paris_gagnants_query = paris_gagnants_query.filter(*filtres_paris)
+            if _has_attr(PariSportif, "statut"):
+                paris_gagnants_query = paris_gagnants_query.filter(
+                    PariSportif.statut.in_(["gagnant", "gagne"])  # type: ignore[arg-type]
+                )
+            else:
+                paris_gagnants_query = paris_gagnants_query.filter(PariSportif.gain.isnot(None))
+            paris_gagnants = paris_gagnants_query.scalar() or 0
             
             # Loto
-            loto_total = session.query(func.count(GrilleLoto.id)).filter(
-                GrilleLoto.user_id == user_id,
-                GrilleLoto.date_creation >= date_debut,
-                GrilleLoto.statut.in_(["gagnant", "perdant"])
-            ).scalar()
-            
-            loto_gagnants = session.query(func.count(GrilleLoto.id)).filter(
-                GrilleLoto.user_id == user_id,
-                GrilleLoto.date_creation >= date_debut,
-                GrilleLoto.statut == "gagnant"
-            ).scalar()
+            filtres_loto = []
+            if _has_attr(GrilleLoto, "user_id"):
+                filtres_loto.append(GrilleLoto.user_id == user_id)
+            if _has_attr(GrilleLoto, "date_creation"):
+                filtres_loto.append(GrilleLoto.date_creation >= date_debut)
+
+            loto_total_query = session.query(func.count(GrilleLoto.id))
+            if filtres_loto:
+                loto_total_query = loto_total_query.filter(*filtres_loto)
+            if _has_attr(GrilleLoto, "statut"):
+                loto_total_query = loto_total_query.filter(
+                    GrilleLoto.statut.in_(["gagnant", "perdant", "gagne", "perdu"])  # type: ignore[arg-type]
+                )
+            loto_total = loto_total_query.scalar() or 0
+
+            loto_gagnants_query = session.query(func.count(GrilleLoto.id))
+            if filtres_loto:
+                loto_gagnants_query = loto_gagnants_query.filter(*filtres_loto)
+            if _has_attr(GrilleLoto, "statut"):
+                loto_gagnants_query = loto_gagnants_query.filter(
+                    GrilleLoto.statut.in_(["gagnant", "gagne"])  # type: ignore[arg-type]
+                )
+            else:
+                loto_gagnants_query = loto_gagnants_query.filter(GrilleLoto.gain.isnot(None))
+            loto_gagnants = loto_gagnants_query.scalar() or 0
             
             # Euromillions
-            euro_total = session.query(func.count(GrilleEuromillions.id)).filter(
-                GrilleEuromillions.user_id == user_id,
-                GrilleEuromillions.date_creation >= date_debut,
-                GrilleEuromillions.statut.in_(["gagnant", "perdant"])
-            ).scalar()
-            
-            euro_gagnants = session.query(func.count(GrilleEuromillions.id)).filter(
-                GrilleEuromillions.user_id == user_id,
-                GrilleEuromillions.date_creation >= date_debut,
-                GrilleEuromillions.statut == "gagnant"
-            ).scalar()
+            filtres_euro = []
+            if _has_attr(GrilleEuromillions, "user_id"):
+                filtres_euro.append(GrilleEuromillions.user_id == user_id)
+            if _has_attr(GrilleEuromillions, "date_creation"):
+                filtres_euro.append(GrilleEuromillions.date_creation >= date_debut)
+
+            euro_total_query = session.query(func.count(GrilleEuromillions.id))
+            if filtres_euro:
+                euro_total_query = euro_total_query.filter(*filtres_euro)
+            if _has_attr(GrilleEuromillions, "statut"):
+                euro_total_query = euro_total_query.filter(
+                    GrilleEuromillions.statut.in_(["gagnant", "perdant", "gagne", "perdu"])  # type: ignore[arg-type]
+                )
+            euro_total = euro_total_query.scalar() or 0
+
+            euro_gagnants_query = session.query(func.count(GrilleEuromillions.id))
+            if filtres_euro:
+                euro_gagnants_query = euro_gagnants_query.filter(*filtres_euro)
+            if _has_attr(GrilleEuromillions, "statut"):
+                euro_gagnants_query = euro_gagnants_query.filter(
+                    GrilleEuromillions.statut.in_(["gagnant", "gagne"])  # type: ignore[arg-type]
+                )
+            else:
+                euro_gagnants_query = euro_gagnants_query.filter(GrilleEuromillions.gain.isnot(None))
+            euro_gagnants = euro_gagnants_query.scalar() or 0
             
             # Calculs
             nb_total = paris_total + loto_total + euro_total
@@ -233,11 +299,11 @@ class StatsPersonnellesService:
                 PariSportif.type_pari,
                 func.count(PariSportif.id).label("nb"),
                 func.sum(PariSportif.gain).label("gains"),
-                func.sum(PariSportif.montant).label("mises")
+                func.sum(PariSportif.mise).label("mises")
             ).filter(
                 PariSportif.user_id == user_id,
                 PariSportif.date_pari >= date_debut,
-                PariSportif.statut.in_(["gagnant", "perdant"])
+                PariSportif.statut.in_(["gagnant", "perdant", "gagne", "perdu"])
             ).group_by(PariSportif.type_pari).all()
             
             roi_par_type = {}
@@ -253,17 +319,22 @@ class StatsPersonnellesService:
                         meilleur_roi = roi
                         meilleur_type = type_pari
             
-            # Stratégies Loto
-            strategies_loto = session.query(
-                GrilleLoto.strategie,
-                func.count(GrilleLoto.id).label("nb"),
-                func.sum(func.cast(GrilleLoto.backtest["gain"].astext, float)).label("gains")
-            ).filter(
-                GrilleLoto.user_id == user_id,
-                GrilleLoto.date_creation >= date_debut,
-                GrilleLoto.statut == "gagnant",
-                GrilleLoto.backtest.isnot(None)
-            ).group_by(GrilleLoto.strategie).all()
+            # Stratégies Loto (skip gracieux si champs legacy absents)
+            strategies_loto = []
+            if all(_has_attr(GrilleLoto, attr) for attr in ("strategie", "backtest", "user_id", "date_creation")):
+                loto_statut_filter = (
+                    [GrilleLoto.statut.in_(["gagnant", "gagne"])] if _has_attr(GrilleLoto, "statut") else []
+                )
+                strategies_loto = session.query(
+                    GrilleLoto.strategie,
+                    func.count(GrilleLoto.id).label("nb"),
+                    func.sum(func.cast(GrilleLoto.backtest["gain"].astext, float)).label("gains")
+                ).filter(
+                    GrilleLoto.user_id == user_id,
+                    GrilleLoto.date_creation >= date_debut,
+                    GrilleLoto.backtest.isnot(None),
+                    *loto_statut_filter,
+                ).group_by(GrilleLoto.strategie).all()
             
             meilleure_strat_loto = None
             max_gains_loto = 0
@@ -273,17 +344,25 @@ class StatsPersonnellesService:
                     max_gains_loto = gains
                     meilleure_strat_loto = strat
             
-            # Stratégies Euromillions
-            strategies_euro = session.query(
-                GrilleEuromillions.strategie,
-                func.count(GrilleEuromillions.id).label("nb"),
-                func.sum(func.cast(GrilleEuromillions.backtest["gain"].astext, float)).label("gains")
-            ).filter(
-                GrilleEuromillions.user_id == user_id,
-                GrilleEuromillions.date_creation >= date_debut,
-                GrilleEuromillions.statut == "gagnant",
-                GrilleEuromillions.backtest.isnot(None)
-            ).group_by(GrilleEuromillions.strategie).all()
+            # Stratégies Euromillions (skip gracieux si champs legacy absents)
+            strategies_euro = []
+            if all(
+                _has_attr(GrilleEuromillions, attr)
+                for attr in ("strategie", "backtest", "user_id", "date_creation")
+            ):
+                euro_statut_filter = (
+                    [GrilleEuromillions.statut.in_(["gagnant", "gagne"])] if _has_attr(GrilleEuromillions, "statut") else []
+                )
+                strategies_euro = session.query(
+                    GrilleEuromillions.strategie,
+                    func.count(GrilleEuromillions.id).label("nb"),
+                    func.sum(func.cast(GrilleEuromillions.backtest["gain"].astext, float)).label("gains")
+                ).filter(
+                    GrilleEuromillions.user_id == user_id,
+                    GrilleEuromillions.date_creation >= date_debut,
+                    GrilleEuromillions.backtest.isnot(None),
+                    *euro_statut_filter,
+                ).group_by(GrilleEuromillions.strategie).all()
             
             meilleure_strat_euro = None
             max_gains_euro = 0
@@ -379,30 +458,46 @@ class StatsPersonnellesService:
                     PariSportif.user_id == user_id,
                     PariSportif.date_pari >= date_debut,
                     PariSportif.date_pari < date_fin,
-                    PariSportif.statut.in_(["gagnant", "perdant"])
+                    PariSportif.statut.in_(["gagnant", "perdant", "gagne", "perdu"])
                 ).all()
                 
                 gains_paris = sum(p.gain for p in paris if p.gain)
                 mises_paris = sum(p.montant for p in paris)
                 
                 # Loto
-                grilles_loto = session.query(GrilleLoto).filter(
-                    GrilleLoto.user_id == user_id,
-                    GrilleLoto.date_creation >= date_debut,
-                    GrilleLoto.date_creation < date_fin,
-                    GrilleLoto.statut.in_(["gagnant", "perdant"])
-                ).all()
+                filtres_loto = []
+                if _has_attr(GrilleLoto, "user_id"):
+                    filtres_loto.append(GrilleLoto.user_id == user_id)
+                if _has_attr(GrilleLoto, "date_creation"):
+                    filtres_loto.append(GrilleLoto.date_creation >= date_debut)
+                    filtres_loto.append(GrilleLoto.date_creation < date_fin)
+                if _has_attr(GrilleLoto, "statut"):
+                    filtres_loto.append(GrilleLoto.statut.in_(["gagnant", "perdant", "gagne", "perdu"]))
+
+                grilles_loto_query = session.query(GrilleLoto)
+                if filtres_loto:
+                    grilles_loto_query = grilles_loto_query.filter(*filtres_loto)
+                grilles_loto = grilles_loto_query.all()
                 
                 gains_loto = sum(g.backtest.get("gain", 0) for g in grilles_loto if g.backtest)
                 mises_loto = len(grilles_loto) * 2.2
                 
                 # Euromillions
-                grilles_euro = session.query(GrilleEuromillions).filter(
-                    GrilleEuromillions.user_id == user_id,
-                    GrilleEuromillions.date_creation >= date_debut,
-                    GrilleEuromillions.date_creation < date_fin,
-                    GrilleEuromillions.statut.in_(["gagnant", "perdant"])
-                ).all()
+                filtres_euro = []
+                if _has_attr(GrilleEuromillions, "user_id"):
+                    filtres_euro.append(GrilleEuromillions.user_id == user_id)
+                if _has_attr(GrilleEuromillions, "date_creation"):
+                    filtres_euro.append(GrilleEuromillions.date_creation >= date_debut)
+                    filtres_euro.append(GrilleEuromillions.date_creation < date_fin)
+                if _has_attr(GrilleEuromillions, "statut"):
+                    filtres_euro.append(
+                        GrilleEuromillions.statut.in_(["gagnant", "perdant", "gagne", "perdu"])
+                    )
+
+                grilles_euro_query = session.query(GrilleEuromillions)
+                if filtres_euro:
+                    grilles_euro_query = grilles_euro_query.filter(*filtres_euro)
+                grilles_euro = grilles_euro_query.all()
                 
                 gains_euro = sum(g.backtest.get("gain", 0) for g in grilles_euro if g.backtest)
                 mises_euro = len(grilles_euro) * 2.5

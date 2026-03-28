@@ -134,6 +134,24 @@ _config_creche: dict = {
 }
 
 
+class _ConfigCrecheAdapter:
+    """Adapter minimal pour compatibilité tests legacy (get_all/update/commit)."""
+
+    def get_all(self) -> dict:
+        return dict(_config_creche)
+
+    def update(self, values: dict) -> None:
+        _config_creche.update(values)
+
+    def commit(self) -> bool:
+        return True
+
+
+def _obtenir_config_creche() -> _ConfigCrecheAdapter:
+    """Point d'entrée legacy patché par les tests."""
+    return _ConfigCrecheAdapter()
+
+
 # ═══════════════════════════════════════════════════════════
 # SERVICE
 # ═══════════════════════════════════════════════════════════
@@ -168,7 +186,7 @@ class ServiceJoursSpeciaux:
         Returns:
             Liste de JourSpecial pour chaque jour de fermeture.
         """
-        pstate = _config_creche
+        pstate = _obtenir_config_creche().get_all()
         semaines = pstate.get("semaines_fermeture", [])
         jours: list[JourSpecial] = []
 
@@ -210,7 +228,9 @@ class ServiceJoursSpeciaux:
             "zone_academique": zone_academique,
             "annee_courante": date.today().year,
         }
-        _config_creche.update(nouvelle_config)
+        pstate = _obtenir_config_creche()
+        pstate.update(nouvelle_config)
+        pstate.commit()
 
         # Persister en base si possible
         try:

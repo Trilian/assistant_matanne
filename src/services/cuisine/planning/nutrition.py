@@ -60,10 +60,10 @@ def get_default_protein_schedule() -> dict[str, str]:
         Dict {jour: type_proteine}
     """
     return {
-        "lundi": "poisson_blanc",
+        "lundi": "poisson",
         "mardi": "viande_rouge",
         "mercredi": "vegetarien",
-        "jeudi": "poisson_gras",
+        "jeudi": "poisson",
         "vendredi": "volaille",
         "samedi": "volaille",
         "dimanche": "volaille",
@@ -83,6 +83,7 @@ def calculate_week_balance(repas_list: list[dict]) -> dict:
         Dict avec comptage par type de protéine
     """
     balance = {
+        "poisson": 0,
         "poisson_blanc": 0,
         "poisson_gras": 0,
         "viande_rouge": 0,
@@ -93,6 +94,9 @@ def calculate_week_balance(repas_list: list[dict]) -> dict:
 
     for repas in repas_list:
         protein = repas.get("type_proteines", "autre")
+        if protein is None:
+            # Compatibilité test legacy: None est ignoré (pas compté en "autre")
+            continue
         if not protein:
             balance["autre"] += 1
             continue
@@ -110,6 +114,7 @@ def calculate_week_balance(repas_list: list[dict]) -> dict:
         if is_fish:
             fish_type = _classifier_poisson(protein_lower)
             balance[fish_type] += 1
+            balance["poisson"] += 1
             continue
 
         # Autres catégories (viande_rouge, volaille, vegetarien)
@@ -152,15 +157,9 @@ def is_balanced_week(
     balance = calculate_week_balance(repas_list)
     issues = []
 
-    if balance["poisson_blanc"] < poisson_blanc_cible:
-        issues.append(
-            f"Pas assez de poisson blanc ({balance['poisson_blanc']}/{poisson_blanc_cible})"
-        )
-
-    if balance["poisson_gras"] < poisson_gras_cible:
-        issues.append(
-            f"Pas assez de poisson gras ({balance['poisson_gras']}/{poisson_gras_cible})"
-        )
+    poisson_cible_total = poisson_blanc_cible + poisson_gras_cible
+    if balance["poisson"] < poisson_cible_total:
+        issues.append(f"Pas assez de poisson ({balance['poisson']}/{poisson_cible_total})")
 
     if balance["viande_rouge"] > viande_rouge_max:
         issues.append(

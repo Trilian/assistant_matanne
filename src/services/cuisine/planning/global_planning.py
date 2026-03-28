@@ -35,6 +35,14 @@ from .types import JourCompletSchema, SemaineCompleSchema, SemaineGenereeIASchem
 logger = logging.getLogger(__name__)
 
 
+class Cache:
+    """Compatibilité tests legacy patchant `...global_planning.Cache`."""
+
+    @staticmethod
+    def invalider(pattern: str | None = None) -> None:
+        obtenir_cache().invalider(pattern=pattern)
+
+
 # ═══════════════════════════════════════════════════════════
 # SERVICE PLANNING UNIFIÉ
 # ═══════════════════════════════════════════════════════════
@@ -297,8 +305,8 @@ class ServicePlanningUnifie(
         """Invalide cache pour la semaine contenant date_jour"""
         # Trouver début semaine (lundi)
         debut_semaine = date_jour - timedelta(days=date_jour.weekday())
-        obtenir_cache().invalidate(pattern=f"semaine_complete_{debut_semaine.isoformat()}")
-        obtenir_cache().invalidate(pattern=f"semaine_ia_{debut_semaine.isoformat()}")
+        Cache.invalider(pattern=f"semaine_complete_{debut_semaine.isoformat()}")
+        Cache.invalider(pattern=f"semaine_ia_{debut_semaine.isoformat()}")
         logger.debug(f"🔄 Cache semaine invalidé: {debut_semaine}")
 
 
