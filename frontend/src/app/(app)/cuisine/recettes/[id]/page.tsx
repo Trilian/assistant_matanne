@@ -17,6 +17,7 @@ import {
   Heart,
   Printer,
   Baby,
+  Star,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -147,7 +148,7 @@ export default function PageDetailRecette({
           </div>
         </div>
         <div className="flex gap-2 shrink-0 print:hidden">
-          <Button variant="outline" size="sm" onClick={() => adapterPourJules()} disabled={enVersionJules}>
+          <Button variant="outline" size="sm" onClick={() => adapterPourJules(undefined)} disabled={enVersionJules}>
             <Baby className="mr-1 h-4 w-4" />
             {enVersionJules ? "Génération..." : "Version Jules"}
           </Button>

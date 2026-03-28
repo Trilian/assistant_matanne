@@ -35,7 +35,7 @@ export function utiliserRequete<T>(
  * Mutation wrapper avec invalidation automatique.
  * Usage: `utiliserMutation(mutationFn, { onSuccess: () => ... })`
  */
-export function utiliserMutation<TData, TVariables>(
+export function utiliserMutation<TData, TVariables = void>(
   fn: (variables: TVariables) => Promise<TData>,
   options?: Partial<UseMutationOptions<TData, Error, TVariables>>
 ) {

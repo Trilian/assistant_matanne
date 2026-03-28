@@ -79,7 +79,7 @@ export default function PageConfigFamille() {
       {/* Onglets */}
       <div className="flex gap-2 flex-wrap">
         {ONGLETS_CONFIG.map((o) => (
-          o.href ? (
+          'href' in o ? (
             <Link key={o.id} href={o.href}>
               <Button variant="outline" size="sm" className="gap-1.5">
                 <o.Icone className="h-4 w-4" />

@@ -215,9 +215,10 @@ export default function LotoPage() {
         <GenerateurGrille typeJeu="loto" genererFn={genererGrilleLoto} />
 
         <GrilleIAPonderee
-          onGenerer={async (mode, sauvegarder) => {
+          onGenerer={async (mode) => {
             try {
-              return await genererGrilleIAPonderee(mode, sauvegarder);
+              const res = await genererGrilleIAPonderee(mode, false);
+              return { numeros: res.numeros, numero_chance: res.numero_chance, mode: res.mode, analyse: res.analyse, confiance: res.confiance };
             } catch (error) {
               toast.error("Erreur lors de la génération IA");
               throw error;

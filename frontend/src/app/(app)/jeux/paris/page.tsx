@@ -250,8 +250,8 @@ export default function ParisPage() {
 
   // ─── Patterns analysis ─────────────────────
   const { data: patternsData } = utiliserRequete(
-    ["jeux", "patterns-analysis", user?.id],
-    () => obtenirAnalysePatterns(user!.id),
+    ["jeux", "patterns-analysis", user?.id ?? ""],
+    () => obtenirAnalysePatterns(Number(user!.id)),
     { enabled: !!user?.id, staleTime: 10 * 60 * 1000 }
   );
 
@@ -441,7 +441,7 @@ export default function ParisPage() {
       {/* Widget Bankroll & Money Management */}
       {user && (
         <BankrollWidget
-          userId={user.id}
+          userId={Number(user.id)}
         />
       )}
 
@@ -666,7 +666,7 @@ export default function ParisPage() {
           open={modalPatternsOuvert}
           onClose={() => setModalPatternsOuvert(false)}
           alerts={patternsData}
-          userId={user.id}
+          userId={Number(user.id)}
         />
       )}
     </div>

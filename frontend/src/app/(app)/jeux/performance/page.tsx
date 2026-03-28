@@ -212,7 +212,16 @@ export default function PerformancePage() {
             <CardTitle className="text-base">Évolution Bankroll (cumulée)</CardTitle>
           </CardHeader>
           <CardContent>
-            <LineChart data={perf.par_mois} />
+            <LineChart
+              data={perf.par_mois.reduce<{ mois: string; bankroll_cumul: number }[]>((acc, mois) => {
+                const precedent = acc.at(-1)?.bankroll_cumul ?? 0;
+                acc.push({
+                  mois: mois.mois,
+                  bankroll_cumul: precedent + mois.benefice,
+                });
+                return acc;
+              }, [])}
+            />
           </CardContent>
         </Card>
       )}

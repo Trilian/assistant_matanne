@@ -78,7 +78,7 @@ interface StatsData {
 }
 
 interface StatsPersonnellesProps {
-  userId: number
+  userId: string | number
 }
 
 export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {

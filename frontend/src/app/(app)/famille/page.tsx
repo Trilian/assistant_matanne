@@ -172,7 +172,7 @@ export default function PageFamille() {
 
   // PHASE B2 — Suggestions IA Achats (nouveau hook)
   const mutationSuggestionsAchats = useMutation({
-    mutationFn: () => obtenirSuggestionsAchatsEnrichies({ trigger: 'hub_rapide', limite: 2 }),
+    mutationFn: () => obtenirSuggestionsAchatsEnrichies({ triggers: ['hub_rapide'] }),
   });
 
   const mutationSuggestionsAchatsIA = useMutation({
@@ -429,10 +429,10 @@ export default function PageFamille() {
                 {mutationSuggestionsAchats.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
                 Suggestions IA
               </Button>
-              {mutationSuggestionsAchats.data?.suggestions?.slice(0,2).map((s, i) => (
+              {mutationSuggestionsAchats.data?.items?.slice(0,2).map((s, i) => (
                 <div key={i} className="text-xs p-1.5 rounded bg-muted/50 mt-1">
-                  <p className="font-medium truncate">{s.titre || s.nom}</p>
-                  {s.raison_suggestion && <p className="text-muted-foreground truncate">{s.raison_suggestion}</p>}
+                  <p className="font-medium truncate">{s.titre}</p>
+                  {s.pertinence && <p className="text-muted-foreground truncate">{s.pertinence}</p>}
                   <Link href="/famille/achats" className="text-primary text-[10px]">Voir dans Achats →</Link>
                 </div>
               ))}
@@ -541,7 +541,7 @@ export default function PageFamille() {
             (j) =>
               j.jours_restants !== undefined &&
               j.jours_restants <= 30 &&
-              (j.label ?? "").toLowerCase().includes("vacanc")
+              (j.nom ?? "").toLowerCase().includes("vacanc")
           ) && (
             <CarteSuggestionIA
               titre="Vacances approchent"

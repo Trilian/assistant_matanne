@@ -36,5 +36,5 @@ export function utiliserAuth() {
     apiDeconnecter();
   }, [reinitialiser]);
 
-  return { utilisateur, estConnecte, estChargement, deconnecter };
+  return { utilisateur, user: utilisateur, estConnecte, estChargement, deconnecter };
 }

@@ -15,7 +15,7 @@ export default function ChargesPage() {
   const [annee, setAnnee] = useState(ANNEE_COURANTE);
 
   const { data: charges = [], isLoading } = utiliserRequete<ChargesMaison[]>(
-    ["maison", "charges", annee],
+    ["maison", "charges", String(annee)],
     () => listerCharges(annee),
     { staleTime: 5 * 60 * 1000 }
   );

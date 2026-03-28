@@ -232,7 +232,7 @@ export default function PageJeux() {
             );
           }
           if (item.id === "ia") {
-            return <SectionIA analyse={dashboard?.analyse_ia} /> ?? <Card><CardContent className="py-6 text-sm text-muted-foreground">Analyse IA indisponible</CardContent></Card>;
+            return <SectionIA analyse={dashboard?.analyse_ia} />;
           }
           if (item.id === "kpis") {
             return dashboard?.kpis ? (

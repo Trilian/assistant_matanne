@@ -75,16 +75,16 @@ function OngletContrats() {
     <div className="space-y-4">
       {resume && (
         <div className="grid grid-cols-2 gap-3">
-          <Card><CardContent className="py-3"><p className="text-xs text-muted-foreground">Mensuel total</p><p className="text-xl font-bold">{(resume.mensuel_total ?? 0).toFixed(2)} €</p></CardContent></Card>
-          <Card><CardContent className="py-3"><p className="text-xs text-muted-foreground">Annuel total</p><p className="text-xl font-bold">{(resume.annuel_total ?? 0).toFixed(2)} €</p></CardContent></Card>
+          <Card><CardContent className="py-3"><p className="text-xs text-muted-foreground">Mensuel total</p><p className="text-xl font-bold">{(resume.total_mensuel ?? 0).toFixed(2)} €</p></CardContent></Card>
+          <Card><CardContent className="py-3"><p className="text-xs text-muted-foreground">Annuel total</p><p className="text-xl font-bold">{(resume.total_annuel ?? 0).toFixed(2)} €</p></CardContent></Card>
         </div>
       )}
 
-      {alertes?.length > 0 && (
+      {(alertes?.length ?? 0) > 0 && (
         <Card className="border-amber-300">
           <CardContent className="py-3">
-            <p className="text-sm font-medium text-amber-700 mb-1.5 flex items-center gap-1.5"><AlertTriangle className="h-4 w-4" />{alertes.length} contrat(s) expirant bientôt</p>
-            {alertes.slice(0, 3).map((c: { id: number; nom: string; date_fin?: string }) => (
+            <p className="text-sm font-medium text-amber-700 mb-1.5 flex items-center gap-1.5"><AlertTriangle className="h-4 w-4" />{alertes!.length} contrat(s) expirant bientôt</p>
+            {alertes!.slice(0, 3).map((c: { id: number; nom: string; date_fin?: string }) => (
               <p key={c.id} className="text-xs text-muted-foreground">• {c.nom}{c.date_fin ? ` (fin ${new Date(c.date_fin).toLocaleDateString("fr-FR")})` : ""}</p>
             ))}
           </CardContent>
