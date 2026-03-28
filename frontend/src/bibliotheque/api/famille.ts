@@ -903,3 +903,43 @@ export async function obtenirCroissanceJules(): Promise<CroissanceData> {
   );
   return data;
 }
+
+// ─── Aliments exclus Jules ──────────────────────────────
+
+/** Obtenir les aliments exclus pour Jules */
+export async function obtenirAlimentsExclus(): Promise<{ aliments_exclus: string[] }> {
+  const { data } = await clientApi.get<{ aliments_exclus: string[] }>(
+    "/famille/jules/aliments-exclus"
+  );
+  return data;
+}
+
+/** Sauvegarder la liste des aliments exclus pour Jules */
+export async function sauvegarderAlimentsExclus(
+  aliments: string[]
+): Promise<{ aliments_exclus: string[] }> {
+  const { data } = await clientApi.put<{ aliments_exclus: string[] }>(
+    "/famille/jules/aliments-exclus",
+    { aliments_exclus: aliments }
+  );
+  return data;
+}
+
+// ─── Coaching hebdomadaire Jules ────────────────────────
+
+export interface CoachingJules {
+  semaine: string;
+  conseils: string[];
+  alertes: string[];
+  points_positifs: string[];
+  prochain_rdv?: string;
+  resume: string;
+}
+
+/** Obtenir le coaching hebdomadaire IA pour Jules */
+export async function obtenirCoachingHebdo(): Promise<CoachingJules> {
+  const { data } = await clientApi.get<CoachingJules>(
+    "/famille/jules/coaching-hebdo"
+  );
+  return data;
+}

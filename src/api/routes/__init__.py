@@ -7,8 +7,10 @@ FastAPI lors de l'import d'un seul sous-module de routes.
 from __future__ import annotations
 
 __all__ = [
+    "assistant_router",
     "admin_router",
     "anti_gaspillage_router",
+    "automations_router",
     "auth_router",
     "batch_cooking_router",
     "calendriers_router",
@@ -18,6 +20,7 @@ __all__ = [
     "export_router",
 
     "famille_router",
+    "garmin_router",
     "inventaire_router",
     "jeux_router",
     "maison_router",
@@ -30,13 +33,16 @@ __all__ = [
     "suggestions_router",
     "upload_router",
     "utilitaires_router",
+    "voyages_router",
     "webhooks_router",
 ]
 
 
 _MODULES = {
+    "assistant_router": ".assistant",
     "admin_router": ".admin",
     "anti_gaspillage_router": ".anti_gaspillage",
+    "automations_router": ".automations",
     "auth_router": ".auth",
     "batch_cooking_router": ".batch_cooking",
     "calendriers_router": ".calendriers",
@@ -45,6 +51,7 @@ _MODULES = {
     "documents_router": ".documents",
     "export_router": ".export",
     "famille_router": ".famille",
+    "garmin_router": ".garmin",
     "inventaire_router": ".inventaire",
     "jeux_router": ".jeux",
     "maison_router": ".maison",
@@ -57,6 +64,7 @@ _MODULES = {
     "suggestions_router": ".suggestions",
     "upload_router": ".upload",
     "utilitaires_router": ".utilitaires",
+    "voyages_router": ".voyages",
     "webhooks_router": ".webhooks",
 }
 

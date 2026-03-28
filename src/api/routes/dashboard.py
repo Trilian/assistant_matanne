@@ -433,3 +433,107 @@ async def sauvegarder_config_dashboard(
             }
 
     return await executer_async(_query)
+
+
+@router.get(
+    "/alertes-contextuelles",
+    responses=REPONSES_LISTE,
+    summary="Alertes météo contextuelles cross-modules",
+)
+@gerer_exception_api
+async def obtenir_alertes_contextuelles(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne des alertes météo/action cross-modules pour les 48h à venir."""
+    import httpx
+
+    async def _fetch_alertes() -> dict[str, Any]:
+        alertes: list[dict[str, Any]] = []
+        try:
+            async with httpx.AsyncClient(timeout=8.0) as client:
+                reponse = await client.get(
+                    "https://api.open-meteo.com/v1/forecast",
+                    params={
+                        "latitude": 50.63,
+                        "longitude": 3.06,
+                        "hourly": "temperature_2m,precipitation_probability,windspeed_10m",
+                        "forecast_days": 2,
+                    },
+                )
+                reponse.raise_for_status()
+                data = reponse.json().get("hourly", {})
+        except Exception:
+            data = {}
+
+        temperatures = data.get("temperature_2m", []) or []
+        pluie = data.get("precipitation_probability", []) or []
+        vent = data.get("windspeed_10m", []) or []
+
+        if temperatures and min(temperatures) <= 0:
+            alertes.append(
+                {
+                    "type": "gel",
+                    "module": "maison",
+                    "icone": "snowflake",
+                    "titre": "Risque de gel",
+                    "message": "Penser à protéger les plantes extérieures et vérifier les équipements sensibles.",
+                    "action": "Mettre les pots fragiles à l'abri",
+                }
+            )
+        if temperatures and max(temperatures) >= 30:
+            alertes.append(
+                {
+                    "type": "canicule",
+                    "module": "famille",
+                    "icone": "sun",
+                    "titre": "Chaleur élevée",
+                    "message": "Prévoir plus d'eau, des repas frais et limiter les sorties aux heures chaudes.",
+                    "action": "Adapter le planning de Jules et les repas",
+                }
+            )
+        if pluie and max(pluie) >= 65:
+            alertes.append(
+                {
+                    "type": "pluie",
+                    "module": "planning",
+                    "icone": "cloud-rain",
+                    "titre": "Pluie probable",
+                    "message": "Les activités extérieures risquent d'être perturbées dans les 48 prochaines heures.",
+                    "action": "Prévoir une alternative intérieure",
+                }
+            )
+        if vent and max(vent) >= 45:
+            alertes.append(
+                {
+                    "type": "vent",
+                    "module": "maison",
+                    "icone": "wind",
+                    "titre": "Vent fort",
+                    "message": "Sécuriser le mobilier extérieur et vérifier les objets légers dans le jardin.",
+                    "action": "Ranger ou fixer les objets extérieurs",
+                }
+            )
+
+        return {"items": alertes[:3], "total": len(alertes[:3])}
+
+    return await _fetch_alertes()
+
+
+@router.get(
+    "/points-famille",
+    responses=REPONSES_LISTE,
+    summary="Points famille gamification",
+)
+@gerer_exception_api
+async def obtenir_points_famille(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les points famille consolidés (sport, alimentation, anti-gaspi)."""
+
+    def _query():
+        from src.services.dashboard.points_famille import get_points_famille_service
+
+        service = get_points_famille_service()
+        return service.calculer_points()
+
+    return await executer_async(_query)

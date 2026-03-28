@@ -755,57 +755,62 @@ async def webhook_whatsapp(request: Request):
 ## Suivi d'avancement
 
 ### Sprint 1 — Bugs critiques + SQL fondations
-- [ ] P-01 — Persistance push subscriptions en DB
-- [ ] P-02 — Endpoint VAPID public key
-- [ ] P-03 — Scheduler ntfy digest + rappel courses
-- [ ] P-04 — Supprimer table `liste_cours`
-- [ ] P-05 — Déplacer inline ALTER TABLE en tête
-- [ ] P-06 — Absorber sql/migrations/001|002|003
-- [ ] P-07 — Absorber alembic/versions/ + archiver Alembic
+- [x] P-01 — Persistance push subscriptions en DB
+- [x] P-02 — Endpoint VAPID public key
+- [x] P-03 — Scheduler ntfy digest + rappel courses
+- [x] P-04 — Supprimer table `liste_cours`
+- [x] P-05 — Déplacer inline ALTER TABLE en tête
+- [x] P-06 — Absorber sql/migrations/001|002|003
+- [x] P-07 — Absorber alembic/versions/ + archiver Alembic
 
 ### Sprint 2 — Bugs hauts + Nettoyage doc
-- [ ] B-06 — `url_source` absent du modèle Recette
-- [ ] B-07 — `verifier_saison` silencieux
+- [x] B-06 — `url_source` absent du modèle Recette
+- [x] B-07 — `verifier_saison` silencieux
 - [ ] B-11 — Lien sidebar Calendriers → 404
-- [ ] B-12 — `est_favori` vs `feedback` TypeScript
-- [ ] CT-15 — Supprimer STATUS_PHASES.md
-- [ ] CT-16 — Nettoyer ROADMAP.md
-- [ ] CT-17 — Nettoyage docs/
-- [ ] CT-11 — Mettre à jour doc SQL
+- [x] B-12 — `est_favori` vs `feedback` TypeScript
+- [x] CT-15 — Supprimer STATUS_PHASES.md
+- [x] CT-16 — Nettoyer ROADMAP.md
+- [x] CT-17 — Nettoyage docs/
+- [x] CT-11 — Mettre à jour doc SQL
 
 ### Sprint 3 — Tests
-- [ ] CT-12 — Test cohérence schéma ORM ↔ SQL
-- [ ] CT-13 — Tests push notifications
-- [ ] CT-14 — Tests routes admin + RGPD
-- [ ] CT-07 — Tests famille achats + garde
+- [x] CT-12 — Test cohérence schéma ORM ↔ SQL
+- [x] CT-13 — Tests push notifications
+- [x] CT-14 — Tests routes admin + RGPD
+- [x] CT-07 — Tests famille achats + garde
 
 ### Sprint 4 — Features cuisine/famille/Jules
-- [ ] CT-09 — Bouton Version Jules + profil aliments exclus
-- [ ] CT-06 — Génération recette depuis photo
-- [ ] CT-05 — Coaching hebdo Jules (IA-06)
+- [x] CT-09 — Bouton Version Jules + profil aliments exclus (backend)
+- [ ] CT-09-frontend — Bouton Version Jules UI + aliments-exclus page Jules
+- [x] CT-06 — Génération recette depuis photo (backend)
+- [ ] CT-06-frontend — Bouton photo dans nouvelle recette
+- [x] CT-05 — Coaching hebdo Jules (backend)
+- [ ] CT-05-frontend — Widget coaching Jules UI
 - [ ] QW-02 — Recette Surprise
-- [ ] QW-04 — Compteur jours depuis dernière cuisine
+- [x] QW-04 — Compteur jours depuis dernière cuisine
 
 ### Sprint 5 — Notifications email + Admin étendu
 - [x] CT-01 — Canal email (Resend)
 - [x] CT-02 — Mode Admin étendu (jobs + users + cache)
-- [ ] QW-03 — Partage liste courses QR
+- [x] QW-03 — Partage liste courses QR
 
 ### Sprint 6 — Cron jobs + SQL avancé
 - [x] CT-03 — Job J-02 push contextuel soir
 - [x] CT-04 — Job J-01 résumé hebdo
 - [x] CT-08 — Index manquants SQL
 - [x] CT-10 — Audit tables orphelines ORM ↔ SQL
-- [ ] QW-10 — Score anti-gaspi partageable
+- [x] QW-10 — Score anti-gaspi partageable
 
 ### Sprint 7 — Inter-modules + Dashboard
 - [x] MT-01 — Cellier ↔ Inventaire cuisine
 - [x] MT-03 — Score bien-être (IA-09)
-- [ ] MT-06 — Widgets dashboard configurables
+- [x] MT-06 — Widgets dashboard configurables
 - [x] MT-08 — Timeline vie familiale
 - [x] MT-09 — OCR photo-frigo auto-sync
-- [ ] QW-01 — Widget météo dashboard
-- [ ] QW-06 — Aujourd'hui dans l'histoire
+- [x] QW-01 — Widget météo dashboard
+- [x] QW-06 — Aujourd'hui dans l'histoire
+- [x] QW-07 — Mode sombre/clair auto après 21h
+- [x] QW-08 — Impression optimisée recette
 
 ### Sprint 8 — WhatsApp + IA avancée
 - [ ] MT-02 — Canal WhatsApp

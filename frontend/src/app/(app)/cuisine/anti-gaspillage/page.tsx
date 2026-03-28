@@ -12,7 +12,6 @@ import {
   TrendingDown,
   Euro,
   ChefHat,
-  Loader2,
   Trophy,
   BarChart2,
   ImageDown,
@@ -350,14 +349,14 @@ export default function PageAntiGaspillage() {
                   </span>
                   <div className="flex-1 h-5 rounded-full bg-muted overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${
+                      className={`h-full rounded-full transition-all [width:var(--progress-width)] ${
                         s.score >= 80
                           ? "bg-green-500"
                           : s.score >= 50
                           ? "bg-orange-400"
                           : "bg-red-500"
                       }`}
-                      style={{ width: `${s.score}%` }}
+                      style={{ "--progress-width": `${s.score}%` } as React.CSSProperties}
                     />
                   </div>
                   <span className="text-xs font-medium w-10 text-right">{s.score}</span>

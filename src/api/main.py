@@ -53,8 +53,10 @@ from src.api.middleware.budget_guard import BudgetGuardMiddleware
 from src.api.prometheus import prometheus_router
 from src.api.rate_limiting import MiddlewareLimitationDebit
 from src.api.routes import (
+    assistant_router,
     admin_router,
     anti_gaspillage_router,
+    automations_router,
     batch_cooking_router,
     calendriers_router,
     courses_router,
@@ -62,6 +64,7 @@ from src.api.routes import (
     documents_router,
     export_router,
     famille_router,
+    garmin_router,
     inventaire_router,
     jeux_router,
     maison_router,
@@ -73,6 +76,7 @@ from src.api.routes import (
     suggestions_router,
     upload_router,
     utilitaires_router,
+    voyages_router,
     webhooks_router,
 )
 from src.api.routes.auth import router as auth_router
@@ -516,6 +520,7 @@ app.include_router(suggestions_router)
 # Nouveaux routers - famille, maison, jeux, calendriers
 app.include_router(famille_router)
 app.include_router(maison_router)
+app.include_router(assistant_router)
 app.include_router(jeux_router)
 app.include_router(calendriers_router)
 
@@ -523,10 +528,13 @@ app.include_router(calendriers_router)
 app.include_router(dashboard_router)
 app.include_router(batch_cooking_router)
 app.include_router(preferences_router)
+app.include_router(automations_router)
 app.include_router(anti_gaspillage_router)
 app.include_router(export_router)
 app.include_router(utilitaires_router)
 app.include_router(recherche_router)
+app.include_router(voyages_router)
+app.include_router(garmin_router)
 app.include_router(documents_router)
 app.include_router(upload_router)
 app.include_router(rgpd_router)

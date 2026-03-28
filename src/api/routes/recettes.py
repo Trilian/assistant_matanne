@@ -1217,3 +1217,61 @@ def _parse_minutes(valeur: str | None) -> int:
             total = int(digits.group(1))
     return total
 
+
+@router.get("/surprise", response_model=RecetteResponse, responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def recette_surprise(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne une recette surprise adaptée à la saison et aux stocks (QW-02)."""
+    import random
+    from datetime import date
+
+    from src.core.models import Recette as RecetteORM
+    from src.core.models.inventaire import ArticleInventaire
+
+    def _query():
+        with executer_avec_session() as session:
+            # Saison courante (approximation par mois)
+            mois = date.today().month
+            if mois in (12, 1, 2):
+                saison = "hiver"
+            elif mois in (3, 4, 5):
+                saison = "printemps"
+            elif mois in (6, 7, 8):
+                saison = "été"
+            else:
+                saison = "automne"
+
+            # Articles en stock (noms normalisés)
+            stocks = {
+                a.nom.lower()
+                for a in session.query(ArticleInventaire.nom).all()
+            }
+
+            # Toutes les recettes avec leurs ingrédients
+            recettes = session.query(RecetteORM).all()
+            if not recettes:
+                raise HTTPException(status_code=404, detail="Aucune recette disponible")
+
+            # Filtrer par saison si des tags existent
+            candidates = [
+                r for r in recettes
+                if saison in (r.tags or []) or not r.tags
+            ] or recettes
+
+            # Préférer les recettes dont des ingrédients sont en stock
+            def _score(r: RecetteORM) -> int:
+                return sum(
+                    1 for ing in (r.ingredients or [])
+                    if ing.nom.lower() in stocks
+                )
+
+            candidates.sort(key=_score, reverse=True)
+            # Prendre parmi le top 5 des meilleures correspondances
+            top = candidates[:5]
+            recette = random.choice(top)
+            return _serialiser_recette(recette, session, user)
+
+    return await executer_async(_query)
+

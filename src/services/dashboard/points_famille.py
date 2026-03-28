@@ -1,0 +1,88 @@
+"""Gamification famille: points sport + alimentation + anti-gaspi."""
+
+from __future__ import annotations
+
+from datetime import date, timedelta
+from typing import Any
+
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
+from src.core.decorators import avec_gestion_erreurs, avec_session_db
+from src.services.core.registry import service_factory
+
+
+class PointsFamilleService:
+    """Calcule des points famille consolidés pour le dashboard."""
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def calculer_points(self, db: Session | None = None) -> dict[str, Any]:
+        if db is None:
+            return {}
+
+        from src.core.models import ArticleInventaire
+        from src.core.models.users import ActiviteGarmin, ResumeQuotidienGarmin
+        from src.services.dashboard.score_bienetre import get_score_bien_etre_service
+
+        aujourd_hui = date.today()
+        debut = aujourd_hui - timedelta(days=6)
+
+        activites = (
+            db.query(ActiviteGarmin)
+            .filter(ActiviteGarmin.date_debut >= debut)
+            .all()
+        )
+        resumes = (
+            db.query(ResumeQuotidienGarmin)
+            .filter(ResumeQuotidienGarmin.date >= debut)
+            .all()
+        )
+        articles_risque = (
+            db.query(func.count(ArticleInventaire.id))
+            .filter(
+                ArticleInventaire.date_peremption.isnot(None),
+                ArticleInventaire.date_peremption >= aujourd_hui - timedelta(days=3),
+                ArticleInventaire.date_peremption <= aujourd_hui + timedelta(days=3),
+            )
+            .scalar()
+            or 0
+        )
+
+        total_pas = sum(item.pas for item in resumes)
+        total_calories = sum(item.calories_actives for item in resumes)
+        points_sport = min(300, len(activites) * 40 + total_calories // 20 + total_pas // 1000)
+
+        score_bien_etre = get_score_bien_etre_service().calculer_score() or {}
+        score_global = int(score_bien_etre.get("score_global", 0))
+        points_alimentation = min(300, score_global * 3)
+        points_anti_gaspi = max(0, 200 - int(articles_risque) * 15)
+
+        total = points_sport + points_alimentation + points_anti_gaspi
+        badges: list[str] = []
+        if points_sport >= 180:
+            badges.append("Bougeotte")
+        if points_alimentation >= 220:
+            badges.append("Assiette futée")
+        if points_anti_gaspi >= 170:
+            badges.append("Zéro gaspi")
+
+        return {
+            "total_points": total,
+            "sport": points_sport,
+            "alimentation": points_alimentation,
+            "anti_gaspi": points_anti_gaspi,
+            "badges": badges,
+            "details": {
+                "activites_garmin": len(activites),
+                "total_pas": total_pas,
+                "total_calories": total_calories,
+                "score_bien_etre": score_global,
+                "articles_a_risque": int(articles_risque),
+            },
+        }
+
+
+@service_factory("points_famille", tags={"dashboard", "gamification", "famille"})
+def get_points_famille_service() -> PointsFamilleService:
+    return PointsFamilleService()

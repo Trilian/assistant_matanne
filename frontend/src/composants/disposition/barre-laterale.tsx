@@ -111,7 +111,6 @@ const LIENS: LienNav[] = [
       { nom: "Anniversaires", chemin: "/famille/anniversaires", Icone: Cake },
       { nom: "Contacts", chemin: "/famille/contacts", Icone: Contact },
       { nom: "Documents", chemin: "/famille/documents", Icone: FileText },
-      { nom: "Calendriers", chemin: "/famille/calendriers", Icone: CalendarDays },
       { nom: "Config", chemin: "/famille/config", Icone: Settings },
     ],
   },

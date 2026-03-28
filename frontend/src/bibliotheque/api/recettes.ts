@@ -95,3 +95,39 @@ export async function importerRecettePDF(file: File): Promise<Recette> {
   return data;
 }
 
+// ─── Version Jules ───────────────────────────────────────
+
+export interface VersionJulesResult {
+  nom: string;
+  ingredients: string[];
+  instructions: string;
+  adaptations: string[];
+  aliments_exclus_retires: string[];
+}
+
+/** Générer une version adaptée pour Jules (bébé/enfant) */
+export async function genererVersionJules(recetteId: number): Promise<VersionJulesResult> {
+  const { data } = await clientApi.post<VersionJulesResult>(`/recettes/${recetteId}/version-jules`);
+  return data;
+}
+
+// ─── Génération depuis photo ─────────────────────────────
+
+/** Générer une recette à partir d'une photo (Pixtral) */
+export async function genererDepuisPhoto(file: File): Promise<Recette> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await clientApi.post<Recette>("/recettes/generer-depuis-photo", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+// ─── Recette Surprise ────────────────────────────────────
+
+/** Obtenir une recette surprise (filtrée par saison + frigo) */
+export async function obtenirRecetteSurprise(): Promise<Recette> {
+  const { data } = await clientApi.get<Recette>("/recettes/surprise");
+  return data;
+}
+
