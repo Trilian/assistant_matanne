@@ -289,6 +289,7 @@ async def inscription(request: RegisterRequest):
 
         return TokenResponse(access_token=token)
 
+
     except HTTPException:
         raise
     except Exception as e:
@@ -297,6 +298,70 @@ async def inscription(request: RegisterRequest):
             status_code=400, detail="Impossible de créer le compte"
         ) from e
 
+
+# ═══════════════════════════════════════════════════════════
+# MOT DE PASSE OUBLIÉ / VÉRIFICATION EMAIL
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post(
+    "/forgot-password",
+    summary="Mot de passe oublié",
+    description="Envoie un email de réinitialisation de mot de passe.",
+    status_code=200,
+)
+@gerer_exception_api
+async def mot_de_passe_oublie(request: LoginRequest):
+    """
+    Envoie un email de réinitialisation de mot de passe.
+
+    Retourne toujours 200 pour éviter l'énumération des emails.
+    """
+    # Générer un token signé à courte durée (30 min)
+    token = creer_token_acces(
+        user_id="reset",
+        email=request.email,
+        role="reset_password",
+        duree_heures=0.5,
+    )
+
+    try:
+        from src.services.core.notifications.notif_email import get_service_email
+
+        service_email = get_service_email()
+        service_email.envoyer_reset_password(request.email, token)
+    except Exception as e:
+        logger.warning("Erreur envoi email reset pour %s : %s", request.email, e)
+
+    # Toujours retourner 200 (ne pas révéler si l'email existe)
+    return {"message": "Si cet email existe, un lien de réinitialisation a été envoyé."}
+
+
+@router.post(
+    "/verify-email",
+    summary="Renvoyer l'email de vérification",
+    description="Envoie un nouvel email de vérification d'adresse.",
+    status_code=200,
+)
+@gerer_exception_api
+async def renvoyer_verification_email(request: LoginRequest):
+    """Envoie un email de vérification à l'adresse fournie."""
+    token = creer_token_acces(
+        user_id="verify",
+        email=request.email,
+        role="verify_email",
+        duree_heures=24,
+    )
+
+    try:
+        from src.services.core.notifications.notif_email import get_service_email
+
+        service_email = get_service_email()
+        service_email.envoyer_verification_email(request.email, token)
+    except Exception as e:
+        logger.warning("Erreur envoi email vérification pour %s : %s", request.email, e)
+
+    return {"message": "Email de vérification envoyé."}
 
 @router.post(
     "/refresh",

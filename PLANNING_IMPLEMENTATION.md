@@ -787,8 +787,8 @@ async def webhook_whatsapp(request: Request):
 - [ ] QW-04 — Compteur jours depuis dernière cuisine
 
 ### Sprint 5 — Notifications email + Admin étendu
-- [ ] CT-01 — Canal email (Resend)
-- [ ] CT-02 — Mode Admin étendu (jobs + users + cache)
+- [x] CT-01 — Canal email (Resend)
+- [x] CT-02 — Mode Admin étendu (jobs + users + cache)
 - [ ] QW-03 — Partage liste courses QR
 
 ### Sprint 6 — Cron jobs + SQL avancé

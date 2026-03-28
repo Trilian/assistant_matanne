@@ -59,6 +59,17 @@ from src.services.core.notifications.types import (
 # ═══════════════════════════════════════════════════════════
 from src.services.core.notifications.utils import (
     construire_info_abonnement,
+)
+from src.services.core.notifications.notif_email import (
+    ServiceEmail,
+    get_service_email,
+)
+from src.services.core.notifications.notif_dispatcher import (
+    DispatcherNotifications,
+    get_dispatcher_notifications,
+)
+from src.services.core.notifications.utils import (
+    construire_info_abonnement,
     construire_payload_push,
     creer_notification_liste_partagee,
     creer_notification_peremption,
