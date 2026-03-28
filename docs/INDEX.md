@@ -1,6 +1,6 @@
 ﻿# 📚 Documentation Index — MaTanne
 
-> **Dernière mise à jour** : Mars 2026
+> **Dernière mise à jour** : 28 mars 2026 — Sprint 2
 
 ---
 
@@ -8,8 +8,9 @@
 
 | Document | Description |
 |----------|-------------|
-| [../STATUS_PHASES.md](../STATUS_PHASES.md) | **État des 28 phases** (A-AC) — Audit complet de l'implémentation |
-| [../ROADMAP.md](../ROADMAP.md) | **Feuille de route** — Priorités court/moyen/long terme + mapping phases |
+| [../ANALYSE_COMPLETE.md](../ANALYSE_COMPLETE.md) | **Audit complet** (28 mars 2026) — état réel, bugs, dette tech, plan à long terme |
+| [../PLANNING_IMPLEMENTATION.md](../PLANNING_IMPLEMENTATION.md) | **Planning d'implémentation** — sprints 1-9, tâches détaillées |
+| [../ROADMAP.md](../ROADMAP.md) | **Feuille de route** — priorités moyen/long terme + principes |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Architecture technique (FastAPI + Next.js) |
 | [API_REFERENCE.md](./API_REFERENCE.md) | Référence complète de l'API REST (242 endpoints) |
 | [MODULES.md](./MODULES.md) | Carte des modules : fonctionnalités, routes, services, modèles |
@@ -19,7 +20,7 @@
 | [UI_COMPONENTS.md](./UI_COMPONENTS.md) | Composants UI Next.js / shadcn |
 | [SQLALCHEMY_SESSION_GUIDE.md](./SQLALCHEMY_SESSION_GUIDE.md) | Guide sessions DB |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Guide de déploiement (local, Docker, Railway, Vercel, Supabase) |
-| [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) | Guide migration stack technique |
+| [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) | Guide migration stack technique + workflow DB |
 | [REDIS_SETUP.md](./REDIS_SETUP.md) | Configuration Redis (optionnel) |
 
 ## Guides par module
@@ -49,7 +50,7 @@ docs/
 ├── UI_COMPONENTS.md             ← Composants UI Next.js
 ├── SQLALCHEMY_SESSION_GUIDE.md  ← Guide sessions DB
 ├── DEPLOYMENT.md                ← Guide déploiement
-├── MIGRATION_GUIDE.md           ← Guide migration
+├── MIGRATION_GUIDE.md           ← Guide migration stack + workflow DB
 ├── REDIS_SETUP.md               ← Setup Redis
 └── guides/
     ├── cuisine/README.md        ← Cuisine complet

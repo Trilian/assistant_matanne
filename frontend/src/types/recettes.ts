@@ -14,7 +14,7 @@ export interface Recette {
   categorie?: string;
   tags?: string[];
   image_url?: string;
-  source_url?: string;
+  url_source?: string;
   ingredients: IngredientRecette[];
   note_moyenne?: number;
   est_favori?: boolean;
@@ -52,4 +52,22 @@ export interface SuggestionRecette {
   temps_total: number;
   difficulte: string;
   ingredients_principaux: string[];
+}
+
+export type FeedbackRecette = "like" | "neutral" | "dislike";
+
+export interface RetourRecettePayload {
+  recette_id: number;
+  feedback: FeedbackRecette;
+  note?: number;
+  contexte?: string;
+}
+
+export interface RetourRecette {
+  id: number;
+  recette_id: number;
+  feedback: FeedbackRecette;
+  note?: number;
+  contexte?: string;
+  created_at: string;
 }

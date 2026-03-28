@@ -291,6 +291,22 @@ class NotificationPersistenceMixin:
         db.refresh(prefs)
         return prefs
 
+    @avec_session_db
+    def charger_tous_abonnements_actifs_db(
+        self,
+        db: Session = None,
+    ) -> list[PushSubscriptionModel]:
+        """Charge tous les abonnements actifs depuis la DB (B-01 : évite la perte au redémarrage).
+
+        Utilisé par les cron jobs pour accéder aux abonnés sans dépendre
+        du cache mémoire `_subscriptions` (vide après redémarrage du service).
+        """
+        return (
+            db.query(PushSubscriptionModel)
+            .filter(PushSubscriptionModel.actif.is_(True))
+            .all()
+        )
+
     # ═══════════════════════════════════════════════════════════
     # ALIAS RÉTROCOMPATIBILITÉ
     # ═══════════════════════════════════════════════════════════

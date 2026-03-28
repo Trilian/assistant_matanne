@@ -71,6 +71,8 @@ DROP TABLE IF EXISTS templates_checklist CASCADE;
 DROP TABLE IF EXISTS voyages CASCADE;
 DROP TABLE IF EXISTS documents_famille CASCADE;
 DROP TABLE IF EXISTS evenements_familiaux CASCADE;
+DROP TABLE IF EXISTS items_checklist_anniversaire CASCADE;
+DROP TABLE IF EXISTS checklists_anniversaire CASCADE;
 DROP TABLE IF EXISTS anniversaires_famille CASCADE;
 DROP TABLE IF EXISTS contacts_famille CASCADE;
 DROP TABLE IF EXISTS normes_oms CASCADE;
@@ -291,6 +293,7 @@ CREATE TABLE recettes (
     score_ia FLOAT,
     -- Media
     url_image VARCHAR(500),
+    url_source VARCHAR(500),
     -- Timestamps
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -876,7 +879,7 @@ CREATE INDEX IF NOT EXISTS ix_house_stocks_categorie ON stocks_maison(categorie)
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE preferences_utilisateurs (
     id SERIAL PRIMARY KEY,
-    user_id VARCHAR(100) NOT NULL,
+    user_id UUID NOT NULL,
     nb_adultes INTEGER NOT NULL DEFAULT 2,
     jules_present BOOLEAN NOT NULL DEFAULT TRUE,
     jules_age_mois INTEGER NOT NULL DEFAULT 19,
@@ -1034,7 +1037,7 @@ CREATE INDEX IF NOT EXISTS ix_backups_cree_le ON sauvegardes(cree_le);
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE historique_actions (
     id BIGSERIAL PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
+    user_id UUID NOT NULL,
     user_name VARCHAR(255) NOT NULL,
     action_type VARCHAR(100) NOT NULL,
     entity_type VARCHAR(100) NOT NULL,
@@ -1081,6 +1084,8 @@ CREATE TABLE abonnements_push (
     auth_key TEXT NOT NULL,
     device_info JSONB DEFAULT '{}',
     user_id UUID,
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
+    dernier_ping TIMESTAMP WITH TIME ZONE,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     last_used TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
@@ -1128,7 +1133,7 @@ CREATE INDEX IF NOT EXISTS ix_webhooks_user ON webhooks_abonnements(user_id);
 CREATE TABLE IF NOT EXISTS etats_persistants (
     id SERIAL PRIMARY KEY,
     namespace VARCHAR(100) NOT NULL,
-    user_id VARCHAR(100) NOT NULL DEFAULT 'default',
+    user_id UUID NOT NULL,
     data JSONB NOT NULL DEFAULT '{}'::jsonb,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -1141,7 +1146,7 @@ CREATE INDEX IF NOT EXISTS ix_pstate_user ON etats_persistants(user_id);
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE configs_calendriers_externes (
     id SERIAL PRIMARY KEY,
-    user_id VARCHAR(100) NOT NULL,
+    user_id UUID NOT NULL,
     provider VARCHAR(20) NOT NULL DEFAULT 'google',
     name VARCHAR(200) NOT NULL DEFAULT 'Mon Calendrier',
     calendar_url VARCHAR(500),
@@ -1396,7 +1401,7 @@ CREATE INDEX IF NOT EXISTS ix_batch_meals_date_peremption ON repas_batch(date_pe
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE retours_recettes (
     id SERIAL PRIMARY KEY,
-    user_id VARCHAR(100) NOT NULL,
+    user_id UUID NOT NULL,
     recette_id INTEGER NOT NULL,
     feedback VARCHAR(20) NOT NULL DEFAULT 'neutral',
     contexte VARCHAR(200),
@@ -2228,6 +2233,45 @@ CREATE TABLE anniversaires_famille (
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_anniversaires_date ON anniversaires_famille(date_naissance);
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 4.XX CHECKLISTS_ANNIVERSAIRE — Listes de tâches pour préparer les anniversaires
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE checklists_anniversaire (
+    id SERIAL PRIMARY KEY,
+    anniversaire_id INTEGER NOT NULL REFERENCES anniversaires_famille(id) ON DELETE CASCADE,
+    nom VARCHAR(200) NOT NULL,
+    budget_total FLOAT,
+    date_limite DATE,
+    completee BOOLEAN NOT NULL DEFAULT FALSE,
+    notes TEXT,
+    maj_auto_le TIMESTAMP,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_anniversaire_id ON checklists_anniversaire(anniversaire_id);
+CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_completee ON checklists_anniversaire(completee);
+
+CREATE TABLE items_checklist_anniversaire (
+    id SERIAL PRIMARY KEY,
+    checklist_id INTEGER NOT NULL REFERENCES checklists_anniversaire(id) ON DELETE CASCADE,
+    categorie VARCHAR(50) NOT NULL,
+    libelle VARCHAR(300) NOT NULL,
+    budget_estime FLOAT,
+    budget_reel FLOAT,
+    fait BOOLEAN NOT NULL DEFAULT FALSE,
+    priorite VARCHAR(20) NOT NULL DEFAULT 'moyenne',
+    responsable VARCHAR(50),
+    quand VARCHAR(20),
+    source VARCHAR(20) NOT NULL DEFAULT 'manuel',
+    score_pertinence FLOAT,
+    raison_suggestion TEXT,
+    ordre INTEGER NOT NULL DEFAULT 0,
+    notes TEXT,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_checklist_id ON items_checklist_anniversaire(checklist_id);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_categorie ON items_checklist_anniversaire(categorie);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_fait ON items_checklist_anniversaire(fait);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_checklist_anniversaire(source);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX EVENEMENTS_FAMILIAUX — Calendrier partagé
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -4217,200 +4261,3 @@ COMMIT;
 --   anon          : Aucun accès
 --
 -- ============================================================================
--- ============================================================================
--- MIGRATIONS NON-DESTRUCTIVES AJOUTÉES: 2026-02-27
--- Ces blocs sont idempotents (IF NOT EXISTS / DO $$ checks)
--- Ajoutés automatiquement par l'agent pour synchroniser le schéma
--- ============================================================================
--- 1) Rename columns and add child profile fields
-BEGIN;
--- Rename ingredients.unite_mesure -> unite (if exists)
-DO $$ BEGIN IF EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'ingredients'
-        AND column_name = 'unite_mesure'
-) THEN
-ALTER TABLE ingredients
-    RENAME COLUMN unite_mesure TO unite;
-END IF;
-END $$;
--- Rename taches_entretien.created_at -> cree_le and updated_at -> modifie_le
-DO $$ BEGIN IF EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'taches_entretien'
-        AND column_name = 'created_at'
-) THEN
-ALTER TABLE taches_entretien
-    RENAME COLUMN created_at TO cree_le;
-END IF;
-IF EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'taches_entretien'
-        AND column_name = 'updated_at'
-) THEN
-ALTER TABLE taches_entretien
-    RENAME COLUMN updated_at TO modifie_le;
-END IF;
-END $$;
--- Add new columns to profils_enfants: taille_vetements (jsonb) and pointure (varchar)
-DO $$ BEGIN IF NOT EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'profils_enfants'
-        AND column_name = 'taille_vetements'
-) THEN
-ALTER TABLE profils_enfants
-ADD COLUMN taille_vetements jsonb DEFAULT '{}'::jsonb;
-END IF;
-IF NOT EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'profils_enfants'
-        AND column_name = 'pointure'
-) THEN
-ALTER TABLE profils_enfants
-ADD COLUMN pointure varchar(50);
-END IF;
-END $$;
-COMMIT;
--- 2) Add sous_categorie to contacts_famille
-BEGIN;
-ALTER TABLE IF EXISTS contacts_famille
-ADD COLUMN IF NOT EXISTS sous_categorie varchar(100);
-COMMIT;
--- 3) Add date_debut and date_fin to albums_famille
-BEGIN;
-ALTER TABLE IF EXISTS albums_famille
-ADD COLUMN IF NOT EXISTS date_debut date;
-ALTER TABLE IF EXISTS albums_famille
-ADD COLUMN IF NOT EXISTS date_fin date;
-COMMIT;
--- 4) Add titre to documents_famille and backfill from fichier_nom if present
-BEGIN;
-ALTER TABLE IF EXISTS documents_famille
-ADD COLUMN IF NOT EXISTS titre varchar(200);
-DO $$ BEGIN IF EXISTS (
-    SELECT 1
-    FROM information_schema.columns
-    WHERE table_name = 'documents_famille'
-        AND column_name = 'fichier_nom'
-) THEN EXECUTE 'UPDATE documents_famille SET titre = fichier_nom WHERE titre IS NULL AND fichier_nom IS NOT NULL';
-END IF;
-END $$;
-COMMIT;
--- 5) Add budget_reel to voyages
-BEGIN;
-ALTER TABLE IF EXISTS voyages
-ADD COLUMN IF NOT EXISTS budget_reel double precision;
-COMMIT;
--- ============================================================================
--- FIN DES MIGRATIONS AJOUTÉES LE 2026-02-27
--- ============================================================================
-
--- ============================================================================
--- MIGRATIONS AJOUTÉES LE 2026-03-06
--- Synchronisation ORM ↔ SQL : recettes + evenements_planning
--- Ces blocs sont idempotents (IF NOT EXISTS / DO $$ checks)
--- ============================================================================
-
--- 6) Ajouter colonnes manquantes à la table recettes (ORM sync)
-BEGIN;
--- Flags système
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS est_rapide BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS est_equilibre BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS est_vegetarien BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_bebe BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_batch BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS congelable BOOLEAN NOT NULL DEFAULT FALSE;
--- Types de protéines
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS type_proteines VARCHAR(100);
--- Bio & Local
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS est_bio BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS est_local BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS score_bio INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS score_local INTEGER NOT NULL DEFAULT 0;
--- Robots compatibles
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_cookeo BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_monsieur_cuisine BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_airfryer BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS compatible_multicooker BOOLEAN NOT NULL DEFAULT FALSE;
--- Nutrition
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS calories INTEGER;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS proteines FLOAT;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS lipides FLOAT;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS glucides FLOAT;
--- IA
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS genere_par_ia BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS score_ia FLOAT;
--- Media
-ALTER TABLE IF EXISTS recettes ADD COLUMN IF NOT EXISTS url_image VARCHAR(500);
--- Index
-CREATE INDEX IF NOT EXISTS ix_recettes_nom ON recettes(nom);
-CREATE INDEX IF NOT EXISTS ix_recettes_est_rapide ON recettes(est_rapide);
-CREATE INDEX IF NOT EXISTS ix_recettes_est_vegetarien ON recettes(est_vegetarien);
-CREATE INDEX IF NOT EXISTS ix_recettes_compatible_bebe ON recettes(compatible_bebe);
-CREATE INDEX IF NOT EXISTS ix_recettes_compatible_batch ON recettes(compatible_batch);
-CREATE INDEX IF NOT EXISTS ix_recettes_est_bio ON recettes(est_bio);
-CREATE INDEX IF NOT EXISTS ix_recettes_est_local ON recettes(est_local);
-CREATE INDEX IF NOT EXISTS ix_recettes_compatible_cookeo ON recettes(compatible_cookeo);
-CREATE INDEX IF NOT EXISTS ix_recettes_compatible_monsieur_cuisine ON recettes(compatible_monsieur_cuisine);
-CREATE INDEX IF NOT EXISTS ix_recettes_compatible_airfryer ON recettes(compatible_airfryer);
-COMMIT;
-
--- 7) Ajouter colonnes récurrence à evenements_planning (ORM sync)
-BEGIN;
-ALTER TABLE IF EXISTS evenements_planning ADD COLUMN IF NOT EXISTS recurrence_type VARCHAR(20);
-ALTER TABLE IF EXISTS evenements_planning ADD COLUMN IF NOT EXISTS recurrence_interval INTEGER DEFAULT 1;
-ALTER TABLE IF EXISTS evenements_planning ADD COLUMN IF NOT EXISTS recurrence_jours VARCHAR(20);
-ALTER TABLE IF EXISTS evenements_planning ADD COLUMN IF NOT EXISTS recurrence_fin DATE;
-ALTER TABLE IF EXISTS evenements_planning ADD COLUMN IF NOT EXISTS parent_event_id INTEGER REFERENCES evenements_planning(id);
-COMMIT;
-
--- ============================================================================
--- FIN DES MIGRATIONS AJOUTÉES LE 2026-03-06
--- ============================================================================
-
--- ============================================================================
--- CHECKLISTS ANNIVERSAIRES (Phase 2026-03-27)
--- ============================================================================
-BEGIN;
-CREATE TABLE IF NOT EXISTS checklists_anniversaire (
-    id SERIAL PRIMARY KEY,
-    anniversaire_id INTEGER NOT NULL REFERENCES anniversaires_famille(id) ON DELETE CASCADE,
-    nom VARCHAR(200) NOT NULL,
-    budget_total FLOAT,
-    date_limite DATE,
-    completee BOOLEAN NOT NULL DEFAULT FALSE,
-    notes TEXT,
-    maj_auto_le TIMESTAMP,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_anniversaire_id ON checklists_anniversaire(anniversaire_id);
-CREATE INDEX IF NOT EXISTS ix_checklists_anniversaire_completee ON checklists_anniversaire(completee);
-
-CREATE TABLE IF NOT EXISTS items_checklist_anniversaire (
-    id SERIAL PRIMARY KEY,
-    checklist_id INTEGER NOT NULL REFERENCES checklists_anniversaire(id) ON DELETE CASCADE,
-    categorie VARCHAR(50) NOT NULL,
-    libelle VARCHAR(300) NOT NULL,
-    budget_estime FLOAT,
-    budget_reel FLOAT,
-    fait BOOLEAN NOT NULL DEFAULT FALSE,
-    priorite VARCHAR(20) NOT NULL DEFAULT 'moyenne',
-    responsable VARCHAR(50),
-    quand VARCHAR(20),
-    source VARCHAR(20) NOT NULL DEFAULT 'manuel',
-    score_pertinence FLOAT,
-    raison_suggestion TEXT,
-    ordre INTEGER NOT NULL DEFAULT 0,
-    notes TEXT,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_checklist_id ON items_checklist_anniversaire(checklist_id);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_categorie ON items_checklist_anniversaire(categorie);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_fait ON items_checklist_anniversaire(fait);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_checklist_anniversaire(source);
-COMMIT;

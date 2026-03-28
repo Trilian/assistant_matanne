@@ -181,6 +181,7 @@ class Recette(TimestampMixin, Base):
 
     # Media
     url_image: Mapped[str | None] = mapped_column(String(500))
+    url_source: Mapped[str | None] = mapped_column(String(500))
 
     # Relations
     ingredients: Mapped[list["RecetteIngredient"]] = relationship(

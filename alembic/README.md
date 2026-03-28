@@ -1,33 +1,10 @@
-# Alembic migrations — Assistant Matanne
+# Alembic migrations — Assistant Matanne (ARCHIVÉ)
 
-Ce dossier contient les migrations de base de données gérées par **Alembic**.
+> **⚠️ Sprint 1 — 2026-03-28** : Alembic est **désactivé**. Les versions Alembic ont été absorbées
+> dans `sql/INIT_COMPLET.sql` (source de vérité unique). `alembic.ini` a été renommé en
+> `alembic.ini.bak`. Le workflow actif est `INIT_COMPLET.sql` + `GestionnaireMigrations`.
 
-## Contexte
 
-Le schéma initial de l'application est défini dans `sql/INIT_COMPLET.sql` et
-appliqué directement sur Supabase. Le système de migrations SQL-file maison
-(`GestionnaireMigrations`) gère les migrations `sql/migrations/V00x_***.sql`.
-
-Alembic prend le relais pour les **migrations incrémentales** à partir de la
-baseline `0001_initial_baseline`, offrant :
-- Autogénération depuis les modèles SQLAlchemy (`--autogenerate`)
-- Historique versionné et traçable
-- Rollback fiable
-- Génération SQL offline pour Supabase
-
-## Démarrage sur une DB existante
-
-Si la DB a déjà le schéma `sql/INIT_COMPLET.sql` appliqué :
-
-```bash
-# Marquer la DB comme étant à la baseline sans ré-exécuter de migration
-alembic stamp head
-
-# Vérifier l'état
-alembic current
-```
-
-## Commandes courantes
 
 ```bash
 # Générer une migration depuis les changements de modèles

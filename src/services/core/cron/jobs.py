@@ -79,10 +79,23 @@ def _job_push_quotidien() -> None:
         from src.services.core.rappels_intelligents import get_rappels_intelligents_service
 
         push_service = get_push_notification_service()
-        # Pas d'abonnés → sortir tôt
-        if not push_service._subscriptions:
-            logger.debug("Push quotidien : aucun abonné, job ignoré")
+
+        # B-01 : charger les abonnés actifs depuis la DB (pas depuis le cache mémoire)
+        try:
+            abonnes_db = push_service.charger_tous_abonnements_actifs_db()
+        except Exception:
+            abonnes_db = []
+
+        # Fallback sur le cache mémoire si DB indisponible
+        nb_abonnes = len(abonnes_db) if abonnes_db else sum(
+            len(subs) for subs in push_service._subscriptions.values()
+        )
+
+        if not nb_abonnes:
+            logger.debug("Push quotidien : aucun abonné actif, job ignoré")
             return
+
+        logger.debug("Push quotidien : %d abonné(s) actif(s)", nb_abonnes)
 
         # ── Rappels intelligents ──
         rappels_service = get_rappels_intelligents_service()
@@ -106,7 +119,11 @@ def _job_push_quotidien() -> None:
             if suivi and getattr(suivi, "serie_type", None) == "perdu":
                 nb_series = int(getattr(suivi, "serie_nb", 0))
                 if nb_series >= 5:
-                    for user_id in list(push_service._subscriptions.keys()):
+                    # Utiliser les abonnés DB plutôt que le cache mémoire
+                    user_ids = {str(a.user_id) for a in abonnes_db if a.user_id} or set(
+                        push_service._subscriptions.keys()
+                    )
+                    for user_id in user_ids:
                         push_service.notifier_alerte_serie_jeux(user_id, nb_series)
                     logger.info("Alerte série jeux (%d défaites) envoyée", nb_series)
         except Exception:
@@ -127,7 +144,7 @@ def _job_entretien_saisonnier() -> None:
             resultats = service.verifier_saison()
             logger.info("Entretien saisonnier : %s", resultats)
         else:
-            logger.debug("Entretien saisonnier : méthode verifier_saison non disponible")
+            logger.warning("Entretien saisonnier : méthode verifier_saison non disponible")
     except Exception:
         logger.exception("Erreur lors de la vérification saisonnière")
 
@@ -150,6 +167,65 @@ def _job_enrichissement_catalogues() -> None:
         )
     except Exception:
         logger.exception("Erreur lors de l'enrichissement des catalogues")
+
+
+def _job_digest_ntfy() -> None:
+    """Envoie le digest quotidien ntfy.sh (résumé tâches + rappels du jour) à 9h."""
+    try:
+        from src.services.core.notifications.notif_ntfy import obtenir_service_ntfy
+
+        service = obtenir_service_ntfy()
+        resultat = service.envoyer_digest_quotidien_sync()
+        if resultat.succes:
+            logger.info("Digest ntfy envoyé : %s", resultat.message)
+        else:
+            logger.warning("Digest ntfy échoué : %s", resultat.message)
+    except Exception:
+        logger.exception("Erreur lors du digest ntfy")
+
+
+def _job_rappel_courses_ntfy() -> None:
+    """Envoie un rappel ntfy.sh pour les articles de courses en attente à 18h."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.courses import LisCourse  # noqa: F401 — import for query
+
+        nb_articles = 0
+        try:
+            with obtenir_contexte_db() as session:
+                # Compter les articles non achetés dans les listes actives
+                from sqlalchemy import text
+                result = session.execute(
+                    text(
+                        "SELECT COUNT(*) FROM liste_courses lc"
+                        " JOIN listes_courses ls ON ls.id = lc.liste_id"
+                        " WHERE lc.achete = FALSE AND ls.statut IN ('active', 'en_cours')"
+                    )
+                )
+                nb_articles = result.scalar() or 0
+        except Exception:
+            logger.debug("Impossible de compter les articles en attente, rappel annulé")
+            return
+
+        if nb_articles == 0:
+            logger.debug("Rappel courses ntfy : aucun article en attente")
+            return
+
+        import asyncio
+        from src.services.core.notifications.notif_ntfy import obtenir_service_ntfy
+
+        service = obtenir_service_ntfy()
+
+        async def _envoyer():
+            return await service.envoyer_rappel_courses(nb_articles)
+
+        resultat = asyncio.run(_envoyer())
+        if resultat.succes:
+            logger.info("Rappel courses ntfy envoyé (%d articles)", nb_articles)
+        else:
+            logger.warning("Rappel courses ntfy échoué : %s", resultat.message)
+    except Exception:
+        logger.exception("Erreur lors du rappel courses ntfy")
 
 
 # ─── Orchestrateur ────────────────────────────────────────────────────────────
@@ -201,6 +277,20 @@ class DémarreurCron:
             CronTrigger(day=1, hour=3, minute=0),
             id="enrichissement_catalogues",
             name="Enrichissement mensuel catalogues IA",
+        )
+        self._scheduler.add_job(
+            _job_digest_ntfy,
+            CronTrigger(hour=9, minute=0),
+            id="digest_ntfy",
+            replace_existing=True,
+            name="Digest quotidien ntfy.sh (tâches + rappels)",
+        )
+        self._scheduler.add_job(
+            _job_rappel_courses_ntfy,
+            CronTrigger(hour=18, minute=0),
+            id="rappel_courses",
+            replace_existing=True,
+            name="Rappel courses ntfy.sh (articles en attente)",
         )
 
     def demarrer(self) -> None:

@@ -34,6 +34,26 @@ router = APIRouter(
 
 
 # ═══════════════════════════════════════════════════════════
+# CLÉS VAPID
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/vapid-public-key",
+    summary="Clé publique VAPID",
+    description="Retourne la clé publique VAPID pour l'abonnement Web Push côté frontend.",
+)
+async def obtenir_cle_vapid_publique():
+    """Retourne la clé publique VAPID pour l'abonnement push navigateur.
+
+    Le frontend doit utiliser cette clé pour le `applicationServerKey`
+    lors de l'appel à `pushManager.subscribe()`.
+    """
+    from src.services.core.notifications.types import VAPID_PUBLIC_KEY
+    return {"public_key": VAPID_PUBLIC_KEY}
+
+
+# ═══════════════════════════════════════════════════════════
 # ENDPOINTS
 # ═══════════════════════════════════════════════════════════
 

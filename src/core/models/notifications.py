@@ -58,6 +58,10 @@ class AbonnementPush(CreeLeMixin, Base):
     # Timestamps (last_used reste manuel — nom non-standard)
     last_used: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
 
+    # Statut actif (B-01 : permet de filtrer les abonnements expiré/désactivés)
+    actif: Mapped[bool] = mapped_column(Boolean, default=True)
+    dernier_ping: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
     def __repr__(self) -> str:
         return f"<AbonnementPush(id={self.id}, user_id={self.user_id})>"
 
