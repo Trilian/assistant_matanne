@@ -441,7 +441,11 @@ export default function ParisPage() {
       {/* Widget Bankroll & Money Management */}
       {user && (
         <BankrollWidget
-          uabs: Paris / Stats */}
+          userId={user.id}
+        />
+      )}
+
+      {/* Tabs: Paris / Stats */}
       <Tabs defaultValue="paris">
         <TabsList>
           <TabsTrigger value="paris">💰 Paris</TabsTrigger>
@@ -467,7 +471,6 @@ export default function ParisPage() {
             </Button>
           </div>
 
-          {/* Vue Expert */}
           {modeVue === "expert" ? (
             <TableauMatchsExpert
               onCreerPari={preRemplirPari}
@@ -475,14 +478,6 @@ export default function ParisPage() {
             />
           ) : (
             <>
-          {/* Vue Expert */}
-      {modeVue === "expert" ? (
-        <TableauMatchsExpert
-          onCreerPari={preRemplirPari}
-          onVoirDetails={setDrawerMatch}
-        />
-      ) : (
-        <>
           {/* Vue Simple (contenu existant) */}
           {/* Value Bets */}
       {chVB ? (
@@ -640,6 +635,14 @@ export default function ParisPage() {
                         </Button>
                       </TableCell>
                     </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
             </>
           )}
         </TabsContent>
@@ -647,15 +650,7 @@ export default function ParisPage() {
         <TabsContent value="stats" className="mt-6">
           {user && <StatsPersonnelles userId={user.id} />}
         </TabsContent>
-      </Tabs>        })}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-        </>
-      )}
+      </Tabs>
 
       {/* Drawer détail match */}
       <DrawerMatchDetail

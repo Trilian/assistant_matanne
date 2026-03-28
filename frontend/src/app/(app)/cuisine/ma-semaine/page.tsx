@@ -205,7 +205,7 @@ export default function MaSemainePage() {
   );
 
   const { mutate: consommerRepas } = utiliserMutation(
-    (repasId: number) => marquerRepasConsomme(repasId, true),
+    (repasId: number) => marquerRepasConsomme(repasId, 1),
     {
       onSuccess: () => {
         invalider(["planning"]);

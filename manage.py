@@ -52,7 +52,14 @@ def format_code():
 def lint():
     """VÃ©rifie le code avec ruff"""
     print("[SEARCH] VÃ©rification du code...")
-    run_cmd("ruff check src tests")
+    import importlib.util
+
+    if importlib.util.find_spec("ruff") is None:
+        print("[INSTALL] Ruff absent, installation en cours...")
+        if not run_cmd(f'"{sys.executable}" -m pip install ruff', shell=True):
+            return False
+
+    return run_cmd(f'"{sys.executable}" -m ruff check src tests', shell=True)
 
 
 def migrate():

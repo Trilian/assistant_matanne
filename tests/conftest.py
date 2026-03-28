@@ -10,6 +10,7 @@ This module provides:
 
 import os
 import sys
+import inspect
 from pathlib import Path
 
 # DÉSACTIVER LE RATE LIMITING POUR TOUS LES TESTS
@@ -23,6 +24,7 @@ if str(workspace_root) not in sys.path:
 from datetime import date, timedelta  # noqa: E402
 
 import pytest  # noqa: E402
+import httpx  # noqa: E402
 from sqlalchemy import create_engine, event  # noqa: E402
 from sqlalchemy.orm import Session, sessionmaker  # noqa: E402
 from sqlalchemy.pool import StaticPool  # noqa: E402
@@ -41,6 +43,16 @@ from src.services.cuisine.recettes import ServiceRecettes  # noqa: E402
 from src.services.inventaire import ServiceInventaire  # noqa: E402
 
 # ==================== DATABASE SETUP - SQLite JSON compatibility ====================
+
+
+# Compatibilité httpx 0.28+ avec starlette.testclient.TestClient utilisé par une partie du parc de tests.
+if "app" not in inspect.signature(httpx.Client.__init__).parameters:
+    _httpx_client_init_original = httpx.Client.__init__
+
+    def _httpx_client_init_compat(self, *args, app=None, **kwargs):
+        return _httpx_client_init_original(self, *args, **kwargs)
+
+    httpx.Client.__init__ = _httpx_client_init_compat
 
 
 def adapt_jsonb_for_sqlite(connection, record):
