@@ -965,21 +965,6 @@ Source : `ANALYSE_COMPLETE.md` §4
 
 ---
 
-### J2 — Job `rapport_nutrition_jules` _(S)_
-
-| Attribut | Valeur |
-|----------|--------|
-| Schedule | Dimanche 19:00 |
-| Description | Bilan nutrition Jules semaine |
-| Canal | ntfy + email |
-
-**Actions :**
-- [ ] Agréger repas Jules de la semaine depuis `repas_planning` (champ `plat_jules`)
-- [ ] Calculer score diversité, aliments nouveaux, aliments refusés
-- [ ] Envoyer résumé ntfy + email dimanche soir
-
----
-
 ### J3 — Job `alerte_stock_bas` _(S)_
 
 | Attribut | Valeur |
@@ -1311,7 +1296,6 @@ F5 (pages maison) ──────────────────→ IM9 
 - [ ] IA6 — Génération automations via IA
 - [ ] IA7 — Prédiction péremption personnalisée
 - [ ] J1 — Job `sync_google_calendar`
-- [ ] J2 — Job `rapport_nutrition_jules`
 - [ ] J3 — Job `alerte_stock_bas`
 - [ ] J4 — Job `archive_batches_expires`
 - [ ] J5 — Job `rapport_maison_mensuel`
