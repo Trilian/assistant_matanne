@@ -17,6 +17,8 @@ import {
   PlayCircle,
   Snowflake,
   AlertTriangle,
+  CalendarPlus,
+  UtensilsCrossed,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
@@ -36,6 +38,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/composants/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import {
   utiliserRequete,
   utiliserMutation,
@@ -153,6 +156,29 @@ export default function PageBatchCooking() {
         </Button>
       </div>
 
+      <Tabs defaultValue="sessions" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="sessions">
+            <CookingPot className="mr-1 h-4 w-4" />
+            Sessions
+          </TabsTrigger>
+          <TabsTrigger value="stock">
+            <Snowflake className="mr-1 h-4 w-4" />
+            En stock
+            {preparations.length > 0 && (
+              <Badge variant="secondary" className="ml-1.5 text-xs px-1.5 py-0">
+                {preparations.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="planifier">
+            <CalendarPlus className="mr-1 h-4 w-4" />
+            Planifier repas
+          </TabsTrigger>
+        </TabsList>
+
+        {/* ═════ Onglet Sessions ═════ */}
+        <TabsContent value="sessions">
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -186,15 +212,12 @@ export default function PageBatchCooking() {
           ))}
         </div>
       )}
+        </TabsContent>
 
-      {/* Préparations en stock */}
-      {preparations.length > 0 && (
+        {/* ═════ Onglet En stock ═════ */}
+        <TabsContent value="stock">
+      {preparations.length > 0 ? (
         <div>
-          <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <Snowflake className="h-5 w-5 text-blue-500" />
-            Préparations en stock ({preparations.length})
-          </h2>
-
           {/* Filtres par localisation */}
           <div className="flex gap-2 mb-4">
             {FILTRES_LOCALISATION.map((f) => (
@@ -270,7 +293,76 @@ export default function PageBatchCooking() {
             )}
           </div>
         </div>
+      ) : (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-4 py-12">
+            <Snowflake className="h-12 w-12 text-muted-foreground" />
+            <p className="text-muted-foreground">Aucune préparation en stock</p>
+            <p className="text-xs text-muted-foreground">
+              Terminez une session batch cooking pour avoir des préparations disponibles.
+            </p>
+          </CardContent>
+        </Card>
       )}
+        </TabsContent>
+
+        {/* ═════ Onglet Planifier repas ═════ */}
+        <TabsContent value="planifier">
+      {preparations.filter((p) => (p.portions_restantes ?? 0) > 0).length > 0 ? (
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Sélectionnez des préparations en stock pour les intégrer à votre planning repas de la semaine.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {preparations
+              .filter((p) => (p.portions_restantes ?? 0) > 0)
+              .map((p) => (
+                <Card key={p.id} className="hover:bg-accent/30 transition-colors">
+                  <CardContent className="pt-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm truncate">{p.nom}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          🍽️ {p.portions_restantes} portion{(p.portions_restantes ?? 0) > 1 ? "s" : ""} disponible{(p.portions_restantes ?? 0) > 1 ? "s" : ""}
+                        </p>
+                      </div>
+                      {p.localisation && (
+                        <Badge variant="outline" className="text-xs capitalize shrink-0">
+                          {p.localisation}
+                        </Badge>
+                      )}
+                    </div>
+                    {p.date_peremption && (
+                      <p className={`text-xs mt-2 ${p.alerte_peremption ? "text-orange-600 font-medium" : "text-muted-foreground"}`}>
+                        {p.alerte_peremption && <AlertTriangle className="inline h-3 w-3 mr-1" />}
+                        À consommer avant le {new Date(p.date_peremption).toLocaleDateString("fr-FR")}
+                        {p.jours_avant_peremption != null && ` (${p.jours_avant_peremption}j)`}
+                      </p>
+                    )}
+                    <Link href={`/cuisine/planning?preparation=${p.id}`}>
+                      <Button variant="outline" size="sm" className="mt-3 w-full">
+                        <UtensilsCrossed className="mr-1 h-3 w-3" />
+                        Ajouter au planning
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-4 py-12">
+            <CalendarPlus className="h-12 w-12 text-muted-foreground" />
+            <p className="text-muted-foreground">Aucune préparation disponible</p>
+            <p className="text-xs text-muted-foreground">
+              Il faut des préparations avec des portions restantes pour planifier des repas.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+        </TabsContent>
+      </Tabs>
 
       {/* Dialogue création */}
       <Dialog open={dialogueCreation} onOpenChange={setDialogueCreation}>

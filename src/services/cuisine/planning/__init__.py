@@ -91,6 +91,11 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # ─── Prompts IA ───
     "build_planning_prompt_context": (".prompts", "build_planning_prompt_context"),
     "parse_ai_planning_response": (".prompts", "parse_ai_planning_response"),
+    # ─── Météo ───
+    "MeteoJour": (".meteo", "MeteoJour"),
+    "obtenir_meteo_jour": (".meteo", "obtenir_meteo_jour"),
+    "construire_contexte_meteo_prompt": (".meteo", "construire_contexte_meteo_prompt"),
+    "MeteoMixin": (".meteo_mixin", "MeteoMixin"),
 }
 
 
