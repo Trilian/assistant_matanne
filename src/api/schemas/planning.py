@@ -36,7 +36,14 @@ class RepasCreate(RepasBase):
 class RepasResponse(RepasBase, IdentifiedResponse):
     """Schéma de réponse pour un repas."""
 
-    pass
+    recette_nom: str | None = None
+    plat_jules: str | None = None
+    notes_jules: str | None = None
+    adaptation_auto: bool = True
+    compatible_cookeo: bool = False
+    compatible_monsieur_cuisine: bool = False
+    compatible_airfryer: bool = False
+    consomme: bool = False
 
 
 class PlanningSemaineResponse(BaseModel):

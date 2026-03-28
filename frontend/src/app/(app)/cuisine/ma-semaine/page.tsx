@@ -17,6 +17,11 @@ import {
   AlertCircle,
   Loader2,
   CookingPot,
+  Baby,
+  Flame,
+  UtensilsCrossed,
+  Wind,
+  Check,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
@@ -32,11 +37,13 @@ import {
   obtenirPlanningSemaine,
   genererPlanningSemaine,
   obtenirNutritionHebdo,
+  marquerRepasConsomme,
 } from "@/bibliotheque/api/planning";
 import { listerInventaire, obtenirAlertes } from "@/bibliotheque/api/inventaire";
 import { genererCoursesDepuisPlanning } from "@/bibliotheque/api/courses";
 import { genererSessionDepuisPlanning } from "@/bibliotheque/api/batch-cooking";
 import { toast } from "sonner";
+import type { RepasPlanning } from "@/types/planning";
 
 const ETAPES = [
   {
@@ -73,6 +80,50 @@ function getLundiDeSemaine(offset = 0): string {
   lundi.setDate(now.getDate() + diff + offset * 7);
   return lundi.toISOString().split("T")[0];
 }
+
+function ApplianceIcons({ repas }: { repas: RepasPlanning }) {
+  const icons = [];
+  if (repas.compatible_cookeo) icons.push({ key: "cookeo", label: "Cookeo", Ic: Flame });
+  if (repas.compatible_monsieur_cuisine) icons.push({ key: "mc", label: "Mr Cuisine", Ic: UtensilsCrossed });
+  if (repas.compatible_airfryer) icons.push({ key: "af", label: "Air Fryer", Ic: Wind });
+  if (icons.length === 0) return null;
+  return (
+    <div className="flex gap-0.5">
+      {icons.map(({ key, label, Ic }) => (
+        <span key={key} title={label} className="text-muted-foreground">
+          <Ic className="h-3 w-3" />
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function JulesRow({ repas }: { repas: RepasPlanning }) {
+  if (!repas.plat_jules && !repas.notes_jules) return null;
+  return (
+    <div className="flex items-start gap-2 ml-4 mt-1 text-xs">
+      <Baby className="h-3.5 w-3.5 text-purple-500 shrink-0 mt-0.5" />
+      <div className="min-w-0">
+        <span className="font-medium text-purple-700 dark:text-purple-300">
+          Jules :
+        </span>{" "}
+        <span className="text-muted-foreground">{repas.plat_jules ?? repas.notes_jules}</span>
+        {repas.adaptation_auto && (
+          <Badge variant="outline" className="ml-1 text-[9px] px-1 py-0 border-purple-300 text-purple-600 dark:text-purple-400">
+            auto
+          </Badge>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const TYPE_REPAS_LABEL: Record<string, string> = {
+  petit_dejeuner: "🌅 Petit-déj",
+  dejeuner: "🍽️ Déjeuner",
+  gouter: "🍪 Goûter",
+  diner: "🌙 Dîner",
+};
 
 export default function MaSemainePage() {
   const router = useRouter();
@@ -153,11 +204,33 @@ export default function MaSemainePage() {
     }
   );
 
+  const { mutate: consommerRepas } = utiliserMutation(
+    (repasId: number) => marquerRepasConsomme(repasId, true),
+    {
+      onSuccess: () => {
+        invalider(["planning"]);
+        toast.success("Repas marqué comme consommé !");
+      },
+      onError: () => toast.error("Erreur lors de la mise à jour"),
+    }
+  );
+
   // Calculs
   const nbRepas = planning?.repas?.length ?? 0;
   const articlesEnStock = inventaire?.length ?? 0;
   const alertesCount = alertes?.length ?? 0;
   const progression = ((etapeActuelle + 1) / ETAPES.length) * 100;
+
+  // Regrouper les repas par jour pour l'affichage
+  const repasParJour = useMemo(() => {
+    const repas = planning?.repas ?? [];
+    const parJour: Record<string, RepasPlanning[]> = {};
+    for (const r of repas) {
+      const jour = r.date_repas ?? r.date ?? "";
+      (parJour[jour] ??= []).push(r);
+    }
+    return Object.entries(parJour).sort(([a], [b]) => a.localeCompare(b));
+  }, [planning?.repas]);
 
   const peutAvancer = useMemo(() => {
     if (etapeActuelle === 0) return nbRepas > 0;
@@ -217,6 +290,7 @@ export default function MaSemainePage() {
             >
               <button
                 onClick={() => setEtapeActuelle(idx)}
+                title={e.titre}
                 className={`rounded-full p-3 transition-colors ${
                   estActif
                     ? "bg-primary text-primary-foreground"
@@ -309,6 +383,51 @@ export default function MaSemainePage() {
                       </div>
                     </div>
                   )}
+
+                  {/* Liste des repas par jour */}
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {repasParJour.map(([jour, repasJour]) => (
+                      <div key={jour} className="space-y-1">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                          {new Date(jour).toLocaleDateString("fr-FR", {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "short",
+                          })}
+                        </p>
+                        {repasJour.map((r) => (
+                          <div key={r.id}>
+                            <div className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-accent/50 transition-colors">
+                              <button
+                                type="button"
+                                onClick={() => !r.consomme && consommerRepas(r.id)}
+                                className={`h-5 w-5 rounded-full border flex items-center justify-center shrink-0 ${
+                                  r.consomme
+                                    ? "bg-green-500 border-green-500 text-white"
+                                    : "border-muted-foreground/30 hover:border-green-400"
+                                }`}
+                                title={r.consomme ? "Consommé" : "Marquer consommé"}
+                              >
+                                {r.consomme && <Check className="h-3 w-3" />}
+                              </button>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-xs text-muted-foreground">
+                                    {TYPE_REPAS_LABEL[r.type_repas] ?? r.type_repas}
+                                  </span>
+                                  <span className={`text-sm font-medium truncate ${r.consomme ? "line-through opacity-60" : ""}`}>
+                                    {r.recette_nom ?? r.notes ?? "—"}
+                                  </span>
+                                </div>
+                              </div>
+                              <ApplianceIcons repas={r} />
+                            </div>
+                            <JulesRow repas={r} />
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-8 space-y-4">

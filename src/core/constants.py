@@ -186,6 +186,22 @@ LOG_LEVEL_PRODUCTION = "INFO"
 JULES_NAISSANCE: _date = _date(2024, 6, 22)
 """Date de naissance de Jules (22 juin 2024)."""
 
+# ═══════════════════════════════════════════════════════════
+# INVENTAIRE
+# ═══════════════════════════════════════════════════════════
+
+EMPLACEMENTS_INVENTAIRE: list[str] = [
+    "Frigo",
+    "Congélateur Tiroir",
+    "Congélateur Coffre",
+    "Cellier",
+    "Placard",
+]
+"""Emplacements de stockage normalisés pour l'inventaire."""
+
+EMPLACEMENT_DEFAUT: str = "Frigo"
+"""Emplacement par défaut pour les nouveaux articles."""
+
 OBJECTIF_PAS_QUOTIDIEN_DEFAUT: int = 10_000
 """Objectif de pas quotidien par défaut."""
 
@@ -233,4 +249,7 @@ __all__ = [
     "JULES_NAISSANCE",
     "OBJECTIF_PAS_QUOTIDIEN_DEFAUT",
     "OBJECTIF_CALORIES_BRULEES_DEFAUT",
+    # Inventaire
+    "EMPLACEMENTS_INVENTAIRE",
+    "EMPLACEMENT_DEFAUT",
 ]

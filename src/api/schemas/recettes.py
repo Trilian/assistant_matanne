@@ -129,3 +129,6 @@ class RecetteResponse(RecetteBase, IdentifiedResponse):
     est_favori: bool = False
     note_moyenne: float | None = None
     url_source: str | None = None
+    compatible_cookeo: bool = False
+    compatible_monsieur_cuisine: bool = False
+    compatible_airfryer: bool = False

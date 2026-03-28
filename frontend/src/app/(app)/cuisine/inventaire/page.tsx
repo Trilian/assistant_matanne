@@ -1,5 +1,5 @@
 ﻿// ═══════════════════════════════════════════════════════════
-// Inventaire — Stock alimentaire et alertes
+// Inventaire — Stock alimentaire avec onglets emplacement
 // ═══════════════════════════════════════════════════════════
 
 "use client";
@@ -14,6 +14,11 @@ import {
   Search,
   Camera,
   ScanLine,
+  QrCode,
+  Refrigerator,
+  Archive,
+  Warehouse,
+  DoorOpen,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,6 +47,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/composants/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import {
   utiliserRequete,
   utiliserMutation,
@@ -65,6 +71,16 @@ import { toast } from "sonner";
 import type { ArticleInventaire } from "@/types/inventaire";
 import { ScanneurMultiCodes } from "@/composants/scanneur-multi-codes";
 import type { ArticleBarcode } from "@/bibliotheque/api/inventaire";
+import { EtiquetteQR } from "@/composants/cuisine/etiquette-qr";
+import type { LucideIcon } from "lucide-react";
+
+const EMPLACEMENTS: { id: string; label: string; icone: LucideIcon }[] = [
+  { id: "Frigo", label: "Frigo", icone: Refrigerator },
+  { id: "Congélateur Tiroir", label: "Congél. Tiroir", icone: Archive },
+  { id: "Congélateur Coffre", label: "Congél. Coffre", icone: Archive },
+  { id: "Cellier", label: "Cellier", icone: Warehouse },
+  { id: "Placard", label: "Placard", icone: DoorOpen },
+];
 
 const CATEGORIES = [
   "Tous",
@@ -87,18 +103,20 @@ const FILTRES_ETAT = [
 ];
 
 export default function PageInventaire() {
+  const [ongletActif, setOngletActif] = useState("Frigo");
   const [recherche, setRecherche] = useState("");
   const [categorie, setCategorie] = useState("Tous");
   const [filtreEtat, setFiltreEtat] = useState("tous");
   const [dialogueAjout, setDialogueAjout] = useState(false);
   const [ocrResultat, setOcrResultat] = useState<ResultatOCRFrigo | null>(null);
   const [scanneurOuvert, setScanneurOuvert] = useState(false);
+  const [qrArticle, setQrArticle] = useState<ArticleInventaire | null>(null);
 
   const invalider = utiliserInvalidation();
 
   const { data: articles, isLoading } = utiliserRequete(
-    ["inventaire"],
-    listerInventaire
+    ["inventaire", ongletActif],
+    () => listerInventaire(ongletActif)
   );
 
   const { data: alertes } = utiliserRequete(
@@ -287,130 +305,143 @@ export default function PageInventaire() {
         </Card>
       )}
 
-      {/* Filtres */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher..."
-            className="pl-9"
-            value={recherche}
-            onChange={(e) => setRecherche(e.target.value)}
-          />
-        </div>
-        <Select value={categorie} onValueChange={setCategorie}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {CATEGORIES.map((c) => (
-              <SelectItem key={c} value={c}>
-                {c}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={filtreEtat} onValueChange={setFiltreEtat}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {FILTRES_ETAT.map((f) => (
-              <SelectItem key={f.valeur} value={f.valeur}>
-                {f.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {/* Onglets par emplacement */}
+      <Tabs value={ongletActif} onValueChange={setOngletActif}>
+        <TabsList className="w-full grid grid-cols-5">
+          {EMPLACEMENTS.map((e) => {
+            const Icone = e.icone;
+            const nb = (articles ?? []).length;
+            return (
+              <TabsTrigger key={e.id} value={e.id} className="gap-1 text-xs sm:text-sm">
+                <Icone className="h-4 w-4 hidden sm:inline" />
+                {e.label}
+                {ongletActif === e.id && nb > 0 && (
+                  <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
+                    {nb}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
 
-      {/* Table articles */}
-      {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </div>
-      ) : articlesFiltres.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12">
-            <Package className="h-12 w-12 text-muted-foreground" />
-            <p className="text-muted-foreground">Aucun article trouvé</p>
-            <Button variant="outline" onClick={() => setDialogueAjout(true)}>
-              <Plus className="mr-1 h-4 w-4" />
-              Ajouter un article
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-3 font-medium">Article</th>
-                    <th className="text-left p-3 font-medium">Quantité</th>
-                    <th className="text-left p-3 font-medium hidden sm:table-cell">
-                      Catégorie
-                    </th>
-                    <th className="text-left p-3 font-medium hidden md:table-cell">
-                      Emplacement
-                    </th>
-                    <th className="text-left p-3 font-medium hidden md:table-cell">
-                      Péremption
-                    </th>
-                    <th className="text-left p-3 font-medium">État</th>
-                    <th className="text-left p-3 font-medium hidden lg:table-cell">
-                      Qualité
-                    </th>
-                    <th className="p-3" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {articlesFiltres.map((a) => (
-                    <tr key={a.id} className="border-b last:border-0 hover:bg-accent/50">
-                      <td className="p-3 font-medium">{a.nom}</td>
-                      <td className="p-3">
-                        {a.quantite}
-                        {a.unite ? ` ${a.unite}` : ""}
-                      </td>
-                      <td className="p-3 hidden sm:table-cell">
-                        {a.categorie ?? "—"}
-                      </td>
-                      <td className="p-3 hidden md:table-cell">
-                        {a.emplacement ?? "—"}
-                      </td>
-                      <td className="p-3 hidden md:table-cell">
-                        {a.date_peremption
-                          ? new Date(a.date_peremption).toLocaleDateString("fr-FR")
-                          : "—"}
-                      </td>
-                      <td className="p-3">
-                        <EtatBadge article={a} />
-                      </td>
-                      <td className="p-3 hidden lg:table-cell">
-                        <BadgesOFF article={a} />
-                      </td>
-                      <td className="p-3">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => supprimer(a.id)}
-                          aria-label="Supprimer l'article"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </td>
-                    </tr>
+        {EMPLACEMENTS.map((e) => (
+          <TabsContent key={e.id} value={e.id} className="space-y-4 mt-4">
+            {/* Filtres */}
+            <div className="flex flex-wrap gap-3">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher..."
+                  className="pl-9"
+                  value={recherche}
+                  onChange={(ev) => setRecherche(ev.target.value)}
+                />
+              </div>
+              <Select value={categorie} onValueChange={setCategorie}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
                   ))}
-                </tbody>
-              </table>
+                </SelectContent>
+              </Select>
+              <Select value={filtreEtat} onValueChange={setFiltreEtat}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FILTRES_ETAT.map((f) => (
+                    <SelectItem key={f.valeur} value={f.valeur}>{f.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </CardContent>
-        </Card>
-      )}
+
+            {/* Table articles */}
+            {isLoading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            ) : articlesFiltres.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center gap-4 py-12">
+                  <Package className="h-12 w-12 text-muted-foreground" />
+                  <p className="text-muted-foreground">Aucun article dans {e.label}</p>
+                  <Button variant="outline" onClick={() => setDialogueAjout(true)}>
+                    <Plus className="mr-1 h-4 w-4" />
+                    Ajouter un article
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-3 font-medium">Article</th>
+                          <th className="text-left p-3 font-medium">Quantité</th>
+                          <th className="text-left p-3 font-medium hidden sm:table-cell">Catégorie</th>
+                          <th className="text-left p-3 font-medium hidden md:table-cell">Péremption</th>
+                          <th className="text-left p-3 font-medium">État</th>
+                          <th className="text-left p-3 font-medium hidden lg:table-cell">Qualité</th>
+                          <th className="p-3" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {articlesFiltres.map((a) => (
+                          <tr key={a.id} className="border-b last:border-0 hover:bg-accent/50">
+                            <td className="p-3 font-medium">{a.nom}</td>
+                            <td className="p-3">
+                              {a.quantite}{a.unite ? ` ${a.unite}` : ""}
+                            </td>
+                            <td className="p-3 hidden sm:table-cell">{a.categorie ?? "—"}</td>
+                            <td className="p-3 hidden md:table-cell">
+                              {a.date_peremption
+                                ? new Date(a.date_peremption).toLocaleDateString("fr-FR")
+                                : "—"}
+                            </td>
+                            <td className="p-3"><EtatBadge article={a} /></td>
+                            <td className="p-3 hidden lg:table-cell"><BadgesOFF article={a} /></td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={() => setQrArticle(a)}
+                                  aria-label="QR Code"
+                                >
+                                  <QrCode className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={() => supprimer(a.id)}
+                                  aria-label="Supprimer l'article"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        ))}
+      </Tabs>
 
       {/* Dialogue ajout */}
       <Dialog open={dialogueAjout} onOpenChange={setDialogueAjout}>
@@ -454,11 +485,23 @@ export default function PageInventaire() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="inv-empl">Emplacement</Label>
-                <Input
-                  id="inv-empl"
-                  {...register("emplacement")}
-                  placeholder="Frigo, placard..."
-                />
+                <Select
+                  defaultValue={ongletActif}
+                  onValueChange={(v) => {
+                    // react-hook-form manual setValue
+                    const ev = { target: { name: "emplacement", value: v } };
+                    register("emplacement").onChange(ev as never);
+                  }}
+                >
+                  <SelectTrigger id="inv-empl">
+                    <SelectValue placeholder="Choisir..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EMPLACEMENTS.map((em) => (
+                      <SelectItem key={em.id} value={em.id}>{em.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -493,6 +536,18 @@ export default function PageInventaire() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Étiquette QR */}
+      {qrArticle && (
+        <EtiquetteQR
+          ouvert
+          onFermer={() => setQrArticle(null)}
+          articleId={qrArticle.id}
+          articleNom={qrArticle.nom}
+          emplacement={qrArticle.emplacement}
+          datePeremption={qrArticle.date_peremption}
+        />
+      )}
 
       <ScanneurMultiCodes
         ouvert={scanneurOuvert}

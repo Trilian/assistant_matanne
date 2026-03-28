@@ -14,6 +14,13 @@ export interface RepasPlanning {
   notes?: string;
   portions?: number;
   nutri_score?: string | null;
+  plat_jules?: string;
+  notes_jules?: string;
+  adaptation_auto?: boolean;
+  compatible_cookeo?: boolean;
+  compatible_monsieur_cuisine?: boolean;
+  compatible_airfryer?: boolean;
+  consomme?: boolean;
 }
 
 export interface PlanningSemaine {

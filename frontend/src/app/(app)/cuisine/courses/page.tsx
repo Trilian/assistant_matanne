@@ -1,10 +1,10 @@
 ﻿// ═══════════════════════════════════════════════════════════
-// Courses — Gestion des listes de courses
+// Courses — Bring!-style tiles par catégorie
 // ═══════════════════════════════════════════════════════════
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Plus,
   ShoppingCart,
@@ -12,6 +12,9 @@ import {
   Trash2,
   Loader2,
   ScanLine,
+  Leaf,
+  RotateCcw,
+  CheckCircle2,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,19 +48,33 @@ import {
   ajouterArticle,
   cocherArticle,
   supprimerArticle,
+  validerCourses,
+  obtenirSuggestionsBioLocal,
+  obtenirRecurrentsSuggeres,
 } from "@/bibliotheque/api/courses";
 import { schemaArticleCourses, type DonneesArticleCourses } from "@/bibliotheque/validateurs";
 import { toast } from "sonner";
-import type { ListeCourses } from "@/types/courses";
-import { SwipeableItem } from "@/composants/swipeable-item";
+import type { ArticleCourses } from "@/types/courses";
 import { ScanneurMultiCodes } from "@/composants/scanneur-multi-codes";
 import type { ArticleBarcode } from "@/bibliotheque/api/inventaire";
+import { TileArticle } from "@/composants/cuisine/tile-article";
+
+/** Group articles by category for Bring!-style display */
+function grouperParCategorie(articles: ArticleCourses[]): Record<string, ArticleCourses[]> {
+  const groupes: Record<string, ArticleCourses[]> = {};
+  for (const a of articles) {
+    const cat = a.categorie || "Autre";
+    (groupes[cat] ??= []).push(a);
+  }
+  return groupes;
+}
 
 export default function PageCourses() {
   const [listeSelectionnee, setListeSelectionnee] = useState<number | null>(null);
   const [nomNouvelleListe, setNomNouvelleListe] = useState("");
   const [dialogueArticle, setDialogueArticle] = useState(false);
   const [scanneurOuvert, setScanneurOuvert] = useState(false);
+  const [panneauBio, setPanneauBio] = useState(false);
 
   const invalider = utiliserInvalidation();
 
@@ -72,6 +89,19 @@ export default function PageCourses() {
     ["courses", String(listeSelectionnee)],
     () => obtenirListeCourses(listeSelectionnee!),
     { enabled: listeSelectionnee !== null }
+  );
+
+  // Bio-local suggestions
+  const { data: bioLocal } = utiliserRequete(
+    ["courses", "bio-local", String(listeSelectionnee)],
+    () => obtenirSuggestionsBioLocal(listeSelectionnee!),
+    { enabled: listeSelectionnee !== null && panneauBio }
+  );
+
+  // Récurrents suggérés
+  const { data: recurrents } = utiliserRequete(
+    ["courses", "recurrents"],
+    obtenirRecurrentsSuggeres
   );
 
   // Mutations
@@ -119,6 +149,18 @@ export default function PageCourses() {
     }
   );
 
+  const { mutate: valider, isPending: enValidation } = utiliserMutation(
+    () => validerCourses(listeSelectionnee!),
+    {
+      onSuccess: () => {
+        invalider(["courses"]);
+        invalider(["inventaire"]);
+        toast.success("Courses validées ! Stock mis à jour.");
+      },
+      onError: () => toast.error("Erreur lors de la validation"),
+    }
+  );
+
   // Formulaire article
   const {
     register: regArticle,
@@ -133,7 +175,11 @@ export default function PageCourses() {
   const articlesNonCoches = articles.filter((a) => !a.est_coche);
   const articlesCoches = articles.filter((a) => a.est_coche);
 
-  // Callback scanner : coche les articles trouvés dans la liste courante
+  // Regrouper par catégorie
+  const groupesNonCoches = useMemo(() => grouperParCategorie(articlesNonCoches), [articlesNonCoches]);
+  const categoriesTriees = useMemo(() => Object.keys(groupesNonCoches).sort(), [groupesNonCoches]);
+
+  // Scanner callback
   const importerDepuisScanner = async (
     trouves: ArticleBarcode[],
     inconnus: string[]
@@ -155,15 +201,41 @@ export default function PageCourses() {
       toast.success(`${importes} article(s) ajouté(s) à la liste`);
     }
     if (inconnus.length > 0) {
-      toast.warning(`${inconnus.length} code(s) non reconnu(s) dans l'inventaire`);
+      toast.warning(`${inconnus.length} code(s) non reconnu(s)`);
     }
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">🛒 Courses</h1>
-        <p className="text-muted-foreground">Gérez vos listes de courses</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">🛒 Courses</h1>
+          <p className="text-muted-foreground">Gérez vos listes de courses</p>
+        </div>
+        {listeSelectionnee && (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPanneauBio((v) => !v)}
+            >
+              <Leaf className="mr-1 h-4 w-4" />
+              Bio & Local
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => valider(undefined)}
+              disabled={enValidation || articlesNonCoches.length > 0}
+            >
+              {enValidation ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="mr-1 h-4 w-4" />
+              )}
+              Valider courses
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -173,7 +245,6 @@ export default function PageCourses() {
             <CardTitle className="text-lg">Mes listes</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {/* Créer une nouvelle liste */}
             <form
               className="flex gap-2"
               onSubmit={(e) => {
@@ -196,7 +267,6 @@ export default function PageCourses() {
               </Button>
             </form>
 
-            {/* Liste des listes */}
             {chargementListes ? (
               <div className="space-y-2">
                 {Array.from({ length: 3 }).map((_, i) => (
@@ -227,10 +297,36 @@ export default function PageCourses() {
                 ))}
               </div>
             )}
+
+            {/* Récurrents suggérés */}
+            {recurrents && recurrents.suggestions.length > 0 && listeSelectionnee && (
+              <div className="border-t pt-3 mt-3">
+                <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                  <RotateCcw className="h-3 w-3" />
+                  Achats récurrents
+                </p>
+                <div className="space-y-1">
+                  {recurrents.suggestions.slice(0, 5).map((r) => (
+                    <button
+                      key={r.article_nom}
+                      className="w-full text-left text-xs rounded px-2 py-1 hover:bg-accent transition-colors"
+                      onClick={() =>
+                        ajouter({ nom: r.article_nom, categorie: r.categorie ?? undefined })
+                      }
+                    >
+                      <span className="font-medium">{r.article_nom}</span>
+                      <span className="text-muted-foreground ml-1">
+                        +{r.retard_jours}j retard
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Panel articles */}
+        {/* Panel articles — Bring!-style tiles */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -244,23 +340,20 @@ export default function PageCourses() {
                 </CardDescription>
               )}
             </div>
-            {listeSelectionnee && (
-              <Button size="sm" onClick={() => setDialogueArticle(true)}>
-                <Plus className="mr-1 h-4 w-4" />
-                Article
-              </Button>
-            )}
-            {listeSelectionnee && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setScanneurOuvert(true)}
-                aria-label="Scanner plusieurs codes-barres"
-              >
-                <ScanLine className="mr-1 h-4 w-4" />
-                Scanner
-              </Button>
-            )}
+            <div className="flex gap-1">
+              {listeSelectionnee && (
+                <>
+                  <Button size="sm" variant="outline" onClick={() => setScanneurOuvert(true)}>
+                    <ScanLine className="mr-1 h-4 w-4" />
+                    Scanner
+                  </Button>
+                  <Button size="sm" onClick={() => setDialogueArticle(true)}>
+                    <Plus className="mr-1 h-4 w-4" />
+                    Article
+                  </Button>
+                </>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {!listeSelectionnee ? (
@@ -271,100 +364,58 @@ export default function PageCourses() {
                 </p>
               </div>
             ) : chargementDetail ? (
-              <div className="space-y-2">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-full" />
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-square rounded-xl" />
                 ))}
               </div>
             ) : articles.length === 0 ? (
               <div className="flex flex-col items-center gap-4 py-12">
                 <p className="text-muted-foreground">Liste vide</p>
-                <Button
-                  variant="outline"
-                  onClick={() => setDialogueArticle(true)}
-                >
+                <Button variant="outline" onClick={() => setDialogueArticle(true)}>
                   <Plus className="mr-1 h-4 w-4" />
                   Ajouter un article
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
-                {/* Articles non cochés */}
-                {articlesNonCoches.length > 0 && (
-                  <div className="space-y-1">
-                    {articlesNonCoches.map((a) => (
-                      <SwipeableItem
-                        key={a.id}
-                        onSwipeRight={() => cocher({ articleId: a.id, coche: true })}
-                        onSwipeLeft={() => supprimer(a.id)}
-                        labelDroit="Cocher"
-                        labelGauche="Supprimer"
-                        iconeDroit={<Check className="h-4 w-4" />}
-                        iconeGauche={<Trash2 className="h-4 w-4" />}
-                      >
-                        <div className="flex items-center gap-3 rounded-md px-2 py-1.5 bg-background">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-6 w-6 shrink-0 rounded-full"
-                            onClick={() =>
-                              cocher({ articleId: a.id, coche: true })
-                            }
-                          >
-                            <span className="sr-only">Cocher</span>
-                          </Button>
-                          <div className="flex-1 min-w-0">
-                            <span className="text-sm font-medium">
-                              {a.nom}
-                            </span>
-                            {(a.quantite || a.categorie) && (
-                              <span className="text-xs text-muted-foreground ml-2">
-                                {a.quantite
-                                  ? `${a.quantite}${a.unite ? " " + a.unite : ""}`
-                                  : ""}
-                                {a.categorie ? ` · ${a.categorie}` : ""}
-                              </span>
-                            )}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 shrink-0"
-                            onClick={() => supprimer(a.id)}
-                            aria-label="Supprimer l'article"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </SwipeableItem>
-                    ))}
+              <div className="space-y-6">
+                {/* Articles par catégorie */}
+                {categoriesTriees.map((cat) => (
+                  <div key={cat}>
+                    <h3 className="text-sm font-semibold mb-2">{cat}</h3>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                      {groupesNonCoches[cat].map((a) => (
+                        <TileArticle
+                          key={a.id}
+                          nom={a.nom}
+                          quantite={a.quantite}
+                          unite={a.unite}
+                          categorie={a.categorie}
+                          onClick={() => cocher({ articleId: a.id, coche: true })}
+                          onLongPress={() => supprimer(a.id)}
+                        />
+                      ))}
+                    </div>
                   </div>
-                )}
+                ))}
 
                 {/* Articles cochés */}
                 {articlesCoches.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-2">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-2">
                       Complétés ({articlesCoches.length})
-                    </p>
-                    <div className="space-y-1 opacity-60">
+                    </h3>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                       {articlesCoches.map((a) => (
-                        <div
+                        <TileArticle
                           key={a.id}
-                          className="flex items-center gap-3 rounded-md px-2 py-1.5"
-                        >
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-6 w-6 shrink-0 rounded-full bg-primary text-primary-foreground"
-                            onClick={() =>
-                              cocher({ articleId: a.id, coche: false })
-                            }
-                          >
-                            <Check className="h-3 w-3" />
-                          </Button>
-                          <span className="text-sm line-through">{a.nom}</span>
-                        </div>
+                          nom={a.nom}
+                          quantite={a.quantite}
+                          unite={a.unite}
+                          categorie={a.categorie}
+                          estCoche
+                          onClick={() => cocher({ articleId: a.id, coche: false })}
+                        />
                       ))}
                     </div>
                   </div>
@@ -374,6 +425,43 @@ export default function PageCourses() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Panel Bio & Local */}
+      {panneauBio && bioLocal && bioLocal.suggestions.length > 0 && (
+        <Card className="border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-950">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2 text-green-700 dark:text-green-300">
+              <Leaf className="h-4 w-4" />
+              Suggestions Bio & Local — {bioLocal.mois}
+            </CardTitle>
+            <CardDescription className="text-green-600 dark:text-green-400">
+              {bioLocal.nb_en_saison} article(s) de saison dans votre liste
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {bioLocal.suggestions.map((s) => (
+                <div
+                  key={s.article_id}
+                  className="flex items-center justify-between rounded-lg border border-green-200 dark:border-green-800 px-3 py-2 text-sm"
+                >
+                  <div>
+                    <span className="font-medium">{s.nom}</span>
+                    <div className="flex gap-1 mt-0.5">
+                      {s.en_saison && <Badge variant="secondary" className="text-[10px]">🌱 Saison</Badge>}
+                      {s.bio_disponible && <Badge variant="secondary" className="text-[10px]">🌿 Bio</Badge>}
+                      {s.local_disponible && <Badge variant="secondary" className="text-[10px]">📍 Local</Badge>}
+                    </div>
+                  </div>
+                  {s.alternative_bio && (
+                    <span className="text-xs text-muted-foreground">→ {s.alternative_bio}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Dialogue ajout article */}
       <Dialog open={dialogueArticle} onOpenChange={setDialogueArticle}>
@@ -443,7 +531,6 @@ export default function PageCourses() {
         </DialogContent>
       </Dialog>
 
-      {/* Scanner multi-codes */}
       <ScanneurMultiCodes
         ouvert={scanneurOuvert}
         onFermer={() => setScanneurOuvert(false)}

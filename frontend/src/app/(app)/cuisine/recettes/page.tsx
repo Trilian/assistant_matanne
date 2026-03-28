@@ -1,5 +1,5 @@
 ﻿// ═══════════════════════════════════════════════════════════
-// Recettes — Liste avec recherche, filtres et pagination
+// Recettes — Marmiton-style cards + kitchen appliance filters
 // ═══════════════════════════════════════════════════════════
 
 "use client";
@@ -15,6 +15,10 @@ import {
   Filter,
   Heart,
   CalendarDays,
+  Users,
+  UtensilsCrossed,
+  Flame,
+  Wind,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/composants/ui/button";
@@ -38,6 +42,7 @@ import {
   deplanifierRecetteSemaine,
 } from "@/bibliotheque/api/recettes";
 import { DialogueImportRecette } from "@/composants/cuisine/dialogue-import-recette";
+import type { Recette } from "@/types/recettes";
 
 const CATEGORIES = [
   "Toutes",
@@ -58,10 +63,44 @@ const DIFFICULTES = [
   { valeur: "difficile", label: "Difficile" },
 ];
 
+const APPAREILS = [
+  { cle: "cookeo" as const, label: "Cookeo", icone: Flame },
+  { cle: "monsieur_cuisine" as const, label: "Mr Cuisine", icone: UtensilsCrossed },
+  { cle: "airfryer" as const, label: "Air Fryer", icone: Wind },
+] as const;
+
+type CleAppareil = (typeof APPAREILS)[number]["cle"];
+
+function tempsTotal(r: Recette): number {
+  return (r.temps_preparation ?? 0) + (r.temps_cuisson ?? 0);
+}
+
+function ApplianceBadges({ recette }: { recette: Recette }) {
+  const appareils = [];
+  if (recette.compatible_cookeo) appareils.push({ label: "Cookeo", icone: Flame });
+  if (recette.compatible_monsieur_cuisine) appareils.push({ label: "Mr Cuisine", icone: UtensilsCrossed });
+  if (recette.compatible_airfryer) appareils.push({ label: "Air Fryer", icone: Wind });
+  if (appareils.length === 0) return null;
+  return (
+    <div className="flex gap-1 mt-1">
+      {appareils.map((a) => {
+        const Ic = a.icone;
+        return (
+          <Badge key={a.label} variant="outline" className="text-[10px] gap-0.5 px-1 py-0">
+            <Ic className="h-2.5 w-2.5" />
+            {a.label}
+          </Badge>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function PageRecettes() {
   const [recherche, setRecherche] = useState("");
   const [categorie, setCategorie] = useState("Toutes");
   const [page, setPage] = useState(1);
+  const [filtresAppareils, setFiltresAppareils] = useState<Set<CleAppareil>>(new Set());
   const rechercheDelayee = utiliserDelai(recherche, 300);
 
   const { data, isLoading } = utiliserRequete(
@@ -89,6 +128,27 @@ export default function PageRecettes() {
 
   const recettes = data?.items ?? [];
   const totalPages = data?.pages_totales ?? 1;
+
+  // Filtrage client par appareil
+  const recettesFiltrees = filtresAppareils.size === 0
+    ? recettes
+    : recettes.filter((r) => {
+        for (const f of filtresAppareils) {
+          if (f === "cookeo" && !r.compatible_cookeo) return false;
+          if (f === "monsieur_cuisine" && !r.compatible_monsieur_cuisine) return false;
+          if (f === "airfryer" && !r.compatible_airfryer) return false;
+        }
+        return true;
+      });
+
+  const toggleAppareil = (cle: CleAppareil) => {
+    setFiltresAppareils((prev) => {
+      const next = new Set(prev);
+      if (next.has(cle)) next.delete(cle);
+      else next.add(cle);
+      return next;
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -146,22 +206,40 @@ export default function PageRecettes() {
         </Select>
       </div>
 
+      {/* Filtres appareils */}
+      <div className="flex flex-wrap gap-2">
+        {APPAREILS.map((ap) => {
+          const Ic = ap.icone;
+          const actif = filtresAppareils.has(ap.cle);
+          return (
+            <Button
+              key={ap.cle}
+              variant={actif ? "default" : "outline"}
+              size="sm"
+              onClick={() => toggleAppareil(ap.cle)}
+              className="gap-1.5"
+            >
+              <Ic className="h-4 w-4" />
+              {ap.label}
+            </Button>
+          );
+        })}
+      </div>
+
       {/* Grille de recettes */}
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i}>
-              <CardHeader>
+              <Skeleton className="h-40 w-full rounded-t-xl" />
+              <CardContent className="pt-3 space-y-2">
                 <Skeleton className="h-5 w-3/4" />
                 <Skeleton className="h-4 w-1/2" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-20 w-full" />
               </CardContent>
             </Card>
           ))}
         </div>
-      ) : recettes.length === 0 ? (
+      ) : recettesFiltrees.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-4 py-12">
             <ChefHat className="h-12 w-12 text-muted-foreground" />
@@ -185,95 +263,115 @@ export default function PageRecettes() {
         </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {recettes.map((recette) => (
-            <div key={recette.id} className="relative">
+          {recettesFiltrees.map((recette) => (
+            <div key={recette.id} className="relative group">
               <Link href={`/cuisine/recettes/${recette.id}`}>
-                <Card className="hover:bg-accent/50 transition-colors h-full">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-base line-clamp-1">
-                        {recette.nom}
-                      </CardTitle>
-                      <div className="flex shrink-0 items-center gap-1">
-                        {recette.est_favori && (
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
+                  {/* Photo placeholder */}
+                  <div className="relative h-40 bg-gradient-to-br from-orange-100 to-amber-50 dark:from-orange-950 dark:to-amber-950 flex items-center justify-center">
+                    {recette.image_url ? (
+                      <img
+                        src={recette.image_url}
+                        alt={recette.nom}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <ChefHat className="h-12 w-12 text-orange-300 dark:text-orange-700" />
+                    )}
+                    {/* Actions overlay */}
+                    <div className="absolute top-2 right-2 flex gap-1">
+                      {recette.est_favori && (
+                        <div className="rounded-full bg-white/80 dark:bg-black/50 p-1">
                           <Heart className="h-4 w-4 text-red-500 fill-red-500" />
-                        )}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (idsPlanifies.has(recette.id)) {
-                              mutationDeplanifier.mutate(recette.id);
-                            } else {
-                              mutationPlanifier.mutate(recette.id);
-                            }
-                          }}
-                          title={
-                            idsPlanifies.has(recette.id)
-                              ? "Retirer du menu de la semaine"
-                              : "Ajouter au menu de la semaine"
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (idsPlanifies.has(recette.id)) {
+                            mutationDeplanifier.mutate(recette.id);
+                          } else {
+                            mutationPlanifier.mutate(recette.id);
                           }
-                          className="rounded p-0.5 hover:bg-accent"
-                        >
-                          <CalendarDays
-                            className={`h-4 w-4 transition-colors ${
-                              idsPlanifies.has(recette.id)
-                                ? "text-blue-500 fill-blue-100"
-                                : "text-muted-foreground"
-                            }`}
-                          />
-                        </button>
-                      </div>
-                    </div>
-                    {recette.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {recette.description}
-                      </p>
-                    )}
-                  </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {recette.categorie && (
-                      <Badge variant="secondary">{recette.categorie}</Badge>
-                    )}
-                    {recette.difficulte && (
-                      <Badge
-                        variant={
-                          recette.difficulte === "facile"
-                            ? "outline"
-                            : recette.difficulte === "moyen"
-                              ? "secondary"
-                              : "destructive"
+                        }}
+                        title={
+                          idsPlanifies.has(recette.id)
+                            ? "Retirer du menu de la semaine"
+                            : "Ajouter au menu de la semaine"
                         }
+                        className="rounded-full bg-white/80 dark:bg-black/50 p-1 hover:bg-white dark:hover:bg-black/70 transition-colors"
                       >
-                        {recette.difficulte}
+                        <CalendarDays
+                          className={`h-4 w-4 ${
+                            idsPlanifies.has(recette.id)
+                              ? "text-blue-500"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    {/* Catégorie badge */}
+                    {recette.categorie && (
+                      <Badge className="absolute bottom-2 left-2 bg-white/90 text-foreground dark:bg-black/70 dark:text-white text-xs">
+                        {recette.categorie}
                       </Badge>
                     )}
                   </div>
-                  <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-                    {(recette.temps_preparation || recette.temps_cuisson) && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {(recette.temps_preparation ?? 0) +
-                          (recette.temps_cuisson ?? 0)}{" "}
-                        min
-                      </span>
+
+                  <CardContent className="pt-3 pb-3 space-y-2">
+                    <h3 className="font-semibold text-sm line-clamp-1">
+                      {recette.nom}
+                    </h3>
+                    {recette.description && (
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {recette.description}
+                      </p>
                     )}
-                    {recette.portions && (
-                      <span>{recette.portions} portions</span>
-                    )}
-                    {recette.note_moyenne && (
-                      <span className="flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                        {recette.note_moyenne.toFixed(1)}
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
+
+                    {/* Métadonnées */}
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      {tempsTotal(recette) > 0 && (
+                        <span className="flex items-center gap-0.5">
+                          <Clock className="h-3 w-3" />
+                          {tempsTotal(recette)} min
+                        </span>
+                      )}
+                      {recette.portions && (
+                        <span className="flex items-center gap-0.5">
+                          <Users className="h-3 w-3" />
+                          {recette.portions}
+                        </span>
+                      )}
+                      {recette.note_moyenne && (
+                        <span className="flex items-center gap-0.5">
+                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                          {recette.note_moyenne.toFixed(1)}
+                        </span>
+                      )}
+                      {recette.difficulte && (
+                        <Badge
+                          variant={
+                            recette.difficulte === "facile"
+                              ? "outline"
+                              : recette.difficulte === "moyen"
+                                ? "secondary"
+                                : "destructive"
+                          }
+                          className="text-[10px] px-1 py-0"
+                        >
+                          {recette.difficulte}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Appareils compatibles */}
+                    <ApplianceBadges recette={recette} />
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
           ))}
         </div>
       )}

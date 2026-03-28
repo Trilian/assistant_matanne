@@ -9,6 +9,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, computed_field, field_validator
 
+from src.core.constants import EMPLACEMENTS_INVENTAIRE
+
 from .base import IdentifiedResponse, QuantiteStricteValidatorMixin
 
 # ═══════════════════════════════════════════════════════════
@@ -60,6 +62,16 @@ class InventaireItemCreate(BaseModel, QuantiteStricteValidatorMixin):
             raise ValueError("ingredient_id doit être un entier positif")
         return v
 
+    @field_validator("emplacement")
+    @classmethod
+    def validate_emplacement(cls, v: str | None) -> str | None:
+        if v is not None and v not in EMPLACEMENTS_INVENTAIRE:
+            raise ValueError(
+                f"Emplacement invalide: '{v}'. "
+                f"Valeurs acceptées: {', '.join(EMPLACEMENTS_INVENTAIRE)}"
+            )
+        return v
+
 
 # ═══════════════════════════════════════════════════════════
 # UPDATE (PATCH partiel)
@@ -89,6 +101,16 @@ class InventaireItemUpdate(BaseModel):
     def validate_quantite(cls, v: float | None) -> float | None:
         if v is not None and v < 0:
             raise ValueError("La quantité ne peut pas être négative")
+        return v
+
+    @field_validator("emplacement")
+    @classmethod
+    def validate_emplacement(cls, v: str | None) -> str | None:
+        if v is not None and v not in EMPLACEMENTS_INVENTAIRE:
+            raise ValueError(
+                f"Emplacement invalide: '{v}'. "
+                f"Valeurs acceptées: {', '.join(EMPLACEMENTS_INVENTAIRE)}"
+            )
         return v
 
 

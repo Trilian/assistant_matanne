@@ -32,6 +32,14 @@ from src.api.utils import executer_async, executer_avec_session, gerer_exception
 router = APIRouter(prefix="/api/v1/inventaire", tags=["Inventaire"])
 
 
+@router.get("/emplacements")
+async def lister_emplacements() -> list[str]:
+    """Retourne la liste des emplacements de stockage normalisés."""
+    from src.core.constants import EMPLACEMENTS_INVENTAIRE
+
+    return EMPLACEMENTS_INVENTAIRE
+
+
 @router.get("", response_model=ReponsePaginee[InventaireItemResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_inventaire(

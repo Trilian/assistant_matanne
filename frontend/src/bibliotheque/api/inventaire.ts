@@ -6,8 +6,16 @@ import { clientApi } from "./client";
 import type { ArticleInventaire, CreerArticleInventaireDTO } from "@/types/inventaire";
 
 /** Lister les articles de l'inventaire */
-export async function listerInventaire(): Promise<ArticleInventaire[]> {
-  const { data } = await clientApi.get<ArticleInventaire[]>("/inventaire");
+export async function listerInventaire(emplacement?: string): Promise<ArticleInventaire[]> {
+  const params: Record<string, string> = {};
+  if (emplacement) params.emplacement = emplacement;
+  const { data } = await clientApi.get<ArticleInventaire[]>("/inventaire", { params });
+  return data;
+}
+
+/** Lister les emplacements normalisés */
+export async function listerEmplacements(): Promise<string[]> {
+  const { data } = await clientApi.get<string[]>("/inventaire/emplacements");
   return data;
 }
 
