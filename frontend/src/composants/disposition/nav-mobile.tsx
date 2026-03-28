@@ -125,8 +125,7 @@ export function NavMobile() {
           </SheetHeader>
           <div className="grid grid-cols-2 gap-3">
             {PLUS_ITEMS.map(({ nom, chemin, Icone }) => {
-              const estActif =
-                chemin === "/" ? pathname === "/" : pathname.startsWith(chemin);
+              const estActif = pathname.startsWith(chemin);
               return (
                 <button
                   key={chemin}

@@ -2,6 +2,8 @@
 // Coquille App — Conteneur principal responsive
 // ═══════════════════════════════════════════════════════════
 
+"use client";
+
 import { BarreLaterale } from "./barre-laterale";
 import { NavMobile } from "./nav-mobile";
 import { EnTete } from "./en-tete";

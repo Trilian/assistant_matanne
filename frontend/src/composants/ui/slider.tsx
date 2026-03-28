@@ -3,7 +3,9 @@
 import * as React from "react";
 import { cn } from "@/bibliotheque/utils";
 
-export interface SliderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
+export interface SliderProps {
+  className?: string;
+  id?: string;
   value?: number[];
   defaultValue?: number[];
   min?: number;

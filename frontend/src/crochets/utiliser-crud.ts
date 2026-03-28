@@ -57,12 +57,28 @@ export function utiliserDialogCrud<T>(options?: {
 
   return {
     dialogOuvert,
+    ouvert: dialogOuvert,
     setDialogOuvert,
     enEdition,
+    elementEnEdition: enEdition,
+    elementEnCours: enEdition,
+    mode: enEdition !== null ? "edition" : "creation",
     /** Vrai si on est en mode édition (enEdition !== null) */
     estEnEdition: enEdition !== null,
     ouvrirCreation,
     ouvrirEdition,
+    ouvrir: (modeOuItem?: T | "creation" | "edition", itemEdition?: T) => {
+      if (modeOuItem === "edition" && itemEdition !== undefined) {
+        ouvrirEdition(itemEdition);
+        return;
+      }
+      if (modeOuItem !== undefined && modeOuItem !== "creation" && modeOuItem !== "edition") {
+        ouvrirEdition(modeOuItem);
+        return;
+      }
+      ouvrirCreation();
+    },
+    fermer: fermerDialog,
     fermerDialog,
   };
 }

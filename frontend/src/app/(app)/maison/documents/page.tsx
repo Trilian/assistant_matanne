@@ -183,17 +183,17 @@ function OngletDiagnostics() {
             <div>
               <p className="text-xs text-muted-foreground">Dernière estimation</p>
               <p className="text-lg font-bold">{estimation.valeur_estimee?.toLocaleString("fr-FR")} €</p>
-              {estimation.date_estimation && <p className="text-xs text-muted-foreground">{new Date(estimation.date_estimation).toLocaleDateString("fr-FR")}</p>}
+              {estimation.date && <p className="text-xs text-muted-foreground">{new Date(estimation.date).toLocaleDateString("fr-FR")}</p>}
             </div>
           </CardContent>
         </Card>
       )}
 
-      {alertes?.length > 0 && (
+      {(alertes?.length ?? 0) > 0 && (
         <Card className="border-amber-300">
           <CardContent className="py-3">
-            <p className="text-sm font-medium text-amber-700 mb-1.5 flex items-center gap-1.5"><AlertTriangle className="h-4 w-4" />{alertes.length} diagnostic(s) expirant bientôt</p>
-            {alertes.slice(0, 3).map((d: { id: number; type_diagnostic: string; date_expiration?: string }) => (
+            <p className="text-sm font-medium text-amber-700 mb-1.5 flex items-center gap-1.5"><AlertTriangle className="h-4 w-4" />{alertes!.length} diagnostic(s) expirant bientôt</p>
+            {alertes!.slice(0, 3).map((d: { id: number; type_diagnostic: string; date_expiration?: string }) => (
               <p key={d.id} className="text-xs text-muted-foreground">• {d.type_diagnostic}{d.date_expiration ? ` (exp. ${new Date(d.date_expiration).toLocaleDateString("fr-FR")})` : ""}</p>
             ))}
           </CardContent>

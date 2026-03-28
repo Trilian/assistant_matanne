@@ -146,7 +146,7 @@ export default function PageVisualisation() {
 
   // Détail pièce (objets avec statuts)
   const { data: detailPiece, isLoading: chargementDetail } = utiliserRequete(
-    ["maison", "pieces", pieceSelectionnee?.id ?? 0, "detail"],
+    ["maison", "pieces", String(pieceSelectionnee?.id ?? ""), "detail"],
     () => obtenirDetailPiece(pieceSelectionnee!.id),
     { enabled: !!pieceSelectionnee && sheetPieceOuverte }
   );

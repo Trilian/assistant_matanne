@@ -8,7 +8,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Sofa, Plus, Trash2, Pencil, ExternalLink, ShoppingCart,
-  Euro, Package, CheckCircle2, Truck, Star,
+  Euro, Package, CheckCircle2, Truck, Star, type LucideIcon,
 } from "lucide-react";
 import {
   Card, CardContent, CardHeader, CardTitle,
@@ -49,7 +49,7 @@ const COULEUR_PRIORITE: Record<string, string> = {
   basse: "bg-gray-100 text-gray-600",
 };
 
-const ICONE_STATUT: Record<string, React.ElementType> = {
+const ICONE_STATUT: Record<string, LucideIcon> = {
   "souhaité": Star,
   "commandé": ShoppingCart,
   "reçu": Package,
@@ -471,7 +471,7 @@ function ContenuMeubles() {
                       <CarteMeuble
                         key={meuble.id}
                         meuble={meuble}
-                        onModifier={(m) => ouvrir("edition", m)}
+                        onModifier={(m) => ouvrir(m)}
                         onSupprimer={(id) => {
                           if (confirm("Supprimer ce meuble ?")) mutSupprimer.mutate(id);
                         }}

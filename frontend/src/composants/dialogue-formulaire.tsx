@@ -41,11 +41,13 @@ interface DialogueFormulaireProps {
   description?: string;
   children?: ReactNode;
   champs?: ChampFormulaire[];
+  valeurInitiale?: object;
   onClose?: () => void;
   onFermer?: () => void;
   onChangerOuvert?: (ouvert: boolean) => void;
+  onOuvertChange?: (ouvert: boolean) => void;
   onSubmit?: () => void;
-  onSoumettre?: (donnees?: Record<string, unknown>) => void;
+  onSoumettre?: (donnees: Record<string, unknown>) => void;
   enCours?: boolean;
   chargement?: boolean;
   enChargement?: boolean;
@@ -58,9 +60,11 @@ export function DialogueFormulaire({
   description,
   children,
   champs,
+  valeurInitiale,
   onClose,
   onFermer,
   onChangerOuvert,
+  onOuvertChange,
   onSubmit,
   onSoumettre,
   enCours = false,
@@ -77,13 +81,13 @@ export function DialogueFormulaire({
       champs.reduce<Record<string, unknown>>((acc, champ) => {
         const cle = champ.id ?? champ.nom;
         if (!cle) return acc;
-        acc[cle] = champ.value ?? champ.defaut ?? "";
+        acc[cle] = champ.value ?? champ.defaut ?? (valeurInitiale as Record<string, unknown> | undefined)?.[cle] ?? "";
         return acc;
       }, {})
     );
-  }, [champs, ouvert]);
+  }, [champs, ouvert, valeurInitiale]);
 
-  const fermer = onClose ?? onFermer ?? (() => onChangerOuvert?.(false));
+  const fermer = onClose ?? onFermer ?? (() => onChangerOuvert?.(false) ?? onOuvertChange?.(false));
   const estEnCours = enCours || chargement || enChargement;
 
   function obtenirCle(champ: ChampFormulaire) {

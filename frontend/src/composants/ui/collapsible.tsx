@@ -55,20 +55,25 @@ export function Collapsible({
 
 export const CollapsibleTrigger = React.forwardRef<
   HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement>
->(({ onClick, children, ...props }, ref) => {
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }
+>(({ onClick, children, asChild = false, ...props }, ref) => {
   const { open, setOpen } = useCollapsibleContext();
+
+  const gererClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    onClick?.(event);
+    if (!event.defaultPrevented) {
+      setOpen(!open);
+    }
+  };
+
+  void asChild;
+
   return (
     <button
       ref={ref}
       type="button"
       data-state={open ? "open" : "closed"}
-      onClick={(event) => {
-        onClick?.(event);
-        if (!event.defaultPrevented) {
-          setOpen(!open);
-        }
-      }}
+      onClick={gererClick}
       {...props}
     >
       {children}

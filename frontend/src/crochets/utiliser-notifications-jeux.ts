@@ -63,7 +63,6 @@ export function useNotificationsJeux() {
             },
           },
           duration: 10000,
-          important: true,
         });
       }
     }

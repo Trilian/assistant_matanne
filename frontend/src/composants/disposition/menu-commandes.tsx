@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
 import {
   CommandDialog,
@@ -83,7 +83,7 @@ export function MenuCommandes() {
           <>
             <CommandGroup heading="Récents">
               {pagesRecentes.map((page) => {
-                const Icone = page.Icone;
+                const Icone = page.Icone as ComponentType<{ className?: string }>;
                 return (
                   <CommandItem
                     key={`recent-${page.chemin}`}
@@ -105,7 +105,7 @@ export function MenuCommandes() {
         {groupes.map(([categorie, pages]) => (
           <CommandGroup key={categorie} heading={categorie}>
             {pages.map((page) => {
-              const Icone = page.Icone;
+              const Icone = page.Icone as ComponentType<{ className?: string }>;
               const searchValue = [
                 page.nom,
                 page.categorie,

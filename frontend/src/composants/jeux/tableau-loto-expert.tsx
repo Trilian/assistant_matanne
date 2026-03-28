@@ -82,7 +82,11 @@ export function TableauLotoExpert({
 
   const { data: grilles = [], isLoading } = utiliserRequete<GrilleLoto[]>(
     ['loto-expert', queryParams],
-    `/api/v1/jeux/loto/grilles-expert?${queryParams}`
+    async () => {
+      const response = await fetch(`/api/v1/jeux/loto/grilles-expert?${queryParams}`)
+      if (!response.ok) throw new Error('Erreur chargement grilles Loto')
+      return response.json()
+    }
   )
 
   // Export CSV

@@ -86,7 +86,7 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
 
   // Fetch stats data
   const { data, isLoading, error } = utiliserRequete<StatsData>(
-    ['jeux', 'stats-personnelles', userId, periode],
+    ['jeux', 'stats-personnelles', String(userId), String(periode)],
     async () => {
       const response = await fetch(`/api/v1/jeux/stats/personnelles/${userId}?periode=${periode}`)
       if (!response.ok) throw new Error('Erreur chargement stats')

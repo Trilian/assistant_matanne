@@ -39,7 +39,7 @@ import type { Garantie } from "@/types/maison";
 function OngletInventaire() {
   const [pieceFiltree, setPieceFiltree] = useState<string | undefined>(undefined);
   const { data: inventaire, isLoading } = utiliserRequete(
-    ["maison", "inventaire", pieceFiltree],
+    ["maison", "inventaire", pieceFiltree ?? ""],
     () => obtenirPiecesAvecObjets(pieceFiltree)
   );
   const { data: suggestions } = utiliserRequete(
@@ -150,7 +150,7 @@ function OngletGaranties() {
       onOuvrirCreation: () => setForm(formsVide),
       onOuvrirEdition: (g) => setForm({
         nom: g.nom ?? "", fournisseur: g.fournisseur ?? "", date_debut: g.date_debut ?? "",
-        date_fin: g.date_fin ?? "", numero: (g as Record<string, unknown>).numero as string ?? "", notes: (g as Record<string, unknown>).notes as string ?? "",
+        date_fin: g.date_fin ?? "", numero: g.numero ?? "", notes: g.notes ?? "",
       }),
     });
 
@@ -237,7 +237,7 @@ function OngletGaranties() {
 
 function CarteGarantie({ garantie: g, onEdit, onDelete }: { garantie: Garantie; onEdit: () => void; onDelete: () => void }) {
   const { data: finVie } = utiliserRequete(
-    ["maison", "garanties", g.id, "fin-vie"],
+    ["maison", "garanties", String(g.id), "fin-vie"],
     () => evaluerFinVieGarantie(g.id),
     { enabled: !!g.date_fin }
   );

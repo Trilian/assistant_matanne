@@ -87,7 +87,11 @@ export function TableauEuromillionsExpert({
 
   const { data: grilles = [], isLoading } = utiliserRequete<GrilleEuromillions[]>(
     ['euromillions-expert', queryParams],
-    `/api/v1/jeux/euromillions/grilles-expert?${queryParams}`
+    async () => {
+      const response = await fetch(`/api/v1/jeux/euromillions/grilles-expert?${queryParams}`)
+      if (!response.ok) throw new Error('Erreur chargement grilles Euromillions')
+      return response.json()
+    }
   )
 
   // Export CSV

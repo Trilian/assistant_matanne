@@ -140,6 +140,7 @@ export interface ArticleCellier {
   quantite: number;
   unite?: string;
   emplacement?: string;
+  date_achat?: string;
   date_peremption?: string;
   seuil_alerte?: number;
   prix_unitaire?: number;
@@ -161,6 +162,7 @@ export interface StatsCellier {
   valeur_totale: number;
   articles_perimes: number;
   articles_bientot_perimes: number;
+  articles_perimes_bientot?: number;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -193,6 +195,7 @@ export interface StatsArtisans {
   total_artisans: number;
   par_metier: Record<string, number>;
   depenses_totales: number;
+  total_depenses?: number;
   total_interventions: number;
 }
 
@@ -236,11 +239,16 @@ export interface ResumeFinancierContrats {
 export interface Garantie {
   id: number;
   appareil: string;
+  nom?: string;
   marque?: string;
   numero_serie?: string;
+  numero?: string;
   date_achat: string;
+  date_debut?: string;
   date_fin_garantie: string;
+  date_fin?: string;
   magasin?: string;
+  fournisseur?: string;
   prix_achat?: number;
   piece?: string;
   document_url?: string;
@@ -350,7 +358,9 @@ export interface DepenseMaison {
 
 export interface StatsDepenses {
   total_mois: number;
+  total_mois_courant?: number;
   total_annee: number;
+  total_annee_courante?: number;
   moyenne_mensuelle: number;
   delta_mois_precedent: number;
   par_categorie: Record<string, number>;
@@ -419,6 +429,7 @@ export interface ReleveCompteur {
 export interface PieceMaison {
   id: number;
   nom: string;
+  type_piece?: string;
   etage: number;
   surface_m2?: number;
   couleur?: string;

@@ -52,7 +52,7 @@ function OngletCharges() {
   const [annee, setAnnee] = useState(anneeActuelle);
 
   const { data: charges, isLoading } = utiliserRequete(
-    ["maison", "charges", annee],
+    ["maison", "charges", String(annee)],
     () => listerCharges(annee)
   );
 
@@ -205,7 +205,12 @@ function OngletEnergie() {
   const invalider = () => queryClient.invalidateQueries({ queryKey: ["maison", "energie"] });
 
   const { mutate: ajouterReleve, isPending } = utiliserMutation(
-    (data: { compteur: string; valeur: number; date: string }) => creerReleve(data),
+    (data: { compteur: string; valeur: number; date: string }) =>
+      creerReleve({
+        type_compteur: data.compteur,
+        valeur: data.valeur,
+        date_releve: data.date,
+      }),
     { onSuccess: () => { invalider(); setDialogOuvert(false); setValeur(""); setDate(""); toast.success("Relevé ajouté"); } }
   );
   const { mutate: supprimerR } = utiliserMutation(supprimerReleve, { onSuccess: () => { invalider(); toast.success("Relevé supprimé"); } });
@@ -255,7 +260,7 @@ function OngletEnergie() {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="mois" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} unit={` ${unites[compteur]}`} />
-                  <Tooltip formatter={(v: number) => [`${v} ${unites[compteur]}`, "Consommation"]} />
+                  <Tooltip formatter={(v) => [`${Number(v ?? 0)} ${unites[compteur]}`, "Consommation"]} />
                   <Line type="monotone" dataKey="consommation" stroke={couleurs[compteur]} strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
@@ -267,10 +272,10 @@ function OngletEnergie() {
       )}
 
       {/* Derniers relevés */}
-      {releves?.slice(0, 5).map((r: { id: number; valeur: number; date: string }) => (
+      {releves?.slice(0, 5).map((r) => (
         <Card key={r.id}>
           <CardContent className="py-2 flex items-center justify-between">
-            <p className="text-sm">{r.valeur} {unites[compteur]} · {new Date(r.date).toLocaleDateString("fr-FR")}</p>
+            <p className="text-sm">{r.valeur} {unites[compteur]} · {new Date(r.date_releve).toLocaleDateString("fr-FR")}</p>
             <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive" onClick={() => supprimerR(r.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
           </CardContent>
         </Card>

@@ -64,7 +64,7 @@ function OngletEco() {
   const [form, setForm] = useState(formVide);
 
   const { data: ecoTips, isLoading } = utiliserRequete(
-    ["maison", "eco-tips", actifOnly],
+    ["maison", "eco-tips", String(actifOnly)],
     () => listerEcoTips(actifOnly)
   );
 

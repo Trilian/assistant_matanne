@@ -49,12 +49,12 @@ function OngletStocks() {
         quantite: String(s.quantite ?? ""),
         seuil_alerte: s.seuil_alerte != null ? String(s.seuil_alerte) : "",
         emplacement: s.emplacement ?? "",
-        unite: (s as Record<string, unknown>).unite as string ?? "",
+        unite: s.unite ?? "",
       }),
     });
 
   const { data: stocks, isLoading } = utiliserRequete(
-    ["maison", "stocks", alerteUniquement],
+    ["maison", "stocks", String(alerteUniquement)],
     () => listerStocks(undefined, alerteUniquement)
   );
   const invalider = () => queryClient.invalidateQueries({ queryKey: ["maison", "stocks"] });
@@ -208,11 +208,11 @@ function OngletCellier() {
       )}
 
       {/* Alertes péremption */}
-      {alertes?.length > 0 && (
+      {(alertes?.length ?? 0) > 0 && (
         <Card className="border-amber-300">
           <CardContent className="py-3">
-            <p className="text-sm font-medium text-amber-700 mb-2 flex items-center gap-1.5"><AlertTriangle className="h-4 w-4" />{alertes.length} article(s) à consommer vite</p>
-            {alertes.slice(0, 3).map((a: { id: number; nom: string; date_peremption?: string }) => (
+            <p className="text-sm font-medium text-amber-700 mb-2 flex items-center gap-1.5"><AlertTriangle className="h-4 w-4" />{alertes!.length} article(s) à consommer vite</p>
+            {alertes!.slice(0, 3).map((a: { id: number; nom: string; date_peremption?: string }) => (
               <p key={a.id} className="text-xs text-muted-foreground">• {a.nom}{a.date_peremption ? ` (exp. ${new Date(a.date_peremption).toLocaleDateString("fr-FR")})` : ""}</p>
             ))}
           </CardContent>

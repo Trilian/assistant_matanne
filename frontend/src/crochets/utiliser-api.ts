@@ -23,12 +23,19 @@ export function utiliserRequete<T>(
   fn: () => Promise<T>,
   options?: Partial<UseQueryOptions<T>>
 ) {
-  return useQuery<T>({
+  const requete = useQuery<T>({
     queryKey: cle,
     queryFn: fn,
     staleTime: DUREE_CACHE_MS,
     ...options,
   });
+
+  return {
+    ...requete,
+    donnees: requete.data,
+    chargement: requete.isLoading,
+    erreur: requete.error,
+  };
 }
 
 /**

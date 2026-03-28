@@ -739,7 +739,7 @@ export async function historiqueDepensesMaisonCategorie(
 export async function historiqueEnergie(
   typeEnergie: string,
   nbMois = 12
-): Promise<Record<string, unknown>> {
+): Promise<Array<{ mois: string; consommation: number }>> {
   const { data } = await clientApi.get(
     `/maison/depenses/energie/${encodeURIComponent(typeEnergie)}?nb_mois=${nbMois}`
   );
@@ -911,6 +911,7 @@ export interface PrevisionsEnergie {
   type: string;
   mois_prochain: string | null;
   consommation_prevue: number | null;
+  cout_prevu?: number | null;
   tendance: "hausse" | "baisse" | "stable" | "insuffisant";
   confiance: number;
   pente_mensuelle?: number;

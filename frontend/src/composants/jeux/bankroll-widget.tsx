@@ -83,20 +83,35 @@ export function BankrollWidget({
 
   // Récupérer données bankroll
   const { data: bankrollData, isLoading: loadingBankroll } = utiliserRequete<BankrollData>(
-    ['bankroll', userId, bankrollInitiale],
-    `/api/v1/jeux/bankroll/${userId}?bankroll_initiale=${bankrollInitiale}`
+    ['bankroll', String(userId), String(bankrollInitiale)],
+    async () => {
+      const reponse = await fetch(`/api/v1/jeux/bankroll/${userId}?bankroll_initiale=${bankrollInitiale}`)
+      if (!reponse.ok) throw new Error('Impossible de charger la bankroll')
+      return reponse.json() as Promise<BankrollData>
+    }
   )
 
   // Récupérer suggestion Kelly
   const { data: suggestion, isLoading: loadingSuggestion } = utiliserRequete<SuggestionMise>(
-    ['suggestion-mise', userId, bankrollData?.bankroll_actuelle, coteLocale, edgeLocal, confianceIA],
-    bankrollData
-      ? `/api/v1/jeux/bankroll/suggestion-mise?` +
-        `bankroll=${bankrollData.bankroll_actuelle}&` +
-        `edge=${edgeLocal / 100}&` +
-        `cote=${coteLocale}&` +
-        `confiance_ia=${confianceIA || 70}`
-      : null,
+    [
+      'suggestion-mise',
+      String(userId),
+      String(bankrollData?.bankroll_actuelle ?? ''),
+      String(coteLocale),
+      String(edgeLocal),
+      String(confianceIA ?? 70),
+    ],
+    async () => {
+      const reponse = await fetch(
+        `/api/v1/jeux/bankroll/suggestion-mise?` +
+          `bankroll=${bankrollData!.bankroll_actuelle}&` +
+          `edge=${edgeLocal / 100}&` +
+          `cote=${coteLocale}&` +
+          `confiance_ia=${confianceIA || 70}`
+      )
+      if (!reponse.ok) throw new Error('Impossible de calculer la mise suggérée')
+      return reponse.json() as Promise<SuggestionMise>
+    },
     { enabled: !!bankrollData && coteLocale > 1 && edgeLocal > 0 }
   )
 

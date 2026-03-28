@@ -43,7 +43,7 @@ import {
 import type { Artisan } from "@/types/maison";
 import { toast } from "sonner";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
-import { BoutonAchat } from "@/composants/maison/bouton-achat";
+import { BoutonAchat } from "@/composants/bouton-achat";
 import { utiliserAutoCompletionMaison } from "@/crochets/utiliser-auto-completion-maison";
 
 // ─── Couleurs ────────────────────────────────────────────────
@@ -70,7 +70,7 @@ function SheetEstimationIA({
   onFermer: () => void;
 }) {
   const { data: estimation, isLoading, error } = utiliserRequete(
-    ["maison", "projets", projetId, "estimation-ia"],
+    ["maison", "projets", String(projetId ?? ""), "estimation-ia"],
     () => estimerProjetIA(projetId!),
     { enabled: ouvert && projetId !== null, staleTime: 30 * 60 * 1000 }
   );
@@ -145,7 +145,7 @@ function SheetEstimationIA({
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {m.prix_estime && <span className="text-xs font-semibold">{m.prix_estime} €</span>}
-                        <BoutonAchat article={{ nom: m.nom, magasin: m.magasin_suggere }} taille="xs" />
+                        <BoutonAchat article={{ nom: m.nom }} taille="xs" />
                       </div>
                     </div>
                   ))}
@@ -367,8 +367,8 @@ function OngletEntretien() {
           </CardHeader>
           {sante.actions_urgentes?.length > 0 && (
             <CardContent className="pt-0">
-              {sante.actions_urgentes.slice(0, 3).map((a: string, i: number) => (
-                <p key={i} className="text-xs text-muted-foreground flex items-center gap-1"><AlertTriangle className="h-3 w-3 text-amber-500 shrink-0" />{a}</p>
+              {sante.actions_urgentes.slice(0, 3).map((a, i) => (
+                <p key={i} className="text-xs text-muted-foreground flex items-center gap-1"><AlertTriangle className="h-3 w-3 text-amber-500 shrink-0" />{a.tache} ({a.zone})</p>
               ))}
             </CardContent>
           )}

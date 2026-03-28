@@ -20,7 +20,7 @@ export function BandeauIA({ section }: BandeauIAProps) {
   const [clefRafraichi, setClefRafraichi] = useState(0);
 
   const { data, isFetching, refetch } = utiliserRequete(
-    ["maison", "conseil-ia", section, clefRafraichi],
+    ["maison", "conseil-ia", section, String(clefRafraichi)],
     () => obtenirConseilIA(section),
     {
       // Ne charge que si le bandeau est ouvert
