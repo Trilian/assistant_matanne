@@ -7,6 +7,10 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/famille/weekend",
 }));
 
+vi.mock("@tanstack/react-query", () => ({
+  useMutation: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 const mockActivites = [
   { id: 1, titre: "Parc aventure", date: "2025-01-25", type: "sortie", lieu: "Lyon" },
   { id: 2, titre: "Cinéma", date: "2025-01-26", type: "culture", lieu: "Paris" },
@@ -18,6 +22,7 @@ vi.mock("@/crochets/utiliser-api", () => ({
 
 vi.mock("@/bibliotheque/api/famille", () => ({
   listerActivites: vi.fn(),
+  convertirWeekendEnActivite: vi.fn(),
 }));
 
 describe("PageWeekend", () => {

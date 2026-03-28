@@ -164,6 +164,28 @@ class Parametres(BaseSettings):
     GOOGLE_REDIRECT_URI: str = ""
     """URI de redirection OAuth2 Google."""
 
+    # ── WhatsApp Meta Business API ──
+
+    META_WHATSAPP_TOKEN: str = ""
+    """Token d'accès Meta WhatsApp Business API."""
+
+    META_PHONE_NUMBER_ID: str = ""
+    """ID du numéro de téléphone Meta WhatsApp Business."""
+
+    WHATSAPP_VERIFY_TOKEN: str = ""
+    """Token de vérification pour le webhook WhatsApp."""
+
+    WHATSAPP_USER_NUMBER: str = ""
+    """Numéro WhatsApp de l'utilisateur principal (format: 33612345678)."""
+
+    # ── OpenWeatherMap ──
+
+    OPENWEATHER_API_KEY: str = ""
+    """Clé API OpenWeatherMap (gratuit < 1000 req/jour)."""
+
+    OPENWEATHER_CITY: str = "Paris,FR"
+    """Ville pour les prévisions météo (format: Ville,Code)."""
+
     # ═══════════════════════════════════════════════════════════
     # RATE LIMITING
     # ═══════════════════════════════════════════════════════════

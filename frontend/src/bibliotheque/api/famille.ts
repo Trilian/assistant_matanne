@@ -592,6 +592,16 @@ export async function obtenirSuggestionsWeekend(params?: {
   return data;
 }
 
+/** Convertit une activite weekend en activite famille */
+export async function convertirWeekendEnActivite(
+  activiteId: number
+): Promise<{ succes: boolean; weekend_id: number; activite_famille_id: number }> {
+  const { data } = await clientApi.post<{ succes: boolean; weekend_id: number; activite_famille_id: number }>(
+    `/famille/weekend/${activiteId}/convertir-activite`
+  );
+  return data;
+}
+
 /** Suggestions soirée couple IA */
 export async function obtenirSuggestionsSoiree(params?: {
   budget?: number;

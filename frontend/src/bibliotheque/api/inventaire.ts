@@ -118,3 +118,21 @@ export async function scannerCodesBatch(
   );
   return data;
 }
+
+/** Enrichir un article via OpenFoodFacts (nutriscore, ecoscore, etc.) */
+export async function enrichirParCodeBarres(
+  code: string
+): Promise<{
+  code_barres: string;
+  enrichi: boolean;
+  donnees?: {
+    nutriscore?: string;
+    ecoscore?: string;
+    nova_group?: number;
+    calories?: number;
+    nom_produit?: string;
+  };
+}> {
+  const { data } = await clientApi.post(`/inventaire/barcode/${code}/enrichir`);
+  return data;
+}

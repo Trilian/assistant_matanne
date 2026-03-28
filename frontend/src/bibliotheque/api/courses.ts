@@ -138,3 +138,49 @@ export async function analyserTicketCaisse(
   );
   return data;
 }
+
+// ─── Validation & Intelligence ────────────────────────────
+
+/** Valider une liste (incrémenter inventaire + historique achats) */
+export async function validerCourses(listeId: number): Promise<{ message: string; id: number }> {
+  const { data } = await clientApi.post<{ message: string; id: number }>(
+    `/courses/${listeId}/valider`
+  );
+  return data;
+}
+
+/** Suggestions bio/local pour la liste */
+export interface SuggestionBioLocal {
+  article_id: number;
+  nom: string;
+  en_saison: boolean;
+  bio_disponible: boolean;
+  local_disponible: boolean;
+  producteur: string | null;
+  alternative_bio: string | null;
+}
+
+export async function obtenirSuggestionsBioLocal(
+  listeId: number
+): Promise<{ liste_id: number; mois: string; suggestions: SuggestionBioLocal[]; nb_en_saison: number }> {
+  const { data } = await clientApi.get(`/courses/${listeId}/bio-local`);
+  return data;
+}
+
+/** Articles récurrents suggérés (basé sur l'historique d'achats) */
+export interface ArticleRecurrent {
+  article_nom: string;
+  categorie: string | null;
+  frequence_jours: number;
+  jours_depuis_dernier_achat: number;
+  retard_jours: number;
+  nb_achats_total: number;
+}
+
+export async function obtenirRecurrentsSuggeres(): Promise<{
+  suggestions: ArticleRecurrent[];
+  total: number;
+}> {
+  const { data } = await clientApi.get("/courses/recurrents-suggeres");
+  return data;
+}

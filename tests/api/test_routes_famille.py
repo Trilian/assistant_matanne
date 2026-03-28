@@ -165,6 +165,7 @@ class TestEndpointsExistent:
             ("GET", "/api/v1/famille/anniversaires/1/checklists"),
             ("POST", "/api/v1/famille/anniversaires/1/checklists/1/items"),
             ("POST", "/api/v1/famille/anniversaires/1/checklists/1/items/1/vers-achats"),
+            ("POST", "/api/v1/famille/weekend/1/convertir-activite"),
         ],
     )
     def test_endpoint_existe(self, method, path):
@@ -531,3 +532,35 @@ class TestSubscribersIntelligents:
 
         cache.invalidate.assert_any_call(pattern="anniversaires")
         cache.invalidate.assert_any_call(pattern="checklists_anniversaire")
+
+
+@pytest.mark.asyncio
+class TestWeekendConversionRoute:
+    @patch("src.api.routes.famille.executer_async")
+    @patch("src.services.famille.weekend.obtenir_service_weekend")
+    async def test_convertir_weekend_en_activite_succes(self, mock_obtenir_service, mock_exec, client):
+        mock_exec.side_effect = lambda fn: fn()
+        mock_service = MagicMock()
+        mock_service.convertir_en_activite_famille.return_value = 42
+        mock_obtenir_service.return_value = mock_service
+
+        response = await client.post("/api/v1/famille/weekend/10/convertir-activite")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["succes"] is True
+        assert data["weekend_id"] == 10
+        assert data["activite_famille_id"] == 42
+
+    @patch("src.api.routes.famille.executer_async")
+    @patch("src.services.famille.weekend.obtenir_service_weekend")
+    async def test_convertir_weekend_en_activite_introuvable(self, mock_obtenir_service, mock_exec, client):
+        mock_exec.side_effect = lambda fn: fn()
+        mock_service = MagicMock()
+        mock_service.convertir_en_activite_famille.return_value = None
+        mock_obtenir_service.return_value = mock_service
+
+        response = await client.post("/api/v1/famille/weekend/999/convertir-activite")
+
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Activite weekend introuvable"

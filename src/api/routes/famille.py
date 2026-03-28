@@ -2334,6 +2334,29 @@ async def suggestions_sejour(
     return await executer_async(_query)
 
 
+@router.post("/weekend/{activite_id}/convertir-activite", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def convertir_weekend_en_activite(
+    activite_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Convertit une activite weekend en activite familiale persistante."""
+    from src.services.famille.weekend import obtenir_service_weekend
+
+    def _query():
+        service = obtenir_service_weekend()
+        activite_famille_id = service.convertir_en_activite_famille(activite_id)
+        if activite_famille_id is None:
+            raise HTTPException(status_code=404, detail="Activite weekend introuvable")
+        return {
+            "succes": True,
+            "weekend_id": activite_id,
+            "activite_famille_id": activite_famille_id,
+        }
+
+    return await executer_async(_query)
+
+
 # ═══════════════════════════════════════════════════════════
 # SUGGESTIONS IA ACHATS (Phase P)
 # ═══════════════════════════════════════════════════════════

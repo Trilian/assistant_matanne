@@ -266,7 +266,7 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 ---
 
-### Phase F : Batch Cooking Sélection ✅ QUASI-COMPLÈTE ⚡ **FINALISÉE CETTE SESSION**
+### Phase F : Batch Cooking Sélection ✅ COMPLÈTE ⚡ **FINALISÉE**
 
 **Objectif** : Sélecteur recettes from planning, vue détail session, préparations stockées
 
@@ -276,13 +276,13 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Modèle `SessionBatchCooking` avec relations `PreparationBatch`
 - ✅ Bouton Détails → lien `/cuisine/batch-cooking/${session.id}` dans la liste
 - ✅ Page détail `/cuisine/batch-cooking/[id]` avec étapes, progression, robots
-- ✅ **NOUVEAU** : Section « Préparations en stock » — cards portions restantes + alertes péremption
-- ✅ **NOUVEAU** : `listerPreparations()` API client + `GET /batch-cooking/preparations?consomme=false`
+- ✅ Section « Préparations en stock » — cards portions restantes + alertes péremption
+- ✅ `listerPreparations()` API client + `GET /batch-cooking/preparations?consomme=false`
+- ✅ **Session 2** : Endpoint `POST /batch-cooking/preparations/{id}/consommer` — consomme N portions
+- ✅ **Session 2** : Filtres localisation (Tout / 🧊 Frigo / ❄️ Congélateur) dans la UI
+- ✅ **Session 2** : Bouton « Consommer 1 portion » par carte préparation + `consommerPreparation()` client
 
-**Ce qui manque** :
-- ❌ Action pour marquer une préparation comme consommée depuis la UI
-
-**Impact** : UX session batch complète — détail + étapes + progression visuelle
+**Impact** : Phase complète — détail + étapes + progression + consommation + filtrage localisation
 
 ---
 
@@ -294,7 +294,7 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 
 ---
 
-### Phase H : Nutrition & Diététique 🔄 PARTIELLE ⚡ **AVANCÉE CETTE SESSION**
+### Phase H : Nutrition & Diététique ✅ QUASI-COMPLÈTE ⚡ **AVANCÉE SESSION 2**
 
 **Objectif** : Profil diététique, calcul macro automatique, dashboard nutrition, Nutri-Score
 
@@ -304,18 +304,19 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Service d'enrichissement nutrition (`enrichers.py`)
 - ✅ Endpoint `GET /api/v1/planning/nutrition-hebdo` — totaux + par_jour + moyenne_calories
 - ✅ `obtenirNutritionHebdo()` client API frontend
-- ✅ **NOUVEAU** : Dashboard nutrition dans `/outils/nutritionniste` — 4 KPIs (calories, protéines, lipides, glucides) + histogramme calories/jour
+- ✅ Dashboard nutrition dans `/outils/nutritionniste` — 4 KPIs + histogramme calories/jour
+- ✅ **Session 2** : Page dédiée `/cuisine/nutrition` — navigation semaine (← →), 4 cards macros summary, barres progression par jour vs objectifs, détail repas par jour, alerte repas sans données
+- ✅ **Session 2** : Lien "Nutrition" ajouté au hub cuisine (icône BarChart3)
 
 **Ce qui manque** :
-- ❌ Profil diététique utilisateur structuré
-- ❌ Calcul Nutri-Score automatique
+- ❌ Profil diététique utilisateur structuré (objectifs personnalisables)
 - ❌ Badge nutrition sur recettes
 
-**Impact** : Dashboard hebdomadaire opérationnel, infrastructure complète
+**Impact** : Dashboard hebdomadaire complet avec page dédiée, infrastructure nutrition opérationnelle
 
 ---
 
-### Phase I : Bio, Local & Éco-responsable 🔄 PARTIELLE
+### Phase I : Bio, Local & Éco-responsable ✅ COMPLÈTE ⚡ **FINALISÉE SESSION 2**
 
 **Objectif** : Badges Eco/Nutri/NOVA, auto-enrichissement scan, saisonnalité
 
@@ -324,16 +325,14 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ Fichier `produits_de_saison.json` (65 produits)
 - ✅ Tags bio/local dans modèle `Recette`
 - ✅ Service enrichissement bio/local (`BioLocalTagger` dans enrichers.py)
-
-**Ce qui existe également** :
 - ✅ Badges Nutri-Score (N-A..N-E), Éco-Score (E-A..E-E) et NOVA (G1..G4) sur chaque article inventaire
 - ✅ Colonne "Qualité" dans la table inventaire (masquée sur petits écrans)
-- ✅ **NOUVEAU** : Badge saisonnalité 🌱 dans la colonne Qualité — détection par nom d'article vs `produits_de_saison.json` (65 produits, 12 mois)
+- ✅ Badge saisonnalité 🌱 dans la colonne Qualité — détection par nom d'article vs `produits_de_saison.json`
+- ✅ **Session 2** : Endpoint `POST /inventaire/barcode/{code}/enrichir` — enrichissement OpenFoodFacts (nutriscore, ecoscore, nova_group, calories)
+- ✅ **Session 2** : Auto-enrichissement dans `importerStockDepuisScanner()` — appel automatique après scan code-barres
+- ✅ **Session 2** : `enrichirParCodeBarres()` client API frontend
 
-**Ce qui manque** :
-- ❌ Auto-enrichissement scan code-barres incomplet
-
-**Impact** : Badges OpenFoodFacts affichés dans inventaire, backend déjà renvoyait les données
+**Impact** : Badges affichés + auto-enrichissement scan complet — Phase complète
 
 ---
 
@@ -394,11 +393,11 @@ Les 28 phases correspondent au plan de refonte complet de l'application, organis
 - ✅ **NOUVEAU** : Frontend PDF tab activé dans `dialogue-import-recette.tsx`
 
 **Ce qui manque** :
-- ❌ Intégration météo suggestions absente
 - ❌ Table nutrition incomplète (47 items, cible 200+)
 
-**NOUVEAU cette session** :
-- ✅ **Enrichissement saisonnier planning IA** — injection `produits_de_saison` (mois en cours) dans `preferences_enrichies` avant génération Mistral
+**Avancées sessions précédentes** :
+- ✅ Enrichissement saisonnier planning IA — injection `produits_de_saison` (mois en cours) dans `preferences_enrichies` avant génération Mistral
+- ✅ **Session 2** : Météo dans suggestions-rapides — `MeteoService` injecté dans `GET /suggestions-rapides`, boost catégories selon température (froid < 10°C → soupes/plats mijotés, chaud > 25°C → salades), contexte météo retourné dans la réponse
 
 **Fichiers clés** :
 - `src/services/cuisine/recettes/enrichers.py` ✅ NOUVEAU

@@ -3,10 +3,11 @@ Tests pour NotificationJeuxService - Gestion des notifications jeux.
 """
 
 from datetime import datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+from src.services.core.events import EvenementDomaine
 from src.services.jeux import (
     SEUIL_VALUE_ALERTE,
     SEUIL_VALUE_HAUTE,
@@ -404,3 +405,59 @@ class TestNotificationFactory:
             assert isinstance(service, NotificationJeuxService)
         finally:
             module._notification_service_instance = None
+
+
+class TestNotificationEventHandlers:
+    def test_service_souscrit_aux_evenements_responsable(self):
+        bus = MagicMock()
+
+        with patch("src.services.jeux._internal.notification_service.obtenir_bus", return_value=bus):
+            NotificationJeuxService(storage={})
+
+        topics = [call.args[0] for call in bus.souscrire.call_args_list]
+        assert "responsable.alerte" in topics
+        assert "responsable.auto_exclusion" in topics
+
+    def test_on_responsable_alerte_cree_notification(self):
+        with patch("src.services.jeux._internal.notification_service.obtenir_bus"):
+            service = NotificationJeuxService(storage={})
+
+        service.creer_notification = MagicMock()
+        event = EvenementDomaine(
+            type="responsable.alerte",
+            data={
+                "pourcentage": 92,
+                "alertes": ["danger", "bloque"],
+                "type_jeu": "loto",
+            },
+            source="tests",
+        )
+
+        service._on_responsable_alerte(event)
+
+        service.creer_notification.assert_called_once()
+        kwargs = service.creer_notification.call_args.kwargs
+        assert kwargs["type"] == TypeNotification.ALERTE
+        assert kwargs["urgence"] == NiveauUrgence.HAUTE
+        assert kwargs["type_jeu"] == "loto"
+        assert kwargs["metadata"]["pourcentage"] == 92.0
+
+    def test_on_responsable_auto_exclusion_cree_notification(self):
+        with patch("src.services.jeux._internal.notification_service.obtenir_bus"):
+            service = NotificationJeuxService(storage={})
+
+        service.creer_notification = MagicMock()
+        event = EvenementDomaine(
+            type="responsable.auto_exclusion",
+            data={"nb_jours": 30, "fin": "2026-12-31"},
+            source="tests",
+        )
+
+        service._on_responsable_auto_exclusion(event)
+
+        service.creer_notification.assert_called_once()
+        kwargs = service.creer_notification.call_args.kwargs
+        assert kwargs["type"] == TypeNotification.ALERTE
+        assert kwargs["urgence"] == NiveauUrgence.HAUTE
+        assert kwargs["type_jeu"] == "global"
+        assert "30" in kwargs["message"]

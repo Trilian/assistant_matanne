@@ -117,6 +117,25 @@ export default function PageBatchCooking() {
 
   const preparations = preparationsDonnees?.items ?? [];
 
+  const { mutate: consommer, isPending: enConsommation } = utiliserMutation(
+    (id: number) => consommerPreparation(id),
+    {
+      onSuccess: (result) => {
+        invalider(["batch-cooking", "preparations"]);
+        if (result.consomme) {
+          toast.success(`${result.nom} terminé !`);
+        } else {
+          toast.success(`1 portion consommée — ${result.portions_restantes} restante(s)`);
+        }
+      },
+    }
+  );
+
+  const preparationsFiltrees =
+    filtreLocalisation === "tout"
+      ? preparations
+      : preparations.filter((p) => p.localisation === filtreLocalisation);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -175,15 +194,35 @@ export default function PageBatchCooking() {
             <Snowflake className="h-5 w-5 text-blue-500" />
             Préparations en stock ({preparations.length})
           </h2>
+
+          {/* Filtres par localisation */}
+          <div className="flex gap-2 mb-4">
+            {FILTRES_LOCALISATION.map((f) => (
+              <Button
+                key={f.valeur}
+                variant={filtreLocalisation === f.valeur ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFiltreLocalisation(f.valeur)}
+              >
+                {f.label}
+                {f.valeur !== "tout" && (
+                  <span className="ml-1 text-xs opacity-70">
+                    ({preparations.filter((p) => p.localisation === f.valeur).length})
+                  </span>
+                )}
+              </Button>
+            ))}
+          </div>
+
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {preparations.map((p) => (
+            {preparationsFiltrees.map((p) => (
               <Card key={p.id} className={p.alerte_peremption ? "border-orange-300" : ""}>
                 <CardContent className="pt-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <p className="font-medium text-sm truncate">{p.nom}</p>
                       {p.localisation && (
-                        <p className="text-xs text-muted-foreground">{p.localisation}</p>
+                        <p className="text-xs text-muted-foreground capitalize">{p.localisation}</p>
                       )}
                     </div>
                     {p.alerte_peremption && (
@@ -199,14 +238,36 @@ export default function PageBatchCooking() {
                     )}
                     {p.date_peremption && (
                       <span className={p.alerte_peremption ? "text-orange-600 font-medium" : ""}>
-                        📅 Expire {new Date(p.date_peremption).toLocaleDateString("fr-FR")}
+                        📅 {new Date(p.date_peremption).toLocaleDateString("fr-FR")}
                         {p.jours_avant_peremption != null && ` (${p.jours_avant_peremption}j)`}
                       </span>
                     )}
                   </div>
+                  {/* Bouton consommer */}
+                  {(p.portions_restantes ?? 0) > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 w-full"
+                      disabled={enConsommation}
+                      onClick={() => consommer(p.id)}
+                    >
+                      {enConsommation ? (
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="mr-1 h-3 w-3" />
+                      )}
+                      Consommer 1 portion
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
+            {preparationsFiltrees.length === 0 && (
+              <p className="text-sm text-muted-foreground col-span-full py-4 text-center">
+                Aucune préparation dans cette catégorie.
+              </p>
+            )}
           </div>
         </div>
       )}

@@ -65,6 +65,14 @@ def demarrer_scheduler() -> None:
     except Exception as e:
         logger.error(f"❌ Échec configuration cron jobs Loteries: {e}", exc_info=True)
     
+    # Enregistrer les jobs Cuisine
+    try:
+        from src.services.cuisine.cron_cuisine import configurer_jobs_cuisine
+        configurer_jobs_cuisine(scheduler)
+        logger.info("✅ Cron jobs Cuisine configurés")
+    except Exception as e:
+        logger.error(f"❌ Échec configuration cron jobs Cuisine: {e}", exc_info=True)
+    
     # Démarrer le scheduler
     scheduler.start()
     logger.info("✅ Scheduler APScheduler démarré avec succès")

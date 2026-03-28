@@ -281,12 +281,46 @@ async def obtenir_dashboard_cuisine(
                 .first()
             )
 
+            # Score anti-gaspillage : articles proches de la péremption / total
+            total_inventaire = session.query(func.count(ArticleInventaire.id)).scalar() or 0
+            score_anti_gaspillage = 100
+            if total_inventaire > 0:
+                articles_a_risque = alertes_inventaire
+                score_anti_gaspillage = max(0, round(100 - (articles_a_risque / total_inventaire * 100)))
+
+            # Repas Jules aujourd'hui (adaptations bébé)
+            repas_jules = [
+                {
+                    "type_repas": r.type_repas,
+                    "plat_jules": r.plat_jules,
+                    "notes_jules": r.notes_jules,
+                    "adaptation_auto": r.adaptation_auto,
+                }
+                for r in repas_jour
+                if r.plat_jules
+            ]
+
+            # Repas consommés cette semaine
+            repas_consommes = (
+                session.query(func.count(Repas.id))
+                .filter(
+                    Repas.date_repas >= debut_semaine,
+                    Repas.date_repas <= fin_semaine,
+                    Repas.consomme == True,  # noqa: E712
+                )
+                .scalar()
+                or 0
+            )
+
             return {
                 "repas_aujourd_hui": repas_aujourd_hui,
                 "repas_semaine_count": int(repas_semaine_count),
+                "repas_consommes_semaine": int(repas_consommes),
                 "nb_recettes": int(nb_recettes),
                 "articles_courses_restants": int(articles_courses_restants),
                 "alertes_inventaire": int(alertes_inventaire),
+                "score_anti_gaspillage": score_anti_gaspillage,
+                "repas_jules_aujourd_hui": repas_jules,
                 "batch_en_cours": batch_session is not None,
                 "batch_session_id": batch_session.id if batch_session else None,
             }

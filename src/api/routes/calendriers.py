@@ -517,3 +517,59 @@ async def deconnecter_google(
             return {"status": "disconnected"}
 
     return await executer_async(_delete)
+
+
+# ═══════════════════════════════════════════════════════════
+# GOOGLE CALENDAR — SYNC PLANNING REPAS
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/google/sync-planning", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def synchroniser_planning_vers_google(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Pousse le planning repas actif de la semaine vers Google Calendar.
+
+    Pour chaque repas du planning actif, crée un événement Google Calendar
+    avec l'heure appropriée (déjeuner 12h, dîner 19h, etc.).
+    """
+    from src.services.integrations.google_calendar import synchroniser_planning_google
+
+    from src.core.models.planning import Planning, Repas
+    from datetime import date, timedelta
+
+    def _collect():
+        with executer_avec_session() as session:
+            aujourd_hui = date.today()
+            debut_semaine = aujourd_hui - timedelta(days=aujourd_hui.weekday())
+            fin_semaine = debut_semaine + timedelta(days=6)
+
+            repas = (
+                session.query(Repas)
+                .join(Planning)
+                .filter(
+                    Planning.statut == "actif",
+                    Repas.date_repas >= debut_semaine,
+                    Repas.date_repas <= fin_semaine,
+                )
+                .all()
+            )
+
+            return [
+                {
+                    "date": r.date_repas.isoformat(),
+                    "type_repas": r.type_repas,
+                    "recette_nom": r.recette.nom if r.recette else r.notes or "Repas",
+                    "notes": r.notes or "",
+                }
+                for r in repas
+            ]
+
+    repas_list = await executer_async(_collect)
+
+    if not repas_list:
+        return {"created": 0, "errors": [], "message": "Aucun repas à synchroniser"}
+
+    result = await synchroniser_planning_google(repas_list)
+    return result

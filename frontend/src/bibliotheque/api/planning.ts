@@ -29,6 +29,38 @@ export async function supprimerRepas(id: number): Promise<void> {
   await clientApi.delete(`/planning/repas/${id}`);
 }
 
+/** Valider un planning (proposé → actif) */
+export async function validerPlanning(planningId: number): Promise<{ message: string; id: number }> {
+  const { data } = await clientApi.post<{ message: string; id: number }>(
+    `/planning/${planningId}/valider`
+  );
+  return data;
+}
+
+/** Marquer un repas comme consommé (décrémenter l'inventaire) */
+export async function marquerRepasConsomme(
+  repasId: number,
+  portions = 1
+): Promise<{ message: string; id: number }> {
+  const { data } = await clientApi.post<{ message: string; id: number }>(
+    `/planning/repas/${repasId}/consomme`,
+    null,
+    { params: { portions } }
+  );
+  return data;
+}
+
+/** Obtenir des alternatives pour un repas */
+export async function obtenirAlternativesRepas(
+  repasId: number,
+  nombre = 5
+): Promise<{ alternatives: unknown[]; repas_id: number }> {
+  const { data } = await clientApi.get(`/planning/repas/${repasId}/alternatives`, {
+    params: { nombre },
+  });
+  return data;
+}
+
 /** Générer un planning IA pour la semaine */
 export async function genererPlanningSemaine(
   params?: GenererPlanningParams

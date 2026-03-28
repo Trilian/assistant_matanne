@@ -54,6 +54,7 @@ import {
   supprimerArticleInventaire,
   obtenirAlertes,
   ocrPhotoFrigo,
+  enrichirParCodeBarres,
   type ResultatOCRFrigo,
 } from "@/bibliotheque/api/inventaire";
 import {
@@ -147,19 +148,32 @@ export default function PageInventaire() {
     inconnus: string[]
   ) {
     let misAJour = 0;
+    let enrichis = 0;
     for (const t of trouves) {
       try {
         await modifierArticleInventaire(t.article.id, {
           quantite: (t.article.quantite ?? 0) + 1,
         });
         misAJour++;
+        // Auto-enrichissement OpenFoodFacts (nutriscore, ecoscore)
+        if (t.article.code_barres) {
+          try {
+            const res = await enrichirParCodeBarres(t.article.code_barres);
+            if (res.enrichi) enrichis++;
+          } catch {
+            // Enrichissement optionnel — ne pas bloquer
+          }
+        }
       } catch {
         // Ignore individual failures
       }
     }
     if (misAJour > 0) {
       invalider(["inventaire"]);
-      toast.success(`${misAJour} article(s) mis à jour`);
+      const msg = enrichis > 0
+        ? `${misAJour} article(s) mis à jour, ${enrichis} enrichi(s) via OFF`
+        : `${misAJour} article(s) mis à jour`;
+      toast.success(msg);
     }
     if (inconnus.length > 0) {
       toast.info(`${inconnus.length} code(s) non reconnu(s)`);

@@ -744,3 +744,112 @@ async def ocr_photo_frigo(
             return {"articles": articles_detectes, "total": len(articles_detectes), "crees": crees, "mis_a_jour": maj}
 
     return await executer_async(_bulk)
+
+
+# ═══════════════════════════════════════════════════════════
+# QR CODE — ÉTIQUETAGE INVENTAIRE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/articles/{article_id}/qr",
+    responses=REPONSES_CRUD_LECTURE,
+    summary="Générer un QR code PNG pour un article",
+)
+@gerer_exception_api
+async def generer_qr_article(
+    article_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Génère un QR code PNG contenant les infos de l'article pour étiquetage.
+
+    Le QR code encode un JSON compact : id, nom, emplacement, péremption.
+    """
+    import io
+    import json as json_mod
+
+    import qrcode
+    from fastapi.responses import StreamingResponse
+
+    from src.core.models import ArticleInventaire
+
+    def _gen():
+        with executer_avec_session() as session:
+            article = session.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
+            if not article:
+                raise HTTPException(status_code=404, detail="Article non trouvé")
+
+            data = {
+                "id": article.id,
+                "nom": article.nom,
+                "emplacement": article.emplacement,
+                "peremption": str(article.date_peremption) if article.date_peremption else None,
+            }
+            return json_mod.dumps(data, ensure_ascii=False)
+
+    qr_data = await executer_async(_gen)
+
+    # Générer le QR code en mémoire
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
+    qr.add_data(qr_data)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+
+    return StreamingResponse(
+        buf,
+        media_type="image/png",
+        headers={"Content-Disposition": f"inline; filename=qr_article_{article_id}.png"},
+    )
+
+
+@router.get(
+    "/qr/scan",
+    responses=REPONSES_CRUD_LECTURE,
+    summary="Retrouver un article par son QR code",
+)
+@gerer_exception_api
+async def scanner_qr_article(
+    article_id: int = Query(..., description="ID de l'article encodé dans le QR code"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retrouve un article depuis les données scannées du QR code.
+
+    Le frontend scanne le QR, extrait l'ID, et appelle cet endpoint.
+    Retourne l'article complet + actions rapides disponibles.
+    """
+    from src.core.models import ArticleInventaire
+
+    def _scan():
+        with executer_avec_session() as session:
+            article = session.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
+            if not article:
+                raise HTTPException(status_code=404, detail="Article non trouvé via QR code")
+
+            jours_peremption = None
+            if article.date_peremption:
+                from datetime import date
+
+                delta = (article.date_peremption - date.today()).days
+                jours_peremption = delta
+
+            return {
+                "article": {
+                    "id": article.id,
+                    "nom": article.nom,
+                    "quantite": float(article.quantite) if article.quantite else 0,
+                    "unite": article.unite,
+                    "emplacement": article.emplacement,
+                    "date_peremption": str(article.date_peremption) if article.date_peremption else None,
+                    "jours_avant_peremption": jours_peremption,
+                },
+                "actions": [
+                    {"label": "Consommer", "method": "PATCH", "url": f"/api/v1/inventaire/articles/{article_id}"},
+                    {"label": "Supprimer", "method": "DELETE", "url": f"/api/v1/inventaire/articles/{article_id}"},
+                ],
+            }
+
+    return await executer_async(_scan)

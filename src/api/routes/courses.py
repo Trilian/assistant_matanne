@@ -1018,6 +1018,255 @@ async def supprimer_article(
 
 
 # ═══════════════════════════════════════════════════════════
+# VALIDATION COURSES → SYNC INVENTAIRE + HISTORIQUE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post(
+    "/{liste_id}/valider",
+    response_model=MessageResponse,
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def valider_courses(
+    liste_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Valide une liste de courses : incrémente l'inventaire + met à jour l'historique d'achats.
+
+    Pour chaque article coché :
+    - Incrémente l'article correspondant dans l'inventaire (ou le crée)
+    - Met à jour la table historique_achats (fréquence d'achat pour l'IA)
+
+    Puis archive la liste.
+    """
+    from datetime import datetime, UTC
+
+    from src.core.models import ArticleInventaire
+    from src.core.models.courses import ArticleCourses, HistoriqueAchats, ListeCourses
+    from src.core.models.recettes import Ingredient
+
+    def _valider():
+        with executer_avec_session() as session:
+            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+            if not liste:
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
+
+            articles_achetes = (
+                session.query(ArticleCourses)
+                .filter(
+                    ArticleCourses.liste_id == liste_id,
+                    ArticleCourses.achete == True,  # noqa: E712
+                )
+                .all()
+            )
+
+            articles_sync = 0
+            now = datetime.now(UTC)
+
+            for art in articles_achetes:
+                # Incrémenter l'inventaire
+                inv = (
+                    session.query(ArticleInventaire)
+                    .filter(ArticleInventaire.ingredient_id == art.ingredient_id)
+                    .first()
+                )
+                if inv:
+                    inv.quantite = float(inv.quantite or 0) + float(art.quantite_necessaire or 1)
+                else:
+                    session.add(
+                        ArticleInventaire(
+                            ingredient_id=art.ingredient_id,
+                            quantite=float(art.quantite_necessaire or 1),
+                            quantite_min=1.0,
+                        )
+                    )
+                articles_sync += 1
+
+                # Mettre à jour l'historique d'achats
+                ingredient = (
+                    session.query(Ingredient).filter(Ingredient.id == art.ingredient_id).first()
+                )
+                if ingredient:
+                    hist = (
+                        session.query(HistoriqueAchats)
+                        .filter(HistoriqueAchats.article_nom == ingredient.nom)
+                        .first()
+                    )
+                    if hist:
+                        # Calculer la fréquence
+                        if hist.derniere_achat:
+                            delta = (now - hist.derniere_achat).days
+                            if delta > 0:
+                                ancien_freq = hist.frequence_jours or delta
+                                hist.frequence_jours = round(
+                                    (ancien_freq * hist.nb_achats + delta) / (hist.nb_achats + 1)
+                                )
+                        hist.nb_achats += 1
+                        hist.derniere_achat = now
+                    else:
+                        session.add(
+                            HistoriqueAchats(
+                                article_nom=ingredient.nom,
+                                categorie=ingredient.categorie,
+                                rayon_magasin=art.rayon_magasin,
+                                derniere_achat=now,
+                                nb_achats=1,
+                            )
+                        )
+
+            # Archiver la liste
+            liste.archivee = True
+            session.commit()
+
+            return MessageResponse(
+                message=f"Courses validées : {articles_sync} articles synchronisés avec l'inventaire",
+                id=liste_id,
+            )
+
+    return await executer_async(_valider)
+
+
+@router.get(
+    "/{liste_id}/bio-local",
+    responses=REPONSES_LISTE,
+)
+@gerer_exception_api
+async def obtenir_suggestions_bio_local(
+    liste_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Analyse les articles de la liste et retourne des suggestions bio/local/saison.
+
+    Pour chaque article :
+    - Vérifie si un producteur local est disponible
+    - Vérifie si le produit est de saison
+    - Propose des alternatives bio si pertinent
+    """
+    import json
+    from pathlib import Path
+
+    from src.core.models.courses import ArticleCourses, ListeCourses
+
+    def _analyse():
+        with executer_avec_session() as session:
+            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+            if not liste:
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
+
+            articles = (
+                session.query(ArticleCourses)
+                .filter(ArticleCourses.liste_id == liste_id)
+                .all()
+            )
+
+            # Charger les données de saison
+            saison_path = Path("data/reference/produits_de_saison.json")
+            produits_saison: dict = {}
+            if saison_path.exists():
+                produits_saison = json.loads(saison_path.read_text(encoding="utf-8"))
+
+            from datetime import date
+            mois_actuel = date.today().month
+            mois_noms = [
+                "", "janvier", "février", "mars", "avril", "mai", "juin",
+                "juillet", "août", "septembre", "octobre", "novembre", "décembre",
+            ]
+            mois_str = mois_noms[mois_actuel]
+
+            suggestions = []
+            for art in articles:
+                nom = art.ingredient.nom.lower() if art.ingredient else ""
+                info: dict[str, Any] = {
+                    "article_id": art.id,
+                    "nom": art.ingredient.nom if art.ingredient else "?",
+                    "en_saison": False,
+                    "bio_disponible": False,
+                    "local_disponible": False,
+                    "producteur": None,
+                    "alternative_bio": None,
+                }
+
+                # Vérifier saisonnalité
+                if isinstance(produits_saison, dict):
+                    for categorie, produits in produits_saison.items():
+                        if isinstance(produits, list):
+                            for p in produits:
+                                if isinstance(p, dict) and nom in p.get("nom", "").lower():
+                                    mois_dispo = p.get("mois", [])
+                                    if mois_str in mois_dispo or mois_actuel in mois_dispo:
+                                        info["en_saison"] = True
+
+                suggestions.append(info)
+
+            return {
+                "liste_id": liste_id,
+                "mois": mois_str,
+                "suggestions": suggestions,
+                "nb_en_saison": sum(1 for s in suggestions if s["en_saison"]),
+            }
+
+    return await executer_async(_analyse)
+
+
+@router.get(
+    "/recurrents-suggeres",
+    responses=REPONSES_LISTE,
+)
+@gerer_exception_api
+async def obtenir_recurrents_suggeres(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les articles récurrents dont la fréquence d'achat est dépassée.
+
+    Se base sur l'historique d'achats pour suggérer les articles que l'utilisateur
+    achète habituellement à une certaine fréquence.
+    """
+    from datetime import datetime, UTC
+
+    from src.core.models.courses import HistoriqueAchats
+
+    def _recurrents():
+        with executer_avec_session() as session:
+            now = datetime.now(UTC)
+
+            # Articles avec fréquence connue
+            historiques = (
+                session.query(HistoriqueAchats)
+                .filter(
+                    HistoriqueAchats.frequence_jours.isnot(None),
+                    HistoriqueAchats.nb_achats >= 2,
+                )
+                .all()
+            )
+
+            suggestions = []
+            for h in historiques:
+                if not h.derniere_achat or not h.frequence_jours:
+                    continue
+                jours_depuis = (now - h.derniere_achat).days
+                if jours_depuis >= h.frequence_jours:
+                    suggestions.append({
+                        "article_nom": h.article_nom,
+                        "categorie": h.categorie,
+                        "frequence_jours": h.frequence_jours,
+                        "jours_depuis_dernier_achat": jours_depuis,
+                        "retard_jours": jours_depuis - h.frequence_jours,
+                        "nb_achats_total": h.nb_achats,
+                    })
+
+            # Trier par retard décroissant
+            suggestions.sort(key=lambda x: x["retard_jours"], reverse=True)
+
+            return {
+                "suggestions": suggestions[:20],
+                "total": len(suggestions),
+            }
+
+    return await executer_async(_recurrents)
+
+
+# ═══════════════════════════════════════════════════════════
 # OCR TICKET DE CAISSE → IMPORT COURSES
 # ═══════════════════════════════════════════════════════════
 

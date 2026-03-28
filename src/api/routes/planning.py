@@ -307,6 +307,183 @@ async def supprimer_repas(repas_id: int, user: dict[str, Any] = Depends(require_
 
 
 # ─────────────────────────────────────────────────────────
+# VALIDATION & CONSOMMATION
+# ─────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/{planning_id}/valider",
+    response_model=MessageResponse,
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def valider_planning(
+    planning_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Valide un planning proposé et le rend actif.
+
+    Désactive tout planning actif précédent pour la même semaine.
+    """
+    from src.core.models import Planning
+
+    def _valider():
+        with executer_avec_session() as session:
+            planning = session.query(Planning).filter(Planning.id == planning_id).first()
+            if not planning:
+                raise HTTPException(status_code=404, detail="Planning non trouvé")
+
+            # Désactiver les plannings actifs de la même semaine
+            session.query(Planning).filter(
+                Planning.semaine_debut == planning.semaine_debut,
+                Planning.id != planning_id,
+                Planning.statut == "actif",
+            ).update({"statut": "archive", "actif": False})
+
+            planning.statut = "actif"
+            planning.actif = True
+            session.commit()
+
+            return MessageResponse(message="Planning validé et activé", id=planning_id)
+
+    return await executer_async(_valider)
+
+
+@router.post(
+    "/repas/{repas_id}/consomme",
+    response_model=MessageResponse,
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def marquer_repas_consomme(
+    repas_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Marque un repas comme consommé et décrémente l'inventaire.
+
+    Pour chaque ingrédient de la recette :
+    - Cherche l'article correspondant dans l'inventaire
+    - Décrémente la quantité proportionnellement aux portions
+    """
+    from src.core.models import ArticleInventaire, Repas
+    from src.core.models.recettes import RecetteIngredient
+
+    def _consommer():
+        with executer_avec_session() as session:
+            repas = session.query(Repas).filter(Repas.id == repas_id).first()
+            if not repas:
+                raise HTTPException(status_code=404, detail="Repas non trouvé")
+
+            if repas.consomme:
+                return MessageResponse(message="Repas déjà marqué comme consommé", id=repas_id)
+
+            # Marquer consommé
+            repas.consomme = True
+            repas.consomme_le = datetime.now(UTC)
+
+            # Décrémenter l'inventaire si recette liée
+            articles_decremented = 0
+            if repas.recette_id:
+                portions = repas.portion_ajustee or (
+                    repas.recette.portions if repas.recette else 1
+                )
+                facteur = portions / max(repas.recette.portions, 1) if repas.recette and repas.recette.portions else 1.0
+
+                ingredients = (
+                    session.query(RecetteIngredient)
+                    .filter(RecetteIngredient.recette_id == repas.recette_id)
+                    .all()
+                )
+
+                for ing in ingredients:
+                    article = (
+                        session.query(ArticleInventaire)
+                        .filter(ArticleInventaire.ingredient_id == ing.ingredient_id)
+                        .first()
+                    )
+                    if article:
+                        quantite_utilisee = (ing.quantite or 0) * facteur
+                        article.quantite = max(0.0, float(article.quantite or 0) - quantite_utilisee)
+                        articles_decremented += 1
+
+            session.commit()
+
+            return MessageResponse(
+                message=f"Repas consommé, {articles_decremented} articles inventaire mis à jour",
+                id=repas_id,
+            )
+
+    return await executer_async(_consommer)
+
+
+@router.get(
+    "/repas/{repas_id}/alternatives",
+    responses=REPONSES_LISTE,
+)
+@gerer_exception_api
+async def obtenir_alternatives_repas(
+    repas_id: int,
+    nb: int = Query(3, ge=1, le=5, description="Nombre d'alternatives à proposer"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne des recettes alternatives pour un slot de repas.
+
+    Utilise les contraintes du jour (équilibre, type de repas) pour proposer
+    des alternatives cohérentes via la logique IA existante.
+    """
+    from src.core.models import Recette, Repas
+
+    def _alternatives():
+        with executer_avec_session() as session:
+            repas = session.query(Repas).filter(Repas.id == repas_id).first()
+            if not repas:
+                raise HTTPException(status_code=404, detail="Repas non trouvé")
+
+            # Exclure la recette actuelle
+            exclude_ids = [repas.recette_id] if repas.recette_id else []
+
+            # Chercher des alternatives du même type de repas
+            query = session.query(Recette).filter(Recette.id.notin_(exclude_ids))
+
+            # Priorité aux rapides pour le soir
+            if repas.type_repas in ("dîner", "diner"):
+                query = query.order_by(Recette.temps_total.asc().nullslast())
+
+            alternatives = query.limit(nb * 3).all()
+
+            # Sélectionner les meilleures alternatives (variété de catégories)
+            seen_categories: set[str] = set()
+            result = []
+            for r in alternatives:
+                cat = r.categorie or "Autre"
+                if len(result) >= nb:
+                    break
+                if cat not in seen_categories or len(result) < nb:
+                    seen_categories.add(cat)
+                    result.append({
+                        "id": r.id,
+                        "nom": r.nom,
+                        "temps_total": r.temps_total,
+                        "difficulte": r.difficulte,
+                        "categorie": r.categorie,
+                        "tag_robot_cookeo": r.tag_robot_cookeo if hasattr(r, "tag_robot_cookeo") else False,
+                        "tag_robot_airfryer": r.tag_robot_airfryer if hasattr(r, "tag_robot_airfryer") else False,
+                        "tag_bio": r.tag_bio if hasattr(r, "tag_bio") else False,
+                        "tag_local": r.tag_local if hasattr(r, "tag_local") else False,
+                        "photo_url": r.photo_url if hasattr(r, "photo_url") else None,
+                    })
+
+            return {
+                "repas_id": repas_id,
+                "date_repas": repas.date_repas.isoformat(),
+                "type_repas": repas.type_repas,
+                "alternatives": result,
+            }
+
+    return await executer_async(_alternatives)
+
+
+# ─────────────────────────────────────────────────────────
 # GÉNÉRATION IA
 # ─────────────────────────────────────────────────────────
 
