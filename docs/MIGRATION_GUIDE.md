@@ -4,6 +4,54 @@
 
 ---
 
+## Workflow schéma DB (Sprint 1 — 28 mars 2026)
+
+**Source unique de vérité : `sql/INIT_COMPLET.sql`**
+
+Depuis le Sprint 1, le workflow de gestion du schéma est simplifié :
+
+```
+✅ INIT_COMPLET.sql   ← seule source de vérité (DROP CASCADE + CREATE TABLE)
+❌ sql/migrations/    ← archivé (fichiers 001/002/003 absorbés dans INIT_COMPLET)
+❌ alembic/           ← archivé (alembic.ini → alembic.ini.bak)
+```
+
+### Initialisation d'une nouvelle DB
+
+```sql
+-- Dans Supabase SQL Editor ou psql :
+-- Exécuter sql/INIT_COMPLET.sql dans son intégralité
+```
+
+### Ajouter une colonne ou une table
+
+1. Modifier directement le `CREATE TABLE` concerné dans `sql/INIT_COMPLET.sql`
+2. Sur la DB existante (Supabase) : exécuter manuellement l'`ALTER TABLE` correspondant
+3. Mettre à jour le modèle ORM SQLAlchemy dans `src/core/models/`
+4. Mettre à jour le schéma Pydantic dans `src/api/schemas/`
+
+> **Pourquoi pas de migrations incrémentales ?** Sur Supabase (PostgreSQL managé), les migrations sont appliquées manuellement via le SQL Editor. `INIT_COMPLET.sql` sert pour fresh install, les changements incrémentiels sont appliqués directement sur la DB de prod.
+
+### Vérification cohérence ORM ↔ SQL
+
+```bash
+# Sprint 3 prévoir test automatique :
+python -c "
+import re
+from pathlib import Path
+from src.core.models import Base, charger_tous_modeles
+charger_tous_modeles()
+sql = Path('sql/INIT_COMPLET.sql').read_text()
+sql_tables = set(re.findall(r'CREATE TABLE (?:IF NOT EXISTS )?(\\w+)', sql))
+for m in Base.registry.mappers:
+    t = m.class_.__tablename__
+    assert t in sql_tables, f'ORM table {t!r} absente de INIT_COMPLET.sql'
+print('OK — tous les modèles ORM ont un CREATE TABLE')
+"
+```
+
+---
+
 ## Stack actuelle (Mars 2026)
 
 | Composant | Version | Requirement |

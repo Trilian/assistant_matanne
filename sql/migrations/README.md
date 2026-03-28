@@ -1,33 +1,12 @@
-# 📁 Migrations SQL — Assistant MaTanne
+# 📁 Migrations SQL — Archivé (Sprint 1)
 
-## Convention de nommage
+> ⚠️ **Sprint 1 — 28 mars 2026** : Ce répertoire est archivé.
+>
+> Les 3 fichiers de migration (`001_routine_moment_journee.sql`, `002_standardize_user_id_uuid.sql`, `003_add_cotes_historique.sql`) ont été absorbés dans `sql/INIT_COMPLET.sql`.
+>
+> **Workflow actif** : `sql/INIT_COMPLET.sql` est la seule source de vérité pour le schéma DB.
+> Voir `docs/MIGRATION_GUIDE.md` pour les instructions.
 
-```
-V{numero}_{description}.sql
-```
-
-Exemple : `V003_ajout_table_xxx.sql`
-
-## Workflow
-
-```bash
-# Créer une migration
-python manage.py create-migration
-
-# Appliquer les migrations en attente
-python manage.py migrate
-
-# Vérifier l'état
-SELECT * FROM schema_migrations ORDER BY applied_at DESC;
-```
-
-## Règles
-
-1. **Idempotent** : Utiliser `IF NOT EXISTS`, `IF EXISTS`, `DO $$ ... END $$` avec checks
-2. **Non-destructif** : Pas de `DROP TABLE` sans `CREATE TABLE IF NOT EXISTS` de remplacement
-3. **Réversible** : Documenter le rollback dans un commentaire en fin de fichier
-4. **Commenté** : Décrire le pourquoi en haut du fichier
-5. **Testé** : Tester sur une copie avant d'appliquer en production
 
 ## Suivi
 
