@@ -64,6 +64,30 @@ export interface ConfigDashboard {
   config_dashboard: Record<string, boolean>;
 }
 
+export interface AlerteContextuelle {
+  type: string;
+  module: string;
+  icone: string;
+  titre: string;
+  message: string;
+  action: string;
+}
+
+export interface PointsFamille {
+  total_points: number;
+  sport: number;
+  alimentation: number;
+  anti_gaspi: number;
+  badges: string[];
+  details: {
+    activites_garmin: number;
+    total_pas: number;
+    total_calories: number;
+    score_bien_etre: number;
+    articles_a_risque: number;
+  };
+}
+
 /** Obtenir le bilan mensuel IA (mois au format YYYY-MM, défaut = mois courant) */
 export async function obtenirBilanMensuel(mois?: string): Promise<BilanMensuel> {
   const params = mois ? `?mois=${mois}` : "";
@@ -84,5 +108,20 @@ export async function sauvegarderConfigDashboard(
   const { data } = await clientApi.put<ConfigDashboard>("/dashboard/config", {
     config_dashboard: configDashboard,
   });
+  return data;
+}
+
+/** Lire les alertes météo contextuelles cross-modules */
+export async function obtenirAlertesContextuelles(): Promise<{
+  items: AlerteContextuelle[];
+  total: number;
+}> {
+  const { data } = await clientApi.get("/dashboard/alertes-contextuelles");
+  return data;
+}
+
+/** Lire les points famille gamifiés */
+export async function obtenirPointsFamille(): Promise<PointsFamille> {
+  const { data } = await clientApi.get<PointsFamille>("/dashboard/points-famille");
   return data;
 }
