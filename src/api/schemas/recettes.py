@@ -127,7 +127,6 @@ class RecetteResponse(RecetteBase, IdentifiedResponse):
     ingredients: list[IngredientResponse] = Field(default_factory=list)
     etapes: list[EtapeResponse] = Field(default_factory=list)
     est_favori: bool = False
-    note_moyenne: float | None = None
     url_source: str | None = None
     compatible_cookeo: bool = False
     compatible_monsieur_cuisine: bool = False

@@ -11,7 +11,6 @@ import {
   Search,
   Clock,
   ChefHat,
-  Star,
   Filter,
   Heart,
   CalendarDays,
@@ -352,12 +351,7 @@ export default function PageRecettes() {
                           {recette.portions}
                         </span>
                       )}
-                      {recette.note_moyenne && (
-                        <span className="flex items-center gap-0.5">
-                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                          {recette.note_moyenne.toFixed(1)}
-                        </span>
-                      )}
+
                       {recette.difficulte && (
                         <Badge
                           variant={

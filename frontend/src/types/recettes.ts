@@ -16,7 +16,6 @@ export interface Recette {
   image_url?: string;
   url_source?: string;
   ingredients: IngredientRecette[];
-  note_moyenne?: number;
   est_favori?: boolean;
   jours_depuis_derniere_cuisson?: number;
   compatible_cookeo?: boolean;

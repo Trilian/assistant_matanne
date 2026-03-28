@@ -382,8 +382,6 @@ class HistoriqueRecette(CreeLeMixin, Base):
         recette_id: ID de la recette
         date_cuisson: Date de préparation
         portions_cuisinees: Nombre de portions préparées
-        note: Note de 0 à 5 étoiles
-        avis: Commentaire personnel
     """
 
     __tablename__ = "historique_recettes"
@@ -394,14 +392,11 @@ class HistoriqueRecette(CreeLeMixin, Base):
     )
     date_cuisson: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     portions_cuisinees: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    note: Mapped[int | None] = mapped_column(Integer)
-    avis: Mapped[str | None] = mapped_column(Text)
 
     # Relations
     recette: Mapped["Recette"] = relationship(back_populates="historique")
 
     __table_args__ = (
-        CheckConstraint("note IS NULL OR (note >= 0 AND note <= 5)", name="ck_note_valide"),
         CheckConstraint("portions_cuisinees > 0", name="ck_portions_cuisinees_positive"),
     )
 
@@ -413,7 +408,7 @@ class HistoriqueRecette(CreeLeMixin, Base):
         return (dt_date.today() - self.date_cuisson).days
 
     def __repr__(self) -> str:
-        return f"<HistoriqueRecette(recette={self.recette_id}, date={self.date_cuisson}, note={self.note})>"
+        return f"<HistoriqueRecette(recette={self.recette_id}, date={self.date_cuisson})>"
 
 
 class RepasBatch(CreeLeMixin, Base):

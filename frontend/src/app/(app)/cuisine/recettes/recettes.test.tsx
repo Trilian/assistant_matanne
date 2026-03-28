@@ -27,7 +27,6 @@ const mockRecettes = {
       difficulte: "Facile",
       temps_preparation: 30,
       portions: 6,
-      note_moyenne: 4.5,
     },
     {
       id: 2,
@@ -37,7 +36,6 @@ const mockRecettes = {
       difficulte: "Facile",
       temps_preparation: 20,
       portions: 4,
-      note_moyenne: 4.0,
     },
   ],
   total: 2,

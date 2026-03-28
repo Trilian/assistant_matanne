@@ -122,19 +122,6 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
     )
     est_favori = retour.feedback == "like" if retour else False
 
-    # Note moyenne
-    from src.core.models.recettes import HistoriqueRecette
-    from sqlalchemy import func
-
-    note_avg = (
-        session.query(func.avg(HistoriqueRecette.note))
-        .filter(
-            HistoriqueRecette.recette_id == db_recette.id,
-            HistoriqueRecette.note.isnot(None),
-        )
-        .scalar()
-    )
-
     derniere_cuisson = (
         session.query(func.max(HistoriqueRecette.date_cuisson))
         .filter(HistoriqueRecette.recette_id == db_recette.id)
@@ -156,7 +143,6 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
         ingredients=ingredients_resp,
         etapes=etapes_resp,
         est_favori=est_favori,
-        note_moyenne=round(note_avg, 1) if note_avg else None,
         url_source=getattr(db_recette, "url_source", None),
         jours_depuis_derniere_cuisson=jours_depuis_derniere_cuisson,
     )
@@ -997,42 +983,6 @@ async def retirer_favori(recette_id: int, user: dict[str, Any] = Depends(require
             return MessageResponse(message=f"Recette {recette_id} retirée des favoris")
 
     return await executer_async(_remove)
-
-
-@router.post("/{recette_id}/noter", response_model=MessageResponse)
-@gerer_exception_api
-async def noter_recette(
-    recette_id: int,
-    note: int = Query(..., ge=0, le=5, description="Note de 0 à 5"),
-    avis: str | None = Query(None, description="Commentaire optionnel"),
-    user: dict[str, Any] = Depends(require_auth),
-):
-    """Note une recette (0-5 étoiles) en créant une entrée dans l'historique."""
-    from datetime import date
-
-    from src.core.models import Recette
-    from src.core.models.recettes import HistoriqueRecette
-
-    def _noter():
-        with executer_avec_session() as session:
-            recette = session.query(Recette).filter(Recette.id == recette_id).first()
-            if not recette:
-                raise HTTPException(status_code=404, detail="Recette non trouvée")
-
-            historique = HistoriqueRecette(
-                recette_id=recette_id,
-                date_cuisson=date.today(),
-                portions_cuisinees=recette.portions,
-                note=note,
-                avis=avis,
-            )
-            session.add(historique)
-            session.commit()
-            return MessageResponse(
-                message=f"Recette {recette_id} notée {note}/5", id=historique.id
-            )
-
-    return await executer_async(_noter)
 
 
 # ═══════════════════════════════════════════════════════════

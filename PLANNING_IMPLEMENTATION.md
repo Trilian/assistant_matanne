@@ -1,440 +1,1340 @@
 # 🗓️ Planning d'implémentation — Assistant Matanne
-> **Source** : `ANALYSE_COMPLETE.md` (mise à jour Sprint 5 — 28 mars 2026)
-> **État global** : ~98% de couverture fonctionnelle
+> **Source** : `ANALYSE_COMPLETE.md` — généré le 28 mars 2026
+> **Couverture** : Intégralité des sections 2 à 13 de l'analyse + annexes
 > **Légende efforts** : XS ≤ 1h | S = 2-4h | M = 1-2j | L = 3-5j
 
 ---
 
-## État d'avancement global
+## Table des matières
 
-| Sprint | Statut | Thème |
-|--------|--------|-------|
-| Sprints 1 + 4 + 5 + 6 | ✅ TERMINÉ | Bugs critiques push, features Jules, email, admin, cron, WhatsApp |
-| Sprint 7 | ✅ TERMINÉ | SQL consolidation + bugs résiduels + tests + doc cleanup |
-| Sprint 8 | 🔜 À FAIRE | Inter-modules + Dashboard avancé |
-| Sprint 9 | 🔜 À FAIRE | WhatsApp sortant + IA avancée |
-| Sprint 10 | ✅ MVP IMPLÉMENTÉ | Innovations (Garmin, gamification, voyage smart, automations) |
-
----
-
-## ✅ Ce qui est déjà implémenté
-
-### Bugs critiques (P-01 à P-03 + B-05)
-- ✅ **P-01** — Push subscriptions persistées en DB (`NotificationPersistenceMixin`, `abonnements_push_vapid`)
-- ✅ **P-02** — Endpoint `GET /push/vapid-public-key` exposé
-- ✅ **P-03** — Jobs `digest_ntfy` (09h00) et `rappel_courses` (18h00) ajoutés à APScheduler
-- ✅ **B-05** — Accès fragile `_subscriptions` remplacé par DB
-
-### Features cuisine/famille/Jules (Sprint 4)
-- ✅ **CT-09** — Bouton 🍼 Version Jules : `POST /recettes/{id}/version-jules` + `ServiceVersionRecetteJules` (171L)
-- ✅ **CT-09** — Profil aliments exclus Jules : `GET/PUT /famille/jules/aliments-exclus`
-- ✅ **CT-06** — Génération recette depuis photo : `POST /recettes/generer-depuis-photo` (Pixtral)
-- ✅ **CT-05** — Coaching hebdo Jules : `GET /famille/jules/coaching-hebdo` (JulesAIService)
-- ✅ **QW-02** — Recette Surprise : `GET /recettes/surprise` filtrée saison/frigo
-
-### Notifications + Admin (Sprint 5)
-- ✅ **CT-01** — `ServiceEmail` via Resend (`notif_email.py`, 230L) — reset mdp, verify, résumé hebdo, alertes, invitations
-- ✅ **CT-01** — `DispatcherNotifications` multi-canal (`notif_dispatcher.py`, 185L)
-- ✅ **CT-02** — Admin enrichi backend (`admin.py`, 425L) — jobs, notif test, cache stats/purge, liste users
-- ✅ **CT-02** — `ServiceAudit` (354L), export CSV, stats
-- ✅ **2FA TOTP** — `ServiceDeuxFacteurs` (125L) — `/2fa/enable`, `/2fa/verify-setup`, `/2fa/disable`, `/2fa/status`
-- ✅ **WhatsApp** — Webhook entrant Meta Cloud API (`webhooks_whatsapp.py`, 296L) — réponse IA via Mistral
-- ✅ **RouteurIA** — `core/ai/router.py` (704L) — routage multi-fournisseur avec `_ClassifieurComplexite`
-- ✅ **Cache Redis L2** — `caching/redis.py` opérationnel (complète L1+L3)
-
-### Cron jobs (Sprint 6)
-- ✅ **CT-04** — Job `resume_hebdo` (Lundi 07h30) — ntfy + email
-- ✅ **CT-03** — Job `push_contextuel_soir` (18h00) — planning demain + météo
-- ✅ **10 jobs APScheduler** actifs (était 6)
+1. [Vue d'ensemble & Roadmap](#1-vue-densemble--roadmap)
+2. [Sprint Correctif — Bugs actifs](#2-sprint-correctif--bugs-actifs)
+3. [Sprint SQL — Consolidation](#3-sprint-sql--consolidation)
+4. [Sprint Tests — Couverture manquante](#4-sprint-tests--couverture-manquante)
+5. [Sprint Documentation](#5-sprint-documentation)
+6. [Sprint 11 — Features manquantes prioritaires](#6-sprint-11--features-manquantes-prioritaires)
+7. [Sprint 12 — Architecture & Refactoring](#7-sprint-12--architecture--refactoring)
+8. [Sprint 13 — WhatsApp étendu + Email complet](#8-sprint-13--whatsapp-étendu--email-complet)
+9. [Sprint 14 — Nouvelles opportunités IA + Cron jobs manquants](#9-sprint-14--nouvelles-opportunités-ia--cron-jobs-manquants)
+10. [Sprint 15 — Interactions inter-modules avancées](#10-sprint-15--interactions-inter-modules-avancées)
+11. [Sprint 16 — Admin complet](#11-sprint-16--admin-complet)
+12. [Dépendances entre items](#12-dépendances-entre-items)
+13. [Suivi d'avancement global](#13-suivi-davancement-global)
 
 ---
 
-## Sprint 7 — SQL consolidation + Bugs résiduels + Tests + Doc
-> **Priorité** : 🟠 IMPORTANT | À faire maintenant
+## 1. Vue d'ensemble & Roadmap
 
-### SQL — P-04 à P-07
+### État actuel
 
-#### P-04 — Supprimer table `liste_cours` (doublon) _(XS)_
-**Bug** : B-10 — doublon `liste_cours` / `listes_courses` dans `sql/INIT_COMPLET.sql`
-- Supprimer le bloc `CREATE TABLE liste_cours`
-- Remplacer tout `INSERT INTO liste_cours` par `INSERT INTO listes_courses`
-- Vérifier les FK qui référencent `liste_cours`
+| Dimension | État | Score |
+|-----------|------|-------|
+| Couverture fonctionnelle | 70 pages, 28 routes API, ~130 tables | ✅ ~95% |
+| Bugs bloquants | 2 critiques, 3 hauts, 8 moyens | 🔴 À corriger |
+| Couverture tests | ~786 tests API, ~200+ tests services | 🟡 Manques ciblés |
+| Documentation | 13 docs techniques + guides | 🟡 Partiellement stale |
+| SQL consolidation | INIT_COMPLET.sql v3 (~130 tables) | 🟡 V002 intégré |
+| IA intégration | Mistral + Multimodal (Pixtral) actifs | ✅ Bien intégré |
+| Cron jobs | 19 jobs APScheduler + 6 jeux | ✅ Couvre l'essentiel |
+| WhatsApp | Webhook entrant + 3 outbound channels | 🟡 Proactif partiel |
+| Sécurité | JWT, 2FA, RGPD, RLS Supabase | 🟡 Quelques gaps |
 
-#### P-05 — Déplacer inline ALTER TABLE en tête _(S)_
-**Problème** : SQL-05 — colonnes ajoutées en bas via `ALTER TABLE ... ADD COLUMN`
-- Rechercher tous les `ALTER TABLE xxx ADD COLUMN` en bas de `sql/INIT_COMPLET.sql`
-- Intégrer chaque colonne directement dans le `CREATE TABLE` correspondant
-- Supprimer les blocs `ALTER TABLE` devenus inutiles
+### Roadmap globale
 
-#### P-06 — Absorber `sql/migrations/001|002|003.sql` _(S)_
-1. `001_routine_moment_journee.sql` → `moment_journee VARCHAR(20)` + `jour_semaine INTEGER` dans `CREATE TABLE routines`
-2. `002_standardize_user_id_uuid.sql` → corriger `user_id VARCHAR → UUID` dans 5 tables
-3. `003_add_cotes_historique.sql` → ajouter `CREATE TABLE jeux_cotes_historique` + RLS dans section Jeux
-4. **Supprimer** `sql/migrations/001*.sql`, `002*.sql`, `003*.sql`
-
-#### P-07 — Absorber `alembic/versions/` + archiver Alembic _(S)_
-1. `a1b2c3d4e5f6_initial_baseline.py` — baseline vide → **supprimer directement**
-2. `f7e8d9c0b1a2_famille_refonte_phase1.py` → intégrer dans INIT_COMPLET :
-   - `heure_debut TIME` dans `activites_famille`
-   - `derniere_completion DATE` dans `routines`
-   - `pour_qui`, `a_revendre`, `prix_revente_estime`, `vendu_le` dans `achats_famille`
-   - `user_id UUID` + 8 colonnes JSONB dans `preferences_utilisateurs`
-3. `c8d1e2f3a4b5_anniversaire_checklists.py` → intégrer :
-   - Tables `checklists_anniversaire` + `items_checklist_anniversaire` + 7 index
-4. **Supprimer** les 3 fichiers `alembic/versions/`
-5. **Archiver/supprimer** `alembic.ini` et `alembic/`
-
-**Validation post-absorption** — vérifier dans INIT_COMPLET que :
-- [ ] `routines` : `moment_journee`, `jour_semaine`, `derniere_completion` présents
-- [ ] `activites_famille` : `heure_debut TIME` présent
-- [ ] `achats_famille` : 4 colonnes présentes
-- [ ] `preferences_utilisateurs` : `user_id UUID` + 8 colonnes JSONB présentes
-- [ ] `jeux_cotes_historique` : table + 3 index + RLS présents
-- [ ] `checklists_anniversaire` + `items_checklist_anniversaire` : 2 tables + 7 index présents
+| Sprint | Durée estimée | Statut | Thème |
+|--------|--------------|--------|-------|
+| Sprint Correctif | ~1-2j | 🔴 PRIORITÉ 1 | Bugs actifs bloquants |
+| Sprint SQL | ~0.5j | 🟠 PRIORITÉ 2 | Consolidation SQL |
+| Sprint Tests | ~2-3j | 🟡 PRIORITÉ 3 | Couverture tests manquants |
+| Sprint Documentation | ~1j | 🟡 PRIORITÉ 4 | Docs stale + manquantes |
+| Sprint 11 | ~2-3j | 🔵 PLANIFIÉ | Features prioritaires manquantes |
+| Sprint 12 | ~2-3j | 🔵 PLANIFIÉ | Architecture & Refactoring |
+| Sprint 13 | ~2j | 🔵 PLANIFIÉ | WhatsApp étendu + Email complet |
+| Sprint 14 | ~3-4j | 🔵 PLANIFIÉ | IA avancée + Cron jobs |
+| Sprint 15 | ~3-4j | 🔵 PLANIFIÉ | Inter-modules avancés |
+| Sprint 16 | ~2j | 🔵 PLANIFIÉ | Admin complet |
 
 ---
 
-### Bugs hauts résiduels
+## 2. Sprint Correctif — Bugs actifs
 
-#### B-06 — `url_source` absent du modèle ORM Recette _(S)_
-- `src/core/models/recettes.py` → ajouter `url_source: Mapped[str | None]`
-- `sql/INIT_COMPLET.sql` → ajouter la colonne dans `CREATE TABLE recettes`
+> **~1-2 jours — PRIORITÉ ABSOLUE**
+> Source : `ANALYSE_COMPLETE.md` §2
 
-#### B-07 — `verifier_saison` silencieusement ignoré _(S)_
-- `src/services/core/cron/jobs.py` → remplacer `logger.debug()` par `logger.warning()` si `hasattr()` est False
-- Ajouter une vérification visible au démarrage de l'application
+### 🔴 C1 — Fix imports `recherche.py` _(XS)_
 
-#### B-08 — `RepasPlanning` modèle manquant _(S)_
-- Identifier le test `skip` dans `tests/api/test_routes_dashboard_jeux.py`
-- Créer le modèle `RepasPlanning` manquant ou corriger la référence
+**Fichier :** `src/api/routes/recherche.py` (lignes 38–44)
 
-#### B-11 — Lien sidebar "Calendriers" → 404 _(S)_
-- `frontend/src/composants/disposition/barre-laterale.tsx` → supprimer ou corriger le lien vers `/famille/calendriers`
-- Vérifier tous les autres liens de navigation pointant vers des pages inexistantes
+**Problème :** Imports de classes inexistantes → `ImportError` à chaque appel → barre de recherche globale 100% inutilisable.
 
-#### B-12 — `RetourRecette.est_favori` vs `feedback` _(S)_
-- Aligner `frontend/src/types/recettes.ts` : utiliser `feedback: "like" | "neutral" | "dislike"` OU
-- Ajouter un champ calculé `est_favori: bool` dans le schéma Pydantic `RecetteResponse`
-
----
-
-### Tests manquants
-
-#### CT-12 — Test cohérence schéma ORM ↔ SQL _(S)_
-**Fichier à créer** : `tests/sql/test_schema_coherence.py`
 ```python
-def test_chaque_orm_a_un_create_table():
-    """Vérifie que chaque __tablename__ ORM correspond à un CREATE TABLE dans INIT_COMPLET.sql."""
-    import re
-    from pathlib import Path
-    from src.core.models import Base
+# ❌ Actuel
+from src.core.models import (
+    Activite,   # Inexistant → ActiviteFamille
+    Note,       # Inexistant → NoteMemo
+    Contact,    # Inexistant → ContactFamille / ContactUtile
+)
 
-    sql_content = Path("sql/INIT_COMPLET.sql").read_text()
-    sql_tables = set(re.findall(r"CREATE TABLE (?:IF NOT EXISTS )?(\w+)", sql_content))
-
-    for mapper in Base.registry.mappers:
-        table_name = mapper.class_.__tablename__
-        assert table_name in sql_tables, f"Table ORM '{table_name}' absente de INIT_COMPLET.sql"
+# ✅ Fix
+from src.core.models import (
+    ActiviteFamille,
+    NoteMemo,
+    ContactFamille,
+)
 ```
 
-#### CT-13 — Tests push notifications _(M)_
-**Fichier à créer** : `tests/api/test_push_notifications.py`
-- `test_subscribe_persisted_in_db` — POST /push/subscribe insère en DB
-- `test_subscribe_survives_restart` — abonnements rechargés depuis DB
-- `test_vapid_public_key_endpoint` — GET /push/vapid-public-key retourne une clé
-- `test_ntfy_digest_scheduled` — `digest_ntfy` dans APScheduler
-- `test_rappel_courses_scheduled` — `rappel_courses` dans APScheduler
-- `test_unsubscribe_sets_actif_false` — désabonnement logique
-
-#### CT-14 — Tests routes admin + RGPD _(M)_
-**Fichier à créer** : `tests/api/test_admin_routes.py`
-- `test_lister_users_admin_only`
-- `test_lister_jobs_admin_only`
-- `test_executer_job_admin_only`
-- `test_export_rgpd_data`
-- `test_delete_account_rgpd`
-
-#### CT-07 — Tests famille (achats + garde) _(M)_
-- `tests/api/test_famille_achats.py` : CRUD + suggestions IA (mock Mistral) + scoring + Vinted
-- `tests/api/test_famille_garde.py` : config zones + semaines fermeture + jours-sans-crèche
+**Actions :**
+- [ ] Corriger les 3 imports dans `recherche.py`
+- [ ] Mettre à jour les filtres ORM correspondants (références `Activite` → `ActiviteFamille`, etc.)
+- [ ] Tester `GET /api/v1/recherche/global` en dev
 
 ---
 
-### Nettoyage documentation
+### 🔴 C2 — Fix SQL cron `liste_courses` → `articles_courses` _(XS)_
 
-#### CT-15 — Supprimer `STATUS_PHASES.md` _(S)_
-- Supprimer `STATUS_PHASES.md` (1004 lignes redondantes avec ANALYSE_COMPLETE.md)
-- Modifier `ROADMAP.md` : retirer la référence
-- Modifier `docs/INDEX.md` : retirer le lien, ajouter ANALYSE_COMPLETE.md comme référence principale
+**Fichier :** `src/services/core/cron/jobs.py` (ligne ~222)
 
-#### CT-16 — Nettoyer `ROADMAP.md` _(M)_
-- Supprimer l'historique des sprints déjà livrés
-- Supprimer la section "Système de Phases A-AC"
-- Aligner la table "Priorités 2 semaines" sur la section 13 de ANALYSE_COMPLETE.md
+**Problème :** La table `liste_courses` est un doublon supprimé. Le job cron `rappel_courses` (18h00) crashe silencieusement.
 
-#### CT-17 — Nettoyage `docs/` _(S)_
-- Supprimer `docs/JEUX_AMELIORATIONS_PLAN.md` (jeux 100% complet)
-- Supprimer `docs/JEUX_PLAN_VALIDATION.md`
-- Supprimer `docs/guides/batch_cooking.md` (fichier vide)
-- Supprimer `docs/markdown-preview.md` (debug)
-- Mettre à jour `docs/INDEX.md`
-
-#### CT-11 — Mettre à jour doc SQL _(S)_
-- `docs/MIGRATION_GUIDE.md` → retirer workflow SQL-file, documenter "INIT_COMPLET only"
-- Archiver ou supprimer `sql/migrations/README.md` et `alembic/README.md`
-
-#### CT-08 — Index SQL manquants _(S)_
-**Ajouter dans `sql/INIT_COMPLET.sql`** :
 ```sql
-CREATE INDEX IF NOT EXISTS idx_recette_ingredients_ingredient_id ON recette_ingredients(ingredient_id);
-CREATE INDEX IF NOT EXISTS idx_repas_planning_id ON repas(planning_id);
-CREATE INDEX IF NOT EXISTS idx_articles_courses_liste_id ON articles_courses(liste_id);
-CREATE INDEX IF NOT EXISTS idx_historique_inventaire_article_id ON historique_inventaire(article_id);
-CREATE INDEX IF NOT EXISTS idx_jalons_profil_id ON jalons(profil_enfant_id);
-CREATE INDEX IF NOT EXISTS idx_paris_user_date ON jeux_paris_sportifs(user_id, date_pari);
+-- ❌ Actuel
+SELECT COUNT(*) FROM liste_courses lc
+JOIN listes_courses ls ON ls.id = lc.liste_id
+
+-- ✅ Fix
+SELECT COUNT(*) FROM articles_courses ac
+JOIN listes_courses ls ON ls.id = ac.liste_id
 ```
 
-#### CT-10 — Audit tables orphelines ORM ↔ SQL _(M)_
-- Lister les `__tablename__` de `src/core/models/voyage.py` → vérifier présence dans INIT_COMPLET
-- Vérifier `journal_bord`, `sessions_travail`, `log_statut_objets` — ont-ils un modèle ORM ?
-- Pour orphelines SQL sans ORM : créer le modèle ou supprimer la table
-- Pour modèles ORM sans SQL : ajouter CREATE TABLE ou supprimer le modèle
-
-#### CT-02-FE — Page frontend Admin Jobs _(S)_
-**Manque** : `frontend/src/app/(app)/admin/jobs/page.tsx` non créée (backend opérationnel)
-- Table des jobs : ID, libellé, schedule, dernier run, statut (✅/❌)
-- Bouton ▶ "Exécuter maintenant" par ligne → `POST /admin/jobs/{id}/run`
-- Toast confirmation + feedback statut
-- Onglets dans la page admin : Logs | Jobs | Notifications test | Cache | Utilisateurs
+**Actions :**
+- [ ] Corriger la requête SQL dans `cron/jobs.py`
+- [ ] Vérifier qu'il n'y a pas d'autres références à `liste_courses` dans les services
 
 ---
 
-## Sprint 8 — Inter-modules + Dashboard avancé
-> **Priorité** : ⭐⭐⭐ HAUTE VALEUR
+### 🟠 C3 — Fix RGPD `user_id` vide _(XS)_
 
-### MT-01 — Cellier ↔ Inventaire cuisine _(M)_
-**Endpoint à créer** : `GET /api/v1/inventaire/consolide`
-- Merge `ArticleInventaire` (cuisine) + `ArticleCellier` (maison) avec champ `source: "cuisine" | "cellier"`
-- Générer la liste de courses depuis la vue consolidée (évite les doublons)
+**Fichier :** `src/api/routes/rgpd.py` (lignes 54, 77)
 
-### MT-03 — Score bien-être global (IA-09) _(M)_
-**Score 0–100** : diversité alimentaire (40%) + Nutri-Score moyen (30%) + activités sportives (30%)
-- `src/services/dashboard/score_bienetre.py` (nouveau)
-- `GET /api/v1/dashboard/score-bienetre`
-- Widget jauge circulaire sur le dashboard + trend semaine précédente
+**Problème :** Si JWT sans `sub` ni `id`, `user_id = ""` est passé aux opérations RGPD → risque export/suppression globale.
 
-### MT-04 — Alertes météo contextuelles cross-modules _(M)_
-**Endpoint** : `GET /api/v1/dashboard/alertes-contextuelles`
-- Charger météo Open-Meteo 48h (déjà intégré dans `/outils/meteo`)
-- Évaluer gel/canicule/vent/pluie/pollen
-- Générer alertes cross-modules (jardin, cuisine, Jules, maison extérieur) selon le tableau de ANALYSE_COMPLETE.md section 7
-- Widget "Alertes contextuelles" sur le dashboard (max 3 simultanées)
+```python
+# ❌ Actuel
+user_id = user.get("sub", user.get("id", ""))
 
-### MT-06 — Widgets dashboard configurables _(L)_
-- `GET/PUT /api/v1/dashboard/config` — stocker config dans `preferences_utilisateurs.config_dashboard` (JSONB)
-- Frontend : mode "Configurer le dashboard" + drag & drop (dnd-kit) + sauvegarde
-
-### MT-08 — Timeline vie familiale _(M)_
-**Endpoint** : `GET /api/v1/famille/timeline`
-- Agréger : jalons Jules, événements familiaux, projets maison complétés, matchs mémorables
-- Page `frontend/src/app/(app)/famille/timeline/page.tsx` — visualisation chronologique, filtrable, export PDF
-
-### MT-09 — OCR photo-frigo → auto-sync inventaire _(S)_
-- `frontend/src/app/(app)/cuisine/inventaire/page.tsx` → bouton "Tout ajouter à l'inventaire" sur résultat OCR
-- `POST /api/v1/inventaire/bulk` (import en lot, à créer/vérifier)
-- Checkboxes par article avant import
-
-### QW-01 — Widget météo sur dashboard _(XS)_
-- Réutiliser l'API Open-Meteo déjà intégrée dans `/outils/meteo`
-- Widget compact (température, icône, prévision 3j) dans le dashboard
-
-### QW-06 — "Aujourd'hui dans l'histoire de la famille" _(S)_
-- `GET /api/v1/famille/aujourd-hui-historique?date=...` → jalons + événements du même jour les années précédentes
-- Widget dashboard / section famille
-
----
-
-## Sprint 9 — WhatsApp sortant + IA avancée
-> **Priorité** : ⭐⭐ MOYEN
-
-### MT-02 — WhatsApp sortant proactif _(M)_
-**Manque** : le webhook entrant est fait, mais pas les messages préemptifs
-- Compléter `notif_whatsapp.py` ou utiliser Meta Cloud API `POST /messages`
-- Cas d'usage : rappels crèche, liste courses partagée, rapport hebdo WhatsApp
-- Intégrer dans `DispatcherNotifications` (canal `"whatsapp"`)
-
-### MT-07 — Assistant vocal (IA-01) _(L)_
-- Frontend : bouton microphone flottant (accessible depuis toutes les pages)
-- Web Speech API → transcription texte
-- `POST /api/v1/assistant/commande-vocale` → Mistral extrait l'intention → dispatch API interne
-- Intentions à gérer :
-  - "Ajoute [article] à la liste de courses" → `POST /courses/{id}/articles`
-  - "Jules pèse [X] kg" → `POST /famille/jules/croissance`
-  - "Rappelle-moi [action] [quand]" → `POST /maison/routines`
-
-### Jobs cron restants (J-03 à J-11)
-
-| ID | Schedule | Description | Effort |
-|----|----------|-------------|--------|
-| J-03 | Dim 20h00 | Génération planning semaine si vide → ntfy | S |
-| J-04 | 06h00 quotidien | Alertes péremptions produits J+48h | S |
-| J-07 | 1er du mois | Rapport mensuel budget famille+maison+jeux | M |
-| J-08 | Ven 17h00 | Score weekend : activités météo prévues + Jules | S |
-| J-09 | 1er du mois | Contrôle garanties/contrats expirant dans 3 mois | XS |
-| J-10 | Mer 20h00 | Rapport jardin : arrosage + semis prévus | S |
-| J-11 | Dim 20h00 | Score bien-être hebdo + alerte si dérive | S |
-
-### IA avancée restante
-
-| ID | Feature | Endpoint | Effort |
-|----|---------|----------|--------|
-| IA-04 | Planificateur vacances IA | `POST /famille/voyage/planifier-ia` | M |
-| IA-05 | Anomalies financières cross-modules | `GET /dashboard/anomalies-financieres` | M |
-| IA-07 | Optimisation budget courses IA | `GET /courses/optimiser-budget-ia` | M |
-| IA-08 | Diagnostic maison photo (Pixtral) | `POST /maison/diagnostics/ia-photo` | M |
-
----
-
-## Sprint 10 — Innovations & Long terme
-
-### LT-01 — Intégration Garmin santé/sport _(L)_
-- ✅ Sync Garmin automatique matinale (cron `garmin_sync_matinal`, 06h00)
-- ✅ Endpoint recommandations dîner selon calories brûlées : `GET /api/v1/garmin/recommandation-diner`
-- ✅ Contribution Garmin au score bien-être (`activites_garmin`, `calories_actives_garmin`)
-
-### LT-02 — Gamification sport + alimentation _(M)_
-- ✅ Persistance des points hebdo : table `points_utilisateurs`
-- ✅ Persistance des badges : table `badges_utilisateurs`
-- ✅ Recalcul hebdomadaire des points (cron `points_famille_hebdo`, dimanche 20h00)
-- ✅ Page frontend dédiée : `/famille/gamification`
-
-### LT-03 — Mode Voyage avec checklists intelligentes _(M)_
-- ✅ Checklists proportionnelles au nombre de participants (scaling quantités)
-- ✅ Génération de courses depuis checklists : `POST /api/v1/famille/voyages/{id}/generer-courses`
-- ✅ Événement `voyage.en_cours` émis pour alléger planning/arrosage
-
-### LT-04 — Automations "Si → Alors" _(L)_
-- ✅ Table `automations` en DB
-- ✅ Moteur d'exécution (déclencheur `stock_bas`, actions `ajouter_courses`/`notifier`)
-- ✅ Exécution périodique APScheduler (job `automations_runner`, toutes les 5 min)
-- ✅ Endpoint manuel : `POST /api/v1/automations/{id}/executer-maintenant`
-
----
-
-## Suivi d'avancement
-
-### ✅ Sprints terminés
-
-**Bugs critiques (Sprint 1)**
-- [x] P-01 — Persistance push subscriptions en DB
-- [x] P-02 — Endpoint VAPID public key
-- [x] P-03 — Scheduler ntfy digest + rappel courses
-- [x] B-05 — Accès fragile `_subscriptions` remplacé
-
-**Features Jules + Cuisine (Sprint 4)**
-- [x] CT-09 — Bouton Version Jules + profil aliments exclus
-- [x] CT-06 — Génération recette depuis photo (Pixtral)
-- [x] CT-05 — Coaching hebdo Jules
-- [x] QW-02 — Recette Surprise
-
-**Notifications + Admin + 2FA (Sprint 5)**
-- [x] CT-01 — ServiceEmail (Resend) + DispatcherNotifications
-- [x] CT-02 — Admin backend enrichi (jobs, cache, users, audit)
-- [x] WhatsApp webhook entrant
-- [x] 2FA TOTP complet
-- [x] RouteurIA multi-fournisseur
-- [x] Cache Redis L2
-
-**Cron jobs (Sprint 6)**
-- [x] CT-04 — Job résumé hebdo (Lundi 07h30)
-- [x] CT-03 — Job push contextuel soir (18h00)
-
----
-
-### 🔜 Sprint 7 (prochain)
-
-**SQL consolidation**
-- [x] P-04 — Supprimer table `liste_cours` (doublon B-10)
-- [x] P-05 — Déplacer inline ALTER TABLE en tête de CREATE TABLE
-- [x] P-06 — Absorber `sql/migrations/001|002|003.sql` dans INIT_COMPLET
-- [x] P-07 — Absorber `alembic/versions/` + archiver Alembic (`alembic.ini.bak`)
-
-**Bugs hauts résiduels**
-- [x] B-06 — `url_source` absent du modèle ORM Recette
-- [x] B-07 — `verifier_saison` silencieusement ignoré
-- [x] B-08 — `RepasPlanning` modèle manquant (test skip)
-- [x] B-11 — Lien sidebar "Calendriers" → 404
-- [x] B-12 — `est_favori` vs `feedback` TypeScript
-
-**Tests manquants**
-- [x] CT-12 — Test cohérence schéma ORM ↔ SQL
-- [x] CT-13 — Tests push notifications (B-01/B-02/B-03)
-- [x] CT-14 — Tests routes admin + RGPD
-- [x] CT-07 — Tests famille achats + garde
-
-**Documentation**
-- [x] CT-11 — Mettre à jour `docs/MIGRATION_GUIDE.md`
-- [x] CT-15 — Supprimer `STATUS_PHASES.md`
-- [x] CT-16 — Nettoyer `ROADMAP.md`
-- [x] CT-17 — Nettoyage `docs/` (fichiers Jeux obsolètes + vides)
-
-**SQL + Admin**
-- [x] CT-08 — Index manquants SQL (`idx_recette_ingredients_ingredient_id`, `idx_repas_planning_id`)
-- [x] CT-10 — Audit tables orphelines ORM ↔ SQL + test de non-régression
-- [x] CT-02-FE — Page frontend Admin Jobs (`/admin/jobs`)
-
----
-
-### 🔜 Sprint 8
-
-- [x] MT-01 — Cellier ↔ Inventaire cuisine (endpoint `/inventaire/consolide` + client TS `listerInventaireConsolide`)
-- [x] MT-03 — Score bien-être global (service + route + widget dashboard jauge)
-- [x] MT-04 — Alertes météo contextuelles cross-modules (route + widget dashboard)
-- [x] MT-06 — Widgets dashboard configurables (config GET/PUT + toggles + localStorage)
-- [x] MT-08 — Timeline vie familiale (route `/famille/timeline` + page frontend filtrable)
-- [x] MT-09 — OCR photo-frigo → checkboxes sélection avant import via `/inventaire/bulk`
-- [x] QW-01 — Widget météo sur dashboard (wttr.in Open-Meteo)
-- [x] QW-06 — "Aujourd'hui dans l'histoire de la famille" (route + widget dashboard)
-
-### ✅ Sprint 9
-
-- [x] MT-02 — WhatsApp sortant proactif
-- [x] MT-07 — Assistant vocal (Web Speech API → Mistral → API)
-- [x] J-03 — Job Dim 20h00 (planning semaine vide)
-- [x] J-04 — Job 06h00 (alertes péremptions)
-- [x] J-07 — Rapport mensuel budget
-- [x] J-08 — Score weekend
-- [x] J-09 — Contrôle garanties/contrats
-- [x] J-10 — Rapport jardin
-- [x] J-11 — Score bien-être hebdo
-- [x] IA-04 — Planificateur vacances IA
-- [x] IA-05 — Anomalies financières cross-modules
-- [x] IA-07 — Optimisation budget courses IA
-- [x] IA-08 — Diagnostic maison photo (Pixtral)
-
-### ✅ Sprint 10 (MVP implémenté)
-
-- [x] LT-01 — Intégration Garmin santé/sport
-- [x] LT-02 — Gamification sport + alimentation
-- [x] LT-03 — Mode Voyage avec checklists intelligentes
-- [x] LT-04 — Automations "Si → Alors"
-
----
-
-## Dépendances entre items
-
-```
-P-06 + P-07 (absorber migrations SQL) ──→ CT-12 (test cohérence ORM ↔ SQL)
-B-06 (url_source ORM) ────────────────→ CT-13 (tests push recettes)
-CT-02-FE (admin jobs UI) ─────────────→ dépend de CT-02 backend ✅
-MT-01 (cellier ↔ inventaire) ─────────→ courses consolidées (Sprint 8)
-MT-03 (score bien-être) ──────────────→ MT-06 (widget dashboard)
-MT-04 (alertes météo) ────────────────→ QW-01 (widget météo dashboard)
-J-11 (score bien-être hebdo) ─────────→ MT-03 (service score déjà là)
-LT-01 (Garmin) ───────────────────────→ MT-03 (activités sport → score bien-être)
+# ✅ Fix
+user_id = user.get("sub") or user.get("id")
+if not user_id:
+    raise HTTPException(status_code=401, detail="Identifiant utilisateur manquant")
 ```
 
+**Actions :**
+- [ ] Corriger les 2 occurrences dans `rgpd.py` (lignes 54 et 77)
+
 ---
 
-*Plan mis à jour le 28 mars 2026 — GitHub Copilot*
-*Référence : `ANALYSE_COMPLETE.md` (état post-Sprint 5)*
+### 🟠 C4 — Fix mutation DB dans un GET `automations.py` _(S)_
+
+**Fichier :** `src/api/routes/automations.py` (lignes 38–53)
+
+**Problème :** `GET /api/v1/automations` exécute un `session.commit()` si la liste est vide — violation idempotence HTTP, race conditions potentielles.
+
+**Actions :**
+- [ ] Extraire la logique d'initialisation dans un handler de démarrage (startup event) ou créer `POST /automations/init`
+- [ ] Le `GET` ne doit faire aucune mutation
+
+---
+
+### 🟠 C5 — Sanitisation entrée vocale `assistant.py` _(XS)_
+
+**Fichier :** `src/api/routes/assistant.py` (lignes 66–67)
+
+**Problème :** Commandes vocales parsées par regex et stockées sans passer par `SanitiseurDonnees` → risque injection HTML/SQL.
+
+```python
+# ❌ Actuel
+nom_article = course_match.group("article").strip(" .,!?")
+# → ArticleCourses(nom=nom_article) stocké directement
+
+# ✅ Fix
+from src.core.validation import SanitiseurDonnees
+nom_article = SanitiseurDonnees.nettoyer_texte(
+    course_match.group("article").strip(" .,!?")
+)
+```
+
+**Actions :**
+- [ ] Importer `SanitiseurDonnees` dans `assistant.py`
+- [ ] Appliquer `nettoyer_texte()` avant toute persistance de donnée vocale
+
+---
+
+### 🟡 C6 — Fix API SQLAlchemy dépréciée dans `auth.py` _(XS)_
+
+**Fichier :** `src/api/routes/auth.py` (ligne 96)
+
+```python
+# ❌ Actuel (API SQLAlchemy 1.x, supprimée en 2.0)
+profil = session.query(ProfilUtilisateur).get(int(user_id))
+
+# ✅ Fix (SQLAlchemy 2.0)
+profil = session.get(ProfilUtilisateur, int(user_id))
+```
+
+**Actions :**
+- [ ] Corriger la ligne dans `auth.py`
+- [ ] Scanner les autres routes pour d'autres occurrences de `.query(...).get()`
+
+---
+
+### 🟡 C7 — Remplacer `except Exception: pass` par logging _(M)_
+
+**12 occurrences dans :**
+
+| Fichier | Lignes | Contexte |
+|---------|--------|---------|
+| `planning.py` | L712 | Météo non chargée |
+| `planning.py` | L1123, L1150, L1169 | Vue semaine incomplète |
+| `famille.py` | L787 | Budget IA données incomplètes |
+| `famille.py` | L2683 | Suggestions jardin dégradées |
+| `dashboard.py` | L149, L281 | Alertes et métriques partielles |
+| `recherche.py` | L151, L179 | Résultats vides sans raison |
+| `export.py` | L204 | Export partiel silencieux |
+| `maison.py` | L3713 | Erreur swallowed service maison |
+
+```python
+# ❌ Actuel
+except Exception:
+    pass
+
+# ✅ Fix systématique
+except Exception as e:
+    logger.warning(f"[module] Erreur non bloquante: {e}")
+```
+
+**Actions :**
+- [ ] Corriger les 12 occurrences (8 fichiers)
+
+---
+
+### 🟡 C8 — Exposer `push_service.obtenir_abonnes()` public _(S)_
+
+**Fichier :** `src/services/core/cron/jobs.py` (lignes 106, 133)
+
+**Problème :** Accès à `push_service._subscriptions` (attribut privé). Après redémarrage, `_subscriptions` est vide → notifications ne partent pas silencieusement.
+
+**Actions :**
+- [ ] Ajouter méthode publique `obtenir_abonnes()` dans le service push (lecture depuis DB)
+- [ ] Remplacer les 2 accès `._subscriptions.keys()` par `push_service.obtenir_abonnes()`
+
+---
+
+### 🟡 C9 — Auto-discovery modèles dans `backup/service.py` _(S)_
+
+**Fichier :** `src/services/core/backup/service.py` (lignes 23–47)
+
+**Problème :** Liste de 25 modèles hardcodée. Les modèles `gamification.py` et `persistent_state.py` probablement non couverts (27+ fichiers modèles actuels).
+
+```python
+# ✅ Fix — auto-discovery via inspect
+import inspect
+from src.core import models as models_module
+from src.core.db import Base
+
+all_models = [
+    cls for _, cls in inspect.getmembers(models_module, inspect.isclass)
+    if issubclass(cls, Base) and cls is not Base
+]
+```
+
+**Actions :**
+- [ ] Remplacer la liste hardcodée par auto-discovery `inspect.getmembers()` sur `src.core.models`
+- [ ] Valider que tous les modèles sont couverts
+
+---
+
+### 🔵 C10 — Masquage numéro WhatsApp dans les logs (RGPD) _(XS)_
+
+**Fichier :** `src/services/integrations/whatsapp.py` (ligne 61)
+
+**Problème :** Même tronqué à 6 chiffres, le numéro reste une donnée personnelle RGPD.
+
+```python
+# ❌ Actuel
+logger.info(f"✅ Message WhatsApp envoyé à {destinataire[:6]}***")
+
+# ✅ Fix
+import hashlib
+hash_dest = hashlib.sha256(destinataire.encode()).hexdigest()[:8]
+logger.info(f"✅ Message WhatsApp envoyé à [hash:{hash_dest}]")
+```
+
+**Actions :**
+- [ ] Remplacer le log par hash SHA-256 court ou `"destinataire masqué"`
+
+---
+
+### 🔵 C11 — Garde de rôle côté frontend page admin _(XS)_
+
+**Fichier(s) :** Pages `frontend/src/app/(app)/admin/`
+
+**Problème :** Absence de vérification `role === "admin"` dans les composants (defense in depth manquant côté frontend).
+
+**Actions :**
+- [ ] Ajouter guard `if (user?.role !== "admin") return <Redirect to="/" />` dans les pages admin concernées
+
+---
+
+## 3. Sprint SQL — Consolidation
+
+> **~0.5 jour — PRIORITÉ 2**
+> Source : `ANALYSE_COMPLETE.md` §4
+
+### SQL1 — Supprimer le doublon `liste_courses` _(XS)_
+
+**Fichier :** `sql/INIT_COMPLET.sql`
+
+**Problème :** Table `liste_courses` (singulier) est un doublon de `listes_courses`. Bug documenté B-10.
+
+**Actions :**
+- [ ] Supprimer le bloc `CREATE TABLE liste_courses` de `INIT_COMPLET.sql`
+- [ ] Vérifier et supprimer toutes les FK qui referencent `liste_courses`
+- [ ] Vérifier qu'il n'y a aucun `INSERT INTO liste_courses`
+
+---
+
+### SQL2 — Ajouter les 5 index manquants _(S)_
+
+**Fichier :** `sql/INIT_COMPLET.sql`
+
+**Justification :** Requêtes fréquentes sans index → full table scan.
+
+```sql
+CREATE INDEX IF NOT EXISTS idx_articles_courses_liste_achete
+    ON articles_courses(liste_id, achete);
+
+CREATE INDEX IF NOT EXISTS idx_articles_inventaire_peremption
+    ON articles_inventaire(date_peremption);
+
+CREATE INDEX IF NOT EXISTS idx_repas_planning_planning_date
+    ON repas_planning(planning_id, date_repas);
+
+CREATE INDEX IF NOT EXISTS idx_historique_actions_user_date
+    ON historique_actions(user_id, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_paris_sportifs_statut_user
+    ON paris_sportifs(statut, user_id);
+```
+
+**Actions :**
+- [ ] Ajouter les 5 index dans `INIT_COMPLET.sql`
+
+---
+
+### SQL3 — Vérifier et supprimer vues obsolètes Streamlit _(S)_
+
+**Fichier :** `sql/INIT_COMPLET.sql`
+
+**Problème :** Vues `v_autonomie`, `v_budgets_status`, `v_stats_domaine_mois` créées pour l'ancienne version Streamlit — probablement inutilisées par FastAPI.
+
+**Actions :**
+- [ ] Grep `v_autonomie`, `v_budgets_status`, `v_stats_domaine_mois` dans `src/api/routes/`
+- [ ] Si aucun usage → supprimer les vues de `INIT_COMPLET.sql`
+- [ ] Si usages → conserver et documenter
+
+---
+
+### SQL4 — Ajouter trigger `listes_courses.modifie_le` _(S)_
+
+**Fichier :** `sql/INIT_COMPLET.sql`
+
+**Problème :** `listes_courses.modifie_le` non mis à jour quand un `articles_courses` change.
+
+```sql
+CREATE OR REPLACE FUNCTION update_liste_courses_modifie_le()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE listes_courses
+    SET modifie_le = NOW()
+    WHERE id = COALESCE(NEW.liste_id, OLD.liste_id);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_articles_courses_update_liste
+    AFTER INSERT OR UPDATE OR DELETE ON articles_courses
+    FOR EACH ROW EXECUTE FUNCTION update_liste_courses_modifie_le();
+```
+
+**Actions :**
+- [ ] Ajouter la fonction et le trigger dans `INIT_COMPLET.sql`
+
+---
+
+### SQL5 — Ajouter trigger invalidation cache planning _(S)_
+
+**Fichier :** `sql/INIT_COMPLET.sql`
+
+**Problème :** L'invalidation cache planning existe pour batch cooking mais pas pour les modifications directes de `repas_planning`.
+
+**Actions :**
+- [ ] Ajouter trigger `AFTER INSERT OR UPDATE OR DELETE ON repas_planning` → `pg_notify('planning_changed', user_id::text)`
+- [ ] Vérifier côté service si un listener écoute ce canal, sinon créer le handler
+
+---
+
+## 4. Sprint Tests — Couverture manquante
+
+> **~2-3 jours — PRIORITÉ 3**
+> Source : `ANALYSE_COMPLETE.md` §5
+
+### T1 — `test_routes_assistant.py` _(M)_
+
+**Gap :** Aucun test dédié pour `src/api/routes/assistant.py`
+
+**Actions — créer `tests/api/test_routes_assistant.py` :**
+- [ ] `test_commande_vocale_ajouter_article` — POST "ajoute du lait" → ArticleCourses créé
+- [ ] `test_commande_vocale_sanitisee` — input avec HTML → stocké sanitisé
+- [ ] `test_commande_vocale_inconnue` — commande non reconnue → réponse gracieuse
+- [ ] `test_commande_vocale_sans_auth` → 401
+
+---
+
+### T2 — `test_routes_whatsapp.py` _(M)_
+
+**Gap :** Aucun test pour `src/api/routes/webhooks_whatsapp.py`
+
+**Actions — créer `tests/api/test_routes_whatsapp.py` :**
+- [ ] `test_webhook_verification_challenge` — GET avec `hub.challenge` → retourne la valeur
+- [ ] `test_webhook_message_planning` — POST texte "planning" → réponse planning
+- [ ] `test_webhook_message_courses` — POST texte "courses" → réponse courses
+- [ ] `test_webhook_invalid_signature` — mauvaise signature → 403
+- [ ] `test_webhook_button_reply` — button_reply → machine d'état
+
+---
+
+### T3 — `test_cron_jobs.py` _(M)_
+
+**Gap :** Aucun test pour les 19 jobs APScheduler dans `src/services/core/cron/jobs.py`
+
+**Actions — créer `tests/services/test_cron_jobs.py` :**
+- [ ] `test_rappels_famille_job_scheduled` — job présent dans APScheduler
+- [ ] `test_rappel_courses_sql_correct` — requête utilise `articles_courses` pas `liste_courses`
+- [ ] `test_alertes_peremption_48h` — articles expirés détectés correctement
+- [ ] `test_resume_hebdo_structure` — dict retourné contient les sections attendues
+- [ ] `test_push_contextuel_soir_notif` — mock push_service, vérifier appel
+- [ ] `test_rapport_mensuel_budget` — mock email, vérifier envoi
+- [ ] `test_cron_push_service_uses_public_method` — pas d'accès `._subscriptions`
+
+---
+
+### T4 — `test_routes_automations.py` dédié _(S)_
+
+**Gap :** 6 tests partagés pour automations + voyages + garmin dans un seul fichier
+
+**Actions — créer `tests/api/test_routes_automations.py` :**
+- [ ] `test_lister_automations_sans_mutation` — GET ne crée rien
+- [ ] `test_creer_automation_si_alors`
+- [ ] `test_executer_automation_maintenant`
+- [ ] `test_automation_condition_stock_bas`
+
+---
+
+### T5 — `test_routes_voyages.py` + `test_routes_garmin.py` _(S)_
+
+**Actions — créer les 2 fichiers :**
+- [ ] `tests/api/test_routes_voyages.py` : CRUD voyages, génération courses, événement `voyage.en_cours`
+- [ ] `tests/api/test_routes_garmin.py` : sync matinal, recommandation dîner, score bien-être
+
+---
+
+### T6 — Tests services d'intégration sans couverture _(M)_
+
+**Gap :** 5 services d'intégration sans aucun test
+
+**Actions :**
+- [ ] `tests/services/test_whatsapp_service.py` : envoi message, envoi interactif, masquage numéro
+- [ ] `tests/services/test_google_calendar.py` : sync planning, création événement (mock OAuth)
+- [ ] `tests/services/test_ticket_caisse.py` : parsing ticket → articles dépenses
+- [ ] `tests/services/test_facture.py` : parsing facture → données structurées
+- [ ] `tests/services/test_recettes_enrichers.py` : enrichissement recette → données complètes
+
+---
+
+### T7 — Tests famille Phase 6 _(M)_
+
+**Gap :** Tests prévus mais non créés
+
+**Actions :**
+- [ ] Créer `tests/api/test_famille_garde.py` : config zones, semaines fermeture, jours-sans-crèche
+- [ ] Compléter `tests/api/test_famille_achats.py` : CRUD + suggestions IA (mock Mistral) + scoring + Vinted
+
+---
+
+### T8 — Fichiers `error.tsx` et `loading.tsx` manquants _(S)_
+
+**Gap :** Pages admin, ma-semaine et dashboard racine sans gestion d'erreur Next.js
+
+**Actions :**
+- [ ] Créer `frontend/src/app/(app)/admin/error.tsx`
+- [ ] Créer `frontend/src/app/(app)/admin/loading.tsx`
+- [ ] Créer `frontend/src/app/(app)/ma-semaine/error.tsx`
+- [ ] Créer `frontend/src/app/(app)/ma-semaine/loading.tsx`
+- [ ] Créer `frontend/src/app/(app)/error.tsx` (root app)
+
+---
+
+### T9 — Tests pages frontend manquantes _(M)_
+
+**Gap :** Pages récentes sans test Vitest
+
+**Actions — créer dans `frontend/src/__tests__/` :**
+- [ ] `admin/jobs.test.tsx`
+- [ ] `cuisine/photo-frigo.test.tsx`
+- [ ] `famille/timeline.test.tsx`
+- [ ] `outils/assistant-vocal.test.tsx`
+- [ ] `outils/nutritionniste.test.tsx`
+
+---
+
+## 5. Sprint Documentation
+
+> **~1 jour — PRIORITÉ 4**
+> Source : `ANALYSE_COMPLETE.md` §6
+
+### D1 — Mettre à jour `docs/ARCHITECTURE.md` _(S)_
+
+**Problème :** Modules Garmin, automations, voyages et gamification non documentés dans ARCHITECTURE.md.
+
+**Actions :**
+- [ ] Ajouter section "Intégration Garmin" dans ARCHITECTURE.md
+- [ ] Ajouter section "Module Gamification" dans ARCHITECTURE.md
+- [ ] Ajouter section "Module Voyages" dans ARCHITECTURE.md
+- [ ] Ajouter section "Automations Si→Alors" dans ARCHITECTURE.md
+- [ ] Mettre à jour le schéma architecture globale (WebSocket x4, 44+ routers)
+- [ ] Mettre à jour la liste des services (80+ services)
+
+---
+
+### D2 — Mettre à jour `docs/API_REFERENCE.md` _(S)_
+
+**Problème :** Routes manquantes : Garmin, automations, voyages, gamification.
+
+**Actions :**
+- [ ] Ajouter les endpoints manquants : `/garmin/*`, `/automations/*`, `/famille/voyages/*`, `/famille/gamification/*`
+- [ ] Vérifier cohérence avec les schémas Pydantic actuels
+
+---
+
+### D3 — Mettre à jour `docs/SERVICES_REFERENCE.md` _(S)_
+
+**Problème :** Famille refonte non reflétée, nouveaux services (Garmin, voyages, gamification, automations) absents.
+
+**Actions :**
+- [ ] Documenter la séparation famille → jules, budget, activités, garde
+- [ ] Ajouter les services Garmin, gamification, voyage, automations
+
+---
+
+### D4 — Régénérer `docs/ERD_SCHEMA.md` _(M)_
+
+**Problème :** Environ 100 tables documentées vs 130 réelles. V002 non reflétée.
+
+**Actions :**
+- [ ] Recenser les 130 tables actuelles depuis `sql/INIT_COMPLET.sql`
+- [ ] Regrouper par domaine (cuisine, famille, maison, jeux, planning, admin, intégrations)
+- [ ] Mettre à jour le diagramme ERD + les relations FK principales
+
+---
+
+### D5 — Supprimer `docs/REDIS_SETUP.md` → créer `docs/CACHE_SETUP.md` _(S)_
+
+**Problème :** `REDIS_SETUP.md` est trompeur — Redis n'est pas utilisé. L'app utilise cache L1 mémoire + L3 fichier (+ L2 Redis optionnel).
+
+**Actions :**
+- [ ] Supprimer `docs/REDIS_SETUP.md`
+- [ ] Créer `docs/CACHE_SETUP.md` : L1 mémoire (TTL court), L2 Redis (optionnel), L3 fichier (TTL long), `@avec_cache`, invalidation
+- [ ] Mettre à jour `docs/INDEX.md` (retirer REDIS, ajouter CACHE)
+
+---
+
+### D6 — Créer `docs/WHATSAPP.md` _(S)_
+
+**Actions :**
+- [ ] Machine d'état conversationnelle (commandes, states, transitions)
+- [ ] Setup Meta Cloud API (variables env requis, webhook URL, verification token)
+- [ ] Canaux sortants : messages simples, interactifs, templates
+- [ ] Liste commandes actuelles : `planning`, `courses`, `frigo`, `menu`
+- [ ] Liste commandes à venir : `jules`, `ajouter`, `budget`, `anniversaires`, `recette`, `tâches`
+
+---
+
+### D7 — Créer `docs/CRON_JOBS.md` _(S)_
+
+**Actions :**
+- [ ] Tableau complet des 19 jobs APScheduler + 6 jeux : ID, schedule, description, canaux, dépendances
+- [ ] Section "Jobs à créer" (6 jobs proposés dans l'analyse)
+- [ ] Section "Monitoring" : logs, détection échec, trigger manuel
+- [ ] Section "Trigger manuel" via endpoint admin
+
+---
+
+### D8 — Créer `docs/ADMIN_GUIDE.md` _(S)_
+
+**Actions :**
+- [ ] Mode admin : accès, rôles, navigation
+- [ ] Audit logs : format, retention, export CSV/JSON
+- [ ] Backup : commandes CLI, fréquence
+- [ ] Trigger manuel cron jobs depuis UI
+- [ ] Gestion utilisateurs (liste, désactivation, reset password)
+- [ ] Test notifications (WhatsApp, push, email)
+- [ ] Cache stats + purge
+
+---
+
+### D9 — Créer `docs/AUTOMATIONS.md` _(S)_
+
+**Actions :**
+- [ ] Architecture moteur Si→Alors
+- [ ] Conditions disponibles : `stock_bas`, `peremption_proche`, `meteo_xxx`, `budget_depasse`
+- [ ] Actions disponibles : `ajouter_courses`, `notifier`, `creer_tache`, `desactiver_planning`
+- [ ] Format JSON des règles
+- [ ] Exemples de règles pratiques
+
+---
+
+### D10 — Créer `docs/GARMIN.md` _(S)_
+
+**Actions :**
+- [ ] OAuth 2.0 setup Garmin Connect API
+- [ ] Scopes requis (activités, santé, sommeil)
+- [ ] Sync matinal : données importées, modèles DB (`activites_garmin`, `calories_actives_garmin`)
+- [ ] Endpoint recommandation dîner selon calories brûlées
+- [ ] Contribution au score bien-être
+
+---
+
+### D11 — Mettre à jour `ROADMAP.md` _(S)_
+
+**Problème :** Sprint 8-9 marqués "À FAIRE" alors que déjà partiellement livrés.
+
+**Actions :**
+- [ ] Fermer les items Sprint 8 et Sprint 9 déjà livrés
+- [ ] Aligner sur l'état réel actuel
+- [ ] Ajouter sprints correctifs, SQL, tests, docs comme prochaines priorités
+
+---
+
+## 6. Sprint 11 — Features manquantes prioritaires
+
+> **~2-3 jours**
+> Source : `ANALYSE_COMPLETE.md` §3 (Gaps par module)
+
+### 🟠 F3 — Rappels jour-par-jour (notifications planning) _(M)_
+
+**État :** Manquant.
+
+**Actions :**
+- [ ] Ajouter dans `rappels_generaux` une vérification `repas_planning` du jour
+- [ ] Notifier via ntfy + push : "Ce soir : [recette]" avec les ingrédients à sortir
+- [ ] Paramètre opt-in dans les préférences utilisateur
+
+---
+
+### 🟠 F4 — Logs sécurité admin _(M)_
+
+**État :** Manquant.
+
+**Actions :**
+- [ ] Créer table `logs_securite` : `user_id`, `event_type`, `ip`, `user_agent`, `created_at` (SQL + ORM)
+- [ ] Ajouter RLS sur la table (admin only)
+- [ ] Logger les événements dans les middlewares rate_limiting et auth
+- [ ] Endpoint `GET /api/v1/admin/security-logs` avec filtres type/date
+- [ ] Widget dans la page admin avec les derniers événements suspects
+
+---
+
+### 🟡 F5 — Pages frontend maison manquantes _(S)_
+
+**État :** API existante, pages absentes.
+
+**Actions :**
+- [ ] Créer `frontend/src/app/(app)/maison/contrats/page.tsx`
+- [ ] Créer `frontend/src/app/(app)/maison/artisans/page.tsx`
+- [ ] Créer `frontend/src/app/(app)/maison/diagnostics/page.tsx`
+- [ ] Ajouter les liens dans la navigation maison
+
+---
+
+### 🟡 F6 — Connecter scan ticket caisse → dépenses auto _(S)_
+
+**État :** `src/services/integrations/ticket_caisse.py` existe mais non connecté.
+
+**Actions :**
+- [ ] Endpoint `POST /api/v1/maison/depenses/import-ticket` (upload photo + parsing OCR)
+- [ ] Afficher résultat parsé avec confirmation avant import
+- [ ] Bouton "Importer depuis photo" dans la page dépenses
+
+---
+
+### 🟡 F8 — Partage recette (lien public + PDF) _(S)_
+
+**État :** Entièrement manquant.
+
+**Actions :**
+- [ ] Endpoint `POST /api/v1/recettes/{id}/partager` → génère token temporaire (24-48h)
+- [ ] Route publique `GET /share/recette/{token}` (sans auth)
+- [ ] Endpoint `GET /api/v1/recettes/{id}/export-pdf`
+- [ ] Bouton "Partager" dans la fiche recette
+
+---
+
+### 🟡 F10 — Gestion conflits cross-module visible dans l'UI _(S)_
+
+**État :** `ServiceConflits.detecter_conflits()` existe, non surfacé.
+
+**Actions :**
+- [ ] Endpoint `GET /api/v1/planning/conflits`
+- [ ] Widget "Conflits" dans la vue planning (ex: "Activité Jules × repas 19h00")
+- [ ] Option de résolution rapide (déplacer l'un ou l'autre)
+
+---
+
+### 🔵 F11 — Vue calendrier mensuel planning _(M)_
+
+**État :** Vue hebdomadaire seulement.
+
+**Actions :**
+- [ ] Endpoint `GET /api/v1/planning/mensuel?mois=YYYY-MM`
+- [ ] Composant `CalendrierMensuel` dans `frontend/src/composants/`
+- [ ] Toggle semaine/mois dans la page planning
+
+---
+
+### 🔵 F12 — Export planning PDF depuis l'UI _(XS)_
+
+**État :** Endpoint export existe, pas de bouton dans la page planning.
+
+**Actions :**
+- [ ] Ajouter bouton "Exporter en PDF" dans `frontend/src/app/(app)/planning/page.tsx`
+- [ ] Appel vers `GET /api/v1/export/planning` avec paramètres semaine/mois
+
+---
+
+### 🔵 F13 — Interface backtest stratégies paris _(S)_
+
+**État :** Service existe, UI partielle.
+
+**Actions :**
+- [ ] Compléter `frontend/src/app/(app)/jeux/paris/page.tsx` avec onglet "Backtests"
+- [ ] Graphique performance stratégie vs bankroll dans le temps
+
+---
+
+### 🔵 F14 — Détection patterns jeux (hot hand / régression) _(S)_
+
+**État :** TODO dans `jeux.py` ligne ~372.
+
+**Actions :**
+- [ ] Implémenter l'analyse statistique des séries de paris
+- [ ] Endpoint `GET /api/v1/jeux/patterns` → détection séquences chaudes/froides
+- [ ] Widget dans la page paris : "Attention — 5 paris perdants consécutifs"
+
+---
+
+## 7. Sprint 12 — Architecture & Refactoring
+
+> **~2-3 jours**
+> Source : `ANALYSE_COMPLETE.md` §13
+
+### A1 — Splitter `maison.py` (~3700 lignes) _(L)_
+
+**Problème :** Fichier trop grand, maintenabilité dégradée.
+
+**Actions :**
+- [ ] Créer `src/api/routes/maison_projets.py`
+- [ ] Créer `src/api/routes/maison_entretien.py`
+- [ ] Créer `src/api/routes/maison_finances.py` (dépenses, contrats, artisans)
+- [ ] Créer `src/api/routes/maison_jardin.py`
+- [ ] Garder `maison.py` comme router central avec `include_router`
+- [ ] Mettre à jour `src/api/routes/__init__.py` et `main.py`
+- [ ] Vérifier qu'aucun test ne casse
+
+---
+
+### A2 — Splitter `famille.py` (~2700 lignes) _(L)_
+
+**Actions :**
+- [ ] Créer `src/api/routes/famille_jules.py`
+- [ ] Créer `src/api/routes/famille_budget.py`
+- [ ] Créer `src/api/routes/famille_activites.py`
+- [ ] Garder `famille.py` comme re-export/router central
+- [ ] Mettre à jour `__init__.py` et `main.py`
+
+---
+
+### A3 — Uniformiser noms factory (tout en français) _(S)_
+
+**Problème :** Mélange `get_xxx_service()` (anglais) et `obtenir_service_xxx()` (français).
+
+**Actions :**
+- [ ] Lister toutes les fonctions factory `get_*_service` dans `src/services/`
+- [ ] Renommer en `obtenir_*_service()` par module
+- [ ] Mettre à jour les imports dans les routes correspondantes
+- [ ] Mettre à jour les tests
+
+---
+
+### A4 — Génération automatique types TypeScript depuis Pydantic _(M)_
+
+**Problème :** Types `frontend/src/types/` maintenus manuellement → risque de désynchronisation.
+
+**Actions :**
+- [ ] Installer `openapi-typescript` : `npm install -D openapi-typescript`
+- [ ] Configurer script `npm run generate-types` → `openapi-typescript http://localhost:8000/openapi.json -o src/types/api-generated.ts`
+- [ ] Ajouter au `package.json`
+- [ ] Documenter dans le README frontend
+
+---
+
+### A5 — Audit tables orphelines ORM ↔ SQL _(M)_
+
+Source : `ANALYSE_COMPLETE.md` §4
+
+**Actions :**
+- [ ] Lister les `__tablename__` de `src/core/models/voyage.py` → vérifier dans INIT_COMPLET
+- [ ] Vérifier `journal_bord`, `sessions_travail`, `log_statut_objets` : ORM existant ?
+- [ ] Vérifier `gamification.py` et `persistent_state.py` : présents en SQL ?
+- [ ] Pour orphelines SQL sans ORM : créer le modèle ou supprimer la table
+- [ ] Pour ORM sans SQL : ajouter CREATE TABLE ou supprimer le modèle
+
+---
+
+## 8. Sprint 13 — WhatsApp étendu + Email complet
+
+> **~2 jours**
+> Source : `ANALYSE_COMPLETE.md` §11
+
+### W1 — Compléter TODO IA régénération planning WhatsApp _(S)_
+
+**Fichier :** `src/api/routes/webhooks_whatsapp.py` (TODO ligne 131)
+
+**Actions :**
+- [ ] Implémenter le handler `regenerer_planning_ia()` sur button reply "Régénérer"
+- [ ] Appeler `PlanningService.generer_planning_ia()` et envoyer le nouveau planning en WhatsApp
+
+---
+
+### W2 — Nouvelles commandes WhatsApp _(M)_
+
+**Actions — ajouter dans `webhooks_whatsapp.py` :**
+
+| Commande | Action | Effort |
+|----------|--------|--------|
+| `jules` / `bébé` | Résumé Jules : repas, activités, jalons récents | S |
+| `ajouter [article]` | Ajouter directement en liste courses active | S |
+| `budget` | Budget mensuel en cours vs objectif | S |
+| `anniversaires` | Prochains anniversaires 30 jours | XS |
+| `recette [nom]` | Fiche recette avec ingrédients | S |
+| `tâches` | Tâches maison en retard | S |
+| `aide admin` | (admin only) liste commandes admin | XS |
+
+- [ ] Ajouter les 7 commandes dans la machine d'état WhatsApp
+
+---
+
+### W3 — Compléter dispatcher email SMTP _(M)_
+
+**État :** `ServiceEmail` via Resend configuré, certains envois non câblés.
+
+**Actions :**
+- [ ] Rapport hebdo famille → vérifier que l'email est envoyé (cron `resume_hebdo`)
+- [ ] Rapport mensuel budget → email en plus de ntfy
+- [ ] Alertes critiques → email si péremption < 24h OU garantie < 30j
+- [ ] Tester en dev avec compte Resend sandbox
+
+---
+
+### W4 — Préférences canaux notification utilisateur _(S)_
+
+**Actions :**
+- [ ] Ajouter champ `preferences_notifications` JSONB dans `preferences_utilisateurs` (SQL + ORM)
+- [ ] Endpoint `GET/PUT /api/v1/preferences/notifications`
+- [ ] UI dans les paramètres : toggle par canal (ntfy, WhatsApp, email, push) par catégorie (rappels, alertes, résumés)
+
+---
+
+## 9. Sprint 14 — Nouvelles opportunités IA + Cron jobs manquants
+
+> **~3-4 jours**
+> Source : `ANALYSE_COMPLETE.md` §9 + §10
+
+### IA1 — Résumé famille contextualisé hebdomadaire _(M)_
+
+**Valeur :** ⭐⭐⭐ Haute
+
+**Actions :**
+- [ ] `src/services/dashboard/resume_famille_ia.py` — résumé bienveillant via Mistral
+- [ ] Contexte injecté : planning semaine + inventaire + budget + score Jules + météo
+- [ ] Endpoint `GET /api/v1/dashboard/resume-hebdo-ia`
+- [ ] Widget dashboard "Votre semaine en un coup d'œil"
+- [ ] Inclure dans le cron `resume_hebdo` (envoi push + email vendredi soir)
+
+---
+
+### IA2 — Prédiction liste courses _(L)_
+
+**Valeur :** ⭐⭐⭐ Haute — **Prérequis :** Historique achats > 4 semaines
+
+**Actions :**
+- [ ] `src/services/cuisine/prediction_courses.py` — analyse historique `articles_courses` + fréquence
+- [ ] Endpoint `GET /api/v1/courses/predictions` → liste pré-complétée avec scores confiance
+- [ ] Dans la page courses : section "Articles habituels" (checkboxes pré-cochées)
+- [ ] Amélioration progressive via feedback (ajout/refus)
+
+---
+
+### IA3 — Détection anomalies dépenses _(M)_
+
+**Valeur :** ⭐⭐⭐ Haute
+
+**Actions :**
+- [ ] `src/services/dashboard/anomalies_financieres.py` — compare mois courant vs N-1, N-2
+- [ ] Endpoint `GET /api/v1/dashboard/anomalies-financieres`
+- [ ] Alertes : +X% vs moyenne habituelle par catégorie (courses, énergie, loisirs)
+- [ ] Widget dashboard avec recommandations IA
+
+---
+
+### IA4 — Chat IA contextuel cross-module enrichi _(M)_
+
+**État :** Chat IA existe, contexte limité.
+
+**Actions :**
+- [ ] Injecter dans le prompt système : planning + inventaire + budget + score Jules + événements famille
+- [ ] Mémoire conversationnelle courte (5 derniers échanges)
+- [ ] Endpoint `POST /api/v1/assistant/chat` avec contexte enrichi
+
+---
+
+### IA5 — Suggestions activités Jules contextuelles _(S)_
+
+**Valeur :** ⭐⭐
+
+**Actions :**
+- [ ] Dans `JulesAIService` : enrichir le prompt avec météo + crèche ouverte/fermée + âge Jules
+- [ ] Endpoint `GET /api/v1/famille/jules/activites-suggestions?contexte=meteo_pluie`
+- [ ] Widget dans la page famille Jules
+
+---
+
+### IA6 — Génération automatique d'automations via IA _(M)_
+
+**Valeur :** ⭐⭐
+
+**Actions :**
+- [ ] Endpoint `POST /api/v1/automations/generer-ia` — prompt libre → règle Si→Alors JSON
+- [ ] Mistral génère `{ condition, action, parametres }`
+- [ ] Interface : champ texte libre → prévisualisation règle → confirmation
+
+---
+
+### IA7 — Prédiction péremption personnalisée _(S)_
+
+**Valeur :** ⭐⭐
+
+**Actions :**
+- [ ] Analyser durée de vie réelle des produits (date achat → date consommation)
+- [ ] Modèle simple : durée_vie_moyenne par catégorie × facteur conservation
+- [ ] Alertes proactives basées sur ce modèle plutôt que date DB fixe
+
+---
+
+### J1 — Job `sync_google_calendar` _(S)_
+
+| Attribut | Valeur |
+|----------|--------|
+| Schedule | Quotidien 23:00 |
+| Description | Sync planning repas + activités → Google Calendar |
+| Canal | interne |
+| Dépendance | `google_calendar.py` service existant |
+
+**Actions :**
+- [ ] Ajouter job APScheduler `sync_google_calendar` (23h00 quotidien)
+- [ ] Sync des events créés/modifiés depuis 24h
+
+---
+
+### J2 — Job `rapport_nutrition_jules` _(S)_
+
+| Attribut | Valeur |
+|----------|--------|
+| Schedule | Dimanche 19:00 |
+| Description | Bilan nutrition Jules semaine |
+| Canal | ntfy + email |
+
+**Actions :**
+- [ ] Agréger repas Jules de la semaine depuis `repas_planning` (champ `plat_jules`)
+- [ ] Calculer score diversité, aliments nouveaux, aliments refusés
+- [ ] Envoyer résumé ntfy + email dimanche soir
+
+---
+
+### J3 — Job `alerte_stock_bas` _(S)_
+
+| Attribut | Valeur |
+|----------|--------|
+| Schedule | Quotidien 07:00 |
+| Description | Articles inventaire < seuil minimum → ajout auto liste courses |
+| Canal | ntfy |
+
+**Actions :**
+- [ ] Requête `articles_inventaire WHERE quantite < seuil_minimum AND actif = true`
+- [ ] Créer ou compléter la liste courses du jour
+- [ ] Notification ntfy "X articles ajoutés automatiquement"
+
+---
+
+### J4 — Job `archive_batches_expires` _(XS)_
+
+| Attribut | Valeur |
+|----------|--------|
+| Schedule | Quotidien 02:00 |
+| Description | Archiver préparations batch expirées |
+
+**Actions :**
+- [ ] `UPDATE preparations_batch SET archive = true WHERE date_expiration < NOW()`
+
+---
+
+### J5 — Job `rapport_maison_mensuel` _(S)_
+
+| Attribut | Valeur |
+|----------|--------|
+| Schedule | 1er du mois 09:30 |
+| Description | État maison : projets actifs, entretiens à venir, dépenses mois |
+| Canal | ntfy + email |
+
+**Actions :**
+- [ ] Agréger : projets en cours, entretiens planifiés N+30j, dépenses maison mois N-1
+- [ ] Envoyer ntfy + email
+
+---
+
+### J6 — Job `sync_openFoodFacts` _(S)_
+
+| Attribut | Valeur |
+|----------|--------|
+| Schedule | Dimanche 03:00 |
+| Description | Refresh cache OpenFoodFacts pour les articles fréquents |
+
+**Actions :**
+- [ ] Identifier les produits scannés les 30 derniers jours
+- [ ] Rafraîchir les données nutritionnelles depuis OpenFoodFacts API
+- [ ] Mettre à jour `articles_inventaire.donnees_nutritionnelles`
+
+---
+
+## 10. Sprint 15 — Interactions inter-modules avancées
+
+> **~3-4 jours**
+> Source : `ANALYSE_COMPLETE.md` §7 + §8
+
+### IM1 — Cuisine × Famille : adaptation auto repas adultes → Jules (semaine entière) _(M)_
+
+**Valeur :** Gain de temps majeur
+
+**Actions :**
+- [ ] `ServiceVersionRecetteJules.adapter_planning(planning_id)` → batch sur tous les repas de la semaine
+- [ ] Endpoint `POST /api/v1/planning/{id}/adapter-jules`
+- [ ] UI : bouton "Adapter toute la semaine pour Jules" dans le planning
+
+---
+
+### IM2 — Maison (Jardin) × Cuisine : stock récoltes → recettes suggérées _(S)_
+
+**Valeur :** Cohérence local/bio
+
+**Actions :**
+- [ ] Endpoint `GET /api/v1/recettes/depuis-jardin` → récoltes disponibles → recettes suggérées
+- [ ] Mention dans le rapport jardin hebdo (cron `rapport_jardin`)
+- [ ] Widget dashboard cuisine "Récolter et cuisiner"
+
+---
+
+### IM3 — Jeux × Famille (Budget) : alerte paris > seuil semaine _(S)_
+
+**Valeur :** Gaming responsable
+
+**Actions :**
+- [ ] Paramètre `seuil_paris_semaine` dans les préférences utilisateur
+- [ ] Dans `BudgetGuardMiddleware` : vérifier cumul paris semaine courante
+- [ ] Si dépassement : notif ntfy + WhatsApp + entrée `logs_securite`
+- [ ] Dashboard jeux : indicateur "Budget paris : X€ / Y€ cette semaine"
+
+---
+
+### IM4 — Planning × Famille (Voyages) : pause automatique planning lors voyage _(S)_
+
+**État :** Événement `voyage.en_cours` émis mais non intercepté par le planning.
+
+**Actions :**
+- [ ] Dans le service planning : écouter `voyage.en_cours` via Event Bus
+- [ ] Suspendre la génération automatique du planning pendant le voyage
+- [ ] Reprendre à la date de retour
+- [ ] Notification "Planning mis en pause — voyage détecté"
+
+---
+
+### IM5 — Maison (Energie) × Cuisine : heures creuses → suggérer appareils _(S)_
+
+**Valeur :** Optimisation éco/coût
+
+**Actions :**
+- [ ] Enrichir les données énergie avec les plages heures creuses (configurable)
+- [ ] Endpoint `GET /api/v1/cuisine/suggestions-heures-creuses`
+- [ ] Widget cuisine : "Heures creuses de 22h à 6h — lancez le Cookeo maintenant"
+
+---
+
+### IM6 — Garmin × Planning (Nutrition) : calories brûlées → ajustement macros _(M)_
+
+**Valeur :** Santé personnalisée
+
+**Actions :**
+- [ ] Dans `garmin_sync_matinal` : calculer les macros supplémentaires nécessaires
+- [ ] Endpoint `GET /api/v1/planning/ajustement-macros-garmin`
+- [ ] Affichage dans le planning : "Vous avez brûlé +450 kcal → ajustez le dîner"
+
+---
+
+### IM7 — Garmin × Famille (Bien-être) : dashboard santé famille _(M)_
+
+**Valeur :** Vue globale santé famille
+
+**Actions :**
+- [ ] Endpoint `GET /api/v1/famille/sante-globale` — score Jules + données Garmin adultes
+- [ ] Widget dashboard "Santé famille cette semaine"
+- [ ] Métriques : activité adultes (Garmin), sommeil, nutrition Jules, score bien-être global
+
+---
+
+### IM8 — Jeux × Outils (Automations) : gain jeux → journal/budget _(S)_
+
+**Actions :**
+- [ ] Action automation `noter_gain_jeux` — si gain > X€ → entrée journal + ligne budget
+- [ ] Exemple règle : "Si gain paris > 50€ → noter dans journal + ajouter au budget"
+
+---
+
+### IM9 — Maison (Diagnostics IA) × Artisans : workflow réparation complet _(M)_
+
+**Valeur :** Photo → diagnostic → artisans en 3 étapes
+
+**Actions :**
+- [ ] `POST /api/v1/maison/diagnostics/ia-photo` → Pixtral → identification panne + estimation coût
+- [ ] Résultat diag → lien vers liste artisans filtrée par type de panne
+- [ ] Création automatique d'un projet maison depuis le diagnostic
+- [ ] Page `maison/diagnostics/page.tsx` (voir Sprint 11 F5)
+
+---
+
+## 11. Sprint 16 — Admin complet
+
+> **~2 jours**
+> Source : `ANALYSE_COMPLETE.md` §12
+
+### ADM1 — Endpoints admin manquants _(M)_
+
+**Actions — créer/compléter dans `src/api/routes/admin.py` :**
+
+```
+POST /api/v1/admin/jobs/{job_id}/run      → Trigger manuel d'un cron job
+GET  /api/v1/admin/jobs                   → Liste + dernière exécution + statut
+GET  /api/v1/admin/jobs/{job_id}/logs    → Logs dernière exécution
+POST /api/v1/admin/whatsapp/test          → Message WhatsApp de test
+POST /api/v1/admin/push/test              → Push notification de test
+POST /api/v1/admin/email/test             → Email de test
+GET  /api/v1/admin/services/health        → Health check registre services
+GET  /api/v1/admin/cache/stats            → Statistiques cache hit/miss/size
+POST /api/v1/admin/cache/clear            → Vider cache L1 + L3
+GET  /api/v1/admin/users                  → Liste utilisateurs
+POST /api/v1/admin/users/{id}/disable     → Désactiver compte
+GET  /api/v1/admin/db/coherence           → Lancer test cohérence rapide
+```
+
+- [ ] Tous avec `Depends(require_role("admin"))`
+- [ ] Rate limiting spécifique admin : 5 req/min sur triggers jobs
+- [ ] Audit log automatique sur chaque action admin
+
+---
+
+### ADM2 — Pages frontend admin manquantes _(M)_
+
+```
+frontend/src/app/(app)/admin/
+  ├── page.tsx                    → Audit logs (existant ✅)
+  ├── jobs/page.tsx               → À compléter : liste + trigger + logs
+  ├── services/page.tsx           → À créer : health check + cache stats
+  ├── notifications/page.tsx      → À créer : test WhatsApp/Push/Email + historique
+  └── utilisateurs/page.tsx       → À créer : liste users + désactiver + reset
+```
+
+**Actions :**
+- [ ] Compléter `admin/jobs/page.tsx` : table jobs, bouton ▶ Exécuter, toast feedback, logs
+- [ ] Créer `admin/services/page.tsx` : health services + stats cache
+- [ ] Créer `admin/notifications/page.tsx` : tester canaux + historique envois
+- [ ] Créer `admin/utilisateurs/page.tsx` : liste users + actions (désactiver, reset password)
+
+---
+
+### ADM3 — Sécurité audit logs généralisée _(S)_
+
+**Actions :**
+- [ ] Généraliser l'audit log automatique à toutes les actions admin
+- [ ] Intégrer logs sécurité (Sprint 11 F4) dans la page admin (`admin/page.tsx`)
+- [ ] Navigation admin conditionnelle `role === "admin"` vérifiée dans chaque composant (defense in depth)
+
+---
+
+## 12. Dépendances entre items
+
+```
+C1 (fix recherche imports) ─────────→ T1 (tests assistant)
+C2 (fix SQL cron) ─────────────────→ T3 (tests cron jobs)
+SQL1 (supprimer liste_courses) ──────→ C2 (à faire en même temps)
+SQL2 (index) ───────────────────────→ meilleures perfs pour IA3 (anomalies)
+C8 (méthode publique push) ──────────→ T3 (tests cron — accès public)
+T6 (tests services intégrations) ───→ W1 (WhatsApp IA complet)
+D5 (supprimer REDIS_SETUP.md) ───────→ docs cohérentes
+D7 (CRON_JOBS.md) ──────────────────→ J1 à J6 (référence pour nouveaux jobs)
+F2 (profil diététique) ─────────────→ IA3 (anomalies dépenses nutrition) + F3 (rappels)
+W4 (préférences canaux) ─────────────→ F3 (rappels planning opt-in)
+IA1 (résumé hebdo IA) ──────────────→ W2 (commande WhatsApp `résumé`)
+IA2 (prédiction courses) ───────────→ J3 (alerte stock bas)
+IM6 (Garmin × nutrition) ───────────→ J2 (rapport nutrition Jules)
+A1 (split maison.py) ───────────────→ ADM1 (endpoints admin lisibles)
+A2 (split famille.py) ──────────────→ T7 (tests famille plus ciblés)
+A3 (unifier factory) ───────────────→ A4 (types TS proprement générés)
+ADM1 (endpoints admin) ─────────────→ ADM2 (pages frontend admin)
+F4 (logs sécurité) ─────────────────→ ADM3 (admin audit généralisé)
+F5 (pages maison) ──────────────────→ IM9 (diagnostics IA × artisans)
+```
+
+---
+
+## 13. Suivi d'avancement global
+
+### Sprint Correctif
+
+- [ ] C1 — Fix imports `recherche.py` (ActiviteFamille, NoteMemo, ContactFamille)
+- [ ] C2 — Fix SQL cron `liste_courses` → `articles_courses`
+- [ ] C3 — Fix RGPD user_id vide
+- [ ] C4 — Fix mutation DB dans GET automations
+- [ ] C5 — Sanitisation entrée vocale assistant
+- [ ] C6 — Fix API SQLAlchemy dépréciée auth.py
+- [ ] C7 — Remplacer 12x `except: pass` par logging
+- [ ] C8 — Méthode publique `push_service.obtenir_abonnes()`
+- [ ] C9 — Auto-discovery modèles backup/service.py
+- [ ] C10 — Masquage numéro WhatsApp logs RGPD
+- [ ] C11 — Garde de rôle frontend pages admin
+
+### Sprint SQL
+
+- [ ] SQL1 — Supprimer doublon `liste_courses`
+- [ ] SQL2 — 5 index manquants
+- [ ] SQL3 — Vérifier/supprimer vues Streamlit obsolètes
+- [ ] SQL4 — Trigger `listes_courses.modifie_le`
+- [ ] SQL5 — Trigger invalidation cache planning
+
+### Sprint Tests
+
+- [ ] T1 — `test_routes_assistant.py`
+- [ ] T2 — `test_routes_whatsapp.py`
+- [ ] T3 — `test_cron_jobs.py`
+- [ ] T4 — `test_routes_automations.py` dédié
+- [ ] T5 — `test_routes_voyages.py` + `test_routes_garmin.py`
+- [ ] T6 — Tests services intégrations (5 fichiers)
+- [ ] T7 — Tests famille Phase 6 (garde + achats)
+- [ ] T8 — `error.tsx` + `loading.tsx` manquants (admin, ma-semaine, root)
+- [ ] T9 — Tests pages frontend (5 fichiers)
+
+### Sprint Documentation
+
+- [ ] D1 — Mettre à jour `ARCHITECTURE.md`
+- [ ] D2 — Mettre à jour `API_REFERENCE.md`
+- [ ] D3 — Mettre à jour `SERVICES_REFERENCE.md` (famille refonte)
+- [ ] D4 — Régénérer `ERD_SCHEMA.md` (130 tables)
+- [ ] D5 — Supprimer `REDIS_SETUP.md` → créer `CACHE_SETUP.md`
+- [ ] D6 — Créer `docs/WHATSAPP.md`
+- [ ] D7 — Créer `docs/CRON_JOBS.md`
+- [ ] D8 — Créer `docs/ADMIN_GUIDE.md`
+- [ ] D9 — Créer `docs/AUTOMATIONS.md`
+- [ ] D10 — Créer `docs/GARMIN.md`
+- [ ] D11 — Mettre à jour `ROADMAP.md`
+
+### Sprint 11 — Features prioritaires
+
+- [ ] F3 — Rappels jour-par-jour notifications planning
+- [ ] F4 — Logs sécurité admin
+- [ ] F5 — Pages frontend maison (contrats, artisans, diagnostics)
+- [ ] F6 — Scan ticket caisse → dépenses auto
+- [ ] F8 — Partage recette (lien + PDF)
+- [ ] F10 — Conflits cross-module visible UI
+- [ ] F11 — Vue calendrier mensuel planning
+- [ ] F12 — Export planning PDF depuis UI
+- [ ] F13 — Interface backtest stratégies paris
+- [ ] F14 — Détection patterns jeux (hot hand)
+
+### Sprint 12 — Architecture
+
+- [ ] A1 — Splitter `maison.py`
+- [ ] A2 — Splitter `famille.py`
+- [ ] A3 — Uniformiser noms factory (français)
+- [ ] A4 — Génération automatique types TypeScript
+- [ ] A5 — Audit tables orphelines ORM ↔ SQL
+
+### Sprint 13 — WhatsApp + Email
+
+- [ ] W1 — TODO IA régénération planning WhatsApp (L131)
+- [ ] W2 — 7 nouvelles commandes WhatsApp
+- [ ] W3 — Compléter dispatcher email SMTP
+- [ ] W4 — Préférences canaux notification utilisateur
+
+### Sprint 14 — IA + Cron
+
+- [ ] IA1 — Résumé famille contextualisé IA
+- [ ] IA2 — Prédiction liste courses
+- [ ] IA3 — Détection anomalies dépenses
+- [ ] IA4 — Chat IA contextuel cross-module enrichi
+- [ ] IA5 — Suggestions activités Jules contextuelles
+- [ ] IA6 — Génération automations via IA
+- [ ] IA7 — Prédiction péremption personnalisée
+- [ ] J1 — Job `sync_google_calendar`
+- [ ] J2 — Job `rapport_nutrition_jules`
+- [ ] J3 — Job `alerte_stock_bas`
+- [ ] J4 — Job `archive_batches_expires`
+- [ ] J5 — Job `rapport_maison_mensuel`
+- [ ] J6 — Job `sync_openFoodFacts`
+
+### Sprint 15 — Inter-modules
+
+- [ ] IM1 — Cuisine × Jules : adaptation auto repas semaine
+- [ ] IM2 — Jardin × Cuisine : stock récoltes → recettes
+- [ ] IM3 — Jeux × Budget : alerte paris seuil semaine
+- [ ] IM4 — Planning × Voyages : pause automatique
+- [ ] IM5 — Energie × Cuisine : heures creuses → appareils
+- [ ] IM6 — Garmin × Nutrition : ajustement macros
+- [ ] IM7 — Garmin × Famille : dashboard santé
+- [ ] IM8 — Jeux × Automations : gain → journal/budget
+- [ ] IM9 — Diagnostics IA × Artisans : workflow réparation
+
+### Sprint 16 — Admin complet
+
+- [ ] ADM1 — Endpoints admin manquants (12 endpoints)
+- [ ] ADM2 — Pages frontend admin (3 à créer, 1 à compléter)
+- [ ] ADM3 — Sécurité audit logs généralisée
+
+---
+
+*Plan généré le 28 mars 2026 depuis `ANALYSE_COMPLETE.md` (sections 2→13 + annexes) — GitHub Copilot*

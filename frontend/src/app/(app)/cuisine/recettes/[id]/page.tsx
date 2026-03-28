@@ -17,7 +17,6 @@ import {
   Heart,
   Printer,
   Baby,
-  Star,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -250,19 +249,7 @@ export default function PageDetailRecette({
             </CardContent>
           </Card>
         )}
-        {recette.note_moyenne != null && (
-          <Card>
-            <CardContent className="flex items-center gap-2 py-3">
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-              <div>
-                <p className="text-sm font-medium">
-                  {recette.note_moyenne.toFixed(1)}
-                </p>
-                <p className="text-xs text-muted-foreground">Note</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
