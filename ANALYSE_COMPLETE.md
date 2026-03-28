@@ -1,4 +1,4 @@
-# 🔍 Analyse Complète — Assistant Matanne
+i# 🔍 Analyse Complète — Assistant Matanne
 > **Date** : 27 mars 2026 | **Auteur** : GitHub Copilot  
 > **État global** : ~96% de couverture fonctionnelle sur 28 phases
 
@@ -108,28 +108,36 @@ Infrastructure
 
 ### 🍽️ Cuisine
 
-**État** : ~72% complet | Backend solide, quelques features UI manquantes
+**État** : ~87% complet | Backend très solide, quelques features UI manquantes
 
 #### Ce qui est implémenté ✅
 - CRUD recettes complet (import URL, PDF, enrichissement auto nutrition/bio/robots)
+- Filtres appareils sur liste recettes (Cookeo / Monsieur Cuisine / Air Fryer)
+- `VersionRecette` ORM + service (`type_version: "jules" | "batch_cooking"`) — base pour l'adaptation menu Jules
 - Planning semaine IA (Mistral) avec suggestions contextuelles météo
+- `dessert_jules_recette_id` + `entree_recette_id` dans le modèle `Repas` (lignes de planning séparées)
 - Listes de courses + génération depuis planning + collaboration WebSocket
+- Suggestions bio-local + articles récurrents suggérés dans courses
+- Idempotency cache sur l'API courses (évite les doublons de soumission)
 - Inventaire avec badges Open Food Facts (Nutri-Score, Éco-Score, NOVA)
-- Photo frigo OCR Pixtral (identification ingrédients zones identifiées)
-- Anti-gaspillage : score hebdo + historique + trophées gamification
-- Batch cooking : sessions, étapes par robot, préparations surgelées
+- ScanneurMultiCodes + EtiquetteQR (scan de lots + étiquettes QR de stockage)
+- Photo frigo OCR Pixtral multi-zones (frigo / placard / congélateur)
+- Anti-gaspillage : score hebdo + historique + trophées + suggestions IA + service zéro déchet batch
+- Batch cooking : sessions, étapes par robot, préparations surgelées, `avec_jules` (tâches adaptées à Jules)
 - Stepper "Ma Semaine" 4 étapes (Planning → Inventaire → Courses → Récap)
+- Scan ticket de caisse → import courses avec sélection article par article (OCR Pixtral)
 - Import PDF recette avec enrichissement (calories, tags, robots)
 - Page /cuisine/nutrition : histogramme quotidien + KPIs macros
+- BadgeNutriscore + ConvertisseurInline embarqués dans la fiche recette et le planning
 
 #### Ce qui manque ❌
-- **Profil diététique structuré** : objectifs calories/macros personnalisables par utilisateur (stockés en DB)
-- **Badge nutrition sur cartes recettes** : afficher les macros calculées dans la liste recettes
+- **Bouton 🍼 Version Jules sur fiche recette** : déclencher l'IA pour générer une `VersionRecette` adaptée (sel → supprimer, saumon fumé → saumon cuit, épices fortes → supprimer, alcool → fond de volaille, viande/poisson cru → cuisson obligatoire). Utilise le champ JSONB `ingredients_modifies` déjà dans le modèle
+- **Profil aliments exclus Jules** : liste configurable dans `/famille/jules` → transmis à l'IA lors de la génération de la version Jules (miel avant 12 mois, sel ajouté, épices, alcool, charcuterie fumée, viande crue…)
 - **OCR photo-frigo → sync inventaire automatique** : le bouton "ajouter à l'inventaire" existe mais l'auto-sync continu n'est pas implémenté
 - **Onboarding "Ma Semaine"** : popup première utilisation guidant l'utilisateur sur le stepper
 - **Table nutrition incomplète** : 47 ingrédients couverts sur ~200+ ciblés → calcul macro silencieusement incomplet pour beaucoup de recettes
-- **Rappels jour-par-jour cuisine** : push quotidien "ce soir tu prépares X" basé sur planning  
-- **Saisonnalité enrichie inventaire** : affichage des produits de saison disponibles au marché
+- **Rappels jour-par-jour cuisine** : push quotidien "ce soir tu prépares X" basé sur planning
+- **Saisonnalité enrichie inventaire** : affichage des produits de saison disponibles au marché + préférences sources d'approvisionnement (Biocoop / marché / ferme) configurables dans les préférences
 
 #### Bugs ⚠️
 - `RetourRecette` utilise `feedback='like'|'neutral'` pour les favoris, mais les types TypeScript frontend utilisent `est_favori: boolean` → potentielle désynchronisation si le champ est lu directement
@@ -143,7 +151,7 @@ Infrastructure
 
 #### Ce qui est implémenté ✅
 - Hub famille contextuel (Aujourd'hui/À venir/Suggestions IA)
-- Suivi Jules : jalons de développement, croissance (poids/taille vs normes OMS), carnet de santé
+- Suivi Jules : jalons de développement, carnet de santé numérique (vaccinations, RDV pédiatre, notes santé)
 - Activités : CRUD + suggestions IA auto-préfill + météo contexte  
 - Routines : matin/soir avec complétion rapide et streak
 - Budget : CRUD + analyse IA anomalies + prédictions + OCR tickets
@@ -154,11 +162,10 @@ Infrastructure
 - Contacts, Documents, Calendriers (Google OAuth)
 
 #### Ce qui manque ❌
-- **Album photo** : page `redirect("/famille")` intentionnel, service supprimé — fonctionnalité absente
-- **Journal de famille** : idem redirect, supprimé — pas de mémoire narrative de la famille
+- **Adaptation menu Jules** : bouton 🍼 "Version Jules" sur chaque fiche recette (voir section Cuisine) — Jules mange comme nous mais avec substitutions adaptées à son âge via `VersionRecette` IA
 - **Tests famille** : `tests/api/test_famille_achats.py` et `test_famille_garde.py` marqués "À FAIRE" dans le roadmap
-- **Partage de planning avec la crèche** : le lien "jours sans crèche" génère les dates mais aucun export ou contact de la crèche
-- **Suivi diversification Jules** : service `diversification.py` existe mais aucune page UI dédiée
+- **Rappels médicaux Jules** : vaccins (à partir du calendrier vaccinal standard) + RDV pédiatre en push
+- **Deep link Family Album** : bouton "📸 Partager sur Family Album" sur les fiches activités/anniversaires Jules (app iOS externe, pas d'API — deep link uniquement)
 
 ---
 
@@ -198,8 +205,7 @@ Infrastructure
 - Séries de victoires/défaites avec alertes
 
 #### Ce qui manque ❌
-- **Scraping automatique des cotes** : les cotes sont saisies manuellement, pas de connexion à une API bookmaker (Oddsportal, The Odds API…)
-- **Alertes en temps réel matchs live** : notifications push pendant un match pour un pari en cours
+- **Actualisation cotes à la demande** : les cotes sont saisies manuellement — prévoir un bouton "Actualiser" sur la fiche match qui interroge une API bookmaker (Oddsportal, The Odds API…) uniquement à la consultation, pas de scraping continu
 - **Statistiques avancées par équipe** : possession, xG, forme à domicile/extérieur (données football.api)
 
 ---
@@ -212,7 +218,7 @@ Infrastructure
 - Planning repas semaine + génération IA
 - Nutrition hebdo (macros par jour)
 - Export iCal
-- "Ma Semaine" unifiée (repas + activités + matchs + tâches maison)
+- "Ma Semaine" unifiée (repas + activités + tâches maison)
 - Timeline page
 
 #### Ce qui manque ❌
@@ -254,7 +260,7 @@ Infrastructure
 #### Ce qui manque ❌
 - **Partage de notes** : les notes sont privées, pas de partage famille
 - **Notes vocales** : dictaphone → texte (Web Speech API ou Whisper)
-- **Outils contextuels** : le convertisseur existe sur la page recette mais pas dans les autres contextes où il serait utile (inventaire, courses)
+- **Outils transversaux** : les outils sont embarqués dans les modules qui en ont besoin — convertisseur dans inventaire et courses, minuteur déclenché depuis le temps de cuisson d'une recette, météo dans le dashboard + jardin + famille, chat IA accessible depuis n'importe quel module. La page `/outils` reste l'accès direct centralisé
 
 ---
 
@@ -320,14 +326,14 @@ Infrastructure
 
 | Feature | Effort | Impact |
 |---|---|---|
-| Profil diététique structuré (objectifs calories/macros per user) | M | ⭐⭐⭐ |
+| Bouton 🍼 Version Jules sur fiche recette (`VersionRecette` IA) | S | ⭐⭐⭐ |
+| Profil aliments exclus Jules (configurable `/famille/jules`) | S | ⭐⭐⭐ |
 | OCR photo-frigo → auto-ajout inventaire sans confirmation | S | ⭐⭐⭐ |
 | Rappels push "soir cuisine" : "Ce soir tu prépares X" | S | ⭐⭐⭐ |
-| Badge nutrition sur cartes recettes (liste + hub) | S | ⭐⭐ |
 | Table nutrition étendue (200+ ingrédients vs 47 actuels) | M | ⭐⭐ |
 | Onboarding Ma Semaine (popup first-use) | S | ⭐⭐ |
 | Partage de liste de courses avec invité (lien ou QR code) | M | ⭐⭐ |
-| Historique prix articles (suivi inflation) | M | ⭐⭐ |
+| Sources approvisionnement préférées (Biocoop / marché / ferme) | S | ⭐⭐ |
 | Scan code-barres continu (stream caméra) pour inventaire | L | ⭐⭐ |
 | Génération automatique recette à partir d'une photo plat (Pixtral) | M | ⭐⭐⭐ |
 
@@ -335,13 +341,10 @@ Infrastructure
 
 | Feature | Effort | Impact |
 |---|---|---|
-| Diversification alimentaire Jules (UI dédiée) | M | ⭐⭐⭐ |
-| Journal de famille (texte + photos — supprimé à remettre ?) | L | ⭐⭐ |
-| Album photo avec timeline (supprimé) | L | ⭐⭐ |
-| Export/partage planning Jules (crèche, médecin) | S | ⭐⭐ |
+| Adaptation menu Jules : bouton 🍼 Version Jules (voir Cuisine) | S | ⭐⭐⭐ |
 | Tests famille (achats, garde) | M | ⭐⭐ |
-| Rappels médicaux Jules (vaccins, RDV) en push | S | ⭐⭐⭐ |
-| Suivi poids/taille des adultes (santé famille globale) | M | ⭐⭐ |
+| Rappels médicaux Jules (vaccins, RDV pédiatre) en push | S | ⭐⭐⭐ |
+| Deep link Family Album pour événements Jules | XS | ⭐⭐ |
 
 ### 🏡 Maison — lacunes
 
@@ -418,6 +421,32 @@ grep "^CREATE TABLE" sql/INIT_COMPLET.sql | sort > /tmp/sql_tables.txt
 diff /tmp/orm_tables.txt /tmp/sql_tables.txt
 ```
 
+### Plan de consolidation SQL (à faire — P-06/P-07)
+
+Objectif : **`sql/INIT_COMPLET.sql` = seule source de vérité absolue** — plus aucun `ALTER TABLE` flottant ni fichier de migration séparé.
+
+#### Fichiers à absorber puis supprimer
+
+| Fichier | Contenu à intégrer dans INIT_COMPLET | Action |
+|---|---|---|
+| `sql/migrations/001_routine_moment_journee.sql` | `moment_journee VARCHAR(20)` + `jour_semaine INTEGER` sur `routines` | Déplacer dans le `CREATE TABLE routines` |
+| `sql/migrations/002_standardize_user_id_uuid.sql` | Colonnes `user_id VARCHAR → UUID` sur 5 tables (`preferences_utilisateurs`, `historique_actions`, `etats_persistants`, `configs_calendriers_externes`, `retours_recettes`) | Corriger les types directement dans chaque `CREATE TABLE` |
+| `sql/migrations/003_add_cotes_historique.sql` | Table `jeux_cotes_historique` (cotes bookmaker par match + timestamps + RLS) | Ajouter comme bloc `CREATE TABLE` dans la section Jeux |
+| `alembic/versions/f7e8d9c0b1a2_famille_refonte_phase1.py` | Colonnes `heure_debut TIME` (activites), `derniere_completion DATE` (routines), `pour_qui/a_revendre/prix_revente_estime/vendu_le` (achats), 8 colonnes JSONB (preferences_utilisateurs) | Intégrer dans les `CREATE TABLE` concernés |
+| `alembic/versions/c8d1e2f3a4b5_anniversaire_checklists.py` | Tables `checklists_anniversaire` + `items_checklist_anniversaire` + 7 index | Ajouter les 2 blocs `CREATE TABLE` avec index |
+| `alembic/versions/a1b2c3d4e5f6_initial_baseline.py` | Baseline vide (`pass`) — aucun DDL | Supprimer directement |
+
+Une fois absorbé : supprimer `sql/migrations/001|002|003.sql` + les 3 fichiers `alembic/versions/` + archiver `alembic.ini` si Alembic n'est plus utilisé.
+
+#### Tables à valider dans INIT_COMPLET après absorption
+
+- `routines` : colonnes `moment_journee`, `jour_semaine`, `derniere_completion` présentes ?
+- `activites_famille` : colonne `heure_debut TIME` présente ?
+- `achats_famille` : colonnes `pour_qui`, `a_revendre`, `prix_revente_estime`, `vendu_le` présentes ?
+- `preferences_utilisateurs` : `user_id UUID` (pas `VARCHAR`) + 8 colonnes JSONB (`taille_vetements_*`, `style_achats_*`, `interets_*`, `equipement_activites`, `config_garde`) présentes ?
+- `jeux_cotes_historique` : table complète avec 3 index + RLS présente ?
+- `checklists_anniversaire` + `items_checklist_anniversaire` : 2 blocs `CREATE TABLE` + 7 index présents ?
+
 ---
 
 ## 7. Interactions intra-modules & inter-modules
@@ -453,25 +482,37 @@ Famille/Config ←→ Planning : jours sans crèche → planning famille
 **Solution** : Un bouton "Importer résultat du mois" dans Budget Famille qui additionne `somme_pertes_mois` des paris en `ArticleBudget` catégorie "loisirs/jeux".  
 **API** : `GET /api/v1/famille/budget/import-jeux-mois`
 
-#### 🔗 Jules/Santé ↔ Planning Cuisine
-**Problème** : Les repas de Jules ne sont pas planifiés en tenant compte de son âge et allergies.  
-**Solution** : Le planning génère une colonne "Jules" selon le profil enfant (`ProfilEnfant .date_naissance`, allergènes). Recettes filtrées `compatible_bebe=True` pour moins de 2 ans.  
-**API** : Modifier `POST /api/v1/planning/generer` pour accepter `pour_jules: bool`.
+#### 🔗 Jules ↔ Planning Cuisine (Version Jules)
+**Concept** : Jules mange comme nous, mais avec des substitutions adaptées à son âge. L'infrastructure est déjà en place : `VersionRecette(type_version="jules")` + champ JSONB `ingredients_modifies`.  
+**Solution** : Sur chaque fiche recette, bouton 🍼 "Version Jules" → appel Mistral avec le profil aliments exclus Jules (sel, épices, alcool, saumon fumé → saumon cuit, viande crue → cuisson obligatoire…) → création `VersionRecette` sauvegardée et réutilisable.  
+**Lien planning** : Le champ `dessert_jules_recette_id` dans `Repas` permet déjà de mettre une version Jules différente pour le dessert. À étendre au plat principal.  
+**API** : `POST /api/v1/recettes/{id}/version-jules` → `VersionRecette`.
 
 #### 🔗 Maison/Entretien ↔ Routines
 **Problème** : Les routines ménagères et les tâches d'entretien sont dans deux silos différents.  
-**Solution** : Vue unifiée "À faire ce week-end" qui fusionnerait routines en retard + tâches entretien urgentes + tâches jardin.  
-**API** : `GET /api/v1/maison/planning-weekend`
+**Solution** : Vue unifiée "À faire aujourd'hui" proposée sur les jours configurables : télétravail, jours de congé, ou tout jour non-travaillé. Configurable dans `/parametres` — pas en dur le weekend. Fusionnerait routines en retard + tâches entretien urgentes + tâches jardin.  
+**API** : `GET /api/v1/maison/planning-jour?date=...`
 
-#### 🔗 Dashboard ↔ Météo ↔ Planning
-**Problème** : La météo influence les activités, le jardin, le planning cuisine mais n'est pas centralisée dans le dashboard.  
-**Solution** : Widget météo sur le dashboard avec contexte (pluie → suggestions cuisine dedans, soleil → rappel arrosage jardin, grand froid → emprunter manteau Jules).  
-**Déjà partiel** : `suggestions-rapides` cuisine utilise la météo, à étendre au dashboard.
+#### 🔗 Moteur d'alertes météo contextuel (cross-modules)
+**Concept** : La météo influence simultanément plusieurs modules. Un moteur d'alertes centralisé produit des actions contextuelles selon les conditions, qui remontent dans le dashboard + les notifications.
 
-#### 🔗 Anniversaires ↔ Budget Famille ↔ Courses
-**Problème** : Quand Jules a un anniversaire, il faut budget + liste de courses + invitations → silo actuel.  
-**Solution** : Depuis une fiche anniversaire, générer en 1 clic : budget prévisionnel + liste de courses (gâteau, déco, goûter) + événement calendrier.  
-**API** : `POST /api/v1/famille/anniversaires/{id}/preparer-evenement`
+| Météo | Jardin | Cuisine | Famille (Jules) | Maison/Extérieur |
+|---|---|---|---|---|
+| ❄️ Gel (<0°C) | Voile hivernage, rentrer les pots | Décongeler viande la veille | Manteau Jules | Rentrer le salon de jardin |
+| 🌡️ Canicule (>32°C) | Arroser matin + soir | Recettes fraîches + proposer glaces dans le planning 🍦 | Hydratation Jules, pas de sortie 12h-16h | Fermer volets dès le matin |
+| 💨 Vent fort | — | — | — | Rentrer parasol, meubles extérieurs, déco |
+| 🌧️ Pluie prolongée | Stopper arrosage automatique | — | Activités intérieures Jules | — |
+| 🌸 Pollen élevé | — | — | Alerte si allergie notée dans profil famille | — |
+
+**Note** : les alertes s'appliquent à **tous les membres** du profil famille dont une allergie est notée (pas uniquement Jules). Les seuils (0°C, 32°C…) et les réponses sont configurables dans `/parametres/famille`.  
+**Déjà partiel** : `suggestions-rapides` cuisine utilise la météo. L'API météo Open-Meteo est déjà intégrée dans `/outils/meteo`.  
+**API** : `GET /api/v1/dashboard/alertes-contextuelles` (météo + date du jour → liste d'alertes cross-modules).
+
+#### 🔗 Planificateur d'événements ↔ Budget Famille ↔ Courses
+**Concept** : Étendre au-delà des anniversaires — couvrir tous les événements familiaux avec checklist et budget adapté.  
+**Types d'événements** : 🎂 Anniversaire (Jules / famille / ami), ⛪ Baptême, 💍 Mariage, 🥖 Barbecue / Repas amis, 🎉 Fête / Soirée  
+**Solution** : Depuis une fiche événement, générer en 1 clic : checklist IA adaptée au type (événement, invités, lieu, courses proportionnelles aux convives, budget prévisionnel) + événement calendrier.  
+**API** : `POST /api/v1/famille/evenements/{id}/preparer` (généralisation de l'endpoint anniversaire existant)
 
 #### 🔗 Recherche globale ↔ Tous modules
 **Existant** : `/api/v1/recherche/global` cherche recettes, projets, activités, notes, contacts.  
@@ -540,8 +581,8 @@ Famille/Config ←→ Planning : jours sans crèche → planning famille
 **API** : `GET /api/v1/dashboard/anomalies-financieres`.  
 **Effort** : M.
 
-#### 🤖 IA-06 : Coaching santé Jules proactif
-**Concept** : Basé sur les mesures de croissance Julius (poids/taille), diversification, activités et normes OMS → message hebdo d'un "pédiatre IA" contextuel.  
+#### 🤖 IA-06 : Coaching Jules proactif
+**Concept** : Basé sur les activités de la semaine, les repas (versions Jules planifiées), le carnet de santé (vaccins à jour, dernier RDV pédiatre) → message hebdo contextuel : "Jules n'a pas eu d'activité créative cette semaine" ou "Rappel : vaccin 24 mois dans 2 semaines".  
 **API** : `GET /api/v1/famille/jules/coaching-hebdo`.  
 **Effort** : S — `JulesAIService` existe déjà.
 
@@ -556,7 +597,8 @@ Famille/Config ←→ Planning : jours sans crèche → planning famille
 **Effort** : M.
 
 #### 🤖 IA-09 : Score bien-être familial global
-**Concept** : Un indicateur 0-100 calculé chaque semaine à partir de : diversité alimentaire, activités Jules, budget équilibré, tâches maison à jour, sommeil (si Garmin connecté). Trend hebdomadaire.  
+**Concept** : Un indicateur 0-100 calculé chaque semaine à partir de : diversité alimentaire de la semaine, Nutri-Score moyen des repas planifiés, activités sportives (saisie manuelle ou Garmin si connecté). Trend hebdomadaire affiché sur le dashboard.  
+**Formule** : diversité alimentaire 40% + Nutri-Score hebdo 30% + activités sportives 30%  
 **API** : `GET /api/v1/dashboard/score-bienetre`.  
 **Effort** : M.
 
@@ -594,8 +636,7 @@ Famille/Config ←→ Planning : jours sans crèche → planning famille
 | J-08 | **Vendredi 17h00** | **Score weekend** : suggestions activités basées météo des 2 prochains jours + état Jules | ntfy | S |
 | J-09 | **1er du mois** | **Contrôle garanties et contrats** : rappels expirations dans les 3 prochains mois | ntfy / email | XS (déjà 08h00 maison, à enrichir) |
 | J-10 | **Mercredi 20h00** | **Rapport jardin** : arrosage, semis prévus cette semaine selon données météo | ntfy | S |
-| J-11 | **Hebdo dimanche** | **Sync cotes paris sportifs** depuis une API externe (si abonnement) | Interne | L |
-| J-12 | **Quotidien 07h00** | **Score bien-être Jules** : alerte si dérive courbe OMS | ntfy vers parents | S |
+| J-11 | **Dimanche 20h00** | **Score bien-être hebdo** : calcul diversité alimentaire + Nutri-Score + activités sportives → alerte si dérive | ntfy + dashboard | S |
 
 ---
 
@@ -834,20 +875,22 @@ const { data: jobs } = useQuery({ queryKey: ['admin-jobs'], queryFn: listerJobs 
 **Concept** : Basé sur l'historique, prédire les dépenses des 12 prochains mois et alerter sur les gros postes à venir (vacances, rentrée scolaire, révision chaudière...).  
 **Effort** : M.
 
-#### Innovation-04 : Mode "Congé" et "Voyage" auto-adapté
-**Concept** : Déclarer "On est en vacances du 15 au 22 juillet" → l'app désactive certains rappels (pas de rappel arrosage si jardin géré par un voisin), génère la checklist voyage, adapte le planning cuisine (repas voyage/snacks).  
-**Effort** : M.
+#### Innovation-04 : Mode "Voyage" avec checklists intelligentes
+**Concept** : Déclarer "On part 5 jours à la mer en été" → 4 listes distinctes selon contexte (🏖️ Mer été / ⛷️ Montagne hiver / 🥾 Montagne été / 🌊 Mer hiver), générées depuis le template adapté. Courses sur place au quotidien, pas de cuisine anticipée.  
+**Mécanique d'apprentissage** : bouton "Acheté sur place" pendant le séjour → à la fin (date retour ou bouton "On est rentrés 🏠"), popup proposant d'ajouter définitivement les achats imprévus à la liste. Chaque item a un champ `source: "template" | "utilisateur" | "expérience"` tracé.  
+**Désactivation contextuelle** : rappels arrosage jardin suspendus pendant la période, planning cuisine allégé, rappels maison en pause.  
+**Effort** : M — service `voyage.py` et checklists existent.
 
 #### Innovation-05 : Connexion Garmin / santé adultes
 **Concept** : Les modèles Garmin existent (`GarminToken`, `ResumeQuotidienGarmin`). Activer l'intégration pour : calories brûlées → recommandations repas du soir ; qualité sommeil → conseil récupération Jules.  
 **Effort** : L (OAuth Garmin Connect + webhook daily sync).
 
-#### Innovation-06 : Mode "Budget Famille Serré"
-**Concept** : Activer un mode "budget contrainte" qui : filtre les recettes par coût/portion, suggère substitutions moins chères, compare prix entre magasins, génère un plan de repas sous Budget N€/semaine.  
-**Effort** : M.
+#### Innovation-06 : Intégration Garmin (santé sport)
+**Concept** : Les modèles Garmin existent (`GarminToken`, `ResumeQuotidienGarmin`). Activer l'intégration pour : calories brülées → recommandations repas du soir ; qualité sommeil → conseil récupération ; activités enregistrées → contribution au score bien-être (IA-09).  
+**Effort** : L (OAuth Garmin Connect + webhook daily sync).
 
-#### Innovation-07 : Gamification famille complète
-**Concept** : Étendre la gamification (déjà présente sur entretien maison) à toute la famille : points pour routines complétées, défis hebdo, badges "Zéro gaspi cette semaine", tableau de bord points famille.  
+#### Innovation-07 : Gamification sport et alimentation
+**Concept** : Deux axes uniquement : **sport** (points pour chaque activité physique saisie, défis hebdo, streaks) et **mieux manger** (badges Nutri-Score moyen de la semaine, diversité alimentaire, "Zéro gaspi cette semaine"). Tableau de bord points famille sur le dashboard.  
 **Effort** : M — `ServiceGamification` existe dans `src/services/core/gamification.py`.
 
 #### Innovation-08 : Scan reçus et factures automatique
@@ -870,7 +913,7 @@ const { data: jobs } = useQuery({ queryKey: ['admin-jobs'], queryFn: listerJobs 
 | QW-06 | "Aujourd'hui dans l'histoire de la famille" (événements passés ce jour) | S | ⭐⭐⭐ |
 | QW-07 | Mode sombre/clair forcé selon heure (auto après 21h) | XS | ⭐⭐ |
 | QW-08 | Impression optimisée recette (CSS print) | XS | ⭐⭐ |
-| QW-09 | Synchronisation planning → Apple Calendar (iCal existant) | S | ⭐⭐ |
+| QW-09 | Export iCal générique (Google Calendar, Android, Thunderbird…) — iCal déjà implémenté | XS | ⭐⭐ |
 | QW-10 | Score anti-gaspi hebdo partageable (image générée) | S | ⭐⭐ |
 
 ---
@@ -886,6 +929,8 @@ const { data: jobs } = useQuery({ queryKey: ['admin-jobs'], queryFn: listerJobs 
 | P-03 | **Fixer B-03** : scheduler ntfy digest + rappel courses | XS | 🟠 Bug haut |
 | P-04 | **SQL-01** : supprimer table `liste_cours` (doublon) | XS | 🟠 SQL |
 | P-05 | **SQL-05** : déplacer inline ALTER TABLE en tête de CREATE TABLE | S | 🟠 SQL |
+| P-06 | **SQL-CONSOLIDATION** : absorber `sql/migrations/001|002|003.sql` dans INIT_COMPLET + supprimer les 3 fichiers | S | 🟠 SQL |
+| P-07 | **SQL-CONSOLIDATION** : absorber `alembic/versions/` (baseline vide + refonte famille + anniversaires) dans INIT_COMPLET + supprimer les 3 fichiers | S | 🟠 SQL |
 
 ### Court terme (1-3 semaines)
 
@@ -899,6 +944,15 @@ const { data: jobs } = useQuery({ queryKey: ['admin-jobs'], queryFn: listerJobs 
 | CT-06 | **IA-02** : recette depuis photo (variation Pixtral) | S | 🤖 IA |
 | CT-07 | **F-01** (Famille) : tests achats + garde | M | ✅ Tests |
 | CT-08 | **SQL-06** : index manquants sur relations fréquentes | S | SQL |
+| CT-09 | **Bouton Version Jules** sur fiche recette + profil aliments exclus | S | 👶 Famille/Cuisine |
+| CT-10 | **SQL-03/04** : audit et nettoyage tables orphelines ORM↔SQL (`voyage.py` sans CREATE TABLE, `journal_bord`/`sessions_travail` sans ORM) | M | 🟠 SQL |
+| CT-11 | **Doc SQL** : mettre à jour `docs/MIGRATION_GUIDE.md` (retirer workflow SQL-file, documenter INIT_COMPLET only) + archiver `sql/migrations/README.md` + `alembic/README.md` | S | 📚 Doc |
+| CT-12 | **Test schéma** : créer `tests/sql/test_schema_coherence.py` — vérifie automatiquement que chaque `__tablename__` ORM a un `CREATE TABLE` correspondant dans INIT_COMPLET.sql | S | ✅ Tests |
+| CT-13 | **Tests push** : créer `tests/api/test_push_notifications.py` — couvre B-01 (persistance abonnements), B-02 (endpoint VAPID), B-03 (scheduler ntfy/courses) | M | ✅ Tests |
+| CT-14 | **Tests routes** : compléter couverture admin (`/admin/users`, `/admin/jobs`), recherche globale, RGPD (`/admin/export-data`, `/admin/delete-account`) | M | ✅ Tests |
+| CT-15 | **Supprimer `STATUS_PHASES.md`** : 1004 lignes désormais redondantes avec `ANALYSE_COMPLETE.md`. Retirer toutes les références (`ROADMAP.md` section "Système de Phases", `docs/INDEX.md`). `ANALYSE_COMPLETE.md` devient la référence unique d'état du projet | S | 📚 Doc |
+| CT-16 | **Néttoyer `ROADMAP.md`** : supprimer l'historique des sprints déjà livrés (sections "Mise à jour copilot-worktree", "Sprint 2", "Sprint 3" etc.), retirer la section "Système de Phases A-AC" (absorbée par ANALYSE_COMPLETE.md), aligner la table "Priorités 2 semaines" sur la section 13 de ANALYSE_COMPLETE.md | M | 📚 Doc |
+| CT-17 | **Nettoyage `docs/`** : supprimer `JEUX_AMELIORATIONS_PLAN.md` + `JEUX_PLAN_VALIDATION.md` (jeux 100% complet, obsolètes), `docs/guides/batch_cooking.md` (fichier vide 0 ligne), `markdown-preview.md` (fichier de debug) ; mettre à jour `docs/INDEX.md` (retirer lien `STATUS_PHASES.md`, ajouter lien `ANALYSE_COMPLETE.md` comme référence principale) | S | 📚 Doc |
 
 ### Moyen terme (1-2 mois)
 
@@ -906,8 +960,7 @@ const { data: jobs } = useQuery({ queryKey: ['admin-jobs'], queryFn: listerJobs 
 |---|---|---|---|
 | MT-01 | **Interaction** Cellier ↔ Inventaire cuisine | M | 🔗 Inter-modules |
 | MT-02 | **Canal WhatsApp** + webhook entrant | L | 📱 Notifications |
-| MT-03 | **Profil diététique structuré** (Phase H complète) | M | 🍽️ Cuisine |
-| MT-04 | **Dashboard score bien-être** (IA-09) | M | 📊 Dashboard |
+| MT-03 | **Dashboard score bien-être** (IA-09 : sport + alimentation) | M | 📊 Dashboard |
 | MT-05 | **Innovation-01** : Automations "Si → Alors" | L | 🚀 Innovation |
 | MT-06 | **Widgets dashboard configurables** | L | 📊 Dashboard |
 | MT-07 | **IA-01** : Assistant vocal (Speech-to-Text → Action) | L | 🤖 IA |
@@ -918,11 +971,10 @@ const { data: jobs } = useQuery({ queryKey: ['admin-jobs'], queryFn: listerJobs 
 
 | # | Action | Effort | Catégorie |
 |---|---|---|---|
-| LT-01 | **Innovation-05** : Connexion Garmin santé adultes | L | 🚀 |
-| LT-02 | **Innovation-06** : Mode Budget Serré complet | M | 🚀 |
-| LT-03 | **Innovation-07** : Gamification famille complète | M | 🚀 |
-| LT-04 | **Innovation-04** : Mode Congé/Voyage auto-adapté | M | 🚀 |
-| LT-05 | **Diversification alimentaire Jules** (UI dédiée) | M | 👶 Famille |
+| LT-01 | **Innovation-06** : Intégration Garmin santé sport | L | 🚀 |
+| LT-02 | **Innovation-07** : Gamification sport + alimentation | M | 🚀 |
+| LT-03 | **Innovation-04** : Mode Voyage with checklists intelligentes | M | 🚀 |
+| LT-04 | **Innovation-01** : Automations “Si → Alors” | L | 🚀 |
 
 ---
 
@@ -969,8 +1021,21 @@ CREATE POLICY "Utilisateur voit ses abonnements" ON abonnements_push_vapid
 | `src/api/routes/admin.py` (enrichi) | +endpoints jobs, notif-test, cache, users | 🟠 CT-02 |
 | `src/services/core/automations/` | Moteur "Si → Alors" | 🟡 MT-01 |
 | `frontend/src/app/(app)/admin/jobs/page.tsx` | UI déclenchement manuel des jobs | 🟠 CT-02 |
-| `src/services/famille/diversification_ui.py` | Service UI diversification Jules | 🟡 LT-05 |
+| `src/services/famille/version_recette_jules.py` | Génération VersionRecette Jules + profil aliments exclus | 🟠 CT-09 |
+| `tests/sql/test_schema_coherence.py` | Vérifie cohérence ORM ↔ INIT_COMPLET.sql (chaque `__tablename__` a son `CREATE TABLE`) | 🟠 CT-12 |
+| `tests/api/test_push_notifications.py` | Tests B-01/B-02/B-03 : persistance abonnements push, endpoint VAPID, scheduler ntfy + courses | 🟠 CT-13 |
+| `tests/api/test_admin_routes.py` | Couverture `/admin/users`, `/admin/jobs`, export RGPD, suppression compte | 🟡 CT-14 |
+
+### Fichiers à supprimer (CT-15/CT-16/CT-17)
+
+| Fichier | Raison | Priorité |
+|---|---|---|
+| `STATUS_PHASES.md` (racine) | 1004 lignes redondantes avec ANALYSE_COMPLETE.md | 🟠 CT-15 |
+| `docs/JEUX_AMELIORATIONS_PLAN.md` | Module Jeux 100% complet — plan obsolète | 🟠 CT-17 |
+| `docs/JEUX_PLAN_VALIDATION.md` | Module Jeux 100% complet — plan de validation obsolète | 🟠 CT-17 |
+| `docs/guides/batch_cooking.md` | Fichier vide (0 ligne) | 🟠 CT-17 |
+| `docs/markdown-preview.md` | Fichier de debug/preview (17 lignes) | 🟠 CT-17 |
 
 ---
 
-*Rapport généré le 27 mars 2026 — GitHub Copilot*
+*Rapport généré le 27 mars 2026 — Mis à jour le 28 mars 2026 — GitHub Copilot*
