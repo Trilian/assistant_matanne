@@ -132,3 +132,19 @@ class RecetteResponse(RecetteBase, IdentifiedResponse):
     compatible_cookeo: bool = False
     compatible_monsieur_cuisine: bool = False
     compatible_airfryer: bool = False
+
+
+class VersionRecetteResponse(BaseModel):
+    """Réponse pour une version Jules d'une recette (CT-09)."""
+
+    id: int
+    recette_base_id: int
+    type_version: str
+    instructions_modifiees: str | None = None
+    ingredients_modifies: dict | None = None
+    notes_bebe: str | None = None
+    modifications_resume: list[str] = Field(default_factory=list)
+    recette_nom: str | None = None
+    age_mois_jules: int | None = None
+
+    model_config = {"from_attributes": True}

@@ -7,8 +7,6 @@ Endpoints:
 - GET /api/v1/push/status: Statut des notifications pour l'utilisateur
 """
 
-from __future__ import annotations
-
 import logging
 
 from typing import Any
@@ -67,7 +65,7 @@ async def obtenir_cle_vapid_publique():
 )
 @gerer_exception_api
 async def souscrire_push(
-    request: PushSubscriptionRequest,
+    request: PushSubscriptionRequest = Body(...),
     current_user: dict = Depends(require_auth),
 ):
     """
@@ -110,7 +108,7 @@ async def souscrire_push(
 )
 @gerer_exception_api
 async def desabonner_push(
-    request: PushUnsubscribeRequest,
+    request: PushUnsubscribeRequest = Body(...),
     current_user: dict = Depends(require_auth),
 ):
     """

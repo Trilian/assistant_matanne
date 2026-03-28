@@ -764,3 +764,25 @@ class MiseResponsable(CreeLeMixin, Base):
         if self.cooldown_actif and self.cooldown_fin and self.cooldown_fin > date_type.today():
             return True
         return self.mises_cumulees >= self.limite_mensuelle
+
+
+# ═══════════════════════════════════════════════════════════════════
+# BANKROLL HISTORIQUE
+# ═══════════════════════════════════════════════════════════════════
+
+
+class BankrollHistorique(CreeLeMixin, Base):
+    """Historique de la bankroll par utilisateur."""
+
+    __tablename__ = "jeux_bankroll_historique"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    montant: Mapped[float] = mapped_column(Float, nullable=False)
+    variation: Mapped[float] = mapped_column(Float, default=0.0)
+    date: Mapped[datetime] = mapped_column(DateTime, default=utc_now)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    def __repr__(self) -> str:  # pragma: no cover
+        return f"<BankrollHistorique(user={self.user_id}, montant={self.montant})>"
+

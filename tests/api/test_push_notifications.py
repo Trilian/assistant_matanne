@@ -12,8 +12,10 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import httpx
 import pytest
-from fastapi.testclient import TestClient
+import pytest_asyncio
+from httpx import ASGITransport
 
 
 # ═══════════════════════════════════════════════════════════
@@ -21,19 +23,22 @@ from fastapi.testclient import TestClient
 # ═══════════════════════════════════════════════════════════
 
 
-@pytest.fixture
-def client():
+@pytest_asyncio.fixture
+async def async_client():
     from src.api.main import app
     from src.api.dependencies import require_auth
 
     app.dependency_overrides[require_auth] = lambda: {"id": "test-user", "role": "membre"}
-    with TestClient(app, raise_server_exceptions=False) as c:
-        yield c
+    async with httpx.AsyncClient(
+        transport=ASGITransport(app=app, raise_app_exceptions=False),
+        base_url="http://test",
+    ) as client:
+        yield client
     app.dependency_overrides.clear()
 
 
 @pytest.fixture
-def subscription_payload():
+def subscription_payload() -> dict:
     return {
         "endpoint": "https://fcm.googleapis.com/fcm/send/test-token-123",
         "keys": {
@@ -51,32 +56,37 @@ def subscription_payload():
 class TestVapidPublicKey:
     """Tests pour GET /api/v1/push/vapid-public-key."""
 
-    def test_retourne_200(self, client: TestClient):
+    @pytest.mark.asyncio
+    async def test_retourne_200(self, async_client: httpx.AsyncClient):
         """L'endpoint doit répondre 200."""
-        response = client.get("/api/v1/push/vapid-public-key")
+        response = await async_client.get("/api/v1/push/vapid-public-key")
         assert response.status_code == 200
 
-    def test_retourne_public_key(self, client: TestClient):
+    @pytest.mark.asyncio
+    async def test_retourne_public_key(self, async_client: httpx.AsyncClient):
         """La réponse doit contenir le champ public_key."""
-        response = client.get("/api/v1/push/vapid-public-key")
+        response = await async_client.get("/api/v1/push/vapid-public-key")
         assert response.status_code == 200
         data = response.json()
         assert "public_key" in data
 
-    def test_public_key_est_une_chaine(self, client: TestClient):
+    @pytest.mark.asyncio
+    async def test_public_key_est_une_chaine(self, async_client: httpx.AsyncClient):
         """La clé publique doit être une chaîne non vide."""
-        response = client.get("/api/v1/push/vapid-public-key")
+        response = await async_client.get("/api/v1/push/vapid-public-key")
         data = response.json()
         assert isinstance(data["public_key"], str)
-        # La clé peut être vide si VAPID n'est pas configuré, mais le champ doit exister
 
-    def test_endpoint_sans_auth(self):
+    @pytest.mark.asyncio
+    async def test_endpoint_sans_auth(self):
         """L'endpoint VAPID ne nécessite pas d'authentification."""
         from src.api.main import app
 
-        # Sans override d'auth
-        with TestClient(app, raise_server_exceptions=False) as c:
-            response = c.get("/api/v1/push/vapid-public-key")
+        async with httpx.AsyncClient(
+            transport=ASGITransport(app=app, raise_app_exceptions=False),
+            base_url="http://test",
+        ) as client:
+            response = await client.get("/api/v1/push/vapid-public-key")
         assert response.status_code == 200
 
 
@@ -128,8 +138,9 @@ class TestSchedulerJobs:
 class TestSubscribePersistance:
     """Tests que POST /subscribe persiste l'abonnement via le service."""
 
-    def test_subscribe_appelle_sauvegarder_abonnement(
-        self, client: TestClient, subscription_payload: dict
+    @pytest.mark.asyncio
+    async def test_subscribe_appelle_sauvegarder_abonnement(
+        self, async_client: httpx.AsyncClient, subscription_payload: dict
     ):
         """sauvegarder_abonnement doit être appelé lors d'un POST /subscribe."""
         mock_service = MagicMock()
@@ -139,16 +150,19 @@ class TestSubscribePersistance:
         )
 
         with patch(
-            "src.api.routes.push.get_push_notification_service",
+            "src.services.core.notifications.notif_web_core.get_push_notification_service",
             return_value=mock_service,
         ):
-            response = client.post("/api/v1/push/subscribe", json=subscription_payload)
+            response = await async_client.post(
+                "/api/v1/push/subscribe", json=subscription_payload
+            )
 
         assert response.status_code in [200, 201], response.text
         mock_service.sauvegarder_abonnement.assert_called_once()
 
-    def test_subscribe_passe_user_id_correct(
-        self, client: TestClient, subscription_payload: dict
+    @pytest.mark.asyncio
+    async def test_subscribe_passe_user_id_correct(
+        self, async_client: httpx.AsyncClient, subscription_payload: dict
     ):
         """sauvegarder_abonnement doit recevoir le user_id de l'utilisateur authentifié."""
         mock_service = MagicMock()
@@ -158,18 +172,19 @@ class TestSubscribePersistance:
         )
 
         with patch(
-            "src.api.routes.push.get_push_notification_service",
+            "src.services.core.notifications.notif_web_core.get_push_notification_service",
             return_value=mock_service,
         ):
-            client.post("/api/v1/push/subscribe", json=subscription_payload)
+            await async_client.post("/api/v1/push/subscribe", json=subscription_payload)
 
         call_args = mock_service.sauvegarder_abonnement.call_args
         assert call_args is not None
         user_id_arg = call_args[0][0] if call_args[0] else call_args[1].get("user_id")
         assert user_id_arg == "test-user"
 
-    def test_subscribe_reponse_contient_endpoint(
-        self, client: TestClient, subscription_payload: dict
+    @pytest.mark.asyncio
+    async def test_subscribe_reponse_contient_endpoint(
+        self, async_client: httpx.AsyncClient, subscription_payload: dict
     ):
         """La réponse doit contenir l'endpoint de l'abonnement."""
         mock_service = MagicMock()
@@ -179,10 +194,12 @@ class TestSubscribePersistance:
         )
 
         with patch(
-            "src.api.routes.push.get_push_notification_service",
+            "src.services.core.notifications.notif_web_core.get_push_notification_service",
             return_value=mock_service,
         ):
-            response = client.post("/api/v1/push/subscribe", json=subscription_payload)
+            response = await async_client.post(
+                "/api/v1/push/subscribe", json=subscription_payload
+            )
 
         if response.status_code in [200, 201]:
             data = response.json()
@@ -198,16 +215,19 @@ class TestSubscribePersistance:
 class TestUnsubscribe:
     """Tests pour DELETE /api/v1/push/unsubscribe."""
 
-    def test_unsubscribe_appelle_supprimer_abonnement(self, client: TestClient):
+    @pytest.mark.asyncio
+    async def test_unsubscribe_appelle_supprimer_abonnement(
+        self, async_client: httpx.AsyncClient
+    ):
         """supprimer_abonnement doit être appelé lors du désabonnement."""
         mock_service = MagicMock()
         endpoint = "https://fcm.googleapis.com/fcm/send/test-token-123"
 
         with patch(
-            "src.api.routes.push.get_push_notification_service",
+            "src.services.core.notifications.notif_web_core.get_push_notification_service",
             return_value=mock_service,
         ):
-            response = client.request(
+            response = await async_client.request(
                 "DELETE",
                 "/api/v1/push/unsubscribe",
                 json={"endpoint": endpoint},
@@ -216,16 +236,17 @@ class TestUnsubscribe:
         assert response.status_code in [200, 201, 204], response.text
         mock_service.supprimer_abonnement.assert_called_once()
 
-    def test_unsubscribe_reponse_success(self, client: TestClient):
+    @pytest.mark.asyncio
+    async def test_unsubscribe_reponse_success(self, async_client: httpx.AsyncClient):
         """La réponse du désabonnement doit indiquer success=True."""
         mock_service = MagicMock()
         endpoint = "https://fcm.googleapis.com/fcm/send/test-token-to-remove"
 
         with patch(
-            "src.api.routes.push.get_push_notification_service",
+            "src.services.core.notifications.notif_web_core.get_push_notification_service",
             return_value=mock_service,
         ):
-            response = client.request(
+            response = await async_client.request(
                 "DELETE",
                 "/api/v1/push/unsubscribe",
                 json={"endpoint": endpoint},

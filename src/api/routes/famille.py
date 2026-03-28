@@ -1806,7 +1806,7 @@ async def marquer_achat_achete(
     achat_id: int,
     payload: MarquerAchetePayload,
     user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
+) -> MessageResponse:
     """Marque un achat comme acheté."""
     from src.services.famille.achats import obtenir_service_achats_famille
 
@@ -2727,3 +2727,106 @@ async def suggestions_activites_auto(
         }
 
     return await _query()
+
+# ═══════════════════════════════════════════════════════════
+# JULES — ALIMENTS EXCLUS (CT-09)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/jules/aliments-exclus", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def lire_aliments_exclus_jules(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne la liste des aliments exclus pour Jules."""
+    from src.core.models.user_preferences import PreferenceUtilisateur
+    from sqlalchemy import select as sa_select
+
+    def _query():
+        with executer_avec_session() as session:
+            user_id = user.get("sub", user.get("id", "dev"))
+            pref = session.execute(
+                sa_select(PreferenceUtilisateur).where(
+                    PreferenceUtilisateur.user_id == user_id
+                )
+            ).scalar_one_or_none()
+            return {
+                "aliments_exclus_jules": pref.aliments_exclus_jules if pref else [],
+                "age_mois": pref.jules_age_mois if pref else 19,
+            }
+
+    return await executer_async(_query)
+
+
+@router.put("/jules/aliments-exclus", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def mettre_a_jour_aliments_exclus_jules(
+    payload: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Met à jour la liste des aliments exclus pour Jules.
+
+    Body: {"aliments_exclus_jules": ["sel", "miel", ...]}
+    """
+    from src.core.models.user_preferences import PreferenceUtilisateur
+    from sqlalchemy import select as sa_select
+
+    aliments = payload.get("aliments_exclus_jules", [])
+    if not isinstance(aliments, list):
+        raise HTTPException(status_code=422, detail="aliments_exclus_jules doit être une liste")
+
+    def _update():
+        with executer_avec_session() as session:
+            user_id = user.get("sub", user.get("id", "dev"))
+            pref = session.execute(
+                sa_select(PreferenceUtilisateur).where(
+                    PreferenceUtilisateur.user_id == user_id
+                )
+            ).scalar_one_or_none()
+            if pref is None:
+                pref = PreferenceUtilisateur(user_id=user_id)
+                session.add(pref)
+            pref.aliments_exclus_jules = aliments
+            session.commit()
+        return MessageResponse(message=f"{len(aliments)} aliment(s) exclus mis à jour pour Jules")
+
+    return await executer_async(_update)
+
+
+# ═══════════════════════════════════════════════════════════
+# JULES — COACHING HEBDOMADAIRE (CT-05)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/jules/coaching-hebdo", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_coaching_hebdo_jules(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère le coaching hebdomadaire personnalisé pour Jules (CT-05).
+
+    Retourne un bilan développemental, 3 activités et un conseil alimentation
+    adaptés à l'âge actuel de Jules.
+    """
+    from src.core.models.user_preferences import PreferenceUtilisateur
+    from src.services.famille.jules_ai import get_jules_ai_service
+    from sqlalchemy import select as sa_select
+
+    def _query():
+        with executer_avec_session() as session:
+            user_id = user.get("sub", user.get("id", "dev"))
+            pref = session.execute(
+                sa_select(PreferenceUtilisateur).where(
+                    PreferenceUtilisateur.user_id == user_id
+                )
+            ).scalar_one_or_none()
+            age_mois = pref.jules_age_mois if pref else 19
+
+        service = get_jules_ai_service()
+        coaching = service.generer_coaching_hebdo(age_mois=age_mois)
+        return {
+            "age_mois": age_mois,
+            "coaching": coaching,
+        }
+
+    return await executer_async(_query)

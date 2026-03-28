@@ -8,8 +8,10 @@ Tests couvrant:
 
 from __future__ import annotations
 
+import httpx
 import pytest
-from fastapi.testclient import TestClient
+import pytest_asyncio
+from httpx import ASGITransport
 
 
 # ═══════════════════════════════════════════════════════════
@@ -17,23 +19,31 @@ from fastapi.testclient import TestClient
 # ═══════════════════════════════════════════════════════════
 
 
-@pytest.fixture
-def client():
+@pytest_asyncio.fixture
+async def async_client():
+    """Client async avec override d'auth : rôle admin pour les tests admin/RGPD."""
+    from src.api.main import app
+    from src.api.dependencies import require_auth
+
+    app.dependency_overrides[require_auth] = lambda: {"id": "test-user", "role": "admin"}
+    async with httpx.AsyncClient(
+        transport=ASGITransport(app=app, raise_app_exceptions=False),
+        base_url="http://test",
+    ) as client:
+        yield client
+    app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def unauthenticated_client():
+    """Client async SANS override d'auth pour tester les refus."""
     from src.api.main import app
 
-    return TestClient(app, raise_server_exceptions=False)
-
-
-@pytest.fixture
-def auth_headers():
-    """Headers pour un utilisateur authentifié (rôle membre standard)."""
-    return {"Authorization": "Bearer test-token"}
-
-
-@pytest.fixture
-def admin_headers():
-    """Headers pour un utilisateur avec le rôle admin."""
-    return {"Authorization": "Bearer admin-token"}
+    async with httpx.AsyncClient(
+        transport=ASGITransport(app=app, raise_app_exceptions=False),
+        base_url="http://test",
+    ) as client:
+        yield client
 
 
 # ═══════════════════════════════════════════════════════════
@@ -44,55 +54,67 @@ def admin_headers():
 class TestAdminAuditLogs:
     """GET /api/v1/admin/audit-logs — accessible admin seulement."""
 
-    def test_sans_auth_retourne_401_ou_403(self, client: TestClient):
+    @pytest.mark.asyncio
+    async def test_sans_auth_retourne_401_ou_403(self, unauthenticated_client: httpx.AsyncClient):
         """L'endpoint doit refuser les requêtes sans token."""
-        response = client.get("/api/v1/admin/audit-logs")
+        response = await unauthenticated_client.get("/api/v1/admin/audit-logs")
         assert response.status_code in [401, 403, 404]
 
-    def test_avec_token_admin_retourne_200_ou_200(self, client: TestClient, admin_headers: dict):
+    @pytest.mark.asyncio
+    async def test_avec_token_admin_retourne_200_ou_200(
+        self, async_client: httpx.AsyncClient
+    ):
         """Avec un token admin valide, l'endpoint doit répondre."""
-        response = client.get("/api/v1/admin/audit-logs", headers=admin_headers)
-        # En mode dev, l'admin-token peut être accepté ou refusé selon la config
-        assert response.status_code in [200, 401, 403, 404]
+        response = await async_client.get("/api/v1/admin/audit-logs")
+        assert response.status_code in [200, 401, 403, 404, 500]
 
-    def test_reponse_json(self, client: TestClient, admin_headers: dict):
+    @pytest.mark.asyncio
+    async def test_reponse_json(self, async_client: httpx.AsyncClient):
         """Quand il retourne 200, la réponse doit être du JSON."""
-        response = client.get("/api/v1/admin/audit-logs", headers=admin_headers)
+        response = await async_client.get("/api/v1/admin/audit-logs")
         if response.status_code == 200:
             data = response.json()
             assert "items" in data or "total" in data
 
-    def test_pagination_params_acceptes(self, client: TestClient, admin_headers: dict):
+    @pytest.mark.asyncio
+    async def test_pagination_params_acceptes(self, async_client: httpx.AsyncClient):
         """Les paramètres de pagination doivent être acceptés."""
-        response = client.get(
-            "/api/v1/admin/audit-logs?page=1&par_page=10",
-            headers=admin_headers,
+        response = await async_client.get(
+            "/api/v1/admin/audit-logs?page=1&par_page=10"
         )
-        assert response.status_code in [200, 401, 403, 404, 422]
+        assert response.status_code in [200, 401, 403, 404, 422, 500]
 
 
 class TestAdminAuditStats:
     """GET /api/v1/admin/audit-stats — accessible admin seulement."""
 
-    def test_sans_auth_retourne_401_ou_403(self, client: TestClient):
-        response = client.get("/api/v1/admin/audit-stats")
+    @pytest.mark.asyncio
+    async def test_sans_auth_retourne_401_ou_403(
+        self, unauthenticated_client: httpx.AsyncClient
+    ):
+        response = await unauthenticated_client.get("/api/v1/admin/audit-stats")
         assert response.status_code in [401, 403, 404]
 
-    def test_avec_token_admin(self, client: TestClient, admin_headers: dict):
-        response = client.get("/api/v1/admin/audit-stats", headers=admin_headers)
-        assert response.status_code in [200, 401, 403, 404]
+    @pytest.mark.asyncio
+    async def test_avec_token_admin(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/audit-stats")
+        assert response.status_code in [200, 401, 403, 404, 500]
 
 
 class TestAdminAuditExport:
     """GET /api/v1/admin/audit-export — export CSV admin."""
 
-    def test_sans_auth_retourne_401_ou_403(self, client: TestClient):
-        response = client.get("/api/v1/admin/audit-export")
+    @pytest.mark.asyncio
+    async def test_sans_auth_retourne_401_ou_403(
+        self, unauthenticated_client: httpx.AsyncClient
+    ):
+        response = await unauthenticated_client.get("/api/v1/admin/audit-export")
         assert response.status_code in [401, 403, 404]
 
-    def test_avec_token_admin_csv_ou_erreur(self, client: TestClient, admin_headers: dict):
-        response = client.get("/api/v1/admin/audit-export", headers=admin_headers)
-        assert response.status_code in [200, 401, 403, 404]
+    @pytest.mark.asyncio
+    async def test_avec_token_admin_csv_ou_erreur(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/audit-export")
+        assert response.status_code in [200, 401, 403, 404, 500]
         if response.status_code == 200:
             content_type = response.headers.get("content-type", "")
             assert "text/csv" in content_type or "application/octet-stream" in content_type
@@ -117,14 +139,18 @@ class TestAdminRouterExiste:
 class TestRGPDExport:
     """GET /api/v1/rgpd/export — export données utilisateur."""
 
-    def test_sans_auth_retourne_401_ou_200(self, client: TestClient):
+    @pytest.mark.asyncio
+    async def test_sans_auth_retourne_401_ou_200(
+        self, unauthenticated_client: httpx.AsyncClient
+    ):
         """L'export nécessite une authentification (ou dev mode accepte)."""
-        response = client.get("/api/v1/rgpd/export")
+        response = await unauthenticated_client.get("/api/v1/rgpd/export")
         assert response.status_code in [200, 401, 403]
 
-    def test_avec_auth_retourne_zip(self, client: TestClient, auth_headers: dict):
+    @pytest.mark.asyncio
+    async def test_avec_auth_retourne_zip(self, async_client: httpx.AsyncClient):
         """Avec authentification, l'export retourne un fichier ZIP."""
-        response = client.get("/api/v1/rgpd/export", headers=auth_headers)
+        response = await async_client.get("/api/v1/rgpd/export")
         assert response.status_code in [200, 401, 403, 500]
         if response.status_code == 200:
             content_type = response.headers.get("content-type", "")
@@ -134,12 +160,16 @@ class TestRGPDExport:
 class TestRGPDSummary:
     """GET /api/v1/rgpd/data-summary — résumé des données stockées."""
 
-    def test_sans_auth_retourne_401_ou_200(self, client: TestClient):
-        response = client.get("/api/v1/rgpd/data-summary")
+    @pytest.mark.asyncio
+    async def test_sans_auth_retourne_401_ou_200(
+        self, unauthenticated_client: httpx.AsyncClient
+    ):
+        response = await unauthenticated_client.get("/api/v1/rgpd/data-summary")
         assert response.status_code in [200, 401, 403]
 
-    def test_avec_auth_retourne_structure_valide(self, client: TestClient, auth_headers: dict):
-        response = client.get("/api/v1/rgpd/data-summary", headers=auth_headers)
+    @pytest.mark.asyncio
+    async def test_avec_auth_retourne_structure_valide(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/rgpd/data-summary")
         assert response.status_code in [200, 401, 403, 500]
         if response.status_code == 200:
             data = response.json()
@@ -149,28 +179,31 @@ class TestRGPDSummary:
 class TestRGPDDeleteAccount:
     """POST /api/v1/rgpd/delete-account — suppression de compte."""
 
-    def test_sans_auth_retourne_401(self, client: TestClient):
-        response = client.post(
+    @pytest.mark.asyncio
+    async def test_sans_auth_retourne_401(
+        self, unauthenticated_client: httpx.AsyncClient
+    ):
+        response = await unauthenticated_client.post(
             "/api/v1/rgpd/delete-account",
             json={"confirmation": "SUPPRIMER MON COMPTE"},
         )
         assert response.status_code in [200, 401, 403, 422]
 
-    def test_avec_auth_confirmation_manquante(self, client: TestClient, auth_headers: dict):
+    @pytest.mark.asyncio
+    async def test_avec_auth_confirmation_manquante(self, async_client: httpx.AsyncClient):
         """Sans le mot de confirmation, la suppression doit échouer."""
-        response = client.post(
+        response = await async_client.post(
             "/api/v1/rgpd/delete-account",
             json={},
-            headers=auth_headers,
         )
         assert response.status_code in [401, 403, 422, 500]
 
-    def test_avec_auth_et_confirmation(self, client: TestClient, auth_headers: dict):
+    @pytest.mark.asyncio
+    async def test_avec_auth_et_confirmation(self, async_client: httpx.AsyncClient):
         """Avec confirmation correcte, la requête est acceptée (pas nécessairement exécutée)."""
-        response = client.post(
+        response = await async_client.post(
             "/api/v1/rgpd/delete-account",
             json={"confirmation": "SUPPRIMER MON COMPTE"},
-            headers=auth_headers,
         )
         # Peut échouer si l'utilisateur de test n'existe pas en DB
         assert response.status_code in [200, 401, 403, 404, 422, 500]

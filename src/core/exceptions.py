@@ -19,6 +19,7 @@ __all__ = [
     "ErreurNonTrouve",
     "ErreurBaseDeDonnees",
     "ErreurServiceIA",
+    "ErreurService",
     "ErreurLimiteDebit",
     "ErreurServiceExterne",
     "ErreurConfiguration",
@@ -182,6 +183,10 @@ class ErreurConfiguration(ExceptionApp):
     """
 
     code_erreur = "CONFIGURATION_ERROR"
+
+
+# Alias de compatibilité
+ErreurService = ErreurServiceIA
 
 
 # ═══════════════════════════════════════════════════════════

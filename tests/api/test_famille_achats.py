@@ -112,7 +112,7 @@ class TestListerAchats:
         mock_service.lister_achats.return_value = []
 
         with patch(
-            "src.api.routes.famille.obtenir_service_achats_famille",
+            "src.services.famille.achats.obtenir_service_achats_famille",
             return_value=mock_service,
         ):
             response = await async_client.get("/api/v1/famille/achats")
@@ -126,7 +126,7 @@ class TestListerAchats:
         mock_service.lister_achats.return_value = [mock_achat]
 
         with patch(
-            "src.api.routes.famille.obtenir_service_achats_famille",
+            "src.services.famille.achats.obtenir_service_achats_famille",
             return_value=mock_service,
         ):
             response = await async_client.get("/api/v1/famille/achats")
@@ -142,7 +142,7 @@ class TestListerAchats:
         mock_service.lister_par_personne.return_value = []
 
         with patch(
-            "src.api.routes.famille.obtenir_service_achats_famille",
+            "src.services.famille.achats.obtenir_service_achats_famille",
             return_value=mock_service,
         ):
             response = await async_client.get("/api/v1/famille/achats?pour_qui=jules")
@@ -156,7 +156,7 @@ class TestListerAchats:
         mock_service.lister_a_revendre.return_value = []
 
         with patch(
-            "src.api.routes.famille.obtenir_service_achats_famille",
+            "src.services.famille.achats.obtenir_service_achats_famille",
             return_value=mock_service,
         ):
             response = await async_client.get("/api/v1/famille/achats?a_revendre=true")
@@ -180,7 +180,7 @@ class TestCreerAchat:
         mock_service.ajouter_achat.return_value = mock_achat
 
         with patch(
-            "src.api.routes.famille.obtenir_service_achats_famille",
+            "src.services.famille.achats.obtenir_service_achats_famille",
             return_value=mock_service,
         ):
             response = await async_client.post(
@@ -196,7 +196,7 @@ class TestCreerAchat:
         mock_service.ajouter_achat.return_value = mock_achat
 
         with patch(
-            "src.api.routes.famille.obtenir_service_achats_famille",
+            "src.services.famille.achats.obtenir_service_achats_famille",
             return_value=mock_service,
         ):
             response = await async_client.post(
@@ -227,7 +227,7 @@ class TestCreerAchat:
         mock_service.ajouter_achat.return_value = mock_achat
 
         with patch(
-            "src.api.routes.famille.obtenir_service_achats_famille",
+            "src.services.famille.achats.obtenir_service_achats_famille",
             return_value=mock_service,
         ):
             await async_client.post("/api/v1/famille/achats", json=ACHAT_CREATE_PAYLOAD)
@@ -249,7 +249,7 @@ class TestMarquerAchete:
         mock_service.marquer_achete.return_value = True
 
         with patch(
-            "src.api.routes.famille.obtenir_service_achats_famille",
+            "src.services.famille.achats.obtenir_service_achats_famille",
             return_value=mock_service,
         ):
             response = await async_client.post(
@@ -265,7 +265,7 @@ class TestMarquerAchete:
         mock_service.marquer_achete.return_value = False
 
         with patch(
-            "src.api.routes.famille.obtenir_service_achats_famille",
+            "src.services.famille.achats.obtenir_service_achats_famille",
             return_value=mock_service,
         ):
             response = await async_client.post(
@@ -287,12 +287,16 @@ class TestSupprimerAchat:
     @pytest.mark.asyncio
     async def test_supprimer_not_found(self, async_client: httpx.AsyncClient):
         """Un achat inexistant doit retourner 404 (via DB mock)."""
-        with patch("src.api.routes.famille.executer_avec_session") as mock_ctx:
-            session = MagicMock()
-            session.query.return_value.filter.return_value.first.return_value = None
-            mock_ctx.return_value.__enter__ = lambda s: session
-            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        from contextlib import contextmanager
 
+        session = MagicMock()
+        session.query.return_value.filter.return_value.first.return_value = None
+
+        @contextmanager
+        def _mock_session():
+            yield session
+
+        with patch("src.api.routes.famille.executer_avec_session", _mock_session):
             response = await async_client.delete("/api/v1/famille/achats/9999")
 
         assert response.status_code == 404

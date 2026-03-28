@@ -92,6 +92,7 @@ class PreferenceUtilisateur(TimestampMixin, Base):
     # Préférences alimentaires (JSONB - stocke des listes)
     aliments_exclus: Mapped[list[str]] = mapped_column(JSONB, default=list)
     aliments_favoris: Mapped[list[str]] = mapped_column(JSONB, default=list)
+    aliments_exclus_jules: Mapped[list[str]] = mapped_column(JSONB, default=list)
 
     # Équilibre souhaité
     poisson_par_semaine: Mapped[int] = mapped_column(Integer, default=2)

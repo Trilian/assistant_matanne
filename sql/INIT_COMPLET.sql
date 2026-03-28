@@ -119,6 +119,7 @@ DROP TABLE IF EXISTS achats_famille CASCADE;
 DROP TABLE IF EXISTS activites_famille CASCADE;
 DROP TABLE IF EXISTS budgets_famille CASCADE;
 DROP TABLE IF EXISTS articles_achats_famille CASCADE;
+DROP TABLE IF EXISTS historique_achats CASCADE;
 DROP TABLE IF EXISTS evenements_planning CASCADE;
 DROP TABLE IF EXISTS meubles CASCADE;
 DROP TABLE IF EXISTS depenses_maison CASCADE;
@@ -730,6 +731,21 @@ CREATE INDEX IF NOT EXISTS ix_shopping_items_liste ON articles_achats_famille(li
 CREATE INDEX IF NOT EXISTS ix_shopping_items_actif ON articles_achats_famille(actif);
 CREATE INDEX IF NOT EXISTS ix_shopping_items_date ON articles_achats_famille(date_ajout);
 -- ─────────────────────────────────────────────────────────────────────────────
+-- 3.25b HISTORIQUE_ACHATS (apprentissage fréquence IA)
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE historique_achats (
+    id SERIAL PRIMARY KEY,
+    article_nom VARCHAR(200) NOT NULL,
+    categorie VARCHAR(100),
+    rayon_magasin VARCHAR(100),
+    derniere_achat TIMESTAMP WITH TIME ZONE NOT NULL,
+    frequence_jours INTEGER,
+    nb_achats INTEGER NOT NULL DEFAULT 1
+);
+CREATE INDEX IF NOT EXISTS ix_historique_achats_nom ON historique_achats(article_nom);
+CREATE INDEX IF NOT EXISTS ix_historique_achats_date ON historique_achats(derniere_achat);
+CREATE INDEX IF NOT EXISTS ix_historique_achats_nom_date ON historique_achats(article_nom, derniere_achat);
+-- ─────────────────────────────────────────────────────────────────────────────
 -- 3.26 CALENDAR_EVENTS
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE evenements_planning (
@@ -887,6 +903,7 @@ CREATE TABLE preferences_utilisateurs (
     temps_weekend VARCHAR(20) NOT NULL DEFAULT 'long',
     aliments_exclus JSONB NOT NULL DEFAULT '[]',
     aliments_favoris JSONB NOT NULL DEFAULT '[]',
+    aliments_exclus_jules JSONB NOT NULL DEFAULT '[]',
     poisson_par_semaine INTEGER NOT NULL DEFAULT 2,
     vegetarien_par_semaine INTEGER NOT NULL DEFAULT 1,
     viande_rouge_max INTEGER NOT NULL DEFAULT 2,
@@ -2826,6 +2843,21 @@ CREATE TABLE jeux_mise_responsable (
     UNIQUE (mois)
 );
 CREATE INDEX IF NOT EXISTS idx_mise_responsable_mois ON jeux_mise_responsable(mois DESC);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- BANKROLL HISTORIQUE (CT-09 Sprint 4)
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE jeux_bankroll_historique (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    montant FLOAT NOT NULL,
+    variation FLOAT NOT NULL DEFAULT 0.0,
+    date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    notes TEXT,
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_bankroll_historique_user ON jeux_bankroll_historique(user_id, date DESC);
+
 -- ============================================================================
 -- PARTIE 5C : TABLES MAISON EXTENSIONS (contrats, artisans, garanties, etc.)
 -- ============================================================================

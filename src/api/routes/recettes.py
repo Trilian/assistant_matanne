@@ -7,7 +7,7 @@ recherche par nom et documentation OpenAPI enrichie.
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 
 from src.api.dependencies import require_auth
 from src.api.schemas import (
@@ -757,7 +757,7 @@ async def importer_recette_url(
 @router.post("/import-pdf", response_model=RecetteResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def importer_recette_pdf(
-    file: "UploadFile",
+    file: UploadFile,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
@@ -779,8 +779,6 @@ async def importer_recette_pdf(
     """
     import tempfile
     from pathlib import Path
-    
-    from fastapi import UploadFile
     
     from src.core.models import Recette
     from src.services.cuisine.recettes.importer import RecipeImporter
@@ -1046,4 +1044,144 @@ async def enrichir_nutrition_batch(
         return service.enrichir_batch(limite=limite)
 
     return await executer_async(_batch)
+
+
+# ═══════════════════════════════════════════════════════════
+# VERSION JULES (CT-09)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/{recette_id}/version-jules", response_model=dict)
+@gerer_exception_api
+async def generer_version_jules(
+    recette_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère une version adaptée à Jules (bébé) pour une recette.
+
+    Adapte les ingrédients et instructions selon l'âge et les aliments exclus
+    de Jules définis dans les préférences de l'utilisateur.
+
+    Args:
+        recette_id: ID de la recette source
+
+    Returns:
+        Données de la VersionRecette créée/mise à jour
+    """
+    from src.core.models.user_preferences import PreferenceUtilisateur
+    from src.services.famille.version_recette_jules import get_version_recette_jules_service
+
+    def _generate():
+        with executer_avec_session() as session:
+            user_id = user.get("sub", user.get("id", "dev"))
+            prefs = (
+                session.query(PreferenceUtilisateur)
+                .filter(PreferenceUtilisateur.user_id == user_id)
+                .first()
+            )
+            profil_jules = {
+                "age_mois": prefs.jules_age_mois if prefs else 19,
+                "aliments_exclus_jules": prefs.aliments_exclus_jules if prefs else [],
+            }
+
+        service = get_version_recette_jules_service()
+        return service.generer_version_jules(recette_id, profil_jules)
+
+    return await executer_async(_generate)
+
+
+# ═══════════════════════════════════════════════════════════
+# GÉNÉRATION DEPUIS PHOTO (CT-06)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/generer-depuis-photo", response_model=RecetteResponse, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def generer_recette_depuis_photo(
+    image: UploadFile = File(..., description="Photo du plat ou de la recette"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère une recette complète depuis une photo via IA vision (CT-06).
+
+    Analyse la photo avec Pixtral pour identifier les ingrédients et préparer
+    une recette structurée, puis la persiste en base de données.
+
+    Args:
+        image: Image du plat (JPEG, PNG, WEBP)
+
+    Returns:
+        Recette créée avec ingrédients et étapes
+    """
+    import asyncio
+
+    from src.core.models import Recette
+    from src.services.integrations.multimodal import get_multimodal_service
+
+    image_bytes = await image.read()
+
+    async def _generate_async():
+        multimodal = get_multimodal_service()
+        recette_extraite = await multimodal.extraire_recette_image(image_bytes)
+
+        if not recette_extraite:
+            raise HTTPException(
+                status_code=422,
+                detail="Impossible d'identifier une recette dans cette image",
+            )
+
+        def _persist():
+            with executer_avec_session() as session:
+                db_recette = Recette(
+                    nom=recette_extraite.nom,
+                    description=f"Recette générée depuis photo",
+                    temps_preparation=_parse_minutes(recette_extraite.temps_preparation),
+                    temps_cuisson=_parse_minutes(recette_extraite.temps_cuisson),
+                    portions=4,
+                    difficulte=(recette_extraite.difficulte or "moyen").lower(),
+                    categorie=(recette_extraite.categorie or "plat").lower(),
+                    genere_par_ia=True,
+                )
+                session.add(db_recette)
+                session.flush()
+
+                from src.api.schemas.recettes import IngredientItem
+                ing_items = [
+                    IngredientItem(
+                        nom=ing.nom,
+                        quantite=float(ing.quantite or 1),
+                        unite=ing.unite or "pièce",
+                    )
+                    for ing in recette_extraite.ingredients
+                    if ing.nom
+                ]
+                _sauvegarder_ingredients(session, db_recette.id, ing_items)
+                _sauvegarder_etapes(session, db_recette.id, recette_extraite.etapes)
+
+                session.commit()
+                session.refresh(db_recette)
+                return _serialiser_recette(db_recette, session, user)
+
+        return await executer_async(_persist)
+
+    return await _generate_async()
+
+
+def _parse_minutes(valeur: str | None) -> int:
+    """Parse une chaîne '15 min', '1h30' etc. en nombre de minutes."""
+    if not valeur:
+        return 0
+    import re
+    valeur = valeur.lower()
+    h = re.search(r"(\d+)\s*h", valeur)
+    m = re.search(r"(\d+)\s*(?:min|mn|m\b)", valeur)
+    total = 0
+    if h:
+        total += int(h.group(1)) * 60
+    if m:
+        total += int(m.group(1))
+    if not h and not m:
+        digits = re.search(r"(\d+)", valeur)
+        if digits:
+            total = int(digits.group(1))
+    return total
 

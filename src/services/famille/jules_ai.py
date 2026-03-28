@@ -256,6 +256,63 @@ Assure-toi que les activités sont sécuritaires, adaptées à l'âge et faciles
             max_tokens=2000,
         )
 
+    def generer_coaching_hebdo(
+        self,
+        age_mois: int,
+        jalons_recents: list[str] | None = None,
+        preoccupations: list[str] | None = None,
+    ) -> str:
+        """Génère un bilan de coaching hebdomadaire pour Jules (CT-05).
+
+        Retourne un texte personnalisé avec:
+        - Bilan du développement à l'âge actuel
+        - 3 activités à privilégier cette semaine
+        - Conseil alimentation de la semaine
+        - Point vigilance / rappel santé
+
+        Args:
+            age_mois: Âge de Jules en mois
+            jalons_recents: Jalons atteints récemment (optionnel)
+            preoccupations: Préoccupations parentales de la semaine (optionnel)
+
+        Returns:
+            Texte de coaching hebdomadaire formaté
+        """
+        jalons_txt = (
+            f"\nJalons récents atteints : {', '.join(jalons_recents)}"
+            if jalons_recents
+            else ""
+        )
+        preoc_txt = (
+            f"\nPréoccupations parentales : {', '.join(preoccupations)}"
+            if preoccupations
+            else ""
+        )
+
+        prompt = f"""Jules a {age_mois} mois aujourd'hui.{jalons_txt}{preoc_txt}
+
+Génère un coaching hebdomadaire personnalisé avec ces 4 sections :
+
+## 🌱 Bilan développement
+Ce qui est attendu / normal à {age_mois} mois. Ce que Jules fait probablement maintenant.
+
+## 🎯 3 activités de la semaine
+Des activités concrètes adaptées à {age_mois} mois. Chaque activité : nom + description courte (1 ligne) + bénéfice.
+
+## 🥣 Conseil alimentation
+Un conseil pratique sur l'alimentation à {age_mois} mois (diversification, textures, portions, aliments à introduire).
+
+## ⚠️ Point vigilance
+Un rappel santé ou sécurité important pour cette tranche d'âge.
+
+Ton bienveillant, positif et pratique. Tutoie les parents (vous êtes parents de Jules)."""
+
+        return self.call_with_streaming_sync(
+            prompt=prompt,
+            system_prompt="Tu es pédiatre et coach parental expert. Réponds en français de manière chaleureuse et concrète.",
+            max_tokens=900,
+        )
+
 
 @service_factory("jules_ai", tags={"famille", "ia", "enfant"})
 def obtenir_jules_ai_service() -> JulesAIService:

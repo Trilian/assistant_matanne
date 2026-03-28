@@ -290,7 +290,7 @@ class PressePapierEntree(TimestampMixin, Base):
         expire_le: Date d'expiration optionnelle
     """
 
-    __tablename__ = "presse_papiers"
+    __tablename__ = "presse_papier_entrees"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     contenu: Mapped[str] = mapped_column(Text, nullable=False)

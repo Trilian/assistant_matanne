@@ -11,8 +11,8 @@ from src.core.models.users import (
     CategorieAchat,
     PrioriteAchat,
     ActiviteWeekend,
-    AchatFamille,
 )
+from src.core.models.famille import AchatFamille
 
 
 class TestUsers:

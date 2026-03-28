@@ -57,7 +57,7 @@ class TestLireConfigGarde:
         mock_service = _mock_jours_speciaux_service()
 
         with patch(
-            "src.api.routes.famille.obtenir_service_jours_speciaux",
+            "src.services.famille.jours_speciaux.obtenir_service_jours_speciaux",
             return_value=mock_service,
         ), patch("src.services.famille.jours_speciaux._config_creche", {
             "semaines_fermeture": [],
@@ -74,7 +74,7 @@ class TestLireConfigGarde:
         mock_service = _mock_jours_speciaux_service()
 
         with patch(
-            "src.api.routes.famille.obtenir_service_jours_speciaux",
+            "src.services.famille.jours_speciaux.obtenir_service_jours_speciaux",
             return_value=mock_service,
         ), patch("src.services.famille.jours_speciaux._config_creche", {
             "semaines_fermeture": [],
@@ -94,7 +94,7 @@ class TestLireConfigGarde:
         mock_service = _mock_jours_speciaux_service()
 
         with patch(
-            "src.api.routes.famille.obtenir_service_jours_speciaux",
+            "src.services.famille.jours_speciaux.obtenir_service_jours_speciaux",
             return_value=mock_service,
         ), patch("src.services.famille.jours_speciaux._config_creche", {
             "semaines_fermeture": [],
@@ -128,7 +128,7 @@ class TestSauvegarderConfigGarde:
         }
 
         with patch(
-            "src.api.routes.famille.obtenir_service_jours_speciaux",
+            "src.services.famille.jours_speciaux.obtenir_service_jours_speciaux",
             return_value=mock_service,
         ):
             response = await async_client.put("/api/v1/famille/config/garde", json=payload)
@@ -146,7 +146,7 @@ class TestSauvegarderConfigGarde:
         }
 
         with patch(
-            "src.api.routes.famille.obtenir_service_jours_speciaux",
+            "src.services.famille.jours_speciaux.obtenir_service_jours_speciaux",
             return_value=mock_service,
         ):
             await async_client.put("/api/v1/famille/config/garde", json=payload)
@@ -178,7 +178,7 @@ class TestJoursSansCreche:
         mock_service = _mock_jours_speciaux_service()
 
         with patch(
-            "src.api.routes.famille.obtenir_service_jours_speciaux",
+            "src.services.famille.jours_speciaux.obtenir_service_jours_speciaux",
             return_value=mock_service,
         ):
             response = await async_client.get("/api/v1/famille/planning/jours-sans-creche")
@@ -190,7 +190,7 @@ class TestJoursSansCreche:
         mock_service = _mock_jours_speciaux_service()
 
         with patch(
-            "src.api.routes.famille.obtenir_service_jours_speciaux",
+            "src.services.famille.jours_speciaux.obtenir_service_jours_speciaux",
             return_value=mock_service,
         ):
             response = await async_client.get("/api/v1/famille/planning/jours-sans-creche")
@@ -206,7 +206,7 @@ class TestJoursSansCreche:
         mock_service = _mock_jours_speciaux_service()
 
         with patch(
-            "src.api.routes.famille.obtenir_service_jours_speciaux",
+            "src.services.famille.jours_speciaux.obtenir_service_jours_speciaux",
             return_value=mock_service,
         ):
             response = await async_client.get(
@@ -222,7 +222,7 @@ class TestJoursSansCreche:
         mock_service = _mock_jours_speciaux_service()
 
         with patch(
-            "src.api.routes.famille.obtenir_service_jours_speciaux",
+            "src.services.famille.jours_speciaux.obtenir_service_jours_speciaux",
             return_value=mock_service,
         ):
             response = await async_client.get(
@@ -240,7 +240,7 @@ class TestJoursSansCreche:
         mock_service = _mock_jours_speciaux_service(jours=[mock_jour])
 
         with patch(
-            "src.api.routes.famille.obtenir_service_jours_speciaux",
+            "src.services.famille.jours_speciaux.obtenir_service_jours_speciaux",
             return_value=mock_service,
         ):
             response = await async_client.get(
