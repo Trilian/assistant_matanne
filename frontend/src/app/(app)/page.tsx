@@ -30,7 +30,9 @@ import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
 import {
   obtenirBilanMensuel,
+  obtenirAlertesContextuelles,
   obtenirConfigDashboard,
+  obtenirPointsFamille,
   obtenirTableauBord,
   sauvegarderConfigDashboard,
 } from "@/bibliotheque/api/tableau-bord";
@@ -49,6 +51,8 @@ const WIDGETS_DEFAUT = {
   bilan_mensuel: true,
   meteo: true,
   histoire_famille: true,
+  alertes_contextuelles: true,
+  points_famille: true,
 };
 
 type ClesWidget = keyof typeof WIDGETS_DEFAUT;
@@ -86,6 +90,14 @@ export default function PageAccueil() {
       const { data } = await clientApi.get<HistoireFamille>("/famille/aujourd-hui-histoire");
       return data;
     }
+  );
+  const { data: alertesContextuelles } = utiliserRequete(
+    ["dashboard", "alertes-contextuelles"],
+    obtenirAlertesContextuelles
+  );
+  const { data: pointsFamille } = utiliserRequete(
+    ["dashboard", "points-famille"],
+    obtenirPointsFamille
   );
 
   const [widgetsStockes, setWidgetsStockes] = utiliserStockageLocal("dashboard-widgets", WIDGETS_DEFAUT);
@@ -238,6 +250,56 @@ export default function PageAccueil() {
                 </p>
               </div>
             ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {widgets.alertes_contextuelles && alertesContextuelles && alertesContextuelles.total > 0 && (
+        <Card className="border-amber-300/60 bg-amber-50/50 dark:border-amber-900/40 dark:bg-amber-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Alertes contextuelles</CardTitle>
+            <CardDescription>Actions recommandées sur les 48 prochaines heures</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {alertesContextuelles.items.map((alerte) => (
+              <div key={`${alerte.type}-${alerte.module}`} className="rounded-md border bg-background/70 px-3 py-2">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium">{alerte.titre}</p>
+                  <span className="text-[11px] uppercase text-muted-foreground">{alerte.module}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{alerte.message}</p>
+                <p className="text-xs mt-1">Action: {alerte.action}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {widgets.points_famille && pointsFamille && (
+        <Card className="border-emerald-300/50 bg-emerald-50/50 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Points famille</CardTitle>
+            <CardDescription>Gamification sport, alimentation et anti-gaspi</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-3xl font-bold">{pointsFamille.total_points}</p>
+                <p className="text-xs text-muted-foreground">points cumulés</p>
+              </div>
+              <div className="text-right text-xs text-muted-foreground space-y-1">
+                <p>Sport: {pointsFamille.sport}</p>
+                <p>Alimentation: {pointsFamille.alimentation}</p>
+                <p>Anti-gaspi: {pointsFamille.anti_gaspi}</p>
+              </div>
+            </div>
+            {!!pointsFamille.badges.length && (
+              <div className="flex flex-wrap gap-2 text-xs">
+                {pointsFamille.badges.map((badge) => (
+                  <span key={badge} className="rounded-full border px-2 py-1">{badge}</span>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

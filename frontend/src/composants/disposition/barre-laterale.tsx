@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { createElement, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
@@ -13,10 +13,8 @@ import {
   Home,
   ChefHat,
   Users,
-  Calendar,
   House,
   Gamepad2,
-  Wrench,
   PanelLeftClose,
   PanelLeft,
   ChevronDown,
@@ -25,7 +23,6 @@ import {
   ShoppingCart,
   Package,
   CookingPot,
-  Leaf,
   Baby,
   ClipboardList,
   RotateCw,
@@ -33,13 +30,8 @@ import {
   Hammer,
   Sprout,
   SprayCan,
-  Receipt,
   Banknote,
-  Zap,
-  Wine,
   FileText,
-  ShieldCheck,
-  ClipboardCheck,
   Trophy,
   Dices,
   TrendingUp,
@@ -47,8 +39,8 @@ import {
   Contact,
   Layers,
   Shield,
-  Camera,
-  Wifi,
+  Plane,
+  Activity,
   CalendarRange,
   Boxes,
   ShoppingBag,
@@ -111,6 +103,8 @@ const LIENS: LienNav[] = [
       { nom: "Anniversaires", chemin: "/famille/anniversaires", Icone: Cake },
       { nom: "Contacts", chemin: "/famille/contacts", Icone: Contact },
       { nom: "Documents", chemin: "/famille/documents", Icone: FileText },
+      { nom: "Voyages", chemin: "/famille/voyages", Icone: Plane },
+      { nom: "Garmin", chemin: "/famille/garmin", Icone: Activity },
       { nom: "Config", chemin: "/famille/config", Icone: Settings },
     ],
   },
@@ -245,6 +239,7 @@ export function BarreLaterale() {
               Récents
             </p>
             {recents.map((page) => {
+              const IconePage = page.Icone as React.ElementType;
               const estActif = pathname === page.chemin;
               return (
                 <Link
@@ -257,7 +252,7 @@ export function BarreLaterale() {
                       : "hover:bg-accent/50 text-foreground/70"
                   )}
                 >
-                  <page.Icone className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  {createElement(IconePage, { className: "h-4 w-4 shrink-0 text-muted-foreground" })}
                   <span className="truncate">{page.nom}</span>
                 </Link>
               );
@@ -270,6 +265,7 @@ export function BarreLaterale() {
       {/* Navigation */}
       <nav aria-label="Navigation principale" className="flex-1 overflow-y-auto space-y-1 p-2">
         {LIENS.map((lien) => {
+          const IconeLien = lien.Icone as React.ElementType;
           const estActif =
             lien.chemin === "/"
               ? pathname === "/"
@@ -288,7 +284,7 @@ export function BarreLaterale() {
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                 )}
               >
-                <lien.Icone className="h-5 w-5 shrink-0" />
+                {createElement(IconeLien, { className: "h-5 w-5 shrink-0" })}
                 {sidebarOuverte && <span className="truncate" title={lien.nom}>{lien.nom}</span>}
                 {sidebarOuverte && lien.chemin === "/famille" && nbRappelsDanger > 0 && (
                   <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1 text-xs flex items-center justify-center shrink-0">
@@ -304,7 +300,6 @@ export function BarreLaterale() {
                   }}
                   className="p-1 rounded hover:bg-sidebar-accent/50 text-sidebar-foreground/50"
                   aria-label={estOuverte ? `Fermer le sous-menu ${lien.nom}` : `Ouvrir le sous-menu ${lien.nom}`}
-                  aria-expanded={estOuverte ? "true" : "false"}
                 >
                   <ChevronDown
                     className={cn(
@@ -333,6 +328,7 @@ export function BarreLaterale() {
               {aSousliens && estOuverte && sidebarOuverte && (
                 <div className="ml-5 mt-1 space-y-0.5 border-l pl-3">
                   {lien.sousLiens!.map((sous) => {
+                    const IconeSousLien = sous.Icone as React.ElementType;
                     const sousActif = pathname === sous.chemin;
                     return (
                       <Link
@@ -346,7 +342,7 @@ export function BarreLaterale() {
                             : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground"
                         )}
                       >
-                        <sous.Icone className="h-3.5 w-3.5 shrink-0" />
+                        {createElement(IconeSousLien, { className: "h-3.5 w-3.5 shrink-0" })}
                         <span className="truncate">{sous.nom}</span>
                       </Link>
                     );

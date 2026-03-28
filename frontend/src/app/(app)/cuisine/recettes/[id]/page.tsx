@@ -4,7 +4,7 @@
 
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -14,9 +14,9 @@ import {
   ChefHat,
   Edit,
   Trash2,
-  Star,
   Heart,
   Printer,
+  Baby,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -30,7 +30,7 @@ import { Badge } from "@/composants/ui/badge";
 import { Separator } from "@/composants/ui/separator";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
-import { obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
+import { genererVersionJules, obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 import { toast } from "sonner";
 import { useEffect } from "react";
@@ -45,6 +45,7 @@ export default function PageDetailRecette({
   const router = useRouter();
   const invalider = utiliserInvalidation();
   const { definirTitrePage } = utiliserStoreUI();
+  const [versionJules, setVersionJules] = useState<Awaited<ReturnType<typeof genererVersionJules>> | null>(null);
 
   const { data: recette, isLoading } = utiliserRequete(
     ["recette", id],
@@ -65,6 +66,17 @@ export default function PageDetailRecette({
         router.push("/cuisine/recettes");
       },
       onError: () => toast.error("Erreur lors de la suppression"),
+    }
+  );
+
+  const { mutate: adapterPourJules, isPending: enVersionJules } = utiliserMutation(
+    () => genererVersionJules(Number(id)),
+    {
+      onSuccess: (data) => {
+        setVersionJules(data);
+        toast.success("Version Jules générée");
+      },
+      onError: () => toast.error("Impossible de générer la version Jules"),
     }
   );
 
@@ -135,6 +147,10 @@ export default function PageDetailRecette({
           </div>
         </div>
         <div className="flex gap-2 shrink-0 print:hidden">
+          <Button variant="outline" size="sm" onClick={() => adapterPourJules()} disabled={enVersionJules}>
+            <Baby className="mr-1 h-4 w-4" />
+            {enVersionJules ? "Génération..." : "Version Jules"}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => window.print()}>
             <Printer className="mr-1 h-4 w-4" />
             Imprimer
@@ -158,6 +174,41 @@ export default function PageDetailRecette({
           </Button>
         </div>
       </div>
+
+      {versionJules && (
+        <Card className="border-emerald-200 bg-emerald-50/60 dark:border-emerald-900 dark:bg-emerald-950/20 print:hidden">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Baby className="h-4 w-4" />
+              Version Jules
+            </CardTitle>
+            <CardDescription>{versionJules.nom}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            {!!versionJules.adaptations?.length && (
+              <div>
+                <p className="font-medium mb-1">Adaptations</p>
+                <ul className="list-disc pl-4 space-y-1">
+                  {versionJules.adaptations.map((adaptation) => (
+                    <li key={adaptation}>{adaptation}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {!!versionJules.ingredients?.length && (
+              <div>
+                <p className="font-medium mb-1">Ingrédients adaptés</p>
+                <ul className="list-disc pl-4 space-y-1">
+                  {versionJules.ingredients.map((ingredient) => (
+                    <li key={ingredient}>{ingredient}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <p className="text-muted-foreground whitespace-pre-line">{versionJules.instructions}</p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Métriques */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

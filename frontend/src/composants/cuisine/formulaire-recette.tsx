@@ -4,10 +4,11 @@
 
 "use client";
 
+import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Plus, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Loader2, Camera } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
@@ -27,7 +28,7 @@ import {
 } from "@/composants/ui/select";
 import { schemaRecette, type DonneesRecette } from "@/bibliotheque/validateurs";
 import { utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
-import { creerRecette, modifierRecette } from "@/bibliotheque/api/recettes";
+import { creerRecette, genererDepuisPhoto, modifierRecette } from "@/bibliotheque/api/recettes";
 import type { Recette } from "@/types/recettes";
 
 interface PropsFormulaireRecette {
@@ -38,6 +39,7 @@ export function FormulaireRecette({ recetteExistante }: PropsFormulaireRecette) 
   const router = useRouter();
   const invalider = utiliserInvalidation();
   const estEdition = !!recetteExistante;
+  const inputPhotoRef = useRef<HTMLInputElement | null>(null);
 
   const {
     register,
@@ -88,6 +90,16 @@ export function FormulaireRecette({ recetteExistante }: PropsFormulaireRecette) 
     }
   );
 
+  const { mutate: genererPhoto, isPending: generationPhotoEnCours } = utiliserMutation(
+    (file: File) => genererDepuisPhoto(file),
+    {
+      onSuccess: (recette) => {
+        invalider(["recettes"]);
+        router.push(`/cuisine/recettes/${recette.id}`);
+      },
+    }
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
@@ -102,6 +114,43 @@ export function FormulaireRecette({ recetteExistante }: PropsFormulaireRecette) 
       <h1 className="text-2xl font-bold tracking-tight">
         {estEdition ? "✏️ Modifier la recette" : "➕ Nouvelle recette"}
       </h1>
+
+      {!estEdition && (
+        <Card>
+          <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-medium">Générer depuis une photo</p>
+              <p className="text-sm text-muted-foreground">
+                Importez une photo de plat ou de recette et laissez l'IA créer une première version.
+              </p>
+            </div>
+            <>
+              <input
+                ref={inputPhotoRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                aria-label="Choisir une photo pour générer une recette"
+                title="Choisir une photo pour générer une recette"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) genererPhoto(file);
+                  event.target.value = "";
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={generationPhotoEnCours}
+                onClick={() => inputPhotoRef.current?.click()}
+              >
+                <Camera className="mr-2 h-4 w-4" />
+                {generationPhotoEnCours ? "Analyse photo..." : "Générer depuis une photo"}
+              </Button>
+            </>
+          </CardContent>
+        </Card>
+      )}
 
       <form
         onSubmit={handleSubmit((data) => sauvegarder(data))}

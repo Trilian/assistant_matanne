@@ -1,6 +1,6 @@
-i# 🔍 Analyse Complète — Assistant Matanne
-> **Date** : 27 mars 2026 | **Auteur** : GitHub Copilot  
-> **État global** : ~96% de couverture fonctionnelle sur 28 phases
+# 🔍 Analyse Complète — Assistant Matanne
+> **Date** : 27 mars 2026 | **Dernière mise à jour** : Sprint 5 (notifications, admin, 2FA) — 29 mars 2026  
+> **Auteur** : GitHub Copilot | **État global** : ~98% de couverture fonctionnelle — aucun bug critique restant
 
 ---
 
@@ -29,13 +29,16 @@ i# 🔍 Analyse Complète — Assistant Matanne
 | Indicateur | Valeur |
 |---|---|
 | **Modules fonctionnels** | 8 (Cuisine, Famille, Maison, Jeux, Planning, Outils, Admin, Dashboard) |
-| **Endpoints API** | ~300+ réels (aucun 501 détecté) |
+| **Endpoints API** | ~350+ réels (aucun 501 détecté) |
 | **Pages frontend** | ~60 pages Next.js (App Router) |
 | **Tables SQL** | ~130 tables |
 | **Services backend** | ~200+ fichiers Python dans `src/services/` |
 | **Modèles ORM** | 128+ classes SQLAlchemy dans 28 fichiers |
 | **Tests** | 197 fichiers (141 backend + 46 frontend unit + 10 E2E Playwright) |
-| **Couverture phases** | 24/28 complètes, 3 quasi-complètes, 1 partielle |
+| **Couverture phases** | 26/28 complètes, 2 quasi-complètes, 0 partielle |
+| **Cron jobs APScheduler** | 10 jobs actifs (était 6) |
+| **Canaux de notification** | 4 (ntfy.sh, Web Push VAPID, Email Resend, WhatsApp webhook) |
+| **WebSockets** | 4 channels (courses, planning, notes, projets) |
 
 ### Points forts
 
@@ -44,11 +47,22 @@ i# 🔍 Analyse Complète — Assistant Matanne
 - ✅ **Modules Famille, Jeux, Maison** : 100% fonctionnels avec IA contextuelle
 - ✅ **Infrastructure prod-ready** : Sentry, Prometheus, CI/CD 8 workflows, PWA offline, 2FA TOTP, RGPD, WebSockets
 
-### Problèmes critiques
+### ✅ Tous les bugs critiques résolus (Sprint 5)
 
-- 🔴 **Push subscriptions en mémoire vive** : toutes les souscriptions Web Push sont perdues à chaque redémarrage
-- 🔴 **Aucun canal email/SMS/WhatsApp** : seule combinaison ntfy.sh + Web Push disponible
-- 🔴 **Digest ntfy jamais déclenché** : service implémenté mais pas schedulé
+- ✅ **Push subscriptions persistées en DB** : `NotificationPersistenceMixin` dans `notif_web_persistence.py` → les abonnements VAPID survivent aux redémarrages
+- ✅ **Canal email opérationnel** : `ServiceEmail` via Resend (`notif_email.py`) — reset password, verify email, résumé hebdo, alertes critiques
+- ✅ **Digest ntfy + rappel courses schedulés** : jobs `digest_ntfy` (09h00) et `rappel_courses` (18h00) ajoutés à APScheduler
+- ✅ **WhatsApp webhook entrant** : `webhooks_whatsapp.py` — receive + réponse IA via Meta Cloud API
+- ✅ **Dispatcher multi-canal** : `DispatcherNotifications` (`notif_dispatcher.py`) — ntfy / push / email via `envoyer(user_id, message, canaux=[…])`
+
+### Points forts renforcés (Sprint 5)
+
+- ✅ **2FA TOTP complet** : `/2fa/enable`, `/2fa/verify-setup`, `/2fa/disable`, `/2fa/status`, `/2fa/login` — `ServiceDeuxFacteurs` (125 lignes)
+- ✅ **Admin enrichi** : `admin.py` (425 lignes) — audit logs, triggers manuels de jobs, test notif, purge cache, liste utilisateurs
+- ✅ **Version Jules recette** : bouton 🍼 sur fiche recette → `POST /recettes/{id}/version-jules` + `ServiceVersionRecetteJules`
+- ✅ **Profil aliments exclus Jules** : `GET/PUT /famille/jules/aliments-exclus` + coaching hebdo `GET /famille/jules/coaching-hebdo`
+- ✅ **RouteurIA** : `core/ai/router.py` (704 lignes) — routage multi-fournisseur avec classificateur de complexité (`_ClassifieurComplexite`)
+- ✅ **Cache Redis L2** : `CacheRedis` dans `caching/redis.py` (optionnel, en complement du L1+L3)
 
 ---
 
@@ -60,18 +74,19 @@ i# 🔍 Analyse Complète — Assistant Matanne
 Backend
 ├── Python 3.13+ / FastAPI
 ├── SQLAlchemy 2.0 ORM + Pydantic v2
-├── Mistral AI (texte) + Pixtral (vision)
-├── APScheduler (cron) — 6 jobs actifs
-├── ntfy.sh + Web Push VAPID (notifications)
+├── Mistral AI (texte) + Pixtral (vision) + RouteurIA multi-fournisseur
+├── APScheduler (cron) — 10 jobs actifs
+├── ntfy.sh + Web Push VAPID + Email (Resend) + WhatsApp webhook
 ├── Redis (L2 cache optionnel)
 └── Supabase PostgreSQL (production)
 
 Frontend
-├── Next.js 16.2 (App Router + Turbopack)
+├── Next.js 16.2.1 (App Router + Turbopack)
 ├── TypeScript 5 + Tailwind CSS v4 + shadcn/ui
-├── TanStack Query v5 (data fetching + cache)
-├── Zustand 5 (state global)
-├── React Hook Form 7 + Zod 4.3 (validation)
+├── React 19.2.4 + TanStack Query v5.94.5 (data fetching + cache)
+├── Zustand 5.0.12 (state global)
+├── React Hook Form 7.72 + Zod 4.3.6 (validation)
+├── @react-three/fiber 9.5 + Three.js 0.183 (visualisation 3D maison)
 └── PWA + IndexedDB (offline)
 
 Infrastructure
@@ -79,7 +94,7 @@ Infrastructure
 ├── Dockerfile + Docker Compose staging
 ├── Sentry (FE + BE) — conditionnel avec DSN
 ├── Prometheus + métriques custom
-└── Alembic (migrations — 3 fichiers)
+└── Alembic (migrations — 3 fichiers à absorber dans INIT_COMPLET)
 ```
 
 ### WebSockets actifs
@@ -99,7 +114,11 @@ Infrastructure
 | `rappels_maison` | 08h00 quotidien | Garanties, contrats, entretien |
 | `rappels_generaux` | 08h30 quotidien | Inventaire, garanties générales |
 | `entretien_saisonnier` | Lundi 06h00 | Création tâches entretien saisonnières |
+| `resume_hebdo` | Lundi 07h30 | Résumé hebdo famille complet |
 | `push_quotidien` | 09h00 quotidien | Web Push alertes urgentes + jeux |
+| `digest_ntfy` | 09h00 quotidien | Digest ntfy.sh quotidien (tâches + rappels) |
+| `rappel_courses` | 18h00 quotidien | Alerte ntfy.sh articles courses en attente |
+| `push_contextuel_soir` | 18h00 quotidien | Push contextuel soir (planning + météo) |
 | `enrichissement_catalogues` | 1er du mois 03h00 | Enrichissement IA 4 catalogues JSON |
 
 ---
@@ -108,7 +127,7 @@ Infrastructure
 
 ### 🍽️ Cuisine
 
-**État** : ~87% complet | Backend très solide, quelques features UI manquantes
+**État** : ~93% complet | Backend très solide, quelques features UI restantes
 
 #### Ce qui est implémenté ✅
 - CRUD recettes complet (import URL, PDF, enrichissement auto nutrition/bio/robots)
@@ -129,15 +148,16 @@ Infrastructure
 - Import PDF recette avec enrichissement (calories, tags, robots)
 - Page /cuisine/nutrition : histogramme quotidien + KPIs macros
 - BadgeNutriscore + ConvertisseurInline embarqués dans la fiche recette et le planning
+- **🍼 Bouton Version Jules** : `POST /api/v1/recettes/{id}/version-jules` → `ServiceVersionRecetteJules` (171 lignes) crée une `VersionRecette` avec substitutions IA (sel → retirer, épices → retirer, alcool → fond de volaille, saumon fumé → saumon cuit)
+- **🍼 Recette Surprise** : `GET /api/v1/recettes/surprise` — recette aléatoire filtrée saison/frigo
+- Import recette depuis photo plat (`POST /generer-depuis-photo`) — Pixtral
 
 #### Ce qui manque ❌
-- **Bouton 🍼 Version Jules sur fiche recette** : déclencher l'IA pour générer une `VersionRecette` adaptée (sel → supprimer, saumon fumé → saumon cuit, épices fortes → supprimer, alcool → fond de volaille, viande/poisson cru → cuisson obligatoire). Utilise le champ JSONB `ingredients_modifies` déjà dans le modèle
-- **Profil aliments exclus Jules** : liste configurable dans `/famille/jules` → transmis à l'IA lors de la génération de la version Jules (miel avant 12 mois, sel ajouté, épices, alcool, charcuterie fumée, viande crue…)
 - **OCR photo-frigo → sync inventaire automatique** : le bouton "ajouter à l'inventaire" existe mais l'auto-sync continu n'est pas implémenté
 - **Onboarding "Ma Semaine"** : popup première utilisation guidant l'utilisateur sur le stepper
 - **Table nutrition incomplète** : 47 ingrédients couverts sur ~200+ ciblés → calcul macro silencieusement incomplet pour beaucoup de recettes
-- **Rappels jour-par-jour cuisine** : push quotidien "ce soir tu prépares X" basé sur planning
-- **Saisonnalité enrichie inventaire** : affichage des produits de saison disponibles au marché + préférences sources d'approvisionnement (Biocoop / marché / ferme) configurables dans les préférences
+- **Rappels jour-par-jour cuisine** : push quotidien "ce soir tu prépares X" basé sur planning (job J-02 prévu)
+- **Saisonnalité enrichie inventaire** : affichage des produits de saison disponibles au marché + préférences sources d'approvisionnement (Biocoop / marché / ferme)
 
 #### Bugs ⚠️
 - `RetourRecette` utilise `feedback='like'|'neutral'` pour les favoris, mais les types TypeScript frontend utilisent `est_favori: boolean` → potentielle désynchronisation si le champ est lu directement
@@ -147,7 +167,7 @@ Infrastructure
 
 ### 👨‍👩‍👦 Famille
 
-**État** : ~97% complet | Module le plus avancé
+**État** : ~98% complet | Module le plus avancé
 
 #### Ce qui est implémenté ✅
 - Hub famille contextuel (Aujourd'hui/À venir/Suggestions IA)
@@ -160,11 +180,13 @@ Infrastructure
 - Config Garde : zones, semaines fermeture crèche, jours-sans-crèche planning
 - Weekend suggestions IA : activités, météo, séjours
 - Contacts, Documents, Calendriers (Google OAuth)
+- **Profil aliments exclus Jules** : `GET/PUT /api/v1/famille/jules/aliments-exclus` — liste configurable transmise à l'IA lors de la génération des versions Jules (sel, miel avant 12 mois, épices, alcool, charcuterie fumée, viande crue)
+- **Coaching hebdo Jules** : `GET /api/v1/famille/jules/coaching-hebdo` — `JulesAIService` analyse la semaine (activités, repas, carnet santé) → message hebdo contextuel
+- **Version Jules recette** : bouton 🍼 déclenche `POST /recettes/{id}/version-jules` depuis la fiche Jules (lien depuis section Cuisine)
 
 #### Ce qui manque ❌
-- **Adaptation menu Jules** : bouton 🍼 "Version Jules" sur chaque fiche recette (voir section Cuisine) — Jules mange comme nous mais avec substitutions adaptées à son âge via `VersionRecette` IA
-- **Tests famille** : `tests/api/test_famille_achats.py` et `test_famille_garde.py` marqués "À FAIRE" dans le roadmap
-- **Rappels médicaux Jules** : vaccins (à partir du calendrier vaccinal standard) + RDV pédiatre en push
+- **Tests famille** : `tests/api/test_famille_achats.py` et `test_famille_garde.py` marqués "À FAIRE" dans le roadmap (CT-07)
+- **Rappels médicaux Jules** : vaccins (calendrier vaccinal standard) + RDV pédiatre en push ntfy/Web Push
 - **Deep link Family Album** : bouton "📸 Partager sur Family Album" sur les fiches activités/anniversaires Jules (app iOS externe, pas d'API — deep link uniquement)
 
 ---
@@ -266,36 +288,42 @@ Infrastructure
 
 ### 🔐 Admin
 
-**État** : Basique mais fonctionnel
+**État** : ~90% complet ✅ | Sprint 5 — panneau admin complètement enrichi
 
 #### Ce qui est implémenté ✅
 - Page admin `/admin` protégée par rôle
-- Audit logs : liste, stats, export CSV
+- Audit logs : liste, stats, export CSV (`GET /admin/audit-logs`, `/audit-stats`, `/audit-export-csv`)
+- **Jobs APScheduler** : `GET /admin/jobs` (liste tous les jobs + dernier run + statut), `POST /admin/jobs/{job_id}/run` (déclenchement immédiat manuel)
+- **Test notifications** : `POST /admin/notifications/test` — envoie une notif test sur le canal demandé (ntfy/push/email)
+- **Cache** : `POST /admin/cache/purge` + `GET /admin/cache/stats` (hits/misses par module)
+- **Utilisateurs** : `GET /admin/users` (liste des comptes + rôles + dernier login)
+- **2FA TOTP** : `ServiceDeuxFacteurs` (125 lignes) — `/2fa/enable`, `/2fa/verify-setup`, `/2fa/disable`, `/2fa/status`, `/2fa/login`
+- **ServiceAudit** (354 lignes) : traçage de toutes les actions admin en base
 - Backup DB : CLI script + GitHub Actions workflow
 
 #### Ce qui manque ❌
-- **Gestion utilisateurs** : pas de liste/modification/suppression d'utilisateurs depuis l'admin UI
-- **Tableau de bord monitoring** : métriques Prometheus exposées mais pas visualisées dans l'UI
-- **Déclenchement manuel de jobs** : aucun bouton "lancer le cron maintenant" (voir section 11)
+- **Tableau de bord monitoring** : métriques Prometheus exposées mais pas visualisées dans l'UI admin (graphes)
+- **Modification/suppression utilisateurs** depuis l'UI admin (liste disponible via `GET /admin/users`, mais PATCH/DELETE non exposés encore)
+- **Page frontend jobs** : `frontend/src/app/(app)/admin/jobs/page.tsx` non créée — les endpoints backend existent mais pas l'UI de déclenchement
 
 ---
 
 ## 4. Bugs & régressions identifiés
 
-### 🔴 Critiques
+### ✅ Critiques résolus (Sprint 5)
 
-| # | Bug | Localisation | Impact |
+| # | Bug | Fix | Statut |
 |---|---|---|---|
-| B-01 | **Push subscriptions perdues au redémarrage** : `_subscriptions` stockées en dict en mémoire dans `NotifWebCoreService`, pas de table DB dédiée | `src/services/core/notifications/notif_web_core.py` | Toutes les souscriptions Web Push cassées après chaque déploiement |
-| B-02 | **Pas d'endpoint VAPID public key** : le frontend a besoin de la clé publique VAPID pour s'abonner — aucun `GET /api/v1/push/vapid-public-key` n'est exposé | `src/api/routes/push.py` | PWA notifications impossibles sans config manuelle |
-| B-03 | **Digest ntfy et rappel courses jamais schedulés** : `envoyer_digest_quotidien()` et `envoyer_rappel_courses()` sont dans `ServiceNtfy` mais n'apparaissent dans aucun job APScheduler | `src/services/core/cron/jobs.py`, `notif_ntfy.py` | Feature entière morte |
+| B-01 | Push subscriptions perdues au redémarrage | `NotificationPersistenceMixin` dans `notif_web_persistence.py` (317 lignes) — abonnements persistés en DB (`abonnements_push_vapid`) | ✅ CORRIGÉ |
+| B-02 | Pas d'endpoint VAPID public key | `GET /api/v1/push/vapid-public-key` ajouté dans `push.py` | ✅ CORRIGÉ |
+| B-03 | Digest ntfy + rappel courses jamais schedulés | Jobs `digest_ntfy` (09h00) et `rappel_courses` (18h00) ajoutés à APScheduler | ✅ CORRIGÉ |
+| B-05 | Accès direct `_subscriptions` dans le cron | `NotificationPersistenceMixin` remplace le dict en mémoire | ✅ CORRIGÉ |
 
 ### 🟠 Hauts
 
 | # | Bug | Localisation | Impact |
 |---|---|---|---|
 | B-04 | **Cache L1 non partagé** : en mode multi-workers (Uvicorn + Gunicorn), chaque process a son propre L1. Sans Redis configuré, les workers se désynchronisent | `src/core/caching/orchestrator.py` | Données périmées affichées selon le worker |
-| B-05 | **Accès direct attribut privé** : `_job_push_quotidien` lit `push_service._subscriptions` — couplage fragile à la structure interne | `src/services/core/cron/jobs.py` | Cron silencieusement cassé si l'implémentation interne change |
 | B-06 | **`url_source` absent du modèle Recette** : le schéma `RecetteResponse` retourne toujours `None` pour `url_source` mais l'UI attend une URL cliquable | `src/core/models/recettes.py`, `src/api/schemas/recettes.py` | Lien "source" non fonctionnel sur les recettes importées depuis URL |
 | B-07 | **`verifier_saison` silencieusement ignoré** : le cron entretien saisonnier vérifie `hasattr()` mais ne log qu'en DEBUG si absent → aucun feedback si le service ne démarre pas | `src/services/core/cron/jobs.py` | Maintenance saisonnière silencieusement inactive |
 | B-08 | **`RepasPlanning` modèle manquant** : 1 test dashboard est `skip` car le modèle n'est pas défini | `tests/api/test_routes_dashboard_jeux.py` | Couverture test incomplète |
@@ -326,22 +354,18 @@ Infrastructure
 
 | Feature | Effort | Impact |
 |---|---|---|
-| Bouton 🍼 Version Jules sur fiche recette (`VersionRecette` IA) | S | ⭐⭐⭐ |
-| Profil aliments exclus Jules (configurable `/famille/jules`) | S | ⭐⭐⭐ |
 | OCR photo-frigo → auto-ajout inventaire sans confirmation | S | ⭐⭐⭐ |
-| Rappels push "soir cuisine" : "Ce soir tu prépares X" | S | ⭐⭐⭐ |
+| Rappels push "soir cuisine" : "Ce soir tu prépares X" (job J-02) | M | ⭐⭐⭐ |
 | Table nutrition étendue (200+ ingrédients vs 47 actuels) | M | ⭐⭐ |
 | Onboarding Ma Semaine (popup first-use) | S | ⭐⭐ |
 | Partage de liste de courses avec invité (lien ou QR code) | M | ⭐⭐ |
 | Sources approvisionnement préférées (Biocoop / marché / ferme) | S | ⭐⭐ |
 | Scan code-barres continu (stream caméra) pour inventaire | L | ⭐⭐ |
-| Génération automatique recette à partir d'une photo plat (Pixtral) | M | ⭐⭐⭐ |
 
 ### 👨‍👩‍👦 Famille — lacunes
 
 | Feature | Effort | Impact |
 |---|---|---|
-| Adaptation menu Jules : bouton 🍼 Version Jules (voir Cuisine) | S | ⭐⭐⭐ |
 | Tests famille (achats, garde) | M | ⭐⭐ |
 | Rappels médicaux Jules (vaccins, RDV pédiatre) en push | S | ⭐⭐⭐ |
 | Deep link Family Album pour événements Jules | XS | ⭐⭐ |
@@ -364,16 +388,17 @@ Infrastructure
 | Météo intégrée (widget dashboard) | S | ⭐⭐ |
 | Activité récente / fil d'événements (timeline) | M | ⭐⭐ |
 
-### 🔔 Notifications — lacunes importantes
+### 🔔 Notifications — lacunes résiduelles
 
-| Feature | Effort | Impact |
+| Feature | Effort | Statut |
 |---|---|---|
-| Persistance Push subscriptions en DB | S | 🔴 CRITIQUE |
-| Endpoint VAPID public key | XS | 🔴 CRITIQUE |
-| Canal email (reset password, invitations, résumés hebdo) | L | ⭐⭐⭐ |
-| Canal WhatsApp (récapitulatifs + commandes vocales) | L | ⭐⭐⭐ |
-| ntfy digest quotidien schedulé | XS | ⭐⭐⭐ |
-| Rappel courses ntfy (push vers mobile) | XS | ⭐⭐⭐ |
+| ~~Persistance Push subscriptions en DB~~ | ~~S~~ | ✅ FAIT (Sprint 5) |
+| ~~Endpoint VAPID public key~~ | ~~XS~~ | ✅ FAIT (Sprint 5) |
+| ~~Canal email~~ | ~~L~~ | ✅ FAIT (Sprint 5 — Resend) |
+| ~~ntfy digest quotidien schedulé~~ | ~~XS~~ | ✅ FAIT (Sprint 5) |
+| ~~Rappel courses ntfy~~ | ~~XS~~ | ✅ FAIT (Sprint 5) |
+| Canal SMS | L | ⭐ Optionnel |
+| Dispatcher WhatsApp sortant (messages proactifs) | M | ⭐⭐ (webhook entrant ✅, sortant non) |
 
 ---
 
@@ -547,6 +572,12 @@ Famille/Config ←→ Planning : jours sans crèche → planning famille
 | Chat général | Multi-contexte (cuisine/maison/famille/jeux) | Mistral Large |
 | OCR tickets | `ticket_caisse.py` (Pixtral) | Pixtral 12B |
 | Résumé hebdo famille | `ServiceResumeHebdo` | Mistral Large |
+| **Génération recette depuis photo** | `POST /recettes/generer-depuis-photo` | Pixtral 12B |
+| **Coaching hebdo Jules** | `GET /famille/jules/coaching-hebdo` | Mistral Large |
+| **Version recette Jules** | `ServiceVersionRecetteJules` | Mistral Large |
+| **WhatsApp Intent → Action** | `webhooks_whatsapp.py` (Mistral interprète) | Mistral Large |
+
+> **RouteurIA** (`src/core/ai/router.py`, 704 lignes) : nouveau composant de routage multi-fournisseur ajouté en Sprint 5 — `_ClassifieurComplexite` analyse la requête et route automatiquement vers le bon modèle/fournisseur selon la complexité.
 
 ### Nouveaux axes IA à implémenter
 
@@ -560,16 +591,11 @@ Famille/Config ←→ Planning : jours sans crèche → planning famille
 **Stack** : Web Speech API (navigateur, gratuit) ou `whisper-tiny` local → Mistral pour extraction d'intention → dispatch vers API.  
 **Effort** : L — nécessite mapping intention → API.
 
-#### 🤖 IA-02 : Génération recette depuis photo plat
-**Concept** : Photo d'un plat restaurant/magazine → Pixtral identifie → Mistral génère la recette complète.  
-**API** : `POST /api/v1/recettes/generer-depuis-photo` (multipart image → RecetteResponse).  
-**Effort** : S — déjà du code Pixtral dans `multimodal.py`, c'est une variation du prompt.
+#### ✅ IA-02 : Génération recette depuis photo plat — IMPLÉMENTÉ
+**API** : `POST /api/v1/recettes/generer-depuis-photo` (multipart image → RecetteResponse) — **opérationnel**.
 
-#### 🤖 IA-03 : Résumé hebdo intelligent multi-modules
-**Concept** : Chaque lundi matin, générer un résumé personnalisé de la semaine : recettes cuisinées, budget dépensé, activités Jules, paris réussis/perdus, tâches maison faites, jardin = état.  
-**Canal** : ntfy + email (si configuré).  
-**API** : `POST /api/v1/dashboard/resume-semaine` (déclenché par cron + manuellement).  
-**Effort** : M.
+#### ✅ IA-03 : Résumé hebdo intelligent multi-modules — IMPLÉMENTÉ
+**Job** : `resume_hebdo` (Lundi 07h30) — cron actif. **API manuelle** : `POST /api/v1/admin/jobs/resume_hebdo/run`.
 
 #### 🤖 IA-04 : Planificateur de vacances IA
 **Concept** : "On part en Bretagne 5 jours avec Jules (22 mois)" → IA génère : planning d'activités, liste de courses adaptée, checklist voyage (déjà service `voyage.py`), budget prévisionnel.  
@@ -581,10 +607,8 @@ Famille/Config ←→ Planning : jours sans crèche → planning famille
 **API** : `GET /api/v1/dashboard/anomalies-financieres`.  
 **Effort** : M.
 
-#### 🤖 IA-06 : Coaching Jules proactif
-**Concept** : Basé sur les activités de la semaine, les repas (versions Jules planifiées), le carnet de santé (vaccins à jour, dernier RDV pédiatre) → message hebdo contextuel : "Jules n'a pas eu d'activité créative cette semaine" ou "Rappel : vaccin 24 mois dans 2 semaines".  
-**API** : `GET /api/v1/famille/jules/coaching-hebdo`.  
-**Effort** : S — `JulesAIService` existe déjà.
+#### ✅ IA-06 : Coaching Jules proactif — IMPLÉMENTÉ
+**API** : `GET /api/v1/famille/jules/coaching-hebdo` — **opérationnel**. `JulesAIService` analyse la semaine (activités, repas, carnet santé) → message hebdo contextuel.
 
 #### 🤖 IA-07 : Optimisation budget courses IA
 **Concept** : Analyser l'historique d'achat + les prix habituels → suggérer les substitutions économiques ("Remplace noix de cajou par noix de Grenoble, économie estimée 3€/semaine").  
@@ -611,27 +635,31 @@ Famille/Config ←→ Planning : jours sans crèche → planning famille
 
 ## 9. Jobs automatiques — Planning cron
 
-### Jobs existants (rappel)
+### Jobs existants (10 actifs)
 
-| Schedule | Job | Statut |
-|---|---|---|
-| 07h00 | Rappels famille (anniversaires, jalons, crèche) | ✅ Actif |
-| 08h00 | Rappels maison (garanties, contrats, entretien) | ✅ Actif |
-| 08h30 | Rappels généraux (inventaire, alertes) | ✅ Actif |
-| 09h00 | Push quotidien (urgences + jeux) | ✅ Actif |
-| Lundi 06h00 | Entretien saisonnier | ✅ Actif |
-| 1er mois 03h00 | Enrichissement catalogues JSON (IA) | ✅ Actif |
+| Schedule | Job ID | Action | Statut |
+|---|---|---|---|
+| Lundi 06h00 | `entretien_saisonnier` | Création tâches entretien saisonnières | ✅ Actif |
+| Lundi 07h30 | `resume_hebdo` | Résumé hebdo famille complet (ntfy + email) | ✅ Actif |
+| 07h00 quotidien | `rappels_famille` | Anniversaires, jalons, crèche, documents | ✅ Actif |
+| 08h00 quotidien | `rappels_maison` | Garanties, contrats, entretien | ✅ Actif |
+| 08h30 quotidien | `rappels_generaux` | Inventaire, alertes générales | ✅ Actif |
+| 09h00 quotidien | `push_quotidien` | Web Push alertes urgentes + jeux | ✅ Actif |
+| 09h00 quotidien | `digest_ntfy` | Digest ntfy.sh (tâches + rappels) | ✅ Actif |
+| 18h00 quotidien | `rappel_courses` | Alerte ntfy.sh articles courses en attente | ✅ Actif |
+| 18h00 quotidien | `push_contextuel_soir` | Push contextuel soir (planning demain + météo) | ✅ Actif |
+| 1er du mois 03h00 | `enrichissement_catalogues` | Enrichissement IA 4 catalogues JSON | ✅ Actif |
 
 ### Jobs à créer
 
 | ID | Schedule | Description | Canal notification | Effort |
 |---|---|---|---|---|
-| J-01 | **Lundi 07h30** | **Résumé hebdo complet** : recettes cuisinées, budget, activités Jules, tâches maison faites, gains/pertes jeux | ntfy digest + email (si dispo) | M |
-| J-02 | **18h00 quotidien** | **Push contextuel IA** : "Ce soir tu prépares X (45min)" + recommandations météo | ntfy / Web Push | M |
+| ~~J-01~~ | ~~Lundi 07h30~~ | ~~Résumé hebdo complet~~ | ~~ntfy + email~~ | ✅ IMPLÉMENTÉ (`resume_hebdo`) |
+| J-02 | **18h00 quotidien** | **Push contextuel IA amélioré** : "Ce soir tu prépares X (45min)" basé sur planning | ntfy / Web Push | M |
 | J-03 | **Dimanche 20h00** | **Génération planning semaine suivante** IA si le planning est vide | ntfy ("Ton planning est vide, génère-le ?") | S |
 | J-04 | **06h00 quotidien** | **Alerte péremptions** : produits expirant dans 48h → suggère recettes | ntfy / Web Push | S |
-| J-05 | **09h00 quotidien** | **digest ntfy** (déjà implémenté, juste **scheduler** le cron) | ntfy | XS |
-| J-06 | **18h00 quotidien** | **Rappel courses urgentes** (déjà implémenté, juste **scheduler**) | ntfy | XS |
+| ~~J-05~~ | ~~09h00~~ | ~~digest ntfy~~ | ~~ntfy~~ | ✅ IMPLÉMENTÉ (`digest_ntfy`) |
+| ~~J-06~~ | ~~18h00~~ | ~~Rappel courses urgentes~~ | ~~ntfy~~ | ✅ IMPLÉMENTÉ (`rappel_courses`) |
 | J-07 | **1er du mois** | **Rapport mensuel budget** : synthèse famille + maison + jeux + recommandations IA | ntfy / email | M |
 | J-08 | **Vendredi 17h00** | **Score weekend** : suggestions activités basées météo des 2 prochains jours + état Jules | ntfy | S |
 | J-09 | **1er du mois** | **Contrôle garanties et contrats** : rappels expirations dans les 3 prochains mois | ntfy / email | XS (déjà 08h00 maison, à enrichir) |
@@ -642,196 +670,80 @@ Famille/Config ←→ Planning : jours sans crèche → planning famille
 
 ## 10. Notifications — WhatsApp, Mail, Push
 
-### État actuel
+### État actuel (Sprint 5)
 
 | Canal | Service | Statut | Couverture |
 |---|---|---|---|
-| **ntfy.sh** | `ServiceNtfy` | ✅ Implémenté | Maison, tâches, digest (pas schedulé) |
-| **Web Push (VAPID)** | `NotifWebCoreService` | 🔴 Critique (en-mémoire) | Famille, jeux, maison |
-| **Email** | — | ❌ Absent | Rien |
-| **SMS** | — | ❌ Absent | Rien |
-| **WhatsApp** | — | ❌ Absent | Rien |
+| **ntfy.sh** | `ServiceNtfy` (298 lignes) | ✅ Opérationnel + schedulé | Digest quotidien 09h00, rappel courses 18h00, maison, tâches |
+| **Web Push (VAPID)** | `ServiceWebPush` + `NotificationPersistenceMixin` | ✅ Opérationnel (DB-persisté) | Famille, jeux, maison, alertes urgentes |
+| **Email** | `ServiceEmail` via **Resend** (230 lignes) | ✅ Opérationnel | Reset password, verify email, résumé hebdo, alertes critiques, invitation famille |
+| **WhatsApp** | `webhooks_whatsapp.py` (296 lignes) | ✅ Webhook entrant actif | Réception messages + réponse IA via Meta Cloud API |
+| **Dispatcher** | `DispatcherNotifications` (185 lignes) | ✅ Opérationnel | Multi-canal `envoyer(user_id, message, canaux=["push","email","ntfy"])` |
+| **SMS** | — | ❌ Absent | — |
 
-### Plan notifications complet
+### Architecture notifications (Sprint 5)
 
-#### Canal Email (Priorité HAUTE)
+```
+src/services/core/notifications/
+├── types.py (279L)                  ← Types, VAPID_PUBLIC_KEY, TypeNotification
+├── notif_email.py (230L)           ← ✅ ServiceEmail (Resend) — 6 méthodes
+├── notif_ntfy.py (298L)            ← ✅ ServiceNtfy + PlanificateurNtfy
+├── notif_web_core.py (293L)        ← ✅ ServiceWebPush (pywebpush)
+├── notif_web_persistence.py (317L) ← ✅ NotificationPersistenceMixin (DB)
+├── notif_web_templates.py (235L)   ← ✅ Templates par domaine (famille, jeux, maison)
+├── notif_dispatcher.py (185L)      ← ✅ DispatcherNotifications multi-canal
+├── inventaire.py (278L)            ← ✅ ServiceNotificationsInventaire
+└── utils.py (567L)                 ← Helpers mapping types
+```
 
-**Stack recommandée** : `Resend` (API email moderne, quota gratuit 3000/mois, SDK Python simple)  
-ou alternative : `Brevo` (ex-Sendinblue), `Postmark`, ou SMTP Supabase natif.
+### Canal Email — méthodes disponibles (`ServiceEmail`)
 
 ```python
-# Exemple d'intégration Resend
-# pip install resend
-import resend
-resend.api_key = os.environ["RESEND_API_KEY"]
-
-resend.Emails.send({
-    "from": "matanne@votredomaine.fr",
-    "to": ["user@example.com"],
-    "subject": "Ton planning de la semaine 🍽️",
-    "html": "<html>...</html>"
-})
+service_email.envoyer_reset_password(email, token)
+service_email.envoyer_verification_email(email, token)
+service_email.envoyer_resume_hebdo(email, resume_data)
+service_email.envoyer_rapport_mensuel(email, rapport_data)
+service_email.envoyer_alerte_critique(email, message)
+service_email.envoyer_invitation_famille(email, invitant)
 ```
 
-**Cas d'usage email** :
-- Reset de mot de passe (actuellement absent du flow auth)
-- Vérification email à l'inscription
-- Résumé hebdo famille (optionnel, désactivable)
-- Rapport mensuel budget
-- Alerte critique (expiration garantie importante, stock nul sur article prioritaire)
-- Invitation d'un autre membre famille
+### Canal WhatsApp — webhook entrant
 
-**Fichiers à créer** :
-- `src/services/core/notifications/notif_email.py` — `ServiceEmail`
-- Intégrer dans `src/api/routes/auth.py` (reset password, verify email)
-- Ajouter dans cron J-01 (résumé hebdo)
+`POST /api/v1/whatsapp/webhook` (Meta Cloud API) :
+1. Réception message texte WhatsApp
+2. Mistral interprète l'intention ("Ajoute du lait aux courses" → `POST /courses/{id}/articles`)
+3. Dispatch vers API interne correspondante
+4. Confirmation envoyée en réponse WhatsApp
 
-#### Canal WhatsApp (Priorité MOYENNE)
+**WhatsApp sortant (proactif)** : Pas encore implémenté — prévoir via Meta Cloud API `POST /messages`.
 
-**Stack recommandée** : **WhatsApp Business API via Twilio** ou **Meta Cloud API** (gratuit pour les 1000 premiers messages/mois).
+### Actions restantes notifications
 
-**Alternative simple** : `ntfy.sh` est déjà installé et couvre le push mobile — WhatsApp est un nice-to-have.
-
-**Cas d'usage WhatsApp** :
-- Commandes vocales converties en actions ("Ajoute du lait aux courses" → WhatsApp → webhook → API)
-- Partage de liste de courses avec un autre téléphone sans app installée
-- Rapport hebdo qui se lit dans WhatsApp sans ouvrir l'app
-- Rappels crèche (jours sans crèche cette semaine)
-
-```python
-# Exemple Twilio WhatsApp
-# pip install twilio
-from twilio.rest import Client
-client = Client(account_sid, auth_token)
-message = client.messages.create(
-    from_="whatsapp:+14155238886",
-    body="🛒 Ta liste de courses: lait, pain, yaourt",
-    to="whatsapp:+33600000000"
-)
-```
-
-**Webhook entrant WhatsApp → actions** :
-```
-POST /api/v1/webhooks/whatsapp
-→ Extraire message texte
-→ Mistral : interpréter intention (ajouter courses, rappel, info météo...)
-→ Dispatcher vers API interne correspondante
-→ Répondre avec confirmation
-```
-
-**Fichiers à créer** :
-- `src/services/core/notifications/notif_whatsapp.py`
-- `src/api/routes/webhooks.py` : ajouter route `/whatsapp` (webhook entrant Twilio)
-
-#### Correctifs Push urgents (Priorité CRITIQUE)
-
-```python
-# CORRECTION B-01 : Persistance DB des subscriptions
-# Ajouter dans src/core/models/notifications.py :
-class AbonnementPush(Base):
-    __tablename__ = "abonnements_push"
-    id: Mapped[int]
-    user_id: Mapped[str]
-    endpoint: Mapped[str]  # URL unique VAPID
-    p256dh: Mapped[str]    # Clé publique navigateur
-    auth: Mapped[str]      # Token auth
-    cree_le: Mapped[datetime]
-    actif: Mapped[bool] = True
-
-# + dans notif_web_core.py : charger/sauvegarder depuis DB au lieu de dict en mémoire
-```
-
-```python
-# CORRECTION B-02 : Exposer la clé VAPID publique
-# Dans push.py ajouter :
-@router.get("/vapid-public-key")
-async def get_vapid_public_key():
-    return {"public_key": settings.VAPID_PUBLIC_KEY}
-```
+- **WhatsApp sortant proactif** : messages préemptifs (rappels crèche, liste courses partagée) — Effort M
+- **Canal SMS** : optionnel (Twilio / Vonage) — Effort M
+- **B-09** : compléter `manifest.json` avec `gcm_sender_id` / `background_sync` pour Chrome Android
 
 ---
 
 ## 11. Mode Admin / Déclenchement manuel
 
-### Concept
+### ✅ Implémenté (Sprint 5) — `admin.py` 425 lignes
 
-Un **panneau admin étendu** accessible uniquement avec `role == "admin"`, permettant de déclencher manuellement tout job ou action automatique. Invisible pour les utilisateurs normaux. Essentiel en développement pour tester sans attendre la plage horaire.
+Le panneau admin complet est désormais opérationnel avec `role == "admin"` requis sur tous les endpoints.
 
-### Architecture recommandée
+### Endpoints backend implémentés
 
-#### Backend — Route admin étendue
-
-```python
-# src/api/routes/admin.py — Ajouter ces endpoints :
-
-# Lister tous les jobs disponibles
-@router.get("/jobs", response_model=list[JobInfoResponse])
-async def lister_jobs(user: dict = Depends(require_role("admin"))):
-    """Retourne tous les jobs APScheduler disponibles + dernier run + statut"""
-
-# Déclencher un job manuellement
-@router.post("/jobs/{job_id}/run")
-async def executer_job(job_id: str, user: dict = Depends(require_role("admin"))):
-    """Exécute immédiatement le job désigné"""
-    jobs_disponibles = {
-        "rappels_famille": _job_rappels_famille,
-        "rappels_maison": _job_rappels_maison,
-        "push_quotidien": _job_push_quotidien,
-        "digest_ntfy": ServiceNtfy.envoyer_digest_quotidien,
-        "rappel_courses": ServiceNtfy.envoyer_rappel_courses,
-        "enrichissement_catalogues": _job_enrichissement_catalogues,
-        "resume_hebdo": ServiceResumeHebdo.generer_resume,
-        "score_bienetre": CalculScoreBienetre.calculer,
-        ...
-    }
-    if job_id not in jobs_disponibles:
-        raise HTTPException(404, f"Job inconnu : {job_id}")
-    await executer_async(jobs_disponibles[job_id])
-    return {"status": "executed", "job_id": job_id, "executed_at": datetime.utcnow()}
-
-# Envoyer une notification test
-@router.post("/notifications/test")
-async def envoyer_notification_test(
-    canal: str,  # "ntfy" | "push" | "email" | "whatsapp"
-    message: str,
-    user: dict = Depends(require_role("admin"))
-):
-    """Envoie une notif test sur le canal demandé"""
-
-# Recalculer les alertes inventaire maintenant
-@router.post("/actions/recalculer-alertes")
-async def recalculer_alertes(user: dict = Depends(require_role("admin"))):
-    """Force le recalcul de toutes les alertes inventaire/maison"""
-
-# Purger les caches
-@router.post("/cache/purge")
-async def purger_cache(pattern: str = "*", user: dict = Depends(require_role("admin"))):
-    """Invalide le cache selon un pattern"""
-```
-
-#### Frontend — Page admin étendue
-
-```typescript
-// Ajouter dans frontend/src/app/(app)/admin/page.tsx
-
-// Onglet "Jobs"
-const { data: jobs } = useQuery({ queryKey: ['admin-jobs'], queryFn: listerJobs })
-
-// Bouton par job :
-<Button onClick={() => executerJob(job.id)} variant="outline">
-  ▶ Exécuter maintenant
-</Button>
-// + badge dernière exécution + statut (success/error)
-
-// Onglet "Notifications test"
-// Formulaire : canal (ntfy/push/email) + message + bouton envoyer
-
-// Onglet "Cache"
-// Bouton purge par module + stats (hits/misses)
-
-// Onglet "Utilisateurs" (nouveau)
-// Liste des comptes, modification rôle, désactivation
-```
+| Endpoint | Description |
+|---|---|
+| `GET /admin/audit-logs` | Liste des actions avec filtres |
+| `GET /admin/audit-stats` | Stats audit (top users, actions, périodes) |
+| `GET /admin/audit-export-csv` | Export CSV de l'audit log |
+| `GET /admin/jobs` | Liste tous les jobs APScheduler + dernier run + statut |
+| `POST /admin/jobs/{job_id}/run` | Déclenchement immédiat d'un job |
+| `POST /admin/notifications/test` | Test envoi notif (canal: ntfy/push/email) |
+| `GET /admin/cache/stats` | Stats cache (hits/misses par couche) |
+| `POST /admin/cache/purge` | Purge cache par pattern |
+| `GET /admin/users` | Liste des comptes + rôles + dernier login |
 
 ### Jobs disponibles dans le panneau admin
 
@@ -839,15 +751,20 @@ const { data: jobs } = useQuery({ queryKey: ['admin-jobs'], queryFn: listerJobs 
 |---|---|---|
 | `rappels_famille` | Rappels famille (anniversaires, crèche...) | Famille |
 | `rappels_maison` | Rappels maison (garanties, contrats...) | Maison |
+| `rappels_generaux` | Rappels généraux (inventaire, alertes) | Général |
 | `push_quotidien` | Push quotidien (alertes urgentes) | Notifications |
 | `digest_ntfy` | Digest ntfy quotidien | Notifications |
 | `rappel_courses` | Rappel courses urgentes | Courses |
 | `entretien_saisonnier` | Entretien saisonnier | Maison |
-| `enrichissement_catalogues` | Enrichissement catalogues IA | IA |
 | `resume_hebdo` | Résumé hebdomadaire famille | Famille |
-| `peremptions_urgentes` | Alertes péremptions J+48h | Inventaire |
-| `score_bienetre` | Score bien-être global | Dashboard |
-| `sync_cotes` | Sync cotes paris (externe) | Jeux |
+| `push_contextuel_soir` | Push contextuel soir | Notifications |
+| `enrichissement_catalogues` | Enrichissement catalogues IA | IA |
+
+### Ce qui reste à faire (admin)
+
+- **Page frontend jobs** : `frontend/src/app/(app)/admin/jobs/page.tsx` — UI avec boutons "Exécuter" + badge dernier run + statut (backend prêt, UI non créée)
+- **Modification/suppression utilisateurs** depuis l'UI (PATCH/DELETE sur comptes)
+- **Tableau monitoring** : visualisation graphes Prometheus dans l'UI admin
 
 ---
 
@@ -959,8 +876,9 @@ const { data: jobs } = useQuery({ queryKey: ['admin-jobs'], queryFn: listerJobs 
 | # | Action | Effort | Catégorie |
 |---|---|---|---|
 | MT-01 | **Interaction** Cellier ↔ Inventaire cuisine | M | 🔗 Inter-modules |
-| MT-02 | **Canal WhatsApp** + webhook entrant | L | 📱 Notifications |
+| MT-02 | **WhatsApp sortant proactif** (envoi messages, rappels préemptifs) | M | 📱 Notifications |
 | MT-03 | **Dashboard score bien-être** (IA-09 : sport + alimentation) | M | 📊 Dashboard |
+| MT-04 | **Page frontend jobs admin** : UI boutons déclenchement + badges statut | S | 🔧 Admin |
 | MT-05 | **Innovation-01** : Automations "Si → Alors" | L | 🚀 Innovation |
 | MT-06 | **Widgets dashboard configurables** | L | 📊 Dashboard |
 | MT-07 | **IA-01** : Assistant vocal (Speech-to-Text → Action) | L | 🤖 IA |
@@ -1013,17 +931,17 @@ CREATE POLICY "Utilisateur voit ses abonnements" ON abonnements_push_vapid
 
 ## Annexe B — Résumé des fichiers à créer
 
-| Fichier | Contenu | Priorité |
+| Fichier | Contenu | Statut |
 |---|---|---|
-| `src/services/core/notifications/notif_email.py` | `ServiceEmail` avec Resend ou SMTP | 🟠 CT-01 |
-| `src/services/core/notifications/notif_whatsapp.py` | Client Twilio WhatsApp | 🟡 MT-02 |
-| `src/services/core/notifications/notif_dispatcher.py` | Dispatcher multi-canal (email/push/ntfy/whatsapp) | 🟠 CT-01 |
-| `src/api/routes/admin.py` (enrichi) | +endpoints jobs, notif-test, cache, users | 🟠 CT-02 |
-| `src/services/core/automations/` | Moteur "Si → Alors" | 🟡 MT-01 |
-| `frontend/src/app/(app)/admin/jobs/page.tsx` | UI déclenchement manuel des jobs | 🟠 CT-02 |
-| `src/services/famille/version_recette_jules.py` | Génération VersionRecette Jules + profil aliments exclus | 🟠 CT-09 |
-| `tests/sql/test_schema_coherence.py` | Vérifie cohérence ORM ↔ INIT_COMPLET.sql (chaque `__tablename__` a son `CREATE TABLE`) | 🟠 CT-12 |
-| `tests/api/test_push_notifications.py` | Tests B-01/B-02/B-03 : persistance abonnements push, endpoint VAPID, scheduler ntfy + courses | 🟠 CT-13 |
+| ~~`src/services/core/notifications/notif_email.py`~~ | ~~`ServiceEmail` avec Resend~~ | ✅ FAIT (Sprint 5) |
+| ~~`src/services/core/notifications/notif_dispatcher.py`~~ | ~~Dispatcher multi-canal~~ | ✅ FAIT (Sprint 5) |
+| ~~`src/api/routes/admin.py` (enrichi)~~ | ~~+endpoints jobs, notif-test, cache, users~~ | ✅ FAIT (Sprint 5) |
+| ~~`src/services/famille/version_recette_jules.py`~~ | ~~Génération VersionRecette Jules~~ | ✅ FAIT (Sprint 5) |
+| `src/services/core/notifications/notif_whatsapp.py` | Client WhatsApp sortant proactif | 🟡 MT-02 |
+| `src/services/core/automations/` | Moteur "Si → Alors" | 🟡 MT-05 |
+| `frontend/src/app/(app)/admin/jobs/page.tsx` | UI déclenchement manuel des jobs | 🟠 MT-04 |
+| `tests/sql/test_schema_coherence.py` | Vérifie cohérence ORM ↔ INIT_COMPLET.sql | 🟠 CT-12 |
+| `tests/api/test_push_notifications.py` | Tests persistance abonnements, endpoint VAPID, scheduler | 🟠 CT-13 |
 | `tests/api/test_admin_routes.py` | Couverture `/admin/users`, `/admin/jobs`, export RGPD, suppression compte | 🟡 CT-14 |
 
 ### Fichiers à supprimer (CT-15/CT-16/CT-17)
@@ -1038,4 +956,4 @@ CREATE POLICY "Utilisateur voit ses abonnements" ON abonnements_push_vapid
 
 ---
 
-*Rapport généré le 27 mars 2026 — Mis à jour le 28 mars 2026 — GitHub Copilot*
+*Rapport généré le 27 mars 2026 — Mis à jour le 29 mars 2026 (Sprint 5 : notifications, admin, 2FA, Version Jules) — GitHub Copilot*

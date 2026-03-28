@@ -51,6 +51,9 @@ import {
   obtenirProfilJules,
   listerJalons,
   ajouterJalon,
+  obtenirAlimentsExclus,
+  obtenirCoachingHebdo,
+  sauvegarderAlimentsExclus,
 } from "@/bibliotheque/api/famille";
 import dynamic from "next/dynamic";
 import type { JalonJules } from "@/types/famille";
@@ -77,6 +80,7 @@ function iconeCategorie(cat: string) {
 export default function PageJules() {
   const [categorieFiltre, setCategorieFiltre] = useState("tous");
   const [dialogueAjout, setDialogueAjout] = useState(false);
+  const [nouvelAliment, setNouvelAliment] = useState("");
 
   // Form state
   const [titre, setTitre] = useState("");
@@ -97,6 +101,16 @@ export default function PageJules() {
       listerJalons(categorieFiltre !== "tous" ? categorieFiltre : undefined)
   );
 
+  const { data: alimentsExclus } = utiliserRequete(
+    ["famille", "jules", "aliments-exclus"],
+    obtenirAlimentsExclus
+  );
+
+  const { data: coaching } = utiliserRequete(
+    ["famille", "jules", "coaching-hebdo"],
+    obtenirCoachingHebdo
+  );
+
   const { mutate: ajouter, isPending: enAjout } = utiliserMutation(
     (jalon: Omit<JalonJules, "id">) => ajouterJalon(jalon),
     {
@@ -109,6 +123,18 @@ export default function PageJules() {
         toast.success("Jalon ajouté");
       },
       onError: () => toast.error("Erreur lors de l'ajout"),
+    }
+  );
+
+  const { mutate: enregistrerAliments, isPending: enSauvegardeAliments } = utiliserMutation(
+    (items: string[]) => sauvegarderAlimentsExclus(items),
+    {
+      onSuccess: () => {
+        invalider(["famille", "jules", "aliments-exclus"]);
+        setNouvelAliment("");
+        toast.success("Aliments exclus mis à jour");
+      },
+      onError: () => toast.error("Impossible d'enregistrer les aliments exclus"),
     }
   );
 
@@ -187,6 +213,78 @@ export default function PageJules() {
           </CardContent>
         </Card>
       )}
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Aliments exclus</CardTitle>
+            <CardDescription>
+              Liste utilisée pour la génération des versions Jules des recettes.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {(alimentsExclus?.aliments_exclus ?? []).map((aliment) => (
+                <Badge key={aliment} variant="secondary">
+                  {aliment}
+                </Badge>
+              ))}
+              {!(alimentsExclus?.aliments_exclus?.length) && (
+                <p className="text-sm text-muted-foreground">Aucun aliment exclu enregistré.</p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={nouvelAliment}
+                onChange={(e) => setNouvelAliment(e.target.value)}
+                placeholder="Ex: miel, fruits à coque..."
+              />
+              <Button
+                type="button"
+                variant="outline"
+                disabled={enSauvegardeAliments || !nouvelAliment.trim()}
+                onClick={() => {
+                  const base = alimentsExclus?.aliments_exclus ?? [];
+                  const prochain = Array.from(new Set([...base, nouvelAliment.trim()]));
+                  enregistrerAliments(prochain);
+                }}
+              >
+                Ajouter
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Coaching hebdo Jules</CardTitle>
+            <CardDescription>{coaching?.semaine ?? "Semaine en cours"}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm">{coaching?.resume ?? "Pas encore de coaching disponible."}</p>
+            {!!coaching?.conseils?.length && (
+              <div>
+                <p className="text-xs font-medium uppercase text-muted-foreground mb-1">Conseils</p>
+                <ul className="space-y-1 text-sm list-disc pl-4">
+                  {coaching.conseils.slice(0, 3).map((conseil) => (
+                    <li key={conseil}>{conseil}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {!!coaching?.alertes?.length && (
+              <div>
+                <p className="text-xs font-medium uppercase text-muted-foreground mb-1">Alertes</p>
+                <div className="flex flex-wrap gap-2">
+                  {coaching.alertes.map((alerte) => (
+                    <Badge key={alerte} variant="outline">{alerte}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Timeline jalons */}
       {isLoading ? (

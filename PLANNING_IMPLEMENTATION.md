@@ -766,7 +766,7 @@ async def webhook_whatsapp(request: Request):
 ### Sprint 2 — Bugs hauts + Nettoyage doc
 - [x] B-06 — `url_source` absent du modèle Recette
 - [x] B-07 — `verifier_saison` silencieux
-- [ ] B-11 — Lien sidebar Calendriers → 404
+- [x] B-11 — Lien sidebar Calendriers → 404
 - [x] B-12 — `est_favori` vs `feedback` TypeScript
 - [x] CT-15 — Supprimer STATUS_PHASES.md
 - [x] CT-16 — Nettoyer ROADMAP.md
@@ -781,11 +781,11 @@ async def webhook_whatsapp(request: Request):
 
 ### Sprint 4 — Features cuisine/famille/Jules
 - [x] CT-09 — Bouton Version Jules + profil aliments exclus (backend)
-- [ ] CT-09-frontend — Bouton Version Jules UI + aliments-exclus page Jules
+- [x] CT-09-frontend — Bouton Version Jules UI + aliments-exclus page Jules
 - [x] CT-06 — Génération recette depuis photo (backend)
-- [ ] CT-06-frontend — Bouton photo dans nouvelle recette
+- [x] CT-06-frontend — Bouton photo dans nouvelle recette
 - [x] CT-05 — Coaching hebdo Jules (backend)
-- [ ] CT-05-frontend — Widget coaching Jules UI
+- [x] CT-05-frontend — Widget coaching Jules UI
 - [ ] QW-02 — Recette Surprise
 - [x] QW-04 — Compteur jours depuis dernière cuisine
 
@@ -813,15 +813,15 @@ async def webhook_whatsapp(request: Request):
 - [x] QW-08 — Impression optimisée recette
 
 ### Sprint 8 — WhatsApp + IA avancée
-- [ ] MT-02 — Canal WhatsApp
-- [ ] MT-04 — Alertes météo contextuelles
-- [ ] MT-07 — Assistant vocal
+- [x] MT-02 — Canal WhatsApp
+- [x] MT-04 — Alertes météo contextuelles
+- [x] MT-07 — Assistant vocal
 
 ### Sprint 9 — Long terme
-- [ ] LT-01 — Garmin santé/sport
-- [ ] LT-02 — Gamification sport + alimentation
-- [ ] LT-03 — Mode Voyage
-- [ ] LT-04 — Automations Si → Alors
+- [x] LT-01 — Garmin santé/sport
+- [x] LT-02 — Gamification sport + alimentation
+- [x] LT-03 — Mode Voyage
+- [x] LT-04 — Automations Si → Alors
 
 ---
 
