@@ -1051,13 +1051,12 @@ async def obtenir_semaine_unifiee(
     user: dict = Depends(require_auth),
 ) -> dict:
     """
-    Vue unifiée de la semaine trans-modules : repas, tâches maison, activités famille, matchs.
+    Vue unifiée de la semaine trans-modules : repas, tâches maison, activités famille.
 
     Agrège en une seule réponse :
     - `repas` : planning repas (déjeuner/dîner par jour)
     - `taches_maison` : tâches ménage/entretien du jour
     - `activites_famille` : activités Jules et famille de la semaine
-    - `matchs` : paris sportifs prévus cette semaine
     - `meta` : dates de début/fin de semaine
     """
     import datetime as dt
@@ -1123,33 +1122,6 @@ async def obtenir_semaine_unifiee(
             except Exception:
                 pass
 
-            # ── Matchs / Paris jeux ───────────────────────────────────
-            matchs: list[dict] = []
-            try:
-                from src.core.models.jeux import Match
-
-                ms = (
-                    session.query(Match)
-                    .filter(
-                        Match.date_match >= debut,
-                        Match.date_match <= fin,
-                    )
-                    .order_by(Match.date_match)
-                    .all()
-                )
-                matchs = [
-                    {
-                        "id": m.id,
-                        "date": m.date_match.isoformat() if m.date_match else None,
-                        "equipe_domicile": getattr(m, "equipe_domicile", None),
-                        "equipe_exterieur": getattr(m, "equipe_exterieur", None),
-                        "competition": getattr(m, "competition", None),
-                    }
-                    for m in ms
-                ]
-            except Exception:
-                pass
-
             # ── Tâches maison du jour ──────────────────────────────────
             taches_maison: list[dict] = []
             try:
@@ -1176,7 +1148,6 @@ async def obtenir_semaine_unifiee(
                 },
                 "repas": repas_par_jour,
                 "activites_famille": activites,
-                "matchs": matchs,
                 "taches_maison": taches_maison,
             }
 

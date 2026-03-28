@@ -8,7 +8,6 @@ import Link from "next/link";
 import {
   UtensilsCrossed,
   Baby,
-  Trophy,
   SprayCan,
   ChevronLeft,
   ChevronRight,
@@ -119,9 +118,8 @@ export default function PageMaSemaine() {
             const activitesJour = (data?.activites_famille ?? []).filter(
               (a) => a.date === jour
             );
-            const matchsJour = (data?.matchs ?? []).filter((m) => m.date === jour);
 
-            const isEmpty = !repasJour.length && !activitesJour.length && !matchsJour.length;
+            const isEmpty = !repasJour.length && !activitesJour.length;
 
             return (
               <Card key={jour} className={isEmpty ? "opacity-50" : ""}>
@@ -159,22 +157,6 @@ export default function PageMaSemaine() {
                       </span>
                       <span className="text-sm truncate">{a.titre}</span>
                       <Link href="/famille/activites" className="ml-auto">
-                        <Badge variant="outline" className="text-xs">→</Badge>
-                      </Link>
-                    </div>
-                  ))}
-
-                  {/* Matchs */}
-                  {matchsJour.map((m) => (
-                    <div key={m.id} className="flex items-center gap-2">
-                      <Trophy className="h-3.5 w-3.5 text-yellow-500 shrink-0" />
-                      <span className="text-xs text-muted-foreground w-14 shrink-0 truncate">
-                        {m.competition ?? "Match"}
-                      </span>
-                      <span className="text-sm truncate">
-                        {m.equipe_domicile ?? "?"} — {m.equipe_exterieur ?? "?"}
-                      </span>
-                      <Link href="/jeux/paris" className="ml-auto">
                         <Badge variant="outline" className="text-xs">→</Badge>
                       </Link>
                     </div>

@@ -128,7 +128,6 @@ export interface SemaineUnifiee {
   meta: { semaine_debut: string; semaine_fin: string };
   repas: Record<string, { id: number; type: string; recette_id: number | null; nom_recette: string | null }[]>;
   activites_famille: { id: number; date: string | null; titre: string; type: string | null }[];
-  matchs: { id: number; date: string | null; equipe_domicile: string | null; equipe_exterieur: string | null; competition: string | null }[];
   taches_maison: { nom: string; categorie: string | null; duree_estimee_min: number | null }[];
 }
 
