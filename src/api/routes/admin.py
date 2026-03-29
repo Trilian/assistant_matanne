@@ -317,6 +317,21 @@ _LABELS_JOBS: dict[str, str] = {
     "resume_hebdo": "Résumé hebdomadaire (lun 07h30)",
     "peremptions_urgentes": "Alerte péremptions urgentes (08h00)",
     "score_bienetre": "Score bien-être Jules (dim 20h00)",
+    "planning_semaine_si_vide": "J-03 Vérification planning semaine suivante (dim 20h00)",
+    "alertes_peremption_48h": "J-04 Alertes péremption 48h (06h00)",
+    "rapport_mensuel_budget": "J-07 Rapport mensuel budget (1er/mois 08h15)",
+    "score_weekend": "J-08 Score weekend (ven 17h00)",
+    "controle_contrats_garanties": "J-09 Contrats & garanties (1er/mois 09h00)",
+    "rapport_jardin": "J-10 Rapport jardin hebdo (mer 20h00)",
+    "score_bien_etre_hebdo": "J-11 Score bien-être hebdo (dim 20h00)",
+    "garmin_sync_matinal": "Sync Garmin automatique matinale (06h00)",
+    "automations_runner": "Exécution automations (toutes les 5 min)",
+    "points_famille_hebdo": "Calcul points famille hebdo (dim 20h00)",
+    "sync_google_calendar": "J1 Sync Google Calendar (quotidien 23h00)",
+    "alerte_stock_bas": "J3 Alerte stock bas → liste courses (07h00)",
+    "archive_batches_expires": "J4 Archivage préparations batch expirées (02h00)",
+    "rapport_maison_mensuel": "J5 Rapport maison mensuel (1er/mois 09h30)",
+    "sync_openfoodfacts": "J6 Sync cache OpenFoodFacts (dim 03h00)",
 }
 
 

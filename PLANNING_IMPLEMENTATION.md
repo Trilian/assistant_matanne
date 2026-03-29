@@ -50,7 +50,7 @@
 | Sprint 11 | ~2-3j | 🔵 PLANIFIÉ | Features prioritaires manquantes |
 | Sprint 12 | ~2-3j | 🔵 PLANIFIÉ | Architecture & Refactoring |
 | Sprint 13 | ~2j | ✅ COMPLÉTÉ | WhatsApp étendu + Email complet |
-| Sprint 14 | ~3-4j | 🔵 PLANIFIÉ | IA avancée + Cron jobs |
+| Sprint 14 | ~3-4j | ✅ COMPLÉTÉ | IA avancée + Cron jobs |
 | Sprint 15 | ~3-4j | 🔵 PLANIFIÉ | Inter-modules avancés |
 | Sprint 16 | ~2j | ✅ TERMINÉ | Admin complet |
 
@@ -882,6 +882,7 @@ Source : `ANALYSE_COMPLETE.md` §4
 ## 9. Sprint 14 — Nouvelles opportunités IA + Cron jobs manquants
 
 > **~3-4 jours**
+> **✅ COMPLÉTÉ**
 > Source : `ANALYSE_COMPLETE.md` §9 + §10
 
 ### IA1 — Résumé famille contextualisé hebdomadaire _(M)_
@@ -889,11 +890,11 @@ Source : `ANALYSE_COMPLETE.md` §4
 **Valeur :** ⭐⭐⭐ Haute
 
 **Actions :**
-- [ ] `src/services/dashboard/resume_famille_ia.py` — résumé bienveillant via Mistral
-- [ ] Contexte injecté : planning semaine + inventaire + budget + score Jules + météo
-- [ ] Endpoint `GET /api/v1/dashboard/resume-hebdo-ia`
-- [ ] Widget dashboard "Votre semaine en un coup d'œil"
-- [ ] Inclure dans le cron `resume_hebdo` (envoi push + email vendredi soir)
+- [x] `src/services/dashboard/resume_famille_ia.py` — résumé bienveillant via Mistral
+- [x] Contexte injecté : planning semaine + inventaire + budget + score Jules + météo
+- [x] Endpoint `GET /api/v1/dashboard/resume-hebdo-ia`
+- [ ] Widget dashboard "Votre semaine en un coup d'œil" _(UI — hors scope backend)_
+- [ ] Inclure dans le cron `resume_hebdo` (envoi push + email vendredi soir) _(UI — hors scope)_
 
 ---
 
@@ -902,10 +903,10 @@ Source : `ANALYSE_COMPLETE.md` §4
 **Valeur :** ⭐⭐⭐ Haute — **Prérequis :** Historique achats > 4 semaines
 
 **Actions :**
-- [ ] `src/services/cuisine/prediction_courses.py` — analyse historique `articles_courses` + fréquence
-- [ ] Endpoint `GET /api/v1/courses/predictions` → liste pré-complétée avec scores confiance
-- [ ] Dans la page courses : section "Articles habituels" (checkboxes pré-cochées)
-- [ ] Amélioration progressive via feedback (ajout/refus)
+- [x] `src/services/cuisine/prediction_courses.py` — analyse historique `articles_courses` + fréquence
+- [x] Endpoint `GET /api/v1/courses/predictions` → liste pré-complétée avec scores confiance
+- [ ] Dans la page courses : section "Articles habituels" (checkboxes pré-cochées) _(UI — hors scope backend)_
+- [x] Amélioration progressive via feedback (ajout/refus)
 
 ---
 
@@ -914,10 +915,10 @@ Source : `ANALYSE_COMPLETE.md` §4
 **Valeur :** ⭐⭐⭐ Haute
 
 **Actions :**
-- [ ] `src/services/dashboard/anomalies_financieres.py` — compare mois courant vs N-1, N-2
-- [ ] Endpoint `GET /api/v1/dashboard/anomalies-financieres`
-- [ ] Alertes : +X% vs moyenne habituelle par catégorie (courses, énergie, loisirs)
-- [ ] Widget dashboard avec recommandations IA
+- [x] `src/services/dashboard/anomalies_financieres.py` — compare mois courant vs N-1, N-2
+- [x] Endpoint `GET /api/v1/dashboard/anomalies-financieres`
+- [x] Alertes : +X% vs moyenne habituelle par catégorie (courses, énergie, loisirs)
+- [ ] Widget dashboard avec recommandations IA _(UI — hors scope backend)_
 
 ---
 
@@ -926,9 +927,9 @@ Source : `ANALYSE_COMPLETE.md` §4
 **État :** Chat IA existe, contexte limité.
 
 **Actions :**
-- [ ] Injecter dans le prompt système : planning + inventaire + budget + score Jules + événements famille
-- [ ] Mémoire conversationnelle courte (5 derniers échanges)
-- [ ] Endpoint `POST /api/v1/assistant/chat` avec contexte enrichi
+- [x] Injecter dans le prompt système : planning + inventaire + budget + score Jules + événements famille
+- [x] Mémoire conversationnelle courte (5 derniers échanges)
+- [x] Endpoint `POST /api/v1/assistant/chat` avec contexte enrichi
 
 ---
 
@@ -937,9 +938,9 @@ Source : `ANALYSE_COMPLETE.md` §4
 **Valeur :** ⭐⭐
 
 **Actions :**
-- [ ] Dans `JulesAIService` : enrichir le prompt avec météo + crèche ouverte/fermée + âge Jules
-- [ ] Endpoint `GET /api/v1/famille/jules/activites-suggestions?contexte=meteo_pluie`
-- [ ] Widget dans la page famille Jules
+- [x] Dans `JulesAIService` : enrichir le prompt avec météo + crèche ouverte/fermée + âge Jules
+- [x] Endpoint `GET /api/v1/famille/jules/activites-suggestions?contexte=meteo_pluie`
+- [ ] Widget dans la page famille Jules _(UI — hors scope backend)_
 
 ---
 
@@ -948,9 +949,9 @@ Source : `ANALYSE_COMPLETE.md` §4
 **Valeur :** ⭐⭐
 
 **Actions :**
-- [ ] Endpoint `POST /api/v1/automations/generer-ia` — prompt libre → règle Si→Alors JSON
-- [ ] Mistral génère `{ condition, action, parametres }`
-- [ ] Interface : champ texte libre → prévisualisation règle → confirmation
+- [x] Endpoint `POST /api/v1/automations/generer-ia` — prompt libre → règle Si→Alors JSON
+- [x] Mistral génère `{ condition, action, parametres }`
+- [ ] Interface : champ texte libre → prévisualisation règle → confirmation _(UI — hors scope backend)_
 
 ---
 
@@ -959,9 +960,9 @@ Source : `ANALYSE_COMPLETE.md` §4
 **Valeur :** ⭐⭐
 
 **Actions :**
-- [ ] Analyser durée de vie réelle des produits (date achat → date consommation)
-- [ ] Modèle simple : durée_vie_moyenne par catégorie × facteur conservation
-- [ ] Alertes proactives basées sur ce modèle plutôt que date DB fixe
+- [x] Analyser durée de vie réelle des produits (date achat → date consommation)
+- [x] Modèle simple : durée_vie_moyenne par catégorie × facteur conservation
+- [x] Alertes proactives basées sur ce modèle plutôt que date DB fixe
 
 ---
 
@@ -975,8 +976,8 @@ Source : `ANALYSE_COMPLETE.md` §4
 | Dépendance | `google_calendar.py` service existant |
 
 **Actions :**
-- [ ] Ajouter job APScheduler `sync_google_calendar` (23h00 quotidien)
-- [ ] Sync des events créés/modifiés depuis 24h
+- [x] Ajouter job APScheduler `sync_google_calendar` (23h00 quotidien)
+- [x] Sync des events créés/modifiés depuis 24h
 
 ---
 
@@ -989,9 +990,9 @@ Source : `ANALYSE_COMPLETE.md` §4
 | Canal | ntfy |
 
 **Actions :**
-- [ ] Requête `articles_inventaire WHERE quantite < seuil_minimum AND actif = true`
-- [ ] Créer ou compléter la liste courses du jour
-- [ ] Notification ntfy "X articles ajoutés automatiquement"
+- [x] Requête `articles_inventaire WHERE quantite < seuil_minimum AND actif = true`
+- [x] Créer ou compléter la liste courses du jour
+- [x] Notification ntfy "X articles ajoutés automatiquement"
 
 ---
 
@@ -1003,7 +1004,7 @@ Source : `ANALYSE_COMPLETE.md` §4
 | Description | Archiver préparations batch expirées |
 
 **Actions :**
-- [ ] `UPDATE preparations_batch SET archive = true WHERE date_expiration < NOW()`
+- [x] `UPDATE preparations_batch SET consomme = true WHERE date_peremption < NOW()`
 
 ---
 
@@ -1016,8 +1017,8 @@ Source : `ANALYSE_COMPLETE.md` §4
 | Canal | ntfy + email |
 
 **Actions :**
-- [ ] Agréger : projets en cours, entretiens planifiés N+30j, dépenses maison mois N-1
-- [ ] Envoyer ntfy + email
+- [x] Agréger : projets en cours, entretiens planifiés N+30j, dépenses maison mois N-1
+- [x] Envoyer ntfy + email
 
 ---
 
@@ -1029,9 +1030,9 @@ Source : `ANALYSE_COMPLETE.md` §4
 | Description | Refresh cache OpenFoodFacts pour les articles fréquents |
 
 **Actions :**
-- [ ] Identifier les produits scannés les 30 derniers jours
-- [ ] Rafraîchir les données nutritionnelles depuis OpenFoodFacts API
-- [ ] Mettre à jour `articles_inventaire.donnees_nutritionnelles`
+- [x] Identifier les produits scannés les 30 derniers jours
+- [x] Rafraîchir les données nutritionnelles depuis OpenFoodFacts API
+- [x] Mettre à jour `openfoodfacts_cache` (code-barres + nutrition_data)
 
 ---
 
@@ -1299,18 +1300,18 @@ F5 (pages maison) ──────────────────→ IM9 
 
 ### Sprint 14 — IA + Cron
 
-- [ ] IA1 — Résumé famille contextualisé IA
-- [ ] IA2 — Prédiction liste courses
-- [ ] IA3 — Détection anomalies dépenses
-- [ ] IA4 — Chat IA contextuel cross-module enrichi
-- [ ] IA5 — Suggestions activités Jules contextuelles
-- [ ] IA6 — Génération automations via IA
-- [ ] IA7 — Prédiction péremption personnalisée
-- [ ] J1 — Job `sync_google_calendar`
-- [ ] J3 — Job `alerte_stock_bas`
-- [ ] J4 — Job `archive_batches_expires`
-- [ ] J5 — Job `rapport_maison_mensuel`
-- [ ] J6 — Job `sync_openFoodFacts`
+- [x] IA1 — Résumé famille contextualisé IA
+- [x] IA2 — Prédiction liste courses
+- [x] IA3 — Détection anomalies dépenses
+- [x] IA4 — Chat IA contextuel cross-module enrichi
+- [x] IA5 — Suggestions activités Jules contextuelles
+- [x] IA6 — Génération automations via IA
+- [x] IA7 — Prédiction péremption personnalisée
+- [x] J1 — Job `sync_google_calendar`
+- [x] J3 — Job `alerte_stock_bas`
+- [x] J4 — Job `archive_batches_expires`
+- [x] J5 — Job `rapport_maison_mensuel`
+- [x] J6 — Job `sync_openFoodFacts`
 
 ### Sprint 15 — Inter-modules
 

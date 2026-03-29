@@ -13,6 +13,7 @@ from sqlalchemy import (
     BigInteger,
     Boolean,
     DateTime,
+    Integer,
     Index,
     String,
     Text,
@@ -111,3 +112,29 @@ class HistoriqueAction(CreeLeMixin, Base):
 
     def __repr__(self) -> str:
         return f"<HistoriqueAction(id={self.id}, user='{self.user_name}', action='{self.action_type}')>"
+
+
+class LogSecurite(CreeLeMixin, Base):
+    """Journal dédié des événements sécurité (auth/rate-limit/admin).
+
+    Table SQL: logs_securite
+    """
+
+    __tablename__ = "logs_securite"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[str | None] = mapped_column(String(255), index=True)
+    event_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    ip: Mapped[str | None] = mapped_column(String(45))
+    user_agent: Mapped[str | None] = mapped_column(String(500))
+    details: Mapped[dict | None] = mapped_column(JSONB, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
+
+    __table_args__ = (
+        Index("ix_logs_securite_created_at", "created_at"),
+        Index("ix_logs_securite_event_type_created_at", "event_type", "created_at"),
+        Index("ix_logs_securite_user_created_at", "user_id", "created_at"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<LogSecurite(id={self.id}, event_type='{self.event_type}', user_id='{self.user_id}')>"

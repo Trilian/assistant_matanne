@@ -906,6 +906,299 @@ def _job_points_famille_hebdo() -> None:
         logger.exception("Erreur lors du calcul des points famille hebdo")
 
 
+def _job_sync_google_calendar() -> None:
+    """J1 — Sync planning repas + activités → Google Calendar (quotidien 23h00)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import CalendrierExterne
+        from src.services.famille.calendrier import get_calendar_sync_service
+
+        service = get_calendar_sync_service()
+
+        with obtenir_contexte_db() as session:
+            calendriers = (
+                session.query(CalendrierExterne)
+                .filter(
+                    CalendrierExterne.enabled == True,  # noqa: E712
+                    CalendrierExterne.provider == "google",
+                )
+                .all()
+            )
+            user_ids = list({str(c.user_id) for c in calendriers if c.user_id})
+
+        nb_syncs = 0
+        for user_id in user_ids:
+            try:
+                user_calendriers = service.lister_calendriers_utilisateur(user_id=user_id, db=session)
+                for cal_config in user_calendriers:
+                    result = service.sync_google_calendar(cal_config)
+                    if result.success:
+                        nb_syncs += 1
+                    else:
+                        logger.warning("J1: sync Google Calendar échouée pour user %s: %s", user_id, result.message)
+            except Exception:
+                logger.exception("J1: erreur sync pour user %s", user_id)
+
+        logger.info("J1 sync_google_calendar terminée: %d calendrier(s) synchronisé(s)", nb_syncs)
+    except Exception:
+        logger.exception("Erreur job J1 sync_google_calendar")
+
+
+def _job_alerte_stock_bas() -> None:
+    """J3 — Alerte stock bas : articles inventaire < seuil → ajout auto liste courses (quotidien 07h00)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire, ArticleCourses, ListeCourses
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from datetime import date
+
+        articles_stock_bas: list[ArticleInventaire] = []
+        with obtenir_contexte_db() as session:
+            articles_stock_bas = (
+                session.query(ArticleInventaire)
+                .filter(
+                    ArticleInventaire.quantite < ArticleInventaire.quantite_min,
+                    ArticleInventaire.quantite_min > 0,
+                )
+                .limit(30)
+                .all()
+            )
+
+            if not articles_stock_bas:
+                logger.info("J3: aucun article en stock bas")
+                return
+
+            # Trouver ou créer la liste courses active du jour
+            aujourd_hui = date.today()
+            liste = (
+                session.query(ListeCourses)
+                .filter(
+                    ListeCourses.statut.in_(["active", "en_cours"]),
+                )
+                .order_by(ListeCourses.id.desc())
+                .first()
+            )
+
+            if liste is None:
+                liste = ListeCourses(
+                    nom=f"Courses {aujourd_hui:%d/%m/%Y}",
+                    statut="active",
+                )
+                session.add(liste)
+                session.flush()
+
+            # Ajouter les articles manquants (éviter doublons)
+            ingredient_ids_existants: set[int] = {
+                ac.ingredient_id
+                for ac in session.query(ArticleCourses.ingredient_id)
+                .filter(ArticleCourses.liste_id == liste.id, ArticleCourses.achete == False)  # noqa: E712
+                .all()
+            }
+
+            nb_ajoutes = 0
+            for article in articles_stock_bas:
+                if article.ingredient_id in ingredient_ids_existants:
+                    continue
+                quantite_a_acheter = max(
+                    article.quantite_min - article.quantite,
+                    article.quantite_min,
+                )
+                nouvel_article = ArticleCourses(
+                    liste_id=liste.id,
+                    ingredient_id=article.ingredient_id,
+                    quantite_necessaire=quantite_a_acheter,
+                    achete=False,
+                )
+                session.add(nouvel_article)
+                nb_ajoutes += 1
+
+            session.commit()
+
+        if nb_ajoutes > 0:
+            noms = [a.nom or f"Ingrédient #{a.ingredient_id}" for a in articles_stock_bas[:5]]
+            message = (
+                f"{nb_ajoutes} article(s) ajouté(s) automatiquement à la liste courses "
+                f"(stock bas) : {', '.join(noms)}{'...' if len(articles_stock_bas) > 5 else ''}."
+            )
+            dispatcher = get_dispatcher_notifications()
+            dispatcher.envoyer(
+                user_id="matanne",
+                message=message,
+                canaux=["ntfy"],
+                titre="Stock bas — courses mises à jour",
+            )
+            logger.info("J3: %d article(s) ajouté(s) à la liste courses", nb_ajoutes)
+        else:
+            logger.info("J3: aucun nouvel article à ajouter (déjà sur la liste)")
+    except Exception:
+        logger.exception("Erreur job J3 alerte_stock_bas")
+
+
+def _job_archive_batches_expires() -> None:
+    """J4 — Archive les préparations batch cooking expirées (quotidien 02h00)."""
+    try:
+        from datetime import datetime
+
+        from sqlalchemy import text
+
+        from src.core.db import obtenir_contexte_db
+
+        with obtenir_contexte_db() as session:
+            result = session.execute(
+                text(
+                    "UPDATE preparations_batch"
+                    " SET consomme = TRUE"
+                    " WHERE consomme = FALSE"
+                    "   AND date_peremption IS NOT NULL"
+                    "   AND date_peremption < :now"
+                ),
+                {"now": datetime.utcnow()},
+            )
+            nb_archivees = result.rowcount
+            session.commit()
+
+        logger.info("J4: %d préparation(s) batch expirée(s) archivée(s)", nb_archivees)
+    except Exception:
+        logger.exception("Erreur job J4 archive_batches_expires")
+
+
+def _job_rapport_maison_mensuel() -> None:
+    """J5 — Rapport maison mensuel : projets actifs, entretiens N+30j, dépenses mois N-1 (1er/mois 09h30)."""
+    try:
+        from datetime import date, timedelta
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import DepenseMaison, Projet, TacheEntretien
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        mois_ref = (aujourd_hui.replace(day=1) - timedelta(days=1))
+        mois = mois_ref.month
+        annee = mois_ref.year
+        horizon_30j = aujourd_hui + timedelta(days=30)
+
+        with obtenir_contexte_db() as session:
+            nb_projets_actifs = (
+                session.query(Projet)
+                .filter(Projet.statut == "en_cours")
+                .count()
+            )
+            entretiens_a_venir = (
+                session.query(TacheEntretien)
+                .filter(
+                    TacheEntretien.fait == False,  # noqa: E712
+                    TacheEntretien.prochaine_fois.isnot(None),
+                    TacheEntretien.prochaine_fois >= aujourd_hui,
+                    TacheEntretien.prochaine_fois <= horizon_30j,
+                )
+                .count()
+            )
+            total_depenses = (
+                session.query(func.sum(DepenseMaison.montant))
+                .filter(DepenseMaison.mois == mois, DepenseMaison.annee == annee)
+                .scalar()
+                or 0
+            )
+
+        message = (
+            f"Rapport maison {mois:02d}/{annee}: "
+            f"{nb_projets_actifs} projet(s) en cours, "
+            f"{entretiens_a_venir} entretien(s) planifié(s) dans 30j, "
+            f"dépenses mois N-1: {float(total_depenses):.2f} EUR."
+        )
+
+        import os
+        email_dest = os.getenv("EMAIL_RESUME_HEBDO")
+        canaux = ["ntfy", "email"] if email_dest else ["ntfy"]
+        kwargs: dict = {
+            "titre": f"Rapport maison mensuel {mois:02d}/{annee}",
+        }
+        if email_dest:
+            kwargs.update({
+                "email": email_dest,
+                "type_email": "rapport_mensuel",
+                "rapport": {
+                    "mois": f"{mois:02d}/{annee}",
+                    "projets_actifs": nb_projets_actifs,
+                    "entretiens_a_venir": entretiens_a_venir,
+                    "depenses_maison": float(total_depenses),
+                },
+            })
+
+        dispatcher = get_dispatcher_notifications()
+        res = dispatcher.envoyer(user_id="matanne", message=message, canaux=canaux, **kwargs)
+        logger.info("J5 rapport_maison_mensuel exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur job J5 rapport_maison_mensuel")
+
+
+def _job_sync_openfoodfacts() -> None:
+    """J6 — Refresh cache OpenFoodFacts pour les articles scannés les 30 derniers jours (dim 03h00)."""
+    try:
+        from datetime import datetime, timedelta
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire
+        from src.core.models.user_preferences import OpenFoodFactsCache
+        from src.services.integrations.produit import OpenFoodFactsService
+        import time
+
+        service = OpenFoodFactsService()
+        horizon = datetime.utcnow() - timedelta(days=30)
+
+        with obtenir_contexte_db() as session:
+            # Articles scannés (avec code-barres) ajoutés ou modifiés dans les 30 derniers jours
+            articles = (
+                session.query(ArticleInventaire)
+                .filter(
+                    ArticleInventaire.code_barres.isnot(None),
+                    ArticleInventaire.code_barres != "",
+                )
+                .limit(100)
+                .all()
+            )
+
+            codes_barres = list({a.code_barres for a in articles if a.code_barres})
+
+        nb_maj = 0
+        for code in codes_barres:
+            try:
+                produit = service.rechercher_produit(code)
+                if produit is None:
+                    continue
+
+                with obtenir_contexte_db() as session:
+                    cache_entry = (
+                        session.query(OpenFoodFactsCache)
+                        .filter(OpenFoodFactsCache.code_barres == code)
+                        .first()
+                    )
+                    if cache_entry is None:
+                        cache_entry = OpenFoodFactsCache(code_barres=code)
+                        session.add(cache_entry)
+
+                    cache_entry.nom = produit.nom
+                    cache_entry.marque = produit.marque
+                    cache_entry.categorie = produit.categorie
+                    cache_entry.nutriscore = produit.nutriscore
+                    cache_entry.nova_group = produit.nova_group
+                    cache_entry.ecoscore = produit.ecoscore
+                    cache_entry.nutrition_data = produit.nutrition_data
+                    cache_entry.image_url = produit.image_url
+                    cache_entry.last_updated = datetime.utcnow()
+                    session.commit()
+
+                nb_maj += 1
+                # Respecter l'API publique OpenFoodFacts (throttle léger)
+                time.sleep(0.5)
+            except Exception:
+                logger.debug("J6: impossible de mettre à jour le code-barres %s", code, exc_info=True)
+
+        logger.info("J6 sync_openfoodfacts terminée: %d produit(s) mis à jour sur %d", nb_maj, len(codes_barres))
+    except Exception:
+        logger.exception("Erreur job J6 sync_openfoodfacts")
+
+
 # ─── Orchestrateur ────────────────────────────────────────────────────────────
 
 
@@ -1053,6 +1346,41 @@ class DémarreurCron:
             id="points_famille_hebdo",
             replace_existing=True,
             name="Calcul points famille hebdomadaire",
+        )
+        self._scheduler.add_job(
+            _job_sync_google_calendar,
+            CronTrigger(hour=23, minute=0),
+            id="sync_google_calendar",
+            replace_existing=True,
+            name="J1 Sync Google Calendar (quotidien 23h00)",
+        )
+        self._scheduler.add_job(
+            _job_alerte_stock_bas,
+            CronTrigger(hour=7, minute=0),
+            id="alerte_stock_bas",
+            replace_existing=True,
+            name="J3 Alerte stock bas → liste courses",
+        )
+        self._scheduler.add_job(
+            _job_archive_batches_expires,
+            CronTrigger(hour=2, minute=0),
+            id="archive_batches_expires",
+            replace_existing=True,
+            name="J4 Archivage préparations batch expirées (02h00)",
+        )
+        self._scheduler.add_job(
+            _job_rapport_maison_mensuel,
+            CronTrigger(day=1, hour=9, minute=30),
+            id="rapport_maison_mensuel",
+            replace_existing=True,
+            name="J5 Rapport maison mensuel (1er/mois 09h30)",
+        )
+        self._scheduler.add_job(
+            _job_sync_openfoodfacts,
+            CronTrigger(day_of_week="sun", hour=3, minute=0),
+            id="sync_openfoodfacts",
+            replace_existing=True,
+            name="J6 Sync cache OpenFoodFacts (dim 03h00)",
         )
 
     def demarrer(self) -> None:

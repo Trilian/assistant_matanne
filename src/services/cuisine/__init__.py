@@ -47,4 +47,12 @@ def __getattr__(name: str):
         from src.services.cuisine.batch_cooking import obtenir_service_batch_cooking
 
         return obtenir_service_batch_cooking
+    if name == "obtenir_service_prediction_courses":
+        from src.services.cuisine.prediction_courses import obtenir_service_prediction_courses
+
+        return obtenir_service_prediction_courses
+    if name == "obtenir_service_prediction_peremption":
+        from src.services.cuisine.prediction_peremption import obtenir_service_prediction_peremption
+
+        return obtenir_service_prediction_peremption
     raise AttributeError(f"module 'src.services.cuisine' has no attribute '{name}'")
