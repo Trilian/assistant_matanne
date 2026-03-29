@@ -17,7 +17,6 @@ export * from "./documents";
 export * from "./utilitaires";
 export * from "./calendriers";
 export * from "./preferences";
-export * from "./album";
 export * from "./anti-gaspillage";
 export * from "./batch-cooking";
 export * from "./push";

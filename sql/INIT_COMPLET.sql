@@ -64,8 +64,7 @@ DROP TABLE IF EXISTS historique_inventaire CASCADE;
 DROP TABLE IF EXISTS inventaire CASCADE;
 DROP TABLE IF EXISTS entrees_bien_etre CASCADE;
 DROP TABLE IF EXISTS jalons CASCADE;
-DROP TABLE IF EXISTS souvenirs_famille CASCADE;
-DROP TABLE IF EXISTS albums_famille CASCADE;
+
 DROP TABLE IF EXISTS checklists_voyage CASCADE;
 DROP TABLE IF EXISTS templates_checklist CASCADE;
 DROP TABLE IF EXISTS voyages CASCADE;
@@ -2489,43 +2488,7 @@ CREATE INDEX IF NOT EXISTS ix_documents_type ON documents_famille(type_document)
 CREATE INDEX IF NOT EXISTS ix_documents_expiration ON documents_famille(date_expiration)
 WHERE date_expiration IS NOT NULL;
 CREATE INDEX IF NOT EXISTS ix_documents_membre ON documents_famille(membre_famille);
--- ─────────────────────────────────────────────────────────────────────────────
--- 4.XX ALBUMS_FAMILLE — Albums souvenirs
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE albums_famille (
-    id SERIAL PRIMARY KEY,
-    titre VARCHAR(200) NOT NULL,
-    description TEXT,
-    type_album VARCHAR(50) DEFAULT 'general',
-    photo_couverture_url VARCHAR(500),
-    date_debut DATE,
-    date_fin DATE,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_albums_type ON albums_famille(type_album);
--- ─────────────────────────────────────────────────────────────────────────────
--- 4.XX SOUVENIRS_FAMILLE (→ albums_famille, jalons)
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE souvenirs_famille (
-    id SERIAL PRIMARY KEY,
-    album_id INTEGER,
-    jalon_id INTEGER,
-    titre VARCHAR(200) NOT NULL,
-    description TEXT,
-    photo_url VARCHAR(500),
-    date_souvenir DATE NOT NULL,
-    emotion VARCHAR(50),
-    participants JSONB DEFAULT '[]',
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_souvenir_album FOREIGN KEY (album_id) REFERENCES albums_famille(id) ON DELETE
-    SET NULL,
-        CONSTRAINT fk_souvenir_jalon FOREIGN KEY (jalon_id) REFERENCES jalons(id) ON DELETE
-    SET NULL
-);
-CREATE INDEX IF NOT EXISTS ix_souvenirs_album ON souvenirs_famille(album_id);
-CREATE INDEX IF NOT EXISTS ix_souvenirs_jalon ON souvenirs_famille(jalon_id);
-CREATE INDEX IF NOT EXISTS ix_souvenirs_date ON souvenirs_famille(date_souvenir);
+
 -- ============================================================================
 -- PARTIE 5 : TABLES MAISON (sans modèles ORM — migration 020)
 -- ============================================================================
@@ -3424,7 +3387,7 @@ tables_modifie_le TEXT [] := ARRAY [
         'sessions_batch_cooking', 'preparations_batch', 'plannings',
     'modeles_courses', 'templates_semaine', 'points_utilisateurs', 'automations',
         'contacts_famille', 'anniversaires_famille', 'evenements_familiaux',
-        'voyages', 'checklists_voyage', 'documents_famille', 'albums_famille',
+        'voyages', 'checklists_voyage', 'documents_famille',
         -- Jeux extensions
         'jeux_mise_responsable',
         -- Maison extensions
@@ -3690,7 +3653,7 @@ shared_tables TEXT[] := ARRAY[
     'profils_enfants', 'entrees_bien_etre', 'jalons',
     'activites_famille', 'budgets_famille', 'achats_famille',
     'activites_weekend', 'anniversaires_famille', 'evenements_familiaux',
-    'albums_famille', 'souvenirs_famille', 'contacts_famille', 'documents_famille',
+    'contacts_famille', 'documents_famille',
     -- Santé & Fitness
     'profils_utilisateurs', 'routines_sante', 'objectifs_sante', 'entrees_sante',
     'journaux_alimentaires', 'garmin_tokens', 'activites_garmin', 'resumes_quotidiens_garmin',

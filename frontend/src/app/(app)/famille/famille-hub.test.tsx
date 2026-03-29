@@ -34,7 +34,6 @@ describe("PageFamille (Hub)", () => {
     expect(screen.getByText("Jules")).toBeInTheDocument();
     expect(screen.getByText("Budget")).toBeInTheDocument();
     expect(screen.getByText("Routines")).toBeInTheDocument();
-    expect(screen.getByText("Album")).toBeInTheDocument();
     expect(screen.getByText("Contacts")).toBeInTheDocument();
     expect(screen.getByText("Documents")).toBeInTheDocument();
     expect(screen.getByText("Calendriers")).toBeInTheDocument();

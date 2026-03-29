@@ -1,6 +1,6 @@
 # 👨‍👩‍👦 Guide Module Famille
 
-> Ce guide couvre le suivi familial dans MaTanne : développement de Jules, activités, budget, routines, album, contacts, journal, anniversaires, documents.
+> Ce guide couvre le suivi familial dans MaTanne : développement de Jules, activités, budget, routines, contacts, journal, anniversaires, documents.
 
 ## Table des matières
 
@@ -10,8 +10,7 @@
 4. [Budget familial](#budget-familial)
 5. [Routines](#routines)
 6. [Week-end](#week-end)
-7. [Album photo](#album-photo)
-8. [Contacts](#contacts)
+7. [Contacts](#contacts)
 9. [Journal](#journal)
 10. [Anniversaires](#anniversaires)
 11. [Documents](#documents)
@@ -195,29 +194,6 @@ suggestions = service.suggerer_activites_weekend(
     météo="ensoleillé", rayon_km=30, budget=50
 )
 ```
-
----
-
-## Album photo
-
-### Fonctionnalités
-
-- Galerie photo organisée par date et tags
-- Upload d'images (Supabase Storage)
-- Légendes et commentaires
-- Vue chronologique / vue mosaïque
-- **Phase R — Liaison jalons** : les photos peuvent être liées à un jalon de développement via le sélecteur en en-tête ; badge "Jalon #N" affiché sur chaque photo liée ; lien de navigation Jules ↔ Album
-
-### Usage
-
-```
-/famille/album
-/famille/album?jalon_id=5   ← filtrage des photos liées au jalon 5
-```
-
-### Liaison jalons (Phase R)
-
-Le sélecteur **"Lier les uploads à un jalon"** dans l'en-tête préfixe le nom du fichier (`jalon-{id}_{fichier}`) au moment de l'upload. Depuis Jules, chaque jalon affiche un lien "Voir les photos liées à ce jalon" qui filtre l'album par `jalon_id`.
 
 ---
 

@@ -30,15 +30,6 @@ logger = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parents[3] / "data"
 
 
-class AlerteVaccinDict(TypedDict):
-    """Alerte pour un vaccin en retard ou à faire."""
-
-    vaccin_nom: str
-    date_prevue: date_type
-    jours_retard: int
-    enfant_id: int
-
-
 class PositionOMSDict(TypedDict):
     """Positionnement de la mesure sur les courbes OMS."""
 
@@ -128,42 +119,6 @@ class ServiceCarnetSante(BaseService[Vaccin]):
             source="ServiceCarnetSante",
         )
         return vaccin
-
-    @chronometre("carnet_sante.alertes_vaccins", seuil_alerte_ms=1500)
-    @avec_cache(ttl=600, key_func=lambda self, child_id: f"alertes_vaccins_{child_id}")
-    @avec_gestion_erreurs(default_return=[])
-    @avec_session_db
-    def obtenir_alertes_vaccins(
-        self, child_id: int, *, db: Session | None = None
-    ) -> list[AlerteVaccinDict]:
-        """Identifie les vaccins en retard ou à planifier bientôt."""
-        if db is None:
-            return []
-        alertes: list[AlerteVaccinDict] = []
-        aujourd_hui = date_type.today()
-        rappels_a_venir = (
-            db.query(Vaccin)
-            .filter(
-                and_(
-                    Vaccin.child_id == child_id,
-                    Vaccin.rappel_prevu.isnot(None),
-                    Vaccin.rappel_prevu <= aujourd_hui + timedelta(days=30),
-                )
-            )
-            .all()
-        )
-        for v in rappels_a_venir:
-            if v.rappel_prevu:
-                jours_retard = (aujourd_hui - v.rappel_prevu).days
-                alertes.append(
-                    AlerteVaccinDict(
-                        vaccin_nom=v.nom,
-                        date_prevue=v.rappel_prevu,
-                        jours_retard=max(0, jours_retard),
-                        enfant_id=child_id,
-                    )
-                )
-        return sorted(alertes, key=lambda a: a["jours_retard"], reverse=True)
 
     # ═══════════════════════════════════════════════════════════
     # RENDEZ-VOUS MÉDICAUX

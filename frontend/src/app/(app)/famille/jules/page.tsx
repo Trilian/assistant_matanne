@@ -350,14 +350,6 @@ export default function PageJules() {
                         </span>
                       )}
                       {j.notes && <p className="mt-1">{j.notes}</p>}
-                      <div className="mt-2">
-                        <Link
-                          href={`/famille/album?jalon_id=${j.id}`}
-                          className="text-xs text-primary hover:underline"
-                        >
-                          Voir les photos liées à ce jalon
-                        </Link>
-                      </div>
                     </CardContent>
                   )}
                 </Card>

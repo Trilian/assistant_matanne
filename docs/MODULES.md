@@ -9,7 +9,7 @@
 | Module | Pages | Routes API | Service | Description |
 |--------|-------|-----------|---------|-------------|
 | **Cuisine** | 7 | 6 routeurs | `cuisine/`, `planning/`, `inventaire/` | Recettes, planning repas, courses, inventaire, batch cooking, anti-gaspillage |
-| **Famille** | 11 | 1 routeur | `famille/` | Jules (suivi enfant), activités, routines, budget, weekend, album, anniversaires, contacts, documents, journal |
+| **Famille** | 10 | 1 routeur | `famille/` | Jules (suivi enfant), activités, routines, budget, weekend, anniversaires, contacts, documents, journal |
 | **Maison** | 9 | 1 routeur | `maison/` | Projets, charges, dépenses, énergie, entretien, jardin, stocks, cellier, artisans, contrats, garanties, diagnostics |
 | **Planning** | 2 | 1 routeur | `planning/` | Hub planning, timeline |
 | **Jeux** | 4 | 1 routeur | `jeux/` | Paris sportifs, Loto, EuroMillions |
@@ -65,7 +65,6 @@
 - **Routines** — Routines quotidiennes (matin/soir), tâches
 - **Budget famille** — Achats familiaux, suivi dépenses, catégories
 - **Weekend** — Suggestions activités weekend IA, planification
-- **Album** — Albums photo famille, souvenirs
 - **Anniversaires** — Suivi anniversaires, rappels
 - **Contacts** — Carnet contacts famille
 - **Documents** — Documents familiaux (upload, partage)
@@ -78,8 +77,8 @@
 | Routes API | `src/api/routes/famille.py` |
 | Schémas | `src/api/schemas/famille.py` |
 | Services | `src/services/famille/` (service, jules_ai, weekend_ai) |
-| Modèles ORM | `src/core/models/famille.py`, `album.py`, `contacts.py`, `documents.py`, `carnet_sante.py`, `users.py` |
-| Frontend | `frontend/src/app/(app)/famille/` (jules, activites, routines, budget, weekend, album, anniversaires, contacts, documents, journal) |
+| Modèles ORM | `src/core/models/famille.py`, `contacts.py`, `documents.py`, `carnet_sante.py`, `users.py` |
+| Frontend | `frontend/src/app/(app)/famille/` (jules, activites, routines, budget, weekend, anniversaires, contacts, documents, journal) |
 
 ### Endpoints principaux
 
@@ -90,7 +89,6 @@
 | GET/POST | `/api/v1/famille/routines` | Routines quotidiennes |
 | GET/POST | `/api/v1/famille/budget` | Budget / achats |
 | GET | `/api/v1/famille/weekend/suggestions` | Suggestions IA weekend |
-| GET/POST | `/api/v1/famille/albums` | Albums photo |
 
 ---
 

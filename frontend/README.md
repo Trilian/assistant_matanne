@@ -100,7 +100,7 @@ src/
 | Module | Routes | Description |
 |---|---|---|
 | Cuisine | 8 | Recettes CRUD, planning repas, courses, inventaire, batch cooking, anti-gaspi |
-| Famille | 10 | Suivi Jules, activités, routines, budget, weekend, album, anniversaires… |
+| Famille | 9 | Suivi Jules, activités, routines, budget, weekend, anniversaires… |
 | Maison | 7 | Projets, jardin, entretien, charges, dépenses, énergie, stocks |
 | Planning | 2 | Calendrier semaine + timeline |
 | Jeux | 3 | Paris sportifs, loto, euromillions |

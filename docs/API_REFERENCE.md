@@ -714,8 +714,6 @@ Upload vers Supabase Storage.
 | Méthode | Path | Params | Description |
 |---------|------|--------|-------------|
 | POST | `/upload` | `bucket="documents"`, Body: `UploadFile` (multipart, 10MB max) | Upload fichier |
-| GET | `/upload/photos` | `categorie?` | Liste photos album famille |
-| DELETE | `/upload/photos/{path}` | — | Supprime une photo |
 
 ---
 

@@ -119,7 +119,7 @@ Le core est organisé en **10 sous-packages** + fichiers utilitaires.
 - **Pages par module** (`src/app/(app)/`):
   - `page.tsx`: Tableau de bord (dashboard)
   - `cuisine/`: Hub + recettes, planning, courses, inventaire, anti-gaspillage, batch-cooking
-  - `famille/`: Hub + jules, activites, routines, budget, weekend, album, anniversaires, contacts, documents, journal
+  - `famille/`: Hub + jules, activites, routines, budget, weekend, anniversaires, contacts, documents, journal
   - `maison/`: Hub + projets, charges, depenses, energie, entretien, jardin, stocks
   - `planning/`: Hub + timeline
   - `jeux/`: Hub + paris, loto, euromillions

@@ -28,7 +28,7 @@
 | Guide | Module | Description |
 |-------|--------|-------------|
 | [guides/cuisine/README.md](./guides/cuisine/README.md) | Cuisine | Recettes, planning repas, courses, inventaire, batch cooking, anti-gaspillage |
-| [guides/famille/README.md](./guides/famille/README.md) | Famille | Jules, activités, routines, budget, weekend, album |
+| [guides/famille/README.md](./guides/famille/README.md) | Famille | Jules, activités, routines, budget, weekend |
 | [guides/maison/README.md](./guides/maison/README.md) | Maison | Projets, entretien, jardin, énergie, stocks |
 | [guides/planning/README.md](./guides/planning/README.md) | Planning | Hub planning, timeline, calendriers |
 | [guides/jeux/README.md](./guides/jeux/README.md) | Jeux | Paris sportifs, Loto, EuroMillions |
