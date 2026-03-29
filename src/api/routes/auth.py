@@ -87,9 +87,9 @@ def _obtenir_profil_par_id(user_id: str):
                 .first()
             )
             if not profil:
-                # Essayer par id numérique
+                # Essayer par id numérique (SQLAlchemy 2.0 API)
                 try:
-                    profil = session.query(ProfilUtilisateur).get(int(user_id))
+                    profil = session.get(ProfilUtilisateur, int(user_id))
                 except (ValueError, TypeError):
                     pass
             if profil:

@@ -35,16 +35,19 @@ async def recherche_globale(
     Returns:
         Liste de résultats avec type, id, titre, description, url
     """
+    import logging
     from src.core.models import (
         Recette,
         Projet,
-        Activite,
-        Note,
-        Contact,
+        ActiviteFamille,
+        NoteMemo,
+        ContactFamille,
     )
+
+    _logger = logging.getLogger(__name__)
     
     def _search():
-        user_id = user.get("sub", user.get("id", "dev"))
+        user_id = user.get("sub") or user.get("id") or "dev"
         resultats = []
         
         with executer_avec_session() as session:
@@ -99,39 +102,39 @@ async def recherche_globale(
                     "icone": "🔨",
                 })
             
-            # 3. Activités famille
-            activites = (
-                session.query(Activite)
-                .filter(
-                    Activite.cree_par == user_id,
-                    or_(
-                        Activite.nom.ilike(pattern),
-                        Activite.description.ilike(pattern),
+            # 3. Activités famille (ActiviteFamille — titre + description)
+            try:
+                activites = (
+                    session.query(ActiviteFamille)
+                    .filter(
+                        or_(
+                            ActiviteFamille.titre.ilike(pattern),
+                            ActiviteFamille.description.ilike(pattern),
+                        )
                     )
+                    .limit(limit // 5)
+                    .all()
                 )
-                .limit(limit // 5)
-                .all()
-            )
-            for a in activites:
-                resultats.append({
-                    "type": "activite",
-                    "id": a.id,
-                    "titre": a.nom,
-                    "description": a.description or f"{a.frequence} • {a.jour or ''}",
-                    "url": "/famille/activites",
-                    "frequence": a.frequence,
-                    "icone": "🎯",
-                })
+                for a in activites:
+                    resultats.append({
+                        "type": "activite",
+                        "id": a.id,
+                        "titre": a.titre,
+                        "description": a.description or f"{a.type_activite}",
+                        "url": "/famille/activites",
+                        "icone": "🎯",
+                    })
+            except Exception as e:
+                _logger.warning("[recherche] Erreur requête activités famille: %s", e)
             
-            # 4. Notes
+            # 4. Notes / mémos
             try:
                 notes = (
-                    session.query(Note)
+                    session.query(NoteMemo)
                     .filter(
-                        Note.cree_par == user_id,
                         or_(
-                            Note.titre.ilike(pattern),
-                            Note.contenu.ilike(pattern),
+                            NoteMemo.titre.ilike(pattern),
+                            NoteMemo.contenu.ilike(pattern),
                         )
                     )
                     .limit(limit // 5)
@@ -146,20 +149,18 @@ async def recherche_globale(
                         "url": "/outils/notes",
                         "icone": "📝",
                     })
-            except Exception:
-                # Note model might not exist
-                pass
+            except Exception as e:
+                _logger.warning("[recherche] Erreur requête notes mémos: %s", e)
             
-            # 5. Contacts
+            # 5. Contacts famille (ContactFamille — nom, email, telephone)
             try:
                 contacts = (
-                    session.query(Contact)
+                    session.query(ContactFamille)
                     .filter(
-                        Contact.cree_par == user_id,
                         or_(
-                            Contact.nom.ilike(pattern),
-                            Contact.email.ilike(pattern),
-                            Contact.telephone.ilike(pattern),
+                            ContactFamille.nom.ilike(pattern),
+                            ContactFamille.email.ilike(pattern),
+                            ContactFamille.telephone.ilike(pattern),
                         )
                     )
                     .limit(limit // 5)
@@ -170,13 +171,12 @@ async def recherche_globale(
                         "type": "contact",
                         "id": c.id,
                         "titre": c.nom,
-                        "description": c.email or c.telephone or c.relation,
+                        "description": c.email or c.telephone or c.categorie,
                         "url": "/famille/contacts",
                         "icone": "👤",
                     })
-            except Exception:
-                # Contact model might not exist
-                pass
+            except Exception as e:
+                _logger.warning("[recherche] Erreur requête contacts famille: %s", e)
         
         # Limiter au nombre total demandé
         return resultats[:limit]

@@ -1,24 +1,38 @@
 """
-Routes d'administration pour les audit logs.
+Routes d'administration complètes.
 
 Endpoints:
-- GET  /api/v1/admin/audit-logs: Lister les logs d'audit (paginés, filtrés)
-- GET  /api/v1/admin/audit-stats: Statistiques d'audit
-- GET  /api/v1/admin/audit-export: Export CSV des logs
+- GET  /api/v1/admin/audit-logs       : Audit logs paginés + filtrés
+- GET  /api/v1/admin/audit-stats      : Statistiques d'audit
+- GET  /api/v1/admin/audit-export     : Export CSV des logs
+- GET  /api/v1/admin/jobs             : Liste jobs cron + statut
+- POST /api/v1/admin/jobs/{id}/run    : Trigger manuel (rate-limited: 5 req/min)
+- GET  /api/v1/admin/jobs/{id}/logs   : Logs dernière exécution job
+- GET  /api/v1/admin/services/health  : Health check registre services
+- POST /api/v1/admin/notifications/test : Test ntfy / push / email / whatsapp
+- GET  /api/v1/admin/cache/stats      : Statistiques cache hit/miss
+- POST /api/v1/admin/cache/clear      : Vider cache L1 + L3
+- GET  /api/v1/admin/users            : Liste utilisateurs
+- POST /api/v1/admin/users/{id}/disable : Désactiver un compte
+- GET  /api/v1/admin/db/coherence     : Test cohérence DB rapide
 
 Sécurité:
-- Toutes les routes nécessitent le rôle admin
+- Toutes les routes nécessitent le rôle admin (Depends(require_role("admin")))
+- Rate limiting spécifique sur trigger jobs : 5 req/min par admin
+- Audit log automatique sur toutes les actions admin mutantes
 """
 
 from __future__ import annotations
 
+import collections
 import csv
 import io
 import logging
+import time
 from datetime import datetime
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -32,6 +46,58 @@ router = APIRouter(
     prefix="/api/v1/admin",
     tags=["Admin"],
 )
+
+# ── Rate limiting jobs triggers (5 req/min par admin) ────────────────────────
+_JOB_TRIGGER_RATE_LIMIT = 5  # requêtes par minute
+_job_trigger_timestamps: dict[str, collections.deque] = {}
+
+
+def _verifier_limite_jobs(user_id: str) -> None:
+    """Lève HTTPException 429 si l'admin dépasse 5 triggers/min."""
+    now = time.time()
+    window = 60.0
+    q = _job_trigger_timestamps.setdefault(user_id, collections.deque())
+    while q and q[0] < now - window:
+        q.popleft()
+    if len(q) >= _JOB_TRIGGER_RATE_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Trop de déclenchements. Maximum {_JOB_TRIGGER_RATE_LIMIT} par minute.",
+        )
+    q.append(now)
+
+
+# ── Logs in-memory pour dernière exécution des jobs ──────────────────────────
+_job_logs: dict[str, list[dict]] = {}  # job_id → list of {timestamp, status, message}
+_MAX_LOGS_PAR_JOB = 20
+
+
+def _ajouter_log_job(job_id: str, status: str, message: str) -> None:
+    logs = _job_logs.setdefault(job_id, [])
+    logs.append({"timestamp": datetime.now().isoformat(), "status": status, "message": message})
+    if len(logs) > _MAX_LOGS_PAR_JOB:
+        logs.pop(0)
+
+
+def _journaliser_action_admin(
+    action: str,
+    entite_type: str,
+    utilisateur_id: str,
+    details: dict[str, Any] | None = None,
+) -> None:
+    """Enregistre l'action admin dans le journal d'audit (best-effort)."""
+    try:
+        from src.services.core.audit import obtenir_service_audit
+
+        obtenir_service_audit().enregistrer_action(
+            action=action,
+            entite_type=entite_type,
+            source="admin",
+            utilisateur_id=utilisateur_id,
+            details=details or {},
+        )
+    except Exception as exc:
+        logger.warning("Impossible de journaliser l'action admin '%s': %s", action, exc)
 
 
 @router.get(
@@ -163,7 +229,7 @@ class UtilisateurAdminResponse(BaseModel):
 
 
 class NotificationTestRequest(BaseModel):
-    canal: Literal["ntfy", "push", "email"]
+    canal: Literal["ntfy", "push", "email", "whatsapp"]
     message: str
     email: str | None = None
     titre: str = "Test Matanne"
@@ -171,6 +237,10 @@ class NotificationTestRequest(BaseModel):
 
 class CachePurgeRequest(BaseModel):
     pattern: str = "*"
+
+
+class DesactiverUtilisateurRequest(BaseModel):
+    raison: str | None = None
 
 
 # ═══════════════════════════════════════════════════════════
@@ -233,7 +303,7 @@ async def lister_jobs(
     "/jobs/{job_id}/run",
     responses=REPONSES_AUTH_ADMIN,
     summary="Déclencher un job manuellement",
-    description="Exécute immédiatement le job indiqué. Nécessite le rôle admin.",
+    description="Exécute immédiatement le job indiqué. Nécessite le rôle admin. Rate-limited: 5 req/min.",
 )
 @gerer_exception_api
 async def executer_job(
@@ -242,6 +312,9 @@ async def executer_job(
 ) -> dict:
     """Déclenche un job cron de façon asynchrone."""
     from src.api.utils import executer_async
+
+    # Rate limiting : 5 triggers/min par admin
+    _verifier_limite_jobs(str(user.get("id", "admin")))
 
     # Fonctions de job disponibles (évite l'exécution de code arbitraire)
     _JOBS_DISPONIBLES: dict[str, str] = {
@@ -256,7 +329,6 @@ async def executer_job(
     }
 
     if job_id not in _JOBS_DISPONIBLES:
-        from fastapi import HTTPException
         raise HTTPException(
             status_code=404,
             detail=f"Job '{job_id}' inconnu. Jobs disponibles : {list(_JOBS_DISPONIBLES)}",
@@ -266,12 +338,90 @@ async def executer_job(
 
     def _run():
         import importlib
-        module = importlib.import_module(module_path)
-        func = getattr(module, func_name)
-        func()
-        return {"status": "ok", "job_id": job_id, "message": f"Job '{job_id}' exécuté."}
 
-    return await executer_async(_run)
+        debut = datetime.now()
+        try:
+            module = importlib.import_module(module_path)
+            func = getattr(module, func_name)
+            func()
+            duree_ms = int((datetime.now() - debut).total_seconds() * 1000)
+            _ajouter_log_job(job_id, "succes", f"Exécuté en {duree_ms} ms")
+            return {"status": "ok", "job_id": job_id, "message": f"Job '{job_id}' exécuté."}
+        except Exception as exc:
+            _ajouter_log_job(job_id, "erreur", str(exc))
+            raise
+
+    result = await executer_async(_run)
+    _journaliser_action_admin(
+        action="admin.job.run",
+        entite_type="job",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"job_id": job_id},
+    )
+    return result
+
+
+@router.get(
+    "/jobs/{job_id}/logs",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Logs dernière exécution d'un job",
+    description="Retourne l'historique des déclenchements manuels du job. Nécessite le rôle admin.",
+)
+@gerer_exception_api
+async def logs_job(
+    job_id: str,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict:
+    """Retourne les logs des N dernières exécutions manuelles du job."""
+    logs = _job_logs.get(job_id, [])
+    return {
+        "job_id": job_id,
+        "nom": _LABELS_JOBS.get(job_id, job_id),
+        "logs": list(reversed(logs)),  # plus récent en premier
+        "total": len(logs),
+    }
+
+
+# ═══════════════════════════════════════════════════════════
+# SERVICES HEALTH
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/services/health",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Health check registre services",
+    description="Vérifie l'état de santé de tous les services instanciés. Nécessite le rôle admin.",
+)
+@gerer_exception_api
+async def sante_services(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict:
+    """Retourne le health check global du registre de services."""
+    from src.api.utils import executer_async
+
+    def _check():
+        try:
+            from src.services.core.registry import registre
+
+            sante = registre.health_check_global()
+            metriques = registre.obtenir_metriques()
+            return {
+                **sante,
+                "metriques": metriques,
+            }
+        except Exception as exc:
+            logger.warning("Impossible de vérifier l'état des services : %s", exc)
+            return {
+                "global_status": "error",
+                "total_services": 0,
+                "instantiated": 0,
+                "healthy": 0,
+                "erreurs": [str(exc)],
+                "services": {},
+            }
+
+    return await executer_async(_check)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -283,7 +433,7 @@ async def executer_job(
     "/notifications/test",
     responses=REPONSES_AUTH_ADMIN,
     summary="Envoyer une notification de test",
-    description="Envoie une notification sur le canal spécifié. Nécessite le rôle admin.",
+    description="Envoie une notification sur le canal spécifié (ntfy/push/email/whatsapp). Nécessite le rôle admin.",
 )
 @gerer_exception_api
 async def envoyer_notification_test(
@@ -294,6 +444,17 @@ async def envoyer_notification_test(
     from src.api.utils import executer_async
 
     def _send():
+        if body.canal == "whatsapp":
+            import asyncio
+
+            from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+            result = asyncio.run(envoyer_message_whatsapp(destinataire="", texte=body.message))
+            return {
+                "resultats": {"whatsapp": result},
+                "message": "Notification WhatsApp de test envoyée." if result else "Échec envoi WhatsApp.",
+            }
+
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
         dispatcher = get_dispatcher_notifications()
@@ -336,13 +497,52 @@ async def purger_cache(
             from src.core.caching import obtenir_cache
 
             cache = obtenir_cache()
-            cache.invalider(pattern=body.pattern)
-            return {"status": "ok", "pattern": body.pattern, "message": "Cache purgé."}
+            nb = cache.invalidate(pattern=body.pattern)
+            _journaliser_action_admin(
+                action="admin.cache.purge",
+                entite_type="cache",
+                utilisateur_id=str(user.get("id", "admin")),
+                details={"pattern": body.pattern, "nb_invalidees": nb},
+            )
+            return {"status": "ok", "pattern": body.pattern, "nb_invalidees": nb, "message": "Cache purgé."}
         except Exception as e:
             logger.warning("Impossible de purger le cache : %s", e)
             return {"status": "error", "pattern": body.pattern, "message": str(e)}
 
     return await executer_async(_purge)
+
+
+@router.post(
+    "/cache/clear",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Vider entièrement le cache L1 + L3",
+    description="Supprime toutes les entrées cache (L1 mémoire + L3 fichier). Nécessite le rôle admin.",
+)
+@gerer_exception_api
+async def vider_cache(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict:
+    """Vide entièrement le cache multi-niveaux."""
+    from src.api.utils import executer_async
+
+    def _clear():
+        try:
+            from src.core.caching import obtenir_cache
+
+            cache = obtenir_cache()
+            cache.clear(levels="all")
+            _journaliser_action_admin(
+                action="admin.cache.clear",
+                entite_type="cache",
+                utilisateur_id=str(user.get("id", "admin")),
+                details={"niveaux": "all"},
+            )
+            return {"status": "ok", "message": "Cache entièrement vidé (L1 + L3)."}
+        except Exception as e:
+            logger.warning("Impossible de vider le cache : %s", e)
+            return {"status": "error", "message": str(e)}
+
+    return await executer_async(_clear)
 
 
 @router.get(
@@ -363,8 +563,8 @@ async def stats_cache(
             from src.core.caching import obtenir_cache
 
             cache = obtenir_cache()
-            if hasattr(cache, "statistiques"):
-                return cache.statistiques()
+            if hasattr(cache, "obtenir_statistiques"):
+                return cache.obtenir_statistiques()
             return {"message": "Statistiques non disponibles pour ce backend de cache."}
         except Exception as e:
             logger.warning("Impossible de lire les stats cache : %s", e)
@@ -411,9 +611,11 @@ async def lister_utilisateurs(
                 result.append({
                     "id": str(getattr(p, "username", p.id)),
                     "email": getattr(p, "email", ""),
-                    "nom": getattr(p, "nom", None),
+                    "nom": getattr(p, "nom", None) or getattr(p, "display_name", None),
                     "role": getattr(p, "role", "membre"),
-                    "actif": getattr(p, "actif", True),
+                    "actif": not bool(
+                        (getattr(p, "preferences_modules", None) or {}).get("compteDesactive")
+                    ),
                     "cree_le": (
                         p.cree_le.isoformat()
                         if hasattr(p, "cree_le") and p.cree_le
@@ -423,3 +625,130 @@ async def lister_utilisateurs(
             return result
 
     return await executer_async(_query)
+
+
+@router.post(
+    "/users/{user_id}/disable",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Désactiver un compte utilisateur",
+    description="Marque le compte comme désactivé. Nécessite le rôle admin.",
+)
+@gerer_exception_api
+async def desactiver_utilisateur(
+    user_id: str,
+    body: DesactiverUtilisateurRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict:
+    """Désactive un compte utilisateur (flag dans preferences_modules)."""
+    from src.api.utils import executer_async, executer_avec_session
+
+    def _disable():
+        with executer_avec_session() as session:
+            from src.core.models.users import ProfilUtilisateur
+
+            profil = (
+                session.query(ProfilUtilisateur)
+                .filter(ProfilUtilisateur.username == user_id)
+                .first()
+            )
+            if not profil:
+                raise HTTPException(status_code=404, detail=f"Utilisateur '{user_id}' introuvable.")
+
+            prefs = dict(profil.preferences_modules or {})
+            prefs["compteDesactive"] = True
+            if body.raison:
+                prefs["raisonDesactivation"] = body.raison
+            prefs["desactiveParAdmin"] = str(user.get("id", "admin"))
+            prefs["desactiveLe"] = datetime.now().isoformat()
+            profil.preferences_modules = prefs
+            session.commit()
+            return {"status": "ok", "user_id": user_id, "message": f"Compte '{user_id}' désactivé."}
+
+    result = await executer_async(_disable)
+    _journaliser_action_admin(
+        action="admin.user.disable",
+        entite_type="utilisateur",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"cible_user_id": user_id, "raison": body.raison},
+    )
+    return result
+
+
+# ═══════════════════════════════════════════════════════════
+# DB COHÉRENCE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/db/coherence",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Test cohérence base de données",
+    description="Lance des vérifications rapides d'intégrité DB. Nécessite le rôle admin.",
+)
+@gerer_exception_api
+async def coherence_db(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict:
+    """Vérifie la cohérence de la base de données (checks rapides)."""
+    from src.api.utils import executer_async, executer_avec_session
+
+    def _check():
+        resultats: list[dict] = []
+        erreurs: list[str] = []
+
+        with executer_avec_session() as session:
+            # 1. Connexion DB
+            try:
+                session.execute(__import__("sqlalchemy").text("SELECT 1"))
+                resultats.append({"check": "connexion_db", "status": "ok"})
+            except Exception as exc:
+                erreurs.append(f"connexion_db: {exc}")
+                resultats.append({"check": "connexion_db", "status": "erreur", "detail": str(exc)})
+
+            # 2. Tables principales présentes
+            tables_essentielles = [
+                "recettes", "articles_courses", "listes_courses",
+                "inventaire_items", "profils_utilisateurs",
+            ]
+            try:
+                from sqlalchemy import text
+
+                for table in tables_essentielles:
+                    try:
+                        session.execute(text(f"SELECT 1 FROM {table} LIMIT 1"))
+                        resultats.append({"check": f"table_{table}", "status": "ok"})
+                    except Exception as exc:
+                        erreurs.append(f"table_{table}: {exc}")
+                        resultats.append({"check": f"table_{table}", "status": "erreur", "detail": str(exc)})
+            except Exception as exc:
+                erreurs.append(f"vérification tables: {exc}")
+
+            # 3. Articles de courses sans liste parent (orphelins)
+            try:
+                from sqlalchemy import text
+
+                row = session.execute(
+                    text(
+                        "SELECT COUNT(*) FROM articles_courses ac "
+                        "LEFT JOIN listes_courses lc ON lc.id = ac.liste_id "
+                        "WHERE lc.id IS NULL"
+                    )
+                ).scalar()
+                resultats.append({
+                    "check": "articles_orphelins",
+                    "status": "ok" if (row or 0) == 0 else "avertissement",
+                    "detail": f"{row} article(s) orphelin(s)",
+                })
+            except Exception as exc:
+                logger.debug("Check articles orphelins ignoré: %s", exc)
+
+        statut_global = "erreur" if erreurs else "ok"
+        return {
+            "status": statut_global,
+            "checks": resultats,
+            "erreurs": erreurs,
+            "total_checks": len(resultats),
+            "checks_ok": sum(1 for c in resultats if c["status"] == "ok"),
+        }
+
+    return await executer_async(_check)

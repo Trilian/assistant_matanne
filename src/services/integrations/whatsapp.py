@@ -57,7 +57,9 @@ async def envoyer_message_whatsapp(
         async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.post(url, json=payload, headers=headers)
             resp.raise_for_status()
-            logger.info(f"✅ Message WhatsApp envoyé à {destinataire[:6]}***")
+            import hashlib
+            hash_dest = hashlib.sha256(destinataire.encode()).hexdigest()[:8]
+            logger.info(f"✅ Message WhatsApp envoyé à [hash:{hash_dest}]")
             return True
     except httpx.HTTPStatusError as e:
         logger.error(f"❌ Erreur WhatsApp HTTP {e.response.status_code}: {e.response.text}")

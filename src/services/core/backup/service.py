@@ -11,6 +11,7 @@ Fonctionnalités:
 """
 
 import gzip
+import inspect
 import json
 import logging
 from datetime import datetime
@@ -20,32 +21,15 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
-from src.core.models import (
-    ActiviteFamille,
-    ArticleCourses,
-    ArticleInventaire,
-    BudgetFamille,
-    ElementJardin,
-    EntreeBienEtre,
-    EntreeSante,
-    EtapeRecette,
-    EvenementPlanning,
-    Ingredient,
-    Jalon,
-    JournalJardin,
-    ObjectifSante,
-    Planning,
-    ProfilEnfant,
-    Projet,
-    Recette,
-    RecetteIngredient,
-    Repas,
-    Routine,
-    RoutineSante,
-    TacheProjet,
-    TacheRoutine,
-    VersionRecette,
-)
+import src.core.models as _models_module
+from src.core.models.base import Base
+
+# Auto-discovery : tous les modèles SQLAlchemy du package core.models
+ALL_MODELS = [
+    cls
+    for _, cls in inspect.getmembers(_models_module, inspect.isclass)
+    if isinstance(cls, type) and issubclass(cls, Base) and cls is not Base
+]
 from src.services.core.backup.backup_export import BackupExportMixin
 from src.services.core.backup.backup_restore import BackupRestoreMixin
 from src.services.core.backup.types import (
@@ -71,32 +55,11 @@ class ServiceBackup(BackupRestoreMixin, BackupExportMixin):
     - Rotation automatique des anciens backups
     """
 
-    # Mapping des modèles à exporter
-    MODELS_TO_BACKUP = {
-        "ingredients": Ingredient,
-        "recettes": Recette,
-        "recette_ingredients": RecetteIngredient,
-        "etapes_recette": EtapeRecette,
-        "versions_recette": VersionRecette,
-        "articles_inventaire": ArticleInventaire,
-        "articles_courses": ArticleCourses,
-        "plannings": Planning,
-        "repas": Repas,
-        "profils_enfants": ProfilEnfant,
-        "jalons": Jalon,
-        "activites_famille": ActiviteFamille,
-        "budgets_famille": BudgetFamille,
-        "entrees_bien_etre": EntreeBienEtre,
-        "routines_sante": RoutineSante,
-        "objectifs_sante": ObjectifSante,
-        "entrees_sante": EntreeSante,
-        "projets": Projet,
-        "taches_projets": TacheProjet,
-        "routines": Routine,
-        "taches_routines": TacheRoutine,
-        "elements_jardin": ElementJardin,
-        "journaux_jardin": JournalJardin,
-        "evenements_planning": EvenementPlanning,
+    # Mapping des modèles à exporter — auto-découverte via __tablename__
+    MODELS_TO_BACKUP: dict[str, type] = {
+        cls.__tablename__: cls
+        for cls in ALL_MODELS
+        if hasattr(cls, "__tablename__")
     }
 
     def __init__(self, config: BackupConfig | None = None):

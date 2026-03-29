@@ -32,29 +32,35 @@ def _charger_automations(session, user: dict[str, Any]):
         .all()
     )
 
-    # Compatibilité: migration douce depuis preferences_modules["automations"].
+    return profil, automations
+
+
+def _migrer_automations_depuis_preferences(session, profil) -> list:
+    """Migration douce préférences → AutomationRegle (POST /init uniquement, pas dans GET)."""
+    from src.core.models import AutomationRegle
+
     preferences_modules = profil.preferences_modules or {}
     automations_pref = preferences_modules.get("automations", [])
-    if not automations and automations_pref:
-        for item in automations_pref:
-            session.add(
-                AutomationRegle(
-                    user_id=profil.id,
-                    nom=item.get("nom") or "Nouvelle automation",
-                    declencheur=item.get("declencheur") or {"type": "stock_bas", "seuil": 2},
-                    action=item.get("action") or {"type": "ajouter_courses", "quantite": 1},
-                    active=bool(item.get("active", True)),
-                )
-            )
-        session.commit()
-        automations = (
-            session.query(AutomationRegle)
-            .filter(AutomationRegle.user_id == profil.id)
-            .order_by(AutomationRegle.id.asc())
-            .all()
-        )
+    if not automations_pref:
+        return []
 
-    return profil, automations
+    for item in automations_pref:
+        session.add(
+            AutomationRegle(
+                user_id=profil.id,
+                nom=item.get("nom") or "Nouvelle automation",
+                declencheur=item.get("declencheur") or {"type": "stock_bas", "seuil": 2},
+                action=item.get("action") or {"type": "ajouter_courses", "quantite": 1},
+                active=bool(item.get("active", True)),
+            )
+        )
+    session.commit()
+    return (
+        session.query(AutomationRegle)
+        .filter(AutomationRegle.user_id == profil.id)
+        .order_by(AutomationRegle.id.asc())
+        .all()
+    )
 
 
 def _serialiser_automation(item) -> dict[str, Any]:
@@ -77,6 +83,21 @@ async def lister_automations(user: dict[str, Any] = Depends(require_auth)) -> di
             _, automations = _charger_automations(session, user)
             items = [_serialiser_automation(item) for item in automations]
             return {"items": items, "total": len(items)}
+
+    return await executer_async(_query)
+
+
+@router.post("/init", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def initialiser_automations(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
+    """Initialise les automations depuis les préférences legacy (migration unique, idempotent)."""
+    def _query():
+        with executer_avec_session() as session:
+            profil, automations = _charger_automations(session, user)
+            if automations:
+                return {"message": "Automations déjà initialisées", "total": len(automations)}
+            migrees = _migrer_automations_depuis_preferences(session, profil)
+            return {"message": f"{len(migrees)} automation(s) importée(s)", "total": len(migrees)}
 
     return await executer_async(_query)
 

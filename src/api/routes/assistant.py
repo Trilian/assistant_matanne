@@ -65,7 +65,10 @@ async def interpreter_commande_vocale(
                 texte_lower,
             )
             if course_match:
-                nom_article = course_match.group("article").strip(" .,!?")
+                from src.core.validation import SanitiseurDonnees
+                nom_article = SanitiseurDonnees.nettoyer_texte(
+                    course_match.group("article").strip(" .,!?")
+                )
                 liste = (
                     session.query(ListeCourses)
                     .filter(ListeCourses.archivee.is_(False))

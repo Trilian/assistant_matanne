@@ -1543,33 +1543,8 @@ CREATE INDEX IF NOT EXISTS ix_historique_inventaire_ingredient ON historique_inv
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_type ON historique_inventaire(type_modification);
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_date ON historique_inventaire(date_modification);
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.13 LISTE_COURSES (articles) (→ listes_courses, ingredients)
+-- 4.13 [SUPPRIMÉ] — Table liste_courses (doublon de articles_courses) — SQL1
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE liste_courses (
-    id SERIAL PRIMARY KEY,
-    liste_id INTEGER NOT NULL,
-    ingredient_id INTEGER NOT NULL,
-    quantite_necessaire FLOAT NOT NULL,
-    priorite VARCHAR(50) NOT NULL DEFAULT 'moyenne',
-    achete BOOLEAN NOT NULL DEFAULT FALSE,
-    suggere_par_ia BOOLEAN NOT NULL DEFAULT FALSE,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    achete_le TIMESTAMP WITH TIME ZONE,
-    rayon_magasin VARCHAR(100),
-    magasin_cible VARCHAR(50),
-    notes TEXT,
-    CONSTRAINT fk_liste_courses_liste FOREIGN KEY (liste_id) REFERENCES listes_courses(id) ON DELETE CASCADE,
-    CONSTRAINT fk_liste_courses_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE,
-    CONSTRAINT ck_quantite_courses_positive CHECK (quantite_necessaire > 0)
-);
-CREATE INDEX IF NOT EXISTS ix_liste_courses_liste ON liste_courses(liste_id);
-CREATE INDEX IF NOT EXISTS idx_articles_courses_liste_id ON liste_courses(liste_id);
-CREATE INDEX IF NOT EXISTS ix_liste_courses_ingredient ON liste_courses(ingredient_id);
-CREATE INDEX IF NOT EXISTS ix_liste_courses_priorite ON liste_courses(priorite);
-CREATE INDEX IF NOT EXISTS ix_liste_courses_achete ON liste_courses(achete);
-CREATE INDEX IF NOT EXISTS ix_liste_courses_cree_le ON liste_courses(cree_le);
-CREATE INDEX IF NOT EXISTS ix_liste_courses_rayon ON liste_courses(rayon_magasin);
-CREATE INDEX IF NOT EXISTS ix_liste_courses_magasin ON liste_courses(magasin_cible);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.14 ARTICLES_MODELES (→ modeles_courses, ingredients)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -3541,20 +3516,8 @@ FROM (
 GROUP BY d.jour
 ORDER BY d.jour;
 -- Vue: Pourcentage autonomie alimentaire
-CREATE OR REPLACE VIEW v_autonomie AS
-SELECT COALESCE(SUM(production_kg_an), 0) AS production_totale_kg,
-    COALESCE(SUM(besoin_kg_an), 0) AS besoin_total_kg,
-    CASE
-        WHEN COALESCE(SUM(besoin_kg_an), 0) > 0 THEN ROUND(
-            (SUM(production_kg_an) / SUM(besoin_kg_an)) * 100
-        )
-        ELSE 0
-    END AS pourcentage_global,
-    COUNT(*) AS nb_legumes_suivis,
-    COUNT(*) FILTER (
-        WHERE pourcentage_atteint >= 100
-    ) AS nb_objectifs_atteints
-FROM objectifs_autonomie;
+-- SQL3: v_autonomie supprimée (vue Streamlit obsolète, non utilisée par FastAPI)
+
 -- ============================================================================
 -- PARTIE 8 : FONCTIONS HELPER
 -- ============================================================================
@@ -4341,6 +4304,64 @@ FROM pg_tables t
 WHERE schemaname = 'public'
 ORDER BY tablename;
 COMMIT;
+-- ============================================================================
+-- INDEXES MANQUANTS (SQL2)
+-- ============================================================================
+CREATE INDEX IF NOT EXISTS idx_articles_courses_liste_achete
+    ON articles_courses(liste_id, achete);
+
+CREATE INDEX IF NOT EXISTS idx_articles_inventaire_peremption
+    ON articles_inventaire(date_peremption);
+
+CREATE INDEX IF NOT EXISTS idx_repas_planning_planning_date
+    ON repas_planning(planning_id, date_repas);
+
+CREATE INDEX IF NOT EXISTS idx_historique_actions_user_date
+    ON historique_actions(user_id, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_paris_sportifs_statut_user
+    ON paris_sportifs(statut, user_id);
+
+-- ============================================================================
+-- TRIGGER : listes_courses.modifie_le (SQL4)
+-- ============================================================================
+CREATE OR REPLACE FUNCTION update_liste_courses_modifie_le()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE listes_courses
+    SET modifie_le = NOW()
+    WHERE id = COALESCE(NEW.liste_id, OLD.liste_id);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_articles_courses_update_liste ON articles_courses;
+CREATE TRIGGER trg_articles_courses_update_liste
+    AFTER INSERT OR UPDATE OR DELETE ON articles_courses
+    FOR EACH ROW EXECUTE FUNCTION update_liste_courses_modifie_le();
+
+-- ============================================================================
+-- TRIGGER : invalidation cache planning (SQL5)
+-- ============================================================================
+CREATE OR REPLACE FUNCTION notify_planning_changed()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_user_id TEXT;
+BEGIN
+    SELECT p.cree_par INTO v_user_id
+    FROM plannings p
+    WHERE p.id = COALESCE(NEW.planning_id, OLD.planning_id)
+    LIMIT 1;
+    PERFORM pg_notify('planning_changed', COALESCE(v_user_id, ''));
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_repas_planning_notify ON repas_planning;
+CREATE TRIGGER trg_repas_planning_notify
+    AFTER INSERT OR UPDATE OR DELETE ON repas_planning
+    FOR EACH ROW EXECUTE FUNCTION notify_planning_changed();
+
 -- ============================================================================
 -- FIN DU SCRIPT — ~130 tables créées (consolidation complète)
 -- ============================================================================

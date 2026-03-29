@@ -15,6 +15,9 @@ from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_LISTE
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
+import logging
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/v1/dashboard", tags=["Tableau de bord"])
 
 
@@ -146,8 +149,8 @@ async def obtenir_tableau_bord(
                             "urgence": "haute" if jours <= 2 else "moyenne",
                         }
                     )
-            except Exception:
-                pass  # ArticleInventaire peut ne pas avoir date_peremption
+            except Exception as e:
+                logger.warning("[dashboard] Alertes péremption non chargées: %s", e)
 
             if stocks_alerte > 0:
                 alertes.append(
@@ -278,10 +281,8 @@ async def obtenir_dashboard_cuisine(
                     .scalar()
                     or 0
                 )
-            except Exception:
-                pass
-
-            # Session batch cooking en cours
+            except Exception as e:
+                logger.warning("[dashboard] Métriques inventaire non chargées: %s", e)
             batch_session = (
                 session.query(SessionBatchCooking)
                 .filter(SessionBatchCooking.statut == "en_cours")
@@ -462,8 +463,9 @@ async def obtenir_alertes_contextuelles(
                 )
                 reponse.raise_for_status()
                 data = reponse.json().get("hourly", {})
-        except Exception:
+        except Exception as e:
             data = {}
+            logger.warning("[dashboard] Météo non disponible pour alertes: %s", e)
 
         temperatures = data.get("temperature_2m", []) or []
         pluie = data.get("precipitation_probability", []) or []

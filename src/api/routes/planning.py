@@ -25,6 +25,9 @@ from src.api.schemas.errors import (
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
+import logging
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/v1/planning", tags=["Planning"])
 
 
@@ -601,8 +604,8 @@ async def generer_planning_ia(
                 ]
                 if produits_saison:
                     preferences_enrichies["produits_de_saison"] = produits_saison[:20]
-        except Exception:
-            pass  # Enrichissement saisonnier optionnel, ne bloque pas la génération
+        except Exception as e:
+            logger.warning("[planning] Enrichissement saisonnier non chargé: %s", e)
 
         service = obtenir_service_planning()
         planning_obj = service.generer_planning_ia(
@@ -709,12 +712,11 @@ async def obtenir_suggestions_rapides(
                 "description": meteo.actuelle.description,
                 "emoji": meteo.actuelle.emoji,
             }
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("[planning] Météo non chargée pour suggestions rapides: %s", e)
 
     def _query():
         with executer_avec_session() as session:
-            # Trouver les recettes déjà planifiées cette semaine pour les exclure
             from datetime import date
 
             today = date.today()
@@ -1119,10 +1121,8 @@ async def obtenir_semaine_unifiee(
                     }
                     for a in acts
                 ]
-            except Exception:
-                pass
-
-            # ── Tâches maison du jour ──────────────────────────────────
+            except Exception as e:
+                logger.warning("[planning] Activités famille non chargées pour ma-semaine: %s", e)───────
             taches_maison: list[dict] = []
             try:
                 from src.services.maison import get_service_menage
@@ -1138,12 +1138,8 @@ async def obtenir_semaine_unifiee(
                     }
                     for t in (taches_raw or [])
                 ]
-            except Exception:
-                pass
-
-            return {
-                "meta": {
-                    "semaine_debut": debut.isoformat(),
+            except Exception as e:
+                logger.warning("[planning] Tâches maison non chargées pour ma-semaine: %s", e)
                     "semaine_fin": fin.isoformat(),
                 },
                 "repas": repas_par_jour,

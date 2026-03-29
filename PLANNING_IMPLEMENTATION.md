@@ -1212,25 +1212,25 @@ F5 (pages maison) ──────────────────→ IM9 
 
 ### Sprint Correctif
 
-- [ ] C1 — Fix imports `recherche.py` (ActiviteFamille, NoteMemo, ContactFamille)
-- [ ] C2 — Fix SQL cron `liste_courses` → `articles_courses`
-- [ ] C3 — Fix RGPD user_id vide
-- [ ] C4 — Fix mutation DB dans GET automations
-- [ ] C5 — Sanitisation entrée vocale assistant
-- [ ] C6 — Fix API SQLAlchemy dépréciée auth.py
-- [ ] C7 — Remplacer 12x `except: pass` par logging
-- [ ] C8 — Méthode publique `push_service.obtenir_abonnes()`
-- [ ] C9 — Auto-discovery modèles backup/service.py
-- [ ] C10 — Masquage numéro WhatsApp logs RGPD
-- [ ] C11 — Garde de rôle frontend pages admin
+- [x] C1 — Fix imports `recherche.py` (ActiviteFamille, NoteMemo, ContactFamille)
+- [x] C2 — Fix SQL cron `liste_courses` → `articles_courses`
+- [x] C3 — Fix RGPD user_id vide
+- [x] C4 — Fix mutation DB dans GET automations
+- [x] C5 — Sanitisation entrée vocale assistant
+- [x] C6 — Fix API SQLAlchemy dépréciée auth.py
+- [x] C7 — Remplacer 12x `except: pass` par logging
+- [x] C8 — Méthode publique `push_service.obtenir_abonnes()`
+- [x] C9 — Auto-discovery modèles backup/service.py
+- [x] C10 — Masquage numéro WhatsApp logs RGPD
+- [x] C11 — Garde de rôle frontend pages admin (déjà implémenté)
 
 ### Sprint SQL
 
-- [ ] SQL1 — Supprimer doublon `liste_courses`
-- [ ] SQL2 — 5 index manquants
-- [ ] SQL3 — Vérifier/supprimer vues Streamlit obsolètes
-- [ ] SQL4 — Trigger `listes_courses.modifie_le`
-- [ ] SQL5 — Trigger invalidation cache planning
+- [x] SQL1 — Supprimer doublon `liste_courses`
+- [x] SQL2 — 5 index manquants
+- [x] SQL3 — Vérifier/supprimer vues Streamlit obsolètes (v_autonomie supprimée, autres non créées)
+- [x] SQL4 — Trigger `listes_courses.modifie_le`
+- [x] SQL5 — Trigger invalidation cache planning
 
 ### Sprint Tests
 

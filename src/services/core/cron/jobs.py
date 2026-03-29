@@ -102,9 +102,7 @@ def _job_push_quotidien() -> None:
             abonnes_db = []
 
         # Fallback sur le cache mémoire si DB indisponible
-        nb_abonnes = len(abonnes_db) if abonnes_db else sum(
-            len(subs) for subs in push_service._subscriptions.values()
-        )
+        nb_abonnes = len(abonnes_db) if abonnes_db else len(push_service.obtenir_abonnes())
 
         if not nb_abonnes:
             logger.debug("Push quotidien : aucun abonné actif, job ignoré")
@@ -135,9 +133,7 @@ def _job_push_quotidien() -> None:
                 nb_series = int(getattr(suivi, "serie_nb", 0))
                 if nb_series >= 5:
                     # Utiliser les abonnés DB plutôt que le cache mémoire
-                    user_ids = {str(a.user_id) for a in abonnes_db if a.user_id} or set(
-                        push_service._subscriptions.keys()
-                    )
+                    user_ids = {str(a.user_id) for a in abonnes_db if a.user_id} or push_service.obtenir_abonnes()
                     for user_id in user_ids:
                         push_service.notifier_alerte_serie_jeux(user_id, nb_series)
                     logger.info("Alerte série jeux (%d défaites) envoyée", nb_series)
@@ -213,9 +209,9 @@ def _job_rappel_courses_ntfy() -> None:
                 from sqlalchemy import text
                 result = session.execute(
                     text(
-                        "SELECT COUNT(*) FROM liste_courses lc"
-                        " JOIN listes_courses ls ON ls.id = lc.liste_id"
-                        " WHERE lc.achete = FALSE AND ls.statut IN ('active', 'en_cours')"
+                        "SELECT COUNT(*) FROM articles_courses ac"
+                        " JOIN listes_courses ls ON ls.id = ac.liste_id"
+                        " WHERE ac.achete = FALSE AND ls.statut IN ('active', 'en_cours')"
                     )
                 )
                 nb_articles = result.scalar() or 0
@@ -223,11 +219,11 @@ def _job_rappel_courses_ntfy() -> None:
                 top_rows = session.execute(
                     text(
                         "SELECT i.nom "
-                        "FROM liste_courses lc "
-                        "JOIN ingredients i ON i.id = lc.ingredient_id "
-                        "JOIN listes_courses ls ON ls.id = lc.liste_id "
-                        "WHERE lc.achete = FALSE AND ls.statut IN ('active', 'en_cours') "
-                        "ORDER BY lc.id ASC LIMIT 8"
+                        "FROM articles_courses ac "
+                        "JOIN ingredients i ON i.id = ac.ingredient_id "
+                        "JOIN listes_courses ls ON ls.id = ac.liste_id "
+                        "WHERE ac.achete = FALSE AND ls.statut IN ('active', 'en_cours') "
+                        "ORDER BY ac.id ASC LIMIT 8"
                     )
                 )
                 noms_articles = [str(r[0]) for r in top_rows.fetchall() if r and r[0]]

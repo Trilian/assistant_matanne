@@ -199,6 +199,16 @@ class ServiceWebPush(NotificationPersistenceMixin, NotificationTemplatesMixin):
 
         return success
 
+    def obtenir_abonnes(self) -> set[str]:
+        """Retourne les user_id abonnés (DB en priorité, fallback cache mémoire)."""
+        try:
+            abonnements = self.charger_tous_abonnements_actifs_db()
+            if abonnements:
+                return {str(a.user_id) for a in abonnements if a.user_id}
+        except Exception:
+            pass
+        return set(self._subscriptions.keys())
+
     def envoyer_a_tous(self, notification: NotificationPush) -> int:
         """
         Envoie une notification à tous les utilisateurs.

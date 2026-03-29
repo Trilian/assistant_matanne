@@ -48,7 +48,9 @@ async def exporter_donnees(
     from src.services.core.utilisateur.rgpd import get_rgpd_service
 
     service = get_rgpd_service()
-    user_id = user.get("sub", user.get("id", ""))
+    user_id = user.get("sub") or user.get("id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Identifiant utilisateur manquant")
 
     def _export():
         return service.exporter_donnees_utilisateur(user_id=user_id)
@@ -79,7 +81,9 @@ async def resume_donnees(
     from src.services.core.utilisateur.rgpd import get_rgpd_service
 
     service = get_rgpd_service()
-    user_id = user.get("sub", user.get("id", ""))
+    user_id = user.get("sub") or user.get("id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Identifiant utilisateur manquant")
 
     def _summary():
         return service.obtenir_resume_donnees(user_id=user_id)
@@ -109,7 +113,9 @@ async def supprimer_compte(
     from src.services.core.utilisateur.rgpd import get_rgpd_service
 
     service = get_rgpd_service()
-    user_id = user.get("sub", user.get("id", ""))
+    user_id = user.get("sub") or user.get("id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Identifiant utilisateur manquant")
 
     logger.warning(
         f"Demande de suppression de compte RGPD pour user {user_id[:8]}, "

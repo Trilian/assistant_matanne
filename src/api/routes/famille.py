@@ -52,6 +52,9 @@ from src.api.schemas.famille import (
 )
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
+import logging
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/v1/famille", tags=["Famille"])
 
 
@@ -784,8 +787,8 @@ async def analyse_budget_ia(
         for d in deps or []:
             cat_key = f"maison:{d.categorie}"
             depenses_maison[cat_key] = depenses_maison.get(cat_key, 0) + float(d.montant)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("[famille] Dépenses maison non chargées pour budget IA: %s", e)
 
     service = get_budget_ai_service()
     predictions = service.predire_budget_mensuel(donnees["historique"])
@@ -2015,8 +2018,8 @@ async def prefill_revente_achat(
                             )
                         if taille:
                             raisons.append(f"Taille '{taille}' issue des préférences famille")
-            except Exception:  # noqa: BLE001
-                pass  # Préférences optionnelles
+            except Exception as e:  # noqa: BLE001
+                logger.warning("[famille] Préférences taille non récupérées: %s", e)
 
             # Raison choix plateforme
             if plateforme == "vinted":
@@ -2680,10 +2683,8 @@ async def suggestions_activites_auto(
                     jardin_activites.append({"type": "arrosage", "nom": getattr(p, "nom", str(p))})
                 for p in jardin_svc.obtenir_recoltes_proches():
                     jardin_activites.append({"type": "recolte", "nom": getattr(p, "nom", str(p))})
-        except Exception:
-            pass
-
-        # Construire le prompt enrichi
+        except Exception as e:
+            logger.warning("[famille] Activités jardin non chargées pour suggestions weekend: %s", e)
         prompt_extra = ""
         if journee_libre:
             prompt_extra = " C'est une journée libre (férié ou crèche fermée), propose des activités pour une journée complète."
