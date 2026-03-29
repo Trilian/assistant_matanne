@@ -459,6 +459,65 @@ async def valider_planning(
 
 
 @router.post(
+    "/{planning_id}/adapter-jules",
+    response_model=MessageResponse,
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def adapter_planning_jules(
+    planning_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Adapte TOUS les repas d'une semaine pour Jules (IM1).
+
+    Génère une version Jules pour chaque repas du planning, en tenant compte de:
+    - L'âge de Jules
+    - Ses aliments exclus
+    - Les règles de nutrition pédiatrique
+
+    Les adaptations sont auto-persistées dans les champs plat_jules / notes_jules
+    de chaque repas.
+
+    Args:
+        planning_id: ID du planning à adapter
+
+    Returns:
+        Message avec résumé des adaptations (nombre réussi, erreurs)
+
+    Example:
+        ```
+        POST /api/v1/planning/15/adapter-jules
+        Response:
+        {
+            "message": "5 repas adaptés pour Jules, 0 erreurs",
+            "nb_adapte": 5,
+            "nb_erreurs": 0
+        }
+        ```
+    """
+    from src.services.famille import obtenir_version_recette_jules_service
+
+    def _adapter():
+        try:
+            service = obtenir_version_recette_jules_service()
+            result = service.adapter_planning(planning_id)
+
+            return MessageResponse(
+                message=result.get("summary", "Planning adapté"),
+                id=planning_id,
+                data={
+                    "nb_adapte": result.get("adapte", 0),
+                    "nb_erreurs": result.get("erreurs", 0),
+                    "details": result.get("details", []),
+                },
+            )
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=str(e))
+
+    return await executer_async(_adapter)
+
+
+@router.post(
     "/repas/{repas_id}/consomme",
     response_model=MessageResponse,
     responses=REPONSES_CRUD_ECRITURE,

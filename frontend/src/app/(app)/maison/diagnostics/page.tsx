@@ -42,7 +42,9 @@ export default function PageDiagnosticsMaison() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={diag.statut === "valide" ? "default" : "secondary"}>{diag.statut ?? "à vérifier"}</Badge>
+                  <Badge variant={diag.date_expiration ? "secondary" : "default"}>
+                    {diag.date_expiration ? `Expire ${new Date(diag.date_expiration).toLocaleDateString("fr-FR")}` : "Sans expiration"}
+                  </Badge>
                   <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
                 </div>
               </div>

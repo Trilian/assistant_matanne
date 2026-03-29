@@ -17,6 +17,7 @@ import {
   Heart,
   Printer,
   Baby,
+  Share2,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -30,7 +31,7 @@ import { Badge } from "@/composants/ui/badge";
 import { Separator } from "@/composants/ui/separator";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
-import { genererVersionJules, obtenirRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
+import { exporterRecettePdf, genererVersionJules, obtenirRecette, partagerRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 import { toast } from "sonner";
 import { useEffect } from "react";
@@ -77,6 +78,23 @@ export default function PageDetailRecette({
         toast.success("Version Jules générée");
       },
       onError: () => toast.error("Impossible de générer la version Jules"),
+    }
+  );
+
+  const { mutate: creerLienPartage, isPending: enPartage } = utiliserMutation(
+    () => partagerRecette(Number(id), 48),
+    {
+      onSuccess: async (result) => {
+        const base = window.location.origin;
+        const lien = `${base}${result.url}`;
+        try {
+          await navigator.clipboard.writeText(lien);
+          toast.success("Lien de partage copié");
+        } catch {
+          toast.success(`Lien de partage: ${lien}`);
+        }
+      },
+      onError: () => toast.error("Impossible de générer le lien de partage"),
     }
   );
 
@@ -154,6 +172,14 @@ export default function PageDetailRecette({
           <Button variant="outline" size="sm" onClick={() => window.print()}>
             <Printer className="mr-1 h-4 w-4" />
             Imprimer
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => exporterRecettePdf(Number(id)).catch(() => toast.error("Erreur export PDF"))}>
+            <Printer className="mr-1 h-4 w-4" />
+            PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => creerLienPartage(undefined)} disabled={enPartage}>
+            <Share2 className="mr-1 h-4 w-4" />
+            {enPartage ? "Partage..." : "Partager"}
           </Button>
           <Button variant="outline" size="sm" asChild>
             <Link href={`/cuisine/recettes/${id}/modifier`}>

@@ -69,7 +69,13 @@ def _job_rappels_maison() -> None:
 def _job_rappels_generaux() -> None:
     """Évalue les rappels GenericService (inventaire faible, garanties générales)."""
     try:
+        from datetime import date
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Repas
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
         from src.services.core.rappels_intelligents import get_rappels_intelligents_service
+        from sqlalchemy.orm import joinedload
 
         service = get_rappels_intelligents_service()
         rappels = service.evaluer_rappels()
@@ -77,6 +83,38 @@ def _job_rappels_generaux() -> None:
             logger.info("Rappels intelligents : %d rappel(s) actif(s)", len(rappels))
         else:
             logger.debug("Rappels intelligents : aucun rappel actif")
+
+        # Sprint 11 (F3): rappel repas du jour avec ingrédients à sortir.
+        try:
+            aujourd_hui = date.today()
+            with obtenir_contexte_db() as session:
+                repas_soir = (
+                    session.query(Repas)
+                    .options(joinedload(Repas.recette))
+                    .filter(Repas.date_repas == aujourd_hui, Repas.type_repas == "diner")
+                    .first()
+                )
+
+                nom_recette = None
+                ingredients: list[str] = []
+                if repas_soir and getattr(repas_soir, "recette", None):
+                    nom_recette = repas_soir.recette.nom or "Repas du soir"
+                    for ri in getattr(repas_soir.recette, "ingredients", []):
+                        if getattr(ri, "ingredient", None) and getattr(ri.ingredient, "nom", None):
+                            ingredients.append(ri.ingredient.nom)
+
+            if nom_recette:
+                ingredients_txt = ", ".join(ingredients[:5]) if ingredients else "vérifie la fiche recette"
+
+                dispatcher = get_dispatcher_notifications()
+                dispatcher.envoyer(
+                    user_id="matanne",
+                    message=f"Ce soir : {nom_recette}. A sortir : {ingredients_txt}.",
+                    canaux=["ntfy", "push"],
+                    titre="Rappel repas du jour",
+                )
+        except Exception:
+            logger.debug("Rappel repas du jour: impossible d'envoyer le rappel", exc_info=True)
     except Exception:
         logger.exception("Erreur lors des rappels intelligents")
 

@@ -6,6 +6,7 @@ import time
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, UploadFile
+from pydantic import BaseModel, Field
 
 # â”€â”€â”€ Idempotency cache (TTL 5 min, single-instance) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _IDEMPOTENCY_CACHE: dict[str, tuple[float, Any]] = {}
@@ -55,6 +56,13 @@ from src.api.schemas.errors import (
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
+
+
+class FeedbackPredictionCoursesRequest(BaseModel):
+    """Feedback utilisateur sur une suggestion d'article habituel."""
+
+    article_nom: str = Field(..., min_length=1, max_length=200)
+    accepte: bool = Field(..., description="True si l'article a ete ajoute, False sinon")
 
 
 @router.get("", response_model=ReponsePaginee[ListeCoursesResume], responses=REPONSES_LISTE)
@@ -1603,4 +1611,69 @@ async def importer_ticket_caisse(
         "articles_non_importes": ignores,
         "liste_id": liste_id,
     }
+
+
+@router.get(
+    "/predictions",
+    responses=REPONSES_LISTE,
+    summary="Predictions d'articles habituels",
+)
+@gerer_exception_api
+async def obtenir_predictions_courses(
+    limite: int = Query(25, ge=1, le=100),
+    inclure_deja_sur_liste: bool = Query(False),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne une liste pre-completee d'articles habituels avec score de confiance."""
+
+    def _query() -> dict[str, Any]:
+        from src.services.cuisine.prediction_courses import obtenir_service_prediction_courses
+
+        service = obtenir_service_prediction_courses()
+        items = service.predire_articles(
+            limite=limite,
+            inclure_deja_sur_liste=inclure_deja_sur_liste,
+        )
+        return {
+            "items": items,
+            "total": len(items),
+            "meta": {
+                "source": "historique_achats",
+                "scoring": "retard_frequence + fiabilite_historique",
+            },
+        }
+
+    return await executer_async(_query)
+
+
+@router.post(
+    "/predictions/feedback",
+    responses=REPONSES_CRUD_ECRITURE,
+    summary="Feedback prediction courses",
+)
+@gerer_exception_api
+async def enregistrer_feedback_prediction_courses(
+    payload: FeedbackPredictionCoursesRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Ameliore progressivement les predictions via feedback utilisateur (ajout/refus)."""
+
+    def _query() -> dict[str, Any]:
+        from src.services.cuisine.prediction_courses import obtenir_service_prediction_courses
+
+        service = obtenir_service_prediction_courses()
+        ok = service.enregistrer_feedback(
+            article_nom=payload.article_nom,
+            accepte=payload.accepte,
+        )
+        if not ok:
+            raise HTTPException(status_code=404, detail="Article historique introuvable")
+
+        return {
+            "message": "Feedback enregistre",
+            "article_nom": payload.article_nom,
+            "accepte": payload.accepte,
+        }
+
+    return await executer_async(_query)
 

@@ -164,6 +164,85 @@ Adapte cette recette pour Jules."""
                 "age_mois_jules": age_mois,
             }
 
+    def adapter_planning(self, planning_id: int) -> dict:
+        """Adapte TOUS les repas d'une semaine pour Jules (IM1).
+
+        Parcourt tous les repas du planning, génère une version Jules pour chacun,
+        et met à jour les champs plat_jules / notes_jules du repas.
+
+        Args:
+            planning_id: ID du planning à adapter
+
+        Returns:
+            Dict avec résumé des adaptations : nombre adapté, recettes skippées, erreurs
+        """
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Planning, Repas, ProfilFamille
+
+        with obtenir_contexte_db() as session:
+            # Charger le planning et ses repas
+            planning = session.query(Planning).filter(Planning.id == planning_id).first()
+            if not planning:
+                raise ValueError(f"Planning {planning_id} introuvable")
+
+            repas_semaine = (
+                session.query(Repas)
+                .filter(Repas.planning_id == planning_id, Repas.recette_id.isnot(None))
+                .all()
+            )
+
+            # Charger le profil de Jules
+            profil_jules = session.query(ProfilFamille).filter(
+                ProfilFamille.relation == "fils",
+                ProfilFamille.prenom.ilike("Jules")
+            ).first()
+
+            if not profil_jules:
+                logger.warning(f"⚠️ Profil Jules non trouvé pour le planning {planning_id}")
+                profil_data = {"age_mois": 19, "aliments_exclus_jules": []}
+            else:
+                profil_data = {
+                    "age_mois": profil_jules.age_mois or 19,
+                    "aliments_exclus_jules": profil_jules.aliments_exclus or [],
+                }
+
+            adaptations = {"adapte": 0, "skipped": 0, "erreurs": 0, "details": []}
+
+            # Adapter chaque repas
+            for repas in repas_semaine:
+                try:
+                    result = self.generer_version_jules(repas.recette_id, profil_data)
+
+                    # Mettre à jour le repas avec la version Jules
+                    repas.plat_jules = result.get("instructions_modifiees")
+                    repas.notes_jules = result.get("notes_bebe")
+                    repas.adaptation_auto = True
+
+                    adapte_details = {
+                        "repas_id": repas.id,
+                        "date": repas.date_repas.isoformat(),
+                        "type_repas": repas.type_repas,
+                        "recette_nom": result.get("recette_nom"),
+                        "modifications": result.get("modifications_resume", []),
+                    }
+
+                    adaptations["details"].append(adapte_details)
+                    adaptations["adapte"] += 1
+                    logger.info(f"✅ Repas {repas.id} ({result.get('recette_nom')}) adapté pour Jules")
+
+                except Exception as e:
+                    logger.error(f"❌ Erreur adaptation repas {repas.id}: {e}")
+                    adaptations["erreurs"] += 1
+
+            session.commit()
+
+            adaptations["summary"] = (
+                f"{adaptations['adapte']} repas adaptés, "
+                f"{adaptations['erreurs']} erreurs"
+            )
+
+            return adaptations
+
 
 @service_factory("version_recette_jules", tags={"famille", "ia", "recettes"})
 def obtenir_version_recette_jules_service() -> ServiceVersionRecetteJules:

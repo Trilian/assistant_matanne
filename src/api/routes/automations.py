@@ -5,12 +5,28 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_CRUD_CREATION, REPONSES_CRUD_LECTURE, REPONSES_LISTE
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/automations", tags=["Automations"])
+
+
+class GenerationAutomationIARequest(BaseModel):
+    """Prompt libre pour generer une regle Si->Alors."""
+
+    prompt: str = Field(..., min_length=5, max_length=1200)
+
+
+class RegleAutomationIA(BaseModel):
+    """Sortie structuree attendue de l'IA pour une automation."""
+
+    condition: dict[str, Any] = Field(default_factory=dict)
+    action: dict[str, Any] = Field(default_factory=dict)
+    parametres: dict[str, Any] = Field(default_factory=dict)
+    nom: str = Field(default="Automation IA")
 
 
 def _charger_automations(session, user: dict[str, Any]):
@@ -212,5 +228,62 @@ async def executer_automation_maintenant(
             if not result.get("success"):
                 raise HTTPException(status_code=404, detail=result.get("message", "Automation introuvable"))
             return {"message": "Automation exÃ©cutÃ©e", "resultat": result, "user_id": profil.id}
+
+    return await executer_async(_query)
+
+
+@router.post("/generer-ia", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def generer_automation_ia(
+    payload: GenerationAutomationIARequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """IA6 - Genere une regle d'automation Si->Alors depuis un prompt libre."""
+    from src.services.core.base.ai_service import create_base_ai_service
+
+    def _query() -> dict[str, Any]:
+        ai_service = create_base_ai_service(
+            cache_prefix="automations_ia",
+            service_name="automations_ia",
+            default_ttl=900,
+            default_temperature=0.2,
+        )
+
+        prompt = (
+            "Transforme la demande utilisateur en regle d'automation.\n"
+            f"Demande: {payload.prompt}\n\n"
+            "Retourne uniquement un JSON strict avec les cles:\n"
+            "- nom\n"
+            "- condition (dict)\n"
+            "- action (dict)\n"
+            "- parametres (dict)\n"
+            "Exemple condition: {\"type\": \"stock_bas\", \"seuil\": 2}\n"
+            "Exemple action: {\"type\": \"ajouter_courses\"}"
+        )
+
+        regle = ai_service.call_with_json_parsing_sync(
+            prompt=prompt,
+            response_model=RegleAutomationIA,
+            system_prompt=(
+                "Tu es un moteur d'automations domestiques. "
+                "Reponds en JSON valide uniquement, sans markdown."
+            ),
+            max_tokens=450,
+            use_cache=False,
+        )
+
+        if regle is None:
+            # Fallback deterministe minimal
+            regle = RegleAutomationIA(
+                nom="Automation IA",
+                condition={"type": "evenement", "source": "manuel"},
+                action={"type": "notification"},
+                parametres={"message": payload.prompt[:200]},
+            )
+
+        return {
+            "message": "Regle generee, previsualisez puis confirmez avant creation.",
+            "regle": regle.model_dump(),
+        }
 
     return await executer_async(_query)

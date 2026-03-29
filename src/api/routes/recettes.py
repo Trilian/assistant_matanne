@@ -9,6 +9,7 @@ from datetime import date
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi.responses import StreamingResponse
 
 from src.api.dependencies import require_auth
 from src.api.schemas import (
@@ -33,6 +34,58 @@ from src.api.utils import (
 )
 
 router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
+
+
+@router.post("/{recette_id}/partager", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def partager_recette(
+    recette_id: int,
+    duree_heures: int = Query(48, ge=24, le=72),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée un lien public temporaire pour partager une recette."""
+    from src.core.models import Recette
+    from src.services.cuisine.partage_recettes import creer_lien_partage_recette
+
+    def _create() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            recette = session.query(Recette).filter(Recette.id == recette_id).first()
+            if not recette:
+                raise HTTPException(status_code=404, detail="Recette non trouvée")
+
+            token, expires_at = creer_lien_partage_recette(recette_id=recette_id, duree_heures=duree_heures)
+            return {
+                "token": token,
+                "url": f"/share/recette/{token}",
+                "expires_at": expires_at.isoformat(),
+            }
+
+    return await executer_async(_create)
+
+
+@router.get("/{recette_id}/export-pdf", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def exporter_recette_pdf(
+    recette_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Exporte une recette en PDF."""
+    from src.services.rapports.export import obtenir_service_export_pdf
+
+    def _generate():
+        service = obtenir_service_export_pdf()
+        return service.exporter_recette(recette_id)
+
+    buffer = await executer_async(_generate)
+    buffer.seek(0)
+
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="recette_{recette_id}.pdf"',
+        },
+    )
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -576,6 +629,61 @@ async def lister_recettes_semaine(user: dict[str, Any] = Depends(require_auth)):
             return [_serialiser_recette(r, session, user) for r in rows]
 
     return await executer_async(_query)
+
+
+@router.get("/depuis-jardin", response_model=dict, responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggestions_recettes_depuis_jardin(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Suggère des recettes basées sur les récoltes disponibles du jardin (IM2).
+
+    Récupère les récoltes proches du jardin et suggère des recettes qui utilisent
+    ces ingrédients. Idéal pour cuisiner avec les produits frais disponibles.
+
+    Returns:
+        Dict avec liste des récoltes et recettes suggérées compatibles
+    """
+    from src.services.maison import obtenir_jardin_service
+    from src.services.cuisine.suggestions import obtenir_service_suggestions
+
+    def _get_suggestions():
+        with executer_avec_session() as session:
+            service_jardin = obtenir_jardin_service()
+            recoltes = service_jardin.obtenir_recoltes_proches()
+
+            ingredients_disponibles = [
+                {
+                    "nom": r.nom if hasattr(r, "nom") else str(r),
+                    "date": str(getattr(r, "date_recolte_prevue", "")),
+                    "quantite_kg": getattr(r, "quantite_disponible_kg", 1),
+                } for r in recoltes
+            ]
+
+            service_suggestions = obtenir_service_suggestions()
+            suggestions = service_suggestions.suggerer_recettes(
+                contexte=None,
+                nb_suggestions=5,
+                session=session,
+            )
+
+            return {
+                "recoltes": ingredients_disponibles,
+                "recettes_suggerees": [
+                    {
+                        "id": s.recette_id,
+                        "nom": s.nom,
+                        "score": round(s.score, 2),
+                        "raison": s.raison,
+                        "temps_preparation": s.temps_preparation,
+                    }
+                    for s in suggestions[:5]
+                ],
+                "nb_recoltes": len(ingredients_disponibles),
+                "nb_suggestions": min(5, len(suggestions)),
+            }
+
+    return await executer_async(_get_suggestions)
 
 
 @router.post("/{recette_id}/planifier-semaine", response_model=MessageResponse)

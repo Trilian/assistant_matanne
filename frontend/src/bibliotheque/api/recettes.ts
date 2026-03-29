@@ -131,3 +131,34 @@ export async function obtenirRecetteSurprise(): Promise<Recette> {
   return data;
 }
 
+export interface LienPartageRecette {
+  token: string;
+  url: string;
+  expires_at: string;
+}
+
+/** Générer un lien de partage public temporaire pour une recette */
+export async function partagerRecette(recetteId: number, dureeHeures = 48): Promise<LienPartageRecette> {
+  const { data } = await clientApi.post<LienPartageRecette>(
+    `/recettes/${recetteId}/partager?duree_heures=${dureeHeures}`
+  );
+  return data;
+}
+
+/** Exporter la recette en PDF */
+export async function exporterRecettePdf(recetteId: number): Promise<void> {
+  // Endpoint dédié sprint 11: /api/v1/recettes/{id}/export-pdf
+  const response = await clientApi.get(`/recettes/${recetteId}/export-pdf`, {
+    responseType: "blob",
+  });
+  const blob = new Blob([response.data], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `recette_${recetteId}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+

@@ -112,8 +112,11 @@ export async function exporterPlanningIcal(semaines = 2): Promise<void> {
 }
 
 /** Exporter le planning en PDF */
-export async function exporterPlanningPdf(): Promise<void> {
-  await exporterPdf("planning");
+export async function exporterPlanningPdf(planningId?: number): Promise<void> {
+  if (!planningId) {
+    throw new Error("planning_id requis pour l'export PDF du planning");
+  }
+  await exporterPdf("planning", planningId);
 }
 
 // ─── Nutrition hebdomadaire ─────────────────────────────────

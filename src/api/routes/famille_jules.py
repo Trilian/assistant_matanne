@@ -400,6 +400,78 @@ async def suggestions_activites_auto(
 
     return await _query()
 
+
+@router.get("/jules/activites-suggestions", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggestions_activites_jules_contextuelles(
+    contexte: str = Query("meteo_variable", description="Ex: meteo_pluie, meteo_soleil, interieur"),
+    budget_max: float = Query(40.0, ge=0, le=300),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """IA5 - Suggestions d'activites Jules selon meteo + creche + age."""
+    from src.services.famille.jours_speciaux import obtenir_service_jours_speciaux
+    from src.services.famille.jules import obtenir_service_jules
+    from src.services.famille.jules_ai import obtenir_jules_ai_service
+    from src.services.integrations.weather import obtenir_service_meteo
+
+    def _query() -> dict[str, Any]:
+        # Age Jules
+        jules_service = obtenir_service_jules()
+        age_mois = jules_service.get_age_mois(default=19)
+
+        # Meteo prioritaire: parametre contexte, sinon prevision J0
+        meteo_effective = "mixte"
+        contexte_l = (contexte or "").lower()
+        if "pluie" in contexte_l:
+            meteo_effective = "pluie"
+        elif "soleil" in contexte_l:
+            meteo_effective = "soleil"
+        elif "interieur" in contexte_l:
+            meteo_effective = "interieur"
+        elif "exterieur" in contexte_l:
+            meteo_effective = "exterieur"
+        else:
+            try:
+                previsions = obtenir_service_meteo().get_previsions(nb_jours=1)
+                if previsions:
+                    meteo_effective = getattr(previsions[0], "condition", "mixte") or "mixte"
+            except Exception:
+                meteo_effective = "mixte"
+
+        # Contexte creche ouverte/fermee
+        jours_service = obtenir_service_jours_speciaux()
+        creche_fermee = jours_service.est_fermeture_creche(date.today())
+
+        preferences = ["educatif", "motricite", "autonomie"]
+        if creche_fermee:
+            preferences.append("journee_complete")
+        if "pluie" in meteo_effective.lower() or "interieur" in contexte_l:
+            preferences.append("interieur")
+        if "soleil" in meteo_effective.lower() or "exterieur" in contexte_l:
+            preferences.append("exterieur")
+
+        service = obtenir_jules_ai_service()
+        suggestions = service.suggerer_activites_enrichies(
+            age_mois=age_mois,
+            meteo=meteo_effective,
+            budget_max=budget_max,
+            preferences=preferences,
+            nb_suggestions=5,
+        )
+
+        return {
+            "items": [s.model_dump() for s in suggestions],
+            "total": len(suggestions),
+            "contexte": {
+                "age_mois": age_mois,
+                "meteo": meteo_effective,
+                "creche_fermee": creche_fermee,
+                "contexte_requete": contexte,
+            },
+        }
+
+    return await executer_async(_query)
+
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # JULES â€” ALIMENTS EXCLUS (CT-09)
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

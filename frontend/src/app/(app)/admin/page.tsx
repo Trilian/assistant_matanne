@@ -99,6 +99,16 @@ interface UtilisateurAdmin {
   cree_le: string | null;
 }
 
+interface SecurityLog {
+  id: number;
+  created_at: string;
+  event_type: string;
+  user_id: string | null;
+  ip: string | null;
+  user_agent: string | null;
+  source: string;
+}
+
 const COULEURS = [
   "#2563eb", "#16a34a", "#d97706", "#dc2626", "#7c3aed",
   "#0891b2", "#db2777", "#65a30d",
@@ -151,6 +161,14 @@ export default function PageAdmin() {
     ["admin", "cache-stats"],
     async () => {
       const { data } = await clientApi.get("/admin/cache/stats");
+      return data;
+    }
+  );
+
+  const { data: securityLogs } = utiliserRequete(
+    ["admin", "security-logs"],
+    async (): Promise<{ items: SecurityLog[] }> => {
+      const { data } = await clientApi.get("/admin/security-logs?par_page=8");
       return data;
     }
   );
@@ -321,6 +339,32 @@ export default function PageAdmin() {
               </Card>
             </div>
           )}
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Événements sécurité récents</CardTitle>
+              <CardDescription>Auth, actions admin et événements sensibles.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {!securityLogs?.items?.length ? (
+                <p className="text-sm text-muted-foreground">Aucun événement de sécurité récent.</p>
+              ) : (
+                securityLogs.items.map((evt) => (
+                  <div key={evt.id} className="rounded-md border p-2.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-medium truncate">{evt.event_type}</p>
+                      <Badge variant="outline" className="shrink-0">{evt.source || "unknown"}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {format(new Date(evt.created_at), "dd/MM/yyyy HH:mm", { locale: fr })}
+                      {evt.user_id ? ` · user ${evt.user_id}` : ""}
+                      {evt.ip ? ` · ip ${evt.ip}` : ""}
+                    </p>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
 
           {stats && (actionsData.length > 0 || entitesData.length > 0) && (
             <div className="grid gap-4 md:grid-cols-2">

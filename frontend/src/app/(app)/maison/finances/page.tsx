@@ -20,6 +20,7 @@ import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
+import { Progress } from "@/composants/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -92,9 +93,7 @@ function OngletCharges() {
                   <p className="text-sm font-medium">{type}</p>
                   <p className="text-sm font-semibold">{(montant as number).toFixed(2)} €</p>
                 </div>
-                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, ((montant as number) / total) * 100)}%` }} />
-                </div>
+                <Progress value={Math.min(100, ((montant as number) / Math.max(total, 1)) * 100)} className="h-1.5" />
               </CardContent>
             </Card>
           ))}

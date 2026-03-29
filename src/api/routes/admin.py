@@ -139,6 +139,62 @@ async def lister_audit_logs(
 
 
 @router.get(
+    "/security-logs",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Lister les événements de sécurité",
+    description="Retourne les logs de sécurité (auth, rate limiting, admin) avec filtres.",
+)
+@gerer_exception_api
+async def lister_logs_securite(
+    page: int = Query(1, ge=1),
+    par_page: int = Query(20, ge=1, le=200),
+    event_type: str | None = Query(None, description="Filtrer par type d'événement"),
+    depuis: datetime | None = Query(None, description="Date de début (ISO 8601)"),
+    jusqu_a: datetime | None = Query(None, description="Date de fin (ISO 8601)"),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Expose un flux dédié sécurité pour le dashboard admin."""
+    from src.services.core.audit import obtenir_service_audit
+
+    service = obtenir_service_audit()
+
+    filtre_action = event_type
+    if not filtre_action:
+        # Filtre sécurité par défaut: événements auth/admin/rate-limit.
+        filtre_action = "admin."
+
+    resultats = service.consulter(
+        action=filtre_action,
+        depuis=depuis,
+        jusqu_a=jusqu_a,
+        limite=par_page,
+        page=page,
+    )
+
+    items = [
+        {
+            "id": e.id,
+            "created_at": e.timestamp.isoformat(),
+            "event_type": e.action,
+            "user_id": e.utilisateur_id,
+            "ip": (e.details or {}).get("ip") if isinstance(e.details, dict) else None,
+            "user_agent": (e.details or {}).get("user_agent") if isinstance(e.details, dict) else None,
+            "source": e.source,
+            "details": e.details,
+        }
+        for e in resultats.entrees
+    ]
+
+    return {
+        "items": items,
+        "total": resultats.total,
+        "page": resultats.page,
+        "par_page": resultats.par_page,
+        "pages_totales": max(1, (resultats.total + par_page - 1) // par_page),
+    }
+
+
+@router.get(
     "/audit-stats",
     responses=REPONSES_AUTH_ADMIN,
     summary="Statistiques d'audit",

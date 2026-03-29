@@ -10,6 +10,7 @@ Chat conversationnel avec contexte familial:
 """
 
 import logging
+from typing import Any
 from typing import Literal
 
 from src.core.ai import obtenir_client_ia
@@ -120,7 +121,7 @@ class ChatAIService(BaseAIService):
         if historique:
             conversation = "\n".join(
                 f"{'Utilisateur' if m['role'] == 'user' else 'Assistant'}: {m['contenu']}"
-                for m in historique[-10:]  # Limiter aux 10 derniers messages
+                for m in historique[-5:]  # Memoire conversationnelle courte (IA4)
             )
             prompt = f"""Historique de la conversation:
 {conversation}
@@ -138,6 +139,45 @@ Réponds de manière cohérente avec la conversation précédente."""
             use_cache=False,  # Pas de cache pour les messages conversationnels
         )
 
+    def envoyer_message_contextualise(
+        self,
+        message: str,
+        contexte_metier: dict[str, Any] | None = None,
+        contexte: ContexteChat = "general",
+        historique: list[dict[str, str]] | None = None,
+    ) -> str | None:
+        """Envoie un message IA avec contexte cross-modules injecte (IA4)."""
+        system_prompt = SYSTEM_PROMPTS.get(contexte, SYSTEM_PROMPTS["general"])
+        contexte_txt = (
+            f"Contexte metier disponible (JSON): {contexte_metier}\n\n"
+            if contexte_metier
+            else ""
+        )
+
+        prompt = f"{contexte_txt}Utilisateur: {message}"
+
+        if historique:
+            conversation = "\n".join(
+                f"{'Utilisateur' if m.get('role') == 'user' else 'Assistant'}: {m.get('contenu', '')}"
+                for m in historique[-5:]
+            )
+            prompt = (
+                "Historique recent (5 derniers echanges max):\n"
+                f"{conversation}\n\n"
+                f"{contexte_txt}Utilisateur: {message}"
+            )
+
+        return self.call_with_cache_sync(
+            prompt=prompt,
+            system_prompt=(
+                f"{system_prompt}\n"
+                "Utilise explicitement le contexte metier s'il est fourni (planning, inventaire, budget, score Jules, evenements). "
+                "Si une donnee manque, dis-le clairement sans l'inventer."
+            ),
+            max_tokens=1200,
+            use_cache=False,
+        )
+
     def obtenir_actions_rapides(self, contexte: ContexteChat = "general") -> list[dict[str, str]]:
         """Retourne les actions rapides pour un contexte donné."""
         return ACTIONS_RAPIDES.get(contexte, ACTIONS_RAPIDES["general"])
@@ -147,11 +187,6 @@ Réponds de manière cohérente avec la conversation précédente."""
 def obtenir_chat_ai_service() -> ChatAIService:
     """Factory singleton pour ChatAIService."""
     return ChatAIService()
-
-
-def obtenir_chat_ai_service() -> ChatAIService:
-    """English alias."""
-    return obtenir_chat_ai_service()
 
 
 # ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────

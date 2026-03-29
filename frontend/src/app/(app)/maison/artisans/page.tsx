@@ -21,9 +21,9 @@ export default function PageArtisansMaison() {
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{stats.total_artisans ?? 0}</p><p className="text-xs text-muted-foreground">Artisans</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{stats.nb_metiers ?? 0}</p><p className="text-xs text-muted-foreground">Métiers</p></CardContent></Card>
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{Object.keys(stats.par_metier ?? {}).length}</p><p className="text-xs text-muted-foreground">Métiers</p></CardContent></Card>
           <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{(stats.depenses_totales ?? 0).toFixed(0)} €</p><p className="text-xs text-muted-foreground">Dépenses</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{stats.nb_interventions ?? 0}</p><p className="text-xs text-muted-foreground">Interventions</p></CardContent></Card>
+          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{stats.total_interventions ?? 0}</p><p className="text-xs text-muted-foreground">Interventions</p></CardContent></Card>
         </div>
       )}
 
@@ -44,7 +44,7 @@ export default function PageArtisansMaison() {
                   <p className="text-xs text-muted-foreground truncate">{artisan.metier ?? "Métier non précisé"}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {artisan.note_moyenne != null && <Badge variant="outline">⭐ {artisan.note_moyenne.toFixed(1)}</Badge>}
+                  {artisan.note_satisfaction != null && <Badge variant="outline">⭐ {artisan.note_satisfaction.toFixed(1)}</Badge>}
                   <Wrench className="h-4 w-4 text-muted-foreground" />
                 </div>
               </div>

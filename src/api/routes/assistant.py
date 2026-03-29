@@ -22,6 +22,14 @@ class CommandeVocaleRequest(BaseModel):
     texte: str = Field(..., min_length=2)
 
 
+class AssistantChatRequest(BaseModel):
+    """Payload chat assistant contextuel (IA4)."""
+
+    message: str = Field(..., min_length=1, max_length=2000)
+    contexte: str = Field(default="general")
+    historique: list[dict[str, str]] = Field(default_factory=list)
+
+
 @router.post(
     "/commande-vocale",
     responses=REPONSES_CRUD_CREATION,
@@ -194,6 +202,111 @@ async def interpreter_commande_vocale(
             }
 
     return await executer_async(_action)
+
+
+@router.post(
+    "/chat",
+    responses=REPONSES_CRUD_LECTURE,
+    summary="Chat IA contextuel enrichi",
+)
+@gerer_exception_api
+async def chat_assistant_contextuel(
+    payload: AssistantChatRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Chat IA avec contexte cross-module (planning, inventaire, budget, score Jules, evenements)."""
+
+    def _query() -> dict[str, Any]:
+        from sqlalchemy import func
+
+        from src.core.models import ActiviteFamille, ArticleInventaire, BudgetFamille, Repas
+        from src.core.models.calendrier import EvenementPlanning
+        from src.services.dashboard.points_famille import obtenir_points_famille_service
+        from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
+
+        today = date.today()
+        horizon = today + timedelta(days=7)
+        debut_mois = today.replace(day=1)
+
+        with executer_avec_session() as session:
+            contexte_metier = {
+                "planning": {
+                    "repas_7j": int(
+                        session.query(func.count(Repas.id))
+                        .filter(Repas.date_repas >= today, Repas.date_repas <= horizon)
+                        .scalar()
+                        or 0
+                    ),
+                    "activites_7j": int(
+                        session.query(func.count(ActiviteFamille.id))
+                        .filter(
+                            ActiviteFamille.date_prevue >= today,
+                            ActiviteFamille.date_prevue <= horizon,
+                        )
+                        .scalar()
+                        or 0
+                    ),
+                    "evenements_7j": int(
+                        session.query(func.count(EvenementPlanning.id))
+                        .filter(
+                            EvenementPlanning.date_debut >= today,
+                            EvenementPlanning.date_debut <= horizon,
+                        )
+                        .scalar()
+                        or 0
+                    ),
+                },
+                "inventaire": {
+                    "stock_bas": int(
+                        session.query(func.count(ArticleInventaire.id))
+                        .filter(ArticleInventaire.quantite < ArticleInventaire.quantite_min)
+                        .scalar()
+                        or 0
+                    ),
+                    "peremptions_7j": int(
+                        session.query(func.count(ArticleInventaire.id))
+                        .filter(
+                            ArticleInventaire.date_peremption.isnot(None),
+                            ArticleInventaire.date_peremption >= today,
+                            ArticleInventaire.date_peremption <= horizon,
+                        )
+                        .scalar()
+                        or 0
+                    ),
+                },
+                "budget": {
+                    "depenses_mois": float(
+                        session.query(func.sum(BudgetFamille.montant))
+                        .filter(BudgetFamille.date >= debut_mois)
+                        .scalar()
+                        or 0.0
+                    )
+                },
+                "score_jules": {},
+            }
+
+        points = obtenir_points_famille_service().calculer_points() or {}
+        contexte_metier["score_jules"] = {
+            "total_points": int(points.get("total_points", 0)),
+            "badges": points.get("badges", []),
+        }
+
+        service = obtenir_chat_ai_service()
+        reponse = service.envoyer_message_contextualise(
+            message=payload.message,
+            contexte_metier=contexte_metier,
+            contexte=payload.contexte if payload.contexte else "general",
+            historique=payload.historique,
+        )
+
+        return {
+            "reponse": reponse or "Je n'ai pas pu generer de reponse pour le moment.",
+            "contexte": payload.contexte,
+            "memoire_utilisee": min(5, len(payload.historique or [])),
+            "contexte_metier": contexte_metier,
+        }
+
+    return await executer_async(_query)
 
 
 @router.get(

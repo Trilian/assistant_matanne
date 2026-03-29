@@ -366,7 +366,13 @@ export default function PagePlanning() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => exporterPlanningPdf().catch(() => toast.error("Erreur d'export PDF"))}
+            onClick={() => {
+              if (!planning?.planning_id) {
+                toast.error("Planning non persisté: générez un planning avant export PDF");
+                return;
+              }
+              exporterPlanningPdf(planning.planning_id).catch(() => toast.error("Erreur d'export PDF"));
+            }}
             title="Exporter en PDF"
           >
             <Download className="mr-2 h-4 w-4" />
