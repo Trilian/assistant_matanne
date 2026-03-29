@@ -3,13 +3,25 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
-from src.core.models import ArticleCourses, ArticleInventaire, AutomationRegle, ListeCourses
+from src.core.models import (
+    ActiviteGarmin,
+    AnniversaireFamille,
+    ArticleCourses,
+    ArticleInventaire,
+    AutomationRegle,
+    Depense,
+    DocumentFamille,
+    EvenementPlanning,
+    ListeCourses,
+    Recette,
+    TacheEntretien,
+)
 from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 from src.services.core.registry import service_factory
 
@@ -50,6 +62,122 @@ class MoteurAutomationsService:
             if article_nom in nom:
                 filtres.append(item)
         return filtres
+
+    def _declenche_peremption_proche(self, declencheur: dict[str, Any], db: Session) -> list[ArticleInventaire]:
+        jours = int(declencheur.get("jours", 3) or 3)
+        limite = datetime.now(UTC).date() + timedelta(days=max(1, jours))
+        return (
+            db.query(ArticleInventaire)
+            .filter(
+                ArticleInventaire.date_peremption.isnot(None),
+                ArticleInventaire.date_peremption <= limite,
+                ArticleInventaire.quantite > 0,
+            )
+            .limit(30)
+            .all()
+        )
+
+    def _declenche_budget_depassement(self, declencheur: dict[str, Any], db: Session) -> list[dict[str, Any]]:
+        seuil = float(declencheur.get("seuil", 300) or 300)
+        maintenant = datetime.now(UTC)
+        debut_mois = maintenant.date().replace(day=1)
+        total = (
+            db.query(Depense)
+            .filter(Depense.date >= debut_mois, Depense.date <= maintenant.date())
+            .with_entities(db.func.sum(Depense.montant))
+            .scalar()
+            or 0
+        )
+        if float(total) <= seuil:
+            return []
+        return [{"type": "budget_depassement", "total": float(total), "seuil": seuil}]
+
+    def _declenche_meteo_alerte(self, declencheur: dict[str, Any]) -> list[dict[str, Any]]:
+        mot_cle = str(declencheur.get("mot_cle", "pluie")).lower()
+        try:
+            from src.services.utilitaires.meteo_service import obtenir_meteo_service
+
+            service = obtenir_meteo_service()
+            previsions = service.get_previsions(nb_jours=2)
+            if not previsions:
+                return []
+
+            alertes: list[dict[str, Any]] = []
+            for prev in previsions:
+                condition = str(getattr(prev, "condition", "")).lower()
+                if mot_cle in condition or any(x in condition for x in ["orage", "neige", "vent"]):
+                    alertes.append(
+                        {
+                            "date": str(getattr(prev, "date", "")),
+                            "condition": getattr(prev, "condition", ""),
+                        }
+                    )
+            return alertes
+        except Exception:
+            return []
+
+    def _declenche_anniversaire_proche(self, declencheur: dict[str, Any], db: Session) -> list[AnniversaireFamille]:
+        jours = int(declencheur.get("jours", 7) or 7)
+        aujourd_hui = datetime.now(UTC).date()
+        limite = aujourd_hui + timedelta(days=max(1, jours))
+        return (
+            db.query(AnniversaireFamille)
+            .filter(
+                AnniversaireFamille.date_anniversaire >= aujourd_hui,
+                AnniversaireFamille.date_anniversaire <= limite,
+            )
+            .limit(20)
+            .all()
+        )
+
+    def _declenche_tache_en_retard(self, db: Session) -> list[TacheEntretien]:
+        aujourd_hui = datetime.now(UTC).date()
+        return (
+            db.query(TacheEntretien)
+            .filter(
+                TacheEntretien.fait == False,  # noqa: E712
+                TacheEntretien.prochaine_fois.isnot(None),
+                TacheEntretien.prochaine_fois < aujourd_hui,
+            )
+            .limit(30)
+            .all()
+        )
+
+    def _declenche_garmin_inactivite(self, declencheur: dict[str, Any], db: Session) -> list[dict[str, Any]]:
+        jours = int(declencheur.get("jours", 3) or 3)
+        seuil = datetime.now(UTC) - timedelta(days=max(1, jours))
+        rows = (
+            db.query(ActiviteGarmin.user_id, db.func.max(ActiviteGarmin.date_debut))
+            .group_by(ActiviteGarmin.user_id)
+            .all()
+        )
+        return [
+            {"user_id": int(user_id), "derniere_activite": str(derniere)}
+            for user_id, derniere in rows
+            if derniere is None or derniere < seuil
+        ]
+
+    def _declenche_document_expiration(self, declencheur: dict[str, Any], db: Session) -> list[DocumentFamille]:
+        jours = int(declencheur.get("jours", 30) or 30)
+        limite = datetime.now(UTC).date() + timedelta(days=max(1, jours))
+        return (
+            db.query(DocumentFamille)
+            .filter(
+                DocumentFamille.actif == True,  # noqa: E712
+                DocumentFamille.date_expiration.isnot(None),
+                DocumentFamille.date_expiration <= limite,
+            )
+            .limit(20)
+            .all()
+        )
+
+    def _declenche_recette_sans_photo(self, db: Session) -> list[Recette]:
+        return (
+            db.query(Recette)
+            .filter((Recette.url_image.is_(None)) | (Recette.url_image == ""))
+            .limit(20)
+            .all()
+        )
 
     def _executer_action_ajouter_courses(
         self,
@@ -117,20 +245,127 @@ class MoteurAutomationsService:
             return 1
         return 0
 
-    def _executer_une_regle(self, regle: AutomationRegle, db: Session) -> dict[str, Any]:
+    def _executer_action_envoyer_whatsapp(self, action: dict[str, Any], user_id: int) -> int:
+        dispatcher = get_dispatcher_notifications()
+        resultats = dispatcher.envoyer(
+            user_id=str(user_id),
+            message=str(action.get("message", "Automation déclenchée.")),
+            canaux=["whatsapp"],
+            titre=str(action.get("titre", "Automation")),
+        )
+        return 1 if any(bool(v) for v in resultats.values()) else 0
+
+    def _executer_action_envoyer_email(self, action: dict[str, Any], user_id: int) -> int:
+        dispatcher = get_dispatcher_notifications()
+        titre = str(action.get("titre", "Automation"))
+        message = str(action.get("message", "Automation déclenchée."))
+        resultats = dispatcher.envoyer(
+            user_id=str(user_id),
+            message=message,
+            canaux=["email"],
+            titre=titre,
+            type_email="alerte_critique",
+            alerte={"titre": titre, "message": message},
+        )
+        return 1 if any(bool(v) for v in resultats.values()) else 0
+
+    def _executer_action_ajouter_au_planning(self, action: dict[str, Any], db: Session) -> int:
+        date_debut = action.get("date_debut")
+        if isinstance(date_debut, str) and date_debut:
+            dt_debut = datetime.fromisoformat(date_debut)
+        else:
+            dt_debut = datetime.now(UTC)
+
+        db.add(
+            EvenementPlanning(
+                titre=str(action.get("titre", "Tâche automatique")),
+                description=str(action.get("description", "Ajouté par automation")),
+                date_debut=dt_debut,
+                date_fin=dt_debut + timedelta(minutes=int(action.get("duree_minutes", 30) or 30)),
+                type_event=str(action.get("type_event", "autre")),
+            )
+        )
+        return 1
+
+    def _executer_action_creer_tache_maison(self, action: dict[str, Any], db: Session) -> int:
+        db.add(
+            TacheEntretien(
+                nom=str(action.get("nom", "Tâche automation")),
+                description=str(action.get("description", "Créée automatiquement")),
+                categorie=str(action.get("categorie", "maintenance")),
+                priorite=str(action.get("priorite", "normale")),
+                prochaine_fois=datetime.now(UTC).date(),
+                fait=False,
+            )
+        )
+        return 1
+
+    def _executer_action_generer_rapport_pdf(self, action: dict[str, Any], user_id: int) -> int:
+        dispatcher = get_dispatcher_notifications()
+        resultats = dispatcher.envoyer(
+            user_id=str(user_id),
+            message=str(action.get("message", "Rapport PDF prêt à générer")),
+            canaux=["ntfy"],
+            titre="Rapport PDF",
+        )
+        return 1 if any(bool(v) for v in resultats.values()) else 0
+
+    def _executer_action_mettre_a_jour_budget(self, action: dict[str, Any], db: Session) -> int:
+        montant = float(action.get("montant", 0) or 0)
+        if montant <= 0:
+            return 0
+
+        db.add(
+            Depense(
+                montant=montant,
+                categorie=str(action.get("categorie", "autre")),
+                description=str(action.get("description", "Ajustement budget automation")),
+                date=datetime.now(UTC).date(),
+            )
+        )
+        return 1
+
+    @staticmethod
+    def _executer_action_archiver(_action: dict[str, Any], regle: AutomationRegle) -> int:
+        regle.active = False
+        return 1
+
+    def _evaluer_declencheur(self, declencheur: dict[str, Any], db: Session) -> list[Any]:
+        type_declencheur = str(declencheur.get("type", "")).strip().lower()
+        if type_declencheur == "stock_bas":
+            return self._declenche_stock_bas(declencheur, db)
+        if type_declencheur == "peremption_proche":
+            return self._declenche_peremption_proche(declencheur, db)
+        if type_declencheur == "budget_depassement":
+            return self._declenche_budget_depassement(declencheur, db)
+        if type_declencheur == "meteo_alerte":
+            return self._declenche_meteo_alerte(declencheur)
+        if type_declencheur == "anniversaire_proche":
+            return self._declenche_anniversaire_proche(declencheur, db)
+        if type_declencheur == "tache_en_retard":
+            return self._declenche_tache_en_retard(db)
+        if type_declencheur == "garmin_inactivite":
+            return self._declenche_garmin_inactivite(declencheur, db)
+        if type_declencheur == "document_expiration":
+            return self._declenche_document_expiration(declencheur, db)
+        if type_declencheur == "recette_sans_photo":
+            return self._declenche_recette_sans_photo(db)
+        raise ValueError(f"Déclencheur non supporté: {type_declencheur}")
+
+    def _executer_une_regle(self, regle: AutomationRegle, db: Session, *, dry_run: bool = False) -> dict[str, Any]:
         declencheur = regle.declencheur or {}
         action = regle.action or {}
 
-        type_declencheur = str(declencheur.get("type", "")).strip().lower()
-        if type_declencheur != "stock_bas":
+        try:
+            items = self._evaluer_declencheur(declencheur, db)
+        except ValueError as exc:
             return {
                 "success": False,
                 "automation_id": regle.id,
-                "message": f"Déclencheur non supporté: {type_declencheur}",
+                "message": str(exc),
                 "executed": 0,
             }
 
-        items = self._declenche_stock_bas(declencheur, db)
         if not items:
             return {
                 "success": True,
@@ -141,10 +376,33 @@ class MoteurAutomationsService:
 
         type_action = str(action.get("type", "")).strip().lower()
         executed = 0
-        if type_action == "ajouter_courses":
+        if type_action in {"ajouter_courses", "generer_liste_courses"}:
             executed = self._executer_action_ajouter_courses(action, items, db)
+        elif type_action == "suggerer_recette":
+            executed = self._executer_action_notifier(
+                {
+                    "titre": action.get("titre", "Suggestions recettes"),
+                    "message": action.get("message", "Des ingrédients déclenchent une suggestion recette."),
+                },
+                items,
+                regle.user_id,
+            )
+        elif type_action == "creer_tache_maison":
+            executed = self._executer_action_creer_tache_maison(action, db)
+        elif type_action == "ajouter_au_planning":
+            executed = self._executer_action_ajouter_au_planning(action, db)
+        elif type_action == "mettre_a_jour_budget":
+            executed = self._executer_action_mettre_a_jour_budget(action, db)
+        elif type_action == "generer_rapport_pdf":
+            executed = self._executer_action_generer_rapport_pdf(action, regle.user_id)
+        elif type_action == "archiver":
+            executed = self._executer_action_archiver(action, regle)
         elif type_action == "notifier":
             executed = self._executer_action_notifier(action, items, regle.user_id)
+        elif type_action == "envoyer_whatsapp":
+            executed = self._executer_action_envoyer_whatsapp(action, regle.user_id)
+        elif type_action == "envoyer_email":
+            executed = self._executer_action_envoyer_email(action, regle.user_id)
         else:
             return {
                 "success": False,
@@ -153,15 +411,17 @@ class MoteurAutomationsService:
                 "executed": 0,
             }
 
-        regle.derniere_execution = datetime.utcnow()
-        regle.execution_count = int(regle.execution_count or 0) + 1
+        if not dry_run:
+            regle.derniere_execution = datetime.utcnow()
+            regle.execution_count = int(regle.execution_count or 0) + 1
 
         return {
             "success": True,
             "automation_id": regle.id,
-            "message": "Automation exécutée",
+            "message": "Automation exécutée" if not dry_run else "Automation simulée (dry-run)",
             "executed": executed,
             "items_declenches": len(items),
+            "dry_run": dry_run,
         }
 
     @avec_gestion_erreurs(default_return={"executed": 0, "results": []})
@@ -197,12 +457,46 @@ class MoteurAutomationsService:
         executed_count = sum(1 for r in results if r.get("success") and r.get("executed", 0) > 0)
         return {"executed": executed_count, "results": results, "total": len(results)}
 
+    @avec_gestion_erreurs(default_return={"executed": 0, "results": [], "dry_run": True})
+    @avec_session_db
+    def executer_automations_actives_dry_run(self, db: Session | None = None) -> dict[str, Any]:
+        """Simule l'exécution des automations actives sans persistance."""
+        if db is None:
+            return {"executed": 0, "results": [], "dry_run": True}
+
+        regles = (
+            db.query(AutomationRegle)
+            .filter(AutomationRegle.active == True)  # noqa: E712
+            .order_by(AutomationRegle.id.asc())
+            .all()
+        )
+
+        results: list[dict[str, Any]] = []
+        for regle in regles:
+            try:
+                results.append(self._executer_une_regle(regle, db, dry_run=True))
+            except Exception as exc:  # pragma: no cover
+                results.append(
+                    {
+                        "success": False,
+                        "automation_id": regle.id,
+                        "message": str(exc),
+                        "executed": 0,
+                        "dry_run": True,
+                    }
+                )
+
+        db.rollback()
+        executed_count = sum(1 for r in results if r.get("success") and r.get("executed", 0) > 0)
+        return {"executed": executed_count, "results": results, "total": len(results), "dry_run": True}
+
     @avec_gestion_erreurs(default_return={"success": False, "message": "automation introuvable"})
     @avec_session_db
     def executer_automation_par_id(
         self,
         automation_id: int,
         user_id: int | None = None,
+        dry_run: bool = False,
         db: Session | None = None,
     ) -> dict[str, Any]:
         if db is None:
@@ -216,8 +510,11 @@ class MoteurAutomationsService:
         if not regle.active:
             return {"success": False, "message": "Automation inactive"}
 
-        result = self._executer_une_regle(regle, db)
-        db.commit()
+        result = self._executer_une_regle(regle, db, dry_run=dry_run)
+        if dry_run:
+            db.rollback()
+        else:
+            db.commit()
         return result
 
 

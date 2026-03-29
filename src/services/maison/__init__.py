@@ -36,6 +36,7 @@ _SERVICES = {
     # CRUD services
     "DepensesCrudService": "depenses_crud_service",
     "get_depenses_crud_service": "depenses_crud_service",
+    "obtenir_depenses_crud_service": "depenses_crud_service",
     "obtenir_service_depenses_crud": "depenses_crud_service",
     "HubDataService": "hub_data_service",
     "get_hub_data_service": "hub_data_service",
@@ -150,6 +151,7 @@ if TYPE_CHECKING:
     from .cellier_crud_service import CellierCrudService, get_cellier_crud_service
     from .checklists_crud_service import ChecklistsCrudService, get_checklists_service
     from .contrats_crud_service import ContratsCrudService, get_contrats_crud_service
+    from .depenses_crud_service import obtenir_depenses_crud_service
     from .diagnostics_crud_service import (
         DiagnosticsCrudService,
         EstimationsCrudService,
@@ -227,6 +229,7 @@ __all__ = [
     # CRUD services
     "DepensesCrudService",
     "get_depenses_crud_service",
+    "obtenir_depenses_crud_service",
     "obtenir_service_depenses_crud",
     "HubDataService",
     "get_hub_data_service",

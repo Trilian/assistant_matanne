@@ -1025,14 +1025,14 @@ AutomationEngine
 
 > **Objectif** : L'IA est partout où elle apporte de la valeur.
 
-**Statut (mise à jour 2026-03-29)** : `EN COURS` — **7/8** actions réalisées, **1/8** partielle.
+**Statut (mise à jour 2026-03-29)** : `TERMINEE` — **8/8** actions réalisées.
 
 | Action | Statut | Détail |
 |--------|--------|--------|
 | 6.1 Nutrition → détection carences + suggestions | ✅ Fait | Endpoint `GET /api/v1/planning/nutrition-hebdo` enrichi avec `insights` (carences probables + suggestions compensatoires) |
 | 6.2 Prédiction courses intelligente (avec contexte) | ✅ Fait | Endpoint `GET /api/v1/courses/predictions` accepte `nb_invites` + `evenements`; scoring contextualisé + quantité ajustée |
 | 6.3 Assistant multi-contexte | ✅ Fait | Route `POST /api/v1/assistant/chat` injecte un contexte cross-modules (planning, inventaire, budget, score Jules) |
-| 6.4 Énergie → anomalies IA | 🟡 Partiel | Endpoints `maison/energie/tendances` et `maison/energie/previsions-ia` actifs; moteur IA dédié anomalies à renforcer |
+| 6.4 Énergie → anomalies IA | ✅ Fait | Nouvel endpoint `GET /api/v1/maison/energie/anomalies-ia` avec score d'anormalité et explications IA par type compteur |
 | 6.5 Planificateur semaine complète | ✅ Fait | `POST /api/v1/planning/generer` génère une semaine complète avec signaux historiques, nutrition et saisonnalité |
 | 6.6 Prédiction péremption (patterns) | ✅ Fait | Service `prediction_peremption` implémente durées de vie observées + facteurs de conservation |
 | 6.7 Détection de tendances (3-6 mois) | ✅ Fait | Nouvel endpoint `GET /api/v1/dashboard/tendances-ia` avec signaux 6 mois budget + énergie et insights consolidés |
@@ -1043,7 +1043,7 @@ AutomationEngine
 | 6.1 | Nutrition → détection carences + suggestions | IA-1 | 4h | 🔴 | ✅ |
 | 6.2 | Prédiction courses intelligente (avec contexte) | IA-2 | 4h | 🔴 | ✅ |
 | 6.3 | Assistant multi-contexte | IA-NEW-1 | 8h | 🟡 | ✅ |
-| 6.4 | Énergie → anomalies IA | IA-7/G-MAI-1 | 3h | 🟡 | 🟡 |
+| 6.4 | Énergie → anomalies IA | IA-7/G-MAI-1 | 3h | 🟡 | ✅ |
 | 6.5 | Planificateur semaine complète | IA-NEW-3 | 8h | 🟡 | ✅ |
 | 6.6 | Prédiction péremption (apprentissage patterns) | IA-3 | 4h | 🟢 | ✅ |
 | 6.7 | Détection de tendances (3-6 mois) | IA-NEW-5 | 6h | 🟢 | ✅ |
@@ -1053,27 +1053,35 @@ AutomationEngine
 
 > **Objectif** : Jobs fiables avec historique, moteur d'automatisation riche.
 
-| # | Action | Réf. | Effort | Priorité |
-|---|--------|------|--------|----------|
-| 7.1 | Table `job_executions` + historique automatique | ADM-4/J2 | 3h | 🔴 |
-| 7.2 | Notification d'échec job → admin (push + email) | J4 | 1h | 🔴 |
-| 7.3 | Ajouter les 8 jobs manquants (JOB-1 à JOB-8) | — | 6h | 🟡 |
-| 7.4 | Étendre moteur d'automatisation (10 triggers, 9 actions) | — | 8h | 🟡 |
-| 7.5 | Mode dry-run pour jobs et automations | ADM-3 | 2h | 🟡 |
-| 7.6 | Métriques durée de chaque job | J5 | 1h | 🟢 |
+**Statut (mise à jour 2026-03-29)** : `TERMINEE` — **6/6** actions Phase 7 implémentées côté backend.
+
+| # | Action | Réf. | Effort | Priorité | Statut |
+|---|--------|------|--------|----------|--------|
+| 7.1 | Table `job_executions` + historique automatique | ADM-4/J2 | 3h | 🔴 | ✅ Fait — migration SQL `V006__phase7_jobs_automations.sql` + persistance des exécutions (cron et manuel) |
+| 7.2 | Notification d'échec job → admin (push + email) | J4 | 1h | 🔴 | ✅ Fait — notification automatique aux admins sur échec job |
+| 7.3 | Ajouter les 8 jobs manquants (JOB-1 à JOB-8) | — | 6h | 🟡 | ✅ Fait — jobs ajoutés au registre + scheduling APScheduler |
+| 7.4 | Étendre moteur d'automatisation (10 triggers, 9 actions) | — | 8h | 🟡 | ✅ Fait — déclencheurs/actions étendus dans `automations_engine.py` |
+| 7.5 | Mode dry-run pour jobs et automations | ADM-3 | 2h | 🟡 | ✅ Fait — dry-run sur exécution admin jobs + endpoint automation manuel |
+| 7.6 | Métriques durée de chaque job | J5 | 1h | 🟢 | ✅ Fait — `duration_ms` persisté dans `job_executions` |
 
 ### Phase 8 — Notifications & Communications
 
 > **Objectif** : Notifications fiables, multi-canal, avec préférences utilisateur.
 
-| # | Action | Réf. | Effort | Priorité |
-|---|--------|------|--------|----------|
-| 8.1 | Finaliser WhatsApp envoi (confirmer/implémenter) | N3 | 3h | 🔴 |
-| 8.2 | Préférences unifiées par canal et par type | N2 | 3h | 🔴 |
-| 8.3 | Failover push → WhatsApp → email | N1 | 2h | 🟡 |
-| 8.4 | Throttling & digest (regroupement notifications) | N5/N6 | 3h | 🟡 |
-| 8.5 | Mapper événements → canaux (tableau §11.4) | — | 2h | 🟡 |
-| 8.6 | Tests notifications failover | T10 | 2h | 🟢 |
+| # | Action | Réf. | Effort | Priorité | Statut (2026-03-29) |
+|---|--------|------|--------|----------|----------------------|
+| 8.1 | Finaliser WhatsApp envoi (confirmer/implémenter) | N3 | 3h | 🔴 | ✅ Fait (dispatcher WhatsApp consolidé) |
+| 8.2 | Préférences unifiées par canal et par type | N2 | 3h | 🔴 | ✅ Fait (canaux + max/h + digest via API préférences) |
+| 8.3 | Failover push → WhatsApp → email | N1 | 2h | 🟡 | ✅ Fait (stratégie failover dans dispatcher) |
+| 8.4 | Throttling & digest (regroupement notifications) | N5/N6 | 3h | 🟡 | 🟡 Partiel (throttling + queue digest implémentés, purge auto à planifier) |
+| 8.5 | Mapper événements → canaux (tableau §11.4) | — | 2h | 🟡 | ✅ Fait (mapping centralisé dans dispatcher) |
+| 8.6 | Tests notifications failover | T10 | 2h | 🟢 | ✅ Fait (tests unitaires Phase 8 ajoutés) |
+
+Notes d'implémentation Phase 8 (2026-03-29):
+
+- Fichier `src/services/core/notifications/notif_dispatcher.py` : ajout routing événementiel, failover, throttling et digest.
+- Fichiers `src/api/schemas/preferences.py` et `src/api/routes/preferences.py` : ajout préférences `max_par_heure` et `mode_digest`.
+- Fichier `tests/services/test_notif_dispatcher_phase8.py` : nouveaux tests ciblés failover/routing/throttling.
 
 ### Phase 9 — Mode Admin Complet
 

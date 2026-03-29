@@ -35,6 +35,7 @@ from typing import Any, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from sqlalchemy import text
 
 from src.api.dependencies import require_role
 from src.api.schemas.errors import REPONSES_AUTH_ADMIN
@@ -360,6 +361,14 @@ _LABELS_JOBS: dict[str, str] = {
     "archive_batches_expires": "J4 Archivage préparations batch expirées (02h00)",
     "rapport_maison_mensuel": "J5 Rapport maison mensuel (1er/mois 09h30)",
     "sync_openfoodfacts": "J6 Sync cache OpenFoodFacts (dim 03h00)",
+    "prediction_courses_weekly": "JOB-1 Prédiction courses hebdo (dim 10h00)",
+    "sync_jeux_budget": "JOB-2 Sync jeux -> budget (22h00)",
+    "analyse_nutrition_hebdo": "JOB-3 Analyse nutrition hebdo (dim 20h00)",
+    "alertes_energie": "JOB-4 Alertes énergie (07h00)",
+    "nettoyage_logs": "JOB-5 Nettoyage logs > 90j (dim 04h00)",
+    "check_garmin_anomalies": "JOB-6 Anomalies Garmin (08h00)",
+    "resume_jardin_saisonnier": "JOB-7 Résumé jardin saisonnier (1er 08h00)",
+    "expiration_documents": "JOB-8 Expiration documents (09h00)",
 }
 
 # Vues SQL explicitement autorisées (lecture seule)
@@ -415,6 +424,7 @@ async def lister_jobs(
 @gerer_exception_api
 async def executer_job(
     job_id: str,
+    dry_run: bool = Query(False, description="Simuler le job sans exécution réelle"),
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict:
     """Déclenche un job cron de façon asynchrone."""
@@ -423,47 +433,36 @@ async def executer_job(
     # Rate limiting : 5 triggers/min par admin
     _verifier_limite_jobs(str(user.get("id", "admin")))
 
-    # Fonctions de job disponibles (évite l'exécution de code arbitraire)
-    _JOBS_DISPONIBLES: dict[str, str] = {
-        "rappels_famille": "src.services.core.cron.jobs._job_rappels_famille",
-        "rappels_maison": "src.services.core.cron.jobs._job_rappels_maison",
-        "rappels_generaux": "src.services.core.cron.jobs._job_rappels_generaux",
-        "push_quotidien": "src.services.core.cron.jobs._job_push_quotidien",
-        "digest_ntfy": "src.services.core.cron.jobs._job_digest_ntfy",
-        "rappel_courses": "src.services.core.cron.jobs._job_rappel_courses_ntfy",
-        "entretien_saisonnier": "src.services.core.cron.jobs._job_entretien_saisonnier",
-        "enrichissement_catalogues": "src.services.core.cron.jobs._job_enrichissement_catalogues",
-    }
+    from src.services.core.cron.jobs import executer_job_par_id, lister_jobs_disponibles
 
-    if job_id not in _JOBS_DISPONIBLES:
+    jobs_disponibles = lister_jobs_disponibles()
+    if job_id not in jobs_disponibles:
         raise HTTPException(
             status_code=404,
-            detail=f"Job '{job_id}' inconnu. Jobs disponibles : {list(_JOBS_DISPONIBLES)}",
+            detail=f"Job '{job_id}' inconnu. Jobs disponibles : {jobs_disponibles}",
         )
 
-    module_path, func_name = _JOBS_DISPONIBLES[job_id].rsplit(".", 1)
-
     def _run():
-        import importlib
-
-        debut = datetime.now()
-        try:
-            module = importlib.import_module(module_path)
-            func = getattr(module, func_name)
-            func()
-            duree_ms = int((datetime.now() - debut).total_seconds() * 1000)
-            _ajouter_log_job(job_id, "succes", f"Exécuté en {duree_ms} ms")
-            return {"status": "ok", "job_id": job_id, "message": f"Job '{job_id}' exécuté."}
-        except Exception as exc:
-            _ajouter_log_job(job_id, "erreur", str(exc))
-            raise
+        resultat = executer_job_par_id(
+            job_id,
+            dry_run=dry_run,
+            source="manual",
+            triggered_by_user_id=str(user.get("id", "admin")),
+            relancer_exception=True,
+        )
+        _ajouter_log_job(
+            job_id,
+            "succes" if resultat.get("status") in {"ok", "dry_run"} else "erreur",
+            str(resultat.get("message", "")),
+        )
+        return resultat
 
     result = await executer_async(_run)
     _journaliser_action_admin(
         action="admin.job.run",
         entite_type="job",
         utilisateur_id=str(user.get("id", "admin")),
-        details={"job_id": job_id},
+        details={"job_id": job_id, "dry_run": dry_run},
     )
     return result
 
@@ -480,11 +479,43 @@ async def logs_job(
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict:
     """Retourne les logs des N dernières exécutions manuelles du job."""
-    logs = _job_logs.get(job_id, [])
+    from src.api.utils import executer_avec_session
+
+    logs_persistes: list[dict[str, Any]] = []
+    try:
+        with executer_avec_session() as session:
+            logs_rows = session.execute(
+                text(
+                    """
+                    SELECT started_at, ended_at, duration_ms, status, error_message, output_logs
+                    FROM job_executions
+                    WHERE job_id = :job_id
+                    ORDER BY started_at DESC
+                    LIMIT 50
+                    """
+                ),
+                {"job_id": job_id},
+            ).mappings().all()
+        logs_persistes = [
+            {
+                "timestamp": row["started_at"].isoformat() if row["started_at"] else None,
+                "ended_at": row["ended_at"].isoformat() if row["ended_at"] else None,
+                "status": row["status"],
+                "duration_ms": int(row["duration_ms"] or 0),
+                "message": row["error_message"] or row["output_logs"] or "",
+                "source": "db",
+            }
+            for row in logs_rows
+        ]
+    except Exception:
+        logs_persistes = []
+
+    logs_mem = _job_logs.get(job_id, [])
+    logs = logs_persistes or list(reversed(logs_mem))
     return {
         "job_id": job_id,
         "nom": _LABELS_JOBS.get(job_id, job_id),
-        "logs": list(reversed(logs)),  # plus récent en premier
+        "logs": logs,
         "total": len(logs),
     }
 

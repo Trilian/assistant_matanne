@@ -29,3 +29,16 @@ def test_previsions_energie_ia_ok():
     assert data.get("type") == "electricite"
     # either a valid forecast or an explanatory message
     assert any(k in data for k in ("consommation_prevue", "message"))
+
+
+@pytest.mark.integration
+def test_anomalies_energie_ia_ok():
+    resp = client.get(
+        "/api/v1/maison/energie/anomalies-ia?type_compteur=electricite&nb_mois=6&seuil_pct=20"
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data.get("type") == "electricite"
+    assert "points" in data
+    assert "anomalies" in data
+    assert "score_anormalite_global" in data

@@ -4,7 +4,7 @@ Schémas Pydantic pour les préférences utilisateur.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class PreferencesBase(BaseModel):
@@ -80,6 +80,17 @@ class CanauxParCategorie(BaseModel):
         description="Canaux pour les résumés hebdo/mensuel",
     )
 
+    @field_validator("rappels", "alertes", "resumes")
+    @classmethod
+    def valider_canaux(cls, value: list[str]) -> list[str]:
+        propres: list[str] = []
+        for canal in value or []:
+            if canal in _CANAUX_VALIDES and canal not in propres:
+                propres.append(canal)
+        if not propres:
+            raise ValueError("Au moins un canal valide est requis")
+        return propres
+
 
 class PreferencesNotificationsBase(BaseModel):
     """Champs communs pour les préférences de notification."""
@@ -93,6 +104,32 @@ class PreferencesNotificationsBase(BaseModel):
     canaux_par_categorie: CanauxParCategorie = Field(default_factory=CanauxParCategorie)
     quiet_hours_start: str = Field("22:00", description="Heure début silence (HH:MM)")
     quiet_hours_end: str = Field("07:00", description="Heure fin silence (HH:MM)")
+    max_par_heure: int = Field(5, ge=1, le=50, description="Limite d'envoi par heure")
+    mode_digest: bool = Field(False, description="Activer la consolidation en digest")
+
+    @field_validator("canal_prefere")
+    @classmethod
+    def valider_canal_prefere(cls, value: str) -> str:
+        if value not in _CANAUX_VALIDES:
+            raise ValueError("canal_prefere invalide")
+        return value
+
+    @field_validator("quiet_hours_start", "quiet_hours_end")
+    @classmethod
+    def valider_heure(cls, value: str) -> str:
+        if value is None:
+            return value
+        txt = str(value)
+        if len(txt) != 5 or txt[2] != ":":
+            raise ValueError("Format attendu HH:MM")
+        heures, minutes = txt.split(":", 1)
+        if not (heures.isdigit() and minutes.isdigit()):
+            raise ValueError("Format attendu HH:MM")
+        h = int(heures)
+        m = int(minutes)
+        if not (0 <= h <= 23 and 0 <= m <= 59):
+            raise ValueError("Heure invalide")
+        return f"{h:02d}:{m:02d}"
 
 
 class PreferencesNotificationsUpdate(BaseModel):
@@ -107,6 +144,34 @@ class PreferencesNotificationsUpdate(BaseModel):
     canaux_par_categorie: CanauxParCategorie | None = None
     quiet_hours_start: str | None = None
     quiet_hours_end: str | None = None
+    max_par_heure: int | None = Field(default=None, ge=1, le=50)
+    mode_digest: bool | None = None
+
+    @field_validator("canal_prefere")
+    @classmethod
+    def valider_canal_prefere(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        if value not in _CANAUX_VALIDES:
+            raise ValueError("canal_prefere invalide")
+        return value
+
+    @field_validator("quiet_hours_start", "quiet_hours_end")
+    @classmethod
+    def valider_heure(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        txt = str(value)
+        if len(txt) != 5 or txt[2] != ":":
+            raise ValueError("Format attendu HH:MM")
+        heures, minutes = txt.split(":", 1)
+        if not (heures.isdigit() and minutes.isdigit()):
+            raise ValueError("Format attendu HH:MM")
+        h = int(heures)
+        m = int(minutes)
+        if not (0 <= h <= 23 and 0 <= m <= 59):
+            raise ValueError("Heure invalide")
+        return f"{h:02d}:{m:02d}"
 
 
 class PreferencesNotificationsResponse(PreferencesNotificationsBase):

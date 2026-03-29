@@ -968,7 +968,7 @@ async def historique_energie(
 
     def _query():
         service = obtenir_depenses_crud_service()
-        return service.charger_historique_energie(type_energie, nb_mois=nb_mois)
+        return {"items": service.charger_historique_energie(type_energie, nb_mois=nb_mois)}
 
     return await executer_async(_query)
 
@@ -1019,6 +1019,31 @@ async def tendances_energie(
                 "moyenne": round(moyenne, 2),
                 "total": len(points),
             }
+
+    return await executer_async(_query)
+
+
+@router.get("/energie/anomalies-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def anomalies_energie_ia(
+    type_compteur: str = Query("electricite", description="electricite | eau | gaz"),
+    nb_mois: int = Query(12, ge=3, le=36, description="Nombre de mois a analyser"),
+    seuil_pct: float = Query(20.0, ge=5.0, le=80.0, description="Seuil d'ecart (%) pour considerer une anomalie"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Detecte les anomalies energie avec scoring et explications IA."""
+
+    def _query() -> dict[str, Any]:
+        from src.services.maison.energie_anomalies_ia import (
+            obtenir_service_energie_anomalies_ia,
+        )
+
+        service = obtenir_service_energie_anomalies_ia()
+        return service.analyser_anomalies(
+            type_compteur=type_compteur,
+            nb_mois=nb_mois,
+            seuil_pct=seuil_pct,
+        )
 
     return await executer_async(_query)
 

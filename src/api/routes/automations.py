@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
@@ -215,6 +215,7 @@ async def simuler_automation(
 @gerer_exception_api
 async def executer_automation_maintenant(
     automation_id: int,
+    dry_run: bool = Query(False, description="Simuler l'exécution sans persistance"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """DÃ©clenche manuellement une automation (LT-04)."""
@@ -227,11 +228,13 @@ async def executer_automation_maintenant(
             result = service.executer_automation_par_id(
                 automation_id,
                 user_id=profil.id,
+                dry_run=dry_run,
                 db=session,
             )
             if not result.get("success"):
                 raise HTTPException(status_code=404, detail=result.get("message", "Automation introuvable"))
-            return {"message": "Automation exÃ©cutÃ©e", "resultat": result, "user_id": profil.id}
+            message = "Automation simulÃ©e" if dry_run else "Automation exÃ©cutÃ©e"
+            return {"message": message, "resultat": result, "user_id": profil.id, "dry_run": dry_run}
 
     return await executer_async(_query)
 

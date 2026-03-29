@@ -189,6 +189,7 @@ _CANAUX_DEFAULTS: dict[str, list[str]] = {
 def _notif_to_dict(prefs: Any, user_id: str) -> dict[str, Any]:
     """Sérialise une PreferenceNotification en dict API."""
     canaux_par_cat = prefs.canaux_par_categorie or _CANAUX_DEFAULTS
+    modules_actifs = prefs.modules_actifs or {}
     return {
         "user_id": user_id,
         "courses_rappel": prefs.courses_rappel,
@@ -204,6 +205,8 @@ def _notif_to_dict(prefs: Any, user_id: str) -> dict[str, Any]:
         },
         "quiet_hours_start": str(prefs.quiet_hours_start or "22:00")[:5],
         "quiet_hours_end": str(prefs.quiet_hours_end or "07:00")[:5],
+        "max_par_heure": int(modules_actifs.get("max_par_heure", 5)),
+        "mode_digest": bool(modules_actifs.get("mode_digest", False)),
     }
 
 
@@ -236,6 +239,8 @@ async def obtenir_preferences_notifications(
                     "canaux_par_categorie": _CANAUX_DEFAULTS,
                     "quiet_hours_start": "22:00",
                     "quiet_hours_end": "07:00",
+                    "max_par_heure": 5,
+                    "mode_digest": False,
                 }
 
             return _notif_to_dict(prefs, user["id"])
@@ -265,6 +270,7 @@ async def modifier_preferences_notifications(
                 session.add(prefs)
 
             updates = donnees.model_dump(exclude_unset=True)
+            modules_actifs = dict(prefs.modules_actifs or {})
             for key, value in updates.items():
                 if key == "canaux_par_categorie" and value is not None:
                     # Convertir Pydantic model → dict
@@ -277,8 +283,12 @@ async def modifier_preferences_notifications(
                         setattr(prefs, key, _time(int(h), int(m)))
                     except Exception:
                         pass
+                elif key in ("max_par_heure", "mode_digest"):
+                    modules_actifs[key] = value
                 else:
                     setattr(prefs, key, value)
+
+            prefs.modules_actifs = modules_actifs
 
             session.commit()
             session.refresh(prefs)

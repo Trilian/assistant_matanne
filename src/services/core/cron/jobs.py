@@ -10,10 +10,13 @@ Jobs déclarés :
 
 import logging
 import os
+import time
+from collections.abc import Callable
+from datetime import UTC, date, datetime, timedelta
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from sqlalchemy import func
+from sqlalchemy import func, text
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +60,228 @@ def _envoyer_notif_tous_users(
         except Exception:
             logger.debug("Échec envoi notification à %s", user_id)
     return resultats
+
+
+def _obtenir_admin_user_ids() -> list[str]:
+    """Retourne les identifiants admin pour les alertes d'échec de jobs.
+
+    Priorité:
+    1) Variable d'env ``ADMIN_USER_IDS`` (csv)
+    2) Fallback sur le 1er utilisateur actif
+    """
+    admins_env = os.getenv("ADMIN_USER_IDS", "")
+    admins = [uid.strip() for uid in admins_env.split(",") if uid.strip()]
+    if admins:
+        return admins
+
+    actifs = _obtenir_user_ids_actifs()
+    return actifs[:1] if actifs else ["matanne"]
+
+
+def _creer_execution_job(
+    *,
+    job_id: str,
+    job_name: str,
+    status: str,
+    started_at: datetime,
+    dry_run: bool = False,
+    source: str = "cron",
+    triggered_by_user_id: str | None = None,
+) -> int | None:
+    """Insère une exécution dans ``job_executions`` (best-effort)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+
+        with obtenir_contexte_db() as session:
+            result = session.execute(
+                text(
+                    """
+                    INSERT INTO job_executions (
+                        job_id,
+                        job_name,
+                        started_at,
+                        status,
+                        output_logs,
+                        triggered_by_user_id,
+                        triggered_by_user_role,
+                        created_at,
+                        modified_at
+                    )
+                    VALUES (
+                        :job_id,
+                        :job_name,
+                        :started_at,
+                        :status,
+                        :output_logs,
+                        :triggered_by_user_id,
+                        :triggered_by_user_role,
+                        NOW(),
+                        NOW()
+                    )
+                    RETURNING id
+                    """
+                ),
+                {
+                    "job_id": job_id,
+                    "job_name": job_name,
+                    "started_at": started_at,
+                    "status": status,
+                    "output_logs": f"source={source};dry_run={dry_run}",
+                    "triggered_by_user_id": triggered_by_user_id,
+                    "triggered_by_user_role": "admin" if source == "manual" else "system",
+                },
+            )
+            execution_id = result.scalar()
+            session.commit()
+            return int(execution_id) if execution_id is not None else None
+    except Exception:
+        logger.debug("Table job_executions indisponible (migration non appliquée?)", exc_info=True)
+        return None
+
+
+def _finaliser_execution_job(
+    execution_id: int | None,
+    *,
+    status: str,
+    duration_ms: int,
+    error_message: str | None = None,
+    output_logs: str | None = None,
+) -> None:
+    """Met à jour une exécution de job (best-effort)."""
+    if execution_id is None:
+        return
+
+    try:
+        from src.core.db import obtenir_contexte_db
+
+        with obtenir_contexte_db() as session:
+            session.execute(
+                text(
+                    """
+                    UPDATE job_executions
+                    SET
+                        ended_at = NOW(),
+                        duration_ms = :duration_ms,
+                        status = :status,
+                        error_message = :error_message,
+                        output_logs = COALESCE(:output_logs, output_logs),
+                        modified_at = NOW()
+                    WHERE id = :id
+                    """
+                ),
+                {
+                    "id": execution_id,
+                    "duration_ms": duration_ms,
+                    "status": status,
+                    "error_message": error_message,
+                    "output_logs": output_logs,
+                },
+            )
+            session.commit()
+    except Exception:
+        logger.debug("Impossible de finaliser job_executions id=%s", execution_id, exc_info=True)
+
+
+def _notifier_echec_job_admin(job_id: str, job_name: str, erreur: str) -> None:
+    """Notifie les admins en push + email si un job échoue."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        dispatcher = get_dispatcher_notifications()
+        message = (
+            f"Le job '{job_name}' ({job_id}) a échoué. "
+            f"Erreur: {erreur[:300]}"
+        )
+        for admin_id in _obtenir_admin_user_ids():
+            dispatcher.envoyer(
+                user_id=admin_id,
+                message=message,
+                canaux=["push", "email"],
+                titre="Echec job cron",
+                type_email="alerte_critique",
+                alerte={
+                    "titre": "Echec job cron",
+                    "message": message,
+                },
+            )
+    except Exception:
+        logger.exception("Impossible d'envoyer la notification d'échec job aux admins")
+
+
+def _executer_job_trace(
+    *,
+    job_id: str,
+    job_name: str,
+    fonction: Callable[[], None],
+    dry_run: bool = False,
+    source: str = "cron",
+    triggered_by_user_id: str | None = None,
+    relancer_exception: bool = False,
+) -> dict[str, str | int | bool]:
+    """Exécute un job avec traçabilité complète (historique + métriques)."""
+    started_at = datetime.now(UTC)
+    t0 = time.perf_counter()
+    execution_id = _creer_execution_job(
+        job_id=job_id,
+        job_name=job_name,
+        status="running",
+        started_at=started_at,
+        dry_run=dry_run,
+        source=source,
+        triggered_by_user_id=triggered_by_user_id,
+    )
+
+    if dry_run:
+        duration_ms = int((time.perf_counter() - t0) * 1000)
+        _finaliser_execution_job(
+            execution_id,
+            status="dry_run",
+            duration_ms=duration_ms,
+            output_logs="Simulation uniquement - aucune écriture effectuée.",
+        )
+        return {
+            "status": "dry_run",
+            "job_id": job_id,
+            "message": f"Job '{job_id}' simulé (dry-run).",
+            "duration_ms": duration_ms,
+            "dry_run": True,
+        }
+
+    try:
+        fonction()
+        duration_ms = int((time.perf_counter() - t0) * 1000)
+        _finaliser_execution_job(
+            execution_id,
+            status="success",
+            duration_ms=duration_ms,
+        )
+        return {
+            "status": "ok",
+            "job_id": job_id,
+            "message": f"Job '{job_id}' exécuté.",
+            "duration_ms": duration_ms,
+            "dry_run": False,
+        }
+    except Exception as exc:
+        duration_ms = int((time.perf_counter() - t0) * 1000)
+        erreur = str(exc)
+        _finaliser_execution_job(
+            execution_id,
+            status="failure",
+            duration_ms=duration_ms,
+            error_message=erreur[:1000],
+        )
+        _notifier_echec_job_admin(job_id, job_name, erreur)
+        logger.exception("Erreur job %s", job_id)
+        if relancer_exception:
+            raise
+        return {
+            "status": "error",
+            "job_id": job_id,
+            "message": erreur,
+            "duration_ms": duration_ms,
+            "dry_run": False,
+        }
 
 
 # ─── Jobs ─────────────────────────────────────────────────────────────────────
@@ -408,7 +633,8 @@ def _job_push_contextuel_soir() -> None:
         resultats = _envoyer_notif_tous_users(
             dispatcher,
             message=message,
-            canaux=["ntfy", "push"],
+            canaux=["push"],
+            strategie="failover",
             titre="Préparation de demain",
         )
         logger.info("Push contextuel soir envoyé: %s", resultats)
@@ -1270,7 +1496,671 @@ def _job_sync_openfoodfacts() -> None:
         logger.exception("Erreur job J6 sync_openfoodfacts")
 
 
+def _job_prediction_courses_weekly() -> None:
+    """JOB-1 — Pré-remplit la liste courses hebdomadaire selon l'historique."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleCourses, ListeCourses
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.cuisine.prediction_courses import obtenir_service_prediction_courses
+
+        predictions = obtenir_service_prediction_courses().predire_articles(limite=30)
+        if not predictions:
+            logger.info("JOB-1: aucune prédiction courses disponible")
+            return
+
+        with obtenir_contexte_db() as session:
+            liste = (
+                session.query(ListeCourses)
+                .filter(ListeCourses.archivee.is_(False))
+                .order_by(ListeCourses.id.desc())
+                .first()
+            )
+            if liste is None:
+                liste = ListeCourses(nom="Courses prédites", archivee=False)
+                session.add(liste)
+                session.flush()
+
+            existants = {
+                row[0]
+                for row in session.query(ArticleCourses.ingredient_id)
+                .filter(
+                    ArticleCourses.liste_id == liste.id,
+                    ArticleCourses.achete.is_(False),
+                )
+                .all()
+            }
+
+            nb_ajoutes = 0
+            for pred in predictions:
+                ingredient_id = pred.get("ingredient_id")
+                if not ingredient_id or ingredient_id in existants:
+                    continue
+
+                session.add(
+                    ArticleCourses(
+                        liste_id=liste.id,
+                        ingredient_id=int(ingredient_id),
+                        quantite_necessaire=float(pred.get("quantite_suggeree", 1.0) or 1.0),
+                        priorite="moyenne",
+                        achete=False,
+                        suggere_par_ia=True,
+                        notes="Ajout automatique (prediction hebdo)",
+                    )
+                )
+                nb_ajoutes += 1
+
+            session.commit()
+
+        if nb_ajoutes > 0:
+            dispatcher = get_dispatcher_notifications()
+            _envoyer_notif_tous_users(
+                dispatcher,
+                message=f"{nb_ajoutes} article(s) prédit(s) ajouté(s) à la liste courses.",
+                canaux=["ntfy", "push"],
+                titre="Courses hebdo prédites",
+            )
+        logger.info("JOB-1 exécuté: %d article(s) ajouté(s)", nb_ajoutes)
+    except Exception:
+        logger.exception("Erreur JOB-1 prediction_courses_weekly")
+
+
+def _job_sync_jeux_budget() -> None:
+    """JOB-2 — Synchronise les gains/pertes jeux vers le budget famille."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import BudgetFamille, PariSportif
+
+        today = date.today()
+        debut_jour = datetime.combine(today - timedelta(days=1), datetime.min.time(), tzinfo=UTC)
+        fin_jour = datetime.combine(today, datetime.min.time(), tzinfo=UTC)
+
+        with obtenir_contexte_db() as session:
+            mises = (
+                session.query(func.sum(PariSportif.mise))
+                .filter(PariSportif.date_pari >= debut_jour, PariSportif.date_pari < fin_jour)
+                .scalar()
+                or 0
+            )
+            gains = (
+                session.query(func.sum(PariSportif.gain))
+                .filter(PariSportif.date_pari >= debut_jour, PariSportif.date_pari < fin_jour)
+                .scalar()
+                or 0
+            )
+
+            net = float(gains) - float(mises)
+            if net == 0:
+                logger.info("JOB-2: aucun mouvement jeux à synchroniser")
+                return
+
+            existe = (
+                session.query(BudgetFamille)
+                .filter(
+                    BudgetFamille.date == (today - timedelta(days=1)),
+                    BudgetFamille.categorie == "jeux",
+                    BudgetFamille.description == "Sync jeux auto",
+                )
+                .first()
+            )
+            if existe is None:
+                session.add(
+                    BudgetFamille(
+                        date=today - timedelta(days=1),
+                        categorie="jeux",
+                        description="Sync jeux auto",
+                        montant=abs(net),
+                        notes=f"Net jeux J-1: {net:.2f} EUR (gains={float(gains):.2f}, mises={float(mises):.2f})",
+                    )
+                )
+                session.commit()
+
+        logger.info("JOB-2 exécuté: net jeux J-1 synchronisé (%.2f EUR)", net)
+    except Exception:
+        logger.exception("Erreur JOB-2 sync_jeux_budget")
+
+
+def _job_analyse_nutrition_hebdo() -> None:
+    """JOB-3 — Analyse nutritionnelle hebdomadaire simple sur les repas planifiés."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Recette, Repas
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        debut = aujourd_hui - timedelta(days=7)
+
+        with obtenir_contexte_db() as session:
+            rows = (
+                session.query(Recette.calories, Recette.proteines, Recette.glucides, Recette.lipides)
+                .join(Repas, Repas.recette_id == Recette.id)
+                .filter(Repas.date_repas >= debut, Repas.date_repas <= aujourd_hui)
+                .all()
+            )
+
+        if not rows:
+            logger.info("JOB-3: aucune donnée nutritionnelle sur la semaine")
+            return
+
+        nb = len(rows)
+        cal_moy = sum(float(r[0] or 0) for r in rows) / nb
+        prot_moy = sum(float(r[1] or 0) for r in rows) / nb
+        gluc_moy = sum(float(r[2] or 0) for r in rows) / nb
+        lip_moy = sum(float(r[3] or 0) for r in rows) / nb
+
+        carences: list[str] = []
+        if prot_moy < 15:
+            carences.append("protéines")
+        if cal_moy < 350:
+            carences.append("apports énergétiques")
+
+        msg_carences = (
+            f" Carences possibles: {', '.join(carences)}." if carences else ""
+        )
+        message = (
+            f"Nutrition semaine: {cal_moy:.0f} kcal/repas, {prot_moy:.1f}g prot, "
+            f"{gluc_moy:.1f}g gluc, {lip_moy:.1f}g lip.{msg_carences}"
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["ntfy", "email"],
+            titre="Analyse nutrition hebdo",
+            type_email="resume_hebdo",
+            resume={"semaine": f"{debut.isoformat()} → {aujourd_hui.isoformat()}", "resume_ia": message},
+        )
+        logger.info("JOB-3 exécuté")
+    except Exception:
+        logger.exception("Erreur JOB-3 analyse_nutrition_hebdo")
+
+
+def _job_alertes_energie() -> None:
+    """JOB-4 — Détection simple d'anomalies énergie (vs moyenne historique)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ReleveEnergie
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        alertes: list[str] = []
+        with obtenir_contexte_db() as session:
+            types = [r[0] for r in session.query(ReleveEnergie.type_energie).distinct().all() if r and r[0]]
+            for t in types:
+                releves = (
+                    session.query(ReleveEnergie)
+                    .filter(ReleveEnergie.type_energie == t)
+                    .order_by(ReleveEnergie.annee.desc(), ReleveEnergie.mois.desc())
+                    .limit(6)
+                    .all()
+                )
+                if len(releves) < 4:
+                    continue
+
+                dernier = float(releves[0].consommation or 0)
+                historique = [float(r.consommation or 0) for r in releves[1:] if r.consommation is not None]
+                if not historique:
+                    continue
+
+                moyenne = sum(historique) / len(historique)
+                if moyenne > 0 and dernier > moyenne * 1.25:
+                    alertes.append(f"{t}: {dernier:.1f} (> +25% vs {moyenne:.1f})")
+
+        if not alertes:
+            logger.info("JOB-4: aucune anomalie énergie détectée")
+            return
+
+        message = "Anomalies énergie détectées: " + "; ".join(alertes)
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["ntfy", "push", "email"],
+            titre="Alerte consommation énergie",
+            type_email="alerte_critique",
+            alerte={"titre": "Alerte consommation énergie", "message": message},
+        )
+        logger.info("JOB-4 exécuté: %d alerte(s)", len(alertes))
+    except Exception:
+        logger.exception("Erreur JOB-4 alertes_energie")
+
+
+def _job_nettoyage_logs() -> None:
+    """JOB-5 — Purge des logs d'audit/sécurité > 90 jours."""
+    try:
+        from src.core.db import obtenir_contexte_db
+
+        with obtenir_contexte_db() as session:
+            nb_audit = session.execute(
+                text("DELETE FROM historique_actions WHERE cree_le < (NOW() - INTERVAL '90 days')")
+            ).rowcount or 0
+            nb_secu = session.execute(
+                text("DELETE FROM logs_securite WHERE created_at < (NOW() - INTERVAL '90 days')")
+            ).rowcount or 0
+            session.commit()
+
+        logger.info("JOB-5 exécuté: purge logs (audit=%s, securite=%s)", nb_audit, nb_secu)
+    except Exception:
+        logger.exception("Erreur JOB-5 nettoyage_logs")
+
+
+def _job_check_garmin_anomalies() -> None:
+    """JOB-6 — Alerte si inactivité Garmin > 3 jours."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ActiviteGarmin, ProfilUtilisateur
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        seuil = datetime.now(UTC) - timedelta(days=3)
+        inactifs: list[str] = []
+
+        with obtenir_contexte_db() as session:
+            profils = (
+                session.query(ProfilUtilisateur)
+                .filter(ProfilUtilisateur.garmin_connected.is_(True))
+                .all()
+            )
+            for profil in profils:
+                derniere = (
+                    session.query(func.max(ActiviteGarmin.date_debut))
+                    .filter(ActiviteGarmin.user_id == profil.id)
+                    .scalar()
+                )
+                if derniere is None or derniere < seuil:
+                    inactifs.append(profil.display_name or profil.username)
+
+        if inactifs:
+            message = "Aucune activité Garmin depuis 3 jours: " + ", ".join(inactifs)
+            dispatcher = get_dispatcher_notifications()
+            _envoyer_notif_tous_users(
+                dispatcher,
+                message=message,
+                canaux=["ntfy", "push"],
+                titre="Inactivité Garmin",
+            )
+            logger.info("JOB-6 exécuté: %d profil(s) inactif(s)", len(inactifs))
+        else:
+            logger.info("JOB-6: aucune anomalie Garmin")
+    except Exception:
+        logger.exception("Erreur JOB-6 check_garmin_anomalies")
+
+
+def _job_resume_jardin_saisonnier() -> None:
+    """JOB-7 — Résumé mensuel jardin avec recommandations synthétiques."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ElementJardin, JournalJardin
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        debut = aujourd_hui - timedelta(days=30)
+
+        with obtenir_contexte_db() as session:
+            nb_elements = session.query(ElementJardin).filter(ElementJardin.statut == "actif").count()
+            actions = (
+                session.query(JournalJardin.action, func.count(JournalJardin.id))
+                .filter(JournalJardin.date >= debut, JournalJardin.date <= aujourd_hui)
+                .group_by(JournalJardin.action)
+                .all()
+            )
+
+        top_actions = ", ".join(f"{a}:{n}" for a, n in actions[:4]) if actions else "aucune"
+        recos = "Pense à planifier arrosage + taille préventive si hausse températures."
+        message = (
+            f"Bilan jardin mensuel: {nb_elements} élément(s) actif(s), actions: {top_actions}. "
+            f"Reco: {recos}"
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["ntfy", "email"],
+            titre="Résumé jardin saisonnier",
+            type_email="resume_hebdo",
+            resume={"semaine": "bilan mois", "resume_ia": message},
+        )
+        logger.info("JOB-7 exécuté")
+    except Exception:
+        logger.exception("Erreur JOB-7 resume_jardin_saisonnier")
+
+
+def _job_expiration_documents() -> None:
+    """JOB-8 — Rappels de documents proches d'expiration."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.famille.documents import obtenir_service_documents
+
+        alertes = obtenir_service_documents().obtenir_alertes_expiration(jours=30)
+        if not alertes:
+            logger.info("JOB-8: aucun document à renouveler")
+            return
+
+        noms = ", ".join(a.get("nom") or a.get("titre") or "document" for a in alertes[:5])
+        message = f"{len(alertes)} document(s) à renouveler sous 30 jours: {noms}."
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["ntfy", "email", "push"],
+            titre="Expiration documents",
+            type_email="alerte_critique",
+            alerte={"titre": "Expiration documents", "message": message},
+        )
+        logger.info("JOB-8 exécuté: %d alerte(s)", len(alertes))
+    except Exception:
+        logger.exception("Erreur JOB-8 expiration_documents")
+
+
+_REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
+    # Jobs existants
+    "rappels_famille": ("Rappels famille quotidiens", _job_rappels_famille),
+    "rappels_maison": ("Rappels maison quotidiens", _job_rappels_maison),
+    "rappels_generaux": ("Rappels intelligents quotidiens", _job_rappels_generaux),
+    "entretien_saisonnier": ("Entretien saisonnier hebdomadaire", _job_entretien_saisonnier),
+    "push_quotidien": ("Notifications Web Push quotidiennes", _job_push_quotidien),
+    "enrichissement_catalogues": ("Enrichissement mensuel catalogues IA", _job_enrichissement_catalogues),
+    "digest_ntfy": ("Digest quotidien ntfy.sh", _job_digest_ntfy),
+    "rappel_courses": ("Rappel courses ntfy.sh", _job_rappel_courses_ntfy),
+    "push_contextuel_soir": ("Push contextuel soir", _job_push_contextuel_soir),
+    "resume_hebdo": ("Résumé hebdomadaire", _job_resume_hebdo),
+    "planning_semaine_si_vide": ("Vérification planning semaine suivante", _job_planning_semaine_si_vide),
+    "alertes_peremption_48h": ("Alertes péremption 48h", _job_alertes_peremption_48h),
+    "rapport_mensuel_budget": ("Rapport mensuel budget", _job_rapport_mensuel_budget),
+    "score_weekend": ("Score weekend", _job_score_weekend),
+    "controle_contrats_garanties": ("Contrats et garanties", _job_controle_contrats_garanties),
+    "rapport_jardin": ("Rapport jardin hebdo", _job_rapport_jardin),
+    "score_bien_etre_hebdo": ("Score bien-être hebdo", _job_score_bien_etre_hebdo),
+    "garmin_sync_matinal": ("Sync Garmin automatique matinale", _job_garmin_sync_matinal),
+    "automations_runner": ("Exécution automations", _job_automations),
+    "points_famille_hebdo": ("Calcul points famille hebdo", _job_points_famille_hebdo),
+    "sync_google_calendar": ("Sync Google Calendar", _job_sync_google_calendar),
+    "alerte_stock_bas": ("Alerte stock bas", _job_alerte_stock_bas),
+    "archive_batches_expires": ("Archivage batch expiré", _job_archive_batches_expires),
+    "rapport_maison_mensuel": ("Rapport maison mensuel", _job_rapport_maison_mensuel),
+    "sync_openfoodfacts": ("Sync cache OpenFoodFacts", _job_sync_openfoodfacts),
+    # Phase 7 — nouveaux jobs
+    "prediction_courses_weekly": ("Prédiction courses hebdo", _job_prediction_courses_weekly),
+    "sync_jeux_budget": ("Sync jeux -> budget", _job_sync_jeux_budget),
+    "analyse_nutrition_hebdo": ("Analyse nutrition hebdo", _job_analyse_nutrition_hebdo),
+    "alertes_energie": ("Alertes énergie", _job_alertes_energie),
+    "nettoyage_logs": ("Nettoyage logs > 90j", _job_nettoyage_logs),
+    "check_garmin_anomalies": ("Anomalies Garmin", _job_check_garmin_anomalies),
+    "resume_jardin_saisonnier": ("Résumé jardin saisonnier", _job_resume_jardin_saisonnier),
+    "expiration_documents": ("Expiration documents", _job_expiration_documents),
+}
+
+
+def lister_jobs_disponibles() -> list[str]:
+    """Retourne la liste des IDs de jobs exécutable par API admin."""
+    return sorted(_REGISTRE_JOBS.keys())
+
+
+def executer_job_par_id(
+    job_id: str,
+    *,
+    dry_run: bool = False,
+    source: str = "manual",
+    triggered_by_user_id: str | None = None,
+    relancer_exception: bool = False,
+) -> dict[str, str | int | bool]:
+    """Exécute un job connu avec instrumentation Phase 7."""
+    if job_id not in _REGISTRE_JOBS:
+        raise ValueError(f"Job inconnu: {job_id}")
+
+    job_name, job_func = _REGISTRE_JOBS[job_id]
+    return _executer_job_trace(
+        job_id=job_id,
+        job_name=job_name,
+        fonction=job_func,
+        dry_run=dry_run,
+        source=source,
+        triggered_by_user_id=triggered_by_user_id,
+        relancer_exception=relancer_exception,
+    )
+
+
 # ─── Orchestrateur ────────────────────────────────────────────────────────────
+
+
+def _job_sync_routines_planning() -> None:
+    """IM-10: synchronise les routines actives dans le planning quotidien."""
+    try:
+        from datetime import date, datetime, time, timedelta
+
+        from sqlalchemy import func
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import EvenementPlanning, Routine, TacheRoutine
+
+        aujourd_hui = date.today()
+        nb_crees = 0
+        nb_conflits = 0
+
+        def _heure_par_defaut(moment_journee: str) -> time:
+            mapping = {
+                "matin": time(hour=8, minute=0),
+                "midi": time(hour=12, minute=30),
+                "apres_midi": time(hour=16, minute=30),
+                "soir": time(hour=19, minute=0),
+                "nuit": time(hour=21, minute=0),
+            }
+            return mapping.get((moment_journee or "").lower(), time(hour=8, minute=0))
+
+        def _parser_heure(heure_prevue: str | None, moment_journee: str) -> time:
+            if heure_prevue and ":" in heure_prevue:
+                try:
+                    h, m = heure_prevue.split(":", 1)
+                    return time(hour=int(h), minute=int(m))
+                except Exception:
+                    logger.debug("Routine: heure_prevue invalide '%s'", heure_prevue)
+            return _heure_par_defaut(moment_journee)
+
+        with obtenir_contexte_db() as session:
+            routines = (
+                session.query(Routine)
+                .filter(Routine.actif == True)  # noqa: E712
+                .all()
+            )
+
+            for routine in routines:
+                taches = (
+                    session.query(TacheRoutine)
+                    .filter(TacheRoutine.routine_id == routine.id)
+                    .order_by(TacheRoutine.ordre.asc())
+                    .all()
+                )
+
+                for tache in taches:
+                    heure = _parser_heure(getattr(tache, "heure_prevue", None), routine.moment_journee)
+                    debut = datetime.combine(aujourd_hui, heure)
+                    fin = debut + timedelta(minutes=30)
+                    marqueur = f"sync_routine:{tache.id}:{aujourd_hui.isoformat()}"
+
+                    deja_sync = (
+                        session.query(EvenementPlanning.id)
+                        .filter(
+                            EvenementPlanning.description == marqueur,
+                            func.date(EvenementPlanning.date_debut) == aujourd_hui,
+                        )
+                        .first()
+                    )
+                    if deja_sync:
+                        continue
+
+                    conflit = (
+                        session.query(EvenementPlanning.id)
+                        .filter(
+                            func.date(EvenementPlanning.date_debut) == aujourd_hui,
+                            EvenementPlanning.date_debut < fin,
+                            func.coalesce(EvenementPlanning.date_fin, EvenementPlanning.date_debut)
+                            >= debut,
+                        )
+                        .first()
+                    )
+                    if conflit:
+                        nb_conflits += 1
+                        continue
+
+                    session.add(
+                        EvenementPlanning(
+                            titre=f"Routine: {routine.nom} - {tache.nom}",
+                            description=marqueur,
+                            date_debut=debut,
+                            date_fin=fin,
+                            type_event="routine",
+                            lieu="maison",
+                            couleur="#7AA2F7",
+                        )
+                    )
+                    nb_crees += 1
+
+            session.commit()
+
+        if nb_crees or nb_conflits:
+            logger.info(
+                "IM-10 sync routines->planning: %d événement(s) créé(s), %d conflit(s)",
+                nb_crees,
+                nb_conflits,
+            )
+    except Exception:
+        logger.exception("Erreur IM-10 sync routines->planning")
+
+
+def _job_sync_recoltes_inventaire() -> None:
+    """IM-12: synchronise les récoltes du jardin vers l'inventaire cuisine."""
+    try:
+        from datetime import date, timedelta
+
+        from sqlalchemy import func
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire, ElementJardin, Ingredient, JournalJardin
+
+        today = date.today()
+        nb_sync = 0
+
+        with obtenir_contexte_db() as session:
+            recoltes = (
+                session.query(ElementJardin)
+                .filter(
+                    ElementJardin.statut == "actif",
+                    ElementJardin.date_recolte_prevue.isnot(None),
+                    ElementJardin.date_recolte_prevue <= today,
+                )
+                .all()
+            )
+
+            for element in recoltes:
+                deja_sync = (
+                    session.query(JournalJardin.id)
+                    .filter(
+                        JournalJardin.garden_item_id == element.id,
+                        JournalJardin.action == "sync_inventaire",
+                    )
+                    .first()
+                )
+                if deja_sync:
+                    continue
+
+                ingredient = (
+                    session.query(Ingredient)
+                    .filter(func.lower(Ingredient.nom) == (element.nom or "").lower())
+                    .first()
+                )
+                if ingredient is None:
+                    ingredient = Ingredient(
+                        nom=element.nom,
+                        categorie="jardin",
+                        unite="pièce",
+                    )
+                    session.add(ingredient)
+                    session.flush()
+
+                article = (
+                    session.query(ArticleInventaire)
+                    .filter(ArticleInventaire.ingredient_id == ingredient.id)
+                    .first()
+                )
+                if article:
+                    article.quantite = float(article.quantite or 0) + 1.0
+                    if not article.emplacement:
+                        article.emplacement = "jardin"
+                    if not article.date_peremption:
+                        article.date_peremption = today + timedelta(days=5)
+                else:
+                    session.add(
+                        ArticleInventaire(
+                            ingredient_id=ingredient.id,
+                            quantite=1.0,
+                            quantite_min=1.0,
+                            emplacement="jardin",
+                            date_peremption=today + timedelta(days=5),
+                        )
+                    )
+
+                session.add(
+                    JournalJardin(
+                        garden_item_id=element.id,
+                        date=today,
+                        action="sync_inventaire",
+                        notes="Synchronisation automatique récolte -> inventaire",
+                    )
+                )
+                nb_sync += 1
+
+            session.commit()
+
+        if nb_sync:
+            logger.info("IM-12 sync récoltes->inventaire: %d récolte(s) synchronisée(s)", nb_sync)
+    except Exception:
+        logger.exception("Erreur IM-12 sync récoltes->inventaire")
+
+
+def _job_suggestions_activites_meteo() -> None:
+    """IM-14: génère des suggestions d'activités à partir de la météo et notifie la famille."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.integrations.weather.service import obtenir_service_meteo
+
+        service_meteo = obtenir_service_meteo()
+        previsions = service_meteo.get_previsions(nb_jours=1)
+        if not previsions:
+            logger.info("IM-14: météo indisponible, suggestions non envoyées")
+            return
+
+        meteo = previsions[0]
+        condition = (getattr(meteo, "condition", "") or "").lower()
+        pluie = getattr(meteo, "precipitation_mm", 0) >= 5 or "pluie" in condition
+
+        if pluie:
+            suggestions = [
+                "atelier peinture à la maison",
+                "parcours motricité intérieur",
+                "lecture interactive + musique",
+            ]
+        else:
+            suggestions = [
+                "balade au parc",
+                "atelier jardinage avec récolte",
+                "jeu d'eau / motricité extérieure",
+            ]
+
+        message = (
+            f"Météo du jour: {getattr(meteo, 'condition', 'variable')}. "
+            f"Idées activités famille: {', '.join(suggestions)}."
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["ntfy", "push"],
+            titre="Suggestions activités selon météo",
+        )
+        logger.info("IM-14 suggestions météo envoyées")
+    except Exception:
+        logger.exception("Erreur IM-14 suggestions météo")
 
 
 class DémarreurCron:
@@ -1283,176 +2173,53 @@ class DémarreurCron:
         )
         self._configurer_jobs()
 
+    def _planifier_job(self, job_id: str, trigger: CronTrigger, *, replace_existing: bool = False) -> None:
+        """Planifie un job en passant systématiquement par l'instrumentation Phase 7."""
+        nom = _REGISTRE_JOBS.get(job_id, (job_id, None))[0]
+        self._scheduler.add_job(
+            lambda _job_id=job_id: executer_job_par_id(_job_id, source="cron"),
+            trigger,
+            id=job_id,
+            name=nom,
+            replace_existing=replace_existing,
+        )
+
     def _configurer_jobs(self) -> None:
-        self._scheduler.add_job(
-            _job_rappels_famille,
-            CronTrigger(hour=7, minute=0),
-            id="rappels_famille",
-            name="Rappels famille quotidiens",
-        )
-        self._scheduler.add_job(
-            _job_rappels_maison,
-            CronTrigger(hour=8, minute=0),
-            id="rappels_maison",
-            name="Rappels maison quotidiens",
-        )
-        self._scheduler.add_job(
-            _job_rappels_generaux,
-            CronTrigger(hour=8, minute=30),
-            id="rappels_generaux",
-            name="Rappels intelligents quotidiens",
-        )
-        self._scheduler.add_job(
-            _job_entretien_saisonnier,
-            CronTrigger(day_of_week="mon", hour=6, minute=0),
-            id="entretien_saisonnier",
-            name="Entretien saisonnier hebdomadaire",
-        )
-        self._scheduler.add_job(
-            _job_push_quotidien,
-            CronTrigger(hour=9, minute=0),
-            id="push_quotidien",
-            name="Notifications Web Push quotidiennes (alertes urgentes)",
-        )
-        self._scheduler.add_job(
-            _job_enrichissement_catalogues,
-            CronTrigger(day=1, hour=3, minute=0),
-            id="enrichissement_catalogues",
-            name="Enrichissement mensuel catalogues IA",
-        )
-        self._scheduler.add_job(
-            _job_digest_ntfy,
-            CronTrigger(hour=9, minute=0),
-            id="digest_ntfy",
-            replace_existing=True,
-            name="Digest quotidien ntfy.sh (tâches + rappels)",
-        )
-        self._scheduler.add_job(
-            _job_rappel_courses_ntfy,
-            CronTrigger(hour=18, minute=0),
-            id="rappel_courses",
-            replace_existing=True,
-            name="Rappel courses ntfy.sh (articles en attente)",
-        )
-        self._scheduler.add_job(
-            _job_push_contextuel_soir,
-            CronTrigger(hour=18, minute=0),
-            id="push_contextuel_soir",
-            replace_existing=True,
-            name="Push contextuel soir (planning + météo)",
-        )
-        self._scheduler.add_job(
-            _job_resume_hebdo,
-            CronTrigger(day_of_week="mon", hour=7, minute=30),
-            id="resume_hebdo",
-            replace_existing=True,
-            name="Résumé hebdomadaire (lundi 07h30)",
-        )
-        self._scheduler.add_job(
-            _job_planning_semaine_si_vide,
-            CronTrigger(day_of_week="sun", hour=20, minute=0),
-            id="planning_semaine_si_vide",
-            replace_existing=True,
-            name="J-03 Vérification planning semaine suivante",
-        )
-        self._scheduler.add_job(
-            _job_alertes_peremption_48h,
-            CronTrigger(hour=6, minute=0),
-            id="alertes_peremption_48h",
-            replace_existing=True,
-            name="J-04 Alertes péremption 48h",
-        )
-        self._scheduler.add_job(
-            _job_rapport_mensuel_budget,
-            CronTrigger(day=1, hour=8, minute=15),
-            id="rapport_mensuel_budget",
-            replace_existing=True,
-            name="J-07 Rapport mensuel budget",
-        )
-        self._scheduler.add_job(
-            _job_score_weekend,
-            CronTrigger(day_of_week="fri", hour=17, minute=0),
-            id="score_weekend",
-            replace_existing=True,
-            name="J-08 Score weekend",
-        )
-        self._scheduler.add_job(
-            _job_controle_contrats_garanties,
-            CronTrigger(day=1, hour=9, minute=0),
-            id="controle_contrats_garanties",
-            replace_existing=True,
-            name="J-09 Contrats et garanties",
-        )
-        self._scheduler.add_job(
-            _job_rapport_jardin,
-            CronTrigger(day_of_week="wed", hour=20, minute=0),
-            id="rapport_jardin",
-            replace_existing=True,
-            name="J-10 Rapport jardin hebdo",
-        )
-        self._scheduler.add_job(
-            _job_score_bien_etre_hebdo,
-            CronTrigger(day_of_week="sun", hour=20, minute=0),
-            id="score_bien_etre_hebdo",
-            replace_existing=True,
-            name="J-11 Score bien-être hebdo",
-        )
-        self._scheduler.add_job(
-            _job_garmin_sync_matinal,
-            CronTrigger(hour=6, minute=0),
-            id="garmin_sync_matinal",
-            replace_existing=True,
-            name="Sync Garmin automatique matinale",
-        )
-        self._scheduler.add_job(
-            _job_automations,
-            CronTrigger(minute="*/5"),
-            id="automations_runner",
-            replace_existing=True,
-            name="Exécution des automations (toutes les 5 min)",
-        )
-        self._scheduler.add_job(
-            _job_points_famille_hebdo,
-            CronTrigger(day_of_week="sun", hour=20, minute=0),
-            id="points_famille_hebdo",
-            replace_existing=True,
-            name="Calcul points famille hebdomadaire",
-        )
-        self._scheduler.add_job(
-            _job_sync_google_calendar,
-            CronTrigger(hour=23, minute=0),
-            id="sync_google_calendar",
-            replace_existing=True,
-            name="J1 Sync Google Calendar (quotidien 23h00)",
-        )
-        self._scheduler.add_job(
-            _job_alerte_stock_bas,
-            CronTrigger(hour=7, minute=0),
-            id="alerte_stock_bas",
-            replace_existing=True,
-            name="J3 Alerte stock bas → liste courses",
-        )
-        self._scheduler.add_job(
-            _job_archive_batches_expires,
-            CronTrigger(hour=2, minute=0),
-            id="archive_batches_expires",
-            replace_existing=True,
-            name="J4 Archivage préparations batch expirées (02h00)",
-        )
-        self._scheduler.add_job(
-            _job_rapport_maison_mensuel,
-            CronTrigger(day=1, hour=9, minute=30),
-            id="rapport_maison_mensuel",
-            replace_existing=True,
-            name="J5 Rapport maison mensuel (1er/mois 09h30)",
-        )
-        self._scheduler.add_job(
-            _job_sync_openfoodfacts,
-            CronTrigger(day_of_week="sun", hour=3, minute=0),
-            id="sync_openfoodfacts",
-            replace_existing=True,
-            name="J6 Sync cache OpenFoodFacts (dim 03h00)",
-        )
+        self._planifier_job("rappels_famille", CronTrigger(hour=7, minute=0))
+        self._planifier_job("rappels_maison", CronTrigger(hour=8, minute=0))
+        self._planifier_job("rappels_generaux", CronTrigger(hour=8, minute=30))
+        self._planifier_job("entretien_saisonnier", CronTrigger(day_of_week="mon", hour=6, minute=0))
+        self._planifier_job("push_quotidien", CronTrigger(hour=9, minute=0))
+        self._planifier_job("enrichissement_catalogues", CronTrigger(day=1, hour=3, minute=0))
+        self._planifier_job("digest_ntfy", CronTrigger(hour=9, minute=0), replace_existing=True)
+        self._planifier_job("rappel_courses", CronTrigger(hour=18, minute=0), replace_existing=True)
+        self._planifier_job("push_contextuel_soir", CronTrigger(hour=18, minute=0), replace_existing=True)
+        self._planifier_job("resume_hebdo", CronTrigger(day_of_week="mon", hour=7, minute=30), replace_existing=True)
+        self._planifier_job("planning_semaine_si_vide", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
+        self._planifier_job("alertes_peremption_48h", CronTrigger(hour=6, minute=0), replace_existing=True)
+        self._planifier_job("rapport_mensuel_budget", CronTrigger(day=1, hour=8, minute=15), replace_existing=True)
+        self._planifier_job("score_weekend", CronTrigger(day_of_week="fri", hour=17, minute=0), replace_existing=True)
+        self._planifier_job("controle_contrats_garanties", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
+        self._planifier_job("rapport_jardin", CronTrigger(day_of_week="wed", hour=20, minute=0), replace_existing=True)
+        self._planifier_job("score_bien_etre_hebdo", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
+        self._planifier_job("garmin_sync_matinal", CronTrigger(hour=6, minute=0), replace_existing=True)
+        self._planifier_job("automations_runner", CronTrigger(minute="*/5"), replace_existing=True)
+        self._planifier_job("points_famille_hebdo", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
+        self._planifier_job("sync_google_calendar", CronTrigger(hour=23, minute=0), replace_existing=True)
+        self._planifier_job("alerte_stock_bas", CronTrigger(hour=7, minute=0), replace_existing=True)
+        self._planifier_job("archive_batches_expires", CronTrigger(hour=2, minute=0), replace_existing=True)
+        self._planifier_job("rapport_maison_mensuel", CronTrigger(day=1, hour=9, minute=30), replace_existing=True)
+        self._planifier_job("sync_openfoodfacts", CronTrigger(day_of_week="sun", hour=3, minute=0), replace_existing=True)
+
+        # Phase 7 — nouveaux jobs manquants
+        self._planifier_job("prediction_courses_weekly", CronTrigger(day_of_week="sun", hour=10, minute=0), replace_existing=True)
+        self._planifier_job("sync_jeux_budget", CronTrigger(hour=22, minute=0), replace_existing=True)
+        self._planifier_job("analyse_nutrition_hebdo", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
+        self._planifier_job("alertes_energie", CronTrigger(hour=7, minute=0), replace_existing=True)
+        self._planifier_job("nettoyage_logs", CronTrigger(day_of_week="sun", hour=4, minute=0), replace_existing=True)
+        self._planifier_job("check_garmin_anomalies", CronTrigger(hour=8, minute=0), replace_existing=True)
+        self._planifier_job("resume_jardin_saisonnier", CronTrigger(day=1, hour=8, minute=0), replace_existing=True)
+        self._planifier_job("expiration_documents", CronTrigger(hour=9, minute=0), replace_existing=True)
 
     def demarrer(self) -> None:
         if not self._scheduler.running:
