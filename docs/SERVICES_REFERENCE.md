@@ -1,243 +1,298 @@
-﻿# 🔧 Services Reference — Assistant MaTanne
+﻿# Services Reference — Assistant MaTanne
 
-> Documentation des services backend, leur architecture et leurs APIs internes.
+> Référence mise à jour des packages de services backend, des patterns de factories et des points d'entrée publics les plus utiles.
 
 ---
 
-## Architecture des services
+## Architecture de service
 
-```text
-┌─────────────────────────────────────────────────────────┐
-│              Frontend (Next.js / React)                  │
-└─────────────────────────┬───────────────────────────────┘
-                          │ HTTP / WebSocket
-┌─────────────────────────▼───────────────────────────────┐
-│              Routes API (src/api/routes/)                │
-│       20 routeurs FastAPI — auth, CRUD, IA              │
-└─────────────────────────┬───────────────────────────────┘
-                          │
-┌─────────────────────────▼───────────────────────────────┐
-│                  Services Layer                          │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐   │
-│  │ Cuisine  │ │ Famille  │ │  Maison  │ │   Jeux   │   │
-│  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘   │
-│       └────────────┴─────┬──────┴────────────┘          │
-│                   BaseAIService                          │
-│            (rate limit, cache, parsing)                  │
-└──────────────────────────┬───────────────────────────────┘
-                          │
-┌─────────────────────────▼───────────────────────────────┐
-│                    Core Layer                            │
-│  Database │ Models │ AI Client │ Cache │ Config         │
-└─────────────────────────────────────────────────────────┘
-```
+La couche services est organisée par domaine sous `src/services/`:
 
-### Pattern singleton — `@service_factory`
+- `cuisine/`
+- `famille/`
+- `maison/`
+- `jeux/`
+- `planning/`
+- `dashboard/`
+- `utilitaires/`
+- `inventaire/`
+- `integrations/`
+- `rapports/`
+- `core/`
 
-Tous les services exposent une fonction factory décorée `@service_factory` qui garantit un singleton via le registre :
+Le flux recommandé reste:
+
+1. route FastAPI
+2. service métier
+3. accès DB via décorateur ou contexte de session
+4. publication d'événements ou notifications si nécessaire
+
+---
+
+## Pattern central: `@service_factory`
+
+La plupart des services partagés exposent une factory décorée `@service_factory` qui les enregistre dans le registre central.
+
+Exemple type:
 
 ```python
 from src.services.core.registry import service_factory
 
-@service_factory("recettes", tags={"cuisine"})
-def get_recette_service() -> RecetteService:
-    return RecetteService()
+@service_factory("chat_ia", tags={"outils", "ia", "chat"})
+def obtenir_chat_ai_service() -> ChatAIService:
+    return ChatAIService()
 ```
 
-### BaseAIService
+Intérêt:
 
-Les services nécessitant l'IA héritent de `BaseAIService` (`src/services/core/base/ai_service.py`) qui fournit automatiquement :
-
-- Limitation de débit (quotidien + horaire)
-- Cache sémantique des requêtes
-- Parsing JSON/Pydantic des réponses
-- Gestion d'erreurs et fallback
+- singleton léger piloté par le registre
+- lookup par nom ou tags
+- instrumentation et health checks centralisés
 
 ---
 
-## Services par domaine
+## Services transversaux `core/`
 
-### Recettes — `src/services/cuisine/`
-
-| Fichier | Classe | Factory | Description |
-|---------|--------|---------|-------------|
-| `service.py` | `RecetteService` | `get_recette_service()` | CRUD recettes + suggestions IA |
-| `importer.py` | `ImporterRecette` | — | Import depuis URL / PDF |
-| `suggestions.py` | `ServiceSuggestions(BaseAIService)` | `get_suggestions_service()` | Suggestions IA (repas, recettes) |
-
-```python
-from src.services.cuisine import get_recette_service
-
-service = get_recette_service()
-recette = service.creer_recette(data)
-suggestions = service.suggerer_recettes(type_repas="diner", personnes=4)
-recette = service.importer_depuis_url("https://...")
-```
+| Zone | Rôle |
+|------|------|
+| `core/registry.py` | registre des services et factories |
+| `core/base/` | fondations de services, notamment `BaseAIService` |
+| `core/events/` | bus d'événements domaine |
+| `core/notifications/` | dispatcher et canaux de notification |
+| `core/cron/` | scheduler et jobs planifiés |
+| `core/backup/` | sauvegardes et restauration |
+| `core/utilisateur/` | profils, sécurité, configuration utilisateur |
 
 ---
 
-### Courses — `src/services/cuisine/` (via routes)
+## Domaine Cuisine
 
-Gestion des listes de courses. Collaboration temps réel via WebSocket (`src/api/websocket_courses.py`).
+Packages repérés:
 
-```python
-# Endpoints API principaux
-GET  /api/v1/courses          # Lister les listes
-POST /api/v1/courses          # Créer une liste
-POST /api/v1/courses/{id}/articles  # Ajouter article
-WS   /ws/courses/{liste_id}   # Collaboration temp réel
-```
+- `src/services/cuisine/recettes/`
+- `src/services/cuisine/planning/`
+- `src/services/cuisine/courses/`
+- `src/services/cuisine/suggestions/`
+- `src/services/cuisine/batch_cooking/`
+- `src/services/cuisine/prediction_courses.py`
+- `src/services/cuisine/prediction_peremption.py`
+- `src/services/cuisine/photo_frigo.py`
 
----
+Factories publiques fréquentes:
 
-### Inventaire — `src/services/inventaire/`
+- `obtenir_service_recettes`
+- `obtenir_service_planning`
+- `obtenir_service_courses`
+- `obtenir_service_suggestions`
+- `obtenir_service_batch_cooking`
+- `obtenir_service_prediction_courses`
+- `obtenir_service_prediction_peremption`
 
-| Fichier | Classe | Factory | Description |
-|---------|--------|---------|-------------|
-| `service.py` | `InventaireService` | `get_inventaire_service()` | Stock alimentaire, code-barres, alertes péremption |
+Rôle:
 
-```python
-from src.services.inventaire import get_inventaire_service
-
-service = get_inventaire_service()
-articles = service.lister_articles()
-article = service.rechercher_barcode("3017760000123")  # OpenFoodFacts
-expirant = service.articles_expirant_bientot(jours=7)
-```
-
----
-
-### Planning — `src/services/planning/`
-
-Service modulaire divisé en sous-modules :
-
-| Fichier | Description |
-|---------|-------------|
-| `service.py` | Service principal (planning semaine, repas, suggestions IA) |
-| `nutrition.py` | Équilibre nutritionnel |
-| `agregation.py` | Agrégation liste courses depuis planning |
-| `formatters.py` | Formatage pour l'API |
-| `validators.py` | Validation des plannings |
-| `prompts.py` | Génération prompts IA |
-
-```python
-from src.services.planning import get_planning_service
-
-service = get_planning_service()
-semaine = service.planning_semaine("2026-W13")
-suggestions = service.suggerer_repas_semaine()
-```
+- gestion des recettes
+- génération de planning repas
+- listes de courses
+- batch cooking
+- enrichissements IA et prédictions
 
 ---
 
-### Famille — `src/services/famille/`
+## Domaine Famille
 
-| Fichier | Classe | Factory | Description |
-|---------|--------|---------|-------------|
-| `service.py` | `FamilleService` | `get_famille_service()` | CRUD enfants, activités, routines, budget |
-| `jules_ai.py` | `JulesAIService(BaseAIService)` | `get_jules_ai_service()` | Suggestions développement Jules (streaming) |
-| `weekend_ai.py` | `WeekendAIService(BaseAIService)` | `get_weekend_ai_service()` | Suggestions activités weekend IA |
+Packages repérés:
 
----
+- activités, routines, budget, achats, anniversaires, documents, voyage
+- IA: `jules_ai.py`, `weekend_ai.py`, `soiree_ai.py`, `achats_ia.py`
+- intégrations métier: `calendrier_planning.py`, `inter_module_budget_jeux.py`, `inter_module_garmin_health.py`
 
-### Maison — `src/services/maison/`
+Factories publiques fréquentes:
 
-| Fichier | Classe | Factory | Description |
-|---------|--------|---------|-------------|
-| `service.py` | `MaisonService` | `get_maison_service()` | Projets, entretien, jardin, énergie, stocks |
+- `obtenir_service_jules`
+- `obtenir_service_activites`
+- `obtenir_service_routines`
+- `obtenir_service_achats_famille`
+- `obtenir_service_weekend`
+- `obtenir_service_documents`
+- `obtenir_service_voyage`
+- `get_calendar_sync_service`
 
-Sous-modules mixins (façade pattern) :
-- `jardin_ia_mixin.py` / `jardin_crud_mixin.py` — Jardin IA + CRUD
-- `projets_ia_mixin.py` / `projets_crud_mixin.py` — Projets IA + CRUD
+Rôle:
 
----
-
-### Jeux — `src/services/jeux/`
-
-| Fichier | Classe | Factory | Description |
-|---------|--------|---------|-------------|
-| `service.py` | `JeuxService` | `get_jeux_service()` | Paris sportifs, Loto, EuroMillions |
+- pilotage de la vie familiale
+- suivi de Jules
+- calendrier, routines et rappels
+- suggestions IA contextuelles
 
 ---
 
-### Dashboard — `src/services/dashboard/`
+## Domaine Maison
 
-| Fichier | Classe | Factory | Description |
-|---------|--------|---------|-------------|
-| `service.py` | `DashboardService` | `get_dashboard_service()` | Agrégation métriques pour tableau de bord |
+Le package `src/services/maison/` combine des services principaux, des mixins et de nombreux CRUD spécialisés.
 
----
+Services majeurs:
 
-### Utilitaires — `src/services/utilitaires/`
+- `obtenir_jardin_service`
+- `obtenir_entretien_service`
+- `obtenir_projets_service`
+- `obtenir_contexte_maison_service`
+- `obtenir_notifications_maison_service`
+- `obtenir_visualisation_service`
+- `obtenir_catalogue_entretien_service`
 
-| Fichier | Classe | Factory | Description |
-|---------|--------|---------|-------------|
-| `service.py` | `UtilitairesService` | `get_utilitaires_service()` | Chat IA, notes, outils divers |
+CRUD spécialisés exposés:
 
----
+- artisans
+- contrats
+- garanties
+- diagnostics
+- estimations
+- cellier
+- meubles
+- dépenses
+- checklists
+- nuisibles, devis, entretien saisonnier, relevés
 
-### Rapports — `src/services/rapports/`
+Rôle:
 
-| Fichier | Classe | Factory | Description |
-|---------|--------|---------|-------------|
-| `export.py` | `ServiceExportPDF` | `get_export_service()` | Export PDF (recettes, planning, courses, budget) |
-
----
-
-### Intégrations — `src/services/integrations/`
-
-| Fichier | Description |
-|---------|-------------|
-| `multimodal.py` | IA images (analyse, OCR) |
-| `webhooks.py` | Envoi webhooks HTTP POST sur événements métier |
-| `weather/` | Service météo (agrégation APIs, fallback) |
-
----
-
-## Services transversaux (core)
-
-### Registre — `src/services/core/registry.py`
-
-Registre singleton avec décorateur `@service_factory`. Permet le lookup par nom et tags.
-
-### Bus d'événements — `src/services/core/events/`
-
-Bus pub/sub avec wildcards pour le découplage inter-services. 14 événements typés.
-
-### Audit — `src/services/core/audit.py`
-
-Trail d'audit transversal : souscription wildcard bus, buffer mémoire, persistence DB.
-
-### Utilisateur — `src/services/core/utilisateur/profils.py`
-
-CRUD profils utilisateurs.
+- gestion opérationnelle de la maison
+- projets, entretien, jardin, énergie
+- contexte quotidien et rappels maison
 
 ---
 
-## Référence rapide factories
+## Domaine Jeux
 
-```python
-# Cuisine
-from src.services.cuisine import get_recette_service
-from src.services.inventaire import get_inventaire_service
-from src.services.planning import get_planning_service
+Le package `src/services/jeux/` agit comme façade paresseuse vers `src/services/jeux/_internal/`.
 
-# Famille
-from src.services.famille import get_famille_service
+Services majeurs:
 
-# Maison
-from src.services.maison import get_maison_service
+- `get_paris_crud_service`
+- `get_loto_crud_service`
+- `get_euromillions_crud_service`
+- `get_prediction_service`
+- `get_backtest_service`
+- `get_jeux_ai_service`
+- `get_responsable_gaming_service`
 
-# Jeux
-from src.services.jeux import get_jeux_service
+Rôle:
 
-# Dashboard
-from src.services.dashboard import get_dashboard_service
+- paris sportifs
+- loto et Euromillions
+- analyse IA, backtest et jeu responsable
+- jobs spécialisés côté jeux
 
-# Utilitaires
-from src.services.utilitaires import get_utilitaires_service
+---
 
-# Rapports
-from src.services.rapports import get_export_service
-```
+## Domaine Dashboard
+
+Exports confirmés:
+
+- `obtenir_accueil_data_service`
+- `obtenir_score_bien_etre_service`
+- `obtenir_service_resume_famille_ia`
+- `obtenir_service_anomalies_financieres`
+- `obtenir_points_famille_service`
+
+Rôle:
+
+- agrégation de données multi-modules
+- métriques d'accueil
+- résumés IA et anomalies budgétaires
+
+---
+
+## Domaine Utilitaires
+
+Services confirmés:
+
+- notes
+- journal
+- contacts
+- liens
+- mots de passe
+- presse-papiers
+- énergie
+- OCR
+- météo
+- chat IA
+- import et export utilitaires
+- moteur d'automations
+
+Factories fréquentes:
+
+- `obtenir_notes_service`
+- `obtenir_journal_service`
+- `obtenir_contacts_service`
+- `obtenir_energie_service`
+- `obtenir_ocr_service`
+- `obtenir_meteo_service`
+- `obtenir_chat_ai_service`
+- `obtenir_moteur_automations_service`
+
+---
+
+## Domaine Planning
+
+Le package `src/services/planning/` expose surtout:
+
+- `obtenir_service_conflits`
+- `obtenir_service_rappels`
+- `obtenir_service_suggestions`
+
+Rôle:
+
+- conflits d'horaires
+- rappels intelligents
+- suggestions de créneaux et d'optimisation planning
+
+---
+
+## Intégrations et rapports
+
+Intégrations utiles repérées:
+
+- `obtenir_service_openfoodfacts`
+- `obtenir_multimodal_service`
+- `obtenir_webhook_service`
+- `obtenir_image_generator_service`
+- `obtenir_service_synchronisation_temps_reel`
+
+Rapports:
+
+- `obtenir_service_rapports_pdf`
+
+---
+
+## Services IA à connaître
+
+Services IA explicitement visibles dans le code:
+
+- `obtenir_service_suggestions`
+- `obtenir_chat_ai_service`
+- `obtenir_service_resume_famille_ia`
+- `obtenir_service_anomalies_financieres`
+- `get_jeux_ai_service`
+- `obtenir_multimodal_service`
+- `obtenir_service_prediction_courses`
+- `obtenir_service_prediction_peremption`
+
+Voir aussi `docs/AI_SERVICES.md` pour le détail fonctionnel.
+
+---
+
+## Conseils d'usage
+
+- importer via les factories publiques plutôt que d'instancier directement quand le service est enregistré dans le registre
+- utiliser `executer_avec_session()` côté routes et `@avec_session_db` côté services
+- éviter les appels croisés directs si un événement métier ou un cron suffit
+
+---
+
+## Références associées
+
+- `docs/ARCHITECTURE.md`
+- `docs/AI_SERVICES.md`
+- `docs/INTER_MODULES.md`
+- `docs/CRON_JOBS.md`
 

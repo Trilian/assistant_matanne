@@ -1,6 +1,6 @@
 # 🎮 Guide Module Jeux
 
-> Guide complet du module Jeux : paris sportifs intelligents, Loto/Euromillions avec IA, jeu responsable.
+> Guide complet du module Jeux : paris sportifs intelligents, Loto/Euromillions avec IA, backtest et jeu responsable.
 
 **Statut** : ✅ **100% COMPLET** — Phases S/T/U/V/W finalisées (27 mars 2026)
 
@@ -34,6 +34,12 @@ Le module **Jeux** est un système complet de suivi et d'analyse des paris sport
 - **Backtest** : Simulation ROI sur historique, validation stratégies
 - **Notifications push** : Résultats paris/loto en temps réel (Web Push)
 - **Jeu responsable** : Limites budgétaires, auto-exclusion, alertes séries dangereuses
+- **Services planifiés** : cron jeux et alertes périodiques côté backend
+
+### Points d'attention actuels
+
+- l'agrégation pertes/gains -> budget global reste une interaction planifiée mais pas encore finalisée
+- les alertes jeu responsable existent mais leur orchestration multi-canal doit encore être consolidée
 
 > ⚠️ **Avertissement** : Ce module est conçu pour un usage personnel de suivi analytique. MaTanne ne réalise pas de paris réels — il s'agit uniquement d'un outil de gestion, d'apprentissage et de contrôle budgétaire.
 

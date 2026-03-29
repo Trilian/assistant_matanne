@@ -10,7 +10,7 @@ import logging
 import re
 from typing import TypeVar
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, create_model
 
 logger = logging.getLogger(__name__)
 
@@ -366,18 +366,20 @@ def analyser_liste_reponse(
         logger.debug(f"Stratégie 2 (regex) échouée: {str(e)[:100]}")
         pass
 
-    # Stratégie 3: Utiliser 'items' hardcoded comme fallback
+    # Stratégie 3: Utiliser la clé de liste comme fallback via enveloppe dynamique
     try:
-
-        class EnvelopeListe(BaseModel):
-            items: list[modele_item]
+        EnvelopeListe = create_model(
+            "EnvelopeListe",
+            **{cle_liste: (list[modele_item], ...)},
+        )
 
         donnees_enveloppe = AnalyseurIA.analyser(
-            reponse, EnvelopeListe, valeur_secours={"items": items_secours or []}, strict=False
+            reponse, EnvelopeListe, valeur_secours={cle_liste: items_secours or []}, strict=False
         )
-        if donnees_enveloppe.items:
-            logger.info(f"✅ Envelope parser successful: {len(donnees_enveloppe.items)} items")
-        return donnees_enveloppe.items
+        items_result = getattr(donnees_enveloppe, cle_liste, [])
+        if items_result:
+            logger.info(f"✅ Envelope parser successful: {len(items_result)} items")
+        return items_result
     except Exception as e:
         logger.warning(f"Stratégie 3 (envelope) échouée: {e}")
 

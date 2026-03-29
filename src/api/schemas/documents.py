@@ -21,7 +21,7 @@ class DocumentBase(BaseModel):
 
 
 class DocumentCreate(DocumentBase):
-    pass
+    """Création d'un document famille — hérite tous les champs de DocumentBase."""
 
 
 class DocumentPatch(BaseModel):

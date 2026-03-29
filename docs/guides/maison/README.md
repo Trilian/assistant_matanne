@@ -21,9 +21,16 @@
 
 Le module **Maison** centralise tout ce qui concerne la gestion physique et administrative du foyer.
 
-**URL** : `/maison`  
-**Service backend** : `src/services/maison/`  
+**URL** : `/maison`
+**Service backend** : `src/services/maison/`
 **Route API** : `src/api/routes/maison.py` (`/api/v1/maison`)
+
+### Capacités récentes à connaître
+
+- notifications maison et rappels périodiques
+- rapport maison mensuel planifié
+- gestion avancée des contrats, garanties, diagnostics, meubles et relevés
+- vue de contexte maison et catalogue d'entretien enrichi
 
 ---
 
@@ -36,6 +43,7 @@ Le module **Maison** centralise tout ce qui concerne la gestion physique et admi
 - Calculer la ROI des investissements
 - Suggestions IA pour planifier les travaux (priorité, budget, timing)
 - Visualiser l'impact sur la valeur du bien
+- synthèse maison mensuelle via job dédié
 
 ### Usage
 
@@ -77,6 +85,7 @@ suggestions = service.suggerer_projets_ia(budget=5000)
 - Alertes pour les tâches en retard ou à venir
 - Historique des interventions
 - Catalogue de tâches préremplies avec fréquences recommandées
+- intégration avec les jobs d'entretien et de contrôle de garanties
 
 ### Usage
 
@@ -105,6 +114,7 @@ taches_urgentes = service.get_taches_urgentes(horizon_jours=30)
 - Journal des semis et récoltes
 - Conseils IA saisonniers basés sur la météo locale
 - Gestion des espaces (potager, massifs, pelouse)
+- rapport jardin hebdomadaire côté cron
 
 ### Usage
 
@@ -138,6 +148,7 @@ conseils = service.obtenir_conseils_ia(saison="printemps")
 - Graphiques de consommation mensuelle/annuelle
 - Comparaison avec les périodes précédentes
 - Eco-tips personnalisés pour réduire la consommation
+- zone encore prévue pour les anomalies IA de consommation
 
 ### Usage
 

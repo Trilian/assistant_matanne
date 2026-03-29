@@ -202,6 +202,7 @@ class MoteurAutomationsService:
     def executer_automation_par_id(
         self,
         automation_id: int,
+        user_id: int | None = None,
         db: Session | None = None,
     ) -> dict[str, Any]:
         if db is None:
@@ -209,6 +210,8 @@ class MoteurAutomationsService:
 
         regle = db.get(AutomationRegle, automation_id)
         if regle is None:
+            return {"success": False, "message": "Automation introuvable"}
+        if user_id is not None and int(regle.user_id) != int(user_id):
             return {"success": False, "message": "Automation introuvable"}
         if not regle.active:
             return {"success": False, "message": "Automation inactive"}

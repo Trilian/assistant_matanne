@@ -22,9 +22,16 @@
 
 Le module **Famille** centralise le suivi du développement de l'enfant et la vie familiale.
 
-**URL** : `/famille`  
-**Service backend** : `src/services/famille/`  
+**URL** : `/famille`
+**Service backend** : `src/services/famille/`
 **Route API** : `src/api/routes/famille.py` (`/api/v1/famille`)
+
+### Capacités récentes à connaître
+
+- suggestions IA pour les activités et le weekend
+- suggestions d'achats famille assistées par IA
+- rappels famille intégrés aux jobs planifiés
+- résumé hebdomadaire et intégrations calendrier / Garmin
 
 ---
 
@@ -38,6 +45,7 @@ Le module **Famille** centralise le suivi du développement de l'enfant et la vi
 - **Diversification alimentaire** : suivi des aliments introduits et réactions
 - Suggestions IA personnalisées sur le développement
 - Alertes sur les jalons en retard
+- intégration avec les suggestions d'activités via invalidation de cache et notifications
 
 ### Usage
 
@@ -70,6 +78,7 @@ analyse = service.analyser_developpement(age_mois=18, jalons_atteints=[...])
 - Association à des membres de la famille
 - Vue calendrier des activités planifiées
 - **Phase O — Suggestions IA avec pré-remplissage** : `POST /famille/activites/suggestions-ia-auto` retourne `suggestions_struct` (liste d'objets pré-remplissables) pour injecter directement dans le formulaire de création
+- contribution au résumé hebdomadaire et au dashboard
 
 ### Usage
 
@@ -132,6 +141,7 @@ Réponse: { suggestions: [{titre, description, source, fourchette_prix?, ou_ache
 - Suivi mensuel avec comparaison aux mois précédents
 - Alertes quand les dépenses dépassent un budget défini
 - Export CSV des transactions
+- base de travail pour l'agrégation future avec maison et jeux
 
 ### Usage
 
@@ -161,6 +171,7 @@ import CamembertBudget from "@/composants/graphiques/camembert-budget"
 - Cases à cocher interactives pour valider chaque étape
 - Suivi de la régularité (score de cohérence sur 30 jours)
 - Routines dédiées enfant (bain, lecture, coucher) et adulte
+- interaction cible identifiée avec le planning central
 
 ### Usage
 
@@ -178,6 +189,7 @@ import CamembertBudget from "@/composants/graphiques/camembert-budget"
 - Basé sur la météo locale, la saison, l'âge de Jules
 - Filtrage par rayon géographique et budget
 - Sauvegarde des activités favorites
+- score weekend alimenté par job planifié dédié
 
 ### Usage
 

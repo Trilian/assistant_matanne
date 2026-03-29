@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 export { clientApi } from "./client";
+export * from "./admin";
 export * from "./auth";
 export * from "./recettes";
 export * from "./courses";

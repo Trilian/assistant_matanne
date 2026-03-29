@@ -3645,7 +3645,7 @@ shared_tables TEXT[] := ARRAY[
     'repas_batch', 'config_batch_cooking', 'sessions_batch_cooking',
     'etapes_batch_cooking', 'preparations_batch',
     -- Inventaire & Courses
-    'inventaire', 'historique_inventaire', 'listes_courses', 'liste_courses',
+    'inventaire', 'historique_inventaire', 'listes_courses',
     'modeles_courses', 'articles_modeles', 'articles_achats_famille',
     -- Planning & Calendrier
     'plannings', 'repas', 'evenements_planning', 'templates_semaine', 'elements_templates',

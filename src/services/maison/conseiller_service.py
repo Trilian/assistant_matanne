@@ -91,7 +91,7 @@ class ConseillierMaisonService(BaseAIService):
         try:
             import json as _json
             # Appel IA synchrone via la version auto-générée par sync_wrapper
-            reponse_brute: str | None = self.call_with_cache_sync(  # type: ignore[attr-defined]
+            reponse_brute: str | None = self.call_with_cache_sync(  # type: ignore[attr-defined]  # Méthode générée par ServiceMeta
                 prompt=prompt_utilisateur,
                 system_prompt=prompt_systeme,
                 temperature=0.7,
@@ -154,7 +154,7 @@ class ConseillierMaisonService(BaseAIService):
 
         import json as _json
         try:
-            reponse_brute: str | None = self.call_with_cache_sync(  # type: ignore[attr-defined]
+            reponse_brute: str | None = self.call_with_cache_sync(  # type: ignore[attr-defined]  # Méthode générée par ServiceMeta
                 prompt=prompt_utilisateur,
                 system_prompt=prompt_systeme,
                 temperature=0.5,
@@ -212,7 +212,7 @@ class ConseillierMaisonService(BaseAIService):
             "Réponds impérativement en français."
         )
         try:
-            reponse: str | None = self.call_with_cache_sync(  # type: ignore[attr-defined]
+            reponse: str | None = self.call_with_cache_sync(  # type: ignore[attr-defined]  # Méthode générée par ServiceMeta
                 prompt=message,
                 system_prompt=prompt_systeme,
                 temperature=0.6,

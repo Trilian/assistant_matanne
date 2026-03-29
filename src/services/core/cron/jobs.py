@@ -9,6 +9,7 @@ Jobs déclarés :
 """
 
 import logging
+import os
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -17,6 +18,45 @@ from sqlalchemy import func
 logger = logging.getLogger(__name__)
 
 _scheduler: BackgroundScheduler | None = None
+
+
+def _obtenir_user_ids_actifs() -> list[str]:
+    """Récupère les identifiants de tous les utilisateurs actifs.
+
+    Interroge la table ``profils_utilisateurs`` pour obtenir les usernames.
+    Si la DB est inaccessible, utilise la variable d'env ``CRON_DEFAULT_USER_IDS``
+    (liste séparée par des virgules) ou le fallback ``"matanne"``.
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ProfilUtilisateur
+
+        with obtenir_contexte_db() as session:
+            profils = session.query(ProfilUtilisateur.username).all()
+            if profils:
+                return [p.username for p in profils if p.username]
+    except Exception:
+        logger.debug("Impossible de charger les profils utilisateurs, utilisation du fallback")
+
+    fallback = os.getenv("CRON_DEFAULT_USER_IDS", "matanne")
+    return [uid.strip() for uid in fallback.split(",") if uid.strip()]
+
+
+def _envoyer_notif_tous_users(
+    dispatcher: object,
+    message: str,
+    canaux: list[str],
+    **kwargs: object,
+) -> dict[str, bool]:
+    """Envoie une notification à tous les utilisateurs actifs."""
+    resultats: dict[str, bool] = {}
+    for user_id in _obtenir_user_ids_actifs():
+        try:
+            res = dispatcher.envoyer(user_id=user_id, message=message, canaux=canaux, **kwargs)  # type: ignore[union-attr]
+            resultats.update(res or {})
+        except Exception:
+            logger.debug("Échec envoi notification à %s", user_id)
+    return resultats
 
 
 # ─── Jobs ─────────────────────────────────────────────────────────────────────
@@ -35,8 +75,8 @@ def _job_rappels_famille() -> None:
         # Sprint 9 (MT-02): rappel proactif WhatsApp pour les rappels famille.
         if nb > 0:
             dispatcher = get_dispatcher_notifications()
-            dispatcher.envoyer(
-                user_id="matanne",
+            _envoyer_notif_tous_users(
+                dispatcher,
                 message=(
                     f"{nb} rappel(s) famille aujourd'hui (anniversaires, documents, crèche, jalons). "
                     "Ouvre l'application pour le détail."
@@ -107,8 +147,8 @@ def _job_rappels_generaux() -> None:
                 ingredients_txt = ", ".join(ingredients[:5]) if ingredients else "vérifie la fiche recette"
 
                 dispatcher = get_dispatcher_notifications()
-                dispatcher.envoyer(
-                    user_id="matanne",
+                _envoyer_notif_tous_users(
+                    dispatcher,
                     message=f"Ce soir : {nom_recette}. A sortir : {ingredients_txt}.",
                     canaux=["ntfy", "push"],
                     titre="Rappel repas du jour",
@@ -287,8 +327,8 @@ def _job_rappel_courses_ntfy() -> None:
 
             # Sprint 9 (MT-02): partage WhatsApp de la liste active.
             dispatcher = get_dispatcher_notifications()
-            dispatcher.envoyer(
-                user_id="matanne",
+            _envoyer_notif_tous_users(
+                dispatcher,
                 message=f"{nb_articles} article(s) en attente sur la liste.",
                 canaux=["whatsapp"],
                 type_whatsapp="articles_courses",
@@ -365,8 +405,8 @@ def _job_push_contextuel_soir() -> None:
         ).strip()
 
         dispatcher = get_dispatcher_notifications()
-        resultats = dispatcher.envoyer(
-            user_id="matanne",
+        resultats = _envoyer_notif_tous_users(
+            dispatcher,
             message=message,
             canaux=["ntfy", "push"],
             titre="Préparation de demain",
@@ -414,8 +454,8 @@ def _job_resume_hebdo() -> None:
         # Canal WhatsApp: résumé compact dédié.
         kwargs["type_whatsapp"] = "rapport_hebdo"
 
-        resultats = dispatcher.envoyer(
-            user_id="matanne",
+        resultats = _envoyer_notif_tous_users(
+            dispatcher,
             message=texte,
             canaux=canaux,
             **kwargs,
@@ -458,8 +498,8 @@ def _job_planning_semaine_si_vide() -> None:
             "Pense à générer le menu hebdo."
         )
         dispatcher = get_dispatcher_notifications()
-        res = dispatcher.envoyer(
-            user_id="matanne",
+        res = _envoyer_notif_tous_users(
+            dispatcher,
             message=message,
             canaux=["ntfy", "whatsapp"],
             titre="Planning semaine à générer",
@@ -535,8 +575,8 @@ def _job_alertes_peremption_48h() -> None:
             })
             logger.info("J-04: %d produit(s) expirent sous 24h → email critique envoyé", len(articles_critiques_24h))
 
-        res = dispatcher.envoyer(
-            user_id="matanne",
+        res = _envoyer_notif_tous_users(
+            dispatcher,
             message=message,
             canaux=canaux,
             **kwargs,
@@ -606,8 +646,8 @@ def _job_rapport_mensuel_budget() -> None:
         )
 
         dispatcher = get_dispatcher_notifications()
-        res = dispatcher.envoyer(
-            user_id="matanne",
+        res = _envoyer_notif_tous_users(
+            dispatcher,
             message=message,
             canaux=["ntfy", "email", "whatsapp"],
             titre=f"Rapport mensuel {mois:02d}/{annee}",
@@ -674,8 +714,8 @@ def _job_score_weekend() -> None:
             f"Activités prévues: {nb_activites}. Météo: {meteo_resume}."
         )
         dispatcher = get_dispatcher_notifications()
-        res = dispatcher.envoyer(
-            user_id="matanne",
+        res = _envoyer_notif_tous_users(
+            dispatcher,
             message=message,
             canaux=["ntfy", "whatsapp"],
             titre="Score weekend",
@@ -759,8 +799,8 @@ def _job_controle_contrats_garanties() -> None:
             logger.info("J-09: %d garantie(s) expirent dans 30j → email critique envoyé", len(garanties_30j))
 
         dispatcher = get_dispatcher_notifications()
-        res = dispatcher.envoyer(
-            user_id="matanne",
+        res = _envoyer_notif_tous_users(
+            dispatcher,
             message=message,
             canaux=canaux,
             **kwargs,
@@ -808,8 +848,8 @@ def _job_rapport_jardin() -> None:
         )
 
         dispatcher = get_dispatcher_notifications()
-        res = dispatcher.envoyer(
-            user_id="matanne",
+        res = _envoyer_notif_tous_users(
+            dispatcher,
             message=message,
             canaux=["ntfy", "whatsapp"],
             titre="Rapport jardin hebdo",
@@ -843,8 +883,8 @@ def _job_score_bien_etre_hebdo() -> None:
 
         dispatcher = get_dispatcher_notifications()
         canaux = ["ntfy", "whatsapp"] if niveau != "normal" else ["ntfy"]
-        res = dispatcher.envoyer(
-            user_id="matanne",
+        res = _envoyer_notif_tous_users(
+            dispatcher,
             message=message,
             canaux=canaux,
             titre="Score bien-être hebdo",
@@ -1021,8 +1061,8 @@ def _job_alerte_stock_bas() -> None:
                 f"(stock bas) : {', '.join(noms)}{'...' if len(articles_stock_bas) > 5 else ''}."
             )
             dispatcher = get_dispatcher_notifications()
-            dispatcher.envoyer(
-                user_id="matanne",
+            _envoyer_notif_tous_users(
+                dispatcher,
                 message=message,
                 canaux=["ntfy"],
                 titre="Stock bas — courses mises à jour",
@@ -1126,7 +1166,7 @@ def _job_rapport_maison_mensuel() -> None:
             })
 
         dispatcher = get_dispatcher_notifications()
-        res = dispatcher.envoyer(user_id="matanne", message=message, canaux=canaux, **kwargs)
+        res = _envoyer_notif_tous_users(dispatcher, message=message, canaux=canaux, **kwargs)
         logger.info("J5 rapport_maison_mensuel exécuté: %s", res)
     except Exception:
         logger.exception("Erreur job J5 rapport_maison_mensuel")

@@ -1,6 +1,6 @@
 ﻿# 📚 Documentation Index — MaTanne
 
-> **Dernière mise à jour** : 28 mars 2026 — Sprint 2
+> **Dernière mise à jour** : 29 mars 2026 — Phase 4 Documentation
 
 ---
 
@@ -18,6 +18,14 @@
 | [ERD_SCHEMA.md](./ERD_SCHEMA.md) | Schéma entité-relation de la DB (Mermaid) |
 | [PATTERNS.md](./PATTERNS.md) | Patterns de code récurrents (résilience, cache, events) |
 | [UI_COMPONENTS.md](./UI_COMPONENTS.md) | Composants UI Next.js / shadcn |
+| [ADMIN_RUNBOOK.md](./ADMIN_RUNBOOK.md) | Procédures d'administration: jobs, cache, santé, utilisateurs |
+| [CRON_JOBS.md](./CRON_JOBS.md) | Référence des tâches planifiées APScheduler |
+| [NOTIFICATIONS.md](./NOTIFICATIONS.md) | Canaux, préférences, tests admin et limites actuelles |
+| [INTER_MODULES.md](./INTER_MODULES.md) | Cartographie des flux inter-modules |
+| [AI_SERVICES.md](./AI_SERVICES.md) | Référence des services IA et usages actuels |
+| [AUTOMATIONS.md](./AUTOMATIONS.md) | Moteur d'automatisation Si→Alors |
+| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Pannes fréquentes et diagnostics rapides |
+| [DEVELOPER_SETUP.md](./DEVELOPER_SETUP.md) | Installation développeur locale complète |
 | [SQLALCHEMY_SESSION_GUIDE.md](./SQLALCHEMY_SESSION_GUIDE.md) | Guide sessions DB |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Guide de déploiement (local, Docker, Railway, Vercel, Supabase) |
 | [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) | Guide migration stack technique + workflow DB |
@@ -48,6 +56,14 @@ docs/
 ├── ERD_SCHEMA.md                ← Schéma ERD
 ├── PATTERNS.md                  ← Patterns de code
 ├── UI_COMPONENTS.md             ← Composants UI Next.js
+├── ADMIN_RUNBOOK.md             ← Opérations admin
+├── CRON_JOBS.md                 ← Référence jobs planifiés
+├── NOTIFICATIONS.md             ← Système de notifications
+├── INTER_MODULES.md             ← Interactions cross-module
+├── AI_SERVICES.md               ← Services IA
+├── AUTOMATIONS.md               ← Automations Si→Alors
+├── TROUBLESHOOTING.md           ← Diagnostic rapide
+├── DEVELOPER_SETUP.md           ← Setup développeur
 ├── SQLALCHEMY_SESSION_GUIDE.md  ← Guide sessions DB
 ├── DEPLOYMENT.md                ← Guide déploiement
 ├── MIGRATION_GUIDE.md           ← Guide migration stack + workflow DB

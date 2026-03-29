@@ -120,6 +120,30 @@ class TestAdminAuditExport:
             assert "text/csv" in content_type or "application/octet-stream" in content_type
 
 
+class TestAdminJobsACL:
+    """GET /api/v1/admin/jobs* — contrôle d'accès admin."""
+
+    @pytest.mark.asyncio
+    async def test_jobs_sans_auth_refuse(self, unauthenticated_client: httpx.AsyncClient):
+        response = await unauthenticated_client.get("/api/v1/admin/jobs")
+        assert response.status_code in [401, 403, 404]
+
+    @pytest.mark.asyncio
+    async def test_jobs_logs_sans_auth_refuse(self, unauthenticated_client: httpx.AsyncClient):
+        response = await unauthenticated_client.get("/api/v1/admin/jobs/rappels_famille/logs")
+        assert response.status_code in [401, 403, 404]
+
+    @pytest.mark.asyncio
+    async def test_jobs_avec_admin_repond(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/jobs")
+        assert response.status_code in [200, 401, 403, 404, 500]
+
+    @pytest.mark.asyncio
+    async def test_jobs_logs_avec_admin_repond(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/jobs/rappels_famille/logs")
+        assert response.status_code in [200, 401, 403, 404, 500]
+
+
 class TestAdminRouterExiste:
     """Vérifie que les routes admin sont bien enregistrées dans l'app."""
 

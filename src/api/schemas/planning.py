@@ -28,9 +28,7 @@ class RepasBase(BaseModel, TypeRepasValidator):
 
 
 class RepasCreate(RepasBase):
-    """Schéma pour créer un repas."""
-
-    pass
+    """Création d'un repas — hérite tous les champs de RepasBase."""
 
 
 class RepasResponse(RepasBase, IdentifiedResponse):

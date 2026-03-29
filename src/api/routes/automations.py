@@ -224,7 +224,11 @@ async def executer_automation_maintenant(
         with executer_avec_session() as session:
             profil, _ = _charger_automations(session, user)
             service = obtenir_moteur_automations_service()
-            result = service.executer_automation_par_id(automation_id, db=session)
+            result = service.executer_automation_par_id(
+                automation_id,
+                user_id=profil.id,
+                db=session,
+            )
             if not result.get("success"):
                 raise HTTPException(status_code=404, detail=result.get("message", "Automation introuvable"))
             return {"message": "Automation exÃ©cutÃ©e", "resultat": result, "user_id": profil.id}

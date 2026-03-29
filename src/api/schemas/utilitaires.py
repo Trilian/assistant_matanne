@@ -24,7 +24,7 @@ class NoteBase(BaseModel):
 
 
 class NoteCreate(NoteBase):
-    pass
+    """Création d'une note — hérite tous les champs de NoteBase."""
 
 
 class NotePatch(BaseModel):
@@ -66,7 +66,7 @@ class JournalBase(BaseModel):
 
 
 class JournalCreate(JournalBase):
-    pass
+    """Création d'une entrée journal — hérite tous les champs de JournalBase."""
 
 
 class JournalPatch(BaseModel):
@@ -105,7 +105,7 @@ class ContactBase(BaseModel):
 
 
 class ContactCreate(ContactBase):
-    pass
+    """Création d'un contact — hérite tous les champs de ContactBase."""
 
 
 class ContactPatch(BaseModel):
@@ -146,7 +146,7 @@ class LienBase(BaseModel):
 
 
 class LienCreate(LienBase):
-    pass
+    """Création d'un lien favori — hérite tous les champs de LienBase."""
 
 
 class LienPatch(BaseModel):
@@ -182,7 +182,7 @@ class MotDePasseBase(BaseModel):
 
 
 class MotDePasseCreate(MotDePasseBase):
-    pass
+    """Création d'un mot de passe maison — hérite tous les champs de MotDePasseBase."""
 
 
 class MotDePassePatch(BaseModel):
@@ -219,7 +219,7 @@ class EnergieBase(BaseModel):
 
 
 class EnergieCreate(EnergieBase):
-    pass
+    """Création d'un relevé énergie — hérite tous les champs d'EnergieBase."""
 
 
 class EnergiePatch(BaseModel):

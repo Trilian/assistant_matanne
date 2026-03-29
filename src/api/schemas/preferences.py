@@ -25,9 +25,7 @@ class PreferencesBase(BaseModel):
 
 
 class PreferencesCreate(PreferencesBase):
-    """Création de préférences."""
-
-    pass
+    """Création de préférences — hérite tous les champs de PreferencesBase."""
 
 
 class PreferencesPatch(BaseModel):

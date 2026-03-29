@@ -24,7 +24,7 @@ class AnniversaireBase(BaseModel):
 
 
 class AnniversaireCreate(AnniversaireBase):
-    pass
+    """Création d'un anniversaire — hérite tous les champs d'AnniversaireBase."""
 
 
 class AnniversairePatch(BaseModel):
@@ -97,7 +97,7 @@ class EvenementFamilialBase(BaseModel):
 
 
 class EvenementFamilialCreate(EvenementFamilialBase):
-    pass
+    """Création d'un événement familial — hérite tous les champs d'EvenementFamilialBase."""
 
 
 class EvenementFamilialPatch(BaseModel):
@@ -379,7 +379,7 @@ class PreferencesFamilleRequest(BaseModel):
 
 
 class PreferencesFamilleResponse(PreferencesFamilleRequest):
-    pass
+    """Réponse des préférences famille — hérite tous les champs de la requête."""
 
 
 # ═══════════════════════════════════════════════════════════

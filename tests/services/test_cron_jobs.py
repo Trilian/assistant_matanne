@@ -340,3 +340,33 @@ class TestPushServiceAccesPublic:
             "charger_tous_abonnements_actifs_db" in source
             or "obtenir_abonnes" in source
         ), "_job_push_quotidien doit utiliser la méthode publique d'abonnements."
+
+
+# ═══════════════════════════════════════════════════════════
+# T2 — Error handling jobs cron
+# ═══════════════════════════════════════════════════════════
+
+
+class TestCronErrorHandling:
+    """Valide que les jobs absorbent les erreurs et journalisent l'échec."""
+
+    def test_job_rappels_famille_capture_exception(self, caplog):
+        """Une exception service ne doit pas remonter hors du job."""
+        from src.services.core.cron.jobs import _job_rappels_famille
+
+        with patch("src.services.famille.rappels.ServiceRappelsFamille") as mock_service_cls:
+            mock_service_cls.return_value.envoyer_rappels_du_jour.side_effect = RuntimeError("boom")
+            with caplog.at_level(logging.ERROR):
+                _job_rappels_famille()
+
+        assert "Erreur lors des rappels famille" in caplog.text
+
+    def test_job_rappel_courses_capture_exception_db(self, caplog):
+        """Une erreur DB dans le rappel courses est gérée sans lever d'exception."""
+        from src.services.core.cron.jobs import _job_rappel_courses_ntfy
+
+        with patch("src.core.db.obtenir_contexte_db", side_effect=RuntimeError("db down")):
+            with caplog.at_level(logging.DEBUG):
+                _job_rappel_courses_ntfy()
+
+        assert "Impossible de compter les articles en attente" in caplog.text

@@ -19,6 +19,10 @@ from src.services.jeux.bankroll_manager import get_bankroll_manager
 
 logger = logging.getLogger(__name__)
 
+# Constantes de statuts pour les requêtes SQLAlchemy
+_STATUTS_RESOLUS: list[str] = ["gagnant", "perdant", "gagne", "perdu"]
+_STATUTS_GAGNANTS: list[str] = ["gagnant", "gagne"]
+
 
 def _has_attr(model: type, attr: str) -> bool:
     """Compatibility helper for model field drift across refactors."""
@@ -175,7 +179,7 @@ class StatsPersonnellesService:
                 paris_total_query = paris_total_query.filter(*filtres_paris)
             if _has_attr(PariSportif, "statut"):
                 paris_total_query = paris_total_query.filter(
-                    PariSportif.statut.in_(["gagnant", "perdant", "gagne", "perdu"])  # type: ignore[arg-type]
+                    PariSportif.statut.in_(_STATUTS_RESOLUS)
                 )
             paris_total = paris_total_query.scalar() or 0
 
@@ -184,7 +188,7 @@ class StatsPersonnellesService:
                 paris_gagnants_query = paris_gagnants_query.filter(*filtres_paris)
             if _has_attr(PariSportif, "statut"):
                 paris_gagnants_query = paris_gagnants_query.filter(
-                    PariSportif.statut.in_(["gagnant", "gagne"])  # type: ignore[arg-type]
+                    PariSportif.statut.in_(_STATUTS_GAGNANTS)
                 )
             else:
                 paris_gagnants_query = paris_gagnants_query.filter(PariSportif.gain.isnot(None))
@@ -202,7 +206,7 @@ class StatsPersonnellesService:
                 loto_total_query = loto_total_query.filter(*filtres_loto)
             if _has_attr(GrilleLoto, "statut"):
                 loto_total_query = loto_total_query.filter(
-                    GrilleLoto.statut.in_(["gagnant", "perdant", "gagne", "perdu"])  # type: ignore[arg-type]
+                    GrilleLoto.statut.in_(_STATUTS_RESOLUS)
                 )
             loto_total = loto_total_query.scalar() or 0
 
@@ -211,7 +215,7 @@ class StatsPersonnellesService:
                 loto_gagnants_query = loto_gagnants_query.filter(*filtres_loto)
             if _has_attr(GrilleLoto, "statut"):
                 loto_gagnants_query = loto_gagnants_query.filter(
-                    GrilleLoto.statut.in_(["gagnant", "gagne"])  # type: ignore[arg-type]
+                    GrilleLoto.statut.in_(_STATUTS_GAGNANTS)
                 )
             else:
                 loto_gagnants_query = loto_gagnants_query.filter(GrilleLoto.gain.isnot(None))
@@ -229,7 +233,7 @@ class StatsPersonnellesService:
                 euro_total_query = euro_total_query.filter(*filtres_euro)
             if _has_attr(GrilleEuromillions, "statut"):
                 euro_total_query = euro_total_query.filter(
-                    GrilleEuromillions.statut.in_(["gagnant", "perdant", "gagne", "perdu"])  # type: ignore[arg-type]
+                    GrilleEuromillions.statut.in_(_STATUTS_RESOLUS)
                 )
             euro_total = euro_total_query.scalar() or 0
 
@@ -238,7 +242,7 @@ class StatsPersonnellesService:
                 euro_gagnants_query = euro_gagnants_query.filter(*filtres_euro)
             if _has_attr(GrilleEuromillions, "statut"):
                 euro_gagnants_query = euro_gagnants_query.filter(
-                    GrilleEuromillions.statut.in_(["gagnant", "gagne"])  # type: ignore[arg-type]
+                    GrilleEuromillions.statut.in_(_STATUTS_GAGNANTS)
                 )
             else:
                 euro_gagnants_query = euro_gagnants_query.filter(GrilleEuromillions.gain.isnot(None))

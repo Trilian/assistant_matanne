@@ -990,6 +990,8 @@ AutomationEngine
 ## 19. Nouveau module — Projet Habitat (Déménagement / Agrandissement / Déco / Jardin)
 
 > **Contexte** : Réflexion sur un 2ème enfant → hésitation entre déménager, faire un agrandissement, ou rester et aménager. Besoin d'un outil pour centraliser la recherche immobilière, la conception de plans, la décoration intérieure et l'aménagement du jardin (2600 m², en pente, tout en longueur).
+>
+> **Positionnement** : Module **séparé** au même niveau que Cuisine / Famille / Maison (pas un sous-module de Maison). Exception : le tracker de meubles au quotidien reste dans Maison, le module Habitat gère la vision projet.
 
 ### 19.1 Vue d'ensemble du module
 
@@ -998,10 +1000,10 @@ Le module **Projet Habitat** est un hub central avec 5 sous-modules :
 | Sous-module | Description | Écrans |
 |-------------|-------------|--------|
 | **🏠 Scénarios** | Comparer les 3 options (déménager, agrandir, rester+aménager) avec scoring multicritère | Hub + comparateur |
-| **🔍 Veille Immo** | Recherche de maisons avec alertes automatiques sur les annonces correspondantes | Critères, résultats, alertes |
-| **📐 Plans & Visu 3D** | Dessiner/importer des plans (intérieur + extérieur), visualisation 3D, suggestions IA | Éditeur plan, vue 3D, galerie |
-| **🎨 Déco & Meubles** | Design intérieur par pièce, palette couleurs, sélection meubles avec budget | Pièces, moodboards, budget |
-| **🌳 Paysagisme** | Aménagement du jardin (2600 m², pente), plantations, zones, budget | Plan jardin, zones, plantes |
+| **🔍 Veille Immo** | Scraping direct des sites d'annonces (zone ARA) avec alertes automatiques | Critères, résultats, carte, alertes |
+| **📐 Plans & Modifications IA** | Importer ses plans existants → prompt libre → analyse IA cohérente → génération visuelle | Import, analyse, galerie visuels |
+| **🎨 Déco & Meubles** | Design intérieur par pièce, palette couleurs, génération d'images IA, budget | Pièces, visuels IA, budget |
+| **🌳 Paysagisme** | Aménagement du jardin (2600 m², pente) avec import satellite + canvas zones + visuels IA | Plan jardin, zones, visuels |
 
 ### 19.2 Architecture technique proposée
 
@@ -1012,20 +1014,30 @@ src/api/routes/habitat.py               # Routes API REST
 src/api/schemas/habitat.py              # Schémas Pydantic
 src/services/habitat/                   # Services métier
 ├── scenarios_service.py                # Comparaison scénarios
-├── veille_immo_service.py              # Scraping + alertes annonces
-├── plans_service.py                    # Gestion plans 2D/3D
-├── deco_service.py                     # Déco intérieure, meubles
-├── paysagisme_service.py               # Jardin, plantations
-└── habitat_ia_service.py               # IA transversale (estimation, suggestions)
+├── veille_immo_service.py              # Orchestration scraping + scoring + alertes
+├── plans_service.py                    # Gestion plans importés + analyse IA
+├── deco_service.py                     # Déco intérieure, meubles, visuels IA
+├── paysagisme_service.py               # Jardin, plantations, visuels IA
+└── habitat_ia_service.py               # IA transversale (estimation, analyse plans)
+
+src/services/integrations/              # Services partagés
+├── image_generation.py                 # Service centralisé Hugging Face Inference API
+└── scrapers/                           # Scrapers immobiliers
+    ├── base.py                         # Classe abstraite ScraperImmo
+    ├── leboncoin.py                    # Scraper LeBonCoin
+    ├── seloger.py                      # Scraper SeLoger
+    ├── pap.py                          # Scraper PAP
+    ├── bienici.py                      # Scraper Bien'ici
+    └── aggregator.py                   # Agrégateur + déduplication
 
 # Frontend
 frontend/src/app/(app)/habitat/
 ├── page.tsx                            # Hub projet habitat
 ├── scenarios/page.tsx                  # Comparateur de scénarios
-├── veille-immo/page.tsx                # Recherche + alertes annonces
-├── plans/page.tsx                      # Éditeur de plans + visu 3D
-├── deco/page.tsx                       # Design intérieur par pièce
-└── jardin/page.tsx                     # Aménagement paysager
+├── veille-immo/page.tsx                # Annonces scrapées + carte + alertes
+├── plans/page.tsx                      # Import plans + prompt libre + visuels IA
+├── deco/page.tsx                       # Design intérieur par pièce + visuels IA
+└── jardin/page.tsx                     # Aménagement paysager + canvas
 
 # SQL
 sql/migrations/xxx_habitat_projet.sql   # Tables dédiées
@@ -1069,36 +1081,62 @@ CREATE TABLE habitat_criteres (
 - Comparaison visuelle en colonnes (radar chart, barres)
 - **IA** : Suggérer les critères pertinents en fonction du contexte (2ème enfant, budget estimé)
 
-### 19.4 Sous-module : Veille Immobilière — Alertes annonces
+### 19.4 Sous-module : Veille Immobilière — Scraping direct
 
-**Objectif** : Monitorer les annonces immobilières correspondant à vos critères et alerter quand une bonne affaire apparaît.
+**Objectif** : Scraper directement les sites d'annonces immobilières (zone Auvergne-Rhône-Alpes) et alerter quand une bonne affaire apparaît.
 
-**Stratégie technique** :
+**Stratégie technique — Scraping direct** :
 
-| Approche | API/Source | Faisabilité | Description |
-|----------|-----------|-------------|-------------|
-| **Scraping structuré** | LeBonCoin, SeLoger, PAP, Bien'ici | ⚠️ ToS compliqués | Risque de blocage, maintenance lourde |
-| **API immobilières** | DVF (données publiques), API Castorus | ✅ Légal | Données de vente réelles (historique, prix au m²) |
-| **Agrégateurs open** | OpenDataSoft DVF, data.gouv.fr | ✅ Légal & gratuit | Historique de ventes, pas d'annonces temps réel |
-| **Alertes email parsing** | Gmail API / scraping email | ✅ Faisable | Créer des alertes sur les sites → parser les emails reçus |
-| **Services de veille** | Jinka, Castorus | ✅ API disponible | Services tiers spécialisés veille immo |
+L'utilisateur préfère le scraping direct des sites plutôt que le parsing d'emails d'alertes. Approche retenue :
 
-**Architecture recommandée** (approche hybride) :
-1. **Critères de recherche** stockés en DB (ville, budget min/max, surface min, nb pièces, terrain min, etc.)
-2. **Cron job quotidien** qui :
-   - Interroge l'API DVF (Demandes de Valeurs Foncières) pour les prix de référence du secteur
-   - Parse les emails d'alertes des sites d'annonces (SeLoger, LeBonCoin, PAP) via IMAP ou Gmail API
-   - Compare chaque annonce détectée aux critères → scoring de pertinence
-3. **Alerting** : Push + WhatsApp quand score ≥ seuil configurable
-4. **Historique** : Tracker les annonces vues, favorites, contactées, visitées
+| Site | Technique | Anti-ban |
+|------|-----------|----------|
+| **LeBonCoin** | `httpx` + parsing HTML (`beautifulsoup4`) | Headers rotatifs, délais aléatoires (2-5s), proxy optionnel |
+| **SeLoger** | API JSON interne (reverse-engineered) | Rate limiting strict (1 req/10s) |
+| **PAP** | `httpx` + parsing HTML | User-Agent rotatif |
+| **Bien'ici** | API JSON interne | Rate limiting |
+
+**Architecture des scrapers** :
+```python
+# src/services/integrations/scrapers/base.py
+class ScraperImmo(ABC):
+    """Classe abstraite pour tous les scrapers immobiliers."""
+    
+    @abstractmethod
+    async def scraper_annonces(self, criteres: CriteresImmo) -> list[AnnonceScrapee]: ...
+    
+    async def _requete_avec_delai(self, url: str) -> str:
+        """Requête HTTP avec délai aléatoire anti-ban (2-5s)."""
+        await asyncio.sleep(random.uniform(2, 5))
+        async with httpx.AsyncClient(headers=self._headers_rotatifs()) as client:
+            response = await client.get(url, timeout=30)
+            return response.text
+
+# src/services/integrations/scrapers/aggregator.py
+class AggregateurAnnonces:
+    """Agrège les résultats de tous les scrapers, déduplique, score."""
+    
+    def __init__(self):
+        self.scrapers = [LeBonCoinScraper(), SeLogerScraper(), PAPScraper(), BienIciScraper()]
+    
+    async def scraper_toutes_sources(self, criteres: CriteresImmo) -> list[AnnonceScrapee]:
+        """Lance tous les scrapers en parallèle, déduplique par adresse+surface+prix."""
+        ...
+```
+
+**Cron job** :
+- **Fréquence** : **1×/jour** (ex: 7h00 du matin) — suffisant pour le besoin
+- **Zone** : Auvergne-Rhône-Alpes uniquement (filtrage par département/code postal)
+- **Pipeline** : Scraping → Déduplication → Scoring vs critères → Notification si score ≥ seuil
+- **Robustesse** : Circuit breaker par scraper (si un site bloque, les autres continuent)
 
 **Modèle de données** :
 ```sql
 CREATE TABLE habitat_criteres_immo (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL DEFAULT 'Recherche principale',
-    ville VARCHAR(200),
-    code_postal VARCHAR(10),
+    departements JSONB DEFAULT '[]',     -- ["01","07","15","26","38","42","43","63","69","73","74"]
+    villes JSONB DEFAULT '[]',           -- Villes spécifiques si besoin
     rayon_km INTEGER DEFAULT 10,
     budget_min DECIMAL(12,2),
     budget_max DECIMAL(12,2),
@@ -1116,8 +1154,8 @@ CREATE TABLE habitat_criteres_immo (
 CREATE TABLE habitat_annonces (
     id SERIAL PRIMARY KEY,
     critere_id INTEGER REFERENCES habitat_criteres_immo(id),
-    source VARCHAR(100) NOT NULL,        -- "seloger", "leboncoin", "pap", "dvf"
-    url_annonce VARCHAR(500),
+    source VARCHAR(100) NOT NULL,        -- "leboncoin", "seloger", "pap", "bienici"
+    url_source VARCHAR(500) NOT NULL,    -- Lien direct vers l'annonce originale
     titre VARCHAR(500),
     prix DECIMAL(12,2),
     surface_m2 DECIMAL(8,2),
@@ -1125,37 +1163,80 @@ CREATE TABLE habitat_annonces (
     nb_pieces INTEGER,
     ville VARCHAR(200),
     code_postal VARCHAR(10),
+    departement VARCHAR(3),
     photos JSONB DEFAULT '[]',
     description_brute TEXT,
     score_pertinence DECIMAL(5,2),       -- Score calculé par rapport aux critères
     statut VARCHAR(50) DEFAULT 'nouveau', -- nouveau, vu, favori, contacte, visite, rejete
     prix_m2_secteur DECIMAL(8,2),        -- Prix au m² de référence DVF
     ecart_prix_pct DECIMAL(5,2),         -- % d'écart par rapport au prix marché
+    hash_dedup VARCHAR(64),              -- SHA256(adresse+surface+prix) pour déduplication
     notes TEXT,
     detectee_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
 
 **Fonctionnalités UI** :
-- Formulaire de critères de recherche (ville, budget, surface, terrain, pièces…)
+- Formulaire de critères de recherche (départements ARA, budget, surface, terrain, pièces…)
 - Dashboard annonces avec scoring et tri par pertinence
+- **Lien direct vers la source** pour chaque annonce (LBC, SeLoger, PAP, Bien'ici)
 - Badge "Bonne affaire" si prix < prix_m2_secteur × surface - 10%
-- Carte interactive des annonces (Leaflet/Mapbox)
+- Carte interactive des annonces (Leaflet) — zone ARA
 - Pipeline de statut : Nouveau → Vu → Favori → Contacté → Visité → Rejeté / Offre
 - Historique des prix DVF du secteur (graphique d'évolution)
+- Notification Push quand une annonce "top" est détectée (score ≥ seuil)
 
-### 19.5 Sous-module : Plans & Visualisation 3D
+### 19.5 Sous-module : Plans & Modifications IA — Pipeline analyse cohérente
 
-**Objectif** : Créer/importer des plans de maison et visualiser en 3D, pour explorer des options d'agrandissement ou de réaménagement.
+**Objectif** : Importer ses plans de maison existants, décrire des modifications en langage naturel ("Ajouter une chambre de 12m² côté jardin"), obtenir une **analyse IA complète et cohérente** puis un visuel généré.
 
-**Stack technique** :
+**Principe clé** : Le prompt libre de l'utilisateur ne génère pas directement une image. Il passe par un **pipeline à 2 étapes** — analyse textuelle par Mistral, puis génération visuelle par Hugging Face.
 
-| Composant | Bibliothèque | Rôle |
-|-----------|-------------|------|
-| **Éditeur de plan 2D** | [Konva.js](https://konvajs.org/) + react-konva | Dessiner murs, pièces, portes, fenêtres sur canvas |
-| **Visualisation 3D** | [Three.js](https://threejs.org/) + @react-three/fiber | Extrusion des plans 2D en 3D, navigation orbitale |
-| **Import de plans** | Upload image/PDF → calibration manuelle | Tracer par-dessus un plan existant |
-| **IA estimation** | Mistral | Estimer coûts de travaux à partir du plan |
+**Pipeline de modification** :
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ ÉTAPE 1 — Analyse IA (Mistral)                                     │
+│                                                                     │
+│ Entrées:                                                            │
+│   • Prompt utilisateur: "Ajouter une chambre de 12m² côté jardin"  │
+│   • Plan importé: pièces existantes, dimensions, positions          │
+│   • Contraintes: murs porteurs, PLU, budget, orientation           │
+│                                                                     │
+│ Sortie: AnalyseModificationPlan (JSON structuré)                   │
+│   • faisabilite: bool                                               │
+│   • score_confiance: 0.85                                           │
+│   • contraintes_identifiees: ["Mur porteur côté est", "PLU: COS"]  │
+│   • impact_structurel: "Extension légère, fondations nécessaires"   │
+│   • estimation_cout: {min: 18000, max: 28000}                      │
+│   • disposition_proposee: {pièces modifiées avec dimensions}        │
+│   • recommandations: ["Privilégier une extension de plain-pied"]    │
+│   • prompt_image_optimise: "Floor plan, French suburban house..."   │
+├─────────────────────────────────────────────────────────────────────┤
+│ ÉTAPE 2 — Génération visuelle (Hugging Face)                       │
+│                                                                     │
+│ Entrée: prompt_image_optimise (généré par Mistral, pas le brut)    │
+│ Sortie: Image architecturale cohérente                              │
+│                                                                     │
+│ Modèle: SDXL / Stable Diffusion 3 / Flux via HF Inference API     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Modèle Pydantic pour l'analyse** :
+```python
+class AnalyseModificationPlan(BaseModel):
+    """Résultat structuré de l'analyse IA d'une modification de plan."""
+    faisabilite: bool
+    score_confiance: float = Field(ge=0, le=1)
+    contraintes_identifiees: list[str]
+    impact_structurel: str
+    estimation_cout_min: int
+    estimation_cout_max: int
+    disposition_proposee: dict  # Pièces modifiées avec nouvelles dimensions
+    recommandations: list[str]
+    prompt_image_optimise: str  # Prompt enrichi pour la génération d'image
+    alternatives: list[str] = []  # Suggestions alternatives si faisabilité faible
+```
 
 **Modèle de données** :
 ```sql
@@ -1163,15 +1244,26 @@ CREATE TABLE habitat_plans (
     id SERIAL PRIMARY KEY,
     scenario_id INTEGER REFERENCES habitat_scenarios(id) ON DELETE SET NULL,
     nom VARCHAR(200) NOT NULL,
-    type_plan VARCHAR(50) NOT NULL,       -- 'interieur', 'extension', 'jardin'
-    donnees_plan JSONB NOT NULL,          -- Définition vectorielle (murs, pièces, cotes)
-    image_fond_url VARCHAR(500),          -- Image de fond importée (plan existant)
+    type_plan VARCHAR(50) NOT NULL,       -- 'interieur', 'extension', 'jardin', 'parcelle'
+    image_importee_url VARCHAR(500),      -- Plan original importé (photo/scan/PDF)
+    donnees_pieces JSONB NOT NULL DEFAULT '{}', -- Pièces extraites/saisies {nom, dims, position}
+    contraintes JSONB DEFAULT '{}',       -- Murs porteurs, PLU, orientation, etc.
     surface_totale_m2 DECIMAL(8,2),
     budget_estime DECIMAL(12,2),
     notes TEXT,
     version INTEGER DEFAULT 1,
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE habitat_modifications_plan (
+    id SERIAL PRIMARY KEY,
+    plan_id INTEGER REFERENCES habitat_plans(id) ON DELETE CASCADE,
+    prompt_utilisateur TEXT NOT NULL,      -- "Ajouter une chambre de 12m² côté jardin"
+    analyse_ia JSONB NOT NULL,            -- AnalyseModificationPlan sérialisé
+    image_generee_url VARCHAR(500),       -- URL de l'image générée par HF
+    acceptee BOOLEAN,                     -- L'utilisateur a-t-il validé cette modification ?
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE habitat_pieces (
@@ -1193,24 +1285,33 @@ CREATE TABLE habitat_pieces (
 ```
 
 **Fonctionnalités** :
-- Éditeur de plan 2D : dessiner des murs, placer des pièces, ajouter des cotes
-- Import d'un plan existant (photo/scan) comme fond → tracer par-dessus
-- Visualisation 3D interactive (rotation orbitale) à partir du plan 2D
-- Versioning des plans (v1, v2… pour comparer avant/après extension)
-- **IA** : "Estimer le coût de cette extension de 25m²" → Mistral avec contexte local (prix au m² travaux de la région)
-- Galerie de plans sauvegardés
+- **Import de plans** : Upload image/scan/PDF des plans existants de la maison
+- **Saisie des pièces** : Après import, saisir les pièces et dimensions (l'IA ne peut pas les extraire d'une image)
+- **Saisie des contraintes** : Murs porteurs, PLU local, orientation, budget max
+- **Prompt libre** : Zone de texte libre → pipeline analyse + visuel
+- **Affichage résultat** : Analyse complète (faisabilité, coût, contraintes, recommandations) côte à côte avec le visuel généré
+- **Historique** : Toutes les modifications demandées avec leur analyse, pour comparer
+- **Versioning** : v1 (état actuel) → v2 (après extension) → comparer
+- **Galerie** : Images générées sauvegardées avec leur contexte
 
 ### 19.6 Sous-module : Décoration & Meubles
 
-**Objectif** : Concevoir la décoration intérieure pièce par pièce, avec palette de couleurs, sélection de meubles et suivi du budget (sortir enfin des cartons et des murs blancs !).
+**Objectif** : Concevoir la décoration intérieure pièce par pièce, avec génération d'images IA pour se projeter, palette de couleurs, et suivi du budget.
+
+**Double présence des meubles** :
+- **Habitat** : Vision projet — meubles souhaités, inspirations, budget prévisionnel
+- **Maison** (module existant) : Tracker quotidien — meubles achetés, entretien, garanties
+
+Quand un meuble est acheté dans Habitat → il est automatiquement créé dans le tracker Maison.
 
 **Fonctionnalités** :
 - **Par pièce** : créer un "projet déco" pour chaque pièce
 - **Moodboard** : collecter des inspirations (images uploadées, URLs Pinterest)
 - **Palette couleurs** : générer une palette harmonieuse (complémentaire, analogique…) — lib `chroma-js` ou IA
+- **Génération visuelle IA** : "Montre-moi ce salon en style scandinave avec du parquet chêne" → image générée via Hugging Face (prompt enrichi par Mistral avec les dimensions/contraintes réelles)
 - **Catalogue meubles** : ajouter des meubles souhaités avec prix, dimensions, lien achat, priorité
-- **Budget déco** : budget global → réparti par pièce → suivi des achats effectifs vs prévisionnel
-- **IA suggestions** : "Propose-moi une palette pour un salon cosy de 20m² avec du parquet chêne"
+- **Budget déco** : budget dédié par pièce → suivi achats effectifs vs prévisionnel
+- **Sync finances** : Quand un achat est validé avec une date de paiement → auto-sync vers Maison/Finances
 - **Checklist emménagement** : liste de ce qu'il faut acheter par priorité (essentiel, confort, cosmétique)
 
 **Modèle de données** :
@@ -1229,6 +1330,19 @@ CREATE TABLE habitat_projets_deco (
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+CREATE TABLE habitat_visuels_ia (
+    id SERIAL PRIMARY KEY,
+    projet_deco_id INTEGER REFERENCES habitat_projets_deco(id) ON DELETE CASCADE,
+    plan_id INTEGER REFERENCES habitat_plans(id) ON DELETE CASCADE,
+    zone_jardin_id INTEGER REFERENCES habitat_zones_jardin(id) ON DELETE CASCADE,
+    prompt_utilisateur TEXT NOT NULL,
+    prompt_enrichi TEXT NOT NULL,          -- Prompt optimisé par Mistral
+    image_url VARCHAR(500),
+    modele_utilise VARCHAR(200),           -- "stabilityai/sdxl-turbo", "black-forest-labs/FLUX.1-dev"
+    contexte VARCHAR(50),                 -- "deco", "plan", "jardin"
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 CREATE TABLE habitat_meubles_souhaites (
     id SERIAL PRIMARY KEY,
     projet_deco_id INTEGER REFERENCES habitat_projets_deco(id) ON DELETE CASCADE,
@@ -1243,21 +1357,26 @@ CREATE TABLE habitat_meubles_souhaites (
     priorite VARCHAR(20) DEFAULT 'moyen', -- essentiel, haut, moyen, bas
     achete BOOLEAN DEFAULT FALSE,
     date_achat DATE,
+    date_paiement DATE,                   -- Si renseignée → sync vers Maison/Finances
+    synced_maison BOOLEAN DEFAULT FALSE,  -- Créé dans le tracker Maison ?
     notes TEXT
 );
 ```
 
 ### 19.7 Sous-module : Paysagisme — Aménagement jardin
 
-**Objectif** : Concevoir l'aménagement du jardin de 2600 m² (terrain en pente, tout en longueur) avec zones fonctionnelles, plantations, et budget.
+**Objectif** : Concevoir l'aménagement du jardin de 2600 m² (terrain en pente, tout en longueur) avec import de vue satellite, canvas zones, visuels IA, et budget.
 
 **Fonctionnalités** :
-- **Plan jardin** : canvas 2D avec le contour du terrain (forme allongée, pente indiquée)
+- **Import vue satellite** : Upload de la vue satellite de la parcelle comme fond de plan
+- **Infos parcelle** : Saisie des données terrain (surface, orientation, pente, type de sol)
+- **Plan jardin canvas** : canvas 2D (`react-konva`) par-dessus la vue satellite pour dessiner les zones
 - **Zones fonctionnelles** : potager, pelouse, terrasse, aire de jeux, haie, verger, compost, piscine éventuelle…
 - **Catalogue plantes** : sélection depuis le catalogue existant (`data/reference/plantes_catalogue.json`) + nouvelles entrées
 - **Gestion de la pente** : visualisation du dénivelé, suggestions de terrasses/murets de soutènement
+- **Visuels IA** : "Montre-moi cette zone terrasse avec des dalles en pierre et une pergola" → image via Hugging Face
 - **Budget paysagisme** : estimation par zone (terrassement, plantations, clôture, arrosage)
-- **IA** : "Propose un aménagement pour un jardin en pente de 2600m² orienté sud avec 2 enfants en bas âge" → plan de zones + estimations
+- **IA suggestions** : "Propose un aménagement pour un jardin en pente de 2600m² orienté sud avec 2 enfants en bas âge" → plan de zones + estimations
 - **Intégration module Jardin existant** : lier les zones du plan paysager aux fiches plantes du module maison/jardin
 
 **Modèle de données** :
@@ -1273,6 +1392,7 @@ CREATE TABLE habitat_zones_jardin (
     position_y DECIMAL(8,2),
     largeur DECIMAL(8,2),
     longueur DECIMAL(8,2),
+    donnees_canvas JSONB DEFAULT '{}',    -- Forme dessinée sur le canvas (polygone libre)
     plantes JSONB DEFAULT '[]',           -- [{nom, quantite, prix_unitaire}]
     amenagements JSONB DEFAULT '[]',      -- [{type, description, cout}]
     budget_estime DECIMAL(10,2),
@@ -1280,54 +1400,123 @@ CREATE TABLE habitat_zones_jardin (
 );
 ```
 
-### 19.8 Intégrations avec les modules existants
+### 19.8 Service génération d'images IA — Hugging Face Inference API (gratuit)
+
+**Choix** : Hugging Face Inference API (free tier) au lieu de DALL-E 3 / Stability AI payants.
+
+**Justification** :
+- ~1000 requêtes/mois gratuites — largement suffisant pour quelques images/semaine
+- Modèles de qualité disponibles : SDXL, Stable Diffusion 3, Flux
+- Pas de carte bancaire requise, juste un token HF gratuit
+- API simple et légère
+
+**Architecture du service centralisé** :
+```python
+# src/services/integrations/image_generation.py
+class ServiceGenerationImages:
+    """Service centralisé de génération d'images via Hugging Face Inference API."""
+    
+    HF_API_URL = "https://api-inference.huggingface.co/models"
+    MODELE_DEFAUT = "stabilityai/stable-diffusion-xl-base-1.0"
+    MODELES_DISPONIBLES = {
+        "sdxl": "stabilityai/stable-diffusion-xl-base-1.0",
+        "sdxl-turbo": "stabilityai/sdxl-turbo",
+        "flux-dev": "black-forest-labs/FLUX.1-dev",
+    }
+    
+    async def generer_image(
+        self,
+        prompt: str,
+        modele: str = "sdxl",
+        negative_prompt: str = "blurry, low quality, distorted",
+    ) -> bytes:
+        """Génère une image à partir d'un prompt textuel."""
+        url = f"{self.HF_API_URL}/{self.MODELES_DISPONIBLES[modele]}"
+        headers = {"Authorization": f"Bearer {settings.HF_API_TOKEN}"}
+        payload = {"inputs": prompt, "parameters": {"negative_prompt": negative_prompt}}
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload, headers=headers, timeout=120)
+            response.raise_for_status()
+            return response.content  # bytes de l'image
+```
+
+**Configuration** :
+- Variable d'environnement : `HF_API_TOKEN` dans `.env.local` (token gratuit à créer sur huggingface.co)
+- Dépendance Python : `huggingface_hub` (léger) — optionnel, on peut aussi utiliser `httpx` directement
+- Rate limiting interne : max 5 images/heure pour ne pas épuiser le quota gratuit
+- Fallback : si HF indisponible → message "Service de génération temporairement indisponible"
+
+**Usages dans le module Habitat** :
+- Plans : visuel architectural après analyse de modification
+- Déco : projection visuelle d'une pièce dans un style donné
+- Jardin : rendu visuel d'une zone aménagée
+
+### 19.9 Intégrations avec les modules existants
 
 | Module existant | Interaction | Direction |
 |----------------|-------------|-----------|
 | **Maison/Projets** | Les travaux d'agrandissement → projets maison (suivi chantier, artisans) | Habitat → Maison |
 | **Maison/Jardin** | Les zones jardin du plan → fiches plantes existantes (entretien, arrosage) | Habitat ↔ Jardin |
-| **Maison/Finances** | Le budget habitat (déco, travaux, jardin) → agrégé dans les finances maison | Habitat → Finances |
+| **Maison/Meubles** | Meuble acheté dans Habitat → auto-créé dans le tracker Maison | Habitat → Maison |
+| **Maison/Finances** | Budget validé avec date de paiement → agrégé dans les finances maison | Habitat → Finances |
 | **Dashboard** | Widget "Projet Habitat" : avancement global, prochaines actions, budget restant | Habitat → Dashboard |
 | **Famille/Budget** | Gros achats meubles/déco → suivi dans le budget famille | Habitat → Famille |
 | **IA Chat** | Contexte habitat disponible pour le chat IA multi-module | Habitat → Chat IA |
-| **Notifications** | Alertes annonces immobilières → Push/WhatsApp | Habitat → Notifications |
+| **Notifications** | Alertes annonces immobilières top → Push/WhatsApp avec lien source | Habitat → Notifications |
 
-### 19.9 IA — Opportunités spécifiques
+### 19.10 IA — Opportunités spécifiques
 
 | # | Opportunité IA | Description |
 |---|---------------|-------------|
-| HAB-IA-1 | **Estimation budget travaux** | À partir du plan + type de travaux → estimation réaliste (coût/m² régional) |
-| HAB-IA-2 | **Suggestions déco** | Palette couleurs + style → suggestions meubles, matériaux, agencement |
-| HAB-IA-3 | **Analyse annonce** | Résumé automatique d'une annonce + scoring + comparaison au marché |
-| HAB-IA-4 | **Plan jardin intelligent** | Contraintes (pente, orientation, budget, enfants) → proposition de zones |
-| HAB-IA-5 | **Architecte virtuel** | "J'ai 30m² de plus, comment les répartir ?" → propositions d'agencement |
-| HAB-IA-6 | **Comparateur prix meubles** | Nom du meuble → recherche des meilleurs prix en ligne |
+| HAB-IA-1 | **Analyse modification plan** | Prompt libre → analyse faisabilité, contraintes, coût, disposition — pipeline Mistral structuré |
+| HAB-IA-2 | **Génération visuelle plan** | Prompt optimisé par Mistral → image architecturale via Hugging Face |
+| HAB-IA-3 | **Estimation budget travaux** | À partir du plan + type de travaux → estimation réaliste (coût/m² régional ARA) |
+| HAB-IA-4 | **Suggestions déco + visuel** | Style + pièce + contraintes → palette + suggestions + image de projection |
+| HAB-IA-5 | **Analyse annonce immobilière** | Résumé automatique d'une annonce scrapée + scoring + comparaison au marché DVF |
+| HAB-IA-6 | **Plan jardin intelligent** | Contraintes (pente, orientation, budget, enfants) → proposition de zones + estimations |
+| HAB-IA-7 | **Architecte virtuel** | "J'ai 30m² de plus, comment les répartir ?" → analyse + propositions d'agencement |
+| HAB-IA-8 | **Visuel paysager** | Zone jardin + aménagements → image de rendu du jardin aménagé |
 
-### 19.10 Plan d'implémentation
+### 19.11 Budget — Stratégie de gestion
+
+**Budget dédié** au module Habitat, avec **auto-sync vers Maison/Finances** :
+
+- Chaque sous-module a son propre budget (scénarios, déco par pièce, jardin par zone, travaux)
+- Budget global Habitat = somme des sous-budgets
+- **Quand un achat est validé avec une date de paiement** → écriture automatique dans Maison/Finances avec :
+  - Catégorie : "Habitat / {sous-module}" (ex: "Habitat / Déco salon")
+  - Montant, date de paiement, description
+  - Lien retour vers l'item Habitat d'origine
+- Vue consolidée : budget prévu vs dépensé vs reste à engager
+
+### 19.12 Plan d'implémentation
 
 | Phase | Contenu | Effort estimé | Priorité |
 |-------|---------|---------------|----------|
 | **H1** | Tables SQL + modèles ORM + schémas Pydantic + routes API CRUD | 6h | 🔴 |
 | **H2** | Hub frontend + page Scénarios (comparateur) | 4h | 🔴 |
-| **H3** | Veille Immo : critères + cron parsing emails + alertes | 8h | 🔴 |
-| **H4** | Éditeur de plan 2D (Konva.js) + sauvegarde JSONB | 10h | 🟡 |
-| **H5** | Visualisation 3D (Three.js / @react-three/fiber) | 8h | 🟡 |
-| **H6** | Déco & Meubles : projets par pièce, moodboard, budget | 6h | 🟡 |
-| **H7** | Paysagisme : plan jardin canvas + zones + catalogue plantes | 8h | 🟡 |
-| **H8** | IA : estimations budget, suggestions déco, analyse annonces | 6h | 🟢 |
-| **H9** | Intégrations inter-modules (projets, jardin, finances, dashboard) | 4h | 🟢 |
-| **H10** | Carte interactive annonces (Leaflet) + historique DVF | 4h | 🟢 |
+| **H3** | Scrapers immobiliers (LBC, SeLoger, PAP, Bien'ici) + agrégateur + cron 1×/jour | 10h | 🔴 |
+| **H4** | Veille Immo frontend : liste annonces, carte Leaflet, alertes, lien source | 6h | 🔴 |
+| **H5** | Service Hugging Face Inference API (génération images centralisé) | 3h | 🔴 |
+| **H6** | Plans : import + saisie pièces/contraintes + pipeline analyse IA Mistral + visuel HF | 10h | 🟡 |
+| **H7** | Déco & Meubles : projets par pièce, visuels IA, moodboard, budget, sync Maison | 8h | 🟡 |
+| **H8** | Paysagisme : import satellite + canvas Konva + zones + visuels IA + catalogue plantes | 8h | 🟡 |
+| **H9** | Budget dédié + auto-sync Maison/Finances sur date de paiement | 4h | 🟡 |
+| **H10** | IA avancée : estimation travaux régionale, architecte virtuel, analyse annonces | 6h | 🟢 |
+| **H11** | Intégrations inter-modules (projets, jardin, finances, dashboard, notifications) | 4h | 🟢 |
+| **H12** | Historique DVF (data.gouv.fr) + graphiques évolution prix secteur | 4h | 🟢 |
 
-### 19.11 Dépendances npm/pip à ajouter
+### 19.13 Dépendances npm/pip à ajouter
 
 | Package | Usage | Côté |
 |---------|-------|------|
-| `react-konva` + `konva` | Éditeur de plan 2D canvas | Frontend |
-| `@react-three/fiber` + `@react-three/drei` + `three` | Visualisation 3D | Frontend |
-| `chroma-js` | Manipulation de couleurs (palettes) | Frontend |
-| `react-leaflet` + `leaflet` | Carte interactive annonces | Frontend |
-| `imaplib` (stdlib) ou `imap-tools` | Parsing emails alertes immo | Backend |
-| `beautifulsoup4` | Parsing HTML des emails d'alertes | Backend |
+| `react-konva` + `konva` | Canvas 2D (plan jardin, zones) | Frontend |
+| `chroma-js` | Manipulation de couleurs (palettes déco) | Frontend |
+| `react-leaflet` + `leaflet` | Carte interactive annonces (zone ARA) | Frontend |
+| `httpx` | Requêtes HTTP async scrapers + Hugging Face API | Backend |
+| `beautifulsoup4` | Parsing HTML pages annonces (LBC, PAP) | Backend |
+| `huggingface_hub` | Client HF Inference API (optionnel, `httpx` suffit) | Backend |
 
 ---
 

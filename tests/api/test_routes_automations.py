@@ -308,3 +308,28 @@ class TestExecuterAutomation:
 
         assert response.status_code == 404
 
+    @pytest.mark.asyncio
+    async def test_executer_maintenant_passe_user_id_au_service(self, async_client: httpx.AsyncClient):
+        """La route doit exécuter avec le profil courant (isolation multi-user)."""
+        profil = SimpleNamespace(id=42, email="test@matanne.fr", preferences_modules={})
+        mock_service = MagicMock()
+        mock_service.executer_automation_par_id.return_value = {
+            "success": True,
+            "automation_id": 7,
+            "executed": 1,
+        }
+
+        with (
+            patch("src.api.routes.automations._charger_automations", return_value=(profil, [])),
+            patch(
+                "src.services.utilitaires.automations_engine.obtenir_moteur_automations_service",
+                return_value=mock_service,
+            ),
+        ):
+            response = await async_client.post("/api/v1/automations/7/executer-maintenant")
+
+        assert response.status_code == 200
+        mock_service.executer_automation_par_id.assert_called_once()
+        _, kwargs = mock_service.executer_automation_par_id.call_args
+        assert kwargs["user_id"] == 42
+

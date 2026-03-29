@@ -78,6 +78,25 @@ class TestWebSocketConnexion:
                 assert data2["type"] == "users_list"
                 assert len(data2["users"]) == 2
 
+    def test_reconnexion_meme_utilisateur(self, ws_client: TestClient):
+        """Un utilisateur peut se reconnecter avec le même user_id après déconnexion."""
+        with ws_client.websocket_connect(_ws_url(22, "reco", "Reco")) as ws1:
+            data1 = ws1.receive_json()
+            assert data1["type"] == "users_list"
+            assert len(data1["users"]) == 1
+
+        # Nouvelle connexion avec le même user_id sur la même liste
+        with ws_client.websocket_connect(_ws_url(22, "reco", "Reco")) as ws2:
+            data2 = ws2.receive_json()
+            assert data2["type"] == "users_list"
+            # Le manager a bien nettoyé l'ancienne connexion
+            assert len(data2["users"]) == 1
+            assert data2["users"][0]["user_id"] == "reco"
+
+            ws2.send_json({"action": "ping"})
+            pong = ws2.receive_json()
+            assert pong["type"] == "pong"
+
 
 # ═══════════════════════════════════════════════════════════
 # USER JOINED / USER LEFT

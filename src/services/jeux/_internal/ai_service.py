@@ -124,7 +124,7 @@ FORMAT DE RÉPONSE:
             service_name="jeux",
         )
 
-    @property  # type: ignore[override]
+    @property  # type: ignore[override]  # Intentionnel: property remplace l'attribut parent pour lazy-loading
     def client(self) -> ClientIA | None:
         """Lazy loading du client IA."""
         if self._client_ia is None:

@@ -3,7 +3,11 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";
-import type { DonneesAntiGaspillage, HistoriqueGaspillage } from "@/types/anti-gaspillage";
+import type {
+  DonneesAntiGaspillage,
+  HistoriqueGaspillage,
+  SuggestionsIAAntiGaspillage,
+} from "@/types/anti-gaspillage";
 
 /** Obtenir le score anti-gaspillage, articles urgents et recettes rescue */
 export async function obtenirAntiGaspillage(
@@ -23,6 +27,17 @@ export async function obtenirHistoriqueGaspillage(
   const { data } = await clientApi.get<HistoriqueGaspillage>(
     "/anti-gaspillage/historique",
     { params: { semaines } }
+  );
+  return data;
+}
+
+/** Obtenir des suggestions IA pour utiliser les produits bientôt périmés */
+export async function obtenirSuggestionsIAAntiGaspillage(
+  jours = 7
+): Promise<SuggestionsIAAntiGaspillage> {
+  const { data } = await clientApi.post<SuggestionsIAAntiGaspillage>(
+    "/anti-gaspillage/suggestions-ia",
+    { jours }
   );
   return data;
 }

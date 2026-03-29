@@ -1,6 +1,6 @@
 # 🍽️ Guide Module Cuisine
 
-> Recettes, planning repas, courses, inventaire, batch cooking et anti-gaspillage.
+> Recettes, planning repas, courses, inventaire, batch cooking, anti-gaspillage et enrichissements IA.
 
 ## Table des matières
 
@@ -17,11 +17,19 @@
 
 ## Vue d'ensemble
 
-Le module **Cuisine** est le plus complet de l'application. Il couvre toute la chaîne : trouver des recettes → planifier les repas → générer les courses → suivre le stock → réduire le gaspillage.
+Le module **Cuisine** couvre toute la chaîne alimentaire du foyer : recettes, planning repas, courses, inventaire, batch cooking et réduction du gaspillage.
 
-**URL** : `/cuisine`  
-**Services backend** : `src/services/cuisine/`, `src/services/planning/`, `src/services/inventaire/`  
-**Routes API** : `src/api/routes/recettes.py`, `courses.py`, `inventaire.py`, `planning.py`, `batch_cooking.py`, `anti_gaspillage.py`
+**URL** : `/cuisine`
+**Services backend** : `src/services/cuisine/`, `src/services/planning/`, `src/services/inventaire/`
+**Routes API** : `src/api/routes/recettes.py`, `src/api/routes/courses.py`, `src/api/routes/inventaire.py`, `src/api/routes/planning.py`, `src/api/routes/batch_cooking.py`, `src/api/routes/anti_gaspillage.py`
+
+### Capacités récentes à connaître
+
+- suggestions IA de recettes et de planning
+- prédiction de courses
+- prédiction / priorisation de péremption
+- rappel repas du soir via cron
+- stock bas -> ajout automatique à la liste de courses
 
 ---
 
@@ -58,6 +66,7 @@ Le module **Cuisine** est le plus complet de l'application. Il couvre toute la c
 - Templates de semaine réutilisables
 - Génération automatique de liste de courses depuis le planning
 - Vérification nutritionnelle (équilibre protéines/légumes/féculents)
+- Rappel du repas du soir via job planifié
 
 ### Pages frontend
 
@@ -76,6 +85,7 @@ Le module **Cuisine** est le plus complet de l'application. Il couvre toute la c
 - Modèles de courses réutilisables
 - Génération automatique depuis planning repas
 - Scan code-barres (caméra WebRTC)
+- Enrichissement automatique possible depuis les jobs de stock bas
 
 ### Pages frontend
 
@@ -102,6 +112,7 @@ ws://localhost:8000/ws/courses/{liste_id}
 - Recherche par code-barres via OpenFoodFacts
 - Historique des mouvements (ajout, consommation)
 - Import CSV en masse
+- Alertes anti-gaspillage alimentées par les jobs planifiés
 
 ### Pages frontend
 
@@ -119,6 +130,7 @@ ws://localhost:8000/ws/courses/{liste_id}
 - Étapes de préparation groupée
 - Préparations et stockage (dates de péremption)
 - Configuration batch (nombre de portions, durée max)
+- Archivage automatique des préparations expirées via cron
 
 ### Pages frontend
 
@@ -136,6 +148,7 @@ ws://localhost:8000/ws/courses/{liste_id}
 - Suggestions de recettes pour valoriser les produits proches péremption
 - Actions pour réduire le gaspillage
 - Statistiques et tendances
+- Base de travail pour les futures interactions péremption -> recettes automatiques
 
 ### Pages frontend
 
