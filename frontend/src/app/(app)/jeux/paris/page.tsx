@@ -54,6 +54,7 @@ import {
   enregistrerMise,
   obtenirSuiviResponsable,
   obtenirHistoriqueCotes,
+  obtenirBacktest,
 } from "@/bibliotheque/api/jeux";
 import dynamic from "next/dynamic";
 import type { PariSportif, StatsParis, MatchJeu, ValueBet, SerieJeux, PredictionMatch, AnalyseIA, SuiviResponsable } from "@/types/jeux";
@@ -70,6 +71,13 @@ const GraphiqueROI = dynamic(
   () => import("@/composants/graphiques/graphique-roi").then((m) => m.GraphiqueROI),
   { ssr: false }
 );
+const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), { ssr: false });
+const LineChart = dynamic(() => import("recharts").then((m) => m.LineChart), { ssr: false });
+const Line = dynamic(() => import("recharts").then((m) => m.Line), { ssr: false });
+const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), { ssr: false });
+const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), { ssr: false });
+const TooltipChart = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
+const Legend = dynamic(() => import("recharts").then((m) => m.Legend), { ssr: false });
 
 const FILTRES_STATUT = ["tous", "gagne", "perdu", "en_cours", "annule"] as const;
 
@@ -243,6 +251,8 @@ export default function ParisPage() {
   const [showSeries, setShowSeries] = useState(false);
   const [modeVue, setModeVue] = useState<"simple" | "expert">("simple");
   const [modalPatternsOuvert, setModalPatternsOuvert] = useState(false);
+  const [seuilBacktest, setSeuilBacktest] = useState("2");
+  const [nbBacktest, setNbBacktest] = useState("120");
 
   const sourceOCR = useMemo(() => searchParams.get("source_ocr") === "1", [searchParams]);
 
@@ -337,6 +347,12 @@ export default function ParisPage() {
     () => listerMatchs()
   );
 
+  const { data: backtestParis, isLoading: chargementBacktest } = utiliserRequete(
+    ["jeux", "backtest", "paris", seuilBacktest, nbBacktest],
+    () => obtenirBacktest("paris", Number(seuilBacktest), Number(nbBacktest)),
+    { staleTime: 10 * 60 * 1000 }
+  );
+
   useEffect(() => {
     if (!sourceOCR) return;
 
@@ -356,6 +372,31 @@ export default function ParisPage() {
   }, [sourceOCR, searchParams]);
 
   const matchParId = new Map(matchs.map((m) => [m.id, m]));
+
+  const pointsBacktest = useMemo(() => {
+    const settles = paris.filter((p) => p.statut === "gagne" || p.statut === "perdu");
+    if (settles.length === 0) return [];
+
+    const taux = Number(backtestParis?.taux_reussite ?? 0);
+    let reel = 1000;
+    let strategie = 1000;
+
+    return settles.map((p, idx) => {
+      const gainReel = p.gain != null ? Number(p.gain) - Number(p.mise) : -Number(p.mise);
+      reel += gainReel;
+
+      const gainStrategie = idx / Math.max(settles.length - 1, 1) <= taux
+        ? Number(p.mise) * (Number(p.cote) - 1)
+        : -Number(p.mise);
+      strategie += gainStrategie;
+
+      return {
+        index: idx + 1,
+        reel: Number(reel.toFixed(2)),
+        strategie: Number(strategie.toFixed(2)),
+      };
+    });
+  }, [paris, backtestParis]);
 
   return (
     <div className="space-y-6">
@@ -445,10 +486,11 @@ export default function ParisPage() {
         />
       )}
 
-      {/* Tabs: Paris / Stats */}
+      {/* Tabs: Paris / Backtests / Stats */}
       <Tabs defaultValue="paris">
         <TabsList>
           <TabsTrigger value="paris">💰 Paris</TabsTrigger>
+          <TabsTrigger value="backtests">🧪 Backtests</TabsTrigger>
           <TabsTrigger value="stats">📊 Mes Stats</TabsTrigger>
         </TabsList>
 
@@ -645,6 +687,62 @@ export default function ParisPage() {
 
             </>
           )}
+        </TabsContent>
+
+        <TabsContent value="backtests" className="space-y-4 mt-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Paramètres backtest</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label>Seuil value</Label>
+                <Input value={seuilBacktest} onChange={(e) => setSeuilBacktest(e.target.value)} type="number" step="0.1" />
+              </div>
+              <div>
+                <Label>Échantillon historique</Label>
+                <Input value={nbBacktest} onChange={(e) => setNbBacktest(e.target.value)} type="number" min={20} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Résultats stratégie</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="rounded-md bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Prédictions</p><p className="text-xl font-bold">{Number(backtestParis?.nb_predictions ?? 0)}</p></div>
+              <div className="rounded-md bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Correctes</p><p className="text-xl font-bold">{Number(backtestParis?.nb_correctes ?? 0)}</p></div>
+              <div className="rounded-md bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Taux réussite</p><p className="text-xl font-bold">{(Number(backtestParis?.taux_reussite ?? 0) * 100).toFixed(1)}%</p></div>
+              <div className="rounded-md bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Seuil</p><p className="text-xl font-bold">{Number(backtestParis?.seuil_value ?? 0).toFixed(1)}</p></div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Performance stratégie vs bankroll réelle</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {chargementBacktest ? (
+                <Skeleton className="h-64 w-full" />
+              ) : pointsBacktest.length < 2 ? (
+                <p className="text-sm text-muted-foreground">Pas assez de paris clôturés pour tracer la courbe.</p>
+              ) : (
+                <div className="h-72 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={pointsBacktest}>
+                      <XAxis dataKey="index" tick={{ fontSize: 11 }} />
+                      <YAxis tick={{ fontSize: 11 }} />
+                      <TooltipChart />
+                      <Legend />
+                      <Line type="monotone" dataKey="reel" name="Bankroll réelle" stroke="hsl(220, 70%, 45%)" dot={false} strokeWidth={2} />
+                      <Line type="monotone" dataKey="strategie" name="Stratégie backtest" stroke="hsl(145, 70%, 38%)" dot={false} strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="stats" className="mt-6">

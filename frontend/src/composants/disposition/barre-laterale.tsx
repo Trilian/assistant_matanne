@@ -45,6 +45,8 @@ import {
   Boxes,
   ShoppingBag,
   Settings,
+  Wrench,
+  ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -120,6 +122,9 @@ const LIENS: LienNav[] = [
       { nom: "Travaux", chemin: "/maison/travaux", Icone: Hammer },
       { nom: "Équipements", chemin: "/maison/equipements", Icone: Boxes },
       { nom: "Finances", chemin: "/maison/finances", Icone: Banknote },
+      { nom: "Artisans", chemin: "/maison/artisans", Icone: Wrench },
+      { nom: "Contrats", chemin: "/maison/contrats", Icone: FileText },
+      { nom: "Diagnostics", chemin: "/maison/diagnostics", Icone: ClipboardCheck },
       { nom: "Provisions", chemin: "/maison/provisions", Icone: Package },
       { nom: "Documents", chemin: "/maison/documents", Icone: FileText },
     ],
