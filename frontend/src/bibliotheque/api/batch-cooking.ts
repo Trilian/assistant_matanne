@@ -87,3 +87,18 @@ export async function consommerPreparation(
   });
   return data;
 }
+
+/** Modifier une session (PATCH partiel) */
+export async function modifierSessionBatch(
+  id: number,
+  dto: ModifierSessionBatchDTO
+): Promise<SessionBatchCooking> {
+  const { data } = await clientApi.patch<SessionBatchCooking>(`/batch-cooking/${id}`, dto)
+  return data
+}
+
+/** Obtenir la configuration batch cooking de l'utilisateur */
+export async function obtenirConfigBatch(): Promise<ConfigBatchCooking> {
+  const { data } = await clientApi.get<ConfigBatchCooking>("/batch-cooking/config")
+  return data
+}

@@ -258,6 +258,129 @@ class NutritionEnrichmentService:
 
         return resultats
 
+    def analyser_carences_et_suggestions(
+        self,
+        totaux_hebdo: dict[str, float | int],
+        nb_jours: int,
+    ) -> dict[str, Any]:
+        """Analyse les signaux de carence macro sur la semaine et propose des compensations.
+
+        Cette analyse est heuristique (pas un diagnostic medical).
+        """
+        jours = max(1, int(nb_jours or 1))
+
+        calories_jour = float(totaux_hebdo.get("calories", 0) or 0) / jours
+        proteines_jour = float(totaux_hebdo.get("proteines", 0) or 0) / jours
+        lipides_jour = float(totaux_hebdo.get("lipides", 0) or 0) / jours
+        glucides_jour = float(totaux_hebdo.get("glucides", 0) or 0) / jours
+
+        kcal_proteines = proteines_jour * 4
+        kcal_glucides = glucides_jour * 4
+        kcal_lipides = lipides_jour * 9
+        kcal_total_macro = max(1.0, kcal_proteines + kcal_glucides + kcal_lipides)
+
+        ratios = {
+            "proteines_pct": round(kcal_proteines / kcal_total_macro * 100, 1),
+            "glucides_pct": round(kcal_glucides / kcal_total_macro * 100, 1),
+            "lipides_pct": round(kcal_lipides / kcal_total_macro * 100, 1),
+        }
+
+        carences: list[dict[str, str]] = []
+        suggestions: list[dict[str, Any]] = []
+
+        if calories_jour < 1600:
+            carences.append(
+                {
+                    "code": "apport_energetique_bas",
+                    "niveau": "moyen",
+                    "message": "Apport energetique moyen faible pour la semaine.",
+                }
+            )
+            suggestions.append(
+                {
+                    "objectif": "Augmenter l'apport energetique qualite",
+                    "ingredients": ["legumineuses", "cereales completes", "huile d'olive", "oeufs"],
+                    "idees_recettes": ["dahl lentilles coco", "salade pois chiches quinoa", "omelette legumes"],
+                }
+            )
+
+        if proteines_jour < 45:
+            carences.append(
+                {
+                    "code": "proteines_insuffisantes",
+                    "niveau": "eleve",
+                    "message": "Apport proteique probablement insuffisant sur la semaine.",
+                }
+            )
+            suggestions.append(
+                {
+                    "objectif": "Renforcer les proteines",
+                    "ingredients": ["poisson", "oeufs", "lentilles", "yaourt grec", "tofu"],
+                    "idees_recettes": ["bowl lentilles saumon", "omelette complete", "curry tofu pois chiches"],
+                }
+            )
+
+        if glucides_jour < 180:
+            carences.append(
+                {
+                    "code": "glucides_complexes_bas",
+                    "niveau": "moyen",
+                    "message": "Apport en glucides complexes faible, risque de baisse d'energie.",
+                }
+            )
+            suggestions.append(
+                {
+                    "objectif": "Remonter les glucides complexes",
+                    "ingredients": ["riz complet", "avoine", "pommes de terre", "patate douce"],
+                    "idees_recettes": ["buddha bowl riz complet", "porridge avoine", "gratin patate douce"],
+                }
+            )
+
+        if lipides_jour < 40:
+            carences.append(
+                {
+                    "code": "lipides_qualite_bas",
+                    "niveau": "faible",
+                    "message": "Lipides un peu bas, penser aux sources de bons acides gras.",
+                }
+            )
+            suggestions.append(
+                {
+                    "objectif": "Ajouter des lipides de qualite",
+                    "ingredients": ["huile d'olive", "noix", "avocat", "sardines"],
+                    "idees_recettes": ["salade avocat noix", "tartines sardines citron", "pates pesto maison"],
+                }
+            )
+
+        if calories_jour > 2600:
+            carences.append(
+                {
+                    "code": "apport_energetique_eleve",
+                    "niveau": "moyen",
+                    "message": "Apport energetique eleve, a equilibrer avec legumes/fibres.",
+                }
+            )
+            suggestions.append(
+                {
+                    "objectif": "Reequilibrer densite calorique",
+                    "ingredients": ["legumes verts", "legumineuses", "fruits frais"],
+                    "idees_recettes": ["poelee legumes proteines", "salade composee legumineuses"],
+                }
+            )
+
+        return {
+            "indicateurs": {
+                "calories_jour": round(calories_jour),
+                "proteines_jour": round(proteines_jour, 1),
+                "lipides_jour": round(lipides_jour, 1),
+                "glucides_jour": round(glucides_jour, 1),
+                **ratios,
+            },
+            "carences_probables": carences,
+            "suggestions_compensatoires": suggestions,
+            "disclaimer": "Analyse indicative. Pour un suivi personnalise, consulter un professionnel de sante.",
+        }
+
     def estimer_nutriscore(self, recette_id: int) -> str | None:
         """Estime un Nutri-Score approximatif pour une recette.
 

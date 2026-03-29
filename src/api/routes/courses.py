@@ -1622,6 +1622,8 @@ async def importer_ticket_caisse(
 async def obtenir_predictions_courses(
     limite: int = Query(25, ge=1, le=100),
     inclure_deja_sur_liste: bool = Query(False),
+    nb_invites: int = Query(0, ge=0, le=20, description="Nombre d'invites prevus"),
+    evenements: list[str] | None = Query(None, description="Evenements contextuels (repetable)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Retourne une liste pre-completee d'articles habituels avec score de confiance."""
@@ -1633,13 +1635,19 @@ async def obtenir_predictions_courses(
         items = service.predire_articles(
             limite=limite,
             inclure_deja_sur_liste=inclure_deja_sur_liste,
+            evenements=evenements,
+            nb_invites=nb_invites,
         )
         return {
             "items": items,
             "total": len(items),
             "meta": {
                 "source": "historique_achats",
-                "scoring": "retard_frequence + fiabilite_historique",
+                "scoring": "retard_frequence + fiabilite_historique + contexte_evenementiel",
+                "contexte": {
+                    "nb_invites": nb_invites,
+                    "evenements": evenements or [],
+                },
             },
         }
 

@@ -1091,6 +1091,18 @@ async def previsions_energie_ia(
             mois_label = f"{today.year + 1}-01" if today.month == 12 else f"{today.year}-{today.month + 1:02d}"
 
             return {
+                "type": type_compteur,
+                "mois_prochain": mois_label,
+                "consommation_prevue": round(conso_prevue, 1),
+                "tendance": tendance,
+                "confiance": confiance,
+                "pente_mensuelle": round(a, 2),
+                "nb_mois_analyses": n,
+            }
+
+    return await executer_async(_query)
+
+
 @router.post("/depenses/import-ticket", responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def importer_depenses_depuis_ticket(
@@ -1155,16 +1167,6 @@ async def importer_depenses_depuis_ticket(
         }
 
     return await executer_async(_importer)
-                "type": type_compteur,
-                "mois_prochain": mois_label,
-                "consommation_prevue": round(conso_prevue, 1),
-                "tendance": tendance,
-                "confiance": confiance,
-                "pente_mensuelle": round(a, 2),
-                "nb_mois_analyses": n,
-            }
-
-    return await executer_async(_query)
 
 
 @router.get("/depenses/{depense_id}", responses=REPONSES_CRUD_LECTURE)

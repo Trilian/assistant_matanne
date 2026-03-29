@@ -517,8 +517,11 @@ def _job_alertes_peremption_48h() -> None:
     try:
         from datetime import date, timedelta
 
+        from sqlalchemy import func
+
         from src.core.db import obtenir_contexte_db
         from src.core.models import ArticleInventaire
+        from src.core.models.recettes import Ingredient, Recette, RecetteIngredient
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
         aujourd_hui = date.today()
@@ -549,6 +552,34 @@ def _job_alertes_peremption_48h() -> None:
             if getattr(a, "date_peremption", None)
         ]
         message = "Produits à consommer sous 48h:\n" + "\n".join(lignes)
+
+        # IM-9: proposer automatiquement des recettes "rescue" basées sur les produits urgents.
+        suggestions_recettes: list[str] = []
+        try:
+            noms_urgents = [a.nom.lower() for a in articles if getattr(a, "nom", None)]
+            if noms_urgents:
+                with obtenir_contexte_db() as session:
+                    recettes_avec_urgents = (
+                        session.query(Recette.nom)
+                        .join(RecetteIngredient, RecetteIngredient.recette_id == Recette.id)
+                        .join(Ingredient, Ingredient.id == RecetteIngredient.ingredient_id)
+                        .filter(func.lower(Ingredient.nom).in_(noms_urgents))
+                        .group_by(Recette.id)
+                        .order_by(func.count(RecetteIngredient.ingredient_id).desc())
+                        .limit(3)
+                        .all()
+                    )
+                suggestions_recettes = [str(row[0]) for row in recettes_avec_urgents if row and row[0]]
+        except Exception:
+            logger.debug("J-04: impossible de calculer les recettes rescue", exc_info=True)
+
+        if suggestions_recettes:
+            message += (
+                "\n\nRecettes suggérées: "
+                + ", ".join(suggestions_recettes)
+                + "."
+                + "\nTu peux générer plus d'idées via /api/v1/anti-gaspillage/suggestions-ia."
+            )
 
         # Déterminer si des produits expirent dans les 24h (alerte critique → email)
         articles_critiques_24h = [

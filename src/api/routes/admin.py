@@ -362,6 +362,14 @@ _LABELS_JOBS: dict[str, str] = {
     "sync_openfoodfacts": "J6 Sync cache OpenFoodFacts (dim 03h00)",
 }
 
+# Vues SQL explicitement autorisées (lecture seule)
+_VUES_SQL_AUTORISEES: tuple[str, ...] = (
+    "v_objets_a_remplacer",
+    "v_temps_par_activite_30j",
+    "v_budget_travaux_par_piece",
+    "v_charge_semaine",
+)
+
 
 @router.get(
     "/jobs",
@@ -851,3 +859,73 @@ async def coherence_db(
         }
 
     return await executer_async(_check)
+
+
+@router.get(
+    "/sql-views",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Lister les vues SQL exposées",
+    description="Retourne la liste des vues SQL disponibles via l'API admin (lecture seule).",
+)
+@gerer_exception_api
+async def lister_vues_sql(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Liste blanche des vues SQL consultables depuis l'admin."""
+    return {
+        "items": [
+            {"nom": nom_vue, "endpoint": f"/api/v1/admin/sql-views/{nom_vue}"}
+            for nom_vue in _VUES_SQL_AUTORISEES
+        ],
+        "total": len(_VUES_SQL_AUTORISEES),
+    }
+
+
+@router.get(
+    "/sql-views/{view_name}",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Lire une vue SQL exposée",
+    description="Exécute un SELECT paginé en lecture seule sur une vue SQL autorisée.",
+)
+@gerer_exception_api
+async def lire_vue_sql(
+    view_name: str,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Retourne les lignes d'une vue SQL autorisée."""
+    from sqlalchemy import text
+
+    from src.api.utils import executer_avec_session
+
+    if view_name not in _VUES_SQL_AUTORISEES:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Vue SQL '{view_name}' non exposée.",
+        )
+
+    offset = (page - 1) * page_size
+
+    with executer_avec_session() as session:
+        total = int(
+            session.execute(text(f"SELECT COUNT(*) FROM {view_name}")).scalar() or 0
+        )
+        rows = session.execute(
+            text(
+                f"SELECT * FROM {view_name} "
+                "ORDER BY 1 "
+                "LIMIT :limit OFFSET :offset"
+            ),
+            {"limit": page_size, "offset": offset},
+        ).mappings().all()
+
+    items = [dict(row) for row in rows]
+    return {
+        "view": view_name,
+        "items": items,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "pages_totales": max(1, (total + page_size - 1) // page_size),
+    }

@@ -49,6 +49,7 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
       >
         <div className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-secondary">
           <div
+            aria-hidden="true"
             className="absolute h-full bg-primary"
             style={{ width: `${pct}%` }}
           />
@@ -67,6 +68,7 @@ const Slider = React.forwardRef<HTMLDivElement, SliderProps>(
           aria-valuemax={max}
         />
         <div
+          aria-hidden="true"
           className="absolute h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           style={{ left: `calc(${pct}% - 8px)` }}
         />

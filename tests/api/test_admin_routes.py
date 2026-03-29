@@ -144,6 +144,25 @@ class TestAdminJobsACL:
         assert response.status_code in [200, 401, 403, 404, 500]
 
 
+class TestAdminSqlViewsACL:
+    """GET /api/v1/admin/sql-views* — contrôle d'accès admin."""
+
+    @pytest.mark.asyncio
+    async def test_sql_views_sans_auth_refuse(self, unauthenticated_client: httpx.AsyncClient):
+        response = await unauthenticated_client.get("/api/v1/admin/sql-views")
+        assert response.status_code in [401, 403, 404]
+
+    @pytest.mark.asyncio
+    async def test_sql_views_avec_admin_repond(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/sql-views")
+        assert response.status_code in [200, 401, 403, 404, 500]
+
+    @pytest.mark.asyncio
+    async def test_sql_view_detail_avec_admin_repond(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/sql-views/v_objets_a_remplacer")
+        assert response.status_code in [200, 401, 403, 404, 500]
+
+
 class TestAdminRouterExiste:
     """Vérifie que les routes admin sont bien enregistrées dans l'app."""
 

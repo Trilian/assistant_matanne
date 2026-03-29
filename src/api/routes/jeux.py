@@ -792,13 +792,15 @@ async def modifier_pari(
     """Met Ã  jour un pari (statut, gain, etc.)."""
     from decimal import Decimal
 
-    from src.core.models import PariSportif
+    from src.core.models import BudgetFamille, PariSportif
 
     def _query():
         with executer_avec_session() as session:
             pari = session.query(PariSportif).filter(PariSportif.id == pari_id).first()
             if not pari:
                 raise HTTPException(status_code=404, detail="Pari non trouvÃ©")
+
+            ancien_statut = pari.statut
 
             if "statut" in payload:
                 pari.statut = payload["statut"]
@@ -807,6 +809,23 @@ async def modifier_pari(
             if "notes" in payload:
                 pari.notes = payload["notes"]
 
+            # IM-8 : synchroniser les pertes réelles vers le budget global.
+            if (
+                ancien_statut != pari.statut
+                and pari.statut == "perdu"
+                and not pari.est_virtuel
+                and pari.mise
+            ):
+                session.add(
+                    BudgetFamille(
+                        date=date.today(),
+                        categorie="jeux_paris",
+                        description=f"Perte pari #{pari.id}",
+                        montant=float(pari.mise),
+                        notes="sync_jeux_budget:auto",
+                    )
+                )
+
             session.commit()
             session.refresh(pari)
             return {
@@ -814,6 +833,11 @@ async def modifier_pari(
                 "statut": pari.statut,
                 "gain": float(pari.gain) if pari.gain else None,
                 "mise": float(pari.mise),
+                "sync_budget": (
+                    ancien_statut != pari.statut
+                    and pari.statut == "perdu"
+                    and not pari.est_virtuel
+                ),
             }
 
     return await executer_async(_query)

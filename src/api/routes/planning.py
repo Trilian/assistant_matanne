@@ -1106,10 +1106,12 @@ async def nutrition_hebdomadaire(
     - Totaux calories / protÃ©ines / lipides / glucides
     - RÃ©partition par jour
     - Nombre de repas sans donnÃ©es nutritionnelles
+    - Signaux de carences probables + suggestions compensatoires
     """
     from datetime import date
     from src.core.models.planning import Repas
     from src.core.models.recettes import Recette
+    from src.services.cuisine.nutrition import obtenir_service_nutrition
 
     def _query() -> dict:
         import datetime as dt
@@ -1190,6 +1192,12 @@ async def nutrition_hebdomadaire(
                 else 0
             )
 
+            service_nutrition = obtenir_service_nutrition()
+            insights = service_nutrition.analyser_carences_et_suggestions(
+                totaux_hebdo=totaux,
+                nb_jours=nb_jours_avec_donnees,
+            )
+
             return {
                 "semaine_debut": debut.isoformat(),
                 "semaine_fin": fin.isoformat(),
@@ -1198,6 +1206,7 @@ async def nutrition_hebdomadaire(
                 "par_jour": par_jour,
                 "nb_repas_sans_donnees": sans_donnees,
                 "nb_repas_total": len(repas_liste),
+                "insights": insights,
             }
 
     return await executer_async(_query)

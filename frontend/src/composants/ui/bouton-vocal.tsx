@@ -34,7 +34,7 @@ export function BoutonVocal({
         variant={variante}
         size={taille}
         onClick={enEcoute ? arreterEcoute : demarrerEcoute}
-        title={enEcoute ? "Arrêter l'écoute" : placeholder}
+        aria-label={enEcoute ? "Arrêter l'écoute" : placeholder}
         className={cn(
           "relative",
           enEcoute && "text-destructive ring-2 ring-destructive/30"
@@ -42,11 +42,11 @@ export function BoutonVocal({
       >
         {enEcoute ? (
           <>
-            <MicOff className="h-4 w-4" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive animate-pulse" />
+            <MicOff className="h-4 w-4" aria-hidden="true" />
+            <span aria-hidden="true" className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive animate-pulse" />
           </>
         ) : (
-          <Mic className="h-4 w-4" />
+           <Mic className="h-4 w-4" aria-hidden="true" />
         )}
       </Button>
       {erreur && (

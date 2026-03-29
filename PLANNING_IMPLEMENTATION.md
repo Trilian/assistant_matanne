@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD013 MD032 MD040 MD060 -->
+
 # PLANNING D'IMPLÉMENTATION — Assistant Matanne
 
 **Basé sur** : ANALYSE_COMPLETE.md (audit du 29 mars 2026)
@@ -81,6 +83,7 @@
 | **Tests** | `tests/services/recettes/` (5), `tests/services/planning/` (8), `tests/services/batch_cooking/` (3), `tests/services/inventaire/` (2) | ⚠️ Manque anti-gaspillage |
 
 **Actions Cuisine** :
+
 - [ ] Tests anti-gaspillage à ajouter
 - [ ] G-CUI-1 : Péremption → suggestions recettes auto
 - [ ] G-CUI-2 : Batch cooking → courses auto
@@ -98,6 +101,7 @@
 | **Tests** | Couverture partielle — manque tests unitaires pour budget_ai, achats_ia, soiree_ai | ⚠️ |
 
 **Actions Famille** :
+
 - [ ] Tests unitaires pour budget_ai, achats_ia, soiree_ai
 - [ ] G-FAM-1 : Routines → Planning (mapper heure_prevue vers créneaux)
 - [ ] G-FAM-2 : Budget famille + maison = budget global
@@ -114,6 +118,7 @@
 | **Pages frontend** | Hub + travaux + jardin + menage + finances + charges + provisions + artisans + equipements + contrats + diagnostics + documents + meubles + visualisation + energie | ✅ |
 
 **Actions Maison** :
+
 - [ ] G-MAI-1 : Énergie → anomalies IA
 - [ ] G-MAI-2 : Jardin → météo proactive (alertes → actions)
 - [ ] G-MAI-3 : Exposer les 4 vues SQL non exploitées
@@ -130,6 +135,7 @@
 | **Pages frontend** | Hub + paris + loto + euromillions + performance + ocr-ticket | ✅ |
 
 **Actions Jeux** :
+
 - [ ] G-JEU-1 : Pertes → budget/finances (sync auto)
 - [ ] G-JEU-2 : Page frontend bankroll management
 - [ ] G-JEU-3 : Connecter alertes responsable gaming aux canaux notifications
@@ -143,6 +149,7 @@
 | **Pages frontend** | Hub + chat-ia + assistant-vocal + automations + convertisseur + meteo + minuteur + notes + nutritionniste | ✅ |
 
 **Actions Outils** :
+
 - [ ] G-OUT-1 : Notes → tags/catégories
 - [ ] G-OUT-2 : Chat IA → contexte multi-module
 - [ ] G-OUT-3 : Minuteur → intégration recettes
@@ -157,6 +164,7 @@
 | **Documentation** | Admin : aucune doc | ❌ |
 
 **Actions Dashboard & Admin** :
+
 - [ ] G-DASH-1 : Vue budgétaire unifiée (famille + maison + jeux)
 - [ ] G-DASH-2 : Score bien-être interactif
 - [ ] G-DASH-3 : Widgets configurables
@@ -337,6 +345,7 @@ Le fichier `sql/INIT_COMPLET.sql` (~4 500 lignes) contient :
 Interactions **à l'intérieur** d'un même module qui fonctionnent déjà — pas d'action requise, référence pour la maintenance.
 
 ### Cuisine (intra)
+
 | Interaction | Flux | État |
 |-------------|------|------|
 | Recettes → Planning | Catalogue recettes → planifier la semaine | ✅ |
@@ -347,6 +356,7 @@ Interactions **à l'intérieur** d'un même module qui fonctionnent déjà — p
 | Photo frigo → Suggestions | Analyse photo → ingrédients détectés → suggestions recettes | ✅ |
 
 ### Famille (intra)
+
 | Interaction | Flux | État |
 |-------------|------|------|
 | Jules (enfant) → Jalons | Suivi développement → jalons atteints | ✅ |
@@ -356,6 +366,7 @@ Interactions **à l'intérieur** d'un même module qui fonctionnent déjà — p
 | Weekend IA → Activités | Suggestions IA de weekend → activités planifiées | ✅ |
 
 ### Maison (intra)
+
 | Interaction | Flux | État |
 |-------------|------|------|
 | Projets → Tâches | Projet créé → décomposition en tâches | ✅ |
@@ -364,6 +375,7 @@ Interactions **à l'intérieur** d'un même module qui fonctionnent déjà — p
 | Diagnostics → Projets | Diagnostic détecté → projet de réparation suggéré | ✅ |
 
 ### Jeux (intra)
+
 | Interaction | Flux | État |
 |-------------|------|------|
 | Paris → Stats | Paris placés → statistiques de performance | ✅ |
@@ -611,12 +623,14 @@ Interactions **entre modules différents** qui fonctionnent déjà — référen
 ### 12.3 Principe de visibilité admin
 
 > **Règle** : Les fonctionnalités admin sont **invisibles** pour l'utilisateur normal.
+>
 > - Les pages `/admin/*` ne sont pas dans la sidebar standard
 > - Le header admin n'apparaît que si `role === "admin"`
 > - En dev (`ENVIRONMENT=development`), un bouton discret dans le footer permet d'accéder à l'admin
 > - Aucun lien direct vers `/admin` dans la navigation mobile
 
 **Implémentation frontend à réaliser** :
+
 ```tsx
 // Dans barre-laterale.tsx
 {utilisateur?.role === 'admin' && (
@@ -920,7 +934,7 @@ AutomationEngine
 
 > **Objectif** : Couverture ≥ 80% sur les zones critiques.
 
-**Statut (mise à jour 2026-03-29)** : `EN COURS` — **8/9** actions réalisées.
+**Statut (mise à jour 2026-03-29)** : `TERMINEE` — **9/9** actions réalisées.
 
 | Action | Statut | Détail |
 |--------|--------|--------|
@@ -929,7 +943,7 @@ AutomationEngine
 | 3.3 Tests WhatsApp send | ✅ Fait | Couvert par les tests existants `tests/services/integrations/test_whatsapp_service.py` |
 | 3.4 Tests multi-user isolation | ✅ Fait | Isolation renforcée sur exécution manuelle d'automation (`user_id` imposé) |
 | 3.5 Tests moteur automations | ✅ Fait | Nouveau fichier de tests unitaires dédié au moteur (`tests/services/test_automations_engine.py`) |
-| 3.6 Tests inter-modules E2E | ⏳ Partiel | Parc E2E déjà présent, scénario transverse dédié à compléter |
+| 3.6 Tests inter-modules E2E | ✅ Fait | Scénario transverse ajouté (`frontend/e2e/inter-modules-flow.spec.ts`) |
 | 3.7 Coverage CI/CD ≥ 80% | ✅ Fait | Seuil CI relevé à 80% dans workflows backend et global |
 | 3.8 Tests WebSocket reconnexion | ✅ Fait | Cas de reconnexion explicite ajouté sur WS courses |
 | 3.9 Setup pre-commit hooks | ✅ Fait | Déjà en place (`.pre-commit-config.yaml`) |
@@ -950,7 +964,7 @@ AutomationEngine
 
 > **Objectif** : Tout est documenté, à jour, trouvable.
 
-**Statut du 29 mars 2026**
+#### Statut du 29 mars 2026
 
 - ✅ `docs/ADMIN_RUNBOOK.md` créé
 - ✅ `docs/CRON_JOBS.md` créé
@@ -981,32 +995,59 @@ AutomationEngine
 
 > **Objectif** : Les modules communiquent et se renforcent mutuellement.
 
-| # | Action | Réf. | Effort | Priorité |
-|---|--------|------|--------|----------|
-| 5.1 | Inventaire péremption → Suggestions recettes | IM-9 | 3h | 🔴 |
-| 5.2 | Jeux pertes/gains → Budget/Finances | IM-8 | 4h | 🔴 |
-| 5.3 | Routines famille → Planning général | IM-10 | 4h | 🟡 |
-| 5.4 | Jardin récoltes → Cuisine inventaire | IM-12 | 2h | 🟡 |
-| 5.5 | Météo → Activités famille | IM-14 | 2h | 🟡 |
-| 5.6 | Push ↔ WhatsApp failover | IM-15 | 3h | 🟡 |
-| 5.7 | Chat IA contexte multi-module | IM-11 | 6h | 🟢 |
-| 5.8 | Vue budgétaire unifiée dashboard | G-DASH-1 | 3h | 🔴 |
-| 5.9 | Exposer vues SQL dans frontend | G-MAI-3 | 2h | 🟡 |
+**Statut (mise à jour 2026-03-29)** : `EN COURS` — **4/9** actions avancées (2 réalisées, 2 partielles).
+
+| Action | Statut | Détail |
+|--------|--------|--------|
+| 5.1 Inventaire péremption → Suggestions recettes | ✅ Fait | `jobs.py` enrichit l'alerte J-04 avec des recettes rescue automatiques + lien API anti-gaspillage |
+| 5.2 Jeux pertes/gains → Budget/Finances | 🟡 Partiel | `PATCH /jeux/paris/{id}` synchronise les **pertes réelles** vers `BudgetFamille` (statut `perdu`) |
+| 5.8 Vue budgétaire unifiée dashboard | ✅ Fait | Nouvel endpoint `GET /api/v1/dashboard/budget-unifie` + client frontend `tableau-bord.ts` |
+| 5.9 Exposer vues SQL dans frontend | 🟡 Partiel | Endpoints admin créés (`/api/v1/admin/sql-views` et `/sql-views/{view_name}`) + client frontend `admin.ts` |
+| 5.3 Routines famille → Planning général | ⏳ À faire | Mapping `heure_prevue` → créneau + sync quotidienne non implémentés |
+| 5.4 Jardin récoltes → Cuisine inventaire | ⏳ À faire | Service de sync récoltes→inventaire non implémenté |
+| 5.5 Météo → Activités famille | ⏳ À faire | Suggestions d'activités contextuelles à brancher |
+| 5.6 Push ↔ WhatsApp failover | ⏳ À faire | Chaîne de fallback cross-canal à implémenter dans dispatcher |
+| 5.7 Chat IA contexte multi-module | ✅ Déjà fait | Déjà en production (`chat_ai.py` + page `outils/chat-ia`) |
+
+| # | Action | Réf. | Effort | Priorité | Statut |
+|---|--------|------|--------|----------|--------|
+| 5.1 | Inventaire péremption → Suggestions recettes | IM-9 | 3h | 🔴 | ✅ |
+| 5.2 | Jeux pertes/gains → Budget/Finances | IM-8 | 4h | 🔴 | 🟡 |
+| 5.3 | Routines famille → Planning général | IM-10 | 4h | 🟡 | ⏳ |
+| 5.4 | Jardin récoltes → Cuisine inventaire | IM-12 | 2h | 🟡 | ⏳ |
+| 5.5 | Météo → Activités famille | IM-14 | 2h | 🟡 | ⏳ |
+| 5.6 | Push ↔ WhatsApp failover | IM-15 | 3h | 🟡 | ⏳ |
+| 5.7 | Chat IA contexte multi-module | IM-11 | 6h | 🟢 | ✅ |
+| 5.8 | Vue budgétaire unifiée dashboard | G-DASH-1 | 3h | 🔴 | ✅ |
+| 5.9 | Exposer vues SQL dans frontend | G-MAI-3 | 2h | 🟡 | 🟡 |
 
 ### Phase 6 — IA & Intelligence
 
 > **Objectif** : L'IA est partout où elle apporte de la valeur.
 
-| # | Action | Réf. | Effort | Priorité |
-|---|--------|------|--------|----------|
-| 6.1 | Nutrition → détection carences + suggestions | IA-1 | 4h | 🔴 |
-| 6.2 | Prédiction courses intelligente (avec contexte) | IA-2 | 4h | 🔴 |
-| 6.3 | Assistant multi-contexte | IA-NEW-1 | 8h | 🟡 |
-| 6.4 | Énergie → anomalies IA | IA-7/G-MAI-1 | 3h | 🟡 |
-| 6.5 | Planificateur semaine complète | IA-NEW-3 | 8h | 🟡 |
-| 6.6 | Prédiction péremption (apprentissage patterns) | IA-3 | 4h | 🟢 |
-| 6.7 | Détection de tendances (3-6 mois) | IA-NEW-5 | 6h | 🟢 |
-| 6.8 | Recommandation budget IA | IA-NEW-2 | 4h | 🟢 |
+**Statut (mise à jour 2026-03-29)** : `EN COURS` — **7/8** actions réalisées, **1/8** partielle.
+
+| Action | Statut | Détail |
+|--------|--------|--------|
+| 6.1 Nutrition → détection carences + suggestions | ✅ Fait | Endpoint `GET /api/v1/planning/nutrition-hebdo` enrichi avec `insights` (carences probables + suggestions compensatoires) |
+| 6.2 Prédiction courses intelligente (avec contexte) | ✅ Fait | Endpoint `GET /api/v1/courses/predictions` accepte `nb_invites` + `evenements`; scoring contextualisé + quantité ajustée |
+| 6.3 Assistant multi-contexte | ✅ Fait | Route `POST /api/v1/assistant/chat` injecte un contexte cross-modules (planning, inventaire, budget, score Jules) |
+| 6.4 Énergie → anomalies IA | 🟡 Partiel | Endpoints `maison/energie/tendances` et `maison/energie/previsions-ia` actifs; moteur IA dédié anomalies à renforcer |
+| 6.5 Planificateur semaine complète | ✅ Fait | `POST /api/v1/planning/generer` génère une semaine complète avec signaux historiques, nutrition et saisonnalité |
+| 6.6 Prédiction péremption (patterns) | ✅ Fait | Service `prediction_peremption` implémente durées de vie observées + facteurs de conservation |
+| 6.7 Détection de tendances (3-6 mois) | ✅ Fait | Nouvel endpoint `GET /api/v1/dashboard/tendances-ia` avec signaux 6 mois budget + énergie et insights consolidés |
+| 6.8 Recommandation budget IA | ✅ Fait | `BudgetAIService` + routes `famille/budget/analyse-ia`, `predictions`, `anomalies` opérationnels |
+
+| # | Action | Réf. | Effort | Priorité | Statut |
+|---|--------|------|--------|----------|--------|
+| 6.1 | Nutrition → détection carences + suggestions | IA-1 | 4h | 🔴 | ✅ |
+| 6.2 | Prédiction courses intelligente (avec contexte) | IA-2 | 4h | 🔴 | ✅ |
+| 6.3 | Assistant multi-contexte | IA-NEW-1 | 8h | 🟡 | ✅ |
+| 6.4 | Énergie → anomalies IA | IA-7/G-MAI-1 | 3h | 🟡 | 🟡 |
+| 6.5 | Planificateur semaine complète | IA-NEW-3 | 8h | 🟡 | ✅ |
+| 6.6 | Prédiction péremption (apprentissage patterns) | IA-3 | 4h | 🟢 | ✅ |
+| 6.7 | Détection de tendances (3-6 mois) | IA-NEW-5 | 6h | 🟢 | ✅ |
+| 6.8 | Recommandation budget IA | IA-NEW-2 | 4h | 🟢 | ✅ |
 
 ### Phase 7 — Jobs & Automatisations
 
@@ -1132,6 +1173,7 @@ sql/migrations/xxx_habitat_projet.sql   # Tables dédiées
 **Objectif** : Aider à prendre la décision déménager vs agrandir vs rester en pondérant des critères objectifs.
 
 **Modèle de données** :
+
 ```sql
 CREATE TABLE habitat_scenarios (
     id SERIAL PRIMARY KEY,
@@ -1159,6 +1201,8 @@ CREATE TABLE habitat_criteres (
 ```
 
 **Fonctionnalités** :
+    ### Phase 2 — SQL Consolidation + Refactoring léger ✅ TERMINÉE
+
 - Créer N scénarios (déménager 3 pièces, 4 pièces, agrandir extension, agrandir surélévation, rester)
 - Définir des critères pondérés (budget, surface, localisation, écoles, transports…)
 - Score automatique = Σ(note × poids) / Σ(poids)
@@ -1179,6 +1223,7 @@ CREATE TABLE habitat_criteres (
 | **Bien'ici** | API JSON interne | Rate limiting |
 
 **Architecture des scrapers** :
+
 ```python
 # src/services/integrations/scrapers/base.py
 class ScraperImmo(ABC):
@@ -1207,12 +1252,14 @@ class AggregateurAnnonces:
 ```
 
 **Cron job** :
+
 - **Fréquence** : **1×/jour** (ex: 7h00 du matin) — suffisant pour le besoin
 - **Zone** : Auvergne-Rhône-Alpes uniquement (filtrage par département/code postal)
 - **Pipeline** : Scraping → Déduplication → Scoring vs critères → Notification si score ≥ seuil
 - **Robustesse** : Circuit breaker par scraper (si un site bloque, les autres continuent)
 
 **Modèle de données** :
+
 ```sql
 CREATE TABLE habitat_criteres_immo (
     id SERIAL PRIMARY KEY,
@@ -1259,6 +1306,7 @@ CREATE TABLE habitat_annonces (
 ```
 
 **Fonctionnalités UI** :
+
 - Formulaire de critères de recherche (départements ARA, budget, surface, terrain, pièces…)
 - Dashboard annonces avec scoring et tri par pertinence
 - **Lien direct vers la source** pour chaque annonce (LBC, SeLoger, PAP, Bien'ici)
@@ -1305,6 +1353,7 @@ CREATE TABLE habitat_annonces (
 ```
 
 **Modèle Pydantic pour l'analyse** :
+
 ```python
 class AnalyseModificationPlan(BaseModel):
     """Résultat structuré de l'analyse IA d'une modification de plan."""
@@ -1321,6 +1370,7 @@ class AnalyseModificationPlan(BaseModel):
 ```
 
 **Modèle de données** :
+
 ```sql
 CREATE TABLE habitat_plans (
     id SERIAL PRIMARY KEY,
@@ -1367,6 +1417,7 @@ CREATE TABLE habitat_pieces (
 ```
 
 **Fonctionnalités** :
+
 - **Import de plans** : Upload image/scan/PDF des plans existants de la maison
 - **Saisie des pièces** : Après import, saisir les pièces et dimensions (l'IA ne peut pas les extraire d'une image)
 - **Saisie des contraintes** : Murs porteurs, PLU local, orientation, budget max
@@ -1381,12 +1432,14 @@ CREATE TABLE habitat_pieces (
 **Objectif** : Concevoir la décoration intérieure pièce par pièce, avec génération d'images IA pour se projeter, palette de couleurs, et suivi du budget.
 
 **Double présence des meubles** :
+
 - **Habitat** : Vision projet — meubles souhaités, inspirations, budget prévisionnel
 - **Maison** (module existant) : Tracker quotidien — meubles achetés, entretien, garanties
 
 Quand un meuble est acheté dans Habitat → il est automatiquement créé dans le tracker Maison.
 
 **Fonctionnalités** :
+
 - **Par pièce** : créer un "projet déco" pour chaque pièce
 - **Moodboard** : collecter des inspirations (images uploadées, URLs Pinterest)
 - **Palette couleurs** : générer une palette harmonieuse (complémentaire, analogique…) — lib `chroma-js` ou IA
@@ -1397,6 +1450,7 @@ Quand un meuble est acheté dans Habitat → il est automatiquement créé dans 
 - **Checklist emménagement** : liste de ce qu'il faut acheter par priorité (essentiel, confort, cosmétique)
 
 **Modèle de données** :
+
 ```sql
 CREATE TABLE habitat_projets_deco (
     id SERIAL PRIMARY KEY,
@@ -1450,6 +1504,7 @@ CREATE TABLE habitat_meubles_souhaites (
 **Objectif** : Concevoir l'aménagement du jardin de 2600 m² (terrain en pente, tout en longueur) avec import de vue satellite, canvas zones, visuels IA, et budget.
 
 **Fonctionnalités** :
+
 - **Import vue satellite** : Upload de la vue satellite de la parcelle comme fond de plan
 - **Infos parcelle** : Saisie des données terrain (surface, orientation, pente, type de sol)
 - **Plan jardin canvas** : canvas 2D (`react-konva`) par-dessus la vue satellite pour dessiner les zones
@@ -1462,6 +1517,7 @@ CREATE TABLE habitat_meubles_souhaites (
 - **Intégration module Jardin existant** : lier les zones du plan paysager aux fiches plantes du module maison/jardin
 
 **Modèle de données** :
+
 ```sql
 CREATE TABLE habitat_zones_jardin (
     id SERIAL PRIMARY KEY,
@@ -1487,12 +1543,14 @@ CREATE TABLE habitat_zones_jardin (
 **Choix** : Hugging Face Inference API (free tier) au lieu de DALL-E 3 / Stability AI payants.
 
 **Justification** :
+
 - ~1000 requêtes/mois gratuites — largement suffisant pour quelques images/semaine
 - Modèles de qualité disponibles : SDXL, Stable Diffusion 3, Flux
 - Pas de carte bancaire requise, juste un token HF gratuit
 - API simple et légère
 
 **Architecture du service centralisé** :
+
 ```python
 # src/services/integrations/image_generation.py
 class ServiceGenerationImages:
@@ -1524,12 +1582,14 @@ class ServiceGenerationImages:
 ```
 
 **Configuration** :
+
 - Variable d'environnement : `HF_API_TOKEN` dans `.env.local` (token gratuit à créer sur huggingface.co)
 - Dépendance Python : `huggingface_hub` (léger) — optionnel, on peut aussi utiliser `httpx` directement
 - Rate limiting interne : max 5 images/heure pour ne pas épuiser le quota gratuit
 - Fallback : si HF indisponible → message "Service de génération temporairement indisponible"
 
 **Usages dans le module Habitat** :
+
 - Plans : visuel architectural après analyse de modification
 - Déco : projection visuelle d'une pièce dans un style donné
 - Jardin : rendu visuel d'une zone aménagée

@@ -4,7 +4,7 @@
 // Rôle requis : admin
 // ═══════════════════════════════════════════════════════════
 
-import { apiClient } from './client'
+import { clientApi } from './client'
 
 // ─── Types ─────────────────────────────────────────────────
 
@@ -106,6 +106,25 @@ export interface DbCoherenceResponse {
   [key: string]: unknown
 }
 
+export interface VueSqlExposee {
+  nom: string
+  endpoint: string
+}
+
+export interface VuesSqlResponse {
+  items: VueSqlExposee[]
+  total: number
+}
+
+export interface VueSqlDataResponse {
+  view: string
+  items: Record<string, unknown>[]
+  total: number
+  page: number
+  page_size: number
+  pages_totales: number
+}
+
 // ─── Audit Logs ────────────────────────────────────────────
 
 export async function listerAuditLogs(params?: {
@@ -116,12 +135,12 @@ export async function listerAuditLogs(params?: {
   depuis?: string
   jusqu_a?: string
 }): Promise<AuditLogsResponse> {
-  const { data } = await apiClient.get('/api/v1/admin/audit-logs', { params })
+  const { data } = await clientApi.get('/api/v1/admin/audit-logs', { params })
   return data
 }
 
 export async function obtenirStatsAudit(): Promise<AuditStatsResponse> {
-  const { data } = await apiClient.get('/api/v1/admin/audit-stats')
+  const { data } = await clientApi.get('/api/v1/admin/audit-stats')
   return data
 }
 
@@ -149,48 +168,48 @@ export async function listerLogsSecurite(params?: {
   depuis?: string
   jusqu_a?: string
 }): Promise<SecurityLogsResponse> {
-  const { data } = await apiClient.get('/api/v1/admin/security-logs', { params })
+  const { data } = await clientApi.get('/api/v1/admin/security-logs', { params })
   return data
 }
 
 // ─── Jobs Cron ─────────────────────────────────────────────
 
 export async function listerJobs(): Promise<JobInfo[]> {
-  const { data } = await apiClient.get('/api/v1/admin/jobs')
+  const { data } = await clientApi.get('/api/v1/admin/jobs')
   return data
 }
 
 export async function declencherJob(jobId: string): Promise<{ status: string; job_id: string; message: string }> {
-  const { data } = await apiClient.post(`/api/v1/admin/jobs/${jobId}/run`)
+  const { data } = await clientApi.post(`/api/v1/admin/jobs/${jobId}/run`)
   return data
 }
 
 export async function obtenirLogsJob(jobId: string): Promise<JobLogsResponse> {
-  const { data } = await apiClient.get(`/api/v1/admin/jobs/${jobId}/logs`)
+  const { data } = await clientApi.get(`/api/v1/admin/jobs/${jobId}/logs`)
   return data
 }
 
 // ─── Services & Santé ──────────────────────────────────────
 
 export async function obtenirSanteServices(): Promise<ServiceHealthResponse> {
-  const { data } = await apiClient.get('/api/v1/admin/services/health')
+  const { data } = await clientApi.get('/api/v1/admin/services/health')
   return data
 }
 
 // ─── Cache ─────────────────────────────────────────────────
 
 export async function obtenirStatsCache(): Promise<CacheStatsResponse> {
-  const { data } = await apiClient.get('/api/v1/admin/cache/stats')
+  const { data } = await clientApi.get('/api/v1/admin/cache/stats')
   return data
 }
 
 export async function purgerCache(pattern = '*'): Promise<{ status: string; nb_invalidees: number; message: string }> {
-  const { data } = await apiClient.post('/api/v1/admin/cache/purge', { pattern })
+  const { data } = await clientApi.post('/api/v1/admin/cache/purge', { pattern })
   return data
 }
 
 export async function viderCache(): Promise<{ status: string; message: string }> {
-  const { data } = await apiClient.post('/api/v1/admin/cache/clear')
+  const { data } = await clientApi.post('/api/v1/admin/cache/clear')
   return data
 }
 
@@ -200,7 +219,7 @@ export async function listerUtilisateurs(params?: {
   page?: number
   par_page?: number
 }): Promise<UtilisateurAdmin[]> {
-  const { data } = await apiClient.get('/api/v1/admin/users', { params })
+  const { data } = await clientApi.get('/api/v1/admin/users', { params })
   return data
 }
 
@@ -208,7 +227,7 @@ export async function desactiverUtilisateur(
   userId: string,
   raison?: string,
 ): Promise<{ status: string; user_id: string; message: string }> {
-  const { data } = await apiClient.post(`/api/v1/admin/users/${userId}/disable`, { raison })
+  const { data } = await clientApi.post(`/api/v1/admin/users/${userId}/disable`, { raison })
   return data
 }
 
@@ -217,13 +236,26 @@ export async function desactiverUtilisateur(
 export async function envoyerNotificationTest(
   payload: NotificationTestPayload,
 ): Promise<{ resultats: Record<string, unknown>; message: string }> {
-  const { data } = await apiClient.post('/api/v1/admin/notifications/test', payload)
+  const { data } = await clientApi.post('/api/v1/admin/notifications/test', payload)
   return data
 }
 
 // ─── Base de données ───────────────────────────────────────
 
 export async function verifierCoherenceDb(): Promise<DbCoherenceResponse> {
-  const { data } = await apiClient.get('/api/v1/admin/db/coherence')
+  const { data } = await clientApi.get('/api/v1/admin/db/coherence')
+  return data
+}
+
+export async function listerVuesSql(): Promise<VuesSqlResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/sql-views')
+  return data
+}
+
+export async function lireVueSql(
+  viewName: string,
+  params?: { page?: number; page_size?: number },
+): Promise<VueSqlDataResponse> {
+  const { data } = await clientApi.get(`/api/v1/admin/sql-views/${viewName}`, { params })
   return data
 }

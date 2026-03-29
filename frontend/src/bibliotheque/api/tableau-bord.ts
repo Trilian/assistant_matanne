@@ -157,6 +157,18 @@ export interface AnomaliesFinancieresResponse {
   };
 }
 
+export interface BudgetUnifieDashboard {
+  mois: string;
+  famille: { depenses: number };
+  maison: { depenses: number };
+  jeux: { mises: number; gains: number; net: number };
+  totaux: {
+    depenses_hors_jeux: number;
+    depenses_avec_mises_jeux: number;
+    impact_global_avec_jeux: number;
+  };
+}
+
 /** Obtenir le score bien-être hebdomadaire (alimentation + nutrition + activités) */
 export async function obtenirScoreBienEtre(): Promise<ScoreBienEtre> {
   const { data } = await clientApi.get<ScoreBienEtre>("/dashboard/score-bienetre");
@@ -168,5 +180,11 @@ export async function obtenirAnomaliesFinancieres(): Promise<AnomaliesFinanciere
   const { data } = await clientApi.get<AnomaliesFinancieresResponse>(
     "/dashboard/anomalies-financieres"
   );
+  return data;
+}
+
+/** Obtenir l'agrégation budgétaire unifiée (famille + maison + jeux). */
+export async function obtenirBudgetUnifieDashboard(): Promise<BudgetUnifieDashboard> {
+  const { data } = await clientApi.get<BudgetUnifieDashboard>("/dashboard/budget-unifie");
   return data;
 }

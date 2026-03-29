@@ -14,12 +14,56 @@ from src.services.core.registry import service_factory
 class ServicePredictionCourses:
     """Predictions d'articles recurrents avec score de confiance."""
 
+    def _calculer_boost_contexte(
+        self,
+        article_nom: str,
+        categorie: str | None,
+        now: datetime,
+        evenements: list[str] | None,
+        nb_invites: int,
+    ) -> tuple[float, float, list[str]]:
+        """Retourne (boost_confiance, multiplicateur_quantite, raisons)."""
+        nom = (article_nom or "").lower()
+        cat = (categorie or "").lower()
+        raisons: list[str] = []
+        boost = 0.0
+        multiplicateur_quantite = 1.0
+
+        # Saisonnalite simple (signal faible)
+        mois = now.month
+        hiver = {11, 12, 1, 2}
+        ete = {6, 7, 8}
+        if mois in hiver and any(k in nom or k in cat for k in ["soupe", "potage", "raclette", "fondue"]):
+            boost += 0.08
+            raisons.append("saisonnalite_hiver")
+        if mois in ete and any(k in nom or k in cat for k in ["salade", "glace", "barbecue", "grillade"]):
+            boost += 0.08
+            raisons.append("saisonnalite_ete")
+
+        # Evenements declares (anniversaire, fete, invites...)
+        for ev in (evenements or []):
+            ev_l = ev.lower()
+            if any(k in ev_l for k in ["anniversaire", "fete", "soir", "invite", "apero", "barbecue"]):
+                boost += 0.06
+                raisons.append("evenement_festif")
+                break
+
+        # Nombre d'invites impacte surtout la quantite suggeree
+        if nb_invites > 0:
+            multiplicateur_quantite += min(1.0, nb_invites * 0.15)
+            boost += min(0.1, nb_invites * 0.02)
+            raisons.append("invites")
+
+        return boost, multiplicateur_quantite, raisons
+
     @avec_gestion_erreurs(default_return=[])
     @avec_session_db
     def predire_articles(
         self,
         limite: int = 25,
         inclure_deja_sur_liste: bool = False,
+        evenements: list[str] | None = None,
+        nb_invites: int = 0,
         *,
         db: Session | None = None,
     ) -> list[dict[str, Any]]:
@@ -78,6 +122,17 @@ class ServicePredictionCourses:
             fiabilite = min(1.0, (h.nb_achats or 0) / 10.0)
             confiance = round((retard_ratio * 0.7) + (fiabilite * 0.3), 3)
 
+            boost_contexte, multiplicateur_quantite, raisons_contexte = self._calculer_boost_contexte(
+                article_nom=nom,
+                categorie=h.categorie,
+                now=now,
+                evenements=evenements,
+                nb_invites=nb_invites,
+            )
+
+            confiance_contextualisee = round(min(1.0, confiance + boost_contexte), 3)
+            quantite_suggeree = round(max(1.0, multiplicateur_quantite), 1)
+
             ingredient = db.query(Ingredient).filter(Ingredient.nom.ilike(nom)).first()
 
             predictions.append(
@@ -89,16 +144,22 @@ class ServicePredictionCourses:
                     "jours_depuis_dernier_achat": jours_depuis,
                     "retard_jours": max(0, jours_depuis - frequence),
                     "confiance": confiance,
+                    "confiance_contextualisee": confiance_contextualisee,
                     "sur_liste_active": sur_liste,
                     "ingredient_id": ingredient.id if ingredient else None,
-                    "quantite_suggeree": 1.0,
+                    "quantite_suggeree": quantite_suggeree,
                     "unite_suggeree": ingredient.unite if ingredient else "pcs",
+                    "contexte_applique": {
+                        "nb_invites": nb_invites,
+                        "evenements": evenements or [],
+                        "raisons": raisons_contexte,
+                    },
                 }
             )
 
         predictions.sort(
             key=lambda item: (
-                item["confiance"],
+                item["confiance_contextualisee"],
                 item["retard_jours"],
                 item["jours_depuis_dernier_achat"],
             ),

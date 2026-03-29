@@ -34,6 +34,7 @@ export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
       >
         <span
           data-state={checked ? "checked" : "unchecked"}
+          aria-hidden="true"
           className={cn(
             "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-sm ring-0 transition-transform",
             checked ? "translate-x-5" : "translate-x-0",

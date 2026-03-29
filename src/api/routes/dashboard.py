@@ -21,6 +21,66 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/dashboard", tags=["Tableau de bord"])
 
 
+def _calculer_budget_unifie(session: Any, mois: int, annee: int) -> dict[str, Any]:
+    """Agrège les dépenses famille/maison et le net jeux pour un mois donné."""
+    from src.core.models import BudgetFamille, DepenseMaison, PariSportif
+
+    total_famille = (
+        session.query(func.sum(BudgetFamille.montant))
+        .filter(
+            func.extract("month", BudgetFamille.date) == mois,
+            func.extract("year", BudgetFamille.date) == annee,
+        )
+        .scalar()
+        or 0
+    )
+    total_maison = (
+        session.query(func.sum(DepenseMaison.montant))
+        .filter(DepenseMaison.mois == mois, DepenseMaison.annee == annee)
+        .scalar()
+        or 0
+    )
+    mises_jeux = (
+        session.query(func.sum(PariSportif.mise))
+        .filter(
+            func.extract("month", PariSportif.cree_le) == mois,
+            func.extract("year", PariSportif.cree_le) == annee,
+            PariSportif.est_virtuel == False,  # noqa: E712
+        )
+        .scalar()
+        or 0
+    )
+    gains_jeux = (
+        session.query(func.sum(PariSportif.gain))
+        .filter(
+            func.extract("month", PariSportif.cree_le) == mois,
+            func.extract("year", PariSportif.cree_le) == annee,
+            PariSportif.est_virtuel == False,  # noqa: E712
+        )
+        .scalar()
+        or 0
+    )
+
+    net_jeux = float(gains_jeux) - float(mises_jeux)
+    depenses_hors_jeux = float(total_famille) + float(total_maison)
+
+    return {
+        "mois": f"{mois:02d}/{annee}",
+        "famille": {"depenses": float(total_famille)},
+        "maison": {"depenses": float(total_maison)},
+        "jeux": {
+            "mises": float(mises_jeux),
+            "gains": float(gains_jeux),
+            "net": net_jeux,
+        },
+        "totaux": {
+            "depenses_hors_jeux": depenses_hors_jeux,
+            "depenses_avec_mises_jeux": depenses_hors_jeux + float(mises_jeux),
+            "impact_global_avec_jeux": depenses_hors_jeux - net_jeux,
+        },
+    }
+
+
 class DashboardConfigRequest(BaseModel):
     """Configuration personnalisÃ©e des widgets dashboard."""
 
@@ -197,6 +257,25 @@ async def obtenir_tableau_bord(
                 ],
                 "alertes": alertes,
             }
+
+    return await executer_async(_query)
+
+
+@router.get("/budget-unifie", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def obtenir_budget_unifie(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne la vue budgétaire unifiée (famille + maison + jeux)."""
+
+    def _query():
+        with executer_avec_session() as session:
+            aujourd_hui = date.today()
+            return _calculer_budget_unifie(
+                session=session,
+                mois=aujourd_hui.month,
+                annee=aujourd_hui.year,
+            )
 
     return await executer_async(_query)
 
@@ -558,6 +637,131 @@ async def obtenir_anomalies_financieres(
 
         service = obtenir_service_anomalies_financieres()
         return service.detecter_anomalies()
+
+    return await executer_async(_query)
+
+
+@router.get(
+    "/tendances-ia",
+    responses=REPONSES_LISTE,
+    summary="Detection de tendances multi-domaines (6 mois)",
+)
+@gerer_exception_api
+async def obtenir_tendances_ia(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Detecte des tendances 3-6 mois sur budget unifie et energie.
+
+    Endpoint orienté aide a la decision: il fournit des signaux interpretes,
+    sans se substituer a une analyse financiere ou energetique experte.
+    """
+
+    def _classer_tendance(valeurs: list[float]) -> tuple[str, float]:
+        if len(valeurs) < 2:
+            return "insuffisant", 0.0
+        pente = (valeurs[-1] - valeurs[0]) / (len(valeurs) - 1)
+        moyenne = sum(valeurs) / len(valeurs) if valeurs else 0.0
+        variation_pct = (pente / moyenne * 100) if moyenne else 0.0
+        if variation_pct > 3:
+            return "hausse", round(variation_pct, 1)
+        if variation_pct < -3:
+            return "baisse", round(variation_pct, 1)
+        return "stable", round(variation_pct, 1)
+
+    def _query() -> dict[str, Any]:
+        from src.core.models.maison_extensions import ReleveCompteur
+
+        today = date.today()
+
+        # Fenetre glissante sur 6 mois (inclus mois courant)
+        mois_annee: list[tuple[int, int]] = []
+        m = today.month
+        a = today.year
+        for _ in range(6):
+            mois_annee.append((m, a))
+            m -= 1
+            if m == 0:
+                m = 12
+                a -= 1
+        mois_annee.reverse()
+
+        with executer_avec_session() as session:
+            points_budget: list[dict[str, Any]] = []
+            points_energie: list[dict[str, Any]] = []
+
+            for mois, annee in mois_annee:
+                budget = _calculer_budget_unifie(session, mois=mois, annee=annee)
+                points_budget.append(
+                    {
+                        "mois": f"{annee}-{mois:02d}",
+                        "valeur": float(budget["totaux"]["depenses_hors_jeux"]),
+                    }
+                )
+
+                conso = (
+                    session.query(func.sum(ReleveCompteur.consommation_periode))
+                    .filter(
+                        ReleveCompteur.type_compteur == "electricite",
+                        func.extract("month", ReleveCompteur.date_releve) == mois,
+                        func.extract("year", ReleveCompteur.date_releve) == annee,
+                    )
+                    .scalar()
+                    or 0
+                )
+                points_energie.append(
+                    {
+                        "mois": f"{annee}-{mois:02d}",
+                        "valeur": float(conso),
+                    }
+                )
+
+            tendance_budget, variation_budget = _classer_tendance(
+                [p["valeur"] for p in points_budget]
+            )
+            tendance_energie, variation_energie = _classer_tendance(
+                [p["valeur"] for p in points_energie]
+            )
+
+            insights: list[str] = []
+            if tendance_budget == "hausse":
+                insights.append(
+                    f"Depenses budget hors jeux en hausse (~{variation_budget}%/mois): verifier les categories dominantes."
+                )
+            elif tendance_budget == "baisse":
+                insights.append(
+                    f"Depenses budget hors jeux en baisse (~{abs(variation_budget)}%/mois): dynamique economique positive."
+                )
+
+            if tendance_energie == "hausse":
+                insights.append(
+                    f"Consommation electrique en hausse (~{variation_energie}%/mois): investiguer les appareils energivores."
+                )
+            elif tendance_energie == "baisse":
+                insights.append(
+                    f"Consommation electrique en baisse (~{abs(variation_energie)}%/mois): optimisation energetique en cours."
+                )
+
+            if not insights:
+                insights.append("Tendances globalement stables sur 6 mois.")
+
+            return {
+                "periode": {
+                    "debut": points_budget[0]["mois"] if points_budget else None,
+                    "fin": points_budget[-1]["mois"] if points_budget else None,
+                    "nb_mois": len(points_budget),
+                },
+                "budget": {
+                    "tendance": tendance_budget,
+                    "variation_pct_mensuelle": variation_budget,
+                    "points": points_budget,
+                },
+                "energie": {
+                    "tendance": tendance_energie,
+                    "variation_pct_mensuelle": variation_energie,
+                    "points": points_energie,
+                },
+                "insights": insights,
+            }
 
     return await executer_async(_query)
 

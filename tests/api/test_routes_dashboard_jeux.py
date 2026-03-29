@@ -106,6 +106,11 @@ class TestEndpointsDashboard:
         response = await client.get("/api/v1/dashboard/cuisine")
         assert response.status_code not in (404, 405)
 
+    async def test_dashboard_budget_unifie_existe(self, client):
+        """GET /api/v1/dashboard/budget-unifie n'est pas 404."""
+        response = await client.get("/api/v1/dashboard/budget-unifie")
+        assert response.status_code not in (404, 405)
+
     @patch("src.api.routes.dashboard.executer_async")
     async def test_dashboard_cuisine_format(self, mock_exec, client):
         """GET /api/v1/dashboard/cuisine retourne les bonnes clés."""
@@ -216,6 +221,30 @@ class TestFormatDashboard:
         assert "alertes" in data
         assert "recettes_total" in data["statistiques"]
         assert "total_mois" in data["budget_mois"]
+
+    @patch("src.api.routes.dashboard.executer_avec_session")
+    @patch("src.api.routes.dashboard.executer_async")
+    async def test_budget_unifie_format(self, mock_exec, mock_session, client):
+        """Le budget unifié retourne famille/maison/jeux/totaux."""
+        mock_exec.side_effect = lambda fn: fn()
+
+        ctx = MagicMock()
+        ctx.__enter__ = MagicMock(return_value=MagicMock())
+        ctx.__exit__ = MagicMock(return_value=False)
+        session = ctx.__enter__()
+
+        query = session.query.return_value
+        query.filter.return_value = query
+        query.scalar.return_value = 0
+        mock_session.return_value = ctx
+
+        response = await client.get("/api/v1/dashboard/budget-unifie")
+        assert response.status_code == 200
+        data = response.json()
+        assert "famille" in data
+        assert "maison" in data
+        assert "jeux" in data
+        assert "totaux" in data
 
 
 # ═══════════════════════════════════════════════════════════
