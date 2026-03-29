@@ -4,8 +4,11 @@ Middleware FastAPI pour la limitation de débit.
 
 import os
 
+from fastapi import HTTPException
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
+
+from src.api.security_logs import journaliser_evenement_securite
 
 from .limiter import LimiteurDebit, limiteur_debit
 
@@ -47,11 +50,30 @@ class MiddlewareLimitationDebit(BaseHTTPMiddleware):
 
         est_ia = "/ai/" in request.url.path or "/suggest" in request.url.path
 
-        info_limite = self.limiteur.verifier_limite(
-            request,
-            id_utilisateur=id_utilisateur,
-            est_endpoint_ia=est_ia,
-        )
+        try:
+            info_limite = self.limiteur.verifier_limite(
+                request,
+                id_utilisateur=id_utilisateur,
+                est_endpoint_ia=est_ia,
+            )
+        except HTTPException as exc:
+            if exc.status_code == 429:
+                client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (
+                    request.client.host if request.client else None
+                )
+                journaliser_evenement_securite(
+                    event_type="rate_limit.exceeded",
+                    user_id=id_utilisateur,
+                    ip=client_ip,
+                    user_agent=request.headers.get("User-Agent"),
+                    details={
+                        "path": request.url.path,
+                        "method": request.method,
+                        "query": str(request.url.query),
+                        "is_ai_endpoint": est_ia,
+                    },
+                )
+            raise
 
         response = await call_next(request)
         self.limiteur.ajouter_headers(response, info_limite)

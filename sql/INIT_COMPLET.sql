@@ -137,6 +137,7 @@ DROP TABLE IF EXISTS alertes_meteo CASCADE;
 DROP TABLE IF EXISTS config_meteo CASCADE;
 DROP TABLE IF EXISTS sauvegardes CASCADE;
 DROP TABLE IF EXISTS historique_actions CASCADE;
+DROP TABLE IF EXISTS logs_securite CASCADE;
 DROP TABLE IF EXISTS calendriers_externes CASCADE;
 DROP TABLE IF EXISTS abonnements_push CASCADE;
 DROP TABLE IF EXISTS preferences_notifications CASCADE;
@@ -1072,6 +1073,21 @@ CREATE TABLE historique_actions (
     user_agent VARCHAR(500),
     cree_le TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE logs_securite (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255),
+    event_type VARCHAR(100) NOT NULL,
+    ip VARCHAR(45),
+    user_agent VARCHAR(500),
+    details JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_logs_securite_user_id ON logs_securite(user_id);
+CREATE INDEX IF NOT EXISTS ix_logs_securite_event_type ON logs_securite(event_type);
+CREATE INDEX IF NOT EXISTS ix_logs_securite_created_at ON logs_securite(created_at);
+CREATE INDEX IF NOT EXISTS ix_logs_securite_event_type_created_at ON logs_securite(event_type, created_at);
+CREATE INDEX IF NOT EXISTS ix_logs_securite_user_created_at ON logs_securite(user_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_action_history_user_id ON historique_actions(user_id);
 CREATE INDEX IF NOT EXISTS idx_action_history_action_type ON historique_actions(action_type);
 CREATE INDEX IF NOT EXISTS idx_action_history_cree_le ON historique_actions(cree_le DESC);
@@ -3743,6 +3759,24 @@ BEGIN FOREACH t IN ARRAY readonly_tables LOOP
     EXECUTE format('DROP POLICY IF EXISTS "authenticated_access_%s" ON public.%I', t, t);
 END LOOP;
 END $$;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 9.5 Logs sécurité admin-only
+-- ─────────────────────────────────────────────────────────────────────────────
+ALTER TABLE IF EXISTS public.logs_securite ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "service_role_access_logs_securite" ON public.logs_securite;
+CREATE POLICY "service_role_access_logs_securite"
+    ON public.logs_securite
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+DROP POLICY IF EXISTS "authenticated_deny_logs_securite" ON public.logs_securite;
+CREATE POLICY "authenticated_deny_logs_securite"
+    ON public.logs_securite
+    FOR ALL TO authenticated
+    USING (false)
+    WITH CHECK (false);
 -- ============================================================================
 -- PARTIE 10 : DONNÉES DE RÉFÉRENCE
 -- ============================================================================

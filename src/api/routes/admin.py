@@ -154,43 +154,71 @@ async def lister_logs_securite(
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict[str, Any]:
     """Expose un flux dédié sécurité pour le dashboard admin."""
-    from src.services.core.audit import obtenir_service_audit
+    from sqlalchemy import text
 
-    service = obtenir_service_audit()
+    from src.api.utils import executer_avec_session
 
-    filtre_action = event_type
-    if not filtre_action:
-        # Filtre sécurité par défaut: événements auth/admin/rate-limit.
-        filtre_action = "admin."
+    offset = (page - 1) * par_page
+    conditions: list[str] = ["1=1"]
+    params: dict[str, Any] = {"limit": par_page, "offset": offset}
 
-    resultats = service.consulter(
-        action=filtre_action,
-        depuis=depuis,
-        jusqu_a=jusqu_a,
-        limite=par_page,
-        page=page,
-    )
+    if event_type:
+        conditions.append("event_type = :event_type")
+        params["event_type"] = event_type
+    else:
+        conditions.append("(event_type LIKE 'auth.%' OR event_type LIKE 'rate_limit.%' OR event_type LIKE 'admin.%')")
+
+    if depuis:
+        conditions.append("created_at >= :depuis")
+        params["depuis"] = depuis
+    if jusqu_a:
+        conditions.append("created_at <= :jusqu_a")
+        params["jusqu_a"] = jusqu_a
+
+    where_clause = " AND ".join(conditions)
+
+    with executer_avec_session() as session:
+        total = int(
+            session.execute(
+                text(f"SELECT COUNT(*) FROM logs_securite WHERE {where_clause}"),
+                params,
+            ).scalar()
+            or 0
+        )
+
+        rows = session.execute(
+            text(
+                f"""
+                SELECT id, created_at, event_type, user_id, ip, user_agent, details
+                FROM logs_securite
+                WHERE {where_clause}
+                ORDER BY created_at DESC
+                LIMIT :limit OFFSET :offset
+                """
+            ),
+            params,
+        ).mappings().all()
 
     items = [
         {
-            "id": e.id,
-            "created_at": e.timestamp.isoformat(),
-            "event_type": e.action,
-            "user_id": e.utilisateur_id,
-            "ip": (e.details or {}).get("ip") if isinstance(e.details, dict) else None,
-            "user_agent": (e.details or {}).get("user_agent") if isinstance(e.details, dict) else None,
-            "source": e.source,
-            "details": e.details,
+            "id": int(r["id"]),
+            "created_at": r["created_at"].isoformat() if r["created_at"] else None,
+            "event_type": r["event_type"],
+            "user_id": r["user_id"],
+            "ip": r["ip"],
+            "user_agent": r["user_agent"],
+            "source": "security",
+            "details": r["details"] or {},
         }
-        for e in resultats.entrees
+        for r in rows
     ]
 
     return {
         "items": items,
-        "total": resultats.total,
-        "page": resultats.page,
-        "par_page": resultats.par_page,
-        "pages_totales": max(1, (resultats.total + par_page - 1) // par_page),
+        "total": total,
+        "page": page,
+        "par_page": par_page,
+        "pages_totales": max(1, (total + par_page - 1) // par_page),
     }
 
 

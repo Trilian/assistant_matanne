@@ -9,10 +9,11 @@ import logging
 import os
 from typing import Any
 
-from fastapi import Depends, HTTPException, Security
+from fastapi import Depends, HTTPException, Request, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from .auth import valider_token
+from .security_logs import journaliser_evenement_securite
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +72,7 @@ def _est_environnement_dev() -> bool:
 
 
 async def get_current_user(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Security(security),
 ) -> dict[str, Any] | None:
     """
@@ -86,6 +88,16 @@ async def get_current_user(
         if _est_environnement_dev():
             logger.debug("Mode développement: utilisateur dev auto-authentifié (rôle membre)")
             return {"id": "dev", "email": "dev@local", "role": "membre"}
+        client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (
+            request.client.host if request.client else None
+        )
+        journaliser_evenement_securite(
+            event_type="auth.missing_token",
+            user_id=None,
+            ip=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            details={"reason": "authorization_header_missing"},
+        )
         raise HTTPException(status_code=401, detail="Token requis")
 
     try:
@@ -98,12 +110,32 @@ async def get_current_user(
                 "role": utilisateur.role,
             }
 
+        client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (
+            request.client.host if request.client else None
+        )
+        journaliser_evenement_securite(
+            event_type="auth.invalid_token",
+            user_id=None,
+            ip=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            details={"reason": "token_validation_failed"},
+        )
         raise HTTPException(status_code=401, detail="Token invalide")
 
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Erreur validation token: {e}")
+        client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (
+            request.client.host if request.client else None
+        )
+        journaliser_evenement_securite(
+            event_type="auth.error",
+            user_id=None,
+            ip=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            details={"reason": "token_exception", "error": str(e)},
+        )
         raise HTTPException(status_code=401, detail="Token invalide ou expiré") from e
 
 
@@ -131,8 +163,21 @@ def require_role(required_role: str):
             ...
     """
 
-    def role_checker(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
+    def role_checker(
+        request: Request,
+        user: dict[str, Any] = Depends(require_auth),
+    ) -> dict[str, Any]:
         if user.get("role") != required_role:
+            client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (
+                request.client.host if request.client else None
+            )
+            journaliser_evenement_securite(
+                event_type="auth.role_denied",
+                user_id=str(user.get("id")) if user.get("id") else None,
+                ip=client_ip,
+                user_agent=request.headers.get("User-Agent"),
+                details={"required_role": required_role, "actual_role": user.get("role")},
+            )
             raise HTTPException(
                 status_code=403,
                 detail=f"Rôle '{required_role}' requis",
