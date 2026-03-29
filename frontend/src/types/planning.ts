@@ -31,6 +31,34 @@ export interface PlanningSemaine {
   repas: RepasPlanning[];
 }
 
+export interface PlanningMensuel {
+  mois: string;
+  debut: string;
+  fin: string;
+  repas: RepasPlanning[];
+  par_jour: Record<string, RepasPlanning[]>;
+}
+
+export interface ConflitPlanning {
+  type: string;
+  niveau: "erreur" | "avertissement" | "info";
+  message: string;
+  date_jour: string;
+  suggestion?: string | null;
+  evenement_1?: Record<string, unknown> | null;
+  evenement_2?: Record<string, unknown> | null;
+}
+
+export interface RapportConflitsPlanning {
+  date_debut: string;
+  date_fin: string;
+  resume: string;
+  nb_erreurs: number;
+  nb_avertissements: number;
+  nb_infos: number;
+  items: ConflitPlanning[];
+}
+
 export interface CreerRepasPlanningDTO {
   date: string;
   type_repas: TypeRepas;

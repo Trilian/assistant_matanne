@@ -749,6 +749,10 @@ def obtenir_service_entretien(client: ClientIA | None = None) -> EntretienServic
 
 
 @service_factory("entretien", tags={"maison", "crud", "entretien"})
-def get_entretien_service(client: ClientIA | None = None) -> EntretienService:
+def obtenir_entretien_service(client: ClientIA | None = None) -> EntretienService:
     """Factory pour obtenir le service entretien (alias anglais)."""
     return obtenir_service_entretien(client)
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_entretien_service = obtenir_entretien_service  # alias rétrocompatibilité Sprint 12 A3

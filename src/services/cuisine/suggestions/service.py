@@ -554,7 +554,7 @@ def obtenir_service_suggestions() -> ServiceSuggestions:
     return ServiceSuggestions()
 
 
-def get_suggestions_service() -> ServiceSuggestions:
+def obtenir_suggestions_service() -> ServiceSuggestions:
     """Factory for suggestions service (English alias)."""
     return obtenir_service_suggestions()
 
@@ -564,3 +564,7 @@ __all__ = [
     "obtenir_service_suggestions",
     "get_suggestions_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_suggestions_service = obtenir_suggestions_service  # alias rétrocompatibilité Sprint 12 A3

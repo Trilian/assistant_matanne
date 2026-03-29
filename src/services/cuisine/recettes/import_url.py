@@ -319,6 +319,10 @@ def obtenir_service_import_recettes() -> RecipeImportService:
     return RecipeImportService()
 
 
-def get_recipe_import_service() -> RecipeImportService:
+def obtenir_recipe_import_service() -> RecipeImportService:
     """Factory pour le service d'import de recettes (alias anglais)."""
     return obtenir_service_import_recettes()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_recipe_import_service = obtenir_recipe_import_service  # alias rétrocompatibilité Sprint 12 A3

@@ -5,16 +5,32 @@
 import { clientApi } from "./client";
 import type {
   PlanningSemaine,
+  PlanningMensuel,
+  RapportConflitsPlanning,
   RepasPlanning,
   CreerRepasPlanningDTO,
   SuggestionRecettePlanning,
   GenererPlanningParams,
 } from "@/types/planning";
+import { exporterPdf } from "@/bibliotheque/api/export";
 
 /** Obtenir le planning de la semaine courante ou spécifiée */
 export async function obtenirPlanningSemaine(dateDebut?: string): Promise<PlanningSemaine> {
   const params = dateDebut ? `?date_debut=${dateDebut}` : "";
   const { data } = await clientApi.get<PlanningSemaine>(`/planning/semaine${params}`);
+  return data;
+}
+
+/** Obtenir le planning mensuel */
+export async function obtenirPlanningMensuel(mois: string): Promise<PlanningMensuel> {
+  const { data } = await clientApi.get<PlanningMensuel>(`/planning/mensuel?mois=${encodeURIComponent(mois)}`);
+  return data;
+}
+
+/** Obtenir les conflits de la semaine */
+export async function obtenirConflitsPlanning(dateDebut?: string): Promise<RapportConflitsPlanning> {
+  const params = dateDebut ? `?date_debut=${encodeURIComponent(dateDebut)}` : "";
+  const { data } = await clientApi.get<RapportConflitsPlanning>(`/planning/conflits${params}`);
   return data;
 }
 
@@ -93,6 +109,11 @@ export async function exporterPlanningIcal(semaines = 2): Promise<void> {
   a.click();
   a.remove();
   window.URL.revokeObjectURL(url);
+}
+
+/** Exporter le planning en PDF */
+export async function exporterPlanningPdf(): Promise<void> {
+  await exporterPdf("planning");
 }
 
 // ─── Nutrition hebdomadaire ─────────────────────────────────

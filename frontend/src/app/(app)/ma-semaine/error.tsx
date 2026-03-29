@@ -1,0 +1,33 @@
+"use client";
+
+import { Button } from "@/composants/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/composants/ui/card";
+
+export default function MaSemaineError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-center p-8">
+      <Card className="max-w-md w-full">
+        <CardHeader>
+          <CardTitle className="text-destructive">📅 Erreur Ma Semaine</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            {error.message || "Une erreur est survenue lors du chargement de votre semaine."}
+          </p>
+        </CardContent>
+        <CardFooter className="flex gap-2">
+          <Button onClick={reset}>Réessayer</Button>
+          <Button variant="outline" asChild>
+            <a href="/ma-semaine">Retour à Ma Semaine</a>
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+}

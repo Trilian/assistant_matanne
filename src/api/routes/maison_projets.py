@@ -1,5 +1,5 @@
-"""
-Routes API Maison — Projets domestiques.
+﻿"""
+Routes API Maison â€” Projets domestiques.
 
 Sous-routeur inclus dans maison.py.
 """
@@ -25,9 +25,9 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Maison"])
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PROJETS DOMESTIQUES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/projets", responses=REPONSES_LISTE)
@@ -35,8 +35,8 @@ router = APIRouter(tags=["Maison"])
 async def lister_projets(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    statut: str | None = Query(None, description="Filtrer par statut (en_cours, terminé, annulé)"),
-    priorite: str | None = Query(None, description="Filtrer par priorité"),
+    statut: str | None = Query(None, description="Filtrer par statut (en_cours, terminÃ©, annulÃ©)"),
+    priorite: str | None = Query(None, description="Filtrer par prioritÃ©"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les projets domestiques."""
@@ -90,14 +90,14 @@ async def lister_projets(
 @router.get("/projets/{projet_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_projet(projet_id: int, user: dict[str, Any] = Depends(require_auth)):
-    """Récupère un projet avec ses tâches."""
+    """RÃ©cupÃ¨re un projet avec ses tÃ¢ches."""
     from src.core.models import Projet
 
     def _query():
         with executer_avec_session() as session:
             projet = session.query(Projet).filter(Projet.id == projet_id).first()
             if not projet:
-                raise HTTPException(status_code=404, detail="Projet non trouvé")
+                raise HTTPException(status_code=404, detail="Projet non trouvÃ©")
 
             return {
                 "id": projet.id,
@@ -134,7 +134,7 @@ async def creer_projet(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée un nouveau projet domestique."""
+    """CrÃ©e un nouveau projet domestique."""
     from src.core.models import Projet
 
     def _query():
@@ -167,14 +167,14 @@ async def modifier_projet(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour un projet domestique."""
+    """Met Ã  jour un projet domestique."""
     from src.core.models import Projet
 
     def _query():
         with executer_avec_session() as session:
             projet = session.query(Projet).filter(Projet.id == projet_id).first()
             if not projet:
-                raise HTTPException(status_code=404, detail="Projet non trouvé")
+                raise HTTPException(status_code=404, detail="Projet non trouvÃ©")
 
             for champ in ("nom", "description", "statut", "priorite", "date_debut", "date_fin_prevue", "date_fin_reelle"):
                 if champ in payload:
@@ -198,17 +198,17 @@ async def supprimer_projet(
     projet_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Supprime un projet et ses tâches."""
+    """Supprime un projet et ses tÃ¢ches."""
     from src.core.models import Projet
 
     def _query():
         with executer_avec_session() as session:
             projet = session.query(Projet).filter(Projet.id == projet_id).first()
             if not projet:
-                raise HTTPException(status_code=404, detail="Projet non trouvé")
+                raise HTTPException(status_code=404, detail="Projet non trouvÃ©")
             session.delete(projet)
             session.commit()
-            return MessageResponse(message=f"Projet '{projet.nom}' supprimé")
+            return MessageResponse(message=f"Projet '{projet.nom}' supprimÃ©")
 
     return await executer_async(_query)
 
@@ -219,15 +219,15 @@ async def estimer_projet_ia(
     projet_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Génère une estimation IA complète pour un projet (budget, tâches, matériaux)."""
+    """GÃ©nÃ¨re une estimation IA complÃ¨te pour un projet (budget, tÃ¢ches, matÃ©riaux)."""
     from src.core.models import Projet
-    from src.services.maison import get_projets_service
+    from src.services.maison import obtenir_projets_service
 
     def _get_projet():
         with executer_avec_session() as session:
             projet = session.query(Projet).filter(Projet.id == projet_id).first()
             if not projet:
-                raise HTTPException(status_code=404, detail="Projet non trouvé")
+                raise HTTPException(status_code=404, detail="Projet non trouvÃ©")
             return {
                 "nom": projet.nom,
                 "description": projet.description or "",
@@ -236,7 +236,7 @@ async def estimer_projet_ia(
 
     projet_data = await executer_async(_get_projet)
 
-    service = get_projets_service()
+    service = obtenir_projets_service()
     estimation = await service.estimer_projet(
         nom=projet_data["nom"],
         description=projet_data["description"],
@@ -245,9 +245,9 @@ async def estimer_projet_ia(
     return estimation.model_dump(mode="json")
 
 
-# ═══════════════════════════════════════════════════════════
-# PROJETS — PRIORISER IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# PROJETS â€” PRIORISER IA
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/projets/prioriser-ia", responses=REPONSES_CRUD_LECTURE)
@@ -255,9 +255,9 @@ async def estimer_projet_ia(
 async def prioriser_projets_ia(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Suggère un ordre de priorité pour les projets en cours via l'IA."""
+    """SuggÃ¨re un ordre de prioritÃ© pour les projets en cours via l'IA."""
     from src.core.models.maison import ProjetMaison
-    from src.services.maison.conseiller_service import get_conseiller_maison_service
+    from src.services.maison.conseiller_service import obtenir_conseiller_maison_service
     from src.api.utils import executer_avec_session
 
     def _query():
@@ -270,9 +270,9 @@ async def prioriser_projets_ia(
                 .all()
             )
             if not projets:
-                return {"priorites": [], "conseil": "Aucun projet actif à prioriser."}
+                return {"priorites": [], "conseil": "Aucun projet actif Ã  prioriser."}
 
-            service = get_conseiller_maison_service()
+            service = obtenir_conseiller_maison_service()
             noms = ", ".join(p.nom for p in projets)
             try:
                 conseil = service.obtenir_conseil("travaux")
@@ -293,10 +293,4 @@ async def prioriser_projets_ia(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# SYNC TÂCHES MAISON → PLANNING FAMILIAL
-# ═══════════════════════════════════════════════════════════
 
-
-@router.post("/planning/sync-famille", responses=REPONSES_CRUD_CREATION)
-@gerer_exception_api

@@ -55,10 +55,13 @@ import {
 } from "@/crochets/utiliser-api";
 import {
   obtenirPlanningSemaine,
+  obtenirPlanningMensuel,
+  obtenirConflitsPlanning,
   definirRepas,
   supprimerRepas,
   genererPlanningSemaine,
   exporterPlanningIcal,
+  exporterPlanningPdf,
   obtenirNutritionHebdo,
   obtenirSuggestionsRapides,
 } from "@/bibliotheque/api/planning";
@@ -73,6 +76,7 @@ import type {
 } from "@/types/planning";
 import { BadgeNutriscore } from "@/composants/cuisine/badge-nutriscore";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
+import { CalendrierMensuel } from "@/composants/planning/calendrier-mensuel";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
@@ -103,7 +107,9 @@ function getDatesDeSemaine(dateDebut: string): string[] {
 }
 
 export default function PagePlanning() {
+  const [modeAffichage, setModeAffichage] = useState<"semaine" | "mois">("semaine");
   const [offsetSemaine, setOffsetSemaine] = useState(0);
+  const [offsetMois, setOffsetMois] = useState(0);
   const [dialogueOuvert, setDialogueOuvert] = useState(false);
   const [repasEnCours, setRepasEnCours] = useState<{
     date: string;
@@ -121,11 +127,26 @@ export default function PagePlanning() {
   const invalider = utiliserInvalidation();
   const dateDebut = getLundiDeSemaine(offsetSemaine);
   const datesSemaine = getDatesDeSemaine(dateDebut);
+  const moisDate = new Date();
+  moisDate.setMonth(moisDate.getMonth() + offsetMois);
+  const moisSelectionne = `${moisDate.getFullYear()}-${String(moisDate.getMonth() + 1).padStart(2, "0")}`;
 
   // ─── Requêtes ───
   const { data: planning, isLoading } = utiliserRequete(
     ["planning", dateDebut],
     () => obtenirPlanningSemaine(dateDebut)
+  );
+
+  const { data: planningMensuel, isLoading: chargementMensuel } = utiliserRequete(
+    ["planning", "mensuel", moisSelectionne],
+    () => obtenirPlanningMensuel(moisSelectionne),
+    { enabled: modeAffichage === "mois" }
+  );
+
+  const { data: conflits } = utiliserRequete(
+    ["planning", "conflits", dateDebut],
+    () => obtenirConflitsPlanning(dateDebut),
+    { staleTime: 3 * 60 * 1000 }
   );
 
   const { data: nutrition } = utiliserRequete(
@@ -262,19 +283,48 @@ export default function PagePlanning() {
     year: "numeric",
   });
 
+  const moisLabelComplet = moisDate.toLocaleDateString("fr-FR", {
+    month: "long",
+    year: "numeric",
+  });
+
   return (
     <div className="space-y-6">
       {/* ─── En-tête ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">📅 Planning repas</h1>
-          <p className="text-muted-foreground capitalize">{moisLabel}</p>
+          <p className="text-muted-foreground capitalize">
+            {modeAffichage === "semaine" ? moisLabel : moisLabelComplet}
+          </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <div className="rounded-md border p-0.5 flex items-center gap-0.5">
+            <Button
+              variant={modeAffichage === "semaine" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setModeAffichage("semaine")}
+            >
+              Semaine
+            </Button>
+            <Button
+              variant={modeAffichage === "mois" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setModeAffichage("mois")}
+            >
+              Mois
+            </Button>
+          </div>
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setOffsetSemaine((o) => o - 1)}
+            onClick={() => {
+              if (modeAffichage === "semaine") {
+                setOffsetSemaine((o) => o - 1);
+              } else {
+                setOffsetMois((o) => o - 1);
+              }
+            }}
             aria-label="Semaine précédente"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -282,14 +332,23 @@ export default function PagePlanning() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setOffsetSemaine(0)}
+            onClick={() => {
+              setOffsetSemaine(0);
+              setOffsetMois(0);
+            }}
           >
             Aujourd'hui
           </Button>
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setOffsetSemaine((o) => o + 1)}
+            onClick={() => {
+              if (modeAffichage === "semaine") {
+                setOffsetSemaine((o) => o + 1);
+              } else {
+                setOffsetMois((o) => o + 1);
+              }
+            }}
             aria-label="Semaine suivante"
           >
             <ChevronRight className="h-4 w-4" />
@@ -303,6 +362,15 @@ export default function PagePlanning() {
           >
             <Sparkles className="mr-2 h-4 w-4" />
             {enGeneration ? "Génération..." : "Générer IA"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exporterPlanningPdf().catch(() => toast.error("Erreur d'export PDF"))}
+            title="Exporter en PDF"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            PDF
           </Button>
           <Button
             variant="outline"
@@ -337,7 +405,13 @@ export default function PagePlanning() {
       </div>
 
       {/* ─── Grille Planning ─── */}
-      {isLoading ? (
+      {modeAffichage === "mois" ? (
+        chargementMensuel ? (
+          <Skeleton className="h-[520px] w-full" />
+        ) : planningMensuel ? (
+          <CalendrierMensuel mois={planningMensuel.mois} parJour={planningMensuel.par_jour} />
+        ) : null
+      ) : isLoading ? (
         <div className="grid gap-2">
           {Array.from({ length: 7 }).map((_, i) => (
             <Skeleton key={i} className="h-24 w-full" />
@@ -429,6 +503,34 @@ export default function PagePlanning() {
             );
           })}
         </div>
+      )}
+
+      {conflits && conflits.items.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">⚠️ Conflits détectés</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-sm text-muted-foreground">{conflits.resume}</p>
+            {conflits.items.slice(0, 5).map((conflit, index) => (
+              <div key={`${conflit.date_jour}-${index}`} className="rounded-md border p-3">
+                <p className="text-sm font-medium">{conflit.message}</p>
+                {conflit.suggestion && (
+                  <p className="text-xs text-muted-foreground mt-0.5">Suggestion: {conflit.suggestion}</p>
+                )}
+                <div className="mt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toast.info("Aide à la résolution rapide bientôt disponible")}
+                  >
+                    Résoudre rapidement
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       )}
 
       {/* ─── Nutrition hebdomadaire ─── */}

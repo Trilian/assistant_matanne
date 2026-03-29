@@ -849,7 +849,7 @@ RÉPONSE AU FORMAT JSON:
 
 
 @service_factory("jeux_ai", tags={"jeux", "ia"})
-def get_jeux_ai_service() -> JeuxAIService:
+def obtenir_jeux_ai_service() -> JeuxAIService:
     """Factory singleton pour le service IA Jeux."""
     return JeuxAIService()
 
@@ -870,3 +870,7 @@ __all__ = [
     "obtenir_service_ia_jeux",
     "get_jeux_ai_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_jeux_ai_service = obtenir_jeux_ai_service  # alias rétrocompatibilité Sprint 12 A3

@@ -49,10 +49,10 @@
 | Sprint Documentation | ~1j | 🟡 PRIORITÉ 4 | Docs stale + manquantes |
 | Sprint 11 | ~2-3j | 🔵 PLANIFIÉ | Features prioritaires manquantes |
 | Sprint 12 | ~2-3j | 🔵 PLANIFIÉ | Architecture & Refactoring |
-| Sprint 13 | ~2j | 🔵 PLANIFIÉ | WhatsApp étendu + Email complet |
+| Sprint 13 | ~2j | ✅ COMPLÉTÉ | WhatsApp étendu + Email complet |
 | Sprint 14 | ~3-4j | 🔵 PLANIFIÉ | IA avancée + Cron jobs |
 | Sprint 15 | ~3-4j | 🔵 PLANIFIÉ | Inter-modules avancés |
-| Sprint 16 | ~2j | 🔵 PLANIFIÉ | Admin complet |
+| Sprint 16 | ~2j | ✅ TERMINÉ | Admin complet |
 
 ---
 
@@ -383,9 +383,9 @@ CREATE TRIGGER trg_articles_courses_update_liste
 
 ---
 
-## 4. Sprint Tests — Couverture manquante
+## 4. Sprint Tests — Couverture manquante ✅ TERMINÉ
 
-> **~2-3 jours — PRIORITÉ 3**
+> **~2-3 jours — PRIORITÉ 3 — COMPLÉTÉ**
 > Source : `ANALYSE_COMPLETE.md` §5
 
 ### T1 — `test_routes_assistant.py` _(M)_
@@ -812,55 +812,70 @@ Source : `ANALYSE_COMPLETE.md` §4
 
 ## 8. Sprint 13 — WhatsApp étendu + Email complet
 
-> **~2 jours**
+> **~2 jours — ✅ COMPLÉTÉ le 29/03/2026**
 > Source : `ANALYSE_COMPLETE.md` §11
 
-### W1 — Compléter TODO IA régénération planning WhatsApp _(S)_
+### W1 — Compléter TODO IA régénération planning WhatsApp _(S)_ ✅
 
-**Fichier :** `src/api/routes/webhooks_whatsapp.py` (TODO ligne 131)
+**Fichier :** `src/api/routes/webhooks_whatsapp.py`
 
-**Actions :**
-- [ ] Implémenter le handler `regenerer_planning_ia()` sur button reply "Régénérer"
-- [ ] Appeler `PlanningService.generer_planning_ia()` et envoyer le nouveau planning en WhatsApp
+**Réalisé :**
+- [x] Implémenté le handler `_regenerer_planning_ia()` — remplace le `# TODO` ligne 131
+- [x] Appel `PlanningService.generer_planning_ia()` via `loop.run_in_executor` (non-bloquant)
+- [x] Formatage du nouveau planning et envoi WhatsApp avec confirmation
 
 ---
 
-### W2 — Nouvelles commandes WhatsApp _(M)_
+### W2 — Nouvelles commandes WhatsApp _(M)_ ✅
 
-**Actions — ajouter dans `webhooks_whatsapp.py` :**
+**Fichier :** `src/api/routes/webhooks_whatsapp.py`
 
-| Commande | Action | Effort |
+| Commande | Fonction implémentée | Statut |
 |----------|--------|--------|
-| `jules` / `bébé` | Résumé Jules : repas, activités, jalons récents | S |
-| `ajouter [article]` | Ajouter directement en liste courses active | S |
-| `budget` | Budget mensuel en cours vs objectif | S |
-| `anniversaires` | Prochains anniversaires 30 jours | XS |
-| `recette [nom]` | Fiche recette avec ingrédients | S |
-| `tâches` | Tâches maison en retard | S |
-| `aide admin` | (admin only) liste commandes admin | XS |
+| `jules` / `bébé` | `_envoyer_resume_jules()` — activités, jalons, repas à venir | ✅ |
+| `ajouter [article]` | `_ajouter_article_courses()` — sanitisation XSS + ajout liste active | ✅ |
+| `budget` | `_envoyer_resume_budget()` — dépenses mois vs budget prévu | ✅ |
+| `anniversaires` | `_envoyer_anniversaires_proches()` — 30 prochains jours | ✅ |
+| `recette [nom]` | `_envoyer_fiche_recette()` — fiche avec ingrédients | ✅ |
+| `tâches` | `_envoyer_taches_retard()` — tâches maison en retard | ✅ |
+| `aide admin` | `_envoyer_aide_admin()` — admin only via WHATSAPP_USER_NUMBER | ✅ |
 
-- [ ] Ajouter les 7 commandes dans la machine d'état WhatsApp
-
----
-
-### W3 — Compléter dispatcher email SMTP _(M)_
-
-**État :** `ServiceEmail` via Resend configuré, certains envois non câblés.
-
-**Actions :**
-- [ ] Rapport hebdo famille → vérifier que l'email est envoyé (cron `resume_hebdo`)
-- [ ] Rapport mensuel budget → email en plus de ntfy
-- [ ] Alertes critiques → email si péremption < 24h OU garantie < 30j
-- [ ] Tester en dev avec compte Resend sandbox
+- [x] 7 commandes ajoutées dans la machine d'état WhatsApp
+- [x] Help text mis à jour avec toutes les commandes
 
 ---
 
-### W4 — Préférences canaux notification utilisateur _(S)_
+### W3 — Compléter dispatcher email SMTP _(M)_ ✅
 
-**Actions :**
-- [ ] Ajouter champ `preferences_notifications` JSONB dans `preferences_utilisateurs` (SQL + ORM)
-- [ ] Endpoint `GET/PUT /api/v1/preferences/notifications`
-- [ ] UI dans les paramètres : toggle par canal (ntfy, WhatsApp, email, push) par catégorie (rappels, alertes, résumés)
+**Fichier :** `src/services/core/cron/jobs.py`
+
+**Réalisé :**
+- [x] Rapport hebdo famille → email déjà câblé (confirmé dans `_job_resume_hebdo`)
+- [x] Rapport mensuel budget → email câblé dans `_job_rapport_mensuel_budget` (canal "email" présent)
+- [x] `_job_alertes_peremption_48h` : si péremption **< 24h** → canal "email" ajouté avec `envoyer_alerte_critique`
+- [x] `_job_controle_contrats_garanties` : si garantie expire **< 30j** → canal "email" ajouté avec `envoyer_alerte_critique`
+
+---
+
+### W4 — Préférences canaux notification utilisateur _(S)_ ✅
+
+**Fichiers modifiés :**
+- `src/core/models/notifications.py` — ajout colonne `canaux_par_categorie` JSONB
+- `src/api/schemas/preferences.py` — nouveaux schémas `PreferencesNotificationsBase`, `PreferencesNotificationsUpdate`, `PreferencesNotificationsResponse`, `CanauxParCategorie`
+- `src/api/routes/preferences.py` — endpoints `GET/PUT /api/v1/preferences/notifications`
+- `frontend/src/bibliotheque/api/preferences.ts` — `obtenirPreferencesNotifications()`, `sauvegarderPreferencesNotifications()`
+- `frontend/src/app/(app)/parametres/page.tsx` — composant `OngletCanauxNotifications` avec toggles par canal/catégorie
+- `sql/INIT_COMPLET.sql` — colonne `canaux_par_categorie` ajoutée
+- `sql/migrations/V003__sprint13_canaux_notifications.sql` — migration pour BDD existantes
+
+**Structure `canaux_par_categorie` :**
+```json
+{
+  "rappels":  ["push", "ntfy"],
+  "alertes":  ["push", "ntfy", "email"],
+  "resumes":  ["email"]
+}
+```
 
 ---
 
@@ -1234,15 +1249,15 @@ F5 (pages maison) ──────────────────→ IM9 
 
 ### Sprint Tests
 
-- [ ] T1 — `test_routes_assistant.py`
-- [ ] T2 — `test_routes_whatsapp.py`
-- [ ] T3 — `test_cron_jobs.py`
-- [ ] T4 — `test_routes_automations.py` dédié
-- [ ] T5 — `test_routes_voyages.py` + `test_routes_garmin.py`
-- [ ] T6 — Tests services intégrations (5 fichiers)
-- [ ] T7 — Tests famille Phase 6 (garde + achats)
-- [ ] T8 — `error.tsx` + `loading.tsx` manquants (admin, ma-semaine, root)
-- [ ] T9 — Tests pages frontend (5 fichiers)
+- [x] T1 — `test_routes_assistant.py`
+- [x] T2 — `test_routes_whatsapp.py`
+- [x] T3 — `test_cron_jobs.py`
+- [x] T4 — `test_routes_automations.py` dédié
+- [x] T5 — `test_routes_voyages.py` + `test_routes_garmin.py`
+- [x] T6 — Tests services intégrations (5 fichiers)
+- [x] T7 — Tests famille Phase 6 (garde + achats)
+- [x] T8 — `error.tsx` + `loading.tsx` manquants (admin, ma-semaine, root)
+- [x] T9 — Tests pages frontend (5 fichiers)
 
 ### Sprint Documentation
 
@@ -1273,11 +1288,11 @@ F5 (pages maison) ──────────────────→ IM9 
 
 ### Sprint 12 — Architecture
 
-- [ ] A1 — Splitter `maison.py`
-- [ ] A2 — Splitter `famille.py`
-- [ ] A3 — Uniformiser noms factory (français)
-- [ ] A4 — Génération automatique types TypeScript
-- [ ] A5 — Audit tables orphelines ORM ↔ SQL
+- [x] A1 — Splitter `maison.py` (4 sous-routeurs : maison_projets, maison_entretien, maison_finances, maison_jardin — 155 routes)
+- [x] A2 — Splitter `famille.py` (3 sous-routeurs : famille_jules, famille_budget, famille_activites — 74 routes)
+- [x] A3 — Uniformiser noms factory (français) — 96 fonctions `get_*_service` → `obtenir_*_service` avec aliases rétrocompatibilité
+- [x] A4 — Génération automatique types TypeScript — `openapi-typescript` configuré, script `npm run generate-types`
+- [x] A5 — Audit tables orphelines ORM ↔ SQL — `articles_courses` créé (anciennement `liste_courses`), 14 orphelines SQL documentées
 
 ### Sprint 13 — WhatsApp + Email
 
@@ -1315,9 +1330,9 @@ F5 (pages maison) ──────────────────→ IM9 
 
 ### Sprint 16 — Admin complet
 
-- [ ] ADM1 — Endpoints admin manquants (12 endpoints)
-- [ ] ADM2 — Pages frontend admin (3 à créer, 1 à compléter)
-- [ ] ADM3 — Sécurité audit logs généralisée
+- [x] ADM1 — Endpoints admin manquants (12 endpoints)
+- [x] ADM2 — Pages frontend admin (3 à créer, 1 à compléter)
+- [x] ADM3 — Sécurité audit logs généralisée
 
 ---
 

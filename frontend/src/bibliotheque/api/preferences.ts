@@ -41,3 +41,38 @@ export async function modifierPreferences(
   const { data } = await clientApi.patch<Preferences>("/preferences", prefs);
   return data;
 }
+
+// ─── Préférences canaux de notification (Sprint 13 — W4) ─────────────────────
+
+export interface CanauxParCategorie {
+  rappels: string[];
+  alertes: string[];
+  resumes: string[];
+}
+
+export interface PreferencesNotifications {
+  user_id: string | null;
+  courses_rappel: boolean;
+  repas_suggestion: boolean;
+  stock_alerte: boolean;
+  meteo_alerte: boolean;
+  budget_alerte: boolean;
+  canal_prefere: string;
+  canaux_par_categorie: CanauxParCategorie;
+  quiet_hours_start: string;
+  quiet_hours_end: string;
+}
+
+/** Récupérer les préférences de notification */
+export async function obtenirPreferencesNotifications(): Promise<PreferencesNotifications> {
+  const { data } = await clientApi.get<PreferencesNotifications>("/preferences/notifications");
+  return data;
+}
+
+/** Mettre à jour les préférences de notification (upsert) */
+export async function sauvegarderPreferencesNotifications(
+  prefs: Partial<Omit<PreferencesNotifications, "user_id">>
+): Promise<PreferencesNotifications> {
+  const { data } = await clientApi.put<PreferencesNotifications>("/preferences/notifications", prefs);
+  return data;
+}

@@ -450,6 +450,10 @@ class WebhookService:
 
 
 @service_factory("webhooks", tags={"notifications"})
-def get_webhook_service() -> WebhookService:
+def obtenir_webhook_service() -> WebhookService:
     """Factory singleton pour le service webhooks."""
     return WebhookService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_webhook_service = obtenir_webhook_service  # alias rétrocompatibilité Sprint 12 A3

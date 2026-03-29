@@ -203,7 +203,7 @@ class CellierCrudService(EventBusMixin, BaseService[ArticleCellier]):
 
 
 @service_factory("cellier_crud", tags={"maison", "crud", "cellier"})
-def get_cellier_crud_service() -> CellierCrudService:
+def obtenir_cellier_crud_service() -> CellierCrudService:
     """Factory singleton pour le service CRUD cellier."""
     return CellierCrudService()
 
@@ -211,3 +211,7 @@ def get_cellier_crud_service() -> CellierCrudService:
 def obtenir_service_cellier_crud() -> CellierCrudService:
     """Factory française pour le service CRUD cellier."""
     return get_cellier_crud_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_cellier_crud_service = obtenir_cellier_crud_service  # alias rétrocompatibilité Sprint 12 A3

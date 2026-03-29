@@ -274,7 +274,7 @@ def obtenir_service_recurrence() -> ServiceRecurrence:
     return ServiceRecurrence()
 
 
-def get_recurrence_service() -> ServiceRecurrence:
+def obtenir_recurrence_service() -> ServiceRecurrence:
     """Factory for recurrence service (English alias)."""
     return obtenir_service_recurrence()
 
@@ -288,3 +288,7 @@ __all__ = [
     "obtenir_service_recurrence",
     "get_recurrence_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_recurrence_service = obtenir_recurrence_service  # alias rétrocompatibilité Sprint 12 A3

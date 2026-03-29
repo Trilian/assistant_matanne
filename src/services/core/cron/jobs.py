@@ -253,7 +253,7 @@ def _job_rappel_courses_ntfy() -> None:
                 user_id="matanne",
                 message=f"{nb_articles} article(s) en attente sur la liste.",
                 canaux=["whatsapp"],
-                type_whatsapp="liste_courses",
+                type_whatsapp="articles_courses",
                 articles=noms_articles or [f"{nb_articles} article(s) en attente"],
                 nom_liste="Courses en attente",
                 titre="Courses",
@@ -432,7 +432,10 @@ def _job_planning_semaine_si_vide() -> None:
 
 
 def _job_alertes_peremption_48h() -> None:
-    """J-04: envoie les alertes de péremption à J+48h."""
+    """J-04: envoie les alertes de péremption à J+48h.
+
+    Sprint 13 — W3 : si péremption < 24h, envoie aussi un email critique.
+    """
     try:
         from datetime import date, timedelta
 
@@ -441,7 +444,8 @@ def _job_alertes_peremption_48h() -> None:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
         aujourd_hui = date.today()
-        seuil = aujourd_hui + timedelta(days=2)
+        seuil_48h = aujourd_hui + timedelta(days=2)
+        seuil_24h = aujourd_hui + timedelta(days=1)
 
         with obtenir_contexte_db() as session:
             articles = (
@@ -449,7 +453,7 @@ def _job_alertes_peremption_48h() -> None:
                 .filter(
                     ArticleInventaire.date_peremption.isnot(None),
                     ArticleInventaire.date_peremption >= aujourd_hui,
-                    ArticleInventaire.date_peremption <= seuil,
+                    ArticleInventaire.date_peremption <= seuil_48h,
                     ArticleInventaire.quantite > 0,
                 )
                 .order_by(ArticleInventaire.date_peremption.asc())
@@ -468,12 +472,36 @@ def _job_alertes_peremption_48h() -> None:
         ]
         message = "Produits à consommer sous 48h:\n" + "\n".join(lignes)
 
+        # Déterminer si des produits expirent dans les 24h (alerte critique → email)
+        articles_critiques_24h = [
+            a for a in articles
+            if getattr(a, "date_peremption", None) and a.date_peremption <= seuil_24h
+        ]
+
         dispatcher = get_dispatcher_notifications()
+        canaux = ["ntfy", "whatsapp"]
+        kwargs: dict = {"titre": "Alerte péremption 48h"}
+
+        if articles_critiques_24h:
+            # Péremption < 24h → email critique en plus
+            canaux = ["ntfy", "whatsapp", "email"]
+            noms_critiques = ", ".join(a.nom for a in articles_critiques_24h[:5])
+            kwargs.update({
+                "type_email": "alerte_critique",
+                "alerte": {
+                    "titre": "Alerte péremption urgente — < 24h",
+                    "message": f"Les produits suivants expirent aujourd'hui ou demain : {noms_critiques}. "
+                               "Consommez-les ou congélez-les rapidement.",
+                    "lien": "http://localhost:3000/cuisine/inventaire",
+                },
+            })
+            logger.info("J-04: %d produit(s) expirent sous 24h → email critique envoyé", len(articles_critiques_24h))
+
         res = dispatcher.envoyer(
             user_id="matanne",
             message=message,
-            canaux=["ntfy", "whatsapp"],
-            titre="Alerte péremption 48h",
+            canaux=canaux,
+            **kwargs,
         )
         logger.info("J-04 exécuté: %s", res)
     except Exception:
@@ -620,7 +648,10 @@ def _job_score_weekend() -> None:
 
 
 def _job_controle_contrats_garanties() -> None:
-    """J-09: contrôle des contrats/garanties expirant dans 3 mois."""
+    """J-09: contrôle des contrats/garanties expirant dans 3 mois.
+
+    Sprint 13 — W3 : si garantie expire dans 30j, envoie aussi un email critique.
+    """
     try:
         from datetime import date, timedelta
 
@@ -630,6 +661,7 @@ def _job_controle_contrats_garanties() -> None:
 
         aujourd_hui = date.today()
         horizon = aujourd_hui + timedelta(days=90)
+        horizon_30j = aujourd_hui + timedelta(days=30)
 
         with obtenir_contexte_db() as session:
             contrats = (
@@ -661,12 +693,39 @@ def _job_controle_contrats_garanties() -> None:
             f"Échéances 3 mois: {len(contrats)} contrat(s), {len(garanties)} garantie(s). "
             "Vérifie les renouvellements et options de résiliation."
         )
+
+        # Garanties expirant dans 30j → email critique
+        garanties_30j = [
+            g for g in garanties
+            if getattr(g, "date_fin_garantie", None) and g.date_fin_garantie <= horizon_30j
+        ]
+
+        canaux = ["ntfy", "whatsapp"]
+        kwargs: dict = {"titre": "Contrats & garanties à surveiller"}
+
+        if garanties_30j:
+            canaux = ["ntfy", "whatsapp", "email"]
+            noms_garanties = ", ".join(
+                getattr(g, "appareil", None) or getattr(g, "nom", "Garantie")
+                for g in garanties_30j[:5]
+            )
+            kwargs.update({
+                "type_email": "alerte_critique",
+                "alerte": {
+                    "titre": f"Garanties expirant dans moins de 30 jours ({len(garanties_30j)})",
+                    "message": f"Les garanties suivantes expirent bientôt : {noms_garanties}. "
+                               "Pensez à vérifier les options de prolongation ou de remplacement.",
+                    "lien": "http://localhost:3000/maison/entretien",
+                },
+            })
+            logger.info("J-09: %d garantie(s) expirent dans 30j → email critique envoyé", len(garanties_30j))
+
         dispatcher = get_dispatcher_notifications()
         res = dispatcher.envoyer(
             user_id="matanne",
             message=message,
-            canaux=["ntfy", "whatsapp"],
-            titre="Contrats & garanties à surveiller",
+            canaux=canaux,
+            **kwargs,
         )
         logger.info("J-09 exécuté: %s", res)
     except Exception:

@@ -411,6 +411,10 @@ def obtenir_service_preferences_utilisateur(
     return _preferences_par_user[user_id]
 
 
-def get_user_preference_service(user_id: str = DEFAULT_USER_ID) -> UserPreferenceService:
+def obtenir_user_preference_service(user_id: str = DEFAULT_USER_ID) -> UserPreferenceService:
     """Factory pour obtenir le service de préférences (alias anglais)."""
     return obtenir_service_preferences_utilisateur(user_id)
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_user_preference_service = obtenir_user_preference_service  # alias rétrocompatibilité Sprint 12 A3

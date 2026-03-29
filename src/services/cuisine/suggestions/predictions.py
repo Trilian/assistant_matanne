@@ -352,6 +352,10 @@ def obtenir_service_predictions() -> InventairePredictionService:
     return InventairePredictionService()
 
 
-def get_predictions_service() -> InventairePredictionService:
+def obtenir_predictions_service() -> InventairePredictionService:
     """Factory for predictions service (English alias)."""
     return obtenir_service_predictions()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_predictions_service = obtenir_predictions_service  # alias rétrocompatibilité Sprint 12 A3

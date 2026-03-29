@@ -286,6 +286,10 @@ class ServiceRGPD:
 
 
 @service_factory("rgpd", tags={"utilisateur", "rgpd"})
-def get_rgpd_service() -> ServiceRGPD:
+def obtenir_rgpd_service() -> ServiceRGPD:
     """Retourne le service RGPD (singleton via registre)."""
     return ServiceRGPD()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_rgpd_service = obtenir_rgpd_service  # alias rétrocompatibilité Sprint 12 A3

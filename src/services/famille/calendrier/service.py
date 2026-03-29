@@ -541,6 +541,10 @@ def obtenir_service_synchronisation_calendrier() -> CalendarSyncService:
     return CalendarSyncService()
 
 
-def get_calendar_sync_service() -> CalendarSyncService:
+def obtenir_calendar_sync_service() -> CalendarSyncService:
     """Factory pour le service de synchronisation calendrier (alias anglais)."""
     return obtenir_service_synchronisation_calendrier()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_calendar_sync_service = obtenir_calendar_sync_service  # alias rétrocompatibilité Sprint 12 A3

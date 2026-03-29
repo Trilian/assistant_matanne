@@ -540,6 +540,10 @@ def obtenir_service_meteo() -> ServiceMeteo:
     return ServiceMeteo()
 
 
-def get_weather_service() -> ServiceMeteo:
+def obtenir_weather_service() -> ServiceMeteo:
     """Factory for weather service (English alias)."""
     return obtenir_service_meteo()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_weather_service = obtenir_weather_service  # alias rétrocompatibilité Sprint 12 A3

@@ -77,7 +77,7 @@ class ArticleCourses(CreeLeMixin, Base):
         notes: Notes supplémentaires
     """
 
-    __tablename__ = "liste_courses"
+    __tablename__ = "articles_courses"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     liste_id: Mapped[int] = mapped_column(
@@ -104,8 +104,8 @@ class ArticleCourses(CreeLeMixin, Base):
     ingredient: Mapped["Ingredient"] = relationship("Ingredient", foreign_keys=[ingredient_id])
 
     __table_args__ = (
-        Index("ix_liste_courses_cree_le", "cree_le"),
-        CheckConstraint("quantite_necessaire > 0", name="ck_quantite_courses_positive"),
+        Index("ix_articles_courses_cree_le", "cree_le"),
+        CheckConstraint("quantite_necessaire > 0", name="ck_quantite_articles_courses_positive"),
     )
 
     def __repr__(self) -> str:

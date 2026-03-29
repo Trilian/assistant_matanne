@@ -1,16 +1,16 @@
-"""
+﻿"""
 Routes API pour les jeux (Paris sportifs & Loto).
 
 Endpoints pour:
-- Équipes et matchs de football
+- Ã‰quipes et matchs de football
 - Paris sportifs
 - Tirages et grilles de loto
 - Statistiques de jeux
-- Séries et alertes (loi des séries)
-- Prédictions et value bets
+- SÃ©ries et alertes (loi des sÃ©ries)
+- PrÃ©dictions et value bets
 - Jeu responsable
 - Euromillions
-- Dashboard agrégé
+- Dashboard agrÃ©gÃ©
 - Performance et analytics
 - Analyse IA
 - Backtest
@@ -44,9 +44,9 @@ from src.api.utils import executer_async, executer_avec_session, gerer_exception
 router = APIRouter(prefix="/api/v1/jeux", tags=["Jeux"])
 
 
-# ═══════════════════════════════════════════════════════════
-# ÉQUIPES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã‰QUIPES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/equipes", responses=REPONSES_LISTE)
@@ -56,7 +56,7 @@ async def lister_equipes(
     search: str | None = Query(None, description="Recherche par nom"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les équipes de football."""
+    """Liste les Ã©quipes de football."""
     from src.core.models import Equipe
 
     def _query():
@@ -97,14 +97,14 @@ async def lister_equipes(
 @router.get("/equipes/{equipe_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_equipe(equipe_id: int, user: dict[str, Any] = Depends(require_auth)):
-    """Récupère une équipe avec sa forme récente."""
+    """RÃ©cupÃ¨re une Ã©quipe avec sa forme rÃ©cente."""
     from src.core.models import Equipe
 
     def _query():
         with executer_avec_session() as session:
             equipe = session.query(Equipe).filter(Equipe.id == equipe_id).first()
             if not equipe:
-                raise HTTPException(status_code=404, detail="Équipe non trouvée")
+                raise HTTPException(status_code=404, detail="Ã‰quipe non trouvÃ©e")
 
             return {
                 "id": equipe.id,
@@ -126,9 +126,9 @@ async def obtenir_equipe(equipe_id: int, user: dict[str, Any] = Depends(require_
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MATCHS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/matchs", responses=REPONSES_LISTE)
@@ -137,7 +137,7 @@ async def lister_matchs(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     championnat: str | None = Query(None, description="Filtrer par championnat"),
-    joue: bool | None = Query(None, description="Filtrer par statut joué/non joué"),
+    joue: bool | None = Query(None, description="Filtrer par statut jouÃ©/non jouÃ©"),
     date_debut: date | None = Query(None, description="Date minimum"),
     date_fin: date | None = Query(None, description="Date maximum"),
     cursor: str | None = Query(None, description="Curseur pour pagination cursor-based"),
@@ -204,14 +204,14 @@ async def lister_matchs(
 @router.get("/matchs/{match_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_match(match_id: int, user: dict[str, Any] = Depends(require_auth)):
-    """Récupère un match avec ses paris."""
+    """RÃ©cupÃ¨re un match avec ses paris."""
     from src.core.models import Match
 
     def _query():
         with executer_avec_session() as session:
             match = session.query(Match).filter(Match.id == match_id).first()
             if not match:
-                raise HTTPException(status_code=404, detail="Match non trouvé")
+                raise HTTPException(status_code=404, detail="Match non trouvÃ©")
 
             return {
                 "id": match.id,
@@ -275,17 +275,17 @@ async def lister_matchs_expert(
     date_max: date | None = Query(None, description="Date maximum"),
     ev_min: float | None = Query(None, description="Expected Value minimum (0-1)"),
     confidence_min: float | None = Query(None, description="Confiance IA minimum (0-1)"),
-    pattern: str | None = Query(None, description="Pattern statistique détecté"),
-    search: str | None = Query(None, description="Recherche équipe"),
+    pattern: str | None = Query(None, description="Pattern statistique dÃ©tectÃ©"),
+    search: str | None = Query(None, description="Recherche Ã©quipe"),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Liste les matchs avec filtres avancés pour la vue Expert.
+    Liste les matchs avec filtres avancÃ©s pour la vue Expert.
     
     Filtre par championnat, dates, EV, confiance IA, patterns statistiques.
-    Retourne toutes les données nécessaires pour l'analyse experte.
+    Retourne toutes les donnÃ©es nÃ©cessaires pour l'analyse experte.
     """
     from src.core.models import Match, Equipe
     from sqlalchemy import or_, and_, func
@@ -313,7 +313,7 @@ async def lister_matchs_expert(
             if date_max:
                 query = query.filter(Match.date_match <= date_max)
 
-            # Filtres uniquement sur matchs non joués avec prédictions
+            # Filtres uniquement sur matchs non jouÃ©s avec prÃ©dictions
             query = query.filter(Match.joue == False)
             query = query.filter(Match.prediction_resultat.isnot(None))
 
@@ -321,13 +321,13 @@ async def lister_matchs_expert(
             if confidence_min is not None:
                 query = query.filter(Match.prediction_confiance >= confidence_min)
 
-            # Filtre par Expected Value (calculé: meilleure_proba * meilleure_cote - 1)
+            # Filtre par Expected Value (calculÃ©: meilleure_proba * meilleure_cote - 1)
             if ev_min is not None:
-                # Filtre approximatif - le calcul exact EV nécessite de déterminer meilleure cote/proba
+                # Filtre approximatif - le calcul exact EV nÃ©cessite de dÃ©terminer meilleure cote/proba
                 # On utilise la confiance comme proxy pour filtrage initial
                 query = query.filter(Match.prediction_confiance >= (ev_min / 0.20 + 0.5))
 
-            # Filtre par recherche équipe
+            # Filtre par recherche Ã©quipe
             if search:
                 safe_search = search.replace("%", "\\%").replace("_", "\\_")
                 query = query.filter(
@@ -343,7 +343,7 @@ async def lister_matchs_expert(
             total = query.count()
             items = query.offset((page - 1) * page_size).limit(page_size).all()
 
-            # Construction des résultats avec calcul EV
+            # Construction des rÃ©sultats avec calcul EV
             matchs_data = []
             for m in items:
                 # Calcul Expected Value
@@ -360,16 +360,20 @@ async def lister_matchs_expert(
                     if ev is None or ev_ext > ev:
                         ev = ev_ext
 
-                # Filtre final par EV (après calcul exact)
+                # Filtre final par EV (aprÃ¨s calcul exact)
                 if ev_min is not None and (ev is None or ev < ev_min):
                     total -= 1
                     continue
 
-                # Pattern détecté (placeholder - sera implémenté par SeriesStatistiquesService)
+                # Détection simple des patterns pour la vue expert.
                 pattern_detecte = None
-                if ev and ev > 0.10:
+                confiance = float(m.prediction_confiance) if m.prediction_confiance else 0.0
+                if ev is not None and ev >= 0.15 and confiance >= 0.7:
+                    pattern_detecte = "hot_hand"
+                elif ev is not None and ev <= -0.05 and confiance < 0.45:
+                    pattern_detecte = "regression_risk"
+                elif ev is not None and ev > 0.08:
                     pattern_detecte = "high_ev"
-                # TODO: intégrer détection patterns réels (hot hand, regression, etc.)
 
                 matchs_data.append({
                     "id": m.id,
@@ -408,16 +412,16 @@ async def lister_matchs_expert(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BANKROLL & MONEY MANAGEMENT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/bankroll/{user_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_bankroll(
     user_id: int,
-    bankroll_initiale: float = Query(1000, description="Bankroll de départ"),
+    bankroll_initiale: float = Query(1000, description="Bankroll de dÃ©part"),
     jours: int = Query(30, description="Historique sur N jours"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
@@ -475,11 +479,11 @@ async def obtenir_bankroll(
 async def suggerer_mise_kelly(
     bankroll: float = Query(..., description="Bankroll actuelle"),
     edge: float = Query(..., description="Expected value (EV)"),
-    cote: float = Query(..., description="Cote décimale"),
+    cote: float = Query(..., description="Cote dÃ©cimale"),
     confiance_ia: float = Query(70, description="Confiance de l'IA (0-100)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Suggère une mise optimale selon le critère de Kelly fractionnaire."""
+    """SuggÃ¨re une mise optimale selon le critÃ¨re de Kelly fractionnaire."""
     from src.services.jeux.bankroll_manager import get_bankroll_manager
 
     def _query():
@@ -505,9 +509,9 @@ async def suggerer_mise_kelly(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PARIS SPORTIFS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/paris", responses=REPONSES_LISTE)
@@ -516,7 +520,7 @@ async def lister_paris(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
     statut: str | None = Query(None, description="en_attente, gagne, perdu, annule"),
-    est_virtuel: bool | None = Query(None, description="Paris virtuels ou réels"),
+    est_virtuel: bool | None = Query(None, description="Paris virtuels ou rÃ©els"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les paris sportifs."""
@@ -567,7 +571,7 @@ async def lister_paris(
 @router.get("/paris/stats", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def statistiques_paris(
-    est_virtuel: bool | None = Query(None, description="Stats paris virtuels ou réels"),
+    est_virtuel: bool | None = Query(None, description="Stats paris virtuels ou rÃ©els"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Retourne les statistiques des paris sportifs."""
@@ -599,7 +603,7 @@ async def statistiques_paris(
                 .all()
             )
 
-            # Taux de réussite
+            # Taux de rÃ©ussite
             resolus = sum(count for stat, count in par_statut if stat in ("gagne", "perdu"))
             gagnes = next((count for stat, count in par_statut if stat == "gagne"), 0)
             taux_reussite = (gagnes / resolus * 100) if resolus > 0 else 0
@@ -623,12 +627,12 @@ async def analyser_patterns_utilisateur(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Analyse les patterns de paris de l'utilisateur pour détecter les biais cognitifs.
+    Analyse les patterns de paris de l'utilisateur pour dÃ©tecter les biais cognitifs.
     
     Retourne:
-    - regression_moyenne: Alerte si série exceptionnelle (hot/cold streak)
+    - regression_moyenne: Alerte si sÃ©rie exceptionnelle (hot/cold streak)
     - hot_hand: Alerte si clustering de victoires (illusion main chaude)
-    - gamblers_fallacy: Alerte si augmentation mise après perte (erreur du parieur)
+    - gamblers_fallacy: Alerte si augmentation mise aprÃ¨s perte (erreur du parieur)
     """
     from src.services.jeux.series_statistiques import SeriesStatistiquesService
 
@@ -676,24 +680,72 @@ async def analyser_patterns_utilisateur(
     return await executer_async(_query)
 
 
+@router.get("/patterns", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_patterns_jeux(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les patterns jeux (hot hand, régression, gambler's fallacy) de l'utilisateur connecté."""
+    from src.services.jeux.series_statistiques import SeriesStatistiquesService
+
+    user_id = user.get("sub") or user.get("id")
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="Identifiant utilisateur manquant")
+
+    def _query() -> dict[str, Any]:
+        service = SeriesStatistiquesService()
+        resultats = service.analyser_patterns_utilisateur(int(user_id))
+
+        payload: dict[str, Any] = {
+            "user_id": int(user_id),
+            "items": [],
+            "resume": {
+                "hot_hand": False,
+                "regression_moyenne": False,
+                "gamblers_fallacy": False,
+            },
+        }
+
+        for cle in ("hot_hand", "regression_moyenne", "gamblers_fallacy"):
+            pattern = resultats.get(cle)
+            if not pattern:
+                continue
+
+            alerte = bool(getattr(pattern, "alerte", False))
+            payload["resume"][cle] = alerte
+            payload["items"].append(
+                {
+                    "type": cle,
+                    "alerte": alerte,
+                    "severite": getattr(pattern, "severite", "info"),
+                    "message": getattr(pattern, "message", ""),
+                    "details": getattr(pattern, "details", {}),
+                }
+            )
+
+        return payload
+
+    return await executer_async(_query)
+
+
 @router.post("/paris", status_code=201, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def creer_pari(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée un nouveau pari sportif."""
+    """CrÃ©e un nouveau pari sportif."""
     from decimal import Decimal
 
     from src.core.models import Match, PariSportif
-    from src.services.jeux import get_responsable_gaming_service
+    from src.services.jeux import obtenir_responsable_gaming_service
 
     def _query():
         with executer_avec_session() as session:
             # Garde-fou budget responsable
             mise = Decimal(str(payload.get("mise", 0)))
             if mise > 0 and not payload.get("est_virtuel", True):
-                svc_resp = get_responsable_gaming_service()
+                svc_resp = obtenir_responsable_gaming_service()
                 check = svc_resp.verifier_mise_autorisee(mise)
                 if not check.get("autorisee", True):
                     raise HTTPException(
@@ -703,7 +755,7 @@ async def creer_pari(
 
             match = session.query(Match).filter(Match.id == payload["match_id"]).first()
             if not match:
-                raise HTTPException(status_code=404, detail="Match non trouvé")
+                raise HTTPException(status_code=404, detail="Match non trouvÃ©")
 
             pari = PariSportif(
                 match_id=payload["match_id"],
@@ -737,7 +789,7 @@ async def modifier_pari(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour un pari (statut, gain, etc.)."""
+    """Met Ã  jour un pari (statut, gain, etc.)."""
     from decimal import Decimal
 
     from src.core.models import PariSportif
@@ -746,7 +798,7 @@ async def modifier_pari(
         with executer_avec_session() as session:
             pari = session.query(PariSportif).filter(PariSportif.id == pari_id).first()
             if not pari:
-                raise HTTPException(status_code=404, detail="Pari non trouvé")
+                raise HTTPException(status_code=404, detail="Pari non trouvÃ©")
 
             if "statut" in payload:
                 pari.statut = payload["statut"]
@@ -780,17 +832,17 @@ async def supprimer_pari(
         with executer_avec_session() as session:
             pari = session.query(PariSportif).filter(PariSportif.id == pari_id).first()
             if not pari:
-                raise HTTPException(status_code=404, detail="Pari non trouvé")
+                raise HTTPException(status_code=404, detail="Pari non trouvÃ©")
             session.delete(pari)
             session.commit()
-            return MessageResponse(message="Pari supprimé")
+            return MessageResponse(message="Pari supprimÃ©")
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # LOTO
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/loto/tirages", responses=REPONSES_LISTE)
@@ -840,10 +892,10 @@ async def lister_tirages_loto(
 @router.get("/loto/grilles", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_grilles_loto(
-    est_virtuelle: bool | None = Query(None, description="Grilles virtuelles ou réelles"),
+    est_virtuelle: bool | None = Query(None, description="Grilles virtuelles ou rÃ©elles"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les grilles de loto jouées."""
+    """Liste les grilles de loto jouÃ©es."""
     from src.core.models import GrilleLoto
 
     def _query():
@@ -872,9 +924,9 @@ async def lister_grilles_loto(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# DASHBOARD AGRÉGÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# DASHBOARD AGRÃ‰GÃ‰
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/dashboard", responses=REPONSES_LISTE)
@@ -882,23 +934,23 @@ async def lister_grilles_loto(
 async def dashboard_jeux(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Dashboard agrégé : opportunités, matchs du jour, budget, KPIs."""
+    """Dashboard agrÃ©gÃ© : opportunitÃ©s, matchs du jour, budget, KPIs."""
     from sqlalchemy import func
 
     from src.core.models import Match, PariSportif
     from src.services.jeux import (
-        get_loto_data_service,
-        get_responsable_gaming_service,
-        get_series_service,
+        obtenir_loto_data_service,
+        obtenir_responsable_gaming_service,
+        obtenir_series_service,
     )
 
     def _query():
         with executer_avec_session() as session:
-            series_svc = get_series_service()
-            responsable_svc = get_responsable_gaming_service()
-            loto_data_svc = get_loto_data_service()
+            series_svc = obtenir_series_service()
+            responsable_svc = obtenir_responsable_gaming_service()
+            loto_data_svc = obtenir_loto_data_service()
 
-            # 1. Opportunités (séries avec value >= 2.0)
+            # 1. OpportunitÃ©s (sÃ©ries avec value >= 2.0)
             opportunites_raw = series_svc.detecter_opportunites(seuil=2.0)
             opportunites = [
                 {
@@ -943,7 +995,7 @@ async def dashboard_jeux(
                 for m in matchs_jour
             ]
 
-            # 3. Loto numéros en retard
+            # 3. Loto numÃ©ros en retard
             try:
                 numeros_retard_raw = loto_data_svc.obtenir_numeros_en_retard(seuil_value=2.0)
                 loto_retard = [
@@ -1050,9 +1102,9 @@ async def dashboard_jeux(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# SÉRIES & ALERTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# SÃ‰RIES & ALERTES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/series", responses=REPONSES_LISTE)
@@ -1062,11 +1114,11 @@ async def lister_series(
     seuil: float = Query(2.0, ge=0),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Détecte les opportunités (séries avec value >= seuil)."""
-    from src.services.jeux import get_series_service
+    """DÃ©tecte les opportunitÃ©s (sÃ©ries avec value >= seuil)."""
+    from src.services.jeux import obtenir_series_service
 
     def _query():
-        svc = get_series_service()
+        svc = obtenir_series_service()
         series = svc.detecter_opportunites(type_jeu=type_jeu, seuil=seuil)
         return {
             "items": [
@@ -1093,11 +1145,11 @@ async def lister_alertes(
     type_jeu: str | None = Query(None, description="paris, loto, euromillions"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les alertes non notifiées."""
-    from src.services.jeux import get_series_service
+    """Liste les alertes non notifiÃ©es."""
+    from src.services.jeux import obtenir_series_service
 
     def _query():
-        svc = get_series_service()
+        svc = obtenir_series_service()
         alertes = svc.obtenir_alertes_non_notifiees(type_jeu=type_jeu)
         return {
             "items": [
@@ -1120,9 +1172,9 @@ async def lister_alertes(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# PRÉDICTIONS & VALUE BETS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# PRÃ‰DICTIONS & VALUE BETS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/paris/predictions/{match_id}", responses=REPONSES_CRUD_LECTURE)
@@ -1131,17 +1183,17 @@ async def prediction_match(
     match_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Prédiction IA pour un match donné."""
+    """PrÃ©diction IA pour un match donnÃ©."""
     from src.core.models import Match
-    from src.services.jeux import get_prediction_service
+    from src.services.jeux import obtenir_prediction_service
 
     def _query():
         with executer_avec_session() as session:
             match = session.query(Match).filter(Match.id == match_id).first()
             if not match:
-                raise HTTPException(status_code=404, detail="Match non trouvé")
+                raise HTTPException(status_code=404, detail="Match non trouvÃ©")
 
-            # Construire les données de forme
+            # Construire les donnÃ©es de forme
             forme_dom = {
                 "victoires": match.equipe_domicile.victoires if match.equipe_domicile else 0,
                 "nuls": match.equipe_domicile.nuls if match.equipe_domicile else 0,
@@ -1167,7 +1219,7 @@ async def prediction_match(
             if match.cote_exterieur:
                 cotes["exterieur"] = match.cote_exterieur
 
-            svc = get_prediction_service()
+            svc = obtenir_prediction_service()
             pred = svc.predire_resultat_match(forme_dom, forme_ext, h2h, cotes or None)
 
             return {
@@ -1193,7 +1245,7 @@ async def lister_value_bets(
 ) -> dict[str, Any]:
     """Liste les value bets (matchs avec edge > seuil)."""
     from src.core.models import Match
-    from src.services.jeux import get_odds_data_service, get_prediction_service
+    from src.services.jeux import obtenir_odds_data_service, obtenir_prediction_service
 
     def _query():
         with executer_avec_session() as session:
@@ -1210,8 +1262,8 @@ async def lister_value_bets(
                 .all()
             )
 
-            odds_svc = get_odds_data_service()
-            pred_svc = get_prediction_service()
+            odds_svc = obtenir_odds_data_service()
+            pred_svc = obtenir_prediction_service()
             value_bets = []
 
             for m in matchs:
@@ -1267,9 +1319,9 @@ async def lister_value_bets(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # LOTO STATS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/loto/stats", responses=REPONSES_LISTE)
@@ -1277,11 +1329,11 @@ async def lister_value_bets(
 async def stats_loto(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Statistiques des numéros Loto (fréquences, chauds, froids)."""
-    from src.services.jeux import get_loto_data_service
+    """Statistiques des numÃ©ros Loto (frÃ©quences, chauds, froids)."""
+    from src.services.jeux import obtenir_loto_data_service
 
     def _query():
-        svc = get_loto_data_service()
+        svc = obtenir_loto_data_service()
         stats = svc.calculer_toutes_statistiques()
 
         frequences = {}
@@ -1325,11 +1377,11 @@ async def numeros_retard_loto(
     seuil: float = Query(2.0, ge=0),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Numéros en retard avec value >= seuil."""
-    from src.services.jeux import get_loto_data_service
+    """NumÃ©ros en retard avec value >= seuil."""
+    from src.services.jeux import obtenir_loto_data_service
 
     def _query():
-        svc = get_loto_data_service()
+        svc = obtenir_loto_data_service()
         retard = svc.obtenir_numeros_en_retard(seuil_value=seuil)
         return {
             "items": [
@@ -1348,9 +1400,9 @@ async def numeros_retard_loto(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # EUROMILLIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/euromillions/tirages", responses=REPONSES_LISTE)
@@ -1361,10 +1413,10 @@ async def lister_tirages_euromillions(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les tirages Euromillions."""
-    from src.services.jeux import get_euromillions_crud_service
+    from src.services.jeux import obtenir_euromillions_crud_service
 
     def _query():
-        svc = get_euromillions_crud_service()
+        svc = obtenir_euromillions_crud_service()
         tirages = svc.obtenir_tirages(limite=page_size)
         return {"items": tirages or []}
 
@@ -1376,11 +1428,11 @@ async def lister_tirages_euromillions(
 async def lister_grilles_euromillions(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les grilles Euromillions jouées."""
-    from src.services.jeux import get_euromillions_crud_service
+    """Liste les grilles Euromillions jouÃ©es."""
+    from src.services.jeux import obtenir_euromillions_crud_service
 
     def _query():
-        svc = get_euromillions_crud_service()
+        svc = obtenir_euromillions_crud_service()
         grilles = svc.obtenir_grilles(limite=100)
         return {"items": grilles or []}
 
@@ -1394,19 +1446,19 @@ async def creer_grille_euromillions(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Enregistre une grille Euromillions."""
-    from src.services.jeux import get_euromillions_crud_service
+    from src.services.jeux import obtenir_euromillions_crud_service
 
     numeros = payload.get("numeros", [])
     etoiles = payload.get("etoiles", [])
     if len(numeros) != 5 or len(etoiles) != 2:
-        raise HTTPException(status_code=400, detail="5 numéros et 2 étoiles requis")
+        raise HTTPException(status_code=400, detail="5 numÃ©ros et 2 Ã©toiles requis")
     if not all(1 <= n <= 50 for n in numeros):
-        raise HTTPException(status_code=400, detail="Numéros entre 1 et 50")
+        raise HTTPException(status_code=400, detail="NumÃ©ros entre 1 et 50")
     if not all(1 <= e <= 12 for e in etoiles):
-        raise HTTPException(status_code=400, detail="Étoiles entre 1 et 12")
+        raise HTTPException(status_code=400, detail="Ã‰toiles entre 1 et 12")
 
     def _query():
-        svc = get_euromillions_crud_service()
+        svc = obtenir_euromillions_crud_service()
         grille_id = svc.enregistrer_grille(
             numeros=sorted(numeros),
             etoiles=sorted(etoiles),
@@ -1425,7 +1477,7 @@ async def creer_grille_euromillions(
 async def stats_euromillions(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Statistiques des numéros Euromillions."""
+    """Statistiques des numÃ©ros Euromillions."""
     from src.core.models.jeux import StatistiquesEuromillions
 
     def _query():
@@ -1464,7 +1516,7 @@ async def stats_euromillions(
 @gerer_exception_api
 async def lister_grilles_expert_euromillions(
     strategie: str | None = Query(None, description="equilibree, frequences, retards, ia_creative"),
-    qualite_min: float | None = Query(None, ge=0, le=100, description="Seuil de qualité"),
+    qualite_min: float | None = Query(None, ge=0, le=100, description="Seuil de qualitÃ©"),
     date_min: str | None = Query(None, description="Date min YYYY-MM-DD"),
     date_max: str | None = Query(None, description="Date max YYYY-MM-DD"),
     search: str | None = Query(None, description="Recherche texte"),
@@ -1475,7 +1527,7 @@ async def lister_grilles_expert_euromillions(
     """
     Liste les grilles Euromillions avec analyse expert.
     
-    Retourne qualité, distribution, backtest pour chaque grille.
+    Retourne qualitÃ©, distribution, backtest pour chaque grille.
     """
     from src.core.models.jeux import GrilleEuromillions
     from datetime import datetime
@@ -1548,31 +1600,31 @@ async def generer_grille_ia_euromillions(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Génère une grille Euromillions avec IA.
+    GÃ©nÃ¨re une grille Euromillions avec IA.
     
-    Stratégies disponibles:
-    - equilibree: Mix fréquences + retards (défaut)
-    - frequences: Numéros chauds
-    - retards: Numéros en retard
-    - ia_creative: Génération créative par Mistral
+    StratÃ©gies disponibles:
+    - equilibree: Mix frÃ©quences + retards (dÃ©faut)
+    - frequences: NumÃ©ros chauds
+    - retards: NumÃ©ros en retard
+    - ia_creative: GÃ©nÃ©ration crÃ©ative par Mistral
     """
-    from src.services.jeux.euromillions_ia import get_euromillions_ia_service
+    from src.services.jeux.euromillions_ia import obtenir_euromillions_ia_service
 
     def _query():
-        service = get_euromillions_ia_service()
+        service = obtenir_euromillions_ia_service()
         strategie = payload.get("strategie", "equilibree")
         
         # Calculer stats une seule fois
         stats = service.calculer_statistiques(jours=365)
         
-        # Générer selon stratégie
+        # GÃ©nÃ©rer selon stratÃ©gie
         if strategie == "frequences":
             grille = service.generer_grille_frequences(stats)
         elif strategie == "retards":
             grille = service.generer_grille_retards(stats)
         elif strategie == "ia_creative":
             grille = service.generer_grille_ia_creative(stats)
-        else:  # equilibree par défaut
+        else:  # equilibree par dÃ©faut
             grille = service.generer_grille_equilibree(stats)
         
         return {
@@ -1587,9 +1639,9 @@ async def generer_grille_ia_euromillions(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# GÉNÉRATION DE GRILLES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# GÃ‰NÃ‰RATION DE GRILLES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/loto/generer-grille", responses=REPONSES_CRUD_CREATION)
@@ -1598,10 +1650,10 @@ async def generer_grille_loto(
     payload: GenererGrilleRequest,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Génère une grille Loto (statistique, aléatoire ou IA)."""
+    """GÃ©nÃ¨re une grille Loto (statistique, alÃ©atoire ou IA)."""
     import random
 
-    from src.services.jeux import get_loto_data_service
+    from src.services.jeux import obtenir_loto_data_service
 
     def _query():
         strategie = payload.strategie.value
@@ -1611,7 +1663,7 @@ async def generer_grille_loto(
             chance = random.randint(1, 10)
             return {"numeros": numeros, "special": [chance], "strategie": strategie}
 
-        svc = get_loto_data_service()
+        svc = obtenir_loto_data_service()
         stats = svc.calculer_toutes_statistiques()
 
         if not stats or not stats.numeros_principaux:
@@ -1656,9 +1708,9 @@ async def generer_grille_loto(
         result = {"numeros": sorted(numeros), "special": [chance], "strategie": strategie}
 
         if payload.sauvegarder:
-            from src.services.jeux import get_loto_crud_service
+            from src.services.jeux import obtenir_loto_crud_service
 
-            loto_svc = get_loto_crud_service()
+            loto_svc = obtenir_loto_crud_service()
             loto_svc.sauvegarder_grille(
                 numeros=sorted(numeros),
                 numero_chance=chance,
@@ -1674,17 +1726,17 @@ async def generer_grille_loto(
 @gerer_exception_api
 async def obtenir_stats_personnelles(
     user_id: int,
-    periode: int = Query(30, description="Période en jours"),
+    periode: int = Query(30, description="PÃ©riode en jours"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Récupère les statistiques personnelles d'un utilisateur.
+    RÃ©cupÃ¨re les statistiques personnelles d'un utilisateur.
     
     Retourne:
     - ROI global
     - Win rate par type
     - Meilleurs patterns
-    - Évolution mensuelle
+    - Ã‰volution mensuelle
     """
     
     def _query():
@@ -1694,7 +1746,7 @@ async def obtenir_stats_personnelles(
         
         roi_data = service.calculer_roi_global(user_id, jours=periode)
         winrate_data = service.calculer_win_rate(user_id, jours=periode)
-        patterns_data = service.analyser_patterns_gagnants(user_id, jours=periode * 3)  # 3× période pour patterns
+        patterns_data = service.analyser_patterns_gagnants(user_id, jours=periode * 3)  # 3Ã— pÃ©riode pour patterns
         evolution_data = service.obtenir_evolution_mensuelle(user_id, mois=6)
         
         return {
@@ -1713,7 +1765,7 @@ async def generer_grille_euromillions(
     payload: GenererGrilleRequest,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Génère une grille Euromillions (statistique, aléatoire ou IA)."""
+    """GÃ©nÃ¨re une grille Euromillions (statistique, alÃ©atoire ou IA)."""
     import random
 
     def _query():
@@ -1773,9 +1825,9 @@ async def generer_grille_euromillions(
         result = {"numeros": sorted(numeros), "special": sorted(etoiles), "strategie": strategie}
 
         if payload.sauvegarder:
-            from src.services.jeux import get_euromillions_crud_service
+            from src.services.jeux import obtenir_euromillions_crud_service
 
-            svc = get_euromillions_crud_service()
+            svc = obtenir_euromillions_crud_service()
             svc.enregistrer_grille(
                 numeros=sorted(numeros),
                 etoiles=sorted(etoiles),
@@ -1787,15 +1839,15 @@ async def generer_grille_euromillions(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PERFORMANCE & ANALYTICS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/performance", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def performance_jeux(
-    mois: int | None = Query(None, ge=1, le=24, description="Nombre de mois (défaut: 6)"),
+    mois: int | None = Query(None, ge=1, le=24, description="Nombre de mois (dÃ©faut: 6)"),
     type_jeu: str | None = Query(None, description="paris ou loto"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
@@ -1870,7 +1922,7 @@ async def performance_jeux(
                 if worst_roi is None or roi_m < worst_roi:
                     worst_roi, worst_mois = roi_m, label
 
-            # Séries gagnantes/perdantes
+            # SÃ©ries gagnantes/perdantes
             paris_ordonnes = (
                 base_q.filter(PariSportif.statut.in_(["gagne", "perdu"]))
                 .order_by(PariSportif.cree_le)
@@ -1888,7 +1940,7 @@ async def performance_jeux(
                 max_win = max(max_win, cur_win)
                 max_lose = max(max_lose, cur_lose)
 
-            # Par championnat (jointure PariSportif → Match)
+            # Par championnat (jointure PariSportif â†’ Match)
             par_champ_raw = (
                 session.query(
                     Match.championnat,
@@ -1952,10 +2004,10 @@ async def performance_jeux(
 @router.get("/performance/confiance", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def performance_par_confiance(
-    mois: int | None = Query(None, ge=1, le=24, description="Nombre de mois à analyser (défaut: 6)"),
+    mois: int | None = Query(None, ge=1, le=24, description="Nombre de mois Ã  analyser (dÃ©faut: 6)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Distribution taux de réussite par tranche de confiance IA (0-25%, 25-50%, 50-75%, 75-100%)."""
+    """Distribution taux de rÃ©ussite par tranche de confiance IA (0-25%, 25-50%, 50-75%, 75-100%)."""
     from sqlalchemy import func
 
     from src.core.models import PariSportif
@@ -2017,22 +2069,22 @@ async def performance_par_confiance(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# RÉSUMÉ MENSUEL IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# RÃ‰SUMÃ‰ MENSUEL IA
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/resume-mensuel", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def resume_mensuel(
-    mois: str | None = Query(None, description="Format YYYY-MM (défaut: mois courant)"),
+    mois: str | None = Query(None, description="Format YYYY-MM (dÃ©faut: mois courant)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Résumé mensuel IA avec analyse Mistral enrichie."""
+    """RÃ©sumÃ© mensuel IA avec analyse Mistral enrichie."""
     from sqlalchemy import func
 
     from src.core.models import PariSportif
-    from src.services.jeux import get_jeux_ai_service
+    from src.services.jeux import obtenir_jeux_ai_service
 
     def _query():
         today = date.today()
@@ -2078,32 +2130,32 @@ async def resume_mensuel(
 
             mois_str = f"{annee}-{mois_num:02d}"
 
-            # Générer le résumé IA enrichi
+            # GÃ©nÃ©rer le rÃ©sumÃ© IA enrichi
             try:
-                ai_svc = get_jeux_ai_service()
+                ai_svc = obtenir_jeux_ai_service()
                 resume = ai_svc.generer_resume_mensuel(mois_str, kpis)
                 return resume
             except Exception as e:
-                logger.warning(f"Erreur IA résumé mensuel, fallback: {e}")
-                # Fallback simple si IA échoue
+                logger.warning(f"Erreur IA rÃ©sumÃ© mensuel, fallback: {e}")
+                # Fallback simple si IA Ã©choue
                 points_forts = []
                 points_faibles = []
                 if roi > 0:
                     points_forts.append(f"ROI positif de {roi:.1f}%")
                 else:
-                    points_faibles.append(f"ROI négatif de {roi:.1f}%")
+                    points_faibles.append(f"ROI nÃ©gatif de {roi:.1f}%")
                 if taux >= 50:
-                    points_forts.append(f"Taux de réussite de {taux:.1f}%")
+                    points_forts.append(f"Taux de rÃ©ussite de {taux:.1f}%")
                 elif resolus > 0:
-                    points_faibles.append(f"Taux de réussite bas: {taux:.1f}%")
+                    points_faibles.append(f"Taux de rÃ©ussite bas: {taux:.1f}%")
 
                 return {
                     "mois": mois_str,
-                    "analyse": f"En {mois_num:02d}/{annee}, vous avez placé {total} paris pour un ROI de {roi:.1f}%.",
+                    "analyse": f"En {mois_num:02d}/{annee}, vous avez placÃ© {total} paris pour un ROI de {roi:.1f}%.",
                     "points_forts": points_forts or ["Aucun point fort ce mois"],
-                    "points_faibles": points_faibles or ["Performances à améliorer"],
+                    "points_faibles": points_faibles or ["Performances Ã  amÃ©liorer"],
                     "recommandations": [
-                        "Continuez à privilégier les value bets avec edge > 5%",
+                        "Continuez Ã  privilÃ©gier les value bets avec edge > 5%",
                         "Respectez votre budget mensuel de jeu responsable",
                     ],
                     "kpis": kpis,
@@ -2112,9 +2164,9 @@ async def resume_mensuel(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # JEU RESPONSABLE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/responsable/suivi", responses=REPONSES_CRUD_LECTURE)
@@ -2122,17 +2174,17 @@ async def resume_mensuel(
 async def suivi_responsable(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Suivi mensuel du budget jeu responsable avec série actuelle."""
+    """Suivi mensuel du budget jeu responsable avec sÃ©rie actuelle."""
     from datetime import date
 
     from src.core.models import PariSportif
-    from src.services.jeux import get_responsable_gaming_service
+    from src.services.jeux import obtenir_responsable_gaming_service
 
     def _query():
-        svc = get_responsable_gaming_service()
+        svc = obtenir_responsable_gaming_service()
         raw = svc.obtenir_suivi_mensuel()
 
-        # Calculer la série actuelle (pertes/gains consécutifs récents)
+        # Calculer la sÃ©rie actuelle (pertes/gains consÃ©cutifs rÃ©cents)
         with executer_avec_session() as session:
             paris_recents = (
                 session.query(PariSportif.statut)
@@ -2176,14 +2228,14 @@ async def suivi_responsable(
 @router.get("/responsable/verifier-mise", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def verifier_mise(
-    montant: float = Query(..., gt=0, description="Montant de la mise à vérifier"),
+    montant: float = Query(..., gt=0, description="Montant de la mise Ã  vÃ©rifier"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Vérifie si une mise est autorisée par le budget."""
-    from src.services.jeux import get_responsable_gaming_service
+    """VÃ©rifie si une mise est autorisÃ©e par le budget."""
+    from src.services.jeux import obtenir_responsable_gaming_service
 
     def _query():
-        svc = get_responsable_gaming_service()
+        svc = obtenir_responsable_gaming_service()
         result = svc.verifier_mise_autorisee(Decimal(str(montant)))
         return {
             "autorise": result.get("autorisee", True),
@@ -2201,10 +2253,10 @@ async def enregistrer_mise(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Enregistre une mise dans le suivi responsable."""
-    from src.services.jeux import get_responsable_gaming_service
+    from src.services.jeux import obtenir_responsable_gaming_service
 
     def _query():
-        svc = get_responsable_gaming_service()
+        svc = obtenir_responsable_gaming_service()
         result = svc.enregistrer_mise(Decimal(str(payload.montant)), payload.type_jeu)
         return result
 
@@ -2218,12 +2270,12 @@ async def modifier_limite(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Modifie la limite mensuelle de jeu."""
-    from src.services.jeux import get_responsable_gaming_service
+    from src.services.jeux import obtenir_responsable_gaming_service
 
     def _query():
-        svc = get_responsable_gaming_service()
+        svc = obtenir_responsable_gaming_service()
         svc.modifier_limite(Decimal(str(payload.nouvelle_limite)))
-        return {"limite": payload.nouvelle_limite, "message": "Limite mise à jour"}
+        return {"limite": payload.nouvelle_limite, "message": "Limite mise Ã  jour"}
 
     return await executer_async(_query)
 
@@ -2235,15 +2287,15 @@ async def activer_auto_exclusion(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Active l'auto-exclusion pour N jours."""
-    from src.services.jeux import get_responsable_gaming_service
+    from src.services.jeux import obtenir_responsable_gaming_service
 
     def _query():
-        svc = get_responsable_gaming_service()
+        svc = obtenir_responsable_gaming_service()
         date_fin = svc.activer_auto_exclusion(payload.nb_jours)
         return {
             "auto_exclusion_jusqu_a": str(date_fin),
             "nb_jours": payload.nb_jours,
-            "message": f"Auto-exclusion activée jusqu'au {date_fin}",
+            "message": f"Auto-exclusion activÃ©e jusqu'au {date_fin}",
         }
 
     return await executer_async(_query)
@@ -2256,19 +2308,19 @@ async def historique_limites(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Historique des limites et mises sur les N derniers mois."""
-    from src.services.jeux import get_responsable_gaming_service
+    from src.services.jeux import obtenir_responsable_gaming_service
 
     def _query():
-        svc = get_responsable_gaming_service()
+        svc = obtenir_responsable_gaming_service()
         historique = svc.obtenir_historique_limites(nb_mois=nb_mois)
         return {"items": historique or []}
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ANALYSE IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/ocr-ticket", responses=REPONSES_CRUD_CREATION)
@@ -2279,9 +2331,9 @@ async def analyser_ticket_ocr_jeux(
 ) -> dict[str, Any]:
     """Analyse OCR d'un ticket loto/euromillions via IA vision."""
     contenu = await file.read()
-    from src.services.utilitaires.ocr_service import get_ocr_service
+    from src.services.utilitaires.ocr_service import obtenir_ocr_service
 
-    service = get_ocr_service()
+    service = obtenir_ocr_service()
     try:
         service.valider_upload_image(file.content_type, contenu, "JPEG, PNG, WebP")
     except ValueError as exc:
@@ -2292,13 +2344,13 @@ async def analyser_ticket_ocr_jeux(
     if not resultat:
         return {
             "success": False,
-            "message": "Analyse OCR impossible. Essayez une photo plus nette et bien cadrée.",
+            "message": "Analyse OCR impossible. Essayez une photo plus nette et bien cadrÃ©e.",
             "donnees": None,
         }
 
     return {
         "success": True,
-        "message": "Ticket analysé avec succès",
+        "message": "Ticket analysÃ© avec succÃ¨s",
         "donnees": service.formater_donnees_jeux(resultat),
     }
 
@@ -2309,16 +2361,16 @@ async def analyse_ia(
     payload: AnalyseIARequest,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Déclenche une analyse IA (paris ou loto)."""
-    from src.services.jeux import get_jeux_ai_service
+    """DÃ©clenche une analyse IA (paris ou loto)."""
+    from src.services.jeux import obtenir_jeux_ai_service
 
     def _query():
-        svc = get_jeux_ai_service()
+        svc = obtenir_jeux_ai_service()
 
         if payload.type == "paris":
             result = svc.analyser_paris(
                 opportunites=payload.data.get("opportunites", []),
-                competition=payload.data.get("competition", "Général"),
+                competition=payload.data.get("competition", "GÃ©nÃ©ral"),
             )
         else:
             result = svc.analyser_loto(
@@ -2338,9 +2390,9 @@ async def analyse_ia(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# GÉNÉRATION & ANALYSE IA AVANCÉE (Phase U)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# GÃ‰NÃ‰RATION & ANALYSE IA AVANCÃ‰E (Phase U)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/loto/generer-grille-ia-ponderee", responses=REPONSES_CRUD_CREATION)
@@ -2351,18 +2403,18 @@ async def generer_grille_ia_ponderee(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Génère une grille Loto intelligente avec Mistral IA.
+    GÃ©nÃ¨re une grille Loto intelligente avec Mistral IA.
     
     Modes:
-    - chauds: privilégie les numéros sortis récemment (fréquents)
-    - froids: privilégie les numéros en retard (écart élevé)
-    - equilibre: mix des deux stratégies (recommandé)
+    - chauds: privilÃ©gie les numÃ©ros sortis rÃ©cemment (frÃ©quents)
+    - froids: privilÃ©gie les numÃ©ros en retard (Ã©cart Ã©levÃ©)
+    - equilibre: mix des deux stratÃ©gies (recommandÃ©)
     """
-    from src.services.jeux import get_jeux_ai_service, get_loto_crud_service, get_loto_data_service
+    from src.services.jeux import obtenir_jeux_ai_service, obtenir_loto_crud_service, obtenir_loto_data_service
 
     def _query():
-        # Récupérer les statistiques
-        data_svc = get_loto_data_service()
+        # RÃ©cupÃ©rer les statistiques
+        data_svc = obtenir_loto_data_service()
         stats_obj = data_svc.calculer_toutes_statistiques()
 
         if not stats_obj or not stats_obj.numeros_principaux:
@@ -2380,13 +2432,13 @@ async def generer_grille_ia_ponderee(
                 "dernier": stat.dernier_tirage.isoformat() if stat.dernier_tirage else None,
             }
 
-        # Générer avec IA
-        ai_svc = get_jeux_ai_service()
+        # GÃ©nÃ©rer avec IA
+        ai_svc = obtenir_jeux_ai_service()
         grille = ai_svc.generer_grille_ia_ponderee(stats_dict, mode)
 
-        # Sauvegarder si demandé
+        # Sauvegarder si demandÃ©
         if sauvegarder:
-            loto_svc = get_loto_crud_service()
+            loto_svc = obtenir_loto_crud_service()
             loto_svc.sauvegarder_grille(
                 numeros=grille["numeros"],
                 numero_chance=grille["numero_chance"],
@@ -2397,7 +2449,7 @@ async def generer_grille_ia_ponderee(
             "numeros": grille["numeros"],
             "numero_chance": grille["numero_chance"],
             "mode": mode,
-            "analyse": grille.get("analyse", "Grille générée par IA"),
+            "analyse": grille.get("analyse", "Grille gÃ©nÃ©rÃ©e par IA"),
             "confiance": grille.get("confiance", 0.5),
             "sauvegardee": sauvegarder,
         }
@@ -2408,24 +2460,24 @@ async def generer_grille_ia_ponderee(
 @router.post("/loto/analyser-grille", responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def analyser_grille_joueur(
-    numeros: list[int] = Query(..., description="5 numéros de 1 à 49"),
+    numeros: list[int] = Query(..., description="5 numÃ©ros de 1 Ã  49"),
     numero_chance: int = Query(..., ge=1, le=10),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Analyse une grille Loto avec critique IA Mistral."""
-    from src.services.jeux import get_jeux_ai_service, get_loto_data_service
+    from src.services.jeux import obtenir_jeux_ai_service, obtenir_loto_data_service
 
     # Validation
     if len(numeros) != 5:
-        raise HTTPException(status_code=400, detail="Exactement 5 numéros requis")
+        raise HTTPException(status_code=400, detail="Exactement 5 numÃ©ros requis")
     if any(n < 1 or n > 49 for n in numeros):
-        raise HTTPException(status_code=400, detail="Numéros doivent être entre 1 et 49")
+        raise HTTPException(status_code=400, detail="NumÃ©ros doivent Ãªtre entre 1 et 49")
     if len(set(numeros)) != 5:
-        raise HTTPException(status_code=400, detail="Pas de numéros en double")
+        raise HTTPException(status_code=400, detail="Pas de numÃ©ros en double")
 
     def _query():
         # Stats
-        data_svc = get_loto_data_service()
+        data_svc = obtenir_loto_data_service()
         stats_obj = data_svc.calculer_toutes_statistiques()
 
         stats_dict = {}
@@ -2437,7 +2489,7 @@ async def analyser_grille_joueur(
                 }
 
         # Analyse IA
-        ai_svc = get_jeux_ai_service()
+        ai_svc = obtenir_jeux_ai_service()
         analyse = ai_svc.analyser_grille_joueur(numeros, numero_chance, stats_dict)
 
         return {
@@ -2446,15 +2498,15 @@ async def analyser_grille_joueur(
             "points_forts": analyse.get("points_forts", []),
             "points_faibles": analyse.get("points_faibles", []),
             "recommandations": analyse.get("recommandations", []),
-            "appreciation": analyse.get("appreciation", "Grille analysée."),
+            "appreciation": analyse.get("appreciation", "Grille analysÃ©e."),
         }
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HISTORIQUE COTES (Phase T - Heatmap)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/paris/cotes-historique/{match_id}", responses=REPONSES_LISTE)
@@ -2463,7 +2515,7 @@ async def obtenir_historique_cotes(
     match_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Récupère l'historique des cotes d'un match pour heatmap."""
+    """RÃ©cupÃ¨re l'historique des cotes d'un match pour heatmap."""
     from src.core.models import CoteHistorique
 
     def _query():
@@ -2503,9 +2555,9 @@ async def obtenir_historique_cotes(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BACKTEST
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/backtest", responses=REPONSES_LISTE)
@@ -2516,22 +2568,22 @@ async def backtest_jeux(
     nb_tirages: int = Query(100, ge=10, le=1000),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Backtest des stratégies sur les données historiques."""
+    """Backtest des stratÃ©gies sur les donnÃ©es historiques."""
     from src.services.jeux import (
-        get_backtest_service,
-        get_euromillions_crud_service,
-        get_loto_crud_service,
+        obtenir_backtest_service,
+        obtenir_euromillions_crud_service,
+        obtenir_loto_crud_service,
     )
 
     def _query():
-        backtest_svc = get_backtest_service()
+        backtest_svc = obtenir_backtest_service()
 
         if type_jeu == "loto":
-            loto_svc = get_loto_crud_service()
+            loto_svc = obtenir_loto_crud_service()
             tirages = loto_svc.charger_tirages(limite=nb_tirages)
             result = backtest_svc.backtester_loto(tirages, seuil_value=seuil_value)
         elif type_jeu == "euromillions":
-            euro_svc = get_euromillions_crud_service()
+            euro_svc = obtenir_euromillions_crud_service()
             tirages_euro = euro_svc.obtenir_tirages(limite=nb_tirages)
             tirages_normalises = [
                 {
@@ -2551,15 +2603,15 @@ async def backtest_jeux(
             "taux_reussite": result.taux_reussite if result else 0.0,
             "tirages_moyens": result.tirages_moyens_avant_realisation if result else 0.0,
             "seuil_value": seuil_value,
-            "avertissement": "Les performances passées ne préjugent pas des résultats futurs.",
+            "avertissement": "Les performances passÃ©es ne prÃ©jugent pas des rÃ©sultats futurs.",
         }
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # NOTIFICATIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/notifications", responses=REPONSES_LISTE)
@@ -2568,10 +2620,10 @@ async def lister_notifications(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les notifications non lues."""
-    from src.services.jeux import get_notification_jeux_service
+    from src.services.jeux import obtenir_notification_jeux_service
 
     def _query():
-        svc = get_notification_jeux_service()
+        svc = obtenir_notification_jeux_service()
         notifs = svc.obtenir_non_lues()
         return {
             "items": [
@@ -2600,13 +2652,14 @@ async def marquer_notification_lue(
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
     """Marque une notification comme lue."""
-    from src.services.jeux import get_notification_jeux_service
+    from src.services.jeux import obtenir_notification_jeux_service
 
     def _query():
-        svc = get_notification_jeux_service()
+        svc = obtenir_notification_jeux_service()
         success = svc.marquer_lue(notification_id)
         if not success:
-            raise HTTPException(status_code=404, detail="Notification non trouvée")
-        return MessageResponse(message="Notification marquée comme lue")
+            raise HTTPException(status_code=404, detail="Notification non trouvÃ©e")
+        return MessageResponse(message="Notification marquÃ©e comme lue")
 
     return await executer_async(_query)
+

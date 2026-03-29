@@ -335,6 +335,10 @@ class ResponsableGamingService:
 
 
 @service_factory("responsable_gaming", tags={"jeux", "responsable"})
-def get_responsable_gaming_service() -> ResponsableGamingService:
+def obtenir_responsable_gaming_service() -> ResponsableGamingService:
     """Factory pour le service de mise responsable."""
     return ResponsableGamingService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_responsable_gaming_service = obtenir_responsable_gaming_service  # alias rétrocompatibilité Sprint 12 A3

@@ -86,7 +86,11 @@ async def interpreter_commande_vocale(
                     session.add(ingredient)
                     session.flush()
 
-                article = ArticleCourses(liste_id=liste.id, ingredient_id=ingredient.id, quantite=1.0)
+                article = ArticleCourses(
+                    liste_id=liste.id,
+                    ingredient_id=ingredient.id,
+                    quantite_necessaire=1.0,
+                )
                 session.add(article)
                 session.commit()
                 return {
@@ -155,7 +159,7 @@ async def interpreter_commande_vocale(
                 demain = date.today() + timedelta(days=1)
                 planning = (
                     session.query(Planning)
-                    .order_by(Planning.date_creation.desc())
+                    .order_by(Planning.cree_le.desc())
                     .first()
                 )
                 repas = []

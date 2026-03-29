@@ -1,9 +1,9 @@
-"""
+﻿"""
 Tests pour le service de codes-barres.
 
 Couverture cible: >80%
 - Validation de codes-barres (EAN-13, EAN-8, UPC, QR, CODE128, CODE39)
-- Scan et détection d'articles
+- Scan et dÃ©tection d'articles
 - CRUD articles par code-barres
 - Import/Export CSV
 """
@@ -19,12 +19,12 @@ from src.services.integrations.codes_barres import (
     BarcodeData,
     BarcodeService,
     ScanResultat,
-    get_barcode_service,
+    obtenir_barcode_service,
 )
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def service():
 
 @pytest.fixture
 def mock_session():
-    """Session DB mockée."""
+    """Session DB mockÃ©e."""
     session = Mock()
     session.query.return_value = session
     session.filter.return_value = session
@@ -48,16 +48,16 @@ def mock_session():
     return session
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SCHÉMAS PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SCHÃ‰MAS PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBarcodeData:
-    """Tests du schéma BarcodeData."""
+    """Tests du schÃ©ma BarcodeData."""
 
     def test_creation_valide(self):
-        """Test création avec données valides."""
+        """Test crÃ©ation avec donnÃ©es valides."""
         data = BarcodeData(code="3017620422003", type_code="EAN-13", source="scanner")
         assert data.code == "3017620422003"
         assert data.type_code == "EAN-13"
@@ -81,17 +81,17 @@ class TestBarcodeData:
 
 
 class TestBarcodeArticle:
-    """Tests du schéma BarcodeArticle."""
+    """Tests du schÃ©ma BarcodeArticle."""
 
     def test_creation_complete(self):
-        """Test création avec tous les champs."""
+        """Test crÃ©ation avec tous les champs."""
         article = BarcodeArticle(
             barcode="3017620422003",
             article_id=1,
             nom_article="Nutella 400g",
             quantite_defaut=1.5,
             unite_defaut="pot",
-            categorie="Épicerie",
+            categorie="Ã‰picerie",
             prix_unitaire=4.50,
             date_peremption_jours=365,
             lieu_stockage="Placard",
@@ -102,21 +102,21 @@ class TestBarcodeArticle:
         assert article.prix_unitaire == 4.50
 
     def test_valeurs_defaut(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         article = BarcodeArticle(
             barcode="12345678", article_id=1, nom_article="Test", categorie="Autre"
         )
         assert article.quantite_defaut == 1.0
-        assert article.unite_defaut == "unité"
+        assert article.unite_defaut == "unitÃ©"
         assert article.lieu_stockage == "Placard"
         assert article.prix_unitaire is None
 
 
 class TestScanResultat:
-    """Tests du schéma ScanResultat."""
+    """Tests du schÃ©ma ScanResultat."""
 
     def test_creation(self):
-        """Test création résultat."""
+        """Test crÃ©ation rÃ©sultat."""
         result = ScanResultat(
             barcode="12345678", type_scan="article", details={"id": 1, "nom": "Test"}
         )
@@ -130,9 +130,9 @@ class TestScanResultat:
             ScanResultat(barcode="12345678", type_scan="invalid", details={})
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATION BARCODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestValidationBarcode:
@@ -175,13 +175,13 @@ class TestValidationBarcode:
         assert "Checksum" in raison
 
     def test_qr_code(self, service):
-        """Test QR code alphanumérique."""
+        """Test QR code alphanumÃ©rique."""
         valide, type_code = service.valider_barcode("PRODUCT-12345-ABC")
         assert valide is True
         assert type_code == "QR"
 
     def test_code128(self, service):
-        """Test CODE128 alphanumérique (8+ chars alphanumeric with digits)."""
+        """Test CODE128 alphanumÃ©rique (8+ chars alphanumeric with digits)."""
         # CODE128 requires 8+ alphanumeric chars but is checked after QR
         # QR matches longer patterns with special chars, CODE128 matches pure alphanum
         valide, type_code = service.valider_barcode("ABC12345DE")
@@ -203,15 +203,15 @@ class TestValidationBarcode:
         assert "non reconnu" in raison
 
     def test_strip_et_uppercase(self, service):
-        """Test que le code est nettoyé."""
+        """Test que le code est nettoyÃ©."""
         valide, type_code = service.valider_barcode("  product-12345-abc  ")
         assert valide is True
         assert type_code == "QR"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CHECKSUM INDIVIDUELS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestChecksumFunctions:
@@ -230,7 +230,7 @@ class TestChecksumFunctions:
         assert BarcodeService._valider_checksum_ean13("123") is False
 
     def test_checksum_ean13_non_numerique(self):
-        """Test checksum EAN-13 non numérique."""
+        """Test checksum EAN-13 non numÃ©rique."""
         assert BarcodeService._valider_checksum_ean13("301762042200A") is False
 
     def test_checksum_ean8_valide(self):
@@ -246,7 +246,7 @@ class TestChecksumFunctions:
         assert BarcodeService._valider_checksum_ean8("1234") is False
 
     def test_checksum_ean8_non_numerique(self):
-        """Test checksum EAN-8 non numérique."""
+        """Test checksum EAN-8 non numÃ©rique."""
         assert BarcodeService._valider_checksum_ean8("9638507A") is False
 
     def test_checksum_upc_valide(self):
@@ -262,13 +262,13 @@ class TestChecksumFunctions:
         assert BarcodeService._valider_checksum_upc("12345") is False
 
     def test_checksum_upc_non_numerique(self):
-        """Test checksum UPC non numérique."""
+        """Test checksum UPC non numÃ©rique."""
         assert BarcodeService._valider_checksum_upc("01234567890A") is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SCANNER CODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestScannerCode:
@@ -299,7 +299,7 @@ class TestScannerCode:
         mock_db.return_value.__enter__ = Mock(return_value=mock_session)
         mock_db.return_value.__exit__ = Mock(return_value=False)
 
-        # Test avec appel direct (contourne les décorateurs)
+        # Test avec appel direct (contourne les dÃ©corateurs)
         result = service.scanner_code.__wrapped__(service, "3017620422003", session=mock_session)
 
         assert result.barcode == "3017620422003"
@@ -321,9 +321,9 @@ class TestScannerCode:
         assert "non reconnu" in result.details["message"]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS AJOUT ARTICLE PAR BARCODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAjouterArticle:
@@ -336,7 +336,7 @@ class TestAjouterArticle:
                 service.ajouter_article_par_barcode.__wrapped__(service, code="123", nom="Test")
 
     def test_ajout_barcode_existant(self, service, mock_session):
-        """Test ajout avec code déjà existant."""
+        """Test ajout avec code dÃ©jÃ  existant."""
         existing_article = Mock()
         existing_article.nom = "Article existant"
         mock_session.query.return_value.filter.return_value.first.return_value = existing_article
@@ -345,14 +345,14 @@ class TestAjouterArticle:
             service.ajouter_article_par_barcode.__wrapped__(
                 service, code="3017620422003", nom="Nouveau", session=mock_session
             )
-        assert "déjà assigné" in str(exc_info.value)
+        assert "dÃ©jÃ  assignÃ©" in str(exc_info.value)
 
     def test_ajout_succes(self, service, mock_session):
-        """Test ajout réussi - vérifie que add et commit sont appelés."""
+        """Test ajout rÃ©ussi - vÃ©rifie que add et commit sont appelÃ©s."""
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
-        # Le test vérifie la logique d'ajout, pas le modèle SQLAlchemy
-        # On vérifie que le code valide et l'article inexistant permettent l'ajout
+        # Le test vÃ©rifie la logique d'ajout, pas le modÃ¨le SQLAlchemy
+        # On vÃ©rifie que le code valide et l'article inexistant permettent l'ajout
         try:
             service.ajouter_article_par_barcode.__wrapped__(
                 service,
@@ -360,7 +360,7 @@ class TestAjouterArticle:
                 nom="Nutella",
                 quantite=2.0,
                 unite="pot",
-                categorie="Épicerie",
+                categorie="Ã‰picerie",
                 prix_unitaire=4.50,
                 emplacement="Placard",
                 session=mock_session,
@@ -369,14 +369,14 @@ class TestAjouterArticle:
             # Model may have different field names - that's OK, we tested the business logic
             pass
 
-        # La validation du barcode et la vérification d'unicité ont réussi
+        # La validation du barcode et la vÃ©rification d'unicitÃ© ont rÃ©ussi
         mock_session.query.assert_called()
 
     def test_ajout_avec_peremption(self, service, mock_session):
-        """Test ajout avec jours de péremption - vérifie la logique métier."""
+        """Test ajout avec jours de pÃ©remption - vÃ©rifie la logique mÃ©tier."""
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
-        # Le test vérifie que la validation passe
+        # Le test vÃ©rifie que la validation passe
         try:
             service.ajouter_article_par_barcode.__wrapped__(
                 service,
@@ -389,20 +389,20 @@ class TestAjouterArticle:
             # Model may have different field names - that's OK
             pass
 
-        # La validation du barcode a réussi
+        # La validation du barcode a rÃ©ussi
         mock_session.query.assert_called()
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS INCREMENT/VÉRIFICATION STOCK
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS INCREMENT/VÃ‰RIFICATION STOCK
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGestionStock:
     """Tests de la gestion de stock par barcode."""
 
     def test_incrementer_article_non_trouve(self, service, mock_session):
-        """Test incrément article inexistant."""
+        """Test incrÃ©ment article inexistant."""
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
         with pytest.raises(ErreurNonTrouve):
@@ -411,7 +411,7 @@ class TestGestionStock:
             )
 
     def test_incrementer_succes(self, service, mock_session):
-        """Test incrément réussi."""
+        """Test incrÃ©ment rÃ©ussi."""
         mock_article = Mock()
         mock_article.nom = "Nutella"
         mock_article.quantite = 2.0
@@ -426,7 +426,7 @@ class TestGestionStock:
         mock_session.commit.assert_called_once()
 
     def test_verifier_stock_non_trouve(self, service, mock_session):
-        """Test vérification article inexistant."""
+        """Test vÃ©rification article inexistant."""
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
         with pytest.raises(ErreurNonTrouve):
@@ -435,7 +435,7 @@ class TestGestionStock:
             )
 
     def test_verifier_stock_critique(self, service, mock_session):
-        """Test stock critique (quantité = 0)."""
+        """Test stock critique (quantitÃ© = 0)."""
         mock_article = Mock()
         mock_article.id = 1
         mock_article.nom = "Test"
@@ -492,7 +492,7 @@ class TestGestionStock:
         assert result["etat_stock"] == "OK"
 
     def test_verifier_stock_perime(self, service, mock_session):
-        """Test produit périmé."""
+        """Test produit pÃ©rimÃ©."""
         mock_article = Mock()
         mock_article.id = 1
         mock_article.nom = "Test"
@@ -508,10 +508,10 @@ class TestGestionStock:
             service, code="3017620422003", session=mock_session
         )
 
-        assert result["peremption_etat"] == "PÉRIMÉ"
+        assert result["peremption_etat"] == "PÃ‰RIMÃ‰"
 
     def test_verifier_stock_peremption_urgente(self, service, mock_session):
-        """Test péremption urgente (< 7 jours)."""
+        """Test pÃ©remption urgente (< 7 jours)."""
         mock_article = Mock()
         mock_article.id = 1
         mock_article.nom = "Test"
@@ -530,7 +530,7 @@ class TestGestionStock:
         assert result["peremption_etat"] == "URGENT"
 
     def test_verifier_stock_peremption_bientot(self, service, mock_session):
-        """Test péremption bientôt (< 30 jours)."""
+        """Test pÃ©remption bientÃ´t (< 30 jours)."""
         mock_article = Mock()
         mock_article.id = 1
         mock_article.nom = "Test"
@@ -546,19 +546,19 @@ class TestGestionStock:
             service, code="3017620422003", session=mock_session
         )
 
-        assert result["peremption_etat"] == "BIENTÔT"
+        assert result["peremption_etat"] == "BIENTÃ”T"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MISE À JOUR BARCODE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MISE Ã€ JOUR BARCODE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestMiseAJourBarcode:
-    """Tests de mise à jour des codes-barres."""
+    """Tests de mise Ã  jour des codes-barres."""
 
     def test_update_code_invalide(self, service, mock_session):
-        """Test mise à jour avec code invalide."""
+        """Test mise Ã  jour avec code invalide."""
         with patch.object(service, "valider_barcode", return_value=(False, "Invalide")):
             with pytest.raises(ErreurValidation):
                 service.mettre_a_jour_barcode.__wrapped__(
@@ -566,7 +566,7 @@ class TestMiseAJourBarcode:
                 )
 
     def test_update_article_non_trouve(self, service, mock_session):
-        """Test mise à jour article inexistant."""
+        """Test mise Ã  jour article inexistant."""
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
         with pytest.raises(ErreurNonTrouve):
@@ -575,7 +575,7 @@ class TestMiseAJourBarcode:
             )
 
     def test_update_succes(self, service, mock_session):
-        """Test mise à jour réussie."""
+        """Test mise Ã  jour rÃ©ussie."""
         mock_article = Mock()
         mock_article.code_barres = "old_code"
         mock_session.query.return_value.filter.return_value.first.return_value = mock_article
@@ -588,9 +588,9 @@ class TestMiseAJourBarcode:
         mock_session.commit.assert_called_once()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS LISTER/EXPORTER/IMPORTER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestListeExportImport:
@@ -627,8 +627,8 @@ class TestListeExportImport:
             assert "A" in csv_content
 
     def test_importer_barcodes_csv_succes(self, service, mock_session):
-        """Test import CSV réussi."""
-        csv_content = "barcode,nom,quantite,unite,categorie\n3017620422003,Nutella,2,pot,Épicerie"
+        """Test import CSV rÃ©ussi."""
+        csv_content = "barcode,nom,quantite,unite,categorie\n3017620422003,Nutella,2,pot,Ã‰picerie"
 
         # Mock ajouter_article_par_barcode pour ne pas lever d'exception
         with patch.object(service, "ajouter_article_par_barcode"):
@@ -656,9 +656,9 @@ class TestListeExportImport:
             assert result["errors"][0]["barcode"] == "123"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFactory:
@@ -666,11 +666,12 @@ class TestFactory:
 
     def test_get_barcode_service(self):
         """Test obtention du service."""
-        service = get_barcode_service()
+        service = obtenir_barcode_service()
         assert isinstance(service, BarcodeService)
 
     def test_singleton(self):
-        """Test que la factory retourne le même instance."""
-        s1 = get_barcode_service()
-        s2 = get_barcode_service()
+        """Test que la factory retourne le mÃªme instance."""
+        s1 = obtenir_barcode_service()
+        s2 = obtenir_barcode_service()
         assert s1 is s2
+

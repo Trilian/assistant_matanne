@@ -396,7 +396,7 @@ class SchedulerService:
 
 
 @service_factory("scheduler", tags={"jeux", "scheduler"})
-def get_scheduler_service(
+def obtenir_scheduler_service(
     sync_service: SyncService | None = None,
     api_key_football: str | None = None,
 ) -> SchedulerService:
@@ -444,3 +444,7 @@ def reset_scheduler_service() -> None:
         except Exception:
             pass
     reg.reinitialiser("scheduler")
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_scheduler_service = obtenir_scheduler_service  # alias rétrocompatibilité Sprint 12 A3

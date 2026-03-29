@@ -364,7 +364,7 @@ class SyncService:
 
 
 @service_factory("sync", tags={"jeux", "sync"})
-def get_sync_service() -> SyncService:
+def obtenir_sync_service() -> SyncService:
     """
     Factory singleton pour SyncService.
 
@@ -382,3 +382,7 @@ def obtenir_service_sync_jeux() -> SyncService:
         Instance SyncService
     """
     return get_sync_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_sync_service = obtenir_sync_service  # alias rétrocompatibilité Sprint 12 A3

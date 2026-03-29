@@ -395,7 +395,7 @@ class LotoDataService:
 
 
 @service_factory("loto_data", tags={"jeux", "data", "loto"})
-def get_loto_data_service() -> LotoDataService:
+def obtenir_loto_data_service() -> LotoDataService:
     """
     Factory singleton pour le service (singleton via registre).
 
@@ -413,3 +413,7 @@ def obtenir_service_donnees_loto() -> LotoDataService:
         Instance LotoDataService
     """
     return get_loto_data_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_loto_data_service = obtenir_loto_data_service  # alias rétrocompatibilité Sprint 12 A3

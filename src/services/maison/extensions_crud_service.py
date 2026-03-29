@@ -413,24 +413,31 @@ class RelevesCrudService(EventBusMixin, BaseService[ReleveCompteur]):
 
 
 @service_factory("nuisibles_crud", tags={"maison", "crud", "nuisibles"})
-def get_nuisibles_crud_service() -> NuisiblesCrudService:
+def obtenir_nuisibles_crud_service() -> NuisiblesCrudService:
     """Factory singleton pour le service CRUD nuisibles."""
     return NuisiblesCrudService()
 
 
 @service_factory("devis_crud", tags={"maison", "crud", "devis"})
-def get_devis_crud_service() -> DevisCrudService:
+def obtenir_devis_crud_service() -> DevisCrudService:
     """Factory singleton pour le service CRUD devis."""
     return DevisCrudService()
 
 
 @service_factory("entretien_saisonnier_crud", tags={"maison", "crud", "entretien_saisonnier"})
-def get_entretien_saisonnier_crud_service() -> EntretienSaisonnierCrudService:
+def obtenir_entretien_saisonnier_crud_service() -> EntretienSaisonnierCrudService:
     """Factory singleton pour le service CRUD entretien saisonnier."""
     return EntretienSaisonnierCrudService()
 
 
 @service_factory("releves_crud", tags={"maison", "crud", "releves"})
-def get_releves_crud_service() -> RelevesCrudService:
+def obtenir_releves_crud_service() -> RelevesCrudService:
     """Factory singleton pour le service CRUD relevés compteurs."""
     return RelevesCrudService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_nuisibles_crud_service = obtenir_nuisibles_crud_service  # alias rétrocompatibilité Sprint 12 A3
+get_devis_crud_service = obtenir_devis_crud_service  # alias rétrocompatibilité Sprint 12 A3
+get_entretien_saisonnier_crud_service = obtenir_entretien_saisonnier_crud_service  # alias rétrocompatibilité Sprint 12 A3
+get_releves_crud_service = obtenir_releves_crud_service  # alias rétrocompatibilité Sprint 12 A3

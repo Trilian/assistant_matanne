@@ -57,9 +57,18 @@ from .validators import (
     valider_modele,
 )
 
+
+class SanitiseurDonnees:
+    """Compatibilité ascendante avec l'ancienne API de sanitisation."""
+
+    @staticmethod
+    def nettoyer_texte(texte: str) -> str:
+        return nettoyer_texte(texte)
+
 __all__ = [
     # Sanitizer
     "NettoyeurEntrees",
+    "SanitiseurDonnees",
     # Helpers
     "nettoyer_texte",
     # Constantes

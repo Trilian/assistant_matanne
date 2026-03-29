@@ -1,5 +1,5 @@
-"""
-Tests pour BacktestService - Backtesting de la loi des séries.
+﻿"""
+Tests pour BacktestService - Backtesting de la loi des sÃ©ries.
 """
 
 from datetime import datetime, timedelta
@@ -14,12 +14,12 @@ from src.services.jeux import (
     Prediction,
     ResultatBacktest,
     ResultatPrediction,
-    get_backtest_service,
+    obtenir_backtest_service,
 )
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -30,13 +30,13 @@ def service():
 
 @pytest.fixture
 def tirages_loto_historiques():
-    """Historique de tirages Loto simulés."""
+    """Historique de tirages Loto simulÃ©s."""
     tirages = []
     base_date = datetime.now() - timedelta(days=200)
 
-    # Générer 200 tirages avec patterns prévisibles
+    # GÃ©nÃ©rer 200 tirages avec patterns prÃ©visibles
     for i in range(200):
-        # Numéros qui sortent régulièrement
+        # NumÃ©ros qui sortent rÃ©guliÃ¨rement
         numeros = [
             (i % 49) + 1,
             ((i + 10) % 49) + 1,
@@ -44,7 +44,7 @@ def tirages_loto_historiques():
             ((i + 30) % 49) + 1,
             ((i + 40) % 49) + 1,
         ]
-        # Éviter doublons
+        # Ã‰viter doublons
         numeros = list(set(numeros))
         while len(numeros) < 5:
             numeros.append((numeros[-1] % 49) + 1)
@@ -62,13 +62,13 @@ def tirages_loto_historiques():
 
 @pytest.fixture
 def matchs_paris_historiques():
-    """Historique de matchs Paris simulés."""
+    """Historique de matchs Paris simulÃ©s."""
     matchs = []
     base_date = datetime.now() - timedelta(days=100)
 
-    # Générer 100 matchs avec patterns variés
+    # GÃ©nÃ©rer 100 matchs avec patterns variÃ©s
     for i in range(100):
-        # Scores variés pour tester différents marchés
+        # Scores variÃ©s pour tester diffÃ©rents marchÃ©s
         if i % 3 == 0:
             score_dom, score_ext = 2, 1  # Plus de 2.5, BTTS yes
         elif i % 3 == 1:
@@ -89,16 +89,16 @@ def matchs_paris_historiques():
     return matchs
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PREDICTION DATACLASS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPrediction:
     """Tests de la dataclass Prediction."""
 
     def test_creation(self):
-        """La prédiction est créée correctement."""
+        """La prÃ©diction est crÃ©Ã©e correctement."""
         pred = Prediction(
             identifiant="Numero_7",
             type_jeu="loto",
@@ -142,16 +142,16 @@ class TestPrediction:
         assert pred.etait_opportunite is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RESULTAT BACKTEST
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestResultatBacktest:
     """Tests de la dataclass ResultatBacktest."""
 
     def test_creation(self):
-        """Le résultat est créé correctement."""
+        """Le rÃ©sultat est crÃ©Ã© correctement."""
         resultat = ResultatBacktest(
             type_jeu="loto",
             periode_debut=datetime.now() - timedelta(days=30),
@@ -167,7 +167,7 @@ class TestResultatBacktest:
         assert resultat.taux_reussite == 0.632
 
     def test_avertissement_present(self):
-        """L'avertissement sur le hasard est présent."""
+        """L'avertissement sur le hasard est prÃ©sent."""
         resultat = ResultatBacktest(
             type_jeu="loto",
             periode_debut=datetime.now(),
@@ -183,9 +183,9 @@ class TestResultatBacktest:
         assert "HISTORIQUES" in resultat.avertissement
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BACKTESTING LOTO
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBacktesterLoto:
@@ -204,7 +204,7 @@ class TestBacktesterLoto:
 
         resultat = service.backtester_loto(tirages)
 
-        assert resultat.nb_predictions == 0  # Pas assez de données
+        assert resultat.nb_predictions == 0  # Pas assez de donnÃ©es
 
     def test_backtest_retourne_resultat(self, service, tirages_loto_historiques):
         """Backtest retourne un ResultatBacktest valide."""
@@ -218,8 +218,8 @@ class TestBacktesterLoto:
         assert resultat.type_jeu == "loto"
 
     def test_calcul_numeros_retard(self, service):
-        """Calcul correct des numéros en retard."""
-        # Tirages où le numéro 7 ne sort jamais
+        """Calcul correct des numÃ©ros en retard."""
+        # Tirages oÃ¹ le numÃ©ro 7 ne sort jamais
         tirages = []
         for i in range(100):
             numeros = [1, 2, 3, 4, 5]  # 7 absent
@@ -229,12 +229,12 @@ class TestBacktesterLoto:
 
         numeros_retard = service._calculer_numeros_retard_loto(tirages, seuil_value=2.0)
 
-        # Le numéro 7 devrait être en retard
+        # Le numÃ©ro 7 devrait Ãªtre en retard
         numeros_7 = [n for n in numeros_retard if n["numero"] == 7]
-        assert len(numeros_7) > 0 or True  # Le test dépend des calculs
+        assert len(numeros_7) > 0 or True  # Le test dÃ©pend des calculs
 
     def test_verifier_realisation_trouve(self, service):
-        """Vérification quand le numéro sort."""
+        """VÃ©rification quand le numÃ©ro sort."""
         tirages = [
             {"numeros": [1, 2, 3, 4, 5]},
             {"numeros": [6, 7, 8, 9, 10]},  # 7 sort ici
@@ -247,7 +247,7 @@ class TestBacktesterLoto:
         assert resultat["tirages"] == 2
 
     def test_verifier_realisation_non_trouve(self, service):
-        """Vérification quand le numéro ne sort pas."""
+        """VÃ©rification quand le numÃ©ro ne sort pas."""
         tirages = [
             {"numeros": [1, 2, 3, 4, 5]},
             {"numeros": [6, 8, 9, 10, 11]},
@@ -258,9 +258,9 @@ class TestBacktesterLoto:
         assert resultat["realise"] is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS BACKTESTING PARIS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBacktesterParis:
@@ -286,7 +286,7 @@ class TestBacktesterParis:
         assert resultat.type_jeu == "paris"
 
     def test_marche_realise_more_2_5(self, service):
-        """Test marché More 2.5."""
+        """Test marchÃ© More 2.5."""
         match_high = {"score_domicile": 2, "score_exterieur": 1}
         match_low = {"score_domicile": 1, "score_exterieur": 0}
 
@@ -294,7 +294,7 @@ class TestBacktesterParis:
         assert service._marche_realise(match_low, "More_2_5") is False
 
     def test_marche_realise_less_2_5(self, service):
-        """Test marché Less 2.5."""
+        """Test marchÃ© Less 2.5."""
         match_high = {"score_domicile": 2, "score_exterieur": 1}
         match_low = {"score_domicile": 1, "score_exterieur": 0}
 
@@ -302,7 +302,7 @@ class TestBacktesterParis:
         assert service._marche_realise(match_low, "Less_2_5") is True
 
     def test_marche_realise_btts_yes(self, service):
-        """Test marché BTTS Yes."""
+        """Test marchÃ© BTTS Yes."""
         match_btts = {"score_domicile": 1, "score_exterieur": 1}
         match_no_btts = {"score_domicile": 2, "score_exterieur": 0}
 
@@ -310,7 +310,7 @@ class TestBacktesterParis:
         assert service._marche_realise(match_no_btts, "BTTS_Yes") is False
 
     def test_marche_realise_btts_no(self, service):
-        """Test marché BTTS No."""
+        """Test marchÃ© BTTS No."""
         match_btts = {"score_domicile": 1, "score_exterieur": 1}
         match_no_btts = {"score_domicile": 2, "score_exterieur": 0}
 
@@ -318,7 +318,7 @@ class TestBacktesterParis:
         assert service._marche_realise(match_no_btts, "BTTS_No") is True
 
     def test_marche_realise_1x2(self, service):
-        """Test marchés 1, X, 2."""
+        """Test marchÃ©s 1, X, 2."""
         match_dom = {"score_domicile": 2, "score_exterieur": 0}
         match_nul = {"score_domicile": 1, "score_exterieur": 1}
         match_ext = {"score_domicile": 0, "score_exterieur": 3}
@@ -328,7 +328,7 @@ class TestBacktesterParis:
         assert service._marche_realise(match_ext, "2") is True
 
     def test_calcul_stats_marche(self, service, matchs_paris_historiques):
-        """Calcul correct des stats pour un marché."""
+        """Calcul correct des stats pour un marchÃ©."""
         stats = service._calculer_stats_marche(matchs_paris_historiques[:50], "More_2_5")
 
         assert "value" in stats
@@ -337,13 +337,13 @@ class TestBacktesterParis:
         assert 0 <= stats["frequence"] <= 1
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS CALCUL RÉSULTATS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS CALCUL RÃ‰SULTATS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCalculerResultat:
-    """Tests du calcul des résultats."""
+    """Tests du calcul des rÃ©sultats."""
 
     def test_predictions_vides(self, service):
         """Calcul avec liste vide."""
@@ -353,7 +353,7 @@ class TestCalculerResultat:
         assert resultat.taux_reussite == 0.0
 
     def test_taux_reussite(self, service):
-        """Calcul correct du taux de réussite."""
+        """Calcul correct du taux de rÃ©ussite."""
         predictions = [
             Prediction(
                 identifiant="P1",
@@ -394,7 +394,7 @@ class TestCalculerResultat:
         assert resultat.taux_reussite == pytest.approx(2 / 3, rel=0.01)
 
     def test_metriques_detaillees(self, service):
-        """Calcul correct des métriques détaillées."""
+        """Calcul correct des mÃ©triques dÃ©taillÃ©es."""
         predictions = [
             Prediction(
                 identifiant="P1",
@@ -426,9 +426,9 @@ class TestCalculerResultat:
         assert resultat.tirages_moyens_avant_realisation == 5.0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS COMPARAISON SEUILS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestComparerSeuils:
@@ -457,13 +457,13 @@ class TestComparerSeuils:
         assert len(resultats) == 2
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS GÉNÉRATION RAPPORT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS GÃ‰NÃ‰RATION RAPPORT
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererRapport:
-    """Tests de la génération de rapport."""
+    """Tests de la gÃ©nÃ©ration de rapport."""
 
     def test_rapport_contient_infos(self, service):
         """Le rapport contient les informations essentielles."""
@@ -508,9 +508,9 @@ class TestGenererRapport:
         assert "hasard" in rapport.lower()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFactory:
@@ -518,23 +518,24 @@ class TestFactory:
 
     def test_get_backtest_service(self):
         """Factory retourne une instance singleton."""
-        service1 = get_backtest_service()
-        service2 = get_backtest_service()
+        service1 = obtenir_backtest_service()
+        service2 = obtenir_backtest_service()
 
         assert service1 is service2
         assert isinstance(service1, BacktestService)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ENUM RESULTAT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestResultatPredictionEnum:
-    """Tests de l'énumération ResultatPrediction."""
+    """Tests de l'Ã©numÃ©ration ResultatPrediction."""
 
     def test_valeurs(self):
         """Toutes les valeurs existent."""
         assert ResultatPrediction.CORRECT.value == "correct"
         assert ResultatPrediction.INCORRECT.value == "incorrect"
         assert ResultatPrediction.EN_COURS.value == "en_cours"
+

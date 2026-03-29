@@ -1,8 +1,8 @@
-"""
+﻿"""
 Routes API pour les utilitaires.
 
 CRUD pour: notes, journal de bord, contacts utiles, liens favoris,
-mots de passe maison, relevés énergie.
+mots de passe maison, relevÃ©s Ã©nergie.
 """
 
 from typing import Any, Literal
@@ -38,20 +38,20 @@ from src.api.utils import executer_async, executer_avec_session, gerer_exception
 router = APIRouter(prefix="/api/v1/utilitaires", tags=["Utilitaires"])
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CHAT IA MULTI-CONTEXTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class MessageChatRequest(BaseModel):
-    """Requête de message chat."""
+    """RequÃªte de message chat."""
 
     message: str = Field(..., min_length=1, max_length=2000, description="Message de l'utilisateur")
     contexte: Literal["cuisine", "famille", "maison", "budget", "general"] = Field(
         default="general", description="Contexte du chat"
     )
     historique: list[dict[str, str]] = Field(
-        default_factory=list, description="Messages précédents [{role, contenu}]"
+        default_factory=list, description="Messages prÃ©cÃ©dents [{role, contenu}]"
     )
 
 
@@ -61,11 +61,11 @@ async def envoyer_message_chat(
     payload: MessageChatRequest,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Envoie un message au chat IA et retourne la réponse."""
-    from src.services.utilitaires.chat_ai import get_chat_ai_service
+    """Envoie un message au chat IA et retourne la rÃ©ponse."""
+    from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
 
     def _query():
-        service = get_chat_ai_service()
+        service = obtenir_chat_ai_service()
         reponse = service.envoyer_message(
             message=payload.message,
             contexte=payload.contexte,
@@ -76,7 +76,7 @@ async def envoyer_message_chat(
     reponse = await executer_async(_query)
 
     return {
-        "reponse": reponse or "Désolé, je n'ai pas pu générer de réponse. Réessayez.",
+        "reponse": reponse or "DÃ©solÃ©, je n'ai pas pu gÃ©nÃ©rer de rÃ©ponse. RÃ©essayez.",
         "contexte": payload.contexte,
     }
 
@@ -90,17 +90,17 @@ async def obtenir_actions_rapides_chat(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Retourne les suggestions d'actions rapides pour un contexte."""
-    from src.services.utilitaires.chat_ai import get_chat_ai_service
+    from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
 
-    service = get_chat_ai_service()
+    service = obtenir_chat_ai_service()
     actions = service.obtenir_actions_rapides(contexte)
 
     return {"contexte": contexte, "actions": actions}
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # NOTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/notes", responses=REPONSES_LISTE)
@@ -112,7 +112,7 @@ async def lister_notes(
     search: str | None = Query(None),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les notes mémo."""
+    """Liste les notes mÃ©mo."""
     from src.core.models import NoteMemo
 
     def _query():
@@ -159,7 +159,7 @@ async def creer_note(
     donnees: NoteCreate,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée une nouvelle note."""
+    """CrÃ©e une nouvelle note."""
     from src.core.models import NoteMemo
 
     def _create():
@@ -190,18 +190,18 @@ async def modifier_note(
     patch: NotePatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour partiellement une note."""
+    """Met Ã  jour partiellement une note."""
     from src.core.models import NoteMemo
 
     def _update():
         with executer_avec_session() as session:
             note = session.query(NoteMemo).filter(NoteMemo.id == note_id).first()
             if not note:
-                raise HTTPException(status_code=404, detail="Note non trouvée")
+                raise HTTPException(status_code=404, detail="Note non trouvÃ©e")
 
             updates = patch.model_dump(exclude_unset=True)
             if not updates:
-                raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour")
+                raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
             for key, value in updates.items():
                 setattr(note, key, value)
@@ -235,17 +235,17 @@ async def supprimer_note(
         with executer_avec_session() as session:
             note = session.query(NoteMemo).filter(NoteMemo.id == note_id).first()
             if not note:
-                raise HTTPException(status_code=404, detail="Note non trouvée")
+                raise HTTPException(status_code=404, detail="Note non trouvÃ©e")
             session.delete(note)
             session.commit()
-            return {"message": "Note supprimée", "id": note_id}
+            return {"message": "Note supprimÃ©e", "id": note_id}
 
     return await executer_async(_delete)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # JOURNAL DE BORD
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/journal", responses=REPONSES_LISTE)
@@ -255,7 +255,7 @@ async def lister_journal(
     limit: int = Query(30, ge=1, le=365),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les entrées du journal de bord."""
+    """Liste les entrÃ©es du journal de bord."""
     from src.core.models import EntreeJournal
 
     def _query():
@@ -289,7 +289,7 @@ async def creer_entree_journal(
     donnees: JournalCreate,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée une entrée dans le journal de bord."""
+    """CrÃ©e une entrÃ©e dans le journal de bord."""
     from datetime import date as date_type
 
     from src.core.models import EntreeJournal
@@ -327,18 +327,18 @@ async def modifier_entree_journal(
     patch: JournalPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour partiellement une entrée journal."""
+    """Met Ã  jour partiellement une entrÃ©e journal."""
     from src.core.models import EntreeJournal
 
     def _update():
         with executer_avec_session() as session:
             entree = session.query(EntreeJournal).filter(EntreeJournal.id == entree_id).first()
             if not entree:
-                raise HTTPException(status_code=404, detail="Entrée non trouvée")
+                raise HTTPException(status_code=404, detail="EntrÃ©e non trouvÃ©e")
 
             updates = patch.model_dump(exclude_unset=True)
             if not updates:
-                raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour")
+                raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
             for key, value in updates.items():
                 setattr(entree, key, value)
@@ -364,24 +364,24 @@ async def supprimer_entree_journal(
     entree_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Supprime une entrée du journal."""
+    """Supprime une entrÃ©e du journal."""
     from src.core.models import EntreeJournal
 
     def _delete():
         with executer_avec_session() as session:
             entree = session.query(EntreeJournal).filter(EntreeJournal.id == entree_id).first()
             if not entree:
-                raise HTTPException(status_code=404, detail="Entrée non trouvée")
+                raise HTTPException(status_code=404, detail="EntrÃ©e non trouvÃ©e")
             session.delete(entree)
             session.commit()
-            return {"message": "Entrée supprimée", "id": entree_id}
+            return {"message": "EntrÃ©e supprimÃ©e", "id": entree_id}
 
     return await executer_async(_delete)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONTACTS UTILES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/contacts", responses=REPONSES_LISTE)
@@ -434,7 +434,7 @@ async def creer_contact(
     donnees: ContactCreate,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée un nouveau contact utile."""
+    """CrÃ©e un nouveau contact utile."""
     from src.core.models import ContactUtile
 
     def _create():
@@ -464,18 +464,18 @@ async def modifier_contact(
     patch: ContactPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour partiellement un contact."""
+    """Met Ã  jour partiellement un contact."""
     from src.core.models import ContactUtile
 
     def _update():
         with executer_avec_session() as session:
             contact = session.query(ContactUtile).filter(ContactUtile.id == contact_id).first()
             if not contact:
-                raise HTTPException(status_code=404, detail="Contact non trouvé")
+                raise HTTPException(status_code=404, detail="Contact non trouvÃ©")
 
             updates = patch.model_dump(exclude_unset=True)
             if not updates:
-                raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour")
+                raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
             for key, value in updates.items():
                 setattr(contact, key, value)
@@ -509,17 +509,17 @@ async def supprimer_contact(
         with executer_avec_session() as session:
             contact = session.query(ContactUtile).filter(ContactUtile.id == contact_id).first()
             if not contact:
-                raise HTTPException(status_code=404, detail="Contact non trouvé")
+                raise HTTPException(status_code=404, detail="Contact non trouvÃ©")
             session.delete(contact)
             session.commit()
-            return {"message": "Contact supprimé", "id": contact_id}
+            return {"message": "Contact supprimÃ©", "id": contact_id}
 
     return await executer_async(_delete)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # LIENS FAVORIS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/liens", responses=REPONSES_LISTE)
@@ -565,7 +565,7 @@ async def creer_lien(
     donnees: LienCreate,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée un nouveau lien favori."""
+    """CrÃ©e un nouveau lien favori."""
     from src.core.models import LienFavori
 
     def _create():
@@ -594,18 +594,18 @@ async def modifier_lien(
     patch: LienPatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour partiellement un lien."""
+    """Met Ã  jour partiellement un lien."""
     from src.core.models import LienFavori
 
     def _update():
         with executer_avec_session() as session:
             lien = session.query(LienFavori).filter(LienFavori.id == lien_id).first()
             if not lien:
-                raise HTTPException(status_code=404, detail="Lien non trouvé")
+                raise HTTPException(status_code=404, detail="Lien non trouvÃ©")
 
             updates = patch.model_dump(exclude_unset=True)
             if not updates:
-                raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour")
+                raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
             for key, value in updates.items():
                 setattr(lien, key, value)
@@ -637,17 +637,17 @@ async def supprimer_lien(
         with executer_avec_session() as session:
             lien = session.query(LienFavori).filter(LienFavori.id == lien_id).first()
             if not lien:
-                raise HTTPException(status_code=404, detail="Lien non trouvé")
+                raise HTTPException(status_code=404, detail="Lien non trouvÃ©")
             session.delete(lien)
             session.commit()
-            return {"message": "Lien supprimé", "id": lien_id}
+            return {"message": "Lien supprimÃ©", "id": lien_id}
 
     return await executer_async(_delete)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # MOTS DE PASSE MAISON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/passwords", responses=REPONSES_LISTE)
@@ -656,7 +656,7 @@ async def lister_mots_de_passe(
     categorie: str | None = Query(None),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les mots de passe maison (valeurs chiffrées)."""
+    """Liste les mots de passe maison (valeurs chiffrÃ©es)."""
     from src.core.models import MotDePasseMaison
 
     def _query():
@@ -689,7 +689,7 @@ async def creer_mot_de_passe(
     donnees: MotDePasseCreate,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée un nouveau mot de passe maison."""
+    """CrÃ©e un nouveau mot de passe maison."""
     from src.core.models import MotDePasseMaison
 
     def _create():
@@ -723,20 +723,20 @@ async def modifier_mot_de_passe(
     patch: MotDePassePatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour un mot de passe maison."""
+    """Met Ã  jour un mot de passe maison."""
     from src.core.models import MotDePasseMaison
 
     def _update():
         with executer_avec_session() as session:
             mdp = session.query(MotDePasseMaison).filter(MotDePasseMaison.id == mdp_id).first()
             if not mdp:
-                raise HTTPException(status_code=404, detail="Mot de passe non trouvé")
+                raise HTTPException(status_code=404, detail="Mot de passe non trouvÃ©")
 
             updates = patch.model_dump(exclude_unset=True)
             if not updates:
-                raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour")
+                raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
-            # Le champ "valeur" dans le schema → "valeur_chiffree" dans le modèle
+            # Le champ "valeur" dans le schema â†’ "valeur_chiffree" dans le modÃ¨le
             if "valeur" in updates:
                 updates["valeur_chiffree"] = updates.pop("valeur")
 
@@ -770,17 +770,17 @@ async def supprimer_mot_de_passe(
         with executer_avec_session() as session:
             mdp = session.query(MotDePasseMaison).filter(MotDePasseMaison.id == mdp_id).first()
             if not mdp:
-                raise HTTPException(status_code=404, detail="Mot de passe non trouvé")
+                raise HTTPException(status_code=404, detail="Mot de passe non trouvÃ©")
             session.delete(mdp)
             session.commit()
-            return {"message": "Mot de passe supprimé", "id": mdp_id}
+            return {"message": "Mot de passe supprimÃ©", "id": mdp_id}
 
     return await executer_async(_delete)
 
 
-# ═══════════════════════════════════════════════════════════
-# ÉNERGIE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã‰NERGIE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/energie", responses=REPONSES_LISTE)
@@ -790,7 +790,7 @@ async def lister_releves_energie(
     annee: int | None = Query(None),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les relevés énergie."""
+    """Liste les relevÃ©s Ã©nergie."""
     from src.core.models import ReleveEnergie
 
     def _query():
@@ -831,7 +831,7 @@ async def creer_releve_energie(
     donnees: EnergieCreate,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée un relevé énergie."""
+    """CrÃ©e un relevÃ© Ã©nergie."""
     from src.core.models import ReleveEnergie
 
     def _create():
@@ -860,18 +860,18 @@ async def modifier_releve_energie(
     patch: EnergiePatch,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour un relevé énergie."""
+    """Met Ã  jour un relevÃ© Ã©nergie."""
     from src.core.models import ReleveEnergie
 
     def _update():
         with executer_avec_session() as session:
             releve = session.query(ReleveEnergie).filter(ReleveEnergie.id == releve_id).first()
             if not releve:
-                raise HTTPException(status_code=404, detail="Relevé non trouvé")
+                raise HTTPException(status_code=404, detail="RelevÃ© non trouvÃ©")
 
             updates = patch.model_dump(exclude_unset=True)
             if not updates:
-                raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour")
+                raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
             for key, value in updates.items():
                 setattr(releve, key, value)
@@ -896,16 +896,17 @@ async def supprimer_releve_energie(
     releve_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Supprime un relevé énergie."""
+    """Supprime un relevÃ© Ã©nergie."""
     from src.core.models import ReleveEnergie
 
     def _delete():
         with executer_avec_session() as session:
             releve = session.query(ReleveEnergie).filter(ReleveEnergie.id == releve_id).first()
             if not releve:
-                raise HTTPException(status_code=404, detail="Relevé non trouvé")
+                raise HTTPException(status_code=404, detail="RelevÃ© non trouvÃ©")
             session.delete(releve)
             session.commit()
-            return {"message": "Relevé supprimé", "id": releve_id}
+            return {"message": "RelevÃ© supprimÃ©", "id": releve_id}
 
     return await executer_async(_delete)
+

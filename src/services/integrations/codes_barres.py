@@ -534,6 +534,10 @@ def obtenir_service_codes_barres() -> BarcodeService:
     return BarcodeService()
 
 
-def get_barcode_service() -> BarcodeService:
+def obtenir_barcode_service() -> BarcodeService:
     """Factory pour obtenir le service Barcode (alias anglais)."""
     return obtenir_service_codes_barres()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_barcode_service = obtenir_barcode_service  # alias rétrocompatibilité Sprint 12 A3

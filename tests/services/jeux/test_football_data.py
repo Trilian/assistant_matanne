@@ -1,5 +1,5 @@
-"""
-Tests pour FootballDataService - Service données Football-Data.org.
+﻿"""
+Tests pour FootballDataService - Service donnÃ©es Football-Data.org.
 """
 
 from datetime import date
@@ -15,7 +15,7 @@ from src.services.jeux import (
     ResultatMiTemps,
     ScoreMatch,
     StatistiquesMarcheData,
-    get_football_data_service,
+    obtenir_football_data_service,
 )
 
 
@@ -23,18 +23,18 @@ class TestFootballDataServiceFactory:
     """Tests de la factory."""
 
     def test_get_football_data_service(self):
-        """Test création service via factory."""
-        # Reset le singleton du registre pour recréer le service
+        """Test crÃ©ation service via factory."""
+        # Reset le singleton du registre pour recrÃ©er le service
         from src.services.core.registry import obtenir_registre
 
         obtenir_registre().reinitialiser("football_data")
-        service = get_football_data_service()
+        service = obtenir_football_data_service()
         assert isinstance(service, FootballDataService)
 
     def test_get_football_data_service_with_api_key(self):
-        """Test création service avec clé API."""
+        """Test crÃ©ation service avec clÃ© API."""
         # Appel avec argument bypass le singleton registre
-        service = get_football_data_service("test_api_key")
+        service = obtenir_football_data_service("test_api_key")
         assert isinstance(service, FootballDataService)
         assert service.api_key == "test_api_key"
 
@@ -43,7 +43,7 @@ class TestFootballDataServiceConstantes:
     """Tests des constantes."""
 
     def test_competitions_disponibles(self):
-        """Vérifie les compétitions configurées."""
+        """VÃ©rifie les compÃ©titions configurÃ©es."""
         assert "FL1" in COMPETITIONS  # Ligue 1
         assert "PL" in COMPETITIONS  # Premier League
         assert "BL1" in COMPETITIONS  # Bundesliga
@@ -51,16 +51,16 @@ class TestFootballDataServiceConstantes:
         assert "PD" in COMPETITIONS  # La Liga
 
     def test_competitions_noms(self):
-        """Vérifie les noms des compétitions."""
+        """VÃ©rifie les noms des compÃ©titions."""
         assert COMPETITIONS["FL1"] == "Ligue 1"
         assert COMPETITIONS["PL"] == "Premier League"
 
 
 class TestScoreMatch:
-    """Tests du modèle ScoreMatch."""
+    """Tests du modÃ¨le ScoreMatch."""
 
     def test_score_defaut(self):
-        """Test score par défaut."""
+        """Test score par dÃ©faut."""
         score = ScoreMatch()
         assert score.domicile_mi_temps == 0
         assert score.exterieur_mi_temps == 0
@@ -80,10 +80,10 @@ class TestScoreMatch:
 
 
 class TestMatch:
-    """Tests du modèle Match."""
+    """Tests du modÃ¨le Match."""
 
     def test_match_est_termine(self):
-        """Test propriété est_termine."""
+        """Test propriÃ©tÃ© est_termine."""
         match = Match(
             id=1,
             competition="FL1",
@@ -177,10 +177,10 @@ class TestFootballDataServiceCalculs:
         assert stats.total_matchs == 4
         assert stats.nb_occurrences == 2  # Lyon et Monaco
         assert stats.frequence == 0.5
-        assert stats.serie_actuelle == 1  # 1 match sans nul après Monaco
+        assert stats.serie_actuelle == 1  # 1 match sans nul aprÃ¨s Monaco
 
     def test_calculer_statistiques_exterieur_final(self, service, matchs_exemple):
-        """Test statistiques victoire extérieur finale."""
+        """Test statistiques victoire extÃ©rieur finale."""
         stats = service.calculer_statistiques_marche(matchs_exemple, "exterieur_final")
 
         assert stats.marche == "exterieur_final"
@@ -197,7 +197,7 @@ class TestFootballDataServiceCalculs:
         assert stats.frequence == 0.0
 
     def test_match_correspond_marche(self, service, matchs_exemple):
-        """Test correspondance marché."""
+        """Test correspondance marchÃ©."""
         match_dom = matchs_exemple[0]  # PSG domicile
 
         assert service._match_correspond_marche(match_dom, "domicile_mi_temps") is True
@@ -206,11 +206,11 @@ class TestFootballDataServiceCalculs:
 
 
 class TestFootballDataServiceAPI:
-    """Tests d'intégration API (mocked)."""
+    """Tests d'intÃ©gration API (mocked)."""
 
     @pytest.fixture
     def mock_response_data(self):
-        """Données de réponse API simulées."""
+        """DonnÃ©es de rÃ©ponse API simulÃ©es."""
         return {
             "matches": [
                 {
@@ -229,7 +229,7 @@ class TestFootballDataServiceAPI:
 
     @patch("httpx.Client.get")
     def test_obtenir_matchs_termines(self, mock_get, mock_response_data):
-        """Test récupération matchs avec mock."""
+        """Test rÃ©cupÃ©ration matchs avec mock."""
         mock_response = MagicMock()
         mock_response.json.return_value = mock_response_data
         mock_response.raise_for_status = MagicMock()
@@ -242,3 +242,4 @@ class TestFootballDataServiceAPI:
         assert matchs[0].equipe_domicile == "PSG"
         assert matchs[0].equipe_exterieur == "OM"
         assert matchs[0].resultat_mi_temps == ResultatMiTemps.DOMICILE
+

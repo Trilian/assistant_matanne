@@ -1,7 +1,7 @@
-"""
+﻿"""
 Routes API pour les recettes.
 
-CRUD complet pour les recettes avec pagination, filtres par catégorie,
+CRUD complet pour les recettes avec pagination, filtres par catÃ©gorie,
 recherche par nom et documentation OpenAPI enrichie.
 """
 
@@ -35,13 +35,13 @@ from src.api.utils import (
 router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HELPERS INTERNES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def _sauvegarder_ingredients(session, recette_id: int, ingredients: list) -> None:
-    """Persiste les RecetteIngredient en trouvant/créant les Ingredient de référence."""
+    """Persiste les RecetteIngredient en trouvant/crÃ©ant les Ingredient de rÃ©fÃ©rence."""
     from src.core.models import Ingredient, RecetteIngredient
 
     for idx, ing in enumerate(ingredients, start=1):
@@ -49,10 +49,10 @@ def _sauvegarder_ingredients(session, recette_id: int, ingredients: list) -> Non
         if not nom:
             continue
 
-        # Find or create l'ingrédient de référence
+        # Find or create l'ingrÃ©dient de rÃ©fÃ©rence
         db_ingredient = session.query(Ingredient).filter(Ingredient.nom == nom).first()
         if not db_ingredient:
-            db_ingredient = Ingredient(nom=nom, unite=ing.unite or "pièce")
+            db_ingredient = Ingredient(nom=nom, unite=ing.unite or "piÃ¨ce")
             session.add(db_ingredient)
             session.flush()
 
@@ -84,11 +84,11 @@ def _sauvegarder_etapes(session, recette_id: int, instructions: list[str]) -> No
 
 
 def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
-    """Sérialise une Recette ORM en RecetteResponse avec relations."""
+    """SÃ©rialise une Recette ORM en RecetteResponse avec relations."""
     from src.core.models import RecetteIngredient
     from src.core.models.user_preferences import RetourRecette
 
-    # Charger ingrédients avec le nom depuis la table Ingredient
+    # Charger ingrÃ©dients avec le nom depuis la table Ingredient
     ingredients_resp = []
     for ri in db_recette.ingredients:
         ingredients_resp.append(
@@ -101,7 +101,7 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
             }
         )
 
-    # Charger étapes
+    # Charger Ã©tapes
     etapes_resp = [
         {
             "id": e.id,
@@ -113,7 +113,7 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
         for e in sorted(db_recette.etapes, key=lambda e: e.ordre)
     ]
 
-    # Vérifier favori (feedback == 'like' dans RetourRecette)
+    # VÃ©rifier favori (feedback == 'like' dans RetourRecette)
     user_id = user.get("sub", user.get("id", "dev"))
     retour = (
         session.query(RetourRecette)
@@ -151,10 +151,10 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
 @router.get("", response_model=ReponsePaginee[RecetteResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_recettes(
-    page: int = Query(1, ge=1, description="Numéro de page (1-indexé)"),
-    page_size: int = Query(20, ge=1, le=100, description="Nombre d'éléments par page"),
+    page: int = Query(1, ge=1, description="NumÃ©ro de page (1-indexÃ©)"),
+    page_size: int = Query(20, ge=1, le=100, description="Nombre d'Ã©lÃ©ments par page"),
     categorie: str | None = Query(
-        None, description="Filtrer par catégorie (plat, dessert, entrée...)"
+        None, description="Filtrer par catÃ©gorie (plat, dessert, entrÃ©e...)"
     ),
     search: str | None = Query(None, description="Recherche dans le nom de la recette"),
     user: dict[str, Any] = Depends(require_auth),
@@ -162,17 +162,17 @@ async def lister_recettes(
     """
     Liste les recettes avec pagination et filtres.
 
-    Retourne une liste paginée de recettes avec possibilité de filtrer
-    par catégorie ou de rechercher par nom.
+    Retourne une liste paginÃ©e de recettes avec possibilitÃ© de filtrer
+    par catÃ©gorie ou de rechercher par nom.
 
     Args:
-        page: Numéro de page (défaut: 1)
-        page_size: Taille de page (défaut: 20, max: 100)
-        categorie: Filtre optionnel par catégorie
+        page: NumÃ©ro de page (dÃ©faut: 1)
+        page_size: Taille de page (dÃ©faut: 20, max: 100)
+        categorie: Filtre optionnel par catÃ©gorie
         search: Recherche partielle dans le nom
 
     Returns:
-        Réponse paginée avec items, total, pages
+        RÃ©ponse paginÃ©e avec items, total, pages
 
     Example:
         ```
@@ -201,7 +201,7 @@ async def lister_recettes(
                 query = query.filter(Recette.categorie == categorie)
 
             if search:
-                # Échapper les caractères spéciaux SQL wildcard pour éviter l'injection
+                # Ã‰chapper les caractÃ¨res spÃ©ciaux SQL wildcard pour Ã©viter l'injection
                 safe_search = search.replace("%", "\\%").replace("_", "\\_")
                 query = query.filter(Recette.nom.ilike(f"%{safe_search}%"))
 
@@ -223,7 +223,7 @@ async def lister_recettes(
                 for recette_id, derniere_cuisson in historiques
             }
 
-            # Sérialisation basique (sans relations) pour la liste
+            # SÃ©rialisation basique (sans relations) pour la liste
             items_dicts = [
                 {
                     "id": r.id,
@@ -252,16 +252,16 @@ async def lister_recettes(
 @gerer_exception_api
 async def obtenir_recette(recette_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
-    Récupère une recette par son ID.
+    RÃ©cupÃ¨re une recette par son ID.
 
     Args:
         recette_id: Identifiant unique de la recette
 
     Returns:
-        Détail complet de la recette
+        DÃ©tail complet de la recette
 
     Raises:
-        404: Recette non trouvée
+        404: Recette non trouvÃ©e
 
     Example:
         ```
@@ -270,7 +270,7 @@ async def obtenir_recette(recette_id: int, user: dict[str, Any] = Depends(requir
         Response:
         {
             "id": 42,
-            "nom": "Poulet rôti",
+            "nom": "Poulet rÃ´ti",
             "description": "Un classique familial",
             "temps_preparation": 15,
             "temps_cuisson": 60,
@@ -296,7 +296,7 @@ async def obtenir_recette(recette_id: int, user: dict[str, Any] = Depends(requir
             )
 
             if not recette:
-                raise HTTPException(status_code=404, detail="Recette non trouvée")
+                raise HTTPException(status_code=404, detail="Recette non trouvÃ©e")
 
             return _serialiser_recette(recette, session, user)
 
@@ -307,13 +307,13 @@ async def obtenir_recette(recette_id: int, user: dict[str, Any] = Depends(requir
 @gerer_exception_api
 async def creer_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)):
     """
-    Crée une nouvelle recette avec ses ingrédients et étapes.
+    CrÃ©e une nouvelle recette avec ses ingrÃ©dients et Ã©tapes.
 
     Args:
-        recette: Données de la recette (nom, ingrédients, instructions...)
+        recette: DonnÃ©es de la recette (nom, ingrÃ©dients, instructions...)
 
     Returns:
-        La recette créée avec ses ingrédients et étapes
+        La recette crÃ©Ã©e avec ses ingrÃ©dients et Ã©tapes
 
     Example:
         ```
@@ -321,7 +321,7 @@ async def creer_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(r
         Body:
         {
             "nom": "Gratin dauphinois",
-            "description": "Pommes de terre gratinées",
+            "description": "Pommes de terre gratinÃ©es",
             "temps_preparation": 20,
             "temps_cuisson": 45,
             "portions": 6,
@@ -329,9 +329,9 @@ async def creer_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(r
             "categorie": "accompagnement",
             "ingredients": [
                 {"nom": "Pommes de terre", "quantite": 1, "unite": "kg"},
-                {"nom": "Crème fraîche", "quantite": 30, "unite": "cl"}
+                {"nom": "CrÃ¨me fraÃ®che", "quantite": 30, "unite": "cl"}
             ],
-            "instructions": ["Éplucher les pommes de terre", "Préchauffer le four à 180°C"]
+            "instructions": ["Ã‰plucher les pommes de terre", "PrÃ©chauffer le four Ã  180Â°C"]
         }
         ```
     """
@@ -367,32 +367,32 @@ async def creer_recette(recette: RecetteCreate, user: dict[str, Any] = Depends(r
 async def modifier_recette(
     recette_id: int, recette: RecetteCreate, user: dict[str, Any] = Depends(require_auth)
 ):
-    """Met à jour une recette complètement (remplacement total).
+    """Met Ã  jour une recette complÃ¨tement (remplacement total).
 
     Remplace tous les champs de la recette par les valeurs fournies.
-    Pour une mise à jour partielle, utiliser PATCH.
+    Pour une mise Ã  jour partielle, utiliser PATCH.
 
     Args:
-        recette_id: ID de la recette à modifier
+        recette_id: ID de la recette Ã  modifier
         recette: Tous les champs de la recette (remplacement complet)
 
     Returns:
-        La recette mise à jour
+        La recette mise Ã  jour
 
     Raises:
-        401: Non authentifié
-        404: Recette non trouvée
-        422: Données invalides
+        401: Non authentifiÃ©
+        404: Recette non trouvÃ©e
+        422: DonnÃ©es invalides
 
     Example:
         ```
         PUT /api/v1/recettes/42
         Authorization: Bearer <token>
 
-        Body: {"nom": "Poulet rôti aux herbes", "temps_cuisson": 75}
+        Body: {"nom": "Poulet rÃ´ti aux herbes", "temps_cuisson": 75}
 
         Response:
-        {"id": 42, "nom": "Poulet rôti aux herbes", "temps_cuisson": 75, ...}
+        {"id": 42, "nom": "Poulet rÃ´ti aux herbes", "temps_cuisson": 75, ...}
         ```
     """
     from src.core.models import EtapeRecette, Recette, RecetteIngredient
@@ -402,7 +402,7 @@ async def modifier_recette(
             db_recette = session.query(Recette).filter(Recette.id == recette_id).first()
 
             if not db_recette:
-                raise HTTPException(status_code=404, detail="Recette non trouvée")
+                raise HTTPException(status_code=404, detail="Recette non trouvÃ©e")
 
             for key, value in recette.model_dump(
                 exclude={"ingredients", "instructions", "tags"}
@@ -410,7 +410,7 @@ async def modifier_recette(
                 if hasattr(db_recette, key):
                     setattr(db_recette, key, value)
 
-            # Remplacer ingrédients et étapes
+            # Remplacer ingrÃ©dients et Ã©tapes
             session.query(RecetteIngredient).filter(
                 RecetteIngredient.recette_id == recette_id
             ).delete()
@@ -434,32 +434,32 @@ async def modifier_recette(
 async def modifier_partiellement_recette(
     recette_id: int, patch: RecettePatch, user: dict[str, Any] = Depends(require_auth)
 ):
-    """Mise à jour partielle d'une recette.
+    """Mise Ã  jour partielle d'une recette.
 
-    Seuls les champs fournis dans le body sont modifiés.
-    Les champs absents ou ``null`` restent inchangés.
+    Seuls les champs fournis dans le body sont modifiÃ©s.
+    Les champs absents ou ``null`` restent inchangÃ©s.
 
     Args:
-        recette_id: ID de la recette à modifier
-        patch: Champs à mettre à jour (tous optionnels)
+        recette_id: ID de la recette Ã  modifier
+        patch: Champs Ã  mettre Ã  jour (tous optionnels)
 
     Returns:
-        La recette mise à jour
+        La recette mise Ã  jour
 
     Raises:
-        401: Non authentifié
-        404: Recette non trouvée
-        422: Données invalides
+        401: Non authentifiÃ©
+        404: Recette non trouvÃ©e
+        422: DonnÃ©es invalides
 
     Example:
         ```
         PATCH /api/v1/recettes/42
         Authorization: Bearer <token>
 
-        Body: {"nom": "Poulet rôti aux herbes", "temps_cuisson": 75}
+        Body: {"nom": "Poulet rÃ´ti aux herbes", "temps_cuisson": 75}
 
         Response:
-        {"id": 42, "nom": "Poulet rôti aux herbes", "temps_cuisson": 75, ...}
+        {"id": 42, "nom": "Poulet rÃ´ti aux herbes", "temps_cuisson": 75, ...}
         ```
     """
     from src.core.models import EtapeRecette, Recette, RecetteIngredient
@@ -469,13 +469,13 @@ async def modifier_partiellement_recette(
             db_recette = session.query(Recette).filter(Recette.id == recette_id).first()
 
             if not db_recette:
-                raise HTTPException(status_code=404, detail="Recette non trouvée")
+                raise HTTPException(status_code=404, detail="Recette non trouvÃ©e")
 
             donnees = patch.model_dump(exclude_unset=True)
             if not donnees:
                 raise HTTPException(
                     status_code=422,
-                    detail="Aucun champ à mettre à jour fourni",
+                    detail="Aucun champ Ã  mettre Ã  jour fourni",
                 )
 
             ingredients_data = donnees.pop("ingredients", None)
@@ -514,14 +514,14 @@ async def supprimer_recette(recette_id: int, user: dict[str, Any] = Depends(requ
     """Supprime une recette.
 
     Args:
-        recette_id: ID de la recette à supprimer
+        recette_id: ID de la recette Ã  supprimer
 
     Returns:
         Message de confirmation
 
     Raises:
-        401: Non authentifié
-        404: Recette non trouvée
+        401: Non authentifiÃ©
+        404: Recette non trouvÃ©e
 
     Example:
         ```
@@ -529,7 +529,7 @@ async def supprimer_recette(recette_id: int, user: dict[str, Any] = Depends(requ
         Authorization: Bearer <token>
 
         Response:
-        {"message": "Recette 42 supprimée", "id": 42}
+        {"message": "Recette 42 supprimÃ©e", "id": 42}
         ```
     """
     from src.core.models import Recette
@@ -539,25 +539,25 @@ async def supprimer_recette(recette_id: int, user: dict[str, Any] = Depends(requ
             db_recette = session.query(Recette).filter(Recette.id == recette_id).first()
 
             if not db_recette:
-                raise HTTPException(status_code=404, detail="Recette non trouvée")
+                raise HTTPException(status_code=404, detail="Recette non trouvÃ©e")
 
             session.delete(db_recette)
             session.commit()
 
-            return MessageResponse(message=f"Recette {recette_id} supprimée", id=recette_id)
+            return MessageResponse(message=f"Recette {recette_id} supprimÃ©e", id=recette_id)
 
     return await executer_async(_delete)
 
 
-# ─────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # PLANIFICATION "CETTE SEMAINE"
-# ─────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
 @router.get("/planifiees-semaine", response_model=list[RecetteResponse])
 @gerer_exception_api
 async def lister_recettes_semaine(user: dict[str, Any] = Depends(require_auth)):
-    """Liste les recettes marquées 'à faire cette semaine'."""
+    """Liste les recettes marquÃ©es 'Ã  faire cette semaine'."""
     from src.core.models import Recette
     from src.core.models.user_preferences import RetourRecette
 
@@ -581,7 +581,7 @@ async def lister_recettes_semaine(user: dict[str, Any] = Depends(require_auth)):
 @router.post("/{recette_id}/planifier-semaine", response_model=MessageResponse)
 @gerer_exception_api
 async def planifier_recette_semaine(recette_id: int, user: dict[str, Any] = Depends(require_auth)):
-    """Marque une recette comme 'à faire cette semaine'."""
+    """Marque une recette comme 'Ã  faire cette semaine'."""
     from datetime import datetime
 
     from src.core.models import Recette
@@ -591,7 +591,7 @@ async def planifier_recette_semaine(recette_id: int, user: dict[str, Any] = Depe
         with executer_avec_session() as session:
             recette = session.query(Recette).filter(Recette.id == recette_id).first()
             if not recette:
-                raise HTTPException(status_code=404, detail="Recette non trouvée")
+                raise HTTPException(status_code=404, detail="Recette non trouvÃ©e")
 
             user_id = user.get("sub", user.get("id", "dev"))
             retour = (
@@ -611,7 +611,7 @@ async def planifier_recette_semaine(recette_id: int, user: dict[str, Any] = Depe
                 )
                 session.add(retour)
             session.commit()
-            return MessageResponse(message=f"Recette {recette_id} planifiée cette semaine")
+            return MessageResponse(message=f"Recette {recette_id} planifiÃ©e cette semaine")
 
     return await executer_async(_upsert)
 
@@ -636,41 +636,41 @@ async def deplanifier_recette_semaine(
                 retour.planifie_cette_semaine = False
                 retour.date_planifie = None
                 session.commit()
-            return MessageResponse(message=f"Recette {recette_id} retirée de cette semaine")
+            return MessageResponse(message=f"Recette {recette_id} retirÃ©e de cette semaine")
 
     return await executer_async(_clear)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # IMPORT DE RECETTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/import-url", response_model=RecetteResponse, responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def importer_recette_url(
-    url: str = Query(..., description="URL de la recette à importer"),
+    url: str = Query(..., description="URL de la recette Ã  importer"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
     Importe une recette depuis une URL.
     
     Supporte les sites populaires (Marmiton, CuisineAZ, etc.) ainsi que
-    les pages génériques via extraction IA.
+    les pages gÃ©nÃ©riques via extraction IA.
     
     Args:
-        url: URL complète de la recette
-        user: Utilisateur authentifié
+        url: URL complÃ¨te de la recette
+        user: Utilisateur authentifiÃ©
     
     Returns:
-        Recette créée avec données importées
+        Recette crÃ©Ã©e avec donnÃ©es importÃ©es
     
     Raises:
-        HTTPException 422: URL invalide ou recette non trouvée
+        HTTPException 422: URL invalide ou recette non trouvÃ©e
         HTTPException 500: Erreur lors de l'import
     """
     from src.core.models import Recette
-    from src.services.cuisine.recettes.import_url import get_recipe_import_service
+    from src.services.cuisine.recettes.import_url import obtenir_recipe_import_service
     from src.services.cuisine.recettes.enrichers import (
         ImportedIngredient,
         ImportedRecipe,
@@ -679,7 +679,7 @@ async def importer_recette_url(
     
     def _import():
         # Import via service
-        import_service = get_recipe_import_service()
+        import_service = obtenir_recipe_import_service()
         result = import_service.import_from_url(url, use_ai_fallback=True)
         
         if not result.success:
@@ -713,9 +713,9 @@ async def importer_recette_url(
         enricher = get_recipe_enricher()
         enrichment = enricher.enrich(imported_recipe)
         
-        # Créer la recette en DB
+        # CrÃ©er la recette en DB
         with executer_avec_session() as session:
-            # Créer recette principale avec enrichissement
+            # CrÃ©er recette principale avec enrichissement
             recette = Recette(
                 nom=recipe_data.nom,
                 description=recipe_data.description,
@@ -724,7 +724,7 @@ async def importer_recette_url(
                 portions=recipe_data.portions or 4,
                 difficulte=getattr(recipe_data, "niveau", "moyen") or "moyen",
                 categorie=recipe_data.categorie or "plat",
-                saison="toute_année",
+                saison="toute_annÃ©e",
                 genere_par_ia=True,
                 # Enrichissement nutrition
                 calories=enrichment.calories,
@@ -747,21 +747,21 @@ async def importer_recette_url(
             session.add(recette)
             session.flush()
             
-            # Ajouter ingrédients via helper (find-or-create Ingredient + RecetteIngredient)
+            # Ajouter ingrÃ©dients via helper (find-or-create Ingredient + RecetteIngredient)
             from src.api.schemas.recettes import IngredientItem
 
             ing_items = [
                 IngredientItem(
                     nom=ing_data.nom,
                     quantite=ing_data.quantite or 1,
-                    unite=ing_data.unite or "pièce",
+                    unite=ing_data.unite or "piÃ¨ce",
                 )
                 for ing_data in (recipe_data.ingredients or [])
                 if ing_data.nom
             ]
             _sauvegarder_ingredients(session, recette.id, ing_items)
             
-            # Ajouter étapes
+            # Ajouter Ã©tapes
             _sauvegarder_etapes(session, recette.id, recipe_data.etapes or [])
             
             session.commit()
@@ -785,11 +785,11 @@ async def importer_recette_pdf(
     (nutrition, bio/local, classification, robots).
     
     Args:
-        file: Fichier PDF uploadé
-        user: Utilisateur authentifié
+        file: Fichier PDF uploadÃ©
+        user: Utilisateur authentifiÃ©
     
     Returns:
-        Recette créée avec données extraites et enrichies
+        Recette crÃ©Ã©e avec donnÃ©es extraites et enrichies
     
     Raises:
         HTTPException 422: Fichier invalide ou non PDF
@@ -807,11 +807,11 @@ async def importer_recette_pdf(
     )
     
     def _import():
-        # Vérifier type de fichier
+        # VÃ©rifier type de fichier
         if not file.filename.lower().endswith('.pdf'):
             raise HTTPException(
                 status_code=422,
-                detail="Seuls les fichiers PDF sont acceptés"
+                detail="Seuls les fichiers PDF sont acceptÃ©s"
             )
         
         # Sauvegarder temporairement le fichier
@@ -830,7 +830,7 @@ async def importer_recette_pdf(
                 )
             
             # Convertir en ImportedRecipe pour l'enrichissement
-            # Les ingrédients sont des strings simples, on parse basiquement
+            # Les ingrÃ©dients sont des strings simples, on parse basiquement
             imported_ingredients = []
             for ing_str in raw_data.get("ingredients", []):
                 # Pattern simple: "250g farine" -> 250, g, farine
@@ -842,11 +842,11 @@ async def importer_recette_pdf(
                         ImportedIngredient(
                             nom=name.strip(),
                             quantite=float(qty),
-                            unite=unit or "pièce",
+                            unite=unit or "piÃ¨ce",
                         )
                     )
                 else:
-                    # Pas de quantité détectée, juste le nom
+                    # Pas de quantitÃ© dÃ©tectÃ©e, juste le nom
                     imported_ingredients.append(
                         ImportedIngredient(nom=ing_str.strip())
                     )
@@ -865,7 +865,7 @@ async def importer_recette_pdf(
             enricher = get_recipe_enricher()
             enrichment = enricher.enrich(recipe)
             
-            # Créer en DB
+            # CrÃ©er en DB
             with executer_avec_session() as session:
                 recette = Recette(
                     nom=recipe.nom,
@@ -875,7 +875,7 @@ async def importer_recette_pdf(
                     portions=recipe.portions,
                     difficulte="moyen",
                     categorie="plat",
-                    saison="toute_année",
+                    saison="toute_annÃ©e",
                     genere_par_ia=False,
                     # Enrichissement nutrition
                     calories=enrichment.calories,
@@ -898,20 +898,20 @@ async def importer_recette_pdf(
                 session.add(recette)
                 session.flush()
                 
-                # Ingrédients
+                # IngrÃ©dients
                 from src.api.schemas.recettes import IngredientItem
                 
                 ing_items = [
                     IngredientItem(
                         nom=ing.nom,
                         quantite=ing.quantite or 1,
-                        unite=ing.unite or "pièce",
+                        unite=ing.unite or "piÃ¨ce",
                     )
                     for ing in recipe.ingredients
                 ]
                 _sauvegarder_ingredients(session, recette.id, ing_items)
                 
-                # Étapes
+                # Ã‰tapes
                 _sauvegarder_etapes(session, recette.id, recipe.etapes)
                 
                 session.commit()
@@ -926,9 +926,9 @@ async def importer_recette_pdf(
     return await executer_async(_import)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FAVORIS & NOTATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/{recette_id}/favori", response_model=MessageResponse)
@@ -942,7 +942,7 @@ async def ajouter_favori(recette_id: int, user: dict[str, Any] = Depends(require
         with executer_avec_session() as session:
             recette = session.query(Recette).filter(Recette.id == recette_id).first()
             if not recette:
-                raise HTTPException(status_code=404, detail="Recette non trouvée")
+                raise HTTPException(status_code=404, detail="Recette non trouvÃ©e")
 
             user_id = user.get("sub", user.get("id", "dev"))
             retour = (
@@ -958,7 +958,7 @@ async def ajouter_favori(recette_id: int, user: dict[str, Any] = Depends(require
                 )
                 session.add(retour)
             session.commit()
-            return MessageResponse(message=f"Recette {recette_id} ajoutée aux favoris")
+            return MessageResponse(message=f"Recette {recette_id} ajoutÃ©e aux favoris")
 
     return await executer_async(_upsert)
 
@@ -980,14 +980,14 @@ async def retirer_favori(recette_id: int, user: dict[str, Any] = Depends(require
             if retour:
                 retour.feedback = "neutral"
                 session.commit()
-            return MessageResponse(message=f"Recette {recette_id} retirée des favoris")
+            return MessageResponse(message=f"Recette {recette_id} retirÃ©e des favoris")
 
     return await executer_async(_remove)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ENRICHISSEMENT NUTRITIONNEL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/{recette_id}/enrichir-nutrition")
@@ -996,7 +996,7 @@ async def enrichir_nutrition_recette(
     recette_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Enrichit une recette avec les données nutritionnelles via OpenFoodFacts."""
+    """Enrichit une recette avec les donnÃ©es nutritionnelles via OpenFoodFacts."""
     from src.services.cuisine.nutrition import obtenir_service_nutrition
 
     def _enrichir():
@@ -1005,7 +1005,7 @@ async def enrichir_nutrition_recette(
         if not resultat:
             raise HTTPException(
                 status_code=404,
-                detail="Impossible d'enrichir cette recette (ingrédients manquants ou non trouvés)",
+                detail="Impossible d'enrichir cette recette (ingrÃ©dients manquants ou non trouvÃ©s)",
             )
         return resultat
 
@@ -1015,10 +1015,10 @@ async def enrichir_nutrition_recette(
 @router.post("/enrichir-nutrition-batch")
 @gerer_exception_api
 async def enrichir_nutrition_batch(
-    limite: int = Query(50, ge=1, le=200, description="Nombre max de recettes à traiter"),
+    limite: int = Query(50, ge=1, le=200, description="Nombre max de recettes Ã  traiter"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Enrichit en batch les recettes sans données nutritionnelles."""
+    """Enrichit en batch les recettes sans donnÃ©es nutritionnelles."""
     from src.services.cuisine.nutrition import obtenir_service_nutrition
 
     def _batch():
@@ -1028,9 +1028,9 @@ async def enrichir_nutrition_batch(
     return await executer_async(_batch)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VERSION JULES (CT-09)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/{recette_id}/version-jules", response_model=dict)
@@ -1039,19 +1039,19 @@ async def generer_version_jules(
     recette_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Génère une version adaptée à Jules (bébé) pour une recette.
+    """GÃ©nÃ¨re une version adaptÃ©e Ã  Jules (bÃ©bÃ©) pour une recette.
 
-    Adapte les ingrédients et instructions selon l'âge et les aliments exclus
-    de Jules définis dans les préférences de l'utilisateur.
+    Adapte les ingrÃ©dients et instructions selon l'Ã¢ge et les aliments exclus
+    de Jules dÃ©finis dans les prÃ©fÃ©rences de l'utilisateur.
 
     Args:
         recette_id: ID de la recette source
 
     Returns:
-        Données de la VersionRecette créée/mise à jour
+        DonnÃ©es de la VersionRecette crÃ©Ã©e/mise Ã  jour
     """
     from src.core.models.user_preferences import PreferenceUtilisateur
-    from src.services.famille.version_recette_jules import get_version_recette_jules_service
+    from src.services.famille.version_recette_jules import obtenir_version_recette_jules_service
 
     def _generate():
         with executer_avec_session() as session:
@@ -1066,15 +1066,15 @@ async def generer_version_jules(
                 "aliments_exclus_jules": prefs.aliments_exclus_jules if prefs else [],
             }
 
-        service = get_version_recette_jules_service()
+        service = obtenir_version_recette_jules_service()
         return service.generer_version_jules(recette_id, profil_jules)
 
     return await executer_async(_generate)
 
 
-# ═══════════════════════════════════════════════════════════
-# GÉNÉRATION DEPUIS PHOTO (CT-06)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# GÃ‰NÃ‰RATION DEPUIS PHOTO (CT-06)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/generer-depuis-photo", response_model=RecetteResponse, responses=REPONSES_CRUD_CREATION)
@@ -1083,26 +1083,26 @@ async def generer_recette_depuis_photo(
     image: UploadFile = File(..., description="Photo du plat ou de la recette"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Génère une recette complète depuis une photo via IA vision (CT-06).
+    """GÃ©nÃ¨re une recette complÃ¨te depuis une photo via IA vision (CT-06).
 
-    Analyse la photo avec Pixtral pour identifier les ingrédients et préparer
-    une recette structurée, puis la persiste en base de données.
+    Analyse la photo avec Pixtral pour identifier les ingrÃ©dients et prÃ©parer
+    une recette structurÃ©e, puis la persiste en base de donnÃ©es.
 
     Args:
         image: Image du plat (JPEG, PNG, WEBP)
 
     Returns:
-        Recette créée avec ingrédients et étapes
+        Recette crÃ©Ã©e avec ingrÃ©dients et Ã©tapes
     """
     import asyncio
 
     from src.core.models import Recette
-    from src.services.integrations.multimodal import get_multimodal_service
+    from src.services.integrations.multimodal import obtenir_multimodal_service
 
     image_bytes = await image.read()
 
     async def _generate_async():
-        multimodal = get_multimodal_service()
+        multimodal = obtenir_multimodal_service()
         recette_extraite = await multimodal.extraire_recette_image(image_bytes)
 
         if not recette_extraite:
@@ -1115,7 +1115,7 @@ async def generer_recette_depuis_photo(
             with executer_avec_session() as session:
                 db_recette = Recette(
                     nom=recette_extraite.nom,
-                    description=f"Recette générée depuis photo",
+                    description=f"Recette gÃ©nÃ©rÃ©e depuis photo",
                     temps_preparation=_parse_minutes(recette_extraite.temps_preparation),
                     temps_cuisson=_parse_minutes(recette_extraite.temps_cuisson),
                     portions=4,
@@ -1131,7 +1131,7 @@ async def generer_recette_depuis_photo(
                     IngredientItem(
                         nom=ing.nom,
                         quantite=float(ing.quantite or 1),
-                        unite=ing.unite or "pièce",
+                        unite=ing.unite or "piÃ¨ce",
                     )
                     for ing in recette_extraite.ingredients
                     if ing.nom
@@ -1149,7 +1149,7 @@ async def generer_recette_depuis_photo(
 
 
 def _parse_minutes(valeur: str | None) -> int:
-    """Parse une chaîne '15 min', '1h30' etc. en nombre de minutes."""
+    """Parse une chaÃ®ne '15 min', '1h30' etc. en nombre de minutes."""
     if not valeur:
         return 0
     import re
@@ -1173,7 +1173,7 @@ def _parse_minutes(valeur: str | None) -> int:
 async def recette_surprise(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Retourne une recette surprise adaptée à la saison et aux stocks (QW-02)."""
+    """Retourne une recette surprise adaptÃ©e Ã  la saison et aux stocks (QW-02)."""
     import random
     from datetime import date
 
@@ -1189,17 +1189,17 @@ async def recette_surprise(
             elif mois in (3, 4, 5):
                 saison = "printemps"
             elif mois in (6, 7, 8):
-                saison = "été"
+                saison = "Ã©tÃ©"
             else:
                 saison = "automne"
 
-            # Articles en stock (noms normalisés)
+            # Articles en stock (noms normalisÃ©s)
             stocks = {
                 a.nom.lower()
                 for a in session.query(ArticleInventaire.nom).all()
             }
 
-            # Toutes les recettes avec leurs ingrédients
+            # Toutes les recettes avec leurs ingrÃ©dients
             recettes = session.query(RecetteORM).all()
             if not recettes:
                 raise HTTPException(status_code=404, detail="Aucune recette disponible")
@@ -1210,7 +1210,7 @@ async def recette_surprise(
                 if saison in (r.tags or []) or not r.tags
             ] or recettes
 
-            # Préférer les recettes dont des ingrédients sont en stock
+            # PrÃ©fÃ©rer les recettes dont des ingrÃ©dients sont en stock
             def _score(r: RecetteORM) -> int:
                 return sum(
                     1 for ing in (r.ingredients or [])
@@ -1224,4 +1224,5 @@ async def recette_surprise(
             return _serialiser_recette(recette, session, user)
 
     return await executer_async(_query)
+
 

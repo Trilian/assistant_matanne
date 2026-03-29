@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/api/routes/webhooks.py
 
 Tests unitaires pour les routes webhooks.
@@ -18,9 +18,9 @@ def client():
     return TestClient(app, raise_server_exceptions=False)
 
 
-# ═══════════════════════════════════════════════════════════
-# DONNÉES DE TEST
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# DONNÃ‰ES DE TEST
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 WEBHOOK_CREATE = {
     "url": "https://example.com/webhook",
@@ -34,9 +34,9 @@ WEBHOOK_UPDATE = {
 }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ROUTES WEBHOOKS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRoutesWebhooks:
@@ -79,7 +79,7 @@ class TestRoutesWebhooksAvecMock:
     """Tests avec mock du service webhooks."""
 
     def test_creer_webhook_appelle_service(self):
-        """Création de webhook appelle le service."""
+        """CrÃ©ation de webhook appelle le service."""
         mock_service = MagicMock()
         mock_service.creer_webhook.return_value = {
             "id": 1,
@@ -90,7 +90,7 @@ class TestRoutesWebhooksAvecMock:
         }
 
         with patch(
-            "src.api.routes.webhooks.get_webhook_service",
+            "src.api.routes.webhooks.obtenir_webhook_service",
             return_value=mock_service,
         ):
             from src.api.main import app
@@ -110,7 +110,7 @@ class TestRoutesWebhooksAvecMock:
         }
 
         with patch(
-            "src.api.routes.webhooks.get_webhook_service",
+            "src.api.routes.webhooks.obtenir_webhook_service",
             return_value=mock_service,
         ):
             from src.api.main import app
@@ -118,3 +118,4 @@ class TestRoutesWebhooksAvecMock:
             client = TestClient(app)
             response = client.post("/api/v1/webhooks/1/test")
             assert response.status_code in (200, 404, 500)
+

@@ -157,7 +157,7 @@ class CatalogueEntretienService:
 
 
 @service_factory("catalogue_entretien", tags={"maison"})
-def get_catalogue_entretien_service() -> CatalogueEntretienService:
+def obtenir_catalogue_entretien_service() -> CatalogueEntretienService:
     """Factory singleton pour le service catalogue entretien."""
     return CatalogueEntretienService()
 
@@ -165,3 +165,7 @@ def get_catalogue_entretien_service() -> CatalogueEntretienService:
 def obtenir_service_catalogue_entretien() -> CatalogueEntretienService:
     """Alias français."""
     return get_catalogue_entretien_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_catalogue_entretien_service = obtenir_catalogue_entretien_service  # alias rétrocompatibilité Sprint 12 A3

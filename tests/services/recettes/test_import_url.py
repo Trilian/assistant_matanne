@@ -1,4 +1,4 @@
-"""Tests pour src/services/recettes/import_url.py"""
+﻿"""Tests pour src/services/recettes/import_url.py"""
 
 from unittest.mock import Mock, patch
 
@@ -14,36 +14,36 @@ from src.services.cuisine.recettes.import_url import (
     MarmitonParser,
     RecipeImportService,
     RecipeParser,
-    get_recipe_import_service,
+    obtenir_recipe_import_service,
 )
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
 def sample_marmiton_html():
-    """HTML simplifié type Marmiton."""
+    """HTML simplifiÃ© type Marmiton."""
     return """
     <html>
-    <head><title>Poulet rôti - Marmiton</title></head>
+    <head><title>Poulet rÃ´ti - Marmiton</title></head>
     <body>
-        <h1>Poulet rôti aux herbes</h1>
-        <p class="description">Un délicieux poulet parfumé</p>
+        <h1>Poulet rÃ´ti aux herbes</h1>
+        <p class="description">Un dÃ©licieux poulet parfumÃ©</p>
         <img class="recipe-media" src="https://example.com/poulet.jpg">
         <div class="time">
-            <span>Préparation: 15 min</span>
+            <span>PrÃ©paration: 15 min</span>
             <span>Cuisson: 1h 30</span>
         </div>
         <div class="serving">4 personnes</div>
         <div class="ingredient">
             <li>1 poulet de 1,5 kg</li>
-            <li>2 cuillères à soupe d'huile d'olive</li>
+            <li>2 cuillÃ¨res Ã  soupe d'huile d'olive</li>
             <li>10 g de thym</li>
         </div>
         <div class="step">
-            <li>Préchauffer le four à 200°C</li>
+            <li>PrÃ©chauffer le four Ã  200Â°C</li>
             <li>Assaisonner le poulet avec les herbes</li>
             <li>Enfourner pendant 1h30</li>
         </div>
@@ -69,12 +69,12 @@ def sample_jsonld_html():
             "image": "https://example.com/tarte.jpg",
             "recipeIngredient": [
                 "500g de pommes",
-                "200g de pâte feuilletée",
+                "200g de pÃ¢te feuilletÃ©e",
                 "100g de sucre"
             ],
             "recipeInstructions": [
-                {"text": "Préchauffer le four"},
-                {"text": "Éplucher les pommes"},
+                {"text": "PrÃ©chauffer le four"},
+                {"text": "Ã‰plucher les pommes"},
                 {"text": "Garnir le moule"}
             ]
         }
@@ -87,23 +87,23 @@ def sample_jsonld_html():
     """
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PYDANTIC MODELS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestImportedIngredient:
     """Tests pour ImportedIngredient."""
 
     def test_create_basic(self):
-        """Test création basique."""
+        """Test crÃ©ation basique."""
         ing = ImportedIngredient(nom="farine")
         assert ing.nom == "farine"
         assert ing.quantite is None
         assert ing.unite == ""
 
     def test_create_complete(self):
-        """Test création complète."""
+        """Test crÃ©ation complÃ¨te."""
         ing = ImportedIngredient(nom="farine", quantite=200.0, unite="g")
         assert ing.nom == "farine"
         assert ing.quantite == 200.0
@@ -114,7 +114,7 @@ class TestImportedRecipe:
     """Tests pour ImportedRecipe."""
 
     def test_create_default(self):
-        """Test création avec défauts."""
+        """Test crÃ©ation avec dÃ©fauts."""
         recipe = ImportedRecipe()
         assert recipe.nom == ""
         assert recipe.portions == 4
@@ -124,10 +124,10 @@ class TestImportedRecipe:
         assert recipe.confiance_score == 0.0
 
     def test_create_complete(self):
-        """Test création complète."""
+        """Test crÃ©ation complÃ¨te."""
         recipe = ImportedRecipe(
-            nom="Poulet rôti",
-            description="Délicieux",
+            nom="Poulet rÃ´ti",
+            description="DÃ©licieux",
             temps_preparation=15,
             temps_cuisson=60,
             portions=4,
@@ -135,7 +135,7 @@ class TestImportedRecipe:
             source_site="Test",
             confiance_score=0.8,
         )
-        assert recipe.nom == "Poulet rôti"
+        assert recipe.nom == "Poulet rÃ´ti"
         assert recipe.confiance_score == 0.8
 
 
@@ -143,7 +143,7 @@ class TestImportResult:
     """Tests pour ImportResult."""
 
     def test_create_success(self):
-        """Test résultat succès."""
+        """Test rÃ©sultat succÃ¨s."""
         recipe = ImportedRecipe(nom="Test")
         result = ImportResult(
             success=True,
@@ -154,19 +154,19 @@ class TestImportResult:
         assert result.recipe.nom == "Test"
 
     def test_create_failure(self):
-        """Test résultat échec."""
+        """Test rÃ©sultat Ã©chec."""
         result = ImportResult(
             success=False,
             message="Erreur",
-            errors=["Détail 1", "Détail 2"],
+            errors=["DÃ©tail 1", "DÃ©tail 2"],
         )
         assert result.success is False
         assert len(result.errors) == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RECIPE PARSER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRecipeParser:
@@ -203,7 +203,7 @@ class TestRecipeParser:
         assert RecipeParser.parse_duration("2h 15 minutes") == 135
 
     def test_parse_duration_empty(self):
-        """Test durée vide."""
+        """Test durÃ©e vide."""
         assert RecipeParser.parse_duration("") == 0
         assert RecipeParser.parse_duration(None) == 0
 
@@ -224,27 +224,27 @@ class TestRecipeParser:
 
     def test_parse_portions_bounds(self):
         """Test limites portions."""
-        # 0 devient 1 (min), pas 4 car un nombre est trouvé
+        # 0 devient 1 (min), pas 4 car un nombre est trouvÃ©
         assert RecipeParser.parse_portions("0 personnes") == 1  # min(max(0,1),20) = 1
         assert RecipeParser.parse_portions("100 personnes") == 20  # max 20
 
     # Tests parse_ingredient
     def test_parse_ingredient_basic(self):
-        """Test parsing ingrédient basique."""
+        """Test parsing ingrÃ©dient basique."""
         ing = RecipeParser.parse_ingredient("200 g de farine")
         assert ing.nom == "farine"
         assert ing.quantite == 200
         assert ing.unite == "g"
 
     def test_parse_ingredient_no_unit(self):
-        """Test sans unité."""
+        """Test sans unitÃ©."""
         ing = RecipeParser.parse_ingredient("2 oeufs")
         assert ing.nom == "oeufs"
         assert ing.quantite == 2
 
     def test_parse_ingredient_cuillere(self):
-        """Test cuillère à soupe."""
-        ing = RecipeParser.parse_ingredient("2 cuillères à soupe de sucre")
+        """Test cuillÃ¨re Ã  soupe."""
+        ing = RecipeParser.parse_ingredient("2 cuillÃ¨res Ã  soupe de sucre")
         assert ing.nom == "sucre"
         assert ing.quantite == 2
         assert "cuill" in ing.unite.lower()
@@ -257,26 +257,26 @@ class TestRecipeParser:
         assert ing.unite == "ml"
 
     def test_parse_ingredient_empty(self):
-        """Test ingrédient vide."""
+        """Test ingrÃ©dient vide."""
         ing = RecipeParser.parse_ingredient("")
         assert ing.nom == ""
 
     def test_parse_ingredient_no_quantity(self):
-        """Test sans quantité."""
+        """Test sans quantitÃ©."""
         ing = RecipeParser.parse_ingredient("sel et poivre")
         assert ing.nom == "sel et poivre"
 
     def test_parse_ingredient_float_quantity(self):
-        """Test quantité décimale."""
+        """Test quantitÃ© dÃ©cimale."""
         ing = RecipeParser.parse_ingredient("1,5 kg de viande")
         assert ing.nom == "viande"
         assert ing.quantite == 1.5
         assert ing.unite == "kg"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS MARMITON PARSER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestMarmitonParser:
@@ -287,7 +287,7 @@ class TestMarmitonParser:
         soup = BeautifulSoup(sample_marmiton_html, "html.parser")
         recipe = MarmitonParser.parse(soup, "https://marmiton.org/recette")
 
-        assert recipe.nom == "Poulet rôti aux herbes"
+        assert recipe.nom == "Poulet rÃ´ti aux herbes"
         assert recipe.source_site == "Marmiton"
         assert recipe.confiance_score > 0
 
@@ -299,14 +299,14 @@ class TestMarmitonParser:
         assert recipe.image_url == "https://example.com/poulet.jpg"
 
     def test_parse_extracts_ingredients(self, sample_marmiton_html):
-        """Test extraction ingrédients."""
+        """Test extraction ingrÃ©dients."""
         soup = BeautifulSoup(sample_marmiton_html, "html.parser")
         recipe = MarmitonParser.parse(soup, "https://marmiton.org/recette")
 
         assert len(recipe.ingredients) >= 1
 
     def test_parse_extracts_steps(self, sample_marmiton_html):
-        """Test extraction étapes."""
+        """Test extraction Ã©tapes."""
         soup = BeautifulSoup(sample_marmiton_html, "html.parser")
         recipe = MarmitonParser.parse(soup, "https://marmiton.org/recette")
 
@@ -319,11 +319,11 @@ class TestMarmitonParser:
         assert score == 0.0
 
     def test_calculate_confidence_complete(self):
-        """Test score confiance recette complète."""
+        """Test score confiance recette complÃ¨te."""
         recipe = ImportedRecipe(
-            nom="Test recette complète",
+            nom="Test recette complÃ¨te",
             ingredients=[ImportedIngredient(nom=f"ing{i}") for i in range(5)],
-            etapes=["Étape 1", "Étape 2"],
+            etapes=["Ã‰tape 1", "Ã‰tape 2"],
             temps_preparation=30,
             image_url="https://example.com/img.jpg",
         )
@@ -331,9 +331,9 @@ class TestMarmitonParser:
         assert score > 0.5
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CUISINEAZ PARSER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCuisineAZParser:
@@ -361,7 +361,7 @@ class TestCuisineAZParser:
         soup = BeautifulSoup(sample_jsonld_html, "html.parser")
         recipe = CuisineAZParser.parse(soup, "https://cuisineaz.com/recette")
 
-        # JSON-LD doit être extrait
+        # JSON-LD doit Ãªtre extrait
         assert len(recipe.ingredients) >= 1 or recipe.nom != ""
 
     def test_calculate_confidence(self):
@@ -371,9 +371,9 @@ class TestCuisineAZParser:
         assert score > 0
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GENERIC PARSER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenericRecipeParser:
@@ -389,14 +389,14 @@ class TestGenericRecipeParser:
         assert recipe.confiance_score == 0.9  # Score JSON-LD
 
     def test_parse_jsonld_ingredients(self, sample_jsonld_html):
-        """Test extraction ingrédients JSON-LD."""
+        """Test extraction ingrÃ©dients JSON-LD."""
         soup = BeautifulSoup(sample_jsonld_html, "html.parser")
         recipe = GenericRecipeParser.parse(soup, "https://example.com/recette")
 
         assert len(recipe.ingredients) == 3
 
     def test_parse_jsonld_steps(self, sample_jsonld_html):
-        """Test extraction étapes JSON-LD."""
+        """Test extraction Ã©tapes JSON-LD."""
         soup = BeautifulSoup(sample_jsonld_html, "html.parser")
         recipe = GenericRecipeParser.parse(soup, "https://example.com/recette")
 
@@ -445,7 +445,7 @@ class TestGenericRecipeParser:
             {
                 "@type": "Recipe",
                 "name": "Test",
-                "recipeInstructions": "Étape 1. Étape 2. Étape 3."
+                "recipeInstructions": "Ã‰tape 1. Ã‰tape 2. Ã‰tape 3."
             }
             </script>
         </head>
@@ -470,9 +470,9 @@ class TestGenericRecipeParser:
         assert score > 0.5
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RECIPE IMPORT SERVICE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRecipeImportService:
@@ -485,25 +485,25 @@ class TestRecipeImportService:
         assert service.cache_prefix == "recipe_import"
 
     def test_get_parser_for_url_marmiton(self):
-        """Test sélection parser Marmiton."""
+        """Test sÃ©lection parser Marmiton."""
         service = RecipeImportService()
         parser = service._get_parser_for_url("https://www.marmiton.org/recettes/test")
         assert parser == MarmitonParser
 
     def test_get_parser_for_url_cuisineaz(self):
-        """Test sélection parser CuisineAZ."""
+        """Test sÃ©lection parser CuisineAZ."""
         service = RecipeImportService()
         parser = service._get_parser_for_url("https://www.cuisineaz.com/recettes/test")
         assert parser == CuisineAZParser
 
     def test_get_parser_for_url_generic(self):
-        """Test fallback parser générique."""
+        """Test fallback parser gÃ©nÃ©rique."""
         service = RecipeImportService()
         parser = service._get_parser_for_url("https://blog.example.com/recette")
         assert parser == GenericRecipeParser
 
     def test_import_from_url_invalid_scheme(self):
-        """Test URL invalide (schéma)."""
+        """Test URL invalide (schÃ©ma)."""
         service = RecipeImportService()
         result = service.import_from_url("ftp://example.com/recette")
 
@@ -522,11 +522,11 @@ class TestRecipeImportService:
         result = service.import_from_url("https://example.com/recette")
 
         assert result.success is False
-        assert "télécharger" in result.message.lower() or result is None
+        assert "tÃ©lÃ©charger" in result.message.lower() or result is None
 
     @patch.object(RecipeImportService, "__init__", lambda x: None)
     def test_import_from_url_success(self, sample_jsonld_html):
-        """Test import réussi."""
+        """Test import rÃ©ussi."""
         service = RecipeImportService()
 
         # Mock HTTP client
@@ -574,8 +574,8 @@ class TestGetRecipeImportService:
 
         module._import_service = None
 
-        service1 = get_recipe_import_service()
-        service2 = get_recipe_import_service()
+        service1 = obtenir_recipe_import_service()
+        service2 = obtenir_recipe_import_service()
 
         assert service1 is service2
 
@@ -585,36 +585,36 @@ class TestGetRecipeImportService:
 
         module._import_service = None
 
-        service = get_recipe_import_service()
+        service = obtenir_recipe_import_service()
         assert isinstance(service, RecipeImportService)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEdgeCases:
     """Tests cas limites."""
 
     def test_parse_ingredient_with_apostrophe(self):
-        """Test ingrédient avec apostrophe."""
+        """Test ingrÃ©dient avec apostrophe."""
         ing = RecipeParser.parse_ingredient("200 g d'amandes")
         assert ing.nom == "amandes"
 
     def test_parse_ingredient_pinch(self):
-        """Test pincée."""
-        ing = RecipeParser.parse_ingredient("1 pincée de sel")
+        """Test pincÃ©e."""
+        ing = RecipeParser.parse_ingredient("1 pincÃ©e de sel")
         assert "sel" in ing.nom
         assert ing.quantite == 1
 
     def test_parse_duration_iso8601(self):
-        """Test durée format ISO 8601."""
-        # Le parser devrait gérer PT30M -> 30
+        """Test durÃ©e format ISO 8601."""
+        # Le parser devrait gÃ©rer PT30M -> 30
         assert RecipeParser.parse_duration("30") == 30
 
     def test_import_result_defaults(self):
-        """Test valeurs par défaut ImportResult."""
+        """Test valeurs par dÃ©faut ImportResult."""
         result = ImportResult()
         assert result.success is False
         assert result.message == ""
@@ -632,23 +632,23 @@ class TestEdgeCases:
         assert recipe.source_site == "Example"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INTEGRATION PARSERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestParserIntegration:
-    """Tests d'intégration des parsers."""
+    """Tests d'intÃ©gration des parsers."""
 
     def test_marmiton_full_recipe(self):
-        """Test recette Marmiton complète."""
+        """Test recette Marmiton complÃ¨te."""
         html = """
         <html>
         <body>
             <h1>Coq au vin</h1>
-            <p class="description">Le classique de la cuisine française</p>
+            <p class="description">Le classique de la cuisine franÃ§aise</p>
             <img class="recipe-media" src="https://img.marmiton.org/coq.jpg">
-            <div class="time">Préparation: 45 min</div>
+            <div class="time">PrÃ©paration: 45 min</div>
             <div class="time">Cuisson: 2h 30</div>
             <div class="portion">6 personnes</div>
             <div class="ingredient">
@@ -658,7 +658,7 @@ class TestParserIntegration:
                 <li>250g de champignons</li>
             </div>
             <div class="step">
-                <li>Découper le coq en morceaux</li>
+                <li>DÃ©couper le coq en morceaux</li>
                 <li>Faire revenir les lardons</li>
                 <li>Ajouter le vin et laisser mijoter 2h30</li>
             </div>
@@ -678,7 +678,7 @@ class TestParserIntegration:
         html = """
         <html>
         <head>
-            <meta name="description" content="Une délicieuse recette maison">
+            <meta name="description" content="Une dÃ©licieuse recette maison">
         </head>
         <body>
             <h1>Recette test</h1>
@@ -688,7 +688,7 @@ class TestParserIntegration:
         soup = BeautifulSoup(html, "html.parser")
         recipe = GenericRecipeParser.parse(soup, "https://example.com")
 
-        assert "délicieuse" in recipe.description.lower() or recipe.nom == "Recette test"
+        assert "dÃ©licieuse" in recipe.description.lower() or recipe.nom == "Recette test"
 
     def test_generic_parser_image_og(self):
         """Test extraction image Open Graph."""
@@ -705,20 +705,20 @@ class TestParserIntegration:
         soup = BeautifulSoup(html, "html.parser")
         recipe = GenericRecipeParser.parse(soup, "https://example.com")
 
-        # Image peut être extraite ou non selon l'ordre des sélecteurs
+        # Image peut Ãªtre extraite ou non selon l'ordre des sÃ©lecteurs
         assert recipe.nom == "Test"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ADDITIONNELS POUR COUVERTURE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRecipeParserAdditional:
     """Tests additionnels pour RecipeParser."""
 
     def test_parse_duration_various_formats(self):
-        """Test différents formats de durée."""
+        """Test diffÃ©rents formats de durÃ©e."""
         assert RecipeParser.parse_duration("PT30M") >= 0  # ISO format
         assert RecipeParser.parse_duration("1 heure 30") >= 60
         assert RecipeParser.parse_duration("90 minutes") == 90
@@ -749,7 +749,7 @@ class TestRecipeParserAdditional:
         assert ing.quantite == 6
 
     def test_clean_text_with_newlines_and_tabs(self):
-        """Test nettoyage avec caractères spéciaux."""
+        """Test nettoyage avec caractÃ¨res spÃ©ciaux."""
         result = RecipeParser.clean_text("  Hello\t\n  World  \n \t  Test   ")
         assert result == "Hello World Test"
 
@@ -809,14 +809,14 @@ class TestGenericParserAdditional:
         r1 = ImportedRecipe(nom="AB")
         s1 = GenericRecipeParser._calculate_confidence(r1)
 
-        # Recipe avec nom long et ingrédients
+        # Recipe avec nom long et ingrÃ©dients
         r2 = ImportedRecipe(
             nom="This is a longer recipe name",
             ingredients=[ImportedIngredient(nom="test")],
         )
         s2 = GenericRecipeParser._calculate_confidence(r2)
 
-        # r2 a un nom > 3 chars (0.2) + ingrédients (0.04) = 0.24
+        # r2 a un nom > 3 chars (0.2) + ingrÃ©dients (0.04) = 0.24
         # r1 a un nom < 3 chars = 0
         assert s2 > s1
 
@@ -836,7 +836,7 @@ class TestCuisineAZParserAdditional:
         """
         soup = BeautifulSoup(html, "html.parser")
         recipe = CuisineAZParser.parse(soup, "https://cuisineaz.com/recette")
-        # L'image devrait avoir le protocole https ajouté
+        # L'image devrait avoir le protocole https ajoutÃ©
         if recipe.image_url:
             assert recipe.image_url.startswith("https:")
 
@@ -863,14 +863,14 @@ class TestRecipeImportServiceAdditional:
     """Tests additionnels pour RecipeImportService."""
 
     def test_get_parser_strips_www(self):
-        """Test que www est bien retiré de l'URL."""
+        """Test que www est bien retirÃ© de l'URL."""
         service = RecipeImportService()
         parser1 = service._get_parser_for_url("https://www.marmiton.org/test")
         parser2 = service._get_parser_for_url("https://marmiton.org/test")
         assert parser1 == parser2 == MarmitonParser
 
     def test_import_from_url_with_ftp_scheme(self):
-        """Test URL avec schéma FTP invalide."""
+        """Test URL avec schÃ©ma FTP invalide."""
         service = RecipeImportService()
         result = service.import_from_url("ftp://example.com/recette")
         assert result.success is False
@@ -882,10 +882,10 @@ class TestRecipeImportServiceAdditional:
         assert results == []
 
     def test_import_batch_mixed_results(self):
-        """Test import lot avec résultats mixtes."""
+        """Test import lot avec rÃ©sultats mixtes."""
         service = RecipeImportService()
         with patch.object(service, "import_from_url") as mock_import:
-            # Premier succès, deuxième échec
+            # Premier succÃ¨s, deuxiÃ¨me Ã©chec
             mock_import.side_effect = [
                 ImportResult(success=True, message="OK"),
                 ImportResult(success=False, message="Erreur"),
@@ -899,7 +899,7 @@ class TestRecipeImportServiceAdditional:
 
 
 class TestJsonLdParsing:
-    """Tests pour le parsing JSON-LD avancé."""
+    """Tests pour le parsing JSON-LD avancÃ©."""
 
     def test_jsonld_with_image_array(self):
         """Test JSON-LD avec image en tableau."""
@@ -982,3 +982,4 @@ class TestJsonLdParsing:
         recipe = GenericRecipeParser.parse(soup, "https://example.com")
         # Doit utiliser le fallback HTML
         assert recipe.nom == "Fallback Title"
+

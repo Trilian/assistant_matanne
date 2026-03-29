@@ -241,7 +241,7 @@ class ServiceGenerateurImages:
 
 
 @service_factory("image_generator", tags={"integrations", "images"})
-def get_image_generator_service() -> ServiceGenerateurImages:
+def obtenir_image_generator_service() -> ServiceGenerateurImages:
     """Factory singleton pour le service générateur d'images."""
     return ServiceGenerateurImages()
 
@@ -290,3 +290,7 @@ def _rechercher_image_pixabay(nom_recette: str, search_query: str = "") -> str |
 def _rechercher_image_unsplash(nom_recette: str, search_query: str = "") -> str | None:
     """Recherche image Unsplash (délègue à providers.py)."""
     return _rechercher_image_unsplash_impl(nom_recette, search_query, api_key=UNSPLASH_API_KEY)
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_image_generator_service = obtenir_image_generator_service  # alias rétrocompatibilité Sprint 12 A3

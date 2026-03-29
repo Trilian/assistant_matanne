@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unitaires pour service.py
 
 Module: src.services.budget.service
@@ -18,55 +18,55 @@ from src.services.famille.budget.schemas import (
 )
 from src.services.famille.budget.service import (
     BudgetService,
-    get_budget_service,
+    obtenir_budget_service,
 )
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS - INITIALISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBudgetServiceInit:
     """Tests d'initialisation de BudgetService."""
 
     def test_creation(self):
-        """Création du service."""
+        """CrÃ©ation du service."""
         service = BudgetService()
         assert service is not None
 
     def test_cache_initialise(self):
-        """Cache des dépenses initialisé."""
+        """Cache des dÃ©penses initialisÃ©."""
         service = BudgetService()
         assert hasattr(service, "_depenses_cache")
         assert isinstance(service._depenses_cache, dict)
 
     def test_budgets_defaut_exist(self):
-        """Budgets par défaut définis."""
+        """Budgets par dÃ©faut dÃ©finis."""
         service = BudgetService()
         assert hasattr(service, "BUDGETS_DEFAUT")
         assert len(service.BUDGETS_DEFAUT) > 0
 
     def test_budgets_defaut_all_categories(self):
-        """Budgets par défaut contiennent des catégories connues."""
+        """Budgets par dÃ©faut contiennent des catÃ©gories connues."""
         service = BudgetService()
         assert CategorieDepense.ALIMENTATION in service.BUDGETS_DEFAUT
         assert CategorieDepense.COURSES in service.BUDGETS_DEFAUT
         assert CategorieDepense.TRANSPORT in service.BUDGETS_DEFAUT
 
     def test_budgets_defaut_values_positive(self):
-        """Tous les budgets par défaut sont positifs."""
+        """Tous les budgets par dÃ©faut sont positifs."""
         service = BudgetService()
         for cat, montant in service.BUDGETS_DEFAUT.items():
-            assert montant >= 0, f"Budget {cat} doit être >= 0"
+            assert montant >= 0, f"Budget {cat} doit Ãªtre >= 0"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS - FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetBudgetService:
-    """Tests de la factory get_budget_service."""
+    """Tests de la factory obtenir_budget_service."""
 
     def test_retourne_instance(self):
         """Factory retourne une instance."""
@@ -75,27 +75,27 @@ class TestGetBudgetService:
 
         module._budget_service = None
 
-        service = get_budget_service()
+        service = obtenir_budget_service()
         assert service is not None
         assert isinstance(service, BudgetService)
 
     def test_singleton(self):
-        """Factory retourne le même singleton."""
-        service1 = get_budget_service()
-        service2 = get_budget_service()
+        """Factory retourne le mÃªme singleton."""
+        service1 = obtenir_budget_service()
+        service2 = obtenir_budget_service()
         assert service1 is service2
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS - CRUD DÉPENSES (Mock DB)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS - CRUD DÃ‰PENSES (Mock DB)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAjouterDepense:
     """Tests pour ajouter_depense."""
 
     def test_ajouter_depense_simple(self):
-        """Ajout d'une dépense simple."""
+        """Ajout d'une dÃ©pense simple."""
         mock_session = MagicMock()
 
         service = BudgetService()
@@ -119,7 +119,7 @@ class TestAjouterDepense:
         assert mock_session.commit.called
 
     def test_ajouter_depense_recurrente(self):
-        """Ajout d'une dépense récurrente."""
+        """Ajout d'une dÃ©pense rÃ©currente."""
         mock_session = MagicMock()
 
         service = BudgetService()
@@ -139,7 +139,7 @@ class TestAjouterDepense:
         with patch.object(service, "_verifier_alertes_budget"):
             result = service.ajouter_depense(depense, db=mock_session)
 
-        # Vérifier que est_recurrent est passé au modèle
+        # VÃ©rifier que est_recurrent est passÃ© au modÃ¨le
         call_args = mock_session.add.call_args
         assert call_args is not None
 
@@ -148,7 +148,7 @@ class TestModifierDepense:
     """Tests pour modifier_depense."""
 
     def test_modifier_depense_found(self):
-        """Modification d'une dépense existante."""
+        """Modification d'une dÃ©pense existante."""
         mock_session = MagicMock()
         mock_entry = MagicMock()
         mock_entry.id = 1
@@ -162,7 +162,7 @@ class TestModifierDepense:
         assert mock_session.commit.called
 
     def test_modifier_depense_not_found(self):
-        """Modification d'une dépense inexistante."""
+        """Modification d'une dÃ©pense inexistante."""
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
@@ -176,7 +176,7 @@ class TestSupprimerDepense:
     """Tests pour supprimer_depense."""
 
     def test_supprimer_depense_found(self):
-        """Suppression d'une dépense existante."""
+        """Suppression d'une dÃ©pense existante."""
         mock_session = MagicMock()
         mock_entry = MagicMock()
         mock_session.query.return_value.filter.return_value.first.return_value = mock_entry
@@ -189,7 +189,7 @@ class TestSupprimerDepense:
         assert mock_session.commit.called
 
     def test_supprimer_depense_not_found(self):
-        """Suppression d'une dépense inexistante."""
+        """Suppression d'une dÃ©pense inexistante."""
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
@@ -204,7 +204,7 @@ class TestGetDepensesMois:
     """Tests pour get_depenses_mois."""
 
     def test_get_depenses_mois_empty(self):
-        """Mois sans dépenses retourne liste vide."""
+        """Mois sans dÃ©penses retourne liste vide."""
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
 
@@ -214,7 +214,7 @@ class TestGetDepensesMois:
         assert result == []
 
     def test_get_depenses_mois_with_data(self):
-        """Récupération des dépenses d'un mois."""
+        """RÃ©cupÃ©ration des dÃ©penses d'un mois."""
         mock_session = MagicMock()
 
         mock_entry = MagicMock()
@@ -236,7 +236,7 @@ class TestGetDepensesMois:
         assert result[0].montant == 45.0
 
     def test_get_depenses_mois_filter_categorie(self):
-        """Filtrage par catégorie."""
+        """Filtrage par catÃ©gorie."""
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.filter.return_value.order_by.return_value.all.return_value = []
 
@@ -248,16 +248,16 @@ class TestGetDepensesMois:
         assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS - GESTION DES BUDGETS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDefinirBudget:
     """Tests pour definir_budget."""
 
     def test_definir_budget_nouveau(self):
-        """Définir un budget pour une catégorie (création)."""
+        """DÃ©finir un budget pour une catÃ©gorie (crÃ©ation)."""
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
@@ -270,7 +270,7 @@ class TestDefinirBudget:
         assert mock_session.commit.called
 
     def test_definir_budget_update(self):
-        """Mise à jour d'un budget existant."""
+        """Mise Ã  jour d'un budget existant."""
         mock_session = MagicMock()
         mock_budget = MagicMock()
         mock_budget.budgets_par_categorie = {"transport": 200}
@@ -289,7 +289,7 @@ class TestGetBudget:
     """Tests pour get_budget."""
 
     def test_get_budget_from_db(self):
-        """Récupérer un budget depuis la DB."""
+        """RÃ©cupÃ©rer un budget depuis la DB."""
         mock_session = MagicMock()
         mock_budget = MagicMock()
         mock_budget.budgets_par_categorie = {"alimentation": 700.0}
@@ -303,7 +303,7 @@ class TestGetBudget:
         assert result == 700.0
 
     def test_get_budget_default(self):
-        """Retourne le budget par défaut si non défini."""
+        """Retourne le budget par dÃ©faut si non dÃ©fini."""
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
@@ -319,19 +319,19 @@ class TestGetTousBudgets:
     """Tests pour get_tous_budgets."""
 
     def test_get_tous_budgets_empty(self):
-        """Retourne les budgets par défaut si DB vide."""
+        """Retourne les budgets par dÃ©faut si DB vide."""
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
         service = BudgetService()
         result = service.get_tous_budgets(2, 2026, db=mock_session)
 
-        # Devrait contenir les catégories avec défauts
+        # Devrait contenir les catÃ©gories avec dÃ©fauts
         assert isinstance(result, dict)
         assert CategorieDepense.ALIMENTATION in result
 
     def test_get_tous_budgets_from_db(self):
-        """Récupère les budgets depuis la DB."""
+        """RÃ©cupÃ¨re les budgets depuis la DB."""
         mock_session = MagicMock()
         mock_budget = MagicMock()
         mock_budget.budgets_par_categorie = {"alimentation": 800.0, "transport": 250.0}
@@ -348,7 +348,7 @@ class TestDefinirBudgetsBatch:
     """Tests pour definir_budgets_batch."""
 
     def test_definir_budgets_batch(self):
-        """Définir plusieurs budgets en une fois."""
+        """DÃ©finir plusieurs budgets en une fois."""
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
@@ -364,16 +364,16 @@ class TestDefinirBudgetsBatch:
         assert mock_session.commit.called
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS - STATISTIQUES ET ANALYSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetResumeMensuel:
     """Tests pour get_resume_mensuel."""
 
     def test_get_resume_mensuel(self):
-        """Génère un résumé financier."""
+        """GÃ©nÃ¨re un rÃ©sumÃ© financier."""
         service = BudgetService()
 
         with patch.object(service, "get_depenses_mois") as mock_deps:
@@ -400,7 +400,7 @@ class TestGetTendances:
     """Tests pour get_tendances."""
 
     def test_get_tendances(self):
-        """Récupère les tendances sur plusieurs mois."""
+        """RÃ©cupÃ¨re les tendances sur plusieurs mois."""
         service = BudgetService()
 
         with patch.object(service, "get_depenses_mois") as mock_deps:
@@ -418,7 +418,7 @@ class TestPrevoirDepenses:
     """Tests pour prevoir_depenses."""
 
     def test_prevoir_depenses(self):
-        """Génère des prévisions."""
+        """GÃ©nÃ¨re des prÃ©visions."""
         mock_session = MagicMock()
 
         service = BudgetService()
@@ -435,16 +435,16 @@ class TestPrevoirDepenses:
             assert isinstance(result[0], PrevisionDepense)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS - ALERTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestVerifierAlertesBudget:
     """Tests pour _verifier_alertes_budget."""
 
     def test_genere_alertes_depassement(self):
-        """Génère des alertes si budget dépassé."""
+        """GÃ©nÃ¨re des alertes si budget dÃ©passÃ©."""
         service = BudgetService()
 
         with patch.object(service, "get_tous_budgets") as mock_budgets:
@@ -463,7 +463,7 @@ class TestVerifierAlertesBudget:
         assert any(a["type"] == "danger" for a in alertes)
 
     def test_genere_alertes_warning(self):
-        """Génère un warning si budget > 80%."""
+        """GÃ©nÃ¨re un warning si budget > 80%."""
         service = BudgetService()
 
         with patch.object(service, "get_tous_budgets") as mock_budgets:
@@ -482,16 +482,16 @@ class TestVerifierAlertesBudget:
         assert any(a["type"] == "warning" for a in alertes)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS - FACTURES MAISON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAjouterFactureMaison:
     """Tests pour ajouter_facture_maison."""
 
     def test_ajouter_facture_structure(self):
-        """Vérifie la structure d'une facture."""
+        """VÃ©rifie la structure d'une facture."""
         facture = FactureMaison(
             categorie=CategorieDepense.ELECTRICITE,
             montant=120.0,
@@ -513,17 +513,17 @@ class TestAjouterFactureMaison:
             mois=2,
             annee=2026,
             consommation=100.0,
-            unite_consommation="m³",
+            unite_consommation="mÂ³",
             fournisseur="Engie",
         )
 
-        # Le fallback vers BudgetFamille sera utilisé dans la plupart des cas
+        # Le fallback vers BudgetFamille sera utilisÃ© dans la plupart des cas
         try:
             result = service.ajouter_facture_maison(facture)
             assert result is not None
             assert result.montant == 90.0
         except Exception:
-            # La méthode gère les erreurs (DepenseMaison peut ne pas exister)
+            # La mÃ©thode gÃ¨re les erreurs (DepenseMaison peut ne pas exister)
             pass
 
 
@@ -541,11 +541,11 @@ class TestGetFacturesMaison:
 
             result = service.get_factures_maison(db=mock_session)
 
-        # Peut retourner [] ou lever une exception qu'on gère
+        # Peut retourner [] ou lever une exception qu'on gÃ¨re
         assert isinstance(result, list)
 
     def test_get_factures_filter_categorie(self):
-        """Filtre par catégorie."""
+        """Filtre par catÃ©gorie."""
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
 
@@ -563,7 +563,7 @@ class TestGetEvolutionConsommation:
     """Tests pour get_evolution_consommation."""
 
     def test_get_evolution_empty(self):
-        """Retourne liste vide si pas de données."""
+        """Retourne liste vide si pas de donnÃ©es."""
         service = BudgetService()
 
         with patch.object(service, "get_factures_maison", return_value=[]):
@@ -572,7 +572,7 @@ class TestGetEvolutionConsommation:
         assert result == []
 
     def test_get_evolution_with_data(self):
-        """Retourne l'évolution avec données."""
+        """Retourne l'Ã©volution avec donnÃ©es."""
         service = BudgetService()
 
         factures = [
@@ -600,16 +600,16 @@ class TestGetEvolutionConsommation:
         assert result[1]["mois"] == 2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS - EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEdgeCases:
     """Tests des cas limites."""
 
     def test_depense_categorie_invalide_devient_autre(self):
-        """Catégorie invalide dans DB devient AUTRE."""
+        """CatÃ©gorie invalide dans DB devient AUTRE."""
         mock_session = MagicMock()
 
         mock_entry = MagicMock()
@@ -630,17 +630,17 @@ class TestEdgeCases:
         assert result[0].categorie == CategorieDepense.AUTRE
 
     def test_budget_default_mois_annee(self):
-        """Mois/année par défaut = aujourd'hui."""
+        """Mois/annÃ©e par dÃ©faut = aujourd'hui."""
         mock_session = MagicMock()
         mock_session.query.return_value.filter.return_value.first.return_value = None
 
         service = BudgetService()
         today = date.today()
 
-        # definir_budget sans mois/année utilise le mois courant
+        # definir_budget sans mois/annÃ©e utilise le mois courant
         service.definir_budget(CategorieDepense.ALIMENTATION, montant=500.0, db=mock_session)
 
-        # Le filtre doit avoir été appelé avec date du mois courant
+        # Le filtre doit avoir Ã©tÃ© appelÃ© avec date du mois courant
         assert mock_session.query.called
 
     def test_get_depenses_mois_description_none(self):
@@ -662,3 +662,4 @@ class TestEdgeCases:
         result = service.get_depenses_mois(2, 2026, db=mock_session)
 
         assert result[0].description == ""
+

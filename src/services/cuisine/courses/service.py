@@ -588,7 +588,7 @@ def obtenir_service_courses() -> ServiceCourses:
     return ServiceCourses()
 
 
-def get_shopping_service() -> ServiceCourses:
+def obtenir_shopping_service() -> ServiceCourses:
     """Factory for shopping service (English alias)."""
     return obtenir_service_courses()
 
@@ -598,3 +598,7 @@ __all__ = [
     "obtenir_service_courses",
     "get_shopping_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_shopping_service = obtenir_shopping_service  # alias rétrocompatibilité Sprint 12 A3

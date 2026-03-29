@@ -1,7 +1,7 @@
-"""
+﻿"""
 Routes API pour l'inventaire.
 
-Gestion du stock alimentaire : suivi des quantités, dates de péremption,
+Gestion du stock alimentaire : suivi des quantitÃ©s, dates de pÃ©remption,
 alertes de stock bas et recherche par code-barres.
 """
 
@@ -35,7 +35,7 @@ router = APIRouter(prefix="/api/v1/inventaire", tags=["Inventaire"])
 
 @router.get("/emplacements")
 async def lister_emplacements() -> list[str]:
-    """Retourne la liste des emplacements de stockage normalisés."""
+    """Retourne la liste des emplacements de stockage normalisÃ©s."""
     from src.core.constants import EMPLACEMENTS_INVENTAIRE
 
     return EMPLACEMENTS_INVENTAIRE
@@ -46,11 +46,11 @@ async def lister_emplacements() -> list[str]:
 async def inventaire_consolide(
     user: dict[str, Any] = Depends(require_auth),
 ) -> list[dict[str, Any]]:
-    """Fusionne inventaire cuisine + cellier en vue unifiée."""
+    """Fusionne inventaire cuisine + cellier en vue unifiÃ©e."""
 
     def _normaliser_nom(nom: str) -> str:
         n = (nom or "").strip().lower()
-        for old, new in (("é", "e"), ("è", "e"), ("ê", "e"), ("à", "a"), ("ù", "u")):
+        for old, new in (("Ã©", "e"), ("Ã¨", "e"), ("Ãª", "e"), ("Ã ", "a"), ("Ã¹", "u")):
             n = n.replace(old, new)
         return " ".join(n.split())
 
@@ -101,7 +101,7 @@ async def inventaire_consolide(
             for a in rows_cellier:
                 nom = a.nom or f"cellier_{a.id}"
                 cle = _normaliser_nom(nom)
-                unite = a.unite or "unité"
+                unite = a.unite or "unitÃ©"
                 entree = fusion.setdefault(
                     cle,
                     {
@@ -139,9 +139,9 @@ async def inventaire_consolide(
 @router.get("", response_model=ReponsePaginee[InventaireItemResponse], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_inventaire(
-    page: int = Query(1, ge=1, description="Numéro de page (1-indexé)"),
-    page_size: int = Query(50, ge=1, le=200, description="Nombre d'éléments par page (max 200)"),
-    categorie: str | None = Query(None, description="Filtrer par catégorie d'ingrédient"),
+    page: int = Query(1, ge=1, description="NumÃ©ro de page (1-indexÃ©)"),
+    page_size: int = Query(50, ge=1, le=200, description="Nombre d'Ã©lÃ©ments par page (max 200)"),
+    categorie: str | None = Query(None, description="Filtrer par catÃ©gorie d'ingrÃ©dient"),
     emplacement: str | None = Query(
         None, description="Filtrer par emplacement (frigo, placard...)"
     ),
@@ -152,21 +152,21 @@ async def lister_inventaire(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Liste les articles d'inventaire avec pagination et filtres avancés.
+    Liste les articles d'inventaire avec pagination et filtres avancÃ©s.
 
     Permet de surveiller le stock alimentaire avec des filtres combinables
-    pour identifier rapidement les articles à racheter ou à consommer.
+    pour identifier rapidement les articles Ã  racheter ou Ã  consommer.
 
     Args:
-        page: Numéro de page (défaut: 1)
-        page_size: Taille de page (défaut: 50, max: 200)
-        categorie: Filtre par catégorie d'ingrédient (ex: "produits laitiers")
-        emplacement: Filtre par lieu de stockage (frigo, placard, congélateur)
+        page: NumÃ©ro de page (dÃ©faut: 1)
+        page_size: Taille de page (dÃ©faut: 50, max: 200)
+        categorie: Filtre par catÃ©gorie d'ingrÃ©dient (ex: "produits laitiers")
+        emplacement: Filtre par lieu de stockage (frigo, placard, congÃ©lateur)
         stock_bas: Si True, ne montre que les articles sous le seuil minimum
         peremption_proche: Si True, ne montre que les articles expirant sous 7 jours
 
     Returns:
-        Réponse paginée avec items, total, page, page_size, pages
+        RÃ©ponse paginÃ©e avec items, total, page, page_size, pages
 
     Example:
         ```
@@ -217,7 +217,7 @@ async def lister_inventaire(
                 .all()
             )
 
-            # Enrichir avec données OpenFoodFacts si code-barres présent
+            # Enrichir avec donnÃ©es OpenFoodFacts si code-barres prÃ©sent
             codes = [i.code_barres for i in items if i.code_barres]
             off_map: dict[str, OpenFoodFactsCache] = {}
             if codes:
@@ -255,20 +255,20 @@ async def creer_article_inventaire(
     item: InventaireItemCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
-    Crée un nouvel article d'inventaire.
+    CrÃ©e un nouvel article d'inventaire.
 
-    Nécessite une authentification. L'article est ajouté au stock
-    avec la quantité et les métadonnées spécifiées.
+    NÃ©cessite une authentification. L'article est ajoutÃ© au stock
+    avec la quantitÃ© et les mÃ©tadonnÃ©es spÃ©cifiÃ©es.
 
     Args:
-        item: Données de l'article (nom, quantité, unité, catégorie, etc.)
+        item: DonnÃ©es de l'article (nom, quantitÃ©, unitÃ©, catÃ©gorie, etc.)
 
     Returns:
-        L'article créé avec son ID
+        L'article crÃ©Ã© avec son ID
 
     Raises:
-        401: Non authentifié
-        422: Données invalides
+        401: Non authentifiÃ©
+        422: DonnÃ©es invalides
 
     Example:
         ```
@@ -277,7 +277,7 @@ async def creer_article_inventaire(
 
         Body:
         {
-            "nom": "Lait demi-écrémé",
+            "nom": "Lait demi-Ã©crÃ©mÃ©",
             "quantite": 2.0,
             "unite": "L",
             "categorie": "Produits laitiers",
@@ -292,14 +292,14 @@ async def creer_article_inventaire(
 
     def _create():
         with executer_avec_session() as session:
-            # Vérifier que l'ingrédient existe
+            # VÃ©rifier que l'ingrÃ©dient existe
             ingredient = (
                 session.query(Ingredient).filter(Ingredient.id == item.ingredient_id).first()
             )
             if not ingredient:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"Ingrédient #{item.ingredient_id} non trouvé",
+                    detail=f"IngrÃ©dient #{item.ingredient_id} non trouvÃ©",
                 )
 
             db_item = ArticleInventaire(
@@ -314,7 +314,7 @@ async def creer_article_inventaire(
             session.add(db_item)
             session.commit()
 
-            # Recharger avec la relation ingredient pour la réponse
+            # Recharger avec la relation ingredient pour la rÃ©ponse
             db_item = (
                 session.query(ArticleInventaire)
                 .options(joinedload(ArticleInventaire.ingredient))
@@ -333,16 +333,16 @@ async def creer_article_inventaire(
 @gerer_exception_api
 async def obtenir_par_code_barres(code: str, user: dict[str, Any] = Depends(require_auth)):
     """
-    Récupère un article par son code-barres.
+    RÃ©cupÃ¨re un article par son code-barres.
 
-    Utilisé par le scanner de codes-barres pour identifier un article
-    dans l'inventaire. Le code peut être un EAN-13 ou tout autre format.
+    UtilisÃ© par le scanner de codes-barres pour identifier un article
+    dans l'inventaire. Le code peut Ãªtre un EAN-13 ou tout autre format.
 
     Args:
         code: Code-barres de l'article (EAN-13, UPC, etc.)
 
     Returns:
-        Détail de l'article correspondant
+        DÃ©tail de l'article correspondant
 
     Raises:
         404: Aucun article avec ce code-barres
@@ -374,7 +374,7 @@ async def obtenir_par_code_barres(code: str, user: dict[str, Any] = Depends(requ
             )
 
             if not item:
-                raise HTTPException(status_code=404, detail="Article non trouvé")
+                raise HTTPException(status_code=404, detail="Article non trouvÃ©")
 
             return InventaireItemResponse.model_validate(item)
 
@@ -392,16 +392,16 @@ async def scanner_codes_batch(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Résout un lot de codes-barres en articles d'inventaire.
+    RÃ©sout un lot de codes-barres en articles d'inventaire.
 
-    Utilisé par le scanner multi-codes : une seule requête pour identifier
-    plusieurs articles scannés en une passe caméra.
+    UtilisÃ© par le scanner multi-codes : une seule requÃªte pour identifier
+    plusieurs articles scannÃ©s en une passe camÃ©ra.
 
     Args:
-        request: Liste de codes-barres (à scanner, max 50)
+        request: Liste de codes-barres (Ã  scanner, max 50)
 
     Returns:
-        ``trouves``: articles trouvés avec leur détail
+        ``trouves``: articles trouvÃ©s avec leur dÃ©tail
         ``inconnus``: codes-barres sans article correspondant
 
     Example:
@@ -461,16 +461,16 @@ async def enrichir_par_code_barres(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Enrichit un article d'inventaire via OpenFoodFacts à partir de son code-barres.
+    Enrichit un article d'inventaire via OpenFoodFacts Ã  partir de son code-barres.
 
-    Récupère nom, nutrition (nutriscore, ecoscore, nova), marque, catégories
-    et met à jour l'article en base.
+    RÃ©cupÃ¨re nom, nutrition (nutriscore, ecoscore, nova), marque, catÃ©gories
+    et met Ã  jour l'article en base.
 
     Args:
         code: Code-barres (EAN-13, UPC, etc.)
 
     Returns:
-        Données enrichies du produit
+        DonnÃ©es enrichies du produit
     """
     from src.core.models import ArticleInventaire
     from src.services.integrations.produit import OpenFoodFactsService
@@ -479,7 +479,7 @@ async def enrichir_par_code_barres(
     produit = off_service.rechercher_produit(code)
 
     if not produit:
-        raise HTTPException(status_code=404, detail="Produit non trouvé sur OpenFoodFacts")
+        raise HTTPException(status_code=404, detail="Produit non trouvÃ© sur OpenFoodFacts")
 
     def _update():
         with executer_avec_session() as session:
@@ -507,7 +507,7 @@ async def enrichir_par_code_barres(
                 enrichment["lipides_100g"] = produit.nutrition.lipides_g
 
             if article:
-                # Mettre à jour les champs disponibles sur le modèle
+                # Mettre Ã  jour les champs disponibles sur le modÃ¨le
                 for attr in ("nutriscore", "ecoscore", "nova_group"):
                     if hasattr(article, attr) and enrichment.get(attr):
                         setattr(article, attr, enrichment[attr])
@@ -527,16 +527,16 @@ async def enrichir_par_code_barres(
 @gerer_exception_api
 async def obtenir_article_inventaire(item_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
-    Récupère un article d'inventaire par son ID.
+    RÃ©cupÃ¨re un article d'inventaire par son ID.
 
     Args:
         item_id: Identifiant unique de l'article
 
     Returns:
-        Détail complet de l'article
+        DÃ©tail complet de l'article
 
     Raises:
-        404: Article non trouvé
+        404: Article non trouvÃ©
 
     Example:
         ```
@@ -548,7 +548,7 @@ async def obtenir_article_inventaire(item_id: int, user: dict[str, Any] = Depend
             "nom": "Farine T55",
             "quantite": 1.5,
             "unite": "kg",
-            "categorie": "Épicerie",
+            "categorie": "Ã‰picerie",
             "emplacement": "placard",
             "date_peremption": "2026-06-15"
         }
@@ -568,7 +568,7 @@ async def obtenir_article_inventaire(item_id: int, user: dict[str, Any] = Depend
             )
 
             if not item:
-                raise HTTPException(status_code=404, detail="Article non trouvé")
+                raise HTTPException(status_code=404, detail="Article non trouvÃ©")
 
             return InventaireItemResponse.model_validate(item)
 
@@ -581,22 +581,22 @@ async def modifier_article_inventaire(
     item_id: int, item: InventaireItemUpdate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
-    Met à jour un article d'inventaire (PATCH partiel).
+    Met Ã  jour un article d'inventaire (PATCH partiel).
 
-    Seuls les champs fournis dans le body sont modifiés.
-    Permet de modifier tous les champs : ingredient_id, quantité,
-    quantité min, emplacement, date de péremption, code-barres, prix.
+    Seuls les champs fournis dans le body sont modifiÃ©s.
+    Permet de modifier tous les champs : ingredient_id, quantitÃ©,
+    quantitÃ© min, emplacement, date de pÃ©remption, code-barres, prix.
 
     Args:
-        item_id: ID de l'article à modifier
-        item: Champs à mettre à jour (seuls les champs présents sont appliqués)
+        item_id: ID de l'article Ã  modifier
+        item: Champs Ã  mettre Ã  jour (seuls les champs prÃ©sents sont appliquÃ©s)
 
     Returns:
-        L'article mis à jour
+        L'article mis Ã  jour
 
     Raises:
-        401: Non authentifié
-        404: Article non trouvé
+        401: Non authentifiÃ©
+        404: Article non trouvÃ©
 
     Example:
         ```
@@ -623,12 +623,12 @@ async def modifier_article_inventaire(
             )
 
             if not db_item:
-                raise HTTPException(status_code=404, detail="Article non trouvé")
+                raise HTTPException(status_code=404, detail="Article non trouvÃ©")
 
             # Appliquer uniquement les champs fournis (exclude_unset)
             update_data = item.model_dump(exclude_unset=True)
 
-            # Si ingredient_id est modifié, vérifier qu'il existe
+            # Si ingredient_id est modifiÃ©, vÃ©rifier qu'il existe
             if "ingredient_id" in update_data:
                 ingredient = (
                     session.query(Ingredient)
@@ -638,7 +638,7 @@ async def modifier_article_inventaire(
                 if not ingredient:
                     raise HTTPException(
                         status_code=404,
-                        detail=f"Ingrédient #{update_data['ingredient_id']} non trouvé",
+                        detail=f"IngrÃ©dient #{update_data['ingredient_id']} non trouvÃ©",
                     )
 
             for field, value in update_data.items():
@@ -646,7 +646,7 @@ async def modifier_article_inventaire(
 
             session.commit()
 
-            # Recharger avec la relation ingredient pour la réponse
+            # Recharger avec la relation ingredient pour la rÃ©ponse
             db_item = (
                 session.query(ArticleInventaire)
                 .options(joinedload(ArticleInventaire.ingredient))
@@ -666,14 +666,14 @@ async def supprimer_article_inventaire(item_id: int, user: dict[str, Any] = Depe
     Supprime un article d'inventaire.
 
     Args:
-        item_id: ID de l'article à supprimer
+        item_id: ID de l'article Ã  supprimer
 
     Returns:
         Message de confirmation
 
     Raises:
-        401: Non authentifié
-        404: Article non trouvé
+        401: Non authentifiÃ©
+        404: Article non trouvÃ©
 
     Example:
         ```
@@ -681,7 +681,7 @@ async def supprimer_article_inventaire(item_id: int, user: dict[str, Any] = Depe
         Authorization: Bearer <token>
 
         Response:
-        {"message": "Article supprimé", "id": 42}
+        {"message": "Article supprimÃ©", "id": 42}
         ```
     """
     from src.core.models import ArticleInventaire
@@ -693,12 +693,12 @@ async def supprimer_article_inventaire(item_id: int, user: dict[str, Any] = Depe
             )
 
             if not db_item:
-                raise HTTPException(status_code=404, detail="Article non trouvé")
+                raise HTTPException(status_code=404, detail="Article non trouvÃ©")
 
             session.delete(db_item)
             session.commit()
 
-            return MessageResponse(message="Article supprimé", id=item_id)
+            return MessageResponse(message="Article supprimÃ©", id=item_id)
 
     return await executer_async(_delete)
 
@@ -712,14 +712,14 @@ async def supprimer_article_inventaire(item_id: int, user: dict[str, Any] = Depe
 @gerer_exception_api
 async def ajouter_articles_bulk(
     articles: list[dict[str, Any]],
-    emplacement: str = Query("frigo", description="Emplacement par défaut"),
+    emplacement: str = Query("frigo", description="Emplacement par dÃ©faut"),
     user: dict[str, Any] = Depends(require_auth),
 ):
-    """Ajoute plusieurs articles à l'inventaire en une seule requête (import photo-frigo).
+    """Ajoute plusieurs articles Ã  l'inventaire en une seule requÃªte (import photo-frigo).
 
     Chaque article doit avoir au minimum: nom (str), quantite (float).
     Champs optionnels: unite (str), categorie (str).
-    Si l'ingrédient existe déjà, la quantité est cumulée.
+    Si l'ingrÃ©dient existe dÃ©jÃ , la quantitÃ© est cumulÃ©e.
     """
     from src.core.models import ArticleInventaire, Ingredient
 
@@ -730,13 +730,13 @@ async def ajouter_articles_bulk(
         with executer_avec_session() as session:
             crees = 0
             maj = 0
-            for art in articles[:50]:  # Limiter à 50 par appel
+            for art in articles[:50]:  # Limiter Ã  50 par appel
                 nom = (art.get("nom") or "").strip()
                 if not nom:
                     continue
                 quantite = float(art.get("quantite") or 1.0)
 
-                # Trouver ou créer l'ingrédient
+                # Trouver ou crÃ©er l'ingrÃ©dient
                 ingredient = session.query(Ingredient).filter(
                     Ingredient.nom == nom
                 ).first()
@@ -749,7 +749,7 @@ async def ajouter_articles_bulk(
                     session.add(ingredient)
                     session.flush()
 
-                # Trouver ou créer l'article inventaire
+                # Trouver ou crÃ©er l'article inventaire
                 inv = session.query(ArticleInventaire).filter(
                     ArticleInventaire.ingredient_id == ingredient.id
                 ).first()
@@ -769,7 +769,7 @@ async def ajouter_articles_bulk(
 
             session.commit()
             return MessageResponse(
-                message=f"{crees} créés, {maj} mis à jour",
+                message=f"{crees} crÃ©Ã©s, {maj} mis Ã  jour",
                 id=0,
             )
 
@@ -779,41 +779,41 @@ async def ajouter_articles_bulk(
 @router.post("/ocr-photo-frigo", responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def ocr_photo_frigo(
-    photo: UploadFile = File(..., description="Photo du réfrigérateur (jpg/png, max 10 Mo)"),
-    emplacement: str = Query("frigo", description="Emplacement par défaut pour les articles créés"),
-    importer: bool = Query(True, alias="import", description="Si False, détecte sans importer (mode preview)"),
+    photo: UploadFile = File(..., description="Photo du rÃ©frigÃ©rateur (jpg/png, max 10 Mo)"),
+    emplacement: str = Query("frigo", description="Emplacement par dÃ©faut pour les articles crÃ©Ã©s"),
+    importer: bool = Query(True, alias="import", description="Si False, dÃ©tecte sans importer (mode preview)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Analyse une photo de frigo via IA vision et importe les aliments détectés dans l'inventaire.
+    """Analyse une photo de frigo via IA vision et importe les aliments dÃ©tectÃ©s dans l'inventaire.
 
-    Avec `import=false`, retourne les articles détectés sans les sauvegarder (mode preview pour checkboxes).
-    Retourne la liste des articles créés/mis à jour.
+    Avec `import=false`, retourne les articles dÃ©tectÃ©s sans les sauvegarder (mode preview pour checkboxes).
+    Retourne la liste des articles crÃ©Ã©s/mis Ã  jour.
     """
     # Valider le type de fichier
     if photo.content_type not in ("image/jpeg", "image/png", "image/webp"):
-        raise HTTPException(status_code=422, detail="Seuls les formats JPEG, PNG et WebP sont acceptés")
+        raise HTTPException(status_code=422, detail="Seuls les formats JPEG, PNG et WebP sont acceptÃ©s")
 
     # Lire les bytes (limite 10 Mo)
     image_bytes = await photo.read()
     if len(image_bytes) > 10 * 1024 * 1024:
         raise HTTPException(status_code=413, detail="Image trop volumineuse (max 10 Mo)")
 
-    from src.services.integrations.multimodal import get_multimodal_service
+    from src.services.integrations.multimodal import obtenir_multimodal_service
 
-    service = get_multimodal_service()
+    service = obtenir_multimodal_service()
     articles_detectes = await service.analyser_frigo(image_bytes)
 
     if not articles_detectes:
-        return {"articles": [], "total": 0, "crees": 0, "mis_a_jour": 0, "message": "Aucun aliment détecté dans la photo"}
+        return {"articles": [], "total": 0, "crees": 0, "mis_a_jour": 0, "message": "Aucun aliment dÃ©tectÃ© dans la photo"}
 
-    # Mode preview : retourner les articles détectés sans importer
+    # Mode preview : retourner les articles dÃ©tectÃ©s sans importer
     if not importer:
         return {
             "articles": articles_detectes,
             "total": len(articles_detectes),
             "crees": 0,
             "mis_a_jour": 0,
-            "message": f"{len(articles_detectes)} aliment(s) détecté(s) — en attente de confirmation",
+            "message": f"{len(articles_detectes)} aliment(s) dÃ©tectÃ©(s) â€” en attente de confirmation",
         }
 
     # Importer dans l'inventaire via le bulk
@@ -862,24 +862,24 @@ async def ocr_photo_frigo(
     return await executer_async(_bulk)
 
 
-# ═══════════════════════════════════════════════════════════
-# QR CODE — ÉTIQUETAGE INVENTAIRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# QR CODE â€” Ã‰TIQUETAGE INVENTAIRE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get(
     "/articles/{article_id}/qr",
     responses=REPONSES_CRUD_LECTURE,
-    summary="Générer un QR code PNG pour un article",
+    summary="GÃ©nÃ©rer un QR code PNG pour un article",
 )
 @gerer_exception_api
 async def generer_qr_article(
     article_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ):
-    """Génère un QR code PNG contenant les infos de l'article pour étiquetage.
+    """GÃ©nÃ¨re un QR code PNG contenant les infos de l'article pour Ã©tiquetage.
 
-    Le QR code encode un JSON compact : id, nom, emplacement, péremption.
+    Le QR code encode un JSON compact : id, nom, emplacement, pÃ©remption.
     """
     import io
     import json as json_mod
@@ -893,7 +893,7 @@ async def generer_qr_article(
         with executer_avec_session() as session:
             article = session.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
             if not article:
-                raise HTTPException(status_code=404, detail="Article non trouvé")
+                raise HTTPException(status_code=404, detail="Article non trouvÃ©")
 
             data = {
                 "id": article.id,
@@ -905,7 +905,7 @@ async def generer_qr_article(
 
     qr_data = await executer_async(_gen)
 
-    # Générer le QR code en mémoire
+    # GÃ©nÃ©rer le QR code en mÃ©moire
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(qr_data)
     qr.make(fit=True)
@@ -929,10 +929,10 @@ async def generer_qr_article(
 )
 @gerer_exception_api
 async def scanner_qr_article(
-    article_id: int = Query(..., description="ID de l'article encodé dans le QR code"),
+    article_id: int = Query(..., description="ID de l'article encodÃ© dans le QR code"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Retrouve un article depuis les données scannées du QR code.
+    """Retrouve un article depuis les donnÃ©es scannÃ©es du QR code.
 
     Le frontend scanne le QR, extrait l'ID, et appelle cet endpoint.
     Retourne l'article complet + actions rapides disponibles.
@@ -943,7 +943,7 @@ async def scanner_qr_article(
         with executer_avec_session() as session:
             article = session.query(ArticleInventaire).filter(ArticleInventaire.id == article_id).first()
             if not article:
-                raise HTTPException(status_code=404, detail="Article non trouvé via QR code")
+                raise HTTPException(status_code=404, detail="Article non trouvÃ© via QR code")
 
             jours_peremption = None
             if article.date_peremption:
@@ -969,3 +969,4 @@ async def scanner_qr_article(
             }
 
     return await executer_async(_scan)
+

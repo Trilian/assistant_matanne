@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour le service OCR de factures.
 
 Couverture cible: >80%
-- Modèles de données (DonneesFacture, ResultatOCR)
-- Parser de réponses JSON
+- ModÃ¨les de donnÃ©es (DonneesFacture, ResultatOCR)
+- Parser de rÃ©ponses JSON
 - Extraction OCR (avec mocks)
-- Fonctions de détection manuelle
+- Fonctions de dÃ©tection manuelle
 - Patterns de montants
 """
 
@@ -23,12 +23,12 @@ from src.services.integrations.facture import (
     ResultatOCR,
     detecter_fournisseur,
     extraire_montant,
-    get_facture_ocr_service,
+    obtenir_facture_ocr_service,
 )
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -39,7 +39,7 @@ def service():
 
 @pytest.fixture
 def donnees_facture_valides():
-    """Données de facture valides pour les tests."""
+    """DonnÃ©es de facture valides pour les tests."""
     return {
         "fournisseur": "EDF",
         "type_energie": "electricite",
@@ -58,16 +58,16 @@ def donnees_facture_valides():
     }
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES DE DONNÉES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES DE DONNÃ‰ES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDonneesFacture:
-    """Tests du modèle DonneesFacture."""
+    """Tests du modÃ¨le DonneesFacture."""
 
     def test_creation_minimale(self):
-        """Test création avec champs requis uniquement."""
+        """Test crÃ©ation avec champs requis uniquement."""
         donnees = DonneesFacture(fournisseur="EDF", type_energie="electricite", montant_ttc=100.0)
         assert donnees.fournisseur == "EDF"
         assert donnees.type_energie == "electricite"
@@ -76,7 +76,7 @@ class TestDonneesFacture:
         assert donnees.erreurs == []
 
     def test_creation_complete(self, donnees_facture_valides):
-        """Test création avec tous les champs."""
+        """Test crÃ©ation avec tous les champs."""
         # Convertir les dates
         data = donnees_facture_valides.copy()
         data["date_debut"] = date.fromisoformat(data["date_debut"])
@@ -91,7 +91,7 @@ class TestDonneesFacture:
         assert donnees.numero_facture == "FA-2025-0001"
 
     def test_valeurs_par_defaut(self):
-        """Test des valeurs par défaut."""
+        """Test des valeurs par dÃ©faut."""
         donnees = DonneesFacture(fournisseur="Inconnu", type_energie="autre", montant_ttc=0)
 
         assert donnees.montant_ht is None
@@ -108,7 +108,7 @@ class TestDonneesFacture:
             type_energie="electricite",
             montant_ttc=100.0,
             confiance=0.85,
-            erreurs=["Consommation non trouvée", "Date incomplète"],
+            erreurs=["Consommation non trouvÃ©e", "Date incomplÃ¨te"],
         )
 
         assert donnees.confiance == 0.85
@@ -116,10 +116,10 @@ class TestDonneesFacture:
 
 
 class TestResultatOCR:
-    """Tests du modèle ResultatOCR."""
+    """Tests du modÃ¨le ResultatOCR."""
 
     def test_succes(self):
-        """Test résultat succès."""
+        """Test rÃ©sultat succÃ¨s."""
         donnees = DonneesFacture(fournisseur="EDF", type_energie="electricite", montant_ttc=100.0)
         result = ResultatOCR(
             succes=True, donnees=donnees, texte_brut='{"fournisseur": "EDF"}', message="OK"
@@ -130,7 +130,7 @@ class TestResultatOCR:
         assert result.donnees.fournisseur == "EDF"
 
     def test_echec(self):
-        """Test résultat échec."""
+        """Test rÃ©sultat Ã©chec."""
         result = ResultatOCR(succes=False, donnees=None, message="Erreur OCR")
 
         assert result.succes is False
@@ -138,7 +138,7 @@ class TestResultatOCR:
         assert result.message == "Erreur OCR"
 
     def test_valeurs_par_defaut(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         result = ResultatOCR()
 
         assert result.succes is True
@@ -147,9 +147,9 @@ class TestResultatOCR:
         assert result.message == ""
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS PARSER DE RÉPONSES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS PARSER DE RÃ‰PONSES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestParserReponse:
@@ -184,14 +184,14 @@ class TestParserReponse:
 
     def test_parser_calcul_confiance_montant_manquant(self, service):
         """Test calcul confiance sans montant explicite (montant_ttc=0)."""
-        # montant_ttc est requis, donc on teste avec montant_ttc=0 qui déclenche la pénalité
+        # montant_ttc est requis, donc on teste avec montant_ttc=0 qui dÃ©clenche la pÃ©nalitÃ©
         data = {"fournisseur": "EDF", "type_energie": "electricite", "montant_ttc": 0}
         json_str = json.dumps(data)
         result = service._parser_reponse(json_str)
 
-        # Montant 0 déclenche l'erreur "Montant TTC non trouvé"
-        assert result.confiance < 1.0  # Pénalité pour montant manquant
-        assert "Montant TTC non trouvé" in result.erreurs
+        # Montant 0 dÃ©clenche l'erreur "Montant TTC non trouvÃ©"
+        assert result.confiance < 1.0  # PÃ©nalitÃ© pour montant manquant
+        assert "Montant TTC non trouvÃ©" in result.erreurs
 
     def test_parser_calcul_confiance_fournisseur_inconnu(self, service):
         """Test calcul confiance fournisseur inconnu."""
@@ -199,8 +199,8 @@ class TestParserReponse:
         json_str = json.dumps(data)
         result = service._parser_reponse(json_str)
 
-        assert result.confiance < 1.0  # Pénalité pour fournisseur inconnu
-        assert "Fournisseur non identifié" in result.erreurs
+        assert result.confiance < 1.0  # PÃ©nalitÃ© pour fournisseur inconnu
+        assert "Fournisseur non identifiÃ©" in result.erreurs
 
     def test_parser_calcul_confiance_consommation_manquante(self, service):
         """Test calcul confiance sans consommation."""
@@ -208,7 +208,7 @@ class TestParserReponse:
         json_str = json.dumps(data)
         result = service._parser_reponse(json_str)
 
-        assert "Consommation non trouvée" in result.erreurs
+        assert "Consommation non trouvÃ©e" in result.erreurs
 
     def test_parser_dates_conversion(self, service):
         """Test conversion des dates."""
@@ -242,17 +242,17 @@ class TestParserReponse:
         assert result.date_fin is None
 
     def test_parser_confiance_complete(self, service, donnees_facture_valides):
-        """Test confiance maximale avec données complètes."""
+        """Test confiance maximale avec donnÃ©es complÃ¨tes."""
         json_str = json.dumps(donnees_facture_valides)
         result = service._parser_reponse(json_str)
 
-        # Avec toutes les données, confiance devrait être élevée
+        # Avec toutes les donnÃ©es, confiance devrait Ãªtre Ã©levÃ©e
         assert result.confiance >= 0.7
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXTRACTION OCR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExtractionOCR:
@@ -260,7 +260,7 @@ class TestExtractionOCR:
 
     @pytest.mark.asyncio
     async def test_extraction_succes(self, service, donnees_facture_valides):
-        """Test extraction réussie."""
+        """Test extraction rÃ©ussie."""
         json_response = json.dumps(donnees_facture_valides)
 
         with patch.object(
@@ -271,7 +271,7 @@ class TestExtractionOCR:
             assert result.succes is True
             assert result.donnees is not None
             assert result.donnees.fournisseur == "EDF"
-            assert result.message == "Extraction réussie"
+            assert result.message == "Extraction rÃ©ussie"
 
     @pytest.mark.asyncio
     async def test_extraction_erreur_api(self, service):
@@ -301,32 +301,32 @@ class TestExtractionOCR:
             assert result.donnees is not None
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS DÉTECTION FOURNISSEUR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS DÃ‰TECTION FOURNISSEUR
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDetectionFournisseur:
-    """Tests de la détection de fournisseur."""
+    """Tests de la dÃ©tection de fournisseur."""
 
     def test_detecter_edf(self):
-        """Test détection EDF."""
-        texte = "Facture EDF Numéro 123456"
+        """Test dÃ©tection EDF."""
+        texte = "Facture EDF NumÃ©ro 123456"
         nom, type_energie = detecter_fournisseur(texte)
 
         assert nom == "EDF"
         assert type_energie == "electricite"
 
     def test_detecter_electricite_de_france(self):
-        """Test détection Électricité de France."""
-        texte = "ÉLECTRICITÉ DE FRANCE - Votre facture"
+        """Test dÃ©tection Ã‰lectricitÃ© de France."""
+        texte = "Ã‰LECTRICITÃ‰ DE FRANCE - Votre facture"
         nom, type_energie = detecter_fournisseur(texte)
 
         assert nom == "EDF"
         assert type_energie == "electricite"
 
     def test_detecter_engie(self):
-        """Test détection Engie."""
+        """Test dÃ©tection Engie."""
         texte = "ENGIE votre fournisseur de gaz"
         nom, type_energie = detecter_fournisseur(texte)
 
@@ -334,7 +334,7 @@ class TestDetectionFournisseur:
         assert type_energie == "gaz"
 
     def test_detecter_gdf(self):
-        """Test détection GDF (ancien Engie)."""
+        """Test dÃ©tection GDF (ancien Engie)."""
         texte = "Gaz de France - Facture mensuelle"
         nom, type_energie = detecter_fournisseur(texte)
 
@@ -342,15 +342,15 @@ class TestDetectionFournisseur:
         assert type_energie == "gaz"
 
     def test_detecter_totalenergies(self):
-        """Test détection TotalEnergies."""
-        texte = "TotalEnergies - Votre facture électricité"
+        """Test dÃ©tection TotalEnergies."""
+        texte = "TotalEnergies - Votre facture Ã©lectricitÃ©"
         nom, type_energie = detecter_fournisseur(texte)
 
         assert nom == "TOTALENERGIES"
         assert type_energie == "electricite"
 
     def test_detecter_total_direct_energie(self):
-        """Test détection Total Direct Energie."""
+        """Test dÃ©tection Total Direct Energie."""
         texte = "Total Direct Energie - Facture"
         nom, type_energie = detecter_fournisseur(texte)
 
@@ -358,7 +358,7 @@ class TestDetectionFournisseur:
         assert type_energie == "electricite"
 
     def test_detecter_veolia(self):
-        """Test détection Veolia."""
+        """Test dÃ©tection Veolia."""
         texte = "Veolia Eau - Consommation"
         nom, type_energie = detecter_fournisseur(texte)
 
@@ -366,7 +366,7 @@ class TestDetectionFournisseur:
         assert type_energie == "eau"
 
     def test_detecter_eau_de_paris(self):
-        """Test détection Eau de Paris."""
+        """Test dÃ©tection Eau de Paris."""
         texte = "Eau de Paris - Facture d'eau"
         nom, type_energie = detecter_fournisseur(texte)
 
@@ -374,7 +374,7 @@ class TestDetectionFournisseur:
         assert type_energie == "eau"
 
     def test_detecter_suez(self):
-        """Test détection Suez."""
+        """Test dÃ©tection Suez."""
         texte = "SUEZ - Votre facture eau"
         nom, type_energie = detecter_fournisseur(texte)
 
@@ -390,9 +390,9 @@ class TestDetectionFournisseur:
         assert type_energie == "autre"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXTRACTION MONTANTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExtractionMontants:
@@ -400,14 +400,14 @@ class TestExtractionMontants:
 
     def test_extraire_montant_ttc(self):
         """Test extraction montant TTC."""
-        texte = "Total à payer: 156,78 €"
+        texte = "Total Ã  payer: 156,78 â‚¬"
         montant = extraire_montant(texte, PATTERNS_MONTANTS["montant_ttc"])
 
         assert montant == 156.78
 
     def test_extraire_montant_ttc_variante(self):
         """Test extraction montant TTC variante."""
-        texte = "Total TTC 123.45€"
+        texte = "Total TTC 123.45â‚¬"
         montant = extraire_montant(texte, PATTERNS_MONTANTS["montant_ttc"])
 
         assert montant == 123.45
@@ -427,8 +427,8 @@ class TestExtractionMontants:
         assert montant == 1250.0
 
     def test_extraire_consommation_m3(self):
-        """Test extraction consommation m³."""
-        texte = "Volume consommé: 45,5 m³"
+        """Test extraction consommation mÂ³."""
+        texte = "Volume consommÃ©: 45,5 mÂ³"
         montant = extraire_montant(texte, PATTERNS_MONTANTS["consommation_m3"])
 
         assert montant == 45.5
@@ -441,7 +441,7 @@ class TestExtractionMontants:
         assert montant == 32.7
 
     def test_extraire_montant_non_trouve(self):
-        """Test montant non trouvé."""
+        """Test montant non trouvÃ©."""
         texte = "Pas de montant ici"
         montant = extraire_montant(texte, PATTERNS_MONTANTS["montant_ttc"])
 
@@ -449,19 +449,19 @@ class TestExtractionMontants:
 
     def test_extraire_montant_invalide(self):
         """Test montant avec format invalide."""
-        texte = "Total: ABC €"
+        texte = "Total: ABC â‚¬"
         montant = extraire_montant(texte, PATTERNS_MONTANTS["montant_ttc"])
 
         assert montant is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PATTERNS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPatterns:
-    """Tests des patterns de détection."""
+    """Tests des patterns de dÃ©tection."""
 
     def test_patterns_fournisseurs_exist(self):
         """Test que tous les patterns fournisseurs existent."""
@@ -484,9 +484,9 @@ class TestPatterns:
         assert "consommation_m3" in PATTERNS_MONTANTS
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFactory:
@@ -494,20 +494,20 @@ class TestFactory:
 
     def test_get_facture_ocr_service(self):
         """Test obtention du service."""
-        service = get_facture_ocr_service()
+        service = obtenir_facture_ocr_service()
         assert isinstance(service, FactureOCRService)
 
     def test_factory_singleton(self):
-        """Test que la factory retourne la même instance (singleton)."""
-        s1 = get_facture_ocr_service()
-        s2 = get_facture_ocr_service()
-        # La factory est un singleton — même instance à chaque appel
+        """Test que la factory retourne la mÃªme instance (singleton)."""
+        s1 = obtenir_facture_ocr_service()
+        s2 = obtenir_facture_ocr_service()
+        # La factory est un singleton â€” mÃªme instance Ã  chaque appel
         assert s1 is s2
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE INIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestServiceInit:
@@ -520,7 +520,8 @@ class TestServiceInit:
         assert hasattr(service, "_parser_reponse")
 
     def test_service_heritage(self, service):
-        """Test que le service hérite de BaseAIService."""
+        """Test que le service hÃ©rite de BaseAIService."""
         from src.services.core.base import BaseAIService
 
         assert isinstance(service, BaseAIService)
+

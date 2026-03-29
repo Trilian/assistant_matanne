@@ -2,6 +2,7 @@
 Routes API pour les préférences utilisateur.
 
 CRUD pour les préférences alimentaires, robots, magasins.
+Sprint 13 — W4 : ajout endpoints préférences canaux de notification.
 """
 
 from typing import Any
@@ -10,7 +11,11 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_CRUD_ECRITURE, REPONSES_CRUD_LECTURE
-from src.api.schemas.preferences import PreferencesCreate, PreferencesPatch
+from src.api.schemas.preferences import (
+    PreferencesCreate,
+    PreferencesPatch,
+    PreferencesNotificationsUpdate,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/preferences", tags=["Préférences"])
@@ -168,3 +173,115 @@ async def modifier_preferences(
             }
 
     return await executer_async(_update)
+
+
+# ─────────────────────────────────────────────────────────
+# Préférences canaux de notification (Sprint 13 — W4)
+# ─────────────────────────────────────────────────────────
+
+_CANAUX_DEFAULTS: dict[str, list[str]] = {
+    "rappels": ["push", "ntfy"],
+    "alertes": ["push", "ntfy", "email"],
+    "resumes": ["email"],
+}
+
+
+def _notif_to_dict(prefs: Any, user_id: str) -> dict[str, Any]:
+    """Sérialise une PreferenceNotification en dict API."""
+    canaux_par_cat = prefs.canaux_par_categorie or _CANAUX_DEFAULTS
+    return {
+        "user_id": user_id,
+        "courses_rappel": prefs.courses_rappel,
+        "repas_suggestion": prefs.repas_suggestion,
+        "stock_alerte": prefs.stock_alerte,
+        "meteo_alerte": prefs.meteo_alerte,
+        "budget_alerte": prefs.budget_alerte,
+        "canal_prefere": prefs.canal_prefere or "push",
+        "canaux_par_categorie": {
+            "rappels": canaux_par_cat.get("rappels", _CANAUX_DEFAULTS["rappels"]),
+            "alertes": canaux_par_cat.get("alertes", _CANAUX_DEFAULTS["alertes"]),
+            "resumes": canaux_par_cat.get("resumes", _CANAUX_DEFAULTS["resumes"]),
+        },
+        "quiet_hours_start": str(prefs.quiet_hours_start or "22:00")[:5],
+        "quiet_hours_end": str(prefs.quiet_hours_end or "07:00")[:5],
+    }
+
+
+@router.get("/notifications", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_preferences_notifications(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Récupère les préférences de canaux de notification de l'utilisateur."""
+    from src.core.models.notifications import PreferenceNotification
+
+    def _query():
+        with executer_avec_session() as session:
+            prefs = (
+                session.query(PreferenceNotification)
+                .filter(PreferenceNotification.user_id == user["id"])
+                .first()
+            )
+
+            if not prefs:
+                # Retourner les valeurs par défaut
+                return {
+                    "user_id": user["id"],
+                    "courses_rappel": True,
+                    "repas_suggestion": True,
+                    "stock_alerte": True,
+                    "meteo_alerte": True,
+                    "budget_alerte": True,
+                    "canal_prefere": "push",
+                    "canaux_par_categorie": _CANAUX_DEFAULTS,
+                    "quiet_hours_start": "22:00",
+                    "quiet_hours_end": "07:00",
+                }
+
+            return _notif_to_dict(prefs, user["id"])
+
+    return await executer_async(_query)
+
+
+@router.put("/notifications", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def modifier_preferences_notifications(
+    donnees: PreferencesNotificationsUpdate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée ou met à jour les préférences de canaux de notification (upsert)."""
+    from src.core.models.notifications import PreferenceNotification
+
+    def _upsert():
+        with executer_avec_session() as session:
+            prefs = (
+                session.query(PreferenceNotification)
+                .filter(PreferenceNotification.user_id == user["id"])
+                .first()
+            )
+
+            if not prefs:
+                prefs = PreferenceNotification(user_id=user["id"])
+                session.add(prefs)
+
+            updates = donnees.model_dump(exclude_unset=True)
+            for key, value in updates.items():
+                if key == "canaux_par_categorie" and value is not None:
+                    # Convertir Pydantic model → dict
+                    setattr(prefs, key, value if isinstance(value, dict) else value.model_dump())
+                elif key in ("quiet_hours_start", "quiet_hours_end") and value is not None:
+                    # Stocker comme string "HH:MM", conversion en Time si possible
+                    try:
+                        from datetime import time as _time
+                        h, m = str(value).split(":")
+                        setattr(prefs, key, _time(int(h), int(m)))
+                    except Exception:
+                        pass
+                else:
+                    setattr(prefs, key, value)
+
+            session.commit()
+            session.refresh(prefs)
+            return _notif_to_dict(prefs, user["id"])
+
+    return await executer_async(_upsert)

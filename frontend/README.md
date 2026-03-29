@@ -35,7 +35,28 @@ npm run test:e2e   # Playwright E2E
 
 # Analyse bundle
 npm run analyze    # Ouvre le rapport dans le navigateur
+
+# Génération des types TypeScript depuis l'API (backend doit tourner sur :8000)
+npm run generate-types    # → src/types/api-generated.ts
 ```
+
+## Génération automatique des types TypeScript
+
+Les types sont auto-générés depuis le schéma OpenAPI du backend (FastAPI) via [`openapi-typescript`](https://openapi-ts.dev/).
+
+```bash
+# 1. Démarrer le backend
+uvicorn src.api.main:app --reload --port 8000
+
+# 2. Générer les types
+cd frontend
+npm run generate-types
+# Produit: src/types/api-generated.ts
+```
+
+Le fichier `src/types/api-generated.ts` est un artefact généré (ne pas modifier manuellement).
+Les types manuels dans `src/types/` restent utilisés pour les interfaces supplémentaires non couvertes par l'API.
+
 
 ## Variables d'environnement
 

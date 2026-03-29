@@ -260,6 +260,10 @@ class ExportService:
 
 
 @service_factory("export_service", tags={"utilitaires", "donnees"})
-def get_export_service() -> ExportService:
+def obtenir_export_service() -> ExportService:
     """Factory singleton ExportService."""
     return ExportService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_export_service = obtenir_export_service  # alias rétrocompatibilité Sprint 12 A3

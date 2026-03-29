@@ -726,6 +726,32 @@ export async function statsDepensesMaison(): Promise<StatsDepenses> {
   return data;
 }
 
+export interface ImportTicketDepensesResult {
+  confirmer: boolean;
+  nb_detectees?: number;
+  nb_importees?: number;
+  confiance_ocr: number;
+  magasin?: string;
+  total_ticket?: number;
+  depenses: DepenseMaison[];
+}
+
+export async function importerDepensesDepuisTicket(
+  fichier: File,
+  confirmer = false
+): Promise<ImportTicketDepensesResult> {
+  const formData = new FormData();
+  formData.append("photo", fichier);
+
+  const { data } = await clientApi.post<ImportTicketDepensesResult>(
+    `/maison/depenses/import-ticket?confirmer=${confirmer ? "true" : "false"}`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+
+  return data;
+}
+
 export async function historiqueDepensesMaisonCategorie(
   categorie: string,
   nbMois = 12

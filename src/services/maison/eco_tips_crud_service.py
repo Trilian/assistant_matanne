@@ -152,7 +152,7 @@ class EcoTipsCrudService(EventBusMixin, BaseService[ActionEcologique]):
 
 
 @service_factory("eco_tips_crud", tags={"maison", "crud", "eco_tips"})
-def get_eco_tips_crud_service() -> EcoTipsCrudService:
+def obtenir_eco_tips_crud_service() -> EcoTipsCrudService:
     """Factory singleton pour le service CRUD actions écologiques."""
     return EcoTipsCrudService()
 
@@ -160,3 +160,7 @@ def get_eco_tips_crud_service() -> EcoTipsCrudService:
 def obtenir_service_eco_tips_crud() -> EcoTipsCrudService:
     """Factory française pour le service CRUD actions écologiques."""
     return get_eco_tips_crud_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_eco_tips_crud_service = obtenir_eco_tips_crud_service  # alias rétrocompatibilité Sprint 12 A3

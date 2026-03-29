@@ -487,7 +487,7 @@ def obtenir_service_rapports_pdf() -> ServiceRapportsPDF:
     return ServiceRapportsPDF()
 
 
-def get_pdf_reports_service() -> ServiceRapportsPDF:
+def obtenir_pdf_reports_service() -> ServiceRapportsPDF:
     """Factory for PDF reports service (English alias)."""
     return obtenir_service_rapports_pdf()
 
@@ -501,3 +501,7 @@ __all__ = [
     "obtenir_service_rapports_pdf",
     "get_pdf_reports_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_pdf_reports_service = obtenir_pdf_reports_service  # alias rétrocompatibilité Sprint 12 A3

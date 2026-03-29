@@ -123,6 +123,10 @@ def obtenir_service_jardin(client: ClientIA | None = None) -> JardinService:
 
 
 @service_factory("jardin", tags={"maison", "crud", "jardin"})
-def get_jardin_service(client: ClientIA | None = None) -> JardinService:
+def obtenir_jardin_service(client: ClientIA | None = None) -> JardinService:
     """Factory pour obtenir le service jardin (alias anglais)."""
     return obtenir_service_jardin(client)
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_jardin_service = obtenir_jardin_service  # alias rétrocompatibilité Sprint 12 A3

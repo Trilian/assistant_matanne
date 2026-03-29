@@ -244,7 +244,7 @@ class GarantiesCrudService(EventBusMixin, BaseService[Garantie]):
 
 
 @service_factory("garanties_crud", tags={"maison", "crud", "garanties"})
-def get_garanties_crud_service() -> GarantiesCrudService:
+def obtenir_garanties_crud_service() -> GarantiesCrudService:
     """Factory singleton pour le service CRUD garanties."""
     return GarantiesCrudService()
 
@@ -252,3 +252,7 @@ def get_garanties_crud_service() -> GarantiesCrudService:
 def obtenir_service_garanties_crud() -> GarantiesCrudService:
     """Factory française pour le service CRUD garanties."""
     return get_garanties_crud_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_garanties_crud_service = obtenir_garanties_crud_service  # alias rétrocompatibilité Sprint 12 A3

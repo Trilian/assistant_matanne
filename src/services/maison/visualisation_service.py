@@ -411,6 +411,10 @@ def obtenir_service_visualisation() -> VisualisationService:
 
 
 @service_factory("visualisation_maison", tags={"maison", "crud", "visualisation"})
-def get_visualisation_service() -> VisualisationService:
+def obtenir_visualisation_service() -> VisualisationService:
     """Factory singleton pour le service visualisation maison."""
     return VisualisationService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_visualisation_service = obtenir_visualisation_service  # alias rétrocompatibilité Sprint 12 A3

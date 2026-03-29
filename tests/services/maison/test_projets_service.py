@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour ProjetsService.
 
 Couvre:
 - Estimation de projets
-- Suggestions de matériaux
+- Suggestions de matÃ©riaux
 - Calcul de ROI
-- Priorisation des tâches
+- Priorisation des tÃ¢ches
 """
 
 import json
@@ -15,7 +15,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.services.maison.projets_service import ProjetsService, get_projets_service
+from src.services.maison.projets_service import ProjetsService, obtenir_projets_service
 from src.services.maison.schemas import ProjetCreate, ProjetEstimation
 
 
@@ -25,13 +25,13 @@ class TestProjetsServiceInit:
     def test_factory_returns_service(self):
         """La factory retourne une instance valide."""
         with patch("src.services.maison.projets_service.ClientIA"):
-            service = get_projets_service()
+            service = obtenir_projets_service()
             assert isinstance(service, ProjetsService)
 
     def test_factory_accepts_custom_client(self):
-        """La factory accepte un client personnalisé."""
+        """La factory accepte un client personnalisÃ©."""
         mock_client = MagicMock()
-        service = get_projets_service(client=mock_client)
+        service = obtenir_projets_service(client=mock_client)
         assert service.client == mock_client
 
 
@@ -49,15 +49,15 @@ class TestProjetsServiceEstimation:
                 "materiaux": [
                     {"nom": "Peinture blanche 10L", "quantite": 2, "prix": 45},
                     {"nom": "Rouleau", "quantite": 3, "prix": 8},
-                    {"nom": "Bâche protection", "quantite": 1, "prix": 15},
+                    {"nom": "BÃ¢che protection", "quantite": 1, "prix": 15},
                 ],
                 "etapes": [
-                    "Préparation des surfaces",
+                    "PrÃ©paration des surfaces",
                     "Application sous-couche",
                     "2 couches de peinture",
                     "Finitions et nettoyage",
                 ],
-                "risques": ["Temps de séchage variable selon météo"],
+                "risques": ["Temps de sÃ©chage variable selon mÃ©tÃ©o"],
             }
         )
 
@@ -66,7 +66,7 @@ class TestProjetsServiceEstimation:
 
         estimation = await service.estimer_projet(
             nom="Peinture chambre",
-            description="Peinture chambre 12m²",
+            description="Peinture chambre 12mÂ²",
             categorie="peinture",
         )
 
@@ -74,14 +74,14 @@ class TestProjetsServiceEstimation:
 
     @pytest.mark.asyncio
     async def test_estimer_projet_renovation(self, mock_client_ia, projet_test_data):
-        """Estime un projet de rénovation."""
+        """Estime un projet de rÃ©novation."""
         mock_response = json.dumps(
             {
                 "duree_heures": 24,
                 "budget_min": 500,
                 "budget_max": 1200,
                 "niveau_difficulte": "moyen",
-                "competences_requises": ["Électricité de base", "Plâtrerie"],
+                "competences_requises": ["Ã‰lectricitÃ© de base", "PlÃ¢trerie"],
             }
         )
 
@@ -89,7 +89,7 @@ class TestProjetsServiceEstimation:
         service.call_with_cache = AsyncMock(return_value=mock_response)
 
         estimation = await service.estimer_projet(
-            nom="Rénovation",
+            nom="RÃ©novation",
             description=projet_test_data["description"],
             categorie="renovation",
         )
@@ -111,7 +111,7 @@ class TestProjetsServiceEstimation:
 
         estimation = await service.estimer_projet(
             nom="Peinture garage",
-            description="Peinture garage, budget max 100€, temps max 4h",
+            description="Peinture garage, budget max 100â‚¬, temps max 4h",
             categorie="peinture",
         )
 
@@ -119,11 +119,11 @@ class TestProjetsServiceEstimation:
 
 
 class TestProjetsServiceMateriaux:
-    """Tests des suggestions de matériaux."""
+    """Tests des suggestions de matÃ©riaux."""
 
     @pytest.mark.asyncio
     async def test_suggerer_materiaux(self, mock_client_ia):
-        """Suggère les matériaux nécessaires."""
+        """SuggÃ¨re les matÃ©riaux nÃ©cessaires."""
         mock_response = json.dumps(
             [
                 {
@@ -132,12 +132,12 @@ class TestProjetsServiceMateriaux:
                     "unite": "pot",
                     "prix": 35,
                     "magasin": "Leroy Merlin",
-                    "alternatif": "Marque distributeur 25€",
+                    "alternatif": "Marque distributeur 25â‚¬",
                 },
                 {
                     "nom": "Rouleau mousse",
                     "quantite": 3,
-                    "unite": "unité",
+                    "unite": "unitÃ©",
                     "prix": 8,
                     "magasin": "Castorama",
                 },
@@ -149,7 +149,7 @@ class TestProjetsServiceMateriaux:
 
         materiels = await service.suggerer_materiaux(
             nom_projet="Peinture garage",
-            description="Repeindre les murs du garage 20m²",
+            description="Repeindre les murs du garage 20mÂ²",
             categorie="peinture",
         )
 
@@ -161,13 +161,13 @@ class TestProjetsServiceMateriaux:
 
     @pytest.mark.asyncio
     async def test_suggerer_alternatives_eco(self, mock_client_ia):
-        """Suggère des alternatives écologiques."""
+        """SuggÃ¨re des alternatives Ã©cologiques."""
         from src.services.maison.schemas import MaterielProjet
 
         mock_response = json.dumps(
             [
                 {
-                    "original": "Peinture glycéro",
+                    "original": "Peinture glycÃ©ro",
                     "alternatif": "Peinture acrylique",
                     "prix_alternatif": 25,
                 },
@@ -183,7 +183,7 @@ class TestProjetsServiceMateriaux:
         service.call_with_cache = AsyncMock(return_value=mock_response)
 
         materiels = [
-            MaterielProjet(nom="Peinture glycéro", quantite=2, prix_estime=Decimal("35")),
+            MaterielProjet(nom="Peinture glycÃ©ro", quantite=2, prix_estime=Decimal("35")),
             MaterielProjet(nom="Bois exotique", quantite=1, prix_estime=Decimal("50")),
         ]
         alternatives = await service.suggerer_alternatives(
@@ -220,7 +220,7 @@ class TestProjetsServiceBudget:
         assert service.call_with_cache.called
 
     def test_calcul_cout_materiaux(self):
-        """Calcule le coût des matériaux."""
+        """Calcule le coÃ»t des matÃ©riaux."""
         materiaux = [
             {"nom": "Peinture", "quantite": 2, "prix_unitaire": Decimal("45.00")},
             {"nom": "Rouleaux", "quantite": 3, "prix_unitaire": Decimal("8.00")},
@@ -236,7 +236,7 @@ class TestProjetsServiceROI:
 
     @pytest.mark.asyncio
     async def test_calculer_roi_renovation(self, mock_client_ia):
-        """Calcule le ROI d'une rénovation."""
+        """Calcule le ROI d'une rÃ©novation."""
         mock_response = json.dumps(
             {
                 "investissement": 5000,
@@ -244,7 +244,7 @@ class TestProjetsServiceROI:
                 "roi_pourcentage": 60,
                 "temps_retour_annees": 2,
                 "facteurs": [
-                    "Amélioration DPE",
+                    "AmÃ©lioration DPE",
                     "Modernisation cuisine",
                 ],
             }
@@ -262,13 +262,13 @@ class TestProjetsServiceROI:
 
     @pytest.mark.asyncio
     async def test_calculer_roi_energie(self, mock_client_ia):
-        """Calcule le ROI d'une amélioration énergie."""
+        """Calcule le ROI d'une amÃ©lioration Ã©nergie."""
         mock_response = json.dumps(
             {
                 "investissement": 3000,
                 "economies_annuelles": 400,
                 "temps_retour_annees": 7.5,
-                "aides_disponibles": ["MaPrimeRénov", "CEE"],
+                "aides_disponibles": ["MaPrimeRÃ©nov", "CEE"],
             }
         )
 
@@ -284,17 +284,17 @@ class TestProjetsServiceROI:
 
 
 class TestProjetsServiceTaches:
-    """Tests de la gestion des tâches."""
+    """Tests de la gestion des tÃ¢ches."""
 
     @pytest.mark.asyncio
     async def test_suggerer_taches_projet(self, mock_client_ia):
-        """Suggère les tâches pour un projet."""
+        """SuggÃ¨re les tÃ¢ches pour un projet."""
         mock_response = json.dumps(
             [
-                {"nom": "Préparation surfaces", "duree_h": 2, "ordre": 1},
+                {"nom": "PrÃ©paration surfaces", "duree_h": 2, "ordre": 1},
                 {"nom": "Sous-couche", "duree_h": 1, "ordre": 2},
-                {"nom": "1ère couche", "duree_h": 3, "ordre": 3},
-                {"nom": "2ème couche", "duree_h": 3, "ordre": 4},
+                {"nom": "1Ã¨re couche", "duree_h": 3, "ordre": 3},
+                {"nom": "2Ã¨me couche", "duree_h": 3, "ordre": 4},
                 {"nom": "Finitions", "duree_h": 1, "ordre": 5},
             ]
         )
@@ -311,7 +311,7 @@ class TestProjetsServiceTaches:
 
     @pytest.mark.asyncio
     async def test_prioriser_taches(self, mock_client_ia):
-        """Priorise les tâches d'un projet."""
+        """Priorise les tÃ¢ches d'un projet."""
         mock_response = json.dumps(
             {
                 "ordre_optimal": [
@@ -325,7 +325,7 @@ class TestProjetsServiceTaches:
         service.call_with_cache = AsyncMock(return_value=mock_response)
 
         priorites = await service.prioriser_taches(
-            nom_projet="Rénovation",
+            nom_projet="RÃ©novation",
             taches=[
                 "Urgente",
                 "Importante",
@@ -344,13 +344,13 @@ class TestProjetsServiceRisques:
         mock_response = json.dumps(
             [
                 {
-                    "risque": "Mauvaise météo",
+                    "risque": "Mauvaise mÃ©tÃ©o",
                     "probabilite": "moyenne",
                     "impact": "retard 2-3 jours",
-                    "mitigation": "Prévoir weekend de backup",
+                    "mitigation": "PrÃ©voir weekend de backup",
                 },
                 {
-                    "risque": "Matériau en rupture",
+                    "risque": "MatÃ©riau en rupture",
                     "probabilite": "faible",
                     "impact": "retard 1 semaine",
                     "mitigation": "Commander en avance",
@@ -373,7 +373,7 @@ class TestProjetsServiceCalculs:
     """Tests des calculs utilitaires."""
 
     def test_calcul_duree_totale(self):
-        """Calcule la durée totale d'un projet."""
+        """Calcule la durÃ©e totale d'un projet."""
         taches = [
             {"duree_h": 2},
             {"duree_h": 3},
@@ -392,7 +392,7 @@ class TestProjetsServiceCalculs:
         assert jours == 6  # 6 jours de 4h
 
     def test_calcul_marge_budget(self):
-        """Calcule la marge de sécurité budget."""
+        """Calcule la marge de sÃ©curitÃ© budget."""
         budget_base = Decimal("500.00")
         marge_pct = Decimal("10")  # 10%
 
@@ -402,7 +402,7 @@ class TestProjetsServiceCalculs:
         assert budget_total == Decimal("550.00")
 
     def test_verification_deadline(self, projet_test_data):
-        """Vérifie si un projet respecte sa deadline."""
+        """VÃ©rifie si un projet respecte sa deadline."""
         duree_estimee_jours = 7
         date_debut = projet_test_data["date_debut_prevue"]
         date_fin = date_debut + timedelta(days=duree_estimee_jours)
@@ -411,3 +411,4 @@ class TestProjetsServiceCalculs:
         en_retard = date_fin > deadline
 
         assert not en_retard  # Projet dans les temps
+

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/web/synchronisation.py
 """
 
@@ -10,7 +10,7 @@ class TestSyncEventType:
     """Tests pour l'enum SyncEventType."""
 
     def test_event_types_exist(self):
-        """Test existence des types d'événements."""
+        """Test existence des types d'Ã©vÃ©nements."""
         from src.services.integrations.web.synchronisation import SyncEventType
 
         assert SyncEventType.ITEM_ADDED == "item_added"
@@ -21,7 +21,7 @@ class TestSyncEventType:
         assert SyncEventType.LIST_CLEARED == "list_cleared"
 
     def test_user_events(self):
-        """Test événements utilisateur."""
+        """Test Ã©vÃ©nements utilisateur."""
         from src.services.integrations.web.synchronisation import SyncEventType
 
         assert SyncEventType.USER_JOINED == "user_joined"
@@ -30,10 +30,10 @@ class TestSyncEventType:
 
 
 class TestSyncEvent:
-    """Tests pour le modèle SyncEvent."""
+    """Tests pour le modÃ¨le SyncEvent."""
 
     def test_sync_event_creation(self):
-        """Test création d'un événement."""
+        """Test crÃ©ation d'un Ã©vÃ©nement."""
         from src.services.integrations.web.synchronisation import SyncEvent, SyncEventType
 
         event = SyncEvent(
@@ -49,7 +49,7 @@ class TestSyncEvent:
         assert event.user_name == "Test User"
 
     def test_sync_event_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.integrations.web.synchronisation import SyncEvent, SyncEventType
 
         event = SyncEvent(
@@ -60,7 +60,7 @@ class TestSyncEvent:
         assert event.data == {}
 
     def test_sync_event_with_data(self):
-        """Test événement avec données."""
+        """Test Ã©vÃ©nement avec donnÃ©es."""
         from src.services.integrations.web.synchronisation import SyncEvent, SyncEventType
 
         event = SyncEvent(
@@ -76,10 +76,10 @@ class TestSyncEvent:
 
 
 class TestPresenceInfo:
-    """Tests pour le modèle PresenceInfo."""
+    """Tests pour le modÃ¨le PresenceInfo."""
 
     def test_presence_info_creation(self):
-        """Test création d'une info de présence."""
+        """Test crÃ©ation d'une info de prÃ©sence."""
         from src.services.integrations.web.synchronisation import PresenceInfo
 
         info = PresenceInfo(user_id="user123", user_name="Test User")
@@ -88,7 +88,7 @@ class TestPresenceInfo:
         assert info.user_name == "Test User"
 
     def test_presence_info_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.integrations.web.synchronisation import PresenceInfo
 
         info = PresenceInfo(user_id="u1", user_name="Test")
@@ -103,7 +103,7 @@ class TestSyncState:
     """Tests pour le dataclass SyncState."""
 
     def test_sync_state_defaults(self):
-        """Test valeurs par défaut."""
+        """Test valeurs par dÃ©faut."""
         from src.services.integrations.web.synchronisation import SyncState
 
         state = SyncState()
@@ -154,10 +154,10 @@ class TestRealtimeSyncServiceInit:
 
 
 class TestRealtimeSyncServiceState:
-    """Tests pour la gestion d'état."""
+    """Tests pour la gestion d'Ã©tat."""
 
     def test_state_property_creates_new(self):
-        """Test création d'état si inexistant."""
+        """Test crÃ©ation d'Ã©tat si inexistant."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService, SyncState
@@ -169,7 +169,7 @@ class TestRealtimeSyncServiceState:
         assert "_realtime_sync_state" in storage
 
     def test_state_property_returns_existing(self):
-        """Test retour état existant."""
+        """Test retour Ã©tat existant."""
         from src.services.integrations.web.synchronisation import RealtimeSyncService, SyncState
 
         existing_state = SyncState(liste_id=42, connected=True)
@@ -199,7 +199,7 @@ class TestJoinLeaveList:
         assert result is False
 
     def test_join_list_with_mock_client(self):
-        """Test join_list avec client mocké."""
+        """Test join_list avec client mockÃ©."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService
@@ -470,11 +470,11 @@ class TestBroadcastHelpers:
 
 
 class TestHandlers:
-    """Tests pour les handlers d'événements."""
+    """Tests pour les handlers d'Ã©vÃ©nements."""
 
     @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_id")
     def test_handle_broadcast_ignores_own_events(self, mock_id):
-        """Test ignore ses propres événements."""
+        """Test ignore ses propres Ã©vÃ©nements."""
         storage = {}
         mock_id.return_value = "user1"
 
@@ -525,7 +525,7 @@ class TestHandlers:
 
     @patch("src.services.integrations.web.synchronisation.RealtimeSyncService._get_current_user_id")
     def test_handle_broadcast_callback_error(self, mock_id):
-        """Test callback qui lève une exception."""
+        """Test callback qui lÃ¨ve une exception."""
         storage = {}
         on_rerun = MagicMock()
         mock_id.return_value = "user1"
@@ -565,7 +565,7 @@ class TestHandlers:
         service._handle_broadcast(payload)
 
     def test_handle_presence_sync(self):
-        """Test synchronisation présence."""
+        """Test synchronisation prÃ©sence."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService
@@ -583,7 +583,7 @@ class TestHandlers:
         assert service.state.users_present["user1"].user_name == "Alice"
 
     def test_handle_presence_sync_dict_format(self):
-        """Test sync présence avec format dict."""
+        """Test sync prÃ©sence avec format dict."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService
@@ -601,7 +601,7 @@ class TestHandlers:
         assert "user1" in service.state.users_present
 
     def test_handle_presence_sync_error(self):
-        """Test sync présence avec erreur."""
+        """Test sync prÃ©sence avec erreur."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService
@@ -615,7 +615,7 @@ class TestHandlers:
         service._handle_presence_sync(payload)
 
     def test_handle_presence_join(self):
-        """Test arrivée utilisateur."""
+        """Test arrivÃ©e utilisateur."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService
@@ -630,7 +630,7 @@ class TestHandlers:
         assert service.state.users_present["user3"].user_name == "Charlie"
 
     def test_handle_presence_join_error(self):
-        """Test arrivée utilisateur avec erreur."""
+        """Test arrivÃ©e utilisateur avec erreur."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService
@@ -644,7 +644,7 @@ class TestHandlers:
         service._handle_presence_join(payload)
 
     def test_handle_presence_leave(self):
-        """Test départ utilisateur."""
+        """Test dÃ©part utilisateur."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import PresenceInfo, RealtimeSyncService
@@ -659,7 +659,7 @@ class TestHandlers:
         assert "user3" not in service.state.users_present
 
     def test_handle_presence_leave_nonexistent(self):
-        """Test départ utilisateur non présent."""
+        """Test dÃ©part utilisateur non prÃ©sent."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService
@@ -672,7 +672,7 @@ class TestHandlers:
         service._handle_presence_leave(payload)
 
     def test_handle_presence_leave_error(self):
-        """Test départ utilisateur avec erreur."""
+        """Test dÃ©part utilisateur avec erreur."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService
@@ -690,7 +690,7 @@ class TestCallbackRegistration:
     """Tests pour l'enregistrement de callbacks."""
 
     def test_on_event(self):
-        """Test enregistrement callback générique."""
+        """Test enregistrement callback gÃ©nÃ©rique."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService, SyncEventType
@@ -716,7 +716,7 @@ class TestCallbackRegistration:
         assert callback in service._callbacks[SyncEventType.ITEM_ADDED]
 
     def test_on_item_checked(self):
-        """Test on_item_checked enregistre les deux événements."""
+        """Test on_item_checked enregistre les deux Ã©vÃ©nements."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService, SyncEventType
@@ -734,7 +734,7 @@ class TestResolveConflict:
     """Tests pour resolve_conflict."""
 
     def test_resolve_conflict_remote_wins(self):
-        """Test conflit avec remote plus récent."""
+        """Test conflit avec remote plus rÃ©cent."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService
@@ -750,7 +750,7 @@ class TestResolveConflict:
         assert service.state.conflict_count == 1
 
     def test_resolve_conflict_local_wins(self):
-        """Test conflit avec local plus récent."""
+        """Test conflit avec local plus rÃ©cent."""
         storage = {}
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService
@@ -856,13 +856,13 @@ class TestFactory:
         from src.services.core.registry import obtenir_registre
         from src.services.integrations.web.synchronisation import (
             RealtimeSyncService,
-            get_realtime_sync_service,
+            obtenir_realtime_sync_service,
         )
 
         obtenir_registre().reinitialiser("sync_temps_reel")
 
-        service1 = get_realtime_sync_service()
-        service2 = get_realtime_sync_service()
+        service1 = obtenir_realtime_sync_service()
+        service2 = obtenir_realtime_sync_service()
 
         assert isinstance(service1, RealtimeSyncService)
         assert service1 is service2
@@ -898,9 +898,9 @@ class TestInitClient:
 
         from src.services.integrations.web.synchronisation import RealtimeSyncService
 
-        # Le test passe si aucune exception n'est levée
+        # Le test passe si aucune exception n'est levÃ©e
         service = RealtimeSyncService(storage=storage)
-        # _client sera None si import échoue
+        # _client sera None si import Ã©choue
         assert service._client is None or service._client is not None
 
 
@@ -908,7 +908,7 @@ class TestGetCurrentUser:
     """Tests pour _get_current_user_id et _get_current_user_name."""
 
     def test_get_current_user_id_with_user(self):
-        """Test get_current_user_id avec utilisateur connecté."""
+        """Test get_current_user_id avec utilisateur connectÃ©."""
         storage = {}
 
         mock_user = MagicMock()
@@ -917,7 +917,7 @@ class TestGetCurrentUser:
         mock_auth.get_current_user.return_value = mock_user
 
         with patch(
-            "src.services.integrations.web.synchronisation.get_auth_service",
+            "src.services.integrations.web.synchronisation.obtenir_auth_service",
             return_value=mock_auth,
             create=True,
         ):
@@ -926,11 +926,11 @@ class TestGetCurrentUser:
             service = RealtimeSyncService(storage=storage)
 
             with patch.object(service, "_get_current_user_id", wraps=service._get_current_user_id):
-                # Appeler à travers un wrapper pour tester
+                # Appeler Ã  travers un wrapper pour tester
                 pass
 
     def test_get_current_user_name_with_user(self):
-        """Test get_current_user_name avec utilisateur connecté."""
+        """Test get_current_user_name avec utilisateur connectÃ©."""
         storage = {}
 
         mock_user = MagicMock()
@@ -939,14 +939,14 @@ class TestGetCurrentUser:
         mock_auth.get_current_user.return_value = mock_user
 
         with patch(
-            "src.services.integrations.web.synchronisation.get_auth_service",
+            "src.services.integrations.web.synchronisation.obtenir_auth_service",
             return_value=mock_auth,
             create=True,
         ):
             from src.services.integrations.web.synchronisation import RealtimeSyncService
 
             _service = RealtimeSyncService(storage=storage)
-            # Test passera car les méthodes sont mockées ailleurs
+            # Test passera car les mÃ©thodes sont mockÃ©es ailleurs
 
 
 class TestExports:
@@ -958,7 +958,7 @@ class TestExports:
 
         expected = [
             "RealtimeSyncService",
-            "get_realtime_sync_service",
+            "obtenir_realtime_sync_service",
             "SyncEvent",
             "SyncEventType",
             "PresenceInfo",
@@ -966,3 +966,4 @@ class TestExports:
 
         for name in expected:
             assert name in synchronisation.__all__
+

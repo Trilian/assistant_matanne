@@ -1,5 +1,5 @@
-"""
-Routes API Maison — Jardin, stocks et nuisibles.
+﻿"""
+Routes API Maison â€” Jardin, stocks et nuisibles.
 
 Sous-routeur inclus dans maison.py.
 """
@@ -26,17 +26,17 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Maison"])
 
 # JARDIN
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/jardin", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_elements_jardin(
-    type_element: str | None = Query(None, description="Filtrer par type (plante, légume, etc.)"),
+    type_element: str | None = Query(None, description="Filtrer par type (plante, lÃ©gume, etc.)"),
     statut: str | None = Query(None, description="Filtrer par statut"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les éléments du jardin."""
+    """Liste les Ã©lÃ©ments du jardin."""
     from src.core.models import ElementJardin
 
     def _query():
@@ -78,7 +78,7 @@ async def obtenir_journal_jardin(
     element_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Récupère le journal d'entretien d'un élément du jardin."""
+    """RÃ©cupÃ¨re le journal d'entretien d'un Ã©lÃ©ment du jardin."""
     from src.core.models import JournalJardin
 
     def _query():
@@ -112,7 +112,7 @@ async def creer_element_jardin(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Ajoute un élément au jardin."""
+    """Ajoute un Ã©lÃ©ment au jardin."""
     from src.core.models import ElementJardin
 
     def _query():
@@ -146,14 +146,14 @@ async def modifier_element_jardin(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour un élément du jardin."""
+    """Met Ã  jour un Ã©lÃ©ment du jardin."""
     from src.core.models import ElementJardin
 
     def _query():
         with executer_avec_session() as session:
             element = session.query(ElementJardin).filter(ElementJardin.id == element_id).first()
             if not element:
-                raise HTTPException(status_code=404, detail="Élément non trouvé")
+                raise HTTPException(status_code=404, detail="Ã‰lÃ©ment non trouvÃ©")
 
             for champ in ("nom", "type", "location", "statut", "date_plantation",
                           "date_recolte_prevue", "notes"):
@@ -178,17 +178,17 @@ async def supprimer_element_jardin(
     element_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Supprime un élément du jardin."""
+    """Supprime un Ã©lÃ©ment du jardin."""
     from src.core.models import ElementJardin
 
     def _query():
         with executer_avec_session() as session:
             element = session.query(ElementJardin).filter(ElementJardin.id == element_id).first()
             if not element:
-                raise HTTPException(status_code=404, detail="Élément non trouvé")
+                raise HTTPException(status_code=404, detail="Ã‰lÃ©ment non trouvÃ©")
             session.delete(element)
             session.commit()
-            return MessageResponse(message=f"Élément '{element.nom}' supprimé")
+            return MessageResponse(message=f"Ã‰lÃ©ment '{element.nom}' supprimÃ©")
 
     return await executer_async(_query)
 
@@ -198,19 +198,19 @@ async def supprimer_element_jardin(
 async def suggestions_ia_jardin(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Tâches saisonnières du jardin générées par IA (conseils pratiques pour la saison en cours)."""
-    from src.services.maison.jardin_service import get_jardin_service
+    """TÃ¢ches saisonniÃ¨res du jardin gÃ©nÃ©rÃ©es par IA (conseils pratiques pour la saison en cours)."""
+    from src.services.maison.jardin_service import obtenir_jardin_service
     import asyncio
 
-    service = get_jardin_service()
+    service = obtenir_jardin_service()
     conseils_bruts = await service.generer_conseils_saison()
 
-    # Transformer la réponse texte en liste structurée de tâches
+    # Transformer la rÃ©ponse texte en liste structurÃ©e de tÃ¢ches
     lignes = [l.strip() for l in conseils_bruts.splitlines() if l.strip()]
     taches = []
     for ligne in lignes:
-        # Nettoyer les puces/numéros en début de ligne
-        for prefix in ("- ", "• ", "* "):
+        # Nettoyer les puces/numÃ©ros en dÃ©but de ligne
+        for prefix in ("- ", "â€¢ ", "* "):
             if ligne.startswith(prefix):
                 ligne = ligne[len(prefix):]
         if ligne and not ligne.endswith(":"):
@@ -219,15 +219,15 @@ async def suggestions_ia_jardin(
     return {"taches": taches, "total": len(taches)}
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # STOCKS MAISON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/stocks", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_stocks_maison(
-    categorie: str | None = Query(None, description="Filtrer par catégorie"),
+    categorie: str | None = Query(None, description="Filtrer par catÃ©gorie"),
     alerte_stock: bool = Query(False, description="Afficher seulement les stocks bas"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
@@ -280,7 +280,7 @@ async def creer_stock(
                 nom=payload["nom"],
                 categorie=payload.get("categorie", "autre"),
                 quantite=payload.get("quantite", 0),
-                unite=payload.get("unite", "unité"),
+                unite=payload.get("unite", "unitÃ©"),
                 seuil_alerte=payload.get("seuil_alerte", 1),
                 emplacement=payload.get("emplacement"),
                 prix_unitaire=payload.get("prix_unitaire"),
@@ -305,14 +305,14 @@ async def modifier_stock(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour un stock (quantité, seuil, etc.)."""
+    """Met Ã  jour un stock (quantitÃ©, seuil, etc.)."""
     from src.core.models import StockMaison
 
     def _query():
         with executer_avec_session() as session:
             stock = session.query(StockMaison).filter(StockMaison.id == stock_id).first()
             if not stock:
-                raise HTTPException(status_code=404, detail="Stock non trouvé")
+                raise HTTPException(status_code=404, detail="Stock non trouvÃ©")
 
             for champ in ("nom", "categorie", "quantite", "unite", "seuil_alerte",
                           "emplacement", "prix_unitaire"):
@@ -344,31 +344,31 @@ async def supprimer_stock(
         with executer_avec_session() as session:
             stock = session.query(StockMaison).filter(StockMaison.id == stock_id).first()
             if not stock:
-                raise HTTPException(status_code=404, detail="Stock non trouvé")
+                raise HTTPException(status_code=404, detail="Stock non trouvÃ©")
             session.delete(stock)
             session.commit()
-            return MessageResponse(message=f"Stock '{stock.nom}' supprimé")
+            return MessageResponse(message=f"Stock '{stock.nom}' supprimÃ©")
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALENDRIER DES SEMIS (JARDIN INTELLIGENT)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/jardin/calendrier-semis", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def obtenir_calendrier_semis(
-    mois: int | None = Query(None, ge=1, le=12, description="Mois (1-12), défaut: mois courant"),
+    mois: int | None = Query(None, ge=1, le=12, description="Mois (1-12), dÃ©faut: mois courant"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Retourne le calendrier des semis pour le mois donné.
+    Retourne le calendrier des semis pour le mois donnÃ©.
 
     Utilise le catalogue de plantes (data/plantes_catalogue.json) pour
-    déterminer quoi semer, planter et récolter selon la saison.
+    dÃ©terminer quoi semer, planter et rÃ©colter selon la saison.
     """
     import json
     from pathlib import Path
@@ -376,8 +376,8 @@ async def obtenir_calendrier_semis(
     mois_courant = mois or date.today().month
 
     NOMS_MOIS = [
-        "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-        "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+        "", "Janvier", "FÃ©vrier", "Mars", "Avril", "Mai", "Juin",
+        "Juillet", "AoÃ»t", "Septembre", "Octobre", "Novembre", "DÃ©cembre",
     ]
 
     # Charger le catalogue de plantes
@@ -424,7 +424,7 @@ async def obtenir_calendrier_semis(
     }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/nuisibles", responses=REPONSES_LISTE)
@@ -433,10 +433,10 @@ async def lister_nuisibles(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les traitements anti-nuisibles."""
-    from src.services.maison import get_nuisibles_crud_service
+    from src.services.maison import obtenir_nuisibles_crud_service
 
     def _query():
-        service = get_nuisibles_crud_service()
+        service = obtenir_nuisibles_crud_service()
         return {"items": service.get_all()}
 
     return await executer_async(_query)
@@ -448,11 +448,11 @@ async def prochains_traitements(
     jours: int = Query(30, ge=1, le=180, description="Horizon en jours"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Traitements à effectuer prochainement."""
-    from src.services.maison import get_nuisibles_crud_service
+    """Traitements Ã  effectuer prochainement."""
+    from src.services.maison import obtenir_nuisibles_crud_service
 
     def _query():
-        service = get_nuisibles_crud_service()
+        service = obtenir_nuisibles_crud_service()
         return {"items": service.get_prochains_traitements(jours_horizon=jours)}
 
     return await executer_async(_query)
@@ -465,10 +465,10 @@ async def creer_traitement_nuisible(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Enregistre un traitement anti-nuisible."""
-    from src.services.maison import get_nuisibles_crud_service
+    from src.services.maison import obtenir_nuisibles_crud_service
 
     def _query():
-        service = get_nuisibles_crud_service()
+        service = obtenir_nuisibles_crud_service()
         return service.create(payload)
 
     return await executer_async(_query)
@@ -481,11 +481,11 @@ async def modifier_traitement_nuisible(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour un traitement."""
-    from src.services.maison import get_nuisibles_crud_service
+    """Met Ã  jour un traitement."""
+    from src.services.maison import obtenir_nuisibles_crud_service
 
     def _query():
-        service = get_nuisibles_crud_service()
+        service = obtenir_nuisibles_crud_service()
         return service.update(traitement_id, payload)
 
     return await executer_async(_query)
@@ -498,13 +498,14 @@ async def supprimer_traitement_nuisible(
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
     """Supprime un traitement."""
-    from src.services.maison import get_nuisibles_crud_service
+    from src.services.maison import obtenir_nuisibles_crud_service
 
     def _query():
-        service = get_nuisibles_crud_service()
+        service = obtenir_nuisibles_crud_service()
         service.delete(traitement_id)
-        return MessageResponse(message="Traitement supprimé")
+        return MessageResponse(message="Traitement supprimÃ©")
 
     return await executer_async(_query)
+
 
 

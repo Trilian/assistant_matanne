@@ -566,7 +566,7 @@ Si aucun problème visible, retourne problemes_detectes vide avec urgence_global
 
 
 @service_factory("multimodal", tags={"ia", "vision"})
-def get_multimodal_service() -> MultiModalAIService:
+def obtenir_multimodal_service() -> MultiModalAIService:
     """Obtient le service multi-modal (singleton).
 
     Returns:
@@ -669,3 +669,7 @@ async def analyser_frigo(image: bytes | str | Path) -> list[dict]:
     """
     service = get_multimodal_service()
     return await service.analyser_frigo(image)
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_multimodal_service = obtenir_multimodal_service  # alias rétrocompatibilité Sprint 12 A3

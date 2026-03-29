@@ -340,3 +340,167 @@ class TestAchatSchemas:
         dumped = patch_data.model_dump(exclude_unset=True)
         assert "priorite" in dumped
         assert "nom" not in dumped
+
+
+# ═══════════════════════════════════════════════════════════
+# POST /api/v1/famille/achats/suggestions-ia-enrichies
+# ═══════════════════════════════════════════════════════════
+
+
+class TestSuggestionsIAEnrichies:
+    """Tests pour POST /api/v1/famille/achats/suggestions-ia-enrichies."""
+
+    @pytest.mark.asyncio
+    async def test_suggestions_generiques_retourne_200(self, async_client: httpx.AsyncClient):
+        """Trigger générique → appelle suggerer_achats et retourne 200."""
+        mock_ia_service = MagicMock()
+        mock_ia_service.suggerer_achats.return_value = []
+
+        with patch(
+            "src.services.famille.achats_ia.obtenir_service_achats_ia",
+            return_value=mock_ia_service,
+        ):
+            response = await async_client.post(
+                "/api/v1/famille/achats/suggestions-ia-enrichies",
+                json={"triggers": ["autre"], "pour_qui": "famille"},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "items" in data
+        assert "total" in data
+
+    @pytest.mark.asyncio
+    async def test_suggestions_vetements_qualite(self, async_client: httpx.AsyncClient):
+        """Trigger vetements_qualite avec pour_qui → appelle suggerer_vetements_qualite."""
+        mock_ia_service = MagicMock()
+        mock_ia_service.suggerer_vetements_qualite.return_value = [
+            {"nom": "T-shirt coton bio", "priorite": "haute"},
+        ]
+
+        with patch(
+            "src.services.famille.achats_ia.obtenir_service_achats_ia",
+            return_value=mock_ia_service,
+        ):
+            response = await async_client.post(
+                "/api/v1/famille/achats/suggestions-ia-enrichies",
+                json={"triggers": ["vetements_qualite"], "pour_qui": "jules"},
+            )
+
+        assert response.status_code == 200
+        mock_ia_service.suggerer_vetements_qualite.assert_called_once_with(
+            pour_qui="jules", saison="courante"
+        )
+
+    @pytest.mark.asyncio
+    async def test_suggestions_sejour_avec_destination(self, async_client: httpx.AsyncClient):
+        """Trigger sejour avec destination → appelle suggerer_achats_sejour."""
+        mock_ia_service = MagicMock()
+        mock_ia_service.suggerer_achats_sejour.return_value = []
+
+        with patch(
+            "src.services.famille.achats_ia.obtenir_service_achats_ia",
+            return_value=mock_ia_service,
+        ):
+            response = await async_client.post(
+                "/api/v1/famille/achats/suggestions-ia-enrichies",
+                json={
+                    "triggers": ["sejour"],
+                    "destination": "Barcelone",
+                    "age_jules_mois": 18,
+                },
+            )
+
+        assert response.status_code == 200
+        mock_ia_service.suggerer_achats_sejour.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_triggers_manquants_retourne_422(self, async_client: httpx.AsyncClient):
+        """Payload sans triggers → validation Pydantic (422)."""
+        response = await async_client.post(
+            "/api/v1/famille/achats/suggestions-ia-enrichies", json={}
+        )
+        assert response.status_code == 422
+
+
+# ═══════════════════════════════════════════════════════════
+# POST /api/v1/famille/achats/{id}/annonce-vinted
+# ═══════════════════════════════════════════════════════════
+
+
+class TestAnnonceVinted:
+    """Tests pour POST /api/v1/famille/achats/{id}/annonce-vinted."""
+
+    PAYLOAD_VINTED = {
+        "nom": "Pull Jules 18 mois Petit Bateau",
+        "description": "Très bon état, porté 2 fois.",
+        "etat_usage": "bon",
+        "prix_cible": 8.0,
+        "marque": "Petit Bateau",
+        "taille": "18 mois",
+        "categorie_vinted": "Vêtements enfants",
+    }
+
+    @pytest.mark.asyncio
+    async def test_generer_annonce_retourne_200(self, async_client: httpx.AsyncClient):
+        """Génération annonce Vinted valide → 200 avec texte."""
+        mock_ia_service = MagicMock()
+        mock_ia_service.generer_annonce_vinted = MagicMock(
+            return_value="Pull Petit Bateau 18 mois…"
+        )
+
+        with patch(
+            "src.services.famille.achats_ia.obtenir_service_achats_ia",
+            return_value=mock_ia_service,
+        ):
+            response = await async_client.post(
+                "/api/v1/famille/achats/1/annonce-vinted",
+                json=self.PAYLOAD_VINTED,
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "annonce" in data
+
+    @pytest.mark.asyncio
+    async def test_generer_annonce_appelle_service(self, async_client: httpx.AsyncClient):
+        """Le service est bien appelé avec marque et taille."""
+        mock_ia_service = MagicMock()
+        mock_ia_service.generer_annonce_vinted = MagicMock(return_value="Annonce test")
+
+        with patch(
+            "src.services.famille.achats_ia.obtenir_service_achats_ia",
+            return_value=mock_ia_service,
+        ):
+            await async_client.post(
+                "/api/v1/famille/achats/1/annonce-vinted",
+                json=self.PAYLOAD_VINTED,
+            )
+
+        mock_ia_service.generer_annonce_vinted.assert_called_once()
+        call_kwargs = mock_ia_service.generer_annonce_vinted.call_args
+        assert call_kwargs.kwargs.get("marque") == "Petit Bateau"
+
+    @pytest.mark.asyncio
+    async def test_payload_minimal_sans_marque_retourne_200_ou_422(
+        self, async_client: httpx.AsyncClient
+    ):
+        """Annonce sans champs optionnels (marque/taille/categorie) → accepté ou validation."""
+        mock_ia_service = MagicMock()
+        mock_ia_service.generer_annonce_vinted = MagicMock(return_value="Annonce minimale")
+
+        with patch(
+            "src.services.famille.achats_ia.obtenir_service_achats_ia",
+            return_value=mock_ia_service,
+        ):
+            response = await async_client.post(
+                "/api/v1/famille/achats/1/annonce-vinted",
+                json={
+                    "nom": "Tshirt",
+                    "description": "Bon état.",
+                    "etat_usage": "bon",
+                    "prix_cible": 5.0,
+                },
+            )
+
+        assert response.status_code in [200, 422]

@@ -254,7 +254,7 @@ def extraire_montant(texte: str, pattern: str) -> float | None:
 
 
 @service_factory("facture_ocr", tags={"integrations", "ia", "ocr"})
-def get_facture_ocr_service() -> FactureOCRService:
+def obtenir_facture_ocr_service() -> FactureOCRService:
     """Factory singleton pour le service OCR."""
     return FactureOCRService()
 
@@ -262,3 +262,7 @@ def get_facture_ocr_service() -> FactureOCRService:
 def obtenir_service_ocr_facture() -> FactureOCRService:
     """Alias français pour le service OCR."""
     return get_facture_ocr_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_facture_ocr_service = obtenir_facture_ocr_service  # alias rétrocompatibilité Sprint 12 A3

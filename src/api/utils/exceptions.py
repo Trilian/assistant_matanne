@@ -3,8 +3,9 @@ Gestion des exceptions pour l'API REST.
 """
 
 import logging
+from inspect import Signature, signature
 from functools import wraps
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, TypeVar, get_type_hints
 
 from fastapi import HTTPException
 
@@ -29,7 +30,10 @@ def gerer_exception_api(func: F) -> F:
     Note: Ce décorateur est optionnel si vous utilisez executer_avec_session()
     """
 
-    @wraps(func)
+    @wraps(
+        func,
+        assigned=("__module__", "__name__", "__qualname__", "__doc__"),
+    )
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return await func(*args, **kwargs)
@@ -41,5 +45,22 @@ def gerer_exception_api(func: F) -> F:
                 status_code=500,
                 detail="Une erreur interne est survenue. Veuillez réessayer.",
             ) from e
+
+    # Préserve une signature résolue pour FastAPI (compatible annotations différées).
+    sig = signature(func)
+    try:
+        resolved_hints = get_type_hints(func, include_extras=True)
+        resolved_parameters = []
+        for param in sig.parameters.values():
+            resolved_annotation = resolved_hints.get(param.name, param.annotation)
+            resolved_parameters.append(param.replace(annotation=resolved_annotation))
+
+        resolved_return = resolved_hints.get("return", sig.return_annotation)
+        wrapper.__signature__ = Signature(
+            parameters=resolved_parameters,
+            return_annotation=resolved_return,
+        )
+    except Exception:
+        wrapper.__signature__ = sig
 
     return wrapper  # type: ignore

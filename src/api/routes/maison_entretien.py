@@ -1,5 +1,5 @@
-"""
-Routes API Maison — Entretien, routines et ménage.
+﻿"""
+Routes API Maison â€” Entretien, routines et mÃ©nage.
 
 Sous-routeur inclus dans maison.py.
 """
@@ -27,13 +27,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Maison"])
 
 # ROUTINES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/routines", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_routines(
-    categorie: str | None = Query(None, description="Filtrer par catégorie"),
+    categorie: str | None = Query(None, description="Filtrer par catÃ©gorie"),
     actif: bool = Query(True, description="Routines actives seulement"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
@@ -72,14 +72,14 @@ async def lister_routines(
 @router.get("/routines/{routine_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_routine(routine_id: int, user: dict[str, Any] = Depends(require_auth)):
-    """Récupère une routine avec ses tâches."""
+    """RÃ©cupÃ¨re une routine avec ses tÃ¢ches."""
     from src.core.models import Routine
 
     def _query():
         with executer_avec_session() as session:
             routine = session.query(Routine).filter(Routine.id == routine_id).first()
             if not routine:
-                raise HTTPException(status_code=404, detail="Routine non trouvée")
+                raise HTTPException(status_code=404, detail="Routine non trouvÃ©e")
 
             return {
                 "id": routine.id,
@@ -113,14 +113,14 @@ async def enregistrer_repetition(
     tache_ids: list[int] | None = None,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Enregistre une répétition (toutes ou certaines tâches faites aujourd'hui)."""
+    """Enregistre une rÃ©pÃ©tition (toutes ou certaines tÃ¢ches faites aujourd'hui)."""
     from src.core.models import Routine, TacheRoutine
 
     def _query():
         with executer_avec_session() as session:
             routine = session.query(Routine).filter(Routine.id == routine_id).first()
             if not routine:
-                raise HTTPException(status_code=404, detail="Routine non trouvée")
+                raise HTTPException(status_code=404, detail="Routine non trouvÃ©e")
 
             query = session.query(TacheRoutine).filter(
                 TacheRoutine.routine_id == routine_id
@@ -145,20 +145,20 @@ async def enregistrer_repetition(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# TÂCHES D'ENTRETIEN
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TÃ‚CHES D'ENTRETIEN
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/entretien", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_taches_entretien(
-    categorie: str | None = Query(None, description="Filtrer par catégorie"),
-    piece: str | None = Query(None, description="Filtrer par pièce"),
+    categorie: str | None = Query(None, description="Filtrer par catÃ©gorie"),
+    piece: str | None = Query(None, description="Filtrer par piÃ¨ce"),
     fait: bool | None = Query(None, description="Filtrer par statut fait/non fait"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les tâches d'entretien planifiées."""
+    """Liste les tÃ¢ches d'entretien planifiÃ©es."""
     from src.core.models import TacheEntretien
 
     def _query():
@@ -205,7 +205,7 @@ async def creer_tache_entretien(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée une nouvelle tâche d'entretien."""
+    """CrÃ©e une nouvelle tÃ¢che d'entretien."""
     from src.core.models import TacheEntretien
 
     def _query():
@@ -243,21 +243,21 @@ async def modifier_tache_entretien(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour une tâche d'entretien (ou la marque comme faite)."""
+    """Met Ã  jour une tÃ¢che d'entretien (ou la marque comme faite)."""
     from src.core.models import TacheEntretien
 
     def _query():
         with executer_avec_session() as session:
             tache = session.query(TacheEntretien).filter(TacheEntretien.id == tache_id).first()
             if not tache:
-                raise HTTPException(status_code=404, detail="Tâche non trouvée")
+                raise HTTPException(status_code=404, detail="TÃ¢che non trouvÃ©e")
 
             for champ in ("nom", "description", "categorie", "piece", "frequence_jours",
                           "prochaine_fois", "duree_minutes", "responsable", "priorite", "fait"):
                 if champ in payload:
                     setattr(tache, champ, payload[champ])
 
-            # Si marqué comme fait, mettre à jour derniere_fois
+            # Si marquÃ© comme fait, mettre Ã  jour derniere_fois
             if payload.get("fait") is True:
                 tache.derniere_fois = date.today()
                 if tache.frequence_jours:
@@ -284,25 +284,25 @@ async def supprimer_tache_entretien(
     tache_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Supprime une tâche d'entretien."""
+    """Supprime une tÃ¢che d'entretien."""
     from src.core.models import TacheEntretien
 
     def _query():
         with executer_avec_session() as session:
             tache = session.query(TacheEntretien).filter(TacheEntretien.id == tache_id).first()
             if not tache:
-                raise HTTPException(status_code=404, detail="Tâche non trouvée")
+                raise HTTPException(status_code=404, detail="TÃ¢che non trouvÃ©e")
             session.delete(tache)
             session.commit()
-            return MessageResponse(message=f"Tâche '{tache.nom}' supprimée")
+            return MessageResponse(message=f"TÃ¢che '{tache.nom}' supprimÃ©e")
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# ═══════════════════════════════════════════════════════════
-# SANTÉ DES APPAREILS (ENTRETIEN INTELLIGENT)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# SANTÃ‰ DES APPAREILS (ENTRETIEN INTELLIGENT)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/entretien/sante-appareils", responses=REPONSES_LISTE)
@@ -311,9 +311,9 @@ async def obtenir_sante_appareils(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Dashboard santé des appareils.
+    Dashboard santÃ© des appareils.
 
-    Agrège les tâches d'entretien pour calculer un score de santé
+    AgrÃ¨ge les tÃ¢ches d'entretien pour calculer un score de santÃ©
     par appareil/zone, et identifie les actions urgentes.
     """
     from src.core.models import TacheEntretien
@@ -324,12 +324,12 @@ async def obtenir_sante_appareils(
 
             taches = session.query(TacheEntretien).all()
 
-            # Grouper par pièce/catégorie
+            # Grouper par piÃ¨ce/catÃ©gorie
             par_zone: dict[str, dict[str, Any]] = {}
             actions_urgentes = []
 
             for t in taches:
-                zone = t.piece or t.categorie or "Général"
+                zone = t.piece or t.categorie or "GÃ©nÃ©ral"
 
                 if zone not in par_zone:
                     par_zone[zone] = {
@@ -390,10 +390,10 @@ async def obtenir_sante_appareils(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ENTRETIEN SAISONNIER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/entretien-saisonnier", responses=REPONSES_LISTE)
@@ -401,11 +401,11 @@ async def obtenir_sante_appareils(
 async def lister_entretien_saisonnier(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les tâches d'entretien saisonnier."""
-    from src.services.maison import get_entretien_saisonnier_crud_service
+    """Liste les tÃ¢ches d'entretien saisonnier."""
+    from src.services.maison import obtenir_entretien_saisonnier_crud_service
 
     def _query():
-        service = get_entretien_saisonnier_crud_service()
+        service = obtenir_entretien_saisonnier_crud_service()
         return {"items": service.get_all()}
 
     return await executer_async(_query)
@@ -416,11 +416,11 @@ async def lister_entretien_saisonnier(
 async def alertes_entretien_saisonnier(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Tâches saisonnières à faire ce mois-ci."""
-    from src.services.maison import get_entretien_saisonnier_crud_service
+    """TÃ¢ches saisonniÃ¨res Ã  faire ce mois-ci."""
+    from src.services.maison import obtenir_entretien_saisonnier_crud_service
 
     def _query():
-        service = get_entretien_saisonnier_crud_service()
+        service = obtenir_entretien_saisonnier_crud_service()
         return {"items": service.get_alertes_saisonnieres()}
 
     return await executer_async(_query)
@@ -432,11 +432,11 @@ async def creer_entretien_saisonnier(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée une tâche d'entretien saisonnier."""
-    from src.services.maison import get_entretien_saisonnier_crud_service
+    """CrÃ©e une tÃ¢che d'entretien saisonnier."""
+    from src.services.maison import obtenir_entretien_saisonnier_crud_service
 
     def _query():
-        service = get_entretien_saisonnier_crud_service()
+        service = obtenir_entretien_saisonnier_crud_service()
         return service.create(payload)
 
     return await executer_async(_query)
@@ -448,13 +448,13 @@ async def supprimer_entretien_saisonnier(
     entretien_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Supprime une tâche d'entretien saisonnier."""
-    from src.services.maison import get_entretien_saisonnier_crud_service
+    """Supprime une tÃ¢che d'entretien saisonnier."""
+    from src.services.maison import obtenir_entretien_saisonnier_crud_service
 
     def _query():
-        service = get_entretien_saisonnier_crud_service()
+        service = obtenir_entretien_saisonnier_crud_service()
         service.delete(entretien_id)
-        return MessageResponse(message="Tâche saisonnière supprimée")
+        return MessageResponse(message="TÃ¢che saisonniÃ¨re supprimÃ©e")
 
     return await executer_async(_query)
 
@@ -465,11 +465,11 @@ async def marquer_entretien_saisonnier_fait(
     entretien_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Marque une tâche saisonnière comme faite."""
-    from src.services.maison import get_entretien_saisonnier_crud_service
+    """Marque une tÃ¢che saisonniÃ¨re comme faite."""
+    from src.services.maison import obtenir_entretien_saisonnier_crud_service
 
     def _query():
-        service = get_entretien_saisonnier_crud_service()
+        service = obtenir_entretien_saisonnier_crud_service()
         return service.marquer_fait(entretien_id)
 
     return await executer_async(_query)
@@ -480,22 +480,22 @@ async def marquer_entretien_saisonnier_fait(
 async def reset_entretien_saisonnier(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Réinitialise la checklist saisonnière pour la nouvelle année."""
-    from src.services.maison import get_entretien_saisonnier_crud_service
+    """RÃ©initialise la checklist saisonniÃ¨re pour la nouvelle annÃ©e."""
+    from src.services.maison import obtenir_entretien_saisonnier_crud_service
 
     def _query():
-        service = get_entretien_saisonnier_crud_service()
+        service = obtenir_entretien_saisonnier_crud_service()
         service.reset_annuel()
-        return {"message": "Checklist saisonnière réinitialisée"}
+        return {"message": "Checklist saisonniÃ¨re rÃ©initialisÃ©e"}
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BRIEFING MAISON (contexte quotidien)
 # NOTE: Routes canoniques /briefing, /alertes, /taches-jour
-# définies en haut du fichier (section CONTEXTE MAISON Phase X).
-# ═══════════════════════════════════════════════════════════
+# dÃ©finies en haut du fichier (section CONTEXTE MAISON Phase X).
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/entretien/sync-catalogue", status_code=200, responses=REPONSES_CRUD_CREATION)
@@ -503,22 +503,22 @@ async def reset_entretien_saisonnier(
 async def sync_catalogue_entretien(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Force la synchronisation catalogue → tâches d'entretien."""
-    from src.services.maison import get_catalogue_entretien_service
+    """Force la synchronisation catalogue â†’ tÃ¢ches d'entretien."""
+    from src.services.maison import obtenir_catalogue_entretien_service
 
     def _query():
-        service = get_catalogue_entretien_service()
+        service = obtenir_catalogue_entretien_service()
         result = service.sync_catalogue()
         if result is None:
-            return {"message": "Sync échouée"}
+            return {"message": "Sync Ã©chouÃ©e"}
         return result.model_dump()
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # RAPPELS MAISON (notifications push)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/rappels/envoyer", status_code=200, responses=REPONSES_CRUD_CREATION)
@@ -526,11 +526,11 @@ async def sync_catalogue_entretien(
 async def envoyer_rappels_maison(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Évalue et envoie les rappels push maison (garanties, contrats, entretien, gel, cellier)."""
-    from src.services.maison import get_notifications_maison_service
+    """Ã‰value et envoie les rappels push maison (garanties, contrats, entretien, gel, cellier)."""
+    from src.services.maison import obtenir_notifications_maison_service
 
     def _query():
-        service = get_notifications_maison_service()
+        service = obtenir_notifications_maison_service()
         result = service.evaluer_et_envoyer_rappels()
         if result is None:
             return {"rappels_envoyes": 0, "rappels_ignores": 0, "erreurs": ["Service indisponible"]}
@@ -539,22 +539,22 @@ async def envoyer_rappels_maison(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# MÉNAGE — Planning semaine & préférences
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# MÃ‰NAGE â€” Planning semaine & prÃ©fÃ©rences
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/menage/planning-semaine", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def planning_semaine_menage(
-    date_debut: date | None = Query(None, description="Date début semaine (lundi)"),
+    date_debut: date | None = Query(None, description="Date dÃ©but semaine (lundi)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Planning ménage hebdomadaire optimisé par l'IA."""
-    from src.services.maison import get_entretien_service
+    """Planning mÃ©nage hebdomadaire optimisÃ© par l'IA."""
+    from src.services.maison import obtenir_entretien_service
 
     def _query():
-        service = get_entretien_service()
+        service = obtenir_entretien_service()
         planning = service.generer_planning_semaine()
         if planning is None:
             return {"planning": {}}
@@ -569,19 +569,19 @@ async def sauvegarder_preferences_menage(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Sauvegarde les préférences ménage utilisateur."""
+    """Sauvegarde les prÃ©fÃ©rences mÃ©nage utilisateur."""
     # Stockage simple dans cache applicatif (remplacement complet)
     from src.core.caching import obtenir_cache
 
     cache = obtenir_cache()
     cle = f"preferences_menage_{user.get('sub', 'default')}"
     cache.set(cle, payload, ttl=365 * 24 * 3600)
-    return {"message": "Préférences sauvegardées", "preferences": payload}
+    return {"message": "PrÃ©fÃ©rences sauvegardÃ©es", "preferences": payload}
 
 
-# ═══════════════════════════════════════════════════════════
-# TÂCHES PONCTUELLES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TÃ‚CHES PONCTUELLES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/taches-ponctuelles", status_code=201, responses=REPONSES_CRUD_CREATION)
@@ -590,7 +590,7 @@ async def creer_tache_ponctuelle(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée une tâche ménagère ponctuelle."""
+    """CrÃ©e une tÃ¢che mÃ©nagÃ¨re ponctuelle."""
     import datetime as _dt
 
     from src.core.models.habitat import TacheEntretien
@@ -611,14 +611,14 @@ async def creer_tache_ponctuelle(
             )
             session.add(tache)
             session.flush()
-            return {"id": tache.id, "nom": tache.nom, "message": "Tâche créée"}
+            return {"id": tache.id, "nom": tache.nom, "message": "TÃ¢che crÃ©Ã©e"}
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PLANNING IA ADAPTATIF
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/menage/planning-semaine-ia/regenerer", status_code=200, responses=REPONSES_CRUD_CREATION)
@@ -627,11 +627,11 @@ async def regenerer_planning_ia(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Régénère le planning ménage IA pour la semaine."""
-    from src.services.maison import get_entretien_service
+    """RÃ©gÃ©nÃ¨re le planning mÃ©nage IA pour la semaine."""
+    from src.services.maison import obtenir_entretien_service
 
     def _query():
-        service = get_entretien_service()
+        service = obtenir_entretien_service()
         planning = service.generer_planning_semaine()
         if planning is None:
             return {"planning": {}}
@@ -647,13 +647,13 @@ async def completer_tache_menage(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Marque une tâche ménagère comme complétée."""
-    return {"message": "Tâche complétée", "tache_id": tache_id}
+    """Marque une tÃ¢che mÃ©nagÃ¨re comme complÃ©tÃ©e."""
+    return {"message": "TÃ¢che complÃ©tÃ©e", "tache_id": tache_id}
 
 
-# ═══════════════════════════════════════════════════════════
-# AUTO-COMPLÉTION ASSISTANT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# AUTO-COMPLÃ‰TION ASSISTANT
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/assistant/auto-completion", status_code=200, responses=REPONSES_CRUD_CREATION)
@@ -662,15 +662,15 @@ async def auto_completer_champ(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Suggère des complétions de champ via IA."""
-    from src.services.maison.conseiller_service import get_conseiller_maison_service
+    """SuggÃ¨re des complÃ©tions de champ via IA."""
+    from src.services.maison.conseiller_service import obtenir_conseiller_maison_service
 
     champ_nom = payload.get("champ_nom", "")
     valeur_partielle = payload.get("valeur_partielle", "")
     contexte_page = payload.get("contexte_page", "general")
 
     def _query():
-        service = get_conseiller_maison_service()
+        service = obtenir_conseiller_maison_service()
         return service.auto_completer(
             champ_nom=champ_nom,
             valeur_partielle=valeur_partielle,
@@ -681,27 +681,27 @@ async def auto_completer_champ(
     return {"suggestions": suggestions}
 
 
-# ═══════════════════════════════════════════════════════════
-# FICHE TÂCHE ASSISTÉE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# FICHE TÃ‚CHE ASSISTÃ‰E
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/fiche-tache", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_fiche_tache(
     type: str = Query(..., description="Type: entretien, travaux, jardin, lessive"),
-    id: int | None = Query(None, description="ID de la tâche (si entretien)"),
-    nom: str | None = Query(None, description="Nom de la tâche (recherche catalogue)"),
+    id: int | None = Query(None, description="ID de la tÃ¢che (si entretien)"),
+    nom: str | None = Query(None, description="Nom de la tÃ¢che (recherche catalogue)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Fiche tâche assistée : étapes, produits, durée, astuce connectée."""
-    from src.services.maison import get_fiche_tache_service
+    """Fiche tÃ¢che assistÃ©e : Ã©tapes, produits, durÃ©e, astuce connectÃ©e."""
+    from src.services.maison import obtenir_fiche_tache_service
 
     def _query():
-        service = get_fiche_tache_service()
+        service = obtenir_fiche_tache_service()
         fiche = service.obtenir_fiche(type_tache=type, id_tache=id, nom_tache=nom)
         if fiche is None:
-            return {"message": "Tâche non trouvée dans le catalogue"}
+            return {"message": "TÃ¢che non trouvÃ©e dans le catalogue"}
         return fiche.model_dump() if hasattr(fiche, "model_dump") else fiche
 
     return await executer_async(_query)
@@ -713,11 +713,11 @@ async def generer_fiche_tache_ia(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Génère une fiche tâche personnalisée via IA Mistral."""
-    from src.services.maison import get_fiche_tache_service
+    """GÃ©nÃ¨re une fiche tÃ¢che personnalisÃ©e via IA Mistral."""
+    from src.services.maison import obtenir_fiche_tache_service
 
     def _query():
-        service = get_fiche_tache_service()
+        service = obtenir_fiche_tache_service()
         nom_tache = payload.get("nom", "")
         contexte = payload.get("contexte", "")
         fiche = service.generer_fiche_ia(nom_tache=nom_tache, contexte=contexte)
@@ -726,26 +726,26 @@ async def generer_fiche_tache_ia(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# GUIDE LESSIVE & ÉLECTROMÉNAGER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# GUIDE LESSIVE & Ã‰LECTROMÃ‰NAGER
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/guide", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def guide_pratique(
     type: str = Query(..., description="Type: lessive, electromenager, travaux"),
-    tache: str | None = Query(None, description="Tache ou problème (ex: vin, odeurs)"),
+    tache: str | None = Query(None, description="Tache ou problÃ¨me (ex: vin, odeurs)"),
     tissu: str | None = Query(None, description="Type tissu pour lessive"),
-    appareil: str | None = Query(None, description="Appareil électroménager"),
-    probleme: str | None = Query(None, description="Problème constaté"),
+    appareil: str | None = Query(None, description="Appareil Ã©lectromÃ©nager"),
+    probleme: str | None = Query(None, description="ProblÃ¨me constatÃ©"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Guide pratique : lessive anti-taches, dépannage électroménager, travaux."""
-    from src.services.maison import get_fiche_tache_service
+    """Guide pratique : lessive anti-taches, dÃ©pannage Ã©lectromÃ©nager, travaux."""
+    from src.services.maison import obtenir_fiche_tache_service
 
     def _query():
-        service = get_fiche_tache_service()
+        service = obtenir_fiche_tache_service()
         return service.consulter_guide(
             type_guide=type,
             tache=tache,
@@ -757,9 +757,9 @@ async def guide_pratique(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# ROUTINES PAR DÉFAUT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ROUTINES PAR DÃ‰FAUT
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/routines/initialiser-defaut", status_code=200, responses=REPONSES_CRUD_CREATION)
@@ -767,13 +767,13 @@ async def guide_pratique(
 async def initialiser_routines_defaut(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée les 3 routines par défaut (matin, soir, weekly) depuis le JSON de référence."""
-    from src.services.maison import get_entretien_service
+    """CrÃ©e les 3 routines par dÃ©faut (matin, soir, weekly) depuis le JSON de rÃ©fÃ©rence."""
+    from src.services.maison import obtenir_entretien_service
 
     def _query():
-        service = get_entretien_service()
+        service = obtenir_entretien_service()
         nb = service.initialiser_routines_defaut()
-        return {"routines_creees": nb, "message": f"{nb} routine(s) créée(s)"}
+        return {"routines_creees": nb, "message": f"{nb} routine(s) crÃ©Ã©e(s)"}
 
     return await executer_async(_query)
 
@@ -784,7 +784,7 @@ async def creer_routine(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée une nouvelle routine."""
+    """CrÃ©e une nouvelle routine."""
     from src.core.models import Routine
 
     def _query():
@@ -821,14 +821,14 @@ async def modifier_routine(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Modifie une routine existante (y compris activation/désactivation)."""
+    """Modifie une routine existante (y compris activation/dÃ©sactivation)."""
     from src.core.models import Routine
 
     def _query():
         with executer_avec_session() as session:
             routine = session.query(Routine).filter(Routine.id == routine_id).first()
             if not routine:
-                raise HTTPException(status_code=404, detail="Routine non trouvée")
+                raise HTTPException(status_code=404, detail="Routine non trouvÃ©e")
             for champ in ("nom", "description", "categorie", "frequence", "actif", "moment_journee", "jour_semaine"):
                 if champ in payload:
                     setattr(routine, champ, payload[champ])
@@ -852,25 +852,25 @@ async def supprimer_routine(
     routine_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Supprime une routine et ses tâches."""
+    """Supprime une routine et ses tÃ¢ches."""
     from src.core.models import Routine
 
     def _query():
         with executer_avec_session() as session:
             routine = session.query(Routine).filter(Routine.id == routine_id).first()
             if not routine:
-                raise HTTPException(status_code=404, detail="Routine non trouvée")
+                raise HTTPException(status_code=404, detail="Routine non trouvÃ©e")
             session.delete(routine)
             session.commit()
-            return {"message": "Routine supprimée"}
+            return {"message": "Routine supprimÃ©e"}
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# ═══════════════════════════════════════════════════════════
-# ROUTINES — EXTENSIONS (tâches inline, dupliquer, IA)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ROUTINES â€” EXTENSIONS (tÃ¢ches inline, dupliquer, IA)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/routines/taches", responses=REPONSES_LISTE)
@@ -878,7 +878,7 @@ async def supprimer_routine(
 async def lister_toutes_taches_routines(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste toutes les tâches de toutes les routines (pour associer à un objet)."""
+    """Liste toutes les tÃ¢ches de toutes les routines (pour associer Ã  un objet)."""
     from src.core.models.maison import TacheRoutine, Routine
     from src.api.utils import executer_avec_session
 
@@ -915,8 +915,8 @@ async def creer_routine_ia(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Génère et crée une routine personnalisée via l'IA."""
-    from src.services.maison.conseiller_service import get_conseiller_maison_service
+    """GÃ©nÃ¨re et crÃ©e une routine personnalisÃ©e via l'IA."""
+    from src.services.maison.conseiller_service import obtenir_conseiller_maison_service
     from src.core.models.maison import Routine, TacheRoutine
     from src.api.utils import executer_avec_session
     import json
@@ -927,12 +927,12 @@ async def creer_routine_ia(
         raise HTTPException(status_code=422, detail="Le nom de la routine est requis")
 
     def _query():
-        service = get_conseiller_maison_service()
+        service = obtenir_conseiller_maison_service()
         prompt = (
-            f"Génère une routine ménagère nommée '{nom}' avec la description suivante : {description}. "
+            f"GÃ©nÃ¨re une routine mÃ©nagÃ¨re nommÃ©e '{nom}' avec la description suivante : {description}. "
             "Retourne un JSON avec les champs: frequence (quotidien/hebdomadaire/mensuel), "
             "moment_journee (matin/soir/flexible), categorie (menage/cuisine/rangement/entretien), "
-            "taches (liste de {{nom, ordre, duree_min}} max 8 tâches)."
+            "taches (liste de {{nom, ordre, duree_min}} max 8 tÃ¢ches)."
         )
         try:
             conseil = service.obtenir_conseil("menage")
@@ -940,7 +940,7 @@ async def creer_routine_ia(
             frequence = "hebdomadaire"
             moment = "flexible"
             categorie = "menage"
-            # Parsing basique si l'IA renvoie du JSON structuré
+            # Parsing basique si l'IA renvoie du JSON structurÃ©
             if isinstance(conseil, dict) and "data" in conseil:
                 raw = conseil["data"]
                 if isinstance(raw, str):
@@ -951,9 +951,9 @@ async def creer_routine_ia(
                         categorie = parsed.get("categorie", categorie)
                         taches_ia = parsed.get("taches", [])
                     except Exception as e:
-                        logger.warning("[maison] Parsing réponse IA routine échoué: %s", e)
+                        logger.warning("[maison] Parsing rÃ©ponse IA routine Ã©chouÃ©: %s", e)
         except Exception as e:
-            logger.warning("[maison] Génération IA routine échouée, valeurs défaut utilisées: %s", e)
+            logger.warning("[maison] GÃ©nÃ©ration IA routine Ã©chouÃ©e, valeurs dÃ©faut utilisÃ©es: %s", e)
 
         with executer_avec_session() as session:
             routine = Routine(
@@ -969,7 +969,7 @@ async def creer_routine_ia(
             for i, t in enumerate(taches_ia[:8]):
                 tache = TacheRoutine(
                     routine_id=routine.id,
-                    nom=t.get("nom", f"Tâche {i+1}"),
+                    nom=t.get("nom", f"TÃ¢che {i+1}"),
                     ordre=t.get("ordre", i + 1),
                 )
                 session.add(tache)
@@ -991,7 +991,7 @@ async def dupliquer_routine(
     routine_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Duplique une routine existante et toutes ses tâches."""
+    """Duplique une routine existante et toutes ses tÃ¢ches."""
     from src.core.models.maison import Routine, TacheRoutine
     from src.api.utils import executer_avec_session
 
@@ -1037,7 +1037,7 @@ async def lister_taches_routine(
     routine_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les tâches d'une routine."""
+    """Liste les tÃ¢ches d'une routine."""
     from src.core.models.maison import TacheRoutine
     from src.api.utils import executer_avec_session
 
@@ -1075,13 +1075,13 @@ async def ajouter_tache_routine(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Ajoute une tâche à une routine existante."""
+    """Ajoute une tÃ¢che Ã  une routine existante."""
     from src.core.models.maison import Routine, TacheRoutine
     from src.api.utils import executer_avec_session
 
     nom = payload.get("nom", "").strip()
     if not nom:
-        raise HTTPException(status_code=422, detail="Le nom de la tâche est requis")
+        raise HTTPException(status_code=422, detail="Le nom de la tÃ¢che est requis")
 
     def _query():
         with executer_avec_session() as session:
@@ -1112,7 +1112,7 @@ async def supprimer_tache_routine(
     tache_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Supprime une tâche d'une routine."""
+    """Supprime une tÃ¢che d'une routine."""
     from src.core.models.maison import TacheRoutine
     from src.api.utils import executer_avec_session
 
@@ -1123,17 +1123,17 @@ async def supprimer_tache_routine(
                 TacheRoutine.routine_id == routine_id,
             ).first()
             if not tache:
-                raise HTTPException(status_code=404, detail="Tâche introuvable")
+                raise HTTPException(status_code=404, detail="TÃ¢che introuvable")
             session.delete(tache)
             session.commit()
-            return {"message": "Tâche supprimée"}
+            return {"message": "TÃ¢che supprimÃ©e"}
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# OBJETS — ASSOCIER ROUTINE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# OBJETS â€” ASSOCIER ROUTINE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.patch("/objets/{objet_id}/associer-routine", responses=REPONSES_CRUD_LECTURE)
@@ -1143,7 +1143,7 @@ async def associer_routine_objet(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Associe un objet/équipement à une tâche de routine (via notes)."""
+    """Associe un objet/Ã©quipement Ã  une tÃ¢che de routine (via notes)."""
     from src.core.models.temps_entretien import ObjetMaison
     from src.api.utils import executer_avec_session
 
@@ -1156,7 +1156,7 @@ async def associer_routine_objet(
                 raise HTTPException(status_code=404, detail="Objet introuvable")
             note_routine = f"routine_tache:{tache_routine_id}" if tache_routine_id else None
             notes_actuelles = objet.notes or ""
-            # Remplacer ou ajouter la référence de routine
+            # Remplacer ou ajouter la rÃ©fÃ©rence de routine
             import re
             if re.search(r"routine_tache:\d+", notes_actuelles):
                 objet.notes = re.sub(r"routine_tache:\d+", note_routine or "", notes_actuelles).strip()
@@ -1168,20 +1168,26 @@ async def associer_routine_objet(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# SYNC TÃ‚CHES MAISON â†’ PLANNING FAMILIAL
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+
+@router.post("/planning/sync-famille", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
 async def synchroniser_taches_vers_planning(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Synchronise des tâches/projets maison vers le planning familial.
+    """Synchronise des tÃ¢ches/projets maison vers le planning familial.
 
-    Crée des événements dans le calendrier famille pour les tâches et projets
-    maison sélectionnés (par IDs). Permet de visualiser les travaux maison
+    CrÃ©e des Ã©vÃ©nements dans le calendrier famille pour les tÃ¢ches et projets
+    maison sÃ©lectionnÃ©s (par IDs). Permet de visualiser les travaux maison
     dans le planning familial.
 
     Body:
-        taches_ids: list[int] — IDs de TacheEntretien à synchroniser
-        projets_ids: list[int] — IDs de ProjetMaison à synchroniser
+        taches_ids: list[int] â€” IDs de TacheEntretien Ã  synchroniser
+        projets_ids: list[int] â€” IDs de ProjetMaison Ã  synchroniser
     """
     from datetime import time
 
@@ -1192,7 +1198,7 @@ async def synchroniser_taches_vers_planning(
     projets_ids = payload.get("projets_ids", [])
 
     if not taches_ids and not projets_ids:
-        return {"succes": True, "evenements_crees": 0, "message": "Aucun élément à synchroniser"}
+        return {"succes": True, "evenements_crees": 0, "message": "Aucun Ã©lÃ©ment Ã  synchroniser"}
 
     def _query():
         planning_svc = obtenir_service_calendrier_planning()
@@ -1200,7 +1206,7 @@ async def synchroniser_taches_vers_planning(
         conflits: list[str] = []
 
         with executer_avec_session() as session:
-            # Synchroniser les tâches d'entretien
+            # Synchroniser les tÃ¢ches d'entretien
             if taches_ids:
                 taches = (
                     session.query(TacheEntretien)
@@ -1211,14 +1217,14 @@ async def synchroniser_taches_vers_planning(
                     date_cible = t.prochaine_fois or date.today()
                     try:
                         planning_svc.creer_event_calendrier(
-                            titre=f"🔧 {t.nom}",
+                            titre=f"ðŸ”§ {t.nom}",
                             date_event=date_cible,
                             type_event="entretien_maison",
-                            description=f"Tâche entretien maison (durée ~{t.duree_minutes or 30}min)",
+                            description=f"TÃ¢che entretien maison (durÃ©e ~{t.duree_minutes or 30}min)",
                         )
                         crees += 1
                     except Exception as e:
-                        conflits.append(f"Tâche {t.nom}: {e}")
+                        conflits.append(f"TÃ¢che {t.nom}: {e}")
 
             # Synchroniser les projets
             if projets_ids:
@@ -1231,10 +1237,10 @@ async def synchroniser_taches_vers_planning(
                     date_cible = p.date_fin_prevue or date.today()
                     try:
                         planning_svc.creer_event_calendrier(
-                            titre=f"🏠 {p.nom}",
+                            titre=f"ðŸ  {p.nom}",
                             date_event=date_cible,
                             type_event="projet_maison",
-                            description=f"Projet maison — {p.statut or 'planifié'}",
+                            description=f"Projet maison â€” {p.statut or 'planifiÃ©'}",
                         )
                         crees += 1
                     except Exception as e:
@@ -1244,8 +1250,9 @@ async def synchroniser_taches_vers_planning(
             "succes": True,
             "evenements_crees": crees,
             "conflits_detectes": conflits,
-            "message": f"{crees} événement(s) créé(s) dans le planning familial",
+            "message": f"{crees} Ã©vÃ©nement(s) crÃ©Ã©(s) dans le planning familial",
         }
 
     return await executer_async(_query)
+
 

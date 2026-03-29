@@ -336,10 +336,14 @@ class OddsDataService:
 
 
 @service_factory("odds_data", tags={"jeux", "data", "cotes"})
-def get_odds_data_service() -> OddsDataService:
+def obtenir_odds_data_service() -> OddsDataService:
     """Factory pour le service de cotes."""
     from src.core.config import obtenir_parametres
 
     params = obtenir_parametres()
     api_key = getattr(params, "ODDS_API_KEY", None)
     return OddsDataService(api_key=api_key)
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_odds_data_service = obtenir_odds_data_service  # alias rétrocompatibilité Sprint 12 A3

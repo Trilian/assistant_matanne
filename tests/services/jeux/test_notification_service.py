@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour NotificationJeuxService - Gestion des notifications jeux.
 """
 
@@ -18,12 +18,12 @@ from src.services.jeux import (
     afficher_badge_notifications,
     afficher_liste_notifications,
     afficher_notification,
-    get_notification_jeux_service,
+    obtenir_notification_jeux_service,
 )
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -52,22 +52,22 @@ def notification_exemple():
     )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS NOTIFICATION DATACLASS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationJeux:
     """Tests de la dataclass NotificationJeux."""
 
     def test_creation(self, notification_exemple):
-        """La notification est créée correctement."""
+        """La notification est crÃ©Ã©e correctement."""
         assert notification_exemple.id == "test_123"
         assert notification_exemple.type == TypeNotification.OPPORTUNITE
         assert notification_exemple.lue is False
 
     def test_icone(self):
-        """L'icône correspond au type."""
+        """L'icÃ´ne correspond au type."""
         notif = NotificationJeux(
             id="1",
             type=TypeNotification.ALERTE,
@@ -76,10 +76,10 @@ class TestNotificationJeux:
             urgence=NiveauUrgence.HAUTE,
             type_jeu="paris",
         )
-        assert notif.icone == "⚠️"
+        assert notif.icone == "âš ï¸"
 
     def test_couleur_urgence(self):
-        """La couleur correspond à l'urgence."""
+        """La couleur correspond Ã  l'urgence."""
         notif_haute = NotificationJeux(
             id="1",
             type=TypeNotification.INFO,
@@ -101,16 +101,16 @@ class TestNotificationJeux:
         assert "#00C851" in notif_basse.couleur
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS SERVICE CRÉATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS SERVICE CRÃ‰ATION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCreerNotification:
-    """Tests de création de notifications."""
+    """Tests de crÃ©ation de notifications."""
 
     def test_creer_notification_simple(self, service):
-        """Créer une notification simple."""
+        """CrÃ©er une notification simple."""
         notif = service.creer_notification(
             type=TypeNotification.INFO,
             titre="Test",
@@ -123,7 +123,7 @@ class TestCreerNotification:
         assert notif.urgence == NiveauUrgence.BASSE
 
     def test_creer_notification_ajoute_session(self, service):
-        """La notification est ajoutée à la session."""
+        """La notification est ajoutÃ©e Ã  la session."""
         service.creer_notification(
             type=TypeNotification.INFO,
             titre="Test",
@@ -134,8 +134,8 @@ class TestCreerNotification:
         assert len(service.notifications) == 1
 
     def test_limite_notifications(self, service):
-        """Les notifications sont limitées."""
-        # Créer plus que la limite
+        """Les notifications sont limitÃ©es."""
+        # CrÃ©er plus que la limite
         for i in range(service.MAX_NOTIFICATIONS + 10):
             service.creer_notification(
                 type=TypeNotification.INFO,
@@ -148,10 +148,10 @@ class TestCreerNotification:
 
 
 class TestCreerAlerteOpportunite:
-    """Tests de création d'alertes opportunité."""
+    """Tests de crÃ©ation d'alertes opportunitÃ©."""
 
     def test_opportunite_haute(self, service):
-        """Opportunité avec value haute = urgence haute."""
+        """OpportunitÃ© avec value haute = urgence haute."""
         notif = service.creer_alerte_opportunite(
             identifiant="More_2_5",
             value=SEUIL_VALUE_HAUTE + 0.5,
@@ -160,10 +160,10 @@ class TestCreerAlerteOpportunite:
         )
 
         assert notif.urgence == NiveauUrgence.HAUTE
-        assert "🟢" in notif.message
+        assert "ðŸŸ¢" in notif.message
 
     def test_opportunite_moyenne(self, service):
-        """Opportunité avec value moyenne = urgence moyenne."""
+        """OpportunitÃ© avec value moyenne = urgence moyenne."""
         notif = service.creer_alerte_opportunite(
             identifiant="BTTS_Yes",
             value=SEUIL_VALUE_ALERTE + 0.1,
@@ -172,12 +172,12 @@ class TestCreerAlerteOpportunite:
         )
 
         assert notif.urgence == NiveauUrgence.MOYENNE
-        assert "🟡" in notif.message
+        assert "ðŸŸ¡" in notif.message
 
     def test_opportunite_metadata(self, service):
-        """Les metadata sont correctement stockées."""
+        """Les metadata sont correctement stockÃ©es."""
         notif = service.creer_alerte_opportunite(
-            identifiant="Numéro7",
+            identifiant="NumÃ©ro7",
             value=2.8,
             serie=28,
             type_jeu="loto",
@@ -188,10 +188,10 @@ class TestCreerAlerteOpportunite:
 
 
 class TestCreerAlerteSync:
-    """Tests de création d'alertes de synchronisation."""
+    """Tests de crÃ©ation d'alertes de synchronisation."""
 
     def test_sync_succes(self, service):
-        """Sync réussie = notification basse."""
+        """Sync rÃ©ussie = notification basse."""
         notif = service.creer_alerte_sync(
             type_jeu="paris",
             succes=True,
@@ -199,24 +199,24 @@ class TestCreerAlerteSync:
             nb_alertes=3,
         )
 
-        assert "✅" in notif.titre
+        assert "âœ…" in notif.titre
         assert notif.urgence == NiveauUrgence.BASSE
 
     def test_sync_echec(self, service):
-        """Sync échouée = notification haute."""
+        """Sync Ã©chouÃ©e = notification haute."""
         notif = service.creer_alerte_sync(
             type_jeu="loto",
             succes=False,
             erreur="Timeout API",
         )
 
-        assert "❌" in notif.titre
+        assert "âŒ" in notif.titre
         assert notif.urgence == NiveauUrgence.HAUTE
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE LECTURE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLectureNotifications:
@@ -224,7 +224,7 @@ class TestLectureNotifications:
 
     def test_obtenir_non_lues(self, service):
         """Obtenir seulement les non lues."""
-        # Créer 3 notifications
+        # CrÃ©er 3 notifications
         for i in range(3):
             service.creer_notification(
                 type=TypeNotification.INFO,
@@ -290,9 +290,9 @@ class TestLectureNotifications:
         assert service.compter_non_lues() == 5
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE ACTIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestActionsNotifications:
@@ -362,13 +362,13 @@ class TestActionsNotifications:
         assert len(service.notifications) == 0
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS TYPES ÉNUMÉRATIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS TYPES Ã‰NUMÃ‰RATIONS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEnumerations:
-    """Tests des énumérations."""
+    """Tests des Ã©numÃ©rations."""
 
     def test_type_notification_valeurs(self):
         """Tous les types de notification existent."""
@@ -385,9 +385,9 @@ class TestEnumerations:
         assert NiveauUrgence.BASSE.value == "basse"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNotificationFactory:
@@ -401,7 +401,7 @@ class TestNotificationFactory:
         module._notification_service_instance = NotificationJeuxService(storage={})
 
         try:
-            service = get_notification_jeux_service()
+            service = obtenir_notification_jeux_service()
             assert isinstance(service, NotificationJeuxService)
         finally:
             module._notification_service_instance = None
@@ -461,3 +461,4 @@ class TestNotificationEventHandlers:
         assert kwargs["urgence"] == NiveauUrgence.HAUTE
         assert kwargs["type_jeu"] == "global"
         assert "30" in kwargs["message"]
+

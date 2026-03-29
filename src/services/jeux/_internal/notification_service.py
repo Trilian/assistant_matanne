@@ -456,7 +456,7 @@ def afficher_liste_notifications(
 
 
 @service_factory("notification_jeux", tags={"jeux", "notification"})
-def get_notification_jeux_service() -> NotificationJeuxService:
+def obtenir_notification_jeux_service() -> NotificationJeuxService:
     """Factory singleton pour le service de notifications."""
     return NotificationJeuxService()
 
@@ -484,3 +484,7 @@ __all__ = [
     "obtenir_service_notifications_jeux",
     "get_notification_jeux_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_notification_jeux_service = obtenir_notification_jeux_service  # alias rétrocompatibilité Sprint 12 A3

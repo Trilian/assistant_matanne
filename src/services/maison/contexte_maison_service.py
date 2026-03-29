@@ -645,7 +645,7 @@ class ContexteMaisonService(BaseAIService):
 
 
 @service_factory("contexte_maison", tags={"maison"})
-def get_contexte_maison_service() -> ContexteMaisonService:
+def obtenir_contexte_maison_service() -> ContexteMaisonService:
     """Factory singleton pour le service contexte maison."""
     return ContexteMaisonService()
 
@@ -653,3 +653,7 @@ def get_contexte_maison_service() -> ContexteMaisonService:
 def obtenir_service_contexte_maison() -> ContexteMaisonService:
     """Alias français."""
     return get_contexte_maison_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_contexte_maison_service = obtenir_contexte_maison_service  # alias rétrocompatibilité Sprint 12 A3

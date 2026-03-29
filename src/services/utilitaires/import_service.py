@@ -320,6 +320,10 @@ class ImportService:
 
 
 @service_factory("import_service", tags={"utilitaires", "donnees"})
-def get_import_service() -> ImportService:
+def obtenir_import_service() -> ImportService:
     """Factory singleton ImportService."""
     return ImportService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_import_service = obtenir_import_service  # alias rétrocompatibilité Sprint 12 A3

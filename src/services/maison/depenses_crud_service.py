@@ -365,7 +365,7 @@ class DepensesCrudService(
 
 
 @service_factory("depenses_crud", tags={"maison", "crud", "depenses"})
-def get_depenses_crud_service() -> DepensesCrudService:
+def obtenir_depenses_crud_service() -> DepensesCrudService:
     """Factory singleton pour le service CRUD dépenses."""
     return DepensesCrudService()
 
@@ -373,3 +373,7 @@ def get_depenses_crud_service() -> DepensesCrudService:
 def obtenir_service_depenses_crud() -> DepensesCrudService:
     """Factory française pour le service CRUD dépenses."""
     return get_depenses_crud_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_depenses_crud_service = obtenir_depenses_crud_service  # alias rétrocompatibilité Sprint 12 A3

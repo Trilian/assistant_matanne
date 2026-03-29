@@ -1126,6 +1126,8 @@ CREATE TABLE preferences_notifications (
     quiet_hours_end TIME DEFAULT '07:00',
     modules_actifs JSONB DEFAULT '{}'::jsonb,
     canal_prefere VARCHAR(20) DEFAULT 'push',
+    -- Sprint 13 — W4 : canaux par catégorie
+    canaux_par_categorie JSONB DEFAULT '{"rappels":["push","ntfy"],"alertes":["push","ntfy","email"],"resumes":["email"]}'::jsonb,
     user_id UUID,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
@@ -1543,8 +1545,31 @@ CREATE INDEX IF NOT EXISTS ix_historique_inventaire_ingredient ON historique_inv
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_type ON historique_inventaire(type_modification);
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_date ON historique_inventaire(date_modification);
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.13 [SUPPRIMÉ] — Table liste_courses (doublon de articles_courses) — SQL1
+-- 4.13 ARTICLES_COURSES (→ listes_courses, ingredients) — Sprint 12 A5
+-- Anciennement liste_courses. Renommé en articles_courses pour cohérence.
 -- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE articles_courses (
+    id SERIAL PRIMARY KEY,
+    liste_id INTEGER NOT NULL,
+    ingredient_id INTEGER NOT NULL,
+    quantite_necessaire FLOAT NOT NULL,
+    priorite VARCHAR(50) NOT NULL DEFAULT 'moyenne',
+    achete BOOLEAN NOT NULL DEFAULT FALSE,
+    suggere_par_ia BOOLEAN NOT NULL DEFAULT FALSE,
+    achete_le TIMESTAMP WITH TIME ZONE,
+    rayon_magasin VARCHAR(100),
+    magasin_cible VARCHAR(50),
+    notes TEXT,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_articles_courses_liste FOREIGN KEY (liste_id) REFERENCES listes_courses(id) ON DELETE CASCADE,
+    CONSTRAINT fk_articles_courses_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE,
+    CONSTRAINT ck_quantite_articles_courses_positive CHECK (quantite_necessaire > 0)
+);
+CREATE INDEX IF NOT EXISTS ix_articles_courses_liste_id ON articles_courses(liste_id);
+CREATE INDEX IF NOT EXISTS ix_articles_courses_ingredient_id ON articles_courses(ingredient_id);
+CREATE INDEX IF NOT EXISTS ix_articles_courses_priorite ON articles_courses(priorite);
+CREATE INDEX IF NOT EXISTS ix_articles_courses_achete ON articles_courses(achete);
+CREATE INDEX IF NOT EXISTS ix_articles_courses_cree_le ON articles_courses(cree_le);
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.14 ARTICLES_MODELES (→ modeles_courses, ingredients)
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -4307,8 +4332,7 @@ COMMIT;
 -- ============================================================================
 -- INDEXES MANQUANTS (SQL2)
 -- ============================================================================
-CREATE INDEX IF NOT EXISTS idx_articles_courses_liste_achete
-    ON articles_courses(liste_id, achete);
+-- idx_articles_courses_liste_achete already created in section 4.13 above
 
 CREATE INDEX IF NOT EXISTS idx_articles_inventaire_peremption
     ON articles_inventaire(date_peremption);

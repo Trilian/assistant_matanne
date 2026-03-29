@@ -100,7 +100,7 @@ class NotesService:
 
 
 @service_factory("notes_service", tags={"utilitaires"})
-def get_notes_service() -> NotesService:
+def obtenir_notes_service() -> NotesService:
     """Factory singleton NotesService."""
     return NotesService()
 
@@ -211,7 +211,7 @@ class JournalService:
 
 
 @service_factory("journal_service", tags={"utilitaires"})
-def get_journal_service() -> JournalService:
+def obtenir_journal_service() -> JournalService:
     """Factory singleton JournalService."""
     return JournalService()
 
@@ -273,7 +273,7 @@ class ContactsService:
 
 
 @service_factory("contacts_service", tags={"utilitaires"})
-def get_contacts_service() -> ContactsService:
+def obtenir_contacts_service() -> ContactsService:
     """Factory singleton ContactsService."""
     return ContactsService()
 
@@ -326,7 +326,7 @@ class LiensService:
 
 
 @service_factory("liens_service", tags={"utilitaires"})
-def get_liens_service() -> LiensService:
+def obtenir_liens_service() -> LiensService:
     """Factory singleton LiensService."""
     return LiensService()
 
@@ -397,7 +397,7 @@ class MotsDePasseService:
 
 
 @service_factory("mots_de_passe_service", tags={"utilitaires", "securite"})
-def get_mots_de_passe_service() -> MotsDePasseService:
+def obtenir_mots_de_passe_service() -> MotsDePasseService:
     """Factory singleton MotsDePasseService."""
     return MotsDePasseService()
 
@@ -451,7 +451,7 @@ class PressePapiersService:
 
 
 @service_factory("presse_papiers_service", tags={"utilitaires"})
-def get_presse_papiers_service() -> PressePapiersService:
+def obtenir_presse_papiers_service() -> PressePapiersService:
     """Factory singleton PressePapiersService."""
     return PressePapiersService()
 
@@ -533,6 +533,16 @@ class EnergieService:
 
 
 @service_factory("energie_service", tags={"utilitaires", "maison"})
-def get_energie_service() -> EnergieService:
+def obtenir_energie_service() -> EnergieService:
     """Factory singleton EnergieService."""
     return EnergieService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_notes_service = obtenir_notes_service  # alias rétrocompatibilité Sprint 12 A3
+get_journal_service = obtenir_journal_service  # alias rétrocompatibilité Sprint 12 A3
+get_contacts_service = obtenir_contacts_service  # alias rétrocompatibilité Sprint 12 A3
+get_liens_service = obtenir_liens_service  # alias rétrocompatibilité Sprint 12 A3
+get_mots_de_passe_service = obtenir_mots_de_passe_service  # alias rétrocompatibilité Sprint 12 A3
+get_presse_papiers_service = obtenir_presse_papiers_service  # alias rétrocompatibilité Sprint 12 A3
+get_energie_service = obtenir_energie_service  # alias rétrocompatibilité Sprint 12 A3

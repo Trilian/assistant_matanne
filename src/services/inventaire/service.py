@@ -206,7 +206,7 @@ def obtenir_service_inventaire() -> ServiceInventaire:
     return ServiceInventaire()
 
 
-def get_inventory_service() -> ServiceInventaire:
+def obtenir_inventory_service() -> ServiceInventaire:
     """Factory for inventory service (English alias)."""
     return obtenir_service_inventaire()
 
@@ -222,3 +222,7 @@ __all__ = [
     # Variable globale
     "inventaire_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_inventory_service = obtenir_inventory_service  # alias rétrocompatibilité Sprint 12 A3

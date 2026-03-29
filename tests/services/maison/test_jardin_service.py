@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour JardinService.
 
 Couvre:
 - Conseils saisonniers
 - Plans d'arrosage
 - Diagnostics plantes
-- Impact météo
+- Impact mÃ©tÃ©o
 """
 
 import json
@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.services.maison.jardin_service import JardinService, get_jardin_service
+from src.services.maison.jardin_service import JardinService, obtenir_jardin_service
 from src.services.maison.schemas import ConseilJardin, PlanArrosage
 
 
@@ -24,13 +24,13 @@ class TestJardinServiceInit:
     def test_factory_returns_service(self):
         """La factory retourne une instance valide."""
         with patch("src.services.maison.jardin_service.ClientIA"):
-            service = get_jardin_service()
+            service = obtenir_jardin_service()
             assert isinstance(service, JardinService)
 
     def test_factory_accepts_custom_client(self):
-        """La factory accepte un client personnalisé."""
+        """La factory accepte un client personnalisÃ©."""
         mock_client = MagicMock()
-        service = get_jardin_service(client=mock_client)
+        service = obtenir_jardin_service(client=mock_client)
         assert service.client == mock_client
 
 
@@ -39,7 +39,7 @@ class TestJardinServiceConseils:
 
     @pytest.mark.asyncio
     async def test_generer_conseils_saison_printemps(self, mock_client_ia):
-        """Génère des conseils adaptés au printemps."""
+        """GÃ©nÃ¨re des conseils adaptÃ©s au printemps."""
         mock_client_ia.generer = AsyncMock(
             return_value=json.dumps(
                 [
@@ -60,18 +60,18 @@ class TestJardinServiceConseils:
 
         conseils = await service.generer_conseils_saison("printemps")
 
-        # Vérifier que l'appel IA est fait
+        # VÃ©rifier que l'appel IA est fait
         assert service.call_with_cache.called
 
     @pytest.mark.asyncio
     async def test_generer_conseils_sans_plantes(self, mock_client_ia):
-        """Génère des conseils généraux sans liste de plantes."""
-        mock_client_ia.generer = AsyncMock(return_value="Conseils généraux")
+        """GÃ©nÃ¨re des conseils gÃ©nÃ©raux sans liste de plantes."""
+        mock_client_ia.generer = AsyncMock(return_value="Conseils gÃ©nÃ©raux")
 
         service = JardinService(client=mock_client_ia)
-        service.call_with_cache = AsyncMock(return_value="Conseils généraux")
+        service.call_with_cache = AsyncMock(return_value="Conseils gÃ©nÃ©raux")
 
-        conseils = await service.generer_conseils_saison("été")
+        conseils = await service.generer_conseils_saison("Ã©tÃ©")
 
         assert service.call_with_cache.called
 
@@ -80,7 +80,7 @@ class TestJardinServiceArrosage:
     """Tests des plans d'arrosage."""
 
     def test_conseil_arrosage_calcul(self, mock_jardin_service, plante_jardin_data):
-        """Calcule le conseil d'arrosage basé sur les données."""
+        """Calcule le conseil d'arrosage basÃ© sur les donnÃ©es."""
         # Simuler une plante qui a besoin d'eau
         plante_jardin_data["derniere_irrigation"] = date.today() - timedelta(days=5)
 
@@ -89,13 +89,13 @@ class TestJardinServiceArrosage:
         assert jours_depuis == 5
 
     def test_conseil_arrosage_gel_prevu(self, meteo_gel_data):
-        """Pas d'arrosage si gel prévu."""
+        """Pas d'arrosage si gel prÃ©vu."""
         assert meteo_gel_data["gel_prevu"] is True
-        # Le service devrait retourner "Reporter l'arrosage - gel prévu"
+        # Le service devrait retourner "Reporter l'arrosage - gel prÃ©vu"
 
     @pytest.mark.asyncio
     async def test_generer_plan_arrosage(self, mock_client_ia):
-        """Génère un plan d'arrosage pour plusieurs plantes."""
+        """GÃ©nÃ¨re un plan d'arrosage pour plusieurs plantes."""
         mock_response = json.dumps(
             {
                 "plan": [
@@ -128,7 +128,7 @@ class TestJardinServiceDiagnostic:
                 "plante": "Tomate",
                 "etat": "attention",
                 "problemes": ["Carence en azote"],
-                "traitements": ["Apport d'engrais azoté"],
+                "traitements": ["Apport d'engrais azotÃ©"],
             }
         )
 
@@ -146,7 +146,7 @@ class TestJardinServiceDiagnostic:
 
     @pytest.mark.asyncio
     async def test_diagnostiquer_plante_sans_image(self, mock_client_ia):
-        """Diagnostic basé uniquement sur les symptômes."""
+        """Diagnostic basÃ© uniquement sur les symptÃ´mes."""
         # Without valid image, the method falls back to error handling
         mock_client_ia.appeler_avec_image = AsyncMock(side_effect=Exception("No image"))
 
@@ -163,11 +163,11 @@ class TestJardinServiceDiagnostic:
 
 
 class TestJardinServiceMeteo:
-    """Tests de l'intégration météo."""
+    """Tests de l'intÃ©gration mÃ©tÃ©o."""
 
     @pytest.mark.asyncio
     async def test_analyser_meteo_impact(self, mock_client_ia, meteo_data):
-        """Analyse l'impact de la météo sur le jardin."""
+        """Analyse l'impact de la mÃ©tÃ©o sur le jardin."""
         mock_response = json.dumps(
             {
                 "impact": "favorable",
@@ -188,7 +188,7 @@ class TestJardinServiceMeteo:
 
     @pytest.mark.asyncio
     async def test_analyser_meteo_gel(self, mock_client_ia, meteo_gel_data):
-        """Détecte et alerte sur le risque de gel."""
+        """DÃ©tecte et alerte sur le risque de gel."""
         service = JardinService(client=mock_client_ia)
 
         impact = await service.analyser_meteo_impact(
@@ -198,13 +198,13 @@ class TestJardinServiceMeteo:
         )
 
         assert isinstance(impact, list)
-        # Gel prévu à -3°C, devrait avoir au moins une alerte
+        # Gel prÃ©vu Ã  -3Â°C, devrait avoir au moins une alerte
         assert len(impact) >= 1
 
     @pytest.mark.asyncio
     async def test_generer_conseils_meteo(self, mock_client_ia):
-        """Génère des conseils adaptés à la météo."""
-        mock_response = "Journée idéale pour le jardinage. Pensez à arroser ce soir."
+        """GÃ©nÃ¨re des conseils adaptÃ©s Ã  la mÃ©tÃ©o."""
+        mock_response = "JournÃ©e idÃ©ale pour le jardinage. Pensez Ã  arroser ce soir."
 
         service = JardinService(client=mock_client_ia)
         service.call_with_cache = AsyncMock(return_value=mock_response)
@@ -223,7 +223,7 @@ class TestJardinServiceSuggestions:
 
     @pytest.mark.asyncio
     async def test_suggerer_plantes_saison(self, mock_client_ia):
-        """Suggère des plantes adaptées à la saison."""
+        """SuggÃ¨re des plantes adaptÃ©es Ã  la saison."""
         mock_response = json.dumps(
             [
                 "Tomates cerises",
@@ -242,12 +242,12 @@ class TestJardinServiceSuggestions:
 
     @pytest.mark.asyncio
     async def test_suggerer_plantes_avec_contraintes(self, mock_client_ia):
-        """Suggère des plantes avec contraintes (ombre, peu d'entretien)."""
+        """SuggÃ¨re des plantes avec contraintes (ombre, peu d'entretien)."""
         mock_response = json.dumps(
             [
                 "Hostas",
-                "Fougères",
-                "Heuchères",
+                "FougÃ¨res",
+                "HeuchÃ¨res",
             ]
         )
 
@@ -255,7 +255,7 @@ class TestJardinServiceSuggestions:
         service.call_with_cache = AsyncMock(return_value=mock_response)
 
         suggestions = await service.suggerer_plantes_saison(
-            "été",
+            "Ã©tÃ©",
             climat="ombre",
         )
 
@@ -263,30 +263,30 @@ class TestJardinServiceSuggestions:
 
 
 class TestJardinServiceIntegration:
-    """Tests d'intégration avec vraies données."""
+    """Tests d'intÃ©gration avec vraies donnÃ©es."""
 
     def test_calcul_frequence_arrosage(self):
-        """Teste le calcul de fréquence d'arrosage."""
-        # Température élevée = arrosage plus fréquent
+        """Teste le calcul de frÃ©quence d'arrosage."""
+        # TempÃ©rature Ã©levÃ©e = arrosage plus frÃ©quent
         temp_haute = 30
         freq_haute = max(1, 4 - (temp_haute - 20) // 5)  # 2 jours
 
         temp_basse = 15
-        freq_basse = max(1, 4 - (temp_basse - 20) // 5)  # 5 jours (cap à 4)
+        freq_basse = max(1, 4 - (temp_basse - 20) // 5)  # 5 jours (cap Ã  4)
 
         assert freq_haute < freq_basse or freq_basse == 4
 
     def test_detection_saison(self):
-        """Teste la détection de saison basée sur le mois."""
+        """Teste la dÃ©tection de saison basÃ©e sur le mois."""
         mois_saison = {
             1: "hiver",
             2: "hiver",
             3: "printemps",
             4: "printemps",
             5: "printemps",
-            6: "été",
-            7: "été",
-            8: "été",
+            6: "Ã©tÃ©",
+            7: "Ã©tÃ©",
+            8: "Ã©tÃ©",
             9: "automne",
             10: "automne",
             11: "automne",
@@ -297,8 +297,9 @@ class TestJardinServiceIntegration:
             if mois in [3, 4, 5]:
                 assert saison == "printemps"
             elif mois in [6, 7, 8]:
-                assert saison == "été"
+                assert saison == "Ã©tÃ©"
             elif mois in [9, 10, 11]:
                 assert saison == "automne"
             else:
                 assert saison == "hiver"
+

@@ -513,7 +513,7 @@ class PredictionServiceJeux:
 
 
 @service_factory("prediction", tags={"jeux", "ia", "prediction"})
-def get_prediction_service() -> PredictionServiceJeux:
+def obtenir_prediction_service() -> PredictionServiceJeux:
     """Factory singleton pour le service de prédiction."""
     return PredictionServiceJeux()
 
@@ -574,3 +574,7 @@ def generer_conseil_pari(
     """Fonction de compatibilité avec l'ancienne API."""
     service = get_prediction_service()
     return service._generer_conseil_pari(prediction, confiance, cotes)
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_prediction_service = obtenir_prediction_service  # alias rétrocompatibilité Sprint 12 A3

@@ -57,7 +57,7 @@ class AccueilDataService:
 
 
 @service_factory("accueil_data", tags={"accueil", "data"})
-def get_accueil_data_service() -> AccueilDataService:
+def obtenir_accueil_data_service() -> AccueilDataService:
     """Factory singleton pour le service accueil data."""
     return AccueilDataService()
 
@@ -65,3 +65,7 @@ def get_accueil_data_service() -> AccueilDataService:
 def obtenir_service_accueil_data() -> AccueilDataService:
     """Factory française pour le service accueil data."""
     return get_accueil_data_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_accueil_data_service = obtenir_accueil_data_service  # alias rétrocompatibilité Sprint 12 A3

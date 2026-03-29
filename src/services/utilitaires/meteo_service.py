@@ -223,6 +223,10 @@ class MeteoService:
 
 
 @service_factory("meteo_service", tags={"utilitaires", "api"})
-def get_meteo_service() -> MeteoService:
+def obtenir_meteo_service() -> MeteoService:
     """Factory singleton MeteoService."""
     return MeteoService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_meteo_service = obtenir_meteo_service  # alias rétrocompatibilité Sprint 12 A3

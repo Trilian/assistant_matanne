@@ -441,7 +441,7 @@ def obtenir_service_batch_cooking() -> ServiceBatchCooking:
     return ServiceBatchCooking()
 
 
-def get_batch_cooking_service() -> ServiceBatchCooking:
+def obtenir_batch_cooking_service() -> ServiceBatchCooking:
     """Factory for batch cooking service (English alias)."""
     return obtenir_service_batch_cooking()
 
@@ -451,3 +451,7 @@ __all__ = [
     "obtenir_service_batch_cooking",
     "get_batch_cooking_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_batch_cooking_service = obtenir_batch_cooking_service  # alias rétrocompatibilité Sprint 12 A3

@@ -346,6 +346,10 @@ def _conseils_fallback(section: str) -> list[str]:
 
 
 @service_factory("conseiller_maison")
-def get_conseiller_maison_service() -> ConseillierMaisonService:
+def obtenir_conseiller_maison_service() -> ConseillierMaisonService:
     """Retourne l'instance singleton du service conseiller IA."""
     return ConseillierMaisonService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_conseiller_maison_service = obtenir_conseiller_maison_service  # alias rétrocompatibilité Sprint 12 A3

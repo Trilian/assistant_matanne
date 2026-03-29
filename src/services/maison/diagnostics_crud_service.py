@@ -203,13 +203,13 @@ class EstimationsCrudService(EventBusMixin, BaseService[EstimationImmobiliere]):
 
 
 @service_factory("diagnostics_crud", tags={"maison", "crud", "diagnostics"})
-def get_diagnostics_crud_service() -> DiagnosticsCrudService:
+def obtenir_diagnostics_crud_service() -> DiagnosticsCrudService:
     """Factory singleton pour le service CRUD diagnostics."""
     return DiagnosticsCrudService()
 
 
 @service_factory("estimations_crud", tags={"maison", "crud", "estimations"})
-def get_estimations_crud_service() -> EstimationsCrudService:
+def obtenir_estimations_crud_service() -> EstimationsCrudService:
     """Factory singleton pour le service CRUD estimations."""
     return EstimationsCrudService()
 
@@ -222,3 +222,8 @@ def obtenir_service_diagnostics_crud() -> DiagnosticsCrudService:
 def obtenir_service_estimations_crud() -> EstimationsCrudService:
     """Factory française pour le service CRUD estimations."""
     return get_estimations_crud_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_diagnostics_crud_service = obtenir_diagnostics_crud_service  # alias rétrocompatibilité Sprint 12 A3
+get_estimations_crud_service = obtenir_estimations_crud_service  # alias rétrocompatibilité Sprint 12 A3

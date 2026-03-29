@@ -199,7 +199,7 @@ class MeublesCrudService(EventBusMixin, BaseService[Meuble]):
 
 
 @service_factory("meubles_crud", tags={"maison", "crud", "meubles"})
-def get_meubles_crud_service() -> MeublesCrudService:
+def obtenir_meubles_crud_service() -> MeublesCrudService:
     """Factory singleton pour le service CRUD meubles."""
     return MeublesCrudService()
 
@@ -207,3 +207,7 @@ def get_meubles_crud_service() -> MeublesCrudService:
 def obtenir_service_meubles_crud() -> MeublesCrudService:
     """Factory française pour le service CRUD meubles."""
     return get_meubles_crud_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_meubles_crud_service = obtenir_meubles_crud_service  # alias rétrocompatibilité Sprint 12 A3

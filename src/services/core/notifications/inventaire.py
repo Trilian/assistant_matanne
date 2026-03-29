@@ -266,7 +266,7 @@ def obtenir_service_notifications_inventaire() -> ServiceNotificationsInventaire
     return ServiceNotificationsInventaire()
 
 
-def get_inventory_notification_service() -> ServiceNotificationsInventaire:
+def obtenir_inventory_notification_service() -> ServiceNotificationsInventaire:
     """Factory for inventory notification service (English alias)."""
     return obtenir_service_notifications_inventaire()
 
@@ -276,3 +276,7 @@ __all__ = [
     "obtenir_service_notifications_inventaire",
     "get_inventory_notification_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_inventory_notification_service = obtenir_inventory_notification_service  # alias rétrocompatibilité Sprint 12 A3

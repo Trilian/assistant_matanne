@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/services/budget/__init__.py
 
 Couvre les exports du module budget.
@@ -18,13 +18,13 @@ class TestBudgetModuleExports:
         assert BudgetService is not None
 
     def test_exports_get_budget_service(self):
-        """Export get_budget_service."""
-        from src.services.famille.budget import get_budget_service
+        """Export obtenir_budget_service."""
+        from src.services.famille.budget import obtenir_budget_service
 
-        assert callable(get_budget_service)
+        assert callable(obtenir_budget_service)
 
     def test_exports_schemas(self):
-        """Export des schémas."""
+        """Export des schÃ©mas."""
         from src.services.famille.budget import (
             CategorieDepense,
             Depense,
@@ -42,3 +42,4 @@ class TestBudgetModuleExports:
 
         assert callable(calculer_moyenne_ponderee)
         assert callable(valider_montant)
+

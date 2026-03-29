@@ -150,6 +150,10 @@ class ScoreBienEtreService:
 
 
 @service_factory("score_bien_etre", tags={"dashboard", "famille", "cuisine"})
-def get_score_bien_etre_service() -> ScoreBienEtreService:
+def obtenir_score_bien_etre_service() -> ScoreBienEtreService:
     """Factory singleton du service de score bien-etre."""
     return ScoreBienEtreService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_score_bien_etre_service = obtenir_score_bien_etre_service  # alias rétrocompatibilité Sprint 12 A3

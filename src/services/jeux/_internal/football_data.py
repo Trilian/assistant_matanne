@@ -324,7 +324,7 @@ class FootballDataService:
 
 
 @service_factory("football_data", tags={"jeux", "data", "football"})
-def get_football_data_service(api_key: str | None = None) -> FootballDataService:
+def obtenir_football_data_service(api_key: str | None = None) -> FootballDataService:
     """
     Factory singleton pour le service Football-Data.
 
@@ -357,3 +357,7 @@ from .football_compat import (  # noqa: E402, F401
     obtenir_cle_api,
     vider_cache,
 )
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_football_data_service = obtenir_football_data_service  # alias rétrocompatibilité Sprint 12 A3

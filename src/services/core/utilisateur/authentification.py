@@ -361,7 +361,7 @@ def obtenir_service_authentification() -> AuthService:
     return AuthService()
 
 
-def get_auth_service() -> AuthService:
+def obtenir_auth_service() -> AuthService:
     """Factory pour le service d'authentification (alias anglais)."""
     return obtenir_service_authentification()
 
@@ -380,3 +380,7 @@ __all__ = [
     "TokenValidationMixin",
     "ProfileMixin",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_auth_service = obtenir_auth_service  # alias rétrocompatibilité Sprint 12 A3

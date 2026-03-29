@@ -730,7 +730,7 @@ def obtenir_service_export_pdf() -> ServiceExportPDF:
     return ServiceExportPDF()
 
 
-def get_pdf_export_service() -> ServiceExportPDF:
+def obtenir_pdf_export_service() -> ServiceExportPDF:
     """Factory for PDF export service (English alias)."""
     return obtenir_service_export_pdf()
 
@@ -740,3 +740,7 @@ __all__ = [
     "obtenir_service_export_pdf",
     "get_pdf_export_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_pdf_export_service = obtenir_pdf_export_service  # alias rétrocompatibilité Sprint 12 A3

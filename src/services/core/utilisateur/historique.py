@@ -290,7 +290,7 @@ def obtenir_service_historique_actions() -> ActionHistoryService:
     return ActionHistoryService()
 
 
-def get_action_history_service() -> ActionHistoryService:
+def obtenir_action_history_service() -> ActionHistoryService:
     """Factory pour le service d'historique (alias anglais)."""
     return obtenir_service_historique_actions()
 
@@ -317,3 +317,7 @@ __all__ = [
     "afficher_user_activity",
     "afficher_activity_stats",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_action_history_service = obtenir_action_history_service  # alias rétrocompatibilité Sprint 12 A3

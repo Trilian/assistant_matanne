@@ -55,7 +55,7 @@ class ParisCrudService(
 
 
 @service_factory("paris_crud", tags={"jeux", "crud", "paris"})
-def get_paris_crud_service() -> ParisCrudService:
+def obtenir_paris_crud_service() -> ParisCrudService:
     """Factory singleton pour ParisCrudService."""
     return ParisCrudService()
 
@@ -63,3 +63,7 @@ def get_paris_crud_service() -> ParisCrudService:
 def obtenir_service_paris_crud() -> ParisCrudService:
     """Alias français pour get_paris_crud_service."""
     return get_paris_crud_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_paris_crud_service = obtenir_paris_crud_service  # alias rétrocompatibilité Sprint 12 A3

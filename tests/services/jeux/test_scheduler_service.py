@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour SchedulerService - Planification automatique des synchronisations.
 """
 
@@ -14,27 +14,27 @@ from src.services.jeux import (
     INTERVALLE_PARIS_HEURES,
     MINUTE_LOTO,
     SchedulerService,
-    get_scheduler_service,
+    obtenir_scheduler_service,
     reset_scheduler_service,
 )
 
 
 @pytest.fixture(autouse=True)
 def reset_singleton():
-    """Reset le singleton après chaque test."""
+    """Reset le singleton aprÃ¨s chaque test."""
     yield
     reset_scheduler_service()
 
 
 class TestSchedulerServiceDisponibilite:
-    """Tests de disponibilité."""
+    """Tests de disponibilitÃ©."""
 
     def test_apscheduler_disponible(self):
-        """Vérifie que APScheduler est installé."""
+        """VÃ©rifie que APScheduler est installÃ©."""
         assert APSCHEDULER_AVAILABLE is True
 
     def test_service_creation(self):
-        """Test création du service."""
+        """Test crÃ©ation du service."""
         service = SchedulerService()
         assert service is not None
         assert service.est_disponible is True
@@ -44,21 +44,21 @@ class TestSchedulerServiceFactory:
     """Tests de la factory singleton."""
 
     def test_get_scheduler_service(self):
-        """Test création via factory."""
-        service = get_scheduler_service()
+        """Test crÃ©ation via factory."""
+        service = obtenir_scheduler_service()
         assert isinstance(service, SchedulerService)
 
     def test_singleton_pattern(self):
-        """Test que la factory retourne toujours la même instance."""
-        service1 = get_scheduler_service()
-        service2 = get_scheduler_service()
+        """Test que la factory retourne toujours la mÃªme instance."""
+        service1 = obtenir_scheduler_service()
+        service2 = obtenir_scheduler_service()
         assert service1 is service2
 
     def test_reset_singleton(self):
         """Test reset du singleton."""
-        service1 = get_scheduler_service()
+        service1 = obtenir_scheduler_service()
         reset_scheduler_service()
-        service2 = get_scheduler_service()
+        service2 = obtenir_scheduler_service()
         assert service1 is not service2
 
 
@@ -66,20 +66,20 @@ class TestSchedulerServiceConstantes:
     """Tests des constantes."""
 
     def test_intervalle_paris(self):
-        """Vérifie l'intervalle Paris."""
+        """VÃ©rifie l'intervalle Paris."""
         assert INTERVALLE_PARIS_HEURES == 6
 
     def test_heure_loto(self):
-        """Vérifie l'heure Loto."""
+        """VÃ©rifie l'heure Loto."""
         assert HEURE_LOTO == 21
         assert MINUTE_LOTO == 30
 
 
 class TestSchedulerServiceDemarrage:
-    """Tests du démarrage/arrêt."""
+    """Tests du dÃ©marrage/arrÃªt."""
 
     def test_demarrer_scheduler(self):
-        """Test démarrage du scheduler."""
+        """Test dÃ©marrage du scheduler."""
         service = SchedulerService()
 
         assert service.est_demarre is False
@@ -92,7 +92,7 @@ class TestSchedulerServiceDemarrage:
         service.arreter()
 
     def test_arreter_scheduler(self):
-        """Test arrêt du scheduler."""
+        """Test arrÃªt du scheduler."""
         service = SchedulerService()
         service.demarrer()
 
@@ -102,18 +102,18 @@ class TestSchedulerServiceDemarrage:
         assert service.est_demarre is False
 
     def test_demarrage_double(self):
-        """Test double démarrage (devrait être idempotent)."""
+        """Test double dÃ©marrage (devrait Ãªtre idempotent)."""
         service = SchedulerService()
         service.demarrer()
 
-        # Second démarrage
+        # Second dÃ©marrage
         result = service.demarrer()
-        assert result is True  # Retourne True même si déjà démarré
+        assert result is True  # Retourne True mÃªme si dÃ©jÃ  dÃ©marrÃ©
 
         service.arreter()
 
     def test_redemarrer_scheduler(self):
-        """Test redémarrage."""
+        """Test redÃ©marrage."""
         service = SchedulerService()
         service.demarrer()
 
@@ -126,10 +126,10 @@ class TestSchedulerServiceDemarrage:
 
 
 class TestSchedulerServiceJobs:
-    """Tests des jobs programmés."""
+    """Tests des jobs programmÃ©s."""
 
     def test_jobs_crees_au_demarrage(self):
-        """Vérifie que les jobs sont créés."""
+        """VÃ©rifie que les jobs sont crÃ©Ã©s."""
         service = SchedulerService()
         service.demarrer(competitions=["FL1"], inclure_loto=True)
 
@@ -145,7 +145,7 @@ class TestSchedulerServiceJobs:
         service.arreter()
 
     def test_jobs_multiples_competitions(self):
-        """Test avec plusieurs compétitions."""
+        """Test avec plusieurs compÃ©titions."""
         service = SchedulerService()
         service.demarrer(competitions=["FL1", "PL", "BL1"], inclure_loto=False)
 
@@ -172,7 +172,7 @@ class TestSchedulerServiceJobs:
         service.arreter()
 
     def test_prochaines_executions(self):
-        """Test récupération des prochaines exécutions."""
+        """Test rÃ©cupÃ©ration des prochaines exÃ©cutions."""
         service = SchedulerService()
         service.demarrer(competitions=["FL1"], inclure_loto=True)
 
@@ -181,7 +181,7 @@ class TestSchedulerServiceJobs:
         assert "paris" in prochaines
         assert "loto" in prochaines
 
-        # Vérifier que les dates sont dans le futur
+        # VÃ©rifier que les dates sont dans le futur
         now = datetime.now(prochaines["paris"].tzinfo)
         assert prochaines["paris"] > now
 
@@ -189,11 +189,11 @@ class TestSchedulerServiceJobs:
 
 
 class TestSchedulerServiceExecutionManuelle:
-    """Tests d'exécution manuelle."""
+    """Tests d'exÃ©cution manuelle."""
 
     @patch.object(SchedulerService, "_executer_sync_paris")
     def test_executer_maintenant_paris(self, mock_sync):
-        """Test exécution manuelle Paris."""
+        """Test exÃ©cution manuelle Paris."""
         mock_sync.return_value = {"marches_maj": 6}
 
         service = SchedulerService()
@@ -204,7 +204,7 @@ class TestSchedulerServiceExecutionManuelle:
 
     @patch.object(SchedulerService, "_executer_sync_loto")
     def test_executer_maintenant_loto(self, mock_sync):
-        """Test exécution manuelle Loto."""
+        """Test exÃ©cution manuelle Loto."""
         mock_sync.return_value = {"numeros_maj": 59}
 
         service = SchedulerService()
@@ -225,7 +225,7 @@ class TestSchedulerServiceHistorique:
     """Tests de l'historique."""
 
     def test_historique_vide_initial(self):
-        """Test historique vide au départ."""
+        """Test historique vide au dÃ©part."""
         service = SchedulerService()
 
         historique = service.obtenir_historique()
@@ -243,7 +243,7 @@ class TestSchedulerServiceHistorique:
         historique = service.obtenir_historique()
 
         assert len(historique) == 2
-        # Plus récent en premier
+        # Plus rÃ©cent en premier
         assert historique[0]["type"] == "loto"
         assert historique[1]["type"] == "paris"
 
@@ -258,16 +258,16 @@ class TestSchedulerServiceHistorique:
 
         historique = service.obtenir_historique(limite=10)
 
-        # Devrait être limité à _max_historique
+        # Devrait Ãªtre limitÃ© Ã  _max_historique
         assert len(service._historique) == 5
 
 
 class TestSchedulerServiceIntegration:
-    """Tests d'intégration avec mocks."""
+    """Tests d'intÃ©gration avec mocks."""
 
-    @patch("src.services.jeux._internal.scheduler_service.get_sync_service")
+    @patch("src.services.jeux._internal.scheduler_service.obtenir_sync_service")
     def test_integration_sync_service(self, mock_get_sync):
-        """Test intégration avec SyncService."""
+        """Test intÃ©gration avec SyncService."""
         mock_sync = MagicMock()
         mock_sync.synchroniser_paris.return_value = {"marches_maj": 6}
         mock_sync.synchroniser_loto.return_value = {"numeros_maj": 59}
@@ -275,7 +275,7 @@ class TestSchedulerServiceIntegration:
 
         service = SchedulerService(sync_service=mock_sync)
 
-        # Exécuter manuellement
+        # ExÃ©cuter manuellement
         result_paris = service._executer_sync_paris("FL1")
         result_loto = service._executer_sync_loto()
 
@@ -284,33 +284,33 @@ class TestSchedulerServiceIntegration:
 
 
 class TestSchedulerServiceScenarios:
-    """Tests de scénarios réalistes."""
+    """Tests de scÃ©narios rÃ©alistes."""
 
     def test_scenario_demarrage_complet(self):
         """
-        Scénario: Démarrage complet avec Ligue 1 et Loto.
+        ScÃ©nario: DÃ©marrage complet avec Ligue 1 et Loto.
         """
         service = SchedulerService()
 
-        # Démarrer
+        # DÃ©marrer
         assert service.demarrer(competitions=["FL1"], inclure_loto=True)
 
-        # Vérifier jobs
+        # VÃ©rifier jobs
         jobs = service.obtenir_jobs()
         assert len(jobs) == 2
 
-        # Vérifier infos jobs
+        # VÃ©rifier infos jobs
         for job in jobs:
             assert "id" in job
             assert "nom" in job
             assert "prochaine_execution" in job
 
-        # Arrêter proprement
+        # ArrÃªter proprement
         assert service.arreter()
 
     def test_scenario_plusieurs_ligues(self):
         """
-        Scénario: Suivi de plusieurs championnats européens.
+        ScÃ©nario: Suivi de plusieurs championnats europÃ©ens.
         """
         service = SchedulerService()
 
@@ -322,3 +322,4 @@ class TestSchedulerServiceScenarios:
         assert len(jobs) == 6
 
         service.arreter()
+

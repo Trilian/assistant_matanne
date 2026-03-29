@@ -1,5 +1,5 @@
-"""
-Tests pour LotoDataService - Service données Loto FDJ.
+﻿"""
+Tests pour LotoDataService - Service donnÃ©es Loto FDJ.
 """
 
 from datetime import date
@@ -15,7 +15,7 @@ from src.services.jeux import (
     StatistiqueNumeroLoto,
     StatistiquesGlobalesLoto,
     TirageLoto,
-    get_loto_data_service,
+    obtenir_loto_data_service,
 )
 
 
@@ -23,8 +23,8 @@ class TestLotoDataServiceFactory:
     """Tests de la factory."""
 
     def test_get_loto_data_service(self):
-        """Test création service via factory."""
-        service = get_loto_data_service()
+        """Test crÃ©ation service via factory."""
+        service = obtenir_loto_data_service()
         assert isinstance(service, LotoDataService)
 
 
@@ -32,23 +32,23 @@ class TestLotoDataServiceConstantes:
     """Tests des constantes."""
 
     def test_nb_numeros_principaux(self):
-        """Vérifie le nombre de numéros principaux."""
+        """VÃ©rifie le nombre de numÃ©ros principaux."""
         assert NB_NUMEROS_PRINCIPAUX == 49
 
     def test_nb_numeros_chance(self):
-        """Vérifie le nombre de numéros chance."""
+        """VÃ©rifie le nombre de numÃ©ros chance."""
         assert NB_NUMEROS_CHANCE == 10
 
     def test_numeros_par_tirage(self):
-        """Vérifie le nombre de numéros par tirage."""
+        """VÃ©rifie le nombre de numÃ©ros par tirage."""
         assert NUMEROS_PAR_TIRAGE == 5
 
 
 class TestTirageLoto:
-    """Tests du modèle TirageLoto."""
+    """Tests du modÃ¨le TirageLoto."""
 
     def test_tirage_creation(self):
-        """Test création d'un tirage."""
+        """Test crÃ©ation d'un tirage."""
         tirage = TirageLoto(
             date_tirage=date(2026, 2, 15),
             jour_semaine="samedi",
@@ -60,7 +60,7 @@ class TestTirageLoto:
         assert tirage.numero_chance == 5
 
     def test_tirage_tous_numeros(self):
-        """Test propriété tous_numeros."""
+        """Test propriÃ©tÃ© tous_numeros."""
         tirage = TirageLoto(
             date_tirage=date(2026, 2, 15),
             numeros=[7, 15, 23, 31, 42],
@@ -70,10 +70,10 @@ class TestTirageLoto:
 
 
 class TestStatistiqueNumeroLoto:
-    """Tests du modèle StatistiqueNumeroLoto."""
+    """Tests du modÃ¨le StatistiqueNumeroLoto."""
 
     def test_stat_defaut(self):
-        """Test statistiques par défaut."""
+        """Test statistiques par dÃ©faut."""
         stat = StatistiqueNumeroLoto(numero=7)
         assert stat.numero == 7
         assert stat.type_numero == "principal"
@@ -81,12 +81,12 @@ class TestStatistiqueNumeroLoto:
         assert stat.frequence == 0.0
 
     def test_frequence_theorique(self):
-        """Test fréquence théorique."""
-        # Numéro principal: 5/49 ≈ 0.102
+        """Test frÃ©quence thÃ©orique."""
+        # NumÃ©ro principal: 5/49 â‰ˆ 0.102
         freq_theorique_principal = NUMEROS_PAR_TIRAGE / NB_NUMEROS_PRINCIPAUX
         assert round(freq_theorique_principal, 3) == 0.102
 
-        # Numéro chance: 1/10 = 0.1
+        # NumÃ©ro chance: 1/10 = 0.1
         freq_theorique_chance = 1 / NB_NUMEROS_CHANCE
         assert freq_theorique_chance == 0.1
 
@@ -130,8 +130,8 @@ class TestLotoDataServiceCalculs:
         ]
 
     def test_calculer_statistiques_numero_principal(self, service, tirages_exemple):
-        """Test statistiques numéro principal."""
-        # Le 7 est sorti 2 fois (10 et 17 février)
+        """Test statistiques numÃ©ro principal."""
+        # Le 7 est sorti 2 fois (10 et 17 fÃ©vrier)
         stats = service.calculer_statistiques_numero(7, tirages_exemple, "principal")
 
         assert stats.numero == 7
@@ -143,7 +143,7 @@ class TestLotoDataServiceCalculs:
         assert stats.derniere_sortie == date(2026, 2, 17)
 
     def test_calculer_statistiques_numero_en_retard(self, service, tirages_exemple):
-        """Test numéro qui n'est jamais sorti."""
+        """Test numÃ©ro qui n'est jamais sorti."""
         # Le 2 n'est jamais sorti
         stats = service.calculer_statistiques_numero(2, tirages_exemple, "principal")
 
@@ -154,26 +154,26 @@ class TestLotoDataServiceCalculs:
         assert stats.derniere_sortie is None
 
     def test_calculer_statistiques_numero_chance(self, service, tirages_exemple):
-        """Test statistiques numéro chance."""
-        # Le 5 est sorti 2 fois (10 et 15 février)
+        """Test statistiques numÃ©ro chance."""
+        # Le 5 est sorti 2 fois (10 et 15 fÃ©vrier)
         stats = service.calculer_statistiques_numero(5, tirages_exemple, "chance")
 
         assert stats.numero == 5
         assert stats.type_numero == "chance"
         assert stats.nb_sorties == 2
-        assert stats.serie_actuelle == 1  # 1 tirage depuis (17 février)
+        assert stats.serie_actuelle == 1  # 1 tirage depuis (17 fÃ©vrier)
 
     def test_calculer_value(self, service, tirages_exemple):
-        """Test calcul de la value (loi des séries)."""
-        # Numéro 2 jamais sorti: frequence=0, serie=4, value=0
+        """Test calcul de la value (loi des sÃ©ries)."""
+        # NumÃ©ro 2 jamais sorti: frequence=0, serie=4, value=0
         stats_2 = service.calculer_statistiques_numero(2, tirages_exemple, "principal")
         assert stats_2.value == 0.0
 
-        # Le 23 sorti 2 fois, série actuelle = 2
+        # Le 23 sorti 2 fois, sÃ©rie actuelle = 2
         stats_23 = service.calculer_statistiques_numero(23, tirages_exemple, "principal")
         assert stats_23.nb_sorties == 2
-        assert stats_23.serie_actuelle == 2  # Pas sorti les 15 et 17 février
-        # value = 0.5 × 2 = 1.0
+        assert stats_23.serie_actuelle == 2  # Pas sorti les 15 et 17 fÃ©vrier
+        # value = 0.5 Ã— 2 = 1.0
         assert stats_23.value == 1.0
 
     def test_calculer_toutes_statistiques(self, service, tirages_exemple):
@@ -187,8 +187,8 @@ class TestLotoDataServiceCalculs:
         assert len(stats.numeros_chance) == 10
 
     def test_obtenir_numeros_en_retard(self, service, tirages_exemple):
-        """Test détection des numéros en retard."""
-        # Avec un seuil bas pour avoir des résultats
+        """Test dÃ©tection des numÃ©ros en retard."""
+        # Avec un seuil bas pour avoir des rÃ©sultats
         numeros_retard = service.obtenir_numeros_en_retard(
             tirages_exemple, seuil_value=0.5, type_numero="principal"
         )
@@ -199,13 +199,13 @@ class TestLotoDataServiceCalculs:
         assert numeros_values[23] == 1.0
 
     def test_tri_numeros_en_retard(self, service, tirages_exemple):
-        """Test que les numéros sont triés par value décroissante."""
+        """Test que les numÃ©ros sont triÃ©s par value dÃ©croissante."""
         numeros = service.obtenir_numeros_en_retard(
             tirages_exemple, seuil_value=0.1, type_numero="principal"
         )
 
         if len(numeros) >= 2:
-            # Vérifier tri décroissant
+            # VÃ©rifier tri dÃ©croissant
             for i in range(len(numeros) - 1):
                 assert numeros[i].value >= numeros[i + 1].value
 
@@ -238,18 +238,18 @@ class TestLotoDataServiceParsing:
 
         tirages = service._parser_csv_fdj(csv_content)
 
-        # Devrait gérer gracieusement les différents formats
+        # Devrait gÃ©rer gracieusement les diffÃ©rents formats
         # Note: peut ne pas parser parfaitement selon le format exact
 
 
 class TestLotoDataServiceScenarios:
-    """Tests de scénarios réalistes."""
+    """Tests de scÃ©narios rÃ©alistes."""
 
     def test_scenario_numero_tres_en_retard(self):
         """
-        Scénario: Numéro absent depuis longtemps.
-        Fréquence théorique: 5/49 ≈ 10.2%
-        Si absent 25 tirages: value = 0.102 × 25 = 2.55 (opportunité)
+        ScÃ©nario: NumÃ©ro absent depuis longtemps.
+        FrÃ©quence thÃ©orique: 5/49 â‰ˆ 10.2%
+        Si absent 25 tirages: value = 0.102 Ã— 25 = 2.55 (opportunitÃ©)
         """
         from src.services.jeux import SeriesService
 
@@ -258,14 +258,14 @@ class TestLotoDataServiceScenarios:
 
         value = SeriesService.calculer_value(frequence_theorique, serie)
 
-        assert value > 2.5  # Haute opportunité
+        assert value > 2.5  # Haute opportunitÃ©
         assert SeriesService.est_opportunite(value)
 
     def test_scenario_numero_chance_en_retard(self):
         """
-        Scénario: Numéro chance absent.
-        Fréquence théorique: 1/10 = 10%
-        Si absent 25 tirages: value = 0.1 × 25 = 2.5 (opportunité)
+        ScÃ©nario: NumÃ©ro chance absent.
+        FrÃ©quence thÃ©orique: 1/10 = 10%
+        Si absent 25 tirages: value = 0.1 Ã— 25 = 2.5 (opportunitÃ©)
         """
         from src.services.jeux import SeriesService
 
@@ -276,3 +276,4 @@ class TestLotoDataServiceScenarios:
 
         assert value == 2.5
         assert SeriesService.est_opportunite(value)
+

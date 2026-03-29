@@ -12,6 +12,8 @@ import {
   Activity,
   Users,
   Layers,
+  ServerCrash,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -108,7 +110,7 @@ export default function PageAdmin() {
   const [page, setPage] = useState(1);
   const invalider = utiliserInvalidation();
   // Notifications test
-  const [canalNotif, setCanalNotif] = useState<"ntfy" | "push" | "email">("ntfy");
+  const [canalNotif, setCanalNotif] = useState<"ntfy" | "push" | "email" | "whatsapp">("ntfy");
   const [messageNotif, setMessageNotif] = useState("");
   const [emailNotif, setEmailNotif] = useState("");
   const [envoyant, setEnvoyant] = useState(false);
@@ -234,6 +236,31 @@ export default function PageAdmin() {
             <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
+      </div>
+
+      {/* Accès rapides vers les pages dédiées */}
+      <div className="grid gap-3 md:grid-cols-4">
+        {[
+          { href: "/admin/jobs", icon: Clock, label: "Jobs planifiés", desc: "Trigger + logs" },
+          { href: "/admin/services", icon: ServerCrash, label: "Services & Cache", desc: "Health + stats" },
+          { href: "/admin/notifications", icon: Bell, label: "Notifications", desc: "Test canaux" },
+          { href: "/admin/utilisateurs", icon: Users, label: "Utilisateurs", desc: "Comptes + désactiver" },
+        ].map(({ href, icon: Icon, label, desc }) => (
+          <Link key={href} href={href}>
+            <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
+              <CardContent className="flex items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                  <Icon className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">{label}</p>
+                    <p className="text-xs text-muted-foreground">{desc}</p>
+                  </div>
+                </div>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </div>
 
       <Tabs defaultValue="audit">
@@ -462,7 +489,10 @@ export default function PageAdmin() {
                 <Bell className="h-5 w-5" />Notification de test
               </CardTitle>
               <CardDescription>
-                Envoyez une notification de test sur le canal de votre choix.
+                Envoyez une notification de test.{" "}
+                <Link href="/admin/notifications" className="underline text-primary">
+                  Page dédiée avec historique →
+                </Link>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 max-w-md">
@@ -479,6 +509,7 @@ export default function PageAdmin() {
                     <SelectItem value="ntfy">ntfy.sh</SelectItem>
                     <SelectItem value="push">Web Push</SelectItem>
                     <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -581,7 +612,11 @@ export default function PageAdmin() {
                 <Users className="h-5 w-5" />Comptes utilisateurs
               </CardTitle>
               <CardDescription>
-                {utilisateurs ? `${utilisateurs.length} compte(s)` : "Chargement…"}
+                {utilisateurs ? `${utilisateurs.length} compte(s)` : "Chargement…"}{" "}
+                —{" "}
+                <Link href="/admin/utilisateurs" className="underline text-primary">
+                  Gérer les comptes →
+                </Link>
               </CardDescription>
             </CardHeader>
             <CardContent>

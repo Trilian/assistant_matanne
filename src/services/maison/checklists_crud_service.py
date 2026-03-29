@@ -269,7 +269,7 @@ class ChecklistsCrudService(EventBusMixin, BaseService[ChecklistVacances]):
 
 
 @service_factory("checklists_crud", tags={"maison", "crud", "checklists"})
-def get_checklists_crud_service() -> ChecklistsCrudService:
+def obtenir_checklists_crud_service() -> ChecklistsCrudService:
     """Factory singleton pour le service CRUD checklists."""
     return ChecklistsCrudService()
 
@@ -277,3 +277,7 @@ def get_checklists_crud_service() -> ChecklistsCrudService:
 def obtenir_service_checklists_crud() -> ChecklistsCrudService:
     """Factory française pour le service CRUD checklists."""
     return get_checklists_crud_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_checklists_crud_service = obtenir_checklists_crud_service  # alias rétrocompatibilité Sprint 12 A3

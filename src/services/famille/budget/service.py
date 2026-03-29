@@ -470,6 +470,10 @@ def obtenir_service_budget() -> BudgetService:
     return BudgetService()
 
 
-def get_budget_service() -> BudgetService:
+def obtenir_budget_service() -> BudgetService:
     """Factory pour le service budget (alias anglais)."""
     return obtenir_service_budget()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_budget_service = obtenir_budget_service  # alias rétrocompatibilité Sprint 12 A3

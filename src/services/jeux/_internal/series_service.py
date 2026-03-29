@@ -513,7 +513,7 @@ class SeriesService:
 
 
 @service_factory("series", tags={"jeux", "crud", "series"})
-def get_series_service() -> SeriesService:
+def obtenir_series_service() -> SeriesService:
     """
     Factory singleton pour SeriesService.
 
@@ -531,3 +531,7 @@ def obtenir_service_series() -> SeriesService:
         Instance de SeriesService
     """
     return get_series_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_series_service = obtenir_series_service  # alias rétrocompatibilité Sprint 12 A3

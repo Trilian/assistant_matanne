@@ -464,6 +464,10 @@ Génère une combinaison créative en JSON:
 
 
 # Factory
-def get_euromillions_ia_service() -> EuromillionsIAService:
+def obtenir_euromillions_ia_service() -> EuromillionsIAService:
     """Retourne une instance du service Euromillions IA."""
     return EuromillionsIAService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_euromillions_ia_service = obtenir_euromillions_ia_service  # alias rétrocompatibilité Sprint 12 A3

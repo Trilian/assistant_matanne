@@ -167,6 +167,10 @@ class EuromillionsCrudService:
 
 
 @service_factory("euromillions_crud", tags={"jeux", "crud", "euromillions"})
-def get_euromillions_crud_service() -> EuromillionsCrudService:
+def obtenir_euromillions_crud_service() -> EuromillionsCrudService:
     """Factory pour le service CRUD Euromillions."""
     return EuromillionsCrudService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_euromillions_crud_service = obtenir_euromillions_crud_service  # alias rétrocompatibilité Sprint 12 A3

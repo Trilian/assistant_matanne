@@ -550,7 +550,7 @@ def obtenir_service_recettes() -> ServiceRecettes:
     return ServiceRecettes()
 
 
-def get_recipes_service() -> ServiceRecettes:
+def obtenir_recipes_service() -> ServiceRecettes:
     """Factory for recipes service (English alias)."""
     return obtenir_service_recettes()
 
@@ -560,3 +560,7 @@ __all__ = [
     "obtenir_service_recettes",
     "get_recipes_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_recipes_service = obtenir_recipes_service  # alias rétrocompatibilité Sprint 12 A3

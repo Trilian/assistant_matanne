@@ -1,7 +1,7 @@
-"""
+﻿"""
 Routes API pour le tableau de bord.
 
-Agrégation des données de tous les modules pour la page d'accueil.
+AgrÃ©gation des donnÃ©es de tous les modules pour la page d'accueil.
 """
 
 from datetime import date, timedelta
@@ -22,7 +22,7 @@ router = APIRouter(prefix="/api/v1/dashboard", tags=["Tableau de bord"])
 
 
 class DashboardConfigRequest(BaseModel):
-    """Configuration personnalisée des widgets dashboard."""
+    """Configuration personnalisÃ©e des widgets dashboard."""
 
     config_dashboard: dict[str, Any] = Field(default_factory=dict)
 
@@ -33,9 +33,9 @@ async def obtenir_tableau_bord(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Retourne les données agrégées du tableau de bord.
+    Retourne les donnÃ©es agrÃ©gÃ©es du tableau de bord.
 
-    Inclut: statistiques rapides, budget du mois, prochaines activités, alertes.
+    Inclut: statistiques rapides, budget du mois, prochaines activitÃ©s, alertes.
     """
 
     def _query():
@@ -68,7 +68,7 @@ async def obtenir_tableau_bord(
                 or 0
             )
 
-            # Tâches entretien en retard
+            # TÃ¢ches entretien en retard
             taches_retard = (
                 session.query(func.count(TacheEntretien.id))
                 .filter(
@@ -79,7 +79,7 @@ async def obtenir_tableau_bord(
                 or 0
             )
 
-            # Activités à venir (7 prochains jours)
+            # ActivitÃ©s Ã  venir (7 prochains jours)
             activites_a_venir = (
                 session.query(func.count(ActiviteFamille.id))
                 .filter(
@@ -116,7 +116,7 @@ async def obtenir_tableau_bord(
                 .all()
             )
 
-            # Prochaines activités (5 max)
+            # Prochaines activitÃ©s (5 max)
             prochaines = (
                 session.query(ActiviteFamille)
                 .filter(ActiviteFamille.date_prevue >= aujourd_hui)
@@ -125,7 +125,7 @@ async def obtenir_tableau_bord(
                 .all()
             )
 
-            # Alertes: articles inventaire bientôt périmés (7 jours)
+            # Alertes: articles inventaire bientÃ´t pÃ©rimÃ©s (7 jours)
             alertes = []
             try:
                 articles_perissables = (
@@ -150,7 +150,7 @@ async def obtenir_tableau_bord(
                         }
                     )
             except Exception as e:
-                logger.warning("[dashboard] Alertes péremption non chargées: %s", e)
+                logger.warning("[dashboard] Alertes pÃ©remption non chargÃ©es: %s", e)
 
             if stocks_alerte > 0:
                 alertes.append(
@@ -165,7 +165,7 @@ async def obtenir_tableau_bord(
                 alertes.append(
                     {
                         "type": "entretien",
-                        "message": f"{taches_retard} tâche(s) d'entretien en retard",
+                        "message": f"{taches_retard} tÃ¢che(s) d'entretien en retard",
                         "urgence": "haute" if taches_retard > 3 else "moyenne",
                     }
                 )
@@ -207,10 +207,10 @@ async def obtenir_dashboard_cuisine(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Dashboard agrégé spécifique au module cuisine.
+    Dashboard agrÃ©gÃ© spÃ©cifique au module cuisine.
 
     Retourne: repas du jour, compteur semaine, recettes totales,
-    articles courses restants, alertes inventaire, état batch cooking.
+    articles courses restants, alertes inventaire, Ã©tat batch cooking.
     """
 
     def _query():
@@ -237,7 +237,7 @@ async def obtenir_dashboard_cuisine(
                 for r in repas_jour
             ]
 
-            # Nombre de repas planifiés dans la semaine
+            # Nombre de repas planifiÃ©s dans la semaine
             repas_semaine_count = (
                 session.query(func.count(Repas.id))
                 .filter(
@@ -251,7 +251,7 @@ async def obtenir_dashboard_cuisine(
             # Nombre total de recettes
             nb_recettes = session.query(func.count(Recette.id)).scalar() or 0
 
-            # Articles à acheter (non achetés, listes non archivées)
+            # Articles Ã  acheter (non achetÃ©s, listes non archivÃ©es)
             articles_courses_restants = (
                 session.query(func.count(ArticleCourses.id))
                 .join(ListeCourses)
@@ -263,7 +263,7 @@ async def obtenir_dashboard_cuisine(
                 or 0
             )
 
-            # Alertes inventaire: stock bas OU péremption dans 7 jours
+            # Alertes inventaire: stock bas OU pÃ©remption dans 7 jours
             alertes_inventaire = 0
             try:
                 alertes_inventaire = (
@@ -282,21 +282,21 @@ async def obtenir_dashboard_cuisine(
                     or 0
                 )
             except Exception as e:
-                logger.warning("[dashboard] Métriques inventaire non chargées: %s", e)
+                logger.warning("[dashboard] MÃ©triques inventaire non chargÃ©es: %s", e)
             batch_session = (
                 session.query(SessionBatchCooking)
                 .filter(SessionBatchCooking.statut == "en_cours")
                 .first()
             )
 
-            # Score anti-gaspillage : articles proches de la péremption / total
+            # Score anti-gaspillage : articles proches de la pÃ©remption / total
             total_inventaire = session.query(func.count(ArticleInventaire.id)).scalar() or 0
             score_anti_gaspillage = 100
             if total_inventaire > 0:
                 articles_a_risque = alertes_inventaire
                 score_anti_gaspillage = max(0, round(100 - (articles_a_risque / total_inventaire * 100)))
 
-            # Repas Jules aujourd'hui (adaptations bébé)
+            # Repas Jules aujourd'hui (adaptations bÃ©bÃ©)
             repas_jules = [
                 {
                     "type_repas": r.type_repas,
@@ -308,7 +308,7 @@ async def obtenir_dashboard_cuisine(
                 if r.plat_jules
             ]
 
-            # Repas consommés cette semaine
+            # Repas consommÃ©s cette semaine
             repas_consommes = (
                 session.query(func.count(Repas.id))
                 .filter(
@@ -341,8 +341,8 @@ async def obtenir_dashboard_cuisine(
     responses=REPONSES_LISTE,
     summary="Bilan mensuel IA",
     description=(
-        "Génère un bilan mensuel enrichi par l'IA : dépenses, repas planifiés, "
-        "activités et entretien, avec une synthèse narrative."
+        "GÃ©nÃ¨re un bilan mensuel enrichi par l'IA : dÃ©penses, repas planifiÃ©s, "
+        "activitÃ©s et entretien, avec une synthÃ¨se narrative."
     ),
 )
 @gerer_exception_api
@@ -351,14 +351,14 @@ async def bilan_mensuel(
     user: dict = Depends(require_auth),
 ) -> dict:
     """
-    Retourne les données agrégées du mois + synthèse IA.
+    Retourne les donnÃ©es agrÃ©gÃ©es du mois + synthÃ¨se IA.
 
-    Le paramètre `mois` est au format YYYY-MM (ex: 2025-06).
+    Le paramÃ¨tre `mois` est au format YYYY-MM (ex: 2025-06).
     Si absent, utilise le mois courant.
     """
-    from src.services.rapports.bilan_mensuel import get_bilan_mensuel_service
+    from src.services.rapports.bilan_mensuel import obtenir_bilan_mensuel_service
 
-    service = get_bilan_mensuel_service()
+    service = obtenir_bilan_mensuel_service()
     return await service.generer_bilan(mois=mois)
 
 
@@ -366,7 +366,7 @@ async def bilan_mensuel(
     "/score-bienetre",
     responses=REPONSES_LISTE,
     summary="Score bien-etre global",
-    description="Calcule le score bien-etre hebdomadaire (alimentation + nutrition + activités).",
+    description="Calcule le score bien-etre hebdomadaire (alimentation + nutrition + activitÃ©s).",
 )
 @gerer_exception_api
 async def obtenir_score_bien_etre(
@@ -375,9 +375,9 @@ async def obtenir_score_bien_etre(
     """Retourne le score bien-etre pour la semaine courante."""
 
     def _query():
-        from src.services.dashboard.score_bienetre import get_score_bien_etre_service
+        from src.services.dashboard.score_bienetre import obtenir_score_bien_etre_service
 
-        service = get_score_bien_etre_service()
+        service = obtenir_score_bien_etre_service()
         return service.calculer_score()
 
     return await executer_async(_query)
@@ -392,7 +392,7 @@ async def obtenir_score_bien_etre(
 async def lire_config_dashboard(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Retourne la configuration widgets enregistrée pour l'utilisateur."""
+    """Retourne la configuration widgets enregistrÃ©e pour l'utilisateur."""
 
     def _query():
         from src.core.models.user_preferences import PreferenceUtilisateur
@@ -409,14 +409,14 @@ async def lire_config_dashboard(
 @router.put(
     "/config",
     responses=REPONSES_LISTE,
-    summary="Mettre à jour la config dashboard",
+    summary="Mettre Ã  jour la config dashboard",
 )
 @gerer_exception_api
 async def sauvegarder_config_dashboard(
     payload: DashboardConfigRequest,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Sauvegarde la configuration personnalisée du dashboard."""
+    """Sauvegarde la configuration personnalisÃ©e du dashboard."""
 
     def _query():
         from src.core.models.user_preferences import PreferenceUtilisateur
@@ -429,7 +429,7 @@ async def sauvegarder_config_dashboard(
             pref.config_dashboard = payload.config_dashboard
             session.commit()
             return {
-                "message": "Configuration dashboard sauvegardée",
+                "message": "Configuration dashboard sauvegardÃ©e",
                 "config_dashboard": pref.config_dashboard,
             }
 
@@ -439,13 +439,13 @@ async def sauvegarder_config_dashboard(
 @router.get(
     "/alertes-contextuelles",
     responses=REPONSES_LISTE,
-    summary="Alertes météo contextuelles cross-modules",
+    summary="Alertes mÃ©tÃ©o contextuelles cross-modules",
 )
 @gerer_exception_api
 async def obtenir_alertes_contextuelles(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Retourne des alertes météo/action cross-modules pour les 48h à venir."""
+    """Retourne des alertes mÃ©tÃ©o/action cross-modules pour les 48h Ã  venir."""
     import httpx
 
     async def _fetch_alertes() -> dict[str, Any]:
@@ -465,7 +465,7 @@ async def obtenir_alertes_contextuelles(
                 data = reponse.json().get("hourly", {})
         except Exception as e:
             data = {}
-            logger.warning("[dashboard] Météo non disponible pour alertes: %s", e)
+            logger.warning("[dashboard] MÃ©tÃ©o non disponible pour alertes: %s", e)
 
         temperatures = data.get("temperature_2m", []) or []
         pluie = data.get("precipitation_probability", []) or []
@@ -478,8 +478,8 @@ async def obtenir_alertes_contextuelles(
                     "module": "maison",
                     "icone": "snowflake",
                     "titre": "Risque de gel",
-                    "message": "Penser à protéger les plantes extérieures et vérifier les équipements sensibles.",
-                    "action": "Mettre les pots fragiles à l'abri",
+                    "message": "Penser Ã  protÃ©ger les plantes extÃ©rieures et vÃ©rifier les Ã©quipements sensibles.",
+                    "action": "Mettre les pots fragiles Ã  l'abri",
                 }
             )
         if temperatures and max(temperatures) >= 30:
@@ -488,8 +488,8 @@ async def obtenir_alertes_contextuelles(
                     "type": "canicule",
                     "module": "famille",
                     "icone": "sun",
-                    "titre": "Chaleur élevée",
-                    "message": "Prévoir plus d'eau, des repas frais et limiter les sorties aux heures chaudes.",
+                    "titre": "Chaleur Ã©levÃ©e",
+                    "message": "PrÃ©voir plus d'eau, des repas frais et limiter les sorties aux heures chaudes.",
                     "action": "Adapter le planning de Jules et les repas",
                 }
             )
@@ -500,8 +500,8 @@ async def obtenir_alertes_contextuelles(
                     "module": "planning",
                     "icone": "cloud-rain",
                     "titre": "Pluie probable",
-                    "message": "Les activités extérieures risquent d'être perturbées dans les 48 prochaines heures.",
-                    "action": "Prévoir une alternative intérieure",
+                    "message": "Les activitÃ©s extÃ©rieures risquent d'Ãªtre perturbÃ©es dans les 48 prochaines heures.",
+                    "action": "PrÃ©voir une alternative intÃ©rieure",
                 }
             )
         if vent and max(vent) >= 45:
@@ -511,8 +511,8 @@ async def obtenir_alertes_contextuelles(
                     "module": "maison",
                     "icone": "wind",
                     "titre": "Vent fort",
-                    "message": "Sécuriser le mobilier extérieur et vérifier les objets légers dans le jardin.",
-                    "action": "Ranger ou fixer les objets extérieurs",
+                    "message": "SÃ©curiser le mobilier extÃ©rieur et vÃ©rifier les objets lÃ©gers dans le jardin.",
+                    "action": "Ranger ou fixer les objets extÃ©rieurs",
                 }
             )
 
@@ -524,13 +524,13 @@ async def obtenir_alertes_contextuelles(
 @router.get(
     "/anomalies-financieres",
     responses=REPONSES_LISTE,
-    summary="Anomalies financières cross-modules",
+    summary="Anomalies financiÃ¨res cross-modules",
 )
 @gerer_exception_api
 async def obtenir_anomalies_financieres(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Détecte les anomalies de dépenses entre famille, maison et jeux."""
+    """DÃ©tecte les anomalies de dÃ©penses entre famille, maison et jeux."""
     from datetime import date
 
     from src.core.models import BudgetFamille, DepenseMaison, PariSportif
@@ -541,7 +541,7 @@ async def obtenir_anomalies_financieres(
             mois = aujourd_hui.month
             annee = aujourd_hui.year
 
-            # Famille - dépenses du mois courant par catégorie
+            # Famille - dÃ©penses du mois courant par catÃ©gorie
             depenses_famille = (
                 session.query(BudgetFamille.categorie, func.sum(BudgetFamille.montant).label("total"))
                 .filter(
@@ -552,7 +552,7 @@ async def obtenir_anomalies_financieres(
                 .all()
             )
 
-            # Référence famille = moyenne des 3 mois précédents
+            # RÃ©fÃ©rence famille = moyenne des 3 mois prÃ©cÃ©dents
             moyennes_famille: dict[str, float] = {}
             for i in range(1, 4):
                 m = mois - i
@@ -574,7 +574,7 @@ async def obtenir_anomalies_financieres(
 
             moyennes_famille = {cat: total / 3 for cat, total in moyennes_famille.items()}
 
-            # Maison - dépenses du mois courant par catégorie
+            # Maison - dÃ©penses du mois courant par catÃ©gorie
             depenses_maison = (
                 session.query(DepenseMaison.categorie, func.sum(DepenseMaison.montant).label("total"))
                 .filter(DepenseMaison.mois == mois, DepenseMaison.annee == annee)
@@ -689,12 +689,13 @@ async def obtenir_anomalies_financieres(
 async def obtenir_points_famille(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Retourne les points famille consolidés (sport, alimentation, anti-gaspi)."""
+    """Retourne les points famille consolidÃ©s (sport, alimentation, anti-gaspi)."""
 
     def _query():
-        from src.services.dashboard.points_famille import get_points_famille_service
+        from src.services.dashboard.points_famille import obtenir_points_famille_service
 
-        service = get_points_famille_service()
+        service = obtenir_points_famille_service()
         return service.calculer_points()
 
     return await executer_async(_query)
+

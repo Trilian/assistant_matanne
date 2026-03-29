@@ -435,7 +435,7 @@ class LotoCrudService(BaseService[GrilleLoto]):
 
 
 @service_factory("loto_crud", tags={"jeux", "crud", "loto"})
-def get_loto_crud_service() -> LotoCrudService:
+def obtenir_loto_crud_service() -> LotoCrudService:
     """Factory singleton pour LotoCrudService."""
     return LotoCrudService()
 
@@ -443,3 +443,7 @@ def get_loto_crud_service() -> LotoCrudService:
 def obtenir_service_loto_crud() -> LotoCrudService:
     """Alias français pour get_loto_crud_service."""
     return get_loto_crud_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_loto_crud_service = obtenir_loto_crud_service  # alias rétrocompatibilité Sprint 12 A3

@@ -245,7 +245,7 @@ class NotificationsMaisonService:
 
 
 @service_factory("notifications_maison", tags={"maison", "notification"})
-def get_notifications_maison_service() -> NotificationsMaisonService:
+def obtenir_notifications_maison_service() -> NotificationsMaisonService:
     """Factory singleton pour le service notifications maison."""
     return NotificationsMaisonService()
 
@@ -253,3 +253,7 @@ def get_notifications_maison_service() -> NotificationsMaisonService:
 def obtenir_service_notifications_maison() -> NotificationsMaisonService:
     """Alias français."""
     return get_notifications_maison_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_notifications_maison_service = obtenir_notifications_maison_service  # alias rétrocompatibilité Sprint 12 A3

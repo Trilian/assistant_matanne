@@ -487,7 +487,7 @@ def obtenir_service_planning() -> ServicePlanning:
     return ServicePlanning()
 
 
-def get_planning_service() -> ServicePlanning:
+def obtenir_planning_service() -> ServicePlanning:
     """Factory for planning service (English alias)."""
     return obtenir_service_planning()
 
@@ -504,3 +504,7 @@ __all__ = [
     "obtenir_service_planning",
     "get_planning_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_planning_service = obtenir_planning_service  # alias rétrocompatibilité Sprint 12 A3

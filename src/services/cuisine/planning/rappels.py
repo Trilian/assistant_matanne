@@ -138,7 +138,7 @@ def obtenir_service_rappels() -> Any:
     return _obtenir_service_rappels_planning()
 
 
-def get_reminders_service() -> Any:
+def obtenir_reminders_service() -> Any:
     """English alias returning the unified reminders service."""
     return obtenir_service_rappels()
 
@@ -189,3 +189,7 @@ __all__ = [
     "get_reminders_service",
     "verifier_et_envoyer_rappels",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_reminders_service = obtenir_reminders_service  # alias rétrocompatibilité Sprint 12 A3

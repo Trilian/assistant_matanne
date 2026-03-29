@@ -336,6 +336,10 @@ class PhotoFrigoService:
 
 
 @service_factory("photo_frigo")
-def get_photo_frigo_service() -> PhotoFrigoService:
+def obtenir_photo_frigo_service() -> PhotoFrigoService:
     """Factory pour le service photo frigo."""
     return PhotoFrigoService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_photo_frigo_service = obtenir_photo_frigo_service  # alias rétrocompatibilité Sprint 12 A3

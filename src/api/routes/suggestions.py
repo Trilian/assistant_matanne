@@ -1,8 +1,8 @@
-"""
+﻿"""
 Routes API pour les suggestions IA.
 
-Suggestions de recettes et de plannings de repas générées par Mistral AI,
-avec limitation de débit intégrée et cache sémantique.
+Suggestions de recettes et de plannings de repas gÃ©nÃ©rÃ©es par Mistral AI,
+avec limitation de dÃ©bit intÃ©grÃ©e et cache sÃ©mantique.
 """
 
 import logging
@@ -20,43 +20,43 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/suggestions", tags=["IA"])
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ROUTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/recettes", response_model=SuggestionsRecettesResponse, responses=REPONSES_IA)
 @gerer_exception_api
 async def suggest_recettes(
     contexte: str = Query(
-        "repas équilibré",
-        description="Contexte pour les suggestions (ex: 'rapide', 'végétarien', 'batch cooking')",
+        "repas Ã©quilibrÃ©",
+        description="Contexte pour les suggestions (ex: 'rapide', 'vÃ©gÃ©tarien', 'batch cooking')",
     ),
-    nombre: int = Query(3, ge=1, le=10, description="Nombre de suggestions à retourner (1-10)"),
+    nombre: int = Query(3, ge=1, le=10, description="Nombre de suggestions Ã  retourner (1-10)"),
     user: dict = Depends(require_auth),
     _rate_check: dict = Depends(verifier_limite_debit_ia),
 ):
     """
-    Suggère des recettes via l'IA Mistral.
+    SuggÃ¨re des recettes via l'IA Mistral.
 
-    Génère des suggestions de recettes personnalisées en fonction du contexte
-    fourni. Soumis à une limitation de débit (quota horaire/journalier).
+    GÃ©nÃ¨re des suggestions de recettes personnalisÃ©es en fonction du contexte
+    fourni. Soumis Ã  une limitation de dÃ©bit (quota horaire/journalier).
 
     Args:
-        contexte: Description du type de repas souhaité
-        nombre: Nombre de suggestions (défaut: 3, max: 10)
+        contexte: Description du type de repas souhaitÃ©
+        nombre: Nombre de suggestions (dÃ©faut: 3, max: 10)
 
     Returns:
-        Liste de suggestions avec le contexte utilisé
+        Liste de suggestions avec le contexte utilisÃ©
 
     Raises:
-        401: Non authentifié
-        429: Limite de débit IA dépassée
+        401: Non authentifiÃ©
+        429: Limite de dÃ©bit IA dÃ©passÃ©e
         503: Service IA indisponible
 
     Example:
         ```
-        GET /api/v1/suggestions/recettes?contexte=végétarien&nombre=5
+        GET /api/v1/suggestions/recettes?contexte=vÃ©gÃ©tarien&nombre=5
         Authorization: Bearer <token>
 
         Response:
@@ -65,7 +65,7 @@ async def suggest_recettes(
                 {"nom": "Curry de lentilles", "description": "...", "temps_preparation": 30},
                 {"nom": "Buddha bowl", "description": "...", "temps_preparation": 20}
             ],
-            "contexte": "végétarien",
+            "contexte": "vÃ©gÃ©tarien",
             "nombre": 5
         }
         ```
@@ -89,27 +89,27 @@ async def suggest_recettes(
 @router.get("/planning", response_model=SuggestionsPlanningResponse, responses=REPONSES_IA)
 @gerer_exception_api
 async def suggest_planning(
-    jours: int = Query(7, ge=1, le=14, description="Nombre de jours à planifier (1-14)"),
-    personnes: int = Query(4, ge=1, le=20, description="Nombre de personnes à table"),
+    jours: int = Query(7, ge=1, le=14, description="Nombre de jours Ã  planifier (1-14)"),
+    personnes: int = Query(4, ge=1, le=20, description="Nombre de personnes Ã  table"),
     user: dict = Depends(require_auth),
     _rate_check: dict = Depends(verifier_limite_debit_ia),
 ):
     """
-    Suggère un planning de repas complet via l'IA Mistral.
+    SuggÃ¨re un planning de repas complet via l'IA Mistral.
 
-    Génère un planning hebdomadaire équilibré avec petit-déjeuner,
-    déjeuner et dîner pour le nombre de jours et personnes spécifiés.
+    GÃ©nÃ¨re un planning hebdomadaire Ã©quilibrÃ© avec petit-dÃ©jeuner,
+    dÃ©jeuner et dÃ®ner pour le nombre de jours et personnes spÃ©cifiÃ©s.
 
     Args:
-        jours: Nombre de jours à planifier (défaut: 7, max: 14)
-        personnes: Nombre de convives (défaut: 4, max: 20)
+        jours: Nombre de jours Ã  planifier (dÃ©faut: 7, max: 14)
+        personnes: Nombre de convives (dÃ©faut: 4, max: 20)
 
     Returns:
-        Planning structuré par jour avec recettes suggérées
+        Planning structurÃ© par jour avec recettes suggÃ©rÃ©es
 
     Raises:
-        401: Non authentifié
-        429: Limite de débit IA dépassée
+        401: Non authentifiÃ©
+        429: Limite de dÃ©bit IA dÃ©passÃ©e
         503: Service IA indisponible
 
     Example:
@@ -120,7 +120,7 @@ async def suggest_planning(
         Response:
         {
             "planning": {
-                "lundi": {"dejeuner": "Poulet rôti", "diner": "Soupe de légumes"},
+                "lundi": {"dejeuner": "Poulet rÃ´ti", "diner": "Soupe de lÃ©gumes"},
                 "mardi": {"dejeuner": "Pasta carbonara", "diner": "Salade compose"}
             },
             "jours": 7,
@@ -154,30 +154,30 @@ async def suggest_planning(
 @gerer_exception_api
 async def analyser_photo_frigo(
     file: UploadFile = File(..., description="Photo du frigo (JPEG/PNG, max 10MB)"),
-    zone: str = Query("frigo", pattern="^(frigo|placard|congelateur)$", description="Zone analysée"),
+    zone: str = Query("frigo", pattern="^(frigo|placard|congelateur)$", description="Zone analysÃ©e"),
     zones: list[str] | None = Query(
         None,
-        description="Zones à analyser en multi-zone (frigo, placard, congelateur)",
+        description="Zones Ã  analyser en multi-zone (frigo, placard, congelateur)",
     ),
     user: dict = Depends(require_auth),
     _rate_check: dict = Depends(verifier_limite_debit_ia),
 ):
     """
-    Analyse une photo du frigo et suggère des recettes.
+    Analyse une photo du frigo et suggÃ¨re des recettes.
 
-    Envoie une photo du frigo pour détecter les ingrédients visibles
-    et obtenir des suggestions de recettes réalisables.
+    Envoie une photo du frigo pour dÃ©tecter les ingrÃ©dients visibles
+    et obtenir des suggestions de recettes rÃ©alisables.
     """
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Le fichier doit être une image")
+        raise HTTPException(status_code=400, detail="Le fichier doit Ãªtre une image")
 
     image_bytes = await file.read()
     if len(image_bytes) > 10 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="L'image ne doit pas dépasser 10 MB")
+        raise HTTPException(status_code=400, detail="L'image ne doit pas dÃ©passer 10 MB")
 
-    from src.services.cuisine.photo_frigo import get_photo_frigo_service
+    from src.services.cuisine.photo_frigo import obtenir_photo_frigo_service
 
-    service = get_photo_frigo_service()
+    service = obtenir_photo_frigo_service()
     zones_valides = {"frigo", "placard", "congelateur"}
 
     if zones:
@@ -185,7 +185,7 @@ async def analyser_photo_frigo(
         if not zones_filtres:
             raise HTTPException(
                 status_code=400,
-                detail="Paramètre zones invalide. Valeurs autorisées: frigo, placard, congelateur",
+                detail="ParamÃ¨tre zones invalide. Valeurs autorisÃ©es: frigo, placard, congelateur",
             )
         resultat = await service.analyser_photo_frigo_multi_zone(image_bytes, zones_filtres)
     else:
@@ -194,9 +194,9 @@ async def analyser_photo_frigo(
     return resultat.model_dump()
 
 
-# ═══════════════════════════════════════════════════════════
-# PRÉDICTIONS ML
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# PRÃ‰DICTIONS ML
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/predictions/courses")
@@ -204,12 +204,12 @@ async def analyser_photo_frigo(
 async def predictions_courses(
     articles: str = Query(
         ...,
-        description="Articles à prédire (séparés par virgule)",
+        description="Articles Ã  prÃ©dire (sÃ©parÃ©s par virgule)",
     ),
-    horizon: int = Query(7, ge=1, le=30, description="Horizon de prédiction en jours"),
+    horizon: int = Query(7, ge=1, le=30, description="Horizon de prÃ©diction en jours"),
     user: dict = Depends(require_auth),
 ):
-    """Prédit la consommation d'articles sur un horizon donné."""
+    """PrÃ©dit la consommation d'articles sur un horizon donnÃ©."""
     from src.services.cuisine.suggestions.ml_predictions import obtenir_ml_predictions
 
     service = obtenir_ml_predictions()
@@ -228,7 +228,7 @@ async def predictions_courses(
 async def statut_predictions(
     user: dict = Depends(require_auth),
 ):
-    """Retourne le statut des modèles ML (entraînés ou non)."""
+    """Retourne le statut des modÃ¨les ML (entraÃ®nÃ©s ou non)."""
     from src.services.cuisine.suggestions.ml_predictions import obtenir_ml_predictions
 
     service = obtenir_ml_predictions()
@@ -241,7 +241,7 @@ async def produits_de_saison(
     mois: int = Query(0, ge=0, le=12, description="Mois (1-12). 0 = mois courant"),
     user: dict = Depends(require_auth),
 ):
-    """Retourne les fruits et légumes de saison pour le mois donné."""
+    """Retourne les fruits et lÃ©gumes de saison pour le mois donnÃ©."""
     import json
     from datetime import date
     from pathlib import Path
@@ -264,3 +264,4 @@ async def produits_de_saison(
         "legumes": sorted(legumes),
         "total": len(fruits) + len(legumes),
     }
+

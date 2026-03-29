@@ -304,7 +304,7 @@ def obtenir_service_templates() -> ServiceTemplates:
     return ServiceTemplates()
 
 
-def get_templates_service() -> ServiceTemplates:
+def obtenir_templates_service() -> ServiceTemplates:
     """Factory for templates service (English alias)."""
     return obtenir_service_templates()
 
@@ -315,3 +315,7 @@ __all__ = [
     "obtenir_service_templates",
     "get_templates_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_templates_service = obtenir_templates_service  # alias rétrocompatibilité Sprint 12 A3

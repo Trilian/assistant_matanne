@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour EntretienService.
 
 Couvre:
-- Création de routines
-- Suggestions de tâches
+- CrÃ©ation de routines
+- Suggestions de tÃ¢ches
 - Optimisation planning
-- Détection de périodicité
+- DÃ©tection de pÃ©riodicitÃ©
 """
 
 import json
@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from src.services.maison.entretien_service import EntretienService, get_entretien_service
+from src.services.maison.entretien_service import EntretienService, obtenir_entretien_service
 from src.services.maison.schemas import RoutineCreate
 
 
@@ -24,13 +24,13 @@ class TestEntretienServiceInit:
     def test_factory_returns_service(self):
         """La factory retourne une instance valide."""
         with patch("src.services.maison.entretien_service.ClientIA"):
-            service = get_entretien_service()
+            service = obtenir_entretien_service()
             assert isinstance(service, EntretienService)
 
     def test_factory_accepts_custom_client(self):
-        """La factory accepte un client personnalisé."""
+        """La factory accepte un client personnalisÃ©."""
         mock_client = MagicMock()
-        service = get_entretien_service(client=mock_client)
+        service = obtenir_entretien_service(client=mock_client)
         assert service.client == mock_client
 
 
@@ -39,15 +39,15 @@ class TestEntretienServiceRoutines:
 
     @pytest.mark.asyncio
     async def test_creer_routine_ia(self, mock_client_ia):
-        """Crée une routine optimisée par l'IA."""
+        """CrÃ©e une routine optimisÃ©e par l'IA."""
         mock_response = json.dumps(
             {
-                "nom": "Ménage hebdomadaire",
+                "nom": "MÃ©nage hebdomadaire",
                 "taches": [
                     {"nom": "Aspirer", "duree": 30, "jour": "samedi"},
                     {"nom": "Nettoyer cuisine", "duree": 20, "jour": "mercredi"},
                 ],
-                "conseils": ["Commencer par les zones à fort passage"],
+                "conseils": ["Commencer par les zones Ã  fort passage"],
             }
         )
 
@@ -55,7 +55,7 @@ class TestEntretienServiceRoutines:
         service.call_with_cache = AsyncMock(return_value=mock_response)
 
         routine = await service.creer_routine_ia(
-            nom="ménage",
+            nom="mÃ©nage",
             description="Salon, Cuisine, Chambres",
             categorie="menage",
         )
@@ -64,10 +64,10 @@ class TestEntretienServiceRoutines:
 
     @pytest.mark.asyncio
     async def test_creer_routine_avec_preferences(self, mock_client_ia):
-        """Crée une routine respectant les préférences."""
+        """CrÃ©e une routine respectant les prÃ©fÃ©rences."""
         mock_response = json.dumps(
             {
-                "nom": "Routine personnalisée",
+                "nom": "Routine personnalisÃ©e",
                 "taches": [],
             }
         )
@@ -76,8 +76,8 @@ class TestEntretienServiceRoutines:
         service.call_with_cache = AsyncMock(return_value=mock_response)
 
         routine = await service.creer_routine_ia(
-            nom="ménage",
-            description="Salon - préférence matin, pas le dimanche",
+            nom="mÃ©nage",
+            description="Salon - prÃ©fÃ©rence matin, pas le dimanche",
             categorie="menage",
         )
 
@@ -85,11 +85,11 @@ class TestEntretienServiceRoutines:
 
 
 class TestEntretienServiceSuggestions:
-    """Tests des suggestions de tâches."""
+    """Tests des suggestions de tÃ¢ches."""
 
     @pytest.mark.asyncio
     async def test_suggerer_taches_jour(self, mock_client_ia, tache_entretien_data):
-        """Suggère des tâches pour aujourd'hui."""
+        """SuggÃ¨re des tÃ¢ches pour aujourd'hui."""
         mock_response = json.dumps(
             [
                 "Passer l'aspirateur (salon)",
@@ -102,7 +102,7 @@ class TestEntretienServiceSuggestions:
         service.call_with_cache = AsyncMock(return_value=mock_response)
 
         taches = await service.suggerer_taches(
-            nom_routine="Ménage du jour",
+            nom_routine="MÃ©nage du jour",
             contexte="taches en retard",
         )
 
@@ -110,7 +110,7 @@ class TestEntretienServiceSuggestions:
 
     @pytest.mark.asyncio
     async def test_suggerer_taches_urgent(self, mock_client_ia):
-        """Priorise les tâches urgentes."""
+        """Priorise les tÃ¢ches urgentes."""
         tache_urgente = {
             "nom": "Nettoyage four",
             "derniere_execution": date.today() - timedelta(days=60),
@@ -127,7 +127,7 @@ class TestEntretienServiceSuggestions:
         service.call_with_cache = AsyncMock(return_value=mock_response)
 
         taches = await service.suggerer_taches(
-            nom_routine="Tâches urgentes",
+            nom_routine="TÃ¢ches urgentes",
             contexte="Nettoyage four en retard de 30 jours",
         )
 
@@ -143,11 +143,11 @@ class TestEntretienServiceOptimisation:
         mock_response = json.dumps(
             {
                 "lundi": ["Courses", "Tri du linge"],
-                "mardi": ["Aspirateur étage"],
+                "mardi": ["Aspirateur Ã©tage"],
                 "mercredi": ["Nettoyage cuisine"],
                 "jeudi": ["Repassage"],
                 "vendredi": ["Nettoyage salle de bain"],
-                "samedi": ["Ménage complet"],
+                "samedi": ["MÃ©nage complet"],
                 "dimanche": [],
             }
         )
@@ -167,11 +167,11 @@ class TestEntretienServiceOptimisation:
 
     @pytest.mark.asyncio
     async def test_optimiser_avec_indisponibilites(self, mock_client_ia):
-        """Optimise en tenant compte des indisponibilités."""
+        """Optimise en tenant compte des indisponibilitÃ©s."""
         mock_response = json.dumps(
             {
                 "lundi": [],  # Indisponible
-                "mardi": ["Toutes les tâches du lundi"],
+                "mardi": ["Toutes les tÃ¢ches du lundi"],
             }
         )
 
@@ -187,10 +187,10 @@ class TestEntretienServiceOptimisation:
 
 
 class TestEntretienServicePeriodicite:
-    """Tests de détection de périodicité."""
+    """Tests de dÃ©tection de pÃ©riodicitÃ©."""
 
     def test_detecter_periodicite_hebdomadaire(self):
-        """Détecte une périodicité hebdomadaire."""
+        """DÃ©tecte une pÃ©riodicitÃ© hebdomadaire."""
         executions = [
             date.today() - timedelta(days=7),
             date.today() - timedelta(days=14),
@@ -198,7 +198,7 @@ class TestEntretienServicePeriodicite:
             date.today() - timedelta(days=28),
         ]
 
-        # Calcul de la périodicité moyenne
+        # Calcul de la pÃ©riodicitÃ© moyenne
         intervals = []
         for i in range(len(executions) - 1):
             intervals.append((executions[i] - executions[i + 1]).days)
@@ -207,7 +207,7 @@ class TestEntretienServicePeriodicite:
         assert moyenne == 7  # Hebdomadaire
 
     def test_detecter_periodicite_mensuelle(self):
-        """Détecte une périodicité mensuelle."""
+        """DÃ©tecte une pÃ©riodicitÃ© mensuelle."""
         executions = [
             date.today() - timedelta(days=30),
             date.today() - timedelta(days=60),
@@ -223,7 +223,7 @@ class TestEntretienServicePeriodicite:
 
     @pytest.mark.asyncio
     async def test_suggerer_prochaine_date(self, mock_client_ia):
-        """Suggère la prochaine date d'exécution."""
+        """SuggÃ¨re la prochaine date d'exÃ©cution."""
         derniere = date.today() - timedelta(days=7)
         frequence = 7  # Hebdomadaire
 
@@ -232,7 +232,7 @@ class TestEntretienServicePeriodicite:
 
 
 class TestEntretienServiceMeteo:
-    """Tests d'adaptation météo."""
+    """Tests d'adaptation mÃ©tÃ©o."""
 
     @pytest.mark.asyncio
     async def test_adapter_planning_pluie(self, mock_client_ia):
@@ -255,7 +255,7 @@ class TestEntretienServiceMeteo:
             meteo={"pluie_mm": 15, "ensoleillement": "faible"},
         )
 
-        assert service.call_with_cache.called or True  # Méthode ne fait pas d'appel IA
+        assert service.call_with_cache.called or True  # MÃ©thode ne fait pas d'appel IA
 
     @pytest.mark.asyncio
     async def test_adapter_planning_canicule(self, mock_client_ia):
@@ -271,12 +271,12 @@ class TestEntretienServiceMeteo:
 
 
 class TestEntretienServiceConseils:
-    """Tests des conseils d'efficacité."""
+    """Tests des conseils d'efficacitÃ©."""
 
     @pytest.mark.asyncio
     async def test_conseil_efficacite(self, mock_client_ia):
-        """Génère des conseils d'efficacité."""
-        mock_response = "Pour un ménage plus efficace: commencez par le haut et descendez."
+        """GÃ©nÃ¨re des conseils d'efficacitÃ©."""
+        mock_response = "Pour un mÃ©nage plus efficace: commencez par le haut et descendez."
 
         service = EntretienService(client=mock_client_ia)
         service.call_with_cache = AsyncMock(return_value=mock_response)
@@ -290,7 +290,7 @@ class TestEntretienServiceCalculs:
     """Tests des calculs utilitaires."""
 
     def test_calcul_retard_tache(self, tache_entretien_data):
-        """Calcule le retard d'une tâche."""
+        """Calcule le retard d'une tÃ¢che."""
         derniere = tache_entretien_data["derniere_execution"]
         frequence_attendue = 7  # Hebdomadaire
 
@@ -300,7 +300,7 @@ class TestEntretienServiceCalculs:
         assert retard == 1  # 8 jours depuis, attendu 7
 
     def test_calcul_duree_totale(self):
-        """Calcule la durée totale d'un planning."""
+        """Calcule la durÃ©e totale d'un planning."""
         taches = [
             {"nom": "Aspirer", "duree": 30},
             {"nom": "Cuisine", "duree": 20},
@@ -311,9 +311,10 @@ class TestEntretienServiceCalculs:
         assert duree_totale == 65
 
     def test_repartition_temps_semaine(self):
-        """Teste la répartition du temps sur la semaine."""
+        """Teste la rÃ©partition du temps sur la semaine."""
         temps_total = 180  # 3h par semaine
         jours_disponibles = 6  # Pas le dimanche
 
         temps_par_jour = temps_total / jours_disponibles
         assert temps_par_jour == 30  # 30 min par jour
+

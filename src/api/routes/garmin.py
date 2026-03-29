@@ -1,4 +1,4 @@
-"""Routes API Garmin santé/sport."""
+﻿"""Routes API Garmin santÃ©/sport."""
 
 from __future__ import annotations
 
@@ -51,12 +51,12 @@ async def creer_url_connexion_garmin(
     callback_url: str = Query("oob"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    from src.services.integrations.garmin.service import get_garmin_service
+    from src.services.integrations.garmin.service import obtenir_garmin_service
 
-    service = get_garmin_service()
+    service = obtenir_garmin_service()
     authorization_url, request_token = service.get_authorization_url(callback_url=callback_url)
     if not authorization_url:
-        raise HTTPException(status_code=503, detail="Garmin n'est pas configuré côté serveur")
+        raise HTTPException(status_code=503, detail="Garmin n'est pas configurÃ© cÃ´tÃ© serveur")
     return {"authorization_url": authorization_url, "request_token": request_token}
 
 
@@ -66,7 +66,7 @@ async def terminer_connexion_garmin(
     payload: dict[str, str],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    from src.services.integrations.garmin.service import get_garmin_service
+    from src.services.integrations.garmin.service import obtenir_garmin_service
 
     oauth_verifier = (payload.get("oauth_verifier") or "").strip()
     if not oauth_verifier:
@@ -75,11 +75,11 @@ async def terminer_connexion_garmin(
     def _query():
         with executer_avec_session() as session:
             user_id = _resoudre_user_id(session, user)
-            service = get_garmin_service()
+            service = obtenir_garmin_service()
             succes = service.complete_authorization(user_id=user_id, oauth_verifier=oauth_verifier, db=session)
             if not succes:
                 raise HTTPException(status_code=400, detail="Impossible de terminer la connexion Garmin")
-            return {"connected": True, "message": "Garmin connecté"}
+            return {"connected": True, "message": "Garmin connectÃ©"}
 
     return await executer_async(_query)
 
@@ -90,12 +90,12 @@ async def synchroniser_garmin(
     days_back: int = Query(7, ge=1, le=30),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    from src.services.integrations.garmin.service import get_garmin_service
+    from src.services.integrations.garmin.service import obtenir_garmin_service
 
     def _query():
         with executer_avec_session() as session:
             user_id = _resoudre_user_id(session, user)
-            service = get_garmin_service()
+            service = obtenir_garmin_service()
             return service.sync_user_data(user_id=user_id, days_back=days_back, db=session)
 
     return await executer_async(_query)
@@ -107,12 +107,12 @@ async def obtenir_stats_garmin(
     days: int = Query(7, ge=1, le=60),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    from src.services.integrations.garmin.service import get_garmin_service
+    from src.services.integrations.garmin.service import obtenir_garmin_service
 
     def _query():
         with executer_avec_session() as session:
             user_id = _resoudre_user_id(session, user)
-            service = get_garmin_service()
+            service = obtenir_garmin_service()
             return service.get_user_stats(user_id=user_id, days=days, db=session)
 
     return await executer_async(_query)
@@ -121,12 +121,12 @@ async def obtenir_stats_garmin(
 @router.post("/disconnect", responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def deconnecter_garmin(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
-    from src.services.integrations.garmin.service import get_garmin_service
+    from src.services.integrations.garmin.service import obtenir_garmin_service
 
     def _query():
         with executer_avec_session() as session:
             user_id = _resoudre_user_id(session, user)
-            service = get_garmin_service()
+            service = obtenir_garmin_service()
             succes = service.disconnect_user(user_id=user_id, db=session)
             return {"success": succes}
 
@@ -139,7 +139,7 @@ async def recommander_diner_selon_activite(
     calories_brulees: int = Query(0, ge=0, le=3000),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Propose un dîner adapté au niveau de dépense énergétique Garmin."""
+    """Propose un dÃ®ner adaptÃ© au niveau de dÃ©pense Ã©nergÃ©tique Garmin."""
 
     def _query():
         with executer_avec_session() as session:
@@ -167,14 +167,14 @@ async def recommander_diner_selon_activite(
                 return {
                     "strategie": strategie,
                     "calories_brulees": calories_brulees,
-                    "message": "Aucune recette calorique adaptée trouvée",
+                    "message": "Aucune recette calorique adaptÃ©e trouvÃ©e",
                     "items": [],
                 }
 
             return {
                 "strategie": strategie,
                 "calories_brulees": calories_brulees,
-                "message": "Suggestions de dîner adaptées à la dépense du jour",
+                "message": "Suggestions de dÃ®ner adaptÃ©es Ã  la dÃ©pense du jour",
                 "items": [
                     {
                         "id": r.id,

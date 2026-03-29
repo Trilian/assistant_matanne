@@ -1,7 +1,7 @@
-"""
-Routes API RGPD — Export et suppression des données personnelles.
+﻿"""
+Routes API RGPD â€” Export et suppression des donnÃ©es personnelles.
 
-Endpoints pour le droit d'accès, de portabilité et d'effacement (RGPD).
+Endpoints pour le droit d'accÃ¨s, de portabilitÃ© et d'effacement (RGPD).
 """
 
 import logging
@@ -24,9 +24,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/rgpd", tags=["RGPD"])
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ENDPOINTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/export", responses={200: {"content": {"application/zip": {}}}})
@@ -35,19 +35,19 @@ async def exporter_donnees(
     user: dict = Depends(require_auth),
 ):
     """
-    Exporte toutes les données personnelles de l'utilisateur (droit d'accès RGPD).
+    Exporte toutes les donnÃ©es personnelles de l'utilisateur (droit d'accÃ¨s RGPD).
 
     Retourne un fichier ZIP contenant :
-    - `donnees.json` : toutes les données en JSON
-    - Un fichier CSV par catégorie de données
-    - `metadata.json` : métadonnées de l'export
+    - `donnees.json` : toutes les donnÃ©es en JSON
+    - Un fichier CSV par catÃ©gorie de donnÃ©es
+    - `metadata.json` : mÃ©tadonnÃ©es de l'export
 
     Returns:
-        Fichier ZIP téléchargeable
+        Fichier ZIP tÃ©lÃ©chargeable
     """
-    from src.services.core.utilisateur.rgpd import get_rgpd_service
+    from src.services.core.utilisateur.rgpd import obtenir_rgpd_service
 
-    service = get_rgpd_service()
+    service = obtenir_rgpd_service()
     user_id = user.get("sub") or user.get("id")
     if not user_id:
         raise HTTPException(status_code=401, detail="Identifiant utilisateur manquant")
@@ -58,7 +58,7 @@ async def exporter_donnees(
     zip_path = await executer_async(_export)
 
     if not zip_path or not zip_path.exists():
-        raise HTTPException(status_code=500, detail="Erreur lors de la génération de l'export")
+        raise HTTPException(status_code=500, detail="Erreur lors de la gÃ©nÃ©ration de l'export")
 
     return FileResponse(
         path=str(zip_path),
@@ -74,13 +74,13 @@ async def resume_donnees(
     user: dict = Depends(require_auth),
 ):
     """
-    Résumé des données personnelles stockées (nombre d'éléments par catégorie).
+    RÃ©sumÃ© des donnÃ©es personnelles stockÃ©es (nombre d'Ã©lÃ©ments par catÃ©gorie).
 
-    Permet à l'utilisateur de voir quelles données sont stockées sans les télécharger.
+    Permet Ã  l'utilisateur de voir quelles donnÃ©es sont stockÃ©es sans les tÃ©lÃ©charger.
     """
-    from src.services.core.utilisateur.rgpd import get_rgpd_service
+    from src.services.core.utilisateur.rgpd import obtenir_rgpd_service
 
-    service = get_rgpd_service()
+    service = obtenir_rgpd_service()
     user_id = user.get("sub") or user.get("id")
     if not user_id:
         raise HTTPException(status_code=401, detail="Identifiant utilisateur manquant")
@@ -98,9 +98,9 @@ async def supprimer_compte(
     user: dict = Depends(require_auth),
 ):
     """
-    Supprime définitivement le compte et toutes les données associées (droit à l'effacement).
+    Supprime dÃ©finitivement le compte et toutes les donnÃ©es associÃ©es (droit Ã  l'effacement).
 
-    **ATTENTION** : Cette action est irréversible. Toutes les données seront supprimées.
+    **ATTENTION** : Cette action est irrÃ©versible. Toutes les donnÃ©es seront supprimÃ©es.
 
     Le champ `confirmation` doit contenir exactement "SUPPRIMER MON COMPTE".
     """
@@ -110,16 +110,16 @@ async def supprimer_compte(
             detail="Confirmation invalide. Envoyez exactement 'SUPPRIMER MON COMPTE'.",
         )
 
-    from src.services.core.utilisateur.rgpd import get_rgpd_service
+    from src.services.core.utilisateur.rgpd import obtenir_rgpd_service
 
-    service = get_rgpd_service()
+    service = obtenir_rgpd_service()
     user_id = user.get("sub") or user.get("id")
     if not user_id:
         raise HTTPException(status_code=401, detail="Identifiant utilisateur manquant")
 
     logger.warning(
         f"Demande de suppression de compte RGPD pour user {user_id[:8]}, "
-        f"motif: {request.motif or 'non spécifié'}"
+        f"motif: {request.motif or 'non spÃ©cifiÃ©'}"
     )
 
     def _delete():
@@ -128,7 +128,8 @@ async def supprimer_compte(
     elements_supprimes = await executer_async(_delete)
 
     return SuppressionCompteResponse(
-        message="Votre compte et toutes vos données ont été supprimés définitivement.",
+        message="Votre compte et toutes vos donnÃ©es ont Ã©tÃ© supprimÃ©s dÃ©finitivement.",
         deleted_at=datetime.now(UTC),
         elements_supprimes=elements_supprimes,
     )
+

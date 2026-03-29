@@ -232,6 +232,10 @@ def obtenir_service_backup(config: BackupConfig | None = None) -> ServiceBackup:
     return ServiceBackup(config)
 
 
-def get_backup_service(config: BackupConfig | None = None) -> ServiceBackup:
+def obtenir_backup_service(config: BackupConfig | None = None) -> ServiceBackup:
     """Factory for backup service (English alias)."""
     return obtenir_service_backup(config)
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_backup_service = obtenir_backup_service  # alias rétrocompatibilité Sprint 12 A3

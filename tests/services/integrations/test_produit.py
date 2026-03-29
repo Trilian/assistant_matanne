@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour le service OpenFoodFacts.
 
 Couverture cible: >80%
-- Modèles de données (NutritionInfo, ProduitOpenFoodFacts)
+- ModÃ¨les de donnÃ©es (NutritionInfo, ProduitOpenFoodFacts)
 - Recherche par code-barres (avec mocks httpx)
 - Recherche par nom
-- Parser de réponses API
+- Parser de rÃ©ponses API
 - Fonctions utilitaires (nutriscore, nova)
 """
 
@@ -22,12 +22,12 @@ from src.services.integrations.produit import (
     NutritionInfo,
     OpenFoodFactsService,
     ProduitOpenFoodFacts,
-    get_openfoodfacts_service,
+    obtenir_openfoodfacts_service,
 )
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -38,7 +38,7 @@ def service():
 
 @pytest.fixture
 def mock_cache():
-    """Cache mocké."""
+    """Cache mockÃ©."""
     cache = Mock()
     cache.get.return_value = None
     cache.set = Mock()
@@ -47,7 +47,7 @@ def mock_cache():
 
 @pytest.fixture
 def api_response_nutella():
-    """Réponse API simulée pour Nutella."""
+    """RÃ©ponse API simulÃ©e pour Nutella."""
     return {
         "status": 1,
         "product": {
@@ -77,7 +77,7 @@ def api_response_nutella():
             "traces_tags": ["en:gluten", "en:soy"],
             "labels_tags_fr": ["en:no-artificial-colors"],
             "origins": "Italie",
-            "conservation_conditions": "À conserver au frais",
+            "conservation_conditions": "Ã€ conserver au frais",
             "completeness": 90,
         },
     }
@@ -85,13 +85,13 @@ def api_response_nutella():
 
 @pytest.fixture
 def api_response_not_found():
-    """Réponse API pour produit non trouvé."""
+    """RÃ©ponse API pour produit non trouvÃ©."""
     return {"status": 0, "status_verbose": "product not found"}
 
 
 @pytest.fixture
 def api_search_response():
-    """Réponse API pour recherche."""
+    """RÃ©ponse API pour recherche."""
     return {
         "count": 2,
         "products": [
@@ -113,16 +113,16 @@ def api_search_response():
     }
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS MODÈLES DE DONNÉES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS MODÃˆLES DE DONNÃ‰ES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestNutritionInfo:
-    """Tests du modèle NutritionInfo."""
+    """Tests du modÃ¨le NutritionInfo."""
 
     def test_creation_vide(self):
-        """Test création sans données."""
+        """Test crÃ©ation sans donnÃ©es."""
         nutrition = NutritionInfo()
 
         assert nutrition.energie_kcal is None
@@ -130,7 +130,7 @@ class TestNutritionInfo:
         assert nutrition.nutriscore is None
 
     def test_creation_complete(self):
-        """Test création avec toutes les données."""
+        """Test crÃ©ation avec toutes les donnÃ©es."""
         nutrition = NutritionInfo(
             energie_kcal=539,
             proteines_g=6.3,
@@ -152,10 +152,10 @@ class TestNutritionInfo:
 
 
 class TestProduitOpenFoodFacts:
-    """Tests du modèle ProduitOpenFoodFacts."""
+    """Tests du modÃ¨le ProduitOpenFoodFacts."""
 
     def test_creation_minimale(self):
-        """Test création avec champs requis."""
+        """Test crÃ©ation avec champs requis."""
         produit = ProduitOpenFoodFacts(code_barres="3017620422003", nom="Nutella")
 
         assert produit.code_barres == "3017620422003"
@@ -164,18 +164,18 @@ class TestProduitOpenFoodFacts:
         assert produit.confiance == 0.0
 
     def test_creation_complete(self):
-        """Test création avec tous les champs."""
+        """Test crÃ©ation avec tous les champs."""
         nutrition = NutritionInfo(energie_kcal=539)
         produit = ProduitOpenFoodFacts(
             code_barres="3017620422003",
             nom="Nutella",
             marque="Ferrero",
             quantite="400g",
-            categories=["Pâtes à tartiner", "Petit-déjeuner"],
+            categories=["PÃ¢tes Ã  tartiner", "Petit-dÃ©jeuner"],
             image_url="https://example.com/image.jpg",
             nutrition=nutrition,
             ingredients_texte="Sucre, huile de palme...",
-            allergenes=["Lait", "Fruits à coque"],
+            allergenes=["Lait", "Fruits Ã  coque"],
             traces=["Gluten"],
             labels=["Sans colorants artificiels"],
             origine="Italie",
@@ -191,7 +191,7 @@ class TestProduitOpenFoodFacts:
         assert produit.confiance == 0.9
 
     def test_valeurs_par_defaut(self):
-        """Test des valeurs par défaut."""
+        """Test des valeurs par dÃ©faut."""
         produit = ProduitOpenFoodFacts(code_barres="12345678", nom="Test")
 
         assert produit.marque is None
@@ -201,9 +201,9 @@ class TestProduitOpenFoodFacts:
         assert isinstance(produit.date_recuperation, datetime)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE INIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestServiceInit:
@@ -215,13 +215,13 @@ class TestServiceInit:
         assert "AssistantMatanne" in service.user_agent
 
     def test_cache_reference(self, service):
-        """Test référence au cache."""
+        """Test rÃ©fÃ©rence au cache."""
         assert service.cache is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RECHERCHE PAR CODE-BARRES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRechercherProduit:
@@ -240,7 +240,7 @@ class TestRechercherProduit:
             mock_cache.get.assert_called_once()
 
     def test_recherche_succes(self, service, api_response_nutella):
-        """Test recherche réussie."""
+        """Test recherche rÃ©ussie."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_nutella
@@ -261,7 +261,7 @@ class TestRechercherProduit:
                     assert result.marque == "Ferrero"
 
     def test_recherche_produit_non_trouve(self, service, api_response_not_found):
-        """Test recherche produit non trouvé."""
+        """Test recherche produit non trouvÃ©."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_not_found
@@ -307,7 +307,7 @@ class TestRechercherProduit:
                 assert result is None
 
     def test_recherche_exception(self, service):
-        """Test recherche avec exception générale."""
+        """Test recherche avec exception gÃ©nÃ©rale."""
         with patch.object(service.cache, "get", return_value=None):
             with patch("httpx.Client") as mock_client:
                 mock_client.return_value.__enter__ = Mock(
@@ -320,20 +320,20 @@ class TestRechercherProduit:
                 assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS PARSER PRODUIT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestParserProduit:
     """Tests du parser de produit."""
 
     def test_parser_nom_fr(self, service):
-        """Test parsing avec nom français."""
-        data = {"product_name_fr": "Pâtes", "product_name": "Pasta"}
+        """Test parsing avec nom franÃ§ais."""
+        data = {"product_name_fr": "PÃ¢tes", "product_name": "Pasta"}
         result = service._parser_produit("123", data)
 
-        assert result.nom == "Pâtes"
+        assert result.nom == "PÃ¢tes"
 
     def test_parser_nom_fallback(self, service):
         """Test parsing avec fallback nom."""
@@ -343,11 +343,11 @@ class TestParserProduit:
         assert result.nom == "Pasta"
 
     def test_parser_nom_generic(self, service):
-        """Test parsing avec nom générique."""
-        data = {"generic_name_fr": "Pâtes alimentaires"}
+        """Test parsing avec nom gÃ©nÃ©rique."""
+        data = {"generic_name_fr": "PÃ¢tes alimentaires"}
         result = service._parser_produit("123", data)
 
-        assert result.nom == "Pâtes alimentaires"
+        assert result.nom == "PÃ¢tes alimentaires"
 
     def test_parser_nom_inconnu(self, service):
         """Test parsing sans nom."""
@@ -368,16 +368,16 @@ class TestParserProduit:
         assert result.nutrition.nova_group == 4
 
     def test_parser_categories(self, service, api_response_nutella):
-        """Test parsing catégories."""
+        """Test parsing catÃ©gories."""
         data = api_response_nutella["product"]
         result = service._parser_produit("3017620422003", data)
 
         assert len(result.categories) > 0
-        # Les catégories sont nettoyées et formatées
+        # Les catÃ©gories sont nettoyÃ©es et formatÃ©es
         assert all(isinstance(c, str) for c in result.categories)
 
     def test_parser_allergenes(self, service, api_response_nutella):
-        """Test parsing allergènes."""
+        """Test parsing allergÃ¨nes."""
         data = api_response_nutella["product"]
         result = service._parser_produit("3017620422003", data)
 
@@ -403,7 +403,7 @@ class TestParserProduit:
         data = api_response_nutella["product"]
         result = service._parser_produit("3017620422003", data)
 
-        # Avec completeness=90, confiance devrait être 0.9
+        # Avec completeness=90, confiance devrait Ãªtre 0.9
         assert result.confiance == 0.9
 
     def test_parser_confiance_sans_completeness(self, service):
@@ -411,7 +411,7 @@ class TestParserProduit:
         data = {"product_name": "Test"}
         result = service._parser_produit("123", data)
 
-        # Sans completeness, confiance par défaut = 0.5
+        # Sans completeness, confiance par dÃ©faut = 0.5
         assert result.confiance == 0.5
 
     def test_parser_images(self, service, api_response_nutella):
@@ -423,16 +423,16 @@ class TestParserProduit:
         assert result.image_thumb_url is not None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS RECHERCHE PAR NOM
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRechercherParNom:
     """Tests de la recherche par nom."""
 
     def test_recherche_succes(self, service, api_search_response):
-        """Test recherche par nom réussie."""
+        """Test recherche par nom rÃ©ussie."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_search_response
@@ -450,7 +450,7 @@ class TestRechercherParNom:
             assert results[1].nom == "Nutella 750g"
 
     def test_recherche_vide(self, service):
-        """Test recherche sans résultats."""
+        """Test recherche sans rÃ©sultats."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"count": 0, "products": []}
@@ -493,7 +493,7 @@ class TestRechercherParNom:
             assert results == []
 
     def test_recherche_limite(self, service, api_search_response):
-        """Test limite de résultats."""
+        """Test limite de rÃ©sultats."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_search_response
@@ -506,14 +506,14 @@ class TestRechercherParNom:
 
             service.rechercher_par_nom("nutella", limite=5)
 
-            # Vérifier que page_size=5 est passé
+            # VÃ©rifier que page_size=5 est passÃ©
             call_args = mock_instance.get.call_args
             assert call_args[1]["params"]["page_size"] == 5
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FONCTIONS UTILITAIRES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestUtilitaires:
@@ -521,34 +521,34 @@ class TestUtilitaires:
 
     def test_nutriscore_emoji_a(self, service):
         """Test emoji nutriscore A."""
-        assert service.obtenir_nutriscore_emoji("A") == "🟢"
-        assert service.obtenir_nutriscore_emoji("a") == "🟢"
+        assert service.obtenir_nutriscore_emoji("A") == "ðŸŸ¢"
+        assert service.obtenir_nutriscore_emoji("a") == "ðŸŸ¢"
 
     def test_nutriscore_emoji_b(self, service):
         """Test emoji nutriscore B."""
-        assert service.obtenir_nutriscore_emoji("B") == "🟡"
+        assert service.obtenir_nutriscore_emoji("B") == "ðŸŸ¡"
 
     def test_nutriscore_emoji_c(self, service):
         """Test emoji nutriscore C."""
-        assert service.obtenir_nutriscore_emoji("C") == "🟠"
+        assert service.obtenir_nutriscore_emoji("C") == "ðŸŸ "
 
     def test_nutriscore_emoji_d(self, service):
         """Test emoji nutriscore D."""
-        assert service.obtenir_nutriscore_emoji("D") == "🟧"
+        assert service.obtenir_nutriscore_emoji("D") == "ðŸŸ§"
 
     def test_nutriscore_emoji_e(self, service):
         """Test emoji nutriscore E."""
-        assert service.obtenir_nutriscore_emoji("E") == "🔴"
+        assert service.obtenir_nutriscore_emoji("E") == "ðŸ”´"
 
     def test_nutriscore_emoji_inconnu(self, service):
         """Test emoji nutriscore inconnu."""
-        assert service.obtenir_nutriscore_emoji(None) == "⚪"
-        assert service.obtenir_nutriscore_emoji("") == "⚪"
+        assert service.obtenir_nutriscore_emoji(None) == "âšª"
+        assert service.obtenir_nutriscore_emoji("") == "âšª"
 
     def test_nova_description_1(self, service):
         """Test description NOVA 1."""
         result = service.obtenir_nova_description(1)
-        assert "non transformé" in result
+        assert "non transformÃ©" in result
 
     def test_nova_description_2(self, service):
         """Test description NOVA 2."""
@@ -558,12 +558,12 @@ class TestUtilitaires:
     def test_nova_description_3(self, service):
         """Test description NOVA 3."""
         result = service.obtenir_nova_description(3)
-        assert "transformé" in result
+        assert "transformÃ©" in result
 
     def test_nova_description_4(self, service):
         """Test description NOVA 4."""
         result = service.obtenir_nova_description(4)
-        assert "Ultra-transformé" in result
+        assert "Ultra-transformÃ©" in result
 
     def test_nova_description_inconnu(self, service):
         """Test description NOVA inconnu."""
@@ -574,9 +574,9 @@ class TestUtilitaires:
         assert "Inconnu" in result
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
@@ -592,9 +592,9 @@ class TestConstantes:
         assert CACHE_TTL == 86400
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFactory:
@@ -602,26 +602,26 @@ class TestFactory:
 
     def test_get_openfoodfacts_service(self):
         """Test obtention du service."""
-        service = get_openfoodfacts_service()
+        service = obtenir_openfoodfacts_service()
         assert isinstance(service, OpenFoodFactsService)
 
     def test_singleton(self):
-        """Test que la factory retourne le même instance."""
-        s1 = get_openfoodfacts_service()
-        s2 = get_openfoodfacts_service()
+        """Test que la factory retourne le mÃªme instance."""
+        s1 = obtenir_openfoodfacts_service()
+        s2 = obtenir_openfoodfacts_service()
         assert s1 is s2
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS INTÉGRATION CACHE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS INTÃ‰GRATION CACHE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheIntegration:
-    """Tests d'intégration avec le cache."""
+    """Tests d'intÃ©gration avec le cache."""
 
     def test_cache_set_on_success(self, service, api_response_nutella):
-        """Test que le cache est mis à jour après succès."""
+        """Test que le cache est mis Ã  jour aprÃ¨s succÃ¨s."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_nutella
@@ -636,13 +636,13 @@ class TestCacheIntegration:
 
                     result = service.rechercher_produit("3017620422003")
 
-                    # Vérifier que le cache a été mis à jour
+                    # VÃ©rifier que le cache a Ã©tÃ© mis Ã  jour
                     mock_set.assert_called_once()
                     cache_key = mock_set.call_args[0][0]
                     assert "3017620422003" in cache_key
 
     def test_cache_not_set_on_not_found(self, service, api_response_not_found):
-        """Test que le cache n'est pas mis à jour si non trouvé."""
+        """Test que le cache n'est pas mis Ã  jour si non trouvÃ©."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = api_response_not_found
@@ -657,5 +657,6 @@ class TestCacheIntegration:
 
                     result = service.rechercher_produit("0000000000000")
 
-                    # Le cache ne doit pas être mis à jour pour un produit non trouvé
+                    # Le cache ne doit pas Ãªtre mis Ã  jour pour un produit non trouvÃ©
                     mock_set.assert_not_called()
+

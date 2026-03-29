@@ -1,9 +1,9 @@
-"""
+﻿"""
 Routes API pour les calendriers.
 
 Endpoints pour:
-- Calendriers externes synchronisés
-- Événements de calendrier
+- Calendriers externes synchronisÃ©s
+- Ã‰vÃ©nements de calendrier
 """
 
 from datetime import datetime
@@ -26,9 +26,9 @@ from src.core.models import CalendrierExterne, EvenementCalendrier
 router = APIRouter(prefix="/api/v1/calendriers", tags=["Calendriers"])
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALENDRIERS EXTERNES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("", responses=REPONSES_LISTE)
@@ -37,10 +37,10 @@ async def lister_calendriers(
     provider: str | None = Query(
         None, description="Filtrer par fournisseur (google, apple, outlook, ical_url)"
     ),
-    enabled: bool | None = Query(None, description="Filtrer par statut activé"),
+    enabled: bool | None = Query(None, description="Filtrer par statut activÃ©"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les calendriers externes synchronisés."""
+    """Liste les calendriers externes synchronisÃ©s."""
 
     def _query():
         with executer_avec_session() as session:
@@ -78,7 +78,7 @@ async def obtenir_calendrier(
     calendrier_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ):
-    """Récupère un calendrier externe par son ID."""
+    """RÃ©cupÃ¨re un calendrier externe par son ID."""
 
     def _query():
         with executer_avec_session() as session:
@@ -88,7 +88,7 @@ async def obtenir_calendrier(
                 .first()
             )
             if not calendrier:
-                raise HTTPException(status_code=404, detail="Calendrier non trouvé")
+                raise HTTPException(status_code=404, detail="Calendrier non trouvÃ©")
 
             return {
                 "id": calendrier.id,
@@ -116,10 +116,10 @@ async def creer_calendrier(
     sync_direction: str = Query("import", description="Direction sync: import, export, bidirectional"),
     user: dict[str, Any] = Depends(require_auth),
 ):
-    """Crée un nouveau calendrier externe (iCal par URL)."""
+    """CrÃ©e un nouveau calendrier externe (iCal par URL)."""
 
     if provider not in ("ical_url", "google", "apple", "outlook"):
-        raise HTTPException(status_code=422, detail=f"Provider non supporté: {provider}")
+        raise HTTPException(status_code=422, detail=f"Provider non supportÃ©: {provider}")
 
     if provider == "ical_url" and not url:
         raise HTTPException(status_code=422, detail="url requis pour provider=ical_url")
@@ -171,15 +171,15 @@ async def supprimer_calendrier(
             )
             session.commit()
             if not deleted:
-                raise HTTPException(status_code=404, detail="Calendrier non trouvé")
-            return MessageResponse(message="Calendrier supprimé", id=calendrier_id)
+                raise HTTPException(status_code=404, detail="Calendrier non trouvÃ©")
+            return MessageResponse(message="Calendrier supprimÃ©", id=calendrier_id)
 
     return await executer_async(_delete)
 
 
-# ═══════════════════════════════════════════════════════════
-# ÉVÉNEMENTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã‰VÃ‰NEMENTS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/evenements", responses=REPONSES_LISTE)
@@ -190,12 +190,12 @@ async def lister_evenements(
     calendrier_id: int | None = Query(None, description="Filtrer par calendrier source"),
     date_debut: datetime | None = Query(None, description="Date minimum (ISO 8601)"),
     date_fin: datetime | None = Query(None, description="Date maximum (ISO 8601)"),
-    all_day: bool | None = Query(None, description="Filtrer événements journée entière"),
+    all_day: bool | None = Query(None, description="Filtrer Ã©vÃ©nements journÃ©e entiÃ¨re"),
     cursor: str | None = Query(None, description="Curseur pour pagination cursor-based"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Liste les événements de calendrier.
+    Liste les Ã©vÃ©nements de calendrier.
 
     Supporte pagination offset ou cursor-based pour grandes collections.
     """
@@ -258,7 +258,7 @@ async def obtenir_evenement(
     evenement_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ):
-    """Récupère un événement par son ID."""
+    """RÃ©cupÃ¨re un Ã©vÃ©nement par son ID."""
 
     def _query():
         with executer_avec_session() as session:
@@ -268,7 +268,7 @@ async def obtenir_evenement(
                 .first()
             )
             if not evenement:
-                raise HTTPException(status_code=404, detail="Événement non trouvé")
+                raise HTTPException(status_code=404, detail="Ã‰vÃ©nement non trouvÃ©")
 
             return {
                 "id": evenement.id,
@@ -294,7 +294,7 @@ async def obtenir_evenement(
 async def evenements_aujourdhui(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Récupère les événements du jour."""
+    """RÃ©cupÃ¨re les Ã©vÃ©nements du jour."""
     def _query():
         with executer_avec_session() as session:
             from datetime import timedelta
@@ -334,10 +334,10 @@ async def evenements_aujourdhui(
 @router.get("/evenements/semaine", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def evenements_semaine(
-    date_debut: datetime | None = Query(None, description="Date de début (défaut: lundi courant)"),
+    date_debut: datetime | None = Query(None, description="Date de dÃ©but (dÃ©faut: lundi courant)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Récupère les événements de la semaine."""
+    """RÃ©cupÃ¨re les Ã©vÃ©nements de la semaine."""
 
     def _query():
         with executer_avec_session() as session:
@@ -389,9 +389,9 @@ async def evenements_semaine(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# GOOGLE CALENDAR — OAuth & Sync
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# GOOGLE CALENDAR â€” OAuth & Sync
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/google/auth-url")
@@ -399,16 +399,16 @@ async def evenements_semaine(
 async def obtenir_url_auth_google(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, str]:
-    """Génère l'URL d'autorisation OAuth2 Google Calendar."""
+    """GÃ©nÃ¨re l'URL d'autorisation OAuth2 Google Calendar."""
     from src.core.config import obtenir_parametres
-    from src.services.famille.calendrier import get_calendar_sync_service
+    from src.services.famille.calendrier import obtenir_calendar_sync_service
 
     def _gen():
         params = obtenir_parametres()
         redirect_uri = params.GOOGLE_REDIRECT_URI
         if not redirect_uri:
-            raise HTTPException(status_code=500, detail="GOOGLE_REDIRECT_URI non configuré")
-        service = get_calendar_sync_service()
+            raise HTTPException(status_code=500, detail="GOOGLE_REDIRECT_URI non configurÃ©")
+        service = obtenir_calendar_sync_service()
         url = service.get_google_auth_url(str(user["id"]), redirect_uri)
         return {"auth_url": url}
 
@@ -419,19 +419,19 @@ async def obtenir_url_auth_google(
 @gerer_exception_api
 async def callback_google(
     code: str = Query(..., description="Code d'autorisation OAuth2"),
-    state: str = Query(..., description="User ID passé via state"),
+    state: str = Query(..., description="User ID passÃ© via state"),
 ) -> dict[str, Any]:
-    """Callback OAuth2 Google — échange le code contre des tokens."""
+    """Callback OAuth2 Google â€” Ã©change le code contre des tokens."""
     from src.core.config import obtenir_parametres
-    from src.services.famille.calendrier import get_calendar_sync_service
+    from src.services.famille.calendrier import obtenir_calendar_sync_service
 
     def _exchange():
         params = obtenir_parametres()
         redirect_uri = params.GOOGLE_REDIRECT_URI
-        service = get_calendar_sync_service()
+        service = obtenir_calendar_sync_service()
         config = service.handle_google_callback(state, code, redirect_uri)
         if not config:
-            raise HTTPException(status_code=400, detail="Échec de l'authentification Google")
+            raise HTTPException(status_code=400, detail="Ã‰chec de l'authentification Google")
         return {
             "status": "connected",
             "provider": "google",
@@ -446,11 +446,11 @@ async def callback_google(
 async def synchroniser_google(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Déclenche une synchronisation manuelle avec Google Calendar."""
-    from src.services.famille.calendrier import get_calendar_sync_service
+    """DÃ©clenche une synchronisation manuelle avec Google Calendar."""
+    from src.services.famille.calendrier import obtenir_calendar_sync_service
 
     def _sync():
-        service = get_calendar_sync_service()
+        service = obtenir_calendar_sync_service()
         result = service.sync_google_calendar(str(user["id"]))
         return {
             "status": "success",
@@ -467,7 +467,7 @@ async def synchroniser_google(
 async def statut_google(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Vérifie l'état de la connexion Google Calendar."""
+    """VÃ©rifie l'Ã©tat de la connexion Google Calendar."""
     from src.core.models import CalendrierExterne
 
     def _query():
@@ -498,7 +498,7 @@ async def statut_google(
 async def deconnecter_google(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, str]:
-    """Déconnecte Google Calendar et supprime les tokens."""
+    """DÃ©connecte Google Calendar et supprime les tokens."""
     from src.core.models import CalendrierExterne
 
     def _delete():
@@ -513,15 +513,15 @@ async def deconnecter_google(
             )
             session.commit()
             if not deleted:
-                raise HTTPException(status_code=404, detail="Aucune connexion Google trouvée")
+                raise HTTPException(status_code=404, detail="Aucune connexion Google trouvÃ©e")
             return {"status": "disconnected"}
 
     return await executer_async(_delete)
 
 
-# ═══════════════════════════════════════════════════════════
-# GOOGLE CALENDAR — SYNC PLANNING REPAS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# GOOGLE CALENDAR â€” SYNC PLANNING REPAS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post("/google/sync-planning", responses=REPONSES_CRUD_CREATION)
@@ -531,8 +531,8 @@ async def synchroniser_planning_vers_google(
 ) -> dict[str, Any]:
     """Pousse le planning repas actif de la semaine vers Google Calendar.
 
-    Pour chaque repas du planning actif, crée un événement Google Calendar
-    avec l'heure appropriée (déjeuner 12h, dîner 19h, etc.).
+    Pour chaque repas du planning actif, crÃ©e un Ã©vÃ©nement Google Calendar
+    avec l'heure appropriÃ©e (dÃ©jeuner 12h, dÃ®ner 19h, etc.).
     """
     from src.services.integrations.google_calendar import synchroniser_planning_google
 
@@ -569,7 +569,8 @@ async def synchroniser_planning_vers_google(
     repas_list = await executer_async(_collect)
 
     if not repas_list:
-        return {"created": 0, "errors": [], "message": "Aucun repas à synchroniser"}
+        return {"created": 0, "errors": [], "message": "Aucun repas Ã  synchroniser"}
 
     result = await synchroniser_planning_google(repas_list)
     return result
+

@@ -301,6 +301,10 @@ class CatalogueEnrichissementService:
 
 
 @service_factory("catalogue_enrichissement")
-def get_catalogue_enrichissement_service() -> CatalogueEnrichissementService:
+def obtenir_catalogue_enrichissement_service() -> CatalogueEnrichissementService:
     """Factory singleton pour CatalogueEnrichissementService."""
     return CatalogueEnrichissementService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_catalogue_enrichissement_service = obtenir_catalogue_enrichissement_service  # alias rétrocompatibilité Sprint 12 A3

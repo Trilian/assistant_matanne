@@ -1,9 +1,10 @@
-"""
-Routes API Maison — Finances (dépenses, contrats, artisans, garanties, etc.).
+﻿"""
+Routes API Maison â€” Finances (dÃ©penses, contrats, artisans, garanties, etc.).
 
 Sous-routeur inclus dans maison.py.
 """
 
+import base64
 from datetime import date
 from typing import Any
 
@@ -25,22 +26,22 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Maison"])
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ARTISANS (carnet d'adresses)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/artisans", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_artisans(
-    metier: str | None = Query(None, description="Filtrer par métier"),
+    metier: str | None = Query(None, description="Filtrer par mÃ©tier"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les artisans du carnet d'adresses."""
-    from src.services.maison import get_artisans_crud_service
+    from src.services.maison import obtenir_artisans_crud_service
 
     def _query():
-        service = get_artisans_crud_service()
+        service = obtenir_artisans_crud_service()
         return {"items": service.get_all_artisans(filtre_metier=metier)}
 
     return await executer_async(_query)
@@ -51,11 +52,11 @@ async def lister_artisans(
 async def stats_artisans(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Statistiques artisans (nb métiers, dépenses, interventions)."""
-    from src.services.maison import get_artisans_crud_service
+    """Statistiques artisans (nb mÃ©tiers, dÃ©penses, interventions)."""
+    from src.services.maison import obtenir_artisans_crud_service
 
     def _query():
-        service = get_artisans_crud_service()
+        service = obtenir_artisans_crud_service()
         return service.get_stats_artisans()
 
     return await executer_async(_query)
@@ -67,14 +68,14 @@ async def obtenir_artisan(
     artisan_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Détail d'un artisan."""
-    from src.services.maison import get_artisans_crud_service
+    """DÃ©tail d'un artisan."""
+    from src.services.maison import obtenir_artisans_crud_service
 
     def _query():
-        service = get_artisans_crud_service()
+        service = obtenir_artisans_crud_service()
         result = service.get_artisan_by_id(artisan_id)
         if not result:
-            raise HTTPException(status_code=404, detail="Artisan non trouvé")
+            raise HTTPException(status_code=404, detail="Artisan non trouvÃ©")
         return model_to_dict(result)
 
     return await executer_async(_query)
@@ -87,10 +88,10 @@ async def creer_artisan(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Ajoute un artisan au carnet."""
-    from src.services.maison import get_artisans_crud_service
+    from src.services.maison import obtenir_artisans_crud_service
 
     def _query():
-        service = get_artisans_crud_service()
+        service = obtenir_artisans_crud_service()
         return model_to_dict(service.create_artisan(payload))
 
     return await executer_async(_query)
@@ -103,11 +104,11 @@ async def modifier_artisan(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour un artisan."""
-    from src.services.maison import get_artisans_crud_service
+    """Met Ã  jour un artisan."""
+    from src.services.maison import obtenir_artisans_crud_service
 
     def _query():
-        service = get_artisans_crud_service()
+        service = obtenir_artisans_crud_service()
         return model_to_dict(service.update_artisan(artisan_id, payload))
 
     return await executer_async(_query)
@@ -120,12 +121,12 @@ async def supprimer_artisan(
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
     """Supprime un artisan et ses interventions."""
-    from src.services.maison import get_artisans_crud_service
+    from src.services.maison import obtenir_artisans_crud_service
 
     def _query():
-        service = get_artisans_crud_service()
+        service = obtenir_artisans_crud_service()
         service.delete_artisan(artisan_id)
-        return MessageResponse(message="Artisan supprimé")
+        return MessageResponse(message="Artisan supprimÃ©")
 
     return await executer_async(_query)
 
@@ -137,10 +138,10 @@ async def lister_interventions(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Historique des interventions d'un artisan."""
-    from src.services.maison import get_artisans_crud_service
+    from src.services.maison import obtenir_artisans_crud_service
 
     def _query():
-        service = get_artisans_crud_service()
+        service = obtenir_artisans_crud_service()
         return {"items": service.get_interventions(artisan_id)}
 
     return await executer_async(_query)
@@ -154,12 +155,12 @@ async def creer_intervention(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Enregistre une intervention d'un artisan."""
-    from src.services.maison import get_artisans_crud_service
+    from src.services.maison import obtenir_artisans_crud_service
 
     payload["artisan_id"] = artisan_id
 
     def _query():
-        service = get_artisans_crud_service()
+        service = obtenir_artisans_crud_service()
         return model_to_dict(service.create_intervention(payload))
 
     return await executer_async(_query)
@@ -172,19 +173,19 @@ async def supprimer_intervention(
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
     """Supprime une intervention."""
-    from src.services.maison import get_artisans_crud_service
+    from src.services.maison import obtenir_artisans_crud_service
 
     def _query():
-        service = get_artisans_crud_service()
+        service = obtenir_artisans_crud_service()
         service.delete_intervention(intervention_id)
-        return MessageResponse(message="Intervention supprimée")
+        return MessageResponse(message="Intervention supprimÃ©e")
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# CONTRATS (assurances, énergie, etc.)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CONTRATS (assurances, Ã©nergie, etc.)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/contrats", responses=REPONSES_LISTE)
@@ -195,10 +196,10 @@ async def lister_contrats(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les contrats de la maison."""
-    from src.services.maison import get_contrats_crud_service
+    from src.services.maison import obtenir_contrats_crud_service
 
     def _query():
-        service = get_contrats_crud_service()
+        service = obtenir_contrats_crud_service()
         return {"items": service.get_all_contrats(filtre_type=type_contrat, filtre_statut=statut)}
 
     return await executer_async(_query)
@@ -210,11 +211,11 @@ async def alertes_contrats(
     jours: int = Query(60, ge=1, le=365, description="Horizon en jours"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Contrats à renouveler ou résilier prochainement."""
-    from src.services.maison import get_contrats_crud_service
+    """Contrats Ã  renouveler ou rÃ©silier prochainement."""
+    from src.services.maison import obtenir_contrats_crud_service
 
     def _query():
-        service = get_contrats_crud_service()
+        service = obtenir_contrats_crud_service()
         return {"items": service.get_alertes_contrats(jours_horizon=jours)}
 
     return await executer_async(_query)
@@ -225,11 +226,11 @@ async def alertes_contrats(
 async def resume_financier_contrats(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Résumé financier des contrats (mensuel/annuel par type)."""
-    from src.services.maison import get_contrats_crud_service
+    """RÃ©sumÃ© financier des contrats (mensuel/annuel par type)."""
+    from src.services.maison import obtenir_contrats_crud_service
 
     def _query():
-        service = get_contrats_crud_service()
+        service = obtenir_contrats_crud_service()
         return service.get_resume_financier()
 
     return await executer_async(_query)
@@ -241,14 +242,14 @@ async def obtenir_contrat(
     contrat_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Détail d'un contrat."""
-    from src.services.maison import get_contrats_crud_service
+    """DÃ©tail d'un contrat."""
+    from src.services.maison import obtenir_contrats_crud_service
 
     def _query():
-        service = get_contrats_crud_service()
+        service = obtenir_contrats_crud_service()
         result = service.get_contrat_by_id(contrat_id)
         if not result:
-            raise HTTPException(status_code=404, detail="Contrat non trouvé")
+            raise HTTPException(status_code=404, detail="Contrat non trouvÃ©")
         return model_to_dict(result)
 
     return await executer_async(_query)
@@ -260,11 +261,11 @@ async def creer_contrat(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée un contrat."""
-    from src.services.maison import get_contrats_crud_service
+    """CrÃ©e un contrat."""
+    from src.services.maison import obtenir_contrats_crud_service
 
     def _query():
-        service = get_contrats_crud_service()
+        service = obtenir_contrats_crud_service()
         return model_to_dict(service.create_contrat(payload))
 
     return await executer_async(_query)
@@ -277,11 +278,11 @@ async def modifier_contrat(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour un contrat."""
-    from src.services.maison import get_contrats_crud_service
+    """Met Ã  jour un contrat."""
+    from src.services.maison import obtenir_contrats_crud_service
 
     def _query():
-        service = get_contrats_crud_service()
+        service = obtenir_contrats_crud_service()
         return model_to_dict(service.update_contrat(contrat_id, payload))
 
     return await executer_async(_query)
@@ -294,33 +295,33 @@ async def supprimer_contrat(
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
     """Supprime un contrat."""
-    from src.services.maison import get_contrats_crud_service
+    from src.services.maison import obtenir_contrats_crud_service
 
     def _query():
-        service = get_contrats_crud_service()
+        service = obtenir_contrats_crud_service()
         service.delete_contrat(contrat_id)
-        return MessageResponse(message="Contrat supprimé")
+        return MessageResponse(message="Contrat supprimÃ©")
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # GARANTIES & INCIDENTS SAV
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/garanties", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_garanties(
     statut: str | None = Query(None, description="Filtrer par statut"),
-    piece: str | None = Query(None, description="Filtrer par pièce"),
+    piece: str | None = Query(None, description="Filtrer par piÃ¨ce"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les garanties enregistrées."""
-    from src.services.maison import get_garanties_crud_service
+    """Liste les garanties enregistrÃ©es."""
+    from src.services.maison import obtenir_garanties_crud_service
 
     def _query():
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         return {"items": service.get_all_garanties(filtre_statut=statut, filtre_piece=piece)}
 
     return await executer_async(_query)
@@ -332,11 +333,11 @@ async def alertes_garanties(
     jours: int = Query(60, ge=1, le=365, description="Horizon en jours"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Garanties arrivant à expiration."""
-    from src.services.maison import get_garanties_crud_service
+    """Garanties arrivant Ã  expiration."""
+    from src.services.maison import obtenir_garanties_crud_service
 
     def _query():
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         return {"items": service.get_alertes_garanties(jours_horizon=jours)}
 
     return await executer_async(_query)
@@ -347,11 +348,11 @@ async def alertes_garanties(
 async def stats_garanties(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Statistiques garanties (total, actives, expirées, valeur)."""
-    from src.services.maison import get_garanties_crud_service
+    """Statistiques garanties (total, actives, expirÃ©es, valeur)."""
+    from src.services.maison import obtenir_garanties_crud_service
 
     def _query():
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         return service.get_stats_garanties()
 
     return await executer_async(_query)
@@ -360,23 +361,23 @@ async def stats_garanties(
 @router.get("/garanties/alertes-predictives", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def alertes_predictives_garanties(
-    horizon_mois: int = Query(12, ge=1, le=36, description="Horizon prédictif en mois"),
+    horizon_mois: int = Query(12, ge=1, le=36, description="Horizon prÃ©dictif en mois"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Retourne les appareils approchant leur fin de vie théorique.
+    Retourne les appareils approchant leur fin de vie thÃ©orique.
 
     Croise les garanties avec le catalogue d'entretien pour estimer :
-    - l'âge actuel de l'appareil
-    - les mois restants estimés
-    - l'action recommandée (SAV, remplacement, surveillance)
+    - l'Ã¢ge actuel de l'appareil
+    - les mois restants estimÃ©s
+    - l'action recommandÃ©e (SAV, remplacement, surveillance)
     """
-    from src.services.maison import get_garanties_crud_service, obtenir_service_catalogue_entretien
+    from src.services.maison import obtenir_garanties_crud_service, obtenir_service_catalogue_entretien
 
     def _query():
         from datetime import date
 
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         catalogue = obtenir_service_catalogue_entretien()
         garanties = service.get_all_garanties()
 
@@ -402,7 +403,7 @@ async def alertes_predictives_garanties(
 
             if restant_mois <= 0:
                 niveau = "CRITIQUE"
-                action = "Prévoir remplacement et vérifier extension/prise en charge SAV"
+                action = "PrÃ©voir remplacement et vÃ©rifier extension/prise en charge SAV"
             elif restant_mois <= 3:
                 niveau = "HAUTE"
                 action = "Anticiper SAV ou devis de remplacement"
@@ -438,14 +439,14 @@ async def obtenir_garantie(
     garantie_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Détail d'une garantie."""
-    from src.services.maison import get_garanties_crud_service
+    """DÃ©tail d'une garantie."""
+    from src.services.maison import obtenir_garanties_crud_service
 
     def _query():
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         result = service.get_garantie_by_id(garantie_id)
         if not result:
-            raise HTTPException(status_code=404, detail="Garantie non trouvée")
+            raise HTTPException(status_code=404, detail="Garantie non trouvÃ©e")
         return model_to_dict(result)
 
     return await executer_async(_query)
@@ -458,10 +459,10 @@ async def creer_garantie(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Enregistre une garantie."""
-    from src.services.maison import get_garanties_crud_service
+    from src.services.maison import obtenir_garanties_crud_service
 
     def _query():
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         return model_to_dict(service.create_garantie(payload))
 
     return await executer_async(_query)
@@ -474,11 +475,11 @@ async def modifier_garantie(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour une garantie."""
-    from src.services.maison import get_garanties_crud_service
+    """Met Ã  jour une garantie."""
+    from src.services.maison import obtenir_garanties_crud_service
 
     def _query():
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         return model_to_dict(service.update_garantie(garantie_id, payload))
 
     return await executer_async(_query)
@@ -491,12 +492,12 @@ async def supprimer_garantie(
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
     """Supprime une garantie et ses incidents."""
-    from src.services.maison import get_garanties_crud_service
+    from src.services.maison import obtenir_garanties_crud_service
 
     def _query():
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         service.delete_garantie(garantie_id)
-        return MessageResponse(message="Garantie supprimée")
+        return MessageResponse(message="Garantie supprimÃ©e")
 
     return await executer_async(_query)
 
@@ -508,10 +509,10 @@ async def lister_incidents_garantie(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les incidents SAV d'une garantie."""
-    from src.services.maison import get_garanties_crud_service
+    from src.services.maison import obtenir_garanties_crud_service
 
     def _query():
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         return {"items": service.get_incidents(garantie_id)}
 
     return await executer_async(_query)
@@ -525,12 +526,12 @@ async def creer_incident_garantie(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Enregistre un incident SAV."""
-    from src.services.maison import get_garanties_crud_service
+    from src.services.maison import obtenir_garanties_crud_service
 
     payload["garantie_id"] = garantie_id
 
     def _query():
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         return model_to_dict(service.create_incident(payload))
 
     return await executer_async(_query)
@@ -543,11 +544,11 @@ async def modifier_incident_garantie(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour le statut/coût d'un incident SAV."""
-    from src.services.maison import get_garanties_crud_service
+    """Met Ã  jour le statut/coÃ»t d'un incident SAV."""
+    from src.services.maison import obtenir_garanties_crud_service
 
     def _query():
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         return model_to_dict(service.update_incident(incident_id, payload))
 
     return await executer_async(_query)
@@ -564,11 +565,11 @@ async def ouvrir_dossier_sav(
     payload: dict[str, Any] = {},
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Ouvre un dossier SAV en 1 clic avec pré-remplissage depuis la garantie."""
-    from src.services.maison import get_garanties_crud_service
+    """Ouvre un dossier SAV en 1 clic avec prÃ©-remplissage depuis la garantie."""
+    from src.services.maison import obtenir_garanties_crud_service
 
     def _query():
-        service = get_garanties_crud_service()
+        service = obtenir_garanties_crud_service()
         return service.ouvrir_dossier_sav_rapide(
             garantie_id=garantie_id,
             description=payload.get("description"),
@@ -578,9 +579,9 @@ async def ouvrir_dossier_sav(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DIAGNOSTICS IMMOBILIERS & ESTIMATIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/diagnostics", responses=REPONSES_LISTE)
@@ -589,10 +590,10 @@ async def lister_diagnostics(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les diagnostics immobiliers (DPE, amiante, plomb...)."""
-    from src.services.maison import get_diagnostics_crud_service
+    from src.services.maison import obtenir_diagnostics_crud_service
 
     def _query():
-        service = get_diagnostics_crud_service()
+        service = obtenir_diagnostics_crud_service()
         return {"items": service.get_all()}
 
     return await executer_async(_query)
@@ -604,11 +605,11 @@ async def alertes_diagnostics(
     jours: int = Query(90, ge=1, le=365, description="Horizon en jours"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Diagnostics dont la validité expire bientôt."""
-    from src.services.maison import get_diagnostics_crud_service
+    """Diagnostics dont la validitÃ© expire bientÃ´t."""
+    from src.services.maison import obtenir_diagnostics_crud_service
 
     def _query():
-        service = get_diagnostics_crud_service()
+        service = obtenir_diagnostics_crud_service()
         return {"items": service.get_alertes_validite(jours_horizon=jours)}
 
     return await executer_async(_query)
@@ -619,11 +620,11 @@ async def alertes_diagnostics(
 async def validite_types_diagnostics(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Durées de validité par type de diagnostic."""
-    from src.services.maison import get_diagnostics_crud_service
+    """DurÃ©es de validitÃ© par type de diagnostic."""
+    from src.services.maison import obtenir_diagnostics_crud_service
 
     def _query():
-        service = get_diagnostics_crud_service()
+        service = obtenir_diagnostics_crud_service()
         return service.get_validite_par_type()
 
     return await executer_async(_query)
@@ -632,8 +633,8 @@ async def validite_types_diagnostics(
 @router.post("/diagnostics/ia-photo", responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def diagnostic_photo_ia(
-    photo: UploadFile = File(..., description="Photo de la pièce à diagnostiquer"),
-    piece: str = Query("maison", description="Nom de la pièce (cuisine, salle de bain, etc.)"),
+    photo: UploadFile = File(..., description="Photo de la piÃ¨ce Ã  diagnostiquer"),
+    piece: str = Query("maison", description="Nom de la piÃ¨ce (cuisine, salle de bain, etc.)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Analyse une photo de maison et propose un diagnostic IA (Pixtral)."""
@@ -641,16 +642,16 @@ async def diagnostic_photo_ia(
     if photo.content_type not in TYPES_AUTORISES:
         raise HTTPException(
             status_code=422,
-            detail=f"Type non supporté: {photo.content_type}. Utilisez JPEG, PNG ou WebP.",
+            detail=f"Type non supportÃ©: {photo.content_type}. Utilisez JPEG, PNG ou WebP.",
         )
 
     contenu = await photo.read()
     if len(contenu) > 10 * 1024 * 1024:
         raise HTTPException(status_code=413, detail="Fichier trop volumineux (max 10 Mo)")
 
-    from src.services.integrations.multimodal import get_multimodal_service
+    from src.services.integrations.multimodal import obtenir_multimodal_service
 
-    service = get_multimodal_service()
+    service = obtenir_multimodal_service()
     diagnostic = await service.diagnostiquer_photo_maison(contenu, piece=piece)
 
     if not diagnostic:
@@ -661,7 +662,7 @@ async def diagnostic_photo_ia(
             "problemes_detectes": [],
             "estimation_cout_min": 0,
             "estimation_cout_max": 0,
-            "actions_48h": ["Refaire une photo nette de la zone concernée."],
+            "actions_48h": ["Refaire une photo nette de la zone concernÃ©e."],
         }
 
     return diagnostic.model_dump()
@@ -674,10 +675,10 @@ async def creer_diagnostic(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Enregistre un diagnostic immobilier."""
-    from src.services.maison import get_diagnostics_crud_service
+    from src.services.maison import obtenir_diagnostics_crud_service
 
     def _query():
-        service = get_diagnostics_crud_service()
+        service = obtenir_diagnostics_crud_service()
         return model_to_dict(service.create(payload))
 
     return await executer_async(_query)
@@ -690,11 +691,11 @@ async def modifier_diagnostic(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour un diagnostic."""
-    from src.services.maison import get_diagnostics_crud_service
+    """Met Ã  jour un diagnostic."""
+    from src.services.maison import obtenir_diagnostics_crud_service
 
     def _query():
-        service = get_diagnostics_crud_service()
+        service = obtenir_diagnostics_crud_service()
         return model_to_dict(service.update(diagnostic_id, payload))
 
     return await executer_async(_query)
@@ -707,12 +708,12 @@ async def supprimer_diagnostic(
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
     """Supprime un diagnostic."""
-    from src.services.maison import get_diagnostics_crud_service
+    from src.services.maison import obtenir_diagnostics_crud_service
 
     def _query():
-        service = get_diagnostics_crud_service()
+        service = obtenir_diagnostics_crud_service()
         service.delete(diagnostic_id)
-        return MessageResponse(message="Diagnostic supprimé")
+        return MessageResponse(message="Diagnostic supprimÃ©")
 
     return await executer_async(_query)
 
@@ -722,11 +723,11 @@ async def supprimer_diagnostic(
 async def lister_estimations(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les estimations immobilières."""
-    from src.services.maison import get_estimations_crud_service
+    """Liste les estimations immobiliÃ¨res."""
+    from src.services.maison import obtenir_estimations_crud_service
 
     def _query():
-        service = get_estimations_crud_service()
+        service = obtenir_estimations_crud_service()
         return {"items": service.get_all()}
 
     return await executer_async(_query)
@@ -737,14 +738,14 @@ async def lister_estimations(
 async def derniere_estimation(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Dernière estimation immobilière."""
-    from src.services.maison import get_estimations_crud_service
+    """DerniÃ¨re estimation immobiliÃ¨re."""
+    from src.services.maison import obtenir_estimations_crud_service
 
     def _query():
-        service = get_estimations_crud_service()
+        service = obtenir_estimations_crud_service()
         result = service.get_derniere_estimation()
         if not result:
-            raise HTTPException(status_code=404, detail="Aucune estimation trouvée")
+            raise HTTPException(status_code=404, detail="Aucune estimation trouvÃ©e")
         return result
 
     return await executer_async(_query)
@@ -756,11 +757,11 @@ async def creer_estimation(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Enregistre une estimation immobilière."""
-    from src.services.maison import get_estimations_crud_service
+    """Enregistre une estimation immobiliÃ¨re."""
+    from src.services.maison import obtenir_estimations_crud_service
 
     def _query():
-        service = get_estimations_crud_service()
+        service = obtenir_estimations_crud_service()
         return service.create(payload)
 
     return await executer_async(_query)
@@ -773,19 +774,19 @@ async def supprimer_estimation(
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
     """Supprime une estimation."""
-    from src.services.maison import get_estimations_crud_service
+    from src.services.maison import obtenir_estimations_crud_service
 
     def _query():
-        service = get_estimations_crud_service()
+        service = obtenir_estimations_crud_service()
         service.delete(estimation_id)
-        return MessageResponse(message="Estimation supprimée")
+        return MessageResponse(message="Estimation supprimÃ©e")
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# ÉCO-TIPS (actions écologiques)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Ã‰CO-TIPS (actions Ã©cologiques)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/eco-tips", responses=REPONSES_LISTE)
@@ -794,11 +795,11 @@ async def lister_eco_tips(
     actif_only: bool = Query(False, description="Seulement les actions actives"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les actions écologiques."""
-    from src.services.maison import get_eco_tips_crud_service
+    """Liste les actions Ã©cologiques."""
+    from src.services.maison import obtenir_eco_tips_crud_service
 
     def _query():
-        service = get_eco_tips_crud_service()
+        service = obtenir_eco_tips_crud_service()
         return {"items": service.get_all_actions(actif_only=actif_only)}
 
     return await executer_async(_query)
@@ -810,14 +811,14 @@ async def obtenir_eco_tip(
     action_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Détail d'une action écologique."""
-    from src.services.maison import get_eco_tips_crud_service
+    """DÃ©tail d'une action Ã©cologique."""
+    from src.services.maison import obtenir_eco_tips_crud_service
 
     def _query():
-        service = get_eco_tips_crud_service()
+        service = obtenir_eco_tips_crud_service()
         result = service.get_action_by_id(action_id)
         if not result:
-            raise HTTPException(status_code=404, detail="Action non trouvée")
+            raise HTTPException(status_code=404, detail="Action non trouvÃ©e")
         return model_to_dict(result)
 
     return await executer_async(_query)
@@ -829,11 +830,11 @@ async def creer_eco_tip(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée une action écologique."""
-    from src.services.maison import get_eco_tips_crud_service
+    """CrÃ©e une action Ã©cologique."""
+    from src.services.maison import obtenir_eco_tips_crud_service
 
     def _query():
-        service = get_eco_tips_crud_service()
+        service = obtenir_eco_tips_crud_service()
         return model_to_dict(service.create_action(payload))
 
     return await executer_async(_query)
@@ -846,11 +847,11 @@ async def modifier_eco_tip(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour une action écologique."""
-    from src.services.maison import get_eco_tips_crud_service
+    """Met Ã  jour une action Ã©cologique."""
+    from src.services.maison import obtenir_eco_tips_crud_service
 
     def _query():
-        service = get_eco_tips_crud_service()
+        service = obtenir_eco_tips_crud_service()
         return model_to_dict(service.update_action(action_id, payload))
 
     return await executer_async(_query)
@@ -862,20 +863,20 @@ async def supprimer_eco_tip(
     action_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Supprime une action écologique."""
-    from src.services.maison import get_eco_tips_crud_service
+    """Supprime une action Ã©cologique."""
+    from src.services.maison import obtenir_eco_tips_crud_service
 
     def _query():
-        service = get_eco_tips_crud_service()
+        service = obtenir_eco_tips_crud_service()
         service.delete_action(action_id)
-        return MessageResponse(message="Action supprimée")
+        return MessageResponse(message="Action supprimÃ©e")
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# CHARGES RÉCURRENTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CHARGES RÃ‰CURRENTES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/charges", responses=REPONSES_LISTE)
@@ -883,11 +884,11 @@ async def supprimer_eco_tip(
 async def lister_charges(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les charges récurrentes (contrats et abonnements actifs)."""
-    from src.services.maison import get_contrats_crud_service
+    """Liste les charges rÃ©currentes (contrats et abonnements actifs)."""
+    from src.services.maison import obtenir_contrats_crud_service
 
     def _query():
-        service = get_contrats_crud_service()
+        service = obtenir_contrats_crud_service()
         contrats = service.get_all_contrats(statut="actif")
         items = contrats if isinstance(contrats, list) else []
         return {"items": [str(c) for c in items], "total": len(items)}
@@ -895,23 +896,23 @@ async def lister_charges(
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# DÉPENSES MAISON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# DÃ‰PENSES MAISON
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/depenses", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_depenses(
     mois: int | None = Query(None, ge=1, le=12, description="Mois (1-12)"),
-    annee: int | None = Query(None, ge=2020, description="Année"),
+    annee: int | None = Query(None, ge=2020, description="AnnÃ©e"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les dépenses maison (par mois ou année)."""
-    from src.services.maison import get_depenses_crud_service
+    """Liste les dÃ©penses maison (par mois ou annÃ©e)."""
+    from src.services.maison import obtenir_depenses_crud_service
 
     def _query():
-        service = get_depenses_crud_service()
+        service = obtenir_depenses_crud_service()
         if mois and annee:
             return {"items": service.get_depenses_mois(mois, annee)}
         elif annee:
@@ -928,11 +929,11 @@ async def lister_depenses(
 async def stats_depenses(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Statistiques globales des dépenses (tendance, moyenne, delta)."""
-    from src.services.maison import get_depenses_crud_service
+    """Statistiques globales des dÃ©penses (tendance, moyenne, delta)."""
+    from src.services.maison import obtenir_depenses_crud_service
 
     def _query():
-        service = get_depenses_crud_service()
+        service = obtenir_depenses_crud_service()
         return service.get_stats_globales()
 
     return await executer_async(_query)
@@ -945,11 +946,11 @@ async def historique_depenses_categorie(
     nb_mois: int = Query(12, ge=1, le=36, description="Nombre de mois d'historique"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Historique des dépenses par catégorie."""
-    from src.services.maison import get_depenses_crud_service
+    """Historique des dÃ©penses par catÃ©gorie."""
+    from src.services.maison import obtenir_depenses_crud_service
 
     def _query():
-        service = get_depenses_crud_service()
+        service = obtenir_depenses_crud_service()
         return {"items": service.get_historique_categorie(categorie, nb_mois=nb_mois)}
 
     return await executer_async(_query)
@@ -962,11 +963,11 @@ async def historique_energie(
     nb_mois: int = Query(12, ge=1, le=36, description="Nombre de mois d'historique"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Historique de consommation énergétique avec tendance."""
-    from src.services.maison import get_depenses_crud_service
+    """Historique de consommation Ã©nergÃ©tique avec tendance."""
+    from src.services.maison import obtenir_depenses_crud_service
 
     def _query():
-        service = get_depenses_crud_service()
+        service = obtenir_depenses_crud_service()
         return service.charger_historique_energie(type_energie, nb_mois=nb_mois)
 
     return await executer_async(_query)
@@ -976,10 +977,10 @@ async def historique_energie(
 @gerer_exception_api
 async def tendances_energie(
     type_compteur: str = Query("electricite", description="electricite | eau | gaz"),
-    nb_mois: int = Query(12, ge=2, le=36, description="Nombre de mois à analyser"),
+    nb_mois: int = Query(12, ge=2, le=36, description="Nombre de mois Ã  analyser"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Tendances de consommation mensuelle avec détection d'anomalies (écart > 20 % vs moyenne)."""
+    """Tendances de consommation mensuelle avec dÃ©tection d'anomalies (Ã©cart > 20 % vs moyenne)."""
     from src.core.models.maison_extensions import ReleveCompteur
     from sqlalchemy import func
 
@@ -1026,10 +1027,10 @@ async def tendances_energie(
 @gerer_exception_api
 async def previsions_energie_ia(
     type_compteur: str = Query("electricite", description="electricite | eau | gaz"),
-    nb_mois: int = Query(6, ge=3, le=24, description="Nombre de mois pour la régression"),
+    nb_mois: int = Query(6, ge=3, le=24, description="Nombre de mois pour la rÃ©gression"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Prévision de consommation du mois prochain par régression linéaire."""
+    """PrÃ©vision de consommation du mois prochain par rÃ©gression linÃ©aire."""
     from datetime import date
 
     from sqlalchemy import func
@@ -1061,7 +1062,7 @@ async def previsions_energie_ia(
                     "consommation_prevue": None,
                     "tendance": "insuffisant",
                     "confiance": 0.0,
-                    "message": f"Seulement {n} mois disponible(s) — il faut au moins 3 relevés mensuels.",
+                    "message": f"Seulement {n} mois disponible(s) â€” il faut au moins 3 relevÃ©s mensuels.",
                 }
 
             x_vals = list(range(n))
@@ -1090,6 +1091,70 @@ async def previsions_energie_ia(
             mois_label = f"{today.year + 1}-01" if today.month == 12 else f"{today.year}-{today.month + 1:02d}"
 
             return {
+@router.post("/depenses/import-ticket", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def importer_depenses_depuis_ticket(
+    photo: UploadFile = File(..., description="Photo du ticket de caisse (JPEG/PNG/WebP)"),
+    confirmer: bool = Query(False, description="Si true, importe les dépenses dans la base"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Analyse un ticket de caisse et propose un aperçu des dépenses à importer."""
+    types_autorises = {"image/jpeg", "image/png", "image/webp"}
+    if photo.content_type not in types_autorises:
+        raise HTTPException(status_code=422, detail="Type de fichier non supporté (JPEG/PNG/WebP)")
+
+    contenu = await photo.read()
+    if not contenu:
+        raise HTTPException(status_code=422, detail="Fichier vide")
+    if len(contenu) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Fichier trop volumineux (max 10 Mo)")
+
+    from src.services.integrations.ticket_caisse import scanner_ticket_vision, ticket_vers_depenses
+    from src.services.maison import obtenir_depenses_crud_service
+
+    image_base64 = base64.b64encode(contenu).decode("utf-8")
+    ticket = scanner_ticket_vision(image_base64)
+    depenses_brutes = ticket_vers_depenses(ticket)
+
+    apercu = [
+        {
+            "libelle": d.get("description", "Achat ticket"),
+            "montant": float(d.get("montant", 0.0) or 0.0),
+            "categorie": d.get("rayon") or "courses",
+            "date": d.get("date").isoformat() if hasattr(d.get("date"), "isoformat") else None,
+            "fournisseur": d.get("magasin") or ticket.magasin or None,
+            "notes": "Import ticket caisse",
+        }
+        for d in depenses_brutes
+        if float(d.get("montant", 0.0) or 0.0) > 0
+    ]
+
+    if not confirmer:
+        return {
+            "confirmer": False,
+            "nb_detectees": len(apercu),
+            "confiance_ocr": ticket.confiance_ocr,
+            "magasin": ticket.magasin,
+            "total_ticket": ticket.total,
+            "depenses": apercu,
+        }
+
+    def _importer() -> dict[str, Any]:
+        service = obtenir_depenses_crud_service()
+        imports: list[dict[str, Any]] = []
+        for d in apercu:
+            cree = service.create_depense(d)
+            imports.append(model_to_dict(cree))
+
+        return {
+            "confirmer": True,
+            "nb_importees": len(imports),
+            "depenses": imports,
+            "magasin": ticket.magasin,
+            "confiance_ocr": ticket.confiance_ocr,
+        }
+
+    return await executer_async(_importer)
                 "type": type_compteur,
                 "mois_prochain": mois_label,
                 "consommation_prevue": round(conso_prevue, 1),
@@ -1108,14 +1173,14 @@ async def obtenir_depense(
     depense_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Détail d'une dépense."""
-    from src.services.maison import get_depenses_crud_service
+    """DÃ©tail d'une dÃ©pense."""
+    from src.services.maison import obtenir_depenses_crud_service
 
     def _query():
-        service = get_depenses_crud_service()
+        service = obtenir_depenses_crud_service()
         result = service.get_depense_by_id(depense_id)
         if not result:
-            raise HTTPException(status_code=404, detail="Dépense non trouvée")
+            raise HTTPException(status_code=404, detail="DÃ©pense non trouvÃ©e")
         return model_to_dict(result)
 
     return await executer_async(_query)
@@ -1127,11 +1192,11 @@ async def creer_depense(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Enregistre une dépense maison."""
-    from src.services.maison import get_depenses_crud_service
+    """Enregistre une dÃ©pense maison."""
+    from src.services.maison import obtenir_depenses_crud_service
 
     def _query():
-        service = get_depenses_crud_service()
+        service = obtenir_depenses_crud_service()
         return model_to_dict(service.create_depense(payload))
 
     return await executer_async(_query)
@@ -1144,11 +1209,11 @@ async def modifier_depense(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour une dépense."""
-    from src.services.maison import get_depenses_crud_service
+    """Met Ã  jour une dÃ©pense."""
+    from src.services.maison import obtenir_depenses_crud_service
 
     def _query():
-        service = get_depenses_crud_service()
+        service = obtenir_depenses_crud_service()
         return model_to_dict(service.update_depense(depense_id, payload))
 
     return await executer_async(_query)
@@ -1160,20 +1225,20 @@ async def supprimer_depense(
     depense_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Supprime une dépense."""
-    from src.services.maison import get_depenses_crud_service
+    """Supprime une dÃ©pense."""
+    from src.services.maison import obtenir_depenses_crud_service
 
     def _query():
-        service = get_depenses_crud_service()
+        service = obtenir_depenses_crud_service()
         service.delete_depense(depense_id)
-        return MessageResponse(message="Dépense supprimée")
+        return MessageResponse(message="DÃ©pense supprimÃ©e")
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSEILLER IA MAISON
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/conseiller/conseil", responses=REPONSES_CRUD_LECTURE)
@@ -1182,11 +1247,11 @@ async def obtenir_conseil_ia(
     section: str = Query("default", description="Section maison (travaux, finances, provisions, jardin, documents, equipements)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Retourne 3 à 5 conseils IA contextuels pour la section demandée."""
-    from src.services.maison.conseiller_service import get_conseiller_maison_service
+    """Retourne 3 Ã  5 conseils IA contextuels pour la section demandÃ©e."""
+    from src.services.maison.conseiller_service import obtenir_conseiller_maison_service
 
     def _query():
-        service = get_conseiller_maison_service()
+        service = obtenir_conseiller_maison_service()
         conseil = service.obtenir_conseil(section)
         if conseil is None:
             return {"section": section, "conseils": [], "message": "Aucun conseil disponible"}
@@ -1200,11 +1265,11 @@ async def obtenir_conseil_ia(
 async def obtenir_conseils_hub_ia(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Retourne 4-6 conseils structurés pour le hub maison, triés par urgence."""
-    from src.services.maison.conseiller_service import get_conseiller_maison_service
+    """Retourne 4-6 conseils structurÃ©s pour le hub maison, triÃ©s par urgence."""
+    from src.services.maison.conseiller_service import obtenir_conseiller_maison_service
 
     def _query():
-        service = get_conseiller_maison_service()
+        service = obtenir_conseiller_maison_service()
         conseils = service.obtenir_conseils_hub() or []
         return {"items": conseils}
 
@@ -1218,27 +1283,27 @@ async def chat_assistant_maison(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Chat libre avec l'assistant IA maison."""
-    from src.services.maison.conseiller_service import get_conseiller_maison_service
+    from src.services.maison.conseiller_service import obtenir_conseiller_maison_service
 
     message = body.get("message", "").strip()
     if not message:
-        raise HTTPException(status_code=400, detail="Le message ne peut pas être vide")
+        raise HTTPException(status_code=400, detail="Le message ne peut pas Ãªtre vide")
 
     contexte = body.get("contexte", "maison")
 
     def _query():
-        service = get_conseiller_maison_service()
+        service = obtenir_conseiller_maison_service()
         reponse = service.chat_assistant(message, contexte)
         return {"reponse": reponse, "message": message}
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # NUISIBLES (traitements)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DEVIS COMPARATIFS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/devis", responses=REPONSES_LISTE)
@@ -1248,10 +1313,10 @@ async def lister_devis(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Liste les devis comparatifs."""
-    from src.services.maison import get_devis_crud_service
+    from src.services.maison import obtenir_devis_crud_service
 
     def _query():
-        service = get_devis_crud_service()
+        service = obtenir_devis_crud_service()
         return {"items": service.get_all(projet_id=projet_id)}
 
     return await executer_async(_query)
@@ -1263,11 +1328,11 @@ async def creer_devis(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Crée un devis."""
-    from src.services.maison import get_devis_crud_service
+    """CrÃ©e un devis."""
+    from src.services.maison import obtenir_devis_crud_service
 
     def _query():
-        service = get_devis_crud_service()
+        service = obtenir_devis_crud_service()
         return service.create(payload)
 
     return await executer_async(_query)
@@ -1280,11 +1345,11 @@ async def modifier_devis(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met à jour un devis."""
-    from src.services.maison import get_devis_crud_service
+    """Met Ã  jour un devis."""
+    from src.services.maison import obtenir_devis_crud_service
 
     def _query():
-        service = get_devis_crud_service()
+        service = obtenir_devis_crud_service()
         return service.update(devis_id, payload)
 
     return await executer_async(_query)
@@ -1297,12 +1362,12 @@ async def supprimer_devis(
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
     """Supprime un devis et ses lignes."""
-    from src.services.maison import get_devis_crud_service
+    from src.services.maison import obtenir_devis_crud_service
 
     def _query():
-        service = get_devis_crud_service()
+        service = obtenir_devis_crud_service()
         service.delete(devis_id)
-        return MessageResponse(message="Devis supprimé")
+        return MessageResponse(message="Devis supprimÃ©")
 
     return await executer_async(_query)
 
@@ -1314,13 +1379,13 @@ async def ajouter_ligne_devis(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Ajoute une ligne à un devis."""
-    from src.services.maison import get_devis_crud_service
+    """Ajoute une ligne Ã  un devis."""
+    from src.services.maison import obtenir_devis_crud_service
 
     payload["devis_id"] = devis_id
 
     def _query():
-        service = get_devis_crud_service()
+        service = obtenir_devis_crud_service()
         return service.add_ligne(payload)
 
     return await executer_async(_query)
@@ -1332,18 +1397,18 @@ async def choisir_devis(
     devis_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Accepte un devis (rejette automatiquement les autres du même projet)."""
-    from src.services.maison import get_devis_crud_service
+    """Accepte un devis (rejette automatiquement les autres du mÃªme projet)."""
+    from src.services.maison import obtenir_devis_crud_service
 
     def _query():
-        service = get_devis_crud_service()
+        service = obtenir_devis_crud_service()
         return service.choisir_devis(devis_id)
 
     return await executer_async(_query)
 
 
-# RELEVÉS COMPTEURS
-# ═══════════════════════════════════════════════════════════
+# RELEVÃ‰S COMPTEURS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get("/releves", responses=REPONSES_LISTE)
@@ -1351,11 +1416,11 @@ async def choisir_devis(
 async def lister_releves(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les relevés de compteurs (eau, gaz, électricité)."""
-    from src.services.maison import get_releves_crud_service
+    """Liste les relevÃ©s de compteurs (eau, gaz, Ã©lectricitÃ©)."""
+    from src.services.maison import obtenir_releves_crud_service
 
     def _query():
-        service = get_releves_crud_service()
+        service = obtenir_releves_crud_service()
         return {"items": service.get_all()}
 
     return await executer_async(_query)
@@ -1367,11 +1432,11 @@ async def creer_releve(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Enregistre un relevé de compteur."""
-    from src.services.maison import get_releves_crud_service
+    """Enregistre un relevÃ© de compteur."""
+    from src.services.maison import obtenir_releves_crud_service
 
     def _query():
-        service = get_releves_crud_service()
+        service = obtenir_releves_crud_service()
         return service.create(payload)
 
     return await executer_async(_query)
@@ -1383,16 +1448,17 @@ async def supprimer_releve(
     releve_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Supprime un relevé."""
-    from src.services.maison import get_releves_crud_service
+    """Supprime un relevÃ©."""
+    from src.services.maison import obtenir_releves_crud_service
 
     def _query():
-        service = get_releves_crud_service()
+        service = obtenir_releves_crud_service()
         service.delete(releve_id)
-        return MessageResponse(message="Relevé supprimé")
+        return MessageResponse(message="RelevÃ© supprimÃ©")
 
     return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VISUALISATION PLAN MAISON
+

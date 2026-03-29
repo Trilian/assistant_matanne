@@ -105,6 +105,10 @@ class PreferenceNotification(TimestampMixin, Base):
     modules_actifs: Mapped[dict | None] = mapped_column(JSONB, default=dict)
     canal_prefere: Mapped[str] = mapped_column(String(20), default="push")
 
+    # Canaux par catégorie (Sprint 13 — W4)
+    # Structure : {"rappels": ["push", "ntfy"], "alertes": ["push", "ntfy", "email"], "resumes": ["email"]}
+    canaux_par_categorie: Mapped[dict | None] = mapped_column(JSONB, default=dict)
+
     # Supabase user (unique)
     user_id: Mapped[UUID | None] = mapped_column(PG_UUID(as_uuid=True), unique=True)
 

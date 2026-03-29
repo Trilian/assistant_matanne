@@ -277,7 +277,7 @@ def obtenir_service_ntfy(config: ConfigurationNtfy | None = None) -> ServiceNtfy
     return ServiceNtfy(config)
 
 
-def get_ntfy_service(config: ConfigurationNtfy | None = None) -> ServiceNtfy:
+def obtenir_ntfy_service(config: ConfigurationNtfy | None = None) -> ServiceNtfy:
     """Factory for ntfy notification service (English alias)."""
     return obtenir_service_ntfy(config)
 
@@ -296,3 +296,7 @@ __all__ = [
     "get_ntfy_service",
     "obtenir_planificateur_ntfy",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_ntfy_service = obtenir_ntfy_service  # alias rétrocompatibilité Sprint 12 A3

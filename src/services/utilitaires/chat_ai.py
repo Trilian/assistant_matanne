@@ -149,6 +149,10 @@ def obtenir_chat_ai_service() -> ChatAIService:
     return ChatAIService()
 
 
-def get_chat_ai_service() -> ChatAIService:
+def obtenir_chat_ai_service() -> ChatAIService:
     """English alias."""
     return obtenir_chat_ai_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_chat_ai_service = obtenir_chat_ai_service  # alias rétrocompatibilité Sprint 12 A3

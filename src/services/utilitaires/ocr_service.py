@@ -71,6 +71,10 @@ class OCRService:
 
 
 @service_factory("ocr_service", tags={"utilitaires", "ia"})
-def get_ocr_service() -> OCRService:
+def obtenir_ocr_service() -> OCRService:
     """Factory singleton OCRService."""
     return OCRService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_ocr_service = obtenir_ocr_service  # alias rétrocompatibilité Sprint 12 A3

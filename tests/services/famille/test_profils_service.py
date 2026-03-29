@@ -1,13 +1,13 @@
-"""
-Tests pour src/services/profils.py — ProfilService.
+﻿"""
+Tests pour src/services/profils.py â€” ProfilService.
 
 Couvre:
-- CRUD profils (obtenir, mettre à jour)
+- CRUD profils (obtenir, mettre Ã  jour)
 - Changement de profil actif
-- PIN: définir, vérifier, supprimer
-- Sections protégées
+- PIN: dÃ©finir, vÃ©rifier, supprimer
+- Sections protÃ©gÃ©es
 - Export/import configuration (round-trip)
-- Réinitialisation de section
+- RÃ©initialisation de section
 - Validation schemas Pydantic
 """
 
@@ -27,22 +27,22 @@ from src.services.core.utilisateur.profils import (
     SECTIONS_PROTEGER,
     ProfilService,
     _hasher_pin,
-    get_profil_service,
+    obtenir_profil_service,
 )
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
 def profil_anne(db: Session) -> ProfilUtilisateur:
-    """Crée le profil Anne en base de test."""
+    """CrÃ©e le profil Anne en base de test."""
     profil = ProfilUtilisateur(
         username="anne",
         display_name="Anne",
         email="anne@test.com",
-        avatar_emoji="👩",
+        avatar_emoji="ðŸ‘©",
         taille_cm=165,
         poids_kg=60.0,
         objectif_pas_quotidien=10000,
@@ -60,12 +60,12 @@ def profil_anne(db: Session) -> ProfilUtilisateur:
 
 @pytest.fixture
 def profil_mathieu(db: Session) -> ProfilUtilisateur:
-    """Crée le profil Mathieu en base de test."""
+    """CrÃ©e le profil Mathieu en base de test."""
     profil = ProfilUtilisateur(
         username="mathieu",
         display_name="Mathieu",
         email="mathieu@test.com",
-        avatar_emoji="👨",
+        avatar_emoji="ðŸ‘¨",
         objectif_pas_quotidien=12000,
         objectif_calories_brulees=600,
         objectif_minutes_actives=45,
@@ -86,9 +86,9 @@ def deux_profils(profil_anne, profil_mathieu):
 
 @pytest.fixture
 def notif_prefs(db: Session) -> PreferenceNotification:
-    """Crée des préférences de notification en base."""
+    """CrÃ©e des prÃ©fÃ©rences de notification en base."""
     pref = PreferenceNotification(
-        id=1,  # BigInteger PK — SQLite ne l'auto-incrémente pas
+        id=1,  # BigInteger PK â€” SQLite ne l'auto-incrÃ©mente pas
         courses_rappel=True,
         repas_suggestion=True,
         stock_alerte=True,
@@ -103,9 +103,9 @@ def notif_prefs(db: Session) -> PreferenceNotification:
     return pref
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONSTANTES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestConstantes:
@@ -138,102 +138,102 @@ class TestConstantes:
         assert "admin" in SECTIONS_PROTEGER
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # HELPERS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestHasherPin:
     """Tests de la fonction de hachage PIN."""
 
     def test_hash_deterministe(self):
-        """Le même PIN produit le même hash."""
+        """Le mÃªme PIN produit le mÃªme hash."""
         assert _hasher_pin("1234") == _hasher_pin("1234")
 
     def test_hash_differents_pins(self):
-        """Deux PINs différents donnent des hashs différents."""
+        """Deux PINs diffÃ©rents donnent des hashs diffÃ©rents."""
         assert _hasher_pin("1234") != _hasher_pin("5678")
 
     def test_hash_longueur_sha256(self):
-        """Le hash SHA-256 fait 64 caractères hex."""
+        """Le hash SHA-256 fait 64 caractÃ¨res hex."""
         h = _hasher_pin("0000")
         assert len(h) == 64
         assert all(c in "0123456789abcdef" for c in h)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFactory:
     """Tests de la factory singleton."""
 
     def test_get_profil_service_retourne_instance(self):
-        service = get_profil_service()
+        service = obtenir_profil_service()
         assert isinstance(service, ProfilService)
 
     def test_get_profil_service_singleton(self):
-        """Deux appels retournent le même objet."""
-        s1 = get_profil_service()
-        s2 = get_profil_service()
+        """Deux appels retournent le mÃªme objet."""
+        s1 = obtenir_profil_service()
+        s2 = obtenir_profil_service()
         assert s1 is s2
 
 
-# ═══════════════════════════════════════════════════════════
-# CRUD — OBTENIR PROFILS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CRUD â€” OBTENIR PROFILS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestObtenir:
-    """Tests des méthodes de lecture."""
+    """Tests des mÃ©thodes de lecture."""
 
     def test_obtenir_profils_vide(self, patch_db_context):
-        """Base vide → liste vide."""
+        """Base vide â†’ liste vide."""
         result = ProfilService.obtenir_profils()
         assert result == []
 
     def test_obtenir_profils_deux(self, db, deux_profils, patch_db_context):
-        """Deux profils insérés → liste de 2."""
+        """Deux profils insÃ©rÃ©s â†’ liste de 2."""
         result = ProfilService.obtenir_profils()
         assert len(result) == 2
         noms = {p.username for p in result}
         assert noms == {"anne", "mathieu"}
 
     def test_obtenir_profil_existant(self, db, profil_anne, patch_db_context):
-        """Récupérer un profil existant par username."""
+        """RÃ©cupÃ©rer un profil existant par username."""
         result = ProfilService.obtenir_profil("anne")
         assert result is not None
         assert result.username == "anne"
         assert result.display_name == "Anne"
 
     def test_obtenir_profil_inexistant(self, patch_db_context):
-        """Username inconnu → None."""
+        """Username inconnu â†’ None."""
         result = ProfilService.obtenir_profil("inconnu")
         assert result is None
 
     def test_obtenir_profil_par_id(self, db, profil_anne, patch_db_context):
-        """Récupérer un profil par ID."""
+        """RÃ©cupÃ©rer un profil par ID."""
         result = ProfilService.obtenir_profil_par_id(profil_anne.id)
         assert result is not None
         assert result.username == "anne"
 
     def test_obtenir_profil_par_id_inexistant(self, patch_db_context):
-        """ID inconnu → None."""
+        """ID inconnu â†’ None."""
         result = ProfilService.obtenir_profil_par_id(9999)
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
-# CRUD — MISE À JOUR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CRUD â€” MISE Ã€ JOUR
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestMettreAJour:
-    """Tests de mise à jour de profil."""
+    """Tests de mise Ã  jour de profil."""
 
     def test_mettre_a_jour_champs_basiques(self, db, profil_anne, patch_db_context):
-        """Mise à jour email et display_name."""
+        """Mise Ã  jour email et display_name."""
         result = ProfilService.mettre_a_jour_profil(
             "anne", {"email": "nouveau@test.com", "display_name": "Anne M."}
         )
@@ -242,20 +242,20 @@ class TestMettreAJour:
         assert result.display_name == "Anne M."
 
     def test_mettre_a_jour_theme(self, db, profil_anne, patch_db_context):
-        """Mise à jour du thème préféré."""
+        """Mise Ã  jour du thÃ¨me prÃ©fÃ©rÃ©."""
         result = ProfilService.mettre_a_jour_profil("anne", {"theme_prefere": "sombre"})
         assert result is not None
         assert result.theme_prefere == "sombre"
 
     def test_mettre_a_jour_preferences_modules(self, db, profil_anne, patch_db_context):
-        """Mise à jour des préférences modules."""
+        """Mise Ã  jour des prÃ©fÃ©rences modules."""
         prefs = {"cuisine": {"nb_suggestions_ia": 10}}
         result = ProfilService.mettre_a_jour_profil("anne", {"preferences_modules": prefs})
         assert result is not None
         assert result.preferences_modules["cuisine"]["nb_suggestions_ia"] == 10
 
     def test_mettre_a_jour_objectifs_fitness(self, db, profil_anne, patch_db_context):
-        """Mise à jour des objectifs fitness."""
+        """Mise Ã  jour des objectifs fitness."""
         result = ProfilService.mettre_a_jour_profil(
             "anne",
             {
@@ -270,7 +270,7 @@ class TestMettreAJour:
         assert result.objectif_minutes_actives == 60
 
     def test_mettre_a_jour_champ_interdit_ignore(self, db, profil_anne, patch_db_context):
-        """Les champs non autorisés sont ignorés silencieusement."""
+        """Les champs non autorisÃ©s sont ignorÃ©s silencieusement."""
         result = ProfilService.mettre_a_jour_profil(
             "anne", {"username": "hacker", "pin_hash": "fake"}
         )
@@ -280,14 +280,14 @@ class TestMettreAJour:
         assert result.pin_hash is None
 
     def test_mettre_a_jour_profil_inexistant(self, patch_db_context):
-        """Mise à jour d'un profil inexistant → None."""
+        """Mise Ã  jour d'un profil inexistant â†’ None."""
         result = ProfilService.mettre_a_jour_profil("inconnu", {"email": "x@x.com"})
         assert result is None
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CHANGEMENT DE PROFIL ACTIF
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestChangerProfil:
@@ -302,58 +302,58 @@ class TestChangerProfil:
         assert result is True
 
     def test_changer_profil_actif_inexistant(self, patch_db_context):
-        """Changement vers un profil inexistant → False."""
+        """Changement vers un profil inexistant â†’ False."""
         with patch("src.services.core.utilisateur.profils.ProfilService.obtenir_profil", return_value=None):
             result = ProfilService.changer_profil_actif("inconnu")
         assert result is False
 
 
-# ═══════════════════════════════════════════════════════════
-# PIN / SÉCURITÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# PIN / SÃ‰CURITÃ‰
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPIN:
     """Tests de gestion du PIN."""
 
     def test_definir_pin(self, db, profil_anne, patch_db_context):
-        """Définir un PIN sur un profil."""
+        """DÃ©finir un PIN sur un profil."""
         result = ProfilService.definir_pin("anne", "1234")
         assert result is True
-        # Vérifier en base
+        # VÃ©rifier en base
         db.refresh(profil_anne)
         assert profil_anne.pin_hash is not None
         assert profil_anne.pin_hash == _hasher_pin("1234")
 
     def test_definir_pin_profil_inexistant(self, patch_db_context):
-        """PIN sur profil inexistant → False."""
+        """PIN sur profil inexistant â†’ False."""
         result = ProfilService.definir_pin("inconnu", "1234")
         assert result is False
 
     def test_verifier_pin_correct(self, db, profil_anne, patch_db_context):
-        """Vérifier un PIN correct."""
+        """VÃ©rifier un PIN correct."""
         ProfilService.definir_pin("anne", "4567")
         result = ProfilService.verifier_pin("anne", "4567")
         assert result is True
 
     def test_verifier_pin_incorrect(self, db, profil_anne, patch_db_context):
-        """Vérifier un PIN incorrect."""
+        """VÃ©rifier un PIN incorrect."""
         ProfilService.definir_pin("anne", "4567")
         result = ProfilService.verifier_pin("anne", "9999")
         assert result is False
 
     def test_verifier_pin_absent(self, db, profil_anne, patch_db_context):
-        """Vérifier PIN quand aucun n'est défini → False."""
+        """VÃ©rifier PIN quand aucun n'est dÃ©fini â†’ False."""
         result = ProfilService.verifier_pin("anne", "1234")
         assert result is False
 
     def test_verifier_pin_profil_inexistant(self, patch_db_context):
-        """Vérifier PIN d'un profil inexistant → False."""
+        """VÃ©rifier PIN d'un profil inexistant â†’ False."""
         result = ProfilService.verifier_pin("inconnu", "1234")
         assert result is False
 
     def test_supprimer_pin(self, db, profil_anne, patch_db_context):
-        """Supprimer le PIN réinitialise pin_hash et sections."""
+        """Supprimer le PIN rÃ©initialise pin_hash et sections."""
         ProfilService.definir_pin("anne", "1234")
         ProfilService.definir_sections_protegees("anne", ["budget", "admin"])
 
@@ -365,49 +365,49 @@ class TestPIN:
         assert profil_anne.sections_protegees is None
 
     def test_supprimer_pin_profil_inexistant(self, patch_db_context):
-        """Supprimer PIN d'un profil inexistant → False."""
+        """Supprimer PIN d'un profil inexistant â†’ False."""
         result = ProfilService.supprimer_pin("inconnu")
         assert result is False
 
 
-# ═══════════════════════════════════════════════════════════
-# SECTIONS PROTÉGÉES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# SECTIONS PROTÃ‰GÃ‰ES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSectionsProtegees:
-    """Tests de la gestion des sections protégées."""
+    """Tests de la gestion des sections protÃ©gÃ©es."""
 
     def test_definir_sections(self, db, profil_anne, patch_db_context):
-        """Définir les sections protégées."""
+        """DÃ©finir les sections protÃ©gÃ©es."""
         result = ProfilService.definir_sections_protegees("anne", ["budget", "sante"])
         assert result is True
         db.refresh(profil_anne)
         assert profil_anne.sections_protegees == ["budget", "sante"]
 
     def test_definir_sections_vide(self, db, profil_anne, patch_db_context):
-        """Définir une liste vide de sections."""
+        """DÃ©finir une liste vide de sections."""
         result = ProfilService.definir_sections_protegees("anne", [])
         assert result is True
         db.refresh(profil_anne)
         assert profil_anne.sections_protegees == []
 
     def test_definir_sections_profil_inexistant(self, patch_db_context):
-        """Sections sur profil inexistant → False."""
+        """Sections sur profil inexistant â†’ False."""
         result = ProfilService.definir_sections_protegees("inconnu", ["admin"])
         assert result is False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # EXPORT / IMPORT
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExport:
     """Tests d'export de configuration."""
 
     def test_exporter_configuration_basique(self, db, profil_anne, patch_db_context):
-        """Export contient version, profil et santé."""
+        """Export contient version, profil et santÃ©."""
         export = ProfilService.exporter_configuration("anne")
         assert export["version"] == "1.0"
         assert "timestamp" in export
@@ -417,28 +417,28 @@ class TestExport:
         assert export["sante"]["poids_kg"] == 60.0
 
     def test_exporter_configuration_profil_inexistant(self, patch_db_context):
-        """Export d'un profil inexistant → dict vide."""
+        """Export d'un profil inexistant â†’ dict vide."""
         export = ProfilService.exporter_configuration("inconnu")
         assert export == {}
 
     def test_exporter_configuration_avec_notifications(
         self, db, profil_anne, notif_prefs, patch_db_context
     ):
-        """Export inclut les préférences de notification."""
+        """Export inclut les prÃ©fÃ©rences de notification."""
         export = ProfilService.exporter_configuration("anne")
         assert "notifications" in export
         assert export["notifications"]["canal_prefere"] == "push"
         assert export["notifications"]["courses_rappel"] is True
 
     def test_exporter_preferences_modules(self, db, profil_anne, patch_db_context):
-        """Export inclut les préférences par module."""
+        """Export inclut les prÃ©fÃ©rences par module."""
         export = ProfilService.exporter_configuration("anne")
         prefs = export["profil"]["preferences_modules"]
         assert "cuisine" in prefs
         assert prefs["cuisine"]["nb_suggestions_ia"] == 5
 
     def test_exporter_theme(self, db, profil_anne, patch_db_context):
-        """Export inclut le thème préféré."""
+        """Export inclut le thÃ¨me prÃ©fÃ©rÃ©."""
         export = ProfilService.exporter_configuration("anne")
         assert export["profil"]["theme_prefere"] == "auto"
 
@@ -451,9 +451,9 @@ class TestImport:
         data = {
             "version": "1.0",
             "profil": {
-                "display_name": "Anne Modifiée",
+                "display_name": "Anne ModifiÃ©e",
                 "email": "new@test.com",
-                "avatar_emoji": "🦸‍♀️",
+                "avatar_emoji": "ðŸ¦¸â€â™€ï¸",
                 "theme_prefere": "clair",
                 "preferences_modules": {"cuisine": {"nb_suggestions_ia": 8}},
             },
@@ -465,27 +465,27 @@ class TestImport:
         }
         ok, msg = ProfilService.importer_configuration("anne", data)
         assert ok is True
-        assert "succès" in msg.lower()
+        assert "succÃ¨s" in msg.lower()
 
         db.refresh(profil_anne)
-        assert profil_anne.display_name == "Anne Modifiée"
+        assert profil_anne.display_name == "Anne ModifiÃ©e"
         assert profil_anne.email == "new@test.com"
         assert profil_anne.taille_cm == 170
         assert profil_anne.objectif_pas_quotidien == 12000
 
     def test_importer_format_invalide_sans_version(self, db, profil_anne, patch_db_context):
-        """Import sans version → erreur."""
+        """Import sans version â†’ erreur."""
         ok, msg = ProfilService.importer_configuration("anne", {"profil": {}})
         assert ok is False
         assert "version" in msg.lower() or "invalide" in msg.lower()
 
     def test_importer_format_invalide_sans_profil(self, db, profil_anne, patch_db_context):
-        """Import sans clé profil → erreur."""
+        """Import sans clÃ© profil â†’ erreur."""
         ok, msg = ProfilService.importer_configuration("anne", {"version": "1.0"})
         assert ok is False
 
     def test_importer_profil_inexistant(self, patch_db_context):
-        """Import sur profil inexistant → erreur."""
+        """Import sur profil inexistant â†’ erreur."""
         data = {"version": "1.0", "profil": {"display_name": "X"}}
         ok, msg = ProfilService.importer_configuration("inconnu", data)
         assert ok is False
@@ -493,10 +493,10 @@ class TestImport:
 
 
 class TestExportImportRoundTrip:
-    """Tests aller-retour export → import."""
+    """Tests aller-retour export â†’ import."""
 
     def test_round_trip_preserves_data(self, db, profil_anne, notif_prefs, patch_db_context):
-        """Un export suivi d'un import préserve les données."""
+        """Un export suivi d'un import prÃ©serve les donnÃ©es."""
         # Modifier le profil
         ProfilService.mettre_a_jour_profil(
             "anne",
@@ -512,7 +512,7 @@ class TestExportImportRoundTrip:
         export = ProfilService.exporter_configuration("anne")
         assert export["profil"]["display_name"] == "Anne T."
 
-        # Réinitialiser le profil
+        # RÃ©initialiser le profil
         ProfilService.mettre_a_jour_profil(
             "anne",
             {
@@ -523,7 +523,7 @@ class TestExportImportRoundTrip:
             },
         )
 
-        # Ré-importer
+        # RÃ©-importer
         ok, _ = ProfilService.importer_configuration("anne", export)
         assert ok is True
 
@@ -534,16 +534,16 @@ class TestExportImportRoundTrip:
         assert profil_anne.preferences_modules["cuisine"]["nb_suggestions_ia"] == 12
 
 
-# ═══════════════════════════════════════════════════════════
-# RÉINITIALISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# RÃ‰INITIALISATION
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestReinitialiser:
-    """Tests de réinitialisation de section."""
+    """Tests de rÃ©initialisation de section."""
 
     def test_reinitialiser_preferences_modules(self, db, profil_anne, patch_db_context):
-        """Réinitialiser preferences_modules remet les valeurs par défaut."""
+        """RÃ©initialiser preferences_modules remet les valeurs par dÃ©faut."""
         # Modifier les prefs
         ProfilService.mettre_a_jour_profil(
             "anne", {"preferences_modules": {"cuisine": {"nb_suggestions_ia": 99}}}
@@ -551,13 +551,13 @@ class TestReinitialiser:
 
         ok, msg = ProfilService.reinitialiser_section("anne", "preferences_modules")
         assert ok is True
-        assert "réinitialisées" in msg.lower()
+        assert "rÃ©initialisÃ©es" in msg.lower()
 
         db.refresh(profil_anne)
         assert profil_anne.preferences_modules == PREFERENCES_MODULES_DEFAUT
 
     def test_reinitialiser_securite(self, db, profil_anne, patch_db_context):
-        """Réinitialiser securite supprime le PIN."""
+        """RÃ©initialiser securite supprime le PIN."""
         ProfilService.definir_pin("anne", "1234")
         ok, msg = ProfilService.reinitialiser_section("anne", "securite")
         assert ok is True
@@ -565,24 +565,24 @@ class TestReinitialiser:
         assert profil_anne.pin_hash is None
 
     def test_reinitialiser_notifications(self, db, profil_anne, patch_db_context):
-        """Réinitialiser notifications retourne True."""
+        """RÃ©initialiser notifications retourne True."""
         ok, msg = ProfilService.reinitialiser_section("anne", "notifications")
         assert ok is True
 
     def test_reinitialiser_section_inconnue(self, patch_db_context):
-        """Section inconnue → False."""
+        """Section inconnue â†’ False."""
         ok, msg = ProfilService.reinitialiser_section("anne", "inconnu")
         assert ok is False
         assert "inconnue" in msg.lower()
 
 
-# ═══════════════════════════════════════════════════════════
-# SCHÉMAS PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# SCHÃ‰MAS PYDANTIC
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestSchemasPydantic:
-    """Tests des schémas de validation Pydantic."""
+    """Tests des schÃ©mas de validation Pydantic."""
 
     def test_schema_pin_valide(self):
         from src.core.validation.schemas.profils import SchemaPIN
@@ -649,7 +649,7 @@ class TestSchemasPydantic:
         with pytest.raises(Exception):
             SchemaImportConfiguration(
                 version="1.0",
-                profil={"display_name": "Test"},  # données mais pas de username
+                profil={"display_name": "Test"},  # donnÃ©es mais pas de username
             )
 
     def test_schema_import_configuration_version_invalide(self):
@@ -660,3 +660,4 @@ class TestSchemasPydantic:
                 version="2.0",
                 profil={"username": "anne"},
             )
+

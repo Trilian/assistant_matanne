@@ -1,11 +1,11 @@
-"""
+﻿"""
 Tests pour src/services/multimodal.py
 
 Tests pour MultiModalAIService:
 - Factory singleton
-- Structure des schémas Pydantic (validation des types de données)
+- Structure des schÃ©mas Pydantic (validation des types de donnÃ©es)
 
-Note: Les tests d'IA réels (analyse d'images) nécessitent des clés API actives
+Note: Les tests d'IA rÃ©els (analyse d'images) nÃ©cessitent des clÃ©s API actives
 et sont exclus des tests unitaires. Focus sur la structure et la validation.
 """
 
@@ -18,13 +18,13 @@ from src.services.integrations.multimodal import (
     LigneFacture,
     MultiModalAIService,
     RecetteExtraite,
-    get_multimodal_service,
+    obtenir_multimodal_service,
 )
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -33,16 +33,16 @@ def service():
     return MultiModalAIService()
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 def test_get_multimodal_service_singleton():
-    """Vérifie que la factory retourne un singleton."""
-    service1 = get_multimodal_service()
-    service2 = get_multimodal_service()
+    """VÃ©rifie que la factory retourne un singleton."""
+    service1 = obtenir_multimodal_service()
+    service2 = obtenir_multimodal_service()
     
     assert isinstance(service1, MultiModalAIService)
     assert service1 is service2  # Singleton via @service_factory
@@ -56,14 +56,14 @@ def test_multimodal_service_initialization(service):
     assert service.cache_prefix == "multimodal"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SCHEMAS PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
 def test_ingredient_extrait_schema():
-    """Test du schéma IngredientExtrait."""
+    """Test du schÃ©ma IngredientExtrait."""
     ingredient = IngredientExtrait(
         nom="Tomate",
         quantite="200",
@@ -79,25 +79,25 @@ def test_ingredient_extrait_schema():
 
 @pytest.mark.unit
 def test_ingredient_extrait_defaults():
-    """Test des valeurs par défaut du schéma IngredientExtrait."""
+    """Test des valeurs par dÃ©faut du schÃ©ma IngredientExtrait."""
     ingredient = IngredientExtrait(nom="Sel")
     
     assert ingredient.nom == "Sel"
     assert ingredient.quantite is None
     assert ingredient.unite is None
-    assert ingredient.confiance == 0.8  # Valeur par défaut
+    assert ingredient.confiance == 0.8  # Valeur par dÃ©faut
 
 
 @pytest.mark.unit
 def test_recette_extraite_schema():
-    """Test du schéma RecetteExtraite."""
+    """Test du schÃ©ma RecetteExtraite."""
     recette = RecetteExtraite(
         nom="Tarte aux pommes",
         ingredients=[
-            IngredientExtrait(nom="Pommes", quantite="3", unite="unités"),
+            IngredientExtrait(nom="Pommes", quantite="3", unite="unitÃ©s"),
             IngredientExtrait(nom="Sucre", quantite="100", unite="g"),
         ],
-        etapes=["Éplucher les pommes", "Préparer la pâte"],
+        etapes=["Ã‰plucher les pommes", "PrÃ©parer la pÃ¢te"],
         temps_preparation="20 min",
         difficulte="facile",
         categorie="dessert"
@@ -112,7 +112,7 @@ def test_recette_extraite_schema():
 
 @pytest.mark.unit
 def test_recette_extraite_defaults():
-    """Test des valeurs par défaut du schéma RecetteExtraite."""
+    """Test des valeurs par dÃ©faut du schÃ©ma RecetteExtraite."""
     recette = RecetteExtraite()
     
     assert recette.nom == "Recette sans nom"
@@ -123,7 +123,7 @@ def test_recette_extraite_defaults():
 
 @pytest.mark.unit
 def test_ligne_facture_schema():
-    """Test du schéma LigneFacture."""
+    """Test du schÃ©ma LigneFacture."""
     ligne = LigneFacture(
         description="Pain complet",
         quantite=2,
@@ -139,7 +139,7 @@ def test_ligne_facture_schema():
 
 @pytest.mark.unit
 def test_facture_extraite_schema():
-    """Test du schéma FactureExtraite."""
+    """Test du schÃ©ma FactureExtraite."""
     facture = FactureExtraite(
         magasin="Carrefour",
         date="01/01/2024",
@@ -158,7 +158,7 @@ def test_facture_extraite_schema():
 
 @pytest.mark.unit
 def test_facture_extraite_defaults():
-    """Test des valeurs par défaut du schéma FactureExtraite."""
+    """Test des valeurs par dÃ©faut du schÃ©ma FactureExtraite."""
     facture = FactureExtraite()
     
     assert facture.magasin is None
@@ -168,9 +168,9 @@ def test_facture_extraite_defaults():
 
 @pytest.mark.unit
 def test_analyse_nutritionnelle_schema():
-    """Test du schéma AnalyseNutritionnelle."""
+    """Test du schÃ©ma AnalyseNutritionnelle."""
     analyse = AnalyseNutritionnelle(
-        description="Salade César",
+        description="Salade CÃ©sar",
         calories_estimees=350,
         proteines_g=25.0,
         glucides_g=15.0,
@@ -178,36 +178,36 @@ def test_analyse_nutritionnelle_schema():
         fibres_g=5.0,
         portion_estimee="300g",
         ingredients_detectes=["Poulet", "Laitue", "Parmesan"],
-        equilibre="Bien équilibré",
-        conseils=["Réduire la sauce", "Ajouter des légumes"]
+        equilibre="Bien Ã©quilibrÃ©",
+        conseils=["RÃ©duire la sauce", "Ajouter des lÃ©gumes"]
     )
     
-    assert analyse.description == "Salade César"
+    assert analyse.description == "Salade CÃ©sar"
     assert analyse.calories_estimees == 350
     assert analyse.proteines_g == 25.0
     assert analyse.glucides_g == 15.0
     assert analyse.lipides_g == 20.0
     assert analyse.fibres_g == 5.0
     assert len(analyse.ingredients_detectes) == 3
-    assert analyse.equilibre == "Bien équilibré"
+    assert analyse.equilibre == "Bien Ã©quilibrÃ©"
     assert len(analyse.conseils) == 2
 
 
 @pytest.mark.unit
 def test_analyse_nutritionnelle_defaults():
-    """Test des valeurs par défaut du schéma AnalyseNutritionnelle."""
-    analyse = AnalyseNutritionnelle(description="Plat mystère")
+    """Test des valeurs par dÃ©faut du schÃ©ma AnalyseNutritionnelle."""
+    analyse = AnalyseNutritionnelle(description="Plat mystÃ¨re")
     
-    assert analyse.description == "Plat mystère"
+    assert analyse.description == "Plat mystÃ¨re"
     assert analyse.calories_estimees == 0
     assert analyse.proteines_g is None
     assert analyse.ingredients_detectes == []
     assert analyse.conseils == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VALIDATION PYDANTIC
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.mark.unit
@@ -219,9 +219,10 @@ def test_ingredient_confiance_range_validation():
     ingredient = IngredientExtrait(nom="Sel", confiance=0.5)
     assert 0 <= ingredient.confiance <= 1
     
-    # Confiance invalide (hors limites) — Pydantic devrait lever une erreur
+    # Confiance invalide (hors limites) â€” Pydantic devrait lever une erreur
     with pytest.raises(ValidationError):
         IngredientExtrait(nom="Sel", confiance=1.5)
     
     with pytest.raises(ValidationError):
         IngredientExtrait(nom="Sel", confiance=-0.1)
+

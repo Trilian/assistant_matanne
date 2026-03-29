@@ -363,6 +363,10 @@ class ProfilService:
 
 
 @service_factory("profil", tags={"utilisateur", "config"})
-def get_profil_service() -> ProfilService:
+def obtenir_profil_service() -> ProfilService:
     """Factory singleton pour ProfilService."""
     return ProfilService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_profil_service = obtenir_profil_service  # alias rétrocompatibilité Sprint 12 A3

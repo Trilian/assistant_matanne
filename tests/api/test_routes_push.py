@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/api/routes/push.py
 
 Tests unitaires pour les endpoints de notifications push.
@@ -9,14 +9,14 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
 def mock_current_user():
-    """Mock pour l'utilisateur authentifié."""
+    """Mock pour l'utilisateur authentifiÃ©."""
     return {
         "user_id": "user_123",
         "email": "test@example.com",
@@ -26,7 +26,7 @@ def mock_current_user():
 
 @pytest.fixture
 def mock_subscription_info():
-    """Données d'abonnement push type."""
+    """DonnÃ©es d'abonnement push type."""
     return {
         "endpoint": "https://fcm.googleapis.com/fcm/send/abc123",
         "keys": {
@@ -49,16 +49,16 @@ def mock_push_service():
     return service
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SCHEMAS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPushSchemas:
-    """Tests de validation des schémas."""
+    """Tests de validation des schÃ©mas."""
 
     def test_push_subscription_request_valid(self):
-        """Test que le schéma accepte des données valides."""
+        """Test que le schÃ©ma accepte des donnÃ©es valides."""
         from src.api.routes.push import PushSubscriptionRequest
 
         data = {
@@ -75,7 +75,7 @@ class TestPushSchemas:
         assert request.keys.auth == data["keys"]["auth"]
 
     def test_push_subscription_request_missing_keys(self):
-        """Test que le schéma rejette les données sans clés."""
+        """Test que le schÃ©ma rejette les donnÃ©es sans clÃ©s."""
         from pydantic import ValidationError
 
         from src.api.routes.push import PushSubscriptionRequest
@@ -91,7 +91,7 @@ class TestPushSchemas:
 class TestPushSubscribe:
     """Tests pour POST /api/v1/push/subscribe."""
 
-    @patch("src.services.core.notifications.notif_web_core.get_push_notification_service")
+    @patch("src.services.core.notifications.notif_web_core.obtenir_push_notification_service")
     @patch("src.api.dependencies.get_current_user")
     def test_subscribe_success(
         self,
@@ -101,7 +101,7 @@ class TestPushSubscribe:
         mock_subscription_info,
         mock_push_service,
     ):
-        """Test l'enregistrement réussi d'un abonnement."""
+        """Test l'enregistrement rÃ©ussi d'un abonnement."""
         from src.api.main import app
 
         mock_get_user.return_value = mock_current_user
@@ -114,7 +114,7 @@ class TestPushSubscribe:
 
         response = client.post("/api/v1/push/subscribe", json=mock_subscription_info)
 
-        # Peut échouer si l'auth réelle est requise ou le service interne échoue
+        # Peut Ã©chouer si l'auth rÃ©elle est requise ou le service interne Ã©choue
         assert response.status_code in [200, 401, 403, 500]
 
 
@@ -122,7 +122,7 @@ class TestPushStatus:
     """Tests pour GET /api/v1/push/status."""
 
     def test_status_response_model(self):
-        """Test la structure de la réponse."""
+        """Test la structure de la rÃ©ponse."""
         from src.api.routes.push import PushStatusResponse
 
         response = PushStatusResponse(
@@ -140,14 +140,14 @@ class TestPushRouterExports:
     """Tests des exports du module."""
 
     def test_router_exists(self):
-        """Test que le router est exporté."""
+        """Test que le router est exportÃ©."""
         from src.api.routes.push import router
 
         assert router is not None
         assert hasattr(router, "routes")
 
     def test_routes_registered(self):
-        """Test que les routes sont enregistrées."""
+        """Test que les routes sont enregistrÃ©es."""
         from src.api.routes.push import router
 
         paths = [r.path for r in router.routes]
@@ -156,7 +156,7 @@ class TestPushRouterExports:
         assert "/api/v1/push/status" in paths
 
     def test_router_in_package_exports(self):
-        """Test que le router est exporté depuis le package."""
+        """Test que le router est exportÃ© depuis le package."""
         from src.api.routes import push_router
 
         assert push_router is not None
@@ -168,3 +168,4 @@ class TestPushRouterExports:
         paths = [r.path for r in app.routes if hasattr(r, "path")]
         push_paths = [p for p in paths if "push" in p]
         assert len(push_paths) >= 3
+

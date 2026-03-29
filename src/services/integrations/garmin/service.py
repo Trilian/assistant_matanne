@@ -531,7 +531,7 @@ def obtenir_service_garmin() -> ServiceGarmin:
 
 
 @service_factory("garmin", tags={"integrations", "garmin"})
-def get_garmin_service() -> ServiceGarmin:
+def obtenir_garmin_service() -> ServiceGarmin:
     """Factory pour obtenir le service Garmin (alias anglais)"""
     return ServiceGarmin()
 
@@ -577,3 +577,7 @@ def get_user_by_username(username: str, db: Session = None) -> ProfilUtilisateur
 def list_all_users(db: Session = None) -> list[ProfilUtilisateur]:
     """Liste tous les utilisateurs"""
     return db.query(ProfilUtilisateur).all()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_garmin_service = obtenir_garmin_service  # alias rétrocompatibilité Sprint 12 A3

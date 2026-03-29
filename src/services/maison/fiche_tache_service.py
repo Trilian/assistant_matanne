@@ -313,7 +313,7 @@ Format JSON:
 
 
 @service_factory("fiche_tache", tags={"maison"})
-def get_fiche_tache_service(client: ClientIA | None = None) -> FicheTacheService:
+def obtenir_fiche_tache_service(client: ClientIA | None = None) -> FicheTacheService:
     """Factory singleton pour le service fiches tâches."""
     return FicheTacheService(client=client)
 
@@ -321,3 +321,7 @@ def get_fiche_tache_service(client: ClientIA | None = None) -> FicheTacheService
 def obtenir_service_fiche_tache(client: ClientIA | None = None) -> FicheTacheService:
     """Alias français."""
     return get_fiche_tache_service(client)
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_fiche_tache_service = obtenir_fiche_tache_service  # alias rétrocompatibilité Sprint 12 A3

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Routes pour les notifications push.
 
 Endpoints:
@@ -31,29 +31,29 @@ router = APIRouter(
 )
 
 
-# ═══════════════════════════════════════════════════════════
-# CLÉS VAPID
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CLÃ‰S VAPID
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.get(
     "/vapid-public-key",
-    summary="Clé publique VAPID",
-    description="Retourne la clé publique VAPID pour l'abonnement Web Push côté frontend.",
+    summary="ClÃ© publique VAPID",
+    description="Retourne la clÃ© publique VAPID pour l'abonnement Web Push cÃ´tÃ© frontend.",
 )
 async def obtenir_cle_vapid_publique():
-    """Retourne la clé publique VAPID pour l'abonnement push navigateur.
+    """Retourne la clÃ© publique VAPID pour l'abonnement push navigateur.
 
-    Le frontend doit utiliser cette clé pour le `applicationServerKey`
-    lors de l'appel à `pushManager.subscribe()`.
+    Le frontend doit utiliser cette clÃ© pour le `applicationServerKey`
+    lors de l'appel Ã  `pushManager.subscribe()`.
     """
     from src.services.core.notifications.types import VAPID_PUBLIC_KEY
     return {"public_key": VAPID_PUBLIC_KEY}
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ENDPOINTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @router.post(
@@ -69,14 +69,14 @@ async def souscrire_push(
     current_user: dict = Depends(require_auth),
 ):
     """
-    Enregistre un abonnement push pour l'utilisateur authentifié.
+    Enregistre un abonnement push pour l'utilisateur authentifiÃ©.
 
     Le frontend doit envoyer l'objet AbonnementPush.toJSON() obtenu
-    après navigator.serviceWorker.pushManager.subscribe().
+    aprÃ¨s navigator.serviceWorker.pushManager.subscribe().
     """
-    from src.services.core.notifications.notif_web_core import get_push_notification_service
+    from src.services.core.notifications.notif_web_core import obtenir_push_notification_service
 
-    service = get_push_notification_service()
+    service = obtenir_push_notification_service()
 
     subscription_info = {
         "endpoint": request.endpoint,
@@ -89,11 +89,11 @@ async def souscrire_push(
     user_id = current_user["id"]
     subscription = service.sauvegarder_abonnement(user_id, subscription_info)
 
-    logger.info(f"✅ Abonnement push enregistré pour {user_id}")
+    logger.info(f"âœ… Abonnement push enregistrÃ© pour {user_id}")
 
     return PushSubscriptionResponse(
         success=True,
-        message="Abonnement push enregistré avec succès",
+        message="Abonnement push enregistrÃ© avec succÃ¨s",
         user_id=user_id,
         endpoint=subscription.endpoint,
     )
@@ -112,20 +112,20 @@ async def desabonner_push(
     current_user: dict = Depends(require_auth),
 ):
     """
-    Supprime un abonnement push pour l'utilisateur authentifié.
+    Supprime un abonnement push pour l'utilisateur authentifiÃ©.
     """
-    from src.services.core.notifications.notif_web_core import get_push_notification_service
+    from src.services.core.notifications.notif_web_core import obtenir_push_notification_service
 
-    service = get_push_notification_service()
+    service = obtenir_push_notification_service()
     user_id = current_user["id"]
 
     service.supprimer_abonnement(user_id, request.endpoint)
 
-    logger.info(f"Abonnement push supprimé pour {user_id}")
+    logger.info(f"Abonnement push supprimÃ© pour {user_id}")
 
     return PushSubscriptionResponse(
         success=True,
-        message="Abonnement push supprimé",
+        message="Abonnement push supprimÃ©",
         user_id=user_id,
         endpoint=request.endpoint,
     )
@@ -143,11 +143,11 @@ async def obtenir_statut_push(
     current_user: dict = Depends(require_auth),
 ):
     """
-    Retourne le statut des notifications push pour l'utilisateur authentifié.
+    Retourne le statut des notifications push pour l'utilisateur authentifiÃ©.
     """
-    from src.services.core.notifications.notif_web_core import get_push_notification_service
+    from src.services.core.notifications.notif_web_core import obtenir_push_notification_service
 
-    service = get_push_notification_service()
+    service = obtenir_push_notification_service()
     user_id = current_user["id"]
 
     subscriptions = service.obtenir_abonnements_utilisateur(user_id)
@@ -163,22 +163,22 @@ async def obtenir_statut_push(
 @router.get(
     "/rappels/evaluer",
     responses=REPONSES_AUTH,
-    summary="Évaluer les rappels intelligents",
+    summary="Ã‰valuer les rappels intelligents",
     description=(
-        "Analyse les données de l'application et retourne les rappels "
-        "contextuels actifs : garanties expirant bientôt, stocks bas, "
-        "tâches d'entretien en retard."
+        "Analyse les donnÃ©es de l'application et retourne les rappels "
+        "contextuels actifs : garanties expirant bientÃ´t, stocks bas, "
+        "tÃ¢ches d'entretien en retard."
     ),
 )
 @gerer_exception_api
 async def evaluer_rappels(
     current_user: dict = Depends(require_auth),
 ):
-    """Retourne la liste consolidée des rappels intelligents."""
-    from src.services.core.rappels_intelligents import get_rappels_intelligents_service
+    """Retourne la liste consolidÃ©e des rappels intelligents."""
+    from src.services.core.rappels_intelligents import obtenir_rappels_intelligents_service
     from src.api.utils import executer_async
 
-    service = get_rappels_intelligents_service()
+    service = obtenir_rappels_intelligents_service()
 
     rappels = await executer_async(service.evaluer_rappels)
 
@@ -188,11 +188,11 @@ async def evaluer_rappels(
 @router.post(
     "/notifier-metier",
     responses=REPONSES_AUTH,
-    summary="Déclencher une notification push métier",
+    summary="DÃ©clencher une notification push mÃ©tier",
     description=(
-        "Envoie une notification push Web Push à l'utilisateur authentifié "
-        "depuis un événement métier (famille, jeux, maison). "
-        "Utile pour les tests manuels et les déclenchements depuis des cron jobs."
+        "Envoie une notification push Web Push Ã  l'utilisateur authentifiÃ© "
+        "depuis un Ã©vÃ©nement mÃ©tier (famille, jeux, maison). "
+        "Utile pour les tests manuels et les dÃ©clenchements depuis des cron jobs."
     ),
 )
 @gerer_exception_api
@@ -202,23 +202,23 @@ async def notifier_metier(
     titre: str = Body(..., description="Titre de la notification"),
     message: str = Body(..., description="Corps de la notification"),
     url: str = Body("/", description="URL de redirection"),
-    dry_run: bool = Body(False, description="Si True, vérifie sans envoyer"),
-    donnees: dict[str, Any] = Body(default_factory=dict, description="Données optionnelles selon le type"),
+    dry_run: bool = Body(False, description="Si True, vÃ©rifie sans envoyer"),
+    donnees: dict[str, Any] = Body(default_factory=dict, description="DonnÃ©es optionnelles selon le type"),
     current_user: dict = Depends(require_auth),
 ):
-    """Déclenche une notification push métier vers l'utilisateur authentifié.
+    """DÃ©clenche une notification push mÃ©tier vers l'utilisateur authentifiÃ©.
 
-    Modules supportés:
-    - famille / rappel → notifier_rappel_famille
-    - jeux / serie_defaites → notifier_alerte_serie_jeux
-    - maison / alerte_predictive → notifier_alerte_predictive_maison
-    - tout module / message générique si type inconnu
+    Modules supportÃ©s:
+    - famille / rappel â†’ notifier_rappel_famille
+    - jeux / serie_defaites â†’ notifier_alerte_serie_jeux
+    - maison / alerte_predictive â†’ notifier_alerte_predictive_maison
+    - tout module / message gÃ©nÃ©rique si type inconnu
     """
     from src.api.utils import executer_async
-    from src.services.core.notifications.notif_web_core import get_push_notification_service
+    from src.services.core.notifications.notif_web_core import obtenir_push_notification_service
 
     user_id = current_user["id"]
-    service = get_push_notification_service()
+    service = obtenir_push_notification_service()
 
     if dry_run:
         subscriptions = service.obtenir_abonnements_utilisateur(user_id)
@@ -240,7 +240,7 @@ async def notifier_metier(
             return service.notifier_alerte_serie_jeux(user_id, nb, mise_max)
         if module == "maison" or type_evenement == "alerte_predictive":
             return service.notifier_alerte_predictive_maison(user_id, titre, message, url)
-        # Fallback générique
+        # Fallback gÃ©nÃ©rique
         from src.services.core.notifications.types import NotificationPush, TypeNotification
         notif = NotificationPush(
             title=titre,
@@ -253,12 +253,13 @@ async def notifier_metier(
 
     envoye = await executer_async(_envoyer)
 
-    logger.info(f"Notification métier {'envoyée' if envoye else 'ignorée (préférences)'} → {user_id} [{module}/{type_evenement}]")
+    logger.info(f"Notification mÃ©tier {'envoyÃ©e' if envoye else 'ignorÃ©e (prÃ©fÃ©rences)'} â†’ {user_id} [{module}/{type_evenement}]")
 
     return {
         "success": bool(envoye),
         "user_id": user_id,
         "module": module,
         "type_evenement": type_evenement,
-        "message": "Notification envoyée" if envoye else "Ignorée (préférences ou pas d'abonnement)",
+        "message": "Notification envoyÃ©e" if envoye else "IgnorÃ©e (prÃ©fÃ©rences ou pas d'abonnement)",
     }
+

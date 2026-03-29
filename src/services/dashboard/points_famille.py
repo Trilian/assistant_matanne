@@ -165,5 +165,9 @@ class PointsFamilleService:
 
 
 @service_factory("points_famille", tags={"dashboard", "gamification", "famille"})
-def get_points_famille_service() -> PointsFamilleService:
+def obtenir_points_famille_service() -> PointsFamilleService:
     return PointsFamilleService()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_points_famille_service = obtenir_points_famille_service  # alias rétrocompatibilité Sprint 12 A3

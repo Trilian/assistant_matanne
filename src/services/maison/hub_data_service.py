@@ -77,7 +77,7 @@ class HubDataService:
 
 
 @service_factory("hub_data", tags={"maison", "data"})
-def get_hub_data_service() -> HubDataService:
+def obtenir_hub_data_service() -> HubDataService:
     """Factory singleton pour le service hub data."""
     return HubDataService()
 
@@ -85,3 +85,7 @@ def get_hub_data_service() -> HubDataService:
 def obtenir_service_hub_data() -> HubDataService:
     """Alias français pour get_hub_data_service."""
     return get_hub_data_service()
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_hub_data_service = obtenir_hub_data_service  # alias rétrocompatibilité Sprint 12 A3

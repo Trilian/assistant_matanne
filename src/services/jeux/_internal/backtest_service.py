@@ -518,7 +518,7 @@ class BacktestService:
 
 
 @service_factory("backtest", tags={"jeux", "ia", "backtest"})
-def get_backtest_service() -> BacktestService:
+def obtenir_backtest_service() -> BacktestService:
     """Factory singleton pour le service de backtesting."""
     return BacktestService()
 
@@ -543,3 +543,7 @@ __all__ = [
     "obtenir_service_backtest",
     "get_backtest_service",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_backtest_service = obtenir_backtest_service  # alias rétrocompatibilité Sprint 12 A3

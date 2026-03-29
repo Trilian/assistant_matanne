@@ -523,7 +523,7 @@ def obtenir_service_synchronisation_temps_reel() -> RealtimeSyncService:
     return RealtimeSyncService()
 
 
-def get_realtime_sync_service() -> RealtimeSyncService:
+def obtenir_realtime_sync_service() -> RealtimeSyncService:
     """Factory pour le service de synchronisation (alias anglais)."""
     return obtenir_service_synchronisation_temps_reel()
 
@@ -536,3 +536,7 @@ __all__ = [
     "SyncEventType",
     "PresenceInfo",
 ]
+
+
+# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
+get_realtime_sync_service = obtenir_realtime_sync_service  # alias rétrocompatibilité Sprint 12 A3
