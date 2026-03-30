@@ -33,9 +33,10 @@ import type { Recette } from "@/types/recettes";
 
 interface PropsFormulaireRecette {
   recetteExistante?: Recette;
+  modeSimple?: boolean;
 }
 
-export function FormulaireRecette({ recetteExistante }: PropsFormulaireRecette) {
+export function FormulaireRecette({ recetteExistante, modeSimple = false }: PropsFormulaireRecette) {
   const router = useRouter();
   const invalider = utiliserInvalidation();
   const estEdition = !!recetteExistante;
@@ -115,47 +116,115 @@ export function FormulaireRecette({ recetteExistante }: PropsFormulaireRecette) 
         {estEdition ? "✏️ Modifier la recette" : "➕ Nouvelle recette"}
       </h1>
 
-      {!estEdition && (
+      {/* Mode simplifié (4.4) — juste nom + photo */}
+      {modeSimple && !estEdition ? (
         <Card>
-          <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-medium">Générer depuis une photo</p>
-              <p className="text-sm text-muted-foreground">
-                Importez une photo de plat ou de recette et laissez l'IA créer une première version.
-              </p>
-            </div>
-            <>
-              <input
-                ref={inputPhotoRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                aria-label="Choisir une photo pour générer une recette"
-                title="Choisir une photo pour générer une recette"
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) genererPhoto(file);
-                  event.target.value = "";
-                }}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                disabled={generationPhotoEnCours}
-                onClick={() => inputPhotoRef.current?.click()}
+          <CardHeader>
+            <CardTitle className="text-lg">Créer rapidement</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <form
+              onSubmit={handleSubmit((data) => sauvegarder(data))}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="nom-simple">Nom de la recette *</Label>
+                <Input 
+                  id="nom-simple"
+                  {...register("nom")} 
+                  placeholder="Ex: Gratin dauphinois"
+                  className="text-lg"
+                />
+                {errors.nom && (
+                  <p className="text-sm text-destructive">{errors.nom.message}</p>
+                )}
+              </div>
+              
+              <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                <input
+                  ref={inputPhotoRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  aria-label="Choisir une photo pour générer une recette"
+                  title="Choisir une photo pour générer une recette"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) genererPhoto(file);
+                    event.target.value = "";
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  disabled={generationPhotoEnCours}
+                  onClick={() => inputPhotoRef.current?.click()}
+                  className="w-full"
+                >
+                  <Camera className="mr-2 h-5 w-5" />
+                  {generationPhotoEnCours ? "Analyse photo..." : "Ajouter une photo du plat"}
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2">
+                  L'IA générera les détails automatiquement
+                </p>
+              </div>
+
+              <Button 
+                type="submit" 
+                size="lg"
+                disabled={isPending}
+                className="w-full"
               >
-                <Camera className="mr-2 h-4 w-4" />
-                {generationPhotoEnCours ? "Analyse photo..." : "Générer depuis une photo"}
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Créer
               </Button>
-            </>
+            </form>
           </CardContent>
         </Card>
-      )}
+      ) : (
+        <>
+          {!estEdition && (
+            <Card>
+              <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-medium">Générer depuis une photo</p>
+                  <p className="text-sm text-muted-foreground">
+                    Importez une photo de plat ou de recette et laissez l'IA créer une première version.
+                  </p>
+                </div>
+                <>
+                  <input
+                    ref={inputPhotoRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    aria-label="Choisir une photo pour générer une recette"
+                    title="Choisir une photo pour générer une recette"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) genererPhoto(file);
+                      event.target.value = "";
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={generationPhotoEnCours}
+                    onClick={() => inputPhotoRef.current?.click()}
+                  >
+                    <Camera className="mr-2 h-4 w-4" />
+                    {generationPhotoEnCours ? "Analyse photo..." : "Générer depuis une photo"}
+                  </Button>
+                </>
+              </CardContent>
+            </Card>
+          )}
 
-      <form
-        onSubmit={handleSubmit((data) => sauvegarder(data))}
-        className="space-y-6"
-      >
+          <form
+            onSubmit={handleSubmit((data) => sauvegarder(data))}
+            className="space-y-6"
+          >
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Infos principales */}
           <Card className="lg:col-span-2">
@@ -347,7 +416,9 @@ export function FormulaireRecette({ recetteExistante }: PropsFormulaireRecette) 
             {estEdition ? "Enregistrer" : "Créer la recette"}
           </Button>
         </div>
-      </form>
+        </form>
+        </>
+      )}
     </div>
   );
 }

@@ -70,3 +70,45 @@ Le module expose aussi un format structuré `RegleAutomationIA` pour les répons
 - pas de rollback
 
 Ces limites sont déjà prévues dans le planning d'extension.
+
+---
+
+## Statut CRON et exécution
+
+Le moteur d'automations est orchestré par le scheduler global de l'application.
+
+Statut actuel:
+
+- jobs planifiés: 38+ au niveau plateforme
+- job automation dédié: `automations_runner`
+- fréquence recommandée: 5 minutes
+
+Points de contrôle opérationnels:
+
+- visibilité des exécutions via routes admin jobs
+- logs de dernière exécution consultables
+- relance manuelle possible pour diagnostic
+
+---
+
+## Extension prévue
+
+Déclencheurs supplémentaires ciblés:
+
+- `document_expirant`
+- `peremption_proche`
+- `routine_en_retard`
+- `seuil_budget_depasse`
+
+Actions supplémentaires ciblées:
+
+- `creer_tache_planning`
+- `envoyer_email`
+- `envoyer_whatsapp`
+- `declencher_webhook`
+
+Améliorations structurelles prévues:
+
+- historique persistant des exécutions
+- mode dry-run
+- meilleure observabilité des erreurs par règle

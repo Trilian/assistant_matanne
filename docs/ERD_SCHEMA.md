@@ -845,3 +845,30 @@ erDiagram
 | **Notifications** | 4       | 1         |
 | **Jeux**          | 7       | 4         |
 | **Total**         | **58**  | **31**    |
+
+---
+
+## Addendum Phase 3
+
+Cette section synthétise les ajouts de périmètre issus de la phase 3 du planning.
+
+### Habitat
+
+- `PlanHabitat` : plan importé, référence visuelle, rattachement scénario.
+- `PieceHabitat` : segmentation des pièces (nom, type, surface, position).
+- `ModificationPlanHabitat` : variantes proposées et transformations IA.
+- `ProjetDecoHabitat` : projets déco par pièce et budget prévisionnel.
+- `CritereScenarioHabitat` : pondération multicritère pour comparaison de scénarios.
+
+### Garmin / santé
+
+- `GarminToken` : credentials OAuth1 liés au profil utilisateur.
+- `ActiviteGarmin` : activités synchronisées (distance, durée, calories).
+- `ResumeQuotidienGarmin` : pas, calories, sommeil agrégés par jour.
+
+### Gamification
+
+- `PointsUtilisateur` : snapshot hebdomadaire sport/alimentation/anti-gaspi.
+- `BadgeUtilisateur` : badges calculés à partir des règles de points.
+
+Note: les noms exacts de colonnes et contraintes restent pilotés par les modèles SQLAlchemy et `sql/INIT_COMPLET.sql`.

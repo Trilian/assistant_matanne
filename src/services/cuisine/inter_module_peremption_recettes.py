@@ -9,6 +9,8 @@ import logging
 from datetime import date, timedelta
 from typing import Any
 
+from sqlalchemy.orm import Session
+
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.services.core.registry import service_factory
 
@@ -21,7 +23,11 @@ class PeremptionRecettesInteractionService:
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
     def suggerer_recettes_peremption(
-        self, *, jours_seuil: int = 2, limite: int = 5, db=None
+        self,
+        *,
+        jours_seuil: int = 2,
+        limite: int = 5,
+        db: Session | None = None,
     ) -> dict[str, Any]:
         """Récupère les produits expirant bientôt et suggère des recettes.
 
@@ -33,7 +39,14 @@ class PeremptionRecettesInteractionService:
         Returns:
             Dict avec produits_expirants, recettes_suggerees, message
         """
-        from src.core.models import ArticleInventaire, Recette
+        from src.core.models import ArticleInventaire
+
+        if db is None:
+            return {
+                "produits_expirants": [],
+                "recettes_suggerees": [],
+                "message": "Base indisponible.",
+            }
 
         aujourd_hui = date.today()
         seuil = aujourd_hui + timedelta(days=jours_seuil)
@@ -93,28 +106,27 @@ class PeremptionRecettesInteractionService:
         }
 
     def _chercher_recettes_par_ingredients(
-        self, db, noms_ingredients: list[str], limite: int
+        self,
+        db: Session,
+        noms_ingredients: list[str],
+        limite: int,
     ) -> list[dict[str, Any]]:
         """Cherche en base des recettes contenant les ingrédients expirants."""
-        from sqlalchemy import or_, func
+        from sqlalchemy import func
         from src.core.models import Recette
+        from src.core.models.recettes import Ingredient, RecetteIngredient
 
         if not noms_ingredients:
             return []
 
-        # Recherche par LIKE sur les ingrédients en JSON
-        conditions = []
-        for nom in noms_ingredients[:10]:
-            conditions.append(
-                func.lower(func.cast(Recette.ingredients, db.bind.dialect.name == "postgresql" and "TEXT" or "VARCHAR")).like(f"%{nom}%")
-                if hasattr(Recette, "ingredients")
-                else func.lower(Recette.nom).like(f"%{nom}%")
-            )
-
         try:
             recettes = (
                 db.query(Recette)
-                .filter(or_(*conditions))
+                .join(RecetteIngredient, RecetteIngredient.recette_id == Recette.id)
+                .join(Ingredient, Ingredient.id == RecetteIngredient.ingredient_id)
+                .filter(func.lower(Ingredient.nom).in_(noms_ingredients[:10]))
+                .group_by(Recette.id)
+                .order_by(func.count(RecetteIngredient.ingredient_id).desc())
                 .limit(limite)
                 .all()
             )

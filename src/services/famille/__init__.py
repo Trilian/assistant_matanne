@@ -139,4 +139,22 @@ def __getattr__(name: str):
         )
 
         return obtenir_service_checklists_anniversaire
+    if name == "obtenir_service_documents_notifications":
+        from src.services.famille.inter_module_documents_notifications import (
+            obtenir_service_documents_notifications,
+        )
+
+        return obtenir_service_documents_notifications
+    if name == "obtenir_service_anniversaires_budget_interaction":
+        from src.services.famille.inter_module_anniversaires_budget import (
+            obtenir_service_anniversaires_budget_interaction,
+        )
+
+        return obtenir_service_anniversaires_budget_interaction
+    if name == "obtenir_service_voyages_budget_interaction":
+        from src.services.famille.inter_module_voyages_budget import (
+            obtenir_service_voyages_budget_interaction,
+        )
+
+        return obtenir_service_voyages_budget_interaction
     raise AttributeError(f"module 'src.services.famille' has no attribute '{name}'")

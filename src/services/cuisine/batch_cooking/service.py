@@ -321,6 +321,20 @@ class ServiceBatchCooking(
             source="batch_cooking",
         )
 
+        # Inter-module Phase 2: session terminée -> déduction inventaire.
+        try:
+            from src.services.cuisine.inter_module_batch_inventaire import (
+                obtenir_service_batch_inventaire_interaction,
+            )
+
+            interaction = obtenir_service_batch_inventaire_interaction()
+            interaction.deduire_ingredients_session_terminee(session_id)
+        except Exception:
+            logger.debug(
+                "Impossible de déduire l'inventaire après batch cooking",
+                exc_info=True,
+            )
+
         logger.info(f"✅ Session batch cooking terminée: {session_id}")
         return session
 

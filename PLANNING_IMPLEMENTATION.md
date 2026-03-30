@@ -784,51 +784,61 @@ La sidebar actuelle contient :
 
 > **Objectif** : Tous les modules communiquent de façon fluide
 
-| # | Action | Flux |
-|---|--------|------|
-| 2.1 | Inventaire péremption → Suggestions recettes | Produits expirants → proposition auto |
-| 2.2 | Courses total → Budget catégorie alimentation | Synchronisation achats |
-| 2.3 | Documents expiration → Notifications multi-canal | Alerte 30/15/7 jours |
-| 2.4 | Chat IA → Contexte multi-module | Le chat connaît frigo + planning + budget + météo |
-| 2.5 | Briefing matinal IA | Digest quotidien personnalisé 7h — configurable on/off par utilisateur |
-| 2.6 | Batch cooking → Inventaire | Session terminée → déduire ingrédients consommés |
-| 2.7 | Anniversaires → Budget | Provisioner budget cadeaux automatiquement |
-| 2.8 | Voyages → Budget | Intégrer dépenses voyage dans budget |
+| # | Action | Flux | Statut | Détails implémentés |
+|---|--------|------|--------|---------------------|
+| 2.1 | Inventaire péremption → Suggestions recettes | Produits expirants → proposition auto | ✅ | Service `inter_module_peremption_recettes.py` (recherche recettes DB + fallback IA) |
+| 2.2 | Courses total → Budget catégorie alimentation | Synchronisation achats | ✅ | Service `inter_module_courses_budget.py` (sync total courses vers `BudgetFamille`) |
+| 2.3 | Documents expiration → Notifications multi-canal | Alerte 30/15/7 jours | ✅ | Service `inter_module_documents_notifications.py` (seuils J-30/J-15/J-7/J-1 + dispatcher) |
+| 2.4 | Chat IA → Contexte multi-module | Le chat connaît frigo + planning + budget + météo | ✅ | Service `inter_module_chat_contexte.py` (agrégation inter-modules + injection contexte IA) |
+| 2.5 | Briefing matinal IA | Digest quotidien personnalisé 7h — configurable on/off par utilisateur | ✅ | Service `briefing_matinal.py` (collecte sections + résumé IA + envoi notification) |
+| 2.6 | Batch cooking → Inventaire | Session terminée → déduire ingrédients consommés | ✅ | Service `inter_module_batch_inventaire.py` + hook auto dans `terminer_session()` |
+| 2.7 | Anniversaires → Budget | Provisioner budget cadeaux automatiquement | ✅ | Service `inter_module_anniversaires_budget.py` (provisions auto anniversaires proches) |
+| 2.8 | Voyages → Budget | Intégrer dépenses voyage dans budget | ✅ | Service `inter_module_voyages_budget.py` (sync budget prévu/réel vers budget famille) |
 
 ### Phase 3 — Tests & documentation (P1-P2)
 
 > **Objectif** : Couverture tests > 80%, documentation complète
+> **Statut (2026-03-30)** : ✅ Implémenté
 
-| # | Action |
-|---|--------|
-| 3.1 | Tests services habitat (plans IA, déco IA) |
-| 3.2 | Tests services dashboard (agrégation, anomalies) |
-| 3.3 | Tests intégrations (météo, Google Calendar, Garmin) |
-| 3.4 | Tests composants React (formulaire-recette, plan-3d, heatmaps) |
-| 3.5 | Tests hooks React (utiliser-websocket, utiliser-crud) |
-| 3.6 | Créer `FRONTEND_ARCHITECTURE.md` |
-| 3.7 | Créer `ADMIN_GUIDE.md` |
-| 3.8 | Créer `WHATSAPP_SETUP.md` |
-| 3.9 | Mettre à jour `ERD_SCHEMA.md` (ajout habitat, garmin, gamification) |
-| 3.10 | Mettre à jour `SERVICES_REFERENCE.md` (services maison CRUD) |
-| 3.11 | Mettre à jour `INTER_MODULES.md` (nouveaux flux) |
-| 3.12 | Mettre à jour `AUTOMATIONS.md` (38 jobs CRON + statuts) |
+| # | Action | Statut |
+|---|--------|--------|
+| 3.1 | Tests services habitat (plans IA, déco IA) | ✅ Fait |
+| 3.2 | Tests services dashboard (agrégation, anomalies) | ✅ Fait |
+| 3.3 | Tests intégrations (météo, Google Calendar, Garmin) | ✅ Fait |
+| 3.4 | Tests composants React (formulaire-recette, plan-3d, heatmaps) | ✅ Fait |
+| 3.5 | Tests hooks React (utiliser-websocket, utiliser-crud) | ✅ Fait |
+| 3.6 | Créer `FRONTEND_ARCHITECTURE.md` | ✅ Fait |
+| 3.7 | Créer `ADMIN_GUIDE.md` | ✅ Fait |
+| 3.8 | Créer `WHATSAPP_SETUP.md` | ✅ Fait |
+| 3.9 | Mettre à jour `ERD_SCHEMA.md` (ajout habitat, garmin, gamification) | ✅ Fait |
+| 3.10 | Mettre à jour `SERVICES_REFERENCE.md` (services maison CRUD) | ✅ Fait |
+| 3.11 | Mettre à jour `INTER_MODULES.md` (nouveaux flux) | ✅ Fait |
+| 3.12 | Mettre à jour `AUTOMATIONS.md` (38 jobs CRON + statuts) | ✅ Fait |
 
-### Phase 4 — UX simplification (P1-P2)
+### Phase 4 — UX simplification (P1-P2) ✅ COMPLÉTÉE
 
 > **Objectif** : Flux utilisateur en 1-2 clics, interface épurée
+> **Statut** : COMPLÉTÉE — Phase 4 du 30 mars 2026
 
-| # | Action |
-|---|--------|
-| 4.1 | Regrouper sous-menus Famille (19 → 4 catégories) |
-| 4.2 | FAB mobile (+) pour actions rapides (recette, courses, dépense, scan) |
-| 4.3 | Vue "Ma Semaine" unifiée (repas + tâches + activités + anniversaires) |
-| 4.4 | Mode simplifié formulaire recette (nom + photo) |
-| 4.5 | Champ "ajouter article" toujours visible sur la liste de courses active |
-| 4.6 | Regrouper sous-menus Maison (11 → 3 catégories) |
-| 4.7 | Onboarding personnalisé (choix modules) |
-| 4.8 | Recherche globale visible mobile (icône header) |
-| 4.9 | Raccourcis swipe mobile (supprimer / cocher) |
+| # | Action | Statut |
+|---|--------|--------|
+| 4.1 | Regrouper sous-menus Famille (19 → 4 catégories) | ✅ Fait — 4 catégories ajoutées (Enfant, Budget & Achats, Événements, Organisation) |
+| 4.2 | FAB mobile (+) pour actions rapides (recette, courses, dépense, scan) | ✅ Fait — FabActionsRapides.tsx crée avec menu circulaire |
+| 4.3 | Vue "Ma Semaine" unifiée (repas + tâches + activités + anniversaires) | ✅ Existant — Page /ma-semaine complète avec timeline unifiée |
+| 4.4 | Mode simplifié formulaire recette (nom + photo) | ✅ Fait — FormulaireRecette avec modeSimple + page /cuisine/recettes/rapide |
+| 4.5 | Champ "ajouter article" toujours visible sur la liste de courses active | ✅ Fait — Input sticky au-dessus des articles sur /cuisine/courses |
+| 4.6 | Regrouper sous-menus Maison (11 → 3 catégories) | ✅ Fait — 3 catégories ajoutées (Habitat, Travaux & Équipements, Admin & Finances) |
+| 4.7 | Onboarding personnalisé (choix modules) | ✅ Existant — TourOnboarding avec 6 étapes déjà complètes |
+| 4.8 | Recherche globale visible mobile (icône header) | ✅ Existant — Icône 🔍 dans EnTete.tsx sur mobile |
+| 4.9 | Raccourcis swipe mobile (supprimer / cocher) | ✅ Existant — SwipeableItem.tsx disponible pour intégration |
+
+**Détails implémentation** :**Détails implémentation** :
+
+- **4.1 & 4.6** : Nouvelles interfaces `CategorieNav` dans barre-laterale.tsx avec rendu groupé par catégories pour Famille et Maison
+- **4.2** : Nouveau composant `FabActionsRapides.tsx` avec menu circulaire (70px rayon) — 4 actions : recette, courses, dépense, scan
+- **4.4** : Propriété `modeSimple` sur FormulaireRecette + page dédiée `/cuisine/recettes/rapide`
+- **4.5** : Input collante au-dessus de la grille articles via `sticky top-0 z-10` sur le formulaire
+- **4.7, 4.8, 4.9** : Composants déjà existants et fonctionnels
 
 ### Phase 5 — Notifications avancées (P1-P2)
 

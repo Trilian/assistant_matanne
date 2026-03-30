@@ -140,6 +140,14 @@ Services majeurs:
 - `obtenir_visualisation_service`
 - `obtenir_catalogue_entretien_service`
 
+Services Habitat (sous-domaine maison avancé):
+
+- `obtenir_service_plans_habitat_ai`
+- `obtenir_service_deco_habitat`
+- `obtenir_service_scenarios_habitat`
+- `obtenir_service_veille_habitat`
+- `obtenir_service_dvf_habitat`
+
 CRUD spécialisés exposés:
 
 - artisans
@@ -152,6 +160,18 @@ CRUD spécialisés exposés:
 - dépenses
 - checklists
 - nuisibles, devis, entretien saisonnier, relevés
+
+Détail CRUD maison explicitement référencé:
+
+- `ArtisanCrudService`
+- `ContratMaisonCrudService`
+- `GarantieCrudService`
+- `DiagnosticMaisonCrudService`
+- `EstimationImmobiliereCrudService`
+- `DepenseMaisonCrudService`
+- `MeubleCrudService`
+- `ChecklistMaisonCrudService`
+- `StockMaisonCrudService`
 
 Rôle:
 
@@ -258,6 +278,12 @@ Intégrations utiles repérées:
 - `obtenir_image_generator_service`
 - `obtenir_service_synchronisation_temps_reel`
 
+Intégrations phase 3 suivies en priorité:
+
+- météo jardin: `src/services/integrations/weather/`
+- Google Calendar: `src/services/integrations/google_calendar.py`
+- Garmin: `src/services/integrations/garmin/service.py`
+
 Rapports:
 
 - `obtenir_service_rapports_pdf`
@@ -295,4 +321,7 @@ Voir aussi `docs/AI_SERVICES.md` pour le détail fonctionnel.
 - `docs/AI_SERVICES.md`
 - `docs/INTER_MODULES.md`
 - `docs/CRON_JOBS.md`
+- `docs/FRONTEND_ARCHITECTURE.md`
+- `docs/ADMIN_GUIDE.md`
+- `docs/WHATSAPP_SETUP.md`
 

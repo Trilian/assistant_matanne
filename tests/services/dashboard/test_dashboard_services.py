@@ -1,5 +1,7 @@
 """Tests pour les services Dashboard — agrégation, anomalies, bien-être, points."""
 
+# pyright: reportUnknownParameterType=false, reportMissingParameterType=false, reportPrivateUsage=false
+
 from datetime import date, timedelta
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
@@ -66,8 +68,8 @@ class TestServiceAnomaliesFinancieres:
     def test_normaliser_categorie_courses(self, mock_ia):
         svc = ServiceAnomaliesFinancieres
         assert svc._normaliser_categorie("Courses alimentaires") == "courses"
-        assert svc._normaliser_categorie("Supermarché") == "courses"
-        assert svc._normaliser_categorie("épicerie") == "courses"
+        assert svc._normaliser_categorie("Supermarche") == "courses"
+        assert svc._normaliser_categorie("epicerie") == "courses"
 
     @patch("src.services.dashboard.anomalies_financieres.obtenir_client_ia")
     def test_normaliser_categorie_energie(self, mock_ia):

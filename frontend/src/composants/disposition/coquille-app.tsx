@@ -12,6 +12,7 @@ import { MenuCommandes } from "./menu-commandes";
 import { TourOnboarding } from "./tour-onboarding";
 import { FabChatIA } from "./fab-chat-ia";
 import { FabAssistantVocal } from "./fab-assistant-vocal";
+import { FabActionsRapides } from "./fab-actions-rapides";
 import { MinuteurFlottant } from "./minuteur-flottant";
 import { BarreProgression } from "./barre-progression";
 import { ContenuPrincipal } from "./contenu-principal";
@@ -53,6 +54,9 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
 
       {/* FAB chat IA flottant (AC2) */}
       <FabChatIA />
+
+      {/* FAB actions rapides mobiles (Phase 4) */}
+      <FabActionsRapides />
 
       {/* FAB assistant vocal global (Sprint 8) */}
       <FabAssistantVocal />

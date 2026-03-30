@@ -506,61 +506,87 @@ export default function PageCourses() {
                   Sélectionnez ou créez une liste pour commencer
                 </p>
               </div>
-            ) : chargementDetail ? (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <Skeleton key={i} className="aspect-square rounded-xl" />
-                ))}
-              </div>
-            ) : articles.length === 0 ? (
-              <div className="flex flex-col items-center gap-4 py-12">
-                <p className="text-muted-foreground">Liste vide</p>
-                <Button variant="outline" onClick={() => setDialogueArticle(true)}>
-                  <Plus className="mr-1 h-4 w-4" />
-                  Ajouter un article
-                </Button>
-              </div>
             ) : (
-              <div className="space-y-6">
-                {/* Articles par catégorie */}
-                {categoriesTriees.map((cat) => (
-                  <div key={cat}>
-                    <h3 className="text-sm font-semibold mb-2">{cat}</h3>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                      {groupesNonCoches[cat].map((a) => (
-                        <TileArticle
-                          key={a.id}
-                          nom={a.nom}
-                          quantite={a.quantite}
-                          unite={a.unite}
-                          categorie={a.categorie}
-                          onClick={() => cocher({ articleId: a.id, coche: true })}
-                          onLongPress={() => supprimer(a.id)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
+              <div className="space-y-4">
+                {/* Champ "Ajouter article" toujours visible (4.5) */}
+                <form 
+                  onSubmit={submitArticle((data) => ajouter(data))}
+                  className="flex gap-2 sticky top-0 bg-card pb-3 z-10 border-b"
+                >
+                  <Input
+                    {...regArticle("nom")}
+                    placeholder="+ Ajouter un article..."
+                    className="flex-1"
+                    disabled={enAjout}
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={enAjout}
+                    aria-label="Ajouter l'article"
+                  >
+                    {enAjout ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
+                  </Button>
+                </form>
 
-                {/* Articles cochés */}
-                {articlesCoches.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-                      Complétés ({articlesCoches.length})
-                    </h3>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                      {articlesCoches.map((a) => (
-                        <TileArticle
-                          key={a.id}
-                          nom={a.nom}
-                          quantite={a.quantite}
-                          unite={a.unite}
-                          categorie={a.categorie}
-                          estCoche
-                          onClick={() => cocher({ articleId: a.id, coche: false })}
-                        />
-                      ))}
-                    </div>
+                {/* Affichage articles */}
+                {chargementDetail ? (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                    {Array.from({ length: 10 }).map((_, i) => (
+                      <Skeleton key={i} className="aspect-square rounded-xl" />
+                    ))}
+                  </div>
+                ) : articles.length === 0 ? (
+                  <div className="flex flex-col items-center gap-4 py-12">
+                    <p className="text-muted-foreground">Liste vide</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Articles par catégorie */}
+                    {categoriesTriees.map((cat) => (
+                      <div key={cat}>
+                        <h3 className="text-sm font-semibold mb-2">{cat}</h3>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                          {groupesNonCoches[cat].map((a) => (
+                            <TileArticle
+                              key={a.id}
+                              nom={a.nom}
+                              quantite={a.quantite}
+                              unite={a.unite}
+                              categorie={a.categorie}
+                              onClick={() => cocher({ articleId: a.id, coche: true })}
+                              onLongPress={() => supprimer(a.id)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Articles cochés */}
+                    {articlesCoches.length > 0 && (
+                      <div>
+                        <h3 className="text-sm font-semibold text-muted-foreground mb-2">
+                          Complétés ({articlesCoches.length})
+                        </h3>
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                          {articlesCoches.map((a) => (
+                            <TileArticle
+                              key={a.id}
+                              nom={a.nom}
+                              quantite={a.quantite}
+                              unite={a.unite}
+                              categorie={a.categorie}
+                              estCoche
+                              onClick={() => cocher({ articleId: a.id, coche: false })}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

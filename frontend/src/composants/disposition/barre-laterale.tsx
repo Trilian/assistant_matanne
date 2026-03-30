@@ -371,29 +371,67 @@ export function BarreLaterale() {
           return (
             <div key={lien.chemin}>
               {boutonPrincipal}
-              {/* Sous-liens */}
+              {/* Sous-liens avec groupage optionnel par catégories */}
               {aSousliens && estOuverte && sidebarOuverte && (
                 <div className="ml-5 mt-1 space-y-0.5 border-l pl-3">
-                  {lien.sousLiens!.map((sous) => {
-                    const IconeSousLien = sous.Icone as React.ElementType;
-                    const sousActif = pathname === sous.chemin;
-                    return (
-                      <Link
-                        key={sous.chemin}
-                        href={sous.chemin}
-                        aria-label={sous.nom}
-                        className={cn(
-                          "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
-                          sousActif
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                            : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground"
-                        )}
-                      >
-                        {createElement(IconeSousLien, { className: "h-3.5 w-3.5 shrink-0" })}
-                        <span className="truncate">{sous.nom}</span>
-                      </Link>
-                    );
-                  })}
+                  {lien.categories && lien.categories.length > 0
+                    ? // Affichage groupé par catégories
+                      lien.categories.map((categorie) => {
+                        const sousLiensCategorie = lien.sousLiens!.slice(
+                          categorie.debut,
+                          categorie.fin
+                        );
+                        return (
+                          <div key={categorie.label}>
+                            {/* Label de catégorie */}
+                            <p className="text-xs font-semibold text-sidebar-foreground/40 uppercase tracking-wider px-2 py-1 mt-2 first:mt-0">
+                              {categorie.label}
+                            </p>
+                            {/* Sous-liens de la catégorie */}
+                            {sousLiensCategorie.map((sous) => {
+                              const IconeSousLien = sous.Icone as React.ElementType;
+                              const sousActif = pathname === sous.chemin;
+                              return (
+                                <Link
+                                  key={sous.chemin}
+                                  href={sous.chemin}
+                                  aria-label={sous.nom}
+                                  className={cn(
+                                    "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
+                                    sousActif
+                                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                      : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground"
+                                  )}
+                                >
+                                  {createElement(IconeSousLien, { className: "h-3.5 w-3.5 shrink-0" })}
+                                  <span className="truncate">{sous.nom}</span>
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        );
+                      })
+                    : // Affichage sans catégories (défaut)
+                      lien.sousLiens!.map((sous) => {
+                        const IconeSousLien = sous.Icone as React.ElementType;
+                        const sousActif = pathname === sous.chemin;
+                        return (
+                          <Link
+                            key={sous.chemin}
+                            href={sous.chemin}
+                            aria-label={sous.nom}
+                            className={cn(
+                              "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
+                              sousActif
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground"
+                            )}
+                          >
+                            {createElement(IconeSousLien, { className: "h-3.5 w-3.5 shrink-0" })}
+                            <span className="truncate">{sous.nom}</span>
+                          </Link>
+                        );
+                      })}
                 </div>
               )}
             </div>

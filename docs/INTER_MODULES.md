@@ -31,6 +31,9 @@ Le bus d'événements est documenté dans `src/services/core/events/__init__.py`
 | Planning | Google Calendar | sync externe planifiée | actif |
 | Inventaire | Courses | stock bas -> liste de courses | actif |
 | Famille | Activités IA | jalon -> invalidation suggestions et notification | actif |
+| Dashboard | Garmin + Cuisine + Inventaire | score bien-être et points famille consolidés | actif |
+| Habitat Plans IA | Scénarios Habitat | calcul de score pondéré | actif |
+| Habitat Déco IA | Finances Maison | synchronisation budget dépense | actif partiel |
 
 ---
 
@@ -79,6 +82,10 @@ Le moteur actuel supporte:
 | Péremption -> suggestions recettes automatiques | à enrichir |
 | Push -> WhatsApp failover | à faire |
 | Chat IA contexte multi-module | à enrichir |
+| Documents expirants -> Notifications multicanal | planifié |
+| Batch cooking terminé -> Déduction inventaire | planifié |
+| Anniversaires -> Provision budget cadeaux | planifié |
+| Voyages -> Intégration budget famille | planifié |
 
 ---
 

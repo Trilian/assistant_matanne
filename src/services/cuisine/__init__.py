@@ -55,4 +55,22 @@ def __getattr__(name: str):
         from src.services.cuisine.prediction_peremption import obtenir_service_prediction_peremption
 
         return obtenir_service_prediction_peremption
+    if name == "obtenir_service_peremption_recettes":
+        from src.services.cuisine.inter_module_peremption_recettes import (
+            obtenir_service_peremption_recettes,
+        )
+
+        return obtenir_service_peremption_recettes
+    if name == "obtenir_service_courses_budget":
+        from src.services.cuisine.inter_module_courses_budget import (
+            obtenir_service_courses_budget,
+        )
+
+        return obtenir_service_courses_budget
+    if name == "obtenir_service_batch_inventaire_interaction":
+        from src.services.cuisine.inter_module_batch_inventaire import (
+            obtenir_service_batch_inventaire_interaction,
+        )
+
+        return obtenir_service_batch_inventaire_interaction
     raise AttributeError(f"module 'src.services.cuisine' has no attribute '{name}'")
