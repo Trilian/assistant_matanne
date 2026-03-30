@@ -193,13 +193,12 @@ Services majeurs:
 - `get_prediction_service`
 - `get_backtest_service`
 - `get_jeux_ai_service`
-- `get_responsable_gaming_service`
 
 Rôle:
 
 - paris sportifs
 - loto et Euromillions
-- analyse IA, backtest et jeu responsable
+- analyse IA et backtest
 - jobs spécialisés côté jeux
 
 ---

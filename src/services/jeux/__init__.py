@@ -241,7 +241,6 @@ if TYPE_CHECKING:
         predire_over_under,
         predire_resultat_match,
     )
-    from ._internal.responsable_gaming import (
     from ._internal.scheduler_service import (
         APSCHEDULER_AVAILABLE,
         HEURE_LOTO,

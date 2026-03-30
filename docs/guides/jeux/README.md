@@ -1,6 +1,6 @@
 # 🎮 Guide Module Jeux
 
-> Guide complet du module Jeux : paris sportifs intelligents, Loto/Euromillions avec IA, backtest et jeu responsable.
+> Guide complet du module Jeux : paris sportifs intelligents, Loto/Euromillions avec IA et backtest.
 
 **Statut** : ✅ **100% COMPLET** — Phases S/T/U/V/W finalisées (27 mars 2026)
 
@@ -12,14 +12,13 @@
 4. [Loto & IA](#loto--ia)
 5. [Euromillions](#euromillions)
 6. [Performance & Analytics](#performance--analytics)
-7. [Jeu responsable](#jeu-responsable)
-8. [API Reference](#api-reference)
+7. [API Reference](#api-reference)
 
 ---
 
 ## Vue d'ensemble
 
-Le module **Jeux** est un système complet de suivi et d'analyse des paris sportifs et jeux de loterie avec **intelligence artificielle** (Mistral AI), détection d'opportunités, backtest, et outils de jeu responsable.
+Le module **Jeux** est un système complet de suivi et d'analyse des paris sportifs et jeux de loterie avec **intelligence artificielle** (Mistral AI), détection d'opportunités et backtest.
 
 **URL principale** : `/jeux`  
 **Backend** : `src/services/jeux/` (13 modèles, 5 services IA, 20+ endpoints)  
@@ -33,13 +32,11 @@ Le module **Jeux** est un système complet de suivi et d'analyse des paris sport
 - **Heatmaps** : Évolution des cotes bookmaker, fréquences numéros loto
 - **Backtest** : Simulation ROI sur historique, validation stratégies
 - **Notifications push** : Résultats paris/loto en temps réel (Web Push)
-- **Jeu responsable** : Limites budgétaires, auto-exclusion, alertes séries dangereuses
 - **Services planifiés** : cron jeux et alertes périodiques côté backend
 
 ### Points d'attention actuels
 
 - l'agrégation pertes/gains -> budget global reste une interaction planifiée mais pas encore finalisée
-- les alertes jeu responsable existent mais leur orchestration multi-canal doit encore être consolidée
 
 > ⚠️ **Avertissement** : Ce module est conçu pour un usage personnel de suivi analytique. MaTanne ne réalise pas de paris réels — il s'agit uniquement d'un outil de gestion, d'apprentissage et de contrôle budgétaire.
 
@@ -91,7 +88,7 @@ Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de 
 |---------|-----|-------------|
 | GET | `/api/v1/jeux/dashboard` | Dashboard complet (budget, value bets, KPIs, analyse IA) |
 | GET | `/api/v1/jeux/series` | Séries actives détectées (seuil configurable) |
-| GET | `/api/v1/jeux/alertes` | Alertes jeu responsable (séries dangereuses, limites) |
+| GET | `/api/v1/jeux/alertes` | Alertes séries dangereuses |
 
 ### Paris sportifs
 
@@ -137,17 +134,6 @@ Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de 
 | GET | `/api/v1/jeux/performance/confiance` | Breakdown par tranches confiance IA |
 | GET | `/api/v1/jeux/resume-mensuel` | Résumé IA du mois (Mistral) |
 | GET | `/api/v1/jeux/backtest` | Simulation rétrospective stratégies |
-
-### Jeu responsable
-
-| Méthode | URL | Description |
-|---------|-----|-------------|
-| GET | `/api/v1/jeux/responsable/suivi` | État actuel (limite, consommé, auto-exclusion) |
-| GET | `/api/v1/jeux/responsable/verifier-mise` | Vérifier si mise autorisée |
-| POST | `/api/v1/jeux/responsable/enregistrer-mise` | Enregistrer mise (hors paris, pour tracking) |
-| PUT | `/api/v1/jeux/responsable/limite` | Modifier limite mensuelle |
-| POST | `/api/v1/jeux/responsable/auto-exclusion` | Activer auto-exclusion (7/30/90 jours) |
-| GET | `/api/v1/jeux/responsable/historique` | Historique limites sur 12 mois |
 
 ### Utilitaires
 
@@ -229,20 +215,6 @@ Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de 
 }
 ```
 
-### SuiviResponsable
-
-```typescript
-{
-  limite_mensuelle: number;
-  total_mise_mois: number;
-  pourcentage_utilise: number;
-  auto_exclusion_active: boolean;
-  date_fin_exclusion?: string;
-  serie_defaites_actuelle: number;
-  alerte_active: boolean;
-}
-```
-
 ---
 
 ## Guide développeur
@@ -253,7 +225,6 @@ Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de 
 - **`SeriesService`** : Détection loi des séries (n-grammes, patterns)
 - **`PredictionServiceJeux`** : Modèle prédictif local (forme, H2H, cotes)
 - **`BacktestService`** : Simulateur ROI rétrospectif
-- **`ResponsableGamingService`** : Limites, auto-exclusion, tracking
 
 ### Composants frontend clés
 
@@ -377,43 +348,6 @@ Simulation rétrospective pour valider stratégies :
 
 ---
 
-## Jeu responsable
-
-**URL** : `/jeux/responsable`
-
-### 💰 Limites budgétaires
-
-- **Limite mensuelle** : Configurable (défaut 100€)
-- **Progression** : Barre visuelle + pourcentage consommé
-- **Alerte proactive** : Toast orange si >80% limite atteinte
-- **Blocage** : Middleware backend bloque `POST /jeux/paris` si limite dépassée
-
-**Modification limite** :
-
-- Bouton dans page responsable
-- Historique des changements de limite (traçabilité)
-- Délai réflexion : Attendre 24h entre 2 augmentations
-
-### 🚫 Auto-exclusion
-
-Prenez une pause forcée du jeu :
-
-- **Durées** : 7 jours, 30 jours, 90 jours, 6 mois
-- **Effet** : Blocage total création paris/grilles + masquage module dans sidebar
-- **Bannière** : Affichage permanent en haut de page avec date de fin
-- **Irréversible** : Impossible d'annuler avant la fin de la période
-
-**Activation** : Page responsable > Bouton "Prendre une pause" > Dialog choix durée
-
-### ⚠️ Alertes séries dangereuses
-
-Détection automatique des patterns à risque :
-
-- **Série de défaites** : Si 5+ paris perdus consécutivement
-- **Bannière orange** : Affichage hub jeux avec message d'avertissement
-- **Recommandation IA** : Pause suggérée, analyse des erreurs
-- **Notification** : Toast si nouvelle série détectée
-
 ### 🔔 Notifications push résultats
 
 **Activation** : Paramètres > Notifications > "Activer les notifications jeux"
@@ -423,7 +357,6 @@ Types de notifications Web Push :
 1. **Pari gagné** 🎉 : Affiche montant gain + action "Voir détails"
 2. **Pari perdu** 😞 : Affiche perte + encouragement
 3. **Résultat loto** 🎱 : Affiche numéros gagnants + votre résultat
-4. **Série de défaites** ⚠️ : Alerte si 5+ paris perdus (jeu responsable)
 
 **Implémentation** :
 

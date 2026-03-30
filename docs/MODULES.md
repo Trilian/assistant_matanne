@@ -146,7 +146,6 @@
 - **Paris sportifs** — Suivi paris, équipes, matchs, cotes, value betting, séries
 - **Loto** — Tirages, grilles (4 stratégies génération), statistiques, historique
 - **EuroMillions** — Tirages, grilles, statistiques spécifiques
-- **Mise responsable** — Limites mensuelles, suivi gains/pertes
 
 ### Architecture
 

@@ -371,10 +371,9 @@ Recettes ──planifier──→ Planning ──générer──→ Liste Course
 |------|------|--------|
 | Analyse matchs → paris proposés | ✅ Implémenté | — |
 | Backtest stratégies → scoring | ✅ Implémenté | — |
-| Bankroll → limite mise responsable | ✅ Implémenté | — |
+| Bankroll → suivi P&L | ✅ Implémenté | — |
 | Stats historiques → heatmaps numéros | ✅ Implémenté | — |
 | **MANQUANT** : Résultats auto → P&L instantané | ⚠️ Cron existe | Affichage temps réel |
-| **MANQUANT** : Série perdante → alerte jeu responsable | ⚠️ Partiel | Push notification |
 
 ---
 
@@ -397,7 +396,7 @@ Recettes ──planifier──→ Planning ──générer──→ Liste Course
 
 | # | Flux proposé | Source → Cible | Valeur | Effort |
 |---|-------------|----------------|--------|--------|
-| I1 | **Récolte jardin → Recettes saison** | Maison/Jardin → Cuisine | 🔴 Haute | M |
+| I1 | **Récolte jardin → Recettes saison** (proposées au prochain planning semaine) | Maison/Jardin → Cuisine | 🔴 Haute | M |
 | I2 | **Garmin santé → Activités Jules** | Famille/Garmin → Famille/Jules | 🟡 Moyenne | M |
 | I3 | **Anomalie énergie → Tâche entretien** | Maison/Énergie → Maison/Entretien | 🔴 Haute | S |
 | I4 | **Budget dépassement → Alerte dashboard** | Famille/Budget → Dashboard | 🔴 Haute | S |
@@ -406,7 +405,7 @@ Recettes ──planifier──→ Planning ──générer──→ Liste Course
 | I7 | **Projets terminés → Valeur bien habitat** | Maison/Projets → Habitat | 🟡 Moyenne | M |
 | I8 | **Entretien artisan → Devis comparatif auto** | Maison/Entretien → Maison/Artisans | 🟡 Moyenne | M |
 | I9 | **Inventaire → Courses prédictives** | Inventaire → Courses | 🔴 Haute | L |
-| I10 | **Résultats paris → P&L famille** | Jeux → Famille/Budget | 🟡 Moyenne | S |
+| ~~I10~~ | ~~Résultats paris → P&L famille~~ | ~~Jeux → Famille/Budget~~ | ❌ Rejeté | — | Budget jeux volontairement séparé |
 | I11 | **Routines santé → Briefing matinal** | Famille/Santé → Dashboard | 🟡 Moyenne | S |
 | I12 | **Anniversaire → Suggestion cadeau IA** | Famille → IA Avancée | 🟢 Innovation | M |
 | I13 | **Retour recette → Ajuster planning futur** | Cuisine → Planning | 🔴 Haute | M |
@@ -607,7 +606,7 @@ DispatcherNotifications (central)
 | N5 | **Email : Newsletter hebdo** | Email | Template riche avec images, graphiques inline, call-to-action | M |
 | N6 | **Email : Rapport budget PDF** | Email | PDF en pièce jointe (déjà généré, ajouter l'envoi) | S |
 | N7 | **Push : Actions rapides** | Push | Notifications avec boutons d'action (ex: "Valider" / "Reporter") | M |
-| N8 | **Push : Géolocalisation** | Push | Rappel courses quand proche d'un supermarché | L |
+| ~~N8~~ | ~~Push : Géolocalisation~~ | ~~Push~~ | ❌ Rejeté (habite à côté du supermarché) | — |
 | N9 | **Préférences granulaires** | Tous | UI pour choisir par type d'événement quel canal utiliser | M |
 | N10 | **Historique notifications** | Tous | Page "Centre de notifications" dans l'app | M |
 
@@ -823,7 +822,7 @@ frontend/src/
 | IN4 | **Mode vocal complet** | "Hey Matanne, qu'est-ce qu'on mange ce soir ?" → réponse TTS | 🟢 Innovation | L |
 | IN5 | **Scan & Go** | Scanner code-barres produit → ajouter auto à inventaire + infos nutrition | 🟡 Fort | M |
 | IN6 | **Intégration IoT** | Capteurs maison (température, humidité, consommation) → dashboards | 🟢 Innovation | XL |
-| IN7 | **Marketplace recettes** | Partager/importer des recettes depuis une communauté | 🟢 Innovation | L |
+| ~~IN7~~ | ~~Marketplace recettes~~ | ❌ Rejeté (pas de volet social) | — | — |
 | IN8 | **Mode déconnecté enrichi** | IndexedDB + background sync → toutes les fonctions de base hors-ligne | 🟡 Fort | XL |
 
 ### Innovations UX
@@ -831,10 +830,10 @@ frontend/src/
 | # | Innovation | Description | Impact | Effort |
 |---|-----------|-------------|--------|--------|
 | IN9 | **Thèmes saisonniers** | L'interface s'adapte visuellement aux saisons (couleurs, illustrations) | 🟢 Fun | S |
-| IN10 | **Gamification familiale** | Points/badges familiaux → classement famille ludique (en cours Phase 10) | 🟡 Fort | M |
+| IN10 | **Gamification sportive uniquement** | Points/badges sur données Garmin/activité physique uniquement | 🟡 Fort | S |
 | IN11 | **Mode focus** | Vue épurée "essentiel du jour" : 1 écran = météo + repas + tâches + rappels | 🔴 Transformant | M |
-| IN12 | **Raccourcis Siri/Google Assistant** | Actions rapides via assistants vocaux natifs | 🟢 Innovation | M |
-| IN13 | **QR code partage** | QR code sur l'écran pour partager une recette ou liste courses avec un invité | 🟢 Fun | S |
+| IN12 | **Raccourcis Google Assistant** | Actions rapides via assistant vocal Google (tablette) | 🟢 Innovation | M |
+| ~~IN13~~ | ~~QR code partage~~ | ❌ Rejeté (aucun intérêt) | — | — |
 | IN14 | **Mode vacances** | Pause des notifications non essentielles + checklist voyage auto | 🟡 Fort | S |
 
 ### Innovations Data & IA
@@ -844,7 +843,7 @@ frontend/src/
 | IN15 | **Analytics familiales** | Tendances long terme : nutrition, dépenses, activités, énergie → graphiques | 🔴 Transformant | L |
 | IN16 | **Prédictions ML** | Modèles prédictifs : courses de la semaine, dépenses du mois, pannes probables | 🟡 Fort | XL |
 | IN17 | **Benchmark famille** | Comparer (anonymement) ses habitudes avec des moyennes nationales | 🟢 Innovation | L |
-| IN18 | **Export Notion/Obsidian** | Exporter les données famille vers des outils tiers (journal, budget) | 🟢 Innovation | M |
+| ~~IN18~~ | ~~Export Notion/Obsidian~~ | ❌ Rejeté (pas d'intérêt) | — | — |
 | IN19 | **Intégration bancaire** | Sync avec banque via API (Plaid/Bridge) → dépenses auto-catégorisées | 🔴 Transformant | XL |
 | IN20 | **Agent IA proactif** | L'IA suggère des actions avant que l'utilisateur ne demande (ex: "Il fait beau, promenez-vous au parc !") | 🟡 Fort | M |
 
@@ -888,7 +887,7 @@ frontend/src/
 
 | # | Tâche | Réf | Effort |
 |---|-------|-----|--------|
-| 1 | Récolte jardin → Recettes saison | I1 | M |
+| 1 | Récolte jardin → Recettes saison (prochain planning) | I1 | M |
 | 2 | Anomalie énergie → Tâche entretien | I3 | S |
 | 3 | Budget dépassement → Alerte dashboard | I4 | S |
 | 4 | Inventaire → Courses prédictives | I9 | L |
@@ -946,7 +945,7 @@ frontend/src/
 | 1 | Mode famille multi-utilisateurs | IN1 | XL |
 | 2 | Analytics familiales long terme | IN15 | L |
 | 3 | Agent IA proactif | IN20 | M |
-| 4 | QR code partage | IN13 | S |
+| 4 | Raccourcis Google Assistant | IN12 | M |
 | 5 | Thèmes saisonniers | IN9 | S |
 
 ---
