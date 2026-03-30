@@ -53,6 +53,8 @@ import {
   CalendarRange,
   Settings,
   Map,
+  Sparkles,
+  MapPin,
 } from "lucide-react";
 
 export interface PageNavigation {
@@ -140,6 +142,23 @@ export const PAGES_NAVIGATION: PageNavigation[] = [
   // Configuration
   { nom: "Paramètres", chemin: "/parametres", categorie: "Configuration", Icone: Settings },
   { nom: "Planning", chemin: "/planning", categorie: "Configuration", Icone: CalendarRange },
+
+  // IA Avancée — Phase 6
+  { nom: "IA Avancée", chemin: "/ia-avancee", categorie: "IA", Icone: Sparkles, keywords: ["intelligence artificielle", "suggestions", "optimisation", "ai"] },
+  { nom: "Suggestions Achats", chemin: "/ia-avancee/suggestions-achats", categorie: "IA", Icone: ShoppingCart, keywords: ["shopping", "liste", "courses"] },
+  { nom: "Planning Adaptatif", chemin: "/ia-avancee/planning-adaptatif", categorie: "IA", Icone: CalendarDays, keywords: ["repas", "menu", "semaine"] },
+  { nom: "Diagnostic Plantes", chemin: "/ia-avancee/diagnostic-plante", categorie: "IA", Icone: Sprout, keywords: ["jardin", "sante", "plante"] },
+  { nom: "Prévision Dépenses", chemin: "/ia-avancee/prevision-depenses", categorie: "IA", Icone: TrendingUp, keywords: ["budget", "fin de mois", "prevision"] },
+  { nom: "Suggestions Cadeaux", chemin: "/ia-avancee/idees-cadeaux", categorie: "IA", Icone: Cake, keywords: ["noel", "anniversaire", "present"] },
+  { nom: "Analyse Photos", chemin: "/ia-avancee/analyse-photo", categorie: "IA", Icone: Camera, keywords: ["scan", "ocr", "document"] },
+  { nom: "Optimisation Routines", chemin: "/ia-avancee/optimisation-routines", categorie: "IA", Icone: RotateCw, keywords: ["temps", "efficacite", "habitudes"] },
+  { nom: "Analyse Documents", chemin: "/ia-avancee/analyse-document", categorie: "IA", Icone: FileText, keywords: ["ocr", "facture", "contrat"] },
+  { nom: "Estimation Travaux", chemin: "/ia-avancee/estimation-travaux", categorie: "IA", Icone: Hammer, keywords: ["bricolage", "reparation", "cout"] },
+  { nom: "Planning Voyage", chemin: "/ia-avancee/planning-voyage", categorie: "IA", Icone: MapPin, keywords: ["vacances", "destination", "itineraire"] },
+  { nom: "Économies Énergie", chemin: "/ia-avancee/recommandations-energie", categorie: "IA", Icone: Zap, keywords: ["conso", "electricite", "eco"] },
+  { nom: "Prédiction Pannes", chemin: "/ia-avancee/prediction-pannes", categorie: "IA", Icone: Wrench, keywords: ["maintenance", "prevention", "repair"] },
+  { nom: "Suggestions Proactives", chemin: "/ia-avancee/suggestions-proactives", categorie: "IA", Icone: Sparkles, keywords: ["alertes", "actions", "contexte"] },
+  { nom: "Adaptation Météo", chemin: "/ia-avancee/adaptations-meteo", categorie: "IA", Icone: CloudSun, keywords: ["previsions", "planning", "meteorologie"] },
 ];
 
 /** Map chemin → nom lisible — dérivée automatiquement de PAGES_NAVIGATION */

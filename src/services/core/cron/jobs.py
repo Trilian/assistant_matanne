@@ -498,6 +498,22 @@ def _job_digest_ntfy() -> None:
         logger.exception("Erreur lors du digest ntfy")
 
 
+def _job_digest_whatsapp_matinal() -> None:
+    """Envoie le digest WhatsApp matinal (repas, tâches, péremptions) à 07h30."""
+    try:
+        import asyncio
+
+        from src.services.integrations.whatsapp import envoyer_digest_matinal
+
+        resultat = asyncio.run(envoyer_digest_matinal())
+        if resultat:
+            logger.info("Digest WhatsApp matinal envoyé")
+        else:
+            logger.debug("Digest WhatsApp matinal non envoyé (désactivé/non configuré)")
+    except Exception:
+        logger.exception("Erreur lors du digest WhatsApp matinal")
+
+
 def _job_digest_notifications_queue() -> None:
     """Vide les files digest en attente (Phase 8.4) et envoie les résumés utilisateur.
 
@@ -694,11 +710,9 @@ def _job_resume_hebdo() -> None:
         )
 
         dispatcher = get_dispatcher_notifications()
-        # ntfy toujours tenté; email et whatsapp si configurés
+        # ntfy, email et WhatsApp sont tous tentés. Le dispatcher résout
+        # l'email utilisateur depuis la DB quand aucun override n'est fourni.
         canaux = ["ntfy", "email", "whatsapp"]
-        import os
-
-        email_dest = os.getenv("EMAIL_RESUME_HEBDO")
         kwargs = {
             "titre": f"Résumé hebdomadaire {resume.semaine}",
             "type_email": "resume_hebdo",
@@ -710,11 +724,8 @@ def _job_resume_hebdo() -> None:
                 "taches_maison": resume.taches.nb_taches_realisees,
                 "resume_ia": resume.resume_narratif,
             },
+            "type_evenement": "resume_hebdo",
         }
-        if email_dest:
-            kwargs["email"] = email_dest
-        else:
-            canaux = ["ntfy", "whatsapp"]
 
         # Canal WhatsApp: résumé compact dédié.
         kwargs["type_whatsapp"] = "rapport_hebdo"
@@ -1918,6 +1929,7 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "push_quotidien": ("Notifications Web Push quotidiennes", _job_push_quotidien),
     "enrichissement_catalogues": ("Enrichissement mensuel catalogues IA", _job_enrichissement_catalogues),
     "digest_ntfy": ("Digest quotidien ntfy.sh", _job_digest_ntfy),
+    "digest_whatsapp_matinal": ("Digest WhatsApp matinal", _job_digest_whatsapp_matinal),
     "digest_notifications_queue": ("Flush digest notifications", _job_digest_notifications_queue),
     "rappel_courses": ("Rappel courses ntfy.sh", _job_rappel_courses_ntfy),
     "push_contextuel_soir": ("Push contextuel soir", _job_push_contextuel_soir),
@@ -2279,6 +2291,7 @@ class DémarreurCron:
         self._planifier_job("push_quotidien", CronTrigger(hour=9, minute=0))
         self._planifier_job("enrichissement_catalogues", CronTrigger(day=1, hour=3, minute=0))
         self._planifier_job("digest_ntfy", CronTrigger(hour=9, minute=0), replace_existing=True)
+        self._planifier_job("digest_whatsapp_matinal", CronTrigger(hour=7, minute=30), replace_existing=True)
         self._planifier_job("digest_notifications_queue", CronTrigger(hour="*/2", minute=5), replace_existing=True)
         self._planifier_job("rappel_courses", CronTrigger(hour=18, minute=0), replace_existing=True)
         self._planifier_job("push_contextuel_soir", CronTrigger(hour=18, minute=0), replace_existing=True)

@@ -25,6 +25,7 @@ Le fuseau horaire utilisé par le scheduler principal est `Europe/Paris`.
 | `rappels_generaux` | Quotidien 08:30 | Rappels intelligents + repas du soir | ntfy + push |
 | `entretien_saisonnier` | Lundi 06:00 | Vérification entretien saisonnier | Maison |
 | `push_quotidien` | Quotidien 09:00 | Push urgents | charge les abonnés DB en priorité |
+| `digest_whatsapp_matinal` | Quotidien 07:30 | Digest WhatsApp matinal | repas du jour, tâches, péremptions + boutons interactifs |
 | `digest_ntfy` | Quotidien 09:00 | Digest ntfy | résumé quotidien |
 | `rappel_courses` | Quotidien 18:00 | Rappel liste de courses | WhatsApp |
 | `push_contextuel_soir` | Quotidien 18:00 | Préparation du lendemain | ntfy + push |

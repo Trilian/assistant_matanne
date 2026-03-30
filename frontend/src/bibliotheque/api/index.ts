@@ -21,5 +21,6 @@ export * from "./calendriers";
 export * from "./preferences";
 export * from "./anti-gaspillage";
 export * from "./batch-cooking";
+export * from "./ia_avancee";
 export * from "./push";
 export * from "./export";

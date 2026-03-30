@@ -20,6 +20,7 @@ import {
   Wrench,
   Settings,
   Map,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserRequete } from "@/crochets/utiliser-api";
@@ -45,12 +46,13 @@ const PLUS_ITEMS = [
   { nom: "Ma Semaine", chemin: "/ma-semaine", Icone: CalendarRange },
   { nom: "Habitat", chemin: "/habitat", Icone: Map },
   { nom: "Jeux", chemin: "/jeux", Icone: Gamepad2 },
+  { nom: "IA Avancée", chemin: "/ia-avancee", Icone: Sparkles },
   { nom: "Outils", chemin: "/outils", Icone: Wrench },
   { nom: "Paramètres", chemin: "/parametres", Icone: Settings },
 ] as const;
 
 /** Routes couvertes par l'onglet « Plus » */
-const PLUS_PREFIXES = ["/ma-semaine", "/habitat", "/jeux", "/outils", "/parametres"];
+const PLUS_PREFIXES = ["/ma-semaine", "/habitat", "/jeux", "/ia-avancee", "/outils", "/parametres"];
 
 /**
  * Bottom navigation bar mobile — visible uniquement sur petits écrans (< md).

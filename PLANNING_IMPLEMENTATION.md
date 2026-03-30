@@ -843,39 +843,50 @@ La sidebar actuelle contient :
 ### Phase 5 — Notifications avancées (P1-P2)
 
 > **Objectif** : Système de notification fiable et multi-canal
+> **Statut (2026-03-30)** : ✅ Implémenté
 
-| # | Action |
-|---|--------|
-| 5.1 | Cascade failover (Push → Email → WhatsApp) |
-| 5.2 | Templates email HTML (Jinja2) |
-| 5.3 | Rate limiting WhatsApp |
-| 5.4 | Validation numéro téléphone |
-| 5.5 | Commandes WhatsApp supplémentaires (planning, météo, jardin) |
-| 5.6 | Digest WhatsApp matinal |
-| 5.7 | Fix `_envoyer_aide_admin()` manquant |
-| 5.8 | Boutons interactifs WhatsApp |
-| 5.9 | Email résumé hebdo automatique |
+| # | Action | Statut | Détails implémentés |
+|---|--------|--------|---------------------|
+| 5.1 | Cascade failover (Push → Email → WhatsApp) | ✅ | Dispatcher enrichi avec chaîne de fallback multi-canal et journalisation des bascules réussies/échouées |
+| 5.2 | Templates email HTML (Jinja2) | ✅ | `ServiceEmail` refactoré avec Jinja2 + dossier `templates/` (`reset_password`, `verification_email`, `resume_hebdo`, `rapport_mensuel`, `alerte_critique`, `invitation_famille`, `digest`) |
+| 5.3 | Rate limiting WhatsApp | ✅ | Limites in-memory ajoutées côté intégration WhatsApp (`10/h` par destinataire, `100/jour` global) |
+| 5.4 | Validation numéro téléphone | ✅ | Validation E.164 + normalisation des numéros FR avant envoi WhatsApp |
+| 5.5 | Commandes WhatsApp supplémentaires (planning, météo, jardin) | ✅ | Webhook enrichi avec commandes `météo`, `jardin`, `énergie`, `entretien` + handlers dédiés |
+| 5.6 | Digest WhatsApp matinal | ✅ | Nouveau digest matinal WhatsApp avec repas du jour, péremptions proches et tâches du jour |
+| 5.7 | Fix `_envoyer_aide_admin()` manquant | ✅ | Handler admin présent et complété avec les nouvelles commandes Phase 5 |
+| 5.8 | Boutons interactifs WhatsApp | ✅ | Support boutons + listes interactives, nouveaux handlers d'actions (`digest`, `courses`, `entretien`) et réponses `button_reply` / `list_reply` |
+| 5.9 | Email résumé hebdo automatique | ✅ | Job cron hebdo corrigé pour toujours tenter le canal email via résolution automatique de l'adresse utilisateur dans le dispatcher |
 
 ### Phase 6 — IA avancée (P1-P2)
 
 > **Objectif** : IA proactive et contextuelle
+> **Statut (2026-03-30)** : ✅ Implémenté
 
-| # | Action |
-|---|--------|
-| 6.1 | Inventaire → suggestions achats IA (historique consommation) |
-| 6.2 | Planning adaptatif (météo + énergie Garmin + budget) |
-| 6.3 | Diagnostic plantes photo (Pixtral — infra existe) |
-| 6.4 | Budget → prévision dépenses fin de mois |
-| 6.5 | Idées cadeaux IA (anniversaires) |
-| 6.6 | Analyse photo multi-usage (un bouton, IA détecte le contexte) |
-| 6.7 | Optimisation routines IA |
-| 6.8 | Analyse documents photo (OCR + classement auto) |
-| 6.9 | Estimation travaux IA améliorée (photo avant/après) |
-| 6.10 | Planning voyage IA (destination + dates + budget → itinéraire) |
-| 6.11 | Recommandations économies énergie |
-| 6.12 | Prédiction pannes entretien |
-| 6.13 | Suggestions proactives (l'app propose sans qu'on demande) |
-| 6.14 | Météo → Planning repas / Jardin / Activités famille |
+| # | Action | Statut | Détails implémentés |
+|---|--------|--------|---------------------|
+| 6.1 | Inventaire → suggestions achats IA (historique consommation) | ✅ | Endpoint `GET /api/v1/ia-avancee/suggestions-achats` + analyse inventaire/stock bas |
+| 6.2 | Planning adaptatif (météo + énergie Garmin + budget) | ✅ | Endpoint `POST /api/v1/ia-avancee/planning-adaptatif` + contexte planning/budget |
+| 6.3 | Diagnostic plantes photo (Pixtral — infra existe) | ✅ | Endpoint `POST /api/v1/ia-avancee/diagnostic-plante` via service multimodal Pixtral |
+| 6.4 | Budget → prévision dépenses fin de mois | ✅ | Endpoint `GET /api/v1/ia-avancee/prevision-depenses` + agrégation budget mensuelle |
+| 6.5 | Idées cadeaux IA (anniversaires) | ✅ | Endpoint `POST /api/v1/ia-avancee/idees-cadeaux` + scoring contexte occasion/budget |
+| 6.6 | Analyse photo multi-usage (un bouton, IA détecte le contexte) | ✅ | Endpoint `POST /api/v1/ia-avancee/analyse-photo` avec autodétection recette/plante/maison/document/plat |
+| 6.7 | Optimisation routines IA | ✅ | Endpoint `GET /api/v1/ia-avancee/optimisation-routines` + analyse routines existantes |
+| 6.8 | Analyse documents photo (OCR + classement auto) | ✅ | Endpoint `POST /api/v1/ia-avancee/analyse-document` + OCR/classification/actions suggérées |
+| 6.9 | Estimation travaux IA améliorée (photo avant/après) | ✅ | Endpoint `POST /api/v1/ia-avancee/estimation-travaux` + budget/durée/DIY/artisans |
+| 6.10 | Planning voyage IA (destination + dates + budget → itinéraire) | ✅ | Endpoint `POST /api/v1/ia-avancee/planning-voyage` + itinéraire jour par jour |
+| 6.11 | Recommandations économies énergie | ✅ | Endpoint `GET /api/v1/ia-avancee/recommandations-energie` + lecture relevés compteur |
+| 6.12 | Prédiction pannes entretien | ✅ | Endpoint `GET /api/v1/ia-avancee/prediction-pannes` + score santé équipements |
+| 6.13 | Suggestions proactives (l'app propose sans qu'on demande) | ✅ | Endpoint `GET /api/v1/ia-avancee/suggestions-proactives` + agrégation multi-modules |
+| 6.14 | Météo → Planning repas / Jardin / Activités famille | ✅ | Endpoint `POST /api/v1/ia-avancee/adaptations-meteo` + adaptations repas/jardin/activités |
+
+**Détails implémentation** :
+
+- Nouveau package `src/services/ia_avancee/` avec `IAAvanceeService` centralisant les 14 fonctionnalités Phase 6
+- Nouveaux schémas typés dans `src/services/ia_avancee/types.py` et `src/api/schemas/ia_avancee.py`
+- Nouveau routeur FastAPI `src/api/routes/ia_avancee.py` avec 14 endpoints protégés par auth + rate limiting IA
+- Réutilisation de l'infrastructure existante `BaseAIService` (cache sémantique, circuit breaker, parsing JSON, rate limiting)
+- Réutilisation du service multimodal Pixtral pour les analyses photo/plante/document/travaux
+- Intégration de contexte DB réel pour inventaire, budget, planning, routines, énergie et suggestions proactives
 
 ### Phase 7 — Mode admin avancé (P1-P2)
 

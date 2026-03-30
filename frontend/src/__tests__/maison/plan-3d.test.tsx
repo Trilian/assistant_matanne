@@ -3,7 +3,8 @@ import { render, screen } from "@testing-library/react";
 import Plan3D from "@/composants/maison/plan-3d";
 
 vi.mock("@react-three/fiber", () => ({
-  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="canvas">{children}</div>,
+  // Do not render children in JSDOM to avoid warnings from Three.js primitives.
+  Canvas: () => <div data-testid="canvas" />,
 }));
 
 vi.mock("@react-three/drei", () => ({

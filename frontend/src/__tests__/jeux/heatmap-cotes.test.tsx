@@ -4,7 +4,9 @@ import { HeatmapCotes } from "@/composants/jeux/heatmap-cotes";
 
 vi.mock("next/dynamic", () => ({
   default: (loader: () => unknown) => {
-    const MockComponent = (props: Record<string, unknown>) => <div data-testid="dynamic-chart" {...props} />;
+    const MockComponent = ({ children }: { children?: React.ReactNode }) => (
+      <div data-testid="dynamic-chart">{children}</div>
+    );
     return MockComponent;
   },
 }));

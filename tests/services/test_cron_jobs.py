@@ -74,6 +74,11 @@ class TestJobsSchedules:
         job_ids = [j.id for j in demarreur_cron._scheduler.get_jobs()]
         assert "digest_notifications_queue" in job_ids
 
+    def test_job_digest_whatsapp_matinal_present(self, demarreur_cron):
+        """digest_whatsapp_matinal doit être dans le scheduler."""
+        job_ids = [j.id for j in demarreur_cron._scheduler.get_jobs()]
+        assert "digest_whatsapp_matinal" in job_ids
+
     def test_job_sync_calendrier_scolaire_present(self, demarreur_cron):
         """sync_calendrier_scolaire doit être dans le scheduler."""
         job_ids = [j.id for j in demarreur_cron._scheduler.get_jobs()]
@@ -403,6 +408,22 @@ class TestDigestQueueCron:
         assert mock_dispatcher.vider_digest.call_count == 2
         mock_dispatcher.vider_digest.assert_any_call("u1")
         mock_dispatcher.vider_digest.assert_any_call("u2")
+
+
+class TestDigestWhatsappMatinalCron:
+    """Tests du job digest WhatsApp matinal."""
+
+    def test_job_digest_whatsapp_matinal_appelle_integration(self):
+        """Le job doit appeler envoyer_digest_matinal()."""
+        from src.services.core.cron.jobs import _job_digest_whatsapp_matinal
+
+        with patch(
+            "src.services.integrations.whatsapp.envoyer_digest_matinal",
+            new=AsyncMock(return_value=True),
+        ) as mock_digest:
+            _job_digest_whatsapp_matinal()
+
+        mock_digest.assert_called_once()
 
 
 class TestJobExecutionsPersistence:

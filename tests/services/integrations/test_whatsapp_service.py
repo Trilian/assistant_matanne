@@ -9,6 +9,7 @@ Couvre src/services/integrations/whatsapp.py :
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -164,3 +165,57 @@ class TestMasquageNumero:
         # Au moins un log avec le hash SHA-256
         found = any(hash_attendu in r.getMessage() for r in caplog.records)
         assert found, f"Hash SHA-256 '{hash_attendu}' non trouvé dans les logs."
+
+
+class TestValidationNumeroWhatsapp:
+    """Tests de validation/normalisation des numéros WhatsApp."""
+
+    def test_valider_numero_format_fr_converti(self):
+        """Un numéro FR local 06... est converti en 33..."""
+        from src.services.integrations.whatsapp import valider_numero_telephone
+
+        ok, numero = valider_numero_telephone("06 12 34 56 78")
+        assert ok is True
+        assert numero == "33612345678"
+
+    def test_valider_numero_invalide(self):
+        """Un numéro invalide doit être refusé."""
+        from src.services.integrations.whatsapp import valider_numero_telephone
+
+        ok, _ = valider_numero_telephone("abc")
+        assert ok is False
+
+
+class TestDigestMatinalWhatsapp:
+    """Tests du digest WhatsApp matinal."""
+
+    @pytest.mark.asyncio
+    async def test_digest_matinal_sans_destinataire_retourne_false(self):
+        """Sans numéro admin configuré, aucun envoi n'est tenté."""
+        from src.services.integrations.whatsapp import envoyer_digest_matinal
+
+        with patch("src.services.integrations.whatsapp.obtenir_parametres") as mock_params:
+            mock_params.return_value.WHATSAPP_USER_NUMBER = ""
+            result = await envoyer_digest_matinal()
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_digest_matinal_avec_destinataire_envoie_interactif(self):
+        """Le digest doit appeler envoyer_message_interactif avec des boutons."""
+        from src.services.integrations.whatsapp import envoyer_digest_matinal
+
+        @contextmanager
+        def _ctx_db():
+            yield MagicMock()
+
+        with (
+            patch("src.services.integrations.whatsapp.obtenir_parametres") as mock_params,
+            patch("src.services.integrations.whatsapp.envoyer_message_interactif", new=AsyncMock(return_value=True)) as mock_interactif,
+            patch("src.core.db.obtenir_contexte_db", return_value=_ctx_db()),
+        ):
+            mock_params.return_value.WHATSAPP_USER_NUMBER = "33612345678"
+            result = await envoyer_digest_matinal()
+
+        assert result is True
+        mock_interactif.assert_called_once()

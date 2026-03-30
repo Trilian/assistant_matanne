@@ -8,12 +8,16 @@ Couvre src/api/routes/webhooks_whatsapp.py :
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+from typing import Any, cast
 from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport
+
+Payload = dict[str, Any]
 
 
 # ═══════════════════════════════════════════════════════════
@@ -22,7 +26,7 @@ from httpx import ASGITransport
 
 
 @pytest_asyncio.fixture
-async def async_client():
+async def async_client() -> AsyncIterator[httpx.AsyncClient]:
     """Client async standard (webhooks WhatsApp ne nécessitent pas d'auth utilisateur)."""
     from src.api.main import app
 
@@ -33,7 +37,7 @@ async def async_client():
         yield client
 
 
-def _payload_message_texte(sender: str, texte: str) -> dict:
+def _payload_message_texte(sender: str, texte: str) -> Payload:
     """Construit un payload WhatsApp Cloud API typique (message texte)."""
     return {
         "entry": [
@@ -57,7 +61,7 @@ def _payload_message_texte(sender: str, texte: str) -> dict:
     }
 
 
-def _payload_button_reply(sender: str, action_id: str) -> dict:
+def _payload_button_reply(sender: str, action_id: str) -> Payload:
     """Construit un payload WhatsApp interactive button_reply."""
     return {
         "entry": [
@@ -74,6 +78,33 @@ def _payload_button_reply(sender: str, action_id: str) -> dict:
                                         "button_reply": {"id": action_id, "title": "OK"},
                                     },
                                     "id": "wamid.btn123",
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+
+
+def _payload_list_reply(sender: str, action_id: str) -> Payload:
+    """Construit un payload WhatsApp interactive list_reply."""
+    return {
+        "entry": [
+            {
+                "changes": [
+                    {
+                        "value": {
+                            "messages": [
+                                {
+                                    "from": sender,
+                                    "type": "interactive",
+                                    "interactive": {
+                                        "type": "list_reply",
+                                        "list_reply": {"id": action_id, "title": "Action"},
+                                    },
+                                    "id": "wamid.list123",
                                 }
                             ]
                         }
@@ -143,16 +174,12 @@ class TestReceptionMessageTexte:
     @pytest.mark.asyncio
     async def test_message_planning_repond_ok(self, async_client: httpx.AsyncClient):
         """Message 'planning' → réponse planning envoyée, HTTP 200."""
-        with patch(
-            "src.api.routes.webhooks_whatsapp._traiter_message_texte",
-            new_callable=lambda: lambda *a, **kw: AsyncMock(return_value=None).__call__(*a, **kw),
-        ) as mock_traiter:
-            mock_traiter = AsyncMock()
-            with patch("src.api.routes.webhooks_whatsapp._traiter_message_texte", mock_traiter):
-                response = await async_client.post(
-                    "/api/v1/whatsapp/webhook",
-                    json=_payload_message_texte("33612345678", "planning"),
-                )
+        mock_traiter = AsyncMock()
+        with patch("src.api.routes.webhooks_whatsapp._traiter_message_texte", mock_traiter):
+            response = await async_client.post(
+                "/api/v1/whatsapp/webhook",
+                json=_payload_message_texte("33612345678", "planning"),
+            )
 
         assert response.status_code == 200
         mock_traiter.assert_called_once_with("33612345678", "planning")
@@ -181,7 +208,7 @@ class TestReceptionMessageTexte:
         """Payload entry sans changes → 200."""
         response = await async_client.post(
             "/api/v1/whatsapp/webhook",
-            json={"entry": [{"changes": []}]},
+            json=cast(Payload, {"entry": [{"changes": []}]}),
         )
         assert response.status_code == 200
 
@@ -190,7 +217,7 @@ class TestReceptionMessageTexte:
         """Payload changes sans messages → 200."""
         response = await async_client.post(
             "/api/v1/whatsapp/webhook",
-            json={"entry": [{"changes": [{"value": {"messages": []}}]}]},
+            json=cast(Payload, {"entry": [{"changes": [{"value": {"messages": []}}]}]}),
         )
         assert response.status_code == 200
 
@@ -230,29 +257,72 @@ class TestReponsesBouton:
         mock_action.assert_called_once_with("33600000000", "planning_modifier")
 
     @pytest.mark.asyncio
+    async def test_list_reply_redirige_vers_traiter_action(self, async_client: httpx.AsyncClient):
+        """Interactive list_reply doit être routé vers _traiter_action_bouton."""
+        mock_action = AsyncMock()
+        with patch("src.api.routes.webhooks_whatsapp._traiter_action_bouton", mock_action):
+            response = await async_client.post(
+                "/api/v1/whatsapp/webhook",
+                json=_payload_list_reply("33600000000", "cmd_meteo"),
+            )
+
+        assert response.status_code == 200
+        mock_action.assert_called_once_with("33600000000", "cmd_meteo")
+
+    @pytest.mark.asyncio
     async def test_traiter_action_bouton_valider_envoie_confirmation(self):
         """_traiter_action_bouton(planning_valider) → appel envoyer_message_whatsapp."""
-        from src.api.routes.webhooks_whatsapp import _traiter_action_bouton
+        from src.api.routes import webhooks_whatsapp as webhook_module
+
+        traiter_action_bouton = cast(Any, webhook_module)._traiter_action_bouton
 
         mock_envoyer = AsyncMock(return_value=True)
         mock_valider = AsyncMock()
         with (
-            patch("src.api.routes.webhooks_whatsapp.envoyer_message_whatsapp", mock_envoyer),
+            patch("src.services.integrations.whatsapp.envoyer_message_whatsapp", mock_envoyer),
             patch("src.api.routes.webhooks_whatsapp._valider_planning_courant", mock_valider),
         ):
-            await _traiter_action_bouton("33611111111", "planning_valider")
+            await traiter_action_bouton("33611111111", "planning_valider")
 
         mock_valider.assert_called_once()
         mock_envoyer.assert_called_once()
-        assert "validé" in mock_envoyer.call_args[0][1].lower()
+        assert "valide" in mock_envoyer.call_args[0][1].lower()
 
     @pytest.mark.asyncio
     async def test_traiter_message_texte_courses_envoie_liste(self):
         """_traiter_message_texte('courses') → appel _envoyer_liste_courses."""
-        from src.api.routes.webhooks_whatsapp import _traiter_message_texte
+        from src.api.routes import webhooks_whatsapp as webhook_module
+
+        traiter_message_texte = cast(Any, webhook_module)._traiter_message_texte
 
         mock_envoyer_liste = AsyncMock()
         with patch("src.api.routes.webhooks_whatsapp._envoyer_liste_courses", mock_envoyer_liste):
-            await _traiter_message_texte("33611111111", "courses")
+            await traiter_message_texte("33611111111", "courses")
 
         mock_envoyer_liste.assert_called_once_with("33611111111")
+
+    @pytest.mark.asyncio
+    async def test_traiter_action_bouton_digest_courses(self):
+        """Action digest_courses doit renvoyer la liste de courses."""
+        from src.api.routes import webhooks_whatsapp as webhook_module
+
+        traiter_action_bouton = cast(Any, webhook_module)._traiter_action_bouton
+
+        mock_liste = AsyncMock()
+        with patch("src.api.routes.webhooks_whatsapp._envoyer_liste_courses", mock_liste):
+            await traiter_action_bouton("33611111111", "digest_courses")
+
+        mock_liste.assert_called_once_with("33611111111")
+
+    @pytest.mark.asyncio
+    async def test_traiter_action_bouton_cmd_route_texte(self):
+        """Action cmd_* doit être reroutée vers _traiter_message_texte."""
+        from src.api.routes import webhooks_whatsapp as webhook_module
+
+        traiter_action_bouton = cast(Any, webhook_module)._traiter_action_bouton
+
+        mock_texte = AsyncMock()
+        with patch("src.api.routes.webhooks_whatsapp._traiter_message_texte", mock_texte):
+            await traiter_action_bouton("33611111111", "cmd_meteo")
+
+        mock_texte.assert_called_once_with("33611111111", "meteo")

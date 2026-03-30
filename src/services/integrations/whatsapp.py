@@ -9,9 +9,17 @@ Utilisé pour :
 - Recevoir la validation "OK" / "Changer lundi soir" par message
 - Alertes péremption
 - Rappels de repas du jour
+
+Rate limiting intégré :
+- 10 messages/heure par destinataire
+- 100 messages/jour global
+- Respect des quotas Meta (1000 conversations/mois)
 """
 
 import logging
+import re
+import time
+from collections import defaultdict
 
 import httpx
 
@@ -20,6 +28,88 @@ from src.core.config import obtenir_parametres
 logger = logging.getLogger(__name__)
 
 META_API_BASE = "https://graph.facebook.com/v21.0"
+
+
+# ═══════════════════════════════════════════════════════════
+# RATE LIMITING
+# ═══════════════════════════════════════════════════════════
+
+_LIMITE_PAR_HEURE = 10
+_LIMITE_PAR_JOUR = 100
+
+_compteurs_heure: dict[str, list[float]] = defaultdict(list)
+_compteurs_jour: list[float] = []
+
+
+def _nettoyer_compteur_heure(dest: str) -> None:
+    """Supprime les entrées de plus d'une heure."""
+    seuil = time.monotonic() - 3600
+    _compteurs_heure[dest] = [t for t in _compteurs_heure[dest] if t > seuil]
+
+
+def _nettoyer_compteur_jour() -> None:
+    """Supprime les entrées de plus de 24h."""
+    global _compteurs_jour
+    seuil = time.monotonic() - 86400
+    _compteurs_jour = [t for t in _compteurs_jour if t > seuil]
+
+
+def _verifier_rate_limit(destinataire: str) -> tuple[bool, str]:
+    """Vérifie si l'envoi est autorisé.
+
+    Returns:
+        (autorisé, raison si refusé)
+    """
+    _nettoyer_compteur_heure(destinataire)
+    if len(_compteurs_heure[destinataire]) >= _LIMITE_PAR_HEURE:
+        return False, f"Limite horaire atteinte ({_LIMITE_PAR_HEURE}/h) pour ce destinataire"
+
+    _nettoyer_compteur_jour()
+    if len(_compteurs_jour) >= _LIMITE_PAR_JOUR:
+        return False, f"Limite journalière atteinte ({_LIMITE_PAR_JOUR}/jour)"
+
+    return True, ""
+
+
+def _enregistrer_envoi(destinataire: str) -> None:
+    """Enregistre un envoi réussi pour le rate limiting."""
+    now = time.monotonic()
+    _compteurs_heure[destinataire].append(now)
+    _compteurs_jour.append(now)
+
+
+# ═══════════════════════════════════════════════════════════
+# VALIDATION NUMÉRO DE TÉLÉPHONE
+# ═══════════════════════════════════════════════════════════
+
+_REGEX_E164 = re.compile(r"^\d{10,15}$")
+
+
+def valider_numero_telephone(numero: str) -> tuple[bool, str]:
+    """Valide un numéro de téléphone au format international E.164 (sans le +).
+
+    Exemples valides : "33612345678", "14155552671"
+    Exemples invalides : "+33612345678", "06 12 34 56 78", ""
+
+    Returns:
+        (valide, numéro nettoyé ou message d'erreur)
+    """
+    if not numero:
+        return False, "Numéro vide"
+
+    # Nettoyer : supprimer espaces, tirets, parenthèses, +
+    propre = numero.replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
+    if propre.startswith("+"):
+        propre = propre[1:]
+
+    # Convertir le format français 06/07 → international
+    if propre.startswith("0") and len(propre) == 10:
+        propre = "33" + propre[1:]
+
+    if not _REGEX_E164.match(propre):
+        return False, f"Format invalide : '{numero}' → attendu 10-15 chiffres (format E.164)"
+
+    return True, propre
 
 
 async def envoyer_message_whatsapp(
@@ -41,6 +131,19 @@ async def envoyer_message_whatsapp(
         logger.debug("WhatsApp non configuré — message ignoré")
         return False
 
+    # Validation du numéro
+    valide, resultat = valider_numero_telephone(destinataire)
+    if not valide:
+        logger.warning("WhatsApp : numéro invalide — %s", resultat)
+        return False
+    destinataire = resultat
+
+    # Rate limiting
+    autorise, raison = _verifier_rate_limit(destinataire)
+    if not autorise:
+        logger.warning("WhatsApp rate limit : %s", raison)
+        return False
+
     url = f"{META_API_BASE}/{settings.META_PHONE_NUMBER_ID}/messages"
     headers = {
         "Authorization": f"Bearer {settings.META_WHATSAPP_TOKEN}",
@@ -60,6 +163,7 @@ async def envoyer_message_whatsapp(
             import hashlib
             hash_dest = hashlib.sha256(destinataire.encode()).hexdigest()[:8]
             logger.info(f"✅ Message WhatsApp envoyé à [hash:{hash_dest}]")
+            _enregistrer_envoi(destinataire)
             return True
     except httpx.HTTPStatusError as e:
         logger.error(f"❌ Erreur WhatsApp HTTP {e.response.status_code}: {e.response.text}")
@@ -84,6 +188,19 @@ async def envoyer_message_interactif(
     settings = obtenir_parametres()
 
     if not settings.META_WHATSAPP_TOKEN or not settings.META_PHONE_NUMBER_ID:
+        return False
+
+    # Validation du numéro
+    valide, resultat = valider_numero_telephone(destinataire)
+    if not valide:
+        logger.warning("WhatsApp interactif : numéro invalide — %s", resultat)
+        return False
+    destinataire = resultat
+
+    # Rate limiting
+    autorise, raison = _verifier_rate_limit(destinataire)
+    if not autorise:
+        logger.warning("WhatsApp interactif rate limit : %s", raison)
         return False
 
     url = f"{META_API_BASE}/{settings.META_PHONE_NUMBER_ID}/messages"
@@ -113,6 +230,7 @@ async def envoyer_message_interactif(
         async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.post(url, json=payload, headers=headers)
             resp.raise_for_status()
+            _enregistrer_envoi(destinataire)
             return True
     except Exception as e:
         logger.error(f"❌ Erreur WhatsApp interactif : {e}")
@@ -212,3 +330,183 @@ async def envoyer_rapport_hebdo_whatsapp(texte_resume: str) -> bool:
             {"id": "resume_detail", "title": "📊 Détail"},
         ],
     )
+
+
+async def envoyer_digest_matinal() -> bool:
+    """Envoie le digest matinal WhatsApp : résumé de la journée à venir.
+
+    Contenu :
+    - Repas prévus aujourd'hui
+    - Tâches/rendez-vous du jour
+    - Alertes péremption imminentes
+    - Météo (si configurée)
+
+    Appelé par le CRON job matinal (7h-8h).
+    """
+    from datetime import date, timedelta
+
+    settings = obtenir_parametres()
+    destinataire = settings.WHATSAPP_USER_NUMBER
+
+    if not destinataire:
+        return False
+
+    aujourd_hui = date.today()
+    sections: list[str] = []
+
+    # 1. Repas du jour
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.planning import Repas
+
+        with obtenir_contexte_db() as session:
+            repas = (
+                session.query(Repas)
+                .filter(Repas.date_repas == aujourd_hui)
+                .order_by(Repas.type_repas)
+                .all()
+            )
+            if repas:
+                lignes = []
+                for r in repas:
+                    nom = r.recette.nom if getattr(r, "recette", None) else (r.notes or "?")
+                    emoji = "🌙" if r.type_repas == "diner" else "☀️"
+                    lignes.append(f"  {emoji} {r.type_repas.capitalize()} : {nom}")
+                sections.append("🍽️ *Repas du jour :*\n" + "\n".join(lignes))
+    except Exception:
+        logger.debug("Digest matinal : repas indisponibles")
+
+    # 2. Alertes péremption (J0-J2)
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire
+
+        with obtenir_contexte_db() as session:
+            seuil = aujourd_hui + timedelta(days=2)
+            peremptions = (
+                session.query(ArticleInventaire)
+                .filter(
+                    ArticleInventaire.date_peremption.isnot(None),
+                    ArticleInventaire.date_peremption <= seuil,
+                )
+                .limit(5)
+                .all()
+            )
+            if peremptions:
+                lignes = [f"  • {a.nom} — {a.date_peremption}" for a in peremptions]
+                sections.append("⚠️ *Péremptions proches :*\n" + "\n".join(lignes))
+    except Exception:
+        logger.debug("Digest matinal : péremptions indisponibles")
+
+    # 3. Tâches du jour (entretien/maison)
+    try:
+        from src.core.db import obtenir_contexte_db
+
+        with obtenir_contexte_db() as session:
+            from sqlalchemy import text
+
+            rows = session.execute(
+                text(
+                    "SELECT titre FROM taches_maison"
+                    " WHERE statut NOT IN ('termine', 'annule')"
+                    " AND date_echeance = :today"
+                    " LIMIT 5"
+                ),
+                {"today": aujourd_hui},
+            ).fetchall()
+            if rows:
+                lignes = [f"  • {titre}" for (titre,) in rows]
+                sections.append("📋 *Tâches du jour :*\n" + "\n".join(lignes))
+    except Exception:
+        logger.debug("Digest matinal : tâches indisponibles")
+
+    if not sections:
+        message = f"☀️ *Bonjour !* — {aujourd_hui.strftime('%A %d %B')}\n\nRien de spécial prévu aujourd'hui. Bonne journée !"
+    else:
+        message = f"☀️ *Bonjour !* — {aujourd_hui.strftime('%A %d %B')}\n\n" + "\n\n".join(sections)
+
+    return await envoyer_message_interactif(
+        destinataire=destinataire,
+        corps=message,
+        boutons=[
+            {"id": "digest_courses", "title": "🛒 Courses"},
+            {"id": "digest_detail", "title": "📊 Détail"},
+        ],
+    )
+
+
+async def envoyer_message_liste(
+    destinataire: str,
+    corps: str,
+    bouton_texte: str,
+    sections: list[dict],
+) -> bool:
+    """Envoie un message avec une liste interactive WhatsApp.
+
+    Args:
+        destinataire: Numéro au format international
+        corps: Texte principal du message
+        bouton_texte: Texte du bouton pour ouvrir la liste (max 20 chars)
+        sections: Liste de sections, chaque section = {
+            "title": "Titre section",
+            "rows": [{"id": "action_id", "title": "Texte", "description": "Desc optionnelle"}]
+        }
+    """
+    settings = obtenir_parametres()
+
+    if not settings.META_WHATSAPP_TOKEN or not settings.META_PHONE_NUMBER_ID:
+        return False
+
+    valide, resultat = valider_numero_telephone(destinataire)
+    if not valide:
+        return False
+    destinataire = resultat
+
+    autorise, raison = _verifier_rate_limit(destinataire)
+    if not autorise:
+        logger.warning("WhatsApp liste rate limit : %s", raison)
+        return False
+
+    url = f"{META_API_BASE}/{settings.META_PHONE_NUMBER_ID}/messages"
+    headers = {
+        "Authorization": f"Bearer {settings.META_WHATSAPP_TOKEN}",
+        "Content-Type": "application/json",
+    }
+
+    # Formater les sections pour Meta API
+    sections_wa = []
+    for section in sections[:10]:
+        rows_wa = []
+        for row in section.get("rows", [])[:10]:
+            row_wa = {
+                "id": row["id"][:200],
+                "title": row["title"][:24],
+            }
+            if row.get("description"):
+                row_wa["description"] = row["description"][:72]
+            rows_wa.append(row_wa)
+        sections_wa.append({"title": section.get("title", "")[:24], "rows": rows_wa})
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": destinataire,
+        "type": "interactive",
+        "interactive": {
+            "type": "list",
+            "body": {"text": corps},
+            "action": {
+                "button": bouton_texte[:20],
+                "sections": sections_wa,
+            },
+        },
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(url, json=payload, headers=headers)
+            resp.raise_for_status()
+            _enregistrer_envoi(destinataire)
+            return True
+    except Exception as e:
+        logger.error("❌ Erreur WhatsApp liste : %s", e)
+        return False

@@ -48,6 +48,10 @@ import {
   Wrench,
   ClipboardCheck,
   Map,
+  Sparkles,
+  BarChart3,
+  Lightbulb,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -180,6 +184,16 @@ const LIENS: LienNav[] = [
       { nom: "Bankroll", chemin: "/jeux/bankroll", Icone: TrendingUp },
       { nom: "Performance", chemin: "/jeux/performance", Icone: TrendingUp },
       { nom: "Jeu responsable", chemin: "/jeux/responsable", Icone: Shield },
+    ],
+  },
+  {
+    nom: "IA Avancée",
+    chemin: "/ia-avancee",
+    Icone: Sparkles,
+    sousLiens: [
+      { nom: "Dashboard", chemin: "/ia-avancee", Icone: BarChart3 },
+      { nom: "Suggestions achats", chemin: "/ia-avancee/suggestions-achats", Icone: Lightbulb },
+      { nom: "Suggestions proactives", chemin: "/ia-avancee/suggestions-proactives", Icone: Zap },
     ],
   },
 ];

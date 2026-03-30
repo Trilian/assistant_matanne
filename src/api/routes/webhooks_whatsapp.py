@@ -1,14 +1,14 @@
 ﻿"""
-Webhook WhatsApp â€” RÃ©ception des messages entrants Meta Cloud API.
+Webhook WhatsApp pour la reception des messages entrants Meta Cloud API.
 
-Endpoints :
-- GET  /api/v1/whatsapp/webhook : VÃ©rification Meta (challenge)
-- POST /api/v1/whatsapp/webhook : RÃ©ception messages et rÃ©ponses boutons
+Endpoints:
+- GET  /api/v1/whatsapp/webhook : verification Meta (challenge)
+- POST /api/v1/whatsapp/webhook : reception messages et reponses boutons
 
-Machine d'Ã©tat conversationnelle :
-- "planning_valider" â†’ valide le planning proposÃ©
-- "planning_modifier" â†’ demande quel repas modifier
-- "planning_regenerer" â†’ relance la gÃ©nÃ©ration IA
+Machine d'etat conversationnelle:
+- "planning_valider" : valide le planning propose
+- "planning_modifier" : demande quel repas modifier
+- "planning_regenerer" : relance la generation IA
 """
 
 import logging
@@ -25,9 +25,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/whatsapp", tags=["WhatsApp"])
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# VÃ‰RIFICATION WEBHOOK META
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ============================================================
+# VERIFICATION WEBHOOK META
+# ============================================================
 
 
 @router.get("/webhook")
@@ -36,7 +36,7 @@ async def verifier_webhook_whatsapp(
     hub_verify_token: str = Query(None, alias="hub.verify_token"),
     hub_challenge: str = Query(None, alias="hub.challenge"),
 ) -> int | str:
-    """Endpoint de vÃ©rification Meta.
+    """Endpoint de verification Meta.
 
     Meta envoie un GET avec hub.mode=subscribe, hub.verify_token et hub.challenge.
     On valide le token et retourne le challenge.
@@ -44,28 +44,28 @@ async def verifier_webhook_whatsapp(
     settings = obtenir_parametres()
 
     if hub_mode == "subscribe" and hub_verify_token == settings.WHATSAPP_VERIFY_TOKEN:
-        logger.info("âœ… Webhook WhatsApp vÃ©rifiÃ© par Meta")
+        logger.info("Webhook WhatsApp verifie par Meta")
         return int(hub_challenge) if hub_challenge else 0
 
-    logger.warning("âš ï¸ Tentative de vÃ©rification webhook invalide")
-    raise HTTPException(status_code=403, detail="Token de vÃ©rification invalide")
+    logger.warning("Tentative de verification webhook invalide")
+    raise HTTPException(status_code=403, detail="Token de verification invalide")
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# RÃ‰CEPTION MESSAGES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ============================================================
+# RECEPTION MESSAGES
+# ============================================================
 
 
 @router.post("/webhook", response_model=MessageResponse)
 @gerer_exception_api
 async def recevoir_message_whatsapp(request: Request) -> MessageResponse:
-    """ReÃ§oit les messages WhatsApp entrants (texte ou rÃ©ponse bouton).
+    """Recoit les messages WhatsApp entrants (texte ou reponse bouton).
 
     Traite les interactions du flux planning :
-    - Bouton "planning_valider" â†’ valide le planning de la semaine
-    - Bouton "planning_modifier" â†’ envoie les options de modification
-    - Bouton "planning_regenerer" â†’ relance la suggestion IA
-    - Texte libre â†’ interprÃ©tation IA basique
+    - Bouton "planning_valider" : valide le planning de la semaine
+    - Bouton "planning_modifier" : envoie les options de modification
+    - Bouton "planning_regenerer" : relance la suggestion IA
+    - Texte libre : interpretation IA basique
     """
     body = await request.json()
 
@@ -87,12 +87,14 @@ async def recevoir_message_whatsapp(request: Request) -> MessageResponse:
     sender = msg.get("from", "")
     msg_type = msg.get("type", "")
 
-    logger.info(f"ðŸ“¨ Message WhatsApp reÃ§u de {sender[:6]}***, type: {msg_type}")
+    logger.info(f"Message WhatsApp recu de {sender[:6]}***, type: {msg_type}")
 
     # Traiter selon le type
     if msg_type == "interactive":
-        button_reply = msg.get("interactive", {}).get("button_reply", {})
-        action_id = button_reply.get("id", "")
+        interactive = msg.get("interactive", {})
+        # Boutons classiques OU réponses de liste interactive
+        reply = interactive.get("button_reply") or interactive.get("list_reply") or {}
+        action_id = reply.get("id", "")
         await _traiter_action_bouton(sender, action_id)
     elif msg_type == "text":
         texte = msg.get("text", {}).get("body", "")
@@ -101,35 +103,56 @@ async def recevoir_message_whatsapp(request: Request) -> MessageResponse:
     return MessageResponse(message="ok", id=0)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# MACHINE D'Ã‰TAT CONVERSATIONNELLE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ============================================================
+# MACHINE D'ETAT CONVERSATIONNELLE
+# ============================================================
 
 
 async def _traiter_action_bouton(sender: str, action_id: str) -> None:
-    """Traite une rÃ©ponse bouton WhatsApp."""
+    """Traite une reponse bouton WhatsApp."""
     from src.services.integrations.whatsapp import envoyer_message_whatsapp
 
     if action_id == "planning_valider":
-        # Valider le planning proposÃ© le plus rÃ©cent
+        # Valider le planning proposé le plus récent
         await _valider_planning_courant()
-        await envoyer_message_whatsapp(sender, "âœ… Planning validÃ© ! Bon appÃ©tit cette semaine ðŸ½ï¸")
+        await envoyer_message_whatsapp(sender, "[OK] Planning valide ! Bon appetit cette semaine.")
 
     elif action_id == "planning_modifier":
         await envoyer_message_whatsapp(
             sender,
-            "âœï¸ Quel repas veux-tu modifier ?\n"
-            "RÃ©ponds avec le format : *lundi soir* ou *mercredi midi*",
+            "Quel repas veux-tu modifier ?\n"
+            "Reponds avec le format : *lundi soir* ou *mercredi midi*",
         )
 
     elif action_id == "planning_regenerer":
         await envoyer_message_whatsapp(
             sender,
-            "ðŸ”„ RÃ©gÃ©nÃ©ration du planning en cours...\n"
+            "Regeneration du planning en cours...\n"
             "Je te renvoie les nouvelles suggestions dans quelques instants.",
         )
         await _regenerer_planning_ia(sender)
+    # --- Boutons digest matinal ---
+    elif action_id == "digest_courses":
+        await _envoyer_liste_courses(sender)
 
+    elif action_id == "digest_detail":
+        await _envoyer_detail_journee(sender)
+
+    # --- Boutons actions courses ---
+    elif action_id == "courses_tout_acheter":
+        await _marquer_courses_achetees(sender)
+
+    elif action_id == "courses_partager":
+        await _partager_liste_courses(sender)
+
+    # --- Boutons entretien ---
+    elif action_id == "entretien_fait":
+        await _marquer_entretien_fait(sender)
+
+    # --- Réponses de liste interactive ---
+    elif action_id.startswith("cmd_"):
+        commande = action_id[4:]
+        await _traiter_message_texte(sender, commande)
     else:
         logger.warning(f"Action bouton inconnue : {action_id}")
 
@@ -148,7 +171,7 @@ async def _traiter_message_texte(sender: str, texte: str) -> None:
     elif texte_lower in ("frigo", "stock", "inventaire"):
         await _envoyer_alerte_stocks(sender)
     # Nouvelles commandes Sprint 13
-    elif texte_lower in ("jules", "bÃ©bÃ©", "bebe"):
+    elif texte_lower in ("jules", "bébé", "bebe"):
         await _envoyer_resume_jules(sender)
     elif texte_lower.startswith("ajouter "):
         article = texte.strip()[8:].strip()
@@ -160,28 +183,41 @@ async def _traiter_message_texte(sender: str, texte: str) -> None:
     elif texte_lower.startswith("recette "):
         nom = texte.strip()[8:].strip()
         await _envoyer_fiche_recette(sender, nom)
-    elif texte_lower in ("tÃ¢ches", "taches", "tÃ¢che", "tache"):
+    elif texte_lower in ("tâches", "taches", "tâche", "tache"):
         await _envoyer_taches_retard(sender)
     elif texte_lower in ("aide admin", "admin"):
         await _envoyer_aide_admin(sender)
+    # Nouvelles commandes Phase 5
+    elif texte_lower in ("météo", "meteo", "temps"):
+        await _envoyer_meteo(sender)
+    elif texte_lower in ("jardin", "plantes", "potager"):
+        await _envoyer_resume_jardin(sender)
+    elif texte_lower in ("énergie", "energie", "conso"):
+        await _envoyer_resume_energie(sender)
+    elif texte_lower in ("entretien", "maintenance"):
+        await _envoyer_entretien_urgent(sender)
     else:
         await envoyer_message_whatsapp(
             sender,
-            "ðŸ¤– Commandes disponibles :\n"
-            "â€¢ *menu* â€” Planning de la semaine\n"
-            "â€¢ *courses* â€” Liste de courses en cours\n"
-            "â€¢ *frigo* â€” Ã‰tat des stocks\n"
-            "â€¢ *jules* â€” RÃ©sumÃ© de Jules\n"
-            "â€¢ *ajouter [article]* â€” Ajouter Ã  la liste\n"
-            "â€¢ *budget* â€” Budget mensuel\n"
-            "â€¢ *anniversaires* â€” Prochains anniversaires\n"
-            "â€¢ *recette [nom]* â€” Fiche recette\n"
-            "â€¢ *tÃ¢ches* â€” TÃ¢ches maison en retard",
+            "🤖 Commandes disponibles :\n"
+            "- *menu* : Planning de la semaine\n"
+            "- *courses* : Liste de courses en cours\n"
+            "- *frigo* : Etat des stocks\n"
+            "- *jules* : Resume de Jules\n"
+            "- *ajouter [article]* : Ajouter a la liste\n"
+            "- *budget* : Budget mensuel\n"
+            "- *anniversaires* : Prochains anniversaires\n"
+            "- *recette [nom]* : Fiche recette\n"
+            "- *taches* : Taches maison en retard\n"
+            "- *meteo* : Previsions du jour\n"
+            "- *jardin* : Etat du jardin\n"
+            "- *energie* : Consommation energie\n"
+            "- *entretien* : Entretiens urgents",
         )
 
 
 async def _valider_planning_courant() -> None:
-    """Valide le planning proposÃ© le plus rÃ©cent."""
+    """Valide le planning proposé le plus récent."""
     from src.core.db import obtenir_contexte_db
     from src.core.models.planning import Planning
 
@@ -273,11 +309,20 @@ async def _envoyer_liste_courses(sender: str) -> None:
         if len(articles) > 20:
             msg += f"\n\n... et {len(articles) - 20} autres"
 
-        await envoyer_message_whatsapp(sender, msg)
+        from src.services.integrations.whatsapp import envoyer_message_interactif
+
+        await envoyer_message_interactif(
+            destinataire=sender,
+            corps=msg,
+            boutons=[
+                {"id": "courses_tout_acheter", "title": "Tout acheté"},
+                {"id": "courses_partager", "title": "Partager"},
+            ],
+        )
 
 
 async def _envoyer_alerte_stocks(sender: str) -> None:
-    """Envoie l'Ã©tat des stocks bas + pÃ©remptions proches."""
+    """Envoie l'état des stocks bas + péremptions proches."""
     from datetime import date, timedelta
 
     from src.core.db import obtenir_contexte_db
@@ -325,7 +370,7 @@ async def _envoyer_alerte_stocks(sender: str) -> None:
 
 
 async def _regenerer_planning_ia(sender: str) -> None:
-    """RÃ©gÃ©nÃ¨re le planning IA et envoie le rÃ©sultat via WhatsApp."""
+    """Régénère le planning IA et envoie le résultat via WhatsApp."""
     import asyncio
     from datetime import date, timedelta
 
@@ -336,10 +381,10 @@ async def _regenerer_planning_ia(sender: str) -> None:
 
         service = obtenir_planning_service()
         aujourd_hui = date.today()
-        # DÃ©but de la semaine courante (lundi)
+        # Début de la semaine courante (lundi)
         debut_semaine = aujourd_hui - timedelta(days=aujourd_hui.weekday())
 
-        # ExÃ©cution synchrone dans un thread dÃ©diÃ© pour ne pas bloquer la boucle async
+        # Exécution synchrone dans un thread dédié pour ne pas bloquer la boucle async
         loop = asyncio.get_event_loop()
         planning = await loop.run_in_executor(
             None,
@@ -353,7 +398,7 @@ async def _regenerer_planning_ia(sender: str) -> None:
             )
             return
 
-        # Formater le planning gÃ©nÃ©rÃ©
+        # Formater le planning généré
         jours = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
         lignes = []
         repas = sorted(getattr(planning, "repas", []) or [], key=lambda r: (r.date_repas, r.type_repas))
@@ -372,7 +417,7 @@ async def _regenerer_planning_ia(sender: str) -> None:
         logger.info("âœ… Planning IA rÃ©gÃ©nÃ©rÃ© et envoyÃ© via WhatsApp Ã  %s***", sender[:6])
 
     except Exception:
-        logger.exception("Erreur rÃ©gÃ©nÃ©ration planning IA WhatsApp")
+        logger.exception("Erreur régénération planning IA WhatsApp")
         await envoyer_message_whatsapp(
             sender,
             "âŒ Erreur lors de la gÃ©nÃ©ration du planning. Essaie depuis l'application.",
@@ -380,7 +425,7 @@ async def _regenerer_planning_ia(sender: str) -> None:
 
 
 async def _envoyer_resume_jules(sender: str) -> None:
-    """Envoie un rÃ©sumÃ© des activitÃ©s, repas et jalons rÃ©cents de Jules."""
+    """Envoie un résumé des activités, repas et jalons récents de Jules."""
     from datetime import date, timedelta
 
     from src.core.db import obtenir_contexte_db
@@ -417,7 +462,7 @@ async def _envoyer_resume_jules(sender: str) -> None:
                 for j in jalons:
                     lignes.append(f"  â€¢ {j.titre} â€” {j.date_atteinte}")
         except Exception:
-            logger.debug("RÃ©sumÃ© Jules : impossible de charger activitÃ©s/jalons")
+            logger.debug("Résumé Jules : impossible de charger activités/jalons")
 
         try:
             from src.core.models.planning import Repas
@@ -434,7 +479,7 @@ async def _envoyer_resume_jules(sender: str) -> None:
                     nom = r.recette.nom if getattr(r, "recette", None) else (r.notes or "?")
                     lignes.append(f"  â€¢ {r.date_repas} {r.type_repas} : {nom}")
         except Exception:
-            logger.debug("RÃ©sumÃ© Jules : impossible de charger les repas")
+            logger.debug("Résumé Jules : impossible de charger les repas")
 
         if not lignes:
             await envoyer_message_whatsapp(sender, "ðŸ‘¶ Jules : aucune activitÃ© rÃ©cente enregistrÃ©e.")
@@ -443,7 +488,7 @@ async def _envoyer_resume_jules(sender: str) -> None:
 
 
 async def _ajouter_article_courses(sender: str, nom_article: str) -> None:
-    """Ajoute un article Ã  la liste de courses active."""
+    """Ajoute un article à la liste de courses active."""
     from src.core.db import obtenir_contexte_db
     from src.core.validation import SanitiseurDonnees
     from src.services.integrations.whatsapp import envoyer_message_whatsapp
@@ -465,7 +510,7 @@ async def _ajouter_article_courses(sender: str, nom_article: str) -> None:
             )
 
             if not liste:
-                # CrÃ©er une nouvelle liste si aucune n'existe
+                # Créer une nouvelle liste si aucune n'existe
                 from datetime import date
                 liste = ListeCourses(
                     nom=f"Courses {date.today().strftime('%d/%m/%Y')}",
@@ -484,14 +529,14 @@ async def _ajouter_article_courses(sender: str, nom_article: str) -> None:
             await envoyer_message_whatsapp(
                 sender, f"âœ… *{nom_propre}* ajoutÃ© Ã  la liste de courses !"
             )
-            logger.info("Article '%s' ajoutÃ© via WhatsApp", nom_propre)
+            logger.info("Article '%s' ajouté via WhatsApp", nom_propre)
         except Exception:
             logger.exception("Erreur ajout article courses via WhatsApp")
             await envoyer_message_whatsapp(sender, "âŒ Erreur lors de l'ajout. RÃ©essaye.")
 
 
 async def _envoyer_resume_budget(sender: str) -> None:
-    """Envoie le rÃ©sumÃ© du budget mensuel en cours."""
+    """Envoie le résumé du budget mensuel en cours."""
     from datetime import date
 
     from src.core.db import obtenir_contexte_db
@@ -511,14 +556,14 @@ async def _envoyer_resume_budget(sender: str) -> None:
             )
             total_depense = float(result.scalar() or 0)
 
-            # Essayer de rÃ©cupÃ©rer le budget prÃ©vu
+            # Essayer de récupérer le budget prévu
             budget_prevu_result = session.execute(
                 text(
                     "SELECT valeur FROM preferences_utilisateurs"
                     " WHERE user_id IS NOT NULL LIMIT 1"
                 ),
             )
-            budget_prevu = 2000.0  # Valeur par dÃ©faut si non configurÃ©e
+            budget_prevu = 2000.0  # Valeur par défaut si non configurée
 
             ecart = total_depense - budget_prevu
             pourcentage = (total_depense / budget_prevu * 100) if budget_prevu > 0 else 0
@@ -565,7 +610,7 @@ async def _envoyer_anniversaires_proches(sender: str) -> None:
             anniversaires: list[tuple[int, str, str]] = []
             for nom, date_naissance in rows:
                 try:
-                    # Calculer le prochain anniversaire cette annÃ©e
+                    # Calculer le prochain anniversaire cette année
                     prochain = date_naissance.replace(year=aujourd_hui.year)
                     if prochain < aujourd_hui:
                         prochain = prochain.replace(year=aujourd_hui.year + 1)
@@ -585,12 +630,12 @@ async def _envoyer_anniversaires_proches(sender: str) -> None:
                     sender, "ðŸŽ‚ *Anniversaires Ã  venir :*\n\n" + "\n".join(lignes)
                 )
         except Exception:
-            logger.debug("Anniversaires WhatsApp : donnÃ©es indisponibles")
+            logger.debug("Anniversaires WhatsApp : données indisponibles")
             await envoyer_message_whatsapp(sender, "ðŸŽ‚ Anniversaires : donnÃ©es indisponibles.")
 
 
 async def _envoyer_fiche_recette(sender: str, nom_recette: str) -> None:
-    """Envoie la fiche d'une recette avec ses ingrÃ©dients."""
+    """Envoie la fiche d'une recette avec ses ingrédients."""
     from src.core.db import obtenir_contexte_db
     from src.services.integrations.whatsapp import envoyer_message_whatsapp
 
@@ -610,7 +655,7 @@ async def _envoyer_fiche_recette(sender: str, nom_recette: str) -> None:
 
             lignes = [
                 f"ðŸ³ *{recette.nom}*",
-                f"â±ï¸ Temps : {recette.temps_preparation or '?'} min",
+                f"⏱️ Temps : {recette.temps_preparation or '?'} min",
                 f"ðŸ‘¥ Portions : {recette.nb_portions or '?'}",
                 "\nðŸ§¾ *IngrÃ©dients :*",
             ]
@@ -627,7 +672,7 @@ async def _envoyer_fiche_recette(sender: str, nom_recette: str) -> None:
 
 
 async def _envoyer_taches_retard(sender: str) -> None:
-    """Envoie les tÃ¢ches maison en retard."""
+    """Envoie les tâches maison en retard."""
     from datetime import date
 
     from src.core.db import obtenir_contexte_db
@@ -656,35 +701,444 @@ async def _envoyer_taches_retard(sender: str) -> None:
                     sender, f"ðŸšï¸ *TÃ¢ches en retard ({len(rows)}) :*\n\n" + "\n".join(lignes)
                 )
         except Exception:
-            logger.debug("TÃ¢ches retard WhatsApp : table indisponible")
+            logger.debug("Tâches retard WhatsApp : table indisponible")
             await envoyer_message_whatsapp(sender, "ðŸšï¸ TÃ¢ches : donnÃ©es indisponibles.")
 
 
 async def _envoyer_aide_admin(sender: str) -> None:
-    """Envoie la liste des commandes admin (accÃ¨s limitÃ©)."""
+    """Envoie la liste des commandes admin (accès limité)."""
     from src.core.config import obtenir_parametres
     from src.services.integrations.whatsapp import envoyer_message_whatsapp
 
     settings = obtenir_parametres()
-    # VÃ©rifier que l'expÃ©diteur est le numÃ©ro admin configurÃ©
+    # Vérifier que l'expéditeur est le numéro admin configuré
     numero_admin = getattr(settings, "WHATSAPP_USER_NUMBER", None)
     if numero_admin and sender != numero_admin:
-        logger.warning("Tentative d'accÃ¨s aide admin depuis numÃ©ro non autorisÃ© : %s***", sender[:6])
+        logger.warning("Tentative d'accès aide admin depuis numéro non autorisé : %s***", sender[:6])
         await envoyer_message_whatsapp(sender, "âŒ AccÃ¨s refusÃ©.")
         return
 
     await envoyer_message_whatsapp(
         sender,
-        "ðŸ”§ *Commandes admin :*\n\n"
-        "â€¢ *menu* / *planning* â€” Planning semaine\n"
-        "â€¢ *courses* â€” Liste de courses\n"
-        "â€¢ *frigo* â€” Alertes stocks\n"
-        "â€¢ *jules* â€” RÃ©sumÃ© Jules\n"
-        "â€¢ *ajouter [article]* â€” Ajouter Ã  la liste\n"
-        "â€¢ *budget* â€” Budget mensuel\n"
-        "â€¢ *anniversaires* â€” Prochains anniversaires\n"
-        "â€¢ *recette [nom]* â€” Fiche recette\n"
-        "â€¢ *tÃ¢ches* â€” TÃ¢ches en retard\n"
-        "â€¢ *aide admin* â€” Cette liste",
+        "[Admin] Commandes admin :\n\n"
+        "- *menu* / *planning* : Planning semaine\n"
+        "- *courses* : Liste de courses\n"
+        "- *frigo* : Alertes stocks\n"
+        "- *jules* : Resume Jules\n"
+        "- *ajouter [article]* : Ajouter a la liste\n"
+        "- *budget* : Budget mensuel\n"
+        "- *anniversaires* : Prochains anniversaires\n"
+        "- *recette [nom]* : Fiche recette\n"
+        "- *taches* : Taches en retard\n"
+        "- *meteo* : Previsions du jour\n"
+        "- *jardin* : Etat du jardin\n"
+        "- *energie* : Consommation energie\n"
+        "- *entretien* : Entretiens urgents\n"
+        "- *aide admin* : Cette liste",
     )
 
+# ═══════════════════════════════════════════════════════════════════
+# NOUVEAUX HANDLERS — PHASE 5
+# ═══════════════════════════════════════════════════════════════════
+
+
+async def _envoyer_meteo(sender: str) -> None:
+    """Envoie les prévisions météo du jour."""
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    try:
+        import os
+
+        import httpx
+
+        api_key = os.getenv("OPENWEATHER_API_KEY", "")
+        ville = os.getenv("OPENWEATHER_CITY", "Paris")
+
+        if not api_key:
+            await envoyer_message_whatsapp(sender, "🌤️ Météo : service non configuré (OPENWEATHER_API_KEY manquante).")
+            return
+
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                "https://api.openweathermap.org/data/2.5/weather",
+                params={"q": ville, "appid": api_key, "units": "metric", "lang": "fr"},
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        temp = data["main"]["temp"]
+        temp_min = data["main"]["temp_min"]
+        temp_max = data["main"]["temp_max"]
+        description = data["weather"][0]["description"].capitalize()
+        humidite = data["main"]["humidity"]
+        vent = data.get("wind", {}).get("speed", 0)
+
+        msg = (
+            f"🌤️ *Météo {ville}*\n\n"
+            f"🌡️ {temp:.0f}°C ({temp_min:.0f}° / {temp_max:.0f}°)\n"
+            f"☁️ {description}\n"
+            f"💧 Humidité : {humidite}%\n"
+            f"💨 Vent : {vent:.0f} km/h"
+        )
+        await envoyer_message_whatsapp(sender, msg)
+    except Exception:
+        logger.debug("Météo WhatsApp : erreur")
+        await envoyer_message_whatsapp(sender, "🌤️ Météo : données indisponibles.")
+
+
+async def _envoyer_resume_jardin(sender: str) -> None:
+    """Envoie le résumé de l'état du jardin (plantes, arrosage, récoltes)."""
+    from src.core.db import obtenir_contexte_db
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    with obtenir_contexte_db() as session:
+        try:
+            from datetime import date, timedelta
+
+            from sqlalchemy import text
+
+            aujourd_hui = date.today()
+            dans_3j = aujourd_hui + timedelta(days=3)
+
+            # Plantes nécessitant un arrosage
+            rows_arrosage = session.execute(
+                text(
+                    "SELECT nom, dernier_arrosage FROM plantes_jardin"
+                    " WHERE actif = true"
+                    " AND (dernier_arrosage IS NULL OR dernier_arrosage < :seuil)"
+                    " ORDER BY dernier_arrosage ASC NULLS FIRST"
+                    " LIMIT 10"
+                ),
+                {"seuil": aujourd_hui - timedelta(days=2)},
+            ).fetchall()
+
+            # Récoltes prêtes
+            rows_recolte = session.execute(
+                text(
+                    "SELECT nom, date_recolte_prevue FROM plantes_jardin"
+                    " WHERE actif = true"
+                    " AND date_recolte_prevue IS NOT NULL"
+                    " AND date_recolte_prevue <= :dans_3j"
+                    " ORDER BY date_recolte_prevue ASC"
+                    " LIMIT 5"
+                ),
+                {"dans_3j": dans_3j},
+            ).fetchall()
+
+            lignes: list[str] = []
+            if rows_arrosage:
+                lignes.append("💧 *À arroser :*")
+                for nom, dernier in rows_arrosage:
+                    jours = (aujourd_hui - dernier).days if dernier else "?"
+                    lignes.append(f"  • {nom} (dernier arrosage : il y a {jours}j)")
+
+            if rows_recolte:
+                lignes.append("\n🌿 *Récoltes prêtes :*")
+                for nom, date_recolte in rows_recolte:
+                    lignes.append(f"  • {nom} — {date_recolte}")
+
+            if not lignes:
+                await envoyer_message_whatsapp(sender, "🌱 Jardin : tout est OK !")
+            else:
+                await envoyer_message_whatsapp(sender, "🌱 *État du jardin*\n\n" + "\n".join(lignes))
+        except Exception:
+            logger.debug("Jardin WhatsApp : table indisponible")
+            await envoyer_message_whatsapp(sender, "🌱 Jardin : données indisponibles.")
+
+
+async def _envoyer_resume_energie(sender: str) -> None:
+    """Envoie un résumé de la consommation d'énergie du mois en cours."""
+    from src.core.db import obtenir_contexte_db
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    with obtenir_contexte_db() as session:
+        try:
+            from datetime import date
+
+            from sqlalchemy import text
+
+            mois_debut = date.today().replace(day=1)
+
+            result = session.execute(
+                text(
+                    "SELECT COALESCE(SUM(valeur), 0), COUNT(*)"
+                    " FROM releves_energie"
+                    " WHERE date_releve >= :debut"
+                ),
+                {"debut": mois_debut},
+            ).first()
+
+            total_kwh = float(result[0]) if result else 0
+            nb_releves = int(result[1]) if result else 0
+
+            if nb_releves == 0:
+                await envoyer_message_whatsapp(sender, "⚡ Énergie : aucun relevé ce mois-ci.")
+                return
+
+            msg = (
+                f"⚡ *Énergie — {mois_debut.strftime('%B %Y')}*\n\n"
+                f"📊 Consommation : {total_kwh:.1f} kWh\n"
+                f"📝 {nb_releves} relevé(s) enregistré(s)"
+            )
+            await envoyer_message_whatsapp(sender, msg)
+        except Exception:
+            logger.debug("Énergie WhatsApp : table indisponible")
+            await envoyer_message_whatsapp(sender, "⚡ Énergie : données indisponibles.")
+
+
+async def _envoyer_entretien_urgent(sender: str) -> None:
+    """Envoie les tâches d'entretien urgentes ou en retard."""
+    from src.core.db import obtenir_contexte_db
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    with obtenir_contexte_db() as session:
+        try:
+            from datetime import date
+
+            from sqlalchemy import text
+
+            today = date.today()
+
+            rows = session.execute(
+                text(
+                    "SELECT titre, date_echeance, priorite FROM entretiens_maison"
+                    " WHERE statut NOT IN ('termine', 'annule')"
+                    " AND (date_echeance < :today OR priorite = 'urgente')"
+                    " ORDER BY date_echeance ASC NULLS LAST"
+                    " LIMIT 10"
+                ),
+                {"today": today},
+            ).fetchall()
+
+            if not rows:
+                await envoyer_message_whatsapp(sender, "🔧 Entretien : aucune tâche urgente !")
+            else:
+                lignes = []
+                for titre, echeance, priorite in rows:
+                    emoji = "🔴" if priorite == "urgente" else "🟡"
+                    lignes.append(f"  {emoji} {titre} (échéance: {echeance or 'N/A'})")
+
+                from src.services.integrations.whatsapp import envoyer_message_interactif
+
+                await envoyer_message_interactif(
+                    destinataire=sender,
+                    corps=f"🔧 *Entretien urgent ({len(rows)}) :*\n\n" + "\n".join(lignes),
+                    boutons=[{"id": "entretien_fait", "title": "Marquer fait"}],
+                )
+        except Exception:
+            logger.debug("Entretien WhatsApp : table indisponible")
+            await envoyer_message_whatsapp(sender, "🔧 Entretien : données indisponibles.")
+
+
+# ═══════════════════════════════════════════════════════════════════
+# HANDLERS BOUTONS INTERACTIFS — PHASE 5
+# ═══════════════════════════════════════════════════════════════════
+
+
+async def _envoyer_detail_journee(sender: str) -> None:
+    """Envoie un détail complet de la journée (bouton digest_detail)."""
+    from datetime import date
+
+    from src.core.db import obtenir_contexte_db
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    aujourd_hui = date.today()
+    sections: list[str] = []
+
+    with obtenir_contexte_db() as session:
+        try:
+            from sqlalchemy import text
+
+            # Repas
+            rows = session.execute(
+                text(
+                    "SELECT r.type_repas, rec.nom"
+                    " FROM repas r LEFT JOIN recettes rec ON r.recette_id = rec.id"
+                    " WHERE r.date_repas = :today ORDER BY r.type_repas"
+                ),
+                {"today": aujourd_hui},
+            ).fetchall()
+            if rows:
+                sections.append("🍽️ *Repas :*\n" + "\n".join(f"  • {t} : {n or '?'}" for t, n in rows))
+        except Exception:
+            pass
+
+        try:
+            from sqlalchemy import text
+
+            # Tâches du jour
+            rows = session.execute(
+                text(
+                    "SELECT titre, priorite FROM taches_maison"
+                    " WHERE statut NOT IN ('termine', 'annule')"
+                    " AND date_echeance = :today"
+                    " ORDER BY priorite DESC LIMIT 10"
+                ),
+                {"today": aujourd_hui},
+            ).fetchall()
+            if rows:
+                sections.append(
+                    "📋 *Tâches :*\n" + "\n".join(f"  • {t} ({p or '-'})" for t, p in rows)
+                )
+        except Exception:
+            pass
+
+        try:
+            from datetime import timedelta
+
+            from sqlalchemy import text
+
+            # Péremptions
+            seuil = aujourd_hui + timedelta(days=2)
+            rows = session.execute(
+                text(
+                    "SELECT nom, date_peremption, quantite FROM inventaire"
+                    " WHERE date_peremption IS NOT NULL"
+                    " AND date_peremption <= :seuil"
+                    " LIMIT 8"
+                ),
+                {"seuil": seuil},
+            ).fetchall()
+            if rows:
+                sections.append(
+                    "⚠️ *Péremptions :*\n"
+                    + "\n".join(f"  • {n} ({q or '?'}) — {d}" for n, d, q in rows)
+                )
+        except Exception:
+            pass
+
+    if not sections:
+        msg = f"📊 *Détail {aujourd_hui.strftime('%A %d %B')}*\n\nAucune donnée pour aujourd'hui."
+    else:
+        msg = f"📊 *Détail {aujourd_hui.strftime('%A %d %B')}*\n\n" + "\n\n".join(sections)
+
+    await envoyer_message_whatsapp(sender, msg)
+
+
+async def _marquer_courses_achetees(sender: str) -> None:
+    """Marque tous les articles de la liste active comme achetés."""
+    from src.core.db import obtenir_contexte_db
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    with obtenir_contexte_db() as session:
+        try:
+            from src.core.models.courses import ArticleCourses, ListeCourses
+
+            liste = (
+                session.query(ListeCourses)
+                .filter(ListeCourses.archivee == False)  # noqa: E712
+                .order_by(ListeCourses.date_creation.desc())
+                .first()
+            )
+            if not liste:
+                await envoyer_message_whatsapp(sender, "🛒 Aucune liste de courses active.")
+                return
+
+            nb = (
+                session.query(ArticleCourses)
+                .filter(
+                    ArticleCourses.liste_id == liste.id,
+                    ArticleCourses.achete == False,  # noqa: E712
+                )
+                .update({"achete": True})
+            )
+            session.commit()
+            await envoyer_message_whatsapp(sender, f"✅ {nb} article(s) marqué(s) comme acheté(s) !")
+        except Exception:
+            logger.debug("Courses achetées WhatsApp : erreur")
+            await envoyer_message_whatsapp(sender, "❌ Erreur lors du marquage des courses.")
+
+
+async def _partager_liste_courses(sender: str) -> None:
+    """Partage la liste de courses sous forme de texte formaté."""
+    from src.core.db import obtenir_contexte_db
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    with obtenir_contexte_db() as session:
+        try:
+            from src.core.models.courses import ArticleCourses, ListeCourses
+
+            liste = (
+                session.query(ListeCourses)
+                .filter(ListeCourses.archivee == False)  # noqa: E712
+                .order_by(ListeCourses.date_creation.desc())
+                .first()
+            )
+            if not liste:
+                await envoyer_message_whatsapp(sender, "🛒 Aucune liste à partager.")
+                return
+
+            articles = (
+                session.query(ArticleCourses)
+                .filter(
+                    ArticleCourses.liste_id == liste.id,
+                    ArticleCourses.achete == False,  # noqa: E712
+                )
+                .order_by(ArticleCourses.categorie, ArticleCourses.nom)
+                .all()
+            )
+
+            if not articles:
+                await envoyer_message_whatsapp(sender, "✅ Tous les articles sont achetés !")
+                return
+
+            # Grouper par catégorie
+            par_cat: dict[str, list[str]] = {}
+            for a in articles:
+                cat = a.categorie or "Autre"
+                par_cat.setdefault(cat, []).append(
+                    f"  □ {a.nom}" + (f" ×{a.quantite}" if a.quantite and a.quantite > 1 else "")
+                )
+
+            lignes = [f"🛒 *{liste.nom}*\n"]
+            for cat, items in sorted(par_cat.items()):
+                lignes.append(f"*{cat}*")
+                lignes.extend(items)
+                lignes.append("")
+
+            lignes.append(f"📝 {len(articles)} article(s) restant(s)")
+            await envoyer_message_whatsapp(sender, "\n".join(lignes))
+        except Exception:
+            logger.debug("Partage courses WhatsApp : erreur")
+            await envoyer_message_whatsapp(sender, "❌ Erreur lors du partage.")
+
+
+async def _marquer_entretien_fait(sender: str) -> None:
+    """Marque la tâche d'entretien la plus urgente comme terminée."""
+    from src.core.db import obtenir_contexte_db
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    with obtenir_contexte_db() as session:
+        try:
+            from datetime import date
+
+            from sqlalchemy import text
+
+            today = date.today()
+
+            # Trouver la tâche la plus urgente
+            row = session.execute(
+                text(
+                    "SELECT id, titre FROM entretiens_maison"
+                    " WHERE statut NOT IN ('termine', 'annule')"
+                    " AND (date_echeance < :today OR priorite = 'urgente')"
+                    " ORDER BY date_echeance ASC NULLS LAST"
+                    " LIMIT 1"
+                ),
+                {"today": today},
+            ).first()
+
+            if not row:
+                await envoyer_message_whatsapp(sender, "✅ Aucune tâche d'entretien en attente !")
+                return
+
+            tache_id, titre = row
+            session.execute(
+                text("UPDATE entretiens_maison SET statut = 'termine' WHERE id = :id"),
+                {"id": tache_id},
+            )
+            session.commit()
+            await envoyer_message_whatsapp(sender, f"✅ *{titre}* marqué comme terminé !")
+        except Exception:
+            logger.debug("Entretien fait WhatsApp : erreur")
+            await envoyer_message_whatsapp(sender, "❌ Erreur lors du marquage de l'entretien.")

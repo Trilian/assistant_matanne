@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% set couleur_header = "#dc2626" %}
+{% set titre_header = "Alerte critique" %}
+
+{% block contenu %}
+<div class="alert-box">
+  <h3>⚠️ {{ titre }}</h3>
+  <p>{{ message }}</p>
+</div>
+{% if lien %}
+<a href="{{ lien }}" class="btn btn-danger">Voir les détails</a>
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+Alerte automatique Matanne.
+{% endblock %}

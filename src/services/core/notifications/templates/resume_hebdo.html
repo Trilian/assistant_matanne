@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% set couleur_header = "#2563eb" %}
+{% set titre_header = "Résumé hebdomadaire" %}
+
+{% block contenu %}
+<h2>📋 Résumé de la semaine {{ semaine }}</h2>
+<ul style="line-height:1.8">
+  {% if recettes_cuisinees %}
+  <li>🍽️ {{ recettes_cuisinees }} recettes cuisinées</li>
+  {% endif %}
+  {% if budget_depense is not none %}
+  <li>💰 Budget dépensé : {{ "%.2f"|format(budget_depense) }} €</li>
+  {% endif %}
+  {% if activites_jules %}
+  <li>👶 {{ activites_jules }} activités avec Jules</li>
+  {% endif %}
+  {% if taches_maison %}
+  <li>🏡 {{ taches_maison }} tâches maison effectuées</li>
+  {% endif %}
+  {% if not recettes_cuisinees and budget_depense is none and not activites_jules and not taches_maison %}
+  <li>Aucune donnée cette semaine</li>
+  {% endif %}
+</ul>
+{% if resume_ia %}
+<blockquote>{{ resume_ia }}</blockquote>
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+Vous recevez cet email car vous êtes abonné aux résumés hebdo sur Matanne.
+{% endblock %}

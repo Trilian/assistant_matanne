@@ -51,8 +51,10 @@ class DispatcherNotifications:
     """Dispatcher multi-canal : email / push / ntfy."""
 
     _FALLBACK_CANAUX: dict[str, list[str]] = {
-        "push": ["whatsapp", "email"],
-        "whatsapp": ["email"],
+        "push": ["ntfy", "whatsapp", "email"],
+        "ntfy": ["push", "whatsapp", "email"],
+        "whatsapp": ["push", "email"],
+        "email": ["push", "ntfy"],
     }
 
     def __init__(self) -> None:
@@ -136,7 +138,18 @@ class DispatcherNotifications:
                 resultats[canal] = False
 
             if strategie == "failover" and resultats.get(canal):
+                if len(resultats) > 1:
+                    canaux_echoues = [c for c, ok in resultats.items() if not ok]
+                    logger.info(
+                        "Failover réussi via '%s' après échec(s) : %s",
+                        canal,
+                        ", ".join(canaux_echoues) or "aucun",
+                    )
                 break
+            elif strategie == "failover" and not resultats.get(canal):
+                logger.warning(
+                    "Failover canal '%s' échoué, tentative canal suivant…", canal
+                )
 
         if any(resultats.values()):
             self._incrementer_compteur(user_id)

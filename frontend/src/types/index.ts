@@ -13,3 +13,4 @@ export type * from "./jeux";
 export type * from "./outils";
 export type * from "./anti-gaspillage";
 export type * from "./batch-cooking";
+export type * from "./ia_avancee";
