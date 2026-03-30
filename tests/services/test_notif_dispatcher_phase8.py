@@ -67,7 +67,7 @@ def test_resolution_canaux_depuis_mapping_et_preferences():
     canaux = dispatcher._resoudre_canaux(
         user_id="u1",
         canaux=None,
-        type_evenement="alerte_jeu_responsable",
+        type_evenement="tache_entretien_urgente",
         categorie=None,
     )
 

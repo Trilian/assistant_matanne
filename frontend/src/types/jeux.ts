@@ -194,38 +194,6 @@ export interface PerformanceJeux {
   serie_perdante_max: number;
 }
 
-// ─── Jeu Responsable ─────────────────────────────────────
-
-export interface BudgetResponsable {
-  limite: number;
-  mises_cumulees: number;
-  pourcentage_utilise: number;
-  reste_disponible: number;
-  cooldown_actif: boolean;
-  auto_exclusion_jusqu_a?: string;
-}
-
-export interface SuiviResponsable {
-  limite: number;
-  mises_cumulees: number;
-  pourcentage_utilise: number;
-  reste_disponible: number;
-  alertes: Record<string, boolean>;
-  cooldown_actif: boolean;
-  auto_exclusion_jusqu_a?: string;
-  serie_actuelle?: {
-    type: "gagne" | "perdu";
-    nb: number;
-    alerte_active: boolean;
-  } | null;
-}
-
-export interface VerificationMise {
-  autorise: boolean;
-  raison?: string;
-  reste_apres: number;
-}
-
 // ─── Analyse IA ───────────────────────────────────────────
 
 export interface AnalyseIA {

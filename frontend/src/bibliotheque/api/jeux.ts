@@ -267,44 +267,6 @@ export async function obtenirPerformanceConfiance(mois?: number): Promise<{ tran
   return data;
 }
 
-// ─── Jeu Responsable ─────────────────────────────────────
-
-export async function obtenirSuiviResponsable(): Promise<SuiviResponsable> {
-  const { data } = await clientApi.get<SuiviResponsable>("/jeux/responsable/suivi");
-  return data;
-}
-
-export async function verifierMise(montant: number): Promise<VerificationMise> {
-  const { data } = await clientApi.get<VerificationMise>(
-    `/jeux/responsable/verifier-mise?montant=${montant}`
-  );
-  return data;
-}
-
-export async function enregistrerMise(montant: number, typeJeu = "paris"): Promise<void> {
-  await clientApi.post("/jeux/responsable/enregistrer-mise", {
-    montant,
-    type_jeu: typeJeu,
-  });
-}
-
-export async function modifierLimite(nouvelleLimite: number): Promise<void> {
-  await clientApi.put("/jeux/responsable/limite", {
-    nouvelle_limite: nouvelleLimite,
-  });
-}
-
-export async function activerAutoExclusion(nbJours: number): Promise<void> {
-  await clientApi.post("/jeux/responsable/auto-exclusion", {
-    nb_jours: nbJours,
-  });
-}
-
-export async function obtenirHistoriqueLimites(nbMois = 12): Promise<unknown[]> {
-  const { data } = await clientApi.get(`/jeux/responsable/historique?nb_mois=${nbMois}`);
-  return data.items ?? data;
-}
-
 // ─── Analyse IA ───────────────────────────────────────────
 
 export async function obtenirAnalyseIA(

@@ -66,17 +66,7 @@ export default function PageBankroll() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/jeux/responsable">
-          <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
-            <CardContent className="flex items-center justify-between p-4">
-              <div>
-                <p className="text-sm font-medium">Jeu responsable</p>
-                <p className="text-xs text-muted-foreground">Limites, alertes, auto-exclusion</p>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            </CardContent>
-          </Card>
-        </Link>
+
       </div>
     </div>
   );

@@ -169,7 +169,6 @@ DROP TABLE IF EXISTS jeux_grilles_euromillions CASCADE;
 DROP TABLE IF EXISTS jeux_stats_euromillions CASCADE;
 DROP TABLE IF EXISTS jeux_tirages_euromillions CASCADE;
 DROP TABLE IF EXISTS jeux_cotes_historique CASCADE;
-DROP TABLE IF EXISTS jeux_mise_responsable CASCADE;
 -- Tables utilitaires
 DROP TABLE IF EXISTS notes_memos CASCADE;
 DROP TABLE IF EXISTS journal_bord CASCADE;
@@ -2866,30 +2865,6 @@ CREATE INDEX IF NOT EXISTS idx_cotes_hist_match ON jeux_cotes_historique(match_i
 CREATE INDEX IF NOT EXISTS idx_cotes_hist_timestamp ON jeux_cotes_historique(timestamp_cote DESC);
 CREATE INDEX IF NOT EXISTS idx_cotes_hist_bookmaker ON jeux_cotes_historique(bookmaker);
 -- ─────────────────────────────────────────────────────────────────────────────
--- 5B.05 JEUX_MISE_RESPONSABLE
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE jeux_mise_responsable (
-    id SERIAL PRIMARY KEY,
-    mois DATE NOT NULL,
-    limite_mensuelle NUMERIC(10, 2) NOT NULL DEFAULT 50.00,
-    mises_cumulees NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
-    nb_mises INTEGER NOT NULL DEFAULT 0,
-    alerte_50 BOOLEAN DEFAULT FALSE,
-    alerte_75 BOOLEAN DEFAULT FALSE,
-    alerte_90 BOOLEAN DEFAULT FALSE,
-    alerte_100 BOOLEAN DEFAULT FALSE,
-    cooldown_actif BOOLEAN DEFAULT FALSE,
-    cooldown_fin TIMESTAMP WITH TIME ZONE,
-    auto_exclusion BOOLEAN DEFAULT FALSE,
-    auto_exclusion_fin DATE,
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE (mois)
-);
-CREATE INDEX IF NOT EXISTS idx_mise_responsable_mois ON jeux_mise_responsable(mois DESC);
-
--- ─────────────────────────────────────────────────────────────────────────────
 -- BANKROLL HISTORIQUE (CT-09 Sprint 4)
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_bankroll_historique (
@@ -3388,8 +3363,6 @@ tables_modifie_le TEXT [] := ARRAY [
     'modeles_courses', 'templates_semaine', 'points_utilisateurs', 'automations',
         'contacts_famille', 'anniversaires_famille', 'evenements_familiaux',
         'voyages', 'checklists_voyage', 'documents_famille',
-        -- Jeux extensions
-        'jeux_mise_responsable',
         -- Maison extensions
         'contrats_maison', 'artisans', 'interventions_artisans', 'garanties',
         'incidents_sav', 'articles_cellier', 'diagnostics_maison',
@@ -3671,7 +3644,7 @@ shared_tables TEXT[] := ARRAY[
     'jeux_tirages_loto', 'jeux_grilles_loto', 'jeux_stats_loto',
     'jeux_historique', 'jeux_series', 'jeux_alertes', 'jeux_configuration',
     'jeux_tirages_euromillions', 'jeux_grilles_euromillions', 'jeux_stats_euromillions',
-    'jeux_cotes_historique', 'jeux_mise_responsable',
+    'jeux_cotes_historique',
     -- Temps Entretien & Jardin
     'plans_jardin', 'zones_jardin', 'plantes_jardin', 'actions_plantes',
     'pieces_maison', 'objets_maison', 'sessions_travail',
@@ -3861,9 +3834,6 @@ VALUES ('Tomate', 40.00, 8.00),
     ('Oignon', 10.00, 2.00),
     ('Ail', 3.00, 1.00),
     ('Fraise', 10.00, 4.00) ON CONFLICT (legume) DO NOTHING;
--- Mise responsable par défaut (mois courant)
-INSERT INTO jeux_mise_responsable (mois, limite_mensuelle)
-VALUES (DATE_TRUNC('month', CURRENT_DATE)::DATE, 50.00) ON CONFLICT (mois) DO NOTHING;
 -- Entretiens saisonniers prédéfinis
 INSERT INTO entretiens_saisonniers (
         nom,

@@ -15,7 +15,7 @@ import { Checkbox } from '@/composants/ui/checkbox'
 import { Label } from '@/composants/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/composants/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/composants/ui/card'
-import { Flame, Dice1, TrendingDown, AlertTriangle, Info, X, BookOpen } from 'lucide-react'
+import { Flame, Dice1, TrendingDown, AlertTriangle, Info, X } from 'lucide-react'
 
 interface ResultatTest {
   alerte: boolean
@@ -161,28 +161,6 @@ export function DetectionPatternModal({
             </TabsContent>
           )}
         </Tabs>
-
-        {/* Ressources jeu responsable */}
-        <Card className="mt-4 border-blue-200 bg-blue-50/30">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Besoin d'aide ?
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-gray-700 space-y-2">
-            <p>
-              <strong>Joueurs Info Service :</strong> 09 74 75 13 13 (appel non surtaxé)
-            </p>
-            <p>
-              Si vous ressentez une perte de contrôle sur vos paris, n'hésitez pas à contacter 
-              un professionnel ou à utiliser nos outils d'auto-exclusion.
-            </p>
-            <Button variant="link" size="sm" className="h-auto p-0 text-xs">
-              → Activer l'auto-exclusion temporaire
-            </Button>
-          </CardContent>
-        </Card>
 
         {/* Options */}
         <div className="flex items-center justify-between pt-4 border-t">

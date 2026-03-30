@@ -13,20 +13,6 @@ from fastapi.testclient import TestClient
 @pytest.fixture
 def client(monkeypatch):
     """Client de test FastAPI."""
-    class _ServiceJeuResponsableMock:
-        def obtenir_suivi_mensuel(self):
-            return {
-                "auto_exclusion": None,
-                "est_bloque": False,
-                "cooldown_actif": False,
-                "limite_mensuelle": 0,
-            }
-
-    monkeypatch.setattr(
-        "src.services.jeux.get_responsable_gaming_service",
-        lambda: _ServiceJeuResponsableMock(),
-    )
-
     from src.api.main import app
 
     return TestClient(app)
