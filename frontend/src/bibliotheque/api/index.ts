@@ -15,6 +15,7 @@ export * from "./jeux";
 export * from "./tableau-bord";
 export * from "./outils";
 export * from "./documents";
+export * from "./habitat";
 export * from "./utilitaires";
 export * from "./calendriers";
 export * from "./preferences";

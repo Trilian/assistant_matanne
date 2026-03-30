@@ -47,10 +47,12 @@ import {
   Shield,
   Camera,
   Apple,
+  ShoppingBag,
   CalendarCheck,
   Wifi,
   CalendarRange,
   Settings,
+  Map,
 } from "lucide-react";
 
 export interface PageNavigation {
@@ -92,6 +94,12 @@ export const PAGES_NAVIGATION: PageNavigation[] = [
 
   // Maison - Gestion
   { nom: "Maison", chemin: "/maison", categorie: "Maison", Icone: House },
+  { nom: "Habitat", chemin: "/habitat", categorie: "Habitat", Icone: Map, keywords: ["logement", "immo", "deco", "jardin"] },
+  { nom: "Scenarios Habitat", chemin: "/habitat/scenarios", categorie: "Habitat", Icone: Home, keywords: ["comparaison", "decision"] },
+  { nom: "Veille Immo", chemin: "/habitat/veille-immo", categorie: "Habitat", Icone: ShoppingBag, keywords: ["annonces", "immobilier"] },
+  { nom: "Plans Habitat", chemin: "/habitat/plans", categorie: "Habitat", Icone: Layers, keywords: ["plans", "pieces", "architecture"] },
+  { nom: "Deco Habitat", chemin: "/habitat/deco", categorie: "Habitat", Icone: House, keywords: ["interieur", "meubles", "style"] },
+  { nom: "Jardin Habitat", chemin: "/habitat/jardin", categorie: "Habitat", Icone: Sprout, keywords: ["paysagisme", "zones", "terrain"] },
   { nom: "Projets Maison", chemin: "/maison/projets", categorie: "Maison - Gestion", Icone: Hammer, keywords: ["travaux", "renovation"] },
   { nom: "Ménage", chemin: "/maison/menage", categorie: "Maison - Entretien", Icone: SprayCan, keywords: ["nettoyage", "proprete"] },
   { nom: "Jardin", chemin: "/maison/jardin", categorie: "Maison - Jardin", Icone: Sprout, keywords: ["plantes", "potager"] },
@@ -114,6 +122,7 @@ export const PAGES_NAVIGATION: PageNavigation[] = [
   { nom: "Paris Sportifs", chemin: "/jeux/paris", categorie: "Jeux", Icone: Trophy, keywords: ["pari", "sport"] },
   { nom: "Loto", chemin: "/jeux/loto", categorie: "Jeux", Icone: Dices, keywords: ["tirage", "fdj"] },
   { nom: "EuroMillions", chemin: "/jeux/euromillions", categorie: "Jeux", Icone: Dices, keywords: ["euro", "tirage"] },
+  { nom: "Bankroll", chemin: "/jeux/bankroll", categorie: "Jeux", Icone: TrendingUp, keywords: ["capital", "mise", "kelly"] },
   { nom: "Performance Jeux", chemin: "/jeux/performance", categorie: "Jeux", Icone: TrendingUp, keywords: ["stats", "resultats"] },
   { nom: "Jeu Responsable", chemin: "/jeux/responsable", categorie: "Jeux", Icone: Shield, keywords: ["limites", "controle"] },
 

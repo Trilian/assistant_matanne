@@ -182,6 +182,10 @@ class DispatcherNotifications:
             self._digest_queue[user_id] = []
         return resultats
 
+    def lister_users_digest_pending(self) -> list[str]:
+        """Retourne les user_id ayant au moins un message en attente de digest."""
+        return sorted([uid for uid, items in self._digest_queue.items() if items])
+
     def _construire_sequence_failover(self, canaux: list[str]) -> list[str]:
         """Construit une chaîne de canaux ordonnée avec fallback sans doublons."""
         sequence: list[str] = []

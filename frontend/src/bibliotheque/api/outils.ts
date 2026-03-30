@@ -9,12 +9,14 @@ import type { Note, NoteCreate, NotePatch } from "@/types/outils";
 
 export async function listerNotes(params?: {
   categorie?: string;
+  tag?: string;
   epingle?: boolean;
   archive?: boolean;
   recherche?: string;
 }): Promise<Note[]> {
   const sp = new URLSearchParams();
   if (params?.categorie) sp.set("categorie", params.categorie);
+  if (params?.tag) sp.set("tag", params.tag);
   if (params?.epingle !== undefined) sp.set("epingle", String(params.epingle));
   if (params?.archive !== undefined) sp.set("archive", String(params.archive));
   if (params?.recherche) sp.set("search", params.recherche);
@@ -35,6 +37,11 @@ export async function modifierNote(id: number, patch: NotePatch): Promise<Note> 
 
 export async function supprimerNote(id: number): Promise<void> {
   await clientApi.delete(`/utilitaires/notes/${id}`);
+}
+
+export async function listerTagsNotes(): Promise<Array<{ tag: string; count: number }>> {
+  const { data } = await clientApi.get("/utilitaires/notes/tags");
+  return data.items ?? [];
 }
 
 // ─── Suggestions IA ────────────────────────────────────────────

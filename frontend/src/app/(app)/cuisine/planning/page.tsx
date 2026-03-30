@@ -123,6 +123,7 @@ export default function PagePlanning() {
   const [batchDialogue, setBatchDialogue] = useState(false);
   const [batchResultat, setBatchResultat] = useState<GenererSessionDepuisPlanningResult | null>(null);
   const [choixModePrepa, setChoixModePrepa] = useState(false);
+  const [repasGlisse, setRepasGlisse] = useState<RepasPlanning | null>(null);
 
   const invalider = utiliserInvalidation();
   const dateDebut = getLundiDeSemaine(offsetSemaine);
@@ -253,6 +254,37 @@ export default function PagePlanning() {
     setOngletDialogue("suggestions");
     setDialogueOuvert(true);
   }
+
+  const deplacerRepas = useCallback(
+    async (dateCible: string, typeCible: TypeRepas) => {
+      if (!repasGlisse) return;
+
+      const dateSource = (repasGlisse.date_repas || repasGlisse.date || "").split("T")[0];
+      if (dateSource === dateCible && repasGlisse.type_repas === typeCible) {
+        setRepasGlisse(null);
+        return;
+      }
+
+      try {
+        await definirRepas({
+          date: dateCible,
+          type_repas: typeCible,
+          recette_id: repasGlisse.recette_id,
+          notes: repasGlisse.notes ?? repasGlisse.recette_nom,
+          portions: repasGlisse.portions,
+        });
+
+        await supprimerRepas(repasGlisse.id);
+        invalider(["planning"]);
+        toast.success("Repas déplacé");
+      } catch {
+        toast.error("Impossible de déplacer ce repas");
+      } finally {
+        setRepasGlisse(null);
+      }
+    },
+    [repasGlisse, invalider]
+  );
 
   const choisirRecette = useCallback(
     (recette: SuggestionRecettePlanning) => {
@@ -457,17 +489,39 @@ export default function PagePlanning() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {TYPES_REPAS.map(({ valeur, label, emoji }) => {
                       const repas = trouverRepas(date, valeur);
+                      const estCibleDrop =
+                        !!repasGlisse &&
+                        (repasGlisse.date_repas || repasGlisse.date || "").split("T")[0] !== date;
 
                       return (
                         <div
                           key={valeur}
-                          className="min-h-[48px] rounded-md border border-dashed border-muted-foreground/25 p-2 text-xs"
+                          className={`min-h-[48px] rounded-md border border-dashed p-2 text-xs transition-colors ${
+                            estCibleDrop
+                              ? "border-primary/40 bg-primary/5"
+                              : "border-muted-foreground/25"
+                          }`}
+                          onDragOver={(e) => {
+                            if (repasGlisse) {
+                              e.preventDefault();
+                              e.dataTransfer.dropEffect = "move";
+                            }
+                          }}
+                          onDrop={() => deplacerRepas(date, valeur)}
                         >
                           <div className="text-muted-foreground mb-1">
                             {emoji} {label}
                           </div>
                           {repas ? (
-                            <div className="flex items-center justify-between gap-1">
+                            <div
+                              className="flex items-center justify-between gap-1"
+                              draggable
+                              onDragStart={(e) => {
+                                setRepasGlisse(repas);
+                                e.dataTransfer.effectAllowed = "move";
+                              }}
+                              onDragEnd={() => setRepasGlisse(null)}
+                            >
                               <div className="flex items-center gap-1 min-w-0">
                                 <span className="font-medium text-foreground truncate">
                                   {repas.recette_nom || repas.notes || "—"}
@@ -478,6 +532,22 @@ export default function PagePlanning() {
                               </div>
                               <div className="flex items-center gap-0.5 shrink-0">
                                 <ConvertisseurInline className="h-5 px-1" />
+                                <Button
+                                  asChild
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-5 w-5"
+                                  title="Lancer un minuteur lié à ce repas"
+                                >
+                                  <a
+                                    href={`/outils/minuteur?repas=${encodeURIComponent(
+                                      repas.recette_nom || repas.notes || label
+                                    )}&duree=${repas.type_repas === "diner" ? 35 : repas.type_repas === "dejeuner" ? 30 : 15}`}
+                                    aria-label="Ouvrir le minuteur pour ce repas"
+                                  >
+                                    <Clock className="h-3 w-3" />
+                                  </a>
+                                </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"

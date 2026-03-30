@@ -26,10 +26,19 @@ import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/composants/ui/select";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import {
+  activerCalendrierScolaireAuto,
   listerCalendriers,
   listerEvenements,
+  listerZonesScolaires,
   obtenirUrlAuthGoogle,
   synchroniserGoogle,
   statutGoogle,
@@ -51,9 +60,84 @@ export default function PageCalendriers() {
       </div>
 
       <CarteGoogleCalendar />
+      <CarteCalendrierScolaireAuto />
       <CarteCalendrierIcal />
       <CarteEvenementsSemaine />
     </div>
+  );
+}
+
+// ─── Calendrier scolaire auto ─────────────────────────────
+
+function CarteCalendrierScolaireAuto() {
+  const invalider = utiliserInvalidation();
+  const [zone, setZone] = useState("A");
+
+  const { data: zones, isLoading: chargementZones } = utiliserRequete(
+    ["calendriers", "scolaire", "zones"],
+    listerZonesScolaires
+  );
+
+  const { mutate: activer, isPending: activationEnCours } = utiliserMutation(
+    () => activerCalendrierScolaireAuto({ zone, ajuster_planning: true }),
+    {
+      onSuccess: (res) => {
+        invalider(["calendriers"]);
+        toast.success(
+          `Zone ${res.zone} activée: ${res.evenements_importes} période(s) importée(s), ${res.events_planning_ajustes} ajustement(s) planning.`
+        );
+      },
+      onError: () => toast.error("Erreur activation calendrier scolaire"),
+    }
+  );
+
+  const zonesDisponibles = zones && zones.length > 0 ? zones : ["A", "B", "C"];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CalendarDays className="h-5 w-5 text-emerald-600" />
+          Calendrier scolaire auto
+        </CardTitle>
+        <CardDescription>
+          Import automatique des vacances scolaires par zone avec ajustement du planning vacances.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {chargementZones ? (
+          <Skeleton className="h-9 w-40" />
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+            <Select value={zone} onValueChange={setZone}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Zone" />
+              </SelectTrigger>
+              <SelectContent>
+                {zonesDisponibles.map((z) => (
+                  <SelectItem key={z} value={z}>
+                    Zone {z}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="outline"
+              onClick={() => activer(undefined)}
+              disabled={activationEnCours}
+            >
+              {activationEnCours ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-4 w-4" />
+              )}
+              Activer / Synchroniser
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

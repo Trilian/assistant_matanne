@@ -51,6 +51,8 @@ pytest-cov = "^4.1.0"
 pytest-asyncio = "^0.23.2"
 ruff = "^0.1.9"
 alembic = "^1.13.0"
+mutmut = "^2.5.1"
+schemathesis = "^3.39.16"
 
 [build-system]
 requires = ["poetry-core"]

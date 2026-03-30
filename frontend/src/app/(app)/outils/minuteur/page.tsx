@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
@@ -75,12 +76,27 @@ function ComposantChronometre() {
   );
 }
 
-function ComposantMinuteur() {
+interface ComposantMinuteurProps {
+  repasSuggere: string | null;
+  dureeSuggeree: number | null;
+}
+
+function ComposantMinuteur({ repasSuggere, dureeSuggeree }: ComposantMinuteurProps) {
   const [dureeMinutes, setDureeMinutes] = useState(5);
   const [restant, setRestant] = useState(0);
   const [enMarche, setEnMarche] = useState(false);
   const refIntervalle = useRef<ReturnType<typeof setInterval> | null>(null);
   const refFin = useRef(0);
+
+  useEffect(() => {
+    if (!dureeSuggeree || enMarche || restant > 0) return;
+    const valeur = Number.isFinite(dureeSuggeree)
+      ? Math.min(999, Math.max(1, Math.round(dureeSuggeree)))
+      : null;
+    if (valeur) {
+      setDureeMinutes(valeur);
+    }
+  }, [dureeSuggeree, enMarche, restant]);
 
   const demarrer = useCallback(() => {
     const msFin = restant > 0 ? restant : dureeMinutes * 60 * 1000;
@@ -141,6 +157,24 @@ function ComposantMinuteur() {
 
   return (
     <div className="text-center space-y-6">
+      {repasSuggere && (
+        <div className="rounded-md border bg-muted/40 px-3 py-2 text-left">
+          <p className="text-xs text-muted-foreground">Minuteur lié au repas</p>
+          <p className="text-sm font-medium truncate">{repasSuggere}</p>
+          {dureeSuggeree && (
+            <div className="mt-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setDureeMinutes(Math.min(999, Math.max(1, Math.round(dureeSuggeree))))}
+              >
+                Utiliser {Math.round(dureeSuggeree)} min
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
       {!enMarche && restant === 0 && (
         <div className="space-y-3">
           <div className="flex justify-center gap-2 flex-wrap">
@@ -192,6 +226,11 @@ function ComposantMinuteur() {
 }
 
 export default function MinuteurPage() {
+  const params = useSearchParams();
+  const repasSuggere = params.get("repas");
+  const dureeBrute = params.get("duree");
+  const dureeSuggeree = dureeBrute ? Number(dureeBrute) : null;
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">⏱️ Minuteur</h1>
@@ -207,7 +246,7 @@ export default function MinuteurPage() {
               <TabsTrigger value="chronometre">Chronomètre</TabsTrigger>
             </TabsList>
             <TabsContent value="minuteur" className="pt-6">
-              <ComposantMinuteur />
+              <ComposantMinuteur repasSuggere={repasSuggere} dureeSuggeree={dureeSuggeree} />
             </TabsContent>
             <TabsContent value="chronometre" className="pt-6">
               <ComposantChronometre />

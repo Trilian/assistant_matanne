@@ -46,6 +46,16 @@ class TestRoutesCalendriers:
         response = client.get("/api/v1/calendriers/999999")
         assert response.status_code in (200, 404, 500)
 
+    def test_lister_zones_calendrier_scolaire_endpoint(self, client):
+        """GET /api/v1/calendriers/scolaire/zones existe."""
+        response = client.get("/api/v1/calendriers/scolaire/zones")
+        assert response.status_code in (200, 401, 403, 500)
+
+    def test_activer_calendrier_scolaire_endpoint(self, client):
+        """POST /api/v1/calendriers/scolaire/activer existe."""
+        response = client.post("/api/v1/calendriers/scolaire/activer?zone=A")
+        assert response.status_code in (200, 201, 401, 403, 422, 500)
+
 
 # ═══════════════════════════════════════════════════════════
 # TESTS ROUTES ÉVÉNEMENTS

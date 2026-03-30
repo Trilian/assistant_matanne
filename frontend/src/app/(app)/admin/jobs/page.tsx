@@ -66,6 +66,7 @@ export default function PageAdminJobs() {
   const [jobLogsOuverts, setJobLogsOuverts] = useState<Record<string, boolean>>({});
   const [jobLogs, setJobLogs] = useState<Record<string, JobLogsResponse>>({});
   const [chargementLogs, setChargementLogs] = useState<Record<string, boolean>>({});
+  const [modeDryRun, setModeDryRun] = useState(false);
 
   const {
     data: jobs,
@@ -79,7 +80,7 @@ export default function PageAdminJobs() {
   const executerJob = async (jobId: string) => {
     setRunStatuts((s) => ({ ...s, [jobId]: "running" }));
     try {
-      await clientApi.post(`/admin/jobs/${jobId}/run`);
+      await clientApi.post(`/admin/jobs/${jobId}/run`, null, { params: { dry_run: modeDryRun } });
       setRunStatuts((s) => ({ ...s, [jobId]: "success" }));
       // Rafraîchir les logs automatiquement après l'exécution
       chargerLogs(jobId);
@@ -121,6 +122,14 @@ export default function PageAdminJobs() {
           <p className="text-muted-foreground">
             Gérez et déclenchez manuellement les tâches automatiques
           </p>
+          <label className="mt-2 inline-flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+            <input
+              type="checkbox"
+              checked={modeDryRun}
+              onChange={(e) => setModeDryRun(e.target.checked)}
+            />
+            Mode dry-run (simulation)
+          </label>
         </div>
         <Button variant="outline" size="sm" onClick={() => refetch()} aria-label="Actualiser">
           <RefreshCw className="h-4 w-4" />

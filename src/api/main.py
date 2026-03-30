@@ -64,6 +64,7 @@ from src.api.routes import (
     documents_router,
     export_router,
     famille_router,
+    habitat_router,
     garmin_router,
     inventaire_router,
     jeux_router,
@@ -172,6 +173,10 @@ tags_metadata = [
     {
         "name": "Maison",
         "description": "Projets, routines, entretien, jardin et stocks maison",
+    },
+    {
+        "name": "Habitat",
+        "description": "Scenarios, veille immo, plans, deco et paysagisme",
     },
     {
         "name": "Jeux",
@@ -522,6 +527,7 @@ app.include_router(suggestions_router)
 # Nouveaux routers - famille, maison, jeux, calendriers
 app.include_router(famille_router)
 app.include_router(maison_router)
+app.include_router(habitat_router)
 app.include_router(assistant_router)
 app.include_router(jeux_router)
 app.include_router(calendriers_router)

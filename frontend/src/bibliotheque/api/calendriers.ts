@@ -137,3 +137,34 @@ export async function ajouterCalendrierIcal(
 export async function supprimerCalendrier(id: number): Promise<void> {
   await clientApi.delete(`/calendriers/${id}`);
 }
+
+// ═══════════════════════════════════════════════════════════
+// CALENDRIER SCOLAIRE AUTO (INNO-14)
+// ═══════════════════════════════════════════════════════════
+
+export interface ActivationCalendrierScolaireResult {
+  zone: string;
+  calendrier_id: number;
+  evenements_importes: number;
+  events_planning_ajustes: number;
+  ajustement_planning: boolean;
+  success: boolean;
+}
+
+export async function listerZonesScolaires(): Promise<string[]> {
+  const { data } = await clientApi.get<{ zones: string[] }>("/calendriers/scolaire/zones");
+  return data.zones ?? [];
+}
+
+export async function activerCalendrierScolaireAuto(params: {
+  zone: string;
+  ajuster_planning?: boolean;
+}): Promise<ActivationCalendrierScolaireResult> {
+  const search = new URLSearchParams();
+  search.set("zone", params.zone);
+  search.set("ajuster_planning", String(params.ajuster_planning ?? true));
+  const { data } = await clientApi.post<ActivationCalendrierScolaireResult>(
+    `/calendriers/scolaire/activer?${search.toString()}`
+  );
+  return data;
+}

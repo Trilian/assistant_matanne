@@ -26,6 +26,37 @@ from src.core.models import CalendrierExterne, EvenementCalendrier
 router = APIRouter(prefix="/api/v1/calendriers", tags=["Calendriers"])
 
 
+@router.get("/scolaire/zones", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_zones_calendrier_scolaire(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les zones scolaires supportees pour l'import automatique."""
+    from src.services.famille.calendrier_scolaire import lister_zones_scolaires
+
+    return {"zones": lister_zones_scolaires()}
+
+
+@router.post("/scolaire/activer", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def activer_calendrier_scolaire_auto(
+    zone: str = Query(..., description="Zone scolaire A, B ou C"),
+    ajuster_planning: bool = Query(True, description="Creer/mettre a jour les evenements planning vacances"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Active l'import auto du calendrier scolaire pour une zone."""
+    from src.services.famille.calendrier_scolaire import importer_calendrier_scolaire
+
+    def _query() -> dict[str, Any]:
+        return importer_calendrier_scolaire(
+            user_id=user.get("id"),
+            zone=zone,
+            ajuster_planning=ajuster_planning,
+        )
+
+    return await executer_async(_query)
+
+
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CALENDRIERS EXTERNES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

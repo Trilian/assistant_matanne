@@ -82,6 +82,57 @@ export interface ServiceHealthResponse {
   metriques?: Record<string, unknown>
 }
 
+export interface AdminDashboardResponse {
+  generated_at: string
+  jobs: {
+    total: number
+    actifs: number
+    inactifs: number
+  }
+  services: ServiceHealthResponse
+  metriques_services: Record<string, unknown>
+  cache: Record<string, unknown>
+  security: {
+    events_24h: number
+  }
+  feature_flags: Record<string, boolean>
+}
+
+export interface ServiceActionInfo {
+  id: string
+  service: string
+  description: string
+  dry_run: boolean
+}
+
+export interface ServiceActionsResponse {
+  items: ServiceActionInfo[]
+  total: number
+  enabled: boolean
+}
+
+export interface FeatureFlagsResponse {
+  flags: Record<string, boolean>
+  total: number
+}
+
+export interface RuntimeConfigResponse {
+  values: Record<string, unknown>
+  readonly: Record<string, unknown>
+}
+
+export interface ResyncTarget {
+  id: string
+  job_id: string
+  description: string
+}
+
+export interface ResyncTargetsResponse {
+  items: ResyncTarget[]
+  total: number
+  enabled: boolean
+}
+
 export interface CacheStatsResponse {
   [key: string]: unknown
 }
@@ -196,6 +247,28 @@ export async function obtenirSanteServices(): Promise<ServiceHealthResponse> {
   return data
 }
 
+export async function obtenirDashboardAdmin(): Promise<AdminDashboardResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/dashboard')
+  return data
+}
+
+export async function listerActionsServices(): Promise<ServiceActionsResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/services/actions')
+  return data
+}
+
+export async function executerActionService(
+  actionId: string,
+  options?: { dry_run?: boolean; params?: Record<string, unknown> },
+): Promise<{ status: string; action_id: string; dry_run?: boolean; result: unknown }> {
+  const { data } = await clientApi.post(
+    `/api/v1/admin/services/actions/${actionId}/run`,
+    { params: options?.params ?? {} },
+    { params: { dry_run: options?.dry_run ?? false } },
+  )
+  return data
+}
+
 // ─── Cache ─────────────────────────────────────────────────
 
 export async function obtenirStatsCache(): Promise<CacheStatsResponse> {
@@ -210,6 +283,59 @@ export async function purgerCache(pattern = '*'): Promise<{ status: string; nb_i
 
 export async function viderCache(): Promise<{ status: string; message: string }> {
   const { data } = await clientApi.post('/api/v1/admin/cache/clear')
+  return data
+}
+
+export async function lireFeatureFlags(): Promise<FeatureFlagsResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/feature-flags')
+  return data
+}
+
+export async function sauvegarderFeatureFlags(
+  flags: Record<string, boolean>,
+): Promise<{ status: string; flags: Record<string, boolean>; total: number }> {
+  const { data } = await clientApi.put('/api/v1/admin/feature-flags', { flags })
+  return data
+}
+
+export async function lireRuntimeConfig(): Promise<RuntimeConfigResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/runtime-config')
+  return data
+}
+
+export async function sauvegarderRuntimeConfig(
+  values: Record<string, unknown>,
+): Promise<{ status: string; values: Record<string, unknown> }> {
+  const { data } = await clientApi.put('/api/v1/admin/runtime-config', { values })
+  return data
+}
+
+export async function listerResyncTargets(): Promise<ResyncTargetsResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/resync/targets')
+  return data
+}
+
+export async function forcerResync(
+  targetId: string,
+  dryRun = false,
+): Promise<Record<string, unknown>> {
+  const { data } = await clientApi.post(
+    `/api/v1/admin/resync/${targetId}`,
+    null,
+    { params: { dry_run: dryRun } },
+  )
+  return data
+}
+
+export async function lancerSeedDev(
+  scope: 'recettes_standard' = 'recettes_standard',
+  dryRun = false,
+): Promise<Record<string, unknown>> {
+  const { data } = await clientApi.post(
+    '/api/v1/admin/seed/dev',
+    { scope },
+    { params: { dry_run: dryRun } },
+  )
   return data
 }
 

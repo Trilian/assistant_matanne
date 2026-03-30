@@ -107,6 +107,7 @@ async def obtenir_actions_rapides_chat(
 @gerer_exception_api
 async def lister_notes(
     categorie: str | None = Query(None),
+    tag: str | None = Query(None),
     epingle: bool | None = Query(None),
     archive: bool = Query(False),
     search: str | None = Query(None),
@@ -120,6 +121,9 @@ async def lister_notes(
             query = session.query(NoteMemo)
             if categorie:
                 query = query.filter(NoteMemo.categorie == categorie)
+            if tag:
+                safe_tag = tag.strip().lower()
+                query = query.filter(NoteMemo.tags.isnot(None))
             if epingle is not None:
                 query = query.filter(NoteMemo.epingle == epingle)
             query = query.filter(NoteMemo.archive == archive)
@@ -130,6 +134,12 @@ async def lister_notes(
             items = query.order_by(
                 NoteMemo.epingle.desc(), NoteMemo.cree_le.desc()
             ).all()
+
+            if tag:
+                items = [
+                    n for n in items
+                    if any(str(t).strip().lower() == safe_tag for t in (n.tags or []))
+                ]
 
             return {
                 "items": [
@@ -149,6 +159,34 @@ async def lister_notes(
                     for n in items
                 ],
             }
+
+    return await executer_async(_query)
+
+
+@router.get("/notes/tags", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_tags_notes(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne le catalogue de tags disponibles pour les notes."""
+    from src.core.models import NoteMemo
+
+    def _query():
+        with executer_avec_session() as session:
+            rows = session.query(NoteMemo.tags).filter(NoteMemo.archive == False).all()  # noqa: E712
+            compteur: dict[str, int] = {}
+            for (tags,) in rows:
+                for tag in tags or []:
+                    valeur = str(tag).strip()
+                    if not valeur:
+                        continue
+                    compteur[valeur] = compteur.get(valeur, 0) + 1
+
+            items = [
+                {"tag": tag, "count": count}
+                for tag, count in sorted(compteur.items(), key=lambda item: (-item[1], item[0].lower()))
+            ]
+            return {"items": items, "total": len(items)}
 
     return await executer_async(_query)
 

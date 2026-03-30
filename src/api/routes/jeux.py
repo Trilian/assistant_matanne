@@ -792,7 +792,7 @@ async def modifier_pari(
     """Met Ã  jour un pari (statut, gain, etc.)."""
     from decimal import Decimal
 
-    from src.core.models import BudgetFamille, PariSportif
+    from src.core.models import BudgetFamille, HistoriqueJeux, PariSportif
 
     def _query():
         with executer_avec_session() as session:
@@ -801,6 +801,7 @@ async def modifier_pari(
                 raise HTTPException(status_code=404, detail="Pari non trouvÃ©")
 
             ancien_statut = pari.statut
+            ancien_gain = Decimal(str(pari.gain or 0))
 
             if "statut" in payload:
                 pari.statut = payload["statut"]
@@ -809,22 +810,71 @@ async def modifier_pari(
             if "notes" in payload:
                 pari.notes = payload["notes"]
 
-            # IM-8 : synchroniser les pertes réelles vers le budget global.
-            if (
-                ancien_statut != pari.statut
-                and pari.statut == "perdu"
-                and not pari.est_virtuel
-                and pari.mise
-            ):
-                session.add(
-                    BudgetFamille(
-                        date=date.today(),
-                        categorie="jeux_paris",
-                        description=f"Perte pari #{pari.id}",
-                        montant=float(pari.mise),
-                        notes="sync_jeux_budget:auto",
-                    )
+            statut_change = ancien_statut != pari.statut
+            sync_budget = False
+            mise = Decimal(str(pari.mise or 0))
+            gain = Decimal(str(pari.gain or 0))
+
+            # IM-8 : synchroniser pertes + gains vers budget/finances avec logique idempotente.
+            if statut_change and not pari.est_virtuel:
+                marqueur_sync = f"sync_jeux_budget:auto:pari:{pari.id}:"
+                (
+                    session.query(BudgetFamille)
+                    .filter(BudgetFamille.notes.like(f"{marqueur_sync}%"))
+                    .delete(synchronize_session=False)
                 )
+
+                if pari.statut == "perdu" and mise > 0:
+                    session.add(
+                        BudgetFamille(
+                            date=date.today(),
+                            categorie="jeux_paris_perte",
+                            description=f"Perte pari #{pari.id}",
+                            montant=float(mise),
+                            notes=f"{marqueur_sync}perte",
+                        )
+                    )
+                    sync_budget = True
+                elif pari.statut == "gagne" and gain > 0:
+                    session.add(
+                        BudgetFamille(
+                            date=date.today(),
+                            categorie="jeux_paris_gain",
+                            description=f"Gain pari #{pari.id}",
+                            montant=float(gain),
+                            notes=f"{marqueur_sync}gain",
+                        )
+                    )
+                    sync_budget = True
+
+                historique = (
+                    session.query(HistoriqueJeux)
+                    .filter(HistoriqueJeux.date == date.today(), HistoriqueJeux.type_jeu == "paris")
+                    .first()
+                )
+                if historique is None:
+                    historique = HistoriqueJeux(date=date.today(), type_jeu="paris")
+                    session.add(historique)
+                    session.flush()
+
+                def _ajuster_historique(statut: str, mise_val: Decimal, gain_val: Decimal, sens: int) -> None:
+                    if statut not in {"gagne", "perdu"}:
+                        return
+                    historique.nb_paris = max(0, int(historique.nb_paris or 0) + sens)
+                    historique.mises_totales = Decimal(str(historique.mises_totales or 0)) + (
+                        mise_val * sens
+                    )
+
+                    if statut == "gagne":
+                        historique.paris_gagnes = max(0, int(historique.paris_gagnes or 0) + sens)
+                        historique.gains_totaux = Decimal(str(historique.gains_totaux or 0)) + (
+                            gain_val * sens
+                        )
+                    elif statut == "perdu":
+                        historique.paris_perdus = max(0, int(historique.paris_perdus or 0) + sens)
+
+                _ajuster_historique(ancien_statut, mise, ancien_gain, -1)
+                _ajuster_historique(pari.statut, mise, gain, +1)
 
             session.commit()
             session.refresh(pari)
@@ -833,11 +883,7 @@ async def modifier_pari(
                 "statut": pari.statut,
                 "gain": float(pari.gain) if pari.gain else None,
                 "mise": float(pari.mise),
-                "sync_budget": (
-                    ancien_statut != pari.statut
-                    and pari.statut == "perdu"
-                    and not pari.est_virtuel
-                ),
+                "sync_budget": sync_budget,
             }
 
     return await executer_async(_query)
@@ -2422,7 +2468,7 @@ async def analyse_ia(
 @router.post("/loto/generer-grille-ia-ponderee", responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def generer_grille_ia_ponderee(
-    mode: str = Query("equilibre", regex="^(chauds|froids|equilibre)$"),
+    mode: str = Query("equilibre", pattern="^(chauds|froids|equilibre)$"),
     sauvegarder: bool = Query(False),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:

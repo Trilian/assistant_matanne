@@ -7,13 +7,23 @@ import { test, expect } from "@playwright/test";
 async function configurerContexteInterModules(page: import("@playwright/test").Page) {
   let prochainIdListe = 2;
   const listes = [
-    { id: 1, nom: "Courses semaine", nb_articles: 2, nb_coches: 0 },
+    {
+      id: 1,
+      nom: "Courses semaine",
+      date_creation: "2026-03-23T08:00:00Z",
+      est_terminee: false,
+      articles: [],
+      nombre_articles: 2,
+      nombre_coche: 0,
+    },
   ];
   const detailsListes = new Map<number, {
     id: number;
     nom: string;
-    nb_articles: number;
-    nb_coches: number;
+    date_creation: string;
+    est_terminee: boolean;
+    nombre_articles: number;
+    nombre_coche: number;
     articles: Array<{
       id: number;
       nom: string;
@@ -26,16 +36,29 @@ async function configurerContexteInterModules(page: import("@playwright/test").P
   detailsListes.set(1, {
     id: 1,
     nom: "Courses semaine",
-    nb_articles: 2,
-    nb_coches: 0,
+    date_creation: "2026-03-23T08:00:00Z",
+    est_terminee: false,
+    nombre_articles: 2,
+    nombre_coche: 0,
     articles: [
       { id: 1, nom: "Pommes", quantite: 6, categorie: "Fruits", est_coche: false },
       { id: 2, nom: "Lait", quantite: 2, categorie: "Laitier", est_coche: false },
     ],
   });
 
+  await page.context().addCookies([
+    {
+      name: "access_token",
+      value: "e2e-dev-token",
+      url: "http://localhost:3000",
+      httpOnly: false,
+      sameSite: "Lax",
+    },
+  ]);
+
   await page.addInitScript(() => {
     window.localStorage.setItem("access_token", "e2e-dev-token");
+    window.localStorage.setItem("matanne-onboarding-complete", "true");
   });
 
   await page.route("**/api/v1/auth/me", async (route) => {
@@ -130,11 +153,14 @@ async function configurerContexteInterModules(page: import("@playwright/test").P
       const nouvelleListe = {
         id: prochainIdListe++,
         nom: donnees.nom?.trim() || "Nouvelle liste",
-        nb_articles: 0,
-        nb_coches: 0,
+        date_creation: "2026-03-23T08:05:00Z",
+        est_terminee: false,
+        articles: [],
+        nombre_articles: 0,
+        nombre_coche: 0,
       };
       listes.push(nouvelleListe);
-      detailsListes.set(nouvelleListe.id, { ...nouvelleListe, articles: [] });
+      detailsListes.set(nouvelleListe.id, nouvelleListe);
 
       await route.fulfill({
         status: 200,
@@ -157,8 +183,10 @@ async function configurerContexteInterModules(page: import("@playwright/test").P
       const detail = detailsListes.get(identifiant) ?? {
         id: identifiant,
         nom: `Liste ${identifiant}`,
-        nb_articles: 0,
-        nb_coches: 0,
+        date_creation: "2026-03-23T08:10:00Z",
+        est_terminee: false,
+        nombre_articles: 0,
+        nombre_coche: 0,
         articles: [],
       };
 
@@ -249,7 +277,7 @@ test.describe("Inter-modules cuisine", () => {
       }
     }
 
-    await expect(page.getByText(nomListe)).toBeVisible();
+    await expect(page.getByText(nomListe).first()).toBeVisible();
 
     await page.goto("/cuisine/inventaire");
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });

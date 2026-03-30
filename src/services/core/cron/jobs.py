@@ -498,6 +498,45 @@ def _job_digest_ntfy() -> None:
         logger.exception("Erreur lors du digest ntfy")
 
 
+def _job_digest_notifications_queue() -> None:
+    """Vide les files digest en attente (Phase 8.4) et envoie les résumés utilisateur.
+
+    Ce job complète le digest ntfy quotidien avec un flush multi-canal basé
+    sur les notifications mises en file d'attente par throttling/mode digest.
+    """
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        dispatcher = get_dispatcher_notifications()
+        user_ids = dispatcher.lister_users_digest_pending()
+
+        if not user_ids:
+            logger.debug("Digest queue: aucun utilisateur à traiter")
+            return
+
+        nb_succes = 0
+        nb_echecs = 0
+        for user_id in user_ids:
+            try:
+                resultats = dispatcher.vider_digest(user_id)
+                if any(resultats.values()):
+                    nb_succes += 1
+                else:
+                    nb_echecs += 1
+            except Exception:
+                nb_echecs += 1
+                logger.debug("Digest queue: échec flush pour %s", user_id, exc_info=True)
+
+        logger.info(
+            "Digest queue flush terminé: %d utilisateur(s) traité(s), %d succès, %d échec(s)",
+            len(user_ids),
+            nb_succes,
+            nb_echecs,
+        )
+    except Exception:
+        logger.exception("Erreur lors du flush automatique de la queue digest")
+
+
 def _job_rappel_courses_ntfy() -> None:
     """Envoie un rappel ntfy.sh pour les articles de courses en attente à 18h."""
     try:
@@ -1852,6 +1891,24 @@ def _job_expiration_documents() -> None:
         logger.exception("Erreur JOB-8 expiration_documents")
 
 
+def _job_sync_calendrier_scolaire() -> None:
+    """INNO-14 — Resynchronise les calendriers scolaires auto actifs."""
+    try:
+        from src.services.famille.calendrier_scolaire import (
+            synchroniser_calendriers_scolaires_actifs,
+        )
+
+        result = synchroniser_calendriers_scolaires_actifs()
+        logger.info(
+            "Calendrier scolaire auto sync: %d total, %d succes, %d erreurs",
+            result.get("total", 0),
+            result.get("succes", 0),
+            result.get("erreurs", 0),
+        )
+    except Exception:
+        logger.exception("Erreur INNO-14 sync calendrier scolaire")
+
+
 _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     # Jobs existants
     "rappels_famille": ("Rappels famille quotidiens", _job_rappels_famille),
@@ -1861,6 +1918,7 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "push_quotidien": ("Notifications Web Push quotidiennes", _job_push_quotidien),
     "enrichissement_catalogues": ("Enrichissement mensuel catalogues IA", _job_enrichissement_catalogues),
     "digest_ntfy": ("Digest quotidien ntfy.sh", _job_digest_ntfy),
+    "digest_notifications_queue": ("Flush digest notifications", _job_digest_notifications_queue),
     "rappel_courses": ("Rappel courses ntfy.sh", _job_rappel_courses_ntfy),
     "push_contextuel_soir": ("Push contextuel soir", _job_push_contextuel_soir),
     "resume_hebdo": ("Résumé hebdomadaire", _job_resume_hebdo),
@@ -1888,6 +1946,7 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "check_garmin_anomalies": ("Anomalies Garmin", _job_check_garmin_anomalies),
     "resume_jardin_saisonnier": ("Résumé jardin saisonnier", _job_resume_jardin_saisonnier),
     "expiration_documents": ("Expiration documents", _job_expiration_documents),
+    "sync_calendrier_scolaire": ("Sync calendrier scolaire auto", _job_sync_calendrier_scolaire),
 }
 
 
@@ -2163,6 +2222,15 @@ def _job_suggestions_activites_meteo() -> None:
         logger.exception("Erreur IM-14 suggestions météo")
 
 
+_REGISTRE_JOBS.update(
+    {
+        "sync_routines_planning": ("Sync routines -> planning", _job_sync_routines_planning),
+        "sync_recoltes_inventaire": ("Sync récoltes -> inventaire", _job_sync_recoltes_inventaire),
+        "suggestions_activites_meteo": ("Suggestions activités selon météo", _job_suggestions_activites_meteo),
+    }
+)
+
+
 class DémarreurCron:
     """Enveloppe legère autour de BackgroundScheduler pour un démarrage/arrêt propre."""
 
@@ -2192,6 +2260,7 @@ class DémarreurCron:
         self._planifier_job("push_quotidien", CronTrigger(hour=9, minute=0))
         self._planifier_job("enrichissement_catalogues", CronTrigger(day=1, hour=3, minute=0))
         self._planifier_job("digest_ntfy", CronTrigger(hour=9, minute=0), replace_existing=True)
+        self._planifier_job("digest_notifications_queue", CronTrigger(hour="*/2", minute=5), replace_existing=True)
         self._planifier_job("rappel_courses", CronTrigger(hour=18, minute=0), replace_existing=True)
         self._planifier_job("push_contextuel_soir", CronTrigger(hour=18, minute=0), replace_existing=True)
         self._planifier_job("resume_hebdo", CronTrigger(day_of_week="mon", hour=7, minute=30), replace_existing=True)
@@ -2220,6 +2289,10 @@ class DémarreurCron:
         self._planifier_job("check_garmin_anomalies", CronTrigger(hour=8, minute=0), replace_existing=True)
         self._planifier_job("resume_jardin_saisonnier", CronTrigger(day=1, hour=8, minute=0), replace_existing=True)
         self._planifier_job("expiration_documents", CronTrigger(hour=9, minute=0), replace_existing=True)
+        self._planifier_job("sync_calendrier_scolaire", CronTrigger(hour=5, minute=30), replace_existing=True)
+        self._planifier_job("sync_routines_planning", CronTrigger(hour=5, minute=45), replace_existing=True)
+        self._planifier_job("sync_recoltes_inventaire", CronTrigger(hour=6, minute=15), replace_existing=True)
+        self._planifier_job("suggestions_activites_meteo", CronTrigger(hour=7, minute=15), replace_existing=True)
 
     def demarrer(self) -> None:
         if not self._scheduler.running:

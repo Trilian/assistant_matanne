@@ -995,31 +995,31 @@ AutomationEngine
 
 > **Objectif** : Les modules communiquent et se renforcent mutuellement.
 
-**Statut (mise à jour 2026-03-29)** : `EN COURS` — **4/9** actions avancées (2 réalisées, 2 partielles).
+**Statut (mise à jour 2026-03-29)** : `TERMINEE` — **9/9** actions réalisées.
 
 | Action | Statut | Détail |
 |--------|--------|--------|
 | 5.1 Inventaire péremption → Suggestions recettes | ✅ Fait | `jobs.py` enrichit l'alerte J-04 avec des recettes rescue automatiques + lien API anti-gaspillage |
-| 5.2 Jeux pertes/gains → Budget/Finances | 🟡 Partiel | `PATCH /jeux/paris/{id}` synchronise les **pertes réelles** vers `BudgetFamille` (statut `perdu`) |
+| 5.2 Jeux pertes/gains → Budget/Finances | ✅ Fait | `PATCH /jeux/paris/{id}` synchronise désormais **pertes + gains** vers `BudgetFamille` + met à jour `HistoriqueJeux` avec transitions idempotentes |
 | 5.8 Vue budgétaire unifiée dashboard | ✅ Fait | Nouvel endpoint `GET /api/v1/dashboard/budget-unifie` + client frontend `tableau-bord.ts` |
-| 5.9 Exposer vues SQL dans frontend | 🟡 Partiel | Endpoints admin créés (`/api/v1/admin/sql-views` et `/sql-views/{view_name}`) + client frontend `admin.ts` |
-| 5.3 Routines famille → Planning général | ⏳ À faire | Mapping `heure_prevue` → créneau + sync quotidienne non implémentés |
-| 5.4 Jardin récoltes → Cuisine inventaire | ⏳ À faire | Service de sync récoltes→inventaire non implémenté |
-| 5.5 Météo → Activités famille | ⏳ À faire | Suggestions d'activités contextuelles à brancher |
-| 5.6 Push ↔ WhatsApp failover | ⏳ À faire | Chaîne de fallback cross-canal à implémenter dans dispatcher |
+| 5.9 Exposer vues SQL dans frontend | ✅ Fait | Page admin dédiée `/admin/sql-views` (sélection vue, pagination, tableau dynamique) + raccourci depuis accueil admin |
+| 5.3 Routines famille → Planning général | ✅ Fait | Job `sync_routines_planning` (IM-10) ajoute les routines actives en événements planning avec gestion des conflits |
+| 5.4 Jardin récoltes → Cuisine inventaire | ✅ Fait | Job `sync_recoltes_inventaire` (IM-12) synchronise récoltes jardin vers ingrédients/articles inventaire |
+| 5.5 Météo → Activités famille | ✅ Fait | Job `suggestions_activites_meteo` (IM-14) génère suggestions météo et notifie la famille |
+| 5.6 Push ↔ WhatsApp failover | ✅ Fait | Dispatcher notifications supporte `strategie=\"failover\"` avec fallback push→whatsapp→email |
 | 5.7 Chat IA contexte multi-module | ✅ Déjà fait | Déjà en production (`chat_ai.py` + page `outils/chat-ia`) |
 
 | # | Action | Réf. | Effort | Priorité | Statut |
 |---|--------|------|--------|----------|--------|
 | 5.1 | Inventaire péremption → Suggestions recettes | IM-9 | 3h | 🔴 | ✅ |
-| 5.2 | Jeux pertes/gains → Budget/Finances | IM-8 | 4h | 🔴 | 🟡 |
-| 5.3 | Routines famille → Planning général | IM-10 | 4h | 🟡 | ⏳ |
-| 5.4 | Jardin récoltes → Cuisine inventaire | IM-12 | 2h | 🟡 | ⏳ |
-| 5.5 | Météo → Activités famille | IM-14 | 2h | 🟡 | ⏳ |
-| 5.6 | Push ↔ WhatsApp failover | IM-15 | 3h | 🟡 | ⏳ |
+| 5.2 | Jeux pertes/gains → Budget/Finances | IM-8 | 4h | 🔴 | ✅ |
+| 5.3 | Routines famille → Planning général | IM-10 | 4h | 🟡 | ✅ |
+| 5.4 | Jardin récoltes → Cuisine inventaire | IM-12 | 2h | 🟡 | ✅ |
+| 5.5 | Météo → Activités famille | IM-14 | 2h | 🟡 | ✅ |
+| 5.6 | Push ↔ WhatsApp failover | IM-15 | 3h | 🟡 | ✅ |
 | 5.7 | Chat IA contexte multi-module | IM-11 | 6h | 🟢 | ✅ |
 | 5.8 | Vue budgétaire unifiée dashboard | G-DASH-1 | 3h | 🔴 | ✅ |
-| 5.9 | Exposer vues SQL dans frontend | G-MAI-3 | 2h | 🟡 | 🟡 |
+| 5.9 | Exposer vues SQL dans frontend | G-MAI-3 | 2h | 🟡 | ✅ |
 
 ### Phase 6 — IA & Intelligence
 
@@ -1073,13 +1073,14 @@ AutomationEngine
 | 8.1 | Finaliser WhatsApp envoi (confirmer/implémenter) | N3 | 3h | 🔴 | ✅ Fait (dispatcher WhatsApp consolidé) |
 | 8.2 | Préférences unifiées par canal et par type | N2 | 3h | 🔴 | ✅ Fait (canaux + max/h + digest via API préférences) |
 | 8.3 | Failover push → WhatsApp → email | N1 | 2h | 🟡 | ✅ Fait (stratégie failover dans dispatcher) |
-| 8.4 | Throttling & digest (regroupement notifications) | N5/N6 | 3h | 🟡 | 🟡 Partiel (throttling + queue digest implémentés, purge auto à planifier) |
+| 8.4 | Throttling & digest (regroupement notifications) | N5/N6 | 3h | 🟡 | ✅ Fait (throttling + queue digest + job auto flush toutes les 2h) |
 | 8.5 | Mapper événements → canaux (tableau §11.4) | — | 2h | 🟡 | ✅ Fait (mapping centralisé dans dispatcher) |
 | 8.6 | Tests notifications failover | T10 | 2h | 🟢 | ✅ Fait (tests unitaires Phase 8 ajoutés) |
 
 Notes d'implémentation Phase 8 (2026-03-29):
 
 - Fichier `src/services/core/notifications/notif_dispatcher.py` : ajout routing événementiel, failover, throttling et digest.
+- Fichier `src/services/core/cron/jobs.py` : ajout job `digest_notifications_queue` (flush automatique queue digest toutes les 2h).
 - Fichiers `src/api/schemas/preferences.py` et `src/api/routes/preferences.py` : ajout préférences `max_par_heure` et `mode_digest`.
 - Fichier `tests/services/test_notif_dispatcher_phase8.py` : nouveaux tests ciblés failover/routing/throttling.
 
@@ -1087,36 +1088,40 @@ Notes d'implémentation Phase 8 (2026-03-29):
 
 > **Objectif** : Un admin peut tout contrôler sans toucher au code.
 
-| # | Action | Réf. | Effort | Priorité |
-|---|--------|------|--------|----------|
-| 9.1 | Dashboard admin consolidé | ADM-1 | 4h | 🔴 |
-| 9.2 | Lancer tout service manuellement | ADM-2 | 3h | 🔴 |
-| 9.3 | Mode dry-run | ADM-3 | 2h | 🟡 |
-| 9.4 | Feature flags | ADM-5 | 3h | 🟡 |
-| 9.5 | Forcer re-sync externes | ADM-7 | 1h | 🟡 |
-| 9.6 | Score bien-être interactif | G-DASH-2 | 2h | 🟡 |
-| 9.7 | Page bankroll management | G-JEU-2 | 3h | 🟡 |
-| 9.8 | Tags/catégories notes | G-OUT-1 | 2h | 🟡 |
-| 9.9 | SQL query viewer read-only | ADM-8 | 3h | 🟢 |
-| 9.10 | Seed data dev | ADM-9 | 2h | 🟢 |
+**Statut (mise à jour 2026-03-30)** : `TERMINEE` — **10/10** actions couvertes. Les items 9.6 et 9.9 étaient déjà présents et ont été confirmés, les autres ont été implémentés ou complétés dans cette passe.
+
+| # | Action | Réf. | Effort | Priorité | Statut (2026-03-30) |
+|---|--------|------|--------|----------|----------------------|
+| 9.1 | Dashboard admin consolidé | ADM-1 | 4h | 🔴 | ✅ Fait (dashboard admin agrégé + centre de contrôle services/cache/flags/config/re-sync) |
+| 9.2 | Lancer tout service manuellement | ADM-2 | 3h | 🔴 | ✅ Fait (catalogue d'actions admin déclenchables depuis l'UI) |
+| 9.3 | Mode dry-run | ADM-3 | 2h | 🟡 | ✅ Fait (jobs admin, actions services, re-sync et seed) |
+| 9.4 | Feature flags | ADM-5 | 3h | 🟡 | ✅ Fait (lecture/édition persistée via état admin) |
+| 9.5 | Forcer re-sync externes | ADM-7 | 1h | 🟡 | ✅ Fait (cibles Garmin, Google Calendar et OpenFoodFacts exposées) |
+| 9.6 | Score bien-être interactif | G-DASH-2 | 2h | 🟡 | ✅ Déjà présent et confirmé sur le dashboard |
+| 9.7 | Page bankroll management | G-JEU-2 | 3h | 🟡 | ✅ Fait (page dédiée + navigation jeux) |
+| 9.8 | Tags/catégories notes | G-OUT-1 | 2h | 🟡 | ✅ Fait (filtrage par tag, suggestions et saisie tags côté UI) |
+| 9.9 | SQL query viewer read-only | ADM-8 | 3h | 🟢 | ✅ Déjà présent et confirmé |
+| 9.10 | Seed data dev | ADM-9 | 2h | 🟢 | ✅ Fait (endpoint admin de seed dev avec dry-run) |
 
 ### Phase 10 — Innovation & UX
 
 > **Objectif** : Différenciation, expérience utilisateur supérieure.
 
-| # | Action | Réf. | Effort | Priorité |
-|---|--------|------|--------|----------|
-| 10.1 | Mode hors-ligne (PWA + IndexedDB) | INNO-1 | 16h | 🟡 |
-| 10.2 | Planificateur IA semaine complète | INNO-6 | 8h | 🟡 |
-| 10.3 | Commandes vocales enrichies | INNO-3 | 4h | 🟡 |
-| 10.4 | Drag & drop planning | UX-3 | 4h | 🟡 |
-| 10.5 | Mode invités | INNO-7 | 4h | 🟢 |
-| 10.6 | Suivi écologique | INNO-13 | 6h | 🟢 |
-| 10.7 | Calendrier scolaire auto | INNO-14 | 3h | 🟢 |
-| 10.8 | Widgets configurables | G-DASH-3 | 4h | 🟢 |
-| 10.9 | Export complet DB | ADM-10 | 2h | 🟢 |
-| 10.10 | Minuteur ↔ recettes | G-OUT-3 | 2h | 🟢 |
-| 10.11 | Mutation testing, contract testing, visual regression | — | 8h | 🟢 |
+**Statut (mise à jour 2026-03-30)** : `EN COURS` — **8/11** actions réalisées, **3/11** partielles.
+
+| # | Action | Réf. | Effort | Priorité | Statut (2026-03-29) |
+|---|--------|------|--------|----------|----------------------|
+| 10.1 | Mode hors-ligne (PWA + IndexedDB) | INNO-1 | 16h | 🟡 | ✅ Fait (Service Worker + cache API + file sync IndexedDB) |
+| 10.2 | Planificateur IA semaine complète | INNO-6 | 8h | 🟡 | ✅ Fait (endpoint génération planning IA hebdo en place) |
+| 10.3 | Commandes vocales enrichies | INNO-3 | 4h | 🟡 | ✅ Fait (hook reconnaissance + page assistant vocal + FAB) |
+| 10.4 | Drag & drop planning | UX-3 | 4h | 🟡 | ✅ Fait (déplacement de repas par glisser-déposer sur la grille hebdo) |
+| 10.5 | Mode invités | INNO-7 | 4h | 🟢 | 🟡 Partiel (prise en compte `nb_invites` côté prédiction courses, UI dédiée à finaliser) |
+| 10.6 | Suivi écologique | INNO-13 | 6h | 🟢 | 🟡 Partiel (CRUD actions écologiques disponible, agrégation score multi-modules à compléter) |
+| 10.7 | Calendrier scolaire auto | INNO-14 | 3h | 🟢 | ✅ Fait (activation zone A/B/C + import auto + sync cron + ajustement planning vacances) |
+| 10.8 | Widgets configurables | G-DASH-3 | 4h | 🟢 | ✅ Fait (grille widgets réordonnable persistée en localStorage) |
+| 10.9 | Export complet DB | ADM-10 | 2h | 🟢 | ✅ Fait (export RGPD JSON + exports PDF/ICS opérationnels) |
+| 10.10 | Minuteur ↔ recettes | G-OUT-3 | 2h | 🟢 | ✅ Fait (lancement minuteur depuis un repas planning avec durée préremplie) |
+| 10.11 | Mutation testing, contract testing, visual regression | — | 8h | 🟢 | 🟡 Partiel (socle outillage ajouté: dépendances + test contrat OpenAPI + spec visuelle Playwright + scripts npm) |
 
 ---
 
@@ -1656,6 +1661,28 @@ class ServiceGenerationImages:
 | **H10** | IA avancée : estimation travaux régionale, architecte virtuel, analyse annonces | 6h | 🟢 |
 | **H11** | Intégrations inter-modules (projets, jardin, finances, dashboard, notifications) | 4h | 🟢 |
 | **H12** | Historique DVF (data.gouv.fr) + graphiques évolution prix secteur | 4h | 🟢 |
+
+### 19.12.1 Statut d'implémentation Habitat au 29 mars 2026
+
+**Livré dans ce sprint** : socle technique H1 + base UI H2.
+
+| Lot | Statut | Réalisations |
+|-----|--------|--------------|
+| **H1 Backend** | ✅ Réalisé | Ajout des modèles ORM `habitat_projet.py`, schémas Pydantic `src/api/schemas/habitat.py`, routeur REST `src/api/routes/habitat.py`, migration SQL `sql/migrations/V007__module_habitat.sql`, branchement dans `src/api/main.py` et `src/api/routes/__init__.py` |
+| **H2 Frontend socle** | ✅ Réalisé | Création du hub `frontend/src/app/(app)/habitat/page.tsx`, page `scenarios/page.tsx`, et squelettes fonctionnels `veille-immo`, `plans`, `deco`, `jardin` |
+| **Navigation** | ✅ Réalisé | Habitat ajouté à la barre latérale, à la nav mobile et à `pages-navigation.ts` |
+| **Client API / types** | ✅ Réalisé | Ajout de `frontend/src/bibliotheque/api/habitat.ts` et `frontend/src/types/habitat.ts` |
+| **Tests ciblés** | ✅ Réalisé | Ajout de tests backend service/API et d'un test frontend hub |
+| **H3 à H12** | ⬜ À faire | Scrapers réels, génération d'images HF, pipeline IA plans, budgets synchronisés, intégrations inter-modules |
+
+**Décision d'implémentation prise** : le module Habitat est bien livré comme **module séparé** de Maison, avec son propre préfixe API `/api/v1/habitat` et ses propres pages frontend sous `frontend/src/app/(app)/habitat/`.
+
+**Portée exacte de cette livraison** :
+
+- CRUD de base pour scénarios, critères de scénarios, critères immo, annonces, plans, pièces, projets déco et zones jardin
+- Calcul de score pondéré pour les scénarios
+- Hub frontend et lecture des données principales
+- Socle prêt pour les phases H3-H12 sans dépendre du module Maison existant
 
 ### 19.13 Dépendances npm/pip à ajouter
 

@@ -205,6 +205,11 @@ export default function PageJeux() {
               <TrendingUp className="h-3 w-3" /> Performance
             </Badge>
           </Link>
+          <Link href="/jeux/bankroll">
+            <Badge variant="outline" className="cursor-pointer gap-1">
+              <TrendingUp className="h-3 w-3" /> Bankroll
+            </Badge>
+          </Link>
         </div>
       </div>
 

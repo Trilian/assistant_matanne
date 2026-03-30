@@ -62,6 +62,11 @@ export interface GenererCoursesResult {
   nom: string;
   total_articles: number;
   articles_en_stock: number;
+  contexte?: {
+    nb_invites: number;
+    evenements: string[];
+    multiplicateur_quantites: number;
+  };
   articles: Array<{
     nom: string;
     quantite: number;
@@ -75,7 +80,12 @@ export interface GenererCoursesResult {
 /** Générer une liste de courses depuis le planning de la semaine */
 export async function genererCoursesDepuisPlanning(
   semaineDebut: string,
-  options?: { soustraireStock?: boolean; nomListe?: string }
+  options?: {
+    soustraireStock?: boolean;
+    nomListe?: string;
+    nbInvites?: number;
+    evenements?: string[];
+  }
 ): Promise<GenererCoursesResult> {
   const { data } = await clientApi.post<GenererCoursesResult>(
     "/courses/generer-depuis-planning",
@@ -83,7 +93,65 @@ export async function genererCoursesDepuisPlanning(
       semaine_debut: semaineDebut,
       soustraire_stock: options?.soustraireStock ?? true,
       nom_liste: options?.nomListe ?? "Courses de la semaine",
+      nb_invites: options?.nbInvites ?? 0,
+      evenements: options?.evenements ?? [],
     }
+  );
+  return data;
+}
+
+export interface PredictionCoursesItem {
+  article_nom: string;
+  categorie: string | null;
+  rayon_magasin: string | null;
+  frequence_jours: number;
+  jours_depuis_dernier_achat: number;
+  retard_jours: number;
+  confiance: number;
+  confiance_contextualisee: number;
+  ingredient_id: number | null;
+  quantite_suggeree: number;
+  unite_suggeree: string;
+  contexte_applique: {
+    nb_invites: number;
+    evenements: string[];
+    raisons: string[];
+  };
+}
+
+export interface PredictionsCoursesResponse {
+  items: PredictionCoursesItem[];
+  total: number;
+  meta: {
+    source: string;
+    scoring: string;
+    contexte: {
+      nb_invites: number;
+      evenements: string[];
+    };
+  };
+}
+
+export async function obtenirPredictionsCourses(params?: {
+  limite?: number;
+  inclureDejaSurListe?: boolean;
+  nbInvites?: number;
+  evenements?: string[];
+}): Promise<PredictionsCoursesResponse> {
+  const searchParams = new URLSearchParams();
+  searchParams.set("limite", String(params?.limite ?? 8));
+  if (params?.inclureDejaSurListe) {
+    searchParams.set("inclure_deja_sur_liste", "true");
+  }
+  if ((params?.nbInvites ?? 0) > 0) {
+    searchParams.set("nb_invites", String(params?.nbInvites));
+  }
+  for (const evenement of params?.evenements ?? []) {
+    searchParams.append("evenements", evenement);
+  }
+
+  const { data } = await clientApi.get<PredictionsCoursesResponse>(
+    `/courses/predictions?${searchParams.toString()}`
   );
   return data;
 }

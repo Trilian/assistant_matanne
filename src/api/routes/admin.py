@@ -27,9 +27,11 @@ from __future__ import annotations
 import collections
 import csv
 import io
+import json
 import logging
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -328,6 +330,22 @@ class DesactiverUtilisateurRequest(BaseModel):
     raison: str | None = None
 
 
+class ServiceActionRunRequest(BaseModel):
+    params: dict[str, Any] = {}
+
+
+class FeatureFlagsUpdateRequest(BaseModel):
+    flags: dict[str, bool]
+
+
+class RuntimeConfigUpdateRequest(BaseModel):
+    values: dict[str, Any]
+
+
+class SeedDataRequest(BaseModel):
+    scope: Literal["recettes_standard"] = "recettes_standard"
+
+
 # ═══════════════════════════════════════════════════════════
 # JOBS
 # ═══════════════════════════════════════════════════════════
@@ -341,6 +359,7 @@ _LABELS_JOBS: dict[str, str] = {
     "push_quotidien": "Push Web quotidien (09h00)",
     "enrichissement_catalogues": "Enrichissement catalogues IA (1er/mois 03h00)",
     "digest_ntfy": "Digest ntfy.sh (09h00)",
+    "digest_notifications_queue": "Flush digest notifications (toutes les 2h)",
     "rappel_courses": "Rappel courses ntfy.sh (18h00)",
     "push_contextuel_soir": "Push contextuel soir (18h00)",
     "resume_hebdo": "Résumé hebdomadaire (lun 07h30)",
@@ -353,6 +372,7 @@ _LABELS_JOBS: dict[str, str] = {
     "controle_contrats_garanties": "J-09 Contrats & garanties (1er/mois 09h00)",
     "rapport_jardin": "J-10 Rapport jardin hebdo (mer 20h00)",
     "score_bien_etre_hebdo": "J-11 Score bien-être hebdo (dim 20h00)",
+        "sync_calendrier_scolaire": "INNO-14 Sync calendrier scolaire auto (05h30)",
     "garmin_sync_matinal": "Sync Garmin automatique matinale (06h00)",
     "automations_runner": "Exécution automations (toutes les 5 min)",
     "points_famille_hebdo": "Calcul points famille hebdo (dim 20h00)",
@@ -378,6 +398,185 @@ _VUES_SQL_AUTORISEES: tuple[str, ...] = (
     "v_budget_travaux_par_piece",
     "v_charge_semaine",
 )
+
+_NAMESPACE_FEATURE_FLAGS = "admin_feature_flags"
+_NAMESPACE_RUNTIME_CONFIG = "admin_runtime_config"
+
+_FEATURE_FLAGS_PAR_DEFAUT: dict[str, bool] = {
+    "admin.service_actions_enabled": True,
+    "admin.resync_enabled": True,
+    "admin.seed_dev_enabled": True,
+    "jeux.bankroll_page_enabled": True,
+    "outils.notes_tags_ui_enabled": True,
+}
+
+_RUNTIME_CONFIG_PAR_DEFAUT: dict[str, Any] = {
+    "dashboard.refresh_seconds": 300,
+    "notifications.digest_interval_minutes": 120,
+    "admin.max_jobs_triggers_per_min": _JOB_TRIGGER_RATE_LIMIT,
+}
+
+
+def _lire_namespace_persistant(
+    namespace: str,
+    fallback: dict[str, Any],
+    *,
+    user_id: str = "global",
+) -> dict[str, Any]:
+    """Lit une configuration persistante dans ``etats_persistants`` (best-effort)."""
+    from src.api.utils import executer_avec_session
+
+    try:
+        from src.core.models import EtatPersistantDB
+
+        with executer_avec_session() as session:
+            row = (
+                session.query(EtatPersistantDB)
+                .filter(
+                    EtatPersistantDB.namespace == namespace,
+                    EtatPersistantDB.user_id == user_id,
+                )
+                .first()
+            )
+            if row and isinstance(row.data, dict):
+                return {**fallback, **row.data}
+    except Exception:
+        logger.debug("Namespace persistant indisponible: %s", namespace, exc_info=True)
+    return dict(fallback)
+
+
+def _ecrire_namespace_persistant(
+    namespace: str,
+    values: dict[str, Any],
+    *,
+    user_id: str = "global",
+) -> dict[str, Any]:
+    """Écrit une configuration persistante dans ``etats_persistants`` (best-effort)."""
+    from src.api.utils import executer_avec_session
+
+    from src.core.models import EtatPersistantDB
+
+    with executer_avec_session() as session:
+        row = (
+            session.query(EtatPersistantDB)
+            .filter(
+                EtatPersistantDB.namespace == namespace,
+                EtatPersistantDB.user_id == user_id,
+            )
+            .first()
+        )
+        if row is None:
+            row = EtatPersistantDB(namespace=namespace, user_id=user_id, data={})
+            session.add(row)
+
+        current_data = row.data if isinstance(row.data, dict) else {}
+        row.data = {**current_data, **values}
+        session.commit()
+        return dict(row.data)
+
+
+def _catalogue_actions_services() -> list[dict[str, Any]]:
+    """Retourne le catalogue d'actions de services exécutables manuellement."""
+    return [
+        {
+            "id": "dashboard.score_bien_etre.recalculer",
+            "service": "score_bien_etre",
+            "description": "Recalculer immédiatement le score bien-être.",
+            "dry_run": False,
+        },
+        {
+            "id": "dashboard.points_famille.recalculer",
+            "service": "points_famille",
+            "description": "Recalculer les points famille.",
+            "dry_run": False,
+        },
+        {
+            "id": "automations.executer",
+            "service": "moteur_automations",
+            "description": "Exécuter le moteur d'automations actif.",
+            "dry_run": True,
+        },
+        {
+            "id": "cache.clear_all",
+            "service": "cache",
+            "description": "Vider le cache multi-niveaux.",
+            "dry_run": True,
+        },
+    ]
+
+
+def _executer_action_service(
+    action_id: str,
+    *,
+    dry_run: bool,
+    params: dict[str, Any],
+) -> dict[str, Any]:
+    """Exécute une action de service autorisée."""
+    if action_id == "dashboard.score_bien_etre.recalculer":
+        from src.services.dashboard.score_bienetre import obtenir_score_bien_etre_service
+
+        result = obtenir_score_bien_etre_service().calculer_score()
+        return {"status": "ok", "action_id": action_id, "result": result, "dry_run": False}
+
+    if action_id == "dashboard.points_famille.recalculer":
+        from src.services.dashboard.points_famille import get_points_famille_service
+
+        result = get_points_famille_service().calculer_points()
+        return {"status": "ok", "action_id": action_id, "result": result, "dry_run": False}
+
+    if action_id == "automations.executer":
+        from src.services.utilitaires.automations_engine import get_moteur_automations_service
+
+        service = get_moteur_automations_service()
+        result = (
+            service.executer_automations_actives_dry_run()
+            if dry_run
+            else service.executer_automations_actives()
+        )
+        return {"status": "ok", "action_id": action_id, "result": result, "dry_run": dry_run}
+
+    if action_id == "cache.clear_all":
+        if dry_run:
+            return {
+                "status": "dry_run",
+                "action_id": action_id,
+                "dry_run": True,
+                "result": {"message": "Simulation uniquement - cache non vidé."},
+            }
+
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        cache.clear(levels="all")
+        return {
+            "status": "ok",
+            "action_id": action_id,
+            "dry_run": False,
+            "result": {"message": "Cache vidé (L1 + L3)."},
+        }
+
+    raise HTTPException(status_code=404, detail=f"Action de service inconnue: {action_id}")
+
+
+def _cibles_resync() -> list[dict[str, str]]:
+    """Catalogue des cibles de re-synchronisation externe."""
+    return [
+        {
+            "id": "garmin",
+            "job_id": "garmin_sync_matinal",
+            "description": "Forcer la synchronisation Garmin.",
+        },
+        {
+            "id": "google_calendar",
+            "job_id": "sync_google_calendar",
+            "description": "Forcer la synchronisation Google Calendar.",
+        },
+        {
+            "id": "openfoodfacts",
+            "job_id": "sync_openfoodfacts",
+            "description": "Rafraîchir le cache OpenFoodFacts.",
+        },
+    ]
 
 
 @router.get(
@@ -890,6 +1089,344 @@ async def coherence_db(
         }
 
     return await executer_async(_check)
+
+
+# ═══════════════════════════════════════════════════════════
+# DASHBOARD ADMIN CONSOLIDÉ
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/dashboard",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Dashboard admin consolidé",
+    description="Retourne une vue consolidée des métriques admin (audit, jobs, services, cache, sécurité).",
+)
+@gerer_exception_api
+async def dashboard_admin(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Vue consolidée pour le cockpit admin."""
+    from src.api.utils import executer_async, executer_avec_session
+
+    def _query():
+        from src.services.core.cron.jobs import _demarreur
+        from src.services.core.registry import registre
+
+        jobs = []
+        if _demarreur is not None and _demarreur._scheduler.running:
+            jobs = list(_demarreur._scheduler.get_jobs())
+
+        jobs_actifs = sum(1 for j in jobs if j.next_run_time is not None)
+
+        try:
+            from src.core.caching import obtenir_cache
+
+            cache_stats = (
+                obtenir_cache().obtenir_statistiques() if hasattr(obtenir_cache(), "obtenir_statistiques") else {}
+            )
+        except Exception:
+            cache_stats = {}
+
+        security_24h = 0
+        with executer_avec_session() as session:
+            security_24h = int(
+                session.execute(
+                    text(
+                        """
+                        SELECT COUNT(*)
+                        FROM logs_securite
+                        WHERE created_at >= NOW() - INTERVAL '24 HOURS'
+                        """
+                    )
+                ).scalar()
+                or 0
+            )
+
+        return {
+            "generated_at": datetime.now().isoformat(),
+            "jobs": {
+                "total": len(jobs),
+                "actifs": jobs_actifs,
+                "inactifs": max(0, len(jobs) - jobs_actifs),
+            },
+            "services": registre.health_check_global(),
+            "metriques_services": registre.obtenir_metriques(),
+            "cache": cache_stats,
+            "security": {
+                "events_24h": security_24h,
+            },
+            "feature_flags": _lire_namespace_persistant(
+                _NAMESPACE_FEATURE_FLAGS,
+                _FEATURE_FLAGS_PAR_DEFAUT,
+            ),
+        }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# SERVICE ACTIONS MANUELLES
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/services/actions",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Lister les actions de service manuelles",
+    description="Catalogue d'actions de services exécutables manuellement depuis l'admin.",
+)
+@gerer_exception_api
+async def lister_actions_services(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
+    return {
+        "items": _catalogue_actions_services(),
+        "total": len(_catalogue_actions_services()),
+        "enabled": bool(flags.get("admin.service_actions_enabled", True)),
+    }
+
+
+@router.post(
+    "/services/actions/{action_id}/run",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Exécuter une action de service",
+    description="Lance une action de service whitelistée (avec support dry-run selon l'action).",
+)
+@gerer_exception_api
+async def executer_action_service(
+    action_id: str,
+    body: ServiceActionRunRequest,
+    dry_run: bool = Query(False, description="Simulation sans écriture"),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.api.utils import executer_async
+
+    flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
+    if not bool(flags.get("admin.service_actions_enabled", True)):
+        raise HTTPException(status_code=403, detail="Les actions de service manuelles sont désactivées.")
+
+    result = await executer_async(
+        lambda: _executer_action_service(action_id, dry_run=dry_run, params=body.params)
+    )
+    _journaliser_action_admin(
+        action="admin.service_action.run",
+        entite_type="service_action",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"action_id": action_id, "dry_run": dry_run},
+    )
+    return result
+
+
+# ═══════════════════════════════════════════════════════════
+# FEATURE FLAGS & CONFIG RUNTIME
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/feature-flags",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Lire les feature flags",
+    description="Retourne les feature flags runtime modifiables depuis l'admin.",
+)
+@gerer_exception_api
+async def lire_feature_flags(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
+    return {"flags": flags, "total": len(flags)}
+
+
+@router.put(
+    "/feature-flags",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Mettre à jour les feature flags",
+    description="Met à jour les feature flags runtime côté admin.",
+)
+@gerer_exception_api
+async def mettre_a_jour_feature_flags(
+    body: FeatureFlagsUpdateRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    flags = _ecrire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, body.flags)
+    _journaliser_action_admin(
+        action="admin.feature_flags.update",
+        entite_type="feature_flag",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"updates": body.flags},
+    )
+    return {"status": "ok", "flags": flags, "total": len(flags)}
+
+
+@router.get(
+    "/runtime-config",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Lire la configuration runtime admin",
+    description="Retourne la configuration runtime éditable et quelques valeurs système en lecture seule.",
+)
+@gerer_exception_api
+async def lire_runtime_config(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.core.config import obtenir_parametres
+
+    params = obtenir_parametres()
+    runtime = _lire_namespace_persistant(_NAMESPACE_RUNTIME_CONFIG, _RUNTIME_CONFIG_PAR_DEFAUT)
+    readonly = {
+        "env": params.ENV,
+        "debug": params.DEBUG,
+        "mistral_model": params.MISTRAL_MODEL,
+        "cache_enabled": params.CACHE_ENABLED,
+        "log_level": params.LOG_LEVEL,
+    }
+    return {"values": runtime, "readonly": readonly}
+
+
+@router.put(
+    "/runtime-config",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Mettre à jour la configuration runtime admin",
+    description="Met à jour la configuration runtime éditable stockée côté serveur.",
+)
+@gerer_exception_api
+async def mettre_a_jour_runtime_config(
+    body: RuntimeConfigUpdateRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    values = _ecrire_namespace_persistant(_NAMESPACE_RUNTIME_CONFIG, body.values)
+    _journaliser_action_admin(
+        action="admin.runtime_config.update",
+        entite_type="runtime_config",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"updates": body.values},
+    )
+    return {"status": "ok", "values": values}
+
+
+# ═══════════════════════════════════════════════════════════
+# FORCER RE-SYNC EXTERNES
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/resync/targets",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Lister les cibles de re-sync",
+    description="Catalogue des synchronisations externes déclenchables manuellement.",
+)
+@gerer_exception_api
+async def lister_cibles_resync(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
+    return {
+        "items": _cibles_resync(),
+        "total": len(_cibles_resync()),
+        "enabled": bool(flags.get("admin.resync_enabled", True)),
+    }
+
+
+@router.post(
+    "/resync/{target_id}",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Forcer une synchronisation externe",
+    description="Déclenche une synchronisation externe (Garmin, Google Calendar, OpenFoodFacts).",
+)
+@gerer_exception_api
+async def forcer_resync(
+    target_id: str,
+    dry_run: bool = Query(False, description="Simuler sans exécution"),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.services.core.cron.jobs import executer_job_par_id
+
+    flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
+    if not bool(flags.get("admin.resync_enabled", True)):
+        raise HTTPException(status_code=403, detail="Les actions de re-sync sont désactivées.")
+
+    cible = next((c for c in _cibles_resync() if c["id"] == target_id), None)
+    if cible is None:
+        raise HTTPException(status_code=404, detail=f"Cible de re-sync inconnue: {target_id}")
+
+    result = executer_job_par_id(
+        cible["job_id"],
+        dry_run=dry_run,
+        source="manual",
+        triggered_by_user_id=str(user.get("id", "admin")),
+        relancer_exception=False,
+    )
+    _journaliser_action_admin(
+        action="admin.resync.run",
+        entite_type="resync",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"target": target_id, "dry_run": dry_run},
+    )
+    return {"target": target_id, **result}
+
+
+# ═══════════════════════════════════════════════════════════
+# SEED DEV
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post(
+    "/seed/dev",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Injecter des données seed (dev)",
+    description="Injecte des données de seed en environnement dev/test uniquement.",
+)
+@gerer_exception_api
+async def injecter_seed_dev(
+    body: SeedDataRequest,
+    dry_run: bool = Query(False, description="Simulation sans écriture"),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.core.config import obtenir_parametres
+
+    flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
+    if not bool(flags.get("admin.seed_dev_enabled", True)):
+        raise HTTPException(status_code=403, detail="Le seed dev est désactivé.")
+
+    env = obtenir_parametres().ENV.lower()
+    if env not in {"development", "dev", "test"}:
+        raise HTTPException(status_code=403, detail="Le seed est autorisé uniquement en dev/test.")
+
+    if body.scope != "recettes_standard":
+        raise HTTPException(status_code=422, detail=f"Scope seed non supporté: {body.scope}")
+
+    seed_file = Path("data/seed/recettes_standard.json")
+    if dry_run:
+        total = 0
+        try:
+            payload = json.loads(seed_file.read_text(encoding="utf-8"))
+            total = len(payload.get("recettes_standard", []))
+        except Exception:
+            total = 0
+
+        return {
+            "status": "dry_run",
+            "scope": body.scope,
+            "file": str(seed_file),
+            "recettes_detectees": total,
+            "message": "Simulation uniquement - aucune écriture DB.",
+        }
+
+    from scripts.db.import_recettes import importer_recettes_standard
+
+    imported = int(importer_recettes_standard())
+    _journaliser_action_admin(
+        action="admin.seed.run",
+        entite_type="seed",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"scope": body.scope, "imported": imported},
+    )
+    return {
+        "status": "ok",
+        "scope": body.scope,
+        "imported": imported,
+        "message": f"Seed terminé ({imported} recette(s) importée(s)).",
+    }
 
 
 @router.get(

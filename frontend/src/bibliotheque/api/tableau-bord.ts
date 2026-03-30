@@ -88,6 +88,25 @@ export interface PointsFamille {
   };
 }
 
+export interface ScoreEcologique {
+  score_global: number;
+  niveau: "excellent" | "bon" | "vigilance" | "critique";
+  modules: {
+    cuisine: {
+      score: number;
+      anti_gaspillage: number;
+      produits_ecoscores: number | null;
+    };
+    maison: {
+      score: number;
+      energie: number;
+      eco_actions: number;
+      economie_mensuelle_estimee: number;
+    };
+  };
+  leviers_prioritaires: string[];
+}
+
 /** Obtenir le bilan mensuel IA (mois au format YYYY-MM, défaut = mois courant) */
 export async function obtenirBilanMensuel(mois?: string): Promise<BilanMensuel> {
   const params = mois ? `?mois=${mois}` : "";
@@ -123,6 +142,11 @@ export async function obtenirAlertesContextuelles(): Promise<{
 /** Lire les points famille gamifiés */
 export async function obtenirPointsFamille(): Promise<PointsFamille> {
   const { data } = await clientApi.get<PointsFamille>("/dashboard/points-famille");
+  return data;
+}
+
+export async function obtenirScoreEcologique(): Promise<ScoreEcologique> {
+  const { data } = await clientApi.get<ScoreEcologique>("/dashboard/score-ecologique");
   return data;
 }
 

@@ -47,6 +47,7 @@ import {
   Settings,
   Wrench,
   ClipboardCheck,
+  Map,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
@@ -130,6 +131,18 @@ const LIENS: LienNav[] = [
     ],
   },
   {
+    nom: "Habitat",
+    chemin: "/habitat",
+    Icone: Map,
+    sousLiens: [
+      { nom: "Scenarios", chemin: "/habitat/scenarios", Icone: Home },
+      { nom: "Veille Immo", chemin: "/habitat/veille-immo", Icone: ShoppingBag },
+      { nom: "Plans", chemin: "/habitat/plans", Icone: Layers },
+      { nom: "Deco", chemin: "/habitat/deco", Icone: House },
+      { nom: "Jardin", chemin: "/habitat/jardin", Icone: Sprout },
+    ],
+  },
+  {
     nom: "Jeux",
     chemin: "/jeux",
     Icone: Gamepad2,
@@ -137,6 +150,7 @@ const LIENS: LienNav[] = [
       { nom: "Paris", chemin: "/jeux/paris", Icone: Trophy },
       { nom: "Loto", chemin: "/jeux/loto", Icone: Dices },
       { nom: "EuroMillions", chemin: "/jeux/euromillions", Icone: Dices },
+      { nom: "Bankroll", chemin: "/jeux/bankroll", Icone: TrendingUp },
       { nom: "Performance", chemin: "/jeux/performance", Icone: TrendingUp },
       { nom: "Jeu responsable", chemin: "/jeux/responsable", Icone: Shield },
     ],

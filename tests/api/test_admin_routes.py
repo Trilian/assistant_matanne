@@ -12,6 +12,7 @@ import httpx
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport
+from unittest.mock import patch
 
 
 # ═══════════════════════════════════════════════════════════
@@ -142,6 +143,41 @@ class TestAdminJobsACL:
     async def test_jobs_logs_avec_admin_repond(self, async_client: httpx.AsyncClient):
         response = await async_client.get("/api/v1/admin/jobs/rappels_famille/logs")
         assert response.status_code in [200, 401, 403, 404, 500]
+
+    @pytest.mark.asyncio
+    async def test_executer_job_dry_run_propage_flag(self, async_client: httpx.AsyncClient):
+        with (
+            patch("src.api.routes.admin._verifier_limite_jobs"),
+            patch("src.api.routes.admin._ajouter_log_job"),
+            patch("src.api.routes.admin._journaliser_action_admin"),
+            patch(
+                "src.services.core.cron.jobs.lister_jobs_disponibles",
+                return_value=["rappels_famille"],
+            ),
+            patch(
+                "src.services.core.cron.jobs.executer_job_par_id",
+                return_value={
+                    "status": "dry_run",
+                    "job_id": "rappels_famille",
+                    "message": "Job 'rappels_famille' simulé (dry-run).",
+                    "duration_ms": 7,
+                    "dry_run": True,
+                },
+            ) as mock_exec,
+        ):
+            response = await async_client.post("/api/v1/admin/jobs/rappels_famille/run?dry_run=true")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "dry_run"
+        assert data["dry_run"] is True
+        mock_exec.assert_called_once_with(
+            "rappels_famille",
+            dry_run=True,
+            source="manual",
+            triggered_by_user_id="test-user",
+            relancer_exception=True,
+        )
 
 
 class TestAdminSqlViewsACL:

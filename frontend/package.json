@@ -11,6 +11,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:e2e": "playwright test",
+    "test:visual": "playwright test e2e/visual-regression.spec.ts --project=chromium",
+    "test:visual:update": "playwright test e2e/visual-regression.spec.ts --project=chromium --update-snapshots",
     "analyze": "ANALYZE=true next build --env-file ../.env.local",
     "generate-types": "openapi-typescript http://localhost:8000/openapi.json -o src/types/api-generated.ts"
   },

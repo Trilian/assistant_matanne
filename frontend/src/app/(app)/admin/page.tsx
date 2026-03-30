@@ -257,12 +257,13 @@ export default function PageAdmin() {
       </div>
 
       {/* Accès rapides vers les pages dédiées */}
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-5">
         {[
           { href: "/admin/jobs", icon: Clock, label: "Jobs planifiés", desc: "Trigger + logs" },
           { href: "/admin/services", icon: ServerCrash, label: "Services & Cache", desc: "Health + stats" },
           { href: "/admin/notifications", icon: Bell, label: "Notifications", desc: "Test canaux" },
           { href: "/admin/utilisateurs", icon: Users, label: "Utilisateurs", desc: "Comptes + désactiver" },
+          { href: "/admin/sql-views", icon: Layers, label: "Vues SQL", desc: "Lecture analytics" },
         ].map(({ href, icon: Icon, label, desc }) => (
           <Link key={href} href={href}>
             <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
