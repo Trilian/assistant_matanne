@@ -891,16 +891,23 @@ La sidebar actuelle contient :
 ### Phase 7 — Mode admin avancé (P1-P2)
 
 > **Objectif** : Admin peut tout tester et monitorer
+> **Statut (2026-03-30)** : ✅ Implémenté
 
-| # | Action |
-|---|--------|
-| 7.1 | Persistance historique jobs en DB |
-| 7.2 | Console d'exécution manuelle avec paramètres custom |
-| 7.3 | Bouton "Tester tous les canaux notifications" |
-| 7.4 | Dry-run mode CRON (preview sans commit) |
-| 7.5 | Import/export configuration complète |
-| 7.6 | Simulateur de flux |
-| 7.7 | Dashboard temps réel admin (requêtes/sec, latence, cache) |
+| # | Action | Statut | Détails implémentés |
+|---|--------|--------|---------------------|
+| 7.1 | Persistance historique jobs en DB | ✅ | `job_executions` déjà câblée et exploitée dans les logs admin avec lecture DB prioritaire |
+| 7.2 | Console d'exécution manuelle avec paramètres custom | ✅ | Console admin services existante consolidée + exécution manuelle whitelistée avec `params` et dry-run |
+| 7.3 | Bouton "Tester tous les canaux notifications" | ✅ | Endpoint `POST /api/v1/admin/notifications/test-all` + UI dédiée admin notifications |
+| 7.4 | Dry-run mode CRON (preview sans commit) | ✅ | Dry-run existant sur jobs/resync/seed conservé et exposé dans l'UI admin |
+| 7.5 | Import/export configuration complète | ✅ | Endpoints `GET /api/v1/admin/config/export` et `POST /api/v1/admin/config/import` + UI admin services |
+| 7.6 | Simulateur de flux | ✅ | Endpoint `POST /api/v1/admin/flow-simulator` + simulateur UI pour scénarios notifications/inter-modules |
+| 7.7 | Dashboard temps réel admin (requêtes/sec, latence, cache) | ✅ | Endpoint `GET /api/v1/admin/live-snapshot` + cockpit live auto-refresh sur la page admin services |
+
+**Détails implémentation** :
+
+- **Monitoring temps réel** : agrégation des métriques API (`get_metrics()`), cache, sécurité et exécutions jobs récentes via `live-snapshot`
+- **Tests admin** : couverture API ajoutée pour `test-all`, import/export config, simulateur de flux et snapshot live
+- **UX admin** : page Services enrichie avec snapshot live, export/import JSON et onglet simulateur ; page Notifications enrichie avec test multi-canal
 
 ### Phase 8 — Jobs CRON additionnels (P2)
 

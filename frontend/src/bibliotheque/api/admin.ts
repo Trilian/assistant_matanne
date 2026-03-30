@@ -19,8 +19,11 @@ export interface JobInfo {
 
 export interface JobLog {
   timestamp: string
-  status: 'succes' | 'erreur'
+  status: 'succes' | 'erreur' | 'success' | 'failure' | 'dry_run'
   message: string
+  ended_at?: string | null
+  duration_ms?: number
+  source?: string
 }
 
 export interface JobLogsResponse {
@@ -151,6 +154,72 @@ export interface NotificationTestPayload {
   message: string
   email?: string
   titre?: string
+}
+
+export interface NotificationTestAllPayload {
+  message: string
+  email?: string
+  titre?: string
+  inclure_whatsapp?: boolean
+}
+
+export interface NotificationTestAllResponse {
+  resultats: Record<string, boolean>
+  canaux_testes: string[]
+  succes: string[]
+  echecs: string[]
+  message: string
+}
+
+export interface ConfigAdminExport {
+  exported_at: string
+  feature_flags: Record<string, boolean>
+  runtime_config: Record<string, unknown>
+}
+
+export interface ConfigAdminImportPayload {
+  feature_flags?: Record<string, boolean>
+  runtime_config?: Record<string, unknown>
+  merge?: boolean
+}
+
+export interface FlowSimulationPayload {
+  scenario: 'peremption_j2' | 'document_expirant' | 'echec_cron_job' | 'rappel_courses' | 'resume_hebdo'
+  user_id?: string
+  message?: string
+  dry_run?: boolean
+  payload?: Record<string, unknown>
+}
+
+export interface FlowSimulationResponse {
+  scenario: string
+  user_id: string
+  dry_run: boolean
+  actions: Array<Record<string, unknown>>
+  payload: Record<string, unknown>
+}
+
+export interface LiveSnapshotResponse {
+  generated_at: string
+  api: {
+    uptime_seconds: number
+    requests_total: number
+    top_endpoints: Array<{ endpoint: string; count: number }>
+    latency: {
+      avg_ms: number
+      p95_ms: number
+      tracked_endpoints: number
+    }
+    rate_limiting: Record<string, unknown>
+    ai: Record<string, unknown>
+  }
+  cache: Record<string, unknown>
+  jobs: {
+    last_24h: Record<string, number>
+  }
+  security: {
+    events_1h: number
+  }
 }
 
 export interface DbCoherenceResponse {
@@ -363,6 +432,37 @@ export async function envoyerNotificationTest(
   payload: NotificationTestPayload,
 ): Promise<{ resultats: Record<string, unknown>; message: string }> {
   const { data } = await clientApi.post('/api/v1/admin/notifications/test', payload)
+  return data
+}
+
+export async function envoyerNotificationTestTousCanaux(
+  payload: NotificationTestAllPayload,
+): Promise<NotificationTestAllResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/notifications/test-all', payload)
+  return data
+}
+
+export async function exporterConfigAdmin(): Promise<ConfigAdminExport> {
+  const { data } = await clientApi.get('/api/v1/admin/config/export')
+  return data
+}
+
+export async function importerConfigAdmin(
+  payload: ConfigAdminImportPayload,
+): Promise<{ status: string; feature_flags: Record<string, boolean>; runtime_config: Record<string, unknown> }> {
+  const { data } = await clientApi.post('/api/v1/admin/config/import', payload)
+  return data
+}
+
+export async function simulerFluxAdmin(
+  payload: FlowSimulationPayload,
+): Promise<FlowSimulationResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/flow-simulator', payload)
+  return data
+}
+
+export async function obtenirLiveSnapshotAdmin(): Promise<LiveSnapshotResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/live-snapshot')
   return data
 }
 

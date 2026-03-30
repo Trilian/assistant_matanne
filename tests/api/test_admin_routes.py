@@ -199,6 +199,70 @@ class TestAdminSqlViewsACL:
         assert response.status_code in [200, 401, 403, 404, 500]
 
 
+class TestAdminPhase7Endpoints:
+    """Endpoints complémentaires phase 7."""
+
+    @pytest.mark.asyncio
+    async def test_notification_test_all(self, async_client: httpx.AsyncClient):
+        with patch(
+            "src.services.core.notifications.notif_dispatcher.DispatcherNotifications.envoyer",
+            return_value={"ntfy": True, "push": True, "email": False, "whatsapp": True},
+        ):
+            response = await async_client.post(
+                "/api/v1/admin/notifications/test-all",
+                json={"message": "hello", "email": "admin@example.com", "inclure_whatsapp": True},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["resultats"]["ntfy"] is True
+        assert "email" in data["echecs"]
+
+    @pytest.mark.asyncio
+    async def test_config_export(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/config/export")
+        assert response.status_code == 200
+        data = response.json()
+        assert "feature_flags" in data
+        assert "runtime_config" in data
+
+    @pytest.mark.asyncio
+    async def test_config_import(self, async_client: httpx.AsyncClient):
+        response = await async_client.post(
+            "/api/v1/admin/config/import",
+            json={
+                "feature_flags": {"admin.mode_test": True},
+                "runtime_config": {"dashboard.refresh_seconds": 30},
+                "merge": True,
+            },
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "ok"
+        assert "feature_flags" in data
+
+    @pytest.mark.asyncio
+    async def test_flow_simulator(self, async_client: httpx.AsyncClient):
+        response = await async_client.post(
+            "/api/v1/admin/flow-simulator",
+            json={"scenario": "peremption_j2", "dry_run": True},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["scenario"] == "peremption_j2"
+        assert isinstance(data["actions"], list)
+        assert data["dry_run"] is True
+
+    @pytest.mark.asyncio
+    async def test_live_snapshot(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/live-snapshot")
+        assert response.status_code == 200
+        data = response.json()
+        assert "api" in data
+        assert "jobs" in data
+        assert "security" in data
+
+
 class TestAdminRouterExiste:
     """Vérifie que les routes admin sont bien enregistrées dans l'app."""
 

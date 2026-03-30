@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
 import { Badge } from '@/composants/ui/badge'
@@ -11,6 +11,17 @@ export default function DiagnosticPlantePage() {
   const [file, setFile] = useState<File | null>(null)
   const [chargement, setChargement] = useState(false)
   const [resultat, setResultat] = useState<DiagnosticPlantResponse | null>(null)
+  const [apercu, setApercu] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!file) {
+      setApercu(null)
+      return
+    }
+    const url = URL.createObjectURL(file)
+    setApercu(url)
+    return () => URL.revokeObjectURL(url)
+  }, [file])
 
   async function analyser() {
     if (!file) return
@@ -34,9 +45,21 @@ export default function DiagnosticPlantePage() {
         <CardHeader><CardTitle>Photo de la plante</CardTitle><CardDescription>Charge une image JPG ou PNG.</CardDescription></CardHeader>
         <CardContent className="space-y-4">
           <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+          {file && (
+            <div className="space-y-2 rounded-md border p-3">
+              <p className="text-sm text-muted-foreground">Fichier sélectionné: {file.name}</p>
+              {apercu && <img src={apercu} alt="Aperçu plante" className="max-h-64 w-full rounded-md object-cover" />}
+            </div>
+          )}
           <Button onClick={analyser} disabled={!file || chargement}>{chargement ? 'Analyse...' : 'Analyser'}</Button>
         </CardContent>
       </Card>
+      {!resultat && !chargement && (
+        <Card>
+          <CardHeader><CardTitle>En attente d'analyse</CardTitle></CardHeader>
+          <CardContent><p className="text-sm text-muted-foreground">Charge une photo pour obtenir un diagnostic complet et des traitements recommandés.</p></CardContent>
+        </Card>
+      )}
       {resultat && (
         <div className="grid gap-4 lg:grid-cols-2">
           <Card><CardHeader><CardTitle>{resultat.nom_plante}</CardTitle></CardHeader><CardContent className="space-y-2"><Badge>{resultat.etat_general}</Badge><p>Confiance : {Math.round(resultat.confiance * 100)}%</p><p>{resultat.arrosage_conseil}</p><p>{resultat.exposition_conseil}</p></CardContent></Card>

@@ -10,14 +10,17 @@ import {
   DatabaseZap,
   Flag,
   FlaskConical,
+  Download,
   Loader2,
   Play,
   RefreshCw,
   Repeat,
   ServerCrash,
   Settings2,
+  Upload,
   Trash2,
   XCircle,
+  Zap,
 } from "lucide-react";
 import {
   Card,
@@ -42,20 +45,26 @@ import {
 } from "@/composants/ui/table";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import {
+  type FlowSimulationResponse,
+  type LiveSnapshotResponse,
   type ServiceHealthResponse,
+  exporterConfigAdmin,
   executerActionService,
   forcerResync,
+  importerConfigAdmin,
   lancerSeedDev,
   lireFeatureFlags,
   lireRuntimeConfig,
   listerActionsServices,
   listerResyncTargets,
+  obtenirLiveSnapshotAdmin,
   obtenirDashboardAdmin,
   obtenirSanteServices,
   obtenirStatsCache,
   purgerCache,
   sauvegarderFeatureFlags,
   sauvegarderRuntimeConfig,
+  simulerFluxAdmin,
   viderCache,
 } from "@/bibliotheque/api/admin";
 
@@ -89,12 +98,18 @@ export default function PageAdminServices() {
   const [configText, setConfigText] = useState("{}");
   const [configSaving, setConfigSaving] = useState(false);
   const [configResultat, setConfigResultat] = useState<string | null>(null);
+  const [importText, setImportText] = useState("");
+  const [importLoading, setImportLoading] = useState(false);
 
   const [resyncLoadingId, setResyncLoadingId] = useState<string | null>(null);
   const [resultatResync, setResultatResync] = useState<string | null>(null);
 
   const [seedLoading, setSeedLoading] = useState(false);
   const [seedResultat, setSeedResultat] = useState<string | null>(null);
+  const [simulationScenario, setSimulationScenario] = useState<"peremption_j2" | "document_expirant" | "echec_cron_job" | "rappel_courses" | "resume_hebdo">("peremption_j2");
+  const [simulationMessage, setSimulationMessage] = useState("");
+  const [simulationLoading, setSimulationLoading] = useState(false);
+  const [simulationResultat, setSimulationResultat] = useState<FlowSimulationResponse | null>(null);
 
   const {
     data: sante,
@@ -139,6 +154,12 @@ export default function PageAdminServices() {
     listerResyncTargets,
   );
 
+  const { data: liveSnapshot, refetch: actualiserLive } = utiliserRequete(
+    ["admin", "live-snapshot"],
+    (): Promise<LiveSnapshotResponse> => obtenirLiveSnapshotAdmin(),
+    { refetchInterval: 15000 },
+  );
+
   useEffect(() => {
     if (featureFlags?.flags) {
       setFlagsLocal(featureFlags.flags);
@@ -159,6 +180,43 @@ export default function PageAdminServices() {
     actualiserFlags();
     actualiserConfig();
     actualiserResync();
+    actualiserLive();
+  };
+
+  const exporterConfig = async () => {
+    const data = await exporterConfigAdmin();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `admin-config-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setConfigResultat("OK: configuration exportée.");
+  };
+
+  const importerConfig = async () => {
+    setImportLoading(true);
+    setConfigResultat(null);
+    try {
+      const parsed = JSON.parse(importText) as {
+        feature_flags?: Record<string, boolean>
+        runtime_config?: Record<string, unknown>
+      };
+      await importerConfigAdmin({
+        feature_flags: parsed.feature_flags,
+        runtime_config: parsed.runtime_config,
+        merge: true,
+      });
+      setConfigResultat("OK: configuration importée.");
+      actualiserFlags();
+      actualiserConfig();
+      actualiserDashboard();
+    } catch {
+      setConfigResultat("JSON invalide ou import impossible.");
+    } finally {
+      setImportLoading(false);
+    }
   };
 
   const purgeCache = async () => {
@@ -262,6 +320,22 @@ export default function PageAdminServices() {
     }
   };
 
+  const lancerSimulation = async () => {
+    setSimulationLoading(true);
+    try {
+      const data = await simulerFluxAdmin({
+        scenario: simulationScenario,
+        message: simulationMessage || undefined,
+        dry_run: true,
+      });
+      setSimulationResultat(data);
+    } catch {
+      setSimulationResultat(null);
+    } finally {
+      setSimulationLoading(false);
+    }
+  };
+
   const badgeStatut = (statut: string) => {
     if (statut === "healthy" || statut === "ok") {
       return <Badge variant="default"><CheckCircle2 className="mr-1 h-3 w-3" />Sain</Badge>;
@@ -311,16 +385,38 @@ export default function PageAdminServices() {
       )}
 
       <Tabs value={tab} onValueChange={setTab} defaultValue="services">
-        <TabsList className="grid w-full grid-cols-6 max-w-5xl">
+        <TabsList className="grid w-full grid-cols-7 max-w-6xl">
           <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="cache">Cache</TabsTrigger>
           <TabsTrigger value="actions">Actions</TabsTrigger>
           <TabsTrigger value="flags">Flags</TabsTrigger>
           <TabsTrigger value="config">Config</TabsTrigger>
           <TabsTrigger value="resync">Re-sync</TabsTrigger>
+          <TabsTrigger value="simulateur">Simulateur</TabsTrigger>
         </TabsList>
 
         <TabsContent value="services" className="mt-4 space-y-4">
+          {liveSnapshot && (
+            <div className="grid gap-4 md:grid-cols-4">
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Requêtes API</CardTitle></CardHeader>
+                <CardContent><span className="text-2xl font-bold">{liveSnapshot.api.requests_total}</span></CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Latence moyenne</CardTitle></CardHeader>
+                <CardContent><span className="text-2xl font-bold">{liveSnapshot.api.latency.avg_ms.toFixed(1)} ms</span></CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm">P95 max</CardTitle></CardHeader>
+                <CardContent><span className="text-2xl font-bold">{liveSnapshot.api.latency.p95_ms.toFixed(1)} ms</span></CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Sécurité 1h</CardTitle></CardHeader>
+                <CardContent><span className="text-2xl font-bold">{liveSnapshot.security.events_1h}</span></CardContent>
+              </Card>
+            </div>
+          )}
+
           {sante && (
             <div className="grid gap-4 md:grid-cols-4">
               <Card>
@@ -381,6 +477,32 @@ export default function PageAdminServices() {
               )}
             </CardContent>
           </Card>
+
+          {liveSnapshot && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Zap className="h-4 w-4" />Snapshot live</CardTitle>
+                <CardDescription>Mise à jour automatique toutes les 15 secondes.</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <p className="text-sm font-medium mb-2">Top endpoints</p>
+                  <div className="space-y-2">
+                    {liveSnapshot.api.top_endpoints.map((item) => (
+                      <div key={item.endpoint} className="flex items-center justify-between text-sm border rounded-md px-3 py-2">
+                        <span className="font-mono text-xs">{item.endpoint}</span>
+                        <span>{item.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-2">Jobs 24h</p>
+                  <pre className="text-xs bg-muted rounded p-3 overflow-auto max-h-48">{JSON.stringify(liveSnapshot.jobs.last_24h, null, 2)}</pre>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="cache" className="mt-4 space-y-4">
@@ -517,9 +639,26 @@ export default function PageAdminServices() {
             </CardHeader>
             <CardContent className="space-y-3">
               <Textarea value={configText} onChange={(e) => setConfigText(e.target.value)} rows={12} className="font-mono text-xs" />
-              <Button onClick={saveRuntimeConfig} disabled={configSaving}>
-                {configSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Settings2 className="mr-2 h-4 w-4" />}
-                Sauvegarder la configuration
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={saveRuntimeConfig} disabled={configSaving}>
+                  {configSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Settings2 className="mr-2 h-4 w-4" />}
+                  Sauvegarder la configuration
+                </Button>
+                <Button variant="outline" onClick={exporterConfig}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Exporter
+                </Button>
+              </div>
+              <Textarea
+                value={importText}
+                onChange={(e) => setImportText(e.target.value)}
+                rows={8}
+                className="font-mono text-xs"
+                placeholder='Collez ici un export JSON admin à réimporter'
+              />
+              <Button variant="outline" onClick={importerConfig} disabled={importLoading}>
+                {importLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                Importer la configuration
               </Button>
               {configResultat && <p className="text-sm text-muted-foreground">{configResultat}</p>}
               {runtimeConfig?.readonly && (
@@ -586,6 +725,50 @@ export default function PageAdminServices() {
                 </Button>
               </div>
               {seedResultat && <p className="text-sm text-muted-foreground">{seedResultat}</p>}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="simulateur" className="mt-4 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><FlaskConical className="h-4 w-4" />Simulateur de flux</CardTitle>
+              <CardDescription>Prévisualisez un scénario admin/inter-modules sans effet de bord.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1">
+                <Label htmlFor="scenario-simulateur">Scénario</Label>
+                <select
+                  id="scenario-simulateur"
+                  aria-label="Scénario de simulation"
+                  className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  value={simulationScenario}
+                  onChange={(e) => setSimulationScenario(e.target.value as typeof simulationScenario)}
+                >
+                  <option value="peremption_j2">Péremption J-2</option>
+                  <option value="document_expirant">Document expirant</option>
+                  <option value="echec_cron_job">Échec job cron</option>
+                  <option value="rappel_courses">Rappel courses</option>
+                  <option value="resume_hebdo">Résumé hebdo</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="message-simulateur">Message personnalisé</Label>
+                <Textarea
+                  id="message-simulateur"
+                  rows={4}
+                  value={simulationMessage}
+                  onChange={(e) => setSimulationMessage(e.target.value)}
+                  placeholder="Optionnel: surcharge du message simulé"
+                />
+              </div>
+              <Button onClick={lancerSimulation} disabled={simulationLoading}>
+                {simulationLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+                Lancer la simulation
+              </Button>
+              {simulationResultat && (
+                <pre className="text-xs bg-muted rounded p-3 overflow-auto max-h-96">{JSON.stringify(simulationResultat, null, 2)}</pre>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

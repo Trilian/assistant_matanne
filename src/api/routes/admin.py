@@ -322,6 +322,13 @@ class NotificationTestRequest(BaseModel):
     titre: str = "Test Matanne"
 
 
+class NotificationTestAllRequest(BaseModel):
+    message: str
+    email: str | None = None
+    titre: str = "Test multi-canal Matanne"
+    inclure_whatsapp: bool = True
+
+
 class CachePurgeRequest(BaseModel):
     pattern: str = "*"
 
@@ -342,8 +349,28 @@ class RuntimeConfigUpdateRequest(BaseModel):
     values: dict[str, Any]
 
 
+class ConfigImportRequest(BaseModel):
+    feature_flags: dict[str, bool] | None = None
+    runtime_config: dict[str, Any] | None = None
+    merge: bool = True
+
+
 class SeedDataRequest(BaseModel):
     scope: Literal["recettes_standard"] = "recettes_standard"
+
+
+class FlowSimulationRequest(BaseModel):
+    scenario: Literal[
+        "peremption_j2",
+        "document_expirant",
+        "echec_cron_job",
+        "rappel_courses",
+        "resume_hebdo",
+    ]
+    user_id: str | None = None
+    message: str | None = None
+    dry_run: bool = True
+    payload: dict[str, Any] = {}
 
 
 # ═══════════════════════════════════════════════════════════
@@ -589,6 +616,158 @@ def _cibles_resync() -> list[dict[str, str]]:
     ]
 
 
+def _resumer_api_metrics() -> dict[str, Any]:
+    """Construit un résumé compact des métriques HTTP pour le cockpit admin."""
+    from src.api.utils import get_metrics
+
+    metrics = get_metrics()
+    requests_total = metrics.get("requests", {}).get("total", {}) or {}
+    latency = metrics.get("latency", {}) or {}
+
+    total_requetes = sum(int(v) for v in requests_total.values())
+    endpoints_tries = sorted(
+        requests_total.items(),
+        key=lambda item: item[1],
+        reverse=True,
+    )[:5]
+
+    latences_moyennes = [
+        float(values.get("avg_ms", 0.0))
+        for values in latency.values()
+        if values.get("avg_ms") is not None
+    ]
+    p95_values = [
+        float(values.get("p95_ms", 0.0))
+        for values in latency.values()
+        if values.get("p95_ms") is not None
+    ]
+
+    return {
+        "uptime_seconds": metrics.get("uptime_seconds", 0),
+        "requests_total": total_requetes,
+        "top_endpoints": [
+            {"endpoint": endpoint, "count": count}
+            for endpoint, count in endpoints_tries
+        ],
+        "latency": {
+            "avg_ms": round(sum(latences_moyennes) / len(latences_moyennes), 2)
+            if latences_moyennes
+            else 0.0,
+            "p95_ms": round(max(p95_values), 2) if p95_values else 0.0,
+            "tracked_endpoints": len(latency),
+        },
+        "rate_limiting": metrics.get("rate_limiting", {}),
+        "ai": metrics.get("ai", {}),
+    }
+
+
+def _exporter_config_admin() -> dict[str, Any]:
+    """Exporte la configuration runtime persistée côté admin."""
+    return {
+        "exported_at": datetime.now().isoformat(),
+        "feature_flags": _lire_namespace_persistant(
+            _NAMESPACE_FEATURE_FLAGS,
+            _FEATURE_FLAGS_PAR_DEFAUT,
+        ),
+        "runtime_config": _lire_namespace_persistant(
+            _NAMESPACE_RUNTIME_CONFIG,
+            _RUNTIME_CONFIG_PAR_DEFAUT,
+        ),
+    }
+
+
+def _importer_config_admin(body: ConfigImportRequest) -> dict[str, Any]:
+    """Importe la configuration runtime persistée côté admin."""
+    feature_flags = body.feature_flags or {}
+    runtime_config = body.runtime_config or {}
+
+    if not body.merge:
+        feature_flags = {**_FEATURE_FLAGS_PAR_DEFAUT, **feature_flags}
+        runtime_config = {**_RUNTIME_CONFIG_PAR_DEFAUT, **runtime_config}
+
+    flags = _ecrire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, feature_flags)
+    runtime = _ecrire_namespace_persistant(_NAMESPACE_RUNTIME_CONFIG, runtime_config)
+    return {
+        "feature_flags": flags,
+        "runtime_config": runtime,
+    }
+
+
+def _simuler_flux_admin(body: FlowSimulationRequest, user_id: str) -> dict[str, Any]:
+    """Simule un flux inter-modules/notifications sans effet de bord."""
+    from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+    dispatcher = get_dispatcher_notifications()
+    event_message = body.message or {
+        "peremption_j2": "3 produits expirent sous 48h.",
+        "document_expirant": "1 passeport expire sous 30 jours.",
+        "echec_cron_job": "Le job sync_google_calendar a échoué.",
+        "rappel_courses": "Pense à terminer la liste de courses ce soir.",
+        "resume_hebdo": "Résumé hebdomadaire prêt à être envoyé.",
+    }[body.scenario]
+
+    canaux = dispatcher._resoudre_canaux(  # type: ignore[attr-defined]
+        user_id=user_id,
+        canaux=None,
+        type_evenement=body.scenario,
+        categorie=None,
+    )
+    sequence_failover = dispatcher._construire_sequence_failover(canaux)  # type: ignore[attr-defined]
+
+    actions = [
+        {
+            "type": "notification.preparee",
+            "message": event_message,
+            "canaux": canaux,
+            "failover": sequence_failover,
+        }
+    ]
+
+    if body.scenario == "peremption_j2":
+        actions.append(
+            {
+                "type": "suggestion_recettes",
+                "details": "Déclencher des suggestions de recettes anti-gaspi à partir des produits expirants.",
+            }
+        )
+    elif body.scenario == "document_expirant":
+        actions.append(
+            {
+                "type": "rappel_administratif",
+                "details": "Créer une alerte documentaire prioritaire avec échéance visible sur le dashboard.",
+            }
+        )
+    elif body.scenario == "echec_cron_job":
+        actions.append(
+            {
+                "type": "audit_admin",
+                "details": "Journaliser l'échec et exposer l'entrée dans le cockpit admin temps réel.",
+            }
+        )
+    elif body.scenario == "rappel_courses":
+        actions.append(
+            {
+                "type": "budget_sync",
+                "details": "Prévoir une synchronisation budget si une liste est finalisée après le rappel.",
+            }
+        )
+    elif body.scenario == "resume_hebdo":
+        actions.append(
+            {
+                "type": "digest",
+                "details": "Consolider les sections famille, maison et cuisine avant l'envoi.",
+            }
+        )
+
+    return {
+        "scenario": body.scenario,
+        "user_id": user_id,
+        "dry_run": body.dry_run,
+        "actions": actions,
+        "payload": body.payload,
+    }
+
+
 @router.get(
     "/jobs",
     response_model=list[JobInfoResponse],
@@ -818,6 +997,59 @@ async def envoyer_notification_test(
         return {"resultats": resultats, "message": "Notification de test envoyée."}
 
     return await executer_async(_send)
+
+
+@router.post(
+    "/notifications/test-all",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Tester tous les canaux notifications",
+    description="Envoie un test sur l'ensemble des canaux admin configurés.",
+)
+@gerer_exception_api
+async def envoyer_notification_test_all(
+    body: NotificationTestAllRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Envoie un test multi-canal pour valider la cascade notifications."""
+    from src.api.utils import executer_async
+
+    def _send_all() -> dict[str, Any]:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        dispatcher = get_dispatcher_notifications()
+        canaux = ["ntfy", "push", "email"]
+        if body.inclure_whatsapp:
+            canaux.append("whatsapp")
+
+        kwargs: dict[str, Any] = {"titre": body.titre, "strategie": "parallel"}
+        if body.email:
+            kwargs["email"] = body.email
+
+        resultats = dispatcher.envoyer(
+            user_id=str(user.get("id", "admin")),
+            message=body.message,
+            canaux=canaux,
+            forcer=True,
+            **kwargs,
+        )
+        succes = [canal for canal, ok in resultats.items() if ok]
+        echecs = [canal for canal, ok in resultats.items() if not ok]
+        return {
+            "resultats": resultats,
+            "canaux_testes": canaux,
+            "succes": succes,
+            "echecs": echecs,
+            "message": "Test multi-canal terminé.",
+        }
+
+    result = await executer_async(_send_all)
+    _journaliser_action_admin(
+        action="admin.notifications.test_all",
+        entite_type="notification",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"inclure_whatsapp": body.inclure_whatsapp},
+    )
+    return result
 
 
 # ═══════════════════════════════════════════════════════════
@@ -1348,6 +1580,131 @@ async def mettre_a_jour_runtime_config(
         details={"updates": body.values},
     )
     return {"status": "ok", "values": values}
+
+
+@router.get(
+    "/config/export",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Exporter la configuration admin",
+    description="Exporte les feature flags et la configuration runtime persistée.",
+)
+@gerer_exception_api
+async def exporter_config_admin(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    return _exporter_config_admin()
+
+
+@router.post(
+    "/config/import",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Importer la configuration admin",
+    description="Importe les feature flags et la configuration runtime persistée.",
+)
+@gerer_exception_api
+async def importer_config_admin(
+    body: ConfigImportRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    result = _importer_config_admin(body)
+    _journaliser_action_admin(
+        action="admin.config.import",
+        entite_type="runtime_config",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={
+            "merge": body.merge,
+            "feature_flags": list((body.feature_flags or {}).keys()),
+            "runtime_config": list((body.runtime_config or {}).keys()),
+        },
+    )
+    return {"status": "ok", **result}
+
+
+@router.post(
+    "/flow-simulator",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Simuler un flux",
+    description="Prévisualise un flux inter-modules/admin sans exécution réelle.",
+)
+@gerer_exception_api
+async def simuler_flux_admin(
+    body: FlowSimulationRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    cible_user_id = body.user_id or str(user.get("id", "admin"))
+    result = _simuler_flux_admin(body, cible_user_id)
+    _journaliser_action_admin(
+        action="admin.flow.simulate",
+        entite_type="simulation",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"scenario": body.scenario, "target_user_id": cible_user_id},
+    )
+    return result
+
+
+@router.get(
+    "/live-snapshot",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Snapshot live admin",
+    description="Retourne un snapshot temps réel du cockpit admin.",
+)
+@gerer_exception_api
+async def snapshot_live_admin(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.api.utils import executer_avec_session
+
+    cache_stats = {}
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        if hasattr(cache, "obtenir_statistiques"):
+            cache_stats = cache.obtenir_statistiques()
+    except Exception:
+        cache_stats = {}
+
+    executions_recentes: dict[str, int] = {"success": 0, "failure": 0, "dry_run": 0}
+    evenements_securite_1h = 0
+    try:
+        with executer_avec_session() as session:
+            rows = session.execute(
+                text(
+                    """
+                    SELECT status, COUNT(*) AS total
+                    FROM job_executions
+                    WHERE started_at >= NOW() - INTERVAL '24 HOURS'
+                    GROUP BY status
+                    """
+                )
+            ).mappings().all()
+            for row in rows:
+                status = str(row["status"] or "unknown")
+                executions_recentes[status] = int(row["total"] or 0)
+
+            evenements_securite_1h = int(
+                session.execute(
+                    text(
+                        """
+                        SELECT COUNT(*)
+                        FROM logs_securite
+                        WHERE created_at >= NOW() - INTERVAL '1 HOUR'
+                        """
+                    )
+                ).scalar()
+                or 0
+            )
+    except Exception:
+        executions_recentes = {"success": 0, "failure": 0, "dry_run": 0}
+        evenements_securite_1h = 0
+
+    return {
+        "generated_at": datetime.now().isoformat(),
+        "api": _resumer_api_metrics(),
+        "cache": cache_stats,
+        "jobs": {"last_24h": executions_recentes},
+        "security": {"events_1h": evenements_securite_1h},
+    }
 
 
 # ═══════════════════════════════════════════════════════════

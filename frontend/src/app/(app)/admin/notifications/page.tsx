@@ -24,7 +24,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/composants/ui/select";
-import { clientApi } from "@/bibliotheque/api/client";
+import { Alert, AlertDescription, AlertTitle } from "@/composants/ui/alert";
+import {
+  envoyerNotificationTest,
+  envoyerNotificationTestTousCanaux,
+} from "@/bibliotheque/api/admin";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -44,6 +48,8 @@ export default function PageAdminNotifications() {
   const [email, setEmail] = useState("");
   const [envoyant, setEnvoyant] = useState(false);
   const [resultat, setResultat] = useState<{ ok: boolean; message: string } | null>(null);
+  const [envoyantTous, setEnvoyantTous] = useState(false);
+  const [resultatTous, setResultatTous] = useState<{ ok: boolean; message: string; details?: string } | null>(null);
   const [historique, setHistorique] = useState<HistoriqueNotif[]>([]);
 
   const envoyerTest = async () => {
@@ -59,7 +65,7 @@ export default function PageAdminNotifications() {
     if (canal === "email" && email) body.email = email;
 
     try {
-      const { data } = await clientApi.post("/admin/notifications/test", body);
+      const data = await envoyerNotificationTest(body as { canal: Canal; message: string; titre: string; email?: string });
       const msg = data.message ?? "Notification envoyée avec succès.";
       setResultat({ ok: true, message: msg });
       setHistorique((h) => [
@@ -82,6 +88,43 @@ export default function PageAdminNotifications() {
       ]);
     } finally {
       setEnvoyant(false);
+    }
+  };
+
+  const envoyerTousLesCanaux = async () => {
+    if (!message.trim()) {
+      setResultatTous({ ok: false, message: "Le message ne peut pas être vide." });
+      return;
+    }
+
+    setEnvoyantTous(true);
+    setResultatTous(null);
+
+    try {
+      const data = await envoyerNotificationTestTousCanaux({
+        message,
+        titre,
+        email: email || undefined,
+        inclure_whatsapp: true,
+      });
+      const details = `Succès: ${data.succes.join(", ") || "aucun"} · Échecs: ${data.echecs.join(", ") || "aucun"}`;
+      setResultatTous({ ok: data.echecs.length === 0, message: data.message, details });
+      setHistorique((h) => [
+        {
+          canal: "multi",
+          message,
+          envoyeA: new Date().toISOString(),
+          statut: data.echecs.length === 0 ? "succes" : "erreur",
+        },
+        ...h.slice(0, 19),
+      ]);
+    } catch (err: unknown) {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ??
+        "Erreur lors du test multi-canal.";
+      setResultatTous({ ok: false, message: detail });
+    } finally {
+      setEnvoyantTous(false);
     }
   };
 
@@ -171,6 +214,15 @@ export default function PageAdminNotifications() {
               Envoyer sur {canalLabel[canal]}
             </Button>
 
+            <Button variant="outline" onClick={envoyerTousLesCanaux} disabled={envoyantTous} className="w-full">
+              {envoyantTous ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Bell className="mr-2 h-4 w-4" />
+              )}
+              Tester tous les canaux
+            </Button>
+
             {resultat && (
               <div
                 className={`flex items-start gap-2 text-sm rounded-md p-3 ${
@@ -186,6 +238,16 @@ export default function PageAdminNotifications() {
                 )}
                 <span>{resultat.message}</span>
               </div>
+            )}
+
+            {resultatTous && (
+              <Alert variant={resultatTous.ok ? "default" : "destructive"}>
+                <AlertTitle>Test multi-canal</AlertTitle>
+                <AlertDescription>
+                  <div>{resultatTous.message}</div>
+                  {resultatTous.details && <div className="mt-1 text-xs">{resultatTous.details}</div>}
+                </AlertDescription>
+              </Alert>
             )}
           </CardContent>
         </Card>

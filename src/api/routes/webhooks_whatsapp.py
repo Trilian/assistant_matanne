@@ -231,7 +231,7 @@ async def _valider_planning_courant() -> None:
         if planning:
             planning.statut = "actif"
             session.commit()
-            logger.info(f"âœ… Planning #{planning.id} validÃ© via WhatsApp")
+            logger.info(f"✅ Planning #{planning.id} validé via WhatsApp")
 
 
 async def _envoyer_planning_courant(sender: str) -> None:
@@ -260,7 +260,7 @@ async def _envoyer_planning_courant(sender: str) -> None:
         )
 
         if not repas:
-            await envoyer_message_whatsapp(sender, "ðŸ“… Aucun planning actif cette semaine.")
+            await envoyer_message_whatsapp(sender, "📅 Aucun planning actif cette semaine.")
             return
 
         jours = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
@@ -268,11 +268,11 @@ async def _envoyer_planning_courant(sender: str) -> None:
         for r in repas:
             jour = jours[r.date_repas.weekday()]
             nom = r.recette.nom if r.recette else r.notes or "?"
-            emoji = "ðŸŒ™" if r.type_repas == "diner" else "â˜€ï¸"
+            emoji = "🌙" if r.type_repas == "diner" else "☀️"
             lignes.append(f"{emoji} {jour} {r.type_repas} : {nom}")
 
         await envoyer_message_whatsapp(
-            sender, f"ðŸ½ï¸ *Planning de la semaine*\n\n{''.join(chr(10) + l for l in lignes)}"
+            sender, f"🍽️ *Planning de la semaine*\n\n{''.join(chr(10) + l for l in lignes)}"
         )
 
 
@@ -291,7 +291,7 @@ async def _envoyer_liste_courses(sender: str) -> None:
         )
 
         if not liste:
-            await envoyer_message_whatsapp(sender, "ðŸ›’ Aucune liste de courses en cours.")
+            await envoyer_message_whatsapp(sender, "🛒 Aucune liste de courses en cours.")
             return
 
         articles = (
@@ -303,8 +303,8 @@ async def _envoyer_liste_courses(sender: str) -> None:
             .all()
         )
 
-        lignes = [f"â€¢ {a.ingredient.nom if a.ingredient else '?'}" for a in articles[:20]]
-        msg = f"ðŸ›’ *Liste de courses* ({len(articles)} articles)\n\n{''.join(chr(10) + l for l in lignes)}"
+        lignes = [f"• {a.ingredient.nom if a.ingredient else '?'}" for a in articles[:20]]
+        msg = f"🛒 *Liste de courses* ({len(articles)} articles)\n\n{''.join(chr(10) + l for l in lignes)}"
 
         if len(articles) > 20:
             msg += f"\n\n... et {len(articles) - 20} autres"
@@ -350,23 +350,23 @@ async def _envoyer_alerte_stocks(sender: str) -> None:
 
         lignes = []
         if stocks_bas:
-            lignes.append("ðŸ“‰ *Stocks bas :*")
+            lignes.append("📉 *Stocks bas :*")
             for a in stocks_bas[:10]:
-                lignes.append(f"  â€¢ {a.nom} ({a.quantite}/{a.quantite_min})")
+                lignes.append(f"  • {a.nom} ({a.quantite}/{a.quantite_min})")
         if peremptions:
-            lignes.append("\nâš ï¸ *PÃ©remption proche :*")
+            lignes.append("\n⚠️ *Péremption proche :*")
             for a in peremptions[:10]:
-                lignes.append(f"  â€¢ {a.nom} â€” {a.date_peremption}")
+                lignes.append(f"  • {a.nom} — {a.date_peremption}")
 
         if not lignes:
-            await envoyer_message_whatsapp(sender, "âœ… Tous les stocks sont OK !")
+            await envoyer_message_whatsapp(sender, "✅ Tous les stocks sont OK !")
         else:
             await envoyer_message_whatsapp(sender, "\n".join(lignes))
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # NOUVEAUX HANDLERS â€” SPRINT 13
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 async def _regenerer_planning_ia(sender: str) -> None:
@@ -394,7 +394,7 @@ async def _regenerer_planning_ia(sender: str) -> None:
         if not planning:
             await envoyer_message_whatsapp(
                 sender,
-                "âŒ Impossible de gÃ©nÃ©rer un planning. RÃ©essaye dans quelques instants.",
+                "❌ Impossible de générer un planning. Réessaye dans quelques instants.",
             )
             return
 
@@ -405,22 +405,22 @@ async def _regenerer_planning_ia(sender: str) -> None:
         for r in repas:
             jour = jours[r.date_repas.weekday()]
             nom = r.recette.nom if getattr(r, "recette", None) else (r.notes or "?")
-            emoji = "ðŸŒ™" if r.type_repas == "diner" else "â˜€ï¸"
+            emoji = "🌙" if r.type_repas == "diner" else "☀️"
             lignes.append(f"{emoji} {jour} : {nom}")
 
         if not lignes:
-            await envoyer_message_whatsapp(sender, "âœ… Nouveau planning gÃ©nÃ©rÃ© (vide). Ouvre l'app pour voir.")
+            await envoyer_message_whatsapp(sender, "✅ Nouveau planning généré (vide). Ouvre l'app pour voir.")
             return
 
-        msg = f"âœ¨ *Nouveau planning IA*\n\n{''.join(chr(10) + l for l in lignes)}\n\nâœ… Valide ou ðŸ“ modifie via l'application."
+        msg = f"✨ *Nouveau planning IA*\n\n{''.join(chr(10) + l for l in lignes)}\n\n✅ Valide ou 📝 modifie via l'application."
         await envoyer_message_whatsapp(sender, msg)
-        logger.info("âœ… Planning IA rÃ©gÃ©nÃ©rÃ© et envoyÃ© via WhatsApp Ã  %s***", sender[:6])
+        logger.info("✅ Planning IA régénéré et envoyé via WhatsApp à %s***", sender[:6])
 
     except Exception:
         logger.exception("Erreur régénération planning IA WhatsApp")
         await envoyer_message_whatsapp(
             sender,
-            "âŒ Erreur lors de la gÃ©nÃ©ration du planning. Essaie depuis l'application.",
+            "❌ Erreur lors de la génération du planning. Essaie depuis l'application.",
         )
 
 
@@ -447,9 +447,9 @@ async def _envoyer_resume_jules(sender: str) -> None:
                 .all()
             )
             if activites:
-                lignes.append("ðŸŽ® *ActivitÃ©s (7 derniers jours) :*")
+                lignes.append("🎮 *Activités (7 derniers jours) :*")
                 for a in activites:
-                    lignes.append(f"  â€¢ {a.nom} ({a.date_activite})")
+                    lignes.append(f"  • {a.nom} ({a.date_activite})")
 
             jalons = (
                 session.query(JalonDeveloppement)
@@ -458,9 +458,9 @@ async def _envoyer_resume_jules(sender: str) -> None:
                 .all()
             )
             if jalons:
-                lignes.append("\nðŸŒŸ *Derniers jalons :*")
+                lignes.append("\n🌟 *Derniers jalons :*")
                 for j in jalons:
-                    lignes.append(f"  â€¢ {j.titre} â€” {j.date_atteinte}")
+                    lignes.append(f"  • {j.titre} — {j.date_atteinte}")
         except Exception:
             logger.debug("Résumé Jules : impossible de charger activités/jalons")
 
@@ -474,17 +474,17 @@ async def _envoyer_resume_jules(sender: str) -> None:
                 .all()
             )
             if repas:
-                lignes.append("\nðŸ¼ *Repas Ã  venir :*")
+                lignes.append("\n🍼 *Repas à venir :*")
                 for r in repas:
                     nom = r.recette.nom if getattr(r, "recette", None) else (r.notes or "?")
-                    lignes.append(f"  â€¢ {r.date_repas} {r.type_repas} : {nom}")
+                    lignes.append(f"  • {r.date_repas} {r.type_repas} : {nom}")
         except Exception:
             logger.debug("Résumé Jules : impossible de charger les repas")
 
         if not lignes:
-            await envoyer_message_whatsapp(sender, "ðŸ‘¶ Jules : aucune activitÃ© rÃ©cente enregistrÃ©e.")
+            await envoyer_message_whatsapp(sender, "👶 Jules : aucune activité récente enregistrée.")
         else:
-            await envoyer_message_whatsapp(sender, "ðŸ‘¶ *RÃ©sumÃ© Jules*\n\n" + "\n".join(lignes))
+            await envoyer_message_whatsapp(sender, "👶 *Résumé Jules*\n\n" + "\n".join(lignes))
 
 
 async def _ajouter_article_courses(sender: str, nom_article: str) -> None:
@@ -495,7 +495,7 @@ async def _ajouter_article_courses(sender: str, nom_article: str) -> None:
 
     nom_propre = SanitiseurDonnees.nettoyer_texte(nom_article)[:100]
     if not nom_propre:
-        await envoyer_message_whatsapp(sender, "âŒ Nom d'article invalide.")
+        await envoyer_message_whatsapp(sender, "❌ Nom d'article invalide.")
         return
 
     with obtenir_contexte_db() as session:
@@ -527,12 +527,12 @@ async def _ajouter_article_courses(sender: str, nom_article: str) -> None:
             session.add(article)
             session.commit()
             await envoyer_message_whatsapp(
-                sender, f"âœ… *{nom_propre}* ajoutÃ© Ã  la liste de courses !"
+                sender, f"✅ *{nom_propre}* ajouté à la liste de courses !"
             )
             logger.info("Article '%s' ajouté via WhatsApp", nom_propre)
         except Exception:
             logger.exception("Erreur ajout article courses via WhatsApp")
-            await envoyer_message_whatsapp(sender, "âŒ Erreur lors de l'ajout. RÃ©essaye.")
+            await envoyer_message_whatsapp(sender, "❌ Erreur lors de l'ajout. Réessaye.")
 
 
 async def _envoyer_resume_budget(sender: str) -> None:
@@ -567,19 +567,19 @@ async def _envoyer_resume_budget(sender: str) -> None:
 
             ecart = total_depense - budget_prevu
             pourcentage = (total_depense / budget_prevu * 100) if budget_prevu > 0 else 0
-            emoji_jauge = "ðŸŸ¢" if pourcentage <= 75 else ("ðŸŸ¡" if pourcentage <= 95 else "ðŸ”´")
+            emoji_jauge = "🟢" if pourcentage <= 75 else ("🟡" if pourcentage <= 95 else "🔴")
 
             msg = (
-                f"ðŸ’° *Budget {mois_debut.strftime('%B %Y')}*\n\n"
-                f"{emoji_jauge} DÃ©pensÃ© : {total_depense:.2f} â‚¬ / {budget_prevu:.2f} â‚¬\n"
-                f"ðŸ“Š Utilisation : {pourcentage:.0f}%\n"
-                f"{'ðŸ”´ DÃ©passement' if ecart > 0 else 'âœ… Sous budget'} : "
-                f"{'+ ' if ecart > 0 else ''}{ecart:.2f} â‚¬"
+                f"💰 *Budget {mois_debut.strftime('%B %Y')}*\n\n"
+                f"{emoji_jauge} Dépensé : {total_depense:.2f} € / {budget_prevu:.2f} €\n"
+                f"📊 Utilisation : {pourcentage:.0f}%\n"
+                f"{'🔴 Dépassement' if ecart > 0 else '✅ Sous budget'} : "
+                f"{'+ ' if ecart > 0 else ''}{ecart:.2f} €"
             )
             await envoyer_message_whatsapp(sender, msg)
         except Exception:
             logger.debug("Budget WhatsApp : table depenses_familles indisponible")
-            await envoyer_message_whatsapp(sender, "ðŸ’° Budget : donnÃ©es indisponibles pour l'instant.")
+            await envoyer_message_whatsapp(sender, "💰 Budget : données indisponibles pour l'instant.")
 
 
 async def _envoyer_anniversaires_proches(sender: str) -> None:
@@ -623,15 +623,15 @@ async def _envoyer_anniversaires_proches(sender: str) -> None:
             anniversaires.sort(key=lambda x: x[0])
 
             if not anniversaires:
-                await envoyer_message_whatsapp(sender, "ðŸŽ‚ Aucun anniversaire dans les 30 prochains jours.")
+                await envoyer_message_whatsapp(sender, "🎂 Aucun anniversaire dans les 30 prochains jours.")
             else:
-                lignes = [f"â€¢ {nom} â€” {date_fmt} (dans {j}j)" for j, nom, date_fmt in anniversaires]
+                lignes = [f"• {nom} — {date_fmt} (dans {j}j)" for j, nom, date_fmt in anniversaires]
                 await envoyer_message_whatsapp(
-                    sender, "ðŸŽ‚ *Anniversaires Ã  venir :*\n\n" + "\n".join(lignes)
+                    sender, "🎂 *Anniversaires à venir :*\n\n" + "\n".join(lignes)
                 )
         except Exception:
             logger.debug("Anniversaires WhatsApp : données indisponibles")
-            await envoyer_message_whatsapp(sender, "ðŸŽ‚ Anniversaires : donnÃ©es indisponibles.")
+            await envoyer_message_whatsapp(sender, "🎂 Anniversaires : données indisponibles.")
 
 
 async def _envoyer_fiche_recette(sender: str, nom_recette: str) -> None:
@@ -650,25 +650,25 @@ async def _envoyer_fiche_recette(sender: str, nom_recette: str) -> None:
             )
 
             if not recette:
-                await envoyer_message_whatsapp(sender, f"âŒ Recette *{nom_recette}* introuvable.")
+                await envoyer_message_whatsapp(sender, f"❌ Recette *{nom_recette}* introuvable.")
                 return
 
             lignes = [
-                f"ðŸ³ *{recette.nom}*",
+                f"🍳 *{recette.nom}*",
                 f"⏱️ Temps : {recette.temps_preparation or '?'} min",
-                f"ðŸ‘¥ Portions : {recette.nb_portions or '?'}",
-                "\nðŸ§¾ *IngrÃ©dients :*",
+                f"👥 Portions : {recette.nb_portions or '?'}",
+                "\n🧾 *Ingrédients :*",
             ]
 
             for ri in (recette.ingredients or [])[:12]:
                 qte = f"{ri.quantite} {ri.unite}" if ri.quantite else ""
                 nom_ing = ri.ingredient.nom if ri.ingredient else "?"
-                lignes.append(f"  â€¢ {nom_ing} {qte}".strip())
+                lignes.append(f"  • {nom_ing} {qte}".strip())
 
             await envoyer_message_whatsapp(sender, "\n".join(lignes))
         except Exception:
             logger.debug("Fiche recette WhatsApp : erreur")
-            await envoyer_message_whatsapp(sender, f"âŒ Recette introuvable : {nom_recette}")
+            await envoyer_message_whatsapp(sender, f"❌ Recette introuvable : {nom_recette}")
 
 
 async def _envoyer_taches_retard(sender: str) -> None:
@@ -694,15 +694,15 @@ async def _envoyer_taches_retard(sender: str) -> None:
             ).fetchall()
 
             if not rows:
-                await envoyer_message_whatsapp(sender, "âœ… Aucune tÃ¢che maison en retard !")
+                await envoyer_message_whatsapp(sender, "✅ Aucune tâche maison en retard !")
             else:
-                lignes = [f"â€¢ {titre} (Ã©chÃ©ance: {echeance})" for titre, echeance in rows]
+                lignes = [f"• {titre} (échéance: {echeance})" for titre, echeance in rows]
                 await envoyer_message_whatsapp(
-                    sender, f"ðŸšï¸ *TÃ¢ches en retard ({len(rows)}) :*\n\n" + "\n".join(lignes)
+                    sender, f"🏚️ *Tâches en retard ({len(rows)}) :*\n\n" + "\n".join(lignes)
                 )
         except Exception:
             logger.debug("Tâches retard WhatsApp : table indisponible")
-            await envoyer_message_whatsapp(sender, "ðŸšï¸ TÃ¢ches : donnÃ©es indisponibles.")
+            await envoyer_message_whatsapp(sender, "🏚️ Tâches : données indisponibles.")
 
 
 async def _envoyer_aide_admin(sender: str) -> None:
@@ -715,7 +715,7 @@ async def _envoyer_aide_admin(sender: str) -> None:
     numero_admin = getattr(settings, "WHATSAPP_USER_NUMBER", None)
     if numero_admin and sender != numero_admin:
         logger.warning("Tentative d'accès aide admin depuis numéro non autorisé : %s***", sender[:6])
-        await envoyer_message_whatsapp(sender, "âŒ AccÃ¨s refusÃ©.")
+        await envoyer_message_whatsapp(sender, "❌ Accès refusé.")
         return
 
     await envoyer_message_whatsapp(
