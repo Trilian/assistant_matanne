@@ -58,6 +58,13 @@ from src.api.utils import executer_async, executer_avec_session, gerer_exception
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
 
 
+def _calculer_multiplicateur_invites(nb_invites: int) -> float:
+    """Applique la même logique de majoration que le moteur de prédiction."""
+    if nb_invites <= 0:
+        return 1.0
+    return round(1.0 + min(1.0, nb_invites * 0.15), 2)
+
+
 class FeedbackPredictionCoursesRequest(BaseModel):
     """Feedback utilisateur sur une suggestion d'article habituel."""
 
@@ -826,6 +833,8 @@ async def generer_depuis_planning(
 
     semaine_debut = data.semaine_debut
     semaine_fin = semaine_debut + timedelta(days=6)
+    multiplicateur_quantites = _calculer_multiplicateur_invites(data.nb_invites)
+    evenements = [item.strip() for item in data.evenements if item.strip()][:6]
 
     def _generate():
         with executer_avec_session() as session:
@@ -892,7 +901,7 @@ async def generer_depuis_planning(
 
             for ing in sorted_ings:
                 nom = ing["nom"]
-                besoin = ing["quantite"]
+                besoin = float(ing["quantite"]) * multiplicateur_quantites
                 en_stock = 0.0
 
                 if data.soustraire_stock:
@@ -960,6 +969,11 @@ async def generer_depuis_planning(
                 "nom": liste.nom,
                 "total_articles": len(articles_a_acheter),
                 "articles_en_stock": articles_en_stock,
+                "contexte": {
+                    "nb_invites": data.nb_invites,
+                    "evenements": evenements,
+                    "multiplicateur_quantites": multiplicateur_quantites,
+                },
                 "articles": [
                     {
                         "nom": a["nom"],

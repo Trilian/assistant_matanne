@@ -1,14 +1,11 @@
 """Services du module Habitat."""
 
-from src.services.core.registry import service_factory
-
-from .scenarios_service import ScenariosHabitatService
-
-
-@service_factory("habitat_scenarios", tags={"habitat", "ia", "decision"})
-def obtenir_service_scenarios_habitat() -> ScenariosHabitatService:
-    """Factory singleton du service de scénarios Habitat."""
-    return ScenariosHabitatService()
-
+from .deco_service import DecoHabitatService, obtenir_service_deco_habitat
+from .plans_ai_service import PlansHabitatAIService, obtenir_service_plans_habitat
+from .scenarios_service import ScenariosHabitatService, obtenir_service_scenarios_habitat
+from .veille_service import VeilleHabitatService, obtenir_service_veille_habitat
 
 get_habitat_scenarios_service = obtenir_service_scenarios_habitat
+get_habitat_veille_service = obtenir_service_veille_habitat
+get_habitat_plans_service = obtenir_service_plans_habitat
+get_habitat_deco_service = obtenir_service_deco_habitat

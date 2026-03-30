@@ -268,16 +268,23 @@ test.describe("Inter-modules cuisine", () => {
     const inputNom = page.locator('input[placeholder*="Nouvelle liste"]');
     const nomListe = `Flow-${Date.now()}`;
 
-    if (await inputNom.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await inputNom.fill(nomListe);
-      const boutonCreer = page.getByRole("button", { name: /créer la liste/i });
-      if (await boutonCreer.isEnabled().catch(() => false)) {
-        await boutonCreer.click();
-        await page.waitForTimeout(1000);
-      }
-    }
+    await expect(inputNom).toBeVisible();
+    await inputNom.fill(nomListe);
 
-    await expect(page.getByText(nomListe).first()).toBeVisible();
+    const boutonCreer = page.getByRole("button", { name: /créer la liste/i });
+    await expect(boutonCreer).toBeEnabled();
+
+    await Promise.all([
+      page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/v1/courses") &&
+          response.request().method() === "POST" &&
+          response.status() === 200
+      ),
+      boutonCreer.click(),
+    ]);
+
+    await expect(page.getByRole("button", { name: new RegExp(nomListe, "i") }).first()).toBeVisible();
 
     await page.goto("/cuisine/inventaire");
     await expect(page.locator("body")).toBeVisible({ timeout: 15000 });

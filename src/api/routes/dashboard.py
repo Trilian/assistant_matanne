@@ -21,6 +21,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/dashboard", tags=["Tableau de bord"])
 
 
+def _score_lettre_vers_points(note: str | None) -> int | None:
+    mapping = {"A": 100, "B": 80, "C": 60, "D": 40, "E": 20}
+    if not note:
+        return None
+    return mapping.get(str(note).upper())
+
+
 def _calculer_budget_unifie(session: Any, mois: int, annee: int) -> dict[str, Any]:
     """Agrège les dépenses famille/maison et le net jeux pour un mois donné."""
     from src.core.models import BudgetFamille, DepenseMaison, PariSportif
@@ -81,6 +88,147 @@ def _calculer_budget_unifie(session: Any, mois: int, annee: int) -> dict[str, An
     }
 
 
+def _calculer_score_ecologique(session: Any) -> dict[str, Any]:
+    """Construit un score écologique transversal cuisine + maison."""
+    from src.core.models import ActionEcologique, ArticleInventaire
+    from src.core.models.maison_extensions import ReleveCompteur
+
+    aujourd_hui = date.today()
+    debut_mois = aujourd_hui.replace(day=1)
+    debut_historique = debut_mois - timedelta(days=180)
+
+    total_inventaire = session.query(func.count(ArticleInventaire.id)).scalar() or 0
+    articles_a_risque = (
+        session.query(func.count(ArticleInventaire.id))
+        .filter(
+            ArticleInventaire.date_peremption.isnot(None),
+            ArticleInventaire.date_peremption <= aujourd_hui + timedelta(days=7),
+        )
+        .scalar()
+        or 0
+    )
+    score_anti_gaspillage = 100
+    if total_inventaire > 0:
+        score_anti_gaspillage = max(
+            0,
+            round(100 - ((articles_a_risque / total_inventaire) * 100)),
+        )
+
+    notes_ecoscore = [
+        _score_lettre_vers_points(item[0])
+        for item in session.query(ArticleInventaire.ecoscore)
+        .filter(ArticleInventaire.ecoscore.isnot(None))
+        .all()
+    ]
+    notes_ecoscore_valides = [note for note in notes_ecoscore if note is not None]
+    score_produits = (
+        round(sum(notes_ecoscore_valides) / len(notes_ecoscore_valides))
+        if notes_ecoscore_valides
+        else None
+    )
+
+    score_cuisine = round(
+        score_anti_gaspillage * (0.65 if score_produits is not None else 1.0)
+        + (score_produits or 0) * (0.35 if score_produits is not None else 0.0)
+    )
+
+    releves = (
+        session.query(
+            ReleveCompteur.type_compteur,
+            func.date_trunc("month", ReleveCompteur.date_releve).label("mois"),
+            func.sum(ReleveCompteur.consommation_periode).label("conso"),
+        )
+        .filter(
+            ReleveCompteur.consommation_periode.isnot(None),
+            ReleveCompteur.date_releve >= debut_historique,
+        )
+        .group_by(
+            ReleveCompteur.type_compteur,
+            func.date_trunc("month", ReleveCompteur.date_releve),
+        )
+        .order_by(
+            ReleveCompteur.type_compteur.asc(),
+            func.date_trunc("month", ReleveCompteur.date_releve).asc(),
+        )
+        .all()
+    )
+
+    releves_par_type: dict[str, list[float]] = {}
+    for type_compteur, _, consommation in releves:
+        releves_par_type.setdefault(str(type_compteur), []).append(float(consommation or 0))
+
+    scores_energie = []
+    for valeurs in releves_par_type.values():
+        if not valeurs:
+            continue
+        courante = valeurs[-1]
+        reference = (sum(valeurs[:-1]) / len(valeurs[:-1])) if len(valeurs) > 1 else courante
+        ecart_pct = abs(((courante - reference) / reference) * 100) if reference else 0.0
+        scores_energie.append(max(0, round(100 - min(100, ecart_pct))))
+
+    score_energie = round(sum(scores_energie) / len(scores_energie)) if scores_energie else 70
+
+    nb_actions_ecologiques = (
+        session.query(func.count(ActionEcologique.id))
+        .filter(ActionEcologique.actif.is_(True))
+        .scalar()
+        or 0
+    )
+    economie_mensuelle = (
+        session.query(func.sum(ActionEcologique.economie_mensuelle))
+        .filter(ActionEcologique.actif.is_(True))
+        .scalar()
+        or 0
+    )
+    economie_mensuelle_float = float(economie_mensuelle or 0)
+    score_eco_actions = max(
+        25,
+        min(100, round((nb_actions_ecologiques * 18) + min(46.0, economie_mensuelle_float * 2))),
+    )
+
+    score_maison = round((score_energie * 0.6) + (score_eco_actions * 0.4))
+    score_global = round((score_cuisine * 0.55) + (score_maison * 0.45))
+
+    niveau = "excellent"
+    if score_global < 45:
+        niveau = "critique"
+    elif score_global < 65:
+        niveau = "vigilance"
+    elif score_global < 80:
+        niveau = "bon"
+
+    leviers = []
+    if score_anti_gaspillage < 75:
+        leviers.append("Réduire les produits proches de péremption dans l'inventaire.")
+    if score_energie < 75:
+        leviers.append("Surveiller les consommations énergétiques anormales du mois.")
+    if score_eco_actions < 60:
+        leviers.append("Activer davantage d'actions écologiques suivies côté maison.")
+    if score_produits is not None and score_produits < 65:
+        leviers.append("Favoriser plus de produits avec un éco-score A/B dans l'inventaire.")
+    if not leviers:
+        leviers.append("Maintenir le rythme actuel: les indicateurs écologiques restent bien orientés.")
+
+    return {
+        "score_global": score_global,
+        "niveau": niveau,
+        "modules": {
+            "cuisine": {
+                "score": score_cuisine,
+                "anti_gaspillage": score_anti_gaspillage,
+                "produits_ecoscores": score_produits,
+            },
+            "maison": {
+                "score": score_maison,
+                "energie": score_energie,
+                "eco_actions": score_eco_actions,
+                "economie_mensuelle_estimee": round(economie_mensuelle_float, 2),
+            },
+        },
+        "leviers_prioritaires": leviers[:3],
+    }
+
+
 class DashboardConfigRequest(BaseModel):
     """Configuration personnalisÃ©e des widgets dashboard."""
 
@@ -108,6 +256,11 @@ async def obtenir_tableau_bord(
                 Repas,
                 StockMaison,
                 TacheEntretien,
+            )
+            from src.core.models import (
+                AnnonceHabitat,
+                ProjetDecoHabitat,
+                ZoneJardinHabitat,
             )
 
             aujourd_hui = date.today()
@@ -221,6 +374,27 @@ async def obtenir_tableau_bord(
                     }
                 )
 
+            habitat_alertes = (
+                session.query(func.count(AnnonceHabitat.id))
+                .filter(AnnonceHabitat.statut.in_(["alerte", "nouveau"]))
+                .scalar()
+                or 0
+            )
+            budget_deco = (
+                session.query(func.sum(ProjetDecoHabitat.budget_depense))
+                .scalar()
+                or 0
+            )
+            zones_jardin = session.query(func.count(ZoneJardinHabitat.id)).scalar() or 0
+            if habitat_alertes > 0:
+                alertes.append(
+                    {
+                        "type": "habitat",
+                        "message": f"{habitat_alertes} annonce(s) habitat a qualifier",
+                        "urgence": "moyenne",
+                    }
+                )
+
             if taches_retard > 0:
                 alertes.append(
                     {
@@ -244,6 +418,11 @@ async def obtenir_tableau_bord(
                     "par_categorie": {
                         cat: float(total) for cat, total in budget_par_cat
                     },
+                },
+                "habitat": {
+                    "alertes": int(habitat_alertes),
+                    "budget_deco_depense": float(budget_deco),
+                    "zones_jardin": int(zones_jardin),
                 },
                 "prochaines_activites": [
                     {
@@ -458,6 +637,24 @@ async def obtenir_score_bien_etre(
 
         service = obtenir_score_bien_etre_service()
         return service.calculer_score()
+
+    return await executer_async(_query)
+
+
+@router.get(
+    "/score-ecologique",
+    responses=REPONSES_LISTE,
+    summary="Score écologique transversal",
+)
+@gerer_exception_api
+async def obtenir_score_ecologique(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Agrège anti-gaspillage, produits éco-scorés, énergie et éco-actions."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            return _calculer_score_ecologique(session)
 
     return await executer_async(_query)
 

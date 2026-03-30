@@ -1,12 +1,20 @@
 import { clientApi } from "./client";
 import type {
+  AlerteHabitat,
+  AnalysePlanHabitat,
   AnnonceHabitat,
   CritereImmoHabitat,
   CritereScenarioHabitat,
   HabitatHub,
+  HistoriquePlanHabitat,
   PieceHabitat,
+  PointCarteHabitat,
   PlanHabitat,
   ProjetDecoHabitat,
+  ResultatConceptDecoHabitat,
+  ResultatImageHabitat,
+  ResultatAnalysePlanHabitat,
+  ResumeJardinHabitat,
   ScenarioHabitat,
   ZoneJardinHabitat,
 } from "@/types/habitat";
@@ -49,8 +57,46 @@ export async function listerAnnoncesHabitat(): Promise<AnnonceHabitat[]> {
   return data.items ?? [];
 }
 
+export async function synchroniserVeilleHabitat(payload?: {
+  critere_id?: number;
+  limite_par_source?: number;
+  envoyer_alertes?: boolean;
+}): Promise<{
+  criteres: number;
+  annonces_creees: number;
+  annonces_mises_a_jour: number;
+  alertes: number;
+  sources: string[];
+}> {
+  const { data } = await clientApi.post("/habitat/veille/synchroniser", payload ?? {});
+  return data;
+}
+
+export async function listerAlertesHabitat(): Promise<AlerteHabitat[]> {
+  const { data } = await clientApi.get("/habitat/veille/alertes");
+  return data.items ?? [];
+}
+
+export async function obtenirCarteHabitat(): Promise<PointCarteHabitat[]> {
+  const { data } = await clientApi.get("/habitat/veille/carte");
+  return data.items ?? [];
+}
+
 export async function listerPlansHabitat(): Promise<PlanHabitat[]> {
   const { data } = await clientApi.get("/habitat/plans");
+  return data.items ?? [];
+}
+
+export async function analyserPlanHabitat(
+  planId: number,
+  payload?: { prompt_utilisateur?: string; generer_image?: boolean }
+): Promise<ResultatAnalysePlanHabitat> {
+  const { data } = await clientApi.post(`/habitat/plans/${planId}/analyser`, payload ?? {});
+  return data;
+}
+
+export async function historiquePlanHabitat(planId: number): Promise<HistoriquePlanHabitat[]> {
+  const { data } = await clientApi.get(`/habitat/plans/${planId}/historique-ia`);
   return data.items ?? [];
 }
 
@@ -64,8 +110,46 @@ export async function listerProjetsDecoHabitat(): Promise<ProjetDecoHabitat[]> {
   return data.items ?? [];
 }
 
+export async function genererSuggestionsDecoHabitat(
+  projetId: number,
+  payload?: { brief?: string; generer_image?: boolean }
+): Promise<ResultatConceptDecoHabitat> {
+  const { data } = await clientApi.post(`/habitat/deco/projets/${projetId}/suggestions`, payload ?? {});
+  return data;
+}
+
+export async function synchroniserDepenseDecoHabitat(
+  projetId: number,
+  payload: { montant: number; fournisseur?: string; note?: string; categorie_depense?: string }
+): Promise<{ projet_id: number; depense_maison_id: number; budget_depense: number }> {
+  const { data } = await clientApi.post(`/habitat/deco/projets/${projetId}/depenses`, payload);
+  return data;
+}
+
+export async function genererImageHabitat(payload: {
+  prompt: string;
+  negative_prompt?: string;
+}): Promise<ResultatImageHabitat> {
+  const { data } = await clientApi.post("/habitat/deco/images", payload);
+  return data;
+}
+
 export async function listerZonesJardinHabitat(planId?: number): Promise<ZoneJardinHabitat[]> {
   const suffix = typeof planId === "number" ? `?plan_id=${planId}` : "";
   const { data } = await clientApi.get(`/habitat/jardin/zones${suffix}`);
   return data.items ?? [];
+}
+
+export async function modifierZoneJardinHabitat(
+  zoneId: number,
+  payload: Partial<ZoneJardinHabitat>
+): Promise<ZoneJardinHabitat> {
+  const { data } = await clientApi.patch(`/habitat/jardin/zones/${zoneId}`, payload);
+  return data;
+}
+
+export async function obtenirResumeJardinHabitat(planId?: number): Promise<ResumeJardinHabitat> {
+  const suffix = typeof planId === "number" ? `?plan_id=${planId}` : "";
+  const { data } = await clientApi.get(`/habitat/jardin/resume${suffix}`);
+  return data;
 }

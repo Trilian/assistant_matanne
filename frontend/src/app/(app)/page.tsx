@@ -17,6 +17,7 @@ import {
   Bell,
   Settings2,
   Heart,
+  Leaf,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -34,6 +35,7 @@ import {
   obtenirAlertesContextuelles,
   obtenirConfigDashboard,
   obtenirPointsFamille,
+  obtenirScoreEcologique,
   obtenirScoreBienEtre,
   obtenirTableauBord,
   sauvegarderConfigDashboard,
@@ -56,6 +58,7 @@ const WIDGETS_DEFAUT = {
   alertes_contextuelles: true,
   points_famille: true,
   score_bienetre: true,
+  score_ecologique: true,
 };
 
 type ClesWidget = keyof typeof WIDGETS_DEFAUT;
@@ -105,6 +108,10 @@ export default function PageAccueil() {
   const { data: scoreBienEtre } = utiliserRequete(
     ["dashboard", "score-bienetre"],
     obtenirScoreBienEtre
+  );
+  const { data: scoreEcologique } = utiliserRequete(
+    ["dashboard", "score-ecologique"],
+    obtenirScoreEcologique
   );
 
   const [widgetsStockes, setWidgetsStockes] = utiliserStockageLocal("dashboard-widgets", WIDGETS_DEFAUT);
@@ -343,6 +350,45 @@ export default function PageAccueil() {
                 className="h-full rounded-full bg-purple-500 transition-all"
                 style={{ width: `${Math.min(100, scoreBienEtre.score_global)}%` }}
               />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {widgets.score_ecologique && scoreEcologique && (
+        <Card className="border-lime-300/50 bg-lime-50/60 dark:border-lime-900/40 dark:bg-lime-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Leaf className="h-4 w-4 text-lime-600" />
+              Score ecologique
+            </CardTitle>
+            <CardDescription>
+              Niveau {scoreEcologique.niveau} · cuisine {scoreEcologique.modules.cuisine.score}/100 · maison {scoreEcologique.modules.maison.score}/100
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-4xl font-bold text-lime-700 dark:text-lime-400">
+                  {scoreEcologique.score_global}
+                  <span className="text-lg text-muted-foreground">/100</span>
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {scoreEcologique.modules.maison.economie_mensuelle_estimee.toFixed(0)} € d'economies mensuelles estimees
+                </p>
+              </div>
+              <div className="text-right text-xs text-muted-foreground space-y-1">
+                <p>♻️ Anti-gaspi: {scoreEcologique.modules.cuisine.anti_gaspillage}</p>
+                <p>⚡ Energie: {scoreEcologique.modules.maison.energie}</p>
+                <p>🌿 Eco-actions: {scoreEcologique.modules.maison.eco_actions}</p>
+              </div>
+            </div>
+            <div className="space-y-1">
+              {scoreEcologique.leviers_prioritaires.slice(0, 2).map((levier) => (
+                <p key={levier} className="text-xs text-muted-foreground">
+                  • {levier}
+                </p>
+              ))}
             </div>
           </CardContent>
         </Card>

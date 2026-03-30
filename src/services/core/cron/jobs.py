@@ -2222,11 +2222,30 @@ def _job_suggestions_activites_meteo() -> None:
         logger.exception("Erreur IM-14 suggestions météo")
 
 
+def _job_sync_veille_habitat() -> None:
+    """Synchronise la veille Habitat et pousse les meilleures alertes."""
+    try:
+        from src.api.utils import executer_avec_session
+        from src.services.habitat import obtenir_service_veille_habitat
+
+        with executer_avec_session() as session:
+            resultat = obtenir_service_veille_habitat().synchroniser_annonces(
+                session,
+                user_id="matanne",
+                limite_par_source=10,
+                envoyer_alertes=True,
+            )
+        logger.info("Habitat veille sync: %s", resultat)
+    except Exception:
+        logger.exception("Erreur sync veille Habitat")
+
+
 _REGISTRE_JOBS.update(
     {
         "sync_routines_planning": ("Sync routines -> planning", _job_sync_routines_planning),
         "sync_recoltes_inventaire": ("Sync récoltes -> inventaire", _job_sync_recoltes_inventaire),
         "suggestions_activites_meteo": ("Suggestions activités selon météo", _job_suggestions_activites_meteo),
+        "sync_veille_habitat": ("Sync veille habitat", _job_sync_veille_habitat),
     }
 )
 
@@ -2275,6 +2294,7 @@ class DémarreurCron:
         self._planifier_job("automations_runner", CronTrigger(minute="*/5"), replace_existing=True)
         self._planifier_job("points_famille_hebdo", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
         self._planifier_job("sync_google_calendar", CronTrigger(hour=23, minute=0), replace_existing=True)
+        self._planifier_job("sync_veille_habitat", CronTrigger(hour=12, minute=15), replace_existing=True)
         self._planifier_job("alerte_stock_bas", CronTrigger(hour=7, minute=0), replace_existing=True)
         self._planifier_job("archive_batches_expires", CronTrigger(hour=2, minute=0), replace_existing=True)
         self._planifier_job("rapport_maison_mensuel", CronTrigger(day=1, hour=9, minute=30), replace_existing=True)

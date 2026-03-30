@@ -37,6 +37,8 @@ from src.api.utils import executer_async, executer_avec_session, gerer_exception
 
 router = APIRouter(prefix="/api/v1/utilitaires", tags=["Utilitaires"])
 
+HistoriqueChatItem = dict[str, str]
+
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CHAT IA MULTI-CONTEXTE
@@ -50,7 +52,7 @@ class MessageChatRequest(BaseModel):
     contexte: Literal["cuisine", "famille", "maison", "budget", "general"] = Field(
         default="general", description="Contexte du chat"
     )
-    historique: list[dict[str, str]] = Field(
+    historique: list[HistoriqueChatItem] = Field(
         default_factory=list, description="Messages prÃ©cÃ©dents [{role, contenu}]"
     )
 
@@ -117,12 +119,12 @@ async def lister_notes(
     from src.core.models import NoteMemo
 
     def _query():
+        safe_tag = tag.strip().lower() if tag else None
         with executer_avec_session() as session:
             query = session.query(NoteMemo)
             if categorie:
                 query = query.filter(NoteMemo.categorie == categorie)
-            if tag:
-                safe_tag = tag.strip().lower()
+            if safe_tag:
                 query = query.filter(NoteMemo.tags.isnot(None))
             if epingle is not None:
                 query = query.filter(NoteMemo.epingle == epingle)
@@ -135,10 +137,13 @@ async def lister_notes(
                 NoteMemo.epingle.desc(), NoteMemo.cree_le.desc()
             ).all()
 
-            if tag:
+            if safe_tag:
                 items = [
                     n for n in items
-                    if any(str(t).strip().lower() == safe_tag for t in (n.tags or []))
+                    if any(
+                        str(t).strip().lower() == safe_tag
+                        for t in (n.tags if isinstance(n.tags, list) else [])
+                    )
                 ]
 
             return {
@@ -176,7 +181,8 @@ async def lister_tags_notes(
             rows = session.query(NoteMemo.tags).filter(NoteMemo.archive == False).all()  # noqa: E712
             compteur: dict[str, int] = {}
             for (tags,) in rows:
-                for tag in tags or []:
+                tags_liste = tags if isinstance(tags, list) else []
+                for tag in tags_liste:
                     valeur = str(tag).strip()
                     if not valeur:
                         continue

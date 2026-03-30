@@ -111,6 +111,11 @@ class TestEndpointsDashboard:
         response = await client.get("/api/v1/dashboard/budget-unifie")
         assert response.status_code not in (404, 405)
 
+    async def test_dashboard_score_ecologique_existe(self, client):
+        """GET /api/v1/dashboard/score-ecologique n'est pas 404."""
+        response = await client.get("/api/v1/dashboard/score-ecologique")
+        assert response.status_code not in (404, 405)
+
     @patch("src.api.routes.dashboard.executer_async")
     async def test_dashboard_cuisine_format(self, mock_exec, client):
         """GET /api/v1/dashboard/cuisine retourne les bonnes clés."""
@@ -245,6 +250,34 @@ class TestFormatDashboard:
         assert "maison" in data
         assert "jeux" in data
         assert "totaux" in data
+
+    @patch("src.api.routes.dashboard.executer_avec_session")
+    @patch("src.api.routes.dashboard.executer_async")
+    async def test_score_ecologique_format(self, mock_exec, mock_session, client):
+        """Le score écologique retourne score global + modules."""
+        mock_exec.side_effect = lambda fn: fn()
+
+        ctx = MagicMock()
+        ctx.__enter__ = MagicMock(return_value=MagicMock())
+        ctx.__exit__ = MagicMock(return_value=False)
+        session = ctx.__enter__()
+
+        query = session.query.return_value
+        query.filter.return_value = query
+        query.group_by.return_value = query
+        query.order_by.return_value = query
+        query.scalar.return_value = 0
+        query.all.return_value = []
+        mock_session.return_value = ctx
+
+        response = await client.get("/api/v1/dashboard/score-ecologique")
+        assert response.status_code == 200
+        data = response.json()
+        assert "score_global" in data
+        assert "niveau" in data
+        assert "modules" in data
+        assert "cuisine" in data["modules"]
+        assert "maison" in data["modules"]
 
 
 # ═══════════════════════════════════════════════════════════

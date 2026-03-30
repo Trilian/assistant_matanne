@@ -75,8 +75,12 @@ import type {
   SuggestionRecettePlanning,
 } from "@/types/planning";
 import { BadgeNutriscore } from "@/composants/cuisine/badge-nutriscore";
+import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 import { CalendrierMensuel } from "@/composants/planning/calendrier-mensuel";
+import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
+import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
+import { listerEvenements } from "@/bibliotheque/api/calendriers";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
@@ -107,6 +111,7 @@ function getDatesDeSemaine(dateDebut: string): string[] {
 }
 
 export default function PagePlanning() {
+  const { contexte: modeInvites, mettreAJour: mettreAJourModeInvites, reinitialiser: reinitialiserModeInvites } = utiliserModeInvites();
   const [modeAffichage, setModeAffichage] = useState<"semaine" | "mois">("semaine");
   const [offsetSemaine, setOffsetSemaine] = useState(0);
   const [offsetMois, setOffsetMois] = useState(0);
@@ -161,6 +166,39 @@ export default function PagePlanning() {
     { enabled: dialogueOuvert }
   );
 
+  const { data: evenementsFamille } = utiliserRequete(
+    ["famille", "evenements", "planning-invites"],
+    listerEvenementsFamiliaux,
+    { staleTime: 10 * 60 * 1000 }
+  );
+
+  const { data: evenementsCalendrier } = utiliserRequete(
+    ["calendriers", "evenements", "planning-invites"],
+    () => {
+      const debut = new Date().toISOString().slice(0, 10);
+      const fin = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10);
+      return listerEvenements({ date_debut: debut, date_fin: fin });
+    },
+    { staleTime: 10 * 60 * 1000 }
+  );
+
+  const contexteInvitesActif = modeInvites.actif && modeInvites.nbInvites > 0;
+  const evenementsModeInvites = useMemo(() => {
+    const items = [...modeInvites.evenements];
+    if (modeInvites.occasion.trim()) {
+      items.unshift(modeInvites.occasion.trim());
+    }
+    return Array.from(new Set(items.filter(Boolean))).slice(0, 6);
+  }, [modeInvites.evenements, modeInvites.occasion]);
+
+  const suggestionsInvites = useMemo(() => {
+    const libellesFamille = (evenementsFamille ?? []).map((item) => item.titre).filter(Boolean);
+    const libellesCalendrier = (evenementsCalendrier ?? []).map((item) => item.titre).filter(Boolean);
+    return Array.from(new Set([...libellesFamille, ...libellesCalendrier])).slice(0, 6);
+  }, [evenementsCalendrier, evenementsFamille]);
+
   // ─── Mutations ───
   const { mutate: ajouterRepas, isPending: enAjout } = utiliserMutation(
     (dto: CreerRepasPlanningDTO) => definirRepas(dto),
@@ -184,7 +222,20 @@ export default function PagePlanning() {
   });
 
   const { mutate: genererIA, isPending: enGeneration } = utiliserMutation(
-    () => genererPlanningSemaine({ date_debut: dateDebut }),
+    () =>
+      genererPlanningSemaine({
+        date_debut: dateDebut,
+        nb_personnes: 4 + (contexteInvitesActif ? modeInvites.nbInvites : 0),
+        preferences:
+          contexteInvitesActif || evenementsModeInvites.length > 0
+            ? {
+                mode_invites: contexteInvitesActif,
+                nb_invites: contexteInvitesActif ? modeInvites.nbInvites : 0,
+                occasion: modeInvites.occasion || undefined,
+                evenements: evenementsModeInvites,
+              }
+            : undefined,
+      }),
     {
       onSuccess: () => {
         invalider(["planning"]);
@@ -195,7 +246,15 @@ export default function PagePlanning() {
   );
 
   const { mutate: genererCourses, isPending: enGenerationCourses } = utiliserMutation(
-    () => genererCoursesDepuisPlanning(dateDebut),
+    () =>
+      genererCoursesDepuisPlanning(dateDebut, {
+        nbInvites: contexteInvitesActif ? modeInvites.nbInvites : 0,
+        evenements: evenementsModeInvites,
+        nomListe:
+          contexteInvitesActif && modeInvites.occasion
+            ? `Courses ${modeInvites.occasion}`
+            : undefined,
+      }),
     {
       onSuccess: (result) => {
         setCoursesResultat(result);
@@ -441,6 +500,14 @@ export default function PagePlanning() {
           </Button>
         </div>
       </div>
+
+      <CarteModeInvites
+        contexte={modeInvites}
+        onChange={mettreAJourModeInvites}
+        onReset={reinitialiserModeInvites}
+        suggestionsEvenements={suggestionsInvites}
+        description="Adaptez le nombre de portions, la génération IA et la liste de courses pour une réception ou un repas élargi."
+      />
 
       {/* ─── Grille Planning ─── */}
       {modeAffichage === "mois" ? (
@@ -783,6 +850,11 @@ export default function PagePlanning() {
                 <p className="font-medium">
                   ✅ {coursesResultat.total_articles} articles ajoutés
                 </p>
+                {coursesResultat.contexte && coursesResultat.contexte.nb_invites > 0 && (
+                  <p className="text-muted-foreground">
+                    👥 Quantités ajustées pour {coursesResultat.contexte.nb_invites} invité(s)
+                  </p>
+                )}
                 {coursesResultat.articles_en_stock > 0 && (
                   <p className="text-muted-foreground">
                     📦 {coursesResultat.articles_en_stock} articles déjà en stock (non ajoutés)

@@ -116,6 +116,8 @@ class GenererCoursesRequest(BaseModel):
     semaine_debut: date
     soustraire_stock: bool = Field(True, description="Soustraire les quantités en stock")
     nom_liste: str = Field("Courses de la semaine", min_length=1, max_length=200)
+    nb_invites: int = Field(0, ge=0, le=20, description="Nombre d'invités à prendre en compte")
+    evenements: list[str] = Field(default_factory=list, description="Événements contextuels")
 
 
 class ArticleGenereResume(BaseModel):
@@ -135,5 +137,6 @@ class GenererCoursesResponse(BaseModel):
     nom: str
     total_articles: int
     articles_en_stock: int
+    contexte: dict[str, float | int | list[str]] = Field(default_factory=dict)
     articles: list[ArticleGenereResume] = Field(default_factory=list)
     par_rayon: dict[str, int] = Field(default_factory=dict)

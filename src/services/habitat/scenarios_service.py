@@ -7,6 +7,7 @@ from decimal import Decimal
 from sqlalchemy.orm import Session
 
 from src.core.models.habitat_projet import CritereScenarioHabitat
+from src.services.core.registry import service_factory
 
 
 class ScenariosHabitatService:
@@ -36,3 +37,9 @@ class ScenariosHabitatService:
 
         score_sur_10 = somme_ponderee / somme_poids
         return (score_sur_10 * Decimal("10")).quantize(Decimal("0.01"))
+
+
+@service_factory("habitat_scenarios", tags={"habitat", "ia", "decision"})
+def obtenir_service_scenarios_habitat() -> ScenariosHabitatService:
+    """Factory singleton du service de scénarios Habitat."""
+    return ScenariosHabitatService()

@@ -12,12 +12,18 @@ from src.api.schemas.habitat import (
     AnnonceHabitatCreate,
     CritereImmoCreate,
     CritereScenarioCreate,
+    GenerationImageHabitatCreate,
     PieceHabitatCreate,
+    PlanHabitatAnalyseCreate,
     PlanHabitatCreate,
+    ProjetDecoDepenseCreate,
     ProjetDecoHabitatCreate,
+    ProjetDecoSuggestionCreate,
     ScenarioHabitatCreate,
     ScenarioHabitatPatch,
+    SynchronisationVeilleHabitatCreate,
     ZoneJardinHabitatCreate,
+    ZoneJardinHabitatPatch,
 )
 from src.api.schemas.common import MessageResponse
 from src.api.schemas.errors import (
@@ -31,13 +37,20 @@ from src.core.models.habitat_projet import (
     AnnonceHabitat,
     CritereImmoHabitat,
     CritereScenarioHabitat,
+    ModificationPlanHabitat,
     PieceHabitat,
     PlanHabitat,
     ProjetDecoHabitat,
     ScenarioHabitat,
     ZoneJardinHabitat,
 )
-from src.services.habitat import obtenir_service_scenarios_habitat
+from src.services.habitat import (
+    obtenir_service_deco_habitat,
+    obtenir_service_plans_habitat,
+    obtenir_service_scenarios_habitat,
+    obtenir_service_veille_habitat,
+)
+from src.services.integrations.image_generation import obtenir_service_generation_image
 
 router = APIRouter(prefix="/api/v1/habitat", tags=["Habitat"])
 
@@ -53,13 +66,65 @@ async def habitat_hub(user: dict[str, Any] = Depends(require_auth)) -> dict[str,
 
     def _query() -> dict[str, Any]:
         with executer_avec_session() as session:
+            alertes = obtenir_service_veille_habitat().lister_alertes(session)
+            depenses_deco = session.query(ProjetDecoHabitat).all()
             return {
                 "scenarios": session.query(ScenarioHabitat).count(),
                 "annonces": session.query(AnnonceHabitat).count(),
                 "plans": session.query(PlanHabitat).count(),
                 "projets_deco": session.query(ProjetDecoHabitat).count(),
                 "zones_jardin": session.query(ZoneJardinHabitat).count(),
+                "alertes": len(alertes),
+                "annonces_a_traiter": session.query(AnnonceHabitat).filter(AnnonceHabitat.statut.in_(["nouveau", "alerte"])) .count(),
+                "budget_deco_total": round(sum(float(item.budget_prevu or 0) for item in depenses_deco), 2),
+                "budget_deco_depense": round(sum(float(item.budget_depense or 0) for item in depenses_deco), 2),
             }
+
+    return await executer_async(_query)
+
+
+@router.post("/veille/synchroniser", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def synchroniser_veille(
+    payload: SynchronisationVeilleHabitatCreate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Lance une synchronisation réelle des sources immobilières."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            service = obtenir_service_veille_habitat()
+            return service.synchroniser_annonces(
+                session,
+                user_id=str(user.get("id") or "dev"),
+                critere_id=payload.critere_id,
+                limite_par_source=payload.limite_par_source,
+                envoyer_alertes=payload.envoyer_alertes,
+            )
+
+    return await executer_async(_query)
+
+
+@router.get("/veille/alertes", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_alertes_veille(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
+    """Retourne les meilleures opportunités détectées par la veille."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            return {"items": obtenir_service_veille_habitat().lister_alertes(session)}
+
+    return await executer_async(_query)
+
+
+@router.get("/veille/carte", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def carte_veille(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
+    """Agrège les annonces par ville avec coordonnées pour affichage carte."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            return {"items": obtenir_service_veille_habitat().carte_annonces(session)}
 
     return await executer_async(_query)
 
@@ -363,13 +428,51 @@ async def lister_plans(user: dict[str, Any] = Depends(require_auth)) -> dict[str
                         "scenario_id": p.scenario_id,
                         "nom": p.nom,
                         "type_plan": p.type_plan,
+                        "image_importee_url": p.image_importee_url,
                         "surface_totale_m2": _to_float(p.surface_totale_m2),
                         "budget_estime": _to_float(p.budget_estime),
                         "version": p.version,
+                        "suggestions_ia": (p.donnees_pieces or {}).get("suggestions_ia", []),
                     }
                     for p in items
                 ]
             }
+
+    return await executer_async(_query)
+
+
+@router.post("/plans/{plan_id}/analyser", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def analyser_plan_habitat(
+    plan_id: int,
+    payload: PlanHabitatAnalyseCreate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Analyse un plan Habitat avec le pipeline IA."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            return obtenir_service_plans_habitat().analyser_plan(
+                session,
+                plan_id=plan_id,
+                prompt_utilisateur=payload.prompt_utilisateur,
+                generer_image=payload.generer_image,
+            )
+
+    return await executer_async(_query)
+
+
+@router.get("/plans/{plan_id}/historique-ia", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def historique_plan_habitat(
+    plan_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Historique des analyses et propositions IA sur un plan."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            return {"items": obtenir_service_plans_habitat().historique_plan(session, plan_id)}
 
     return await executer_async(_query)
 
@@ -453,6 +556,8 @@ async def lister_projets_deco(user: dict[str, Any] = Depends(require_auth)) -> d
                         "piece_id": p.piece_id,
                         "nom_piece": p.nom_piece,
                         "style": p.style,
+                        "palette_couleurs": p.palette_couleurs or [],
+                        "inspirations": p.inspirations or [],
                         "budget_prevu": _to_float(p.budget_prevu),
                         "budget_depense": _to_float(p.budget_depense),
                         "statut": p.statut,
@@ -462,6 +567,64 @@ async def lister_projets_deco(user: dict[str, Any] = Depends(require_auth)) -> d
             }
 
     return await executer_async(_query)
+
+
+@router.post("/deco/projets/{projet_id}/suggestions", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def suggerer_projet_deco(
+    projet_id: int,
+    payload: ProjetDecoSuggestionCreate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Génère un concept déco avancé avec option d'image."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            return obtenir_service_deco_habitat().generer_concept(
+                session,
+                projet_id=projet_id,
+                brief=payload.brief,
+                generer_image=payload.generer_image,
+            )
+
+    return await executer_async(_query)
+
+
+@router.post("/deco/projets/{projet_id}/depenses", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def synchroniser_depense_deco(
+    projet_id: int,
+    payload: ProjetDecoDepenseCreate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Synchronise une dépense déco vers les dépenses maison."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            return obtenir_service_deco_habitat().synchroniser_depense(
+                session,
+                projet_id=projet_id,
+                montant=float(payload.montant),
+                fournisseur=payload.fournisseur,
+                note=payload.note,
+                categorie_depense=payload.categorie_depense,
+            )
+
+    return await executer_async(_query)
+
+
+@router.post("/deco/images", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def generer_image_deco(
+    payload: GenerationImageHabitatCreate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Expose le service Hugging Face pour créer une inspiration visuelle Habitat."""
+
+    return obtenir_service_generation_image().generer_image(
+        prompt=payload.prompt,
+        negative_prompt=payload.negative_prompt,
+    )
 
 
 @router.post("/deco/projets", status_code=201, responses=REPONSES_CRUD_CREATION)
@@ -504,11 +667,62 @@ async def lister_zones_jardin(
                         "nom": z.nom,
                         "type_zone": z.type_zone,
                         "surface_m2": _to_float(z.surface_m2),
+                        "position_x": _to_float(z.position_x),
+                        "position_y": _to_float(z.position_y),
+                        "largeur": _to_float(z.largeur),
+                        "longueur": _to_float(z.longueur),
+                        "donnees_canvas": z.donnees_canvas or {},
+                        "plantes": z.plantes or [],
+                        "amenagements": z.amenagements or [],
                         "budget_estime": _to_float(z.budget_estime),
                     }
                     for z in items
                 ]
             }
+
+    return await executer_async(_query)
+
+
+@router.patch("/jardin/zones/{zone_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def modifier_zone_jardin(
+    zone_id: int,
+    payload: ZoneJardinHabitatPatch,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour les coordonnées et données canvas d'une zone jardin."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            zone = session.query(ZoneJardinHabitat).filter(ZoneJardinHabitat.id == zone_id).first()
+            if not zone:
+                raise HTTPException(status_code=404, detail="Zone jardin non trouvee")
+            for key, value in payload.model_dump(exclude_unset=True).items():
+                setattr(zone, key, value)
+            session.flush()
+            return {
+                "id": zone.id,
+                "nom": zone.nom,
+                "position_x": _to_float(zone.position_x),
+                "position_y": _to_float(zone.position_y),
+                "largeur": _to_float(zone.largeur),
+                "longueur": _to_float(zone.longueur),
+            }
+
+    return await executer_async(_query)
+
+
+@router.get("/jardin/resume", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def resume_jardin(
+    plan_id: int | None = Query(None),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne un résumé budgétaire et surfacique du canvas paysager."""
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            return obtenir_service_deco_habitat().resume_jardin(session, plan_id)
 
     return await executer_async(_query)
 

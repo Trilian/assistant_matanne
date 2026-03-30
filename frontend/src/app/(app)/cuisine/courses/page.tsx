@@ -53,6 +53,7 @@ import {
   validerCourses,
   obtenirSuggestionsBioLocal,
   obtenirRecurrentsSuggeres,
+  obtenirPredictionsCourses,
   obtenirQrPartageListe,
 } from "@/bibliotheque/api/courses";
 import { schemaArticleCourses, type DonneesArticleCourses } from "@/bibliotheque/validateurs";
@@ -61,6 +62,10 @@ import type { ArticleCourses } from "@/types/courses";
 import { ScanneurMultiCodes } from "@/composants/scanneur-multi-codes";
 import type { ArticleBarcode } from "@/bibliotheque/api/inventaire";
 import { TileArticle } from "@/composants/cuisine/tile-article";
+import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
+import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
+import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
+import { listerEvenements } from "@/bibliotheque/api/calendriers";
 
 /** Group articles by category for Bring!-style display */
 function grouperParCategorie(articles: ArticleCourses[]): Record<string, ArticleCourses[]> {
@@ -73,6 +78,7 @@ function grouperParCategorie(articles: ArticleCourses[]): Record<string, Article
 }
 
 export default function PageCourses() {
+  const { contexte: modeInvites, mettreAJour: mettreAJourModeInvites, reinitialiser: reinitialiserModeInvites } = utiliserModeInvites();
   const [listeSelectionnee, setListeSelectionnee] = useState<number | null>(null);
   const [nomNouvelleListe, setNomNouvelleListe] = useState("");
   const [dialogueArticle, setDialogueArticle] = useState(false);
@@ -83,6 +89,14 @@ export default function PageCourses() {
   const [chargementQr, setChargementQr] = useState(false);
 
   const invalider = utiliserInvalidation();
+  const contexteInvitesActif = modeInvites.actif && modeInvites.nbInvites > 0;
+  const evenementsModeInvites = useMemo(() => {
+    const items = [...modeInvites.evenements];
+    if (modeInvites.occasion.trim()) {
+      items.unshift(modeInvites.occasion.trim());
+    }
+    return Array.from(new Set(items.filter(Boolean))).slice(0, 6);
+  }, [modeInvites.evenements, modeInvites.occasion]);
 
   async function ouvrirQrPartage() {
     if (!listeSelectionnee) return;
@@ -136,6 +150,49 @@ export default function PageCourses() {
   const { data: recurrents } = utiliserRequete(
     ["courses", "recurrents"],
     obtenirRecurrentsSuggeres
+  );
+
+  const { data: evenementsFamille } = utiliserRequete(
+    ["famille", "evenements", "courses-invites"],
+    listerEvenementsFamiliaux,
+    { staleTime: 10 * 60 * 1000 }
+  );
+
+  const { data: evenementsCalendrier } = utiliserRequete(
+    ["calendriers", "evenements", "courses-invites"],
+    () => {
+      const debut = new Date().toISOString().slice(0, 10);
+      const fin = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10);
+      return listerEvenements({ date_debut: debut, date_fin: fin });
+    },
+    { staleTime: 10 * 60 * 1000 }
+  );
+
+  const suggestionsInvites = useMemo(() => {
+    const libellesFamille = (evenementsFamille ?? []).map((item) => item.titre).filter(Boolean);
+    const libellesCalendrier = (evenementsCalendrier ?? []).map((item) => item.titre).filter(Boolean);
+    return Array.from(new Set([...libellesFamille, ...libellesCalendrier])).slice(0, 6);
+  }, [evenementsCalendrier, evenementsFamille]);
+
+  const { data: predictionsInvites } = utiliserRequete(
+    [
+      "courses",
+      "predictions",
+      String(modeInvites.nbInvites),
+      evenementsModeInvites.join("|"),
+    ],
+    () =>
+      obtenirPredictionsCourses({
+        limite: 6,
+        nbInvites: contexteInvitesActif ? modeInvites.nbInvites : 0,
+        evenements: evenementsModeInvites,
+      }),
+    {
+      enabled: contexteInvitesActif || evenementsModeInvites.length > 0,
+      staleTime: 5 * 60 * 1000,
+    }
   );
 
   // Mutations
@@ -275,6 +332,14 @@ export default function PageCourses() {
           </div>
         )}
       </div>
+
+      <CarteModeInvites
+        contexte={modeInvites}
+        onChange={mettreAJourModeInvites}
+        onReset={reinitialiserModeInvites}
+        suggestionsEvenements={suggestionsInvites}
+        description="Le contexte invité alimente les suggestions d'achats et les quantités recommandées pour la liste active."
+      />
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Panel listes */}
@@ -482,6 +547,48 @@ export default function PageCourses() {
                 <div
                   key={s.article_id}
                   className="flex items-center justify-between rounded-lg border border-green-200 dark:border-green-800 px-3 py-2 text-sm"
+
+            {listeSelectionnee && predictionsInvites && predictionsInvites.items.length > 0 && (
+              <div className="border-t pt-3 mt-3">
+                <p className="text-xs font-medium text-muted-foreground mb-2">
+                  Suggestions invites
+                </p>
+                <div className="space-y-2">
+                  {predictionsInvites.items.slice(0, 5).map((prediction) => (
+                    <button
+                      key={`${prediction.article_nom}-${prediction.quantite_suggeree}`}
+                      className="w-full rounded-md border px-2 py-2 text-left hover:bg-accent transition-colors"
+                      onClick={() =>
+                        ajouter({
+                          nom: prediction.article_nom,
+                          quantite: prediction.quantite_suggeree,
+                          unite: prediction.unite_suggeree,
+                          categorie:
+                            prediction.categorie ?? prediction.rayon_magasin ?? undefined,
+                        })
+                      }
+                    >
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <span className="font-medium text-foreground">
+                          {prediction.article_nom}
+                        </span>
+                        <span className="text-muted-foreground">
+                          x{prediction.quantite_suggeree} {prediction.unite_suggeree}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        Confiance {Math.round(prediction.confiance_contextualisee * 100)}%
+                        {prediction.contexte_applique.raisons.length > 0 && (
+                          <span>
+                            {" "}· {prediction.contexte_applique.raisons.join(", ")}
+                          </span>
+                        )}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
                 >
                   <div>
                     <span className="font-medium">{s.nom}</span>
