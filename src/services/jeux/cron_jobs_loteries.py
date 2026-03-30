@@ -6,8 +6,11 @@ Cron jobs pour le module Loteries (Loto + Euromillions).
 2. Backtest grilles: 1×/jour à 22h (après scraping)
 """
 
+import csv
+import io
 import logging
-from datetime import datetime
+import zipfile
+from datetime import datetime, date
 from typing import Any
 
 from apscheduler.triggers.cron import CronTrigger
@@ -19,6 +22,21 @@ from src.core.models.jeux import TirageLoto, TirageEuromillions, GrilleLoto, Gri
 logger = logging.getLogger(__name__)
 
 
+# URLs publiques FDJ pour les historiques de tirages (fichiers ZIP contenant des CSV)
+# Ces URLs sont accessibles sans authentification depuis la page historique FDJ.
+_FDJ_LOTO_CSV_URL = (
+    "https://www.sto.api.fdj.fr/anonymous/service-draw-info/v3/documentations/"
+    "1a2b3c4d-9876-4562-b3fc-2c963f66afp6"
+)
+_FDJ_EUROMILLIONS_CSV_URL = (
+    "https://www.sto.api.fdj.fr/anonymous/service-draw-info/v3/documentations/"
+    "1a2b3c4d-9876-4562-b3fc-2c963f66afq6"
+)
+
+# Timeout pour les requêtes HTTP vers FDJ
+_HTTP_TIMEOUT = 30
+
+
 # ═══════════════════════════════════════════════════════════
 # JOB 1: SCRAPER RÉSULTATS FDJ (Loto + Euromillions)
 # ═══════════════════════════════════════════════════════════
@@ -26,64 +44,265 @@ logger = logging.getLogger(__name__)
 
 def scraper_resultats_fdj():
     """
-    Scrape les résultats des tirages Loto et Euromillions via API FDJ.
-    
+    Scrape les résultats des tirages Loto et Euromillions via l'API publique FDJ.
+
     Fréquence: 1×/jour à 21h30 (après les tirages à 21h)
-    
+
     Implémente:
-    - Récupération dernier tirage Loto (Lundi/Mercredi/Samedi)
-    - Récupération dernier tirage Euromillions (Mardi/Vendredi)
-    - Stockage en base avec numéros + complémentaire/étoiles
-    - Mise à jour statistiques globales
+    - Téléchargement du fichier historique CSV depuis l'API FDJ
+    - Parsing des résultats (numéros + chance/étoiles + jackpot)
+    - Insertion des tirages manquants en base
+    - Gestion des erreurs réseau avec fallback
     """
     logger.info("🔄 Début scraping résultats FDJ (Loto + Euromillions)")
-    
+
+    nb_loto = 0
+    nb_euro = 0
+
     try:
-        import httpx
-        
-        # URL API FDJ (exemple - à adapter selon documentation)
-        # Note: L'API FDJ officielle nécessite une clé API
-        # Alternative: scraper le site web public
-        
-        # Pour l'instant, placeholder avec simulation
-        logger.warning("⚠️ Scraping FDJ non implémenté - Simulation uniquement")
-        
-        # TODO: Implémenter scraping réel
-        # Exemple structure:
-        # response = httpx.get("https://api.fdj.fr/loto/tirage/dernier", headers={"X-API-Key": "..."})
-        # data = response.json()
-        
-        # Simuler insertion tirage Loto
-        with obtenir_contexte_db() as session:
-            # Vérifier si tirage aujourd'hui existe déjà
-            today = datetime.now().date()
-            tirage_existant = session.query(TirageLoto).filter(
-                TirageLoto.date == today
-            ).first()
-            
-            if tirage_existant:
-                logger.info(f"✅ Tirage Loto du {today} déjà en base")
-            else:
-                # TODO: Insérer vrai tirage depuis API
-                logger.info(f"📥 Nouveau tirage Loto à insérer (simulation)")
-            
-            # Idem pour Euromillions
-            tirage_euro_existant = session.query(TirageEuromillions).filter(
-                TirageEuromillions.date == today
-            ).first()
-            
-            if tirage_euro_existant:
-                logger.info(f"✅ Tirage Euromillions du {today} déjà en base")
-            else:
-                logger.info(f"📥 Nouveau tirage Euromillions à insérer (simulation)")
-            
-            session.commit()
-        
-        logger.info("✅ Scraping FDJ terminé")
-    
+        nb_loto = _scraper_tirages_loto()
+        logger.info(f"✅ Loto: {nb_loto} nouveau(x) tirage(s) inséré(s)")
     except Exception as e:
-        logger.error(f"❌ Erreur scraping FDJ: {e}", exc_info=True)
-        raise ErreurService(f"Échec scraping FDJ: {e}")
+        logger.error(f"❌ Erreur scraping Loto: {e}", exc_info=True)
+
+    try:
+        nb_euro = _scraper_tirages_euromillions()
+        logger.info(f"✅ Euromillions: {nb_euro} nouveau(x) tirage(s) inséré(s)")
+    except Exception as e:
+        logger.error(f"❌ Erreur scraping Euromillions: {e}", exc_info=True)
+
+    logger.info(f"✅ Scraping FDJ terminé: {nb_loto} Loto + {nb_euro} Euromillions")
+
+
+def _telecharger_csv_fdj(url: str) -> str:
+    """Télécharge un fichier CSV ou ZIP depuis l'API FDJ et retourne le contenu CSV."""
+    import httpx
+
+    response = httpx.get(url, timeout=_HTTP_TIMEOUT, follow_redirects=True)
+    response.raise_for_status()
+
+    content_type = response.headers.get("content-type", "")
+
+    # Si c'est un ZIP, extraire le premier CSV
+    if "zip" in content_type or url.endswith(".zip") or response.content[:4] == b"PK\x03\x04":
+        with zipfile.ZipFile(io.BytesIO(response.content)) as zf:
+            csv_files = [n for n in zf.namelist() if n.endswith(".csv")]
+            if not csv_files:
+                raise ErreurService("Aucun fichier CSV trouvé dans l'archive ZIP FDJ")
+            return zf.read(csv_files[0]).decode("utf-8-sig")
+
+    # Sinon, c'est directement un CSV
+    return response.text
+
+
+def _parser_date_fdj(date_str: str) -> date | None:
+    """Parse une date FDJ (formats: dd/mm/yyyy, yyyy-mm-dd, etc.)."""
+    for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y"):
+        try:
+            return datetime.strptime(date_str.strip(), fmt).date()
+        except (ValueError, AttributeError):
+            continue
+    return None
+
+
+def _scraper_tirages_loto() -> int:
+    """Télécharge et insère les tirages Loto manquants. Retourne le nombre inséré."""
+    csv_content = _telecharger_csv_fdj(_FDJ_LOTO_CSV_URL)
+    reader = csv.DictReader(io.StringIO(csv_content), delimiter=";")
+
+    # Normaliser les noms de colonnes (le CSV FDJ utilise des noms variés)
+    tirages_a_inserer = []
+    for row in reader:
+        # Adapter selon les noms de colonnes FDJ connus
+        date_tirage = _parser_date_fdj(
+            row.get("date_de_tirage", row.get("date", row.get("Date", "")))
+        )
+        if not date_tirage:
+            continue
+
+        try:
+            # Les colonnes de numéros FDJ sont nommées "boule_1" à "boule_5" + "numero_chance"
+            numeros = []
+            for col_prefix in ("boule_", "Boule ", "numero_"):
+                for i in range(1, 6):
+                    val = row.get(f"{col_prefix}{i}")
+                    if val and val.strip().isdigit():
+                        numeros.append(int(val.strip()))
+                if len(numeros) == 5:
+                    break
+
+            if len(numeros) != 5:
+                continue
+
+            chance_val = row.get("numero_chance", row.get("Numero Chance", row.get("chance", "")))
+            if not chance_val or not str(chance_val).strip().isdigit():
+                continue
+            numero_chance = int(str(chance_val).strip())
+
+            # Jackpot (optionnel)
+            jackpot_str = row.get("rapport_du_rang1", row.get("jackpot", ""))
+            jackpot = None
+            if jackpot_str:
+                try:
+                    jackpot = int(float(str(jackpot_str).replace(",", ".").replace(" ", "").replace("€", "")))
+                except (ValueError, TypeError):
+                    pass
+
+            # Gagnants rang 1 (optionnel)
+            gagnants_str = row.get("nombre_de_gagnant_au_rang1", row.get("gagnants_rang1", ""))
+            gagnants = None
+            if gagnants_str:
+                try:
+                    gagnants = int(str(gagnants_str).strip())
+                except (ValueError, TypeError):
+                    pass
+
+            tirages_a_inserer.append({
+                "date_tirage": date_tirage,
+                "numeros": sorted(numeros),
+                "numero_chance": numero_chance,
+                "jackpot": jackpot,
+                "gagnants": gagnants,
+            })
+        except (ValueError, KeyError, TypeError) as e:
+            logger.debug(f"Ligne Loto ignorée : {e}")
+            continue
+
+    # Insérer les tirages manquants en base
+    nb_inseres = 0
+    with obtenir_contexte_db() as session:
+        for t in tirages_a_inserer:
+            existant = session.query(TirageLoto).filter(
+                TirageLoto.date_tirage == t["date_tirage"]
+            ).first()
+            if existant:
+                continue
+
+            tirage = TirageLoto(
+                date_tirage=t["date_tirage"],
+                numero_1=t["numeros"][0],
+                numero_2=t["numeros"][1],
+                numero_3=t["numeros"][2],
+                numero_4=t["numeros"][3],
+                numero_5=t["numeros"][4],
+                numero_chance=t["numero_chance"],
+                jackpot_euros=t["jackpot"],
+                gagnants_rang1=t["gagnants"],
+            )
+            session.add(tirage)
+            nb_inseres += 1
+
+        if nb_inseres > 0:
+            session.commit()
+            logger.info(f"📥 {nb_inseres} tirage(s) Loto inséré(s)")
+
+    return nb_inseres
+
+
+def _scraper_tirages_euromillions() -> int:
+    """Télécharge et insère les tirages Euromillions manquants. Retourne le nombre inséré."""
+    csv_content = _telecharger_csv_fdj(_FDJ_EUROMILLIONS_CSV_URL)
+    reader = csv.DictReader(io.StringIO(csv_content), delimiter=";")
+
+    tirages_a_inserer = []
+    for row in reader:
+        date_tirage = _parser_date_fdj(
+            row.get("date_de_tirage", row.get("date", row.get("Date", "")))
+        )
+        if not date_tirage:
+            continue
+
+        try:
+            # Numéros principaux (5)
+            numeros = []
+            for col_prefix in ("boule_", "Boule ", "numero_"):
+                for i in range(1, 6):
+                    val = row.get(f"{col_prefix}{i}")
+                    if val and val.strip().isdigit():
+                        numeros.append(int(val.strip()))
+                if len(numeros) == 5:
+                    break
+
+            if len(numeros) != 5:
+                continue
+
+            # Étoiles (2)
+            etoiles = []
+            for col_prefix in ("etoile_", "Etoile ", "étoile_"):
+                for i in range(1, 3):
+                    val = row.get(f"{col_prefix}{i}")
+                    if val and val.strip().isdigit():
+                        etoiles.append(int(val.strip()))
+                if len(etoiles) == 2:
+                    break
+
+            if len(etoiles) != 2:
+                continue
+
+            # Jackpot (optionnel)
+            jackpot_str = row.get("rapport_du_rang1", row.get("jackpot", ""))
+            jackpot = None
+            if jackpot_str:
+                try:
+                    jackpot = int(float(str(jackpot_str).replace(",", ".").replace(" ", "").replace("€", "")))
+                except (ValueError, TypeError):
+                    pass
+
+            # Gagnants rang 1 (optionnel)
+            gagnants_str = row.get("nombre_de_gagnant_au_rang1", row.get("gagnants_rang1", ""))
+            gagnants = None
+            if gagnants_str:
+                try:
+                    gagnants = int(str(gagnants_str).strip())
+                except (ValueError, TypeError):
+                    pass
+
+            # My Million (optionnel)
+            my_million = row.get("code_my_million", row.get("My Million", None))
+
+            tirages_a_inserer.append({
+                "date_tirage": date_tirage,
+                "numeros": sorted(numeros),
+                "etoiles": sorted(etoiles),
+                "jackpot": jackpot,
+                "gagnants": gagnants,
+                "my_million": str(my_million).strip() if my_million else None,
+            })
+        except (ValueError, KeyError, TypeError) as e:
+            logger.debug(f"Ligne Euromillions ignorée : {e}")
+            continue
+
+    # Insérer les tirages manquants en base
+    nb_inseres = 0
+    with obtenir_contexte_db() as session:
+        for t in tirages_a_inserer:
+            existant = session.query(TirageEuromillions).filter(
+                TirageEuromillions.date_tirage == t["date_tirage"]
+            ).first()
+            if existant:
+                continue
+
+            tirage = TirageEuromillions(
+                date_tirage=t["date_tirage"],
+                numero_1=t["numeros"][0],
+                numero_2=t["numeros"][1],
+                numero_3=t["numeros"][2],
+                numero_4=t["numeros"][3],
+                numero_5=t["numeros"][4],
+                etoile_1=t["etoiles"][0],
+                etoile_2=t["etoiles"][1],
+                jackpot_euros=t["jackpot"],
+                gagnants_rang1=t["gagnants"],
+                code_my_million=t["my_million"],
+            )
+            session.add(tirage)
+            nb_inseres += 1
+
+        if nb_inseres > 0:
+            session.commit()
+            logger.info(f"📥 {nb_inseres} tirage(s) Euromillions inséré(s)")
+
+    return nb_inseres
 
 
 # ═══════════════════════════════════════════════════════════

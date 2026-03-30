@@ -60,7 +60,10 @@ def analyser_peremptions_matin():
                     f"{', '.join(a.nom for a in bientot[:5])}"
                 )
 
-            # TODO: Envoyer notification push/WhatsApp si configuré
+            # Envoyer notifications push/WhatsApp
+            if expires or bientot:
+                _notifier_peremptions(expires, bientot)
+
             logger.info(f"✅ Analyse péremptions terminée : {len(expires)} expirés, {len(bientot)} à risque")
 
     except Exception as e:
@@ -102,7 +105,7 @@ def suggerer_planning_semaine():
                     f"⚠️ Aucun planning actif pour la semaine du {lundi_prochain}. "
                     "Notification à envoyer."
                 )
-                # TODO: Déclencher notification push / WhatsApp pour rappeler
+                _notifier_planning_manquant(lundi_prochain)
 
     except Exception as e:
         logger.error(f"❌ Erreur vérification planning : {e}", exc_info=True)
@@ -130,12 +133,138 @@ def verifier_stocks_bas():
             if stocks_bas:
                 noms = ", ".join(a.nom for a in stocks_bas[:10])
                 logger.warning(f"⚠️ {len(stocks_bas)} article(s) en stock bas : {noms}")
-                # TODO: Suggérer d'ajouter à la liste de courses automatiquement
+                _ajouter_stocks_bas_aux_courses(stocks_bas)
             else:
                 logger.info("✅ Tous les stocks sont au-dessus du seuil minimum")
 
     except Exception as e:
         logger.error(f"❌ Erreur vérification stocks : {e}", exc_info=True)
+
+
+# ═══════════════════════════════════════════════════════════
+# HELPERS NOTIFICATIONS & AUTO-AJOUT COURSES
+# ═══════════════════════════════════════════════════════════
+
+
+def _notifier_peremptions(expires: list, bientot: list) -> None:
+    """Envoie une notification push pour les articles expirés et expirant bientôt."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        dispatcher = get_dispatcher_notifications()
+        parties = []
+        if expires:
+            noms_expires = ", ".join(a.nom for a in expires[:5])
+            parties.append(f"❌ {len(expires)} expiré(s) : {noms_expires}")
+        if bientot:
+            noms_bientot = ", ".join(a.nom for a in bientot[:5])
+            parties.append(f"⚠️ {len(bientot)} expire(nt) sous 3j : {noms_bientot}")
+
+        message = "🍽️ Alerte péremption\n" + "\n".join(parties)
+
+        for user_id in _obtenir_user_ids():
+            dispatcher.envoyer_evenement(
+                user_id=user_id,
+                type_evenement="peremption_j2",
+                message=message,
+                titre="Alerte péremption inventaire",
+            )
+        logger.info("📤 Notification péremption envoyée")
+    except Exception as e:
+        logger.error(f"❌ Erreur envoi notification péremption : {e}", exc_info=True)
+
+
+def _notifier_planning_manquant(lundi_prochain: date) -> None:
+    """Envoie un rappel push/WhatsApp pour planifier les repas de la semaine."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        dispatcher = get_dispatcher_notifications()
+        message = (
+            f"📅 Aucun planning repas pour la semaine du {lundi_prochain.strftime('%d/%m')}. "
+            "Pensez à planifier vos repas !"
+        )
+
+        for user_id in _obtenir_user_ids():
+            dispatcher.envoyer_evenement(
+                user_id=user_id,
+                type_evenement="rappel_courses",
+                message=message,
+                titre="Rappel planning repas",
+            )
+        logger.info("📤 Notification planning manquant envoyée")
+    except Exception as e:
+        logger.error(f"❌ Erreur envoi notification planning : {e}", exc_info=True)
+
+
+def _ajouter_stocks_bas_aux_courses(stocks_bas: list) -> None:
+    """Ajoute automatiquement les articles en stock bas à la liste de courses active."""
+    try:
+        from src.services.cuisine.courses.service import obtenir_service_courses
+
+        service = obtenir_service_courses()
+        nb_ajoutes = 0
+
+        for article in stocks_bas:
+            nom = article.nom
+            if not nom:
+                continue
+            ingredient_id = service.obtenir_ou_creer_ingredient(
+                nom=nom,
+                unite=article.unite or "pièce",
+            )
+            if ingredient_id:
+                quantite = max(article.quantite_min - article.quantite, 1)
+                service.create({
+                    "ingredient_id": ingredient_id,
+                    "quantite_necessaire": quantite,
+                    "priorite": "haute",
+                    "rayon_magasin": article.categorie or "Autre",
+                    "notes": f"Ajout auto — stock bas ({article.quantite}/{article.quantite_min})",
+                    "suggere_par_ia": False,
+                })
+                nb_ajoutes += 1
+
+        if nb_ajoutes > 0:
+            logger.info(f"🛒 {nb_ajoutes} article(s) ajouté(s) automatiquement aux courses")
+
+            # Notifier l'utilisateur
+            from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+            dispatcher = get_dispatcher_notifications()
+            noms = ", ".join(a.nom for a in stocks_bas[:5] if a.nom)
+            message = (
+                f"🛒 {nb_ajoutes} article(s) en stock bas ajouté(s) aux courses : {noms}"
+            )
+            for user_id in _obtenir_user_ids():
+                dispatcher.envoyer_evenement(
+                    user_id=user_id,
+                    type_evenement="rappel_courses",
+                    message=message,
+                    titre="Stock bas → courses",
+                )
+
+    except Exception as e:
+        logger.error(f"❌ Erreur ajout auto courses : {e}", exc_info=True)
+
+
+def _obtenir_user_ids() -> list[str]:
+    """Récupère les identifiants des utilisateurs actifs (réutilise le helper global)."""
+    import os
+
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ProfilUtilisateur
+
+        with obtenir_contexte_db() as session:
+            profils = session.query(ProfilUtilisateur.username).all()
+            if profils:
+                return [p.username for p in profils if p.username]
+    except Exception:
+        pass
+
+    fallback = os.getenv("CRON_DEFAULT_USER_IDS", "matanne")
+    return [uid.strip() for uid in fallback.split(",") if uid.strip()]
 
 
 # ═══════════════════════════════════════════════════════════

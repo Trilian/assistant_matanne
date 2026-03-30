@@ -65,6 +65,12 @@ import {
 import { FavorisRapides } from "./favoris-rapides";
 import type { RappelFamille } from "@/types/famille";
 
+interface CategorieNav {
+  label: string;
+  debut: number;
+  fin: number;
+}
+
 interface SousLien {
   nom: string;
   chemin: string;
@@ -76,6 +82,7 @@ interface LienNav {
   chemin: string;
   Icone: React.ElementType;
   sousLiens?: SousLien[];
+  categories?: CategorieNav[];
 }
 
 const LIENS: LienNav[] = [
@@ -98,18 +105,29 @@ const LIENS: LienNav[] = [
     chemin: "/famille",
     Icone: Users,
     sousLiens: [
+      // 👶 Enfant
       { nom: "Jules", chemin: "/famille/jules", Icone: Baby },
       { nom: "Activités", chemin: "/famille/activites", Icone: ClipboardList },
       { nom: "Routines", chemin: "/famille/routines", Icone: RotateCw },
+      // 💰 Budget & Achats
       { nom: "Budget", chemin: "/famille/budget", Icone: Wallet },
       { nom: "Achats", chemin: "/famille/achats", Icone: ShoppingBag },
+      // 📅 Événements
       { nom: "Anniversaires", chemin: "/famille/anniversaires", Icone: Cake },
+      { nom: "Voyages", chemin: "/famille/voyages", Icone: Plane },
+      // 📋 Organisation
       { nom: "Contacts", chemin: "/famille/contacts", Icone: Contact },
       { nom: "Documents", chemin: "/famille/documents", Icone: FileText },
-      { nom: "Voyages", chemin: "/famille/voyages", Icone: Plane },
       { nom: "Garmin", chemin: "/famille/garmin", Icone: Activity },
       { nom: "Gamification", chemin: "/famille/gamification", Icone: Trophy },
       { nom: "Config", chemin: "/famille/config", Icone: Settings },
+    ],
+    // Catégories pour regroupement visuel des sous-liens
+    categories: [
+      { label: "Enfant", debut: 0, fin: 3 },
+      { label: "Budget & Achats", debut: 3, fin: 5 },
+      { label: "Événements", debut: 5, fin: 7 },
+      { label: "Organisation", debut: 7, fin: 12 },
     ],
   },
   {
@@ -117,17 +135,25 @@ const LIENS: LienNav[] = [
     chemin: "/maison",
     Icone: House,
     sousLiens: [
+      // 🏠 Habitat
       { nom: "Visualisation", chemin: "/maison/visualisation", Icone: Layers },
       { nom: "Ménage", chemin: "/maison/menage", Icone: SprayCan },
       { nom: "Jardin", chemin: "/maison/jardin", Icone: Sprout },
+      // 🔧 Travaux & Équipements
       { nom: "Travaux", chemin: "/maison/travaux", Icone: Hammer },
       { nom: "Équipements", chemin: "/maison/equipements", Icone: Boxes },
-      { nom: "Finances", chemin: "/maison/finances", Icone: Banknote },
       { nom: "Artisans", chemin: "/maison/artisans", Icone: Wrench },
-      { nom: "Contrats", chemin: "/maison/contrats", Icone: FileText },
       { nom: "Diagnostics", chemin: "/maison/diagnostics", Icone: ClipboardCheck },
+      // 💼 Admin & Finances
+      { nom: "Finances", chemin: "/maison/finances", Icone: Banknote },
+      { nom: "Contrats", chemin: "/maison/contrats", Icone: FileText },
       { nom: "Provisions", chemin: "/maison/provisions", Icone: Package },
       { nom: "Documents", chemin: "/maison/documents", Icone: FileText },
+    ],
+    categories: [
+      { label: "Habitat", debut: 0, fin: 3 },
+      { label: "Travaux & Équipements", debut: 3, fin: 7 },
+      { label: "Admin & Finances", debut: 7, fin: 11 },
     ],
   },
   {

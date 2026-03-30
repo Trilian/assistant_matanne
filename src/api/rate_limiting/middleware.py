@@ -34,6 +34,15 @@ class MiddlewareLimitationDebit(BaseHTTPMiddleware):
         if os.environ.get("RATE_LIMITING_DISABLED", "").lower() == "true":
             return await call_next(request)
 
+        # Bypass si mode test admin activé
+        try:
+            from src.api.routes.admin import est_mode_test_actif
+
+            if est_mode_test_actif():
+                return await call_next(request)
+        except Exception:
+            pass
+
         id_utilisateur = None
         auth_header = request.headers.get("Authorization", "")
 

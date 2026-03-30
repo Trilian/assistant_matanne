@@ -406,6 +406,7 @@ _FEATURE_FLAGS_PAR_DEFAUT: dict[str, bool] = {
     "admin.service_actions_enabled": True,
     "admin.resync_enabled": True,
     "admin.seed_dev_enabled": True,
+    "admin.mode_test": False,
     "jeux.bankroll_page_enabled": True,
     "outils.notes_tags_ui_enabled": True,
 }
@@ -473,6 +474,15 @@ def _ecrire_namespace_persistant(
         row.data = {**current_data, **values}
         session.commit()
         return dict(row.data)
+
+
+def est_mode_test_actif() -> bool:
+    """Vérifie si le Mode Test admin est activé (best-effort, False par défaut)."""
+    try:
+        flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
+        return bool(flags.get("admin.mode_test", False))
+    except Exception:
+        return False
 
 
 def _catalogue_actions_services() -> list[dict[str, Any]]:
@@ -1257,6 +1267,42 @@ async def mettre_a_jour_feature_flags(
         details={"updates": body.flags},
     )
     return {"status": "ok", "flags": flags, "total": len(flags)}
+
+
+@router.get(
+    "/mode-test",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="État du mode test",
+    description="Retourne si le mode test admin est actif. "
+    "Quand actif : logs verbose, rate-limiting désactivé, IDs internes visibles.",
+)
+@gerer_exception_api
+async def lire_mode_test(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    return {"mode_test": est_mode_test_actif()}
+
+
+@router.put(
+    "/mode-test",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Activer / désactiver le mode test",
+    description="Bascule le mode test admin.",
+)
+@gerer_exception_api
+async def basculer_mode_test(
+    body: dict[str, bool],
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    actif = bool(body.get("enabled", False))
+    _ecrire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, {"admin.mode_test": actif})
+    _journaliser_action_admin(
+        action="admin.mode_test.toggle",
+        entite_type="feature_flag",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"mode_test": actif},
+    )
+    return {"status": "ok", "mode_test": actif}
 
 
 @router.get(
