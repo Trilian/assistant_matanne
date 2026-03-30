@@ -74,6 +74,18 @@ jobs:
           MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
         run: |
           pytest --cov=src --cov-report=xml --cov-report=term -v
+
+      - name: Install Schemathesis (contract tests)
+        run: |
+          pip install schemathesis
+
+      - name: Run OpenAPI contract tests
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/assistant_matanne_test
+          ENVIRONMENT: test
+          JWT_SECRET: test_secret_key_for_ci
+        run: |
+          pytest tests/contracts -m contract -v
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

@@ -153,6 +153,12 @@ cd frontend && npm test
 
 # Frontend — E2E Playwright
 cd frontend && npx playwright test
+
+# Backend — contract tests OpenAPI (Schemathesis)
+pytest tests/contracts -m contract -v
+
+# Frontend — visual regression snapshots
+cd frontend && npm run test:visual
 ```
 
 ---

@@ -1,7 +1,6 @@
 import { clientApi } from "./client";
 import type {
   AlerteHabitat,
-  AnalysePlanHabitat,
   AnnonceHabitat,
   CritereImmoHabitat,
   CritereScenarioHabitat,

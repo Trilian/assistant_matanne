@@ -133,6 +133,23 @@ cd frontend
 npx playwright test
 ```
 
+Contract tests (OpenAPI):
+
+```bash
+pytest tests/contracts -m contract -v
+```
+
+Visual regression:
+
+```bash
+cd frontend
+npm run test:visual
+```
+
+Guide detaille:
+
+- `docs/TESTING_ADVANCED.md`
+
 ---
 
 ## 6. Staging local avec Docker

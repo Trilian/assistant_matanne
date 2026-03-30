@@ -15,6 +15,9 @@ def client():
     ("method", "path", "payload"),
     [
         ("GET", "/api/v1/habitat/hub", None),
+        ("POST", "/api/v1/habitat/veille/synchroniser", {}),
+        ("GET", "/api/v1/habitat/veille/alertes", None),
+        ("GET", "/api/v1/habitat/veille/carte", None),
         ("GET", "/api/v1/habitat/scenarios", None),
         ("POST", "/api/v1/habitat/scenarios", {"nom": "Test scenario"}),
         ("GET", "/api/v1/habitat/scenarios/comparaison", None),
@@ -28,9 +31,16 @@ def client():
         ),
         ("GET", "/api/v1/habitat/plans", None),
         ("POST", "/api/v1/habitat/plans", {"nom": "Plan RDC", "type_plan": "interieur"}),
+        ("POST", "/api/v1/habitat/plans/1/analyser", {}),
+        ("GET", "/api/v1/habitat/plans/1/historique-ia", None),
         ("GET", "/api/v1/habitat/deco/projets", None),
         ("POST", "/api/v1/habitat/deco/projets", {"nom_piece": "Salon"}),
+        ("POST", "/api/v1/habitat/deco/projets/1/suggestions", {}),
+        ("POST", "/api/v1/habitat/deco/projets/1/depenses", {"montant": 50}),
+        ("POST", "/api/v1/habitat/deco/images", {"prompt": "salon chaleureux, bois clair, rangement integre"}),
         ("GET", "/api/v1/habitat/jardin/zones", None),
+        ("GET", "/api/v1/habitat/jardin/resume", None),
+        ("PATCH", "/api/v1/habitat/jardin/zones/1", {}),
     ],
 )
 def test_routes_habitat_existent(client: TestClient, method: str, path: str, payload: dict | None):

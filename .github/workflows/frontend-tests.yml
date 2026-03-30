@@ -49,9 +49,23 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Run visual regression snapshots
+        run: npm run test:visual
+        continue-on-error: true  # Baselines visuels peuvent évoluer, on collecte les artefacts
+
       - name: Run E2E tests (Playwright)
         run: npx playwright test --project=chromium
         continue-on-error: true  # E2E tests peuvent échouer sans bloquer
+
+      - name: Upload visual snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-snapshots
+          path: |
+            frontend/e2e/**/*.png
+            frontend/test-results/
+          retention-days: 7
       
       - name: Upload test results
         if: always()

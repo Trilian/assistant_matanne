@@ -50,7 +50,16 @@ async function configurerContexteInterModules(page: import("@playwright/test").P
     {
       name: "access_token",
       value: "e2e-dev-token",
-      url: "http://localhost:3000",
+      domain: "localhost",
+      path: "/",
+      httpOnly: false,
+      sameSite: "Lax",
+    },
+    {
+      name: "access_token",
+      value: "e2e-dev-token",
+      domain: "127.0.0.1",
+      path: "/",
       httpOnly: false,
       sameSite: "Lax",
     },
@@ -61,7 +70,7 @@ async function configurerContexteInterModules(page: import("@playwright/test").P
     window.localStorage.setItem("matanne-onboarding-complete", "true");
   });
 
-  await page.route("**/api/v1/auth/me", async (route) => {
+  await page.route("**/api/v1/auth/me*", async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -71,6 +80,14 @@ async function configurerContexteInterModules(page: import("@playwright/test").P
         nom: "E2E Local",
         role: "membre",
       }),
+    });
+  });
+
+  await page.route("**/api/v1/auth/refresh*", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ access_token: "e2e-dev-token", token_type: "bearer" }),
     });
   });
 
@@ -238,32 +255,21 @@ test.describe("Inter-modules cuisine", () => {
     await configurerContexteInterModules(page);
 
     await page.goto("/cuisine/planning");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
     await expect(page.getByRole("heading", { name: /planning repas/i })).toBeVisible();
 
     await page.goto("/cuisine/courses");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
-
-    const hasCoursesContext =
-      (await page.locator('input[placeholder*="Nouvelle liste"]').isVisible().catch(() => false)) ||
-      (await page.locator("text=Courses").first().isVisible().catch(() => false));
-    expect(hasCoursesContext).toBeTruthy();
+    await expect(page.getByRole("heading", { name: /courses/i })).toBeVisible({ timeout: 30000 });
+    await expect(page.locator('input[placeholder*="Nouvelle liste"]')).toBeVisible({ timeout: 30000 });
 
     await page.goto("/cuisine/inventaire");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
-
-    const hasInventaireContext =
-      (await page.locator("text=Inventaire").first().isVisible().catch(() => false)) ||
-      (await page.locator('input[placeholder*="Rechercher"]').isVisible().catch(() => false)) ||
-      (await page.locator('input[placeholder*="rechercher"]').isVisible().catch(() => false));
-    expect(hasInventaireContext).toBeTruthy();
+    await expect(page.getByRole("heading", { name: /inventaire/i })).toBeVisible({ timeout: 30000 });
   });
 
   test("création de liste courses puis consultation inventaire", async ({ page }) => {
     await configurerContexteInterModules(page);
 
     await page.goto("/cuisine/courses");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: /courses/i })).toBeVisible({ timeout: 30000 });
 
     const inputNom = page.locator('input[placeholder*="Nouvelle liste"]');
     const nomListe = `Flow-${Date.now()}`;
@@ -287,12 +293,6 @@ test.describe("Inter-modules cuisine", () => {
     await expect(page.getByRole("button", { name: new RegExp(nomListe, "i") }).first()).toBeVisible();
 
     await page.goto("/cuisine/inventaire");
-    await expect(page.locator("body")).toBeVisible({ timeout: 15000 });
-
-    const hasInventaireContext =
-      (await page.locator("text=Inventaire").first().isVisible().catch(() => false)) ||
-      (await page.locator('input[placeholder*="Rechercher"]').isVisible().catch(() => false)) ||
-      (await page.locator('input[placeholder*="rechercher"]').isVisible().catch(() => false));
-    expect(hasInventaireContext).toBeTruthy();
+    await expect(page.getByRole("heading", { name: /inventaire/i })).toBeVisible({ timeout: 30000 });
   });
 });

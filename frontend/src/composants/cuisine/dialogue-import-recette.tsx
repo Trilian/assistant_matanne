@@ -23,6 +23,14 @@ import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 
+interface ErreurApiAvecDetail {
+  response?: {
+    data?: {
+      detail?: string;
+    };
+  };
+}
+
 interface DialogueImportRecetteProps {
   onSuccess?: () => void;
 }
@@ -49,7 +57,7 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
       setUrl("");
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: ErreurApiAvecDetail) => {
       toast.error(
         error.response?.data?.detail ||
           "Impossible d'importer la recette. Vérifiez l'URL."
@@ -67,7 +75,7 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
       setFichierPDF(null);
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: ErreurApiAvecDetail) => {
       toast.error(
         error.response?.data?.detail ||
           "Impossible d'extraire la recette du PDF."
@@ -125,7 +133,7 @@ export function DialogueImportRecette({ onSuccess }: DialogueImportRecetteProps)
           <DialogTitle>Importer une recette</DialogTitle>
           <DialogDescription>
             Importez une recette depuis une URL ou un fichier PDF.
-            L'IA analysera le contenu automatiquement.
+            L&apos;IA analysera le contenu automatiquement.
           </DialogDescription>
         </DialogHeader>
 

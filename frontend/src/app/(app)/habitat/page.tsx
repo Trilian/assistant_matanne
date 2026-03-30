@@ -97,7 +97,7 @@ export default function HabitatPage() {
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>1. Veille Immo pour capter les opportunites et la carte.</p>
-              <p>2. Plans pour lancer l'analyse IA et l'historique de variantes.</p>
+              <p>2. Plans pour lancer l&apos;analyse IA et l&apos;historique de variantes.</p>
               <p>3. Deco/Jardin pour convertir en decisions budgetees.</p>
             </CardContent>
           </Card>

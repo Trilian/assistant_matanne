@@ -1107,7 +1107,7 @@ Notes d'implémentation Phase 8 (2026-03-29):
 
 > **Objectif** : Différenciation, expérience utilisateur supérieure.
 
-**Statut (mise à jour 2026-03-30)** : `EN COURS` — **8/11** actions réalisées, **3/11** partielles.
+**Statut (mise à jour 2026-03-30)** : `TERMINEE` — **11/11** actions réalisées.
 
 | # | Action | Réf. | Effort | Priorité | Statut (2026-03-29) |
 |---|--------|------|--------|----------|----------------------|
@@ -1115,13 +1115,13 @@ Notes d'implémentation Phase 8 (2026-03-29):
 | 10.2 | Planificateur IA semaine complète | INNO-6 | 8h | 🟡 | ✅ Fait (endpoint génération planning IA hebdo en place) |
 | 10.3 | Commandes vocales enrichies | INNO-3 | 4h | 🟡 | ✅ Fait (hook reconnaissance + page assistant vocal + FAB) |
 | 10.4 | Drag & drop planning | UX-3 | 4h | 🟡 | ✅ Fait (déplacement de repas par glisser-déposer sur la grille hebdo) |
-| 10.5 | Mode invités | INNO-7 | 4h | 🟢 | 🟡 Partiel (prise en compte `nb_invites` côté prédiction courses, UI dédiée à finaliser) |
-| 10.6 | Suivi écologique | INNO-13 | 6h | 🟢 | 🟡 Partiel (CRUD actions écologiques disponible, agrégation score multi-modules à compléter) |
+| 10.5 | Mode invités | INNO-7 | 4h | 🟢 | ✅ Fait (UI dédiée planning + courses, contexte partagé, quantités/suggestions adaptées) |
+| 10.6 | Suivi écologique | INNO-13 | 6h | 🟢 | ✅ Fait (score écologique agrégé multi-modules exposé API + widget dashboard) |
 | 10.7 | Calendrier scolaire auto | INNO-14 | 3h | 🟢 | ✅ Fait (activation zone A/B/C + import auto + sync cron + ajustement planning vacances) |
 | 10.8 | Widgets configurables | G-DASH-3 | 4h | 🟢 | ✅ Fait (grille widgets réordonnable persistée en localStorage) |
 | 10.9 | Export complet DB | ADM-10 | 2h | 🟢 | ✅ Fait (export RGPD JSON + exports PDF/ICS opérationnels) |
 | 10.10 | Minuteur ↔ recettes | G-OUT-3 | 2h | 🟢 | ✅ Fait (lancement minuteur depuis un repas planning avec durée préremplie) |
-| 10.11 | Mutation testing, contract testing, visual regression | — | 8h | 🟢 | 🟡 Partiel (socle outillage ajouté: dépendances + test contrat OpenAPI + spec visuelle Playwright + scripts npm) |
+| 10.11 | Mutation testing, contract testing, visual regression | — | 8h | 🟢 | ✅ Fait (doc d'exécution + CI contract + CI visual snapshots + artefacts) |
 
 ---
 
@@ -1662,18 +1662,27 @@ class ServiceGenerationImages:
 | **H11** | Intégrations inter-modules (projets, jardin, finances, dashboard, notifications) | 4h | 🟢 |
 | **H12** | Historique DVF (data.gouv.fr) + graphiques évolution prix secteur | 4h | 🟢 |
 
-### 19.12.1 Statut d'implémentation Habitat au 29 mars 2026
+### 19.12.1 Statut d'implémentation Habitat au 30 mars 2026
 
-**Livré dans ce sprint** : socle technique H1 + base UI H2.
+**Livré dans ce sprint** : socle H1-H2 finalisé, puis extension fonctionnelle large sur H3-H11.
 
 | Lot | Statut | Réalisations |
 |-----|--------|--------------|
 | **H1 Backend** | ✅ Réalisé | Ajout des modèles ORM `habitat_projet.py`, schémas Pydantic `src/api/schemas/habitat.py`, routeur REST `src/api/routes/habitat.py`, migration SQL `sql/migrations/V007__module_habitat.sql`, branchement dans `src/api/main.py` et `src/api/routes/__init__.py` |
-| **H2 Frontend socle** | ✅ Réalisé | Création du hub `frontend/src/app/(app)/habitat/page.tsx`, page `scenarios/page.tsx`, et squelettes fonctionnels `veille-immo`, `plans`, `deco`, `jardin` |
+| **H2 Frontend socle** | ✅ Réalisé | Création du hub `frontend/src/app/(app)/habitat/page.tsx`, page `scenarios/page.tsx`, et base des pages `veille-immo`, `plans`, `deco`, `jardin` |
+| **H3 Veille scrapers** | 🟡 Partiel avancé | Service `src/services/habitat/veille_service.py` avec scraping HTTP réel, parsing JSON-LD/HTML générique, déduplication, scoring, synchronisation DB et job cron `sync_veille_habitat` |
+| **H4 Veille frontend** | 🟡 Partiel avancé | Refonte de `frontend/src/app/(app)/habitat/veille-immo/page.tsx` avec sync manuelle, alertes, vue carte simplifiée par ville et liste consolidée des annonces |
+| **H5 Génération image** | ✅ Réalisé | Service central `src/services/integrations/image_generation.py` branché aux usages Habitat via l'API `/api/v1/habitat/deco/images` |
+| **H6 Plans IA** | ✅ Réalisé | Service `src/services/habitat/plans_ai_service.py`, endpoints d'analyse/historique, stockage des suggestions IA et page `plans/page.tsx` avec déclenchement d'analyse + image |
+| **H7 Déco avancée** | 🟡 Partiel avancé | Service `src/services/habitat/deco_service.py` pour concepts déco, palettes, achats prioritaires, génération visuelle et enrichissement des projets déco |
+| **H8 Paysagisme** | 🟡 Partiel avancé | Canvas paysager léger sur `jardin/page.tsx`, édition persistée des coordonnées de zones et résumé budgétaire/surfacique ; import satellite/Konva/catalogue plantes restent à faire |
+| **H9 Sync budget** | ✅ Réalisé | Synchronisation des dépenses déco Habitat vers `DepenseMaison` avec émission d'événement domaine et mise à jour des budgets déco |
+| **H10 IA avancée** | 🟡 Partiel avancé | Analyse d'annonces, estimation budgétaire et prompts d'images intégrés aux services veille/plans/déco, mais sans moteur régional travaux complet ni architecte virtuel dédié |
+| **H11 Intégrations** | ✅ Réalisé | Intégration dashboard, notifications, cron et event bus pour Habitat |
+| **H12 DVF / historique prix** | ⬜ À faire | Aucun connecteur DVF/data.gouv ni graphiques d'évolution secteur implémentés à ce stade |
 | **Navigation** | ✅ Réalisé | Habitat ajouté à la barre latérale, à la nav mobile et à `pages-navigation.ts` |
 | **Client API / types** | ✅ Réalisé | Ajout de `frontend/src/bibliotheque/api/habitat.ts` et `frontend/src/types/habitat.ts` |
-| **Tests ciblés** | ✅ Réalisé | Ajout de tests backend service/API et d'un test frontend hub |
-| **H3 à H12** | ⬜ À faire | Scrapers réels, génération d'images HF, pipeline IA plans, budgets synchronisés, intégrations inter-modules |
+| **Tests ciblés** | ✅ Réalisé | Tests backend étendus sur les routes Habitat + service scénarios, validation lint frontend Habitat |
 
 **Décision d'implémentation prise** : le module Habitat est bien livré comme **module séparé** de Maison, avec son propre préfixe API `/api/v1/habitat` et ses propres pages frontend sous `frontend/src/app/(app)/habitat/`.
 
@@ -1681,8 +1690,18 @@ class ServiceGenerationImages:
 
 - CRUD de base pour scénarios, critères de scénarios, critères immo, annonces, plans, pièces, projets déco et zones jardin
 - Calcul de score pondéré pour les scénarios
-- Hub frontend et lecture des données principales
-- Socle prêt pour les phases H3-H12 sans dépendre du module Maison existant
+- Veille immobilière synchronisable avec scoring, alertes et job cron dédié
+- Pipeline IA plans avec historique et génération d'images optionnelle
+- Concepts déco générés par IA + synchronisation budget vers Maison
+- Canvas paysager léger modifiable depuis le frontend
+- Widget dashboard Habitat et intégrations notifications/events/cron
+
+**Reste ouvert pour terminer la roadmap Habitat** :
+
+- Connecteurs robustes et spécifiques par source immobilière (LBC / PAP / SeLoger / Bien'ici) au-delà du scraping générique actuel
+- Carte Leaflet réelle, import satellite et canvas Konva complet
+- Historique DVF / data.gouv et graphiques d'évolution des prix secteur
+- Approfondissement IA avancée: architecte virtuel dédié, chiffrage régional travaux plus fiable, moodboard plus riche
 
 ### 19.13 Dépendances npm/pip à ajouter
 

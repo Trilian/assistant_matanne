@@ -30,6 +30,19 @@ vi.mock("@/bibliotheque/api/courses", () => ({
   ajouterArticle: vi.fn(),
   cocherArticle: vi.fn(),
   supprimerArticle: vi.fn(),
+  validerCourses: vi.fn(),
+  obtenirSuggestionsBioLocal: vi.fn(),
+  obtenirRecurrentsSuggeres: vi.fn(),
+  obtenirPredictionsCourses: vi.fn(),
+  obtenirQrPartageListe: vi.fn(),
+}));
+
+vi.mock("@/bibliotheque/api/famille", () => ({
+  listerEvenementsFamiliaux: vi.fn(),
+}));
+
+vi.mock("@/bibliotheque/api/calendriers", () => ({
+  listerEvenements: vi.fn(),
 }));
 
 function renderWithQuery(ui: React.ReactElement) {

@@ -62,7 +62,7 @@ export function CarteModeInvites({
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <p className="text-sm font-medium mb-1">Nombre d'invites</p>
+            <p className="text-sm font-medium mb-1">Nombre d&apos;invites</p>
             <Input
               type="number"
               min={0}

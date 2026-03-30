@@ -157,7 +157,7 @@ def _calculer_score_ecologique(session: Any) -> dict[str, Any]:
     for type_compteur, _, consommation in releves:
         releves_par_type.setdefault(str(type_compteur), []).append(float(consommation or 0))
 
-    scores_energie = []
+    scores_energie: list[int] = []
     for valeurs in releves_par_type.values():
         if not valeurs:
             continue
@@ -197,7 +197,7 @@ def _calculer_score_ecologique(session: Any) -> dict[str, Any]:
     elif score_global < 80:
         niveau = "bon"
 
-    leviers = []
+    leviers: list[str] = []
     if score_anti_gaspillage < 75:
         leviers.append("Réduire les produits proches de péremption dans l'inventaire.")
     if score_energie < 75:

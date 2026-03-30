@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Any
+from typing import Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -37,29 +37,30 @@ from src.core.models.habitat_projet import (
     AnnonceHabitat,
     CritereImmoHabitat,
     CritereScenarioHabitat,
-    ModificationPlanHabitat,
     PieceHabitat,
     PlanHabitat,
     ProjetDecoHabitat,
     ScenarioHabitat,
     ZoneJardinHabitat,
 )
-from src.services.habitat import (
-    obtenir_service_deco_habitat,
-    obtenir_service_plans_habitat,
-    obtenir_service_scenarios_habitat,
-    obtenir_service_veille_habitat,
-)
+from src.services.habitat.deco_service import obtenir_service_deco_habitat
+from src.services.habitat.plans_ai_service import obtenir_service_plans_habitat
+from src.services.habitat.scenarios_service import obtenir_service_scenarios_habitat
+from src.services.habitat.veille_service import obtenir_service_veille_habitat
 from src.services.integrations.image_generation import obtenir_service_generation_image
 
 router = APIRouter(prefix="/api/v1/habitat", tags=["Habitat"])
+REPONSES_LISTE_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES_LISTE)
+REPONSES_CRUD_LECTURE_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES_CRUD_LECTURE)
+REPONSES_CRUD_CREATION_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES_CRUD_CREATION)
+REPONSES_CRUD_SUPPRESSION_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES_CRUD_SUPPRESSION)
 
 
 def _to_float(value: Decimal | None) -> float | None:
     return float(value) if value is not None else None
 
 
-@router.get("/hub", responses=REPONSES_CRUD_LECTURE)
+@router.get("/hub", responses=REPONSES_CRUD_LECTURE_TYPED)
 @gerer_exception_api
 async def habitat_hub(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     """Résumé consolidé du module Habitat."""
@@ -75,7 +76,7 @@ async def habitat_hub(user: dict[str, Any] = Depends(require_auth)) -> dict[str,
                 "projets_deco": session.query(ProjetDecoHabitat).count(),
                 "zones_jardin": session.query(ZoneJardinHabitat).count(),
                 "alertes": len(alertes),
-                "annonces_a_traiter": session.query(AnnonceHabitat).filter(AnnonceHabitat.statut.in_(["nouveau", "alerte"])) .count(),
+                "annonces_a_traiter": session.query(AnnonceHabitat).filter(AnnonceHabitat.statut.in_(["nouveau", "alerte"])).count(),
                 "budget_deco_total": round(sum(float(item.budget_prevu or 0) for item in depenses_deco), 2),
                 "budget_deco_depense": round(sum(float(item.budget_depense or 0) for item in depenses_deco), 2),
             }
@@ -83,7 +84,7 @@ async def habitat_hub(user: dict[str, Any] = Depends(require_auth)) -> dict[str,
     return await executer_async(_query)
 
 
-@router.post("/veille/synchroniser", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/veille/synchroniser", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def synchroniser_veille(
     payload: SynchronisationVeilleHabitatCreate,
@@ -105,7 +106,7 @@ async def synchroniser_veille(
     return await executer_async(_query)
 
 
-@router.get("/veille/alertes", responses=REPONSES_LISTE)
+@router.get("/veille/alertes", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def lister_alertes_veille(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     """Retourne les meilleures opportunités détectées par la veille."""
@@ -117,7 +118,7 @@ async def lister_alertes_veille(user: dict[str, Any] = Depends(require_auth)) ->
     return await executer_async(_query)
 
 
-@router.get("/veille/carte", responses=REPONSES_LISTE)
+@router.get("/veille/carte", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def carte_veille(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     """Agrège les annonces par ville avec coordonnées pour affichage carte."""
@@ -129,7 +130,7 @@ async def carte_veille(user: dict[str, Any] = Depends(require_auth)) -> dict[str
     return await executer_async(_query)
 
 
-@router.get("/scenarios", responses=REPONSES_LISTE)
+@router.get("/scenarios", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def lister_scenarios(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     """Liste les scénarios Habitat avec leur score global."""
@@ -138,7 +139,7 @@ async def lister_scenarios(user: dict[str, Any] = Depends(require_auth)) -> dict
         with executer_avec_session() as session:
             service = obtenir_service_scenarios_habitat()
             items = session.query(ScenarioHabitat).order_by(ScenarioHabitat.score_global.desc()).all()
-            result = []
+            result: list[dict[str, Any]] = []
             for scenario in items:
                 score = service.calculer_score_global(session, scenario.id)
                 scenario.score_global = score
@@ -163,7 +164,7 @@ async def lister_scenarios(user: dict[str, Any] = Depends(require_auth)) -> dict
     return await executer_async(_query)
 
 
-@router.post("/scenarios", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/scenarios", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def creer_scenario(
     payload: ScenarioHabitatCreate,
@@ -181,7 +182,7 @@ async def creer_scenario(
     return await executer_async(_query)
 
 
-@router.patch("/scenarios/{scenario_id}", responses=REPONSES_CRUD_LECTURE)
+@router.patch("/scenarios/{scenario_id}", responses=REPONSES_CRUD_LECTURE_TYPED)
 @gerer_exception_api
 async def modifier_scenario(
     scenario_id: int,
@@ -208,7 +209,7 @@ async def modifier_scenario(
     return await executer_async(_query)
 
 
-@router.delete("/scenarios/{scenario_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete("/scenarios/{scenario_id}", responses=REPONSES_CRUD_SUPPRESSION_TYPED)
 @gerer_exception_api
 async def supprimer_scenario(
     scenario_id: int,
@@ -227,7 +228,7 @@ async def supprimer_scenario(
     return await executer_async(_query)
 
 
-@router.post("/scenarios/{scenario_id}/criteres", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/scenarios/{scenario_id}/criteres", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def ajouter_critere_scenario(
     scenario_id: int,
@@ -261,7 +262,7 @@ async def ajouter_critere_scenario(
     return await executer_async(_query)
 
 
-@router.get("/scenarios/comparaison", responses=REPONSES_LISTE)
+@router.get("/scenarios/comparaison", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def comparer_scenarios(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     """Retourne les scénarios ordonnés du meilleur score au plus faible."""
@@ -270,7 +271,7 @@ async def comparer_scenarios(user: dict[str, Any] = Depends(require_auth)) -> di
         with executer_avec_session() as session:
             service = obtenir_service_scenarios_habitat()
             scenarios = session.query(ScenarioHabitat).all()
-            resultat = []
+            resultat: list[dict[str, Any]] = []
             for scenario in scenarios:
                 score = service.calculer_score_global(session, scenario.id)
                 scenario.score_global = score
@@ -291,7 +292,7 @@ async def comparer_scenarios(user: dict[str, Any] = Depends(require_auth)) -> di
     return await executer_async(_query)
 
 
-@router.get("/criteres-immo", responses=REPONSES_LISTE)
+@router.get("/criteres-immo", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def lister_criteres_immo(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     """Liste les critères de recherche immobilière."""
@@ -319,7 +320,7 @@ async def lister_criteres_immo(user: dict[str, Any] = Depends(require_auth)) -> 
     return await executer_async(_query)
 
 
-@router.post("/criteres-immo", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/criteres-immo", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def creer_critere_immo(
     payload: CritereImmoCreate,
@@ -337,7 +338,7 @@ async def creer_critere_immo(
     return await executer_async(_query)
 
 
-@router.get("/annonces", responses=REPONSES_LISTE)
+@router.get("/annonces", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def lister_annonces(
     statut: str | None = Query(None),
@@ -374,7 +375,7 @@ async def lister_annonces(
     return await executer_async(_query)
 
 
-@router.post("/annonces", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/annonces", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def creer_annonce(
     payload: AnnonceHabitatCreate,
@@ -392,7 +393,7 @@ async def creer_annonce(
     return await executer_async(_query)
 
 
-@router.patch("/annonces/{annonce_id}/statut", responses=REPONSES_CRUD_LECTURE)
+@router.patch("/annonces/{annonce_id}/statut", responses=REPONSES_CRUD_LECTURE_TYPED)
 @gerer_exception_api
 async def changer_statut_annonce(
     annonce_id: int,
@@ -413,7 +414,7 @@ async def changer_statut_annonce(
     return await executer_async(_query)
 
 
-@router.get("/plans", responses=REPONSES_LISTE)
+@router.get("/plans", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def lister_plans(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     """Liste les plans Habitat."""
@@ -432,7 +433,7 @@ async def lister_plans(user: dict[str, Any] = Depends(require_auth)) -> dict[str
                         "surface_totale_m2": _to_float(p.surface_totale_m2),
                         "budget_estime": _to_float(p.budget_estime),
                         "version": p.version,
-                        "suggestions_ia": (p.donnees_pieces or {}).get("suggestions_ia", []),
+                        "suggestions_ia": cast(dict[str, Any], p.donnees_pieces or {}).get("suggestions_ia", []),
                     }
                     for p in items
                 ]
@@ -441,7 +442,7 @@ async def lister_plans(user: dict[str, Any] = Depends(require_auth)) -> dict[str
     return await executer_async(_query)
 
 
-@router.post("/plans/{plan_id}/analyser", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/plans/{plan_id}/analyser", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def analyser_plan_habitat(
     plan_id: int,
@@ -462,7 +463,7 @@ async def analyser_plan_habitat(
     return await executer_async(_query)
 
 
-@router.get("/plans/{plan_id}/historique-ia", responses=REPONSES_LISTE)
+@router.get("/plans/{plan_id}/historique-ia", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def historique_plan_habitat(
     plan_id: int,
@@ -477,7 +478,7 @@ async def historique_plan_habitat(
     return await executer_async(_query)
 
 
-@router.post("/plans", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/plans", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def creer_plan(
     payload: PlanHabitatCreate,
@@ -495,7 +496,7 @@ async def creer_plan(
     return await executer_async(_query)
 
 
-@router.get("/plans/{plan_id}/pieces", responses=REPONSES_LISTE)
+@router.get("/plans/{plan_id}/pieces", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def lister_pieces(plan_id: int, user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     """Liste les pièces associées à un plan."""
@@ -519,7 +520,7 @@ async def lister_pieces(plan_id: int, user: dict[str, Any] = Depends(require_aut
     return await executer_async(_query)
 
 
-@router.post("/plans/{plan_id}/pieces", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/plans/{plan_id}/pieces", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def creer_piece(
     plan_id: int,
@@ -541,7 +542,7 @@ async def creer_piece(
     return await executer_async(_query)
 
 
-@router.get("/deco/projets", responses=REPONSES_LISTE)
+@router.get("/deco/projets", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def lister_projets_deco(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
     """Liste les projets déco Habitat."""
@@ -556,8 +557,8 @@ async def lister_projets_deco(user: dict[str, Any] = Depends(require_auth)) -> d
                         "piece_id": p.piece_id,
                         "nom_piece": p.nom_piece,
                         "style": p.style,
-                        "palette_couleurs": p.palette_couleurs or [],
-                        "inspirations": p.inspirations or [],
+                        "palette_couleurs": cast(list[Any], p.palette_couleurs or []),
+                        "inspirations": cast(list[Any], p.inspirations or []),
                         "budget_prevu": _to_float(p.budget_prevu),
                         "budget_depense": _to_float(p.budget_depense),
                         "statut": p.statut,
@@ -569,7 +570,7 @@ async def lister_projets_deco(user: dict[str, Any] = Depends(require_auth)) -> d
     return await executer_async(_query)
 
 
-@router.post("/deco/projets/{projet_id}/suggestions", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/deco/projets/{projet_id}/suggestions", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def suggerer_projet_deco(
     projet_id: int,
@@ -590,7 +591,7 @@ async def suggerer_projet_deco(
     return await executer_async(_query)
 
 
-@router.post("/deco/projets/{projet_id}/depenses", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/deco/projets/{projet_id}/depenses", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def synchroniser_depense_deco(
     projet_id: int,
@@ -613,7 +614,7 @@ async def synchroniser_depense_deco(
     return await executer_async(_query)
 
 
-@router.post("/deco/images", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/deco/images", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def generer_image_deco(
     payload: GenerationImageHabitatCreate,
@@ -627,7 +628,7 @@ async def generer_image_deco(
     )
 
 
-@router.post("/deco/projets", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/deco/projets", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def creer_projet_deco(
     payload: ProjetDecoHabitatCreate,
@@ -645,7 +646,7 @@ async def creer_projet_deco(
     return await executer_async(_query)
 
 
-@router.get("/jardin/zones", responses=REPONSES_LISTE)
+@router.get("/jardin/zones", responses=REPONSES_LISTE_TYPED)
 @gerer_exception_api
 async def lister_zones_jardin(
     plan_id: int | None = Query(None),
@@ -671,9 +672,9 @@ async def lister_zones_jardin(
                         "position_y": _to_float(z.position_y),
                         "largeur": _to_float(z.largeur),
                         "longueur": _to_float(z.longueur),
-                        "donnees_canvas": z.donnees_canvas or {},
-                        "plantes": z.plantes or [],
-                        "amenagements": z.amenagements or [],
+                        "donnees_canvas": cast(dict[str, Any], z.donnees_canvas or {}),
+                        "plantes": cast(list[Any], z.plantes or []),
+                        "amenagements": cast(list[Any], z.amenagements or []),
                         "budget_estime": _to_float(z.budget_estime),
                     }
                     for z in items
@@ -683,7 +684,7 @@ async def lister_zones_jardin(
     return await executer_async(_query)
 
 
-@router.patch("/jardin/zones/{zone_id}", responses=REPONSES_CRUD_LECTURE)
+@router.patch("/jardin/zones/{zone_id}", responses=REPONSES_CRUD_LECTURE_TYPED)
 @gerer_exception_api
 async def modifier_zone_jardin(
     zone_id: int,
@@ -712,7 +713,7 @@ async def modifier_zone_jardin(
     return await executer_async(_query)
 
 
-@router.get("/jardin/resume", responses=REPONSES_CRUD_LECTURE)
+@router.get("/jardin/resume", responses=REPONSES_CRUD_LECTURE_TYPED)
 @gerer_exception_api
 async def resume_jardin(
     plan_id: int | None = Query(None),
@@ -727,7 +728,7 @@ async def resume_jardin(
     return await executer_async(_query)
 
 
-@router.post("/jardin/zones", status_code=201, responses=REPONSES_CRUD_CREATION)
+@router.post("/jardin/zones", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)
 @gerer_exception_api
 async def creer_zone_jardin(
     payload: ZoneJardinHabitatCreate,

@@ -426,6 +426,48 @@ export default function PageCourses() {
                 </div>
               </div>
             )}
+
+            {listeSelectionnee && predictionsInvites && predictionsInvites.items.length > 0 && (
+              <div className="border-t pt-3 mt-3">
+                <p className="text-xs font-medium text-muted-foreground mb-2">
+                  Suggestions invites
+                </p>
+                <div className="space-y-2">
+                  {predictionsInvites.items.slice(0, 5).map((prediction) => (
+                    <button
+                      key={`${prediction.article_nom}-${prediction.quantite_suggeree}`}
+                      className="w-full rounded-md border px-2 py-2 text-left hover:bg-accent transition-colors"
+                      onClick={() =>
+                        ajouter({
+                          nom: prediction.article_nom,
+                          quantite: prediction.quantite_suggeree,
+                          unite: prediction.unite_suggeree,
+                          categorie:
+                            prediction.categorie ?? prediction.rayon_magasin ?? undefined,
+                        })
+                      }
+                    >
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <span className="font-medium text-foreground">
+                          {prediction.article_nom}
+                        </span>
+                        <span className="text-muted-foreground">
+                          x{prediction.quantite_suggeree} {prediction.unite_suggeree}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        Confiance {Math.round(prediction.confiance_contextualisee * 100)}%
+                        {prediction.contexte_applique.raisons.length > 0 && (
+                          <span>
+                            {" "}· {prediction.contexte_applique.raisons.join(", ")}
+                          </span>
+                        )}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -547,48 +589,6 @@ export default function PageCourses() {
                 <div
                   key={s.article_id}
                   className="flex items-center justify-between rounded-lg border border-green-200 dark:border-green-800 px-3 py-2 text-sm"
-
-            {listeSelectionnee && predictionsInvites && predictionsInvites.items.length > 0 && (
-              <div className="border-t pt-3 mt-3">
-                <p className="text-xs font-medium text-muted-foreground mb-2">
-                  Suggestions invites
-                </p>
-                <div className="space-y-2">
-                  {predictionsInvites.items.slice(0, 5).map((prediction) => (
-                    <button
-                      key={`${prediction.article_nom}-${prediction.quantite_suggeree}`}
-                      className="w-full rounded-md border px-2 py-2 text-left hover:bg-accent transition-colors"
-                      onClick={() =>
-                        ajouter({
-                          nom: prediction.article_nom,
-                          quantite: prediction.quantite_suggeree,
-                          unite: prediction.unite_suggeree,
-                          categorie:
-                            prediction.categorie ?? prediction.rayon_magasin ?? undefined,
-                        })
-                      }
-                    >
-                      <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="font-medium text-foreground">
-                          {prediction.article_nom}
-                        </span>
-                        <span className="text-muted-foreground">
-                          x{prediction.quantite_suggeree} {prediction.unite_suggeree}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[11px] text-muted-foreground">
-                        Confiance {Math.round(prediction.confiance_contextualisee * 100)}%
-                        {prediction.contexte_applique.raisons.length > 0 && (
-                          <span>
-                            {" "}· {prediction.contexte_applique.raisons.join(", ")}
-                          </span>
-                        )}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
                 >
                   <div>
                     <span className="font-medium">{s.nom}</span>
