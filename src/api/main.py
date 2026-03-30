@@ -95,6 +95,7 @@ from src.api.utils import (
 )
 from src.api.versioning import VersionMiddleware
 from src.api.websocket import ws_notes_router, ws_planning_router, ws_projets_router
+from src.api.websocket.admin_logs import router as ws_admin_logs_router
 from src.api.websocket_courses import router as websocket_router
 from src.core.monitoring.health import StatutSante, verifier_sante_globale
 
@@ -557,4 +558,5 @@ app.include_router(websocket_router)
 app.include_router(ws_planning_router)
 app.include_router(ws_notes_router)
 app.include_router(ws_projets_router)
+app.include_router(ws_admin_logs_router)
 app.include_router(admin_router)

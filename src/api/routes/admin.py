@@ -1900,3 +1900,107 @@ async def lire_vue_sql(
         "page_size": page_size,
         "pages_totales": max(1, (total + page_size - 1) // page_size),
     }
+
+
+# ═══════════════════════════════════════════════════════════
+# PHASE 10 — RESET MODULE + LOGS WS ADMIN
+# ═══════════════════════════════════════════════════════════
+
+
+_MODULES_RESETABLES = {
+    "courses": ["listes_courses", "articles_courses"],
+    "inventaire": ["articles_inventaire"],
+    "planning": ["repas", "plannings"],
+    "jeux": ["paris_sportifs"],
+}
+
+
+class ResetModuleRequest(BaseModel):
+    """Requête de réinitialisation d'un module."""
+
+    module: str
+    confirmer: bool = False
+
+
+@router.post(
+    "/reset-module",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Réinitialiser un module (données de test)",
+)
+@gerer_exception_api
+async def reset_module(
+    body: ResetModuleRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Remet à zéro les données d'un module (courses, inventaire, planning, jeux).
+
+    Nécessite `confirmer: true` pour exécuter.
+    """
+    if body.module not in _MODULES_RESETABLES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Module '{body.module}' non réinitialisable. Modules disponibles: {list(_MODULES_RESETABLES.keys())}",
+        )
+
+    if not body.confirmer:
+        tables = _MODULES_RESETABLES[body.module]
+        return {
+            "status": "preview",
+            "module": body.module,
+            "tables_affectees": tables,
+            "message": f"⚠️ Ceci supprimera toutes les données de {body.module}. Envoyez 'confirmer: true' pour exécuter.",
+        }
+
+    from src.api.utils import executer_avec_session
+
+    tables = _MODULES_RESETABLES[body.module]
+    resultats = {}
+
+    with executer_avec_session() as session:
+        for table in tables:
+            try:
+                count = session.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar() or 0
+                session.execute(text(f"DELETE FROM {table}"))
+                resultats[table] = {"supprimees": count}
+            except Exception as exc:
+                resultats[table] = {"erreur": str(exc)}
+        session.commit()
+
+    _journaliser_action_admin(
+        action="admin.reset_module",
+        entite_type=body.module,
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"tables": tables, "resultats": resultats},
+    )
+
+    return {
+        "status": "ok",
+        "module": body.module,
+        "resultats": resultats,
+    }
+
+
+@router.get(
+    "/logs/stream-info",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Informations sur le stream de logs",
+)
+@gerer_exception_api
+async def logs_stream_info(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Retourne les informations pour se connecter au stream de logs temps réel.
+
+    Le stream est disponible via WebSocket sur /api/v1/ws/admin/logs.
+    """
+    return {
+        "websocket_url": "/api/v1/ws/admin/logs",
+        "description": "Stream de logs structurés en temps réel (WebSocket)",
+        "message_format": {
+            "type": "log_entry",
+            "timestamp": "ISO 8601",
+            "level": "DEBUG|INFO|WARNING|ERROR",
+            "module": "src.api.routes.admin",
+            "message": "Texte du log",
+        },
+    }
