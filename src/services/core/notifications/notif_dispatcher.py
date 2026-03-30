@@ -44,6 +44,7 @@ _MAPPING_EVENEMENTS_CANAUX: dict[str, dict[str, Any]] = {
     },
     "document_expirant": {"categorie": "alertes", "canaux": ["push", "ntfy", "email"]},
     "recolte_jardin_prete": {"categorie": "rappels", "canaux": ["push", "ntfy"]},
+    "badge_debloque": {"categorie": "rappels", "canaux": ["push", "ntfy"]},
 }
 
 

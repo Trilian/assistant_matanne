@@ -29,6 +29,12 @@ export default function AdaptationsMeteoPage() {
     <div className="space-y-6">
       <div><h1 className="text-3xl font-bold">Adaptations météo</h1><p className="text-muted-foreground">Transforme les prévisions météo en ajustements concrets du planning.</p></div>
       <Card><CardHeader><CardTitle>Prévisions météo</CardTitle><CardDescription>Colle un JSON météo simple pour obtenir des adaptations.</CardDescription></CardHeader><CardContent><form className="space-y-4" onSubmit={soumettre}><Textarea rows={8} value={meteoJson} onChange={(e) => setMeteoJson(e.target.value)} /><Button type="submit" disabled={chargement}>{chargement ? 'Analyse...' : 'Adapter le planning'}</Button></form></CardContent></Card>
+      {!resultat && !chargement && (
+        <Card>
+          <CardHeader><CardTitle>En attente d'adaptation</CardTitle></CardHeader>
+          <CardContent><p className="text-sm text-muted-foreground">Soumets des prévisions météo JSON pour obtenir des ajustements actionnables du planning.</p></CardContent>
+        </Card>
+      )}
       {resultat && <div className="grid gap-4 lg:grid-cols-2"><Card><CardHeader><CardTitle>Résumé météo</CardTitle></CardHeader><CardContent><pre className="text-xs whitespace-pre-wrap">{JSON.stringify(resultat.meteo_resume, null, 2)}</pre></CardContent></Card><Card><CardHeader><CardTitle>Adaptations</CardTitle></CardHeader><CardContent><ul className="space-y-2">{resultat.adaptations.map((item, index) => <li key={index}>• {item.type_adaptation} / {item.condition_meteo} : {item.recommandation} ({item.impact})</li>)}</ul></CardContent></Card></div>}
     </div>
   )

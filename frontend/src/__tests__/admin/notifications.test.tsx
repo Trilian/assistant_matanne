@@ -29,7 +29,11 @@ function renderWithQuery(ui: React.ReactElement) {
 describe("PageAdminNotifications", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(HTMLElement.prototype, "scrollIntoView").mockImplementation(() => {});
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      writable: true,
+      value: vi.fn(),
+    });
   });
 
   it("envoie un test mono-canal et affiche le succès", async () => {

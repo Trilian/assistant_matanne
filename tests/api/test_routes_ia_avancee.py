@@ -329,3 +329,214 @@ class TestRoutesIAAvancee:
         with patch("src.api.routes.ia_avancee._get_service", return_value=mock_service):
             response = client.post("/api/v1/ia-avancee/adaptations-meteo", json={})
         assert response.status_code == 422
+
+    @pytest.mark.parametrize(
+        "path,method,payload,service_method",
+        [
+            ("/api/v1/ia-avancee/suggestions-achats", "get", None, "suggerer_achats"),
+            (
+                "/api/v1/ia-avancee/planning-adaptatif",
+                "post",
+                {"meteo": {"etat": "pluie"}, "budget_restant": 120.0},
+                "generer_planning_adaptatif",
+            ),
+            ("/api/v1/ia-avancee/prevision-depenses", "get", None, "prevoir_depenses_fin_mois"),
+            (
+                "/api/v1/ia-avancee/idees-cadeaux",
+                "post",
+                {"nom": "Lina", "age": 8, "relation": "fille", "budget_max": 35.0, "occasion": "anniversaire"},
+                "suggerer_cadeaux",
+            ),
+            ("/api/v1/ia-avancee/optimisation-routines", "get", None, "optimiser_routines"),
+            ("/api/v1/ia-avancee/recommandations-energie", "get", None, "recommander_economies_energie"),
+            ("/api/v1/ia-avancee/prediction-pannes", "get", None, "predire_pannes"),
+            ("/api/v1/ia-avancee/suggestions-proactives", "get", None, "generer_suggestions_proactives"),
+            (
+                "/api/v1/ia-avancee/adaptations-meteo",
+                "post",
+                {"previsions_meteo": {"lundi": "pluie"}},
+                "adapter_planning_meteo",
+            ),
+        ],
+    )
+    def test_none_fallback_endpoints_json_200(
+        self,
+        client: TestClient,
+        mock_service: MagicMock,
+        path: str,
+        method: str,
+        payload: dict | None,
+        service_method: str,
+    ):
+        getattr(mock_service, service_method).return_value = None
+
+        with patch("src.api.routes.ia_avancee._get_service", return_value=mock_service):
+            response = client.get(path) if method == "get" else client.post(path, json=payload)
+
+        assert response.status_code == 200
+        assert isinstance(response.json(), dict)
+
+    @pytest.mark.parametrize(
+        "path,service_method,with_file,payload",
+        [
+            ("/api/v1/ia-avancee/diagnostic-plante", "diagnostiquer_plante_photo", True, None),
+            ("/api/v1/ia-avancee/analyse-photo", "analyser_photo_multi_usage", True, None),
+            ("/api/v1/ia-avancee/analyse-document", "analyser_document_photo", True, None),
+            ("/api/v1/ia-avancee/estimation-travaux", "estimer_travaux_photo", True, None),
+            (
+                "/api/v1/ia-avancee/planning-voyage",
+                "generer_planning_voyage",
+                False,
+                {"destination": "Lyon", "duree_jours": 3, "budget_total": 350.0, "avec_enfant": True},
+            ),
+        ],
+    )
+    def test_none_fallback_endpoints_unavailable_503(
+        self,
+        client: TestClient,
+        mock_service: MagicMock,
+        path: str,
+        service_method: str,
+        with_file: bool,
+        payload: dict | None,
+    ):
+        getattr(mock_service, service_method).return_value = None
+
+        with patch("src.api.routes.ia_avancee._get_service", return_value=mock_service):
+            if with_file:
+                files = {"file": ("image.jpg", b"fake-image-bytes", "image/jpeg")}
+                if path.endswith("estimation-travaux"):
+                    response = client.post(path + "?description=test", files=files)
+                else:
+                    response = client.post(path, files=files)
+            else:
+                response = client.post(path, json=payload)
+
+        assert response.status_code == 503
+
+    @pytest.mark.parametrize(
+        "path,method,payload,service_method,expected_json",
+        [
+            (
+                "/api/v1/ia-avancee/suggestions-achats",
+                "get",
+                None,
+                "suggerer_achats",
+                {
+                    "suggestions": [],
+                    "nb_produits_analyses": 0,
+                    "periode_analyse_jours": 90,
+                },
+            ),
+            (
+                "/api/v1/ia-avancee/planning-adaptatif",
+                "post",
+                {"meteo": {"etat": "pluie"}, "budget_restant": 120.0},
+                "generer_planning_adaptatif",
+                {
+                    "recommandations": [],
+                    "repas_suggerees": [],
+                    "activites_suggerees": [],
+                    "score_adaptation": 0,
+                    "contexte_utilise": {},
+                },
+            ),
+            (
+                "/api/v1/ia-avancee/prevision-depenses",
+                "get",
+                None,
+                "prevoir_depenses_fin_mois",
+                {
+                    "depenses_actuelles": 0,
+                    "prevision_fin_mois": 0,
+                    "budget_mensuel": 0,
+                    "ecart_prevu": 0,
+                    "tendance": "stable",
+                    "postes_vigilance": [],
+                    "conseils_economies": [],
+                },
+            ),
+            (
+                "/api/v1/ia-avancee/idees-cadeaux",
+                "post",
+                {"nom": "Lina", "age": 8, "relation": "fille", "budget_max": 35.0, "occasion": "anniversaire"},
+                "suggerer_cadeaux",
+                {
+                    "idees": [],
+                    "destinataire": "",
+                    "occasion": "anniversaire",
+                },
+            ),
+            (
+                "/api/v1/ia-avancee/optimisation-routines",
+                "get",
+                None,
+                "optimiser_routines",
+                {
+                    "optimisations": [],
+                    "score_efficacite_actuel": 0,
+                    "score_efficacite_projete": 0,
+                },
+            ),
+            (
+                "/api/v1/ia-avancee/recommandations-energie",
+                "get",
+                None,
+                "recommander_economies_energie",
+                {
+                    "recommandations": [],
+                    "consommation_actuelle_resume": None,
+                    "potentiel_economie_global": None,
+                },
+            ),
+            (
+                "/api/v1/ia-avancee/prediction-pannes",
+                "get",
+                None,
+                "predire_pannes",
+                {
+                    "predictions": [],
+                    "nb_equipements_analyses": 0,
+                    "score_sante_global": 0,
+                },
+            ),
+            (
+                "/api/v1/ia-avancee/suggestions-proactives",
+                "get",
+                None,
+                "generer_suggestions_proactives",
+                {
+                    "suggestions": [],
+                    "date_generation": None,
+                },
+            ),
+            (
+                "/api/v1/ia-avancee/adaptations-meteo",
+                "post",
+                {"previsions_meteo": {"lundi": "pluie"}},
+                "adapter_planning_meteo",
+                {
+                    "adaptations": [],
+                    "meteo_resume": {},
+                    "date_prevision": None,
+                },
+            ),
+        ],
+    )
+    def test_none_fallback_payloads_exact(
+        self,
+        client: TestClient,
+        mock_service: MagicMock,
+        path: str,
+        method: str,
+        payload: dict | None,
+        service_method: str,
+        expected_json: dict,
+    ):
+        getattr(mock_service, service_method).return_value = None
+
+        with patch("src.api.routes.ia_avancee._get_service", return_value=mock_service):
+            response = client.get(path) if method == "get" else client.post(path, json=payload)
+
+        assert response.status_code == 200
+        assert response.json() == expected_json

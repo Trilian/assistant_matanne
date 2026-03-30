@@ -656,6 +656,61 @@ def _livrer_webhooks(event: EvenementDomaine) -> None:
 
 
 # ═══════════════════════════════════════════════════════════
+# PHASE 8 — CONNEXIONS INTER-MODULES
+# ═══════════════════════════════════════════════════════════
+
+
+def _sync_entretien_vers_budget(event: EvenementDomaine) -> None:
+    """Invalide le cache budget quand une dépense d'entretien est synchronisée."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="budget")
+        nb += cache.invalidate(pattern="depenses")
+        nb += cache.invalidate(pattern="dashboard")
+        logger.debug(
+            "Cache budget/dashboard invalidé (%d entrées) suite à sync entretien",
+            nb,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache entretien->budget: %s", e)
+
+
+def _sync_voyages_vers_planning(event: EvenementDomaine) -> None:
+    """Invalide le cache planning quand des voyages sont synchronisés."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="planning")
+        nb += cache.invalidate(pattern="calendrier")
+        logger.debug(
+            "Cache planning/calendrier invalidé (%d entrées) suite à sync voyages",
+            nb,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache voyages->planning: %s", e)
+
+
+def _sync_charges_vers_dashboard(event: EvenementDomaine) -> None:
+    """Invalide le cache dashboard quand les charges sont mises à jour."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="dashboard")
+        nb += cache.invalidate(pattern="charges")
+        nb += cache.invalidate(pattern="budget")
+        logger.debug(
+            "Cache dashboard invalidé (%d entrées) suite à sync charges",
+            nb,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache charges->dashboard: %s", e)
+
+
+# ═══════════════════════════════════════════════════════════
 # ENREGISTREMENT — Appelé au bootstrap
 # ═══════════════════════════════════════════════════════════
 
@@ -767,6 +822,20 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("jalon.ajoute", _notifier_jalon_ajoute_avec_activites, priority=75)
     compteur += 1
 
+    # ── Phase 8 — Connexions inter-modules ──
+
+    # Entretien → Budget (sync dépenses)
+    bus.souscrire("depenses.sync_entretien", _sync_entretien_vers_budget, priority=85)
+    compteur += 1
+
+    # Voyages → Calendrier (sync événements planning)
+    bus.souscrire("planning.sync_voyages", _sync_voyages_vers_planning, priority=85)
+    compteur += 1
+
+    # Charges → Dashboard (mise à jour métriques)
+    bus.souscrire("dashboard.charges_update", _sync_charges_vers_dashboard, priority=85)
+    compteur += 1
+
     # ── Métriques (priorité moyenne) ──
     bus.souscrire("*", _enregistrer_metrique_evenement, priority=50)
     compteur += 1
@@ -791,4 +860,7 @@ __all__ = [
     "_filtrer_suggestions_budget_serre",
     "_notifier_document_echeance_proche",
     "_notifier_jalon_ajoute_avec_activites",
+    "_sync_entretien_vers_budget",
+    "_sync_voyages_vers_planning",
+    "_sync_charges_vers_dashboard",
 ]

@@ -32,6 +32,12 @@ export default function PrevisionDepensesPage() {
         </div>
         <Button onClick={charger} disabled={chargement}>{chargement ? 'Actualisation...' : 'Actualiser'}</Button>
       </div>
+      {!resultat && !chargement && (
+        <Card>
+          <CardHeader><CardTitle>Chargement initial terminé</CardTitle></CardHeader>
+          <CardContent><p className="text-sm text-muted-foreground">Aucune prévision disponible pour le moment. Réessaie avec le bouton Actualiser.</p></CardContent>
+        </Card>
+      )}
       {resultat && (
         <>
           <div className="grid gap-4 md:grid-cols-4">

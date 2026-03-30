@@ -1,12 +1,12 @@
 ﻿"""
-T5b â€” Tests routes Garmin.
+T5b - Tests routes Garmin.
 
 Couvre src/api/routes/garmin.py :
 - GET  /api/v1/garmin/status                : statut connexion Garmin
 - POST /api/v1/garmin/connect-url           : URL d'autorisation OAuth
-- POST /api/v1/garmin/sync                  : synchronisation donnÃ©es
-- GET  /api/v1/garmin/stats                 : statistiques activitÃ©
-- GET  /api/v1/garmin/recommandation-diner  : recommandation dÃ®ner selon calories
+- POST /api/v1/garmin/sync                  : synchronisation donnees
+- GET  /api/v1/garmin/stats                 : statistiques activite
+- GET  /api/v1/garmin/recommandation-diner  : recommandation diner selon calories
 """
 
 from __future__ import annotations
@@ -21,9 +21,9 @@ import pytest_asyncio
 from httpx import ASGITransport
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
 
 
 @pytest_asyncio.fixture
@@ -59,9 +59,9 @@ def _session_avec_profil(garmin_connected: bool = False) -> tuple[MagicMock, Sim
     return session, profil
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS â€” STATUT GARMIN
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
+# TESTS - STATUT GARMIN
+# -----------------------------------------------------------------------------
 
 
 class TestStatutGarmin:
@@ -69,7 +69,7 @@ class TestStatutGarmin:
 
     @pytest.mark.asyncio
     async def test_statut_non_connecte(self, async_client: httpx.AsyncClient):
-        """Profil sans Garmin â†’ connected: False."""
+        """Profil sans Garmin -> connected: False."""
         session, profil = _session_avec_profil(garmin_connected=False)
 
         @contextmanager
@@ -85,7 +85,7 @@ class TestStatutGarmin:
 
     @pytest.mark.asyncio
     async def test_statut_connecte(self, async_client: httpx.AsyncClient):
-        """Profil avec Garmin connectÃ© â†’ connected: True."""
+        """Profil avec Garmin connecte -> connected: True."""
         session, profil = _session_avec_profil(garmin_connected=True)
 
         @contextmanager
@@ -100,9 +100,9 @@ class TestStatutGarmin:
         assert data["connected"] is True
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS â€” URL DE CONNEXION GARMIN
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
+# TESTS - URL DE CONNEXION GARMIN
+# -----------------------------------------------------------------------------
 
 
 class TestConnectUrlGarmin:
@@ -110,7 +110,7 @@ class TestConnectUrlGarmin:
 
     @pytest.mark.asyncio
     async def test_connect_url_non_configure(self, async_client: httpx.AsyncClient):
-        """Service Garmin non configurÃ© â†’ 503."""
+        """Service Garmin non configure -> 503."""
         mock_service = MagicMock()
         mock_service.get_authorization_url.return_value = (None, None)
 
@@ -121,7 +121,7 @@ class TestConnectUrlGarmin:
 
     @pytest.mark.asyncio
     async def test_connect_url_retourne_url(self, async_client: httpx.AsyncClient):
-        """Service Garmin configurÃ© â†’ URL d'autorisation retournÃ©e."""
+        """Service Garmin configure -> URL d'autorisation retournee."""
         mock_service = MagicMock()
         mock_service.get_authorization_url.return_value = (
             "https://garmin.com/oauth/auth?token=xxx",
@@ -137,9 +137,9 @@ class TestConnectUrlGarmin:
         assert "garmin" in data["authorization_url"].lower()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS â€” SYNC GARMIN
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
+# TESTS - SYNC GARMIN
+# -----------------------------------------------------------------------------
 
 
 class TestSyncGarmin:
@@ -147,7 +147,7 @@ class TestSyncGarmin:
 
     @pytest.mark.asyncio
     async def test_sync_succes(self, async_client: httpx.AsyncClient):
-        """Synchronisation rÃ©ussie â†’ donnÃ©es retournÃ©es."""
+        """Synchronisation reussie -> donnees retournees."""
         session, profil = _session_avec_profil(garmin_connected=True)
         mock_service = MagicMock()
         mock_service.sync_user_data.return_value = {
@@ -169,17 +169,17 @@ class TestSyncGarmin:
         assert response.status_code in (200, 201)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS â€” RECOMMANDATION DÃŽNER
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
+# TESTS - RECOMMANDATION DINER
+# -----------------------------------------------------------------------------
 
 
 class TestRecommandationDiner:
-    """GET /api/v1/garmin/recommandation-diner â€” adaptation selon calories brÃ»lÃ©es (LT-01)."""
+    """GET /api/v1/garmin/recommandation-diner - adaptation selon calories brulees (LT-01)."""
 
     @pytest.mark.asyncio
     async def test_recommandation_recharge_haute_activite(self, async_client: httpx.AsyncClient):
-        """â‰¥600 kcal brÃ»lÃ©es â†’ stratÃ©gie recharge."""
+        """>=600 kcal brulees -> strategie recharge."""
         session, profil = _session_avec_profil()
         recette = SimpleNamespace(
             id=1, nom="Poulet riz", calories=700,
@@ -198,7 +198,7 @@ class TestRecommandationDiner:
                 "/api/v1/garmin/recommandation-diner?calories_brulees=700"
             )
 
-        # Soit 200 (recette proposÃ©e) soit 200 avec message appropriÃ©
+        # Soit 200 (recette proposee) soit 200 avec message approprie
         assert response.status_code == 200
         data = response.json()
         assert "strategie" in data
@@ -206,7 +206,7 @@ class TestRecommandationDiner:
 
     @pytest.mark.asyncio
     async def test_recommandation_leger_faible_activite(self, async_client: httpx.AsyncClient):
-        """0 kcal brÃ»lÃ©es â†’ stratÃ©gie lÃ©ger."""
+        """0 kcal brulees -> strategie leger."""
         session, profil = _session_avec_profil()
         recette = SimpleNamespace(
             id=2, nom="Salade", calories=300,
@@ -232,7 +232,7 @@ class TestRecommandationDiner:
 
     @pytest.mark.asyncio
     async def test_recommandation_sans_recette_message(self, async_client: httpx.AsyncClient):
-        """Aucune recette en base â†’ message clair (pas de 500)."""
+        """Aucune recette en base -> message clair (pas de 500)."""
         session, profil = _session_avec_profil()
         mock_query = MagicMock()
         mock_query.filter.return_value.order_by.return_value.limit.return_value.all.return_value = []

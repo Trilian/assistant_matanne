@@ -1,11 +1,11 @@
 ﻿"""
-T4 â€” Tests dÃ©diÃ©s pour les routes automations.
+T4 - Tests dedies pour les routes automations.
 
 Couvre src/api/routes/automations.py :
 - GET  /api/v1/automations              : lecture sans mutation (C4 fix)
 - POST /api/v1/automations/init         : migration idempotente
-- POST /api/v1/automations              : crÃ©ation
-- POST /api/v1/automations/{id}/executer-maintenant : exÃ©cution manuelle
+- POST /api/v1/automations              : creation
+- POST /api/v1/automations/{id}/executer-maintenant : execution manuelle
 """
 
 from __future__ import annotations
@@ -20,9 +20,9 @@ import pytest_asyncio
 from httpx import ASGITransport
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
 
 
 @pytest_asyncio.fixture
@@ -56,13 +56,13 @@ def _make_automation(id_: int = 1, nom: str = "Automation test") -> SimpleNamesp
     )
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# T4a â€” GET sans mutation
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
+# T4a - GET sans mutation
+# -----------------------------------------------------------------------------
 
 
 class TestListerAutomationsSansMutation:
-    """GET /api/v1/automations â€” vÃ©rification qu'aucun commit n'est effectuÃ©."""
+    """GET /api/v1/automations - verification qu'aucun commit n'est effectue."""
 
     @pytest.mark.asyncio
     async def test_get_automations_200(self, async_client: httpx.AsyncClient):
@@ -100,13 +100,13 @@ class TestListerAutomationsSansMutation:
             response = await async_client.get("/api/v1/automations")
 
         assert response.status_code == 200
-        # Le mock session ne doit pas avoir Ã©tÃ© commitÃ© par la route GET
-        # (_charger_automations est patchÃ©, donc session.commit n'est pas appelÃ©)
+        # Le mock session ne doit pas avoir ete commit par la route GET
+        # (_charger_automations est patche, donc session.commit n'est pas appele)
         mock_session.commit.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_get_automations_sans_auth_401(self, monkeypatch):
-        """GET sans token â†’ 401."""
+        """GET sans token -> 401."""
         from src.api.main import app
         monkeypatch.setenv("ENVIRONMENT", "production")
 
@@ -119,17 +119,17 @@ class TestListerAutomationsSansMutation:
         assert response.status_code in (401, 403)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# T4b â€” POST /init (migration idempotente)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
+# T4b - POST /init (migration idempotente)
+# -----------------------------------------------------------------------------
 
 
 class TestInitAutomations:
-    """POST /api/v1/automations/init â€” migration idempotente."""
+    """POST /api/v1/automations/init - migration idempotente."""
 
     @pytest.mark.asyncio
     async def test_init_deja_initialisees(self, async_client: httpx.AsyncClient):
-        """Si des automations existent dÃ©jÃ , le message indique qu'elles le sont."""
+        """Si des automations existent deja, le message indique qu'elles le sont."""
         profil = SimpleNamespace(id=1, email="test@matanne.fr", preferences_modules={})
         automations = [_make_automation(1)]
 
@@ -141,11 +141,11 @@ class TestInitAutomations:
 
         assert response.status_code == 200
         data = response.json()
-        assert "dÃ©jÃ " in data.get("message", "").lower() or data["total"] >= 1
+        assert "déjà" in data.get("message", "").lower() or data["total"] >= 1
 
     @pytest.mark.asyncio
     async def test_init_vide_migre(self, async_client: httpx.AsyncClient):
-        """Avec des prÃ©fÃ©rences legacy, la migration crÃ©e des automations."""
+        """Avec des preferences legacy, la migration cree des automations."""
         profil = SimpleNamespace(
             id=1,
             email="test@matanne.fr",
@@ -174,19 +174,19 @@ class TestInitAutomations:
         assert data["total"] == 1
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# T4c â€” POST /api/v1/automations (crÃ©ation)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
+# T4c - POST /api/v1/automations (creation)
+# -----------------------------------------------------------------------------
 
 
 class TestCreerAutomation:
-    """POST /api/v1/automations â€” crÃ©ation d'une rÃ¨gle Siâ†’Alors."""
+    """POST /api/v1/automations - creation d'une regle Si->Alors."""
 
     @pytest.mark.asyncio
     async def test_creer_automation_si_alors(self, async_client: httpx.AsyncClient):
-        """POST avec payload valide â†’ item crÃ©Ã© en base."""
+        """POST avec payload valide -> item cree en base."""
         profil = SimpleNamespace(id=1, email="test@matanne.fr", preferences_modules={})
-        auto_cree = _make_automation(5, "Stock bas â†’ courses")
+        auto_cree = _make_automation(5, "Stock bas -> courses")
 
         mock_session = MagicMock()
         mock_session.refresh = MagicMock()
@@ -209,7 +209,7 @@ class TestCreerAutomation:
             response = await async_client.post(
                 "/api/v1/automations",
                 json={
-                    "nom": "Stock bas â†’ courses",
+                    "nom": "Stock bas -> courses",
                     "declencheur": {"type": "stock_bas", "seuil": 2},
                     "action": {"type": "ajouter_courses", "quantite": 1},
                     "active": True,
@@ -222,7 +222,7 @@ class TestCreerAutomation:
 
     @pytest.mark.asyncio
     async def test_creer_automation_condition_stock_bas(self, async_client: httpx.AsyncClient):
-        """Le payload avec condition stock_bas est acceptÃ©."""
+        """Le payload avec condition stock_bas est accepte."""
         profil = SimpleNamespace(id=1, email="test@matanne.fr", preferences_modules={})
 
         mock_session = MagicMock()
@@ -247,24 +247,24 @@ class TestCreerAutomation:
                 json={
                     "nom": "Alerte stock farine",
                     "declencheur": {"type": "stock_bas", "seuil": 0, "ingredient": "farine"},
-                    "action": {"type": "notification", "message": "Farine presque Ã©puisÃ©e!"},
+                    "action": {"type": "notification", "message": "Farine presque épuisée!"},
                 },
             )
 
         assert response.status_code in (200, 201)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# T4d â€” POST /{id}/executer-maintenant
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
+# T4d - POST /{id}/executer-maintenant
+# -----------------------------------------------------------------------------
 
 
 class TestExecuterAutomation:
-    """POST /api/v1/automations/{id}/executer-maintenant â€” exÃ©cution manuelle."""
+    """POST /api/v1/automations/{id}/executer-maintenant - execution manuelle."""
 
     @pytest.mark.asyncio
     async def test_executer_maintenant_success(self, async_client: httpx.AsyncClient):
-        """ExÃ©cution manuelle â†’ success + rÃ©sultat."""
+        """Execution manuelle -> success + resultat."""
         profil = SimpleNamespace(id=1, email="test@matanne.fr", preferences_modules={})
         mock_service = MagicMock()
         mock_service.executer_automation_par_id.return_value = {
@@ -284,12 +284,12 @@ class TestExecuterAutomation:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["message"] == "Automation exÃ©cutÃ©e"
+        assert data["message"] == "Automation exécutée"
         assert data["resultat"]["success"] is True
 
     @pytest.mark.asyncio
     async def test_executer_automation_introuvable_404(self, async_client: httpx.AsyncClient):
-        """Automation introuvable â†’ 404."""
+        """Automation introuvable -> 404."""
         profil = SimpleNamespace(id=1, email="test@matanne.fr", preferences_modules={})
         mock_service = MagicMock()
         mock_service.executer_automation_par_id.return_value = {

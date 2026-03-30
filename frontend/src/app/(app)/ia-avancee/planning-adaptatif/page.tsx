@@ -50,6 +50,12 @@ export default function PlanningAdaptatifPage() {
           </form>
         </CardContent>
       </Card>
+      {!resultat && !chargement && (
+        <Card>
+          <CardHeader><CardTitle>En attente de génération</CardTitle></CardHeader>
+          <CardContent><p className="text-sm text-muted-foreground">Renseigne le contexte puis génère pour obtenir des recommandations, repas et activités adaptés.</p></CardContent>
+        </Card>
+      )}
       {resultat && (
         <div className="grid gap-4 lg:grid-cols-2">
           <Card>

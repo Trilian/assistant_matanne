@@ -1,5 +1,5 @@
 ﻿"""
-Tests API ciblÃ©s Sprint 10.
+Tests API cibles Sprint 10.
 
 Couvre:
 - POST /api/v1/automations/{id}/executer-maintenant
@@ -37,7 +37,7 @@ async def async_client():
 
 
 class TestAutomationsExecuterMaintenant:
-    """Tests endpoint exÃ©cution manuelle d'automation (LT-04)."""
+    """Tests endpoint execution manuelle d'automation (LT-04)."""
 
     @pytest.mark.asyncio
     async def test_executer_automation_success(self, async_client: httpx.AsyncClient):
@@ -60,7 +60,7 @@ class TestAutomationsExecuterMaintenant:
 
         assert response.status_code == 200, response.text
         data = response.json()
-        assert data["message"] == "Automation exÃ©cutÃ©e"
+        assert data["message"] == "Automation exécutée"
         assert data["user_id"] == 42
         assert data["resultat"]["success"] is True
 
@@ -86,7 +86,7 @@ class TestAutomationsExecuterMaintenant:
 
 
 class TestGarminRecommandationDiner:
-    """Tests endpoint recommandation dÃ®ner selon calories brÃ»lÃ©es (LT-01)."""
+    """Tests endpoint recommandation diner selon calories brulees (LT-01)."""
 
     @pytest.mark.asyncio
     async def test_recommandation_diner_success(self, async_client: httpx.AsyncClient):
@@ -141,7 +141,7 @@ class TestGarminRecommandationDiner:
 
 
 class TestVoyagesGenererCourses:
-    """Tests endpoint gÃ©nÃ©ration courses depuis voyage (LT-03)."""
+    """Tests endpoint generation courses depuis voyage (LT-03)."""
 
     @pytest.mark.asyncio
     async def test_generer_courses_success(self, async_client: httpx.AsyncClient):

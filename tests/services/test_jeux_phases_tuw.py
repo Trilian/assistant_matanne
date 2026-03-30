@@ -1,5 +1,5 @@
 ﻿"""
-Test unitaire pour les nouvelles fonctionnalitÃ©s jeux Phase T/U/W
+Test unitaire pour les nouvelles fonctionnalites jeux Phase T/U/W
 """
 
 import pytest
@@ -7,13 +7,13 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
 # PHASE T: Heatmap cotes bookmakers
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
 
 
 def test_cote_historique_model():
-    """Test crÃ©ation modÃ¨le CoteHistorique."""
+    """Test creation modele CoteHistorique."""
     from src.core.models import CoteHistorique, Match, Equipe
     from sqlalchemy import create_engine
     from sqlalchemy.orm import Session
@@ -23,7 +23,7 @@ def test_cote_historique_model():
     Base.metadata.create_all(engine)
 
     with Session(engine) as session:
-        # CrÃ©er Ã©quipes et match
+        # Creer equipes et match
         eq1 = Equipe(nom="PSG", championnat="Ligue 1")
         eq2 = Equipe(nom="Lyon", championnat="Ligue 1")
         session.add_all([eq1, eq2])
@@ -38,7 +38,7 @@ def test_cote_historique_model():
         session.add(match)
         session.flush()
 
-        # CrÃ©er historique cotes
+        # Creer historique cotes
         cote1 = CoteHistorique(
             match_id=match.id,
             cote_domicile=1.85,
@@ -49,19 +49,19 @@ def test_cote_historique_model():
         session.add(cote1)
         session.commit()
 
-        # VÃ©rifier
+        # Verifier
         assert cote1.id is not None
         assert cote1.cote_domicile == 1.85
         assert cote1.bookmaker == "betclic"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# PHASE U: GÃ©nÃ©rateur grilles IA & Analyse
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
+# PHASE U: Generateur grilles IA & Analyse
+# -----------------------------------------------------------------------------
 
 
 def test_generer_grille_ia_ponderee():
-    """Test gÃ©nÃ©rateur grilles IA pondÃ©rÃ©."""
+    """Test generateur grilles IA pondere."""
     from src.services.jeux import obtenir_jeux_ai_service
 
     stats = {
@@ -122,7 +122,7 @@ def test_valider_grille():
         "numero_chance": 7,
     }) == True
 
-    # Pas assez de numÃ©ros
+    # Pas assez de numeros
     assert service._valider_grille({
         "numeros": [5, 12, 23],
         "numero_chance": 7,
@@ -134,20 +134,20 @@ def test_valider_grille():
         "numero_chance": 7,
     }) == False
 
-    # NumÃ©ro hors bornes
+    # Numero hors bornes
     assert service._valider_grille({
         "numeros": [5, 12, 23, 34, 55],
         "numero_chance": 7,
     }) == False
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# PHASE W: Notifications Web Push rÃ©sultats
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
+# PHASE W: Notifications Web Push resultats
+# -----------------------------------------------------------------------------
 
 
 def test_notifier_pari_gagne():
-    """Test template notification pari gagnÃ©."""
+    """Test template notification pari gagne."""
     from src.services.core.notifications.notif_web_core import obtenir_push_notification_service
 
     service = obtenir_push_notification_service()
@@ -167,17 +167,17 @@ def test_notifier_pari_gagne():
         cote=2.55,
     )
 
-    assert result == True
+    assert result is True
     assert len(envois) == 1
     user_id, notif = envois[0]
     assert user_id == "user123"
-    assert "ðŸŽ‰" in notif.title
+    assert "🎉" in notif.title
     assert "25.50" in notif.body
     assert notif.notification_type.value == "jeux_pari_gagne"
 
 
 def test_notifier_resultat_loto():
-    """Test template notification rÃ©sultat loto."""
+    """Test template notification resultat loto."""
     from src.services.core.notifications.notif_web_core import obtenir_push_notification_service
 
     service = obtenir_push_notification_service()
@@ -192,10 +192,10 @@ def test_notifier_resultat_loto():
     # Gain potentiel
     service.notifier_resultat_loto("user123", nb_numeros_trouves=4, chance_trouvee=True, gain=50.0)
     assert len(envois) == 1
-    assert "ðŸŽ°" in envois[0][1].title
+    assert "🎰" in envois[0][1].title
     assert envois[0][1].notification_type.value == "jeux_loto_gain"
 
-    # RÃ©sultat moyen
+    # Resultat moyen
     envois.clear()
     service.notifier_resultat_loto("user123", nb_numeros_trouves=2, chance_trouvee=False)
     assert len(envois) == 1
@@ -215,14 +215,14 @@ def test_type_notification_enum():
     assert TypeNotification.RESULTAT_LOTO_GAIN.value == "jeux_loto_gain"
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
 # FIXTURES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# -----------------------------------------------------------------------------
 
 
 @pytest.fixture
 def mock_ai_client():
-    """Mock ClientIA pour Ã©viter appels Mistral rÃ©els."""
+    """Mock ClientIA pour eviter appels Mistral reels."""
     from unittest.mock import MagicMock
     from src.core.ai import ClientIA
 

@@ -44,6 +44,12 @@ export default function SuggestionsAchatsPage() {
           </form>
         </CardContent>
       </Card>
+      {!resultat && !chargement && (
+        <Card>
+          <CardHeader><CardTitle>En attente d'analyse</CardTitle></CardHeader>
+          <CardContent><p className="text-sm text-muted-foreground">Lance une analyse pour afficher les articles à racheter avec leur urgence.</p></CardContent>
+        </Card>
+      )}
       {resultat && (
         <div className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">

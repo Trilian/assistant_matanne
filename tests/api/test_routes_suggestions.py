@@ -364,6 +364,115 @@ class TestSuggestionsPlanning:
 
 
 # ═══════════════════════════════════════════════════════════
+# TESTS: PAYLOAD EXACT — SUGGESTIONS
+# ═══════════════════════════════════════════════════════════
+
+
+class TestSuggestionsPayloadExact:
+    """Tests stricts des payloads retournés par les endpoints suggestions."""
+
+    def test_recettes_payload_exact_default(self, client, mock_recette_service):
+        """Le payload par défaut est exact (structure et valeurs)."""
+        with patch(
+            "src.services.cuisine.recettes.obtenir_service_recettes",
+            return_value=mock_recette_service,
+        ):
+            response = client.get("/api/v1/suggestions/recettes")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "suggestions": SUGGESTIONS_RECETTES_MOCK,
+            "contexte": "repas équilibré",
+            "nombre": 3,
+        }
+
+    def test_recettes_payload_exact_custom(self, client, mock_recette_service):
+        """Le payload personnalisé est exact (contexte/nombre propagés)."""
+        with patch(
+            "src.services.cuisine.recettes.obtenir_service_recettes",
+            return_value=mock_recette_service,
+        ):
+            response = client.get(
+                "/api/v1/suggestions/recettes",
+                params={"contexte": "batch cooking", "nombre": 2},
+            )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "suggestions": SUGGESTIONS_RECETTES_MOCK,
+            "contexte": "batch cooking",
+            "nombre": 2,
+        }
+
+    def test_recettes_payload_exact_empty(self, client):
+        """Si le service renvoie une liste vide, le payload final reste exact."""
+        mock_service = MagicMock()
+        mock_service.suggerer_recettes_ia.return_value = []
+        with patch(
+            "src.services.cuisine.recettes.obtenir_service_recettes",
+            return_value=mock_service,
+        ):
+            response = client.get("/api/v1/suggestions/recettes")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "suggestions": [],
+            "contexte": "repas équilibré",
+            "nombre": 3,
+        }
+
+    def test_planning_payload_exact_default(self, client, mock_planning_service):
+        """Le payload planning par défaut est exact."""
+        with patch(
+            "src.services.cuisine.planning.obtenir_service_planning",
+            return_value=mock_planning_service,
+        ):
+            response = client.get("/api/v1/suggestions/planning")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "planning": PLANNING_MOCK,
+            "jours": 7,
+            "personnes": 4,
+        }
+
+    def test_planning_payload_exact_custom(self, client, mock_planning_service):
+        """Le payload planning personnalisé est exact (jours/personnes propagés)."""
+        with patch(
+            "src.services.cuisine.planning.obtenir_service_planning",
+            return_value=mock_planning_service,
+        ):
+            response = client.get(
+                "/api/v1/suggestions/planning",
+                params={"jours": 5, "personnes": 2},
+            )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "planning": PLANNING_MOCK,
+            "jours": 5,
+            "personnes": 2,
+        }
+
+    def test_planning_payload_exact_empty(self, client):
+        """Si le service renvoie un planning vide, le payload final reste exact."""
+        mock_service = MagicMock()
+        mock_service.generer_planning_ia.return_value = {}
+        with patch(
+            "src.services.cuisine.planning.obtenir_service_planning",
+            return_value=mock_service,
+        ):
+            response = client.get("/api/v1/suggestions/planning")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "planning": {},
+            "jours": 7,
+            "personnes": 4,
+        }
+
+
+# ═══════════════════════════════════════════════════════════
 # TESTS: SÉCURITÉ — /metrics protégé (Item 4 audit)
 # ═══════════════════════════════════════════════════════════
 

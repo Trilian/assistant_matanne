@@ -1,8 +1,8 @@
 ﻿"""
 Routes API pour le planning.
 
-Gestion du planning de repas hebdomadaire : consultation, crÃ©ation,
-modification et suppression de repas planifiÃ©s.
+Gestion du planning de repas hebdomadaire : consultation, création,
+modification et suppression de repas planifiés.
 """
 
 from datetime import UTC, date, datetime, timedelta
@@ -141,21 +141,21 @@ async def obtenir_conflits_planning(
 @gerer_exception_api
 async def obtenir_planning_semaine(
     date_debut: datetime | None = Query(
-        None, description="Date de dÃ©but de semaine (ISO 8601). DÃ©faut: lundi courant"
+        None, description="Date de début de semaine (ISO 8601). Défaut: lundi courant"
     ),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    RÃ©cupÃ¨re le planning de repas de la semaine.
+    Récupère le planning de repas de la semaine.
 
-    Retourne tous les repas planifiÃ©s pour une semaine donnÃ©e, organisÃ©s
-    par jour et type de repas (petit-dÃ©jeuner, dÃ©jeuner, dÃ®ner).
+    Retourne tous les repas planifiés pour une semaine donnée, organisés
+    par jour et type de repas (petit-déjeuner, déjeuner, dîner).
 
     Args:
-        date_debut: Date de dÃ©but (dÃ©faut: lundi de la semaine courante)
+        date_debut: Date de début (défaut: lundi de la semaine courante)
 
     Returns:
-        Planning structurÃ© par jour avec date_debut, date_fin et repas
+        Planning structuré par jour avec date_debut, date_fin et repas
 
     Example:
         ```
@@ -215,21 +215,21 @@ async def obtenir_planning_semaine(
 @gerer_exception_api
 async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require_auth)):
     """
-    Planifie un repas pour une date et un type donnÃ©s.
+    Planifie un repas pour une date et un type donnés.
 
-    CrÃ©e automatiquement le planning hebdomadaire s'il n'existe pas.
-    Si un repas existe dÃ©jÃ  pour la mÃªme date et le mÃªme type,
-    il est mis Ã  jour au lieu d'Ãªtre dupliquÃ©.
+    Crée automatiquement le planning hebdomadaire s'il n'existe pas.
+    Si un repas existe déjà pour la même date et le même type,
+    il est mis à jour au lieu d'être dupliqué.
 
     Args:
-        repas: DonnÃ©es du repas (date, type_repas, recette_id, notes)
+        repas: Données du repas (date, type_repas, recette_id, notes)
 
     Returns:
-        Message de confirmation avec l'ID du repas crÃ©Ã©/mis Ã  jour
+        Message de confirmation avec l'ID du repas créé/mis à jour
 
     Raises:
-        401: Non authentifiÃ©
-        422: DonnÃ©es invalides
+        401: Non authentifié
+        422: Données invalides
 
     Example:
         ```
@@ -241,19 +241,19 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
             "date": "2026-02-19",
             "type_repas": "diner",
             "recette_id": 42,
-            "notes": "PrÃ©parer la veille"
+            "notes": "Préparer la veille"
         }
 
         Response:
-        {"message": "Repas planifiÃ©", "id": 7}
+        {"message": "Repas planifié", "id": 7}
         ```
     """
     from src.core.models import Planning, Repas
 
     def _create():
         with executer_avec_session() as session:
-            # RÃ©cupÃ©rer ou crÃ©er un planning par dÃ©faut
-            # repas.date est un objet date (plus datetime) depuis le schÃ©ma corrigÃ©
+            # Récupérer ou créer un planning par défaut
+            # repas.date est un objet date (plus datetime) depuis le schéma corrigé
             date_repas = repas.date
 
             # Chercher un planning existant pour cette date
@@ -264,7 +264,7 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
             )
 
             if not planning:
-                # CrÃ©er un planning par dÃ©faut
+                # Créer un planning par défaut
                 debut = date_repas - timedelta(days=date_repas.weekday())
                 fin = debut + timedelta(days=6)
                 planning = Planning(
@@ -276,7 +276,7 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
                 session.add(planning)
                 session.flush()
 
-            # VÃ©rifier s'il existe dÃ©jÃ  un repas pour cette date/type
+            # Vérifier s'il existe déjà un repas pour cette date/type
             existing = (
                 session.query(Repas)
                 .filter(
@@ -288,14 +288,14 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
             )
 
             if existing:
-                # Mettre Ã  jour
+                # Mettre à jour
                 existing.recette_id = repas.recette_id
                 if hasattr(existing, "notes"):
                     existing.notes = repas.notes
                 session.commit()
-                return MessageResponse(message="Repas mis Ã  jour", id=existing.id)
+                return MessageResponse(message="Repas mis à jour", id=existing.id)
 
-            # CrÃ©er
+            # Créer
             db_repas = Repas(
                 planning_id=planning.id,
                 date_repas=date_repas,
@@ -305,7 +305,7 @@ async def creer_repas(repas: RepasCreate, user: dict[str, Any] = Depends(require
             session.add(db_repas)
             session.commit()
 
-            return MessageResponse(message="Repas planifiÃ©", id=db_repas.id)
+            return MessageResponse(message="Repas planifié", id=db_repas.id)
 
     return await executer_async(_create)
 
@@ -316,21 +316,21 @@ async def modifier_repas(
     repas_id: int, repas: RepasCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
-    Met Ã  jour un repas planifiÃ©.
+    Met à jour un repas planifié.
 
     Permet de changer la recette, le type de repas ou les notes
-    d'un repas dÃ©jÃ  planifiÃ©.
+    d'un repas déjà planifié.
 
     Args:
-        repas_id: ID du repas Ã  modifier
-        repas: Nouvelles donnÃ©es du repas
+        repas_id: ID du repas à modifier
+        repas: Nouvelles données du repas
 
     Returns:
         Message de confirmation
 
     Raises:
-        401: Non authentifiÃ©
-        404: Repas non trouvÃ©
+        401: Non authentifié
+        404: Repas non trouvé
 
     Example:
         ```
@@ -342,11 +342,11 @@ async def modifier_repas(
             "date": "2026-02-19",
             "type_repas": "diner",
             "recette_id": 15,
-            "notes": "Changement de derniÃ¨re minute"
+            "notes": "Changement de dernière minute"
         }
 
         Response:
-        {"message": "Repas mis Ã  jour", "id": 7}
+        {"message": "Repas mis à jour", "id": 7}
         ```
     """
     from src.core.models import Repas
@@ -356,7 +356,7 @@ async def modifier_repas(
             db_repas = session.query(Repas).filter(Repas.id == repas_id).first()
 
             if not db_repas:
-                raise HTTPException(status_code=404, detail="Repas non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Repas non trouvé")
 
             db_repas.type_repas = repas.type_repas
             db_repas.recette_id = repas.recette_id
@@ -366,7 +366,7 @@ async def modifier_repas(
             session.commit()
             session.refresh(db_repas)
 
-            return MessageResponse(message="Repas mis Ã  jour", id=db_repas.id)
+            return MessageResponse(message="Repas mis à jour", id=db_repas.id)
 
     return await executer_async(_update)
 
@@ -377,17 +377,17 @@ async def modifier_repas(
 @gerer_exception_api
 async def supprimer_repas(repas_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
-    Supprime un repas planifiÃ©.
+    Supprime un repas planifié.
 
     Args:
-        repas_id: ID du repas Ã  supprimer
+        repas_id: ID du repas à supprimer
 
     Returns:
         Message de confirmation
 
     Raises:
-        401: Non authentifiÃ©
-        404: Repas non trouvÃ©
+        401: Non authentifié
+        404: Repas non trouvé
 
     Example:
         ```
@@ -395,7 +395,7 @@ async def supprimer_repas(repas_id: int, user: dict[str, Any] = Depends(require_
         Authorization: Bearer <token>
 
         Response:
-        {"message": "Repas supprimÃ©", "id": 7}
+        {"message": "Repas supprimé", "id": 7}
         ```
     """
     from src.core.models import Repas
@@ -405,19 +405,19 @@ async def supprimer_repas(repas_id: int, user: dict[str, Any] = Depends(require_
             repas = session.query(Repas).filter(Repas.id == repas_id).first()
 
             if not repas:
-                raise HTTPException(status_code=404, detail="Repas non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Repas non trouvé")
 
             session.delete(repas)
             session.commit()
 
-            return MessageResponse(message="Repas supprimÃ©", id=repas_id)
+            return MessageResponse(message="Repas supprimé", id=repas_id)
 
     return await executer_async(_delete)
 
 
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----------------------------------------------------------
 # VALIDATION & CONSOMMATION
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----------------------------------------------------------
 
 
 @router.post(
@@ -430,9 +430,9 @@ async def valider_planning(
     planning_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Valide un planning proposÃ© et le rend actif.
+    """Valide un planning proposé et le rend actif.
 
-    DÃ©sactive tout planning actif prÃ©cÃ©dent pour la mÃªme semaine.
+    Désactive tout planning actif précédent pour la même semaine.
     """
     from src.core.models import Planning
 
@@ -440,9 +440,9 @@ async def valider_planning(
         with executer_avec_session() as session:
             planning = session.query(Planning).filter(Planning.id == planning_id).first()
             if not planning:
-                raise HTTPException(status_code=404, detail="Planning non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Planning non trouvé")
 
-            # DÃ©sactiver les plannings actifs de la mÃªme semaine
+            # Désactiver les plannings actifs de la même semaine
             session.query(Planning).filter(
                 Planning.semaine_debut == planning.semaine_debut,
                 Planning.id != planning_id,
@@ -453,7 +453,7 @@ async def valider_planning(
             planning.actif = True
             session.commit()
 
-            return MessageResponse(message="Planning validÃ© et activÃ©", id=planning_id)
+            return MessageResponse(message="Planning validé et activé", id=planning_id)
 
     return await executer_async(_valider)
 
@@ -527,11 +527,11 @@ async def marquer_repas_consomme(
     repas_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Marque un repas comme consommÃ© et dÃ©crÃ©mente l'inventaire.
+    """Marque un repas comme consommé et décrémente l'inventaire.
 
-    Pour chaque ingrÃ©dient de la recette :
+    Pour chaque ingrédient de la recette :
     - Cherche l'article correspondant dans l'inventaire
-    - DÃ©crÃ©mente la quantitÃ© proportionnellement aux portions
+    - Décrémente la quantité proportionnellement aux portions
     """
     from src.core.models import ArticleInventaire, Repas
     from src.core.models.recettes import RecetteIngredient
@@ -540,16 +540,16 @@ async def marquer_repas_consomme(
         with executer_avec_session() as session:
             repas = session.query(Repas).filter(Repas.id == repas_id).first()
             if not repas:
-                raise HTTPException(status_code=404, detail="Repas non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Repas non trouvé")
 
             if repas.consomme:
-                return MessageResponse(message="Repas dÃ©jÃ  marquÃ© comme consommÃ©", id=repas_id)
+                return MessageResponse(message="Repas déjà marqué comme consommé", id=repas_id)
 
-            # Marquer consommÃ©
+            # Marquer consommé
             repas.consomme = True
             repas.consomme_le = datetime.now(UTC)
 
-            # DÃ©crÃ©menter l'inventaire si recette liÃ©e
+            # Décrémenter l'inventaire si recette liée
             articles_decremented = 0
             if repas.recette_id:
                 portions = repas.portion_ajustee or (
@@ -577,7 +577,7 @@ async def marquer_repas_consomme(
             session.commit()
 
             return MessageResponse(
-                message=f"Repas consommÃ©, {articles_decremented} articles inventaire mis Ã  jour",
+                message=f"Repas consommé, {articles_decremented} articles inventaire mis à jour",
                 id=repas_id,
             )
 
@@ -591,13 +591,13 @@ async def marquer_repas_consomme(
 @gerer_exception_api
 async def obtenir_alternatives_repas(
     repas_id: int,
-    nb: int = Query(3, ge=1, le=5, description="Nombre d'alternatives Ã  proposer"),
+    nb: int = Query(3, ge=1, le=5, description="Nombre d'alternatives à proposer"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """Retourne des recettes alternatives pour un slot de repas.
 
-    Utilise les contraintes du jour (Ã©quilibre, type de repas) pour proposer
-    des alternatives cohÃ©rentes via la logique IA existante.
+    Utilise les contraintes du jour (équilibre, type de repas) pour proposer
+    des alternatives cohérentes via la logique IA existante.
     """
     from src.core.models import Recette, Repas
 
@@ -605,21 +605,21 @@ async def obtenir_alternatives_repas(
         with executer_avec_session() as session:
             repas = session.query(Repas).filter(Repas.id == repas_id).first()
             if not repas:
-                raise HTTPException(status_code=404, detail="Repas non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Repas non trouvé")
 
             # Exclure la recette actuelle
             exclude_ids = [repas.recette_id] if repas.recette_id else []
 
-            # Chercher des alternatives du mÃªme type de repas
+            # Chercher des alternatives du même type de repas
             query = session.query(Recette).filter(Recette.id.notin_(exclude_ids))
 
-            # PrioritÃ© aux rapides pour le soir
-            if repas.type_repas in ("dÃ®ner", "diner"):
+            # Priorité aux rapides pour le soir
+            if repas.type_repas in ("dîner", "diner"):
                 query = query.order_by(Recette.temps_total.asc().nullslast())
 
             alternatives = query.limit(nb * 3).all()
 
-            # SÃ©lectionner les meilleures alternatives (variÃ©tÃ© de catÃ©gories)
+            # Sélectionner les meilleures alternatives (variété de catégories)
             seen_categories: set[str] = set()
             result = []
             for r in alternatives:
@@ -651,9 +651,9 @@ async def obtenir_alternatives_repas(
     return await executer_async(_alternatives)
 
 
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-# GÃ‰NÃ‰RATION IA
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----------------------------------------------------------
+# GÉNÉRATION IA
+# ----------------------------------------------------------
 
 
 @router.post("/generer", response_model=PlanningSemaineResponse)
@@ -663,16 +663,16 @@ async def generer_planning_ia(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    GÃ©nÃ¨re un planning de repas hebdomadaire via l'IA Mistral.
+    Génère un planning de repas hebdomadaire via l'IA Mistral.
 
-    CrÃ©e 7 jours Ã— 2 repas (dÃ©jeuner + dÃ®ner) en utilisant Mistral AI.
+    Crée 7 jours × 2 repas (déjeuner + dîner) en utilisant Mistral AI.
     Persiste directement les repas dans la DB.
 
     Args:
-        body: ParamÃ¨tres optionnels (date_debut, nb_personnes, preferences)
+        body: Paramètres optionnels (date_debut, nb_personnes, preferences)
 
     Returns:
-        Planning complet de la semaine gÃ©nÃ©rÃ©e
+        Planning complet de la semaine générée
 
     Example:
         ```
@@ -710,7 +710,7 @@ async def generer_planning_ia(
         from src.core.models import Recette
         from src.core.models.recettes import HistoriqueRecette
 
-        # Enrichir les prÃ©fÃ©rences avec signaux historiques + nutrition
+        # Enrichir les préférences avec signaux historiques + nutrition
         preferences_base = getattr(body, "preferences", None) or {}
         preferences_enrichies = dict(preferences_base)
         with executer_avec_session() as session:
@@ -770,7 +770,7 @@ async def generer_planning_ia(
                 if produits_saison:
                     preferences_enrichies["produits_de_saison"] = produits_saison[:20]
         except Exception as e:
-            logger.warning("[planning] Enrichissement saisonnier non chargÃ©: %s", e)
+            logger.warning("[planning] Enrichissement saisonnier non chargé: %s", e)
 
         service = obtenir_service_planning()
         planning_obj = service.generer_planning_ia(
@@ -781,10 +781,10 @@ async def generer_planning_ia(
         if not planning_obj:
             raise HTTPException(
                 status_code=503,
-                detail="Impossible de gÃ©nÃ©rer le planning. RÃ©essayez plus tard."
+                detail="Impossible de générer le planning. Réessayez plus tard."
             )
 
-        # Reconstruire la rÃ©ponse dans le mÃªme format que GET /semaine
+        # Reconstruire la réponse dans le même format que GET /semaine
         with executer_avec_session() as session:
             from src.core.models import Repas
 
@@ -804,7 +804,7 @@ async def generer_planning_ia(
                 if jour not in planning_dict:
                     planning_dict[jour] = {}
 
-                # Inclure le nom de la recette si liÃ©e
+                # Inclure le nom de la recette si liée
                 entry = {
                     "id": r.id,
                     "recette_id": r.recette_id,
@@ -812,7 +812,7 @@ async def generer_planning_ia(
                 }
                 if r.recette_id and hasattr(r, "recette") and r.recette:
                     entry["recette_nom"] = r.recette.nom
-                    # Nutri-Score simplifiÃ© dÃ©rivÃ© des macros (heuristique)
+                    # Nutri-Score simplifié dérivé des macros (heuristique)
                     rec = r.recette
                     cal = rec.calories or 0
                     prot = rec.proteines or 0
@@ -844,9 +844,9 @@ async def generer_planning_ia(
     return await executer_async(_generate)
 
 
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----------------------------------------------------------
 # SUGGESTIONS RAPIDES
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----------------------------------------------------------
 
 
 @router.get("/suggestions-rapides")
@@ -858,14 +858,14 @@ async def obtenir_suggestions_rapides(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Suggestions rapides de recettes pour le sÃ©lecteur de repas.
+    Suggestions rapides de recettes pour le sélecteur de repas.
 
-    Retourne des recettes adaptÃ©es au type de repas, Ã  la saison et Ã  la mÃ©tÃ©o,
-    en excluant celles dÃ©jÃ  planifiÃ©es cette semaine.
+    Retourne des recettes adaptées au type de repas, à la saison et à la météo,
+    en excluant celles déjà planifiées cette semaine.
     """
     from src.core.models import Recette, Repas
 
-    # RÃ©cupÃ©rer la mÃ©tÃ©o (non bloquant â€” fallback si Ã©chec)
+    # Récupérer la météo (non bloquant - fallback si échec)
     meteo_ctx: dict[str, Any] = {}
     try:
         from src.services.utilitaires.meteo_service import obtenir_meteo_service
@@ -878,7 +878,7 @@ async def obtenir_suggestions_rapides(
                 "emoji": meteo.actuelle.emoji,
             }
     except Exception as e:
-        logger.warning("[planning] MÃ©tÃ©o non chargÃ©e pour suggestions rapides: %s", e)
+        logger.warning("[planning] Météo non chargée pour suggestions rapides: %s", e)
 
     def _query():
         with executer_avec_session() as session:
@@ -899,29 +899,29 @@ async def obtenir_suggestions_rapides(
                 .all()
             ]
 
-            # Chercher des recettes adaptÃ©es
+            # Chercher des recettes adaptées
             query = session.query(Recette)
 
-            # Exclure les dÃ©jÃ  planifiÃ©es
+            # Exclure les déjà planifiées
             if recettes_planifiees_ids:
                 query = query.filter(Recette.id.notin_(recettes_planifiees_ids))
 
             # Adapter au type de repas
             if type_repas in ("petit_dejeuner", "gouter"):
                 query = query.filter(
-                    Recette.categorie.in_(["Petit-dÃ©jeuner", "Dessert", "GoÃ»ter", "Snack"])
+                    Recette.categorie.in_(["Petit-déjeuner", "Dessert", "Goûter", "Snack"])
                 )
 
-            # Adaptation mÃ©tÃ©o : favoriser catÃ©gories selon tempÃ©rature
+            # Adaptation météo : favoriser catégories selon température
             categories_favorites: list[str] = []
             temp = meteo_ctx.get("temperature")
             if temp is not None:
                 if temp < 10:
-                    categories_favorites = ["Soupe", "Plat mijotÃ©", "Gratin", "Plat"]
+                    categories_favorites = ["Soupe", "Plat mijoté", "Gratin", "Plat"]
                 elif temp > 25:
-                    categories_favorites = ["Salade", "EntrÃ©e froide", "Smoothie"]
+                    categories_favorites = ["Salade", "Entrée froide", "Smoothie"]
 
-            # Trier par popularitÃ© (nombre d'historiques) et varier
+            # Trier par popularité (nombre d'historiques) et varier
             from sqlalchemy import func, case
             from src.core.models.recettes import HistoriqueRecette
 
@@ -930,7 +930,7 @@ async def obtenir_suggestions_rapides(
             ).group_by(Recette.id)
 
             if categories_favorites:
-                # Boost les catÃ©gories adaptÃ©es Ã  la mÃ©tÃ©o
+                # Boost les catégories adaptées à la météo
                 meteo_boost = case(
                     (Recette.categorie.in_(categories_favorites), 1),
                     else_=0,
@@ -968,15 +968,15 @@ async def obtenir_suggestions_rapides(
     return await executer_async(_query)
 
 
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----------------------------------------------------------
 # EXPORT iCAL
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----------------------------------------------------------
 
 
 @router.get("/export/ical")
 @gerer_exception_api
 async def exporter_planning_ical(
-    semaines: int = Query(2, ge=1, le=8, description="Nombre de semaines Ã  exporter (1-8)"),
+    semaines: int = Query(2, ge=1, le=8, description="Nombre de semaines à exporter (1-8)"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> Response:
     """
@@ -985,10 +985,10 @@ async def exporter_planning_ical(
     Compatible Google Calendar, Apple Calendar, Outlook.
 
     Args:
-        semaines: Nombre de semaines Ã  inclure (dÃ©faut: 2, max: 8)
+        semaines: Nombre de semaines à inclure (défaut: 2, max: 8)
 
     Returns:
-        Fichier .ics tÃ©lÃ©chargeable
+        Fichier .ics téléchargeable
 
     Example:
         ```
@@ -1029,30 +1029,30 @@ async def exporter_planning_ical(
             ]
 
             TYPES_REPAS_HEURES = {
-                "petit_dÃ©jeuner": "070000",
-                "dÃ©jeuner": "120000",
-                "goÃ»ter": "160000",
-                "dÃ®ner": "190000",
+                "petit_déjeuner": "070000",
+                "déjeuner": "120000",
+                "goûter": "160000",
+                "dîner": "190000",
             }
 
             for repas in repas_liste:
                 heure = TYPES_REPAS_HEURES.get(repas.type_repas, "120000")
                 dt_debut = f"{repas.date_repas.strftime('%Y%m%d')}T{heure}"
-                # DurÃ©e par dÃ©faut 30 min
+                # Durée par défaut 30 min
                 heure_fin = str(int(heure[:2]) * 10000 + int(heure[2:4]) * 100 + 3000).zfill(6)
                 dt_fin = f"{repas.date_repas.strftime('%Y%m%d')}T{heure_fin}"
 
                 # Titre : recette ou type de repas
-                nom_recette = "Repas Ã  planifier"
+                nom_recette = "Repas à planifier"
                 if repas.recette:
                     nom_recette = repas.recette.nom
 
                 type_label = repas.type_repas.replace("_", " ").capitalize()
-                summary = f"{type_label} â€“ {nom_recette}"
+                summary = f"{type_label} - {nom_recette}"
 
                 description_parts = []
                 if repas.entree:
-                    description_parts.append(f"EntrÃ©e: {repas.entree}")
+                    description_parts.append(f"Entrée: {repas.entree}")
                 if repas.dessert:
                     description_parts.append(f"Dessert: {repas.dessert}")
                 if repas.notes:
@@ -1091,21 +1091,21 @@ async def exporter_planning_ical(
     "/nutrition-hebdo",
     responses=REPONSES_LISTE,
     summary="Analyse nutritionnelle hebdomadaire",
-    description="AgrÃ¨ge les donnÃ©es nutritionnelles des repas planifiÃ©s pour une semaine donnÃ©e.",
+    description="Agrège les données nutritionnelles des repas planifiés pour une semaine donnée.",
 )
 @gerer_exception_api
 async def nutrition_hebdomadaire(
     semaine: str | None = Query(
         None,
-        description="Date de dÃ©but de semaine ISO 8601 (YYYY-MM-DD). DÃ©faut: semaine courante.",
+        description="Date de début de semaine ISO 8601 (YYYY-MM-DD). Défaut: semaine courante.",
     ),
     user: dict = Depends(require_auth),
 ) -> dict:
     """
-    Retourne l'analyse nutritionnelle agrÃ©gÃ©e de la semaine :
-    - Totaux calories / protÃ©ines / lipides / glucides
-    - RÃ©partition par jour
-    - Nombre de repas sans donnÃ©es nutritionnelles
+    Retourne l'analyse nutritionnelle agrégée de la semaine :
+    - Totaux calories / protéines / lipides / glucides
+    - Répartition par jour
+    - Nombre de repas sans données nutritionnelles
     - Signaux de carences probables + suggestions compensatoires
     """
     from datetime import date
@@ -1153,7 +1153,7 @@ async def nutrition_hebdomadaire(
                 recette = repas.recette
                 if recette and recette.calories is not None:
                     portions = repas.portion_ajustee or (recette.portions or 1)
-                    # Valeur nutritionnelle = par portion Ã— nombre de portions / portions standard
+                    # Valeur nutritionnelle = par portion × nombre de portions / portions standard
                     facteur = portions / (recette.portions or 1) if recette.portions else 1
                     cal = int((recette.calories or 0) * facteur)
                     prot = round((recette.proteines or 0.0) * facteur, 1)
@@ -1222,7 +1222,7 @@ async def nutrition_hebdomadaire(
 async def obtenir_semaine_unifiee(
     date_debut: str | None = Query(
         None,
-        description="Date de dÃ©but de semaine ISO (YYYY-MM-DD). DÃ©faut: lundi courant.",
+        description="Date de début de semaine ISO (YYYY-MM-DD). Défaut: lundi courant.",
     ),
     user: dict = Depends(require_auth),
 ) -> dict:

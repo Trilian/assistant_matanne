@@ -67,6 +67,7 @@ from src.api.routes import (
     habitat_router,
     garmin_router,
     ia_avancee_router,
+    innovations_router,
     inventaire_router,
     jeux_router,
     maison_router,
@@ -540,6 +541,7 @@ app.include_router(preferences_router)
 app.include_router(automations_router)
 app.include_router(anti_gaspillage_router)
 app.include_router(ia_avancee_router)
+app.include_router(innovations_router)
 app.include_router(export_router)
 app.include_router(utilitaires_router)
 app.include_router(recherche_router)

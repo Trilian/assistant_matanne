@@ -45,6 +45,12 @@ export default function IdeesCadeauxPage() {
           </form>
         </CardContent>
       </Card>
+      {!resultat && !chargement && (
+        <Card>
+          <CardHeader><CardTitle>En attente d'idées</CardTitle></CardHeader>
+          <CardContent><p className="text-sm text-muted-foreground">Remplis le profil et lance la génération pour obtenir des idées adaptées.</p></CardContent>
+        </Card>
+      )}
       {resultat && <div className="grid gap-4 md:grid-cols-2">{resultat.idees.map((idee, index) => <Card key={`${idee.titre}-${index}`}><CardHeader><CardTitle className="text-lg">{idee.titre}</CardTitle><CardDescription>{idee.fourchette_prix}</CardDescription></CardHeader><CardContent className="space-y-2"><p>{idee.description}</p><p className="text-sm text-muted-foreground">Pertinence : {idee.pertinence}</p>{idee.raison && <p className="text-sm text-muted-foreground">{idee.raison}</p>}{idee.ou_acheter && <p className="text-sm">Où acheter : {idee.ou_acheter}</p>}</CardContent></Card>)}</div>}
     </div>
   )

@@ -52,7 +52,7 @@ def _charger_automations(session, user: dict[str, Any]):
 
 
 def _migrer_automations_depuis_preferences(session, profil) -> list:
-    """Migration douce prÃ©fÃ©rences â†’ AutomationRegle (POST /init uniquement, pas dans GET)."""
+    """Migration douce préférences -> AutomationRegle (POST /init uniquement, pas dans GET)."""
     from src.core.models import AutomationRegle
 
     preferences_modules = profil.preferences_modules or {}
@@ -106,14 +106,14 @@ async def lister_automations(user: dict[str, Any] = Depends(require_auth)) -> di
 @router.post("/init", responses=REPONSES_CRUD_CREATION)
 @gerer_exception_api
 async def initialiser_automations(user: dict[str, Any] = Depends(require_auth)) -> dict[str, Any]:
-    """Initialise les automations depuis les prÃ©fÃ©rences legacy (migration unique, idempotent)."""
+    """Initialise les automations depuis les préférences legacy (migration unique, idempotent)."""
     def _query():
         with executer_avec_session() as session:
             profil, automations = _charger_automations(session, user)
             if automations:
-                return {"message": "Automations dÃ©jÃ  initialisÃ©es", "total": len(automations)}
+                return {"message": "Automations déjà initialisées", "total": len(automations)}
             migrees = _migrer_automations_depuis_preferences(session, profil)
-            return {"message": f"{len(migrees)} automation(s) importÃ©e(s)", "total": len(migrees)}
+            return {"message": f"{len(migrees)} automation(s) importée(s)", "total": len(migrees)}
 
     return await executer_async(_query)
 
@@ -136,7 +136,7 @@ async def creer_automation(payload: dict[str, Any], user: dict[str, Any] = Depen
             session.add(automation)
             session.commit()
             session.refresh(automation)
-            return {"message": "Automation crÃ©Ã©e", "item": _serialiser_automation(automation)}
+            return {"message": "Automation créée", "item": _serialiser_automation(automation)}
 
     return await executer_async(_query)
 
@@ -174,7 +174,7 @@ async def modifier_automation(
                 automation.active = bool(payload["active"])
 
             session.commit()
-            return {"message": "Automation mise Ã  jour", "item": _serialiser_automation(automation)}
+            return {"message": "Automation mise à jour", "item": _serialiser_automation(automation)}
 
     return await executer_async(_query)
 
@@ -204,7 +204,7 @@ async def simuler_automation(
             action = automation.action or {}
             return {
                 "success": True,
-                "resume": f"Si {declencheur.get('type', 'Ã©vÃ©nement')} alors {action.get('type', 'action')}",
+                "resume": f"Si {declencheur.get('type', 'événement')} alors {action.get('type', 'action')}",
                 "item": _serialiser_automation(automation),
             }
 
@@ -218,7 +218,7 @@ async def executer_automation_maintenant(
     dry_run: bool = Query(False, description="Simuler l'exécution sans persistance"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """DÃ©clenche manuellement une automation (LT-04)."""
+    """Déclenche manuellement une automation (LT-04)."""
     from src.services.utilitaires.automations_engine import obtenir_moteur_automations_service
 
     def _query():
@@ -233,7 +233,7 @@ async def executer_automation_maintenant(
             )
             if not result.get("success"):
                 raise HTTPException(status_code=404, detail=result.get("message", "Automation introuvable"))
-            message = "Automation simulÃ©e" if dry_run else "Automation exÃ©cutÃ©e"
+            message = "Automation simulée" if dry_run else "Automation exécutée"
             return {"message": message, "resultat": result, "user_id": profil.id, "dry_run": dry_run}
 
     return await executer_async(_query)

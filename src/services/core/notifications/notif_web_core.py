@@ -299,5 +299,8 @@ def obtenir_service_webpush() -> ServiceWebPush:
     return ServiceWebPush()
 
 
+# Alias français pour compatibilité historique des routes API
+obtenir_push_notification_service = obtenir_service_webpush
+
 # Alias anglais pour compatibilité API routes
 get_push_notification_service = obtenir_service_webpush

@@ -26,6 +26,12 @@ export default function OptimisationRoutinesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4"><div><h1 className="text-3xl font-bold">Optimisation des routines</h1><p className="text-muted-foreground">Identifie les frictions et les gains de temps possibles.</p></div><Button onClick={charger} disabled={chargement}>{chargement ? 'Analyse...' : 'Relancer l’analyse'}</Button></div>
+      {!resultat && !chargement && (
+        <Card>
+          <CardHeader><CardTitle>Chargement initial terminé</CardTitle></CardHeader>
+          <CardContent><p className="text-sm text-muted-foreground">Aucune optimisation disponible pour l’instant. Relance l’analyse pour réessayer.</p></CardContent>
+        </Card>
+      )}
       {resultat && (
         <>
           <div className="grid gap-4 md:grid-cols-2">

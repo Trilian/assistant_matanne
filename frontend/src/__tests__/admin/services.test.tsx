@@ -3,6 +3,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 
+vi.mock("@/composants/ui/tabs", () => ({
+  Tabs: ({ children }: { children: React.ReactNode }) => React.createElement("div", null, children),
+  TabsList: ({ children }: { children: React.ReactNode }) => React.createElement("div", null, children),
+  TabsTrigger: ({ children }: { children: React.ReactNode }) => React.createElement("button", { type: "button" }, children),
+  TabsContent: ({ children }: { children: React.ReactNode }) => React.createElement("div", null, children),
+}));
+
 vi.mock("@/bibliotheque/api/admin", () => ({
   executerActionService: vi.fn(),
   exporterConfigAdmin: vi.fn(),
@@ -59,7 +66,11 @@ function renderWithQuery(ui: React.ReactElement) {
 describe("PageAdminServices", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.spyOn(HTMLElement.prototype, "scrollIntoView").mockImplementation(() => {});
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      writable: true,
+      value: vi.fn(),
+    });
 
     mockedObtenirSanteServices.mockResolvedValue({
       global_status: "healthy",
@@ -178,11 +189,8 @@ describe("PageAdminServices", () => {
   it("importe la configuration admin depuis le JSON collé", async () => {
     renderWithQuery(React.createElement(PageAdminServices));
 
-    fireEvent.click(screen.getByRole("tab", { name: /config/i }));
-
     await screen.findByRole("button", { name: /importer la configuration/i });
-    const textareas = await screen.findAllByRole("textbox");
-    const importTextarea = textareas[textareas.length - 1];
+    const importTextarea = await screen.findByPlaceholderText(/collez ici un export json admin/i);
     fireEvent.change(importTextarea, {
       target: {
         value: JSON.stringify({
@@ -206,7 +214,6 @@ describe("PageAdminServices", () => {
   it("lance une simulation de flux depuis l'onglet simulateur", async () => {
     renderWithQuery(React.createElement(PageAdminServices));
 
-    fireEvent.click(screen.getByRole("tab", { name: /simulateur/i }));
     await screen.findByLabelText(/scénario de simulation/i);
     fireEvent.click(await screen.findByRole("button", { name: /lancer la simulation/i }));
 

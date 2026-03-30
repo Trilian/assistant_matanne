@@ -5,7 +5,7 @@ Audit rapide des tests - Analyse des patterns et mapping sans coverage.
 Ce script analyse rapidement:
 1. Le mapping source/test
 2. Les patterns de tests inefficaces
-3. GÃ©nÃ¨re un rapport actionnable
+3. Genere un rapport actionnable
 
 Usage:
     python scripts/test/audit_tests_fast.py
@@ -33,7 +33,7 @@ class TestAnalysis:
     lines: int
     nb_tests: int
     patterns: dict[str, int] = field(default_factory=dict)
-    score: float = 0.0  # 0-100, qualitÃ© estimÃ©e
+    score: float = 0.0  # 0-100, qualite estimee
     issues: list[str] = field(default_factory=list)
 
 
@@ -54,7 +54,7 @@ INEFFECTIVE_PATTERNS = {
 # Patterns positifs (bonnes pratiques)
 POSITIVE_PATTERNS = {
     "db_fixture": (r"def test_\w+\([^)]*db\s*:", 2, "Utilise fixture DB"),
-    "real_assert": (r"assert\s+\w+\.\w+\s*==", 2, "Assertion sur attribut rÃ©el"),
+    "real_assert": (r"assert\s+\w+\.\w+\s*==", 2, "Assertion sur attribut reel"),
     "exception_test": (r"pytest\.raises\(|with self\.assertRaises", 3, "Test d'exception"),
 }
 
@@ -79,13 +79,13 @@ def analyze_test_file(filepath: Path) -> TestAnalysis:
     issues = []
     score = 100.0  # Start with perfect score
 
-    # DÃ©tecter patterns nÃ©gatifs
+    # Detecter patterns negatifs
     for name, (pattern, penalty, desc) in INEFFECTIVE_PATTERNS.items():
         matches = re.findall(pattern, content, re.MULTILINE)
         count = len(matches)
         if count > 0:
             patterns_found[name] = count
-            # PÃ©nalitÃ© proportionnelle au nombre de matchs
+            # Penalite proportionnelle au nombre de matchs
             score -= min(30, count * penalty)
             if count >= 5:
                 issues.append(f"{desc} ({count}x)")
@@ -101,7 +101,7 @@ def analyze_test_file(filepath: Path) -> TestAnalysis:
     test_density = nb_tests / max(1, lines / 50)
     if test_density > 3:  # Plus de 3 tests par 50 lignes = probablement hasattr
         score -= 10
-        issues.append("DensitÃ© tests trÃ¨s haute (tests superficiels?)")
+        issues.append("Densite tests tres haute (tests superficiels?)")
 
     score = max(0, min(100, score))
 
@@ -116,7 +116,7 @@ def analyze_test_file(filepath: Path) -> TestAnalysis:
 
 
 def find_source_for_test(test_path: str, source_files: dict[str, Path]) -> list[str]:
-    """Trouve les fichiers source correspondant Ã  un test."""
+    """Trouve les fichiers source correspondant a un test."""
     test_name = Path(test_path).stem
 
     # Extraire le nom de module du test
@@ -150,7 +150,7 @@ def find_source_for_test(test_path: str, source_files: dict[str, Path]) -> list[
 
 
 def run_audit(project_root: Path, output_csv: Path):
-    """ExÃ©cute l'audit rapide."""
+    """Execute l'audit rapide."""
     src_dir = project_root / "src"
     tests_dir = project_root / "tests"
 
@@ -173,7 +173,7 @@ def run_audit(project_root: Path, output_csv: Path):
             analysis = analyze_test_file(py_file)
             test_analyses.append(analysis)
 
-    print(f"    {len(test_analyses)} fichiers de test analysÃ©s")
+    print(f"    {len(test_analyses)} fichiers de test analyses")
 
     # Mapper tests -> sources
     test_to_sources = {}
@@ -193,8 +193,8 @@ def run_audit(project_root: Path, output_csv: Path):
     low_quality_tests = [a for a in test_analyses if 50 <= a.score < 70]
     good_tests = [a for a in test_analyses if a.score >= 70]
 
-    # GÃ©nÃ©rer le rapport CSV
-    print(f"\n[*] GÃ©nÃ©ration du rapport: {output_csv}")
+    # Generer le rapport CSV
+    print(f"\n[*] Generation du rapport: {output_csv}")
     output_csv.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_csv, "w", newline="", encoding="utf-8") as f:
@@ -248,7 +248,7 @@ def run_audit(project_root: Path, output_csv: Path):
                 ["source", src, lines, 0, 0, "", "Pas de test correspondant", "CREATE_TESTS"]
             )
 
-    # RÃ©sumÃ©
+    # Resume
     print("\n" + "=" * 70)
     print("RESUME DE L'AUDIT")
     print("=" * 70)
@@ -256,12 +256,12 @@ def run_audit(project_root: Path, output_csv: Path):
     print(f"Fichiers de test: {len(test_analyses)}")
     print(f"Tests totaux: {sum(a.nb_tests for a in test_analyses)}")
 
-    print(f"\n[+] Tests de qualitÃ© (>=70): {len(good_tests)}")
-    print(f"[~] Tests Ã  amÃ©liorer (50-70): {len(low_quality_tests)}")
+    print(f"\n[+] Tests de qualite (>=70): {len(good_tests)}")
+    print(f"[~] Tests a ameliorer (50-70): {len(low_quality_tests)}")
     print(f"[-] Tests inefficaces (<50): {len(ineffective_tests)}")
     print(f"[!] Sources sans tests: {len(uncovered_sources)}")
 
-    # Top tests Ã  supprimer/rÃ©Ã©crire
+    # Top tests a supprimer/reecrire
     if ineffective_tests:
         print("\n--- TESTS A SUPPRIMER/REECRIRE (score < 50) ---")
         for a in sorted(ineffective_tests, key=lambda x: x.score)[:15]:

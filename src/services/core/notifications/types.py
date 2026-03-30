@@ -63,6 +63,9 @@ class TypeNotification(StrEnum):
     ALERTE_PREDICTIVE_MAISON = "maison_alerte_predictive"
     ALERTE_GARANTIE = "maison_garantie_alerte"
 
+    # Gamification
+    BADGE_DEBLOQUE = "badge_debloque"
+
     # Système
     MISE_A_JOUR_SYSTEME = "system_update"
     SYNC_TERMINEE = "sync_complete"

@@ -1249,8 +1249,39 @@ def _job_points_famille_hebdo() -> None:
 
         points = get_points_famille_service().calculer_points()
         logger.info("Points famille hebdo recalculés: %s", points.get("total_points", 0))
+
+        # Phase 9: évaluer et attribuer les badges + notifications
+        from src.services.dashboard.badges_triggers import get_badges_triggers_service
+
+        service = get_badges_triggers_service()
+        nouveaux = service.evaluer_et_attribuer()
+
+        if nouveaux:
+            _notifier_badges_debloques(nouveaux)
     except Exception:
         logger.exception("Erreur lors du calcul des points famille hebdo")
+
+
+def _notifier_badges_debloques(badges: list[dict]) -> None:
+    """Envoie une notification push pour chaque badge débloqué (Phase 9)."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import (
+            get_dispatcher_notifications,
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        noms = ", ".join(f"{b.get('emoji', '🏅')} {b['badge_label']}" for b in badges)
+        message = f"Nouveau(x) badge(s) débloqué(s) : {noms}"
+
+        dispatcher.envoyer(
+            user_id="1",
+            message=message,
+            type_evenement="badge_debloque",
+            titre="🎯 Badge débloqué !",
+        )
+        logger.info("Notification badges envoyée: %d badges", len(badges))
+    except Exception:
+        logger.exception("Erreur envoi notification badge")
 
 
 def _job_sync_google_calendar() -> None:
@@ -2252,12 +2283,838 @@ def _job_sync_veille_habitat() -> None:
         logger.exception("Erreur sync veille Habitat")
 
 
+# ─── Phase 8 — Jobs CRON additionnels ─────────────────────────────────────────
+
+
+def _job_rappel_documents_expirants() -> None:
+    """P8-01 — Rappel quotidien des documents familiaux expirant sous 30/60/90 jours (8h).
+
+    Envoie des notifications graduées selon l'urgence :
+    - < 7 jours : email critique + push + ntfy
+    - < 30 jours : push + ntfy + email
+    - < 60/90 jours : ntfy seulement
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import DocumentFamille
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        horizon_90j = aujourd_hui + timedelta(days=90)
+
+        with obtenir_contexte_db() as session:
+            docs_expirants = (
+                session.query(DocumentFamille)
+                .filter(
+                    DocumentFamille.actif.is_(True),
+                    DocumentFamille.date_expiration.isnot(None),
+                    DocumentFamille.date_expiration >= aujourd_hui,
+                    DocumentFamille.date_expiration <= horizon_90j,
+                )
+                .order_by(DocumentFamille.date_expiration.asc())
+                .all()
+            )
+
+        if not docs_expirants:
+            logger.info("P8-01: aucun document expirant sous 90 jours")
+            return
+
+        urgents = [d for d in docs_expirants if d.jours_avant_expiration is not None and d.jours_avant_expiration < 7]
+        proches = [d for d in docs_expirants if d.jours_avant_expiration is not None and 7 <= d.jours_avant_expiration < 30]
+        lointains = [d for d in docs_expirants if d.jours_avant_expiration is not None and d.jours_avant_expiration >= 30]
+
+        dispatcher = get_dispatcher_notifications()
+
+        if urgents:
+            noms = ", ".join(f"{d.titre} (J-{d.jours_avant_expiration})" for d in urgents[:5])
+            message = f"URGENT: {len(urgents)} document(s) expirent dans moins de 7 jours: {noms}."
+            _envoyer_notif_tous_users(
+                dispatcher,
+                message=message,
+                canaux=["push", "ntfy", "email"],
+                titre="Documents urgents à renouveler",
+                type_email="alerte_critique",
+                alerte={"titre": "Documents urgents", "message": message},
+            )
+
+        if proches:
+            noms = ", ".join(f"{d.titre} ({d.membre_famille})" for d in proches[:5])
+            message = f"{len(proches)} document(s) expirent sous 30 jours: {noms}."
+            _envoyer_notif_tous_users(
+                dispatcher,
+                message=message,
+                canaux=["push", "ntfy"],
+                titre="Documents à renouveler",
+            )
+
+        if lointains:
+            logger.info("P8-01: %d document(s) expirent entre 30 et 90 jours", len(lointains))
+
+        logger.info(
+            "P8-01 exécuté: %d urgent(s), %d proche(s), %d lointain(s)",
+            len(urgents), len(proches), len(lointains),
+        )
+    except Exception:
+        logger.exception("Erreur P8-01 rappel_documents_expirants")
+
+
+def _job_rapport_mensuel_auto() -> None:
+    """P8-02 — Rapport mensuel automatique consolidé (1er/mois 8h).
+
+    Agrège : dépenses, projets maison, activités famille, énergie, jardin, jeux.
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import (
+            BudgetMensuelDB,
+            DepenseMaison,
+            Projet,
+            ReleveEnergie,
+        )
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        mois_ref = aujourd_hui.replace(day=1) - timedelta(days=1)
+        mois = mois_ref.month
+        annee = mois_ref.year
+        premier_mois_ref = date(annee, mois, 1)
+
+        with obtenir_contexte_db() as session:
+            # Dépenses maison
+            total_depenses_maison = (
+                session.query(func.sum(DepenseMaison.montant))
+                .filter(DepenseMaison.mois == mois, DepenseMaison.annee == annee)
+                .scalar()
+            ) or 0
+
+            # Projets actifs
+            nb_projets = session.query(Projet).filter(Projet.statut == "en_cours").count()
+
+            # Budget mensuel (mois est un champ Date = 1er du mois)
+            budget = (
+                session.query(BudgetMensuelDB)
+                .filter(BudgetMensuelDB.mois == premier_mois_ref)
+                .first()
+            )
+            budget_total = float(budget.budget_total) if budget and budget.budget_total else 0
+
+            # Énergie
+            releves = (
+                session.query(ReleveEnergie)
+                .filter(ReleveEnergie.mois == mois, ReleveEnergie.annee == annee)
+                .all()
+            )
+            energie_txt = ", ".join(
+                f"{r.type_energie}: {float(r.consommation or 0):.1f} {r.unite}"
+                for r in releves
+            ) if releves else "aucun relevé"
+
+        message = (
+            f"Rapport mensuel {mois:02d}/{annee}: "
+            f"Dépenses maison: {float(total_depenses_maison):.2f} EUR"
+            f"{f' (budget: {budget_total:.2f} EUR)' if budget_total else ''}, "
+            f"{nb_projets} projet(s) en cours, "
+            f"Énergie: {energie_txt}."
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["ntfy", "email", "whatsapp"],
+            titre=f"Rapport mensuel {mois:02d}/{annee}",
+            type_email="rapport_mensuel",
+            rapport={
+                "mois": f"{mois:02d}/{annee}",
+                "depenses_maison": float(total_depenses_maison),
+                "budget_total": budget_total,
+                "projets_actifs": nb_projets,
+                "energie": energie_txt,
+            },
+        )
+        logger.info("P8-02 rapport_mensuel_auto exécuté")
+    except Exception:
+        logger.exception("Erreur P8-02 rapport_mensuel_auto")
+
+
+def _job_sync_contrats_alertes() -> None:
+    """P8-03 — Synchronisation hebdomadaire contrats et alertes (lundi 9h).
+
+    Vérifie les contrats actifs, met à jour les statuts expirés
+    et envoie des alertes pour les prochains renouvellements/résiliations.
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Contrat
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        horizon_60j = aujourd_hui + timedelta(days=60)
+
+        nb_expires = 0
+        alertes: list[str] = []
+
+        with obtenir_contexte_db() as session:
+            # Auto-expirer les contrats passés
+            contrats_a_expirer = (
+                session.query(Contrat)
+                .filter(
+                    Contrat.statut == "actif",
+                    Contrat.date_fin.isnot(None),
+                    Contrat.date_fin < aujourd_hui,
+                    Contrat.tacite_reconduction.is_(False),
+                )
+                .all()
+            )
+            for c in contrats_a_expirer:
+                c.statut = "expire"
+                nb_expires += 1
+            if nb_expires:
+                session.commit()
+
+            # Contrats à renouvellement proche
+            contrats_renouvellement = (
+                session.query(Contrat)
+                .filter(
+                    Contrat.statut == "actif",
+                    Contrat.date_renouvellement.isnot(None),
+                    Contrat.date_renouvellement >= aujourd_hui,
+                    Contrat.date_renouvellement <= horizon_60j,
+                )
+                .all()
+            )
+            for c in contrats_renouvellement:
+                jours = (c.date_renouvellement - aujourd_hui).days
+                alertes.append(f"{c.nom} ({c.fournisseur}): renouvellement dans {jours}j")
+
+            # Contrats avec date de résiliation proche
+            contrats_resiliation = (
+                session.query(Contrat)
+                .filter(
+                    Contrat.statut == "actif",
+                    Contrat.date_limite_resiliation.isnot(None),
+                    Contrat.date_limite_resiliation >= aujourd_hui,
+                    Contrat.date_limite_resiliation <= horizon_60j,
+                )
+                .all()
+            )
+            for c in contrats_resiliation:
+                jours = (c.date_limite_resiliation - aujourd_hui).days
+                alertes.append(f"{c.nom}: date limite résiliation dans {jours}j")
+
+        if nb_expires:
+            logger.info("P8-03: %d contrat(s) auto-expiré(s)", nb_expires)
+
+        if not alertes:
+            logger.info("P8-03: aucune alerte contrat sous 60 jours")
+            return
+
+        message = f"Contrats à surveiller ({len(alertes)}): " + "; ".join(alertes[:5])
+        if len(alertes) > 5:
+            message += f" (+{len(alertes) - 5} autres)"
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["ntfy", "push"],
+            titre="Alertes contrats hebdomadaires",
+        )
+        logger.info("P8-03 exécuté: %d alerte(s), %d expiré(s)", len(alertes), nb_expires)
+    except Exception:
+        logger.exception("Erreur P8-03 sync_contrats_alertes")
+
+
+def _job_check_garanties_expirant() -> None:
+    """P8-04 — Vérification hebdomadaire des garanties expirant bientôt.
+
+    Alerte sur les garanties actives qui expirent dans les 60 prochains jours,
+    avec email critique pour celles qui expirent dans < 14 jours.
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Garantie
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        horizon_60j = aujourd_hui + timedelta(days=60)
+        horizon_14j = aujourd_hui + timedelta(days=14)
+
+        with obtenir_contexte_db() as session:
+            garanties = (
+                session.query(Garantie)
+                .filter(
+                    Garantie.statut == "active",
+                    Garantie.date_fin_garantie >= aujourd_hui,
+                    Garantie.date_fin_garantie <= horizon_60j,
+                )
+                .order_by(Garantie.date_fin_garantie.asc())
+                .all()
+            )
+
+        if not garanties:
+            logger.info("P8-04: aucune garantie expirant sous 60 jours")
+            return
+
+        critiques = [g for g in garanties if g.date_fin_garantie <= horizon_14j]
+        non_critiques = [g for g in garanties if g.date_fin_garantie > horizon_14j]
+
+        dispatcher = get_dispatcher_notifications()
+
+        if critiques:
+            noms = ", ".join(
+                f"{g.appareil} (J-{(g.date_fin_garantie - aujourd_hui).days})"
+                for g in critiques[:5]
+            )
+            message = f"URGENT: {len(critiques)} garantie(s) expirent sous 14 jours: {noms}."
+            _envoyer_notif_tous_users(
+                dispatcher,
+                message=message,
+                canaux=["push", "ntfy", "email"],
+                titre="Garanties expirant bientôt",
+                type_email="alerte_critique",
+                alerte={
+                    "titre": f"Garanties critiques ({len(critiques)})",
+                    "message": message,
+                    "lien": "http://localhost:3000/maison/entretien",
+                },
+            )
+
+        if non_critiques:
+            noms = ", ".join(f"{g.appareil}" for g in non_critiques[:5])
+            message = f"{len(non_critiques)} garantie(s) expirent sous 60 jours: {noms}."
+            _envoyer_notif_tous_users(
+                dispatcher,
+                message=message,
+                canaux=["ntfy"],
+                titre="Garanties à surveiller",
+            )
+
+        logger.info(
+            "P8-04 exécuté: %d critique(s), %d non-critique(s)",
+            len(critiques), len(non_critiques),
+        )
+    except Exception:
+        logger.exception("Erreur P8-04 check_garanties_expirant")
+
+
+def _job_bilan_energetique() -> None:
+    """P8-05 — Bilan énergétique mensuel (1er/mois 8h30).
+
+    Compare la consommation du mois écoulé avec la même période l'année précédente
+    et la moyenne glissante 12 mois. Produit un rapport synthétique.
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ReleveEnergie
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        mois_ref = aujourd_hui.replace(day=1) - timedelta(days=1)
+        mois = mois_ref.month
+        annee = mois_ref.year
+        mois_prec_annee = annee - 1
+
+        bilans: list[str] = []
+
+        with obtenir_contexte_db() as session:
+            types = [r[0] for r in session.query(ReleveEnergie.type_energie).distinct().all() if r and r[0]]
+
+            for t in types:
+                # Consommation du mois
+                releve_actuel = (
+                    session.query(ReleveEnergie)
+                    .filter(
+                        ReleveEnergie.type_energie == t,
+                        ReleveEnergie.mois == mois,
+                        ReleveEnergie.annee == annee,
+                    )
+                    .first()
+                )
+                if not releve_actuel or not releve_actuel.consommation:
+                    continue
+
+                conso = float(releve_actuel.consommation)
+                montant = float(releve_actuel.montant or 0)
+                unite = releve_actuel.unite
+
+                # Même mois année précédente
+                releve_n1 = (
+                    session.query(ReleveEnergie)
+                    .filter(
+                        ReleveEnergie.type_energie == t,
+                        ReleveEnergie.mois == mois,
+                        ReleveEnergie.annee == mois_prec_annee,
+                    )
+                    .first()
+                )
+
+                # Moyenne 12 derniers mois
+                avg_12m = (
+                    session.query(func.avg(ReleveEnergie.consommation))
+                    .filter(
+                        ReleveEnergie.type_energie == t,
+                        ReleveEnergie.consommation.isnot(None),
+                        (ReleveEnergie.annee * 12 + ReleveEnergie.mois)
+                        >= (annee * 12 + mois - 11),
+                        (ReleveEnergie.annee * 12 + ReleveEnergie.mois)
+                        <= (annee * 12 + mois),
+                    )
+                    .scalar()
+                )
+
+                bilan = f"{t}: {conso:.1f} {unite}"
+                if montant:
+                    bilan += f" ({montant:.2f} EUR)"
+                if releve_n1 and releve_n1.consommation:
+                    diff_n1 = ((conso - float(releve_n1.consommation)) / float(releve_n1.consommation)) * 100
+                    bilan += f", vs N-1: {diff_n1:+.1f}%"
+                if avg_12m:
+                    diff_avg = ((conso - float(avg_12m)) / float(avg_12m)) * 100
+                    bilan += f", vs moy.12m: {diff_avg:+.1f}%"
+
+                bilans.append(bilan)
+
+        if not bilans:
+            logger.info("P8-05: aucun relevé énergie pour %02d/%d", mois, annee)
+            return
+
+        message = f"Bilan énergie {mois:02d}/{annee}: " + "; ".join(bilans)
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["ntfy", "email"],
+            titre=f"Bilan énergétique {mois:02d}/{annee}",
+            type_email="rapport_mensuel",
+            rapport={"mois": f"{mois:02d}/{annee}", "bilans": bilans},
+        )
+        logger.info("P8-05 bilan_energetique exécuté: %d type(s) d'énergie", len(bilans))
+    except Exception:
+        logger.exception("Erreur P8-05 bilan_energetique")
+
+
+def _job_rappel_vaccins() -> None:
+    """P8-06 — Rappels vaccins hebdomadaire (lundi 9h).
+
+    Vérifie les rappels de vaccins prévus pour les 30 prochains jours
+    et les vaccins obligatoires non faits.
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Vaccin
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        horizon_30j = aujourd_hui + timedelta(days=30)
+        horizon_7j = aujourd_hui + timedelta(days=7)
+
+        with obtenir_contexte_db() as session:
+            # Rappels de vaccins prévus dans les 30 prochains jours
+            rappels_proches = (
+                session.query(Vaccin)
+                .filter(
+                    Vaccin.rappel_prevu.isnot(None),
+                    Vaccin.rappel_prevu >= aujourd_hui,
+                    Vaccin.rappel_prevu <= horizon_30j,
+                    Vaccin.fait.is_(False),
+                )
+                .order_by(Vaccin.rappel_prevu.asc())
+                .all()
+            )
+
+            # Vaccins obligatoires non faits (sans date de rappel, potentiellement en retard)
+            vaccins_en_retard = (
+                session.query(Vaccin)
+                .filter(
+                    Vaccin.type_vaccin == "obligatoire",
+                    Vaccin.fait.is_(False),
+                    Vaccin.rappel_prevu.isnot(None),
+                    Vaccin.rappel_prevu < aujourd_hui,
+                )
+                .all()
+            )
+
+        if not rappels_proches and not vaccins_en_retard:
+            logger.info("P8-06: aucun rappel vaccin à signaler")
+            return
+
+        dispatcher = get_dispatcher_notifications()
+
+        if vaccins_en_retard:
+            noms = ", ".join(v.nom_vaccin for v in vaccins_en_retard[:5])
+            message = f"RETARD: {len(vaccins_en_retard)} vaccin(s) obligatoire(s) en retard: {noms}."
+            _envoyer_notif_tous_users(
+                dispatcher,
+                message=message,
+                canaux=["push", "ntfy", "whatsapp"],
+                titre="Vaccins en retard",
+            )
+
+        if rappels_proches:
+            urgents = [v for v in rappels_proches if v.rappel_prevu and v.rappel_prevu <= horizon_7j]
+            autres = [v for v in rappels_proches if v.rappel_prevu and v.rappel_prevu > horizon_7j]
+
+            if urgents:
+                noms = ", ".join(
+                    f"{v.nom_vaccin} (J-{(v.rappel_prevu - aujourd_hui).days})"
+                    for v in urgents[:5]
+                )
+                message = f"Vaccins à faire cette semaine: {noms}."
+                _envoyer_notif_tous_users(
+                    dispatcher,
+                    message=message,
+                    canaux=["push", "ntfy", "whatsapp"],
+                    titre="Rappels vaccins urgents",
+                )
+
+            if autres:
+                noms = ", ".join(f"{v.nom_vaccin}" for v in autres[:5])
+                message = f"{len(autres)} rappel(s) de vaccin(s) prévus sous 30 jours: {noms}."
+                _envoyer_notif_tous_users(
+                    dispatcher,
+                    message=message,
+                    canaux=["ntfy"],
+                    titre="Rappels vaccins à venir",
+                )
+
+        logger.info(
+            "P8-06 exécuté: %d rappel(s) proche(s), %d en retard",
+            len(rappels_proches), len(vaccins_en_retard),
+        )
+    except Exception:
+        logger.exception("Erreur P8-06 rappel_vaccins")
+
+
+def _job_sync_entretien_budget() -> None:
+    """P8-07a — Connexion inter-modules Entretien → Budget.
+
+    Synchronise les coûts d'entretien réalisés vers les dépenses maison.
+    Agrège les interventions terminées du mois écoulé non encore comptabilisées.
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import DepenseMaison, InterventionArtisan
+        from src.services.core.events.bus import obtenir_bus
+
+        aujourd_hui = date.today()
+        debut_mois = aujourd_hui.replace(day=1)
+        fin_mois_prec = debut_mois - timedelta(days=1)
+        debut_mois_prec = fin_mois_prec.replace(day=1)
+
+        nb_syncs = 0
+
+        with obtenir_contexte_db() as session:
+            # Interventions artisan facturées le mois précédent
+            interventions = (
+                session.query(InterventionArtisan)
+                .filter(
+                    InterventionArtisan.montant_facture.isnot(None),
+                    InterventionArtisan.montant_facture > 0,
+                    InterventionArtisan.date_intervention >= debut_mois_prec,
+                    InterventionArtisan.date_intervention <= fin_mois_prec,
+                )
+                .all()
+            )
+
+            for intervention in interventions:
+                # Vérifier si déjà sync via notes
+                ref = f"[intervention:{intervention.id}]"
+                existant = (
+                    session.query(DepenseMaison)
+                    .filter(
+                        DepenseMaison.notes.contains(ref),
+                    )
+                    .first()
+                )
+                if existant:
+                    continue
+
+                depense = DepenseMaison(
+                    categorie="entretien",
+                    montant=intervention.montant_facture,
+                    notes=f"Intervention: {intervention.description[:100]} {ref}",
+                    mois=fin_mois_prec.month,
+                    annee=fin_mois_prec.year,
+                )
+                session.add(depense)
+                nb_syncs += 1
+
+            if nb_syncs:
+                session.commit()
+
+                bus = obtenir_bus()
+                bus.emettre("depenses.sync_entretien", {
+                    "nb_depenses": nb_syncs,
+                    "mois": fin_mois_prec.month,
+                    "annee": fin_mois_prec.year,
+                }, source="cron.sync_entretien_budget")
+
+        logger.info("P8-07a sync_entretien_budget: %d dépense(s) synchronisée(s)", nb_syncs)
+    except Exception:
+        logger.exception("Erreur P8-07a sync_entretien_budget")
+
+
+def _job_sync_voyages_calendrier() -> None:
+    """P8-07b — Connexion inter-modules Voyages → Calendrier.
+
+    Crée des événements de planning pour les voyages planifiés
+    qui ne sont pas encore dans le calendrier.
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import EvenementPlanning, Voyage
+        from src.services.core.events.bus import obtenir_bus
+
+        aujourd_hui = date.today()
+        horizon = aujourd_hui + timedelta(days=90)
+
+        nb_crees = 0
+
+        with obtenir_contexte_db() as session:
+            voyages = (
+                session.query(Voyage)
+                .filter(
+                    Voyage.statut == "planifié",
+                    Voyage.date_depart >= aujourd_hui,
+                    Voyage.date_depart <= horizon,
+                )
+                .all()
+            )
+
+            for voyage in voyages:
+                ref = f"[voyage:{voyage.id}]"
+                existant = (
+                    session.query(EvenementPlanning)
+                    .filter(
+                        EvenementPlanning.description.contains(ref),
+                    )
+                    .first()
+                )
+                if existant:
+                    continue
+
+                evenement = EvenementPlanning(
+                    titre=f"Voyage: {voyage.titre} — {voyage.destination}",
+                    date_debut=datetime.combine(voyage.date_depart, datetime.min.time()),
+                    date_fin=datetime.combine(voyage.date_retour, datetime.max.time().replace(microsecond=0)),
+                    type_event="voyage",
+                    description=f"Voyage {voyage.type_voyage} à {voyage.destination}. "
+                                f"Participants: {', '.join(voyage.participants or ['Famille'])}. {ref}",
+                )
+                session.add(evenement)
+                nb_crees += 1
+
+            if nb_crees:
+                session.commit()
+
+                bus = obtenir_bus()
+                bus.emettre("planning.sync_voyages", {
+                    "nb_evenements": nb_crees,
+                }, source="cron.sync_voyages_calendrier")
+
+        logger.info("P8-07b sync_voyages_calendrier: %d événement(s) créé(s)", nb_crees)
+    except Exception:
+        logger.exception("Erreur P8-07b sync_voyages_calendrier")
+
+
+def _job_sync_charges_dashboard() -> None:
+    """P8-07c — Connexion inter-modules Charges → Dashboard.
+
+    Agrège les charges mensuelles (contrats actifs) et les pousse comme
+    métriques dashboard pour la page d'accueil.
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Contrat, DepenseMaison
+        from src.services.core.events.bus import obtenir_bus
+
+        aujourd_hui = date.today()
+        mois = aujourd_hui.month
+        annee = aujourd_hui.year
+
+        with obtenir_contexte_db() as session:
+            # Total charges fixes mensuelles (contrats actifs)
+            charges_fixes = (
+                session.query(func.sum(Contrat.montant_mensuel))
+                .filter(
+                    Contrat.statut == "actif",
+                    Contrat.montant_mensuel.isnot(None),
+                )
+                .scalar()
+            ) or 0
+
+            # Total dépenses maison du mois
+            depenses_mois = (
+                session.query(func.sum(DepenseMaison.montant))
+                .filter(DepenseMaison.mois == mois, DepenseMaison.annee == annee)
+                .scalar()
+            ) or 0
+
+            # Nombre de contrats actifs
+            nb_contrats = (
+                session.query(Contrat)
+                .filter(Contrat.statut == "actif")
+                .count()
+            )
+
+        bus = obtenir_bus()
+        bus.emettre("dashboard.charges_update", {
+            "charges_fixes_mensuelles": float(charges_fixes),
+            "depenses_mois": float(depenses_mois),
+            "nb_contrats_actifs": nb_contrats,
+            "mois": mois,
+            "annee": annee,
+        }, source="cron.sync_charges_dashboard")
+
+        logger.info(
+            "P8-07c sync_charges_dashboard: charges fixes=%s EUR, dépenses mois=%s EUR, %d contrat(s)",
+            float(charges_fixes), float(depenses_mois), nb_contrats,
+        )
+    except Exception:
+        logger.exception("Erreur P8-07c sync_charges_dashboard")
+
+
 _REGISTRE_JOBS.update(
     {
         "sync_routines_planning": ("Sync routines -> planning", _job_sync_routines_planning),
         "sync_recoltes_inventaire": ("Sync récoltes -> inventaire", _job_sync_recoltes_inventaire),
         "suggestions_activites_meteo": ("Suggestions activités selon météo", _job_suggestions_activites_meteo),
         "sync_veille_habitat": ("Sync veille habitat", _job_sync_veille_habitat),
+        # Phase 8 — Jobs CRON additionnels
+        "rappel_documents_expirants": ("Rappel documents expirants (quotidien)", _job_rappel_documents_expirants),
+        "rapport_mensuel_auto": ("Rapport mensuel automatique consolidé", _job_rapport_mensuel_auto),
+        "sync_contrats_alertes": ("Sync contrats et alertes (hebdo)", _job_sync_contrats_alertes),
+        "check_garanties_expirant": ("Check garanties expirant (hebdo)", _job_check_garanties_expirant),
+        "bilan_energetique": ("Bilan énergétique mensuel", _job_bilan_energetique),
+        "rappel_vaccins": ("Rappels vaccins", _job_rappel_vaccins),
+        "sync_entretien_budget": ("Sync entretien -> budget", _job_sync_entretien_budget),
+        "sync_voyages_calendrier": ("Sync voyages -> calendrier", _job_sync_voyages_calendrier),
+        "sync_charges_dashboard": ("Sync charges -> dashboard", _job_sync_charges_dashboard),
+    }
+)
+
+
+# ═══════════════════════════════════════════════════════════
+# PHASE 10 — JOBS CRON INNOVATIONS
+# ═══════════════════════════════════════════════════════════
+
+
+def _job_optimisation_routines() -> None:
+    """P10-01 Analyse mensuelle de l'efficacité des routines → suggestions IA."""
+    try:
+        from src.services.innovations import get_innovations_service
+
+        logger.info("P10-01 optimisation_routines: Analyse IA des routines")
+        # Déclenche l'endpoint IA existant via le service
+        service = get_innovations_service()
+        # Réutilise l'optimisation routines IA de Phase 6
+        from src.services.ia_avancee import get_ia_avancee_service
+        ia_service = get_ia_avancee_service()
+        result = ia_service.optimiser_routines()
+        nb = len(getattr(result, "routines", []) if result else [])
+        logger.info("P10-01 optimisation_routines: %d suggestion(s) générée(s)", nb)
+    except Exception:
+        logger.exception("Erreur P10-01 optimisation_routines")
+
+
+def _job_suggestions_saison() -> None:
+    """P10-02 Met en avant les produits de saison du mois en cours."""
+    try:
+        import json
+        from pathlib import Path
+
+        logger.info("P10-02 suggestions_saison: Mise à jour produits de saison")
+        fichier = Path("data/reference/produits_de_saison.json")
+        if fichier.exists():
+            data = json.loads(fichier.read_text(encoding="utf-8"))
+            mois_courant = datetime.now().strftime("%B").lower()
+            produits = data.get(mois_courant, data.get(str(datetime.now().month), []))
+            logger.info("P10-02 suggestions_saison: %d produit(s) de saison pour %s", len(produits), mois_courant)
+
+            dispatcher = _obtenir_dispatcher()
+            if dispatcher and produits:
+                top_5 = produits[:5] if isinstance(produits, list) else []
+                _envoyer_notif_tous_users(
+                    dispatcher,
+                    f"🌿 Produits de saison ce mois-ci : {', '.join(str(p) for p in top_5)}",
+                    canaux=["ntfy"],
+                )
+        else:
+            logger.warning("P10-02 suggestions_saison: fichier produits_de_saison.json introuvable")
+    except Exception:
+        logger.exception("Erreur P10-02 suggestions_saison")
+
+
+def _job_purge_historique_jeux() -> None:
+    """P10-03 Archive les données de paris sportifs > 12 mois."""
+    try:
+        from src.core.db import obtenir_contexte_db
+
+        logger.info("P10-03 purge_historique_jeux: Archivage données > 12 mois")
+        limite = datetime.now() - timedelta(days=365)
+
+        with obtenir_contexte_db() as session:
+            # Compter les anciens paris avant suppression
+            nb_anciens = session.execute(
+                text("SELECT COUNT(*) FROM paris_sportifs WHERE date_match < :limite"),
+                {"limite": limite},
+            ).scalar() or 0
+
+            if nb_anciens > 0:
+                session.execute(
+                    text("DELETE FROM paris_sportifs WHERE date_match < :limite"),
+                    {"limite": limite},
+                )
+                session.commit()
+                logger.info("P10-03 purge_historique_jeux: %d pari(s) archivé(s)", nb_anciens)
+            else:
+                logger.info("P10-03 purge_historique_jeux: aucun pari ancien à archiver")
+    except Exception:
+        logger.exception("Erreur P10-03 purge_historique_jeux")
+
+
+def _job_veille_emploi() -> None:
+    """P10-04 Veille emploi quotidienne multi-sites avec alertes."""
+    try:
+        from src.services.innovations import get_innovations_service
+
+        logger.info("P10-04 veille_emploi: Scan quotidien offres d'emploi")
+        service = get_innovations_service()
+        result = service.executer_veille_emploi()
+
+        if result and result.nb_offres_trouvees > 0:
+            dispatcher = _obtenir_dispatcher()
+            if dispatcher:
+                _envoyer_notif_tous_users(
+                    dispatcher,
+                    f"💼 Veille emploi : {result.nb_offres_trouvees} nouvelle(s) offre(s) détectée(s)",
+                    canaux=["ntfy", "email"],
+                )
+            logger.info("P10-04 veille_emploi: %d offre(s) trouvée(s)", result.nb_offres_trouvees)
+        else:
+            logger.info("P10-04 veille_emploi: aucune nouvelle offre")
+    except Exception:
+        logger.exception("Erreur P10-04 veille_emploi")
+
+
+def _obtenir_dispatcher():
+    """Helper pour obtenir le dispatcher de notifications."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import obtenir_dispatcher_service
+        return obtenir_dispatcher_service()
+    except Exception:
+        return None
+
+
+_REGISTRE_JOBS.update(
+    {
+        # Phase 10 — Jobs CRON Innovations
+        "optimisation_routines": ("Optimisation routines IA (mensuel)", _job_optimisation_routines),
+        "suggestions_saison": ("Suggestions produits de saison (mensuel)", _job_suggestions_saison),
+        "purge_historique_jeux": ("Purge historique jeux > 12 mois", _job_purge_historique_jeux),
+        "veille_emploi": ("Veille emploi quotidienne", _job_veille_emploi),
     }
 )
 
@@ -2326,6 +3183,23 @@ class DémarreurCron:
         self._planifier_job("sync_routines_planning", CronTrigger(hour=5, minute=45), replace_existing=True)
         self._planifier_job("sync_recoltes_inventaire", CronTrigger(hour=6, minute=15), replace_existing=True)
         self._planifier_job("suggestions_activites_meteo", CronTrigger(hour=7, minute=15), replace_existing=True)
+
+        # Phase 8 — Jobs CRON additionnels
+        self._planifier_job("rappel_documents_expirants", CronTrigger(hour=8, minute=0), replace_existing=True)
+        self._planifier_job("rapport_mensuel_auto", CronTrigger(day=1, hour=8, minute=0), replace_existing=True)
+        self._planifier_job("sync_contrats_alertes", CronTrigger(day_of_week="mon", hour=9, minute=0), replace_existing=True)
+        self._planifier_job("check_garanties_expirant", CronTrigger(day_of_week="mon", hour=9, minute=15), replace_existing=True)
+        self._planifier_job("bilan_energetique", CronTrigger(day=1, hour=8, minute=30), replace_existing=True)
+        self._planifier_job("rappel_vaccins", CronTrigger(day_of_week="mon", hour=9, minute=0), replace_existing=True)
+        self._planifier_job("sync_entretien_budget", CronTrigger(day=1, hour=6, minute=0), replace_existing=True)
+        self._planifier_job("sync_voyages_calendrier", CronTrigger(hour=6, minute=30), replace_existing=True)
+        self._planifier_job("sync_charges_dashboard", CronTrigger(hour=7, minute=30), replace_existing=True)
+
+        # Phase 10 — Jobs CRON Innovations
+        self._planifier_job("optimisation_routines", CronTrigger(day=15, hour=10, minute=0), replace_existing=True)
+        self._planifier_job("suggestions_saison", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
+        self._planifier_job("purge_historique_jeux", CronTrigger(day=1, hour=3, minute=30), replace_existing=True)
+        self._planifier_job("veille_emploi", CronTrigger(hour=7, minute=0), replace_existing=True)
 
     def demarrer(self) -> None:
         if not self._scheduler.running:

@@ -29,7 +29,7 @@ router = APIRouter(prefix="/api/v1/suggestions", tags=["IA"])
 @gerer_exception_api
 async def suggest_recettes(
     contexte: str = Query(
-        "repas Ã©quilibrÃ©",
+        "repas équilibré",
         description="Contexte pour les suggestions (ex: 'rapide', 'vÃ©gÃ©tarien', 'batch cooking')",
     ),
     nombre: int = Query(3, ge=1, le=10, description="Nombre de suggestions Ã  retourner (1-10)"),

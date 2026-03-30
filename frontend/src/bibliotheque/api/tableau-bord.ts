@@ -212,3 +212,62 @@ export async function obtenirBudgetUnifieDashboard(): Promise<BudgetUnifieDashbo
   const { data } = await clientApi.get<BudgetUnifieDashboard>("/dashboard/budget-unifie");
   return data;
 }
+// ─── Gamification — Badges & historique (Phase 9) ──────────────
+
+export interface BadgeDefinition {
+  badge_type: string;
+  badge_label: string;
+  categorie: "sport" | "nutrition";
+  emoji: string;
+  description: string;
+  seuil: number;
+  unite: string;
+  obtenu?: boolean;
+  nb_obtenu?: number;
+  derniere_date?: string | null;
+}
+
+export interface HistoriquePoints {
+  semaine_debut: string;
+  points_sport: number;
+  points_alimentation: number;
+  points_anti_gaspi: number;
+  total_points: number;
+  details: Record<string, unknown>;
+}
+
+/** Obtenir le catalogue complet des badges sport + nutrition */
+export async function obtenirCatalogueBadges(): Promise<{ items: BadgeDefinition[]; total: number }> {
+  const { data } = await clientApi.get("/dashboard/badges/catalogue");
+  return data;
+}
+
+/** Obtenir les badges d'un utilisateur avec progression */
+export async function obtenirBadgesUtilisateur(): Promise<{
+  items: BadgeDefinition[];
+  total: number;
+  obtenus: number;
+}> {
+  const { data } = await clientApi.get("/dashboard/badges/utilisateur");
+  return data;
+}
+
+/** Évaluer et attribuer les badges mérités */
+export async function evaluerBadges(): Promise<{
+  nouveaux_badges: { user_id: number; badge_type: string; badge_label: string; emoji: string; categorie: string }[];
+  total_nouveaux: number;
+}> {
+  const { data } = await clientApi.post("/dashboard/badges/evaluer");
+  return data;
+}
+
+/** Obtenir l'historique des points sur N semaines */
+export async function obtenirHistoriquePoints(nbSemaines = 8): Promise<{
+  items: HistoriquePoints[];
+  total: number;
+}> {
+  const { data } = await clientApi.get("/dashboard/historique-points", {
+    params: { nb_semaines: nbSemaines },
+  });
+  return data;
+}

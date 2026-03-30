@@ -8,13 +8,14 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, UploadFile
 from pydantic import BaseModel, Field
 
-# â”€â”€â”€ Idempotency cache (TTL 5 min, single-instance) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ----------------------------------------------------------
+# Idempotency cache (TTL 5 min, single-instance)
 _IDEMPOTENCY_CACHE: dict[str, tuple[float, Any]] = {}
 _IDEMPOTENCY_TTL = 300  # secondes
 
 
 def _check_idempotency(key: str | None) -> Any | None:
-    """Retourne le rÃ©sultat mis en cache si la clÃ© a dÃ©jÃ  Ã©tÃ© traitÃ©e rÃ©cemment."""
+    """Retourne le résultat mis en cache si la clé a déjà été traitée récemment."""
     if not key:
         return None
     now = time.time()
@@ -26,7 +27,7 @@ def _check_idempotency(key: str | None) -> Any | None:
 
 
 def _store_idempotency(key: str | None, result: Any) -> None:
-    """Enregistre un rÃ©sultat pour Ã©viter les doublons d'idempotency."""
+    """Enregistre un résultat pour éviter les doublons d'idempotency."""
     if key:
         _IDEMPOTENCY_CACHE[key] = (time.time(), result)
 
@@ -75,24 +76,24 @@ class FeedbackPredictionCoursesRequest(BaseModel):
 @router.get("", response_model=ReponsePaginee[ListeCoursesResume], responses=REPONSES_LISTE)
 @gerer_exception_api
 async def lister_courses(
-    page: int = Query(1, ge=1, description="NumÃ©ro de page (1-indexÃ©)"),
-    page_size: int = Query(20, ge=1, le=100, description="Nombre d'Ã©lÃ©ments par page"),
-    active_only: bool = Query(True, description="Afficher uniquement les listes non archivÃ©es"),
+    page: int = Query(1, ge=1, description="Numéro de page (1-indexé)"),
+    page_size: int = Query(20, ge=1, le=100, description="Nombre d'éléments par page"),
+    active_only: bool = Query(True, description="Afficher uniquement les listes non archivées"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
     Liste les listes de courses avec pagination.
 
-    Retourne les listes de courses triÃ©es par date de crÃ©ation dÃ©croissante.
-    Par dÃ©faut, seules les listes actives (non archivÃ©es) sont affichÃ©es.
+    Retourne les listes de courses triées par date de création décroissante.
+    Par défaut, seules les listes actives (non archivées) sont affichées.
 
     Args:
-        page: NumÃ©ro de page (dÃ©faut: 1)
-        page_size: Taille de page (dÃ©faut: 20, max: 100)
-        active_only: Filtrer les listes archivÃ©es (dÃ©faut: True)
+        page: Numéro de page (défaut: 1)
+        page_size: Taille de page (défaut: 20, max: 100)
+        active_only: Filtrer les listes archivées (défaut: True)
 
     Returns:
-        RÃ©ponse paginÃ©e avec items, total, page, page_size
+        Réponse paginée avec items, total, page, page_size
 
     Example:
         ```
@@ -148,20 +149,20 @@ async def lister_courses(
 @gerer_exception_api
 async def creer_liste(data: CourseListCreate, user: dict[str, Any] = Depends(require_auth)):
     """
-    CrÃ©e une nouvelle liste de courses.
+    Crée une nouvelle liste de courses.
 
-    NÃ©cessite une authentification. La liste est crÃ©Ã©e vide,
-    les articles peuvent Ãªtre ajoutÃ©s ensuite via POST /{id}/items.
+    Nécessite une authentification. La liste est créée vide,
+    les articles peuvent être ajoutés ensuite via POST /{id}/items.
 
     Args:
-        data: DonnÃ©es de la liste (nom requis)
+        data: Données de la liste (nom requis)
 
     Returns:
-        Message de confirmation avec l'ID de la liste crÃ©Ã©e
+        Message de confirmation avec l'ID de la liste créée
 
     Raises:
-        401: Non authentifiÃ©
-        422: DonnÃ©es invalides (nom vide)
+        401: Non authentifié
+        422: Données invalides (nom vide)
 
     Example:
         ```
@@ -171,7 +172,7 @@ async def creer_liste(data: CourseListCreate, user: dict[str, Any] = Depends(req
         Body: {"nom": "Courses du weekend"}
 
         Response (201):
-        {"message": "Liste crÃ©Ã©e", "id": 5}
+        {"message": "Liste créée", "id": 5}
         ```
     """
     from src.core.models import ListeCourses
@@ -182,7 +183,7 @@ async def creer_liste(data: CourseListCreate, user: dict[str, Any] = Depends(req
             session.add(liste)
             session.commit()
             session.refresh(liste)
-            return MessageResponse(message="Liste crÃ©Ã©e", id=liste.id)
+            return MessageResponse(message="Liste créée", id=liste.id)
 
     return await executer_async(_create)
 
@@ -198,31 +199,31 @@ async def ajouter_article(
     liste_id: int, item: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
 ):
     """
-    Ajoute un article Ã  une liste de courses.
+    Ajoute un article à une liste de courses.
 
-    CrÃ©e automatiquement l'ingrÃ©dient s'il n'existe pas encore en base.
+    Crée automatiquement l'ingrédient s'il n'existe pas encore en base.
 
     Args:
         liste_id: ID de la liste de courses
-        item: DonnÃ©es de l'article (nom, quantitÃ©, unitÃ©, catÃ©gorie)
+        item: Données de l'article (nom, quantité, unité, catégorie)
 
     Returns:
-        Message de confirmation avec l'ID de l'article crÃ©Ã©
+        Message de confirmation avec l'ID de l'article créé
 
     Raises:
-        401: Non authentifiÃ©
-        404: Liste non trouvÃ©e
-        422: DonnÃ©es invalides
+        401: Non authentifié
+        404: Liste non trouvée
+        422: Données invalides
 
     Example:
         ```
         POST /api/v1/courses/5/items
         Authorization: Bearer <token>
 
-        Body: {"nom": "Tomates", "quantite": 2.0, "unite": "kg", "categorie": "Fruits et lÃ©gumes"}
+        Body: {"nom": "Tomates", "quantite": 2.0, "unite": "kg", "categorie": "Fruits et légumes"}
 
         Response (201):
-        {"message": "Article ajoutÃ©", "id": 12}
+        {"message": "Article ajouté", "id": 12}
         ```
     """
     from src.core.models import ArticleCourses, Ingredient, ListeCourses
@@ -232,9 +233,9 @@ async def ajouter_article(
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
 
             if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
 
-            # Trouver ou crÃ©er l'ingrÃ©dient
+            # Trouver ou créer l'ingrédient
             ingredient = session.query(Ingredient).filter(Ingredient.nom == item.nom).first()
             if not ingredient:
                 ingredient = Ingredient(nom=item.nom, unite=item.unite or "pcs")
@@ -251,7 +252,7 @@ async def ajouter_article(
             session.add(article)
             session.commit()
 
-            return MessageResponse(message="Article ajoutÃ©", id=article.id)
+            return MessageResponse(message="Article ajouté", id=article.id)
 
     return await executer_async(_add)
 
@@ -260,16 +261,16 @@ async def ajouter_article(
 @gerer_exception_api
 async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
-    RÃ©cupÃ¨re une liste de courses avec ses articles dÃ©taillÃ©s.
+    Récupère une liste de courses avec ses articles détaillés.
 
     Args:
         liste_id: ID de la liste de courses
 
     Returns:
-        DÃ©tail de la liste avec tous ses articles
+        Détail de la liste avec tous ses articles
 
     Raises:
-        404: Liste non trouvÃ©e
+        404: Liste non trouvée
 
     Example:
         ```
@@ -281,7 +282,7 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
             "nom": "Courses semaine",
             "archivee": false,
             "items": [
-                {"id": 12, "nom": "Tomates", "quantite": 2.0, "coche": false, "categorie": "Fruits et lÃ©gumes"}
+                {"id": 12, "nom": "Tomates", "quantite": 2.0, "coche": false, "categorie": "Fruits et légumes"}
             ]
         }
         ```
@@ -293,7 +294,7 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
 
             if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             return {
                 "id": liste.id,
@@ -322,11 +323,11 @@ async def exporter_liste_texte(
     group_by: str = Query(
         "categorie",
         pattern="^(categorie|simple)$",
-        description="Regroupement du texte exportÃ©",
+        description="Regroupement du texte exporté",
     ),
     user: dict[str, Any] = Depends(require_auth),
 ):
-    """Exporte une liste de courses en texte brut (optimisÃ© mobile/partage)."""
+    """Exporte une liste de courses en texte brut (optimisé mobile/partage)."""
     from datetime import datetime
 
     from src.core.models import ListeCourses
@@ -335,7 +336,7 @@ async def exporter_liste_texte(
         with executer_avec_session() as session:
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
             if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             articles = [a for a in (liste.articles or []) if not a.achete]
 
@@ -377,10 +378,10 @@ async def exporter_liste_texte(
 @gerer_exception_api
 async def generer_qr_partage_liste(
     liste_id: int,
-    include_checked: bool = Query(False, description="Inclure les articles dÃ©jÃ  cochÃ©s"),
+    include_checked: bool = Query(False, description="Inclure les articles déjà cochés"),
     user: dict[str, Any] = Depends(require_auth),
 ):
-    """GÃ©nÃ¨re un QR code PNG contenant une version texte de la liste."""
+    """Génère un QR code PNG contenant une version texte de la liste."""
     from io import BytesIO
 
     import qrcode
@@ -391,7 +392,7 @@ async def generer_qr_partage_liste(
         with executer_avec_session() as session:
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
             if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             articles = [
                 a
@@ -425,28 +426,28 @@ async def modifier_liste(
     liste_id: int, data: CourseListCreate, user: dict[str, Any] = Depends(require_auth)
 ):
     """
-    Met Ã  jour le nom d'une liste de courses.
+    Met à jour le nom d'une liste de courses.
 
     Args:
-        liste_id: ID de la liste Ã  modifier
-        data: Nouvelles donnÃ©es (nom)
+        liste_id: ID de la liste à modifier
+        data: Nouvelles données (nom)
 
     Returns:
         Message de confirmation
 
     Raises:
-        401: Non authentifiÃ©
-        404: Liste non trouvÃ©e
+        401: Non authentifié
+        404: Liste non trouvée
 
     Example:
         ```
         PUT /api/v1/courses/5
         Authorization: Bearer <token>
 
-        Body: {"nom": "Courses marchÃ©"}
+        Body: {"nom": "Courses marché"}
 
         Response:
-        {"message": "Liste mise Ã  jour", "id": 5}
+        {"message": "Liste mise à jour", "id": 5}
         ```
     """
     from src.core.models import ListeCourses
@@ -456,13 +457,13 @@ async def modifier_liste(
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
 
             if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             liste.nom = data.nom
             session.commit()
             session.refresh(liste)
 
-            return MessageResponse(message="Liste mise Ã  jour", id=liste.id)
+            return MessageResponse(message="Liste mise à jour", id=liste.id)
 
     return await executer_async(_update)
 
@@ -475,21 +476,21 @@ async def modifier_article(
     liste_id: int, item_id: int, item: CourseItemBase, user: dict[str, Any] = Depends(require_auth)
 ):
     """
-    Met Ã  jour un article d'une liste de courses.
+    Met à jour un article d'une liste de courses.
 
-    Permet de modifier la quantitÃ©, cocher/dÃ©cocher l'article, ou changer sa catÃ©gorie.
+    Permet de modifier la quantité, cocher/décocher l'article, ou changer sa catégorie.
 
     Args:
         liste_id: ID de la liste contenant l'article
-        item_id: ID de l'article Ã  modifier
-        item: Nouvelles donnÃ©es de l'article
+        item_id: ID de l'article à modifier
+        item: Nouvelles données de l'article
 
     Returns:
         Message de confirmation
 
     Raises:
-        401: Non authentifiÃ©
-        404: Article non trouvÃ© dans cette liste
+        401: Non authentifié
+        404: Article non trouvé dans cette liste
 
     Example:
         ```
@@ -499,7 +500,7 @@ async def modifier_article(
         Body: {"nom": "Tomates", "quantite": 3.0, "coche": true}
 
         Response:
-        {"message": "Article mis Ã  jour", "id": 12}
+        {"message": "Article mis à jour", "id": 12}
         ```
     """
     from src.core.models import ArticleCourses
@@ -513,7 +514,7 @@ async def modifier_article(
             )
 
             if not article:
-                raise HTTPException(status_code=404, detail="Article non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Article non trouvé")
 
             article.quantite_necessaire = item.quantite or 1.0
             article.achete = item.coche
@@ -521,7 +522,7 @@ async def modifier_article(
                 article.rayon_magasin = item.categorie
             session.commit()
 
-            return MessageResponse(message="Article mis Ã  jour", id=item_id)
+            return MessageResponse(message="Article mis à jour", id=item_id)
 
     return await executer_async(_update)
 
@@ -537,14 +538,14 @@ async def checkout_articles(
     payload: CheckoutCoursesRequest,
     user: dict[str, Any] = Depends(require_auth),
 ):
-    """Checkout batch: marque des articles courses comme achetÃ©s et met Ã  jour l'inventaire.
+    """Checkout batch: marque des articles courses comme achetés et met à jour l'inventaire.
 
-    Transaction unique par requÃªte:
+    Transaction unique par requête:
     - coche l'article de courses (achete=True, achete_le)
-    - incrÃ©mente (ou crÃ©e) la ligne inventaire associÃ©e Ã  l'ingrÃ©dient
+    - incrémente (ou crée) la ligne inventaire associée à l'ingrédient
     - enregistre l'historique inventaire
     """
-    # Idempotency: mÃªme clÃ© = mÃªme rÃ©ponse (anti double-scan)
+    # Idempotency: même clé = même réponse (anti double-scan)
     cached = _check_idempotency(payload.idempotency_key)
     if cached is not None:
         return cached
@@ -562,7 +563,7 @@ async def checkout_articles(
         with executer_avec_session() as session:
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
             if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             results: list[dict[str, Any]] = []
             total_maj = 0
@@ -609,7 +610,7 @@ async def checkout_articles(
                 article.achete = True
                 article.achete_le = datetime.now()
 
-                # 2) Met Ã  jour l'inventaire
+                # 2) Met à jour l'inventaire
                 inv = (
                     session.query(ArticleInventaire)
                     .filter(ArticleInventaire.ingredient_id == article.ingredient_id)
@@ -696,11 +697,11 @@ async def scan_barcode_checkout(
     """Checkout rapide en magasin via code-barres.
 
     Workflow:
-    - rÃ©sout le code-barres vers un article inventaire (ingredient_id)
-    - trouve l'article courses non achetÃ© correspondant dans la liste
-    - coche l'article et incrÃ©mente l'inventaire
+    - résout le code-barres vers un article inventaire (ingredient_id)
+    - trouve l'article courses non acheté correspondant dans la liste
+    - coche l'article et incrémente l'inventaire
     """
-    # Idempotency: mÃªme clÃ© = mÃªme rÃ©ponse (anti double-scan)
+    # Idempotency: même clé = même réponse (anti double-scan)
     cached = _check_idempotency(payload.idempotency_key)
     if cached is not None:
         return cached
@@ -718,7 +719,7 @@ async def scan_barcode_checkout(
         with executer_avec_session() as session:
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
             if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             inventaire = (
                 session.query(ArticleInventaire)
@@ -806,12 +807,12 @@ async def generer_depuis_planning(
     data: GenererCoursesRequest,
     user: dict[str, Any] = Depends(require_auth),
 ):
-    """GÃ©nÃ¨re une liste de courses depuis le planning de la semaine.
+    """Génère une liste de courses depuis le planning de la semaine.
 
-    1. RÃ©cupÃ¨re tous les Repas de la semaine avec recette_id
-    2. Extrait et agrÃ¨ge les ingrÃ©dients via RecetteIngredient
-    3. Soustrait le stock existant si demandÃ©
-    4. CrÃ©e une ListeCourses avec les ArticleCourses
+    1. Récupère tous les Repas de la semaine avec recette_id
+    2. Extrait et agrège les ingrédients via RecetteIngredient
+    3. Soustrait le stock existant si demandé
+    4. Crée une ListeCourses avec les ArticleCourses
     """
     from datetime import timedelta
 
@@ -838,7 +839,7 @@ async def generer_depuis_planning(
 
     def _generate():
         with executer_avec_session() as session:
-            # 1) RÃ©cupÃ©rer tous les repas de la semaine avec une recette liÃ©e
+            # 1) Récupérer tous les repas de la semaine avec une recette liée
             repas_list = (
                 session.query(Repas)
                 .filter(
@@ -852,10 +853,10 @@ async def generer_depuis_planning(
             if not repas_list:
                 raise HTTPException(
                     status_code=404,
-                    detail="Aucun repas avec recette trouvÃ© pour cette semaine",
+                    detail="Aucun repas avec recette trouvé pour cette semaine",
                 )
 
-            # Collecter tous les recette_ids (plat + entrÃ©e + desserts)
+            # Collecter tous les recette_ids (plat + entrée + desserts)
             recette_ids: set[int] = set()
             for r in repas_list:
                 if r.recette_id:
@@ -867,7 +868,7 @@ async def generer_depuis_planning(
                 if r.dessert_jules_recette_id:
                     recette_ids.add(r.dessert_jules_recette_id)
 
-            # 2) Extraire les ingrÃ©dients de toutes les recettes
+            # 2) Extraire les ingrédients de toutes les recettes
             rows = (
                 session.query(
                     Ingredient.nom,
@@ -891,7 +892,7 @@ async def generer_depuis_planning(
                 for row in rows
             ]
 
-            # 3) AgrÃ©ger les ingrÃ©dients identiques
+            # 3) Agréger les ingrédients identiques
             aggregated = aggregate_ingredients(ingredients_list)
             sorted_ings = sort_ingredients_by_rayon(aggregated)
 
@@ -925,7 +926,7 @@ async def generer_depuis_planning(
                     "en_stock": en_stock,
                 })
 
-            # 5) CrÃ©er la ListeCourses + ArticleCourses
+            # 5) Créer la ListeCourses + ArticleCourses
             liste = ListeCourses(nom=data.nom_liste, archivee=False)
             session.add(liste)
             session.flush()
@@ -997,14 +998,14 @@ async def supprimer_liste(liste_id: int, user: dict[str, Any] = Depends(require_
     Supprime une liste de courses et tous ses articles.
 
     Args:
-        liste_id: ID de la liste Ã  supprimer
+        liste_id: ID de la liste à supprimer
 
     Returns:
         Message de confirmation
 
     Raises:
-        401: Non authentifiÃ©
-        404: Liste non trouvÃ©e
+        401: Non authentifié
+        404: Liste non trouvée
 
     Example:
         ```
@@ -1012,7 +1013,7 @@ async def supprimer_liste(liste_id: int, user: dict[str, Any] = Depends(require_
         Authorization: Bearer <token>
 
         Response:
-        {"message": "Liste supprimÃ©e", "id": 5}
+        {"message": "Liste supprimée", "id": 5}
         ```
     """
     from src.core.models import ListeCourses
@@ -1022,12 +1023,12 @@ async def supprimer_liste(liste_id: int, user: dict[str, Any] = Depends(require_
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
 
             if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             session.delete(liste)
             session.commit()
 
-            return MessageResponse(message="Liste supprimÃ©e", id=liste_id)
+            return MessageResponse(message="Liste supprimée", id=liste_id)
 
     return await executer_async(_delete)
 
@@ -1046,14 +1047,14 @@ async def supprimer_article(
 
     Args:
         liste_id: ID de la liste contenant l'article
-        item_id: ID de l'article Ã  supprimer
+        item_id: ID de l'article à supprimer
 
     Returns:
         Message de confirmation
 
     Raises:
-        401: Non authentifiÃ©
-        404: Article non trouvÃ© dans cette liste
+        401: Non authentifié
+        404: Article non trouvé dans cette liste
 
     Example:
         ```
@@ -1061,7 +1062,7 @@ async def supprimer_article(
         Authorization: Bearer <token>
 
         Response:
-        {"message": "Article supprimÃ©", "id": 12}
+        {"message": "Article supprimé", "id": 12}
         ```
     """
     from src.core.models import ArticleCourses
@@ -1075,19 +1076,19 @@ async def supprimer_article(
             )
 
             if not article:
-                raise HTTPException(status_code=404, detail="Article non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Article non trouvé")
 
             session.delete(article)
             session.commit()
 
-            return MessageResponse(message="Article supprimÃ©", id=item_id)
+            return MessageResponse(message="Article supprimé", id=item_id)
 
     return await executer_async(_delete)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# VALIDATION COURSES â†’ SYNC INVENTAIRE + HISTORIQUE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ----------------------------------------------------------
+# VALIDATION COURSES -> SYNC INVENTAIRE + HISTORIQUE
+# ----------------------------------------------------------
 
 
 @router.post(
@@ -1100,11 +1101,11 @@ async def valider_courses(
     liste_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Valide une liste de courses : incrÃ©mente l'inventaire + met Ã  jour l'historique d'achats.
+    """Valide une liste de courses : incrémente l'inventaire + met à jour l'historique d'achats.
 
-    Pour chaque article cochÃ© :
-    - IncrÃ©mente l'article correspondant dans l'inventaire (ou le crÃ©e)
-    - Met Ã  jour la table historique_achats (frÃ©quence d'achat pour l'IA)
+    Pour chaque article coché :
+    - Incrémente l'article correspondant dans l'inventaire (ou le crée)
+    - Met à jour la table historique_achats (fréquence d'achat pour l'IA)
 
     Puis archive la liste.
     """
@@ -1118,7 +1119,7 @@ async def valider_courses(
         with executer_avec_session() as session:
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
             if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             articles_achetes = (
                 session.query(ArticleCourses)
@@ -1133,7 +1134,7 @@ async def valider_courses(
             now = datetime.now(UTC)
 
             for art in articles_achetes:
-                # IncrÃ©menter l'inventaire
+                # Incrémenter l'inventaire
                 inv = (
                     session.query(ArticleInventaire)
                     .filter(ArticleInventaire.ingredient_id == art.ingredient_id)
@@ -1151,7 +1152,7 @@ async def valider_courses(
                     )
                 articles_sync += 1
 
-                # Mettre Ã  jour l'historique d'achats
+                # Mettre à jour l'historique d'achats
                 ingredient = (
                     session.query(Ingredient).filter(Ingredient.id == art.ingredient_id).first()
                 )
@@ -1162,7 +1163,7 @@ async def valider_courses(
                         .first()
                     )
                     if hist:
-                        # Calculer la frÃ©quence
+                        # Calculer la fréquence
                         if hist.derniere_achat:
                             delta = (now - hist.derniere_achat).days
                             if delta > 0:
@@ -1188,7 +1189,7 @@ async def valider_courses(
             session.commit()
 
             return MessageResponse(
-                message=f"Courses validÃ©es : {articles_sync} articles synchronisÃ©s avec l'inventaire",
+                message=f"Courses validées : {articles_sync} articles synchronisés avec l'inventaire",
                 id=liste_id,
             )
 
@@ -1207,8 +1208,8 @@ async def obtenir_suggestions_bio_local(
     """Analyse les articles de la liste et retourne des suggestions bio/local/saison.
 
     Pour chaque article :
-    - VÃ©rifie si un producteur local est disponible
-    - VÃ©rifie si le produit est de saison
+    - Vérifie si un producteur local est disponible
+    - Vérifie si le produit est de saison
     - Propose des alternatives bio si pertinent
     """
     import json
@@ -1220,7 +1221,7 @@ async def obtenir_suggestions_bio_local(
         with executer_avec_session() as session:
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
             if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             articles = (
                 session.query(ArticleCourses)
@@ -1228,7 +1229,7 @@ async def obtenir_suggestions_bio_local(
                 .all()
             )
 
-            # Charger les donnÃ©es de saison
+            # Charger les données de saison
             saison_path = Path("data/reference/produits_de_saison.json")
             produits_saison: dict = {}
             if saison_path.exists():
@@ -1237,8 +1238,8 @@ async def obtenir_suggestions_bio_local(
             from datetime import date
             mois_actuel = date.today().month
             mois_noms = [
-                "", "janvier", "fÃ©vrier", "mars", "avril", "mai", "juin",
-                "juillet", "aoÃ»t", "septembre", "octobre", "novembre", "dÃ©cembre",
+                "", "janvier", "février", "mars", "avril", "mai", "juin",
+                "juillet", "août", "septembre", "octobre", "novembre", "décembre",
             ]
             mois_str = mois_noms[mois_actuel]
 
@@ -1255,7 +1256,7 @@ async def obtenir_suggestions_bio_local(
                     "alternative_bio": None,
                 }
 
-                # VÃ©rifier saisonnalitÃ©
+                # Vérifier saisonnalité
                 if isinstance(produits_saison, dict):
                     for categorie, produits in produits_saison.items():
                         if isinstance(produits, list):
@@ -1285,10 +1286,10 @@ async def obtenir_suggestions_bio_local(
 async def obtenir_recurrents_suggeres(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Retourne les articles rÃ©currents dont la frÃ©quence d'achat est dÃ©passÃ©e.
+    """Retourne les articles récurrents dont la fréquence d'achat est dépassée.
 
-    Se base sur l'historique d'achats pour suggÃ©rer les articles que l'utilisateur
-    achÃ¨te habituellement Ã  une certaine frÃ©quence.
+    Se base sur l'historique d'achats pour suggérer les articles que l'utilisateur
+    achète habituellement à une certaine fréquence.
     """
     from datetime import datetime, UTC
 
@@ -1298,7 +1299,7 @@ async def obtenir_recurrents_suggeres(
         with executer_avec_session() as session:
             now = datetime.now(UTC)
 
-            # Articles avec frÃ©quence connue
+            # Articles avec fréquence connue
             historiques = (
                 session.query(HistoriqueAchats)
                 .filter(
@@ -1323,7 +1324,7 @@ async def obtenir_recurrents_suggeres(
                         "nb_achats_total": h.nb_achats,
                     })
 
-            # Trier par retard dÃ©croissant
+            # Trier par retard décroissant
             suggestions.sort(key=lambda x: x["retard_jours"], reverse=True)
 
             return {
@@ -1349,13 +1350,13 @@ async def optimiser_budget_courses_ia(
 
     estimation_par_rayon = {
         "fruits": 2.4,
-        "lÃ©gumes": 2.1,
+        "légumes": 2.1,
         "legumes": 2.1,
         "viandes": 6.5,
         "poissons": 7.0,
         "produits laitiers": 2.2,
         "boissons": 1.8,
-        "Ã©picerie": 2.7,
+        "épicerie": 2.7,
         "epicerie": 2.7,
         "boulangerie": 1.6,
         "autre": 2.5,
@@ -1446,10 +1447,10 @@ async def optimiser_budget_courses_ia(
         message = "Votre liste est dans le budget cible."
     elif estimation <= budget_cible * 1.15:
         niveau_alerte = "attention"
-        message = "Budget lÃ©gÃ¨rement dÃ©passÃ©, appliquez 1 ou 2 substitutions."
+        message = "Budget légèrement dépassé, appliquez 1 ou 2 substitutions."
     else:
         niveau_alerte = "critique"
-        message = "Budget nettement dÃ©passÃ©, priorisez les indispensables et substitutions IA."
+        message = "Budget nettement dépassé, priorisez les indispensables et substitutions IA."
 
     return {
         "liste_id": donnees["liste_id"],
@@ -1464,22 +1465,22 @@ async def optimiser_budget_courses_ia(
     }
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# OCR TICKET DE CAISSE â†’ IMPORT COURSES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ----------------------------------------------------------
+# OCR TICKET DE CAISSE -> IMPORT COURSES
+# ----------------------------------------------------------
 
 
 @router.post(
     "/ocr-ticket-caisse",
     responses={**REPONSES_CRUD_CREATION, **REPONSES_CRUD_LECTURE},
-    summary="OCR ticket de caisse â†’ import courses",
+    summary="OCR ticket de caisse -> import courses",
 )
 @gerer_exception_api
 async def importer_ticket_caisse(
     file: UploadFile,
     liste_id: int | None = Query(
         None,
-        description="ID de la liste oÃ¹ importer les articles (sans = extraction seule)",
+        description="ID de la liste où importer les articles (sans = extraction seule)",
     ),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
@@ -1491,17 +1492,17 @@ async def importer_ticket_caisse(
     1. Upload d'une photo du ticket (JPEG/PNG/WebP)
     2. Extraction OCR via Mistral vision
     3. Si `liste_id` fourni : import automatique dans la liste
-    4. Retourne les donnÃ©es OCR brutes + articles importÃ©s
+    4. Retourne les données OCR brutes + articles importés
 
-    **ParamÃ¨tres**:
+    **Paramètres**:
     - `file`: Photo du ticket (max 10 Mo)
-    - `liste_id` (optionnel): ID de la liste cible ; sans â†’ mode aperÃ§u seul
+    - `liste_id` (optionnel): ID de la liste cible ; sans -> mode aperçu seul
 
     **Retour**:
     ```json
     {
       "success": true,
-      "message": "12 articles importÃ©s",
+            "message": "12 articles importés",
       "donnees_ocr": { "magasin": "Carrefour", "date": "...", "total": 45.30, "articles": [...] },
       "articles_importes": [{ "nom": "Tomates", "quantite": 1.0, "article_id": 42 }],
       "articles_non_importes": [],
@@ -1513,7 +1514,7 @@ async def importer_ticket_caisse(
     if file.content_type not in TYPES_AUTORISES:
         raise HTTPException(
             status_code=422,
-            detail=f"Type non supportÃ©: {file.content_type}. Utilisez JPEG, PNG ou WebP.",
+            detail=f"Type non supporté: {file.content_type}. Utilisez JPEG, PNG ou WebP.",
         )
 
     contenu = await file.read()
@@ -1528,14 +1529,14 @@ async def importer_ticket_caisse(
     if not resultat:
         return {
             "success": False,
-            "message": "Impossible d'extraire les donnÃ©es. Essayez avec une image plus nette.",
+            "message": "Impossible d'extraire les données. Essayez avec une image plus nette.",
             "donnees_ocr": None,
             "articles_importes": [],
             "articles_non_importes": [],
             "liste_id": liste_id,
         }
 
-    # Construire les donnÃ©es OCR normalisÃ©es
+    # Construire les données OCR normalisées
     articles_ocr = [
         {
             "description": ligne.description,
@@ -1556,11 +1557,11 @@ async def importer_ticket_caisse(
         "mode_paiement": resultat.mode_paiement,
     }
 
-    # Mode aperÃ§u : retourner sans importer
+    # Mode aperçu : retourner sans importer
     if liste_id is None:
         return {
             "success": True,
-            "message": f"{len(articles_ocr)} article(s) dÃ©tectÃ©(s) â€” fournir liste_id pour importer",
+            "message": f"{len(articles_ocr)} article(s) détecté(s) - fournir liste_id pour importer",
             "donnees_ocr": donnees_ocr,
             "articles_importes": [],
             "articles_non_importes": articles_ocr,
@@ -1574,7 +1575,7 @@ async def importer_ticket_caisse(
         with executer_avec_session() as session:
             liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
             if not liste:
-                raise HTTPException(status_code=404, detail="Liste non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
 
             importes = []
             ignores = []
@@ -1589,10 +1590,10 @@ async def importer_ticket_caisse(
                 nom = nom[:120]
                 quantite = float(art["quantite"] or 1.0)
 
-                # Trouver ou crÃ©er l'ingrÃ©dient
+                # Trouver ou créer l'ingrédient
                 ingredient = session.query(Ingredient).filter(Ingredient.nom == nom).first()
                 if not ingredient:
-                    ingredient = Ingredient(nom=nom, unite="unitÃ©", categorie="Autre")
+                    ingredient = Ingredient(nom=nom, unite="unité", categorie="Autre")
                     session.add(ingredient)
                     session.flush()
 
@@ -1619,7 +1620,7 @@ async def importer_ticket_caisse(
 
     return {
         "success": True,
-        "message": f"{len(importes)} article(s) importÃ©(s) dans la liste Â« {liste_id} Â»",
+        "message": f"{len(importes)} article(s) importé(s) dans la liste « {liste_id} »",
         "donnees_ocr": donnees_ocr,
         "articles_importes": importes,
         "articles_non_importes": ignores,

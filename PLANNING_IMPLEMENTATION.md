@@ -82,7 +82,7 @@
 | Notifications | 6/10 | 8/10 | Failover, préférences unifiées, throttling |
 | Automatisations | 6/10 | 8/10 | 10 jobs CRON à ajouter |
 | UX | 7/10 | 9/10 | 10 améliorations flux utilisateur |
-| Gamification | 5/10 | 8/10 | Triggers badges sport + nutrition |
+| Gamification | 8/10 | 8/10 | ✅ Triggers badges sport + nutrition implémentés |
 
 ---
 
@@ -717,18 +717,24 @@ La sidebar actuelle contient :
 | **Modèle PointsUtilisateur** | ✅ | Points sport + alimentation par semaine |
 | **Modèle BadgeUtilisateur** | ✅ | Type, label, date acquisition, méta |
 | **Calcul points hebdo** | ✅ | CRON dimanche 20h, agrège Garmin (sport) + nutrition |
-| **Page gamification frontend** | ✅ | Cartes métriques + barres de progression |
+| **Page gamification frontend** | ✅ | Cartes métriques + barres progression + badges détaillés + historique |
 | **API points-famille** | ✅ | GET endpoint fonctionnel |
+| **Triggers badges sport** | ✅ | 6 badges: marcheur, marathonien, sportif, brûleur, athlète, bougeotte |
+| **Triggers badges nutrition** | ✅ | 6 badges: planning, nutritionniste, assiette futée, zéro gaspi, diversité, champion |
+| **Détail badges + progression** | ✅ | Catalogue, état obtenu/non, compteur, dernière date |
+| **Notifications badges** | ✅ | Push + ntfy via dispatcher (événement badge_debloque) |
+| **Historique points** | ✅ | Endpoint historique N semaines + graphique frontend |
+| **Documentation** | ✅ | docs/GAMIFICATION.md |
 
 ### 15.2 Plan d'implémentation gamification (sport + nutrition uniquement)
 
-| # | Feature | Description | Priorité | Phase |
-|---|---------|-------------|----------|-------|
-| 1 | **Triggers badges sport** | Conditions : X pas/jour pendant 7j consécutifs, N sessions sport/semaine, objectif calories brûlées atteint — pas implémentés dans le code | P2 | 9 |
-| 2 | **Triggers badges nutrition** | Conditions : planning repas équilibré N jours de suite, score nutritionnel moyen > seuil, anti-gaspi zéro déchet sur 1 semaine | P2 | 9 |
-| 3 | **Détail badges** | Liste des badges sport + nutrition possibles avec progression (ex : 15/30 jours de marche) | P2 | 9 |
-| 4 | **Notifications badges** | Alerte push quand un badge sport ou nutrition est débloqué | P2 | 9 |
-| 5 | **Historique points** | Graphique évolution des points sport + nutrition semaine par semaine | P3 | 9 |
+| # | Feature | Description | Priorité | Phase | État |
+|---|---------|-------------|----------|-------|------|
+| 1 | **Triggers badges sport** | 6 badges : marcheur régulier (8k pas/7j), marathonien (12k pas/7j), sportif assidu (4 sessions/sem), brûleur calories (2500 kcal/sem), athlète complet (3 types), bougeotte (180+ pts) | P2 | 9 | ✅ |
+| 2 | **Triggers badges nutrition** | 6 badges : planning équilibré (5j repas), nutritionniste (score ≥ 75), assiette futée (220+ pts), zéro gaspi (0 expiré), diversité alimentaire (5 catégories), champion anti-gaspi (170+ pts) | P2 | 9 | ✅ |
+| 3 | **Détail badges** | Catalogue complet 12 badges + progression par utilisateur (obtenu, nb_obtenu, dernière date) + page frontend enrichie | P2 | 9 | ✅ |
+| 4 | **Notifications badges** | Push + ntfy via dispatcher multi-canal. Événement `badge_debloque` dans le mapping. Intégré au job CRON hebdo | P2 | 9 | ✅ |
+| 5 | **Historique points** | Endpoint `/historique-points?nb_semaines=8` + graphique barres empilées frontend (sport/alimentation/anti-gaspi) | P3 | 9 | ✅ |
 
 ---
 
@@ -887,6 +893,7 @@ La sidebar actuelle contient :
 - Réutilisation de l'infrastructure existante `BaseAIService` (cache sémantique, circuit breaker, parsing JSON, rate limiting)
 - Réutilisation du service multimodal Pixtral pour les analyses photo/plante/document/travaux
 - Intégration de contexte DB réel pour inventaire, budget, planning, routines, énergie et suggestions proactives
+- Tests API : `tests/api/test_ia_avancee.py` — 42 tests couvrant les 14 endpoints (CT-14)
 
 ### Phase 7 — Mode admin avancé (P1-P2)
 
@@ -912,29 +919,38 @@ La sidebar actuelle contient :
 ### Phase 8 — Jobs CRON additionnels (P2)
 
 > **Objectif** : Automatisations complètes
+> **Statut (2025-07-17)** : ✅ Implémenté
 
-| # | Action |
-|---|--------|
-| 8.1 | `rappel_documents_expirants` (quotidien 8h) |
-| 8.2 | `rapport_mensuel_auto` (1er/mois 8h) |
-| 8.3 | `sync_contrats_alertes` (hebdo lundi 9h) |
-| 8.4 | `check_garanties_expirant` (hebdo) |
-| 8.5 | `bilan_energetique` (mensuel) |
-| 8.6 | `rappel_vaccins` (lundi 9h) |
-| 8.7 | Connexions inter-modules restantes : Entretien→Budget, Voyages→Calendrier, Charges→Dashboard |
+| # | Action | Statut | Détails implémentés |
+|---|--------|--------|---------------------|
+| 8.1 | `rappel_documents_expirants` (quotidien 8h) | ✅ | Requête `DocumentFamille.date_expiration` sur horizon 90j, alertes graduées (urgent <7j, proches <30j, lointains <90j) |
+| 8.2 | `rapport_mensuel_auto` (1er/mois 8h) | ✅ | Agrégation `DepenseMaison` + `Projet` + `BudgetMensuelDB` + `ReleveEnergie` du mois précédent |
+| 8.3 | `sync_contrats_alertes` (hebdo lundi 9h) | ✅ | Auto-expiration contrats non-tacites échus + alertes renouvellement/résiliation à 60j |
+| 8.4 | `check_garanties_expirant` (hebdo lundi 9h15) | ✅ | Requête `Garantie.date_fin_garantie` sur 60j, email critique pour <14j |
+| 8.5 | `bilan_energetique` (1er/mois 8h30) | ✅ | Comparaison `ReleveEnergie` mois vs N-1 + moyenne 12 mois, calcul % variations |
+| 8.6 | `rappel_vaccins` (lundi 9h) | ✅ | Requête `Vaccin.rappel_prevu` sur 30j + vaccins obligatoires en retard |
+| 8.7 | Connexions inter-modules restantes | ✅ | 3 jobs de sync : `sync_entretien_budget` (1er/mois 6h), `sync_voyages_calendrier` (quotidien 6h30), `sync_charges_dashboard` (quotidien 7h30) |
 
-### Phase 9 — Gamification sport + nutrition (P2-P3)
+**Détails implémentation** :
+
+- **9 nouveaux jobs CRON** ajoutés dans `src/services/core/cron/jobs.py` avec scheduling APScheduler et traçabilité `job_executions`
+- **3 connexions inter-modules** avec émission d'événements via le bus (`depenses.sync_entretien`, `planning.sync_voyages`, `dashboard.charges_update`)
+- **3 subscribers inter-modules** ajoutés dans `src/services/core/events/subscribers.py` pour invalidation de cache automatique
+- **Déduplication** : les jobs de sync vérifient les entrées existantes avant création (via marqueurs `[intervention:ID]`, `[voyage:ID]`)
+- **Tests** : `tests/services/test_cron_phase8.py` — 17 tests couvrant les 9 jobs + subscribers (tous passants)
+
+### Phase 9 — Gamification sport + nutrition (P2-P3) ✅ COMPLÉTÉE
 
 > **Objectif** : Inciter à faire du sport et bien manger via badges et points (périmètre limité volontairement)
 
-| # | Action |
-|---|--------|
-| 9.1 | Implémenter triggers badges sport (pas/jour, sessions/semaine, calories brûlées) |
-| 9.2 | Implémenter triggers badges nutrition (planning équilibré, score nutritionnel, anti-gaspi) |
-| 9.3 | Page détail badges sport + nutrition (liste + progression) |
-| 9.4 | Notifications push badges débloqués |
-| 9.5 | Historique points sport + nutrition (graphique hebdomadaire) |
-| 9.6 | Créer `GAMIFICATION.md` |
+| # | Action | État |
+|---|--------|------|
+| 9.1 | Implémenter triggers badges sport (pas/jour, sessions/semaine, calories brûlées) | ✅ |
+| 9.2 | Implémenter triggers badges nutrition (planning équilibré, score nutritionnel, anti-gaspi) | ✅ |
+| 9.3 | Page détail badges sport + nutrition (liste + progression) | ✅ |
+| 9.4 | Notifications push badges débloqués | ✅ |
+| 9.5 | Historique points sport + nutrition (graphique hebdomadaire) | ✅ |
+| 9.6 | Créer `GAMIFICATION.md` | ✅ |
 
 ### Phase 10 — Innovations (P2-P3)
 

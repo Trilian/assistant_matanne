@@ -1,14 +1,117 @@
 "use client";
 
-import { Award, HeartPulse, Recycle, Trophy } from "lucide-react";
+import { Award, BarChart3, HeartPulse, Recycle, Trophy } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Progress } from "@/composants/ui/progress";
 import { utiliserRequete } from "@/crochets/utiliser-api";
-import { obtenirPointsFamille, obtenirScoreBienEtre } from "@/bibliotheque/api/tableau-bord";
+import {
+  obtenirPointsFamille,
+  obtenirScoreBienEtre,
+  obtenirBadgesUtilisateur,
+  obtenirHistoriquePoints,
+} from "@/bibliotheque/api/tableau-bord";
+import type { BadgeDefinition, HistoriquePoints } from "@/bibliotheque/api/tableau-bord";
+
+function BadgeCard({ badge }: { badge: BadgeDefinition }) {
+  return (
+    <div
+      className={`rounded-lg border p-3 transition-colors ${
+        badge.obtenu
+          ? "border-amber-300 bg-amber-50/50 dark:border-amber-700 dark:bg-amber-950/30"
+          : "border-muted bg-muted/30 opacity-60"
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <span className="text-2xl">{badge.emoji}</span>
+        <div className="min-w-0 flex-1">
+          <p className="font-medium">{badge.badge_label}</p>
+          <p className="text-xs text-muted-foreground">{badge.description}</p>
+          <div className="mt-1 flex items-center gap-2 text-xs">
+            <span
+              className={`rounded-full px-2 py-0.5 ${
+                badge.categorie === "sport"
+                  ? "bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300"
+                  : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300"
+              }`}
+            >
+              {badge.categorie}
+            </span>
+            {badge.obtenu && (
+              <span className="text-amber-600 dark:text-amber-400">
+                ✓ ×{badge.nb_obtenu ?? 1}
+                {badge.derniere_date && ` — ${badge.derniere_date}`}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HistoriqueChart({ data }: { data: HistoriquePoints[] }) {
+  if (!data.length) {
+    return <p className="text-sm text-muted-foreground">Aucun historique disponible.</p>;
+  }
+
+  const maxTotal = Math.max(...data.map((d) => d.total_points), 1);
+
+  return (
+    <div className="space-y-3">
+      {data.map((semaine) => (
+        <div key={semaine.semaine_debut} className="space-y-1">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">{semaine.semaine_debut}</span>
+            <span className="font-medium">{semaine.total_points} pts</span>
+          </div>
+          <div className="flex h-4 gap-0.5 overflow-hidden rounded-md">
+            <div
+              className="bg-sky-400 transition-all"
+              style={{ width: `${(semaine.points_sport / maxTotal) * 100}%` }}
+              title={`Sport: ${semaine.points_sport}`}
+            />
+            <div
+              className="bg-emerald-400 transition-all"
+              style={{ width: `${(semaine.points_alimentation / maxTotal) * 100}%` }}
+              title={`Alimentation: ${semaine.points_alimentation}`}
+            />
+            <div
+              className="bg-lime-400 transition-all"
+              style={{ width: `${(semaine.points_anti_gaspi / maxTotal) * 100}%` }}
+              title={`Anti-gaspi: ${semaine.points_anti_gaspi}`}
+            />
+          </div>
+        </div>
+      ))}
+      <div className="flex flex-wrap gap-4 pt-1 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1">
+          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-sky-400" /> Sport
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-400" /> Alimentation
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-lime-400" /> Anti-gaspi
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function PageGamificationFamille() {
   const { data: points } = utiliserRequete(["dashboard", "points-famille"], obtenirPointsFamille);
   const { data: score } = utiliserRequete(["dashboard", "score-bienetre"], obtenirScoreBienEtre);
+  const { data: badgesData } = utiliserRequete(
+    ["dashboard", "badges-utilisateur"],
+    obtenirBadgesUtilisateur
+  );
+  const { data: historiqueData } = utiliserRequete(
+    ["dashboard", "historique-points"],
+    () => obtenirHistoriquePoints(8)
+  );
+
+  const badgesSport = badgesData?.items.filter((b) => b.categorie === "sport") ?? [];
+  const badgesNutrition = badgesData?.items.filter((b) => b.categorie === "nutrition") ?? [];
 
   return (
     <div className="space-y-6">
@@ -19,6 +122,7 @@ export default function PageGamificationFamille() {
         </p>
       </div>
 
+      {/* ─── Métriques principales ─────────────────────────── */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -50,15 +154,18 @@ export default function PageGamificationFamille() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Badges</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Badges débloqués</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-2">
             <Award className="h-5 w-5 text-amber-500" />
-            <p className="text-3xl font-bold">{points?.badges.length ?? 0}</p>
+            <p className="text-3xl font-bold">
+              {badgesData?.obtenus ?? points?.badges.length ?? 0}
+            </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* ─── Barres de progression ─────────────────────────── */}
       <div className="grid gap-4 lg:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
@@ -100,22 +207,58 @@ export default function PageGamificationFamille() {
         </Card>
       </div>
 
+      {/* ─── Badges Sport ──────────────────────────────────── */}
       <Card>
         <CardHeader>
-          <CardTitle>Badges débloqués</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-sky-500" />
+            Badges Sport
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {points?.badges?.length ? (
-            <div className="flex flex-wrap gap-2">
-              {points.badges.map((badge) => (
-                <span key={badge} className="rounded-full border px-3 py-1 text-sm">
-                  {badge}
-                </span>
+          {badgesSport.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {badgesSport.map((badge) => (
+                <BadgeCard key={badge.badge_type} badge={badge} />
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Aucun badge pour le moment.</p>
+            <p className="text-sm text-muted-foreground">Chargement des badges sport…</p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* ─── Badges Nutrition ──────────────────────────────── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <HeartPulse className="h-5 w-5 text-emerald-500" />
+            Badges Nutrition
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {badgesNutrition.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {badgesNutrition.map((badge) => (
+                <BadgeCard key={badge.badge_type} badge={badge} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Chargement des badges nutrition…</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ─── Historique des points ─────────────────────────── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-violet-500" />
+            Historique hebdomadaire
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <HistoriqueChart data={historiqueData?.items ?? []} />
         </CardContent>
       </Card>
     </div>
