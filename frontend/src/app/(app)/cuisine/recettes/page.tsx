@@ -22,7 +22,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Card, CardContent } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
 import {
@@ -53,13 +53,6 @@ const CATEGORIES = [
   "Petit-déjeuner",
   "Goûter",
   "Snack",
-];
-
-const DIFFICULTES = [
-  { valeur: "toutes", label: "Toutes" },
-  { valeur: "facile", label: "Facile" },
-  { valeur: "moyen", label: "Moyen" },
-  { valeur: "difficile", label: "Difficile" },
 ];
 
 const APPAREILS = [

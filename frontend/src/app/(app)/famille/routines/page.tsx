@@ -50,7 +50,7 @@ import {
   creerRoutine,
   supprimerRoutine,
 } from "@/bibliotheque/api/famille";
-import type { Routine, EtapeRoutine } from "@/types/famille";
+import type { Routine } from "@/types/famille";
 import { toast } from "sonner";
 
 const TYPES_ROUTINE = [

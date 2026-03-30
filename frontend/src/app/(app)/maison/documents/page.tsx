@@ -11,7 +11,7 @@ import {
   FileText, ClipboardCheck, Plus, Trash2, Pencil, AlertTriangle, Home,
 } from "lucide-react";
 import {
-  Card, CardContent, CardHeader, CardTitle, CardDescription,
+  Card, CardContent,
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
@@ -23,7 +23,7 @@ import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
   listerContrats, alertesContrats, resumeFinancierContrats, creerContrat, modifierContrat, supprimerContrat,
-  listerDiagnostics, alertesDiagnostics, listerEstimations, derniereEstimation, creerDiagnostic, modifierDiagnostic, supprimerDiagnostic,
+  listerDiagnostics, alertesDiagnostics, derniereEstimation, creerDiagnostic, modifierDiagnostic, supprimerDiagnostic,
 } from "@/bibliotheque/api/maison";
 import type { Contrat, DiagnosticImmobilier } from "@/types/maison";
 import { toast } from "sonner";

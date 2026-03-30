@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/composants/ui/table'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/composants/ui/dropdown-menu'
 import { utiliserRequete } from '@/crochets/utiliser-api'
-import { MoreVertical, Download, TrendingUp, Flame, Snowflake, Clock } from 'lucide-react'
+import { MoreVertical, Download } from 'lucide-react'
 import { CSVLink } from 'react-csv'
 
 interface Filtres {
@@ -21,6 +21,8 @@ interface Filtres {
   date_max: string
   search: string
 }
+
+type StrategieFiltre = Filtres['strategie']
 
 interface GrilleLoto {
   id: number
@@ -168,7 +170,7 @@ export function TableauLotoExpert({
             <Label>Stratégie</Label>
             <Select
               value={filtres.strategie}
-              onValueChange={(val) => setFiltres({ ...filtres, strategie: val as any })}
+              onValueChange={(val) => setFiltres({ ...filtres, strategie: val as StrategieFiltre })}
             >
               <SelectTrigger>
                 <SelectValue />

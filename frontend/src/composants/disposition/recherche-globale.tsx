@@ -28,12 +28,13 @@ import {
   StickyNote,
   UserCircle,
   Loader2,
+  type LucideIcon,
 } from 'lucide-react'
 
 /**
  * Map des types d'entités vers leurs icônes Lucide
  */
-const ICONES_PAR_TYPE: Record<string, React.ComponentType<any>> = {
+const ICONES_PAR_TYPE: Record<string, LucideIcon> = {
   recette: ChefHat,
   projet: Hammer,
   activite: Users,

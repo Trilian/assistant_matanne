@@ -7,7 +7,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Boxes, ShieldCheck, Wifi, ChevronDown, Plus, Pencil, Trash2,
-  AlertTriangle, Link2, ShoppingCart,
+  AlertTriangle, Link2,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
@@ -37,7 +37,7 @@ import type { Garantie } from "@/types/maison";
 
 // ─── Onglet Inventaire ───────────────────────────────────────
 function OngletInventaire() {
-  const [pieceFiltree, setPieceFiltree] = useState<string | undefined>(undefined);
+  const [pieceFiltree] = useState<string | undefined>(undefined);
   const { data: inventaire, isLoading } = utiliserRequete(
     ["maison", "inventaire", pieceFiltree ?? ""],
     () => obtenirPiecesAvecObjets(pieceFiltree)
@@ -145,7 +145,7 @@ function OngletGaranties() {
   const [form, setForm] = useState(formsVide);
   const { autoCompleter } = utiliserAutoCompletionMaison("equipements_garanties");
 
-  const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
+  const { dialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
     utiliserDialogCrud<Garantie>({
       onOuvrirCreation: () => setForm(formsVide),
       onOuvrirEdition: (g) => setForm({

@@ -84,7 +84,7 @@ export default function PageBatchCooking() {
   );
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
-    (_: void) =>
+    () =>
       creerSessionBatch({
         nom: nomSession.trim(),
         date_session: dateSession || undefined,

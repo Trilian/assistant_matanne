@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { analyserPlanHabitat, historiquePlanHabitat, listerPlansHabitat } from "@/bibliotheque/api/habitat";
+import { EntetePageHabitat } from "@/composants/habitat/entete-page-habitat";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Textarea } from "@/composants/ui/textarea";
@@ -27,10 +28,16 @@ export default function PlansHabitatPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Plans</h1>
-        <p className="text-muted-foreground">Pipeline IA pour analyser les plans et historiser les variantes.</p>
-      </div>
+      <EntetePageHabitat
+        badge="H6 • Plans IA"
+        titre="Plans"
+        description="Analyse des plans, lecture des risques et memorisation des variantes pour converger vers un schema exploitable avant travaux ou amenagement." 
+        stats={[
+          { label: "Plans", valeur: `${plans?.length ?? 0}` },
+          { label: "Historique", valeur: `${historique?.length ?? 0}` },
+          { label: "Plan actif", valeur: planActif?.nom ?? "-" },
+        ]}
+      />
 
       <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
         <Card>

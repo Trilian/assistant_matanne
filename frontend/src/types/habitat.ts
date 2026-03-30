@@ -134,6 +134,22 @@ export interface PointCarteHabitat {
   longitude?: number;
 }
 
+export interface StatSourceVeilleHabitat {
+  source: string;
+  url: string;
+  annonces: number;
+  alertes: number;
+}
+
+export interface ResultatSynchronisationVeilleHabitat {
+  criteres: number;
+  annonces_creees: number;
+  annonces_mises_a_jour: number;
+  alertes: number;
+  sources: string[];
+  stats_sources: StatSourceVeilleHabitat[];
+}
+
 export interface SuggestionPieceHabitat {
   nom: string;
   type_piece: string;
@@ -193,4 +209,57 @@ export interface ResumeJardinHabitat {
   surface_totale_m2: number;
   budget_estime: number;
   types: string[];
+}
+
+export interface HistoriqueMarcheHabitatPoint {
+  mois: string;
+  transactions: number;
+  prix_m2_median?: number | null;
+  prix_m2_moyen?: number | null;
+  valeur_moyenne?: number | null;
+}
+
+export interface RepartitionTypeMarcheHabitat {
+  type_local: string;
+  transactions: number;
+  prix_m2_median?: number | null;
+}
+
+export interface TransactionMarcheHabitat {
+  date_mutation: string;
+  valeur_fonciere?: number | null;
+  surface_m2?: number | null;
+  prix_m2?: number | null;
+  type_local?: string | null;
+  nb_pieces?: number | null;
+  code_postal?: string | null;
+  commune?: string | null;
+  adresse?: string | null;
+}
+
+export interface ResultatMarcheHabitat {
+  source: {
+    dataset_id: string;
+    resource_id?: string | null;
+    resource_title?: string | null;
+  };
+  query: {
+    departement?: string | null;
+    commune?: string | null;
+    code_postal?: string | null;
+    type_local?: string | null;
+    nb_pieces_min?: number | null;
+    surface_min_m2?: number | null;
+  };
+  resume: {
+    nb_transactions: number;
+    prix_m2_median?: number | null;
+    prix_m2_moyen?: number | null;
+    valeur_mediane?: number | null;
+    surface_mediane?: number | null;
+    dernier_mois?: HistoriqueMarcheHabitatPoint | null;
+  };
+  historique: HistoriqueMarcheHabitatPoint[];
+  repartition_types: RepartitionTypeMarcheHabitat[];
+  transactions: TransactionMarcheHabitat[];
 }

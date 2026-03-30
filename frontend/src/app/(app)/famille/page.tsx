@@ -12,7 +12,6 @@ import {
   Baby,
   Wallet,
   ListChecks,
-  Camera,
   BookUser,
   FileText,
   Sparkles,
@@ -27,13 +26,11 @@ import {
   TrendingDown,
   Minus,
   Clock,
-  MapPin,
   Loader2,
 } from "lucide-react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/composants/ui/card";
@@ -153,14 +150,6 @@ export default function PageFamille() {
   const rappelsUrgents =
     rappelsData?.rappels?.filter((r) => r.priorite === "danger" || r.priorite === "warning") ?? [];
 
-  // PHASE B1 — Mapping urgences par module
-  const urgencesParModule: Record<string, number> = {
-    jules: rappelsUrgents.filter(r => ['jalon', 'sante', 'croissance', 'vaccin'].some(t => r.type?.toLowerCase().includes(t))).length,
-    budget: rappelsUrgents.filter(r => ['budget', 'depense', 'depassement'].some(t => r.type?.toLowerCase().includes(t))).length,
-    documents: rappelsUrgents.filter(r => ['document', 'expir', 'passeport', 'carte'].some(t => r.type?.toLowerCase().includes(t))).length,
-    achats: rappelsUrgents.filter(r => ['achat', 'anniversaire', 'cadeau'].some(t => r.type?.toLowerCase().includes(t))).length,
-  };
-
   const urgencesPourModule = (moduleId: string): number => {
     const types = MODULES_RAPPELS_MAPPING[moduleId] ?? [];
     if (types.length === 0) return 0;
@@ -168,17 +157,9 @@ export default function PageFamille() {
   };
 
   const [hasShownToast, setHasShownToast] = useState(false);
-  const [suggestionsAchatsIA, setSuggestionsAchatsIA] = useState<{ titre: string; raison_suggestion?: string; priorite?: string }[]>([]);
-
   // PHASE B2 — Suggestions IA Achats (nouveau hook)
   const mutationSuggestionsAchats = useMutation({
     mutationFn: () => obtenirSuggestionsAchatsEnrichies({ triggers: ['hub_rapide'] }),
-  });
-
-  const mutationSuggestionsAchatsIA = useMutation({
-    mutationFn: () => obtenirSuggestionsAchatsEnrichies({ triggers: ["hub_rapide"] }),
-    onSuccess: (data) => setSuggestionsAchatsIA((data.items ?? []).slice(0, 2)),
-    onError: () => toast.error("Impossible de charger les suggestions IA."),
   });
 
   useEffect(() => {

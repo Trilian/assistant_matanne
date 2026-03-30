@@ -14,7 +14,7 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("@/crochets/utiliser-api", () => ({
-  utiliserRequete: (_key: unknown, _fn: unknown) => ({
+  utiliserRequete: () => ({
     data: null,
     isLoading: false,
     error: null,

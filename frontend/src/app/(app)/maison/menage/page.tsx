@@ -14,7 +14,7 @@ import { Switch } from "@/composants/ui/switch";
 import { Input } from "@/composants/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/composants/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/composants/ui/select";
-import { RefreshCw, Plus, Pencil, Trash2, Copy, ChevronDown, ChevronRight } from "lucide-react";
+import { RefreshCw, Plus, Pencil, Trash2 } from "lucide-react";
 import {
   obtenirTachesJourMaison,
   obtenirPlanningMenageSemaine,
@@ -24,14 +24,8 @@ import {
   creerRoutineMaison,
   modifierRoutineMaison,
   supprimerRoutineMaison,
-  dupliquerRoutine,
-  listerTachesRoutine,
-  ajouterTacheRoutine,
-  supprimerTacheRoutine,
-  creerRoutineIA,
   creerTachePonctuelle,
   regenererPlanningIA,
-  type PlanningSemaine,
   type FicheTache,
   type RoutineMaison,
 } from "@/bibliotheque/api/maison";

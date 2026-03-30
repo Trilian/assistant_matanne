@@ -14,16 +14,18 @@ import { Badge } from '@/composants/ui/badge'
 import { Checkbox } from '@/composants/ui/checkbox'
 import { Label } from '@/composants/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/composants/ui/tabs'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Flame, Dice1, TrendingDown, AlertTriangle, Info, X, BookOpen } from 'lucide-react'
 
 interface ResultatTest {
   alerte: boolean
   severite: 'faible' | 'moyenne' | 'forte'
   message: string
-  details: Record<string, any>
+  details: Record<string, unknown>
   type_pattern: string
 }
+
+type PatternTab = 'all' | 'hot_hand' | 'gamblers' | 'regression'
 
 interface DetectionPatternModalProps {
   open: boolean
@@ -47,7 +49,7 @@ export function DetectionPatternModal({
   userId
 }: DetectionPatternModalProps) {
   const [nePlusAfficher, setNePlusAfficher] = useState(false)
-  const [activeTab, setActiveTab] = useState<'all' | 'hot_hand' | 'gamblers' | 'regression'>('all')
+  const [activeTab, setActiveTab] = useState<PatternTab>('all')
 
   // Compter nombre d'alertes actives
   const nbAlertes = Object.values(alerts).filter(a => a?.alerte).length
@@ -81,91 +83,6 @@ export function DetectionPatternModal({
     return null
   }
 
-  // Helpers couleurs
-  const couleurSeverite = (severite: string) => {
-    switch (severite) {
-      case 'forte':
-        return 'destructive'
-      case 'moyenne':
-        return 'default'
-      case 'faible':
-        return 'secondary'
-      default:
-        return 'outline'
-    }
-  }
-
-  const couleurBordure = (severite: string) => {
-    switch (severite) {
-      case 'forte':
-        return 'border-red-300 bg-red-50/50'
-      case 'moyenne':
-        return 'border-orange-300 bg-orange-50/50'
-      case 'faible':
-        return 'border-yellow-300 bg-yellow-50/50'
-      default:
-        return 'border-gray-300 bg-gray-50/50'
-    }
-  }
-
-  // Icônes par type
-  const getIcone = (type: string) => {
-    switch (type) {
-      case 'hot_hand':
-        return <Flame className="h-5 w-5 text-orange-600" />
-      case 'gamblers_fallacy':
-        return <Dice1 className="h-5 w-5 text-purple-600" />
-      case 'regression_moyenne':
-        return <TrendingDown className="h-5 w-5 text-blue-600" />
-      default:
-        return <AlertTriangle className="h-5 w-5 text-gray-600" />
-    }
-  }
-
-  // Titres éducatifs
-  const getTitre = (type: string) => {
-    switch (type) {
-      case 'hot_hand':
-        return '🔥 Illusion de la "main chaude"'
-      case 'gamblers_fallacy':
-        return '🎲 Erreur du parieur'
-      case 'regression_moyenne':
-        return '📉 Régression vers la moyenne'
-      default:
-        return '⚠️ Pattern détecté'
-    }
-  }
-
-  // Explications pédagogiques
-  const getExplication = (type: string) => {
-    switch (type) {
-      case 'hot_hand':
-        return {
-          titre: "Qu'est-ce que l'illusion de la main chaude ?",
-          texte: `La "main chaude" est la croyance erronée qu'après une série de succès, on a plus de chances de continuer à gagner. En réalité, chaque pari est indépendant. Une série de victoires n'influence pas les résultats futurs.`,
-          conseil: 'Ne pas augmenter vos mises après une série de gains. Suivez votre stratégie initiale.'
-        }
-      case 'gamblers_fallacy':
-        return {
-          titre: "Qu'est-ce que l'erreur du parieur ?",
-          texte: `L'erreur du parieur consiste à croire qu'après une série de pertes, on "doit" bientôt gagner pour "se refaire". Chaque pari reste indépendant avec les mêmes probabilités, quelle que soit l'historique.`,
-          conseil: 'Ne jamais augmenter ses mises après une perte pour "se refaire". C\'est le chemin vers des pertes importantes.'
-        }
-      case 'regression_moyenne':
-        return {
-          titre: "Qu'est-ce que la régression vers la moyenne ?",
-          texte: `Après une période de résultats exceptionnels (très bons ou très mauvais), les résultats tendent naturellement à revenir vers la moyenne à long terme. Cela ne prédit pas le résultat immédiat du prochain pari.`,
-          conseil: 'Ne vous attendez pas à ce que la prochaine série soit forcément différente. Gardez vos attentes réalistes.'
-        }
-      default:
-        return {
-          titre: 'Biais cognitif détecté',
-          texte: 'Un pattern inhabituel a été détecté dans votre comportement de paris.',
-          conseil: 'Prenez du recul et analysez objectivement votre stratégie.'
-        }
-    }
-  }
-
   return (
     <Dialog open={open && shouldShow} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -192,7 +109,7 @@ export function DetectionPatternModal({
           </div>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mt-4">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as PatternTab)} className="mt-4">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="all">
               Toutes ({nbAlertes})

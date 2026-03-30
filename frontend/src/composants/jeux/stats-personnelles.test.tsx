@@ -14,6 +14,8 @@ import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StatsPersonnelles } from './stats-personnelles'
 
+type FetchMock = ReturnType<typeof vi.fn>
+
 // Mock Chart.js
 vi.mock('react-chartjs-2', () => ({
   Line: () => <div data-testid="chart-line">Chart</div>
@@ -78,7 +80,7 @@ describe('StatsPersonnelles', () => {
     vi.clearAllMocks()
     
     // Mock successful fetch
-    ;(global.fetch as any).mockResolvedValue({
+    ;(global.fetch as FetchMock).mockResolvedValue({
       ok: true,
       json: async () => mockStatsData
     })
@@ -93,7 +95,7 @@ describe('StatsPersonnelles', () => {
   }
 
   it('affiche le loader pendant le chargement', () => {
-    ;(global.fetch as any).mockImplementation(() => new Promise(() => {})) // Never resolves
+    ;(global.fetch as FetchMock).mockImplementation(() => new Promise(() => {})) // Never resolves
     
     renderComponent()
     
@@ -251,7 +253,7 @@ describe('StatsPersonnelles', () => {
   })
 
   it('affiche erreur si fetch échoue', async () => {
-    ;(global.fetch as any).mockRejectedValue(new Error('API Error'))
+    ;(global.fetch as FetchMock).mockRejectedValue(new Error('API Error'))
     
     renderComponent()
 

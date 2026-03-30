@@ -28,7 +28,6 @@ import {
   CardTitle,
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
-import { Separator } from "@/composants/ui/separator";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { exporterRecettePdf, genererVersionJules, obtenirRecette, partagerRecette, supprimerRecette } from "@/bibliotheque/api/recettes";
@@ -56,10 +55,10 @@ export default function PageDetailRecette({
   useEffect(() => {
     if (recette?.nom) definirTitrePage(recette.nom);
     return () => definirTitrePage(null);
-  }, [recette?.nom]);
+  }, [recette?.nom, definirTitrePage]);
 
   const { mutate: supprimer, isPending: enSuppression } = utiliserMutation(
-    (_: void) => supprimerRecette(Number(id)),
+    () => supprimerRecette(Number(id)),
     {
       onSuccess: () => {
         invalider(["recettes"]);

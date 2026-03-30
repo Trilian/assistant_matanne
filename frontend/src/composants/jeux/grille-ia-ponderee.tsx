@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Badge } from "@/composants/ui/badge";
-import { Skeleton } from "@/composants/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -101,7 +100,7 @@ export function GrilleIAPonderee({ onGenerer, onAnalyser }: GrilleIAGenereeProps
       <CardContent className="space-y-4">
         {/* Sélecteur mode */}
         <div className="flex items-center gap-3">
-          <Select value={mode} onValueChange={(v) => setMode(v as any)}>
+          <Select value={mode} onValueChange={(v) => setMode(v as "chauds" | "froids" | "equilibre")}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Stratégie" />
             </SelectTrigger>

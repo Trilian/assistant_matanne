@@ -602,7 +602,7 @@ const PREFERENCES_OPTIONS = [
   { value: "sensoriel", label: "Sensoriel", icone: Puzzle },
 ] as const;
 
-function DialogueSuggestionsIA({
+export function DialogueSuggestionsIA({
   ouvert,
   onOpenChange,
 }: {

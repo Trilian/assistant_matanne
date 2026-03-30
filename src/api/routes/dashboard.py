@@ -114,12 +114,14 @@ def _calculer_score_ecologique(session: Any) -> dict[str, Any]:
             round(100 - ((articles_a_risque / total_inventaire) * 100)),
         )
 
-    notes_ecoscore = [
-        _score_lettre_vers_points(item[0])
-        for item in session.query(ArticleInventaire.ecoscore)
-        .filter(ArticleInventaire.ecoscore.isnot(None))
-        .all()
-    ]
+    notes_ecoscore: list[int | None] = []
+    if hasattr(ArticleInventaire, "ecoscore"):
+        notes_ecoscore = [
+            _score_lettre_vers_points(item[0])
+            for item in session.query(ArticleInventaire.ecoscore)
+            .filter(ArticleInventaire.ecoscore.isnot(None))
+            .all()
+        ]
     notes_ecoscore_valides = [note for note in notes_ecoscore if note is not None]
     score_produits = (
         round(sum(notes_ecoscore_valides) / len(notes_ecoscore_valides))

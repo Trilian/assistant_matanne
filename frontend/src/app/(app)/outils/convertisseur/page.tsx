@@ -63,7 +63,6 @@ const UNITES_TEMPERATURE = ["°C", "°F", "K"];
 
 function ConvertisseurUnite({
   unites,
-  titre,
 }: {
   unites: Record<string, number>;
   titre: string;

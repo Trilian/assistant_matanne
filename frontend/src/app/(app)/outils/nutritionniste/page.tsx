@@ -10,7 +10,6 @@ import {
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
 import { ScrollArea } from "@/composants/ui/scroll-area";
-import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
 import {
   Apple,
@@ -27,9 +26,7 @@ import {
 import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
 import {
   envoyerMessageChat,
-  obtenirActionsRapides,
 } from "@/bibliotheque/api/outils";
-import type { ActionRapide } from "@/bibliotheque/api/outils";
 import { obtenirNutritionHebdo } from "@/bibliotheque/api/planning";
 import type { MessageChat } from "@/types/outils";
 import { toast } from "sonner";

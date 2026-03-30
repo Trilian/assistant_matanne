@@ -15,7 +15,6 @@ import {
 import {
   Card, CardContent, CardHeader, CardTitle, CardDescription,
 } from "@/composants/ui/card";
-import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { Input } from "@/composants/ui/input";

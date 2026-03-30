@@ -7,10 +7,15 @@ import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { listerContrats, alertesContrats, resumeFinancierContrats } from "@/bibliotheque/api/maison";
 
+interface ResumeContrats {
+  total_mensuel?: number;
+  total_annuel?: number;
+}
+
 export default function PageContratsMaison() {
   const { data: contrats = [], isLoading } = utiliserRequete(["maison", "contrats"], () => listerContrats());
   const { data: alertes = [] } = utiliserRequete(["maison", "contrats", "alertes"], () => alertesContrats(90));
-  const { data: resume } = utiliserRequete(["maison", "contrats", "resume"], resumeFinancierContrats);
+  const { data: resume } = utiliserRequete<ResumeContrats>(["maison", "contrats", "resume"], resumeFinancierContrats);
 
   return (
     <div className="space-y-6">
@@ -22,8 +27,8 @@ export default function PageContratsMaison() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{contrats.length}</p><p className="text-xs text-muted-foreground">Contrats</p></CardContent></Card>
         <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold text-amber-500">{alertes.length}</p><p className="text-xs text-muted-foreground">Alertes 90j</p></CardContent></Card>
-        <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{Number((resume as any)?.total_mensuel ?? 0).toFixed(0)} €</p><p className="text-xs text-muted-foreground">Mensuel</p></CardContent></Card>
-        <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{Number((resume as any)?.total_annuel ?? 0).toFixed(0)} €</p><p className="text-xs text-muted-foreground">Annuel</p></CardContent></Card>
+        <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{Number(resume?.total_mensuel ?? 0).toFixed(0)} €</p><p className="text-xs text-muted-foreground">Mensuel</p></CardContent></Card>
+        <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{Number(resume?.total_annuel ?? 0).toFixed(0)} €</p><p className="text-xs text-muted-foreground">Annuel</p></CardContent></Card>
       </div>
 
       <Card>

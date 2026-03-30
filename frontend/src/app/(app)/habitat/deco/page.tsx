@@ -7,6 +7,7 @@ import {
   listerProjetsDecoHabitat,
   synchroniserDepenseDecoHabitat,
 } from "@/bibliotheque/api/habitat";
+import { EntetePageHabitat } from "@/composants/habitat/entete-page-habitat";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
@@ -48,10 +49,16 @@ export default function DecoHabitatPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Deco</h1>
-        <p className="text-muted-foreground">Concepts IA, visuels Hugging Face et synchronisation budget Maison.</p>
-      </div>
+      <EntetePageHabitat
+        badge="H7-H9 • Deco & budget"
+        titre="Deco"
+        description="Concepts IA par piece, visuels de projection et synchronisation des depenses avec Maison pour garder une lecture budgetaire coherente." 
+        stats={[
+          { label: "Projets", valeur: `${projets?.length ?? 0}` },
+          { label: "Prevu", valeur: `${Math.round(consommation.prevu).toLocaleString("fr-FR")} EUR` },
+          { label: "Depense", valeur: `${Math.round(consommation.depense).toLocaleString("fr-FR")} EUR` },
+        ]}
+      />
 
       <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
         <Card>

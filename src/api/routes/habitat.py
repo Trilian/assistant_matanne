@@ -44,6 +44,7 @@ from src.core.models.habitat_projet import (
     ZoneJardinHabitat,
 )
 from src.services.habitat.deco_service import obtenir_service_deco_habitat
+from src.services.habitat.dvf_service import obtenir_service_dvf_habitat
 from src.services.habitat.plans_ai_service import obtenir_service_plans_habitat
 from src.services.habitat.scenarios_service import obtenir_service_scenarios_habitat
 from src.services.habitat.veille_service import obtenir_service_veille_habitat
@@ -100,6 +101,7 @@ async def synchroniser_veille(
                 user_id=str(user.get("id") or "dev"),
                 critere_id=payload.critere_id,
                 limite_par_source=payload.limite_par_source,
+                sources=payload.sources,
                 envoyer_alertes=payload.envoyer_alertes,
             )
 
@@ -128,6 +130,31 @@ async def carte_veille(user: dict[str, Any] = Depends(require_auth)) -> dict[str
             return {"items": obtenir_service_veille_habitat().carte_annonces(session)}
 
     return await executer_async(_query)
+
+
+@router.get("/marche/dvf", responses=REPONSES_CRUD_LECTURE_TYPED)
+@gerer_exception_api
+async def marche_dvf(
+    departement: str | None = Query(None),
+    code_postal: str | None = Query(None),
+    commune: str | None = Query(None),
+    type_local: str | None = Query(None),
+    nb_pieces_min: int | None = Query(None, ge=1),
+    surface_min_m2: float | None = Query(None, ge=0),
+    limite: int = Query(180, ge=25, le=250),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Expose un historique de marche Habitat fonde sur les transactions DVF publiques."""
+
+    return obtenir_service_dvf_habitat().obtenir_historique_marche(
+        departement=departement,
+        code_postal=code_postal,
+        commune=commune,
+        type_local=type_local,
+        nb_pieces_min=nb_pieces_min,
+        surface_min_m2=surface_min_m2,
+        limite=limite,
+    )
 
 
 @router.get("/scenarios", responses=REPONSES_LISTE_TYPED)
@@ -364,9 +391,14 @@ async def lister_annonces(
                         "titre": a.titre,
                         "prix": _to_float(a.prix),
                         "surface_m2": _to_float(a.surface_m2),
+                        "surface_terrain_m2": _to_float(a.surface_terrain_m2),
+                        "nb_pieces": a.nb_pieces,
                         "ville": a.ville,
+                        "code_postal": a.code_postal,
                         "statut": a.statut,
                         "score_pertinence": _to_float(a.score_pertinence),
+                        "prix_m2_secteur": _to_float(a.prix_m2_secteur),
+                        "ecart_prix_pct": _to_float(a.ecart_prix_pct),
                     }
                     for a in items
                 ]

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/composants/ui/card";
 
@@ -24,7 +25,7 @@ export default function AppError({
         <CardFooter className="flex gap-2">
           <Button onClick={reset}>Réessayer</Button>
           <Button variant="outline" asChild>
-            <a href="/">Retour à l&apos;accueil</a>
+            <Link href="/">Retour à l&apos;accueil</Link>
           </Button>
         </CardFooter>
       </Card>

@@ -36,13 +36,6 @@ import {
 } from "@/composants/ui/dialog";
 import { Input } from "@/composants/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/composants/ui/select";
-import {
   Tabs,
   TabsContent,
   TabsList,

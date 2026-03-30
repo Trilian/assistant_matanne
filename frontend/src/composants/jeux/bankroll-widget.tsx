@@ -11,13 +11,13 @@ import {
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  type TooltipItem,
 } from 'chart.js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Input } from '@/composants/ui/input'
 import { Label } from '@/composants/ui/label'
 import { Badge } from '@/composants/ui/badge'
-import { Button } from '@/composants/ui/button'
 import { Skeleton } from '@/composants/ui/skeleton'
 import { Slider } from '@/composants/ui/slider'
 import { utiliserRequete } from '@/crochets/utiliser-api'
@@ -92,7 +92,7 @@ export function BankrollWidget({
   )
 
   // Récupérer suggestion Kelly
-  const { data: suggestion, isLoading: loadingSuggestion } = utiliserRequete<SuggestionMise>(
+  const { data: suggestion } = utiliserRequete<SuggestionMise>(
     [
       'suggestion-mise',
       String(userId),
@@ -172,7 +172,7 @@ export function BankrollWidget({
       },
       tooltip: {
         callbacks: {
-          label: (context: any) => {
+          label: (context: TooltipItem<'line'>) => {
             return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}€`
           }
         }
@@ -182,7 +182,7 @@ export function BankrollWidget({
       y: {
         beginAtZero: false,
         ticks: {
-          callback: (value: any) => `${value}€`
+          callback: (value: string | number) => `${value}€`
         }
       }
     }

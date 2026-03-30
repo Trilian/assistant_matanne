@@ -11,7 +11,6 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/composants/ui/sheet";
-import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirGarantie } from "@/bibliotheque/api/maison";

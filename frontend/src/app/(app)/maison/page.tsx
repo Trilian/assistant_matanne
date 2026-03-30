@@ -170,7 +170,7 @@ export default function PageMaison() {
     { staleTime: 2 * 60 * 60 * 1000 }
   );
 
-  const [dismisses, setDismisses] = useState(0); // incrémenté pour forcer un re-render après dismiss
+  const [, setDismisses] = useState(0); // incrémenté pour forcer un re-render après dismiss
 
   const { mutate: envoyerRappels, isPending: envoi } = utiliserMutation(
     envoyerRappelsMaison

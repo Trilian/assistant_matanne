@@ -6,6 +6,7 @@ import {
   modifierZoneJardinHabitat,
   obtenirResumeJardinHabitat,
 } from "@/bibliotheque/api/habitat";
+import { EntetePageHabitat } from "@/composants/habitat/entete-page-habitat";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Input } from "@/composants/ui/input";
@@ -48,10 +49,16 @@ export default function JardinHabitatPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Jardin Habitat</h1>
-        <p className="text-muted-foreground">Canvas paysager léger avec zones persistées et budget agrégé.</p>
-      </div>
+      <EntetePageHabitat
+        badge="H8 • Paysagisme"
+        titre="Jardin Habitat"
+        description="Pilotage des zones exterieures, lecture surfacique et budget d'amenagement dans le meme flux que les plans Habitat." 
+        stats={[
+          { label: "Zones", valeur: `${resume?.zones ?? zones?.length ?? 0}` },
+          { label: "Surface", valeur: `${Math.round(resume?.surface_totale_m2 ?? 0)} m2` },
+          { label: "Budget", valeur: `${Math.round(resume?.budget_estime ?? 0).toLocaleString("fr-FR")} EUR` },
+        ]}
+      />
 
       <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <Card>

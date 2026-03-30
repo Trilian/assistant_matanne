@@ -4,7 +4,7 @@
 
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Sofa, Plus, Trash2, Pencil, ExternalLink, ShoppingCart,
@@ -17,9 +17,6 @@ import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/composants/ui/select";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { utiliserDialogCrud } from "@/crochets/utiliser-crud";

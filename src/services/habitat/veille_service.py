@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass
 from statistics import median
 from typing import Any
-from urllib.parse import quote, urljoin, urlparse
+from urllib.parse import quote, urlencode, urljoin, urlparse
 
 import httpx
 from bs4 import BeautifulSoup
@@ -68,6 +68,79 @@ class VeilleHabitatService:
     def _slug(self, value: str) -> str:
         return quote(value.lower().replace(" ", "-"))
 
+    def _construire_url_source(self, source: str, critere: CritereImmoHabitat, ville: str) -> str | None:
+        budget_min = int(float(critere.budget_min or 0)) if critere.budget_min else 0
+        budget_max = int(float(critere.budget_max or 0)) if critere.budget_max else 0
+        pieces = critere.nb_pieces_min or 0
+        surface_min = int(float(critere.surface_min_m2 or 0)) if critere.surface_min_m2 else 0
+        type_bien = (critere.type_bien or "maison").lower()
+
+        if source == "leboncoin":
+            params = {
+                "category": 9,
+                "text": ville,
+                "real_estate_type": "1,2" if type_bien in {"maison", "appartement"} else "1",
+            }
+            if pieces:
+                params["rooms"] = pieces
+            if budget_min or budget_max:
+                params["price"] = f"{budget_min}-{budget_max or ''}"
+            if surface_min:
+                params["square"] = f"{surface_min}-"
+            return f"https://www.leboncoin.fr/recherche?{urlencode(params)}"
+
+        if source == "bienici":
+            params = {}
+            if budget_max:
+                params["prix-max"] = budget_max
+            if surface_min:
+                params["surface-min"] = surface_min
+            if pieces:
+                params["pieces-min"] = pieces
+            suffix = f"?{urlencode(params)}" if params else ""
+            return f"https://www.bienici.com/recherche/achat/{self._slug(ville)}{suffix}"
+
+        if source == "seloger":
+            params = {
+                "places": f"[{ville}]",
+                "projects": "2",
+                "types": "1,2" if type_bien in {"maison", "appartement"} else "2",
+            }
+            if budget_max:
+                params["price"] = f"NaN/{budget_max}"
+            if surface_min:
+                params["surface"] = f"{surface_min}/NaN"
+            if pieces:
+                params["rooms"] = f"{pieces}/NaN"
+            return f"https://www.seloger.com/list.htm?{urlencode(params)}"
+
+        if source == "pap":
+            segments = ["annonce", "vente", self._slug(ville)]
+            if type_bien == "appartement":
+                segments.insert(2, "appartement")
+            elif type_bien == "maison":
+                segments.insert(2, "maison")
+            params = {}
+            if budget_max:
+                params["prix-max"] = budget_max
+            if surface_min:
+                params["surface-min"] = surface_min
+            if pieces:
+                params["nb-pieces-min"] = pieces
+            suffix = f"?{urlencode(params)}" if params else ""
+            return f"https://www.pap.fr/{'/'.join(segments)}{suffix}"
+
+        return None
+
+    def _obtenir_sources_cibles(self, critere: CritereImmoHabitat) -> list[str]:
+        extra = critere.criteres_supplementaires or {}
+        requested = extra.get("sources")
+        if isinstance(requested, list):
+            sources = [str(item).lower() for item in requested if str(item).strip()]
+            if sources:
+                return sources
+        return ["leboncoin", "bienici", "seloger", "pap"]
+
     def _construire_urls_recherche(self, critere: CritereImmoHabitat) -> list[tuple[str, str]]:
         extra = critere.criteres_supplementaires or {}
         urls: list[tuple[str, str]] = []
@@ -81,27 +154,11 @@ class VeilleHabitatService:
                 if isinstance(url, str) and url.startswith("http"):
                     host = urlparse(url).netloc.replace("www.", "")
                     urls.append((host.split(".")[0], url))
-
         ville = (critere.villes or ["annecy"])[0]
-        budget_min = int(float(critere.budget_min or 0)) if critere.budget_min else 0
-        budget_max = int(float(critere.budget_max or 0)) if critere.budget_max else 0
-        pieces = critere.nb_pieces_min or 0
-
-        urls.append(
-            (
-                "leboncoin",
-                "https://www.leboncoin.fr/recherche"
-                f"?category=9&text={quote(ville)}&real_estate_type=1,2"
-                f"&rooms={pieces if pieces else ''}&price={budget_min}-{budget_max if budget_max else ''}",
-            )
-        )
-        urls.append(
-            (
-                "bienici",
-                "https://www.bienici.com/recherche/achat/"
-                f"{self._slug(ville)}?prix-max={budget_max if budget_max else ''}",
-            )
-        )
+        for source in self._obtenir_sources_cibles(critere):
+            url = self._construire_url_source(source, critere, ville)
+            if url:
+                urls.append((source, url))
 
         uniques: list[tuple[str, str]] = []
         vus: set[str] = set()
@@ -172,12 +229,21 @@ class VeilleHabitatService:
     def _parser_generique_html(self, source: str, url: str, html: str) -> list[AnnonceScrapee]:
         soup = BeautifulSoup(html, "lxml")
         items: list[AnnonceScrapee] = []
-        selectors = [
-            "article",
-            "[data-qa-id*='listing']",
-            "[class*='listing']",
-            "[class*='card']",
-        ]
+        selectors_by_source: dict[str, list[str]] = {
+            "leboncoin": ["[data-qa-id*='aditem']", "[data-testid*='adcard']", "article"],
+            "bienici": ["[class*='adCard']", "[data-testid*='ad']", "article"],
+            "seloger": ["[data-testid*='listing-card']", "[class*='listingCard']", "article"],
+            "pap": [".search-list-item", "[class*='item-annonce']", "article"],
+        }
+        selectors = selectors_by_source.get(
+            source,
+            [
+                "article",
+                "[data-qa-id*='listing']",
+                "[class*='listing']",
+                "[class*='card']",
+            ],
+        )
 
         elements = []
         for selector in selectors:
@@ -329,6 +395,7 @@ class VeilleHabitatService:
         user_id: str,
         critere_id: int | None = None,
         limite_par_source: int = 12,
+        sources: list[str] | None = None,
         envoyer_alertes: bool = True,
     ) -> dict[str, Any]:
         criteres_query = session.query(CritereImmoHabitat).filter(CritereImmoHabitat.actif == True)  # noqa: E712
@@ -340,11 +407,16 @@ class VeilleHabitatService:
         annonces_maj = 0
         alerts: list[dict[str, Any]] = []
         sources_utilisees: set[str] = set()
+        stats_sources: dict[str, dict[str, Any]] = {}
 
         for critere in criteres:
             for source, url in self._construire_urls_recherche(critere):
+                if sources and source not in {item.lower() for item in sources}:
+                    continue
                 sources_utilisees.add(source)
+                stats_sources.setdefault(source, {"source": source, "url": url, "annonces": 0, "alertes": 0})
                 for scraped in self._scraper_url(source, url, limite_par_source):
+                    stats_sources[source]["annonces"] += 1
                     hash_dedup = self._construire_hash(scraped)
                     annonce = (
                         session.query(AnnonceHabitat)
@@ -395,6 +467,7 @@ class VeilleHabitatService:
                         annonces_maj += 1
 
                     if score >= float(critere.seuil_alerte) or (ecart_prix_pct is not None and ecart_prix_pct <= -10):
+                        stats_sources[source]["alertes"] += 1
                         alerts.append(
                             {
                                 "source": scraped.source,
@@ -441,6 +514,7 @@ class VeilleHabitatService:
             "annonces_mises_a_jour": annonces_maj,
             "alertes": len(alerts),
             "sources": sorted(sources_utilisees),
+            "stats_sources": sorted(stats_sources.values(), key=lambda item: item["source"]),
             "top_alertes": alerts[:5],
         }
 

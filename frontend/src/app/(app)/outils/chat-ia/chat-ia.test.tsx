@@ -17,8 +17,8 @@ vi.mock("@/bibliotheque/api/outils", () => ({
   obtenirSuggestionsRecettes: vi.fn(),
 }));
 
-vi.mock("@/composants/ui/scroll-area", () => ({
-  ScrollArea: React.forwardRef(({ children, className }: { children: React.ReactNode; className?: string }, ref: React.Ref<HTMLDivElement>) => {
+const MockScrollArea = React.forwardRef<HTMLDivElement, { children: React.ReactNode; className?: string }>(
+  ({ children, className }, ref) => {
     const internalRef = React.useRef<HTMLDivElement>(null);
     React.useImperativeHandle(ref, () => {
       const el = internalRef.current!;
@@ -26,7 +26,13 @@ vi.mock("@/composants/ui/scroll-area", () => ({
       return el;
     });
     return <div ref={internalRef} className={className}>{children}</div>;
-  }),
+  }
+);
+
+MockScrollArea.displayName = "MockScrollArea";
+
+vi.mock("@/composants/ui/scroll-area", () => ({
+  ScrollArea: MockScrollArea,
 }));
 
 function renderWithQuery(ui: React.ReactElement) {

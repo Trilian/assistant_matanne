@@ -10,6 +10,8 @@ import type {
   PointCarteHabitat,
   PlanHabitat,
   ProjetDecoHabitat,
+  ResultatMarcheHabitat,
+  ResultatSynchronisationVeilleHabitat,
   ResultatConceptDecoHabitat,
   ResultatImageHabitat,
   ResultatAnalysePlanHabitat,
@@ -59,14 +61,9 @@ export async function listerAnnoncesHabitat(): Promise<AnnonceHabitat[]> {
 export async function synchroniserVeilleHabitat(payload?: {
   critere_id?: number;
   limite_par_source?: number;
+  sources?: string[];
   envoyer_alertes?: boolean;
-}): Promise<{
-  criteres: number;
-  annonces_creees: number;
-  annonces_mises_a_jour: number;
-  alertes: number;
-  sources: string[];
-}> {
+}): Promise<ResultatSynchronisationVeilleHabitat> {
   const { data } = await clientApi.post("/habitat/veille/synchroniser", payload ?? {});
   return data;
 }
@@ -79,6 +76,19 @@ export async function listerAlertesHabitat(): Promise<AlerteHabitat[]> {
 export async function obtenirCarteHabitat(): Promise<PointCarteHabitat[]> {
   const { data } = await clientApi.get("/habitat/veille/carte");
   return data.items ?? [];
+}
+
+export async function obtenirMarcheHabitat(payload?: {
+  departement?: string;
+  code_postal?: string;
+  commune?: string;
+  type_local?: string;
+  nb_pieces_min?: number;
+  surface_min_m2?: number;
+  limite?: number;
+}): Promise<ResultatMarcheHabitat> {
+  const { data } = await clientApi.get("/habitat/marche/dvf", { params: payload ?? {} });
+  return data;
 }
 
 export async function listerPlansHabitat(): Promise<PlanHabitat[]> {

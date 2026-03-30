@@ -8,8 +8,6 @@ import { useState, useMemo } from "react";
 import {
   Plus,
   ShoppingCart,
-  Check,
-  Trash2,
   Loader2,
   ScanLine,
   Leaf,

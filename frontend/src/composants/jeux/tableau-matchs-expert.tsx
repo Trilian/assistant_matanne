@@ -22,7 +22,6 @@ import {
 import { 
   Download, 
   Filter, 
-  TrendingUp, 
   AlertTriangle,
   MoreVertical,
   Eye,
@@ -30,7 +29,6 @@ import {
 } from "lucide-react";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { Skeleton } from "@/composants/ui/skeleton";
-import { toast } from "sonner";
 import { CSVLink } from "react-csv";
 
 export interface MatchExpert {
@@ -124,7 +122,7 @@ export function TableauMatchsExpert({
     }
   );
 
-  const matchs = data?.items || [];
+  const matchs = useMemo(() => data?.items ?? [], [data?.items]);
 
   // Données pour export CSV
   const csvData = useMemo(() => {

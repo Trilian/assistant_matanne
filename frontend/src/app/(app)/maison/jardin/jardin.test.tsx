@@ -1,5 +1,5 @@
 ﻿import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import JardinPage from "@/app/(app)/maison/jardin/page";
 
 vi.mock("next/navigation", () => ({

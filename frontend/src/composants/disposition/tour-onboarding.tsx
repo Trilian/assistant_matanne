@@ -17,7 +17,7 @@ import {
   DialogFooter,
 } from '@/composants/ui/dialog'
 import { Button } from '@/composants/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
+import { Card, CardContent } from '@/composants/ui/card'
 import {
   ChefHat,
   ShoppingCart,

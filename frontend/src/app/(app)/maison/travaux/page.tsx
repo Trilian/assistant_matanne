@@ -9,11 +9,11 @@ import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Hammer, SprayCan, Wrench, Plus, Trash2, Pencil,
-  AlertTriangle, CheckCircle2, Activity, Clock,
+  AlertTriangle, CheckCircle2, Activity,
   Phone, Mail, BotMessageSquare,
 } from "lucide-react";
 import {
-  Card, CardContent, CardHeader, CardTitle, CardDescription,
+  Card, CardContent, CardHeader, CardTitle,
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
@@ -38,7 +38,6 @@ import {
   listerProjets, creerProjet, supprimerProjet, estimerProjetIA,
   listerTachesEntretien, obtenirSanteAppareils, creerTacheEntretien, supprimerTacheEntretien,
   listerArtisans, creerArtisan, modifierArtisan, supprimerArtisan, statsArtisans,
-  type EstimationProjet,
 } from "@/bibliotheque/api/maison";
 import type { Artisan } from "@/types/maison";
 import { toast } from "sonner";
@@ -418,7 +417,7 @@ function OngletEntretien() {
 
 // ─── Onglet Artisans ──────────────────────────────────────────
 function OngletArtisans() {
-  const [metier, setMetier] = useState<string | undefined>();
+  const [metier] = useState<string | undefined>();
   const formsVide = { nom: "", metier: "", telephone: "", email: "", adresse: "", note_satisfaction: "" };
   const [form, setForm] = useState(formsVide);
   const queryClient = useQueryClient();

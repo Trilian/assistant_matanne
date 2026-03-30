@@ -173,10 +173,6 @@ export default function PageJules() {
       {/* Résumé catégories */}
       <div className="grid gap-3 grid-cols-2 sm:grid-cols-5">
         {CATEGORIES_JALONS.map(({ valeur, label, Icone }) => {
-          const count =
-            jalons?.filter(
-              (j) => categorieFiltre === "tous" || j.categorie === valeur
-            ).length ?? 0;
           return (
             <Card
               key={valeur}

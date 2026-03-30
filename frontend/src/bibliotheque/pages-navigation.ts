@@ -97,6 +97,7 @@ export const PAGES_NAVIGATION: PageNavigation[] = [
   { nom: "Habitat", chemin: "/habitat", categorie: "Habitat", Icone: Map, keywords: ["logement", "immo", "deco", "jardin"] },
   { nom: "Scenarios Habitat", chemin: "/habitat/scenarios", categorie: "Habitat", Icone: Home, keywords: ["comparaison", "decision"] },
   { nom: "Veille Immo", chemin: "/habitat/veille-immo", categorie: "Habitat", Icone: ShoppingBag, keywords: ["annonces", "immobilier"] },
+  { nom: "Marche Habitat", chemin: "/habitat/marche", categorie: "Habitat", Icone: TrendingUp, keywords: ["dvf", "prix", "transactions"] },
   { nom: "Plans Habitat", chemin: "/habitat/plans", categorie: "Habitat", Icone: Layers, keywords: ["plans", "pieces", "architecture"] },
   { nom: "Deco Habitat", chemin: "/habitat/deco", categorie: "Habitat", Icone: House, keywords: ["interieur", "meubles", "style"] },
   { nom: "Jardin Habitat", chemin: "/habitat/jardin", categorie: "Habitat", Icone: Sprout, keywords: ["paysagisme", "zones", "terrain"] },

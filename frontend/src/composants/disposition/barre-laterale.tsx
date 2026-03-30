@@ -137,6 +137,7 @@ const LIENS: LienNav[] = [
     sousLiens: [
       { nom: "Scenarios", chemin: "/habitat/scenarios", Icone: Home },
       { nom: "Veille Immo", chemin: "/habitat/veille-immo", Icone: ShoppingBag },
+      { nom: "Marche", chemin: "/habitat/marche", Icone: TrendingUp },
       { nom: "Plans", chemin: "/habitat/plans", Icone: Layers },
       { nom: "Deco", chemin: "/habitat/deco", Icone: House },
       { nom: "Jardin", chemin: "/habitat/jardin", Icone: Sprout },

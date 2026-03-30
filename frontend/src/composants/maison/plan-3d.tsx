@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Text } from "@react-three/drei";
 import type { PieceMaison } from "@/types/maison";
@@ -89,7 +89,7 @@ function PieceBox({ piece, selectionne, onClick }: {
   );
 }
 
-function Sol({ pieces }: { pieces: PieceMaison[] }) {
+function Sol() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
       <planeGeometry args={[PLAN_W * SCALE + 2, PLAN_H * SCALE + 2]} />
@@ -136,7 +136,7 @@ export default function Plan3D({ pieces, pieceSelectionnee, onSelectPiece }: Pla
         minPolarAngle={0}
         maxPolarAngle={Math.PI / 2.2}
       />
-      <Sol pieces={piecesAvecPos} />
+      <Sol />
       {piecesAvecPos.map((piece) => (
         <PieceBox
           key={piece.id}

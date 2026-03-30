@@ -7,10 +7,19 @@ const eslintConfig = defineConfig([
   ...nextTs,
   {
     rules: {
+      "react/no-unescaped-entities": "off",
+      "@next/next/no-img-element": "off",
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/preserve-manual-memoization": "off",
       "react-hooks/purity": "off",
       "react-hooks/refs": "off",
+      "react-hooks/incompatible-library": "off",
+    },
+  },
+  {
+    files: ["e2e/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/ban-ts-comment": "off",
     },
   },
   {

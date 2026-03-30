@@ -82,7 +82,6 @@ export function EtiquetteQR({
         </DialogHeader>
 
         <div className="flex flex-col items-center gap-4 py-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             ref={imageRef}
             src={qrUrl}

@@ -128,7 +128,7 @@ const TYPE_REPAS_LABEL: Record<string, string> = {
 export default function MaSemainePage() {
   const router = useRouter();
   const [etapeActuelle, setEtapeActuelle] = useState(0);
-  const [dateDebut, setDateDebut] = useState(getLundiDeSemaine(0));
+  const [dateDebut] = useState(getLundiDeSemaine(0));
   const [coursesGenereesId, setCoursesGenereesId] = useState<number | null>(null);
   const [batchSessionId, setBatchSessionId] = useState<number | null>(null);
 
@@ -147,7 +147,7 @@ export default function MaSemainePage() {
     { enabled: etapeActuelle >= 1 }
   );
 
-  const { data: alertes, isLoading: loadingAlertes } = utiliserRequete(
+  const { data: alertes } = utiliserRequete(
     ["inventaire-alertes"],
     () => obtenirAlertes(),
     { enabled: etapeActuelle >= 1 }

@@ -5,7 +5,7 @@
 "use client";
 
 import Link from "next/link";
-import { Trophy, Ticket, Star, TrendingUp, AlertTriangle, Shield, Bell, ScanLine } from "lucide-react";
+import { Trophy, Ticket, Star, TrendingUp, AlertTriangle, Shield, ScanLine } from "lucide-react";
 import {
   Card,
   CardContent,

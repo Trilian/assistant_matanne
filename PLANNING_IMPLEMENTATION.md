@@ -1664,14 +1664,14 @@ class ServiceGenerationImages:
 
 ### 19.12.1 Statut d'implémentation Habitat au 30 mars 2026
 
-**Livré dans ce sprint** : socle H1-H2 finalisé, puis extension fonctionnelle large sur H3-H11.
+**Livré dans ce sprint** : socle H1-H2 finalisé, extension fonctionnelle H3-H11, puis finalisation H12 avec DVF + API backend + graphes frontend et durcissement final de la veille Habitat.
 
 | Lot | Statut | Réalisations |
 |-----|--------|--------------|
 | **H1 Backend** | ✅ Réalisé | Ajout des modèles ORM `habitat_projet.py`, schémas Pydantic `src/api/schemas/habitat.py`, routeur REST `src/api/routes/habitat.py`, migration SQL `sql/migrations/V007__module_habitat.sql`, branchement dans `src/api/main.py` et `src/api/routes/__init__.py` |
 | **H2 Frontend socle** | ✅ Réalisé | Création du hub `frontend/src/app/(app)/habitat/page.tsx`, page `scenarios/page.tsx`, et base des pages `veille-immo`, `plans`, `deco`, `jardin` |
-| **H3 Veille scrapers** | 🟡 Partiel avancé | Service `src/services/habitat/veille_service.py` avec scraping HTTP réel, parsing JSON-LD/HTML générique, déduplication, scoring, synchronisation DB et job cron `sync_veille_habitat` |
-| **H4 Veille frontend** | 🟡 Partiel avancé | Refonte de `frontend/src/app/(app)/habitat/veille-immo/page.tsx` avec sync manuelle, alertes, vue carte simplifiée par ville et liste consolidée des annonces |
+| **H3 Veille scrapers** | ✅ Réalisé | Service `src/services/habitat/veille_service.py` renforcé avec connecteurs par source (Leboncoin, Bien'ici, SeLoger, PAP), construction d'URLs dédiée, parsing source-aware, scoring, déduplication, synchronisation DB, stats de sync par source et job cron `sync_veille_habitat` |
+| **H4 Veille frontend** | ✅ Réalisé | Refonte de `frontend/src/app/(app)/habitat/veille-immo/page.tsx` avec sync manuelle, alertes, couverture par source, vraie carte Leaflet/OpenStreetMap et liste consolidée des annonces |
 | **H5 Génération image** | ✅ Réalisé | Service central `src/services/integrations/image_generation.py` branché aux usages Habitat via l'API `/api/v1/habitat/deco/images` |
 | **H6 Plans IA** | ✅ Réalisé | Service `src/services/habitat/plans_ai_service.py`, endpoints d'analyse/historique, stockage des suggestions IA et page `plans/page.tsx` avec déclenchement d'analyse + image |
 | **H7 Déco avancée** | 🟡 Partiel avancé | Service `src/services/habitat/deco_service.py` pour concepts déco, palettes, achats prioritaires, génération visuelle et enrichissement des projets déco |
@@ -1679,7 +1679,7 @@ class ServiceGenerationImages:
 | **H9 Sync budget** | ✅ Réalisé | Synchronisation des dépenses déco Habitat vers `DepenseMaison` avec émission d'événement domaine et mise à jour des budgets déco |
 | **H10 IA avancée** | 🟡 Partiel avancé | Analyse d'annonces, estimation budgétaire et prompts d'images intégrés aux services veille/plans/déco, mais sans moteur régional travaux complet ni architecte virtuel dédié |
 | **H11 Intégrations** | ✅ Réalisé | Intégration dashboard, notifications, cron et event bus pour Habitat |
-| **H12 DVF / historique prix** | ⬜ À faire | Aucun connecteur DVF/data.gouv ni graphiques d'évolution secteur implémentés à ce stade |
+| **H12 DVF / historique prix** | ✅ Réalisé | Nouveau service `src/services/habitat/dvf_service.py`, endpoint `/api/v1/habitat/marche/dvf`, page `frontend/src/app/(app)/habitat/marche/page.tsx` et graphes d'évolution secteur depuis `tabular-api.data.gouv.fr` |
 | **Navigation** | ✅ Réalisé | Habitat ajouté à la barre latérale, à la nav mobile et à `pages-navigation.ts` |
 | **Client API / types** | ✅ Réalisé | Ajout de `frontend/src/bibliotheque/api/habitat.ts` et `frontend/src/types/habitat.ts` |
 | **Tests ciblés** | ✅ Réalisé | Tests backend étendus sur les routes Habitat + service scénarios, validation lint frontend Habitat |

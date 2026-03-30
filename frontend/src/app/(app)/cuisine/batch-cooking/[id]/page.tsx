@@ -59,7 +59,7 @@ export default function PageDetailBatch() {
   useEffect(() => {
     if (session?.nom) definirTitrePage(session.nom);
     return () => definirTitrePage(null);
-  }, [session?.nom]);
+  }, [session?.nom, definirTitrePage]);
 
   if (isLoading) {
     return (

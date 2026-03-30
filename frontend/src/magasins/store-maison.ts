@@ -52,8 +52,9 @@ export const utiliserStoreMaison = create<EtatMaison>()(
 
       arreterTimer: (appareil) =>
         set((state) => {
-          const { [appareil]: _, ...reste } = state.timers;
-          return { timers: reste };
+          const timers = { ...state.timers };
+          delete timers[appareil];
+          return { timers };
         }),
 
       marquerTimerTermine: (appareil) =>

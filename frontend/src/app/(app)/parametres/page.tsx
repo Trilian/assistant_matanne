@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   Palette,
   Database,
@@ -53,7 +53,6 @@ import {
   desabonnerPush,
 } from "@/bibliotheque/api/push";
 import { demanderPermissionNotificationsJeux } from "@/crochets/utiliser-notifications-jeux";
-import type { Preferences } from "@/bibliotheque/api/preferences";
 import { toast } from "sonner";
 import { resetOnboarding, TourOnboarding } from "@/composants/disposition/tour-onboarding";
 
@@ -143,7 +142,7 @@ function OngletProfil({
   const invalider = utiliserInvalidation();
 
   const { mutate: sauvegarder, isPending } = utiliserMutation(
-    (_: void) => clientApi.put("/auth/me", { nom }),
+    () => clientApi.put("/auth/me", { nom }),
     {
       onSuccess: () => { invalider(["auth", "profil"]); toast.success("Profil sauvegardé"); },
       onError: () => toast.error("Erreur lors de la sauvegarde"),
@@ -613,7 +612,7 @@ function OngletNotifications() {
   const invalider = utiliserInvalidation();
 
   const { mutate: activer, isPending: enActivation } = utiliserMutation(
-    async (_: void) => {
+    async () => {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -632,7 +631,7 @@ function OngletNotifications() {
   );
 
   const { mutate: desactiver, isPending: enDesactivation } = utiliserMutation(
-    async (_: void) => {
+    async () => {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
       if (subscription) {
@@ -715,7 +714,7 @@ function OngletNotifications() {
                       } else {
                         toast.error("Permission refusée");
                       }
-                    } catch (error) {
+                    } catch {
                       toast.error("Erreur lors de l'activation");
                     }
                   }}

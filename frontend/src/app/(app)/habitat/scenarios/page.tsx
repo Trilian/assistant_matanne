@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BarChart3, PlusCircle } from "lucide-react";
 import { Button } from "@/composants/ui/button";
+import { EntetePageHabitat } from "@/composants/habitat/entete-page-habitat";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
@@ -28,10 +29,15 @@ export default function ScenariosHabitatPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Scenarios Habitat</h1>
-        <p className="text-muted-foreground">Comparer objectivement les options de logement.</p>
-      </div>
+      <EntetePageHabitat
+        badge="H1-H2 • Decision"
+        titre="Scenarios Habitat"
+        description="Comparer objectivement les options logement et garder un arbitrage lisible entre budget, surface cible et confort familial." 
+        stats={[
+          { label: "Scenarios", valeur: `${scenarios?.length ?? 0}` },
+          { label: "Meilleur score", valeur: scenarios?.[0]?.score_global ? `${scenarios[0].score_global.toFixed(1)} / 100` : "-" },
+        ]}
+      />
 
       <Card>
         <CardHeader>

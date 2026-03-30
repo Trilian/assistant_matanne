@@ -11,7 +11,6 @@ import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
 import { ScrollArea } from "@/composants/ui/scroll-area";
 import { Badge } from "@/composants/ui/badge";
-import { Skeleton } from "@/composants/ui/skeleton";
 import {
   UtensilsCrossed,
   Users,

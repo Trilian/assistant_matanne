@@ -27,7 +27,6 @@ import {
   Card,
   CardContent,
 } from "@/composants/ui/card";
-import { Badge } from "@/composants/ui/badge";
 import { toast } from "sonner";
 import { clientApi } from "@/bibliotheque/api/client";
 
@@ -74,7 +73,7 @@ export function UploadTicket({ ouvert, onFermer, onCreerDepense }: UploadTicketP
   const [etape, setEtape] = useState<"upload" | "analyse" | "resultat">("upload");
   const [preview, setPreview] = useState<string | null>(null);
   const [donnees, setDonnees] = useState<DonneesTicket | null>(null);
-  const [chargement, setChargement] = useState(false);
+  const [, setChargement] = useState(false);
   const [montantEdite, setMontantEdite] = useState("");
   const [categorieEditee, setCategorieEditee] = useState("alimentation");
   const [descriptionEditee, setDescriptionEditee] = useState("");

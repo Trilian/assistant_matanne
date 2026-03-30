@@ -5,7 +5,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Send, Loader2, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
+import { Bell, Send, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -24,7 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/composants/ui/select";
-import { utiliserRequete } from "@/crochets/utiliser-api";
 import { clientApi } from "@/bibliotheque/api/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";

@@ -24,7 +24,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
@@ -42,7 +41,6 @@ import {
   type CreerDocumentDTO,
 } from "@/bibliotheque/api/documents";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
-import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 const CATEGORIES = [
@@ -69,7 +67,6 @@ export default function PageDocuments() {
   const [scanEnCours, setScanEnCours] = useState(false);
   const [resultatsOCR, setResultatsOCR] = useState<Record<string, unknown> | null>(null);
 
-  const queryClient = useQueryClient();
   const invalider = utiliserInvalidation();
 
   const { data, isLoading } = utiliserRequete(

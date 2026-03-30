@@ -18,6 +18,7 @@ def client():
         ("POST", "/api/v1/habitat/veille/synchroniser", {}),
         ("GET", "/api/v1/habitat/veille/alertes", None),
         ("GET", "/api/v1/habitat/veille/carte", None),
+        ("GET", "/api/v1/habitat/marche/dvf?commune=Annecy&code_postal=74000", None),
         ("GET", "/api/v1/habitat/scenarios", None),
         ("POST", "/api/v1/habitat/scenarios", {"nom": "Test scenario"}),
         ("GET", "/api/v1/habitat/scenarios/comparaison", None),

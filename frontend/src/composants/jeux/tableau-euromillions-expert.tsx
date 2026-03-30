@@ -22,6 +22,8 @@ interface Filtres {
   search: string
 }
 
+type StrategieFiltre = Filtres['strategie']
+
 interface GrilleEuromillions {
   id: number
   numeros: number[]
@@ -173,7 +175,7 @@ export function TableauEuromillionsExpert({
             <Label>Stratégie</Label>
             <Select
               value={filtres.strategie}
-              onValueChange={(val) => setFiltres({ ...filtres, strategie: val as any })}
+              onValueChange={(val) => setFiltres({ ...filtres, strategie: val as StrategieFiltre })}
             >
               <SelectTrigger>
                 <SelectValue />

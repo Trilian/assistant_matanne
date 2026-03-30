@@ -27,7 +27,7 @@ export default function PageModifierRecette({
   useEffect(() => {
     if (recette?.nom) definirTitrePage(`Modifier — ${recette.nom}`);
     return () => definirTitrePage(null);
-  }, [recette?.nom]);
+  }, [recette?.nom, definirTitrePage]);
 
   if (isLoading) {
     return (

@@ -42,7 +42,6 @@ import {
   type ChecklistAnniversairePreview,
   type Anniversaire,
   type SuggestionAchat,
-  type ItemChecklistAnniversaire,
 } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 

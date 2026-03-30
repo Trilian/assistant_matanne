@@ -167,6 +167,7 @@ class ZoneJardinHabitatPatch(BaseModel):
 class SynchronisationVeilleHabitatCreate(BaseModel):
     critere_id: int | None = None
     limite_par_source: int = Field(default=12, ge=1, le=50)
+    sources: list[str] | None = None
     envoyer_alertes: bool = True
 
 

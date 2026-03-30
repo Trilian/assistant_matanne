@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { utiliserStoreMaison } from "@/magasins/store-maison";
 import { Button } from "@/composants/ui/button";
 
@@ -43,12 +43,12 @@ export function TimerAppareil({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Calculer secondes restantes depuis le timer en cours
-  const calculerRestant = () => {
+  const calculerRestant = useCallback(() => {
     if (!timer || timer.termine) return null;
     const ecouleeMs = Date.now() - timer.debutMs;
     const restantMs = timer.dureeTotalMs - ecouleeMs;
     return Math.max(0, Math.floor(restantMs / 1000));
-  };
+  }, [timer]);
 
   useEffect(() => {
     if (!timer || timer.termine) {
@@ -87,7 +87,7 @@ export function TimerAppareil({
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [timer?.debutMs, timer?.termine]);
+  }, [timer, timer?.debutMs, timer?.termine, calculerRestant, marquerTimerTermine, appareil, onTermine]);
 
   const estActif = !!timer && !timer.termine && secondesRestantes !== null;
   const estTermine = timer?.termine === true;
