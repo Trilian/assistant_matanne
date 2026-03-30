@@ -127,7 +127,6 @@ export const PAGES_NAVIGATION: PageNavigation[] = [
   { nom: "EuroMillions", chemin: "/jeux/euromillions", categorie: "Jeux", Icone: Dices, keywords: ["euro", "tirage"] },
   { nom: "Bankroll", chemin: "/jeux/bankroll", categorie: "Jeux", Icone: TrendingUp, keywords: ["capital", "mise", "kelly"] },
   { nom: "Performance Jeux", chemin: "/jeux/performance", categorie: "Jeux", Icone: TrendingUp, keywords: ["stats", "resultats"] },
-  { nom: "Jeu Responsable", chemin: "/jeux/responsable", categorie: "Jeux", Icone: Shield, keywords: ["limites", "controle"] },
 
   // Outils
   { nom: "Outils", chemin: "/outils", categorie: "Outils", Icone: Wrench },

@@ -427,22 +427,6 @@ def _job_push_quotidien() -> None:
             if nb_envoyes:
                 logger.info("Push urgent '%s' → %d utilisateur(s)", titre, nb_envoyes)
 
-        # ── Alertes jeux responsable ──
-        try:
-            from src.services.jeux import get_responsable_gaming_service
-            jeux_service = get_responsable_gaming_service()
-            suivi = jeux_service.obtenir_suivi() if hasattr(jeux_service, "obtenir_suivi") else None
-            if suivi and getattr(suivi, "serie_type", None) == "perdu":
-                nb_series = int(getattr(suivi, "serie_nb", 0))
-                if nb_series >= 5:
-                    # Utiliser les abonnés DB plutôt que le cache mémoire
-                    user_ids = {str(a.user_id) for a in abonnes_db if a.user_id} or push_service.obtenir_abonnes()
-                    for user_id in user_ids:
-                        push_service.notifier_alerte_serie_jeux(user_id, nb_series)
-                    logger.info("Alerte série jeux (%d défaites) envoyée", nb_series)
-        except Exception:
-            logger.debug("Alerte jeux responsable : service indisponible")
-
         logger.info("Push quotidien terminé")
     except Exception:
         logger.exception("Erreur lors du push quotidien")

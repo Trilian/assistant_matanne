@@ -28,10 +28,6 @@ _MAPPING_EVENEMENTS_CANAUX: dict[str, dict[str, Any]] = {
     "peremption_j2": {"categorie": "alertes", "canaux": ["push", "ntfy"]},
     "rappel_courses": {"categorie": "rappels", "canaux": ["push", "ntfy", "whatsapp"]},
     "resume_hebdo": {"categorie": "resumes", "canaux": ["whatsapp", "email"]},
-    "alerte_jeu_responsable": {
-        "categorie": "alertes",
-        "canaux": ["push", "ntfy", "whatsapp"],
-    },
     "rapport_budget_mensuel": {"categorie": "resumes", "canaux": ["email"]},
     "anniversaire_j7": {"categorie": "rappels", "canaux": ["push", "ntfy", "whatsapp"]},
     "tache_entretien_urgente": {

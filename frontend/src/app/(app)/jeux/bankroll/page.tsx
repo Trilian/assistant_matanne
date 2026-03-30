@@ -5,7 +5,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Shield, TrendingUp } from "lucide-react";
+import { ArrowRight, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
@@ -26,7 +26,6 @@ export default function PageBankroll() {
         </div>
         <div className="flex gap-2">
           <Badge variant="outline" className="gap-1"><TrendingUp className="h-3 w-3" />ROI</Badge>
-          <Badge variant="outline" className="gap-1"><Shield className="h-3 w-3" />Jeu responsable</Badge>
         </div>
       </div>
 

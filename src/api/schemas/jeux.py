@@ -324,40 +324,6 @@ class PerformanceResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# JEU RESPONSABLE
-# ═══════════════════════════════════════════════════════════
-
-
-class SuiviResponsableResponse(BaseModel):
-    limite: float = 50.0
-    mises_cumulees: float = 0.0
-    pourcentage_utilise: float = 0.0
-    reste_disponible: float = 50.0
-    alertes: dict[str, bool] = Field(default_factory=dict)
-    cooldown_actif: bool = False
-    auto_exclusion_jusqu_a: date | None = None
-
-
-class VerifierMiseResponse(BaseModel):
-    autorise: bool = True
-    raison: str | None = None
-    reste_apres: float = 0.0
-
-
-class EnregistrerMiseRequest(BaseModel):
-    montant: float = Field(..., gt=0)
-    type_jeu: str = "paris"
-
-
-class ModifierLimiteRequest(BaseModel):
-    nouvelle_limite: float = Field(..., gt=0)
-
-
-class AutoExclusionRequest(BaseModel):
-    nb_jours: int = Field(..., ge=1, le=365)
-
-
-# ═══════════════════════════════════════════════════════════
 # ANALYSE IA
 # ═══════════════════════════════════════════════════════════
 

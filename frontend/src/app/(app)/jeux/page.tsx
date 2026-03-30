@@ -5,7 +5,7 @@
 "use client";
 
 import Link from "next/link";
-import { Trophy, Ticket, Star, TrendingUp, AlertTriangle, Shield, ScanLine } from "lucide-react";
+import { Trophy, Ticket, Star, TrendingUp, AlertTriangle, ScanLine } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -20,41 +20,6 @@ import { obtenirDashboardJeux } from "@/bibliotheque/api/jeux";
 import type { DashboardJeux, ValueBet, SerieJeux, NumeroRetard } from "@/types/jeux";
 import { useRouter } from "next/navigation";
 import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
-import { couleurBarreBudget } from "@/bibliotheque/utils";
-
-function BandeauBudget({ budget }: { budget: DashboardJeux["budget"] }) {
-  const pct = Math.min(budget.pourcentage_utilise, 100);
-  return (
-    <Card>
-      <CardContent className="pt-4 space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Budget mensuel</span>
-          <span className="text-sm text-muted-foreground">
-            {budget.mises_cumulees.toFixed(0)}€ / {budget.limite.toFixed(0)}€
-          </span>
-        </div>
-        <div className="h-3 rounded-full bg-muted overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all ${couleurBarreBudget(pct)}`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>Reste : {budget.reste_disponible.toFixed(0)}€</span>
-          {budget.cooldown_actif && (
-            <Badge variant="secondary">⏸️ Période de réflexion</Badge>
-          )}
-          {budget.auto_exclusion_jusqu_a && (
-            <Badge variant="destructive">
-              🚫 Exclusion jusqu&apos;au{" "}
-              {new Date(budget.auto_exclusion_jusqu_a).toLocaleDateString("fr-FR")}
-            </Badge>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 function SectionOpportunites({
   valueBets,
@@ -195,11 +160,6 @@ export default function PageJeux() {
               <ScanLine className="h-3 w-3" /> OCR ticket
             </Badge>
           </Link>
-          <Link href="/jeux/responsable">
-            <Badge variant="outline" className="cursor-pointer gap-1">
-              <Shield className="h-3 w-3" /> Jeu responsable
-            </Badge>
-          </Link>
           <Link href="/jeux/performance">
             <Badge variant="outline" className="cursor-pointer gap-1">
               <TrendingUp className="h-3 w-3" /> Performance
@@ -222,9 +182,6 @@ export default function PageJeux() {
         items={widgets as unknown as { id: string; titre: string }[]}
         classeGrille="grid gap-4 md:grid-cols-2"
         renderItem={(item) => {
-          if (item.id === "budget") {
-            return dashboard?.budget ? <BandeauBudget budget={dashboard.budget} /> : <Card><CardContent className="py-6 text-sm text-muted-foreground">Budget indisponible</CardContent></Card>;
-          }
           if (item.id === "opportunites") {
             return dashboard ? (
               <SectionOpportunites

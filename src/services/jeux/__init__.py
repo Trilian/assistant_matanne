@@ -122,10 +122,6 @@ _LAZY_IMPORTS: dict[str, str] = {
     "MouvementCote": "odds_data",
     "get_odds_data_service": "odds_data",
     "obtenir_service_odds_data": "odds_data",
-    # ── Mise Responsable ──
-    "ResponsableGamingService": "responsable_gaming",
-    "get_responsable_gaming_service": "responsable_gaming",
-    "obtenir_service_responsable_gaming": "responsable_gaming",
     # ── Euromillions CRUD ──
     "EuromillionsCrudService": "euromillions_crud_service",
     "get_euromillions_crud_service": "euromillions_crud_service",
@@ -246,10 +242,6 @@ if TYPE_CHECKING:
         predire_resultat_match,
     )
     from ._internal.responsable_gaming import (
-        ResponsableGamingService,
-        get_responsable_gaming_service,
-        obtenir_service_responsable_gaming,
-    )
     from ._internal.scheduler_service import (
         APSCHEDULER_AVAILABLE,
         HEURE_LOTO,

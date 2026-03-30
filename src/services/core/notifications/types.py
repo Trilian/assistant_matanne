@@ -51,9 +51,7 @@ class TypeNotification(StrEnum):
     RAPPEL_SANTE = "health_check_reminder"
     RAPPEL_FAMILLE = "famille_reminder"
 
-    # Jeux responsable
-    ALERTE_SERIE_DEFAITES = "jeux_serie_defaites"
-    ALERTE_BUDGET_JEUX = "jeux_budget_alerte"
+    # Jeux
     RESULTAT_PARI_GAGNE = "jeux_pari_gagne"
     RESULTAT_PARI_PERDU = "jeux_pari_perdu"
     RESULTAT_LOTO = "jeux_loto_resultat"

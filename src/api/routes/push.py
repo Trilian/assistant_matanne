@@ -234,10 +234,6 @@ async def notifier_metier(
     def _envoyer():
         if module == "famille" or type_evenement == "rappel":
             return service.notifier_rappel_famille(user_id, titre, message, url)
-        if module == "jeux" and type_evenement == "serie_defaites":
-            nb = int(donnees.get("nb_defaites", 5))
-            mise_max = float(donnees.get("mise_max", 0))
-            return service.notifier_alerte_serie_jeux(user_id, nb, mise_max)
         if module == "maison" or type_evenement == "alerte_predictive":
             return service.notifier_alerte_predictive_maison(user_id, titre, message, url)
         # Fallback gÃ©nÃ©rique

@@ -183,7 +183,6 @@ const LIENS: LienNav[] = [
       { nom: "EuroMillions", chemin: "/jeux/euromillions", Icone: Dices },
       { nom: "Bankroll", chemin: "/jeux/bankroll", Icone: TrendingUp },
       { nom: "Performance", chemin: "/jeux/performance", Icone: TrendingUp },
-      { nom: "Jeu responsable", chemin: "/jeux/responsable", Icone: Shield },
     ],
   },
   {

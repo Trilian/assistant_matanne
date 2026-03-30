@@ -773,65 +773,6 @@ class CoteHistorique(CreeLeMixin, Base):
         return f"<Cote {self.bookmaker} {self.marche}={self.cote} @ {self.timestamp}>"
 
 
-# ═══════════════════════════════════════════════════════════════════
-# MISE RESPONSABLE
-# ═══════════════════════════════════════════════════════════════════
-
-
-class MiseResponsable(CreeLeMixin, Base):
-    """Suivi mensuel de la mise responsable"""
-
-    __tablename__ = "jeux_mise_responsable"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    mois: Mapped[date] = mapped_column(Date, nullable=False)  # Premier jour du mois
-
-    # Limites
-    limite_mensuelle: Mapped[Decimal] = mapped_column(
-        Numeric(10, 2), nullable=False, default=Decimal("50.00")
-    )
-    mises_cumulees: Mapped[Decimal] = mapped_column(Numeric(10, 2), default=Decimal("0.00"))
-
-    # Alertes déclenchées
-    alerte_50_pct: Mapped[bool] = mapped_column(Boolean, default=False)
-    alerte_75_pct: Mapped[bool] = mapped_column(Boolean, default=False)
-    alerte_90_pct: Mapped[bool] = mapped_column(Boolean, default=False)
-    alerte_100_pct: Mapped[bool] = mapped_column(Boolean, default=False)
-
-    # Auto-exclusion
-    auto_exclusion_jusqu_a: Mapped[date | None] = mapped_column(Date, nullable=True)
-
-    # Cooldown
-    cooldown_actif: Mapped[bool] = mapped_column(Boolean, default=False)
-    cooldown_fin: Mapped[date | None] = mapped_column(Date, nullable=True)
-
-    def __repr__(self) -> str:
-        return f"<MiseResponsable {self.mois}: {self.mises_cumulees}/{self.limite_mensuelle}>"
-
-    @property
-    def pourcentage_utilise(self) -> float:
-        """Pourcentage de la limite utilisée"""
-        if self.limite_mensuelle == 0:
-            return 100.0
-        return float(self.mises_cumulees / self.limite_mensuelle * 100)
-
-    @property
-    def reste_disponible(self) -> Decimal:
-        """Montant restant disponible ce mois"""
-        reste = self.limite_mensuelle - self.mises_cumulees
-        return max(reste, Decimal("0.00"))
-
-    @property
-    def est_bloque(self) -> bool:
-        """Indique si les mises sont bloquées"""
-        from datetime import date as date_type
-
-        if self.auto_exclusion_jusqu_a and self.auto_exclusion_jusqu_a > date_type.today():
-            return True
-        if self.cooldown_actif and self.cooldown_fin and self.cooldown_fin > date_type.today():
-            return True
-        return self.mises_cumulees >= self.limite_mensuelle
-
 
 # ═══════════════════════════════════════════════════════════════════
 # BANKROLL HISTORIQUE

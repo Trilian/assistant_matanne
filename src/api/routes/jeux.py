@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API pour les jeux (Paris sportifs & Loto).
 
 Endpoints pour:
@@ -738,20 +738,10 @@ async def creer_pari(
     from decimal import Decimal
 
     from src.core.models import Match, PariSportif
-    from src.services.jeux import obtenir_responsable_gaming_service
 
     def _query():
         with executer_avec_session() as session:
-            # Garde-fou budget responsable
             mise = Decimal(str(payload.get("mise", 0)))
-            if mise > 0 and not payload.get("est_virtuel", True):
-                svc_resp = obtenir_responsable_gaming_service()
-                check = svc_resp.verifier_mise_autorisee(mise)
-                if not check.get("autorisee", True):
-                    raise HTTPException(
-                        status_code=402,
-                        detail=check.get("raison") or "Limite de mise mensuelle atteinte",
-                    )
 
             match = session.query(Match).filter(Match.id == payload["match_id"]).first()
             if not match:
@@ -1010,14 +1000,12 @@ async def dashboard_jeux(
     from src.core.models import Match, PariSportif
     from src.services.jeux import (
         obtenir_loto_data_service,
-        obtenir_responsable_gaming_service,
         obtenir_series_service,
     )
 
     def _query():
         with executer_avec_session() as session:
             series_svc = obtenir_series_service()
-            responsable_svc = obtenir_responsable_gaming_service()
             loto_data_svc = obtenir_loto_data_service()
 
             # 1. OpportunitÃ©s (sÃ©ries avec value >= 2.0)
@@ -1081,30 +1069,7 @@ async def dashboard_jeux(
             except Exception:
                 loto_retard = []
 
-            # 4. Budget responsable
-            try:
-                budget_raw = responsable_svc.obtenir_suivi_mensuel()
-                budget = {
-                    "limite": budget_raw.get("limite_mensuelle", 50.0),
-                    "mises_cumulees": budget_raw.get("mises_cumulees", 0.0),
-                    "pourcentage_utilise": budget_raw.get("pourcentage", 0.0),
-                    "reste_disponible": budget_raw.get("reste_disponible", 50.0),
-                    "cooldown_actif": budget_raw.get("cooldown_actif", False),
-                    "auto_exclusion_jusqu_a": str(budget_raw["auto_exclusion"])
-                    if budget_raw.get("auto_exclusion")
-                    else None,
-                }
-            except Exception:
-                budget = {
-                    "limite": 50.0,
-                    "mises_cumulees": 0.0,
-                    "pourcentage_utilise": 0.0,
-                    "reste_disponible": 50.0,
-                    "cooldown_actif": False,
-                    "auto_exclusion_jusqu_a": None,
-                }
-
-            # 5. KPIs du mois
+            # 4. KPIs du mois
             debut_mois = today.replace(day=1)
             stats = (
                 session.query(
@@ -1164,7 +1129,6 @@ async def dashboard_jeux(
                 "matchs_jour": matchs_data,
                 "value_bets": [],
                 "loto_retard": loto_retard,
-                "budget": budget,
                 "kpis": kpis,
                 "analyse_ia": None,
             }
@@ -2230,160 +2194,6 @@ async def resume_mensuel(
                     ],
                     "kpis": kpis,
                 }
-
-    return await executer_async(_query)
-
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# JEU RESPONSABLE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-
-@router.get("/responsable/suivi", responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def suivi_responsable(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Suivi mensuel du budget jeu responsable avec sÃ©rie actuelle."""
-    from datetime import date
-
-    from src.core.models import PariSportif
-    from src.services.jeux import obtenir_responsable_gaming_service
-
-    def _query():
-        svc = obtenir_responsable_gaming_service()
-        raw = svc.obtenir_suivi_mensuel()
-
-        # Calculer la sÃ©rie actuelle (pertes/gains consÃ©cutifs rÃ©cents)
-        with executer_avec_session() as session:
-            paris_recents = (
-                session.query(PariSportif.statut)
-                .filter(PariSportif.statut.in_(["gagne", "perdu"]))
-                .order_by(PariSportif.cree_le.desc())
-                .limit(20)
-                .all()
-            )
-
-        serie_nb = 0
-        serie_type = None
-        for (statut,) in paris_recents:
-            if serie_type is None:
-                serie_type = statut
-                serie_nb = 1
-            elif statut == serie_type:
-                serie_nb += 1
-            else:
-                break
-
-        return {
-            "limite": raw.get("limite_mensuelle", 50.0),
-            "mises_cumulees": raw.get("mises_cumulees", 0.0),
-            "pourcentage_utilise": raw.get("pourcentage", 0.0),
-            "reste_disponible": raw.get("reste_disponible", 50.0),
-            "alertes": raw.get("alertes", {}),
-            "cooldown_actif": raw.get("cooldown_actif", False),
-            "auto_exclusion_jusqu_a": str(raw["auto_exclusion"])
-            if raw.get("auto_exclusion")
-            else None,
-            "serie_actuelle": {
-                "type": serie_type,
-                "nb": serie_nb,
-                "alerte_active": serie_type == "perdu" and serie_nb >= 5,
-            } if serie_type else None,
-        }
-
-    return await executer_async(_query)
-
-
-@router.get("/responsable/verifier-mise", responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def verifier_mise(
-    montant: float = Query(..., gt=0, description="Montant de la mise Ã  vÃ©rifier"),
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """VÃ©rifie si une mise est autorisÃ©e par le budget."""
-    from src.services.jeux import obtenir_responsable_gaming_service
-
-    def _query():
-        svc = obtenir_responsable_gaming_service()
-        result = svc.verifier_mise_autorisee(Decimal(str(montant)))
-        return {
-            "autorise": result.get("autorisee", True),
-            "raison": result.get("raison"),
-            "reste_apres": result.get("reste_apres", 0),
-        }
-
-    return await executer_async(_query)
-
-
-@router.post("/responsable/enregistrer-mise", responses=REPONSES_CRUD_CREATION)
-@gerer_exception_api
-async def enregistrer_mise(
-    payload: EnregistrerMiseRequest,
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Enregistre une mise dans le suivi responsable."""
-    from src.services.jeux import obtenir_responsable_gaming_service
-
-    def _query():
-        svc = obtenir_responsable_gaming_service()
-        result = svc.enregistrer_mise(Decimal(str(payload.montant)), payload.type_jeu)
-        return result
-
-    return await executer_async(_query)
-
-
-@router.put("/responsable/limite", responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def modifier_limite(
-    payload: ModifierLimiteRequest,
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Modifie la limite mensuelle de jeu."""
-    from src.services.jeux import obtenir_responsable_gaming_service
-
-    def _query():
-        svc = obtenir_responsable_gaming_service()
-        svc.modifier_limite(Decimal(str(payload.nouvelle_limite)))
-        return {"limite": payload.nouvelle_limite, "message": "Limite mise Ã  jour"}
-
-    return await executer_async(_query)
-
-
-@router.post("/responsable/auto-exclusion", responses=REPONSES_CRUD_CREATION)
-@gerer_exception_api
-async def activer_auto_exclusion(
-    payload: AutoExclusionRequest,
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Active l'auto-exclusion pour N jours."""
-    from src.services.jeux import obtenir_responsable_gaming_service
-
-    def _query():
-        svc = obtenir_responsable_gaming_service()
-        date_fin = svc.activer_auto_exclusion(payload.nb_jours)
-        return {
-            "auto_exclusion_jusqu_a": str(date_fin),
-            "nb_jours": payload.nb_jours,
-            "message": f"Auto-exclusion activÃ©e jusqu'au {date_fin}",
-        }
-
-    return await executer_async(_query)
-
-
-@router.get("/responsable/historique", responses=REPONSES_LISTE)
-@gerer_exception_api
-async def historique_limites(
-    nb_mois: int = Query(12, ge=1, le=24),
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Historique des limites et mises sur les N derniers mois."""
-    from src.services.jeux import obtenir_responsable_gaming_service
-
-    def _query():
-        svc = obtenir_responsable_gaming_service()
-        historique = svc.obtenir_historique_limites(nb_mois=nb_mois)
-        return {"items": historique or []}
 
     return await executer_async(_query)
 
