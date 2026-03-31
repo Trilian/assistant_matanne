@@ -79,7 +79,7 @@
 | **Outils** | chat-IA, notes, journal, contacts, énergie, météo, convertisseur, minuteur, automations | 11 pages | 11+ | via utilitaires | 2 fichiers |
 | **IA Avancée** | suggestions proactives, prévisions, diagnostics, voyage, cadeaux, estimation travaux | 16 pages | 1 orchestrateur | — | 2 fichiers |
 | **Admin** | audit, jobs, services, cache, users, DB | 6 pages | via core | système | 2 fichiers |
-| **Paramètres** | préférences, notifications, RGPD, sauvegardes, intégrations | 4 pages | 5+ | préférences | 2 fichiers |
+| **Paramètres** | préférences, notifications, sauvegardes, intégrations | 4 pages | 5+ | préférences | 2 fichiers |
 | **Dashboard** | tableau de bord, scores, badges, anomalies | 1 page principale | 6 | gamification | 1 fichier |
 
 ### 2.2 Modules d'infrastructure
@@ -143,7 +143,7 @@
 |---|---------|---------|-------------|
 | G1 | Recherche avancée recettes | `recettes/recherche_mixin.py` | Recherche full-text avec filtres (temps, difficulté, ingrédients, saison) |
 | G2 | Suggestions IA recettes | `recettes/recettes_ia_suggestions.py` | Suggestions personnalisées basées sur historique et préférences |
-| G3 | Versions IA recettes | `recettes/recettes_ia_versions.py` | Variantes automatiques (végan, sans gluten, économique) |
+| G3 | Versions IA recettes | `recettes/recettes_ia_versions.py` | 3 versions existantes (bébé, batch cooking, robot) **commentées dans service.py:305-306** — à activer. + 3 nouvelles : version saisonnière (produits de saison), version rapide (< 30 min), version restes (inventaire) |
 | G4 | Google Calendar sync | `famille/calendrier/google_*.py` | Sync bidirectionnelle avec Google Calendar |
 | G5 | Notifications jeux complètes | `jeux/_internal/notification_service.py` | 3 classes stub — alertes résultats, rappels tirages |
 | G6 | Football data compat | `jeux/_internal/football_compat.py` | Intégration données football temps réel |
@@ -173,7 +173,6 @@
 
 | # | Donnée | Fichier attendu | Utilisation |
 |---|--------|-----------------|-------------|
-| G18 | Catalogue allergènes | `data/reference/allergenes.json` | Filtrage recettes Jules + planning |
 | G19 | Table calories/portions par âge | `data/reference/portions_age.json` | Adapter portions recettes Jules |
 | G20 | Catalogue produits ménagers | `data/reference/produits_menagers.json` | Auto-complétion inventaire maison |
 
@@ -402,10 +401,7 @@ Jules ──→ Activités ──→ Routines
   │          ▼             ▼
   │    Suggestions IA   Complétion
   │                        │
-  ├──→ Budget ──→ Achats (Vinted)
-  │       │          │
-  │       ▼          ▼
-  │   Analyse IA   Revente LBC/Vinted
+  ├──→ Budget ──→ Analyse IA
   │
   ├──→ Anniversaires ──→ Checklists
   │
@@ -416,8 +412,6 @@ Jules ──→ Activités ──→ Routines
 
 **Interactions manquantes** 🟡 :
 - Jules croissance → Recettes portions : adapter automatiquement les portions des recettes planifiées
-- Routines complétées → Points gamification : comptabiliser l'assiduité des routines
-- Budget catégorie élevée → Suggestions achats Vinted : si alimentation monte, suggérer achats d'occasion
 - Anniversaire J-14 → Budget prévisionnel : réserver automatiquement le budget estimé
 
 ### 8.3 Module Maison — Flux interne
@@ -439,8 +433,6 @@ Projets ──→ Tâches ──→ Artisans
 ```
 
 **Interactions manquantes** 🟡 :
-- Garantie expire → Checklist : créer rappel de renouvellement ou de remplacement
-- Équipement ancien → Suggestion éco : proposer remplacement par appareil classe A+++
 - Jardin saison → Entretien auto : tâches d'entretien saisonnières automatiques selon les plantes
 - Charges augmentation → Diagnostic énergie : si facture +20%, déclencher analyse anomalie
 
@@ -473,11 +465,8 @@ Projets ──→ Tâches ──→ Artisans
 | I2 | `inter_module_meteo_activites.py` | Météo → Activités famille | Pluie prévue samedi → suggérer activités intérieur pour Jules ; Beau temps → activités extérieur |
 | I3 | `inter_module_entretien_courses.py` | Entretien → Courses | Tâche entretien nécessite produit → ajouter automatiquement à la liste de courses |
 | I4 | `inter_module_charges_energie.py` | Charges (facture) → Énergie (analyse) | Facture reçue avec hausse → déclencher analyse anomalie énergie automatiquement |
-| I5 | `inter_module_routine_gamification.py` | Routines complétées → Points famille | Compléter routines quotidiennes = gagner des points (badges assiduité) |
-| I6 | `inter_module_weekend_courses.py` | Weekend activités → Courses | Activité prévue (randonnée, pique-nique) → ajouter fournitures à la liste de courses |
+| I5 | `inter_module_weekend_courses.py` | Weekend activités → Courses | Activité prévue (randonnée, pique-nique) → ajouter fournitures à la liste de courses |
 | I7 | `inter_module_jules_nutrition.py` | Jules croissance → Planning nutrition | Adapter les portions et nutriments selon la courbe de croissance |
-| I8 | `inter_module_budget_suggestions.py` | Budget serré → Suggestions éco | Si budget alimentation dépasse seuil → ne suggérer que des recettes économiques |
-| I9 | `inter_module_garantie_rappels.py` | Garanties expirant → Rappels + budget | Garantie J-30 → rappel + estimation budget remplacement |
 | I10 | `inter_module_documents_calendrier.py` | Documents expirant → Calendrier | Créer événement calendrier pour renouvellement de documents |
 | I11 | `inter_module_inventaire_planning.py` | Inventaire stock → Planning recettes | Prioriser les recettes utilisant les ingrédients en stock |
 | I12 | `inter_module_saison_menu.py` | Produits de saison → Planning IA | Le planning IA favorise les produits de saison (meilleur prix + qualité) |
@@ -539,15 +528,12 @@ Légende: ■■■ Fort (bien connecté)  ■□ Partiel  □□ Faible  · Auc
 | # | Opportunité | Module | Description | Valeur utilisateur |
 |---|-------------|--------|-------------|-------------------|
 | IA1 | **Détection patterns alimentaires** | Cuisine | Analyser l'historique des repas sur 3 mois → détecter manques nutritionnels, répétitions excessives, proposer de la diversité | Santé famille |
-| IA2 | **Prédiction prix courses** | Courses | Analyser l'historique des prix (via tickets scannés) → prédire le budget courses de la semaine | Budget |
 | IA3 | **Coach routines IA** | Famille | Analyser la complétion des routines → identifier les blocages, suggérer des ajustements d'horaires/fréquences | Productivité |
 | IA4 | **Détection anomalies consommation eau/gaz/élec** | Maison | Comparer consommation mensuelle → alerter si anomalie détectée (fuite, appareil défaillant) | Économies |
 | IA5 | **Optimisation courses par rayon** | Courses | Grouper les articles de la liste par rayon du supermarché → parcours optimal | Temps |
 | IA6 | **Résumé mensuel IA** | Dashboard | Résumé narratif mensuel : recettes préférées, dépenses, activités Jules, projets maison | Vue d'ensemble |
 | IA7 | **Analyse photos jardin** | Maison/Jardin | Photo de plante → diagnostic maladie, suggestion traitement, prévision récolte | Jardin |
 | IA8 | **Planning activités Jules adaptatif** | Famille | En fonction de l'âge, de la météo, des activités passées → planning hebdo activités | Développement |
-| IA9 | **Suggestion menu anti-inflation** | Cuisine | Détecter les hausses de prix via historique → proposer des substitutions économiques | Budget |
-| IA10 | **Auto-catégorisation dépenses** | Budget | OCR ticket de caisse → catégoriser automatiquement chaque ligne (alimentation, hygiène, plaisir) | Budget |
 | IA11 | **Mode "Qu'est-ce qu'on mange ce soir ?"** | Cuisine | Bouton unique : analyse frigo + préférences + temps dispo + humeur → suggestion immédiate | UX |
 | IA12 | **Comparateur prix fournisseurs énergie** | Maison | Analyser la consommation + tarif actuel → comparer avec les offres du marché | Économies |
 
@@ -578,8 +564,6 @@ Légende: ■■■ Fort (bien connecté)  ■□ Partiel  □□ Faible  · Auc
 | # | Job proposé | Horaire | Module | Canal | Description |
 |---|------------|---------|--------|-------|-------------|
 | J1 | **Recap weekend dimanche soir** | Dim 20:00 | Famille | WhatsApp + Push | Résumé des activités du weekend + preview semaine |
-| J2 | **Alerte garanties expirant** | Lun 09:00 | Maison | Push + Email | Garanties qui expirent dans les 30 prochains jours |
-| J3 | **Vérification contrats** | 1er du mois 10:00 | Maison | Email | Contrats en renouvellement prochain |
 | J4 | **Nettoyage cache vieux de 7j** | Quotidien 02:00 | Core | — | Nettoyer les fichiers cache L3 expirés |
 | J5 | **Backup données critiques** | Quotidien 01:00 | Core | — | Export JSON des données essentielles (recettes, planning, inventaire) |
 | J6 | **Sync tirages loto/euromillions** | Mar+Ven 22:00 | Jeux | Push | Vérifier les résultats des tirages + notifier gains |
@@ -588,7 +572,6 @@ Légende: ■■■ Fort (bien connecté)  ■□ Partiel  □□ Faible  · Auc
 | J9 | **Anniversaires rappel J-30** | Quotidien 08:00 | Famille | Push + WhatsApp | Rappel anniversaires dans 30 jours → préparation |
 | J10 | **Analyse tendances mensuelles** | 1er du mois 09:00 | Dashboard | Email | Rapport IA tendances : alimentation, budget, activités Jules, énergie |
 | J11 | **Purge logs anciens** | 1er du mois 03:00 | Admin | — | Supprimer logs et audit > 6 mois |
-| J12 | **Évaluation badges gamification** | Quotidien 21:00 | Dashboard | Push | Vérifier si nouveaux badges débloqués → notification |
 
 ---
 
@@ -629,12 +612,9 @@ DispatcherNotifications
 |---|-------------|-------------|--------|----------|
 | N1 | **Recette du jour** | CRON 11:30 (si planning rempli) | Push | Basse |
 | N2 | **Stock critique (0 restant)** | Inventaire checkout | Push + ntfy + WhatsApp | Haute |
-| N3 | **Garantie expire J-7** | CRON quotidien | Push + Email | Moyenne |
-| N4 | **Résultat tirage loto** | Job sync tirages | Push + WhatsApp | Haute |
-| N5 | **Objectif budget atteint** | Budget seuil 90% | Push + ntfy | Moyenne |
+| N4 | **Résultat tirage loto** | Job sync tirages (seulement si un pari/tirage est enregistré) | Push + WhatsApp | Haute |
 | N6 | **Nouvelle recette de saison** | Changement de saison | Push | Basse |
 | N7 | **Tâche jardin saisonnière** | CRON saisonnier | Push + ntfy | Moyenne |
-| N8 | **Facture anormale détectée** | Charges + analyse IA | Push + ntfy + Email | Haute |
 | N9 | **Planning semaine vide** | Dimanche 10:00 | Push + WhatsApp | Moyenne |
 | N10 | **Astuce anti-gaspillage** | 3+ articles proches péremption | Push | Basse |
 
@@ -683,7 +663,7 @@ DispatcherNotifications
 | A6 | **Voir les métriques IA** | Dashboard : nombre d'appels IA, cache hits, tokens consommés, coût estimé | Haute |
 | A7 | **Régénérer les données de seed** | Relancer l'insertion des données de référence | Basse |
 | A8 | **Mode maintenance** | Activer un mode maintenance (503 pour les utilisateurs, admin accessible) | Moyenne |
-| A9 | **Export DB snapshot** | Exporter un snapshot JSON de toutes les données (RGPD-ready) | Moyenne |
+| A9 | **Export DB snapshot** | Exporter un snapshot JSON de toutes les données (backup personnel) | Moyenne |
 | A10 | **Dashboard temps réel** | WebSocket admin : voir les requêtes en cours, les jobs actifs, les events | Moyenne |
 | A11 | **Panneau de feature flags** | Activer/désactiver des features par module sans redéployer | Haute |
 | A12 | **Logs en temps réel** | Streaming des logs applicatifs via WebSocket (déjà `ws_admin_logs_router`) | ✅ Existe (vérifier fonctionnel) |
@@ -754,17 +734,15 @@ ACTUEL (4 étapes):
 4. Mettre à jour les stocks
 
 PROPOSÉ (1 étape):
-1. Bouton "Courses faites" → Scanner le ticket (OCR)
+1. Bouton "Courses faites" → Cocher tout d'un coup ou par catégorie
    └── Auto-checkout + auto-update inventaire
-   └── Budget alimentation mis à jour
 ```
 
 **Actions** :
-- Scan ticket de caisse → OCR extrait les articles
+- Bouton "Tout cocher" ou cochage par catégorie (frais, épicerie, hygiène…)
 - Match automatique avec la liste de courses → checkout
 - Articles restants non cochés → reporter à la prochaine liste
 - Inventaire mis à jour automatiquement
-- Dépense alimentation budgétée
 
 #### Flux 3 : "Suivi de Jules"
 
@@ -801,7 +779,7 @@ PROPOSÉ:
 | # | Composant | Description | Modules |
 |---|-----------|-------------|---------|
 | UX1 | **Wizard "Première semaine"** | Onboarding guidé : configurer préférences alimentaires, ajouter inventaire, planifier première semaine | Cuisine |
-| UX2 | **Quick Actions Dashboard** | 4-6 actions rapides sur le dashboard (Planifier semaine, Scanner ticket, Tâche du jour, Météo) | Dashboard |
+| UX2 | **Quick Actions Dashboard** | 4-6 actions rapides sur le dashboard (Planifier semaine, Courses du jour, Tâche du jour, Météo) | Dashboard |
 | UX3 | **Swipe-to-complete** | Composant swipeable pour compléter tâches/routines/courses (déjà `swipeable-item.tsx` présent) | Multi |
 | UX4 | **Bottom sheet contextuel** | Au lieu de naviguer vers une page, afficher un bottom sheet avec les actions courantes | Mobile |
 | UX5 | **Mode Focus "Ce soir"** | Une seule vue : recette du soir + ingrédients ok/manquants + minuteur + musique | Cuisine |
@@ -854,7 +832,7 @@ PROPOSÉ:
 | IN3 | **Widgets tablette home screen** | Widgets natifs Android via PWA : planning du jour, minuteur, liste courses | Accès rapide |
 | IN4 | **Auto-sync OpenFoodFacts enrichi** | Scan code-barres → enrichir automatiquement avec nutriscore, allergènes, provenance | Nutrition |
 | IN5 | **Mode collaboratif couple** | Partage planning/courses en temps réel via WebSocket (déjà `websocket_courses.py`) → étendre à planning/tâches | Famille |
-| IN6 | **Export données structuré** | Export CSV/JSON de chaque module (RGPD + portabilité) | Légal |
+| IN6 | **Export données structuré** | Export CSV/JSON de chaque module (backup personnel) | Sécurité |
 | IN7 | **Dark mode intelligent** | Déjà next-themes → ajouter mode auto (sombre le soir, clair le jour) basé sur les habitudes | UX |
 
 ### 16.2 Innovations fonctionnelles
@@ -863,7 +841,6 @@ PROPOSÉ:
 |---|-----------|-------------|--------|
 | IN8 | **Score éco-responsable** | Calculer un score écologique mensuel : gaspillage alimentaire, consommation énergie, achats locaux/bio | Conscience écologique |
 | IN9 | **Planning activités Jules IA adaptatif** | IA génère un planning hebdo d'activités pour Jules en fonction de son âge, de la météo, des activités passées, et des recommandations de développement | Développement enfant |
-| IN10 | **Mode "Budget serré"** | Quand le budget dépasse un seuil → le système bascule automatiquement en mode éco : recettes économiques, suggestions anti-gaspillage renforcées, pause achats non-essentiels | Budget |
 | IN11 | **Tableau de bord santé foyer** | Score global santé du foyer : alimentation (diversité, équilibre), activité physique (Garmin), bien-être (routines), sommeil | Bien-être |
 | IN12 | **Saisonnalité intelligente** | Le système adapte automatiquement : recettes (produits de saison), jardin (actions saisonnières), entretien (tâches saisonnières), énergie (chauffage/clim) | Pertinence |
 | IN13 | **Rétrospective annuelle** | Fin d'année : rapport IA sur les 12 mois — recettes préférées, dépenses, évolution Jules, projets maison terminés, objectifs atteints | Mémoire familiale |
@@ -931,8 +908,6 @@ PROPOSÉ:
 | 4.5 | `inter_module_routine_gamification.py` — Routines → Points | Moyenne |
 | 4.6 | `inter_module_weekend_courses.py` — Weekend → Courses | Moyenne |
 | 4.7 | `inter_module_jules_nutrition.py` — Jules → Planning nutrition | Haute |
-| 4.8 | `inter_module_budget_suggestions.py` — Budget serré → Recettes éco | Haute |
-| 4.9 | `inter_module_garantie_rappels.py` — Garanties → Rappels | Basse |
 | 4.10 | `inter_module_saison_menu.py` — Saison → Planning IA | Haute |
 | 4.11 | `inter_module_documents_calendrier.py` — Documents → Calendrier | Basse |
 
@@ -941,7 +916,7 @@ PROPOSÉ:
 | # | Action | Effort |
 |---|--------|--------|
 | 5.1 | Bouton "Planifier ma semaine" sur le dashboard (planning + courses en 1 clic) | M |
-| 5.2 | Bouton "Courses faites" avec scan ticket OCR → auto-checkout + MAJ inventaire | L |
+| 5.2 | Bouton "Courses faites" (cochage bulk par catégorie) → auto-checkout + MAJ inventaire | M |
 | 5.3 | Hub Jules unifié (timeline jour + jalons + suggestion IA) | M |
 | 5.4 | Swipe-to-complete pour tâches/routines (étendre le composant existant) | S |
 | 5.5 | Quick Actions sur le dashboard (4-6 boutons d'actions rapides) | S |
@@ -975,7 +950,6 @@ PROPOSÉ:
 | 8.2 | Détection patterns alimentaires (IA1) | L |
 | 8.3 | Coach routines IA (IA3) | M |
 | 8.4 | Score éco-responsable (IN8) | M |
-| 8.5 | Mode budget serré automatique (IN10) | M |
 | 8.6 | Saisonnalité intelligente (IN12) | L |
 | 8.7 | Apprentissage continu des habitudes (IN14) | L |
 | 8.8 | Rétrospective annuelle IA (IN13) | L |
@@ -1010,7 +984,6 @@ PROPOSÉ:
 
 ```
 data/reference/
-├── allergenes.json                  ❌ MANQUANT
 ├── astuces_domotique.json           ✅
 ├── calendrier_soldes.json           ✅
 ├── calendrier_vaccinal_fr.json      ✅
