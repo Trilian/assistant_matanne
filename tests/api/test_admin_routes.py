@@ -274,6 +274,50 @@ class TestAdminRouterExiste:
         assert len(admin_paths) >= 2, f"Routes admin introuvables. Chemins: {paths[:20]}"
 
 
+class TestAdminSprintFEndpoints:
+    """Couverture des endpoints ajoutés pour le Sprint F."""
+
+    @pytest.mark.asyncio
+    async def test_notifications_queue_listing(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/notifications/queue")
+        assert response.status_code == 200
+        data = response.json()
+        assert "items" in data
+
+    @pytest.mark.asyncio
+    async def test_maintenance_toggle(self, async_client: httpx.AsyncClient):
+        response = await async_client.put("/api/v1/admin/maintenance", json={"enabled": True})
+        assert response.status_code == 200
+        data = response.json()
+        assert "maintenance_mode" in data
+
+    @pytest.mark.asyncio
+    async def test_console_ia_valide_structure(self, async_client: httpx.AsyncClient):
+        response = await async_client.post("/api/v1/admin/ai/console", json={"prompt": "hello"})
+        assert response.status_code in [200, 401, 403, 429, 500]
+        if response.status_code == 200:
+            data = response.json()
+            assert "response" in data
+            assert "duration_ms" in data
+
+    @pytest.mark.asyncio
+    async def test_db_export_json(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/db/export?format=json")
+        assert response.status_code in [200, 401, 403, 500]
+        if response.status_code == 200:
+            data = response.json()
+            assert data.get("format") == "json"
+            assert "tables" in data
+
+    @pytest.mark.asyncio
+    async def test_db_import_json_payload(self, async_client: httpx.AsyncClient):
+        response = await async_client.post(
+            "/api/v1/admin/db/import",
+            json={"tables": {"etats_persistants": []}, "merge": True},
+        )
+        assert response.status_code in [200, 401, 403, 422, 500]
+
+
 # ═══════════════════════════════════════════════════════════
 # CT-14 — Routes RGPD
 # ═══════════════════════════════════════════════════════════

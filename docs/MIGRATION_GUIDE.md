@@ -6,7 +6,7 @@
 
 ## Workflow schéma DB (Sprint 1 — 28 mars 2026)
 
-**Source unique de vérité : `sql/INIT_COMPLET.sql`**
+**Source unique de vérité : `sql/schema/` → `sql/INIT_COMPLET.sql`**
 
 Depuis le Sprint 1, le workflow de gestion du schéma est simplifié :
 
@@ -31,6 +31,128 @@ Depuis le Sprint 1, le workflow de gestion du schéma est simplifié :
 4. Mettre à jour le schéma Pydantic dans `src/api/schemas/`
 
 > **Pourquoi pas de migrations incrémentales ?** Sur Supabase (PostgreSQL managé), les migrations sont appliquées manuellement via le SQL Editor. `INIT_COMPLET.sql` sert pour fresh install, les changements incrémentiels sont appliqués directement sur la DB de prod.
+
+---
+
+## Workflow SQL-first — Structure modulaire (Sprint H)
+
+**Structure depuis le Sprint H :**
+
+```
+sql/
+├── INIT_COMPLET.sql          ← Régénéré automatiquement (NE PAS ÉDITER À LA MAIN)
+├── schema/
+│   ├── 01_extensions.sql     ← Extensions PostgreSQL (uuid-ossp, pgcrypto…)
+│   ├── 02_functions.sql      ← Fonctions PL/pgSQL et triggers
+│   ├── 03_cuisine.sql        ← Tables cuisine (recettes, ingrédients, planning, courses)
+│   ├── 04_famille.sql        ← Tables famille (profils, activités, budget, santé)
+│   ├── 05_maison.sql         ← Tables maison (projets, entretien, jardin, stocks)
+│   ├── 06_habitat.sql        ← Tables habitat (scénarios, plans, veille)
+│   ├── 07_jeux.sql           ← Tables jeux (paris, loto, euromillions)
+│   ├── 08_systeme.sql        ← Tables système (logs, config, notifications)
+│   ├── 09_rls_policies.sql   ← Politiques Row-Level Security
+│   └── ...
+└── migrations/               ← Changements incrémentiels (garde tel quel)
+```
+
+### Règle fondamentale — Ne jamais éditer INIT_COMPLET.sql directement
+
+`INIT_COMPLET.sql` est **régénéré automatiquement** par le script `scripts/db/regenerate_init.py`.
+Il ne faut **jamais l'éditer manuellement** — toute modification serait écrasée lors du prochain `make regenerate`.
+
+### Workflow complet pour modifier le schéma
+
+**Étape 1 — Modifier le fichier thématique dans `sql/schema/`**
+
+```bash
+# Exemple : ajouter une colonne à la table recettes
+# Éditer sql/schema/03_cuisine.sql
+#   ALTER TABLE recettes ADD COLUMN ... dans le CREATE TABLE correspondant
+```
+
+**Étape 2 — Régénérer `INIT_COMPLET.sql`**
+
+```bash
+python scripts/db/regenerate_init.py
+# Concatène sql/schema/*.sql → sql/INIT_COMPLET.sql (avec header + séparateurs)
+# Idempotent — peut être lancé plusieurs fois sans effet de bord
+```
+
+**Étape 3 — Appliquer sur la DB existante** (Supabase SQL Editor ou psql)
+
+```sql
+-- NE PAS réexécuter INIT_COMPLET.sql (DROP CASCADE sur toutes les tables !)
+-- Exécuter UNIQUEMENT l'ALTER TABLE / CREATE TABLE de la modification :
+ALTER TABLE recettes ADD COLUMN calories INTEGER DEFAULT NULL;
+```
+
+**Étape 4 — Logger dans `sql/migrations/`** (optionnel mais recommandé)
+
+```bash
+# Nommer le fichier avec la date et une description courte
+touch sql/migrations/V008_20260401_add_recettes_calories.sql
+# Contenu : la requête ALTER TABLE exacte appliquée
+```
+
+**Étape 5 — Mettre à jour le modèle ORM**
+
+```python
+# Fichier src/core/models/cuisine.py
+class Recette(Base):
+  ...
+  calories: Mapped[int | None] = mapped_column(Integer, nullable=True)
+```
+
+**Étape 6 — Mettre à jour le schéma Pydantic** (si exposé en API)
+
+```python
+# Fichier src/api/schemas/recettes.py
+class RecetteResponse(BaseModel):
+  ...
+  calories: int | None = None
+```
+
+### Réinitialisation complète d'une DB vide
+
+```bash
+# 1. Régénérer INIT_COMPLET.sql depuis sql/schema/ (obligatoire si modifs récentes)
+python scripts/db/regenerate_init.py
+
+# 2. Exécuter dans Supabase SQL Editor (ou psql)
+#    Copier-coller le contenu de sql/INIT_COMPLET.sql
+#    ⚠️ DESTRUCTIF — DROP CASCADE sur tout !
+```
+
+### Vérifier la cohérence schéma ↔ ORM ↔ API
+
+```bash
+# Vérifier que tous les modèles ORM ont un CREATE TABLE dans INIT_COMPLET.sql
+python -c "
+import re
+from pathlib import Path
+from src.core.models import Base, charger_tous_modeles
+charger_tous_modeles()
+sql = Path('sql/INIT_COMPLET.sql').read_text()
+sql_tables = set(re.findall(r'CREATE TABLE (?:IF NOT EXISTS )?(\w+)', sql))
+missing = [m.class_.__tablename__ for m in Base.registry.mappers if m.class_.__tablename__ not in sql_tables]
+if missing:
+  print('MANQUANT:', missing)
+else:
+  print('OK — tous les modèles ORM ont un CREATE TABLE')
+"
+```
+
+### Conventions de nommage SQL
+
+| Objet | Convention | Exemple |
+|-------|-----------|---------|
+| Tables | `snake_case` pluriel | `recettes`, `paris_sportifs` |
+| Colonnes | `snake_case` | `date_creation`, `user_id` |
+| Index | `idx_{table}_{colonne(s)}` | `idx_recettes_user_id` |
+| Contraintes FK | `fk_{table}_{ref}` | `fk_recettes_user` |
+| Triggers | `trg_{table}_{action}` | `trg_recettes_updated_at` |
+| Politiques RLS | `{table}_{role}_{action}` | `recettes_user_select` |
+
 
 ### Vérification cohérence ORM ↔ SQL
 

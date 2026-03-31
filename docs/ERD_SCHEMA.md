@@ -1,6 +1,21 @@
 # 📊 Schéma ERD - Modèles de Données Assistant Matanne
 
 > Diagramme Entity-Relationship des tables SQLAlchemy
+> Mise à jour Sprint H: 31 mars 2026
+
+## Référence Sprint H
+
+- Source de vérité SQL: `sql/schema/*.sql` (structure modulaire SQL-first)
+- Nombre de tables cible: 143
+- Ce document sert de vue fonctionnelle par domaines; la validation finale passe par le schéma SQL modulaire
+
+### Procédure de rafraîchissement
+
+1. Mettre à jour les fichiers sous `sql/schema/`
+2. Régénérer `sql/INIT_COMPLET.sql` via `scripts/db/regenerate_init.py`
+3. Vérifier l'alignement ORM (`src/core/models/`)
+4. Mettre à jour ce document (sections impactées + relations)
+5. Contrôler les index et clés étrangères avec `docs/guides/DATABASE_INDEXES.md`
 
 ## Vue d'ensemble
 
@@ -194,6 +209,14 @@ erDiagram
     Recette ||--o{ EtapeBatchCooking : "utilisée"
     Recette ||--o{ PreparationBatch : "préparée"
 ```
+
+---
+
+## Validation Sprint H
+
+- Vérification manuelle: alignement avec l'organisation SQL modulaire (`sql/schema/`)
+- Référence migration: `docs/MIGRATION_GUIDE.md`
+- Référence performances/index: `docs/guides/DATABASE_INDEXES.md`
 
 ## Famille & Utilisateurs
 

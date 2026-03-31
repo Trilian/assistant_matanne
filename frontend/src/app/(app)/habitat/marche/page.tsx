@@ -1,15 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Building2, MapPinned, Search } from "lucide-react";
+import { Building2, MapPinned } from "lucide-react";
 import { obtenirMarcheHabitat } from "@/bibliotheque/api/habitat";
 import { EntetePageHabitat } from "@/composants/habitat/entete-page-habitat";
+import { FiltresMarcheHabitat } from "@/composants/habitat/filtres-marche-habitat";
 import { GraphiquesMarcheHabitat } from "@/composants/habitat/graphiques-marche-habitat";
 import { Badge } from "@/composants/ui/badge";
-import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
-import { Input } from "@/composants/ui/input";
-import { Label } from "@/composants/ui/label";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 
 export default function MarcheHabitatPage() {
@@ -37,32 +35,18 @@ export default function MarcheHabitatPage() {
       />
 
       <div className="grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Filtres DVF</CardTitle>
-            <CardDescription>Ajuste la zone et la typologie avant de relancer le chargement.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="commune-habitat">Commune</Label>
-                <Input id="commune-habitat" value={commune} onChange={(event) => setCommune(event.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cp-habitat">Code postal</Label>
-                <Input id="cp-habitat" value={codePostal} onChange={(event) => setCodePostal(event.target.value)} inputMode="numeric" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="type-habitat">Type local</Label>
-              <Input id="type-habitat" value={typeLocal} onChange={(event) => setTypeLocal(event.target.value)} placeholder="Maison, Appartement..." />
-            </div>
-            <Button onClick={() => refetch()} disabled={isFetching} className="w-full sm:w-auto">
-              <Search className="mr-2 h-4 w-4" />
-              {isFetching ? "Chargement..." : "Actualiser l'analyse"}
-            </Button>
-          </CardContent>
-        </Card>
+        <FiltresMarcheHabitat
+          commune={commune}
+          codePostal={codePostal}
+          typeLocal={typeLocal}
+          isFetching={isFetching}
+          onCommuneChange={setCommune}
+          onCodePostalChange={setCodePostal}
+          onTypeLocalChange={setTypeLocal}
+          onRefresh={() => {
+            void refetch();
+          }}
+        />
 
         <Card>
           <CardHeader>

@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { AlertTriangle, Armchair, Building2, Home, Ruler, Search, Trees, Wallet } from "lucide-react";
 import { EntetePageHabitat } from "@/composants/habitat/entete-page-habitat";
+import { GrilleBlocsHabitat } from "@/composants/habitat/grille-blocs-habitat";
+import { GrilleIndicateursHabitat } from "@/composants/habitat/grille-indicateurs-habitat";
 import { Badge } from "@/composants/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { utiliserRequete } from "@/crochets/utiliser-api";
@@ -72,18 +73,7 @@ export default function HabitatPage() {
         ] : undefined}
       />
 
-      {data && (
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-4 xl:grid-cols-8">
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{data.scenarios}</p><p className="text-xs text-muted-foreground">Scenarios</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{data.annonces}</p><p className="text-xs text-muted-foreground">Annonces</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{data.plans}</p><p className="text-xs text-muted-foreground">Plans</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{data.projets_deco}</p><p className="text-xs text-muted-foreground">Projets deco</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{data.zones_jardin}</p><p className="text-xs text-muted-foreground">Zones jardin</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{data.alertes}</p><p className="text-xs text-muted-foreground">Alertes</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{data.annonces_a_traiter}</p><p className="text-xs text-muted-foreground">A traiter</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{Math.round((data.budget_deco_depense / Math.max(data.budget_deco_total || 1, 1)) * 100)}%</p><p className="text-xs text-muted-foreground">Budget deco consomme</p></CardContent></Card>
-        </div>
-      )}
+      {data && <GrilleIndicateursHabitat data={data} />}
 
       {data && (
         <div className="grid gap-4 lg:grid-cols-3">
@@ -139,18 +129,7 @@ export default function HabitatPage() {
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {BLOCS.map(({ titre, description, chemin, Icone }) => (
-          <Link key={chemin} href={chemin}>
-            <Card className="h-full transition-all hover:-translate-y-0.5 hover:bg-accent/40">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg"><Icone className="h-4 w-4" /> {titre}</CardTitle>
-                <CardDescription>{description}</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
-        ))}
-      </div>
+      <GrilleBlocsHabitat blocs={BLOCS} />
     </div>
   );
 }

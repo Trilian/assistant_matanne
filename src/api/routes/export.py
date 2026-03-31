@@ -7,6 +7,7 @@ Export JSON multi-domaine et restauration via ExportService.
 
 from typing import Any
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
 from fastapi.responses import StreamingResponse
 
@@ -16,6 +17,8 @@ from src.api.utils import executer_async, gerer_exception_api
 from src.services.rapports.export import obtenir_service_export_pdf
 
 router = APIRouter(prefix="/api/v1/export", tags=["Export"])
+
+logger = logging.getLogger(__name__)
 
 TYPES_EXPORT = {"courses", "planning", "recette", "budget"}
 
@@ -200,8 +203,11 @@ async def restaurer_depuis_json(
     **Usage recommandé** : restaurer sur une instance vierge ou après backup.
     """
     if file.content_type not in ("application/json", "application/gzip", "application/octet-stream"):
-        # Accept permissive — browsers send varying content-types for JSON files
-        pass
+        logger.warning(
+            "Import restauration: content-type inattendu '%s' (fichier: %s)",
+            file.content_type,
+            file.filename,
+        )
 
     contenu = await file.read()
     if len(contenu) > 100 * 1024 * 1024:  # 100 Mo max

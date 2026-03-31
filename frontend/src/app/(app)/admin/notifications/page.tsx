@@ -28,7 +28,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/composants/ui/alert";
 import {
   envoyerNotificationTest,
   envoyerNotificationTestTousCanaux,
+  listerQueueNotifications,
+  relancerQueueNotifications,
+  supprimerQueueNotifications,
 } from "@/bibliotheque/api/admin";
+import { utiliserRequete } from "@/crochets/utiliser-api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -51,6 +55,12 @@ export default function PageAdminNotifications() {
   const [envoyantTous, setEnvoyantTous] = useState(false);
   const [resultatTous, setResultatTous] = useState<{ ok: boolean; message: string; details?: string } | null>(null);
   const [historique, setHistorique] = useState<HistoriqueNotif[]>([]);
+  const [actionQueueUser, setActionQueueUser] = useState<string | null>(null);
+
+  const { data: queueData, refetch: rafraichirQueue } = utiliserRequete(
+    ["admin", "notifications", "queue"],
+    () => listerQueueNotifications({ limit: 30 })
+  );
 
   const envoyerTest = async () => {
     if (!message.trim()) {
@@ -286,6 +296,88 @@ export default function PageAdminNotifications() {
                 </div>
               </div>
             ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>File d&apos;attente digest</CardTitle>
+            <CardDescription>
+              Utilisateurs avec notifications consolidées en attente
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>{queueData?.total_users_pending ?? 0} utilisateur(s) en attente</span>
+              <Button variant="outline" size="sm" onClick={() => rafraichirQueue()}>
+                Rafraîchir
+              </Button>
+            </div>
+
+            {!queueData?.items?.length ? (
+              <p className="text-sm text-muted-foreground">Aucune file en attente.</p>
+            ) : (
+              <div className="space-y-2">
+                {queueData.items.map((item) => (
+                  <div key={item.user_id} className="rounded-md border p-3 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <p className="font-mono text-xs">{item.user_id}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.taille_queue} message(s) en file
+                        </p>
+                      </div>
+                      <Badge variant="secondary">Digest</Badge>
+                    </div>
+                    {item.dernier_message && (
+                      <p className="text-xs text-muted-foreground truncate">{item.dernier_message}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={actionQueueUser !== null}
+                        onClick={async () => {
+                          setActionQueueUser(item.user_id + ":retry");
+                          try {
+                            await relancerQueueNotifications(item.user_id);
+                            await rafraichirQueue();
+                          } finally {
+                            setActionQueueUser(null);
+                          }
+                        }}
+                      >
+                        {actionQueueUser === item.user_id + ":retry" ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Retry"
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        disabled={actionQueueUser !== null}
+                        onClick={async () => {
+                          setActionQueueUser(item.user_id + ":delete");
+                          try {
+                            await supprimerQueueNotifications(item.user_id);
+                            await rafraichirQueue();
+                          } finally {
+                            setActionQueueUser(null);
+                          }
+                        }}
+                      >
+                        {actionQueueUser === item.user_id + ":delete" ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Delete"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

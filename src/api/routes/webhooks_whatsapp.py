@@ -617,8 +617,8 @@ async def _envoyer_anniversaires_proches(sender: str) -> None:
                     jours_restants = (prochain - aujourd_hui).days
                     if 0 <= jours_restants <= 30:
                         anniversaires.append((jours_restants, nom, prochain.strftime("%d/%m")))
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning("Erreur calcul anniversaire pour %s: %s", nom, e)
 
             anniversaires.sort(key=lambda x: x[0])
 
@@ -960,8 +960,8 @@ async def _envoyer_detail_journee(sender: str) -> None:
             ).fetchall()
             if rows:
                 sections.append("🍽️ *Repas :*\n" + "\n".join(f"  • {t} : {n or '?'}" for t, n in rows))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error("Erreur récupération repas du jour: %s", e)
 
         try:
             from sqlalchemy import text
@@ -980,8 +980,8 @@ async def _envoyer_detail_journee(sender: str) -> None:
                 sections.append(
                     "📋 *Tâches :*\n" + "\n".join(f"  • {t} ({p or '-'})" for t, p in rows)
                 )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error("Erreur récupération tâches du jour: %s", e)
 
         try:
             from datetime import timedelta
@@ -1004,8 +1004,8 @@ async def _envoyer_detail_journee(sender: str) -> None:
                     "⚠️ *Péremptions :*\n"
                     + "\n".join(f"  • {n} ({q or '?'}) — {d}" for n, d, q in rows)
                 )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error("Erreur récupération péremptions: %s", e)
 
     if not sections:
         msg = f"📊 *Détail {aujourd_hui.strftime('%A %d %B')}*\n\nAucune donnée pour aujourd'hui."

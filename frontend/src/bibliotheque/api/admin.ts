@@ -171,6 +171,20 @@ export interface NotificationTestAllResponse {
   message: string
 }
 
+export interface NotificationQueueItem {
+  user_id: string
+  taille_queue: number
+  dernier_message?: string
+  dernier_evenement?: string
+  last_updated?: string
+}
+
+export interface NotificationQueueResponse {
+  items: NotificationQueueItem[]
+  total: number
+  total_users_pending: number
+}
+
 export interface ConfigAdminExport {
   exported_at: string
   feature_flags: Record<string, boolean>
@@ -220,6 +234,38 @@ export interface LiveSnapshotResponse {
   security: {
     events_1h: number
   }
+}
+
+export interface MaintenanceModeResponse {
+  maintenance_mode: boolean
+}
+
+export interface AiConsolePayload {
+  prompt: string
+  prompt_systeme?: string
+  temperature?: number
+  max_tokens?: number
+  utiliser_cache?: boolean
+}
+
+export interface AiConsoleResponse {
+  status: string
+  duration_ms: number
+  model: string
+  response: string
+}
+
+export interface DbExportResponse {
+  format: 'json'
+  exported_at: string
+  tables: Record<string, Array<Record<string, unknown>>>
+  total_tables: number
+}
+
+export interface DbImportResponse {
+  status: string
+  imported_tables: number
+  resultats: Record<string, { imported: number; merge: boolean }>
 }
 
 export interface DbCoherenceResponse {
@@ -442,6 +488,24 @@ export async function envoyerNotificationTestTousCanaux(
   return data
 }
 
+export async function listerQueueNotifications(params?: {
+  user_id?: string
+  limit?: number
+}): Promise<NotificationQueueResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/notifications/queue', { params })
+  return data
+}
+
+export async function relancerQueueNotifications(userId: string): Promise<{ status: string; user_id: string }> {
+  const { data } = await clientApi.post(`/api/v1/admin/notifications/queue/${userId}/retry`)
+  return data
+}
+
+export async function supprimerQueueNotifications(userId: string): Promise<{ status: string; user_id: string; deleted: number }> {
+  const { data } = await clientApi.delete(`/api/v1/admin/notifications/queue/${userId}`)
+  return data
+}
+
 export async function exporterConfigAdmin(): Promise<ConfigAdminExport> {
   const { data } = await clientApi.get('/api/v1/admin/config/export')
   return data
@@ -463,6 +527,39 @@ export async function simulerFluxAdmin(
 
 export async function obtenirLiveSnapshotAdmin(): Promise<LiveSnapshotResponse> {
   const { data } = await clientApi.get('/api/v1/admin/live-snapshot')
+  return data
+}
+
+export async function testerConsoleIA(payload: AiConsolePayload): Promise<AiConsoleResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/ai/console', payload)
+  return data
+}
+
+export async function lireModeMaintenance(): Promise<MaintenanceModeResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/maintenance')
+  return data
+}
+
+export async function basculerModeMaintenance(enabled: boolean): Promise<MaintenanceModeResponse & { status: string }> {
+  const { data } = await clientApi.put('/api/v1/admin/maintenance', { enabled })
+  return data
+}
+
+export async function lireModeMaintenancePublic(): Promise<MaintenanceModeResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/public/maintenance')
+  return data
+}
+
+export async function exporterDbJson(): Promise<DbExportResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/db/export', { params: { format: 'json' } })
+  return data
+}
+
+export async function importerDbJson(
+  tables: Record<string, Array<Record<string, unknown>>>,
+  merge = false,
+): Promise<DbImportResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/db/import', { tables, merge })
   return data
 }
 

@@ -7,6 +7,7 @@ Sprint 13 — W4 : ajout endpoints préférences canaux de notification.
 
 from typing import Any
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.dependencies import require_auth
@@ -19,6 +20,8 @@ from src.api.schemas.preferences import (
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/preferences", tags=["Préférences"])
+
+logger = logging.getLogger(__name__)
 
 
 @router.get("", responses=REPONSES_CRUD_LECTURE)
@@ -281,8 +284,8 @@ async def modifier_preferences_notifications(
                         from datetime import time as _time
                         h, m = str(value).split(":")
                         setattr(prefs, key, _time(int(h), int(m)))
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.warning("Format invalide pour %s='%s': %s", key, value, e)
                 elif key in ("max_par_heure", "mode_digest"):
                     modules_actifs[key] = value
                 else:

@@ -16,6 +16,7 @@ import { FabActionsRapides } from "./fab-actions-rapides";
 import { MinuteurFlottant } from "./minuteur-flottant";
 import { BarreProgression } from "./barre-progression";
 import { ContenuPrincipal } from "./contenu-principal";
+import { PanneauAdminFlottant } from "./panneau-admin-flottant";
 import { InstallPrompt } from "@/composants/pwa/install-prompt";
 import { useNotificationsJeux } from "@/crochets/utiliser-notifications-jeux";
 
@@ -66,6 +67,9 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
 
       {/* Tour d'onboarding pour nouveaux utilisateurs */}
       <TourOnboarding />
+
+      {/* Panneau admin flottant (Ctrl+Shift+A) */}
+      <PanneauAdminFlottant />
 
       {/* Bannière d'installation PWA */}
       <InstallPrompt />

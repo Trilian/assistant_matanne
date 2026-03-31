@@ -75,6 +75,14 @@ jobs:
         run: |
           pytest --cov=src --cov-report=xml --cov-report=term -v
 
+      - name: Run schema coherence test
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/assistant_matanne_test
+          ENVIRONMENT: test
+          JWT_SECRET: test_secret_key_for_ci
+        run: |
+          pytest tests/sql/test_schema_coherence.py -v
+
       - name: Install Schemathesis (contract tests)
         run: |
           pip install schemathesis

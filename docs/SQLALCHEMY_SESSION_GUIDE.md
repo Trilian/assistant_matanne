@@ -249,7 +249,84 @@ def test_modifications_isolated():
 
 ---
 
-**Version:** 1.0  
-**Date:** 30 Janvier 2026  
-**Auteur:** GitHub Copilot  
+**Version:** 1.1 (Sprint H — avril 2026)
+**Date initiale:** 30 Janvier 2026
+**Auteur:** GitHub Copilot
 **Pour:** Assistant Matanne Codebase
+
+---
+
+## Mise à jour Sprint H — Patterns FastAPI
+
+### Pattern routes FastAPI (`executer_avec_session`)
+
+Dans les routes FastAPI, utiliser `executer_avec_session()` + `executer_async()` :
+
+```python
+from src.api.utils import executer_async, executer_avec_session
+
+@router.get("/recettes")
+@gerer_exception_api
+async def lister_recettes(user: dict = Depends(require_auth)) -> dict:
+    def _query():
+        # executer_avec_session() gère ouverture/fermeture + commit/rollback
+        with executer_avec_session() as session:
+            recettes = session.query(Recette).filter_by(user_id=user["id"]).all()
+            # ✅ Sérialiser DANS le context manager — avant fermeture de session
+            return [{"id": r.id, "nom": r.nom} for r in recettes]
+    # executer_async() exécute _query dans un thread pool (non-blocking)
+    return await executer_async(_query)
+```
+
+**Règles clés :**
+- `executer_avec_session()` = `obtenir_contexte_db()` adapté pour les routes
+- Ne JAMAIS retourner des objets SQLAlchemy hors du `with` — les sérialiser à l'intérieur
+- `executer_async()` est obligatoire pour les endpoints `async def` — évite le blocage de l'event loop
+
+### Comparatif des 3 patterns
+
+| Pattern | Usage | Fichier |
+|---------|-------|---------|
+| `executer_avec_session()` | Routes FastAPI | `src/api/utils/__init__.py` |
+| `@avec_session_db` | Services métier | `src/core/decorators/db.py` |
+| `obtenir_contexte_db()` | Flux complexes manuels | `src/core/db/session.py` |
+
+### Anti-pattern : retourner un objet ORM hors session
+
+```python
+# ❌ MAUVAIS — détached instance error à l'accès de relations
+async def get_recette(id: int):
+    def _query():
+        with executer_avec_session() as session:
+            return session.query(Recette).get(id)  # Retourne l'objet ORM !
+    recette = await executer_async(_query)
+    return recette.ingredients  # 💥 DetachedInstanceError
+
+# ✅ BON — sérialiser dans le context manager
+async def get_recette(id: int):
+    def _query():
+        with executer_avec_session() as session:
+            r = session.query(Recette).options(joinedload(Recette.ingredients)).get(id)
+            return {
+                "id": r.id,
+                "nom": r.nom,
+                "ingredients": [{"id": i.id, "nom": i.nom} for i in r.ingredients]
+            }
+    return await executer_async(_query)
+```
+
+### Test avec `executer_avec_session`
+
+Dans les tests, les mêmes patterns s'appliquent avec la `test_db` fixture :
+
+```python
+def test_create_recette(test_db):
+    """test_db est une session SQLite in-memory (conftest.py)"""
+    recette = Recette(nom="Tarte", user_id=1)
+    test_db.add(recette)
+    test_db.commit()
+    
+    result = test_db.query(Recette).filter_by(nom="Tarte").first()
+    assert result.nom == "Tarte"
+    # Session nettoyée automatiquement après le test (rollback dans conftest)
+```

@@ -6,9 +6,11 @@
 
 import { Search, Moon, Sun, LogOut, User, Link2, SlidersHorizontal } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 import { Button } from "@/composants/ui/button";
 import { utiliserStoreUI } from "@/magasins/store-ui";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
+import { lireModeMaintenancePublic } from "@/bibliotheque/api/admin";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +33,29 @@ export function EnTete() {
   const { theme, setTheme } = useTheme();
   const { basculerRecherche } = utiliserStoreUI();
   const { utilisateur, deconnecter } = utiliserAuth();
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    const chargerMaintenance = async () => {
+      try {
+        const data = await lireModeMaintenancePublic();
+        if (mounted) {
+          setMaintenanceMode(Boolean(data.maintenance_mode));
+        }
+      } catch {
+        if (mounted) {
+          setMaintenanceMode(false);
+        }
+      }
+    };
+    chargerMaintenance();
+    const timer = window.setInterval(chargerMaintenance, 30000);
+    return () => {
+      mounted = false;
+      window.clearInterval(timer);
+    };
+  }, []);
 
   const initialesUtilisateur = utilisateur?.nom
     ? utilisateur.nom
@@ -42,7 +67,13 @@ export function EnTete() {
     : "?";
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:px-6">
+    <>
+      {maintenanceMode && (
+        <div className="border-b bg-amber-100 px-4 py-2 text-center text-sm text-amber-900">
+          Maintenance en cours: certaines fonctionnalités peuvent être temporairement ralenties.
+        </div>
+      )}
+      <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:px-6">
       {/* Titre mobile */}
       <span className="text-lg font-semibold md:hidden">🏠 Matanne</span>
 
@@ -136,6 +167,7 @@ export function EnTete() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </header>
+      </header>
+    </>
   );
 }

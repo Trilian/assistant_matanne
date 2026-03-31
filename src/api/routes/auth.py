@@ -91,7 +91,7 @@ def _obtenir_profil_par_id(user_id: str):
                 try:
                     profil = session.get(ProfilUtilisateur, int(user_id))
                 except (ValueError, TypeError):
-                    pass
+                    logger.debug("user_id '%s' n'est pas un id numérique, recherche secondaire ignorée", user_id)
             if profil:
                 session.expunge(profil)
             return profil

@@ -43,6 +43,10 @@ jobs:
       run: |
         pytest tests/ -v --tb=short -m "integration"
 
+    - name: Run schema coherence test
+      run: |
+        pytest tests/sql/test_schema_coherence.py -v
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:

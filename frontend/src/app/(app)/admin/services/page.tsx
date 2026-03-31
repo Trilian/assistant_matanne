@@ -49,8 +49,10 @@ import {
   type LiveSnapshotResponse,
   type ServiceHealthResponse,
   exporterConfigAdmin,
+  exporterDbJson,
   executerActionService,
   forcerResync,
+  importerDbJson,
   importerConfigAdmin,
   lancerSeedDev,
   lireFeatureFlags,
@@ -65,6 +67,7 @@ import {
   sauvegarderFeatureFlags,
   sauvegarderRuntimeConfig,
   simulerFluxAdmin,
+  testerConsoleIA,
   viderCache,
 } from "@/bibliotheque/api/admin";
 
@@ -110,6 +113,14 @@ export default function PageAdminServices() {
   const [simulationMessage, setSimulationMessage] = useState("");
   const [simulationLoading, setSimulationLoading] = useState(false);
   const [simulationResultat, setSimulationResultat] = useState<FlowSimulationResponse | null>(null);
+  const [iaPrompt, setIaPrompt] = useState("");
+  const [iaResponse, setIaResponse] = useState("");
+  const [iaLoading, setIaLoading] = useState(false);
+  const [dbImportText, setDbImportText] = useState("");
+  const [dbLoading, setDbLoading] = useState(false);
+  const [dbResultat, setDbResultat] = useState<string | null>(null);
+  const [wsConnecte, setWsConnecte] = useState(false);
+  const [wsEvents1h, setWsEvents1h] = useState<number | null>(null);
 
   const {
     data: sante,
@@ -171,6 +182,31 @@ export default function PageAdminServices() {
       setConfigText(JSON.stringify(runtimeConfig.values, null, 2));
     }
   }, [runtimeConfig?.values]);
+
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+    if (!token) return;
+
+    const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    const wsUrl = `${base.replace("http", "ws")}/api/v1/ws/admin/metrics?token=${encodeURIComponent(token)}`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => setWsConnecte(true);
+    ws.onclose = () => setWsConnecte(false);
+    ws.onerror = () => setWsConnecte(false);
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data) as { security?: { events_1h?: number } };
+        if (typeof data.security?.events_1h === "number") {
+          setWsEvents1h(data.security.events_1h);
+        }
+      } catch {
+        // ignore payload non JSON
+      }
+    };
+
+    return () => ws.close();
+  }, []);
 
   const actualiserTout = () => {
     actualiserSante();
@@ -336,6 +372,59 @@ export default function PageAdminServices() {
     }
   };
 
+  const executerConsoleIA = async () => {
+    if (!iaPrompt.trim()) {
+      setIaResponse("Le prompt est vide.");
+      return;
+    }
+    setIaLoading(true);
+    try {
+      const data = await testerConsoleIA({ prompt: iaPrompt, utiliser_cache: false });
+      setIaResponse(data.response ?? "(réponse vide)");
+    } catch {
+      setIaResponse("Erreur lors de l'appel IA.");
+    } finally {
+      setIaLoading(false);
+    }
+  };
+
+  const exporterBackupDb = async () => {
+    setDbLoading(true);
+    setDbResultat(null);
+    try {
+      const data = await exporterDbJson();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `db-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setDbResultat(`OK: export ${data.total_tables} table(s).`);
+    } catch {
+      setDbResultat("Erreur export DB.");
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  const importerBackupDb = async () => {
+    setDbLoading(true);
+    setDbResultat(null);
+    try {
+      const parsed = JSON.parse(dbImportText) as { tables: Record<string, Array<Record<string, unknown>>> };
+      if (!parsed.tables || typeof parsed.tables !== "object") {
+        throw new Error("invalid");
+      }
+      const data = await importerDbJson(parsed.tables, false);
+      setDbResultat(`OK: import ${data.imported_tables} table(s).`);
+    } catch {
+      setDbResultat("JSON invalide ou import impossible (dev/test uniquement).");
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
   const badgeStatut = (statut: string) => {
     if (statut === "healthy" || statut === "ok") {
       return <Badge variant="default"><CheckCircle2 className="mr-1 h-3 w-3" />Sain</Badge>;
@@ -385,13 +474,15 @@ export default function PageAdminServices() {
       )}
 
       <Tabs value={tab} onValueChange={setTab} defaultValue="services">
-        <TabsList className="grid w-full grid-cols-7 max-w-6xl">
+        <TabsList className="grid w-full grid-cols-9 max-w-6xl">
           <TabsTrigger value="services">Services</TabsTrigger>
           <TabsTrigger value="cache">Cache</TabsTrigger>
           <TabsTrigger value="actions">Actions</TabsTrigger>
           <TabsTrigger value="flags">Flags</TabsTrigger>
           <TabsTrigger value="config">Config</TabsTrigger>
           <TabsTrigger value="resync">Re-sync</TabsTrigger>
+          <TabsTrigger value="ia">Console IA</TabsTrigger>
+          <TabsTrigger value="backup">Backup DB</TabsTrigger>
           <TabsTrigger value="simulateur">Simulateur</TabsTrigger>
         </TabsList>
 
@@ -412,7 +503,10 @@ export default function PageAdminServices() {
               </Card>
               <Card>
                 <CardHeader className="pb-2"><CardTitle className="text-sm">Sécurité 1h</CardTitle></CardHeader>
-                <CardContent><span className="text-2xl font-bold">{liveSnapshot.security.events_1h}</span></CardContent>
+                <CardContent>
+                  <span className="text-2xl font-bold">{wsEvents1h ?? liveSnapshot.security.events_1h}</span>
+                  <p className="text-xs text-muted-foreground mt-1">{wsConnecte ? "Live WS" : "Polling"}</p>
+                </CardContent>
               </Card>
             </div>
           )}
@@ -725,6 +819,57 @@ export default function PageAdminServices() {
                 </Button>
               </div>
               {seedResultat && <p className="text-sm text-muted-foreground">{seedResultat}</p>}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ia" className="mt-4 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Zap className="h-4 w-4" />Console IA admin</CardTitle>
+              <CardDescription>Tester un prompt et afficher la réponse brute.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Textarea
+                rows={6}
+                value={iaPrompt}
+                onChange={(e) => setIaPrompt(e.target.value)}
+                placeholder="Écrire un prompt de test..."
+              />
+              <Button onClick={executerConsoleIA} disabled={iaLoading}>
+                {iaLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+                Exécuter le prompt
+              </Button>
+              <Textarea rows={10} value={iaResponse} readOnly className="font-mono text-xs" />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="backup" className="mt-4 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Download className="h-4 w-4" />Export / Import DB JSON</CardTitle>
+              <CardDescription>Backup complet JSON et restauration (dev/test).</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={exporterBackupDb} disabled={dbLoading}>
+                  {dbLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                  Exporter DB JSON
+                </Button>
+              </div>
+              <Textarea
+                rows={10}
+                value={dbImportText}
+                onChange={(e) => setDbImportText(e.target.value)}
+                className="font-mono text-xs"
+                placeholder='Coller un backup JSON (format: {"tables": {...}})'
+              />
+              <Button onClick={importerBackupDb} disabled={dbLoading}>
+                {dbLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                Importer DB JSON
+              </Button>
+              {dbResultat && <p className="text-sm text-muted-foreground">{dbResultat}</p>}
             </CardContent>
           </Card>
         </TabsContent>

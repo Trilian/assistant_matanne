@@ -362,6 +362,139 @@ CREATE POLICY depenses_user_policy ON depenses
 > **Note**: Le module multi-tenant (`multi_tenant.py`) a été supprimé car inutilisé en production.
 > L'isolation des données se fait via les politiques RLS de Supabase (voir ci-dessus).
 
+### Authentification WebSocket
+
+Les connexions WebSocket utilisent des mécanismes d'authentification adaptés :
+
+| Endpoint | Mécanisme | Fichier |
+|----------|-----------|---------|
+| `/ws/courses` | Token query param | `src/api/websocket_courses.py` |
+
+---
+
+## Diagramme d'architecture — Vue globale
+
+```mermaid
+graph TB
+    subgraph Clients
+        Browser["Navigateur / Chrome Android"]
+        Mobile["Tablette (PWA standalone)"]
+    end
+
+    subgraph Vercel["Vercel — Next.js 16"]
+        NextApp["App Router (42 pages)"]
+        MW["middleware.ts (auth protection)"]
+        SW["Service Worker (PWA / offline)"]
+    end
+
+    subgraph Railway["Railway — FastAPI"]
+        API["FastAPI (src/api/main.py)"]
+        Auth["JWT Auth (dependencies.py)"]
+        Routes["20 Routeurs REST (/api/v1/...)"]
+        WS["WebSocket /ws/courses"]
+        RL["Rate Limiter (60/min, 10/min IA)"]
+    end
+
+    subgraph CoreBackend["src/core/ — Noyau partagé"]
+        Models["ORM Models (22 fichiers)"]
+        DB["DB Engine (QueuePool)"]
+        Cache["Cache multi-niveaux L1/L3"]
+        AI["Client IA (Mistral + CircuitBreaker)"]
+        Config["Config (Pydantic BaseSettings)"]
+    end
+
+    subgraph Services["src/services/ — Logique métier"]
+        BaseAI["BaseAIService"]
+        Cuisine["cuisine/"]
+        Famille["famille/"]
+        Maison["maison/"]
+        Jeux["jeux/"]
+        Planning["planning/"]
+    end
+
+    subgraph External["Services externes"]
+        Supabase[("Supabase PostgreSQL")]
+        MistralAI["Mistral AI API"]
+        Sentry["Sentry (erreurs)"]
+        Push["VAPID Push API"]
+    end
+
+    Browser --> Vercel
+    Mobile --> Vercel
+    Vercel <-->|"REST / HTTPS"| Railway
+    Browser <-->|"WebSocket"| WS
+    API --> Auth
+    API --> Routes
+    API --> RL
+    Routes --> Services
+    Services --> CoreBackend
+    DB -->|"psycopg2 / psycopg3"| Supabase
+    AI -->|"API HTTPS"| MistralAI
+    API -->|"SDK"| Sentry
+    API -->|"VAPID"| Push
+```
+
+---
+
+## Diagramme de flux — Requête API typique
+
+```mermaid
+sequenceDiagram
+    participant FE as Frontend (Next.js)
+    participant MW as Middleware CORS/RL
+    participant Auth as dependencies.py
+    participant Route as Router (route)
+    participant SVC as Service
+    participant DB as SQLAlchemy Session
+    participant PG as Supabase PostgreSQL
+
+    FE->>MW: GET /api/v1/recettes (Bearer token)
+    MW->>Auth: require_auth()
+    Auth-->>MW: user dict
+    MW->>Route: lister_recettes(user)
+    Route->>SVC: executer_async(_query)
+    SVC->>DB: executer_avec_session()
+    DB->>PG: SELECT * FROM recettes WHERE user_id = ?
+    PG-->>DB: rows
+    DB-->>SVC: List[Recette]
+    SVC-->>Route: ReponsePaginee
+    Route-->>FE: 200 OK (JSON)
+```
+
+---
+
+## Décisions d'architecture notables
+
+| Décision | Raison |
+|----------|--------|
+| SQL-file migrations (post-Alembic) | Contrôle total sur le SQL, compatible Supabase RLS |
+| Cache L1/L3 (pas Redis) | Pas de service Redis à gérer — suffisant pour l'usage actuel |
+| BaseAIService | Rate limiting + cache sémantique + circuit breaker centralisés |
+| `@service_factory` singletons | Évite les instanciations multiples dans FastAPI |
+| RLS Supabase | Isolation des données par user_id sans JOIN cross-tenant |
+| App Router Next.js 16 | SSR partiel, Turbopack, layouts imbriqués, route groups |
+| TanStack Query v5 | Cache client déclaratif, invalidation fine, optimistic updates |
+| `/api/v1/ws/courses/{id}` | Query params `user_id` + `username` | `src/api/websocket_courses.py` |
+| `/api/v1/ws/planning/{id}` | Query params `user_id` + `username` | `src/api/websocket/planning.py` |
+| `/api/v1/ws/notes/{id}` | Query params `user_id` + `username` | `src/api/websocket/notes.py` |
+| `/api/v1/ws/projets/{id}` | Query params `user_id` + `username` | `src/api/websocket/projets.py` |
+| `/api/v1/ws/admin/logs` | JWT token via query param `token`, validé par `decoder_token()` | `src/api/websocket/admin_logs.py` |
+
+**Côté client (hooks React) :**
+- `utiliser-websocket-courses.ts` : Reconnexion auto (max 5 tentatives), heartbeat ping/pong, cleanup on unmount
+- `utiliser-websocket.ts` : Hook générique avec heartbeat, reconnexion, gestion des utilisateurs connectés
+
+**Exemple de connexion :**
+```javascript
+// Courses (query params)
+const ws = new WebSocket("ws://localhost:8000/api/v1/ws/courses/5?user_id=abc&username=Anne");
+
+// Admin logs (JWT token)
+const ws = new WebSocket("ws://localhost:8000/api/v1/ws/admin/logs?token=<jwt_token>");
+```
+
+> **Note** : Les endpoints WebSocket collaboratifs (courses, planning, notes, projets) n'exigent pas de JWT — l'identification se fait par `user_id` en query param. Le endpoint admin exige un JWT valide avec rôle admin.
+
 ## Cache
 
 ### Architecture multi-niveaux (src/core/caching/)

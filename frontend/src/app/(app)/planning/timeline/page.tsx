@@ -4,29 +4,14 @@
 
 "use client";
 
-import { CalendarDays, Utensils, ArrowLeft } from "lucide-react";
+import { CalendarDays, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-} from "@/composants/ui/card";
-import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
+import { EtatVidePlanning } from "@/composants/planning/etat-vide-planning";
+import { TimelineSemaine } from "@/composants/planning/timeline-semaine";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirPlanningSemaine } from "@/bibliotheque/api/planning";
-import type { TypeRepas } from "@/types/planning";
-
-const LABELS_REPAS: Record<TypeRepas, string> = {
-  petit_dejeuner: "🌅 Petit-déjeuner",
-  dejeuner: "☀️ Déjeuner",
-  gouter: "🍰 Goûter",
-  diner: "🌙 Dîner",
-};
-
-const JOURS_SEMAINE = [
-  "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi",
-];
 
 export default function PageTimeline() {
   const { data: planning, isLoading } = utiliserRequete(
@@ -34,21 +19,7 @@ export default function PageTimeline() {
     () => obtenirPlanningSemaine()
   );
 
-  // Trier les repas par date puis par type
-  const repasOrdre: TypeRepas[] = ["petit_dejeuner", "dejeuner", "gouter", "diner"];
-  const repasTries = [...(planning?.repas ?? [])].sort((a, b) => {
-    const dateCompare = (a.date ?? "").localeCompare(b.date ?? "");
-    if (dateCompare !== 0) return dateCompare;
-    return repasOrdre.indexOf(a.type_repas) - repasOrdre.indexOf(b.type_repas);
-  });
-
-  // Grouper par date
-  const parDate: Record<string, typeof repasTries> = {};
-  for (const repas of repasTries) {
-    const key = (repas.date ?? "").split("T")[0];
-    if (!parDate[key]) parDate[key] = [];
-    parDate[key].push(repas);
-  }
+  const repas = planning?.repas ?? [];
 
   return (
     <div className="space-y-6">
@@ -73,84 +44,13 @@ export default function PageTimeline() {
             <Skeleton key={i} className="h-32" />
           ))}
         </div>
-      ) : Object.keys(parDate).length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            <CalendarDays className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            Aucun repas planifié cette semaine
-          </CardContent>
-        </Card>
+      ) : repas.length === 0 ? (
+        <EtatVidePlanning
+          icon={<CalendarDays className="h-8 w-8" />}
+          message="Aucun repas planifié cette semaine"
+        />
       ) : (
-        <div className="relative space-y-6">
-          {/* Ligne de timeline */}
-          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
-
-          {Object.entries(parDate).map(([dateStr, repas]) => {
-            const d = new Date(dateStr);
-            const jourNom = JOURS_SEMAINE[d.getDay()];
-            const estAujourdhui =
-              dateStr === new Date().toISOString().split("T")[0];
-
-            return (
-              <div key={dateStr} className="relative pl-10">
-                {/* Point timeline */}
-                <div
-                  className={`absolute left-2.5 top-1 h-3 w-3 rounded-full border-2 ${
-                    estAujourdhui
-                      ? "bg-primary border-primary"
-                      : "bg-background border-muted-foreground"
-                  }`}
-                />
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <h2
-                      className={`text-sm font-semibold ${
-                        estAujourdhui ? "text-primary" : ""
-                      }`}
-                    >
-                      {jourNom}
-                    </h2>
-                    <span className="text-xs text-muted-foreground">
-                      {d.toLocaleDateString("fr-FR", {
-                        day: "numeric",
-                        month: "long",
-                      })}
-                    </span>
-                    {estAujourdhui && (
-                      <Badge variant="default" className="text-xs">
-                        Aujourd&apos;hui
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    {repas.map((r) => (
-                      <Card key={r.id} className="ml-2">
-                        <CardContent className="flex items-center gap-3 py-3">
-                          <Utensils className="h-4 w-4 text-muted-foreground shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-muted-foreground">
-                              {LABELS_REPAS[r.type_repas] ?? r.type_repas}
-                            </p>
-                            <p className="text-sm font-medium truncate">
-                              {r.recette_nom || r.notes || "—"}
-                            </p>
-                          </div>
-                          {r.portions && (
-                            <Badge variant="secondary" className="text-xs shrink-0">
-                              {r.portions} pers.
-                            </Badge>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <TimelineSemaine repas={repas} />
       )}
     </div>
   );

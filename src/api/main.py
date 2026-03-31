@@ -293,7 +293,7 @@ Les endpoints sont protégés par une limitation de débit:
 )
 
 # CORS sécurisé
-# En production, définir CORS_ORIGINS avec l'URL Vercel (ex: https://assistant-matanne.vercel.app)
+# En production, CORS_ORIGINS DOIT être défini (ex: https://assistant-matanne.vercel.app)
 _cors_origins = [
     o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()
 ]
@@ -303,7 +303,19 @@ _default_origins = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
 ]
-_allowed_origins = _cors_origins if _cors_origins else _default_origins
+_environment = os.getenv("ENVIRONMENT", "development").lower()
+
+if _cors_origins:
+    _allowed_origins = _cors_origins
+elif _environment in ("production", "staging"):
+    logger.warning(
+        "⚠️ CORS_ORIGINS non défini en %s — CORS restreint à aucune origine. "
+        "Définir CORS_ORIGINS avec l'URL du frontend.",
+        _environment,
+    )
+    _allowed_origins = []
+else:
+    _allowed_origins = _default_origins
 
 app.add_middleware(
     CORSMiddleware,

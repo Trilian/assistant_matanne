@@ -335,6 +335,97 @@ Les patterns suivants ont été évalués et supprimés du codebase (dead code, 
 ---
 
 ## Voir aussi
+## Séparation des schémas Pydantic (H.8)
+
+Le projet dispose de **deux emplacements** pour les schémas Pydantic — chacun avec un rôle précis :
+
+### `src/api/schemas/` — Schémas de sérialisation API
+
+**Rôle** : Valider et sérialiser les données à l'entrée/sortie de la couche HTTP.
+
+```
+src/api/schemas/
+├── base.py          → BaseModel avec Config (alias_generator, populate_by_name)
+├── common.py        → ErrorResponse, ReponsePaginee[T], MessageResponse
+├── errors.py        → Constantes responses (REPONSES_CRUD_CREATION, etc.)
+├── recettes.py      → RecetteCreate, RecetteUpdate, RecetteResponse
+├── jeux.py          → AnalyseIARequest, GenererGrilleRequest, etc.
+└── ...
+```
+
+**Règle** : Un schéma `*Response` ne doit pas contenir de logique métier. Il expose exactement
+ce que la route renvoie. Utiliser `model_validate(orm_obj)` (Pydantic v2) pour convertir depuis ORM.
+
+### `src/core/validation/schemas/` — Schémas de validation métier
+
+**Rôle** : Valider les données de structure métier *indépendamment de la couche HTTP*.  
+Utiles dans les services, les imports de données, les scripts de seed.
+
+```
+src/core/validation/schemas/
+├── _helpers.py     → Validators partagés (valider_date_future, etc.)
+├── recettes.py     → Validation stricte des recettes (règles métier)
+├── inventaire.py   → Validation inventaire
+├── courses.py      → Validation courses
+├── planning.py     → Validation planning
+├── famille.py      → Validation profils famille
+├── projets.py      → Validation projets maison
+└── profils.py      → Validation profils utilisateurs
+```
+
+**Règle** : Les schémas ici ne dépendent PAS de FastAPI. Ils peuvent être instanciés
+depuis n'importe où (service, test, script). Utiliser `from src.core.validation.schemas.xxx import XxxSchema`.
+
+### Guide de décision — Où mettre un nouveau schéma ?
+
+```
+Nouvelle validation de données ?
+│
+├── Elle est utilisée UNIQUEMENT dans une route FastAPI (request body/response)
+│   → src/api/schemas/{domain}.py
+│
+├── Elle valide la logique métier independamment du transport HTTP
+│   → src/core/validation/schemas/{domain}.py
+│
+└── Elle est utilisée dans LES DEUX contextes
+    → Définir le schéma dans src/core/validation/schemas/{domain}.py
+    → Importer/hériter dans src/api/schemas/{domain}.py
+    → Éviter la duplication
+```
+
+### Pattern — Relation schémas API ↔ validation métier
+
+```python
+# src/core/validation/schemas/recettes.py  (règles métier réutilisables)
+from pydantic import BaseModel, Field, field_validator
+
+class RecetteBase(BaseModel):
+    nom: str = Field(..., min_length=2, max_length=200)
+    temps_preparation: int = Field(..., ge=1, le=480)
+
+    @field_validator("nom")
+    @classmethod
+    def valider_nom(cls, v: str) -> str:
+        return v.strip()
+
+# src/api/schemas/recettes.py  (schémas HTTP — hérite de la validation métier)
+from src.core.validation.schemas.recettes import RecetteBase
+
+class RecetteCreate(RecetteBase):
+    """Body pour POST /api/v1/recettes"""
+    ingredients: list[int] = []
+
+class RecetteResponse(RecetteBase):
+    """Réponse de GET /api/v1/recettes/{id}"""
+    id: int
+    cree_le: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+```
+
+---
+
+## Voir aussi
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — Vue d'ensemble
 - [API_REFERENCE.md](API_REFERENCE.md) — Référence API

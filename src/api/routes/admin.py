@@ -29,30 +29,58 @@ import csv
 import io
 import json
 import logging
+import os
+import re
 import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy import text
 
-from src.api.dependencies import require_role
+from src.api.dependencies import require_auth, require_role
 from src.api.schemas.errors import REPONSES_AUTH_ADMIN
 from src.api.utils import gerer_exception_api
 
 logger = logging.getLogger(__name__)
 
+# ── Rate limiting global admin (10 req/min par admin) ────────────────────────
+_ADMIN_RATE_LIMIT = 10  # requêtes par minute
+_admin_timestamps: dict[str, collections.deque[float]] = {}
+
+
+async def _verifier_limite_admin(user: dict[str, Any] = Depends(require_role("admin"))) -> dict[str, Any]:
+    """Dépendance de rate limiting pour tous les endpoints admin (10 req/min)."""
+    if os.getenv("ENVIRONMENT", "").lower() in {"test", "testing"} or os.getenv("PYTEST_CURRENT_TEST"):
+        return user
+
+    user_id = user.get("id", "unknown")
+    now = time.time()
+    window = 60.0
+    q = _admin_timestamps.setdefault(user_id, collections.deque())
+    while q and q[0] < now - window:
+        q.popleft()
+    if len(q) >= _ADMIN_RATE_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Trop de requêtes admin. Maximum {_ADMIN_RATE_LIMIT} par minute.",
+        )
+    q.append(now)
+    return user
+
+
 router = APIRouter(
     prefix="/api/v1/admin",
     tags=["Admin"],
+    dependencies=[Depends(_verifier_limite_admin)],
 )
 
 # ── Rate limiting jobs triggers (5 req/min par admin) ────────────────────────
 _JOB_TRIGGER_RATE_LIMIT = 5  # requêtes par minute
-_job_trigger_timestamps: dict[str, collections.deque] = {}
+_job_trigger_timestamps: dict[str, collections.deque[float]] = {}
 
 
 def _verifier_limite_jobs(user_id: str) -> None:
@@ -71,7 +99,7 @@ def _verifier_limite_jobs(user_id: str) -> None:
 
 
 # ── Logs in-memory pour dernière exécution des jobs ──────────────────────────
-_job_logs: dict[str, list[dict]] = {}  # job_id → list of {timestamp, status, message}
+_job_logs: dict[str, list[dict[str, Any]]] = {}  # job_id → list of {timestamp, status, message}
 _MAX_LOGS_PAR_JOB = 20
 
 
@@ -373,6 +401,23 @@ class FlowSimulationRequest(BaseModel):
     payload: dict[str, Any] = {}
 
 
+class MaintenanceModeRequest(BaseModel):
+    enabled: bool
+
+
+class AdminAIConsoleRequest(BaseModel):
+    prompt: str
+    prompt_systeme: str = "Tu es un assistant admin pour une application de gestion familiale."
+    temperature: float = 0.4
+    max_tokens: int = 800
+    utiliser_cache: bool = False
+
+
+class DbImportRequest(BaseModel):
+    tables: dict[str, list[dict[str, Any]]]
+    merge: bool = False
+
+
 # ═══════════════════════════════════════════════════════════
 # JOBS
 # ═══════════════════════════════════════════════════════════
@@ -434,6 +479,7 @@ _FEATURE_FLAGS_PAR_DEFAUT: dict[str, bool] = {
     "admin.resync_enabled": True,
     "admin.seed_dev_enabled": True,
     "admin.mode_test": False,
+    "admin.maintenance_mode": False,
     "jeux.bankroll_page_enabled": True,
     "outils.notes_tags_ui_enabled": True,
 }
@@ -659,6 +705,22 @@ def _resumer_api_metrics() -> dict[str, Any]:
         "rate_limiting": metrics.get("rate_limiting", {}),
         "ai": metrics.get("ai", {}),
     }
+
+
+def _serialiser_valeur_export_db(value: Any) -> Any:
+    """Sérialise une valeur SQLAlchemy vers un format JSON-safe."""
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, (bytes, bytearray)):
+        return value.decode("utf-8", errors="ignore")
+    return value
+
+
+def _normaliser_nom_table(table_name: str) -> str:
+    """Vérifie qu'un nom de table est sûr avant interpolation SQL."""
+    if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", table_name):
+        raise HTTPException(status_code=422, detail=f"Nom de table invalide: {table_name}")
+    return table_name
 
 
 def _exporter_config_admin() -> dict[str, Any]:
@@ -1052,6 +1114,141 @@ async def envoyer_notification_test_all(
     return result
 
 
+@router.get(
+    "/notifications/queue",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Lister la file digest notifications",
+    description="Expose les éléments en attente de digest notifications par utilisateur.",
+)
+@gerer_exception_api
+async def lister_queue_notifications(
+    user_id: str | None = Query(None, description="Filtrer par utilisateur"),
+    limit: int = Query(20, ge=1, le=100),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Liste la file d'attente des digest notifications."""
+    from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+    dispatcher = get_dispatcher_notifications()
+    pending_users = dispatcher.lister_users_digest_pending()
+    if user_id:
+        pending_users = [uid for uid in pending_users if uid == user_id]
+
+    items: list[dict[str, Any]] = []
+    for uid in pending_users[:limit]:
+        queue = dispatcher._digest_queue.get(uid, [])  # noqa: SLF001 - endpoint admin interne
+        latest = queue[-1] if queue else {}
+        items.append(
+            {
+                "user_id": uid,
+                "taille_queue": len(queue),
+                "dernier_message": latest.get("message"),
+                "dernier_evenement": latest.get("type_evenement"),
+                "last_updated": latest.get("created_at"),
+            }
+        )
+
+    return {
+        "items": items,
+        "total": len(items),
+        "total_users_pending": len(pending_users),
+    }
+
+
+@router.post(
+    "/notifications/queue/{user_id}/retry",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Relancer une queue digest",
+    description="Force l'envoi du digest d'un utilisateur et vide la file si succès.",
+)
+@gerer_exception_api
+async def relancer_queue_notifications(
+    user_id: str,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Relance un digest en attente pour un utilisateur."""
+    from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+    dispatcher = get_dispatcher_notifications()
+    resultats = dispatcher.vider_digest(user_id)
+    _journaliser_action_admin(
+        action="admin.notifications.queue.retry",
+        entite_type="notification",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"target_user_id": user_id, "resultats": resultats},
+    )
+    return {"status": "ok", "user_id": user_id, "resultats": resultats}
+
+
+@router.delete(
+    "/notifications/queue/{user_id}",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Supprimer la queue digest d'un utilisateur",
+    description="Vide les notifications digest en attente pour un utilisateur.",
+)
+@gerer_exception_api
+async def supprimer_queue_notifications(
+    user_id: str,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Supprime une file digest utilisateur sans envoi."""
+    from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+    dispatcher = get_dispatcher_notifications()
+    count = len(dispatcher._digest_queue.get(user_id, []))  # noqa: SLF001 - endpoint admin interne
+    dispatcher._digest_queue[user_id] = []  # noqa: SLF001 - endpoint admin interne
+    _journaliser_action_admin(
+        action="admin.notifications.queue.delete",
+        entite_type="notification",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"target_user_id": user_id, "deleted": count},
+    )
+    return {"status": "ok", "user_id": user_id, "deleted": count}
+
+
+@router.post(
+    "/ai/console",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Console IA admin",
+    description="Exécute un prompt IA admin et retourne la réponse brute.",
+)
+@gerer_exception_api
+async def console_ia_admin(
+    body: AdminAIConsoleRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Endpoint de test prompt/réponse brute pour l'admin."""
+    from src.core.ai import obtenir_client_ia
+
+    prompt = body.prompt.strip()
+    if len(prompt) < 3:
+        raise HTTPException(status_code=422, detail="Le prompt doit contenir au moins 3 caractères.")
+
+    start = time.perf_counter()
+    client = obtenir_client_ia()
+    reponse = await client.appeler(
+        prompt=prompt,
+        prompt_systeme=body.prompt_systeme,
+        temperature=body.temperature,
+        max_tokens=body.max_tokens,
+        utiliser_cache=body.utiliser_cache,
+    )
+    duration_ms = round((time.perf_counter() - start) * 1000, 2)
+
+    _journaliser_action_admin(
+        action="admin.ai.console",
+        entite_type="ai",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"duration_ms": duration_ms},
+    )
+    return {
+        "status": "ok",
+        "duration_ms": duration_ms,
+        "model": getattr(client, "modele", "unknown"),
+        "response": reponse,
+    }
+
+
 # ═══════════════════════════════════════════════════════════
 # CACHE
 # ═══════════════════════════════════════════════════════════
@@ -1333,6 +1530,117 @@ async def coherence_db(
     return await executer_async(_check)
 
 
+@router.get(
+    "/db/export",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Exporter la base en JSON",
+    description="Exporte un snapshot JSON des tables publiques (dev/test recommandé).",
+)
+@gerer_exception_api
+async def exporter_db_json(
+    format: str = Query("json", pattern="^json$"),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Exporte les données des tables publiques en JSON."""
+    from src.api.utils import executer_avec_session
+
+    with executer_avec_session() as session:
+        rows = session.execute(
+            text(
+                """
+                SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+                ORDER BY table_name
+                """
+            )
+        ).mappings().all()
+
+        tables = [str(row["table_name"]) for row in rows if row.get("table_name")]
+        data: dict[str, list[dict[str, Any]]] = {}
+
+        for table_name in tables:
+            safe_table = _normaliser_nom_table(table_name)
+            records = session.execute(
+                text(f'SELECT * FROM "{safe_table}"')
+            ).mappings().all()
+            data[safe_table] = [
+                {k: _serialiser_valeur_export_db(v) for k, v in dict(record).items()}
+                for record in records
+            ]
+
+    _journaliser_action_admin(
+        action="admin.db.export",
+        entite_type="database",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"tables": len(data)},
+    )
+    return {
+        "format": format,
+        "exported_at": datetime.now().isoformat(),
+        "tables": data,
+        "total_tables": len(data),
+    }
+
+
+@router.post(
+    "/db/import",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Importer un snapshot JSON en base",
+    description="Restaure des données depuis un payload JSON table->records (mode merge ou replace).",
+)
+@gerer_exception_api
+async def importer_db_json(
+    body: DbImportRequest = Body(...),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Importe des données JSON en base, table par table."""
+    from src.api.utils import executer_avec_session
+    from src.core.config import obtenir_parametres
+
+    env = obtenir_parametres().ENV.lower()
+    if env not in {"development", "dev", "test"}:
+        raise HTTPException(status_code=403, detail="Import DB autorisé uniquement en dev/test.")
+
+    resultats: dict[str, Any] = {}
+    with executer_avec_session() as session:
+        for table_name, records in body.tables.items():
+            safe_table = _normaliser_nom_table(table_name)
+            if not isinstance(records, list):
+                raise HTTPException(status_code=422, detail=f"Format invalide pour la table {safe_table}.")
+
+            if not body.merge:
+                session.execute(text(f'TRUNCATE TABLE "{safe_table}" RESTART IDENTITY CASCADE'))
+
+            imported = 0
+            for record in records:
+                if not isinstance(record, dict) or not record:
+                    continue
+                colonnes = [k for k in record.keys() if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", str(k))]
+                if not colonnes:
+                    continue
+                placeholders = ", ".join(f":{c}" for c in colonnes)
+                cols_sql = ", ".join(f'"{c}"' for c in colonnes)
+                stmt = text(f'INSERT INTO "{safe_table}" ({cols_sql}) VALUES ({placeholders})')
+                session.execute(stmt, {c: record.get(c) for c in colonnes})
+                imported += 1
+
+            resultats[safe_table] = {"imported": imported, "merge": body.merge}
+        session.commit()
+
+    _journaliser_action_admin(
+        action="admin.db.import",
+        entite_type="database",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"tables": list(resultats.keys()), "merge": body.merge},
+    )
+    return {
+        "status": "ok",
+        "imported_tables": len(resultats),
+        "resultats": resultats,
+    }
+
+
 # ═══════════════════════════════════════════════════════════
 # DASHBOARD ADMIN CONSOLIDÉ
 # ═══════════════════════════════════════════════════════════
@@ -1535,6 +1843,57 @@ async def basculer_mode_test(
         details={"mode_test": actif},
     )
     return {"status": "ok", "mode_test": actif}
+
+
+@router.get(
+    "/maintenance",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Lire le mode maintenance",
+    description="Retourne l'état du mode maintenance (feature flag runtime).",
+)
+@gerer_exception_api
+async def lire_mode_maintenance(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
+    return {"maintenance_mode": bool(flags.get("admin.maintenance_mode", False))}
+
+
+@router.put(
+    "/maintenance",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Basculer le mode maintenance",
+    description="Active ou désactive le mode maintenance global.",
+)
+@gerer_exception_api
+async def basculer_mode_maintenance(
+    body: MaintenanceModeRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    flags = _ecrire_namespace_persistant(
+        _NAMESPACE_FEATURE_FLAGS,
+        {"admin.maintenance_mode": body.enabled},
+    )
+    _journaliser_action_admin(
+        action="admin.maintenance.toggle",
+        entite_type="feature_flag",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"maintenance_mode": body.enabled},
+    )
+    return {"status": "ok", "maintenance_mode": bool(flags.get("admin.maintenance_mode", False))}
+
+
+@router.get(
+    "/public/maintenance",
+    summary="État public du mode maintenance",
+    description="Endpoint lecture seule pour afficher un bandeau maintenance côté UI.",
+)
+@gerer_exception_api
+async def lire_mode_maintenance_public(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
+    return {"maintenance_mode": bool(flags.get("admin.maintenance_mode", False))}
 
 
 @router.get(
@@ -1936,6 +2295,12 @@ async def reset_module(
 
     Nécessite `confirmer: true` pour exécuter.
     """
+    from src.core.config import obtenir_parametres
+
+    env = obtenir_parametres().ENV.lower()
+    if env not in {"development", "dev", "test"}:
+        raise HTTPException(status_code=403, detail="Reset module autorisé uniquement en dev/test.")
+
     if body.module not in _MODULES_RESETABLES:
         raise HTTPException(
             status_code=400,
