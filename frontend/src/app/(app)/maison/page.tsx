@@ -54,7 +54,7 @@ import { CarteNotificationsModule } from "@/composants/disposition/carte-notific
 import { utiliserSyntheseVocale } from "@/crochets/utiliser-synthese-vocale";
 
 // Sections consolidées — 9 modules
-const SECTIONS = [
+const SECTIONS: Array<{ id: string; titre: string; description: string; chemin: string; Icone: typeof Hammer; statKey: StatsKeys | null }> = [
   { id: "visualisation", titre: "Visualisation", description: "Plan 2D/3D de la maison", chemin: "/maison/visualisation", Icone: Layers, statKey: null },
   { id: "menage", titre: "Ménage", description: "Planning et guides ménage", chemin: "/maison/menage", Icone: SprayCan, statKey: null },
   { id: "jardin", titre: "Jardin", description: "Plantes, semis et éco-gestes", chemin: "/maison/jardin", Icone: Sprout, statKey: null },
@@ -458,9 +458,9 @@ export default function PageMaison() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-base">{titre}</CardTitle>
-                      {stats && statKey && (stats as unknown as Record<string, number>)[statKey] > 0 && (
+                      {stats && statKey && stats[statKey] > 0 && (
                         <Badge variant={statKey.includes("retard") || statKey.includes("alerte") || statKey.includes("renouveler") ? "destructive" : "secondary"} className="text-xs">
-                          {formatStat(statKey, (stats as unknown as Record<string, number>)[statKey])} {labelStat(statKey)}
+                          {formatStat(statKey, stats[statKey])} {labelStat(statKey)}
                         </Badge>
                       )}
                     </div>

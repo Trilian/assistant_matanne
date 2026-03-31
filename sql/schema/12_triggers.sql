@@ -43,4 +43,46 @@ EXECUTE format(
 );
 END LOOP;
 END $$;
+
+-- ============================================================================
+-- Trigger : mise à jour listes_courses.modifie_le via articles_courses
+-- (V005 absorbé)
+-- ============================================================================
+CREATE OR REPLACE FUNCTION update_liste_courses_modifie_le()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE listes_courses
+    SET modifie_le = NOW()
+    WHERE id = COALESCE(NEW.liste_id, OLD.liste_id);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_articles_courses_update_liste ON articles_courses;
+CREATE TRIGGER trg_articles_courses_update_liste
+    AFTER INSERT OR UPDATE OR DELETE ON articles_courses
+    FOR EACH ROW EXECUTE FUNCTION update_liste_courses_modifie_le();
+
+-- ============================================================================
+-- Trigger : invalidation cache planning via repas_planning
+-- (V005 absorbé)
+-- ============================================================================
+CREATE OR REPLACE FUNCTION notify_planning_changed()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_user_id TEXT;
+BEGIN
+    SELECT p.cree_par INTO v_user_id
+    FROM plannings p
+    WHERE p.id = COALESCE(NEW.planning_id, OLD.planning_id)
+    LIMIT 1;
+    PERFORM pg_notify('planning_changed', COALESCE(v_user_id, ''));
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_repas_planning_notify ON repas_planning;
+CREATE TRIGGER trg_repas_planning_notify
+    AFTER INSERT OR UPDATE OR DELETE ON repas_planning
+    FOR EACH ROW EXECUTE FUNCTION notify_planning_changed();
 -- ============================================================================

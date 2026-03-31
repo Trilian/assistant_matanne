@@ -1,0 +1,1038 @@
+# Planning d'Implémentation — Assistant Matanne
+
+> **Date** : 31 mars 2026
+> **Basé sur** : ANALYSE_COMPLETE.md — Audit intégral backend + frontend + DB + tests + docs + opportunités
+> **Objectif** : Roadmap complète de toutes les actions à mener, priorisées par phase
+
+---
+
+## Table des matières
+
+1. [Notation par catégorie](#1-notation-par-catégorie)
+2. [État des lieux synthétique](#2-état-des-lieux-synthétique)
+3. [Phase 1 — Fondations : bugs critiques & dette technique](#3-phase-1--fondations--bugs-critiques--dette-technique)
+4. [Phase 2 — Tests : couverture critique](#4-phase-2--tests--couverture-critique)
+5. [Phase 3 — SQL : consolidation & tables manquantes](#5-phase-3--sql--consolidation--tables-manquantes)
+6. [Phase 4 — Features manquantes : stubs → implémentation](#6-phase-4--features-manquantes--stubs--implémentation)
+7. [Phase 5 — Interactions inter-modules : nouveaux bridges](#7-phase-5--interactions-inter-modules--nouveaux-bridges)
+8. [Phase 6 — UX : simplification des flux utilisateur](#8-phase-6--ux--simplification-des-flux-utilisateur)
+9. [Phase 7 — Jobs CRON & notifications](#9-phase-7--jobs-cron--notifications)
+10. [Phase 8 — Admin avancé](#10-phase-8--admin-avancé)
+11. [Phase 9 — IA avancée & innovations](#11-phase-9--ia-avancée--innovations)
+12. [Phase 10 — Documentation](#12-phase-10--documentation)
+13. [Phase 11 — Innovations techniques & DevOps](#13-phase-11--innovations-techniques--devops)
+14. [Phase 12 — Refactoring & organisation du code](#14-phase-12--refactoring--organisation-du-code)
+15. [Annexes : données de référence, WebSocket, notifications](#15-annexes)
+16. [Récapitulatif global](#16-récapitulatif-global)
+
+---
+
+## 1. Notation par catégorie
+
+> Évaluation sur 10 de chaque aspect de l'application au 31/03/2026
+
+| Catégorie | Note | Justification |
+|-----------|------|---------------|
+| **Architecture backend** | 9/10 | Excellente : FastAPI + SQLAlchemy 2.0 + Pydantic v2, patterns bien structurés (decorators, registre services, cache multi-niveaux, event bus, résilience). Manque seulement le nettoyage de code mort et quelques stubs. |
+| **Architecture frontend** | 8/10 | Très bonne : Next.js 16 App Router, Zustand 5, TanStack Query v5, 90+ pages, 29 shadcn/ui. Points négatifs : 0 tests unitaires frontend, 12+ `as unknown as`, doublon `outils.ts`/`utilitaires.ts`. |
+| **Base de données / SQL** | 8/10 | Solide : ~130 tables, RLS, triggers, vues, migrations SQL-file. Points négatifs : tables manquantes (congélation, historique IA, Garmin), alembic/ inutilisé, migrations V003-V007 non absorbées. |
+| **Couverture tests backend** | 7/10 | Bonne sur les routes API (89 fichiers), mais lacunes sur les décorateurs core, résilience, bridges inter-modules, event bus subscribers, services famille/maison (testés seulement via routes). |
+| **Couverture tests frontend** | 2/10 | Critique : 0 tests unitaires, Vitest configuré mais aucun test. Seuls 16 specs Playwright E2E couvrent le frontend. Le seuil 50% est fictif. |
+| **Intégration IA** | 9/10 | Excellente : 25+ services IA, client Mistral unifié, cache sémantique, rate limiting, circuit breaker, 16 pages IA avancée, vision, streaming. Manque juste l'historisation des suggestions. |
+| **Système de notifications** | 8.5/10 | Très bon : 4 canaux (push, ntfy, WhatsApp, email), routing intelligent, failover, throttle, digest. Manque quelques notifications contextuelles et commandes WhatsApp. |
+| **Interactions inter-modules** | 7/10 | 12 bridges existants bien pensés. Mais des connexions évidentes manquent (inventaire→planning, météo→activités, entretien→courses, jules→nutrition). |
+| **UX / Flux utilisateur** | 6/10 | Les pages sont là et fonctionnelles, mais les flux courants nécessitent trop d'étapes. Pas de raccourcis dashboard, pas de mode focus, pas de bulk actions courses. |
+| **Documentation** | 7/10 | 28 fichiers markdown couvrant bien l'architecture. Mais manquent EVENT_BUS.md, SECURITY.md, DATA_MODEL.md, guides utilisateur, et certaines docs sont potentiellement périmées. |
+| **Administration** | 7.5/10 | 6 pages admin + 11 endpoints. Manque trigger event bus, métriques IA, feature flags, file notifications, mode maintenance. |
+| **Jobs CRON** | 7/10 | 13 jobs bien structurés. Manquent ~11 jobs critiques (recap weekend, sync tirages, backup, nettoyage cache, rapport hebdo budget). |
+| **Infrastructure / DevOps** | 7/10 | Docker, Sentry, Prometheus, monitoring. Manque CI/CD GitHub Actions, feature flags runtime, monitoring coût IA. |
+| **Sécurité** | 7.5/10 | JWT, RLS, rate limiting, CORS, security headers. Point négatif majeur : secret dev hardcodé dans dependencies.py. Pas de doc SECURITY.md. |
+| **Données de référence** | 8.5/10 | 14 fichiers JSON/CSV couvrant nutrition, saisons, entretien, jardin, vaccins. Manquent : portions par âge, produits ménagers. |
+| **Performance & résilience** | 8.5/10 | Cache multi-niveaux (L1/L2/L3/Redis), middleware ETag, résilience composable (retry, timeout, circuit breaker, bulkhead), benchmarks. |
+
+### Note globale : **7.5/10**
+
+> Application impressionnante par son ampleur (200+ endpoints, 130 tables, 90+ pages, 25+ services IA). L'architecture est professionnelle et bien pensée. Les principales faiblesses sont l'absence de tests frontend, les stubs non implémentés, et les flux UX perfectibles. La dette technique est contenue et identifiable.
+
+---
+
+## 2. État des lieux synthétique
+
+### Métriques du codebase
+
+| Métrique | Valeur |
+|----------|--------|
+| Routes API | 200+ endpoints sur 42 fichiers routes |
+| Modèles SQLAlchemy | 130+ classes sur 31 fichiers |
+| Services | 161+ factory functions sur ~150 fichiers |
+| Pages frontend | 90+ pages (app router) |
+| Composants UI | 29 shadcn/ui + 60+ composants domaine |
+| API clients frontend | 28 fichiers client |
+| Hooks React | 14 hooks custom |
+| Tests backend | 89 fichiers Python |
+| Tests E2E | 16 specs Playwright |
+| Tests frontend unitaires | **0** (lacune majeure) |
+| SQL tables | ~130 tables + RLS + triggers + vues |
+| Docs | 28 fichiers markdown |
+| Inter-module bridges | 12 services |
+| CRON jobs | 13 jobs planifiés |
+| Event types bus | 21 types, 40+ subscribers |
+
+### Modules fonctionnels
+
+| Module | Routes | Pages | Services | Modèles | Tests API |
+|--------|--------|-------|----------|---------|-----------|
+| **Cuisine** | recettes, courses, planning, inventaire, batch-cooking, anti-gaspillage, suggestions | 17 | 30+ | 23 tables | 8 fichiers |
+| **Famille** | famille, jules, activités, budget, achats, routines, anniversaires, événements | 17 | 42+ | 35 tables | 7 fichiers |
+| **Maison** | maison, projets, entretien, jardin, finances, stocks | 15 | 37+ | 40 tables | 6 fichiers |
+| **Habitat** | habitat (veille immo, scénarios, plans, déco, jardin) | 6 | 5 | 10+ tables | 1 fichier |
+| **Jeux** | jeux, paris, loto, euromillions, dashboard | 7 | 14+ | 13 tables | 2 fichiers |
+| **Planning** | planning central, timeline | 2 | 3 | via cuisine | 1 fichier |
+| **Outils** | chat-IA, notes, journal, contacts, énergie, météo, convertisseur, minuteur, automations | 11 | 11+ | via utilitaires | 2 fichiers |
+| **IA Avancée** | suggestions proactives, prévisions, diagnostics, voyage, cadeaux, estimation travaux | 16 | 1 orchestrateur | — | 2 fichiers |
+| **Admin** | audit, jobs, services, cache, users, DB | 6 | via core | système | 2 fichiers |
+| **Paramètres** | préférences, notifications, sauvegardes, intégrations | 4 | 5+ | préférences | 2 fichiers |
+| **Dashboard** | tableau de bord, scores, badges, anomalies | 1 | 6 | gamification | 1 fichier |
+
+### Modules d'infrastructure
+
+| Module | Rôle |
+|--------|------|
+| Auth & JWT | Authentification Supabase + API JWT |
+| Rate Limiting | 60 req/min standard, 10 req/min IA |
+| Cache | Cache multi-niveaux (L1 mémoire, L2 session, L3 fichier, Redis) |
+| Résilience | Retry + Timeout + CircuitBreaker + Bulkhead |
+| Monitoring | Métriques Prometheus + Sentry + health checks + tracing |
+| Event Bus | Pub/sub avec wildcards, 21 types d'événements |
+| WebSocket | 5 connexions WS (courses, planning, notes, projets Kanban, admin logs) |
+| CRON | 13 jobs APScheduler |
+
+---
+
+## 3. Phase 1 — Fondations : bugs critiques & dette technique
+
+> **Objectif** : Stabiliser le socle technique, corriger les vulnérabilités de sécurité, supprimer le code mort
+> **Priorité** : 🔴 CRITIQUE — À faire en premier
+
+### 3.1 Bugs critiques 🔴
+
+| # | Action | Fichier(s) | Effort | Détail |
+|---|--------|-----------|--------|--------|
+| P1-01 | **Corriger le secret dev hardcodé** | `src/api/dependencies.py:65` | S | `"dev-secret-key-change-in-production"` utilisé pour la détection d'environnement dev. Si `API_SECRET_KEY` = cette valeur en prod → contournement d'auth. Remplacer par une détection d'env explicite sans comparaison de secret. |
+| P1-02 | **Remplacer les `print()` par `logger`** dans le pipeline IA | `src/services/core/base/ai_streaming.py` (6 occurrences), `src/core/ai/streaming.py:62`, `src/core/ai/router.py:26` | S | En prod les prints stdout polluent les logs structurés et ne sont pas captés par Sentry/monitoring. |
+
+### 3.2 Bugs moyens 🟡
+
+| # | Action | Fichier(s) | Effort | Détail |
+|---|--------|-----------|--------|--------|
+| P1-03 | Implémenter ou supprimer les **6 classes stub** vides (`pass`) | `recettes_ia_versions.py:38`, `recherche_mixin.py:20`, `recettes_ia_suggestions.py:24`, `notification_service.py:407-421`, `football_compat.py:295` | M | Services marqués comme implémentés mais vides — confusion. Soit implémenter (Phase 4), soit supprimer les fichiers et marquer TODO. |
+| P1-04 | Implémenter ou supprimer les **stubs Google Calendar** | `famille/calendrier/google_auth.py:21`, `google_calendar.py:34` | S | Intégration non implémentée. |
+| P1-05 | **Persister les données de congélation** en DB | `batch_cooking/congelation.py:259` | M | Commentaire `# PERSISTENCE SESSION_STATE` — données de congélation perdues au redémarrage. Voir table SQL Phase 3. |
+| P1-06 | Résoudre le **hack temporaire** stockage token | `core/utilisateur/auth_token.py:45` | S | Commentaire `# Temporaire`. |
+| P1-07 | Supprimer les **mixins IA vides** | `core/base/ai_mixins.py:10` (classe `...`), `core/base/ai_streaming.py:9` (classe `...`) | S | Code mort — classes bases jamais implémentées. |
+
+### 3.3 Bugs faibles 🟢
+
+| # | Action | Fichier(s) | Effort | Détail |
+|---|--------|-----------|--------|--------|
+| P1-08 | Corriger les **12+ `as unknown as`** — aligner types frontend ↔ backend | `famille.ts`, `maison.ts`, `jeux/page.tsx`, etc. | M | Contrats API/types mal alignés. |
+| P1-09 | Corriger le **`as any`** dans `register()` | `parametres/preferences-notifications/page.tsx:167` | S | react-hook-form mal typé. |
+| P1-10 | Corriger la **dépendance manquante** eslint | `famille/activites/page.tsx:194` | S | `eslint-disable-next-line react-hooks/exhaustive-deps`. |
+| P1-11 | Remplacer les **`console.error()`** par un logger structuré | 5 occurrences frontend | S | Devrait utiliser un logger structuré. |
+| P1-12 | Supprimer les **stubs rétrocompatibles** `historique.py` | `core/utilisateur/historique.py` | S | Stubs marqués "UI supprimée" — code mort. |
+
+### 3.4 Contrats types frontend ↔ backend à corriger
+
+| # | Action | Fichier(s) | Effort |
+|---|--------|-----------|--------|
+| P1-13 | Typer correctement la réponse checklist anniversaire | `api/famille.ts:481` + `schemas/famille.py` | S |
+| P1-14 | Typer correctement briefing maison | `api/maison.ts:1036` + routes maison | S |
+| P1-15 | Typer correctement planning semaine | `api/maison.ts:1345` | S |
+| P1-16 | Typer les widgets dashboard jeux | `jeux/page.tsx:182` + `types/jeux.ts` | S |
+| P1-17 | Typer les canaux notification par catégorie | `parametres/onglet-notifications.tsx:104` | S |
+
+### 3.5 Supprimer le code mort
+
+| # | Action | Fichier(s) | Effort |
+|---|--------|-----------|--------|
+| P1-18 | Supprimer le dossier **`alembic/`** | `alembic/` entier | S | 
+| P1-19 | Supprimer le doublon **`outils.ts` / `utilitaires.ts`** frontend | `frontend/src/bibliotheque/api/` | S |
+| P1-20 | Supprimer le `print()` debug dans le router IA | `src/core/ai/router.py:26` | S |
+
+**Total Phase 1 : 20 actions — Effort global : M**
+
+---
+
+## 4. Phase 2 — Tests : couverture critique
+
+> **Objectif** : Atteindre une couverture de tests suffisante pour sécuriser les phases suivantes
+> **Priorité** : 🔴 HAUTE — Base de confiance pour les futures modifications
+
+### 4.1 État actuel des tests
+
+| Catégorie | Fichiers | Couverture | Verdict |
+|-----------|----------|------------|---------|
+| Routes API | 45 fichiers | ✅ Toutes les routes testées | Bon |
+| Core AI | 4 fichiers (cache, client, parser, embeddings) | ✅ Très bon | Bon |
+| Core models | 8 fichiers | ✅ Tous les imports + spécifiques | Bon |
+| Core config/cache | 6 fichiers | ✅ Multi-niveaux, invalidation | Bon |
+| Services cuisine | 4 fichiers | ✅ Enrichers, batch-cooking | Bon |
+| Services budget | 4 fichiers (18 classes) | ✅ Excellent | Excellent |
+| Rate limiting | 1 fichier (21 classes) | ✅ Exhaustif | Excellent |
+| CRON jobs | 2 fichiers | ✅ Bon | Bon |
+| Automations | 1 fichier | ✅ Engine testé | Bon |
+| Gamification | 1 fichier (6 classes) | ✅ Badges, triggers | Bon |
+| Benchmarks | 1 fichier | ✅ Perf core | Bon |
+| Contract | 1 fichier (Schemathesis) | ✅ OpenAPI validation | Bon |
+
+### 4.2 Priorité 1 — Tests critiques manquants (backend)
+
+| # | Action | Module | Effort | Justification |
+|---|--------|--------|--------|---------------|
+| P2-01 | Tests unitaires **décorateurs core** | `@avec_cache`, `@avec_session_db`, `@avec_validation`, `@avec_resilience` | M | Décorateurs utilisés partout — une régression ici casse tout |
+| P2-02 | Tests unitaires **resilience policies** | `RetryPolicy`, `CircuitBreaker`, `Bulkhead`, `Timeout` | M | Critique pour la stabilité en prod |
+| P2-03 | Tests unitaires des **12 inter-module bridges** | `src/services/integrations/inter_module_*.py` | L | Logique métier critique entre modules |
+| P2-04 | Tests unitaires **event bus** + 40 subscribers | `src/services/core/events/` | M | 21 types, 40+ subscribers non testés unitairement |
+| P2-05 | Tests unitaires **intégrations WhatsApp** | `src/services/integrations/` | M | Canal de notification primaire |
+
+### 4.3 Priorité 2 — Tests importants manquants (backend)
+
+| # | Action | Module | Effort | Justification |
+|---|--------|--------|--------|---------------|
+| P2-06 | Tests **services famille** (42 services) | `src/services/famille/` | L | Seulement testés via routes API, pas de tests unitaires services |
+| P2-07 | Tests **services maison** (37 services) | `src/services/maison/` | L | Idem |
+| P2-08 | Tests **intégrations externes** | Garmin, OCR, météo, barcode | M | Intégrations externes critiques |
+| P2-09 | Tests **services habitat** (5 services) | `src/services/habitat/` | M | Module récent |
+
+### 4.4 Priorité 3 — Tests souhaitables (backend)
+
+| # | Action | Module | Effort |
+|---|--------|--------|--------|
+| P2-10 | Tests `src/core/date_utils/` (4 fichiers) | dates | S |
+| P2-11 | Tests `src/core/monitoring/` (3 fichiers) | monitoring | S |
+| P2-12 | Tests `src/core/observability/` | observabilité | S |
+| P2-13 | Tests `src/services/dashboard/` (6 services) | dashboard | M |
+| P2-14 | Tests `src/services/rapports/` (6 services) | rapports PDF | M |
+
+### 4.5 Tests frontend — LACUNE MAJEURE 🔴
+
+**Constat** : 0 tests unitaires frontend. Vitest configuré avec seuil 50% mais aucun test n'existe. Seuls les 16 specs E2E Playwright couvrent les 90+ pages et 60+ composants.
+
+| # | Action | Cible | Effort | Priorité |
+|---|--------|-------|--------|----------|
+| P2-15 | Tests composants critiques | `formulaire-recette`, `barre-laterale`, `recherche-globale` | M | Haute |
+| P2-16 | Tests hooks React | `utiliser-auth`, `utiliser-api`, `utiliser-crud` | M | Haute |
+| P2-17 | Tests API clients | `recettes.ts`, `courses.ts`, `planning.ts` | M | Haute |
+| P2-18 | Tests stores Zustand | `store-auth.ts`, `store-ui.ts`, `store-notifications.ts` | S | Moyenne |
+| P2-19 | Tests pages dashboard et hubs | `page.tsx` de cuisine, famille, maison | M | Moyenne |
+| P2-20 | Tests composants domaine | 60+ composants spécifiques | L | Basse |
+
+**Total Phase 2 : 20 actions — Effort global : XL**
+
+---
+
+## 5. Phase 3 — SQL : consolidation & tables manquantes
+
+> **Objectif** : Source de vérité unique, SQL complet et cohérent
+> **Priorité** : 🟡 HAUTE
+
+### 5.1 Organisation actuelle SQL
+
+```
+sql/
+├── INIT_COMPLET.sql          # Source de vérité (~10 000 lignes)
+├── schema/                   # 17 fichiers ordonnés (01-99)
+│   ├── 01_extensions.sql     # uuid-ossp, pgcrypto, json, hstore
+│   ├── 02_functions.sql      # Helpers (audit_log, dates, JSON)
+│   ├── 03_systeme.sql        # Users, prefs, logs, automations
+│   ├── 04_cuisine.sql        # 23 tables cuisine
+│   ├── 05_famille.sql        # 35 tables famille
+│   ├── 06_maison.sql         # 40 tables maison
+│   ├── 07_habitat.sql        # Habitat extension
+│   ├── 08_jeux.sql           # 13 tables jeux
+│   ├── 09_notifications.sql  # 12 tables notifications
+│   ├── 10_finances.sql       # 6 tables finances
+│   ├── 11_utilitaires.sql    # Calendriers, docs
+│   ├── 12_triggers.sql       # Audit + updated_at
+│   ├── 13_views.sql          # 8+ vues agrégées
+│   ├── 14_indexes.sql        # Index de performance
+│   ├── 15_rls_policies.sql   # Row-level security
+│   ├── 16_seed_data.sql      # Données de référence
+│   ├── 17_migrations_absorbees.sql  # V001-V002 absorbées
+│   └── 99_footer.sql         # COMMIT + vérification
+└── migrations/               # 5 migrations (V003-V007)
+    ├── V003__sprint13_canaux_notifications.sql
+    ├── V004__logs_securite_admin_only.sql
+    ├── V005__phase2_sql_consolidation.sql
+    ├── V006__phase7_jobs_automations.sql
+    ├── V007__module_habitat.sql
+    └── README.md
+```
+
+### 5.2 Actions de consolidation
+
+| # | Action | Effort | Détail |
+|---|--------|--------|--------|
+| P3-01 | **Absorber V003-V007** dans les fichiers `schema/` correspondants | M | `17_migrations_absorbees.sql` ne référence que V001-V002. Intégrer le contenu de V003-V007 dans les fichiers schema/ appropriés (04_cuisine, 06_maison, etc.) |
+| P3-02 | **Script de build** `INIT_COMPLET.sql` = concaténation automatique de `schema/*.sql` | S | Créer `scripts/db/build_init_complet.py` — garantit que INIT_COMPLET.sql est toujours synchronisé avec schema/ |
+| P3-03 | Vérifier que **INIT_COMPLET.sql = concaténation exacte** de `schema/01` à `schema/99` | S | Diff automatique dans le script de build |
+| P3-04 | **Supprimer `alembic/`** | S | Alembic non utilisé — migrations SQL-file uniquement |
+
+### 5.3 Tables manquantes à ajouter
+
+| # | Table | Module | Justification |
+|---|-------|--------|---------------|
+| P3-05 | `batch_cooking_congelation` | Cuisine | Le service `congelation.py` utilise du state mémoire au lieu de SQL — données perdues au redémarrage |
+| P3-06 | `ia_suggestions_historique` | IA Avancée | Les 16 pages IA avancée ne persistent pas l'historique des suggestions en DB |
+| P3-07 | `garmin_activities` + `garmin_daily_summaries` | Famille/Santé | Données Garmin pas persistées en DB (API directe) — impossible de faire des analyses de tendances |
+
+### 5.4 Données de référence manquantes
+
+| # | Fichier | Utilisation |
+|---|---------|-------------|
+| P3-08 | `data/reference/portions_age.json` | Adapter portions recettes Jules selon son âge/poids |
+| P3-09 | `data/reference/produits_menagers.json` | Auto-complétion inventaire maison, suggestions courses entretien |
+
+**Total Phase 3 : 9 actions — Effort global : M**
+
+---
+
+## 6. Phase 4 — Features manquantes : stubs → implémentation
+
+> **Objectif** : Compléter les fonctionnalités partiellement implémentées
+> **Priorité** : 🟡 HAUTE
+
+### 6.1 Services backend stubs à implémenter
+
+| # | Action | Service | Effort | Détail |
+|---|--------|---------|--------|--------|
+| P4-01 | **Recherche avancée recettes** | `recettes/recherche_mixin.py` | M | Recherche full-text avec filtres (temps, difficulté, ingrédients, saison). Utiliser les index GIN PostgreSQL existants. |
+| P4-02 | **Suggestions IA recettes** | `recettes/recettes_ia_suggestions.py` | M | Suggestions personnalisées basées sur historique et préférences. Étendre `BaseAIService`. |
+| P4-03 | **Versions IA recettes** | `recettes/recettes_ia_versions.py` | M | 3 versions existantes commentées (bébé, batch cooking, robot) à activer dans `service.py:305-306`. + 3 nouvelles : version saisonnière, version rapide (< 30 min), version restes (inventaire). |
+| P4-04 | **Google Calendar sync** | `famille/calendrier/google_auth.py`, `google_calendar.py` | L | Sync bidirectionnelle avec Google Calendar. OAuth2 + webhooks push. |
+| P4-05 | **Notifications jeux** | `jeux/_internal/notification_service.py` | M | 3 classes stub — alertes résultats, rappels tirages loto/euromillions. |
+| P4-06 | **Football data compat** | `jeux/_internal/football_compat.py` | M | Intégration données football temps réel pour enrichir l'analyse des paris. |
+| P4-07 | **Persistance congélation** | `batch_cooking/congelation.py` + SQL | M | Table SQL + migration de state mémoire → DB. Lié à P3-05. |
+
+### 6.2 Pages frontend sans API client complet
+
+| # | Action | Page | Gap | Effort |
+|---|--------|------|-----|--------|
+| P4-08 | Persistance minuteur côté serveur | `/outils/minuteur` | localStorage uniquement — pas de sync entre appareils | S |
+| P4-09 | Compléter gamification frontend | `/famille/gamification` | Page existe mais API partiellement connectée | M |
+| P4-10 | Alimenter visualisation 3D | `/maison/visualisation` | Plan Three.js — données pièces/objets partiellement alimentées | L |
+| P4-11 | Historiser pages IA avancée | `/ia-avancee/*` | 16 pages IA — certaines n'ont que des POST sans historique | M |
+
+**Total Phase 4 : 11 actions — Effort global : L**
+
+---
+
+## 7. Phase 5 — Interactions inter-modules : nouveaux bridges
+
+> **Objectif** : Connecter les modules entre eux pour une expérience cohérente
+> **Priorité** : 🟡 MOYENNE-HAUTE
+
+### 7.1 Bridges existants (12) — État
+
+| Bridge | De → Vers | Fonction | État |
+|--------|-----------|----------|------|
+| `inter_module_courses_budget.py` | Courses → Budget | Total courses → dépense alimentation | ✅ |
+| `inter_module_energie_cuisine.py` | Énergie → Cuisine | Heures creuses → planifier cuisson longue | ✅ |
+| `inter_module_batch_inventaire.py` | Batch cooking → Inventaire | Sync batch → stock | ✅ |
+| `inter_module_peremption_recettes.py` | Péremption → Recettes | Alert + recettes rescue | ✅ |
+| `inter_module_planning_voyage.py` | Voyages → Planning | Adapter planning si voyage | ✅ |
+| `inter_module_voyages_budget.py` | Voyages → Budget | Dépenses voyage → budget famille | ✅ |
+| `inter_module_budget_jeux.py` | Budget × Jeux | Alerte dépassement seuil jeux | ✅ |
+| `inter_module_documents_notifications.py` | Documents → Notifications | Docs expirant → alerte ntfy | ✅ |
+| `inter_module_anniversaires_budget.py` | Anniversaires → Budget | Budget cadeaux/fête | ✅ |
+| `inter_module_diagnostics_ia.py` | Diagnostics → Actions | IA → créer tâche entretien | ✅ |
+| `inter_module_garmin_health.py` | Garmin → Santé | Sync activité + suggestions Jules | ✅ |
+| `inter_module_chat_contexte.py` | Multi → Chat IA | Contexte inventaire/planning/routines | ✅ |
+
+### 7.2 Nouveaux bridges à créer
+
+| # | Bridge | De → Vers | Impact utilisateur | Priorité | Effort |
+|---|--------|-----------|-------------------|----------|--------|
+| P5-01 | `inter_module_inventaire_planning.py` | Stock → Planning recettes | Prioriser les recettes utilisant les ingrédients en stock | Haute | M |
+| P5-02 | `inter_module_jules_nutrition.py` | Jules croissance → Planning nutrition | Adapter portions et nutriments selon courbe de croissance | Haute | M |
+| P5-03 | `inter_module_saison_menu.py` | Produits de saison → Planning IA | Le planning IA favorise les produits de saison | Haute | M |
+| P5-04 | `inter_module_meteo_activites.py` | Météo → Activités famille | Pluie → activités intérieur ; Beau temps → extérieur | Haute | M |
+| P5-05 | `inter_module_entretien_courses.py` | Entretien → Courses | Tâche entretien nécessite produit → ajouter à la liste courses | Haute | M |
+| P5-06 | `inter_module_charges_energie.py` | Charges facture → Énergie analyse | Facture +20% → déclencher analyse anomalie automatiquement | Moyenne | M |
+| P5-07 | `inter_module_weekend_courses.py` | Weekend activités → Courses | Randonnée/pique-nique prévu → ajouter fournitures aux courses | Moyenne | S |
+| P5-08 | `inter_module_documents_calendrier.py` | Documents expirant → Calendrier | Créer événement calendrier pour renouvellement de documents | Basse | S |
+
+### 7.3 Interactions intra-modules manquantes
+
+#### Module Cuisine
+
+| # | Interaction | Description |
+|---|------------|-------------|
+| P5-09 | Inventaire → Planning | Suggérer des recettes utilisant les stocks existants en priorité |
+| P5-10 | Anti-gaspillage → Courses | Exclure les articles qu'on a déjà en surplus |
+| P5-11 | Batch cooking → Planning | Bloquer les jours batch sur le planning de la semaine |
+| P5-12 | Nutrition → Planning | Alerter si le planning de la semaine est déséquilibré nutritionnellement |
+| P5-13 | Feedback recette → Suggestions IA | Si recette notée < 3/5, ne plus la suggérer |
+
+#### Module Famille
+
+| # | Interaction | Description |
+|---|------------|-------------|
+| P5-14 | Jules croissance → Recettes portions | Adapter automatiquement les portions des recettes planifiées |
+| P5-15 | Anniversaire J-14 → Budget prévisionnel | Réserver automatiquement le budget estimé |
+
+#### Module Maison
+
+| # | Interaction | Description |
+|---|------------|-------------|
+| P5-16 | Jardin saison → Entretien auto | Tâches d'entretien saisonnières automatiques selon les plantes |
+| P5-17 | Charges augmentation → Diagnostic énergie | Si facture +20%, déclencher analyse anomalie |
+
+### 7.4 Matrice d'interactions cible
+
+```
+            Cuisine  Famille  Maison  Jeux  Planning  Outils  Dashboard
+Cuisine       ■■■      ■■       ■■     ·      ■■■       ■□      ■■
+Famille       ■■       ■■■      ■□     ■□     ■■        ■□      ■■
+Maison        ■■       ■□       ■■■    ·      ■□        ■□      ■■
+Jeux          ·        ■□       ·      ■■■    ·         ·       ■□
+Planning      ■■■      ■■       ■□     ·      ■■■       □□      ■■
+Outils        ■□       ■□       ■□     ·      □□        ■■■     □□
+Dashboard     ■■       ■■       ■■     ■□     ■■        □□      ■■■
+
+          ■■■ Fort   ■■ Bien connecté (cible)   ■□ Partiel   □□ Faible   · Aucun
+```
+
+**Total Phase 5 : 17 actions — Effort global : L**
+
+---
+
+## 8. Phase 6 — UX : simplification des flux utilisateur
+
+> **Objectif** : Réduire à 3 actions max les tâches courantes — le système anticipe, l'utilisateur valide
+> **Priorité** : 🟡 MOYENNE-HAUTE
+
+### 8.1 Flux critiques à simplifier
+
+#### Flux 1 : "Qu'est-ce qu'on mange cette semaine ?"
+
+```
+ACTUEL (6 étapes):
+1. Aller dans Cuisine → Planning
+2. Cliquer "Générer planning"
+3. Configurer les préférences
+4. Valider le planning
+5. Aller dans Courses
+6. Générer la liste de courses
+
+PROPOSÉ (2 étapes):
+1. Dashboard → Bouton "Planifier ma semaine" (ou WhatsApp "Menu")
+2. IA génère planning + courses en 1 clic → Validation
+   └── Option "Modifier" si besoin
+```
+
+| # | Action | Effort |
+|---|--------|--------|
+| P6-01 | Ajouter bouton **"Planifier ma semaine"** sur le dashboard | M |
+| P6-02 | Le planning IA prend en compte : inventaire, préférences, saison, budget, historique | M |
+| P6-03 | Liste de courses auto-générée (corrigée par inventaire existant) | S |
+| P6-04 | Envoi WhatsApp automatique du planning validé | S |
+
+#### Flux 2 : "J'ai fait les courses"
+
+```
+ACTUEL (4 étapes):
+1. Aller dans Courses → Liste active
+2. Cocher les articles un par un
+3. Aller dans Inventaire
+4. Mettre à jour les stocks
+
+PROPOSÉ (1 étape):
+1. Bouton "Courses faites" → Cocher tout d'un coup ou par catégorie
+   └── Auto-checkout + auto-update inventaire
+```
+
+| # | Action | Effort |
+|---|--------|--------|
+| P6-05 | Bouton **"Tout cocher"** ou cochage par catégorie (frais, épicerie, hygiène…) | M |
+| P6-06 | Match automatique liste courses → checkout + MAJ inventaire | M |
+| P6-07 | Articles non cochés → reporter à la prochaine liste | S |
+
+#### Flux 3 : "Suivi de Jules" — Hub unifié
+
+```
+ACTUEL (multiple pages séparées):
+- Page Jules pour les jalons
+- Page Activités pour les activités
+- Page Routines pour les routines  
+- Page Budget pour les achats bébé
+
+PROPOSÉ (1 hub intelligent):
+1. Hub Jules unifié avec :
+   ├── Timeline du jour (routines + activités + repas)
+   ├── Prochains jalons à venir
+   ├── Suggestion d'activité IA (1 click "Valider")
+   └── Achats recommandés (taille vêtements, jouets d'éveil)
+```
+
+| # | Action | Effort |
+|---|--------|--------|
+| P6-08 | **Hub Jules unifié** avec timeline jour + jalons + suggestion IA | M |
+
+#### Flux 4 : "Entretien de la maison"
+
+```
+ACTUEL:
+- Aller dans Maison → Entretien → Voir les tâches à faire
+- Manuellement les compléter
+
+PROPOSÉ:
+1. Dashboard maison → "Tâches du jour" avec swipe pour compléter
+   └── Notification push matin avec les tâches du jour
+   └── Swipe gauche = fait, swipe droit = reporter
+```
+
+| # | Action | Effort |
+|---|--------|--------|
+| P6-09 | **Swipe-to-complete** tâches/routines (étendre composant `swipeable-item.tsx` existant) | S |
+| P6-10 | Notification push matin avec tâches du jour | S |
+
+### 8.2 Composants UX à ajouter
+
+| # | Composant | Description | Modules | Effort |
+|---|-----------|-------------|---------|--------|
+| P6-11 | **Wizard "Première semaine"** | Onboarding guidé : configurer préférences alimentaires, ajouter inventaire, planifier première semaine | Cuisine | M |
+| P6-12 | **Quick Actions Dashboard** | 4-6 actions rapides sur le dashboard (Planifier semaine, Courses du jour, Tâche du jour, Météo) | Dashboard | S |
+| P6-13 | **Bottom sheet contextuel** | Au lieu de naviguer vers une page, afficher un bottom sheet avec les actions courantes | Mobile | M |
+| P6-14 | **Mode Focus "Ce soir"** | Une seule vue : recette du soir + ingrédients ok/manquants + minuteur | Cuisine | M |
+| P6-15 | **Barre de recherche vocale** | "Ajoute du lait à la liste de courses" → exécution directe. Hooks vocaux déjà présents (`utiliser-reconnaissance-vocale.ts`). | Multi | M |
+| P6-16 | **Raccourcis depuis les notifications** | Notification "Péremption yaourts" → bouton "Voir recette" directement dans la notif | Courses | S |
+
+**Total Phase 6 : 16 actions — Effort global : L**
+
+---
+
+## 9. Phase 7 — Jobs CRON & notifications
+
+> **Objectif** : Automatiser tous les rappels et rapports périodiques, enrichir les canaux
+> **Priorité** : 🟡 MOYENNE
+
+### 9.1 Jobs CRON existants (13)
+
+| Heure | Job | Module | Canal |
+|-------|-----|--------|-------|
+| 03:00 (1er mois) | Enrichissement catalogues IA | Core | — |
+| 06:00 (lundi) | Entretien saisonnier | Maison | Push + ntfy |
+| 07:00 | Analyser péremptions matin | Cuisine | Push + ntfy |
+| 07:00 | Rappels famille | Famille | Push + ntfy + WhatsApp |
+| 07:30 | Digest WhatsApp matinal | Multi | WhatsApp |
+| 08:00 | Rappels maison | Maison | Push + ntfy |
+| 08:30 | Rappels généraux | Multi | Push + ntfy |
+| 09:00 | Digest ntfy | Multi | ntfy.sh |
+| 09:00 (lundi) | Vérifier stocks bas | Cuisine | Push + ntfy |
+| 18:00 | Rappel courses | Courses | Push + ntfy + WhatsApp |
+| 18:00 (dimanche) | Suggérer planning semaine | Planning | WhatsApp |
+| 08:00 (1er mois) | Rapport mensuel cuisine | Cuisine | Email |
+| Horaire | Flush digest notifications | Core | Multi |
+
+### 9.2 Nouveaux jobs à ajouter
+
+| # | Job | Horaire | Module | Canal | Effort |
+|---|-----|---------|--------|-------|--------|
+| P7-01 | **Recap weekend dimanche soir** | Dim 20:00 | Famille | WhatsApp + Push | M |
+| P7-02 | **Nettoyage cache 7j** | Quotidien 02:00 | Core | — | S |
+| P7-03 | **Backup données critiques** | Quotidien 01:00 | Core | — | M |
+| P7-04 | **Sync tirages loto/euromillions** | Mar+Ven 22:00 | Jeux | Push | M |
+| P7-05 | **Rapport budget hebdo** | Dim 18:00 | Famille | WhatsApp | M |
+| P7-06 | **MAJ données météo** | Quotidien 06:00 | Outils | — | S |
+| P7-07 | **Anniversaires rappel J-30** | Quotidien 08:00 | Famille | Push + WhatsApp | S |
+| P7-08 | **Analyse tendances mensuelles** | 1er mois 09:00 | Dashboard | Email | M |
+| P7-09 | **Purge logs anciens** | 1er mois 03:00 | Admin | — | S |
+
+### 9.3 Notifications manquantes à ajouter
+
+| # | Notification | Déclencheur | Canaux | Priorité | Effort |
+|---|-------------|-------------|--------|----------|--------|
+| P7-10 | **Recette du jour** | CRON 11:30 (si planning rempli) | Push | Basse | S |
+| P7-11 | **Stock critique (0 restant)** | Inventaire checkout | Push + ntfy + WhatsApp | Haute | S |
+| P7-12 | **Résultat tirage loto** | Job sync tirages (si pari enregistré) | Push + WhatsApp | Haute | M |
+| P7-13 | **Nouvelle recette de saison** | Changement de saison | Push | Basse | S |
+| P7-14 | **Tâche jardin saisonnière** | CRON saisonnier | Push + ntfy | Moyenne | S |
+| P7-15 | **Planning semaine vide** | Dimanche 10:00 | Push + WhatsApp | Moyenne | S |
+| P7-16 | **Astuce anti-gaspillage** | 3+ articles proches péremption | Push | Basse | S |
+
+### 9.4 Mapping événements → canaux cible
+
+| Événement | Push | ntfy | WhatsApp | Email |
+|-----------|------|------|----------|-------|
+| Péremption J-2 | ✅ | ✅ | · | · |
+| Rappel courses | ✅ | ✅ | ✅ | · |
+| Résumé hebdomadaire | · | · | ✅ | ✅ |
+| Rapport budget mensuel | · | · | · | ✅ |
+| Anniversaire J-7 | ✅ | ✅ | ✅ | · |
+| Tâche entretien urgente | ✅ | ✅ | ✅ | · |
+| Échec CRON job | ✅ | ✅ | ✅ | ✅ |
+| Document expirant | ✅ | ✅ | · | ✅ |
+| Badge débloqué | ✅ | ✅ | · | · |
+| **Stock critique (0)** | ✅ | ✅ | ✅ | · |
+| **Résultat tirage** | ✅ | · | ✅ | · |
+| **Recette du jour** | ✅ | · | · | · |
+| **Planning semaine vide** | ✅ | · | ✅ | · |
+
+### 9.5 Commandes WhatsApp conversationnelles à ajouter
+
+| Commande | Réponse | État | Effort |
+|----------|---------|------|--------|
+| "Menu" / "Planning" | Planning de la semaine actuelle | ✅ Existant | — |
+| "Courses" | Liste de courses active + compte articles | À ajouter | S |
+| "Recette [nom]" | Lien vers la recette + ingrédients | À ajouter | M |
+| "Ce soir" | Suggestion rapide repas du soir | À ajouter | M |
+| "Budget" | Résumé budget du mois en cours | À ajouter | S |
+| "Jules" | Dernières activités + prochain jalon | À ajouter | S |
+| "Frigo" | Scanner une photo du frigo → suggestions | À ajouter | M |
+| "Aide" | Liste des commandes disponibles | À ajouter | S |
+
+**Total Phase 7 : 23 actions — Effort global : L**
+
+---
+
+## 10. Phase 8 — Admin avancé
+
+> **Objectif** : Compléter le panneau d'administration pour un contrôle total
+> **Priorité** : 🟢 MOYENNE
+
+### 10.1 Capacités admin existantes
+
+| Endpoint / Page | Fonction | État |
+|----------------|----------|------|
+| `POST /admin/jobs/{id}/run` | Lancer un job CRON manuellement (dry_run optionnel) | ✅ |
+| `GET /admin/jobs` | Voir tous les jobs + état | ✅ |
+| `GET /admin/jobs/{id}/logs` | 20 dernières exécutions | ✅ |
+| `POST /admin/notifications/test` | Notification test (4 canaux) | ✅ |
+| `POST /admin/cache/clear` | Vider tout le cache | ✅ |
+| `GET /admin/cache/stats` | Stats cache (hit/miss) | ✅ |
+| `GET /admin/services/health` | Santé services | ✅ |
+| `POST /admin/services/{id}/action` | Action sur un service | ✅ |
+| `GET /admin/audit-logs` | Logs d'audit | ✅ |
+| `GET /admin/security-logs` | Logs de sécurité | ✅ |
+| `GET /admin/db/coherence` | Test cohérence DB | ✅ |
+| `/admin` | Dashboard admin principal | ✅ |
+| `/admin/utilisateurs` | Gestion utilisateurs | ✅ |
+| `/admin/notifications` | Test notifications push | ✅ |
+| `/admin/jobs` | Status jobs CRON | ✅ |
+| `/admin/services` | Santé services | ✅ |
+| `/admin/sql-views` | Browser vues SQL | ✅ |
+
+### 10.2 Nouvelles fonctionnalités admin — Backend
+
+| # | Action | Description | Priorité | Effort |
+|---|--------|-------------|----------|--------|
+| P8-01 | **Trigger event bus manuel** | Émettre un événement domaine depuis l'admin → tester les subscribers | Haute | M |
+| P8-02 | **Dashboard métriques IA** | Nombre d'appels IA, cache hits, tokens consommés, coût estimé | Haute | M |
+| P8-03 | **Panneau feature flags** | Activer/désactiver features par module sans redéployer | Haute | M |
+| P8-04 | **File d'attente notifications** | Afficher notifications en attente de digest + forcer le flush | Haute | S |
+| P8-05 | **Exécution automation manuelle** | Déclencher une règle d'automation spécifique | Haute | S |
+| P8-06 | **Mode maintenance** | 503 pour les utilisateurs, admin accessible | Moyenne | M |
+| P8-07 | **Export DB snapshot** | Export JSON de toutes les données (backup personnel) | Moyenne | M |
+| P8-08 | **Message WhatsApp test** | Envoyer un message spécifique à un numéro test | Moyenne | S |
+| P8-09 | **Régénérer données seed** | Relancer insertion données de référence | Basse | S |
+| P8-10 | **Simuler un utilisateur** | Se connecter "en tant que" un utilisateur pour tester ses vues | Haute | M |
+
+### 10.3 Pages admin frontend à ajouter
+
+| # | Page | Contenu | Effort |
+|---|------|---------|--------|
+| P8-11 | `/admin/events` | Visualiser bus d'événements en temps réel + trigger manuel | M |
+| P8-12 | `/admin/automations` | Gérer règles d'automation + exécution manuelle | M |
+| P8-13 | `/admin/ia-metrics` | Dashboard métriques IA (appels, coût, cache hit rate) | M |
+| P8-14 | `/admin/notifications-queue` | File d'attente notifications + flush manuel | S |
+| P8-15 | `/admin/feature-flags` | Panneau de feature flags | M |
+| P8-16 | `/admin/cache` | Stats cache détaillées + purge sélective (par module/préfixe) | S |
+| P8-17 | `/admin/whatsapp-test` | Test messages WhatsApp + visualiser conversation | S |
+
+**Total Phase 8 : 17 actions — Effort global : L**
+
+---
+
+## 11. Phase 9 — IA avancée & innovations
+
+> **Objectif** : Exploiter pleinement le potentiel IA et ajouter des fonctionnalités innovantes
+> **Priorité** : 🟢 MOYENNE-BASSE
+
+### 11.1 IA déjà implémentée (inventaire)
+
+| Module | Fonctionnalité IA | Service |
+|--------|-------------------|---------|
+| Cuisine | Suggestions recettes (inventaire + préférences) | `BaseAIService` |
+| Cuisine | Génération planning IA | `PlanningAIMixin` |
+| Cuisine | Photo frigo → recettes | `VisionMixin` |
+| Cuisine | Import recette depuis URL/PDF | `importer.py` |
+| Cuisine | Enrichissement nutrition | `nutrition_enrichment.py` |
+| Cuisine | Version recette pour Jules | `version_recette_jules.py` |
+| Famille | Suggestions activités Jules | `JulesAIService` |
+| Famille | Suggestions weekend | `WeekendAIService` |
+| Famille | Suggestions soirée | `SoireeAIService` |
+| Famille | Résumé hebdomadaire | `ResumeHebdoService` |
+| Famille | Analyse budget IA | `BudgetAIService` |
+| Famille | Suggestions achats enrichies | `AchatsIAService` |
+| Famille | Annonce LBC/Vinted IA | Pré-remplissage annonce vente |
+| Maison | Diagnostics IA artisans | `DiagnosticsIAArtisans` |
+| Maison | Anomalies énergie IA | `EnergieAnomaliesIA` |
+| Maison | Entretien IA | `EntretienIAService` |
+| Habitat | Analyse plans IA | Plans d'architecte |
+| Habitat | Suggestions déco IA | Décoration intérieure |
+| IA Avancée | Chat IA contextuel | `IAAvanceeService` |
+| IA Avancée | Planning adaptatif | Ajustement auto |
+| IA Avancée | Idées cadeaux | Suggestions personnalisées |
+| IA Avancée | Planning voyage | Organisation voyage |
+| IA Avancée | Estimation travaux | Devis automatique |
+| IA Avancée | Adaptations météo | Ajustements plannings |
+| IA Avancée | Diagnostic plante | Vision + catalogue |
+| IA Avancée | Analyse document/photo | OCR + extraction |
+| Outils | Briefing matinal | `BriefingMatinalService` |
+| Outils | Assistant proactif | `AssistantProactifService` |
+
+### 11.2 Nouvelles opportunités IA
+
+| # | Action | Module | Description | Valeur | Effort |
+|---|--------|--------|-------------|--------|--------|
+| P9-01 | **Mode "Qu'est-ce qu'on mange ce soir ?"** | Cuisine | Bouton unique : analyse frigo + préférences + temps dispo + humeur → suggestion immédiate | UX | M |
+| P9-02 | **Détection patterns alimentaires** | Cuisine | Analyser historique repas 3 mois → manques nutritionnels, répétitions, diversité | Santé | L |
+| P9-03 | **Coach routines IA** | Famille | Analyser complétion routines → identifier blocages, ajuster horaires/fréquences | Productivité | M |
+| P9-04 | **Détection anomalies eau/gaz/élec** | Maison | Comparer conso mensuelle → alerter si anomalie (fuite, appareil défaillant) | Économies | M |
+| P9-05 | **Optimisation courses par rayon** | Courses | Grouper articles par rayon du supermarché → parcours optimal | Temps | M |
+| P9-06 | **Résumé mensuel IA** | Dashboard | Résumé narratif : recettes préférées, dépenses, activités Jules, projets maison | Vue d'ensemble | M |
+| P9-07 | **Analyse photos jardin** | Jardin | Photo plante → diagnostic maladie, suggestion traitement, prévision récolte | Jardin | M |
+| P9-08 | **Planning activités Jules adaptatif** | Famille | En fonction de l'âge, météo, activités passées → planning hebdo activités | Développement | L |
+| P9-09 | **Comparateur prix fournisseurs énergie** | Maison | Analyser conso + tarif actuel → comparer offres du marché | Économies | M |
+| P9-10 | **Score éco-responsable** | Dashboard | Score écologique mensuel : gaspillage alimentaire, conso énergie, achats locaux/bio | Conscience | M |
+| P9-11 | **Saisonnalité intelligente** | Multi | Le système adapte automatiquement : recettes (saison), jardin (actions), entretien, énergie | Pertinence | L |
+| P9-12 | **Apprentissage continu des habitudes** | Multi | Recette toujours repoussée → arrêter de la suggérer ; Courses du mardi avec pain → pré-cocher | UX | L |
+| P9-13 | **Rétrospective annuelle IA** | Dashboard | Fin d'année : rapport 12 mois — recettes, dépenses, Jules, projets, objectifs | Mémoire familiale | L |
+| P9-14 | **Alertes intelligentes contextuelles** | Multi | Notifications contextuelles : "Il fait beau, Jules pourrait aller au parc" (météo + calendrier + historique) | Pertinence | L |
+| P9-15 | **Tableau de bord santé foyer** | Dashboard | Score global : alimentation (diversité), activité physique (Garmin), bien-être (routines) | Bien-être | M |
+
+**Total Phase 9 : 15 actions — Effort global : XL**
+
+---
+
+## 12. Phase 10 — Documentation
+
+> **Objectif** : Documentation complète et à jour
+> **Priorité** : 🟢 BASSE-MOYENNE (en parallèle des autres phases)
+
+### 12.1 État actuel des docs (28 fichiers)
+
+| Fichier | État | Action |
+|---------|------|--------|
+| `docs/INDEX.md` | ✅ À jour | — |
+| `docs/ARCHITECTURE.md` | ✅ | — |
+| `docs/API_REFERENCE.md` | ⚠️ Vérifier exhaustivité (200+ endpoints) | Mettre à jour |
+| `docs/MODULES.md` | ⚠️ Modules récents manquants (habitat, innovations) | Mettre à jour |
+| `docs/INTER_MODULES.md` | ⚠️ Nouveaux bridges à documenter | Mettre à jour |
+| `docs/NOTIFICATIONS.md` | ✅ | — |
+| `docs/CRON_JOBS.md` | ⚠️ Vérifier 13 jobs vs docs | Mettre à jour |
+| `docs/AUTOMATIONS.md` | ✅ | — |
+| `docs/AI_SERVICES.md` | ✅ | — |
+| `docs/ADMIN_GUIDE.md` | ✅ | — |
+| `docs/ADMIN_RUNBOOK.md` | ✅ | — |
+| `docs/DEPLOYMENT.md` | ✅ | — |
+| `docs/DEVELOPER_SETUP.md` | ✅ | — |
+| `docs/FRONTEND_ARCHITECTURE.md` | ⚠️ Vérifier avec Next.js 16 | Mettre à jour |
+| `docs/DESIGN_SYSTEM.md` | ✅ | — |
+| `docs/UI_COMPONENTS.md` | ⚠️ 29+ shadcn + 60+ custom | Mettre à jour |
+| `docs/PATTERNS.md` | ✅ | — |
+| `docs/SERVICES_REFERENCE.md` | ⚠️ 161 factories vs docs | Mettre à jour |
+| `docs/SQLALCHEMY_SESSION_GUIDE.md` | ✅ | — |
+| `docs/ERD_SCHEMA.md` | ⚠️ 130 tables vs schéma | Mettre à jour |
+| `docs/TESTING_ADVANCED.md` | ✅ | — |
+| `docs/HABITAT_MODULE.md` | ✅ | — |
+| `docs/GAMIFICATION.md` | ✅ | — |
+| `docs/GOOGLE_ASSISTANT_SETUP.md` | ✅ | — |
+| `docs/WHATSAPP_SETUP.md` | ✅ | — |
+| `docs/REDIS_SETUP.md` | ✅ | — |
+| `docs/MIGRATION_GUIDE.md` | ⚠️ Stratégie SQL-file à clarifier | Mettre à jour |
+| `docs/TROUBLESHOOTING.md` | ✅ | — |
+
+### 12.2 Documentation à créer
+
+| # | Action | Contenu attendu | Effort |
+|---|--------|-----------------|--------|
+| P10-01 | `docs/EVENT_BUS.md` | Catalogue complet des 21 types d'événements + 40 subscribers + exemples | M |
+| P10-02 | `docs/SECURITY.md` | Politique de sécurité (auth, CORS, rate limiting, RLS, secrets management, OWASP) | M |
+| P10-03 | `docs/DATA_MODEL.md` | Modèle de données détaillé avec relations (130 tables + FK + contraintes) | L |
+| P10-04 | `docs/WHATSAPP_COMMANDS.md` | Commandes WhatsApp conversationnelles + machine d'états | S |
+| P10-05 | `docs/MONITORING.md` | Métriques Prometheus, Sentry, health checks, alerting | S |
+| P10-06 | `docs/guides/RECIPE_FLOW.md` | Guide utilisateur : flux complet recette (création → planification → courses → cuisson) | S |
+| P10-07 | `docs/guides/FAMILY_FLOW.md` | Guide utilisateur : flux famille (Jules, activités, routines, budget) | S |
+| P10-08 | `docs/API_SCHEMAS.md` | Documentation Pydantic schemas (auto-générée depuis le code) | S |
+| P10-09 | `docs/PERFORMANCE.md` | Benchmarks, bonnes pratiques perf, résultats load tests | M |
+| P10-10 | `docs/CHANGELOG_MODULES.md` | Historique des changements par module (pas juste par sprint) | M |
+
+### 12.3 Documentation à mettre à jour
+
+| # | Action | Fichier | Effort |
+|---|--------|---------|--------|
+| P10-11 | Vérifier exhaustivité 200+ endpoints | `docs/API_REFERENCE.md` | M |
+| P10-12 | Ajouter modules récents (habitat, innovations) | `docs/MODULES.md` | S |
+| P10-13 | Documenter nouveaux bridges | `docs/INTER_MODULES.md` | S |
+| P10-14 | Vérifier 13 jobs vs docs | `docs/CRON_JOBS.md` | S |
+| P10-15 | Vérifier compatibilité Next.js 16 | `docs/FRONTEND_ARCHITECTURE.md` | S |
+| P10-16 | Inventorier 29+ shadcn + 60+ custom | `docs/UI_COMPONENTS.md` | M |
+| P10-17 | Aligner 161 factories vs docs | `docs/SERVICES_REFERENCE.md` | M |
+| P10-18 | Aligner 130 tables vs schéma | `docs/ERD_SCHEMA.md` | L |
+| P10-19 | Clarifier stratégie SQL-file | `docs/MIGRATION_GUIDE.md` | S |
+| P10-20 | Auto-générer `API_SCHEMAS.md` depuis Pydantic | Script + doc | S |
+
+**Total Phase 10 : 20 actions — Effort global : L**
+
+---
+
+## 13. Phase 11 — Innovations techniques & DevOps
+
+> **Objectif** : Améliorer la DX, la fiabilité et la modernité technique
+> **Priorité** : 🟢 BASSE
+
+### 13.1 Innovations techniques
+
+| # | Action | Description | Impact | Effort |
+|---|--------|-------------|--------|--------|
+| P11-01 | **Mode offline-first** | Service Worker + IndexedDB pour recettes, liste courses, minuteur. PWA déjà initiée (`enregistrement-sw.tsx`, `install-prompt.tsx`) mais pas complète. | PWA | L |
+| P11-02 | **Voice-first interface** | Hooks vocaux existants (`utiliser-reconnaissance-vocale.ts`, `utiliser-synthese-vocale.ts`) → connecter à tous les modules | UX cuisine | M |
+| P11-03 | **Widgets tablette home screen** | Widgets natifs Android via PWA : planning du jour, minuteur, liste courses | Accès rapide | M |
+| P11-04 | **Auto-sync OpenFoodFacts enrichi** | Scan code-barres → enrichir avec nutriscore, allergènes, provenance | Nutrition | M |
+| P11-05 | **Mode collaboratif couple étendu** | WebSocket courses déjà présent → étendre à planning/tâches | Famille | M |
+| P11-06 | **Export données structuré** | Export CSV/JSON de chaque module (backup personnel) | Sécurité | M |
+| P11-07 | **Dark mode intelligent** | next-themes → mode auto (sombre le soir, clair le jour) basé sur habitudes | UX | S |
+
+### 13.2 Innovations fonctionnelles
+
+| # | Action | Description | Effort |
+|---|--------|-------------|--------|
+| P11-08 | **Planning activités Jules IA adaptatif** | IA génère planning hebdo activités selon âge, météo, historique, recommandations développement | L |
+| P11-09 | **Tableau de bord santé foyer** | Score global : alimentation, activité physique (Garmin), bien-être, sommeil | M |
+| P11-10 | **Alertes intelligentes contextuelles** | Notifications contextuelles combinant météo + calendrier + historique | L |
+
+### 13.3 Innovations DevOps
+
+| # | Action | Description | Effort |
+|---|--------|-------------|--------|
+| P11-11 | **CI/CD GitHub Actions** | Pipeline : lint + tests + build + deploy staging → Vercel preview | L |
+| P11-12 | **Feature flags runtime** | Activer/désactiver fonctionnalités sans redéploiement (maison ou LaunchDarkly) | M |
+| P11-13 | **Monitoring coût IA** | Dashboard suivi tokens Mistral consommés + budget mensuel IA | M |
+| P11-14 | **Tests de mutation** | `mutmut` déjà en dépendance → configurer et exécuter | M |
+| P11-15 | **Health check public** | Page `/status` avec uptime de chaque service | S |
+
+**Total Phase 11 : 15 actions — Effort global : XL**
+
+---
+
+## 14. Phase 12 — Refactoring & organisation du code
+
+> **Objectif** : Nettoyer l'organisation du code sans changer la fonctionnalité
+> **Priorité** : 🟢 BASSE (à faire au fil de l'eau)
+
+### 14.1 Refactoring structurel
+
+| # | Action | Zone | Problème | Solution | Effort |
+|---|--------|------|----------|----------|--------|
+| P12-01 | Documenter les compositions de routers famille | Routes famille | 4 fichiers routes sans prefix cohérent | Documenter + s'assurer que chaque sous-router a un prefix explicite | S |
+| P12-02 | Documenter les compositions de routers jeux | Routes jeux | 5 fichiers routes | Même chose | S |
+| P12-03 | Documenter les compositions de routers maison | Routes maison | 5 fichiers routes | Même chose | S |
+| P12-04 | Décider sort des stubs cuisine | Services cuisine/recettes | 3 stubs (`_ia_versions.py`, `recherche_mixin.py`, `_ia_suggestions.py`) | Implémenter (Phase 4) ou supprimer | — |
+
+**Total Phase 12 : 4 actions — Effort global : S**
+
+---
+
+## 15. Annexes
+
+### Annexe A — Inventaire des fichiers de données de référence
+
+```
+data/reference/
+├── astuces_domotique.json           ✅
+├── calendrier_soldes.json           ✅
+├── calendrier_vaccinal_fr.json      ✅
+├── catalogue_pannes_courantes.json  ✅
+├── entretien_catalogue.json         ✅
+├── guide_lessive.json               ✅
+├── guide_nettoyage_surfaces.json    ✅
+├── guide_travaux_courants.json      ✅
+├── normes_oms.json                  ✅
+├── nutrition_table.json             ✅
+├── plantes_catalogue.json           ✅
+├── portions_age.json                ❌ MANQUANT → Phase 3 (P3-08)
+├── produits_de_saison.json          ✅
+├── produits_menagers.json           ❌ MANQUANT → Phase 3 (P3-09)
+├── routines_defaut.json             ✅
+└── template_import_inventaire.csv   ✅
+```
+
+### Annexe B — Inventaire WebSocket
+
+| Route WS | Fonction | État |
+|----------|----------|------|
+| `/ws/courses/{liste_id}` | Collaboration temps réel courses | ✅ |
+| `/ws/planning` | Collaboration planning | ✅ |
+| `/ws/notes` | Édition collaborative notes | ✅ |
+| `/ws/projets` | Kanban projets maison | ✅ |
+| `/ws/admin/logs` | Streaming logs admin | ✅ |
+
+### Annexe C — Canaux de notification par module
+
+| Module | Push | ntfy | WhatsApp | Email |
+|--------|------|------|----------|-------|
+| Cuisine (péremption) | ✅ | ✅ | · | · |
+| Cuisine (planning) | · | · | ✅ | · |
+| Courses (rappel) | ✅ | ✅ | ✅ | · |
+| Famille (anniversaire) | ✅ | ✅ | ✅ | · |
+| Famille (documents) | ✅ | ✅ | · | ✅ |
+| Famille (budget) | · | · | · | ✅ |
+| Maison (entretien urgent) | ✅ | ✅ | ✅ | · |
+| Maison (garantie) | ✅ | · | · | ✅ |
+| Jeux (résultats) | ✅ | ✅ | · | · |
+| Dashboard (badges) | ✅ | ✅ | · | · |
+| Admin (échec CRON) | ✅ | ✅ | ✅ | ✅ |
+| Multi (digest matin) | · | · | ✅ | · |
+| Multi (résumé hebdo) | · | · | ✅ | ✅ |
+| Multi (rapport mensuel) | · | · | · | ✅ |
+
+### Annexe D — Architecture notifications
+
+```
+DispatcherNotifications
+  ├── NotifNtfy (ntfy.sh) ──── Alertes urgentes
+  ├── NotifWebPush (VAPID) ─── Temps réel navigateur
+  ├── NotifEmail (Resend) ──── Rapports, résumés
+  └── NotifWhatsApp (Meta) ─── Digest matinal, partage planning
+
+Routing intelligent:
+  - Smart failover : push → ntfy → WhatsApp → email
+  - Throttle : max 10 messages/heure par utilisateur
+  - Digest mode : messages non urgents consolidés en digest quotidien (09:00)
+```
+
+### Annexe E — Flux intra-modules
+
+#### Cuisine
+```
+Recettes ──→ Planning ──→ Courses ──→ Inventaire
+   │             │            │            │
+   │             ▼            ▼            ▼
+   │      Batch Cooking   Checkout    Stock bas → alerte
+   │             │            │
+   │             ▼            ▼
+   │      Anti-gaspillage  Scan barcode
+   │             │
+   └─────→ Suggestions IA ←─── Photo frigo
+```
+
+#### Famille
+```
+Jules ──→ Activités ──→ Routines
+  │          │             │
+  │          ▼             ▼
+  │    Suggestions IA   Complétion
+  │                        │
+  ├──→ Budget ──→ Analyse IA
+  ├──→ Anniversaires ──→ Checklists
+  ├──→ Calendriers ──→ Événements
+  └──→ Timeline / Journal
+```
+
+#### Maison
+```
+Projets ──→ Tâches ──→ Artisans
+   │           │          │
+   │           ▼          ▼
+   │     Entretien    Devis/Factures
+   │           │
+   │           ▼
+   ├──→ Jardin ──→ Récolte
+   ├──→ Équipements ──→ Garanties ──→ SAV
+   ├──→ Charges ──→ Énergie ──→ Anomalies IA
+   └──→ Stocks/Provisions ──→ Cellier
+```
+
+---
+
+## 16. Récapitulatif global
+
+### Vue synthétique des phases
+
+| Phase | Objectif | Actions | Effort | Priorité |
+|-------|----------|---------|--------|----------|
+| **Phase 1** | Fondations : bugs + dette technique | 20 | M | 🔴 CRITIQUE |
+| **Phase 2** | Tests : couverture critique | 20 | XL | 🔴 HAUTE |
+| **Phase 3** | SQL : consolidation + tables manquantes | 9 | M | 🟡 HAUTE |
+| **Phase 4** | Features : stubs → implémentation | 11 | L | 🟡 HAUTE |
+| **Phase 5** | Inter-modules : nouveaux bridges | 17 | L | 🟡 MOYENNE-HAUTE |
+| **Phase 6** | UX : simplification des flux | 16 | L | 🟡 MOYENNE-HAUTE |
+| **Phase 7** | Jobs CRON + notifications | 23 | L | 🟡 MOYENNE |
+| **Phase 8** | Admin avancé | 17 | L | 🟢 MOYENNE |
+| **Phase 9** | IA avancée + innovations | 15 | XL | 🟢 MOYENNE-BASSE |
+| **Phase 10** | Documentation | 20 | L | 🟢 BASSE-MOYENNE |
+| **Phase 11** | Innovations techniques + DevOps | 15 | XL | 🟢 BASSE |
+| **Phase 12** | Refactoring code | 4 | S | 🟢 BASSE |
+| **TOTAL** | | **187 actions** | | |
+
+### Compteur par taille d'effort
+
+| Taille | Description | Nombre d'actions |
+|--------|-------------|-----------------|
+| **S** (Small) | 1-3 fichiers, changements simples | ~65 |
+| **M** (Medium) | 3-8 fichiers, logique modérée | ~80 |
+| **L** (Large) | 8+ fichiers, logique complexe ou multi-couches | ~32 |
+| **XL** (Extra Large) | Phases entières avec nombreuses dépendances | ~10 |
+
+### Ordre recommandé d'exécution
+
+```
+Phase 1 (Fondations)     ─── Semaines 1-2  ── BLOQUANT pour tout le reste
+    │
+    ├── Phase 3 (SQL)     ─── Semaines 2-3  ── En parallèle des tests
+    │
+    ├── Phase 2 (Tests)   ─── Semaines 2-6  ── Continu, commence tôt
+    │
+    └── Phase 12 (Refactoring) ── Au fil de l'eau
+         │
+         ├── Phase 4 (Features)       ─── Après Phase 1+3
+         │
+         ├── Phase 5 (Inter-modules)  ─── Après Phase 4
+         │
+         ├── Phase 6 (UX)            ─── Après Phase 4
+         │
+         ├── Phase 7 (CRON + Notifs)  ─── Après Phase 4
+         │
+         ├── Phase 8 (Admin)          ─── Après Phase 7
+         │
+         ├── Phase 9 (IA)            ─── Après Phase 5+6
+         │
+         ├── Phase 10 (Docs)         ─── En parallèle de tout
+         │
+         └── Phase 11 (DevOps)       ─── Quand le reste est stabilisé
+```
+
+### Dépendances entre phases
+
+| Phase | Dépend de |
+|-------|-----------|
+| Phase 1 | — (aucune) |
+| Phase 2 | Phase 1 (corr. bugs d'abord) |
+| Phase 3 | Phase 1 (P1-05 congélation) |
+| Phase 4 | Phase 1 + Phase 3 (tables SQL) |
+| Phase 5 | Phase 4 (features complètes) |
+| Phase 6 | Phase 4 (features complètes) |
+| Phase 7 | Phase 4 (features) + Phase 5 (bridges) |
+| Phase 8 | Phase 7 (jobs à manager) |
+| Phase 9 | Phase 5 (bridges) + Phase 6 (UX) |
+| Phase 10 | Toutes phases (documenter ce qui existe) |
+| Phase 11 | Phase 2 (tests en place) |
+| Phase 12 | Phase 1 (dette nettoyée) |
+
+---
+
+> **Document généré le 31/03/2026** — Basé intégralement sur ANALYSE_COMPLETE.md
+> **187 actions identifiées** réparties en **12 phases** priorisées
+> **Note globale app : 7.5/10** — Architecture excellente, pénalisée par l'absence de tests frontend et les stubs non implémentés

@@ -23,7 +23,7 @@ Usage:
 
     # Streaming
     async for chunk in routeur.appeler_streaming("Raconte une histoire"):
-        print(chunk, end="")
+        logger.debug(chunk)
 """
 
 from __future__ import annotations

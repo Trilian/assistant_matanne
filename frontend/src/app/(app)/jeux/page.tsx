@@ -120,12 +120,12 @@ function SectionIA({ analyse }: { analyse?: DashboardJeux["analyse_ia"] }) {
 
 export default function PageJeux() {
   const router = useRouter();
-  const widgets = [
+  const widgets: { id: string; titre: string }[] = [
     { id: "budget", titre: "Budget" },
     { id: "opportunites", titre: "Opportunites" },
     { id: "ia", titre: "IA" },
     { id: "kpis", titre: "KPIs" },
-  ] as const;
+  ];
   const { data: dashboard, isLoading } = utiliserRequete<DashboardJeux>(
     ["jeux", "dashboard"],
     obtenirDashboardJeux
@@ -179,7 +179,7 @@ export default function PageJeux() {
       <GrilleWidgets
         stockageCle="widgets:hub:jeux"
         titre="Widgets"
-        items={widgets as unknown as { id: string; titre: string }[]}
+        items={widgets}
         classeGrille="grid gap-4 md:grid-cols-2"
         renderItem={(item) => {
           if (item.id === "opportunites") {

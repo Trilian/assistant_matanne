@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AlertCircle, Bell, Check, Trash2 } from 'lucide-react'
 import { apiClient } from '@/src/bibliotheque/api/client'
+import { toast } from 'sonner'
 
 /**
  * Page Centre de notifications (E.5)
@@ -64,7 +65,7 @@ export default function CentreNotificationsPage() {
       await apiClient.post(`/api/v1/notifications/historique/${notifId}/marquer-lu`)
       refetch()
     } catch (error) {
-      console.error('Erreur marquage:', error)
+      toast.error('Erreur lors du marquage de la notification')
     }
   }
 
@@ -74,7 +75,7 @@ export default function CentreNotificationsPage() {
       await apiClient.post('/api/v1/notifications/historique/marquer-tous-lus')
       refetch()
     } catch (error) {
-      console.error('Erreur marquage tous:', error)
+      toast.error('Erreur lors du marquage des notifications')
     }
   }
 

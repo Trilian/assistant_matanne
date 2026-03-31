@@ -41,8 +41,10 @@ class TokenValidationMixin:
             return None
 
         try:
-            # Utiliser l'API Supabase pour valider le token
-            self._client.auth._storage_key = token  # Temporaire
+            # TODO(P1-06): Remplacer par l'API officielle Supabase quand disponible.
+            # Accès direct à _storage_key car supabase-py ne fournit pas encore
+            # de méthode publique pour valider un token externe.
+            self._client.auth._storage_key = token
             response = self._client.auth.get_user(token)
 
             if response and response.user:

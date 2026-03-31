@@ -313,9 +313,6 @@ __all__ = [
     "ActionEntry",
     "ActionFilter",
     "ActionStats",
-    "afficher_activity_timeline",
-    "afficher_user_activity",
-    "afficher_activity_stats",
 ]
 
 

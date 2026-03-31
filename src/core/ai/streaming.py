@@ -59,7 +59,7 @@ class StreamingMixin:
 
         Usage:
             async for chunk in client.appeler_streaming("Génère une recette"):
-                print(chunk, end="", flush=True)
+                yield chunk  # Transmettre au client SSE
 
         Raises:
             ErreurServiceIA: Si erreur API

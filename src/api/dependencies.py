@@ -59,14 +59,12 @@ def _est_environnement_dev() -> bool:
     if env in _ENVIRONNEMENTS_DEV_AUTORISES:
         return True
 
-    # Indicateurs supplémentaires de production
-    # (présence de secrets réels, etc.)
-    api_secret = os.getenv("API_SECRET_KEY", "")
-    if api_secret and api_secret != "dev-secret-key-change-in-production":
-        logger.warning(
-            f"ENVIRONMENT='{env}' non reconnu avec API_SECRET_KEY configurée. "
-            "Auto-auth désactivée par sécurité."
-        )
+    # Environnement non reconnu — refuser l'auto-auth par sécurité
+    logger.warning(
+        f"ENVIRONMENT='{env}' non reconnu (pas dans la liste blanche). "
+        "Auto-auth désactivée par sécurité. "
+        "Valeurs reconnues : development, dev, local, test, testing."
+    )
 
     return False
 

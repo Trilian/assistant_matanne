@@ -403,12 +403,12 @@ class NotificationJeuxService:
 
 
 def afficher_badge_notifications(service: "NotificationJeuxService | None" = None) -> None:
-    # UI supprimée — stub rétrocompatible
+    """Déprécié : UI supprimée. Sera retiré dans une version future."""
     pass
 
 
 def afficher_notification(notification: "NotificationJeux") -> None:
-    # UI supprimée — stub rétrocompatible
+    """Déprécié : UI supprimée. Sera retiré dans une version future."""
     pass
 
 
@@ -417,7 +417,7 @@ def afficher_liste_notifications(
     limite: int = 10,
     type_jeu: str | None = None,
 ) -> None:
-    # UI supprimée — stub rétrocompatible
+    """Déprécié : UI supprimée. Sera retiré dans une version future."""
     pass
 
 

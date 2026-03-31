@@ -95,7 +95,16 @@ export default function NotesPage() {
   const tagsForm = (watch("tags") ?? []) as string[];
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
-    (data: DonneesNote) => creerNote(data as unknown as NoteCreate),
+    (data: DonneesNote) => creerNote({
+      titre: data.titre,
+      contenu: data.contenu ?? undefined,
+      categorie: data.categorie,
+      couleur: data.couleur ?? undefined,
+      epingle: data.epingle,
+      est_checklist: data.est_checklist,
+      items_checklist: data.items_checklist ? JSON.stringify(data.items_checklist) : undefined,
+      tags: data.tags,
+    }),
     {
       onSuccess: () => {
         toast.success("Note créée");

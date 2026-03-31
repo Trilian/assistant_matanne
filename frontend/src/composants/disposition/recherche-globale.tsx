@@ -86,7 +86,6 @@ export function RechercheGlobale() {
         const donnees = await rechercheGlobale(terme, 20)
         setResultats(donnees)
       } catch (error) {
-        console.error('Erreur de recherche:', error)
         toast.error('La recherche a échoué. Veuillez réessayer.')
         setResultats([])
       } finally {

@@ -101,7 +101,11 @@ function OngletCanauxNotifications() {
 
   const handleSave = () => {
     sauvegarder({
-      canaux_par_categorie: canaux as unknown as Parameters<typeof sauvegarder>[0]["canaux_par_categorie"],
+      canaux_par_categorie: {
+        rappels: canaux["rappels"] ?? [],
+        alertes: canaux["alertes"] ?? [],
+        resumes: canaux["resumes"] ?? [],
+      },
       mode_vacances: modeVacances,
       checklist_voyage_auto: checklistVoyageAuto,
     });

@@ -46,7 +46,7 @@ class AIStreamingMixin:
         Usage:
             # Via générateur sync
             for chunk in service.call_with_streaming_sync(prompt):
-                print(chunk, end="")
+                yield chunk  # Transmettre au client SSE
 
             # Option 2: Container manuel
             container = st.empty()
@@ -103,7 +103,7 @@ class AIStreamingMixin:
 
         Usage:
             for chunk in service.call_with_streaming_sync("Génère une recette"):
-                print(chunk, end="")
+                yield chunk  # Transmettre au client SSE
         """
         import asyncio
         import concurrent.futures

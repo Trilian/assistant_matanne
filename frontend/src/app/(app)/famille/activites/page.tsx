@@ -191,6 +191,7 @@ export default function PageActivites() {
     if (!dialogueCreation) {
       setPrefillDismiss(false);
     }
+    // Intentionnel : ne déclencher le prefill que quand le dialogue s'ouvre/ferme
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dialogueCreation]);
 

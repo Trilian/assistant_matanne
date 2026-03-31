@@ -64,7 +64,6 @@ export function GrilleIAPonderee({ onGenerer, onAnalyser }: GrilleIAGenereeProps
       toast.success("Grille IA générée avec succès");
     } catch (err) {
       toast.error("Erreur lors de la génération de la grille");
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -80,7 +79,6 @@ export function GrilleIAPonderee({ onGenerer, onAnalyser }: GrilleIAGenereeProps
       toast.success("Analyse complétée");
     } catch (err) {
       toast.error("Erreur lors de l'analyse");
-      console.error(err);
     } finally {
       setLoading(false);
     }

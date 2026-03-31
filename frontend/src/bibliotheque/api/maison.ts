@@ -1032,8 +1032,8 @@ export async function obtenirAlertesMaison(): Promise<AlerteMaison[]> {
 
 /** Tâches du jour avec statut */
 export async function obtenirTachesJourMaison(): Promise<BriefingMaison["taches_jour_detail"]> {
-  const { data } = await clientApi.get<{ items: BriefingMaison["taches_jour_detail"] }>("/maison/taches-jour");
-  return data.items ?? (data as unknown as BriefingMaison["taches_jour_detail"]);
+  const { data } = await clientApi.get<{ items?: BriefingMaison["taches_jour_detail"] } | BriefingMaison["taches_jour_detail"]>("/maison/taches-jour");
+  return Array.isArray(data) ? data : (data.items ?? []);
 }
 
 /** Déclenche l'évaluation et l'envoi des rappels push maison */
@@ -1341,8 +1341,8 @@ export async function creerTachePonctuelle(data: {
 
 /** Régénérer le planning ménage IA */
 export async function regenererPlanningIA(forcer = false): Promise<PlanningSemaine> {
-  const { data } = await clientApi.post<{ planning: PlanningSemaine }>("/maison/menage/planning-semaine-ia/regenerer", { forcer });
-  return data.planning ?? (data as unknown as PlanningSemaine);
+  const { data } = await clientApi.post<{ planning?: PlanningSemaine } & PlanningSemaine>("/maison/menage/planning-semaine-ia/regenerer", { forcer });
+  return data.planning ?? data;
 }
 
 /** Compléter une tâche ménagère */

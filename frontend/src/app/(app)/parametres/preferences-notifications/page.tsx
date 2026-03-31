@@ -164,7 +164,7 @@ export default function PreferencesNotificationsPage() {
                       <input
                         type="checkbox"
                         value={canal.id}
-                        {...register(`canaux_par_categorie.${cat.id as any}`)}
+                        {...register(`canaux_par_categorie.${cat.id}` as const)}
                         className="w-4 h-4"
                       />
                       <span className="text-sm">{canal.label}</span>

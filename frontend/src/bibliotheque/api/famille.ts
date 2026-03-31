@@ -474,11 +474,11 @@ export async function obtenirChecklistAnniversaireItems(
 ): Promise<ItemChecklistAnniversaire[]> {
   const params: Record<string, string> = {};
   if (categorie) params.categorie = categorie;
-  const { data } = await clientApi.get<{ items: ItemChecklistAnniversaire[] }>(
+  const { data } = await clientApi.get<{ items?: ItemChecklistAnniversaire[] } | ItemChecklistAnniversaire[]>(
     `/famille/checklists-anniversaire/${checklistId}/items`,
     { params }
   );
-  return data.items ?? data as unknown as ItemChecklistAnniversaire[];
+  return Array.isArray(data) ? data : (data.items ?? []);
 }
 
 /** Met à jour l'état fait/non-fait d'un item checklist anniversaire */

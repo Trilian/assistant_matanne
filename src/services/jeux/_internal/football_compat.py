@@ -291,5 +291,5 @@ def chercher_equipe(nom: str) -> dict | None:
 
 
 def vider_cache() -> None:
-    """Vide le cache des requêtes (no-op, gardé pour compatibilité)."""
+    """Déprécié : no-op, gardé pour compatibilité. Sera retiré dans une version future."""
     pass

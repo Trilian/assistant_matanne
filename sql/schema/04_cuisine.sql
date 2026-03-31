@@ -525,3 +525,36 @@ CREATE INDEX IF NOT EXISTS ix_prep_batch_consomme ON preparations_batch(consomme
 CREATE INDEX IF NOT EXISTS idx_prep_localisation_peremption ON preparations_batch(localisation, date_peremption);
 CREATE INDEX IF NOT EXISTS idx_prep_consomme_peremption ON preparations_batch(consomme, date_peremption);
 
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Table congélation — persistance des articles congelés (P3-05)
+-- Remplace le stockage mémoire de congelation.py
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS batch_cooking_congelation (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(200) NOT NULL,
+    date_congelation DATE NOT NULL DEFAULT CURRENT_DATE,
+    date_limite DATE NOT NULL,
+    portions INTEGER NOT NULL DEFAULT 1,
+    categorie VARCHAR(50) NOT NULL DEFAULT 'autre',
+    recette_id INTEGER,
+    session_id INTEGER,
+    notes TEXT,
+    consomme BOOLEAN NOT NULL DEFAULT FALSE,
+    date_consommation DATE,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_congelation_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_congelation_session FOREIGN KEY (session_id) REFERENCES sessions_batch_cooking(id) ON DELETE SET NULL,
+    CONSTRAINT ck_congelation_portions_positive CHECK (portions > 0),
+    CONSTRAINT ck_congelation_categorie CHECK (categorie IN (
+        'viande', 'poisson', 'legume', 'fruit', 'plat_cuisine',
+        'soupe', 'sauce', 'pain', 'patisserie', 'herbes', 'autre'
+    ))
+);
+CREATE INDEX IF NOT EXISTS ix_congelation_date_limite ON batch_cooking_congelation(date_limite);
+CREATE INDEX IF NOT EXISTS ix_congelation_categorie ON batch_cooking_congelation(categorie);
+CREATE INDEX IF NOT EXISTS ix_congelation_consomme ON batch_cooking_congelation(consomme);
+CREATE INDEX IF NOT EXISTS ix_congelation_recette ON batch_cooking_congelation(recette_id);
+CREATE INDEX IF NOT EXISTS idx_congelation_consomme_limite ON batch_cooking_congelation(consomme, date_limite)
+    WHERE consomme = FALSE;
+
