@@ -21,6 +21,10 @@ export interface Recette {
   compatible_cookeo?: boolean;
   compatible_monsieur_cuisine?: boolean;
   compatible_airfryer?: boolean;
+  calories?: number;
+  proteines?: number;
+  lipides?: number;
+  glucides?: number;
   created_at: string;
   updated_at?: string;
 }

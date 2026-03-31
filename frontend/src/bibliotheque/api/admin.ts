@@ -33,6 +33,28 @@ export interface JobLogsResponse {
   total: number
 }
 
+export interface JobHistoryEntry {
+  id: number
+  job_id: string
+  job_name: string
+  started_at: string | null
+  ended_at: string | null
+  duration_ms: number
+  status: string
+  error_message: string | null
+  output_logs: string | null
+  triggered_by_user_id: string | null
+  triggered_by_user_role: string | null
+}
+
+export interface JobHistoryResponse {
+  items: JobHistoryEntry[]
+  total: number
+  page: number
+  par_page: number
+  pages_totales: number
+}
+
 export interface AuditLogEntry {
   id: number | string
   timestamp: string
@@ -352,6 +374,18 @@ export async function declencherJob(jobId: string): Promise<{ status: string; jo
 
 export async function obtenirLogsJob(jobId: string): Promise<JobLogsResponse> {
   const { data } = await clientApi.get(`/api/v1/admin/jobs/${jobId}/logs`)
+  return data
+}
+
+export async function listerHistoriqueJobs(params?: {
+  page?: number
+  par_page?: number
+  job_id?: string
+  status?: string
+  depuis?: string
+  jusqu_a?: string
+}): Promise<JobHistoryResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/jobs/history', { params })
   return data
 }
 

@@ -13,6 +13,7 @@ Tous les handlers sont tolérants aux pannes (never crash the bus).
 from __future__ import annotations
 
 import logging
+from datetime import date, timedelta
 
 from .bus import EvenementDomaine
 
@@ -711,6 +712,148 @@ def _sync_charges_vers_dashboard(event: EvenementDomaine) -> None:
 
 
 # ═══════════════════════════════════════════════════════════
+# SPRINT D — INTERACTIONS INTER-MODULES
+# ═══════════════════════════════════════════════════════════
+
+
+def _proposer_recettes_saison_depuis_recolte(event: EvenementDomaine) -> None:
+    """D.1: récolte jardin -> rafraîchir suggestions recettes/planning."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="recettes")
+        nb += cache.invalidate(pattern="planning")
+        nb += cache.invalidate(pattern="suggestions")
+        logger.info(
+            "Sprint D.1: caches recettes/planning invalidés (%d) après %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec flux D.1 recolte->recettes: %s", e)
+
+
+def _creer_tache_entretien_sur_anomalie_energie(event: EvenementDomaine) -> None:
+    """D.2: anomalie énergie -> création d'une tâche d'entretien auto."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import TacheEntretien
+
+        details = event.data.get("details") or []
+        message = event.data.get("message") or "Anomalie énergie détectée"
+        with obtenir_contexte_db() as session:
+            session.add(
+                TacheEntretien(
+                    nom="Vérifier anomalie énergie",
+                    description=str(message)[:500],
+                    categorie="entretien",
+                    priorite="haute",
+                    fait=False,
+                    prochaine_fois=date.today() + timedelta(days=1),
+                    notes="; ".join(str(d) for d in details[:5]) if details else None,
+                )
+            )
+            session.commit()
+        logger.info("Sprint D.2: tâche entretien créée après énergie.anomalie")
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec flux D.2 energie->entretien: %s", e)
+
+
+def _publier_alerte_dashboard_budget(event: EvenementDomaine) -> None:
+    """D.3: dépassement budget -> invalider dashboard/alertes."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="dashboard")
+        nb += cache.invalidate(pattern="budget")
+        nb += cache.invalidate(pattern="alertes")
+        logger.info("Sprint D.3: caches dashboard invalidés (%d)", nb)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec flux D.3 budget->dashboard: %s", e)
+
+
+def _mettre_a_jour_courses_predictives(event: EvenementDomaine) -> None:
+    """D.4: inventaire impacté -> recalcul des suggestions prédictives."""
+    try:
+        from src.services.cuisine.prediction_courses import obtenir_service_prediction_courses
+
+        service = obtenir_service_prediction_courses()
+        service.predire_articles(limite=20)
+
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        cache.invalidate(pattern="courses")
+        cache.invalidate(pattern="predictions")
+        logger.info("Sprint D.4: prédictions courses recalculées")
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec flux D.4 inventaire->courses: %s", e)
+
+
+def _adapter_planning_sur_feedback_recette(event: EvenementDomaine) -> None:
+    """D.5: feedback recette -> invalider recommandations de planning."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        cache.invalidate(pattern="planning")
+        cache.invalidate(pattern="recettes")
+        cache.invalidate(pattern="suggestions")
+        logger.info("Sprint D.5: invalidation planning après recette.feedback")
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec flux D.5 feedback->planning: %s", e)
+
+
+def _notifier_renouvellement_contrat(event: EvenementDomaine) -> None:
+    """D.6: contrat en renouvellement -> notification multi-canal."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        message = str(event.data.get("message") or "Contrats à renouveler prochainement")
+        dispatcher = get_dispatcher_notifications()
+        for user_id in ("matanne",):
+            dispatcher.envoyer(
+                user_id=user_id,
+                message=message,
+                canaux=["ntfy", "push", "email", "whatsapp"],
+                titre="Alerte renouvellement contrats",
+                type_email="alerte_critique",
+                alerte={"titre": "Alerte renouvellement contrats", "message": message},
+            )
+        logger.info("Sprint D.6: notification contrats envoyée")
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec flux D.6 contrats->notifications: %s", e)
+
+
+def _declencher_agent_ia_proactif(event: EvenementDomaine) -> None:
+    """I.15: déclenche l'agent proactif selon météo/planning/contexte EventBus."""
+    try:
+        from src.services.utilitaires.assistant_proactif import (
+            obtenir_service_assistant_proactif,
+        )
+
+        service = obtenir_service_assistant_proactif()
+        resultat = service.traiter_evenement(event_type=event.type, data=event.data)
+
+        if resultat.get("status") == "updated":
+            from .bus import obtenir_bus
+
+            obtenir_bus().emettre(
+                "assistant.proactif.suggestion",
+                {
+                    "event_source": event.type,
+                    "nb_suggestions": resultat.get("nb_suggestions", 0),
+                },
+                source="assistant_proactif",
+            )
+        logger.info("I.15 agent proactif traité: %s -> %s", event.type, resultat.get("status"))
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec I.15 agent proactif: %s", e)
+
+
+# ═══════════════════════════════════════════════════════════
 # ENREGISTREMENT — Appelé au bootstrap
 # ═══════════════════════════════════════════════════════════
 
@@ -836,6 +979,36 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("dashboard.charges_update", _sync_charges_vers_dashboard, priority=85)
     compteur += 1
 
+    # ── Sprint D — Inter-modules EventBus enrichi ──
+
+    bus.souscrire("jardin.recolte", _proposer_recettes_saison_depuis_recolte, priority=80)
+    compteur += 1
+
+    bus.souscrire("energie.anomalie", _creer_tache_entretien_sur_anomalie_energie, priority=80)
+    compteur += 1
+
+    bus.souscrire("budget.depassement", _publier_alerte_dashboard_budget, priority=80)
+    compteur += 1
+
+    bus.souscrire("inventaire.modification_importante", _mettre_a_jour_courses_predictives, priority=80)
+    compteur += 1
+
+    bus.souscrire("recette.feedback", _adapter_planning_sur_feedback_recette, priority=80)
+    compteur += 1
+
+    bus.souscrire("contrat.renouvellement", _notifier_renouvellement_contrat, priority=80)
+    compteur += 1
+
+    # ── Sprint I.15 — Agent IA proactif EventBus ──
+    bus.souscrire("meteo.*", _declencher_agent_ia_proactif, priority=70)
+    compteur += 1
+    bus.souscrire("planning.*", _declencher_agent_ia_proactif, priority=70)
+    compteur += 1
+    bus.souscrire("budget.depassement", _declencher_agent_ia_proactif, priority=70)
+    compteur += 1
+    bus.souscrire("assistant.commande_executee", _declencher_agent_ia_proactif, priority=70)
+    compteur += 1
+
     # ── Métriques (priorité moyenne) ──
     bus.souscrire("*", _enregistrer_metrique_evenement, priority=50)
     compteur += 1
@@ -863,4 +1036,11 @@ __all__ = [
     "_sync_entretien_vers_budget",
     "_sync_voyages_vers_planning",
     "_sync_charges_vers_dashboard",
+    "_proposer_recettes_saison_depuis_recolte",
+    "_creer_tache_entretien_sur_anomalie_energie",
+    "_publier_alerte_dashboard_budget",
+    "_mettre_a_jour_courses_predictives",
+    "_adapter_planning_sur_feedback_recette",
+    "_notifier_renouvellement_contrat",
+    "_declencher_agent_ia_proactif",
 ]

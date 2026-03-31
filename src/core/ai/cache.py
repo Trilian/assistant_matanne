@@ -15,9 +15,16 @@ __all__ = ["CacheIA"]
 import hashlib
 import json
 import logging
+import time
 from typing import Any
 
 from ..constants import CACHE_TTL_IA
+from .embeddings import (
+    embedder_texte,
+    distance_hamming,
+    signature_ann,
+    similarite_cosine,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +47,19 @@ class CacheIA:
     PREFIXE = "ia_"
     """Préfixe pour toutes les clés cache IA."""
 
+    PREFIXE_INDEX_SEMANTIQUE = "ia_semidx_"
+    """Préfixe des indexes sémantiques par couple (modèle, système)."""
+
     TTL_PAR_DEFAUT = CACHE_TTL_IA
     """TTL par défaut pour réponses IA (1h)."""
+
+    INDEX_SEMANTIQUE_MAX = 300
+    """Nombre max d'entrées mémorisées pour la recherche sémantique."""
+
+    SEUIL_SIMILARITE_DEFAUT = 0.72
+    """Seuil cosine minimal pour considérer deux prompts comme proches."""
+
+    _hits_semantiques = 0
 
     @staticmethod
     def generer_cle(
@@ -107,8 +125,21 @@ class CacheIA:
 
         if resultat:
             logger.debug(f"Cache IA HIT: {cle[:16]}...")
+            return resultat
 
-        return resultat
+        resultat_semantique = CacheIA._obtenir_semantique(
+            prompt=prompt,
+            systeme=systeme,
+            temperature=temperature,
+            modele=modele,
+            ttl=ttl,
+        )
+        if resultat_semantique:
+            CacheIA._hits_semantiques += 1
+            logger.debug("Cache IA HIT sémantique")
+            return resultat_semantique
+
+        return None
 
     @staticmethod
     def definir(
@@ -141,6 +172,14 @@ class CacheIA:
         ttl_final = ttl or CacheIA.TTL_PAR_DEFAUT
 
         _cache().set(cle, reponse, ttl=ttl_final, tags=["ia", "mistral"])
+        CacheIA._mettre_a_jour_index_semantique(
+            cle=cle,
+            prompt=prompt,
+            systeme=systeme,
+            temperature=temperature,
+            modele=modele,
+            ttl=ttl_final,
+        )
 
         logger.debug(f"Cache IA SET: {cle[:16]}...")
 
@@ -196,6 +235,7 @@ class CacheIA:
             "taux_hit": (hits / total * 100) if total > 0 else 0,
             "taille_mo": 0.0,
             "ttl_defaut": CacheIA.TTL_PAR_DEFAUT,
+            "hits_semantiques": CacheIA._hits_semantiques,
         }
 
     @staticmethod
@@ -212,6 +252,120 @@ class CacheIA:
         """
         _cache().l1.cleanup_expired()
         logger.info(f"Nettoyage cache IA (âge max: {age_max_secondes}s)")
+
+    @staticmethod
+    def _cle_index_semantique(systeme: str, modele: str) -> str:
+        """Construit la clé d'index sémantique isolée par système et modèle."""
+        identifiant = hashlib.sha256(f"{modele}|{systeme}".encode()).hexdigest()[:16]
+        return f"{CacheIA.PREFIXE_INDEX_SEMANTIQUE}{identifiant}"
+
+    @staticmethod
+    def _mettre_a_jour_index_semantique(
+        cle: str,
+        prompt: str,
+        systeme: str,
+        temperature: float,
+        modele: str,
+        ttl: int,
+    ) -> None:
+        """Mémorise les métadonnées prompt pour la recherche sémantique future."""
+        cle_index = CacheIA._cle_index_semantique(systeme=systeme, modele=modele)
+        index = _cache().get(cle_index, default=[])
+        if not isinstance(index, list):
+            index = []
+
+        vecteur, provider = embedder_texte(prompt, prefer_externe=True)
+        signature = signature_ann(vecteur)
+
+        entree = {
+            "cle": cle,
+            "prompt": prompt,
+            "temperature": float(temperature),
+            "embedding": vecteur,
+            "signature": signature,
+            "provider": provider,
+            "timestamp": time.time(),
+        }
+
+        index = [i for i in index if isinstance(i, dict) and i.get("cle") != cle]
+        index.append(entree)
+        index = index[-CacheIA.INDEX_SEMANTIQUE_MAX :]
+
+        _cache().set(
+            cle_index,
+            index,
+            ttl=max(ttl, CacheIA.TTL_PAR_DEFAUT),
+            tags=["ia", "ia_semantique"],
+            persistent=True,
+        )
+
+    @staticmethod
+    def _obtenir_semantique(
+        prompt: str,
+        systeme: str,
+        temperature: float,
+        modele: str,
+        ttl: int | None,
+    ) -> str | None:
+        """Recherche une réponse de prompt sémantiquement proche."""
+        cle_index = CacheIA._cle_index_semantique(systeme=systeme, modele=modele)
+        index = _cache().get(cle_index, default=[])
+        if not isinstance(index, list) or not index:
+            return None
+
+        prompt_vecteur, provider = embedder_texte(prompt, prefer_externe=True)
+        signature_cible = signature_ann(prompt_vecteur)
+        meilleur_score = 0.0
+        meilleure_entree: dict[str, Any] | None = None
+
+        for entree in index[-80:]:
+            if not isinstance(entree, dict):
+                continue
+
+            temp_candidate = float(entree.get("temperature") or 0.7)
+            if abs(temp_candidate - float(temperature)) > 0.25:
+                continue
+
+            signature_candidate = str(entree.get("signature") or "")
+            if signature_candidate and signature_cible:
+                if distance_hamming(signature_candidate, signature_cible) > 28:
+                    continue
+
+            vecteur_candidate = entree.get("embedding")
+            if not isinstance(vecteur_candidate, list):
+                prompt_candidate = str(entree.get("prompt") or "")
+                if not prompt_candidate:
+                    continue
+                vecteur_candidate, _ = embedder_texte(
+                    prompt_candidate,
+                    prefer_externe=(provider == "mistral"),
+                )
+
+            score = similarite_cosine(prompt_vecteur, vecteur_candidate)
+            if score > meilleur_score:
+                meilleur_score = score
+                meilleure_entree = entree
+
+        if not meilleure_entree or meilleur_score < CacheIA.SEUIL_SIMILARITE_DEFAUT:
+            return None
+
+        cle_candidate = str(meilleure_entree.get("cle") or "")
+        if not cle_candidate:
+            return None
+
+        resultat = _cache().get(cle_candidate)
+        if not resultat:
+            return None
+
+        # Promotion: on hydrate la clé exacte demandée pour les prochains appels.
+        cle_exacte = CacheIA.generer_cle(prompt, systeme, temperature, modele)
+        _cache().set(
+            cle_exacte,
+            resultat,
+            ttl=ttl or CacheIA.TTL_PAR_DEFAUT,
+            tags=["ia", "mistral", "ia_semantique"],
+        )
+        return resultat
 
 
 # ═══════════════════════════════════════════════════════════

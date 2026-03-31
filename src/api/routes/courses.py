@@ -2,34 +2,40 @@
 Routes API pour les courses.
 """
 
-import time
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, UploadFile
 from pydantic import BaseModel, Field
 
 # ----------------------------------------------------------
-# Idempotency cache (TTL 5 min, single-instance)
-_IDEMPOTENCY_CACHE: dict[str, tuple[float, Any]] = {}
+# Idempotency cache (TTL 5 min, multi-worker via cache multi-niveaux)
 _IDEMPOTENCY_TTL = 300  # secondes
+_IDEMPOTENCY_PREFIX = "idempotency:courses:"
 
 
 def _check_idempotency(key: str | None) -> Any | None:
     """Retourne le résultat mis en cache si la clé a déjà été traitée récemment."""
     if not key:
         return None
-    now = time.time()
-    expired = [k for k, (ts, _) in _IDEMPOTENCY_CACHE.items() if now - ts > _IDEMPOTENCY_TTL]
-    for k in expired:
-        del _IDEMPOTENCY_CACHE[k]
-    entry = _IDEMPOTENCY_CACHE.get(key)
-    return entry[1] if entry else None
+    from src.core.caching import obtenir_cache
+
+    cache = obtenir_cache()
+    return cache.get(f"{_IDEMPOTENCY_PREFIX}{key}")
 
 
 def _store_idempotency(key: str | None, result: Any) -> None:
     """Enregistre un résultat pour éviter les doublons d'idempotency."""
     if key:
-        _IDEMPOTENCY_CACHE[key] = (time.time(), result)
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        cache.set(
+            key=f"{_IDEMPOTENCY_PREFIX}{key}",
+            value=result,
+            ttl=_IDEMPOTENCY_TTL,
+            tags=["courses", "idempotency"],
+            persistent=True,
+        )
 
 
 from src.api.dependencies import require_auth

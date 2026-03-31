@@ -91,6 +91,7 @@ interface LienNav {
 
 const LIENS: LienNav[] = [
   { nom: "Accueil", chemin: "/", Icone: Home },
+  { nom: "Focus", chemin: "/focus", Icone: Zap },
   { nom: "Ma Semaine", chemin: "/ma-semaine", Icone: CalendarRange },
   {
     nom: "Cuisine",
@@ -193,6 +194,7 @@ const LIENS: LienNav[] = [
       { nom: "Dashboard", chemin: "/ia-avancee", Icone: BarChart3 },
       { nom: "Suggestions achats", chemin: "/ia-avancee/suggestions-achats", Icone: Lightbulb },
       { nom: "Suggestions proactives", chemin: "/ia-avancee/suggestions-proactives", Icone: Zap },
+      { nom: "Comparateur recettes", chemin: "/ia-avancee/comparateur-recettes", Icone: BookOpen },
     ],
   },
 ];

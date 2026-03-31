@@ -27,6 +27,7 @@ import {
 import { Progress } from "@/composants/ui/progress";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirDashboardCuisine } from "@/bibliotheque/api/tableau-bord";
+import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
 
 const SECTIONS = [
   {
@@ -92,6 +93,8 @@ export default function PageCuisine() {
           Ton cockpit cuisine — planning, courses, stocks
         </p>
       </div>
+
+      <CarteNotificationsModule moduleKey="cuisine" moduleLabel="Cuisine" />
 
       {/* Cockpit KPIs */}
       {dashboard && (

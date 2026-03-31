@@ -15,6 +15,7 @@ from .rate_limit import RateLimitIA
 from .router import Fournisseur, RouteurIA, obtenir_routeur_ia
 from .streaming import StreamingMixin
 from .vision import VisionMixin
+from .embeddings import embedder_texte, embedder_texte_local, signature_ann, similarite_cosine
 
 __all__ = [
     "ClientIA",
@@ -31,4 +32,8 @@ __all__ = [
     "obtenir_routeur_ia",
     "VisionMixin",
     "StreamingMixin",
+    "embedder_texte",
+    "embedder_texte_local",
+    "signature_ann",
+    "similarite_cosine",
 ]

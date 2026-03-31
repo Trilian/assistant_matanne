@@ -20,6 +20,7 @@ import {
   Leaf,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -40,11 +41,18 @@ import {
   obtenirTableauBord,
   sauvegarderConfigDashboard,
 } from "@/bibliotheque/api/tableau-bord";
-import { statsDepensesMaison } from "@/bibliotheque/api/maison";
+import { obtenirAnomaliesBudget } from "@/bibliotheque/api/famille";
+import {
+  modifierTacheEntretien,
+  obtenirTachesJourMaison,
+  statsDepensesMaison,
+} from "@/bibliotheque/api/maison";
 import { evaluerRappels, type RappelItem } from "@/bibliotheque/api/push";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
 import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
 import { clientApi } from "@/bibliotheque/api/client";
+import { SwipeableItem } from "@/composants/swipeable-item";
+import { toast } from "sonner";
 
 const WIDGETS_DEFAUT = {
   metriques: true,
@@ -52,6 +60,8 @@ const WIDGETS_DEFAUT = {
   lecture_ia: true,
   rappels: true,
   depenses: true,
+  alerte_budget: true,
+  checklist_jour: true,
   bilan_mensuel: true,
   meteo: true,
   histoire_famille: true,
@@ -84,10 +94,16 @@ type HistoireFamille = {
 };
 
 export default function PageAccueil() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { utilisateur } = utiliserAuth();
   const { data, isLoading } = utiliserRequete(["tableau-bord"], obtenirTableauBord);
   const { data: statsDepenses } = utiliserRequete(["depenses", "stats"], statsDepensesMaison);
   const { data: rappelsData } = utiliserRequete(["rappels"], evaluerRappels);
+  const { data: tachesJour, refetch: rechargerTachesJour } = utiliserRequete(
+    ["maison", "taches-jour", "dashboard"],
+    obtenirTachesJourMaison
+  );
   const { data: bilanMensuel } = utiliserRequete(["bilan-mensuel"], obtenirBilanMensuel);
   const { data: configDashboard } = utiliserRequete(["dashboard", "config"], obtenirConfigDashboard);
   const { data: histoireFamille } = utiliserRequete(
@@ -113,11 +129,20 @@ export default function PageAccueil() {
     ["dashboard", "score-ecologique"],
     obtenirScoreEcologique
   );
+  const { data: anomaliesBudget } = utiliserRequete(
+    ["famille", "budget", "anomalies"],
+    obtenirAnomaliesBudget
+  );
+
+  const alertesBudget = (anomaliesBudget?.anomalies ?? []).filter(
+    (anomalie) => anomalie.severite === "danger" || anomalie.severite === "warning"
+  );
 
   const [widgetsStockes, setWidgetsStockes] = utiliserStockageLocal("dashboard-widgets", WIDGETS_DEFAUT);
   const [configOuverte, setConfigOuverte] = utiliserStockageLocal("dashboard-config-open", false);
   const [widgets, setWidgets] = useState(WIDGETS_DEFAUT);
   const [meteo, setMeteo] = useState<MeteoWidget | null>(null);
+  const [actionPushTraitee, setActionPushTraitee] = useState(false);
 
   const configFusionnee = useMemo(
     () => ({
@@ -136,6 +161,96 @@ export default function PageAccueil() {
       },
     }
   );
+
+  const { mutate: basculerTacheDashboard, isPending: basculeTacheEnCours } =
+    utiliserMutation(
+      async ({ idSource, fait }: { idSource: number; fait: boolean }) =>
+        modifierTacheEntretien(idSource, { fait }),
+      {
+        onSuccess: () => {
+          void rechargerTachesJour();
+        },
+        onError: () => {
+          toast.error("Impossible de mettre à jour la tâche");
+        },
+      }
+    );
+
+  const { mutateAsync: ajouterArticleCoursesDirect, isPending: ajoutRappelEnCours } = utiliserMutation(
+    async (nomArticle: string) => {
+      const { data: listesData } = await clientApi.get<{
+        items?: Array<{ id: number; nom: string }>;
+      }>("/courses", {
+        params: { page: 1, page_size: 1, active_only: true },
+      });
+
+      let listeId = listesData.items?.[0]?.id;
+
+      if (!listeId) {
+        const { data: nouvelleListe } = await clientApi.post<{ id?: number }>("/courses", {
+          nom: "Rappels stock bas",
+        });
+        listeId = nouvelleListe.id;
+      }
+
+      if (!listeId) {
+        throw new Error("Impossible de récupérer une liste de courses");
+      }
+
+      await clientApi.post(`/courses/${listeId}/items`, {
+        nom: nomArticle,
+        quantite: 1,
+        categorie: "A racheter",
+      });
+    },
+    {
+      onSuccess: () => {
+        toast.success("Article ajouté à la liste de courses");
+      },
+      onError: () => {
+        toast.error("Impossible d'ajouter l'article depuis le rappel");
+      },
+    }
+  );
+
+  const { mutate: ajouterDepuisRappel } = utiliserMutation(
+    async (rappel: RappelItem) => {
+      const nomArticle = extraireArticleDepuisRappel(rappel);
+      if (!nomArticle) {
+        throw new Error("Article introuvable dans le rappel");
+      }
+      await ajouterArticleCoursesDirect(nomArticle);
+    },
+    {
+      onError: () => {
+        toast.error("Impossible d'ajouter l'article depuis le rappel");
+      },
+    }
+  );
+
+  const tachesChecklist = (tachesJour ?? []).slice(0, 5);
+
+  useEffect(() => {
+    if (actionPushTraitee) {
+      return;
+    }
+
+    const action = searchParams.get("action");
+    if (action !== "add-stock") {
+      return;
+    }
+
+    const article = searchParams.get("article");
+    if (!article) {
+      setActionPushTraitee(true);
+      router.replace("/");
+      return;
+    }
+
+    void ajouterArticleCoursesDirect(article);
+    setActionPushTraitee(true);
+    router.replace("/");
+  }, [actionPushTraitee, ajouterArticleCoursesDirect, router, searchParams]);
 
   useEffect(() => {
     setWidgets(configFusionnee);
@@ -285,6 +400,45 @@ export default function PageAccueil() {
                 <p className="text-xs mt-1">Action: {alerte.action}</p>
               </div>
             ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {widgets.alerte_budget && alertesBudget.length > 0 && (
+        <Card className="border-red-300/60 bg-red-50/50 dark:border-red-900/40 dark:bg-red-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+              Alerte budget
+            </CardTitle>
+            <CardDescription>
+              {alertesBudget.length} dépassement(s) ou dérive(s) détecté(s)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {alertesBudget.slice(0, 3).map((anomalie, index) => (
+              <div
+                key={`${anomalie.categorie}-${anomalie.type}-${index}`}
+                className="rounded-md border bg-background/70 px-3 py-2"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium capitalize">{anomalie.categorie}</p>
+                  <span className="text-[11px] uppercase text-muted-foreground">
+                    {anomalie.severite}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{anomalie.description}</p>
+                <p className="text-xs mt-1">
+                  Ecart: {anomalie.ecart_pourcent > 0 ? "+" : ""}
+                  {Math.round(anomalie.ecart_pourcent)}%
+                </p>
+              </div>
+            ))}
+            <Button variant="ghost" size="sm" asChild className="-ml-2">
+              <Link href="/famille/budget" className="flex items-center gap-1">
+                Ouvrir budget <ArrowRight className="h-3 w-3" />
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -497,13 +651,85 @@ export default function PageAccueil() {
           </CardHeader>
           <CardContent className="space-y-2">
             {rappelsData.rappels.slice(0, 4).map((rappel, i) => (
-              <RappelCard key={i} rappel={rappel} />
+              <RappelCard
+                key={`${rappel.type}-${rappel.titre}-${i}`}
+                rappel={rappel}
+                enAjout={ajoutRappelEnCours}
+                onAjouterCourses={() => ajouterDepuisRappel(rappel)}
+              />
             ))}
             {rappelsData.total > 4 && (
               <p className="text-xs text-muted-foreground pt-1">
                 + {rappelsData.total - 4} autre(s) rappel(s)
               </p>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Checklist du jour */}
+      {widgets.checklist_jour && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Checklist du jour</CardTitle>
+            <CardDescription>
+              Swipe droite (mobile) ou clic pour valider une tâche directement.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {tachesChecklist.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Aucune tâche du jour.</p>
+            ) : (
+              tachesChecklist.map((tache) => {
+                const nom = tache.nom;
+                const idSource = tache.id_source;
+                const fait = tache.fait;
+
+                const contenu = (
+                  <div className="rounded-md border bg-background px-3 py-2 flex items-center justify-between gap-3">
+                    <div>
+                      <p className={`text-sm font-medium ${fait ? "line-through text-muted-foreground" : ""}`}>
+                        {nom}
+                      </p>
+                      {tache.categorie && (
+                        <p className="text-xs text-muted-foreground">{tache.categorie}</p>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant={fait ? "outline" : "default"}
+                      disabled={!idSource || basculeTacheEnCours}
+                      onClick={() => {
+                        if (!idSource) return;
+                        basculerTacheDashboard({ idSource, fait: !fait });
+                      }}
+                    >
+                      {fait ? "Annuler" : "Valider"}
+                    </Button>
+                  </div>
+                );
+
+                if (!idSource || fait) {
+                  return <div key={`${nom}-${idSource ?? 0}`}>{contenu}</div>;
+                }
+
+                return (
+                  <SwipeableItem
+                    key={`${nom}-${idSource}`}
+                    labelDroit="Valider"
+                    onSwipeRight={() => basculerTacheDashboard({ idSource, fait: true })}
+                    desactiverGauche
+                  >
+                    {contenu}
+                  </SwipeableItem>
+                );
+              })
+            )}
+            <Button variant="ghost" size="sm" asChild className="-ml-2">
+              <Link href="/maison/entretien" className="flex items-center gap-1">
+                Voir toutes les tâches <ArrowRight className="h-3 w-3" />
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -645,20 +871,55 @@ const PRIORITE_COULEURS: Record<string, string> = {
   basse: "text-muted-foreground",
 };
 
-function RappelCard({ rappel }: { rappel: RappelItem }) {
+function extraireArticleDepuisRappel(rappel: RappelItem): string | null {
+  if (rappel.type !== "inventaire") {
+    return null;
+  }
+  const titre = rappel.titre || "";
+  const separateur = titre.indexOf(":");
+  if (separateur >= 0) {
+    const extrait = titre.slice(separateur + 1).trim();
+    return extrait || null;
+  }
+  return null;
+}
+
+function RappelCard({
+  rappel,
+  onAjouterCourses,
+  enAjout,
+}: {
+  rappel: RappelItem;
+  onAjouterCourses?: () => void;
+  enAjout?: boolean;
+}) {
   const couleur = PRIORITE_COULEURS[rappel.priorite] ?? PRIORITE_COULEURS.normale;
-  const contenu = (
-    <div className="flex items-start gap-2 rounded-md p-2 hover:bg-accent/50 transition-colors">
+  return (
+    <div className="rounded-md p-2 hover:bg-accent/50 transition-colors space-y-2">
+      <div className="flex items-start gap-2">
       <AlertTriangle className={`h-4 w-4 mt-0.5 shrink-0 ${couleur}`} />
       <div className="flex-1 min-w-0">
         <p className={`text-sm font-medium ${couleur}`}>{rappel.titre}</p>
         <p className="text-xs text-muted-foreground line-clamp-2">{rappel.description}</p>
       </div>
+      </div>
+      <div className="flex items-center gap-2 pl-6">
+        {rappel.lien && (
+          <Button size="sm" variant="outline" asChild>
+            <Link href={rappel.lien}>Ouvrir</Link>
+          </Button>
+        )}
+        {rappel.type === "inventaire" && onAjouterCourses && (
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={enAjout}
+            onClick={onAjouterCourses}
+          >
+            Ajouter aux courses
+          </Button>
+        )}
+      </div>
     </div>
   );
-
-  if (rappel.lien) {
-    return <Link href={rappel.lien}>{contenu}</Link>;
-  }
-  return contenu;
 }

@@ -36,6 +36,14 @@ const CATEGORIES = [
   },
 ];
 
+const CHECKLIST_VOYAGE_DEFAUT = [
+  "Verifier passeports et papiers",
+  "Prevenir l'ecole / nounou",
+  "Preparer trousse sante de Jules",
+  "Couper eau / gaz non essentiels",
+  "Verifier fermeture portes et fenetres",
+];
+
 function OngletCanauxNotifications() {
   const invalider = utiliserInvalidation();
 
@@ -66,6 +74,8 @@ function OngletCanauxNotifications() {
     alertes: ["push", "ntfy", "email"],
     resumes: ["email"],
   });
+  const [modeVacances, setModeVacances] = useState(false);
+  const [checklistVoyageAuto, setChecklistVoyageAuto] = useState(true);
 
   useEffect(() => {
     if (prefs?.canaux_par_categorie) {
@@ -75,6 +85,8 @@ function OngletCanauxNotifications() {
         resumes: prefs.canaux_par_categorie.resumes ?? ["email"],
       });
     }
+    setModeVacances(Boolean(prefs?.mode_vacances));
+    setChecklistVoyageAuto(Boolean(prefs?.checklist_voyage_auto ?? true));
   }, [prefs]);
 
   const toggleCanal = (categorie: string, canal: string) => {
@@ -90,6 +102,8 @@ function OngletCanauxNotifications() {
   const handleSave = () => {
     sauvegarder({
       canaux_par_categorie: canaux as unknown as Parameters<typeof sauvegarder>[0]["canaux_par_categorie"],
+      mode_vacances: modeVacances,
+      checklist_voyage_auto: checklistVoyageAuto,
     });
   };
 
@@ -150,6 +164,47 @@ function OngletCanauxNotifications() {
           )}
           Sauvegarder les canaux
         </Button>
+
+        <div className="rounded-md border p-3 space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">Mode vacances</p>
+              <p className="text-xs text-muted-foreground">
+                Met en pause les notifications non essentielles.
+              </p>
+            </div>
+            <Switch
+              checked={modeVacances}
+              onCheckedChange={setModeVacances}
+              aria-label="Activer le mode vacances"
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-medium">Checklist voyage auto</p>
+              <p className="text-xs text-muted-foreground">
+                Ajoute automatiquement une checklist voyage prete a cocher.
+              </p>
+            </div>
+            <Switch
+              checked={checklistVoyageAuto}
+              onCheckedChange={setChecklistVoyageAuto}
+              aria-label="Activer la checklist voyage automatique"
+            />
+          </div>
+
+          {modeVacances && checklistVoyageAuto && (
+            <div className="rounded bg-muted/40 p-2">
+              <p className="text-xs font-medium mb-1">Checklist voyage</p>
+              <ul className="text-xs text-muted-foreground space-y-1">
+                {CHECKLIST_VOYAGE_DEFAUT.map((item) => (
+                  <li key={item}>- {item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

@@ -102,10 +102,25 @@ class PreferencesNotificationsBase(BaseModel):
     budget_alerte: bool = True
     canal_prefere: str = Field("push", description="Canal par défaut (push|ntfy|email|whatsapp)")
     canaux_par_categorie: CanauxParCategorie = Field(default_factory=CanauxParCategorie)
+    notifications_par_module: dict[str, bool] = Field(
+        default_factory=lambda: {
+            "cuisine": True,
+            "famille": True,
+            "maison": True,
+            "planning": True,
+            "jeux": True,
+        },
+        description="Activer ou non les notifications par module",
+    )
     quiet_hours_start: str = Field("22:00", description="Heure début silence (HH:MM)")
     quiet_hours_end: str = Field("07:00", description="Heure fin silence (HH:MM)")
     max_par_heure: int = Field(5, ge=1, le=50, description="Limite d'envoi par heure")
     mode_digest: bool = Field(False, description="Activer la consolidation en digest")
+    mode_vacances: bool = Field(False, description="Pause les notifications non essentielles")
+    checklist_voyage_auto: bool = Field(
+        True,
+        description="Active la checklist voyage automatique quand le mode vacances est activé",
+    )
 
     @field_validator("canal_prefere")
     @classmethod
@@ -117,8 +132,6 @@ class PreferencesNotificationsBase(BaseModel):
     @field_validator("quiet_hours_start", "quiet_hours_end")
     @classmethod
     def valider_heure(cls, value: str) -> str:
-        if value is None:
-            return value
         txt = str(value)
         if len(txt) != 5 or txt[2] != ":":
             raise ValueError("Format attendu HH:MM")
@@ -142,10 +155,13 @@ class PreferencesNotificationsUpdate(BaseModel):
     budget_alerte: bool | None = None
     canal_prefere: str | None = None
     canaux_par_categorie: CanauxParCategorie | None = None
+    notifications_par_module: dict[str, bool] | None = None
     quiet_hours_start: str | None = None
     quiet_hours_end: str | None = None
     max_par_heure: int | None = Field(default=None, ge=1, le=50)
     mode_digest: bool | None = None
+    mode_vacances: bool | None = None
+    checklist_voyage_auto: bool | None = None
 
     @field_validator("canal_prefere")
     @classmethod

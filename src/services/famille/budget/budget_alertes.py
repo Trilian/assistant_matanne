@@ -57,6 +57,16 @@ class BudgetAlertesMixin:
                         "pourcentage": pourcentage,
                     }
                 )
+                emettre_evenement_simple(
+                    "budget.depassement",
+                    {
+                        "categorie": cat.value,
+                        "depense": float(depense),
+                        "budget": float(budget),
+                        "pourcentage": float(pourcentage),
+                    },
+                    source="budget_alertes",
+                )
             elif pourcentage >= 80:
                 alertes.append(
                     {
@@ -65,6 +75,17 @@ class BudgetAlertesMixin:
                         "message": f"Budget {cat.value} à {pourcentage:.0f}%",
                         "pourcentage": pourcentage,
                     }
+                )
+                emettre_evenement_simple(
+                    "budget.contrainte",
+                    {
+                        "categorie": cat.value,
+                        "depense": float(depense),
+                        "budget": float(budget),
+                        "pourcentage": float(pourcentage),
+                        "niveau": "serre",
+                    },
+                    source="budget_alertes",
                 )
 
         # Stocker les alertes

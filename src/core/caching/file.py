@@ -64,7 +64,14 @@ class CacheFichierN3:
                 with open(filepath, encoding="utf-8") as f:
                     data = json.load(f)
 
-                entry = EntreeCache(**data)
+                entry_data = {
+                    "value": data.get("value"),
+                    "created_at": data.get("created_at"),
+                    "ttl": data.get("ttl", 300),
+                    "tags": data.get("tags", []),
+                    "hits": data.get("hits", 0),
+                }
+                entry = EntreeCache(**entry_data)
                 if entry.est_expire:
                     self.remove(key)
                     return None
@@ -90,6 +97,7 @@ class CacheFichierN3:
 
             with self._lock:
                 data = {
+                    "key": key,
                     "value": _json_serialisable(entry.value),
                     "created_at": entry.created_at,
                     "ttl": entry.ttl,
@@ -125,7 +133,11 @@ class CacheFichierN3:
                     with open(filepath, encoding="utf-8") as f:
                         data = json.load(f)
 
-                    if tags and any(tag in data.get("tags", []) for tag in tags):
+                    key = str(data.get("key", ""))
+                    match_pattern = bool(pattern and pattern in key)
+                    match_tags = bool(tags and any(tag in data.get("tags", []) for tag in tags))
+
+                    if match_pattern or match_tags:
                         filepath.unlink()
                         count += 1
                 except Exception:

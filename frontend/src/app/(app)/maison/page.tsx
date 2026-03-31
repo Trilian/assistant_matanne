@@ -25,6 +25,8 @@ import {
   Wine,
   Zap,
   Sofa,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import {
   Card,
@@ -48,6 +50,8 @@ import type { AlerteMaison, TacheJourMaison, AlertePredictiveGarantie } from "@/
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
 import { CarteConseil, estDismissed } from "@/composants/maison/carte-conseil";
 import { obtenirConseilsIA } from "@/bibliotheque/api/maison";
+import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
+import { utiliserSyntheseVocale } from "@/crochets/utiliser-synthese-vocale";
 
 // Sections consolidées — 9 modules
 const SECTIONS = [
@@ -171,6 +175,7 @@ export default function PageMaison() {
   );
 
   const [, setDismisses] = useState(0); // incrémenté pour forcer un re-render après dismiss
+  const { estSupporte, enLecture, lire, arreter } = utiliserSyntheseVocale();
 
   const { mutate: envoyerRappels, isPending: envoi } = utiliserMutation(
     envoyerRappelsMaison
@@ -183,6 +188,10 @@ export default function PageMaison() {
     (a) => a.niveau !== "CRITIQUE" && a.niveau !== "HAUTE"
   ) ?? [];
   const tachesRestantes = briefing?.taches_jour_detail.filter((t) => !t.fait) ?? [];
+
+  const resumeVocal = briefing
+    ? `${briefing.resume}. Vous avez ${tachesRestantes.length} taches a faire aujourd'hui et ${alertesCritiques.length} alertes urgentes.`
+    : "Le briefing maison n'est pas encore disponible.";
 
   return (
     <div className="space-y-6">
@@ -203,6 +212,23 @@ export default function PageMaison() {
           {envoi ? "Envoi…" : "Rappels push"}
         </Button>
       </div>
+
+      {estSupporte && (
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => lire(resumeVocal)}>
+            <Volume2 className="h-4 w-4 mr-1.5" />
+            Lire le briefing
+          </Button>
+          {enLecture && (
+            <Button type="button" variant="ghost" size="sm" onClick={arreter}>
+              <VolumeX className="h-4 w-4 mr-1.5" />
+              Arrêter
+            </Button>
+          )}
+        </div>
+      )}
+
+      <CarteNotificationsModule moduleKey="maison" moduleLabel="Maison" />
 
       {/* Bandeau IA */}
       <BandeauIA section="general" />

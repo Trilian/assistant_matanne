@@ -970,6 +970,103 @@ async def logs_job(
     }
 
 
+@router.get(
+    "/jobs/history",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Historique des exécutions jobs",
+    description="Retourne l'historique paginé des exécutions de jobs avec filtres.",
+)
+@gerer_exception_api
+async def historique_jobs(
+    page: int = Query(1, ge=1),
+    par_page: int = Query(25, ge=1, le=200),
+    job_id: str | None = Query(None, description="Filtrer par identifiant de job"),
+    status: str | None = Query(None, description="Filtrer par statut (success/failure/dry_run/...)"),
+    depuis: datetime | None = Query(None, description="Date de début (ISO 8601)"),
+    jusqu_a: datetime | None = Query(None, description="Date de fin (ISO 8601)"),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Historique paginé/filtrable des lignes job_executions."""
+    from src.api.utils import executer_avec_session
+
+    offset = (page - 1) * par_page
+    conditions: list[str] = ["1=1"]
+    params: dict[str, Any] = {"limit": par_page, "offset": offset}
+
+    if job_id:
+        conditions.append("job_id = :job_id")
+        params["job_id"] = job_id
+    if status:
+        conditions.append("status = :status")
+        params["status"] = status
+    if depuis:
+        conditions.append("started_at >= :depuis")
+        params["depuis"] = depuis
+    if jusqu_a:
+        conditions.append("started_at <= :jusqu_a")
+        params["jusqu_a"] = jusqu_a
+
+    where_clause = " AND ".join(conditions)
+
+    with executer_avec_session() as session:
+        total = int(
+            session.execute(
+                text(f"SELECT COUNT(*) FROM job_executions WHERE {where_clause}"),
+                params,
+            ).scalar()
+            or 0
+        )
+
+        rows = session.execute(
+            text(
+                f"""
+                SELECT
+                    id,
+                    job_id,
+                    job_name,
+                    started_at,
+                    ended_at,
+                    duration_ms,
+                    status,
+                    error_message,
+                    output_logs,
+                    triggered_by_user_id,
+                    triggered_by_user_role
+                FROM job_executions
+                WHERE {where_clause}
+                ORDER BY started_at DESC, id DESC
+                LIMIT :limit OFFSET :offset
+                """
+            ),
+            params,
+        ).mappings().all()
+
+    items = [
+        {
+            "id": int(row["id"]),
+            "job_id": str(row["job_id"]),
+            "job_name": row["job_name"] or _LABELS_JOBS.get(str(row["job_id"]), str(row["job_id"])),
+            "started_at": row["started_at"].isoformat() if row["started_at"] else None,
+            "ended_at": row["ended_at"].isoformat() if row["ended_at"] else None,
+            "duration_ms": int(row["duration_ms"] or 0),
+            "status": str(row["status"] or "unknown"),
+            "error_message": row["error_message"],
+            "output_logs": row["output_logs"],
+            "triggered_by_user_id": row["triggered_by_user_id"],
+            "triggered_by_user_role": row["triggered_by_user_role"],
+        }
+        for row in rows
+    ]
+
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "par_page": par_page,
+        "pages_totales": max(1, (total + par_page - 1) // par_page),
+    }
+
+
 # ═══════════════════════════════════════════════════════════
 # SERVICES HEALTH
 # ═══════════════════════════════════════════════════════════

@@ -1,5 +1,5 @@
-const CACHE_NAME = "matanne-v3";
-const API_CACHE = "matanne-api-v2";
+const CACHE_NAME = "matanne-v4";
+const API_CACHE = "matanne-api-v3";
 const OFFLINE_URL = "/offline.html";
 const SYNC_QUEUE = "matanne-sync-queue";
 
@@ -147,16 +147,46 @@ self.addEventListener("push", (event) => {
     icon: "/icons/icon-192x192.png",
     badge: "/icons/icon-72x72.png",
     tag: data.tag || "matanne-notification",
+    data: data.data || {},
+    actions: data.actions || [],
+    vibrate: data.vibrate || [100, 50, 100],
+    requireInteraction: Boolean(data.requireInteraction),
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
+
+  const payload = event.notification.data || {};
+  const action = event.action;
+
+  if (action === "dismiss") {
+    return;
+  }
+
+  let urlCible = payload.url || "/";
+  if (action === "add_to_cart") {
+    const article = payload.article_nom;
+    if (article) {
+      urlCible = `/?action=add-stock&article=${encodeURIComponent(String(article))}`;
+    } else {
+      urlCible = "/?action=add-stock";
+    }
+  }
+
   event.waitUntil(
-    self.clients.matchAll({ type: "window" }).then((clients) => {
-      if (clients.length > 0) return clients[0].focus();
-      return self.clients.openWindow("/");
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ("focus" in client) {
+          client.focus();
+          if ("navigate" in client) {
+            return client.navigate(urlCible);
+          }
+          return client;
+        }
+      }
+      return self.clients.openWindow(urlCible);
     })
   );
 });

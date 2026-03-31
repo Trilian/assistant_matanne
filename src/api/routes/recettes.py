@@ -198,6 +198,10 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
         est_favori=est_favori,
         url_source=getattr(db_recette, "url_source", None),
         jours_depuis_derniere_cuisson=jours_depuis_derniere_cuisson,
+        calories=getattr(db_recette, "calories", None),
+        proteines=getattr(db_recette, "proteines", None),
+        lipides=getattr(db_recette, "lipides", None),
+        glucides=getattr(db_recette, "glucides", None),
     )
 
 
@@ -1066,6 +1070,17 @@ async def ajouter_favori(recette_id: int, user: dict[str, Any] = Depends(require
                 )
                 session.add(retour)
             session.commit()
+            from src.services.core.event_bus_mixin import emettre_evenement_simple
+
+            emettre_evenement_simple(
+                "recette.feedback",
+                {
+                    "recette_id": recette_id,
+                    "user_id": str(user_id),
+                    "feedback": "like",
+                },
+                source="api.recettes",
+            )
             return MessageResponse(message=f"Recette {recette_id} ajoutÃ©e aux favoris")
 
     return await executer_async(_upsert)
@@ -1088,6 +1103,17 @@ async def retirer_favori(recette_id: int, user: dict[str, Any] = Depends(require
             if retour:
                 retour.feedback = "neutral"
                 session.commit()
+                from src.services.core.event_bus_mixin import emettre_evenement_simple
+
+                emettre_evenement_simple(
+                    "recette.feedback",
+                    {
+                        "recette_id": recette_id,
+                        "user_id": str(user_id),
+                        "feedback": "neutral",
+                    },
+                    source="api.recettes",
+                )
             return MessageResponse(message=f"Recette {recette_id} retirÃ©e des favoris")
 
     return await executer_async(_remove)

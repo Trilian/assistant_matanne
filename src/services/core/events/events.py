@@ -151,6 +151,17 @@ class EvenementJardinModifie:
 
 
 @dataclass(frozen=True, slots=True)
+class EvenementJardinRecolte:
+    """Émis quand une récolte jardin est validée (Sprint D.1)."""
+
+    TYPE: str = "jardin.recolte"
+
+    element_id: int = 0
+    nom: str = ""
+    quantite: float = 0.0
+
+
+@dataclass(frozen=True, slots=True)
 class EvenementProjetModifie:
     """Émis quand un projet maison est créé/modifié."""
 
@@ -221,6 +232,18 @@ class EvenementBudgetModifie:
     categorie: str = ""
     montant: float = 0.0
     action: str = ""  # "depense_ajoutee", "depense_modifiee", "depense_supprimee", "budget_defini"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementBudgetDepassement:
+    """Émis quand une catégorie budgétaire dépasse son seuil (Sprint D.3)."""
+
+    TYPE: str = "budget.depassement"
+
+    categorie: str = ""
+    depense: float = 0.0
+    budget: float = 0.0
+    pourcentage: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -332,6 +355,48 @@ class EvenementPlanningModifie:
     action: str = ""  # "cree", "modifie", "supprime"
 
 
+@dataclass(frozen=True, slots=True)
+class EvenementRecetteFeedback:
+    """Émis quand un feedback recette utilisateur est enregistré (Sprint D.5)."""
+
+    TYPE: str = "recette.feedback"
+
+    recette_id: int = 0
+    user_id: str = ""
+    feedback: str = ""  # like/dislike/neutral
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementEnergieAnomalie:
+    """Émis quand une anomalie énergie est détectée (Sprint D.2)."""
+
+    TYPE: str = "energie.anomalie"
+
+    nb_alertes: int = 0
+    details: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementInventaireModificationImportante:
+    """Émis quand un changement inventaire impacte les courses (Sprint D.4)."""
+
+    TYPE: str = "inventaire.modification_importante"
+
+    nb_articles_impactes: int = 0
+    source_declenchement: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementContratRenouvellement:
+    """Émis quand des contrats arrivent en échéance (Sprint D.6)."""
+
+    TYPE: str = "contrat.renouvellement"
+
+    nb_contrats: int = 0
+    nb_garanties: int = 0
+    message: str = ""
+
+
 # ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS JEUX
 # ═══════════════════════════════════════════════════════════
@@ -384,10 +449,12 @@ REGISTRE_EVENEMENTS: dict[str, type] = {
     "entretien.semaine_optimisee": EvenementEntretienSemaineOptimisee,
     "depenses.modifiee": EvenementDepenseModifiee,
     "jardin.modifie": EvenementJardinModifie,
+    "jardin.recolte": EvenementJardinRecolte,
     "projets.modifie": EvenementProjetModifie,
     "meubles.modifie": EvenementMeubleModifie,
     "eco_tips.modifie": EvenementEcoTipModifie,
     "budget.modifie": EvenementBudgetModifie,
+    "budget.depassement": EvenementBudgetDepassement,
     "sante.modifie": EvenementSanteModifie,
     "loto.modifie": EvenementLotoModifie,
     "paris.modifie": EvenementParisModifie,
@@ -397,6 +464,10 @@ REGISTRE_EVENEMENTS: dict[str, type] = {
     "achats.modifie": EvenementAchatFamille,
     "food_log.ajoute": EvenementJournalAlimentaire,
     "planning.modifie": EvenementPlanningModifie,
+    "recette.feedback": EvenementRecetteFeedback,
+    "energie.anomalie": EvenementEnergieAnomalie,
+    "inventaire.modification_importante": EvenementInventaireModificationImportante,
+    "contrat.renouvellement": EvenementContratRenouvellement,
     "jeux.sync_terminee": EvenementJeuxSyncTerminee,
     "service.error": EvenementErreurService,
 }
@@ -415,10 +486,12 @@ __all__ = [
     "EvenementEntretienSemaineOptimisee",
     "EvenementDepenseModifiee",
     "EvenementJardinModifie",
+    "EvenementJardinRecolte",
     "EvenementProjetModifie",
     "EvenementMeubleModifie",
     "EvenementEcoTipModifie",
     "EvenementBudgetModifie",
+    "EvenementBudgetDepassement",
     "EvenementSanteModifie",
     "EvenementLotoModifie",
     "EvenementParisModifie",
@@ -428,6 +501,10 @@ __all__ = [
     "EvenementAchatFamille",
     "EvenementJournalAlimentaire",
     "EvenementPlanningModifie",
+    "EvenementRecetteFeedback",
+    "EvenementEnergieAnomalie",
+    "EvenementInventaireModificationImportante",
+    "EvenementContratRenouvellement",
     "EvenementJeuxSyncTerminee",
     "EvenementErreurService",
     # Registry

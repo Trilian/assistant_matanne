@@ -5,7 +5,7 @@ CRUD pour les préférences alimentaires, robots, magasins.
 Sprint 13 — W4 : ajout endpoints préférences canaux de notification.
 """
 
-from typing import Any
+from typing import Any, cast
 
 import logging
 from fastapi import APIRouter, Depends, HTTPException
@@ -188,11 +188,33 @@ _CANAUX_DEFAULTS: dict[str, list[str]] = {
     "resumes": ["email"],
 }
 
+_NOTIFICATIONS_MODULES_DEFAULTS: dict[str, bool] = {
+    "cuisine": True,
+    "famille": True,
+    "maison": True,
+    "planning": True,
+    "jeux": True,
+}
+
 
 def _notif_to_dict(prefs: Any, user_id: str) -> dict[str, Any]:
     """Sérialise une PreferenceNotification en dict API."""
     canaux_par_cat = prefs.canaux_par_categorie or _CANAUX_DEFAULTS
-    modules_actifs = prefs.modules_actifs or {}
+    modules_actifs: dict[str, Any] = dict(prefs.modules_actifs or {})
+    notifications_brut = modules_actifs.get("notifications_par_module") or {}
+    notifications_par_module_source: dict[str, Any] = (
+        cast(dict[str, Any], notifications_brut)
+        if isinstance(notifications_brut, dict)
+        else {}
+    )
+    notifications_par_module = {
+        **_NOTIFICATIONS_MODULES_DEFAULTS,
+        **{
+            k: bool(v)
+            for k, v in notifications_par_module_source.items()
+            if isinstance(k, str)
+        },
+    }
     return {
         "user_id": user_id,
         "courses_rappel": prefs.courses_rappel,
@@ -206,10 +228,13 @@ def _notif_to_dict(prefs: Any, user_id: str) -> dict[str, Any]:
             "alertes": canaux_par_cat.get("alertes", _CANAUX_DEFAULTS["alertes"]),
             "resumes": canaux_par_cat.get("resumes", _CANAUX_DEFAULTS["resumes"]),
         },
+        "notifications_par_module": notifications_par_module,
         "quiet_hours_start": str(prefs.quiet_hours_start or "22:00")[:5],
         "quiet_hours_end": str(prefs.quiet_hours_end or "07:00")[:5],
         "max_par_heure": int(modules_actifs.get("max_par_heure", 5)),
         "mode_digest": bool(modules_actifs.get("mode_digest", False)),
+        "mode_vacances": bool(modules_actifs.get("mode_vacances", False)),
+        "checklist_voyage_auto": bool(modules_actifs.get("checklist_voyage_auto", True)),
     }
 
 
@@ -240,10 +265,13 @@ async def obtenir_preferences_notifications(
                     "budget_alerte": True,
                     "canal_prefere": "push",
                     "canaux_par_categorie": _CANAUX_DEFAULTS,
+                    "notifications_par_module": _NOTIFICATIONS_MODULES_DEFAULTS,
                     "quiet_hours_start": "22:00",
                     "quiet_hours_end": "07:00",
                     "max_par_heure": 5,
                     "mode_digest": False,
+                    "mode_vacances": False,
+                    "checklist_voyage_auto": True,
                 }
 
             return _notif_to_dict(prefs, user["id"])
@@ -273,7 +301,7 @@ async def modifier_preferences_notifications(
                 session.add(prefs)
 
             updates = donnees.model_dump(exclude_unset=True)
-            modules_actifs = dict(prefs.modules_actifs or {})
+            modules_actifs: dict[str, Any] = cast(dict[str, Any], prefs.modules_actifs or {})
             for key, value in updates.items():
                 if key == "canaux_par_categorie" and value is not None:
                     # Convertir Pydantic model → dict
@@ -286,8 +314,17 @@ async def modifier_preferences_notifications(
                         setattr(prefs, key, _time(int(h), int(m)))
                     except Exception as e:
                         logger.warning("Format invalide pour %s='%s': %s", key, value, e)
-                elif key in ("max_par_heure", "mode_digest"):
+                elif key in (
+                    "max_par_heure",
+                    "mode_digest",
+                    "mode_vacances",
+                    "checklist_voyage_auto",
+                ):
                     modules_actifs[key] = value
+                elif key == "notifications_par_module" and value is not None:
+                    modules_actifs["notifications_par_module"] = {
+                        k: bool(v) for k, v in dict(value).items()
+                    }
                 else:
                     setattr(prefs, key, value)
 

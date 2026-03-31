@@ -288,8 +288,8 @@ class TestFormatDashboard:
 class TestFormatJeux:
     """Vérifie le format des réponses routes jeux."""
 
-    @patch("src.api.routes.jeux.executer_avec_session")
-    @patch("src.api.routes.jeux.executer_async")
+    @patch("src.api.routes.jeux_paris.executer_avec_session")
+    @patch("src.api.routes.jeux_paris.executer_async")
     async def test_lister_equipes_format(self, mock_exec, mock_session, client):
         """La liste d'équipes retourne items correctement."""
         mock_exec.side_effect = lambda fn: fn()
@@ -310,8 +310,8 @@ class TestFormatJeux:
         assert "items" in data
         assert data["items"][0]["nom"] == "Paris Saint-Germain"
 
-    @patch("src.api.routes.jeux.executer_avec_session")
-    @patch("src.api.routes.jeux.executer_async")
+    @patch("src.api.routes.jeux_paris.executer_avec_session")
+    @patch("src.api.routes.jeux_paris.executer_async")
     async def test_lister_paris_format(self, mock_exec, mock_session, client):
         """La liste de paris retourne format paginé."""
         mock_exec.side_effect = lambda fn: fn()

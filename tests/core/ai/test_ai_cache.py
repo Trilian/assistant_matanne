@@ -101,6 +101,48 @@ class TestCacheIAObtenir:
         result = CacheIA.obtenir("prompt", ttl=3600)
         assert result == "réponse"
 
+    def test_obtenir_semantique_prompt_proche(self):
+        """Le cache sémantique retrouve une réponse pour un prompt proche."""
+        from src.core.ai.cache import CacheIA
+
+        CacheIA.invalider_tout()
+        CacheIA.definir(
+            "Propose un menu familial rapide pour ce soir",
+            "Menu: omelette, salade et soupe.",
+            systeme="assistant cuisine",
+            temperature=0.7,
+            modele="mistral-large",
+        )
+
+        result = CacheIA.obtenir(
+            "Propose un menu familial rapide ce soir",
+            systeme="assistant cuisine",
+            temperature=0.7,
+            modele="mistral-large",
+        )
+        assert result == "Menu: omelette, salade et soupe."
+
+    def test_obtenir_semantique_ignore_contexte_diff(self):
+        """Le cache sémantique reste isolé par système/modèle."""
+        from src.core.ai.cache import CacheIA
+
+        CacheIA.invalider_tout()
+        CacheIA.definir(
+            "Résume le planning de demain",
+            "Résumé planning",
+            systeme="assistant planning",
+            temperature=0.7,
+            modele="mistral-large",
+        )
+
+        result = CacheIA.obtenir(
+            "Résume mon planning demain",
+            systeme="assistant budget",
+            temperature=0.7,
+            modele="mistral-large",
+        )
+        assert result is None
+
 
 # ═══════════════════════════════════════════════════════════
 # TESTS CACHE IA DEFINIR

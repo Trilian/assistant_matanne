@@ -190,13 +190,33 @@ function SheetEstimationIA({
 function OngletProjets() {
   const [statut, setStatut] = useState("tous");
   const [dialogOuvert, setDialogOuvert] = useState(false);
+  const [etapeCreation, setEtapeCreation] = useState(1);
   const [nomProjet, setNomProjet] = useState("");
   const [descProjet, setDescProjet] = useState("");
   const [prioriteProjet, setPrioriteProjet] = useState("moyenne");
   const [categorieProjet, setCategorieProjet] = useState("");
+  const [budgetProjet, setBudgetProjet] = useState("");
+  const [tachesSelectionnees, setTachesSelectionnees] = useState<string[]>([]);
   const [estimationProjetId, setEstimationProjetId] = useState<number | null>(null);
   const queryClient = useQueryClient();
   const { autoCompleter } = utiliserAutoCompletionMaison("travaux_projets");
+
+  const suggestionsTaches = [
+    "Definir le besoin et les contraintes",
+    "Comparer 2 devis minimum",
+    "Commander les materiaux",
+    "Planifier les etapes",
+  ];
+
+  const reinitialiserWizard = () => {
+    setEtapeCreation(1);
+    setNomProjet("");
+    setDescProjet("");
+    setPrioriteProjet("moyenne");
+    setCategorieProjet("");
+    setBudgetProjet("");
+    setTachesSelectionnees([]);
+  };
 
   const { data: projets, isLoading } = utiliserRequete(
     ["maison", "projets", statut],
@@ -207,7 +227,7 @@ function OngletProjets() {
     onSuccess: (nouveauProjet) => {
       queryClient.invalidateQueries({ queryKey: ["maison", "projets"] });
       setDialogOuvert(false);
-      setNomProjet(""); setDescProjet(""); setPrioriteProjet("moyenne"); setCategorieProjet("");
+      reinitialiserWizard();
       toast.success("Projet créé");
       toast("💡 Estimer ce projet avec l'IA ?", {
         action: {
@@ -235,39 +255,155 @@ function OngletProjets() {
             <SelectItem value="termine">Terminé</SelectItem>
           </SelectContent>
         </Select>
-        <Dialog open={dialogOuvert} onOpenChange={setDialogOuvert}>
+        <Dialog
+          open={dialogOuvert}
+          onOpenChange={(ouvert) => {
+            setDialogOuvert(ouvert);
+            if (!ouvert) reinitialiserWizard();
+          }}
+        >
           <DialogTrigger asChild>
             <Button size="sm"><Plus className="mr-2 h-4 w-4" />Nouveau projet</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>Nouveau projet</DialogTitle></DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); creer({ nom: nomProjet, description: descProjet || undefined, priorite: prioriteProjet, statut: "planifié" }); }} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Nom</Label>
-                <Input
-                  value={nomProjet}
-                  onChange={(e) => setNomProjet(e.target.value)}
-                  onBlur={(e) => autoCompleter("nom_projet", e.target.value, (v) => { if (!categorieProjet) setCategorieProjet(v); })}
-                  required
-                />
+            <DialogHeader>
+              <DialogTitle>Wizard projet maison (3 etapes)</DialogTitle>
+            </DialogHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (etapeCreation < 3) {
+                  setEtapeCreation((v) => v + 1);
+                  return;
+                }
+                const segments = [descProjet.trim()];
+                if (categorieProjet.trim()) segments.push(`Type: ${categorieProjet.trim()}`);
+                if (budgetProjet.trim()) segments.push(`Budget cible: ${budgetProjet.trim()} EUR`);
+                if (tachesSelectionnees.length > 0) {
+                  segments.push(`Taches suggerees: ${tachesSelectionnees.join(", ")}`);
+                }
+
+                creer({
+                  nom: nomProjet,
+                  description: segments.filter(Boolean).join(" | ") || undefined,
+                  priorite: prioriteProjet,
+                  statut: "planifié",
+                });
+              }}
+              className="space-y-4"
+            >
+              <div className="text-xs text-muted-foreground">Etape {etapeCreation} / 3</div>
+
+              {etapeCreation === 1 && (
+                <div className="space-y-2">
+                  <Label>Nom du projet</Label>
+                  <Input
+                    value={nomProjet}
+                    onChange={(e) => setNomProjet(e.target.value)}
+                    onBlur={(e) => autoCompleter("nom_projet", e.target.value, (v) => { if (!categorieProjet) setCategorieProjet(v); })}
+                    required
+                    placeholder="Ex: Refaire la salle de bain"
+                  />
+                  <Label>Description rapide</Label>
+                  <Input
+                    value={descProjet}
+                    onChange={(e) => setDescProjet(e.target.value)}
+                    placeholder="Contexte du projet"
+                  />
+                </div>
+              )}
+
+              {etapeCreation === 2 && (
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Type de projet</Label>
+                    <Input
+                      value={categorieProjet}
+                      onChange={(e) => setCategorieProjet(e.target.value)}
+                      placeholder="Renovation, energie, menage..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Budget cible (EUR)</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={budgetProjet}
+                      onChange={(e) => setBudgetProjet(e.target.value)}
+                      placeholder="1500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Priorite</Label>
+                    <Select value={prioriteProjet} onValueChange={setPrioriteProjet}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="haute">Haute</SelectItem>
+                        <SelectItem value="moyenne">Moyenne</SelectItem>
+                        <SelectItem value="basse">Basse</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+
+              {etapeCreation === 3 && (
+                <div className="space-y-2">
+                  <Label>Taches suggerees (IA)</Label>
+                  <div className="space-y-2">
+                    {suggestionsTaches.map((tache) => {
+                      const actif = tachesSelectionnees.includes(tache);
+                      return (
+                        <button
+                          key={tache}
+                          type="button"
+                          className={`w-full text-left rounded-md border px-3 py-2 text-sm ${actif ? "bg-primary/10 border-primary" : ""}`}
+                          onClick={() => {
+                            setTachesSelectionnees((prev) =>
+                              prev.includes(tache)
+                                ? prev.filter((x) => x !== tache)
+                                : [...prev, tache]
+                            );
+                          }}
+                        >
+                          {tache}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  disabled={etapeCreation === 1 || enCreation}
+                  onClick={() => setEtapeCreation((v) => Math.max(1, v - 1))}
+                >
+                  Retour
+                </Button>
+                <Button type="submit" disabled={enCreation || !nomProjet.trim()} className="w-full">
+                  {enCreation
+                    ? "Creation..."
+                    : etapeCreation < 3
+                      ? "Continuer"
+                      : "Creer le projet"}
+                </Button>
               </div>
-              <div className="space-y-2"><Label>Description</Label><Input value={descProjet} onChange={(e) => setDescProjet(e.target.value)} /></div>
-              <div className="space-y-2">
-                <Label>Catégorie <span className="text-xs text-muted-foreground">(suggestion IA)</span></Label>
-                <Input value={categorieProjet} onChange={(e) => setCategorieProjet(e.target.value)} placeholder="Auto-rempli après saisie du nom…" />
-              </div>
-              <div className="space-y-2">
-                <Label>Priorité</Label>
-                <Select value={prioriteProjet} onValueChange={setPrioriteProjet}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="haute">Haute</SelectItem>
-                    <SelectItem value="moyenne">Moyenne</SelectItem>
-                    <SelectItem value="basse">Basse</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" disabled={enCreation} className="w-full">{enCreation ? "Création…" : "Créer le projet"}</Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => {
+                  setDialogOuvert(false);
+                  reinitialiserWizard();
+                }}
+              >
+                Annuler
+              </Button>
             </form>
           </DialogContent>
         </Dialog>

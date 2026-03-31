@@ -55,6 +55,7 @@ import {
   Map,
   Sparkles,
   MapPin,
+  Scale,
 } from "lucide-react";
 
 export interface PageNavigation {
@@ -68,6 +69,7 @@ export interface PageNavigation {
 export const PAGES_NAVIGATION: PageNavigation[] = [
   // Principal
   { nom: "Accueil", chemin: "/", categorie: "Principal", Icone: Home },
+  { nom: "Focus", chemin: "/focus", categorie: "Principal", Icone: Zap, keywords: ["essentiel", "jour", "rappels", "meteo"] },
   { nom: "Ma Semaine", chemin: "/ma-semaine", categorie: "Principal", Icone: CalendarCheck, keywords: ["semaine", "planning", "vue globale", "repas", "activites", "matchs"] },
 
   // Cuisine
@@ -132,6 +134,7 @@ export const PAGES_NAVIGATION: PageNavigation[] = [
   { nom: "Outils", chemin: "/outils", categorie: "Outils", Icone: Wrench },
   { nom: "Chat IA", chemin: "/outils/chat-ia", categorie: "Outils", Icone: MessageSquare, keywords: ["assistant", "question"] },
   { nom: "Assistant vocal", chemin: "/outils/assistant-vocal", categorie: "Outils", Icone: Mic, keywords: ["micro", "voix", "commande"] },
+  { nom: "Google Assistant", chemin: "/outils/google-assistant", categorie: "Outils", Icone: Sparkles, keywords: ["intents", "actions", "fulfillment", "google"] },
   { nom: "Convertisseur", chemin: "/outils/convertisseur", categorie: "Outils", Icone: ArrowLeftRight, keywords: ["unite", "mesure"] },
   { nom: "Météo", chemin: "/outils/meteo", categorie: "Outils", Icone: CloudSun, keywords: ["previsions", "temps"] },
   { nom: "Minuteur", chemin: "/outils/minuteur", categorie: "Outils", Icone: Timer, keywords: ["chrono", "cuisson"] },
@@ -158,6 +161,7 @@ export const PAGES_NAVIGATION: PageNavigation[] = [
   { nom: "Prédiction Pannes", chemin: "/ia-avancee/prediction-pannes", categorie: "IA", Icone: Wrench, keywords: ["maintenance", "prevention", "repair"] },
   { nom: "Suggestions Proactives", chemin: "/ia-avancee/suggestions-proactives", categorie: "IA", Icone: Sparkles, keywords: ["alertes", "actions", "contexte"] },
   { nom: "Adaptation Météo", chemin: "/ia-avancee/adaptations-meteo", categorie: "IA", Icone: CloudSun, keywords: ["previsions", "planning", "meteorologie"] },
+  { nom: "Comparateur Recettes", chemin: "/ia-avancee/comparateur-recettes", categorie: "IA", Icone: Scale, keywords: ["nutrition", "calories", "macros", "comparaison"] },
 ];
 
 /** Map chemin → nom lisible — dérivée automatiquement de PAGES_NAVIGATION */

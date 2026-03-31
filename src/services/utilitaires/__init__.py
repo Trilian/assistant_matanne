@@ -25,6 +25,10 @@ from src.services.utilitaires.inter_module_chat_contexte import (
     ChatContexteMultiModuleService,
     obtenir_service_chat_contexte,
 )
+from src.services.utilitaires.assistant_proactif import (
+    AssistantProactifService,
+    obtenir_service_assistant_proactif,
+)
 
 __all__ = [
     "NotesService",
@@ -37,6 +41,7 @@ __all__ = [
     "OCRService",
     "BriefingMatinalService",
     "ChatContexteMultiModuleService",
+    "AssistantProactifService",
     "get_notes_service",
     "get_journal_service",
     "get_contacts_service",
@@ -47,4 +52,5 @@ __all__ = [
     "get_ocr_service",
     "obtenir_service_briefing_matinal",
     "obtenir_service_chat_contexte",
+    "obtenir_service_assistant_proactif",
 ]

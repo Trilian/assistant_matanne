@@ -132,6 +132,10 @@ class RecetteResponse(RecetteBase, IdentifiedResponse):
     compatible_monsieur_cuisine: bool = False
     compatible_airfryer: bool = False
     jours_depuis_derniere_cuisson: int | None = None
+    calories: int | None = None
+    proteines: float | None = None
+    lipides: float | None = None
+    glucides: float | None = None
 
 
 class VersionRecetteResponse(BaseModel):

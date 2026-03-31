@@ -21,6 +21,7 @@ import {
 const SECTIONS = [
   { titre: "Chat IA", description: "Assistant intelligent", chemin: "/outils/chat-ia", Icone: Sparkles },
   { titre: "Assistant vocal", description: "Commandes à la voix", chemin: "/outils/assistant-vocal", Icone: Mic },
+  { titre: "Google Assistant", description: "Tester intents/actions", chemin: "/outils/google-assistant", Icone: Sparkles },
   { titre: "Notes", description: "Bloc-notes rapide", chemin: "/outils/notes", Icone: StickyNote },
   { titre: "Météo", description: "Prévisions locales", chemin: "/outils/meteo", Icone: CloudSun },
   { titre: "Minuteur", description: "Chronomètre cuisine", chemin: "/outils/minuteur", Icone: Timer },

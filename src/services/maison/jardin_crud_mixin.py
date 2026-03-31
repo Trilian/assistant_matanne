@@ -53,6 +53,12 @@ class JardinCrudMixin:
             {"element_id": element_id, "nom": nom, "action": action},
             source="jardin",
         )
+        if action == "recolte":
+            obtenir_bus().emettre(
+                "jardin.recolte",
+                {"element_id": element_id, "nom": nom, "action": action},
+                source="jardin",
+            )
 
     # ─────────────────────────────────────────────────────────
     # LECTURE PLANTES

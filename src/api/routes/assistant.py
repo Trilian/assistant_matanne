@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import re
-from datetime import date, datetime, timedelta
+import os
+from datetime import date, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
@@ -28,6 +29,298 @@ class AssistantChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=2000)
     contexte: str = Field(default="general")
     historique: list[dict[str, str]] = Field(default_factory=list)
+
+
+class GoogleAssistantIntentRequest(BaseModel):
+    """Payload d'exécution d'un intent Google Assistant."""
+
+    intent: str = Field(..., min_length=3, max_length=80)
+    slots: dict[str, Any] = Field(default_factory=dict)
+    langue: str = Field(default="fr-FR", max_length=10)
+
+
+INTENTS_GOOGLE_ASSISTANT: dict[str, dict[str, Any]] = {
+    "courses_ajouter_article": {
+        "description": "Ajouter un article à la liste de courses",
+        "slots": ["article"],
+        "template": "ajoute du {article} à la liste",
+        "action_attendue": "courses.ajout",
+    },
+    "jules_enregistrer_poids": {
+        "description": "Enregistrer le poids de Jules",
+        "slots": ["poids_kg"],
+        "template": "jules pèse {poids_kg} kg",
+        "action_attendue": "jules.croissance",
+    },
+    "planning_resume_demain": {
+        "description": "Résumer le planning de demain",
+        "slots": [],
+        "template": "quel est mon planning de demain",
+        "action_attendue": "planning.resume",
+    },
+    "routines_creer_rappel": {
+        "description": "Créer un rappel rapide",
+        "slots": ["tache", "moment"],
+        "template": "rappelle-moi {tache} {moment}",
+        "action_attendue": "routine.creation",
+    },
+}
+
+
+def _publier_evenement_assistant(
+    type_evenement: str,
+    data: dict[str, Any],
+    source: str,
+) -> None:
+    """Publie un événement assistant sans interrompre le flux API."""
+    try:
+        from src.services.core.events import obtenir_bus
+
+        obtenir_bus().emettre(type_evenement, data, source=source)
+    except Exception:
+        # L'API ne doit jamais échouer à cause du bus d'événements.
+        pass
+
+
+def _rendre_commande_depuis_intent(intent: str, slots: dict[str, Any]) -> str:
+    """Construit une commande textuelle à partir d'un intent Google Assistant."""
+    config = INTENTS_GOOGLE_ASSISTANT.get(intent)
+    if not config:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": f"Intent Google Assistant non supporté: {intent}",
+                "intents_supportes": sorted(INTENTS_GOOGLE_ASSISTANT.keys()),
+            },
+        )
+
+    valeurs = dict(slots or {})
+    if intent == "routines_creer_rappel" and "moment" not in valeurs:
+        valeurs["moment"] = "demain"
+
+    manquants = [s for s in config.get("slots", []) if not valeurs.get(s)]
+    if manquants:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Slots manquants pour exécuter l'intent",
+                "intent": intent,
+                "slots_requis": config.get("slots", []),
+                "slots_manquants": manquants,
+            },
+        )
+
+    return str(config["template"]).format(**valeurs)
+
+
+def _extraire_payload_google_assistant(payload: dict[str, Any]) -> tuple[str, dict[str, Any], str]:
+    """Extrait intent, slots et langue depuis un payload fulfillment Google Assistant."""
+    intent = (
+        payload.get("intent", {}).get("displayName")
+        or payload.get("intent", {}).get("name")
+        or payload.get("queryResult", {}).get("intent", {}).get("displayName")
+        or payload.get("intent")
+    )
+
+    session_info = payload.get("sessionInfo") or {}
+    query_result = payload.get("queryResult") or {}
+    slots = (
+        session_info.get("parameters")
+        or query_result.get("parameters")
+        or payload.get("slots")
+        or {}
+    )
+
+    langue = (
+        payload.get("languageCode")
+        or query_result.get("languageCode")
+        or "fr-FR"
+    )
+
+    if not isinstance(intent, str) or not intent.strip():
+        raise HTTPException(status_code=400, detail="Intent manquant dans le payload Google Assistant")
+
+    if not isinstance(slots, dict):
+        slots = {}
+
+    return intent.strip(), slots, str(langue)
+
+
+def _executer_commande_assistant(texte: str, source: str = "assistant_api") -> dict[str, Any]:
+    """Exécute une commande assistant (voix/Google Assistant) et retourne le résultat."""
+    from src.core.models import (
+        ArticleCourses,
+        Ingredient,
+        ListeCourses,
+        Planning,
+        ProfilEnfant,
+        Repas,
+        Routine,
+        TacheRoutine,
+    )
+    from src.core.models.carnet_sante import MesureCroissance
+
+    texte_lower = texte.lower()
+    with executer_avec_session() as session:
+        course_match = re.search(
+            r"(?:ajoute|ajouter)\s+(?:du|de la|de l'|des)?\s*(?P<article>[\w\s\-éèêàùç']+)\s+(?:à|dans)\s+la\s+liste",
+            texte_lower,
+        )
+        if course_match:
+            from src.core.validation import SanitiseurDonnees
+
+            nom_article = SanitiseurDonnees.nettoyer_texte(
+                course_match.group("article").strip(" .,!?")
+            )
+            liste = (
+                session.query(ListeCourses)
+                .filter(ListeCourses.archivee.is_(False))
+                .order_by(ListeCourses.id.desc())
+                .first()
+            )
+            if not liste:
+                liste = ListeCourses(nom="Liste principale", archivee=False)
+                session.add(liste)
+                session.flush()
+
+            ingredient = session.query(Ingredient).filter(Ingredient.nom == nom_article).first()
+            if ingredient is None:
+                ingredient = Ingredient(nom=nom_article, unite="pcs")
+                session.add(ingredient)
+                session.flush()
+
+            article = ArticleCourses(
+                liste_id=liste.id,
+                ingredient_id=ingredient.id,
+                quantite_necessaire=1.0,
+            )
+            session.add(article)
+            session.commit()
+            resultat = {
+                "action": "courses.ajout",
+                "message": f"{nom_article.title()} a été ajouté à la liste {liste.nom}.",
+                "details": {"liste_id": liste.id, "article_id": article.id},
+            }
+            _publier_evenement_assistant(
+                "assistant.commande_executee",
+                {"texte": texte, "action": resultat["action"]},
+                source=source,
+            )
+            return resultat
+
+        poids_match = re.search(
+            r"jules\s+p[eè]se\s+(?P<poids>\d+(?:[\.,]\d+)?)\s*kg",
+            texte_lower,
+        )
+        if poids_match:
+            poids = float(poids_match.group("poids").replace(",", "."))
+            enfant = (
+                session.query(ProfilEnfant)
+                .filter(ProfilEnfant.actif.is_(True))
+                .order_by(ProfilEnfant.id.asc())
+                .first()
+            )
+            if enfant is None:
+                raise HTTPException(status_code=404, detail="Profil Jules introuvable")
+
+            age_mois = None
+            if enfant.date_of_birth:
+                age_mois = max(
+                    0,
+                    (date.today().year - enfant.date_of_birth.year) * 12
+                    + date.today().month
+                    - enfant.date_of_birth.month,
+                )
+
+            mesure = MesureCroissance(
+                enfant_id=enfant.id,
+                date_mesure=date.today(),
+                poids_kg=poids,
+                age_mois=age_mois,
+                notes="Ajout via assistant vocal",
+            )
+            session.add(mesure)
+            session.commit()
+            resultat = {
+                "action": "jules.croissance",
+                "message": f"Mesure enregistrée: Jules pèse {poids:.1f} kg.",
+                "details": {"mesure_id": mesure.id},
+            }
+            _publier_evenement_assistant(
+                "assistant.commande_executee",
+                {"texte": texte, "action": resultat["action"]},
+                source=source,
+            )
+            return resultat
+
+        rappel_match = re.search(
+            r"rappelle[- ]moi\s+(?P<tache>.+?)\s+(?:demain|ce soir|ce matin)",
+            texte_lower,
+        )
+        if rappel_match:
+            tache = rappel_match.group("tache").strip(" .,!?")
+            routine = Routine(nom=f"Rappel: {tache}", categorie="assistant", actif=True)
+            session.add(routine)
+            session.flush()
+            session.add(TacheRoutine(routine_id=routine.id, nom=tache, ordre=1))
+            session.commit()
+            resultat = {
+                "action": "routine.creation",
+                "message": f"Rappel créé pour: {tache}.",
+                "details": {"routine_id": routine.id},
+            }
+            _publier_evenement_assistant(
+                "assistant.commande_executee",
+                {"texte": texte, "action": resultat["action"]},
+                source=source,
+            )
+            return resultat
+
+        if "planning de demain" in texte_lower or "programme de demain" in texte_lower:
+            demain = date.today() + timedelta(days=1)
+            planning = session.query(Planning).order_by(Planning.cree_le.desc()).first()
+            repas = []
+            if planning is not None:
+                repas = (
+                    session.query(Repas)
+                    .filter(Repas.planning_id == planning.id, Repas.date_repas == demain)
+                    .order_by(Repas.type_repas.asc())
+                    .all()
+                )
+            if not repas:
+                resultat = {
+                    "action": "planning.resume",
+                    "message": "Aucun repas planifié pour demain.",
+                    "details": {"date": demain.isoformat()},
+                }
+                _publier_evenement_assistant(
+                    "assistant.commande_executee",
+                    {"texte": texte, "action": resultat["action"]},
+                    source=source,
+                )
+                return resultat
+
+            resume = ", ".join(
+                f"{r.type_repas}: {getattr(getattr(r, 'recette', None), 'nom', 'repas libre')}"
+                for r in repas
+            )
+            resultat = {
+                "action": "planning.resume",
+                "message": f"Demain, le planning prévoit {resume}.",
+                "details": {"date": demain.isoformat(), "count": len(repas)},
+            }
+            _publier_evenement_assistant(
+                "assistant.commande_executee",
+                {"texte": texte, "action": resultat["action"]},
+                source=source,
+            )
+            return resultat
+
+        return {
+            "action": "incomprise",
+            "message": "Commande comprise mais non exécutable pour l'instant. Essayez avec une liste de courses, le poids de Jules, un rappel, ou le planning de demain.",
+            "details": {"texte": texte},
+        }
 
 
 @router.post(
@@ -54,154 +347,134 @@ async def interpreter_commande_vocale(
         raise HTTPException(status_code=400, detail="Le texte ne peut pas être vide")
 
     def _action() -> dict[str, Any]:
-        from src.core.models import (
-            ArticleCourses,
-            Ingredient,
-            ListeCourses,
-            Planning,
-            ProfilEnfant,
-            Repas,
-            Routine,
-            TacheRoutine,
-        )
-        from src.core.models.carnet_sante import MesureCroissance
-
-        texte_lower = texte.lower()
-        with executer_avec_session() as session:
-            course_match = re.search(
-                r"(?:ajoute|ajouter)\s+(?:du|de la|de l'|des)?\s*(?P<article>[\w\s\-éèêàùç']+)\s+(?:à|dans)\s+la\s+liste",
-                texte_lower,
-            )
-            if course_match:
-                from src.core.validation import SanitiseurDonnees
-                nom_article = SanitiseurDonnees.nettoyer_texte(
-                    course_match.group("article").strip(" .,!?")
-                )
-                liste = (
-                    session.query(ListeCourses)
-                    .filter(ListeCourses.archivee.is_(False))
-                    .order_by(ListeCourses.id.desc())
-                    .first()
-                )
-                if not liste:
-                    liste = ListeCourses(nom="Liste principale", archivee=False)
-                    session.add(liste)
-                    session.flush()
-
-                ingredient = session.query(Ingredient).filter(Ingredient.nom == nom_article).first()
-                if ingredient is None:
-                    ingredient = Ingredient(nom=nom_article, unite="pcs")
-                    session.add(ingredient)
-                    session.flush()
-
-                article = ArticleCourses(
-                    liste_id=liste.id,
-                    ingredient_id=ingredient.id,
-                    quantite_necessaire=1.0,
-                )
-                session.add(article)
-                session.commit()
-                return {
-                    "action": "courses.ajout",
-                    "message": f"{nom_article.title()} a été ajouté à la liste {liste.nom}.",
-                    "details": {"liste_id": liste.id, "article_id": article.id},
-                }
-
-            poids_match = re.search(
-                r"jules\s+p[eè]se\s+(?P<poids>\d+(?:[\.,]\d+)?)\s*kg",
-                texte_lower,
-            )
-            if poids_match:
-                poids = float(poids_match.group("poids").replace(",", "."))
-                enfant = (
-                    session.query(ProfilEnfant)
-                    .filter(ProfilEnfant.actif.is_(True))
-                    .order_by(ProfilEnfant.id.asc())
-                    .first()
-                )
-                if enfant is None:
-                    raise HTTPException(status_code=404, detail="Profil Jules introuvable")
-
-                age_mois = None
-                if enfant.date_of_birth:
-                    age_mois = max(
-                        0,
-                        (date.today().year - enfant.date_of_birth.year) * 12
-                        + date.today().month
-                        - enfant.date_of_birth.month,
-                    )
-
-                mesure = MesureCroissance(
-                    enfant_id=enfant.id,
-                    date_mesure=date.today(),
-                    poids_kg=poids,
-                    age_mois=age_mois,
-                    notes="Ajout via assistant vocal",
-                )
-                session.add(mesure)
-                session.commit()
-                return {
-                    "action": "jules.croissance",
-                    "message": f"Mesure enregistrée: Jules pèse {poids:.1f} kg.",
-                    "details": {"mesure_id": mesure.id},
-                }
-
-            rappel_match = re.search(
-                r"rappelle[- ]moi\s+(?P<tache>.+?)\s+(?:demain|ce soir|ce matin)",
-                texte_lower,
-            )
-            if rappel_match:
-                tache = rappel_match.group("tache").strip(" .,!?")
-                routine = Routine(nom=f"Rappel: {tache}", categorie="assistant", actif=True)
-                session.add(routine)
-                session.flush()
-                session.add(TacheRoutine(routine_id=routine.id, nom=tache, ordre=1))
-                session.commit()
-                return {
-                    "action": "routine.creation",
-                    "message": f"Rappel créé pour: {tache}.",
-                    "details": {"routine_id": routine.id},
-                }
-
-            if "planning de demain" in texte_lower or "programme de demain" in texte_lower:
-                demain = date.today() + timedelta(days=1)
-                planning = (
-                    session.query(Planning)
-                    .order_by(Planning.cree_le.desc())
-                    .first()
-                )
-                repas = []
-                if planning is not None:
-                    repas = (
-                        session.query(Repas)
-                        .filter(Repas.planning_id == planning.id, Repas.date_repas == demain)
-                        .order_by(Repas.type_repas.asc())
-                        .all()
-                    )
-                if not repas:
-                    return {
-                        "action": "planning.resume",
-                        "message": "Aucun repas planifié pour demain.",
-                        "details": {"date": demain.isoformat()},
-                    }
-
-                resume = ", ".join(
-                    f"{r.type_repas}: {getattr(getattr(r, 'recette', None), 'nom', 'repas libre')}"
-                    for r in repas
-                )
-                return {
-                    "action": "planning.resume",
-                    "message": f"Demain, le planning prévoit {resume}.",
-                    "details": {"date": demain.isoformat(), "count": len(repas)},
-                }
-
-            return {
-                "action": "incomprise",
-                "message": "Commande comprise mais non exécutable pour l'instant. Essayez avec une liste de courses, le poids de Jules, un rappel, ou le planning de demain.",
-                "details": {"texte": texte},
-            }
+        return _executer_commande_assistant(texte=texte, source="assistant_vocal")
 
     return await executer_async(_action)
+
+
+@router.get(
+    "/google-assistant/intents",
+    summary="Lister les intents Google Assistant supportés",
+)
+@gerer_exception_api
+async def lister_intents_google_assistant(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Expose le mapping intents/actions pour les raccourcis Google Assistant (I.10)."""
+    return {
+        "intents": [
+            {
+                "intent": intent,
+                "description": cfg["description"],
+                "slots": cfg["slots"],
+                "action_attendue": cfg["action_attendue"],
+            }
+            for intent, cfg in sorted(INTENTS_GOOGLE_ASSISTANT.items())
+        ]
+    }
+
+
+@router.post(
+    "/google-assistant/executer",
+    summary="Exécuter un intent Google Assistant",
+)
+@gerer_exception_api
+async def executer_intent_google_assistant(
+    payload: GoogleAssistantIntentRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Convertit un intent en commande puis exécute l'action backend associée."""
+
+    commande = _rendre_commande_depuis_intent(payload.intent, payload.slots)
+
+    def _action() -> dict[str, Any]:
+        resultat = _executer_commande_assistant(
+            texte=commande,
+            source=f"google_assistant:{payload.intent}",
+        )
+        return {
+            "intent": payload.intent,
+            "langue": payload.langue,
+            "commande": commande,
+            "resultat": resultat,
+        }
+
+    return await executer_async(_action)
+
+
+@router.post(
+    "/google-assistant/webhook",
+    summary="Webhook fulfillment Google Assistant",
+)
+@gerer_exception_api
+async def webhook_google_assistant(
+    request: Request,
+    x_assistant_secret: str | None = Header(default=None),
+) -> dict[str, Any]:
+    """Endpoint fulfillment direct pour Google Assistant (Dialogflow/Actions)."""
+
+    secret_attendu = os.getenv("GOOGLE_ASSISTANT_WEBHOOK_SECRET", "").strip()
+    if secret_attendu and x_assistant_secret != secret_attendu:
+        raise HTTPException(status_code=401, detail="Webhook Google Assistant non autorisé")
+
+    payload = await request.json()
+    intent, slots, langue = _extraire_payload_google_assistant(payload)
+
+    def _action() -> dict[str, Any]:
+        try:
+            commande = _rendre_commande_depuis_intent(intent, slots)
+            resultat = _executer_commande_assistant(
+                texte=commande,
+                source=f"google_assistant_webhook:{intent}",
+            )
+            message = str(resultat.get("message") or "Action exécutée.")
+            action = str(resultat.get("action") or "incomprise")
+        except HTTPException as e:
+            message = f"Je n'ai pas pu exécuter cette action: {e.detail}"
+            action = "erreur"
+            commande = ""
+
+        return {
+            "fulfillment_response": {
+                "messages": [
+                    {
+                        "text": {
+                            "text": [message],
+                        }
+                    }
+                ]
+            },
+            "sessionInfo": {
+                "parameters": {
+                    "intent": intent,
+                    "langue": langue,
+                    "action": action,
+                    "commande": commande,
+                }
+            },
+        }
+
+    return await executer_async(_action)
+
+
+@router.get(
+    "/proactif/dernieres-suggestions",
+    summary="Dernières suggestions proactives issues de l'EventBus",
+)
+@gerer_exception_api
+async def obtenir_dernieres_suggestions_proactives(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Expose les suggestions proactives les plus récentes produites par I.15."""
+
+    def _query() -> dict[str, Any]:
+        from src.services.utilitaires.assistant_proactif import (
+            obtenir_service_assistant_proactif,
+        )
+
+        return obtenir_service_assistant_proactif().obtenir_derniere_suggestion()
+
+    return await executer_async(_query)
 
 
 @router.post(

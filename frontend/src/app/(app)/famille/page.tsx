@@ -61,6 +61,7 @@ import {
 } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
+import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
 import type { ContexteFamilial, RappelFamille } from "@/types/famille";
 
 const MODULES = [
@@ -243,6 +244,8 @@ export default function PageFamille() {
 
   return (
     <div className="space-y-8">
+      <CarteNotificationsModule moduleKey="famille" moduleLabel="Famille" />
+
       {/* En-tête */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">👨‍👩‍👦 Famille</h1>

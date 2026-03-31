@@ -257,3 +257,95 @@ class TestExemplesCommandes:
         # Au moins une clé liée aux courses
         all_text = " ".join(str(v) for v in data.values()).lower()
         assert "liste" in all_text or "courses" in all_text
+
+
+class TestGoogleAssistantIntents:
+    """Tests I.10 — mapping intents Google Assistant."""
+
+    @pytest.mark.asyncio
+    async def test_lister_intents_google_assistant(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/assistant/google-assistant/intents")
+        assert response.status_code == 200
+        data = response.json()
+        assert "intents" in data
+        assert any(item["intent"] == "courses_ajouter_article" for item in data["intents"])
+
+    @pytest.mark.asyncio
+    async def test_executer_intent_planning_demain(self, async_client: httpx.AsyncClient):
+        """Intent planning_resume_demain -> résultat planning.resume."""
+        with patch("src.core.db.obtenir_contexte_db") as mock_ctx:
+            session = MagicMock()
+            session.query.return_value.order_by.return_value.first.return_value = None
+            session.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
+
+            @contextmanager
+            def _ctx():
+                yield session
+
+            mock_ctx.return_value = _ctx()
+            response = await async_client.post(
+                "/api/v1/assistant/google-assistant/executer",
+                json={"intent": "planning_resume_demain", "slots": {}},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["intent"] == "planning_resume_demain"
+        assert data["resultat"]["action"] == "planning.resume"
+
+
+class TestAssistantProactif:
+    """Tests I.15 — consultation des suggestions proactives EventBus."""
+
+    @pytest.mark.asyncio
+    async def test_dernieres_suggestions_proactives(self, async_client: httpx.AsyncClient):
+        faux_payload = {
+            "event_type": "meteo.actualisee",
+            "date_generation": "2026-03-31",
+            "suggestions": [{"titre": "Test", "module": "planning"}],
+        }
+
+        with patch(
+            "src.services.utilitaires.assistant_proactif.obtenir_service_assistant_proactif"
+        ) as mock_service_fn:
+            mock_service = MagicMock()
+            mock_service.obtenir_derniere_suggestion.return_value = faux_payload
+            mock_service_fn.return_value = mock_service
+
+            response = await async_client.get("/api/v1/assistant/proactif/dernieres-suggestions")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["event_type"] == "meteo.actualisee"
+        assert len(data["suggestions"]) == 1
+
+
+class TestGoogleAssistantWebhook:
+    """Tests webhook fulfillment Google Assistant."""
+
+    @pytest.mark.asyncio
+    async def test_webhook_google_assistant_intent_ok(self, async_client: httpx.AsyncClient):
+        with patch("src.core.db.obtenir_contexte_db") as mock_ctx:
+            session = MagicMock()
+            session.query.return_value.order_by.return_value.first.return_value = None
+            session.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
+
+            @contextmanager
+            def _ctx():
+                yield session
+
+            mock_ctx.return_value = _ctx()
+            response = await async_client.post(
+                "/api/v1/assistant/google-assistant/webhook",
+                json={
+                    "intent": {"displayName": "planning_resume_demain"},
+                    "sessionInfo": {"parameters": {}},
+                    "languageCode": "fr",
+                },
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        message = data["fulfillment_response"]["messages"][0]["text"]["text"][0]
+        assert isinstance(message, str)
+        assert data["sessionInfo"]["parameters"]["intent"] == "planning_resume_demain"

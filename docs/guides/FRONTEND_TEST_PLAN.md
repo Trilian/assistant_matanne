@@ -17,19 +17,19 @@ Structurer une couverture de tests unitaires et d'intégration légère sur 3 ax
 
 ## 1) Hooks
 
-### Déjà couverts
+### Hooks — Déjà couverts
 
 - `frontend/src/__tests__/hooks/utiliser-crud-dialog.test.ts`
 - `frontend/src/__tests__/hooks/utiliser-websocket.test.ts`
 
-### À compléter
+### Hooks — À compléter
 
 - `frontend/src/crochets/utiliser-api.ts`
 - `frontend/src/crochets/utiliser-auth.ts`
 - `frontend/src/crochets/utiliser-stockage-local.ts`
 - `frontend/src/crochets/utiliser-notifications-jeux.ts`
 
-### Cas à tester
+### Hooks — Cas à tester
 
 - États `loading/error/success`
 - Invalidation TanStack Query
@@ -38,13 +38,13 @@ Structurer une couverture de tests unitaires et d'intégration légère sur 3 ax
 
 ## 2) Stores Zustand
 
-### Déjà couverts
+### Stores — Déjà couverts
 
 - `frontend/src/magasins/store-auth.test.ts`
 - `frontend/src/magasins/store-ui.test.ts`
 - `frontend/src/magasins/store-notifications.test.ts`
 
-### À compléter
+### Stores — À compléter
 
 - Scénarios inter-stores (auth + notifications)
 - Persistance et rehydratation
@@ -67,7 +67,7 @@ Structurer une couverture de tests unitaires et d'intégration légère sur 3 ax
 
 - `frontend/src/app/(app)/parametres/_composants/*.tsx`
 
-### Cas à tester
+### Composants — Cas à tester
 
 - Rendu conditionnel
 - Interactions utilisateur (click, switch, input)
@@ -92,7 +92,7 @@ Structurer une couverture de tests unitaires et d'intégration légère sur 3 ax
 ## Matrice de couverture cible
 
 | Zone | Actuel | Cible Sprint I |
-|------|--------|----------------|
+| ---- | ------ | -------------- |
 | Hooks | moyen | élevé |
 | Stores | moyen | élevé |
 | Composants habitat/planning | faible | moyen/élevé |

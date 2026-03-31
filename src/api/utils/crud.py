@@ -6,6 +6,7 @@ Fournit des helpers pour les opérations courantes dans les routes.
 
 import asyncio
 import logging
+import os
 from collections.abc import Callable, Generator
 from contextlib import asynccontextmanager, contextmanager
 from typing import Any, TypeVar
@@ -13,11 +14,15 @@ from typing import Any, TypeVar
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from src.core.exceptions import ErreurBaseDeDonnees
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
 R = TypeVar("R")
+
+DB_RETRY_ATTEMPTS = max(1, int(os.getenv("DB_TRANSIENT_RETRY_ATTEMPTS", "2")))
+DB_RETRY_DELAY_S = max(0.0, float(os.getenv("DB_TRANSIENT_RETRY_DELAY_S", "0.25")))
 
 
 def construire_reponse_paginee(
@@ -77,6 +82,9 @@ def executer_avec_session() -> Generator[Session, None, None]:
     try:
         with obtenir_contexte_db() as session:
             yield session
+    except ErreurBaseDeDonnees as e:
+        logger.warning("Erreur DB transitoire potentielle: %s", e)
+        raise
     except HTTPException:
         raise
     except Exception as e:
@@ -118,16 +126,35 @@ async def executer_async(func: Callable[..., R], *args: Any, **kwargs: Any) -> R
     Raises:
         HTTPException: Re-levée depuis la fonction
     """
-    try:
-        return await asyncio.to_thread(func, *args, **kwargs)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Erreur async: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail="Une erreur interne est survenue. Veuillez réessayer.",
-        ) from e
+    for tentative in range(1, DB_RETRY_ATTEMPTS + 1):
+        try:
+            return await asyncio.to_thread(func, *args, **kwargs)
+        except ErreurBaseDeDonnees as e:
+            if tentative >= DB_RETRY_ATTEMPTS:
+                logger.error("Erreur DB persistante après %d tentative(s): %s", tentative, e)
+                raise HTTPException(
+                    status_code=503,
+                    detail="La base de données est temporairement indisponible. Réessayez.",
+                ) from e
+            logger.warning(
+                "Erreur DB transitoire (tentative %d/%d), nouvelle tentative...",
+                tentative,
+                DB_RETRY_ATTEMPTS,
+            )
+            await asyncio.sleep(DB_RETRY_DELAY_S * tentative)
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Erreur async: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500,
+                detail="Une erreur interne est survenue. Veuillez réessayer.",
+            ) from e
+
+    raise HTTPException(
+        status_code=503,
+        detail="La base de données est temporairement indisponible. Réessayez.",
+    )
 
 
 async def query_async(query_func: Callable[[Session], R]) -> R:

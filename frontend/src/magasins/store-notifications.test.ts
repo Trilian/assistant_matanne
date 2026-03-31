@@ -60,4 +60,26 @@ describe("store-notifications", () => {
     expect(notifs).toHaveLength(2);
     expect(notifs[1].titre).toBe("Erreur");
   });
+
+  it("permet de personnaliser la durée d'auto-dismiss", () => {
+    const { ajouter, definirPreferences } = utiliserStoreNotifications.getState();
+    definirPreferences({ autoDismissMs: 10000 });
+    ajouter({ type: "info", message: "Longue durée" });
+
+    vi.advanceTimersByTime(5000);
+    expect(utiliserStoreNotifications.getState().notifications).toHaveLength(1);
+
+    vi.advanceTimersByTime(5000);
+    expect(utiliserStoreNotifications.getState().notifications).toHaveLength(0);
+  });
+
+  it("conserve les notifications d'erreur si option activée", () => {
+    const { ajouter, definirPreferences } = utiliserStoreNotifications.getState();
+    definirPreferences({ conserverErreurs: true, autoDismissMs: 2000 });
+
+    ajouter({ type: "erreur", message: "Erreur persistante" });
+    vi.advanceTimersByTime(10000);
+
+    expect(utiliserStoreNotifications.getState().notifications).toHaveLength(1);
+  });
 });

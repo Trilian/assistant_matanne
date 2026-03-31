@@ -59,8 +59,11 @@ export interface PreferencesNotifications {
   budget_alerte: boolean;
   canal_prefere: string;
   canaux_par_categorie: CanauxParCategorie;
+  notifications_par_module: Record<string, boolean>;
   quiet_hours_start: string;
   quiet_hours_end: string;
+  mode_vacances: boolean;
+  checklist_voyage_auto: boolean;
 }
 
 /** Récupérer les préférences de notification */

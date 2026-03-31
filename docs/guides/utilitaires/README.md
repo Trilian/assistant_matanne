@@ -21,6 +21,7 @@ Outils transversaux : scanner codes-barres, commandes vocales, et fonctions help
 
 - [Scanner Codes-barres](barcode.md) — Modes de scan, formats supportés, OpenFoodFacts, dépannage
 - [Commandes Vocales](vocal.md) — Commandes reconnues, configuration micro, exemples
+- [Google Assistant](../../GOOGLE_ASSISTANT_SETUP.md) — Intents disponibles, webhook fulfillment, sécurité, tests curl
 
 ## Architecture
 

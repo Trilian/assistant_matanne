@@ -5,6 +5,31 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
+const isProduction = process.env.NODE_ENV === "production";
+
+function construireCsp(): string {
+  const connectSrc = process.env.NEXT_PUBLIC_API_URL
+    ? `${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_API_URL.replace(/^https?:/, "wss:")}`
+    : "http://localhost:8000 ws://localhost:8000 wss://localhost:8000";
+
+  const scriptSrc = isProduction
+    ? "script-src 'self'"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval'";
+  const styleSrc = isProduction ? "style-src 'self'" : "style-src 'self' 'unsafe-inline'";
+
+  return [
+    "default-src 'self'",
+    scriptSrc,
+    styleSrc,
+    "img-src 'self' data: blob: https://*.supabase.co",
+    "font-src 'self' data:",
+    `connect-src 'self' https://*.supabase.co https://*.sentry.io ${connectSrc}`,
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+}
+
 const nextConfig: NextConfig = {
   // Standalone output pour Docker staging
   output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
@@ -35,17 +60,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://*.supabase.co",
-              "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co https://*.sentry.io " + (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL} ${process.env.NEXT_PUBLIC_API_URL.replace(/^https?:/, "wss:")}` : "http://localhost:8000 ws://localhost:8000 wss://localhost:8000"),
-              "frame-ancestors 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-            ].join("; "),
+            value: construireCsp(),
           },
           { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
         ],

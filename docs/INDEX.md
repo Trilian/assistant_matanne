@@ -30,6 +30,7 @@
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Guide de déploiement (local, Docker, Railway, Vercel, Supabase) |
 | [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) | Guide migration stack technique + workflow DB |
 | [REDIS_SETUP.md](./REDIS_SETUP.md) | Configuration Redis (optionnel) |
+| [GOOGLE_ASSISTANT_SETUP.md](./GOOGLE_ASSISTANT_SETUP.md) | Intégration Google Assistant (intents, webhook fulfillment, sécurité) |
 
 ## Guides par module
 
@@ -68,6 +69,7 @@ docs/
 ├── DEPLOYMENT.md                ← Guide déploiement
 ├── MIGRATION_GUIDE.md           ← Guide migration stack + workflow DB
 ├── REDIS_SETUP.md               ← Setup Redis
+├── GOOGLE_ASSISTANT_SETUP.md    ← Setup Google Assistant
 └── guides/
     ├── cuisine/README.md        ← Cuisine complet
     ├── famille/README.md        ← Famille complet

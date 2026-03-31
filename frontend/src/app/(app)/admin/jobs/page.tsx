@@ -15,6 +15,7 @@ import {
 } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Badge } from "@/composants/ui/badge";
+import { Input } from "@/composants/ui/input";
 import {
   Table,
   TableBody,
@@ -23,10 +24,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/composants/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/composants/ui/select";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { clientApi } from "@/bibliotheque/api/client";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import { listerHistoriqueJobs } from "@/bibliotheque/api/admin";
 
 interface JobInfo {
   id: string;
@@ -50,6 +59,28 @@ interface JobLogsResponse {
   total: number;
 }
 
+interface JobHistoryEntry {
+  id: number;
+  job_id: string;
+  job_name: string;
+  started_at: string | null;
+  ended_at: string | null;
+  duration_ms: number;
+  status: string;
+  error_message: string | null;
+  output_logs: string | null;
+  triggered_by_user_id: string | null;
+  triggered_by_user_role: string | null;
+}
+
+interface JobHistoryResponse {
+  items: JobHistoryEntry[];
+  total: number;
+  page: number;
+  par_page: number;
+  pages_totales: number;
+}
+
 type RunStatus = "idle" | "running" | "success" | "error";
 
 function formaterDate(iso: string | null): string {
@@ -67,6 +98,11 @@ export default function PageAdminJobs() {
   const [jobLogs, setJobLogs] = useState<Record<string, JobLogsResponse>>({});
   const [chargementLogs, setChargementLogs] = useState<Record<string, boolean>>({});
   const [modeDryRun, setModeDryRun] = useState(false);
+  const [pageHistorique, setPageHistorique] = useState(1);
+  const [filtreJobId, setFiltreJobId] = useState("");
+  const [filtreStatus, setFiltreStatus] = useState("all");
+  const [filtreDepuis, setFiltreDepuis] = useState("");
+  const [filtreJusqua, setFiltreJusqua] = useState("");
 
   const {
     data: jobs,
@@ -76,6 +112,37 @@ export default function PageAdminJobs() {
     const { data } = await clientApi.get("/admin/jobs");
     return data;
   });
+
+  const { data: historique, isLoading: historiqueLoading } = utiliserRequete(
+    [
+      "admin",
+      "jobs-history",
+      String(pageHistorique),
+      filtreJobId,
+      filtreStatus,
+      filtreDepuis,
+      filtreJusqua,
+    ],
+    async (): Promise<JobHistoryResponse> => {
+      const data = await listerHistoriqueJobs({
+        page: pageHistorique,
+        par_page: 20,
+        job_id: filtreJobId || undefined,
+        status: filtreStatus !== "all" ? filtreStatus : undefined,
+        depuis: filtreDepuis ? `${filtreDepuis}T00:00:00` : undefined,
+        jusqu_a: filtreJusqua ? `${filtreJusqua}T23:59:59` : undefined,
+      });
+      return data;
+    },
+  );
+
+  const badgeHistorique = (status: string) => {
+    if (status === "success") return <Badge>Succès</Badge>;
+    if (status === "dry_run") return <Badge variant="secondary">Dry-run</Badge>;
+    if (status === "failure") return <Badge variant="destructive">Échec</Badge>;
+    if (status === "pending") return <Badge variant="outline">Pending</Badge>;
+    return <Badge variant="outline">{status}</Badge>;
+  };
 
   const executerJob = async (jobId: string) => {
     setRunStatuts((s) => ({ ...s, [jobId]: "running" }));
@@ -284,6 +351,137 @@ export default function PageAdminJobs() {
                 })}
               </TableBody>
             </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Historique des exécutions</CardTitle>
+          <CardDescription>
+            Historique paginé des jobs avec filtres (statut, job, période)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2 md:grid-cols-5">
+            <Input
+              placeholder="Filtrer job_id"
+              value={filtreJobId}
+              onChange={(e) => {
+                setPageHistorique(1);
+                setFiltreJobId(e.target.value);
+              }}
+            />
+            <Select
+              value={filtreStatus}
+              onValueChange={(value) => {
+                setPageHistorique(1);
+                setFiltreStatus(value);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Statut" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous statuts</SelectItem>
+                <SelectItem value="success">Succès</SelectItem>
+                <SelectItem value="failure">Échec</SelectItem>
+                <SelectItem value="dry_run">Dry-run</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              type="date"
+              value={filtreDepuis}
+              onChange={(e) => {
+                setPageHistorique(1);
+                setFiltreDepuis(e.target.value);
+              }}
+            />
+            <Input
+              type="date"
+              value={filtreJusqua}
+              onChange={(e) => {
+                setPageHistorique(1);
+                setFiltreJusqua(e.target.value);
+              }}
+            />
+            <Button
+              variant="outline"
+              onClick={() => {
+                setPageHistorique(1);
+                setFiltreJobId("");
+                setFiltreStatus("all");
+                setFiltreDepuis("");
+                setFiltreJusqua("");
+              }}
+            >
+              Réinitialiser
+            </Button>
+          </div>
+
+          {historiqueLoading ? (
+            <div className="flex items-center justify-center py-8 text-muted-foreground">
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Chargement de l'historique…
+            </div>
+          ) : !historique || historique.items.length === 0 ? (
+            <p className="text-center py-8 text-muted-foreground">Aucune exécution trouvée.</p>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Job</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Durée</TableHead>
+                    <TableHead>Déclenché par</TableHead>
+                    <TableHead>Message</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {historique.items.map((entry) => (
+                    <TableRow key={entry.id}>
+                      <TableCell className="text-sm">{formaterDate(entry.started_at)}</TableCell>
+                      <TableCell className="font-mono text-xs">{entry.job_id}</TableCell>
+                      <TableCell>{badgeHistorique(entry.status)}</TableCell>
+                      <TableCell>{entry.duration_ms} ms</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {entry.triggered_by_user_id ?? "system"}
+                      </TableCell>
+                      <TableCell className="max-w-[420px] truncate text-xs">
+                        {entry.error_message || entry.output_logs || "—"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="flex items-center justify-between text-sm">
+                <p className="text-muted-foreground">
+                  {historique.total} exécution(s) • page {historique.page}/{historique.pages_totales}
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={historique.page <= 1}
+                    onClick={() => setPageHistorique((p) => Math.max(1, p - 1))}
+                  >
+                    Précédent
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={historique.page >= historique.pages_totales}
+                    onClick={() => setPageHistorique((p) => p + 1)}
+                  >
+                    Suivant
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

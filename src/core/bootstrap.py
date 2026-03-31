@@ -152,6 +152,18 @@ def demarrer_application(
         rapport.avertissements.append(f"charger_tous_modeles: {e}")
         logger.warning(f"⚠ Impossible de charger tous les modèles: {e}")
 
+    # ─── Étape 2c: Listener invalidation cache (LISTEN/NOTIFY PostgreSQL)
+    try:
+        from src.core.caching.invalidation_listener import (
+            demarrer_listener_invalidation_cache,
+        )
+
+        demarrer_listener_invalidation_cache()
+        rapport.composants_enregistres.append("CacheInvalidationListener")
+    except Exception as e:
+        rapport.avertissements.append(f"cache_invalidation_listener: {e}")
+        logger.warning(f"⚠ Impossible de démarrer le listener cache: {e}")
+
     # ─── Étape 3: Enregistrement atexit ───
     if enregistrer_atexit:
         atexit.register(arreter_application)
@@ -190,6 +202,14 @@ def arreter_application() -> None:
         return
 
     logger.info("🛑 Arrêt de l'application...")
+
+    # Arrêt listener cache
+    try:
+        from src.core.caching.invalidation_listener import arreter_listener_invalidation_cache
+
+        arreter_listener_invalidation_cache()
+    except Exception as e:
+        logger.debug(f"Arrêt listener cache ignoré: {e}")
 
     # Cleanup du moteur DB
     try:

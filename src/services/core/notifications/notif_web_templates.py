@@ -35,6 +35,7 @@ class NotificationTemplatesMixin:
             notification_type=TypeNotification.STOCK_BAS,
             url="/?module=cuisine.inventaire",
             tag=f"stock_{nom_article}",
+            data={"article_nom": nom_article},
             actions=[
                 {"action": "add_to_cart", "title": "Ajouter aux courses"},
                 {"action": "dismiss", "title": "Ignorer"},

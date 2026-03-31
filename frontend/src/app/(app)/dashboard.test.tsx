@@ -44,6 +44,17 @@ const mockBilanMensuel = {
 
 const mockConfigDashboard = { config_dashboard: {} };
 const mockAlertesContextuelles = { total: 0, items: [] };
+const mockAnomaliesBudget = {
+  anomalies: [
+    {
+      type: "pic",
+      categorie: "courses",
+      ecart_pourcent: 34,
+      severite: "danger",
+      description: "Dépenses courses en forte hausse.",
+    },
+  ],
+};
 const mockPointsFamille = {
   total_points: 120,
   sport: 40,
@@ -107,6 +118,9 @@ vi.mock("@/crochets/utiliser-api", () => ({
     if (key[0] === "dashboard" && key[1] === "score-ecologique") {
       return { data: mockScoreEcologique, isLoading: false, error: null };
     }
+    if (key[0] === "famille" && key[1] === "budget" && key[2] === "anomalies") {
+      return { data: mockAnomaliesBudget, isLoading: false, error: null };
+    }
     if (key[0] === "famille") {
       return { data: mockFamille, isLoading: false, error: null };
     }
@@ -150,5 +164,11 @@ describe("DashboardPage", () => {
     expect(screen.getByText("Score ecologique")).toBeInTheDocument();
     expect(screen.getByText("Suggestion du soir")).toBeInTheDocument();
     expect(screen.getByText("Poulet rôti aux légumes")).toBeInTheDocument();
+  });
+
+  it("affiche le widget alerte budget", () => {
+    render(<DashboardPage />);
+    expect(screen.getByText("Alerte budget")).toBeInTheDocument();
+    expect(screen.getByText("Dépenses courses en forte hausse.")).toBeInTheDocument();
   });
 });

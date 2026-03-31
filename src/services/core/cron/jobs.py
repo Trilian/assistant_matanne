@@ -1096,6 +1096,17 @@ def _job_controle_contrats_garanties() -> None:
             canaux=canaux,
             **kwargs,
         )
+        from src.services.core.event_bus_mixin import emettre_evenement_simple
+
+        emettre_evenement_simple(
+            "contrat.renouvellement",
+            {
+                "nb_contrats": len(contrats),
+                "nb_garanties": len(garanties),
+                "message": message,
+            },
+            source="cron.controle_contrats_garanties",
+        )
         logger.info("J-09 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur job J-09")
@@ -1625,6 +1636,16 @@ def _job_prediction_courses_weekly() -> None:
                 canaux=["ntfy", "push"],
                 titre="Courses hebdo prédites",
             )
+            from src.services.core.event_bus_mixin import emettre_evenement_simple
+
+            emettre_evenement_simple(
+                "inventaire.modification_importante",
+                {
+                    "nb_articles_impactes": int(nb_ajoutes),
+                    "source_declenchement": "prediction_courses_weekly",
+                },
+                source="cron.prediction_courses_weekly",
+            )
         logger.info("JOB-1 exécuté: %d article(s) ajouté(s)", nb_ajoutes)
     except Exception:
         logger.exception("Erreur JOB-1 prediction_courses_weekly")
@@ -1784,6 +1805,17 @@ def _job_alertes_energie() -> None:
             titre="Alerte consommation énergie",
             type_email="alerte_critique",
             alerte={"titre": "Alerte consommation énergie", "message": message},
+        )
+        from src.services.core.event_bus_mixin import emettre_evenement_simple
+
+        emettre_evenement_simple(
+            "energie.anomalie",
+            {
+                "nb_alertes": len(alertes),
+                "details": alertes,
+                "message": message,
+            },
+            source="cron.alertes_energie",
         )
         logger.info("JOB-4 exécuté: %d alerte(s)", len(alertes))
     except Exception:

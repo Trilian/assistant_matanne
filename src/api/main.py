@@ -111,6 +111,15 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
     """Gère le démarrage et l'arrêt de l'application FastAPI."""
     # ── Démarrage ───────────────────────────────────────────
     try:
+        from src.core.caching.invalidation_listener import (
+            demarrer_listener_invalidation_cache,
+        )
+
+        demarrer_listener_invalidation_cache()
+    except Exception:
+        logger.warning("Listener invalidation cache non démarré", exc_info=True)
+
+    try:
         from src.services.core.cron import demarrer_scheduler
 
         demarrer_scheduler()
@@ -126,6 +135,15 @@ async def lifespan(app: FastAPI):  # noqa: ARG001
         arreter_scheduler()
     except Exception:
         logger.debug("Scheduler cron déjà arrêté ou non initialisé")
+
+    try:
+        from src.core.caching.invalidation_listener import (
+            arreter_listener_invalidation_cache,
+        )
+
+        arreter_listener_invalidation_cache()
+    except Exception:
+        logger.debug("Listener invalidation cache déjà arrêté ou non initialisé")
 
 
 

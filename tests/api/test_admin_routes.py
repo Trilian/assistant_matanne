@@ -317,6 +317,37 @@ class TestAdminSprintFEndpoints:
         )
         assert response.status_code in [200, 401, 403, 422, 500]
 
+    @pytest.mark.asyncio
+    async def test_seed_dev_dry_run(self, async_client: httpx.AsyncClient):
+        class _Parametres:
+            ENV = "development"
+
+        with patch("src.core.config.obtenir_parametres", return_value=_Parametres()):
+            response = await async_client.post(
+                "/api/v1/admin/seed/dev?dry_run=true",
+                json={"scope": "recettes_standard"},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "dry_run"
+        assert data["scope"] == "recettes_standard"
+
+    @pytest.mark.asyncio
+    async def test_jobs_history_pagine_filtres(self, async_client: httpx.AsyncClient):
+        response = await async_client.get(
+            "/api/v1/admin/jobs/history",
+            params={"page": 1, "par_page": 10, "status": "success"},
+        )
+
+        assert response.status_code in [200, 500]
+        if response.status_code == 200:
+            data = response.json()
+            assert "items" in data
+            assert "total" in data
+            assert "page" in data
+            assert "pages_totales" in data
+
 
 # ═══════════════════════════════════════════════════════════
 # CT-14 — Routes RGPD

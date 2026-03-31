@@ -27,6 +27,7 @@ const OUTILS = [
   { titre: 'Prédiction pannes', description: 'Risque de panne et maintenance préventive.', chemin: '/ia-avancee/prediction-pannes', icone: '🔧' },
   { titre: 'Suggestions proactives', description: 'Actions suggérées automatiquement par l’app.', chemin: '/ia-avancee/suggestions-proactives', icone: '✨' },
   { titre: 'Adaptations météo', description: 'Transforme les prévisions en arbitrages concrets.', chemin: '/ia-avancee/adaptations-meteo', icone: '🌤️' },
+  { titre: 'Comparateur recettes', description: 'Comparer 2 recettes sur calories et macros.', chemin: '/ia-avancee/comparateur-recettes', icone: '🥗' },
 ]
 
 export default function IAAvanceePage() {
