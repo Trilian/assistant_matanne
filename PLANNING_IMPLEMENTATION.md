@@ -283,10 +283,10 @@
 | # | T?che | Source | Effort | Cat?gorie | Status |
 | --- | ------- | -------- | -------- | ----------- | ------ |
 | E1 | IN1 ? Mode "Pilote automatique" (IA g?re planning/courses/rappels, utilisateur valide) | ?18 Innovation | 5j | Innovation | **Fait** |
-| E2 | IN2 ? Widget tablette Google (repas du jour, t?che, m?t?o, timer) | ?18 Innovation | 4j | Innovation | **Partiel** |
+| E2 | IN2 ? Widget tablette Google (repas du jour, t?che, m?t?o, timer) | ?18 Innovation | 4j | Innovation | **Fait** |
 | E3 | IN10 ? Score famille hebdomadaire composite (nutrition + d?penses + activit?s + entretien) | ?18 Innovation | 2j | Innovation | **Fait** |
 | E4 | IN14 ? Mode "invit?" conjoint (vue simplifi?e : courses, planning, routines) | ?18 Innovation | 2j | Innovation | **Fait** |
-| E5 | V9 ? Graphe r?seau modules admin (D3.js force graph, 21 bridges visuels) | ?16 3D | 2j | Visualisation | **Partiel** |
+| E5 | V9 ? Graphe r?seau modules admin (D3.js force graph, 21 bridges visuels) | ?16 3D | 2j | Visualisation | **Fait** |
 | E6 | V10 ? Timeline Gantt entretien maison (Recharts, planification annuelle) | ?16 2D | 2j | Visualisation | **Fait** |
 | E7 | V2 ? Vue jardin 2D/3D (zones plantation, ?tat plantes, calendrier arrosage) | ?16 3D | 3j | Visualisation | **Fait** |
 | E8 | IN5 ? Journal familial automatique (IA g?n?re r?sum? semaine exportable PDF) | ?18 Innovation | 3j | Innovation | **Fait** |
@@ -317,9 +317,9 @@
 | # | Bug | Module | Impact | Phase |
 | --- | ----- | -------- | -------- | ------- |
 | B5 | **Rate limiting m?moire non born?** ? chaque IP/user unique sans ?viction ? fuite m?moire | Rate Limiting | Memory leak prod | A5 |
-| B6 | **Maintenance mode cache 5s** ? requ?tes accept?es pendant la transition | Admin | Requ?tes pendant maintenance | D (si temps) |
+| B6 | **Maintenance mode cache 5s** ? requ?tes accept?es pendant la transition | Admin | Requ?tes pendant maintenance | Fait (cache court 1s) |
 | B7 | **X-Forwarded-For spoofable** ? bypass rate limiting | S?curit? | Rate limiting contournable | A6 |
-| B8 | **Metrics capped 500 endpoints / 1000 samples** ? percentiles impr?cis | Monitoring | M?triques d?grad?es | D (si temps) |
+| B8 | **Metrics capped 500 endpoints / 1000 samples** ? percentiles impr?cis | Monitoring | M?triques d?grad?es | Fait (historique 2000 points) |
 | B9 | **WhatsApp multi-turn sans persistence** ? state machine perd ?tat entre messages | WhatsApp | Conversation cass?e | A7 |
 | B10 | **CORS vide en production** ? frontend bloqu? sans config explicite | Config | Frontend bloqu? | A8 |
 
@@ -821,7 +821,7 @@ Stocks (cellier) --? consolid? avec inventaire cuisine
 | D3 | Guide admin M?J (20+ endpoints, panneau, simulations, flags) | ? Fait | Termin? |
 | D4 | Guide bridges inter-modules (21 bridges, naming, comment en cr?er) | ? Fait | Termin? |
 | D5 | Guide de test unifi? (pytest + Vitest + Playwright, fixtures, mocks) | ? Fait | Termin? |
-| D6 | Changelog module par module | ?? Partiel | ? compl?ter |
+| D6 | Changelog module par module | ? Fait | Termin? |
 
 ---
 

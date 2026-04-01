@@ -7,7 +7,7 @@ Trois types de métriques:
   HISTOGRAMME  – distribution de valeurs (ex: latences en ms)
 
 Le collecteur maintient un historique glissant configurable (par défaut
-les 500 derniers points par métrique) et offre un *snapshot* structuré
+les 2000 derniers points par métrique) et offre un *snapshot* structuré
 pour l'affichage dans un tableau de bord.
 """
 
@@ -16,10 +16,14 @@ from __future__ import annotations
 import statistics
 import threading
 import time
-from collections import defaultdict, deque
+from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any
+
+
+def _labels_factory() -> dict[str, str]:
+    return {}
 
 # ───────────────────────────────────────────────────────────
 # TYPES PUBLICS
@@ -42,7 +46,7 @@ class PointMetrique:
     valeur: float
     type: MetriqueType
     timestamp: float
-    labels: dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=_labels_factory)
 
 
 # ───────────────────────────────────────────────────────────
@@ -86,7 +90,7 @@ class CollecteurMetriques:
         Nombre maximal de points conservés par métrique (FIFO).
     """
 
-    def __init__(self, taille_historique: int = 500) -> None:
+    def __init__(self, taille_historique: int = 2000) -> None:
         self._lock = threading.RLock()
         self._series: dict[str, _SerieMetrique] = {}
         self._taille = taille_historique

@@ -363,13 +363,14 @@ _MAINTENANCE_CACHE: dict[str, float | bool] = {
     "enabled": False,
     "checked_at": 0.0,
 }
+_MAINTENANCE_CACHE_TTL_S = 1.0
 
 
 def _lire_mode_maintenance() -> bool:
     """Lit le mode maintenance depuis l'état persistant admin (avec cache court)."""
     now = time.monotonic()
     checked_at = float(_MAINTENANCE_CACHE.get("checked_at", 0.0) or 0.0)
-    if now - checked_at <= 5.0:
+    if now - checked_at <= _MAINTENANCE_CACHE_TTL_S:
         return bool(_MAINTENANCE_CACHE.get("enabled", False))
 
     enabled = False

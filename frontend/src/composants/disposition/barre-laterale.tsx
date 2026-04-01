@@ -93,6 +93,7 @@ const LIENS: LienNav[] = [
   { nom: "Accueil", chemin: "/", Icone: Home },
   { nom: "Ma Journée", chemin: "/ma-journee", Icone: CalendarDays },
   { nom: "Focus", chemin: "/focus", Icone: Zap },
+  { nom: "Widget Tablette", chemin: "/widget-tablette", Icone: Lightbulb },
   { nom: "Ma Semaine", chemin: "/ma-semaine", Icone: CalendarRange },
   {
     nom: "Cuisine",

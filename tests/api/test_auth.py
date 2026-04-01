@@ -34,7 +34,7 @@ from src.api.auth import (
 @pytest.fixture
 def api_secret():
     """Secret de test fixe."""
-    return "test-secret-key-for-unit-tests"
+    return "test-secret-key-for-unit-tests-2026-long"
 
 
 @pytest.fixture
@@ -75,7 +75,7 @@ def token_supabase():
         "iat": datetime.now(UTC),
         "exp": datetime.now(UTC) + timedelta(hours=1),
     }
-    return jwt.encode(payload, "supabase-jwt-secret-test", algorithm=ALGORITHME)
+    return jwt.encode(payload, "supabase-jwt-secret-test-2026-long-key", algorithm=ALGORITHME)
 
 
 @pytest.fixture
@@ -89,7 +89,7 @@ def token_supabase_expire():
         "iat": datetime.now(UTC) - timedelta(hours=48),
         "exp": datetime.now(UTC) - timedelta(hours=1),
     }
-    return jwt.encode(payload, "supabase-jwt-secret-test", algorithm=ALGORITHME)
+    return jwt.encode(payload, "supabase-jwt-secret-test-2026-long-key", algorithm=ALGORITHME)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -168,7 +168,10 @@ class TestValiderTokenApi:
 
     def test_token_mauvaise_signature(self, api_secret, token_valide):
         """Un token avec mauvaise clé retourne None."""
-        with patch("src.api.auth._obtenir_api_secret", return_value="wrong-key"):
+        with patch(
+            "src.api.auth._obtenir_api_secret",
+            return_value="wrong-key-long-enough-for-sha256-tests",
+        ):
             result = valider_token_api(token_valide)
         assert result is None
 
@@ -212,7 +215,7 @@ class TestValiderTokenSupabase:
         """Un token Supabase avec bonne signature est validé."""
         with patch(
             "src.api.auth._obtenir_supabase_jwt_secret",
-            return_value="supabase-jwt-secret-test",
+            return_value="supabase-jwt-secret-test-2026-long-key",
         ):
             result = valider_token_supabase(token_supabase)
 
@@ -225,7 +228,7 @@ class TestValiderTokenSupabase:
         """Un token Supabase avec mauvaise signature est rejeté."""
         with patch(
             "src.api.auth._obtenir_supabase_jwt_secret",
-            return_value="wrong-secret",
+            return_value="wrong-secret-long-enough-for-sha256-tests",
         ):
             result = valider_token_supabase(token_supabase)
         assert result is None
@@ -313,11 +316,11 @@ class TestValiderToken:
         with (
             patch(
                 "src.api.auth._obtenir_api_secret",
-                return_value="different-key",
+                return_value="different-key-long-enough-for-sha256-tests",
             ),
             patch(
                 "src.api.auth._obtenir_supabase_jwt_secret",
-                return_value="supabase-jwt-secret-test",
+                return_value="supabase-jwt-secret-test-2026-long-key",
             ),
         ):
             result = valider_token(token_supabase)
