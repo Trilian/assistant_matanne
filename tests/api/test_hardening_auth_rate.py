@@ -30,12 +30,8 @@ class TestAuthHardening:
 
         with patch.dict(os.environ, env_copy, clear=True):
             from src.api import auth
-
-            importlib.reload(auth)
-
-            # La fonction doit lever une erreur si secret par défaut en prod
             with pytest.raises(RuntimeError) as exc_info:
-                auth._obtenir_api_secret()
+                importlib.reload(auth)
 
             assert "API_SECRET_KEY" in str(exc_info.value)
 
@@ -79,11 +75,17 @@ class TestAuthHardening:
 
             from src.api.dependencies import get_current_user
 
+            request = MagicMock()
+            request.headers = {}
+            request.client = MagicMock(host="127.0.0.1")
+
             # Sans credentials en production, doit lever 401
             with pytest.raises(HTTPException) as exc_info:
                 import asyncio
 
-                asyncio.get_event_loop().run_until_complete(get_current_user(None))
+                asyncio.get_event_loop().run_until_complete(
+                    get_current_user(request=request, credentials=None)
+                )
 
             assert exc_info.value.status_code == 401
 

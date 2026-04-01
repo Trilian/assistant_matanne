@@ -68,6 +68,7 @@ import { obtenirStatutBridgesPhase5 } from "@/bibliotheque/api/admin";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { GrapheReseauModules } from "@/composants/admin/graphe-reseau-modules";
 
 interface LogAudit {
   id: number | null;
@@ -329,18 +330,11 @@ export default function PageAdmin() {
       {bridgesPhase5?.items?.length ? (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Graphe Réseau Modules</CardTitle>
-            <CardDescription>Visualisation simplifiée des ponts inter-modules (Phase E5).</CardDescription>
+            <CardTitle className="text-base">Graphe Réseau Modules (Phase E5)</CardTitle>
+            <CardDescription>Visualisation D3.js force-directed des 21 modules et leurs 21+ inter-connections.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-2 md:grid-cols-2">
-              {bridgesPhase5.items.map((item) => (
-                <div key={item.id} className="rounded-md border p-2 text-sm">
-                  <p className="font-medium">{item.id}</p>
-                  <p className="text-muted-foreground text-xs">{item.bridge}</p>
-                </div>
-              ))}
-            </div>
+            <GrapheReseauModules width={1000} height={600} />
           </CardContent>
         </Card>
       ) : null}

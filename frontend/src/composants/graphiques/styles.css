@@ -1,0 +1,21 @@
+/* CSS variables for dynamic layouts */
+
+.chart-container-dynamic {
+  height: var(--chart-height, 300px);
+}
+
+.treemap-rect {
+  left: var(--rect-x, 0%);
+  top: var(--rect-y, 0%);
+  width: var(--rect-w, 100%);
+  height: var(--rect-h, 100%);
+  background-color: var(--rect-color);
+}
+
+.month-label {
+  margin-left: var(--label-margin, 0);
+}
+
+.heatmap-cell {
+  background-color: var(--cell-color);
+}

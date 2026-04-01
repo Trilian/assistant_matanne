@@ -19,12 +19,6 @@ def client():
     return TestClient(app, raise_server_exceptions=False)
 
 
-@pytest.fixture
-def auth_headers():
-    """Headers d'authentification pour les tests (mode dev)."""
-    return {"Authorization": "Bearer test-token"}
-
-
 # ═══════════════════════════════════════════════════════════
 # TESTS RECHERCHE GLOBALE
 # ═══════════════════════════════════════════════════════════

@@ -28,6 +28,15 @@ const eslintConfig = defineConfig([
       "react-hooks/rules-of-hooks": "off",
     },
   },
+  // Disable inline style warnings for components with dynamic styles (charts, visualizations)
+  {
+    files: ["**/{src,frontend}/**/*.{tsx,jsx}"],
+    rules: {
+      "react/no-unknown-property": "off",
+      "no-inline-styles": "off",
+      "style-prop-object": "off",
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

@@ -11,6 +11,7 @@ Utilise Mistral AI Vision pour l'extraction de données structurées.
 
 import logging
 import re
+import unicodedata
 from datetime import date
 
 from pydantic import BaseModel, Field
@@ -203,34 +204,60 @@ Réponds UNIQUEMENT avec le JSON, sans texte autour."""
 
 PATTERNS_FOURNISSEURS = {
     "edf": {
-        "regex": r"(EDF|Électricité de France)",
+        "regex": r"(EDF|LECTRICIT\w*\s+DE\s+FRANCE)",
         "type": "electricite",
     },
     "engie": {
-        "regex": r"(ENGIE|Gaz de France|GDF)",
+        "regex": r"(ENGIE|GAZ\s+DE\s+FRANCE|GDF)",
         "type": "gaz",
     },
     "totalenergies": {
-        "regex": r"(TotalEnergies|Total Direct Energie)",
+        "regex": r"(TOTALENERGIES|TOTAL\s+DIRECT\s+ENERGIE)",
         "type": "electricite",
     },
     "veolia": {
-        "regex": r"(Veolia|Eau de Paris|Suez)",
+        "regex": r"(VEOLIA|EAU\s+DE\s+PARIS|SUEZ)",
         "type": "eau",
     },
 }
 
 PATTERNS_MONTANTS = {
-    "montant_ttc": r"Total\s*(?:à payer|TTC)[^\d]*(\d+[,\.]\d{2})\s*€?",
+    "montant_ttc": r"TOTAL\s*(?:A\s*PAYER|PAYER|TTC)?[^\d]*(\d+[,\.]\d{2})",
     "consommation_kwh": r"(\d+(?:\s*\d+)?)\s*kWh",
-    "consommation_m3": r"(\d+(?:[,\.]\d+)?)\s*m[³3]",
+    "consommation_m3": r"(\d+(?:[,\.]\d+)?)\s*m(?:3|\^3)",
 }
+
+
+def _normaliser_texte_ocr(texte: str) -> str:
+    """Normalise un texte OCR pour rendre les regex robustes.
+
+    Gère les cas fréquents de mojibake (UTF-8 lu en latin-1) et supprime
+    les accents pour matcher sur une base ASCII.
+    """
+    normalise = texte or ""
+
+    # Cas fréquent: UTF-8 décodé comme latin-1 (ex: Ã‰LECTRICITÃ‰, â‚¬, mÂ³)
+    if any(token in normalise for token in ("Ã", "Â", "â")):
+        for encodage in ("cp1252", "latin1"):
+            try:
+                candidat = normalise.encode(encodage).decode("utf-8")
+                normalise = candidat
+                break
+            except UnicodeError:
+                continue
+
+    normalise = normalise.replace("³", "3")
+    normalise = unicodedata.normalize("NFKD", normalise)
+    normalise = "".join(c for c in normalise if not unicodedata.combining(c))
+    return normalise
 
 
 def detecter_fournisseur(texte: str) -> tuple[str, str]:
     """Détecte le fournisseur depuis le texte OCR."""
+    texte_normalise = _normaliser_texte_ocr(texte)
+
     for nom, info in PATTERNS_FOURNISSEURS.items():
-        if re.search(info["regex"], texte, re.IGNORECASE):
+        if re.search(info["regex"], texte_normalise, re.IGNORECASE):
             return nom.upper(), info["type"]
 
     return "Inconnu", "autre"
@@ -238,7 +265,8 @@ def detecter_fournisseur(texte: str) -> tuple[str, str]:
 
 def extraire_montant(texte: str, pattern: str) -> float | None:
     """Extrait un montant depuis le texte."""
-    match = re.search(pattern, texte, re.IGNORECASE)
+    texte_normalise = _normaliser_texte_ocr(texte)
+    match = re.search(pattern, texte_normalise, re.IGNORECASE)
     if match:
         valeur = match.group(1).replace(",", ".").replace(" ", "")
         try:

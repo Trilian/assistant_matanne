@@ -97,7 +97,11 @@ export function TreemapBudget({ donnees, hauteur = 300 }: TreemapBudgetProps) {
 
   if (!donnees.length || total === 0) {
     return (
-      <div className="flex items-center justify-center text-muted-foreground text-sm" style={{ height: hauteur }}>
+      <div
+        className="flex items-center justify-center text-muted-foreground text-sm"
+        // eslint-disable-next-line react/no-unknown-property
+        style={{ height: hauteur }}
+      >
         Aucune donnée de budget
       </div>
     );
@@ -118,6 +122,7 @@ export function TreemapBudget({ donnees, hauteur = 300 }: TreemapBudgetProps) {
       )}
       <div
         className="relative rounded-lg overflow-hidden border"
+        // eslint-disable-next-line react/no-unknown-property
         style={{ height: hauteur }}
       >
         {rects.map((rect) => {
@@ -134,6 +139,7 @@ export function TreemapBudget({ donnees, hauteur = 300 }: TreemapBudgetProps) {
                 "border border-white/20",
                 aEnfants ? "cursor-pointer hover:brightness-110" : "cursor-default"
               )}
+              // eslint-disable-next-line react/no-unknown-property
               style={{
                 left: `${rect.x}%`,
                 top: `${rect.y}%`,

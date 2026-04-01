@@ -2,6 +2,7 @@
 // Heatmap Nutritionnel — Vue calendrier style GitHub contributions
 // Rouge → Vert selon la qualité nutritionnelle de chaque jour
 // ═══════════════════════════════════════════════════════════
+// eslint-disable react/no-unknown-property
 
 "use client";
 
@@ -99,6 +100,7 @@ export function HeatmapNutritionnel({ donnees, mois = 3 }: HeatmapNutritionnelPr
         {moisLabels.map((label, i) => (
           <span
             key={i}
+            // eslint-disable-next-line react/no-unknown-property
             style={{ marginLeft: i === 0 ? 0 : `${(label.colonne - (moisLabels[i - 1]?.colonne ?? 0) - 1) * 14}px` }}
           >
             {label.texte}

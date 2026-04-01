@@ -280,20 +280,20 @@
 > **Semaines** : 9+
 > **Priorit?** : ?? BASSE
 
-| # | T?che | Source | Effort | Cat?gorie |
-| --- | ------- | -------- | -------- | ----------- |
-| E1 | IN1 ? Mode "Pilote automatique" (IA g?re planning/courses/rappels, utilisateur valide) | ?18 Innovation | 5j | Innovation | ? **Fait** |
-| E2 | IN2 ? Widget tablette Google (repas du jour, t?che, m?t?o, timer) | ?18 Innovation | 4j | Innovation | ? **Partiel** (page focus existante, optimisation tablette ? peaufiner) |
-| E3 | IN10 ? Score famille hebdomadaire composite (nutrition + d?penses + activit?s + entretien) | ?18 Innovation | 2j | Innovation | ? **Fait** |
-| E4 | IN14 ? Mode "invit?" conjoint (vue simplifi?e : courses, planning, routines) | ?18 Innovation | 2j | Innovation | ? **Fait** |
-| E5 | V9 ? Graphe r?seau modules admin (D3.js force graph, 21 bridges visuels) | ?16 3D | 2j | Visualisation | ? **Partiel** (vue r?seau simplifi?e livr?e, D3 force graph restant) |
-| E6 | V10 ? Timeline Gantt entretien maison (Recharts, planification annuelle) | ?16 2D | 2j | Visualisation | ? **Fait** |
-| E7 | V2 ? Vue jardin 2D/3D (zones plantation, ?tat plantes, calendrier arrosage) | ?16 3D | 3j | Visualisation | ? **Fait** |
-| E8 | IN5 ? Journal familial automatique (IA g?n?re r?sum? semaine exportable PDF) | ?18 Innovation | 3j | Innovation | ? **Fait** |
-| E9 | IN11 ? Rapport mensuel PDF export (graphiques + r?sum? narratif IA) | ?18 Innovation | 3j | Innovation | ? **Fait** |
-| E10 | IN8 ? Google Home routines ?tendues ("Bonsoir" ? repas demain + t?ches) | ?18 Innovation | 4j | Innovation | ? **Fait** |
-| E11 | G17 ? Sync Google Calendar bidirectionnelle compl?te | ?4 Gap | 4j | Gap | ? **Fait** |
-| E12 | IA4 ? Assistant vocal ?tendu (intents Google Assistant enrichis) | ?8 IA | 4j | IA | ? **Fait** |
+| # | T?che | Source | Effort | Cat?gorie | Status |
+| --- | ------- | -------- | -------- | ----------- | ------ |
+| E1 | IN1 ? Mode "Pilote automatique" (IA g?re planning/courses/rappels, utilisateur valide) | ?18 Innovation | 5j | Innovation | **Fait** |
+| E2 | IN2 ? Widget tablette Google (repas du jour, t?che, m?t?o, timer) | ?18 Innovation | 4j | Innovation | **Partiel** |
+| E3 | IN10 ? Score famille hebdomadaire composite (nutrition + d?penses + activit?s + entretien) | ?18 Innovation | 2j | Innovation | **Fait** |
+| E4 | IN14 ? Mode "invit?" conjoint (vue simplifi?e : courses, planning, routines) | ?18 Innovation | 2j | Innovation | **Fait** |
+| E5 | V9 ? Graphe r?seau modules admin (D3.js force graph, 21 bridges visuels) | ?16 3D | 2j | Visualisation | **Partiel** |
+| E6 | V10 ? Timeline Gantt entretien maison (Recharts, planification annuelle) | ?16 2D | 2j | Visualisation | **Fait** |
+| E7 | V2 ? Vue jardin 2D/3D (zones plantation, ?tat plantes, calendrier arrosage) | ?16 3D | 3j | Visualisation | **Fait** |
+| E8 | IN5 ? Journal familial automatique (IA g?n?re r?sum? semaine exportable PDF) | ?18 Innovation | 3j | Innovation | **Fait** |
+| E9 | IN11 ? Rapport mensuel PDF export (graphiques + r?sum? narratif IA) | ?18 Innovation | 3j | Innovation | **Fait** |
+| E10 | IN8 ? Google Home routines ?tendues ("Bonsoir" ? repas demain + t?ches) | ?18 Innovation | 4j | Innovation | **Fait** |
+| E11 | G17 ? Sync Google Calendar bidirectionnelle compl?te | ?4 Gap | 4j | Gap | **Fait** |
+| E12 | IA4 ? Assistant vocal ?tendu (intents Google Assistant enrichis) | ?8 IA | 4j | IA | **Fait** |
 
 ### Total Phase E : 12 taches
 

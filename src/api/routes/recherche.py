@@ -58,7 +58,6 @@ async def recherche_globale(
             recettes = (
                 session.query(Recette)
                 .filter(
-                    Recette.cree_par == user_id,
                     or_(
                         Recette.nom.ilike(pattern),
                         Recette.description.ilike(pattern),
@@ -82,9 +81,8 @@ async def recherche_globale(
             projets = (
                 session.query(Projet)
                 .filter(
-                    Projet.cree_par == user_id,
                     or_(
-                        Projet.titre.ilike(pattern),
+                        Projet.nom.ilike(pattern),
                         Projet.description.ilike(pattern),
                     )
                 )
@@ -95,7 +93,7 @@ async def recherche_globale(
                 resultats.append({
                     "type": "projet",
                     "id": p.id,
-                    "titre": p.titre,
+                    "titre": p.nom,
                     "description": p.description or f"Statut: {p.statut}",
                     "url": f"/maison/projets",
                     "statut": p.statut,

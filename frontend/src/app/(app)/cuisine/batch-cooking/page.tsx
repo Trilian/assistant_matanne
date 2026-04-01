@@ -495,6 +495,7 @@ function SessionCard({
           <div className="w-full bg-secondary rounded-full h-2">
             <div
               className="bg-primary rounded-full h-2 transition-all"
+              // eslint-disable-next-line react/no-unknown-property
               style={{ width: `${Math.round(session.progression * 100)}%` }}
             />
           </div>

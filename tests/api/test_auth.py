@@ -374,8 +374,9 @@ class TestConfiguration:
     """Tests pour les fonctions de configuration."""
 
     def test_api_secret_depuis_env(self):
-        """La clé API est lue depuis la variable d'environnement."""
-        with patch.dict("os.environ", {"API_SECRET_KEY": "my-secret"}):
+        """La clé API est cachée au démarrage du module."""
+        # Patcher directement _API_SECRET_KEY_RESOLVED puisqu'elle est définie à l'import
+        with patch("src.api.auth._API_SECRET_KEY_RESOLVED", "my-secret"):
             assert _obtenir_api_secret() == "my-secret"
 
     def test_api_secret_defaut(self):

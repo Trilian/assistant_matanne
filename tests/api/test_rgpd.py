@@ -20,12 +20,6 @@ def client():
     return TestClient(app, raise_server_exceptions=False)
 
 
-@pytest.fixture
-def auth_headers():
-    """Headers d'authentification pour les tests."""
-    return {"Authorization": "Bearer test-token"}
-
-
 # ═══════════════════════════════════════════════════════════
 # TESTS EXPORT DONNÉES
 # ═══════════════════════════════════════════════════════════
@@ -102,10 +96,14 @@ class TestResumeDonnees:
         if response.status_code == 200:
             data = response.json()
             for key, value in data.items():
-                if isinstance(value, dict):
-                    # Peut être imbriqué (ex: {recettes: {total: 5, favoris: 2}})
+                if isinstance(value, (dict, list)):
+                    # Peut être imbriqué (ex: {recettes: {total: 5, favoris: 2}}) ou liste
                     continue
-                assert isinstance(value, int), f"{key} devrait être un entier"
+                # user_id est une chaîne (provient du JWT), les autres sont des entiers
+                if key == "user_id":
+                    assert isinstance(value, str), f"{key} devrait être une chaîne"
+                else:
+                    assert isinstance(value, int), f"{key} devrait être un entier"
 
 
 # ═══════════════════════════════════════════════════════════

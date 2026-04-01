@@ -198,6 +198,24 @@ def test_user() -> dict:
 
 
 @pytest.fixture
+def valid_token() -> str:
+    """Crée un token JWT valide pour les tests API."""
+    from src.api.auth import creer_token_acces
+    
+    return creer_token_acces(
+        user_id="123",
+        email="test@example.com",
+        role="member"
+    )
+
+
+@pytest.fixture
+def auth_headers(valid_token) -> dict:
+    """Headers d'authentification avec token JWT valide."""
+    return {"Authorization": f"Bearer {valid_token}"}
+
+
+@pytest.fixture
 def test_recipe() -> dict:
     """Données recette test."""
     return {
