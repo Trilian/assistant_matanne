@@ -1,12 +1,12 @@
-﻿# ðŸ“Š Guide Module Dashboard
+# ?? Guide Module Dashboard
 
-> Tableau de bord familial avec mÃ©triques agrÃ©gÃ©es de tous les modules.
+> Tableau de bord familial avec m�triques agr�g�es de tous les modules.
 
 ---
 
 ## Vue d'ensemble
 
-Le **Dashboard** est la page d'accueil de l'application. Il agrÃ¨ge les donnÃ©es clÃ©s de chaque module pour offrir une vue synthÃ©tique de l'Ã©tat familial.
+Le **Dashboard** est la page d'accueil de l'application. Il agr�ge les donn�es cl�s de chaque module pour offrir une vue synth�tique de l'�tat familial.
 
 **URL** : `/` (page d'accueil)  
 **Service backend** : `src/services/dashboard/service.py`  
@@ -19,23 +19,23 @@ Le **Dashboard** est la page d'accueil de l'application. Il agrÃ¨ge les donnÃ
 
 | Widget | Description | Source |
 | -------- | ------------- | -------- |
-| Repas du jour | Repas planifiÃ©s (dÃ©jeuner, dÃ®ner) | Planning |
-| Courses en attente | Nombre de listes non terminÃ©es | Courses |
-| TÃ¢ches en retard | TÃ¢ches entretien/projets en retard | Maison |
+| Repas du jour | Repas planifi�s (d�jeuner, d�ner) | Planning |
+| Courses en attente | Nombre de listes non termin�es | Courses |
+| T�ches en retard | T�ches entretien/projets en retard | Maison |
 | Anniversaires proches | Prochains anniversaires famille | Famille |
-| MÃ©tÃ©o | MÃ©tÃ©o du jour + alertes | IntÃ©grations |
-| Budget mensuel | DÃ©penses vs budget, reste | Finances |
-| Stock bas | Articles inventaire en quantitÃ© faible | Inventaire |
-| Prochains Ã©vÃ©nements | Ã‰vÃ©nements planifiÃ©s cette semaine | Planning |
+| M�t�o | M�t�o du jour + alertes | Int�grations |
+| Budget mensuel | D�penses vs budget, reste | Finances |
+| Stock bas | Articles inventaire en quantit� faible | Inventaire |
+| Prochains �v�nements | �v�nements planifi�s cette semaine | Planning |
 
 ---
 
 ## API
 
-| MÃ©thode | URL | Description |
+| M�thode | URL | Description |
 | --------- | ----- | ------------- |
-| GET | `/api/v1/dashboard` | DonnÃ©es agrÃ©gÃ©es du dashboard |
-| GET | `/api/v1/dashboard/taches-retard` | TÃ¢ches en retard (limite configurable) |
+| GET | `/api/v1/dashboard` | Donn�es agr�g�es du dashboard |
+| GET | `/api/v1/dashboard/taches-retard` | T�ches en retard (limite configurable) |
 
 ---
 
@@ -43,13 +43,13 @@ Le **Dashboard** est la page d'accueil de l'application. Il agrÃ¨ge les donnÃ
 
 ```
 Frontend (page.tsx)
-  â†’ GET /api/v1/dashboard
-    â†’ src/api/routes/dashboard.py
-      â†’ src/services/dashboard/service.py
-        â†’ RequÃªtes ORM sur : Repas, ListeCourses, Projet, TacheEntretien,
+  ? GET /api/v1/dashboard
+    ? src/api/routes/dashboard.py
+      ? src/services/dashboard/service.py
+        ? Requ�tes ORM sur : Repas, ListeCourses, Projet, TacheEntretien,
            AnniversaireFamille, Depense, BudgetMensuel, Inventaire
 ```
 
-Le service dashboard utilise `@avec_cache(ttl=60)` pour les donnÃ©es agrÃ©gÃ©es (rafraÃ®chissement chaque minute).
+Le service dashboard utilise `@avec_cache(ttl=60)` pour les donn�es agr�g�es (rafra�chissement chaque minute).
 
-Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation complÃ¨te.
+Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation compl�te.

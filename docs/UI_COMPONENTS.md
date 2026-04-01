@@ -1,4 +1,4 @@
-﻿# RÃ©fÃ©rence des Composants UI
+# Référence des Composants UI
 
 Guide des composants UI du frontend Next.js (shadcn/ui + composants layout).
 
@@ -11,61 +11,61 @@ Snapshot phase 10:
 
 ```
 frontend/src/
-â”œâ”€â”€ composants/ui/           # Composants shadcn/ui (29 fichiers)
-â”‚   â”œâ”€â”€ avatar.tsx           # Avatar utilisateur
-â”‚   â”œâ”€â”€ badge.tsx            # Badge statut/tag
-â”‚   â”œâ”€â”€ button.tsx           # Bouton (variants: default, outline, ghost, destructive)
-â”‚   â”œâ”€â”€ card.tsx             # Card, CardHeader, CardContent, CardFooter, CardTitle
-â”‚   â”œâ”€â”€ command.tsx          # Command palette (recherche)
-â”‚   â”œâ”€â”€ dialog.tsx           # Dialog modal (Dialog, DialogTrigger, DialogContent)
-â”‚   â”œâ”€â”€ dropdown-menu.tsx    # Menu dÃ©roulant contextuel
-â”‚   â”œâ”€â”€ input-group.tsx      # Groupe d'inputs avec icÃ´ne
-â”‚   â”œâ”€â”€ input.tsx            # Champ texte
-â”‚   â”œâ”€â”€ label.tsx            # Label formulaire
-â”‚   â”œâ”€â”€ scroll-area.tsx      # Zone scrollable
-â”‚   â”œâ”€â”€ select.tsx           # Select dropdown
-â”‚   â”œâ”€â”€ separator.tsx        # SÃ©parateur horizontal
-â”‚   â”œâ”€â”€ sheet.tsx            # Panneau latÃ©ral (Sheet/Drawer)
-â”‚   â”œâ”€â”€ sidebar.tsx          # Sidebar navigation complÃ¨te
-â”‚   â”œâ”€â”€ skeleton.tsx         # Skeleton loader
-â”‚   â”œâ”€â”€ sonner.tsx           # Toasts (notifications via Sonner)
-â”‚   â”œâ”€â”€ table.tsx            # Table, TableHeader, TableBody, TableRow, TableCell
-â”‚   â”œâ”€â”€ tabs.tsx             # Onglets (Tabs, TabsList, TabsTrigger, TabsContent)
-â”‚   â”œâ”€â”€ textarea.tsx         # Zone de texte multilignes
-â”‚   â””â”€â”€ tooltip.tsx          # Tooltip au survol
-â”œâ”€â”€ composants/disposition/  # Composants layout app (5 fichiers)
-â”‚   â”œâ”€â”€ coquille-app.tsx     # Shell principal (sidebar + content)
-â”‚   â”œâ”€â”€ barre-laterale.tsx   # Sidebar avec navigation modules
-â”‚   â”œâ”€â”€ en-tete.tsx          # Header avec breadcrumbs + actions
-â”‚   â”œâ”€â”€ fil-ariane.tsx       # Breadcrumbs
-â”‚   â””â”€â”€ nav-mobile.tsx       # Bottom navigation bar mobile
-â”œâ”€â”€ fournisseurs/            # Providers React
-â”‚   â”œâ”€â”€ fournisseur-query.tsx   # TanStack Query provider
-â”‚   â”œâ”€â”€ fournisseur-auth.tsx    # Protection routes authentifiÃ©es
-â”‚   â””â”€â”€ fournisseur-theme.tsx   # ThÃ¨me clair/sombre (next-themes)
-â”œâ”€â”€ crochets/                # Hooks React personnalisÃ©s
-â”‚   â”œâ”€â”€ utiliser-api.ts      # utiliserRequete, utiliserMutation, utiliserInvalidation
-â”‚   â”œâ”€â”€ utiliser-auth.ts     # utiliserAuth (user, login, logout)
-â”‚   â”œâ”€â”€ utiliser-delai.ts    # Debounce de valeurs
-â”‚   â””â”€â”€ use-mobile.ts        # DÃ©tection mobile
-â””â”€â”€ magasins/                # Zustand stores
-    â”œâ”€â”€ store-auth.ts        # Ã‰tat auth (utilisateur, estConnecte)
-    â”œâ”€â”€ store-ui.ts          # Ã‰tat UI (sidebar, recherche)
-    â””â”€â”€ store-notifications.ts # File de notifications
+├── composants/ui/           # Composants shadcn/ui (29 fichiers)
+│   ├── avatar.tsx           # Avatar utilisateur
+│   ├── badge.tsx            # Badge statut/tag
+│   ├── button.tsx           # Bouton (variants: default, outline, ghost, destructive)
+│   ├── card.tsx             # Card, CardHeader, CardContent, CardFooter, CardTitle
+│   ├── command.tsx          # Command palette (recherche)
+│   ├── dialog.tsx           # Dialog modal (Dialog, DialogTrigger, DialogContent)
+│   ├── dropdown-menu.tsx    # Menu déroulant contextuel
+│   ├── input-group.tsx      # Groupe d'inputs avec icône
+│   ├── input.tsx            # Champ texte
+│   ├── label.tsx            # Label formulaire
+│   ├── scroll-area.tsx      # Zone scrollable
+│   ├── select.tsx           # Select dropdown
+│   ├── separator.tsx        # Séparateur horizontal
+│   ├── sheet.tsx            # Panneau latéral (Sheet/Drawer)
+│   ├── sidebar.tsx          # Sidebar navigation complète
+│   ├── skeleton.tsx         # Skeleton loader
+│   ├── sonner.tsx           # Toasts (notifications via Sonner)
+│   ├── table.tsx            # Table, TableHeader, TableBody, TableRow, TableCell
+│   ├── tabs.tsx             # Onglets (Tabs, TabsList, TabsTrigger, TabsContent)
+│   ├── textarea.tsx         # Zone de texte multilignes
+│   └── tooltip.tsx          # Tooltip au survol
+├── composants/disposition/  # Composants layout app (5 fichiers)
+│   ├── coquille-app.tsx     # Shell principal (sidebar + content)
+│   ├── barre-laterale.tsx   # Sidebar avec navigation modules
+│   ├── en-tete.tsx          # Header avec breadcrumbs + actions
+│   ├── fil-ariane.tsx       # Breadcrumbs
+│   └── nav-mobile.tsx       # Bottom navigation bar mobile
+├── fournisseurs/            # Providers React
+│   ├── fournisseur-query.tsx   # TanStack Query provider
+│   ├── fournisseur-auth.tsx    # Protection routes authentifiées
+│   └── fournisseur-theme.tsx   # Thème clair/sombre (next-themes)
+├── crochets/                # Hooks React personnalisés
+│   ├── utiliser-api.ts      # utiliserRequete, utiliserMutation, utiliserInvalidation
+│   ├── utiliser-auth.ts     # utiliserAuth (user, login, logout)
+│   ├── utiliser-delai.ts    # Debounce de valeurs
+│   └── use-mobile.ts        # Détection mobile
+└── magasins/                # Zustand stores
+    ├── store-auth.ts        # État auth (utilisateur, estConnecte)
+    ├── store-ui.ts          # État UI (sidebar, recherche)
+    └── store-notifications.ts # File de notifications
 ```
 
 ---
 
 ## Composants shadcn/ui
 
-Tous les composants UI de base proviennent de [shadcn/ui](https://ui.shadcn.com/) et sont dans `frontend/src/composants/ui/`. Ils utilisent Tailwind CSS v4 avec les tokens CSS du thÃ¨me.
+Tous les composants UI de base proviennent de [shadcn/ui](https://ui.shadcn.com/) et sont dans `frontend/src/composants/ui/`. Ils utilisent Tailwind CSS v4 avec les tokens CSS du thème.
 
 ### Button
 
 ```tsx
 import { Button } from "@/components/ui/button"
 
-<Button>DÃ©faut</Button>
+<Button>Défaut</Button>
 <Button variant="outline">Outline</Button>
 <Button variant="ghost">Ghost</Button>
 <Button variant="destructive">Supprimer</Button>
@@ -147,13 +147,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 | `Badge` | Tags statut (couleur via `variant`) |
 | `Input` | Champ texte avec `placeholder` |
 | `Textarea` | Zone texte multiligne |
-| `Select` | Dropdown sÃ©lection |
+| `Select` | Dropdown sélection |
 | `Label` | Label pour formulaire |
-| `Separator` | Ligne sÃ©paratrice |
+| `Separator` | Ligne séparatrice |
 | `Avatar` | Photo/initiales utilisateur |
 | `Tooltip` | Info-bulle au survol |
-| `Sheet` | Panneau latÃ©ral (mobile) |
-| `ScrollArea` | Zone scrollable personnalisÃ©e |
+| `Sheet` | Panneau latéral (mobile) |
+| `ScrollArea` | Zone scrollable personnalisée |
 | `DropdownMenu` | Menu contextuel |
 | `Sonner` | Notifications toast |
 
@@ -173,7 +173,7 @@ import { CoquilleApp } from "@/composants/disposition/coquille-app"
 
 ### BarreLaterale (barre-laterale.tsx)
 
-Navigation principale : modules Cuisine, Famille, Maison, Jeux, Outils, ParamÃ¨tres. Repliable sur desktop, sheet sur mobile.
+Navigation principale : modules Cuisine, Famille, Maison, Jeux, Outils, Paramètres. Repliable sur desktop, sheet sur mobile.
 
 ### EnTete (en-tete.tsx)
 
@@ -181,18 +181,18 @@ Header avec fil d'ariane et actions (recherche, notifications).
 
 ### NavMobile (nav-mobile.tsx)
 
-Bottom bar mobile avec 5 icÃ´nes de navigation rapide.
+Bottom bar mobile avec 5 icônes de navigation rapide.
 
 ---
 
-## Hooks personnalisÃ©s
+## Hooks personnalisés
 
 ### utiliserRequete / utiliserMutation / utiliserInvalidation
 
 ```tsx
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api"
 
-// RequÃªte
+// Requête
 const { data, isLoading, error } = utiliserRequete(["recettes"], listerRecettes)
 
 // Mutation
@@ -202,7 +202,7 @@ const mutation = utiliserMutation(creerRecette, {
 
 // Invalidation
 const invalider = utiliserInvalidation()
-invalider(["recettes"])  // RafraÃ®chit les requÃªtes recettes
+invalider(["recettes"])  // Rafraîchit les requêtes recettes
 ```
 
 ### utiliserAuth
@@ -274,7 +274,7 @@ export default function MonModulePage() {
         {items?.map(item => (
           <Card key={item.id}>
             <CardHeader><CardTitle>{item.nom}</CardTitle></CardHeader>
-            <CardContent>{/* DÃ©tails */}</CardContent>
+            <CardContent>{/* Détails */}</CardContent>
           </Card>
         ))}
       </div>
@@ -285,7 +285,7 @@ export default function MonModulePage() {
           {/* Formulaire */}
           <DialogFooter>
             <Button onClick={() => mutationCreer.mutate(formData)}>
-              CrÃ©er
+              Créer
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -297,9 +297,9 @@ export default function MonModulePage() {
 
 ---
 
-## IcÃ´nes
+## Icônes
 
-L'application utilise [lucide-react](https://lucide.dev/) pour les icÃ´nes :
+L'application utilise [lucide-react](https://lucide.dev/) pour les icônes :
 
 ```tsx
 import { Plus, Pencil, Trash2, Search, Star, Calendar, Home } from "lucide-react"
@@ -310,7 +310,7 @@ import { Plus, Pencil, Trash2, Search, Star, Calendar, Home } from "lucide-react
 
 ---
 
-## IntÃ©grations (integrations/)
+## Intégrations (integrations/)
 
 ### Google Calendar
 
@@ -324,7 +324,7 @@ from src.ui.integrations import (
     REDIRECT_URI_LOCAL
 )
 
-# VÃ©rifier la configuration
+# Vérifier la configuration
 if verifier_config_google():
     afficher_statut_sync_google()
     afficher_bouton_sync_rapide()
@@ -336,7 +336,7 @@ else:
 
 ## Vues Extraites (views/)
 
-Fonctions d'affichage extraites des services pour respecter la sÃ©paration UI/logique.
+Fonctions d'affichage extraites des services pour respecter la séparation UI/logique.
 
 ### Authentification (authentification.py)
 
@@ -355,13 +355,13 @@ afficher_formulaire_connexion(rediriger_apres_succes=True)
 # Menu utilisateur dans la sidebar
 afficher_menu_utilisateur()
 
-# Page paramÃ¨tres profil
+# Page paramètres profil
 afficher_parametres_profil()
 
-# DÃ©corateurs de protection (backend FastAPI)
+# Décorateurs de protection (backend FastAPI)
 @router.get("/protege")
 async def page_protegee(user: dict = Depends(require_auth)):
-    return {"message": "Contenu protÃ©gÃ©"}
+    return {"message": "Contenu protégé"}
 
 @router.get("/admin")
 async def page_admin(user: dict = Depends(require_role("admin"))):
@@ -373,13 +373,13 @@ async def page_admin(user: dict = Depends(require_role("admin"))):
 ```python
 from src.ui.views import afficher_timeline_activite, afficher_activite_utilisateur, afficher_statistiques_activite
 
-# Timeline d'activitÃ© rÃ©cente (10 derniÃ¨res par dÃ©faut)
+# Timeline d'activité récente (10 dernières par défaut)
 afficher_timeline_activite(limit=10)
 
-# ActivitÃ© d'un utilisateur spÃ©cifique
+# Activité d'un utilisateur spécifique
 afficher_activite_utilisateur(user_id="...")
 
-# Statistiques d'activitÃ© globales
+# Statistiques d'activité globales
 afficher_statistiques_activite()
 ```
 
@@ -400,16 +400,16 @@ from src.ui.views import afficher_demande_permission_push, afficher_preferences_
 # Demander permission push au navigateur
 afficher_demande_permission_push()
 
-# ParamÃ¨tres de notifications
+# Paramètres de notifications
 afficher_preferences_notification()
 ```
 
-### MÃ©tÃ©o Jardin (meteo.py)
+### Météo Jardin (meteo.py)
 
 ```python
 from src.ui.views import afficher_meteo_jardin
 
-# Alertes mÃ©tÃ©o pour le jardin
+# Alertes météo pour le jardin
 afficher_meteo_jardin()
 ```
 
@@ -418,7 +418,7 @@ afficher_meteo_jardin()
 ```python
 from src.ui.views import afficher_sauvegarde
 
-# Interface backup/restauration complÃ¨te
+# Interface backup/restauration complète
 afficher_sauvegarde()
 ```
 
@@ -432,7 +432,7 @@ from src.ui.views import (
     afficher_invite_installation_pwa,
 )
 
-# Utilisateurs connectÃ©s en temps rÃ©el
+# Utilisateurs connectés en temps réel
 afficher_indicateur_presence()
 
 # Indicateurs de frappe
@@ -456,7 +456,7 @@ afficher_badge_notifications_jeux(service=None)
 # Notification individuelle
 afficher_notification_jeux(notification)
 
-# Liste paginÃ©e
+# Liste paginée
 afficher_liste_notifications_jeux(service=None, limite=10, type_jeu=None)
 ```
 
@@ -465,7 +465,7 @@ afficher_liste_notifications_jeux(service=None, limite=10, type_jeu=None)
 ```python
 from src.ui.views import injecter_meta_pwa
 
-# AppelÃ© dans app.py aprÃ¨s injecter_css()
+# Appelé dans app.py après injecter_css()
 injecter_meta_pwa()
 ```
 
@@ -473,54 +473,54 @@ injecter_meta_pwa()
 
 ## Bonnes Pratiques
 
-### Import RecommandÃ©
+### Import Recommandé
 
 ```python
-# âœ… Import depuis le point d'entrÃ©e unifiÃ©
+# ✅ Import depuis le point d'entrée unifié
 from src.ui import badge, carte_metrique_avancee, afficher_succes, etat_vide
 
-# âœ… Import spÃ©cifique par sous-package
+# ✅ Import spécifique par sous-package
 from src.ui.tablet import ModeTablette, obtenir_mode_tablette
 from src.ui.views import afficher_timeline_activite
 from src.ui.integrations import verifier_config_google
 
-# âœ… Import dans _common.py des modules mÃ©tier
-from src.ui.components.atoms import etat_vide  # re-exportÃ© via _common.py
+# ✅ Import dans _common.py des modules métier
+from src.ui.components.atoms import etat_vide  # re-exporté via _common.py
 
-# âŒ Ã‰viter les imports profonds dans le code mÃ©tier
-from src.ui.components.atoms import badge  # PrÃ©fÃ©rer from src.ui import badge
+# ❌ Éviter les imports profonds dans le code métier
+from src.ui.components.atoms import badge  # Préférer from src.ui import badge
 ```
 
-### Motif Ã©tat vide
+### Motif état vide
 
-Utiliser le composant `EtatVide` (frontend) pour les Ã©tats vides :
+Utiliser le composant `EtatVide` (frontend) pour les états vides :
 
 ```tsx
-// Composant React unifiÃ©
+// Composant React unifié
 <EtatVide
-  titre="Aucune recette trouvÃ©e"
-  icone="ðŸ½ï¸"
-  description="Ajoutez votre premiÃ¨re recette"
+  titre="Aucune recette trouvée"
+  icone="🍽️"
+  description="Ajoutez votre première recette"
 />
 ```
 
 ### Cache
 
-Les calculs coÃ»teux utilisent `@avec_cache` (dÃ©corateur multi-niveaux) :
+Les calculs coûteux utilisent `@avec_cache` (décorateur multi-niveaux) :
 
 - Graphiques: `ttl=300` (5 min)
-- MÃ©triques: `ttl=60` (1 min)
+- Métriques: `ttl=60` (1 min)
 
 ### Performance
 
-Pour le chargement diffÃ©rÃ© des modules, les services utilisent `@service_factory` (singleton via registre).
+Pour le chargement différé des modules, les services utilisent `@service_factory` (singleton via registre).
 Chaque domaine expose ses routes dans `src/api/routes/` et ses pages dans `frontend/src/app/(app)/`.
 
 ### Nommage
 
 - Fonctions d'affichage : `afficher_*()`
 - Fonctions d'obtention : `obtenir_*()`
-- Fonctions de dÃ©finition : `definir_*()`
+- Fonctions de définition : `definir_*()`
 - Classes : `NomEnFrancais` (PascalCase)
 - Constantes : `NOM_EN_MAJUSCULES`
 
@@ -529,16 +529,16 @@ Chaque domaine expose ses routes dans `src/api/routes/` et ses pages dans `front
 ## Imports Rapides
 
 ```python
-# Point d'entrÃ©e unifiÃ© (~90 exports)
+# Point d'entrée unifié (~90 exports)
 from src.ui import badge, carte_metrique_avancee, afficher_succes
 
-# Sous-packages spÃ©cifiques
+# Sous-packages spécifiques
 from src.ui.components import graphique_repartition_repas
 from src.ui.feedback import spinner_intelligent, SuiviProgression
 from src.ui.tablet import ModeTablette, bouton_tablette
 from src.ui.views import afficher_sauvegarde, afficher_timeline_activite
 from src.ui.integrations import verifier_config_google
 
-# Layout (rÃ©servÃ© Ã  app.py)
+# Layout (réservé à app.py)
 from src.ui.layout import afficher_header, afficher_sidebar, injecter_css
 ```

@@ -1,12 +1,12 @@
-﻿# ðŸ‘¨â€ðŸ‘©â€ðŸ‘¦ Guide Module Famille
+# ???????? Guide Module Famille
 
-> Ce guide couvre le suivi familial dans MaTanne : dÃ©veloppement de Jules, activitÃ©s, budget, routines, contacts, journal, anniversaires, documents.
+> Ce guide couvre le suivi familial dans MaTanne : d�veloppement de Jules, activit�s, budget, routines, contacts, journal, anniversaires, documents.
 
-## Table des matiÃ¨res
+## Table des mati�res
 
 1. [Vue d'ensemble](#vue-densemble)
-2. [Jules â€” Suivi dÃ©veloppement enfant](#jules--suivi-dÃ©veloppement-enfant)
-3. [ActivitÃ©s familiales](#activitÃ©s-familiales)
+2. [Jules � Suivi d�veloppement enfant](#jules--suivi-d�veloppement-enfant)
+3. [Activit�s familiales](#activit�s-familiales)
 4. [Budget familial](#budget-familial)
 5. [Routines](#routines)
 6. [Week-end](#week-end)
@@ -20,32 +20,32 @@
 
 ## Vue d'ensemble
 
-Le module **Famille** centralise le suivi du dÃ©veloppement de l'enfant et la vie familiale.
+Le module **Famille** centralise le suivi du d�veloppement de l'enfant et la vie familiale.
 
 **URL** : `/famille`
 **Service backend** : `src/services/famille/`
 **Route API** : `src/api/routes/famille.py` (`/api/v1/famille`)
 
-### CapacitÃ©s rÃ©centes Ã  connaÃ®tre
+### Capacit�s r�centes � conna�tre
 
-- suggestions IA pour les activitÃ©s et le weekend
-- suggestions d'achats famille assistÃ©es par IA
-- rappels famille intÃ©grÃ©s aux jobs planifiÃ©s
-- rÃ©sumÃ© hebdomadaire et intÃ©grations calendrier / Garmin
+- suggestions IA pour les activit�s et le weekend
+- suggestions d'achats famille assist�es par IA
+- rappels famille int�gr�s aux jobs planifi�s
+- r�sum� hebdomadaire et int�grations calendrier / Garmin
 
 ---
 
-## Jules â€” Suivi dÃ©veloppement enfant
+## Jules � Suivi d�veloppement enfant
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Suivi des **jalons de dÃ©veloppement** (motricitÃ©, langage, social) par rapport aux normes OMS
-- **Courbes de croissance** (poids, taille, pÃ©rimÃ¨tre crÃ¢nien) avec visualisation graphique
-- **Carnet de santÃ©** : vaccinations, consultations, ordonnances
-- **Diversification alimentaire** : suivi des aliments introduits et rÃ©actions
-- Suggestions IA personnalisÃ©es sur le dÃ©veloppement
+- Suivi des **jalons de d�veloppement** (motricit�, langage, social) par rapport aux normes OMS
+- **Courbes de croissance** (poids, taille, p�rim�tre cr�nien) avec visualisation graphique
+- **Carnet de sant�** : vaccinations, consultations, ordonnances
+- **Diversification alimentaire** : suivi des aliments introduits et r�actions
+- Suggestions IA personnalis�es sur le d�veloppement
 - Alertes sur les jalons en retard
-- intÃ©gration avec les suggestions d'activitÃ©s via invalidation de cache et notifications
+- int�gration avec les suggestions d'activit�s via invalidation de cache et notifications
 
 ### Usage
 
@@ -53,32 +53,32 @@ Le module **Famille** centralise le suivi du dÃ©veloppement de l'enfant et la 
 /famille/jules
 ```
 
-### DonnÃ©es de rÃ©fÃ©rence
+### Donn�es de r�f�rence
 
-- `data/reference/normes_oms.json` â€” normes de croissance OMS (0-5 ans)
-- `data/reference/calendrier_vaccinal_fr.json` â€” calendrier vaccinal France 2026
+- `data/reference/normes_oms.json` � normes de croissance OMS (0-5 ans)
+- `data/reference/calendrier_vaccinal_fr.json` � calendrier vaccinal France 2026
 
 ### Services IA
 
 ```python
 from src.services.famille.jules_ai import JulesAIService
 service = JulesAIService()
-# Analyse dÃ©veloppement et suggestions personnalisÃ©es
+# Analyse d�veloppement et suggestions personnalis�es
 analyse = service.analyser_developpement(age_mois=18, jalons_atteints=[...])
 ```
 
 ---
 
-## ActivitÃ©s familiales
+## Activit�s familiales
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Planification et suivi des activitÃ©s (sorties, sports, loisirs)
-- CatÃ©gorisation (sport, culture, plein-air, crÃ©atifâ€¦)
-- Association Ã  des membres de la famille
-- Vue calendrier des activitÃ©s planifiÃ©es
-- **Phase O â€” Suggestions IA avec prÃ©-remplissage** : `POST /famille/activites/suggestions-ia-auto` retourne `suggestions_struct` (liste d'objets prÃ©-remplissables) pour injecter directement dans le formulaire de crÃ©ation
-- contribution au rÃ©sumÃ© hebdomadaire et au dashboard
+- Planification et suivi des activit�s (sorties, sports, loisirs)
+- Cat�gorisation (sport, culture, plein-air, cr�atif�)
+- Association � des membres de la famille
+- Vue calendrier des activit�s planifi�es
+- **Phase O � Suggestions IA avec pr�-remplissage** : `POST /famille/activites/suggestions-ia-auto` retourne `suggestions_struct` (liste d'objets pr�-remplissables) pour injecter directement dans le formulaire de cr�ation
+- contribution au r�sum� hebdomadaire et au dashboard
 
 ### Usage
 
@@ -86,29 +86,29 @@ analyse = service.analyser_developpement(age_mois=18, jalons_atteints=[...])
 /famille/activites
 ```
 
-### PrÃ©-remplissage rapide (Phase O)
+### Pr�-remplissage rapide (Phase O)
 
-Le bouton **"Suggestions IA"** dans l'en-tÃªte ouvre un dialogue :
-1. L'API dÃ©tecte la mÃ©tÃ©o locale automatiquement
+Le bouton **"Suggestions IA"** dans l'en-t�te ouvre un dialogue :
+1. L'API d�tecte la m�t�o locale automatiquement
 2. Retourne `suggestions_struct` : liste d'objets `{titre, description, type, duree_minutes, lieu}`
-3. Cards de prÃ©-remplissage rapide â€” clic sur "Utiliser cette suggestion" injecte les donnÃ©es dans le formulaire
+3. Cards de pr�-remplissage rapide � clic sur "Utiliser cette suggestion" injecte les donn�es dans le formulaire
 
 ```
 POST /api/v1/famille/activites/suggestions-ia-auto
 Body: { type_prefere?: "mixte"|"interieur"|"exterieur", nb_suggestions?: 4 }
-RÃ©ponse: { suggestions: string, suggestions_struct: [{titre, description, type, duree_minutes, lieu}], meteo_detectee?: string, age_jules_mois?: number }
+R�ponse: { suggestions: string, suggestions_struct: [{titre, description, type, duree_minutes, lieu}], meteo_detectee?: string, age_jules_mois?: number }
 ```
 
 ---
 
-## Achats famille â€” Phase P
+## Achats famille � Phase P
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Liste des achats prÃ©vus (cadeaux, vÃªtements, jouets, Ã©quipements) distincts des courses alimentaires
-- GroupÃ©s par catÃ©gorie (cadeau, vÃªtement, jouet, livre, Ã©quipement, autre)
-- Marquer un achat comme effectuÃ© avec prix rÃ©el
-- **Suggestions IA proactives** : `POST /famille/achats/suggestions` infÃ¨re les achats pertinents (anniversaires proches, jalons, saison)
+- Liste des achats pr�vus (cadeaux, v�tements, jouets, �quipements) distincts des courses alimentaires
+- Group�s par cat�gorie (cadeau, v�tement, jouet, livre, �quipement, autre)
+- Marquer un achat comme effectu� avec prix r�el
+- **Suggestions IA proactives** : `POST /famille/achats/suggestions` inf�re les achats pertinents (anniversaires proches, jalons, saison)
 
 ### Usage
 
@@ -118,30 +118,30 @@ RÃ©ponse: { suggestions: string, suggestions_struct: [{titre, description, typ
 
 ### Suggestions IA proactives (Phase P)
 
-Le bouton **"GÃ©nÃ©rer des suggestions proactives"** appelle l'API qui :
-1. DÃ©tecte les anniversaires dans les 30 prochains jours
-2. Identifie les jalons rÃ©cents de Jules
+Le bouton **"G�n�rer des suggestions proactives"** appelle l'API qui :
+1. D�tecte les anniversaires dans les 30 prochains jours
+2. Identifie les jalons r�cents de Jules
 3. Tient compte de la saison courante
 4. Retourne une liste de suggestions avec source + fourchette de prix
 
 ```
 POST /api/v1/famille/achats/suggestions
 Body: {}
-RÃ©ponse: { suggestions: [{titre, description, source, fourchette_prix?, ou_acheter?, pertinence?}], total }
+R�ponse: { suggestions: [{titre, description, source, fourchette_prix?, ou_acheter?, pertinence?}], total }
 ```
 
 ---
 
 ## Budget familial
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Saisie des revenus et dÃ©penses par catÃ©gorie
-- Graphiques de rÃ©partition du budget (diagramme camembert)
-- Suivi mensuel avec comparaison aux mois prÃ©cÃ©dents
-- Alertes quand les dÃ©penses dÃ©passent un budget dÃ©fini
+- Saisie des revenus et d�penses par cat�gorie
+- Graphiques de r�partition du budget (diagramme camembert)
+- Suivi mensuel avec comparaison aux mois pr�c�dents
+- Alertes quand les d�penses d�passent un budget d�fini
 - Export CSV des transactions
-- base de travail pour l'agrÃ©gation future avec maison et jeux
+- base de travail pour l'agr�gation future avec maison et jeux
 
 ### Usage
 
@@ -165,13 +165,13 @@ import CamembertBudget from "@/composants/graphiques/camembert-budget"
 
 ## Routines
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- DÃ©finition des routines quotidiennes (matin, soir, semaine)
-- Cases Ã  cocher interactives pour valider chaque Ã©tape
-- Suivi de la rÃ©gularitÃ© (score de cohÃ©rence sur 30 jours)
-- Routines dÃ©diÃ©es enfant (bain, lecture, coucher) et adulte
-- interaction cible identifiÃ©e avec le planning central
+- D�finition des routines quotidiennes (matin, soir, semaine)
+- Cases � cocher interactives pour valider chaque �tape
+- Suivi de la r�gularit� (score de coh�rence sur 30 jours)
+- Routines d�di�es enfant (bain, lecture, coucher) et adulte
+- interaction cible identifi�e avec le planning central
 
 ### Usage
 
@@ -183,13 +183,13 @@ import CamembertBudget from "@/composants/graphiques/camembert-budget"
 
 ## Week-end
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Suggestions d'activitÃ©s pour le week-end gÃ©nÃ©rÃ©es par IA
-- BasÃ© sur la mÃ©tÃ©o locale, la saison, l'Ã¢ge de Jules
-- Filtrage par rayon gÃ©ographique et budget
-- Sauvegarde des activitÃ©s favorites
-- score weekend alimentÃ© par job planifiÃ© dÃ©diÃ©
+- Suggestions d'activit�s pour le week-end g�n�r�es par IA
+- Bas� sur la m�t�o locale, la saison, l'�ge de Jules
+- Filtrage par rayon g�ographique et budget
+- Sauvegarde des activit�s favorites
+- score weekend aliment� par job planifi� d�di�
 
 ### Usage
 
@@ -203,7 +203,7 @@ import CamembertBudget from "@/composants/graphiques/camembert-budget"
 from src.services.famille.weekend_ai import WeekendAIService
 service = WeekendAIService()
 suggestions = service.suggerer_activites_weekend(
-    mÃ©tÃ©o="ensoleillÃ©", rayon_km=30, budget=50
+    m�t�o="ensoleill�", rayon_km=30, budget=50
 )
 ```
 
@@ -211,12 +211,12 @@ suggestions = service.suggerer_activites_weekend(
 
 ## Contacts
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Carnet de contacts familial (famille Ã©largie, amis, professionnels de santÃ©)
-- CatÃ©gorisation (mÃ©decin, Ã©cole, garderie, famille, amis)
+- Carnet de contacts familial (famille �largie, amis, professionnels de sant�)
+- Cat�gorisation (m�decin, �cole, garderie, famille, amis)
 - Recherche rapide
-- Notes personnalisÃ©es par contact
+- Notes personnalis�es par contact
 
 ### Usage
 
@@ -228,13 +228,13 @@ suggestions = service.suggerer_activites_weekend(
 
 ## Journal
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
 - Journal de bord familial (texte libre, anecdotes, moments forts)
-- EntrÃ©es associÃ©es Ã  une date et un auteur
-- Recherche dans les entrÃ©es passÃ©es
-- SynthÃ¨se hebdomadaire gÃ©nÃ©rÃ©e par IA
-- **Phase R â€” RÃ©sumÃ©s IA sauvegardÃ©s** : les entrÃ©es avec tag `resume-ia` sont affichÃ©es dans une section dÃ©diÃ©e "RÃ©sumÃ©s IA rÃ©cents" en haut de la timeline
+- Entr�es associ�es � une date et un auteur
+- Recherche dans les entr�es pass�es
+- Synth�se hebdomadaire g�n�r�e par IA
+- **Phase R � R�sum�s IA sauvegard�s** : les entr�es avec tag `resume-ia` sont affich�es dans une section d�di�e "R�sum�s IA r�cents" en haut de la timeline
 
 ### Usage
 
@@ -242,25 +242,25 @@ suggestions = service.suggerer_activites_weekend(
 /famille/journal
 ```
 
-### RÃ©sumÃ©s IA (Phase R)
+### R�sum�s IA (Phase R)
 
-Le bouton "RÃ©sumÃ© IA semaine" appelle `POST /famille/journal/ia-semaine` (ou l'alias `resumer-semaine`). Le rÃ©sumÃ© est **automatiquement sauvegardÃ©** comme entrÃ©e journal avec tag `resume-ia` + humeur `bien`. Il apparaÃ®t dans la section "RÃ©sumÃ©s IA rÃ©cents" (max 3 derniers affichÃ©s).
+Le bouton "R�sum� IA semaine" appelle `POST /famille/journal/ia-semaine` (ou l'alias `resumer-semaine`). Le r�sum� est **automatiquement sauvegard�** comme entr�e journal avec tag `resume-ia` + humeur `bien`. Il appara�t dans la section "R�sum�s IA r�cents" (max 3 derniers affich�s).
 
 ```
 POST /api/v1/famille/journal/resumer-semaine
 Body: { date_debut?: "YYYY-MM-DD", style?: "narratif"|"bullet" }
-RÃ©ponse: { resume: string, date_debut: string, date_fin: string }
+R�ponse: { resume: string, date_debut: string, date_fin: string }
 ```
 
 ---
 
 ## Anniversaires
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
 - Calendrier des anniversaires avec alertes J-7 et J-1
-- IdÃ©es de cadeaux (suggestions IA)
-- Historique des fÃªtes passÃ©es
+- Id�es de cadeaux (suggestions IA)
+- Historique des f�tes pass�es
 
 ### Usage
 
@@ -272,11 +272,11 @@ RÃ©ponse: { resume: string, date_debut: string, date_fin: string }
 
 ## Documents
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Archivage des documents administratifs familiaux (actes de naissance, passeports, CAFâ€¦)
-- CatÃ©gorisation par type et membre de la famille
-- AperÃ§u en ligne (PDF, images)
+- Archivage des documents administratifs familiaux (actes de naissance, passeports, CAF�)
+- Cat�gorisation par type et membre de la famille
+- Aper�u en ligne (PDF, images)
 - Alertes d'expiration pour les documents temporaires
 
 ### Usage
@@ -291,15 +291,15 @@ RÃ©ponse: { resume: string, date_debut: string, date_fin: string }
 
 ### Endpoints principaux
 
-| MÃ©thode | URL                              | Description                         |
+| M�thode | URL                              | Description                         |
 | -------- | ---------------------------------- | ------------------------------------- |
-| GET    | `/api/v1/famille/jules/profil`   | Profil et donnÃ©es de Jules          |
+| GET    | `/api/v1/famille/jules/profil`   | Profil et donn�es de Jules          |
 | POST   | `/api/v1/famille/jules/jalons`   | Enregistrer un jalon                |
-| GET    | `/api/v1/famille/activites`      | Lister les activitÃ©s                |
-| POST   | `/api/v1/famille/budget`         | Ajouter une dÃ©pense/revenu          |
-| GET    | `/api/v1/famille/budget/resume`  | RÃ©sumÃ© budgÃ©taire mensuel           |
+| GET    | `/api/v1/famille/activites`      | Lister les activit�s                |
+| POST   | `/api/v1/famille/budget`         | Ajouter une d�pense/revenu          |
+| GET    | `/api/v1/famille/budget/resume`  | R�sum� budg�taire mensuel           |
 | GET    | `/api/v1/famille/routines`       | Lister les routines                 |
 | GET    | `/api/v1/famille/contacts`       | Lister les contacts                 |
-| POST   | `/api/v1/famille/journal`        | Nouvelle entrÃ©e journal             |
+| POST   | `/api/v1/famille/journal`        | Nouvelle entr�e journal             |
 
-Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation complÃ¨te.
+Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation compl�te.

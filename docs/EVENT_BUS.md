@@ -1,59 +1,61 @@
-﻿# Event Bus
+# Event Bus
 
-> RÃ©fÃ©rence du bus d'Ã©vÃ©nements domaine â€” 32 types, 51 subscribers, patterns et bonnes pratiques.
->
-> **DerniÃ¨re mise Ã  jour** : 1er avril 2026
+> Reference du bus d'evenements domaine au 1er avril 2026.
 
 ---
 
 ## Vue d'ensemble
 
-| PropriÃ©tÃ© | Valeur |
-| ----------- | -------- |
-| **ImplÃ©mentation** | `src/services/core/events/bus.py` |
-| **Types d'Ã©vÃ©nements** | 32 (`REGISTRE_EVENEMENTS`) |
-| **Subscribers enregistrÃ©s** | 51 (`enregistrer_subscribers()`) |
-| **Thread-safe** | Oui (`threading.Lock`) |
-| **Wildcards** | Oui (`module.*` matche `module.action`) |
-| **Historique** | 100 derniers Ã©vÃ©nements en mÃ©moire |
-| **MÃ©triques** | Ã‰missions, handlers, erreurs, durÃ©e par type |
+| Propriete | Valeur |
+| --- | --- |
+| Implementation | `src/services/core/events/bus.py` |
+| Types d'evenements | 32 types domaines enregistres |
+| Subscribers | 51 handlers enregistres au bootstrap |
+| Thread-safe | Oui, verrou interne sur le registre |
+| Wildcards | Oui, patterns du type `module.*` |
+| Historique | 100 derniers evenements gardes en memoire |
+| Metriques | emissions, erreurs, duree, repartition par type |
 
----
-
-## Types d'Ã©vÃ©nements (32)
+## Types d'evenements
 
 ### Recettes
+
 `recette.planifiee`, `recette.importee`, `recette.creee`, `recette.feedback`
 
-### Stock / Courses
+### Stock et courses
+
 `stock.modifie`, `courses.generees`, `courses.modifiees`, `inventaire.modification_importante`
 
-### Planning / Batch
+### Planning et batch cooking
+
 `planning.modifie`, `batch_cooking.termine`
 
 ### Maison
+
 `entretien.routine_creee`, `entretien.semaine_optimisee`, `depenses.modifiee`, `jardin.modifie`, `jardin.recolte`, `projets.modifie`, `meubles.modifie`, `eco_tips.modifie`, `energie.anomalie`, `contrat.renouvellement`
 
 ### Famille
+
 `activites.modifiee`, `routines.modifiee`, `weekend.modifie`, `achats.modifie`, `food_log.ajoute`
 
-### Budget / SantÃ©
+### Budget et sante
+
 `budget.modifie`, `budget.depassement`, `sante.modifie`
 
 ### Jeux
+
 `loto.modifie`, `paris.modifie`, `jeux.sync_terminee`
 
-### SystÃ¨me
+### Systeme
+
 `service.error`
 
----
+## Groupes de subscribers
 
-## Groupes de subscribers (51)
+### Invalidation cache
 
-### Invalidation cache (16 subscribers)
-
-| Handler | Ã‰vÃ©nement pattern |
-| --------- | ------------------- |
+| Handler | Pattern |
+| --- | --- |
 | `_invalider_cache_recettes()` | `recette.*` |
 | `_invalider_cache_stock()` | `stock.*` |
 | `_invalider_cache_courses()` | `courses.*` |
@@ -71,59 +73,47 @@
 | `_invalider_cache_jeux()` | `jeux.*` |
 | `_invalider_cache_sante()` | `sante.*` |
 
-### RÃ©actions mÃ©tier (12+ subscribers)
+### Reactions metier
 
-- Checklist anniversaire proche (J-30/14/7/1)
-- Invalidation suggestions achats sur changement prÃ©fÃ©rences
-- Syncs inter-modules enregistrÃ©s via `@service_factory`
+- anniversaires et echeances proches
+- invalidation de suggestions lors de changements de preferences
+- synchronisations inter-modules branchees via les services enregistres
 
-### Notifications (7+ subscribers)
+### Notifications
 
-- Document expiration â†’ ntfy/push
-- Anomalie budget â†’ alertes haute prioritÃ©
-- PÃ©remption J-48h â†’ suggestions anti-gaspillage
-- Batch cooking terminÃ© â†’ notification rÃ©sultat
-- Anomalie Ã©nergie â†’ alerte admin
+- expiration de document vers ntfy et push
+- depassement budget en haute priorite
+- peremption proche vers anti-gaspillage
+- fin de batch cooking avec retour utilisateur
+- anomalies energie vers canal admin
 
-### Monitoring (8+ subscribers)
+### Monitoring et audit
 
-- Collecteur mÃ©triques global
-- Suivi erreurs services
-- Compteurs performance
-- DÃ©tection anomalies
-
-### Audit (6+ subscribers)
-
-- Logging structurÃ© des Ã©vÃ©nements
-- Suivi actions par domaine
-- Enregistrement Ã©vÃ©nements sÃ©curitÃ©
+- collecteur central de metriques
+- suivi des erreurs service
+- comptage des handlers et de la latence
+- journalisation des evenements sensibles
 
 ### Webhooks sortants
 
-- Livraison best-effort via service d'intÃ©gration
+- livraison best-effort vers integrations externes
 
----
+## Exemples de flux reactifs
 
-## Exemples de flux rÃ©actifs
-
-| Ã‰vÃ©nement | RÃ©action automatique |
-| ----------- | --------------------- |
-| `jardin.recolte` | Invalidation cache recettes/planning/suggestions |
-| `energie.anomalie` | CrÃ©ation tÃ¢che entretien |
-| `budget.depassement` | Invalidation dashboard + dÃ©clenchement agent proactif |
-| `document.echeance_proche` | Notification ntfy |
-| `batch_cooking.termine` | DÃ©duction inventaire + notification |
-| `stock.modifie` | Invalidation cache courses + vÃ©rification seuil |
-
----
+| Evenement | Reaction automatique |
+| --- | --- |
+| `jardin.recolte` | invalide les caches recettes, planning et suggestions |
+| `energie.anomalie` | cree une tache entretien ou une alerte admin |
+| `budget.depassement` | invalide le dashboard et declenche l'agent proactif |
+| `document.echeance_proche` | pousse une notification utilisateur |
+| `batch_cooking.termine` | deduit l'inventaire et notifie le resultat |
+| `stock.modifie` | invalide les caches courses et verifie les seuils |
 
 ## API admin
 
 ```http
-# Consulter les derniers Ã©vÃ©nements
 GET /api/v1/admin/events?limite=30&type_evenement=recette.*
 
-# DÃ©clencher un Ã©vÃ©nement manuellement (test)
 POST /api/v1/admin/events/trigger
 {
   "type_evenement": "jardin.recolte",
@@ -132,19 +122,15 @@ POST /api/v1/admin/events/trigger
 }
 ```
 
----
+## Demarrage
 
-## DÃ©marrage
-
-Les subscribers sont enregistrÃ©s au bootstrap via `enregistrer_subscribers()`.
-La fonction est idempotente.
-
----
+Les subscribers sont enregistres au bootstrap via `enregistrer_subscribers()`.
+L'operation est idempotente et peut etre relancee sans doublonner le registre.
 
 ## Bonnes pratiques
 
-- Ã‰mettre des Ã©vÃ©nements mÃ©tier explicites (`module.action`)
-- Garder les handlers rÃ©silients (never fail the bus â€” tout wrappÃ© en `try/except`)
-- Utiliser des wildcard patterns (`budget.*`) pour les comportements transverses
-- Mettre les actions lourdes en asynchrone ou en job planifiÃ©
-- PrioritÃ©s : cache invalidation (10) > mÃ©tier (5) > audit (0)
+- emettre des evenements metier explicites sous la forme `module.action`
+- garder les handlers resilients et non bloquants
+- utiliser les wildcards pour les besoins transverses
+- deplacer les actions lourdes en tache asynchrone ou en job planifie
+- conserver les priorites implicites cache > metier > audit

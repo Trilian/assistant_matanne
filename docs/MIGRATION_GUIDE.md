@@ -1,103 +1,103 @@
-﻿# Guide de Migration â€” Assistant Matanne
+# Guide de Migration — Assistant Matanne
 
-> Ce document recense les migrations de versions majeures dÃ©jÃ  effectuÃ©es et les points d'attention pour les mises Ã  jour futures.
+> Ce document recense les migrations de versions majeures déjà effectuées et les points d'attention pour les mises à jour futures.
 
 ---
 
-## Workflow schÃ©ma DB (Phase 10)
+## Workflow schéma DB (Phase 10)
 
-**Source de vÃ©ritÃ© : `sql/schema/*.sql` rÃ©gÃ©nÃ¨re `sql/INIT_COMPLET.sql`**
+**Source de vérité : `sql/schema/*.sql` régénère `sql/INIT_COMPLET.sql`**
 
 Le workflow actif est SQL-first et modulaire :
 
 ```text
-âœ… sql/schema/*.sql   â† source Ã©ditable du schÃ©ma
-âœ… sql/INIT_COMPLET.sql â† artefact rÃ©gÃ©nÃ©rÃ© pour initialisation complÃ¨te
-âœ… sql/migrations/    â† journal incrÃ©mental des changements dÃ©jÃ  appliquÃ©s
-âŒ alembic/           â† abandonnÃ©
+✅ sql/schema/*.sql   ← source éditable du schéma
+✅ sql/INIT_COMPLET.sql ← artefact régénéré pour initialisation complète
+✅ sql/migrations/    ← journal incrémental des changements déjà appliqués
+❌ alembic/           ← abandonné
 ```
 
 ### Initialisation d'une nouvelle DB
 
 ```sql
 -- Dans Supabase SQL Editor ou psql :
--- ExÃ©cuter sql/INIT_COMPLET.sql dans son intÃ©gralitÃ©
+-- Exécuter sql/INIT_COMPLET.sql dans son intégralité
 ```
 
 ### Ajouter une colonne ou une table
 
-1. Modifier le fichier thÃ©matique concernÃ© dans `sql/schema/`
-2. RÃ©gÃ©nÃ©rer `sql/INIT_COMPLET.sql` avec `scripts/db/regenerate_init.py`
-3. Sur la DB existante (Supabase), exÃ©cuter manuellement l'`ALTER TABLE` ou le `CREATE TABLE` correspondant
-4. Mettre Ã  jour le modÃ¨le ORM SQLAlchemy dans `src/core/models/`
-5. Mettre Ã  jour le schÃ©ma Pydantic dans `src/api/schemas/`
-6. Consigner le delta dans `sql/migrations/` si la modification a dÃ©jÃ  Ã©tÃ© appliquÃ©e sur un environnement persistant
+1. Modifier le fichier thématique concerné dans `sql/schema/`
+2. Régénérer `sql/INIT_COMPLET.sql` avec `scripts/db/regenerate_init.py`
+3. Sur la DB existante (Supabase), exécuter manuellement l'`ALTER TABLE` ou le `CREATE TABLE` correspondant
+4. Mettre à jour le modèle ORM SQLAlchemy dans `src/core/models/`
+5. Mettre à jour le schéma Pydantic dans `src/api/schemas/`
+6. Consigner le delta dans `sql/migrations/` si la modification a déjà été appliquée sur un environnement persistant
 
-> `INIT_COMPLET.sql` sert aux installations neuves. Les Ã©volutions incrÃ©mentales restent appliquÃ©es explicitement sur les environnements existants.
+> `INIT_COMPLET.sql` sert aux installations neuves. Les évolutions incrémentales restent appliquées explicitement sur les environnements existants.
 
 ---
 
-## Workflow SQL-first â€” Structure modulaire (Sprint H)
+## Workflow SQL-first — Structure modulaire (Sprint H)
 
 **Structure depuis le Sprint H :**
 
 ```
 sql/
-â”œâ”€â”€ INIT_COMPLET.sql          â† RÃ©gÃ©nÃ©rÃ© automatiquement (NE PAS Ã‰DITER Ã€ LA MAIN)
-â”œâ”€â”€ schema/
-â”‚   â”œâ”€â”€ 01_extensions.sql     â† Extensions PostgreSQL (uuid-ossp, pgcryptoâ€¦)
-â”‚   â”œâ”€â”€ 02_functions.sql      â† Fonctions PL/pgSQL et triggers
-â”‚   â”œâ”€â”€ 03_cuisine.sql        â† Tables cuisine (recettes, ingrÃ©dients, planning, courses)
-â”‚   â”œâ”€â”€ 04_famille.sql        â† Tables famille (profils, activitÃ©s, budget, santÃ©)
-â”‚   â”œâ”€â”€ 05_maison.sql         â† Tables maison (projets, entretien, jardin, stocks)
-â”‚   â”œâ”€â”€ 06_habitat.sql        â† Tables habitat (scÃ©narios, plans, veille)
-â”‚   â”œâ”€â”€ 07_jeux.sql           â† Tables jeux (paris, loto, euromillions)
-â”‚   â”œâ”€â”€ 08_systeme.sql        â† Tables systÃ¨me (logs, config, notifications)
-â”‚   â”œâ”€â”€ 09_rls_policies.sql   â† Politiques Row-Level Security
-â”‚   â””â”€â”€ ...
-â””â”€â”€ migrations/               â† Changements incrÃ©mentiels (garde tel quel)
+├── INIT_COMPLET.sql          ← Régénéré automatiquement (NE PAS ÉDITER À LA MAIN)
+├── schema/
+│   ├── 01_extensions.sql     ← Extensions PostgreSQL (uuid-ossp, pgcrypto…)
+│   ├── 02_functions.sql      ← Fonctions PL/pgSQL et triggers
+│   ├── 03_cuisine.sql        ← Tables cuisine (recettes, ingrédients, planning, courses)
+│   ├── 04_famille.sql        ← Tables famille (profils, activités, budget, santé)
+│   ├── 05_maison.sql         ← Tables maison (projets, entretien, jardin, stocks)
+│   ├── 06_habitat.sql        ← Tables habitat (scénarios, plans, veille)
+│   ├── 07_jeux.sql           ← Tables jeux (paris, loto, euromillions)
+│   ├── 08_systeme.sql        ← Tables système (logs, config, notifications)
+│   ├── 09_rls_policies.sql   ← Politiques Row-Level Security
+│   └── ...
+└── migrations/               ← Changements incrémentiels (garde tel quel)
 ```
 
-### RÃ¨gle fondamentale â€” Ne jamais Ã©diter INIT_COMPLET.sql directement
+### Règle fondamentale — Ne jamais éditer INIT_COMPLET.sql directement
 
-`INIT_COMPLET.sql` est **rÃ©gÃ©nÃ©rÃ© automatiquement** par le script `scripts/db/regenerate_init.py`.
-Il ne faut **jamais l'Ã©diter manuellement** â€” toute modification serait Ã©crasÃ©e lors du prochain `make regenerate`.
+`INIT_COMPLET.sql` est **régénéré automatiquement** par le script `scripts/db/regenerate_init.py`.
+Il ne faut **jamais l'éditer manuellement** — toute modification serait écrasée lors du prochain `make regenerate`.
 
-### Workflow complet pour modifier le schÃ©ma
+### Workflow complet pour modifier le schéma
 
-**Ã‰tape 1 â€” Modifier le fichier thÃ©matique dans `sql/schema/`**
+**Étape 1 — Modifier le fichier thématique dans `sql/schema/`**
 
 ```bash
-# Exemple : ajouter une colonne Ã  la table recettes
-# Ã‰diter sql/schema/03_cuisine.sql
+# Exemple : ajouter une colonne à la table recettes
+# Éditer sql/schema/03_cuisine.sql
 #   ALTER TABLE recettes ADD COLUMN ... dans le CREATE TABLE correspondant
 ```
 
-**Ã‰tape 2 â€” RÃ©gÃ©nÃ©rer `INIT_COMPLET.sql`**
+**Étape 2 — Régénérer `INIT_COMPLET.sql`**
 
 ```bash
 python scripts/db/regenerate_init.py
-# ConcatÃ¨ne sql/schema/*.sql â†’ sql/INIT_COMPLET.sql (avec header + sÃ©parateurs)
-# Idempotent â€” peut Ãªtre lancÃ© plusieurs fois sans effet de bord
+# Concatène sql/schema/*.sql → sql/INIT_COMPLET.sql (avec header + séparateurs)
+# Idempotent — peut être lancé plusieurs fois sans effet de bord
 ```
 
-**Ã‰tape 3 â€” Appliquer sur la DB existante** (Supabase SQL Editor ou psql)
+**Étape 3 — Appliquer sur la DB existante** (Supabase SQL Editor ou psql)
 
 ```sql
--- NE PAS rÃ©exÃ©cuter INIT_COMPLET.sql (DROP CASCADE sur toutes les tables !)
--- ExÃ©cuter UNIQUEMENT l'ALTER TABLE / CREATE TABLE de la modification :
+-- NE PAS réexécuter INIT_COMPLET.sql (DROP CASCADE sur toutes les tables !)
+-- Exécuter UNIQUEMENT l'ALTER TABLE / CREATE TABLE de la modification :
 ALTER TABLE recettes ADD COLUMN calories INTEGER DEFAULT NULL;
 ```
 
-**Ã‰tape 4 â€” Logger dans `sql/migrations/`** (optionnel mais recommandÃ©)
+**Étape 4 — Logger dans `sql/migrations/`** (optionnel mais recommandé)
 
 ```bash
 # Nommer le fichier avec la date et une description courte
 touch sql/migrations/V008_20260401_add_recettes_calories.sql
-# Contenu : la requÃªte ALTER TABLE exacte appliquÃ©e
+# Contenu : la requête ALTER TABLE exacte appliquée
 ```
 
-**Ã‰tape 5 â€” Mettre Ã  jour le modÃ¨le ORM**
+**Étape 5 — Mettre à jour le modèle ORM**
 
 ```python
 # Fichier src/core/models/cuisine.py
@@ -106,7 +106,7 @@ class Recette(Base):
   calories: Mapped[int | None] = mapped_column(Integer, nullable=True)
 ```
 
-**Ã‰tape 6 â€” Mettre Ã  jour le schÃ©ma Pydantic** (si exposÃ© en API)
+**Étape 6 — Mettre à jour le schéma Pydantic** (si exposé en API)
 
 ```python
 # Fichier src/api/schemas/recettes.py
@@ -115,21 +115,21 @@ class RecetteResponse(BaseModel):
   calories: int | None = None
 ```
 
-### RÃ©initialisation complÃ¨te d'une DB vide
+### Réinitialisation complète d'une DB vide
 
 ```bash
-# 1. RÃ©gÃ©nÃ©rer INIT_COMPLET.sql depuis sql/schema/ (obligatoire si modifs rÃ©centes)
+# 1. Régénérer INIT_COMPLET.sql depuis sql/schema/ (obligatoire si modifs récentes)
 python scripts/db/regenerate_init.py
 
-# 2. ExÃ©cuter dans Supabase SQL Editor (ou psql)
+# 2. Exécuter dans Supabase SQL Editor (ou psql)
 #    Copier-coller le contenu de sql/INIT_COMPLET.sql
-#    âš ï¸ DESTRUCTIF â€” DROP CASCADE sur tout !
+#    ⚠️ DESTRUCTIF — DROP CASCADE sur tout !
 ```
 
-### VÃ©rifier la cohÃ©rence schÃ©ma â†” ORM â†” API
+### Vérifier la cohérence schéma ↔ ORM ↔ API
 
 ```bash
-# VÃ©rifier que tous les modÃ¨les ORM ont un CREATE TABLE dans INIT_COMPLET.sql
+# Vérifier que tous les modèles ORM ont un CREATE TABLE dans INIT_COMPLET.sql
 python -c "
 import re
 from pathlib import Path
@@ -141,7 +141,7 @@ missing = [m.class_.__tablename__ for m in Base.registry.mappers if m.class_.__t
 if missing:
   print('MANQUANT:', missing)
 else:
-  print('OK â€” tous les modÃ¨les ORM ont un CREATE TABLE')
+  print('OK — tous les modèles ORM ont un CREATE TABLE')
 "
 ```
 
@@ -157,10 +157,10 @@ else:
 | Politiques RLS | `{table}_{role}_{action}` | `recettes_user_select` |
 
 
-### VÃ©rification cohÃ©rence ORM â†” SQL
+### Vérification cohérence ORM ↔ SQL
 
 ```bash
-# Sprint 3 prÃ©voir test automatique :
+# Sprint 3 prévoir test automatique :
 python -c "
 import re
 from pathlib import Path
@@ -171,7 +171,7 @@ sql_tables = set(re.findall(r'CREATE TABLE (?:IF NOT EXISTS )?(\\w+)', sql))
 for m in Base.registry.mappers:
     t = m.class_.__tablename__
     assert t in sql_tables, f'ORM table {t!r} absente de INIT_COMPLET.sql'
-print('OK â€” tous les modÃ¨les ORM ont un CREATE TABLE')
+print('OK — tous les modèles ORM ont un CREATE TABLE')
 "
 ```
 
@@ -185,7 +185,7 @@ print('OK â€” tous les modÃ¨les ORM ont un CREATE TABLE')
 | **FastAPI** | 0.109+ | `^0.109.0` |
 | **Pydantic** | 2.5+ | `^2.5.0` |
 | **SQLAlchemy** | 2.0+ | `^2.0.0` |
-| **httpx** | 0.27â€“0.28 | `>=0.27,<0.29` |
+| **httpx** | 0.27–0.28 | `>=0.27,<0.29` |
 | **mistralai** | 1.0+ | `^1.0.0` |
 | **Node.js** | 20+ | `@types/node ^20` |
 | **Next.js** | 16.2.1 | `next@16.2.1` |
@@ -200,32 +200,32 @@ print('OK â€” tous les modÃ¨les ORM ont un CREATE TABLE')
 
 ## Backend Python
 
-### Python 3.12 â†’ 3.13
+### Python 3.12 → 3.13
 
 **Breaking changes** :
-- `distutils` supprimÃ© dÃ©finitivement (Ã©tait dÃ©prÃ©ciÃ© depuis 3.10). Remplacer par `setuptools` si besoin.
+- `distutils` supprimé définitivement (était déprécié depuis 3.10). Remplacer par `setuptools` si besoin.
 - `typing.TypeAlias` est `type` depuis Python 3.12 (syntaxe `type X = ...`).
-- `asyncio.get_event_loop()` sur un thread sans event loop lÃ¨ve une `DeprecationWarning`. Utiliser `asyncio.get_running_loop()` ou `asyncio.new_event_loop()`.
-- Les f-strings supportent maintenant des expressions imbriquÃ©es (Python 3.12+).
+- `asyncio.get_event_loop()` sur un thread sans event loop lève une `DeprecationWarning`. Utiliser `asyncio.get_running_loop()` ou `asyncio.new_event_loop()`.
+- Les f-strings supportent maintenant des expressions imbriquées (Python 3.12+).
 
-**Ce qui a Ã©tÃ© fait dans ce projet** :
-- SQLAlchemy 2.0 avec `Mapped[]` et `mapped_column` â€” compatible 3.13 natif.
+**Ce qui a été fait dans ce projet** :
+- SQLAlchemy 2.0 avec `Mapped[]` et `mapped_column` — compatible 3.13 natif.
 - `asyncio_mode = strict` dans `pytest.ini` pour forcer les bonnes pratiques async.
 
 ---
 
-### FastAPI 0.100 â†’ 0.109+
+### FastAPI 0.100 → 0.109+
 
-**Migrations effectuÃ©es** :
+**Migrations effectuées** :
 
-**`on_event` â†’ `lifespan`** (dÃ©prÃ©ciÃ© depuis 0.93) :
+**`on_event` → `lifespan`** (déprécié depuis 0.93) :
 ```python
-# âŒ Ancien (dÃ©prÃ©ciÃ©)
+# ❌ Ancien (déprécié)
 @app.on_event("startup")
 async def startup():
     ...
 
-# âœ… Nouveau
+# ✅ Nouveau
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
@@ -237,18 +237,18 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 ```
 
-**`response_model_exclude_unset`** : Utiliser dans les routeurs pour Ã©viter de sÃ©rialiser les champs `None` par dÃ©faut :
+**`response_model_exclude_unset`** : Utiliser dans les routeurs pour éviter de sérialiser les champs `None` par défaut :
 ```python
 @router.get("/", response_model=MonSchema, response_model_exclude_unset=True)
 ```
 
-**CompatibilitÃ© Pydantic v2** : FastAPI 0.109+ supporte nativement Pydantic v2. Les schÃ©mas `BaseModel` utilisent `model_dump()` au lieu de `dict()`, `model_validate()` au lieu de `parse_obj()`.
+**Compatibilité Pydantic v2** : FastAPI 0.109+ supporte nativement Pydantic v2. Les schémas `BaseModel` utilisent `model_dump()` au lieu de `dict()`, `model_validate()` au lieu de `parse_obj()`.
 
 ---
 
-### Pydantic v1 â†’ v2
+### Pydantic v1 → v2
 
-**Ce projet utilise Pydantic v2 partout.** Points clÃ©s :
+**Ce projet utilise Pydantic v2 partout.** Points clés :
 
 | v1 | v2 |
 | ---- | ----- |
@@ -261,9 +261,9 @@ app = FastAPI(lifespan=lifespan)
 | `__fields__` | `model_fields` |
 | `Config` inner class | `model_config = ConfigDict(...)` |
 
-**Exemple de migration schÃ©ma** :
+**Exemple de migration schéma** :
 ```python
-# âœ… Style Pydantic v2 utilisÃ© dans ce projet
+# ✅ Style Pydantic v2 utilisé dans ce projet
 from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 
 class RecetteCreate(BaseModel):
@@ -280,9 +280,9 @@ class RecetteCreate(BaseModel):
 
 ---
 
-### SQLAlchemy 1.4 â†’ 2.0
+### SQLAlchemy 1.4 → 2.0
 
-**Ce projet utilise SQLAlchemy 2.0 exclusivement.** Points clÃ©s :
+**Ce projet utilise SQLAlchemy 2.0 exclusivement.** Points clés :
 
 | 1.4 | 2.0 |
 | ----- | ----- |
@@ -314,7 +314,7 @@ def creer_item(data: dict, db: Session) -> MonModel:
     return item
 ```
 
-**Chargement des modÃ¨les pour tests** : Toujours appeler `charger_tous_modeles()` avant `Base.metadata.create_all()` dans les fixtures de test, sinon les FK ne sont pas rÃ©solues :
+**Chargement des modèles pour tests** : Toujours appeler `charger_tous_modeles()` avant `Base.metadata.create_all()` dans les fixtures de test, sinon les FK ne sont pas résolues :
 ```python
 from src.core.models import charger_tous_modeles
 charger_tous_modeles()
@@ -323,7 +323,7 @@ Base.metadata.create_all(bind=engine)
 
 ---
 
-### httpx â€” Contrainte de version
+### httpx — Contrainte de version
 
 **Contrainte actuelle** : `>=0.27,<0.29`
 
@@ -332,11 +332,11 @@ Base.metadata.create_all(bind=engine)
 **Impact sur les tests** : `starlette.testclient.TestClient` (synchrone) est **incompatible** avec httpx 0.28+. Utiliser obligatoirement `httpx.AsyncClient` :
 
 ```python
-# âŒ Ne plus utiliser
+# ❌ Ne plus utiliser
 from fastapi.testclient import TestClient
 client = TestClient(app)
 
-# âœ… Pattern obligatoire dans ce projet
+# ✅ Pattern obligatoire dans ce projet
 import httpx
 import pytest_asyncio
 
@@ -354,53 +354,53 @@ async def test_endpoint(client):
     assert response.status_code == 200
 ```
 
-**Si httpx 0.29 sort** : VÃ©rifier les notes de release pour les changements `ASGITransport` avant de lever la contrainte.
+**Si httpx 0.29 sort** : Vérifier les notes de release pour les changements `ASGITransport` avant de lever la contrainte.
 
 ---
 
 ## Frontend Node.js / Next.js
 
-### Next.js 14 â†’ 16 (App Router)
+### Next.js 14 → 16 (App Router)
 
-**Migrations effectuÃ©es** :
+**Migrations effectuées** :
 
-**Pages Router â†’ App Router** :
+**Pages Router → App Router** :
 ```
-pages/          â†’ app/
-pages/_app.tsx  â†’ app/layout.tsx (+ providers)
-pages/_document â†’ intÃ©grÃ© dans layout.tsx
-getServerSideProps â†’ React Server Components ou fetch()
-getStaticProps  â†’ generateStaticParams()
-```
-
-**Middleware** : En Next.js 16, le "middleware" est renommÃ© "proxy" dans la terminologie interne mais `middleware.ts` Ã  la racine de `src/` fonctionne toujours.
-
-**Layout imbriquÃ©s** : Chaque dossier peut avoir son propre `layout.tsx`. Ce projet utilise :
-```
-app/layout.tsx          â€” root (providers : query, auth, theme)
-app/(auth)/layout.tsx   â€” pages login/register
-app/(app)/layout.tsx    â€” app protÃ©gÃ©e (sidebar + header)
+pages/          → app/
+pages/_app.tsx  → app/layout.tsx (+ providers)
+pages/_document → intégré dans layout.tsx
+getServerSideProps → React Server Components ou fetch()
+getStaticProps  → generateStaticParams()
 ```
 
-**`loading.tsx` et `error.tsx`** : AjoutÃ©s au niveau des modules hub. Les sous-routes n'ont pas de boundaries individuelles â€” comportement normal (elles hÃ©ritent du module parent).
+**Middleware** : En Next.js 16, le "middleware" est renommé "proxy" dans la terminologie interne mais `middleware.ts` à la racine de `src/` fonctionne toujours.
+
+**Layout imbriqués** : Chaque dossier peut avoir son propre `layout.tsx`. Ce projet utilise :
+```
+app/layout.tsx          — root (providers : query, auth, theme)
+app/(auth)/layout.tsx   — pages login/register
+app/(app)/layout.tsx    — app protégée (sidebar + header)
+```
+
+**`loading.tsx` et `error.tsx`** : Ajoutés au niveau des modules hub. Les sous-routes n'ont pas de boundaries individuelles — comportement normal (elles héritent du module parent).
 
 ---
 
-### React 18 â†’ 19
+### React 18 → 19
 
-**React 19 â€” Points clÃ©s** :
+**React 19 — Points clés** :
 
 - **`use()` hook** : Permet de lire des Promises et Context directement dans le rendu.
 - **`useActionState()`** : Nouveau hook pour les Server Actions (remplace `useFormState`).
-- **`useOptimistic()`** : Ã‰tat optimiste automatique sur les mutations.
-- **Ref comme prop** : Plus besoin de `forwardRef` â€” `ref` peut Ãªtre passÃ© directement.
+- **`useOptimistic()`** : État optimiste automatique sur les mutations.
+- **Ref comme prop** : Plus besoin de `forwardRef` — `ref` peut être passé directement.
 - **`ReactDOM.preload/preinit`** : API de preloading de ressources.
 
-**Ce projet** utilise React 19 cÃ´tÃ© client (SPA Next.js). Les Server Components sont disponibles mais non utilisÃ©s activement â€” toutes les pages ont `'use client'`.
+**Ce projet** utilise React 19 côté client (SPA Next.js). Les Server Components sont disponibles mais non utilisés activement — toutes les pages ont `'use client'`.
 
 ---
 
-### Tailwind CSS v3 â†’ v4
+### Tailwind CSS v3 → v4
 
 **Breaking changes majeurs** :
 
@@ -412,34 +412,34 @@ app/(app)/layout.tsx    â€” app protÃ©gÃ©e (sidebar + header)
 | `theme.extend.colors` | `@theme { --color-X: ... }` |
 | `darkMode: 'class'` | `@variant dark (&:is(.dark *))` |
 
-**Ce projet** utilise `postcss.config.mjs` avec `@tailwindcss/postcss`. Les tokens de couleur par domaine sont dÃ©finis dans `globals.css` via `@theme`.
+**Ce projet** utilise `postcss.config.mjs` avec `@tailwindcss/postcss`. Les tokens de couleur par domaine sont définis dans `globals.css` via `@theme`.
 
-**dark mode** : DÃ©clarÃ© via `next-themes` (ajoute la classe `dark` sur `<html>`). Les classes `dark:` Tailwind v4 fonctionnent automatiquement.
+**dark mode** : Déclaré via `next-themes` (ajoute la classe `dark` sur `<html>`). Les classes `dark:` Tailwind v4 fonctionnent automatiquement.
 
 ---
 
-### TanStack Query v4 â†’ v5
+### TanStack Query v4 → v5
 
 **Breaking changes** :
 
 | v4 | v5 |
 | ---- | ----- |
-| `useQuery({ onSuccess, onError })` | Callbacks supprimÃ©s â€” utiliser `useEffect` ou `useMutation` |
+| `useQuery({ onSuccess, onError })` | Callbacks supprimés — utiliser `useEffect` ou `useMutation` |
 | `cacheTime` | `gcTime` |
 | `useQuery(key, fn, options)` | `useQuery({ queryKey, queryFn, ...options })` |
 | `isFetching` global | `useIsFetching()` hook |
 
-**Ce projet** â€” les callbacks `onError` sont gÃ©rÃ©s globalement dans `utiliserMutation` via `sonner` toast. Les handlers individuels `onError` peuvent surcharger le dÃ©faut.
+**Ce projet** — les callbacks `onError` sont gérés globalement dans `utiliserMutation` via `sonner` toast. Les handlers individuels `onError` peuvent surcharger le défaut.
 
 ```typescript
-// Pattern utilisÃ© dans crochets/utiliser-api.ts
+// Pattern utilisé dans crochets/utiliser-api.ts
 export function utiliserMutation<TData, TVariables>(
   mutationFn: (vars: TVariables) => Promise<TData>,
   options?: UseMutationOptions<TData, Error, TVariables>
 ) {
   return useMutation({
     mutationFn,
-    onError: (error) => toast.error(error.message),  // dÃ©faut global
+    onError: (error) => toast.error(error.message),  // défaut global
     ...options,  // options individuelles surchargent
   })
 }
@@ -447,16 +447,16 @@ export function utiliserMutation<TData, TVariables>(
 
 ---
 
-### Zustand v4 â†’ v5
+### Zustand v4 → v5
 
 **Breaking changes** :
 
-- L'API `createStore` est maintenant le pattern recommandÃ© pour les stores partagÃ©s.
-- `subscribeWithSelector` middleware intÃ©grÃ© nativement.
-- `immer` middleware maintenu mais patterns simplifiÃ©s.
-- TypeScript : meilleure infÃ©rence sans `as` casting.
+- L'API `createStore` est maintenant le pattern recommandé pour les stores partagés.
+- `subscribeWithSelector` middleware intégré nativement.
+- `immer` middleware maintenu mais patterns simplifiés.
+- TypeScript : meilleure inférence sans `as` casting.
 
-**Ce projet** â€” stores dans `magasins/` (nomenclature franÃ§aise). Pattern actuel compatible v5 :
+**Ce projet** — stores dans `magasins/` (nomenclature française). Pattern actuel compatible v5 :
 ```typescript
 // magasins/store-auth.ts
 import { create } from 'zustand'
@@ -474,45 +474,45 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 ---
 
-### Zod v3 â†’ v4
+### Zod v3 → v4
 
 **Breaking changes** :
 
 | v3 | v4 |
 | ---- | ----- |
-| `z.record(valueSchema)` | `z.record(z.string(), valueSchema)` â€” **2 args obligatoires** |
-| `z.string().email()` | InchangÃ© |
-| Performances | 2Ã— plus rapide en v4 |
-| `z.discriminatedUnion` | API lÃ©gÃ¨rement modifiÃ©e |
+| `z.record(valueSchema)` | `z.record(z.string(), valueSchema)` — **2 args obligatoires** |
+| `z.string().email()` | Inchangé |
+| Performances | 2× plus rapide en v4 |
+| `z.discriminatedUnion` | API légèrement modifiée |
 
-**Ce projet** â€” `bibliotheque/validateurs.ts` utilise Zod v4. Toujours passer 2 arguments Ã  `z.record()` :
+**Ce projet** — `bibliotheque/validateurs.ts` utilise Zod v4. Toujours passer 2 arguments à `z.record()` :
 ```typescript
-// âœ…
+// ✅
 z.record(z.string(), z.unknown())
 z.record(z.string(), z.number())
-// âŒ
+// ❌
 z.record(z.unknown())
 ```
 
 ---
 
-## ConsidÃ©rations futures
+## Considérations futures
 
-### Upgrade httpx â†’ 0.29+
+### Upgrade httpx → 0.29+
 - Attendre que `mistralai` supporte httpx 0.29 (suivre [mistralai releases](https://github.com/mistralai/client-python/releases))
-- VÃ©rifier l'API `ASGITransport` dans la release httpx 0.29
-- Mettre Ã  jour la contrainte dans `pyproject.toml` : `>=0.27,<0.30`
+- Vérifier l'API `ASGITransport` dans la release httpx 0.29
+- Mettre à jour la contrainte dans `pyproject.toml` : `>=0.27,<0.30`
 
-### Python 3.14 (prÃ©vu fin 2025)
+### Python 3.14 (prévu fin 2025)
 - `typing.TypeForm` nouveau type
-- GIL optionnel (expÃ©rimental depuis 3.13t) â€” potentiellement important pour les workers async
-- VÃ©rifier compatibilitÃ© SQLAlchemy, Pydantic, mistralai
+- GIL optionnel (expérimental depuis 3.13t) — potentiellement important pour les workers async
+- Vérifier compatibilité SQLAlchemy, Pydantic, mistralai
 
-### Next.js 17 (hypothÃ©tique)
-- Surveiller la dÃ©prÃ©ciation de comportements App Router actuels
-- `middleware.ts` / "proxy" : vÃ©rifier renommage officiel
+### Next.js 17 (hypothétique)
+- Surveiller la dépréciation de comportements App Router actuels
+- `middleware.ts` / "proxy" : vérifier renommage officiel
 - Partial Prerendering (PPR) : candidat pour les hubs statiques
 
 ### Supabase SDK v3 (si disponible)
-- `supabase ^2.3.0` â€” surveiller les breaking changes d'auth et storage
-- RLS : aucun impact (gÃ©rÃ© cÃ´tÃ© SQL, indÃ©pendant du SDK)
+- `supabase ^2.3.0` — surveiller les breaking changes d'auth et storage
+- RLS : aucun impact (géré côté SQL, indépendant du SDK)

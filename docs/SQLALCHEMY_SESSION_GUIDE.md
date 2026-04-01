@@ -1,14 +1,14 @@
-﻿# ðŸ“– Guide: SQLAlchemy Session Management - Best Practices
+# 📖 Guide: SQLAlchemy Session Management - Best Practices
 
-## ðŸŽ¯ Objectif
+## 🎯 Objectif
 
-Ã‰viter les erreurs `"Parent instance not bound to a Session"` en gÃ©rant correctement les sessions SQLAlchemy.
+Éviter les erreurs `"Parent instance not bound to a Session"` en gérant correctement les sessions SQLAlchemy.
 
-## âš¡ Les Deux Patterns Principaux
+## ⚡ Les Deux Patterns Principaux
 
-### 1ï¸âƒ£ Pattern Eager Loading (RecommandÃ©)
+### 1️⃣ Pattern Eager Loading (Recommandé)
 
-**Cas d'usage:** Vous savez que vous aurez besoin des relations lors de la rÃ©cupÃ©ration.
+**Cas d'usage:** Vous savez que vous aurez besoin des relations lors de la récupération.
 
 ```python
 from sqlalchemy.orm import joinedload
@@ -16,10 +16,10 @@ from sqlalchemy.orm import joinedload
 # Service layer
 @with_db_session
 def get_planning(self, planning_id=None, db=None):
-    """Retourne Planning avec relations prÃ©chargÃ©es"""
+    """Retourne Planning avec relations préchargées"""
     query = db.query(Planning)
 
-    # âœ… Eager load pour Ã©viter lazy load errors
+    # ✅ Eager load pour éviter lazy load errors
     query = query.options(
         joinedload(Planning.repas).joinedload(Repas.recette)
     )
@@ -31,49 +31,49 @@ def get_planning(self, planning_id=None, db=None):
 
     return query.first()
 
-# UI layer - Utilisation sÃ»re
+# UI layer - Utilisation sûre
 planning = service.get_planning()
 
-# âœ… Accessible sans erreur (dÃ©jÃ  en mÃ©moire)
+# ✅ Accessible sans erreur (déjà en mémoire)
 for repas in planning.repas:
-    print(repas.recette.nom)  # AccÃ¨s safe
+    print(repas.recette.nom)  # Accès safe
 ```
 
-### 2ï¸âƒ£ Pattern Context Manager (Pour les modifications)
+### 2️⃣ Pattern Context Manager (Pour les modifications)
 
-**Cas d'usage:** Vous effectuez des opÃ©rations de lecture/Ã©criture sur BD.
+**Cas d'usage:** Vous effectuez des opérations de lecture/écriture sur BD.
 
 ```python
-# âœ… BON - Context manager avec statement
+# ✅ BON - Context manager avec statement
 with obtenir_contexte_db() as db:
-    # OpÃ©ration de lecture
+    # Opération de lecture
     recipes = db.query(Recette).all()
 
-    # OpÃ©ration de modification
+    # Opération de modification
     repas = db.query(Repas).filter_by(id=1).first()
     if repas:
         repas.prepare = True
         db.commit()  # Commit automatiquement avant de fermer la session
 
-# Session fermÃ©e et nettoyÃ©e automatiquement
+# Session fermée et nettoyée automatiquement
 
-# âŒ MAUVAIS - Session n'est pas fermÃ©e correctement
+# ❌ MAUVAIS - Session n'est pas fermée correctement
 db = next(obtenir_contexte_db())  # Anti-pattern!
 repas = db.query(Repas).first()
-# db reste ouvert ou se ferme de faÃ§on imprÃ©visible
+# db reste ouvert ou se ferme de façon imprévisible
 ```
 
-## ðŸ”„ Flux RecommandÃ© pour une Route FastAPI
+## 🔄 Flux Recommandé pour une Route FastAPI
 
 ```python
 @router.get("/{planning_id}")
 @gerer_exception_api
 async def obtenir_planning(planning_id: int, user: dict = Depends(require_auth)):
-    """ModÃ¨le recommandÃ©"""
+    """Modèle recommandé"""
 
     def _query():
         with executer_avec_session() as session:
-            # 1ï¸âƒ£ RÃ©cupÃ©rer donnÃ©es avec EAGER LOADING
+            # 1️⃣ Récupérer données avec EAGER LOADING
             planning = (
                 session.query(Planning)
                 .options(joinedload(Planning.repas).joinedload(Repas.recette))
@@ -81,9 +81,9 @@ async def obtenir_planning(planning_id: int, user: dict = Depends(require_auth))
                 .first()
             )
             if not planning:
-                raise HTTPException(status_code=404, detail="Planning non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Planning non trouvé")
 
-            # 2ï¸âƒ£ SÃ©rialiser dans la session (relations dÃ©jÃ  chargÃ©es)
+            # 2️⃣ Sérialiser dans la session (relations déjà chargées)
             return {
                 "id": planning.id,
                 "repas": [{"id": r.id, "recette": r.recette.nom} for r in planning.repas],
@@ -92,14 +92,14 @@ async def obtenir_planning(planning_id: int, user: dict = Depends(require_auth))
     return await executer_async(_query)
 ```
 
-## ðŸŽ¨ Checklist: Nouveaux Services
+## 🎨 Checklist: Nouveaux Services
 
-Quand vous crÃ©ez un nouveau service qui retourne des objets avec relations:
+Quand vous créez un nouveau service qui retourne des objets avec relations:
 
 ```python
 class MonService(BaseService):
 
-    # âœ… Toujours eager load les relations
+    # ✅ Toujours eager load les relations
     @with_db_session
     def get_objet_avec_relations(self, id: int, db: Session = None):
         """Retourne objet + relations"""
@@ -115,7 +115,7 @@ class MonService(BaseService):
             .first()
         )
 
-    # âœ… Petite opÃ©ration SANS relations (juste pour modifier)
+    # ✅ Petite opération SANS relations (juste pour modifier)
     @with_db_session
     def marquer_prepare(self, id: int, db: Session = None) -> bool:
         """Simple update sans relations"""
@@ -127,25 +127,25 @@ class MonService(BaseService):
         return False
 ```
 
-## ðŸš¨ Erreurs Courantes Ã  Ã‰viter
+## 🚨 Erreurs Courantes à Éviter
 
-### âŒ Erreur 1: Lazy Load After Session Closed
+### ❌ Erreur 1: Lazy Load After Session Closed
 
 ```python
 # MAUVAIS
 planning = db.query(Planning).first()  # Sans eager load
 db.session.close()  # ou sortir du with
-for repas in planning.repas:  # âŒ ERREUR!
+for repas in planning.repas:  # ❌ ERREUR!
     print(repas)
 ```
 
-### âŒ Erreur 2: Using Generator Wrong
+### ❌ Erreur 2: Using Generator Wrong
 
 ```python
-# MAUVAIS - Utiliser le gÃ©nÃ©rateur au lieu du context manager
+# MAUVAIS - Utiliser le générateur au lieu du context manager
 db = next(obtenir_contexte_db())
 data = db.query(Model).all()
-# db peut Ãªtre fermÃ© ici
+# db peut être fermé ici
 
 # BON
 with obtenir_contexte_db() as db:
@@ -153,7 +153,7 @@ with obtenir_contexte_db() as db:
     # db reste ouvert ici
 ```
 
-### âŒ Erreur 3: Keeping Session Open
+### ❌ Erreur 3: Keeping Session Open
 
 ```python
 # MAUVAIS - Session trop longue
@@ -170,7 +170,7 @@ for i in range(1000):
         # ... traitement ...
 ```
 
-## ðŸ“Š Joinedload Patterns
+## 📊 Joinedload Patterns
 
 ### Simple relation
 
@@ -178,7 +178,7 @@ for i in range(1000):
 .options(joinedload(Parent.children))
 ```
 
-### Relation imbriquÃ©e (1-2 niveaux)
+### Relation imbriquée (1-2 niveaux)
 
 ```python
 .options(
@@ -206,42 +206,42 @@ from sqlalchemy.orm import contains_eager
 .filter(Child.active == True)
 ```
 
-## ðŸ”’ Bonnes Pratiques en RÃ©sumÃ©
+## 🔒 Bonnes Pratiques en Résumé
 
-| Practice           | Bon âœ…                       | Mauvais âŒ                     |
+| Practice           | Bon ✅                       | Mauvais ❌                     |
 | ------------------ | ---------------------------- | ------------------------------ |
 | **Session courte** | `with obtenir_contexte_db()` | Garder session longtemps       |
-| **Relations**      | `joinedload()` dans service  | Lazy load aprÃ¨s session fermÃ©e |
-| **Modifications**  | Context manager sÃ©parÃ©       | RÃ©utiliser la session          |
+| **Relations**      | `joinedload()` dans service  | Lazy load après session fermée |
+| **Modifications**  | Context manager séparé       | Réutiliser la session          |
 | **Erreurs**        | Attraper dans le service     | Laisser remonter               |
 | **Logging**        | Info au service level        | Rien ou debug                  |
 
-## ðŸ§ª Test: Comment vÃ©rifier
+## 🧪 Test: Comment vérifier
 
 ```python
 import pytest
 
 def test_planning_relations_accessible():
-    """VÃ©rifier que les relations sont accessibles"""
+    """Vérifier que les relations sont accessibles"""
     service = PlanningService()
     planning = service.get_planning()
 
-    # âœ… Ne doit pas lever d'erreur
+    # ✅ Ne doit pas lever d'erreur
     assert len(planning.repas) >= 0
 
-    # âœ… Repas et recettes doivent Ãªtre accessibles
+    # ✅ Repas et recettes doivent être accessibles
     for repas in planning.repas:
         assert repas.recette.nom  # Pas d'erreur ici!
 
 def test_modifications_isolated():
-    """VÃ©rifier que les modifications utilisent context managers"""
+    """Vérifier que les modifications utilisent context managers"""
     service = PlanningService()
 
-    # âœ… Doit marcher sans erreur
+    # ✅ Doit marcher sans erreur
     service.marquer_prepare(repas_id=1)
 ```
 
-## ðŸŽ“ Ressources
+## 🎓 Ressources
 
 - [SQLAlchemy Eager Loading](https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html#eager-loading)
 - [Context Managers Python](https://docs.python.org/3/library/contextlib.html)
@@ -249,14 +249,14 @@ def test_modifications_isolated():
 
 ---
 
-**Version:** 1.1 (Sprint H â€” avril 2026)
+**Version:** 1.1 (Sprint H — avril 2026)
 **Date initiale:** 30 Janvier 2026
 **Auteur:** GitHub Copilot
 **Pour:** Assistant Matanne Codebase
 
 ---
 
-## Mise Ã  jour Sprint H â€” Patterns FastAPI
+## Mise à jour Sprint H — Patterns FastAPI
 
 ### Pattern routes FastAPI (`executer_avec_session`)
 
@@ -269,40 +269,40 @@ from src.api.utils import executer_async, executer_avec_session
 @gerer_exception_api
 async def lister_recettes(user: dict = Depends(require_auth)) -> dict:
     def _query():
-        # executer_avec_session() gÃ¨re ouverture/fermeture + commit/rollback
+        # executer_avec_session() gère ouverture/fermeture + commit/rollback
         with executer_avec_session() as session:
             recettes = session.query(Recette).filter_by(user_id=user["id"]).all()
-            # âœ… SÃ©rialiser DANS le context manager â€” avant fermeture de session
+            # ✅ Sérialiser DANS le context manager — avant fermeture de session
             return [{"id": r.id, "nom": r.nom} for r in recettes]
-    # executer_async() exÃ©cute _query dans un thread pool (non-blocking)
+    # executer_async() exécute _query dans un thread pool (non-blocking)
     return await executer_async(_query)
 ```
 
-**RÃ¨gles clÃ©s :**
-- `executer_avec_session()` = `obtenir_contexte_db()` adaptÃ© pour les routes
-- Ne JAMAIS retourner des objets SQLAlchemy hors du `with` â€” les sÃ©rialiser Ã  l'intÃ©rieur
-- `executer_async()` est obligatoire pour les endpoints `async def` â€” Ã©vite le blocage de l'event loop
+**Règles clés :**
+- `executer_avec_session()` = `obtenir_contexte_db()` adapté pour les routes
+- Ne JAMAIS retourner des objets SQLAlchemy hors du `with` — les sérialiser à l'intérieur
+- `executer_async()` est obligatoire pour les endpoints `async def` — évite le blocage de l'event loop
 
 ### Comparatif des 3 patterns
 
 | Pattern | Usage | Fichier |
 | --------- | ------- | --------- |
 | `executer_avec_session()` | Routes FastAPI | `src/api/utils/__init__.py` |
-| `@avec_session_db` | Services mÃ©tier | `src/core/decorators/db.py` |
+| `@avec_session_db` | Services métier | `src/core/decorators/db.py` |
 | `obtenir_contexte_db()` | Flux complexes manuels | `src/core/db/session.py` |
 
 ### Anti-pattern : retourner un objet ORM hors session
 
 ```python
-# âŒ MAUVAIS â€” dÃ©tached instance error Ã  l'accÃ¨s de relations
+# ❌ MAUVAIS — détached instance error à l'accès de relations
 async def get_recette(id: int):
     def _query():
         with executer_avec_session() as session:
             return session.query(Recette).get(id)  # Retourne l'objet ORM !
     recette = await executer_async(_query)
-    return recette.ingredients  # ðŸ’¥ DetachedInstanceError
+    return recette.ingredients  # 💥 DetachedInstanceError
 
-# âœ… BON â€” sÃ©rialiser dans le context manager
+# ✅ BON — sérialiser dans le context manager
 async def get_recette(id: int):
     def _query():
         with executer_avec_session() as session:
@@ -317,7 +317,7 @@ async def get_recette(id: int):
 
 ### Test avec `executer_avec_session`
 
-Dans les tests, les mÃªmes patterns s'appliquent avec la `test_db` fixture :
+Dans les tests, les mêmes patterns s'appliquent avec la `test_db` fixture :
 
 ```python
 def test_create_recette(test_db):
@@ -328,5 +328,5 @@ def test_create_recette(test_db):
     
     result = test_db.query(Recette).filter_by(nom="Tarte").first()
     assert result.nom == "Tarte"
-    # Session nettoyÃ©e automatiquement aprÃ¨s le test (rollback dans conftest)
+    # Session nettoyée automatiquement après le test (rollback dans conftest)
 ```

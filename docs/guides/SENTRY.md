@@ -1,7 +1,7 @@
-﻿# Guide Sentry â€” Monitoring d'Erreurs
+# Guide Sentry — Monitoring d'Erreurs
 
-> **Stack** : `@sentry/nextjs` (frontend) â€” Backend non intÃ©grÃ© (optionnel)  
-> **Environnement** : ActivÃ© uniquement si `NEXT_PUBLIC_SENTRY_DSN` est dÃ©fini  
+> **Stack** : `@sentry/nextjs` (frontend) — Backend non intégré (optionnel)  
+> **Environnement** : Activé uniquement si `NEXT_PUBLIC_SENTRY_DSN` est défini  
 > **Fichiers config** : `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`
 
 ---
@@ -16,42 +16,42 @@ NEXT_PUBLIC_SENTRY_DSN=https://xxxxx@oxxxxx.ingest.sentry.io/xxxxx
 NEXT_PUBLIC_ENVIRONMENT=production  # ou staging, development
 ```
 
-> âš ï¸ Si `NEXT_PUBLIC_SENTRY_DSN` est absent ou vide, Sentry est **silencieusement dÃ©sactivÃ©**.
-> Aucune erreur n'est levÃ©e â€” le code est protÃ©gÃ© par un `try/catch` dans chaque fichier config.
+> ⚠️ Si `NEXT_PUBLIC_SENTRY_DSN` est absent ou vide, Sentry est **silencieusement désactivé**.
+> Aucune erreur n'est levée — le code est protégé par un `try/catch` dans chaque fichier config.
 
 ### Sampling rates
 
-| Contexte | ParamÃ¨tre | Valeur |
+| Contexte | Paramètre | Valeur |
 | --------- | ----------- | -------- |
 | Client (browser) | `tracesSampleRate` | 10% |
-| Client â€” Session Replay sur erreur | `replaysOnErrorSampleRate` | 100% |
-| Client â€” Session Replay global | `replaysSessionSampleRate` | 10% |
+| Client — Session Replay sur erreur | `replaysOnErrorSampleRate` | 100% |
+| Client — Session Replay global | `replaysSessionSampleRate` | 10% |
 | Server (Node.js) | `tracesSampleRate` | 10% |
 | Edge (middleware) | `tracesSampleRate` | 10% |
 
 ### Session Replay
 
-Le Replay masque **tout le texte** (`maskAllText: true`) et **tous les mÃ©dias** (`blockAllMedia: true`).  
-Cela protÃ¨ge les donnÃ©es personnelles (RGPD) : aucune donnÃ©e sensible n'apparaÃ®t dans le replay.
+Le Replay masque **tout le texte** (`maskAllText: true`) et **tous les médias** (`blockAllMedia: true`).  
+Cela protège les données personnelles (RGPD) : aucune donnée sensible n'apparaît dans le replay.
 
 ---
 
-## Installation depuis zÃ©ro
+## Installation depuis zéro
 
-### 1. CrÃ©er un projet Sentry
+### 1. Créer un projet Sentry
 
-1. Aller sur [sentry.io](https://sentry.io) â†’ CrÃ©er un projet **Next.js**
+1. Aller sur [sentry.io](https://sentry.io) → Créer un projet **Next.js**
 2. Copier le DSN (format `https://xxxxx@xxxxxxx.ingest.sentry.io/xxxxxx`)
 
-### 2. Installer le package (si nÃ©cessaire)
+### 2. Installer le package (si nécessaire)
 
 ```bash
 cd frontend
 npm install @sentry/nextjs
 ```
 
-> Le package est en dÃ©pendance optionnelle â€” les fichiers config utilisent `require()` dynamique
-> protÃ©gÃ© par `try/catch` pour Ã©viter les erreurs si le package n'est pas installÃ©.
+> Le package est en dépendance optionnelle — les fichiers config utilisent `require()` dynamique
+> protégé par `try/catch` pour éviter les erreurs si le package n'est pas installé.
 
 ### 3. Configurer les variables
 
@@ -61,10 +61,10 @@ NEXT_PUBLIC_SENTRY_DSN=https://votre-dsn@o123456.ingest.sentry.io/123456
 NEXT_PUBLIC_ENVIRONMENT=production
 ```
 
-### 4. Configurer next.config.ts (si Sentry Webpack plugin nÃ©cessaire)
+### 4. Configurer next.config.ts (si Sentry Webpack plugin nécessaire)
 
 ```typescript
-// frontend/next.config.ts â€” optionnel pour source maps
+// frontend/next.config.ts — optionnel pour source maps
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig = { ... };
@@ -144,13 +144,13 @@ export async function POST(request: Request) {
 // Dans le provider auth (frontend/src/fournisseurs/fournisseur-auth.tsx)
 import * as Sentry from "@sentry/nextjs";
 
-// AprÃ¨s connexion rÃ©ussie :
+// Après connexion réussie :
 Sentry.setUser({
   id: utilisateur.id,
   email: utilisateur.email,
 });
 
-// Lors de la dÃ©connexion :
+// Lors de la déconnexion :
 Sentry.setUser(null);
 ```
 
@@ -158,32 +158,32 @@ Sentry.setUser(null);
 
 ## Alertes et notifications Sentry
 
-### Configuration recommandÃ©e
+### Configuration recommandée
 
-Dans le dashboard Sentry â†’ Alerts â†’ Create Alert Rule :
+Dans le dashboard Sentry → Alerts → Create Alert Rule :
 
 | Condition | Alerte |
 | ----------- | -------- |
-| Erreur nouvellement dÃ©tectÃ©e | Notification immÃ©diate |
+| Erreur nouvellement détectée | Notification immédiate |
 | >10 occurrences en 1h | Notification critique |
-| Performance dÃ©gradÃ©e (>2s) | Alerte performance |
+| Performance dégradée (>2s) | Alerte performance |
 
 ---
 
-## Mode dÃ©veloppement
+## Mode développement
 
-En dÃ©veloppement (`NEXT_PUBLIC_ENVIRONMENT=development`), dÃ©sactiver les logs de debug :
+En développement (`NEXT_PUBLIC_ENVIRONMENT=development`), désactiver les logs de debug :
 
 ```bash
 # .env.local
-NEXT_PUBLIC_SENTRY_DSN=  # laisser vide pour dÃ©sactiver
+NEXT_PUBLIC_SENTRY_DSN=  # laisser vide pour désactiver
 ```
 
-Ou laisser vide et Sentry sera silencieusement dÃ©sactivÃ© (comportement par dÃ©faut).
+Ou laisser vide et Sentry sera silencieusement désactivé (comportement par défaut).
 
 ---
 
 ## Voir aussi
 
-- [DEPLOYMENT.md](../DEPLOYMENT.md) â€” Variables d'environnement Railway / Vercel
-- [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) â€” DÃ©pannage gÃ©nÃ©ral
+- [DEPLOYMENT.md](../DEPLOYMENT.md) — Variables d'environnement Railway / Vercel
+- [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) — Dépannage général

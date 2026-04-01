@@ -1,110 +1,75 @@
-﻿# 📚 Documentation Index — MaTanne
+# Documentation Index - MaTanne
 
-> **Dernière mise à jour** : 1 avril 2026 — Phase 10 Documentation
+> Derniere mise a jour : 1 avril 2026.
+> Statut : index aligne avec la documentation consolidee de la phase 10 et les mises a jour du planning.
 
 ---
 
 ## Documents principaux
 
-| Document | Description |
-| ---------- | ------------- |
-| [../ANALYSE_COMPLETE.md](../ANALYSE_COMPLETE.md) | **Audit complet** (28 mars 2026) — état réel, bugs, dette tech, plan à long terme |
-| [../PLANNING_IMPLEMENTATION.md](../PLANNING_IMPLEMENTATION.md) | **Planning d'implémentation** — sprints 1-9, tâches détaillées |
-| [../ROADMAP.md](../ROADMAP.md) | **Feuille de route** — priorités moyen/long terme + principes |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Architecture technique (FastAPI + Next.js) |
-| [API_REFERENCE.md](./API_REFERENCE.md) | Référence complète de l'API REST audité pendant la phase 10 |
-| [API_SCHEMAS.md](./API_SCHEMAS.md) | Inventaire auto-généré des schémas Pydantic API |
-| [MODULES.md](./MODULES.md) | Carte des modules : fonctionnalités, routes, services, modèles |
-| [SERVICES_REFERENCE.md](./SERVICES_REFERENCE.md) | Documentation des services backend |
-| [ERD_SCHEMA.md](./ERD_SCHEMA.md) | Schéma entité-relation de la DB (Mermaid) |
-| [DATA_MODEL.md](./DATA_MODEL.md) | Vue fonctionnelle du modèle de données |
-| [EVENT_BUS.md](./EVENT_BUS.md) | Catalogue des événements domaine et subscribers |
-| [SECURITY.md](./SECURITY.md) | Référence sécurité applicative |
-| [PATTERNS.md](./PATTERNS.md) | Patterns de code récurrents (résilience, cache, events) |
-| [UI_COMPONENTS.md](./UI_COMPONENTS.md) | Composants UI Next.js / shadcn |
-| [MONITORING.md](./MONITORING.md) | Monitoring, métriques et observabilité |
-| [ADMIN_RUNBOOK.md](./ADMIN_RUNBOOK.md) | Procédures d'administration: jobs, cache, santé, utilisateurs |
-| [CRON_JOBS.md](./CRON_JOBS.md) | Référence des tâches planifiées APScheduler |
-| [NOTIFICATIONS.md](./NOTIFICATIONS.md) | Canaux, préférences, tests admin et limites actuelles |
-| [INTER_MODULES.md](./INTER_MODULES.md) | Cartographie des flux inter-modules |
-| [AI_SERVICES.md](./AI_SERVICES.md) | Référence des services IA et usages actuels |
-| [WHATSAPP_COMMANDS.md](./WHATSAPP_COMMANDS.md) | Commandes conversationnelles WhatsApp |
-| [PERFORMANCE.md](./PERFORMANCE.md) | Référence performance et capacités |
-| [CHANGELOG_MODULES.md](./CHANGELOG_MODULES.md) | Historique transversal par module |
-| [AUTOMATIONS.md](./AUTOMATIONS.md) | Moteur d'automatisation Si→Alors |
-| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Pannes fréquentes et diagnostics rapides |
-| [DEVELOPER_SETUP.md](./DEVELOPER_SETUP.md) | Installation développeur locale complète |
-| [SQLALCHEMY_SESSION_GUIDE.md](./SQLALCHEMY_SESSION_GUIDE.md) | Guide sessions DB |
-| [DEPLOYMENT.md](./DEPLOYMENT.md) | Guide de déploiement (local, Docker, Railway, Vercel, Supabase) |
-| [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) | Guide migration stack technique + workflow DB |
-| [REDIS_SETUP.md](./REDIS_SETUP.md) | Configuration Redis (optionnel) |
-| [GOOGLE_ASSISTANT_SETUP.md](./GOOGLE_ASSISTANT_SETUP.md) | Intégration Google Assistant (intents, webhook fulfillment, sécurité) |
+| Document | Description | Statut |
+| --- | --- | --- |
+| [../ANALYSE_COMPLETE.md](../ANALYSE_COMPLETE.md) | audit complet et etat reel du projet | reference |
+| [../PLANNING_IMPLEMENTATION.md](../PLANNING_IMPLEMENTATION.md) | plan d'implementation detaille issu de l'analyse | mis a jour |
+| [../ROADMAP.md](../ROADMAP.md) | feuille de route produit et principes | mis a jour |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | architecture FastAPI + Next.js | current |
+| [API_REFERENCE.md](./API_REFERENCE.md) | reference API REST | current |
+| [API_SCHEMAS.md](./API_SCHEMAS.md) | inventaire des schemas Pydantic | current |
+| [MODULES.md](./MODULES.md) | carte des modules et perimetres | current |
+| [SERVICES_REFERENCE.md](./SERVICES_REFERENCE.md) | reference des services backend | current |
+| [ERD_SCHEMA.md](./ERD_SCHEMA.md) | schema entite-relation | current |
+| [DATA_MODEL.md](./DATA_MODEL.md) | vue fonctionnelle du modele de donnees | current |
+| [EVENT_BUS.md](./EVENT_BUS.md) | catalogue des evenements domaine et subscribers | mis a jour 2026-04-01 |
+| [SECURITY.md](./SECURITY.md) | securite applicative | current |
+| [PATTERNS.md](./PATTERNS.md) | patterns backend et frontend recurrents | current |
+| [UI_COMPONENTS.md](./UI_COMPONENTS.md) | composants UI Next.js et shadcn | current |
+| [MONITORING.md](./MONITORING.md) | monitoring et observabilite | current |
+| [ADMIN_RUNBOOK.md](./ADMIN_RUNBOOK.md) | procedures d'administration et endpoints | mis a jour 2026-04-01 |
+| [CRON_JOBS.md](./CRON_JOBS.md) | reference APScheduler et historique d'execution | mis a jour 2026-04-01 |
+| [NOTIFICATIONS.md](./NOTIFICATIONS.md) | canaux, preferences, failover et limites | mis a jour 2026-04-01 |
+| [INTER_MODULES.md](./INTER_MODULES.md) | cartographie des flux inter-modules | mis a jour 2026-04-01 |
+| [AI_SERVICES.md](./AI_SERVICES.md) | reference des services IA | current |
+| [WHATSAPP_COMMANDS.md](./WHATSAPP_COMMANDS.md) | commandes conversationnelles WhatsApp | current |
+| [PERFORMANCE.md](./PERFORMANCE.md) | performance et capacite | current |
+| [CHANGELOG_MODULES.md](./CHANGELOG_MODULES.md) | historique transversal par phase, sprint et domaine | mis a jour 2026-04-01 |
+| [AUTOMATIONS.md](./AUTOMATIONS.md) | moteur Si Alors, triggers, actions et API | mis a jour 2026-04-01 |
+| [TESTING.md](./TESTING.md) | guide unifie backend, frontend, E2E, contrat et charge | nouveau 2026-04-01 |
+| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | diagnostics rapides et pannes frequentes | current |
+| [DEVELOPER_SETUP.md](./DEVELOPER_SETUP.md) | installation developpeur locale | current |
+| [SQLALCHEMY_SESSION_GUIDE.md](./SQLALCHEMY_SESSION_GUIDE.md) | guide sessions base de donnees | current |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | deploiement local, Docker, Railway, Vercel, Supabase | current |
+| [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) | migrations stack et workflow DB | current |
+| [REDIS_SETUP.md](./REDIS_SETUP.md) | configuration Redis optionnelle | current |
+| [GOOGLE_ASSISTANT_SETUP.md](./GOOGLE_ASSISTANT_SETUP.md) | integration Google Assistant | current |
 
 ## Guides par module
 
 | Guide | Module | Description |
-| ------- | -------- | ------------- |
-| [guides/cuisine/README.md](./guides/cuisine/README.md) | Cuisine | Recettes, planning repas, courses, inventaire, batch cooking, anti-gaspillage |
-| [guides/famille/README.md](./guides/famille/README.md) | Famille | Jules, activités, routines, budget, weekend |
-| [guides/maison/README.md](./guides/maison/README.md) | Maison | Projets, entretien, jardin, énergie, stocks |
-| [guides/planning/README.md](./guides/planning/README.md) | Planning | Hub planning, timeline, calendriers |
-| [guides/jeux/README.md](./guides/jeux/README.md) | Jeux | Paris sportifs, Loto, EuroMillions |
-| [guides/outils/README.md](./guides/outils/README.md) | Outils | Chat IA, météo, convertisseur, minuteur, notes |
-| [guides/dashboard/README.md](./guides/dashboard/README.md) | Dashboard | Tableau de bord, métriques agrégées |
-| [guides/utilitaires/README.md](./guides/utilitaires/README.md) | Utilitaires | Scanner codes-barres, commandes vocales |
-| [guides/RECIPE_FLOW.md](./guides/RECIPE_FLOW.md) | Guide utilisateur | Flux recette de bout en bout |
-| [guides/FAMILY_FLOW.md](./guides/FAMILY_FLOW.md) | Guide utilisateur | Flux famille de bout en bout |
+| --- | --- | --- |
+| [guides/cuisine/README.md](./guides/cuisine/README.md) | Cuisine | recettes, planning repas, courses, inventaire, batch cooking, anti-gaspillage |
+| [guides/famille/README.md](./guides/famille/README.md) | Famille | Jules, activites, routines, budget, weekend |
+| [guides/maison/README.md](./guides/maison/README.md) | Maison | projets, entretien, jardin, energie, stocks |
+| [guides/planning/README.md](./guides/planning/README.md) | Planning | hub planning, timeline, calendriers |
+| [guides/jeux/README.md](./guides/jeux/README.md) | Jeux | paris sportifs, loto, Euromillions |
+| [guides/outils/README.md](./guides/outils/README.md) | Outils | chat IA, meteo, convertisseur, minuteur, notes |
+| [guides/dashboard/README.md](./guides/dashboard/README.md) | Dashboard | tableau de bord et metriques agregees |
+| [guides/utilitaires/README.md](./guides/utilitaires/README.md) | Utilitaires | scanner codes-barres, commandes vocales |
+| [guides/RECIPE_FLOW.md](./guides/RECIPE_FLOW.md) | Guide utilisateur | flux recette de bout en bout |
+| [guides/FAMILY_FLOW.md](./guides/FAMILY_FLOW.md) | Guide utilisateur | flux famille de bout en bout |
 
-## Structure
+## References a consulter en priorite
 
-```
-docs/
-├── INDEX.md                     ← Vous êtes ici
-├── ARCHITECTURE.md              ← Architecture technique
-├── API_REFERENCE.md             ← Documentation API REST
-├── MODULES.md                   ← Carte des modules
-├── SERVICES_REFERENCE.md        ← Documentation Services
-├── ERD_SCHEMA.md                ← Schéma ERD
-├── PATTERNS.md                  ← Patterns de code
-├── UI_COMPONENTS.md             ← Composants UI Next.js
-├── ADMIN_RUNBOOK.md             ← Opérations admin
-├── CRON_JOBS.md                 ← Référence jobs planifiés
-├── NOTIFICATIONS.md             ← Système de notifications
-├── INTER_MODULES.md             ← Interactions cross-module
-├── AI_SERVICES.md               ← Services IA
-├── AUTOMATIONS.md               ← Automations Si→Alors
-├── TROUBLESHOOTING.md           ← Diagnostic rapide
-├── DEVELOPER_SETUP.md           ← Setup développeur
-├── SQLALCHEMY_SESSION_GUIDE.md  ← Guide sessions DB
-├── DEPLOYMENT.md                ← Guide déploiement
-├── MIGRATION_GUIDE.md           ← Guide migration stack + workflow DB
-├── REDIS_SETUP.md               ← Setup Redis
-├── GOOGLE_ASSISTANT_SETUP.md    ← Setup Google Assistant
-└── guides/
-    ├── cuisine/README.md        ← Cuisine complet
-    ├── famille/README.md        ← Famille complet
-    ├── maison/README.md         ← Maison complet
-    ├── planning/README.md       ← Planning complet
-    ├── jeux/README.md           ← Jeux complet
-    ├── outils/README.md         ← Outils complet
-    ├── dashboard/README.md      ← Dashboard
-    └── utilitaires/
-        ├── README.md            ← Hub utilitaires
-        ├── barcode.md           ← Scan code-barres
-        └── vocal.md             ← Commandes vocales
-```
+1. [../ANALYSE_COMPLETE.md](../ANALYSE_COMPLETE.md) pour l'etat reel et les constats.
+2. [../PLANNING_IMPLEMENTATION.md](../PLANNING_IMPLEMENTATION.md) pour l'ordre d'execution et les statuts.
+3. [CRON_JOBS.md](./CRON_JOBS.md), [NOTIFICATIONS.md](./NOTIFICATIONS.md), [ADMIN_RUNBOOK.md](./ADMIN_RUNBOOK.md), [INTER_MODULES.md](./INTER_MODULES.md), [EVENT_BUS.md](./EVENT_BUS.md) pour les couches transverses.
+4. [TESTING.md](./TESTING.md) pour la verification locale et la couverture de tests.
 
-## Démarrage rapide
+## Demarrage rapide
 
 ```bash
-# Backend FastAPI
-python manage.py run              # http://localhost:8000
-
-# Frontend Next.js
-cd frontend && npm run dev        # http://localhost:3000
-
-# Tests
-python manage.py test_coverage    # Backend (pytest)
-cd frontend && npm test           # Frontend (Vitest)
+python manage.py run
+cd frontend && npm run dev
+python manage.py test_coverage
+cd frontend && npm test
 ```
 

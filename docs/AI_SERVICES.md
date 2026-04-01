@@ -1,6 +1,6 @@
-﻿# AI Services
+# AI Services
 
-> RÃ©fÃ©rence des services IA, de leurs usages actuels et des garde-fous communs.
+> Référence des services IA, de leurs usages actuels et des garde-fous communs.
 
 ---
 
@@ -10,42 +10,42 @@ La brique IA du projet repose sur:
 
 - client IA: `src/core/ai/`
 - base commune: `src/services/core/base/`
-- limitation de dÃ©bit et cache sÃ©mantique intÃ©grÃ©s
-- parsing structurÃ© des rÃ©ponses via Pydantic
+- limitation de débit et cache sémantique intégrés
+- parsing structuré des réponses via Pydantic
 
-CapacitÃ©s transverses fournies par `BaseAIService`:
+Capacités transverses fournies par `BaseAIService`:
 
-- appels synchrones et structurÃ©s
-- cache sÃ©mantique
-- parsing JSON / liste / modÃ¨le Pydantic
+- appels synchrones et structurés
+- cache sémantique
+- parsing JSON / liste / modèle Pydantic
 - gestion d'erreur et fallback
-- pilotage uniforme des prompts systÃ¨me
+- pilotage uniforme des prompts système
 
 ---
 
-## Services IA identifiÃ©s
+## Services IA identifiés
 
-| Domaine | Service | RÃ´le principal |
+| Domaine | Service | Rôle principal |
 | --------- | --------- | ---------------- |
 | Cuisine | `ServiceSuggestions` | suggestions recettes et planning |
-| Cuisine | `ServicePredictionCourses` | prÃ©diction d'achats |
-| Cuisine | `ServicePredictionPeremption` | prÃ©diction / priorisation pÃ©remption |
-| Famille | `JulesAIService` | dÃ©veloppement enfant |
-| Famille | `WeekendAIService` | idÃ©es weekend |
-| Famille | `SoireeAIService` | suggestions de soirÃ©e |
+| Cuisine | `ServicePredictionCourses` | prédiction d'achats |
+| Cuisine | `ServicePredictionPeremption` | prédiction / priorisation péremption |
+| Famille | `JulesAIService` | développement enfant |
+| Famille | `WeekendAIService` | idées weekend |
+| Famille | `SoireeAIService` | suggestions de soirée |
 | Famille | `AchatsIAService` | suggestions d'achats famille |
-| Dashboard | `ResumeFamilleIAService` | rÃ©sumÃ© hebdomadaire |
-| Dashboard | `ServiceAnomaliesFinancieres` | anomalies budgÃ©taires |
-| Jeux | `JeuxAIService` | analyses paris et opportunitÃ©s |
-| Maison | services projets / jardin / conseiller | conseils et enrichissement ciblÃ© |
+| Dashboard | `ResumeFamilleIAService` | résumé hebdomadaire |
+| Dashboard | `ServiceAnomaliesFinancieres` | anomalies budgétaires |
+| Jeux | `JeuxAIService` | analyses paris et opportunités |
+| Maison | services projets / jardin / conseiller | conseils et enrichissement ciblé |
 | Outils | `ChatAIService` | chat conversationnel multi-contexte |
-| IntÃ©grations | `MultiModalAIService` | OCR, analyse image, multimodal |
+| Intégrations | `MultiModalAIService` | OCR, analyse image, multimodal |
 
 ---
 
 ## Chat IA multi-contexte
 
-Le chat IA de `src/services/utilitaires/chat_ai.py` gÃ¨re actuellement les contextes:
+Le chat IA de `src/services/utilitaires/chat_ai.py` gère actuellement les contextes:
 
 - `cuisine`
 - `famille`
@@ -56,31 +56,31 @@ Le chat IA de `src/services/utilitaires/chat_ai.py` gÃ¨re actuellement les con
 
 Objectif actuel du service:
 
-- rÃ©ponses contextualisÃ©es par domaine
-- mÃ©moire courte de conversation
-- actions rapides et ton adaptÃ© au contexte
+- réponses contextualisées par domaine
+- mémoire courte de conversation
+- actions rapides et ton adapté au contexte
 
 ---
 
 ## Bonnes pratiques projet
 
 - toujours utiliser les abstractions du package `src/core/ai`
-- prÃ©fÃ©rer les sorties structurÃ©es Pydantic quand la rÃ©ponse nourrit une logique mÃ©tier
-- limiter les appels coÃ»teux via cache et rate limiting
-- Ã©viter les prompts non bornÃ©s cÃ´tÃ© route API
-- journaliser les dÃ©gradations sans faire Ã©chouer tout le flux utilisateur si l'IA est un enrichissement non bloquant
+- préférer les sorties structurées Pydantic quand la réponse nourrit une logique métier
+- limiter les appels coûteux via cache et rate limiting
+- éviter les prompts non bornés côté route API
+- journaliser les dégradations sans faire échouer tout le flux utilisateur si l'IA est un enrichissement non bloquant
 
 ---
 
-## Limites et points Ã  surveiller
+## Limites et points à surveiller
 
-- certaines fonctionnalitÃ©s restent encore rule-based et non enrichies par IA
-- le chat multi-module peut encore Ãªtre enrichi avec plus de contexte inter-modules
-- certains services mÃ©tier utilisent l'IA comme enrichissement, pas comme source de vÃ©ritÃ©
+- certaines fonctionnalités restent encore rule-based et non enrichies par IA
+- le chat multi-module peut encore être enrichi avec plus de contexte inter-modules
+- certains services métier utilisent l'IA comme enrichissement, pas comme source de vérité
 
 ---
 
-## RÃ©fÃ©rences associÃ©es
+## Références associées
 
 - `docs/ARCHITECTURE.md`
 - `docs/INTER_MODULES.md`

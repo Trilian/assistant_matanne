@@ -1,14 +1,14 @@
-﻿# ðŸ¡ Guide Module Maison
+# ?? Guide Module Maison
 
-> Ce guide couvre la gestion complÃ¨te de la maison dans MaTanne : projets, entretien, jardin, Ã©nergie, artisans, stocks, contrats, diagnostics.
+> Ce guide couvre la gestion compl�te de la maison dans MaTanne : projets, entretien, jardin, �nergie, artisans, stocks, contrats, diagnostics.
 
-## Table des matiÃ¨res
+## Table des mati�res
 
 1. [Vue d'ensemble](#vue-densemble)
 2. [Projets](#projets)
 3. [Entretien & Maintenance](#entretien--maintenance)
 4. [Jardin](#jardin)
-5. [Ã‰nergie](#Ã©nergie)
+5. [�nergie](#�nergie)
 6. [Artisans](#artisans)
 7. [Stocks & Cellier](#stocks--cellier)
 8. [Contrats & Garanties](#contrats--garanties)
@@ -25,25 +25,25 @@ Le module **Maison** centralise tout ce qui concerne la gestion physique et admi
 **Service backend** : `src/services/maison/`
 **Route API** : `src/api/routes/maison.py` (`/api/v1/maison`)
 
-### CapacitÃ©s rÃ©centes Ã  connaÃ®tre
+### Capacit�s r�centes � conna�tre
 
-- notifications maison et rappels pÃ©riodiques
-- rapport maison mensuel planifiÃ©
-- gestion avancÃ©e des contrats, garanties, diagnostics, meubles et relevÃ©s
+- notifications maison et rappels p�riodiques
+- rapport maison mensuel planifi�
+- gestion avanc�e des contrats, garanties, diagnostics, meubles et relev�s
 - vue de contexte maison et catalogue d'entretien enrichi
 
 ---
 
 ## Projets
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- CrÃ©er et suivre des projets de travaux (rÃ©novation, amÃ©nagement)
-- Suivre l'avancement (statuts : `planifiÃ©`, `en_cours`, `terminÃ©`, `annulÃ©`)
+- Cr�er et suivre des projets de travaux (r�novation, am�nagement)
+- Suivre l'avancement (statuts : `planifi�`, `en_cours`, `termin�`, `annul�`)
 - Calculer la ROI des investissements
-- Suggestions IA pour planifier les travaux (prioritÃ©, budget, timing)
+- Suggestions IA pour planifier les travaux (priorit�, budget, timing)
 - Visualiser l'impact sur la valeur du bien
-- synthÃ¨se maison mensuelle via job dÃ©diÃ©
+- synth�se maison mensuelle via job d�di�
 
 ### Usage
 
@@ -51,17 +51,17 @@ Le module **Maison** centralise tout ce qui concerne la gestion physique et admi
 /maison/projets
 ```
 
-### Champs clÃ©s
+### Champs cl�s
 
 | Champ           | Type     | Description                        |
 | ---------------- | ---------- | ------------------------------------ |
 | `nom`           | string   | Nom du projet                      |
-| `statut`        | enum     | `planifiÃ©` / `en_cours` / `terminÃ©` |
-| `budget_estime` | decimal  | Budget prÃ©visionnel                |
-| `budget_reel`   | decimal  | CoÃ»t rÃ©el                          |
-| `date_debut`    | date     | Date de dÃ©marrage                  |
-| `date_fin`      | date     | Date de fin prÃ©vue/rÃ©elle          |
-| `priorite`      | 1-5      | Niveau de prioritÃ©                 |
+| `statut`        | enum     | `planifi�` / `en_cours` / `termin�` |
+| `budget_estime` | decimal  | Budget pr�visionnel                |
+| `budget_reel`   | decimal  | Co�t r�el                          |
+| `date_debut`    | date     | Date de d�marrage                  |
+| `date_fin`      | date     | Date de fin pr�vue/r�elle          |
+| `priorite`      | 1-5      | Niveau de priorit�                 |
 
 ### Services
 
@@ -79,13 +79,13 @@ suggestions = service.suggerer_projets_ia(budget=5000)
 
 ## Entretien & Maintenance
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Calendrier des tÃ¢ches d'entretien rÃ©currentes (chaudiÃ¨re, VMC, gouttiÃ¨resâ€¦)
-- Alertes pour les tÃ¢ches en retard ou Ã  venir
+- Calendrier des t�ches d'entretien r�currentes (chaudi�re, VMC, goutti�res�)
+- Alertes pour les t�ches en retard ou � venir
 - Historique des interventions
-- Catalogue de tÃ¢ches prÃ©remplies avec frÃ©quences recommandÃ©es
-- intÃ©gration avec les jobs d'entretien et de contrÃ´le de garanties
+- Catalogue de t�ches pr�remplies avec fr�quences recommand�es
+- int�gration avec les jobs d'entretien et de contr�le de garanties
 
 ### Usage
 
@@ -93,9 +93,9 @@ suggestions = service.suggerer_projets_ia(budget=5000)
 /maison/entretien
 ```
 
-### Catalogue des tÃ¢ches types
+### Catalogue des t�ches types
 
-Le fichier `data/reference/entretien_catalogue.json` contient 50+ tÃ¢ches d'entretien classiques avec frÃ©quences suggÃ©rÃ©es.
+Le fichier `data/reference/entretien_catalogue.json` contient 50+ t�ches d'entretien classiques avec fr�quences sugg�r�es.
 
 ```python
 from src.services.maison.entretien_service import EntretienService
@@ -107,14 +107,14 @@ taches_urgentes = service.get_taches_urgentes(horizon_jours=30)
 
 ## Jardin
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Catalogue de plantes avec fiches dÃ©taillÃ©es (arrosage, ensoleillement, saison)
-- Planning d'arrosage dynamique (ajustÃ© par mÃ©tÃ©o en temps rÃ©el)
-- Journal des semis et rÃ©coltes
-- Conseils IA saisonniers basÃ©s sur la mÃ©tÃ©o locale
+- Catalogue de plantes avec fiches d�taill�es (arrosage, ensoleillement, saison)
+- Planning d'arrosage dynamique (ajust� par m�t�o en temps r�el)
+- Journal des semis et r�coltes
+- Conseils IA saisonniers bas�s sur la m�t�o locale
 - Gestion des espaces (potager, massifs, pelouse)
-- rapport jardin hebdomadaire cÃ´tÃ© cron
+- rapport jardin hebdomadaire c�t� cron
 
 ### Usage
 
@@ -122,10 +122,10 @@ taches_urgentes = service.get_taches_urgentes(horizon_jours=30)
 /maison/jardin
 ```
 
-### IntÃ©grations
+### Int�grations
 
-- **MÃ©tÃ©o** : `src/services/integrations/weather/` â€” ajustement automatique des arrosages
-- **Catalogue plantes** : `data/reference/plantes_catalogue.json` â€” 200+ espÃ¨ces documentÃ©es
+- **M�t�o** : `src/services/integrations/weather/` � ajustement automatique des arrosages
+- **Catalogue plantes** : `data/reference/plantes_catalogue.json` � 200+ esp�ces document�es
 
 ### Services
 
@@ -140,15 +140,15 @@ conseils = service.obtenir_conseils_ia(saison="printemps")
 
 ---
 
-## Ã‰nergie
+## �nergie
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Saisie et suivi des index de consommation (Ã©lectricitÃ©, gaz, eau)
+- Saisie et suivi des index de consommation (�lectricit�, gaz, eau)
 - Graphiques de consommation mensuelle/annuelle
-- Comparaison avec les pÃ©riodes prÃ©cÃ©dentes
-- Eco-tips personnalisÃ©s pour rÃ©duire la consommation
-- zone encore prÃ©vue pour les anomalies IA de consommation
+- Comparaison avec les p�riodes pr�c�dentes
+- Eco-tips personnalis�s pour r�duire la consommation
+- zone encore pr�vue pour les anomalies IA de consommation
 
 ### Usage
 
@@ -157,7 +157,7 @@ conseils = service.obtenir_conseils_ia(saison="printemps")
 `/maison/eco-tips
 ```
 
-### ModÃ¨le de donnÃ©es
+### Mod�le de donn�es
 
 ```python
 # src/core/models/habitat.py
@@ -165,19 +165,19 @@ class ReleveEnergie(Base):
     type_energie: str       # "electricite" | "gaz" | "eau"
     index_valeur: float     # Valeur du compteur
     date_releve: date
-    consommation: float     # (index actuel - index prÃ©cÃ©dent)
+    consommation: float     # (index actuel - index pr�c�dent)
 ```
 
 ---
 
 ## Artisans
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Carnet d'adresses des artisans (plombier, Ã©lectricien, maÃ§onâ€¦)
-- Notes et Ã©valuations aprÃ¨s intervention
+- Carnet d'adresses des artisans (plombier, �lectricien, ma�on�)
+- Notes et �valuations apr�s intervention
 - Historique des interventions par artisan
-- Devis et factures associÃ©s
+- Devis et factures associ�s
 
 ### Usage
 
@@ -189,12 +189,12 @@ class ReleveEnergie(Base):
 
 ## Stocks & Cellier
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Inventaire des consommables maison (produits d'entretien, ampoules, filtresâ€¦)
-- Gestion des quantitÃ©s et seuils d'alerte
+- Inventaire des consommables maison (produits d'entretien, ampoules, filtres�)
+- Gestion des quantit�s et seuils d'alerte
 - Historique des achats
-- IntÃ©gration avec les listes de courses
+- Int�gration avec les listes de courses
 
 ### Usage
 
@@ -207,12 +207,12 @@ class ReleveEnergie(Base):
 
 ## Contrats & Garanties
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Archivage des contrats (assurance, Ã©nergie, internet, abonnements)
-- Dates d'Ã©chÃ©ance avec alertes de renouvellement J-30
-- Garanties Ã©quipements avec dates d'expiration
-- Export PDF des rÃ©capitulatifs
+- Archivage des contrats (assurance, �nergie, internet, abonnements)
+- Dates d'�ch�ance avec alertes de renouvellement J-30
+- Garanties �quipements avec dates d'expiration
+- Export PDF des r�capitulatifs
 
 ### Usage
 
@@ -225,11 +225,11 @@ class ReleveEnergie(Base):
 
 ## Diagnostics
 
-### FonctionnalitÃ©s
+### Fonctionnalit�s
 
-- Suivi des diagnostics immobiliers (DPE, amiante, plomb, Ã©lectricitÃ©â€¦)
-- Dates de validitÃ© et alertes d'expiration
-- Documents associÃ©s
+- Suivi des diagnostics immobiliers (DPE, amiante, plomb, �lectricit�)
+- Dates de validit� et alertes d'expiration
+- Documents associ�s
 
 ### Usage
 
@@ -243,17 +243,17 @@ class ReleveEnergie(Base):
 
 ### Endpoints principaux
 
-| MÃ©thode | URL                             | Description                    |
+| M�thode | URL                             | Description                    |
 | -------- | --------------------------------- | -------------------------------- |
 | GET    | `/api/v1/maison/projets`        | Lister les projets             |
-| POST   | `/api/v1/maison/projets`        | CrÃ©er un projet                |
+| POST   | `/api/v1/maison/projets`        | Cr�er un projet                |
 | PUT    | `/api/v1/maison/projets/{id}`   | Modifier un projet             |
-| GET    | `/api/v1/maison/entretien`      | TÃ¢ches d'entretien             |
-| POST   | `/api/v1/maison/entretien`      | Ajouter une tÃ¢che              |
+| GET    | `/api/v1/maison/entretien`      | T�ches d'entretien             |
+| POST   | `/api/v1/maison/entretien`      | Ajouter une t�che              |
 | GET    | `/api/v1/maison/jardin/plantes` | Liste des plantes du jardin    |
-| GET    | `/api/v1/maison/energie`        | RelevÃ©s d'Ã©nergie              |
-| POST   | `/api/v1/maison/energie`        | Nouveau relevÃ©                 |
+| GET    | `/api/v1/maison/energie`        | Relev�s d'�nergie              |
+| POST   | `/api/v1/maison/energie`        | Nouveau relev�                 |
 | GET    | `/api/v1/maison/artisans`       | Liste des artisans             |
 | GET    | `/api/v1/maison/contrats`       | Contrats en cours              |
 
-Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation complÃ¨te.
+Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation compl�te.

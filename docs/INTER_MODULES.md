@@ -1,21 +1,21 @@
 # Interactions Inter-Modules
 
-> Cartographie complète des 21+ bridges en production, mécanismes de couplage et guide de création.
+> Cartographie compl�te des 21+ bridges en production, m�canismes de couplage et guide de cr�ation.
 >
-> **Dernière mise à jour** : 1er avril 2026
+> **Derni�re mise � jour** : 1er avril 2026
 
 ---
 
-## Mécanismes utilisés
+## M�canismes utilis�s
 
 Les interactions cross-module reposent sur :
 
-| Mécanisme | Localisation | Usage |
+| M�canisme | Localisation | Usage |
 | ----------- | ------------- | ------- |
-| **Services inter-module** | `src/services/{module}/inter_module_*.py` | Logique métier cross-module |
-| **Bus d'événements** | `src/services/core/events/` | Découplage pub/sub réactif |
-| **Jobs planifiés** | `src/services/core/cron/jobs.py` | Synchronisations périodiques |
-| **Agrégations dashboard** | `src/services/dashboard/` | Données consolidées multi-modules |
+| **Services inter-module** | `src/services/{module}/inter_module_*.py` | Logique m�tier cross-module |
+| **Bus d'�v�nements** | `src/services/core/events/` | D�couplage pub/sub r�actif |
+| **Jobs planifi�s** | `src/services/core/cron/jobs.py` | Synchronisations p�riodiques |
+| **Agr�gations dashboard** | `src/services/dashboard/` | Donn�es consolid�es multi-modules |
 | **Dispatcher notifications** | `src/services/core/notifications/` | Notifications cross-module |
 
 ---
@@ -24,67 +24,67 @@ Les interactions cross-module reposent sur :
 
 ### Cuisine (7 bridges)
 
-| Bridge | Source → Destination | Méthodes clés |
+| Bridge | Source ? Destination | M�thodes cl�s |
 | -------- | --------------------- | --------------- |
-| `inter_module_inventaire_planning.py` | Inventaire → Planning recettes | `suggerer_recettes_selon_stock()`, `exclure_articles_surplus()`, `blocker_batch_jours()`, `analyser_equilibre_nutritionnel()`, `filtrer_recettes_mal_notees()` |
-| `inter_module_jules_nutrition.py` | Croissance Jules → Portions planning | `adapter_planning_nutrition_selon_croissance()`, `adapter_portions_recettes_planifiees()` |
-| `inter_module_saison_menu.py` | Saisonnalité → Planning IA | `obtenir_contexte_saisonnier_planning()` |
-| `inter_module_courses_budget.py` | Total courses → Budget alimentation | `synchroniser_total_courses_vers_budget()`, `estimer_budget_courses_mensuel()` |
-| `inter_module_batch_inventaire.py` | Batch cooking terminé → Déduction stock | `deduire_ingredients_session_terminee()` |
-| `inter_module_peremption_recettes.py` | Péremption → Suggestions anti-gaspillage | Déclenche suggestions IA pour produits expirants |
-| `inter_module_jardin_recettes.py` | Récolte jardin → Recettes semaine suivante | `suggerer_recettes_depuis_recolte()` |
+| `inter_module_inventaire_planning.py` | Inventaire ? Planning recettes | `suggerer_recettes_selon_stock()`, `exclure_articles_surplus()`, `blocker_batch_jours()`, `analyser_equilibre_nutritionnel()`, `filtrer_recettes_mal_notees()` |
+| `inter_module_jules_nutrition.py` | Croissance Jules ? Portions planning | `adapter_planning_nutrition_selon_croissance()`, `adapter_portions_recettes_planifiees()` |
+| `inter_module_saison_menu.py` | Saisonnalit� ? Planning IA | `obtenir_contexte_saisonnier_planning()` |
+| `inter_module_courses_budget.py` | Total courses ? Budget alimentation | `synchroniser_total_courses_vers_budget()`, `estimer_budget_courses_mensuel()` |
+| `inter_module_batch_inventaire.py` | Batch cooking termin� ? D�duction stock | `deduire_ingredients_session_terminee()` |
+| `inter_module_peremption_recettes.py` | P�remption ? Suggestions anti-gaspillage | D�clenche suggestions IA pour produits expirants |
+| `inter_module_jardin_recettes.py` | R�colte jardin ? Recettes semaine suivante | `suggerer_recettes_depuis_recolte()` |
 
 ### Famille (6 bridges)
 
-| Bridge | Source → Destination | Méthodes clés |
+| Bridge | Source ? Destination | M�thodes cl�s |
 | -------- | --------------------- | --------------- |
-| `inter_module_meteo_activites.py` | Météo → Activités famille | `suggerer_activites_selon_meteo()` (pluie = intérieur, soleil = extérieur) |
-| `inter_module_weekend_courses.py` | Activités weekend → Courses | `suggerer_fournitures_weekend()` (matériel rando, pique-nique) |
-| `inter_module_documents_calendrier.py` | Documents expirants → Calendrier | `synchroniser_documents_vers_calendrier()` (rappel J-14) |
-| `inter_module_budget_anomalie.py` | Anomalie budget → Notifications | `detecter_et_notifier_anomalies()` (seuil: +30% vs mois précédent) |
-| `inter_module_anniversaires_budget.py` | Anniversaire J-14 → Budget prévisionnel | `reserver_budget_previsionnel_j14()` |
-| `inter_module_voyages_budget.py` | Voyages → Budget sync | Sync dépenses voyage vers budget |
+| `inter_module_meteo_activites.py` | M�t�o ? Activit�s famille | `suggerer_activites_selon_meteo()` (pluie = int�rieur, soleil = ext�rieur) |
+| `inter_module_weekend_courses.py` | Activit�s weekend ? Courses | `suggerer_fournitures_weekend()` (mat�riel rando, pique-nique) |
+| `inter_module_documents_calendrier.py` | Documents expirants ? Calendrier | `synchroniser_documents_vers_calendrier()` (rappel J-14) |
+| `inter_module_budget_anomalie.py` | Anomalie budget ? Notifications | `detecter_et_notifier_anomalies()` (seuil: +30% vs mois pr�c�dent) |
+| `inter_module_anniversaires_budget.py` | Anniversaire J-14 ? Budget pr�visionnel | `reserver_budget_previsionnel_j14()` |
+| `inter_module_voyages_budget.py` | Voyages ? Budget sync | Sync d�penses voyage vers budget |
 
 ### Maison (3 bridges)
 
-| Bridge | Source → Destination | Méthodes clés |
+| Bridge | Source ? Destination | M�thodes cl�s |
 | -------- | --------------------- | --------------- |
-| `inter_module_entretien_courses.py` | Tâches entretien → Courses | `suggerer_produits_entretien_pour_courses()` (produits ménagers) |
-| `inter_module_charges_energie.py` | Anomalie charges → Analyse énergie | `detecter_hausse_et_declencher_analyse()` (seuil: +20% vs mois précédent) |
-| `inter_module_jardin_entretien.py` | Saison jardin → Entretien auto | `generer_taches_saisonnieres_depuis_plantes()` |
+| `inter_module_entretien_courses.py` | T�ches entretien ? Courses | `suggerer_produits_entretien_pour_courses()` (produits m�nagers) |
+| `inter_module_charges_energie.py` | Anomalie charges ? Analyse �nergie | `detecter_hausse_et_declencher_analyse()` (seuil: +20% vs mois pr�c�dent) |
+| `inter_module_jardin_entretien.py` | Saison jardin ? Entretien auto | `generer_taches_saisonnieres_depuis_plantes()` |
 
 ### Cross-module (2 bridges)
 
-| Bridge | Source → Destination | Méthodes clés |
+| Bridge | Source ? Destination | M�thodes cl�s |
 | -------- | --------------------- | --------------- |
-| `inter_module_chat_contexte.py` | Multi-module → Chat IA | `collecter_contexte_complet()` (frigo, planning, courses, budget, anniversaires, documents, tâches) |
-| `inter_module_diagnostics_ia.py` | Photo → Diagnostic IA → Artisans | `diagnostiquer_panne_photo()`, `creer_projet_maison_depuis_diagnostic()` |
+| `inter_module_chat_contexte.py` | Multi-module ? Chat IA | `collecter_contexte_complet()` (frigo, planning, courses, budget, anniversaires, documents, t�ches) |
+| `inter_module_diagnostics_ia.py` | Photo ? Diagnostic IA ? Artisans | `diagnostiquer_panne_photo()`, `creer_projet_maison_depuis_diagnostic()` |
 
 ### Interactions via jobs CRON
 
-| Job | Source → Destination |
+| Job | Source ? Destination |
 | ----- | --------------------- |
-| `sync_recoltes_inventaire` | Récoltes jardin → Inventaire cuisine |
-| `sync_jeux_budget` | Gains/pertes jeux → Budget famille |
-| `sync_entretien_budget` | Coûts entretien → Dépenses |
-| `sync_charges_dashboard` | Charges fixes → Métriques dashboard |
-| `suggestions_activites_meteo` | Météo → Activités |
-| `sync_routines_planning` | Routines → Planning quotidien |
+| `sync_recoltes_inventaire` | R�coltes jardin ? Inventaire cuisine |
+| `sync_jeux_budget` | Gains/pertes jeux ? Budget famille |
+| `sync_entretien_budget` | Co�ts entretien ? D�penses |
+| `sync_charges_dashboard` | Charges fixes ? M�triques dashboard |
+| `suggestions_activites_meteo` | M�t�o ? Activit�s |
+| `sync_routines_planning` | Routines ? Planning quotidien |
 
 ### Interactions via event bus
 
-| Événement | Réaction |
+| �v�nement | R�action |
 | ----------- | ---------- |
 | `jardin.recolte` | Invalidation cache recettes/planning/suggestions |
-| `energie.anomalie` | Création tâche entretien |
+| `energie.anomalie` | Cr�ation t�che entretien |
 | `budget.depassement` | Invalidation dashboard + agent proactif |
 | `document.echeance_proche` | Notification ntfy/push |
-| `batch_cooking.termine` | Déduction stock + notification |
+| `batch_cooking.termine` | D�duction stock + notification |
 | `stock.modifie` | Invalidation cache courses |
 
 ---
 
-## Observabilité des bridges
+## Observabilit� des bridges
 
 ### Endpoint admin de statut
 
@@ -92,7 +92,7 @@ Les interactions cross-module reposent sur :
 GET /api/v1/admin/bridges/phase5/status?inclure_smoke=true
 ```
 
-Retourne par bridge : `id`, `bridge`, `intitulé`, `vérification`, `statut`, `latence_ms`, `détails`.
+Retourne par bridge : `id`, `bridge`, `intitul�`, `v�rification`, `statut`, `latence_ms`, `d�tails`.
 
 ### Event bus inspection
 
@@ -113,9 +113,9 @@ POST /api/v1/admin/events/trigger
 
 ---
 
-## Guide de création d'un nouveau bridge
+## Guide de cr�ation d'un nouveau bridge
 
-### Pattern 1 : Service inter-module avec événement
+### Pattern 1 : Service inter-module avec �v�nement
 
 ```python
 # src/services/{module}/inter_module_{source}_{dest}.py
@@ -144,7 +144,7 @@ def obtenir_service_source_dest():
     return SourceDestInteractionService()
 ```
 
-### Pattern 2 : Subscriber réactif via event bus
+### Pattern 2 : Subscriber r�actif via event bus
 
 ```python
 # Dans src/services/core/events/subscribers.py
@@ -158,7 +158,7 @@ def _handler_module_action(event: EvenementDomaine) -> None:
         logger.warning(f"Subscriber failed gracefully: {e}")
 ```
 
-### Pattern 3 : Invalidation cache sur événement
+### Pattern 3 : Invalidation cache sur �v�nement
 
 ```python
 def _invalider_cache_module(event: EvenementDomaine) -> None:
@@ -177,7 +177,7 @@ Dans `enregistrer_subscribers()` :
 ```python
 bus = obtenir_bus()
 bus.souscrire("module.changed", _invalider_cache_module, priority=10)   # cache
-bus.souscrire("module.*", _handler_module_action, priority=5)           # métier
+bus.souscrire("module.*", _handler_module_action, priority=5)           # m�tier
 bus.souscrire("*", audit_logger, priority=0)                            # audit
 ```
 
@@ -185,8 +185,8 @@ bus.souscrire("*", audit_logger, priority=0)                            # audit
 
 ## Recommandations
 
-- Privilégier le bus d'événements pour les réactions non bloquantes
+- Privil�gier le bus d'�v�nements pour les r�actions non bloquantes
 - Garder les synchronisations lourdes dans les jobs CRON
-- Éviter les appels directs entre services quand un événement suffit
+- �viter les appels directs entre services quand un �v�nement suffit
 - Documenter chaque nouveau flux ici lors de son ajout
-- Chaque bridge doit être couvert par un smoke test admin
+- Chaque bridge doit �tre couvert par un smoke test admin

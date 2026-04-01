@@ -1,4 +1,4 @@
-﻿# Design System â€” Assistant Matanne
+# Design System — Assistant Matanne
 
 > **Stack** : Tailwind CSS v4, shadcn/ui, Radix UI, class-variance-authority (CVA)  
 > **Theme** : CSS custom properties (variables CSS), support dark/light/system  
@@ -12,9 +12,9 @@
 | ---------- | ------------- |
 | **Mobile-first** | Grille responsive, bottom navigation sur mobile |
 | **Dark mode natif** | Variables CSS `--background`, `--foreground`, etc. |
-| **CohÃ©rence typographique** | Seule police systÃ¨me + `text-sm`, `text-base`, `text-2xl` |
-| **AccessibilitÃ©** | Radix UI (focus-visible, ARIA, keyboard navigation) |
-| **Feedback immÃ©diat** | Toasts (Sonner), skeletons, spinners Loader2 |
+| **Cohérence typographique** | Seule police système + `text-sm`, `text-base`, `text-2xl` |
+| **Accessibilité** | Radix UI (focus-visible, ARIA, keyboard navigation) |
+| **Feedback immédiat** | Toasts (Sonner), skeletons, spinners Loader2 |
 
 ---
 
@@ -23,7 +23,7 @@
 ### Couleurs
 
 ```css
-/* Variables Tailwind CSS v4 â€” dÃ©finies dans globals.css ou via @layer base */
+/* Variables Tailwind CSS v4 — définies dans globals.css ou via @layer base */
 --background        /* Fond principal */
 --foreground        /* Texte principal */
 --card              /* Fond des cartes */
@@ -32,7 +32,7 @@
 --primary-foreground
 --secondary         /* Couleur secondaire */
 --secondary-foreground
---muted             /* Fond attÃ©nuÃ© (zones secondaires) */
+--muted             /* Fond atténué (zones secondaires) */
 --muted-foreground  /* Texte secondaire/discret */
 --accent            /* Accent hover */
 --destructive       /* Actions dangereuses */
@@ -43,7 +43,7 @@
 
 ### Espacement
 
-Tailwind v4 â€” utiliser les classes utilitaires standard :
+Tailwind v4 — utiliser les classes utilitaires standard :
 
 | Usage | Classe |
 | ------- | -------- |
@@ -54,13 +54,13 @@ Tailwind v4 â€” utiliser les classes utilitaires standard :
 
 ### Typographie
 
-| Ã‰lÃ©ment | Classe | Usage |
+| Élément | Classe | Usage |
 | --------- | -------- | ------- |
 | Titre de page | `text-2xl font-bold tracking-tight` | `<h1>` |
 | Titre de carte | Via `CardTitle` | Auto |
 | Sous-titre | `text-sm text-muted-foreground` | Descriptions |
 | Label formulaire | Via `Label` | Champs |
-| Extra-small | `text-xs text-muted-foreground` | MÃ©tadonnÃ©es |
+| Extra-small | `text-xs text-muted-foreground` | Métadonnées |
 | Code | `font-mono text-sm` | Exemples techniques |
 
 ---
@@ -71,25 +71,25 @@ Tailwind v4 â€” utiliser les classes utilitaires standard :
 
 | Composant | Fichier | Usage |
 | ----------- | --------- | ------- |
-| `Sidebar` | `sidebar.tsx` | Navigation latÃ©rale (desktop) |
-| `Sheet` | `sheet.tsx` | Drawer mobile / panels latÃ©raux |
+| `Sidebar` | `sidebar.tsx` | Navigation latérale (desktop) |
+| `Sheet` | `sheet.tsx` | Drawer mobile / panels latéraux |
 | `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent` | `tabs.tsx` | Navigation par onglets |
-| `Separator` | `separator.tsx` | Lignes de sÃ©paration |
-| `ScrollArea` | `scroll-area.tsx` | Zone scrollable avec barre stylisÃ©e |
-| `Collapsible` | `collapsible.tsx` | Sections dÃ©pliables |
+| `Separator` | `separator.tsx` | Lignes de séparation |
+| `ScrollArea` | `scroll-area.tsx` | Zone scrollable avec barre stylisée |
+| `Collapsible` | `collapsible.tsx` | Sections dépliables |
 
 ### Contenu & Display
 
 | Composant | Fichier | Usage |
 | ----------- | --------- | ------- |
-| `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` | `card.tsx` | Conteneur principal de donnÃ©es |
-| `Badge` | `badge.tsx` | Ã‰tiquettes & statuts |
+| `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` | `card.tsx` | Conteneur principal de données |
+| `Badge` | `badge.tsx` | Étiquettes & statuts |
 | `Alert` | `alert.tsx` | Messages d'alerte contextuels |
 | `Avatar` | `avatar.tsx` | Photos de profil |
 | `Progress` | `progress.tsx` | Barres de progression |
 | `Skeleton` | `skeleton.tsx` | Loading states |
 | `Tooltip` | `tooltip.tsx` | Info-bulles au survol |
-| `Table` | `table.tsx` | Tableaux de donnÃ©es |
+| `Table` | `table.tsx` | Tableaux de données |
 
 ### Formulaires & Actions
 
@@ -97,14 +97,14 @@ Tailwind v4 â€” utiliser les classes utilitaires standard :
 | ----------- | --------- | ------- |
 | `Button` | `button.tsx` | Actions (default, outline, ghost, destructive, secondary) |
 | `Input` | `input.tsx` | Saisie texte |
-| `InputGroup` | `input-group.tsx` | Input avec prÃ©fixe/suffixe |
+| `InputGroup` | `input-group.tsx` | Input avec préfixe/suffixe |
 | `Textarea` | `textarea.tsx` | Saisie multiligne |
-| `Label` | `label.tsx` | LibellÃ©s accessibles |
-| `Checkbox` | `checkbox.tsx` | Cases Ã  cocher |
+| `Label` | `label.tsx` | Libellés accessibles |
+| `Checkbox` | `checkbox.tsx` | Cases à cocher |
 | `Switch` | `switch.tsx` | Interrupteurs on/off |
-| `Slider` | `slider.tsx` | Curseurs numÃ©riques |
-| `Select` | `select.tsx` | Listes dÃ©roulantes (Radix) |
-| `Command` | `command.tsx` | Recherche + sÃ©lection (palette de commandes) |
+| `Slider` | `slider.tsx` | Curseurs numériques |
+| `Select` | `select.tsx` | Listes déroulantes (Radix) |
+| `Command` | `command.tsx` | Recherche + sélection (palette de commandes) |
 
 ### Overlay
 
@@ -126,19 +126,19 @@ Tailwind v4 â€” utiliser les classes utilitaires standard :
 ## Variantes du Button
 
 ```tsx
-// default â€” action principale
+// default — action principale
 <Button>Enregistrer</Button>
 
-// outline â€” action secondaire
+// outline — action secondaire
 <Button variant="outline">Annuler</Button>
 
-// ghost â€” action tertiaire / navigation
+// ghost — action tertiaire / navigation
 <Button variant="ghost">Voir plus</Button>
 
-// destructive â€” suppression, danger
+// destructive — suppression, danger
 <Button variant="destructive">Supprimer</Button>
 
-// secondary â€” action alternative
+// secondary — action alternative
 <Button variant="secondary">Dupliquer</Button>
 
 // Tailles
@@ -147,7 +147,7 @@ Tailwind v4 â€” utiliser les classes utilitaires standard :
 <Button size="lg">Grand</Button>
 <Button size="icon"><Plus /></Button>
 
-// Avec icÃ´ne
+// Avec icône
 <Button>
   <Save className="mr-2 h-4 w-4" />
   Enregistrer
@@ -162,7 +162,7 @@ Tailwind v4 â€” utiliser les classes utilitaires standard :
 
 ---
 
-## Pattern â€” Carte de module
+## Pattern — Carte de module
 
 ```tsx
 <Card>
@@ -178,7 +178,7 @@ Tailwind v4 â€” utiliser les classes utilitaires standard :
 
 ---
 
-## Pattern â€” Page avec onglets
+## Pattern — Page avec onglets
 
 ```tsx
 <div className="space-y-6">
@@ -190,7 +190,7 @@ Tailwind v4 â€” utiliser les classes utilitaires standard :
   <Tabs defaultValue="tab1">
     <TabsList>
       <TabsTrigger value="tab1">Premier onglet</TabsTrigger>
-      <TabsTrigger value="tab2">DeuxiÃ¨me onglet</TabsTrigger>
+      <TabsTrigger value="tab2">Deuxième onglet</TabsTrigger>
     </TabsList>
     <TabsContent value="tab1">
       {/* contenu */}
@@ -201,7 +201,7 @@ Tailwind v4 â€” utiliser les classes utilitaires standard :
 
 ---
 
-## Pattern â€” Loading State
+## Pattern — Loading State
 
 ```tsx
 // Skeleton pour liste
@@ -221,24 +221,24 @@ if (isLoading) {
 
 ---
 
-## Pattern â€” Toast
+## Pattern — Toast
 
 ```tsx
 import { toast } from "sonner";
 
-// SuccÃ¨s
-toast.success("Recette sauvegardÃ©e");
+// Succès
+toast.success("Recette sauvegardée");
 
 // Erreur
 toast.error("Impossible de sauvegarder");
 
 // Avec description
-toast.success("Import terminÃ©", { description: "42 recettes importÃ©es" });
+toast.success("Import terminé", { description: "42 recettes importées" });
 
 // Promise
 toast.promise(saveRecette(), {
   loading: "Sauvegarde...",
-  success: "SauvegardÃ© !",
+  success: "Sauvegardé !",
   error: "Erreur lors de la sauvegarde",
 });
 ```
@@ -247,7 +247,7 @@ toast.promise(saveRecette(), {
 
 ## Iconographie
 
-Utiliser [Lucide React](https://lucide.dev/) â€” dÃ©jÃ  installÃ©.
+Utiliser [Lucide React](https://lucide.dev/) — déjà installé.
 
 ```tsx
 import { Plus, Edit, Trash2, ChevronRight, Loader2 } from "lucide-react";
@@ -268,11 +268,11 @@ npx shadcn@latest add [nom-composant]
 # Ex: npx shadcn@latest add accordion
 ```
 
-Le composant est ajoutÃ© dans `src/composants/ui/[nom].tsx` avec les styles Tailwind.
+Le composant est ajouté dans `src/composants/ui/[nom].tsx` avec les styles Tailwind.
 
 ---
 
 ## Voir aussi
 
-- [FRONTEND_ARCHITECTURE.md](../FRONTEND_ARCHITECTURE.md) â€” Architecture frontend complÃ¨te
-- [UI_COMPONENTS.md](../UI_COMPONENTS.md) â€” Guide composants spÃ©cifiques au projet
+- [FRONTEND_ARCHITECTURE.md](../FRONTEND_ARCHITECTURE.md) — Architecture frontend complète
+- [UI_COMPONENTS.md](../UI_COMPONENTS.md) — Guide composants spécifiques au projet
