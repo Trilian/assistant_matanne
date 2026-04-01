@@ -78,4 +78,3 @@ Detail dans [`PLANNING_IMPLEMENTATION.md`](PLANNING_IMPLEMENTATION.md#sprint-10)
 - **Stabilite d'abord** : corriger les bugs et tests avant d'ajouter des fonctionnalites
 - **Documentation a jour** : toute nouvelle feature = mise a jour du guide et de l'API reference
 - **Securite** : RLS Supabase, JWT, rate limiting, sanitization non negociables
-

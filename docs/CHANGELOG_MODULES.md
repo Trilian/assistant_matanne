@@ -103,7 +103,7 @@
 - suggestions IA enrichies selon stock, saisonnalite et feedback utilisateur
 - ponts actifs inventaire vers planning, peremption vers anti-gaspillage, jardin vers recettes
 
-### Famille
+### Famille et quotidien
 
 - consolidation des flux Jules, activites, routines et weekend
 - enrichissement des achats famille et suggestions associees

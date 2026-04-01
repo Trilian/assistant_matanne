@@ -72,4 +72,3 @@ cd frontend && npm run dev
 python manage.py test_coverage
 cd frontend && npm test
 ```
-

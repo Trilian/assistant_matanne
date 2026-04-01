@@ -70,6 +70,11 @@ const GraphiqueJalons = dynamic(
   { ssr: false }
 );
 
+const RadarSkillJules = dynamic(
+  () => import("@/composants/graphiques/radar-skill-jules").then((m) => m.RadarSkillJules),
+  { ssr: false }
+);
+
 const CATEGORIES_JALONS = [
   { valeur: "motricite", label: "Motricité", Icone: Footprints },
   { valeur: "langage", label: "Langage", Icone: MessageCircle },

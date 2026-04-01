@@ -1,33 +1,33 @@
-# ?? Sch�ma ERD - Mod�les de Donn�es Assistant Matanne
+﻿# ?? Sch?ma ERD - Mod?les de Donn?es Assistant Matanne
 
 > Diagramme Entity-Relationship des tables SQLAlchemy
-> Mise � jour Sprint H: 31 mars 2026
+> Mise ? jour Sprint H: 31 mars 2026
 
-## R�f�rence Sprint H
+## R?f?rence Sprint H
 
-- Source de v�rit� SQL: `sql/schema/*.sql` (structure modulaire SQL-first)
+- Source de v?rit? SQL: `sql/schema/*.sql` (structure modulaire SQL-first)
 - Nombre de tables cible: 143
-- Ce document sert de vue fonctionnelle par domaines; la validation finale passe par le sch�ma SQL modulaire
+- Ce document sert de vue fonctionnelle par domaines; la validation finale passe par le sch?ma SQL modulaire
 
 Validation phase 10 (1 avril 2026):
 
-- 143 tables ORM d�tect�es dans `src/core/models/*.py` (hors `mixins.py`)
+- 143 tables ORM d?tect?es dans `src/core/models/*.py` (hors `mixins.py`)
 - alignement maintenu avec `sql/schema/*.sql`
 
-### Proc�dure de rafra�chissement
+### Proc?dure de rafra?chissement
 
-1. Mettre � jour les fichiers sous `sql/schema/`
-2. R�g�n�rer `sql/INIT_COMPLET.sql` via `scripts/db/regenerate_init.py`
-3. V�rifier l'alignement ORM (`src/core/models/`)
-4. Mettre � jour ce document (sections impact�es + relations)
-5. Contr�ler les index et cl�s �trang�res avec `docs/guides/DATABASE_INDEXES.md`
+1. Mettre ? jour les fichiers sous `sql/schema/`
+2. R?g?n?rer `sql/INIT_COMPLET.sql` via `scripts/db/regenerate_init.py`
+3. V?rifier l'alignement ORM (`src/core/models/`)
+4. Mettre ? jour ce document (sections impact?es + relations)
+5. Contr?ler les index et cl?s ?trang?res avec `docs/guides/DATABASE_INDEXES.md`
 
 ## Vue d'ensemble
 
 ```mermaid
 erDiagram
     %% ---------------------------------------------------
-    %% CUISINE - Recettes et Ingr�dients
+    %% CUISINE - Recettes et Ingr?dients
     %% ---------------------------------------------------
 
     Ingredient {
@@ -81,8 +81,8 @@ erDiagram
     }
 
     Recette ||--o{ RecetteIngredient : "contient"
-    Ingredient ||--o{ RecetteIngredient : "utilis�_dans"
-    Recette ||--o{ EtapeRecette : "a_�tapes"
+    Ingredient ||--o{ RecetteIngredient : "utilis?_dans"
+    Recette ||--o{ EtapeRecette : "a_?tapes"
     Recette ||--o{ VersionRecette : "a_versions"
 
     %% ---------------------------------------------------
@@ -176,7 +176,7 @@ erDiagram
     }
 
     Planning ||--o{ Repas : "contient"
-    Recette ||--o{ Repas : "planifi�_dans"
+    Recette ||--o{ Repas : "planifi?_dans"
 
     %% ---------------------------------------------------
     %% BATCH COOKING
@@ -209,19 +209,19 @@ erDiagram
         date date_peremption
     }
 
-    SessionBatchCooking ||--o{ EtapeBatchCooking : "�tapes"
-    SessionBatchCooking ||--o{ PreparationBatch : "pr�parations"
-    Recette ||--o{ EtapeBatchCooking : "utilis�e"
-    Recette ||--o{ PreparationBatch : "pr�par�e"
+    SessionBatchCooking ||--o{ EtapeBatchCooking : "?tapes"
+    SessionBatchCooking ||--o{ PreparationBatch : "pr?parations"
+    Recette ||--o{ EtapeBatchCooking : "utilis?e"
+    Recette ||--o{ PreparationBatch : "pr?par?e"
 ```
 
 ---
 
 ## Validation Sprint H
 
-- V�rification manuelle: alignement avec l'organisation SQL modulaire (`sql/schema/`)
-- R�f�rence migration: `docs/MIGRATION_GUIDE.md`
-- R�f�rence performances/index: `docs/guides/DATABASE_INDEXES.md`
+- V?rification manuelle: alignement avec l'organisation SQL modulaire (`sql/schema/`)
+- R?f?rence migration: `docs/MIGRATION_GUIDE.md`
+- R?f?rence performances/index: `docs/guides/DATABASE_INDEXES.md`
 
 ## Famille & Utilisateurs
 
@@ -280,8 +280,8 @@ erDiagram
     }
 
     UserProfile ||--o| GarminToken : "token_garmin"
-    UserProfile ||--o{ GarminActivity : "activit�s"
-    UserProfile ||--o{ GarminDailySummary : "r�sum�s"
+    UserProfile ||--o{ GarminActivity : "activit?s"
+    UserProfile ||--o{ GarminDailySummary : "r?sum?s"
     UserProfile ||--o{ FoodLog : "journal_alimentaire"
 
     %% ---------------------------------------------------
@@ -334,10 +334,10 @@ erDiagram
         boolean achete
     }
 
-    ChildProfile ||--o{ Milestone : "�tapes_dev"
+    ChildProfile ||--o{ Milestone : "?tapes_dev"
 
     %% ---------------------------------------------------
-    %% PR�F�RENCES & APPRENTISSAGE IA
+    %% PR?F?RENCES & APPRENTISSAGE IA
     %% ---------------------------------------------------
 
     UserPreference {
@@ -388,7 +388,7 @@ erDiagram
         date date_echeance
     }
 
-    Project ||--o{ ProjectTask : "t�ches"
+    Project ||--o{ ProjectTask : "t?ches"
 
     %% ---------------------------------------------------
     %% ROUTINES
@@ -410,7 +410,7 @@ erDiagram
         int duree_minutes
     }
 
-    Routine ||--o{ RoutineTask : "t�ches"
+    Routine ||--o{ RoutineTask : "t?ches"
 
     %% ---------------------------------------------------
     %% JARDIN
@@ -447,7 +447,7 @@ erDiagram
     GardenItem ||--o{ GardenLog : "journal"
 
     %% ---------------------------------------------------
-    %% MEUBLES & D�PENSES
+    %% MEUBLES & D?PENSES
     %% ---------------------------------------------------
 
     Meuble {
@@ -501,7 +501,7 @@ erDiagram
     }
 
     %% ---------------------------------------------------
-    %% DIAGNOSTICS & ESTIMATION IMMOBILI�RE
+    %% DIAGNOSTICS & ESTIMATION IMMOBILI?RE
     %% ---------------------------------------------------
 
     DiagnosticMaison {
@@ -670,10 +670,10 @@ erDiagram
     }
 
     Garantie ||--o{ IncidentSAV : "incidents"
-    Artisan ||--o{ IncidentSAV : "r�parations"
+    Artisan ||--o{ IncidentSAV : "r?parations"
 ```
 
-## Notifications & Int�grations
+## Notifications & Int?grations
 
 ```mermaid
 erDiagram
@@ -699,7 +699,7 @@ erDiagram
     }
 
     %% ---------------------------------------------------
-    %% M�T�O
+    %% M?T?O
     %% ---------------------------------------------------
 
     ConfigMeteo {
@@ -746,7 +746,7 @@ erDiagram
         string sync_direction
     }
 
-    CalendrierExterne ||--o{ EvenementCalendrier : "�v�nements"
+    CalendrierExterne ||--o{ EvenementCalendrier : "?v?nements"
 
     %% ---------------------------------------------------
     %% BACKUP
@@ -847,7 +847,7 @@ erDiagram
 
 ---
 
-## L�gende
+## L?gende
 
 | Symbole  | Signification |
 | -------- | ------------- | ----- | ----------- | --- | ---------- |
@@ -860,7 +860,7 @@ erDiagram
 
 ## Statistiques
 
-| Cat�gorie         | Tables  | Relations |
+| Cat?gorie         | Tables  | Relations |
 | ----------------- | ------- | --------- |
 | **Cuisine**       | 6       | 5         |
 | **Inventaire**    | 2       | 2         |
@@ -878,25 +878,25 @@ erDiagram
 
 ## Addendum Phase 3
 
-Cette section synth�tise les ajouts de p�rim�tre issus de la phase 3 du planning.
+Cette section synth?tise les ajouts de p?rim?tre issus de la phase 3 du planning.
 
 ### Habitat
 
-- `PlanHabitat` : plan import�, r�f�rence visuelle, rattachement sc�nario.
-- `PieceHabitat` : segmentation des pi�ces (nom, type, surface, position).
-- `ModificationPlanHabitat` : variantes propos�es et transformations IA.
-- `ProjetDecoHabitat` : projets d�co par pi�ce et budget pr�visionnel.
-- `CritereScenarioHabitat` : pond�ration multicrit�re pour comparaison de sc�narios.
+- `PlanHabitat` : plan import?, r?f?rence visuelle, rattachement sc?nario.
+- `PieceHabitat` : segmentation des pi?ces (nom, type, surface, position).
+- `ModificationPlanHabitat` : variantes propos?es et transformations IA.
+- `ProjetDecoHabitat` : projets d?co par pi?ce et budget pr?visionnel.
+- `CritereScenarioHabitat` : pond?ration multicrit?re pour comparaison de sc?narios.
 
-### Garmin / sant�
+### Garmin / sant?
 
-- `GarminToken` : credentials OAuth1 li�s au profil utilisateur.
-- `ActiviteGarmin` : activit�s synchronis�es (distance, dur�e, calories).
-- `ResumeQuotidienGarmin` : pas, calories, sommeil agr�g�s par jour.
+- `GarminToken` : credentials OAuth1 li?s au profil utilisateur.
+- `ActiviteGarmin` : activit?s synchronis?es (distance, dur?e, calories).
+- `ResumeQuotidienGarmin` : pas, calories, sommeil agr?g?s par jour.
 
 ### Gamification
 
 - `PointsUtilisateur` : snapshot hebdomadaire sport/alimentation/anti-gaspi.
-- `BadgeUtilisateur` : badges calcul�s � partir des r�gles de points.
+- `BadgeUtilisateur` : badges calcul?s ? partir des r?gles de points.
 
-Note: les noms exacts de colonnes et contraintes restent pilot�s par les mod�les SQLAlchemy et `sql/INIT_COMPLET.sql`.
+Note: les noms exacts de colonnes et contraintes restent pilot?s par les mod?les SQLAlchemy et `sql/INIT_COMPLET.sql`.
