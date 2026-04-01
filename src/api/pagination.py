@@ -6,12 +6,36 @@ Fournit une pagination par curseur (keyset pagination) en alternative
 - Offset: O(n) - doit scanner toutes les lignes jusqu'à l'offset
 - Cursor: O(1) - utilise un index pour sauter directement au curseur
 
+⚠️ BUG B12 FIX: Tri stable requis
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pagination par curseur requiert que:
+1️⃣  Le cursor_field DOIT être le premier champ d'ordre (ou au minimum inclus dans order_by)
+2️⃣  Le secondary_field doit être unique (généralement 'id') pour garantir stabilité
+3️⃣  Si order_by != cursor_field, les suppressions concurrentes causent des sauts
+
+EXEMPLE CORRECT:
+    query = session.query(Activite).order_by(Activite.date_prevue.desc(), Activite.id.desc())
+    return construire_reponse_cursor(
+        items, limit,
+        cursor_field="date_prevue",         ← Match l'ordre principal
+        secondary_field="id",               ← Tie-breaker unique (stable sort)
+    )
+
+EXEMPLE INCORRECT (BUG):
+    query = session.query(Activite).order_by(Activite.date_prevue.desc())  # ❌
+    return construire_reponse_cursor(
+        items, limit,
+        cursor_field="id",                  # ← Mismatch! ordre ≠ cursor_field
+    )
+    # ↑ Suppressions concurrentes = sauts d'enregistrements
+
 Usage:
     from src.api.pagination import (
         CursorParams,
         ReponseCursorPaginee,
         construire_reponse_cursor,
         decoder_cursor,
+        appliquer_cursor_filter,
     )
 
     @router.get("/items")
@@ -22,14 +46,19 @@ Usage:
         decoded = decoder_cursor(cursor) if cursor else None
 
         with executer_avec_session() as session:
-            query = session.query(Item).order_by(Item.id)
+            # ✅ Tri stable: cursor_field + secondary unique
+            query = session.query(Item).order_by(Item.cree_le.desc(), Item.id.desc())
 
             if decoded:
-                query = query.filter(Item.id > decoded["id"])
+                query = appliquer_cursor_filter(query, decoded, Item, 
+                                               cursor_field="cree_le",
+                                               secondary_field="id")
 
-            items = query.limit(limit + 1).all()  # +1 pour détecter has_more
+            items = query.limit(limit + 1).all()
 
-        return construire_reponse_cursor(items, limit, "id")
+        return construire_reponse_cursor(items, limit, 
+                                        cursor_field="cree_le",
+                                        secondary_field="id")
 """
 
 import base64
@@ -310,3 +339,99 @@ def appliquer_cursor_filter(
             query = query.filter(primary_col < cursor.sort_value)
 
     return query
+
+
+# ═══════════════════════════════════════════════════════════
+# VALIDATION ET HELPERS - BUG B12 FIX
+# ═══════════════════════════════════════════════════════════
+
+
+def valider_cursor_config(
+    cursor_field: str,
+    secondary_field: str | None,
+    model_class: Any,
+    route_name: str = "",
+) -> None:
+    """
+    Valide et log un averissement si la configuration du curseur est potentiellement instable.
+    
+    IMPORTANT: Cette fonction aide à détecter les problèmes B12 (tri instable).
+    - cursor_field doit être única (généralement "id" ou "cree_le")
+    - secondary_field doit être différent et unique (généralement "id" si cursor_field != "id")
+    
+    Args:
+        cursor_field: Le champ utilisé pour le curseur
+        secondary_field: Le champ de départ (doit être unique)
+        model_class: La classe du modèle SQLAlchemy
+        route_name: Nom optionnel de la route pour le log
+    
+    Example:
+        valider_cursor_config("date_prevue", "id", ActiviteFamille, "/api/v1/activites")
+    """
+    if not secondary_field or secondary_field == cursor_field:
+        msg = (
+            f"⚠️  POTENTIEL BUG B12 (tri instable) détecté"
+            f"{f' sur {route_name}' if route_name else ''}:\n"
+            f"   cursor_field='{cursor_field}', secondary_field='{secondary_field}'\n"
+            f"   → Suppressions concurrentes peuvent sauter des enregistrements!\n"
+            f"   → FIX: Passer secondary_field='id' (ou autre champ unique)"
+        )
+        logger.warning(msg)
+
+
+def appliquer_cursor_filter_avec_tri_stable(
+    query,
+    cursor: CursorParams | None,
+    model_class,
+    cursor_field: str = "id",
+    secondary_field: str | None = "id",
+    log_warnings: bool = True,
+) -> tuple:
+    """
+    Applique le filtre de curseur et valide que le tri est stable.
+    
+    Version améliorée de appliquer_cursor_filter qui:
+    1. Valide la configuration du curseur (detecte B12)
+    2. Log un averissement si le secondaire_field n'est pas passé
+    3. Retourne (query_modifiee, validation_ok: bool)
+    
+    Args:
+        query: Requête SQLAlchemy
+        cursor: Paramètres du curseur (optionnel)
+        model_class: Classe du modèle
+        cursor_field: Champ principal du curseur
+        secondary_field: Champ unique pour tri stable (généralement 'id')
+        log_warnings: Si True, log les averissements B12
+    
+    Returns:
+        Tuple (query_modifiee, validation_ok)
+    
+    Example:
+        query = session.query(Activite).order_by(
+            Activite.date_prevue.desc(), 
+            Activite.id.desc()  ← Important pour stabilité!
+        )
+        query, is_valid = appliquer_cursor_filter_avec_tri_stable(
+            query, 
+            cursor_params,
+            Activite,
+            cursor_field="date_prevue",
+            secondary_field="id"
+        )
+    """
+    # Valider la configuration
+    if log_warnings and (not secondary_field or secondary_field == cursor_field):
+        valider_cursor_config(cursor_field, secondary_field, model_class)
+        return appliquer_cursor_filter(query, cursor, model_class, cursor_field, secondary_field), False
+    
+    # Appliquer le filtre normal
+    query = appliquer_cursor_filter(query, cursor, model_class, cursor_field, secondary_field)
+    return query, True
+
+
+# Gardez l'API originale pour la compatibilité
+def _get_attr(obj: Any, name: str) -> Any:
+    """Récupère un attribut d'un objet ou d'un dict."""
+    if isinstance(obj, dict):
+        return obj.get(name)
+    return getattr(obj, name, None)

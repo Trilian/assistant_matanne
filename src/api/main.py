@@ -9,6 +9,7 @@ import os
 import time
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -450,8 +451,19 @@ try:
     @app.exception_handler(ResponseValidationError)
     async def response_validation_error_handler(request: Request, exc: ResponseValidationError):
         """Capture les erreurs de sérialisation de réponse (ORM non sérialisé, etc.)"""
+        erreurs: list[dict[str, Any]] = []
+        try:
+            erreurs = list(exc.errors())
+        except Exception:
+            erreurs = []
+
+        premiere_erreur: dict[str, Any] = erreurs[0] if erreurs else {}
         logger.error(
-            f"Erreur de validation de réponse sur {request.method} {request.url.path}: {exc}",
+            (
+                "Erreur de validation de réponse sur "
+                f"{request.method} {request.url.path} | "
+                f"nb_erreurs={len(erreurs)} | premiere_erreur={premiere_erreur}"
+            ),
             exc_info=True,
         )
         return JSONResponse(

@@ -244,14 +244,25 @@ async def lister_evenements(
             if all_day is not None:
                 query = query.filter(EvenementCalendrier.all_day == all_day)
 
-            query = query.order_by(EvenementCalendrier.date_debut.asc())
+            query = query.order_by(EvenementCalendrier.date_debut.asc(), EvenementCalendrier.id.asc())
 
             # Pagination cursor-based
             if cursor:
                 cursor_params = decoder_cursor(cursor)
-                query = appliquer_cursor_filter(query, cursor_params, EvenementCalendrier)
+                query = appliquer_cursor_filter(
+                    query, 
+                    cursor_params, 
+                    EvenementCalendrier,
+                    cursor_field="date_debut",  # FIX B12: match l'ordre principal
+                    secondary_field="id"         # Stable tie-breaker
+                )
                 items = query.limit(page_size + 1).all()
-                return construire_reponse_cursor(items, page_size, cursor_field="id")
+                return construire_reponse_cursor(
+                    items, 
+                    page_size, 
+                    cursor_field="date_debut",   # FIX B12: match l'ordre
+                    secondary_field="id"         # FIX B12: ti-breaker unique
+                )
 
             # Pagination offset
             total = query.count()

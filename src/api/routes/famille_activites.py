@@ -88,17 +88,24 @@ async def lister_activites(
             if date_fin:
                 query = query.filter(ActiviteFamille.date_prevue <= date_fin)
 
-            query = query.order_by(ActiviteFamille.date_prevue.desc())
+            query = query.order_by(ActiviteFamille.date_prevue.desc(), ActiviteFamille.id.desc())
 
             # Pagination cursor-based si cursor fourni
             if cursor:
                 cursor_params = decoder_cursor(cursor)
-                query = appliquer_cursor_filter(query, cursor_params, ActiviteFamille)
+                query = appliquer_cursor_filter(
+                    query, 
+                    cursor_params, 
+                    ActiviteFamille,
+                    cursor_field="date_prevue",  # FIX B12: match l'ordre principal
+                    secondary_field="id"          # Stable tie-breaker
+                )
                 items = query.limit(page_size + 1).all()
                 return construire_reponse_cursor(
                     items,
                     page_size,
-                    cursor_field="id",
+                    cursor_field="date_prevue",   # FIX B12: match l'ordre
+                    secondary_field="id",          # FIX B12: ti-breaker unique
                     serializer=None,
                 )
 
