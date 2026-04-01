@@ -1,50 +1,86 @@
 # Automations
 
-> Documentation du moteur d'automatisation simple de type Si→Alors.
+> Documentation du moteur d'automatisation Si→Alors.
+>
+> **Dernière mise à jour** : 1er avril 2026
 
 ---
 
 ## Vue d'ensemble
 
-Le moteur d'automations actuel permet d'exécuter des règles stockées en base à fréquence régulière.
+Le moteur d'automations exécute des règles stockées en base à fréquence régulière.
 
-Composants:
+Composants :
 
-- routes API: `src/api/routes/automations.py`
-- moteur: `src/services/utilitaires/automations_engine.py`
-- exécution planifiée: job `automations_runner`
+- routes API : `src/api/routes/automations.py`
+- moteur : `src/services/utilitaires/automations_engine.py`
+- exécution planifiée : job CRON `automations_runner` (toutes les 5 minutes)
+- modèle ORM : `AutomationRegle`
 
 ---
 
-## Ce que le moteur supporte aujourd'hui
+## Déclencheurs supportés (9)
 
-### Déclencheurs
+| Type | Description |
+|------|-------------|
+| `stock_bas` | Articles inventaire sous un seuil |
+| `peremption_proche` | Articles arrivant à péremption proche |
+| `budget_depassement` | Dépenses du mois au-dessus d'un seuil |
+| `meteo_alerte` | Prévision météo contenant un mot-clé (pluie, orage, neige, vent) |
+| `anniversaire_proche` | Anniversaires dans une fenêtre de jours |
+| `tache_en_retard` | Tâches d'entretien en retard |
+| `garmin_inactivite` | Inactivité Garmin au-delà d'un seuil |
+| `document_expiration` | Documents arrivant à expiration |
+| `recette_sans_photo` | Recettes sans image |
 
-- `stock_bas`
+---
 
-### Actions
+## Actions supportées (10)
 
-- `ajouter_courses`
-- `notifier`
+| Type | Description |
+|------|-------------|
+| `ajouter_courses` | Ajoute articles à une liste de courses active |
+| `generer_liste_courses` | Alias de `ajouter_courses` |
+| `suggerer_recette` | Envoie une notification de suggestion recette |
+| `creer_tache_maison` | Crée une tâche d'entretien |
+| `ajouter_au_planning` | Crée un événement planning |
+| `mettre_a_jour_budget` | Ajoute une dépense d'ajustement budget |
+| `generer_rapport_pdf` | Notifie qu'un rapport PDF est prêt |
+| `archiver` | Désactive la règle après exécution |
+| `notifier` | Notification ntfy + push |
+| `envoyer_whatsapp` | Notification WhatsApp |
+| `envoyer_email` | Notification email |
 
-### Exécution
+---
+
+## Exécution
 
 - le job `automations_runner` passe toutes les 5 minutes
 - seules les règles actives sont évaluées
 - le moteur met à jour `derniere_execution` et incrémente `execution_count`
+- support du **dry-run** global et par règle
+
+Méthodes principales :
+
+- `executer_automations_actives()`
+- `executer_automations_actives_dry_run()`
+- `executer_automation_par_id()`
 
 ---
 
 ## API disponible
 
-Routes principales:
+| Méthode | Route | Usage |
+|---------|-------|-------|
+| `GET` | `/api/v1/automations` | Lister les automations de l'utilisateur |
+| `POST` | `/api/v1/automations/init` | Initialiser depuis les préférences legacy |
+| `POST` | `/api/v1/automations` | Créer une automation |
+| `PUT` | `/api/v1/automations/{automation_id}` | Modifier une automation |
+| `POST` | `/api/v1/automations/{automation_id}/simuler` | Simuler une automation |
+| `POST` | `/api/v1/automations/{automation_id}/executer-maintenant` | Exécuter immédiatement (`dry_run` optionnel) |
+| `POST` | `/api/v1/automations/generer-ia` | Générer une règle depuis un prompt IA |
 
-- lister les automations de l'utilisateur
-- créer une automation
-- initialiser depuis les préférences historiques
-- générer une règle à partir d'un prompt IA
-
-Le module expose aussi un format structuré `RegleAutomationIA` pour les réponses générées par IA.
+Le module expose aussi un format structuré `RegleAutomationIA` pour les réponses IA.
 
 ---
 
@@ -63,21 +99,17 @@ Le module expose aussi un format structuré `RegleAutomationIA` pour les répons
 
 ## Limitations actuelles
 
-- un seul déclencheur réellement géré côté moteur
-- seulement deux actions prises en charge
-- pas d'historique détaillé persistant
-- pas de dry-run
-- pas de rollback
-
-Ces limites sont déjà prévues dans le planning d'extension.
+- pas d'historique détaillé persistant par exécution d'automation
+- pas de rollback métier avancé
+- déclencheurs évalués en polling via CRON, pas en temps réel événementiel
 
 ---
 
 ## Statut CRON et exécution
 
-Le moteur d'automations est orchestré par le scheduler global de l'application.
+Le moteur d'automations est orchestré par le scheduler global de l'application via `automations_runner`.
 
-Statut actuel:
+Statut actuel : **opérationnel en production**
 
 - jobs planifiés: 38+ au niveau plateforme
 - job automation dédié: `automations_runner`

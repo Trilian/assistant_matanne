@@ -843,11 +843,11 @@ Stocks (cellier) ──→ consolidé avec inventaire cuisine
 | `docs/DATA_MODEL.md` | ⚠️ Vérifier | Peut être obsolète post-phases | D |
 | `docs/DEPLOYMENT.md` | ⚠️ Vérifier | Config Railway/Vercel actuelle | D |
 | `docs/ADMIN_RUNBOOK.md` | ⚠️ Vérifier | 20+ endpoints admin tous docum. ? | D |
-| `docs/CRON_JOBS.md` | 🔴 Obsolète | 68+ jobs à documenter | A15 |
-| `docs/NOTIFICATIONS.md` | 🔴 Obsolète | Système refait en phase 8 | A16 |
-| `docs/AUTOMATIONS.md` | 🔴 Obsolète | Expansion phases 8-10 | D |
-| `docs/INTER_MODULES.md` | ⚠️ Vérifier | 21 bridges documentés ? | D |
-| `docs/EVENT_BUS.md` | ⚠️ Vérifier | Subscribers à jour ? | D |
+| `docs/CRON_JOBS.md` | ✅ MàJ 01/04/2026 | 68 jobs documentés | Terminé |
+| `docs/NOTIFICATIONS.md` | ✅ MàJ 01/04/2026 | 4 canaux, failover, digest, templates | Terminé |
+| `docs/AUTOMATIONS.md` | ✅ MàJ 01/04/2026 | Déclencheurs/actions réels documentés | Terminé |
+| `docs/INTER_MODULES.md` | ✅ MàJ 01/04/2026 | 21+ bridges et patterns documentés | Terminé |
+| `docs/EVENT_BUS.md` | ✅ MàJ 01/04/2026 | 32 événements, 51 subscribers | Terminé |
 | `docs/MONITORING.md` | ⚠️ Vérifier | Prometheus metrics actuelles ? | D |
 | `docs/SECURITY.md` | ⚠️ Vérifier | Rate limiting, 2FA, CORS | D |
 | `PLANNING_IMPLEMENTATION.md` | 🔴 Obsolète | Ce document le remplace | — |
@@ -857,12 +857,12 @@ Stocks (cellier) ──→ consolidé avec inventaire cuisine
 
 | # | Document | Priorité | Phase |
 |---|---------|----------|-------|
-| D1 | Guide complet CRON jobs (68+ jobs, horaires, dépendances) | 🔴 | A15 |
-| D2 | Guide notifications refonte (4 canaux, failover, templates, config) | 🔴 | A16 |
-| D3 | Guide admin MàJ (20+ endpoints, panneau, simulations, flags) | 🟡 | D |
-| D4 | Guide bridges inter-modules (21 bridges, naming, comment en créer) | 🟡 | D |
-| D5 | Guide de test unifié (pytest + Vitest + Playwright, fixtures, mocks) | 🟡 | D |
-| D6 | Changelog module par module | 🟢 | E |
+| D1 | Guide complet CRON jobs (68+ jobs, horaires, dépendances) | ✅ Fait | Terminé |
+| D2 | Guide notifications refonte (4 canaux, failover, templates, config) | ✅ Fait | Terminé |
+| D3 | Guide admin MàJ (20+ endpoints, panneau, simulations, flags) | ✅ Fait | Terminé |
+| D4 | Guide bridges inter-modules (21 bridges, naming, comment en créer) | ✅ Fait | Terminé |
+| D5 | Guide de test unifié (pytest + Vitest + Playwright, fixtures, mocks) | ✅ Fait | Terminé |
+| D6 | Changelog module par module | ⚠️ Partiel | À compléter |
 
 ---
 

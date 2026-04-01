@@ -173,7 +173,8 @@ export function BankrollWidget({
       tooltip: {
         callbacks: {
           label: (context: TooltipItem<'line'>) => {
-            return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}€`
+            const valeur = typeof context.parsed.y === 'number' ? context.parsed.y.toFixed(2) : '0.00'
+            return `${context.dataset.label}: ${valeur}€`
           }
         }
       }

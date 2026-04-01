@@ -16,6 +16,7 @@ import {
   Wallet,
   QrCode,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { cn } from "@/bibliotheque/utils";
@@ -23,7 +24,7 @@ import { cn } from "@/bibliotheque/utils";
 interface ActionRapide {
   id: string;
   label: string;
-  icone: React.ElementType;
+  icone: LucideIcon;
   href: string;
   couleur: string;
 }

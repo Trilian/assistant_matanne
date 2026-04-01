@@ -42,17 +42,19 @@ interface PreferencesFormData {
   }
 }
 
+type CategorieNotification = keyof PreferencesFormData['canaux_par_categorie']
+
 const canaux = [
-  { id: 'push', label: 'ðŸ“± Push', description: 'Notifications navigateur' },
-  { id: 'email', label: 'ðŸ“§ Email', description: 'Emails' },
-  { id: 'ntfy', label: 'ðŸ”” Ntfy', description: 'Notifications ntfy.sh' },
-  { id: 'whatsapp', label: 'ðŸ’¬ WhatsApp', description: 'Messages WhatsApp' },
+  { id: 'push', label: 'Push', description: 'Notifications navigateur' },
+  { id: 'email', label: 'Email', description: 'Emails' },
+  { id: 'ntfy', label: 'Ntfy', description: 'Notifications ntfy.sh' },
+  { id: 'whatsapp', label: 'WhatsApp', description: 'Messages WhatsApp' },
 ]
 
-const categories = [
-  { id: 'rappels', label: 'ðŸ”” Rappels', description: 'Rappels activitÃ©s, courses, etc.' },
-  { id: 'alertes', label: 'âš ï¸ Alertes', description: 'Alertes pÃ©remption, stock, etc.' },
-  { id: 'resumes', label: 'ðŸ“‹ RÃ©sumÃ©s', description: 'RÃ©sumÃ©s hebdo, digests, etc.' },
+const categories: Array<{ id: CategorieNotification; label: string; description: string }> = [
+  { id: 'rappels', label: 'Rappels', description: 'Rappels activites, courses, etc.' },
+  { id: 'alertes', label: 'Alertes', description: 'Alertes peremption, stock, etc.' },
+  { id: 'resumes', label: 'Resumes', description: 'Resumes hebdo, digests, etc.' },
 ]
 
 export default function PreferencesNotificationsPage() {

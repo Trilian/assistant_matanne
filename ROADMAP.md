@@ -49,6 +49,8 @@
 - J-03 à J-11 : cron jobs restants (péremptions, planning dimanche, budget mensuel…)
 - IA-04/IA-05/IA-07/IA-08 : planificateur vacances, anomalies financières, optimisation budget, diagnostic photo maison
 
+Note : plusieurs items de Sprint 9 sont désormais partiellement ou totalement implémentés côté backend, notamment la refonte notifications, l'extension CRON (68 jobs) et le moteur d'automations enrichi. Le détail opérationnel à jour se trouve dans `PLANNING_IMPLEMENTATION.md` et les guides de documentation spécialisés.
+
 ---
 
 ## 🔜 Sprint 10 — Innovations & Long terme
@@ -57,6 +59,12 @@
 - ✅ LT-02 : Gamification sport + alimentation (points/badges persistés + page dédiée)
 - ✅ LT-03 : Mode Voyage avec checklists intelligentes (scaling participants + génération courses)
 - ✅ LT-04 : Automations "Si → Alors" (table DB + moteur + cron + exécution manuelle)
+
+État réel du moteur LT-04 au 1er avril 2026 :
+- 9 déclencheurs supportés
+- 10 actions supportées
+- dry-run global et par règle
+- génération IA de règle structurée
 
 → Détail dans [`PLANNING_IMPLEMENTATION.md`](PLANNING_IMPLEMENTATION.md#sprint-10)
 

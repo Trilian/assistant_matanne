@@ -11,7 +11,7 @@
 ### Composants
 
 | Composant | Fichier | Rôle |
-|-----------|---------|------|
+| ----------- | --------- | ------ |
 | **Dispatcher** | `src/services/core/notifications/notif_dispatcher.py` | Routeur central vers tous les canaux |
 | **Types** | `src/services/core/notifications/types.py` | Enums, modèles Pydantic, constantes |
 | **ntfy** | `src/services/core/notifications/notif_ntfy.py` | Push ntfy.sh |
@@ -26,7 +26,7 @@
 ### Modèles ORM
 
 | Modèle | Table | Fichier |
-|--------|-------|---------|
+| -------- | ------- | --------- |
 | `AbonnementPush` | `abonnements_push` | `src/core/models/notifications.py` |
 | `PreferenceNotification` | `preferences_notifications` | `src/core/models/notifications.py` |
 | `WebhookAbonnement` | `webhooks_abonnements` | `src/core/models/notifications.py` |
@@ -37,7 +37,7 @@
 ## Canaux disponibles
 
 | Canal | Fournisseur | Usage | Variables d'environnement |
-|-------|-------------|-------|--------------------------|
+| ------- | ------------- | ------- | -------------------------- |
 | **ntfy** | [ntfy.sh](https://ntfy.sh) | Push alertes immédiates (topic: `matanne-famille`) | Topic par défaut dans `types.py` |
 | **push** | Web Push API (VAPID) | Notifications navigateur | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL` |
 | **email** | [Resend](https://resend.com) | Résumés, rapports, alertes longues | `RESEND_API_KEY`, `EMAIL_FROM`, `FRONTEND_URL` |
@@ -145,7 +145,7 @@ MISE_A_JOUR_SYSTEME, SYNC_TERMINEE
 ### Templates email (Jinja2)
 
 | Template | Usage |
-|----------|-------|
+| ---------- | ------- |
 | `base.html` | Template de base (styling) |
 | `reset_password.html` | Lien de réinitialisation |
 | `verification_email.html` | Vérification email à l'inscription |
@@ -158,7 +158,7 @@ MISE_A_JOUR_SYSTEME, SYNC_TERMINEE
 ### Templates push prédéfinies
 
 | Fonction | Icône | Usage |
-|----------|-------|-------|
+| ---------- | ------- | ------- |
 | `notifier_stock_bas()` | 📦 | Stock bas |
 | `notifier_peremption()` | ⚠️ | Alertes péremption |
 | `notifier_rappel_repas()` | 🍽️ | Rappels repas |
@@ -208,7 +208,7 @@ Interface frontend : page paramètres `frontend/src/app/(app)/parametres/page.ts
 ### Push Web
 
 | Méthode | Route | Usage |
-|---------|-------|-------|
+| --------- | ------- | ------- |
 | `GET` | `/api/v1/push/vapid-public-key` | Clé publique VAPID |
 | `POST` | `/api/v1/push/subscribe` | Enregistrer abonnement navigateur |
 | `DELETE` | `/api/v1/push/unsubscribe` | Supprimer abonnement |
@@ -217,7 +217,7 @@ Interface frontend : page paramètres `frontend/src/app/(app)/parametres/page.ts
 ### Webhooks sortants
 
 | Méthode | Route | Usage |
-|---------|-------|-------|
+| --------- | ------- | ------- |
 | `POST` | `/api/v1/webhooks` | Créer webhook sortant |
 | `GET` | `/api/v1/webhooks` | Lister webhooks utilisateur |
 | `GET` | `/api/v1/webhooks/{id}` | Détail webhook |
@@ -228,14 +228,14 @@ Interface frontend : page paramètres `frontend/src/app/(app)/parametres/page.ts
 ### WhatsApp (réception)
 
 | Méthode | Route | Usage |
-|---------|-------|-------|
+| --------- | ------- | ------- |
 | `GET` | `/api/v1/whatsapp/webhook` | Vérification Meta (challenge) |
 | `POST` | `/api/v1/whatsapp/webhook` | Réception messages + réponses boutons |
 
 ### Admin notifications
 
 | Méthode | Route | Usage |
-|---------|-------|-------|
+| --------- | ------- | ------- |
 | `POST` | `/api/v1/admin/notifications/test` | Test sur un canal |
 | `POST` | `/api/v1/admin/notifications/test-all` | Test multi-canal avec failover |
 | `GET` | `/api/v1/admin/notifications/channels` | Canaux configurés + statut |
@@ -304,7 +304,7 @@ dispatcher.vider_digest("user1")
 ## Patterns de conception
 
 | Pattern | Lieu | Usage |
-|---------|------|-------|
+| --------- | ------ | ------- |
 | **Service Factory** | `get_dispatcher_notifications()` | Singleton via registre |
 | **Mixin Composition** | `ServiceWebPush` | Canal modulaire (templates + persistence) |
 | **Strategy** | `strategie="parallel\|failover"` | Algorithmes d'envoi interchangeables |

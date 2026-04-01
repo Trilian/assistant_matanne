@@ -22,8 +22,6 @@ import type {
   GrilleGeneree,
   PerformanceJeux,
   ResumeMensuel,
-  SuiviResponsable,
-  VerificationMise,
   AnalyseIA,
   BacktestResultat,
   NotificationJeux,

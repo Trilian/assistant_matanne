@@ -36,7 +36,7 @@ BackgroundScheduler(
 ### Rappels et notifications quotidiennes (12 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `rappels_famille` | Quotidien 07:00 | Rappels anniversaires, documents, crèche, jalons | WhatsApp |
 | `rappels_maison` | Quotidien 08:00 | Garanties, contrats, entretien | Service interne |
 | `rappels_generaux` | Quotidien 08:30 | Rappels intelligents : stock bas, garanties | ntfy + push |
@@ -53,7 +53,7 @@ BackgroundScheduler(
 ### Résumés hebdomadaires (6 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `resume_hebdo` | Lundi 07:30 | Résumé hebdomadaire agrégé | ntfy + email + WhatsApp |
 | `resume_hebdo_ia` | Dimanche 20:30 | Résumé narratif IA de la semaine | WhatsApp + email |
 | `score_weekend` | Vendredi 17:00 | Score weekend (activités + météo + contexte Jules) | ntfy + WhatsApp |
@@ -64,7 +64,7 @@ BackgroundScheduler(
 ### Rapports mensuels et analyses (9 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `rapport_mensuel_budget` | Le 1er à 08:15 | Rapport budget mensuel (famille + maison + jeux) | ntfy + email + WhatsApp |
 | `rapport_mensuel_auto` | Le 1er à 08:00 | Rapport mensuel consolidé automatique | ntfy + email + WhatsApp |
 | `rapport_maison_mensuel` | Le 1er à 09:30 | Synthèse maison (projets actifs, entretien 30j, dépenses) | ntfy + email |
@@ -78,7 +78,7 @@ BackgroundScheduler(
 ### Inventaire et péremptions (6 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `alertes_peremption_48h` | Quotidien 06:00 | Alertes péremption 48h (email si <24h critique) | ntfy + WhatsApp + email (si urgent) |
 | `alerte_stock_bas` | Quotidien 07:00 | Stock bas : ajout auto à la liste de courses | ntfy |
 | `stock_critique_zero` | Toutes les 3h à :00 | Alerte stock critique (quantité ≤ 0) | push + ntfy + WhatsApp |
@@ -89,7 +89,7 @@ BackgroundScheduler(
 ### Planning et programmation (5 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `planning_semaine_si_vide` | Dimanche 19:00 | J-3 : vérifie planning, propose menu IA si vide | WhatsApp + push |
 | `sync_google_calendar` | Quotidien 23:00 | Sync planning repas + activités → Google Calendar | Service interne |
 | `sync_routines_planning` | Quotidien 05:45 | Sync routines actives dans planning quotidien | Service interne |
@@ -99,7 +99,7 @@ BackgroundScheduler(
 ### Intégrations et synchronisations (9 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `garmin_sync_matinal` | Quotidien 06:00 | Sync données Garmin (profils connectés, lookback 2j) | Service interne |
 | `sync_jeux_budget` | Quotidien 22:00 | Sync gains/pertes jeux → budget famille | Service interne |
 | `sync_recoltes_inventaire` | Quotidien 06:15 | Auto-sync récoltes jardin → inventaire cuisine | Service interne |
@@ -113,7 +113,7 @@ BackgroundScheduler(
 ### IA et analyses (5 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `prediction_courses_weekly` | Dimanche 10:00 | Pré-remplissage liste courses depuis historique | ntfy + push |
 | `analyse_nutrition_hebdo` | Dimanche 20:00 | Analyse nutritionnelle simple sur repas planifiés | ntfy + email |
 | `recap_weekend_dimanche_soir` | Dimanche 20:00 | Récap weekend dimanche soir | WhatsApp + push |
@@ -123,7 +123,7 @@ BackgroundScheduler(
 ### Maintenance et nettoyage (7 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `entretien_saisonnier` | Lundi 06:00 | Vérification tâches entretien saisonnières | Service interne |
 | `enrichissement_catalogues` | Le 1er à 03:00 | Enrichissement IA des catalogues de référence | Service interne |
 | `nettoyage_cache_7j` | Quotidien 02:00 | Purge cache applicatif | Service interne |
@@ -135,7 +135,7 @@ BackgroundScheduler(
 ### Santé et bien-être (3 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `rappel_vaccins` | Lundi 09:00 | Rappels vaccins (horizon 30j + retards) | push + ntfy + WhatsApp |
 | `rappel_documents_expirants` | Quotidien 08:00 | Rappels documents famille expirants (urgence graduée) | push + ntfy + email |
 | `check_garmin_anomalies` | Quotidien 08:00 | Alerte si inactivité Garmin > 3 jours | ntfy + push |
@@ -143,27 +143,27 @@ BackgroundScheduler(
 ### Automatisations (1 job)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `automations_runner` | Toutes les 5 min | Exécution règles Si→Alors actives | Service interne |
 
 ### Gamification et performance (2 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `points_famille_hebdo` | Dimanche 20:00 | Calcul points famille + déblocage badges | push (badges) |
 | `maj_donnees_meteo` | Quotidien 06:00 | Préchargement données météo 7 jours | Service interne |
 
 ### Énergie et jardin (2 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `alertes_energie` | Quotidien 07:00 | Détection anomalies énergie (vs moyenne historique) | ntfy + push + email |
 | `tache_jardin_saisonniere` | Trimestriel (Mar/Jun/Sep/Dec) 06:00 | Rappels tâches jardin saisonnières | push + ntfy |
 
 ### Veille et budget (2 jobs)
 
 | ID | Horaire | Objet | Canaux |
-|----|---------|-------|--------|
+| ---- | --------- | ------- | -------- |
 | `veille_emploi` | Quotidien 07:00 | Veille marché emploi quotidienne (multi-sites) | Service interne |
 | `alertes_budget_seuil` | Quotidien 20:00 | Alerte si catégorie > 80% du budget mensuel | Service interne |
 
@@ -205,7 +205,7 @@ Fallback : variable `CRON_DEFAULT_USER_IDS` (CSV) si la base n'est pas disponibl
 ## Variables d'environnement
 
 | Variable | Usage | Défaut |
-|----------|-------|--------|
+| ---------- | ------- | -------- |
 | `CRON_DEFAULT_USER_IDS` | IDs utilisateurs fallback (CSV) | `"matanne"` |
 | `ADMIN_USER_IDS` | IDs admin pour alertes d'échec (CSV) | Premier utilisateur actif |
 | `ENVIRONMENT` | Mode dev/prod (affecte logging) | `"production"` |

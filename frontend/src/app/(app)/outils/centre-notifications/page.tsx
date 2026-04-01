@@ -145,7 +145,7 @@ export default function CentreNotificationsPage() {
               {Object.entries(stats.par_categorie || {}).map(([cat, count]) => (
                 <div key={cat} className="flex justify-between">
                   <span className="capitalize">{cat}</span>
-                  <span className="font-semibold">{count}</span>
+                  <span className="font-semibold">{String(count)}</span>
                 </div>
               ))}
             </CardContent>

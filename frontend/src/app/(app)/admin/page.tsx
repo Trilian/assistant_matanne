@@ -283,6 +283,9 @@ export default function PageAdmin() {
           { href: "/admin/feature-flags", icon: Flag, label: "Feature Flags", desc: "Runtime toggles" },
           { href: "/admin/cache", icon: DatabaseZap, label: "Cache dédié", desc: "Purge sélective" },
           { href: "/admin/whatsapp-test", icon: MessageSquare, label: "WhatsApp test", desc: "Numéro cible" },
+          { href: "/admin/console", icon: Play, label: "Console rapide", desc: "Commandes admin" },
+          { href: "/admin/scheduler", icon: Clock, label: "Scheduler visuel", desc: "Timeline CRON" },
+          { href: "/admin/logs", icon: Activity, label: "Logs live", desc: "WebSocket temps réel" },
         ].map(({ href, icon: Icon, label, desc }) => (
           <Link key={href} href={href}>
             <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
