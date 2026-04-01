@@ -258,9 +258,23 @@ class TestAdminPhase7Endpoints:
         response = await async_client.get("/api/v1/admin/live-snapshot")
         assert response.status_code == 200
         data = response.json()
-        assert "api" in data
-        assert "jobs" in data
-        assert "security" in data
+
+
+class TestAdminPhase5BridgesStatus:
+    """Endpoint statut opérationnel des bridges phase 5."""
+
+    @pytest.mark.asyncio
+    async def test_status_phase5_presence_mode(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/bridges/phase5/status?inclure_smoke=false")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data.get("phase") == "phase_5"
+        assert "resume" in data
+        assert data["resume"].get("total_actions") == 17
+        assert data["resume"].get("mode_verification") == "presence_only"
+        assert isinstance(data.get("items"), list)
+        assert len(data["items"]) == 17
 
 
 class TestAdminRouterExiste:

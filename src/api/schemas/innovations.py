@@ -50,16 +50,41 @@ class ParcoursOptimiseRequest(BaseModel):
     liste_id: int | None = Field(None, description="ID de la liste de courses (défaut: dernière active)")
 
 
+class MangeCeSoirRequest(BaseModel):
+    """Contexte utilisateur pour la suggestion dîner express."""
+
+    temps_disponible_min: int = Field(30, ge=10, le=180)
+    humeur: str = Field("rapide", min_length=2, max_length=50)
+
+
+class ComparateurEnergieRequest(BaseModel):
+    """Paramètres comparateur énergie."""
+
+    prix_kwh_actuel_eur: float = Field(0.2516, ge=0.05, le=2.0)
+    abonnement_mensuel_eur: float = Field(14.0, ge=0.0, le=200.0)
+
+
 # ── Responses (re-exports depuis types) ──
 
 from src.services.innovations.types import (  # noqa: E402
+    AlertesContextuellesResponse,
     AnalyseTendancesLotoResponse,
+    AnomaliesEnergieResponse,
+    ApprentissageHabitudesResponse,
     BilanAnnuelResponse,
+    CoachRoutinesResponse,
+    ComparateurEnergieResponse,
     DonneesInviteResponse,
     EnrichissementContactsResponse,
     LienInviteResponse,
+    PatternsAlimentairesResponse,
     ParcoursOptimiseResponse,
+    PlanningJulesAdaptatifResponse,
+    ResumeMensuelIAResponse,
+    SaisonnaliteIntelligenteResponse,
+    ScoreEcoResponsableResponse,
     ScoreBienEtreResponse,
+    SuggestionRepasSoirResponse,
     VeilleEmploiResponse,
 )
 
@@ -76,4 +101,17 @@ __all__ = [
     "AnalyseTendancesLotoResponse",
     "ParcoursOptimiseRequest",
     "ParcoursOptimiseResponse",
+    "MangeCeSoirRequest",
+    "SuggestionRepasSoirResponse",
+    "PatternsAlimentairesResponse",
+    "CoachRoutinesResponse",
+    "AnomaliesEnergieResponse",
+    "ResumeMensuelIAResponse",
+    "PlanningJulesAdaptatifResponse",
+    "ComparateurEnergieRequest",
+    "ComparateurEnergieResponse",
+    "ScoreEcoResponsableResponse",
+    "SaisonnaliteIntelligenteResponse",
+    "ApprentissageHabitudesResponse",
+    "AlertesContextuellesResponse",
 ]

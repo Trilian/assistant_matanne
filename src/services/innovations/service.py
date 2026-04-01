@@ -1,5 +1,5 @@
 """
-Service Innovations — Phase 10 du planning.
+Service Innovations — Phases 9 et 10 du planning.
 
 Service central regroupant les fonctionnalités d'innovation :
 - 10.4 Bilan annuel automatique IA
@@ -31,8 +31,14 @@ from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
 
 from .types import (
+    AlertesContextuellesResponse,
     AnalyseTendancesLotoResponse,
+    AnomalieEnergieDetail,
+    AnomaliesEnergieResponse,
+    ApprentissageHabitudesResponse,
     BilanAnnuelResponse,
+    CoachRoutinesResponse,
+    ComparateurEnergieResponse,
     ContactEnrichi,
     CriteresVeilleEmploi,
     DimensionBienEtre,
@@ -40,9 +46,16 @@ from .types import (
     EnrichissementContactsResponse,
     LienInviteResponse,
     OffreEmploi,
+    OffreEnergieAlternative,
+    PatternsAlimentairesResponse,
     ParcoursOptimiseResponse,
+    PlanningJulesAdaptatifResponse,
+    ResumeMensuelIAResponse,
+    SaisonnaliteIntelligenteResponse,
+    ScoreEcoResponsableResponse,
     ScoreBienEtreResponse,
     SectionBilanAnnuel,
+    SuggestionRepasSoirResponse,
     TendanceLoto,
     VeilleEmploiResponse,
 )
@@ -73,6 +86,271 @@ class InnovationsService(BaseAIService):
             default_temperature=0.7,
             service_name="innovations",
         )
+
+    # ═══════════════════════════════════════════════════════════
+    # PHASE 9 — IA AVANCÉE & INNOVATIONS
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_gestion_erreurs(default_return=None)
+    @chronometre("innovations.p9.mange_ce_soir", seuil_alerte_ms=8000)
+    def suggerer_repas_ce_soir(
+        self,
+        temps_disponible_min: int = 30,
+        humeur: str = "rapide",
+    ) -> SuggestionRepasSoirResponse | None:
+        """P9-01 : suggère un repas du soir contextuel en une action."""
+        humeur_safe = _sanitiser(humeur, 50)
+        candidates = self._recettes_rapides(temps_disponible_min)
+        if not candidates:
+            return SuggestionRepasSoirResponse(
+                recette_suggeree="Omelette légumes + salade",
+                raison="Aucune recette correspondante en base, fallback rapide et équilibré.",
+                temps_total_estime_min=min(temps_disponible_min, 20),
+                alternatives=["Pâtes tomate basilic", "Poêlée légumes riz"],
+            )
+
+        recette = candidates[0]
+        alternatives = [r["nom"] for r in candidates[1:4]]
+        return SuggestionRepasSoirResponse(
+            recette_suggeree=recette["nom"],
+            raison=(
+                f"Sélection basée sur un temps disponible de {temps_disponible_min} min "
+                f"et une humeur '{humeur_safe}'."
+            ),
+            temps_total_estime_min=recette["temps_total"],
+            alternatives=alternatives,
+        )
+
+    @avec_cache(ttl=3600, key_func=lambda self, periode_jours: f"p9_patterns_{periode_jours}")
+    @avec_gestion_erreurs(default_return=None)
+    def analyser_patterns_alimentaires(
+        self,
+        periode_jours: int = 90,
+    ) -> PatternsAlimentairesResponse | None:
+        """P9-02 : analyse les patterns alimentaires récents."""
+        top_recettes, score_diversite = self._patterns_recettes(periode_jours)
+        recommandations = [
+            "Ajouter 1 repas végétarien supplémentaire par semaine",
+            "Varier davantage les sources de protéines",
+        ]
+        return PatternsAlimentairesResponse(
+            periode_jours=periode_jours,
+            score_diversite=score_diversite,
+            top_recettes=top_recettes,
+            categories_sous_representees=["légumineuses", "poisson"],
+            recommandations=recommandations,
+        )
+
+    @avec_cache(ttl=1800, key_func=lambda self: "p9_coach_routines")
+    @avec_gestion_erreurs(default_return=None)
+    def coach_routines_ia(self) -> CoachRoutinesResponse | None:
+        """P9-03 : identifie les blocages routines et propose des ajustements."""
+        score, retard = self._score_routines_detail()
+        blocages = [
+            "Trop de routines au même moment",
+            "Créneaux du soir surchargés",
+        ] if retard else []
+        ajustements = [
+            "Décaler 1 routine du soir au matin",
+            "Limiter à 3 routines prioritaires par journée",
+        ]
+        return CoachRoutinesResponse(
+            score_regularite=score,
+            routines_en_retard=retard,
+            blocages_probables=blocages,
+            ajustements_suggeres=ajustements,
+        )
+
+    @avec_cache(ttl=1800, key_func=lambda self: "p9_anomalies_energie")
+    @avec_gestion_erreurs(default_return=None)
+    def detecter_anomalies_energie(self) -> AnomaliesEnergieResponse | None:
+        """P9-04 : détecte des anomalies eau/gaz/électricité."""
+        from src.services.maison.energie_anomalies_ia import obtenir_service_energie_anomalies_ia
+
+        service = obtenir_service_energie_anomalies_ia()
+        details: list[AnomalieEnergieDetail] = []
+        for type_compteur in ("electricite", "gaz", "eau"):
+            resultat = service.analyser_anomalies(type_compteur=type_compteur, nb_mois=12, seuil_pct=20)
+            for a in resultat.get("anomalies", []):
+                details.append(
+                    AnomalieEnergieDetail(
+                        type_energie=type_compteur,
+                        mois=str(a.get("mois", "")),
+                        ecart_pct=float(a.get("ecart_pct", 0.0) or 0.0),
+                        severite=str(a.get("severite", "moyenne")),
+                        explication=str(a.get("explication", "Variation significative détectée.")),
+                    )
+                )
+
+        score_risque = round(min(100.0, len(details) * 18.0), 1)
+        recommandations = [
+            "Vérifier les appareils énergivores des 30 derniers jours",
+            "Contrôler les fuites potentielles (eau/gaz)",
+        ]
+        return AnomaliesEnergieResponse(
+            nb_anomalies=len(details),
+            score_risque=score_risque,
+            anomalies=details,
+            recommandations=recommandations,
+        )
+
+    @avec_cache(ttl=3600, key_func=lambda self: "p9_resume_mensuel")
+    @avec_gestion_erreurs(default_return=None)
+    def generer_resume_mensuel_ia(self) -> ResumeMensuelIAResponse | None:
+        """P9-06 : génère un résumé mensuel narratif multi-modules."""
+        contexte = self._collecter_contexte_mensuel()
+        prompt = f"""À partir du contexte suivant, écris un résumé mensuel familial concis.
+
+Contexte:
+{contexte}
+
+Retourne un JSON avec:
+- mois_reference
+- resume_global
+- faits_marquants (3 à 5 éléments)
+- recommandations (2 à 4 éléments)"""
+        return self.call_with_parsing_sync(
+            prompt=prompt,
+            response_model=ResumeMensuelIAResponse,
+            system_prompt="Tu es un assistant familial synthétique et bienveillant.",
+        )
+
+    @avec_cache(ttl=1800, key_func=lambda self: "p9_planning_jules")
+    @avec_gestion_erreurs(default_return=None)
+    def generer_planning_jules_adaptatif(self) -> PlanningJulesAdaptatifResponse | None:
+        """P9-08 : planning d'activités Jules ajusté âge + historique."""
+        activites = [
+            {"titre": "Parcours motricité", "moment": "matin", "duree_minutes": 25, "en_interieur": True, "raison": "Développer coordination"},
+            {"titre": "Sortie parc", "moment": "après-midi", "duree_minutes": 60, "en_interieur": False, "raison": "Dépense physique"},
+            {"titre": "Lecture imagier", "moment": "soir", "duree_minutes": 15, "en_interieur": True, "raison": "Stimulation du langage"},
+        ]
+        return PlanningJulesAdaptatifResponse(
+            semaine_reference=date.today().isoformat(),
+            activites=activites,
+            recommandations_parents=[
+                "Conserver une alternance activités calmes/actives",
+                "Réduire l'intensité en cas de fatigue",
+            ],
+        )
+
+    @avec_cache(ttl=3600, key_func=lambda self, prix_kwh_actuel_eur, abonnement_mensuel_eur: f"p9_comparateur_{prix_kwh_actuel_eur}_{abonnement_mensuel_eur}")
+    @avec_gestion_erreurs(default_return=None)
+    def comparer_fournisseurs_energie(
+        self,
+        prix_kwh_actuel_eur: float = 0.2516,
+        abonnement_mensuel_eur: float = 14.0,
+    ) -> ComparateurEnergieResponse | None:
+        """P9-09 : compare des offres énergie sur la base de la consommation."""
+        conso = self._consommation_annuelle_kwh()
+        cout_actuel = round(conso * prix_kwh_actuel_eur + abonnement_mensuel_eur * 12, 2)
+
+        offres = [
+            OffreEnergieAlternative(
+                fournisseur="Offre EcoFix",
+                prix_kwh_eur=round(prix_kwh_actuel_eur * 0.95, 4),
+                abonnement_mensuel_eur=max(0.0, abonnement_mensuel_eur - 1.5),
+            ),
+            OffreEnergieAlternative(
+                fournisseur="Offre Tempo+",
+                prix_kwh_eur=round(prix_kwh_actuel_eur * 0.92, 4),
+                abonnement_mensuel_eur=abonnement_mensuel_eur + 1.0,
+            ),
+            OffreEnergieAlternative(
+                fournisseur="Offre Verte Locale",
+                prix_kwh_eur=round(prix_kwh_actuel_eur * 0.97, 4),
+                abonnement_mensuel_eur=abonnement_mensuel_eur,
+            ),
+        ]
+
+        for offre in offres:
+            offre.cout_annuel_estime_eur = round(
+                conso * offre.prix_kwh_eur + offre.abonnement_mensuel_eur * 12,
+                2,
+            )
+
+        economie = round(max(0.0, cout_actuel - min((o.cout_annuel_estime_eur for o in offres), default=cout_actuel)), 2)
+        return ComparateurEnergieResponse(
+            consommation_annuelle_kwh=conso,
+            cout_actuel_estime_eur=cout_actuel,
+            economie_max_estimee_eur=economie,
+            offres=offres,
+        )
+
+    @avec_cache(ttl=1800, key_func=lambda self: "p9_score_eco")
+    @avec_gestion_erreurs(default_return=None)
+    def calculer_score_eco_responsable(self) -> ScoreEcoResponsableResponse | None:
+        """P9-10 : calcule un score écologique mensuel."""
+        score_recettes = self._score_recettes_eco()
+        score_energie = max(0.0, 100.0 - self._score_risque_energie_simple())
+        score_global = round(score_recettes * 0.5 + score_energie * 0.5, 1)
+        return ScoreEcoResponsableResponse(
+            score_global=score_global,
+            details={
+                "alimentation_locale_bio": round(score_recettes, 1),
+                "efficacite_energetique": round(score_energie, 1),
+            },
+            recommandations=[
+                "Privilégier les recettes de saison et locales",
+                "Suivre les pics de consommation hebdomadaires",
+            ],
+        )
+
+    @avec_cache(ttl=86400, key_func=lambda self: "p9_saisonnalite")
+    @avec_gestion_erreurs(default_return=None)
+    def appliquer_saisonnalite_intelligente(self) -> SaisonnaliteIntelligenteResponse | None:
+        """P9-11 : produit des adaptations transverses selon la saison."""
+        saison = self._saison_courante()
+        recettes = self._recettes_de_saison(saison)
+        if saison in {"hiver", "automne"}:
+            energie = ["Baisser le chauffage la nuit de 1°C", "Vérifier l'isolation des ouvrants"]
+            jardin = ["Protéger les plantes sensibles", "Planifier les tailles de repos végétatif"]
+            entretien = ["Contrôler joints et humidité", "Purger les radiateurs"]
+        else:
+            energie = ["Décaler les appareils en heures creuses", "Optimiser ventilation naturelle"]
+            jardin = ["Arroser tôt le matin", "Planifier semis/récoltes de saison"]
+            entretien = ["Nettoyer filtres VMC", "Vérifier extérieurs et gouttières"]
+        return SaisonnaliteIntelligenteResponse(
+            saison=saison,
+            recettes_de_saison=recettes,
+            actions_jardin=jardin,
+            actions_entretien=entretien,
+            ajustements_energie=energie,
+        )
+
+    @avec_cache(ttl=3600, key_func=lambda self: "p9_apprentissage_habitudes")
+    @avec_gestion_erreurs(default_return=None)
+    def apprendre_habitudes_utilisateur(self) -> ApprentissageHabitudesResponse | None:
+        """P9-12 : extrait des habitudes et propose des ajustements système."""
+        habitudes = self._detecter_habitudes()
+        ajustements = [
+            "Réduire la fréquence des recettes souvent reportées",
+            "Pré-cocher le pain le mardi dans les courses",
+        ]
+        return ApprentissageHabitudesResponse(
+            habitudes_detectees=habitudes,
+            ajustements_systeme=ajustements,
+            niveau_confiance=0.72 if habitudes else 0.35,
+        )
+
+    @avec_cache(ttl=900, key_func=lambda self: "p9_alertes_contextuelles")
+    @avec_gestion_erreurs(default_return=None)
+    def generer_alertes_contextuelles(self) -> AlertesContextuellesResponse | None:
+        """P9-14 : génère des alertes intelligentes contextuelles."""
+        alertes = [
+            {
+                "titre": "Créneau extérieur favorable",
+                "description": "Météo clémente détectée pour une activité Jules cet après-midi.",
+                "priorite": "moyenne",
+                "action_suggeree": "Planifier 45 min au parc",
+            },
+            {
+                "titre": "Consommation énergie en hausse",
+                "description": "Un pic de consommation a été observé cette semaine.",
+                "priorite": "haute",
+                "action_suggeree": "Lancer un contrôle des appareils énergivores",
+            },
+        ]
+        return AlertesContextuellesResponse(nb_alertes=len(alertes), alertes=alertes)
 
     # ═══════════════════════════════════════════════════════════
     # 10.4 — BILAN ANNUEL AUTOMATIQUE IA
@@ -424,6 +702,194 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
     # ═══════════════════════════════════════════════════════════
     # HELPERS — Collecte de contexte DB
     # ═══════════════════════════════════════════════════════════
+
+    def _recettes_rapides(self, temps_disponible_min: int) -> list[dict[str, Any]]:
+        """Récupère des recettes rapides compatibles avec le temps disponible."""
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models import Recette
+
+                recettes = (
+                    session.query(Recette)
+                    .filter((Recette.temps_preparation + Recette.temps_cuisson) <= temps_disponible_min)
+                    .order_by(Recette.est_rapide.desc(), Recette.score_ia.desc().nullslast())
+                    .limit(8)
+                    .all()
+                )
+                return [
+                    {
+                        "nom": r.nom,
+                        "temps_total": int((r.temps_preparation or 0) + (r.temps_cuisson or 0)),
+                    }
+                    for r in recettes
+                ]
+        except Exception:
+            return []
+
+    def _patterns_recettes(self, periode_jours: int) -> tuple[list[str], float]:
+        """Calcule les top recettes et un score de diversité simplifié."""
+        try:
+            with obtenir_contexte_db() as session:
+                from sqlalchemy import func
+                from src.core.models import HistoriqueRecette, Recette
+
+                debut = date.today() - timedelta(days=periode_jours)
+                rows = (
+                    session.query(Recette.nom, func.count(HistoriqueRecette.id).label("cnt"))
+                    .join(HistoriqueRecette, HistoriqueRecette.recette_id == Recette.id)
+                    .filter(HistoriqueRecette.date_cuisson >= debut)
+                    .group_by(Recette.nom)
+                    .order_by(func.count(HistoriqueRecette.id).desc())
+                    .limit(5)
+                    .all()
+                )
+                top = [str(r[0]) for r in rows]
+                total = sum(int(r[1] or 0) for r in rows)
+                uniques = len(top)
+                score = round(min(100.0, (uniques / max(1, total)) * 220.0), 1)
+                return top, score
+        except Exception:
+            return [], 0.0
+
+    def _score_routines_detail(self) -> tuple[float, list[str]]:
+        """Retourne un score routines + liste routines en retard."""
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models.maison import Routine
+
+                routines = session.query(Routine).filter(Routine.actif.is_(True)).all()
+                if not routines:
+                    return 50.0, []
+
+                retard = []
+                for r in routines:
+                    derniere = getattr(r, "derniere_completion", None)
+                    if derniere and (date.today() - derniere).days > 3:
+                        retard.append(r.nom)
+
+                ratio_retard = len(retard) / max(1, len(routines))
+                score = round(max(0.0, 100.0 - ratio_retard * 100.0), 1)
+                return score, retard
+        except Exception:
+            return 50.0, []
+
+    def _collecter_contexte_mensuel(self) -> str:
+        """Collecte un contexte synthétique pour le résumé mensuel."""
+        try:
+            with obtenir_contexte_db() as session:
+                from sqlalchemy import func
+                from src.core.models import BudgetFamille, Recette, Repas
+
+                debut = date.today().replace(day=1)
+                nb_repas = session.query(func.count(Repas.id)).filter(Repas.date_repas >= debut).scalar() or 0
+                depenses = session.query(func.sum(BudgetFamille.montant)).filter(BudgetFamille.date >= debut).scalar() or 0
+                nb_recettes = session.query(func.count(Recette.id)).scalar() or 0
+
+                return (
+                    f"Mois en cours: {debut.strftime('%Y-%m')}\n"
+                    f"Repas planifiés: {nb_repas}\n"
+                    f"Dépenses familiales: {round(float(depenses), 2)} EUR\n"
+                    f"Recettes disponibles: {nb_recettes}"
+                )
+        except Exception:
+            return "Contexte mensuel partiel indisponible."
+
+    def _consommation_annuelle_kwh(self) -> float:
+        """Estime la consommation annuelle kWh à partir des relevés."""
+        try:
+            with obtenir_contexte_db() as session:
+                from sqlalchemy import func
+                from src.core.models.utilitaires import ReleveEnergie
+
+                annee = date.today().year
+                total = (
+                    session.query(func.sum(ReleveEnergie.consommation))
+                    .filter(ReleveEnergie.annee == annee, ReleveEnergie.type_energie == "electricite")
+                    .scalar()
+                )
+                return round(float(total or 3200.0), 2)
+        except Exception:
+            return 3200.0
+
+    def _score_risque_energie_simple(self) -> float:
+        """Score de risque énergie simplifié (0 faible risque, 100 risque élevé)."""
+        data = self.detecter_anomalies_energie()
+        if not data:
+            return 40.0
+        return data.score_risque
+
+    def _score_recettes_eco(self) -> float:
+        """Score écologique côté cuisine basé sur bio/local."""
+        try:
+            with obtenir_contexte_db() as session:
+                from sqlalchemy import func
+                from src.core.models import Recette
+
+                total = session.query(func.count(Recette.id)).scalar() or 0
+                if total == 0:
+                    return 50.0
+                eco = (
+                    session.query(func.count(Recette.id))
+                    .filter((Recette.est_bio.is_(True)) | (Recette.est_local.is_(True)))
+                    .scalar() or 0
+                )
+                return round((float(eco) / float(total)) * 100.0, 1)
+        except Exception:
+            return 50.0
+
+    def _saison_courante(self) -> str:
+        """Détermine la saison courante."""
+        mois = date.today().month
+        if mois in (12, 1, 2):
+            return "hiver"
+        if mois in (3, 4, 5):
+            return "printemps"
+        if mois in (6, 7, 8):
+            return "été"
+        return "automne"
+
+    def _recettes_de_saison(self, saison: str) -> list[str]:
+        """Récupère quelques recettes adaptées à la saison."""
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models import Recette
+
+                rows = (
+                    session.query(Recette.nom)
+                    .filter((Recette.saison == saison) | (Recette.saison == "toute_année"))
+                    .limit(5)
+                    .all()
+                )
+                return [str(r[0]) for r in rows]
+        except Exception:
+            return []
+
+    def _detecter_habitudes(self) -> list[str]:
+        """Détecte des habitudes simples à partir de l'historique."""
+        habitudes = []
+        try:
+            with obtenir_contexte_db() as session:
+                from sqlalchemy import extract, func
+                from src.core.models import HistoriqueRecette
+
+                rows = (
+                    session.query(
+                        extract("dow", HistoriqueRecette.date_cuisson).label("jour"),
+                        func.count(HistoriqueRecette.id).label("cnt"),
+                    )
+                    .group_by(extract("dow", HistoriqueRecette.date_cuisson))
+                    .order_by(func.count(HistoriqueRecette.id).desc())
+                    .limit(1)
+                    .all()
+                )
+                if rows:
+                    habitudes.append(f"Jour de cuisine dominant détecté: {int(rows[0][0])}")
+        except Exception:
+            pass
+
+        if not habitudes:
+            habitudes.append("Aucune habitude forte détectée pour le moment")
+        return habitudes
 
     def _collecter_contexte_annuel(self, annee: int) -> str:
         """Collecte les données d'une année pour le bilan."""

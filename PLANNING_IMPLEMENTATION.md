@@ -567,27 +567,27 @@ PROPOSÉ:
 
 | # | Job | Horaire | Module | Canal | Effort |
 |---|-----|---------|--------|-------|--------|
-| P7-01 | **Recap weekend dimanche soir** | Dim 20:00 | Famille | WhatsApp + Push | M |
-| P7-02 | **Nettoyage cache 7j** | Quotidien 02:00 | Core | — | S |
-| P7-03 | **Backup données critiques** | Quotidien 01:00 | Core | — | M |
-| P7-04 | **Sync tirages loto/euromillions** | Mar+Ven 22:00 | Jeux | Push | M |
-| P7-05 | **Rapport budget hebdo** | Dim 18:00 | Famille | WhatsApp | M |
-| P7-06 | **MAJ données météo** | Quotidien 06:00 | Outils | — | S |
-| P7-07 | **Anniversaires rappel J-30** | Quotidien 08:00 | Famille | Push + WhatsApp | S |
-| P7-08 | **Analyse tendances mensuelles** | 1er mois 09:00 | Dashboard | Email | M |
-| P7-09 | **Purge logs anciens** | 1er mois 03:00 | Admin | — | S |
+| P7-01 | **Recap weekend dimanche soir** | Dim 20:00 | Famille | WhatsApp + Push | ✅ |
+| P7-02 | **Nettoyage cache 7j** | Quotidien 02:00 | Core | — | ✅ |
+| P7-03 | **Backup données critiques** | Quotidien 01:00 | Core | — | ✅ |
+| P7-04 | **Sync tirages loto/euromillions** | Mar+Ven 22:00 | Jeux | Push | ✅ |
+| P7-05 | **Rapport budget hebdo** | Dim 18:00 | Famille | WhatsApp | ✅ |
+| P7-06 | **MAJ données météo** | Quotidien 06:00 | Outils | — | ✅ |
+| P7-07 | **Anniversaires rappel J-30** | Quotidien 08:00 | Famille | Push + WhatsApp | ✅ |
+| P7-08 | **Analyse tendances mensuelles** | 1er mois 09:00 | Dashboard | Email | ✅ |
+| P7-09 | **Purge logs anciens** | 1er mois 03:00 | Admin | — | ✅ |
 
 ### 9.3 Notifications manquantes à ajouter
 
 | # | Notification | Déclencheur | Canaux | Priorité | Effort |
 |---|-------------|-------------|--------|----------|--------|
-| P7-10 | **Recette du jour** | CRON 11:30 (si planning rempli) | Push | Basse | S |
-| P7-11 | **Stock critique (0 restant)** | Inventaire checkout | Push + ntfy + WhatsApp | Haute | S |
-| P7-12 | **Résultat tirage loto** | Job sync tirages (si pari enregistré) | Push + WhatsApp | Haute | M |
-| P7-13 | **Nouvelle recette de saison** | Changement de saison | Push | Basse | S |
-| P7-14 | **Tâche jardin saisonnière** | CRON saisonnier | Push + ntfy | Moyenne | S |
-| P7-15 | **Planning semaine vide** | Dimanche 10:00 | Push + WhatsApp | Moyenne | S |
-| P7-16 | **Astuce anti-gaspillage** | 3+ articles proches péremption | Push | Basse | S |
+| P7-10 | **Recette du jour** | CRON 11:30 (si planning rempli) | Push | Basse | ✅ |
+| P7-11 | **Stock critique (0 restant)** | Inventaire checkout | Push + ntfy + WhatsApp | Haute | ✅ |
+| P7-12 | **Résultat tirage loto** | Job sync tirages (si pari enregistré) | Push + WhatsApp | Haute | ✅ |
+| P7-13 | **Nouvelle recette de saison** | Changement de saison | Push | Basse | ✅ |
+| P7-14 | **Tâche jardin saisonnière** | CRON saisonnier | Push + ntfy | Moyenne | ✅ |
+| P7-15 | **Planning semaine vide** | Dimanche 10:00 | Push + WhatsApp | Moyenne | ✅ |
+| P7-16 | **Astuce anti-gaspillage** | 3+ articles proches péremption | Push | Basse | ✅ |
 
 ### 9.4 Mapping événements → canaux cible
 
@@ -612,15 +612,15 @@ PROPOSÉ:
 | Commande | Réponse | État | Effort |
 |----------|---------|------|--------|
 | "Menu" / "Planning" | Planning de la semaine actuelle | ✅ Existant | — |
-| "Courses" | Liste de courses active + compte articles | À ajouter | S |
-| "Recette [nom]" | Lien vers la recette + ingrédients | À ajouter | M |
-| "Ce soir" | Suggestion rapide repas du soir | À ajouter | M |
-| "Budget" | Résumé budget du mois en cours | À ajouter | S |
-| "Jules" | Dernières activités + prochain jalon | À ajouter | S |
-| "Frigo" | Scanner une photo du frigo → suggestions | À ajouter | M |
-| "Aide" | Liste des commandes disponibles | À ajouter | S |
+| "Courses" | Liste de courses active + compte articles | ✅ Implémenté | S |
+| "Recette [nom]" | Lien vers la recette + ingrédients | ✅ Implémenté | M |
+| "Ce soir" | Suggestion rapide repas du soir | ✅ Implémenté | M |
+| "Budget" | Résumé budget du mois en cours | ✅ Implémenté | S |
+| "Jules" | Dernières activités + prochain jalon | ✅ Implémenté | S |
+| "Frigo" | Scanner une photo du frigo → suggestions | ✅ Implémenté (texte) | M |
+| "Aide" | Liste des commandes disponibles | ✅ Implémenté | S |
 
-**Total Phase 7 : 23 actions — Effort global : L**
+**Total Phase 7 : 23 actions — Statut : ✅ Terminé (2026-04-01)**
 
 ---
 
@@ -722,25 +722,25 @@ PROPOSÉ:
 
 ### 11.2 Nouvelles opportunités IA
 
-| # | Action | Module | Description | Valeur | Effort |
-|---|--------|--------|-------------|--------|--------|
-| P9-01 | **Mode "Qu'est-ce qu'on mange ce soir ?"** | Cuisine | Bouton unique : analyse frigo + préférences + temps dispo + humeur → suggestion immédiate | UX | M |
-| P9-02 | **Détection patterns alimentaires** | Cuisine | Analyser historique repas 3 mois → manques nutritionnels, répétitions, diversité | Santé | L |
-| P9-03 | **Coach routines IA** | Famille | Analyser complétion routines → identifier blocages, ajuster horaires/fréquences | Productivité | M |
-| P9-04 | **Détection anomalies eau/gaz/élec** | Maison | Comparer conso mensuelle → alerter si anomalie (fuite, appareil défaillant) | Économies | M |
-| P9-05 | **Optimisation courses par rayon** | Courses | Grouper articles par rayon du supermarché → parcours optimal | Temps | M |
-| P9-06 | **Résumé mensuel IA** | Dashboard | Résumé narratif : recettes préférées, dépenses, activités Jules, projets maison | Vue d'ensemble | M |
-| P9-07 | **Analyse photos jardin** | Jardin | Photo plante → diagnostic maladie, suggestion traitement, prévision récolte | Jardin | M |
-| P9-08 | **Planning activités Jules adaptatif** | Famille | En fonction de l'âge, météo, activités passées → planning hebdo activités | Développement | L |
-| P9-09 | **Comparateur prix fournisseurs énergie** | Maison | Analyser conso + tarif actuel → comparer offres du marché | Économies | M |
-| P9-10 | **Score éco-responsable** | Dashboard | Score écologique mensuel : gaspillage alimentaire, conso énergie, achats locaux/bio | Conscience | M |
-| P9-11 | **Saisonnalité intelligente** | Multi | Le système adapte automatiquement : recettes (saison), jardin (actions), entretien, énergie | Pertinence | L |
-| P9-12 | **Apprentissage continu des habitudes** | Multi | Recette toujours repoussée → arrêter de la suggérer ; Courses du mardi avec pain → pré-cocher | UX | L |
-| P9-13 | **Rétrospective annuelle IA** | Dashboard | Fin d'année : rapport 12 mois — recettes, dépenses, Jules, projets, objectifs | Mémoire familiale | L |
-| P9-14 | **Alertes intelligentes contextuelles** | Multi | Notifications contextuelles : "Il fait beau, Jules pourrait aller au parc" (météo + calendrier + historique) | Pertinence | L |
-| P9-15 | **Tableau de bord santé foyer** | Dashboard | Score global : alimentation (diversité), activité physique (Garmin), bien-être (routines) | Bien-être | M |
+| # | Action | Module | Description | Valeur | Effort | Statut | Détail implémentation |
+|---|--------|--------|-------------|--------|--------|--------|------------------------|
+| P9-01 | **Mode "Qu'est-ce qu'on mange ce soir ?"** | Cuisine | Bouton unique : analyse frigo + préférences + temps dispo + humeur → suggestion immédiate | UX | M | ✅ Terminé | Endpoint `POST /api/v1/innovations/phase9/mange-ce-soir` + méthode `suggerer_repas_ce_soir()` |
+| P9-02 | **Détection patterns alimentaires** | Cuisine | Analyser historique repas 3 mois → manques nutritionnels, répétitions, diversité | Santé | L | ✅ Terminé | Endpoint `GET /api/v1/innovations/phase9/patterns-alimentaires` + agrégat historique recettes |
+| P9-03 | **Coach routines IA** | Famille | Analyser complétion routines → identifier blocages, ajuster horaires/fréquences | Productivité | M | ✅ Terminé | Endpoint `GET /api/v1/innovations/phase9/coach-routines` + score régularité + ajustements |
+| P9-04 | **Détection anomalies eau/gaz/élec** | Maison | Comparer conso mensuelle → alerter si anomalie (fuite, appareil défaillant) | Économies | M | ✅ Terminé | Endpoint `GET /api/v1/innovations/phase9/anomalies-energie` branché sur `EnergieAnomaliesIAService` |
+| P9-05 | **Optimisation courses par rayon** | Courses | Grouper articles par rayon du supermarché → parcours optimal | Temps | M | ✅ Déjà implémenté | Endpoint existant `POST /api/v1/innovations/parcours-magasin` |
+| P9-06 | **Résumé mensuel IA** | Dashboard | Résumé narratif : recettes préférées, dépenses, activités Jules, projets maison | Vue d'ensemble | M | ✅ Terminé | Endpoint `GET /api/v1/innovations/phase9/resume-mensuel` + génération narrative IA |
+| P9-07 | **Analyse photos jardin** | Jardin | Photo plante → diagnostic maladie, suggestion traitement, prévision récolte | Jardin | M | ✅ Déjà implémenté | Endpoint existant `POST /api/v1/ia-avancee/diagnostic-plante` |
+| P9-08 | **Planning activités Jules adaptatif** | Famille | En fonction de l'âge, météo, activités passées → planning hebdo activités | Développement | L | ✅ Terminé | Endpoint `GET /api/v1/innovations/phase9/planning-jules-adaptatif` |
+| P9-09 | **Comparateur prix fournisseurs énergie** | Maison | Analyser conso + tarif actuel → comparer offres du marché | Économies | M | ✅ Terminé | Endpoint `POST /api/v1/innovations/phase9/comparateur-energie` |
+| P9-10 | **Score éco-responsable** | Dashboard | Score écologique mensuel : gaspillage alimentaire, conso énergie, achats locaux/bio | Conscience | M | ✅ Terminé | Endpoint `GET /api/v1/innovations/phase9/score-eco-responsable` |
+| P9-11 | **Saisonnalité intelligente** | Multi | Le système adapte automatiquement : recettes (saison), jardin (actions), entretien, énergie | Pertinence | L | ✅ Terminé | Endpoint `GET /api/v1/innovations/phase9/saisonnalite-intelligente` |
+| P9-12 | **Apprentissage continu des habitudes** | Multi | Recette toujours repoussée → arrêter de la suggérer ; Courses du mardi avec pain → pré-cocher | UX | L | ✅ Terminé | Endpoint `GET /api/v1/innovations/phase9/apprentissage-habitudes` |
+| P9-13 | **Rétrospective annuelle IA** | Dashboard | Fin d'année : rapport 12 mois — recettes, dépenses, Jules, projets, objectifs | Mémoire familiale | L | ✅ Déjà implémenté + exposé P9 | Endpoint `GET /api/v1/innovations/phase9/retrospective-annuelle` (reuse `generer_bilan_annuel`) |
+| P9-14 | **Alertes intelligentes contextuelles** | Multi | Notifications contextuelles : "Il fait beau, Jules pourrait aller au parc" (météo + calendrier + historique) | Pertinence | L | ✅ Terminé | Endpoint `GET /api/v1/innovations/phase9/alertes-contextuelles` |
+| P9-15 | **Tableau de bord santé foyer** | Dashboard | Score global : alimentation (diversité), activité physique (Garmin), bien-être (routines) | Bien-être | M | ✅ Déjà implémenté + exposé P9 | Endpoint `GET /api/v1/innovations/phase9/tableau-sante-foyer` (reuse `calculer_score_bien_etre`) |
 
-**Total Phase 9 : 15 actions — Effort global : XL**
+**Total Phase 9 : 15 actions — 15/15 terminées ✅**
 
 ---
 

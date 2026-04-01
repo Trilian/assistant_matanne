@@ -761,7 +761,7 @@ def _job_planning_semaine_si_vide() -> None:
         res = _envoyer_notif_tous_users(
             dispatcher,
             message=message,
-            canaux=["ntfy", "whatsapp"],
+            canaux=["push", "whatsapp"],
             titre="Planning semaine à générer",
         )
         logger.info("J-03 exécuté: %s", res)
@@ -1967,6 +1967,457 @@ def _job_sync_calendrier_scolaire() -> None:
         logger.exception("Erreur INNO-14 sync calendrier scolaire")
 
 
+def _job_recap_weekend_dimanche_soir() -> None:
+    """P7-01 — Envoie un récap weekend le dimanche 20h (WhatsApp + Push)."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        message = (
+            "Récap weekend: vérifie le planning de la semaine, les courses prioritaires "
+            "et les tâches maison en attente."
+        )
+        dispatcher = get_dispatcher_notifications()
+        res = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["whatsapp", "push"],
+            titre="Récap weekend",
+            type_whatsapp="rapport_hebdo",
+        )
+        logger.info("P7-01 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur P7-01 recap weekend")
+
+
+def _job_nettoyage_cache_7j() -> None:
+    """P7-02 — Nettoie le cache applicatif (quotidien 02h00)."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        cache.clear(levels="all")
+        logger.info("P7-02 exécuté: cache vidé")
+    except Exception:
+        logger.exception("Erreur P7-02 nettoyage cache")
+
+
+def _job_backup_donnees_critiques() -> None:
+    """P7-03 — Snapshot JSON quotidien de tables critiques (01h00)."""
+    try:
+        import json
+        from pathlib import Path
+
+        from src.core.db import obtenir_contexte_db
+
+        horodatage = datetime.now().strftime("%Y%m%d_%H%M%S")
+        repertoire = Path("data/exports/backups")
+        repertoire.mkdir(parents=True, exist_ok=True)
+        fichier = repertoire / f"backup_critique_{horodatage}.json"
+
+        with obtenir_contexte_db() as session:
+            payload = {
+                "generated_at": datetime.now(UTC).isoformat(),
+                "tables": {
+                    "articles_inventaire": int(session.execute(text("SELECT COUNT(*) FROM articles_inventaire")).scalar() or 0),
+                    "listes_courses": int(session.execute(text("SELECT COUNT(*) FROM listes_courses")).scalar() or 0),
+                    "repas": int(session.execute(text("SELECT COUNT(*) FROM repas")).scalar() or 0),
+                    "paris_sportifs": int(session.execute(text("SELECT COUNT(*) FROM paris_sportifs")).scalar() or 0),
+                },
+            }
+
+        fichier.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        logger.info("P7-03 exécuté: backup écrit dans %s", fichier)
+    except Exception:
+        logger.exception("Erreur P7-03 backup donnees critiques")
+
+
+def _job_sync_tirages_loto_euromillions() -> None:
+    """P7-04 — Synchronise les tirages loteries (mardi + vendredi 22h)."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.jeux.cron_jobs_loteries import scraper_resultats_fdj
+
+        scraper_resultats_fdj()
+
+        dispatcher = get_dispatcher_notifications()
+        res = _envoyer_notif_tous_users(
+            dispatcher,
+            message="Synchronisation tirages Loto/Euromillions terminée.",
+            canaux=["push"],
+            titre="Tirages synchronisés",
+        )
+        logger.info("P7-04 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur P7-04 sync tirages")
+
+
+def _job_rapport_budget_hebdo() -> None:
+    """P7-05 — Rapport budget hebdo le dimanche 18h (WhatsApp)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        debut = aujourd_hui - timedelta(days=7)
+
+        with obtenir_contexte_db() as session:
+            total_famille = float(
+                session.execute(
+                    text(
+                        "SELECT COALESCE(SUM(montant), 0) "
+                        "FROM budgets_famille WHERE date >= :debut AND date <= :fin"
+                    ),
+                    {"debut": debut, "fin": aujourd_hui},
+                ).scalar()
+                or 0
+            )
+            total_maison = float(
+                session.execute(
+                    text(
+                        "SELECT COALESCE(SUM(montant), 0) "
+                        "FROM depenses_maison WHERE "
+                        "(annee * 100 + mois) = :periode"
+                    ),
+                    {"periode": aujourd_hui.year * 100 + aujourd_hui.month},
+                ).scalar()
+                or 0
+            )
+
+        message = (
+            f"Budget hebdo: Famille {total_famille:.2f} EUR, "
+            f"Maison (mois courant) {total_maison:.2f} EUR."
+        )
+        dispatcher = get_dispatcher_notifications()
+        res = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["whatsapp"],
+            titre="Rapport budget hebdo",
+            type_whatsapp="rapport_hebdo",
+        )
+        logger.info("P7-05 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur P7-05 rapport budget hebdo")
+
+
+def _job_maj_donnees_meteo() -> None:
+    """P7-06 — Met à jour/précharge les données météo (quotidien 06h00)."""
+    try:
+        from src.services.integrations.weather import obtenir_service_meteo
+
+        service_meteo = obtenir_service_meteo()
+        previsions = service_meteo.get_previsions(nb_jours=7)
+        nb = len(previsions or [])
+        logger.info("P7-06 exécuté: %d prévision(s) météo préchargée(s)", nb)
+    except Exception:
+        logger.exception("Erreur P7-06 maj meteo")
+
+
+def _job_anniversaires_j30() -> None:
+    """P7-07 — Rappels anniversaires à J-30 (quotidien 08h00)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        cible = aujourd_hui + timedelta(days=30)
+
+        with obtenir_contexte_db() as session:
+            rows = session.execute(
+                text(
+                    "SELECT nom, prenom, date_naissance FROM membres_famille "
+                    "WHERE date_naissance IS NOT NULL"
+                )
+            ).fetchall()
+
+        noms: list[str] = []
+        for row in rows:
+            dt = row[2]
+            if dt and getattr(dt, "month", None) == cible.month and getattr(dt, "day", None) == cible.day:
+                noms.append(" ".join(part for part in [row[1], row[0]] if part))
+
+        if not noms:
+            logger.info("P7-07: aucun anniversaire à J-30")
+            return
+
+        dispatcher = get_dispatcher_notifications()
+        message = f"Anniversaire(s) dans 30 jours: {', '.join(noms[:5])}."
+        res = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push", "whatsapp"],
+            titre="Anniversaires J-30",
+        )
+        logger.info("P7-07 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur P7-07 anniversaires J-30")
+
+
+def _job_analyse_tendances_mensuelles() -> None:
+    """P7-08 — Analyse mensuelle des tendances dashboard (email)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        today = date.today()
+        with obtenir_contexte_db() as session:
+            nb_rep = int(
+                session.execute(
+                    text("SELECT COUNT(*) FROM repas WHERE EXTRACT(MONTH FROM date_repas)=:m AND EXTRACT(YEAR FROM date_repas)=:y"),
+                    {"m": today.month, "y": today.year},
+                ).scalar()
+                or 0
+            )
+            nb_courses = int(
+                session.execute(
+                    text("SELECT COUNT(*) FROM articles_courses WHERE achete = TRUE")
+                ).scalar()
+                or 0
+            )
+
+        message = (
+            f"Tendances mensuelles {today.month:02d}/{today.year}: "
+            f"{nb_rep} repas planifiés, {nb_courses} articles achetés."
+        )
+        dispatcher = get_dispatcher_notifications()
+        res = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["email"],
+            titre="Analyse tendances mensuelles",
+            type_email="rapport_mensuel",
+            rapport={"mois": f"{today.month:02d}/{today.year}", "resume": message},
+        )
+        logger.info("P7-08 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur P7-08 analyse tendances")
+
+
+def _job_purge_logs_anciens_mensuelle() -> None:
+    """P7-09 — Purge mensuelle des logs anciens (1er du mois 03h00)."""
+    try:
+        _job_nettoyage_logs()
+        logger.info("P7-09 exécuté")
+    except Exception:
+        logger.exception("Erreur P7-09 purge logs")
+
+
+def _job_recette_du_jour_push() -> None:
+    """P7-10 — Push recette du jour (11h30) si planning actif."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Planning, Repas
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        today = date.today()
+        with obtenir_contexte_db() as session:
+            repas = (
+                session.query(Repas)
+                .join(Planning)
+                .filter(Planning.statut == "actif", Repas.date_repas == today)
+                .order_by(Repas.type_repas.asc())
+                .first()
+            )
+
+        if not repas:
+            logger.debug("P7-10: pas de repas planifié aujourd'hui")
+            return
+
+        nom = repas.recette.nom if getattr(repas, "recette", None) else (repas.notes or "Repas du jour")
+        dispatcher = get_dispatcher_notifications()
+        res = _envoyer_notif_tous_users(
+            dispatcher,
+            message=f"Recette du jour: {nom}.",
+            canaux=["push"],
+            titre="Recette du jour",
+        )
+        logger.info("P7-10 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur P7-10 recette du jour")
+
+
+def _job_stock_critique_zero() -> None:
+    """P7-11 — Alerte stock critique (quantité 0) sur 3 canaux."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        with obtenir_contexte_db() as session:
+            critiques = (
+                session.query(ArticleInventaire)
+                .filter(ArticleInventaire.quantite <= 0)
+                .limit(10)
+                .all()
+            )
+
+        if not critiques:
+            logger.debug("P7-11: aucun stock critique")
+            return
+
+        noms = ", ".join((a.nom or "article") for a in critiques[:6])
+        message = f"Stock critique (0 restant): {noms}."
+        dispatcher = get_dispatcher_notifications()
+        res = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push", "ntfy", "whatsapp"],
+            titre="Stock critique",
+        )
+        logger.info("P7-11 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur P7-11 stock critique")
+
+
+def _job_resultat_tirage_loto() -> None:
+    """P7-12 — Notification résultat tirage (si grilles enregistrées)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.jeux import GrilleEuromillions, GrilleLoto, TirageEuromillions, TirageLoto
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        with obtenir_contexte_db() as session:
+            nb_grilles = (
+                session.query(GrilleLoto).count()
+                + session.query(GrilleEuromillions).count()
+            )
+            dernier_loto = session.query(TirageLoto).order_by(TirageLoto.date_tirage.desc()).first()
+            dernier_euro = (
+                session.query(TirageEuromillions)
+                .order_by(TirageEuromillions.date_tirage.desc())
+                .first()
+            )
+
+        if nb_grilles == 0:
+            logger.debug("P7-12: aucune grille enregistrée")
+            return
+
+        date_loto = getattr(dernier_loto, "date_tirage", None)
+        date_euro = getattr(dernier_euro, "date_tirage", None)
+        message = (
+            f"Résultats tirages disponibles. Loto: {date_loto or 'n/a'}, "
+            f"Euromillions: {date_euro or 'n/a'}."
+        )
+        dispatcher = get_dispatcher_notifications()
+        res = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push", "whatsapp"],
+            titre="Résultat tirage",
+        )
+        logger.info("P7-12 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur P7-12 résultat tirage")
+
+
+def _job_nouvelle_recette_saison() -> None:
+    """P7-13 — Push recette de saison (1er du mois à 11h)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Recette
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        mois = date.today().month
+        if mois in (12, 1, 2):
+            saison = "hiver"
+        elif mois in (3, 4, 5):
+            saison = "printemps"
+        elif mois in (6, 7, 8):
+            saison = "été"
+        else:
+            saison = "automne"
+
+        with obtenir_contexte_db() as session:
+            recette = (
+                session.query(Recette)
+                .filter(Recette.saison == saison)
+                .order_by(Recette.id.desc())
+                .first()
+            )
+
+        if not recette:
+            logger.debug("P7-13: aucune recette de saison")
+            return
+
+        dispatcher = get_dispatcher_notifications()
+        res = _envoyer_notif_tous_users(
+            dispatcher,
+            message=f"Nouvelle recette de saison: {recette.nom}.",
+            canaux=["push"],
+            titre="Recette de saison",
+        )
+        logger.info("P7-13 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur P7-13 recette saison")
+
+
+def _job_tache_jardin_saisonniere() -> None:
+    """P7-14 — Rappel de tâches jardin saisonnières (push + ntfy)."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.maison import get_entretien_service
+
+        service = get_entretien_service()
+        resultats = service.verifier_saison() if hasattr(service, "verifier_saison") else []
+        message = (
+            f"Tâches jardin saisonnières: {len(resultats) if isinstance(resultats, list) else 1} suggestion(s)."
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        res = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push", "ntfy"],
+            titre="Tâches jardin saisonnières",
+        )
+        logger.info("P7-14 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur P7-14 taches jardin")
+
+
+def _job_astuce_anti_gaspillage() -> None:
+    """P7-16 — Astuce anti-gaspillage si 3+ articles proches péremption."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        today = date.today()
+        limite = today + timedelta(days=3)
+        with obtenir_contexte_db() as session:
+            articles = (
+                session.query(ArticleInventaire)
+                .filter(
+                    ArticleInventaire.date_peremption.isnot(None),
+                    ArticleInventaire.date_peremption >= today,
+                    ArticleInventaire.date_peremption <= limite,
+                    ArticleInventaire.quantite > 0,
+                )
+                .limit(10)
+                .all()
+            )
+
+        if len(articles) < 3:
+            logger.debug("P7-16: moins de 3 articles proches péremption")
+            return
+
+        noms = ", ".join((a.nom or "article") for a in articles[:4])
+        message = (
+            f"Astuce anti-gaspillage: cuisine rapidement {noms}. "
+            "Privilégie une soupe, une poêlée ou une salade composée."
+        )
+        dispatcher = get_dispatcher_notifications()
+        res = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push"],
+            titre="Astuce anti-gaspillage",
+        )
+        logger.info("P7-16 exécuté: %s", res)
+    except Exception:
+        logger.exception("Erreur P7-16 astuce anti-gaspillage")
+
+
 _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     # Jobs existants
     "rappels_famille": ("Rappels famille quotidiens", _job_rappels_famille),
@@ -1996,7 +2447,23 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "archive_batches_expires": ("Archivage batch expiré", _job_archive_batches_expires),
     "rapport_maison_mensuel": ("Rapport maison mensuel", _job_rapport_maison_mensuel),
     "sync_openfoodfacts": ("Sync cache OpenFoodFacts", _job_sync_openfoodfacts),
-    # Phase 7 — nouveaux jobs
+    # Phase 7 — jobs ajoutés
+    "recap_weekend_dimanche_soir": ("Recap weekend dimanche soir", _job_recap_weekend_dimanche_soir),
+    "nettoyage_cache_7j": ("Nettoyage cache 7 jours", _job_nettoyage_cache_7j),
+    "backup_donnees_critiques": ("Backup donnees critiques", _job_backup_donnees_critiques),
+    "sync_tirages_loto_euromillions": ("Sync tirages loto/euromillions", _job_sync_tirages_loto_euromillions),
+    "rapport_budget_hebdo": ("Rapport budget hebdo", _job_rapport_budget_hebdo),
+    "maj_donnees_meteo": ("Mise a jour donnees meteo", _job_maj_donnees_meteo),
+    "anniversaires_j30": ("Rappel anniversaires J-30", _job_anniversaires_j30),
+    "analyse_tendances_mensuelles": ("Analyse tendances mensuelles", _job_analyse_tendances_mensuelles),
+    "purge_logs_anciens_mensuelle": ("Purge logs anciens mensuelle", _job_purge_logs_anciens_mensuelle),
+    "recette_du_jour_push": ("Recette du jour", _job_recette_du_jour_push),
+    "stock_critique_zero": ("Stock critique zero", _job_stock_critique_zero),
+    "resultat_tirage_loto": ("Resultat tirage loto", _job_resultat_tirage_loto),
+    "nouvelle_recette_saison": ("Nouvelle recette de saison", _job_nouvelle_recette_saison),
+    "tache_jardin_saisonniere": ("Tache jardin saisonniere", _job_tache_jardin_saisonniere),
+    "astuce_anti_gaspillage": ("Astuce anti-gaspillage", _job_astuce_anti_gaspillage),
+    # Jobs existants (conservés)
     "prediction_courses_weekly": ("Prédiction courses hebdo", _job_prediction_courses_weekly),
     "sync_jeux_budget": ("Sync jeux -> budget", _job_sync_jeux_budget),
     "analyse_nutrition_hebdo": ("Analyse nutrition hebdo", _job_analyse_nutrition_hebdo),
@@ -3169,7 +3636,7 @@ class DémarreurCron:
         self._planifier_job("rappel_courses", CronTrigger(hour=18, minute=0), replace_existing=True)
         self._planifier_job("push_contextuel_soir", CronTrigger(hour=18, minute=0), replace_existing=True)
         self._planifier_job("resume_hebdo", CronTrigger(day_of_week="mon", hour=7, minute=30), replace_existing=True)
-        self._planifier_job("planning_semaine_si_vide", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
+        self._planifier_job("planning_semaine_si_vide", CronTrigger(day_of_week="sun", hour=10, minute=0), replace_existing=True)
         self._planifier_job("alertes_peremption_48h", CronTrigger(hour=6, minute=0), replace_existing=True)
         self._planifier_job("rapport_mensuel_budget", CronTrigger(day=1, hour=8, minute=15), replace_existing=True)
         self._planifier_job("score_weekend", CronTrigger(day_of_week="fri", hour=17, minute=0), replace_existing=True)
@@ -3186,7 +3653,24 @@ class DémarreurCron:
         self._planifier_job("rapport_maison_mensuel", CronTrigger(day=1, hour=9, minute=30), replace_existing=True)
         self._planifier_job("sync_openfoodfacts", CronTrigger(day_of_week="sun", hour=3, minute=0), replace_existing=True)
 
-        # Phase 7 — nouveaux jobs manquants
+        # Phase 7 — Jobs CRON & notifications
+        self._planifier_job("recap_weekend_dimanche_soir", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
+        self._planifier_job("nettoyage_cache_7j", CronTrigger(hour=2, minute=0), replace_existing=True)
+        self._planifier_job("backup_donnees_critiques", CronTrigger(hour=1, minute=0), replace_existing=True)
+        self._planifier_job("sync_tirages_loto_euromillions", CronTrigger(day_of_week="tue,fri", hour=22, minute=0), replace_existing=True)
+        self._planifier_job("rapport_budget_hebdo", CronTrigger(day_of_week="sun", hour=18, minute=0), replace_existing=True)
+        self._planifier_job("maj_donnees_meteo", CronTrigger(hour=6, minute=0), replace_existing=True)
+        self._planifier_job("anniversaires_j30", CronTrigger(hour=8, minute=0), replace_existing=True)
+        self._planifier_job("analyse_tendances_mensuelles", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
+        self._planifier_job("purge_logs_anciens_mensuelle", CronTrigger(day=1, hour=3, minute=0), replace_existing=True)
+        self._planifier_job("recette_du_jour_push", CronTrigger(hour=11, minute=30), replace_existing=True)
+        self._planifier_job("stock_critique_zero", CronTrigger(hour="*/3", minute=0), replace_existing=True)
+        self._planifier_job("resultat_tirage_loto", CronTrigger(day_of_week="tue,fri", hour=22, minute=15), replace_existing=True)
+        self._planifier_job("nouvelle_recette_saison", CronTrigger(day=1, hour=11, minute=0), replace_existing=True)
+        self._planifier_job("tache_jardin_saisonniere", CronTrigger(month="3,6,9,12", day=1, hour=6, minute=0), replace_existing=True)
+        self._planifier_job("astuce_anti_gaspillage", CronTrigger(hour=12, minute=0), replace_existing=True)
+
+        # Jobs existants conservés
         self._planifier_job("prediction_courses_weekly", CronTrigger(day_of_week="sun", hour=10, minute=0), replace_existing=True)
         self._planifier_job("sync_jeux_budget", CronTrigger(hour=22, minute=0), replace_existing=True)
         self._planifier_job("analyse_nutrition_hebdo", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)

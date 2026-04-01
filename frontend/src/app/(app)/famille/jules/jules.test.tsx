@@ -55,7 +55,7 @@ describe("JulesPage", () => {
 
   it("affiche le titre Jules", () => {
     render(<JulesPage />);
-    expect(screen.getByText(/Jules/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Jules/ })).toBeInTheDocument();
   });
 
   it("affiche les catégories de filtre", () => {

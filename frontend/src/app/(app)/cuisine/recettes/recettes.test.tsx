@@ -44,11 +44,23 @@ const mockRecettes = {
 };
 
 vi.mock("@/crochets/utiliser-api", () => ({
-  utiliserRequete: () => ({
-    data: mockRecettes,
-    isLoading: false,
-    error: null,
-  }),
+  utiliserRequete: (queryKey: unknown) => {
+    const key = Array.isArray(queryKey) ? queryKey.join(":") : "";
+
+    if (key.includes("semaine")) {
+      return {
+        data: [],
+        isLoading: false,
+        error: null,
+      };
+    }
+
+    return {
+      data: mockRecettes,
+      isLoading: false,
+      error: null,
+    };
+  },
   utiliserMutation: () => ({ mutate: vi.fn() }),
   utiliserInvalidation: () => vi.fn(),
 }));

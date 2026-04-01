@@ -23,6 +23,7 @@ vi.mock("@/bibliotheque/api/famille", () => ({
   listerAchats: vi.fn(),
   creerAchat: vi.fn(),
   marquerAchatAchete: vi.fn(),
+  marquerAchatVendu: vi.fn(),
   supprimerAchat: vi.fn(),
   obtenirSuggestionsAchatsAuto: vi.fn().mockResolvedValue({
     suggestions: [

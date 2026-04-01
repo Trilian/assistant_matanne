@@ -831,6 +831,407 @@ def _simuler_flux_admin(body: FlowSimulationRequest, user_id: str) -> dict[str, 
 
 
 @router.get(
+    "/bridges/phase5/status",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Statut opérationnel des bridges Phase 5",
+    description=(
+        "Expose l'état opérationnel des 17 actions Phase 5 (bridges inter-modules et "
+        "interactions intra-modules) pour dashboard/admin."
+    ),
+)
+@gerer_exception_api
+async def statut_bridges_phase5(
+    inclure_smoke: bool = Query(
+        True,
+        description=(
+            "Exécute des checks smoke non destructifs sur les actions compatibles. "
+            "Les actions mutatives restent en vérification de présence."
+        ),
+    ),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Retourne un statut détaillé de tous les bridges/actions de la phase 5."""
+    from src.api.utils import executer_async, executer_avec_session
+
+    def _query() -> dict[str, Any]:
+        debut_global = time.perf_counter()
+        resultats: list[dict[str, Any]] = []
+
+        with executer_avec_session() as session:
+            presence_fallbacks: dict[str, Any] = {
+                "P5-01": lambda: hasattr(
+                    __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    ).obtenir_service_inventaire_planning_interaction(),
+                    "suggerer_recettes_selon_stock",
+                ),
+                "P5-02": lambda: hasattr(
+                    __import__(
+                        "src.services.cuisine.inter_module_jules_nutrition",
+                        fromlist=["obtenir_service_jules_nutrition_interaction"],
+                    ).obtenir_service_jules_nutrition_interaction(),
+                    "adapter_planning_nutrition_selon_croissance",
+                ),
+                "P5-03": lambda: hasattr(
+                    __import__(
+                        "src.services.cuisine.inter_module_saison_menu",
+                        fromlist=["obtenir_service_saison_menu_interaction"],
+                    ).obtenir_service_saison_menu_interaction(),
+                    "obtenir_contexte_saisonnier_planning",
+                ),
+                "P5-04": lambda: hasattr(
+                    __import__(
+                        "src.services.famille.inter_module_meteo_activites",
+                        fromlist=["obtenir_service_meteo_activites_interaction"],
+                    ).obtenir_service_meteo_activites_interaction(),
+                    "suggerer_activites_selon_meteo",
+                ),
+                "P5-05": lambda: hasattr(
+                    __import__(
+                        "src.services.maison.inter_module_entretien_courses",
+                        fromlist=["obtenir_service_entretien_courses_interaction"],
+                    ).obtenir_service_entretien_courses_interaction(),
+                    "suggerer_produits_entretien_pour_courses",
+                ),
+                "P5-06": lambda: hasattr(
+                    __import__(
+                        "src.services.maison.inter_module_charges_energie",
+                        fromlist=["obtenir_service_charges_energie_interaction"],
+                    ).obtenir_service_charges_energie_interaction(),
+                    "detecter_hausse_et_declencher_analyse",
+                ),
+                "P5-07": lambda: hasattr(
+                    __import__(
+                        "src.services.famille.inter_module_weekend_courses",
+                        fromlist=["obtenir_service_weekend_courses_interaction"],
+                    ).obtenir_service_weekend_courses_interaction(),
+                    "suggerer_fournitures_weekend",
+                ),
+                "P5-09": lambda: hasattr(
+                    __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    ).obtenir_service_inventaire_planning_interaction(),
+                    "suggerer_recettes_selon_stock",
+                ),
+                "P5-10": lambda: hasattr(
+                    __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    ).obtenir_service_inventaire_planning_interaction(),
+                    "exclure_articles_surplus_des_courses",
+                ),
+                "P5-11": lambda: hasattr(
+                    __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    ).obtenir_service_inventaire_planning_interaction(),
+                    "bloquer_jours_batch_dans_planning",
+                ),
+                "P5-12": lambda: hasattr(
+                    __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    ).obtenir_service_inventaire_planning_interaction(),
+                    "analyser_equilibre_nutritionnel_planning",
+                ),
+                "P5-13": lambda: hasattr(
+                    __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    ).obtenir_service_inventaire_planning_interaction(),
+                    "filtrer_recettes_mal_notees",
+                ),
+                "P5-17": lambda: hasattr(
+                    __import__(
+                        "src.services.maison.inter_module_charges_energie",
+                        fromlist=["obtenir_service_charges_energie_interaction"],
+                    ).obtenir_service_charges_energie_interaction(),
+                    "detecter_hausse_et_declencher_analyse",
+                ),
+            }
+
+            checks: list[dict[str, Any]] = [
+                {
+                    "id": "P5-01",
+                    "bridge": "inter_module_inventaire_planning.py",
+                    "intitule": "Stock -> Planning recettes",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    )
+                    .obtenir_service_inventaire_planning_interaction()
+                    .suggerer_recettes_selon_stock(db=session),
+                },
+                {
+                    "id": "P5-02",
+                    "bridge": "inter_module_jules_nutrition.py",
+                    "intitule": "Jules croissance -> Planning nutrition",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.cuisine.inter_module_jules_nutrition",
+                        fromlist=["obtenir_service_jules_nutrition_interaction"],
+                    )
+                    .obtenir_service_jules_nutrition_interaction()
+                    .adapter_planning_nutrition_selon_croissance(db=session),
+                },
+                {
+                    "id": "P5-03",
+                    "bridge": "inter_module_saison_menu.py",
+                    "intitule": "Produits de saison -> Planning IA",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.cuisine.inter_module_saison_menu",
+                        fromlist=["obtenir_service_saison_menu_interaction"],
+                    )
+                    .obtenir_service_saison_menu_interaction()
+                    .obtenir_contexte_saisonnier_planning(),
+                },
+                {
+                    "id": "P5-04",
+                    "bridge": "inter_module_meteo_activites.py",
+                    "intitule": "Météo -> Activités famille",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.famille.inter_module_meteo_activites",
+                        fromlist=["obtenir_service_meteo_activites_interaction"],
+                    )
+                    .obtenir_service_meteo_activites_interaction()
+                    .suggerer_activites_selon_meteo(db=session),
+                },
+                {
+                    "id": "P5-05",
+                    "bridge": "inter_module_entretien_courses.py",
+                    "intitule": "Entretien -> Courses",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.maison.inter_module_entretien_courses",
+                        fromlist=["obtenir_service_entretien_courses_interaction"],
+                    )
+                    .obtenir_service_entretien_courses_interaction()
+                    .suggerer_produits_entretien_pour_courses(db=session),
+                },
+                {
+                    "id": "P5-06",
+                    "bridge": "inter_module_charges_energie.py",
+                    "intitule": "Charges facture -> Analyse énergie",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.maison.inter_module_charges_energie",
+                        fromlist=["obtenir_service_charges_energie_interaction"],
+                    )
+                    .obtenir_service_charges_energie_interaction()
+                    .detecter_hausse_et_declencher_analyse(db=session),
+                },
+                {
+                    "id": "P5-07",
+                    "bridge": "inter_module_weekend_courses.py",
+                    "intitule": "Weekend activités -> Courses",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.famille.inter_module_weekend_courses",
+                        fromlist=["obtenir_service_weekend_courses_interaction"],
+                    )
+                    .obtenir_service_weekend_courses_interaction()
+                    .suggerer_fournitures_weekend(db=session),
+                },
+                {
+                    "id": "P5-08",
+                    "bridge": "inter_module_documents_calendrier.py",
+                    "intitule": "Documents expirants -> Calendrier",
+                    "type_check": "presence",
+                    "callable": lambda: hasattr(
+                        __import__(
+                            "src.services.famille.inter_module_documents_calendrier",
+                            fromlist=["obtenir_service_documents_calendrier_interaction"],
+                        ).obtenir_service_documents_calendrier_interaction(),
+                        "synchroniser_documents_vers_calendrier",
+                    ),
+                },
+                {
+                    "id": "P5-09",
+                    "bridge": "inter_module_inventaire_planning.py",
+                    "intitule": "Inventaire -> Planning",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    )
+                    .obtenir_service_inventaire_planning_interaction()
+                    .suggerer_recettes_selon_stock(db=session),
+                },
+                {
+                    "id": "P5-10",
+                    "bridge": "inter_module_inventaire_planning.py",
+                    "intitule": "Anti-gaspillage -> Courses",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    )
+                    .obtenir_service_inventaire_planning_interaction()
+                    .exclure_articles_surplus_des_courses(db=session),
+                },
+                {
+                    "id": "P5-11",
+                    "bridge": "inter_module_inventaire_planning.py",
+                    "intitule": "Batch cooking -> Planning",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    )
+                    .obtenir_service_inventaire_planning_interaction()
+                    .bloquer_jours_batch_dans_planning(db=session),
+                },
+                {
+                    "id": "P5-12",
+                    "bridge": "inter_module_inventaire_planning.py",
+                    "intitule": "Nutrition -> Planning",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    )
+                    .obtenir_service_inventaire_planning_interaction()
+                    .analyser_equilibre_nutritionnel_planning(db=session),
+                },
+                {
+                    "id": "P5-13",
+                    "bridge": "inter_module_inventaire_planning.py",
+                    "intitule": "Feedback recette -> Suggestions IA",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.cuisine.inter_module_inventaire_planning",
+                        fromlist=["obtenir_service_inventaire_planning_interaction"],
+                    )
+                    .obtenir_service_inventaire_planning_interaction()
+                    .filtrer_recettes_mal_notees(db=session),
+                },
+                {
+                    "id": "P5-14",
+                    "bridge": "inter_module_jules_nutrition.py",
+                    "intitule": "Jules croissance -> Portions recettes",
+                    "type_check": "presence",
+                    "callable": lambda: hasattr(
+                        __import__(
+                            "src.services.cuisine.inter_module_jules_nutrition",
+                            fromlist=["obtenir_service_jules_nutrition_interaction"],
+                        ).obtenir_service_jules_nutrition_interaction(),
+                        "adapter_portions_recettes_planifiees",
+                    ),
+                },
+                {
+                    "id": "P5-15",
+                    "bridge": "inter_module_anniversaires_budget.py",
+                    "intitule": "Anniversaire J-14 -> Budget prévisionnel",
+                    "type_check": "presence",
+                    "callable": lambda: hasattr(
+                        __import__(
+                            "src.services.famille.inter_module_anniversaires_budget",
+                            fromlist=["obtenir_service_anniversaires_budget_interaction"],
+                        ).obtenir_service_anniversaires_budget_interaction(),
+                        "reserver_budget_previsionnel_j14",
+                    ),
+                },
+                {
+                    "id": "P5-16",
+                    "bridge": "inter_module_jardin_entretien.py",
+                    "intitule": "Jardin saison -> Entretien auto",
+                    "type_check": "presence",
+                    "callable": lambda: hasattr(
+                        __import__(
+                            "src.services.maison.inter_module_jardin_entretien",
+                            fromlist=["obtenir_service_jardin_entretien_interaction"],
+                        ).obtenir_service_jardin_entretien_interaction(),
+                        "generer_taches_saisonnieres_depuis_plantes",
+                    ),
+                },
+                {
+                    "id": "P5-17",
+                    "bridge": "inter_module_charges_energie.py",
+                    "intitule": "Charges augmentation -> Diagnostic énergie",
+                    "type_check": "smoke",
+                    "callable": lambda: __import__(
+                        "src.services.maison.inter_module_charges_energie",
+                        fromlist=["obtenir_service_charges_energie_interaction"],
+                    )
+                    .obtenir_service_charges_energie_interaction()
+                    .detecter_hausse_et_declencher_analyse(db=session),
+                },
+            ]
+
+            for check in checks:
+                debut = time.perf_counter()
+                type_check = check["type_check"]
+                if type_check == "smoke" and not inclure_smoke:
+                    type_check = "presence"
+
+                try:
+                    if type_check == "presence":
+                        if not inclure_smoke and check["id"] in presence_fallbacks:
+                            presence_fallbacks[check["id"]]()
+                        else:
+                            check["callable"]()
+                        resultat = {
+                            "id": check["id"],
+                            "bridge": check["bridge"],
+                            "intitule": check["intitule"],
+                            "verification": "presence",
+                            "statut": "operationnel",
+                            "latence_ms": round((time.perf_counter() - debut) * 1000, 2),
+                            "details": "Factory et méthode disponibles.",
+                        }
+                    else:
+                        sortie = check["callable"]()
+                        resultat = {
+                            "id": check["id"],
+                            "bridge": check["bridge"],
+                            "intitule": check["intitule"],
+                            "verification": "smoke",
+                            "statut": "operationnel",
+                            "latence_ms": round((time.perf_counter() - debut) * 1000, 2),
+                            "details": f"Retour {type(sortie).__name__}.",
+                        }
+                except Exception as exc:
+                    resultat = {
+                        "id": check["id"],
+                        "bridge": check["bridge"],
+                        "intitule": check["intitule"],
+                        "verification": type_check,
+                        "statut": "indisponible",
+                        "latence_ms": round((time.perf_counter() - debut) * 1000, 2),
+                        "details": str(exc)[:300],
+                    }
+
+                resultats.append(resultat)
+
+        total = len(resultats)
+        operationnels = len([r for r in resultats if r["statut"] == "operationnel"])
+        indisponibles = total - operationnels
+        statut_global = "operationnel" if indisponibles == 0 else "degrade"
+
+        return {
+            "phase": "phase_5",
+            "generated_at": datetime.now().isoformat(),
+            "execution_ms": round((time.perf_counter() - debut_global) * 1000, 2),
+            "statut_global": statut_global,
+            "resume": {
+                "total_actions": total,
+                "operationnelles": operationnels,
+                "indisponibles": indisponibles,
+                "taux_operationnel_pct": round((operationnels / total) * 100, 2) if total else 0.0,
+                "mode_verification": "smoke+presence" if inclure_smoke else "presence_only",
+            },
+            "items": sorted(resultats, key=lambda r: r["id"]),
+        }
+
+    return await executer_async(_query)
+
+
+@router.get(
     "/jobs",
     response_model=list[JobInfoResponse],
     responses=REPONSES_AUTH_ADMIN,

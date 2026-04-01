@@ -129,6 +129,146 @@ class ParcoursOptimiseResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
+# PHASE 9 — IA AVANCÉE & INNOVATIONS
+# ═══════════════════════════════════════════════════════════
+
+
+class SuggestionRepasSoirResponse(BaseModel):
+    """Suggestion contextualisée "Qu'est-ce qu'on mange ce soir ?"."""
+
+    recette_suggeree: str = ""
+    raison: str = ""
+    temps_total_estime_min: int = 0
+    alternatives: list[str] = Field(default_factory=list)
+    ingredients_detectes: list[str] = Field(default_factory=list)
+
+
+class PatternsAlimentairesResponse(BaseModel):
+    """Analyse des habitudes alimentaires sur une période."""
+
+    periode_jours: int = 90
+    score_diversite: float = 0.0
+    top_recettes: list[str] = Field(default_factory=list)
+    categories_sous_representees: list[str] = Field(default_factory=list)
+    recommandations: list[str] = Field(default_factory=list)
+
+
+class CoachRoutinesResponse(BaseModel):
+    """Coaching IA pour l'amélioration des routines."""
+
+    score_regularite: float = 0.0
+    routines_en_retard: list[str] = Field(default_factory=list)
+    blocages_probables: list[str] = Field(default_factory=list)
+    ajustements_suggeres: list[str] = Field(default_factory=list)
+
+
+class AnomalieEnergieDetail(BaseModel):
+    """Détail d'une anomalie de consommation."""
+
+    type_energie: str = ""
+    mois: str = ""
+    ecart_pct: float = 0.0
+    severite: str = "faible"
+    explication: str = ""
+
+
+class AnomaliesEnergieResponse(BaseModel):
+    """Synthèse anomalies eau/gaz/électricité."""
+
+    nb_anomalies: int = 0
+    score_risque: float = 0.0
+    anomalies: list[AnomalieEnergieDetail] = Field(default_factory=list)
+    recommandations: list[str] = Field(default_factory=list)
+
+
+class ResumeMensuelIAResponse(BaseModel):
+    """Résumé narratif mensuel multi-modules."""
+
+    mois_reference: str = ""
+    resume_global: str = ""
+    faits_marquants: list[str] = Field(default_factory=list)
+    recommandations: list[str] = Field(default_factory=list)
+
+
+class ActiviteJulesSuggeree(BaseModel):
+    """Activité suggérée pour Jules."""
+
+    titre: str = ""
+    moment: str = ""
+    duree_minutes: int = 0
+    en_interieur: bool = False
+    raison: str = ""
+
+
+class PlanningJulesAdaptatifResponse(BaseModel):
+    """Planning hebdomadaire d'activités Jules adapté au contexte."""
+
+    semaine_reference: str = ""
+    activites: list[ActiviteJulesSuggeree] = Field(default_factory=list)
+    recommandations_parents: list[str] = Field(default_factory=list)
+
+
+class OffreEnergieAlternative(BaseModel):
+    """Offre fournisseur énergie alternative."""
+
+    fournisseur: str = ""
+    prix_kwh_eur: float = 0.0
+    abonnement_mensuel_eur: float = 0.0
+    cout_annuel_estime_eur: float = 0.0
+
+
+class ComparateurEnergieResponse(BaseModel):
+    """Comparateur simple d'offres énergie."""
+
+    consommation_annuelle_kwh: float = 0.0
+    cout_actuel_estime_eur: float = 0.0
+    economie_max_estimee_eur: float = 0.0
+    offres: list[OffreEnergieAlternative] = Field(default_factory=list)
+
+
+class ScoreEcoResponsableResponse(BaseModel):
+    """Score éco-responsable mensuel."""
+
+    score_global: float = 0.0
+    details: dict[str, float] = Field(default_factory=dict)
+    recommandations: list[str] = Field(default_factory=list)
+
+
+class SaisonnaliteIntelligenteResponse(BaseModel):
+    """Adaptations intelligentes selon la saison."""
+
+    saison: str = ""
+    recettes_de_saison: list[str] = Field(default_factory=list)
+    actions_jardin: list[str] = Field(default_factory=list)
+    actions_entretien: list[str] = Field(default_factory=list)
+    ajustements_energie: list[str] = Field(default_factory=list)
+
+
+class ApprentissageHabitudesResponse(BaseModel):
+    """Résultat d'apprentissage continu des habitudes."""
+
+    habitudes_detectees: list[str] = Field(default_factory=list)
+    ajustements_systeme: list[str] = Field(default_factory=list)
+    niveau_confiance: float = 0.0
+
+
+class AlerteContextuelle(BaseModel):
+    """Alerte intelligente contextuelle."""
+
+    titre: str = ""
+    description: str = ""
+    priorite: str = "moyenne"
+    action_suggeree: str = ""
+
+
+class AlertesContextuellesResponse(BaseModel):
+    """Liste des alertes contextuelles proposées."""
+
+    nb_alertes: int = 0
+    alertes: list[AlerteContextuelle] = Field(default_factory=list)
+
+
+# ═══════════════════════════════════════════════════════════
 # 10.8 — VEILLE EMPLOI
 # ═══════════════════════════════════════════════════════════
 

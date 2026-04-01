@@ -15,6 +15,17 @@ vi.mock("next/link", () => ({
 
 const mockData = {
   score: { score: 85, articles_perimes_mois: 2, articles_sauves_mois: 5, economie_estimee: 25.5 },
+  historique: {
+    score_moyen_4s: 78,
+    tendance: "stable",
+    semaines: [
+      { debut: "2026-03-01", score: 72 },
+      { debut: "2026-03-08", score: 76 },
+      { debut: "2026-03-15", score: 80 },
+      { debut: "2026-03-22", score: 84 },
+    ],
+    badges: [],
+  },
   articles_urgents: [
     { id: 1, nom: "Yaourts", jours_restants: 1, date_peremption: "2025-01-28" },
     { id: 2, nom: "Salade", jours_restants: 3, date_peremption: "2025-01-30" },

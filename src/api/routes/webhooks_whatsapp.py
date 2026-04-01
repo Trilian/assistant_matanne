@@ -166,6 +166,8 @@ async def _traiter_message_texte(sender: str, texte: str) -> None:
     # Commandes simples
     if texte_lower in ("menu", "planning", "semaine"):
         await _envoyer_planning_courant(sender)
+    elif texte_lower in ("ce soir", "diner", "dîner"):
+        await _envoyer_suggestion_ce_soir(sender)
     elif texte_lower in ("courses", "liste"):
         await _envoyer_liste_courses(sender)
     elif texte_lower in ("frigo", "stock", "inventaire"):
@@ -196,11 +198,25 @@ async def _traiter_message_texte(sender: str, texte: str) -> None:
         await _envoyer_resume_energie(sender)
     elif texte_lower in ("entretien", "maintenance"):
         await _envoyer_entretien_urgent(sender)
+    elif texte_lower in ("aide", "help", "?"):
+        await envoyer_message_whatsapp(
+            sender,
+            "🤖 Commandes disponibles :\n"
+            "- *menu* : Planning de la semaine\n"
+            "- *ce soir* : Suggestion rapide repas\n"
+            "- *courses* : Liste de courses en cours\n"
+            "- *frigo* : Etat des stocks\n"
+            "- *jules* : Resume de Jules\n"
+            "- *budget* : Budget mensuel\n"
+            "- *recette [nom]* : Fiche recette\n"
+            "- *aide* : Cette liste",
+        )
     else:
         await envoyer_message_whatsapp(
             sender,
             "🤖 Commandes disponibles :\n"
             "- *menu* : Planning de la semaine\n"
+            "- *ce soir* : Suggestion rapide repas\n"
             "- *courses* : Liste de courses en cours\n"
             "- *frigo* : Etat des stocks\n"
             "- *jules* : Resume de Jules\n"
@@ -212,7 +228,8 @@ async def _traiter_message_texte(sender: str, texte: str) -> None:
             "- *meteo* : Previsions du jour\n"
             "- *jardin* : Etat du jardin\n"
             "- *energie* : Consommation energie\n"
-            "- *entretien* : Entretiens urgents",
+            "- *entretien* : Entretiens urgents\n"
+            "- *aide* : Liste des commandes",
         )
 
 
@@ -274,6 +291,32 @@ async def _envoyer_planning_courant(sender: str) -> None:
         await envoyer_message_whatsapp(
             sender, f"🍽️ *Planning de la semaine*\n\n{''.join(chr(10) + l for l in lignes)}"
         )
+
+
+async def _envoyer_suggestion_ce_soir(sender: str) -> None:
+    """Envoie une suggestion rapide de repas pour ce soir."""
+    from datetime import date
+
+    from src.core.db import obtenir_contexte_db
+    from src.core.models.planning import Repas
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    with obtenir_contexte_db() as session:
+        repas = (
+            session.query(Repas)
+            .filter(Repas.date_repas == date.today(), Repas.type_repas == "diner")
+            .first()
+        )
+
+        if repas:
+            nom = repas.recette.nom if getattr(repas, "recette", None) else (repas.notes or "Repas du soir")
+            await envoyer_message_whatsapp(sender, f"🍽️ Ce soir: *{nom}*.")
+            return
+
+    await envoyer_message_whatsapp(
+        sender,
+        "🍽️ Rien de planifié pour ce soir. Suggestion rapide: omelette + salade + fruit.",
+    )
 
 
 async def _envoyer_liste_courses(sender: str) -> None:

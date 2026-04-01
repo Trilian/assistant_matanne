@@ -5,6 +5,7 @@ import JardinPage from "@/app/(app)/maison/jardin/page";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   usePathname: () => "/maison/jardin",
+  useSearchParams: () => ({ get: () => null }),
 }));
 
 vi.mock("next/link", () => ({

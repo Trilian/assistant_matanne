@@ -32,14 +32,14 @@ beforeEach(() => {
 describe("PhotoFrigoPage — rendu initial", () => {
   it("affiche le titre de la page", () => {
     renderWithQuery(React.createElement(PhotoFrigoPage));
-    // La page doit contenir un titre relatif au frigo/IA
-    const title = screen.queryByText(/frigo/i) || screen.queryByText(/photo/i) || screen.queryByText(/IA/i);
-    expect(title).not.toBeNull();
+    expect(screen.getByRole("heading", { name: /Photo Frigo/i })).toBeInTheDocument();
   });
 
   it("affiche les zones disponibles (frigo, placard, congélateur)", () => {
     renderWithQuery(React.createElement(PhotoFrigoPage));
-    expect(screen.queryByText(/frigo/i)).not.toBeNull();
+    expect(screen.getByText("Réfrigérateur")).toBeInTheDocument();
+    expect(screen.getByText("Placard")).toBeInTheDocument();
+    expect(screen.getByText("Congélateur")).toBeInTheDocument();
   });
 
   it("affiche le bouton d'upload image", () => {
