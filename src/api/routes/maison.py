@@ -1,26 +1,31 @@
-﻿"""
+"""
 Routes API pour la maison.
 
-Endpoints pour la gestion de la maison:
-- Projets domestiques
-- Routines
-- TÃ¢ches d'entretien
-- Jardin
-- Stocks maison
-- Meubles wishlist
-- Cellier (cave & garde-manger)
-- Artisans (carnet d'adresses)
-- Contrats (assurances, Ã©nergie, etc.)
-- Garanties (appareils & SAV)
+Agrégateur : inclut 4 sous-routeurs thématiques via include_router() :
+- maison_projets   : Projets domestiques, estimation IA, priorisation IA
+  → /projets, /projets/*
+- maison_entretien : Routines, tâches d'entretien, entretien saisonnier, santé appareils
+  → /routines, /entretien, /entretien-saisonnier
+- maison_finances  : Artisans, contrats, garanties, alertes prédictives
+  → /artisans, /contrats, /garanties
+- maison_jardin    : Jardinage, stocks, nuisibles, calendrier semis
+  → /jardin, /stocks, /nuisibles
+
+Endpoints directs (ce fichier) :
+- Briefing quotidien (/briefing)
+- Alertes globales (/alertes)
+- Meubles wishlist (/meubles)
+- Cellier — cave & garde-manger (/cellier)
 - Diagnostics immobiliers & estimations
-- Ã‰co-tips (actions Ã©cologiques)
-- DÃ©penses maison
-- Nuisibles (traitements)
+- Éco-tips (actions écologiques)
+- Dépenses maison
 - Devis comparatifs
-- Entretien saisonnier
-- RelevÃ©s compteurs
+- Relevés compteurs
 - Visualisation plan maison
 - Hub data (stats dashboard)
+
+Préfixe parent : /api/v1/maison
+Pour routes/__init__.py, "maison_router": ".maison" reste inchangé.
 """
 
 from datetime import date
@@ -714,15 +719,17 @@ async def fin_vie_garantie(
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SOUS-ROUTEURS (Sprint 12 â€” A1 split)
+# SOUS-ROUTEURS
+# Chaque sous-routeur hérite du préfixe /api/v1/maison
+# et définit ses propres paths relatifs.
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 from src.api.routes.maison_projets import router as _projets_router
 from src.api.routes.maison_entretien import router as _entretien_router
 from src.api.routes.maison_finances import router as _finances_router
 from src.api.routes.maison_jardin import router as _jardin_router
 
-router.include_router(_projets_router)
-router.include_router(_entretien_router)
-router.include_router(_finances_router)
-router.include_router(_jardin_router)
+router.include_router(_projets_router, tags=["Maison — Projets"])
+router.include_router(_entretien_router, tags=["Maison — Entretien"])
+router.include_router(_finances_router, tags=["Maison — Finances"])
+router.include_router(_jardin_router, tags=["Maison — Jardin"])
 

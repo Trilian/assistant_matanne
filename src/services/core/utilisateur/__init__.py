@@ -15,7 +15,6 @@ Usage:
         # Historique
         ActionHistoryService, get_action_history_service,
         ActionType, ActionEntry, ActionFilter, ActionStats,
-        afficher_activity_timeline, afficher_user_activity, afficher_activity_stats,
         # Préférences
         UserPreferenceService, get_user_preference_service,
     )

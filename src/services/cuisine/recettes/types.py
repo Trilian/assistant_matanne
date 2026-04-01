@@ -87,9 +87,46 @@ class VersionRobotGeneree(BaseModel):
         return v
 
 
+class VersionSaisonniereGeneree(BaseModel):
+    """Version saisonnière générée par l'IA."""
+
+    instructions_modifiees: str
+    ingredients_saison: list[str] = Field(default_factory=list)
+    saison: str = Field(..., pattern="^(printemps|été|automne|hiver)$")
+    substitutions: str = ""
+
+
+class VersionRapideGeneree(BaseModel):
+    """Version rapide (<30 min) générée par l'IA."""
+
+    instructions_modifiees: str
+    temps_total_minutes: int = Field(30, ge=5, le=30)
+    astuces_gain_temps: str = ""
+    ingredients_simplifies: str = ""
+
+    @field_validator("temps_total_minutes", mode="before")
+    @classmethod
+    def convert_float_to_int_temps(cls, v):
+        if isinstance(v, float):
+            return int(v)
+        return v
+
+
+class VersionRestesGeneree(BaseModel):
+    """Version restes/inventaire générée par l'IA."""
+
+    instructions_modifiees: str
+    ingredients_utilises_du_stock: list[str] = Field(default_factory=list)
+    ingredients_a_acheter: list[str] = Field(default_factory=list)
+    anti_gaspillage_notes: str = ""
+
+
 __all__ = [
     "RecetteSuggestion",
     "VersionBebeGeneree",
     "VersionBatchCookingGeneree",
     "VersionRobotGeneree",
+    "VersionSaisonniereGeneree",
+    "VersionRapideGeneree",
+    "VersionRestesGeneree",
 ]

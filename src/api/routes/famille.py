@@ -1,12 +1,28 @@
 """
 Routes API pour la famille.
 
-Endpoints pour la gestion familiale:
-- Profils enfants
-- Activités familiales
-- Jalons de développement
-- Budget familial
-- Shopping familial
+Agrégateur : inclut 3 sous-routeurs thématiques via include_router() :
+- famille_jules      : Profils enfants, jalons, croissance, coaching IA
+  → /enfants, /jules/*
+- famille_budget     : Dépenses, analyse IA, prédictions, OCR ticket
+  → /budget, /budget/*
+- famille_activites  : Activités familiales, suggestions IA (weekend, soirée)
+  → /activites, /weekend/*, /soiree/*
+
+Endpoints directs (ce fichier) :
+- Shopping familial (/shopping)
+- Routines familiales (/routines)
+- Anniversaires (/anniversaires)
+- Événements (/evenements)
+- Achats / revente (/achats)
+- Configuration garde & préférences (/config/*)
+- Planning jours sans crèche (/planning/*)
+- Rappels (/rappels/*)
+- Résumé hebdo (/resume-hebdo)
+- Contexte familial (/contexte)
+
+Préfixe parent : /api/v1/famille
+Pour routes/__init__.py, "famille_router": ".famille" reste inchangé.
 """
 
 from datetime import date
@@ -1554,12 +1570,14 @@ async def envoyer_rappels_famille(
 
 
 # ═══════════════════════════════════════════════════════════
-# SOUS-ROUTEURS (Sprint 12 — A2 split)
+# SOUS-ROUTEURS
+# Chaque sous-routeur hérite du préfixe /api/v1/famille
+# et définit ses propres paths relatifs.
 # ═══════════════════════════════════════════════════════════
 from src.api.routes.famille_jules import router as _jules_router
 from src.api.routes.famille_budget import router as _budget_router
 from src.api.routes.famille_activites import router as _activites_router
 
-router.include_router(_jules_router)
-router.include_router(_budget_router)
-router.include_router(_activites_router)
+router.include_router(_jules_router, tags=["Famille — Jules"])
+router.include_router(_budget_router, tags=["Famille — Budget"])
+router.include_router(_activites_router, tags=["Famille — Activités"])

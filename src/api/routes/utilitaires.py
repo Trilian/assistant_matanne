@@ -28,6 +28,8 @@ from src.api.schemas.utilitaires import (
     JournalPatch,
     LienCreate,
     LienPatch,
+    MinuteurCreate,
+    MinuteurPatch,
     MotDePasseCreate,
     MotDePassePatch,
     NoteCreate,
@@ -951,6 +953,146 @@ async def supprimer_releve_energie(
             session.delete(releve)
             session.commit()
             return {"message": "RelevÃ© supprimÃ©", "id": releve_id}
+
+    return await executer_async(_delete)
+
+
+# ═══════════════════════════════════════════════════════════
+# MINUTEUR — Sessions de minuterie persistées
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/minuteurs", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_minuteurs(
+    actifs_uniquement: bool = Query(False, description="Ne retourner que les minuteurs actifs"),
+    limite: int = Query(20, ge=1, le=100),
+    user: dict[str, Any] = Depends(require_auth),
+) -> list[dict[str, Any]]:
+    """Liste les sessions de minuteur de l'utilisateur."""
+    from src.core.models import MinuteurSession
+
+    def _query():
+        with executer_avec_session() as session:
+            user_id = user.get("sub", "")
+            query = session.query(MinuteurSession).filter(MinuteurSession.user_id == user_id)
+            if actifs_uniquement:
+                query = query.filter(MinuteurSession.active.is_(True))
+            rows = query.order_by(MinuteurSession.cree_le.desc()).limit(limite).all()
+            return [
+                {
+                    "id": r.id,
+                    "label": r.label,
+                    "duree_secondes": r.duree_secondes,
+                    "recette_id": r.recette_id,
+                    "date_debut": r.date_debut.isoformat() if r.date_debut else None,
+                    "date_fin": r.date_fin.isoformat() if r.date_fin else None,
+                    "terminee": r.terminee,
+                    "active": r.active,
+                }
+                for r in rows
+            ]
+
+    return await executer_async(_query)
+
+
+@router.post("/minuteurs", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_minuteur(
+    body: "MinuteurCreate",
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée une session de minuteur."""
+    from datetime import datetime
+
+    from src.api.schemas.utilitaires import MinuteurCreate as _MC  # noqa: F811
+    from src.core.models import MinuteurSession
+
+    def _create():
+        with executer_avec_session() as session:
+            row = MinuteurSession(
+                user_id=user.get("sub", ""),
+                label=body.label,
+                duree_secondes=body.duree_secondes,
+                recette_id=body.recette_id,
+                date_debut=datetime.utcnow(),
+                active=True,
+            )
+            session.add(row)
+            session.commit()
+            session.refresh(row)
+            return {
+                "id": row.id,
+                "label": row.label,
+                "duree_secondes": row.duree_secondes,
+                "active": row.active,
+            }
+
+    return await executer_async(_create)
+
+
+@router.patch("/minuteurs/{minuteur_id}", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def modifier_minuteur(
+    minuteur_id: int,
+    body: "MinuteurPatch",
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Modifie un minuteur (terminer, mettre en pause)."""
+    from datetime import datetime
+
+    from src.api.schemas.utilitaires import MinuteurPatch as _MP  # noqa: F811
+    from src.core.models import MinuteurSession
+
+    def _update():
+        with executer_avec_session() as session:
+            row = session.query(MinuteurSession).filter(
+                MinuteurSession.id == minuteur_id,
+                MinuteurSession.user_id == user.get("sub", ""),
+            ).first()
+            if not row:
+                raise HTTPException(status_code=404, detail="Minuteur non trouvé")
+            if body.label is not None:
+                row.label = body.label
+            if body.terminee is not None:
+                row.terminee = body.terminee
+                if body.terminee:
+                    row.active = False
+                    row.date_fin = datetime.utcnow()
+            if body.active is not None:
+                row.active = body.active
+            session.commit()
+            session.refresh(row)
+            return {
+                "id": row.id,
+                "label": row.label,
+                "terminee": row.terminee,
+                "active": row.active,
+            }
+
+    return await executer_async(_update)
+
+
+@router.delete("/minuteurs/{minuteur_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_minuteur(
+    minuteur_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Supprime un minuteur."""
+    from src.core.models import MinuteurSession
+
+    def _delete():
+        with executer_avec_session() as session:
+            row = session.query(MinuteurSession).filter(
+                MinuteurSession.id == minuteur_id,
+                MinuteurSession.user_id == user.get("sub", ""),
+            ).first()
+            if not row:
+                raise HTTPException(status_code=404, detail="Minuteur non trouvé")
+            session.delete(row)
+            session.commit()
+            return {"message": "Minuteur supprimé", "id": minuteur_id}
 
     return await executer_async(_delete)
 

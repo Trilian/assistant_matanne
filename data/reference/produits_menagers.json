@@ -1,0 +1,116 @@
+{
+  "meta": {
+    "source": "Guide d'entretien ménager — produits courants France",
+    "description": "Catalogue de produits ménagers pour auto-complétion inventaire et courses",
+    "derniere_mise_a_jour": "2026-03-31"
+  },
+  "categories": [
+    {
+      "id": "nettoyage_sols",
+      "label": "Nettoyage des sols",
+      "produits": [
+        {"nom": "Nettoyant multi-surfaces", "frequence_achat_jours": 30, "contenance_type": "1L", "usage": "Sols carrelage, lino, parquet vitrifié"},
+        {"nom": "Nettoyant parquet", "frequence_achat_jours": 60, "contenance_type": "1L", "usage": "Parquet massif ou stratifié"},
+        {"nom": "Balai serpillère recharges", "frequence_achat_jours": 30, "contenance_type": "lot", "usage": "Lingettes rechargeables"},
+        {"nom": "Javel gel", "frequence_achat_jours": 45, "contenance_type": "750ml", "usage": "Carrelage, joints, sanitaires"},
+        {"nom": "Savon noir liquide", "frequence_achat_jours": 90, "contenance_type": "1L", "usage": "Multi-usages sols et surfaces"}
+      ]
+    },
+    {
+      "id": "cuisine",
+      "label": "Nettoyage cuisine",
+      "produits": [
+        {"nom": "Liquide vaisselle", "frequence_achat_jours": 21, "contenance_type": "500ml", "usage": "Vaisselle à la main"},
+        {"nom": "Tablettes lave-vaisselle", "frequence_achat_jours": 30, "contenance_type": "boîte 30", "usage": "Lave-vaisselle"},
+        {"nom": "Sel régénérant lave-vaisselle", "frequence_achat_jours": 90, "contenance_type": "1kg", "usage": "Adoucisseur lave-vaisselle"},
+        {"nom": "Liquide de rinçage lave-vaisselle", "frequence_achat_jours": 60, "contenance_type": "500ml", "usage": "Brillance vaisselle"},
+        {"nom": "Dégraissant cuisine", "frequence_achat_jours": 30, "contenance_type": "750ml", "usage": "Plan de travail, plaque, hotte"},
+        {"nom": "Nettoyant four", "frequence_achat_jours": 90, "contenance_type": "500ml", "usage": "Four, grilles"},
+        {"nom": "Éponges", "frequence_achat_jours": 14, "contenance_type": "lot 3", "usage": "Vaisselle et surfaces"},
+        {"nom": "Grattoir inox", "frequence_achat_jours": 90, "contenance_type": "unité", "usage": "Plaque vitrocéramique"},
+        {"nom": "Vinaigre blanc ménager", "frequence_achat_jours": 30, "contenance_type": "1L", "usage": "Détartrage, nettoyage multi-usages"},
+        {"nom": "Bicarbonate de soude", "frequence_achat_jours": 60, "contenance_type": "500g", "usage": "Nettoyage, désodorisant"}
+      ]
+    },
+    {
+      "id": "salle_de_bain",
+      "label": "Salle de bain & sanitaires",
+      "produits": [
+        {"nom": "Nettoyant salle de bain", "frequence_achat_jours": 30, "contenance_type": "750ml", "usage": "Lavabo, douche, baignoire"},
+        {"nom": "Gel WC", "frequence_achat_jours": 30, "contenance_type": "750ml", "usage": "Cuvette WC"},
+        {"nom": "Bloc WC", "frequence_achat_jours": 21, "contenance_type": "unité", "usage": "Désodorisant WC"},
+        {"nom": "Détartrant", "frequence_achat_jours": 45, "contenance_type": "750ml", "usage": "Robinetterie, parois de douche"},
+        {"nom": "Nettoyant anti-moisissures", "frequence_achat_jours": 90, "contenance_type": "500ml", "usage": "Joints silicone, murs humides"},
+        {"nom": "Déboucheur canalisations", "frequence_achat_jours": 90, "contenance_type": "1L", "usage": "Éviers, douche, lavabo"}
+      ]
+    },
+    {
+      "id": "linge",
+      "label": "Entretien du linge",
+      "produits": [
+        {"nom": "Lessive liquide", "frequence_achat_jours": 21, "contenance_type": "1.5L", "usage": "Lavage machine"},
+        {"nom": "Lessive capsules", "frequence_achat_jours": 21, "contenance_type": "boîte 30", "usage": "Lavage machine"},
+        {"nom": "Adoucissant", "frequence_achat_jours": 30, "contenance_type": "1.5L", "usage": "Rinçage machine"},
+        {"nom": "Détachant textile", "frequence_achat_jours": 60, "contenance_type": "500ml", "usage": "Prétraitement taches"},
+        {"nom": "Nettoyant machine à laver", "frequence_achat_jours": 60, "contenance_type": "250ml", "usage": "Entretien tambour"},
+        {"nom": "Eau de Javel textile", "frequence_achat_jours": 60, "contenance_type": "1L", "usage": "Blanchiment linge blanc"},
+        {"nom": "Lingettes anti-décoloration", "frequence_achat_jours": 60, "contenance_type": "boîte 20", "usage": "Protège couleurs en machine"}
+      ]
+    },
+    {
+      "id": "surfaces_vitres",
+      "label": "Surfaces & vitres",
+      "produits": [
+        {"nom": "Nettoyant vitres", "frequence_achat_jours": 30, "contenance_type": "750ml", "usage": "Fenêtres, miroirs, écrans"},
+        {"nom": "Dépoussiérant meuble", "frequence_achat_jours": 30, "contenance_type": "400ml", "usage": "Meubles bois et surfaces"},
+        {"nom": "Lingettes multi-surfaces", "frequence_achat_jours": 21, "contenance_type": "boîte 40", "usage": "Nettoyage rapide"},
+        {"nom": "Nettoyant inox", "frequence_achat_jours": 60, "contenance_type": "250ml", "usage": "Électroménager inox"},
+        {"nom": "Chiffons microfibres", "frequence_achat_jours": 90, "contenance_type": "lot 5", "usage": "Tous usages, lavable machine"}
+      ]
+    },
+    {
+      "id": "poubelle_dechets",
+      "label": "Poubelle & déchets",
+      "produits": [
+        {"nom": "Sacs poubelle 30L", "frequence_achat_jours": 21, "contenance_type": "rouleau 20", "usage": "Poubelle cuisine"},
+        {"nom": "Sacs poubelle 50L", "frequence_achat_jours": 30, "contenance_type": "rouleau 20", "usage": "Grande poubelle"},
+        {"nom": "Sacs poubelle 100L", "frequence_achat_jours": 60, "contenance_type": "rouleau 10", "usage": "Poubelle extérieure"},
+        {"nom": "Désodorisant poubelle", "frequence_achat_jours": 60, "contenance_type": "unité", "usage": "Anti-odeurs couvercle"}
+      ]
+    },
+    {
+      "id": "desodorisants",
+      "label": "Désodorisants & ambiance",
+      "produits": [
+        {"nom": "Désodorisant spray", "frequence_achat_jours": 30, "contenance_type": "300ml", "usage": "Pièces de vie"},
+        {"nom": "Bougie parfumée", "frequence_achat_jours": 60, "contenance_type": "unité", "usage": "Ambiance salon"},
+        {"nom": "Diffuseur de parfum", "frequence_achat_jours": 90, "contenance_type": "unité", "usage": "Entrée, salon"},
+        {"nom": "Absorbeur d'humidité", "frequence_achat_jours": 60, "contenance_type": "unité", "usage": "Salle de bain, placard"}
+      ]
+    },
+    {
+      "id": "insectes_nuisibles",
+      "label": "Anti-nuisibles",
+      "produits": [
+        {"nom": "Anti-moustiques diffuseur", "frequence_achat_jours": 90, "contenance_type": "unité", "usage": "Chambres, été"},
+        {"nom": "Insecticide spray", "frequence_achat_jours": 120, "contenance_type": "400ml", "usage": "Insectes volants/rampants"},
+        {"nom": "Piège à mites alimentaires", "frequence_achat_jours": 90, "contenance_type": "lot 2", "usage": "Placards cuisine"},
+        {"nom": "Anti-fourmis", "frequence_achat_jours": 180, "contenance_type": "unité", "usage": "Terrasse, seuils"},
+        {"nom": "Antimite vêtements", "frequence_achat_jours": 180, "contenance_type": "lot", "usage": "Armoires, penderies"}
+      ]
+    },
+    {
+      "id": "papeterie_maison",
+      "label": "Consommables papier",
+      "produits": [
+        {"nom": "Papier toilette", "frequence_achat_jours": 14, "contenance_type": "pack 12", "usage": "WC"},
+        {"nom": "Essuie-tout", "frequence_achat_jours": 14, "contenance_type": "lot 3", "usage": "Cuisine"},
+        {"nom": "Mouchoirs", "frequence_achat_jours": 30, "contenance_type": "boîte", "usage": "Multi-pièces"},
+        {"nom": "Sacs congélation", "frequence_achat_jours": 45, "contenance_type": "boîte 30", "usage": "Conservation aliments"},
+        {"nom": "Film alimentaire", "frequence_achat_jours": 45, "contenance_type": "rouleau", "usage": "Conservation"},
+        {"nom": "Papier aluminium", "frequence_achat_jours": 60, "contenance_type": "rouleau", "usage": "Cuisine, cuisson"},
+        {"nom": "Papier cuisson", "frequence_achat_jours": 60, "contenance_type": "rouleau", "usage": "Four, pâtisserie"}
+      ]
+    }
+  ]
+}

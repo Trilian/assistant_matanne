@@ -351,3 +351,45 @@ class ReleveEnergie(TimestampMixin, Base):
         return (
             f"<ReleveEnergie(id={self.id}, type='{self.type_energie}', {self.mois}/{self.annee})>"
         )
+
+
+# ═══════════════════════════════════════════════════════════
+# MINUTEUR — Sessions de minuterie avec historique
+# ═══════════════════════════════════════════════════════════
+
+
+class MinuteurSession(TimestampMixin, Base):
+    """Session de minuteur avec lien optionnel vers une recette.
+
+    Permet de persister les minuteurs entre appareils et de
+    conserver un historique des utilisations.
+
+    Attributes:
+        user_id: ID de l'utilisateur
+        label: Libellé du minuteur (ex: "Cuire pâtes")
+        duree_secondes: Durée en secondes
+        recette_id: Lien vers la recette si applicable
+        date_debut: Heure de début
+        date_fin: Heure de fin réelle
+        terminee: Si le minuteur a été complété
+        active: Si le minuteur est actuellement en cours
+    """
+
+    __tablename__ = "minuteur_sessions"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    label: Mapped[str] = mapped_column(String(200), nullable=False)
+    duree_secondes: Mapped[int] = mapped_column(Integer, nullable=False)
+    recette_id: Mapped[int | None] = mapped_column(Integer, index=True)
+    date_debut: Mapped[datetime | None] = mapped_column(DateTime)
+    date_fin: Mapped[datetime | None] = mapped_column(DateTime)
+    terminee: Mapped[bool] = mapped_column(Boolean, default=False)
+    active: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+
+    __table_args__ = (
+        CheckConstraint("duree_secondes > 0", name="ck_minuteur_duree_positive"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<MinuteurSession(id={self.id}, label='{self.label}', active={self.active})>"

@@ -469,6 +469,40 @@ CREATE INDEX IF NOT EXISTS ix_job_executions_created_at ON job_executions(create
 CREATE INDEX IF NOT EXISTS ix_job_executions_job_started ON job_executions(job_id, started_at DESC);
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- 4.04F IA_SUGGESTIONS_HISTORIQUE (historique des suggestions IA — P3-06)
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS ia_suggestions_historique (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255),
+    type_suggestion VARCHAR(100) NOT NULL,
+    module VARCHAR(100) NOT NULL,
+    prompt_resume TEXT,
+    suggestion JSONB NOT NULL DEFAULT '{}'::jsonb,
+    contexte JSONB DEFAULT '{}'::jsonb,
+    modele_ia VARCHAR(100),
+    tokens_utilises INTEGER,
+    duree_ms INTEGER,
+    acceptee BOOLEAN,
+    feedback_note INTEGER,
+    feedback_texte TEXT,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT ck_ia_feedback_note CHECK (feedback_note IS NULL OR (feedback_note >= 1 AND feedback_note <= 5)),
+    CONSTRAINT ck_ia_type_suggestion CHECK (type_suggestion IN (
+        'recette', 'planning', 'courses', 'activite', 'entretien',
+        'diagnostic', 'voyage', 'cadeau', 'travaux', 'budget',
+        'anti_gaspillage', 'batch_cooking', 'weekend', 'jules',
+        'chat', 'proactive', 'autre'
+    ))
+);
+CREATE INDEX IF NOT EXISTS ix_ia_suggestions_user ON ia_suggestions_historique(user_id);
+CREATE INDEX IF NOT EXISTS ix_ia_suggestions_type ON ia_suggestions_historique(type_suggestion);
+CREATE INDEX IF NOT EXISTS ix_ia_suggestions_module ON ia_suggestions_historique(module);
+CREATE INDEX IF NOT EXISTS ix_ia_suggestions_created ON ia_suggestions_historique(cree_le DESC);
+CREATE INDEX IF NOT EXISTS ix_ia_suggestions_acceptee ON ia_suggestions_historique(acceptee)
+    WHERE acceptee IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ia_suggestions_user_type_date ON ia_suggestions_historique(user_id, type_suggestion, cree_le DESC);
+
+-- ─────────────────────────────────────────────────────────────────────────────
 -- 4.05 RECETTE_INGREDIENTS (→ recettes, ingredients)
 
 -- ─────────────────────────────────────────────────────────────────────────────

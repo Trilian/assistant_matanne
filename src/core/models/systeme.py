@@ -138,3 +138,48 @@ class LogSecurite(CreeLeMixin, Base):
 
     def __repr__(self) -> str:
         return f"<LogSecurite(id={self.id}, event_type='{self.event_type}', user_id='{self.user_id}')>"
+
+
+# ═══════════════════════════════════════════════════════════
+# TABLE IA_SUGGESTIONS_HISTORIQUE
+# ═══════════════════════════════════════════════════════════
+
+
+class IASuggestionsHistorique(CreeLeMixin, Base):
+    """Historique des suggestions IA pour traçabilité et feedback.
+
+    Table SQL: ia_suggestions_historique
+    Stocke toutes les suggestions IA avec feedback utilisateur.
+
+    Attributes:
+        user_id: ID de l'utilisateur
+        type_suggestion: Type de suggestion (achats, planning_adaptatif, etc.)
+        module: Module source (cuisine, maison, famille, etc.)
+        contenu: Contenu JSON de la suggestion IA
+        acceptee: Si l'utilisateur a accepté la suggestion
+        raison_rejet: Raison du rejet (optionnel)
+        tokens_utilises: Nombre de tokens consommés
+        duree_generation_ms: Durée de génération en millisecondes
+        modele_ia: Modèle IA utilisé
+    """
+
+    __tablename__ = "ia_suggestions_historique"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    type_suggestion: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    module: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    contenu: Mapped[dict | None] = mapped_column(JSONB)
+    acceptee: Mapped[bool | None] = mapped_column(Boolean, index=True)
+    raison_rejet: Mapped[str | None] = mapped_column(Text)
+    tokens_utilises: Mapped[int | None] = mapped_column(Integer)
+    duree_generation_ms: Mapped[int | None] = mapped_column(Integer)
+    modele_ia: Mapped[str | None] = mapped_column(String(100))
+
+    __table_args__ = (
+        Index("ix_ia_hist_user_type_cree", "user_id", "type_suggestion", "cree_le"),
+        Index("ix_ia_hist_module_cree", "module", "cree_le"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<IASuggestionsHistorique(id={self.id}, type='{self.type_suggestion}', module='{self.module}')>"

@@ -42,7 +42,7 @@ DECLARE t TEXT;
 user_id_varchar_tables TEXT[] := ARRAY[
     'preferences_utilisateurs', 'retours_recettes',
     'configs_calendriers_externes', 'etats_persistants',
-    'historique_actions'
+    'historique_actions', 'ia_suggestions_historique'
 ];
 BEGIN FOREACH t IN ARRAY user_id_varchar_tables LOOP
     EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
@@ -65,7 +65,7 @@ shared_tables TEXT[] := ARRAY[
     'versions_recette', 'historique_recettes',
     -- Batch Cooking
     'repas_batch', 'config_batch_cooking', 'sessions_batch_cooking',
-    'etapes_batch_cooking', 'preparations_batch',
+    'etapes_batch_cooking', 'preparations_batch', 'batch_cooking_congelation',
     -- Inventaire & Courses
     'inventaire', 'historique_inventaire', 'listes_courses',
     'modeles_courses', 'articles_modeles', 'articles_achats_famille',
@@ -85,6 +85,9 @@ shared_tables TEXT[] := ARRAY[
     'depenses_maison',
     -- Habitat
     'meubles', 'stocks_maison', 'taches_entretien', 'actions_ecologiques',
+    'habitat_scenarios', 'habitat_criteres', 'habitat_criteres_immo',
+    'habitat_annonces', 'habitat_plans', 'habitat_pieces',
+    'habitat_modifications_plan', 'habitat_projets_deco', 'habitat_zones_jardin',
     -- Maison
     'projets', 'taches_projets', 'routines', 'taches_routines',
     'elements_jardin', 'journaux_jardin',

@@ -1,12 +1,17 @@
 """Routes API pour les jeux (Paris sportifs, Loto, Euromillions).
 
-Agregateur: inclut 4 sous-routeurs thematiques:
-- jeux_paris       : Equipes, Matchs, Paris, Bankroll, Series, Predictions, Cotes
-- jeux_loto        : Loto tirages, grilles, stats, generation IA
-- jeux_euromillions: Euromillions tirages, grilles, stats, generation IA
-- jeux_dashboard   : Dashboard, Performance, Resume Mensuel, Analyse IA, Backtest
+Agrégateur : inclut 4 sous-routeurs thématiques via include_router() :
+- jeux_paris       : Équipes, Matchs, Paris, Bankroll, Séries, Prédictions, Cotes
+  → /equipes, /matchs, /paris/*, /bankroll/*
+- jeux_loto        : Loto tirages, grilles, stats, génération IA
+  → /loto/*
+- jeux_euromillions: Euromillions tirages, grilles, stats, génération IA
+  → /euromillions/*
+- jeux_dashboard   : Dashboard, Performance, Résumé mensuel, Analyse IA, Backtest
+  → /dashboard, /stats/*, /performance/*, /resume-mensuel
 
-Pour routes/__init__.py, "jeux_router": ".jeux" reste inchange.
+Préfixe parent : /api/v1/jeux
+Pour routes/__init__.py, "jeux_router": ".jeux" reste inchangé.
 """
 
 from fastapi import APIRouter
@@ -18,7 +23,7 @@ from .jeux_dashboard import router as dashboard_router
 
 router = APIRouter(prefix="/api/v1/jeux", tags=["Jeux"])
 
-router.include_router(paris_router)
-router.include_router(loto_router)
-router.include_router(euromillions_router)
-router.include_router(dashboard_router)
+router.include_router(paris_router, tags=["Jeux — Paris"])
+router.include_router(loto_router, tags=["Jeux — Loto"])
+router.include_router(euromillions_router, tags=["Jeux — Euromillions"])
+router.include_router(dashboard_router, tags=["Jeux — Dashboard"])

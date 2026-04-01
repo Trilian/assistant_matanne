@@ -2,8 +2,8 @@
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
 -- Version    : 3.1 (régénéré automatiquement)
--- Généré le  : 2026-03-31 19:59 UTC
--- Source     : sql/schema/*.sql (18 fichiers, ~4851 lignes)
+-- Généré le  : 2026-03-31 20:04 UTC
+-- Source     : sql/schema/*.sql (18 fichiers, ~4922 lignes)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
@@ -568,6 +568,40 @@ CREATE INDEX IF NOT EXISTS ix_job_executions_status ON job_executions(status);
 CREATE INDEX IF NOT EXISTS ix_job_executions_started_at ON job_executions(started_at DESC);
 CREATE INDEX IF NOT EXISTS ix_job_executions_created_at ON job_executions(created_at DESC);
 CREATE INDEX IF NOT EXISTS ix_job_executions_job_started ON job_executions(job_id, started_at DESC);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 4.04F IA_SUGGESTIONS_HISTORIQUE (historique des suggestions IA — P3-06)
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS ia_suggestions_historique (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255),
+    type_suggestion VARCHAR(100) NOT NULL,
+    module VARCHAR(100) NOT NULL,
+    prompt_resume TEXT,
+    suggestion JSONB NOT NULL DEFAULT '{}'::jsonb,
+    contexte JSONB DEFAULT '{}'::jsonb,
+    modele_ia VARCHAR(100),
+    tokens_utilises INTEGER,
+    duree_ms INTEGER,
+    acceptee BOOLEAN,
+    feedback_note INTEGER,
+    feedback_texte TEXT,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT ck_ia_feedback_note CHECK (feedback_note IS NULL OR (feedback_note >= 1 AND feedback_note <= 5)),
+    CONSTRAINT ck_ia_type_suggestion CHECK (type_suggestion IN (
+        'recette', 'planning', 'courses', 'activite', 'entretien',
+        'diagnostic', 'voyage', 'cadeau', 'travaux', 'budget',
+        'anti_gaspillage', 'batch_cooking', 'weekend', 'jules',
+        'chat', 'proactive', 'autre'
+    ))
+);
+CREATE INDEX IF NOT EXISTS ix_ia_suggestions_user ON ia_suggestions_historique(user_id);
+CREATE INDEX IF NOT EXISTS ix_ia_suggestions_type ON ia_suggestions_historique(type_suggestion);
+CREATE INDEX IF NOT EXISTS ix_ia_suggestions_module ON ia_suggestions_historique(module);
+CREATE INDEX IF NOT EXISTS ix_ia_suggestions_created ON ia_suggestions_historique(cree_le DESC);
+CREATE INDEX IF NOT EXISTS ix_ia_suggestions_acceptee ON ia_suggestions_historique(acceptee)
+    WHERE acceptee IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_ia_suggestions_user_type_date ON ia_suggestions_historique(user_id, type_suggestion, cree_le DESC);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.05 RECETTE_INGREDIENTS (→ recettes, ingredients)
@@ -1422,6 +1456,39 @@ CREATE INDEX IF NOT EXISTS ix_prep_batch_localisation ON preparations_batch(loca
 CREATE INDEX IF NOT EXISTS ix_prep_batch_consomme ON preparations_batch(consomme);
 CREATE INDEX IF NOT EXISTS idx_prep_localisation_peremption ON preparations_batch(localisation, date_peremption);
 CREATE INDEX IF NOT EXISTS idx_prep_consomme_peremption ON preparations_batch(consomme, date_peremption);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Table congélation — persistance des articles congelés (P3-05)
+-- Remplace le stockage mémoire de congelation.py
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS batch_cooking_congelation (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(200) NOT NULL,
+    date_congelation DATE NOT NULL DEFAULT CURRENT_DATE,
+    date_limite DATE NOT NULL,
+    portions INTEGER NOT NULL DEFAULT 1,
+    categorie VARCHAR(50) NOT NULL DEFAULT 'autre',
+    recette_id INTEGER,
+    session_id INTEGER,
+    notes TEXT,
+    consomme BOOLEAN NOT NULL DEFAULT FALSE,
+    date_consommation DATE,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_congelation_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_congelation_session FOREIGN KEY (session_id) REFERENCES sessions_batch_cooking(id) ON DELETE SET NULL,
+    CONSTRAINT ck_congelation_portions_positive CHECK (portions > 0),
+    CONSTRAINT ck_congelation_categorie CHECK (categorie IN (
+        'viande', 'poisson', 'legume', 'fruit', 'plat_cuisine',
+        'soupe', 'sauce', 'pain', 'patisserie', 'herbes', 'autre'
+    ))
+);
+CREATE INDEX IF NOT EXISTS ix_congelation_date_limite ON batch_cooking_congelation(date_limite);
+CREATE INDEX IF NOT EXISTS ix_congelation_categorie ON batch_cooking_congelation(categorie);
+CREATE INDEX IF NOT EXISTS ix_congelation_consomme ON batch_cooking_congelation(consomme);
+CREATE INDEX IF NOT EXISTS ix_congelation_recette ON batch_cooking_congelation(recette_id);
+CREATE INDEX IF NOT EXISTS idx_congelation_consomme_limite ON batch_cooking_congelation(consomme, date_limite)
+    WHERE consomme = FALSE;
 
 
 -- Source: 05_famille.sql
@@ -3815,7 +3882,8 @@ DECLARE t TEXT;
 tables_modifie_le TEXT [] := ARRAY [
         'profils_utilisateurs', 'garmin_tokens', 'recettes', 'activites_weekend',
         'achats_famille', 'jeux_equipes', 'jeux_matchs', 'config_batch_cooking',
-        'sessions_batch_cooking', 'preparations_batch', 'plannings',
+        'sessions_batch_cooking', 'preparations_batch', 'batch_cooking_congelation',
+        'plannings',
     'modeles_courses', 'templates_semaine', 'points_utilisateurs', 'automations',
         'contacts_famille', 'anniversaires_famille', 'evenements_familiaux',
         'voyages', 'checklists_voyage', 'documents_famille',
@@ -4177,7 +4245,7 @@ DECLARE t TEXT;
 user_id_varchar_tables TEXT[] := ARRAY[
     'preferences_utilisateurs', 'retours_recettes',
     'configs_calendriers_externes', 'etats_persistants',
-    'historique_actions'
+    'historique_actions', 'ia_suggestions_historique'
 ];
 BEGIN FOREACH t IN ARRAY user_id_varchar_tables LOOP
     EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
@@ -4200,7 +4268,7 @@ shared_tables TEXT[] := ARRAY[
     'versions_recette', 'historique_recettes',
     -- Batch Cooking
     'repas_batch', 'config_batch_cooking', 'sessions_batch_cooking',
-    'etapes_batch_cooking', 'preparations_batch',
+    'etapes_batch_cooking', 'preparations_batch', 'batch_cooking_congelation',
     -- Inventaire & Courses
     'inventaire', 'historique_inventaire', 'listes_courses',
     'modeles_courses', 'articles_modeles', 'articles_achats_famille',
@@ -4220,6 +4288,9 @@ shared_tables TEXT[] := ARRAY[
     'depenses_maison',
     -- Habitat
     'meubles', 'stocks_maison', 'taches_entretien', 'actions_ecologiques',
+    'habitat_scenarios', 'habitat_criteres', 'habitat_criteres_immo',
+    'habitat_annonces', 'habitat_plans', 'habitat_pieces',
+    'habitat_modifications_plan', 'habitat_projets_deco', 'habitat_zones_jardin',
     -- Maison
     'projets', 'taches_projets', 'routines', 'taches_routines',
     'elements_jardin', 'journaux_jardin',

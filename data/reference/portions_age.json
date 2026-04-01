@@ -1,0 +1,127 @@
+{
+  "meta": {
+    "source": "Recommandations PNNS / OMS / Anses — adaptations pédiatriques",
+    "description": "Portions recommandées par tranche d'âge pour adapter les recettes",
+    "unites": {
+      "portion_g": "grammes par repas",
+      "calories_jour": "kcal/jour (estimation moyenne)"
+    },
+    "derniere_mise_a_jour": "2026-03-31"
+  },
+  "tranches_age": [
+    {
+      "id": "bebe_6_12m",
+      "label": "Bébé 6-12 mois",
+      "age_min_mois": 6,
+      "age_max_mois": 12,
+      "calories_jour": 700,
+      "portions": {
+        "feculents": {"portion_g": 30, "repas_par_jour": 2, "notes": "Purée ou écrasé"},
+        "legumes": {"portion_g": 50, "repas_par_jour": 2, "notes": "Purée lisse puis morceaux"},
+        "fruits": {"portion_g": 50, "repas_par_jour": 2, "notes": "Compote ou écrasé"},
+        "viande": {"portion_g": 10, "repas_par_jour": 1, "notes": "Mixée, 10g/jour max"},
+        "poisson": {"portion_g": 10, "repas_par_jour": 1, "notes": "Mixé, 1-2x/semaine"},
+        "oeuf": {"portion_g": 10, "repas_par_jour": 1, "notes": "1/4 d'oeuf dur"},
+        "lait_maternel_ou_infantile_ml": {"portion_g": 500, "repas_par_jour": 4, "notes": "500-800ml/jour"},
+        "matiere_grasse": {"portion_g": 5, "repas_par_jour": 2, "notes": "1 cc huile ou beurre par repas"}
+      }
+    },
+    {
+      "id": "bebe_12_18m",
+      "label": "Bébé 12-18 mois",
+      "age_min_mois": 12,
+      "age_max_mois": 18,
+      "calories_jour": 900,
+      "portions": {
+        "feculents": {"portion_g": 50, "repas_par_jour": 3, "notes": "Petits morceaux"},
+        "legumes": {"portion_g": 80, "repas_par_jour": 2, "notes": "Morceaux tendres"},
+        "fruits": {"portion_g": 80, "repas_par_jour": 2, "notes": "Morceaux ou entier mûr"},
+        "viande": {"portion_g": 20, "repas_par_jour": 1, "notes": "20g/jour, haché ou émincé"},
+        "poisson": {"portion_g": 20, "repas_par_jour": 1, "notes": "2x/semaine"},
+        "oeuf": {"portion_g": 20, "repas_par_jour": 1, "notes": "1/3 d'oeuf"},
+        "lait_ou_yaourt_ml": {"portion_g": 500, "repas_par_jour": 3, "notes": "Lait de croissance ou entier"},
+        "fromage": {"portion_g": 15, "repas_par_jour": 1, "notes": "Pasteurisé uniquement"},
+        "matiere_grasse": {"portion_g": 5, "repas_par_jour": 2, "notes": "1 cc par repas"}
+      }
+    },
+    {
+      "id": "enfant_18_36m",
+      "label": "Enfant 18-36 mois",
+      "age_min_mois": 18,
+      "age_max_mois": 36,
+      "calories_jour": 1100,
+      "portions": {
+        "feculents": {"portion_g": 70, "repas_par_jour": 3, "notes": "Pâtes, riz, pain, pommes de terre"},
+        "legumes": {"portion_g": 100, "repas_par_jour": 2, "notes": "Variés, morceaux"},
+        "fruits": {"portion_g": 100, "repas_par_jour": 2, "notes": "Frais de préférence"},
+        "viande": {"portion_g": 30, "repas_par_jour": 1, "notes": "30g/jour"},
+        "poisson": {"portion_g": 30, "repas_par_jour": 1, "notes": "2x/semaine"},
+        "oeuf": {"portion_g": 30, "repas_par_jour": 1, "notes": "1/2 oeuf"},
+        "lait_ou_yaourt_ml": {"portion_g": 500, "repas_par_jour": 2, "notes": "Lait entier ou demi-écrémé"},
+        "fromage": {"portion_g": 20, "repas_par_jour": 1, "notes": "20g/jour"},
+        "matiere_grasse": {"portion_g": 8, "repas_par_jour": 2, "notes": "Varier huiles"}
+      }
+    },
+    {
+      "id": "enfant_3_6ans",
+      "label": "Enfant 3-6 ans",
+      "age_min_mois": 36,
+      "age_max_mois": 72,
+      "calories_jour": 1300,
+      "portions": {
+        "feculents": {"portion_g": 100, "repas_par_jour": 3, "notes": "Pain + féculents repas"},
+        "legumes": {"portion_g": 120, "repas_par_jour": 2, "notes": "Crudités + cuits"},
+        "fruits": {"portion_g": 120, "repas_par_jour": 2, "notes": "1 fruit par repas"},
+        "viande": {"portion_g": 50, "repas_par_jour": 1, "notes": "50g/jour"},
+        "poisson": {"portion_g": 50, "repas_par_jour": 1, "notes": "2x/semaine"},
+        "oeuf": {"portion_g": 50, "repas_par_jour": 1, "notes": "1 oeuf entier"},
+        "lait_ou_yaourt_ml": {"portion_g": 400, "repas_par_jour": 2, "notes": "3-4 produits laitiers/jour"},
+        "fromage": {"portion_g": 25, "repas_par_jour": 1, "notes": "25g/jour"},
+        "matiere_grasse": {"portion_g": 10, "repas_par_jour": 2, "notes": "Beurre matin, huile repas"}
+      }
+    },
+    {
+      "id": "enfant_6_10ans",
+      "label": "Enfant 6-10 ans",
+      "age_min_mois": 72,
+      "age_max_mois": 120,
+      "calories_jour": 1700,
+      "portions": {
+        "feculents": {"portion_g": 150, "repas_par_jour": 3, "notes": "À chaque repas"},
+        "legumes": {"portion_g": 150, "repas_par_jour": 2, "notes": "5 fruits et légumes/jour"},
+        "fruits": {"portion_g": 150, "repas_par_jour": 2, "notes": "Frais ou cuits"},
+        "viande": {"portion_g": 70, "repas_par_jour": 1, "notes": "Alterner viande/poisson/oeuf"},
+        "poisson": {"portion_g": 70, "repas_par_jour": 1, "notes": "2x/semaine dont 1 gras"},
+        "oeuf": {"portion_g": 50, "repas_par_jour": 1, "notes": "1 oeuf"},
+        "produits_laitiers": {"portion_g": 150, "repas_par_jour": 3, "notes": "3 par jour"},
+        "matiere_grasse": {"portion_g": 12, "repas_par_jour": 2, "notes": "Varier sources"}
+      }
+    },
+    {
+      "id": "adulte",
+      "label": "Adulte",
+      "age_min_mois": 216,
+      "age_max_mois": null,
+      "calories_jour": 2200,
+      "portions": {
+        "feculents": {"portion_g": 200, "repas_par_jour": 3, "notes": "Complets de préférence"},
+        "legumes": {"portion_g": 200, "repas_par_jour": 2, "notes": "Variés, crus et cuits"},
+        "fruits": {"portion_g": 150, "repas_par_jour": 3, "notes": "3-5 portions/jour total F&L"},
+        "viande": {"portion_g": 120, "repas_par_jour": 1, "notes": "Limiter viande rouge"},
+        "poisson": {"portion_g": 120, "repas_par_jour": 1, "notes": "2x/semaine"},
+        "oeuf": {"portion_g": 60, "repas_par_jour": 1, "notes": "1-2 oeufs"},
+        "produits_laitiers": {"portion_g": 150, "repas_par_jour": 2, "notes": "2 par jour"},
+        "matiere_grasse": {"portion_g": 15, "repas_par_jour": 2, "notes": "Huile olive/colza"}
+      }
+    }
+  ],
+  "facteur_adaptation": {
+    "description": "Facteur multiplicateur pour adapter les portions recette selon l'âge",
+    "bebe_6_12m": 0.15,
+    "bebe_12_18m": 0.25,
+    "enfant_18_36m": 0.35,
+    "enfant_3_6ans": 0.5,
+    "enfant_6_10ans": 0.7,
+    "adulte": 1.0
+  }
+}

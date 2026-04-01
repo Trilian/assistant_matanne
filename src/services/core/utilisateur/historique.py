@@ -295,26 +295,5 @@ def obtenir_action_history_service() -> ActionHistoryService:
     return obtenir_service_historique_actions()
 
 
-# UI supprimée — stubs rétrocompatibles
-def afficher_user_activity(*args, **kwargs) -> None:
-    pass
-
-def afficher_activity_stats(*args, **kwargs) -> None:
-    pass
-
-def afficher_activity_timeline(*args, **kwargs) -> None:
-    pass
-
-__all__ = [
-    "ActionHistoryService",
-    "obtenir_service_historique_actions",
-    "get_action_history_service",
-    "ActionType",
-    "ActionEntry",
-    "ActionFilter",
-    "ActionStats",
-]
-
-
 # ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
 get_action_history_service = obtenir_action_history_service  # alias rétrocompatibilité Sprint 12 A3

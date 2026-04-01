@@ -31,7 +31,10 @@ from src.services.core.event_bus_mixin import emettre_evenement_simple
 from .types import (
     VersionBatchCookingGeneree,
     VersionBebeGeneree,
+    VersionRapideGeneree,
+    VersionRestesGeneree,
     VersionRobotGeneree,
+    VersionSaisonniereGeneree,
 )
 
 if TYPE_CHECKING:
@@ -524,6 +527,289 @@ Difficulty: {recette.difficulte}"""
         emettre_evenement_simple(
             "recette.modifie",
             {"recette_id": recette_id, "nom": "", "action": f"version_{robot_type}_creee"},
+            source="recettes_ia_versions",
+        )
+        return version
+
+    # ═══════════════════════════════════════════════════════════
+    # NOUVELLES VERSIONS : SAISONNIÈRE, RAPIDE, RESTES
+    # ═══════════════════════════════════════════════════════════
+
+    def _charger_recette_complete(self, recette_id: int, db: Session) -> "Recette":
+        """Charge une recette avec ses ingrédients et étapes."""
+        recette = (
+            db.query(Recette)
+            .options(
+                joinedload(Recette.ingredients).joinedload(RecetteIngredient.ingredient),
+                joinedload(Recette.etapes),
+            )
+            .filter(Recette.id == recette_id)
+            .first()
+        )
+        if not recette:
+            raise ErreurNonTrouve(f"Recipe {recette_id} not found")
+        return recette
+
+    def _construire_contexte_recette(self, recette: "Recette") -> str:
+        """Construit le contexte texte d'une recette pour les prompts IA."""
+        ingredients_str = "\n".join(
+            [f"- {ri.quantite} {ri.unite} {ri.ingredient.nom}" for ri in recette.ingredients]
+        )
+        etapes_str = "\n".join(
+            [f"{e.ordre}. {e.description}" for e in sorted(recette.etapes, key=lambda x: x.ordre)]
+        )
+        return f"""Recette: {recette.nom}
+
+Ingrédients:
+{ingredients_str}
+
+Étapes:
+{etapes_str}
+
+Temps de préparation: {recette.temps_preparation} minutes
+Temps de cuisson: {recette.temps_cuisson} minutes
+Difficulté: {recette.difficulte}"""
+
+    @avec_gestion_erreurs(default_return=None)
+    @avec_cache(ttl=3600, key_func=lambda self, rid: f"version_saison_{rid}")
+    @chronometre("ia.recettes.version_saisonniere", seuil_alerte_ms=15000)
+    @avec_session_db
+    def generer_version_saisonniere(self, recette_id: int, db: Session) -> VersionRecette | None:
+        """Génère une version saisonnière de la recette.
+
+        Adapte la recette pour utiliser les produits de saison actuels.
+        """
+        import json
+        from datetime import date
+        from pathlib import Path
+
+        recette = self._charger_recette_complete(recette_id, db)
+
+        # Déterminer la saison actuelle
+        mois = date.today().month
+        saisons = {(3, 4, 5): "printemps", (6, 7, 8): "été", (9, 10, 11): "automne", (12, 1, 2): "hiver"}
+        saison = next(v for k, v in saisons.items() if mois in k)
+
+        # Vérifier si version existe déjà
+        existing = (
+            db.query(VersionRecette)
+            .filter(
+                VersionRecette.recette_base_id == recette_id,
+                VersionRecette.type_version == f"saisonniere_{saison}",
+            )
+            .first()
+        )
+        if existing:
+            logger.info("Version saisonnière (%s) existe déjà pour recette %s", saison, recette_id)
+            return existing
+
+        # Charger les produits de saison
+        produits_saison = ""
+        chemin_saison = Path("data/reference/produits_de_saison.json")
+        if chemin_saison.exists():
+            try:
+                data = json.loads(chemin_saison.read_text(encoding="utf-8"))
+                if saison in data:
+                    produits_saison = f"\nProduits de saison ({saison}): {', '.join(data[saison][:20])}"
+            except Exception:
+                pass
+
+        context = self._construire_contexte_recette(recette)
+        prompt = self.build_json_prompt(
+            context=f"{context}{produits_saison}",
+            task=f"Adapte cette recette pour la saison {saison} en privilégiant les produits de saison",
+            json_schema='{"instructions_modifiees": str, "ingredients_saison": list[str], "saison": str, "substitutions": str}',
+            constraints=[
+                f"Saison actuelle: {saison}",
+                "Remplacer les ingrédients hors saison par des équivalents de saison",
+                "Conserver le goût et la difficulté de la recette originale",
+                "Lister les ingrédients de saison utilisés",
+            ],
+        )
+
+        version_data = self.call_with_parsing_sync(
+            prompt=prompt,
+            response_model=VersionSaisonniereGeneree,
+            system_prompt=self.build_system_prompt(
+                role="Chef cuisinier spécialiste de la cuisine de saison",
+                expertise=["Produits de saison", "Cuisine locale", "Substitutions d'ingrédients"],
+                rules=["Toujours utiliser des produits frais de saison", f"Retourner saison='{saison}'"],
+            ),
+        )
+        if not version_data:
+            raise ErreurValidation("Réponse IA invalide pour version saisonnière")
+
+        version = VersionRecette(
+            recette_base_id=recette_id,
+            type_version=f"saisonniere_{saison}",
+            instructions_modifiees=version_data.instructions_modifiees,
+            ingredients_modifies={"ingredients_saison": version_data.ingredients_saison},
+            notes_bebe=f"🌿 **Saison: {saison}**\n\n🔄 Substitutions: {version_data.substitutions}",
+        )
+        db.add(version)
+        db.commit()
+        db.refresh(version)
+
+        logger.info("✅ Version saisonnière (%s) créée pour recette %s", saison, recette_id)
+        emettre_evenement_simple(
+            "recette.modifie",
+            {"recette_id": recette_id, "nom": "", "action": "version_saisonniere_creee"},
+            source="recettes_ia_versions",
+        )
+        return version
+
+    @avec_gestion_erreurs(default_return=None)
+    @avec_cache(ttl=3600, key_func=lambda self, rid: f"version_rapide_{rid}")
+    @chronometre("ia.recettes.version_rapide", seuil_alerte_ms=15000)
+    @avec_session_db
+    def generer_version_rapide(self, recette_id: int, db: Session) -> VersionRecette | None:
+        """Génère une version rapide (<30 min) de la recette.
+
+        Simplifie les étapes et propose des raccourcis pour une préparation express.
+        """
+        recette = self._charger_recette_complete(recette_id, db)
+
+        # Vérifier si version existe déjà
+        existing = (
+            db.query(VersionRecette)
+            .filter(
+                VersionRecette.recette_base_id == recette_id,
+                VersionRecette.type_version == "rapide",
+            )
+            .first()
+        )
+        if existing:
+            logger.info("Version rapide existe déjà pour recette %s", recette_id)
+            return existing
+
+        context = self._construire_contexte_recette(recette)
+        prompt = self.build_json_prompt(
+            context=context,
+            task="Simplifie cette recette pour qu'elle soit réalisable en moins de 30 minutes",
+            json_schema='{"instructions_modifiees": str, "temps_total_minutes": int, "astuces_gain_temps": str, "ingredients_simplifies": str}',
+            constraints=[
+                "Le temps total (préparation + cuisson) doit être ≤ 30 minutes",
+                "Remplacer les techniques longues par des alternatives rapides",
+                "Utiliser des ingrédients pré-préparés si nécessaire",
+                "Conserver au maximum le goût de la recette originale",
+                "Proposer des cuissons express (micro-ondes, poêle, etc.)",
+            ],
+        )
+
+        version_data = self.call_with_parsing_sync(
+            prompt=prompt,
+            response_model=VersionRapideGeneree,
+            system_prompt=self.build_system_prompt(
+                role="Chef spécialisé en cuisine rapide et express",
+                expertise=["Cuisine rapide", "Optimisation temps", "Techniques express"],
+                rules=["Temps total ≤ 30 minutes", "Garder la qualité gustative"],
+            ),
+        )
+        if not version_data:
+            raise ErreurValidation("Réponse IA invalide pour version rapide")
+
+        version = VersionRecette(
+            recette_base_id=recette_id,
+            type_version="rapide",
+            instructions_modifiees=version_data.instructions_modifiees,
+            temps_optimise_batch=version_data.temps_total_minutes,
+            notes_bebe=f"⚡ **Version express: {version_data.temps_total_minutes} min**\n\n💡 Astuces: {version_data.astuces_gain_temps}\n\n🛒 Ingrédients simplifiés: {version_data.ingredients_simplifies}",
+        )
+        db.add(version)
+        db.commit()
+        db.refresh(version)
+
+        logger.info("✅ Version rapide créée pour recette %s (%d min)", recette_id, version_data.temps_total_minutes)
+        emettre_evenement_simple(
+            "recette.modifie",
+            {"recette_id": recette_id, "nom": "", "action": "version_rapide_creee"},
+            source="recettes_ia_versions",
+        )
+        return version
+
+    @avec_gestion_erreurs(default_return=None)
+    @chronometre("ia.recettes.version_restes", seuil_alerte_ms=15000)
+    @avec_session_db
+    def generer_version_restes(
+        self, recette_id: int, ingredients_disponibles: list[str] | None = None, db: Session = None,
+    ) -> VersionRecette | None:
+        """Génère une version à partir des restes/inventaire.
+
+        Adapte la recette pour utiliser au maximum les ingrédients disponibles en stock.
+
+        Args:
+            recette_id: ID de la recette de base
+            ingredients_disponibles: Liste d'ingrédients en stock (optionnel, sinon requête DB)
+            db: Database session (injected by @avec_session_db)
+        """
+        recette = self._charger_recette_complete(recette_id, db)
+
+        # Récupérer l'inventaire si non fourni
+        if not ingredients_disponibles:
+            try:
+                from src.core.models import ArticleInventaire
+
+                articles = db.query(ArticleInventaire).filter(
+                    ArticleInventaire.quantite > 0
+                ).limit(50).all()
+                ingredients_disponibles = [a.nom for a in articles]
+            except Exception:
+                ingredients_disponibles = []
+
+        if not ingredients_disponibles:
+            logger.info("Aucun ingrédient en stock pour version restes de recette %s", recette_id)
+            return None
+
+        context = self._construire_contexte_recette(recette)
+        stock_str = ", ".join(ingredients_disponibles[:30])
+
+        prompt = self.build_json_prompt(
+            context=f"{context}\n\nIngrédients disponibles en stock: {stock_str}",
+            task="Adapte cette recette pour utiliser au maximum les ingrédients disponibles en stock",
+            json_schema='{"instructions_modifiees": str, "ingredients_utilises_du_stock": list[str], "ingredients_a_acheter": list[str], "anti_gaspillage_notes": str}',
+            constraints=[
+                "Maximiser l'utilisation des ingrédients en stock",
+                "Minimiser les achats supplémentaires",
+                "Indiquer clairement ce qui vient du stock vs à acheter",
+                "Proposer des substitutions anti-gaspillage",
+                "Conserver la qualité gustative",
+            ],
+        )
+
+        version_data = self.call_with_parsing_sync(
+            prompt=prompt,
+            response_model=VersionRestesGeneree,
+            system_prompt=self.build_system_prompt(
+                role="Chef anti-gaspillage spécialiste de la cuisine des restes",
+                expertise=["Anti-gaspillage", "Cuisine des restes", "Valorisation des stocks"],
+                rules=["Utiliser un maximum d'ingrédients du stock", "Réduire le gaspillage"],
+            ),
+        )
+        if not version_data:
+            raise ErreurValidation("Réponse IA invalide pour version restes")
+
+        version = VersionRecette(
+            recette_base_id=recette_id,
+            type_version="restes",
+            instructions_modifiees=version_data.instructions_modifiees,
+            ingredients_modifies={
+                "utilises_du_stock": version_data.ingredients_utilises_du_stock,
+                "a_acheter": version_data.ingredients_a_acheter,
+            },
+            notes_bebe=f"♻️ **Version anti-gaspillage**\n\n✅ Du stock: {', '.join(version_data.ingredients_utilises_du_stock)}\n\n🛒 À acheter: {', '.join(version_data.ingredients_a_acheter)}\n\n💡 {version_data.anti_gaspillage_notes}",
+        )
+        db.add(version)
+        db.commit()
+        db.refresh(version)
+
+        logger.info(
+            "✅ Version restes créée pour recette %s (%d ingrédients du stock)",
+            recette_id,
+            len(version_data.ingredients_utilises_du_stock),
+        )
+        emettre_evenement_simple(
+            "recette.modifie",
+            {"recette_id": recette_id, "nom": "", "action": "version_restes_creee"},
             source="recettes_ia_versions",
         )
         return version

@@ -429,3 +429,99 @@ class PreparationBatch(TimestampMixin, Base):
 
     def __repr__(self) -> str:
         return f"<PreparationBatch(id={self.id}, nom='{self.nom}', portions={self.portions_restantes})>"
+
+
+# ═══════════════════════════════════════════════════════════
+# ARTICLES CONGELÉS (stock congélateur)
+# ═══════════════════════════════════════════════════════════
+
+
+class CategorieCongelationEnum(enum.StrEnum):
+    """Catégories d'articles congelés."""
+
+    PLAT_CUISINE = "plat cuisine"
+    PLAT = "plat"
+    VIANDE_CRUE = "viande crue"
+    VIANDE_CUITE = "viande cuite"
+    VOLAILLE_CRUE = "volaille crue"
+    VOLAILLE_CUITE = "volaille cuite"
+    POISSON_CRU = "poisson cru"
+    POISSON_CUIT = "poisson cuit"
+    LEGUME_BLANCHI = "légume blanchi"
+    LEGUME_CRU = "légume cru"
+    FRUIT = "fruit"
+    SAUCE = "sauce"
+    BOUILLON = "bouillon"
+    PAIN = "pain"
+    PATE = "pâte"
+    DESSERT = "dessert"
+    FROMAGE = "fromage"
+    BEURRE = "beurre"
+    HERBES = "herbes"
+    AUTRE = "autre"
+
+
+class BatchCookingCongelation(TimestampMixin, Base):
+    """Article stocké au congélateur.
+
+    Table SQL: batch_cooking_congelation
+    Remplace le stockage en mémoire de congelation.py.
+
+    Attributes:
+        nom: Nom de l'article congelé
+        date_congelation: Date de mise au congélateur
+        date_limite: Date limite de conservation
+        portions: Nombre de portions
+        categorie: Catégorie de l'article
+        recette_id: Lien vers la recette d'origine
+        session_id: Lien vers la session batch cooking
+        notes: Notes additionnelles
+        consomme: Si l'article a été entièrement consommé
+        meta_donnees: Métadonnées additionnelles (JSON)
+    """
+
+    __tablename__ = "batch_cooking_congelation"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    nom: Mapped[str] = mapped_column(String(200), nullable=False)
+    date_congelation: Mapped[date] = mapped_column(Date, nullable=False)
+    date_limite: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    portions: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    categorie: Mapped[str] = mapped_column(String(50), default="autre")
+    recette_id: Mapped[int | None] = mapped_column(
+        ForeignKey("recettes.id", ondelete="SET NULL"), index=True
+    )
+    session_id: Mapped[int | None] = mapped_column(
+        ForeignKey("sessions_batch_cooking.id", ondelete="SET NULL"), index=True
+    )
+    notes: Mapped[str | None] = mapped_column(Text)
+    consomme: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    meta_donnees: Mapped[dict | None] = mapped_column("metadata", JSONB)
+
+    __table_args__ = (
+        Index("idx_congelation_date_limite", "date_limite"),
+        Index("idx_congelation_categorie", "categorie"),
+        Index("idx_congelation_consomme_date", "consomme", "date_limite"),
+        CheckConstraint("portions > 0", name="ck_congelation_portions_positive"),
+    )
+
+    @property
+    def jours_restants(self) -> int:
+        """Nombre de jours avant expiration."""
+        return (self.date_limite - date.today()).days
+
+    @property
+    def urgence(self) -> int:
+        """0=expiré, 1=urgent (<7j), 2=bientôt (<30j), 3=ok."""
+        j = self.jours_restants
+        if j < 0:
+            return 0
+        if j < 7:
+            return 1
+        if j < 30:
+            return 2
+        return 3
+
+    def __repr__(self) -> str:
+        return f"<BatchCookingCongelation(id={self.id}, nom='{self.nom}', urgence={self.urgence})>"

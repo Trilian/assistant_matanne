@@ -255,31 +255,46 @@ __all__ = [
     "generer_etiquettes_html",
     "lister_articles_congeles",
     "ajouter_article_congele",
+    "consommer_article_congele",
+    "supprimer_article_congele",
 ]
 
 
 # ═══════════════════════════════════════════════════════════
-# PERSISTENCE SESSION_STATE (en attendant table SQL)
+# PERSISTENCE BASE DE DONNÉES
 # ═══════════════════════════════════════════════════════════
 
-_KEY_CONGELATEUR = "congelateur_stock"
-_CONGELATEUR_STORE: list[ArticleCongele] = []
+
+def _model_vers_dataclass(row) -> ArticleCongele:
+    """Convertit un modèle SQLAlchemy en dataclass ArticleCongele."""
+    return ArticleCongele(
+        nom=row.nom,
+        date_congelation=row.date_congelation,
+        date_limite=row.date_limite,
+        portions=row.portions,
+        categorie=row.categorie or "",
+        recette_id=row.recette_id,
+        notes=row.notes or "",
+    )
 
 
-def _obtenir_stock() -> list[ArticleCongele]:
-    """Récupère le stock congélateur depuis le store en mémoire."""
-    return list(_CONGELATEUR_STORE)
+def lister_articles_congeles(user_id: str | None = None) -> list[ArticleCongele]:
+    """Liste tous les articles du congélateur non consommés, triés par urgence."""
+    from src.core.db import obtenir_contexte_db
+    from src.core.models import BatchCookingCongelation
 
-
-def _sauvegarder_stock(stock: list[ArticleCongele]) -> None:
-    """Persiste le stock congélateur dans le store en mémoire."""
-    _CONGELATEUR_STORE.clear()
-    _CONGELATEUR_STORE.extend(stock)
-
-
-def lister_articles_congeles() -> list[ArticleCongele]:
-    """Liste tous les articles du congélateur, triés par urgence."""
-    return trier_par_urgence(_obtenir_stock())
+    try:
+        with obtenir_contexte_db() as session:
+            query = session.query(BatchCookingCongelation).filter(
+                BatchCookingCongelation.consomme.is_(False)
+            )
+            if user_id:
+                query = query.filter(BatchCookingCongelation.user_id == user_id)
+            rows = query.order_by(BatchCookingCongelation.date_limite).all()
+            return trier_par_urgence([_model_vers_dataclass(r) for r in rows])
+    except Exception:
+        logger.warning("DB indisponible pour congelation, fallback mémoire")
+        return trier_par_urgence(_CONGELATEUR_STORE)
 
 
 def ajouter_article_congele(
@@ -287,9 +302,13 @@ def ajouter_article_congele(
     categorie: str = "plat",
     quantite: str = "",
     portions: int = 1,
+    user_id: str = "default",
     **kwargs,
 ) -> ArticleCongele:
-    """Ajoute un article au congélateur et persiste."""
+    """Ajoute un article au congélateur et persiste en DB."""
+    from src.core.db import obtenir_contexte_db
+    from src.core.models import BatchCookingCongelation
+
     article = creer_article_congele(
         nom=nom,
         categorie=categorie,
@@ -297,7 +316,67 @@ def ajouter_article_congele(
         **kwargs,
     )
     article.notes = quantite or article.notes
-    stock = _obtenir_stock()
-    stock.append(article)
-    _sauvegarder_stock(stock)
+
+    try:
+        with obtenir_contexte_db() as session:
+            row = BatchCookingCongelation(
+                user_id=user_id,
+                nom=article.nom,
+                date_congelation=article.date_congelation,
+                date_limite=article.date_limite,
+                portions=article.portions,
+                categorie=article.categorie or "autre",
+                recette_id=article.recette_id,
+                notes=article.notes or None,
+                consomme=False,
+            )
+            session.add(row)
+            session.commit()
+            logger.info("Article congelé ajouté en DB: %s", article.nom)
+    except Exception:
+        logger.warning("DB indisponible, fallback mémoire pour: %s", article.nom)
+        _CONGELATEUR_STORE.append(article)
+
     return article
+
+
+def consommer_article_congele(article_id: int) -> bool:
+    """Marque un article congelé comme consommé."""
+    from src.core.db import obtenir_contexte_db
+    from src.core.models import BatchCookingCongelation
+
+    try:
+        with obtenir_contexte_db() as session:
+            row = session.query(BatchCookingCongelation).filter(
+                BatchCookingCongelation.id == article_id
+            ).first()
+            if row:
+                row.consomme = True
+                session.commit()
+                return True
+    except Exception:
+        logger.warning("Erreur consommation article congelé %s", article_id)
+    return False
+
+
+def supprimer_article_congele(article_id: int) -> bool:
+    """Supprime un article congelé de la DB."""
+    from src.core.db import obtenir_contexte_db
+    from src.core.models import BatchCookingCongelation
+
+    try:
+        with obtenir_contexte_db() as session:
+            row = session.query(BatchCookingCongelation).filter(
+                BatchCookingCongelation.id == article_id
+            ).first()
+            if row:
+                session.delete(row)
+                session.commit()
+                return True
+    except Exception:
+        logger.warning("Erreur suppression article congelé %s", article_id)
+    return False
+
+
+# Fallback en mémoire (si DB indisponible)
+_CONGELATEUR_STORE: list[ArticleCongele] = []

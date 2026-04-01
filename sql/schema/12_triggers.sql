@@ -6,7 +6,8 @@ DECLARE t TEXT;
 tables_modifie_le TEXT [] := ARRAY [
         'profils_utilisateurs', 'garmin_tokens', 'recettes', 'activites_weekend',
         'achats_famille', 'jeux_equipes', 'jeux_matchs', 'config_batch_cooking',
-        'sessions_batch_cooking', 'preparations_batch', 'plannings',
+        'sessions_batch_cooking', 'preparations_batch', 'batch_cooking_congelation',
+        'plannings',
     'modeles_courses', 'templates_semaine', 'points_utilisateurs', 'automations',
         'contacts_famille', 'anniversaires_famille', 'evenements_familiaux',
         'voyages', 'checklists_voyage', 'documents_famille',

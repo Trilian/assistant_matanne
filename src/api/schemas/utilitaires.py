@@ -239,3 +239,31 @@ class EnergieResponse(BaseModel):
     unite: str = "kWh"
     montant: float | None = None
     notes: str | None = None
+
+
+# ═══════════════════════════════════════════════════════════
+# MINUTEUR
+# ═══════════════════════════════════════════════════════════
+
+
+class MinuteurCreate(BaseModel):
+    label: str = Field(..., min_length=1, max_length=200)
+    duree_secondes: int = Field(..., gt=0, le=86400)
+    recette_id: int | None = None
+
+
+class MinuteurPatch(BaseModel):
+    label: str | None = None
+    terminee: bool | None = None
+    active: bool | None = None
+
+
+class MinuteurResponse(BaseModel):
+    id: int
+    label: str
+    duree_secondes: int
+    recette_id: int | None = None
+    date_debut: str | None = None
+    date_fin: str | None = None
+    terminee: bool = False
+    active: bool = False
