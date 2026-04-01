@@ -393,6 +393,7 @@ export default function PageAccueil() {
       >
 
       {widgets.meteo && meteo && (
+        <WidgetSortable id="meteo">
         <Card className="border-blue-300/50 bg-blue-50/50 dark:border-blue-800/40 dark:bg-blue-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Météo rapide</CardTitle>
@@ -411,9 +412,11 @@ export default function PageAccueil() {
             </div>
           </CardContent>
         </Card>
+        </WidgetSortable>
       )}
 
       {widgets.histoire_famille && histoireFamille && histoireFamille.total > 0 && (
+        <WidgetSortable id="histoire_famille">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Aujourd&apos;hui dans notre histoire</CardTitle>
@@ -432,9 +435,11 @@ export default function PageAccueil() {
             ))}
           </CardContent>
         </Card>
+        </WidgetSortable>
       )}
 
       {widgets.alertes_contextuelles && alertesContextuelles && alertesContextuelles.total > 0 && (
+        <WidgetSortable id="alertes_contextuelles">
         <Card className="border-amber-300/60 bg-amber-50/50 dark:border-amber-900/40 dark:bg-amber-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Alertes contextuelles</CardTitle>
@@ -453,9 +458,11 @@ export default function PageAccueil() {
             ))}
           </CardContent>
         </Card>
+        </WidgetSortable>
       )}
 
       {widgets.alerte_budget && alertesBudget.length > 0 && (
+        <WidgetSortable id="alerte_budget">
         <Card className="border-red-300/60 bg-red-50/50 dark:border-red-900/40 dark:bg-red-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -492,9 +499,11 @@ export default function PageAccueil() {
             </Button>
           </CardContent>
         </Card>
+        </WidgetSortable>
       )}
 
       {widgets.points_famille && pointsFamille && (
+        <WidgetSortable id="points_famille">
         <Card className="border-emerald-300/50 bg-emerald-50/50 dark:border-emerald-900/40 dark:bg-emerald-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Points famille</CardTitle>
@@ -521,9 +530,11 @@ export default function PageAccueil() {
             )}
           </CardContent>
         </Card>
+        </WidgetSortable>
       )}
 
       {widgets.score_bienetre && scoreBienEtre && (
+        <WidgetSortable id="score_bienetre">
         <Card className="border-purple-300/50 bg-purple-50/50 dark:border-purple-900/40 dark:bg-purple-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -556,9 +567,11 @@ export default function PageAccueil() {
             />
           </CardContent>
         </Card>
+        </WidgetSortable>
       )}
 
       {widgets.score_ecologique && scoreEcologique && (
+        <WidgetSortable id="score_ecologique">
         <Card className="border-lime-300/50 bg-lime-50/60 dark:border-lime-900/40 dark:bg-lime-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -595,10 +608,12 @@ export default function PageAccueil() {
             </div>
           </CardContent>
         </Card>
+        </WidgetSortable>
       )}
 
       {/* Cartes métriques */}
       {widgets.metriques && (
+      <WidgetSortable id="metriques">
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <CarteMetrique
           titre="Repas aujourd'hui"
@@ -630,10 +645,12 @@ export default function PageAccueil() {
           alerte={(data?.taches_entretien_urgentes ?? 0) > 0}
         />
       </div>
+      </WidgetSortable>
       )}
 
       {/* Actions rapides */}
       {widgets.actions_rapides && (
+      <WidgetSortable id="actions_rapides">
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Actions rapides</CardTitle>
@@ -677,10 +694,12 @@ export default function PageAccueil() {
           </div>
         </CardContent>
       </Card>
+      </WidgetSortable>
       )}
 
       {/* Suggestion dîner IA */}
       {widgets.lecture_ia && data?.suggestion_diner && (
+        <WidgetSortable id="lecture_ia">
         <Card className="border-primary/20 bg-primary/5">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -697,10 +716,12 @@ export default function PageAccueil() {
             </Button>
           </CardContent>
         </Card>
+        </WidgetSortable>
       )}
 
       {/* Rappels intelligents */}
       {widgets.rappels && rappelsData && rappelsData.total > 0 && (
+        <WidgetSortable id="rappels">
         <Card className="border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -724,10 +745,12 @@ export default function PageAccueil() {
             )}
           </CardContent>
         </Card>
+        </WidgetSortable>
       )}
 
       {/* Checklist du jour */}
       {widgets.checklist_jour && (
+        <WidgetSortable id="checklist_jour">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Checklist du jour</CardTitle>
@@ -791,10 +814,12 @@ export default function PageAccueil() {
             </Button>
           </CardContent>
         </Card>
+        </WidgetSortable>
       )}
 
       {/* Aperçu financier */}
       {widgets.depenses && statsDepenses && (
+        <WidgetSortable id="depenses">
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           <Card>
             <CardHeader className="pb-2">
@@ -858,10 +883,12 @@ export default function PageAccueil() {
             </CardContent>
           </Card>
         </div>
+        </WidgetSortable>
       )}
 
       {/* Bilan mensuel IA */}
       {widgets.bilan_mensuel && bilanMensuel?.synthese_ia && (
+        <WidgetSortable id="bilan_mensuel">
         <Card className="border-primary/20 bg-primary/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -880,6 +907,7 @@ export default function PageAccueil() {
             </p>
           </CardContent>
         </Card>
+        </WidgetSortable>
       )}
 
       </GrilleDashboardDnd>

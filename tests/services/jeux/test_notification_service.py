@@ -76,7 +76,7 @@ class TestNotificationJeux:
             urgence=NiveauUrgence.HAUTE,
             type_jeu="paris",
         )
-        assert notif.icone == "âš ï¸"
+        assert notif.icone == "⚠️"
 
     def test_couleur_urgence(self):
         """La couleur correspond Ã  l'urgence."""
@@ -160,7 +160,7 @@ class TestCreerAlerteOpportunite:
         )
 
         assert notif.urgence == NiveauUrgence.HAUTE
-        assert "ðŸŸ¢" in notif.message
+        assert "🟢" in notif.message
 
     def test_opportunite_moyenne(self, service):
         """OpportunitÃ© avec value moyenne = urgence moyenne."""
@@ -172,7 +172,7 @@ class TestCreerAlerteOpportunite:
         )
 
         assert notif.urgence == NiveauUrgence.MOYENNE
-        assert "ðŸŸ¡" in notif.message
+        assert "🟡" in notif.message
 
     def test_opportunite_metadata(self, service):
         """Les metadata sont correctement stockÃ©es."""
@@ -199,7 +199,7 @@ class TestCreerAlerteSync:
             nb_alertes=3,
         )
 
-        assert "âœ…" in notif.titre
+        assert "✅" in notif.titre
         assert notif.urgence == NiveauUrgence.BASSE
 
     def test_sync_echec(self, service):
@@ -210,7 +210,7 @@ class TestCreerAlerteSync:
             erreur="Timeout API",
         )
 
-        assert "âŒ" in notif.titre
+        assert "❌" in notif.titre
         assert notif.urgence == NiveauUrgence.HAUTE
 
 

@@ -143,6 +143,46 @@ function ColonneJour({
   );
 }
 
+function classeLargeurGantt(nbTaches: number): string {
+  if (nbTaches <= 0) return "w-0";
+  if (nbTaches === 1) return "w-1/5";
+  if (nbTaches === 2) return "w-2/5";
+  if (nbTaches === 3) return "w-3/5";
+  if (nbTaches === 4) return "w-4/5";
+  return "w-full";
+}
+
+function TimelineGanttEntretien({ planning }: { planning: Record<string, FicheTache[]> }) {
+  const jours = Object.keys(planning ?? {});
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm">Timeline Gantt Entretien</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {jours.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Aucune tâche planifiée.</p>
+        ) : (
+          jours.map((jour) => {
+            const taches = planning[jour] ?? [];
+            return (
+              <div key={jour} className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="capitalize">{jour}</span>
+                  <span className="text-muted-foreground">{taches.length} tâche(s)</span>
+                </div>
+                <div className="h-2 rounded bg-muted">
+                  <div className={`h-2 rounded bg-primary ${classeLargeurGantt(taches.length)}`} />
+                </div>
+              </div>
+            );
+          })
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 // �"?�"?�"? Guide lessive �"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?�"?
 
 const TACHES_LESSIVE = [
@@ -196,6 +236,7 @@ function GuideLessive() {
         <div className="flex items-center gap-3">
           <label className="text-sm text-muted-foreground">Tissu (optionnel) :</label>
           <select
+            aria-label="Tissu"
             value={tissu}
             onChange={(e) => setTissu(e.target.value)}
             className="text-sm border rounded-md px-2 py-1 bg-background"
@@ -656,6 +697,11 @@ function ContenuMenage() {
                   />
                 ))}
               </div>
+            </div>
+          )}
+          {planning && (
+            <div className="mt-4">
+              <TimelineGanttEntretien planning={planning as Record<string, FicheTache[]>} />
             </div>
           )}
           {!chargPlanning && !planning && (

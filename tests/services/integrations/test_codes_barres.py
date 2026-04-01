@@ -107,7 +107,7 @@ class TestBarcodeArticle:
             barcode="12345678", article_id=1, nom_article="Test", categorie="Autre"
         )
         assert article.quantite_defaut == 1.0
-        assert article.unite_defaut == "unitÃ©"
+        assert article.unite_defaut == "unité"
         assert article.lieu_stockage == "Placard"
         assert article.prix_unitaire is None
 
@@ -345,7 +345,7 @@ class TestAjouterArticle:
             service.ajouter_article_par_barcode.__wrapped__(
                 service, code="3017620422003", nom="Nouveau", session=mock_session
             )
-        assert "dÃ©jÃ  assignÃ©" in str(exc_info.value)
+        assert "déjà assigné" in str(exc_info.value)
 
     def test_ajout_succes(self, service, mock_session):
         """Test ajout rÃ©ussi - vÃ©rifie que add et commit sont appelÃ©s."""
@@ -508,7 +508,7 @@ class TestGestionStock:
             service, code="3017620422003", session=mock_session
         )
 
-        assert result["peremption_etat"] == "PÃ‰RIMÃ‰"
+        assert result["peremption_etat"] == "PÉRIMÉ"
 
     def test_verifier_stock_peremption_urgente(self, service, mock_session):
         """Test pÃ©remption urgente (< 7 jours)."""
@@ -546,7 +546,7 @@ class TestGestionStock:
             service, code="3017620422003", session=mock_session
         )
 
-        assert result["peremption_etat"] == "BIENTÃ”T"
+        assert result["peremption_etat"] == "BIENTÔT"
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

@@ -228,6 +228,24 @@ export default function PageMaison() {
         </div>
       )}
 
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Phase E - Innovations</CardTitle>
+          <CardDescription>Accès rapide aux nouveautés différenciantes.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-2 md:grid-cols-3">
+          <Button asChild variant="outline" size="sm">
+            <Link href="/innovations">Pilote auto & score famille</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/maison/visualisation">Vue jardin 2D/3D</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/maison/menage?tab=semaine">Timeline Gantt entretien</Link>
+          </Button>
+        </CardContent>
+      </Card>
+
       <CarteNotificationsModule moduleKey="maison" moduleLabel="Maison" />
 
       {/* Bandeau IA */}

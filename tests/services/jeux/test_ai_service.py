@@ -100,7 +100,7 @@ class TestAnalyserParis:
 
         assert isinstance(result, AnalyseIA)
         assert result.type_analyse == "paris"
-        assert "Aucune opportunitÃ©" in result.resume
+        assert "Aucune opportunité" in result.resume
         assert result.confiance == 0.0
 
     @pytest.mark.asyncio
@@ -130,7 +130,7 @@ class TestAnalyserParis:
         assert "Ligue 1" in prompt
         assert "More_2_5" in prompt
         assert "Value=" in prompt
-        assert "SÃ©rie=" in prompt
+        assert "Série=" in prompt
 
     def test_fallback_sans_ia(self, service, opportunites_paris):
         """Fallback gÃ©nÃ¨re une analyse basique sans IA."""
@@ -155,7 +155,7 @@ class TestAnalyserLoto:
 
         assert isinstance(result, AnalyseIA)
         assert result.type_analyse == "loto"
-        assert "Aucun numÃ©ro" in result.resume
+        assert "Aucun numéro" in result.resume
 
     @pytest.mark.asyncio
     async def test_analyse_avec_donnees(self, service, numeros_loto, mock_client_ia):
@@ -179,9 +179,9 @@ class TestAnalyserLoto:
         """Le prompt Loto est correctement construit."""
         prompt = service._construire_prompt_loto(numeros_loto, "principal")
 
-        assert "NumÃ©ro 7" in prompt
+        assert "Numéro 7" in prompt
         assert "30 tirages" in prompt
-        assert "INDÃ‰PENDANT" in prompt
+        assert "INDÉPENDANT" in prompt
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -231,7 +231,7 @@ class TestParserReponse:
 
         result = service._parser_reponse_analyse(reponse, "paris")
 
-        assert "rÃ©sumÃ©" in result.resume.lower()
+        assert "résumé" in result.resume.lower()
         assert len(result.points_cles) >= 1  # Parser best-effort
         assert len(result.recommandations) >= 1  # Parser best-effort
 
@@ -277,7 +277,7 @@ class TestAvertissements:
 
     def test_system_prompt_rappel_hasard(self, service):
         """Le prompt systÃ¨me rappelle le hasard."""
-        assert "INDÃ‰PENDANT" in service.SYSTEM_PROMPT
+        assert "INDÉPENDANT" in service.SYSTEM_PROMPT
         assert "IMPRÃ‰VISIBLES" in service.SYSTEM_PROMPT
 
     def test_analyse_contient_avertissement(self, service, opportunites_paris):

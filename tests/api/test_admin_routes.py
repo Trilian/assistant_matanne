@@ -363,6 +363,58 @@ class TestAdminSprintFEndpoints:
             assert "pages_totales" in data
 
 
+class TestAdminQuickCommand:
+    """Couverture D1: console commande rapide admin."""
+
+    @pytest.mark.asyncio
+    async def test_quick_command_help(self, async_client: httpx.AsyncClient):
+        response = await async_client.post(
+            "/api/v1/admin/quick-command",
+            json={"commande": "help"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data.get("status") == "ok"
+        assert data.get("type") == "help"
+        assert isinstance(data.get("commandes"), dict)
+
+    @pytest.mark.asyncio
+    async def test_quick_command_run_job_dry_run(self, async_client: httpx.AsyncClient):
+        with patch(
+            "src.services.core.cron.jobs.executer_job_par_id",
+            return_value={
+                "status": "dry_run",
+                "job_id": "rappels_famille",
+                "message": "simulé",
+                "duration_ms": 10,
+                "dry_run": True,
+            },
+        ) as mock_exec:
+            response = await async_client.post(
+                "/api/v1/admin/quick-command",
+                json={"commande": "run job rappels_famille --dry-run"},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data.get("type") == "job_result"
+        mock_exec.assert_called_once_with(
+            "rappels_famille",
+            dry_run=True,
+            source="admin_console",
+        )
+
+    @pytest.mark.asyncio
+    async def test_quick_command_inconnue(self, async_client: httpx.AsyncClient):
+        response = await async_client.post(
+            "/api/v1/admin/quick-command",
+            json={"commande": "foo bar baz"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data.get("type") == "error"
+
+
 # ═══════════════════════════════════════════════════════════
 # CT-14 — Routes RGPD
 # ═══════════════════════════════════════════════════════════

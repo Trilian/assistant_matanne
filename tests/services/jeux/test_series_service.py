@@ -46,12 +46,12 @@ class TestSeriesServiceCalculs:
 
     def test_niveau_opportunite(self):
         """Test niveau d'opportunitÃ© pour affichage."""
-        assert SeriesService.niveau_opportunite(3.0) == "ðŸŸ¢"  # Haute
-        assert SeriesService.niveau_opportunite(2.5) == "ðŸŸ¢"  # Haute (seuil)
-        assert SeriesService.niveau_opportunite(2.2) == "ðŸŸ¡"  # Moyenne
-        assert SeriesService.niveau_opportunite(2.0) == "ðŸŸ¡"  # Moyenne (seuil)
-        assert SeriesService.niveau_opportunite(1.5) == "âšª"  # Faible
-        assert SeriesService.niveau_opportunite(0.5) == "âšª"  # Faible
+        assert SeriesService.niveau_opportunite(3.0) == "🟢"  # Haute
+        assert SeriesService.niveau_opportunite(2.5) == "🟢"  # Haute (seuil)
+        assert SeriesService.niveau_opportunite(2.2) == "🟡"  # Moyenne
+        assert SeriesService.niveau_opportunite(2.0) == "🟡"  # Moyenne (seuil)
+        assert SeriesService.niveau_opportunite(1.5) == "⚪"  # Faible
+        assert SeriesService.niveau_opportunite(0.5) == "⚪"  # Faible
 
 
 class TestSeriesServiceFactory:
@@ -130,7 +130,7 @@ class TestSeriesServiceCasUtilisation:
 
         assert value == 2.8
         assert SeriesService.est_opportunite(value) is True
-        assert SeriesService.niveau_opportunite(value) == "ðŸŸ¢"
+        assert SeriesService.niveau_opportunite(value) == "🟢"
 
     def test_scenario_loto_numero_en_retard(self):
         """
@@ -157,7 +157,7 @@ class TestSeriesServiceCasUtilisation:
 
         assert value > SEUIL_VALUE_HAUTE
         assert SeriesService.est_opportunite(value) is True
-        assert SeriesService.niveau_opportunite(value) == "ðŸŸ¢"
+        assert SeriesService.niveau_opportunite(value) == "🟢"
 
     def test_scenario_paris_nul_mi_temps(self):
         """
@@ -171,7 +171,7 @@ class TestSeriesServiceCasUtilisation:
 
         assert round(value, 10) == 2.4  # Utilise round pour Ã©viter erreurs float
         assert SeriesService.est_opportunite(value) is True
-        assert SeriesService.niveau_opportunite(value) == "ðŸŸ¡"
+        assert SeriesService.niveau_opportunite(value) == "🟡"
 
 
 class TestSeriesServiceEdgeCases:
@@ -202,7 +202,7 @@ class TestSeriesServiceEdgeCases:
         value = SeriesService.calculer_value(frequence, serie)
 
         assert value == 5.0
-        assert SeriesService.niveau_opportunite(value) == "ðŸŸ¢"
+        assert SeriesService.niveau_opportunite(value) == "🟢"
 
     def test_seuil_personnalise(self):
         """Test avec seuil personnalisÃ©."""

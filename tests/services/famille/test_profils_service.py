@@ -451,7 +451,7 @@ class TestImport:
         data = {
             "version": "1.0",
             "profil": {
-                "display_name": "Anne ModifiÃ©e",
+                "display_name": "Anne Modifiée",
                 "email": "new@test.com",
                 "avatar_emoji": "ðŸ¦¸â€â™€ï¸",
                 "theme_prefere": "clair",
@@ -465,10 +465,10 @@ class TestImport:
         }
         ok, msg = ProfilService.importer_configuration("anne", data)
         assert ok is True
-        assert "succÃ¨s" in msg.lower()
+        assert "succes" in msg.lower() or "succès" in msg.lower()
 
         db.refresh(profil_anne)
-        assert profil_anne.display_name == "Anne ModifiÃ©e"
+        assert profil_anne.display_name == "Anne Modifiée"
         assert profil_anne.email == "new@test.com"
         assert profil_anne.taille_cm == 170
         assert profil_anne.objectif_pas_quotidien == 12000
@@ -551,7 +551,7 @@ class TestReinitialiser:
 
         ok, msg = ProfilService.reinitialiser_section("anne", "preferences_modules")
         assert ok is True
-        assert "rÃ©initialisÃ©es" in msg.lower()
+        assert "reinitialisees" in msg.lower() or "réinitialisées" in msg.lower()
 
         db.refresh(profil_anne)
         assert profil_anne.preferences_modules == PREFERENCES_MODULES_DEFAUT

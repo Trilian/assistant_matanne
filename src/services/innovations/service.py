@@ -20,6 +20,7 @@ import json
 import logging
 import secrets
 from datetime import UTC, date, datetime, timedelta
+from io import BytesIO
 from typing import Any
 
 from src.core.ai import obtenir_client_ia
@@ -32,6 +33,12 @@ from src.services.core.registry import service_factory
 
 from .types import (
     AlertesContextuellesResponse,
+    JournalFamilialAutoResponse,
+    ModePiloteAutomatiqueResponse,
+    RapportMensuelPdfResponse,
+    ScoreFamilleHebdoResponse,
+    DimensionScoreFamille,
+    ActionPiloteAutomatique,
     AnalyseTendancesLotoResponse,
     AnomalieEnergieDetail,
     AnomaliesEnergieResponse,
@@ -351,6 +358,187 @@ Retourne un JSON avec:
             },
         ]
         return AlertesContextuellesResponse(nb_alertes=len(alertes), alertes=alertes)
+
+    @avec_cache(ttl=900, key_func=lambda self: "phase_e_mode_pilote")
+    @avec_gestion_erreurs(default_return=None)
+    def obtenir_mode_pilote_automatique(self) -> ModePiloteAutomatiqueResponse | None:
+        """E1 : mode pilote automatique (propositions + validations)."""
+        actions: list[ActionPiloteAutomatique] = []
+
+        try:
+            with obtenir_contexte_db() as session:
+                from sqlalchemy import func
+                from src.core.models import ArticleCourses, ListeCourses, Planning, Repas
+                from src.core.models.famille import Routine
+
+                planning_actif = session.query(Planning).filter(Planning.statut == "actif").first()
+                nb_repas = 0
+                if planning_actif:
+                    nb_repas = int(
+                        session.query(func.count(Repas.id)).filter(Repas.planning_id == planning_actif.id).scalar() or 0
+                    )
+                if nb_repas < 14:
+                    actions.append(ActionPiloteAutomatique(
+                        module="planning",
+                        action="proposer_generation_planning",
+                        statut="validation_requise",
+                        details="Planning incomplet : generation d'une semaine equilibree proposee.",
+                    ))
+
+                liste = (
+                    session.query(ListeCourses)
+                    .filter(ListeCourses.archivee.is_(False))
+                    .order_by(ListeCourses.id.desc())
+                    .first()
+                )
+                if liste:
+                    nb_articles = int(
+                        session.query(func.count(ArticleCourses.id))
+                        .filter(ArticleCourses.liste_id == liste.id, ArticleCourses.coche.is_(False))
+                        .scalar() or 0
+                    )
+                    if nb_articles < 8:
+                        actions.append(ActionPiloteAutomatique(
+                            module="courses",
+                            action="proposer_complement_liste",
+                            statut="validation_requise",
+                            details="Liste de courses courte : suggestion de complement depuis historique.",
+                        ))
+
+                routines = session.query(Routine).filter(Routine.actif.is_(True)).all()
+                if not routines:
+                    actions.append(ActionPiloteAutomatique(
+                        module="routines",
+                        action="activer_routines_defaut",
+                        statut="proposee",
+                        details="Aucune routine active detectee.",
+                    ))
+        except Exception:
+            logger.warning("Mode pilote automatique partiel", exc_info=True)
+
+        return ModePiloteAutomatiqueResponse(
+            actif=True,
+            niveau_autonomie="validation_requise",
+            actions=actions,
+            recommandations=[
+                "Valider les actions proposees pour activer l'automatisation complete.",
+                "Configurer une plage horaire de pilotage (soir 20h recommande).",
+            ],
+        )
+
+    @avec_cache(ttl=1800, key_func=lambda self: "phase_e_score_famille_hebdo")
+    @avec_gestion_erreurs(default_return=None)
+    def calculer_score_famille_hebdo(self) -> ScoreFamilleHebdoResponse | None:
+        """E3 : score famille hebdo composite (nutrition, depenses, activites, entretien)."""
+        score_nutrition = self._calculer_score_nutrition()
+        score_budget = self._calculer_score_budget()
+
+        score_activites = 50.0
+        score_entretien = 50.0
+        try:
+            with obtenir_contexte_db() as session:
+                from sqlalchemy import func
+                from src.core.models.famille import ActiviteFamille
+                from src.core.models.maison import TacheEntretien
+
+                debut = date.today() - timedelta(days=7)
+                nb_activites = int(
+                    session.query(func.count(ActiviteFamille.id))
+                    .filter(ActiviteFamille.date_prevue >= debut)
+                    .scalar() or 0
+                )
+                score_activites = min(100.0, nb_activites * 18.0)
+
+                nb_taches_faites = int(
+                    session.query(func.count(TacheEntretien.id))
+                    .filter(TacheEntretien.fait.is_(True), TacheEntretien.date_prevue >= debut)
+                    .scalar() or 0
+                )
+                score_entretien = min(100.0, nb_taches_faites * 12.5)
+        except Exception:
+            logger.warning("Score famille hebdo partiel", exc_info=True)
+
+        dimensions = [
+            DimensionScoreFamille(nom="Nutrition", score=round(score_nutrition, 1), poids=0.30),
+            DimensionScoreFamille(nom="Depenses", score=round(score_budget, 1), poids=0.25),
+            DimensionScoreFamille(nom="Activites", score=round(score_activites, 1), poids=0.25),
+            DimensionScoreFamille(nom="Entretien", score=round(score_entretien, 1), poids=0.20),
+        ]
+        global_score = round(sum(d.score * d.poids for d in dimensions), 1)
+        return ScoreFamilleHebdoResponse(
+            semaine_reference=date.today().isoformat(),
+            score_global=global_score,
+            dimensions=dimensions,
+            recommandations=self._generer_conseils_score_famille(dimensions),
+        )
+
+    @avec_cache(ttl=3600, key_func=lambda self: "phase_e_journal_auto")
+    @avec_gestion_erreurs(default_return=None)
+    def generer_journal_familial_auto(self) -> JournalFamilialAutoResponse | None:
+        """E8 : journal familial automatique hebdomadaire."""
+        contexte = self._collecter_contexte_mensuel()
+        prompt = f"""Redige un journal familial hebdomadaire court et chaleureux a partir du contexte:
+{contexte}
+
+Retourne un JSON avec:
+- semaine_reference
+- titre
+- resume
+- faits_marquants (3 a 5)
+- moments_joyeux (2 a 4)
+- points_attention (1 a 3)
+"""
+        return self.call_with_parsing_sync(
+            prompt=prompt,
+            response_model=JournalFamilialAutoResponse,
+            system_prompt="Tu es chroniqueur familial positif, concret et concis.",
+        )
+
+    @avec_gestion_erreurs(default_return=None)
+    def generer_journal_familial_pdf(self) -> RapportMensuelPdfResponse | None:
+        """E8 : export PDF du journal familial automatique."""
+        journal = self.generer_journal_familial_auto()
+        if not journal:
+            return None
+        contenu = self._generer_pdf_simple(
+            titre=journal.titre or "Journal familial",
+            sections=[
+                ("Resume", [journal.resume]),
+                ("Faits marquants", journal.faits_marquants),
+                ("Moments joyeux", journal.moments_joyeux),
+                ("Points d'attention", journal.points_attention),
+            ],
+        )
+        return RapportMensuelPdfResponse(
+            mois_reference=journal.semaine_reference,
+            filename=f"journal_familial_{date.today().isoformat()}.pdf",
+            contenu_base64=contenu,
+        )
+
+    @avec_gestion_erreurs(default_return=None)
+    def generer_rapport_mensuel_pdf(self, mois: str | None = None) -> RapportMensuelPdfResponse | None:
+        """E9 : rapport mensuel PDF consolide avec narratif IA."""
+        mois_ref = mois or date.today().strftime("%Y-%m")
+        bilan = self.generer_resume_mensuel_ia()
+        score = self.calculer_score_famille_hebdo()
+        sections = [
+            ("Synthese IA", [bilan.resume_global] if bilan else ["Synthese indisponible"]),
+            ("Faits marquants", bilan.faits_marquants if bilan else []),
+            (
+                "Score famille hebdomadaire",
+                [f"Score global: {score.score_global}/100"] if score else ["Score indisponible"],
+            ),
+            ("Recommandations", bilan.recommandations if bilan else []),
+        ]
+        contenu = self._generer_pdf_simple(
+            titre=f"Rapport mensuel {mois_ref}",
+            sections=sections,
+        )
+        return RapportMensuelPdfResponse(
+            mois_reference=mois_ref,
+            filename=f"rapport_mensuel_{mois_ref}.pdf",
+            contenu_base64=contenu,
+        )
 
     # ═══════════════════════════════════════════════════════════
     # 10.4 — BILAN ANNUEL AUTOMATIQUE IA
@@ -1172,6 +1360,54 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
         if not conseils:
             conseils.append("Continuez ainsi, votre bien-être familial est excellent !")
         return conseils
+
+    def _generer_conseils_score_famille(self, dimensions: list[DimensionScoreFamille]) -> list[str]:
+        """Conseils ciblés pour le score famille hebdo."""
+        conseils: list[str] = []
+        faibles = sorted(dimensions, key=lambda d: d.score)[:2]
+        for d in faibles:
+            if d.score < 60:
+                conseils.append(f"Renforcer le pilier {d.nom.lower()} cette semaine.")
+        if not conseils:
+            conseils.append("Semaine bien equilibree, gardez ce rythme.")
+        return conseils
+
+    def _generer_pdf_simple(self, titre: str, sections: list[tuple[str, list[str]]]) -> str:
+        """Genere un PDF simple et retourne son contenu en base64."""
+        import base64
+        from reportlab.lib.pagesizes import A4
+        from reportlab.pdfgen import canvas
+
+        buffer = BytesIO()
+        pdf = canvas.Canvas(buffer, pagesize=A4)
+        y = 800
+        pdf.setFont("Helvetica-Bold", 16)
+        pdf.drawString(40, y, titre[:100])
+        y -= 28
+        pdf.setFont("Helvetica", 10)
+        pdf.drawString(40, y, f"Genere le {datetime.now(UTC).strftime('%d/%m/%Y %H:%M')}")
+        y -= 24
+
+        for section_titre, lignes in sections:
+            if y < 100:
+                pdf.showPage()
+                y = 800
+            pdf.setFont("Helvetica-Bold", 12)
+            pdf.drawString(40, y, section_titre[:90])
+            y -= 16
+            pdf.setFont("Helvetica", 10)
+            for ligne in (lignes or ["-"]):
+                if y < 80:
+                    pdf.showPage()
+                    y = 800
+                    pdf.setFont("Helvetica", 10)
+                pdf.drawString(52, y, f"- {str(ligne)[:130]}")
+                y -= 14
+            y -= 6
+
+        pdf.save()
+        buffer.seek(0)
+        return base64.b64encode(buffer.read()).decode("ascii")
 
     # ── Helpers mode invité ──
 

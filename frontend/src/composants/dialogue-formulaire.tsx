@@ -15,7 +15,6 @@ import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Textarea } from "@/composants/ui/textarea";
-import { useId } from "react";
 
 interface OptionChamp {
   valeur: string;
@@ -75,7 +74,6 @@ export function DialogueFormulaire({
   texteBouton = "Enregistrer",
   stockageSuggestionsCle = "dialogue-formulaire-suggestions",
 }: DialogueFormulaireProps) {
-  const instanceId = useId().replace(/:/g, "");
   const [valeursInternes, setValeursInternes] = useState<Record<string, unknown>>({});
   const [suggestions, setSuggestions] = useState<Record<string, string[]>>({});
 
@@ -109,11 +107,6 @@ export function DialogueFormulaire({
 
   function obtenirCle(champ: ChampFormulaire) {
     return champ.id ?? champ.nom ?? champ.label;
-  }
-
-  function obtenirIdUnique(champ: ChampFormulaire, index?: number): string {
-    const base = `${instanceId}-${obtenirCle(champ).replace(/\s+/g, "-").toLowerCase()}`;
-    return index == null ? base : `${base}-${index}`;
   }
 
   function obtenirValeur(champ: ChampFormulaire) {
@@ -172,20 +165,20 @@ export function DialogueFormulaire({
           className="space-y-4"
         >
           {children ??
-            champs?.map((champ, index) => (
+            champs?.map((champ) => (
               <div key={obtenirCle(champ)} className="space-y-2">
-                <Label htmlFor={obtenirIdUnique(champ, index)}>{champ.label}</Label>
+                <Label>{champ.label}</Label>
                 {champ.type === "textarea" ? (
                   <Textarea
-                    id={obtenirIdUnique(champ, index)}
+                    aria-label={champ.label}
                     value={obtenirValeur(champ)}
                     onChange={(e) => changerValeur(champ, e.target.value)}
                     required={champ.required || champ.requis || champ.obligatoire}
                   />
                 ) : champ.type === "select" ? (
                   <select
-                    id={obtenirIdUnique(champ, index)}
                     title={champ.label}
+                    aria-label={champ.label}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     value={obtenirValeur(champ)}
                     onChange={(e) => changerValeur(champ, e.target.value)}
@@ -200,7 +193,7 @@ export function DialogueFormulaire({
                   </select>
                 ) : (
                   <Input
-                    id={obtenirIdUnique(champ, index)}
+                    aria-label={champ.label}
                     type={champ.type}
                     value={obtenirValeur(champ)}
                     onChange={(e) => changerValeur(champ, e.target.value)}

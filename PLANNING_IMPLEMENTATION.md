@@ -255,6 +255,23 @@
 
 ### Total Phase D : 12 taches
 
+### Statut d'avancement Phase D (mise a jour: 2026-04-01)
+
+| Tache | Statut | Note |
+| --- | --- | --- |
+| D1 | Fait | Console commande rapide admin (`/api/v1/admin/quick-command` + page admin console) |
+| D2 | Fait | Scheduler visuel CRON (page admin dédiée avec filtres, catégories, prochain run) |
+| D3 | Fait | Logs temps réel WebSocket connectés au frontend (`/api/v1/ws/admin/logs`, `/api/v1/ws/admin/metrics`) |
+| D4 | Fait | Job prediction courses hebdo planifié vendredi 16h |
+| D5 | Fait | Job rappels jardin saisonniers hebdo (lundi 07h) |
+| D6 | Fait | Job vérification santé système horaire + alerte ntfy admin |
+| D7 | Fait | Job backup auto hebdo JSON (dimanche 04h, rotation des backups) |
+| D8 | Fait | Persistance état conversation WhatsApp multi-turn en DB (`etats_persistants`) |
+| D9 | Fait | Template email MJML rapport mensuel + fallback HTML |
+| D10 | Fait | Début de découpage du monolithe `jobs.py` (modules `jobs_schedule.py`, `jobs_phase_d.py`) |
+| D11 | Fait | Scripts legacy archivés dans `scripts/_archive/` |
+| D12 | Fait | Standardisation Recharts (suppression dépendances Chart.js inutilisées) |
+
 ---
 
 ## 7. Phase E ? Innovations
@@ -265,18 +282,18 @@
 
 | # | T?che | Source | Effort | Cat?gorie |
 | --- | ------- | -------- | -------- | ----------- |
-| E1 | IN1 ? Mode "Pilote automatique" (IA g?re planning/courses/rappels, utilisateur valide) | ?18 Innovation | 5j | Innovation |
-| E2 | IN2 ? Widget tablette Google (repas du jour, t?che, m?t?o, timer) | ?18 Innovation | 4j | Innovation |
-| E3 | IN10 ? Score famille hebdomadaire composite (nutrition + d?penses + activit?s + entretien) | ?18 Innovation | 2j | Innovation |
-| E4 | IN14 ? Mode "invit?" conjoint (vue simplifi?e : courses, planning, routines) | ?18 Innovation | 2j | Innovation |
-| E5 | V9 ? Graphe r?seau modules admin (D3.js force graph, 21 bridges visuels) | ?16 3D | 2j | Visualisation |
-| E6 | V10 ? Timeline Gantt entretien maison (Recharts, planification annuelle) | ?16 2D | 2j | Visualisation |
-| E7 | V2 ? Vue jardin 2D/3D (zones plantation, ?tat plantes, calendrier arrosage) | ?16 3D | 3j | Visualisation |
-| E8 | IN5 ? Journal familial automatique (IA g?n?re r?sum? semaine exportable PDF) | ?18 Innovation | 3j | Innovation |
-| E9 | IN11 ? Rapport mensuel PDF export (graphiques + r?sum? narratif IA) | ?18 Innovation | 3j | Innovation |
-| E10 | IN8 ? Google Home routines ?tendues ("Bonsoir" ? repas demain + t?ches) | ?18 Innovation | 4j | Innovation |
-| E11 | G17 ? Sync Google Calendar bidirectionnelle compl?te | ?4 Gap | 4j | Gap |
-| E12 | IA4 ? Assistant vocal ?tendu (intents Google Assistant enrichis) | ?8 IA | 4j | IA |
+| E1 | IN1 ? Mode "Pilote automatique" (IA g?re planning/courses/rappels, utilisateur valide) | ?18 Innovation | 5j | Innovation | ? **Fait** |
+| E2 | IN2 ? Widget tablette Google (repas du jour, t?che, m?t?o, timer) | ?18 Innovation | 4j | Innovation | ? **Partiel** (page focus existante, optimisation tablette ? peaufiner) |
+| E3 | IN10 ? Score famille hebdomadaire composite (nutrition + d?penses + activit?s + entretien) | ?18 Innovation | 2j | Innovation | ? **Fait** |
+| E4 | IN14 ? Mode "invit?" conjoint (vue simplifi?e : courses, planning, routines) | ?18 Innovation | 2j | Innovation | ? **Fait** |
+| E5 | V9 ? Graphe r?seau modules admin (D3.js force graph, 21 bridges visuels) | ?16 3D | 2j | Visualisation | ? **Partiel** (vue r?seau simplifi?e livr?e, D3 force graph restant) |
+| E6 | V10 ? Timeline Gantt entretien maison (Recharts, planification annuelle) | ?16 2D | 2j | Visualisation | ? **Fait** |
+| E7 | V2 ? Vue jardin 2D/3D (zones plantation, ?tat plantes, calendrier arrosage) | ?16 3D | 3j | Visualisation | ? **Fait** |
+| E8 | IN5 ? Journal familial automatique (IA g?n?re r?sum? semaine exportable PDF) | ?18 Innovation | 3j | Innovation | ? **Fait** |
+| E9 | IN11 ? Rapport mensuel PDF export (graphiques + r?sum? narratif IA) | ?18 Innovation | 3j | Innovation | ? **Fait** |
+| E10 | IN8 ? Google Home routines ?tendues ("Bonsoir" ? repas demain + t?ches) | ?18 Innovation | 4j | Innovation | ? **Fait** |
+| E11 | G17 ? Sync Google Calendar bidirectionnelle compl?te | ?4 Gap | 4j | Gap | ? **Fait** |
+| E12 | IA4 ? Assistant vocal ?tendu (intents Google Assistant enrichis) | ?8 IA | 4j | IA | ? **Fait** |
 
 ### Total Phase E : 12 taches
 

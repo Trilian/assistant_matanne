@@ -24,6 +24,7 @@ _LAZY_IMPORTS: dict[str, str] = {
     # ── Séries ──
     "SeriesService": "series_service",
     "get_series_service": "series_service",
+    "obtenir_series_service": "series_service",
     "obtenir_service_series": "series_service",
     "SEUIL_VALUE_ALERTE": "series_service",
     "SEUIL_VALUE_HAUTE": "series_service",
@@ -33,6 +34,7 @@ _LAZY_IMPORTS: dict[str, str] = {
     "AnalyseIA": "ai_service",
     "OpportuniteAnalysee": "ai_service",
     "get_jeux_ai_service": "ai_service",
+    "obtenir_jeux_ai_service": "ai_service",
     "obtenir_service_ia_jeux": "ai_service",
     # ── Backtesting ──
     "BacktestService": "backtest_service",
@@ -41,6 +43,7 @@ _LAZY_IMPORTS: dict[str, str] = {
     "ResultatPrediction": "backtest_service",
     "StatistiquesBacktest": "backtest_service",
     "get_backtest_service": "backtest_service",
+    "obtenir_backtest_service": "backtest_service",
     "obtenir_service_backtest": "backtest_service",
     # ── Football - Données ──
     "FootballDataService": "football_data",
@@ -52,6 +55,7 @@ _LAZY_IMPORTS: dict[str, str] = {
     "chercher_equipe": "football_data",
     "configurer_api_key": "football_data",
     "get_football_data_service": "football_data",
+    "obtenir_football_data_service": "football_data",
     "obtenir_service_donnees_football": "football_data",
     "vider_cache": "football_data",
     # ── Football - Types ──
@@ -69,6 +73,7 @@ _LAZY_IMPORTS: dict[str, str] = {
     "StatistiquesGlobalesLoto": "loto_data",
     "TirageLoto": "loto_data",
     "get_loto_data_service": "loto_data",
+    "obtenir_loto_data_service": "loto_data",
     "obtenir_service_donnees_loto": "loto_data",
     # ── Notifications ──
     "NotificationJeuxService": "notification_service",
@@ -79,6 +84,7 @@ _LAZY_IMPORTS: dict[str, str] = {
     "afficher_liste_notifications": "notification_service",
     "afficher_notification": "notification_service",
     "get_notification_jeux_service": "notification_service",
+    "obtenir_notification_jeux_service": "notification_service",
     "obtenir_service_notifications_jeux": "notification_service",
     # ── Prédictions ──
     "PredictionServiceJeux": "prediction_service",
@@ -101,6 +107,7 @@ _LAZY_IMPORTS: dict[str, str] = {
     "INTERVALLE_PARIS_HEURES": "scheduler_service",
     "MINUTE_LOTO": "scheduler_service",
     "get_scheduler_service": "scheduler_service",
+    "obtenir_scheduler_service": "scheduler_service",
     "obtenir_service_planificateur_jeux": "scheduler_service",
     "reset_scheduler_service": "scheduler_service",
     # ── Synchronisation ──

@@ -405,3 +405,64 @@ class TestPayloadsMalformes:
             },
         )
         assert response.status_code == 403
+
+
+class TestWhatsappConversationStatePersistence:
+    """Couverture D8: état conversationnel persistant multi-turn."""
+
+    @pytest.mark.asyncio
+    async def test_planning_modifier_persiste_etat(self):
+        from src.api.routes import webhooks_whatsapp as webhook_module
+
+        traiter_action_bouton = cast(Any, webhook_module)._traiter_action_bouton
+
+        mock_envoyer = AsyncMock(return_value=True)
+        with (
+            patch("src.services.integrations.whatsapp.envoyer_message_whatsapp", mock_envoyer),
+            patch("src.services.integrations.whatsapp.sauvegarder_etat_conversation") as mock_save,
+        ):
+            await traiter_action_bouton("33611111111", "planning_modifier")
+
+        mock_save.assert_called_once()
+        args = mock_save.call_args[0]
+        assert args[0] == "33611111111"
+        assert args[1].get("etat") == "attente_creneau_modification"
+
+    @pytest.mark.asyncio
+    async def test_message_creneau_fait_transition_etat(self):
+        from src.api.routes import webhooks_whatsapp as webhook_module
+
+        traiter_message_texte = cast(Any, webhook_module)._traiter_message_texte
+
+        with (
+            patch(
+                "src.services.integrations.whatsapp.charger_etat_conversation",
+                return_value={"etat": "attente_creneau_modification"},
+            ),
+            patch("src.services.integrations.whatsapp.sauvegarder_etat_conversation") as mock_save,
+            patch("src.services.integrations.whatsapp.envoyer_message_whatsapp", new=AsyncMock(return_value=True)),
+        ):
+            await traiter_message_texte("33611111111", "lundi soir")
+
+        mock_save.assert_called_once()
+        saved_state = mock_save.call_args[0][1]
+        assert saved_state.get("etat") == "attente_detail_modification"
+        assert saved_state.get("creneau") == "lundi soir"
+
+    @pytest.mark.asyncio
+    async def test_message_detail_efface_etat(self):
+        from src.api.routes import webhooks_whatsapp as webhook_module
+
+        traiter_message_texte = cast(Any, webhook_module)._traiter_message_texte
+
+        with (
+            patch(
+                "src.services.integrations.whatsapp.charger_etat_conversation",
+                return_value={"etat": "attente_detail_modification", "creneau": "lundi soir"},
+            ),
+            patch("src.services.integrations.whatsapp.effacer_etat_conversation") as mock_clear,
+            patch("src.services.integrations.whatsapp.envoyer_message_whatsapp", new=AsyncMock(return_value=True)),
+        ):
+            await traiter_message_texte("33611111111", "remplacer par pâtes")
+
+        mock_clear.assert_called_once_with("33611111111")

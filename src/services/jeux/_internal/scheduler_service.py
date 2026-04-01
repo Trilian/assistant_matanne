@@ -37,6 +37,9 @@ from src.services.core.registry import service_factory
 
 from .sync_service import SyncService, get_sync_service
 
+# Alias legacy patchable in old tests
+obtenir_sync_service = get_sync_service
+
 logger = logging.getLogger(__name__)
 
 

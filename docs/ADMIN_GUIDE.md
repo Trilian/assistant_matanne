@@ -43,6 +43,7 @@ Référence: `src/api/routes/admin.py`
 - `GET /api/v1/admin/jobs`
 - `POST /api/v1/admin/jobs/{id}/run`
 - `GET /api/v1/admin/jobs/{id}/logs`
+- `POST /api/v1/admin/quick-command`
 - `GET /api/v1/admin/services/health`
 - `POST /api/v1/admin/notifications/test`
 - `GET /api/v1/admin/cache/stats`

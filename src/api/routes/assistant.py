@@ -64,6 +64,12 @@ INTENTS_GOOGLE_ASSISTANT: dict[str, dict[str, Any]] = {
         "template": "rappelle-moi {tache} {moment}",
         "action_attendue": "routine.creation",
     },
+    "google_home_bonsoir": {
+        "description": "Routine Bonsoir : planning demain + rappel tache",
+        "slots": ["tache"],
+        "template": "rappelle-moi {tache} demain et quel est mon planning de demain",
+        "action_attendue": "routine.bonsoir",
+    },
 }
 
 

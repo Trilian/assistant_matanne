@@ -1211,7 +1211,6 @@ async def _chercher_stock_article(sender: str, article: str) -> None:
     except Exception:
         logger.debug("Erreur recherche stock WhatsApp", exc_info=True)
         await envoyer_message_whatsapp(sender, "❌ Impossible de vérifier le stock.")
-            await envoyer_message_whatsapp(sender, "🔧 Entretien : données indisponibles.")
 
 
 # ═══════════════════════════════════════════════════════════════════

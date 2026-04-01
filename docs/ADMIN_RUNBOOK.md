@@ -37,6 +37,9 @@ cd frontend && npm run dev
 | ------ | ----- | ----------------- |
 | Tableau de bord | `/admin` | Vue globale, alertes, anomalies |
 | Jobs planifi?s | `/admin/jobs` | Liste, ex?cution manuelle, logs |
+| Scheduler visuel | `/admin/scheduler` | Timeline CRON, filtre par cat?gorie, prochain run |
+| Console rapide | `/admin/console` | Commandes admin (`run job`, `clear cache`, `health`) |
+| Logs temps r?el | `/admin/logs` | Flux WebSocket logs + m?triques live |
 | Services | `/admin/services` | Sant?, cache, resync |
 | Notifications | `/admin/notifications` | Tests canaux |
 | Utilisateurs | `/admin/utilisateurs` | Gestion comptes |
@@ -66,6 +69,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 | `POST` | `/api/v1/admin/jobs/{job_id}/run` | D?clencher un job manuellement (dry-run optionnel, rate-limited 5/min) |
 | `GET` | `/api/v1/admin/jobs/{job_id}/logs` | Historique des 50 derni?res ex?cutions |
 | `GET` | `/api/v1/admin/jobs/history` | Historique pagin? avec filtres |
+| `POST` | `/api/v1/admin/quick-command` | Console rapide admin (help, run job, clear cache, maintenance) |
 | `GET` | `/api/v1/admin/bridges/phase5/status` | Statut de tous les bridges Phase 5 (smoke + pr?sence) |
 
 ### Notifications (4 endpoints)

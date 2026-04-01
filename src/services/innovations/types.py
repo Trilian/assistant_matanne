@@ -268,6 +268,60 @@ class AlertesContextuellesResponse(BaseModel):
     alertes: list[AlerteContextuelle] = Field(default_factory=list)
 
 
+class ActionPiloteAutomatique(BaseModel):
+    """Action suggeree/executee par le mode pilote automatique."""
+
+    module: str = ""
+    action: str = ""
+    statut: str = "proposee"
+    details: str = ""
+
+
+class ModePiloteAutomatiqueResponse(BaseModel):
+    """Synthese du mode pilote automatique multi-modules."""
+
+    actif: bool = False
+    niveau_autonomie: str = "validation_requise"
+    actions: list[ActionPiloteAutomatique] = Field(default_factory=list)
+    recommandations: list[str] = Field(default_factory=list)
+
+
+class DimensionScoreFamille(BaseModel):
+    """Dimension du score famille hebdomadaire."""
+
+    nom: str = ""
+    score: float = 0.0
+    poids: float = 0.25
+
+
+class ScoreFamilleHebdoResponse(BaseModel):
+    """Score famille composite hebdomadaire."""
+
+    semaine_reference: str = ""
+    score_global: float = 0.0
+    dimensions: list[DimensionScoreFamille] = Field(default_factory=list)
+    recommandations: list[str] = Field(default_factory=list)
+
+
+class JournalFamilialAutoResponse(BaseModel):
+    """Journal familial automatique genere par IA."""
+
+    semaine_reference: str = ""
+    titre: str = ""
+    resume: str = ""
+    faits_marquants: list[str] = Field(default_factory=list)
+    moments_joyeux: list[str] = Field(default_factory=list)
+    points_attention: list[str] = Field(default_factory=list)
+
+
+class RapportMensuelPdfResponse(BaseModel):
+    """Metadonnees du rapport mensuel PDF genere."""
+
+    mois_reference: str = ""
+    filename: str = ""
+    contenu_base64: str = ""
+
+
 # ═══════════════════════════════════════════════════════════
 # 10.8 — VEILLE EMPLOI
 # ═══════════════════════════════════════════════════════════

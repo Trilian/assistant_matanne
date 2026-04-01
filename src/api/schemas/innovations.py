@@ -67,6 +67,10 @@ class ComparateurEnergieRequest(BaseModel):
 # ── Responses (re-exports depuis types) ──
 
 from src.services.innovations.types import (  # noqa: E402
+    ModePiloteAutomatiqueResponse,
+    ScoreFamilleHebdoResponse,
+    JournalFamilialAutoResponse,
+    RapportMensuelPdfResponse,
     AlertesContextuellesResponse,
     AnalyseTendancesLotoResponse,
     AnomaliesEnergieResponse,
@@ -97,6 +101,10 @@ __all__ = [
     "LienInviteResponse",
     "DonneesInviteResponse",
     "ScoreBienEtreResponse",
+    "ScoreFamilleHebdoResponse",
+    "ModePiloteAutomatiqueResponse",
+    "JournalFamilialAutoResponse",
+    "RapportMensuelPdfResponse",
     "EnrichissementContactsResponse",
     "AnalyseTendancesLotoResponse",
     "ParcoursOptimiseRequest",

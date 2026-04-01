@@ -27,9 +27,9 @@ def sample_marmiton_html():
     """HTML simplifiÃ© type Marmiton."""
     return """
     <html>
-    <head><title>Poulet rÃ´ti - Marmiton</title></head>
+    <head><title>Poulet rôti - Marmiton</title></head>
     <body>
-        <h1>Poulet rÃ´ti aux herbes</h1>
+        <h1>Poulet rôti aux herbes</h1>
         <p class="description">Un dÃ©licieux poulet parfumÃ©</p>
         <img class="recipe-media" src="https://example.com/poulet.jpg">
         <div class="time">
@@ -126,7 +126,7 @@ class TestImportedRecipe:
     def test_create_complete(self):
         """Test crÃ©ation complÃ¨te."""
         recipe = ImportedRecipe(
-            nom="Poulet rÃ´ti",
+            nom="Poulet rôti",
             description="DÃ©licieux",
             temps_preparation=15,
             temps_cuisson=60,
@@ -135,7 +135,7 @@ class TestImportedRecipe:
             source_site="Test",
             confiance_score=0.8,
         )
-        assert recipe.nom == "Poulet rÃ´ti"
+        assert recipe.nom == "Poulet rôti"
         assert recipe.confiance_score == 0.8
 
 
@@ -244,7 +244,7 @@ class TestRecipeParser:
 
     def test_parse_ingredient_cuillere(self):
         """Test cuillÃ¨re Ã  soupe."""
-        ing = RecipeParser.parse_ingredient("2 cuillÃ¨res Ã  soupe de sucre")
+        ing = RecipeParser.parse_ingredient("2 cuillères à soupe de sucre")
         assert ing.nom == "sucre"
         assert ing.quantite == 2
         assert "cuill" in ing.unite.lower()
@@ -287,7 +287,7 @@ class TestMarmitonParser:
         soup = BeautifulSoup(sample_marmiton_html, "html.parser")
         recipe = MarmitonParser.parse(soup, "https://marmiton.org/recette")
 
-        assert recipe.nom == "Poulet rÃ´ti aux herbes"
+        assert recipe.nom == "Poulet rôti aux herbes"
         assert recipe.source_site == "Marmiton"
         assert recipe.confiance_score > 0
 
@@ -522,7 +522,7 @@ class TestRecipeImportService:
         result = service.import_from_url("https://example.com/recette")
 
         assert result.success is False
-        assert "tÃ©lÃ©charger" in result.message.lower() or result is None
+        assert "télécharger" in result.message.lower() or result is None
 
     @patch.object(RecipeImportService, "__init__", lambda x: None)
     def test_import_from_url_success(self, sample_jsonld_html):
@@ -688,7 +688,7 @@ class TestParserIntegration:
         soup = BeautifulSoup(html, "html.parser")
         recipe = GenericRecipeParser.parse(soup, "https://example.com")
 
-        assert "dÃ©licieuse" in recipe.description.lower() or recipe.nom == "Recette test"
+        assert "délicieuse" in recipe.description.lower() or recipe.nom == "Recette test"
 
     def test_generic_parser_image_og(self):
         """Test extraction image Open Graph."""

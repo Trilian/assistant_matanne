@@ -191,7 +191,7 @@ class TestParserReponse:
 
         # Montant 0 dÃ©clenche l'erreur "Montant TTC non trouvÃ©"
         assert result.confiance < 1.0  # PÃ©nalitÃ© pour montant manquant
-        assert "Montant TTC non trouvÃ©" in result.erreurs
+        assert "Montant TTC non trouvé" in result.erreurs
 
     def test_parser_calcul_confiance_fournisseur_inconnu(self, service):
         """Test calcul confiance fournisseur inconnu."""
@@ -200,7 +200,7 @@ class TestParserReponse:
         result = service._parser_reponse(json_str)
 
         assert result.confiance < 1.0  # PÃ©nalitÃ© pour fournisseur inconnu
-        assert "Fournisseur non identifiÃ©" in result.erreurs
+        assert "Fournisseur non identifié" in result.erreurs
 
     def test_parser_calcul_confiance_consommation_manquante(self, service):
         """Test calcul confiance sans consommation."""
@@ -208,7 +208,7 @@ class TestParserReponse:
         json_str = json.dumps(data)
         result = service._parser_reponse(json_str)
 
-        assert "Consommation non trouvÃ©e" in result.erreurs
+        assert "Consommation non trouvée" in result.erreurs
 
     def test_parser_dates_conversion(self, service):
         """Test conversion des dates."""
@@ -271,7 +271,7 @@ class TestExtractionOCR:
             assert result.succes is True
             assert result.donnees is not None
             assert result.donnees.fournisseur == "EDF"
-            assert result.message == "Extraction rÃ©ussie"
+            assert result.message == "Extraction réussie"
 
     @pytest.mark.asyncio
     async def test_extraction_erreur_api(self, service):

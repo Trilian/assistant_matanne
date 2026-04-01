@@ -330,10 +330,10 @@ class TestParserProduit:
 
     def test_parser_nom_fr(self, service):
         """Test parsing avec nom franÃ§ais."""
-        data = {"product_name_fr": "PÃ¢tes", "product_name": "Pasta"}
+        data = {"product_name_fr": "Pâtes", "product_name": "Pasta"}
         result = service._parser_produit("123", data)
 
-        assert result.nom == "PÃ¢tes"
+        assert result.nom == "Pâtes"
 
     def test_parser_nom_fallback(self, service):
         """Test parsing avec fallback nom."""
@@ -344,10 +344,10 @@ class TestParserProduit:
 
     def test_parser_nom_generic(self, service):
         """Test parsing avec nom gÃ©nÃ©rique."""
-        data = {"generic_name_fr": "PÃ¢tes alimentaires"}
+        data = {"generic_name_fr": "Pâtes alimentaires"}
         result = service._parser_produit("123", data)
 
-        assert result.nom == "PÃ¢tes alimentaires"
+        assert result.nom == "Pâtes alimentaires"
 
     def test_parser_nom_inconnu(self, service):
         """Test parsing sans nom."""
@@ -521,34 +521,34 @@ class TestUtilitaires:
 
     def test_nutriscore_emoji_a(self, service):
         """Test emoji nutriscore A."""
-        assert service.obtenir_nutriscore_emoji("A") == "ðŸŸ¢"
-        assert service.obtenir_nutriscore_emoji("a") == "ðŸŸ¢"
+        assert service.obtenir_nutriscore_emoji("A") == "🟢"
+        assert service.obtenir_nutriscore_emoji("a") == "🟢"
 
     def test_nutriscore_emoji_b(self, service):
         """Test emoji nutriscore B."""
-        assert service.obtenir_nutriscore_emoji("B") == "ðŸŸ¡"
+        assert service.obtenir_nutriscore_emoji("B") == "🟡"
 
     def test_nutriscore_emoji_c(self, service):
         """Test emoji nutriscore C."""
-        assert service.obtenir_nutriscore_emoji("C") == "ðŸŸ "
+        assert service.obtenir_nutriscore_emoji("C") == "🟠"
 
     def test_nutriscore_emoji_d(self, service):
         """Test emoji nutriscore D."""
-        assert service.obtenir_nutriscore_emoji("D") == "ðŸŸ§"
+        assert service.obtenir_nutriscore_emoji("D") == "🟧"
 
     def test_nutriscore_emoji_e(self, service):
         """Test emoji nutriscore E."""
-        assert service.obtenir_nutriscore_emoji("E") == "ðŸ”´"
+        assert service.obtenir_nutriscore_emoji("E") == "🔴"
 
     def test_nutriscore_emoji_inconnu(self, service):
         """Test emoji nutriscore inconnu."""
-        assert service.obtenir_nutriscore_emoji(None) == "âšª"
-        assert service.obtenir_nutriscore_emoji("") == "âšª"
+        assert service.obtenir_nutriscore_emoji(None) == "⚪"
+        assert service.obtenir_nutriscore_emoji("") == "⚪"
 
     def test_nova_description_1(self, service):
         """Test description NOVA 1."""
         result = service.obtenir_nova_description(1)
-        assert "non transformÃ©" in result
+        assert "non transformé" in result
 
     def test_nova_description_2(self, service):
         """Test description NOVA 2."""
@@ -558,12 +558,12 @@ class TestUtilitaires:
     def test_nova_description_3(self, service):
         """Test description NOVA 3."""
         result = service.obtenir_nova_description(3)
-        assert "transformÃ©" in result
+        assert "transformé" in result
 
     def test_nova_description_4(self, service):
         """Test description NOVA 4."""
         result = service.obtenir_nova_description(4)
-        assert "Ultra-transformÃ©" in result
+        assert "Ultra-transformé" in result
 
     def test_nova_description_inconnu(self, service):
         """Test description NOVA inconnu."""

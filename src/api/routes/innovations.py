@@ -24,6 +24,10 @@ from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas.errors import REPONSES_IA
 from src.api.schemas.innovations import (
     AlertesContextuellesResponse,
+    JournalFamilialAutoResponse,
+    ModePiloteAutomatiqueResponse,
+    RapportMensuelPdfResponse,
+    ScoreFamilleHebdoResponse,
     AnalyseTendancesLotoResponse,
     AnomaliesEnergieResponse,
     ApprentissageHabitudesResponse,
@@ -260,6 +264,83 @@ async def p9_alertes_contextuelles(
     service = _get_service()
     result = service.generer_alertes_contextuelles()
     return result or AlertesContextuellesResponse()
+
+
+@router.get(
+    "/phasee/mode-pilote",
+    response_model=ModePiloteAutomatiqueResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="E1 Mode pilote automatique",
+)
+@gerer_exception_api
+async def phasee_mode_pilote(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    result = service.obtenir_mode_pilote_automatique()
+    return result or ModePiloteAutomatiqueResponse()
+
+
+@router.get(
+    "/phasee/score-famille-hebdo",
+    response_model=ScoreFamilleHebdoResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="E3 Score famille hebdomadaire",
+)
+@gerer_exception_api
+async def phasee_score_famille_hebdo(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    result = service.calculer_score_famille_hebdo()
+    return result or ScoreFamilleHebdoResponse()
+
+
+@router.get(
+    "/phasee/journal-familial",
+    response_model=JournalFamilialAutoResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="E8 Journal familial automatique",
+)
+@gerer_exception_api
+async def phasee_journal_familial(
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
+):
+    service = _get_service()
+    result = service.generer_journal_familial_auto()
+    return result or JournalFamilialAutoResponse()
+
+
+@router.get(
+    "/phasee/journal-familial/pdf",
+    response_model=RapportMensuelPdfResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="E8 Export PDF journal familial",
+)
+@gerer_exception_api
+async def phasee_journal_familial_pdf(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    result = service.generer_journal_familial_pdf()
+    return result or RapportMensuelPdfResponse()
+
+
+@router.get(
+    "/phasee/rapport-mensuel/pdf",
+    response_model=RapportMensuelPdfResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="E9 Rapport mensuel PDF",
+)
+@gerer_exception_api
+async def phasee_rapport_mensuel_pdf(
+    mois: str | None = Query(None, description="Format YYYY-MM"),
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    result = service.generer_rapport_mensuel_pdf(mois=mois)
+    return result or RapportMensuelPdfResponse()
 
 
 @router.get(

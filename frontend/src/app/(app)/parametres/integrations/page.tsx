@@ -102,8 +102,8 @@ function SectionGoogleCalendar() {
             <div>
               <CardTitle>Google Calendar</CardTitle>
               <CardDescription>
-                Synchronisez votre planning repas et activités avec Google
-                Calendar
+                Synchronisation bidirectionnelle complète du planning repas et activités
+                avec Google Calendar
               </CardDescription>
             </div>
           </div>

@@ -269,7 +269,7 @@ export default function PageAdmin() {
       </div>
 
       {/* Accès rapides vers les pages dédiées */}
-      <div className="grid gap-3 md:grid-cols-5 xl:grid-cols-6">
+      <div className="grid gap-3 md:grid-cols-5 xl:grid-cols-7">
         {[
           { href: "/admin/jobs", icon: Clock, label: "Jobs planifiés", desc: "Trigger + logs" },
           { href: "/admin/services", icon: ServerCrash, label: "Services & Cache", desc: "Health + stats" },
@@ -325,6 +325,25 @@ export default function PageAdmin() {
           </CardContent>
         </Card>
       )}
+
+      {bridgesPhase5?.items?.length ? (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Graphe Réseau Modules</CardTitle>
+            <CardDescription>Visualisation simplifiée des ponts inter-modules (Phase E5).</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2 md:grid-cols-2">
+              {bridgesPhase5.items.map((item) => (
+                <div key={item.id} className="rounded-md border p-2 text-sm">
+                  <p className="font-medium">{item.id}</p>
+                  <p className="text-muted-foreground text-xs">{item.bridge}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Tabs defaultValue="audit">
         <TabsList className="grid w-full grid-cols-5 max-w-2xl">
