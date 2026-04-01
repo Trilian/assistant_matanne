@@ -1,4 +1,4 @@
-# Guide de Migration — Assistant Matanne
+﻿# Guide de Migration — Assistant Matanne
 
 > Ce document recense les migrations de versions majeures déjà effectuées et les points d'attention pour les mises à jour futures.
 
@@ -148,7 +148,7 @@ else:
 ### Conventions de nommage SQL
 
 | Objet | Convention | Exemple |
-| ------- | ----------- | --------- |
+|-------|-----------|---------|
 | Tables | `snake_case` pluriel | `recettes`, `paris_sportifs` |
 | Colonnes | `snake_case` | `date_creation`, `user_id` |
 | Index | `idx_{table}_{colonne(s)}` | `idx_recettes_user_id` |
@@ -180,7 +180,7 @@ print('OK — tous les modèles ORM ont un CREATE TABLE')
 ## Stack actuelle (Mars 2026)
 
 | Composant | Version | Requirement |
-| ----------- | --------- | ------------ |
+|-----------|---------|------------|
 | **Python** | 3.13+ | `^3.13` |
 | **FastAPI** | 0.109+ | `^0.109.0` |
 | **Pydantic** | 2.5+ | `^2.5.0` |
@@ -251,7 +251,7 @@ app = FastAPI(lifespan=lifespan)
 **Ce projet utilise Pydantic v2 partout.** Points clés :
 
 | v1 | v2 |
-| ---- | ----- |
+|----|-----|
 | `validator` decorator | `field_validator` + `@classmethod` |
 | `root_validator` | `model_validator(mode='before'/'after')` |
 | `.dict()` | `.model_dump()` |
@@ -285,7 +285,7 @@ class RecetteCreate(BaseModel):
 **Ce projet utilise SQLAlchemy 2.0 exclusivement.** Points clés :
 
 | 1.4 | 2.0 |
-| ----- | ----- |
+|-----|-----|
 | `Column(Integer)` | `mapped_column(Integer)` |
 | `relationship(...)` | `relationship(...)` + `Mapped[...]` |
 | `session.query(Model)` | `select(Model)` + `session.execute()` |
@@ -405,7 +405,7 @@ app/(app)/layout.tsx    — app protégée (sidebar + header)
 **Breaking changes majeurs** :
 
 | v3 | v4 |
-| ---- | ----- |
+|----|-----|
 | `tailwind.config.ts` | Configuration via CSS `@theme` |
 | `@tailwind base/components/utilities` | `@import "tailwindcss"` |
 | Plugins JS | Plugins CSS natifs |
@@ -423,7 +423,7 @@ app/(app)/layout.tsx    — app protégée (sidebar + header)
 **Breaking changes** :
 
 | v4 | v5 |
-| ---- | ----- |
+|----|-----|
 | `useQuery({ onSuccess, onError })` | Callbacks supprimés — utiliser `useEffect` ou `useMutation` |
 | `cacheTime` | `gcTime` |
 | `useQuery(key, fn, options)` | `useQuery({ queryKey, queryFn, ...options })` |
@@ -479,7 +479,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 **Breaking changes** :
 
 | v3 | v4 |
-| ---- | ----- |
+|----|-----|
 | `z.record(valueSchema)` | `z.record(z.string(), valueSchema)` — **2 args obligatoires** |
 | `z.string().email()` | Inchangé |
 | Performances | 2× plus rapide en v4 |

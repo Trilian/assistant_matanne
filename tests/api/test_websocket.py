@@ -418,3 +418,87 @@ class TestWebSocketUsersList:
                     assert data["type"] == "users_list"
                     user_ids = {u["user_id"] for u in data["users"]}
                     assert user_ids == {"u1", "u2", "u3"}
+
+
+# ═══════════════════════════════════════════════════════════
+# EDGE CASES (Phase A - A5.5)
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.websocket
+class TestWebSocketEdgeCases:
+    """Tests edge cases WebSocket : messages malformés, reconnexion, validation."""
+
+    def test_message_objet_vide(self, ws_client: TestClient):
+        """Un objet JSON vide (sans action) retourne une erreur."""
+        with ws_client.websocket_connect(_ws_url(60, "user_bad", "Bad")) as ws:
+            ws.receive_json()  # users_list
+            ws.send_json({})
+            data = ws.receive_json()
+            assert data.get("type") == "error"
+
+    def test_message_sans_action(self, ws_client: TestClient):
+        """Un message sans champ 'action' retourne une erreur."""
+        with ws_client.websocket_connect(_ws_url(61, "user_no_action", "NoAction")) as ws:
+            ws.receive_json()  # users_list
+            ws.send_json({"data": "sans action"})
+            data = ws.receive_json()
+            assert data.get("type") == "error"
+
+    def test_action_item_added_sans_item(self, ws_client: TestClient):
+        """Action item_added sans données d'item ne crash pas le serveur."""
+        with ws_client.websocket_connect(_ws_url(62, "user_incomplete", "Inc")) as ws:
+            ws.receive_json()  # users_list
+            ws.send_json({"action": "item_added"})
+            # Le serveur broadcast aux autres (personne ici), pas d'accusé pour l'expéditeur.
+            # Vérifier que la connexion est toujours active via ping.
+            ws.send_json({"action": "ping"})
+            data = ws.receive_json()
+            assert data.get("type") == "pong"
+
+    def test_reconnexion_meme_user_remplace(self, ws_client: TestClient):
+        """Reconnexion du même user_id remplace la connexion précédente."""
+        with ws_client.websocket_connect(_ws_url(63, "reconn", "Reconn1")) as ws1:
+            ws1.receive_json()  # users_list
+
+            with ws_client.websocket_connect(_ws_url(63, "reconn", "Reconn2")) as ws2:
+                data = ws2.receive_json()
+                assert data["type"] == "users_list"
+                # Le user_id doit apparaître une seule fois
+                user_ids = [u["user_id"] for u in data["users"]]
+                assert user_ids.count("reconn") == 1
+
+    def test_ping_pong_maintient_connexion(self, ws_client: TestClient):
+        """Plusieurs ping/pong successifs maintiennent la connexion."""
+        with ws_client.websocket_connect(_ws_url(64, "pinger", "Pinger")) as ws:
+            ws.receive_json()  # users_list
+            for _ in range(5):
+                ws.send_json({"action": "ping"})
+                data = ws.receive_json()
+                assert data["type"] == "pong"
+
+    def test_broadcast_multiple_actions_rapides(self, ws_client: TestClient):
+        """Plusieurs actions rapides sont toutes broadcastées correctement."""
+        with ws_client.websocket_connect(_ws_url(65, "fast1", "Fast1")) as ws1:
+            ws1.receive_json()  # users_list
+
+            with ws_client.websocket_connect(_ws_url(65, "fast2", "Fast2")) as ws2:
+                ws1.receive_json()  # user_joined
+                ws2.receive_json()  # users_list
+
+                # Envoyer 3 actions rapides
+                for i in range(3):
+                    ws1.send_json({
+                        "action": "item_added",
+                        "item": {"nom": f"Article {i}", "quantite": 1},
+                    })
+
+                # ws2 doit recevoir les 3
+                received = []
+                for _ in range(3):
+                    data = ws2.receive_json()
+                    received.append(data)
+
+                assert len(received) == 3
+                assert all(d.get("type") == "sync" for d in received)
+                assert all(d.get("action") == "item_added" for d in received)

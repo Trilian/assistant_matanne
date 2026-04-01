@@ -1,4 +1,4 @@
-# Design System — Assistant Matanne
+﻿# Design System — Assistant Matanne
 
 > **Stack** : Tailwind CSS v4, shadcn/ui, Radix UI, class-variance-authority (CVA)  
 > **Theme** : CSS custom properties (variables CSS), support dark/light/system  
@@ -9,7 +9,7 @@
 ## Principes visuels
 
 | Principe | Application |
-| ---------- | ------------- |
+|----------|-------------|
 | **Mobile-first** | Grille responsive, bottom navigation sur mobile |
 | **Dark mode natif** | Variables CSS `--background`, `--foreground`, etc. |
 | **Cohérence typographique** | Seule police système + `text-sm`, `text-base`, `text-2xl` |
@@ -46,7 +46,7 @@
 Tailwind v4 — utiliser les classes utilitaires standard :
 
 | Usage | Classe |
-| ------- | -------- |
+|-------|--------|
 | Espacement entre sections | `space-y-6` |
 | Padding interne carte | `p-4` ou via `CardContent` |
 | Gap grille | `gap-4` |
@@ -55,7 +55,7 @@ Tailwind v4 — utiliser les classes utilitaires standard :
 ### Typographie
 
 | Élément | Classe | Usage |
-| --------- | -------- | ------- |
+|---------|--------|-------|
 | Titre de page | `text-2xl font-bold tracking-tight` | `<h1>` |
 | Titre de carte | Via `CardTitle` | Auto |
 | Sous-titre | `text-sm text-muted-foreground` | Descriptions |
@@ -70,7 +70,7 @@ Tailwind v4 — utiliser les classes utilitaires standard :
 ### Layout & Navigation
 
 | Composant | Fichier | Usage |
-| ----------- | --------- | ------- |
+|-----------|---------|-------|
 | `Sidebar` | `sidebar.tsx` | Navigation latérale (desktop) |
 | `Sheet` | `sheet.tsx` | Drawer mobile / panels latéraux |
 | `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent` | `tabs.tsx` | Navigation par onglets |
@@ -81,7 +81,7 @@ Tailwind v4 — utiliser les classes utilitaires standard :
 ### Contenu & Display
 
 | Composant | Fichier | Usage |
-| ----------- | --------- | ------- |
+|-----------|---------|-------|
 | `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` | `card.tsx` | Conteneur principal de données |
 | `Badge` | `badge.tsx` | Étiquettes & statuts |
 | `Alert` | `alert.tsx` | Messages d'alerte contextuels |
@@ -94,7 +94,7 @@ Tailwind v4 — utiliser les classes utilitaires standard :
 ### Formulaires & Actions
 
 | Composant | Fichier | Usage |
-| ----------- | --------- | ------- |
+|-----------|---------|-------|
 | `Button` | `button.tsx` | Actions (default, outline, ghost, destructive, secondary) |
 | `Input` | `input.tsx` | Saisie texte |
 | `InputGroup` | `input-group.tsx` | Input avec préfixe/suffixe |
@@ -109,7 +109,7 @@ Tailwind v4 — utiliser les classes utilitaires standard :
 ### Overlay
 
 | Composant | Fichier | Usage |
-| ----------- | --------- | ------- |
+|-----------|---------|-------|
 | `Dialog` | `dialog.tsx` | Modales de confirmation / formulaires |
 | `Popover` | `popover.tsx` | Info-bulles avec contenu riche |
 | `DropdownMenu` | `dropdown-menu.tsx` | Menus contextuels |
@@ -118,7 +118,7 @@ Tailwind v4 — utiliser les classes utilitaires standard :
 ### Custom
 
 | Composant | Fichier | Usage |
-| ----------- | --------- | ------- |
+|-----------|---------|-------|
 | `BoutonVocal` | `bouton-vocal.tsx` | Saisie vocale (Web Speech API) |
 
 ---

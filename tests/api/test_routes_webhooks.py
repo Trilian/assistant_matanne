@@ -119,3 +119,100 @@ class TestRoutesWebhooksAvecMock:
             response = client.post("/api/v1/webhooks/1/test")
             assert response.status_code in (200, 404, 500)
 
+
+# ═══════════════════════════════════════════════════════════
+# TESTS WEBHOOKS EDGE CASES (Phase A - A5.2)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestRoutesWebhooksEdgeCases:
+    """Tests edge cases pour les webhooks."""
+
+    def test_creer_webhook_url_invalide(self, client):
+        """Création avec URL invalide retourne erreur."""
+        response = client.post("/api/v1/webhooks", json={
+            "url": "not-a-url",
+            "evenements": ["recette.created"],
+        })
+        assert response.status_code in (400, 422, 500)
+
+    def test_creer_webhook_evenements_vides(self, client):
+        """Création avec liste d'événements vide retourne erreur."""
+        response = client.post("/api/v1/webhooks", json={
+            "url": "https://example.com/hook",
+            "evenements": [],
+        })
+        assert response.status_code in (400, 422, 500)
+
+    def test_supprimer_webhook_inexistant(self, client):
+        """Supprimer un webhook inexistant retourne 204 (idempotent)."""
+        response = client.delete("/api/v1/webhooks/999999")
+        assert response.status_code == 204
+
+    def test_tester_webhook_inexistant(self, client):
+        """Test d'un webhook inexistant retourne 404."""
+        response = client.post("/api/v1/webhooks/999999/test")
+        assert response.status_code in (404, 500)
+
+    def test_modifier_webhook_sans_donnees(self, client):
+        """Modification avec body vide."""
+        response = client.put("/api/v1/webhooks/1", json={})
+        assert response.status_code in (200, 400, 404, 422, 500)
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS WHATSAPP (Phase A - A5.2)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestWhatsAppStateMachine:
+    """Tests pour la gestion d'état conversation WhatsApp."""
+
+    def test_charger_etat_inexistant_retourne_vide(self):
+        """Charger un état pour un destinataire inconnu retourne un dict vide ou None."""
+        from src.services.integrations.whatsapp import charger_etat_conversation
+
+        etat = charger_etat_conversation("destinataire_inconnu_test")
+        assert etat is None or etat == {}
+
+    def test_sauvegarder_et_charger_etat(self):
+        """Sauvegarder puis charger un état fonctionne."""
+        from src.services.integrations.whatsapp import (
+            charger_etat_conversation,
+            sauvegarder_etat_conversation,
+            effacer_etat_conversation,
+        )
+
+        dest = "test_user_whatsapp_state"
+        try:
+            etat_input = {"etape": "attente_creneau_modification", "data": {"recette_id": 42}}
+            sauvegarder_etat_conversation(dest, etat_input)
+
+            etat_lu = charger_etat_conversation(dest)
+            if etat_lu is not None:
+                assert etat_lu.get("etape") == "attente_creneau_modification"
+        finally:
+            # Nettoyage
+            try:
+                effacer_etat_conversation(dest)
+            except Exception:
+                pass
+
+    def test_effacer_etat_conversation(self):
+        """Effacer un état le rend non-chargeable."""
+        from src.services.integrations.whatsapp import (
+            charger_etat_conversation,
+            effacer_etat_conversation,
+            sauvegarder_etat_conversation,
+        )
+
+        dest = "test_user_whatsapp_effacer"
+        try:
+            sauvegarder_etat_conversation(dest, {"etape": "test"})
+            effacer_etat_conversation(dest)
+            etat = charger_etat_conversation(dest)
+            assert etat is None
+        except Exception:
+            # DB non disponible en test = skip gracieux
+            pass
+

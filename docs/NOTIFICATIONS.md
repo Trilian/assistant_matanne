@@ -1,4 +1,4 @@
-# Notifications
+﻿# Notifications
 
 > Système de notifications multi-canal unifié avec failover, throttling, digest et préférences utilisateur.
 >

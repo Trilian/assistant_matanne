@@ -2548,6 +2548,9 @@ async def basculer_mode_maintenance(
         _NAMESPACE_FEATURE_FLAGS,
         {"admin.maintenance_mode": body.enabled},
     )
+    # Activation instantanée in-process (pas de délai de cache DB)
+    from src.api.main import activer_maintenance
+    activer_maintenance(body.enabled)
     _journaliser_action_admin(
         action="admin.maintenance.toggle",
         entite_type="feature_flag",

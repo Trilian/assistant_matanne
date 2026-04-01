@@ -1,4 +1,4 @@
-# Patterns d'Architecture — src/core
+﻿# Patterns d'Architecture — src/core
 
 Ce document présente les patterns **actifs** utilisés dans le core de l'application avec exemples d'usage.
 
@@ -116,7 +116,7 @@ Cache.invalider(pattern="charger_")
 ### Politique de cache
 
 | Couche | Décorateur | Raison |
-| -------- | ----------- | -------- |
+|--------|-----------|--------|
 | Services/métier | `@avec_cache` | Multi-niveaux, testable indépendamment |
 | Frontend | TanStack Query | Cache côté client (staleTime, gcTime) |
 | HTTP | Middleware ETag | Cache navigateur automatique |
@@ -322,7 +322,7 @@ def test_db():
 Les patterns suivants ont été évalués et supprimés du codebase (dead code, inutiles pour cette application):
 
 | Pattern | Raison de suppression |
-| --------- | ---------------------- |
+|---------|----------------------|
 | **Result Monad** (`src/core/result/`) | Zero callers en production. Les exceptions Python standard suffisent. |
 | **Repository Pattern** (`src/core/repository.py`) | Abstraction inutile au-dessus de SQLAlchemy ORM. |
 | **Specification Pattern** (`src/core/specifications.py`) | Jamais utilisé. SQLAlchemy `.filter()` suffit. |

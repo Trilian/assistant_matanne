@@ -253,3 +253,114 @@ class TestTypesEvenements:
         )
         assert event.TYPE == "depenses.modifiee"
         assert event.montant == 45.90
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS WILDCARDS & EDGE CASES (Phase A - A5.3)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestBusWildcards:
+    """Tests pour les souscriptions wildcard."""
+
+    def test_wildcard_etoile_simple(self):
+        """Le pattern 'recette.*' matche 'recette.creee' et 'recette.modifiee'."""
+        bus = BusEvenements()
+        received = []
+
+        bus.souscrire("recette.*", lambda e: received.append(e))
+        bus.emettre("recette.creee", data={"id": 1})
+        bus.emettre("recette.modifiee", data={"id": 2})
+        bus.emettre("stock.modifie", data={"id": 3})
+
+        assert len(received) == 2
+        assert all(e.type.startswith("recette.") for e in received)
+
+    def test_wildcard_global(self):
+        """Le pattern '*' matche tous les événements."""
+        bus = BusEvenements()
+        received = []
+
+        bus.souscrire("*", lambda e: received.append(e))
+        bus.emettre("recette.creee", data={"id": 1})
+        bus.emettre("stock.modifie", data={"id": 2})
+
+        assert len(received) == 2
+
+    def test_wildcard_ne_matche_pas_partiellement(self):
+        """Le pattern 'stock.*' ne matche pas 'stocks.modifie'."""
+        bus = BusEvenements()
+        received = []
+
+        bus.souscrire("stock.*", lambda e: received.append(e))
+        bus.emettre("stocks.modifie", data={"id": 1})
+        bus.emettre("stock.modifie", data={"id": 2})
+
+        assert len(received) == 1
+
+
+class TestBusEdgeCases:
+    """Tests edge cases pour le bus d'événements."""
+
+    def test_handler_erreur_ne_bloque_pas_les_autres(self):
+        """Un handler en erreur ne bloque pas les handlers suivants."""
+        bus = BusEvenements()
+        results = []
+
+        def handler_ok(e):
+            results.append("ok")
+
+        def handler_erreur(e):
+            raise ValueError("Erreur test")
+
+        bus.souscrire("test.event", handler_ok, priority=10)
+        bus.souscrire("test.event", handler_erreur, priority=5)
+        bus.souscrire("test.event", handler_ok, priority=1)
+
+        bus.emettre("test.event", data={})
+        assert results.count("ok") == 2
+
+    def test_handler_duplique_execute_deux_fois(self):
+        """Un même handler souscrit deux fois est exécuté deux fois."""
+        bus = BusEvenements()
+        count = {"n": 0}
+
+        def handler(e):
+            count["n"] += 1
+
+        bus.souscrire("test.event", handler)
+        bus.souscrire("test.event", handler)
+        bus.emettre("test.event", data={})
+
+        assert count["n"] == 2
+
+    def test_emission_evenement_sans_souscripteur(self):
+        """Émettre un événement sans souscripteur ne lève pas d'exception."""
+        bus = BusEvenements()
+        result = bus.emettre("aucun.souscripteur", data={"test": True})
+        assert result == 0
+
+    def test_historique_contient_details(self):
+        """L'historique contient les données de l'événement."""
+        bus = BusEvenements(historique_taille=10)
+        bus.emettre("test.event", data={"clef": "valeur"}, source="test")
+
+        historique = bus.obtenir_historique()
+        assert len(historique) == 1
+        assert historique[0].data.get("clef") == "valeur"
+
+    def test_desouscrire_empêche_reception(self):
+        """Après désabonnement, le handler ne reçoit plus d'événements."""
+        bus = BusEvenements()
+        received = []
+
+        def handler(e):
+            received.append(e)
+
+        bus.souscrire("test.event", handler)
+        bus.emettre("test.event", data={})
+        assert len(received) == 1
+
+        bus.desouscrire("test.event", handler)
+        bus.emettre("test.event", data={})
+        assert len(received) == 1

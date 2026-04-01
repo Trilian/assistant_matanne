@@ -1,4 +1,4 @@
-# 🚀 Guide de Déploiement — MaTanne
+﻿# 🚀 Guide de Déploiement — MaTanne
 
 > **Dernière mise à jour** : Mars 2026
 
@@ -18,7 +18,7 @@
 ## Prérequis
 
 | Composant        | Version minimale | Rôle                         |
-| ----------------- | ----------------- | ------------------------------ |
+|-----------------|-----------------|------------------------------|
 | Python          | 3.13+           | Runtime backend               |
 | Node.js         | 20+             | Runtime frontend              |
 | Docker          | 24+             | Conteneurisation backend      |
@@ -66,7 +66,7 @@ Copier le template : `cp .env.example .env.local` puis remplir avec vos valeurs.
 Dans le dashboard Vercel → Settings → Environment Variables :
 
 | Variable | Exemple | Description |
-| ---------- | --------- | ------------- |
+|----------|---------|-------------|
 | `NEXT_PUBLIC_API_URL` | `https://votre-backend.railway.app` | URL du backend Railway |
 | `NEXT_PUBLIC_WS_URL` | `wss://votre-backend.railway.app` | WebSocket backend |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://xxxx.supabase.co` | Instance Supabase |
@@ -78,7 +78,7 @@ Dans le dashboard Vercel → Settings → Environment Variables :
 Dans le dashboard Railway → Variables :
 
 | Variable | Description |
-| ---------- | ------------- |
+|----------|-------------|
 | `DATABASE_URL` | URL PostgreSQL Supabase |
 | `SUPABASE_URL` | Instance Supabase |
 | `SUPABASE_ANON_KEY` | Clé anon |

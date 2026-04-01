@@ -6,6 +6,7 @@ de tous les cron jobs de l'application.
 """
 
 import logging
+from pathlib import Path
 from typing import Optional
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -75,6 +76,18 @@ def demarrer_scheduler() -> None:
     
     # Démarrer le scheduler
     scheduler.start()
+    
+    # Enregistrer le job de nettoyage des exports (quotidien 03:00)
+    scheduler.add_job(
+        nettoyer_exports_anciens,
+        trigger="cron",
+        hour=3,
+        minute=0,
+        id="nettoyage_exports",
+        name="Nettoyage exports > 7 jours",
+        replace_existing=True,
+    )
+    
     logger.info("✅ Scheduler APScheduler démarré avec succès")
     
     # Afficher les jobs enregistrés
@@ -97,3 +110,39 @@ def arreter_scheduler() -> None:
     logger.info("🛑 Arrêt du scheduler APScheduler...")
     _scheduler.shutdown(wait=True)
     logger.info("✅ Scheduler arrêté")
+
+
+# ── Politique de rétention data/exports/ ──────────────────
+
+EXPORTS_DIR = Path(__file__).resolve().parents[3] / "data" / "exports"
+RETENTION_JOURS = 7
+
+
+def nettoyer_exports_anciens() -> int:
+    """
+    Supprime les fichiers d'export de plus de RETENTION_JOURS jours.
+
+    Returns:
+        Nombre de fichiers supprimés
+    """
+    import time
+
+    if not EXPORTS_DIR.exists():
+        return 0
+
+    seuil = time.time() - (RETENTION_JOURS * 86400)
+    supprimes = 0
+
+    for fichier in EXPORTS_DIR.iterdir():
+        if fichier.is_file() and fichier.stat().st_mtime < seuil:
+            try:
+                fichier.unlink()
+                supprimes += 1
+                logger.info(f"🗑️ Export supprimé (>{RETENTION_JOURS}j) : {fichier.name}")
+            except OSError as e:
+                logger.warning(f"⚠️ Impossible de supprimer {fichier.name}: {e}")
+
+    if supprimes:
+        logger.info(f"🧹 {supprimes} export(s) ancien(s) supprimé(s)")
+
+    return supprimes

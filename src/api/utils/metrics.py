@@ -2,12 +2,13 @@
 Métriques et observabilité pour l'API REST.
 
 Fournit des compteurs et histogrammes pour le monitoring.
+Rolling windows pour les latences (fenêtres glissantes de 15 min).
 """
 
 import logging
 import os
 import time
-from collections import defaultdict
+from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
@@ -16,18 +17,23 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 logger = logging.getLogger(__name__)
 
+# Fenêtre glissante pour les échantillons de latence (en secondes)
+ROLLING_WINDOW_SECONDS = 900  # 15 minutes
+
 
 @dataclass
 class MetricsStore:
-    """Stockage des métriques en mémoire."""
+    """Stockage des métriques en mémoire avec rolling windows."""
 
     # Compteurs de requêtes par endpoint
     requests_total: dict[str, int] = field(default_factory=lambda: defaultdict(int))
     requests_success: dict[str, int] = field(default_factory=lambda: defaultdict(int))
     requests_errors: dict[str, int] = field(default_factory=lambda: defaultdict(int))
 
-    # Histogrammes de latence (en ms)
-    latency_samples: dict[str, list[float]] = field(default_factory=lambda: defaultdict(list))
+    # Rolling windows de latence: deque de (timestamp, latency_ms)
+    latency_windows: dict[str, deque[tuple[float, float]]] = field(
+        default_factory=lambda: defaultdict(lambda: deque(maxlen=MAX_LATENCY_SAMPLES))
+    )
 
     # Métriques rate limiting
     rate_limit_hits: dict[str, int] = field(default_factory=lambda: defaultdict(int))
@@ -56,11 +62,17 @@ _AI_BUDGET_MENSUEL_EUR = float(os.getenv("AI_BUDGET_MENSUEL_EUR", "20"))
 
 
 def record_request(endpoint: str, method: str, status_code: int, latency_ms: float):
-    """Enregistre une requête dans les métriques."""
+    """Enregistre une requête dans les métriques (rolling window)."""
     key = f"{method}:{endpoint}"
 
     # Borner le nombre d'endpoints trackés pour éviter l'exhaustion mémoire
     if key not in _metrics.requests_total and len(_metrics.requests_total) >= MAX_TRACKED_ENDPOINTS:
+        # Log l'avertissement une seule fois quand la limite est atteinte
+        if len(_metrics.requests_total) == MAX_TRACKED_ENDPOINTS:
+            logger.warning(
+                f"Limite de {MAX_TRACKED_ENDPOINTS} endpoints métriques atteinte. "
+                f"Endpoint ignoré: {key}"
+            )
         return
 
     _metrics.requests_total[key] += 1
@@ -70,9 +82,14 @@ def record_request(endpoint: str, method: str, status_code: int, latency_ms: flo
     else:
         _metrics.requests_errors[key] += 1
 
-    # Limite à MAX_LATENCY_SAMPLES échantillons par endpoint
-    if len(_metrics.latency_samples[key]) < MAX_LATENCY_SAMPLES:
-        _metrics.latency_samples[key].append(latency_ms)
+    # Rolling window: ajouter (timestamp, latency_ms)
+    now = time.monotonic()
+    window = _metrics.latency_windows[key]
+    window.append((now, latency_ms))
+    # Élaguer les entrées hors fenêtre
+    cutoff = now - ROLLING_WINDOW_SECONDS
+    while window and window[0][0] < cutoff:
+        window.popleft()
 
 
 def record_rate_limit_hit(identifier: str):
@@ -87,20 +104,26 @@ def record_ai_request(tokens_used: int = 0):
 
 
 def get_metrics() -> dict[str, Any]:
-    """Retourne toutes les métriques."""
+    """Retourne toutes les métriques (latences calculées sur rolling window)."""
     uptime = (datetime.now(UTC) - _metrics.start_time).total_seconds()
+    now = time.monotonic()
+    cutoff = now - ROLLING_WINDOW_SECONDS
 
-    # Calcul des percentiles de latence
+    # Calcul des percentiles de latence sur la fenêtre glissante
     latency_stats = {}
-    for endpoint, samples in _metrics.latency_samples.items():
+    for endpoint, window in _metrics.latency_windows.items():
+        # Filtrer les échantillons dans la fenêtre
+        samples = [lat for ts, lat in window if ts >= cutoff]
         if samples:
             sorted_samples = sorted(samples)
+            n = len(sorted_samples)
             latency_stats[endpoint] = {
-                "count": len(samples),
-                "avg_ms": sum(samples) / len(samples),
-                "p50_ms": sorted_samples[len(samples) // 2],
-                "p95_ms": sorted_samples[int(len(samples) * 0.95)] if len(samples) >= 20 else None,
-                "p99_ms": sorted_samples[int(len(samples) * 0.99)] if len(samples) >= 100 else None,
+                "count": n,
+                "window_seconds": ROLLING_WINDOW_SECONDS,
+                "avg_ms": sum(samples) / n,
+                "p50_ms": sorted_samples[n // 2],
+                "p95_ms": sorted_samples[int(n * 0.95)] if n >= 20 else None,
+                "p99_ms": sorted_samples[int(n * 0.99)] if n >= 100 else None,
             }
 
     ai_cost_eur = (_metrics.ai_tokens_used / 1000.0) * _AI_COST_PER_1K_TOKENS_EUR

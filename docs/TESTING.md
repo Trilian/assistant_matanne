@@ -1,8 +1,8 @@
-﻿# Guide de Test Unifi?
+﻿# Guide de Test Unifié
 
-> R?f?rence compl?te pour pytest (backend), Vitest (frontend), Playwright (E2E) ? fixtures, patterns et bonnes pratiques.
+> Référence complète pour pytest (backend), Vitest (frontend), Playwright (E2E) — fixtures, patterns et bonnes pratiques.
 >
-> **Derni?re mise ? jour** : 1er avril 2026
+> **Dernière mise à jour** : 1er avril 2026
 
 ---
 
@@ -20,7 +20,7 @@
 
 ---
 
-## Backend ? pytest
+## Backend — pytest
 
 ### Configuration (pytest.ini)
 
@@ -39,67 +39,67 @@ asyncio_default_fixture_loop_scope = function
 
 | Marker | Usage |
 | -------- | ------- |
-| `@pytest.mark.unit` | Tests rapides, sans d?pendances externes |
-| `@pytest.mark.integration` | Peut utiliser des d?pendances externes |
-| `@pytest.mark.slow` | Tests n?cessitant optimisation |
-| `@pytest.mark.requires_db` | N?cessite base de donn?es |
-| `@pytest.mark.requires_redis` | N?cessite Redis |
-| `@pytest.mark.requires_internet` | N?cessite acc?s r?seau |
+| `@pytest.mark.unit` | Tests rapides, sans dépendances externes |
+| `@pytest.mark.integration` | Peut utiliser des dépendances externes |
+| `@pytest.mark.slow` | Tests nécessitant optimisation |
+| `@pytest.mark.requires_db` | Nécessite base de données |
+| `@pytest.mark.requires_redis` | Nécessite Redis |
+| `@pytest.mark.requires_internet` | Nécessite accès réseau |
 | `@pytest.mark.endpoint` | Tests d'endpoints API |
 | `@pytest.mark.auth` | Tests d'authentification |
-| `@pytest.mark.rate_limit` | Tests de limitation de d?bit |
+| `@pytest.mark.rate_limit` | Tests de limitation de débit |
 | `@pytest.mark.cache` | Tests de cache |
 | `@pytest.mark.asyncio` | Tests asynchrones |
 | `@pytest.mark.benchmark` | Mesures de performance |
 | `@pytest.mark.contract` | Tests de contrat OpenAPI |
 | `@pytest.mark.e2e` | Tests end-to-end |
-| `@pytest.mark.visual` | R?gression visuelle |
-| `@pytest.mark.a11y` | Accessibilit? |
+| `@pytest.mark.visual` | Régression visuelle |
+| `@pytest.mark.a11y` | Accessibilité |
 
 ### Structure des tests
 
 ```text
 tests/
-+-- conftest.py              ? Fixtures racine (DB, services, factories)
-+-- api/                     ? Tests routes API (~54 fichiers)
-?   +-- conftest.py          ? Fixtures API (app, client, auth override)
-?   +-- test_*_routes.py     ? Un fichier par domaine de routes
-+-- services/                ? Tests logique m?tier
-?   +-- base/                ? Tests services de base
-?   +-- cuisine/             ? Tests services cuisine
-?   +-- famille/             ? Tests services famille
-?   +-- maison/              ? Tests services maison
-?   +-- jeux/                ? Tests services jeux
-?   +-- core/                ? Tests services core
-+-- core/                    ? Tests infrastructure
-?   +-- conftest.py          ? Fixtures core (mocks session, redis, query)
-?   +-- ai/                  ? Tests client IA
-?   +-- models/              ? Tests mod?les ORM
-?   +-- test_*.py            ? Cache, resilience, validation, event bus...
-+-- benchmarks/              ? Tests performance
-+-- contracts/               ? Tests contrat OpenAPI (Schemathesis)
-+-- load/                    ? Tests charge (k6)
-+-- sql/                     ? Tests coh?rence sch?ma SQL
+├── conftest.py              ← Fixtures racine (DB, services, factories)
+├── api/                     ← Tests routes API (~54 fichiers)
+│   ├── conftest.py          ← Fixtures API (app, client, auth override)
+│   └── test_*_routes.py     ← Un fichier par domaine de routes
+├── services/                ← Tests logique métier
+│   ├── base/                ← Tests services de base
+│   ├── cuisine/             ← Tests services cuisine
+│   ├── famille/             ← Tests services famille
+│   ├── maison/              ← Tests services maison
+│   ├── jeux/                ← Tests services jeux
+│   └── core/                ← Tests services core
+├── core/                    ← Tests infrastructure
+│   ├── conftest.py          ← Fixtures core (mocks session, redis, query)
+│   ├── ai/                  ← Tests client IA
+│   ├── models/              ← Tests modèles ORM
+│   └── test_*.py            ← Cache, resilience, validation, event bus...
+├── benchmarks/              ← Tests performance
+├── contracts/               ← Tests contrat OpenAPI (Schemathesis)
+├── load/                    ← Tests charge (k6)
+└── sql/                     ← Tests cohérence schéma SQL
 ```
 
 ### Fixtures racine (tests/conftest.py)
 
-#### Base de donn?es
+#### Base de données
 
 | Fixture | Scope | Usage |
 | --------- | ------- | ------- |
-| `engine` | session | SQLite in-memory + compatibilit? JSONB |
-| `db` | function | Session DB isol?e avec auto-rollback |
-| `test_db` | function | Alias de `db` (r?trocompatibilit?) |
-| `mock_session` | function | Alias de `db` (r?trocompatibilit?) |
+| `engine` | session | SQLite in-memory + compatibilité JSONB |
+| `db` | function | Session DB isolée avec auto-rollback |
+| `test_db` | function | Alias de `db` (rétrocompatibilité) |
+| `mock_session` | function | Alias de `db` (rétrocompatibilité) |
 
-Particularit?s :
+Particularités :
 
-- **SQLite in-memory** avec traduction dialect PostgreSQL (JSONB ? JSON)
-- **Foreign keys activ?es** automatiquement
-- **143+ mod?les ORM** charg?s avant les tests
+- **SQLite in-memory** avec traduction dialect PostgreSQL (JSONB → JSON)
+- **Foreign keys activées** automatiquement
+- **143+ modèles ORM** chargés avant les tests
 - **Auto-rollback** par test pour isolation
-- Singleton production remplac? globalement
+- Singleton production remplacé globalement
 
 #### Services
 
@@ -110,29 +110,29 @@ Particularit?s :
 | `planning_service` | `ServicePlanning()` |
 | `courses_service` | `ServiceCourses()` |
 
-#### Factories de donn?es
+#### Factories de données
 
-| Factory | Donn?es par d?faut |
+| Factory | Données par défaut |
 | --------- | ------------------- |
-| `RecetteFactory` | Recette avec compteur auto-incr?ment? |
-| `IngredientFactory` | Ingr?dient avec compteur |
+| `RecetteFactory` | Recette avec compteur auto-incrémenté |
+| `IngredientFactory` | Ingrédient avec compteur |
 | `PlanningFactory` | Planning avec compteur |
 
-#### Donn?es ?chantillon
+#### Données échantillon
 
 | Fixture | Contenu |
 | --------- | --------- |
-| `sample_recipe` | "Poulet R?ti" (6 portions, 75 min) |
-| `sample_ingredients` | Dict de 3 ingr?dients test |
+| `sample_recipe` | "Poulet Rôti" (6 portions, 75 min) |
+| `sample_ingredients` | Dict de 3 ingrédients test |
 | `sample_planning` | Semaine du 13 jan 2026 |
 | `sample_articles` | 2 articles de courses mock |
 | `sample_suggestions` | 3 suggestions IA mock |
 
 #### Environnement
 
-- Rate limiting d?sactiv? (`RATE_LIMITING_DISABLED=true`)
+- Rate limiting désactivé (`RATE_LIMITING_DISABLED=true`)
 - Environnement test (`ENVIRONMENT=test`)
-- Auto-auth pr?t pour mode d?veloppement
+- Auto-auth prêt pour mode développement
 
 ### Fixtures API (tests/api/conftest.py)
 
@@ -145,15 +145,15 @@ L'app fixture :
 
 - Patche le compilateur JSONB avant import
 - Mock `obtenir_contexte_db()` globalement
-- Override `get_current_user` ? `{"id": "test-user", "role": "admin"}`
+- Override `get_current_user` → `{"id": "test-user", "role": "admin"}`
 
 ### Fixtures core (tests/core/conftest.py)
 
 | Fixture | Usage |
 | --------- | ------- |
 | `mock_session()` | Mock SQLAlchemy Session |
-| `mock_query()` | Mock Query cha?nable (`.filter()`, `.all()`, etc.) |
-| `mock_model()` | Mock mod?le ORM |
+| `mock_query()` | Mock Query chaînable (`.filter()`, `.all()`, etc.) |
+| `mock_model()` | Mock modèle ORM |
 | `mock_redis()` | Mock client Redis |
 | `mock_logger()` | MagicMock logger |
 
@@ -168,7 +168,7 @@ def test_create_recipe(recette_factory):
     assert recipe.nom == "Tarte"
 ```
 
-#### Test int?gration DB
+#### Test intégration DB
 
 ```python
 @pytest.mark.integration
@@ -190,7 +190,7 @@ def test_list_recipes(client):
     assert isinstance(response.json()["data"], list)
 ```
 
-#### Test param?tr?
+#### Test paramétré
 
 ```python
 @pytest.mark.parametrize("difficulty", ["facile", "moyen", "difficile"])
@@ -216,9 +216,9 @@ pytest
 
 # Avec couverture
 python manage.py test_coverage
-# ? pytest --cov=src --cov-report=html --cov-report=term
+# → pytest --cov=src --cov-report=html --cov-report=term
 
-# Fichier sp?cifique
+# Fichier spécifique
 pytest tests/test_recettes.py -v
 
 # Test unique
@@ -235,18 +235,18 @@ open htmlcov/index.html
 
 ---
 
-## Frontend ? Vitest
+## Frontend — Vitest
 
 ### Configuration (frontend/vitest.config.ts)
 
 - **Environnement** : jsdom (browser-like)
 - **Globals** : true (pas d'imports pour `describe`, `it`, `expect`)
-- **Setup** : `vitest.setup.ts` ? `@testing-library/jest-dom/vitest`
+- **Setup** : `vitest.setup.ts` → `@testing-library/jest-dom/vitest`
 - **Patterns** : `src/**/*.test.{ts,tsx}`, `__tests__/**/*.test.{ts,tsx}`
 
 ### Seuils de couverture
 
-| M?trique | Seuil |
+| Métrique | Seuil |
 | ---------- | ------- |
 | Lines | 50% |
 | Functions | 50% |
@@ -261,7 +261,7 @@ Exclusions : layout files, middleware, providers.
 import { describe, it, expect } from 'vitest'
 
 describe('listerRecettes', () => {
-  it('retourne une liste pagin?e', async () => {
+  it('retourne une liste paginée', async () => {
     const result = await listerRecettes(1)
     expect(result.data).toBeDefined()
     expect(Array.isArray(result.data)).toBe(true)
@@ -275,22 +275,22 @@ describe('listerRecettes', () => {
 cd frontend
 
 npm test              # Mode watch
-npm run test:run      # Ex?cution unique
+npm run test:run      # Exécution unique
 ```
 
 ---
 
-## Frontend ? Playwright (E2E)
+## Frontend — Playwright (E2E)
 
 ### Configuration (frontend/playwright.config.ts)
 
 - **Dossier** : `frontend/e2e/`
-- **Parall?le** : oui
+- **Parallèle** : oui
 - **Retries** : 2 en CI, 0 en local
 - **Reporter** : HTML
 - **Base URL** : `http://localhost:3000`
 - **Locale** : `fr-FR`
-- **Screenshots** : uniquement sur ?chec
+- **Screenshots** : uniquement sur échec
 
 ### Navigateurs couverts
 
@@ -300,26 +300,26 @@ npm run test:run      # Ex?cution unique
 | Mobile Chrome | Pixel 5 |
 | Mobile Safari | iPhone 13 |
 
-### Suite E2E (17 sc?narios)
+### Suite E2E (17 scénarios)
 
 | Fichier | Couverture |
 | --------- | ------------ |
-| `accessibility.spec.ts` | Conformit? a11y (axe-core) |
+| `accessibility.spec.ts` | Conformité a11y (axe-core) |
 | `auth-flow.spec.ts` | Login/logout/2FA |
-| `courses-collaboration.spec.ts` | Collaboration temps r?el courses |
+| `courses-collaboration.spec.ts` | Collaboration temps réel courses |
 | `cuisine-complet.spec.ts` | Module cuisine complet |
 | `famille-complet.spec.ts` | Module famille E2E |
 | `inter-modules-flow.spec.ts` | Interactions inter-modules |
 | `interactions.spec.ts` | UI interactions & formulaires |
-| `jules-activites.spec.ts` | Profil enfant & activit?s |
+| `jules-activites.spec.ts` | Profil enfant & activités |
 | `maison-complet.spec.ts` | Module maison/entretien |
 | `modules.spec.ts` | Navigation tous modules |
 | `navigation.spec.ts` | Routage & navigation |
-| `pages-interaction.spec.ts` | Interactions pages sp?cifiques |
+| `pages-interaction.spec.ts` | Interactions pages spécifiques |
 | `parcours-utilisateur.spec.ts` | Parcours utilisateur complet |
 | `planning-ia.spec.ts` | Planning repas avec IA |
 | `projets-maison.spec.ts` | Projets maison workflow |
-| `recettes-flow.spec.ts` | Cr?ation/gestion recettes |
+| `recettes-flow.spec.ts` | Création/gestion recettes |
 | `visual-regression.spec.ts` | Comparison screenshots |
 
 ### Pattern E2E
@@ -342,17 +342,17 @@ test('user can login and view dashboard', async ({ page }) => {
 cd frontend
 
 npx playwright test                    # Tous les E2E
-npx playwright test e2e/auth-flow.spec.ts  # Fichier sp?cifique
-npx playwright test --project=chromium     # Navigateur sp?cifique
+npx playwright test e2e/auth-flow.spec.ts  # Fichier spécifique
+npx playwright test --project=chromium     # Navigateur spécifique
 
-# R?gression visuelle
+# Régression visuelle
 npm run test:visual
-npm run test:visual:update             # Mettre ? jour les snapshots
+npm run test:visual:update             # Mettre à jour les snapshots
 ```
 
 ---
 
-## Tests sp?cialis?s
+## Tests spécialisés
 
 ### Tests de contrat OpenAPI (Schemathesis)
 
@@ -360,7 +360,7 @@ npm run test:visual:update             # Mettre ? jour les snapshots
 pytest tests/contracts/test_openapi_contract.py -m contract
 ```
 
-Valide que les endpoints respectent le sch?ma OpenAPI g?n?r?.
+Valide que les endpoints respectent le schéma OpenAPI généré.
 
 ### Benchmarks performance
 
@@ -374,33 +374,33 @@ pytest tests/benchmarks/test_perf_core_operations.py -m benchmark
 k6 run tests/load/k6_baseline.js
 ```
 
-### Tests coh?rence sch?ma SQL
+### Tests cohérence schéma SQL
 
 ```bash
 pytest tests/sql/test_schema_coherence.py
 ```
 
-V?rifie l'alignement ORM ? SQL.
+Vérifie l'alignement ORM ↔ SQL.
 
 ---
 
 ## Bonnes pratiques
 
-1. **Isolement** : chaque test est ind?pendant gr?ce aux fixtures auto-rollback
-2. **Markers** : toujours annoter les tests avec le marker appropri?
-3. **Factories** : utiliser les factories plut?t que cr?er des donn?es manuellement
-4. **Nettoyage** : supprimer `__pycache__/` apr?s refactoring pour ?viter les `.pyc` obsol?tes
+1. **Isolement** : chaque test est indépendant grâce aux fixtures auto-rollback
+2. **Markers** : toujours annoter les tests avec le marker approprié
+3. **Factories** : utiliser les factories plutôt que créer des données manuellement
+4. **Nettoyage** : supprimer `__pycache__/` après refactoring pour éviter les `.pyc` obsolètes
 5. **Mode test** : `ENVIRONMENT=test` et `RATE_LIMITING_DISABLED=true` sont automatiques
-6. **Frontend** : les matchers `@testing-library/jest-dom` sont charg?s globalement
-7. **E2E** : les screenshots ne sont captur?s que sur ?chec ? pas de bruit en CI
+6. **Frontend** : les matchers `@testing-library/jest-dom` sont chargés globalement
+7. **E2E** : les screenshots ne sont capturés que sur échec → pas de bruit en CI
 
 ---
 
-## Couverture actuelle estim?e
+## Couverture actuelle estimée
 
 | Couche | Couverture | Objectif |
 | -------- | ------------ | ---------- |
 | Backend services | ~55% | 70% |
 | Backend routes | ~50% | 65% |
 | Frontend composants | ~40% | 50% |
-| E2E sc?narios critiques | ~80% | 90% |
+| E2E scénarios critiques | ~80% | 90% |

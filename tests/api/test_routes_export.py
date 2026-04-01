@@ -153,3 +153,78 @@ class TestRoutesExportAvecMock:
         client = TestClient(app, raise_server_exceptions=False)
         response = client.post("/api/v1/export/pdf?type_export=recette")
         assert response.status_code == 422
+
+
+class TestRoutesExportErreurs:
+    """Tests erreurs et edge cases pour l'export PDF."""
+
+    def test_export_service_exception_retourne_500(self):
+        """Si le service lève une exception, l'API retourne 500."""
+        mock_service = MagicMock()
+        mock_service.exporter_liste_courses.side_effect = RuntimeError("PDF generation failed")
+
+        with patch(
+            "src.api.routes.export.obtenir_service_export_pdf",
+            return_value=mock_service,
+        ):
+            from src.api.main import app
+
+            client = TestClient(app, raise_server_exceptions=False)
+            response = client.post("/api/v1/export/pdf?type_export=courses")
+            assert response.status_code == 500
+
+    def test_export_recette_id_negatif(self):
+        """Export recette avec ID négatif ne plante pas."""
+        from src.api.main import app
+
+        client = TestClient(app, raise_server_exceptions=False)
+        response = client.post("/api/v1/export/pdf?type_export=recette&id_ressource=-1")
+        assert response.status_code in (200, 404, 422, 500)
+
+    def test_export_planning_id_inexistant(self):
+        """Export planning avec ID inexistant retourne erreur ou résultat vide."""
+        from src.api.main import app
+
+        client = TestClient(app, raise_server_exceptions=False)
+        response = client.post("/api/v1/export/pdf?type_export=planning&id_ressource=999999")
+        assert response.status_code in (200, 404, 500)
+
+    def test_export_pdf_content_type_valide(self):
+        """L'export PDF retourne le bon Content-Type."""
+        from io import BytesIO
+
+        mock_buffer = BytesIO(b"%PDF-1.4 content")
+        mock_service = MagicMock()
+        mock_service.exporter_liste_courses.return_value = (mock_buffer, "test_export")
+
+        with patch(
+            "src.api.routes.export.obtenir_service_export_pdf",
+            return_value=mock_service,
+        ):
+            from src.api.main import app
+
+            client = TestClient(app, raise_server_exceptions=False)
+            response = client.post("/api/v1/export/pdf?type_export=courses")
+            if response.status_code == 200:
+                assert "application/pdf" in response.headers.get("content-type", "")
+                assert "Content-Disposition" in response.headers
+
+    def test_export_json_domaines_valides(self):
+        """GET /api/v1/export/domaines retourne les domaines disponibles."""
+        from src.api.main import app
+
+        client = TestClient(app, raise_server_exceptions=False)
+        response = client.get("/api/v1/export/domaines")
+        assert response.status_code in (200, 401)
+        if response.status_code == 200:
+            data = response.json()
+            assert "domaines" in data
+            assert len(data["domaines"]) > 0
+
+    def test_export_json_domaine_invalide(self):
+        """GET /api/v1/export/json avec domaine invalide retourne 422."""
+        from src.api.main import app
+
+        client = TestClient(app, raise_server_exceptions=False)
+        response = client.get("/api/v1/export/json?domaines=fake_domain")
+        assert response.status_code in (422, 401)

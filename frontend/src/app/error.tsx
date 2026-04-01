@@ -1,9 +1,10 @@
 ﻿// ═══════════════════════════════════════════════════════════
-// Error boundary global
+// Error boundary global — Sentry intégré
 // ═══════════════════════════════════════════════════════════
 
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/composants/ui/button";
 import {
@@ -21,6 +22,18 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    // Envoyer l'erreur à Sentry si configuré
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const Sentry = require("@sentry/nextjs");
+      Sentry.captureException(error);
+    } catch {
+      // Sentry non installé — log console
+      console.error("Erreur non gérée:", error);
+    }
+  }, [error]);
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="max-w-md w-full">

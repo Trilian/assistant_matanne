@@ -1,7 +1,7 @@
 ﻿"""
-Routes API RGPD â€” Export et suppression des donnÃ©es personnelles.
+"""Routes API Export Backup — Export de données personnelles.
 
-Endpoints pour le droit d'accÃ¨s, de portabilitÃ© et d'effacement (RGPD).
+Endpoints pour l'export de données (backup personnel) et la suppression de compte.
 """
 
 import logging
@@ -21,7 +21,7 @@ from src.api.utils import executer_async, gerer_exception_api
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/rgpd", tags=["RGPD"])
+router = APIRouter(prefix="/api/v1/rgpd", tags=["Export Backup"])
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

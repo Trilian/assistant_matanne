@@ -1,4 +1,4 @@
-# Guide Contribution — Assistant Matanne
+﻿# Guide Contribution — Assistant Matanne
 
 > **Type de projet** : Personnel / Familial — Pas de contributions externes  
 > **Mainteneur** : Famille Matanne  
@@ -207,7 +207,7 @@ npm test                        # Vitest
 ### Couverture de tests cible
 
 | Couche | Cible |
-| -------- | ------- |
+|--------|-------|
 | API routes | 80% |
 | Core modules | 85% |
 | Services métier | 75% |
@@ -231,7 +231,7 @@ main          ← Code de production — déployé automatiquement sur Railway
 ### Quand mettre à jour les docs ?
 
 | Changement | Doc à mettre à jour |
-| ----------- | --------------------- |
+|-----------|---------------------|
 | Nouvelle route API | `docs/API_REFERENCE.md` |
 | Nouveau module | `docs/MODULES.md` + guide module dans `docs/guides/` |
 | Changement de schéma SQL | `docs/ERD_SCHEMA.md` + `docs/MIGRATION_GUIDE.md` |

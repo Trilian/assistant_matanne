@@ -265,8 +265,8 @@ tags_metadata = [
         "description": "Upload de fichiers vers Supabase Storage",
     },
     {
-        "name": "RGPD",
-        "description": "Export de données personnelles et suppression de compte (RGPD)",
+        "name": "Export Backup",
+        "description": "Export de données personnelles (backup) et suppression de compte",
     },
 ]
 
@@ -360,21 +360,26 @@ app.add_middleware(MetricsMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 
 
-_MAINTENANCE_CACHE: dict[str, float | bool] = {
-    "enabled": False,
-    "checked_at": 0.0,
-}
-_MAINTENANCE_CACHE_TTL_S = 1.0
+# Flag atomique in-process pour activation instantanée du mode maintenance.
+# Mis à jour directement par l'endpoint admin (pas de délai de cache).
+# Le flag DB reste la source de vérité au démarrage / entre redémarrages.
+_maintenance_flag: bool = False
+_maintenance_loaded: bool = False
+
+
+def activer_maintenance(enabled: bool) -> None:
+    """Active/désactive le mode maintenance instantanément (in-process)."""
+    global _maintenance_flag
+    _maintenance_flag = enabled
 
 
 def _lire_mode_maintenance() -> bool:
-    """Lit le mode maintenance depuis l'état persistant admin (avec cache court)."""
-    now = time.monotonic()
-    checked_at = float(_MAINTENANCE_CACHE.get("checked_at", 0.0) or 0.0)
-    if now - checked_at <= _MAINTENANCE_CACHE_TTL_S:
-        return bool(_MAINTENANCE_CACHE.get("enabled", False))
+    """Lit le mode maintenance (flag atomique in-process, chargé depuis DB au premier appel)."""
+    global _maintenance_flag, _maintenance_loaded
+    if _maintenance_loaded:
+        return _maintenance_flag
 
-    enabled = False
+    # Premier appel : charger depuis la DB
     try:
         from src.api.utils import executer_avec_session
         from src.core.models import EtatPersistantDB
@@ -389,13 +394,12 @@ def _lire_mode_maintenance() -> bool:
                 .first()
             )
             flags = row.data if row and isinstance(row.data, dict) else {}
-            enabled = bool(flags.get("admin.maintenance_mode", False))
+            _maintenance_flag = bool(flags.get("admin.maintenance_mode", False))
     except Exception:
-        enabled = False
+        _maintenance_flag = False
 
-    _MAINTENANCE_CACHE["enabled"] = enabled
-    _MAINTENANCE_CACHE["checked_at"] = now
-    return enabled
+    _maintenance_loaded = True
+    return _maintenance_flag
 
 
 @app.middleware("http")

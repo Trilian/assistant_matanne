@@ -1,61 +1,59 @@
-# Event Bus
+﻿# Event Bus
 
-> Reference du bus d'evenements domaine au 1er avril 2026.
+> Référence du bus d'événements domaine — 32 types, 51 subscribers, patterns et bonnes pratiques.
+>
+> **Dernière mise à jour** : 1er avril 2026
 
 ---
 
 ## Vue d'ensemble
 
-| Propriete | Valeur |
-| --- | --- |
-| Implementation | `src/services/core/events/bus.py` |
-| Types d'evenements | 32 types domaines enregistres |
-| Subscribers | 51 handlers enregistres au bootstrap |
-| Thread-safe | Oui, verrou interne sur le registre |
-| Wildcards | Oui, patterns du type `module.*` |
-| Historique | 100 derniers evenements gardes en memoire |
-| Metriques | emissions, erreurs, duree, repartition par type |
+| Propriété | Valeur |
+|-----------|--------|
+| **Implémentation** | `src/services/core/events/bus.py` |
+| **Types d'événements** | 32 (`REGISTRE_EVENEMENTS`) |
+| **Subscribers enregistrés** | 51 (`enregistrer_subscribers()`) |
+| **Thread-safe** | Oui (`threading.Lock`) |
+| **Wildcards** | Oui (`module.*` matche `module.action`) |
+| **Historique** | 100 derniers événements en mémoire |
+| **Métriques** | Émissions, handlers, erreurs, durée par type |
 
-## Types d'evenements
+---
+
+## Types d'événements (32)
 
 ### Recettes
-
 `recette.planifiee`, `recette.importee`, `recette.creee`, `recette.feedback`
 
-### Stock et courses
-
+### Stock / Courses
 `stock.modifie`, `courses.generees`, `courses.modifiees`, `inventaire.modification_importante`
 
-### Planning et batch cooking
-
+### Planning / Batch
 `planning.modifie`, `batch_cooking.termine`
 
 ### Maison
-
 `entretien.routine_creee`, `entretien.semaine_optimisee`, `depenses.modifiee`, `jardin.modifie`, `jardin.recolte`, `projets.modifie`, `meubles.modifie`, `eco_tips.modifie`, `energie.anomalie`, `contrat.renouvellement`
 
 ### Famille
-
 `activites.modifiee`, `routines.modifiee`, `weekend.modifie`, `achats.modifie`, `food_log.ajoute`
 
-### Budget et sante
-
+### Budget / Santé
 `budget.modifie`, `budget.depassement`, `sante.modifie`
 
 ### Jeux
-
 `loto.modifie`, `paris.modifie`, `jeux.sync_terminee`
 
-### Systeme
-
+### Système
 `service.error`
 
-## Groupes de subscribers
+---
 
-### Invalidation cache
+## Groupes de subscribers (51)
 
-| Handler | Pattern |
-| --- | --- |
+### Invalidation cache (16 subscribers)
+
+| Handler | Événement pattern |
+|---------|-------------------|
 | `_invalider_cache_recettes()` | `recette.*` |
 | `_invalider_cache_stock()` | `stock.*` |
 | `_invalider_cache_courses()` | `courses.*` |
@@ -73,47 +71,59 @@
 | `_invalider_cache_jeux()` | `jeux.*` |
 | `_invalider_cache_sante()` | `sante.*` |
 
-### Reactions metier
+### Réactions métier (12+ subscribers)
 
-- anniversaires et echeances proches
-- invalidation de suggestions lors de changements de preferences
-- synchronisations inter-modules branchees via les services enregistres
+- Checklist anniversaire proche (J-30/14/7/1)
+- Invalidation suggestions achats sur changement préférences
+- Syncs inter-modules enregistrés via `@service_factory`
 
-### Notifications
+### Notifications (7+ subscribers)
 
-- expiration de document vers ntfy et push
-- depassement budget en haute priorite
-- peremption proche vers anti-gaspillage
-- fin de batch cooking avec retour utilisateur
-- anomalies energie vers canal admin
+- Document expiration → ntfy/push
+- Anomalie budget → alertes haute priorité
+- Péremption J-48h → suggestions anti-gaspillage
+- Batch cooking terminé → notification résultat
+- Anomalie énergie → alerte admin
 
-### Monitoring et audit
+### Monitoring (8+ subscribers)
 
-- collecteur central de metriques
-- suivi des erreurs service
-- comptage des handlers et de la latence
-- journalisation des evenements sensibles
+- Collecteur métriques global
+- Suivi erreurs services
+- Compteurs performance
+- Détection anomalies
+
+### Audit (6+ subscribers)
+
+- Logging structuré des événements
+- Suivi actions par domaine
+- Enregistrement événements sécurité
 
 ### Webhooks sortants
 
-- livraison best-effort vers integrations externes
+- Livraison best-effort via service d'intégration
 
-## Exemples de flux reactifs
+---
 
-| Evenement | Reaction automatique |
-| --- | --- |
-| `jardin.recolte` | invalide les caches recettes, planning et suggestions |
-| `energie.anomalie` | cree une tache entretien ou une alerte admin |
-| `budget.depassement` | invalide le dashboard et declenche l'agent proactif |
-| `document.echeance_proche` | pousse une notification utilisateur |
-| `batch_cooking.termine` | deduit l'inventaire et notifie le resultat |
-| `stock.modifie` | invalide les caches courses et verifie les seuils |
+## Exemples de flux réactifs
+
+| Événement | Réaction automatique |
+|-----------|---------------------|
+| `jardin.recolte` | Invalidation cache recettes/planning/suggestions |
+| `energie.anomalie` | Création tâche entretien |
+| `budget.depassement` | Invalidation dashboard + déclenchement agent proactif |
+| `document.echeance_proche` | Notification ntfy |
+| `batch_cooking.termine` | Déduction inventaire + notification |
+| `stock.modifie` | Invalidation cache courses + vérification seuil |
+
+---
 
 ## API admin
 
 ```http
+# Consulter les derniers événements
 GET /api/v1/admin/events?limite=30&type_evenement=recette.*
 
+# Déclencher un événement manuellement (test)
 POST /api/v1/admin/events/trigger
 {
   "type_evenement": "jardin.recolte",
@@ -122,15 +132,19 @@ POST /api/v1/admin/events/trigger
 }
 ```
 
-## Demarrage
+---
 
-Les subscribers sont enregistres au bootstrap via `enregistrer_subscribers()`.
-L'operation est idempotente et peut etre relancee sans doublonner le registre.
+## Démarrage
+
+Les subscribers sont enregistrés au bootstrap via `enregistrer_subscribers()`.
+La fonction est idempotente.
+
+---
 
 ## Bonnes pratiques
 
-- emettre des evenements metier explicites sous la forme `module.action`
-- garder les handlers resilients et non bloquants
-- utiliser les wildcards pour les besoins transverses
-- deplacer les actions lourdes en tache asynchrone ou en job planifie
-- conserver les priorites implicites cache > metier > audit
+- Émettre des événements métier explicites (`module.action`)
+- Garder les handlers résilients (never fail the bus — tout wrappé en `try/except`)
+- Utiliser des wildcard patterns (`budget.*`) pour les comportements transverses
+- Mettre les actions lourdes en asynchrone ou en job planifié
+- Priorités : cache invalidation (10) > métier (5) > audit (0)

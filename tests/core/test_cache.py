@@ -471,3 +471,150 @@ class TestAvecCacheDecorator:
         result2 = ma_fonction()
         assert result2 == "résultat"
         assert call_count == 1  # Pas réexécuté
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS CACHE EDGE CASES (Phase A - A5.4)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestCacheEdgeCases:
+    """Tests edge cases pour le cache multi-niveaux."""
+
+    def test_cache_none_value(self):
+        """Le cache stocke None (miss par défaut, ne lève pas d'exception)."""
+        from src.core.caching.orchestrator import obtenir_cache
+
+        cache = obtenir_cache()
+        cache.set("key_none", None, ttl=300)
+        result = cache.get("key_none")
+        # None est une valeur valide ou retourne le default
+        assert result is None
+
+    def test_cache_cle_vide(self):
+        """Le cache gère les clés vides."""
+        from src.core.caching.orchestrator import obtenir_cache
+
+        cache = obtenir_cache()
+        cache.set("", "valeur", ttl=300)
+        result = cache.get("")
+        assert result == "valeur"
+
+    def test_cache_valeur_complexe(self):
+        """Le cache stocke des structures complexes (dict imbriqué)."""
+        from src.core.caching.orchestrator import obtenir_cache
+
+        cache = obtenir_cache()
+        data = {
+            "recettes": [{"id": 1, "nom": "Tarte"}, {"id": 2, "nom": "Quiche"}],
+            "total": 2,
+            "metadata": {"page": 1},
+        }
+        cache.set("complex", data, ttl=300)
+        result = cache.get("complex")
+        assert result == data
+        assert result["recettes"][0]["nom"] == "Tarte"
+
+    def test_cache_ttl_court_expire(self):
+        """Les entrées avec TTL court expirent."""
+        from src.core.caching.orchestrator import obtenir_cache
+
+        cache = obtenir_cache()
+        cache.set("ephemere", "valeur", ttl=1)
+        time.sleep(1.5)
+        result = cache.get("ephemere")
+        assert result is None
+
+    def test_invalidation_par_pattern_selectif(self):
+        """L'invalidation par pattern ne touche que les clés matchées."""
+        from src.core.caching.orchestrator import obtenir_cache
+
+        cache = obtenir_cache()
+        cache.set("recette:1", "A", ttl=300)
+        cache.set("recette:2", "B", ttl=300)
+        cache.set("stock:1", "C", ttl=300)
+
+        cache.invalidate(pattern="recette:")
+
+        assert cache.get("recette:1") is None
+        assert cache.get("recette:2") is None
+        assert cache.get("stock:1") == "C"
+
+    def test_invalidation_par_tags(self):
+        """L'invalidation par tags supprime les bonnes entrées."""
+        from src.core.caching.orchestrator import obtenir_cache
+
+        cache = obtenir_cache()
+        cache.set("item1", "A", ttl=300, tags=["cuisine"])
+        cache.set("item2", "B", ttl=300, tags=["maison"])
+        cache.set("item3", "C", ttl=300, tags=["cuisine", "maison"])
+
+        cache.invalidate(tags=["cuisine"])
+
+        assert cache.get("item1") is None
+        assert cache.get("item2") == "B"
+        assert cache.get("item3") is None
+
+    def test_statistiques_apres_operations(self):
+        """Les statistiques reflètent les opérations effectuées."""
+        from src.core.caching.orchestrator import obtenir_cache
+
+        cache = obtenir_cache()
+
+        # Quelques opérations
+        cache.set("stat_test", "valeur", ttl=300)
+        cache.get("stat_test")  # hit
+        cache.get("inexistant")  # miss
+
+        stats = cache.obtenir_statistiques()
+        assert isinstance(stats, dict)
+        assert "l1_hits" in stats
+        assert "misses" in stats
+        assert "hit_rate" in stats
+        # Au moins 1 write (le set)
+        assert stats.get("writes", 0) >= 1
+
+
+class TestAvecCacheDecoratorEdgeCases:
+    """Tests edge cases pour le décorateur @avec_cache."""
+
+    def test_avec_cache_args_differents(self):
+        """Le cache différencie les appels avec args différents."""
+        from src.core.decorators import avec_cache
+
+        call_count = 0
+
+        @avec_cache(ttl=300)
+        def calculer(x, y):
+            nonlocal call_count
+            call_count += 1
+            return x + y
+
+        assert calculer(1, 2) == 3
+        assert calculer(3, 4) == 7
+        assert call_count == 2
+
+        # Même args = cache hit
+        assert calculer(1, 2) == 3
+        assert call_count == 2
+
+    def test_avec_cache_exception_non_cachee(self):
+        """Les exceptions ne sont pas cachées."""
+        from src.core.decorators import avec_cache
+
+        call_count = 0
+
+        @avec_cache(ttl=300)
+        def failing():
+            nonlocal call_count
+            call_count += 1
+            raise ValueError("Erreur test")
+
+        with pytest.raises(ValueError):
+            failing()
+        assert call_count == 1
+
+        # Réessai = réexécution (pas en cache)
+        with pytest.raises(ValueError):
+            failing()
+        assert call_count == 2

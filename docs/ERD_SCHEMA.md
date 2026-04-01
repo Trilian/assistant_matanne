@@ -1,34 +1,34 @@
-﻿# ?? Sch?ma ERD - Mod?les de Donn?es Assistant Matanne
+﻿# 📊 Schéma ERD - Modèles de Données Assistant Matanne
 
 > Diagramme Entity-Relationship des tables SQLAlchemy
-> Mise ? jour Sprint H: 31 mars 2026
+> Mise à jour Sprint H: 31 mars 2026
 
-## R?f?rence Sprint H
+## Référence Sprint H
 
-- Source de v?rit? SQL: `sql/schema/*.sql` (structure modulaire SQL-first)
+- Source de vérité SQL: `sql/schema/*.sql` (structure modulaire SQL-first)
 - Nombre de tables cible: 143
-- Ce document sert de vue fonctionnelle par domaines; la validation finale passe par le sch?ma SQL modulaire
+- Ce document sert de vue fonctionnelle par domaines; la validation finale passe par le schéma SQL modulaire
 
 Validation phase 10 (1 avril 2026):
 
-- 143 tables ORM d?tect?es dans `src/core/models/*.py` (hors `mixins.py`)
+- 143 tables ORM détectées dans `src/core/models/*.py` (hors `mixins.py`)
 - alignement maintenu avec `sql/schema/*.sql`
 
-### Proc?dure de rafra?chissement
+### Procédure de rafraîchissement
 
-1. Mettre ? jour les fichiers sous `sql/schema/`
-2. R?g?n?rer `sql/INIT_COMPLET.sql` via `scripts/db/regenerate_init.py`
-3. V?rifier l'alignement ORM (`src/core/models/`)
-4. Mettre ? jour ce document (sections impact?es + relations)
-5. Contr?ler les index et cl?s ?trang?res avec `docs/guides/DATABASE_INDEXES.md`
+1. Mettre à jour les fichiers sous `sql/schema/`
+2. Régénérer `sql/INIT_COMPLET.sql` via `scripts/db/regenerate_init.py`
+3. Vérifier l'alignement ORM (`src/core/models/`)
+4. Mettre à jour ce document (sections impactées + relations)
+5. Contrôler les index et clés étrangères avec `docs/guides/DATABASE_INDEXES.md`
 
 ## Vue d'ensemble
 
 ```mermaid
 erDiagram
-    %% ---------------------------------------------------
-    %% CUISINE - Recettes et Ingr?dients
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
+    %% CUISINE - Recettes et Ingrédients
+    %% ═══════════════════════════════════════════════════
 
     Ingredient {
         int id PK
@@ -81,13 +81,13 @@ erDiagram
     }
 
     Recette ||--o{ RecetteIngredient : "contient"
-    Ingredient ||--o{ RecetteIngredient : "utilis?_dans"
-    Recette ||--o{ EtapeRecette : "a_?tapes"
+    Ingredient ||--o{ RecetteIngredient : "utilisé_dans"
+    Recette ||--o{ EtapeRecette : "a_étapes"
     Recette ||--o{ VersionRecette : "a_versions"
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% INVENTAIRE
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     ArticleInventaire {
         int id PK
@@ -111,9 +111,9 @@ erDiagram
     Ingredient ||--o{ ArticleInventaire : "en_stock"
     ArticleInventaire ||--o{ HistoriqueInventaire : "historique"
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% COURSES
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     ArticleCourses {
         int id PK
@@ -143,9 +143,9 @@ erDiagram
 
     ModeleCourses ||--o{ ArticleModele : "contient"
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% PLANNING
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     Planning {
         int id PK
@@ -176,11 +176,11 @@ erDiagram
     }
 
     Planning ||--o{ Repas : "contient"
-    Recette ||--o{ Repas : "planifi?_dans"
+    Recette ||--o{ Repas : "planifié_dans"
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% BATCH COOKING
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     SessionBatchCooking {
         int id PK
@@ -209,27 +209,27 @@ erDiagram
         date date_peremption
     }
 
-    SessionBatchCooking ||--o{ EtapeBatchCooking : "?tapes"
-    SessionBatchCooking ||--o{ PreparationBatch : "pr?parations"
-    Recette ||--o{ EtapeBatchCooking : "utilis?e"
-    Recette ||--o{ PreparationBatch : "pr?par?e"
+    SessionBatchCooking ||--o{ EtapeBatchCooking : "étapes"
+    SessionBatchCooking ||--o{ PreparationBatch : "préparations"
+    Recette ||--o{ EtapeBatchCooking : "utilisée"
+    Recette ||--o{ PreparationBatch : "préparée"
 ```
 
 ---
 
 ## Validation Sprint H
 
-- V?rification manuelle: alignement avec l'organisation SQL modulaire (`sql/schema/`)
-- R?f?rence migration: `docs/MIGRATION_GUIDE.md`
-- R?f?rence performances/index: `docs/guides/DATABASE_INDEXES.md`
+- Vérification manuelle: alignement avec l'organisation SQL modulaire (`sql/schema/`)
+- Référence migration: `docs/MIGRATION_GUIDE.md`
+- Référence performances/index: `docs/guides/DATABASE_INDEXES.md`
 
 ## Famille & Utilisateurs
 
 ```mermaid
 erDiagram
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% UTILISATEURS
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     UserProfile {
         int id PK
@@ -280,13 +280,13 @@ erDiagram
     }
 
     UserProfile ||--o| GarminToken : "token_garmin"
-    UserProfile ||--o{ GarminActivity : "activit?s"
-    UserProfile ||--o{ GarminDailySummary : "r?sum?s"
+    UserProfile ||--o{ GarminActivity : "activités"
+    UserProfile ||--o{ GarminDailySummary : "résumés"
     UserProfile ||--o{ FoodLog : "journal_alimentaire"
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% FAMILLE
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     ChildProfile {
         int id PK
@@ -334,11 +334,11 @@ erDiagram
         boolean achete
     }
 
-    ChildProfile ||--o{ Milestone : "?tapes_dev"
+    ChildProfile ||--o{ Milestone : "étapes_dev"
 
-    %% ---------------------------------------------------
-    %% PR?F?RENCES & APPRENTISSAGE IA
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
+    %% PRÉFÉRENCES & APPRENTISSAGE IA
+    %% ═══════════════════════════════════════════════════
 
     UserPreference {
         int id PK
@@ -364,9 +364,9 @@ erDiagram
 
 ```mermaid
 erDiagram
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% PROJETS
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     Project {
         int id PK
@@ -388,11 +388,11 @@ erDiagram
         date date_echeance
     }
 
-    Project ||--o{ ProjectTask : "t?ches"
+    Project ||--o{ ProjectTask : "tâches"
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% ROUTINES
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     Routine {
         int id PK
@@ -410,11 +410,11 @@ erDiagram
         int duree_minutes
     }
 
-    Routine ||--o{ RoutineTask : "t?ches"
+    Routine ||--o{ RoutineTask : "tâches"
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% JARDIN
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     GardenZone {
         int id PK
@@ -446,9 +446,9 @@ erDiagram
     GardenZone ||--o{ GardenItem : "plantes"
     GardenItem ||--o{ GardenLog : "journal"
 
-    %% ---------------------------------------------------
-    %% MEUBLES & D?PENSES
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
+    %% MEUBLES & DÉPENSES
+    %% ═══════════════════════════════════════════════════
 
     Meuble {
         int id PK
@@ -500,9 +500,9 @@ erDiagram
         date date_realisation
     }
 
-    %% ---------------------------------------------------
-    %% DIAGNOSTICS & ESTIMATION IMMOBILI?RE
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
+    %% DIAGNOSTICS & ESTIMATION IMMOBILIÈRE
+    %% ═══════════════════════════════════════════════════
 
     DiagnosticMaison {
         int id PK
@@ -550,9 +550,9 @@ erDiagram
         datetime updated_at
     }
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% CONTRATS MAISON
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     Contrat {
         int id PK
@@ -582,9 +582,9 @@ erDiagram
         datetime updated_at
     }
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% ARTISANS & INTERVENTIONS
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     Artisan {
         int id PK
@@ -626,9 +626,9 @@ erDiagram
 
     Artisan ||--o{ InterventionArtisan : "interventions"
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% GARANTIES & SAV
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     Garantie {
         int id PK
@@ -670,16 +670,16 @@ erDiagram
     }
 
     Garantie ||--o{ IncidentSAV : "incidents"
-    Artisan ||--o{ IncidentSAV : "r?parations"
+    Artisan ||--o{ IncidentSAV : "réparations"
 ```
 
-## Notifications & Int?grations
+## Notifications & Intégrations
 
 ```mermaid
 erDiagram
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% NOTIFICATIONS
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     PushSubscription {
         int id PK
@@ -698,9 +698,9 @@ erDiagram
         string heure_envoi
     }
 
-    %% ---------------------------------------------------
-    %% M?T?O
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
+    %% MÉTÉO
+    %% ═══════════════════════════════════════════════════
 
     ConfigMeteo {
         int id PK
@@ -723,9 +723,9 @@ erDiagram
 
     ConfigMeteo ||--o{ AlerteMeteo : "alertes"
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% CALENDRIER EXTERNE
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     CalendrierExterne {
         int id PK
@@ -746,11 +746,11 @@ erDiagram
         string sync_direction
     }
 
-    CalendrierExterne ||--o{ EvenementCalendrier : "?v?nements"
+    CalendrierExterne ||--o{ EvenementCalendrier : "événements"
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% BACKUP
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     Backup {
         int id PK
@@ -767,9 +767,9 @@ erDiagram
 
 ```mermaid
 erDiagram
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% PARIS SPORTIFS
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     Equipe {
         int id PK
@@ -804,9 +804,9 @@ erDiagram
     Equipe ||--o{ Match : "exterieur"
     Match ||--o{ PariSportif : "paris"
 
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
     %% LOTO
-    %% ---------------------------------------------------
+    %% ═══════════════════════════════════════════════════
 
     TirageLoto {
         int id PK
@@ -847,7 +847,7 @@ erDiagram
 
 ---
 
-## L?gende
+## Légende
 
 | Symbole  | Signification |
 | -------- | ------------- | ----- | ----------- | --- | ---------- |
@@ -860,7 +860,7 @@ erDiagram
 
 ## Statistiques
 
-| Cat?gorie         | Tables  | Relations |
+| Catégorie         | Tables  | Relations |
 | ----------------- | ------- | --------- |
 | **Cuisine**       | 6       | 5         |
 | **Inventaire**    | 2       | 2         |
@@ -878,25 +878,25 @@ erDiagram
 
 ## Addendum Phase 3
 
-Cette section synth?tise les ajouts de p?rim?tre issus de la phase 3 du planning.
+Cette section synthétise les ajouts de périmètre issus de la phase 3 du planning.
 
 ### Habitat
 
-- `PlanHabitat` : plan import?, r?f?rence visuelle, rattachement sc?nario.
-- `PieceHabitat` : segmentation des pi?ces (nom, type, surface, position).
-- `ModificationPlanHabitat` : variantes propos?es et transformations IA.
-- `ProjetDecoHabitat` : projets d?co par pi?ce et budget pr?visionnel.
-- `CritereScenarioHabitat` : pond?ration multicrit?re pour comparaison de sc?narios.
+- `PlanHabitat` : plan importé, référence visuelle, rattachement scénario.
+- `PieceHabitat` : segmentation des pièces (nom, type, surface, position).
+- `ModificationPlanHabitat` : variantes proposées et transformations IA.
+- `ProjetDecoHabitat` : projets déco par pièce et budget prévisionnel.
+- `CritereScenarioHabitat` : pondération multicritère pour comparaison de scénarios.
 
-### Garmin / sant?
+### Garmin / santé
 
-- `GarminToken` : credentials OAuth1 li?s au profil utilisateur.
-- `ActiviteGarmin` : activit?s synchronis?es (distance, dur?e, calories).
-- `ResumeQuotidienGarmin` : pas, calories, sommeil agr?g?s par jour.
+- `GarminToken` : credentials OAuth1 liés au profil utilisateur.
+- `ActiviteGarmin` : activités synchronisées (distance, durée, calories).
+- `ResumeQuotidienGarmin` : pas, calories, sommeil agrégés par jour.
 
 ### Gamification
 
 - `PointsUtilisateur` : snapshot hebdomadaire sport/alimentation/anti-gaspi.
-- `BadgeUtilisateur` : badges calcul?s ? partir des r?gles de points.
+- `BadgeUtilisateur` : badges calculés à partir des règles de points.
 
-Note: les noms exacts de colonnes et contraintes restent pilot?s par les mod?les SQLAlchemy et `sql/INIT_COMPLET.sql`.
+Note: les noms exacts de colonnes et contraintes restent pilotés par les modèles SQLAlchemy et `sql/INIT_COMPLET.sql`.

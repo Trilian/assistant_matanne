@@ -131,3 +131,38 @@ BEGIN
             'Charge quotidienne estimée pour les 7 prochains jours.';
     END IF;
 END $$;
+
+
+-- ============================================================================
+-- Phase A — Index supplémentaires sur colonnes fréquentes
+-- ============================================================================
+-- Audit A4.4 : colonnes user_id, date, statut fréquemment filtrées
+
+-- activites_famille : recherche par user_id + date
+CREATE INDEX IF NOT EXISTS ix_activites_famille_user_date
+    ON activites_famille(user_id, date_prevue DESC);
+
+-- depenses : recherche par user_id + mois
+CREATE INDEX IF NOT EXISTS ix_depenses_user_date
+    ON depenses(user_id, date_depense DESC);
+
+-- notes : recherche par user_id + date
+CREATE INDEX IF NOT EXISTS ix_notes_user_cree_le
+    ON notes(user_id, cree_le DESC);
+
+-- projets_maison : filtrage par statut
+CREATE INDEX IF NOT EXISTS ix_projets_maison_statut
+    ON projets_maison(statut);
+
+-- entretien_maison : prochaine_date pour les alertes
+CREATE INDEX IF NOT EXISTS ix_entretien_maison_prochaine_date
+    ON entretien_maison(prochaine_date)
+    WHERE prochaine_date IS NOT NULL;
+
+-- journal_bord : recherche par user_id + date
+CREATE INDEX IF NOT EXISTS ix_journal_bord_user_date
+    ON journal_bord(user_id, date_entree DESC);
+
+-- etat_persistant : recherche par namespace + user_id (très fréquent)
+CREATE INDEX IF NOT EXISTS ix_etat_persistant_namespace_user
+    ON etat_persistant(namespace, user_id);
