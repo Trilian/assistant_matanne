@@ -20,11 +20,11 @@ import { toast } from 'sonner'
 
 /**
  * Page
- PrÃ©fÃ©rences Notifications (E.4)
+ Preferences Notifications (E.4)
  * 
  * Configure:
- * - Canal prÃ©fÃ©rÃ© (push, email, ntfy, whatsapp)
- * - Canaux par catÃ©gorie (rappels, alertes, rÃ©sumÃ©s)
+ * - Canal prefere (push, email, ntfy, whatsapp)
+ * - Canaux par categorie (rappels, alertes, resumes)
  * - Heures silencieuses
  * - Max notifs/heure
  */
@@ -60,7 +60,7 @@ const categories: Array<{ id: CategorieNotification; label: string; description:
 export default function PreferencesNotificationsPage() {
   const [isEditing, setIsEditing] = useState(false)
 
-  // RÃ©cupÃ©rer les prÃ©fÃ©rences actuelles
+  // Recuperer les preferences actuelles
   const { data: currentPrefs, isLoading } = useQuery({
     queryKey: ['notification-preferences'],
     queryFn: async () => {
@@ -76,14 +76,14 @@ export default function PreferencesNotificationsPage() {
       return response.data
     },
     onSuccess: () => {
-      toast.success('PrÃ©fÃ©rences mises Ã  jour', {
-        description: 'Vos prÃ©fÃ©rences de notifications ont Ã©tÃ© sauvegardÃ©es.',
+      toast.success('Preferences mises a jour', {
+        description: 'Vos preferences de notifications ont ete sauvegardees.',
       })
       setIsEditing(false)
     },
     onError: () => {
       toast.error('Erreur', {
-        description: 'Impossible de sauvegarder les prÃ©fÃ©rences.',
+        description: 'Impossible de sauvegarder les preferences.',
       })
     },
   })
@@ -111,18 +111,18 @@ export default function PreferencesNotificationsPage() {
     <div className="space-y-6 p-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">PrÃ©fÃ©rences Notifications</h1>
+        <h1 className="text-3xl font-bold">Preferences Notifications</h1>
         <p className="text-muted-foreground mt-2">
-          Configurez comment et oÃ¹ recevoir vos notifications (E.4)
+          Configurez comment et ou recevoir vos notifications (E.4)
         </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Canal prÃ©fÃ©rÃ© */}
+        {/* Canal prefere */}
         <Card>
           <CardHeader>
-            <CardTitle>Canal prÃ©fÃ©rÃ©</CardTitle>
-            <CardDescription>Choisissez votre canal de notification par dÃ©faut</CardDescription>
+            <CardTitle>Canal prefere</CardTitle>
+            <CardDescription>Choisissez votre canal de notification par defaut</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -145,11 +145,11 @@ export default function PreferencesNotificationsPage() {
           </CardContent>
         </Card>
 
-        {/* Canaux par catÃ©gorie */}
+        {/* Canaux par categorie */}
         <Card>
           <CardHeader>
-            <CardTitle>Canaux par catÃ©gorie</CardTitle>
-            <CardDescription>SÃ©lectionnez les canaux pour chaque type de notification</CardDescription>
+            <CardTitle>Canaux par categorie</CardTitle>
+            <CardDescription>Selectionnez les canaux pour chaque type de notification</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {categories.map((cat) => (
@@ -179,12 +179,12 @@ export default function PreferencesNotificationsPage() {
           <CardHeader>
             <CardTitle>Heures silencieuses</CardTitle>
             <CardDescription>
-              Pas de notifications non-urgentes pendant ces heures (gÃ©nÃ©ralement 22h Ã  7h)
+              Pas de notifications non urgentes pendant ces heures (generalement 22h a 7h)
             </CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="quiet_debut">DÃ©but</Label>
+              <Label htmlFor="quiet_debut">Debut</Label>
               <input
                 id="quiet_debut"
                 type="time"
@@ -230,12 +230,12 @@ export default function PreferencesNotificationsPage() {
           <div className="flex gap-3">
             <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
             <div className="space-y-2 text-sm">
-              <p className="font-semibold text-blue-900">ðŸ’¡ Conseil</p>
+              <p className="font-semibold text-blue-900">Conseil</p>
               <ul className="space-y-1 text-blue-800 list-disc list-inside">
-                <li>Les alertes (critiques) sont toujours envoyÃ©es en prioritÃ©</li>
-                <li>Les canaux multiples crÃ©ent une cascade de fallback</li>
-                <li>WhatsApp pour les notifications temps rÃ©el (courses, Jules, rÃ©sultats)</li>
-                <li>Email pour les rÃ©sumÃ©s et rapports importants</li>
+                <li>Les alertes critiques sont toujours envoyees en priorite</li>
+                <li>Les canaux multiples creent une cascade de fallback</li>
+                <li>WhatsApp pour les notifications temps reel (courses, Jules, resultats)</li>
+                <li>Email pour les resumes et rapports importants</li>
               </ul>
             </div>
           </div>

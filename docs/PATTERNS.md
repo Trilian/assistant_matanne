@@ -1,8 +1,8 @@
-# Patterns d'Architecture — src/core
+﻿# Patterns d'Architecture â€” src/core
 
-Ce document présente les patterns **actifs** utilisés dans le core de l'application avec exemples d'usage.
+Ce document prÃ©sente les patterns **actifs** utilisÃ©s dans le core de l'application avec exemples d'usage.
 
-## Table des matières
+## Table des matiÃ¨res
 
 1. [Resilience Policies](#resilience-policies)
 2. [Cache Multi-Niveaux](#cache-multi-niveaux)
@@ -18,7 +18,7 @@ Ce document présente les patterns **actifs** utilisés dans le core de l'applic
 
 **Fichier**: `src/core/resilience/policies.py`
 
-Politiques de résilience composables. `executer()` retourne `T` directement ou lève une exception.
+Politiques de rÃ©silience composables. `executer()` retourne `T` directement ou lÃ¨ve une exception.
 
 ### Politiques disponibles
 
@@ -49,11 +49,11 @@ fallback = FallbackPolicy(fallback_value=[])
 # Combiner avec +
 politique = RetryPolicy(3) + TimeoutPolicy(30) + BulkheadPolicy(5)
 
-# Appliquer — retourne T ou lève une exception
+# Appliquer â€” retourne T ou lÃ¨ve une exception
 result = politique.executer(lambda: appel_risque())
 ```
 
-### Pré-configurées
+### PrÃ©-configurÃ©es
 
 ```python
 from src.core.resilience import politique_ia, politique_base_de_donnees, politique_api_externe
@@ -61,7 +61,7 @@ from src.core.resilience import politique_ia, politique_base_de_donnees, politiq
 result = politique_ia().executer(lambda: client.generer(...))
 ```
 
-### Décorateur @avec_resilience
+### DÃ©corateur @avec_resilience
 
 ```python
 from src.core.decorators import avec_resilience
@@ -77,9 +77,9 @@ def appel_api_externe():
 
 **Fichiers**: `src/core/caching/`
 
-Cache L1 (mémoire) → L2 (session) → L3 (fichier).
+Cache L1 (mÃ©moire) â†’ L2 (session) â†’ L3 (fichier).
 
-### Décorateur unifié
+### DÃ©corateur unifiÃ©
 
 ```python
 from src.core.decorators import avec_cache
@@ -115,10 +115,10 @@ Cache.invalider(pattern="charger_")
 
 ### Politique de cache
 
-| Couche | Décorateur | Raison |
-|--------|-----------|--------|
-| Services/métier | `@avec_cache` | Multi-niveaux, testable indépendamment |
-| Frontend | TanStack Query | Cache côté client (staleTime, gcTime) |
+| Couche | DÃ©corateur | Raison |
+| -------- | ----------- | -------- |
+| Services/mÃ©tier | `@avec_cache` | Multi-niveaux, testable indÃ©pendamment |
+| Frontend | TanStack Query | Cache cÃ´tÃ© client (staleTime, gcTime) |
 | HTTP | Middleware ETag | Cache navigateur automatique |
 
 ---
@@ -127,32 +127,32 @@ Cache.invalider(pattern="charger_")
 
 **Fichier**: `src/core/ai/circuit_breaker.py`
 
-Protection contre les cascades d'échecs.
+Protection contre les cascades d'Ã©checs.
 
-### États
+### Ã‰tats
 
-- **FERMÉ**: Fonctionnement normal
-- **OUVERT**: Échecs → appels bloqués
-- **SEMI-OUVERT**: Test de récupération
+- **FERMÃ‰**: Fonctionnement normal
+- **OUVERT**: Ã‰checs â†’ appels bloquÃ©s
+- **SEMI-OUVERT**: Test de rÃ©cupÃ©ration
 
 ### Usage
 
 ```python
 from src.core.ai import CircuitBreaker, obtenir_circuit
 
-# Obtenir ou créer un circuit
+# Obtenir ou crÃ©er un circuit
 circuit = obtenir_circuit("mistral_api")
 
-# Exécuter avec protection
+# ExÃ©cuter avec protection
 result = circuit.executer(lambda: api.call())
 
-# Vérifier l'état
+# VÃ©rifier l'Ã©tat
 if circuit.est_disponible():
     # OK pour appeler
     pass
 ```
 
-### Décorateur
+### DÃ©corateur
 
 ```python
 from src.core.ai import avec_circuit_breaker
@@ -175,13 +175,13 @@ from src.services.core.registry import service_factory
 
 @service_factory("recettes", tags={"cuisine", "ia"})
 def get_recette_service() -> RecetteService:
-    """Factory singleton géré par le registre."""
+    """Factory singleton gÃ©rÃ© par le registre."""
     return RecetteService()
 
-# Accès direct (singleton)
+# AccÃ¨s direct (singleton)
 service = get_recette_service()
 
-# Accès via le registre
+# AccÃ¨s via le registre
 from src.services.core.registry import obtenir_registre
 service = obtenir_registre().obtenir("recettes")
 ```
@@ -198,7 +198,7 @@ async def lister_recettes(user: dict = Depends(require_auth)):
     ...
 ```
 
-> **Important**: Les services sont des singletons instanciés au premier appel via `@service_factory`.
+> **Important**: Les services sont des singletons instanciÃ©s au premier appel via `@service_factory`.
 
 ---
 
@@ -206,7 +206,7 @@ async def lister_recettes(user: dict = Depends(require_auth)):
 
 **Fichiers**: `src/services/core/events/`
 
-### Bus d'événements
+### Bus d'Ã©vÃ©nements
 
 ```python
 from src.services.core.events.bus import obtenir_bus
@@ -217,7 +217,7 @@ bus = obtenir_bus()
 bus.on("recette.creee", lambda data: logger.info(f"Recette: {data['nom']}"))
 bus.on("recette.*", lambda data: audit_log(data))
 
-# Émettre
+# Ã‰mettre
 bus.emettre("recette.creee", {"nom": "Tarte", "id": 42})
 ```
 
@@ -228,32 +228,32 @@ bus.emettre("recette.creee", {"nom": "Tarte", "id": 42})
 ### 1. Utiliser @avec_resilience pour les appels externes
 
 ```python
-# ❌ Mauvais — pas de retry, pas de timeout
+# âŒ Mauvais â€” pas de retry, pas de timeout
 def fetch_api():
     return httpx.get("https://api.foo.com").json()
 
-# ✅ Bon — retry + timeout + fallback
+# âœ… Bon â€” retry + timeout + fallback
 @avec_resilience(retry=2, timeout_s=30, fallback=None)
 def fetch_api():
     return httpx.get("https://api.foo.com").json()
 ```
 
-### 2. Unifier la stratégie de cache
+### 2. Unifier la stratÃ©gie de cache
 
 ```python
-# ✅ Bon (dans le service avec avec_cache)
+# âœ… Bon (dans le service avec avec_cache)
 @avec_cache(ttl=300)
 def charger_donnees():
     return db.query(Recette).all()
 
-# ✅ Invalider manuellement par tag
+# âœ… Invalider manuellement par tag
 cache.invalider_par_tag("recettes")
 ```
 
 ### 3. Utiliser @service_factory pour les singletons
 
 ```python
-# ❌ Mauvais — singleton manuel
+# âŒ Mauvais â€” singleton manuel
 _instance = None
 def get_service():
     global _instance
@@ -261,7 +261,7 @@ def get_service():
         _instance = MyService()
     return _instance
 
-# ✅ Bon — singleton via registre
+# âœ… Bon â€” singleton via registre
 @service_factory("mon_service")
 def get_service():
     return MyService()
@@ -273,10 +273,10 @@ def get_service():
 
 ### Mock DB via `db=` parameter
 
-Le décorateur `@avec_session_db` injecte `db: Session`, mais peut être contourné:
+Le dÃ©corateur `@avec_session_db` injecte `db: Session`, mais peut Ãªtre contournÃ©:
 
 ```python
-# Test unitaire — passer la session directement
+# Test unitaire â€” passer la session directement
 def test_create_recipe(test_db: Session):
     service = RecetteService()
     result = service.creer_recette({"nom": "Tarte"}, db=test_db)
@@ -302,101 +302,101 @@ async def test_lister_articles(mock_factory, client):
 ### Fixtures DB (conftest.py)
 
 ```python
-# conftest.py fournit des fixtures SQLite en mémoire
+# conftest.py fournit des fixtures SQLite en mÃ©moire
 @pytest.fixture
 def test_db():
-    """Session SQLAlchemy isolée — rollback automatique après le test"""
+    """Session SQLAlchemy isolÃ©e â€” rollback automatique aprÃ¨s le test"""
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     with Session(engine) as session:
         yield session
 ```
 
-> **Important**: Après refactoring de tests, toujours supprimer les `__pycache__/` pour éviter
-> que Python charge d'anciens `.pyc` avec des patches obsolètes.
+> **Important**: AprÃ¨s refactoring de tests, toujours supprimer les `__pycache__/` pour Ã©viter
+> que Python charge d'anciens `.pyc` avec des patches obsolÃ¨tes.
 
 ---
 
-## Patterns supprimés
+## Patterns supprimÃ©s
 
-Les patterns suivants ont été évalués et supprimés du codebase (dead code, inutiles pour cette application):
+Les patterns suivants ont Ã©tÃ© Ã©valuÃ©s et supprimÃ©s du codebase (dead code, inutiles pour cette application):
 
 | Pattern | Raison de suppression |
-|---------|----------------------|
+| --------- | ---------------------- |
 | **Result Monad** (`src/core/result/`) | Zero callers en production. Les exceptions Python standard suffisent. |
 | **Repository Pattern** (`src/core/repository.py`) | Abstraction inutile au-dessus de SQLAlchemy ORM. |
-| **Specification Pattern** (`src/core/specifications.py`) | Jamais utilisé. SQLAlchemy `.filter()` suffit. |
-| **Unit of Work** (`src/core/unit_of_work.py`) | Zero callers. `@avec_session_db` gère les transactions. |
+| **Specification Pattern** (`src/core/specifications.py`) | Jamais utilisÃ©. SQLAlchemy `.filter()` suffit. |
+| **Unit of Work** (`src/core/unit_of_work.py`) | Zero callers. `@avec_session_db` gÃ¨re les transactions. |
 | **IoC Container** (`src/core/container.py`) | Zero callers en production. `@service_factory` + registre suffisent. |
-| **Middleware Pipeline** (`src/core/middleware/`) | Zero callers. Le décorateur `@avec_resilience` remplace ce besoin. |
-| **CQRS** (`src/services/core/cqrs/`) | Zero callers. Pas de séparation lecture/écriture pour une app single-user. |
-| **UI v2.0** (DialogBuilder, FormBuilder, URL State) | Zero callers. Migré vers Next.js + shadcn/ui. |
+| **Middleware Pipeline** (`src/core/middleware/`) | Zero callers. Le dÃ©corateur `@avec_resilience` remplace ce besoin. |
+| **CQRS** (`src/services/core/cqrs/`) | Zero callers. Pas de sÃ©paration lecture/Ã©criture pour une app single-user. |
+| **UI v2.0** (DialogBuilder, FormBuilder, URL State) | Zero callers. MigrÃ© vers Next.js + shadcn/ui. |
 
 ---
 
 ## Voir aussi
-## Séparation des schémas Pydantic (H.8)
+## SÃ©paration des schÃ©mas Pydantic (H.8)
 
-Le projet dispose de **deux emplacements** pour les schémas Pydantic — chacun avec un rôle précis :
+Le projet dispose de **deux emplacements** pour les schÃ©mas Pydantic â€” chacun avec un rÃ´le prÃ©cis :
 
-### `src/api/schemas/` — Schémas de sérialisation API
+### `src/api/schemas/` â€” SchÃ©mas de sÃ©rialisation API
 
-**Rôle** : Valider et sérialiser les données à l'entrée/sortie de la couche HTTP.
+**RÃ´le** : Valider et sÃ©rialiser les donnÃ©es Ã  l'entrÃ©e/sortie de la couche HTTP.
 
 ```
 src/api/schemas/
-├── base.py          → BaseModel avec Config (alias_generator, populate_by_name)
-├── common.py        → ErrorResponse, ReponsePaginee[T], MessageResponse
-├── errors.py        → Constantes responses (REPONSES_CRUD_CREATION, etc.)
-├── recettes.py      → RecetteCreate, RecetteUpdate, RecetteResponse
-├── jeux.py          → AnalyseIARequest, GenererGrilleRequest, etc.
-└── ...
+â”œâ”€â”€ base.py          â†’ BaseModel avec Config (alias_generator, populate_by_name)
+â”œâ”€â”€ common.py        â†’ ErrorResponse, ReponsePaginee[T], MessageResponse
+â”œâ”€â”€ errors.py        â†’ Constantes responses (REPONSES_CRUD_CREATION, etc.)
+â”œâ”€â”€ recettes.py      â†’ RecetteCreate, RecetteUpdate, RecetteResponse
+â”œâ”€â”€ jeux.py          â†’ AnalyseIARequest, GenererGrilleRequest, etc.
+â””â”€â”€ ...
 ```
 
-**Règle** : Un schéma `*Response` ne doit pas contenir de logique métier. Il expose exactement
+**RÃ¨gle** : Un schÃ©ma `*Response` ne doit pas contenir de logique mÃ©tier. Il expose exactement
 ce que la route renvoie. Utiliser `model_validate(orm_obj)` (Pydantic v2) pour convertir depuis ORM.
 
-### `src/core/validation/schemas/` — Schémas de validation métier
+### `src/core/validation/schemas/` â€” SchÃ©mas de validation mÃ©tier
 
-**Rôle** : Valider les données de structure métier *indépendamment de la couche HTTP*.  
-Utiles dans les services, les imports de données, les scripts de seed.
+**RÃ´le** : Valider les donnÃ©es de structure mÃ©tier *indÃ©pendamment de la couche HTTP*.  
+Utiles dans les services, les imports de donnÃ©es, les scripts de seed.
 
 ```
 src/core/validation/schemas/
-├── _helpers.py     → Validators partagés (valider_date_future, etc.)
-├── recettes.py     → Validation stricte des recettes (règles métier)
-├── inventaire.py   → Validation inventaire
-├── courses.py      → Validation courses
-├── planning.py     → Validation planning
-├── famille.py      → Validation profils famille
-├── projets.py      → Validation projets maison
-└── profils.py      → Validation profils utilisateurs
+â”œâ”€â”€ _helpers.py     â†’ Validators partagÃ©s (valider_date_future, etc.)
+â”œâ”€â”€ recettes.py     â†’ Validation stricte des recettes (rÃ¨gles mÃ©tier)
+â”œâ”€â”€ inventaire.py   â†’ Validation inventaire
+â”œâ”€â”€ courses.py      â†’ Validation courses
+â”œâ”€â”€ planning.py     â†’ Validation planning
+â”œâ”€â”€ famille.py      â†’ Validation profils famille
+â”œâ”€â”€ projets.py      â†’ Validation projets maison
+â””â”€â”€ profils.py      â†’ Validation profils utilisateurs
 ```
 
-**Règle** : Les schémas ici ne dépendent PAS de FastAPI. Ils peuvent être instanciés
-depuis n'importe où (service, test, script). Utiliser `from src.core.validation.schemas.xxx import XxxSchema`.
+**RÃ¨gle** : Les schÃ©mas ici ne dÃ©pendent PAS de FastAPI. Ils peuvent Ãªtre instanciÃ©s
+depuis n'importe oÃ¹ (service, test, script). Utiliser `from src.core.validation.schemas.xxx import XxxSchema`.
 
-### Guide de décision — Où mettre un nouveau schéma ?
+### Guide de dÃ©cision â€” OÃ¹ mettre un nouveau schÃ©ma ?
 
 ```
-Nouvelle validation de données ?
-│
-├── Elle est utilisée UNIQUEMENT dans une route FastAPI (request body/response)
-│   → src/api/schemas/{domain}.py
-│
-├── Elle valide la logique métier independamment du transport HTTP
-│   → src/core/validation/schemas/{domain}.py
-│
-└── Elle est utilisée dans LES DEUX contextes
-    → Définir le schéma dans src/core/validation/schemas/{domain}.py
-    → Importer/hériter dans src/api/schemas/{domain}.py
-    → Éviter la duplication
+Nouvelle validation de donnÃ©es ?
+â”‚
+â”œâ”€â”€ Elle est utilisÃ©e UNIQUEMENT dans une route FastAPI (request body/response)
+â”‚   â†’ src/api/schemas/{domain}.py
+â”‚
+â”œâ”€â”€ Elle valide la logique mÃ©tier independamment du transport HTTP
+â”‚   â†’ src/core/validation/schemas/{domain}.py
+â”‚
+â””â”€â”€ Elle est utilisÃ©e dans LES DEUX contextes
+    â†’ DÃ©finir le schÃ©ma dans src/core/validation/schemas/{domain}.py
+    â†’ Importer/hÃ©riter dans src/api/schemas/{domain}.py
+    â†’ Ã‰viter la duplication
 ```
 
-### Pattern — Relation schémas API ↔ validation métier
+### Pattern â€” Relation schÃ©mas API â†” validation mÃ©tier
 
 ```python
-# src/core/validation/schemas/recettes.py  (règles métier réutilisables)
+# src/core/validation/schemas/recettes.py  (rÃ¨gles mÃ©tier rÃ©utilisables)
 from pydantic import BaseModel, Field, field_validator
 
 class RecetteBase(BaseModel):
@@ -408,7 +408,7 @@ class RecetteBase(BaseModel):
     def valider_nom(cls, v: str) -> str:
         return v.strip()
 
-# src/api/schemas/recettes.py  (schémas HTTP — hérite de la validation métier)
+# src/api/schemas/recettes.py  (schÃ©mas HTTP â€” hÃ©rite de la validation mÃ©tier)
 from src.core.validation.schemas.recettes import RecetteBase
 
 class RecetteCreate(RecetteBase):
@@ -416,7 +416,7 @@ class RecetteCreate(RecetteBase):
     ingredients: list[int] = []
 
 class RecetteResponse(RecetteBase):
-    """Réponse de GET /api/v1/recettes/{id}"""
+    """RÃ©ponse de GET /api/v1/recettes/{id}"""
     id: int
     cree_le: datetime
 
@@ -427,6 +427,6 @@ class RecetteResponse(RecetteBase):
 
 ## Voir aussi
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — Vue d'ensemble
-- [API_REFERENCE.md](API_REFERENCE.md) — Référence API
-- [SERVICES_REFERENCE.md](SERVICES_REFERENCE.md) — Référence services backend
+- [ARCHITECTURE.md](ARCHITECTURE.md) â€” Vue d'ensemble
+- [API_REFERENCE.md](API_REFERENCE.md) â€” RÃ©fÃ©rence API
+- [SERVICES_REFERENCE.md](SERVICES_REFERENCE.md) â€” RÃ©fÃ©rence services backend

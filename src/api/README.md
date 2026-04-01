@@ -1,20 +1,20 @@
-# API REST Assistant Matanne
+﻿# API REST Assistant Matanne
 
-API REST FastAPI pour l'accès programmatique aux fonctionnalités de l'Assistant Matanne.
+API REST FastAPI pour l'accÃ¨s programmatique aux fonctionnalitÃ©s de l'Assistant Matanne.
 
-## 🚀 Démarrage rapide
+## ðŸš€ DÃ©marrage rapide
 
-### Prérequis
+### PrÃ©requis
 
 ```bash
-# Installer les dépendances
+# Installer les dÃ©pendances
 pip install fastapi uvicorn[standard]
 ```
 
 ### Lancer le serveur
 
 ```bash
-# Mode développement avec rechargement automatique
+# Mode dÃ©veloppement avec rechargement automatique
 uvicorn src.api.main:app --reload --port 8000
 
 # Mode production
@@ -23,73 +23,73 @@ uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --workers 4
 
 ### Documentation interactive
 
-Une fois le serveur lancé:
+Une fois le serveur lancÃ©:
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
-## 📚 Endpoints disponibles
+## ðŸ“š Endpoints disponibles
 
-### Santé
+### SantÃ©
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
+| MÃ©thode | Endpoint | Description |
+| --------- | ---------- | ------------- |
 | GET | `/` | Information sur l'API |
-| GET | `/health` | Vérifie l'état de l'API et de la base de données |
+| GET | `/health` | VÃ©rifie l'Ã©tat de l'API et de la base de donnÃ©es |
 
 ### Recettes
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/api/v1/recettes` | Liste paginée des recettes |
-| GET | `/api/v1/recettes/{id}` | Détails d'une recette |
-| POST | `/api/v1/recettes` | Créer une recette |
-| PUT | `/api/v1/recettes/{id}` | Mettre à jour une recette |
+| MÃ©thode | Endpoint | Description |
+| --------- | ---------- | ------------- |
+| GET | `/api/v1/recettes` | Liste paginÃ©e des recettes |
+| GET | `/api/v1/recettes/{id}` | DÃ©tails d'une recette |
+| POST | `/api/v1/recettes` | CrÃ©er une recette |
+| PUT | `/api/v1/recettes/{id}` | Mettre Ã  jour une recette |
 | DELETE | `/api/v1/recettes/{id}` | Supprimer une recette |
 
-**Paramètres de filtrage:**
-- `page`: Numéro de page (défaut: 1)
-- `page_size`: Taille de page (défaut: 20, max: 100)
-- `categorie`: Filtrer par catégorie
+**ParamÃ¨tres de filtrage:**
+- `page`: NumÃ©ro de page (dÃ©faut: 1)
+- `page_size`: Taille de page (dÃ©faut: 20, max: 100)
+- `categorie`: Filtrer par catÃ©gorie
 - `search`: Recherche par nom
 
 ### Inventaire
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
+| MÃ©thode | Endpoint | Description |
+| --------- | ---------- | ------------- |
 | GET | `/api/v1/inventaire` | Liste de l'inventaire |
 | POST | `/api/v1/inventaire` | Ajouter un article |
 | GET | `/api/v1/inventaire/barcode/{code}` | Rechercher par code-barres |
 
-**Paramètres:**
+**ParamÃ¨tres:**
 - `expiring_soon`: Filtrer les articles qui expirent dans 7 jours
 
 ### Courses
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
+| MÃ©thode | Endpoint | Description |
+| --------- | ---------- | ------------- |
 | GET | `/api/v1/courses` | Listes de courses |
-| POST | `/api/v1/courses` | Créer une liste |
-| POST | `/api/v1/courses/{id}/items` | Ajouter un article à une liste |
+| POST | `/api/v1/courses` | CrÃ©er une liste |
+| POST | `/api/v1/courses/{id}/items` | Ajouter un article Ã  une liste |
 
 ### Planning
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
+| MÃ©thode | Endpoint | Description |
+| --------- | ---------- | ------------- |
 | GET | `/api/v1/planning/semaine` | Planning de la semaine |
 | POST | `/api/v1/planning/repas` | Ajouter un repas |
 
 ### Suggestions IA
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/api/v1/suggestions/recettes` | Suggestions basées sur l'inventaire et l'historique |
+| MÃ©thode | Endpoint | Description |
+| --------- | ---------- | ------------- |
+| GET | `/api/v1/suggestions/recettes` | Suggestions basÃ©es sur l'inventaire et l'historique |
 
-## 🔐 Authentification
+## ðŸ” Authentification
 
 L'API utilise des tokens JWT (JSON Web Tokens) pour l'authentification.
 
-### Mode développement
-En mode développement, un utilisateur par défaut est utilisé si aucun token n'est fourni.
+### Mode dÃ©veloppement
+En mode dÃ©veloppement, un utilisateur par dÃ©faut est utilisÃ© si aucun token n'est fourni.
 
 ### Mode production
 Ajoutez le header `Authorization` avec un token Bearer:
@@ -99,7 +99,7 @@ curl -H "Authorization: Bearer <votre-token>" \
      http://localhost:8000/api/v1/recettes
 ```
 
-## 📖 Exemples d'utilisation
+## ðŸ“– Exemples d'utilisation
 
 ### Python avec requests
 
@@ -117,7 +117,7 @@ response = requests.get(f"{BASE_URL}/recettes", params={
 recettes = response.json()
 print(f"Total: {recettes['total']} recettes")
 
-# Créer une recette
+# CrÃ©er une recette
 nouvelle_recette = {
     "nom": "Tarte aux pommes",
     "temps_preparation": 30,
@@ -125,19 +125,19 @@ nouvelle_recette = {
     "portions": 8,
     "categorie": "dessert",
     "ingredients": [
-        {"nom": "Pommes", "quantite": 6, "unite": "pièces"},
-        {"nom": "Pâte feuilletée", "quantite": 1, "unite": "rouleau"},
+        {"nom": "Pommes", "quantite": 6, "unite": "piÃ¨ces"},
+        {"nom": "PÃ¢te feuilletÃ©e", "quantite": 1, "unite": "rouleau"},
         {"nom": "Sucre", "quantite": 100, "unite": "g"}
     ],
     "instructions": [
-        "Préchauffer le four à 180°C",
-        "Éplucher et couper les pommes",
-        "Disposer sur la pâte",
+        "PrÃ©chauffer le four Ã  180Â°C",
+        "Ã‰plucher et couper les pommes",
+        "Disposer sur la pÃ¢te",
         "Enfourner 45 minutes"
     ]
 }
 response = requests.post(f"{BASE_URL}/recettes", json=nouvelle_recette)
-print(f"Recette créée: {response.json()}")
+print(f"Recette crÃ©Ã©e: {response.json()}")
 
 # Obtenir des suggestions
 response = requests.get(f"{BASE_URL}/suggestions/recettes", params={
@@ -160,7 +160,7 @@ async function getExpiringItems() {
     const response = await fetch(`${BASE_URL}/inventaire?expiring_soon=true`);
     const data = await response.json();
 
-    console.log(`${data.total} articles expirent bientôt:`);
+    console.log(`${data.total} articles expirent bientÃ´t:`);
     data.items.forEach(item => {
         console.log(`- ${item.nom}: ${item.date_peremption}`);
     });
@@ -172,9 +172,9 @@ async function searchBarcode(code) {
     const data = await response.json();
 
     if (data.found !== false) {
-        console.log(`Trouvé: ${data.nom}`);
+        console.log(`TrouvÃ©: ${data.nom}`);
     } else {
-        console.log("Article non trouvé");
+        console.log("Article non trouvÃ©");
     }
 }
 ```
@@ -188,7 +188,7 @@ curl http://localhost:8000/health
 # Liste des recettes
 curl "http://localhost:8000/api/v1/recettes?page=1&page_size=10"
 
-# Créer une recette
+# CrÃ©er une recette
 curl -X POST http://localhost:8000/api/v1/recettes \
      -H "Content-Type: application/json" \
      -d '{"nom": "Salade", "temps_preparation": 10, "portions": 2}'
@@ -200,7 +200,7 @@ curl http://localhost:8000/api/v1/planning/semaine
 curl "http://localhost:8000/api/v1/suggestions/recettes?type_repas=dejeuner&personnes=4"
 ```
 
-## 🧪 Tests
+## ðŸ§ª Tests
 
 ```bash
 # Lancer les tests de l'API
@@ -210,9 +210,9 @@ pytest tests/test_api.py -v
 pytest tests/test_api.py --cov=src.api --cov-report=html
 ```
 
-## 📦 Structure des réponses
+## ðŸ“¦ Structure des rÃ©ponses
 
-### Réponse paginée
+### RÃ©ponse paginÃ©e
 ```json
 {
     "items": [...],
@@ -223,7 +223,7 @@ pytest tests/test_api.py --cov=src.api --cov-report=html
 }
 ```
 
-### Réponse d'erreur
+### RÃ©ponse d'erreur
 ```json
 {
     "detail": "Message d'erreur"
@@ -231,24 +231,24 @@ pytest tests/test_api.py --cov=src.api --cov-report=html
 ```
 
 ### Codes HTTP
-- `200`: Succès
-- `201`: Créé
-- `400`: Requête invalide
-- `401`: Non authentifié
-- `403`: Non autorisé
-- `404`: Non trouvé
+- `200`: SuccÃ¨s
+- `201`: CrÃ©Ã©
+- `400`: RequÃªte invalide
+- `401`: Non authentifiÃ©
+- `403`: Non autorisÃ©
+- `404`: Non trouvÃ©
 - `422`: Erreur de validation
 - `500`: Erreur serveur
 
-## 🔧 Configuration
+## ðŸ”§ Configuration
 
 Variables d'environnement:
 - `DATABASE_URL`: URL de connexion PostgreSQL
 - `SUPABASE_URL`: URL du projet Supabase
-- `SUPABASE_ANON_KEY`: Clé anonyme Supabase
+- `SUPABASE_ANON_KEY`: ClÃ© anonyme Supabase
 
-## 📝 Notes
+## ðŸ“ Notes
 
-- L'API utilise la même base de données que l'application frontend
-- Les modifications sont reflétées en temps réel
-- Utilisez les endpoints de suggestions pour des recommandations intelligentes basées sur votre historique
+- L'API utilise la mÃªme base de donnÃ©es que l'application frontend
+- Les modifications sont reflÃ©tÃ©es en temps rÃ©el
+- Utilisez les endpoints de suggestions pour des recommandations intelligentes basÃ©es sur votre historique

@@ -60,7 +60,7 @@ Intérêt:
 ## Services transversaux `core/`
 
 | Zone | Rôle |
-|------|------|
+| ------ | ------ |
 | `core/registry.py` | registre des services et factories |
 | `core/base/` | fondations de services, notamment `BaseAIService` |
 | `core/events/` | bus d'événements domaine |

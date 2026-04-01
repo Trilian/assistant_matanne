@@ -321,7 +321,7 @@ async def lister_recettes(user: dict = Depends(require_auth)):
 Les modules sont organisés en 3 couches : routes API (`src/api/routes/`), services (`src/services/`), modèles ORM (`src/core/models/`).
 
 | Module | Routes API | Services | Description |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Cuisine | `recettes.py`, `courses.py`, `inventaire.py`, `planning.py`, `batch_cooking.py`, `anti_gaspillage.py` | `cuisine/`, `planning/` | Recettes, courses, stocks, planning repas |
 | Famille | `famille.py` | `famille/` | Vie familiale, suivi enfant Jules, budget |
 | Maison | `maison.py` | `maison/` | Habitat, entretien, jardin, dépenses |
@@ -367,7 +367,7 @@ CREATE POLICY depenses_user_policy ON depenses
 Les connexions WebSocket utilisent des mécanismes d'authentification adaptés :
 
 | Endpoint | Mécanisme | Fichier |
-|----------|-----------|---------|
+| ---------- | ----------- | --------- |
 | `/ws/courses` | Token query param | `src/api/websocket_courses.py` |
 
 ---
@@ -466,7 +466,7 @@ sequenceDiagram
 ## Décisions d'architecture notables
 
 | Décision | Raison |
-|----------|--------|
+| ---------- | -------- |
 | SQL-file migrations (post-Alembic) | Contrôle total sur le SQL, compatible Supabase RLS |
 | Cache L1/L3 (pas Redis) | Pas de service Redis à gérer — suffisant pour l'usage actuel |
 | BaseAIService | Rate limiting + cache sémantique + circuit breaker centralisés |

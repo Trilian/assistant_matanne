@@ -1,13 +1,13 @@
-# 🛠️ Guide Module Outils
+﻿# ðŸ› ï¸ Guide Module Outils
 
-> Ce guide couvre les outils pratiques dans MaTanne : chat IA, météo, convertisseur d'unités, minuteur, et prise de notes.
+> Ce guide couvre les outils pratiques dans MaTanne : chat IA, mÃ©tÃ©o, convertisseur d'unitÃ©s, minuteur, et prise de notes.
 
-## Table des matières
+## Table des matiÃ¨res
 
 1. [Vue d'ensemble](#vue-densemble)
 2. [Chat IA](#chat-ia)
-3. [Météo](#météo)
-4. [Convertisseur d'unités](#convertisseur-dunités)
+3. [MÃ©tÃ©o](#mÃ©tÃ©o)
+4. [Convertisseur d'unitÃ©s](#convertisseur-dunitÃ©s)
 5. [Minuteur](#minuteur)
 6. [Notes](#notes)
 7. [API Reference](#api-reference)
@@ -26,13 +26,13 @@ Le module **Outils** regroupe les utilitaires pratiques du quotidien, accessible
 
 ## Chat IA
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 
 - Interface de conversation libre avec l'IA Mistral
-- Contexte familial injecté automatiquement (profil Jules, recettes récentes, planning)
-- Historique de conversation persisté en session
+- Contexte familial injectÃ© automatiquement (profil Jules, recettes rÃ©centes, planning)
+- Historique de conversation persistÃ© en session
 - Suggestions de questions rapides (raccourcis)
-- Mode streaming pour les réponses longues
+- Mode streaming pour les rÃ©ponses longues
 
 ### Usage
 
@@ -43,16 +43,16 @@ Le module **Outils** regroupe les utilitaires pratiques du quotidien, accessible
 ### Exemples de questions
 
 - *"Qu'est-ce qu'on peut cuisiner ce soir avec ce qu'on a dans le frigo ?"*
-- *"Donne-moi des activités pour un enfant de 18 mois par temps de pluie"*
-- *"Rappelle-moi les tâches d'entretien à faire ce mois-ci"*
+- *"Donne-moi des activitÃ©s pour un enfant de 18 mois par temps de pluie"*
+- *"Rappelle-moi les tÃ¢ches d'entretien Ã  faire ce mois-ci"*
 
 ### Architecture
 
 ```
-Frontend → POST /api/v1/utilitaires/chat
-         → src/services/utilitaires/service.py
-         → src/core/ai/client.py (Mistral)
-         → Réponse streaming (Server-Sent Events)
+Frontend â†’ POST /api/v1/utilitaires/chat
+         â†’ src/services/utilitaires/service.py
+         â†’ src/core/ai/client.py (Mistral)
+         â†’ RÃ©ponse streaming (Server-Sent Events)
 ```
 
 ### Backend
@@ -60,20 +60,20 @@ Frontend → POST /api/v1/utilitaires/chat
 ```python
 from src.services.utilitaires.service import UtilitairesService
 service = UtilitairesService()
-reponse = service.chat_ia(message="Idées repas rapides", contexte_famille=True)
+reponse = service.chat_ia(message="IdÃ©es repas rapides", contexte_famille=True)
 ```
 
 ---
 
-## Météo
+## MÃ©tÃ©o
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 
-- Météo actuelle et prévisions 7 jours
-- Basé sur la localisation configurée dans les paramètres
-- Alertes météo (orage, canicule, gel)
-- Conseils jardin adaptés à la météo
-- Données utilisées par d'autres modules (planning arrosage, suggestions week-end)
+- MÃ©tÃ©o actuelle et prÃ©visions 7 jours
+- BasÃ© sur la localisation configurÃ©e dans les paramÃ¨tres
+- Alertes mÃ©tÃ©o (orage, canicule, gel)
+- Conseils jardin adaptÃ©s Ã  la mÃ©tÃ©o
+- DonnÃ©es utilisÃ©es par d'autres modules (planning arrosage, suggestions week-end)
 
 ### Usage
 
@@ -90,22 +90,22 @@ meteo = service.obtenir_meteo_actuelle(ville="Paris")
 previsions = service.obtenir_previsions(ville="Paris", jours=7)
 ```
 
-### Sources de données
+### Sources de donnÃ©es
 
-Le service météo (`src/services/integrations/weather/`) agrège plusieurs APIs météo avec fallback automatique.
+Le service mÃ©tÃ©o (`src/services/integrations/weather/`) agrÃ¨ge plusieurs APIs mÃ©tÃ©o avec fallback automatique.
 
 ---
 
-## Convertisseur d'unités
+## Convertisseur d'unitÃ©s
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 
-- Conversion entre unités de mesure courantes en cuisine :
-  - **Volumes** : ml, cl, dl, L, cuillère à café, cuillère à soupe, tasse
+- Conversion entre unitÃ©s de mesure courantes en cuisine :
+  - **Volumes** : ml, cl, dl, L, cuillÃ¨re Ã  cafÃ©, cuillÃ¨re Ã  soupe, tasse
   - **Poids** : g, kg, oz, lb
-  - **Températures** : Celsius, Fahrenheit, Gas
-- Conversion rapide de devises (taux de change temps réel)
-- Interface intuitive avec saisie d'une valeur et sélection des unités
+  - **TempÃ©ratures** : Celsius, Fahrenheit, Gas
+- Conversion rapide de devises (taux de change temps rÃ©el)
+- Interface intuitive avec saisie d'une valeur et sÃ©lection des unitÃ©s
 
 ### Usage
 
@@ -116,22 +116,22 @@ Le service météo (`src/services/integrations/weather/`) agrège plusieurs APIs
 ### Exemple
 
 ```
-500 ml → 2.11 tasses (US)
-180°C → 350°F → Thermostat 6
-250g flour → 2 cups
+500 ml â†’ 2.11 tasses (US)
+180Â°C â†’ 350Â°F â†’ Thermostat 6
+250g flour â†’ 2 cups
 ```
 
 ---
 
 ## Minuteur
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 
-- Minuteur compte à rebours avec notifications push à l'expiration
-- Chronomètre
-- Minuteurs nommés simultanés (ex: "Pâtes", "Sauce")
-- Préréglages rapides (3 min, 5 min, 10 min, 15 min)
-- Fonctionne en arrière-plan (Service Worker)
+- Minuteur compte Ã  rebours avec notifications push Ã  l'expiration
+- ChronomÃ¨tre
+- Minuteurs nommÃ©s simultanÃ©s (ex: "PÃ¢tes", "Sauce")
+- PrÃ©rÃ©glages rapides (3 min, 5 min, 10 min, 15 min)
+- Fonctionne en arriÃ¨re-plan (Service Worker)
 
 ### Usage
 
@@ -141,18 +141,18 @@ Le service météo (`src/services/integrations/weather/`) agrège plusieurs APIs
 
 ### PWA
 
-Le minuteur utilise le Service Worker (`public/sw.js`) pour continuer à fonctionner même quand l'onglet est en arrière-plan. La notification arrive via l'API Web Notifications.
+Le minuteur utilise le Service Worker (`public/sw.js`) pour continuer Ã  fonctionner mÃªme quand l'onglet est en arriÃ¨re-plan. La notification arrive via l'API Web Notifications.
 
 ---
 
 ## Notes
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 
 - Prise de notes rapide en texte libre
-- Organisation par catégorie ou tag
+- Organisation par catÃ©gorie ou tag
 - Recherche full-text dans les notes
-- Notes épinglées en haut de liste
+- Notes Ã©pinglÃ©es en haut de liste
 - Persistance locale + synchronisation avec le backend
 
 ### Usage
@@ -161,13 +161,13 @@ Le minuteur utilise le Service Worker (`public/sw.js`) pour continuer à fonctio
 /outils/notes
 ```
 
-### Modèle de données
+### ModÃ¨le de donnÃ©es
 
 ```python
-# Persisté en DB via src/core/models/utilitaires.py
+# PersistÃ© en DB via src/core/models/utilitaires.py
 class Note(Base):
     titre: str
-    contenu: str         # Markdown supporté
+    contenu: str         # Markdown supportÃ©
     tags: list[str]
     epinglee: bool
     user_id: int
@@ -181,14 +181,14 @@ class Note(Base):
 
 ### Endpoints principaux
 
-| Méthode | URL                          | Description                        |
-|--------|------------------------------|------------------------------------|
+| MÃ©thode | URL                          | Description                        |
+| -------- | ------------------------------ | ------------------------------------ |
 | POST   | `/api/v1/utilitaires/chat`   | Chat IA (streaming SSE)            |
-| GET    | `/api/v1/utilitaires/meteo`  | Météo actuelle + prévisions        |
-| GET    | `/api/v1/utilitaires/convertir` | Conversion d'unités             |
+| GET    | `/api/v1/utilitaires/meteo`  | MÃ©tÃ©o actuelle + prÃ©visions        |
+| GET    | `/api/v1/utilitaires/convertir` | Conversion d'unitÃ©s             |
 | GET    | `/api/v1/utilitaires/notes`  | Lister les notes                   |
-| POST   | `/api/v1/utilitaires/notes`  | Créer une note                     |
+| POST   | `/api/v1/utilitaires/notes`  | CrÃ©er une note                     |
 | PUT    | `/api/v1/utilitaires/notes/{id}` | Modifier une note              |
 | DELETE | `/api/v1/utilitaires/notes/{id}` | Supprimer une note             |
 
-Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation complète.
+Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation complÃ¨te.

@@ -7,7 +7,7 @@
 ## Vue d'ensemble
 
 | Module | Pages | Routes API | Service | Description |
-|--------|-------|-----------|---------|-------------|
+| -------- | ------- | ----------- | --------- | ------------- |
 | **Cuisine** | 7 | 6 routeurs | `cuisine/`, `planning/`, `inventaire/` | Recettes, planning repas, courses, inventaire, batch cooking, anti-gaspillage |
 | **Famille** | 10 | 1 routeur | `famille/` | Jules (suivi enfant), activités, routines, budget, weekend, anniversaires, contacts, documents, journal |
 | **Maison** | 9 | 1 routeur | `maison/` | Projets, charges, dépenses, énergie, entretien, jardin, stocks, cellier, artisans, contrats, garanties, diagnostics |
@@ -34,7 +34,7 @@
 ### Architecture
 
 | Couche | Chemin |
-|--------|--------|
+| -------- | -------- |
 | Routes API | `src/api/routes/recettes.py`, `courses.py`, `inventaire.py`, `planning.py`, `batch_cooking.py`, `anti_gaspillage.py` |
 | Schémas | `src/api/schemas/recettes.py`, `courses.py`, `inventaire.py`, `planning.py` |
 | Services | `src/services/cuisine/` (service, importer, suggestions), `src/services/planning/`, `src/services/inventaire/` |
@@ -45,7 +45,7 @@
 ### Endpoints principaux
 
 | Méthode | Route | Description |
-|---------|-------|-------------|
+| --------- | ------- | ------------- |
 | GET/POST | `/api/v1/recettes` | Liste paginée / Créer recette |
 | POST | `/api/v1/recettes/import-url` | Import depuis URL |
 | GET/POST | `/api/v1/courses` | Listes de courses |
@@ -75,7 +75,7 @@
 ### Architecture
 
 | Couche | Chemin |
-|--------|--------|
+| -------- | -------- |
 | Routes API | `src/api/routes/famille.py` |
 | Schémas | `src/api/schemas/famille.py` |
 | Services | `src/services/famille/` (service, jules_ai, weekend_ai) |
@@ -85,7 +85,7 @@
 ### Endpoints principaux
 
 | Méthode | Route | Description |
-|---------|-------|-------------|
+| --------- | ------- | ------------- |
 | GET/POST | `/api/v1/famille/enfants` | Profils enfants |
 | GET/POST | `/api/v1/famille/activites` | Activités familiales |
 | GET/POST | `/api/v1/famille/routines` | Routines quotidiennes |
@@ -114,7 +114,7 @@
 ### Architecture
 
 | Couche | Chemin |
-|--------|--------|
+| -------- | -------- |
 | Routes API | `src/api/routes/maison.py` |
 | Schémas | `src/api/schemas/maison.py` |
 | Services | `src/services/maison/` (service) |
@@ -133,7 +133,7 @@
 ### Architecture
 
 | Couche | Chemin |
-|--------|--------|
+| -------- | -------- |
 | Routes API | `src/api/routes/planning.py`, `calendriers.py` |
 | Services | `src/services/planning/` (service, nutrition, agregation, formatters, validators, prompts) |
 | Modèles ORM | `src/core/models/planning.py`, `calendrier.py` |
@@ -152,7 +152,7 @@
 ### Architecture
 
 | Couche | Chemin |
-|--------|--------|
+| -------- | -------- |
 | Routes API | `src/api/routes/jeux.py` |
 | Schémas | `src/api/schemas/jeux.py` |
 | Services | `src/services/jeux/` (service) |
@@ -174,7 +174,7 @@
 ### Architecture
 
 | Couche | Chemin |
-|--------|--------|
+| -------- | -------- |
 | Routes API | `src/api/routes/utilitaires.py` |
 | Services | `src/services/utilitaires/`, `src/services/integrations/weather/` |
 | Modèles ORM | `src/core/models/utilitaires.py` |
@@ -193,7 +193,7 @@
 ### Architecture
 
 | Couche | Chemin |
-|--------|--------|
+| -------- | -------- |
 | Routes API | `src/api/routes/dashboard.py` |
 | Services | `src/services/dashboard/service.py` |
 | Frontend | `frontend/src/app/(app)/page.tsx` |
@@ -203,7 +203,7 @@
 ## Modules transversaux
 
 | Module | Route API | Description |
-|--------|-----------|-------------|
+| -------- | ----------- | ------------- |
 | Auth | `/api/v1/auth` | Login, refresh, me (JWT Bearer) |
 | Export PDF | `/api/v1/export` | Export recettes, planning, courses, budget en PDF |
 | Préférences | `/api/v1/preferences` | Préférences utilisateur (cuisine, UI, IA) |

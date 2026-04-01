@@ -1,22 +1,22 @@
-# 📅 Guide Module Planning
+﻿# ðŸ“… Guide Module Planning
 
 > Ce guide couvre le module de planification dans MaTanne : planning familial, timeline, gestion des conflits et rappels.
 
-## Table des matières
+## Table des matiÃ¨res
 
 1. [Vue d'ensemble](#vue-densemble)
 2. [Hub Planning](#hub-planning)
 3. [Timeline](#timeline)
 4. [Gestion des conflits](#gestion-des-conflits)
 5. [Rappels](#rappels)
-6. [Intégration avec les autres modules](#intégration)
+6. [IntÃ©gration avec les autres modules](#intÃ©gration)
 7. [API Reference](#api-reference)
 
 ---
 
 ## Vue d'ensemble
 
-Le module **Planning** est le calendrier centralisé de toute la vie familiale. Il agrège les événements en provenance de tous les autres modules (cuisines, famille, maison) dans une vue unifiée.
+Le module **Planning** est le calendrier centralisÃ© de toute la vie familiale. Il agrÃ¨ge les Ã©vÃ©nements en provenance de tous les autres modules (cuisines, famille, maison) dans une vue unifiÃ©e.
 
 **URL** : `/planning`  
 **Service backend** : `src/services/planning/`  
@@ -26,11 +26,11 @@ Le module **Planning** est le calendrier centralisé de toute la vie familiale. 
 
 ## Hub Planning
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 
-- Vue hebdomadaire de tous les événements familiaux
-- Création rapide d'événements depuis le hub
-- Filtrage par catégorie (cuisine, famille, maison, santé…)
+- Vue hebdomadaire de tous les Ã©vÃ©nements familiaux
+- CrÃ©ation rapide d'Ã©vÃ©nements depuis le hub
+- Filtrage par catÃ©gorie (cuisine, famille, maison, santÃ©â€¦)
 - Indicateurs visuels par membre de la famille
 
 ### Usage
@@ -43,12 +43,12 @@ Le module **Planning** est le calendrier centralisé de toute la vie familiale. 
 
 ## Timeline
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 
-- Vue chronologique linéaire de tous les événements
-- Zoom avant/arrière (jour / semaine / mois)
-- Glisser-déposer pour repositionner les événements
-- Indicateurs de jalons importants (anniversaires, rendez-vous médicaux…)
+- Vue chronologique linÃ©aire de tous les Ã©vÃ©nements
+- Zoom avant/arriÃ¨re (jour / semaine / mois)
+- Glisser-dÃ©poser pour repositionner les Ã©vÃ©nements
+- Indicateurs de jalons importants (anniversaires, rendez-vous mÃ©dicauxâ€¦)
 
 ### Usage
 
@@ -58,10 +58,10 @@ Le module **Planning** est le calendrier centralisé de toute la vie familiale. 
 
 ### Composant frontend
 
-La timeline utilise un composant custom qui agrège les données de plusieurs endpoints :
+La timeline utilise un composant custom qui agrÃ¨ge les donnÃ©es de plusieurs endpoints :
 
 ```typescript
-// Exemple de requête combinée
+// Exemple de requÃªte combinÃ©e
 const { data: planning } = utiliserRequete(
   ["planning", semaine],
   () => listerPlanningHebdo(semaine)
@@ -72,7 +72,7 @@ const { data: planning } = utiliserRequete(
 
 ## Gestion des conflits
 
-Le service détecte automatiquement les conflits de planning (chevauchements d'événements pour un même membre).
+Le service dÃ©tecte automatiquement les conflits de planning (chevauchements d'Ã©vÃ©nements pour un mÃªme membre).
 
 ```python
 from src.services.planning.conflits import ServiceConflitPlanning
@@ -80,12 +80,12 @@ service = ServiceConflitPlanning()
 conflits = service.detecter_conflits(user_id=1, date_debut=..., date_fin=...)
 ```
 
-Réponse s'il y a conflit :
+RÃ©ponse s'il y a conflit :
 ```json
 {
   "conflit": true,
   "evenements_concurrents": [
-    {"id": 42, "titre": "Médecin Jules", "debut": "2026-03-26T14:00"}
+    {"id": 42, "titre": "MÃ©decin Jules", "debut": "2026-03-26T14:00"}
   ]
 }
 ```
@@ -94,7 +94,7 @@ Réponse s'il y a conflit :
 
 ## Rappels
 
-Le service de rappels envoie des notifications push avant les événements.
+Le service de rappels envoie des notifications push avant les Ã©vÃ©nements.
 
 - **J-1** : rappel la veille pour les RDV importants
 - **H-1** : rappel 1h avant l'heure
@@ -108,16 +108,16 @@ service.planifier_rappel(evenement_id=42, delai_minutes=60)
 
 ---
 
-## Intégration
+## IntÃ©gration
 
-Le module Planning s'alimente des événements générés par les autres modules :
+Le module Planning s'alimente des Ã©vÃ©nements gÃ©nÃ©rÃ©s par les autres modules :
 
-| Module  | Événements injectés                              |
-|---------|--------------------------------------------------|
-| Cuisine | Repas planifiés, dates batch-cooking             |
-| Famille | Activités, RDV médicaux Jules, anniversaires     |
-| Maison  | Tâches d'entretien, rendez-vous artisans         |
-| Jeux    | Tirages loto/euromillions à ne pas rater         |
+| Module  | Ã‰vÃ©nements injectÃ©s                              |
+| --------- | -------------------------------------------------- |
+| Cuisine | Repas planifiÃ©s, dates batch-cooking             |
+| Famille | ActivitÃ©s, RDV mÃ©dicaux Jules, anniversaires     |
+| Maison  | TÃ¢ches d'entretien, rendez-vous artisans         |
+| Jeux    | Tirages loto/euromillions Ã  ne pas rater         |
 
 ---
 
@@ -125,13 +125,13 @@ Le module Planning s'alimente des événements générés par les autres modules
 
 ### Endpoints principaux
 
-| Méthode | URL                              | Description                      |
-|--------|----------------------------------|----------------------------------|
-| GET    | `/api/v1/planning`               | Événements de la semaine courante |
-| POST   | `/api/v1/planning`               | Créer un événement               |
-| PUT    | `/api/v1/planning/{id}`          | Modifier un événement            |
-| DELETE | `/api/v1/planning/{id}`          | Supprimer un événement           |
-| GET    | `/api/v1/planning/conflits`      | Détecter les conflits            |
-| POST   | `/api/v1/planning/rappels`       | Créer un rappel                  |
+| MÃ©thode | URL                              | Description                      |
+| -------- | ---------------------------------- | ---------------------------------- |
+| GET    | `/api/v1/planning`               | Ã‰vÃ©nements de la semaine courante |
+| POST   | `/api/v1/planning`               | CrÃ©er un Ã©vÃ©nement               |
+| PUT    | `/api/v1/planning/{id}`          | Modifier un Ã©vÃ©nement            |
+| DELETE | `/api/v1/planning/{id}`          | Supprimer un Ã©vÃ©nement           |
+| GET    | `/api/v1/planning/conflits`      | DÃ©tecter les conflits            |
+| POST   | `/api/v1/planning/rappels`       | CrÃ©er un rappel                  |
 
-Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation complète.
+Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation complÃ¨te.

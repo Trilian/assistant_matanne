@@ -280,7 +280,6 @@ export interface DashboardJeux {
   matchs_jour: MatchJourDashboard[];
   value_bets: ValueBet[];
   loto_retard: NumeroRetard[];
-  budget: BudgetResponsable;
   kpis: KPIsJeux;
   analyse_ia?: AnalyseIA;
 }

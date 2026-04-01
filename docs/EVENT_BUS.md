@@ -1,26 +1,26 @@
-# Event Bus
+﻿# Event Bus
 
-> Référence du bus d'événements domaine — 32 types, 51 subscribers, patterns et bonnes pratiques.
+> RÃ©fÃ©rence du bus d'Ã©vÃ©nements domaine â€” 32 types, 51 subscribers, patterns et bonnes pratiques.
 >
-> **Dernière mise à jour** : 1er avril 2026
+> **DerniÃ¨re mise Ã  jour** : 1er avril 2026
 
 ---
 
 ## Vue d'ensemble
 
-| Propriété | Valeur |
-|-----------|--------|
-| **Implémentation** | `src/services/core/events/bus.py` |
-| **Types d'événements** | 32 (`REGISTRE_EVENEMENTS`) |
-| **Subscribers enregistrés** | 51 (`enregistrer_subscribers()`) |
+| PropriÃ©tÃ© | Valeur |
+| ----------- | -------- |
+| **ImplÃ©mentation** | `src/services/core/events/bus.py` |
+| **Types d'Ã©vÃ©nements** | 32 (`REGISTRE_EVENEMENTS`) |
+| **Subscribers enregistrÃ©s** | 51 (`enregistrer_subscribers()`) |
 | **Thread-safe** | Oui (`threading.Lock`) |
 | **Wildcards** | Oui (`module.*` matche `module.action`) |
-| **Historique** | 100 derniers événements en mémoire |
-| **Métriques** | Émissions, handlers, erreurs, durée par type |
+| **Historique** | 100 derniers Ã©vÃ©nements en mÃ©moire |
+| **MÃ©triques** | Ã‰missions, handlers, erreurs, durÃ©e par type |
 
 ---
 
-## Types d'événements (32)
+## Types d'Ã©vÃ©nements (32)
 
 ### Recettes
 `recette.planifiee`, `recette.importee`, `recette.creee`, `recette.feedback`
@@ -37,13 +37,13 @@
 ### Famille
 `activites.modifiee`, `routines.modifiee`, `weekend.modifie`, `achats.modifie`, `food_log.ajoute`
 
-### Budget / Santé
+### Budget / SantÃ©
 `budget.modifie`, `budget.depassement`, `sante.modifie`
 
 ### Jeux
 `loto.modifie`, `paris.modifie`, `jeux.sync_terminee`
 
-### Système
+### SystÃ¨me
 `service.error`
 
 ---
@@ -52,8 +52,8 @@
 
 ### Invalidation cache (16 subscribers)
 
-| Handler | Événement pattern |
-|---------|-------------------|
+| Handler | Ã‰vÃ©nement pattern |
+| --------- | ------------------- |
 | `_invalider_cache_recettes()` | `recette.*` |
 | `_invalider_cache_stock()` | `stock.*` |
 | `_invalider_cache_courses()` | `courses.*` |
@@ -71,59 +71,59 @@
 | `_invalider_cache_jeux()` | `jeux.*` |
 | `_invalider_cache_sante()` | `sante.*` |
 
-### Réactions métier (12+ subscribers)
+### RÃ©actions mÃ©tier (12+ subscribers)
 
 - Checklist anniversaire proche (J-30/14/7/1)
-- Invalidation suggestions achats sur changement préférences
-- Syncs inter-modules enregistrés via `@service_factory`
+- Invalidation suggestions achats sur changement prÃ©fÃ©rences
+- Syncs inter-modules enregistrÃ©s via `@service_factory`
 
 ### Notifications (7+ subscribers)
 
-- Document expiration → ntfy/push
-- Anomalie budget → alertes haute priorité
-- Péremption J-48h → suggestions anti-gaspillage
-- Batch cooking terminé → notification résultat
-- Anomalie énergie → alerte admin
+- Document expiration â†’ ntfy/push
+- Anomalie budget â†’ alertes haute prioritÃ©
+- PÃ©remption J-48h â†’ suggestions anti-gaspillage
+- Batch cooking terminÃ© â†’ notification rÃ©sultat
+- Anomalie Ã©nergie â†’ alerte admin
 
 ### Monitoring (8+ subscribers)
 
-- Collecteur métriques global
+- Collecteur mÃ©triques global
 - Suivi erreurs services
 - Compteurs performance
-- Détection anomalies
+- DÃ©tection anomalies
 
 ### Audit (6+ subscribers)
 
-- Logging structuré des événements
+- Logging structurÃ© des Ã©vÃ©nements
 - Suivi actions par domaine
-- Enregistrement événements sécurité
+- Enregistrement Ã©vÃ©nements sÃ©curitÃ©
 
 ### Webhooks sortants
 
-- Livraison best-effort via service d'intégration
+- Livraison best-effort via service d'intÃ©gration
 
 ---
 
-## Exemples de flux réactifs
+## Exemples de flux rÃ©actifs
 
-| Événement | Réaction automatique |
-|-----------|---------------------|
+| Ã‰vÃ©nement | RÃ©action automatique |
+| ----------- | --------------------- |
 | `jardin.recolte` | Invalidation cache recettes/planning/suggestions |
-| `energie.anomalie` | Création tâche entretien |
-| `budget.depassement` | Invalidation dashboard + déclenchement agent proactif |
+| `energie.anomalie` | CrÃ©ation tÃ¢che entretien |
+| `budget.depassement` | Invalidation dashboard + dÃ©clenchement agent proactif |
 | `document.echeance_proche` | Notification ntfy |
-| `batch_cooking.termine` | Déduction inventaire + notification |
-| `stock.modifie` | Invalidation cache courses + vérification seuil |
+| `batch_cooking.termine` | DÃ©duction inventaire + notification |
+| `stock.modifie` | Invalidation cache courses + vÃ©rification seuil |
 
 ---
 
 ## API admin
 
 ```http
-# Consulter les derniers événements
+# Consulter les derniers Ã©vÃ©nements
 GET /api/v1/admin/events?limite=30&type_evenement=recette.*
 
-# Déclencher un événement manuellement (test)
+# DÃ©clencher un Ã©vÃ©nement manuellement (test)
 POST /api/v1/admin/events/trigger
 {
   "type_evenement": "jardin.recolte",
@@ -134,17 +134,17 @@ POST /api/v1/admin/events/trigger
 
 ---
 
-## Démarrage
+## DÃ©marrage
 
-Les subscribers sont enregistrés au bootstrap via `enregistrer_subscribers()`.
+Les subscribers sont enregistrÃ©s au bootstrap via `enregistrer_subscribers()`.
 La fonction est idempotente.
 
 ---
 
 ## Bonnes pratiques
 
-- Émettre des événements métier explicites (`module.action`)
-- Garder les handlers résilients (never fail the bus — tout wrappé en `try/except`)
+- Ã‰mettre des Ã©vÃ©nements mÃ©tier explicites (`module.action`)
+- Garder les handlers rÃ©silients (never fail the bus â€” tout wrappÃ© en `try/except`)
 - Utiliser des wildcard patterns (`budget.*`) pour les comportements transverses
-- Mettre les actions lourdes en asynchrone ou en job planifié
-- Priorités : cache invalidation (10) > métier (5) > audit (0)
+- Mettre les actions lourdes en asynchrone ou en job planifiÃ©
+- PrioritÃ©s : cache invalidation (10) > mÃ©tier (5) > audit (0)

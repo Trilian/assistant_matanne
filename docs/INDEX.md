@@ -7,7 +7,7 @@
 ## Documents principaux
 
 | Document | Description |
-|----------|-------------|
+| ---------- | ------------- |
 | [../ANALYSE_COMPLETE.md](../ANALYSE_COMPLETE.md) | **Audit complet** (28 mars 2026) — état réel, bugs, dette tech, plan à long terme |
 | [../PLANNING_IMPLEMENTATION.md](../PLANNING_IMPLEMENTATION.md) | **Planning d'implémentation** — sprints 1-9, tâches détaillées |
 | [../ROADMAP.md](../ROADMAP.md) | **Feuille de route** — priorités moyen/long terme + principes |
@@ -43,7 +43,7 @@
 ## Guides par module
 
 | Guide | Module | Description |
-|-------|--------|-------------|
+| ------- | -------- | ------------- |
 | [guides/cuisine/README.md](./guides/cuisine/README.md) | Cuisine | Recettes, planning repas, courses, inventaire, batch cooking, anti-gaspillage |
 | [guides/famille/README.md](./guides/famille/README.md) | Famille | Jules, activités, routines, budget, weekend |
 | [guides/maison/README.md](./guides/maison/README.md) | Maison | Projets, entretien, jardin, énergie, stocks |

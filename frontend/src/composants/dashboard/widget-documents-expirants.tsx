@@ -73,7 +73,7 @@ export function WidgetDocumentsExpirants() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Tous les documents sont Ã  jour</p>
+          <p className="text-sm text-muted-foreground">Tous les documents sont a jour</p>
         </CardContent>
       </Card>
     );
@@ -84,7 +84,7 @@ export function WidgetDocumentsExpirants() {
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-orange-500" />
-          Documents Ã  renouveler
+          Documents a renouveler
           {data.total > 0 && (
             <Badge variant="destructive" className="ml-auto text-xs">
               {data.total}
@@ -109,7 +109,7 @@ export function WidgetDocumentsExpirants() {
             </div>
             <Badge variant="secondary" className={`text-xs shrink-0 ${severiteStyles[doc.severite]}`}>
               {doc.est_expire
-                ? "ExpirÃ©"
+                ? "Expire"
                 : doc.jours_restants <= 1
                   ? "Demain"
                   : `${doc.jours_restants}j`}
@@ -122,7 +122,7 @@ export function WidgetDocumentsExpirants() {
             href="/famille/documents"
             className="block text-xs text-primary hover:underline text-center pt-1"
           >
-            Voir les {data.total} documents â†’
+            Voir les {data.total} documents
           </Link>
         )}
       </CardContent>

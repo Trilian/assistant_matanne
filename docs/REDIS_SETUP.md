@@ -1,11 +1,11 @@
-# Redis — Activation & Configuration en Production
+﻿# Redis â€” Activation & Configuration en Production
 
-> ⚠️ **Redis est optionnel.** Le MVP fonctionne avec le cache L1 mémoire + L3 fichier. Redis n'est nécessaire que pour le scaling en production (cache L2 partagé entre workers).
+> âš ï¸ **Redis est optionnel.** Le MVP fonctionne avec le cache L1 mÃ©moire + L3 fichier. Redis n'est nÃ©cessaire que pour le scaling en production (cache L2 partagÃ© entre workers).
 
-## Prérequis
+## PrÃ©requis
 
-- Redis 7.x+ installé ou un service managé (Upstash, Railway, Redis Cloud)
-- Package Python `redis>=5.0.0` (déjà dans `requirements.txt`)
+- Redis 7.x+ installÃ© ou un service managÃ© (Upstash, Railway, Redis Cloud)
+- Package Python `redis>=5.0.0` (dÃ©jÃ  dans `requirements.txt`)
 
 ## Configuration
 
@@ -26,14 +26,14 @@ REDIS_URL=rediss://:password@redis-host:6380/0
 
 ### 2. Via la config Pydantic
 
-Le paramètre `REDIS_URL` est déclaré dans `Parametres` (src/core/config/settings.py).
+Le paramÃ¨tre `REDIS_URL` est dÃ©clarÃ© dans `Parametres` (src/core/config/settings.py).
 
 ## Validation
 
 ```python
 from src.core.caching.redis import is_redis_available, obtenir_cache_redis
 
-# Vérifier la disponibilité
+# VÃ©rifier la disponibilitÃ©
 print(is_redis_available())  # True si connexion OK
 
 # Obtenir l'instance
@@ -43,15 +43,15 @@ print(cache.get_stats())
 
 ## Architecture multi-niveaux
 
-L'orchestrateur `CacheMultiNiveau` détecte automatiquement Redis :
+L'orchestrateur `CacheMultiNiveau` dÃ©tecte automatiquement Redis :
 
 ```
-Lecture:  L1 (mémoire) → Redis → L2 (session) → L3 (fichier) → miss
-Écriture: L1 + Redis + L2 (L3 si persistent=True)
+Lecture:  L1 (mÃ©moire) â†’ Redis â†’ L2 (session) â†’ L3 (fichier) â†’ miss
+Ã‰criture: L1 + Redis + L2 (L3 si persistent=True)
 ```
 
-- **Sans Redis** : L1 → L2 → L3 (comportement actuel)
-- **Avec Redis** : Redis s'insère entre L1 et L2 pour le partage inter-instances
+- **Sans Redis** : L1 â†’ L2 â†’ L3 (comportement actuel)
+- **Avec Redis** : Redis s'insÃ¨re entre L1 et L2 pour le partage inter-instances
 
 ## Monitoring
 
@@ -65,16 +65,16 @@ print(f"Redis hits: {stats.redis_hits}")
 print(f"Redis disponible: {stats.redis_available}")
 ```
 
-## Fournisseurs recommandés
+## Fournisseurs recommandÃ©s
 
 | Fournisseur | Plan gratuit | Latence | Notes |
-|-------------|-------------|---------|-------|
+| ------------- | ------------- | --------- | ------- |
 | **Upstash** | 10K req/jour | ~5ms | Serverless, TLS natif |
-| **Railway** | $5 crédit | ~1ms (même région) | Simple à déployer |
+| **Railway** | $5 crÃ©dit | ~1ms (mÃªme rÃ©gion) | Simple Ã  dÃ©ployer |
 | **Redis Cloud** | 30MB | ~2ms | Redis officiel |
 
-## Dépannage
+## DÃ©pannage
 
-- **`is_redis_available()` retourne False** : Vérifier que `REDIS_URL` est défini et que le serveur est joignable.
-- **Timeout** : Augmenter le timeout de connexion dans les paramètres Redis.
-- **Erreur TLS** : Utiliser `rediss://` (double s) pour les connexions sécurisées.
+- **`is_redis_available()` retourne False** : VÃ©rifier que `REDIS_URL` est dÃ©fini et que le serveur est joignable.
+- **Timeout** : Augmenter le timeout de connexion dans les paramÃ¨tres Redis.
+- **Erreur TLS** : Utiliser `rediss://` (double s) pour les connexions sÃ©curisÃ©es.

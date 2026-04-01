@@ -1,6 +1,6 @@
-# 🏠 Assistant MaTanne
+﻿# ðŸ  Assistant MaTanne
 
-> Hub de gestion familiale intelligent propulsé par l'IA
+> Hub de gestion familiale intelligent propulsÃ© par l'IA
 
 [![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
@@ -9,14 +9,14 @@
 
 ---
 
-## 🚀 Démarrage rapide
+## ðŸš€ DÃ©marrage rapide
 
-### Prérequis
+### PrÃ©requis
 
 - Python 3.13+
 - Node.js 20+
 - Compte [Supabase](https://supabase.com) (PostgreSQL)
-- Clé API [Mistral AI](https://console.mistral.ai) (optionnel, pour les suggestions IA)
+- ClÃ© API [Mistral AI](https://console.mistral.ai) (optionnel, pour les suggestions IA)
 
 ### Installation
 
@@ -35,76 +35,76 @@ npm install
 ### Lancer l'application
 
 ```bash
-# Terminal 1 — Backend FastAPI
+# Terminal 1 â€” Backend FastAPI
 python manage.py run                 # http://localhost:8000
 
-# Terminal 2 — Frontend Next.js
+# Terminal 2 â€” Frontend Next.js
 cd frontend && npm run dev           # http://localhost:3000
 ```
 
 ---
 
-## 📋 Modules
+## ðŸ“‹ Modules
 
 | Module | Description | Pages |
-|---|---|---|
-| 🍽️ **Cuisine** | Recettes, planning repas, courses, inventaire, batch cooking, anti-gaspi | 7 |
-| 👨‍👩‍👦 **Famille** | Suivi Jules, activités, routines, budget, weekend, album, anniversaires, contacts, documents, journal | 11 |
-| 🏡 **Maison** | Projets, jardin, entretien, charges, dépenses, énergie, stocks, contrats | 9 |
-| 📅 **Planning** | Calendrier semaine, timeline | 2 |
-| 🎮 **Jeux** | Paris sportifs, loto, euromillions | 4 |
-| 🛠️ **Outils** | Chat IA, notes, météo, minuteur, convertisseur | 6 |
-| ⚙️ **Paramètres** | Configuration multi-onglets | 1 |
+| --- | --- | --- |
+| ðŸ½ï¸ **Cuisine** | Recettes, planning repas, courses, inventaire, batch cooking, anti-gaspi | 7 |
+| ðŸ‘¨â€ðŸ‘©â€ðŸ‘¦ **Famille** | Suivi Jules, activitÃ©s, routines, budget, weekend, album, anniversaires, contacts, documents, journal | 11 |
+| ðŸ¡ **Maison** | Projets, jardin, entretien, charges, dÃ©penses, Ã©nergie, stocks, contrats | 9 |
+| ðŸ“… **Planning** | Calendrier semaine, timeline | 2 |
+| ðŸŽ® **Jeux** | Paris sportifs, loto, euromillions | 4 |
+| ðŸ› ï¸ **Outils** | Chat IA, notes, mÃ©tÃ©o, minuteur, convertisseur | 6 |
+| âš™ï¸ **ParamÃ¨tres** | Configuration multi-onglets | 1 |
 
-> **~50 pages** au total, toutes connectées à l'API backend.
+> **~50 pages** au total, toutes connectÃ©es Ã  l'API backend.
 
 ---
 
-## 🏗️ Architecture
+## ðŸ—ï¸ Architecture
 
 ```
 assistant_matanne/
-├── frontend/                  # Next.js 16 — SPA React/TypeScript
-│   ├── src/app/(app)/         #   Routes par module (~50 pages)
-│   ├── src/components/ui/     #   Composants shadcn/ui (21+)
-│   ├── src/composants/        #   Layout (sidebar, header, nav)
-│   ├── src/bibliotheque/api/  #   Clients API par domaine
-│   ├── src/crochets/          #   Custom hooks React
-│   ├── src/magasins/          #   Zustand stores
-│   ├── src/types/             #   Interfaces TypeScript
-│   └── src/fournisseurs/      #   Providers (auth, query, theme)
-│
-├── src/                       # Backend Python — FastAPI
-│   ├── api/                   #   API REST (20 routers, schemas, middleware)
-│   ├── core/                  #   Noyau (config, DB, models, AI, cache)
-│   └── services/              #   Logique métier (80+ services)
-│
-├── sql/INIT_COMPLET.sql       # Schéma DB complet (~130 tables)
-├── tests/                     # Tests Python (pytest, 82+ fichiers)
-├── data/                      # Données statiques (JSON, CSV)
-└── docs/                      # Documentation technique
+â”œâ”€â”€ frontend/                  # Next.js 16 â€” SPA React/TypeScript
+â”‚   â”œâ”€â”€ src/app/(app)/         #   Routes par module (~50 pages)
+â”‚   â”œâ”€â”€ src/components/ui/     #   Composants shadcn/ui (21+)
+â”‚   â”œâ”€â”€ src/composants/        #   Layout (sidebar, header, nav)
+â”‚   â”œâ”€â”€ src/bibliotheque/api/  #   Clients API par domaine
+â”‚   â”œâ”€â”€ src/crochets/          #   Custom hooks React
+â”‚   â”œâ”€â”€ src/magasins/          #   Zustand stores
+â”‚   â”œâ”€â”€ src/types/             #   Interfaces TypeScript
+â”‚   â””â”€â”€ src/fournisseurs/      #   Providers (auth, query, theme)
+â”‚
+â”œâ”€â”€ src/                       # Backend Python â€” FastAPI
+â”‚   â”œâ”€â”€ api/                   #   API REST (20 routers, schemas, middleware)
+â”‚   â”œâ”€â”€ core/                  #   Noyau (config, DB, models, AI, cache)
+â”‚   â””â”€â”€ services/              #   Logique mÃ©tier (80+ services)
+â”‚
+â”œâ”€â”€ sql/INIT_COMPLET.sql       # SchÃ©ma DB complet (~130 tables)
+â”œâ”€â”€ tests/                     # Tests Python (pytest, 82+ fichiers)
+â”œâ”€â”€ data/                      # DonnÃ©es statiques (JSON, CSV)
+â””â”€â”€ docs/                      # Documentation technique
 ```
 
 ### Stack technique
 
 | Couche | Technologies |
-|---|---|
+| --- | --- |
 | **Backend** | FastAPI, SQLAlchemy 2.0 ORM, Pydantic v2, Mistral AI |
 | **Frontend** | Next.js 16.2, TypeScript 5, Tailwind CSS v4, shadcn/ui |
 | **Data Fetching** | TanStack Query v5, Axios |
 | **State** | Zustand 5, react-hook-form, Zod v4 |
-| **Base de données** | Supabase PostgreSQL (~130 tables, RLS activé) |
+| **Base de donnÃ©es** | Supabase PostgreSQL (~130 tables, RLS activÃ©) |
 | **Auth** | JWT Bearer (Supabase Auth + tokens API) |
 | **IA** | Mistral AI (suggestions recettes, analyse paris, aide famille) |
 
 ---
 
-## ⚙️ Configuration
+## âš™ï¸ Configuration
 
 ### Variables d'environnement (.env.local)
 
 ```env
-# Base de données Supabase
+# Base de donnÃ©es Supabase
 DATABASE_URL=postgresql://user:password@host:5432/db
 
 # IA Mistral
@@ -127,43 +127,43 @@ FOOTBALL_DATA_API_KEY=your_football_api_key
 
 ---
 
-## 🗄️ Base de données
+## ðŸ—„ï¸ Base de donnÃ©es
 
-Le schéma complet est dans un unique fichier `sql/INIT_COMPLET.sql` (v3.0, ~130 tables).
+Le schÃ©ma complet est dans un unique fichier `sql/INIT_COMPLET.sql` (v3.0, ~130 tables).
 
 ```bash
-# Initialisation : exécuter sql/INIT_COMPLET.sql dans Supabase SQL Editor ou psql
-# Inclut : tables, RLS, triggers, vues, données de référence
+# Initialisation : exÃ©cuter sql/INIT_COMPLET.sql dans Supabase SQL Editor ou psql
+# Inclut : tables, RLS, triggers, vues, donnÃ©es de rÃ©fÃ©rence
 ```
 
 ---
 
-## 🧪 Tests
+## ðŸ§ª Tests
 
 ```bash
-# Backend — tous les tests avec couverture
+# Backend â€” tous les tests avec couverture
 python manage.py test_coverage
-# → pytest --cov=src --cov-report=html --cov-report=term
+# â†’ pytest --cov=src --cov-report=html --cov-report=term
 
-# Backend — tests spécifiques
+# Backend â€” tests spÃ©cifiques
 pytest tests/api/test_routes_recettes.py -v
 
-# Frontend — Vitest (33 fichiers, 157+ tests)
+# Frontend â€” Vitest (33 fichiers, 157+ tests)
 cd frontend && npm test
 
-# Frontend — E2E Playwright
+# Frontend â€” E2E Playwright
 cd frontend && npx playwright test
 
-# Backend — contract tests OpenAPI (Schemathesis)
+# Backend â€” contract tests OpenAPI (Schemathesis)
 pytest tests/contracts -m contract -v
 
-# Frontend — visual regression snapshots
+# Frontend â€” visual regression snapshots
 cd frontend && npm run test:visual
 ```
 
 ---
 
-## 📝 Commandes utiles
+## ðŸ“ Commandes utiles
 
 ```bash
 python manage.py run                  # Lancer le backend (port 8000)
@@ -172,41 +172,41 @@ cd frontend && npm run dev            # Lancer le frontend (port 3000)
 python manage.py format_code          # Formater (black)
 python manage.py lint                 # Linter (ruff)
 cd frontend && npm run lint           # Linter frontend (ESLint)
-cd frontend && npx next build         # Build de vérification
+cd frontend && npx next build         # Build de vÃ©rification
 
 python manage.py generate_requirements  # Sync requirements.txt
 ```
 
 ---
 
-## 🔗 API
+## ðŸ”— API
 
-Documentation interactive après démarrage du backend :
+Documentation interactive aprÃ¨s dÃ©marrage du backend :
 
 - **Swagger UI** : http://localhost:8000/docs
 - **ReDoc** : http://localhost:8000/redoc
 - **Health check** : http://localhost:8000/
 
-**20 routeurs** organisés par domaine : auth, recettes, courses, inventaire, planning, suggestions IA, famille, maison, jeux, dashboard, batch-cooking, anti-gaspillage, préférences, export, calendriers, documents, utilitaires, push, webhooks, upload.
+**20 routeurs** organisÃ©s par domaine : auth, recettes, courses, inventaire, planning, suggestions IA, famille, maison, jeux, dashboard, batch-cooking, anti-gaspillage, prÃ©fÃ©rences, export, calendriers, documents, utilitaires, push, webhooks, upload.
 
 ---
 
-## � Déploiement
+## ï¿½ DÃ©ploiement
 
-L'application est déployée sur **3 services** :
+L'application est dÃ©ployÃ©e sur **3 services** :
 
 | Service | Plateforme | URL |
-|---|---|---|
+| --- | --- | --- |
 | Backend API | [Railway](https://railway.app) (Docker) | `https://assistant-matanne-api.up.railway.app` |
 | Frontend | [Vercel](https://vercel.com) (Next.js) | `https://assistant-matanne.vercel.app` |
-| Base de données | [Supabase](https://supabase.com) (PostgreSQL) | Dashboard Supabase |
+| Base de donnÃ©es | [Supabase](https://supabase.com) (PostgreSQL) | Dashboard Supabase |
 
-### 1. Supabase (Base de données)
+### 1. Supabase (Base de donnÃ©es)
 
-1. Créer un projet sur [supabase.com](https://supabase.com)
-2. Exécuter `sql/INIT_COMPLET.sql` dans le **SQL Editor** (schéma complet ~130 tables, RLS, triggers)
-3. Récupérer depuis **Settings > Database** :
-   - `DATABASE_URL` (Connection string → URI)
+1. CrÃ©er un projet sur [supabase.com](https://supabase.com)
+2. ExÃ©cuter `sql/INIT_COMPLET.sql` dans le **SQL Editor** (schÃ©ma complet ~130 tables, RLS, triggers)
+3. RÃ©cupÃ©rer depuis **Settings > Database** :
+   - `DATABASE_URL` (Connection string â†’ URI)
    - `SUPABASE_JWT_SECRET` (Settings > API > JWT Secret)
    - `NEXT_PUBLIC_SUPABASE_URL` (Settings > API > URL)
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Settings > API > anon key)
@@ -214,53 +214,53 @@ L'application est déployée sur **3 services** :
 ### 2. Railway (Backend API)
 
 1. Connecter le repo GitHub sur [railway.app](https://railway.app)
-2. Railway détecte automatiquement le `Dockerfile` à la racine
+2. Railway dÃ©tecte automatiquement le `Dockerfile` Ã  la racine
 3. Configurer les **variables d'environnement** dans Railway :
 
 | Variable | Requis | Description |
-|---|---|---|
-| `DATABASE_URL` | ✅ | URI PostgreSQL Supabase |
-| `MISTRAL_API_KEY` | ✅ | Clé API Mistral AI |
-| `API_SECRET_KEY` | ✅ | Secret pour tokens JWT API (`openssl rand -hex 32`) |
-| `SUPABASE_JWT_SECRET` | ✅ | JWT Secret de Supabase |
-| `CORS_ORIGINS` | ✅ | URL frontend Vercel (ex: `https://assistant-matanne.vercel.app`) |
-| `ENVIRONMENT` | ✅ | `production` |
-| `PORT` | ⬜ | Railway le fournit automatiquement (défaut: 8000) |
-| `REDIS_URL` | ⬜ | Optionnel — cache Redis |
-| `SENTRY_DSN` | ⬜ | Optionnel — monitoring erreurs |
+| --- | --- | --- |
+| `DATABASE_URL` | âœ… | URI PostgreSQL Supabase |
+| `MISTRAL_API_KEY` | âœ… | ClÃ© API Mistral AI |
+| `API_SECRET_KEY` | âœ… | Secret pour tokens JWT API (`openssl rand -hex 32`) |
+| `SUPABASE_JWT_SECRET` | âœ… | JWT Secret de Supabase |
+| `CORS_ORIGINS` | âœ… | URL frontend Vercel (ex: `https://assistant-matanne.vercel.app`) |
+| `ENVIRONMENT` | âœ… | `production` |
+| `PORT` | â¬œ | Railway le fournit automatiquement (dÃ©faut: 8000) |
+| `REDIS_URL` | â¬œ | Optionnel â€” cache Redis |
+| `SENTRY_DSN` | â¬œ | Optionnel â€” monitoring erreurs |
 
-4. Railway déploie automatiquement à chaque push sur `main`
+4. Railway dÃ©ploie automatiquement Ã  chaque push sur `main`
 5. Health check : `GET /health`
-6. **Après le premier déploiement**, appliquer les migrations SQL :
+6. **AprÃ¨s le premier dÃ©ploiement**, appliquer les migrations SQL :
    ```bash
    # Via Railway CLI ou shell
    python manage.py migrate
-   # Ou exécuter sql/INIT_COMPLET.sql directement dans Supabase SQL Editor
+   # Ou exÃ©cuter sql/INIT_COMPLET.sql directement dans Supabase SQL Editor
    ```
 
 ### 3. Vercel (Frontend)
 
 1. Importer le repo sur [vercel.com](https://vercel.com), **Root Directory** = `frontend`
-2. **Region** : `cdg1` (Paris) — configuré dans `vercel.json`
+2. **Region** : `cdg1` (Paris) â€” configurÃ© dans `vercel.json`
 3. Variables d'environnement Vercel :
 
 | Variable | Description |
-|---|---|
+| --- | --- |
 | `NEXT_PUBLIC_API_URL` | URL Railway (ex: `https://assistant-matanne-api.up.railway.app`) |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL Supabase (ex: `https://xxx.supabase.co`) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clé anon Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ClÃ© anon Supabase |
 
-4. Vercel déploie automatiquement à chaque push sur `main`
+4. Vercel dÃ©ploie automatiquement Ã  chaque push sur `main`
 
 ### CI/CD
 
-Les workflows GitHub Actions (`.github/workflows/`) s'exécutent sur chaque push/PR :
+Les workflows GitHub Actions (`.github/workflows/`) s'exÃ©cutent sur chaque push/PR :
 
-- **deploy.yml** : Lint (ruff) + tests (pytest) + build frontend — gate avant déploiement
-- **tests.yml** : Tests complets (unit, integration, type-check, encoding, sécurité)
-- **dependabot.yml** : Mises à jour automatiques des dépendances (hebdomadaire)
+- **deploy.yml** : Lint (ruff) + tests (pytest) + build frontend â€” gate avant dÃ©ploiement
+- **tests.yml** : Tests complets (unit, integration, type-check, encoding, sÃ©curitÃ©)
+- **dependabot.yml** : Mises Ã  jour automatiques des dÃ©pendances (hebdomadaire)
 
-### Vérification post-déploiement
+### VÃ©rification post-dÃ©ploiement
 
 ```bash
 # Backend health
@@ -275,31 +275,31 @@ curl https://assistant-matanne-api.up.railway.app/health
 
 ---
 
-## �📚 Documentation
+## ï¿½ðŸ“š Documentation
 
 ### Vue d'ensemble du projet
 
 | Document | Description |
-|---|---|
-| [STATUS_PHASES.md](STATUS_PHASES.md) | **État des 28 phases (A-AC)** — Audit complet de l'implémentation par module |
-| [ROADMAP.md](ROADMAP.md) | **Feuille de route** — Priorités court/moyen/long terme + mapping phases |
+| --- | --- |
+| [STATUS_PHASES.md](STATUS_PHASES.md) | **Ã‰tat des 28 phases (A-AC)** â€” Audit complet de l'implÃ©mentation par module |
+| [ROADMAP.md](ROADMAP.md) | **Feuille de route** â€” PrioritÃ©s court/moyen/long terme + mapping phases |
 
 ### Documentation technique
 
 | Document | Description |
-|---|---|
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture technique détaillée |
-| [API_REFERENCE.md](docs/API_REFERENCE.md) | Référence complète de l'API REST |
+| --- | --- |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture technique dÃ©taillÃ©e |
+| [API_REFERENCE.md](docs/API_REFERENCE.md) | RÃ©fÃ©rence complÃ¨te de l'API REST |
 | [SERVICES_REFERENCE.md](docs/SERVICES_REFERENCE.md) | Documentation des services backend |
-| [MODULES.md](docs/MODULES.md) | Fonctionnalités détaillées par module |
-| [ERD_SCHEMA.md](docs/ERD_SCHEMA.md) | Schéma entité-relation de la DB |
+| [MODULES.md](docs/MODULES.md) | FonctionnalitÃ©s dÃ©taillÃ©es par module |
+| [ERD_SCHEMA.md](docs/ERD_SCHEMA.md) | SchÃ©ma entitÃ©-relation de la DB |
 | [SQLALCHEMY_SESSION_GUIDE.md](docs/SQLALCHEMY_SESSION_GUIDE.md) | Guide sessions DB |
 | [UI_COMPONENTS.md](docs/UI_COMPONENTS.md) | Composants UI Next.js / shadcn |
-| [PATTERNS.md](docs/PATTERNS.md) | Patterns de code récurrents |
+| [PATTERNS.md](docs/PATTERNS.md) | Patterns de code rÃ©currents |
 | [frontend/README.md](frontend/README.md) | Documentation frontend Next.js |
 
 ---
 
-## 📄 Licence
+## ðŸ“„ Licence
 
-Projet privé — Usage familial uniquement.
+Projet privÃ© â€” Usage familial uniquement.

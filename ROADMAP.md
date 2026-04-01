@@ -14,6 +14,7 @@
 **Sprint 5 — Notifications + Admin + 2FA** : CT-01/CT-02/WhatsApp webhook/RouteurIA/Redis L2 ✅  
 **Sprint 6 — Cron jobs** : CT-03/CT-04 (10 jobs APScheduler actifs) ✅  
 **Sprint 7 — SQL consolidation + Bugs + Tests + Doc** ✅
+
 - P-04/P-05/P-06 : migrations SQL absorbées dans INIT_COMPLET (Sprint 1)
 - P-07 : alembic archivé (`alembic.ini.bak`)
 - B-06/B-07/B-11/B-12 : bugs corrigés
@@ -28,7 +29,7 @@
 ## 🔜 Sprint 8 — Inter-modules + Dashboard avancé
 
 | # | Tâche | Item | Effort |
-|---|-------|------|--------|
+| --- | ------- | ------ | -------- |
 | 1 | Cellier ↔ Inventaire cuisine consolidé | MT-01 | M |
 | 2 | Score bien-être global (IA-09) | MT-03 | M |
 | 3 | Alertes météo contextuelles cross-modules | MT-04 | M |
@@ -61,6 +62,7 @@ Note : plusieurs items de Sprint 9 sont désormais partiellement ou totalement i
 - ✅ LT-04 : Automations "Si → Alors" (table DB + moteur + cron + exécution manuelle)
 
 État réel du moteur LT-04 au 1er avril 2026 :
+
 - 9 déclencheurs supportés
 - 10 actions supportées
 - dry-run global et par règle

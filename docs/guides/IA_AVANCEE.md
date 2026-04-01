@@ -1,59 +1,59 @@
-# Guide — Module IA Avancée
+﻿# Guide â€” Module IA AvancÃ©e
 
 > **Routes** : `GET|POST /api/v1/ia-avancee/*`  
-> **Rate limiting** : 10 req/min (plafonné par `verifier_limite_debit_ia`)  
-> **Modèle** : Mistral AI (configuré dans `.env.local`)  
+> **Rate limiting** : 10 req/min (plafonnÃ© par `verifier_limite_debit_ia`)  
+> **ModÃ¨le** : Mistral AI (configurÃ© dans `.env.local`)  
 > **Service** : `src/services/ia_avancee/service.py`
 
 ---
 
-## Vue d'ensemble — Les 14 outils IA
+## Vue d'ensemble â€” Les 14 outils IA
 
-| # | Endpoint | Méthode | Description | Multimodal |
-|---|----------|---------|-------------|-----------|
-| 1 | `/suggestions-achats` | GET | Suggestions achats basées sur l'historique de courses | Non |
-| 2 | `/planning-adaptatif` | POST | Planning repas adapté (météo + budget + préférences) | Non |
-| 3 | `/diagnostic-plante` | POST | Diagnostic plante par photo (maladie, soin recommandé) | ✅ Image |
-| 4 | `/prevision-depenses` | GET | Prévision dépenses de fin de mois | Non |
-| 5 | `/idees-cadeaux` | POST | Idées cadeaux personnalisées pour anniversaire | Non |
-| 6 | `/analyse-photo` | POST | Analyse photo multi-usage (contexte auto-détecté) | ✅ Image |
-| 7 | `/optimisation-routines` | GET | Suggestions d'optimisation des routines ménagères | Non |
-| 8 | `/analyse-document` | POST | Analyse document par photo (OCR + extraction données) | ✅ Image |
-| 9 | `/estimation-travaux` | POST | Estimation coût travaux par photo | ✅ Image |
-| 10 | `/planning-voyage` | POST | Planning voyage complet (itinéraire, budget, checklist) | Non |
-| 11 | `/recommandations-energie` | GET | Économies d'énergie basées sur consommation réelle | Non |
-| 12 | `/prediction-pannes` | GET | Prédiction pannes équipements (historique entretien) | Non |
+| # | Endpoint | MÃ©thode | Description | Multimodal |
+| --- | ---------- | --------- | ------------- | ----------- |
+| 1 | `/suggestions-achats` | GET | Suggestions achats basÃ©es sur l'historique de courses | Non |
+| 2 | `/planning-adaptatif` | POST | Planning repas adaptÃ© (mÃ©tÃ©o + budget + prÃ©fÃ©rences) | Non |
+| 3 | `/diagnostic-plante` | POST | Diagnostic plante par photo (maladie, soin recommandÃ©) | âœ… Image |
+| 4 | `/prevision-depenses` | GET | PrÃ©vision dÃ©penses de fin de mois | Non |
+| 5 | `/idees-cadeaux` | POST | IdÃ©es cadeaux personnalisÃ©es pour anniversaire | Non |
+| 6 | `/analyse-photo` | POST | Analyse photo multi-usage (contexte auto-dÃ©tectÃ©) | âœ… Image |
+| 7 | `/optimisation-routines` | GET | Suggestions d'optimisation des routines mÃ©nagÃ¨res | Non |
+| 8 | `/analyse-document` | POST | Analyse document par photo (OCR + extraction donnÃ©es) | âœ… Image |
+| 9 | `/estimation-travaux` | POST | Estimation coÃ»t travaux par photo | âœ… Image |
+| 10 | `/planning-voyage` | POST | Planning voyage complet (itinÃ©raire, budget, checklist) | Non |
+| 11 | `/recommandations-energie` | GET | Ã‰conomies d'Ã©nergie basÃ©es sur consommation rÃ©elle | Non |
+| 12 | `/prediction-pannes` | GET | PrÃ©diction pannes Ã©quipements (historique entretien) | Non |
 | 13 | `/suggestions-proactives` | GET | Suggestions proactives multi-modules contextuelles | Non |
-| 14 | `/adaptations-meteo` | POST | Adaptations planning selon météo (repas, activités) | Non |
+| 14 | `/adaptations-meteo` | POST | Adaptations planning selon mÃ©tÃ©o (repas, activitÃ©s) | Non |
 
 ---
 
-## Détail de chaque outil
+## DÃ©tail de chaque outil
 
-### 1. Suggestions achats — GET `/suggestions-achats`
+### 1. Suggestions achats â€” GET `/suggestions-achats`
 
-Analyse l'historique de courses et l'inventaire pour suggérer ce qu'il faut racheter.
+Analyse l'historique de courses et l'inventaire pour suggÃ©rer ce qu'il faut racheter.
 
 **Auth** : Bearer token requis  
 **Rate limit** : 10 req/min IA  
-**Réponse** : `SuggestionsAchatsResponse`
+**RÃ©ponse** : `SuggestionsAchatsResponse`
 
 ```python
-# Exemple de réponse
+# Exemple de rÃ©ponse
 {
   "suggestions": [
-    {"nom": "Pâtes", "raison": "Stock bas (2 paquets restants)", "priorite": "haute"},
-    {"nom": "Lait", "raison": "Consommé chaque semaine", "priorite": "normale"}
+    {"nom": "PÃ¢tes", "raison": "Stock bas (2 paquets restants)", "priorite": "haute"},
+    {"nom": "Lait", "raison": "ConsommÃ© chaque semaine", "priorite": "normale"}
   ],
-  "contexte": "Basé sur 8 semaines d'historique"
+  "contexte": "BasÃ© sur 8 semaines d'historique"
 }
 ```
 
 ---
 
-### 2. Planning adaptatif — POST `/planning-adaptatif`
+### 2. Planning adaptatif â€” POST `/planning-adaptatif`
 
-Génère un planning repas adapté aux conditions actuelles (météo, budget restant, préférences).
+GÃ©nÃ¨re un planning repas adaptÃ© aux conditions actuelles (mÃ©tÃ©o, budget restant, prÃ©fÃ©rences).
 
 **Body** : `PlanningAdaptatifRequest`
 ```json
@@ -65,32 +65,32 @@ Génère un planning repas adapté aux conditions actuelles (météo, budget res
 }
 ```
 
-**Réponse** : `PlanningAdaptatif` (7 jours de repas avec justifications)
+**RÃ©ponse** : `PlanningAdaptatif` (7 jours de repas avec justifications)
 
 ---
 
-### 3. Diagnostic plante — POST `/diagnostic-plante`
+### 3. Diagnostic plante â€” POST `/diagnostic-plante`
 
-Analyse une photo de plante pour diagnostiquer maladies et suggérer soins.
+Analyse une photo de plante pour diagnostiquer maladies et suggÃ©rer soins.
 
 **Body** : `multipart/form-data` avec champ `image` (JPG/PNG, max 5MB)  
-**Réponse** : `DiagnosticPlante`
+**RÃ©ponse** : `DiagnosticPlante`
 ```json
 {
-  "diagnostic": "Oïdium (champignon)",
+  "diagnostic": "OÃ¯dium (champignon)",
   "confiance": 0.85,
-  "soins_recommandes": ["Traiter avec fongicide", "Réduire arrosage"],
-  "urgence": "modérée"
+  "soins_recommandes": ["Traiter avec fongicide", "RÃ©duire arrosage"],
+  "urgence": "modÃ©rÃ©e"
 }
 ```
 
 ---
 
-### 4. Prévision dépenses — GET `/prevision-depenses`
+### 4. PrÃ©vision dÃ©penses â€” GET `/prevision-depenses`
 
-Prédit les dépenses restantes du mois en cours.
+PrÃ©dit les dÃ©penses restantes du mois en cours.
 
-**Réponse** : `PrevisionDepenses`
+**RÃ©ponse** : `PrevisionDepenses`
 ```json
 {
   "prevu_fin_mois": 340.00,
@@ -102,9 +102,9 @@ Prédit les dépenses restantes du mois en cours.
 
 ---
 
-### 5. Idées cadeaux — POST `/idees-cadeaux`
+### 5. IdÃ©es cadeaux â€” POST `/idees-cadeaux`
 
-Génère des idées cadeaux personnalisées en fonction du profil et budget.
+GÃ©nÃ¨re des idÃ©es cadeaux personnalisÃ©es en fonction du profil et budget.
 
 **Body** : `IdeesCadeauxRequest`
 ```json
@@ -119,20 +119,20 @@ Génère des idées cadeaux personnalisées en fonction du profil et budget.
 
 ---
 
-### 6. Analyse photo multi-usage — POST `/analyse-photo`
+### 6. Analyse photo multi-usage â€” POST `/analyse-photo`
 
-Analyse une photo et en extrait des informations selon le contexte (produit, plante, document, état).
+Analyse une photo et en extrait des informations selon le contexte (produit, plante, document, Ã©tat).
 
 **Body** : `UploadFile` (JPG/PNG) + champ `contexte` optionnel  
-**Réponse** : `AnalysePhotoMultiUsage`
+**RÃ©ponse** : `AnalysePhotoMultiUsage`
 
 ---
 
-### 7. Optimisation routines — GET `/optimisation-routines`
+### 7. Optimisation routines â€” GET `/optimisation-routines`
 
-Analyse les routines existantes et suggère des optimisations (temps, fréquence, ordonnancement).
+Analyse les routines existantes et suggÃ¨re des optimisations (temps, frÃ©quence, ordonnancement).
 
-**Réponse** : `OptimisationRoutinesResponse`
+**RÃ©ponse** : `OptimisationRoutinesResponse`
 ```json
 {
   "optimisations": [
@@ -145,16 +145,16 @@ Analyse les routines existantes et suggère des optimisations (temps, fréquence
 
 ---
 
-### 8. Analyse document — POST `/analyse-document`
+### 8. Analyse document â€” POST `/analyse-document`
 
-OCR + extraction structurée depuis photo d'un document (facture, contrat, ordonnance).
+OCR + extraction structurÃ©e depuis photo d'un document (facture, contrat, ordonnance).
 
 **Body** : `UploadFile` (JPG/PNG, max 10MB)  
-**Réponse** : `DocumentAnalyse`
+**RÃ©ponse** : `DocumentAnalyse`
 ```json
 {
   "type_document": "facture",
-  "données_extraites": {
+  "donnÃ©es_extraites": {
     "montant": 127.50,
     "date": "2026-03-15",
     "fournisseur": "EDF"
@@ -165,27 +165,27 @@ OCR + extraction structurée depuis photo d'un document (facture, contrat, ordon
 
 ---
 
-### 9. Estimation travaux — POST `/estimation-travaux`
+### 9. Estimation travaux â€” POST `/estimation-travaux`
 
-Estime le coût de travaux à partir d'une photo.
+Estime le coÃ»t de travaux Ã  partir d'une photo.
 
 **Body** : `EstimationTravauxRequest` + `UploadFile`  
-**Réponse** : `EstimationTravauxPhoto`
+**RÃ©ponse** : `EstimationTravauxPhoto`
 ```json
 {
-  "type_travaux": "Remplacement revêtement sol",
+  "type_travaux": "Remplacement revÃªtement sol",
   "estimation_basse": 800,
   "estimation_haute": 1500,
-  "facteurs": ["surface ~20m²", "pose comprise", "matériaux standard"],
+  "facteurs": ["surface ~20mÂ²", "pose comprise", "matÃ©riaux standard"],
   "recommandations": ["Demander 3 devis"]
 }
 ```
 
 ---
 
-### 10. Planning voyage — POST `/planning-voyage`
+### 10. Planning voyage â€” POST `/planning-voyage`
 
-Génère un planning voyage détaillé avec itinéraire, budget et checklist.
+GÃ©nÃ¨re un planning voyage dÃ©taillÃ© avec itinÃ©raire, budget et checklist.
 
 **Body** : `PlanningVoyageRequest`
 ```json
@@ -198,56 +198,56 @@ Génère un planning voyage détaillé avec itinéraire, budget et checklist.
 }
 ```
 
-**Réponse** : `PlanningVoyage` (itinéraire jour par jour + checklist + budget estimé)
+**RÃ©ponse** : `PlanningVoyage` (itinÃ©raire jour par jour + checklist + budget estimÃ©)
 
 ---
 
-### 11. Recommandations énergie — GET `/recommandations-energie`
+### 11. Recommandations Ã©nergie â€” GET `/recommandations-energie`
 
-Analyse la consommation énergétique et recommande des économies.
+Analyse la consommation Ã©nergÃ©tique et recommande des Ã©conomies.
 
-**Réponse** : `RecommandationsEnergieResponse`
+**RÃ©ponse** : `RecommandationsEnergieResponse`
 ```json
 {
   "economies_estimees_euros": 42.0,
   "recommandations": [
-    {"action": "Décaler lave-linge en heures creuses", "economie_mois": 8.50}
+    {"action": "DÃ©caler lave-linge en heures creuses", "economie_mois": 8.50}
   ]
 }
 ```
 
 ---
 
-### 12. Prédiction pannes — GET `/prediction-pannes`
+### 12. PrÃ©diction pannes â€” GET `/prediction-pannes`
 
-Prédit les équipements susceptibles de tomber en panne basé sur l'historique d'entretien.
+PrÃ©dit les Ã©quipements susceptibles de tomber en panne basÃ© sur l'historique d'entretien.
 
-**Réponse** : `PredictionsPannesResponse`
+**RÃ©ponse** : `PredictionsPannesResponse`
 
 ---
 
-### 13. Suggestions proactives — GET `/suggestions-proactives`
+### 13. Suggestions proactives â€” GET `/suggestions-proactives`
 
-Point d'entrée multi-modules — retourne des suggestions contextuelles depuis tous les domaines.
+Point d'entrÃ©e multi-modules â€” retourne des suggestions contextuelles depuis tous les domaines.
 
-**Réponse** : `SuggestionsProactivesResponse`
+**RÃ©ponse** : `SuggestionsProactivesResponse`
 ```json
 {
   "suggestions": [
-    {"module": "cuisine", "message": "3 recettes à utiliser avant péremption", "priorite": 1},
-    {"module": "maison", "message": "Vidange voiture à programmer (12 000 km)", "priorite": 2}
+    {"module": "cuisine", "message": "3 recettes Ã  utiliser avant pÃ©remption", "priorite": 1},
+    {"module": "maison", "message": "Vidange voiture Ã  programmer (12 000 km)", "priorite": 2}
   ]
 }
 ```
 
 ---
 
-### 14. Adaptations météo — POST `/adaptations-meteo`
+### 14. Adaptations mÃ©tÃ©o â€” POST `/adaptations-meteo`
 
-Adapte les activités et repas planifiés selon la météo prévue.
+Adapte les activitÃ©s et repas planifiÃ©s selon la mÃ©tÃ©o prÃ©vue.
 
 **Body** : `AdaptationsMeteoRequest`  
-**Réponse** : `AdaptationsMeteoResponse`
+**RÃ©ponse** : `AdaptationsMeteoResponse`
 
 ---
 
@@ -255,23 +255,23 @@ Adapte les activités et repas planifiés selon la météo prévue.
 
 ### Rate limiting IA
 
-Tous les endpoints IA utilisent la dépendance `verifier_limite_debit_ia` (10 req/min vs 60 req/min standard).
+Tous les endpoints IA utilisent la dÃ©pendance `verifier_limite_debit_ia` (10 req/min vs 60 req/min standard).
 
 ```python
 @router.post("/diagnostic-plante")
 @gerer_exception_api
 async def diagnostic_plante(
     image: UploadFile = File(...),
-    _: None = Depends(verifier_limite_debit_ia),    # ← rate limit IA
+    _: None = Depends(verifier_limite_debit_ia),    # â† rate limit IA
     user: dict = Depends(require_auth),
 ) -> dict:
     ...
 ```
 
-### Cache IA (cache sémantique)
+### Cache IA (cache sÃ©mantique)
 
-Le `CacheIA` dans `src/core/ai/cache.py` stocke les réponses d'appels IA identiques/similaires.
-TTL par défaut : 1 heure. Les appels multimodaux (images) ne sont **pas** mis en cache.
+Le `CacheIA` dans `src/core/ai/cache.py` stocke les rÃ©ponses d'appels IA identiques/similaires.
+TTL par dÃ©faut : 1 heure. Les appels multimodaux (images) ne sont **pas** mis en cache.
 
 ### Client Mistral
 
@@ -285,29 +285,29 @@ reponse = client.appeler_sync(prompt, system_prompt=..., modele="mistral-large-l
 
 ### Circuit Breaker
 
-Si Mistral AI est indisponible, le `CircuitBreaker` (`src/core/ai/circuit_breaker.py`) ouvre le circuit après 5 échecs consécutifs et retourne des réponses de fallback.
+Si Mistral AI est indisponible, le `CircuitBreaker` (`src/core/ai/circuit_breaker.py`) ouvre le circuit aprÃ¨s 5 Ã©checs consÃ©cutifs et retourne des rÃ©ponses de fallback.
 
 ---
 
 ## Limites et quotas
 
-| Paramètre | Valeur | Source config |
-|-----------|--------|---------------|
-| Limite journalière globale | `AI_RATE_LIMIT_DAILY` | `src/core/constants.py` |
+| ParamÃ¨tre | Valeur | Source config |
+| ----------- | -------- | --------------- |
+| Limite journaliÃ¨re globale | `AI_RATE_LIMIT_DAILY` | `src/core/constants.py` |
 | Limite horaire | `AI_RATE_LIMIT_HOURLY` | `src/core/constants.py` |
 | Rate limit HTTP IA | 10 req/min | `src/api/rate_limiting/` |
 | Taille max image | 5 MB (10 MB pour documents) | Validation route |
-| Formats image acceptés | JPG, PNG, WEBP | `UploadFile` validator |
+| Formats image acceptÃ©s | JPG, PNG, WEBP | `UploadFile` validator |
 
 ---
 
-## Dépannage
+## DÃ©pannage
 
 | Erreur | Cause probable | Solution |
-|--------|---------------|---------|
-| `429 Too Many Requests` | Rate limit IA atteint | Attendre 60s puis réessayer |
-| `503 Service Unavailable` | Circuit breaker ouvert (Mistral down) | Attendre et réessayer (auto-reset après 60s) |
-| `422 Unprocessable Entity` | Body mal formé | Vérifier le schéma dans `/docs` (Swagger) |
-| `500 Internal Server Error` | Erreur parsing réponse Mistral | Vérifier les logs `uvicorn` |
+| -------- | --------------- | --------- |
+| `429 Too Many Requests` | Rate limit IA atteint | Attendre 60s puis rÃ©essayer |
+| `503 Service Unavailable` | Circuit breaker ouvert (Mistral down) | Attendre et rÃ©essayer (auto-reset aprÃ¨s 60s) |
+| `422 Unprocessable Entity` | Body mal formÃ© | VÃ©rifier le schÃ©ma dans `/docs` (Swagger) |
+| `500 Internal Server Error` | Erreur parsing rÃ©ponse Mistral | VÃ©rifier les logs `uvicorn` |
 
-Pour tester manuellement : `http://localhost:8000/docs#/IA%20Avancée`
+Pour tester manuellement : `http://localhost:8000/docs#/IA%20AvancÃ©e`

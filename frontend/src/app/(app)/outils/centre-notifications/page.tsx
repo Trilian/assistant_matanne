@@ -1,11 +1,11 @@
 ﻿'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
 import { Badge } from '@/composants/ui/badge'
-import { AlertCircle, Bell, Check, Trash2 } from 'lucide-react'
+import { Bell, Check } from 'lucide-react'
 import { clientApi } from '@/bibliotheque/api/client'
 import { toast } from 'sonner'
 
@@ -16,7 +16,7 @@ import { toast } from 'sonner'
  * - Pagination
  * - Filtres (non-lu seulement)
  * - Actions (marquer comme lu, supprimer)
- * - Stats (nombre non-lu, par canal, par catÃ©gorie)
+ * - Stats (nombre non-lu, par canal, par categorie)
  */
 
 interface Notification {
@@ -35,7 +35,7 @@ export default function CentreNotificationsPage() {
   const [nonLuSeulement, setNonLuSeulement] = useState(false)
   const [selectedNotif, setSelectedNotif] = useState<number | null>(null)
 
-  // RÃ©cupÃ©rer l'historique
+  // Recuperer l'historique
   const { data: historique, isLoading, refetch } = useQuery({
     queryKey: ['notifications', page, nonLuSeulement],
     queryFn: async () => {
@@ -50,7 +50,7 @@ export default function CentreNotificationsPage() {
     },
   })
 
-  // RÃ©cupÃ©rer les stats
+  // Recuperer les stats
   const { data: stats } = useQuery({
     queryKey: ['notifications-stats'],
     queryFn: async () => {
@@ -87,10 +87,10 @@ export default function CentreNotificationsPage() {
   }
 
   const categorieIcons: Record<string, string> = {
-    rappels: 'ðŸ””',
-    alertes: 'âš ï¸',
-    resumes: 'ðŸ“‹',
-    autres: 'ðŸ“¢',
+    rappels: 'R',
+    alertes: '!',
+    resumes: 'S',
+    autres: 'i',
   }
 
   return (
@@ -100,7 +100,7 @@ export default function CentreNotificationsPage() {
         <div>
           <h1 className="text-3xl font-bold">Centre de Notifications</h1>
           <p className="text-muted-foreground mt-2">
-            Historique centralisÃ© de toutes vos notifications (E.5)
+            Historique centralise de toutes vos notifications (E.5)
           </p>
         </div>
         {stats && (
@@ -139,7 +139,7 @@ export default function CentreNotificationsPage() {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Par catÃ©gorie</CardTitle>
+              <CardTitle className="text-sm">Par categorie</CardTitle>
             </CardHeader>
             <CardContent className="space-y-1 text-sm">
               {Object.entries(stats.par_categorie || {}).map(([cat, count]) => (
@@ -153,7 +153,7 @@ export default function CentreNotificationsPage() {
         </div>
       )}
 
-      {/* ContrÃ´les */}
+      {/* Controles */}
       <div className="flex items-center gap-4">
         <div className="flex gap-2">
           <Button
@@ -181,7 +181,7 @@ export default function CentreNotificationsPage() {
         ) : historique?.data?.length === 0 ? (
           <Card className="text-center py-8">
             <Bell className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground">Aucune notification trouvÃ©e</p>
+            <p className="text-muted-foreground">Aucune notification trouvee</p>
           </Card>
         ) : (
           historique?.data?.map((notif: Notification) => (
@@ -194,7 +194,7 @@ export default function CentreNotificationsPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg">{categorieIcons[notif.categorie] || 'ðŸ“¢'}</span>
+                      <span className="text-lg">{categorieIcons[notif.categorie] || 'i'}</span>
                       <h3 className="font-semibold">{notif.titre}</h3>
                       <Badge
                         variant="outline"
@@ -241,7 +241,7 @@ export default function CentreNotificationsPage() {
       {historique && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Page {page} â€¢ {historique.data?.length} notification(s)
+            Page {page} - {historique.data?.length} notification(s)
           </div>
           <div className="flex gap-2">
             <Button
@@ -249,7 +249,7 @@ export default function CentreNotificationsPage() {
               onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
             >
-              PrÃ©cÃ©dent
+              Precedent
             </Button>
             <Button
               variant="outline"

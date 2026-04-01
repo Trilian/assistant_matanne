@@ -19,7 +19,7 @@ export default defineConfig({
         "src/**/index.ts",
         "src/app/**/(layout|loading|error|not-found).tsx",
         "src/fournisseurs/**",
-        "src/middleware.ts",
+        "src/proxy.ts",
       ],
       thresholds: {
         lines: 50,

@@ -1,10 +1,10 @@
-# 🎮 Guide Module Jeux
+﻿# ðŸŽ® Guide Module Jeux
 
 > Guide complet du module Jeux : paris sportifs intelligents, Loto/Euromillions avec IA et backtest.
 
-**Statut** : ✅ **100% COMPLET** — Phases S/T/U/V/W finalisées (27 mars 2026)
+**Statut** : âœ… **100% COMPLET** â€” Phases S/T/U/V/W finalisÃ©es (27 mars 2026)
 
-## Table des matières
+## Table des matiÃ¨res
 
 1. [Vue d'ensemble](#vue-densemble)
 2. [Dashboard Jeux](#dashboard-jeux)
@@ -18,27 +18,27 @@
 
 ## Vue d'ensemble
 
-Le module **Jeux** est un système complet de suivi et d'analyse des paris sportifs et jeux de loterie avec **intelligence artificielle** (Mistral AI), détection d'opportunités et backtest.
+Le module **Jeux** est un systÃ¨me complet de suivi et d'analyse des paris sportifs et jeux de loterie avec **intelligence artificielle** (Mistral AI), dÃ©tection d'opportunitÃ©s et backtest.
 
 **URL principale** : `/jeux`  
-**Backend** : `src/services/jeux/` (13 modèles, 5 services IA, 20+ endpoints)  
+**Backend** : `src/services/jeux/` (13 modÃ¨les, 5 services IA, 20+ endpoints)  
 **Frontend** : `frontend/src/app/(app)/jeux/` (6 pages, 15+ composants)
 
-### 🎯 Fonctionnalités clés
+### ðŸŽ¯ FonctionnalitÃ©s clÃ©s
 
-- **Dashboard contextuel** : Budget, value bets, séries détectées, KPIs temps réel
-- **Prédictions IA** : Analyse de matchs avec probabilités, confiance, conseils
-- **Générateur de grilles IA** : Loto optimisé (modes chauds/froids/équilibre) + critique personnalisée
-- **Heatmaps** : Évolution des cotes bookmaker, fréquences numéros loto
-- **Backtest** : Simulation ROI sur historique, validation stratégies
-- **Notifications push** : Résultats paris/loto en temps réel (Web Push)
-- **Services planifiés** : cron jeux et alertes périodiques côté backend
+- **Dashboard contextuel** : Budget, value bets, sÃ©ries dÃ©tectÃ©es, KPIs temps rÃ©el
+- **PrÃ©dictions IA** : Analyse de matchs avec probabilitÃ©s, confiance, conseils
+- **GÃ©nÃ©rateur de grilles IA** : Loto optimisÃ© (modes chauds/froids/Ã©quilibre) + critique personnalisÃ©e
+- **Heatmaps** : Ã‰volution des cotes bookmaker, frÃ©quences numÃ©ros loto
+- **Backtest** : Simulation ROI sur historique, validation stratÃ©gies
+- **Notifications push** : RÃ©sultats paris/loto en temps rÃ©el (Web Push)
+- **Services planifiÃ©s** : cron jeux et alertes pÃ©riodiques cÃ´tÃ© backend
 
 ### Points d'attention actuels
 
-- l'agrégation pertes/gains -> budget global reste une interaction planifiée mais pas encore finalisée
+- l'agrÃ©gation pertes/gains -> budget global reste une interaction planifiÃ©e mais pas encore finalisÃ©e
 
-> ⚠️ **Avertissement** : Ce module est conçu pour un usage personnel de suivi analytique. MaTanne ne réalise pas de paris réels — il s'agit uniquement d'un outil de gestion, d'apprentissage et de contrôle budgétaire.
+> âš ï¸ **Avertissement** : Ce module est conÃ§u pour un usage personnel de suivi analytique. MaTanne ne rÃ©alise pas de paris rÃ©els â€” il s'agit uniquement d'un outil de gestion, d'apprentissage et de contrÃ´le budgÃ©taire.
 
 ---
 
@@ -46,18 +46,18 @@ Le module **Jeux** est un système complet de suivi et d'analyse des paris sport
 
 **URL** : `/jeux`
 
-Hub central avec vision temps réel de votre activité de jeu.
+Hub central avec vision temps rÃ©el de votre activitÃ© de jeu.
 
 ### Sections
 
 1. **Bandeau budget** : Progression vers limite mensuelle (barre + alerte si >80%)
-2. **Opportunités** : Value bets détectés automatiquement (Expected Value >5%)
-3. **Analyse IA** : Résumé Mistral de votre activité récente (tendances, recommandations)
-4. **KPIs** : ROI global, taux de réussite, bénéfice net, paris actifs
+2. **OpportunitÃ©s** : Value bets dÃ©tectÃ©s automatiquement (Expected Value >5%)
+3. **Analyse IA** : RÃ©sumÃ© Mistral de votre activitÃ© rÃ©cente (tendances, recommandations)
+4. **KPIs** : ROI global, taux de rÃ©ussite, bÃ©nÃ©fice net, paris actifs
 
 ### Widgets personnalisables
 
-- Drag & drop pour réorganiser les grilles
+- Drag & drop pour rÃ©organiser les grilles
 - Sauvegarde automatique dans `localStorage`
 - Support mobile avec navigation fluide
 
@@ -67,86 +67,86 @@ Hub central avec vision temps réel de votre activité de jeu.
 
 **URL** : `/jeux/paris`
 
-### Fonctionnalités de base
+### FonctionnalitÃ©s de base
 
-- ✅ CRUD paris (créer, modifier, supprimer)
-- ✅ Filtres par statut (en cours, gagné, perdu, annulé)
-- ✅ Calcul automatique gains/pertes
-- ✅ Statistiques : ROI, taux de réussite, mise moyenne
+- âœ… CRUD paris (crÃ©er, modifier, supprimer)
+- âœ… Filtres par statut (en cours, gagnÃ©, perdu, annulÃ©)
+- âœ… Calcul automatique gains/pertes
+- âœ… Statistiques : ROI, taux de rÃ©ussite, mise moyenne
 
-### 🤖 Intelligence artificielle
+### ðŸ¤– Intelligence artificielle
 
-#### Prédictions de matchs
+#### PrÃ©dictions de matchs
 
-Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de détail** :
+Lors de la crÃ©ation d'un pari, cliquez sur un match pour ouvrir le **drawer de dÃ©tail** :
 
 - *API Reference
 
-### Dashboard & Séries
+### Dashboard & SÃ©ries
 
-| Méthode | URL | Description |
-|---------|-----|-------------|
+| MÃ©thode | URL | Description |
+| --------- | ----- | ------------- |
 | GET | `/api/v1/jeux/dashboard` | Dashboard complet (budget, value bets, KPIs, analyse IA) |
-| GET | `/api/v1/jeux/series` | Séries actives détectées (seuil configurable) |
-| GET | `/api/v1/jeux/alertes` | Alertes séries dangereuses |
+| GET | `/api/v1/jeux/series` | SÃ©ries actives dÃ©tectÃ©es (seuil configurable) |
+| GET | `/api/v1/jeux/alertes` | Alertes sÃ©ries dangereuses |
 
 ### Paris sportifs
 
-| Méthode | URL | Description |
-|---------|-----|-------------|
+| MÃ©thode | URL | Description |
+| --------- | ----- | ------------- |
 | GET | `/api/v1/jeux/paris` | Lister paris (filtres statut/championnat) |
-| POST | `/api/v1/jeux/paris` | Créer pari (bloqué si limite atteinte) |
-| PATCH | `/api/v1/jeux/paris/{id}` | Modifier pari (résultat, statut) |
+| POST | `/api/v1/jeux/paris` | CrÃ©er pari (bloquÃ© si limite atteinte) |
+| PATCH | `/api/v1/jeux/paris/{id}` | Modifier pari (rÃ©sultat, statut) |
 | DELETE | `/api/v1/jeux/paris/{id}` | Supprimer pari |
 | GET | `/api/v1/jeux/paris/stats` | Statistiques globales paris |
-| GET | `/api/v1/jeux/paris/predictions/{match_id}` | Prédiction IA pour un match |
-| GET | `/api/v1/jeux/paris/value-bets` | Value bets détectés (EV >5%) |
-| GET | `/api/v1/jeux/paris/cotes-historique/{match_id}` | Évolution cotes bookmaker (heatmap) |
+| GET | `/api/v1/jeux/paris/predictions/{match_id}` | PrÃ©diction IA pour un match |
+| GET | `/api/v1/jeux/paris/value-bets` | Value bets dÃ©tectÃ©s (EV >5%) |
+| GET | `/api/v1/jeux/paris/cotes-historique/{match_id}` | Ã‰volution cotes bookmaker (heatmap) |
 
 ### Loto
 
-| Méthode | URL | Description |
-|---------|-----|-------------|
+| MÃ©thode | URL | Description |
+| --------- | ----- | ------------- |
 | GET | `/api/v1/jeux/loto/tirages` | Historique tirages officiels |
-| GET | `/api/v1/jeux/loto/grilles` | Mes grilles jouées |
+| GET | `/api/v1/jeux/loto/grilles` | Mes grilles jouÃ©es |
 | POST | `/api/v1/jeux/loto/grilles` | Ajouter grille |
-| GET | `/api/v1/jeux/loto/stats` | Stats globales (fréquences, total gains) |
-| GET | `/api/v1/jeux/loto/numeros-retard` | Numéros en retard (seuil 2σ) |
-| POST | `/api/v1/jeux/loto/generer-grille` | Générateur classique (statistique/aléatoire) |
-| POST | `/api/v1/jeux/loto/generer-grille-ia-ponderee` | **[Phase U]** Générateur IA (modes chauds/froids/équilibre) |
+| GET | `/api/v1/jeux/loto/stats` | Stats globales (frÃ©quences, total gains) |
+| GET | `/api/v1/jeux/loto/numeros-retard` | NumÃ©ros en retard (seuil 2Ïƒ) |
+| POST | `/api/v1/jeux/loto/generer-grille` | GÃ©nÃ©rateur classique (statistique/alÃ©atoire) |
+| POST | `/api/v1/jeux/loto/generer-grille-ia-ponderee` | **[Phase U]** GÃ©nÃ©rateur IA (modes chauds/froids/Ã©quilibre) |
 | POST | `/api/v1/jeux/loto/analyser-grille` | **[Phase U]** Analyse critique IA d'une grille |
 
 ### Euromillions
 
-| Méthode | URL | Description |
-|---------|-----|-------------|
+| MÃ©thode | URL | Description |
+| --------- | ----- | ------------- |
 | GET | `/api/v1/jeux/euromillions/tirages` | Historique tirages |
 | GET | `/api/v1/jeux/euromillions/grilles` | Mes grilles |
 | POST | `/api/v1/jeux/euromillions/grilles` | Ajouter grille |
 | GET | `/api/v1/jeux/euromillions/stats` | Statistiques |
-| POST | `/api/v1/jeux/euromillions/generer-grille` | Générateur classique |
+| POST | `/api/v1/jeux/euromillions/generer-grille` | GÃ©nÃ©rateur classique |
 
 ### Performance & Analytics
 
-| Méthode | URL | Description |
-|---------|-----|-------------|
-| GET | `/api/v1/jeux/performance` | Métriques globales (ROI, taux réussite, bénéfice) |
+| MÃ©thode | URL | Description |
+| --------- | ----- | ------------- |
+| GET | `/api/v1/jeux/performance` | MÃ©triques globales (ROI, taux rÃ©ussite, bÃ©nÃ©fice) |
 | GET | `/api/v1/jeux/performance/confiance` | Breakdown par tranches confiance IA |
-| GET | `/api/v1/jeux/resume-mensuel` | Résumé IA du mois (Mistral) |
-| GET | `/api/v1/jeux/backtest` | Simulation rétrospective stratégies |
+| GET | `/api/v1/jeux/resume-mensuel` | RÃ©sumÃ© IA du mois (Mistral) |
+| GET | `/api/v1/jeux/backtest` | Simulation rÃ©trospective stratÃ©gies |
 
 ### Utilitaires
 
-| Méthode | URL | Description |
-|---------|-----|-------------|
-| POST | `/api/v1/jeux/analyse-ia` | Analyse IA générique (paris/loto) |
+| MÃ©thode | URL | Description |
+| --------- | ----- | ------------- |
+| POST | `/api/v1/jeux/analyse-ia` | Analyse IA gÃ©nÃ©rique (paris/loto) |
 | GET | `/api/v1/jeux/notifications` | Notifications jeux non lues |
 | POST | `/api/v1/jeux/notifications/{id}/lue` | Marquer notification comme lue |
 | POST | `/api/v1/jeux/ocr-ticket` | OCR ticket papier (Pixtral) |
 
 ---
 
-## Schémas de données
+## SchÃ©mas de donnÃ©es
 
 ### PariSportif
 
@@ -173,12 +173,12 @@ Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de 
 ```typescript
 {
   id: number;
-  numeros: number[]; // 5 numéros entre 1-49
+  numeros: number[]; // 5 numÃ©ros entre 1-49
   numero_chance: number; // 1-10
   mise: number;
   date_tirage: string;
   gains?: number;
-  est_virtuelle: boolean; // true si générée pour simulation
+  est_virtuelle: boolean; // true si gÃ©nÃ©rÃ©e pour simulation
   strategie?: "statistique" | "aleatoire" | "ia";
   mode_ia?: "chauds" | "froids" | "equilibre"; // Phase U
 }
@@ -196,7 +196,7 @@ Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de 
   points_forts: string[];
   points_faibles: string[];
   recommandations: string[];
-  appreciation: string; // "Excellent" | "Bon" | "Moyen" | "À revoir"
+  appreciation: string; // "Excellent" | "Bon" | "Moyen" | "Ã€ revoir"
 }
 ```
 
@@ -217,81 +217,81 @@ Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de 
 
 ---
 
-## Guide développeur
+## Guide dÃ©veloppeur
 
 ### Services backend
 
-- **`JeuxAIService`** : Moteur IA Mistral (prédictions, suggestions, analyses)
-- **`SeriesService`** : Détection loi des séries (n-grammes, patterns)
-- **`PredictionServiceJeux`** : Modèle prédictif local (forme, H2H, cotes)
-- **`BacktestService`** : Simulateur ROI rétrospectif
+- **`JeuxAIService`** : Moteur IA Mistral (prÃ©dictions, suggestions, analyses)
+- **`SeriesService`** : DÃ©tection loi des sÃ©ries (n-grammes, patterns)
+- **`PredictionServiceJeux`** : ModÃ¨le prÃ©dictif local (forme, H2H, cotes)
+- **`BacktestService`** : Simulateur ROI rÃ©trospectif
 
-### Composants frontend clés
+### Composants frontend clÃ©s
 
-- `GrilleIAPonderee` : Générateur + analyseur IA loto
-- `HeatmapCotes` : Graphique évolution cotes (Recharts LineChart)
-- `HeatmapNumeros` : Visualisation fréquences numéros (grid colorée)
-- `DrawerMatchDetail` : Sheet latéral prédictions match
-- `BacktestResultatCard` : Affichage résultats simulation
+- `GrilleIAPonderee` : GÃ©nÃ©rateur + analyseur IA loto
+- `HeatmapCotes` : Graphique Ã©volution cotes (Recharts LineChart)
+- `HeatmapNumeros` : Visualisation frÃ©quences numÃ©ros (grid colorÃ©e)
+- `DrawerMatchDetail` : Sheet latÃ©ral prÃ©dictions match
+- `BacktestResultatCard` : Affichage rÃ©sultats simulation
 
-### Hooks personnalisés
+### Hooks personnalisÃ©s
 
-- `useNotificationsJeux()` : Écoute service worker, affiche toasts résultats
+- `useNotificationsJeux()` : Ã‰coute service worker, affiche toasts rÃ©sultats
 - `demanderPermissionNotificationsJeux()` : Demande permission navigateur
 
 ### Tests
 
 ```bash
-# Backend — 10 tests unitaires Phases T/U/W
+# Backend â€” 10 tests unitaires Phases T/U/W
 pytest tests/services/test_jeux_phases_tuw.py -v
 
-# Frontend — Tests composants jeux
+# Frontend â€” Tests composants jeux
 cd frontend && npm test -- jeux
 ```
 
 ---
 
-## Ressources complémentaires
+## Ressources complÃ©mentaires
 
-- [FINALISATION_PHASES_TUW.md](FINALISATION_PHASES_TUW.md) : Guide technique implémentation Phases T/U/W
-- [API_REFERENCE.md](../../API_REFERENCE.md) : Documentation OpenAPI complète
-- [MODULES.md](../../MODULES.md) : Architecture générale modules
-- [STATUS_PHASES.md](../../STATUS_PHASES.md) : État d'avancement projet (Phases S-W ✅)
+- [FINALISATION_PHASES_TUW.md](FINALISATION_PHASES_TUW.md) : Guide technique implÃ©mentation Phases T/U/W
+- [API_REFERENCE.md](../../API_REFERENCE.md) : Documentation OpenAPI complÃ¨te
+- [MODULES.md](../../MODULES.md) : Architecture gÃ©nÃ©rale modules
+- [STATUS_PHASES.md](../../STATUS_PHASES.md) : Ã‰tat d'avancement projet (Phases S-W âœ…)
 
 ---
 
-**Dernière mise à jour** : 27 mars 2026 — Module Jeux 100% complet (backend + frontend + UI + docs)iers tirages)
-2. **Mode Froids** : Mise sur les numéros en retard (loi des séries)
-3. **Mode Équilibré** : Mix 60% chauds + 40% froids (recommandé)
+**DerniÃ¨re mise Ã  jour** : 27 mars 2026 â€” Module Jeux 100% complet (backend + frontend + UI + docs)iers tirages)
+2. **Mode Froids** : Mise sur les numÃ©ros en retard (loi des sÃ©ries)
+3. **Mode Ã‰quilibrÃ©** : Mix 60% chauds + 40% froids (recommandÃ©)
 
-**Powered by** : Mistral AI analyse l'historique complet, calcule pondérations, génère grille optimisée
+**Powered by** : Mistral AI analyse l'historique complet, calcule pondÃ©rations, gÃ©nÃ¨re grille optimisÃ©e
 
 #### Analyse IA de votre grille
 
-Après génération (ou saisie manuelle d'une grille existante), cliquez **"Analyser cette grille"** :
+AprÃ¨s gÃ©nÃ©ration (ou saisie manuelle d'une grille existante), cliquez **"Analyser cette grille"** :
 
-- **Note globale** : 0-10 selon qualité statistique
-- **Points forts** : Ex. "Bon mix numéros pairs/impairs", "Spread déciles équilibré"
-- **Points faibles** : Ex. "Trop de numéros consécutifs", "Tous dans tranche 1-20"
-- **Recommandations** : Suggestions concrètes d'amélioration
-- **Appréciation** : Texte synthétique (Excellent/Bon/Moyen/À revoir)
+- **Note globale** : 0-10 selon qualitÃ© statistique
+- **Points forts** : Ex. "Bon mix numÃ©ros pairs/impairs", "Spread dÃ©ciles Ã©quilibrÃ©"
+- **Points faibles** : Ex. "Trop de numÃ©ros consÃ©cutifs", "Tous dans tranche 1-20"
+- **Recommandations** : Suggestions concrÃ¨tes d'amÃ©lioration
+- **ApprÃ©ciation** : Texte synthÃ©tique (Excellent/Bon/Moyen/Ã€ revoir)
 
-**Algorithme IA** : Vérifie 8 critères (distribution pairs/impairs, déciles, consécutifs, somme, écart min/max, modulo 10, primes, patterns)
+**Algorithme IA** : VÃ©rifie 8 critÃ¨res (distribution pairs/impairs, dÃ©ciles, consÃ©cutifs, somme, Ã©cart min/max, modulo 10, primes, patterns)
 
-### 📈 Numéros en retard
+### ðŸ“ˆ NumÃ©ros en retard
 
-Section dédiée affichant les 10 numéros les plus en retard avec :
+Section dÃ©diÃ©e affichant les 10 numÃ©ros les plus en retard avec :
 
 - **Valeur de retard** : Score absolu (nombre de tirages sans sortir)
-- **Badge 🔥** : Si retard >2× écart-type (statistiquement significatif)
+- **Badge ðŸ”¥** : Si retard >2Ã— Ã©cart-type (statistiquement significatif)
 
-### 🎲 Backtest loto
+### ðŸŽ² Backtest loto
 
-Bouton "📊 Backtest" sur la page :
+Bouton "ðŸ“Š Backtest" sur la page :
 
-- Simule stratégie sur 100 derniers tirages
-- Calcule ROI, taux de rentabilité, variance
-- Compare performances mode statistique vs aléatoire vs IA
+- Simule stratÃ©gie sur 100 derniers tirages
+- Calcule ROI, taux de rentabilitÃ©, variance
+- Compare performances mode statistique vs alÃ©atoire vs IA
 
 ---
 
@@ -299,14 +299,14 @@ Bouton "📊 Backtest" sur la page :
 
 **URL** : `/jeux/euromillions`
 
-Même logique que Loto avec spécificités :
+MÃªme logique que Loto avec spÃ©cificitÃ©s :
 
-- **Grille** : 5 numéros (1-50) + 2 étoiles (1-12)
-- **Générateur classique** : Stratégies statistique/aléatoire
-- **Heatmap** : Séparé numéros principaux + étoiles
-- **Stats** : Fréquences, retards, tirages récents
+- **Grille** : 5 numÃ©ros (1-50) + 2 Ã©toiles (1-12)
+- **GÃ©nÃ©rateur classique** : StratÃ©gies statistique/alÃ©atoire
+- **Heatmap** : SÃ©parÃ© numÃ©ros principaux + Ã©toiles
+- **Stats** : FrÃ©quences, retards, tirages rÃ©cents
 
-> 💡 **Note** : Le générateur IA pondéré n'est pas encore implémenté pour Euromillions (prévu Phase future). Actuellement disponible uniquement pour le Loto.
+> ðŸ’¡ **Note** : Le gÃ©nÃ©rateur IA pondÃ©rÃ© n'est pas encore implÃ©mentÃ© pour Euromillions (prÃ©vu Phase future). Actuellement disponible uniquement pour le Loto.
 
 ---
 
@@ -316,65 +316,65 @@ Même logique que Loto avec spécificités :
 
 ### Vue d'ensemble
 
-- **ROI global** : (Total gains - Total mises) / Total mises × 100
-- **Taux de réussite** : % paris gagnés
-- **Bénéfice net** : Somme algébrique gains - mises
+- **ROI global** : (Total gains - Total mises) / Total mises Ã— 100
+- **Taux de rÃ©ussite** : % paris gagnÃ©s
+- **BÃ©nÃ©fice net** : Somme algÃ©brique gains - mises
 - **Paris actifs** : Nombre de paris en cours
 
 ### Graphiques
 
-1. **Évolution bankroll** : LineChart cumulatif (gains - pertes)
-2. **Breakdown par championnat** : BarChart horizontal (ROI par compétition)
+1. **Ã‰volution bankroll** : LineChart cumulatif (gains - pertes)
+2. **Breakdown par championnat** : BarChart horizontal (ROI par compÃ©tition)
 3. **Breakdown par confiance IA** : BarChart tranches de confiance (0-50%, 50-70%, etc.)
 
-### 📝 Résumé mensuel IA
+### ðŸ“ RÃ©sumÃ© mensuel IA
 
-Bouton "Générer résumé mensuel" :
+Bouton "GÃ©nÃ©rer rÃ©sumÃ© mensuel" :
 
-- **Powered by** : Mistral AI analyse toutes les données du mois
+- **Powered by** : Mistral AI analyse toutes les donnÃ©es du mois
 - **Contenu** : 
-  - Synthèse performances (meilleurs/pires paris)
-  - Tendances identifiées (sports rentables, erreurs récurrentes)
-  - Recommandations stratégiques personnalisées
-  - Objectifs suggérés pour le mois suivant
+  - SynthÃ¨se performances (meilleurs/pires paris)
+  - Tendances identifiÃ©es (sports rentables, erreurs rÃ©currentes)
+  - Recommandations stratÃ©giques personnalisÃ©es
+  - Objectifs suggÃ©rÃ©s pour le mois suivant
 
-### 🔙 Backtest
+### ðŸ”™ Backtest
 
-Simulation rétrospective pour valider stratégies :
+Simulation rÃ©trospective pour valider stratÃ©gies :
 
-- **Paramètres** : Type jeu (paris/loto), seuil value bet, nb tirages/matchs
-- **Résultats** : ROI simulé, variance, ratio Sharpe, drawdown max
-- **Graphique** : Courbe equity hypothétique
+- **ParamÃ¨tres** : Type jeu (paris/loto), seuil value bet, nb tirages/matchs
+- **RÃ©sultats** : ROI simulÃ©, variance, ratio Sharpe, drawdown max
+- **Graphique** : Courbe equity hypothÃ©tique
 
 ---
 
-### 🔔 Notifications push résultats
+### ðŸ”” Notifications push rÃ©sultats
 
-**Activation** : Paramètres > Notifications > "Activer les notifications jeux"
+**Activation** : ParamÃ¨tres > Notifications > "Activer les notifications jeux"
 
 Types de notifications Web Push :
 
-1. **Pari gagné** 🎉 : Affiche montant gain + action "Voir détails"
-2. **Pari perdu** 😞 : Affiche perte + encouragement
-3. **Résultat loto** 🎱 : Affiche numéros gagnants + votre résultat
+1. **Pari gagnÃ©** ðŸŽ‰ : Affiche montant gain + action "Voir dÃ©tails"
+2. **Pari perdu** ðŸ˜ž : Affiche perte + encouragement
+3. **RÃ©sultat loto** ðŸŽ± : Affiche numÃ©ros gagnants + votre rÃ©sultat
 
-**Implémentation** :
+**ImplÃ©mentation** :
 
-- Service Worker écoute messages backend
-- Hook `useNotificationsJeux()` activé dans layout racine
+- Service Worker Ã©coute messages backend
+- Hook `useNotificationsJeux()` activÃ© dans layout racine
 - Toasts Sonner avec actions contextuelles
-- Permission navigateur requise (demandée via bouton paramètres)
+- Permission navigateur requise (demandÃ©e via bouton paramÃ¨tres)
 
 ---
 
 ## Loto
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 
-- Saisie des grilles jouées (6 numéros + numéro chance)
-- Comparaison automatique avec les résultats officiels
+- Saisie des grilles jouÃ©es (6 numÃ©ros + numÃ©ro chance)
+- Comparaison automatique avec les rÃ©sultats officiels
 - Historique des participations et gains
-- Statistiques des numéros les plus joués
+- Statistiques des numÃ©ros les plus jouÃ©s
 
 ### Usage
 
@@ -385,10 +385,10 @@ Types de notifications Web Push :
 ### Structure d'une grille Loto
 
 | Champ        | Type         | Description                      |
-|-------------|--------------|----------------------------------|
-| `numeros`    | int[5]       | 5 numéros entre 1 et 49          |
-| `numero_chance` | int       | Numéro chance entre 1 et 10      |
-| `mise`       | decimal      | Montant joué                     |
+| ------------- | -------------- | ---------------------------------- |
+| `numeros`    | int[5]       | 5 numÃ©ros entre 1 et 49          |
+| `numero_chance` | int       | NumÃ©ro chance entre 1 et 10      |
+| `mise`       | decimal      | Montant jouÃ©                     |
 | `date_tirage` | date        | Date du tirage                   |
 | `gains`      | decimal      | Gains obtenus (0 si perdant)     |
 
@@ -396,11 +396,11 @@ Types de notifications Web Push :
 
 ## Euromillions
 
-### Fonctionnalités
+### FonctionnalitÃ©s
 
-- Saisie des grilles Euromillions (5 numéros + 2 étoiles)
-- Suivi des participations et résultats
-- Statistiques de fréquence des numéros tirés
+- Saisie des grilles Euromillions (5 numÃ©ros + 2 Ã©toiles)
+- Suivi des participations et rÃ©sultats
+- Statistiques de frÃ©quence des numÃ©ros tirÃ©s
 - Historique avec calcul du solde global
 
 ### Usage
@@ -412,10 +412,10 @@ Types de notifications Web Push :
 ### Structure d'une grille Euromillions
 
 | Champ      | Type       | Description                         |
-|-----------|------------|-------------------------------------|
-| `numeros`  | int[5]     | 5 numéros entre 1 et 50             |
-| `etoiles`  | int[2]     | 2 étoiles entre 1 et 12             |
-| `mise`     | decimal    | Montant joué                        |
+| ----------- | ------------ | ------------------------------------- |
+| `numeros`  | int[5]     | 5 numÃ©ros entre 1 et 50             |
+| `etoiles`  | int[2]     | 2 Ã©toiles entre 1 et 12             |
+| `mise`     | decimal    | Montant jouÃ©                        |
 | `date_tirage` | date   | Date du tirage                      |
 | `gains`    | decimal    | Gains obtenus                       |
 
@@ -425,15 +425,15 @@ Types de notifications Web Push :
 
 ### Endpoints principaux
 
-| Méthode | URL                           | Description                       |
-|--------|-------------------------------|-----------------------------------|
+| MÃ©thode | URL                           | Description                       |
+| -------- | ------------------------------- | ----------------------------------- |
 | GET    | `/api/v1/jeux/paris`          | Lister les paris                  |
 | POST   | `/api/v1/jeux/paris`          | Ajouter un pari                   |
-| PUT    | `/api/v1/jeux/paris/{id}`     | Modifier un pari (résultat)       |
+| PUT    | `/api/v1/jeux/paris/{id}`     | Modifier un pari (rÃ©sultat)       |
 | GET    | `/api/v1/jeux/paris/stats`    | Statistiques paris                |
 | GET    | `/api/v1/jeux/loto`           | Lister les grilles loto           |
 | POST   | `/api/v1/jeux/loto`           | Ajouter une grille                |
 | GET    | `/api/v1/jeux/euromillions`   | Lister les grilles euromillions   |
 | POST   | `/api/v1/jeux/euromillions`   | Ajouter une grille                |
 
-Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation complète.
+Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation complÃ¨te.
