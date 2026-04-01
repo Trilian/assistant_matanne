@@ -14,6 +14,12 @@ Le scheduler est démarré depuis le cycle de vie FastAPI:
 
 Le fuseau horaire utilisé par le scheduler principal est `Europe/Paris`.
 
+## Snapshot Phase 10
+
+- Jobs planifiés détectés dans `src/services/core/cron/jobs.py`: **68**
+- Le fichier contient les jobs historiques + phases 7/8/10.
+- Le tableau ci-dessous reste un extrait des jobs métier les plus structurants.
+
 ---
 
 ## Jobs principaux

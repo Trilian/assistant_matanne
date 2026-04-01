@@ -334,7 +334,7 @@ export default function PageDetailRecette({
         </Card>
       </div>
 
-      <style jsx global>{`
+      <style>{`
         @media print {
           .prose {
             max-width: 100% !important;

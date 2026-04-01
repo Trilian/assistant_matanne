@@ -10,8 +10,24 @@ vi.mock("next/navigation", () => ({
 }));
 
 const mockRoutines = [
-  { id: 1, nom: "Routine matin", type: "matin", etapes: [{ titre: "Se lever" }, { titre: "Petit-déj" }] },
-  { id: 2, nom: "Routine soir", type: "soir", etapes: [{ titre: "Bain" }, { titre: "Histoire" }] },
+  {
+    id: 1,
+    nom: "Routine matin",
+    type: "matin",
+    etapes: [
+      { id: 11, titre: "Se lever", ordre: 1, est_terminee: false },
+      { id: 12, titre: "Petit-déj", ordre: 2, est_terminee: false },
+    ],
+  },
+  {
+    id: 2,
+    nom: "Routine soir",
+    type: "soir",
+    etapes: [
+      { id: 21, titre: "Bain", ordre: 1, est_terminee: false },
+      { id: 22, titre: "Histoire", ordre: 2, est_terminee: false },
+    ],
+  },
 ];
 
 vi.mock("@/crochets/utiliser-api", () => ({

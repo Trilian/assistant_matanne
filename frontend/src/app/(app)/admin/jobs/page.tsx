@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Play, RefreshCw, Clock, CheckCircle2, XCircle, Loader2, FileText } from "lucide-react";
 import {
   Card,
@@ -239,8 +239,8 @@ export default function PageAdminJobs() {
                   const logs = jobLogs[job.id];
                   const chargement = chargementLogs[job.id] ?? false;
                   return (
-                    <>
-                      <TableRow key={job.id}>
+                    <Fragment key={job.id}>
+                      <TableRow>
                         <TableCell className="font-mono text-xs text-muted-foreground">
                           {job.id}
                         </TableCell>
@@ -346,7 +346,7 @@ export default function PageAdminJobs() {
                           </TableCell>
                         </TableRow>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })}
               </TableBody>

@@ -2,11 +2,16 @@
 
 Guide des composants UI du frontend Next.js (shadcn/ui + composants layout).
 
+Snapshot phase 10:
+
+- 29 composants UI dans `frontend/src/composants/ui/`
+- 82 composants metier/layout hors dossier UI
+
 ## Architecture
 
 ```
 frontend/src/
-├── components/ui/           # Composants shadcn/ui (21 fichiers)
+├── composants/ui/           # Composants shadcn/ui (29 fichiers)
 │   ├── avatar.tsx           # Avatar utilisateur
 │   ├── badge.tsx            # Badge statut/tag
 │   ├── button.tsx           # Bouton (variants: default, outline, ghost, destructive)
@@ -53,7 +58,7 @@ frontend/src/
 
 ## Composants shadcn/ui
 
-Tous les composants UI de base proviennent de [shadcn/ui](https://ui.shadcn.com/) et sont dans `frontend/src/components/ui/`. Ils utilisent Tailwind CSS v4 avec les tokens CSS du thème.
+Tous les composants UI de base proviennent de [shadcn/ui](https://ui.shadcn.com/) et sont dans `frontend/src/composants/ui/`. Ils utilisent Tailwind CSS v4 avec les tokens CSS du thème.
 
 ### Button
 

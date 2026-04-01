@@ -2,13 +2,13 @@
 
 Documentation auto-generee depuis `src/api/schemas/*.py`.
 
-- Genere le: 2026-04-01 04:09:56 UTC
+- Genere le: 2026-04-01 06:48:57 UTC
 - Nombre total de classes BaseModel: 282
 - Nombre de modules schemas: 25
 
 ## anti_gaspillage
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | ArticlePerissable | 6 |
 | RecetteRescue | 5 |
@@ -17,7 +17,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## auth
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | LoginRequest | 2 |
 | LoginResponse | 5 |
@@ -30,13 +30,13 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## base
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | TimestampedResponse | 2 |
 
 ## batch_cooking
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | ConfigBatchResponse | 6 |
 | EtapeBatchResponse | 8 |
@@ -49,7 +49,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## calendriers
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | CalendrierResponse | 8 |
 | EvenementJourResponse | 6 |
@@ -59,7 +59,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## common
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | ErrorResponse | 1 |
 | MessageResponse | 3 |
@@ -67,7 +67,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## courses
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | ArticleGenereResume | 5 |
 | ArticleResponse | 5 |
@@ -86,7 +86,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## dashboard
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | DonneesTableauBord | 4 |
 | ResumeBudget | 2 |
@@ -94,7 +94,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## documents
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | DocumentBase | 10 |
 | DocumentPatch | 6 |
@@ -102,14 +102,14 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## export
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | ExportPDFRequest | 2 |
 | ExportPDFResponse | 2 |
 
 ## famille
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | AchatCreate | 13 |
 | AchatPatch | 12 |
@@ -158,7 +158,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## habitat
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | AnnonceHabitatCreate | 19 |
 | CritereImmoCreate | 14 |
@@ -178,7 +178,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## ia_avancee
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | AdaptationsMeteoRequest | 1 |
 | EstimationTravauxRequest | 1 |
@@ -188,7 +188,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## innovations
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | BilanAnnuelRequest | 1 |
 | ComparateurEnergieRequest | 2 |
@@ -200,7 +200,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## inventaire
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | ArticleBatchTrouve | 2 |
 | ArticleConsolideResponse | 8 |
@@ -213,7 +213,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## jeux
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | AlerteJeuxResponse | 10 |
 | AnalyseIARequest | 2 |
@@ -252,7 +252,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## maison
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | ActionEcoCreate | 6 |
 | ActionEcoPatch | 7 |
@@ -318,7 +318,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## planning
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | GenererPlanningRequest | 3 |
 | PlanningSemaineResponse | 3 |
@@ -327,7 +327,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## preferences
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | CanauxParCategorie | 3 |
 | PreferencesBase | 12 |
@@ -337,7 +337,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## push
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | PushStatusResponse | 3 |
 | PushSubscriptionKeys | 2 |
@@ -347,7 +347,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## recettes
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | EtapeResponse | 5 |
 | IngredientItem | 3 |
@@ -358,7 +358,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## rgpd
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | ExportRGPDResponse | 3 |
 | ResumeDonnees | 2 |
@@ -368,7 +368,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## suggestions
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | IngredientDetecteResponse | 3 |
 | PhotoFrigoResponse | 2 |
@@ -379,7 +379,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## utilitaires
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | ContactBase | 8 |
 | ContactPatch | 8 |
@@ -405,7 +405,7 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 
 ## webhooks
 
-| Classe | Champs annnotes |
+| Classe | Champs annotes |
 |---|---:|
 | WebhookCreate | 3 |
 | WebhookListResponse | 2 |
@@ -416,5 +416,5 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 ## Regeneration
 
 ```bash
-c:/Users/menar/Documents/Projet_perso/assistant_matanne/.venv-1/Scripts/python.exe scripts/analysis/generate_api_schemas_doc.py
+python scripts/analysis/generate_api_schemas_doc.py
 ```

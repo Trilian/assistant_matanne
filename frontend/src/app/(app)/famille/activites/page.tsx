@@ -42,6 +42,7 @@ import { Skeleton } from "@/composants/ui/skeleton";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/composants/ui/dialog";
@@ -298,6 +299,9 @@ export default function PageActivites() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Nouvelle activité</DialogTitle>
+            <DialogDescription>
+              Renseignez les informations principales de l'activite.
+            </DialogDescription>
           </DialogHeader>
           <form
             className="space-y-4"
@@ -430,6 +434,9 @@ export default function PageActivites() {
               <Sparkles className="h-5 w-5 text-primary" />
               Suggestions d'activités IA
             </DialogTitle>
+            <DialogDescription>
+              Generez des idees selon la meteo et le contexte familial.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">

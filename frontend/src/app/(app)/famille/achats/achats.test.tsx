@@ -20,7 +20,10 @@ vi.mock("@/crochets/utiliser-api", () => ({
 }));
 
 vi.mock("@/bibliotheque/api/famille", () => ({
-  listerAchats: vi.fn().mockResolvedValue(mockAchats),
+  listerAchats: vi.fn().mockResolvedValue([
+    { id: 1, nom: "Livre d'éveil", categorie: "livre", priorite: "haute", achete: false, suggere_par: null },
+    { id: 2, nom: "Vélo enfant", categorie: "jouet", priorite: "moyenne", achete: false, suggere_par: "ia" },
+  ]),
   creerAchat: vi.fn().mockResolvedValue({}),
   marquerAchatAchete: vi.fn().mockResolvedValue({}),
   marquerAchatVendu: vi.fn(),
@@ -58,7 +61,7 @@ describe("PageAchats (Phase P)", () => {
 
   it("affiche la section Suggestions IA", () => {
     renderWithQuery(<PageAchats />);
-    expect(screen.getByText("Suggestions IA")).toBeInTheDocument();
+    expect(screen.getByText("Suggestions IA contextuelles")).toBeInTheDocument();
   });
 
   it("affiche les triggers de suggestions IA", () => {

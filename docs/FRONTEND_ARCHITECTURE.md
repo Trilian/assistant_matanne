@@ -8,6 +8,12 @@
 
 Le frontend est une SPA Next.js (App Router) dans `frontend/`.
 
+Snapshot 1 avril 2026:
+
+- Next.js 16.2.1 confirme
+- 29 composants UI dans `frontend/src/composants/ui/`
+- 82 composants metier/layout hors UI
+
 Pile principale:
 
 - Next.js 16.2.1 (App Router)
@@ -153,6 +159,11 @@ Zones couvertes en phase 3:
 
 - composants critiques (formulaire recette, plan 3D, heatmap cotes)
 - hooks (CRUD dialog, websocket)
+
+Mise a jour phase 10:
+
+- suites Vitest et Playwright actives
+- architecture App Router reste compatible Next.js 16
 
 ---
 

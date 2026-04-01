@@ -9,6 +9,11 @@
 - Nombre de tables cible: 143
 - Ce document sert de vue fonctionnelle par domaines; la validation finale passe par le schéma SQL modulaire
 
+Validation phase 10 (1 avril 2026):
+
+- 143 tables ORM détectées dans `src/core/models/*.py` (hors `mixins.py`)
+- alignement maintenu avec `sql/schema/*.sql`
+
 ### Procédure de rafraîchissement
 
 1. Mettre à jour les fichiers sous `sql/schema/`

@@ -2,6 +2,12 @@
 
 > Référence mise à jour des packages de services backend, des patterns de factories et des points d'entrée publics les plus utiles.
 
+## Snapshot Phase 10
+
+- Factories détectées (`@service_factory`): **169**
+- Domaine le plus dense: cuisine/maison/famille
+- Registre central: `src/services/core/registry.py`
+
 ---
 
 ## Architecture de service

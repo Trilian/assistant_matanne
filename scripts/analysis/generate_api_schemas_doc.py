@@ -76,7 +76,7 @@ def _render(classes: list[SchemaClass]) -> str:
         subset = [c for c in classes if c.module == module]
         lines.append(f"## {module}")
         lines.append("")
-        lines.append("| Classe | Champs annnotes |")
+        lines.append("| Classe | Champs annotes |")
         lines.append("|---|---:|")
         for c in sorted(subset, key=lambda x: x.name.lower()):
             lines.append(f"| {c.name} | {c.fields} |")
@@ -85,7 +85,7 @@ def _render(classes: list[SchemaClass]) -> str:
     lines.append("## Regeneration")
     lines.append("")
     lines.append("```bash")
-    lines.append("c:/Users/menar/Documents/Projet_perso/assistant_matanne/.venv-1/Scripts/python.exe scripts/analysis/generate_api_schemas_doc.py")
+    lines.append("python scripts/analysis/generate_api_schemas_doc.py")
     lines.append("```")
     lines.append("")
     return "\n".join(lines)

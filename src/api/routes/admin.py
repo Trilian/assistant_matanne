@@ -320,6 +320,75 @@ async def exporter_audit_csv(
     )
 
 
+@router.get(
+    "/events",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Consulter le bus d'événements",
+    description="Expose les métriques et l'historique récent du bus d'événements domaine.",
+)
+@gerer_exception_api
+async def lire_evenements_admin(
+    limite: int = Query(30, ge=1, le=200),
+    type_evenement: str | None = Query(None, description="Filtrer sur un type exact"),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.services.core.events import obtenir_bus
+
+    bus = obtenir_bus()
+    historique = bus.obtenir_historique(type_evenement=type_evenement, limite=limite)
+    items = [
+        {
+            "event_id": event.event_id,
+            "type": event.type,
+            "source": event.source,
+            "timestamp": event.timestamp.isoformat() if event.timestamp else None,
+            "data": event.data or {},
+        }
+        for event in historique
+    ]
+    return {
+        "metriques": bus.obtenir_metriques(),
+        "items": items,
+        "total": len(items),
+    }
+
+
+@router.post(
+    "/events/trigger",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Déclencher un événement domaine",
+    description="Émet manuellement un événement sur le bus pour tester les subscribers.",
+)
+@gerer_exception_api
+async def declencher_evenement_admin(
+    body: EventBusTriggerRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.services.core.events import obtenir_bus
+
+    bus = obtenir_bus()
+    handlers_notifies = bus.emettre(
+        type_evenement=body.type_evenement,
+        data=body.payload,
+        source=body.source,
+    )
+    _journaliser_action_admin(
+        action="admin.events.trigger",
+        entite_type="event_bus",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={
+            "type_evenement": body.type_evenement,
+            "source": body.source,
+            "handlers_notifies": handlers_notifies,
+        },
+    )
+    return {
+        "status": "ok",
+        "type_evenement": body.type_evenement,
+        "handlers_notifies": handlers_notifies,
+    }
+
+
 # ═══════════════════════════════════════════════════════════
 # SCHÉMAS ADMIN ÉTENDU
 # ═══════════════════════════════════════════════════════════
@@ -347,6 +416,7 @@ class NotificationTestRequest(BaseModel):
     canal: Literal["ntfy", "push", "email", "whatsapp"]
     message: str
     email: str | None = None
+    numero_destinataire: str | None = None
     titre: str = "Test Matanne"
 
 
@@ -403,6 +473,17 @@ class FlowSimulationRequest(BaseModel):
 
 class MaintenanceModeRequest(BaseModel):
     enabled: bool
+
+
+class EventBusTriggerRequest(BaseModel):
+    type_evenement: str
+    source: str = "admin"
+    payload: dict[str, Any] = {}
+
+
+class UserImpersonationRequest(BaseModel):
+    duree_heures: int = 1
+    raison: str | None = None
 
 
 class AdminAIConsoleRequest(BaseModel):
@@ -1533,9 +1614,18 @@ async def envoyer_notification_test(
         if body.canal == "whatsapp":
             import asyncio
 
+            from src.core.config import obtenir_parametres
             from src.services.integrations.whatsapp import envoyer_message_whatsapp
 
-            result = asyncio.run(envoyer_message_whatsapp(destinataire="", texte=body.message))
+            parametres = obtenir_parametres()
+            destinataire = body.numero_destinataire or parametres.WHATSAPP_USER_NUMBER or ""
+            if not destinataire:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Aucun numéro WhatsApp de destination configuré.",
+                )
+
+            result = asyncio.run(envoyer_message_whatsapp(destinataire=destinataire, texte=body.message))
             return {
                 "resultats": {"whatsapp": result},
                 "message": "Notification WhatsApp de test envoyée." if result else "Échec envoi WhatsApp.",
@@ -1702,6 +1792,39 @@ async def supprimer_queue_notifications(
         details={"target_user_id": user_id, "deleted": count},
     )
     return {"status": "ok", "user_id": user_id, "deleted": count}
+
+
+@router.get(
+    "/ia/metrics",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Métriques IA avancées",
+    description="Retourne les métriques IA consolidées (appels, tokens, cache, coût estimé).",
+)
+@gerer_exception_api
+async def lire_metriques_ia_admin(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.api.utils import get_metrics
+    from src.core.ai import RateLimitIA
+    from src.core.ai.cache import CacheIA
+    from src.core.monitoring.collector import collecteur
+
+    metrics = get_metrics()
+    ai_metrics = (metrics.get("ai") or {}) if isinstance(metrics, dict) else {}
+    tokens_utilises = int(ai_metrics.get("tokens_used", 0) or 0)
+    cout_1k_tokens = float(os.getenv("IA_COST_EUR_1K_TOKENS", "0.002"))
+    cout_estime = round((tokens_utilises / 1000.0) * cout_1k_tokens, 4)
+
+    collecteur_ia = collecteur.filtrer_par_prefixe("ia.")
+    return {
+        "generated_at": datetime.now().isoformat(),
+        "api": ai_metrics,
+        "rate_limit": RateLimitIA.obtenir_statistiques(),
+        "cache": CacheIA.obtenir_statistiques(),
+        "monitoring": collecteur_ia,
+        "cout_estime_eur": cout_estime,
+        "cout_eur_1k_tokens": cout_1k_tokens,
+    }
 
 
 @router.post(
@@ -1946,6 +2069,59 @@ async def desactiver_utilisateur(
         details={"cible_user_id": user_id, "raison": body.raison},
     )
     return result
+
+
+@router.post(
+    "/users/{user_id}/impersonate",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Simuler un utilisateur",
+    description="Génère un token temporaire pour naviguer avec le contexte d'un utilisateur cible.",
+)
+@gerer_exception_api
+async def simuler_utilisateur(
+    user_id: str,
+    body: UserImpersonationRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.api.auth import creer_token_acces
+    from src.api.utils import executer_avec_session
+    from src.core.models.users import ProfilUtilisateur
+
+    with executer_avec_session() as session:
+        profil = (
+            session.query(ProfilUtilisateur)
+            .filter(ProfilUtilisateur.username == user_id)
+            .first()
+        )
+        if profil is None:
+            raise HTTPException(status_code=404, detail=f"Utilisateur '{user_id}' introuvable.")
+
+        role = str(getattr(profil, "role", "membre") or "membre")
+        email = str(getattr(profil, "email", "") or f"{user_id}@local")
+        token = creer_token_acces(
+            user_id=user_id,
+            email=email,
+            role=role,
+            duree_heures=max(1, min(body.duree_heures, 24)),
+        )
+
+    _journaliser_action_admin(
+        action="admin.user.impersonate",
+        entite_type="utilisateur",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"cible_user_id": user_id, "duree_heures": body.duree_heures, "raison": body.raison},
+    )
+    return {
+        "status": "ok",
+        "token_type": "bearer",
+        "access_token": token,
+        "expires_in": max(1, min(body.duree_heures, 24)) * 3600,
+        "utilisateur": {
+            "id": user_id,
+            "email": email,
+            "role": role,
+        },
+    }
 
 
 # ═══════════════════════════════════════════════════════════

@@ -175,6 +175,7 @@ export interface NotificationTestPayload {
   canal: 'ntfy' | 'push' | 'email' | 'whatsapp'
   message: string
   email?: string
+  numero_destinataire?: string
   titre?: string
 }
 
@@ -233,6 +234,59 @@ export interface FlowSimulationResponse {
   dry_run: boolean
   actions: Array<Record<string, unknown>>
   payload: Record<string, unknown>
+}
+
+export interface EventBusItem {
+  event_id: string
+  type: string
+  source: string
+  timestamp: string | null
+  data: Record<string, unknown>
+}
+
+export interface EventBusResponse {
+  metriques: Record<string, unknown>
+  items: EventBusItem[]
+  total: number
+}
+
+export interface EventBusTriggerPayload {
+  type_evenement: string
+  source?: string
+  payload?: Record<string, unknown>
+}
+
+export interface EventBusTriggerResponse {
+  status: string
+  type_evenement: string
+  handlers_notifies: number
+}
+
+export interface AiMetricsResponse {
+  generated_at: string
+  api: Record<string, unknown>
+  rate_limit: Record<string, unknown>
+  cache: Record<string, unknown>
+  monitoring: Record<string, unknown>
+  cout_estime_eur: number
+  cout_eur_1k_tokens: number
+}
+
+export interface UserImpersonationPayload {
+  duree_heures?: number
+  raison?: string
+}
+
+export interface UserImpersonationResponse {
+  status: string
+  token_type: string
+  access_token: string
+  expires_in: number
+  utilisateur: {
+    id: string
+    email: string
+    role: string
+  }
 }
 
 export interface LiveSnapshotResponse {
@@ -591,6 +645,26 @@ export async function simulerFluxAdmin(
   return data
 }
 
+export async function lireEvenementsAdmin(params?: {
+  limite?: number
+  type_evenement?: string
+}): Promise<EventBusResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/events', { params })
+  return data
+}
+
+export async function declencherEvenementAdmin(
+  payload: EventBusTriggerPayload,
+): Promise<EventBusTriggerResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/events/trigger', payload)
+  return data
+}
+
+export async function lireMetriquesIAAdmin(): Promise<AiMetricsResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/ia/metrics')
+  return data
+}
+
 export async function obtenirLiveSnapshotAdmin(): Promise<LiveSnapshotResponse> {
   const { data } = await clientApi.get('/api/v1/admin/live-snapshot')
   return data
@@ -608,6 +682,14 @@ export async function lireModeMaintenance(): Promise<MaintenanceModeResponse> {
 
 export async function basculerModeMaintenance(enabled: boolean): Promise<MaintenanceModeResponse & { status: string }> {
   const { data } = await clientApi.put('/api/v1/admin/maintenance', { enabled })
+  return data
+}
+
+export async function simulerUtilisateur(
+  userId: string,
+  payload?: UserImpersonationPayload,
+): Promise<UserImpersonationResponse> {
+  const { data } = await clientApi.post(`/api/v1/admin/users/${userId}/impersonate`, payload ?? {})
   return data
 }
 

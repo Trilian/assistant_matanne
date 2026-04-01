@@ -16,6 +16,9 @@ from pathlib import Path
 # DÉSACTIVER LE RATE LIMITING POUR TOUS LES TESTS
 os.environ["RATE_LIMITING_DISABLED"] = "true"
 
+# CONFIGURER L'ENVIRONNEMENT DE TEST POUR ACTIVER L'AUTO-AUTH
+os.environ["ENVIRONMENT"] = "test"
+
 # Configurer le chemin pour les imports
 workspace_root = Path(__file__).parent.parent
 if str(workspace_root) not in sys.path:

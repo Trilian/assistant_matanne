@@ -6,6 +6,7 @@ Point d'entrée principal de l'API avec les middlewares et routers.
 
 import logging
 import os
+import time
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 
@@ -356,6 +357,73 @@ app.add_middleware(MetricsMiddleware)
 
 # Middleware de sécurité HTTP (CSP, HSTS, X-Content-Type-Options, etc.)
 app.add_middleware(SecurityHeadersMiddleware)
+
+
+_MAINTENANCE_CACHE: dict[str, float | bool] = {
+    "enabled": False,
+    "checked_at": 0.0,
+}
+
+
+def _lire_mode_maintenance() -> bool:
+    """Lit le mode maintenance depuis l'état persistant admin (avec cache court)."""
+    now = time.monotonic()
+    checked_at = float(_MAINTENANCE_CACHE.get("checked_at", 0.0) or 0.0)
+    if now - checked_at <= 5.0:
+        return bool(_MAINTENANCE_CACHE.get("enabled", False))
+
+    enabled = False
+    try:
+        from src.api.utils import executer_avec_session
+        from src.core.models import EtatPersistantDB
+
+        with executer_avec_session() as session:
+            row = (
+                session.query(EtatPersistantDB)
+                .filter(
+                    EtatPersistantDB.namespace == "admin_feature_flags",
+                    EtatPersistantDB.user_id == "global",
+                )
+                .first()
+            )
+            flags = row.data if row and isinstance(row.data, dict) else {}
+            enabled = bool(flags.get("admin.maintenance_mode", False))
+    except Exception:
+        enabled = False
+
+    _MAINTENANCE_CACHE["enabled"] = enabled
+    _MAINTENANCE_CACHE["checked_at"] = now
+    return enabled
+
+
+@app.middleware("http")
+async def maintenance_mode_middleware(request: Request, call_next):
+    """Bloque les routes non-admin en mode maintenance avec réponse 503."""
+    path = request.url.path
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
+    prefixes_autorises = (
+        "/api/v1/admin",
+        "/api/v1/auth",
+        "/api/v1/health",
+        "/api/v1/status",
+        "/api/v1/metrics",
+        "/api/v1/prometheus",
+        "/docs",
+        "/redoc",
+        "/openapi.json",
+    )
+    if any(path.startswith(prefix) for prefix in prefixes_autorises):
+        return await call_next(request)
+
+    if path.startswith("/api/") and _lire_mode_maintenance():
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Maintenance en cours. Veuillez réessayer plus tard."},
+        )
+
+    return await call_next(request)
 
 
 # ═══════════════════════════════════════════════════════════

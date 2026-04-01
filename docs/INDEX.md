@@ -12,7 +12,7 @@
 | [../PLANNING_IMPLEMENTATION.md](../PLANNING_IMPLEMENTATION.md) | **Planning d'implémentation** — sprints 1-9, tâches détaillées |
 | [../ROADMAP.md](../ROADMAP.md) | **Feuille de route** — priorités moyen/long terme + principes |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Architecture technique (FastAPI + Next.js) |
-| [API_REFERENCE.md](./API_REFERENCE.md) | Référence complète de l'API REST (242 endpoints) |
+| [API_REFERENCE.md](./API_REFERENCE.md) | Référence complète de l'API REST audité pendant la phase 10 |
 | [API_SCHEMAS.md](./API_SCHEMAS.md) | Inventaire auto-généré des schémas Pydantic API |
 | [MODULES.md](./MODULES.md) | Carte des modules : fonctionnalités, routes, services, modèles |
 | [SERVICES_REFERENCE.md](./SERVICES_REFERENCE.md) | Documentation des services backend |

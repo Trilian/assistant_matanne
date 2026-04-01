@@ -73,19 +73,24 @@ Le moteur actuel supporte:
 
 ---
 
-## Zones identifiées mais pas encore complètes
+## Bridges phase 5 et suivants
 
-| Interaction cible | Statut planning |
-|-------------------|-----------------|
-| Jeux pertes/gains -> budget global | à faire |
-| Routines famille -> planning central | à faire |
-| Péremption -> suggestions recettes automatiques | à enrichir |
-| Push -> WhatsApp failover | à faire |
-| Chat IA contexte multi-module | à enrichir |
-| Documents expirants -> Notifications multicanal | planifié |
-| Batch cooking terminé -> Déduction inventaire | planifié |
-| Anniversaires -> Provision budget cadeaux | planifié |
-| Voyages -> Intégration budget famille | planifié |
+| Bridge | Source -> Destination | Statut |
+|--------|------------------------|--------|
+| `inter_module_inventaire_planning.py` | Inventaire -> Planning recettes | actif |
+| `inter_module_jules_nutrition.py` | Jules -> Nutrition planning | actif |
+| `inter_module_saison_menu.py` | Saisonnalité -> Planning IA | actif |
+| `inter_module_meteo_activites.py` | Météo -> Activités famille | actif |
+| `inter_module_entretien_courses.py` | Entretien -> Courses | actif |
+| `inter_module_charges_energie.py` | Charges -> Analyse énergie | actif |
+| `inter_module_weekend_courses.py` | Weekend -> Courses | actif |
+| `inter_module_documents_calendrier.py` | Documents -> Calendrier | actif |
+
+## Points à enrichir
+
+- granularité des événements émis sur certains flux historiques
+- observabilité bout-en-bout par bridge (latence, erreurs)
+- tests de charge ciblés sur les interactions les plus fréquentes
 
 ---
 

@@ -21,6 +21,16 @@ vi.mock("date-fns", () => ({
   parseISO: vi.fn((s: string) => new Date(s)),
 }));
 
+vi.mock("@/bibliotheque/api/admin", () => ({
+  listerHistoriqueJobs: vi.fn().mockResolvedValue({
+    items: [],
+    total: 0,
+    page: 1,
+    par_page: 20,
+    pages_totales: 1,
+  }),
+}));
+
 import { clientApi } from "@/bibliotheque/api/client";
 import PageAdminJobs from "@/app/(app)/admin/jobs/page";
 
@@ -60,12 +70,11 @@ describe("PageAdminJobs — rendu initial", () => {
   it("affiche un loader pendant le chargement", () => {
     mockedApi.get.mockReturnValue(new Promise(() => {})); // never resolves
     renderWithQuery(React.createElement(PageAdminJobs));
-    // Le titre de la page doit être présent immédiatement
-    expect(screen.getByText(/jobs/i)).toBeDefined();
+    expect(screen.getByText(/Chargement des jobs/i)).toBeDefined();
   });
 
   it("affiche la liste des jobs après chargement", async () => {
-    mockedApi.get.mockResolvedValue({ data: { items: JOBS_MOCK, total: 2 } });
+    mockedApi.get.mockResolvedValue({ data: JOBS_MOCK });
     renderWithQuery(React.createElement(PageAdminJobs));
 
     await waitFor(() => {
@@ -75,7 +84,7 @@ describe("PageAdminJobs — rendu initial", () => {
   });
 
   it("affiche le statut actif en badge", async () => {
-    mockedApi.get.mockResolvedValue({ data: { items: JOBS_MOCK, total: 2 } });
+    mockedApi.get.mockResolvedValue({ data: JOBS_MOCK });
     renderWithQuery(React.createElement(PageAdminJobs));
 
     await waitFor(() => {

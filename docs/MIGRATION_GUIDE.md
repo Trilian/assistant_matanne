@@ -4,16 +4,17 @@
 
 ---
 
-## Workflow schéma DB (Sprint 1 — 28 mars 2026)
+## Workflow schéma DB (Phase 10)
 
-**Source unique de vérité : `sql/schema/` → `sql/INIT_COMPLET.sql`**
+**Source de vérité : `sql/schema/*.sql` régénère `sql/INIT_COMPLET.sql`**
 
-Depuis le Sprint 1, le workflow de gestion du schéma est simplifié :
+Le workflow actif est SQL-first et modulaire :
 
-```
-✅ INIT_COMPLET.sql   ← seule source de vérité (DROP CASCADE + CREATE TABLE)
-❌ sql/migrations/    ← archivé (fichiers 001/002/003 absorbés dans INIT_COMPLET)
-❌ alembic/           ← archivé (alembic.ini → alembic.ini.bak)
+```text
+✅ sql/schema/*.sql   ← source éditable du schéma
+✅ sql/INIT_COMPLET.sql ← artefact régénéré pour initialisation complète
+✅ sql/migrations/    ← journal incrémental des changements déjà appliqués
+❌ alembic/           ← abandonné
 ```
 
 ### Initialisation d'une nouvelle DB
@@ -25,12 +26,14 @@ Depuis le Sprint 1, le workflow de gestion du schéma est simplifié :
 
 ### Ajouter une colonne ou une table
 
-1. Modifier directement le `CREATE TABLE` concerné dans `sql/INIT_COMPLET.sql`
-2. Sur la DB existante (Supabase) : exécuter manuellement l'`ALTER TABLE` correspondant
-3. Mettre à jour le modèle ORM SQLAlchemy dans `src/core/models/`
-4. Mettre à jour le schéma Pydantic dans `src/api/schemas/`
+1. Modifier le fichier thématique concerné dans `sql/schema/`
+2. Régénérer `sql/INIT_COMPLET.sql` avec `scripts/db/regenerate_init.py`
+3. Sur la DB existante (Supabase), exécuter manuellement l'`ALTER TABLE` ou le `CREATE TABLE` correspondant
+4. Mettre à jour le modèle ORM SQLAlchemy dans `src/core/models/`
+5. Mettre à jour le schéma Pydantic dans `src/api/schemas/`
+6. Consigner le delta dans `sql/migrations/` si la modification a déjà été appliquée sur un environnement persistant
 
-> **Pourquoi pas de migrations incrémentales ?** Sur Supabase (PostgreSQL managé), les migrations sont appliquées manuellement via le SQL Editor. `INIT_COMPLET.sql` sert pour fresh install, les changements incrémentiels sont appliqués directement sur la DB de prod.
+> `INIT_COMPLET.sql` sert aux installations neuves. Les évolutions incrémentales restent appliquées explicitement sur les environnements existants.
 
 ---
 

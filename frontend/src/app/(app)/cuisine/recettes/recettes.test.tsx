@@ -2,6 +2,17 @@
 import { render, screen } from "@testing-library/react";
 import RecettesPage from "@/app/(app)/cuisine/recettes/page";
 
+vi.mock("@tanstack/react-query", () => ({
+  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+  useMutation: () => ({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn().mockResolvedValue({}),
+    isPending: false,
+    isError: false,
+    error: null,
+  }),
+}));
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   usePathname: () => "/cuisine/recettes",

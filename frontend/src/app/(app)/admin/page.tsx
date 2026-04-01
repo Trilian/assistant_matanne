@@ -18,8 +18,13 @@ import {
 import Link from "next/link";
 import {
   Bell,
+  Bot,
+  Flag,
+  Inbox,
   DatabaseZap,
+  MessageSquare,
   Play,
+  Sparkles,
   Trash2,
   Clock,
   Send,
@@ -264,13 +269,20 @@ export default function PageAdmin() {
       </div>
 
       {/* Accès rapides vers les pages dédiées */}
-      <div className="grid gap-3 md:grid-cols-5">
+      <div className="grid gap-3 md:grid-cols-5 xl:grid-cols-6">
         {[
           { href: "/admin/jobs", icon: Clock, label: "Jobs planifiés", desc: "Trigger + logs" },
           { href: "/admin/services", icon: ServerCrash, label: "Services & Cache", desc: "Health + stats" },
           { href: "/admin/notifications", icon: Bell, label: "Notifications", desc: "Test canaux" },
           { href: "/admin/utilisateurs", icon: Users, label: "Utilisateurs", desc: "Comptes + désactiver" },
           { href: "/admin/sql-views", icon: Layers, label: "Vues SQL", desc: "Lecture analytics" },
+          { href: "/admin/events", icon: Activity, label: "Event Bus", desc: "Historique + trigger" },
+          { href: "/admin/automations", icon: Bot, label: "Automations", desc: "Exécutions manuelles" },
+          { href: "/admin/ia-metrics", icon: Sparkles, label: "Métriques IA", desc: "Coût + tokens" },
+          { href: "/admin/notifications-queue", icon: Inbox, label: "Queue Notifs", desc: "Flush digest" },
+          { href: "/admin/feature-flags", icon: Flag, label: "Feature Flags", desc: "Runtime toggles" },
+          { href: "/admin/cache", icon: DatabaseZap, label: "Cache dédié", desc: "Purge sélective" },
+          { href: "/admin/whatsapp-test", icon: MessageSquare, label: "WhatsApp test", desc: "Numéro cible" },
         ].map(({ href, icon: Icon, label, desc }) => (
           <Link key={href} href={href}>
             <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
