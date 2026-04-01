@@ -107,6 +107,13 @@ _SERVICES = {
     # Catalogue Enrichissement service (IA enrichissement JSON)
     "CatalogueEnrichissementService": "catalogue_enrichissement_service",
     "get_catalogue_enrichissement_service": "catalogue_enrichissement_service",
+    # Inter-modules Phase 5
+    "ChargesEnergieInteractionService": "inter_module_charges_energie",
+    "obtenir_service_charges_energie_interaction": "inter_module_charges_energie",
+    "EntretienCoursesInteractionService": "inter_module_entretien_courses",
+    "obtenir_service_entretien_courses_interaction": "inter_module_entretien_courses",
+    "JardinEntretienInteractionService": "inter_module_jardin_entretien",
+    "obtenir_service_jardin_entretien_interaction": "inter_module_jardin_entretien",
 }
 
 _SCHEMAS = {
@@ -270,4 +277,11 @@ __all__ = [
     # Visualisation
     "VisualisationService",
     "get_visualisation_service",
+    # Inter-modules Phase 5
+    "ChargesEnergieInteractionService",
+    "obtenir_service_charges_energie_interaction",
+    "EntretienCoursesInteractionService",
+    "obtenir_service_entretien_courses_interaction",
+    "JardinEntretienInteractionService",
+    "obtenir_service_jardin_entretien_interaction",
 ]

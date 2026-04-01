@@ -54,7 +54,13 @@ import {
   obtenirAlimentsExclus,
   obtenirCoachingHebdo,
   sauvegarderAlimentsExclus,
+  listerActivites,
+  listerRoutines,
+  obtenirSuggestionsActivitesAuto,
+  obtenirSuggestionsAchatsAuto,
+  creerActivite,
 } from "@/bibliotheque/api/famille";
+import { obtenirTableauBord } from "@/bibliotheque/api/tableau-bord";
 import dynamic from "next/dynamic";
 import type { JalonJules } from "@/types/famille";
 import { toast } from "sonner";
@@ -89,6 +95,7 @@ export default function PageJules() {
   const [dateObs, setDateObs] = useState("");
 
   const invalider = utiliserInvalidation();
+  const aujourdHuiIso = new Date().toISOString().slice(0, 10);
 
   const { data: profil } = utiliserRequete(
     ["famille", "jules", "profil"],
@@ -109,6 +116,31 @@ export default function PageJules() {
   const { data: coaching } = utiliserRequete(
     ["famille", "jules", "coaching-hebdo"],
     obtenirCoachingHebdo
+  );
+
+  const { data: activitesJour } = utiliserRequete(
+    ["famille", "jules", "activites-jour", aujourdHuiIso],
+    () => listerActivites(undefined, aujourdHuiIso)
+  );
+
+  const { data: routines } = utiliserRequete(
+    ["famille", "jules", "routines"],
+    listerRoutines
+  );
+
+  const { data: suggestionsActivites } = utiliserRequete(
+    ["famille", "jules", "suggestions-activites-auto"],
+    () => obtenirSuggestionsActivitesAuto({ budget_max: 40, duree_max_heures: 2 })
+  );
+
+  const { data: suggestionsAchats } = utiliserRequete(
+    ["famille", "jules", "suggestions-achats-auto"],
+    () => obtenirSuggestionsAchatsAuto({ budget_max: 80 })
+  );
+
+  const { data: dashboardJour } = utiliserRequete(
+    ["famille", "jules", "repas-jour"],
+    obtenirTableauBord
   );
 
   const { mutate: ajouter, isPending: enAjout } = utiliserMutation(
@@ -135,6 +167,28 @@ export default function PageJules() {
         toast.success("Aliments exclus mis à jour");
       },
       onError: () => toast.error("Impossible d'enregistrer les aliments exclus"),
+    }
+  );
+
+  const { mutate: validerSuggestionActivite, isPending: enValidationSuggestion } = utiliserMutation(
+    async (suggestion: { titre: string; description?: string; type?: string; duree_minutes?: number; lieu?: string }) => {
+      return creerActivite({
+        titre: suggestion.titre,
+        description: suggestion.description,
+        type: suggestion.type || "jules",
+        date: aujourdHuiIso,
+        duree_minutes: suggestion.duree_minutes,
+        lieu: suggestion.lieu,
+        participants: ["Jules"],
+        est_terminee: false,
+      });
+    },
+    {
+      onSuccess: () => {
+        invalider(["famille", "jules", "activites-jour"]);
+        toast.success("Suggestion ajoutée aux activités du jour");
+      },
+      onError: () => toast.error("Impossible d'ajouter la suggestion"),
     }
   );
 
@@ -191,6 +245,90 @@ export default function PageJules() {
           );
         })}
       </div>
+
+      {/* Hub Jules unifié */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Timeline du jour</CardTitle>
+            <CardDescription>Routines, activités et repas du jour</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {(routines ?? []).slice(0, 3).map((routine) => (
+              <div key={`routine-${routine.id}`} className="rounded-md border px-3 py-2 text-sm">
+                <p className="font-medium">Routine • {routine.nom}</p>
+                <p className="text-xs text-muted-foreground">{routine.type}</p>
+              </div>
+            ))}
+            {(activitesJour ?? []).slice(0, 3).map((activite) => (
+              <div key={`activite-${activite.id}`} className="rounded-md border px-3 py-2 text-sm">
+                <p className="font-medium">Activité • {activite.titre}</p>
+                <p className="text-xs text-muted-foreground">{activite.type}</p>
+              </div>
+            ))}
+            {(dashboardJour?.repas_aujourd_hui ?? []).slice(0, 2).map((repas, idx) => (
+              <div key={`repas-${idx}`} className="rounded-md border px-3 py-2 text-sm">
+                <p className="font-medium">Repas • {repas.type_repas}</p>
+                <p className="text-xs text-muted-foreground">{repas.recette_nom ?? "À définir"}</p>
+              </div>
+            ))}
+            {(routines?.length ?? 0) + (activitesJour?.length ?? 0) + (dashboardJour?.repas_aujourd_hui?.length ?? 0) === 0 && (
+              <p className="text-sm text-muted-foreground">Aucun élément pour la journée.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Suggestion IA</CardTitle>
+            <CardDescription>1 clic pour valider</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {suggestionsActivites?.suggestions_struct?.[0] ? (
+              <>
+                <div className="rounded-md border px-3 py-2">
+                  <p className="text-sm font-medium">{suggestionsActivites.suggestions_struct[0].titre}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {suggestionsActivites.suggestions_struct[0].description}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  className="w-full"
+                  disabled={enValidationSuggestion}
+                  onClick={() => validerSuggestionActivite(suggestionsActivites.suggestions_struct![0])}
+                >
+                  {enValidationSuggestion && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Valider l'activité
+                </Button>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Pas de suggestion disponible.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Achats recommandés</CardTitle>
+          <CardDescription>Taille vêtements, éveil, saison</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {(suggestionsAchats?.suggestions ?? []).slice(0, 6).map((achat) => (
+            <div key={`${achat.source}-${achat.titre}`} className="rounded-md border px-3 py-2 text-sm">
+              <p className="font-medium">{achat.titre}</p>
+              <p className="text-xs text-muted-foreground mt-1">{achat.description}</p>
+              {achat.fourchette_prix && (
+                <p className="text-xs text-muted-foreground mt-1">Budget: {achat.fourchette_prix}</p>
+              )}
+            </div>
+          ))}
+          {!(suggestionsAchats?.suggestions?.length) && (
+            <p className="text-sm text-muted-foreground">Aucune recommandation d'achat pour le moment.</p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Graphique jalons par catégorie */}
       {jalons && jalons.length > 0 && (

@@ -309,6 +309,15 @@ def creer_notification_peremption(
         "notification_type": notif_type,
         "url": "/?module=cuisine.inventaire&filter=expiring",
         "tag": f"expiry_{nom_article.lower().replace(' ', '_')}",
+        "actions": [
+            {"action": "voir_recette", "title": "Voir recette"},
+            {"action": "add_to_cart", "title": "Ajouter aux courses"},
+            {"action": "dismiss", "title": "Ignorer"},
+        ],
+        "data": {
+            "article_nom": nom_article,
+            "url": "/cuisine/recettes?filtre=anti-gaspillage",
+        },
         "require_interaction": require_interaction,
     }
 

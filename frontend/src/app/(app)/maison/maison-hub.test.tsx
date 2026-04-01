@@ -17,16 +17,52 @@ const mockStats = {
   projets_en_cours: 3,
   taches_en_retard: 1,
   depenses_mois: 450.5,
-  contrats_actifs: 5,
-  diagnostics_expires: 0,
-  garanties_expirant_bientot: 2,
+  contrats_a_renouveler: 5,
+  diagnostics_expirant: 0,
+  garanties_expirant: 2,
+  stocks_en_alerte: 1,
 };
 
 vi.mock("@/crochets/utiliser-api", () => ({
-  utiliserRequete: () => ({
-    data: mockStats,
-    isLoading: false,
-    error: null,
+  utiliserRequete: (queryKey: unknown) => {
+    const key = Array.isArray(queryKey) ? queryKey.join(":") : "";
+
+    if (key.includes("stats")) {
+      return { data: mockStats, isLoading: false, error: null };
+    }
+
+    if (key.includes("briefing")) {
+      return {
+        data: {
+          resume: "Briefing maison",
+          alertes: [],
+          taches_jour_detail: [],
+          meteo: null,
+        },
+        isLoading: false,
+        error: null,
+      };
+    }
+
+    if (key.includes("predictives")) {
+      return { data: [], isLoading: false, error: null };
+    }
+
+    if (key.includes("conseils-ia")) {
+      return { data: [], isLoading: false, error: null };
+    }
+
+    return { data: null, isLoading: false, error: null };
+  },
+  utiliserMutation: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
+vi.mock("@/crochets/utiliser-synthese-vocale", () => ({
+  utiliserSyntheseVocale: () => ({
+    estSupporte: false,
+    enLecture: false,
+    lire: vi.fn(),
+    arreter: vi.fn(),
   }),
 }));
 
@@ -35,7 +71,7 @@ describe("PageMaison (Hub)", () => {
 
   it("affiche le titre Maison", () => {
     render(<PageMaison />);
-    expect(screen.getByText(/Maison/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Maison/ })).toBeInTheDocument();
   });
 
   it("affiche les stats récapitulatives", () => {
@@ -48,8 +84,8 @@ describe("PageMaison (Hub)", () => {
 
   it("affiche les sections maison", () => {
     render(<PageMaison />);
-    expect(screen.getByText("Projets")).toBeInTheDocument();
-    expect(screen.getByText("Entretien")).toBeInTheDocument();
+    expect(screen.getByText("Travaux")).toBeInTheDocument();
+    expect(screen.getByText("Ménage")).toBeInTheDocument();
     expect(screen.getByText("Jardin")).toBeInTheDocument();
   });
 
@@ -57,8 +93,8 @@ describe("PageMaison (Hub)", () => {
     render(<PageMaison />);
     const links = screen.getAllByRole("link");
     const hrefs = links.map((l) => l.getAttribute("href"));
-    expect(hrefs).toContain("/maison/projets");
-    expect(hrefs).toContain("/maison/entretien");
+    expect(hrefs).toContain("/maison/travaux");
+    expect(hrefs).toContain("/maison/menage");
     expect(hrefs).toContain("/maison/jardin");
   });
 });

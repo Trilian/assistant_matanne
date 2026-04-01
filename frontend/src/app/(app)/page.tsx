@@ -53,6 +53,8 @@ import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
 import { clientApi } from "@/bibliotheque/api/client";
 import { SwipeableItem } from "@/composants/swipeable-item";
 import { toast } from "sonner";
+import { genererPlanningSemaine } from "@/bibliotheque/api/planning";
+import { genererCoursesDepuisPlanning } from "@/bibliotheque/api/courses";
 
 const WIDGETS_DEFAUT = {
   metriques: true,
@@ -144,6 +146,15 @@ export default function PageAccueil() {
   const [meteo, setMeteo] = useState<MeteoWidget | null>(null);
   const [actionPushTraitee, setActionPushTraitee] = useState(false);
 
+  function obtenirLundiCourant(): string {
+    const now = new Date();
+    const jour = now.getDay();
+    const diff = jour === 0 ? -6 : 1 - jour;
+    const lundi = new Date(now);
+    lundi.setDate(now.getDate() + diff);
+    return lundi.toISOString().split("T")[0];
+  }
+
   const configFusionnee = useMemo(
     () => ({
       ...WIDGETS_DEFAUT,
@@ -224,6 +235,27 @@ export default function PageAccueil() {
     {
       onError: () => {
         toast.error("Impossible d'ajouter l'article depuis le rappel");
+      },
+    }
+  );
+
+  const { mutate: planifierSemaine, isPending: planificationSemaineEnCours } = utiliserMutation(
+    async () => {
+      const lundi = obtenirLundiCourant();
+      await genererPlanningSemaine({ date_debut: lundi, nb_jours: 7 });
+      const courses = await genererCoursesDepuisPlanning(lundi, {
+        soustraireStock: true,
+        nomListe: "Courses de la semaine",
+      });
+      return courses.total_articles;
+    },
+    {
+      onSuccess: (totalArticles) => {
+        toast.success(`Semaine planifiée : ${totalArticles} article(s) de courses généré(s)`);
+        router.push("/cuisine/ma-semaine");
+      },
+      onError: () => {
+        toast.error("Impossible de planifier la semaine automatiquement");
       },
     }
   );
@@ -592,27 +624,37 @@ export default function PageAccueil() {
         <CardContent>
           <div className="grid gap-2 grid-cols-2 sm:grid-cols-4">
             <Button variant="outline" asChild className="h-auto py-3 flex-col gap-1">
-              <Link href="/cuisine/recettes/nouveau">
-                <ChefHat className="h-5 w-5" />
-                <span className="text-xs">Nouvelle recette</span>
-              </Link>
+              <button
+                type="button"
+                onClick={() => planifierSemaine(undefined)}
+                disabled={planificationSemaineEnCours}
+              >
+                {planificationSemaineEnCours ? (
+                  <LoaderCard />
+                ) : (
+                  <>
+                    <CalendarDays className="h-5 w-5" />
+                    <span className="text-xs">Planifier ma semaine</span>
+                  </>
+                )}
+              </button>
             </Button>
             <Button variant="outline" asChild className="h-auto py-3 flex-col gap-1">
               <Link href="/cuisine/courses">
                 <ShoppingCart className="h-5 w-5" />
-                <span className="text-xs">Liste courses</span>
+                <span className="text-xs">Courses du jour</span>
               </Link>
             </Button>
             <Button variant="outline" asChild className="h-auto py-3 flex-col gap-1">
-              <Link href="/cuisine/planning">
-                <CalendarDays className="h-5 w-5" />
-                <span className="text-xs">Planning repas</span>
+              <Link href="/maison/entretien">
+                <AlertTriangle className="h-5 w-5" />
+                <span className="text-xs">Tâche du jour</span>
               </Link>
             </Button>
             <Button variant="outline" asChild className="h-auto py-3 flex-col gap-1">
-              <Link href="/outils/chat-ia">
-                <Sparkles className="h-5 w-5" />
-                <span className="text-xs">Chat IA</span>
+              <Link href="/focus">
+                <Zap className="h-5 w-5" />
+                <span className="text-xs">Mode focus</span>
               </Link>
             </Button>
           </div>
@@ -823,6 +865,15 @@ export default function PageAccueil() {
         </Card>
       )}
     </div>
+  );
+}
+
+function LoaderCard() {
+  return (
+    <>
+      <Sparkles className="h-5 w-5 animate-pulse" />
+      <span className="text-xs">Génération...</span>
+    </>
   );
 }
 

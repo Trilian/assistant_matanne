@@ -15,6 +15,9 @@ import {
   CheckCircle2,
   QrCode,
   Download,
+  CheckCheck,
+  Mic,
+  MicOff,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,6 +67,7 @@ import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
 import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
+import { utiliserReconnaissanceVocale } from "@/crochets/utiliser-reconnaissance-vocale";
 
 /** Group articles by category for Bring!-style display */
 function grouperParCategorie(articles: ArticleCourses[]): Record<string, ArticleCourses[]> {
@@ -250,14 +254,137 @@ export default function PageCourses() {
     }
   );
 
+  const { mutate: cocherTout, isPending: enCochageGlobal } = utiliserMutation(
+    async () => {
+      if (!listeSelectionnee || articlesNonCoches.length === 0) {
+        return { total: 0 };
+      }
+      await Promise.all(
+        articlesNonCoches.map((article) =>
+          cocherArticle(listeSelectionnee, article.id, true)
+        )
+      );
+      return { total: articlesNonCoches.length };
+    },
+    {
+      onSuccess: ({ total }) => {
+        invalider(["courses"]);
+        if (total > 0) {
+          toast.success(`${total} article(s) cochés`);
+        }
+      },
+      onError: () => toast.error("Erreur lors du cochage global"),
+    }
+  );
+
+  const { mutate: cocherCategorie, isPending: enCochageCategorie } = utiliserMutation(
+    async (categorie: string) => {
+      if (!listeSelectionnee) return { categorie, total: 0 };
+      const cibles = articlesNonCoches.filter(
+        (article) => (article.categorie || "Autre") === categorie
+      );
+      await Promise.all(
+        cibles.map((article) => cocherArticle(listeSelectionnee, article.id, true))
+      );
+      return { categorie, total: cibles.length };
+    },
+    {
+      onSuccess: ({ categorie, total }) => {
+        invalider(["courses"]);
+        if (total > 0) {
+          toast.success(`${total} article(s) cochés dans ${categorie}`);
+        }
+      },
+      onError: () => toast.error("Erreur lors du cochage par catégorie"),
+    }
+  );
+
+  const { mutate: finaliserCourses, isPending: enFinalisationCourses } = utiliserMutation(
+    async () => {
+      if (!listeSelectionnee) {
+        throw new Error("Aucune liste sélectionnée");
+      }
+
+      const nonCoches = [...articlesNonCoches];
+      let listeReportId: number | null = null;
+
+      // Reporter les articles non cochés dans une nouvelle liste active.
+      if (nonCoches.length > 0) {
+        const sourceNom = detailListe?.nom || "Courses";
+        const listeReport = await creerListeCourses(`${sourceNom} - report`);
+        listeReportId = listeReport.id;
+
+        await Promise.all(
+          nonCoches.map((article) =>
+            ajouterArticle(listeReport.id, {
+              nom: article.nom,
+              quantite: article.quantite,
+              unite: article.unite,
+              categorie: article.categorie,
+            })
+          )
+        );
+      }
+
+      // Cocher tous les articles de la liste courante puis valider pour sync inventaire.
+      if (nonCoches.length > 0) {
+        await Promise.all(
+          nonCoches.map((article) =>
+            cocherArticle(listeSelectionnee, article.id, true)
+          )
+        );
+      }
+      await validerCourses(listeSelectionnee);
+
+      return {
+        reportes: nonCoches.length,
+        listeReportId,
+      };
+    },
+    {
+      onSuccess: ({ reportes, listeReportId }) => {
+        invalider(["courses"]);
+        invalider(["inventaire"]);
+        if (listeReportId) {
+          setListeSelectionnee(listeReportId);
+        }
+        if (reportes > 0) {
+          toast.success(`Courses finalisées, ${reportes} article(s) reporté(s) dans une nouvelle liste`);
+        } else {
+          toast.success("Courses finalisées, inventaire mis à jour");
+        }
+      },
+      onError: () => toast.error("Erreur lors de la finalisation des courses"),
+    }
+  );
+
   // Formulaire article
   const {
     register: regArticle,
     handleSubmit: submitArticle,
     reset: resetArticle,
+    setValue: definirValeurArticle,
     formState: { errors: erreursArticle },
   } = useForm<DonneesArticleCourses>({
     resolver: zodResolver(schemaArticleCourses) as never,
+  });
+
+  const {
+    enEcoute,
+    estSupporte,
+    demarrerEcoute,
+    arreterEcoute,
+  } = utiliserReconnaissanceVocale({
+    continu: false,
+    resultatsInterimaires: false,
+    onResultat: (texte) => {
+      const nettoye = texte
+        .replace(/^ajoute(?:r)?\s+/i, "")
+        .trim();
+      if (!nettoye) return;
+      definirValeurArticle("nom", nettoye, { shouldValidate: true, shouldDirty: true });
+      toast.success(`Article détecté: ${nettoye}`);
+    },
   });
 
   const articles = detailListe?.articles ?? [];
@@ -303,6 +430,15 @@ export default function PageCourses() {
         </div>
         {listeSelectionnee && (
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => cocherTout(undefined)}
+              disabled={enCochageGlobal || articlesNonCoches.length === 0}
+            >
+              <CheckCheck className="mr-1 h-4 w-4" />
+              Tout cocher
+            </Button>
             <Button variant="outline" size="sm" onClick={ouvrirQrPartage}>
               <QrCode className="mr-1 h-4 w-4" />
               QR partage
@@ -317,8 +453,21 @@ export default function PageCourses() {
             </Button>
             <Button
               size="sm"
+              variant="secondary"
+              onClick={() => finaliserCourses(undefined)}
+              disabled={enFinalisationCourses || enCochageGlobal || enCochageCategorie}
+            >
+              {enFinalisationCourses ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="mr-1 h-4 w-4" />
+              )}
+              Courses faites
+            </Button>
+            <Button
+              size="sm"
               onClick={() => valider(undefined)}
-              disabled={enValidation || articlesNonCoches.length > 0}
+              disabled={enValidation || articlesNonCoches.length > 0 || enFinalisationCourses}
             >
               {enValidation ? (
                 <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -531,6 +680,23 @@ export default function PageCourses() {
                       <Plus className="h-4 w-4" />
                     )}
                   </Button>
+                  {estSupporte && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={enEcoute ? "secondary" : "outline"}
+                      aria-label="Saisie vocale"
+                      onClick={() => {
+                        if (enEcoute) {
+                          arreterEcoute();
+                        } else {
+                          demarrerEcoute();
+                        }
+                      }}
+                    >
+                      {enEcoute ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    </Button>
+                  )}
                 </form>
 
                 {/* Affichage articles */}
@@ -549,7 +715,18 @@ export default function PageCourses() {
                     {/* Articles par catégorie */}
                     {categoriesTriees.map((cat) => (
                       <div key={cat}>
-                        <h3 className="text-sm font-semibold mb-2">{cat}</h3>
+                        <div className="mb-2 flex items-center justify-between gap-2">
+                          <h3 className="text-sm font-semibold">{cat}</h3>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2 text-xs"
+                            onClick={() => cocherCategorie(cat)}
+                            disabled={enCochageCategorie || enFinalisationCourses}
+                          >
+                            Cocher catégorie
+                          </Button>
+                        </div>
                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                           {groupesNonCoches[cat].map((a) => (
                             <TileArticle

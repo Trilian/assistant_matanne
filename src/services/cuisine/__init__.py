@@ -73,4 +73,22 @@ def __getattr__(name: str):
         )
 
         return obtenir_service_batch_inventaire_interaction
+    if name == "obtenir_service_inventaire_planning_interaction":
+        from src.services.cuisine.inter_module_inventaire_planning import (
+            obtenir_service_inventaire_planning_interaction,
+        )
+
+        return obtenir_service_inventaire_planning_interaction
+    if name == "obtenir_service_jules_nutrition_interaction":
+        from src.services.cuisine.inter_module_jules_nutrition import (
+            obtenir_service_jules_nutrition_interaction,
+        )
+
+        return obtenir_service_jules_nutrition_interaction
+    if name == "obtenir_service_saison_menu_interaction":
+        from src.services.cuisine.inter_module_saison_menu import (
+            obtenir_service_saison_menu_interaction,
+        )
+
+        return obtenir_service_saison_menu_interaction
     raise AttributeError(f"module 'src.services.cuisine' has no attribute '{name}'")

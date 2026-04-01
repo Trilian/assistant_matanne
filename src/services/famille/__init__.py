@@ -157,4 +157,22 @@ def __getattr__(name: str):
         )
 
         return obtenir_service_voyages_budget_interaction
+    if name == "obtenir_service_meteo_activites_interaction":
+        from src.services.famille.inter_module_meteo_activites import (
+            obtenir_service_meteo_activites_interaction,
+        )
+
+        return obtenir_service_meteo_activites_interaction
+    if name == "obtenir_service_weekend_courses_interaction":
+        from src.services.famille.inter_module_weekend_courses import (
+            obtenir_service_weekend_courses_interaction,
+        )
+
+        return obtenir_service_weekend_courses_interaction
+    if name == "obtenir_service_documents_calendrier_interaction":
+        from src.services.famille.inter_module_documents_calendrier import (
+            obtenir_service_documents_calendrier_interaction,
+        )
+
+        return obtenir_service_documents_calendrier_interaction
     raise AttributeError(f"module 'src.services.famille' has no attribute '{name}'")

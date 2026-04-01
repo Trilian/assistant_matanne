@@ -244,3 +244,116 @@ class TestDiagnosticsIAInteraction:
                 description_panne="Fuite d'eau sous l'évier",
             )
             assert isinstance(result, (dict, str))
+
+
+# ═══════════════════════════════════════════════════════════
+# Phase 5 bridges
+# ═══════════════════════════════════════════════════════════
+
+
+class TestPhase5CuisineInteractions:
+    """Tests des bridges cuisine phase 5."""
+
+    def test_inventaire_planning_retourne_dict(self, engine, db):
+        from src.services.cuisine.inter_module_inventaire_planning import (
+            InventairePlanningInteractionService,
+        )
+
+        service = InventairePlanningInteractionService()
+        result = service.suggerer_recettes_selon_stock(db=db)
+        assert isinstance(result, dict)
+
+    def test_jules_nutrition_retourne_dict(self, engine, db):
+        from src.services.cuisine.inter_module_jules_nutrition import (
+            JulesNutritionInteractionService,
+        )
+
+        service = JulesNutritionInteractionService()
+        result = service.adapter_planning_nutrition_selon_croissance(db=db)
+        assert isinstance(result, dict)
+
+    def test_saison_menu_retourne_dict(self, engine):
+        from src.services.cuisine.inter_module_saison_menu import (
+            SaisonMenuInteractionService,
+        )
+
+        service = SaisonMenuInteractionService()
+        result = service.obtenir_contexte_saisonnier_planning()
+        assert isinstance(result, dict)
+
+
+class TestPhase5FamilleInteractions:
+    """Tests des bridges famille phase 5."""
+
+    def test_weekend_courses_retourne_dict(self, engine, db):
+        from src.services.famille.inter_module_weekend_courses import (
+            WeekendCoursesInteractionService,
+        )
+
+        service = WeekendCoursesInteractionService()
+        result = service.suggerer_fournitures_weekend(db=db)
+        assert isinstance(result, dict)
+
+    def test_documents_calendrier_retourne_dict(self, engine, db):
+        from src.services.famille.inter_module_documents_calendrier import (
+            DocumentsCalendrierInteractionService,
+        )
+
+        service = DocumentsCalendrierInteractionService()
+        result = service.synchroniser_documents_vers_calendrier(db=db)
+        assert isinstance(result, dict)
+
+    def test_meteo_activites_retourne_dict(self, engine, db):
+        from src.services.famille.inter_module_meteo_activites import (
+            MeteoActivitesInteractionService,
+        )
+
+        service = MeteoActivitesInteractionService()
+
+        class _Prev:
+            def __init__(self, date, precip_mm, precip_proba):
+                self.date = date
+                self.precip_mm = precip_mm
+                self.precip_proba = precip_proba
+
+        class _Meteo:
+            ville = "Paris"
+            previsions = [_Prev("2026-04-01", 2, 80), _Prev("2026-04-02", 0, 20)]
+
+        with patch(
+            "src.services.utilitaires.meteo_service.obtenir_meteo_service",
+            side_effect=lambda: type("X", (), {"obtenir_meteo": lambda self: _Meteo()})(),
+        ):
+            result = service.suggerer_activites_selon_meteo(db=db)
+            assert isinstance(result, dict)
+
+
+class TestPhase5MaisonInteractions:
+    """Tests des bridges maison phase 5."""
+
+    def test_entretien_courses_retourne_dict(self, engine, db):
+        from src.services.maison.inter_module_entretien_courses import (
+            EntretienCoursesInteractionService,
+        )
+
+        service = EntretienCoursesInteractionService()
+        result = service.suggerer_produits_entretien_pour_courses(db=db)
+        assert isinstance(result, dict)
+
+    def test_charges_energie_retourne_dict(self, engine, db):
+        from src.services.maison.inter_module_charges_energie import (
+            ChargesEnergieInteractionService,
+        )
+
+        service = ChargesEnergieInteractionService()
+        result = service.detecter_hausse_et_declencher_analyse(db=db)
+        assert isinstance(result, dict)
+
+    def test_jardin_entretien_retourne_dict(self, engine, db):
+        from src.services.maison.inter_module_jardin_entretien import (
+            JardinEntretienInteractionService,
+        )
+
+        service = JardinEntretienInteractionService()
+        result = service.generer_taches_saisonnieres_depuis_plantes(db=db)
+        assert isinstance(result, dict)

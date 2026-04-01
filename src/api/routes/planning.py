@@ -453,9 +453,37 @@ async def valider_planning(
             planning.actif = True
             session.commit()
 
-            return MessageResponse(message="Planning validé et activé", id=planning_id)
+            return MessageResponse(
+                message="Planning validé et activé",
+                id=planning_id,
+                data={
+                    "semaine_debut": planning.semaine_debut.isoformat() if planning.semaine_debut else None,
+                },
+            )
 
-    return await executer_async(_valider)
+    resultat = await executer_async(_valider)
+
+    # Notification WhatsApp best-effort après validation.
+    try:
+        from src.services.core.notifications import get_dispatcher_notifications
+
+        semaine = (resultat.data or {}).get("semaine_debut") if hasattr(resultat, "data") else None
+        message = (
+            f"Planning semaine validé ({semaine}). "
+            "La semaine est activée et prête pour les courses."
+        )
+        dispatcher = get_dispatcher_notifications()
+        dispatcher.envoyer(
+            user_id=user.get("sub", ""),
+            message=message,
+            canaux=["whatsapp"],
+            titre="Planning validé",
+            strategie="failover",
+        )
+    except Exception as exc:
+        logger.debug("Notification WhatsApp planning non envoyée: %s", exc)
+
+    return resultat
 
 
 @router.post(
@@ -707,6 +735,8 @@ async def generer_planning_ia(
 
     def _generate():
         from sqlalchemy import func
+        from src.core.models.finances import Depense
+        from src.core.models.inventaire import ArticleInventaire
         from src.core.models import Recette
         from src.core.models.recettes import HistoriqueRecette
 
@@ -752,6 +782,44 @@ async def generer_planning_ia(
                 "proteines_min_jour": round(avg_prot * 2, 1),
                 "lipides_max_jour": round(avg_lip * 2.2, 1),
                 "glucides_cible_jour": round(avg_glu * 2, 1),
+            }
+
+            # Enrichir avec l'inventaire disponible (priorisation des recettes compatibles stock).
+            inventaire_disponible = (
+                session.query(ArticleInventaire)
+                .filter(ArticleInventaire.quantite > 0)
+                .order_by(ArticleInventaire.quantite.desc())
+                .limit(40)
+                .all()
+            )
+            if inventaire_disponible:
+                preferences_enrichies["inventaire_disponible"] = [
+                    {
+                        "ingredient": item.nom,
+                        "quantite": float(item.quantite or 0),
+                        "unite": item.unite,
+                    }
+                    for item in inventaire_disponible
+                    if item.nom
+                ]
+
+            # Enrichir avec un signal budget alimentaire récent (60 derniers jours).
+            debut_budget = datetime.now(UTC).date() - timedelta(days=60)
+            depenses_alim = (
+                session.query(func.sum(Depense.montant).label("total"), func.count(Depense.id).label("nb"))
+                .filter(
+                    Depense.categorie == "alimentation",
+                    Depense.date >= debut_budget,
+                )
+                .first()
+            )
+            total_budget = float(getattr(depenses_alim, "total", 0) or 0)
+            nb_depenses = int(getattr(depenses_alim, "nb", 0) or 0)
+            preferences_enrichies["budget_alimentation"] = {
+                "periode_jours": 60,
+                "depenses_total": round(total_budget, 2),
+                "depense_moyenne": round(total_budget / nb_depenses, 2) if nb_depenses > 0 else 0,
+                "nb_transactions": nb_depenses,
             }
 
         # Enrichir avec les produits de saison du mois en cours

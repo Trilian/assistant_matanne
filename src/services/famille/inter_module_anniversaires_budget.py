@@ -20,6 +20,51 @@ class AnniversairesBudgetInteractionService:
 
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
+    def reserver_budget_previsionnel_j14(
+        self,
+        *,
+        montant_defaut: float = 60.0,
+        db=None,
+    ) -> dict[str, Any]:
+        """P5-15: reserve automatiquement un budget previsionnel a J-14."""
+        from src.core.models import AnniversaireFamille, BudgetFamille
+
+        anniversaires = db.query(AnniversaireFamille).all()
+        reserves = []
+
+        for anniv in anniversaires:
+            jours_restants = getattr(anniv, "jours_restants", None)
+            if jours_restants != 14:
+                continue
+
+            description = f"Reservation budget anniversaire J-14: {anniv.nom}"
+            existe = db.query(BudgetFamille).filter(BudgetFamille.description == description).first()
+            if existe:
+                continue
+
+            montant = self._estimer_budget_cadeau(anniv, montant_defaut)
+            depense = BudgetFamille(
+                date=date_type.today(),
+                montant=montant,
+                categorie="loisirs",
+                description=description,
+                magasin="",
+                est_recurrent=False,
+            )
+            db.add(depense)
+            reserves.append({"nom": anniv.nom, "montant": montant})
+
+        if reserves:
+            db.commit()
+
+        return {
+            "reserves": reserves,
+            "nb_reservations": len(reserves),
+            "message": f"{len(reserves)} reservation(s) budget J-14 creee(s).",
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
     def provisionner_budget_cadeaux(
         self,
         *,

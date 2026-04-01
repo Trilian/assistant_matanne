@@ -173,6 +173,8 @@ self.addEventListener("notificationclick", (event) => {
     } else {
       urlCible = "/?action=add-stock";
     }
+  } else if (action === "voir_recette") {
+    urlCible = payload.url || "/cuisine/recettes?filtre=anti-gaspillage";
   }
 
   event.waitUntil(
