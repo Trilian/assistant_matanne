@@ -55,6 +55,12 @@ import { SwipeableItem } from "@/composants/swipeable-item";
 import { toast } from "sonner";
 import { genererPlanningSemaine } from "@/bibliotheque/api/planning";
 import { genererCoursesDepuisPlanning } from "@/bibliotheque/api/courses";
+import {
+  GrilleDashboardDnd,
+  WidgetSortable,
+} from "@/composants/dashboard/grille-dashboard-dnd";
+import { CompteurAnime } from "@/composants/dashboard/compteur-anime";
+import { Sparkline } from "@/composants/dashboard/sparkline";
 
 const WIDGETS_DEFAUT = {
   metriques: true,
@@ -145,6 +151,12 @@ export default function PageAccueil() {
   const [widgets, setWidgets] = useState(WIDGETS_DEFAUT);
   const [meteo, setMeteo] = useState<MeteoWidget | null>(null);
   const [actionPushTraitee, setActionPushTraitee] = useState(false);
+
+  const ORDRE_WIDGETS_DEFAUT = Object.keys(WIDGETS_DEFAUT);
+  const [ordreWidgets, setOrdreWidgets] = utiliserStockageLocal<string[]>(
+    "dashboard-widgets-ordre",
+    ORDRE_WIDGETS_DEFAUT
+  );
 
   function obtenirLundiCourant(): string {
     const now = new Date();
@@ -354,6 +366,7 @@ export default function PageAccueil() {
               <Settings2 className="h-4 w-4" />
               Personnaliser le tableau de bord
             </CardTitle>
+            <CardDescription>Glissez les widgets pour réorganiser, cochez/décochez pour afficher/masquer.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-2">
@@ -372,6 +385,11 @@ export default function PageAccueil() {
           </CardContent>
         </Card>
       )}
+
+      <GrilleDashboardDnd
+        ordre={ordreWidgets}
+        onOrdreChange={(nouvelOrdre) => setOrdreWidgets(nouvelOrdre)}
+      >
 
       {widgets.meteo && meteo && (
         <Card className="border-blue-300/50 bg-blue-50/50 dark:border-blue-800/40 dark:bg-blue-950/20">
@@ -864,6 +882,8 @@ export default function PageAccueil() {
           </CardContent>
         </Card>
       )}
+
+      </GrilleDashboardDnd>
     </div>
   );
 }
@@ -884,6 +904,7 @@ function CarteMetrique({
   lien,
   chargement,
   alerte,
+  sparkline,
 }: {
   titre: string;
   valeur: number;
@@ -891,6 +912,7 @@ function CarteMetrique({
   lien: string;
   chargement: boolean;
   alerte?: boolean;
+  sparkline?: number[];
 }) {
   return (
     <Link href={lien}>
@@ -905,9 +927,18 @@ function CarteMetrique({
           {chargement ? (
             <Skeleton className="h-8 w-16" />
           ) : (
-            <p className={`text-2xl font-bold ${alerte ? "text-destructive" : ""}`}>
-              {valeur}
-            </p>
+            <div className="flex items-end justify-between gap-2">
+              <p className={`text-2xl font-bold ${alerte ? "text-destructive" : ""}`}>
+                <CompteurAnime valeur={valeur} />
+              </p>
+              {sparkline && sparkline.length >= 2 && (
+                <Sparkline
+                  donnees={sparkline}
+                  couleur={alerte ? "hsl(0, 72%, 51%)" : "hsl(210, 70%, 50%)"}
+                  couleurNegatif="hsl(0, 72%, 51%)"
+                />
+              )}
+            </div>
           )}
         </CardContent>
       </Card>

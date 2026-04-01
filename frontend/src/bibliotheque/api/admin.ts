@@ -626,6 +626,38 @@ export async function supprimerQueueNotifications(userId: string): Promise<{ sta
   return data
 }
 
+// ─── Console Commande Rapide (D1) ──────────────────────────
+
+export interface QuickCommandResponse {
+  status: string
+  type: string
+  message: string
+  commandes?: Record<string, string>
+  jobs?: string[]
+  total?: number
+  result?: Record<string, unknown>
+  pattern?: string
+  nb_invalidees?: number
+  enabled?: boolean
+}
+
+export async function executerCommandeRapide(commande: string): Promise<QuickCommandResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/quick-command', { commande })
+  return data
+}
+
+// ─── Scheduler visuel CRON (D2) ────────────────────────────
+
+export interface JobScheduleInfo extends JobInfo {
+  next_run_in_seconds?: number
+  categorie?: string
+}
+
+export async function listerJobsAvecSchedule(): Promise<JobScheduleInfo[]> {
+  const { data } = await clientApi.get('/api/v1/admin/jobs')
+  return data
+}
+
 export async function exporterConfigAdmin(): Promise<ConfigAdminExport> {
   const { data } = await clientApi.get('/api/v1/admin/config/export')
   return data

@@ -60,7 +60,8 @@ import {
 } from "@/bibliotheque/api/planning";
 import { toast } from "sonner";
 import { genererCoursesDepuisPlanning, type GenererCoursesResult } from "@/bibliotheque/api/courses";
-import { genererSessionDepuisPlanning, type GenererSessionDepuisPlanningResult } from "@/bibliotheque/api/batch-cooking";
+import { genererSessionDepuisPlanning } from "@/bibliotheque/api/batch-cooking";
+import type { GenererSessionDepuisPlanningResult } from "@/types/batch-cooking";
 import type {
   TypeRepas,
   RepasPlanning,

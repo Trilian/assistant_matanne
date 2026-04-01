@@ -1,13 +1,14 @@
 // ═══════════════════════════════════════════════════════════
 // Plan 3D — Vue isométrique des pièces de la maison
+// Connecté aux données réelles : tâches par pièce, énergie, alertes
 // Chargé dynamiquement (ssr: false) depuis la page visualisation
 // ═══════════════════════════════════════════════════════════
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Text } from "@react-three/drei";
+import { OrbitControls, Text, Html } from "@react-three/drei";
 import type { PieceMaison } from "@/types/maison";
 
 // Dimensions du plan en unités 3D (1 unit = 40px du plan 2D)
@@ -15,6 +16,21 @@ const SCALE = 1 / 40;
 const WALL_HEIGHT = 2;
 const PLAN_W = 800;
 const PLAN_H = 560;
+
+export interface DonneesPiece3D {
+  piece_id: number;
+  taches_en_retard: number;
+  taches_total: number;
+  consommation_kwh?: number;
+  alertes?: string[];
+}
+
+interface Plan3DProps {
+  pieces: PieceMaison[];
+  pieceSelectionnee: PieceMaison | null;
+  onSelectPiece: (piece: PieceMaison) => void;
+  donneesParPiece?: Record<number, DonneesPiece3D>;
+}
 
 function couleurHex(piece: PieceMaison): string {
   if (piece.couleur) return piece.couleur;
@@ -30,10 +46,11 @@ function couleurHex(piece: PieceMaison): string {
   return "#6366f1";
 }
 
-function PieceBox({ piece, selectionne, onClick }: {
+function PieceBox({ piece, selectionne, onClick, donnees }: {
   piece: PieceMaison;
   selectionne: boolean;
   onClick: () => void;
+  donnees?: DonneesPiece3D;
 }) {
   const [hovered, setHovered] = useState(false);
 
@@ -49,7 +66,11 @@ function PieceBox({ piece, selectionne, onClick }: {
   const cz = (py + (piece.hauteur ?? 120) / 2) * SCALE - PLAN_H * SCALE / 2;
 
   const color = couleurHex(piece);
-  const opacity = hovered ? 0.9 : selectionne ? 0.95 : 0.75;
+
+  // Modifier la couleur si des tâches sont en retard
+  const aTachesRetard = donnees && donnees.taches_en_retard > 0;
+  const couleurEffective = aTachesRetard ? "#ef4444" : color;
+  const opacity = hovered ? 0.9 : selectionne ? 0.95 : aTachesRetard ? 0.65 : 0.75;
 
   return (
     <group position={[cx, cy, cz]} onClick={(e) => { e.stopPropagation(); onClick(); }}>
@@ -61,7 +82,7 @@ function PieceBox({ piece, selectionne, onClick }: {
       >
         <boxGeometry args={[w, h, d]} />
         <meshStandardMaterial
-          color={color}
+          color={couleurEffective}
           transparent
           opacity={opacity}
           wireframe={false}
@@ -85,6 +106,38 @@ function PieceBox({ piece, selectionne, onClick }: {
       >
         {piece.nom}
       </Text>
+      {/* Badge tâches en retard */}
+      {aTachesRetard && (
+        <Html position={[w / 2 - 0.1, h / 2 + 0.4, -d / 2 + 0.1]} distanceFactor={6}>
+          <div className="bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-sm">
+            {donnees.taches_en_retard}
+          </div>
+        </Html>
+      )}
+      {/* Badge consommation énergie */}
+      {donnees?.consommation_kwh != null && donnees.consommation_kwh > 0 && (
+        <Html position={[-w / 2 + 0.1, h / 2 + 0.4, -d / 2 + 0.1]} distanceFactor={6}>
+          <div className="bg-amber-500 text-white text-[9px] font-medium rounded px-1 shadow-sm whitespace-nowrap">
+            ⚡ {donnees.consommation_kwh} kWh
+          </div>
+        </Html>
+      )}
+      {/* Info-bulle au survol */}
+      {hovered && donnees && (
+        <Html position={[0, h / 2 + 0.6, 0]} distanceFactor={5} center>
+          <div className="bg-white dark:bg-zinc-800 border rounded-md shadow-lg px-2 py-1.5 text-[11px] min-w-[120px] pointer-events-none">
+            <p className="font-semibold">{piece.nom}</p>
+            {piece.surface_m2 && <p className="text-muted-foreground">{piece.surface_m2} m²</p>}
+            <p>Tâches: {donnees.taches_total - donnees.taches_en_retard}/{donnees.taches_total} faites</p>
+            {donnees.consommation_kwh != null && (
+              <p>Énergie: {donnees.consommation_kwh} kWh</p>
+            )}
+            {donnees.alertes?.map((a, i) => (
+              <p key={i} className="text-red-500">⚠ {a}</p>
+            ))}
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
@@ -104,7 +157,7 @@ interface Plan3DProps {
   onSelectPiece: (piece: PieceMaison) => void;
 }
 
-export default function Plan3D({ pieces, pieceSelectionnee, onSelectPiece }: Plan3DProps) {
+export default function Plan3D({ pieces, pieceSelectionnee, onSelectPiece, donneesParPiece }: Plan3DProps) {
   const piecesAvecPos = pieces.filter((p) => p.position_x != null && p.position_y != null);
 
   if (piecesAvecPos.length === 0) {
@@ -143,6 +196,7 @@ export default function Plan3D({ pieces, pieceSelectionnee, onSelectPiece }: Pla
           piece={piece}
           selectionne={pieceSelectionnee?.id === piece.id}
           onClick={() => onSelectPiece(piece)}
+          donnees={donneesParPiece?.[piece.id]}
         />
       ))}
     </Canvas>

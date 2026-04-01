@@ -406,6 +406,46 @@ async def obtenir_tableau_bord(
                     }
                 )
 
+            # B8: Documents expirés ou expirant bientôt
+            try:
+                from src.core.models import DocumentFamille
+
+                docs_expires = (
+                    session.query(func.count(DocumentFamille.id))
+                    .filter(
+                        DocumentFamille.date_expiration.isnot(None),
+                        DocumentFamille.actif.is_(True),
+                        DocumentFamille.date_expiration < aujourd_hui,
+                    )
+                    .scalar()
+                    or 0
+                )
+                docs_bientot = (
+                    session.query(func.count(DocumentFamille.id))
+                    .filter(
+                        DocumentFamille.date_expiration.isnot(None),
+                        DocumentFamille.actif.is_(True),
+                        DocumentFamille.date_expiration >= aujourd_hui,
+                        DocumentFamille.date_expiration <= aujourd_hui + timedelta(days=30),
+                    )
+                    .scalar()
+                    or 0
+                )
+                if docs_expires > 0:
+                    alertes.append({
+                        "type": "document_expire",
+                        "message": f"{docs_expires} document(s) expiré(s) à renouveler",
+                        "urgence": "haute",
+                    })
+                if docs_bientot > 0:
+                    alertes.append({
+                        "type": "document_bientot",
+                        "message": f"{docs_bientot} document(s) expirent dans les 30 jours",
+                        "urgence": "moyenne",
+                    })
+            except Exception as e:
+                logger.warning("[dashboard] Alertes documents non chargées: %s", e)
+
             return {
                 "statistiques": {
                     "recettes_total": recettes_total,
@@ -1077,6 +1117,89 @@ async def obtenir_historique_points(
             user_id=int(user_id), nb_semaines=nb_semaines
         )
         return {"items": historique, "total": len(historique)}
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# B8: Documents expirés — widget dashboard
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/documents-expirants",
+    responses=REPONSES_LISTE,
+    summary="Documents famille expirants ou expirés",
+)
+@gerer_exception_api
+async def obtenir_documents_expirants(
+    jours_horizon: int = 60,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les documents famille expirants (widget dashboard B8).
+
+    Inclut les documents déjà expirés et ceux qui expirent dans les N prochains jours.
+    """
+
+    def _query():
+        with executer_avec_session() as session:
+            from src.core.models import DocumentFamille
+
+            aujourd_hui = date.today()
+            limite = aujourd_hui + timedelta(days=jours_horizon)
+
+            documents = (
+                session.query(DocumentFamille)
+                .filter(
+                    DocumentFamille.date_expiration.isnot(None),
+                    DocumentFamille.actif.is_(True),
+                    DocumentFamille.date_expiration <= limite,
+                )
+                .order_by(DocumentFamille.date_expiration.asc())
+                .all()
+            )
+
+            items = []
+            nb_expires = 0
+            nb_bientot = 0
+
+            for doc in documents:
+                jours_restants = (doc.date_expiration - aujourd_hui).days
+                est_expire = jours_restants < 0
+
+                if est_expire:
+                    nb_expires += 1
+                    severite = "danger"
+                elif jours_restants <= 7:
+                    nb_bientot += 1
+                    severite = "danger"
+                elif jours_restants <= 30:
+                    nb_bientot += 1
+                    severite = "warning"
+                else:
+                    severite = "info"
+
+                items.append({
+                    "id": doc.id,
+                    "titre": doc.titre,
+                    "categorie": doc.categorie,
+                    "membre_famille": doc.membre_famille,
+                    "date_expiration": doc.date_expiration.isoformat(),
+                    "jours_restants": jours_restants,
+                    "est_expire": est_expire,
+                    "severite": severite,
+                })
+
+            return {
+                "items": items,
+                "total": len(items),
+                "nb_expires": nb_expires,
+                "nb_bientot": nb_bientot,
+                "message": (
+                    f"{nb_expires} document(s) expiré(s), "
+                    f"{nb_bientot} expirent bientôt."
+                ),
+            }
 
     return await executer_async(_query)
 

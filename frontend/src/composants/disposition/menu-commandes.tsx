@@ -1,10 +1,11 @@
-﻿// ═══════════════════════════════════════════════════════════
+﻿// -----------------------------------------------------------
 // Menu de commandes — Navigation rapide Cmd+K
-// ═══════════════════════════════════════════════════════════
+// Inclut recherche API globale (B11)
+// -----------------------------------------------------------
 
 "use client";
 
-import { useEffect, useMemo, type ComponentType } from "react";
+import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
 import {
   CommandDialog,
@@ -18,18 +19,32 @@ import {
 import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
 import { utiliserStoreUI } from "@/magasins/store-ui";
 import { PAGES_NAVIGATION, type PageNavigation } from "@/bibliotheque/pages-navigation";
+import { clientApi } from "@/bibliotheque/api/client";
+import { Search } from "lucide-react";
 
 type Page = PageNavigation;
 const PAGES = PAGES_NAVIGATION;
 
+interface ResultatRecherche {
+  type: string;
+  id: number;
+  titre: string;
+  description?: string;
+  url: string;
+  icone?: string;
+}
+
 /**
- * Menu de commandes global — Cmd+K navigation rapide.
+ * Menu de commandes global — Cmd+K navigation rapide + recherche API.
  * Affiche toutes les pages avec recherche intelligente et historique.
- * La liste des pages est importée depuis la source unique `pages-navigation.ts`.
+ * B11: Recherche étendue couvrant notes, jardin, contrats, documents.
  */
 export function MenuCommandes() {
   const { rechercheOuverte, definirRecherche } = utiliserStoreUI();
   const [historique, setHistorique] = utiliserStockageLocal<string[]>("command-history", []);
+  const [recherche, setRecherche] = useState("");
+  const [resultatsAPI, setResultatsAPI] = useState<ResultatRecherche[]>([]);
+  const [chargementAPI, setChargementAPI] = useState(false);
   const router = useRouter();
 
   // Cmd+K / Ctrl+K
@@ -43,6 +58,38 @@ export function MenuCommandes() {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, [rechercheOuverte, definirRecherche]);
+
+  // Reset on close
+  useEffect(() => {
+    if (!rechercheOuverte) {
+      setRecherche("");
+      setResultatsAPI([]);
+    }
+  }, [rechercheOuverte]);
+
+  // B11: Recherche API avec debounce
+  useEffect(() => {
+    if (recherche.length < 3) {
+      setResultatsAPI([]);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setChargementAPI(true);
+      try {
+        const { data } = await clientApi.get("/api/v1/recherche/global", {
+          params: { q: recherche, limit: 10 },
+        });
+        setResultatsAPI(Array.isArray(data) ? data : []);
+      } catch {
+        setResultatsAPI([]);
+      } finally {
+        setChargementAPI(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [recherche]);
 
   const handleSelect = (chemin: string) => {
     setHistorique((prev) => {
@@ -74,9 +121,41 @@ export function MenuCommandes() {
 
   return (
     <CommandDialog open={rechercheOuverte} onOpenChange={definirRecherche}>
-      <CommandInput placeholder="Rechercher une page..." />
+      <CommandInput
+        placeholder="Rechercher pages, recettes, notes, contrats..."
+        value={recherche}
+        onValueChange={setRecherche}
+      />
       <CommandList>
-        <CommandEmpty>Aucune page trouvée</CommandEmpty>
+        <CommandEmpty>
+          {chargementAPI ? "Recherche en cours..." : "Aucun résultat trouvé"}
+        </CommandEmpty>
+
+        {/* B11: Résultats API */}
+        {resultatsAPI.length > 0 && (
+          <>
+            <CommandGroup heading="Résultats">
+              {resultatsAPI.map((r) => (
+                <CommandItem
+                  key={`api-${r.type}-${r.id}`}
+                  value={`api-${r.titre.toLowerCase()} ${r.description?.toLowerCase() || ""}`}
+                  onSelect={() => handleSelect(r.url)}
+                  className="flex items-center gap-2"
+                >
+                  <span className="text-base shrink-0">{r.icone || "??"}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm">{r.titre}</span>
+                    {r.description && (
+                      <p className="text-xs text-muted-foreground truncate">{r.description}</p>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground shrink-0">{r.type}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
 
         {/* Récents */}
         {pagesRecentes.length > 0 && (

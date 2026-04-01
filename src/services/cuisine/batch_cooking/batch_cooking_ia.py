@@ -495,3 +495,156 @@ RÈGLES:
 
         recettes = query.order_by(Recette.congelable.desc()).limit(nb_recettes * 2).all()
         return recettes[:nb_recettes]
+
+    # ═══════════════════════════════════════════════════════════
+    # B10: SUGGESTION BATCH COOKING INTELLIGENT
+    # ═══════════════════════════════════════════════════════════
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def suggerer_session_optimisee(
+        self,
+        *,
+        planning_id: int | None = None,
+        robots_user: list[str] | None = None,
+        duree_max_minutes: int = 180,
+        avec_jules: bool = False,
+        db: Session | None = None,
+    ) -> dict:
+        """B10: Suggère une session batch cooking optimisée à partir du planning.
+
+        Analyse le planning de la semaine, identifie les recettes batch-ables,
+        et génère une timeline optimisée par appareil avec parallélisation.
+
+        Args:
+            planning_id: ID du planning (si None, prend le planning actif)
+            robots_user: Liste des robots disponibles
+            duree_max_minutes: Durée max de la session
+            avec_jules: Si Jules est présent
+            db: Session DB
+
+        Returns:
+            Dict avec timeline optimisée, recettes sélectionnées, temps estimé
+        """
+        from datetime import date as date_type, timedelta
+        from src.core.models import Planning, Recette, Repas
+
+        if not robots_user:
+            robots_user = ["four", "plaques"]
+
+        # Récupérer le planning
+        if planning_id:
+            planning = db.query(Planning).filter_by(id=planning_id).first()
+        else:
+            lundi = date_type.today() - timedelta(days=date_type.today().weekday())
+            planning = (
+                db.query(Planning)
+                .filter(Planning.semaine_debut >= lundi)
+                .order_by(Planning.semaine_debut.asc())
+                .first()
+            )
+
+        if not planning:
+            return {"ok": False, "message": "Aucun planning actif trouvé."}
+
+        # Récupérer les recettes du planning
+        repas = (
+            db.query(Repas)
+            .filter(Repas.planning_id == planning.id)
+            .all()
+        )
+        recette_ids = list({r.recette_id for r in repas if r.recette_id})
+        if not recette_ids:
+            return {"ok": False, "message": "Aucune recette dans le planning."}
+
+        recettes = (
+            db.query(Recette)
+            .options(selectinload(Recette.etapes))
+            .filter(Recette.id.in_(recette_ids))
+            .all()
+        )
+
+        # Filtrer les recettes batch-ables
+        recettes_batch = [r for r in recettes if r.compatible_batch]
+        if not recettes_batch:
+            recettes_batch = recettes[:4]
+
+        # Estimer les temps
+        temps_total = sum(
+            (r.temps_preparation or 0) + (r.temps_cuisson or 0)
+            for r in recettes_batch
+        )
+
+        # Construire le contexte pour l'IA
+        recettes_info = []
+        for r in recettes_batch:
+            robots_recette = r.robots_compatibles or []
+            recettes_info.append({
+                "nom": r.nom,
+                "prep_min": r.temps_preparation or 0,
+                "cuisson_min": r.temps_cuisson or 0,
+                "portions": r.portions or 4,
+                "congelable": bool(r.congelable),
+                "robots_compatibles": robots_recette,
+            })
+
+        robots_section = _construire_robots_section(robots_user)
+        jules_txt = (
+            "Jules (19 mois) est présent. Prévoir des tâches simples pour lui."
+            if avec_jules else "Session solo."
+        )
+
+        prompt = f"""Expert batch cooking. Optimise cette session familiale.
+
+RECETTES À PRÉPARER ({len(recettes_batch)} recettes):
+{json.dumps(recettes_info, ensure_ascii=False, indent=2)}
+
+ÉQUIPEMENT DISPONIBLE:
+{robots_section}
+
+DURÉE MAX: {duree_max_minutes} minutes
+{jules_txt}
+
+Génère une timeline optimisée qui PARALLÉLISE au maximum les tâches.
+Réponds en JSON:
+{{
+  "duree_totale_estimee": 120,
+  "gain_temps_pct": 30,
+  "recettes_selectionnees": ["Recette1", "Recette2"],
+  "timeline": [
+    {{"debut_min": 0, "fin_min": 15, "tache": "Découper légumes", "robot": null, "recette": "Recette1", "parallele_avec": null}},
+    {{"debut_min": 0, "fin_min": 45, "tache": "Cuisson four", "robot": "four", "recette": "Recette2", "parallele_avec": "Découper légumes"}}
+  ],
+  "conseils": ["Commencer par les cuissons longues"]
+}}"""
+
+        try:
+            response = self._appel_ia_detail(prompt, max_tokens=4000)
+            if not response:
+                # Fallback sans IA
+                return {
+                    "ok": True,
+                    "source": "calcul",
+                    "recettes_selectionnees": [r.nom for r in recettes_batch],
+                    "duree_totale_estimee": temps_total,
+                    "gain_temps_pct": 0,
+                    "timeline": [],
+                    "conseils": ["Commencer par les cuissons longues au four."],
+                    "message": f"{len(recettes_batch)} recettes sélectionnées, ~{temps_total}min.",
+                }
+
+            response["ok"] = True
+            response["source"] = "ia"
+            return response
+
+        except Exception as e:
+            logger.warning(f"Suggestion batch cooking IA échouée: {e}")
+            return {
+                "ok": True,
+                "source": "calcul",
+                "recettes_selectionnees": [r.nom for r in recettes_batch],
+                "duree_totale_estimee": temps_total,
+                "gain_temps_pct": 0,
+                "timeline": [],
+                "message": f"{len(recettes_batch)} recettes, ~{temps_total}min (sans optimisation IA).",
+            }

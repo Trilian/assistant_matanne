@@ -244,29 +244,30 @@
 
 ---
 
-## 4. Phase B — Fonctionnalités & IA
+## 4. Phase B — Fonctionnalités & IA ✅ TERMINÉE
 
 > **Objectif** : Combler les gaps fonctionnels, enrichir l'IA, ajouter les CRON et inter-modules critiques
 > **Semaines** : 3-4
 > **Priorité** : 🟡 HAUTE
+> **Statut** : ✅ **Terminée** — 13/13 tâches complétées
 
-| # | Tâche | Source | Effort | Catégorie |
-|---|-------|--------|--------|-----------|
-| B1 | G5 — Mode hors-ligne courses (PWA cache offline en magasin) | §4 Gap | 3j | PWA |
-| B2 | IA1 — Prédiction courses intelligente (historique → pré-remplir liste) | §8 IA | 3j | IA |
-| B3 | J2 — CRON planning auto semaine (dimanche 19h si planning vide) | §9 CRON | 2j | CRON |
-| B4 | J9 — CRON alertes budget seuil (quotidien 20h, catégorie > 80%) | §9 CRON | 1j | CRON |
-| B5 | W2 — Commandes WhatsApp enrichies ("ajoute du lait", "budget ce mois") via Mistral NLP | §10 WhatsApp | 3j | WhatsApp |
-| B6 | I1 — Bridge récolte jardin → recettes semaine suivante | §7 Inter-module | 2j | Bridge |
-| B7 | I3 — Bridge budget anomalie → notification proactive (+30% restaurants) | §7 Inter-module | 2j | Bridge |
-| B8 | I5 — Bridge documents expirés → dashboard alerte widget | §7 Inter-module | 1j | Bridge |
-| B9 | IA5 — Résumé hebdomadaire IA intelligent (narratif : repas, tâches, budget, scores) | §8 IA | 2j | IA |
-| B10 | IA8 — Suggestion batch cooking intelligent (planning + appareils → timeline optimale) | §8 IA | 3j | IA |
-| B11 | G20 — Recherche globale complète (Ctrl+K → couvrir notes, jardin, contrats) | §4 Gap | 3j | Frontend |
-| B12 | Tests pages famille frontend (T8 étendu) | §12 Tests | 2j | Tests |
-| B13 | Tests E2E parcours utilisateur complet (T6) | §12 Tests | 3j | Tests |
+| # | Tâche | Source | Effort | Catégorie | Statut |
+|---|-------|--------|--------|-----------|--------|
+| B1 | G5 — Mode hors-ligne courses (PWA cache offline en magasin) | §4 Gap | 3j | PWA | ✅ |
+| B2 | IA1 — Prédiction courses intelligente (historique → pré-remplir liste) | §8 IA | 3j | IA | ✅ |
+| B3 | J2 — CRON planning auto semaine (dimanche 19h si planning vide) | §9 CRON | 2j | CRON | ✅ |
+| B4 | J9 — CRON alertes budget seuil (quotidien 20h, catégorie > 80%) | §9 CRON | 1j | CRON | ✅ |
+| B5 | W2 — Commandes WhatsApp enrichies ("ajoute du lait", "budget ce mois") via Mistral NLP | §10 WhatsApp | 3j | WhatsApp | ✅ |
+| B6 | I1 — Bridge récolte jardin → recettes semaine suivante | §7 Inter-module | 2j | Bridge | ✅ |
+| B7 | I3 — Bridge budget anomalie → notification proactive (+30% restaurants) | §7 Inter-module | 2j | Bridge | ✅ |
+| B8 | I5 — Bridge documents expirés → dashboard alerte widget | §7 Inter-module | 1j | Bridge | ✅ |
+| B9 | IA5 — Résumé hebdomadaire IA intelligent (narratif : repas, tâches, budget, scores) | §8 IA | 2j | IA | ✅ |
+| B10 | IA8 — Suggestion batch cooking intelligent (planning + appareils → timeline optimale) | §8 IA | 3j | IA | ✅ |
+| B11 | G20 — Recherche globale complète (Ctrl+K → couvrir notes, jardin, contrats) | §4 Gap | 3j | Frontend | ✅ |
+| B12 | Tests pages famille frontend (T8 étendu) | §12 Tests | 2j | Tests | ✅ |
+| B13 | Tests E2E parcours utilisateur complet (T6) | §12 Tests | 3j | Tests | ✅ |
 
-**Total Phase B : 13 tâches**
+**Total Phase B : 13/13 tâches ✅**
 
 ---
 
@@ -1214,8 +1215,8 @@ Throttle: 2h par type / canal
 
 | Phase | Objectif | Tâches | Semaines | Priorité |
 |-------|----------|--------|----------|----------|
-| **Phase A** | Stabilisation : bugs critiques, SQL, tests critiques, doc obsolète | 16 | 1-2 | 🔴 BLOQUANT |
-| **Phase B** | Fonctionnalités : gaps, IA, CRON, bridges, recherche, tests | 13 | 3-4 | 🟡 HAUTE |
+| **Phase A** | Stabilisation : bugs critiques, SQL, tests critiques, doc obsolète | 16 | 1-2 | ✅ TERMINÉE |
+| **Phase B** | Fonctionnalités : gaps, IA, CRON, bridges, recherche, tests | 13 | 3-4 | ✅ TERMINÉE |
 | **Phase C** | UI/UX : visualisations, drag-drop, animations, flux simplifiés | 12 | 5-6 | 🟢 MOYENNE-HAUTE |
 | **Phase D** | Admin : console, scheduler, CRON, notifications, refactoring | 12 | 7-8 | 🟢 MOYENNE |
 | **Phase E** | Innovations : pilote automatique, widget, Google Home, exports | 12 | 9+ | 🟢 BASSE |

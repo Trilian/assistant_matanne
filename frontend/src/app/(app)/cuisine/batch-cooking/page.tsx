@@ -55,10 +55,11 @@ import { toast } from "sonner";
 import type { SessionBatchCooking } from "@/types/batch-cooking";
 
 const BADGES_STATUT: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  planifie: { label: "Planifié", variant: "outline" },
+  planifiee: { label: "Planifié", variant: "outline" },
   en_cours: { label: "En cours", variant: "default" },
-  termine: { label: "Terminé", variant: "secondary" },
-  annule: { label: "Annulé", variant: "destructive" },
+  terminee: { label: "Terminé", variant: "secondary" },
+  annulee: { label: "Annulé", variant: "destructive" },
+  pause: { label: "En pause", variant: "outline" },
 };
 
 type FiltreLocalisation = "tout" | "frigo" | "congelateur";
@@ -440,9 +441,9 @@ function SessionCard({
   session: SessionBatchCooking;
   onSupprimer: () => void;
 }) {
-  const badge = BADGES_STATUT[session.statut] ?? BADGES_STATUT.planifie;
+  const badge = BADGES_STATUT[session.statut] ?? BADGES_STATUT.planifiee;
   const IconeStatut =
-    session.statut === "termine"
+    session.statut === "terminee"
       ? CheckCircle2
       : session.statut === "en_cours"
         ? PlayCircle

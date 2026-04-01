@@ -726,7 +726,7 @@ def _job_resume_hebdo() -> None:
 
 
 def _job_planning_semaine_si_vide() -> None:
-    """J-03: vérifie le planning de la semaine prochaine et alerte s'il est vide."""
+    """J-03 / B3: vérifie le planning semaine prochaine — si vide, propose un planning IA via WhatsApp."""
     try:
         from datetime import date, timedelta
 
@@ -753,20 +753,76 @@ def _job_planning_semaine_si_vide() -> None:
             logger.info("J-03: planning déjà actif pour la semaine du %s", lundi_prochain)
             return
 
+        # Phase B (B3): Proposer un planning IA auto via WhatsApp avec boutons
+        suggestions_ia = ""
+        try:
+            from src.core.ai import obtenir_client_ia
+
+            client = obtenir_client_ia()
+
+            # Contexte inventaire pour suggestions pertinentes
+            inventaire_txt = ""
+            try:
+                from src.core.models.inventaire import ArticleInventaire
+
+                with obtenir_contexte_db() as session:
+                    articles = (
+                        session.query(ArticleInventaire)
+                        .filter(ArticleInventaire.quantite > 0)
+                        .limit(20)
+                        .all()
+                    )
+                    if articles:
+                        inventaire_txt = "Articles en stock: " + ", ".join(
+                            a.nom for a in articles if getattr(a, "nom", None)
+                        )
+            except Exception:
+                logger.debug("Inventaire indisponible pour planning auto")
+
+            prompt = (
+                f"Propose un menu familial simple pour la semaine du {lundi_prochain:%d/%m} au {dimanche_prochain:%d/%m}. "
+                f"{'Utilise si possible ces ingrédients en stock: ' + inventaire_txt + '. ' if inventaire_txt else ''}"
+                "7 déjeuners + 7 dîners. Format concis: "
+                "Lundi midi: X / Lundi soir: Y etc."
+            )
+            reponse = client.appeler(
+                prompt=prompt,
+                system_prompt=(
+                    "Tu es un planificateur de repas familial. Propose des repas variés, "
+                    "équilibrés, adaptés à une famille avec un enfant en bas âge. "
+                    "Sois concis et pratique."
+                ),
+                temperature=0.7,
+                max_tokens=600,
+            )
+            suggestions_ia = reponse.strip()[:500]
+        except Exception:
+            logger.debug("IA indisponible pour planning auto")
+
         message = (
-            f"Aucun planning actif pour la semaine du {lundi_prochain:%d/%m}. "
-            "Pense à générer le menu hebdo."
+            f"Aucun planning pour la semaine du {lundi_prochain:%d/%m}. "
         )
+        if suggestions_ia:
+            message += f"Voici une proposition IA:\n\n{suggestions_ia}\n\nTu valides ?"
+        else:
+            message += "Pense à générer le menu hebdo dans l'app."
+
         dispatcher = get_dispatcher_notifications()
-        res = _envoyer_notif_tous_users(
+
+        # Envoyer avec boutons interactifs WhatsApp si possible
+        _envoyer_notif_tous_users(
             dispatcher,
             message=message,
-            canaux=["push", "whatsapp"],
+            canaux=["whatsapp", "push"],
             titre="Planning semaine à générer",
+            boutons_whatsapp=[
+                {"id": "planning_valider", "title": "Valider"},
+                {"id": "planning_regenerer", "title": "Autre proposition"},
+            ] if suggestions_ia else None,
         )
-        logger.info("J-03 exécuté: %s", res)
+        logger.info("B3 planning auto: proposition envoyée pour semaine du %s", lundi_prochain)
     except Exception:
-        logger.exception("Erreur job J-03")
+        logger.exception("Erreur job B3 planning auto")
 
 
 def _job_alertes_peremption_48h() -> None:
@@ -3602,6 +3658,484 @@ _REGISTRE_JOBS.update(
 )
 
 
+# ─── Phase B — Nouveaux jobs ─────────────────────────────────────────────────
+
+
+def _job_alertes_budget_seuil() -> None:
+    """B4: Alertes budget seuil — quotidien 20h, catégorie > 80% du budget mensuel."""
+    try:
+        from decimal import Decimal
+
+        from sqlalchemy import func
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.finances import BudgetMensuelDB, Depense
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        debut_mois = aujourd_hui.replace(day=1)
+
+        with obtenir_contexte_db() as session:
+            # Récupérer le budget mensuel courant
+            budget_mensuel = (
+                session.query(BudgetMensuelDB)
+                .filter(BudgetMensuelDB.mois == debut_mois)
+                .first()
+            )
+
+            if not budget_mensuel or not budget_mensuel.budgets_par_categorie:
+                logger.info("B4: Aucun budget mensuel défini pour %s", debut_mois)
+                return
+
+            # Calculer les dépenses par catégorie ce mois
+            depenses_par_cat = dict(
+                session.query(
+                    Depense.categorie,
+                    func.sum(Depense.montant),
+                )
+                .filter(
+                    Depense.date >= debut_mois,
+                    Depense.date <= aujourd_hui,
+                )
+                .group_by(Depense.categorie)
+                .all()
+            )
+
+        alertes: list[str] = []
+        budgets_cat = budget_mensuel.budgets_par_categorie or {}
+
+        for categorie, budget_prevu in budgets_cat.items():
+            budget_val = Decimal(str(budget_prevu)) if budget_prevu else Decimal("0")
+            if budget_val <= 0:
+                continue
+
+            depense_val = depenses_par_cat.get(categorie, Decimal("0"))
+            pourcentage = (depense_val / budget_val * 100) if budget_val > 0 else Decimal("0")
+
+            if pourcentage >= 100:
+                alertes.append(
+                    f"🔴 {categorie}: {depense_val:.0f}€ / {budget_val:.0f}€ "
+                    f"({pourcentage:.0f}%) — BUDGET DÉPASSÉ"
+                )
+            elif pourcentage >= 80:
+                alertes.append(
+                    f"🟡 {categorie}: {depense_val:.0f}€ / {budget_val:.0f}€ "
+                    f"({pourcentage:.0f}%)"
+                )
+
+        if not alertes:
+            logger.info("B4: Aucune catégorie > 80%% du budget")
+            return
+
+        message = "Alertes budget du mois:\n" + "\n".join(alertes)
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push", "ntfy"],
+            titre="Alerte budget mensuel",
+            type_evenement="budget_alerte_seuil",
+        )
+        logger.info("B4: %d alerte(s) budget envoyée(s)", len(alertes))
+    except Exception:
+        logger.exception("Erreur job B4 alertes budget seuil")
+
+
+def _job_resume_hebdo_ia() -> None:
+    """B9: Résumé hebdomadaire IA intelligent — narratif agréable."""
+    try:
+        from datetime import timedelta
+
+        from sqlalchemy import func
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.finances import Depense
+        from src.core.models.planning import Repas
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        debut_semaine = aujourd_hui - timedelta(days=aujourd_hui.weekday())
+        fin_semaine = debut_semaine + timedelta(days=6)
+
+        # Collecter les données de la semaine
+        with obtenir_contexte_db() as session:
+            nb_repas = (
+                session.query(func.count(Repas.id))
+                .filter(
+                    Repas.date_repas >= debut_semaine,
+                    Repas.date_repas <= fin_semaine,
+                )
+                .scalar() or 0
+            )
+
+            depenses_semaine = (
+                session.query(func.sum(Depense.montant))
+                .filter(
+                    Depense.date >= debut_semaine,
+                    Depense.date <= fin_semaine,
+                )
+                .scalar() or 0
+            )
+
+            top_categories = dict(
+                session.query(
+                    Depense.categorie,
+                    func.sum(Depense.montant),
+                )
+                .filter(
+                    Depense.date >= debut_semaine,
+                    Depense.date <= fin_semaine,
+                )
+                .group_by(Depense.categorie)
+                .order_by(func.sum(Depense.montant).desc())
+                .limit(3)
+                .all()
+            )
+
+        # Construire le résumé avec l'IA
+        try:
+            from src.core.ai import obtenir_client_ia
+
+            client = obtenir_client_ia()
+            prompt = (
+                f"Résumé familial de la semaine du {debut_semaine:%d/%m} au {fin_semaine:%d/%m}:\n"
+                f"- {nb_repas} repas planifiés\n"
+                f"- {depenses_semaine:.0f}€ de dépenses\n"
+                f"- Top catégories: {', '.join(f'{k}: {v:.0f}€' for k, v in top_categories.items())}\n"
+                "\nRédige un court résumé narratif agréable à lire (3-4 phrases) "
+                "pour une famille. Ton chaleureux et encourageant."
+            )
+            resume = client.appeler(
+                prompt=prompt,
+                system_prompt=(
+                    "Tu es un assistant familial bienveillant. "
+                    "Rédige des résumés hebdomadaires chaleureux et motivants."
+                ),
+                temperature=0.7,
+                max_tokens=300,
+            )
+            message = f"📊 Résumé de ta semaine:\n\n{resume.strip()}"
+        except Exception:
+            logger.debug("IA indisponible pour résumé hebdo, fallback texte simple")
+            cats_txt = ", ".join(f"{k}: {v:.0f}€" for k, v in top_categories.items())
+            message = (
+                f"📊 Résumé semaine {debut_semaine:%d/%m} → {fin_semaine:%d/%m}:\n"
+                f"- {nb_repas} repas planifiés\n"
+                f"- {depenses_semaine:.0f}€ de dépenses ({cats_txt})"
+            )
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["whatsapp", "email"],
+            titre="Résumé hebdomadaire",
+        )
+        logger.info("B9: Résumé hebdo IA envoyé")
+    except Exception:
+        logger.exception("Erreur job B9 résumé hebdo IA")
+
+
+_REGISTRE_JOBS.update(
+    {
+        # Phase B — Nouveaux jobs
+        "alertes_budget_seuil": ("Alertes budget seuil (quotidien 20h)", _job_alertes_budget_seuil),
+        "resume_hebdo_ia": ("Résumé hebdomadaire IA intelligent", _job_resume_hebdo_ia),
+    }
+)
+
+
+# ─── Phase D — Nouveaux jobs CRON ─────────────────────────────────────────────
+
+
+def _job_rappels_jardin_saisonniers() -> None:
+    """D5: Rappels jardin saisonniers — hebdomadaire lundi 07h.
+
+    Consulte le catalogue plantes et la saison courante pour envoyer
+    des rappels d'arrosage, plantation, taille et récolte.
+    """
+    try:
+        import json
+        from pathlib import Path
+
+        from src.core.db import obtenir_contexte_db
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        mois = aujourd_hui.month
+
+        # Déterminer la saison
+        if mois in (3, 4, 5):
+            saison = "printemps"
+        elif mois in (6, 7, 8):
+            saison = "ete"
+        elif mois in (9, 10, 11):
+            saison = "automne"
+        else:
+            saison = "hiver"
+
+        # Charger le catalogue plantes
+        catalogue_path = Path("data/reference/plantes_catalogue.json")
+        rappels: list[str] = []
+
+        if catalogue_path.exists():
+            catalogue = json.loads(catalogue_path.read_text(encoding="utf-8"))
+            plantes = catalogue if isinstance(catalogue, list) else catalogue.get("plantes", [])
+
+            for plante in plantes:
+                nom = plante.get("nom", "")
+                saisons = plante.get("saisons", {})
+                actions_saison = saisons.get(saison, [])
+
+                if isinstance(actions_saison, list):
+                    for action in actions_saison:
+                        rappels.append(f"• {nom}: {action}")
+                elif isinstance(actions_saison, str) and actions_saison:
+                    rappels.append(f"• {nom}: {actions_saison}")
+
+        # Consulter les plantes en DB
+        try:
+            with obtenir_contexte_db() as session:
+                from sqlalchemy import text as sql_text
+
+                plantes_db = session.execute(
+                    sql_text(
+                        """
+                        SELECT nom, type_plante, emplacement
+                        FROM plantes_jardin
+                        WHERE actif = true
+                        ORDER BY nom
+                        LIMIT 20
+                        """
+                    )
+                ).fetchall()
+
+                if plantes_db:
+                    rappels.append("\n🌱 Vos plantes actives:")
+                    for p in plantes_db:
+                        rappels.append(f"  • {p.nom} ({p.type_plante or 'non classé'}) — {p.emplacement or '?'}")
+        except Exception:
+            logger.debug("Table plantes_jardin non disponible")
+
+        if not rappels:
+            logger.info("D5: Aucun rappel jardin pour la saison %s", saison)
+            return
+
+        emoji_saison = {"printemps": "🌸", "ete": "☀️", "automne": "🍂", "hiver": "❄️"}
+        message = (
+            f"{emoji_saison.get(saison, '🌿')} Rappels jardin — {saison.capitalize()}\n\n"
+            + "\n".join(rappels[:15])
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push", "ntfy"],
+            titre=f"Jardin — {saison.capitalize()}",
+        )
+        logger.info("D5: %d rappel(s) jardin envoyé(s) pour %s", len(rappels), saison)
+    except Exception:
+        logger.exception("Erreur job D5 rappels jardin saisonniers")
+
+
+def _job_verification_sante_systeme() -> None:
+    """D6: Vérification santé système — horaire, alerte ntfy si service down.
+
+    Vérifie :
+    - Connexion DB
+    - Service registry santé
+    - Cache disponibilité
+    - API réponse
+    """
+    try:
+        alertes: list[str] = []
+        services_ok = 0
+        services_total = 0
+
+        # 1. Vérifier la connexion DB
+        services_total += 1
+        try:
+            from src.core.db import obtenir_contexte_db
+
+            with obtenir_contexte_db() as session:
+                from sqlalchemy import text as sql_text
+
+                session.execute(sql_text("SELECT 1")).scalar()
+            services_ok += 1
+        except Exception as e:
+            alertes.append(f"🔴 Base de données: {str(e)[:100]}")
+
+        # 2. Vérifier le registre de services
+        services_total += 1
+        try:
+            from src.services.core.registry import obtenir_registre_services
+
+            registre = obtenir_registre_services()
+            health = registre.health_check()
+            if health.get("global_status") == "healthy":
+                services_ok += 1
+            else:
+                erreurs = health.get("erreurs", [])
+                if erreurs:
+                    alertes.append(f"🟡 Registre services: {'; '.join(erreurs[:3])}")
+                else:
+                    services_ok += 1
+        except Exception as e:
+            alertes.append(f"🔴 Registre services: {str(e)[:100]}")
+
+        # 3. Vérifier le cache
+        services_total += 1
+        try:
+            from src.core.caching import obtenir_cache
+
+            cache = obtenir_cache()
+            if hasattr(cache, "obtenir_statistiques"):
+                cache.obtenir_statistiques()
+            services_ok += 1
+        except Exception as e:
+            alertes.append(f"🟡 Cache: {str(e)[:100]}")
+
+        # 4. Vérifier l'espace disque (logs/cache)
+        services_total += 1
+        try:
+            import shutil
+
+            usage = shutil.disk_usage("/")
+            pct_libre = usage.free / usage.total * 100
+            if pct_libre < 10:
+                alertes.append(f"🔴 Disque: seulement {pct_libre:.1f}% libre")
+            else:
+                services_ok += 1
+        except Exception:
+            services_ok += 1  # Non critique sur Windows
+
+        if alertes:
+            message = (
+                f"⚠️ Santé système — {services_ok}/{services_total} services OK\n\n"
+                + "\n".join(alertes)
+            )
+            # Envoyer uniquement aux admins via ntfy
+            try:
+                from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+                dispatcher = get_dispatcher_notifications()
+                for admin_id in _obtenir_admin_user_ids():
+                    dispatcher.envoyer(
+                        user_id=admin_id,
+                        message=message,
+                        canaux=["ntfy"],
+                        titre="Alerte santé système",
+                    )
+            except Exception:
+                logger.error("Impossible d'envoyer l'alerte santé système")
+            logger.warning("D6: %d alerte(s) santé système", len(alertes))
+        else:
+            logger.info("D6: Tous les services OK (%d/%d)", services_ok, services_total)
+    except Exception:
+        logger.exception("Erreur job D6 vérification santé système")
+
+
+def _job_backup_auto_hebdo_json() -> None:
+    """D7: Backup automatique hebdomadaire JSON — dimanche 04h.
+
+    Exporte les tables critiques en JSON dans data/exports/backup_auto/.
+    Conserve les 4 derniers backups (rotation).
+    """
+    try:
+        import json
+        from pathlib import Path
+
+        from src.core.db import obtenir_contexte_db
+
+        backup_dir = Path("data/exports/backup_auto")
+        backup_dir.mkdir(parents=True, exist_ok=True)
+
+        aujourd_hui = date.today()
+        filename = f"backup_{aujourd_hui:%Y%m%d}.json"
+        filepath = backup_dir / filename
+
+        tables_critiques = [
+            "recettes",
+            "plannings",
+            "listes_courses",
+            "articles_courses",
+            "inventaire",
+            "enfants",
+            "jalons_enfant",
+            "depenses",
+            "budgets_mensuels",
+            "projets_maison",
+            "plantes_jardin",
+            "routines",
+            "profils_utilisateurs",
+            "documents_famille",
+            "contacts_famille",
+        ]
+
+        export_data: dict[str, list[dict]] = {}
+        total_rows = 0
+
+        with obtenir_contexte_db() as session:
+            from sqlalchemy import text as sql_text
+
+            for table_name in tables_critiques:
+                try:
+                    result = session.execute(
+                        sql_text(f"SELECT * FROM {table_name} LIMIT 10000")  # noqa: S608
+                    )
+                    rows = [dict(row._mapping) for row in result]
+
+                    # Sérialiser les types non-JSON
+                    cleaned_rows = []
+                    for row in rows:
+                        cleaned = {}
+                        for k, v in row.items():
+                            if isinstance(v, (datetime, date)):
+                                cleaned[k] = v.isoformat()
+                            elif hasattr(v, "__str__"):
+                                cleaned[k] = str(v)
+                            else:
+                                cleaned[k] = v
+                        cleaned_rows.append(cleaned)
+
+                    export_data[table_name] = cleaned_rows
+                    total_rows += len(cleaned_rows)
+                except Exception:
+                    logger.debug("Table %s non disponible pour backup", table_name)
+                    export_data[table_name] = []
+
+        backup_payload = {
+            "exported_at": datetime.now(UTC).isoformat(),
+            "version": "1.0",
+            "tables": export_data,
+            "total_tables": len(export_data),
+            "total_rows": total_rows,
+        }
+
+        filepath.write_text(json.dumps(backup_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        logger.info("D7: Backup JSON créé: %s (%d lignes, %d tables)", filename, total_rows, len(export_data))
+
+        # Rotation : garder les 4 derniers backups
+        backups = sorted(backup_dir.glob("backup_*.json"), reverse=True)
+        for old_backup in backups[4:]:
+            old_backup.unlink()
+            logger.info("D7: Ancien backup supprimé: %s", old_backup.name)
+
+    except Exception:
+        logger.exception("Erreur job D7 backup auto hebdo JSON")
+
+
+_REGISTRE_JOBS.update(
+    {
+        # Phase D — Nouveaux jobs
+        "rappels_jardin_saisonniers": ("Rappels jardin saisonniers (lundi 07h)", _job_rappels_jardin_saisonniers),
+        "verification_sante_systeme": ("Vérification santé système (horaire)", _job_verification_sante_systeme),
+        "backup_auto_hebdo_json": ("Backup auto hebdo JSON (dim 04h)", _job_backup_auto_hebdo_json),
+    }
+)
+
+
 class DémarreurCron:
     """Enveloppe legère autour de BackgroundScheduler pour un démarrage/arrêt propre."""
 
@@ -3636,7 +4170,7 @@ class DémarreurCron:
         self._planifier_job("rappel_courses", CronTrigger(hour=18, minute=0), replace_existing=True)
         self._planifier_job("push_contextuel_soir", CronTrigger(hour=18, minute=0), replace_existing=True)
         self._planifier_job("resume_hebdo", CronTrigger(day_of_week="mon", hour=7, minute=30), replace_existing=True)
-        self._planifier_job("planning_semaine_si_vide", CronTrigger(day_of_week="sun", hour=10, minute=0), replace_existing=True)
+        self._planifier_job("planning_semaine_si_vide", CronTrigger(day_of_week="sun", hour=19, minute=0), replace_existing=True)
         self._planifier_job("alertes_peremption_48h", CronTrigger(hour=6, minute=0), replace_existing=True)
         self._planifier_job("rapport_mensuel_budget", CronTrigger(day=1, hour=8, minute=15), replace_existing=True)
         self._planifier_job("score_weekend", CronTrigger(day_of_week="fri", hour=17, minute=0), replace_existing=True)
@@ -3671,7 +4205,7 @@ class DémarreurCron:
         self._planifier_job("astuce_anti_gaspillage", CronTrigger(hour=12, minute=0), replace_existing=True)
 
         # Jobs existants conservés
-        self._planifier_job("prediction_courses_weekly", CronTrigger(day_of_week="sun", hour=10, minute=0), replace_existing=True)
+        self._planifier_job("prediction_courses_weekly", CronTrigger(day_of_week="fri", hour=16, minute=0), replace_existing=True)
         self._planifier_job("sync_jeux_budget", CronTrigger(hour=22, minute=0), replace_existing=True)
         self._planifier_job("analyse_nutrition_hebdo", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
         self._planifier_job("alertes_energie", CronTrigger(hour=7, minute=0), replace_existing=True)
@@ -3700,6 +4234,15 @@ class DémarreurCron:
         self._planifier_job("suggestions_saison", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
         self._planifier_job("purge_historique_jeux", CronTrigger(day=1, hour=3, minute=30), replace_existing=True)
         self._planifier_job("veille_emploi", CronTrigger(hour=7, minute=0), replace_existing=True)
+
+        # Phase B — Nouveaux jobs
+        self._planifier_job("alertes_budget_seuil", CronTrigger(hour=20, minute=0), replace_existing=True)
+        self._planifier_job("resume_hebdo_ia", CronTrigger(day_of_week="sun", hour=20, minute=30), replace_existing=True)
+
+        # Phase D — Nouveaux jobs
+        self._planifier_job("rappels_jardin_saisonniers", CronTrigger(day_of_week="mon", hour=7, minute=0), replace_existing=True)
+        self._planifier_job("verification_sante_systeme", CronTrigger(minute=0), replace_existing=True)  # Toutes les heures
+        self._planifier_job("backup_auto_hebdo_json", CronTrigger(day_of_week="sun", hour=4, minute=0), replace_existing=True)
 
     def demarrer(self) -> None:
         if not self._scheduler.running:

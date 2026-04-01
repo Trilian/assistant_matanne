@@ -173,9 +173,6 @@ export default function PageJeux() {
         </div>
       </div>
 
-      {/* Bandeau budget */}
-      {dashboard?.budget && <BandeauBudget budget={dashboard.budget} />}
-
       <GrilleWidgets
         stockageCle="widgets:hub:jeux"
         titre="Widgets"

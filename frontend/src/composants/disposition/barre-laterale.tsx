@@ -91,6 +91,7 @@ interface LienNav {
 
 const LIENS: LienNav[] = [
   { nom: "Accueil", chemin: "/", Icone: Home },
+  { nom: "Ma Journée", chemin: "/ma-journee", Icone: CalendarDays },
   { nom: "Focus", chemin: "/focus", Icone: Zap },
   { nom: "Ma Semaine", chemin: "/ma-semaine", Icone: CalendarRange },
   {

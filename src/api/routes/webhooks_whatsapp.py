@@ -177,7 +177,7 @@ async def _traiter_message_texte(sender: str, texte: str) -> None:
         await _envoyer_resume_jules(sender)
     elif texte_lower.startswith("ajouter "):
         article = texte.strip()[8:].strip()
-        await _ajouter_article_courses(sender, article)
+        await _ajouter_article_courses_nlp(sender, article)
     elif texte_lower == "budget":
         await _envoyer_resume_budget(sender)
     elif texte_lower in ("anniversaires", "anniversaire"):
@@ -209,28 +209,15 @@ async def _traiter_message_texte(sender: str, texte: str) -> None:
             "- *jules* : Resume de Jules\n"
             "- *budget* : Budget mensuel\n"
             "- *recette [nom]* : Fiche recette\n"
-            "- *aide* : Cette liste",
+            "- *aide* : Cette liste\n\n"
+            "💬 Tu peux aussi écrire en langage naturel :\n"
+            "- _ajoute du lait et des oeufs_\n"
+            "- _combien j'ai dépensé ce mois ?_\n"
+            "- _qu'est-ce qu'on mange ce soir ?_",
         )
     else:
-        await envoyer_message_whatsapp(
-            sender,
-            "🤖 Commandes disponibles :\n"
-            "- *menu* : Planning de la semaine\n"
-            "- *ce soir* : Suggestion rapide repas\n"
-            "- *courses* : Liste de courses en cours\n"
-            "- *frigo* : Etat des stocks\n"
-            "- *jules* : Resume de Jules\n"
-            "- *ajouter [article]* : Ajouter a la liste\n"
-            "- *budget* : Budget mensuel\n"
-            "- *anniversaires* : Prochains anniversaires\n"
-            "- *recette [nom]* : Fiche recette\n"
-            "- *taches* : Taches maison en retard\n"
-            "- *meteo* : Previsions du jour\n"
-            "- *jardin* : Etat du jardin\n"
-            "- *energie* : Consommation energie\n"
-            "- *entretien* : Entretiens urgents\n"
-            "- *aide* : Liste des commandes",
-        )
+        # Phase B (B5): NLP Mistral — interpréter les commandes en langage naturel
+        await _traiter_commande_nlp(sender, texte)
 
 
 async def _valider_planning_courant() -> None:
@@ -530,52 +517,18 @@ async def _envoyer_resume_jules(sender: str) -> None:
             await envoyer_message_whatsapp(sender, "👶 *Résumé Jules*\n\n" + "\n".join(lignes))
 
 
-async def _ajouter_article_courses(sender: str, nom_article: str) -> None:
-    """Ajoute un article à la liste de courses active."""
-    from src.core.db import obtenir_contexte_db
+async def _ajouter_article_courses_legacy(sender: str, nom_article: str) -> None:
+    """Ajoute un article à la liste de courses active (wrapper legacy)."""
     from src.core.validation import SanitiseurDonnees
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
 
     nom_propre = SanitiseurDonnees.nettoyer_texte(nom_article)[:100]
     if not nom_propre:
+        from src.services.integrations.whatsapp import envoyer_message_whatsapp
         await envoyer_message_whatsapp(sender, "❌ Nom d'article invalide.")
         return
 
-    with obtenir_contexte_db() as session:
-        try:
-            from src.core.models.courses import ArticleCourses, ListeCourses
-
-            liste = (
-                session.query(ListeCourses)
-                .filter(ListeCourses.archivee == False)  # noqa: E712
-                .order_by(ListeCourses.date_creation.desc())
-                .first()
-            )
-
-            if not liste:
-                # Créer une nouvelle liste si aucune n'existe
-                from datetime import date
-                liste = ListeCourses(
-                    nom=f"Courses {date.today().strftime('%d/%m/%Y')}",
-                    archivee=False,
-                )
-                session.add(liste)
-                session.flush()
-
-            article = ArticleCourses(
-                liste_id=liste.id,
-                nom=nom_propre,
-                achete=False,
-            )
-            session.add(article)
-            session.commit()
-            await envoyer_message_whatsapp(
-                sender, f"✅ *{nom_propre}* ajouté à la liste de courses !"
-            )
-            logger.info("Article '%s' ajouté via WhatsApp", nom_propre)
-        except Exception:
-            logger.exception("Erreur ajout article courses via WhatsApp")
-            await envoyer_message_whatsapp(sender, "❌ Erreur lors de l'ajout. Réessaye.")
+    # Délègue à la nouvelle implémentation Phase B avec modèle Ingredient
+    await _ajouter_article_courses_nlp(sender, nom_propre)
 
 
 async def _envoyer_resume_budget(sender: str) -> None:
@@ -970,6 +923,238 @@ async def _envoyer_entretien_urgent(sender: str) -> None:
                 )
         except Exception:
             logger.debug("Entretien WhatsApp : table indisponible")
+
+
+# ═══════════════════════════════════════════════════════════════════
+# PHASE B (B5) — NLP MISTRAL POUR COMMANDES NATURELLES
+# ═══════════════════════════════════════════════════════════════════
+
+
+async def _traiter_commande_nlp(sender: str, texte: str) -> None:
+    """Interprète un message en langage naturel via Mistral et exécute l'action.
+
+    Exemples supportés :
+    - "ajoute du lait et des oeufs" → ajouter_courses
+    - "combien j'ai dépensé ce mois ?" → budget
+    - "qu'est-ce qu'on mange ce soir ?" → planning_ce_soir
+    - "est-ce qu'il nous reste du beurre ?" → stock
+    """
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    try:
+        from src.core.ai import obtenir_client_ia
+
+        client = obtenir_client_ia()
+        reponse = client.appeler(
+            prompt=(
+                f"Message WhatsApp de l'utilisateur : \"{texte}\"\n\n"
+                "Détermine l'intent et les paramètres. Retourne un JSON strict :\n"
+                '{"intent": "<intent>", "params": {<params>}}\n\n'
+                "Intents possibles :\n"
+                '- "ajouter_courses" : params = {"articles": ["lait", "oeufs"]}\n'
+                '- "budget" : params = {"periode": "mois"|"semaine"}\n'
+                '- "planning_ce_soir" : params = {}\n'
+                '- "planning_semaine" : params = {}\n'
+                '- "stock" : params = {"article": "beurre"} (optionnel)\n'
+                '- "recette" : params = {"nom": "..."}\n'
+                '- "jules" : params = {}\n'
+                '- "taches" : params = {}\n'
+                '- "meteo" : params = {}\n'
+                '- "conversation" : params = {"reponse": "ta réponse"}\n\n'
+                "Si tu ne reconnais pas l'intent, utilise 'conversation' et "
+                "réponds naturellement en tant qu'assistant familial."
+            ),
+            system_prompt=(
+                "Tu es l'assistant familial Matanne. Tu interprètes les messages "
+                "WhatsApp en JSON d'action. Sois précis et concis."
+            ),
+            temperature=0.3,
+            max_tokens=300,
+        )
+
+        import json
+        parsed = json.loads(
+            reponse.strip().removeprefix("```json").removesuffix("```").strip()
+        )
+        intent = parsed.get("intent", "conversation")
+        params = parsed.get("params", {})
+
+        if intent == "ajouter_courses":
+            articles = params.get("articles", [])
+            if not articles:
+                await envoyer_message_whatsapp(sender, "Quels articles veux-tu ajouter ?")
+                return
+            nb_ajoutes = 0
+            for article in articles:
+                await _ajouter_article_courses_nlp(sender, str(article), silencieux=True)
+                nb_ajoutes += 1
+            await envoyer_message_whatsapp(
+                sender,
+                f"✅ {nb_ajoutes} article(s) ajouté(s) à la liste : {', '.join(str(a) for a in articles)}",
+            )
+
+        elif intent == "budget":
+            await _envoyer_resume_budget(sender)
+
+        elif intent == "planning_ce_soir":
+            await _envoyer_suggestion_ce_soir(sender)
+
+        elif intent == "planning_semaine":
+            await _envoyer_planning_courant(sender)
+
+        elif intent == "stock":
+            article = params.get("article")
+            if article:
+                await _chercher_stock_article(sender, str(article))
+            else:
+                await _envoyer_alerte_stocks(sender)
+
+        elif intent == "recette":
+            nom = params.get("nom", "")
+            if nom:
+                await _envoyer_fiche_recette(sender, str(nom))
+            else:
+                await envoyer_message_whatsapp(sender, "Quelle recette cherches-tu ?")
+
+        elif intent == "jules":
+            await _envoyer_resume_jules(sender)
+
+        elif intent == "taches":
+            await _envoyer_taches_retard(sender)
+
+        elif intent == "meteo":
+            await _envoyer_meteo(sender)
+
+        elif intent == "conversation":
+            reponse_texte = params.get("reponse", "")
+            if reponse_texte:
+                await envoyer_message_whatsapp(sender, str(reponse_texte))
+            else:
+                await envoyer_message_whatsapp(
+                    sender,
+                    "🤖 Je n'ai pas compris. Tape *aide* pour voir les commandes.",
+                )
+        else:
+            await envoyer_message_whatsapp(
+                sender,
+                "🤖 Je n'ai pas compris. Tape *aide* pour voir les commandes.",
+            )
+
+    except Exception:
+        logger.debug("NLP WhatsApp indisponible, envoi aide classique", exc_info=True)
+        await envoyer_message_whatsapp(
+            sender,
+            "🤖 Commandes : *menu*, *courses*, *frigo*, *budget*, *jules*, "
+            "*ajouter [article]*, *recette [nom]*, *taches*, *aide*",
+        )
+
+
+async def _ajouter_article_courses_nlp(sender: str, article: str, *, silencieux: bool = False) -> None:
+    """Ajoute un article à la liste de courses active (Phase B NLP)."""
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.courses import ArticleCourses, ListeCourses
+        from src.core.models.recettes import Ingredient
+
+        with obtenir_contexte_db() as session:
+            # Trouver ou créer la liste active
+            liste = (
+                session.query(ListeCourses)
+                .filter(ListeCourses.archivee.is_(False))
+                .order_by(ListeCourses.date_creation.desc())
+                .first()
+            )
+
+            if not liste:
+                liste = ListeCourses(nom="Courses WhatsApp")
+                session.add(liste)
+                session.flush()
+
+            # Trouver ou créer l'ingrédient
+            ingredient = (
+                session.query(Ingredient)
+                .filter(Ingredient.nom.ilike(article.strip()))
+                .first()
+            )
+            if not ingredient:
+                ingredient = Ingredient(nom=article.strip().capitalize())
+                session.add(ingredient)
+                session.flush()
+
+            # Vérifier si déjà sur la liste
+            existant = (
+                session.query(ArticleCourses)
+                .filter(
+                    ArticleCourses.liste_id == liste.id,
+                    ArticleCourses.ingredient_id == ingredient.id,
+                    ArticleCourses.achete.is_(False),
+                )
+                .first()
+            )
+
+            if existant:
+                if not silencieux:
+                    await envoyer_message_whatsapp(
+                        sender, f"ℹ️ '{article}' est déjà sur la liste."
+                    )
+                return
+
+            nouveau = ArticleCourses(
+                liste_id=liste.id,
+                ingredient_id=ingredient.id,
+                quantite_necessaire=1,
+                achete=False,
+            )
+            session.add(nouveau)
+            session.commit()
+
+        if not silencieux:
+            await envoyer_message_whatsapp(sender, f"✅ '{article}' ajouté à la liste !")
+    except Exception:
+        logger.debug("Erreur ajout article WhatsApp", exc_info=True)
+        if not silencieux:
+            await envoyer_message_whatsapp(sender, f"❌ Impossible d'ajouter '{article}'.")
+
+
+async def _chercher_stock_article(sender: str, article: str) -> None:
+    """Recherche un article spécifique dans l'inventaire."""
+    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.inventaire import ArticleInventaire
+
+        with obtenir_contexte_db() as session:
+            resultats = (
+                session.query(ArticleInventaire)
+                .filter(
+                    ArticleInventaire.nom.ilike(f"%{article}%"),
+                    ArticleInventaire.quantite > 0,
+                )
+                .limit(5)
+                .all()
+            )
+
+        if not resultats:
+            await envoyer_message_whatsapp(
+                sender,
+                f"❌ Aucun '{article}' trouvé en stock. Veux-tu l'ajouter aux courses ?",
+            )
+        else:
+            lignes = [
+                f"- {r.nom}: {r.quantite} {r.unite or 'pcs'}"
+                + (f" (péremption: {r.date_peremption:%d/%m})" if r.date_peremption else "")
+                for r in resultats
+            ]
+            await envoyer_message_whatsapp(
+                sender,
+                f"📦 Stock '{article}':\n" + "\n".join(lignes),
+            )
+    except Exception:
+        logger.debug("Erreur recherche stock WhatsApp", exc_info=True)
+        await envoyer_message_whatsapp(sender, "❌ Impossible de vérifier le stock.")
             await envoyer_message_whatsapp(sender, "🔧 Entretien : données indisponibles.")
 
 

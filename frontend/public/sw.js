@@ -1,5 +1,6 @@
-const CACHE_NAME = "matanne-v4";
-const API_CACHE = "matanne-api-v3";
+const CACHE_NAME = "matanne-v5";
+const API_CACHE = "matanne-api-v4";
+const COURSES_CACHE = "matanne-courses-v1";
 const OFFLINE_URL = "/offline.html";
 const SYNC_QUEUE = "matanne-sync-queue";
 
@@ -8,6 +9,7 @@ const PRECACHE_URLS = [
   "/offline.html",
   "/manifest.json",
   "/cuisine",
+  "/cuisine/courses",
   "/famille",
   "/maison",
   "/jeux",
@@ -29,6 +31,13 @@ const CACHEABLE_API = [
   "/api/v1/push/rappels/evaluer",
 ];
 
+// Courses-specific API paths — cache-first offline in store
+const COURSES_API_PATHS = [
+  "/api/v1/courses/liste",
+  "/api/v1/courses/listes",
+  "/api/v1/courses",
+];
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
@@ -41,7 +50,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((k) => k !== CACHE_NAME && k !== API_CACHE)
+          .filter((k) => k !== CACHE_NAME && k !== API_CACHE && k !== COURSES_CACHE)
           .map((k) => caches.delete(k))
       )
     )
@@ -73,6 +82,9 @@ self.addEventListener("fetch", (event) => {
     ["POST", "PUT", "PATCH", "DELETE"].includes(event.request.method);
 
   if (isApiMutation) {
+    // Courses mutations get special offline handling
+    const isCourseMutation = COURSES_API_PATHS.some((p) => url.pathname.startsWith(p));
+
     event.respondWith(
       fetch(event.request.clone()).catch(async () => {
         const body = await event.request.text().catch(() => null);
@@ -84,10 +96,19 @@ self.addEventListener("fetch", (event) => {
           headers,
           body,
           timestamp: Date.now(),
+          type: isCourseMutation ? "courses" : "general",
         });
         if (self.registration.sync) {
           await self.registration.sync.register(SYNC_QUEUE);
         }
+
+        // For courses check/uncheck, optimistically update the cached list
+        if (isCourseMutation && body) {
+          try {
+            await mettreAJourCacheCourses(url.pathname, event.request.method, JSON.parse(body));
+          } catch { /* best-effort */ }
+        }
+
         return new Response(
           JSON.stringify({ offline: true, message: "Requête enregistrée pour synchronisation" }),
           { status: 202, headers: { "Content-Type": "application/json" } }
@@ -97,8 +118,32 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // API requests: stale-while-revalidate for cacheable endpoints
+  // Courses API: cache-first offline for shopping in store
   if (url.pathname.startsWith("/api/") && event.request.method === "GET") {
+    const isCoursesApi = COURSES_API_PATHS.some((p) => url.pathname.startsWith(p));
+    if (isCoursesApi) {
+      event.respondWith(
+        caches.open(COURSES_CACHE).then((cache) =>
+          fetch(event.request)
+            .then((response) => {
+              if (response.ok) {
+                cache.put(event.request, response.clone());
+              }
+              return response;
+            })
+            .catch(() => cache.match(event.request).then((cached) => {
+              if (cached) return cached;
+              return new Response(
+                JSON.stringify({ offline: true, items: [], message: "Liste courses hors-ligne" }),
+                { status: 200, headers: { "Content-Type": "application/json" } }
+              );
+            }))
+        )
+      );
+      return;
+    }
+
+    // General API cache: stale-while-revalidate for cacheable endpoints
     const isCacheable = CACHEABLE_API.some((p) => url.pathname.startsWith(p));
     if (isCacheable) {
       event.respondWith(
@@ -259,4 +304,45 @@ function storeGetAll(store) {
     req.onsuccess = (e) => resolve(e.target.result);
     req.onerror = (e) => reject(e.target.error);
   });
+}
+
+// ─── Courses Offline Cache Update ───────────────────────────
+
+/**
+ * Met à jour optimistiquement le cache courses hors-ligne
+ * quand l'utilisateur coche/décoche un article en magasin.
+ */
+async function mettreAJourCacheCourses(pathname, method, body) {
+  const cache = await caches.open(COURSES_CACHE);
+  const keys = await cache.keys();
+
+  for (const request of keys) {
+    const url = new URL(request.url);
+    if (!COURSES_API_PATHS.some((p) => url.pathname.startsWith(p))) continue;
+
+    const response = await cache.match(request);
+    if (!response) continue;
+
+    try {
+      const data = await response.json();
+      if (!data || !Array.isArray(data.items || data.articles || data)) continue;
+
+      const items = data.items || data.articles || data;
+      const articleId = body?.id || body?.article_id;
+      if (!articleId) continue;
+
+      const article = items.find((a) => a.id === articleId);
+      if (article && body.achete !== undefined) {
+        article.achete = body.achete;
+      }
+
+      const updatedResponse = new Response(JSON.stringify(data), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+      await cache.put(request, updatedResponse);
+    } catch {
+      /* Ignore parse errors */
+    }
+  }
 }

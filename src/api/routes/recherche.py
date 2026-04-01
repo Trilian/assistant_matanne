@@ -177,6 +177,90 @@ async def recherche_globale(
                     })
             except Exception as e:
                 _logger.warning("[recherche] Erreur requête contacts famille: %s", e)
+
+            # 6. B11: Plantes jardin
+            try:
+                from src.core.models.temps_entretien import PlanteJardin
+
+                plantes = (
+                    session.query(PlanteJardin)
+                    .filter(
+                        or_(
+                            PlanteJardin.nom.ilike(pattern),
+                            PlanteJardin.variete.ilike(pattern),
+                            PlanteJardin.notes.ilike(pattern),
+                        )
+                    )
+                    .limit(limit // 5)
+                    .all()
+                )
+                for p in plantes:
+                    resultats.append({
+                        "type": "plante",
+                        "id": p.id,
+                        "titre": p.nom,
+                        "description": p.variete or f"État: {p.etat}",
+                        "url": "/maison/jardin",
+                        "icone": "🌱",
+                    })
+            except Exception as e:
+                _logger.warning("[recherche] Erreur requête plantes jardin: %s", e)
+
+            # 7. B11: Contrats maison
+            try:
+                from src.core.models.maison_extensions import ContratMaison
+
+                contrats = (
+                    session.query(ContratMaison)
+                    .filter(
+                        or_(
+                            ContratMaison.nom.ilike(pattern),
+                            ContratMaison.fournisseur.ilike(pattern),
+                            ContratMaison.type_contrat.ilike(pattern),
+                        )
+                    )
+                    .limit(limit // 5)
+                    .all()
+                )
+                for c in contrats:
+                    resultats.append({
+                        "type": "contrat",
+                        "id": c.id,
+                        "titre": c.nom,
+                        "description": f"{c.fournisseur or ''} — {c.type_contrat or ''}".strip(" — "),
+                        "url": "/maison/contrats",
+                        "icone": "📄",
+                    })
+            except Exception as e:
+                _logger.warning("[recherche] Erreur requête contrats maison: %s", e)
+
+            # 8. B11: Documents famille
+            try:
+                from src.core.models import DocumentFamille
+
+                documents = (
+                    session.query(DocumentFamille)
+                    .filter(
+                        DocumentFamille.actif.is_(True),
+                        or_(
+                            DocumentFamille.titre.ilike(pattern),
+                            DocumentFamille.notes.ilike(pattern),
+                        )
+                    )
+                    .limit(limit // 5)
+                    .all()
+                )
+                for d in documents:
+                    resultats.append({
+                        "type": "document",
+                        "id": d.id,
+                        "titre": d.titre,
+                        "description": f"{d.categorie} — {d.membre_famille or ''}".strip(" — "),
+                        "url": "/famille/documents",
+                        "icone": "📁",
+                    })
+            except Exception as e:
+                _logger.warning("[recherche] Erreur requête documents famille: %s", e)
         
         # Limiter au nombre total demandé
         return resultats[:limit]

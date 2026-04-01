@@ -2653,6 +2653,177 @@ async def importer_config_admin(
     return {"status": "ok", **result}
 
 
+# ═══════════════════════════════════════════════════════════
+# D1 — Console commande rapide admin
+# ═══════════════════════════════════════════════════════════
+
+
+class AdminQuickCommandRequest(BaseModel):
+    """Requête pour la console de commande rapide admin."""
+
+    commande: str
+
+
+_COMMANDES_RAPIDES: dict[str, str] = {
+    "run job": "Exécuter un job CRON — ex: run job rappels_famille",
+    "clear cache": "Vider le cache — ex: clear cache (tout) ou clear cache recettes*",
+    "list jobs": "Lister tous les jobs disponibles",
+    "health": "Vérifier la santé des services",
+    "stats cache": "Afficher les statistiques du cache",
+    "maintenance on": "Activer le mode maintenance",
+    "maintenance off": "Désactiver le mode maintenance",
+    "help": "Afficher l'aide des commandes",
+}
+
+
+def _parser_commande_rapide(commande: str) -> dict[str, Any]:
+    """Parse et exécute une commande rapide admin.
+
+    Commandes supportées :
+    - run job <job_id> [--dry-run]
+    - clear cache [pattern]
+    - list jobs
+    - health
+    - stats cache
+    - maintenance on|off
+    - help
+    """
+    commande = commande.strip()
+    cmd_lower = commande.lower()
+
+    if cmd_lower == "help" or cmd_lower == "?":
+        return {
+            "type": "help",
+            "commandes": _COMMANDES_RAPIDES,
+            "message": "Commandes disponibles",
+        }
+
+    if cmd_lower == "list jobs":
+        from src.services.core.cron.jobs import lister_jobs_disponibles
+
+        jobs = lister_jobs_disponibles()
+        return {
+            "type": "list_jobs",
+            "jobs": jobs,
+            "total": len(jobs),
+            "message": f"{len(jobs)} jobs disponibles",
+        }
+
+    if cmd_lower.startswith("run job "):
+        parts = commande[8:].strip().split()
+        job_id = parts[0] if parts else ""
+        dry_run = "--dry-run" in parts
+
+        if not job_id:
+            return {"type": "error", "message": "Usage: run job <job_id> [--dry-run]"}
+
+        from src.services.core.cron.jobs import executer_job_par_id
+
+        try:
+            result = executer_job_par_id(job_id, dry_run=dry_run, source="admin_console")
+            return {"type": "job_result", "result": result, "message": f"Job '{job_id}' exécuté"}
+        except ValueError as e:
+            return {"type": "error", "message": str(e)}
+
+    if cmd_lower.startswith("clear cache"):
+        pattern = commande[11:].strip() or "*"
+        try:
+            from src.core.caching import obtenir_cache
+
+            cache = obtenir_cache()
+            nb = 0
+            if pattern == "*" or not pattern:
+                if hasattr(cache, "vider"):
+                    cache.vider()
+                    nb = -1  # Tout vidé
+            elif hasattr(cache, "invalider"):
+                nb = cache.invalider(pattern)
+            return {
+                "type": "cache_cleared",
+                "pattern": pattern,
+                "nb_invalidees": nb,
+                "message": f"Cache vidé (pattern: {pattern})",
+            }
+        except Exception as e:
+            return {"type": "error", "message": f"Erreur cache: {e}"}
+
+    if cmd_lower == "health":
+        try:
+            from src.services.core.registry import obtenir_registre_services
+
+            registre = obtenir_registre_services()
+            health = registre.health_check()
+            return {
+                "type": "health",
+                "result": health,
+                "message": f"Santé: {health.get('global_status', 'unknown')}",
+            }
+        except Exception as e:
+            return {"type": "error", "message": f"Erreur health: {e}"}
+
+    if cmd_lower == "stats cache":
+        try:
+            from src.core.caching import obtenir_cache
+
+            cache = obtenir_cache()
+            stats = cache.obtenir_statistiques() if hasattr(cache, "obtenir_statistiques") else {}
+            return {
+                "type": "cache_stats",
+                "result": stats,
+                "message": "Statistiques cache",
+            }
+        except Exception as e:
+            return {"type": "error", "message": f"Erreur stats cache: {e}"}
+
+    if cmd_lower in ("maintenance on", "maintenance off"):
+        activer = cmd_lower == "maintenance on"
+        try:
+            from src.core.db import obtenir_contexte_db
+
+            with obtenir_contexte_db() as session:
+                session.execute(
+                    text(
+                        """
+                        INSERT INTO etats_persistants (namespace, cle, valeur, user_id, created_at, modified_at)
+                        VALUES ('admin_feature_flags', 'admin.maintenance_mode', :val, 'system', NOW(), NOW())
+                        ON CONFLICT (namespace, cle) DO UPDATE SET valeur = :val, modified_at = NOW()
+                        """
+                    ),
+                    {"val": json.dumps(activer)},
+                )
+                session.commit()
+            return {
+                "type": "maintenance",
+                "enabled": activer,
+                "message": f"Mode maintenance {'activé' if activer else 'désactivé'}",
+            }
+        except Exception as e:
+            return {"type": "error", "message": f"Erreur maintenance: {e}"}
+
+    return {"type": "error", "message": f"Commande inconnue: '{commande}'. Tapez 'help' pour l'aide."}
+
+
+@router.post(
+    "/quick-command",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Console commande rapide admin",
+    description="Exécute une commande rapide admin (run job, clear cache, health, etc.).",
+)
+@gerer_exception_api
+async def executer_commande_rapide(
+    body: AdminQuickCommandRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    result = _parser_commande_rapide(body.commande)
+    _journaliser_action_admin(
+        action="admin.quick_command",
+        entite_type="console",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"commande": body.commande, "type_resultat": result.get("type")},
+    )
+    return {"status": "ok", **result}
+
+
 @router.post(
     "/flow-simulator",
     responses=REPONSES_AUTH_ADMIN,
