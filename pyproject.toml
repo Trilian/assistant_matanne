@@ -102,6 +102,15 @@ reportPrivateUsage = "warning"
 reportOptionalMemberAccess = "warning"
 reportOptionalSubscript = "warning"
 
+[tool.mutmut]
+paths_to_mutate = ["src/services/dashboard"]
+tests_dir = ["tests/services/dashboard"]
+runner = "python -m pytest tests/services/dashboard -q"
+do_not_mutate = [
+    "**/__init__.py",
+    "**/types.py",
+]
+
 [tool.poetry.scripts]
 # Helper scripts for local development (convenience only)
 check-db = "python scripts/db/check_db.py"

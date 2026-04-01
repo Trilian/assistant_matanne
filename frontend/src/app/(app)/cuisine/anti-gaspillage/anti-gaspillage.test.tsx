@@ -36,7 +36,15 @@ const mockData = {
 };
 
 vi.mock("@/crochets/utiliser-api", () => ({
-  utiliserRequete: () => ({ data: mockData, isLoading: false }),
+  utiliserRequete: (queryKey: unknown) => {
+    const key = Array.isArray(queryKey) ? queryKey.join(":") : "";
+
+    if (key.includes("historique")) {
+      return { data: mockData.historique, isLoading: false };
+    }
+
+    return { data: mockData, isLoading: false };
+  },
 }));
 
 vi.mock("@/bibliotheque/api/anti-gaspillage", () => ({

@@ -62,6 +62,7 @@ vi.mock("@/crochets/utiliser-api", () => ({
     };
   },
   utiliserMutation: () => ({ mutate: vi.fn() }),
+  utiliserMutationAvecInvalidation: () => ({ mutate: vi.fn(), isPending: false }),
   utiliserInvalidation: () => vi.fn(),
 }));
 

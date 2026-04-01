@@ -1,19 +1,21 @@
-"""
-Routes API pour les Innovations — Phases 9 et 10 du planning.
+﻿"""
+Routes API pour les Innovations - Phases 9 et 10 du planning.
 
 Endpoints :
-- GET  /api/v1/innovations/phase9/*           : Endpoints dédiés IA avancée P9
+- GET  /api/v1/innovations/phase9/*           : Endpoints dedies IA avancee P9
 - POST /api/v1/innovations/bilan-annuel        : Bilan annuel IA
-- GET  /api/v1/innovations/score-bien-etre      : Score bien-être familial
+- GET  /api/v1/innovations/score-bien-etre      : Score bien-etre familial
 - GET  /api/v1/innovations/enrichissement-contacts : Enrichissement contacts IA
 - GET  /api/v1/innovations/tendances-loto       : Analyse tendances Loto/EuroMillions
 - POST /api/v1/innovations/parcours-magasin     : Optimisation parcours magasin
 - POST /api/v1/innovations/veille-emploi        : Veille emploi multi-sites
-- POST /api/v1/innovations/invite/creer         : Créer lien invité
-- GET  /api/v1/innovations/invite/{token}       : Accès invité (sans auth)
+- POST /api/v1/innovations/invite/creer         : Creer lien invite
+- GET  /api/v1/innovations/invite/{token}       : Acces invite (sans auth)
 """
 
 import logging
+
+from typing import Any, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -52,6 +54,7 @@ from src.api.utils import gerer_exception_api
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/innovations", tags=["Innovations"])
+RESPONSES_IA_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES_IA)
 
 
 def _get_service():
@@ -61,22 +64,22 @@ def _get_service():
     return get_innovations_service()
 
 
-# ═══════════════════════════════════════════════════════════
-# PHASE 9 — IA AVANCÉE & INNOVATIONS
-# ═══════════════════════════════════════════════════════════
+# ===========================================================
+# PHASE 9 - IA AVANCEE & INNOVATIONS
+# ===========================================================
 
 
 @router.post(
     "/phase9/mange-ce-soir",
     response_model=SuggestionRepasSoirResponse,
-    responses=REPONSES_IA,
-    summary="P9-01 Suggestion dîner express",
+    responses=RESPONSES_IA_TYPED,
+    summary="P9-01 Suggestion diner express",
 )
 @gerer_exception_api
 async def p9_mange_ce_soir(
     body: MangeCeSoirRequest,
-    user: dict = Depends(require_auth),
-    _rate: dict = Depends(verifier_limite_debit_ia),
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
     service = _get_service()
     result = service.suggerer_repas_ce_soir(
@@ -89,13 +92,13 @@ async def p9_mange_ce_soir(
 @router.get(
     "/phase9/patterns-alimentaires",
     response_model=PatternsAlimentairesResponse,
-    responses=REPONSES_IA,
-    summary="P9-02 Détection patterns alimentaires",
+    responses=RESPONSES_IA_TYPED,
+    summary="P9-02 Detection patterns alimentaires",
 )
 @gerer_exception_api
 async def p9_patterns_alimentaires(
     periode_jours: int = Query(90, ge=30, le=365),
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
     result = service.analyser_patterns_alimentaires(periode_jours=periode_jours)
@@ -105,12 +108,12 @@ async def p9_patterns_alimentaires(
 @router.get(
     "/phase9/coach-routines",
     response_model=CoachRoutinesResponse,
-    responses=REPONSES_IA,
+    responses=RESPONSES_IA_TYPED,
     summary="P9-03 Coach routines IA",
 )
 @gerer_exception_api
 async def p9_coach_routines(
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
     result = service.coach_routines_ia()
@@ -120,12 +123,12 @@ async def p9_coach_routines(
 @router.get(
     "/phase9/anomalies-energie",
     response_model=AnomaliesEnergieResponse,
-    responses=REPONSES_IA,
-    summary="P9-04 Détection anomalies eau/gaz/élec",
+    responses=RESPONSES_IA_TYPED,
+    summary="P9-04 Detection anomalies eau/gaz/elec",
 )
 @gerer_exception_api
 async def p9_anomalies_energie(
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
     result = service.detecter_anomalies_energie()
@@ -135,13 +138,13 @@ async def p9_anomalies_energie(
 @router.get(
     "/phase9/resume-mensuel",
     response_model=ResumeMensuelIAResponse,
-    responses=REPONSES_IA,
-    summary="P9-06 Résumé mensuel IA",
+    responses=RESPONSES_IA_TYPED,
+    summary="P9-06 Resume mensuel IA",
 )
 @gerer_exception_api
 async def p9_resume_mensuel(
-    user: dict = Depends(require_auth),
-    _rate: dict = Depends(verifier_limite_debit_ia),
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
     service = _get_service()
     result = service.generer_resume_mensuel_ia()
@@ -151,12 +154,12 @@ async def p9_resume_mensuel(
 @router.get(
     "/phase9/planning-jules-adaptatif",
     response_model=PlanningJulesAdaptatifResponse,
-    responses=REPONSES_IA,
+    responses=RESPONSES_IA_TYPED,
     summary="P9-08 Planning Jules adaptatif",
 )
 @gerer_exception_api
 async def p9_planning_jules_adaptatif(
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
     result = service.generer_planning_jules_adaptatif()
@@ -166,13 +169,13 @@ async def p9_planning_jules_adaptatif(
 @router.post(
     "/phase9/comparateur-energie",
     response_model=ComparateurEnergieResponse,
-    responses=REPONSES_IA,
-    summary="P9-09 Comparateur fournisseurs énergie",
+    responses=RESPONSES_IA_TYPED,
+    summary="P9-09 Comparateur fournisseurs energie",
 )
 @gerer_exception_api
 async def p9_comparateur_energie(
     body: ComparateurEnergieRequest,
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
     result = service.comparer_fournisseurs_energie(
@@ -185,12 +188,12 @@ async def p9_comparateur_energie(
 @router.get(
     "/phase9/score-eco-responsable",
     response_model=ScoreEcoResponsableResponse,
-    responses=REPONSES_IA,
-    summary="P9-10 Score éco-responsable",
+    responses=RESPONSES_IA_TYPED,
+    summary="P9-10 Score eco-responsable",
 )
 @gerer_exception_api
 async def p9_score_eco_responsable(
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
     result = service.calculer_score_eco_responsable()
@@ -200,12 +203,12 @@ async def p9_score_eco_responsable(
 @router.get(
     "/phase9/saisonnalite-intelligente",
     response_model=SaisonnaliteIntelligenteResponse,
-    responses=REPONSES_IA,
-    summary="P9-11 Saisonnalité intelligente",
+    responses=RESPONSES_IA_TYPED,
+    summary="P9-11 Saisonnalite intelligente",
 )
 @gerer_exception_api
 async def p9_saisonnalite_intelligente(
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
     result = service.appliquer_saisonnalite_intelligente()
@@ -215,12 +218,12 @@ async def p9_saisonnalite_intelligente(
 @router.get(
     "/phase9/apprentissage-habitudes",
     response_model=ApprentissageHabitudesResponse,
-    responses=REPONSES_IA,
+    responses=RESPONSES_IA_TYPED,
     summary="P9-12 Apprentissage continu habitudes",
 )
 @gerer_exception_api
 async def p9_apprentissage_habitudes(
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
     result = service.apprendre_habitudes_utilisateur()
@@ -230,14 +233,14 @@ async def p9_apprentissage_habitudes(
 @router.get(
     "/phase9/retrospective-annuelle",
     response_model=BilanAnnuelResponse,
-    responses=REPONSES_IA,
-    summary="P9-13 Rétrospective annuelle IA",
+    responses=RESPONSES_IA_TYPED,
+    summary="P9-13 Retrospective annuelle IA",
 )
 @gerer_exception_api
 async def p9_retrospective_annuelle(
     annee: int | None = Query(None, ge=2020, le=2100),
-    user: dict = Depends(require_auth),
-    _rate: dict = Depends(verifier_limite_debit_ia),
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
     service = _get_service()
     result = service.generer_bilan_annuel(annee=annee)
@@ -247,12 +250,12 @@ async def p9_retrospective_annuelle(
 @router.get(
     "/phase9/alertes-contextuelles",
     response_model=AlertesContextuellesResponse,
-    responses=REPONSES_IA,
+    responses=RESPONSES_IA_TYPED,
     summary="P9-14 Alertes intelligentes contextuelles",
 )
 @gerer_exception_api
 async def p9_alertes_contextuelles(
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
     result = service.generer_alertes_contextuelles()
@@ -262,36 +265,36 @@ async def p9_alertes_contextuelles(
 @router.get(
     "/phase9/tableau-sante-foyer",
     response_model=ScoreBienEtreResponse,
-    responses=REPONSES_IA,
-    summary="P9-15 Tableau de bord santé foyer",
+    responses=RESPONSES_IA_TYPED,
+    summary="P9-15 Tableau de bord sante foyer",
 )
 @gerer_exception_api
 async def p9_tableau_sante_foyer(
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
     result = service.calculer_score_bien_etre()
     return result or ScoreBienEtreResponse()
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.4 — BILAN ANNUEL AUTOMATIQUE IA
-# ═══════════════════════════════════════════════════════════
+# ===========================================================
+# 10.4 - BILAN ANNUEL AUTOMATIQUE IA
+# ===========================================================
 
 
 @router.post(
     "/bilan-annuel",
     response_model=BilanAnnuelResponse,
-    responses=REPONSES_IA,
+    responses=RESPONSES_IA_TYPED,
     summary="Bilan annuel complet IA",
 )
 @gerer_exception_api
 async def bilan_annuel(
     body: BilanAnnuelRequest,
-    user: dict = Depends(require_auth),
-    _rate: dict = Depends(verifier_limite_debit_ia),
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
-    """Génère un bilan annuel complet : cuisine, budget, maison, Jules, sport."""
+    """Genere un bilan annuel complet : cuisine, budget, maison, Jules, sport."""
     service = _get_service()
     result = service.generer_bilan_annuel(annee=body.annee)
     if result is None:
@@ -299,22 +302,22 @@ async def bilan_annuel(
     return result
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.5 — SCORE BIEN-ÊTRE FAMILIAL
-# ═══════════════════════════════════════════════════════════
+# ===========================================================
+# 10.5 - SCORE BIEN-ETRE FAMILIAL
+# ===========================================================
 
 
 @router.get(
     "/score-bien-etre",
     response_model=ScoreBienEtreResponse,
-    responses=REPONSES_IA,
-    summary="Score bien-être familial composite",
+    responses=RESPONSES_IA_TYPED,
+    summary="Score bien-etre familial composite",
 )
 @gerer_exception_api
 async def score_bien_etre(
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
-    """Calcule le score bien-être familial (sport + nutrition + budget + routines)."""
+    """Calcule le score bien-etre familial (sport + nutrition + budget + routines)."""
     service = _get_service()
     result = service.calculer_score_bien_etre()
     if result is None:
@@ -322,23 +325,23 @@ async def score_bien_etre(
     return result
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.17 — ENRICHISSEMENT CONTACTS IA
-# ═══════════════════════════════════════════════════════════
+# ===========================================================
+# 10.17 - ENRICHISSEMENT CONTACTS IA
+# ===========================================================
 
 
 @router.get(
     "/enrichissement-contacts",
     response_model=EnrichissementContactsResponse,
-    responses=REPONSES_IA,
+    responses=RESPONSES_IA_TYPED,
     summary="Enrichissement contacts IA",
 )
 @gerer_exception_api
 async def enrichissement_contacts(
-    user: dict = Depends(require_auth),
-    _rate: dict = Depends(verifier_limite_debit_ia),
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
-    """Analyse et enrichit les contacts (catégorisation, rappels relationnels)."""
+    """Analyse et enrichit les contacts (categorisation, rappels relationnels)."""
     service = _get_service()
     result = service.enrichir_contacts()
     if result is None:
@@ -346,24 +349,24 @@ async def enrichissement_contacts(
     return result
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.18 — ANALYSE TENDANCES LOTO
-# ═══════════════════════════════════════════════════════════
+# ===========================================================
+# 10.18 - ANALYSE TENDANCES LOTO
+# ===========================================================
 
 
 @router.get(
     "/tendances-loto",
     response_model=AnalyseTendancesLotoResponse,
-    responses=REPONSES_IA,
+    responses=RESPONSES_IA_TYPED,
     summary="Analyse tendances Loto/EuroMillions",
 )
 @gerer_exception_api
 async def tendances_loto(
     jeu: str = Query("loto", regex="^(loto|euromillions)$", description="Type de jeu"),
-    user: dict = Depends(require_auth),
-    _rate: dict = Depends(verifier_limite_debit_ia),
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
-    """Analyse statistique des tirages avec numéros chauds/froids et combinaison suggérée."""
+    """Analyse statistique des tirages avec numeros chauds/froids et combinaison suggeree."""
     service = _get_service()
     result = service.analyser_tendances_loto(jeu=jeu)
     if result is None:
@@ -371,22 +374,22 @@ async def tendances_loto(
     return result
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.19 — OPTIMISATION PARCOURS MAGASIN
-# ═══════════════════════════════════════════════════════════
+# ===========================================================
+# 10.19 - OPTIMISATION PARCOURS MAGASIN
+# ===========================================================
 
 
 @router.post(
     "/parcours-magasin",
     response_model=ParcoursOptimiseResponse,
-    responses=REPONSES_IA,
+    responses=RESPONSES_IA_TYPED,
     summary="Optimisation parcours magasin",
 )
 @gerer_exception_api
 async def parcours_magasin(
     body: ParcoursOptimiseRequest,
-    user: dict = Depends(require_auth),
-    _rate: dict = Depends(verifier_limite_debit_ia),
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
     """Regroupe les articles de courses par rayon et optimise l'ordre de parcours."""
     service = _get_service()
@@ -396,24 +399,24 @@ async def parcours_magasin(
     return result
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.8 — VEILLE EMPLOI
-# ═══════════════════════════════════════════════════════════
+# ===========================================================
+# 10.8 - VEILLE EMPLOI
+# ===========================================================
 
 
 @router.post(
     "/veille-emploi",
     response_model=VeilleEmploiResponse,
-    responses=REPONSES_IA,
+    responses=RESPONSES_IA_TYPED,
     summary="Veille emploi multi-sites",
 )
 @gerer_exception_api
 async def veille_emploi(
     body: VeilleEmploiRequest,
-    user: dict = Depends(require_auth),
-    _rate: dict = Depends(verifier_limite_debit_ia),
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
-    """Exécute la veille emploi avec critères configurables."""
+    """Execute la veille emploi avec criteres configurables."""
     from src.services.innovations.types import CriteresVeilleEmploi
 
     criteres = CriteresVeilleEmploi(
@@ -431,22 +434,22 @@ async def veille_emploi(
     return result
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.3 — MODE INVITÉ
-# ═══════════════════════════════════════════════════════════
+# ===========================================================
+# 10.3 - MODE INVITE
+# ===========================================================
 
 
 @router.post(
     "/invite/creer",
     response_model=LienInviteResponse,
-    summary="Créer un lien invité partageable",
+    summary="Creer un lien invite partageable",
 )
 @gerer_exception_api
 async def creer_lien_invite(
     body: LienInviteRequest,
-    user: dict = Depends(require_auth),
+    user: dict[str, Any] = Depends(require_auth),
 ):
-    """Crée un lien partageable pour un invité (nounou, grands-parents).
+    """Cree un lien partageable pour un invite (nounou, grands-parents).
 
     Modules accessibles : repas, routines, contacts_urgence.
     """
@@ -466,13 +469,17 @@ async def creer_lien_invite(
 @router.get(
     "/invite/{token}",
     response_model=DonneesInviteResponse,
-    summary="Accès invité — sans authentification",
+    summary="Acces invite - sans authentification",
 )
 @gerer_exception_api
 async def acceder_donnees_invite(token: str):
-    """Accès aux données via lien invité (pas d'authentification requise)."""
+    """Acces aux donnees via lien invite (pas d'authentification requise)."""
     service = _get_service()
     result = service.obtenir_donnees_invite(token=token)
     if result is None:
-        raise HTTPException(status_code=404, detail="Lien invité invalide ou expiré.")
+        raise HTTPException(status_code=404, detail="Lien invite invalide ou expire.")
     return result
+
+
+
+

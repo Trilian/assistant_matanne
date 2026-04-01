@@ -47,6 +47,7 @@ import { utiliserRequete } from "@/crochets/utiliser-api";
 import {
   type FlowSimulationResponse,
   type LiveSnapshotResponse,
+  type StatutBridgesPhase5Response,
   type ServiceHealthResponse,
   exporterConfigAdmin,
   exporterDbJson,
@@ -61,6 +62,7 @@ import {
   listerResyncTargets,
   obtenirLiveSnapshotAdmin,
   obtenirDashboardAdmin,
+  obtenirStatutBridgesPhase5,
   obtenirSanteServices,
   obtenirStatsCache,
   purgerCache,
@@ -171,6 +173,16 @@ export default function PageAdminServices() {
     { refetchInterval: 15000 },
   );
 
+  const {
+    data: statutBridgesPhase5,
+    isLoading: chargementBridgesPhase5,
+    refetch: actualiserBridgesPhase5,
+  } = utiliserRequete(
+    ["admin", "bridges-phase5-status"],
+    (): Promise<StatutBridgesPhase5Response> => obtenirStatutBridgesPhase5({ inclure_smoke: false }),
+    { refetchInterval: 30000 },
+  );
+
   useEffect(() => {
     if (featureFlags?.flags) {
       setFlagsLocal(featureFlags.flags);
@@ -217,6 +229,7 @@ export default function PageAdminServices() {
     actualiserConfig();
     actualiserResync();
     actualiserLive();
+    actualiserBridgesPhase5();
   };
 
   const exporterConfig = async () => {
@@ -426,14 +439,18 @@ export default function PageAdminServices() {
   };
 
   const badgeStatut = (statut: string) => {
-    if (statut === "healthy" || statut === "ok") {
+    if (statut === "healthy" || statut === "ok" || statut === "operationnel") {
       return <Badge variant="default"><CheckCircle2 className="mr-1 h-3 w-3" />Sain</Badge>;
     }
-    if (statut === "degraded") {
+    if (statut === "degraded" || statut === "degrade") {
       return <Badge variant="secondary">Dégradé</Badge>;
     }
     return <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3" />{statut}</Badge>;
   };
+
+  const aiRequests = Number((liveSnapshot?.api.ai as Record<string, unknown> | undefined)?.requests_total ?? 0);
+  const aiTokens = Number((liveSnapshot?.api.ai as Record<string, unknown> | undefined)?.tokens_used ?? 0);
+  const aiCost = Number((liveSnapshot?.api.ai as Record<string, unknown> | undefined)?.estimated_cost_eur ?? 0);
 
   return (
     <div className="space-y-6">
@@ -488,7 +505,7 @@ export default function PageAdminServices() {
 
         <TabsContent value="services" className="mt-4 space-y-4">
           {liveSnapshot && (
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-5">
               <Card>
                 <CardHeader className="pb-2"><CardTitle className="text-sm">Requêtes API</CardTitle></CardHeader>
                 <CardContent><span className="text-2xl font-bold">{liveSnapshot.api.requests_total}</span></CardContent>
@@ -506,6 +523,13 @@ export default function PageAdminServices() {
                 <CardContent>
                   <span className="text-2xl font-bold">{wsEvents1h ?? liveSnapshot.security.events_1h}</span>
                   <p className="text-xs text-muted-foreground mt-1">{wsConnecte ? "Live WS" : "Polling"}</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Coût IA estimé</CardTitle></CardHeader>
+                <CardContent>
+                  <span className="text-2xl font-bold">{aiCost.toFixed(3)} €</span>
+                  <p className="text-xs text-muted-foreground mt-1">{aiRequests} appels • {aiTokens} tokens</p>
                 </CardContent>
               </Card>
             </div>
@@ -531,6 +555,75 @@ export default function PageAdminServices() {
               </Card>
             </div>
           )}
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Bridges Phase 5</CardTitle>
+              <CardDescription>
+                {chargementBridgesPhase5
+                  ? "Chargement..."
+                  : statutBridgesPhase5
+                    ? `Mode ${statutBridgesPhase5.resume.mode_verification} • ${statutBridgesPhase5.resume.total_actions} action(s)`
+                    : "-"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {statutBridgesPhase5?.resume && (
+                <div className="grid gap-4 md:grid-cols-4">
+                  <Card>
+                    <CardHeader className="pb-2"><CardTitle className="text-sm">Statut global</CardTitle></CardHeader>
+                    <CardContent>{badgeStatut(statutBridgesPhase5.statut_global)}</CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2"><CardTitle className="text-sm">Opérationnelles</CardTitle></CardHeader>
+                    <CardContent><span className="text-2xl font-bold text-green-600">{statutBridgesPhase5.resume.operationnelles}</span></CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2"><CardTitle className="text-sm">Indisponibles</CardTitle></CardHeader>
+                    <CardContent><span className="text-2xl font-bold">{statutBridgesPhase5.resume.indisponibles}</span></CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader className="pb-2"><CardTitle className="text-sm">Taux opérationnel</CardTitle></CardHeader>
+                    <CardContent><span className="text-2xl font-bold">{statutBridgesPhase5.resume.taux_operationnel_pct.toFixed(2)}%</span></CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {statutBridgesPhase5?.items?.length ? (
+                <div className="overflow-x-auto rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Action</TableHead>
+                        <TableHead>Bridge</TableHead>
+                        <TableHead>Vérification</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Latence</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {statutBridgesPhase5.items.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>
+                            <p className="font-mono text-xs">{item.id}</p>
+                            <p className="text-xs text-muted-foreground">{item.intitule}</p>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">{item.bridge}</TableCell>
+                          <TableCell>{item.verification}</TableCell>
+                          <TableCell>{badgeStatut(item.statut)}</TableCell>
+                          <TableCell>{item.latence_ms.toFixed(2)} ms</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                !chargementBridgesPhase5 && (
+                  <p className="text-sm text-muted-foreground">Aucun statut bridge Phase 5 disponible.</p>
+                )
+              )}
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader>

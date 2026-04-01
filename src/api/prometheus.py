@@ -274,6 +274,14 @@ async def get_prometheus_metrics(
             "Total tokens consumed by AI requests",
         )
     )
+    output_lines.append(
+        _format_prometheus_metric(
+            "matanne_ai_estimated_cost_eur",
+            ai_metrics.get("estimated_cost_eur", 0),
+            "gauge",
+            "Estimated AI spend in EUR from token usage",
+        )
+    )
 
     # Mémoire (si disponible)
     try:

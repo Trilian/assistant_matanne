@@ -473,6 +473,7 @@ async def enrichir_par_code_barres(
         DonnÃ©es enrichies du produit
     """
     from src.core.models import ArticleInventaire
+    from src.core.models.user_preferences import OpenFoodFactsCache
     from src.services.integrations.produit import OpenFoodFactsService
 
     off_service = OpenFoodFactsService()
@@ -495,6 +496,8 @@ async def enrichir_par_code_barres(
                 "categories": produit.categories,
                 "image_url": produit.image_url,
                 "labels": produit.labels,
+                "allergenes": produit.allergenes,
+                "provenance": produit.origine,
             }
 
             if produit.nutrition:
@@ -517,6 +520,31 @@ async def enrichir_par_code_barres(
             else:
                 enrichment["article_id"] = None
                 enrichment["article_mis_a_jour"] = False
+
+            # Persister/mettre à jour le cache OFF pour accélérer les prochains scans.
+            cache_entry = (
+                session.query(OpenFoodFactsCache)
+                .filter(OpenFoodFactsCache.code_barres == code)
+                .first()
+            )
+            if cache_entry is None:
+                cache_entry = OpenFoodFactsCache(code_barres=code)
+                session.add(cache_entry)
+
+            cache_entry.nom = produit.nom
+            cache_entry.marque = produit.marque
+            cache_entry.categorie = produit.categories[0] if produit.categories else None
+            cache_entry.image_url = produit.image_url
+            cache_entry.allergenes = produit.allergenes
+            cache_entry.nutriscore = produit.nutrition.nutriscore if produit.nutrition else None
+            cache_entry.ecoscore = produit.nutrition.ecoscore if produit.nutrition else None
+            cache_entry.nova_group = produit.nutrition.nova_group if produit.nutrition else None
+            cache_entry.nutrition_data = {
+                "origine": produit.origine,
+                "labels": produit.labels,
+                "ingredients_texte": produit.ingredients_texte,
+            }
+            session.commit()
 
             return enrichment
 

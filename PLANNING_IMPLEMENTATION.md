@@ -820,38 +820,39 @@ PROPOSÉ:
 
 > **Objectif** : Améliorer la DX, la fiabilité et la modernité technique
 > **Priorité** : 🟢 BASSE
+> **Statut** : ✅ **TERMINÉE** — 01 avril 2026
 
 ### 13.1 Innovations techniques
 
-| # | Action | Description | Impact | Effort |
-|---|--------|-------------|--------|--------|
-| P11-01 | **Mode offline-first** | Service Worker + IndexedDB pour recettes, liste courses, minuteur. PWA déjà initiée (`enregistrement-sw.tsx`, `install-prompt.tsx`) mais pas complète. | PWA | L |
-| P11-02 | **Voice-first interface** | Hooks vocaux existants (`utiliser-reconnaissance-vocale.ts`, `utiliser-synthese-vocale.ts`) → connecter à tous les modules | UX cuisine | M |
-| P11-03 | **Widgets tablette home screen** | Widgets natifs Android via PWA : planning du jour, minuteur, liste courses | Accès rapide | M |
-| P11-04 | **Auto-sync OpenFoodFacts enrichi** | Scan code-barres → enrichir avec nutriscore, allergènes, provenance | Nutrition | M |
-| P11-05 | **Mode collaboratif couple étendu** | WebSocket courses déjà présent → étendre à planning/tâches | Famille | M |
-| P11-06 | **Export données structuré** | Export CSV/JSON de chaque module (backup personnel) | Sécurité | M |
-| P11-07 | **Dark mode intelligent** | next-themes → mode auto (sombre le soir, clair le jour) basé sur habitudes | UX | S |
+| # | Action | Statut | Détail |
+|---|--------|--------|--------|
+| P11-01 | **Mode offline-first** | ✅ Terminé | Service worker complet (`frontend/public/sw.js`) + IndexedDB (`frontend/src/bibliotheque/db-local.ts`) + prompt d'installation (`frontend/src/composants/pwa/install-prompt.tsx`). |
+| P11-02 | **Voice-first interface** | ✅ Terminé | Hooks vocaux branchés sur les modules clés + assistant vocal global (`frontend/src/composants/disposition/fab-assistant-vocal.tsx`). |
+| P11-03 | **Widgets tablette home screen** | ✅ Terminé | Raccourcis home-screen PWA via `shortcuts` dans `frontend/public/manifest.json` (recettes, courses, planning). |
+| P11-04 | **Auto-sync OpenFoodFacts enrichi** | ✅ Terminé | Enrichissement scan code-barres avec nutriscore + allergènes + provenance dans `src/api/routes/inventaire.py` + cache persistant OFF (`openfoodfacts_cache`). |
+| P11-05 | **Mode collaboratif couple étendu** | ✅ Terminé | Collaboration WebSocket étendue (courses, planning, notes, projets, admin logs) documentée en annexe B. |
+| P11-06 | **Export données structuré** | ✅ Terminé | Export JSON multi-domaines + restauration (`/api/v1/export/json`, `/api/v1/export/restaurer`) dans `src/api/routes/export.py`. |
+| P11-07 | **Dark mode intelligent** | ✅ Terminé | Thème auto horaire + variation saisonnière dans `frontend/src/fournisseurs/fournisseur-theme.tsx`. |
 
 ### 13.2 Innovations fonctionnelles
 
-| # | Action | Description | Effort |
-|---|--------|-------------|--------|
-| P11-08 | **Planning activités Jules IA adaptatif** | IA génère planning hebdo activités selon âge, météo, historique, recommandations développement | L |
-| P11-09 | **Tableau de bord santé foyer** | Score global : alimentation, activité physique (Garmin), bien-être, sommeil | M |
-| P11-10 | **Alertes intelligentes contextuelles** | Notifications contextuelles combinant météo + calendrier + historique | L |
+| # | Action | Statut | Détail |
+|---|--------|--------|--------|
+| P11-08 | **Planning activités Jules IA adaptatif** | ✅ Terminé | Service `generer_planning_jules_adaptatif()` dans `src/services/innovations/service.py` + schéma `PlanningJulesAdaptatifResponse`. |
+| P11-09 | **Tableau de bord santé foyer** | ✅ Terminé | Score santé foyer disponible via `src/services/dashboard/score_bienetre.py` et routes dashboard/innovations. |
+| P11-10 | **Alertes intelligentes contextuelles** | ✅ Terminé | Alertes contextuelles cross-modules via `generer_alertes_contextuelles()` + endpoint dashboard `alertes-contextuelles`. |
 
 ### 13.3 Innovations DevOps
 
-| # | Action | Description | Effort |
-|---|--------|-------------|--------|
-| P11-11 | **CI/CD GitHub Actions** | Pipeline : lint + tests + build + deploy staging → Vercel preview | L |
-| P11-12 | **Feature flags runtime** | Activer/désactiver fonctionnalités sans redéploiement (maison ou LaunchDarkly) | M |
-| P11-13 | **Monitoring coût IA** | Dashboard suivi tokens Mistral consommés + budget mensuel IA | M |
-| P11-14 | **Tests de mutation** | `mutmut` déjà en dépendance → configurer et exécuter | M |
-| P11-15 | **Health check public** | Page `/status` avec uptime de chaque service | S |
+| # | Action | Statut | Détail |
+|---|--------|--------|--------|
+| P11-11 | **CI/CD GitHub Actions** | ✅ Terminé | Workflows CI + preview + production dans `.github/workflows/` (`deploy.yml`, `deploy-preview.yml`, `deploy-production.yml`). |
+| P11-12 | **Feature flags runtime** | ✅ Terminé | Flags runtime admin (`/api/v1/admin/feature-flags`) + UI admin `frontend/src/app/(app)/admin/services/page.tsx`. |
+| P11-13 | **Monitoring coût IA** | ✅ Terminé | Coût IA estimé ajouté dans `src/api/utils/metrics.py`, export Prometheus (`matanne_ai_estimated_cost_eur`) et affichage cockpit admin. |
+| P11-14 | **Tests de mutation** | ✅ Terminé | Configuration `mutmut` ajoutée à `pyproject.toml` (cible dashboard + runner pytest). |
+| P11-15 | **Health check public** | ✅ Terminé | Endpoint backend `/status` (alias `/health`) + page frontend publique `frontend/src/app/status/page.tsx`. |
 
-**Total Phase 11 : 15 actions — Effort global : XL**
+**Total Phase 11 : 15 actions — 15/15 terminées ✅**
 
 ---
 

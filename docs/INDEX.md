@@ -1,6 +1,6 @@
 ﻿# 📚 Documentation Index — MaTanne
 
-> **Dernière mise à jour** : 29 mars 2026 — Phase 4 Documentation
+> **Dernière mise à jour** : 1 avril 2026 — Phase 10 Documentation
 
 ---
 
@@ -13,16 +13,24 @@
 | [../ROADMAP.md](../ROADMAP.md) | **Feuille de route** — priorités moyen/long terme + principes |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Architecture technique (FastAPI + Next.js) |
 | [API_REFERENCE.md](./API_REFERENCE.md) | Référence complète de l'API REST (242 endpoints) |
+| [API_SCHEMAS.md](./API_SCHEMAS.md) | Inventaire auto-généré des schémas Pydantic API |
 | [MODULES.md](./MODULES.md) | Carte des modules : fonctionnalités, routes, services, modèles |
 | [SERVICES_REFERENCE.md](./SERVICES_REFERENCE.md) | Documentation des services backend |
 | [ERD_SCHEMA.md](./ERD_SCHEMA.md) | Schéma entité-relation de la DB (Mermaid) |
+| [DATA_MODEL.md](./DATA_MODEL.md) | Vue fonctionnelle du modèle de données |
+| [EVENT_BUS.md](./EVENT_BUS.md) | Catalogue des événements domaine et subscribers |
+| [SECURITY.md](./SECURITY.md) | Référence sécurité applicative |
 | [PATTERNS.md](./PATTERNS.md) | Patterns de code récurrents (résilience, cache, events) |
 | [UI_COMPONENTS.md](./UI_COMPONENTS.md) | Composants UI Next.js / shadcn |
+| [MONITORING.md](./MONITORING.md) | Monitoring, métriques et observabilité |
 | [ADMIN_RUNBOOK.md](./ADMIN_RUNBOOK.md) | Procédures d'administration: jobs, cache, santé, utilisateurs |
 | [CRON_JOBS.md](./CRON_JOBS.md) | Référence des tâches planifiées APScheduler |
 | [NOTIFICATIONS.md](./NOTIFICATIONS.md) | Canaux, préférences, tests admin et limites actuelles |
 | [INTER_MODULES.md](./INTER_MODULES.md) | Cartographie des flux inter-modules |
 | [AI_SERVICES.md](./AI_SERVICES.md) | Référence des services IA et usages actuels |
+| [WHATSAPP_COMMANDS.md](./WHATSAPP_COMMANDS.md) | Commandes conversationnelles WhatsApp |
+| [PERFORMANCE.md](./PERFORMANCE.md) | Référence performance et capacités |
+| [CHANGELOG_MODULES.md](./CHANGELOG_MODULES.md) | Historique transversal par module |
 | [AUTOMATIONS.md](./AUTOMATIONS.md) | Moteur d'automatisation Si→Alors |
 | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Pannes fréquentes et diagnostics rapides |
 | [DEVELOPER_SETUP.md](./DEVELOPER_SETUP.md) | Installation développeur locale complète |
@@ -44,6 +52,8 @@
 | [guides/outils/README.md](./guides/outils/README.md) | Outils | Chat IA, météo, convertisseur, minuteur, notes |
 | [guides/dashboard/README.md](./guides/dashboard/README.md) | Dashboard | Tableau de bord, métriques agrégées |
 | [guides/utilitaires/README.md](./guides/utilitaires/README.md) | Utilitaires | Scanner codes-barres, commandes vocales |
+| [guides/RECIPE_FLOW.md](./guides/RECIPE_FLOW.md) | Guide utilisateur | Flux recette de bout en bout |
+| [guides/FAMILY_FLOW.md](./guides/FAMILY_FLOW.md) | Guide utilisateur | Flux famille de bout en bout |
 
 ## Structure
 

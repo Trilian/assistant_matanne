@@ -313,6 +313,31 @@ export interface VueSqlDataResponse {
   pages_totales: number
 }
 
+export interface StatutBridgePhase5Item {
+  id: string
+  bridge: string
+  intitule: string
+  verification: string
+  statut: string
+  latence_ms: number
+  details: string
+}
+
+export interface StatutBridgesPhase5Response {
+  phase: string
+  generated_at: string
+  execution_ms: number
+  statut_global: string
+  resume: {
+    total_actions: number
+    operationnelles: number
+    indisponibles: number
+    taux_operationnel_pct: number
+    mode_verification: string
+  }
+  items: StatutBridgePhase5Item[]
+}
+
 // ─── Audit Logs ────────────────────────────────────────────
 
 export async function listerAuditLogs(params?: {
@@ -393,6 +418,13 @@ export async function listerHistoriqueJobs(params?: {
 
 export async function obtenirSanteServices(): Promise<ServiceHealthResponse> {
   const { data } = await clientApi.get('/api/v1/admin/services/health')
+  return data
+}
+
+export async function obtenirStatutBridgesPhase5(params?: {
+  inclure_smoke?: boolean
+}): Promise<StatutBridgesPhase5Response> {
+  const { data } = await clientApi.get('/api/v1/admin/bridges/phase5/status', { params })
   return data
 }
 

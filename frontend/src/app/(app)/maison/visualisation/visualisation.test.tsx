@@ -16,6 +16,7 @@ vi.mock("@/crochets/utiliser-api", () => ({
     if (key.includes("etages")) return { data: [0, 1], isLoading: false };
     return { data: [{ id: 1, nom: "Salon", surface: 25, etage: 0 }], isLoading: false };
   }),
+  utiliserMutation: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock("@/bibliotheque/api/maison", () => ({

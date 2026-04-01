@@ -59,6 +59,7 @@ import {
 } from "@/composants/ui/select";
 import { utiliserRequete, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { clientApi } from "@/bibliotheque/api/client";
+import { obtenirStatutBridgesPhase5 } from "@/bibliotheque/api/admin";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -173,6 +174,12 @@ export default function PageAdmin() {
     }
   );
 
+  const { data: bridgesPhase5 } = utiliserRequete(
+    ["admin", "bridges-phase5-status", "presence-only"],
+    async () => obtenirStatutBridgesPhase5({ inclure_smoke: false }),
+    { refetchInterval: 30000 }
+  );
+
   const envoyerNotifTest = async () => {
     setEnvoyant(true);
     setResultatNotif(null);
@@ -281,6 +288,28 @@ export default function PageAdmin() {
           </Link>
         ))}
       </div>
+
+      {bridgesPhase5?.resume && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Bridges Phase 5</CardTitle>
+            <CardDescription>
+              {bridgesPhase5.resume.mode_verification} · {bridgesPhase5.resume.total_actions} action(s)
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center gap-2">
+            <Badge variant={bridgesPhase5.statut_global === "operationnel" ? "default" : "secondary"}>
+              {bridgesPhase5.statut_global === "operationnel" ? "Opérationnel" : "Dégradé"}
+            </Badge>
+            <Badge variant="outline">{bridgesPhase5.resume.operationnelles} OK</Badge>
+            <Badge variant="outline">{bridgesPhase5.resume.indisponibles} KO</Badge>
+            <Badge variant="outline">{bridgesPhase5.resume.taux_operationnel_pct.toFixed(2)}%</Badge>
+            <Button asChild variant="outline" size="sm" className="ml-auto">
+              <Link href="/admin/services">Voir le détail</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs defaultValue="audit">
         <TabsList className="grid w-full grid-cols-5 max-w-2xl">

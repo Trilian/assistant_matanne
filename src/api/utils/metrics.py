@@ -5,6 +5,7 @@ Fournit des compteurs et histogrammes pour le monitoring.
 """
 
 import logging
+import os
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -48,6 +49,10 @@ MAX_LATENCY_SAMPLES = 1000
 
 # Limite maximale d'endpoints uniques trackés (prévention memory exhaustion)
 MAX_TRACKED_ENDPOINTS = 500
+
+# Estimation coût IA (EUR) selon le volume de tokens consommés.
+_AI_COST_PER_1K_TOKENS_EUR = float(os.getenv("AI_COST_PER_1K_TOKENS_EUR", "0.002"))
+_AI_BUDGET_MENSUEL_EUR = float(os.getenv("AI_BUDGET_MENSUEL_EUR", "20"))
 
 
 def record_request(endpoint: str, method: str, status_code: int, latency_ms: float):
@@ -98,6 +103,13 @@ def get_metrics() -> dict[str, Any]:
                 "p99_ms": sorted_samples[int(len(samples) * 0.99)] if len(samples) >= 100 else None,
             }
 
+    ai_cost_eur = (_metrics.ai_tokens_used / 1000.0) * _AI_COST_PER_1K_TOKENS_EUR
+    budget_utilisation_pct = (
+        min((ai_cost_eur / _AI_BUDGET_MENSUEL_EUR) * 100.0, 100.0)
+        if _AI_BUDGET_MENSUEL_EUR > 0
+        else 0.0
+    )
+
     return {
         "uptime_seconds": uptime,
         "requests": {
@@ -112,6 +124,9 @@ def get_metrics() -> dict[str, Any]:
         "ai": {
             "requests_total": _metrics.ai_requests_total,
             "tokens_used": _metrics.ai_tokens_used,
+            "estimated_cost_eur": round(ai_cost_eur, 4),
+            "budget_mensuel_eur": round(_AI_BUDGET_MENSUEL_EUR, 2),
+            "budget_utilisation_pct": round(budget_utilisation_pct, 2),
         },
     }
 

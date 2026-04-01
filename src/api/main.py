@@ -525,6 +525,12 @@ async def health_check():
     )
 
 
+@app.get("/status", response_model=HealthResponse, tags=["Santé"], responses=REPONSE_500)
+async def status_public():
+    """Alias public de `/health` pour les status pages et checks externes."""
+    return await health_check()
+
+
 @app.get("/metrics", tags=["Santé"], responses=REPONSES_AUTH_ADMIN)
 async def get_api_metrics(user: dict = Depends(require_role("admin"))):
     """Retourne les métriques de l'API (latence, requêtes, rate limiting).
