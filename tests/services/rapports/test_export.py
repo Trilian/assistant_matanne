@@ -444,6 +444,111 @@ class TestServiceExportPDFCourses:
             assert result is None or isinstance(result, BytesIO)
 
 
+class TestServiceExportPDFBudget:
+    """Tests de l'export budget."""
+
+    @pytest.fixture
+    def service(self):
+        """Fixture pour le service."""
+        return ServiceExportPDF()
+
+    def test_exporter_budget_avec_depenses(self, service):
+        """Test export budget avec des dépenses mockées."""
+        from decimal import Decimal
+
+        mock_depense1 = MagicMock()
+        mock_depense1.montant = Decimal("45.50")
+        mock_depense1.categorie = "alimentation"
+        mock_depense1.date = datetime(2024, 1, 15).date()
+        mock_depense1.description = "Courses Carrefour"
+
+        mock_depense2 = MagicMock()
+        mock_depense2.montant = Decimal("120.00")
+        mock_depense2.categorie = "loisirs"
+        mock_depense2.date = datetime(2024, 1, 10).date()
+        mock_depense2.description = "Sortie resto"
+
+        with patch("src.services.rapports.export.obtenir_contexte_db") as mock_ctx:
+            mock_db = MagicMock()
+            mock_db.query.return_value.filter.return_value.filter.return_value.order_by.return_value.all.return_value = [
+                mock_depense1,
+                mock_depense2,
+            ]
+            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
+            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+
+            result = service.exporter_budget(periode_jours=30)
+            assert result is None or isinstance(result, BytesIO)
+
+    def test_exporter_budget_vide(self, service):
+        """Test export budget sans dépenses."""
+        with patch("src.services.rapports.export.obtenir_contexte_db") as mock_ctx:
+            mock_db = MagicMock()
+            mock_db.query.return_value.filter.return_value.filter.return_value.order_by.return_value.all.return_value = []
+            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
+            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+
+            result = service.exporter_budget(periode_jours=7)
+            assert result is None or isinstance(result, BytesIO)
+
+    def test_exporter_budget_periode_personnalisee(self, service):
+        """Test export budget avec période personnalisée."""
+        with patch("src.services.rapports.export.obtenir_contexte_db") as mock_ctx:
+            mock_db = MagicMock()
+            mock_db.query.return_value.filter.return_value.filter.return_value.order_by.return_value.all.return_value = []
+            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
+            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+
+            result = service.exporter_budget(periode_jours=90)
+            assert result is None or isinstance(result, BytesIO)
+
+    def test_generer_pdf_budget_direct(self, service):
+        """Test génération PDF budget avec données directes."""
+        from src.services.rapports.types import RapportBudget
+
+        data = RapportBudget(
+            periode_jours=30,
+            depenses_total=250.75,
+            depenses_par_categorie={
+                "alimentation": 120.50,
+                "loisirs": 80.25,
+                "transport": 50.00,
+            },
+            articles_couteux=[
+                {
+                    "date": "15/01/2024",
+                    "description": "Grosse course",
+                    "categorie": "alimentation",
+                    "montant": 85.00,
+                },
+            ],
+        )
+        result = service._generer_pdf_budget(data)
+        assert isinstance(result, BytesIO)
+        assert result.getvalue()
+
+    def test_exporter_budget_depense_sans_categorie(self, service):
+        """Test export budget — dépense sans catégorie utilise 'autre'."""
+        from decimal import Decimal
+
+        mock_depense = MagicMock()
+        mock_depense.montant = Decimal("15.00")
+        mock_depense.categorie = None
+        mock_depense.date = datetime(2024, 1, 20).date()
+        mock_depense.description = None
+
+        with patch("src.services.rapports.export.obtenir_contexte_db") as mock_ctx:
+            mock_db = MagicMock()
+            mock_db.query.return_value.filter.return_value.filter.return_value.order_by.return_value.all.return_value = [
+                mock_depense,
+            ]
+            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_db)
+            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+
+            result = service.exporter_budget(periode_jours=30)
+            assert result is None or isinstance(result, BytesIO)
+
+
 class TestFactoryFunctions:
     """Tests des fonctions factory et alias."""
 

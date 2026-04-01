@@ -5,6 +5,7 @@ Contient les dépendances communes pour l'authentification et l'autorisation.
 Utilise le module auth autonome (JWT Bearer tokens).
 """
 
+import ipaddress
 import logging
 import os
 from typing import Any
@@ -16,6 +17,32 @@ from .auth import valider_token
 from .security_logs import journaliser_evenement_securite
 
 logger = logging.getLogger(__name__)
+
+
+# ═══════════════════════════════════════════════════════════
+# EXTRACTION IP CLIENT (Phase A6)
+# ═══════════════════════════════════════════════════════════
+
+
+def extraire_ip_client(request: Request) -> str | None:
+    """Extrait l'IP du client avec validation du format.
+
+    Phase A6: Valide que l'IP extraite de X-Forwarded-For est bien
+    une adresse IP valide pour éviter les injections dans les logs
+    et le rate limiting.
+    """
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        ip_candidate = forwarded.split(",")[0].strip()
+        try:
+            ipaddress.ip_address(ip_candidate)
+            return ip_candidate
+        except ValueError:
+            logger.warning(
+                f"X-Forwarded-For contient une IP invalide: '{ip_candidate}'. "
+                "Utilisation de l'IP directe."
+            )
+    return request.client.host if request.client else None
 
 
 # ═══════════════════════════════════════════════════════════
@@ -86,9 +113,7 @@ async def get_current_user(
         if _est_environnement_dev():
             logger.debug("Mode développement: utilisateur dev auto-authentifié (rôle membre)")
             return {"id": "dev", "email": "dev@local", "role": "membre"}
-        client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (
-            request.client.host if request.client else None
-        )
+        client_ip = extraire_ip_client(request)
         journaliser_evenement_securite(
             event_type="auth.missing_token",
             user_id=None,
@@ -108,9 +133,7 @@ async def get_current_user(
                 "role": utilisateur.role,
             }
 
-        client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (
-            request.client.host if request.client else None
-        )
+        client_ip = extraire_ip_client(request)
         journaliser_evenement_securite(
             event_type="auth.invalid_token",
             user_id=None,
@@ -124,9 +147,7 @@ async def get_current_user(
         raise
     except Exception as e:
         logger.error(f"Erreur validation token: {e}")
-        client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (
-            request.client.host if request.client else None
-        )
+        client_ip = extraire_ip_client(request)
         journaliser_evenement_securite(
             event_type="auth.error",
             user_id=None,
@@ -166,9 +187,7 @@ def require_role(required_role: str):
         user: dict[str, Any] = Depends(require_auth),
     ) -> dict[str, Any]:
         if user.get("role") != required_role:
-            client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (
-                request.client.host if request.client else None
-            )
+            client_ip = extraire_ip_client(request)
             journaliser_evenement_securite(
                 event_type="auth.role_denied",
                 user_id=str(user.get("id")) if user.get("id") else None,

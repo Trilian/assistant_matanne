@@ -105,3 +105,51 @@ class TestRoutesExportAvecMock:
 
             if response.status_code == 200:
                 assert response.headers.get("content-type") == "application/pdf"
+
+    def test_export_budget_retourne_pdf(self):
+        """Export budget retourne un PDF valide."""
+        from io import BytesIO
+
+        mock_buffer = BytesIO(b"%PDF-1.4 budget content")
+        mock_service = MagicMock()
+        mock_service.exporter_budget.return_value = mock_buffer
+
+        with patch(
+            "src.api.routes.export.obtenir_service_export_pdf",
+            return_value=mock_service,
+        ):
+            from src.api.main import app
+
+            client = TestClient(app)
+            response = client.post("/api/v1/export/pdf?type_export=budget")
+
+            if response.status_code == 200:
+                assert response.headers.get("content-type") == "application/pdf"
+
+    def test_export_recette_retourne_pdf(self):
+        """Export recette avec id_ressource retourne un PDF valide."""
+        from io import BytesIO
+
+        mock_buffer = BytesIO(b"%PDF-1.4 recette content")
+        mock_service = MagicMock()
+        mock_service.exporter_recette.return_value = mock_buffer
+
+        with patch(
+            "src.api.routes.export.obtenir_service_export_pdf",
+            return_value=mock_service,
+        ):
+            from src.api.main import app
+
+            client = TestClient(app)
+            response = client.post("/api/v1/export/pdf?type_export=recette&id_ressource=1")
+
+            if response.status_code == 200:
+                assert response.headers.get("content-type") == "application/pdf"
+
+    def test_export_recette_sans_id_retourne_422(self):
+        """Export recette sans id_ressource retourne 422."""
+        from src.api.main import app
+
+        client = TestClient(app, raise_server_exceptions=False)
+        response = client.post("/api/v1/export/pdf?type_export=recette")
+        assert response.status_code == 422

@@ -12,6 +12,7 @@
 --   V005 : Consolidation SQL       → absorbé dans 14_indexes.sql (CHECK, comments, cleanup)
 --   V006 : job_executions          → absorbé dans 03_systeme.sql
 --   V007 : Module habitat          → absorbé dans 07_habitat.sql
+--   V008 : minuteur_sessions       → absorbé dans 11_utilitaires.sql
 --
 -- Les fichiers originaux sont conservés dans sql/migrations/ pour référence.
 -- ============================================================================

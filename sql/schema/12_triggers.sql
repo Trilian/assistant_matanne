@@ -18,7 +18,9 @@ tables_modifie_le TEXT [] := ARRAY [
         'traitements_nuisibles', 'devis_comparatifs', 'entretiens_saisonniers',
         -- Utilitaires
         'notes_memos', 'journal_bord', 'contacts_utiles', 'liens_favoris',
-        'mots_de_passe_maison', 'releves_energie',
+        'mots_de_passe_maison', 'releves_energie', 'minuteur_sessions',
+        -- Notifications
+        'historique_notifications',
         -- Tables anciennement updated_at (colonnes renommées modifie_le)
         'listes_courses', 'meubles', 'taches_entretien', 'stocks_maison',
         'preferences_utilisateurs', 'depenses', 'budgets_mensuels', 'config_meteo',

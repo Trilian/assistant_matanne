@@ -2,8 +2,8 @@
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
 -- Version    : 3.1 (régénéré automatiquement)
--- Généré le  : 2026-03-31 20:04 UTC
--- Source     : sql/schema/*.sql (18 fichiers, ~4922 lignes)
+-- Généré le  : 2026-04-01 09:33 UTC
+-- Source     : sql/schema/*.sql (18 fichiers, ~4965 lignes)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
@@ -3536,7 +3536,8 @@ CREATE INDEX IF NOT EXISTS idx_cotes_hist_bookmaker ON jeux_cotes_historique(boo
 -- ============================================================================
 -- ASSISTANT MATANNE — Tables Notifications
 -- ============================================================================
--- Contient : abonnements_push, preferences_notifications, webhooks_abonnements
+-- Contient : abonnements_push, preferences_notifications, webhooks_abonnements,
+--            historique_notifications
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE abonnements_push (
@@ -3589,6 +3590,26 @@ CREATE TABLE IF NOT EXISTS webhooks_abonnements (
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_webhooks_user ON webhooks_abonnements(user_id);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE historique_notifications (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    canal VARCHAR(20) NOT NULL,
+    titre VARCHAR(500) NOT NULL,
+    message TEXT NOT NULL,
+    type_evenement VARCHAR(100),
+    categorie VARCHAR(50) NOT NULL DEFAULT 'autres',
+    lu BOOLEAN NOT NULL DEFAULT FALSE,
+    action_effectuee VARCHAR(255),
+    metadata JSONB DEFAULT '{}'::jsonb,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_user ON historique_notifications(user_id);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_lu ON historique_notifications(user_id, lu);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_categorie ON historique_notifications(categorie);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_cree_le ON historique_notifications(cree_le DESC);
 
 
 -- Source: 10_finances.sql
@@ -3719,7 +3740,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_event_uid_user ON evenements_calendrier(uid
 -- ============================================================================
 -- Contient : notes_memos, journal_bord, contacts_utiles, liens_favoris,
 --            mots_de_passe_maison, presse_papier_entrees, releves_energie,
---            voyages, checklists_voyage, templates_checklist
+--            voyages, checklists_voyage, templates_checklist, minuteur_sessions
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE voyages (
@@ -3870,6 +3891,24 @@ CREATE TABLE releves_energie (
 );
 CREATE INDEX IF NOT EXISTS idx_energie_categorie ON releves_energie(categorie);
 CREATE INDEX IF NOT EXISTS idx_energie_date ON releves_energie(date_releve DESC);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE minuteur_sessions (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    label VARCHAR(200) NOT NULL,
+    duree_secondes INTEGER NOT NULL CHECK (duree_secondes > 0),
+    recette_id INTEGER REFERENCES recettes(id) ON DELETE SET NULL,
+    date_debut TIMESTAMP,
+    date_fin TIMESTAMP,
+    terminee BOOLEAN DEFAULT FALSE,
+    active BOOLEAN DEFAULT FALSE,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_minuteur_user_id ON minuteur_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_minuteur_active ON minuteur_sessions(active);
+CREATE INDEX IF NOT EXISTS idx_minuteur_cree_le ON minuteur_sessions(cree_le DESC);
 -- ============================================================================
 
 
@@ -3894,7 +3933,9 @@ tables_modifie_le TEXT [] := ARRAY [
         'traitements_nuisibles', 'devis_comparatifs', 'entretiens_saisonniers',
         -- Utilitaires
         'notes_memos', 'journal_bord', 'contacts_utiles', 'liens_favoris',
-        'mots_de_passe_maison', 'releves_energie',
+        'mots_de_passe_maison', 'releves_energie', 'minuteur_sessions',
+        -- Notifications
+        'historique_notifications',
         -- Tables anciennement updated_at (colonnes renommées modifie_le)
         'listes_courses', 'meubles', 'taches_entretien', 'stocks_maison',
         'preferences_utilisateurs', 'depenses', 'budgets_mensuels', 'config_meteo',
@@ -4245,7 +4286,8 @@ DECLARE t TEXT;
 user_id_varchar_tables TEXT[] := ARRAY[
     'preferences_utilisateurs', 'retours_recettes',
     'configs_calendriers_externes', 'etats_persistants',
-    'historique_actions', 'ia_suggestions_historique'
+    'historique_actions', 'ia_suggestions_historique',
+    'historique_notifications', 'minuteur_sessions'
 ];
 BEGIN FOREACH t IN ARRAY user_id_varchar_tables LOOP
     EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
@@ -4957,6 +4999,7 @@ GRANT USAGE,
 --   V005 : Consolidation SQL       → absorbé dans 14_indexes.sql (CHECK, comments, cleanup)
 --   V006 : job_executions          → absorbé dans 03_systeme.sql
 --   V007 : Module habitat          → absorbé dans 07_habitat.sql
+--   V008 : minuteur_sessions       → absorbé dans 11_utilitaires.sql
 --
 -- Les fichiers originaux sont conservés dans sql/migrations/ pour référence.
 -- ============================================================================

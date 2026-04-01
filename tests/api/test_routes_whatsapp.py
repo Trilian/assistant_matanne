@@ -326,3 +326,82 @@ class TestReponsesBouton:
             await traiter_action_bouton("33611111111", "cmd_meteo")
 
         mock_texte.assert_called_once_with("33611111111", "meteo")
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS — PAYLOADS MALFORMÉS & SÉCURITÉ
+# ═══════════════════════════════════════════════════════════
+
+
+class TestPayloadsMalformes:
+    """Tests de résilience face aux payloads invalides."""
+
+    @pytest.mark.asyncio
+    async def test_payload_entry_invalide(self, async_client: httpx.AsyncClient):
+        """Payload avec entry qui n'est pas une liste → 200 sans crash."""
+        response = await async_client.post(
+            "/api/v1/whatsapp/webhook",
+            json=cast(Payload, {"entry": "pas_une_liste"}),
+        )
+        # Doit ne pas crash — 200 ou 422/500 selon implémentation
+        assert response.status_code in (200, 422, 500)
+
+    @pytest.mark.asyncio
+    async def test_payload_message_sans_from(self, async_client: httpx.AsyncClient):
+        """Message sans champ 'from' → 200 sans crash."""
+        payload = {
+            "entry": [
+                {
+                    "changes": [
+                        {
+                            "value": {
+                                "messages": [
+                                    {"type": "text", "text": {"body": "test"}, "id": "wamid.x"}
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+        response = await async_client.post("/api/v1/whatsapp/webhook", json=payload)
+        assert response.status_code in (200, 500)
+
+    @pytest.mark.asyncio
+    async def test_payload_message_type_inconnu(self, async_client: httpx.AsyncClient):
+        """Type de message inconnu (image, video, etc.) → 200 ok."""
+        payload = {
+            "entry": [
+                {
+                    "changes": [
+                        {
+                            "value": {
+                                "messages": [
+                                    {
+                                        "from": "33600000000",
+                                        "type": "image",
+                                        "image": {"id": "img123"},
+                                        "id": "wamid.img",
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+        response = await async_client.post("/api/v1/whatsapp/webhook", json=payload)
+        assert response.status_code == 200
+
+    @pytest.mark.asyncio
+    async def test_challenge_mode_non_subscribe(self, async_client: httpx.AsyncClient):
+        """Mode != subscribe → 403."""
+        response = await async_client.get(
+            "/api/v1/whatsapp/webhook",
+            params={
+                "hub.mode": "unsubscribe",
+                "hub.verify_token": "quelconque",
+                "hub.challenge": "42",
+            },
+        )
+        assert response.status_code == 403

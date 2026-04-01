@@ -33,6 +33,19 @@ clientApi.interceptors.request.use(
 );
 
 // ─── Intercepteur réponse : gestion erreurs + refresh token ───
+// Phase A3: Sérialisation des refreshs pour éviter les race conditions
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+function onRefreshed(token: string) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+}
+
+function addRefreshSubscriber(cb: (token: string) => void) {
+  refreshSubscribers.push(cb);
+}
+
 clientApi.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ErreurAPI>) => {
@@ -46,11 +59,25 @@ clientApi.interceptors.response.use(
     ) {
       (requeteOriginale as ReturnType<typeof Object.assign> & { _retry?: boolean })._retry = true;
 
+      // Phase A3: Si un refresh est déjà en cours, attendre son résultat
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          addRefreshSubscriber((newToken: string) => {
+            if (requeteOriginale.headers) {
+              requeteOriginale.headers.Authorization = `Bearer ${newToken}`;
+            }
+            resolve(clientApi(requeteOriginale));
+          });
+        });
+      }
+
+      isRefreshing = true;
+
       try {
         const { data } = await axios.post(
           `${URL_API}${PREFIXE_API}/auth/refresh`,
           {},
-          { withCredentials: true }
+          { withCredentials: true, timeout: 10_000 }
         );
 
         if (data.access_token) {
@@ -58,15 +85,22 @@ clientApi.interceptors.response.use(
           if (requeteOriginale.headers) {
             requeteOriginale.headers.Authorization = `Bearer ${data.access_token}`;
           }
+          onRefreshed(data.access_token);
+          isRefreshing = false;
           return clientApi(requeteOriginale);
         }
       } catch {
-        // Refresh échoué → déconnexion
+        // Refresh échoué → déconnexion propre
+        isRefreshing = false;
+        refreshSubscribers = [];
         localStorage.removeItem("access_token");
         if (typeof window !== "undefined") {
           window.location.href = "/connexion";
         }
+        return Promise.reject(error);
       }
+
+      isRefreshing = false;
     }
 
     return Promise.reject(error);

@@ -28,6 +28,12 @@ interface OptionsWebSocket {
   maxTentatives?: number
   /** Intervalle heartbeat en ms (défaut: 30000) */
   intervalleHeartbeat?: number
+  /** URL de fallback HTTP polling (Phase A2) */
+  urlPollingFallback?: string | null
+  /** URL de fallback HTTP action (Phase A2) */
+  urlActionFallback?: string | null
+  /** Intervalle polling en ms (défaut: 3000) */
+  intervallePolling?: number
 }
 
 interface RetourWebSocket {
@@ -41,6 +47,8 @@ interface RetourWebSocket {
   dernierMessage: MessageWS | null
   /** Erreur de connexion */
   erreur: string | null
+  /** Mode de connexion actuel (Phase A2) */
+  mode: 'websocket' | 'polling' | 'deconnecte'
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -53,17 +61,24 @@ export function utiliserWebSocket({
   delaiReconnexion = 3000,
   maxTentatives = 5,
   intervalleHeartbeat = 30000,
+  urlPollingFallback = null,
+  urlActionFallback = null,
+  intervallePolling = 3000,
 }: OptionsWebSocket): RetourWebSocket {
   const [connecte, setConnecte] = useState(false)
   const [utilisateurs, setUtilisateurs] = useState<UtilisateurConnecte[]>([])
   const [dernierMessage, setDernierMessage] = useState<MessageWS | null>(null)
   const [erreur, setErreur] = useState<string | null>(null)
+  const [mode, setMode] = useState<'websocket' | 'polling' | 'deconnecte'>('deconnecte')
 
   const wsRef = useRef<WebSocket | null>(null)
   const tentativesRef = useRef(0)
   const reconnexionRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const gestionnairesRef = useRef(gestionnaires)
+  const pendingActionsRef = useRef<Record<string, unknown>[]>([])
+  const lastSeqRef = useRef(0)
 
   // Garder les gestionnaires à jour sans recréer la connexion
   useEffect(() => {
@@ -149,11 +164,18 @@ export function utiliserWebSocket({
       setConnecte(false)
       arreterHeartbeat()
 
-      // Reconnexion auto
+      // Reconnexion auto avec backoff exponentiel
       if (tentativesRef.current < maxTentatives) {
         tentativesRef.current += 1
-        reconnexionRef.current = setTimeout(connecter, delaiReconnexion)
+        const backoff = delaiReconnexion * Math.pow(2, tentativesRef.current - 1)
+        reconnexionRef.current = setTimeout(connecter, Math.min(backoff, 30000))
+      } else if (urlPollingFallback) {
+        // Phase A2: basculer en mode polling HTTP
+        setMode('polling')
+        setErreur(null)
+        demarrerPolling()
       } else {
+        setMode('deconnecte')
         setErreur('Connexion perdue. Veuillez rafraîchir la page.')
       }
     }
@@ -165,14 +187,52 @@ export function utiliserWebSocket({
     wsRef.current = ws
   }, [url, delaiReconnexion, maxTentatives, demarrerHeartbeat, arreterHeartbeat])
 
+  // Phase A2: Polling HTTP fallback
+  const arreterPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current)
+      pollingRef.current = null
+    }
+  }, [])
+
+  const demarrerPolling = useCallback(() => {
+    if (!urlPollingFallback) return
+    arreterPolling()
+
+    setConnecte(true)
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`${urlPollingFallback}?since_seq=${lastSeqRef.current}`)
+        if (!res.ok) return
+        const data = await res.json()
+        if (data.current_seq) lastSeqRef.current = data.current_seq
+        if (data.users) setUtilisateurs(data.users)
+        for (const change of data.changes ?? []) {
+          setDernierMessage(change)
+          const handler = gestionnairesRef.current[change.type]
+          if (handler) handler(change)
+        }
+      } catch {
+        // Polling error silencieux
+      }
+    }
+
+    // Premier poll immédiat
+    void poll()
+    pollingRef.current = setInterval(poll, intervallePolling)
+  }, [urlPollingFallback, intervallePolling, arreterPolling])
+
   // Connexion / déconnexion
   useEffect(() => {
     if (url) {
+      setMode('websocket')
       connecter()
     }
 
     return () => {
       arreterHeartbeat()
+      arreterPolling()
       if (reconnexionRef.current) {
         clearTimeout(reconnexionRef.current)
       }
@@ -181,13 +241,32 @@ export function utiliserWebSocket({
         wsRef.current = null
       }
     }
-  }, [url, connecter, arreterHeartbeat])
+  }, [url, connecter, arreterHeartbeat, arreterPolling])
 
   const envoyer = useCallback((message: Record<string, unknown>) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
+      // Mode WebSocket : envoi direct + flush de la queue
       wsRef.current.send(JSON.stringify(message))
+      // Envoyer les actions en attente
+      while (pendingActionsRef.current.length > 0) {
+        const pending = pendingActionsRef.current.shift()!
+        wsRef.current.send(JSON.stringify(pending))
+      }
+    } else if (mode === 'polling' && urlActionFallback) {
+      // Phase A2: Fallback HTTP POST
+      void fetch(urlActionFallback, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(message),
+      }).catch(() => {
+        // Mettre en queue si ça échoue aussi
+        pendingActionsRef.current.push(message)
+      })
+    } else {
+      // Mettre en queue pour envoi ultérieur
+      pendingActionsRef.current.push(message)
     }
-  }, [])
+  }, [mode, urlActionFallback])
 
   return {
     connecte,
@@ -195,5 +274,6 @@ export function utiliserWebSocket({
     envoyer,
     dernierMessage,
     erreur,
+    mode,
   }
 }

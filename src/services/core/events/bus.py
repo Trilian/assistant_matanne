@@ -215,6 +215,9 @@ class BusEvenements:
             if len(self._historique) > self._historique_taille:
                 self._historique = self._historique[-self._historique_taille :]
 
+        # Phase A4: Persister l'événement en base (best-effort, non bloquant)
+        self._persister_evenement(event)
+
         # Trouver les handlers correspondants
         handlers = self._trouver_handlers(type_evenement)
 
@@ -353,6 +356,83 @@ class BusEvenements:
         """Reprend l'émission d'événements."""
         self._actif = True
         logger.info("📡 Bus d'événements repris")
+
+    # ───────────────────────────────────────────────────────
+    # PERSISTENCE (Phase A4)
+    # ───────────────────────────────────────────────────────
+
+    def _persister_evenement(self, event: EvenementDomaine) -> None:
+        """Persiste un événement en base de données (best-effort).
+
+        Ne bloque pas l'émission si la DB est indisponible.
+        Utilise la table etats_persistants avec namespace="event_bus".
+        """
+        try:
+            from src.core.db import obtenir_contexte_db
+            from src.core.models.persistent_state import EtatPersistantDB
+
+            with obtenir_contexte_db() as session:
+                session.add(
+                    EtatPersistantDB(
+                        namespace="event_bus",
+                        user_id=event.event_id,
+                        data={
+                            "type": event.type,
+                            "data": event.data,
+                            "source": event.source,
+                            "timestamp": event.timestamp.isoformat(),
+                            "event_id": event.event_id,
+                        },
+                    )
+                )
+                session.commit()
+        except Exception as e:
+            # Best-effort: ne pas bloquer le bus si la DB est down
+            logger.debug(f"Persistance événement échouée (best-effort): {e}")
+
+    def rejouer_historique_db(
+        self,
+        type_evenement: str | None = None,
+        limite: int = 50,
+    ) -> list[EvenementDomaine]:
+        """Recharge les événements persistés depuis la base de données.
+
+        Utilise la table etats_persistants (namespace="event_bus")
+        pour récupérer l'historique post-redémarrage.
+        Ne ré-émet PAS les événements (lecture seule).
+
+        Returns:
+            Liste des événements retrouvés
+        """
+        try:
+            from src.core.db import obtenir_contexte_db
+            from src.core.models.persistent_state import EtatPersistantDB
+
+            with obtenir_contexte_db() as session:
+                query = session.query(EtatPersistantDB).filter(
+                    EtatPersistantDB.namespace == "event_bus",
+                )
+                rows = query.order_by(EtatPersistantDB.id.desc()).limit(limite).all()
+
+                events = []
+                for row in reversed(rows):
+                    val = row.data or {}
+                    evt_type = val.get("type", "")
+                    if type_evenement and evt_type != type_evenement:
+                        continue
+                    events.append(
+                        EvenementDomaine(
+                            type=evt_type,
+                            data=val.get("data", {}),
+                            source=val.get("source", ""),
+                            event_id=val.get("event_id", ""),
+                        )
+                    )
+                logger.info(f"📡 {len(events)} événements rechargés depuis la DB")
+                return events
+        except Exception as e:
+            logger.warning(f"Impossible de recharger l'historique événements: {e}")
+            return []
 
 
 # ═══════════════════════════════════════════════════════════

@@ -392,6 +392,88 @@ async def _persist_change(liste_id: int, action: str, data: dict[str, Any]) -> N
 
 
 # ═══════════════════════════════════════════════════════════
+# FALLBACK HTTP POLLING (Phase A2)
+# ═══════════════════════════════════════════════════════════
+
+# Séquence de changements par liste pour le polling HTTP
+_change_sequences: dict[int, list[dict[str, Any]]] = defaultdict(list)
+_MAX_CHANGES_HISTORY = 200
+
+
+@router.get("/courses/{liste_id}/poll")
+async def poll_courses_changes(
+    liste_id: int,
+    since_seq: int = Query(0, description="Séquence depuis laquelle récupérer les changements"),
+) -> dict[str, Any]:
+    """
+    Fallback HTTP polling pour les clients qui ne supportent pas WebSocket.
+
+    Retourne les changements depuis le numéro de séquence donné.
+    Utilisé quand le WebSocket est bloqué (proxy, 3G, etc.).
+    """
+    changes = _change_sequences.get(liste_id, [])
+    new_changes = [c for c in changes if c.get("seq", 0) > since_seq]
+    current_seq = changes[-1]["seq"] if changes else 0
+    users = _manager.get_connected_users(liste_id)
+
+    return {
+        "changes": new_changes,
+        "current_seq": current_seq,
+        "users": users,
+    }
+
+
+@router.post("/courses/{liste_id}/action")
+async def post_courses_action(
+    liste_id: int,
+    action_data: dict[str, Any],
+    user_id: str = Query(..., description="ID utilisateur"),
+    username: str = Query("Anonyme", description="Nom affiché"),
+) -> dict[str, Any]:
+    """
+    Endpoint REST pour appliquer un changement sur une liste de courses.
+
+    Fallback quand le WebSocket n'est pas disponible.
+    Le changement est persisté et broadcasté aux clients WebSocket connectés.
+    """
+    action = action_data.get("action", "")
+
+    if action not in [
+        WSMessageType.ITEM_ADDED,
+        WSMessageType.ITEM_REMOVED,
+        WSMessageType.ITEM_CHECKED,
+        WSMessageType.ITEM_UPDATED,
+        WSMessageType.LIST_RENAMED,
+    ]:
+        return {"error": f"Action inconnue: {action}", "success": False}
+
+    # Persister en base
+    await _persist_change(liste_id, action, action_data)
+
+    # Enregistrer dans la séquence de polling
+    seq = len(_change_sequences[liste_id]) + 1
+    change_record = {
+        "seq": seq,
+        "type": WSMessageType.SYNC,
+        "action": action,
+        "user_id": user_id,
+        "username": username,
+        "timestamp": datetime.now(UTC).isoformat(),
+        **{k: v for k, v in action_data.items() if k != "action"},
+    }
+    _change_sequences[liste_id].append(change_record)
+
+    # Limiter l'historique
+    if len(_change_sequences[liste_id]) > _MAX_CHANGES_HISTORY:
+        _change_sequences[liste_id] = _change_sequences[liste_id][-_MAX_CHANGES_HISTORY:]
+
+    # Notifier les clients WebSocket
+    await _manager.broadcast(liste_id, change_record, exclude_user=user_id)
+
+    return {"success": True, "seq": seq}
+
+
+# ═══════════════════════════════════════════════════════════
 # UTILITAIRES
 # ═══════════════════════════════════════════════════════════
 

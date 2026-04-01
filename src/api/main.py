@@ -327,12 +327,12 @@ _environment = os.getenv("ENVIRONMENT", "development").lower()
 if _cors_origins:
     _allowed_origins = _cors_origins
 elif _environment in ("production", "staging"):
-    logger.warning(
-        "⚠️ CORS_ORIGINS non défini en %s — CORS restreint à aucune origine. "
-        "Définir CORS_ORIGINS avec l'URL du frontend.",
-        _environment,
+    # Phase A8: Fail-fast — refuser de démarrer sans CORS_ORIGINS en prod/staging
+    raise RuntimeError(
+        f"CORS_ORIGINS non défini en {_environment}. L'application refuse de démarrer. "
+        "Définir CORS_ORIGINS avec l'URL du frontend "
+        "(ex: CORS_ORIGINS=https://assistant-matanne.vercel.app)."
     )
-    _allowed_origins = []
 else:
     _allowed_origins = _default_origins
 

@@ -25,18 +25,48 @@ class StockageLimitationDebit:
     Chaque opération de lecture/écriture est protégée par un verrou
     global (``threading.Lock``) afin d'éviter les race conditions
     lorsque plusieurs threads/workers accèdent au même processus.
+
+    Phase A5: Éviction LRU pour borner la consommation mémoire.
+    Quand le nombre de clés dépasse ``max_cles``, les clés les plus
+    anciennes (sans entrées récentes) sont supprimées.
     """
 
-    def __init__(self):
+    # Seuil maximal de clés en mémoire (Phase A5)
+    MAX_CLES_DEFAUT = 50_000
+
+    def __init__(self, max_cles: int = MAX_CLES_DEFAUT):
         self._store: dict[str, list[tuple[float, int]]] = defaultdict(list)
         self._lock_store: dict[str, float] = {}
         self._lock = threading.Lock()
+        self._max_cles = max_cles
 
     def _nettoyer_anciennes_entrees(self, cle: str, fenetre_secondes: int):
         """Nettoie les entrées expirées. Doit être appelé sous ``_lock``."""
         maintenant = time.time()
         seuil = maintenant - fenetre_secondes
         self._store[cle] = [(ts, compte) for ts, compte in self._store[cle] if ts > seuil]
+        # Phase A5: Supprimer les clés vides pour éviter les fuites mémoire
+        if not self._store[cle]:
+            del self._store[cle]
+
+    def _evicter_si_necessaire(self):
+        """Évicte les clés les plus anciennes si le seuil est dépassé (Phase A5).
+
+        Doit être appelé sous ``_lock``.
+        """
+        if len(self._store) <= self._max_cles:
+            return
+
+        # Trier les clés par timestamp le plus récent (les plus anciennes d'abord)
+        cles_triees = sorted(
+            self._store.keys(),
+            key=lambda k: max((ts for ts, _ in self._store[k]), default=0),
+        )
+
+        # Supprimer les 20% les plus anciennes
+        nb_a_supprimer = max(1, len(cles_triees) // 5)
+        for cle in cles_triees[:nb_a_supprimer]:
+            del self._store[cle]
 
     def incrementer(self, cle: str, fenetre_secondes: int) -> int:
         """
@@ -55,6 +85,7 @@ class StockageLimitationDebit:
             maintenant = time.time()
             self._nettoyer_anciennes_entrees(cle, fenetre_secondes)
             self._store[cle].append((maintenant, 1))
+            self._evicter_si_necessaire()
             return sum(compte for _, compte in self._store[cle])
 
     def obtenir_compte(self, cle: str, fenetre_secondes: int) -> int:

@@ -1,7 +1,8 @@
 -- ============================================================================
 -- ASSISTANT MATANNE — Tables Notifications
 -- ============================================================================
--- Contient : abonnements_push, preferences_notifications, webhooks_abonnements
+-- Contient : abonnements_push, preferences_notifications, webhooks_abonnements,
+--            historique_notifications
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE abonnements_push (
@@ -54,4 +55,24 @@ CREATE TABLE IF NOT EXISTS webhooks_abonnements (
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_webhooks_user ON webhooks_abonnements(user_id);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE historique_notifications (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    canal VARCHAR(20) NOT NULL,
+    titre VARCHAR(500) NOT NULL,
+    message TEXT NOT NULL,
+    type_evenement VARCHAR(100),
+    categorie VARCHAR(50) NOT NULL DEFAULT 'autres',
+    lu BOOLEAN NOT NULL DEFAULT FALSE,
+    action_effectuee VARCHAR(255),
+    metadata JSONB DEFAULT '{}'::jsonb,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_user ON historique_notifications(user_id);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_lu ON historique_notifications(user_id, lu);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_categorie ON historique_notifications(categorie);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_cree_le ON historique_notifications(cree_le DESC);
 

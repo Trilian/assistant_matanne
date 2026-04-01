@@ -36,20 +36,25 @@ DUREE_TOKEN_HEURES = 24
 
 # Clé secrète pour signer/vérifier les tokens API
 # En production, DOIT être configurée via variable d'environnement
-# A2: Clé par défaut aléatoire par processus — empêche toute
-#     prédictibilité même en dev/staging.
+# Phase A1: Clé par défaut fixe par session — générée UNE SEULE FOIS au
+#     chargement du module, partagée par tous les threads/imports du même process.
+#     En multi-worker Uvicorn (--workers N), chaque worker a son propre process
+#     donc une clé différente. C'est pourquoi API_SECRET_KEY est OBLIGATOIRE
+#     en production/staging pour garantir la cohérence inter-workers.
 import secrets as _secrets
 
+# Clé générée une seule fois par process — OK en dev single-worker
 _API_SECRET_KEY_DEFAULT = _secrets.token_urlsafe(64)
 
-# Vérification au chargement du module (A2: alerte précoce)
+# Vérification au chargement du module — fail-fast en prod/staging
 _secret_at_import = os.getenv("API_SECRET_KEY")
+_env_at_import = os.getenv("ENVIRONMENT", "").lower().strip()
 if not _secret_at_import:
-    _env = os.getenv("ENVIRONMENT", "").lower().strip()
-    if _env in ("production", "prod", "staging", "preview"):
-        logger.critical(
+    if _env_at_import in ("production", "prod", "staging", "preview"):
+        raise RuntimeError(
             "SÉCURITÉ CRITIQUE: API_SECRET_KEY non configuré "
-            f"en environnement '{_env}'. Générez une clé sécurisée: "
+            f"en environnement '{_env_at_import}'. L'application refuse de démarrer. "
+            "Générez une clé sécurisée: "
             "python -c 'import secrets; print(secrets.token_urlsafe(64))'"
         )
     else:
@@ -57,7 +62,9 @@ if not _secret_at_import:
             "API_SECRET_KEY non configuré — clé aléatoire générée pour cette session. "
             "Configurez API_SECRET_KEY pour la production."
         )
-del _secret_at_import
+# Cache la clé résolue au démarrage pour cohérence intra-process
+_API_SECRET_KEY_RESOLVED: str = _secret_at_import or _API_SECRET_KEY_DEFAULT
+del _secret_at_import, _env_at_import
 
 
 def _est_production() -> bool:
@@ -66,21 +73,12 @@ def _est_production() -> bool:
 
 
 def _obtenir_api_secret() -> str:
-    """Retourne la clé secrète API depuis les variables d'environnement.
+    """Retourne la clé secrète API (cachée au démarrage du module).
 
-    Raises:
-        RuntimeError: Si la clé par défaut est utilisée en production.
+    En production, la clé est obligatoirement fournie par variable
+    d'environnement (vérifiée au chargement du module — fail-fast).
     """
-    # Utilise le fallback aléatoire si non défini OU si vide
-    secret = os.getenv("API_SECRET_KEY") or _API_SECRET_KEY_DEFAULT
-
-    if _est_production() and not os.getenv("API_SECRET_KEY"):
-        raise RuntimeError(
-            "ERREUR CRITIQUE: API_SECRET_KEY doit être configuré en production. "
-            "Générez une clé: python -c 'import secrets; print(secrets.token_urlsafe(64))'"
-        )
-
-    return secret
+    return _API_SECRET_KEY_RESOLVED
 
 
 def _obtenir_supabase_jwt_secret() -> str | None:

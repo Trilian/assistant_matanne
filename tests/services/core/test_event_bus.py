@@ -2,6 +2,7 @@
 
 import threading
 import time
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -332,3 +333,114 @@ class TestBusThreadSafety:
 
         metriques = bus.obtenir_metriques()
         assert metriques["total_souscriptions"] == 20
+
+
+# ═══════════════════════════════════════════════════════════
+# PERSISTENCE DB (Phase A4)
+# ═══════════════════════════════════════════════════════════
+
+
+class TestBusPersistance:
+    """Tests de la persistance des événements en DB."""
+
+    def setup_method(self):
+        self.bus = BusEvenements()
+
+    def test_persister_evenement_appelle_db(self):
+        """L'émission d'un événement tente de le persister en DB."""
+        with patch("src.services.core.events.bus.obtenir_contexte_db") as mock_ctx:
+            mock_session = MagicMock()
+            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
+            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+
+            self.bus.souscrire("test.persist", lambda e: None)
+            self.bus.emettre("test.persist", {"key": "value"})
+
+            # session.add doit avoir été appelé
+            mock_session.add.assert_called_once()
+            mock_session.commit.assert_called_once()
+
+    def test_persister_evenement_best_effort(self):
+        """Si la DB est down, l'émission ne crash pas."""
+        with patch(
+            "src.services.core.events.bus.obtenir_contexte_db",
+            side_effect=Exception("DB down"),
+        ):
+            received = []
+            self.bus.souscrire("test.persist", lambda e: received.append(e))
+            count = self.bus.emettre("test.persist", {"data": 1})
+
+            assert count == 1
+            assert len(received) == 1
+
+    def test_rejouer_historique_db_retourne_evenements(self):
+        """rejouer_historique_db retourne des événements depuis la DB."""
+        mock_row = MagicMock()
+        mock_row.data = {
+            "type": "recette.planifiee",
+            "data": {"recette_id": 42},
+            "source": "planning_service",
+            "event_id": "recette.planifiee_123",
+        }
+
+        with patch("src.services.core.events.bus.obtenir_contexte_db") as mock_ctx:
+            mock_session = MagicMock()
+            mock_session.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
+                mock_row,
+            ]
+            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
+            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+
+            events = self.bus.rejouer_historique_db(limite=10)
+
+            assert len(events) == 1
+            assert events[0].type == "recette.planifiee"
+            assert events[0].data == {"recette_id": 42}
+            assert events[0].source == "planning_service"
+
+    def test_rejouer_historique_db_filtre_par_type(self):
+        """rejouer_historique_db filtre par type d'événement."""
+        mock_row1 = MagicMock()
+        mock_row1.data = {"type": "recette.planifiee", "data": {}, "source": "", "event_id": "e1"}
+        mock_row2 = MagicMock()
+        mock_row2.data = {"type": "stock.modifie", "data": {}, "source": "", "event_id": "e2"}
+
+        with patch("src.services.core.events.bus.obtenir_contexte_db") as mock_ctx:
+            mock_session = MagicMock()
+            mock_session.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
+                mock_row1,
+                mock_row2,
+            ]
+            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
+            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+
+            events = self.bus.rejouer_historique_db(type_evenement="stock.modifie")
+
+            assert len(events) == 1
+            assert events[0].type == "stock.modifie"
+
+    def test_rejouer_historique_db_best_effort(self):
+        """Si la DB est down, rejouer_historique_db retourne liste vide."""
+        with patch(
+            "src.services.core.events.bus.obtenir_contexte_db",
+            side_effect=Exception("DB down"),
+        ):
+            events = self.bus.rejouer_historique_db()
+            assert events == []
+
+    def test_rejouer_historique_db_row_sans_data(self):
+        """Rows avec data=None sont gérées gracieusement."""
+        mock_row = MagicMock()
+        mock_row.data = None
+
+        with patch("src.services.core.events.bus.obtenir_contexte_db") as mock_ctx:
+            mock_session = MagicMock()
+            mock_session.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = [
+                mock_row,
+            ]
+            mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
+            mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+
+            events = self.bus.rejouer_historique_db()
+            assert len(events) == 1
+            assert events[0].type == ""

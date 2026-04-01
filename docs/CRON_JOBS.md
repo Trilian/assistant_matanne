@@ -116,9 +116,15 @@ Routes disponibles:
 - `POST /api/v1/admin/jobs/{job_id}/run`
 - `GET /api/v1/admin/jobs/{job_id}/logs`
 
-### Historique actuel
+### Historique d'exécution
 
-L'historique des exécutions manuelles est conservé en mémoire de processus seulement. Il n'existe pas encore de table `job_executions` persistante.
+L'historique des exécutions est persisté dans la table `job_executions` (créée dans V006, consolidée dans `sql/schema/03_systeme.sql`).
+
+Colonnes : `id`, `job_id`, `job_name`, `started_at`, `ended_at`, `duration_ms`, `status`, `error_message`, `output_logs`, `triggered_by_user_id`, `triggered_by_user_role`, `created_at`, `modified_at`.
+
+Fonctions internes :
+- `_creer_execution_job(job_id, source)` — crée un enregistrement au démarrage
+- `_finaliser_execution_job(execution_id, status, error_message)` — met à jour en fin d'exécution
 
 ---
 
@@ -158,9 +164,7 @@ L'historique des exécutions manuelles est conservé en mémoire de processus se
 
 ## Gaps connus
 
-- pas de retry riche ni backoff centralisé par job
-- pas de notification d'échec admin systématique
-- pas de métriques persistantes de durée
-- pas d'historique persistant des exécutions
+- Pas de retry riche ni backoff centralisé par job
+- Pas de notification d'échec admin systématique
 
 Ces points sont déjà identifiés dans le planning pour la phase jobs et automatisations.

@@ -67,9 +67,9 @@ class MiddlewareLimitationDebit(BaseHTTPMiddleware):
             )
         except HTTPException as exc:
             if exc.status_code == 429:
-                client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or (
-                    request.client.host if request.client else None
-                )
+                from src.api.dependencies import extraire_ip_client
+
+                client_ip = extraire_ip_client(request)
                 journaliser_evenement_securite(
                     event_type="rate_limit.exceeded",
                     user_id=id_utilisateur,

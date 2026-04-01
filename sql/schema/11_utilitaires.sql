@@ -3,7 +3,7 @@
 -- ============================================================================
 -- Contient : notes_memos, journal_bord, contacts_utiles, liens_favoris,
 --            mots_de_passe_maison, presse_papier_entrees, releves_energie,
---            voyages, checklists_voyage, templates_checklist
+--            voyages, checklists_voyage, templates_checklist, minuteur_sessions
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE voyages (
@@ -154,5 +154,23 @@ CREATE TABLE releves_energie (
 );
 CREATE INDEX IF NOT EXISTS idx_energie_categorie ON releves_energie(categorie);
 CREATE INDEX IF NOT EXISTS idx_energie_date ON releves_energie(date_releve DESC);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE minuteur_sessions (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    label VARCHAR(200) NOT NULL,
+    duree_secondes INTEGER NOT NULL CHECK (duree_secondes > 0),
+    recette_id INTEGER REFERENCES recettes(id) ON DELETE SET NULL,
+    date_debut TIMESTAMP,
+    date_fin TIMESTAMP,
+    terminee BOOLEAN DEFAULT FALSE,
+    active BOOLEAN DEFAULT FALSE,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_minuteur_user_id ON minuteur_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_minuteur_active ON minuteur_sessions(active);
+CREATE INDEX IF NOT EXISTS idx_minuteur_cree_le ON minuteur_sessions(cree_le DESC);
 -- ============================================================================
 

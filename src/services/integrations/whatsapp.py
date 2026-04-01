@@ -31,35 +31,121 @@ META_API_BASE = "https://graph.facebook.com/v21.0"
 
 
 # ═══════════════════════════════════════════════════════════
-# RATE LIMITING
+# RATE LIMITING (Phase A7 — persisté en DB via etats_persistants)
 # ═══════════════════════════════════════════════════════════
 
 _LIMITE_PAR_HEURE = 10
 _LIMITE_PAR_JOUR = 100
 
+# In-memory fallback (utilisé si la DB n'est pas disponible)
 _compteurs_heure: dict[str, list[float]] = defaultdict(list)
 _compteurs_jour: list[float] = []
 
 
+def _charger_compteur_db(destinataire: str) -> tuple[int, int]:
+    """Charge les compteurs depuis la DB (best-effort, fallback in-memory).
+
+    Returns:
+        (envois_derniere_heure, envois_dernier_jour)
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.persistent_state import EtatPersistantDB
+
+        with obtenir_contexte_db() as session:
+            state = (
+                session.query(EtatPersistantDB)
+                .filter(
+                    EtatPersistantDB.namespace == "whatsapp_rate_limit",
+                    EtatPersistantDB.user_id == "global",
+                )
+                .first()
+            )
+            if not state or not state.data:
+                return 0, 0
+
+            envois = state.data.get("envois", [])
+            now = time.time()
+            heure_count = sum(
+                1 for e in envois
+                if e.get("dest") == destinataire and now - e.get("ts", 0) < 3600
+            )
+            jour_count = sum(
+                1 for e in envois
+                if now - e.get("ts", 0) < 86400
+            )
+            return heure_count, jour_count
+    except Exception:
+        return -1, -1  # Sentinel → utiliser fallback in-memory
+
+
+def _enregistrer_envoi_db(destinataire: str) -> None:
+    """Enregistre un envoi en DB (Phase A7: state persisté).
+
+    Conserve un historique glissant de 48h max pour limiter la taille.
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.persistent_state import EtatPersistantDB
+
+        with obtenir_contexte_db() as session:
+            state = (
+                session.query(EtatPersistantDB)
+                .filter(
+                    EtatPersistantDB.namespace == "whatsapp_rate_limit",
+                    EtatPersistantDB.user_id == "global",
+                )
+                .first()
+            )
+            now = time.time()
+            seuil_48h = now - 172800  # 48h
+
+            if not state:
+                state = EtatPersistantDB(
+                    namespace="whatsapp_rate_limit",
+                    user_id="global",
+                    data={"envois": []},
+                )
+                session.add(state)
+
+            envois = [e for e in (state.data or {}).get("envois", []) if e.get("ts", 0) > seuil_48h]
+            envois.append({"dest": destinataire, "ts": now})
+            state.data = {"envois": envois}
+            session.commit()
+    except Exception as e:
+        logger.warning(f"Impossible de persister rate limit WhatsApp: {e}")
+
+
 def _nettoyer_compteur_heure(dest: str) -> None:
-    """Supprime les entrées de plus d'une heure."""
+    """Supprime les entrées de plus d'une heure (fallback in-memory)."""
     seuil = time.monotonic() - 3600
     _compteurs_heure[dest] = [t for t in _compteurs_heure[dest] if t > seuil]
 
 
 def _nettoyer_compteur_jour() -> None:
-    """Supprime les entrées de plus de 24h."""
+    """Supprime les entrées de plus de 24h (fallback in-memory)."""
     global _compteurs_jour
     seuil = time.monotonic() - 86400
     _compteurs_jour = [t for t in _compteurs_jour if t > seuil]
 
 
 def _verifier_rate_limit(destinataire: str) -> tuple[bool, str]:
-    """Vérifie si l'envoi est autorisé.
+    """Vérifie si l'envoi est autorisé (DB first, in-memory fallback).
 
     Returns:
         (autorisé, raison si refusé)
     """
+    # Phase A7: Tenter de lire depuis la DB
+    heure_count, jour_count = _charger_compteur_db(destinataire)
+
+    if heure_count >= 0:  # DB disponible
+        if heure_count >= _LIMITE_PAR_HEURE:
+            return False, f"Limite horaire atteinte ({_LIMITE_PAR_HEURE}/h) pour ce destinataire"
+        if jour_count >= _LIMITE_PAR_JOUR:
+            return False, f"Limite journalière atteinte ({_LIMITE_PAR_JOUR}/jour)"
+        return True, ""
+
+    # Fallback in-memory si DB indisponible
     _nettoyer_compteur_heure(destinataire)
     if len(_compteurs_heure[destinataire]) >= _LIMITE_PAR_HEURE:
         return False, f"Limite horaire atteinte ({_LIMITE_PAR_HEURE}/h) pour ce destinataire"
@@ -72,10 +158,12 @@ def _verifier_rate_limit(destinataire: str) -> tuple[bool, str]:
 
 
 def _enregistrer_envoi(destinataire: str) -> None:
-    """Enregistre un envoi réussi pour le rate limiting."""
+    """Enregistre un envoi réussi (DB + in-memory fallback)."""
     now = time.monotonic()
     _compteurs_heure[destinataire].append(now)
     _compteurs_jour.append(now)
+    # Phase A7: Persister en DB
+    _enregistrer_envoi_db(destinataire)
 
 
 # ═══════════════════════════════════════════════════════════
