@@ -337,6 +337,8 @@ export default function PageMaJournee() {
                     <button
                       type="button"
                       className="shrink-0"
+                      title={tache.fait ? "Marquer non faite" : "Marquer faite"}
+                      aria-label={tache.fait ? "Marquer non faite" : "Marquer faite"}
                       disabled={!tache.id_source || validationEnCours}
                       onClick={() => {
                         if (tache.id_source)

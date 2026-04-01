@@ -41,6 +41,7 @@ import {
   deplanifierRecetteSemaine,
 } from "@/bibliotheque/api/recettes";
 import { DialogueImportRecette } from "@/composants/cuisine/dialogue-import-recette";
+import { SwipeableItem } from "@/composants/swipeable-item";
 import type { Recette } from "@/types/recettes";
 
 const CATEGORIES = [
@@ -256,9 +257,18 @@ export default function PageRecettes() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {recettesFiltrees.map((recette) => (
-            <div key={recette.id} className="relative group">
-              <Link href={`/cuisine/recettes/${recette.id}`}>
-                <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
+            <SwipeableItem
+              key={recette.id}
+              desactiverGauche={idsPlanifies.has(recette.id)}
+              desactiverDroit={!idsPlanifies.has(recette.id)}
+              labelGauche="Planifier"
+              labelDroit="Déplanifier"
+              onSwipeLeft={() => mutationPlanifier.mutate(recette.id)}
+              onSwipeRight={() => mutationDeplanifier.mutate(recette.id)}
+            >
+              <div className="relative group">
+                <Link href={`/cuisine/recettes/${recette.id}`}>
+                  <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
                   {/* Photo placeholder */}
                   <div className="relative h-40 bg-gradient-to-br from-orange-100 to-amber-50 dark:from-orange-950 dark:to-amber-950 flex items-center justify-center">
                     {recette.image_url ? (
@@ -364,9 +374,10 @@ export default function PageRecettes() {
                     {/* Appareils compatibles */}
                     <ApplianceBadges recette={recette} />
                   </CardContent>
-                </Card>
-              </Link>
-            </div>
+                  </Card>
+                </Link>
+              </div>
+            </SwipeableItem>
           ))}
         </div>
       )}

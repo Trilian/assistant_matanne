@@ -94,6 +94,31 @@ class ServiceEmail:
         template = self._jinja_env.get_template(template_name)
         return template.render(**kwargs)
 
+    def _render_mjml(self, template_name: str, fallback_html_template: str, **kwargs: Any) -> str:
+        """Rend un template MJML puis le compile en HTML.
+
+        Si le compilateur MJML n'est pas disponible, fallback sur un template HTML.
+        """
+        try:
+            mjml_source = self._render(template_name, **kwargs)
+            try:
+                from mjml import mjml2html  # type: ignore
+
+                result = mjml2html(mjml_source)
+                if isinstance(result, dict):
+                    html = str(result.get("html", "")).strip()
+                else:
+                    html = str(result).strip()
+
+                if html:
+                    return html
+            except Exception:
+                logger.warning("Compilation MJML indisponible, fallback HTML pour %s", template_name)
+        except Exception:
+            logger.warning("Template MJML introuvable ou invalide: %s", template_name)
+
+        return self._render(fallback_html_template, **kwargs)
+
     # ─── Méthodes publiques ────────────────────────────────────────────────────
 
     def envoyer_reset_password(self, email: str, token: str) -> bool:
@@ -137,8 +162,9 @@ class ServiceEmail:
         total = rapport.get("total_depenses", 0)
         budget = rapport.get("budget_prevu", 0)
         ecart = total - budget
-        html = self._render(
-            "rapport_mensuel.html",
+        html = self._render_mjml(
+            "rapport_mensuel.mjml",
+            fallback_html_template="rapport_mensuel.html",
             sujet=f"Rapport mensuel {mois}",
             mois=mois,
             total_depenses=total,

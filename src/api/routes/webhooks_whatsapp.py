@@ -110,7 +110,11 @@ async def recevoir_message_whatsapp(request: Request) -> MessageResponse:
 
 async def _traiter_action_bouton(sender: str, action_id: str) -> None:
     """Traite une reponse bouton WhatsApp."""
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.whatsapp import (
+        effacer_etat_conversation,
+        envoyer_message_whatsapp,
+        sauvegarder_etat_conversation,
+    )
 
     if action_id == "planning_valider":
         # Valider le planning proposé le plus récent
@@ -118,6 +122,13 @@ async def _traiter_action_bouton(sender: str, action_id: str) -> None:
         await envoyer_message_whatsapp(sender, "[OK] Planning valide ! Bon appetit cette semaine.")
 
     elif action_id == "planning_modifier":
+        sauvegarder_etat_conversation(
+            sender,
+            {
+                "etat": "attente_creneau_modification",
+                "source": "planning_modifier",
+            },
+        )
         await envoyer_message_whatsapp(
             sender,
             "Quel repas veux-tu modifier ?\n"
@@ -125,6 +136,7 @@ async def _traiter_action_bouton(sender: str, action_id: str) -> None:
         )
 
     elif action_id == "planning_regenerer":
+        effacer_etat_conversation(sender)
         await envoyer_message_whatsapp(
             sender,
             "Regeneration du planning en cours...\n"
@@ -159,9 +171,52 @@ async def _traiter_action_bouton(sender: str, action_id: str) -> None:
 
 async def _traiter_message_texte(sender: str, texte: str) -> None:
     """Traite un message texte libre."""
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.whatsapp import (
+        charger_etat_conversation,
+        effacer_etat_conversation,
+        envoyer_message_whatsapp,
+        sauvegarder_etat_conversation,
+    )
 
     texte_lower = texte.lower().strip()
+
+    # Machine d'état persistante multi-turn (Phase D8)
+    etat = charger_etat_conversation(sender)
+    if etat and etat.get("etat") == "attente_creneau_modification":
+        if any(jour in texte_lower for jour in ("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche")) and any(
+            repas in texte_lower for repas in ("midi", "soir", "dejeuner", "diner", "déjeuner", "dîner")
+        ):
+            sauvegarder_etat_conversation(
+                sender,
+                {
+                    "etat": "attente_detail_modification",
+                    "creneau": texte.strip(),
+                    "source": "planning_modifier",
+                },
+            )
+            await envoyer_message_whatsapp(
+                sender,
+                f"Parfait, j'ai noté *{texte.strip()}*.\n"
+                "Quel changement souhaites-tu ? (ex: 'remplacer par pâtes carbonara')",
+            )
+            return
+
+        await envoyer_message_whatsapp(
+            sender,
+            "Je n'ai pas reconnu le créneau. Réponds par exemple *lundi soir* ou *mercredi midi*.",
+        )
+        return
+
+    if etat and etat.get("etat") == "attente_detail_modification":
+        creneau = str(etat.get("creneau", "ce créneau"))
+        effacer_etat_conversation(sender)
+        await envoyer_message_whatsapp(
+            sender,
+            f"✅ Demande de modification enregistrée pour *{creneau}* :\n"
+            f"_{texte.strip()}_\n\n"
+            "Je vais régénérer une proposition dans l'application.",
+        )
+        return
 
     # Commandes simples
     if texte_lower in ("menu", "planning", "semaine"):
@@ -199,6 +254,7 @@ async def _traiter_message_texte(sender: str, texte: str) -> None:
     elif texte_lower in ("entretien", "maintenance"):
         await _envoyer_entretien_urgent(sender)
     elif texte_lower in ("aide", "help", "?"):
+        effacer_etat_conversation(sender)
         await envoyer_message_whatsapp(
             sender,
             "🤖 Commandes disponibles :\n"

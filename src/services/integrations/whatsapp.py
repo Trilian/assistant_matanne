@@ -20,6 +20,8 @@ import logging
 import re
 import time
 from collections import defaultdict
+from datetime import UTC, datetime
+from typing import Any
 
 import httpx
 
@@ -40,6 +42,108 @@ _LIMITE_PAR_JOUR = 100
 # In-memory fallback (utilisé si la DB n'est pas disponible)
 _compteurs_heure: dict[str, list[float]] = defaultdict(list)
 _compteurs_jour: list[float] = []
+
+
+# ═══════════════════════════════════════════════════════════
+# CONVERSATION STATE (Phase D8 — persisté en DB)
+# ═══════════════════════════════════════════════════════════
+
+_NAMESPACE_ETAT_CONVERSATION = "whatsapp_conversation_state"
+_TTL_ETAT_SECONDES = 24 * 3600
+
+
+def charger_etat_conversation(destinataire: str) -> dict[str, Any] | None:
+    """Charge l'état conversationnel persistant d'un destinataire.
+
+    Retourne ``None`` si aucun état n'existe ou si l'état est expiré.
+    """
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.persistent_state import EtatPersistantDB
+
+        with obtenir_contexte_db() as session:
+            state = (
+                session.query(EtatPersistantDB)
+                .filter(
+                    EtatPersistantDB.namespace == _NAMESPACE_ETAT_CONVERSATION,
+                    EtatPersistantDB.user_id == destinataire,
+                )
+                .first()
+            )
+            if not state or not state.data:
+                return None
+
+            updated_at_str = str(state.data.get("updated_at", ""))
+            if updated_at_str:
+                try:
+                    updated_at = datetime.fromisoformat(updated_at_str.replace("Z", "+00:00"))
+                    age_seconds = (datetime.now(UTC) - updated_at).total_seconds()
+                    if age_seconds > _TTL_ETAT_SECONDES:
+                        session.delete(state)
+                        session.commit()
+                        return None
+                except Exception:
+                    # Si la date n'est pas parsable, on conserve l'état.
+                    pass
+
+            return dict(state.data)
+    except Exception:
+        logger.debug("Impossible de charger l'état conversation WhatsApp", exc_info=True)
+        return None
+
+
+def sauvegarder_etat_conversation(destinataire: str, etat: dict[str, Any]) -> None:
+    """Sauvegarde l'état conversationnel persistant d'un destinataire."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.persistent_state import EtatPersistantDB
+
+        payload = dict(etat)
+        payload["updated_at"] = datetime.now(UTC).isoformat()
+
+        with obtenir_contexte_db() as session:
+            state = (
+                session.query(EtatPersistantDB)
+                .filter(
+                    EtatPersistantDB.namespace == _NAMESPACE_ETAT_CONVERSATION,
+                    EtatPersistantDB.user_id == destinataire,
+                )
+                .first()
+            )
+            if state is None:
+                state = EtatPersistantDB(
+                    namespace=_NAMESPACE_ETAT_CONVERSATION,
+                    user_id=destinataire,
+                    data=payload,
+                )
+                session.add(state)
+            else:
+                state.data = payload
+            session.commit()
+    except Exception:
+        logger.warning("Impossible de sauvegarder l'état conversation WhatsApp")
+
+
+def effacer_etat_conversation(destinataire: str) -> None:
+    """Supprime l'état conversationnel persistant d'un destinataire."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.persistent_state import EtatPersistantDB
+
+        with obtenir_contexte_db() as session:
+            state = (
+                session.query(EtatPersistantDB)
+                .filter(
+                    EtatPersistantDB.namespace == _NAMESPACE_ETAT_CONVERSATION,
+                    EtatPersistantDB.user_id == destinataire,
+                )
+                .first()
+            )
+            if state is not None:
+                session.delete(state)
+                session.commit()
+    except Exception:
+        logger.debug("Impossible d'effacer l'état conversation WhatsApp", exc_info=True)
 
 
 def _charger_compteur_db(destinataire: str) -> tuple[int, int]:

@@ -211,6 +211,25 @@
 
 ### Total Phase C : 12 taches
 
+### Statut implementation Phase C (2026-04-01)
+
+| Tache | Statut | Notes implementation |
+| --- | --- | --- |
+| C1 | Fait | Ajout de `@dnd-kit` + composant drag/drop dashboard (`grille-dashboard-dnd.tsx`) et persistence de l'ordre. |
+| C2 | Fait | Nouvelle page unifiee `frontend/src/app/(app)/ma-journee/page.tsx` + lien sidebar. |
+| C3 | Fait | `plan-3d.tsx` connecte aux donnees reelles (taches/energie/alertes par piece) via badges et tooltip. |
+| C4 | Fait | Heatmap nutritionnelle GitHub-like ajoutee sur `cuisine/nutrition`. |
+| C5 | Fait | Treemap budget cliquable avec drill-down ajoutee sur `maison/finances`. |
+| C6 | Fait | Radar skills Jules vs reference OMS ajoute sur `famille/jules`. |
+| C7 | Fait | Composant sparkline cree et integre dans les cartes metriques dashboard. |
+| C8 | Fait | Transitions pages fluides via `framer-motion` dans `contenu-principal.tsx`. |
+| C9 | Fait | Swipe actions deployees sur listes cles : dashboard taches, finances depenses, nutrition jours, recettes (planifier/deplanifier). |
+| C10 | Fait | Compteurs animes dashboard via `CompteurAnime`. |
+| C11 | Fait | Auto-completion intelligente integree au composant reutilisable `DialogueFormulaire` + formulaires Jules/finances. |
+| C12 | Fait | Bandeau proactif global ajoute dans la coquille app (`BandeauSuggestionProactive`). |
+
+**Synthese Phase C**: 12 taches faites.
+
 ---
 
 ## 6. Phase D ? Admin & Automatisations

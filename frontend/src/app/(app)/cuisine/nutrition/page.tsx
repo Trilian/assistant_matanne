@@ -25,11 +25,14 @@ import {
 import { Button } from "@/composants/ui/button";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { Progress } from "@/composants/ui/progress";
 import { utiliserRequete } from "@/crochets/utiliser-api";
+import { SwipeableItem } from "@/composants/swipeable-item";
 import {
   obtenirNutritionHebdo,
   type NutritionHebdo,
 } from "@/bibliotheque/api/planning";
+import { HeatmapNutritionnel } from "@/composants/graphiques/heatmap-nutritionnel";
 
 // Objectifs quotidiens de référence (adulte moyen)
 const OBJECTIFS = {
@@ -78,10 +81,7 @@ function BarreProgression({
         </span>
       </div>
       <div className="h-2 rounded-full bg-muted overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all ${couleurPct(pct)}`}
-          style={{ width: `${Math.min(pct, 100)}%` }}
-        />
+        <Progress value={Math.min(pct, 100)} className={`h-2 ${couleurPct(pct)}`} />
       </div>
     </div>
   );
@@ -105,6 +105,18 @@ export default function PageNutrition() {
   );
 
   const jours = data ? Object.entries(data.par_jour).sort(([a], [b]) => a.localeCompare(b)) : [];
+
+  const donneesHeatmap = jours.map(([dateIso, valeur]) => {
+    const caloriesPct = Math.min(100, (valeur.calories / OBJECTIFS.calories) * 100);
+    const proteinesPct = Math.min(100, (valeur.proteines / OBJECTIFS.proteines) * 100);
+    const score = Math.round((caloriesPct * 0.6) + (proteinesPct * 0.4));
+    return {
+      date: dateIso,
+      score,
+      repas_planifies: valeur.repas_count,
+      details: `${Math.round(valeur.calories)} kcal · ${Math.round(valeur.proteines)}g prot.`,
+    };
+  });
 
   return (
     <div className="space-y-6">
@@ -208,6 +220,15 @@ export default function PageNutrition() {
             </Card>
           </div>
 
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Calendrier nutritionnel</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <HeatmapNutritionnel donnees={donneesHeatmap} mois={3} />
+            </CardContent>
+          </Card>
+
           {/* Alerte repas sans données */}
           {data.nb_repas_sans_donnees > 0 && (
             <div className="flex items-center gap-2 rounded-lg border border-orange-200 bg-orange-50 p-3 text-sm text-orange-700 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-300">
@@ -224,58 +245,67 @@ export default function PageNutrition() {
             <h2 className="text-lg font-semibold">Détail par jour</h2>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {jours.map(([dateStr, jour]) => (
-                <Card key={dateStr}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium capitalize">
-                      {formatDate(dateStr)}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <BarreProgression
-                      valeur={jour.calories}
-                      objectif={OBJECTIFS.calories}
-                      label="Calories"
-                      unite="kcal"
-                    />
-                    <BarreProgression
-                      valeur={jour.proteines}
-                      objectif={OBJECTIFS.proteines}
-                      label="Protéines"
-                      unite="g"
-                    />
-                    <BarreProgression
-                      valeur={jour.lipides}
-                      objectif={OBJECTIFS.lipides}
-                      label="Lipides"
-                      unite="g"
-                    />
-                    <BarreProgression
-                      valeur={jour.glucides}
-                      objectif={OBJECTIFS.glucides}
-                      label="Glucides"
-                      unite="g"
-                    />
-                    {jour.repas.length > 0 && (
-                      <div className="pt-1 space-y-0.5">
-                        {jour.repas.map((r) => (
-                          <div
-                            key={r.id}
-                            className="flex items-center justify-between text-xs text-muted-foreground"
-                          >
-                            <span className="truncate max-w-[140px]">
-                              {r.nom_recette ?? r.type}
-                            </span>
-                            {r.calories != null && (
-                              <Badge variant="secondary" className="text-[10px]">
-                                {r.calories} kcal
-                              </Badge>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                <SwipeableItem
+                  key={dateStr}
+                  desactiverGauche
+                  labelDroit="Voir planning"
+                  onSwipeRight={() => {
+                    window.location.href = "/cuisine/planning";
+                  }}
+                >
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium capitalize">
+                        {formatDate(dateStr)}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <BarreProgression
+                        valeur={jour.calories}
+                        objectif={OBJECTIFS.calories}
+                        label="Calories"
+                        unite="kcal"
+                      />
+                      <BarreProgression
+                        valeur={jour.proteines}
+                        objectif={OBJECTIFS.proteines}
+                        label="Protéines"
+                        unite="g"
+                      />
+                      <BarreProgression
+                        valeur={jour.lipides}
+                        objectif={OBJECTIFS.lipides}
+                        label="Lipides"
+                        unite="g"
+                      />
+                      <BarreProgression
+                        valeur={jour.glucides}
+                        objectif={OBJECTIFS.glucides}
+                        label="Glucides"
+                        unite="g"
+                      />
+                      {jour.repas.length > 0 && (
+                        <div className="pt-1 space-y-0.5">
+                          {jour.repas.map((r) => (
+                            <div
+                              key={r.id}
+                              className="flex items-center justify-between text-xs text-muted-foreground"
+                            >
+                              <span className="truncate max-w-[140px]">
+                                {r.nom_recette ?? r.type}
+                              </span>
+                              {r.calories != null && (
+                                <Badge variant="secondary" className="text-[10px]">
+                                  {r.calories} kcal
+                                </Badge>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </SwipeableItem>
               ))}
             </div>
           </div>

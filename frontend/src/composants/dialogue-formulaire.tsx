@@ -15,6 +15,7 @@ import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Textarea } from "@/composants/ui/textarea";
+import { useId } from "react";
 
 interface OptionChamp {
   valeur: string;
@@ -52,6 +53,7 @@ interface DialogueFormulaireProps {
   chargement?: boolean;
   enChargement?: boolean;
   texteBouton?: string;
+  stockageSuggestionsCle?: string;
 }
 
 export function DialogueFormulaire({
@@ -71,8 +73,11 @@ export function DialogueFormulaire({
   chargement,
   enChargement,
   texteBouton = "Enregistrer",
+  stockageSuggestionsCle = "dialogue-formulaire-suggestions",
 }: DialogueFormulaireProps) {
+  const instanceId = useId().replace(/:/g, "");
   const [valeursInternes, setValeursInternes] = useState<Record<string, unknown>>({});
+  const [suggestions, setSuggestions] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     if (!ouvert || !champs) return;
@@ -87,11 +92,28 @@ export function DialogueFormulaire({
     );
   }, [champs, ouvert, valeurInitiale]);
 
+  useEffect(() => {
+    if (!ouvert || typeof window === "undefined") return;
+    try {
+      const brut = window.localStorage.getItem(stockageSuggestionsCle);
+      if (!brut) return;
+      const parsed = JSON.parse(brut) as Record<string, string[]>;
+      setSuggestions(parsed);
+    } catch {
+      setSuggestions({});
+    }
+  }, [ouvert, stockageSuggestionsCle]);
+
   const fermer = onClose ?? onFermer ?? (() => onChangerOuvert?.(false) ?? onOuvertChange?.(false));
   const estEnCours = enCours || chargement || enChargement;
 
   function obtenirCle(champ: ChampFormulaire) {
     return champ.id ?? champ.nom ?? champ.label;
+  }
+
+  function obtenirIdUnique(champ: ChampFormulaire, index?: number): string {
+    const base = `${instanceId}-${obtenirCle(champ).replace(/\s+/g, "-").toLowerCase()}`;
+    return index == null ? base : `${base}-${index}`;
   }
 
   function obtenirValeur(champ: ChampFormulaire) {
@@ -106,6 +128,21 @@ export function DialogueFormulaire({
   }
 
   function soumettre() {
+    if (typeof window !== "undefined" && champs?.length) {
+      const prochain: Record<string, string[]> = { ...suggestions };
+      for (const champ of champs) {
+        if (champ.type !== "text" && champ.type !== "email") continue;
+        const cle = obtenirCle(champ);
+        const valeur = obtenirValeur(champ).trim();
+        if (!valeur) continue;
+        const existants = prochain[cle] ?? [];
+        const fusion = [valeur, ...existants.filter((v) => v !== valeur)].slice(0, 10);
+        prochain[cle] = fusion;
+      }
+      setSuggestions(prochain);
+      window.localStorage.setItem(stockageSuggestionsCle, JSON.stringify(prochain));
+    }
+
     if (onSubmit) {
       onSubmit();
       return;
@@ -135,19 +172,20 @@ export function DialogueFormulaire({
           className="space-y-4"
         >
           {children ??
-            champs?.map((champ) => (
+            champs?.map((champ, index) => (
               <div key={obtenirCle(champ)} className="space-y-2">
-                <Label htmlFor={obtenirCle(champ)}>{champ.label}</Label>
+                <Label htmlFor={obtenirIdUnique(champ, index)}>{champ.label}</Label>
                 {champ.type === "textarea" ? (
                   <Textarea
-                    id={obtenirCle(champ)}
+                    id={obtenirIdUnique(champ, index)}
                     value={obtenirValeur(champ)}
                     onChange={(e) => changerValeur(champ, e.target.value)}
                     required={champ.required || champ.requis || champ.obligatoire}
                   />
                 ) : champ.type === "select" ? (
                   <select
-                    id={obtenirCle(champ)}
+                    id={obtenirIdUnique(champ, index)}
+                    title={champ.label}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     value={obtenirValeur(champ)}
                     onChange={(e) => changerValeur(champ, e.target.value)}
@@ -162,12 +200,24 @@ export function DialogueFormulaire({
                   </select>
                 ) : (
                   <Input
-                    id={obtenirCle(champ)}
+                    id={obtenirIdUnique(champ, index)}
                     type={champ.type}
                     value={obtenirValeur(champ)}
                     onChange={(e) => changerValeur(champ, e.target.value)}
                     required={champ.required || champ.requis || champ.obligatoire}
+                    list={
+                      (champ.type === "text" || champ.type === "email")
+                        ? `suggestions-${obtenirCle(champ)}`
+                        : undefined
+                    }
                   />
+                )}
+                {(champ.type === "text" || champ.type === "email") && (
+                  <datalist id={`suggestions-${obtenirCle(champ)}`}>
+                    {(suggestions[obtenirCle(champ)] ?? []).map((suggestion) => (
+                      <option key={suggestion} value={suggestion} />
+                    ))}
+                  </datalist>
                 )}
               </div>
             ))}

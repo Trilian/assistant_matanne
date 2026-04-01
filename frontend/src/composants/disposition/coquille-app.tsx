@@ -16,6 +16,7 @@ import { FabActionsRapides } from "./fab-actions-rapides";
 import { MinuteurFlottant } from "./minuteur-flottant";
 import { BarreProgression } from "./barre-progression";
 import { ContenuPrincipal } from "./contenu-principal";
+import { BandeauSuggestionProactive } from "./bandeau-suggestion-proactive";
 import { PanneauAdminFlottant } from "./panneau-admin-flottant";
 import { InstallPrompt } from "@/composants/pwa/install-prompt";
 import { useNotificationsJeux } from "@/crochets/utiliser-notifications-jeux";
@@ -40,6 +41,7 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 flex-col overflow-hidden">
         <EnTete />
         <FilAriane />
+        <BandeauSuggestionProactive />
 
         {/* Contenu scrollable avec fade-in (Idée E) */}
         <ContenuPrincipal>

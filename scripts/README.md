@@ -6,6 +6,12 @@ Scripts utilitaires pour le développement, le déploiement et la maintenance d'
 
 ---
 
+## _archive/ *(scripts legacy, non exécutés en routine)*
+
+Scripts historiques conservés pour audit/référence. Voir `scripts/_archive/README.md`.
+
+---
+
 ## analysis/ *(outils ad-hoc, exécution manuelle)*
 
 ### `analyze_api.py`

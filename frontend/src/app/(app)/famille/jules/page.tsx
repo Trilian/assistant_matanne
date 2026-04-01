@@ -197,13 +197,30 @@ export default function PageJules() {
     }
   );
 
-  // Calcul âge en mois
+  // Calcul age en mois
   const ageMois = profil?.date_naissance
     ? Math.floor(
         (Date.now() - new Date(profil.date_naissance).getTime()) /
           (1000 * 60 * 60 * 24 * 30.44)
       )
     : null;
+
+  const donneesRadar = CATEGORIES_JALONS.map((c) => {
+    const items = (jalons ?? []).filter((j) => j.categorie === c.valeur);
+    const scoreJules = Math.min(100, items.length * 20);
+    const norme = ageMois ? Math.min(100, 35 + ageMois * 2.2) : 60;
+    return {
+      categorie: c.valeur,
+      label: c.label,
+      jules: scoreJules,
+      norme_oms: norme,
+    };
+  });
+
+  const suggestionsTitres = Array.from(new Set((jalons ?? []).map((j) => j.titre))).slice(0, 20);
+  const suggestionsDescriptions = Array.from(
+    new Set((jalons ?? []).map((j) => j.description).filter(Boolean))
+  ).slice(0, 20) as string[];
 
   return (
     <div className="space-y-6">
@@ -506,6 +523,16 @@ export default function PageJules() {
           <DialogHeader>
             <DialogTitle>Nouveau jalon</DialogTitle>
           </DialogHeader>
+          <datalist id="suggestions-titres-jalons">
+            {suggestionsTitres.map((item) => (
+              <option key={item} value={item} />
+            ))}
+          </datalist>
+          <datalist id="suggestions-descriptions-jalons">
+            {suggestionsDescriptions.map((item) => (
+              <option key={item} value={item} />
+            ))}
+          </datalist>
           <form
             className="space-y-4"
             onSubmit={(e) => {
@@ -527,6 +554,7 @@ export default function PageJules() {
                 value={titre}
                 onChange={(e) => setTitre(e.target.value)}
                 placeholder="Ex: Premiers pas"
+                list="suggestions-titres-jalons"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -562,6 +590,7 @@ export default function PageJules() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Détails optionnels..."
+                list="suggestions-descriptions-jalons"
               />
             </div>
             <div className="flex justify-end gap-2">

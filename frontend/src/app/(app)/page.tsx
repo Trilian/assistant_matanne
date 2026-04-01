@@ -30,6 +30,7 @@ import {
 } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { Progress } from "@/composants/ui/progress";
 import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
 import {
   obtenirBilanMensuel,
@@ -549,12 +550,10 @@ export default function PageAccueil() {
                 <p>🏃 Sport: {scoreBienEtre.activites_sport}%</p>
               </div>
             </div>
-            <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full rounded-full bg-purple-500 transition-all"
-                style={{ width: `${Math.min(100, scoreBienEtre.score_global)}%` }}
-              />
-            </div>
+            <Progress
+              value={Math.min(100, scoreBienEtre.score_global)}
+              className="mt-3 h-2"
+            />
           </CardContent>
         </Card>
       )}

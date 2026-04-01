@@ -37,6 +37,8 @@ import {
 import type { DepenseMaison } from "@/types/maison";
 import { toast } from "sonner";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
+import { TreemapBudget } from "@/composants/graphiques/treemap-budget";
+import { SwipeableItem } from "@/composants/swipeable-item";
 
 // Lazy-load Recharts pour éviter le SSR
 const LineChart = dynamic(() => import("recharts").then(m => m.LineChart), { ssr: false });
@@ -121,6 +123,14 @@ function OngletDepenses() {
   const { data: stats } = utiliserRequete(["maison", "depenses", "stats"], () => statsDepensesMaison());
   const invalider = () => queryClient.invalidateQueries({ queryKey: ["maison", "depenses"] });
 
+  const donneesTreemap = Object.entries(stats?.par_categorie ?? {}).map(([nom, montant]) => ({
+    nom,
+    montant: Number(montant ?? 0),
+  }));
+
+  const suggestionsLibelles = Array.from(new Set((depenses ?? []).map((d) => d.libelle))).slice(0, 15);
+  const suggestionsCategories = Array.from(new Set((depenses ?? []).map((d) => d.categorie).filter(Boolean))).slice(0, 12) as string[];
+
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
     (data: Record<string, unknown>) => creerDepenseMaison(data as Omit<DepenseMaison, "id">),
     { onSuccess: () => { invalider(); fermerDialog(); toast.success("Dépense créée"); } }
@@ -180,6 +190,18 @@ function OngletDepenses() {
         </div>
       )}
 
+      {!!donneesTreemap.length && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Répartition budget (Treemap)</CardTitle>
+            <CardDescription>Cliquez une catégorie pour voir le détail</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TreemapBudget donnees={donneesTreemap} hauteur={260} />
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex justify-end">
         <div className="flex items-center gap-2">
           <label className="inline-flex">
@@ -204,28 +226,51 @@ function OngletDepenses() {
           <Button size="sm" onClick={ouvrirCreation}><Plus className="mr-2 h-4 w-4" />Ajouter une dépense</Button>
         </div>
       </div>
-
+      <datalist id="depenses-libelles">
+        {suggestionsLibelles.map((item) => (
+          <option key={item} value={item} />
+        ))}
+      </datalist>
+      <datalist id="depenses-categories">
+        {suggestionsCategories.map((item) => (
+          <option key={item} value={item} />
+        ))}
+      </datalist>
       {isLoading ? (
         <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-14" />)}</div>
       ) : !depenses?.length ? (
         <Card><CardContent className="py-10 text-center text-muted-foreground"><Banknote className="h-8 w-8 mx-auto mb-2 opacity-50" />Aucune dépense enregistrée</CardContent></Card>
       ) : (
         <div className="space-y-2">
-          {depenses.map((d: DepenseMaison) => (
-            <Card key={d.id}>
-              <CardContent className="py-3 flex items-center gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium">{d.libelle}</p>
-                  <p className="text-xs text-muted-foreground">{d.categorie ?? "—"}{d.date ? ` · ${new Date(d.date).toLocaleDateString("fr-FR")}` : ""}</p>
-                </div>
-                <p className="text-sm font-semibold shrink-0">{d.montant.toFixed(2)} €</p>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(d)}><Pencil className="h-3.5 w-3.5" /></Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive" onClick={() => supprimer(d.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {depenses.map((d: DepenseMaison) => {
+            const contenu = (
+              <Card key={d.id}>
+                <CardContent className="py-3 flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{d.libelle}</p>
+                    <p className="text-xs text-muted-foreground">{d.categorie ?? "—"}{d.date ? ` · ${new Date(d.date).toLocaleDateString("fr-FR")}` : ""}</p>
+                  </div>
+                  <p className="text-sm font-semibold shrink-0">{d.montant.toFixed(2)} €</p>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(d)}><Pencil className="h-3.5 w-3.5" /></Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive" onClick={() => supprimer(d.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+
+            return (
+              <SwipeableItem
+                key={d.id}
+                labelGauche="Supprimer"
+                labelDroit="Modifier"
+                onSwipeLeft={() => supprimer(d.id)}
+                onSwipeRight={() => ouvrirEdition(d)}
+              >
+                {contenu}
+              </SwipeableItem>
+            );
+          })}
         </div>
       )}
 

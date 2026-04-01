@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback } from "react";
 import {
   DndContext,
   closestCenter,
@@ -22,14 +22,8 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
-
-interface WidgetConfig {
-  id: string;
-  visible: boolean;
-}
 
 interface GrilleDashboardDndProps {
   ordre: string[];
@@ -48,20 +42,11 @@ function WidgetSortable({
     attributes,
     listeners,
     setNodeRef,
-    transform,
-    transition,
     isDragging,
   } = useSortable({ id });
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    position: "relative" as const,
-  };
-
   return (
-    <div ref={setNodeRef} style={style} className="group">
+    <div ref={setNodeRef} className={cn("group relative", isDragging && "opacity-50") }>
       <button
         type="button"
         className={cn(
