@@ -48,16 +48,19 @@ Note : plusieurs items sont desormais partiellement ou totalement implementes co
 
 ## En cours — Nettoyage documentation et qualite
 
-- Nettoyage des references legacy dans la documentation
-- Reduction du scope GAMIFICATION.md au sport/Garmin uniquement
-- Alignement ROADMAP sur le plan d'implementation actuel
+- Sprint 9 documentation cleanup termine
+- Sprint 10 documentation manquante terminee (4 guides developpeur ajoutes)
+- Priorite active: Sprint 11 bridges inter-modules haute priorite
 
 ---
 
 ## A venir
 
-### Documentation manquante
-- Guide inter-modules, guide IA, guide CRON, parcours utilisateurs
+### Documentation Sprint 10 (terminee)
+- Guide inter-modules (`docs/INTER_MODULES_GUIDE.md`)
+- Guide integration IA (`docs/AI_INTEGRATION_GUIDE.md`)
+- Guide developpement CRON (`docs/CRON_DEVELOPMENT.md`)
+- Parcours utilisateurs (`docs/USER_FLOWS.md`)
 - Detail dans [`PLANNING_IMPLEMENTATION.md`](PLANNING_IMPLEMENTATION.md)
 
 ### Bridges inter-modules

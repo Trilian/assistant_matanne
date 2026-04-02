@@ -2,6 +2,8 @@
 // Hub Outils
 // ═══════════════════════════════════════════════════════════
 
+"use client";
+
 import Link from "next/link";
 import {
   Sparkles,
@@ -10,13 +12,20 @@ import {
   Timer,
   ArrowRightLeft,
   Mic,
+  Bot,
 } from "lucide-react";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/composants/ui/card";
+import { Switch } from "@/composants/ui/switch";
+import { Badge } from "@/composants/ui/badge";
+import { toast } from "sonner";
+import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
+import { configurerModePiloteAuto, obtenirModePiloteAuto } from "@/bibliotheque/api/avance";
 
 const SECTIONS = [
   { titre: "Chat IA", description: "Assistant intelligent", chemin: "/outils/chat-ia", Icone: Sparkles },
@@ -29,6 +38,29 @@ const SECTIONS = [
 ];
 
 export default function PageOutils() {
+  const { data: modePilote, refetch: rechargerModePilote } = utiliserRequete(
+    ["avance", "mode-pilote", "outils"],
+    obtenirModePiloteAuto,
+    { staleTime: 60 * 1000 }
+  );
+
+  const { mutate: basculerModePilote, isPending: basculeModePiloteEnCours } = utiliserMutation(
+    (actif: boolean) =>
+      configurerModePiloteAuto({
+        actif,
+        niveau_autonomie: actif ? modePilote?.niveau_autonomie ?? "validation_requise" : "off",
+      }),
+    {
+      onSuccess: (data) => {
+        toast.success(data.actif ? "Mode pilote activé" : "Mode pilote désactivé");
+        void rechargerModePilote();
+      },
+      onError: () => {
+        toast.error("Impossible de mettre à jour le mode pilote");
+      },
+    }
+  );
+
   return (
     <div className="space-y-6">
       <div>
@@ -37,6 +69,32 @@ export default function PageOutils() {
           Chat IA, notes, météo et utilitaires
         </p>
       </div>
+
+      <Card className="border-sky-300/60 bg-sky-50/50 dark:border-sky-900/50 dark:bg-sky-950/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Bot className="h-4 w-4 text-sky-600" />
+            Mode Pilote Automatique
+          </CardTitle>
+          <CardDescription>
+            Pilotage IA centralisé côté outils.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">Niveau: {modePilote?.niveau_autonomie ?? "validation_requise"}</Badge>
+            <span className="text-xs text-muted-foreground">Actions: {modePilote?.actions?.length ?? 0}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm">Actif</span>
+            <Switch
+              checked={Boolean(modePilote?.actif)}
+              disabled={basculeModePiloteEnCours}
+              onCheckedChange={(actif) => basculerModePilote(actif)}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map(({ titre, description, chemin, Icone }) => (

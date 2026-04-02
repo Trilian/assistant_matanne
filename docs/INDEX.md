@@ -1,9 +1,8 @@
 # Documentation Index - MaTanne
 
-> Derniere mise a jour : 1 avril 2026.
+> Derniere mise a jour : 2 avril 2026.
 > Statut : index aligne avec la documentation consolidee et les mises a jour du planning.
 
----
 
 ## Documents principaux
 
@@ -26,9 +25,12 @@
 | [MONITORING.md](./MONITORING.md) | monitoring et observabilite | current |
 | [ADMIN_RUNBOOK.md](./ADMIN_RUNBOOK.md) | procedures d'administration et endpoints | mis a jour 2026-04-01 |
 | [CRON_JOBS.md](./CRON_JOBS.md) | reference APScheduler et historique d'execution | mis a jour 2026-04-01 |
+| [CRON_DEVELOPMENT.md](./CRON_DEVELOPMENT.md) | guide de creation d un job CRON (schedule, logs, dry run) | nouveau 2026-04-02 |
 | [NOTIFICATIONS.md](./NOTIFICATIONS.md) | canaux, preferences, failover et limites | mis a jour 2026-04-01 |
 | [INTER_MODULES.md](./INTER_MODULES.md) | cartographie des flux inter-modules | mis a jour 2026-04-01 |
+| [INTER_MODULES_GUIDE.md](./INTER_MODULES_GUIDE.md) | guide de creation de bridges inter-modules | nouveau 2026-04-02 |
 | [AI_SERVICES.md](./AI_SERVICES.md) | reference des services IA | current |
+| [AI_INTEGRATION_GUIDE.md](./AI_INTEGRATION_GUIDE.md) | guide d integration pour creer un service IA BaseAIService | nouveau 2026-04-02 |
 | [WHATSAPP_COMMANDS.md](./WHATSAPP_COMMANDS.md) | commandes conversationnelles WhatsApp | current |
 | [PERFORMANCE.md](./PERFORMANCE.md) | performance et capacite | current |
 | [CHANGELOG_MODULES.md](./CHANGELOG_MODULES.md) | historique transversal par phase, sprint et domaine | mis a jour 2026-04-01 |
@@ -56,6 +58,7 @@
 | [guides/utilitaires/README.md](./guides/utilitaires/README.md) | Utilitaires | scanner codes-barres, commandes vocales |
 | [guides/RECIPE_FLOW.md](./guides/RECIPE_FLOW.md) | Guide utilisateur | flux recette de bout en bout |
 | [guides/FAMILY_FLOW.md](./guides/FAMILY_FLOW.md) | Guide utilisateur | flux famille de bout en bout |
+| [USER_FLOWS.md](./USER_FLOWS.md) | Guide utilisateur | parcours cibles cuisine, famille, maison, jeux |
 
 ## References a consulter en priorite
 

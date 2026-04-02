@@ -62,6 +62,7 @@ import {
 } from "@/composants/dashboard/grille-dashboard-dnd";
 import { CompteurAnime } from "@/composants/dashboard/compteur-anime";
 import { Sparkline } from "@/composants/dashboard/sparkline";
+import { obtenirScoreFamilleHebdo } from "@/bibliotheque/api/avance";
 
 const WIDGETS_DEFAUT = {
   metriques: true,
@@ -137,6 +138,11 @@ export default function PageAccueil() {
   const { data: scoreEcologique } = utiliserRequete(
     ["dashboard", "score-ecologique"],
     obtenirScoreEcologique
+  );
+  const { data: scoreFamilleHebdo } = utiliserRequete(
+    ["dashboard", "score-famille-hebdo", "avance"],
+    obtenirScoreFamilleHebdo,
+    { staleTime: 10 * 60 * 1000 }
   );
   const { data: anomaliesBudget } = utiliserRequete(
     ["famille", "budget", "anomalies"],
@@ -565,6 +571,12 @@ export default function PageAccueil() {
               value={Math.min(100, scoreBienEtre.score_global)}
               className="mt-3 h-2"
             />
+            {scoreFamilleHebdo && (
+              <div className="mt-3 rounded-md border border-purple-200/70 bg-background/70 p-2 text-xs">
+                <p className="font-medium">Score famille hebdo: {Math.round(scoreFamilleHebdo.score_global)}/100</p>
+                <p className="text-muted-foreground">{scoreFamilleHebdo.recommandations[0] ?? "Aucune recommandation."}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
         </WidgetSortable>

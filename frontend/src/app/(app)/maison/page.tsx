@@ -195,13 +195,13 @@ export default function PageMaison() {
         </CardHeader>
         <CardContent className="grid gap-2 md:grid-cols-3">
           <Button asChild variant="outline" size="sm">
-            <Link href="/avance">Pilote auto & score famille</Link>
+            <Link href="/outils">Mode pilote (Outils)</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link href="/maison/visualisation">Vue jardin 2D/3D</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href="/maison/menage?tab=semaine">Timeline Gantt entretien</Link>
+            <Link href="/">Score famille (Dashboard)</Link>
           </Button>
         </CardContent>
       </Card>

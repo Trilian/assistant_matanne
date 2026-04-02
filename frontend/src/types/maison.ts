@@ -376,6 +376,7 @@ export interface ObjetMaison {
   piece_id: number;
   nom: string;
   type?: string;
+  statut?: string;
   position_x?: number;
   position_y?: number;
 }

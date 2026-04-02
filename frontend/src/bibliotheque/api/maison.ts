@@ -22,12 +22,6 @@ import type {
   Contrat,
   AlerteContrat,
   ResumeFinancierContrats,
-  Garantie,
-  IncidentSAV,
-  AlerteGarantie,
-  AlertePredictiveGarantie,
-  StatsGaranties,
-  ResultatDossierSAV,
   DiagnosticImmobilier,
   EstimationImmobiliere,
   ActionEcologique,
@@ -443,8 +437,6 @@ export async function resumeFinancierContrats(): Promise<ResumeFinancierContrats
   const { data } = await clientApi.get<ResumeFinancierContrats>("/maison/contrats/resume-financier");
   return data;
 }
-
-// ─── Garanties ────────────────────────────────────────────
 
 // ─── Diagnostics & Estimations ────────────────────────────
 
@@ -1141,18 +1133,6 @@ export async function obtenirSuggestionsRenouvellement(): Promise<{ suggestions:
   return data;
 }
 
-// ─── Fin de vie garantie ────────────────────────────────────
-
-export interface FinVieGarantie {
-  garantie_id: number;
-  nom?: string;
-  ratio: number;
-  jours_restants: number | null;
-  date_fin?: string;
-  alerte?: boolean;
-}
-
-/** Évaluer la fin de vie d'une garantie (ratio 0.0 → 1.0) */
 // ─── Routines — extensions ─────────────────────────────────
 
 export interface TacheRoutine {

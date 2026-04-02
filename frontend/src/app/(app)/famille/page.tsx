@@ -59,6 +59,11 @@ import {
   joursSansCReche,
   obtenirSuggestionsAchatsEnrichies,
 } from "@/bibliotheque/api/famille";
+import {
+  obtenirJournalFamilialAuto,
+  obtenirJournalFamilialPdf,
+  telechargerPdfBase64,
+} from "@/bibliotheque/api/avance";
 import { toast } from "sonner";
 import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
 import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
@@ -119,6 +124,12 @@ export default function PageFamille() {
     { staleTime: 10 * 60 * 1000 }
   );
 
+  const { data: journalFamilialAuto } = utiliserRequete(
+    ["famille", "journal-familial-auto", "hub"],
+    obtenirJournalFamilialAuto,
+    { staleTime: 10 * 60 * 1000 }
+  );
+
   const mutationCompleterRoutine = useMutation({
     mutationFn: completerRoutine,
     onSuccess: (data) => {
@@ -146,6 +157,15 @@ export default function PageFamille() {
       setDialogWeekendOuvert(true);
     },
     onError: () => toast.error("Impossible de charger les suggestions weekend."),
+  });
+
+  const mutationTelechargerJournalFamilial = useMutation({
+    mutationFn: obtenirJournalFamilialPdf,
+    onSuccess: (data) => {
+      telechargerPdfBase64(data.contenu_base64, data.filename);
+      toast.success("Journal familial téléchargé");
+    },
+    onError: () => toast.error("Impossible de télécharger le journal familial"),
   });
 
   const rappelsUrgents =
@@ -251,6 +271,33 @@ export default function PageFamille() {
         <h1 className="text-2xl font-bold tracking-tight">👨‍👩‍👦 Famille</h1>
         <p className="text-muted-foreground">Votre contexte familial en un coup d'œil</p>
       </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Sparkles className="h-4 w-4" />
+            Journal familial automatique
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">{journalFamilialAuto?.semaine_reference ?? "Semaine en cours"}</p>
+          <p className="font-medium">{journalFamilialAuto?.titre ?? "Journal familial"}</p>
+          <p className="text-sm text-muted-foreground">{journalFamilialAuto?.resume ?? "Aucun résumé disponible pour le moment."}</p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => mutationTelechargerJournalFamilial.mutate()}
+              disabled={mutationTelechargerJournalFamilial.isPending}
+            >
+              Télécharger PDF
+            </Button>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/famille/journal">Ouvrir le module journal</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Section 0: Rappels urgents */}
       {rappelsUrgents.length > 0 && (
