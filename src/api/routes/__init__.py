@@ -39,6 +39,10 @@ __all__ = [
     "utilitaires_router",
     "voyages_router",
     "webhooks_router",
+    "predictions_router",
+    "ia_phase_b_router",
+    "bridges_router",
+    "intra_flux_router",
 ]
 
 
@@ -74,6 +78,10 @@ _MODULES = {
     "utilitaires_router": ".utilitaires",
     "voyages_router": ".voyages",
     "webhooks_router": ".webhooks",
+    "predictions_router": ".predictions",
+    "ia_phase_b_router": ".ia_phase_b",
+    "bridges_router": ".bridges",
+    "intra_flux_router": ".intra_flux",
 }
 
 

@@ -854,6 +854,88 @@ def _declencher_agent_ia_proactif(event: EvenementDomaine) -> None:
 
 
 # ═══════════════════════════════════════════════════════════
+# PHASE B — BRIDGES INTER-MODULES IA
+# ═══════════════════════════════════════════════════════════
+
+
+def _invalider_cache_predictions(event: EvenementDomaine) -> None:
+    """Invalide le cache prédictions quand de nouvelles prédictions sont générées."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="predictions")
+        nb += cache.invalidate(pattern="courses")
+        logger.debug(
+            "Cache predictions invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache predictions: %s", e)
+
+
+def _invalider_cache_resume(event: EvenementDomaine) -> None:
+    """Invalide le cache résumé hebdomadaire."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="resume")
+        nb += cache.invalidate(pattern="dashboard")
+        logger.debug(
+            "Cache résumé invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache résumé: %s", e)
+
+
+def _invalider_cache_bridges(event: EvenementDomaine) -> None:
+    """Invalide le cache bridges quand un bridge inter-module est déclenché."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="bridges")
+        logger.debug(
+            "Cache bridges invalidé (%d entrées) suite à %s",
+            nb,
+            event.type,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec invalidation cache bridges: %s", e)
+
+
+def _bridge_recolte_vers_recettes(event: EvenementDomaine) -> None:
+    """Phase B: récolte jardin → suggestion recettes via bridge IA."""
+    try:
+        from src.services.ia.bridges import obtenir_service_bridges
+
+        service = obtenir_service_bridges()
+        nom = event.data.get("nom", "")
+        quantite = event.data.get("quantite", 0)
+        if nom:
+            service.recolte_vers_recettes(ingredient=nom, quantite_kg=float(quantite))
+            logger.info("Phase B bridge: récolte '%s' → suggestions recettes", nom)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge recolte→recettes: %s", e)
+
+
+def _bridge_verifier_anomalies_budget(event: EvenementDomaine) -> None:
+    """Phase B: budget modifié → vérification anomalies proactive."""
+    try:
+        from src.services.ia.bridges import obtenir_service_bridges
+
+        service = obtenir_service_bridges()
+        service.verifier_anomalies_budget_et_notifier()
+        logger.info("Phase B bridge: vérification anomalies budget")
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge budget→anomalies: %s", e)
+
+
+# ═══════════════════════════════════════════════════════════
 # ENREGISTREMENT — Appelé au bootstrap
 # ═══════════════════════════════════════════════════════════
 
@@ -1007,6 +1089,18 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("budget.depassement", _declencher_agent_ia_proactif, priority=70)
     compteur += 1
     bus.souscrire("assistant.commande_executee", _declencher_agent_ia_proactif, priority=70)
+    compteur += 1
+
+    # ── Phase B — Bridges inter-modules IA ──
+    bus.souscrire("prediction.*", _invalider_cache_predictions, priority=100)
+    compteur += 1
+    bus.souscrire("resume.*", _invalider_cache_resume, priority=100)
+    compteur += 1
+    bus.souscrire("bridge.*", _invalider_cache_bridges, priority=90)
+    compteur += 1
+    bus.souscrire("jardin.recolte", _bridge_recolte_vers_recettes, priority=75)
+    compteur += 1
+    bus.souscrire("budget.modifie", _bridge_verifier_anomalies_budget, priority=75)
     compteur += 1
 
     # ── Métriques (priorité moyenne) ──

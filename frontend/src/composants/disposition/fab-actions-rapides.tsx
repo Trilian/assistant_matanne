@@ -16,6 +16,8 @@ import {
   Wallet,
   QrCode,
   X,
+  StickyNote,
+  Timer,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
@@ -58,6 +60,20 @@ const ACTIONS: ActionRapide[] = [
     href: "/cuisine/courses?scan=true",
     couleur: "bg-purple-500 hover:bg-purple-600",
   },
+  {
+    id: "note",
+    label: "Note rapide",
+    icone: StickyNote,
+    href: "/outils/notes?action=nouvelle",
+    couleur: "bg-yellow-500 hover:bg-yellow-600",
+  },
+  {
+    id: "minuteur",
+    label: "Minuteur",
+    icone: Timer,
+    href: "/outils/minuteur",
+    couleur: "bg-rose-500 hover:bg-rose-600",
+  },
 ];
 
 /**
@@ -67,9 +83,9 @@ const ACTIONS: ActionRapide[] = [
 export function FabActionsRapides() {
   const [ouvert, setOuvert] = useState(false);
 
-  // Angles pour positionner les boutons en cercle (4 boutons = 90° d'écart)
-  const rayonCercle = 70; // pixels du centre
-  const angles = [0, 90, 180, 270]; // degrés
+  // Angles pour positionner les boutons en cercle (6 boutons = 60° d'écart)
+  const rayonCercle = 80; // pixels du centre
+  const nbActions = ACTIONS.length;
 
   return (
     <>
@@ -87,7 +103,12 @@ export function FabActionsRapides() {
         {/* Boutons d'action en cercle */}
         {ouvert &&
           ACTIONS.map((action, idx) => {
-            const angle = (angles[idx] * Math.PI) / 180;
+            // Répartir les actions en demi-cercle (vers le haut-gauche)
+            const startAngle = 180;
+            const endAngle = 360;
+            const stepAngle = (endAngle - startAngle) / (nbActions - 1);
+            const angleDeg = startAngle + idx * stepAngle;
+            const angle = (angleDeg * Math.PI) / 180;
             const x = rayonCercle * Math.cos(angle);
             const y = rayonCercle * Math.sin(angle) * -1; // Y inversé (vers le haut)
 

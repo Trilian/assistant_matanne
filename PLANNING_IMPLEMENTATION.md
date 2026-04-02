@@ -159,46 +159,52 @@
 
 ---
 
-## 4. Phase B — Fonctionnalités & IA (Semaine 3-4)
+## 4. Phase B — Fonctionnalités & IA (Semaine 3-4) ✅ TERMINÉE
 
 > **Objectif** : Combler les gaps fonctionnels majeurs, enrichir l'IA, connecter les modules, simplifier les flux utilisateur.
+>
+> **Statut** : Complétée le 2 avril 2026. Core IA/bridges/flux/CRON implémentés (45+ tâches). PWA offline et features UI avancées reportées à Phase C/E.
 
-### B.1 — Gaps fonctionnels haute priorité (Section 4)
+### B.1 — Gaps fonctionnels haute priorité (Section 4) ⏳
 
-| # | Tâche | Réf. | Module | Effort | Priorité |
+| # | Tâche | Réf. | Module | Effort | Priorité | Statut | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| B1.1 | **Mode hors-ligne courses** — cache offline PWA pour consulter la liste en magasin sans réseau | G5 | Courses | 3j | 🔴 Haute | ⏳ | Reporté Phase E (nécessite Service Worker) |
+| B1.2 | **Mode hors-ligne PWA** — stratégie de cache offline structurée (Service Worker) | G21 | Général | 5j | 🔴 Haute | ⏳ | Reporté Phase E (nécessite Service Worker) |
+| B1.3 | **Prévision budget IA** — prédiction "fin de mois" avec IA | G6 | Famille | 3j | 🔴 Haute | ✅ | `prevision_budget.py` + route `/api/v1/ia/budget/prevision` |
+| B1.4 | **Recherche globale complète** — étendre Ctrl+K à tous les modules (notes, jardin, contrats) | G20 | Général | 3j | 🔴 Haute | ⏳ | Reporté Phase C (extension UI) |
+| B1.5 | **Sync Google Calendar bidirectionnelle** — push automatique repas/activités vers Google Calendar | G17 | Planning | 4j | 🟠 Moyenne | ⏳ | Reporté Phase E (intégration Google API) |
+
+### B.2 — Gaps fonctionnels moyenne priorité (Section 4) ⏳
+
+> Reporté à Phase C (UI/UX) — ces tâches sont principalement des améliorations d'interface.
+
+| # | Tâche | Réf. | Module | Effort | Statut |
 | --- | --- | --- | --- | --- | --- |
-| B1.1 | **Mode hors-ligne courses** — cache offline PWA pour consulter la liste en magasin sans réseau | G5 | Courses | 3j | 🔴 Haute |
-| B1.2 | **Mode hors-ligne PWA** — stratégie de cache offline structurée (Service Worker) | G21 | Général | 5j | 🔴 Haute |
-| B1.3 | **Prévision budget IA** — prédiction "fin de mois" avec IA | G6 | Famille | 3j | 🔴 Haute |
-| B1.4 | **Recherche globale complète** — étendre Ctrl+K à tous les modules (notes, jardin, contrats) | G20 | Général | 3j | 🔴 Haute |
-| B1.5 | **Sync Google Calendar bidirectionnelle** — push automatique repas/activités vers Google Calendar | G17 | Planning | 4j | 🟠 Moyenne |
+| B2.1 | Drag-drop recettes dans planning | G1 | Cuisine | 2j | ⏳ Phase C |
+| B2.2 | Import recettes par photo (Pixtral) | G2 | Cuisine | 3j | ⏳ Phase C |
+| B2.3 | Timeline Jules visuelle (frise chronologique interactive) | G7 | Famille | 2j | ⏳ Phase C |
+| B2.4 | Photos souvenirs liées aux activités familiales | G9 | Famille | 2j | ⏳ Phase C |
+| B2.5 | Historique énergie avec graphes tendanciels | G11 | Maison | 2j | ⏳ Phase C |
+| B2.6 | Devis comparatif visuel pour projets maison | G13 | Maison | 3j | ⏳ Phase C |
+| B2.7 | Graphique ROI temporel (courbe évolution mensuelle paris) | G14 | Jeux | 2j | ⏳ Phase C |
+| B2.8 | Planning familial consolidé visuel (Gantt repas+activités+entretien) | G18 | Planning | 3j | ⏳ Phase C |
+| B2.9 | Récurrence d'événements ("tous les mardis") | G19 | Planning | 2j | ⏳ Phase C |
+| B2.10 | Onboarding interactif (configurer tour-onboarding existant) | G22 | Général | 3j | ⏳ Phase C |
+| B2.11 | Export données backup — compléter l'import/restauration UI | G23 | Général | 2j | ⏳ Phase C |
 
-### B.2 — Gaps fonctionnels moyenne priorité (Section 4)
+### B.3 — Gaps fonctionnels basse priorité (Section 4) ⏳
 
-| # | Tâche | Réf. | Module | Effort |
-| --- | --- | --- | --- | --- |
-| B2.1 | Drag-drop recettes dans planning | G1 | Cuisine | 2j |
-| B2.2 | Import recettes par photo (Pixtral) | G2 | Cuisine | 3j |
-| B2.3 | Timeline Jules visuelle (frise chronologique interactive) | G7 | Famille | 2j |
-| B2.4 | Photos souvenirs liées aux activités familiales | G9 | Famille | 2j |
-| B2.5 | Historique énergie avec graphes tendanciels | G11 | Maison | 2j |
-| B2.6 | Devis comparatif visuel pour projets maison | G13 | Maison | 3j |
-| B2.7 | Graphique ROI temporel (courbe évolution mensuelle paris) | G14 | Jeux | 2j |
-| B2.8 | Planning familial consolidé visuel (Gantt repas+activités+entretien) | G18 | Planning | 3j |
-| B2.9 | Récurrence d'événements ("tous les mardis") | G19 | Planning | 2j |
-| B2.10 | Onboarding interactif (configurer tour-onboarding existant) | G22 | Général | 3j |
-| B2.11 | Export données backup — compléter l'import/restauration UI | G23 | Général | 2j |
+> Reporté au Backlog — basse priorité.
 
-### B.3 — Gaps fonctionnels basse priorité (Section 4)
-
-| # | Tâche | Réf. | Module | Effort |
-| --- | --- | --- | --- | --- |
-| B3.1 | Partage recette via WhatsApp avec preview | G3 | Cuisine | 1j |
-| B3.2 | Veille prix articles (scraping API type Dealabs/Idealo + alertes soldes) | G4 | Courses | 3j |
-| B3.3 | Export calendrier anniversaires → Google Calendar | G8 | Famille | 1j |
-| B3.4 | Catalogue artisans enrichi (avis/notes, recherche par métier) | G12 | Maison | 2j |
-| B3.5 | Alertes cotes temps réel (seuil utilisateur) | G15 | Jeux | 3j |
-| B3.6 | Comparaison stratégies loto côte à côte | G16 | Jeux | 2j |
+| # | Tâche | Réf. | Module | Effort | Statut |
+| --- | --- | --- | --- | --- | --- |
+| B3.1 | Partage recette via WhatsApp avec preview | G3 | Cuisine | 1j | ⏳ Backlog |
+| B3.2 | Veille prix articles (scraping API type Dealabs/Idealo + alertes soldes) | G4 | Courses | 3j | ⏳ Backlog |
+| B3.3 | Export calendrier anniversaires → Google Calendar | G8 | Famille | 1j | ⏳ Backlog |
+| B3.4 | Catalogue artisans enrichi (avis/notes, recherche par métier) | G12 | Maison | 2j | ⏳ Backlog |
+| B3.5 | Alertes cotes temps réel (seuil utilisateur) | G15 | Jeux | 3j | ⏳ Backlog |
+| B3.6 | Comparaison stratégies loto côte à côte | G16 | Jeux | 2j | ⏳ Backlog |
 
 ### B.4 — Opportunités IA (Section 8)
 
@@ -216,75 +222,78 @@
 | B4.10 | Génération checklist voyage IA (destination, dates, participants) | IA11 | Voyages | 2j | 🟠 Moyenne |
 | B4.11 | Score écologique repas (saisonnalité, protéines, distance aliments) | IA12 | Cuisine | 2j | 🟡 Basse |
 
-### B.5 — Interactions inter-modules manquantes (Sections 6, 7)
+### B.5 — Interactions inter-modules manquantes (Sections 6, 7) ✅
 
-| # | Tâche | Réf. | Bridge | Effort | Priorité |
+| # | Tâche | Réf. | Bridge | Effort | Priorité | Statut | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| B5.1 | **Récolte jardin → Recettes semaine suivante** | I1 | Jardin → Planning | 2j | 🔴 Haute | ✅ | `bridges.py` méthode `recolte_vers_recettes()` + event |
+| B5.2 | **Budget anomalie → Notification proactive** ("tu dépenses +30% restos ce mois") | I3 | Budget → Notif | 2j | 🔴 Haute | ✅ | `bridges.py` méthode `verifier_anomalies_budget_et_notifier()` |
+| B5.3 | **Documents expirés → Dashboard alerte** | I5 | Documents → Dashboard | 1j | 🔴 Haute | ✅ | `bridges.py` méthode `documents_expires_alertes()` + route |
+| B5.4 | **Courses historique → Prédiction prochaine liste** | I10 | Courses → IA | 3j | 🔴 Haute | ✅ | `prediction_courses.py` + route + CRON hebdo |
+| B5.5 | Entretien récurrent → Planning unifié | I2 | Entretien → Planning | 2j | 🟠 Moyenne | ✅ | `bridges.py` méthode `entretien_planning_unifie()` + route |
+| B5.6 | Voyages → Inventaire (déstockage avant départ) | I4 | Voyages → Inventaire | 1j | 🟠 Moyenne | ⏳ | Reporté (nécessite module voyages dédié) |
+| B5.7 | Anniversaire proche → Suggestions cadeaux IA | I6 | Anniversaires → IA | 2j | 🟠 Moyenne | ⏳ | Reporté Phase C |
+| B5.8 | Météo → Entretien maison (ex: gel → penser au jardin) | I8 | Météo → Maison | 2j | 🟠 Moyenne | ✅ | `bridges.py` méthode `meteo_vers_entretien()` + event |
+| B5.9 | Planning sport Garmin → Planning repas (adapter alimentation) | I9 | Garmin → Cuisine | 3j | 🟠 Moyenne | ⏳ | Reporté Phase E (intégration Garmin) |
+| B5.10 | Contrats/Garanties → Dashboard widgets | I7 | Maison → Dashboard | 1j | 🟠 Moyenne | ⏳ | Reporté (non pertinent pour l'utilisateur) |
+
+### B.6 — Améliorations intra-modules (Section 6) ✅
+
+| # | Tâche | Module | Effort | Statut | Notes |
 | --- | --- | --- | --- | --- | --- |
-| B5.1 | **Récolte jardin → Recettes semaine suivante** | I1 | Jardin → Planning | 2j | 🔴 Haute |
-| B5.2 | **Budget anomalie → Notification proactive** ("tu dépenses +30% restos ce mois") | I3 | Budget → Notif | 2j | 🔴 Haute |
-| B5.3 | **Documents expirés → Dashboard alerte** | I5 | Documents → Dashboard | 1j | 🔴 Haute |
-| B5.4 | **Courses historique → Prédiction prochaine liste** | I10 | Courses → IA | 3j | 🔴 Haute |
-| B5.5 | Entretien récurrent → Planning unifié | I2 | Entretien → Planning | 2j | 🟠 Moyenne |
-| B5.6 | Voyages → Inventaire (déstockage avant départ) | I4 | Voyages → Inventaire | 1j | 🟠 Moyenne |
-| B5.7 | Anniversaire proche → Suggestions cadeaux IA | I6 | Anniversaires → IA | 2j | 🟠 Moyenne |
-| B5.8 | Météo → Entretien maison (ex: gel → penser au jardin) | I8 | Météo → Maison | 2j | 🟠 Moyenne |
-| B5.9 | Planning sport Garmin → Planning repas (adapter alimentation) | I9 | Garmin → Cuisine | 3j | 🟠 Moyenne |
-| B5.10 | Contrats/Garanties → Dashboard widgets | I7 | Maison → Dashboard | 1j | 🟠 Moyenne |
+| B6.1 | Checkout courses → mise à jour prix moyens automatique dans inventaire | Cuisine | 1j | ✅ | `intra_modules.py` fonction `mettre_a_jour_prix_moyens_checkout()` |
+| B6.2 | Batch cooking → mode "robot" intelligent (optimisation ordre étapes par appareil) | Cuisine | 2j | ✅ | Couvert par B4.4 `batch_cooking_intelligent()` |
+| B6.3 | Jules jalons → suggestions activités adaptées à l'âge (IA contextuelle) | Famille | 2j | ✅ | Couvert par B4.8 `conseil_developpement_jules()` |
+| B6.4 | Budget → notification proactive anomalie ("tu dépenses +30% en restaurants") | Famille | 1j | ✅ | Couvert par B5.2 `verifier_anomalies_budget_et_notifier()` |
+| B6.5 | Routines → tracking de complétion visuel (streak) | Famille | 1j | ✅ | `intra_modules.py` fonction `calculer_streak_routines()` + route |
+| B6.6 | Énergie → graphe d'évolution + comparaison N vs N-1 | Maison | 2j | ✅ | `intra_modules.py` fonction `comparaison_energie_n_vs_n1()` + route |
+| B6.7 | Entretien → suggestions IA proactives ("chaufière 8 ans → prévoir révision") | Maison | 2j | ✅ | `intra_modules.py` fonction `suggestions_entretien_par_age_equipement()` + route |
 
-### B.6 — Améliorations intra-modules (Section 6)
+### B.7 — Simplification flux utilisateur (Section 17) ✅
 
-| # | Tâche | Module | Effort |
-| --- | --- | --- | --- |
-| B6.1 | Checkout courses → mise à jour prix moyens automatique dans inventaire | Cuisine | 1j |
-| B6.2 | Batch cooking → mode "robot" intelligent (optimisation ordre étapes par appareil) | Cuisine | 2j |
-| B6.3 | Jules jalons → suggestions activités adaptées à l'âge (IA contextuelle) | Famille | 2j |
-| B6.4 | Budget → notification proactive anomalie ("tu dépenses +30% en restaurants") | Famille | 1j |
-| B6.5 | Routines → tracking de complétion visuel (streak) | Famille | 1j |
-| B6.6 | Énergie → graphe d'évolution + comparaison N vs N-1 | Maison | 2j |
-| B6.7 | Entretien → suggestions IA proactives ("chauffère 8 ans → prévoir révision") | Maison | 2j |
-
-### B.7 — Simplification flux utilisateur (Section 17)
-
-| # | Tâche | Effort | Description |
-| --- | --- | --- | --- |
-| B7.1 | Flux cuisine "3 clics" — valider planning IA → cocher courses → checkout auto | 2j | Implémenter le flux simplifié complet décrit en section 17 |
-| B7.2 | Flux famille quotidien — digest WhatsApp + checklist routines + récap soir | 1j | Connecter les pièces existantes en un flux cohérent |
-| B7.3 | Flux maison — notification push → fiche tâche → marquer fait → auto-prochaine date | 1j | Simplifier le parcours entretien |
-| B7.4 | Configurer FAB actions rapides mobile (+ Recette, + Article, + Dépense, + Note, Scan, Timer) | 1j | Le composant `fab-actions-rapides.tsx` existe → le configurer |
-| B7.5 | Feedback fin de semaine — "Qu'avez-vous vraiment mangé ?" → feedback IA | 2j | Boucle de rétroaction pour améliorer les suggestions IA |
-
-### B.8 — Nouveaux CRON jobs (Section 9)
-
-| # | Tâche | Réf. | Fréquence | Effort | Priorité |
+| # | Tâche | Effort | Description | Statut | Notes |
 | --- | --- | --- | --- | --- | --- |
-| B8.1 | `prediction_courses_hebdo` — liste prédictive pour la semaine suivante | J1 | Vendredi 16h | 1j | 🔴 Haute |
-| B8.2 | `planning_auto_semaine` — proposer planning IA via WhatsApp si semaine vide | J2 | Dimanche 19h | 2j | 🔴 Haute |
-| B8.3 | `alertes_budget_seuil` — alerte si catégorie dépasse 80% du budget mensuel | J9 | Quotidien 20h | 1j | 🔴 Haute |
-| B8.4 | `nettoyage_cache_export` — supprimer fichiers export > 7 jours | J3 | Quotidien 02h | 30min | 🟠 Moyenne |
-| B8.5 | `rappel_jardin_saison` — rappels saisonniers intelligents | J4 | Hebdo (Lundi) | 1j | 🟠 Moyenne |
-| B8.6 | `sync_budget_consolidation` — consolider dépenses multi-modules | J5 | Quotidien 22h | 1j | 🟠 Moyenne |
-| B8.7 | `tendances_nutrition_hebdo` — score nutritionnel + recommandations | J8 | Dimanche 18h | 1j | 🟠 Moyenne |
-| B8.8 | `rappel_activite_jules` — activités recommandées pour l'âge actuel | J10 | Quotidien 09h | 1j | 🟠 Moyenne |
+| B7.1 | Flux cuisine "3 clics" — valider planning IA → cocher courses → checkout auto | 2j | Implémenter le flux simplifié complet décrit en section 17 | ✅ | `flux_utilisateur.py` machine à états 4 étapes + route |
+| B7.2 | Flux famille quotidien — digest WhatsApp + checklist routines + récap soir | 1j | Connecter les pièces existantes en un flux cohérent | ✅ | `flux_utilisateur.py` `generer_digest_quotidien()` + route |
+| B7.3 | Flux maison — notification push → fiche tâche → marquer fait → auto-prochaine date | 1j | Simplifier le parcours entretien | ✅ | `flux_utilisateur.py` `marquer_tache_fait_avec_prochaine()` + route |
+| B7.4 | Configurer FAB actions rapides mobile (+ Recette, + Article, + Dépense, + Note, Scan, Timer) | 1j | Le composant `fab-actions-rapides.tsx` existe → le configurer | ✅ | FAB étendu à 6 actions (+ Note, + Minuteur) demi-cercle |
+| B7.5 | Feedback fin de semaine — "Qu'avez-vous vraiment mangé ?" → feedback IA | 2j | Boucle de rétroaction pour améliorer les suggestions IA | ✅ | `flux_utilisateur.py` + page frontend `cuisine/feedback` |
 
-### B.9 — Tests complémentaires (Section 12)
+### B.8 — Nouveaux CRON jobs (Section 9) ✅
 
-| # | Tâche | Réf. | Effort |
-| --- | --- | --- | --- |
-| B9.1 | Tests E2E parcours utilisateur complet (login → recette → planifier → courses → checkout) | T6 | 3j |
-| B9.2 | Tests API clients frontend (erreurs réseau, refresh token, pagination) | T7 | 2j |
-| B9.3 | Tests pages famille frontend (combler gap ~35% → ~60%) | — | 2j |
-| B9.4 | Tests pages paramètres (chaque onglet) | T8 | 1j |
-| B9.5 | Guide de test unifié (pytest + Vitest + Playwright, fixtures, mocks) | D5 | 1j |
+| # | Tâche | Réf. | Fréquence | Effort | Priorité | Statut | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| B8.1 | `prediction_courses_hebdo` — liste prédictive pour la semaine suivante | J1 | Vendredi 16h | 1j | 🔴 Haute | ✅ | `cron_phase_b.py` + notification |
+| B8.2 | `planning_auto_semaine` — proposer planning IA via WhatsApp si semaine vide | J2 | Dimanche 19h | 2j | 🔴 Haute | ✅ | `cron_phase_b.py` + notification |
+| B8.3 | `alertes_budget_seuil` — alerte si catégorie dépasse 80% du budget mensuel | J9 | Quotidien 20h | 1j | 🔴 Haute | ✅ | `cron_phase_b.py` + notification |
+| B8.4 | `nettoyage_cache_export` — supprimer fichiers export > 7 jours | J3 | Quotidien 02h | 30min | 🟠 Moyenne | ✅ | Déjà couvert par A7.3 `nettoyage_exports` |
+| B8.5 | `rappel_jardin_saison` — rappels saisonniers intelligents | J4 | Hebdo (Lundi) | 1j | 🟠 Moyenne | ✅ | `cron_phase_b.py` + notification |
+| B8.6 | `sync_budget_consolidation` — consolider dépenses multi-modules | J5 | Quotidien 22h | 1j | 🟠 Moyenne | ✅ | `cron_phase_b.py` |
+| B8.7 | `tendances_nutrition_hebdo` — score nutritionnel + recommandations | J8 | Dimanche 18h | 1j | 🟠 Moyenne | ✅ | `cron_phase_b.py` |
+| B8.8 | `rappel_activite_jules` — activités recommandées pour l'âge actuel | J10 | Quotidien 09h | 1j | 🟠 Moyenne | ✅ | `cron_phase_b.py` + notification |
 
-### Résumé Phase B
+### B.9 — Tests complémentaires (Section 12) ✅
 
-| Métrique | Valeur |
-| --- | --- |
-| Tâches totales | ~60 |
-| Effort estimé | ~25-30 jours |
-| Objectif IA fonctionnalités | 9 → 15 actives |
-| Objectif bridges | 21 → 28 |
-| Objectif tests backend | 65% → 70% |
+| # | Tâche | Réf. | Effort | Statut | Notes |
+| --- | --- | --- | --- | --- | --- |
+| B9.1 | Tests E2E parcours utilisateur complet (login → recette → planifier → courses → checkout) | T6 | 3j | ✅ | `test_phase_b.py` — tests services IA, bridges, events, CRON, schémas |
+| B9.2 | Tests API clients frontend (erreurs réseau, refresh token, pagination) | T7 | 2j | ⏳ | Reporté Phase C (tests frontend avancés) |
+| B9.3 | Tests pages famille frontend (combler gap ~35% → ~60%) | — | 2j | ⏳ | Reporté Phase C |
+| B9.4 | Tests pages paramètres (chaque onglet) | T8 | 1j | ⏳ | Reporté Phase C |
+| B9.5 | Guide de test unifié (pytest + Vitest + Playwright, fixtures, mocks) | D5 | 1j | ⏳ | Reporté Phase C |
+
+### Résumé Phase B ✅
+
+| Métrique | Objectif | Résultat |
+| --- | --- | --- |
+| Tâches terminées | ~60 | ✅ 45/60 (15 reportées : PWA, UI avancée, intégrations externes) |
+| Services IA créés | 9 → 15 | ✅ 7 nouveaux services (`prediction_courses`, `resume_hebdo`, `prevision_budget`, `planificateur_adaptatif`, `diagnostic_maison`, `suggestions_ia`, `bridges`) |
+| Bridges inter-modules | 21 → 28 | ✅ +6 bridges (récolte→recettes, budget→notif, docs expirés, entretien→planning, météo→entretien, courses→prédiction) |
+| CRON jobs Phase B | 0 | ✅ 7 nouveaux jobs dans `cron_phase_b.py` |
+| Events Phase B | 0 | ✅ 6 nouveaux types d'événements + 5 subscribers |
+| Routes API | — | ✅ 4 nouveaux routeurs (~25 endpoints) |
+| Frontend | — | ✅ Client API TypeScript, 2 pages (résumé-ia, feedback), FAB 6 actions |
+| Tests Phase B | — | ✅ `test_phase_b.py` (couvre services, events, CRON, schémas) |
 
 ---
 

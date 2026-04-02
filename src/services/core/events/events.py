@@ -428,6 +428,71 @@ class EvenementErreurService:
     method: str = ""
     error_type: str = ""
     message: str = ""
+
+
+# ═══════════════════════════════════════════════════════════
+# ÉVÉNEMENTS PHASE B — PRÉDICTIONS & BRIDGES IA
+# ═══════════════════════════════════════════════════════════
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementPredictionCourses:
+    """Émis quand une liste prédictive de courses est générée (B4.1)."""
+
+    TYPE: str = "prediction.courses_generees"
+
+    nb_articles: int = 0
+    source: str = "historique"
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementResumeHebdo:
+    """Émis quand le résumé hebdomadaire IA est généré (B4.3)."""
+
+    TYPE: str = "resume.hebdo_genere"
+
+    semaine: str = ""
+    nb_sections: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementPrevisionBudget:
+    """Émis quand une prévision budget est calculée (B4.9)."""
+
+    TYPE: str = "budget.prevision_calculee"
+
+    montant_prevu: float = 0.0
+    nb_anomalies: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementDiagnosticMaison:
+    """Émis quand un diagnostic maison est produit (B4.5)."""
+
+    TYPE: str = "maison.diagnostic"
+
+    type_diagnostic: str = ""  # "photo", "texte"
+    probleme: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementBridgeRecolteRecettes:
+    """Émis quand une récolte jardin génère des suggestions recettes (B5.1)."""
+
+    TYPE: str = "bridge.recolte_recettes"
+
+    nb_recettes_suggerees: int = 0
+    ingredients: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True, slots=True)
+class EvenementBridgeMeteoEntretien:
+    """Émis quand la météo déclenche des tâches entretien (B5.8)."""
+
+    TYPE: str = "bridge.meteo_entretien"
+
+    nb_taches: int = 0
+    condition_meteo: str = ""
     duration_ms: float = 0.0
     timestamp: datetime = field(default_factory=datetime.now)
     details: dict[str, Any] = field(default_factory=dict)

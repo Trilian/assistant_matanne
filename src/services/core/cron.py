@@ -74,6 +74,14 @@ def demarrer_scheduler() -> None:
     except Exception as e:
         logger.error(f"❌ Échec configuration cron jobs Cuisine: {e}", exc_info=True)
     
+    # Enregistrer les jobs Phase B (prédictions, budget, jardin, Jules, nutrition)
+    try:
+        from src.services.core.cron_phase_b import configurer_jobs_phase_b
+        configurer_jobs_phase_b(scheduler)
+        logger.info("✅ Cron jobs Phase B configurés")
+    except Exception as e:
+        logger.error(f"❌ Échec configuration cron jobs Phase B: {e}", exc_info=True)
+    
     # Démarrer le scheduler
     scheduler.start()
     

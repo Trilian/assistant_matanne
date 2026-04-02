@@ -83,6 +83,10 @@ from src.api.routes import (
     utilitaires_router,
     voyages_router,
     webhooks_router,
+    predictions_router,
+    ia_phase_b_router,
+    bridges_router,
+    intra_flux_router,
 )
 from src.api.routes.auth import router as auth_router
 from src.api.routes.push import router as push_router
@@ -677,3 +681,9 @@ app.include_router(ws_notes_router)
 app.include_router(ws_projets_router)
 app.include_router(ws_admin_logs_router)
 app.include_router(admin_router)
+
+# Phase B — IA, Prédictions, Bridges
+app.include_router(predictions_router)
+app.include_router(ia_phase_b_router)
+app.include_router(bridges_router)
+app.include_router(intra_flux_router)

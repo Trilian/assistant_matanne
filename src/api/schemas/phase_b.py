@@ -1,0 +1,291 @@
+"""
+Schémas Pydantic — Phase B fonctionnalités & IA.
+
+Couvre prédiction courses, prévision budget, résumé hebdo,
+diagnostic maison, planificateur adaptatif, bridges inter-modules,
+suggestions IA diverses.
+"""
+
+from __future__ import annotations
+
+from pydantic import BaseModel, Field
+
+
+# ═══════════════════════════════════════════════════════════
+# PRÉDICTION COURSES (B4.1 / B5.4)
+# ═══════════════════════════════════════════════════════════
+
+
+class PredictionArticle(BaseModel):
+    """Article prédit par l'IA."""
+    nom: str
+    categorie: str = "Autre"
+    rayon: str = "Autre"
+    frequence_jours: int | None = None
+    dernier_achat: str | None = None
+    prochaine_date_estimee: str | None = None
+    jours_retard: int = 0
+    confiance: float = 0.5
+    nb_achats: int = 0
+
+
+class PredictionCoursesResponse(BaseModel):
+    """Réponse de prédiction de courses."""
+    predictions: list[PredictionArticle]
+    nb_total: int = 0
+
+
+class HabitudesAchatResponse(BaseModel):
+    """Réponse analyse des habitudes d'achat."""
+    nb_articles_suivis: int = 0
+    nb_avec_frequence: int = 0
+    frequence_moyenne_jours: float | None = None
+    top_categories: list[dict] = []
+
+
+class EnregistrerAchatRequest(BaseModel):
+    """Requête d'enregistrement d'achat."""
+    article_nom: str = Field(..., min_length=1, max_length=200)
+    categorie: str | None = Field(None, max_length=100)
+    rayon: str | None = Field(None, max_length=100)
+
+
+# ═══════════════════════════════════════════════════════════
+# PRÉVISION BUDGET (B1.3 / B4.9)
+# ═══════════════════════════════════════════════════════════
+
+
+class PrevisionBudgetResponse(BaseModel):
+    """Réponse de prévision budget."""
+    mois: str
+    jours_ecoules: int = 0
+    jours_total: int = 0
+    depenses_actuelles: float = 0
+    moyenne_jour: float = 0
+    prevision_fin_mois: float = 0
+    depenses_mois_precedent: float = 0
+    tendance_pct: float = 0
+    par_categorie: list[dict] = []
+    anomalies: list[dict] = []
+
+
+class AnomalieBudget(BaseModel):
+    """Anomalie budgétaire détectée."""
+    categorie: str
+    depense: float
+    budget_ref: float
+    pourcentage: float
+    niveau: str = "attention"
+
+
+class CategoriserDepenseRequest(BaseModel):
+    """Requête de catégorisation de dépense."""
+    description: str = Field(..., min_length=1, max_length=500)
+
+
+class CategorieDepenseResponse(BaseModel):
+    """Réponse de catégorisation de dépense."""
+    categorie: str
+    confiance: float
+    source: str = "defaut"
+
+
+# ═══════════════════════════════════════════════════════════
+# RÉSUMÉ HEBDOMADAIRE (B4.3)
+# ═══════════════════════════════════════════════════════════
+
+
+class ResumeHebdoResponse(BaseModel):
+    """Réponse du résumé hebdomadaire."""
+    resume_texte: str = ""
+    points_forts: list[str] = []
+    suggestions: list[str] = []
+    donnees_brutes: dict | None = None
+
+
+# ═══════════════════════════════════════════════════════════
+# DIAGNOSTIC MAISON (B4.5)
+# ═══════════════════════════════════════════════════════════
+
+
+class DiagnosticPhotoRequest(BaseModel):
+    """Requête de diagnostic par photo."""
+    image_base64: str = Field(..., min_length=10)
+    description: str = Field("", max_length=1000)
+
+
+class DiagnosticTexteRequest(BaseModel):
+    """Requête de diagnostic par texte."""
+    description: str = Field(..., min_length=5, max_length=2000)
+
+
+class DiagnosticResponse(BaseModel):
+    """Réponse de diagnostic maison."""
+    diagnostic: str = ""
+    gravite: str = "inconnue"
+    actions_recommandees: list[dict] = []
+    cout_estime: dict | None = None
+    professionnel_requis: bool = False
+    type_professionnel: str | None = None
+
+
+# ═══════════════════════════════════════════════════════════
+# PLANIFICATEUR ADAPTATIF (B4.2)
+# ═══════════════════════════════════════════════════════════
+
+
+class PlanningAdapteResponse(BaseModel):
+    """Réponse du planificateur adaptatif."""
+    planning: list[dict] = []
+    ingredients_a_acheter: list[str] = []
+    ingredients_stock_utilises: list[str] = []
+    raisons: str = ""
+    contexte_utilise: dict = {}
+
+
+# ═══════════════════════════════════════════════════════════
+# SUGGESTIONS IA DIVERSES
+# ═══════════════════════════════════════════════════════════
+
+
+class BatchCookingPlanRequest(BaseModel):
+    """Requête batch cooking intelligent."""
+    recettes: list[str] = Field(..., min_length=1, max_length=10)
+    nb_personnes: int = Field(4, ge=1, le=20)
+
+
+class BatchCookingPlanResponse(BaseModel):
+    """Réponse batch cooking intelligent."""
+    temps_total_minutes: int = 0
+    etapes: list[dict] = []
+    appareils_utilises: list[str] = []
+    conseils: list[str] = []
+    ordre_optimal: list[str] = []
+
+
+class ConseilJulesRequest(BaseModel):
+    """Requête conseil développement Jules."""
+    age_mois: int = Field(..., ge=0, le=240)
+    jalons_atteints: list[str] = []
+
+
+class ConseilJulesResponse(BaseModel):
+    """Réponse conseil développement Jules."""
+    activites_recommandees: list[dict] = []
+    jalons_attendus: list[dict] = []
+    points_attention: list[str] = []
+    jeux_adaptes: list[str] = []
+
+
+class ChecklistVoyageRequest(BaseModel):
+    """Requête checklist voyage."""
+    destination: str = Field(..., min_length=1, max_length=200)
+    dates: str = Field(..., min_length=1, max_length=100)
+    participants: list[str] = []
+
+
+class ChecklistVoyageResponse(BaseModel):
+    """Réponse checklist voyage."""
+    categories: list[dict] = []
+    rappels: list[dict] = []
+    conseils_destination: list[str] = []
+
+
+class ScoreEcologiqueRequest(BaseModel):
+    """Requête score écologique."""
+    ingredients: list[str] = Field(..., min_length=1)
+    saison: str = ""
+
+
+class ScoreEcologiqueResponse(BaseModel):
+    """Réponse score écologique."""
+    score_global: float | None = None
+    score_max: float = 10
+    details: dict = {}
+    ingredients_problematiques: list[str] = []
+    suggestions_amelioration: list[str] = []
+
+
+class AnalyseNutritionnelleRequest(BaseModel):
+    """Requête analyse nutritionnelle."""
+    description_repas: str = Field(..., min_length=3, max_length=1000)
+
+
+class AnalyseNutritionnelleResponse(BaseModel):
+    """Réponse analyse nutritionnelle."""
+    calories_estimees: int | None = None
+    macronutriments: dict = {}
+    score_nutritionnel: float | None = None
+    points_forts: list[str] = []
+    points_faibles: list[str] = []
+    suggestion_amelioration: str = ""
+
+
+class OptimisationEnergieRequest(BaseModel):
+    """Requête optimisation énergie."""
+    releves: list[dict] = Field(..., min_length=1)
+    meteo: dict | None = None
+
+
+class OptimisationEnergieResponse(BaseModel):
+    """Réponse optimisation énergie."""
+    prevision_prochaine_facture: dict | None = None
+    tendance: str = ""
+    variation_pct: float = 0
+    conseils_economies: list[str] = []
+
+
+# ═══════════════════════════════════════════════════════════
+# BRIDGES INTER-MODULES (B5)
+# ═══════════════════════════════════════════════════════════
+
+
+class DocumentExpireAlerte(BaseModel):
+    """Document expiré ou expirant bientôt."""
+    id: int
+    titre: str
+    categorie: str
+    membre_famille: str
+    date_expiration: str
+    jours_restants: int | None = None
+    est_expire: bool = False
+    niveau: str = "attention"
+
+
+class DocumentsExpiresResponse(BaseModel):
+    """Réponse documents expirés."""
+    alertes: list[DocumentExpireAlerte]
+    nb_expires: int = 0
+    nb_bientot: int = 0
+
+
+class PlanningUnifieItem(BaseModel):
+    """Élément du planning unifié."""
+    id: int
+    nom: str
+    prochaine_fois: str
+    en_retard: bool = False
+    jours_restants: int | None = None
+    type: str = "entretien"
+
+
+class PlanningUnifieResponse(BaseModel):
+    """Planning unifié multi-modules."""
+    taches: list[PlanningUnifieItem]
+    nb_total: int = 0
+    nb_en_retard: int = 0
+
+
+class AlerteMeteoEntretien(BaseModel):
+    """Alerte météo liée à l'entretien."""
+    type: str
+    message: str
+    priorite: str = "moyenne"
+    domaine: str = ""
+
+
+class FeedbackSemaineRequest(BaseModel):
+    """Requête feedback fin de semaine (B7.5)."""
+    repas_consommes: list[dict] = []
+    commentaires: str = ""
+    note_globale: int = Field(5, ge=1, le=10)
