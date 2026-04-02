@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Text, Html } from "@react-three/drei";
 import type { PieceMaison } from "@/types/maison";
@@ -149,12 +149,6 @@ function Sol() {
       <meshStandardMaterial color="#f8fafc" />
     </mesh>
   );
-}
-
-interface Plan3DProps {
-  pieces: PieceMaison[];
-  pieceSelectionnee: PieceMaison | null;
-  onSelectPiece: (piece: PieceMaison) => void;
 }
 
 export default function Plan3D({ pieces, pieceSelectionnee, onSelectPiece, donneesParPiece }: Plan3DProps) {

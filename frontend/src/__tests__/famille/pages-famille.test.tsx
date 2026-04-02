@@ -14,6 +14,7 @@ import React from "react";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
   usePathname: () => "/famille",
+  useSearchParams: () => ({ get: vi.fn().mockReturnValue(null) }),
   redirect: vi.fn(),
 }));
 
@@ -35,25 +36,44 @@ vi.mock("@/bibliotheque/api/client", () => ({
   },
 }));
 
-vi.mock("@/bibliotheque/api/famille", () => ({
-  obtenirContexteFamilial: vi.fn().mockResolvedValue({ suggestions: [], rappels: [], anniversaires: [] }),
-  evaluerRappelsFamille: vi.fn().mockResolvedValue([]),
-  listerAchats: vi.fn().mockResolvedValue({ items: [], total: 0 }),
-  obtenirResumeBudgetMois: vi.fn().mockResolvedValue({ total: 500, par_categorie: {} }),
-  completerRoutine: vi.fn().mockResolvedValue({ ok: true }),
-  obtenirSuggestionsWeekend: vi.fn().mockResolvedValue([]),
-  joursSansCReche: vi.fn().mockResolvedValue({ jours: [] }),
-  obtenirSuggestionsAchatsEnrichies: vi.fn().mockResolvedValue([]),
-  obtenirProfilsEnfants: vi.fn().mockResolvedValue([]),
-  obtenirJalonsJules: vi.fn().mockResolvedValue({ items: [], total: 0 }),
-  obtenirMesuresCroissance: vi.fn().mockResolvedValue({ items: [], total: 0 }),
-  obtenirRoutines: vi.fn().mockResolvedValue({ items: [], total: 0 }),
-  listerAnniversaires: vi.fn().mockResolvedValue({ items: [], total: 0 }),
-  listerDocuments: vi.fn().mockResolvedValue({ items: [], total: 0 }),
-  listerContacts: vi.fn().mockResolvedValue({ items: [], total: 0 }),
-  listerJournal: vi.fn().mockResolvedValue({ items: [], total: 0 }),
-  obtenirBudgetFamille: vi.fn().mockResolvedValue({ depenses: [], total: 0 }),
-}));
+vi.mock("@/bibliotheque/api/famille", async () => {
+  const actual = await vi.importActual<typeof import("@/bibliotheque/api/famille")>("@/bibliotheque/api/famille");
+  return {
+    ...actual,
+    obtenirContexteFamilial: vi.fn().mockResolvedValue({ suggestions: [], rappels: [], anniversaires: [] }),
+    evaluerRappelsFamille: vi.fn().mockResolvedValue([]),
+    listerAchats: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+    obtenirResumeBudgetMois: vi.fn().mockResolvedValue({ total: 500, par_categorie: {} }),
+    completerRoutine: vi.fn().mockResolvedValue({ ok: true }),
+    obtenirSuggestionsWeekend: vi.fn().mockResolvedValue([]),
+    joursSansCReche: vi.fn().mockResolvedValue({ jours: [] }),
+    obtenirSuggestionsAchatsEnrichies: vi.fn().mockResolvedValue([]),
+    obtenirProfilJules: vi.fn().mockResolvedValue(null),
+    obtenirAlimentsExclus: vi.fn().mockResolvedValue([]),
+    obtenirCoachingHebdo: vi.fn().mockResolvedValue(null),
+    obtenirProfilsEnfants: vi.fn().mockResolvedValue([]),
+    obtenirJalonsJules: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+    obtenirMesuresCroissance: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+    obtenirRoutines: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+    listerRoutines: vi.fn().mockResolvedValue([]),
+    listerAnniversaires: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+    listerDocuments: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+    listerContacts: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+    listerJournal: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+    obtenirBudgetFamille: vi.fn().mockResolvedValue({ depenses: [], total: 0 }),
+    obtenirStatsBudget: vi.fn().mockResolvedValue({
+      depenses_mensuelles: [],
+      repartition_categories: {},
+      total_mois: 0,
+    }),
+    obtenirAnalyseBudgetIA: vi.fn().mockResolvedValue({
+      resume: "",
+      tendances: [],
+      recommandations: [],
+      alertes: [],
+    }),
+  };
+});
 
 vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: vi.fn().mockReturnValue({
@@ -62,6 +82,12 @@ vi.mock("@/crochets/utiliser-api", () => ({
     error: null,
     refetch: vi.fn(),
   }),
+  utiliserMutation: vi.fn().mockReturnValue({
+    mutate: vi.fn(),
+    mutateAsync: vi.fn(),
+    isPending: false,
+  }),
+  utiliserInvalidation: vi.fn().mockReturnValue(vi.fn()),
 }));
 
 vi.mock("@tanstack/react-query", async () => {

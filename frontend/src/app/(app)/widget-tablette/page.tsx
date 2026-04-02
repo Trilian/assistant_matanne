@@ -1,7 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, Clock3, CloudSun, ListChecks, Utensils } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Clock3, CloudSun, ListChecks, Timer, Utensils } from 'lucide-react'
+import { utiliserRequete } from '@/crochets/utiliser-api'
+import { obtenirTableauBord } from '@/bibliotheque/api/tableau-bord'
+import { obtenirTachesJourMaison } from '@/bibliotheque/api/maison'
 
 function formatDateFr(date: Date): string {
   return new Intl.DateTimeFormat('fr-FR', {
@@ -18,40 +21,74 @@ function formatTimeFr(date: Date): string {
   }).format(date)
 }
 
+function formatTimer(secondes: number): string {
+  const minutes = Math.floor(secondes / 60)
+  const reste = secondes % 60
+  return `${minutes}:${reste.toString().padStart(2, '0')}`
+}
+
 export default function WidgetTablettePage() {
   const [now, setNow] = useState(() => new Date())
+  const [timerActif, setTimerActif] = useState(false)
+  const [timerSecondes, setTimerSecondes] = useState(25 * 60)
+  const [meteo, setMeteo] = useState<{ temperature: number; condition: string } | null>(null)
+
+  const { data: dashboard } = utiliserRequete(['dashboard', 'widget'], obtenirTableauBord)
+  const { data: taches } = utiliserRequete(['maison', 'widget', 'taches'], obtenirTachesJourMaison)
 
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 60_000)
-    return () => window.clearInterval(timer)
+    const horloge = window.setInterval(() => setNow(new Date()), 30_000)
+    return () => window.clearInterval(horloge)
   }, [])
 
-  const blocRepas = useMemo(
-    () => ({
-      titre: 'Repas du jour',
-      valeur: 'Poulet roti, legumes au four',
-      sousTexte: 'Prep 30 min - cuisson 45 min',
-    }),
-    [],
-  )
+  useEffect(() => {
+    let annule = false
 
-  const blocTache = useMemo(
-    () => ({
-      titre: 'Tache prioritaire',
-      valeur: 'Verifier entretien filtre VMC',
-      sousTexte: 'A faire avant 18:00',
-    }),
-    [],
-  )
+    async function chargerMeteo() {
+      try {
+        const response = await fetch('https://wttr.in/Paris?format=j1')
+        if (!response.ok) {
+          return
+        }
+        const json = await response.json()
+        const actuel = json.current_condition?.[0]
+        if (!actuel || annule) {
+          return
+        }
+        setMeteo({
+          temperature: Number(actuel.temp_C ?? 0),
+          condition: actuel.weatherDesc?.[0]?.value ?? 'Variable',
+        })
+      } catch {
+        if (!annule) {
+          setMeteo(null)
+        }
+      }
+    }
 
-  const blocMeteo = useMemo(
-    () => ({
-      titre: 'Meteo',
-      valeur: '17 degres - eclaircies',
-      sousTexte: 'Risque pluie faible en soiree',
-    }),
-    [],
-  )
+    chargerMeteo()
+    return () => {
+      annule = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!timerActif || timerSecondes <= 0) {
+      return
+    }
+    const interval = window.setInterval(() => {
+      setTimerSecondes((precedent) => (precedent > 0 ? precedent - 1 : 0))
+    }, 1000)
+    return () => window.clearInterval(interval)
+  }, [timerActif, timerSecondes])
+
+  const repasAujourdhui = dashboard?.repas_aujourd_hui ?? []
+  const repasPrincipal = repasAujourdhui[0] as
+    | { recette_nom?: string; type_repas?: string }
+    | undefined
+  const tachePrioritaire = (Array.isArray(taches) ? taches : []).find(
+    (t: { fait?: boolean }) => !t.fait
+  ) as { nom?: string; categorie?: string } | undefined
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-emerald-950 p-6 text-zinc-100 md:p-10">
@@ -73,51 +110,76 @@ export default function WidgetTablettePage() {
           <article className="rounded-2xl border border-zinc-700/60 bg-zinc-900/70 p-5">
             <div className="mb-4 flex items-center gap-2 text-emerald-300">
               <Utensils className="h-5 w-5" />
-              <h2 className="text-lg font-medium">{blocRepas.titre}</h2>
+              <h2 className="text-lg font-medium">Repas du jour</h2>
             </div>
-            <p className="text-xl font-semibold leading-snug">{blocRepas.valeur}</p>
-            <p className="mt-2 text-sm text-zinc-300">{blocRepas.sousTexte}</p>
+            <p className="text-xl font-semibold leading-snug">{repasPrincipal?.recette_nom ?? 'Aucun repas planifie'}</p>
+            <p className="mt-2 text-sm text-zinc-300">{repasPrincipal?.type_repas ?? 'Planification a faire'}</p>
           </article>
 
           <article className="rounded-2xl border border-zinc-700/60 bg-zinc-900/70 p-5">
             <div className="mb-4 flex items-center gap-2 text-amber-300">
               <ListChecks className="h-5 w-5" />
-              <h2 className="text-lg font-medium">{blocTache.titre}</h2>
+              <h2 className="text-lg font-medium">Tache prioritaire</h2>
             </div>
-            <p className="text-xl font-semibold leading-snug">{blocTache.valeur}</p>
-            <p className="mt-2 text-sm text-zinc-300">{blocTache.sousTexte}</p>
+            <p className="text-xl font-semibold leading-snug">{tachePrioritaire?.nom ?? 'Rien de prioritaire'}</p>
+            <p className="mt-2 text-sm text-zinc-300">{tachePrioritaire?.categorie ?? 'Maison'}</p>
           </article>
 
           <article className="rounded-2xl border border-zinc-700/60 bg-zinc-900/70 p-5">
             <div className="mb-4 flex items-center gap-2 text-sky-300">
               <CloudSun className="h-5 w-5" />
-              <h2 className="text-lg font-medium">{blocMeteo.titre}</h2>
+              <h2 className="text-lg font-medium">Meteo</h2>
             </div>
-            <p className="text-xl font-semibold leading-snug">{blocMeteo.valeur}</p>
-            <p className="mt-2 text-sm text-zinc-300">{blocMeteo.sousTexte}</p>
+            <p className="text-xl font-semibold leading-snug">
+              {meteo?.temperature != null ? `${meteo.temperature} degres` : 'Donnee indisponible'}
+            </p>
+            <p className="mt-2 text-sm text-zinc-300">{meteo?.condition ?? 'Actualisation en cours'}</p>
           </article>
         </section>
 
         <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <article className="rounded-2xl border border-zinc-700/60 bg-zinc-900/70 p-5">
             <div className="mb-3 flex items-center gap-2 text-zinc-300">
-              <CalendarDays className="h-5 w-5" />
+              <Clock3 className="h-5 w-5" />
               <h2 className="text-lg font-medium">Agenda rapide</h2>
             </div>
             <ul className="space-y-2 text-base text-zinc-100">
-              <li>09:00 - Activite exterieure Jules</li>
-              <li>12:30 - Dejeuner famille</li>
-              <li>18:15 - Courses d'appoint</li>
+              {repasAujourdhui
+                .slice(0, 3)
+                .map((repas: { id?: number | string; type_repas?: string; recette_nom?: string }, index: number) => (
+                <li key={`${repas.id}-${index}`}>
+                  {(repas.type_repas ?? 'repas').toString()} - {(repas.recette_nom ?? 'Repas').toString()}
+                </li>
+              ))}
+              {repasAujourdhui.length === 0 && <li>Aucun evenement repas aujourd'hui</li>}
             </ul>
           </article>
 
           <article className="rounded-2xl border border-zinc-700/60 bg-zinc-900/70 p-5">
             <div className="mb-3 flex items-center gap-2 text-zinc-300">
-              <Clock3 className="h-5 w-5" />
+              <Timer className="h-5 w-5" />
               <h2 className="text-lg font-medium">Timer cuisine</h2>
             </div>
-            <p className="text-3xl font-semibold">00:25:00</p>
-            <p className="mt-2 text-sm text-zinc-300">Mode affiche tablette: vue lisible a distance.</p>
+            <p className="text-3xl font-semibold">{formatTimer(timerSecondes)}</p>
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setTimerActif((precedent) => !precedent)}
+                className="rounded-md bg-emerald-500 px-3 py-2 text-sm font-medium text-zinc-950"
+              >
+                {timerActif ? 'Pause' : 'Demarrer'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTimerActif(false)
+                  setTimerSecondes(25 * 60)
+                }}
+                className="rounded-md border border-zinc-500 px-3 py-2 text-sm"
+              >
+                Reinitialiser
+              </button>
+            </div>
           </article>
         </section>
       </div>

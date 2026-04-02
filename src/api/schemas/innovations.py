@@ -64,6 +64,16 @@ class ComparateurEnergieRequest(BaseModel):
     abonnement_mensuel_eur: float = Field(14.0, ge=0.0, le=200.0)
 
 
+class ModePiloteConfigurationRequest(BaseModel):
+    """Configuration du mode pilote automatique."""
+
+    actif: bool = Field(True, description="Active ou desactive le mode pilote")
+    niveau_autonomie: str = Field(
+        "validation_requise",
+        description="off|proposee|validation_requise|semi_auto|auto",
+    )
+
+
 # ── Responses (re-exports depuis types) ──
 
 from src.services.innovations.types import (  # noqa: E402
@@ -117,6 +127,7 @@ __all__ = [
     "ResumeMensuelIAResponse",
     "PlanningJulesAdaptatifResponse",
     "ComparateurEnergieRequest",
+    "ModePiloteConfigurationRequest",
     "ComparateurEnergieResponse",
     "ScoreEcoResponsableResponse",
     "SaisonnaliteIntelligenteResponse",

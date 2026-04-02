@@ -5,6 +5,7 @@ import DashboardPage from "@/app/(app)/page";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   usePathname: () => "/",
+  useSearchParams: () => ({ get: vi.fn().mockReturnValue(null) }),
 }));
 
 vi.mock("next/link", () => ({

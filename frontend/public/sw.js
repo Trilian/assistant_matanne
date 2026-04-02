@@ -269,7 +269,14 @@ async function rejouerFileDAttente() {
       // Connexion toujours absente — on garde la requête en file
     }
   }
-  await tx.done;
+
+  const restants = await storeCount(store);
+  if (restants === 0) {
+    await notifierClients({ type: "SYNC_QUEUE_FLUSHED" });
+  } else {
+    await notifierClients({ type: "SYNC_QUEUE_UPDATED", pending: restants });
+  }
+  await attendreTransaction(tx);
 }
 
 // ─── Helpers IndexedDB ──────────────────────────────────────
@@ -293,7 +300,16 @@ async function mettreDansFile(item) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction("queue", "readwrite");
     tx.objectStore("queue").add(item);
-    tx.oncomplete = resolve;
+    tx.oncomplete = async () => {
+      try {
+        const txRead = db.transaction("queue", "readonly");
+        const pending = await storeCount(txRead.objectStore("queue"));
+        await notifierClients({ type: "SYNC_QUEUE_UPDATED", pending });
+      } catch {
+        // No-op
+      }
+      resolve();
+    };
     tx.onerror = (e) => reject(e.target.error);
   });
 }
@@ -304,6 +320,29 @@ function storeGetAll(store) {
     req.onsuccess = (e) => resolve(e.target.result);
     req.onerror = (e) => reject(e.target.error);
   });
+}
+
+function attendreTransaction(tx) {
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = (e) => reject(e.target.error);
+    tx.onabort = (e) => reject(e.target.error);
+  });
+}
+
+function storeCount(store) {
+  return new Promise((resolve, reject) => {
+    const req = store.count();
+    req.onsuccess = (e) => resolve(e.target.result || 0);
+    req.onerror = (e) => reject(e.target.error);
+  });
+}
+
+async function notifierClients(payload) {
+  const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+  for (const client of clients) {
+    client.postMessage(payload);
+  }
 }
 
 // ─── Courses Offline Cache Update ───────────────────────────

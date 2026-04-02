@@ -68,7 +68,9 @@ export default function NutritionistePage() {
   );
 
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollRef.current && typeof scrollRef.current.scrollIntoView === "function") {
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
   function gererEnvoi(e: React.FormEvent) {

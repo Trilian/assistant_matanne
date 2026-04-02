@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
@@ -23,7 +23,7 @@ import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   listerPieces, listerEtages, sauvegarderPositions,
-  creerTacheEntretien, obtenirDetailPiece,
+  creerTacheEntretien, obtenirDetailPiece, listerTachesEntretien,
 } from "@/bibliotheque/api/maison";
 import type { PieceMaison } from "@/types/maison";
 import { toast } from "sonner";
@@ -119,6 +119,12 @@ export default function PageVisualisation() {
     () => listerPieces(etageActif)
   );
 
+  const { data: tachesEntretien = [] } = utiliserRequete(
+    ["maison", "entretien", "visualisation", String(etageActif)],
+    () => listerTachesEntretien(),
+    { refetchInterval: 30000 }
+  );
+
   // Sync positions from server data
   useEffect(() => {
     if (!pieces) return;
@@ -212,6 +218,47 @@ export default function PageVisualisation() {
 
   const modesPositionnement = pieces && aPosisions(pieces);
 
+  const donneesParPiece = useMemo(() => {
+    const aujourdHui = new Date();
+    const normaliser = (valeur?: string | null) => (valeur ?? "").trim().toLowerCase();
+
+    const map: Record<number, { piece_id: number; taches_en_retard: number; taches_total: number; alertes: string[] }> = {};
+
+    for (const piece of pieces ?? []) {
+      const pieceNom = normaliser(piece.nom);
+      const tachesPiece = tachesEntretien.filter((t) => {
+        const cible = normaliser(t.piece);
+        return cible.length > 0 && (cible.includes(pieceNom) || pieceNom.includes(cible));
+      });
+
+      const tachesEnRetard = tachesPiece.filter((t) => {
+        if (t.fait || !t.prochaine_fois) return false;
+        const date = new Date(t.prochaine_fois);
+        return !Number.isNaN(date.getTime()) && date < aujourdHui;
+      }).length;
+
+      const alertes: string[] = [];
+      const objetsProblemes = (piece.objets ?? []).filter(
+        (o) => o.statut === "hors_service" || o.statut === "a_reparer" || o.statut === "a_remplacer"
+      ).length;
+      if (objetsProblemes > 0) {
+        alertes.push(`${objetsProblemes} objet(s) à traiter`);
+      }
+      if (tachesEnRetard > 0) {
+        alertes.push(`${tachesEnRetard} tâche(s) en retard`);
+      }
+
+      map[piece.id] = {
+        piece_id: piece.id,
+        taches_total: tachesPiece.length,
+        taches_en_retard: tachesEnRetard,
+        alertes,
+      };
+    }
+
+    return map;
+  }, [pieces, tachesEntretien]);
+
   return (
     <div className="space-y-4">
       {/* En-tête */}
@@ -291,6 +338,7 @@ export default function PageVisualisation() {
                   pieces={pieces}
                   pieceSelectionnee={pieceSelectionnee}
                   onSelectPiece={setPieceSelectionnee}
+                  donneesParPiece={donneesParPiece}
                 />
               </div>
             ) : pieces && pieces.length > 0 ? (

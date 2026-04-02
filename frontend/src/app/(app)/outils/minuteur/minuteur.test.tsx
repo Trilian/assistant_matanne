@@ -5,6 +5,7 @@ import MinuteurPage from "@/app/(app)/outils/minuteur/page";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   usePathname: () => "/outils/minuteur",
+  useSearchParams: () => ({ get: vi.fn().mockReturnValue(null) }),
 }));
 
 describe("MinuteurPage", () => {

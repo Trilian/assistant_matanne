@@ -94,6 +94,78 @@ class InnovationsService(BaseAIService):
             service_name="innovations",
         )
 
+    @staticmethod
+    def _normaliser_niveau_autonomie(niveau: str | None) -> str:
+        """Normalise le niveau d'autonomie du mode pilote."""
+        if not niveau:
+            return "validation_requise"
+        niveau_norm = niveau.strip().lower()
+        niveaux_valides = {"off", "proposee", "validation_requise", "semi_auto", "auto"}
+        if niveau_norm not in niveaux_valides:
+            return "validation_requise"
+        return niveau_norm
+
+    def _lire_config_mode_pilote(self, user_id: int | None) -> tuple[bool, str]:
+        """Lit la configuration du mode pilote depuis les préférences profil."""
+        if not user_id:
+            return True, "validation_requise"
+
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models.users import ProfilUtilisateur
+
+                profil = session.get(ProfilUtilisateur, user_id)
+                if not profil:
+                    return True, "validation_requise"
+
+                preferences = dict(profil.preferences_modules or {})
+                innovations = dict(preferences.get("innovations") or {})
+                mode_pilote = dict(innovations.get("mode_pilote") or {})
+
+                actif = bool(mode_pilote.get("actif", True))
+                niveau = self._normaliser_niveau_autonomie(mode_pilote.get("niveau_autonomie"))
+                return actif, niveau
+        except Exception:
+            logger.warning("Lecture config mode pilote impossible", exc_info=True)
+            return True, "validation_requise"
+
+    @avec_gestion_erreurs(default_return=None)
+    def configurer_mode_pilote_automatique(
+        self,
+        user_id: int | None,
+        actif: bool,
+        niveau_autonomie: str = "validation_requise",
+    ) -> ModePiloteAutomatiqueResponse | None:
+        """Active/desactive le mode pilote et persiste la configuration utilisateur."""
+        if not user_id:
+            return self.obtenir_mode_pilote_automatique(user_id=None)
+
+        niveau_normalise = self._normaliser_niveau_autonomie(niveau_autonomie)
+
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models.users import ProfilUtilisateur
+
+                profil = session.get(ProfilUtilisateur, user_id)
+                if not profil:
+                    return self.obtenir_mode_pilote_automatique(user_id=None)
+
+                preferences = dict(profil.preferences_modules or {})
+                innovations = dict(preferences.get("innovations") or {})
+                innovations["mode_pilote"] = {
+                    "actif": bool(actif),
+                    "niveau_autonomie": niveau_normalise,
+                    "updated_at": datetime.now(UTC).isoformat(),
+                }
+                preferences["innovations"] = innovations
+                profil.preferences_modules = preferences
+                session.add(profil)
+                session.commit()
+        except Exception:
+            logger.warning("Ecriture config mode pilote impossible", exc_info=True)
+
+        return self.obtenir_mode_pilote_automatique(user_id=user_id)
+
     # ═══════════════════════════════════════════════════════════
     # PHASE 9 — IA AVANCÉE & INNOVATIONS
     # ═══════════════════════════════════════════════════════════
@@ -359,10 +431,20 @@ Retourne un JSON avec:
         ]
         return AlertesContextuellesResponse(nb_alertes=len(alertes), alertes=alertes)
 
-    @avec_cache(ttl=900, key_func=lambda self: "phase_e_mode_pilote")
     @avec_gestion_erreurs(default_return=None)
-    def obtenir_mode_pilote_automatique(self) -> ModePiloteAutomatiqueResponse | None:
+    def obtenir_mode_pilote_automatique(self, user_id: int | None = None) -> ModePiloteAutomatiqueResponse | None:
         """E1 : mode pilote automatique (propositions + validations)."""
+        actif, niveau_autonomie = self._lire_config_mode_pilote(user_id)
+        if not actif:
+            return ModePiloteAutomatiqueResponse(
+                actif=False,
+                niveau_autonomie="off",
+                actions=[],
+                recommandations=[
+                    "Mode pilote desactive. Activez-le pour recevoir des propositions IA automatiques.",
+                ],
+            )
+
         actions: list[ActionPiloteAutomatique] = []
 
         try:
@@ -418,13 +500,77 @@ Retourne un JSON avec:
 
         return ModePiloteAutomatiqueResponse(
             actif=True,
-            niveau_autonomie="validation_requise",
+            niveau_autonomie=niveau_autonomie,
             actions=actions,
             recommandations=[
                 "Valider les actions proposees pour activer l'automatisation complete.",
                 "Configurer une plage horaire de pilotage (soir 20h recommande).",
             ],
         )
+
+    @avec_gestion_erreurs(default_return=None)
+    def proposer_repas_adapte_garmin(
+        self,
+        user_id: int | None = None,
+    ) -> SuggestionRepasSoirResponse | None:
+        """E4.2 : adapte la proposition de repas selon la depense Garmin du jour."""
+        calories_brulees = 0
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models import Recette
+                from src.core.models.users import ProfilUtilisateur, ResumeQuotidienGarmin
+
+                profil_id = user_id
+                if not profil_id:
+                    profil = session.query(ProfilUtilisateur).order_by(ProfilUtilisateur.id.asc()).first()
+                    profil_id = profil.id if profil else None
+
+                if profil_id:
+                    resume = (
+                        session.query(ResumeQuotidienGarmin)
+                        .filter(ResumeQuotidienGarmin.user_id == profil_id)
+                        .order_by(ResumeQuotidienGarmin.date.desc())
+                        .first()
+                    )
+                    if resume:
+                        calories_brulees = int(resume.calories_actives or 0)
+
+                if calories_brulees >= 600:
+                    cible_max = 850
+                    strategie = "recharge"
+                elif calories_brulees >= 350:
+                    cible_max = 700
+                    strategie = "equilibre"
+                else:
+                    cible_max = 550
+                    strategie = "leger"
+
+                recettes = (
+                    session.query(Recette)
+                    .filter(Recette.calories.isnot(None), Recette.calories <= cible_max)
+                    .order_by(Recette.calories.desc())
+                    .limit(4)
+                    .all()
+                )
+                if not recettes:
+                    return self.suggerer_repas_ce_soir(temps_disponible_min=30, humeur="equilibre")
+
+                recette_principale = recettes[0]
+                alternatives = [r.nom for r in recettes[1:4]]
+                return SuggestionRepasSoirResponse(
+                    recette_suggeree=recette_principale.nom,
+                    raison=(
+                        f"Strategie {strategie} selon Garmin ({calories_brulees} kcal actives) "
+                        f"avec cible <= {cible_max} kcal."
+                    ),
+                    temps_total_estime_min=int(
+                        (recette_principale.temps_preparation or 0) + (recette_principale.temps_cuisson or 0)
+                    ),
+                    alternatives=alternatives,
+                )
+        except Exception:
+            logger.warning("Recommandation repas Garmin indisponible", exc_info=True)
+            return self.suggerer_repas_ce_soir(temps_disponible_min=25, humeur="rapide")
 
     @avec_cache(ttl=1800, key_func=lambda self: "phase_e_score_famille_hebdo")
     @avec_gestion_erreurs(default_return=None)

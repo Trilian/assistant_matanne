@@ -46,6 +46,7 @@ import {
   deconnecterGoogle,
   ajouterCalendrierIcal,
   supprimerCalendrier,
+  recurrenceLisible,
   type EvenementCalendrier,
 } from "@/bibliotheque/api/calendriers";
 import { toast } from "sonner";
@@ -442,6 +443,11 @@ function EvenementItem({ evenement }: { evenement: EvenementCalendrier }) {
         <p className="text-sm font-medium truncate">{evenement.titre}</p>
         {evenement.lieu && (
           <p className="text-xs text-muted-foreground truncate">{evenement.lieu}</p>
+        )}
+        {evenement.recurrence_rule && (
+          <Badge variant="outline" className="mt-1 text-[10px]">
+            {recurrenceLisible(evenement.recurrence_rule) || "Récurrence active"}
+          </Badge>
         )}
       </div>
     </li>

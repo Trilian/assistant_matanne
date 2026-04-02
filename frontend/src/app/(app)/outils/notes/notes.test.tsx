@@ -24,6 +24,7 @@ vi.mock("@/bibliotheque/api/outils", () => ({
   creerNote: vi.fn(),
   modifierNote: vi.fn(),
   supprimerNote: vi.fn(),
+  listerTagsNotes: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));

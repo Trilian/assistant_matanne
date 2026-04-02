@@ -5,6 +5,7 @@ import LotoPage from "./page";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   usePathname: () => "/jeux/loto",
+  useSearchParams: () => ({ get: vi.fn().mockReturnValue(null) }),
 }));
 
 const mockTirages = [
@@ -18,13 +19,28 @@ const mockGrilles = [
 vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: vi.fn().mockImplementation((key: string[]) => {
     if (key.includes("tirages")) return { data: mockTirages, isLoading: false };
+    if (key.includes("stats")) return { data: null, isLoading: false };
+    if (key.includes("retard")) return { data: [], isLoading: false };
+    if (key.includes("backtest")) return { data: null, isLoading: false };
     return { data: mockGrilles, isLoading: false };
   }),
+  utiliserMutation: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+  utiliserInvalidation: () => vi.fn(),
+}));
+
+vi.mock("@/crochets/utiliser-auth", () => ({
+  utiliserAuth: () => ({ user: null }),
 }));
 
 vi.mock("@/bibliotheque/api/jeux", () => ({
   listerTirages: vi.fn(),
   listerGrilles: vi.fn(),
+  obtenirStatsLoto: vi.fn(),
+  obtenirNumerosRetard: vi.fn(),
+  genererGrilleLoto: vi.fn(),
+  obtenirBacktest: vi.fn(),
+  genererGrilleIAPonderee: vi.fn(),
+  analyserGrilleJoueur: vi.fn(),
 }));
 
 describe("LotoPage", () => {
@@ -32,11 +48,11 @@ describe("LotoPage", () => {
 
   it("affiche le titre Loto", () => {
     render(<LotoPage />);
-    expect(screen.getByText(/Loto/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: /Loto/ })).toBeInTheDocument();
   });
 
-  it("affiche la section Derniers tirages", () => {
+  it("affiche la section Fréquences des numéros", () => {
     render(<LotoPage />);
-    expect(screen.getByText("Derniers tirages")).toBeInTheDocument();
+    expect(screen.getByText("Fréquences des numéros")).toBeInTheDocument();
   });
 });

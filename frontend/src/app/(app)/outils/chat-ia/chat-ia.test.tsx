@@ -10,6 +10,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/crochets/utiliser-api", () => ({
+  utiliserRequete: () => ({ data: null, isLoading: false, error: null }),
   utiliserMutation: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
@@ -17,22 +18,18 @@ vi.mock("@/bibliotheque/api/outils", () => ({
   obtenirSuggestionsRecettes: vi.fn(),
 }));
 
-const MockScrollArea = React.forwardRef<HTMLDivElement, { children: React.ReactNode; className?: string }>(
-  ({ children, className }, ref) => {
-    const internalRef = React.useRef<HTMLDivElement>(null);
-    React.useImperativeHandle(ref, () => {
-      const el = internalRef.current!;
-      if (el && !el.scrollTo) el.scrollTo = vi.fn();
-      return el;
-    });
-    return <div ref={internalRef} className={className}>{children}</div>;
-  }
-);
-
-MockScrollArea.displayName = "MockScrollArea";
-
 vi.mock("@/composants/ui/scroll-area", () => ({
-  ScrollArea: MockScrollArea,
+  ScrollArea: React.forwardRef<HTMLDivElement, { children: React.ReactNode; className?: string }>(
+    ({ children, className }, ref) => {
+      const internalRef = React.useRef<HTMLDivElement>(null);
+      React.useImperativeHandle(ref, () => {
+        const el = internalRef.current!;
+        if (el && !el.scrollTo) el.scrollTo = vi.fn();
+        return el;
+      });
+      return <div ref={internalRef} className={className}>{children}</div>;
+    }
+  ),
 }));
 
 function renderWithQuery(ui: React.ReactElement) {
@@ -50,16 +47,16 @@ describe("ChatIAPage", () => {
 
   it("affiche le message d'accueil", () => {
     renderWithQuery(<ChatIAPage />);
-    expect(screen.getByText(/suggestions de recettes/)).toBeInTheDocument();
+    expect(screen.getByText(/Assistant multi-contexte/)).toBeInTheDocument();
   });
 
   it("affiche le champ de saisie", () => {
     renderWithQuery(<ChatIAPage />);
-    expect(screen.getByPlaceholderText(/poulet/)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Posez votre question/)).toBeInTheDocument();
   });
 
   it("affiche le bouton Envoyer", () => {
     renderWithQuery(<ChatIAPage />);
-    expect(screen.getByText("Envoyer")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Envoyer le message/ })).toBeInTheDocument();
   });
 });

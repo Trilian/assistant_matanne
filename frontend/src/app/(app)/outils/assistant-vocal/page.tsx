@@ -190,25 +190,26 @@ export default function AssistantVocalPage() {
           )}
 
           {/* Zone de texte */}
-          <div className="flex gap-2">
+          <form
+            className="flex gap-2"
+            onSubmit={(e) => {
+              e.preventDefault()
+              envoyerCommande(texteTranscrit)
+            }}
+          >
             <input
               type="text"
               value={texteTranscrit}
               onChange={(e) => setTexteTranscrit(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  envoyerCommande(texteTranscrit)
-                }
-              }}
               placeholder="Texte transcrit ou tapez une commande..."
               className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               disabled={chargement}
             />
             <Button
-              onClick={() => envoyerCommande(texteTranscrit)}
+              type="submit"
               disabled={!texteTranscrit.trim() || chargement}
               size="icon"
+              aria-label="Envoyer"
             >
               {chargement ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -216,7 +217,7 @@ export default function AssistantVocalPage() {
                 <Send className="w-4 h-4" />
               )}
             </Button>
-          </div>
+          </form>
 
           {erreurNavigateur && (
             <p className="text-sm text-red-500 text-center">{erreurNavigateur}</p>

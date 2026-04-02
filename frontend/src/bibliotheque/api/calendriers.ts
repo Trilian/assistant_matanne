@@ -30,6 +30,88 @@ export interface EvenementCalendrier {
   source_calendrier_id?: number;
 }
 
+export interface RecurrenceAnalysee {
+  frequence: "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY" | "UNKNOWN";
+  intervalle: number;
+  joursSemaine: string[];
+}
+
+const MAP_JOURS: Record<string, string> = {
+  MO: "lundi",
+  TU: "mardi",
+  WE: "mercredi",
+  TH: "jeudi",
+  FR: "vendredi",
+  SA: "samedi",
+  SU: "dimanche",
+};
+
+export function analyserRecurrenceRule(recurrenceRule?: string): RecurrenceAnalysee {
+  if (!recurrenceRule) {
+    return { frequence: "UNKNOWN", intervalle: 1, joursSemaine: [] };
+  }
+
+  const segments = recurrenceRule
+    .split(";")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .reduce<Record<string, string>>((acc, part) => {
+      const [k, v] = part.split("=");
+      if (k && v) acc[k.toUpperCase()] = v.toUpperCase();
+      return acc;
+    }, {});
+
+  const freqRaw = segments.FREQ;
+  const frequence =
+    freqRaw === "DAILY" ||
+    freqRaw === "WEEKLY" ||
+    freqRaw === "MONTHLY" ||
+    freqRaw === "YEARLY"
+      ? freqRaw
+      : "UNKNOWN";
+
+  const intervalle = Number.parseInt(segments.INTERVAL ?? "1", 10);
+  const byDay = (segments.BYDAY ?? "")
+    .split(",")
+    .map((d) => d.trim())
+    .filter(Boolean)
+    .map((d) => MAP_JOURS[d] ?? d.toLowerCase());
+
+  return {
+    frequence,
+    intervalle: Number.isFinite(intervalle) && intervalle > 0 ? intervalle : 1,
+    joursSemaine: byDay,
+  };
+}
+
+export function recurrenceLisible(recurrenceRule?: string): string {
+  const parsed = analyserRecurrenceRule(recurrenceRule);
+  if (parsed.frequence === "UNKNOWN") return "";
+
+  if (parsed.frequence === "DAILY") {
+    return parsed.intervalle === 1
+      ? "Tous les jours"
+      : `Tous les ${parsed.intervalle} jours`;
+  }
+
+  if (parsed.frequence === "WEEKLY") {
+    if (parsed.joursSemaine.length > 0) {
+      return `Chaque ${parsed.joursSemaine.join(", ")}`;
+    }
+    return parsed.intervalle === 1
+      ? "Toutes les semaines"
+      : `Toutes les ${parsed.intervalle} semaines`;
+  }
+
+  if (parsed.frequence === "MONTHLY") {
+    return parsed.intervalle === 1
+      ? "Tous les mois"
+      : `Tous les ${parsed.intervalle} mois`;
+  }
+
+  return parsed.intervalle === 1 ? "Tous les ans" : `Tous les ${parsed.intervalle} ans`;
+}
+
 /** Lister les calendriers externes */
 export async function listerCalendriers(
   provider?: string

@@ -14,6 +14,11 @@ export interface ModePiloteAutoResponse {
   recommandations: string[];
 }
 
+export interface ConfigurationModePiloteRequest {
+  actif: boolean;
+  niveau_autonomie?: string;
+}
+
 export interface ScoreFamilleDimension {
   nom: string;
   score: number;
@@ -42,8 +47,22 @@ export interface RapportMensuelPdfResponse {
   contenu_base64: string;
 }
 
+export interface SuggestionRepasGarminResponse {
+  recette_suggeree: string;
+  raison: string;
+  temps_total_estime_min: number;
+  alternatives: string[];
+}
+
 export async function obtenirModePiloteAuto(): Promise<ModePiloteAutoResponse> {
   const { data } = await clientApi.get("/api/v1/innovations/phasee/mode-pilote");
+  return data;
+}
+
+export async function configurerModePiloteAuto(
+  payload: ConfigurationModePiloteRequest
+): Promise<ModePiloteAutoResponse> {
+  const { data } = await clientApi.post("/api/v1/innovations/phasee/mode-pilote/config", payload);
   return data;
 }
 
@@ -66,6 +85,11 @@ export async function obtenirRapportMensuelPdf(mois?: string): Promise<RapportMe
   const { data } = await clientApi.get("/api/v1/innovations/phasee/rapport-mensuel/pdf", {
     params: { mois },
   });
+  return data;
+}
+
+export async function obtenirSuggestionRepasGarmin(): Promise<SuggestionRepasGarminResponse> {
+  const { data } = await clientApi.get("/api/v1/innovations/phasee/garmin-repas-adaptatif");
   return data;
 }
 

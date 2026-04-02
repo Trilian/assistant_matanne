@@ -30,6 +30,7 @@ import {
   listerCalendriers,
   listerEvenements,
   evenementsAujourdHui,
+  synchroniserGoogle,
 } from "@/bibliotheque/api/calendriers";
 
 const mockedApi = vi.mocked(clientApi);
@@ -154,6 +155,31 @@ describe("API Calendriers", () => {
       "/calendriers/evenements?date_debut=2025-01-01&date_fin=2025-01-31"
     );
     expect(result).toEqual([]);
+  });
+
+  it("listerEvenements inclut les filtres avancés (calendrier_id)", async () => {
+    mockedApi.get.mockResolvedValueOnce({ data: { items: [] } });
+
+    await listerEvenements({ calendrier_id: 7, date_debut: "2026-04-01", date_fin: "2026-04-08" });
+
+    expect(mockedApi.get).toHaveBeenCalledWith(
+      "/calendriers/evenements?calendrier_id=7&date_debut=2026-04-01&date_fin=2026-04-08"
+    );
+  });
+
+  it("listerCalendriers accepte le filtre provider", async () => {
+    mockedApi.get.mockResolvedValueOnce({ data: { items: [] } });
+
+    await listerCalendriers("ical_url");
+
+    expect(mockedApi.get).toHaveBeenCalledWith("/calendriers?provider=ical_url");
+  });
+
+  it("propage les erreurs réseau sur synchroniserGoogle", async () => {
+    const erreur = new Error("network");
+    mockedApi.post.mockRejectedValueOnce(erreur);
+
+    await expect(synchroniserGoogle()).rejects.toThrow("network");
   });
 
   it("evenementsAujourdHui appelle GET /calendriers/evenements/aujourd-hui", async () => {

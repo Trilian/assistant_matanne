@@ -1,12 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
+import { render } from "@testing-library/react";
 import PagePlanning from "./page";
+
+const { mockRedirect } = vi.hoisted(() => ({
+  mockRedirect: vi.fn(),
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   usePathname: () => "/planning",
+  redirect: mockRedirect,
 }));
 
 vi.mock("next/link", () => ({
@@ -15,35 +18,11 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@/crochets/utiliser-api", () => ({
-  utiliserRequete: () => ({ data: { repas: [] }, isLoading: false, error: null }),
-  utiliserMutation: () => ({ mutate: vi.fn(), isPending: false }),
-  utiliserInvalidation: () => vi.fn(),
-}));
-
-vi.mock("@/bibliotheque/api/planning", () => ({
-  obtenirPlanningSemaine: vi.fn(),
-  definirRepas: vi.fn(),
-  supprimerRepas: vi.fn(),
-  genererPlanningSemaine: vi.fn(),
-}));
-
-function renderWithQuery(ui: React.ReactElement) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
-}
-
 describe("PagePlanning", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("affiche le titre Planning", () => {
-    renderWithQuery(<PagePlanning />);
-    expect(screen.getByRole("heading", { name: /Planning/ })).toBeInTheDocument();
-  });
-
-  it("affiche les jours de la semaine", () => {
-    renderWithQuery(<PagePlanning />);
-    expect(screen.getByText("Lundi")).toBeInTheDocument();
-    expect(screen.getByText("Dimanche")).toBeInTheDocument();
+  it("redirige vers /cuisine/planning", () => {
+    render(<PagePlanning />);
+    expect(mockRedirect).toHaveBeenCalledWith("/cuisine/planning");
   });
 });

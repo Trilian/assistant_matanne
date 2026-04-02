@@ -36,6 +36,7 @@ from src.api.schemas.innovations import (
     CoachRoutinesResponse,
     ComparateurEnergieRequest,
     ComparateurEnergieResponse,
+    ModePiloteConfigurationRequest,
     DonneesInviteResponse,
     EnrichissementContactsResponse,
     LienInviteRequest,
@@ -277,8 +278,32 @@ async def phasee_mode_pilote(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
-    result = service.obtenir_mode_pilote_automatique()
+    user_id_raw = user.get("id")
+    user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
+    result = service.obtenir_mode_pilote_automatique(user_id=user_id)
     return result or ModePiloteAutomatiqueResponse()
+
+
+@router.post(
+    "/phasee/mode-pilote/config",
+    response_model=ModePiloteAutomatiqueResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="E1 Config mode pilote automatique",
+)
+@gerer_exception_api
+async def phasee_configurer_mode_pilote(
+    body: ModePiloteConfigurationRequest,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    user_id_raw = user.get("id")
+    user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
+    result = service.configurer_mode_pilote_automatique(
+        user_id=user_id,
+        actif=body.actif,
+        niveau_autonomie=body.niveau_autonomie,
+    )
+    return result or ModePiloteAutomatiqueResponse(actif=body.actif)
 
 
 @router.get(
@@ -341,6 +366,23 @@ async def phasee_rapport_mensuel_pdf(
     service = _get_service()
     result = service.generer_rapport_mensuel_pdf(mois=mois)
     return result or RapportMensuelPdfResponse()
+
+
+@router.get(
+    "/phasee/garmin-repas-adaptatif",
+    response_model=SuggestionRepasSoirResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="E4.2 Repas adapte a la depense Garmin",
+)
+@gerer_exception_api
+async def phasee_garmin_repas_adaptatif(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    user_id_raw = user.get("id")
+    user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
+    result = service.proposer_repas_adapte_garmin(user_id=user_id)
+    return result or SuggestionRepasSoirResponse()
 
 
 @router.get(

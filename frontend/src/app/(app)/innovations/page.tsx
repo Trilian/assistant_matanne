@@ -1,24 +1,46 @@
 "use client";
 
-import { Bot, Download, Sparkles, Trophy } from "lucide-react";
+import { Bot, Download, Flame, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
-import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
+import { Switch } from "@/composants/ui/switch";
+import { utiliserInvalidation, utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
 import {
+  configurerModePiloteAuto,
   obtenirJournalFamilialAuto,
   obtenirJournalFamilialPdf,
   obtenirModePiloteAuto,
   obtenirRapportMensuelPdf,
   obtenirScoreFamilleHebdo,
+  obtenirSuggestionRepasGarmin,
   telechargerPdfBase64,
 } from "@/bibliotheque/api/innovations";
 import { toast } from "sonner";
 
 export default function PageInnovations() {
+  const invalider = utiliserInvalidation();
   const { data: modePilote } = utiliserRequete(["innovations", "mode-pilote"], obtenirModePiloteAuto);
   const { data: scoreFamille } = utiliserRequete(["innovations", "score-famille"], obtenirScoreFamilleHebdo);
   const { data: journal } = utiliserRequete(["innovations", "journal-familial"], obtenirJournalFamilialAuto);
+  const { data: repasGarmin } = utiliserRequete(["innovations", "garmin-repas"], obtenirSuggestionRepasGarmin);
+
+  const { mutate: basculerModePilote, isPending: basculeEnCours } = utiliserMutation(
+    (actif: boolean) =>
+      configurerModePiloteAuto({
+        actif,
+        niveau_autonomie: actif ? modePilote?.niveau_autonomie ?? "validation_requise" : "off",
+      }),
+    {
+      onSuccess: (data) => {
+        invalider(["innovations", "mode-pilote"]);
+        toast.success(data.actif ? "Mode pilote active" : "Mode pilote desactive");
+      },
+      onError: () => {
+        toast.error("Impossible de mettre a jour le mode pilote");
+      },
+    }
+  );
 
   const { mutate: telechargerJournal, isPending: telechargementJournal } = utiliserMutation(
     () => obtenirJournalFamilialPdf(),
@@ -57,6 +79,14 @@ export default function PageInnovations() {
             <CardDescription>Niveau: {modePilote?.niveau_autonomie ?? "-"}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
+            <div className="flex items-center justify-between rounded-md border p-2">
+              <p className="text-sm">Activer le pilotage IA</p>
+              <Switch
+                checked={Boolean(modePilote?.actif)}
+                disabled={basculeEnCours}
+                onCheckedChange={(actif) => basculerModePilote(actif)}
+              />
+            </div>
             {(modePilote?.actions ?? []).length === 0 ? (
               <p className="text-sm text-muted-foreground">Aucune action proposée pour le moment.</p>
             ) : (
@@ -93,6 +123,29 @@ export default function PageInnovations() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Flame className="h-5 w-5" />
+            Adaptation Repas selon Garmin
+          </CardTitle>
+          <CardDescription>Proposition automatique selon la depense energetique recente.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <p className="font-medium">{repasGarmin?.recette_suggeree ?? "Suggestion indisponible"}</p>
+          <p className="text-sm text-muted-foreground">{repasGarmin?.raison ?? ""}</p>
+          {(repasGarmin?.alternatives ?? []).length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {repasGarmin?.alternatives.map((alt) => (
+                <Badge key={alt} variant="outline">
+                  {alt}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -55,6 +55,24 @@ export function utiliserHorsLigne() {
     return () => clearInterval(interval)
   }, [estHorsLigne])
 
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return
+
+    const handleMessage = (event: MessageEvent) => {
+      const data = event.data as { type?: string; pending?: number } | undefined
+      if (!data?.type) return
+      if (data.type === "SYNC_QUEUE_UPDATED") {
+        setNbEnAttente(typeof data.pending === "number" ? data.pending : 0)
+      }
+      if (data.type === "SYNC_QUEUE_FLUSHED") {
+        setNbEnAttente(0)
+      }
+    }
+
+    navigator.serviceWorker.addEventListener("message", handleMessage)
+    return () => navigator.serviceWorker.removeEventListener("message", handleMessage)
+  }, [])
+
   const forcerSync = useCallback(async () => {
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       const reg = await navigator.serviceWorker.ready

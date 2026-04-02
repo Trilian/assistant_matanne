@@ -40,11 +40,22 @@ function renderWithQuery(ui: React.ReactElement) {
 beforeEach(() => {
   vi.clearAllMocks();
   mockedNutrition.mockResolvedValue({
-    calories_total: 1800,
-    proteines_g: 80,
-    lipides_g: 60,
-    glucides_g: 220,
-    nb_repas: 21,
+    moyenne_calories_par_jour: 1800,
+    totaux: {
+      proteines: 560,
+      lipides: 420,
+      glucides: 1540,
+    },
+    nb_repas_sans_donnees: 0,
+    par_jour: {
+      lundi: { calories: 1750 },
+      mardi: { calories: 1800 },
+      mercredi: { calories: 1850 },
+      jeudi: { calories: 1700 },
+      vendredi: { calories: 1900 },
+      samedi: { calories: 1950 },
+      dimanche: { calories: 1750 },
+    },
   } as never);
 });
 
@@ -65,7 +76,7 @@ describe("NutritionistePage — rendu initial", () => {
     renderWithQuery(React.createElement(NutritionistePage));
     await waitFor(() => {
       // Les calories de la semaine doivent apparaître
-      expect(screen.getByText(/1\s*800|1800/)).toBeDefined();
+      expect(screen.getAllByText(/1\s*800|1800/).length).toBeGreaterThan(0);
     });
   });
 });

@@ -15,7 +15,17 @@ vi.mock("next/link", () => ({
 
 vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: () => ({
-    data: { total_paris: 5, benefice: 120.5, taux_reussite: 68 },
+    data: {
+      value_bets: [],
+      opportunites: [],
+      loto_retard: [],
+      kpis: {
+        roi_mois: 12.5,
+        taux_reussite_mois: 0.68,
+        benefice_mois: 120.5,
+        paris_actifs: 5,
+      },
+    },
     isLoading: false,
     error: null,
   }),
@@ -31,24 +41,24 @@ describe("PageJeux (Hub)", () => {
 
   it("affiche les 3 sections", () => {
     render(<PageJeux />);
-    expect(screen.getByText("Paris sportifs")).toBeInTheDocument();
+    expect(screen.getByText("Paris")).toBeInTheDocument();
     expect(screen.getByText("Loto")).toBeInTheDocument();
     expect(screen.getByText("Euromillions")).toBeInTheDocument();
   });
 
   it("affiche les stats paris", () => {
     render(<PageJeux />);
-    expect(screen.getByText("Total paris")).toBeInTheDocument();
+    expect(screen.getByText("ROI ce mois")).toBeInTheDocument();
     expect(screen.getByText("Bénéfice")).toBeInTheDocument();
-    expect(screen.getByText("Taux de réussite")).toBeInTheDocument();
+    expect(screen.getByText("Taux réussite")).toBeInTheDocument();
   });
 
   it("rend les liens corrects", () => {
     render(<PageJeux />);
     const links = screen.getAllByRole("link");
     const hrefs = links.map((l) => l.getAttribute("href"));
-    expect(hrefs).toContain("/jeux/paris");
-    expect(hrefs).toContain("/jeux/loto");
-    expect(hrefs).toContain("/jeux/euromillions");
+    expect(hrefs).toContain("/jeux/ocr-ticket");
+    expect(hrefs).toContain("/jeux/performance");
+    expect(hrefs).toContain("/jeux/bankroll");
   });
 });
