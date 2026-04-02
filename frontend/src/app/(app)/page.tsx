@@ -36,6 +36,7 @@ import {
   obtenirBilanMensuel,
   obtenirAlertesContextuelles,
   obtenirConfigDashboard,
+  enregistrerActionWidgetDashboard,
   obtenirPointsFamille,
   obtenirScoreEcologique,
   obtenirScoreBienEtre,
@@ -193,6 +194,15 @@ export default function PageAccueil() {
     }
   );
 
+  const { mutate: tracerActionWidgetDashboard } = utiliserMutation(
+    enregistrerActionWidgetDashboard,
+    {
+      onError: () => {
+        // Le tracking ne doit jamais bloquer l'interaction utilisateur.
+      },
+    }
+  );
+
   const { mutate: basculerTacheDashboard, isPending: basculeTacheEnCours } =
     utiliserMutation(
       async ({ idSource, fait }: { idSource: number; fait: boolean }) =>
@@ -341,6 +351,11 @@ export default function PageAccueil() {
     setWidgets(prochain);
     setWidgetsStockes(prochain);
     sauvegarderWidgets(prochain);
+    tracerActionWidgetDashboard({
+      widget_id: cle,
+      action: prochain[cle] ? "afficher" : "masquer",
+      donnees: { visible: prochain[cle] },
+    });
   }
 
   return (
@@ -398,7 +413,14 @@ export default function PageAccueil() {
 
       <GrilleDashboardDnd
         ordre={ordreWidgets}
-        onOrdreChange={(nouvelOrdre) => setOrdreWidgets(nouvelOrdre)}
+        onOrdreChange={(nouvelOrdre) => {
+          setOrdreWidgets(nouvelOrdre);
+          tracerActionWidgetDashboard({
+            widget_id: "dashboard",
+            action: "reordonner_widgets",
+            donnees: { ordre: nouvelOrdre },
+          });
+        }}
       >
 
       {widgets.meteo && meteo && (
@@ -828,6 +850,11 @@ export default function PageAccueil() {
                       onClick={() => {
                         if (!idSource) return;
                         basculerTacheDashboard({ idSource, fait: !fait });
+                        tracerActionWidgetDashboard({
+                          widget_id: "checklist_jour",
+                          action: !fait ? "valider_tache" : "annuler_tache",
+                          donnees: { id_source: idSource, fait: !fait, nom },
+                        });
                       }}
                     >
                       {fait ? "Annuler" : "Valider"}
@@ -843,7 +870,14 @@ export default function PageAccueil() {
                   <SwipeableItem
                     key={`${nom}-${idSource}`}
                     labelDroit="Valider"
-                    onSwipeRight={() => basculerTacheDashboard({ idSource, fait: true })}
+                    onSwipeRight={() => {
+                      basculerTacheDashboard({ idSource, fait: true });
+                      tracerActionWidgetDashboard({
+                        widget_id: "checklist_jour",
+                        action: "valider_tache_swipe",
+                        donnees: { id_source: idSource, fait: true, nom },
+                      });
+                    }}
                     desactiverGauche
                   >
                     {contenu}

@@ -64,6 +64,18 @@ export interface ConfigDashboard {
   config_dashboard: Record<string, boolean>;
 }
 
+export interface WidgetActionPayload {
+  widget_id: string;
+  action: string;
+  donnees?: Record<string, unknown>;
+}
+
+export interface WidgetActionResponse {
+  widget_id: string;
+  action: string;
+  statut: string;
+}
+
 export interface AlerteContextuelle {
   type: string;
   module: string;
@@ -126,6 +138,18 @@ export async function sauvegarderConfigDashboard(
 ): Promise<ConfigDashboard> {
   const { data } = await clientApi.put<ConfigDashboard>("/dashboard/config", {
     config_dashboard: configDashboard,
+  });
+  return data;
+}
+
+/** Enregistrer une action utilisateur liée à un widget dashboard */
+export async function enregistrerActionWidgetDashboard(
+  payload: WidgetActionPayload
+): Promise<WidgetActionResponse> {
+  const { data } = await clientApi.post<WidgetActionResponse>("/dashboard/widgets/action", {
+    widget_id: payload.widget_id,
+    action: payload.action,
+    donnees: payload.donnees ?? {},
   });
   return data;
 }

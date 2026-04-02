@@ -914,6 +914,25 @@ def _bridge_verifier_anomalies_budget(event: EvenementDomaine) -> None:
         logger.warning("Échec bridge budget→anomalies: %s", e)
 
 
+def _traiter_action_rapide_dashboard(event: EvenementDomaine) -> None:
+    """Dashboard action rapide → invalider le cache dashboard et journaliser l'intention métier."""
+    try:
+        from src.core.caching import obtenir_cache
+
+        cache = obtenir_cache()
+        nb = cache.invalidate(pattern="dashboard")
+        widget_id = event.data.get("widget_id") or "inconnu"
+        action = event.data.get("action") or event.type
+        logger.info(
+            "Dashboard action rapide: widget=%s action=%s cache_invalide=%d",
+            widget_id,
+            action,
+            nb,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec traitement dashboard.widget.action_rapide: %s", e)
+
+
 # ═══════════════════════════════════════════════════════════
 # ENREGISTREMENT — Appelé au bootstrap
 # ═══════════════════════════════════════════════════════════
@@ -1078,6 +1097,9 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("jardin.recolte", _bridge_recolte_vers_recettes, priority=75)
     compteur += 1
     bus.souscrire("budget.modifie", _bridge_verifier_anomalies_budget, priority=75)
+    compteur += 1
+
+    bus.souscrire("dashboard.widget.action_rapide", _traiter_action_rapide_dashboard, priority=75)
     compteur += 1
 
     # ── Métriques (priorité moyenne) ──

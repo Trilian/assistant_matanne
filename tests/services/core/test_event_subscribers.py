@@ -65,6 +65,7 @@ class TestEventSubscribers:
         assert "budget.depassement" in events
         assert "inventaire.modification_importante" in events
         assert "recette.feedback" in events
+        assert "dashboard.widget.action_rapide" in events
         mod._subscribers_enregistres = False
 
     def test_subscriber_energie_cree_tache_entretien(self):
@@ -100,3 +101,19 @@ class TestEventSubscribers:
         patterns = [call.kwargs.get("pattern") for call in mock_cache.invalidate.call_args_list]
         assert "dashboard" in patterns
         assert "budget" in patterns
+
+    def test_subscriber_dashboard_widget_action_invalide_cache(self):
+        from src.services.core.events.subscribers import _traiter_action_rapide_dashboard
+
+        event = EvenementDomaine(
+            type="dashboard.widget.action_rapide",
+            data={"widget_id": "checklist_jour", "action": "valider_tache"},
+            source="test",
+        )
+        with patch("src.core.caching.obtenir_cache") as mock_cache_fn:
+            mock_cache = MagicMock()
+            mock_cache_fn.return_value = mock_cache
+            _traiter_action_rapide_dashboard(event)
+
+        patterns = [call.kwargs.get("pattern") for call in mock_cache.invalidate.call_args_list]
+        assert "dashboard" in patterns

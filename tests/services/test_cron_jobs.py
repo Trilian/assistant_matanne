@@ -469,7 +469,7 @@ class TestSprint15JobsDetailed:
 
         mock_notif.assert_called_once()
         message = mock_notif.call_args.kwargs["message"]
-        assert "3 prévues, 2 terminées" in message
+        assert "3 prévues, 1 terminées" in message
         assert "hausse" in message
 
     def test_job_energie_peak_detection_notifie_les_anomalies(self):

@@ -12,6 +12,7 @@ import httpx
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport
+from typing import Any, cast
 from unittest.mock import patch
 
 
@@ -179,6 +180,90 @@ class TestAdminJobsACL:
             relancer_exception=True,
         )
 
+    @pytest.mark.asyncio
+    async def test_jobs_liste_inclut_job_sprint_15_si_scheduler_actif(self, async_client: httpx.AsyncClient):
+        class FakeScheduler:
+            running = True
+
+            def get_jobs(self) -> list[object]:
+                return [job]
+
+        job = type(
+            "FakeJob",
+            (),
+            {
+                "id": "job_briefing_matinal_push",
+                "name": "Briefing matinal IA",
+                "trigger": "cron[hour='7', minute='0']",
+                "next_run_time": None,
+            },
+        )()
+        fake_scheduler = FakeScheduler()
+        fake_demarreur = type("FakeDemarreur", (), {"_scheduler": fake_scheduler})()
+
+        with patch("src.services.core.cron.jobs._demarreur", fake_demarreur):
+            response = await async_client.get("/api/v1/admin/jobs")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["id"] == "job_briefing_matinal_push"
+        assert data[0]["nom"] == "S15.7 Briefing matinal IA (07h00)"
+        assert data[0]["statut"] == "inactif"
+
+    @pytest.mark.asyncio
+    async def test_executer_job_dry_run_sprint_15(self, async_client: httpx.AsyncClient):
+        with (
+            patch("src.api.routes.admin._verifier_limite_jobs"),
+            patch("src.api.routes.admin._ajouter_log_job"),
+            patch("src.api.routes.admin._journaliser_action_admin"),
+            patch(
+                "src.services.core.cron.jobs.lister_jobs_disponibles",
+                return_value=["job_nutrition_adultes_weekly"],
+            ),
+            patch(
+                "src.services.core.cron.jobs.executer_job_par_id",
+                return_value={
+                    "status": "dry_run",
+                    "job_id": "job_nutrition_adultes_weekly",
+                    "message": "Job 'job_nutrition_adultes_weekly' simulé (dry-run).",
+                    "duration_ms": 11,
+                    "dry_run": True,
+                },
+            ) as mock_exec,
+        ):
+            response = await async_client.post(
+                "/api/v1/admin/jobs/job_nutrition_adultes_weekly/run?dry_run=true"
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "dry_run"
+        assert data["job_id"] == "job_nutrition_adultes_weekly"
+        assert data["dry_run"] is True
+        mock_exec.assert_called_once_with(
+            "job_nutrition_adultes_weekly",
+            dry_run=True,
+            source="manual",
+            triggered_by_user_id="test-user",
+            relancer_exception=True,
+        )
+
+    @pytest.mark.asyncio
+    async def test_executer_job_inconnu_retourne_404(self, async_client: httpx.AsyncClient):
+        with (
+            patch("src.api.routes.admin._verifier_limite_jobs"),
+            patch(
+                "src.services.core.cron.jobs.lister_jobs_disponibles",
+                return_value=["job_briefing_matinal_push"],
+            ),
+        ):
+            response = await async_client.post("/api/v1/admin/jobs/job_inconnu/run")
+
+        assert response.status_code == 404
+        data = response.json()
+        assert "job_inconnu" in data["detail"]
+
 
 class TestAdminSqlViewsACL:
     """GET /api/v1/admin/sql-views* — contrôle d'accès admin."""
@@ -257,7 +342,7 @@ class TestAdminPhase7Endpoints:
     async def test_live_snapshot(self, async_client: httpx.AsyncClient):
         response = await async_client.get("/api/v1/admin/live-snapshot")
         assert response.status_code == 200
-        data = response.json()
+        assert isinstance(response.json(), dict)
 
 
 class TestAdminPhase5BridgesStatus:
@@ -283,7 +368,7 @@ class TestAdminRouterExiste:
     def test_routes_admin_enregistrees(self):
         from src.api.main import app
 
-        paths = [r.path for r in app.routes if hasattr(r, "path")]
+        paths = [cast(Any, r).path for r in app.routes if hasattr(r, "path")]
         admin_paths = [p for p in paths if "/admin/" in p]
         assert len(admin_paths) >= 2, f"Routes admin introuvables. Chemins: {paths[:20]}"
 
@@ -499,6 +584,6 @@ class TestRGPDRouterExiste:
     def test_routes_rgpd_enregistrees(self):
         from src.api.main import app
 
-        paths = [r.path for r in app.routes if hasattr(r, "path")]
+        paths = [cast(Any, r).path for r in app.routes if hasattr(r, "path")]
         rgpd_paths = [p for p in paths if "/rgpd/" in p or "rgpd" in p]
         assert len(rgpd_paths) >= 2, f"Routes RGPD introuvables. Chemins: {paths[:30]}"

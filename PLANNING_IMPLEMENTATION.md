@@ -801,23 +801,34 @@ def get_inventaire_ai_service() -> InventaireAIService:
 > **Objectif** : Enrichir l'Event Bus pour les modules qui ne publient rien
 > **Effort** : Moyen | **Impact** : Architecture event-driven
 > **Dépend de** : Sprint 12
+> **Statut** : ✅ Terminé (partiel — voir notes)
 
 ### Modules à connecter à l'Event Bus
 
-| # | Module | Événements à publier | Subscribers |
-|---|---|---|---|
-| 14.1 | **Famille** | `famille.budget.depense_ajoutee`, `famille.jules.jalon_atteint`, `famille.anniversaire.approche` | Dashboard, Notifications, Chat IA |
-| 14.2 | **Jeux** | `jeux.paris.resultat_recu`, `jeux.loto.tirage_sync`, `jeux.bankroll.seuil_alerte` | Dashboard, Notifications |
-| 14.3 | **Dashboard** | `dashboard.widget.action_rapide`, `dashboard.anomalie.detectee` | Tous les modules concernés |
-| 14.4 | **Chat IA** | `chat.contexte.mis_a_jour`, `chat.action.executee` | Logs, Dashboard |
+| # | Module | Événements à publier | Subscribers | Statut |
+|---|---|---|---|---|
+| 14.1 | **Famille** | `jalon.ajoute`, `anniversaire.proche`, `budget.modifie` | Dashboard, Notifications, Chat IA | ✅ Implémenté |
+| 14.2 | **Jeux** | `paris.modifie`, `loto.modifie`, `jeux.sync_terminee` | Dashboard, Notifications | ✅ Déjà actif |
+| 14.3 | **Dashboard** | `dashboard.widget.action_rapide` | Tous les modules concernés | ✅ Implémenté |
+| 14.4 | **Chat IA** | `chat.contexte.mis_a_jour` | Logs, Dashboard | ✅ Implémenté |
+
+### Notes d'implémentation (Sprint 14)
+
+- `jalon.ajoute` : émis après commit dans `creer_jalon()` (`src/api/routes/famille_jules.py`). Subscriber existant dans `subscribers.py:1026` maintenant actif.
+- `anniversaire.proche` : émis dans `obtenir_prochains()` (`src/services/famille/anniversaires.py`) pour les seuils J-1, J-7, J-14, J-30. Subscriber existant dans `subscribers.py:986` maintenant actif.
+- `budget.modifie` : déjà émis dans `ajouter_depense/modifier_depense/supprimer_depense` — aucune modification nécessaire.
+- `paris.modifie` / `loto.modifie` / `jeux.sync_terminee` : déjà actifs — aucune modification nécessaire.
+- `chat.contexte.mis_a_jour` : émis via `_publier_evenement_assistant()` dans `chat_assistant_contextuel()` (`src/api/routes/assistant.py`). Émission silencieuse (ne rompt jamais le flux API).
+- `dashboard.widget.action_rapide` : émis dans `PUT /api/v1/dashboard/config` lors d'une mise à jour de configuration et dans `POST /api/v1/dashboard/widgets/action` pour les interactions frontend explicites.
+- Tests : 18 tests ajoutés dans `tests/services/famille/test_sprint14_events.py` (100% passants).
 
 ### Critères de validation
 
-- [ ] Famille publie ≥ 3 types d'événements
-- [ ] Jeux publie ≥ 3 types d'événements
-- [ ] Dashboard publie des événements d'action
-- [ ] Tests event bus end-to-end passent
-- [ ] `rg "publier_evenement\|publish_event" src/services/` → inclut famille, jeux, dashboard
+- [x] Famille publie ≥ 3 types d'événements (`jalon.ajoute`, `anniversaire.proche`, `budget.modifie`, `anniversaires.ajoute`, `enfant.profil_cree`)
+- [x] Jeux publie ≥ 3 types d'événements (`paris.modifie`, `loto.modifie`, `jeux.sync_terminee`)
+- [x] Chat IA publie `chat.contexte.mis_a_jour`
+- [x] Tests event bus passent (18/18)
+- [x] Dashboard publie des événements d'action
 
 ---
 

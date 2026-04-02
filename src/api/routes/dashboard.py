@@ -746,10 +746,28 @@ async def sauvegarder_config_dashboard(
                 session.add(pref)
             pref.config_dashboard = payload.config_dashboard
             session.commit()
-            return {
-                "message": "Configuration dashboard sauvegardÃ©e",
-                "config_dashboard": pref.config_dashboard,
-            }
+
+        try:
+            from src.services.core.events import obtenir_bus
+
+            obtenir_bus().emettre(
+                "dashboard.widget.action_rapide",
+                {
+                    "action": "config_update",
+                    "widget_id": None,
+                    "nb_widgets": len(payload.config_dashboard)
+                    if isinstance(payload.config_dashboard, dict)
+                    else None,
+                },
+                source="dashboard",
+            )
+        except Exception:
+            pass
+
+        return {
+            "message": "Configuration dashboard sauvegardée",
+            "config_dashboard": payload.config_dashboard,
+        }
 
     return await executer_async(_query)
 
@@ -1202,4 +1220,52 @@ async def obtenir_documents_expirants(
             }
 
     return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# ACTIONS RAPIDES WIDGETS
+# ═══════════════════════════════════════════════════════════
+
+
+class WidgetActionRequest(BaseModel):
+    widget_id: str = Field(..., description="Identifiant du widget (ex: 'courses', 'planning')")
+    action: str = Field(..., description="Type d'action (ex: 'marquer_vu', 'snooze', 'refresh')")
+    donnees: dict[str, Any] = Field(default_factory=dict, description="Données optionnelles de l'action")
+
+
+@router.post(
+    "/widgets/action",
+    responses=REPONSES_LISTE,
+    summary="Enregistrer une action rapide d'un widget",
+)
+@gerer_exception_api
+async def enregistrer_action_widget(
+    payload: WidgetActionRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Publie un événement dashboard.widget.action_rapide depuis le frontend.
+
+    Permet au dashboard de signaler qu'un utilisateur a interagi avec un widget
+    (marquer comme vu, snoozer une alerte, déclencher un refresh, etc.).
+    """
+    try:
+        from src.services.core.events import obtenir_bus
+
+        obtenir_bus().emettre(
+            "dashboard.widget.action_rapide",
+            {
+                "action": payload.action,
+                "widget_id": payload.widget_id,
+                "donnees": payload.donnees,
+            },
+            source="dashboard",
+        )
+    except Exception:
+        pass
+
+    return {
+        "widget_id": payload.widget_id,
+        "action": payload.action,
+        "statut": "ok",
+    }
 

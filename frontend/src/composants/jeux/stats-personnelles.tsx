@@ -228,7 +228,7 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
             </CardHeader>
             <CardContent>
               {chartData && (
-                <div style={{ height: '300px' }}>
+                <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />

@@ -28,6 +28,7 @@ import { cn } from "@/bibliotheque/utils";
 interface GrilleDashboardDndProps {
   ordre: string[];
   onOrdreChange: (nouvelOrdre: string[]) => void;
+  onWidgetReorder?: (details: { widgetId: string; fromIndex: number; toIndex: number; ordre: string[] }) => void;
   children: React.ReactNode;
 }
 
@@ -69,6 +70,7 @@ function WidgetSortable({
 export function GrilleDashboardDnd({
   ordre,
   onOrdreChange,
+  onWidgetReorder,
   children,
 }: GrilleDashboardDndProps) {
   const sensors = useSensors(
@@ -90,9 +92,15 @@ export function GrilleDashboardDnd({
         const newIndex = ordre.indexOf(over.id as string);
         const nouvelOrdre = arrayMove(ordre, oldIndex, newIndex);
         onOrdreChange(nouvelOrdre);
+        onWidgetReorder?.({
+          widgetId: String(active.id),
+          fromIndex: oldIndex,
+          toIndex: newIndex,
+          ordre: nouvelOrdre,
+        });
       }
     },
-    [ordre, onOrdreChange]
+    [ordre, onOrdreChange, onWidgetReorder]
   );
 
   return (
