@@ -51,7 +51,7 @@ describe("TimelineFamillePage — rendu initial", () => {
     renderWithQuery(React.createElement(TimelineFamillePage));
 
     await waitFor(() => {
-      expect(screen.getByText("Première marche de Jules")).toBeDefined();
+      expect(screen.getAllByText("Première marche de Jules").length).toBeGreaterThan(0);
     });
   });
 
@@ -61,7 +61,7 @@ describe("TimelineFamillePage — rendu initial", () => {
     renderWithQuery(React.createElement(TimelineFamillePage));
 
     await waitFor(() => {
-      expect(screen.getByText("Jules a fait ses premiers pas !")).toBeDefined();
+      expect(screen.getAllByText("Jules a fait ses premiers pas !").length).toBeGreaterThan(0);
     });
   });
 

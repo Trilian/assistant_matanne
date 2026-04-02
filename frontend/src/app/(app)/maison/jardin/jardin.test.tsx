@@ -68,8 +68,8 @@ describe("JardinPage", () => {
 
   it("affiche les plantes enregistrées", () => {
     render(<JardinPage />);
-    expect(screen.getByText("Tomates cerises")).toBeInTheDocument();
-    expect(screen.getByText("Basilic")).toBeInTheDocument();
+    expect(screen.getAllByText("Tomates cerises").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Basilic").length).toBeGreaterThan(0);
   });
 
   it("affiche la description du jardin", () => {

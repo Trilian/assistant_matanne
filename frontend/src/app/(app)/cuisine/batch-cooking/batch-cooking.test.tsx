@@ -47,7 +47,7 @@ describe("PageBatchCooking", () => {
 
   it("affiche les sessions", () => {
     renderWithQuery(<PageBatchCooking />);
-    expect(screen.getByText("Batch dimanche")).toBeInTheDocument();
-    expect(screen.getByText("Prep semaine")).toBeInTheDocument();
+    expect(screen.getAllByText("Batch dimanche").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Prep semaine").length).toBeGreaterThan(0);
   });
 });

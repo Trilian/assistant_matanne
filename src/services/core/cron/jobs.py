@@ -2195,12 +2195,216 @@ def _job_recette_du_jour_push() -> None:
         res = _envoyer_notif_tous_users(
             dispatcher,
             message=f"Recette du jour: {nom}.",
-            canaux=["push"],
+            canaux=["push", "whatsapp"],
             titre="Recette du jour",
+            type_whatsapp="recette_du_jour",
         )
         logger.info("P7-10 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur P7-10 recette du jour")
+
+
+def _job_resume_weekend_whatsapp() -> None:
+    """Sprint 16.3 — Résumé suggestions weekend (vendredi 18h00)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ActiviteWeekend
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        today = date.today()
+        samedi = today + timedelta(days=(5 - today.weekday()) % 7)
+        dimanche = samedi + timedelta(days=1)
+
+        with obtenir_contexte_db() as session:
+            activites = (
+                session.query(ActiviteWeekend)
+                .filter(ActiviteWeekend.date_prevue.in_([samedi, dimanche]))
+                .order_by(ActiviteWeekend.date_prevue.asc())
+                .limit(5)
+                .all()
+            )
+
+        if activites:
+            lignes = [
+                f"- {getattr(a, 'titre', 'Activité')} ({getattr(a, 'date_prevue', '')})"
+                for a in activites
+            ]
+            message = "Suggestions weekend:\n" + "\n".join(lignes)
+        else:
+            message = "Aucune activité planifiée pour ce weekend. Veux-tu des suggestions IA ?"
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["whatsapp"],
+            titre="Résumé weekend",
+            type_whatsapp="resume_weekend",
+        )
+        logger.info("Sprint 16.3 exécuté")
+    except Exception:
+        logger.exception("Erreur Sprint 16.3 résumé weekend WhatsApp")
+
+
+def _job_rappel_entretien_whatsapp() -> None:
+    """Sprint 16.6 — Rappel entretien maison du jour (quotidien)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        today = date.today()
+        with obtenir_contexte_db() as session:
+            rows = session.execute(
+                text(
+                    "SELECT titre FROM taches_entretien "
+                    "WHERE fait = FALSE AND prochaine_fois = :today "
+                    "ORDER BY id ASC LIMIT 5"
+                ),
+                {"today": today},
+            ).fetchall()
+
+        if not rows:
+            logger.debug("Sprint 16.6: aucune tâche entretien aujourd'hui")
+            return
+
+        message = "Tâches entretien à faire aujourd'hui:\n" + "\n".join(
+            f"- {r[0]}" for r in rows if r and r[0]
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["whatsapp"],
+            titre="Rappel entretien",
+            type_whatsapp="rappel_entretien",
+        )
+        logger.info("Sprint 16.6 exécuté")
+    except Exception:
+        logger.exception("Erreur Sprint 16.6 rappel entretien WhatsApp")
+
+
+def _job_bilan_nutrition_whatsapp() -> None:
+    """Sprint 16.5 — Bilan nutrition simplifié (dimanche 20h30)."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        _job_analyse_nutrition_hebdo()
+
+        # Message compact WhatsApp complémentaire
+        message = "Bilan nutrition prêt. Ouvre la vue Nutrition pour les détails et recommandations."
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["whatsapp"],
+            titre="Bilan nutrition semaine",
+            type_whatsapp="bilan_nutrition",
+        )
+        logger.info("Sprint 16.5 exécuté")
+    except Exception:
+        logger.exception("Erreur Sprint 16.5 bilan nutrition WhatsApp")
+
+
+def _job_rapport_famille_mensuel_complet() -> None:
+    """Sprint 16.8 — Rapport mensuel famille complet (email + PDF)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        today = date.today()
+        mois_ref = today.replace(day=1) - timedelta(days=1)
+
+        with obtenir_contexte_db() as session:
+            budget_total = session.execute(
+                text(
+                    "SELECT COALESCE(SUM(montant), 0) FROM budgets_famille "
+                    "WHERE EXTRACT(MONTH FROM date) = :m AND EXTRACT(YEAR FROM date) = :y"
+                ),
+                {"m": mois_ref.month, "y": mois_ref.year},
+            ).scalar() or 0
+            repas_nb = session.execute(
+                text(
+                    "SELECT COUNT(*) FROM repas "
+                    "WHERE EXTRACT(MONTH FROM date_repas) = :m AND EXTRACT(YEAR FROM date_repas) = :y"
+                ),
+                {"m": mois_ref.month, "y": mois_ref.year},
+            ).scalar() or 0
+            projets_actifs = session.execute(
+                text("SELECT COUNT(*) FROM projets WHERE statut IN ('en_cours', 'planifie')")
+            ).scalar() or 0
+
+        rapport = {
+            "mois": f"{mois_ref.month:02d}/{mois_ref.year}",
+            "budget": f"{float(budget_total):.2f} EUR dépensés",
+            "nutrition": f"{int(repas_nb)} repas suivis",
+            "maison": f"{int(projets_actifs)} projet(s) actif(s)",
+            "jardin": "Voir rapport jardin hebdo consolidé",
+            "jules": "Suivi mensuel disponible dans le module Famille",
+        }
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message="Votre rapport famille mensuel complet est prêt.",
+            canaux=["email"],
+            titre="Rapport mensuel famille complet",
+            type_email="rapport_famille_mensuel_complet",
+            rapport=rapport,
+        )
+        logger.info("Sprint 16.8 exécuté")
+    except Exception:
+        logger.exception("Erreur Sprint 16.8 rapport famille mensuel complet")
+
+
+def _job_rapport_maison_trimestriel() -> None:
+    """Sprint 16.9 — Rapport maison trimestriel (email + PDF)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        today = date.today()
+        trimestre = ((today.month - 1) // 3) + 1
+        debut_trimestre = date(today.year, 3 * (trimestre - 1) + 1, 1)
+
+        with obtenir_contexte_db() as session:
+            projets = session.execute(
+                text("SELECT COUNT(*) FROM projets WHERE statut IN ('en_cours', 'planifie')")
+            ).scalar() or 0
+            energie = session.execute(
+                text(
+                    "SELECT COALESCE(SUM(consommation), 0) FROM releves_energie "
+                    "WHERE annee = :y AND mois >= :m"
+                ),
+                {"y": today.year, "m": debut_trimestre.month},
+            ).scalar() or 0
+            entretiens = session.execute(
+                text(
+                    "SELECT COUNT(*) FROM taches_entretien "
+                    "WHERE fait = FALSE AND prochaine_fois IS NOT NULL"
+                )
+            ).scalar() or 0
+
+        rapport = {
+            "trimestre": f"T{trimestre} {today.year}",
+            "projets": f"{int(projets)} projet(s) en cours/planifiés",
+            "energie": f"{float(energie):.1f} unités consommées sur le trimestre",
+            "jardin": "Synthèse jardin disponible dans le module Maison",
+            "entretien": f"{int(entretiens)} tâche(s) d'entretien à venir",
+        }
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message="Votre rapport maison trimestriel est disponible.",
+            canaux=["email"],
+            titre="Rapport maison trimestriel",
+            type_email="rapport_maison_trimestriel",
+            rapport=rapport,
+        )
+        logger.info("Sprint 16.9 exécuté")
+    except Exception:
+        logger.exception("Erreur Sprint 16.9 rapport maison trimestriel")
 
 
 def _job_stock_critique_zero() -> None:
@@ -3817,9 +4021,10 @@ def _job_alertes_budget_seuil() -> None:
         _envoyer_notif_tous_users(
             dispatcher,
             message=message,
-            canaux=["push", "ntfy"],
+            canaux=["push", "ntfy", "whatsapp"],
             titre="Alerte budget mensuel",
-            type_evenement="budget_alerte_seuil",
+            type_evenement="budget_depassement",
+            type_whatsapp="budget_depassement",
         )
         logger.info("B4: %d alerte(s) budget envoyée(s)", len(alertes))
     except Exception:
@@ -3926,6 +4131,12 @@ _REGISTRE_JOBS.update(
         # Nouveaux jobs
         "alertes_budget_seuil": ("Alertes budget seuil (quotidien 20h)", _job_alertes_budget_seuil),
         "resume_hebdo_ia": ("Résumé hebdomadaire IA intelligent", _job_resume_hebdo_ia),
+        # Sprint 16 — Notifications WhatsApp et Email
+        "s16_resume_weekend_whatsapp": ("S16.3 Résumé weekend suggestions WhatsApp", _job_resume_weekend_whatsapp),
+        "s16_rappel_entretien_whatsapp": ("S16.6 Rappel entretien maison WhatsApp", _job_rappel_entretien_whatsapp),
+        "s16_bilan_nutrition_whatsapp": ("S16.5 Bilan nutrition semaine WhatsApp", _job_bilan_nutrition_whatsapp),
+        "s16_rapport_famille_mensuel": ("S16.8 Rapport famille mensuel complet email/PDF", _job_rapport_famille_mensuel_complet),
+        "s16_rapport_maison_trimestriel": ("S16.9 Rapport maison trimestriel email/PDF", _job_rapport_maison_trimestriel),
     }
 )
 

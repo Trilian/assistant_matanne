@@ -935,6 +935,7 @@ def get_inventaire_ai_service() -> InventaireAIService:
 > **Objectif** : Renforcer le panneau d'administration
 > **Effort** : Moyen | **Impact** : Testabilité et monitoring
 > **Dépend de** : Sprint 15
+> **Status** : 🟡 **EN COURS AVANCÉ** (2 avril 2026)
 
 ### Améliorations à implémenter
 
@@ -964,11 +965,13 @@ def get_inventaire_ai_service() -> InventaireAIService:
 
 ### Critères de validation
 
-- [ ] Dashboard admin unifié accessible
-- [ ] Bouton "jobs du matin" fonctionne
-- [ ] Mode "simuler une journée" exécute en dry run
-- [ ] WebSocket log temps-réel fonctionnel
-- [ ] `pytest` passe
+- [x] Dashboard admin unifié accessible
+- [x] Bouton "jobs du matin" fonctionne
+- [x] Mode "simuler une journée" exécute en dry run
+- [x] WebSocket log temps-réel fonctionnel
+- [x] Comparaison dry run vs vraie exécution disponible
+- [x] Export audit logs en PDF disponible
+- [ ] `pytest` passe (suite complète non relancée, tests ciblés admin OK)
 
 ---
 
@@ -1514,9 +1517,13 @@ Les articles existants hériteront de la date actuelle lors de la migration SQL.
 - [ ] Tests dry run passent
 
 ### Sprint 17 — Admin
-- [ ] Dashboard admin unifié
-- [ ] WebSocket log temps-réel
-- [ ] Bouton jobs du matin
+- [x] Dashboard admin unifié (santé services, jobs récents, sécurité, IA)
+- [x] WebSocket log temps-réel
+- [x] Bouton jobs du matin
+- [x] Mode "simuler une journée" (dry-run séquentiel)
+- [x] Comparateur dry-run vs run réel
+- [x] Export audit logs en PDF
+- [ ] `pytest` complet (tests ciblés admin backend/frontend passants)
 
 ### Sprint 18 — UX flux ✅
 - [x] IA Avancée masquée du sidebar
