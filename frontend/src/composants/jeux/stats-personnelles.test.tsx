@@ -16,6 +16,18 @@ import { StatsPersonnelles } from './stats-personnelles'
 
 type FetchMock = ReturnType<typeof vi.fn>
 
+vi.mock('recharts', async () => {
+  const actual = await vi.importActual<typeof import('recharts')>('recharts')
+  return {
+    ...actual,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
+      <div style={{ width: 800, height: 320 }} data-testid="mock-responsive-container">
+        {children}
+      </div>
+    ),
+  }
+})
+
 // Mock data
 const mockStatsData = {
   roi: {

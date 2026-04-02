@@ -14,7 +14,12 @@ const mockNotes = [
 ];
 
 vi.mock("@/crochets/utiliser-api", () => ({
-  utiliserRequete: () => ({ data: mockNotes, isLoading: false }),
+  utiliserRequete: (key: string[]) => {
+    if (key.includes("tags")) {
+      return { data: [], isLoading: false };
+    }
+    return { data: mockNotes, isLoading: false };
+  },
   utiliserMutation: () => ({ mutate: vi.fn(), isPending: false }),
   utiliserInvalidation: () => vi.fn(),
 }));

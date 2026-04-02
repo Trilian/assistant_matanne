@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 describe("MeteoPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    global.fetch = vi.fn();
+    global.fetch = vi.fn(() => new Promise(() => {})) as unknown as typeof fetch;
   });
 
   it("affiche le titre Météo", () => {
