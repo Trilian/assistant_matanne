@@ -19,6 +19,7 @@ import hashlib
 import json
 import logging
 import secrets
+import base64
 from datetime import UTC, date, datetime, timedelta
 from io import BytesIO
 from typing import Any
@@ -83,6 +84,15 @@ from .types import (
     MeteoContextuelleResponse,
     MeteoImpactModule,
     ModeVacancesResponse,
+    ApprentissagePreferencesResponse,
+    BatchCookingIntelligentResponse,
+    BlocPlanificationAuto,
+    CarteMagazineTablette,
+    CarteVisuellePartageableResponse,
+    EtapeBatchIntelligente,
+    ModeTabletteMagazineResponse,
+    PlanificationHebdoCompleteResponse,
+    PreferenceApprise,
 )
 
 logger = logging.getLogger(__name__)
@@ -639,6 +649,150 @@ Retourne un JSON avec:
             temperature=actuelle.temperature,
             description=actuelle.description,
             modules=modules,
+        )
+
+    @avec_cache(ttl=3600, key_func=lambda self, user_id: f"s22_preferences_{user_id or 'anon'}")
+    @avec_gestion_erreurs(default_return=None)
+    def analyser_preferences_apprises(self, user_id: str | None = None) -> ApprentissagePreferencesResponse | None:
+        """S22 IN1 : apprend des préférences stables et active leur influence après 2+ semaines."""
+        semaines_analysees, favoris, a_eviter = self._analyser_preferences_apprises(user_id=user_id)
+        influence_active = semaines_analysees >= 2 and bool(favoris or a_eviter)
+
+        ajustements = []
+        if favoris:
+            ajustements.append("Prioriser les recettes avec les categories favorites detectees")
+        if a_eviter:
+            ajustements.append("Diminuer la frequence des categories avec feedback negatif")
+        if influence_active:
+            ajustements.append("Appliquer les ponderations de preferences aux suggestions hebdomadaires")
+        else:
+            ajustements.append("Collecte en cours: davantage de feedback est necessaire pour personnaliser")
+
+        return ApprentissagePreferencesResponse(
+            semaines_analysees=semaines_analysees,
+            influence_active=influence_active,
+            preferences_favorites=favoris,
+            preferences_a_eviter=a_eviter,
+            ajustements_suggestions=ajustements,
+        )
+
+    @avec_cache(ttl=1800, key_func=lambda self, user_id: f"s22_planification_auto_{user_id or 'anon'}_{date.today().isoformat()}")
+    @avec_gestion_erreurs(default_return=None)
+    def generer_planification_hebdo_complete(self, user_id: str | None = None) -> PlanificationHebdoCompleteResponse | None:
+        """S22 IN9 : génère planning repas + courses + tâches maison + jardin en un seul bloc."""
+        semaine_debut = self._prochaine_semaine_lundi()
+        semaine_fin = semaine_debut + timedelta(days=6)
+
+        repas = self._proposer_repas_semaine(semaine_debut=semaine_debut, limite=7)
+        courses = self._proposer_courses_depuis_repas(repas)
+        taches_maison = self._proposer_taches_maison_hebdo(limite=5)
+        taches_jardin = self._proposer_taches_jardin_hebdo(semaine_fin=semaine_fin, limite=4)
+
+        blocs = [
+            BlocPlanificationAuto(titre="Repas semaine", items=repas),
+            BlocPlanificationAuto(titre="Liste de courses", items=courses),
+            BlocPlanificationAuto(titre="Maison", items=taches_maison),
+            BlocPlanificationAuto(titre="Jardin", items=taches_jardin),
+        ]
+        return PlanificationHebdoCompleteResponse(
+            semaine_reference=semaine_debut.isoformat(),
+            genere_en_un_clic=True,
+            blocs=blocs,
+            resume="Planning complet genere automatiquement pour la semaine cible.",
+        )
+
+    @avec_cache(ttl=1800, key_func=lambda self, user_id: f"s22_batch_intelligent_{user_id or 'anon'}_{date.today().isoformat()}")
+    @avec_gestion_erreurs(default_return=None)
+    def proposer_batch_cooking_intelligent(self, user_id: str | None = None) -> BatchCookingIntelligentResponse | None:
+        """S22 IN13 : propose un plan batch cooking cohérent avec le planning de semaine."""
+        recettes = self._recettes_batch_cibles(limite=4)
+        if not recettes:
+            recettes = [
+                "Base legumes rotis", "Poulet effiloche", "Riz complet", "Compote sans sucre ajoute",
+            ]
+
+        date_session = self._prochaine_date_batch()
+        etapes: list[EtapeBatchIntelligente] = []
+        for index, recette in enumerate(recettes, start=1):
+            etapes.append(
+                EtapeBatchIntelligente(
+                    ordre=index,
+                    action=f"Preparer {recette}",
+                    duree_minutes=25 if index <= 2 else 20,
+                )
+            )
+
+        duree_totale = sum(etape.duree_minutes for etape in etapes)
+        conseils = [
+            "Demarrer par les cuissons longues pour paralléliser les preparatifs.",
+            "Prevoir des portions adaptees pour Jules (sans sel, texture simplifiee).",
+            "Etiqueter les boites avec date et portions restantes.",
+        ]
+        return BatchCookingIntelligentResponse(
+            session_nom=f"Batch intelligent {date_session.strftime('%d/%m')}",
+            date_session=date_session.isoformat(),
+            recettes_cibles=recettes,
+            duree_estimee_totale_minutes=duree_totale,
+            etapes=etapes,
+            conseils=conseils,
+        )
+
+    @avec_gestion_erreurs(default_return=None)
+    def generer_carte_visuelle_partageable(
+        self,
+        type_carte: str = "planning",
+        titre: str | None = None,
+    ) -> CarteVisuellePartageableResponse | None:
+        """S22 IN17 : génère une carte visuelle exportable au format image (SVG base64)."""
+        type_normalise = type_carte if type_carte in {"planning", "recette", "batch", "maison"} else "planning"
+        titre_carte = _sanitiser(titre or f"Carte {type_normalise}", 120)
+        lignes = self._contenu_carte_visuelle(type_carte=type_normalise)
+        svg = self._generer_svg_carte_visuelle(titre=titre_carte, lignes=lignes)
+        image_b64 = base64.b64encode(svg.encode("utf-8")).decode("ascii")
+        filename = f"carte-{type_normalise}-{date.today().isoformat()}.svg"
+        return CarteVisuellePartageableResponse(
+            type_carte=type_normalise,
+            format_image="image/svg+xml",
+            filename=filename,
+            contenu_base64=image_b64,
+            metadata={
+                "generated_at": datetime.now(UTC).isoformat(),
+                "theme": "magazine-familial",
+            },
+        )
+
+    @avec_cache(ttl=900, key_func=lambda self: f"s22_tablette_magazine_{date.today().isoformat()}")
+    @avec_gestion_erreurs(default_return=None)
+    def obtenir_mode_tablette_magazine(self) -> ModeTabletteMagazineResponse | None:
+        """S22 IN7 : fournit une vue magazine condensée pour écran tablette."""
+        score_bien_etre = self.calculer_score_bien_etre() or ScoreBienEtreResponse(score_global=0.0)
+        insights = self.generer_insights_quotidiens(limite=2) or InsightsQuotidiensResponse()
+        meteo = self.analyser_meteo_contextuelle() or MeteoContextuelleResponse()
+
+        cartes = [
+            CarteMagazineTablette(
+                titre="Score bien-etre",
+                valeur=f"{round(score_bien_etre.score_global, 1)}/100",
+                accent="energie",
+                action_url="/outils/tableau-sante",
+            ),
+            CarteMagazineTablette(
+                titre="Insights du jour",
+                valeur=str(insights.nb_insights),
+                accent="focus",
+                action_url="/",
+            ),
+            CarteMagazineTablette(
+                titre="Meteo",
+                valeur=meteo.description or "Stable",
+                accent="saison",
+                action_url="/outils/meteo",
+            ),
+        ]
+        return ModeTabletteMagazineResponse(
+            titre="Edition tablette",
+            sous_titre="Vue magazine priorisee pour la famille",
+            cartes=cartes,
         )
 
     # ═══════════════════════════════════════════════════════════
@@ -1319,6 +1473,241 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
         except Exception:
             logger.warning("Erreur collecte articles courses", exc_info=True)
             return []
+
+    def _prochaine_semaine_lundi(self) -> date:
+        """Retourne la date du prochain lundi (semaine cible)."""
+        today = date.today()
+        delta = (7 - today.weekday()) % 7
+        if delta == 0:
+            delta = 7
+        return today + timedelta(days=delta)
+
+    def _proposer_repas_semaine(self, semaine_debut: date, limite: int = 7) -> list[str]:
+        """Construit une proposition de repas pour la semaine cible."""
+        repas: list[str] = []
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models import Recette
+
+                recettes = (
+                    session.query(Recette.nom)
+                    .order_by(Recette.score_ia.desc().nullslast(), Recette.cree_le.desc())
+                    .limit(limite)
+                    .all()
+                )
+                repas = [str(row[0]) for row in recettes if row and row[0]]
+        except Exception:
+            logger.debug("Selection repas semaine via DB indisponible", exc_info=True)
+
+        if not repas:
+            repas = [
+                "Lundi: Poelee legumes + proteines",
+                "Mardi: Poisson au four + puree douce",
+                "Mercredi: Pates legumes rôtis",
+                "Jeudi: Curry doux maison",
+                "Vendredi: Riz safrane + legumes",
+                "Samedi: Batch restes intelligents",
+                "Dimanche: Plat familial cuisson lente",
+            ]
+        return repas[:limite]
+
+    def _proposer_courses_depuis_repas(self, repas: list[str]) -> list[str]:
+        """Crée une liste de courses simple basée sur les repas prévus."""
+        base = ["fruits de saison", "legumes frais", "yaourts nature", "oeufs", "riz", "huile d'olive"]
+        if any("poisson" in r.lower() for r in repas):
+            base.append("poisson frais")
+        if any("curry" in r.lower() for r in repas):
+            base.append("lait de coco")
+        return base[:10]
+
+    def _proposer_taches_maison_hebdo(self, limite: int = 5) -> list[str]:
+        """Sélectionne les tâches maison prioritaires de la semaine."""
+        taches: list[str] = []
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models.maison import Routine
+
+                routines = (
+                    session.query(Routine)
+                    .filter(Routine.actif.is_(True))
+                    .order_by(Routine.derniere_completion.asc().nullsfirst())
+                    .limit(limite)
+                    .all()
+                )
+                taches = [str(r.nom) for r in routines if getattr(r, "nom", None)]
+        except Exception:
+            logger.debug("Selection taches maison indisponible", exc_info=True)
+
+        if not taches:
+            taches = ["Cuisine: nettoyage complet", "Salle de bain: entretien", "Salon: rangement express"]
+        return taches[:limite]
+
+    def _proposer_taches_jardin_hebdo(self, semaine_fin: date, limite: int = 4) -> list[str]:
+        """Sélectionne les actions jardin pertinentes pour la semaine cible."""
+        actions: list[str] = []
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models.temps_entretien import ZoneJardin
+
+                zones = (
+                    session.query(ZoneJardin)
+                    .filter(ZoneJardin.date_prochaine_action.isnot(None), ZoneJardin.date_prochaine_action <= semaine_fin)
+                    .order_by(ZoneJardin.date_prochaine_action.asc())
+                    .limit(limite)
+                    .all()
+                )
+                actions = [f"{z.nom}: {z.prochaine_action}" for z in zones if getattr(z, "prochaine_action", None)]
+        except Exception:
+            logger.debug("Selection taches jardin indisponible", exc_info=True)
+
+        if not actions:
+            actions = ["Verifier arrosage", "Controler zones a desherber"]
+        return actions[:limite]
+
+    def _recettes_batch_cibles(self, limite: int = 4) -> list[str]:
+        """Extrait les recettes les plus pertinentes pour une session batch."""
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models import Repas, Recette
+
+                start = self._prochaine_semaine_lundi()
+                end = start + timedelta(days=6)
+                rows = (
+                    session.query(Recette.nom)
+                    .join(Repas, Repas.recette_id == Recette.id)
+                    .filter(Repas.date_repas >= start, Repas.date_repas <= end)
+                    .limit(20)
+                    .all()
+                )
+                uniques: list[str] = []
+                for row in rows:
+                    nom = str(row[0]) if row and row[0] else ""
+                    if nom and nom not in uniques:
+                        uniques.append(nom)
+                    if len(uniques) >= limite:
+                        break
+                return uniques
+        except Exception:
+            logger.debug("Extraction recettes batch cible indisponible", exc_info=True)
+            return []
+
+    def _prochaine_date_batch(self) -> date:
+        """Détermine la prochaine date optimale de batch cooking."""
+        fallback = self._prochaine_semaine_lundi() - timedelta(days=1)
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models.batch_cooking import ConfigBatchCooking
+
+                config = session.query(ConfigBatchCooking).order_by(ConfigBatchCooking.id.desc()).first()
+                if not config or not config.jours_batch:
+                    return fallback
+
+                jours_batch = [int(j) for j in config.jours_batch if isinstance(j, int)]
+                if not jours_batch:
+                    return fallback
+
+                today = date.today()
+                delta_candidates = [((jour - today.weekday()) % 7) for jour in jours_batch]
+                delta = min(delta_candidates)
+                return today + timedelta(days=delta)
+        except Exception:
+            return fallback
+
+    def _analyser_preferences_apprises(
+        self,
+        user_id: str | None,
+    ) -> tuple[int, list[PreferenceApprise], list[PreferenceApprise]]:
+        """Calcule semaines observées + top catégories positives/négatives."""
+        try:
+            with obtenir_contexte_db() as session:
+                from sqlalchemy import func
+                from src.core.models import RetourRecette, Recette
+
+                query = session.query(RetourRecette).join(Recette, Recette.id == RetourRecette.recette_id)
+                if user_id:
+                    query = query.filter(RetourRecette.user_id == user_id)
+
+                rows = query.all()
+                if not rows:
+                    return 0, [], []
+
+                dates = [row.cree_le.date() for row in rows if getattr(row, "cree_le", None)]
+                if dates:
+                    span_jours = max(1, (max(dates) - min(dates)).days + 1)
+                    semaines = max(1, span_jours // 7)
+                else:
+                    semaines = 1
+
+                likes = (
+                    session.query(Recette.categorie, func.count(RetourRecette.id).label("cnt"))
+                    .join(Recette, Recette.id == RetourRecette.recette_id)
+                    .filter(RetourRecette.feedback == "like")
+                )
+                dislikes = (
+                    session.query(Recette.categorie, func.count(RetourRecette.id).label("cnt"))
+                    .join(Recette, Recette.id == RetourRecette.recette_id)
+                    .filter(RetourRecette.feedback == "dislike")
+                )
+                if user_id:
+                    likes = likes.filter(RetourRecette.user_id == user_id)
+                    dislikes = dislikes.filter(RetourRecette.user_id == user_id)
+
+                likes_rows = likes.group_by(Recette.categorie).order_by(func.count(RetourRecette.id).desc()).limit(3).all()
+                dislikes_rows = dislikes.group_by(Recette.categorie).order_by(func.count(RetourRecette.id).desc()).limit(3).all()
+
+                favoris = [
+                    PreferenceApprise(
+                        categorie="categorie_recette",
+                        valeur=str(r[0] or "non_classe"),
+                        score_confiance=min(1.0, 0.55 + 0.1 * int(r[1] or 0)),
+                    )
+                    for r in likes_rows
+                ]
+                a_eviter = [
+                    PreferenceApprise(
+                        categorie="categorie_recette",
+                        valeur=str(r[0] or "non_classe"),
+                        score_confiance=min(1.0, 0.55 + 0.1 * int(r[1] or 0)),
+                    )
+                    for r in dislikes_rows
+                ]
+                return semaines, favoris, a_eviter
+        except Exception:
+            logger.debug("Analyse preferences apprises indisponible", exc_info=True)
+            return 0, [], []
+
+    def _contenu_carte_visuelle(self, type_carte: str) -> list[str]:
+        """Construit des lignes de contenu pour la carte visuelle exportable."""
+        if type_carte == "recette":
+            return ["Recette phare de la semaine", "Version Jules adaptee", "Temps total < 35 min"]
+        if type_carte == "batch":
+            return ["Session dimanche", "4 recettes pretes", "Etiquettes portions + dates"]
+        if type_carte == "maison":
+            return ["2 routines prioritaires", "1 action jardin", "Suivi entretien planifie"]
+        return ["Planning hebdo auto", "Courses deduites", "Maison + jardin synchronises"]
+
+    def _generer_svg_carte_visuelle(self, titre: str, lignes: list[str]) -> str:
+        """Génère un SVG compact (image partageable) avec rendu carte."""
+        lignes_svg = []
+        y = 150
+        for ligne in lignes[:4]:
+            lignes_svg.append(
+                f"<text x='48' y='{y}' font-size='24' fill='#1f2937' font-family='Verdana, Geneva, sans-serif'>• {ligne}</text>"
+            )
+            y += 42
+
+        return (
+            "<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630' viewBox='0 0 1200 630'>"
+            "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>"
+            "<stop offset='0%' stop-color='#fef3c7'/><stop offset='100%' stop-color='#bfdbfe'/>"
+            "</linearGradient></defs>"
+            "<rect width='1200' height='630' fill='url(#g)'/>"
+            "<rect x='24' y='24' width='1152' height='582' rx='28' fill='white' fill-opacity='0.84'/>"
+            f"<text x='48' y='92' font-size='44' font-weight='700' fill='#0f172a' font-family='Verdana, Geneva, sans-serif'>{titre}</text>"
+            + "".join(lignes_svg)
+            + "<text x='48' y='588' font-size='18' fill='#334155' font-family='Verdana, Geneva, sans-serif'>Assistant Matanne — carte partageable</text>"
+            "</svg>"
+        )
 
     def _charger_criteres_veille(self) -> CriteresVeilleEmploi:
         """Charge les critères de veille emploi depuis les préférences utilisateur."""

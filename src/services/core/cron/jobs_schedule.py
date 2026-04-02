@@ -107,3 +107,6 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("s16_bilan_nutrition_whatsapp", CronTrigger(day_of_week="sun", hour=20, minute=30), replace_existing=True)
     planifier_job("s16_rapport_famille_mensuel", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
     planifier_job("s16_rapport_maison_trimestriel", CronTrigger(month="1,4,7,10", day=1, hour=9, minute=10), replace_existing=True)
+
+    # Sprint 21 — Rapport mensuel unifié
+    planifier_job("s21_rapport_mensuel_unifie_email", CronTrigger(day=1, hour=9, minute=20), replace_existing=True)

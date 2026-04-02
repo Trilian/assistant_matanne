@@ -446,6 +446,8 @@ class DispatcherNotifications:
             return service_email.envoyer_rapport_famille_mensuel_complet(email, kwargs.get("rapport", {}))
         elif type_email == "rapport_maison_trimestriel":
             return service_email.envoyer_rapport_maison_trimestriel(email, kwargs.get("rapport", {}))
+        elif type_email == "rapport_mensuel_unifie":
+            return service_email.envoyer_rapport_mensuel_unifie(email, kwargs.get("rapport", {}))
         elif type_email == "invitation":
             return service_email.envoyer_invitation_famille(email, kwargs.get("invitant", "Matanne"))
         else:

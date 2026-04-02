@@ -433,6 +433,106 @@ class TestSprint21Innovations:
 
 
 # ═══════════════════════════════════════════════════════════
+# Sprint 22 — Innovations avancées
+# ═══════════════════════════════════════════════════════════
+
+
+class TestSprint22Innovations:
+    """Tests des endpoints Sprint 22 (préférences, planification auto, batch IA, cartes, tablette)."""
+
+    def test_preferences_apprises(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import ApprentissagePreferencesResponse, PreferenceApprise
+
+        mock_innovations_service.analyser_preferences_apprises.return_value = ApprentissagePreferencesResponse(
+            semaines_analysees=3,
+            influence_active=True,
+            preferences_favorites=[
+                PreferenceApprise(categorie="categorie_recette", valeur="poisson", score_confiance=0.82)
+            ],
+            ajustements_suggestions=["Prioriser les recettes poisson"],
+        )
+
+        response = client.get("/api/v1/innovations/phasee/s22/preferences-apprises", headers=auth_headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["semaines_analysees"] >= 2
+        assert data["influence_active"] is True
+
+    def test_planification_hebdo_complete_auto(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import BlocPlanificationAuto, PlanificationHebdoCompleteResponse
+
+        mock_innovations_service.generer_planification_hebdo_complete.return_value = PlanificationHebdoCompleteResponse(
+            semaine_reference="2026-04-06",
+            genere_en_un_clic=True,
+            blocs=[
+                BlocPlanificationAuto(titre="Repas semaine", items=["Saumon + legumes"]),
+                BlocPlanificationAuto(titre="Liste de courses", items=["saumon", "courgettes"]),
+            ],
+            resume="Planning complet genere automatiquement",
+        )
+
+        response = client.get("/api/v1/innovations/phasee/s22/planification-auto", headers=auth_headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["genere_en_un_clic"] is True
+        assert len(data["blocs"]) >= 2
+
+    def test_batch_cooking_intelligent(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import BatchCookingIntelligentResponse, EtapeBatchIntelligente
+
+        mock_innovations_service.proposer_batch_cooking_intelligent.return_value = BatchCookingIntelligentResponse(
+            session_nom="Batch intelligent 06/04",
+            date_session="2026-04-05",
+            recettes_cibles=["Curry doux", "Compote"],
+            duree_estimee_totale_minutes=90,
+            etapes=[EtapeBatchIntelligente(ordre=1, action="Preparer curry", duree_minutes=45)],
+            conseils=["Paralleliser les cuissons"],
+        )
+
+        response = client.get("/api/v1/innovations/phasee/s22/batch-cooking-intelligent", headers=auth_headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["duree_estimee_totale_minutes"] > 0
+        assert len(data["etapes"]) >= 1
+
+    def test_generer_carte_visuelle(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import CarteVisuellePartageableResponse
+
+        mock_innovations_service.generer_carte_visuelle_partageable.return_value = CarteVisuellePartageableResponse(
+            type_carte="planning",
+            format_image="image/svg+xml",
+            filename="carte-planning.svg",
+            contenu_base64="PHN2Zz48L3N2Zz4=",
+            metadata={"theme": "magazine-familial"},
+        )
+
+        response = client.post(
+            "/api/v1/innovations/phasee/s22/carte-visuelle",
+            json={"type_carte": "planning", "titre": "Semaine famille"},
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["format_image"] == "image/svg+xml"
+        assert len(data["contenu_base64"]) > 0
+
+    def test_mode_tablette_magazine(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import CarteMagazineTablette, ModeTabletteMagazineResponse
+
+        mock_innovations_service.obtenir_mode_tablette_magazine.return_value = ModeTabletteMagazineResponse(
+            titre="Edition tablette",
+            sous_titre="Vue magazine",
+            cartes=[CarteMagazineTablette(titre="Score", valeur="78/100", action_url="/")],
+        )
+
+        response = client.get("/api/v1/innovations/phasee/s22/mode-tablette-magazine", headers=auth_headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["titre"] == "Edition tablette"
+        assert len(data["cartes"]) >= 1
+
+
+# ═══════════════════════════════════════════════════════════
 # 10.25 — ADMIN RESET MODULE
 # ═══════════════════════════════════════════════════════════
 

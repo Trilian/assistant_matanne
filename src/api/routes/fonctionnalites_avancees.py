@@ -24,7 +24,12 @@ from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas.errors import REPONSES_IA
 from src.api.schemas.fonctionnalites_avancees import (
     AlertesContextuellesResponse,
+    ApprentissagePreferencesResponse,
+    BatchCookingIntelligentResponse,
+    CarteVisuellePartageableResponse,
+    CarteVisuelleRequest,
     JournalFamilialAutoResponse,
+    ModeTabletteMagazineResponse,
     ModePiloteAutomatiqueResponse,
     RapportMensuelPdfResponse,
     ScoreFamilleHebdoResponse,
@@ -57,6 +62,7 @@ from src.api.schemas.fonctionnalites_avancees import (
     MeteoContextuelleResponse,
     ModeVacancesConfigurationRequest,
     ModeVacancesResponse,
+    PlanificationHebdoCompleteResponse,
 )
 from src.api.utils import gerer_exception_api
 
@@ -455,6 +461,88 @@ async def phasee_garmin_repas_adaptatif(
     user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
     result = service.proposer_repas_adapte_garmin(user_id=user_id)
     return result or SuggestionRepasSoirResponse()
+
+
+@router.get(
+    "/phasee/s22/preferences-apprises",
+    response_model=ApprentissagePreferencesResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S22 IN1 Apprentissage des preferences",
+)
+@gerer_exception_api
+async def phasee_s22_preferences_apprises(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    user_id = str(user.get("id") or "")
+    result = service.analyser_preferences_apprises(user_id=user_id)
+    return result or ApprentissagePreferencesResponse()
+
+
+@router.get(
+    "/phasee/s22/planification-auto",
+    response_model=PlanificationHebdoCompleteResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S22 IN9 Planification hebdo complete automatique",
+)
+@gerer_exception_api
+async def phasee_s22_planification_auto(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    user_id = str(user.get("id") or "")
+    result = service.generer_planification_hebdo_complete(user_id=user_id)
+    return result or PlanificationHebdoCompleteResponse()
+
+
+@router.get(
+    "/phasee/s22/batch-cooking-intelligent",
+    response_model=BatchCookingIntelligentResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S22 IN13 Suggestions batch cooking intelligentes",
+)
+@gerer_exception_api
+async def phasee_s22_batch_cooking_intelligent(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    user_id = str(user.get("id") or "")
+    result = service.proposer_batch_cooking_intelligent(user_id=user_id)
+    return result or BatchCookingIntelligentResponse()
+
+
+@router.post(
+    "/phasee/s22/carte-visuelle",
+    response_model=CarteVisuellePartageableResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S22 IN17 Carte visuelle partageable",
+)
+@gerer_exception_api
+async def phasee_s22_carte_visuelle(
+    body: CarteVisuelleRequest,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    result = service.generer_carte_visuelle_partageable(
+        type_carte=body.type_carte,
+        titre=body.titre,
+    )
+    return result or CarteVisuellePartageableResponse(type_carte=body.type_carte)
+
+
+@router.get(
+    "/phasee/s22/mode-tablette-magazine",
+    response_model=ModeTabletteMagazineResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S22 IN7 Mode tablette magazine",
+)
+@gerer_exception_api
+async def phasee_s22_mode_tablette_magazine(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    result = service.obtenir_mode_tablette_magazine()
+    return result or ModeTabletteMagazineResponse()
 
 
 @router.get(

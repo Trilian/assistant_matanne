@@ -84,6 +84,13 @@ class ModeVacancesConfigurationRequest(BaseModel):
     )
 
 
+class CarteVisuelleRequest(BaseModel):
+    """Paramètres de génération d'une carte visuelle partageable."""
+
+    type_carte: str = Field("planning", pattern="^(planning|recette|batch|maison)$")
+    titre: str | None = Field(None, min_length=2, max_length=120)
+
+
 # ── Responses (re-exports depuis types) ──
 
 from src.services.innovations.types import (  # noqa: E402
@@ -91,6 +98,11 @@ from src.services.innovations.types import (  # noqa: E402
     ScoreFamilleHebdoResponse,
     JournalFamilialAutoResponse,
     RapportMensuelPdfResponse,
+    BatchCookingIntelligentResponse,
+    CarteVisuellePartageableResponse,
+    ModeTabletteMagazineResponse,
+    PlanificationHebdoCompleteResponse,
+    ApprentissagePreferencesResponse,
     AlertesContextuellesResponse,
     AnalyseTendancesLotoResponse,
     AnomaliesEnergieResponse,
@@ -142,7 +154,13 @@ __all__ = [
     "ComparateurEnergieRequest",
     "ModePiloteConfigurationRequest",
     "ModeVacancesConfigurationRequest",
+    "CarteVisuelleRequest",
     "ComparateurEnergieResponse",
+    "ApprentissagePreferencesResponse",
+    "PlanificationHebdoCompleteResponse",
+    "BatchCookingIntelligentResponse",
+    "CarteVisuellePartageableResponse",
+    "ModeTabletteMagazineResponse",
     "ScoreEcoResponsableResponse",
     "SaisonnaliteIntelligenteResponse",
     "ApprentissageHabitudesResponse",

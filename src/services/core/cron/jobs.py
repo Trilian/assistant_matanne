@@ -2407,6 +2407,36 @@ def _job_rapport_maison_trimestriel() -> None:
         logger.exception("Erreur Sprint 16.9 rapport maison trimestriel")
 
 
+def _job_s21_rapport_mensuel_unifie_email() -> None:
+    """Sprint 21.5 — Envoi mensuel du rapport PDF unifié (email)."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.innovations import get_innovations_service
+
+        service = get_innovations_service()
+        rapport_pdf = service.generer_rapport_mensuel_pdf()
+        if not rapport_pdf or not rapport_pdf.contenu_base64:
+            logger.warning("Sprint 21.5: rapport mensuel unifié indisponible")
+            return
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message="Votre rapport mensuel unifié est prêt.",
+            canaux=["email"],
+            titre="Rapport mensuel unifié",
+            type_email="rapport_mensuel_unifie",
+            rapport={
+                "mois_reference": rapport_pdf.mois_reference,
+                "filename": rapport_pdf.filename,
+                "contenu_base64": rapport_pdf.contenu_base64,
+            },
+        )
+        logger.info("Sprint 21.5 exécuté")
+    except Exception:
+        logger.exception("Erreur Sprint 21.5 rapport mensuel unifié")
+
+
 def _job_stock_critique_zero() -> None:
     """P7-11 — Alerte stock critique (quantité 0) sur 3 canaux."""
     try:
@@ -4137,6 +4167,7 @@ _REGISTRE_JOBS.update(
         "s16_bilan_nutrition_whatsapp": ("S16.5 Bilan nutrition semaine WhatsApp", _job_bilan_nutrition_whatsapp),
         "s16_rapport_famille_mensuel": ("S16.8 Rapport famille mensuel complet email/PDF", _job_rapport_famille_mensuel_complet),
         "s16_rapport_maison_trimestriel": ("S16.9 Rapport maison trimestriel email/PDF", _job_rapport_maison_trimestriel),
+        "s21_rapport_mensuel_unifie_email": ("S21.5 Rapport mensuel unifié email/PDF", _job_s21_rapport_mensuel_unifie_email),
     }
 )
 

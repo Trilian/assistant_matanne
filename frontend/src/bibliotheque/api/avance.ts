@@ -91,6 +91,68 @@ export interface MeteoContextuelleResponse {
   modules: MeteoImpactModule[];
 }
 
+export interface PreferenceApprise {
+  categorie: string;
+  valeur: string;
+  score_confiance: number;
+}
+
+export interface ApprentissagePreferencesResponse {
+  semaines_analysees: number;
+  influence_active: boolean;
+  preferences_favorites: PreferenceApprise[];
+  preferences_a_eviter: PreferenceApprise[];
+  ajustements_suggestions: string[];
+}
+
+export interface BlocPlanificationAuto {
+  titre: string;
+  items: string[];
+}
+
+export interface PlanificationHebdoCompleteResponse {
+  semaine_reference: string;
+  genere_en_un_clic: boolean;
+  blocs: BlocPlanificationAuto[];
+  resume: string;
+}
+
+export interface EtapeBatchIntelligente {
+  ordre: number;
+  action: string;
+  duree_minutes: number;
+}
+
+export interface BatchCookingIntelligentResponse {
+  session_nom: string;
+  date_session: string;
+  recettes_cibles: string[];
+  duree_estimee_totale_minutes: number;
+  etapes: EtapeBatchIntelligente[];
+  conseils: string[];
+}
+
+export interface CarteVisuellePartageableResponse {
+  type_carte: string;
+  format_image: string;
+  filename: string;
+  contenu_base64: string;
+  metadata: Record<string, string>;
+}
+
+export interface CarteMagazineTablette {
+  titre: string;
+  valeur: string;
+  accent: string;
+  action_url: string;
+}
+
+export interface ModeTabletteMagazineResponse {
+  titre: string;
+  sous_titre: string;
+  cartes: CarteMagazineTablette[];
+}
+
 export async function obtenirModePiloteAuto(): Promise<ModePiloteAutoResponse> {
   const { data } = await clientApi.get("/api/v1/innovations/phasee/mode-pilote");
   return data;
@@ -152,6 +214,34 @@ export async function obtenirInsightsQuotidiens(limite = 2): Promise<InsightsQuo
 
 export async function obtenirMeteoContextuelle(): Promise<MeteoContextuelleResponse> {
   const { data } = await clientApi.get("/api/v1/innovations/phasee/meteo-contextuelle");
+  return data;
+}
+
+export async function obtenirPreferencesApprises(): Promise<ApprentissagePreferencesResponse> {
+  const { data } = await clientApi.get("/api/v1/innovations/phasee/s22/preferences-apprises");
+  return data;
+}
+
+export async function obtenirPlanificationHebdoAuto(): Promise<PlanificationHebdoCompleteResponse> {
+  const { data } = await clientApi.get("/api/v1/innovations/phasee/s22/planification-auto");
+  return data;
+}
+
+export async function obtenirBatchCookingIntelligent(): Promise<BatchCookingIntelligentResponse> {
+  const { data } = await clientApi.get("/api/v1/innovations/phasee/s22/batch-cooking-intelligent");
+  return data;
+}
+
+export async function genererCarteVisuellePartageable(payload: {
+  type_carte: "planning" | "recette" | "batch" | "maison";
+  titre?: string;
+}): Promise<CarteVisuellePartageableResponse> {
+  const { data } = await clientApi.post("/api/v1/innovations/phasee/s22/carte-visuelle", payload);
+  return data;
+}
+
+export async function obtenirModeTabletteMagazine(): Promise<ModeTabletteMagazineResponse> {
+  const { data } = await clientApi.get("/api/v1/innovations/phasee/s22/mode-tablette-magazine");
   return data;
 }
 

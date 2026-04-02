@@ -1209,7 +1209,7 @@ def get_inventaire_ai_service() -> InventaireAIService:
 > **Objectif** : Implémenter les innovations les plus impactantes
 > **Effort** : Moyen à Élevé | **Impact** : Fonctionnalités différenciantes
 > **Dépend de** : Sprints 13, 18
-> **Statut** : ✅ Implémenté (reste 1 point d'automatisation email)
+> **Statut** : ✅ Implémenté
 
 ### Innovations prioritaires
 
@@ -1229,7 +1229,7 @@ def get_inventaire_ai_service() -> InventaireAIService:
 - [x] Mode vacances toggle fonctionnel
 - [x] 1-2 insights IA par jour, pertinents, pas de spam
 - [x] Journal auto-alimenté visible dans la page famille
-- [ ] PDF mensuel unifié généré et envoyé par email
+- [x] PDF mensuel unifié généré et envoyé par email
 
 ### Notes d'implémentation Sprint 21 (2 Avril 2026)
 
@@ -1246,7 +1246,7 @@ def get_inventaire_ai_service() -> InventaireAIService:
 - Schémas API: nouveaux contracts exposés dans `src/api/schemas/fonctionnalites_avancees.py`.
 - Frontend: client API mis à jour dans `frontend/src/bibliotheque/api/avance.ts` pour consommer ces endpoints.
 - Tests API: couverture ajoutée dans `tests/api/test_innovations.py` pour mode vacances, insights et météo contextuelle.
-- Reste à faire: automatiser l'envoi email du PDF mensuel unifié (la génération PDF est déjà disponible).
+- Envoi email automatique: job CRON mensuel ajouté (`s21_rapport_mensuel_unifie_email`) avec envoi du PDF unifié à tous les utilisateurs actifs.
 
 ---
 
@@ -1588,7 +1588,7 @@ Les articles existants hériteront de la date actuelle lors de la migration SQL.
 
 ### Sprint 21 — Innovations prioritaires
 - [x] Mode saison, mode vacances, insights IA, journal auto, PDF mensuel, score bien-être, météo cross
-- [ ] Envoi email automatique du PDF mensuel unifié
+- [x] Envoi email automatique du PDF mensuel unifié
 
 ### Sprint 22 — Innovations avancées
 - [ ] Apprentissage préférences, planification auto, batch cooking IA, cartes visuelles, mode tablette

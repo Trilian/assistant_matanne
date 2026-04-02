@@ -370,6 +370,91 @@ class MeteoContextuelleResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
+# SPRINT 22 — INNOVATIONS AVANCÉES
+# ═══════════════════════════════════════════════════════════
+
+
+class PreferenceApprise(BaseModel):
+    """Préférence détectée automatiquement sur l'historique."""
+
+    categorie: str = ""
+    valeur: str = ""
+    score_confiance: float = 0.0
+
+
+class ApprentissagePreferencesResponse(BaseModel):
+    """Synthèse des préférences apprises et exploitables."""
+
+    semaines_analysees: int = 0
+    influence_active: bool = False
+    preferences_favorites: list[PreferenceApprise] = Field(default_factory=list)
+    preferences_a_eviter: list[PreferenceApprise] = Field(default_factory=list)
+    ajustements_suggestions: list[str] = Field(default_factory=list)
+
+
+class BlocPlanificationAuto(BaseModel):
+    """Bloc standard d'une planification hebdo auto."""
+
+    titre: str = ""
+    items: list[str] = Field(default_factory=list)
+
+
+class PlanificationHebdoCompleteResponse(BaseModel):
+    """Planification hebdomadaire auto consolidée multi-modules."""
+
+    semaine_reference: str = ""
+    genere_en_un_clic: bool = True
+    blocs: list[BlocPlanificationAuto] = Field(default_factory=list)
+    resume: str = ""
+
+
+class EtapeBatchIntelligente(BaseModel):
+    """Étape recommandée d'un plan batch cooking intelligent."""
+
+    ordre: int = 1
+    action: str = ""
+    duree_minutes: int = 0
+
+
+class BatchCookingIntelligentResponse(BaseModel):
+    """Plan batch cooking recommandé selon la semaine cible."""
+
+    session_nom: str = ""
+    date_session: str = ""
+    recettes_cibles: list[str] = Field(default_factory=list)
+    duree_estimee_totale_minutes: int = 0
+    etapes: list[EtapeBatchIntelligente] = Field(default_factory=list)
+    conseils: list[str] = Field(default_factory=list)
+
+
+class CarteVisuellePartageableResponse(BaseModel):
+    """Carte visuelle exportable pour partage (image encodée)."""
+
+    type_carte: str = "planning"
+    format_image: str = "image/svg+xml"
+    filename: str = ""
+    contenu_base64: str = ""
+    metadata: dict[str, str] = Field(default_factory=dict)
+
+
+class CarteMagazineTablette(BaseModel):
+    """Carte affichée dans la vue magazine tablette."""
+
+    titre: str = ""
+    valeur: str = ""
+    accent: str = "neutre"
+    action_url: str = ""
+
+
+class ModeTabletteMagazineResponse(BaseModel):
+    """Données de rendu pour le mode tablette magazine."""
+
+    titre: str = ""
+    sous_titre: str = ""
+    cartes: list[CarteMagazineTablette] = Field(default_factory=list)
+
+
+# ═══════════════════════════════════════════════════════════
 # 10.8 — VEILLE EMPLOI
 # ═══════════════════════════════════════════════════════════
 

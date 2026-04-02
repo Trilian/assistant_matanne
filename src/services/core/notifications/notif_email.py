@@ -327,6 +327,37 @@ class ServiceEmail:
             attachments=[attachment],
         )
 
+    def envoyer_rapport_mensuel_unifie(self, email: str, rapport: dict[str, Any]) -> bool:
+        """Sprint 21.5 — Envoie le PDF mensuel unifié généré par le service innovations."""
+        mois_reference = str(rapport.get("mois_reference", ""))
+        filename = str(rapport.get("filename", f"rapport_mensuel_{mois_reference or 'unifie'}.pdf"))
+        contenu_base64 = str(rapport.get("contenu_base64", ""))
+
+        if not contenu_base64:
+            logger.warning("Rapport mensuel unifié: contenu_base64 manquant")
+            return False
+
+        html = f"""
+        <html>
+          <body style=\"font-family: Arial, sans-serif; line-height: 1.5;\">
+            <h2>Rapport mensuel unifié {mois_reference}</h2>
+            <p>Votre rapport mensuel consolidé (famille, budget, nutrition, maison, jardin, Jules) est prêt.</p>
+            <p>Le PDF est joint à cet email.</p>
+          </body>
+        </html>
+        """
+
+        attachment = {
+            "filename": filename,
+            "content": contenu_base64,
+        }
+        return self._envoyer(
+            email,
+            f"📘 Rapport mensuel unifié {mois_reference} — Matanne",
+            html,
+            attachments=[attachment],
+        )
+
 
 # ─── Factory ───────────────────────────────────────────────────────────────────
 
