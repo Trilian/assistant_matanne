@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
@@ -127,7 +128,7 @@ export function GrapheReseauModules({ width = 1000, height = 800 }: GrapheReseau
       .data(liens)
       .enter()
       .append('line')
-      .attr('stroke', '#hsl(var(--muted-foreground))')
+      .attr('stroke', 'hsl(var(--muted-foreground))')
       .attr('stroke-opacity', 0.5)
       .attr('stroke-width', (d: any) => {
         const widths = { data: 3, cron: 2, alert: 2, cost: 2, suggest: 1.5, track: 2, plan: 1.5, display: 2, aggregate: 2 }
@@ -168,14 +169,16 @@ export function GrapheReseauModules({ width = 1000, height = 800 }: GrapheReseau
       .attr('stroke', '#ffffff')
       .attr('stroke-width', 2)
       .attr('opacity', 0.9)
-      .call(d3.drag() as any
-        .on('start', dragstarted)
-        .on('drag', dragged)
-        .on('end', dragended))
-      .on('mouseover', function(d: any) {
+        .call(
+          (d3.drag() as any)
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended)
+        )
+      .on('mouseover', function(_d: any) {
         d3.select(this).transition().attr('r', 40).attr('stroke-width', 3)
       })
-      .on('mouseout', function(d: any) {
+      .on('mouseout', function(_d: any) {
         d3.select(this).transition().attr('r', 30).attr('stroke-width', 2)
       })
 

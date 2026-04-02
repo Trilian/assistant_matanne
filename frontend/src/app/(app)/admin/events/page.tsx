@@ -1,14 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Activity, Loader2, Play, RefreshCw, RotateCcw } from "lucide-react";
+import { Activity, Loader2, Play, RefreshCw, RotateCcw, WandSparkles } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Textarea } from "@/composants/ui/textarea";
 import { Badge } from "@/composants/ui/badge";
-import { declencherEvenementAdmin, lireEvenementsAdmin, rejouerEvenementAdmin } from "@/bibliotheque/api/admin";
+import {
+  declencherEvenementAdmin,
+  lancerTestE2EOneClickAdmin,
+  lireEvenementsAdmin,
+  rejouerEvenementAdmin,
+} from "@/bibliotheque/api/admin";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 
 export default function PageAdminEvents() {
@@ -17,6 +22,7 @@ export default function PageAdminEvents() {
   const [payloadTexte, setPayloadTexte] = useState("{}");
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
   const [replayEnCoursId, setReplayEnCoursId] = useState<string | null>(null);
+  const [testCompletEnCours, setTestCompletEnCours] = useState(false);
   const [retour, setRetour] = useState<{ ok: boolean; message: string } | null>(null);
 
   const { data, isLoading, refetch } = utiliserRequete(["admin", "events"], () =>
@@ -59,6 +65,22 @@ export default function PageAdminEvents() {
     }
   };
 
+  const lancerTestComplet = async () => {
+    setRetour(null);
+    setTestCompletEnCours(true);
+    try {
+      const result = await lancerTestE2EOneClickAdmin();
+      setRetour({
+        ok: true,
+        message: `Test one-click simulé (${result.total_etapes} étapes).`,
+      });
+    } catch {
+      setRetour({ ok: false, message: "Impossible de lancer le test one-click." });
+    } finally {
+      setTestCompletEnCours(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -68,6 +90,25 @@ export default function PageAdminEvents() {
         </h1>
         <p className="text-muted-foreground">Visualisation des evenements et trigger manuel pour tests.</p>
       </div>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Test E2E one-click</CardTitle>
+          <CardDescription>
+            Simule le flux recette → planning → courses → checkout → inventaire.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={() => void lancerTestComplet()} disabled={testCompletEnCours}>
+            {testCompletEnCours ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <WandSparkles className="mr-2 h-4 w-4" />
+            )}
+            Lancer test complet
+          </Button>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
