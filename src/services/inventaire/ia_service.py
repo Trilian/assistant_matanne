@@ -175,7 +175,7 @@ Courses planifiées: {'Oui, dans 2-3 jours' if budget_courses_proche else 'Non, 
 
 Message court (1-2 lignes) qui décrit l'urgence et propose une action."""
 
-        return self.call_with_cache(
+        return self.call_with_cache_sync(
             prompt=prompt,
             system_prompt="Tu es assistant de gestion de maison. Sois informatif mais bref.",
             max_tokens=200,

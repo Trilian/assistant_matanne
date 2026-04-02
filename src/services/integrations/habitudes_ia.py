@@ -106,7 +106,7 @@ Historique 7 jours:
 
 Format JSON."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es coach en habitudes. Analyse de manière bienveillante et constructive.",
         )
@@ -160,7 +160,7 @@ Contexte: {notes_contexte if notes_contexte else 'Normal'}
 
 Format JSON."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es expert family wellness. Fournis insights bienveillants et constructifs.",
         )
@@ -252,7 +252,7 @@ Cause probables:
 Fournis: analyse problème, alertes, recommandations.
 Format JSON."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es analyste d'habitudes. Sois factuel et supportant.",
         )

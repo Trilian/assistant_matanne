@@ -9,6 +9,7 @@ chaque fichier à taille raisonnable tout en conservant la même API publique.
     par la couche UI via l'Event Bus.
 """
 
+import json
 import logging
 from datetime import datetime
 from typing import Any
@@ -306,6 +307,47 @@ class BaseAIService(
 
     # Version synchrone auto-générée via sync_wrapper
     call_with_list_parsing_sync = sync_wrapper(call_with_list_parsing)
+
+    async def call_with_dict_parsing(
+        self,
+        prompt: str,
+        system_prompt: str = "",
+        temperature: float | None = None,
+        max_tokens: int = 2000,
+        use_cache: bool = True,
+        fallback: dict | None = None,
+    ) -> dict[str, Any]:
+        """
+        Appel IA avec parsing d'un objet JSON simple en dictionnaire.
+
+        Utile pour les services qui ne disposent pas d'un modèle Pydantic dédié
+        pour une réponse ponctuelle, tout en conservant le nettoyage JSON robuste.
+        """
+        response = await self.call_with_cache(
+            prompt=prompt,
+            system_prompt=system_prompt
+            or "Retourne uniquement du JSON valide, pas de markdown ni de texte.",
+            temperature=temperature,
+            max_tokens=max_tokens,
+            use_cache=use_cache,
+        )
+
+        if not response:
+            return fallback or {}
+
+        try:
+            json_str = AnalyseurIA._extraire_objet_json(response)
+            parsed = json.loads(json_str)
+            if isinstance(parsed, dict):
+                logger.info("✅ JSON parsé vers dict")
+                return parsed
+            logger.warning("Réponse IA parsée mais non-dict: %s", type(parsed).__name__)
+            return fallback or {}
+        except Exception as e:
+            logger.error(f"❌ Erreur parsing dict: {e}")
+            return fallback or {}
+
+    call_with_dict_parsing_sync = sync_wrapper(call_with_dict_parsing)
 
     async def call_with_json_parsing(
         self,

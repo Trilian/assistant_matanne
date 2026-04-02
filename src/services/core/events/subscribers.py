@@ -1086,6 +1086,47 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("service.error", _enregistrer_erreur_service, priority=50)
     compteur += 1
 
+        # ── Sprint 12 — Bridges inter-modules moyenne priorité (NIM5-NIM8) ──
+        try:
+            from src.services.maison.inter_module_entretien_budget import (
+                enregistrer_entretien_budget_subscribers,
+            )
+
+            enregistrer_entretien_budget_subscribers()
+            compteur += 1
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Échec enregistrement bridge NIM5 Entretien→Budget: %s", e)
+
+        try:
+            from src.services.cuisine.inter_module_courses_validation import (
+                enregistrer_courses_validation_subscribers,
+            )
+
+            enregistrer_courses_validation_subscribers()
+            compteur += 1
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Échec enregistrement bridge NIM6 Courses→Planning: %s", e)
+
+        try:
+            from src.services.cuisine.inter_module_inventaire_fifo import (
+                enregistrer_inventaire_fifo_subscribers,
+            )
+
+            enregistrer_inventaire_fifo_subscribers()
+            compteur += 1
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Échec enregistrement bridge NIM7 Inventaire→FIFO: %s", e)
+
+        try:
+            from src.services.utilitaires.inter_module_chat_event_bus import (
+                enregistrer_chat_event_bus_subscribers,
+            )
+
+            enregistrer_chat_event_bus_subscribers()
+            compteur += 1
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Échec enregistrement bridge NIM8 Chat→EventBus: %s", e)
+
     # ── Webhooks sortants (basse priorité, fire-and-forget) ──
     bus.souscrire("*", _livrer_webhooks, priority=5)
     compteur += 1

@@ -115,7 +115,7 @@ Fournis:
 
 Format JSON détaillé."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es expert en rénovation maison (15+ ans expérience). Sois réaliste dans estimations.",
         )
@@ -218,7 +218,7 @@ Analyse:
 
 Format JSON."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es neutre entre DIY et artisan. Conseille au mieux des intérêts.",
         )
@@ -254,7 +254,7 @@ Fournis:
 
 Format JSON."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es expert en sélection artisans. Fournis critères pertinents.",
         )
@@ -302,7 +302,7 @@ Analyse:
 
 Format JSON."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es expert prix secteur BTP. Sois factuel dans comparaisons.",
         )

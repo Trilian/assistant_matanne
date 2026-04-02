@@ -56,6 +56,7 @@ class ArticleInventaire(Base):
     quantite_min: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
     emplacement: Mapped[str | None] = mapped_column(String(100), index=True)
     date_peremption: Mapped[date | None] = mapped_column(Date, index=True)
+        date_entree: Mapped[date] = mapped_column(Date, default=date.today, index=True, nullable=False)
     derniere_maj: Mapped[datetime] = mapped_column(
         DateTime, default=utc_now, onupdate=utc_now, index=True
     )

@@ -238,7 +238,7 @@ Critères:
 
 Liste format: "1. Recette A\n2. Recette B..."."""
 
-        result = self.call_with_cache(
+        result = self.call_with_cache_sync(
             prompt=prompt,
             system_prompt="Tu es chef culinaire pragmatique. Suggère des recettes réalistes et savoureuses.",
             max_tokens=300,

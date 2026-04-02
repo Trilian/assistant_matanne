@@ -120,7 +120,7 @@ Estime:
 
 Format JSON."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es diététicienne experte. Analyse precise basée sur profil et données.",
         )
@@ -178,7 +178,7 @@ Analyse:
 
 Format JSON avec structure claire."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es nutritionniste familial. Comprends les complexités multi-âges.",
         )
@@ -246,7 +246,7 @@ Pour chaque membre, propose:
 
 Format JSON par personne."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es expert nutrition familiale multi-âges. Crée adaptations réalistes.",
         )

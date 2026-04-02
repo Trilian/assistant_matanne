@@ -99,7 +99,7 @@ Pour chaque jour, identifie les impacts sur:
 
 Format JSON par jour avec: conditions, temp min/max, humidité, %pluie, vent, impacts[]."""
 
-        result = await self.call_with_list_parsing_sync(
+        result = await self.call_with_list_parsing(
             prompt=prompt,
             item_model=MeteoContexte,
             system_prompt="Tu es expert météo appliquée aux activités familiales et jardin. Sois spécifique et actionnable.",
@@ -219,7 +219,7 @@ Estime:
 
 Format JSON."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = await self.call_with_dict_parsing(
             prompt=prompt,
             system_prompt="Tu es expert efficacité énergétique. Sois précis dans estimations.",
         )
