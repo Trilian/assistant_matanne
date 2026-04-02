@@ -538,11 +538,4 @@ def obtenir_energie_service() -> EnergieService:
     return EnergieService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_notes_service = obtenir_notes_service  # alias rétrocompatibilité Sprint 12 A3
-get_journal_service = obtenir_journal_service  # alias rétrocompatibilité Sprint 12 A3
-get_contacts_service = obtenir_contacts_service  # alias rétrocompatibilité Sprint 12 A3
-get_liens_service = obtenir_liens_service  # alias rétrocompatibilité Sprint 12 A3
-get_mots_de_passe_service = obtenir_mots_de_passe_service  # alias rétrocompatibilité Sprint 12 A3
-get_presse_papiers_service = obtenir_presse_papiers_service  # alias rétrocompatibilité Sprint 12 A3
-get_energie_service = obtenir_energie_service  # alias rétrocompatibilité Sprint 12 A3
+

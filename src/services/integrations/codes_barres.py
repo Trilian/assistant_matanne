@@ -539,5 +539,4 @@ def obtenir_barcode_service() -> BarcodeService:
     return obtenir_service_codes_barres()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_barcode_service = obtenir_barcode_service  # alias rétrocompatibilité Sprint 12 A3
+

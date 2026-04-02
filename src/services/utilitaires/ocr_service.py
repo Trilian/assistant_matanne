@@ -76,5 +76,4 @@ def obtenir_ocr_service() -> OCRService:
     return OCRService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_ocr_service = obtenir_ocr_service  # alias rétrocompatibilité Sprint 12 A3
+

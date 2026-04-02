@@ -265,5 +265,4 @@ def obtenir_export_service() -> ExportService:
     return ExportService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_export_service = obtenir_export_service  # alias rétrocompatibilité Sprint 12 A3
+
