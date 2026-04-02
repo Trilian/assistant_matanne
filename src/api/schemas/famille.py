@@ -390,7 +390,8 @@ class PreferencesFamilleResponse(PreferencesFamilleRequest):
 class SuggestionsAchatsEnrichiesRequest(BaseModel):
     pour_qui: str | None = Field(None, description="famille, jules, anne, mathieu")
     triggers: list[str] = Field(
-        default_factory=list,
+        ...,
+        min_length=1,
         description="liste de contextes: vetements_qualite, sejour, culture, gaming, etc.",
     )
     age_jules_mois: int | None = None

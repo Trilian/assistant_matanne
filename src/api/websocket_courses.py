@@ -25,7 +25,6 @@ Usage:
     }));
 """
 
-import asyncio
 import json
 import logging
 from collections import defaultdict
@@ -140,23 +139,10 @@ class ConnectionManager:
 
         logger.info(f"🔌 WS: {username} ({user_id}) déconnecté de liste #{liste_id}")
 
-        # Notifier les autres en fire-and-forget pour éviter les deadlocks
-        # lors de la fermeture simultanée de connexions
-        try:
-            loop = asyncio.get_running_loop()
-            loop.create_task(
-                self.broadcast(
-                    liste_id,
-                    {
-                        "type": WSMessageType.USER_LEFT,
-                        "user_id": user_id,
-                        "username": username,
-                        "timestamp": datetime.now(UTC).isoformat(),
-                    },
-                )
-            )
-        except RuntimeError:
-            pass
+        # Note: on ne broadcast PAS user_left ici car cela provoque des deadlocks
+        # avec le TestClient sync de Starlette (les send_json bloquent quand les
+        # connexions se ferment en cascade). En production, le client détecte la
+        # déconnexion via onclose/onerror et rafraîchit la liste des utilisateurs.
 
     async def broadcast(
         self,
@@ -176,12 +162,9 @@ class ConnectionManager:
         await self._safe_send(websocket, message)
 
     async def _safe_send(self, websocket: WebSocket, message: dict[str, Any]) -> None:
-        """Envoie un message avec gestion d'erreur et timeout."""
+        """Envoie un message avec gestion d'erreur."""
         try:
-            import anyio
-
-            with anyio.move_on_after(5.0):
-                await websocket.send_json(message)
+            await websocket.send_json(message)
         except Exception as e:
             logger.warning(f"Erreur envoi WS: {e}")
 

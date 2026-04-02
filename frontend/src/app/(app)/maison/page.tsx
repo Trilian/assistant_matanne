@@ -375,25 +375,6 @@ export default function PageMaison() {
         </Card>
       )}
 
-      {predictives && predictives.length > 0 && (
-        <Card className="border-orange-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-orange-600" />
-              Garanties &amp; durée de vie prévisionnelle
-            </CardTitle>
-            <CardDescription>
-              Appareils approchant leur fin de cycle théorique
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="divide-y">
-            {predictives.slice(0, 4).map((item) => (
-              <CartePredictive key={item.garantie_id} item={item} />
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
       {/* Conseils IA hub */}
       {conseilsIA && conseilsIA.filter(c => !estDismissed(c)).length > 0 && (
         <div className="space-y-3">

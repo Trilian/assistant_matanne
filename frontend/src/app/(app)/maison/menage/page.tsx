@@ -701,7 +701,7 @@ function ContenuMenage() {
           )}
           {planning && (
             <div className="mt-4">
-              <TimelineGanttEntretien planning={planning as Record<string, FicheTache[]>} />
+              <TimelineGanttEntretien planning={planning as unknown as Record<string, FicheTache[]>} />
             </div>
           )}
           {!chargPlanning && !planning && (

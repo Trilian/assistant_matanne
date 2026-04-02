@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/composants/ui/card'
 import { AlertCircle, Cloud, CloudRain, Sun, Utensils, Clock } from 'lucide-react'
 import { utiliserRequete } from '@/crochets/utiliser-api'
 import { obtenirPlanningAujourdhui, obtenirMeteo } from '@/bibliotheque/api/planning'
-import { obtenirTachesAujourdhui } from '@/bibliotheque/api/maison'
+import { obtenirTachesJourMaison } from '@/bibliotheque/api/maison'
 
 interface RepasTablette {
   id: number | string
@@ -47,7 +47,7 @@ export default function PageTablette() {
 
   const { data: taches, isLoading: loadingTaches } = utiliserRequete(
     ['taches', 'aujourd-hui'],
-    () => obtenirTachesAujourdhui(),
+    () => obtenirTachesJourMaison(),
     { staleTime: 5 * 60 * 1000 }
   )
 
@@ -75,7 +75,8 @@ export default function PageTablette() {
     return <Sun className="h-12 w-12 text-yellow-500" />
   }
 
-  const repasAujourdhui: RepasTablette[] = planning?.repas?.[new Date().toISOString().split('T')[0]] || []
+  const dateAujourdhui = new Date().toISOString().split('T')[0]
+  const repasAujourdhui: RepasTablette[] = (planning?.repas as unknown as Record<string, RepasTablette[]> | undefined)?.[dateAujourdhui] || []
   const tachePrioritaire = (taches as TacheTablette[] | undefined)?.filter((t) => !t.fait)?.[0]
 
   return (

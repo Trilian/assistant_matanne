@@ -162,3 +162,15 @@ export async function obtenirSemaineUnifiee(dateDebut?: string): Promise<Semaine
   return data;
 }
 
+// ─── Stubs tablette ────────────────────────────────────────
+
+/** Planning du jour — extrait de la semaine courante */
+export async function obtenirPlanningAujourdhui(): Promise<PlanningSemaine> {
+  return obtenirPlanningSemaine();
+}
+
+/** Météo courante (stub — à connecter à un service météo) */
+export async function obtenirMeteo(): Promise<{ temperature: number; condition: string; humidity?: number } | null> {
+  return null;
+}
+

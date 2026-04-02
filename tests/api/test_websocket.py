@@ -15,16 +15,19 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
+from unittest.mock import AsyncMock, patch
 
 
 @pytest.fixture(autouse=True)
 def _reset_ws_manager():
-    """Réinitialise le ConnectionManager global entre chaque test."""
+    """Réinitialise le ConnectionManager global et désactive la persistance DB."""
     import src.api.websocket_courses as ws_mod
-    from src.api.websocket_courses import ConnectionManager, _manager
+    from src.api.websocket_courses import ConnectionManager
 
     ws_mod._manager = ConnectionManager()
-    yield
+    # Désactive _persist_change pour éviter les deadlocks asyncio.to_thread + sync TestClient
+    with patch.object(ws_mod, "_persist_change", new_callable=AsyncMock):
+        yield
     ws_mod._manager = ConnectionManager()
 
 

@@ -18,8 +18,8 @@ vi.mock("@/bibliotheque/api/outils", () => ({
   obtenirSuggestionsRecettes: vi.fn(),
 }));
 
-vi.mock("@/composants/ui/scroll-area", () => ({
-  ScrollArea: React.forwardRef<HTMLDivElement, { children: React.ReactNode; className?: string }>(
+vi.mock("@/composants/ui/scroll-area", () => {
+  const ScrollArea = React.forwardRef<HTMLDivElement, { children: React.ReactNode; className?: string }>(
     ({ children, className }, ref) => {
       const internalRef = React.useRef<HTMLDivElement>(null);
       React.useImperativeHandle(ref, () => {
@@ -29,8 +29,10 @@ vi.mock("@/composants/ui/scroll-area", () => ({
       });
       return <div ref={internalRef} className={className}>{children}</div>;
     }
-  ),
-}));
+  );
+  ScrollArea.displayName = "ScrollArea";
+  return { ScrollArea };
+});
 
 function renderWithQuery(ui: React.ReactElement) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });

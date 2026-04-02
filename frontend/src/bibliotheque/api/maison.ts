@@ -415,6 +415,35 @@ export async function obtenirContrat(id: number): Promise<Contrat> {
   return data;
 }
 
+export async function listerContrats(): Promise<Contrat[]> {
+  const { data } = await clientApi.get("/maison/contrats");
+  return data.items ?? data;
+}
+
+export async function creerContrat(contrat: Omit<Contrat, "id">): Promise<Contrat> {
+  const { data } = await clientApi.post<Contrat>("/maison/contrats", contrat);
+  return data;
+}
+
+export async function modifierContrat(id: number, contrat: Partial<Contrat>): Promise<Contrat> {
+  const { data } = await clientApi.patch<Contrat>(`/maison/contrats/${id}`, contrat);
+  return data;
+}
+
+export async function supprimerContrat(id: number): Promise<void> {
+  await clientApi.delete(`/maison/contrats/${id}`);
+}
+
+export async function alertesContrats(jours = 90): Promise<AlerteContrat[]> {
+  const { data } = await clientApi.get(`/maison/contrats/alertes?jours=${jours}`);
+  return data.items ?? data;
+}
+
+export async function resumeFinancierContrats(): Promise<ResumeFinancierContrats> {
+  const { data } = await clientApi.get<ResumeFinancierContrats>("/maison/contrats/resume-financier");
+  return data;
+}
+
 // ─── Garanties ────────────────────────────────────────────
 
 // ─── Diagnostics & Estimations ────────────────────────────

@@ -113,7 +113,7 @@ export default function PageNutrition() {
     return {
       date: dateIso,
       score,
-      repas_planifies: valeur.repas_count,
+      repas_planifies: valeur.repas.length,
       details: `${Math.round(valeur.calories)} kcal · ${Math.round(valeur.proteines)}g prot.`,
     };
   });
