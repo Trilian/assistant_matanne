@@ -1268,10 +1268,18 @@ def get_inventaire_ai_service() -> InventaireAIService:
 
 ### Critères de validation
 
-- [ ] Préférences apprises influencent les suggestions après 2+ semaines de données
-- [ ] Planification auto génère un planning complet en un clic
-- [ ] Batch cooking IA propose un plan cohérent
-- [ ] Cartes visuelles exportables en image
+- [x] Préférences apprises influencent les suggestions après 2+ semaines de données
+- [x] Planification auto génère un planning complet en un clic
+- [x] Batch cooking IA propose un plan cohérent
+- [x] Cartes visuelles exportables en image
+
+### Statut d'implémentation Sprint 22
+
+- Backend: endpoints Sprint 22 exposés sur `/api/v1/innovations/phasee/s22/*`.
+- Service innovations: apprentissage préférences, planification hebdo complète auto, batch cooking intelligent, cartes visuelles (SVG base64), mode tablette magazine.
+- Schémas/API frontend: contrats ajoutés dans `frontend/src/bibliotheque/api/avance.ts`.
+- Tests API: couverture Sprint 22 ajoutée dans `tests/api/test_innovations.py`.
+- Impact: fonctionnalités disponibles immédiatement pour intégration UI progressive.
 
 ---
 
@@ -1591,7 +1599,7 @@ Les articles existants hériteront de la date actuelle lors de la migration SQL.
 - [x] Envoi email automatique du PDF mensuel unifié
 
 ### Sprint 22 — Innovations avancées
-- [ ] Apprentissage préférences, planification auto, batch cooking IA, cartes visuelles, mode tablette
+- [x] Apprentissage préférences, planification auto, batch cooking IA, cartes visuelles, mode tablette
 
 ### Sprint 23 — Innovations long terme
 - [ ] WhatsApp conversationnel, comparateur prix, énergie temps-réel, timeline enrichie
