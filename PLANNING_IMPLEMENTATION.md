@@ -892,6 +892,7 @@ def get_inventaire_ai_service() -> InventaireAIService:
 > **Objectif** : Étendre les notifications multi-canal
 > **Effort** : Moyen | **Impact** : Communication proactive
 > **Dépend de** : Sprint 15
+> **Statut** : ✅ TERMINÉ (2 Avril 2026)
 
 ### 7 notifications WhatsApp à ajouter
 
@@ -923,10 +924,43 @@ def get_inventaire_ai_service() -> InventaireAIService:
 
 ### Critères de validation
 
-- [ ] 7 templates WhatsApp créés et fonctionnels
-- [ ] 2 templates email créés avec génération PDF
-- [ ] Tests d'envoi en dry run passent
-- [ ] Page admin/notifications affiche les nouveaux templates
+- [x] 7 templates WhatsApp créés et fonctionnels
+- [x] 2 templates email créés avec génération PDF
+- [x] Tests d'envoi en dry run passent
+- [x] Page admin/notifications affiche les nouveaux templates
+
+### Notes d'implémentation Sprint 16 (2 Avril 2026)
+
+- Templates WhatsApp Sprint 16 ajoutés dans `src/services/integrations/whatsapp.py` :
+    - `envoyer_suggestion_recette_du_jour` (16.1)
+    - `envoyer_alerte_diagnostic_maison` (16.2)
+    - `envoyer_resume_weekend_suggestions` (16.3)
+    - `envoyer_alerte_budget_depassement` (16.4)
+    - `envoyer_bilan_nutrition_semaine` (16.5)
+    - `envoyer_rappel_entretien_maison` (16.6)
+    - Commande vocale rapide (16.7) gérée via webhook WhatsApp (`ajoute` / `ajouter`)
+- Dispatcher enrichi (`src/services/core/notifications/notif_dispatcher.py`) avec routing `type_whatsapp` Sprint 16 et nouveaux types email.
+- Service email enrichi (`src/services/core/notifications/notif_email.py`) :
+    - `envoyer_rapport_famille_mensuel_complet` (16.8) avec pièce jointe PDF
+    - `envoyer_rapport_maison_trimestriel` (16.9) avec pièce jointe PDF
+    - support générique des attachments dans `_envoyer(...)`
+- Templates HTML email ajoutés :
+    - `src/services/core/notifications/templates/rapport_famille_mensuel_complet.html`
+    - `src/services/core/notifications/templates/rapport_maison_trimestriel.html`
+- Jobs CRON Sprint 16 ajoutés et planifiés :
+    - `s16_resume_weekend_whatsapp`
+    - `s16_rappel_entretien_whatsapp`
+    - `s16_bilan_nutrition_whatsapp`
+    - `s16_rapport_famille_mensuel`
+    - `s16_rapport_maison_trimestriel`
+- Admin mis à jour :
+    - labels jobs Sprint 16 dans `src/api/routes/admin.py`
+    - endpoint `GET /api/v1/admin/notifications/templates`
+    - templates visibles dans `frontend/src/app/(app)/admin/notifications/page.tsx`
+- Tests ajoutés :
+    - dry run jobs Sprint 16 dans `tests/services/test_cron_jobs.py`
+    - templates email + pièce jointe PDF dans `tests/services/test_notif_email_mjml.py`
+    - page admin notifications ajustée pour mock des templates
 
 ---
 
@@ -1512,9 +1546,9 @@ Les articles existants hériteront de la date actuelle lors de la migration SQL.
 - [ ] Dry run fonctionnel pour chaque
 
 ### Sprint 16 — Notifications
-- [ ] 7 templates WhatsApp
-- [ ] 2 templates email/PDF
-- [ ] Tests dry run passent
+- [x] 7 templates WhatsApp
+- [x] 2 templates email/PDF
+- [x] Tests dry run passent
 
 ### Sprint 17 — Admin
 - [x] Dashboard admin unifié (santé services, jobs récents, sécurité, IA)

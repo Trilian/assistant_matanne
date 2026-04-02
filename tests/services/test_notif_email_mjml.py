@@ -50,3 +50,46 @@ def test_envoyer_rapport_mensuel_utilise_render_mjml():
     assert ok is True
     mock_render.assert_called_once()
     mock_send.assert_called_once()
+
+
+def test_envoyer_rapport_famille_mensuel_complet_joint_un_pdf():
+    service = _service_email()
+
+    with patch.object(service, "_envoyer", return_value=True) as mock_send:
+        ok = service.envoyer_rapport_famille_mensuel_complet(
+            "test@example.com",
+            {
+                "mois": "04/2026",
+                "budget": "1200 EUR",
+                "nutrition": "60 repas",
+                "maison": "3 projets",
+                "jardin": "2 actions",
+                "jules": "RAS",
+            },
+        )
+
+    assert ok is True
+    kwargs = mock_send.call_args.kwargs
+    assert kwargs.get("attachments")
+    assert kwargs["attachments"][0]["filename"].endswith(".pdf")
+
+
+def test_envoyer_rapport_maison_trimestriel_joint_un_pdf():
+    service = _service_email()
+
+    with patch.object(service, "_envoyer", return_value=True) as mock_send:
+        ok = service.envoyer_rapport_maison_trimestriel(
+            "test@example.com",
+            {
+                "trimestre": "T2 2026",
+                "projets": "4 projets",
+                "energie": "430 kWh",
+                "jardin": "8 tâches",
+                "entretien": "5 rappels",
+            },
+        )
+
+    assert ok is True
+    kwargs = mock_send.call_args.kwargs
+    assert kwargs.get("attachments")
+    assert kwargs["attachments"][0]["filename"].endswith(".pdf")
