@@ -53,6 +53,10 @@ from src.api.schemas.fonctionnalites_avancees import (
     SuggestionRepasSoirResponse,
     VeilleEmploiRequest,
     VeilleEmploiResponse,
+    InsightsQuotidiensResponse,
+    MeteoContextuelleResponse,
+    ModeVacancesConfigurationRequest,
+    ModeVacancesResponse,
 )
 from src.api.utils import gerer_exception_api
 
@@ -366,6 +370,74 @@ async def phasee_rapport_mensuel_pdf(
     service = _get_service()
     result = service.generer_rapport_mensuel_pdf(mois=mois)
     return result or RapportMensuelPdfResponse()
+
+
+@router.get(
+    "/phasee/mode-vacances",
+    response_model=ModeVacancesResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S21 IN10 Lecture mode vacances",
+)
+@gerer_exception_api
+async def phasee_lire_mode_vacances(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    user_id = str(user.get("id") or "")
+    result = service.obtenir_mode_vacances(user_id=user_id)
+    return result or ModeVacancesResponse()
+
+
+@router.post(
+    "/phasee/mode-vacances/config",
+    response_model=ModeVacancesResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S21 IN10 Configuration mode vacances",
+)
+@gerer_exception_api
+async def phasee_configurer_mode_vacances(
+    body: ModeVacancesConfigurationRequest,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    user_id = str(user.get("id") or "")
+    result = service.configurer_mode_vacances(
+        user_id=user_id,
+        actif=body.actif,
+        checklist_voyage_auto=body.checklist_voyage_auto,
+    )
+    return result or ModeVacancesResponse(actif=body.actif, checklist_voyage_auto=body.checklist_voyage_auto)
+
+
+@router.get(
+    "/phasee/insights-quotidiens",
+    response_model=InsightsQuotidiensResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S21 IN11 Insights IA proactifs quotidiens",
+)
+@gerer_exception_api
+async def phasee_insights_quotidiens(
+    limite: int = Query(2, ge=1, le=2, description="1 ou 2 insights maximum par jour"),
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    result = service.generer_insights_quotidiens(limite=limite)
+    return result or InsightsQuotidiensResponse(limite_journaliere=limite)
+
+
+@router.get(
+    "/phasee/meteo-contextuelle",
+    response_model=MeteoContextuelleResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S21 IN4 Meteo contextuelle cross-module",
+)
+@gerer_exception_api
+async def phasee_meteo_contextuelle(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    result = service.analyser_meteo_contextuelle()
+    return result or MeteoContextuelleResponse()
 
 
 @router.get(

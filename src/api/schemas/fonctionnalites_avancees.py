@@ -74,6 +74,16 @@ class ModePiloteConfigurationRequest(BaseModel):
     )
 
 
+class ModeVacancesConfigurationRequest(BaseModel):
+    """Configuration du mode vacances."""
+
+    actif: bool = Field(True, description="Active ou desactive le mode vacances")
+    checklist_voyage_auto: bool = Field(
+        True,
+        description="Active la checklist voyage automatique en mode vacances",
+    )
+
+
 # ── Responses (re-exports depuis types) ──
 
 from src.services.innovations.types import (  # noqa: E402
@@ -100,6 +110,9 @@ from src.services.innovations.types import (  # noqa: E402
     ScoreBienEtreResponse,
     SuggestionRepasSoirResponse,
     VeilleEmploiResponse,
+    InsightsQuotidiensResponse,
+    MeteoContextuelleResponse,
+    ModeVacancesResponse,
 )
 
 __all__ = [
@@ -128,9 +141,13 @@ __all__ = [
     "PlanningJulesAdaptatifResponse",
     "ComparateurEnergieRequest",
     "ModePiloteConfigurationRequest",
+    "ModeVacancesConfigurationRequest",
     "ComparateurEnergieResponse",
     "ScoreEcoResponsableResponse",
     "SaisonnaliteIntelligenteResponse",
     "ApprentissageHabitudesResponse",
     "AlertesContextuellesResponse",
+    "ModeVacancesResponse",
+    "InsightsQuotidiensResponse",
+    "MeteoContextuelleResponse",
 ]

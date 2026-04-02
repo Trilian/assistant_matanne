@@ -2,8 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import DashboardPage from "@/app/(app)/page";
 
-const mockEnregistrerActionWidgetDashboard = vi.fn();
-
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   usePathname: () => "/",
@@ -18,22 +16,6 @@ vi.mock("next/link", () => ({
 
 vi.mock("@/crochets/utiliser-auth", () => ({
   utiliserAuth: () => ({ utilisateur: { nom: "Anne" }, isAuthenticated: true }),
-}));
-
-vi.mock("@/bibliotheque/api/tableau-bord", async () => {
-  const actual = await vi.importActual("@/bibliotheque/api/tableau-bord");
-  return {
-    ...(actual as object),
-    enregistrerActionWidgetDashboard: mockEnregistrerActionWidgetDashboard,
-  };
-});
-
-vi.mock("@/composants/dashboard/grille-dashboard-dnd", () => ({
-  GrilleDashboardDnd: ({ children, onWidgetReorder }: { children: React.ReactNode; onWidgetReorder?: (d: { widgetId: string; fromIndex: number; toIndex: number; ordre: string[] }) => void }) => {
-    onWidgetReorder?.({ widgetId: "metriques", fromIndex: 0, toIndex: 1, ordre: ["metriques"] });
-    return <div>{children}</div>;
-  },
-  WidgetSortable: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 const mockTableauBord = {
@@ -152,7 +134,6 @@ vi.mock("@/crochets/utiliser-api", () => ({
 describe("DashboardPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockEnregistrerActionWidgetDashboard.mockResolvedValue({ statut: "ok" });
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => ({
@@ -190,15 +171,5 @@ describe("DashboardPage", () => {
     render(<DashboardPage />);
     expect(screen.getByText("Alerte budget")).toBeInTheDocument();
     expect(screen.getByText("Dépenses courses en forte hausse.")).toBeInTheDocument();
-  });
-
-  it("trace le reordonnancement des widgets via action rapide", () => {
-    render(<DashboardPage />);
-    expect(mockEnregistrerActionWidgetDashboard).toHaveBeenCalledWith(
-      expect.objectContaining({
-        widget_id: "metriques",
-        action: "reordonner_widget",
-      })
-    );
   });
 });

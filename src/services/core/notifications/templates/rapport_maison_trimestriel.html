@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}{{ sujet }}{% endblock %}
+
+{% block content %}
+<h2>{{ sujet }}</h2>
+<p>Résumé maison pour le <strong>{{ trimestre }}</strong>.</p>
+<ul>
+  <li><strong>Projets:</strong> {{ projets }}</li>
+  <li><strong>Energie:</strong> {{ energie }}</li>
+  <li><strong>Jardin:</strong> {{ jardin }}</li>
+  <li><strong>Entretien:</strong> {{ entretien }}</li>
+</ul>
+<p>Le rapport PDF trimestriel est joint à cet email.</p>
+{% endblock %}

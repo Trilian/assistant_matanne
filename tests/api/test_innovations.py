@@ -344,6 +344,95 @@ class TestModeInvite:
 
 
 # ═══════════════════════════════════════════════════════════
+# Sprint 21 — Innovations prioritaires
+# ═══════════════════════════════════════════════════════════
+
+
+class TestSprint21Innovations:
+    """Tests des endpoints Sprint 21 (mode vacances, insights, météo contextuelle)."""
+
+    def test_lire_mode_vacances(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import ModeVacancesResponse
+
+        mock_innovations_service.obtenir_mode_vacances.return_value = ModeVacancesResponse(
+            actif=True,
+            checklist_voyage_auto=True,
+            courses_mode_compact=True,
+            entretien_suspendu=True,
+            recommandations=["Checklist voyage prête"],
+        )
+
+        response = client.get("/api/v1/innovations/phasee/mode-vacances", headers=auth_headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["actif"] is True
+        assert data["entretien_suspendu"] is True
+
+    def test_configurer_mode_vacances(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import ModeVacancesResponse
+
+        mock_innovations_service.configurer_mode_vacances.return_value = ModeVacancesResponse(
+            actif=False,
+            checklist_voyage_auto=False,
+            courses_mode_compact=False,
+            entretien_suspendu=False,
+            recommandations=["Mode vacances désactivé"],
+        )
+
+        response = client.post(
+            "/api/v1/innovations/phasee/mode-vacances/config",
+            json={"actif": False, "checklist_voyage_auto": False},
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["actif"] is False
+        assert data["checklist_voyage_auto"] is False
+
+    def test_insights_quotidiens_limites_a_deux(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import InsightQuotidien, InsightsQuotidiensResponse
+
+        mock_innovations_service.generer_insights_quotidiens.return_value = InsightsQuotidiensResponse(
+            date_reference="2026-04-02",
+            limite_journaliere=2,
+            nb_insights=2,
+            insights=[
+                InsightQuotidien(titre="Insight 1", message="A", module="cuisine"),
+                InsightQuotidien(titre="Insight 2", message="B", module="maison"),
+            ],
+        )
+
+        response = client.get(
+            "/api/v1/innovations/phasee/insights-quotidiens?limite=2",
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["limite_journaliere"] == 2
+        assert data["nb_insights"] <= 2
+
+    def test_meteo_contextuelle_cross_module(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import MeteoContextuelleResponse, MeteoImpactModule
+
+        mock_innovations_service.analyser_meteo_contextuelle.return_value = MeteoContextuelleResponse(
+            ville="Paris",
+            saison="printemps",
+            temperature=18.5,
+            description="Partiellement nuageux",
+            modules=[
+                MeteoImpactModule(module="cuisine", impact="Adapter les menus"),
+                MeteoImpactModule(module="famille", impact="Activités int/ext"),
+            ],
+        )
+
+        response = client.get("/api/v1/innovations/phasee/meteo-contextuelle", headers=auth_headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["ville"] == "Paris"
+        assert len(data["modules"]) >= 2
+
+
+# ═══════════════════════════════════════════════════════════
 # 10.25 — ADMIN RESET MODULE
 # ═══════════════════════════════════════════════════════════
 

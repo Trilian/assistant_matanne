@@ -36,6 +36,7 @@ import {
   obtenirBilanMensuel,
   obtenirAlertesContextuelles,
   obtenirConfigDashboard,
+  obtenirHistoriqueActionsWidgetsDashboard,
   enregistrerActionWidgetDashboard,
   obtenirPointsFamille,
   obtenirScoreEcologique,
@@ -81,6 +82,7 @@ const WIDGETS_DEFAUT = {
   points_famille: true,
   score_bienetre: true,
   score_ecologique: true,
+  journal_actions_dashboard: true,
 };
 
 type ClesWidget = keyof typeof WIDGETS_DEFAUT;
@@ -105,6 +107,20 @@ type HistoireFamille = {
   }>;
 };
 
+function obtenirStyleActionDashboard(action: string | null): string {
+  const valeur = (action ?? "").toLowerCase();
+  if (valeur.includes("valider") || valeur.includes("afficher") || valeur.includes("refresh")) {
+    return "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/60";
+  }
+  if (valeur.includes("annuler") || valeur.includes("masquer")) {
+    return "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/60";
+  }
+  if (valeur.includes("reordonner")) {
+    return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/60";
+  }
+  return "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900/60 dark:text-slate-300 dark:border-slate-800/70";
+}
+
 export default function PageAccueil() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -128,6 +144,10 @@ export default function PageAccueil() {
   const { data: alertesContextuelles } = utiliserRequete(
     ["dashboard", "alertes-contextuelles"],
     obtenirAlertesContextuelles
+  );
+  const { data: historiqueActionsWidgets } = utiliserRequete(
+    ["dashboard", "widgets-actions"],
+    () => obtenirHistoriqueActionsWidgetsDashboard(8)
   );
   const { data: pointsFamille } = utiliserRequete(
     ["dashboard", "points-famille"],
@@ -160,6 +180,8 @@ export default function PageAccueil() {
   const [widgets, setWidgets] = useState(WIDGETS_DEFAUT);
   const [meteo, setMeteo] = useState<MeteoWidget | null>(null);
   const [actionPushTraitee, setActionPushTraitee] = useState(false);
+  const [filtreWidgetJournal, setFiltreWidgetJournal] = useState("all");
+  const [filtreActionJournal, setFiltreActionJournal] = useState("all");
 
   const ORDRE_WIDGETS_DEFAUT = Object.keys(WIDGETS_DEFAUT);
   const [ordreWidgets, setOrdreWidgets] = utiliserStockageLocal<string[]>(
@@ -184,6 +206,31 @@ export default function PageAccueil() {
     }),
     [configDashboard?.config_dashboard, widgetsStockes]
   );
+
+  const itemsJournalFiltres = useMemo(() => {
+    const source = historiqueActionsWidgets?.items ?? [];
+    return source.filter((item) => {
+      const okWidget = filtreWidgetJournal === "all" || (item.widget_id ?? "dashboard") === filtreWidgetJournal;
+      const okAction = filtreActionJournal === "all" || (item.action ?? "action") === filtreActionJournal;
+      return okWidget && okAction;
+    });
+  }, [historiqueActionsWidgets?.items, filtreActionJournal, filtreWidgetJournal]);
+
+  const optionsWidgetsJournal = useMemo(() => {
+    const values = new Set<string>();
+    (historiqueActionsWidgets?.items ?? []).forEach((item) => {
+      values.add(item.widget_id ?? "dashboard");
+    });
+    return Array.from(values).sort();
+  }, [historiqueActionsWidgets?.items]);
+
+  const optionsActionsJournal = useMemo(() => {
+    const values = new Set<string>();
+    (historiqueActionsWidgets?.items ?? []).forEach((item) => {
+      values.add(item.action ?? "action");
+    });
+    return Array.from(values).sort();
+  }, [historiqueActionsWidgets?.items]);
 
   const { mutate: sauvegarderWidgets } = utiliserMutation(
     (config: Record<string, boolean>) => sauvegarderConfigDashboard(config),
@@ -421,6 +468,13 @@ export default function PageAccueil() {
             donnees: { ordre: nouvelOrdre },
           });
         }}
+        onWidgetReorder={({ widgetId, fromIndex, toIndex, ordre }) => {
+          tracerActionWidgetDashboard({
+            widget_id: widgetId,
+            action: "reordonner_widget",
+            donnees: { from_index: fromIndex, to_index: toIndex, ordre },
+          });
+        }}
       >
 
       {widgets.meteo && meteo && (
@@ -487,6 +541,82 @@ export default function PageAccueil() {
                 <p className="text-xs mt-1">Action: {alerte.action}</p>
               </div>
             ))}
+          </CardContent>
+        </Card>
+        </WidgetSortable>
+      )}
+
+      {widgets.journal_actions_dashboard && (
+        <WidgetSortable id="journal_actions_dashboard">
+        <Card className="border-slate-300/60 bg-slate-50/60 dark:border-slate-800/40 dark:bg-slate-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Journal actions dashboard</CardTitle>
+            <CardDescription>
+              Dernières interactions widgets côté interface
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <label className="text-xs text-muted-foreground">
+                Widget
+                <select
+                  value={filtreWidgetJournal}
+                  onChange={(e) => setFiltreWidgetJournal(e.target.value)}
+                  className="mt-1 w-full rounded-md border bg-background px-2 py-1 text-sm"
+                >
+                  <option value="all">Tous les widgets</option>
+                  {optionsWidgetsJournal.map((widget) => (
+                    <option key={widget} value={widget}>
+                      {widget}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-xs text-muted-foreground">
+                Action
+                <select
+                  value={filtreActionJournal}
+                  onChange={(e) => setFiltreActionJournal(e.target.value)}
+                  className="mt-1 w-full rounded-md border bg-background px-2 py-1 text-sm"
+                >
+                  <option value="all">Toutes les actions</option>
+                  {optionsActionsJournal.map((action) => (
+                    <option key={action} value={action}>
+                      {action}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            {!historiqueActionsWidgets || historiqueActionsWidgets.total === 0 ? (
+              <p className="text-sm text-muted-foreground">Aucune action récente.</p>
+            ) : itemsJournalFiltres.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Aucune action pour ces filtres.</p>
+            ) : (
+              itemsJournalFiltres.slice(0, 6).map((item) => (
+                <div
+                  key={item.event_id}
+                  className="rounded-md border bg-background/70 px-3 py-2"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-medium flex items-center gap-2">
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${obtenirStyleActionDashboard(item.action)}`}
+                      >
+                        {item.action ?? "action"}
+                      </span>
+                      <span>{item.widget_id ?? "dashboard"}</span>
+                    </p>
+                    <span className="text-[11px] uppercase text-muted-foreground">
+                      {item.source || "dashboard"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {new Date(item.timestamp).toLocaleString("fr-FR")}
+                  </p>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
         </WidgetSortable>

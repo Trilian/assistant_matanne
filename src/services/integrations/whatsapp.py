@@ -524,6 +524,81 @@ async def envoyer_rapport_hebdo_whatsapp(texte_resume: str) -> bool:
     )
 
 
+async def envoyer_suggestion_recette_du_jour(message: str) -> bool:
+    """Sprint 16.1 — Envoie une suggestion recette du jour via WhatsApp."""
+    settings = obtenir_parametres()
+    destinataire = settings.WHATSAPP_USER_NUMBER
+    if not destinataire:
+        return False
+    return await envoyer_message_whatsapp(destinataire, f"🍽️ *Suggestion recette du jour*\n\n{message}")
+
+
+async def envoyer_alerte_diagnostic_maison(message: str) -> bool:
+    """Sprint 16.2 — Envoie une alerte de diagnostic maison avec recommandation."""
+    settings = obtenir_parametres()
+    destinataire = settings.WHATSAPP_USER_NUMBER
+    if not destinataire:
+        return False
+    return await envoyer_message_interactif(
+        destinataire=destinataire,
+        corps=f"🛠️ *Diagnostic maison*\n\n{message}",
+        boutons=[
+            {"id": "diagnostic_vu", "title": "✅ Vu"},
+            {"id": "diagnostic_artisan", "title": "👷 Artisans"},
+        ],
+    )
+
+
+async def envoyer_resume_weekend_suggestions(message: str) -> bool:
+    """Sprint 16.3 — Envoie le résumé weekend suggestions (vendredi)."""
+    settings = obtenir_parametres()
+    destinataire = settings.WHATSAPP_USER_NUMBER
+    if not destinataire:
+        return False
+    return await envoyer_message_interactif(
+        destinataire=destinataire,
+        corps=f"🎡 *Weekend en vue*\n\n{message}",
+        boutons=[
+            {"id": "weekend_ok", "title": "✅ OK"},
+            {"id": "weekend_autres", "title": "🔄 Autres idées"},
+        ],
+    )
+
+
+async def envoyer_alerte_budget_depassement(message: str) -> bool:
+    """Sprint 16.4 — Envoie une alerte budget dépassement."""
+    settings = obtenir_parametres()
+    destinataire = settings.WHATSAPP_USER_NUMBER
+    if not destinataire:
+        return False
+    return await envoyer_message_whatsapp(destinataire, f"💸 *Alerte budget*\n\n{message}")
+
+
+async def envoyer_bilan_nutrition_semaine(message: str) -> bool:
+    """Sprint 16.5 — Envoie le bilan nutrition simplifié de la semaine."""
+    settings = obtenir_parametres()
+    destinataire = settings.WHATSAPP_USER_NUMBER
+    if not destinataire:
+        return False
+    return await envoyer_message_whatsapp(destinataire, f"🥗 *Bilan nutrition semaine*\n\n{message}")
+
+
+async def envoyer_rappel_entretien_maison(message: str) -> bool:
+    """Sprint 16.6 — Envoie un rappel de maintenance maison du jour."""
+    settings = obtenir_parametres()
+    destinataire = settings.WHATSAPP_USER_NUMBER
+    if not destinataire:
+        return False
+    return await envoyer_message_interactif(
+        destinataire=destinataire,
+        corps=f"🧰 *Rappel entretien maison*\n\n{message}",
+        boutons=[
+            {"id": "entretien_fait", "title": "✅ Fait"},
+            {"id": "entretien_plus_tard", "title": "⏳ Plus tard"},
+        ],
+    )
+
+
 async def envoyer_digest_matinal() -> bool:
     """Envoie le digest matinal WhatsApp : résumé de la journée à venir.
 

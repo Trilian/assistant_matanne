@@ -18,6 +18,8 @@ import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
+import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
+import { SwipeableItem } from "@/composants/swipeable-item";
 import { useQueryClient } from "@tanstack/react-query";
 import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
@@ -56,6 +58,15 @@ function OngletDiagnostics() {
     { onSuccess: () => { invalider(); fermerDialog(); toast.success("Diagnostic modifié"); } }
   );
   const { mutate: supprimer } = utiliserMutation(supprimerDiagnostic, { onSuccess: () => { invalider(); toast.success("Diagnostic supprimé"); } });
+  const { planifierSuppression } = utiliserSuppressionAnnulable();
+
+  const supprimerAvecUndo = (d: DiagnosticImmobilier) => {
+    planifierSuppression(`diagnostic-${d.id}`, {
+      libelle: d.type_diagnostic,
+      onConfirmer: () => supprimer(d.id),
+      onErreur: () => toast.error("Erreur lors de la suppression"),
+    });
+  };
 
   const soumettre = () => {
     const payload = { type_diagnostic: form.type_diagnostic, date_realisation: form.date_realisation || undefined, date_expiration: form.date_expiration || undefined, resultat: form.resultat || undefined, diagnostiqueur: form.diagnostiqueur || undefined };
@@ -110,20 +121,28 @@ function OngletDiagnostics() {
           {diagnostics.map((d: DiagnosticImmobilier) => {
             const expire = d.date_expiration && new Date(d.date_expiration) < new Date(Date.now() + 90 * 86400000);
             return (
-              <Card key={d.id} className={expire ? "border-amber-200" : ""}>
-                <CardContent className="py-3 flex items-center gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{d.type_diagnostic}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {d.resultat ?? "—"}{d.date_expiration ? ` · exp. ${new Date(d.date_expiration).toLocaleDateString("fr-FR")}` : ""}
-                    </p>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(d)}><Pencil className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive" onClick={() => supprimer(d.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <SwipeableItem
+                key={d.id}
+                labelGauche="Supprimer"
+                labelDroit="Modifier"
+                onSwipeLeft={() => supprimerAvecUndo(d)}
+                onSwipeRight={() => ouvrirEdition(d)}
+              >
+                <Card className={expire ? "border-amber-200" : ""}>
+                  <CardContent className="py-3 flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">{d.type_diagnostic}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {d.resultat ?? "—"}{d.date_expiration ? ` · exp. ${new Date(d.date_expiration).toLocaleDateString("fr-FR")}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(d)}><Pencil className="h-3.5 w-3.5" /></Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive" onClick={() => supprimerAvecUndo(d)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </SwipeableItem>
             );
           })}
         </div>

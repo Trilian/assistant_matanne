@@ -35,7 +35,15 @@ import { utiliserRequete } from "@/crochets/utiliser-api";
 import { clientApi } from "@/bibliotheque/api/client";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import { listerHistoriqueJobs } from "@/bibliotheque/api/admin";
+import { toast } from "sonner";
+import {
+  comparerDryRunVsRun,
+  executerJobsDuMatin,
+  listerHistoriqueJobs,
+  simulerJourneeJobs,
+  type JobCompareResponse,
+  type JobBatchResponse,
+} from "@/bibliotheque/api/admin";
 
 interface JobInfo {
   id: string;
@@ -103,6 +111,8 @@ export default function PageAdminJobs() {
   const [filtreStatus, setFiltreStatus] = useState("all");
   const [filtreDepuis, setFiltreDepuis] = useState("");
   const [filtreJusqua, setFiltreJusqua] = useState("");
+  const [batchLoading, setBatchLoading] = useState<"morning" | "day" | null>(null);
+  const [batchResultat, setBatchResultat] = useState<JobBatchResponse | null>(null);
 
   const {
     data: jobs,
@@ -136,6 +146,15 @@ export default function PageAdminJobs() {
     },
   );
 
+  const {
+    data: comparaison,
+    isLoading: comparaisonLoading,
+    refetch: refetchComparaison,
+  } = utiliserRequete(
+    ["admin", "jobs-compare", "168h"],
+    async (): Promise<JobCompareResponse> => comparerDryRunVsRun({ limite: 20, depuis_heures: 168 }),
+  );
+
   const badgeHistorique = (status: string) => {
     if (status === "success") return <Badge>Succès</Badge>;
     if (status === "dry_run") return <Badge variant="secondary">Dry-run</Badge>;
@@ -155,6 +174,41 @@ export default function PageAdminJobs() {
     } catch {
       setRunStatuts((s) => ({ ...s, [jobId]: "error" }));
       setTimeout(() => setRunStatuts((s) => ({ ...s, [jobId]: "idle" })), 3000);
+    }
+  };
+
+  const lancerJobsMatin = async () => {
+    setBatchLoading("morning");
+    try {
+      const resultat = await executerJobsDuMatin({
+        dry_run: modeDryRun,
+        continuer_sur_erreur: true,
+      });
+      setBatchResultat(resultat);
+      toast.success(`Batch matin terminé: ${resultat.succes} succès / ${resultat.echecs} échec(s)`);
+      refetch();
+      refetchComparaison();
+    } catch {
+      toast.error("Erreur lors du lancement des jobs du matin");
+    } finally {
+      setBatchLoading(null);
+    }
+  };
+
+  const simulerJournee = async () => {
+    setBatchLoading("day");
+    try {
+      const resultat = await simulerJourneeJobs({
+        dry_run: true,
+        continuer_sur_erreur: true,
+      });
+      setBatchResultat(resultat);
+      toast.success(`Simulation journée terminée: ${resultat.succes} succès / ${resultat.echecs} échec(s)`);
+      refetchComparaison();
+    } catch {
+      toast.error("Erreur lors de la simulation de journée");
+    } finally {
+      setBatchLoading(null);
     }
   };
 
@@ -349,6 +403,91 @@ export default function PageAdminJobs() {
                     </Fragment>
                   );
                 })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Actions groupées Sprint 17</CardTitle>
+          <CardDescription>
+            Exécution groupée des jobs du matin et simulation d&apos;une journée type.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button onClick={lancerJobsMatin} disabled={batchLoading !== null}>
+              {batchLoading === "morning" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+              Lancer tous les jobs du matin
+            </Button>
+            <Button variant="outline" onClick={simulerJournee} disabled={batchLoading !== null}>
+              {batchLoading === "day" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Clock className="mr-2 h-4 w-4" />}
+              Simuler une journée (dry-run)
+            </Button>
+          </div>
+
+          {batchResultat && (
+            <div className="rounded-lg border p-3 text-sm">
+              <p className="font-medium">
+                Résultat: {batchResultat.succes} succès / {batchResultat.echecs} échec(s) ({batchResultat.total} job(s))
+              </p>
+              <p className="text-muted-foreground">Mode: {batchResultat.mode}</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Comparaison dry-run vs run</CardTitle>
+          <CardDescription>
+            Dernières comparaisons par job pour valider le passage en exécution réelle.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {comparaisonLoading ? (
+            <div className="flex items-center justify-center py-8 text-muted-foreground">
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Chargement de la comparaison…
+            </div>
+          ) : !comparaison || comparaison.items.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Aucune donnée de comparaison disponible.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Job</TableHead>
+                  <TableHead>Dry-run</TableHead>
+                  <TableHead>Run réel</TableHead>
+                  <TableHead>Delta durée</TableHead>
+                  <TableHead>Statut</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {comparaison.items.map((item) => (
+                  <TableRow key={item.job_id}>
+                    <TableCell>
+                      <div className="font-medium">{item.job_name}</div>
+                      <div className="text-xs text-muted-foreground font-mono">{item.job_id}</div>
+                    </TableCell>
+                    <TableCell>{item.dry_run?.duration_ms ?? "—"} ms</TableCell>
+                    <TableCell>{item.run?.duration_ms ?? "—"} ms</TableCell>
+                    <TableCell>
+                      {item.comparaison.delta_duration_ms === null ? "—" : `${item.comparaison.delta_duration_ms} ms`}
+                    </TableCell>
+                    <TableCell>
+                      {item.comparaison.status_coherent === null ? (
+                        <Badge variant="outline">N/A</Badge>
+                      ) : item.comparaison.status_coherent ? (
+                        <Badge>OK</Badge>
+                      ) : (
+                        <Badge variant="destructive">À vérifier</Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           )}

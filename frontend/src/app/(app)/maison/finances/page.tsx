@@ -25,6 +25,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/composants/ui/select";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
+import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
 import { useQueryClient } from "@tanstack/react-query";
 import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
@@ -141,6 +142,15 @@ function OngletDepenses() {
     { onSuccess: () => { invalider(); fermerDialog(); toast.success("Dépense modifiée"); } }
   );
   const { mutate: supprimer } = utiliserMutation(supprimerDepenseMaison, { onSuccess: () => { invalider(); toast.success("Dépense supprimée"); } });
+  const { planifierSuppression } = utiliserSuppressionAnnulable();
+
+  const supprimerAvecUndo = (d: DepenseMaison) => {
+    planifierSuppression(`depense-${d.id}`, {
+      libelle: d.libelle,
+      onConfirmer: () => supprimer(d.id),
+      onErreur: () => toast.error("Erreur lors de la suppression"),
+    });
+  };
 
   const { mutate: analyserTicket, isPending: analyseEnCours } = utiliserMutation(
     (file: File) => importerDepensesDepuisTicket(file, false),
@@ -254,7 +264,7 @@ function OngletDepenses() {
                   <p className="text-sm font-semibold shrink-0">{d.montant.toFixed(2)} €</p>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => ouvrirEdition(d)}><Pencil className="h-3.5 w-3.5" /></Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive" onClick={() => supprimer(d.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 hover:text-destructive" onClick={() => supprimerAvecUndo(d)}><Trash2 className="h-3.5 w-3.5" /></Button>
                   </div>
                 </CardContent>
               </Card>
@@ -265,7 +275,7 @@ function OngletDepenses() {
                 key={d.id}
                 labelGauche="Supprimer"
                 labelDroit="Modifier"
-                onSwipeLeft={() => supprimer(d.id)}
+                onSwipeLeft={() => supprimerAvecUndo(d)}
                 onSwipeRight={() => ouvrirEdition(d)}
               >
                 {contenu}

@@ -54,6 +54,43 @@ export interface SuggestionRepasGarminResponse {
   alternatives: string[];
 }
 
+export interface ModeVacancesResponse {
+  actif: boolean;
+  checklist_voyage_auto: boolean;
+  courses_mode_compact: boolean;
+  entretien_suspendu: boolean;
+  recommandations: string[];
+}
+
+export interface InsightQuotidien {
+  titre: string;
+  message: string;
+  module: string;
+  priorite: string;
+  action_url: string;
+}
+
+export interface InsightsQuotidiensResponse {
+  date_reference: string;
+  limite_journaliere: number;
+  nb_insights: number;
+  insights: InsightQuotidien[];
+}
+
+export interface MeteoImpactModule {
+  module: string;
+  impact: string;
+  actions_recommandees: string[];
+}
+
+export interface MeteoContextuelleResponse {
+  ville: string;
+  saison: string;
+  temperature: number | null;
+  description: string;
+  modules: MeteoImpactModule[];
+}
+
 export async function obtenirModePiloteAuto(): Promise<ModePiloteAutoResponse> {
   const { data } = await clientApi.get("/api/v1/innovations/phasee/mode-pilote");
   return data;
@@ -90,6 +127,31 @@ export async function obtenirRapportMensuelPdf(mois?: string): Promise<RapportMe
 
 export async function obtenirSuggestionRepasGarmin(): Promise<SuggestionRepasGarminResponse> {
   const { data } = await clientApi.get("/api/v1/innovations/phasee/garmin-repas-adaptatif");
+  return data;
+}
+
+export async function obtenirModeVacances(): Promise<ModeVacancesResponse> {
+  const { data } = await clientApi.get("/api/v1/innovations/phasee/mode-vacances");
+  return data;
+}
+
+export async function configurerModeVacances(payload: {
+  actif: boolean;
+  checklist_voyage_auto?: boolean;
+}): Promise<ModeVacancesResponse> {
+  const { data } = await clientApi.post("/api/v1/innovations/phasee/mode-vacances/config", payload);
+  return data;
+}
+
+export async function obtenirInsightsQuotidiens(limite = 2): Promise<InsightsQuotidiensResponse> {
+  const { data } = await clientApi.get("/api/v1/innovations/phasee/insights-quotidiens", {
+    params: { limite },
+  });
+  return data;
+}
+
+export async function obtenirMeteoContextuelle(): Promise<MeteoContextuelleResponse> {
+  const { data } = await clientApi.get("/api/v1/innovations/phasee/meteo-contextuelle");
   return data;
 }
 

@@ -45,6 +45,8 @@ import {
   utiliserMutation,
   utiliserInvalidation,
 } from "@/crochets/utiliser-api";
+import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
+import { SwipeableItem } from "@/composants/swipeable-item";
 import {
   listerRoutines,
   creerRoutine,
@@ -68,6 +70,7 @@ export default function PageRoutines() {
   ]);
 
   const invalider = utiliserInvalidation();
+  const { planifierSuppression } = utiliserSuppressionAnnulable();
 
   const { data: routines, isLoading } = utiliserRequete(
     ["famille", "routines"],
@@ -91,10 +94,18 @@ export default function PageRoutines() {
   const { mutate: supprimer } = utiliserMutation(
     (id: number) => supprimerRoutine(id),
     {
-      onSuccess: () => { invalider(["famille", "routines"]); toast.success("Routine supprimée"); },
+      onSuccess: () => { invalider(["famille", "routines"]); },
       onError: () => toast.error("Erreur lors de la suppression"),
     }
   );
+
+  const supprimerAvecUndo = (r: Routine) => {
+    planifierSuppression(`routine-${r.id}`, {
+      libelle: r.nom,
+      onConfirmer: () => supprimer(r.id),
+      onErreur: () => toast.error("Erreur lors de la suppression"),
+    });
+  };
 
   const ajouterEtape = () => setEtapes([...etapes, { titre: "" }]);
   const retirerEtape = (idx: number) =>
@@ -169,7 +180,7 @@ export default function PageRoutines() {
                   <RoutineCard
                     key={r.id}
                     routine={r}
-                    onSupprimer={() => supprimer(r.id)}
+                    onSupprimer={() => supprimerAvecUndo(r)}
                   />
                 ))
               )}
@@ -236,12 +247,12 @@ export default function PageRoutines() {
             </div>
 
             <div className="space-y-2">
-              <Label>Étapes</Label>
+              <Label>Etapes</Label>
               <div className="space-y-2">
                 {etapes.map((s, i) => (
                   <div key={i} className="flex gap-2">
                     <Input
-                      placeholder={`Étape ${i + 1}`}
+                      placeholder={`Etape ${i + 1}`}
                       value={s.titre}
                       onChange={(e) => majEtape(i, "titre", e.target.value)}
                       className="flex-1"
@@ -266,7 +277,7 @@ export default function PageRoutines() {
                         variant="ghost"
                         size="icon"
                         onClick={() => retirerEtape(i)}
-                        aria-label="Retirer l'étape"
+                        aria-label="Retirer l etape"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -276,7 +287,7 @@ export default function PageRoutines() {
               </div>
               <Button type="button" variant="outline" size="sm" onClick={ajouterEtape}>
                 <Plus className="mr-1 h-3 w-3" />
-                Étape
+                Etape
               </Button>
             </div>
 
@@ -292,7 +303,7 @@ export default function PageRoutines() {
                 {enCreation && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Créer
+                Creer
               </Button>
             </div>
           </form>
@@ -313,58 +324,60 @@ function RoutineCard({
   const total = routine.etapes.length;
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="text-base">{routine.nom}</CardTitle>
-            <CardDescription className="text-xs">
-              {etapesTerminees}/{total} étapes complétées
-            </CardDescription>
+    <SwipeableItem labelGauche="Supprimer" desactiverDroit onSwipeLeft={onSupprimer}>
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between">
+            <div>
+              <CardTitle className="text-base">{routine.nom}</CardTitle>
+              <CardDescription className="text-xs">
+                {etapesTerminees}/{total} etapes completees
+              </CardDescription>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 shrink-0"
+              onClick={onSupprimer}
+              aria-label="Supprimer la routine"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 shrink-0"
-            onClick={onSupprimer}
-            aria-label="Supprimer la routine"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-1">
-          {routine.etapes
-            .sort((a, b) => a.ordre - b.ordre)
-            .map((e) => (
-              <div
-                key={e.id}
-                className={`flex items-center gap-2 text-sm rounded px-2 py-1 ${
-                  e.est_terminee ? "opacity-50 line-through" : ""
-                }`}
-              >
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-1">
+            {routine.etapes
+              .sort((a, b) => a.ordre - b.ordre)
+              .map((e) => (
                 <div
-                  className={`h-4 w-4 rounded-full border flex items-center justify-center shrink-0 ${
-                    e.est_terminee
-                      ? "bg-primary border-primary"
-                      : "border-muted-foreground"
+                  key={e.id}
+                  className={`flex items-center gap-2 text-sm rounded px-2 py-1 ${
+                    e.est_terminee ? "opacity-50 line-through" : ""
                   }`}
                 >
-                  {e.est_terminee && (
-                    <Check className="h-2.5 w-2.5 text-primary-foreground" />
+                  <div
+                    className={`h-4 w-4 rounded-full border flex items-center justify-center shrink-0 ${
+                      e.est_terminee
+                        ? "bg-primary border-primary"
+                        : "border-muted-foreground"
+                    }`}
+                  >
+                    {e.est_terminee && (
+                      <Check className="h-2.5 w-2.5 text-primary-foreground" />
+                    )}
+                  </div>
+                  <span className="flex-1">{e.titre}</span>
+                  {e.duree_minutes != null && e.duree_minutes > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      {e.duree_minutes}m
+                    </span>
                   )}
                 </div>
-                <span className="flex-1">{e.titre}</span>
-                {e.duree_minutes != null && e.duree_minutes > 0 && (
-                  <span className="text-xs text-muted-foreground">
-                    {e.duree_minutes}m
-                  </span>
-                )}
-              </div>
-            ))}
-        </div>
-      </CardContent>
-    </Card>
+              ))}
+          </div>
+        </CardContent>
+      </Card>
+    </SwipeableItem>
   );
 }

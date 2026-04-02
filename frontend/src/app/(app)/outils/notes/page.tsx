@@ -32,6 +32,8 @@ import { schemaNote, type DonneesNote } from "@/bibliotheque/validateurs";
 import { utiliserBrouillonAuto } from "@/crochets/utiliser-brouillon-auto";
 import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
 import { utiliserRaccourcisPage } from "@/crochets/utiliser-raccourcis-page";
+import { PanneauFiltres, SectionFiltre, BoutonFiltre } from "@/composants/panneau-filtres";
+import { Pin } from "lucide-react";
 
 const CATEGORIES = ["general", "travail", "personnel", "course", "idee"] as const;
 const COULEURS = [
@@ -64,6 +66,8 @@ export default function NotesPage() {
   const [filtreTag, setFiltreTag] = useState<string>("tous");
   const [dialogOuvert, setDialogOuvert] = useState(false);
   const [champTags, setChampTags] = useState("");
+  const [filtreCouleur, setFiltreCouleur] = useState<string | null>(null);
+  const [filtreEpinglee, setFiltreEpinglee] = useState(false);
 
   const invalider = utiliserInvalidation();
   const { planifierSuppression } = utiliserSuppressionAnnulable();
@@ -201,7 +205,20 @@ export default function NotesPage() {
     setValue("tags", tagsForm.filter((item) => item !== tag));
   };
 
-  const notesTriees = [...notes].sort((a, b) => {
+  const nombreFiltresActifs = (filtreCouleur ? 1 : 0) + (filtreEpinglee ? 1 : 0);
+
+  const reinitialiserFiltres = () => {
+    setFiltreCouleur(null);
+    setFiltreEpinglee(false);
+  };
+
+  const notesTriees = [...notes]
+    .filter((n) => {
+      if (filtreEpinglee && !n.epingle) return false;
+      if (filtreCouleur && n.couleur !== filtreCouleur) return false;
+      return true;
+    })
+    .sort((a, b) => {
     if (a.epingle !== b.epingle) return a.epingle ? -1 : 1;
     return 0;
   });
@@ -289,13 +306,39 @@ export default function NotesPage() {
         </Dialog>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         <Input
           placeholder="Rechercher…"
           value={recherche}
           onChange={(e) => setRecherche(e.target.value)}
           className="w-60"
         />
+        <PanneauFiltres
+          nombreFiltresActifs={nombreFiltresActifs}
+          onReinitialiser={reinitialiserFiltres}
+          labelBouton="Filtres"
+        >
+          <SectionFiltre titre="État">
+            <div className="flex flex-wrap gap-2">
+              <BoutonFiltre actif={filtreEpinglee} onClick={() => setFiltreEpinglee((v) => !v)} className="gap-1.5">
+                <Pin className="h-3 w-3" />Épinglées uniquement
+              </BoutonFiltre>
+            </div>
+          </SectionFiltre>
+          <SectionFiltre titre="Couleur">
+            <div className="flex flex-wrap gap-2">
+              {COULEURS.map((c) => (
+                <button
+                  key={c.valeur}
+                  type="button"
+                  title={c.nom}
+                  className={`h-7 w-7 rounded-full border-2 ${CLASSES_COULEUR_BOUTON[c.valeur] ?? "bg-muted"} ${filtreCouleur === c.valeur ? "border-primary ring-2 ring-primary ring-offset-1" : "border-transparent"}`}
+                  onClick={() => setFiltreCouleur((prev) => (prev === c.valeur ? null : c.valeur))}
+                />
+              ))}
+            </div>
+          </SectionFiltre>
+        </PanneauFiltres>
         {["toutes", ...CATEGORIES].map((c) => (
           <Button key={c} variant={filtre === c ? "default" : "outline"} size="sm" onClick={() => setFiltre(c)}>
             {c}

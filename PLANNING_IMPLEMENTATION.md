@@ -1139,20 +1139,30 @@ def get_inventaire_ai_service() -> InventaireAIService:
 - Bulk actions ajoutées sur la liste de courses : sélection multiple, tout sélectionner, cocher la sélection, supprimer la sélection.
 - Cohérence dark mode améliorée sur plusieurs graphiques Recharts existants.
 - Onboarding déjà connecté à la coquille de l'application, et maintenant relançable depuis la palette de commandes.
+- Palette `menu-commandes.tsx` enrichie avec quick actions universelles exécutables depuis n'importe quelle page : création de liste rapide, ajout d'article via requête naturelle, création de note rapide, création de scénario Habitat, relance de l'onboarding, ouverture d'un minuteur prérempli.
+- Recherche globale enrichie avec résultats plus lisibles (type, métadonnées, aperçu court) et groupe dédié d'actions rapides.
+- Undo de suppression avec TTL 10s implémenté côté frontend pour les suppressions d'articles de courses, d'inventaire, de notes, de dépenses, de diagnostics immobiliers, de calendriers iCal et de routines.
+- Auto-save des brouillons via `localStorage` branché sur les formulaires de création de note et de scénario Habitat.
+- Raccourcis clavier par page ajoutés sur les pages Courses, Notes et Habitat Scenarios (`N`, `S`, `Suppr` selon contexte).
+- Bulk actions ajoutées sur la liste de courses : sélection multiple, tout sélectionner, cocher la sélection, supprimer la sélection.
+- Cohérence dark mode améliorée sur plusieurs graphiques Recharts existants.
+- Onboarding déjà connecté à la coquille de l'application, et maintenant relançable depuis la palette de commandes.
+- **Filtres avancés sidebar (20.7)** : composant réutilisable `PanneauFiltres` (`Sheet` latéral) intégré sur les pages recettes (favoris, temps max, appareils) et notes (épinglées, couleur). Badge dynamique du nombre de filtres actifs.
+- **Swipe gestures mobiles (20.9)** : `SwipeableItem` étendu à `maison/documents` (diagnostics), `famille/routines` (RoutineCard), `famille/calendriers` (calendriers iCal).
 
 ### Restant ou partiel
 
-- `20.7` Filtres avancés sidebar : non implémenté dans ce sprint.
-- `20.8` Dark mode charts : amélioration ciblée, pas encore audit complet de tous les graphiques du frontend.
-- `20.9` Swipe gestures mobiles : composant existant conservé, pas encore étendu à toutes les listes.
+- `20.8` Dark mode charts : amélioration ciblée (2 composants), pas encore audit complet de tous les graphiques du frontend.
 - `20.10` Onboarding guidé : connecté et relançable, mais pas enrichi au-delà du tour existant.
 
 ### Critères de validation
 
 - [x] Quick actions accessibles depuis n'importe quelle page
 - [x] Recherche globale affiche des previews riches
-- [x] Undo fonctionne sur suppressions (avec TTL 10s)
+- [x] Undo fonctionne sur suppressions (avec TTL 10s) — 7 pages couvertes
 - [x] Auto-save ne perd aucun brouillon après navigation
+- [x] Filtres avancés sidebar (recettes + notes)
+- [x] Swipe gestures mobiles généralisé (documents, routines, calendriers)
 - [ ] Dark mode cohérent sur tous les charts
 
 ---
@@ -1162,6 +1172,7 @@ def get_inventaire_ai_service() -> InventaireAIService:
 > **Objectif** : Implémenter les innovations les plus impactantes
 > **Effort** : Moyen à Élevé | **Impact** : Fonctionnalités différenciantes
 > **Dépend de** : Sprints 13, 18
+> **Statut** : ✅ Implémenté (reste 1 point d'automatisation email)
 
 ### Innovations prioritaires
 
@@ -1177,11 +1188,28 @@ def get_inventaire_ai_service() -> InventaireAIService:
 
 ### Critères de validation
 
-- [ ] Mode saison détecte automatiquement la saison et adapte les suggestions
-- [ ] Mode vacances toggle fonctionnel
-- [ ] 1-2 insights IA par jour, pertinents, pas de spam
-- [ ] Journal auto-alimenté visible dans la page famille
+- [x] Mode saison détecte automatiquement la saison et adapte les suggestions
+- [x] Mode vacances toggle fonctionnel
+- [x] 1-2 insights IA par jour, pertinents, pas de spam
+- [x] Journal auto-alimenté visible dans la page famille
 - [ ] PDF mensuel unifié généré et envoyé par email
+
+### Notes d'implémentation Sprint 21 (2 Avril 2026)
+
+- Backend: endpoints Sprint 21 ajoutés dans `src/api/routes/fonctionnalites_avancees.py`.
+    - `GET /api/v1/innovations/phasee/mode-vacances`
+    - `POST /api/v1/innovations/phasee/mode-vacances/config`
+    - `GET /api/v1/innovations/phasee/insights-quotidiens?limite=1|2`
+    - `GET /api/v1/innovations/phasee/meteo-contextuelle`
+- Backend: logique métier ajoutée dans `src/services/innovations/service.py`.
+    - Persistance du mode vacances dans `preferences_notifications.modules_actifs`
+    - Génération d'insights quotidiens anti-spam (limite stricte 1-2)
+    - Analyse météo contextuelle cross-module (cuisine, famille, maison, énergie)
+- Backend: nouveaux types Pydantic Sprint 21 dans `src/services/innovations/types.py`.
+- Schémas API: nouveaux contracts exposés dans `src/api/schemas/fonctionnalites_avancees.py`.
+- Frontend: client API mis à jour dans `frontend/src/bibliotheque/api/avance.ts` pour consommer ces endpoints.
+- Tests API: couverture ajoutée dans `tests/api/test_innovations.py` pour mode vacances, insights et météo contextuelle.
+- Reste à faire: automatiser l'envoi email du PDF mensuel unifié (la génération PDF est déjà disponible).
 
 ---
 
@@ -1518,7 +1546,8 @@ Les articles existants hériteront de la date actuelle lors de la migration SQL.
 - [ ] Généralisation des swipe gestures mobiles
 
 ### Sprint 21 — Innovations prioritaires
-- [ ] Mode saison, mode vacances, insights IA, journal auto, PDF mensuel, score bien-être, météo cross
+- [x] Mode saison, mode vacances, insights IA, journal auto, PDF mensuel, score bien-être, météo cross
+- [ ] Envoi email automatique du PDF mensuel unifié
 
 ### Sprint 22 — Innovations avancées
 - [ ] Apprentissage préférences, planification auto, batch cooking IA, cartes visuelles, mode tablette

@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   Plus,
@@ -18,6 +18,7 @@ import {
   UtensilsCrossed,
   Flame,
   Wind,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/composants/ui/button";
@@ -42,6 +43,7 @@ import {
 } from "@/bibliotheque/api/recettes";
 import { DialogueImportRecette } from "@/composants/cuisine/dialogue-import-recette";
 import { SwipeableItem } from "@/composants/swipeable-item";
+import { PanneauFiltres, SectionFiltre, BoutonFiltre } from "@/composants/panneau-filtres";
 import type { Recette } from "@/types/recettes";
 
 const CATEGORIES = [
@@ -94,6 +96,8 @@ export default function PageRecettes() {
   const [categorie, setCategorie] = useState("Toutes");
   const [page, setPage] = useState(1);
   const [filtresAppareils, setFiltresAppareils] = useState<Set<CleAppareil>>(new Set());
+    const [filtresFavoris, setFiltresFavoris] = useState(false);
+    const [filtreTempsMax, setFiltreTempsMax] = useState<number | null>(null);
   const rechercheDelayee = utiliserDelai(recherche, 300);
 
   const { data, isLoading } = utiliserRequete(
@@ -123,16 +127,21 @@ export default function PageRecettes() {
   const totalPages = data?.pages_totales ?? 1;
 
   // Filtrage client par appareil
-  const recettesFiltrees = filtresAppareils.size === 0
-    ? recettes
-    : recettes.filter((r) => {
+  // Filtrage client (appareils + favoris + temps)
+  const recettesFiltrees = useMemo(() => {
+    return recettes.filter((r) => {
+      if (filtresAppareils.size > 0) {
         for (const f of filtresAppareils) {
           if (f === "cookeo" && !r.compatible_cookeo) return false;
           if (f === "monsieur_cuisine" && !r.compatible_monsieur_cuisine) return false;
           if (f === "airfryer" && !r.compatible_airfryer) return false;
         }
-        return true;
-      });
+      }
+      if (filtresFavoris && !r.est_favori) return false;
+      if (filtreTempsMax !== null && tempsTotal(r) > filtreTempsMax) return false;
+      return true;
+    });
+  }, [recettes, filtresAppareils, filtresFavoris, filtreTempsMax]);
 
   const toggleAppareil = (cle: CleAppareil) => {
     setFiltresAppareils((prev) => {
@@ -141,6 +150,17 @@ export default function PageRecettes() {
       else next.add(cle);
       return next;
     });
+  };
+
+  const nombreFiltresActifs =
+    (filtresFavoris ? 1 : 0) +
+    (filtreTempsMax !== null ? 1 : 0) +
+    filtresAppareils.size;
+
+  const reinitialiserFiltres = () => {
+    setFiltresFavoris(false);
+    setFiltreTempsMax(null);
+    setFiltresAppareils(new Set());
   };
 
   return (
@@ -165,7 +185,7 @@ export default function PageRecettes() {
       </div>
 
       {/* Barre de recherche + filtres */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 items-start">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -197,27 +217,46 @@ export default function PageRecettes() {
             ))}
           </SelectContent>
         </Select>
+        <PanneauFiltres
+          nombreFiltresActifs={nombreFiltresActifs}
+          onReinitialiser={reinitialiserFiltres}
+          labelBouton="Filtres"
+        >
+          <SectionFiltre titre="Préférences">
+            <div className="flex flex-wrap gap-2">
+              <BoutonFiltre actif={filtresFavoris} onClick={() => setFiltresFavoris((v) => !v)} className="gap-1.5">
+                <Star className="h-3 w-3" />Favoris uniquement
+              </BoutonFiltre>
+            </div>
+          </SectionFiltre>
+          <SectionFiltre titre="Temps total (prépa + cuisson)">
+            <div className="flex flex-wrap gap-2">
+              {([null, 15, 30, 60] as const).map((t) => (
+                <BoutonFiltre
+                  key={t ?? "tous"}
+                  actif={filtreTempsMax === t}
+                  onClick={() => setFiltreTempsMax(t === filtreTempsMax ? null : t)}
+                >
+                  {t === null ? "Tous" : `≤ ${t}min`}
+                </BoutonFiltre>
+              ))}
+            </div>
+          </SectionFiltre>
+          <SectionFiltre titre="Appareils">
+            <div className="flex flex-wrap gap-2">
+              {APPAREILS.map((ap) => {
+                const Ic = ap.icone;
+                return (
+                  <BoutonFiltre key={ap.cle} actif={filtresAppareils.has(ap.cle)} onClick={() => toggleAppareil(ap.cle)} className="gap-1.5">
+                    <Ic className="h-3 w-3" />{ap.label}
+                  </BoutonFiltre>
+                );
+              })}
+            </div>
+          </SectionFiltre>
+        </PanneauFiltres>
       </div>
 
-      {/* Filtres appareils */}
-      <div className="flex flex-wrap gap-2">
-        {APPAREILS.map((ap) => {
-          const Ic = ap.icone;
-          const actif = filtresAppareils.has(ap.cle);
-          return (
-            <Button
-              key={ap.cle}
-              variant={actif ? "default" : "outline"}
-              size="sm"
-              onClick={() => toggleAppareil(ap.cle)}
-              className="gap-1.5"
-            >
-              <Ic className="h-4 w-4" />
-              {ap.label}
-            </Button>
-          );
-        })}
-      </div>
 
       {/* Grille de recettes */}
       {isLoading ? (

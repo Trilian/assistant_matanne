@@ -35,6 +35,8 @@ import {
   SelectValue,
 } from "@/composants/ui/select";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
+import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
+import { SwipeableItem } from "@/composants/swipeable-item";
 import {
   activerCalendrierScolaireAuto,
   listerCalendriers,
@@ -282,13 +284,19 @@ function CarteCalendrierIcal() {
   const { mutate: supprimer } = utiliserMutation(
     (id: number) => supprimerCalendrier(id),
     {
-      onSuccess: () => {
-        invalider(["calendriers"]);
-        toast.success("Calendrier supprimé");
-      },
+      onSuccess: () => { invalider(["calendriers"]); },
       onError: () => toast.error("Erreur lors de la suppression"),
     }
   );
+  const { planifierSuppression } = utiliserSuppressionAnnulable();
+
+  const supprimerAvecUndo = (cal: { id: number; nom: string }) => {
+    planifierSuppression(`calendrier-${cal.id}`, {
+      libelle: cal.nom,
+      onConfirmer: () => supprimer(cal.id),
+      onErreur: () => toast.error("Erreur lors de la suppression"),
+    });
+  };
 
   return (
     <Card>
@@ -343,27 +351,31 @@ function CarteCalendrierIcal() {
         ) : calendriers && calendriers.length > 0 ? (
           <ul className="space-y-2">
             {calendriers.map((cal) => (
-              <li
+              <SwipeableItem
                 key={cal.id}
-                className="flex items-center justify-between rounded-lg border px-3 py-2"
+                labelGauche="Supprimer"
+                desactiverDroit
+                onSwipeLeft={() => supprimerAvecUndo(cal)}
               >
-                <div>
-                  <p className="text-sm font-medium">{cal.nom}</p>
-                  {cal.url && (
-                    <p className="text-xs text-muted-foreground truncate max-w-xs">
-                      {cal.url}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => supprimer(cal.id)}
-                  aria-label="Supprimer ce calendrier"
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </li>
+                <li className="flex items-center justify-between rounded-lg border px-3 py-2 bg-background">
+                  <div>
+                    <p className="text-sm font-medium">{cal.nom}</p>
+                    {cal.url && (
+                      <p className="text-xs text-muted-foreground truncate max-w-xs">
+                        {cal.url}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => supprimerAvecUndo(cal)}
+                    aria-label="Supprimer ce calendrier"
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </li>
+              </SwipeableItem>
             ))}
           </ul>
         ) : (

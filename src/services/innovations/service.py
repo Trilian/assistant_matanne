@@ -78,6 +78,11 @@ from .types import (
     SuggestionRepasSoirResponse,
     TendanceLoto,
     VeilleEmploiResponse,
+    InsightQuotidien,
+    InsightsQuotidiensResponse,
+    MeteoContextuelleResponse,
+    MeteoImpactModule,
+    ModeVacancesResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -430,6 +435,211 @@ Retourne un JSON avec:
     def generer_rapport_mensuel_pdf(self, mois: str | None = None) -> RapportMensuelPdfResponse | None:
         """E9 : rapport mensuel PDF consolide avec narratif IA."""
         return generer_rapport_mensuel_pdf_module(self, mois=mois)
+
+    @avec_gestion_erreurs(default_return=None)
+    def obtenir_mode_vacances(self, user_id: str | None) -> ModeVacancesResponse | None:
+        """IN10 : lit l'etat du mode vacances utilisateur."""
+        if not user_id:
+            return ModeVacancesResponse()
+
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models.notifications import PreferenceNotification
+
+                prefs = (
+                    session.query(PreferenceNotification)
+                    .filter(PreferenceNotification.user_id == user_id)
+                    .first()
+                )
+                if not prefs:
+                    return ModeVacancesResponse()
+
+                modules_actifs = dict(prefs.modules_actifs or {})
+                actif = bool(modules_actifs.get("mode_vacances", False))
+                checklist_auto = bool(modules_actifs.get("checklist_voyage_auto", True))
+                return ModeVacancesResponse(
+                    actif=actif,
+                    checklist_voyage_auto=checklist_auto,
+                    courses_mode_compact=actif,
+                    entretien_suspendu=actif,
+                    recommandations=[
+                        "Mode vacances actif: prioriser courses essentielles et routines critiques.",
+                        "Verifier la checklist voyage 24h avant le depart.",
+                    ]
+                    if actif
+                    else ["Mode vacances inactif. Activez-le avant un depart."],
+                )
+        except Exception:
+            logger.warning("Lecture mode vacances indisponible", exc_info=True)
+            return ModeVacancesResponse()
+
+    @avec_gestion_erreurs(default_return=None)
+    def configurer_mode_vacances(
+        self,
+        user_id: str | None,
+        actif: bool,
+        checklist_voyage_auto: bool = True,
+    ) -> ModeVacancesResponse | None:
+        """IN10 : active/desactive le mode vacances dans les preferences notifications."""
+        if not user_id:
+            return ModeVacancesResponse()
+
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models.notifications import PreferenceNotification
+
+                prefs = (
+                    session.query(PreferenceNotification)
+                    .filter(PreferenceNotification.user_id == user_id)
+                    .first()
+                )
+                if not prefs:
+                    prefs = PreferenceNotification(user_id=user_id)
+                    session.add(prefs)
+
+                modules_actifs = dict(prefs.modules_actifs or {})
+                modules_actifs["mode_vacances"] = bool(actif)
+                modules_actifs["checklist_voyage_auto"] = bool(checklist_voyage_auto)
+                prefs.modules_actifs = modules_actifs
+                session.commit()
+        except Exception:
+            logger.warning("Ecriture mode vacances indisponible", exc_info=True)
+
+        return self.obtenir_mode_vacances(user_id=user_id)
+
+    @avec_cache(ttl=43200, key_func=lambda self, limite: f"s21_insights_{limite}_{date.today().isoformat()}")
+    @avec_gestion_erreurs(default_return=None)
+    def generer_insights_quotidiens(self, limite: int = 2) -> InsightsQuotidiensResponse | None:
+        """IN11 : génère 1-2 insights IA proactifs par jour (anti-spam)."""
+        limite_normalisee = 1 if limite <= 1 else 2
+        insights: list[InsightQuotidien] = []
+
+        score_nutrition = self._calculer_score_nutrition()
+        if score_nutrition < 45:
+            insights.append(
+                InsightQuotidien(
+                    titre="Planning nutrition à renforcer",
+                    message="Votre couverture repas est basse cette semaine. Ajoutez 2 repas planifiés.",
+                    module="cuisine",
+                    priorite="haute",
+                    action_url="/cuisine/planning",
+                )
+            )
+
+        jours_sans_poisson = self._jours_depuis_repas_poisson()
+        if jours_sans_poisson >= 14:
+            insights.append(
+                InsightQuotidien(
+                    titre="Equilibre protéines",
+                    message="Aucun repas poisson détecté depuis 2 semaines. Intégrez-en un cette semaine.",
+                    module="cuisine",
+                    priorite="normale",
+                    action_url="/cuisine/recettes",
+                )
+            )
+
+        score_entretien = self._score_routines_detail()[0]
+        if score_entretien < 45:
+            insights.append(
+                InsightQuotidien(
+                    titre="Routines maison à relancer",
+                    message="Plusieurs routines sont en retard. Priorisez 1 action d'entretien aujourd'hui.",
+                    module="maison",
+                    priorite="normale",
+                    action_url="/maison/menage",
+                )
+            )
+
+        if not insights:
+            insights.append(
+                InsightQuotidien(
+                    titre="Cap maintenu",
+                    message="Aucun signal critique aujourd'hui. Continuez le rythme actuel.",
+                    module="dashboard",
+                    priorite="basse",
+                    action_url="/",
+                )
+            )
+
+        insights = insights[:limite_normalisee]
+        return InsightsQuotidiensResponse(
+            date_reference=date.today().isoformat(),
+            limite_journaliere=limite_normalisee,
+            nb_insights=len(insights),
+            insights=insights,
+        )
+
+    @avec_cache(ttl=1800, key_func=lambda self: f"s21_meteo_cross_{date.today().isoformat()}")
+    @avec_gestion_erreurs(default_return=None)
+    def analyser_meteo_contextuelle(self) -> MeteoContextuelleResponse | None:
+        """IN4 : synthèse météo unique avec impacts cuisine/famille/maison/énergie."""
+        from src.services.utilitaires.meteo_service import obtenir_meteo_service
+
+        meteo = obtenir_meteo_service().obtenir_meteo()
+        actuelle = meteo.actuelle
+        saison = self._saison_courante()
+
+        if not actuelle:
+            return MeteoContextuelleResponse(
+                ville=meteo.ville,
+                saison=saison,
+                description="Données météo indisponibles",
+                modules=[],
+            )
+
+        modules: list[MeteoImpactModule] = []
+        est_pluvieux = actuelle.precip_mm > 0 or actuelle.code_meteo >= 61
+        est_chaud = actuelle.temperature >= 24
+        est_froid = actuelle.temperature <= 6
+
+        modules.append(
+            MeteoImpactModule(
+                module="cuisine",
+                impact="Adapter les menus à la météo du jour",
+                actions_recommandees=[
+                    "Favoriser repas frais et hydratants" if est_chaud else "Prévoir repas chauds de saison",
+                    "Ajouter des produits de saison dans les courses",
+                ],
+            )
+        )
+        modules.append(
+            MeteoImpactModule(
+                module="famille",
+                impact="Arbitrer activités intérieur/extérieur",
+                actions_recommandees=[
+                    "Prévoir activité intérieure" if est_pluvieux else "Programmer une sortie extérieure",
+                    "Adapter la durée des sorties selon la température",
+                ],
+            )
+        )
+        modules.append(
+            MeteoImpactModule(
+                module="maison",
+                impact="Ajuster l'entretien et le jardin",
+                actions_recommandees=[
+                    "Décaler arrosage" if est_pluvieux else "Planifier arrosage tôt le matin",
+                    "Prioriser tâches d'entretien saisonnier",
+                ],
+            )
+        )
+        modules.append(
+            MeteoImpactModule(
+                module="energie",
+                impact="Optimiser le confort thermique",
+                actions_recommandees=[
+                    "Réduire chauffage nocturne" if est_froid else "Ventiler en heures fraîches",
+                    "Surveiller pics de consommation journaliers",
+                ],
+            )
+        )
+
+        return MeteoContextuelleResponse(
+            ville=meteo.ville,
+            saison=saison,
+            temperature=actuelle.temperature,
+            description=actuelle.description,
+            modules=modules,
+        )
 
     # ═══════════════════════════════════════════════════════════
     # 10.4 — BILAN ANNUEL AUTOMATIQUE IA
@@ -969,6 +1179,25 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
         if not habitudes:
             habitudes.append("Aucune habitude forte détectée pour le moment")
         return habitudes
+
+    def _jours_depuis_repas_poisson(self) -> int:
+        """Retourne le nombre de jours depuis le dernier repas poisson (max 365)."""
+        try:
+            with obtenir_contexte_db() as session:
+                from src.core.models import Recette, Repas
+
+                dernier = (
+                    session.query(Repas.date_repas)
+                    .join(Recette, Recette.id == Repas.recette_id)
+                    .filter(Recette.categorie == "poisson")
+                    .order_by(Repas.date_repas.desc())
+                    .first()
+                )
+                if not dernier or not dernier[0]:
+                    return 365
+                return max(0, (date.today() - dernier[0]).days)
+        except Exception:
+            return 365
 
     def _collecter_contexte_annuel(self, annee: int) -> str:
         """Collecte les données d'une année pour le bilan."""

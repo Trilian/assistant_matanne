@@ -7,7 +7,7 @@ AgrÃ©gation des donnÃ©es de tous les modules pour la page d'accueil.
 from datetime import date, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import func
 
@@ -1268,4 +1268,40 @@ async def enregistrer_action_widget(
         "action": payload.action,
         "statut": "ok",
     }
+
+
+@router.get(
+    "/widgets/actions",
+    responses=REPONSES_LISTE,
+    summary="Historique des actions rapides widgets",
+)
+@gerer_exception_api
+async def obtenir_historique_actions_widgets(
+    limite: int = Query(10, ge=1, le=50),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les dernières actions widgets émises sur l'Event Bus dashboard."""
+
+    def _query() -> dict[str, Any]:
+        from src.services.core.events import obtenir_bus
+
+        events = obtenir_bus().obtenir_historique(
+            type_evenement="dashboard.widget.action_rapide",
+            limite=limite,
+        )
+        items = [
+            {
+                "event_id": event.event_id,
+                "type": event.type,
+                "source": event.source,
+                "timestamp": event.timestamp.isoformat(),
+                "widget_id": (event.data or {}).get("widget_id"),
+                "action": (event.data or {}).get("action"),
+                "donnees": (event.data or {}).get("donnees", {}),
+            }
+            for event in reversed(events)
+        ]
+        return {"items": items, "total": len(items)}
+
+    return await executer_async(_query)
 

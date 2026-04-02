@@ -22,7 +22,7 @@ describe("PagePlanning", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("redirige vers /cuisine/planning", () => {
-    render(<PagePlanning />);
+    PagePlanning();
     expect(mockRedirect).toHaveBeenCalledWith("/cuisine/planning");
   });
 });

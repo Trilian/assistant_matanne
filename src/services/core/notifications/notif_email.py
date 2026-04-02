@@ -17,7 +17,9 @@ Dépendance : `pip install resend` + `RESEND_API_KEY` dans `.env.local`
 
 import logging
 import os
+import base64
 from pathlib import Path
+from io import BytesIO
 from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -70,16 +72,26 @@ class ServiceEmail:
         resend.api_key = self._api_key
         return resend
 
-    def _envoyer(self, to: str, subject: str, html: str) -> bool:
+    def _envoyer(
+        self,
+        to: str,
+        subject: str,
+        html: str,
+        attachments: list[dict[str, str]] | None = None,
+    ) -> bool:
         """Envoie un email et retourne True si succès."""
         try:
             client = self._client()
-            client.Emails.send({
+            payload: dict[str, Any] = {
                 "from": self._from_addr,
                 "to": [to],
                 "subject": subject,
                 "html": html,
-            })
+            }
+            if attachments:
+                payload["attachments"] = attachments
+
+            client.Emails.send(payload)
             logger.info("Email '%s' envoyé à %s", subject, to)
             return True
         except RuntimeError as e:
@@ -207,6 +219,113 @@ class ServiceEmail:
             notifications=notifications,
         )
         return self._envoyer(email, "🔔 Vos notifications — Matanne", html)
+
+    def _generer_pdf_simple(self, titre: str, sections: list[tuple[str, str]]) -> bytes:
+        """Génère un PDF textuel léger en mémoire pour les rapports email."""
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.units import cm
+        from reportlab.pdfgen import canvas
+
+        buffer = BytesIO()
+        c = canvas.Canvas(buffer, pagesize=A4)
+        largeur, hauteur = A4
+        y = hauteur - 2 * cm
+
+        c.setFont("Helvetica-Bold", 16)
+        c.drawString(2 * cm, y, titre)
+        y -= 1.0 * cm
+
+        c.setFont("Helvetica", 10)
+        for nom_section, contenu in sections:
+            if y < 3 * cm:
+                c.showPage()
+                y = hauteur - 2 * cm
+                c.setFont("Helvetica", 10)
+
+            c.setFont("Helvetica-Bold", 11)
+            c.drawString(2 * cm, y, nom_section)
+            y -= 0.6 * cm
+
+            c.setFont("Helvetica", 10)
+            for ligne in (contenu or "").split("\n")[:25]:
+                if y < 2.5 * cm:
+                    c.showPage()
+                    y = hauteur - 2 * cm
+                    c.setFont("Helvetica", 10)
+                c.drawString(2.3 * cm, y, ligne[:110])
+                y -= 0.45 * cm
+            y -= 0.4 * cm
+
+        c.save()
+        return buffer.getvalue()
+
+    def envoyer_rapport_famille_mensuel_complet(self, email: str, rapport: dict[str, Any]) -> bool:
+        """Sprint 16.8 — Email mensuel famille avec PDF joint."""
+        mois = str(rapport.get("mois", ""))
+        html = self._render(
+            "rapport_famille_mensuel_complet.html",
+            sujet=f"Rapport famille complet {mois}",
+            mois=mois,
+            budget=rapport.get("budget", "Non disponible"),
+            nutrition=rapport.get("nutrition", "Non disponible"),
+            maison=rapport.get("maison", "Non disponible"),
+            jardin=rapport.get("jardin", "Non disponible"),
+            jules=rapport.get("jules", "Non disponible"),
+        )
+
+        pdf_bytes = self._generer_pdf_simple(
+            titre=f"Rapport famille mensuel — {mois}",
+            sections=[
+                ("Budget", str(rapport.get("budget", "Non disponible"))),
+                ("Nutrition", str(rapport.get("nutrition", "Non disponible"))),
+                ("Maison", str(rapport.get("maison", "Non disponible"))),
+                ("Jardin", str(rapport.get("jardin", "Non disponible"))),
+                ("Jules", str(rapport.get("jules", "Non disponible"))),
+            ],
+        )
+        attachment = {
+            "filename": f"rapport-famille-{mois or 'mensuel'}.pdf",
+            "content": base64.b64encode(pdf_bytes).decode("ascii"),
+        }
+        return self._envoyer(
+            email,
+            f"📦 Rapport famille complet {mois} — Matanne",
+            html,
+            attachments=[attachment],
+        )
+
+    def envoyer_rapport_maison_trimestriel(self, email: str, rapport: dict[str, Any]) -> bool:
+        """Sprint 16.9 — Email trimestriel maison avec PDF joint."""
+        trimestre = str(rapport.get("trimestre", ""))
+        html = self._render(
+            "rapport_maison_trimestriel.html",
+            sujet=f"Rapport maison trimestriel {trimestre}",
+            trimestre=trimestre,
+            projets=rapport.get("projets", "Non disponible"),
+            energie=rapport.get("energie", "Non disponible"),
+            jardin=rapport.get("jardin", "Non disponible"),
+            entretien=rapport.get("entretien", "Non disponible"),
+        )
+
+        pdf_bytes = self._generer_pdf_simple(
+            titre=f"Rapport maison trimestriel — {trimestre}",
+            sections=[
+                ("Projets", str(rapport.get("projets", "Non disponible"))),
+                ("Energie", str(rapport.get("energie", "Non disponible"))),
+                ("Jardin", str(rapport.get("jardin", "Non disponible"))),
+                ("Entretien", str(rapport.get("entretien", "Non disponible"))),
+            ],
+        )
+        attachment = {
+            "filename": f"rapport-maison-{trimestre or 'trimestriel'}.pdf",
+            "content": base64.b64encode(pdf_bytes).decode("ascii"),
+        }
+        return self._envoyer(
+            email,
+            f"🏡 Rapport maison trimestriel {trimestre} — Matanne",
+            html,
+            attachments=[attachment],
+        )
 
 
 # ─── Factory ───────────────────────────────────────────────────────────────────

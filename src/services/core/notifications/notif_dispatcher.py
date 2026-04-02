@@ -41,6 +41,8 @@ _MAPPING_EVENEMENTS_CANAUX: dict[str, dict[str, Any]] = {
     "document_expirant": {"categorie": "alertes", "canaux": ["push", "ntfy", "email"]},
     "recolte_jardin_prete": {"categorie": "rappels", "canaux": ["push", "ntfy"]},
     "badge_debloque": {"categorie": "rappels", "canaux": ["push", "ntfy"]},
+    "diagnostic_maison_alerte": {"categorie": "alertes", "canaux": ["whatsapp", "push", "email"]},
+    "budget_depassement": {"categorie": "alertes", "canaux": ["whatsapp", "push", "ntfy"]},
 }
 
 
@@ -370,6 +372,12 @@ class DispatcherNotifications:
                 envoyer_message_whatsapp,
                 envoyer_liste_courses_partagee,
                 envoyer_rapport_hebdo_whatsapp,
+                envoyer_suggestion_recette_du_jour,
+                envoyer_alerte_diagnostic_maison,
+                envoyer_resume_weekend_suggestions,
+                envoyer_alerte_budget_depassement,
+                envoyer_bilan_nutrition_semaine,
+                envoyer_rappel_entretien_maison,
             )
             from src.core.config import obtenir_parametres
 
@@ -388,6 +396,18 @@ class DispatcherNotifications:
                     return await envoyer_liste_courses_partagee(articles, nom_liste)
                 elif type_wa == "rapport_hebdo":
                     return await envoyer_rapport_hebdo_whatsapp(message)
+                elif type_wa == "recette_du_jour":
+                    return await envoyer_suggestion_recette_du_jour(message)
+                elif type_wa == "diagnostic_maison":
+                    return await envoyer_alerte_diagnostic_maison(message)
+                elif type_wa == "resume_weekend":
+                    return await envoyer_resume_weekend_suggestions(message)
+                elif type_wa == "budget_depassement":
+                    return await envoyer_alerte_budget_depassement(message)
+                elif type_wa == "bilan_nutrition":
+                    return await envoyer_bilan_nutrition_semaine(message)
+                elif type_wa == "rappel_entretien":
+                    return await envoyer_rappel_entretien_maison(message)
                 else:
                     return await envoyer_message_whatsapp(destinataire, message)
 
@@ -422,6 +442,10 @@ class DispatcherNotifications:
             return service_email.envoyer_resume_hebdo(email, kwargs.get("resume", {"semaine": "", "resume_ia": message}))
         elif type_email == "rapport_mensuel":
             return service_email.envoyer_rapport_mensuel(email, kwargs.get("rapport", {}))
+        elif type_email == "rapport_famille_mensuel_complet":
+            return service_email.envoyer_rapport_famille_mensuel_complet(email, kwargs.get("rapport", {}))
+        elif type_email == "rapport_maison_trimestriel":
+            return service_email.envoyer_rapport_maison_trimestriel(email, kwargs.get("rapport", {}))
         elif type_email == "invitation":
             return service_email.envoyer_invitation_famille(email, kwargs.get("invitant", "Matanne"))
         else:

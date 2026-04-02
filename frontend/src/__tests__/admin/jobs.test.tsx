@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 
@@ -101,6 +101,81 @@ describe("PageAdminJobs — gestion erreur API", () => {
     // La page ne doit pas planter
     await waitFor(() => {
       expect(document.body).toBeDefined();
+    });
+  });
+});
+
+describe("PageAdminJobs — exécution dry-run", () => {
+  it("propage dry_run=true lors de l'exécution d'un job", async () => {
+    mockedApi.get.mockImplementation(async (url: string) => {
+      if (url === "/admin/jobs") {
+        return { data: JOBS_MOCK };
+      }
+      if (url.includes("/admin/jobs/") && url.endsWith("/logs")) {
+        return {
+          data: {
+            job_id: "job_push_quotidien",
+            nom: "Push quotidien 20h",
+            logs: [],
+            total: 0,
+          },
+        };
+      }
+      return { data: [] };
+    });
+    mockedApi.post.mockResolvedValue({ data: { status: "dry_run", dry_run: true } });
+
+    renderWithQuery(React.createElement(PageAdminJobs));
+
+    await waitFor(() => {
+      expect(screen.getByText("Push quotidien 20h")).toBeInTheDocument();
+    });
+
+    const dryRunCheckbox = screen.getByRole("checkbox");
+    fireEvent.click(dryRunCheckbox);
+
+    const runButton = screen.getByRole("button", { name: /Exécuter Push quotidien 20h/i });
+    fireEvent.click(runButton);
+
+    await waitFor(() => {
+      expect(mockedApi.post).toHaveBeenCalledWith(
+        "/admin/jobs/job_push_quotidien/run",
+        null,
+        { params: { dry_run: true } },
+      );
+    });
+  });
+
+  it("affiche l'état erreur quand l'exécution du job échoue", async () => {
+    mockedApi.get.mockImplementation(async (url: string) => {
+      if (url === "/admin/jobs") {
+        return { data: JOBS_MOCK };
+      }
+      if (url.includes("/admin/jobs/") && url.endsWith("/logs")) {
+        return {
+          data: {
+            job_id: "job_push_quotidien",
+            nom: "Push quotidien 20h",
+            logs: [],
+            total: 0,
+          },
+        };
+      }
+      return { data: [] };
+    });
+    mockedApi.post.mockRejectedValue(new Error("échec exécution"));
+
+    renderWithQuery(React.createElement(PageAdminJobs));
+
+    await waitFor(() => {
+      expect(screen.getByText("Push quotidien 20h")).toBeInTheDocument();
+    });
+
+    const runButton = screen.getByRole("button", { name: /Exécuter Push quotidien 20h/i });
+    fireEvent.click(runButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Erreur")).toBeInTheDocument();
     });
   });
 });

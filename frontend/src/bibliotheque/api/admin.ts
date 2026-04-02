@@ -55,6 +55,50 @@ export interface JobHistoryResponse {
   pages_totales: number
 }
 
+export interface JobBatchItem {
+  job_id: string
+  status: string
+  duration_ms: number
+  message: string
+}
+
+export interface JobBatchResponse {
+  mode: 'dry_run' | 'run'
+  jobs_cibles?: string[]
+  total: number
+  succes: number
+  echecs: number
+  items: JobBatchItem[]
+}
+
+export interface JobCompareItem {
+  job_id: string
+  job_name: string
+  dry_run: {
+    status: string
+    started_at: string | null
+    duration_ms: number
+    error_message: string | null
+  } | null
+  run: {
+    status: string
+    started_at: string | null
+    duration_ms: number
+    error_message: string | null
+  } | null
+  comparaison: {
+    delta_duration_ms: number | null
+    status_coherent: boolean | null
+  }
+}
+
+export interface JobCompareResponse {
+  generated_at: string
+  fenetre_heures: number
+  total: number
+  items: JobCompareItem[]
+}
+
 export interface AuditLogEntry {
   id: number | string
   timestamp: string
@@ -457,6 +501,21 @@ export function urlExportAuditCSV(params?: {
   return `/api/v1/admin/audit-export${qs ? `?${qs}` : ''}`
 }
 
+export function urlExportAuditPDF(params?: {
+  action?: string
+  entite_type?: string
+  depuis?: string
+  jusqu_a?: string
+}): string {
+  const query = new URLSearchParams()
+  if (params?.action) query.set('action', params.action)
+  if (params?.entite_type) query.set('entite_type', params.entite_type)
+  if (params?.depuis) query.set('depuis', params.depuis)
+  if (params?.jusqu_a) query.set('jusqu_a', params.jusqu_a)
+  const qs = query.toString()
+  return `/api/v1/admin/audit-export/pdf${qs ? `?${qs}` : ''}`
+}
+
 // ─── Security Logs ─────────────────────────────────────────
 
 export async function listerLogsSecurite(params?: {
@@ -496,6 +555,38 @@ export async function listerHistoriqueJobs(params?: {
   jusqu_a?: string
 }): Promise<JobHistoryResponse> {
   const { data } = await clientApi.get('/api/v1/admin/jobs/history', { params })
+  return data
+}
+
+export async function executerJobsDuMatin(options?: {
+  dry_run?: boolean
+  continuer_sur_erreur?: boolean
+}): Promise<JobBatchResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/jobs/run-morning-batch', {
+    dry_run: options?.dry_run ?? false,
+    continuer_sur_erreur: options?.continuer_sur_erreur ?? true,
+  })
+  return data
+}
+
+export async function simulerJourneeJobs(options?: {
+  dry_run?: boolean
+  continuer_sur_erreur?: boolean
+  inclure_jobs_inactifs?: boolean
+}): Promise<JobBatchResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/jobs/simulate-day', {
+    dry_run: options?.dry_run ?? true,
+    continuer_sur_erreur: options?.continuer_sur_erreur ?? true,
+    inclure_jobs_inactifs: options?.inclure_jobs_inactifs ?? false,
+  })
+  return data
+}
+
+export async function comparerDryRunVsRun(params?: {
+  limite?: number
+  depuis_heures?: number
+}): Promise<JobCompareResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/jobs/compare-dry-run', { params })
   return data
 }
 

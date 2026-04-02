@@ -32,13 +32,18 @@ import logging
 import os
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Literal
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import cm
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from sqlalchemy import text
 
 from src.api.dependencies import require_auth, require_role
@@ -321,6 +326,49 @@ async def exporter_audit_csv(
 
 
 @router.get(
+    "/audit-export/pdf",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Export PDF des logs d'audit",
+    description="Exporte les logs d'audit au format PDF.",
+)
+@gerer_exception_api
+async def exporter_audit_pdf(
+    action: str | None = Query(None),
+    entite_type: str | None = Query(None),
+    depuis: datetime | None = Query(None),
+    jusqu_a: datetime | None = Query(None),
+    user: dict[str, Any] = Depends(require_role("admin")),
+):
+    """Export PDF des logs d'audit."""
+    from src.services.core.audit import obtenir_service_audit
+
+    service = obtenir_service_audit()
+    resultat = service.consulter(
+        action=action,
+        entite_type=entite_type,
+        depuis=depuis,
+        jusqu_a=jusqu_a,
+        limite=2000,
+        page=1,
+    )
+
+    pdf_bytes = _construire_pdf_audit(
+        list(resultat.entrees),
+        {
+            "action": action,
+            "entite_type": entite_type,
+            "depuis": depuis.isoformat() if depuis else None,
+            "jusqu_a": jusqu_a.isoformat() if jusqu_a else None,
+        },
+    )
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=audit-logs.pdf"},
+    )
+
+
+@router.get(
     "/events",
     responses=REPONSES_AUTH_ADMIN,
     summary="Consulter le bus d'événements",
@@ -569,6 +617,17 @@ class DbImportRequest(BaseModel):
     merge: bool = False
 
 
+class JobsBulkRequest(BaseModel):
+    dry_run: bool = False
+    continuer_sur_erreur: bool = True
+
+
+class JobsSimulationJourneeRequest(BaseModel):
+    dry_run: bool = True
+    continuer_sur_erreur: bool = True
+    inclure_jobs_inactifs: bool = False
+
+
 # ═══════════════════════════════════════════════════════════
 # JOBS
 # ═══════════════════════════════════════════════════════════
@@ -647,6 +706,70 @@ _RUNTIME_CONFIG_PAR_DEFAUT: dict[str, Any] = {
     "notifications.digest_interval_minutes": 120,
     "admin.max_jobs_triggers_per_min": _JOB_TRIGGER_RATE_LIMIT,
 }
+
+
+def _extraire_jobs_matin() -> list[str]:
+    """Retourne les IDs de jobs planifiés entre 06:00 et 09:00 inclus, selon les labels connus."""
+    jobs_matin: list[str] = []
+    for job_id, label in _LABELS_JOBS.items():
+        match = re.search(r"\((\d{2})h(\d{2})\)", label)
+        if not match:
+            continue
+        heure = int(match.group(1))
+        if 6 <= heure <= 9:
+            jobs_matin.append(job_id)
+    return sorted(set(jobs_matin))
+
+
+def _construire_pdf_audit(entrees: list[Any], filtres: dict[str, Any]) -> bytes:
+    """Construit un PDF simple des logs d'audit filtrés."""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        leftMargin=1.2 * cm,
+        rightMargin=1.2 * cm,
+        topMargin=1.2 * cm,
+        bottomMargin=1.2 * cm,
+    )
+    styles = getSampleStyleSheet()
+    elements: list[Any] = []
+
+    elements.append(Paragraph("Audit Logs - Export PDF", styles["Title"]))
+    elements.append(Spacer(1, 0.3 * cm))
+    elements.append(Paragraph(f"Genere le : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles["Normal"]))
+    elements.append(Paragraph(f"Nombre d'entrees : {len(entrees)}", styles["Normal"]))
+
+    filtres_actifs = [f"{k}={v}" for k, v in filtres.items() if v not in {None, ""}]
+    if filtres_actifs:
+        elements.append(Paragraph(f"Filtres : {' | '.join(filtres_actifs)}", styles["Normal"]))
+    elements.append(Spacer(1, 0.35 * cm))
+
+    lignes = [["Timestamp", "Action", "Source", "Entite", "Utilisateur"]]
+    for entry in entrees:
+        lignes.append([
+            entry.timestamp.strftime("%Y-%m-%d %H:%M:%S") if entry.timestamp else "",
+            str(entry.action or "")[:45],
+            str(entry.source or "")[:25],
+            str(entry.entite_type or "")[:30],
+            str(entry.utilisateur_id or "")[:28],
+        ])
+
+    table = Table(lignes, repeatRows=1)
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1f2937")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 8),
+        ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#d1d5db")),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]))
+    elements.append(table)
+
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer.getvalue()
 
 
 def _lire_namespace_persistant(
@@ -1515,6 +1638,138 @@ async def executer_job(
     return result
 
 
+@router.post(
+    "/jobs/run-morning-batch",
+    responses=REPONSES_AUTH_ADMIN,
+    summary='Lancer tous les jobs du matin',
+    description="Exécute en séquence les jobs planifiés entre 06:00 et 09:00.",
+)
+@gerer_exception_api
+async def executer_jobs_matin(
+    body: JobsBulkRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.api.utils import executer_async
+
+    def _run() -> dict[str, Any]:
+        from src.services.core.cron.jobs import executer_job_par_id, lister_jobs_disponibles
+
+        jobs_matin = [j for j in _extraire_jobs_matin() if j in set(lister_jobs_disponibles())]
+        resultats: list[dict[str, Any]] = []
+        for job_id in jobs_matin:
+            debut = time.perf_counter()
+            try:
+                sortie = executer_job_par_id(
+                    job_id,
+                    dry_run=body.dry_run,
+                    source="admin_morning_batch",
+                    triggered_by_user_id=str(user.get("id", "admin")),
+                    relancer_exception=True,
+                )
+                statut = str(sortie.get("status", "ok"))
+                resultats.append({
+                    "job_id": job_id,
+                    "status": statut,
+                    "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
+                    "message": str(sortie.get("message", "")),
+                })
+                _ajouter_log_job(job_id, "succes" if statut in {"ok", "dry_run", "success"} else "erreur", str(sortie))
+            except Exception as exc:
+                resultats.append({
+                    "job_id": job_id,
+                    "status": "failure",
+                    "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
+                    "message": str(exc),
+                })
+                _ajouter_log_job(job_id, "erreur", str(exc))
+                if not body.continuer_sur_erreur:
+                    break
+
+        return {
+            "mode": "dry_run" if body.dry_run else "run",
+            "jobs_cibles": jobs_matin,
+            "total": len(resultats),
+            "succes": len([r for r in resultats if r["status"] in {"ok", "dry_run", "success"}]),
+            "echecs": len([r for r in resultats if r["status"] not in {"ok", "dry_run", "success"}]),
+            "items": resultats,
+        }
+
+    result = await executer_async(_run)
+    _journaliser_action_admin(
+        action="admin.jobs.morning_batch.run",
+        entite_type="job_batch",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"dry_run": body.dry_run, "continuer_sur_erreur": body.continuer_sur_erreur},
+    )
+    return result
+
+
+@router.post(
+    "/jobs/simulate-day",
+    responses=REPONSES_AUTH_ADMIN,
+    summary='Simuler une journée de jobs',
+    description="Exécute séquentiellement les jobs disponibles d'une journée type en mode dry-run.",
+)
+@gerer_exception_api
+async def simuler_journee_jobs(
+    body: JobsSimulationJourneeRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.api.utils import executer_async
+
+    def _run() -> dict[str, Any]:
+        from src.services.core.cron.jobs import executer_job_par_id, lister_jobs_disponibles
+
+        jobs_disponibles = list(lister_jobs_disponibles())
+        resultats: list[dict[str, Any]] = []
+        debut_journee = datetime.now()
+
+        for job_id in jobs_disponibles:
+            debut = time.perf_counter()
+            try:
+                sortie = executer_job_par_id(
+                    job_id,
+                    dry_run=body.dry_run,
+                    source="admin_day_simulation",
+                    triggered_by_user_id=str(user.get("id", "admin")),
+                    relancer_exception=True,
+                )
+                resultats.append({
+                    "job_id": job_id,
+                    "status": str(sortie.get("status", "ok")),
+                    "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
+                    "message": str(sortie.get("message", "")),
+                })
+            except Exception as exc:
+                resultats.append({
+                    "job_id": job_id,
+                    "status": "failure",
+                    "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
+                    "message": str(exc),
+                })
+                if not body.continuer_sur_erreur:
+                    break
+
+        return {
+            "mode": "dry_run" if body.dry_run else "run",
+            "started_at": debut_journee.isoformat(),
+            "ended_at": datetime.now().isoformat(),
+            "total": len(resultats),
+            "succes": len([r for r in resultats if r["status"] in {"ok", "dry_run", "success"}]),
+            "echecs": len([r for r in resultats if r["status"] not in {"ok", "dry_run", "success"}]),
+            "items": resultats,
+        }
+
+    result = await executer_async(_run)
+    _journaliser_action_admin(
+        action="admin.jobs.day_simulation.run",
+        entite_type="job_batch",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"dry_run": body.dry_run, "continuer_sur_erreur": body.continuer_sur_erreur},
+    )
+    return result
+
+
 @router.get(
     "/jobs/{job_id}/logs",
     responses=REPONSES_AUTH_ADMIN,
@@ -1662,6 +1917,88 @@ async def historique_jobs(
         "page": page,
         "par_page": par_page,
         "pages_totales": max(1, (total + par_page - 1) // par_page),
+    }
+
+
+@router.get(
+    "/jobs/compare-dry-run",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Comparer dry-run et exécution réelle",
+    description="Compare les dernières exécutions dry-run et réelles par job.",
+)
+@gerer_exception_api
+async def comparer_dry_run_vs_reel(
+    limite: int = Query(20, ge=1, le=100),
+    depuis_heures: int = Query(168, ge=1, le=24 * 30),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.api.utils import executer_avec_session
+
+    debut = datetime.now() - timedelta(hours=depuis_heures)
+    par_job: dict[str, dict[str, Any]] = {}
+
+    with executer_avec_session() as session:
+        rows = session.execute(
+            text(
+                """
+                SELECT job_id, job_name, status, started_at, duration_ms, error_message
+                FROM job_executions
+                WHERE started_at >= :debut
+                ORDER BY started_at DESC
+                LIMIT 5000
+                """
+            ),
+            {"debut": debut},
+        ).mappings().all()
+
+    for row in rows:
+        job_id = str(row["job_id"])
+        data = par_job.setdefault(
+            job_id,
+            {
+                "job_id": job_id,
+                "job_name": row["job_name"] or _LABELS_JOBS.get(job_id, job_id),
+                "dry_run": None,
+                "run": None,
+            },
+        )
+        status = str(row["status"] or "")
+        entree = {
+            "status": status,
+            "started_at": row["started_at"].isoformat() if row["started_at"] else None,
+            "duration_ms": int(row["duration_ms"] or 0),
+            "error_message": row["error_message"],
+        }
+        if status == "dry_run" and data["dry_run"] is None:
+            data["dry_run"] = entree
+        if status != "dry_run" and data["run"] is None:
+            data["run"] = entree
+
+    items = []
+    for v in par_job.values():
+        dry = v["dry_run"]
+        run = v["run"]
+        if not dry and not run:
+            continue
+        items.append({
+            **v,
+            "comparaison": {
+                "delta_duration_ms": (run["duration_ms"] - dry["duration_ms"]) if dry and run else None,
+                "status_coherent": (run["status"] in {"ok", "success"}) if run else None,
+            },
+        })
+
+    items_sorted = sorted(
+        items,
+        key=lambda i: (i["run"] or i["dry_run"] or {}).get("started_at") or "",
+        reverse=True,
+    )[:limite]
+
+    return {
+        "generated_at": datetime.now().isoformat(),
+        "fenetre_heures": depuis_heures,
+        "total": len(items_sorted),
+        "items": items_sorted,
     }
 
 
@@ -2469,6 +2806,8 @@ async def dashboard_admin(
             cache_stats = {}
 
         security_24h = 0
+        dernieres_executions_jobs: list[dict[str, Any]] = []
+        metriques_ia: dict[str, Any] = {}
         with executer_avec_session() as session:
             security_24h = int(
                 session.execute(
@@ -2483,6 +2822,32 @@ async def dashboard_admin(
                 or 0
             )
 
+            rows = session.execute(
+                text(
+                    """
+                    SELECT job_id, status, started_at, duration_ms
+                    FROM job_executions
+                    ORDER BY started_at DESC
+                    LIMIT 8
+                    """
+                )
+            ).mappings().all()
+            dernieres_executions_jobs = [
+                {
+                    "job_id": str(r["job_id"]),
+                    "job_name": _LABELS_JOBS.get(str(r["job_id"]), str(r["job_id"])),
+                    "status": str(r["status"] or "unknown"),
+                    "started_at": r["started_at"].isoformat() if r["started_at"] else None,
+                    "duration_ms": int(r["duration_ms"] or 0),
+                }
+                for r in rows
+            ]
+
+        try:
+            metriques_ia = _resumer_api_metrics().get("ai", {})
+        except Exception:
+            metriques_ia = {}
+
         return {
             "generated_at": datetime.now().isoformat(),
             "jobs": {
@@ -2496,6 +2861,8 @@ async def dashboard_admin(
             "security": {
                 "events_24h": security_24h,
             },
+            "jobs_recents": dernieres_executions_jobs,
+            "ia": metriques_ia,
             "feature_flags": _lire_namespace_persistant(
                 _NAMESPACE_FEATURE_FLAGS,
                 _FEATURE_FLAGS_PAR_DEFAUT,

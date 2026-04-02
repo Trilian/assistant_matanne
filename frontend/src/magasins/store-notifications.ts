@@ -96,3 +96,25 @@ export const utiliserStoreNotifications = create<EtatNotifications>((set) => ({
       return prochain;
     }),
 }));
+
+type TypeNotificationLegacy = "success" | "error" | "info" | "warning";
+
+export function useNotifications() {
+  const ajouter = utiliserStoreNotifications((state) => state.ajouter);
+
+  const ajouter_notification = (message: string, type: TypeNotificationLegacy = "info") => {
+    const mapType: Record<TypeNotificationLegacy, Notification["type"]> = {
+      success: "succes",
+      error: "erreur",
+      info: "info",
+      warning: "attention",
+    };
+
+    ajouter({
+      message,
+      type: mapType[type],
+    });
+  };
+
+  return { ajouter_notification };
+}

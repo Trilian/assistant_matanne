@@ -233,6 +233,19 @@ export default function PageAdmin() {
     URL.revokeObjectURL(url);
   };
 
+  const exporterPDF = async () => {
+    const params = new URLSearchParams();
+    if (filtreAction) params.append("action", filtreAction);
+    if (filtreEntite) params.append("entite_type", filtreEntite);
+    const response = await clientApi.get(`/admin/audit-export/pdf?${params}`, { responseType: "blob" });
+    const url = URL.createObjectURL(response.data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `audit-logs-${format(new Date(), "yyyy-MM-dd")}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const actionsData = stats
     ? Object.entries(stats.par_action)
         .slice(0, 8)
@@ -494,6 +507,9 @@ export default function PageAdmin() {
                 </div>
                 <Button variant="outline" size="sm" onClick={exporterCSV}>
                   <Download className="mr-2 h-4 w-4" />Export CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={exporterPDF}>
+                  <Download className="mr-2 h-4 w-4" />Export PDF
                 </Button>
               </div>
 

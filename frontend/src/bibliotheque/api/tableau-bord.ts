@@ -76,6 +76,21 @@ export interface WidgetActionResponse {
   statut: string;
 }
 
+export interface WidgetActionHistoriqueItem {
+  event_id: string;
+  type: string;
+  source: string;
+  timestamp: string;
+  widget_id: string | null;
+  action: string | null;
+  donnees: Record<string, unknown>;
+}
+
+export interface WidgetActionHistoriqueResponse {
+  items: WidgetActionHistoriqueItem[];
+  total: number;
+}
+
 export interface AlerteContextuelle {
   type: string;
   module: string;
@@ -150,6 +165,16 @@ export async function enregistrerActionWidgetDashboard(
     widget_id: payload.widget_id,
     action: payload.action,
     donnees: payload.donnees ?? {},
+  });
+  return data;
+}
+
+/** Lire l'historique récent des actions widgets dashboard */
+export async function obtenirHistoriqueActionsWidgetsDashboard(
+  limite = 10
+): Promise<WidgetActionHistoriqueResponse> {
+  const { data } = await clientApi.get<WidgetActionHistoriqueResponse>("/dashboard/widgets/actions", {
+    params: { limite },
   });
   return data;
 }

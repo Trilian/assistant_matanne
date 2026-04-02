@@ -322,6 +322,53 @@ class RapportMensuelPdfResponse(BaseModel):
     contenu_base64: str = ""
 
 
+class ModeVacancesResponse(BaseModel):
+    """Etat du mode vacances et impacts transverses."""
+
+    actif: bool = False
+    checklist_voyage_auto: bool = True
+    courses_mode_compact: bool = False
+    entretien_suspendu: bool = False
+    recommandations: list[str] = Field(default_factory=list)
+
+
+class InsightQuotidien(BaseModel):
+    """Insight IA proactif quotidien."""
+
+    titre: str = ""
+    message: str = ""
+    module: str = ""
+    priorite: str = "normale"
+    action_url: str = ""
+
+
+class InsightsQuotidiensResponse(BaseModel):
+    """Liste d'insights IA proactifs du jour (anti-spam)."""
+
+    date_reference: str = ""
+    limite_journaliere: int = 2
+    nb_insights: int = 0
+    insights: list[InsightQuotidien] = Field(default_factory=list)
+
+
+class MeteoImpactModule(BaseModel):
+    """Impact météo pour un module donné."""
+
+    module: str = ""
+    impact: str = ""
+    actions_recommandees: list[str] = Field(default_factory=list)
+
+
+class MeteoContextuelleResponse(BaseModel):
+    """Synthèse météo contextuelle cross-module."""
+
+    ville: str = ""
+    saison: str = ""
+    temperature: float | None = None
+    description: str = ""
+    modules: list[MeteoImpactModule] = Field(default_factory=list)
+
+
 # ═══════════════════════════════════════════════════════════
 # 10.8 — VEILLE EMPLOI
 # ═══════════════════════════════════════════════════════════
