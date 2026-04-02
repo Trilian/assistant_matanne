@@ -716,19 +716,10 @@ CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_check
 -- 5.06 OBJECTIFS_AUTONOMIE
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 5.07 CONTRATS
+-- 5.07 DEPENSES_HOME
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 5.08 FACTURES (→ contrats)
-
--- ─────────────────────────────────────────────────────────────────────────────
--- 5.09 COMPARATIFS (→ contrats)
-
--- ─────────────────────────────────────────────────────────────────────────────
--- 5.10 DEPENSES_HOME (→ contrats, factures)
-
--- ─────────────────────────────────────────────────────────────────────────────
--- 5.11 BUDGETS_HOME
+-- 5.08 BUDGETS_HOME
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5B.01 JEUX_TIRAGES_EUROMILLIONS
@@ -758,23 +749,14 @@ CREATE TABLE jeux_bankroll_historique (
 CREATE INDEX IF NOT EXISTS idx_bankroll_historique_user ON jeux_bankroll_historique(user_id, date DESC);
 
 -- ============================================================================
--- PARTIE 5C : TABLES MAISON EXTENSIONS (contrats, artisans, garanties, etc.)
+-- PARTIE 5C : TABLES MAISON EXTENSIONS (artisans, cellier, diagnostics, etc.)
 -- ============================================================================
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 5C.01 CONTRATS_MAISON
+-- 5C.01 ARTISANS
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 5C.02 ARTISANS
-
--- ─────────────────────────────────────────────────────────────────────────────
--- 5C.03 INTERVENTIONS_ARTISANS (→ artisans)
-
--- ─────────────────────────────────────────────────────────────────────────────
--- 5C.04 GARANTIES
-
--- ─────────────────────────────────────────────────────────────────────────────
--- 5C.05 INCIDENTS_SAV (→ garanties, artisans)
+-- 5C.02 INTERVENTIONS_ARTISANS (→ artisans)
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.06 ARTICLES_CELLIER

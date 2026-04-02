@@ -295,5 +295,5 @@ def obtenir_action_history_service() -> ActionHistoryService:
     return obtenir_service_historique_actions()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_action_history_service = obtenir_action_history_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_action_history_service = obtenir_action_history_service  # alias rétrocompatibilité 

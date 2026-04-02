@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes pour les webhooks sortants.
 
 Endpoints:

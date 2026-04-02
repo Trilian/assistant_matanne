@@ -431,7 +431,7 @@ class EvenementErreurService:
 
 
 # ═══════════════════════════════════════════════════════════
-# ÉVÉNEMENTS PHASE B — PRÉDICTIONS & BRIDGES IA
+# ÉVÉNEMENTS PRÉDICTIONS & BRIDGES IA
 # ═══════════════════════════════════════════════════════════
 
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/api/routes/push.py
 
 Tests unitaires pour les endpoints de notifications push.

@@ -215,7 +215,7 @@ class BusEvenements:
             if len(self._historique) > self._historique_taille:
                 self._historique = self._historique[-self._historique_taille :]
 
-        # Phase A4: Persister l'événement en base (best-effort, non bloquant)
+        # Persister l'événement en base (best-effort, non bloquant)
         self._persister_evenement(event)
 
         # Trouver les handlers correspondants
@@ -358,7 +358,7 @@ class BusEvenements:
         logger.info("📡 Bus d'événements repris")
 
     # ───────────────────────────────────────────────────────
-    # PERSISTENCE (Phase A4)
+    # PERSISTENCE 
     # ───────────────────────────────────────────────────────
 
     def _persister_evenement(self, event: EvenementDomaine) -> None:

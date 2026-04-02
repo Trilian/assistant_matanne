@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour SchedulerService - Planification automatique des synchronisations.
 """
 

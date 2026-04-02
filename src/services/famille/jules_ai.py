@@ -326,5 +326,5 @@ def obtenir_jules_ai_service() -> JulesAIService:
     return obtenir_jules_ai_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_jules_ai_service = obtenir_jules_ai_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_jules_ai_service = obtenir_jules_ai_service  # alias rétrocompatibilité 

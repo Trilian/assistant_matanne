@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/accueil_data_service.py
 
 Tests pour AccueilDataService:

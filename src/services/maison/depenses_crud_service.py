@@ -6,7 +6,7 @@ Hérite de BaseService[DepenseMaison] pour CRUD générique.
 Centralise tous les accès base de données pour les dépenses maison
 (gaz, eau, électricité, loyer, crèche, etc.).
 
-Sprint 6: Health checks et métriques intégrés.
+Health checks et métriques intégrés.
 """
 
 import logging
@@ -57,7 +57,7 @@ class DepensesCrudService(
 
     Hérite de BaseService[DepenseMaison] pour le CRUD générique.
 
-    Sprint 6 additions:
+    Fonctionnalités supplémentaires:
     - ServiceHealthMixin: Health checks granulaires
     - ServiceMetricsMixin: Métriques Prometheus
     - EventBusMixin: Émission automatique d'événements
@@ -68,7 +68,7 @@ class DepensesCrudService(
 
     def __init__(self):
         super().__init__(model=DepenseMaison, cache_ttl=600)
-        # Sprint 6: Initialiser health checks et métriques
+        # Initialiser health checks et métriques
         self._register_health_check()
         self._init_metrics()
 
@@ -168,7 +168,7 @@ class DepensesCrudService(
         db.commit()
         db.refresh(depense)
 
-        # Émettre événement via mixin (Sprint 6 - Event Bus 100%)
+        # Émettre événement via mixin 
         self._emettre_creation(
             "depenses",
             depense.id,
@@ -188,7 +188,7 @@ class DepensesCrudService(
             db.commit()
             db.refresh(depense)
 
-            # Émettre événement via mixin (Sprint 6 - Event Bus 100%)
+            # Émettre événement via mixin 
             self._emettre_modification(
                 "depenses",
                 depense_id,
@@ -208,7 +208,7 @@ class DepensesCrudService(
             db.delete(depense)
             db.commit()
 
-            # Émettre événement via mixin (Sprint 6 - Event Bus 100%)
+            # Émettre événement via mixin 
             self._emettre_suppression("depenses", depense_id)
             self._incrementer_compteur("depenses_supprimees")
 
@@ -375,5 +375,5 @@ def obtenir_service_depenses_crud() -> DepensesCrudService:
     return get_depenses_crud_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_depenses_crud_service = obtenir_depenses_crud_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_depenses_crud_service = obtenir_depenses_crud_service  # alias rétrocompatibilité 

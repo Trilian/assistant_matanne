@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API pour les utilitaires.
 
 CRUD pour: notes, journal de bord, contacts utiles, liens favoris,

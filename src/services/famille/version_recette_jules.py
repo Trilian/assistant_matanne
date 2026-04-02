@@ -250,5 +250,5 @@ def obtenir_version_recette_jules_service() -> ServiceVersionRecetteJules:
     return ServiceVersionRecetteJules()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_version_recette_jules_service = obtenir_version_recette_jules_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_version_recette_jules_service = obtenir_version_recette_jules_service  # alias rétrocompatibilité 

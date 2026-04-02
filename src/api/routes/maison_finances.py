@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API Maison â€” Finances (dÃ©penses, contrats, artisans, garanties, etc.).
 
 Sous-routeur inclus dans maison.py.
@@ -475,28 +475,6 @@ async def supprimer_eco_tip(
         service = obtenir_eco_tips_crud_service()
         service.delete_action(action_id)
         return MessageResponse(message="Action supprimÃ©e")
-
-    return await executer_async(_query)
-
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# CHARGES RÃ‰CURRENTES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-
-@router.get("/charges", responses=REPONSES_LISTE)
-@gerer_exception_api
-async def lister_charges(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Liste les charges rÃ©currentes (contrats et abonnements actifs)."""
-    from src.services.maison import obtenir_contrats_crud_service
-
-    def _query():
-        service = obtenir_contrats_crud_service()
-        contrats = service.get_all_contrats(statut="actif")
-        items = contrats if isinstance(contrats, list) else []
-        return {"items": [str(c) for c in items], "total": len(items)}
 
     return await executer_async(_query)
 

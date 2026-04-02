@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour BacktestService - Backtesting de la loi des sÃ©ries.
 """
 

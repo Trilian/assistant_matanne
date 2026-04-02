@@ -137,7 +137,7 @@ class NotificationTemplatesMixin:
         return self.envoyer_notification(user_id, notification)
 
     def notifier_pari_gagne(self, user_id: str, match_info: str, gain: float, cote: float):
-        """Notifie un pari sportif gagné (Phase W)."""
+        """Notifie un pari sportif gagné ."""
         notification = NotificationPush(
             title="🎉 Pari gagné!",
             body=f"{match_info} — Gain: {gain:.2f}€ (cote {cote:.2f})",
@@ -153,7 +153,7 @@ class NotificationTemplatesMixin:
         return self.envoyer_notification(user_id, notification)
 
     def notifier_pari_perdu(self, user_id: str, match_info: str, mise: float):
-        """Notifie un pari sportif perdu (Phase W)."""
+        """Notifie un pari sportif perdu ."""
         notification = NotificationPush(
             title="❌ Pari perdu",
             body=f"{match_info} — Mise perdue: {mise:.2f}€",
@@ -170,7 +170,7 @@ class NotificationTemplatesMixin:
     def notifier_resultat_loto(
         self, user_id: str, nb_numeros_trouves: int, chance_trouvee: bool, gain: float | None = None
     ):
-        """Notifie le résultat d'une grille Loto (Phase W)."""
+        """Notifie le résultat d'une grille Loto ."""
         if nb_numeros_trouves >= 4 or (nb_numeros_trouves >= 3 and chance_trouvee):
             # Gain potentiel
             title = "🎰 Tirage Loto — Résultat intéressant!"

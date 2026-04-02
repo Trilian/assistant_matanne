@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/profils.py â€” ProfilService.
 
 Couvre:

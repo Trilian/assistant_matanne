@@ -48,8 +48,8 @@ class TestSprintDEvenements:
         assert "budget.depassement" in emitted_types
 
 
-class TestSprintDSubscribers:
-    def test_sprint_d_subscribers_enregistres(self):
+class TestEventSubscribers:
+    def test_event_subscribers_enregistres(self):
         import src.services.core.events.subscribers as mod
         from src.services.core.events.subscribers import enregistrer_subscribers
 

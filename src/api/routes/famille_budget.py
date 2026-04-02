@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API Famille â€” Budget familial.
 
 Sous-routeur inclus dans famille.py.

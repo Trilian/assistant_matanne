@@ -445,5 +445,5 @@ def obtenir_service_loto_crud() -> LotoCrudService:
     return get_loto_crud_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_loto_crud_service = obtenir_loto_crud_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_loto_crud_service = obtenir_loto_crud_service  # alias rétrocompatibilité 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API pour les suggestions IA.
 
 Suggestions de recettes et de plannings de repas gÃ©nÃ©rÃ©es par Mistral AI,

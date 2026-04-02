@@ -457,5 +457,5 @@ __all__ = [
 ]
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_notification_jeux_service = obtenir_notification_jeux_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_notification_jeux_service = obtenir_notification_jeux_service  # alias rétrocompatibilité 

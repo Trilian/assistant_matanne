@@ -65,5 +65,5 @@ def obtenir_service_paris_crud() -> ParisCrudService:
     return get_paris_crud_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_paris_crud_service = obtenir_paris_crud_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_paris_crud_service = obtenir_paris_crud_service  # alias rétrocompatibilité 

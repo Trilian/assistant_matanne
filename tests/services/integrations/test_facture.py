@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour le service OCR de factures.
 
 Couverture cible: >80%

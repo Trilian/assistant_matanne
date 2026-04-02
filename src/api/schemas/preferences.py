@@ -52,7 +52,7 @@ class PreferencesResponse(PreferencesBase):
 
 
 # ─────────────────────────────────────────────────────────
-# Préférences canaux de notification (Sprint 13 — W4)
+# Préférences canaux de notification (W4)
 # ─────────────────────────────────────────────────────────
 
 _CANAUX_VALIDES = {"push", "ntfy", "email", "whatsapp"}

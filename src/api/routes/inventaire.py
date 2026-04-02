@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API pour l'inventaire.
 
 Gestion du stock alimentaire : suivi des quantitÃ©s, dates de pÃ©remption,

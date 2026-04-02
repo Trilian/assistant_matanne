@@ -162,5 +162,5 @@ def obtenir_service_eco_tips_crud() -> EcoTipsCrudService:
     return get_eco_tips_crud_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_eco_tips_crud_service = obtenir_eco_tips_crud_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_eco_tips_crud_service = obtenir_eco_tips_crud_service  # alias rétrocompatibilité 

@@ -135,7 +135,7 @@ readonly_tables TEXT[] := ARRAY[
     'normes_oms', 'plantes_catalogue',
     -- Legacy migration tables (read-only, données historiques)
     'preferences_home', 'taches_home', 'stats_home',
-    'contrats', 'factures', 'comparatifs', 'depenses_home', 'budgets_home'
+    'factures', 'comparatifs', 'depenses_home', 'budgets_home'
 ];
 BEGIN FOREACH t IN ARRAY readonly_tables LOOP
     EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);

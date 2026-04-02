@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests API cibles Sprint 10.
 
 Couvre:

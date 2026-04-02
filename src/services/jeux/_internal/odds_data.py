@@ -345,5 +345,5 @@ def obtenir_odds_data_service() -> OddsDataService:
     return OddsDataService(api_key=api_key)
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_odds_data_service = obtenir_odds_data_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_odds_data_service = obtenir_odds_data_service  # alias rétrocompatibilité 

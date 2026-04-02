@@ -291,5 +291,5 @@ def obtenir_rgpd_service() -> ServiceRGPD:
     return ServiceRGPD()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_rgpd_service = obtenir_rgpd_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_rgpd_service = obtenir_rgpd_service  # alias rétrocompatibilité 

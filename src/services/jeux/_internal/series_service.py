@@ -533,5 +533,5 @@ def obtenir_service_series() -> SeriesService:
     return get_series_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_series_service = obtenir_series_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_series_service = obtenir_series_service  # alias rétrocompatibilité 

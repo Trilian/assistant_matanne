@@ -357,5 +357,5 @@ def obtenir_predictions_service() -> InventairePredictionService:
     return obtenir_service_predictions()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_predictions_service = obtenir_predictions_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_predictions_service = obtenir_predictions_service  # alias rétrocompatibilité 

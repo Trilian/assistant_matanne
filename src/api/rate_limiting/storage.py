@@ -26,12 +26,12 @@ class StockageLimitationDebit:
     global (``threading.Lock``) afin d'éviter les race conditions
     lorsque plusieurs threads/workers accèdent au même processus.
 
-    Phase A5: Éviction LRU pour borner la consommation mémoire.
+    Éviction LRU pour borner la consommation mémoire.
     Quand le nombre de clés dépasse ``max_cles``, les clés les plus
     anciennes (sans entrées récentes) sont supprimées.
     """
 
-    # Seuil maximal de clés en mémoire (Phase A5)
+    # Seuil maximal de clés en mémoire 
     MAX_CLES_DEFAUT = 50_000
 
     def __init__(self, max_cles: int = MAX_CLES_DEFAUT):
@@ -45,12 +45,12 @@ class StockageLimitationDebit:
         maintenant = time.time()
         seuil = maintenant - fenetre_secondes
         self._store[cle] = [(ts, compte) for ts, compte in self._store[cle] if ts > seuil]
-        # Phase A5: Supprimer les clés vides pour éviter les fuites mémoire
+        # Supprimer les clés vides pour éviter les fuites mémoire
         if not self._store[cle]:
             del self._store[cle]
 
     def _evicter_si_necessaire(self):
-        """Évicte les clés les plus anciennes si le seuil est dépassé (Phase A5).
+        """Évicte les clés les plus anciennes si le seuil est dépassé .
 
         Doit être appelé sous ``_lock``.
         """

@@ -279,5 +279,5 @@ def obtenir_service_checklists_crud() -> ChecklistsCrudService:
     return get_checklists_crud_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_checklists_crud_service = obtenir_checklists_crud_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_checklists_crud_service = obtenir_checklists_crud_service  # alias rétrocompatibilité 

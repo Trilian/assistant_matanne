@@ -49,18 +49,10 @@ _SERVICES = {
     "EcoTipsCrudService": "eco_tips_crud_service",
     "get_eco_tips_crud_service": "eco_tips_crud_service",
     "obtenir_service_eco_tips_crud": "eco_tips_crud_service",
-    # Contrats CRUD service
-    "ContratsCrudService": "contrats_crud_service",
-    "get_contrats_crud_service": "contrats_crud_service",
-    "obtenir_service_contrats_crud": "contrats_crud_service",
     # Artisans CRUD service
     "ArtisansCrudService": "artisans_crud_service",
     "get_artisans_crud_service": "artisans_crud_service",
     "obtenir_service_artisans_crud": "artisans_crud_service",
-    # Garanties CRUD service
-    "GarantiesCrudService": "garanties_crud_service",
-    "get_garanties_crud_service": "garanties_crud_service",
-    "obtenir_service_garanties_crud": "garanties_crud_service",
     # Cellier CRUD service
     "CellierCrudService": "cellier_crud_service",
     "get_cellier_crud_service": "cellier_crud_service",
@@ -156,8 +148,6 @@ def __dir__():
 if TYPE_CHECKING:
     from .artisans_crud_service import ArtisansCrudService, get_artisans_crud_service
     from .cellier_crud_service import CellierCrudService, get_cellier_crud_service
-    from .checklists_crud_service import ChecklistsCrudService, get_checklists_service
-    from .contrats_crud_service import ContratsCrudService, get_contrats_crud_service
     from .depenses_crud_service import obtenir_depenses_crud_service
     from .diagnostics_crud_service import (
         DiagnosticsCrudService,
@@ -185,7 +175,6 @@ if TYPE_CHECKING:
         get_nuisibles_crud_service,
         get_releves_crud_service,
     )
-    from .garanties_crud_service import GarantiesCrudService, get_garanties_crud_service
     from .jardin_service import JardinService, get_jardin_service, obtenir_service_jardin
     from .meubles_crud_service import (
         MeublesCrudService,
@@ -249,13 +238,9 @@ __all__ = [
     "EcoTipsCrudService",
     "get_eco_tips_crud_service",
     "obtenir_service_eco_tips_crud",
-    # NEW: Contrats, Artisans, Garanties, Cellier, Checklists
-    "ContratsCrudService",
-    "get_contrats_crud_service",
+    # Artisans, Cellier, Checklists
     "ArtisansCrudService",
     "get_artisans_crud_service",
-    "GarantiesCrudService",
-    "get_garanties_crud_service",
     "CellierCrudService",
     "get_cellier_crud_service",
     "ChecklistsCrudService",

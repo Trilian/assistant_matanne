@@ -1,5 +1,5 @@
 """
-Cron jobs Phase B — Prédictions, alertes, consolidation.
+Cron jobs bridges — Prédictions, alertes, consolidation.
 
 8 nouveaux jobs :
 1. prediction_courses_hebdo — Vendredi 16h
@@ -392,7 +392,7 @@ def _obtenir_user_ids() -> list[str]:
 
 
 def configurer_jobs_phase_b(scheduler: BackgroundScheduler) -> None:
-    """Enregistre les 8 cron jobs Phase B dans le scheduler."""
+    """Enregistre les 8 cron jobs bridges dans le scheduler."""
 
     # B8.1: Prédiction courses — Vendredi 16h
     scheduler.add_job(
@@ -457,4 +457,4 @@ def configurer_jobs_phase_b(scheduler: BackgroundScheduler) -> None:
         replace_existing=True,
     )
 
-    logger.info("✅ 7 cron jobs Phase B configurés")
+    logger.info("✅ 7 cron jobs bridges configurés")

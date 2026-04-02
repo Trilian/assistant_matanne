@@ -351,5 +351,5 @@ def obtenir_conseiller_maison_service() -> ConseillierMaisonService:
     return ConseillierMaisonService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_conseiller_maison_service = obtenir_conseiller_maison_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_conseiller_maison_service = obtenir_conseiller_maison_service  # alias rétrocompatibilité 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API pour le planning.
 
 Gestion du planning de repas hebdomadaire : consultation, création,

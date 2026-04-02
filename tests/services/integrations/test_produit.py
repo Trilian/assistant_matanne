@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour le service OpenFoodFacts.
 
 Couverture cible: >80%

@@ -39,7 +39,7 @@ from src.api.utils import gerer_exception_api
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/ia", tags=["IA Avancée Phase B"])
+router = APIRouter(prefix="/api/v1/ia", tags=["IA Avancée"])
 
 
 # ═══════════════════════════════════════════════════════════

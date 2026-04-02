@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour JeuxAIService - Analyse IA des opportunitÃ©s.
 """
 

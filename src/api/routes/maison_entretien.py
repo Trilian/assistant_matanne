@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API Maison â€” Entretien, routines et mÃ©nage.
 
 Sous-routeur inclus dans maison.py.
@@ -494,7 +494,7 @@ async def reset_entretien_saisonnier(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BRIEFING MAISON (contexte quotidien)
 # NOTE: Routes canoniques /briefing, /alertes, /taches-jour
-# dÃ©finies en haut du fichier (section CONTEXTE MAISON Phase X).
+# dÃ©finies en haut du fichier (section CONTEXTE MAISON .
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -526,7 +526,7 @@ async def sync_catalogue_entretien(
 async def envoyer_rappels_maison(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Ã‰value et envoie les rappels push maison (garanties, contrats, entretien, gel, cellier)."""
+    """Ã‰value et envoie les rappels push maison (entretien, gel, cellier)."""
     from src.services.maison import obtenir_notifications_maison_service
 
     def _query():

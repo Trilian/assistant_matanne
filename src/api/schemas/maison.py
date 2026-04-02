@@ -1,8 +1,8 @@
-﻿"""
+"""
 Sch\u00e9mas Pydantic pour les routes Maison.
 
 Couvre : projets, routines, entretien, jardin, stocks, meubles,
-cellier, artisans, contrats, garanties, diagnostics, estimations,
+cellier, artisans, diagnostics, estimations,
 \u00e9co-tips, d\u00e9penses, nuisibles, devis, entretien saisonnier, relev\u00e9s,
 visualisation plan, hub stats.
 """
@@ -286,143 +286,6 @@ class StatsArtisansResponse(BaseModel):
     par_metier: dict[str, int] = {}
     depenses_totales: float = 0
     total_interventions: int = 0
-
-# Contrats
-
-class ContratCreate(BaseModel, NomValidatorMixin):
-    nom: str = Field(..., max_length=200)
-    type_contrat: str = Field(..., max_length=100)
-    fournisseur: str | None = Field(None, max_length=200)
-    numero_contrat: str | None = Field(None, max_length=100)
-    montant_mensuel: float | None = Field(None, ge=0)
-    montant_annuel: float | None = Field(None, ge=0)
-    date_debut: _dt.date
-    date_fin: _dt.date | None = None
-    date_resiliation: _dt.date | None = None
-    statut: str = Field("actif", max_length=50)
-    notes: str | None = None
-
-class ContratPatch(BaseModel):
-    nom: str | None = Field(None, max_length=200)
-    type_contrat: str | None = Field(None, max_length=100)
-    fournisseur: str | None = Field(None, max_length=200)
-    numero_contrat: str | None = Field(None, max_length=100)
-    montant_mensuel: float | None = Field(None, ge=0)
-    montant_annuel: float | None = Field(None, ge=0)
-    date_debut: _dt.date | None = None
-    date_fin: _dt.date | None = None
-    date_resiliation: _dt.date | None = None
-    statut: str | None = Field(None, max_length=50)
-    notes: str | None = None
-
-class ContratResponse(IdentifiedResponse):
-    nom: str
-    type_contrat: str
-    fournisseur: str | None = None
-    numero_contrat: str | None = None
-    montant_mensuel: float | None = None
-    montant_annuel: float | None = None
-    date_debut: _dt.date
-    date_fin: _dt.date | None = None
-    date_resiliation: _dt.date | None = None
-    statut: str
-    notes: str | None = None
-
-class AlerteContratResponse(BaseModel):
-    id: int
-    nom: str
-    type_contrat: str
-    date_fin: _dt.date
-    jours_restants: int
-
-class ResumeFinancierContratsResponse(BaseModel):
-    total_mensuel: float = 0
-    total_annuel: float = 0
-    par_type: dict[str, float] = {}
-
-# Garanties
-
-class GarantieCreate(BaseModel):
-    appareil: str = Field(..., max_length=200)
-    marque: str | None = Field(None, max_length=100)
-    numero_serie: str | None = Field(None, max_length=100)
-    date_achat: _dt.date
-    date_fin_garantie: _dt.date
-    magasin: str | None = Field(None, max_length=200)
-    prix_achat: float | None = Field(None, ge=0)
-    piece: str | None = Field(None, max_length=100)
-    document_url: str | None = Field(None, max_length=500)
-    notes: str | None = None
-
-    @field_validator("appareil")
-    @classmethod
-    def validate_appareil(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("Le nom de l'appareil ne peut pas \u00eatre vide")
-        return v.strip()
-
-class GarantiePatch(BaseModel):
-    appareil: str | None = Field(None, max_length=200)
-    marque: str | None = Field(None, max_length=100)
-    numero_serie: str | None = Field(None, max_length=100)
-    date_achat: _dt.date | None = None
-    date_fin_garantie: _dt.date | None = None
-    magasin: str | None = Field(None, max_length=200)
-    prix_achat: float | None = Field(None, ge=0)
-    piece: str | None = Field(None, max_length=100)
-    document_url: str | None = Field(None, max_length=500)
-    notes: str | None = None
-
-class GarantieResponse(IdentifiedResponse):
-    appareil: str
-    marque: str | None = None
-    numero_serie: str | None = None
-    date_achat: _dt.date
-    date_fin_garantie: _dt.date
-    magasin: str | None = None
-    prix_achat: float | None = None
-    piece: str | None = None
-    document_url: str | None = None
-    statut: str = "active"
-    notes: str | None = None
-
-class IncidentSAVCreate(BaseModel):
-    garantie_id: int
-    date: _dt.date
-    description: str = Field(..., max_length=500)
-    statut: str = Field("ouvert", max_length=50)
-    cout_reparation: float | None = Field(None, ge=0)
-    reference_dossier: str | None = Field(None, max_length=100)
-    notes: str | None = None
-
-class IncidentSAVPatch(BaseModel):
-    date: _dt.date | None = None
-    description: str | None = Field(None, max_length=500)
-    statut: str | None = Field(None, max_length=50)
-    cout_reparation: float | None = Field(None, ge=0)
-    reference_dossier: str | None = Field(None, max_length=100)
-    notes: str | None = None
-
-class IncidentSAVResponse(IdentifiedResponse):
-    garantie_id: int
-    date: _dt.date
-    description: str
-    statut: str
-    cout_reparation: float | None = None
-    reference_dossier: str | None = None
-    notes: str | None = None
-
-class AlerteGarantieResponse(BaseModel):
-    id: int
-    appareil: str
-    date_fin_garantie: _dt.date
-    jours_restants: int
-
-class StatsGarantiesResponse(BaseModel):
-    total: int = 0
-    actives: int = 0
-    expirees: int = 0
-    valeur_totale: float = 0
 
 # Diagnostics & Estimations
 
@@ -741,8 +604,6 @@ class ObjetResponse(IdentifiedResponse):
 class StatsHubMaisonResponse(BaseModel):
     projets_en_cours: int = 0
     taches_en_retard: int = 0
-    garanties_expirant: int = 0
-    contrats_a_renouveler: int = 0
     depenses_mois: float = 0
     stocks_en_alerte: int = 0
     articles_perimes: int = 0

@@ -610,5 +610,5 @@ def obtenir_euromillions_ia_service() -> EuromillionsIAService:
     return EuromillionsIAService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_euromillions_ia_service = obtenir_euromillions_ia_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_euromillions_ia_service = obtenir_euromillions_ia_service  # alias rétrocompatibilité 

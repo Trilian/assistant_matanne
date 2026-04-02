@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour LotoDataService - Service donnÃ©es Loto FDJ.
 """
 

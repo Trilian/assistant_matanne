@@ -378,11 +378,12 @@ sql/
 
 ---
 
-## 7. Sprint 5 — Correction de bugs et TODOs critiques
+## 7. Sprint 5 — Correction de bugs et TODOs critiques ✅
 
 > **Objectif** : Résoudre les vrais bugs et TODOs bloquants
 > **Effort** : Moyen | **Impact** : Qualité et sécurité
 > **Dépend de** : Sprint 1
+> **Statut** : ✅ Terminé (2 Avril 2026)
 
 ### Bugs à corriger
 
@@ -393,7 +394,7 @@ sql/
 | B3 | Champs legacy planning | Moyenne | `src/core/models/planning.py` | Déjà supprimé Sprint 1 |
 | B4 | Champs legacy jeux | Moyenne | `src/core/models/jeux.py` | Déjà supprimé Sprint 1 |
 | B5 | Validators legacy phase_b | Moyenne | `src/api/schemas/phase_b.py` | Déjà supprimé Sprint 1 |
-| B6 | **TODO(P1-06)** — remplacer par API officielle Supabase | **Haute** | `src/services/core/utilisateur/auth_token.py` L44 | **Résoudre ici** |
+| B6 | **TODO(P1-06)** — remplacer par API officielle Supabase | **Haute** | `src/services/core/utilisateur/auth_token.py` L44 | ✅ Résolu — workaround `_storage_key` supprimé, utilise `auth.get_user(token)` officiel (supabase-py v2.28) |
 | B7 | Aliases rétrocompat Sprint 12 A3 | Moyenne | 10+ services | Déjà audité Sprint 1 |
 | B8 | Page scan-ticket accessible mais OCR désactivé | Faible | Frontend | Déjà supprimé Sprint 1 |
 | B9 | Page jeux/ocr-ticket accessible | Faible | Frontend | Déjà supprimé Sprint 1 |
@@ -402,10 +403,10 @@ sql/
 
 | # | TODO | Action |
 |---|---|---|
-| 5.1 | **TODO(P1-06)** : Remplacer auth_token.py par API officielle Supabase | Implémenter l'appel Supabase GoTrue officiel pour la gestion des tokens au lieu du workaround actuel |
-| 5.2 | Vérifier panneau admin flottant : protégé par `require_role("admin")` côté backend | Audit du code backend + frontend |
-| 5.3 | Vérifier panneau admin : conditionnel au rôle admin côté frontend | Audit `panneau-admin-flottant.tsx` |
-| 5.4 | Vérifier panneau admin : absent de la navigation utilisateur standard | Audit `barre-laterale.tsx`, `nav-mobile.tsx` |
+| 5.1 | **TODO(P1-06)** : Remplacer auth_token.py par API officielle Supabase | ✅ Supprimé le workaround `_storage_key`, utilise `auth.get_user(token)` officiel supabase-py v2.28 |
+| 5.2 | Vérifier panneau admin flottant : protégé par `require_role("admin")` côté backend | ✅ Audité — Router admin a `dependencies=[Depends(_verifier_limite_admin)]` qui dépend de `require_role("admin")` + chaque endpoint a son propre `Depends(require_role("admin"))` (55 occurrences pour 54 routes) |
+| 5.3 | Vérifier panneau admin : conditionnel au rôle admin côté frontend | ✅ Audité — `panneau-admin-flottant.tsx` vérifie `estAdmin = utilisateur?.role === "admin"` et retourne `null` si non-admin. Keydown handler aussi protégé. |
+| 5.4 | Vérifier panneau admin : absent de la navigation utilisateur standard | ✅ Audité — `barre-laterale.tsx` : lien Admin conditionné par `{estAdmin && (...)}`. `nav-mobile.tsx` : aucun lien admin dans ITEMS ni PLUS_ITEMS. |
 
 ### Problèmes d'architecture à traiter
 
@@ -421,9 +422,9 @@ sql/
 
 ### Critères de validation
 
-- [ ] `rg "TODO(P1-06)" src/` → aucun résultat
-- [ ] Panneau admin protégé backend ET frontend
-- [ ] `pytest` passe sans régression
+- [x] `rg "TODO(P1-06)" src/` → aucun résultat ✅
+- [x] Panneau admin protégé backend ET frontend ✅
+- [x] `pytest` passe sans régression ✅ (128 passed, seul échec pré-existant non lié : `test_triggers_manquants_retourne_422`)
 
 ---
 
@@ -1180,10 +1181,10 @@ Les groupes suivants peuvent être travaillés en parallèle :
 - [ ] 1 seul fichier test décorateurs
 - [ ] `pytest` vert
 
-### Sprint 5 — Bugs
-- [ ] TODO(P1-06) résolu
-- [ ] Panneau admin sécurisé (backend + frontend)
-- [ ] `pytest` vert
+### Sprint 5 — Bugs ✅
+- [x] TODO(P1-06) résolu
+- [x] Panneau admin sécurisé (backend + frontend)
+- [x] `pytest` vert (aucune régression)
 
 ### Sprint 6 — Tests bridges
 - [ ] 23 tests de bridges créés

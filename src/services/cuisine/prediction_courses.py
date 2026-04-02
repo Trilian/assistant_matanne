@@ -1,6 +1,6 @@
 """Service de prediction de courses a partir de l'historique d'achats (IA2).
 
-Phase B (B2): Prediction courses intelligente — historique + IA Mistral
+ Prediction courses intelligente — historique + IA Mistral
 pour pre-remplir la liste de courses avec des suggestions contextuelles.
 """
 

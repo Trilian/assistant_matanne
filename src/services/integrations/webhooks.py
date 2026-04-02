@@ -455,5 +455,5 @@ def obtenir_webhook_service() -> WebhookService:
     return WebhookService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_webhook_service = obtenir_webhook_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_webhook_service = obtenir_webhook_service  # alias rétrocompatibilité 

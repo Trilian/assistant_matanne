@@ -290,5 +290,5 @@ __all__ = [
 ]
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_recurrence_service = obtenir_recurrence_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_recurrence_service = obtenir_recurrence_service  # alias rétrocompatibilité 

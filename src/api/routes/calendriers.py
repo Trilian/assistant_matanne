@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API pour les calendriers.
 
 Endpoints pour:

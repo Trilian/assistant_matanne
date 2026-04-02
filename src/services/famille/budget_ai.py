@@ -228,5 +228,5 @@ def obtenir_budget_ai_service() -> BudgetAIService:
     return obtenir_budget_ai_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_budget_ai_service = obtenir_budget_ai_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_budget_ai_service = obtenir_budget_ai_service  # alias rétrocompatibilité 

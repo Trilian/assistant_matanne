@@ -324,5 +324,5 @@ def obtenir_recipe_import_service() -> RecipeImportService:
     return obtenir_service_import_recettes()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_recipe_import_service = obtenir_recipe_import_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_recipe_import_service = obtenir_recipe_import_service  # alias rétrocompatibilité 

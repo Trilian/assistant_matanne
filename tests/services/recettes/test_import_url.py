@@ -1,4 +1,4 @@
-﻿"""Tests pour src/services/recettes/import_url.py"""
+"""Tests pour src/services/recettes/import_url.py"""
 
 from unittest.mock import Mock, patch
 

@@ -384,5 +384,5 @@ def obtenir_service_sync_jeux() -> SyncService:
     return get_sync_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_sync_service = obtenir_sync_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_sync_service = obtenir_sync_service  # alias rétrocompatibilité 

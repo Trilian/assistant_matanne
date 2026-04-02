@@ -416,5 +416,5 @@ def obtenir_visualisation_service() -> VisualisationService:
     return VisualisationService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_visualisation_service = obtenir_visualisation_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_visualisation_service = obtenir_visualisation_service  # alias rétrocompatibilité 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service pour gÃ©rer les notifications enrichies du Sprint E.
 
 Features:
@@ -378,8 +378,8 @@ class ServiceNotificationsEnrichis:
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-@service_factory("service_notifications_enrichis", tags={"notifications", "sprint_e"})
+@service_factory("service_notifications_enrichis", tags={"notifications", "enrichis"})
 def obtenir_service_notifications_enrichis() -> ServiceNotificationsEnrichis:
-    """Factory pour le service notifications enrichis (E)."""
+    """Factory pour le service notifications enrichis."""
     with obtenir_contexte_db() as session:
         return ServiceNotificationsEnrichis(session)

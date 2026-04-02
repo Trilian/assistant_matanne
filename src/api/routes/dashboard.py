@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API pour le tableau de bord.
 
 AgrÃ©gation des donnÃ©es de tous les modules pour la page d'accueil.

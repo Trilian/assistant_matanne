@@ -323,5 +323,5 @@ def obtenir_service_fiche_tache(client: ClientIA | None = None) -> FicheTacheSer
     return get_fiche_tache_service(client)
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_fiche_tache_service = obtenir_fiche_tache_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_fiche_tache_service = obtenir_fiche_tache_service  # alias rétrocompatibilité 

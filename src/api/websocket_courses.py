@@ -392,7 +392,7 @@ async def _persist_change(liste_id: int, action: str, data: dict[str, Any]) -> N
 
 
 # ═══════════════════════════════════════════════════════════
-# FALLBACK HTTP POLLING (Phase A2)
+# FALLBACK HTTP POLLING 
 # ═══════════════════════════════════════════════════════════
 
 # Séquence de changements par liste pour le polling HTTP

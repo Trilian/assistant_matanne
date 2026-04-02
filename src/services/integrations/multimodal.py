@@ -671,5 +671,5 @@ async def analyser_frigo(image: bytes | str | Path) -> list[dict]:
     return await service.analyser_frigo(image)
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_multimodal_service = obtenir_multimodal_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_multimodal_service = obtenir_multimodal_service  # alias rétrocompatibilité 

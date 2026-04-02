@@ -415,5 +415,5 @@ def obtenir_service_donnees_loto() -> LotoDataService:
     return get_loto_data_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_loto_data_service = obtenir_loto_data_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_loto_data_service = obtenir_loto_data_service  # alias rétrocompatibilité 

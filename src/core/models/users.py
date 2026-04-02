@@ -508,5 +508,5 @@ __all__ = [
     "ResumeQuotidienGarmin",
     "JournalAlimentaire",
     "ActiviteWeekend",
-    # AchatFamille is defined in famille.py (canonical Phase P version)
+    # AchatFamille is defined in famille.py (canonical version)
 ]

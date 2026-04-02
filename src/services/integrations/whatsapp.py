@@ -33,7 +33,7 @@ META_API_BASE = "https://graph.facebook.com/v21.0"
 
 
 # ═══════════════════════════════════════════════════════════
-# RATE LIMITING (Phase A7 — persisté en DB via etats_persistants)
+# RATE LIMITING (persisté en DB via etats_persistants)
 # ═══════════════════════════════════════════════════════════
 
 _LIMITE_PAR_HEURE = 10
@@ -45,7 +45,7 @@ _compteurs_jour: list[float] = []
 
 
 # ═══════════════════════════════════════════════════════════
-# CONVERSATION STATE (Phase D8 — persisté en DB)
+# CONVERSATION STATE (persisté en DB)
 # ═══════════════════════════════════════════════════════════
 
 _NAMESPACE_ETAT_CONVERSATION = "whatsapp_conversation_state"
@@ -184,7 +184,7 @@ def _charger_compteur_db(destinataire: str) -> tuple[int, int]:
 
 
 def _enregistrer_envoi_db(destinataire: str) -> None:
-    """Enregistre un envoi en DB (Phase A7: state persisté).
+    """Enregistre un envoi en DB (state persisté).
 
     Conserve un historique glissant de 48h max pour limiter la taille.
     """
@@ -239,7 +239,7 @@ def _verifier_rate_limit(destinataire: str) -> tuple[bool, str]:
     Returns:
         (autorisé, raison si refusé)
     """
-    # Phase A7: Tenter de lire depuis la DB
+    # Tenter de lire depuis la DB
     heure_count, jour_count = _charger_compteur_db(destinataire)
 
     if heure_count >= 0:  # DB disponible
@@ -266,7 +266,7 @@ def _enregistrer_envoi(destinataire: str) -> None:
     now = time.monotonic()
     _compteurs_heure[destinataire].append(now)
     _compteurs_jour.append(now)
-    # Phase A7: Persister en DB
+    # Persister en DB
     _enregistrer_envoi_db(destinataire)
 
 

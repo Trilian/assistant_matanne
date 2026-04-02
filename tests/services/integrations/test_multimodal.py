@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/services/multimodal.py
 
 Tests pour MultiModalAIService:

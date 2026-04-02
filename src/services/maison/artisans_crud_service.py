@@ -179,5 +179,5 @@ def obtenir_service_artisans_crud() -> ArtisansCrudService:
     return get_artisans_crud_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_artisans_crud_service = obtenir_artisans_crud_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_artisans_crud_service = obtenir_artisans_crud_service  # alias rétrocompatibilité 

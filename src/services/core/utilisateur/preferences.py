@@ -416,5 +416,5 @@ def obtenir_user_preference_service(user_id: str = DEFAULT_USER_ID) -> UserPrefe
     return obtenir_service_preferences_utilisateur(user_id)
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_user_preference_service = obtenir_user_preference_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_user_preference_service = obtenir_user_preference_service  # alias rétrocompatibilité 

@@ -306,5 +306,5 @@ def obtenir_catalogue_enrichissement_service() -> CatalogueEnrichissementService
     return CatalogueEnrichissementService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_catalogue_enrichissement_service = obtenir_catalogue_enrichissement_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_catalogue_enrichissement_service = obtenir_catalogue_enrichissement_service  # alias rétrocompatibilité 

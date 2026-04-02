@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API Maison â€” Jardin, stocks et nuisibles.
 
 Sous-routeur inclus dans maison.py.

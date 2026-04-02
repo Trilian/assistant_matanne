@@ -167,5 +167,5 @@ def obtenir_service_catalogue_entretien() -> CatalogueEntretienService:
     return get_catalogue_entretien_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_catalogue_entretien_service = obtenir_catalogue_entretien_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_catalogue_entretien_service = obtenir_catalogue_entretien_service  # alias rétrocompatibilité 

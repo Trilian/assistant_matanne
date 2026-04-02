@@ -1,4 +1,4 @@
-﻿"""
+"""
 T4 - Tests dedies pour les routes automations.
 
 Couvre src/api/routes/automations.py :

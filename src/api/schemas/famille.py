@@ -125,7 +125,7 @@ class EvenementFamilialResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# CONTEXTE FAMILIAL (Phase M)
+# CONTEXTE FAMILIAL 
 # ═══════════════════════════════════════════════════════════
 
 
@@ -202,7 +202,7 @@ class ContexteFamilialResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# ACHATS FAMILLE (Phase M4)
+# ACHATS FAMILLE 
 # ═══════════════════════════════════════════════════════════
 
 
@@ -263,7 +263,7 @@ class MarquerAchetePayload(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# SUGGESTIONS IA (Phase M3 + P)
+# SUGGESTIONS IA 
 # ═══════════════════════════════════════════════════════════
 
 
@@ -308,7 +308,7 @@ class SuggestionAchatResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# RAPPELS (Phase Q)
+# RAPPELS 
 # ═══════════════════════════════════════════════════════════
 
 
@@ -322,7 +322,7 @@ class RappelFamilleResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# CROISSANCE OMS (Phase R)
+# CROISSANCE OMS 
 # ═══════════════════════════════════════════════════════════
 
 
@@ -343,7 +343,7 @@ class CroissanceResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# CONFIG GARDE (Phase Famille Refonte)
+# CONFIG GARDE 
 # ═══════════════════════════════════════════════════════════
 
 
@@ -383,7 +383,7 @@ class PreferencesFamilleResponse(PreferencesFamilleRequest):
 
 
 # ═══════════════════════════════════════════════════════════
-# SUGGESTIONS ACHATS ENRICHIES (Phase Famille Refonte)
+# SUGGESTIONS ACHATS ENRICHIES 
 # ═══════════════════════════════════════════════════════════
 
 
@@ -438,7 +438,7 @@ class PrefillReventeResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# JOURS SANS CRECHE (Phase Famille Refonte)
+# JOURS SANS CRECHE 
 # ═══════════════════════════════════════════════════════════
 
 
@@ -449,7 +449,7 @@ class JourSansCrecheResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# SEJOUR (Phase Famille Refonte)
+# SEJOUR 
 # ═══════════════════════════════════════════════════════════
 
 
@@ -461,7 +461,7 @@ class SuggestionsSejourRequest(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# BUDGET RÉSUMÉ (Phase Famille Refonte)
+# BUDGET RÉSUMÉ 
 # ═══════════════════════════════════════════════════════════
 
 

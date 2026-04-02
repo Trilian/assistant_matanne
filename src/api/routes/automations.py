@@ -1,4 +1,4 @@
-﻿"""Routes API pour les automations simples type 'Si -> Alors'."""
+"""Routes API pour les automations simples type 'Si -> Alors'."""
 
 from __future__ import annotations
 

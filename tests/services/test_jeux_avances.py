@@ -1,4 +1,4 @@
-﻿"""
+"""
 Test unitaire pour les fonctionnalités avancées jeux.
 """
 

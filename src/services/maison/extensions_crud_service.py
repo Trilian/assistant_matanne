@@ -436,8 +436,8 @@ def obtenir_releves_crud_service() -> RelevesCrudService:
     return RelevesCrudService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_nuisibles_crud_service = obtenir_nuisibles_crud_service  # alias rétrocompatibilité Sprint 12 A3
-get_devis_crud_service = obtenir_devis_crud_service  # alias rétrocompatibilité Sprint 12 A3
-get_entretien_saisonnier_crud_service = obtenir_entretien_saisonnier_crud_service  # alias rétrocompatibilité Sprint 12 A3
-get_releves_crud_service = obtenir_releves_crud_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_nuisibles_crud_service = obtenir_nuisibles_crud_service  # alias rétrocompatibilité 
+get_devis_crud_service = obtenir_devis_crud_service  # alias rétrocompatibilité 
+get_entretien_saisonnier_crud_service = obtenir_entretien_saisonnier_crud_service  # alias rétrocompatibilité 
+get_releves_crud_service = obtenir_releves_crud_service  # alias rétrocompatibilité 

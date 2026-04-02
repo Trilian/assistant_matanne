@@ -449,5 +449,5 @@ def reset_scheduler_service() -> None:
     reg.reinitialiser("scheduler")
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_scheduler_service = obtenir_scheduler_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_scheduler_service = obtenir_scheduler_service  # alias rétrocompatibilité 

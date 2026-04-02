@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour FootballDataService - Service donnÃ©es Football-Data.org.
 """
 

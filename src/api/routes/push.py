@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes pour les notifications push.
 
 Endpoints:
@@ -166,7 +166,7 @@ async def obtenir_statut_push(
     summary="Ã‰valuer les rappels intelligents",
     description=(
         "Analyse les donnÃ©es de l'application et retourne les rappels "
-        "contextuels actifs : garanties expirant bientÃ´t, stocks bas, "
+        "contextuels actifs : stocks bas, "
         "tÃ¢ches d'entretien en retard."
     ),
 )

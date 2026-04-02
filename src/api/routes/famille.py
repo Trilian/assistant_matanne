@@ -759,7 +759,7 @@ async def obtenir_resume_hebdomadaire(
 
 
 # ═══════════════════════════════════════════════════════════
-# CONTEXTE FAMILIAL (Phase M)
+# CONTEXTE FAMILIAL 
 # ═══════════════════════════════════════════════════════════
 
 
@@ -942,7 +942,7 @@ async def supprimer_achat(
 
 
 # ═══════════════════════════════════════════════════════════
-# ACHATS — ENDPOINTS PHASE REFONTE
+# ACHATS — ENDPOINTS
 # ═══════════════════════════════════════════════════════════
 
 
@@ -1383,7 +1383,7 @@ async def convertir_weekend_en_activite(
 
 
 # ═══════════════════════════════════════════════════════════
-# SUGGESTIONS IA ACHATS (Phase P)
+# SUGGESTIONS IA ACHATS 
 # ═══════════════════════════════════════════════════════════
 
 
@@ -1530,7 +1530,7 @@ async def suggestions_achats_auto(
 
 
 # ═══════════════════════════════════════════════════════════
-# RAPPELS FAMILLE (Phase Q)
+# RAPPELS FAMILLE 
 # ═══════════════════════════════════════════════════════════
 
 

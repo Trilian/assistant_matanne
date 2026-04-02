@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 
 
 # ═══════════════════════════════════════════════════════════
-# EXTRACTION IP CLIENT (Phase A6)
+# EXTRACTION IP CLIENT 
 # ═══════════════════════════════════════════════════════════
 
 
 def extraire_ip_client(request: Request) -> str | None:
     """Extrait l'IP du client avec validation du format.
 
-    Phase A6: Valide que l'IP extraite de X-Forwarded-For est bien
+    Valide que l'IP extraite de X-Forwarded-For est bien
     une adresse IP valide pour éviter les injections dans les logs
     et le rate limiting.
     """

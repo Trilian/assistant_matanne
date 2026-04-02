@@ -1,4 +1,4 @@
-﻿"""Routes API Garmin santÃ©/sport."""
+"""Routes API Garmin santÃ©/sport."""
 
 from __future__ import annotations
 

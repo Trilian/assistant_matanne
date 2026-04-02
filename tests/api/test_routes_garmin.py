@@ -1,4 +1,4 @@
-﻿"""
+"""
 T5b - Tests routes Garmin.
 
 Couvre src/api/routes/garmin.py :

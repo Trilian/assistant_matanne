@@ -359,5 +359,5 @@ from .football_compat import (  # noqa: E402, F401
 )
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_football_data_service = obtenir_football_data_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_football_data_service = obtenir_football_data_service  # alias rétrocompatibilité 

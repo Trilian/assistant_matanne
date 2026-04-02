@@ -1,10 +1,8 @@
 """
-Schemas Pydantic pour les nouvelles fonctionnalités Maison.
+Schemas Pydantic pour les fonctionnalités Maison.
 
 Contient les schemas pour:
-- Contrats
 - Artisans & interventions
-- Garanties & SAV
 - Cellier
 - Diagnostics (DPE)
 - Estimations immobilières
@@ -19,61 +17,6 @@ from datetime import date as date_type
 from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
-
-# ═══════════════════════════════════════════════════════════
-# CONTRATS
-# ═══════════════════════════════════════════════════════════
-
-
-class ContratCreate(BaseModel):
-    """Création d'un contrat maison."""
-
-    nom: str
-    type_contrat: str
-    fournisseur: str
-    numero_contrat: str | None = None
-    numero_client: str | None = None
-    date_debut: date_type
-    date_fin: date_type | None = None
-    date_renouvellement: date_type | None = None
-    duree_engagement_mois: int | None = None
-    tacite_reconduction: bool = True
-    preavis_resiliation_jours: int | None = None
-    date_limite_resiliation: date_type | None = None
-    montant_mensuel: Decimal | None = None
-    montant_annuel: Decimal | None = None
-    telephone: str | None = None
-    email: str | None = None
-    espace_client_url: str | None = None
-    alerte_jours_avant: int = 30
-    notes: str | None = None
-
-
-class ContratResume(BaseModel):
-    """Résumé d'un contrat pour l'affichage."""
-
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    nom: str
-    type_contrat: str
-    fournisseur: str
-    montant_mensuel: Decimal | None = None
-    date_renouvellement: date_type | None = None
-    statut: str = "actif"
-    jours_avant_renouvellement: int | None = None
-
-
-class AlerteContrat(BaseModel):
-    """Alerte d'un contrat à renouveler/résilier."""
-
-    contrat_id: int
-    nom: str
-    type_contrat: str
-    date_echeance: date_type
-    jours_restants: int
-    action: str  # renouveler, résilier, vérifier
-
 
 # ═══════════════════════════════════════════════════════════
 # ARTISANS
@@ -113,53 +56,6 @@ class InterventionCreate(BaseModel):
     paye: bool = False
     satisfaction: int | None = None
     commentaire: str | None = None
-
-
-# ═══════════════════════════════════════════════════════════
-# GARANTIES & SAV
-# ═══════════════════════════════════════════════════════════
-
-
-class GarantieCreate(BaseModel):
-    """Création d'une garantie."""
-
-    nom_appareil: str
-    marque: str | None = None
-    modele: str | None = None
-    numero_serie: str | None = None
-    piece: str | None = None
-    date_achat: date_type
-    lieu_achat: str | None = None
-    prix_achat: Decimal | None = None
-    duree_garantie_mois: int = 24
-    date_fin_garantie: date_type
-    garantie_etendue: bool = False
-    date_fin_garantie_etendue: date_type | None = None
-    cout_remplacement: Decimal | None = None
-    notes: str | None = None
-
-
-class IncidentCreate(BaseModel):
-    """Création d'un incident SAV."""
-
-    garantie_id: int
-    date_incident: date_type
-    description: str
-    sous_garantie: bool = True
-    reparateur: str | None = None
-    artisan_id: int | None = None
-    cout_reparation: Decimal | None = None
-    notes: str | None = None
-
-
-class AlerteGarantie(BaseModel):
-    """Alerte de fin de garantie."""
-
-    garantie_id: int
-    nom_appareil: str
-    date_fin_garantie: date_type
-    jours_restants: int
-    garantie_etendue: bool
 
 
 # ═══════════════════════════════════════════════════════════

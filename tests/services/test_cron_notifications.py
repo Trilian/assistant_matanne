@@ -41,10 +41,10 @@ def demarreur_cron():
     yield d
 
 
-class TestPhase8JobsSchedules:
-    """Vérifie que les jobs Phase 8 sont enregistrés dans le scheduler."""
+class TestNotificationJobsSchedules:
+    """Vérifie que les jobs de notifications sont enregistrés dans le scheduler."""
 
-    PHASE8_JOBS = [
+    NOTIFICATION_JOBS = [
         "rappel_documents_expirants",
         "rapport_mensuel_auto",
         "bilan_energetique",
@@ -54,23 +54,23 @@ class TestPhase8JobsSchedules:
         "sync_charges_dashboard",
     ]
 
-    def test_tous_les_jobs_phase8_presents(self, demarreur_cron):
-        """Tous les jobs Phase 8 doivent être dans le scheduler."""
+    def test_tous_les_jobs_notifications_presents(self, demarreur_cron):
+        """Tous les jobs de notifications doivent être dans le scheduler."""
         job_ids = [j.id for j in demarreur_cron._scheduler.get_jobs()]
-        for job_id in self.PHASE8_JOBS:
+        for job_id in self.NOTIFICATION_JOBS:
             assert job_id in job_ids, f"Job '{job_id}' manquant dans le scheduler"
 
-    def test_jobs_phase8_dans_registre(self):
-        """Tous les jobs Phase 8 doivent être dans le registre."""
+    def test_jobs_notifications_dans_registre(self):
+        """Tous les jobs de notifications doivent être dans le registre."""
         from src.services.core.cron.jobs import lister_jobs_disponibles
 
         jobs = lister_jobs_disponibles()
-        for job_id in self.PHASE8_JOBS:
+        for job_id in self.NOTIFICATION_JOBS:
             assert job_id in jobs, f"Job '{job_id}' manquant dans le registre"
 
 
 # ═══════════════════════════════════════════════════════════
-# P8-01 — Rappel documents expirants
+# Rappel documents expirants
 # ═══════════════════════════════════════════════════════════
 
 
@@ -431,8 +431,8 @@ class TestSyncChargesDashboard:
 
 class TestInterModuleSubscribers:
 
-    def test_subscribers_phase8_enregistres(self):
-        """Les subscribers Phase 8 doivent être enregistrés dans le bus."""
+    def test_subscribers_notifications_enregistres(self):
+        """Les subscribers de notifications doivent être enregistrés dans le bus."""
         from src.services.core.events.subscribers import enregistrer_subscribers
 
         # Reset le flag pour permettre le re-enregistrement
@@ -444,7 +444,7 @@ class TestInterModuleSubscribers:
             mock_bus_fn.return_value = mock_bus
             nb = enregistrer_subscribers()
 
-        # Vérifier que les 3 nouveaux subscribers Phase 8 sont enregistrés
+        # Vérifier que les 3 nouveaux subscribers de notifications sont enregistrés
         souscriptions = [call[0][0] for call in mock_bus.souscrire.call_args_list]
         assert "depenses.sync_entretien" in souscriptions
         assert "planning.sync_voyages" in souscriptions

@@ -2,7 +2,7 @@
 -- ASSISTANT MATANNE — Tables Maison
 -- ============================================================================
 -- Contient : projets, routines, jardin, entretien, stocks, pièces,
---            objets, artisans, contrats, énergie, maison extensions
+--            objets, artisans, énergie, maison extensions
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE projets (

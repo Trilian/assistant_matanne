@@ -162,51 +162,7 @@ class ContexteMaisonService(BaseAIService):
         """Collecte les alertes de toutes les sources."""
         alertes: list[AlerteMaison] = []
 
-        # 1. Garanties expirant bientôt
-        try:
-            from src.services.maison import get_garanties_crud_service
-
-            service = get_garanties_crud_service()
-            for g in service.get_alertes_garanties(jours_horizon=30):
-                jours = g.get("jours_restants", 30)
-                niveau = NiveauUrgence.HAUTE if jours <= 7 else NiveauUrgence.MOYENNE
-                alertes.append(
-                    AlerteMaison(
-                        type=TypeAlerteMaison.STOCK,
-                        niveau=niveau,
-                        titre=f"Garantie {g.get('nom_appareil', '?')} expire bientôt",
-                        message=f"Expire dans {jours} jours",
-                        action_suggeree="Vérifier prolongation ou planifier remplacement",
-                        date_limite=g.get("date_fin_garantie"),
-                        metadata=g,
-                    )
-                )
-        except Exception as e:
-            logger.warning(f"Collecte alertes garanties échouée: {e}")
-
-        # 2. Contrats à renouveler
-        try:
-            from src.services.maison import get_contrats_crud_service
-
-            service = get_contrats_crud_service()
-            for c in service.get_alertes_contrats(jours_horizon=60):
-                jours = c.get("jours_restants", 60)
-                niveau = NiveauUrgence.HAUTE if jours <= 14 else NiveauUrgence.MOYENNE
-                alertes.append(
-                    AlerteMaison(
-                        type=TypeAlerteMaison.ENTRETIEN,
-                        niveau=niveau,
-                        titre=f"Contrat {c.get('nom', '?')} — {c.get('action', 'renouveler')}",
-                        message=f"Échéance dans {jours} jours",
-                        action_suggeree=f"Vérifier les conditions avant {c.get('action', 'renouvellement')}",
-                        date_limite=c.get("date_echeance"),
-                        metadata=c,
-                    )
-                )
-        except Exception as e:
-            logger.warning(f"Collecte alertes contrats échouée: {e}")
-
-        # 3. Cellier — péremptions + stock bas
+        # 1. Cellier — péremptions + stock bas
         try:
             from src.services.maison import get_cellier_crud_service
 
@@ -655,5 +611,5 @@ def obtenir_service_contexte_maison() -> ContexteMaisonService:
     return get_contexte_maison_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_contexte_maison_service = obtenir_contexte_maison_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_contexte_maison_service = obtenir_contexte_maison_service  # alias rétrocompatibilité 

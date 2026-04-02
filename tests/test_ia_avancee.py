@@ -241,8 +241,8 @@ class TestFluxUtilisateur:
 # ═══════════════════════════════════════════════════════════
 
 
-class TestCronJobsPhaseB:
-    """Tests des cron jobs Phase B."""
+class TestCronJobsBridges:
+    """Tests des cron jobs bridges inter-modules."""
 
     def test_configurer_jobs(self):
         """configurer_jobs_phase_b s'exécute sans erreur."""

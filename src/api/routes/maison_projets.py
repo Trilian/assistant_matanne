@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API Maison â€” Projets domestiques.
 
 Sous-routeur inclus dans maison.py.

@@ -332,7 +332,7 @@ _environment = os.getenv("ENVIRONMENT", "development").lower()
 if _cors_origins:
     _allowed_origins = _cors_origins
 elif _environment in ("production", "staging"):
-    # Phase A8: Fail-fast — refuser de démarrer sans CORS_ORIGINS en prod/staging
+    # Fail-fast — refuser de démarrer sans CORS_ORIGINS en prod/staging
     raise RuntimeError(
         f"CORS_ORIGINS non défini en {_environment}. L'application refuse de démarrer. "
         "Définir CORS_ORIGINS avec l'URL du frontend "

@@ -545,5 +545,5 @@ def obtenir_weather_service() -> ServiceMeteo:
     return obtenir_service_meteo()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_weather_service = obtenir_weather_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_weather_service = obtenir_weather_service  # alias rétrocompatibilité 

@@ -224,6 +224,6 @@ def obtenir_service_estimations_crud() -> EstimationsCrudService:
     return get_estimations_crud_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_diagnostics_crud_service = obtenir_diagnostics_crud_service  # alias rétrocompatibilité Sprint 12 A3
-get_estimations_crud_service = obtenir_estimations_crud_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_diagnostics_crud_service = obtenir_diagnostics_crud_service  # alias rétrocompatibilité 
+get_estimations_crud_service = obtenir_estimations_crud_service  # alias rétrocompatibilité 

@@ -396,5 +396,5 @@ def obtenir_calendrier_planning_service() -> ServiceCalendrierPlanning:
     return _creer_service_calendrier_planning()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_calendrier_planning_service = obtenir_calendrier_planning_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_calendrier_planning_service = obtenir_calendrier_planning_service  # alias rétrocompatibilité 

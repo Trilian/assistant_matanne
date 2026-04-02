@@ -341,5 +341,5 @@ def obtenir_photo_frigo_service() -> PhotoFrigoService:
     return PhotoFrigoService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_photo_frigo_service = obtenir_photo_frigo_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_photo_frigo_service = obtenir_photo_frigo_service  # alias rétrocompatibilité 

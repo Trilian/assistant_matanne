@@ -295,11 +295,11 @@ class ArticleAchat(Base):
 
 
 # ═══════════════════════════════════════════════════════════
-# ACHATS FAMILLE (table principale Phase P)
+# ACHATS FAMILLE (table principale)
 # ═══════════════════════════════════════════════════════════
 
 class AchatFamille(Base):
-    """Achat familial enrichi (liste d'achats Phase P).
+    """Achat familial enrichi (liste d'achats).
 
     Attributes:
         nom: Nom de l'article

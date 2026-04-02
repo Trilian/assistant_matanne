@@ -292,5 +292,5 @@ def _rechercher_image_unsplash(nom_recette: str, search_query: str = "") -> str 
     return _rechercher_image_unsplash_impl(nom_recette, search_query, api_key=UNSPLASH_API_KEY)
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_image_generator_service = obtenir_image_generator_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_image_generator_service = obtenir_image_generator_service  # alias rétrocompatibilité 

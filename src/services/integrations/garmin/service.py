@@ -579,5 +579,5 @@ def list_all_users(db: Session = None) -> list[ProfilUtilisateur]:
     return db.query(ProfilUtilisateur).all()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_garmin_service = obtenir_garmin_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_garmin_service = obtenir_garmin_service  # alias rétrocompatibilité 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour EntretienService.
 
 Couvre:

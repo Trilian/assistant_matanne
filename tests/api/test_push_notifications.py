@@ -1,4 +1,4 @@
-﻿"""
+"""
 CT-13 - Tests des notifications push (Sprint 3)
 
 Tests couvrant:

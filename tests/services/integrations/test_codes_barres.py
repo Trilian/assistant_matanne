@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour le service de codes-barres.
 
 Couverture cible: >80%

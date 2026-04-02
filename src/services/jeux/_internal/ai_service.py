@@ -522,7 +522,7 @@ Génère un résumé court (3-4 phrases) avec:
         return _sync(alertes_actives, opportunites_paris, opportunites_loto)
 
     # ───────────────────────────────────────────────────────────────
-    # GÉNÉRATEUR GRILLES IA PONDÉRÉ (Phase U)
+    # GÉNÉRATEUR GRILLES IA PONDÉRÉ 
     # ───────────────────────────────────────────────────────────────
 
     async def generer_grille_ia_ponderee_async(
@@ -595,7 +595,7 @@ RÉPONSE AU FORMAT JSON:
         return _sync(stats_frequences, mode)
 
     # ───────────────────────────────────────────────────────────────
-    # ANALYSE GRILLES JOUEUR (Phase U)
+    # ANALYSE GRILLES JOUEUR 
     # ───────────────────────────────────────────────────────────────
 
     async def analyser_grille_joueur_async(
@@ -872,5 +872,5 @@ __all__ = [
 ]
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_jeux_ai_service = obtenir_jeux_ai_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_jeux_ai_service = obtenir_jeux_ai_service  # alias rétrocompatibilité 

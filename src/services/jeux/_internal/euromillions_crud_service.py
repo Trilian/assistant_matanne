@@ -172,5 +172,5 @@ def obtenir_euromillions_crud_service() -> EuromillionsCrudService:
     return EuromillionsCrudService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_euromillions_crud_service = obtenir_euromillions_crud_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_euromillions_crud_service = obtenir_euromillions_crud_service  # alias rétrocompatibilité 

@@ -368,5 +368,5 @@ def obtenir_profil_service() -> ProfilService:
     return ProfilService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_profil_service = obtenir_profil_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_profil_service = obtenir_profil_service  # alias rétrocompatibilité 

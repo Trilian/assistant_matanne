@@ -160,5 +160,5 @@ def obtenir_projets_service(client: ClientIA | None = None) -> ProjetsService:
     return obtenir_service_projets(client)
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_projets_service = obtenir_projets_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_projets_service = obtenir_projets_service  # alias rétrocompatibilité 

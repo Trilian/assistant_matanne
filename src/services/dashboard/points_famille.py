@@ -169,5 +169,5 @@ def obtenir_points_famille_service() -> PointsFamilleService:
     return PointsFamilleService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_points_famille_service = obtenir_points_famille_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_points_famille_service = obtenir_points_famille_service  # alias rétrocompatibilité 

@@ -461,7 +461,7 @@ def _invalider_cache_documents_expires(event: EvenementDomaine) -> None:
 
 
 # ═══════════════════════════════════════════════════════════
-# SPRINT 2 — INTERACTIONS INTELLIGENTES
+# INTERACTIONS INTELLIGENTES
 # ═══════════════════════════════════════════════════════════
 
 
@@ -854,7 +854,7 @@ def _declencher_agent_ia_proactif(event: EvenementDomaine) -> None:
 
 
 # ═══════════════════════════════════════════════════════════
-# PHASE B — BRIDGES INTER-MODULES IA
+# BRIDGES INTER-MODULES IA
 # ═══════════════════════════════════════════════════════════
 
 
@@ -909,7 +909,7 @@ def _invalider_cache_bridges(event: EvenementDomaine) -> None:
 
 
 def _bridge_recolte_vers_recettes(event: EvenementDomaine) -> None:
-    """Phase B: récolte jardin → suggestion recettes via bridge IA."""
+    """Récolte jardin → suggestion recettes via bridge IA."""
     try:
         from src.services.ia.bridges import obtenir_service_bridges
 
@@ -918,19 +918,19 @@ def _bridge_recolte_vers_recettes(event: EvenementDomaine) -> None:
         quantite = event.data.get("quantite", 0)
         if nom:
             service.recolte_vers_recettes(ingredient=nom, quantite_kg=float(quantite))
-            logger.info("Phase B bridge: récolte '%s' → suggestions recettes", nom)
+            logger.info("Bridge: récolte '%s' → suggestions recettes", nom)
     except Exception as e:  # noqa: BLE001
         logger.warning("Échec bridge recolte→recettes: %s", e)
 
 
 def _bridge_verifier_anomalies_budget(event: EvenementDomaine) -> None:
-    """Phase B: budget modifié → vérification anomalies proactive."""
+    """Budget modifié → vérification anomalies proactive."""
     try:
         from src.services.ia.bridges import obtenir_service_bridges
 
         service = obtenir_service_bridges()
         service.verifier_anomalies_budget_et_notifier()
-        logger.info("Phase B bridge: vérification anomalies budget")
+        logger.info("Bridge: vérification anomalies budget")
     except Exception as e:  # noqa: BLE001
         logger.warning("Échec bridge budget→anomalies: %s", e)
 
@@ -1033,7 +1033,7 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("documents.proche_expiration", _invalider_cache_documents_expires, priority=90)
     compteur += 1
 
-    # ── Sprint 2 — Interactions intelligentes ──
+    # ── Interactions intelligentes ──
 
     # Budget serré → filtrer suggestions (invalider cache suggestions_*)
     bus.souscrire("budget.contrainte", _filtrer_suggestions_budget_serre, priority=85)
@@ -1091,7 +1091,7 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("assistant.commande_executee", _declencher_agent_ia_proactif, priority=70)
     compteur += 1
 
-    # ── Phase B — Bridges inter-modules IA ──
+    # ── Bridges inter-modules IA ──
     bus.souscrire("prediction.*", _invalider_cache_predictions, priority=100)
     compteur += 1
     bus.souscrire("resume.*", _invalider_cache_resume, priority=100)

@@ -2,7 +2,7 @@
 Routes API pour les préférences utilisateur.
 
 CRUD pour les préférences alimentaires, robots, magasins.
-Sprint 13 — W4 : ajout endpoints préférences canaux de notification.
+W4 : ajout endpoints préférences canaux de notification.
 """
 
 from typing import Any, cast
@@ -179,7 +179,7 @@ async def modifier_preferences(
 
 
 # ─────────────────────────────────────────────────────────
-# Préférences canaux de notification (Sprint 13 — W4)
+# Préférences canaux de notification (W4)
 # ─────────────────────────────────────────────────────────
 
 _CANAUX_DEFAULTS: dict[str, list[str]] = {

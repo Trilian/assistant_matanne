@@ -576,5 +576,5 @@ def generer_conseil_pari(
     return service._generer_conseil_pari(prediction, confiance, cotes)
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_prediction_service = obtenir_prediction_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_prediction_service = obtenir_prediction_service  # alias rétrocompatibilité 

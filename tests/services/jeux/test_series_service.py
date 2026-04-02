@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour SeriesService - Service de calcul des sÃ©ries (loi des sÃ©ries).
 """
 

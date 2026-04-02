@@ -175,5 +175,5 @@ def obtenir_bilan_mensuel_service() -> BilanMensuelService:
     return BilanMensuelService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_bilan_mensuel_service = obtenir_bilan_mensuel_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_bilan_mensuel_service = obtenir_bilan_mensuel_service  # alias rétrocompatibilité 

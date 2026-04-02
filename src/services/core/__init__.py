@@ -12,7 +12,7 @@ Importez directement depuis les sous-packages:
     from src.services.core.notifications import obtenir_service_notifications
     from src.services.core.utilisateur import get_auth_service
 
-    # Health checks & Metrics (Sprint 6)
+    # Health checks & Metrics 
     from src.services.core.service_health import (
         ServiceHealthMixin, obtenir_sante_services, initialiser_health_services
     )
@@ -120,7 +120,7 @@ def __getattr__(name: str):
 
         return get_auth_service
 
-    # Event Bus Mixin (Sprint 6)
+    # Event Bus Mixin 
     if name == "EventBusMixin":
         from src.services.core.event_bus_mixin import EventBusMixin
 
@@ -134,7 +134,7 @@ def __getattr__(name: str):
 
         return avec_evenement
 
-    # Service Health (Sprint 6)
+    # Service Health 
     if name == "ServiceHealthMixin":
         from src.services.core.service_health import ServiceHealthMixin
 
@@ -148,7 +148,7 @@ def __getattr__(name: str):
 
         return initialiser_health_services
 
-    # Service Metrics (Sprint 6)
+    # Service Metrics 
     if name == "ServiceMetricsMixin":
         from src.services.core.service_metrics import ServiceMetricsMixin
 

@@ -278,5 +278,5 @@ __all__ = [
 ]
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_inventory_notification_service = obtenir_inventory_notification_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_inventory_notification_service = obtenir_inventory_notification_service  # alias rétrocompatibilité 

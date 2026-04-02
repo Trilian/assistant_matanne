@@ -36,7 +36,7 @@ DUREE_TOKEN_HEURES = 24
 
 # Clé secrète pour signer/vérifier les tokens API
 # En production, DOIT être configurée via variable d'environnement
-# Phase A1: Clé par défaut fixe par session — générée UNE SEULE FOIS au
+# Clé par défaut fixe par session — générée UNE SEULE FOIS au
 #     chargement du module, partagée par tous les threads/imports du même process.
 #     En multi-worker Uvicorn (--workers N), chaque worker a son propre process
 #     donc une clé différente. C'est pourquoi API_SECRET_KEY est OBLIGATOIRE

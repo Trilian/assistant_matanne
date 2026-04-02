@@ -87,5 +87,5 @@ def obtenir_service_hub_data() -> HubDataService:
     return get_hub_data_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_hub_data_service = obtenir_hub_data_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_hub_data_service = obtenir_hub_data_service  # alias rétrocompatibilité 

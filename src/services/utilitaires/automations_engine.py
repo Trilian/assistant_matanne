@@ -523,5 +523,5 @@ def obtenir_moteur_automations_service() -> MoteurAutomationsService:
     return MoteurAutomationsService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_moteur_automations_service = obtenir_moteur_automations_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_moteur_automations_service = obtenir_moteur_automations_service  # alias rétrocompatibilité 

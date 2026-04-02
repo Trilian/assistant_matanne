@@ -155,5 +155,5 @@ def obtenir_score_bien_etre_service() -> ScoreBienEtreService:
     return ScoreBienEtreService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_score_bien_etre_service = obtenir_score_bien_etre_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_score_bien_etre_service = obtenir_score_bien_etre_service  # alias rétrocompatibilité 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API pour les Fonctionnalités Avancées.
 
 Endpoints :

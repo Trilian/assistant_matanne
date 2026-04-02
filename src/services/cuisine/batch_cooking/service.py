@@ -467,5 +467,5 @@ __all__ = [
 ]
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_batch_cooking_service = obtenir_batch_cooking_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_batch_cooking_service = obtenir_batch_cooking_service  # alias rétrocompatibilité 

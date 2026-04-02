@@ -77,7 +77,7 @@ class JardinService(
             default_ttl=3600,
             service_name="jardin",
         )
-        # Sprint 6: Initialiser health checks et métriques
+        # Initialiser health checks et métriques
         self._register_health_check()
         self._init_metrics()
 
@@ -128,5 +128,5 @@ def obtenir_jardin_service(client: ClientIA | None = None) -> JardinService:
     return obtenir_service_jardin(client)
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_jardin_service = obtenir_jardin_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_jardin_service = obtenir_jardin_service  # alias rétrocompatibilité 

@@ -1,5 +1,5 @@
-﻿"""
-Routes API Famille â€” Jules (profils enfants, jalons, coaching).
+"""
+Routes API Famille — Jules (profils enfants, jalons, coaching).
 
 Sous-routeur inclus dans famille.py.
 """
@@ -26,9 +26,9 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Famille"])
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # PROFILS ENFANTS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @router.get("/enfants", responses=REPONSES_LISTE)
@@ -43,7 +43,7 @@ async def lister_enfants(
     Liste les profils enfants.
 
     Returns:
-        RÃ©ponse paginÃ©e avec les profils enfants
+        Réponse paginée avec les profils enfants
     """
     from src.core.models import ProfilEnfant
 
@@ -88,14 +88,14 @@ async def lister_enfants(
 @router.get("/enfants/{enfant_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_enfant(enfant_id: int, user: dict[str, Any] = Depends(require_auth)):
-    """RÃ©cupÃ¨re un profil enfant par son ID."""
+    """Récupère un profil enfant par son ID."""
     from src.core.models import ProfilEnfant
 
     def _query():
         with executer_avec_session() as session:
             enfant = session.query(ProfilEnfant).filter(ProfilEnfant.id == enfant_id).first()
             if not enfant:
-                raise HTTPException(status_code=404, detail="Enfant non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Enfant non trouvé")
 
             return {
                 "id": enfant.id,
@@ -116,10 +116,10 @@ async def obtenir_enfant(enfant_id: int, user: dict[str, Any] = Depends(require_
 @gerer_exception_api
 async def lister_jalons_enfant(
     enfant_id: int,
-    categorie: str | None = Query(None, description="Filtrer par catÃ©gorie"),
+    categorie: str | None = Query(None, description="Filtrer par catégorie"),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Liste les jalons de dÃ©veloppement d'un enfant."""
+    """Liste les jalons de développement d'un enfant."""
     from src.core.models import Jalon
 
     def _query():
@@ -156,14 +156,14 @@ async def creer_jalon(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Ajoute un jalon de dÃ©veloppement pour un enfant."""
+    """Ajoute un jalon de développement pour un enfant."""
     from src.core.models import Jalon, ProfilEnfant
 
     def _query():
         with executer_avec_session() as session:
             enfant = session.query(ProfilEnfant).filter(ProfilEnfant.id == enfant_id).first()
             if not enfant:
-                raise HTTPException(status_code=404, detail="Enfant non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Enfant non trouvé")
 
             jalon = Jalon(
                 child_id=enfant_id,
@@ -197,7 +197,7 @@ async def supprimer_jalon(
     jalon_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Supprime un jalon de dÃ©veloppement."""
+    """Supprime un jalon de développement."""
     from src.core.models import Jalon
 
     def _query():
@@ -208,19 +208,19 @@ async def supprimer_jalon(
                 .first()
             )
             if not jalon:
-                raise HTTPException(status_code=404, detail="Jalon non trouvÃ©")
+                raise HTTPException(status_code=404, detail="Jalon non trouvé")
             session.delete(jalon)
             session.commit()
-            return MessageResponse(message=f"Jalon '{jalon.titre}' supprimÃ©")
+            return MessageResponse(message=f"Jalon '{jalon.titre}' supprimé")
 
     return await executer_async(_query)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ACTIVITÃ‰S FAMILIALES
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# CROISSANCE OMS (Phase R)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# ACTIVITÉS FAMILIALES
+# ═══════════════════════════════════════════════════════════
+# CROISSANCE OMS 
+# ═══════════════════════════════════════════════════════════
 
 
 @router.get("/jules/croissance", responses=REPONSES_CRUD_LECTURE)
@@ -228,14 +228,14 @@ async def supprimer_jalon(
 async def obtenir_croissance_jules(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Retourne les normes OMS de croissance pour l'Ã¢ge de Jules."""
+    """Retourne les normes OMS de croissance pour l'âge de Jules."""
     from src.services.famille.contexte import obtenir_service_contexte_familial
     from src.services.famille.jules import obtenir_service_jules
 
     def _query():
         jules_service = obtenir_service_jules()
         if not jules_service.get_date_naissance_jules():
-            raise HTTPException(status_code=404, detail="Profil Jules non trouvÃ©")
+            raise HTTPException(status_code=404, detail="Profil Jules non trouvé")
         age_mois = jules_service.get_age_mois()
 
         contexte_service = obtenir_service_contexte_familial()
@@ -249,9 +249,9 @@ async def obtenir_croissance_jules(
     return await executer_async(_query)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SUGGESTIONS ACTIVITÃ‰S SIMPLIFIÃ‰ES (Phase O)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# SUGGESTIONS ACTIVITÉS SIMPLIFIÉES 
+# ═══════════════════════════════════════════════════════════
 
 
 @router.post("/activites/suggestions-ia-auto", responses=REPONSES_LISTE)
@@ -260,22 +260,22 @@ async def suggestions_activites_auto(
     payload: SuggestionsActivitesSimpleRequest,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Suggestions d'activitÃ©s avec mÃ©tÃ©o et Ã¢ge auto-injectÃ©s (sans saisie manuelle)."""
+    """Suggestions d'activités avec météo et âge auto-injectés (sans saisie manuelle)."""
     from src.services.famille.activites import obtenir_service_activites
     from src.services.famille.jours_speciaux import obtenir_service_jours_speciaux
     from src.services.famille.jules import obtenir_service_jules
     from src.services.integrations.weather.service import obtenir_service_meteo
 
     def _structurer_suggestions_texte(texte: str) -> list[dict[str, Any]]:
-        """Convertit le texte IA en suggestions structurÃ©es pour prÃ©-remplissage UI."""
+        """Convertit le texte IA en suggestions structurées pour pré-remplissage UI."""
         suggestions: list[dict[str, Any]] = []
         if not texte:
             return suggestions
 
-        blocs = [b.strip() for b in texte.split("ðŸŽ¯") if b.strip()]
+        blocs = [b.strip() for b in texte.split("🎯") if b.strip()]
         for bloc in blocs:
             lignes = [l.strip() for l in bloc.splitlines() if l.strip()]
-            titre = lignes[0] if lignes else "ActivitÃ© familiale"
+            titre = lignes[0] if lignes else "Activité familiale"
             description = ""
             duree_minutes = 90
             type_activite = "autre"
@@ -289,8 +289,8 @@ async def suggestions_activites_auto(
                     chiffres = "".join(c if c.isdigit() else " " for c in ligne).split()
                     if chiffres:
                         duree_minutes = int(chiffres[0]) * 60 if "heure" in low else int(chiffres[0])
-                elif "mÃ©tÃ©o" in low or "meteo" in low:
-                    lieu = "exterieur" if "extÃ©rieur" in low or "exterieur" in low else "interieur"
+                elif "météo" in low or "meteo" in low:
+                    lieu = "exterieur" if "extérieur" in low or "exterieur" in low else "interieur"
 
             titre_low = titre.lower()
             if "parc" in titre_low or "balade" in titre_low:
@@ -305,7 +305,7 @@ async def suggestions_activites_auto(
             suggestions.append(
                 {
                     "titre": titre,
-                    "description": description or "Suggestion IA adaptÃ©e au contexte du jour.",
+                    "description": description or "Suggestion IA adaptée au contexte du jour.",
                     "type": type_activite,
                     "duree_minutes": duree_minutes,
                     "lieu": lieu,
@@ -315,23 +315,23 @@ async def suggestions_activites_auto(
         return suggestions
 
     async def _query():
-        # Auto-inject mÃ©tÃ©o
+        # Auto-inject météo
         meteo_service = obtenir_service_meteo()
         previsions = meteo_service.get_previsions(nb_jours=3)
         meteo_txt = "variable"
         if previsions:
             meteo_txt = previsions[0].condition or "variable"
 
-        # Force intÃ©rieur si pluie
+        # Force intérieur si pluie
         type_effectif = payload.type_prefere
         if previsions and previsions[0].precipitation_mm > 5 and type_effectif == "les_deux":
             type_effectif = "interieur"
 
-        # Auto-inject Ã¢ge Jules
+        # Auto-inject âge Jules
         jules_service = obtenir_service_jules()
         age_mois = jules_service.get_age_mois(default=19)
 
-        # DÃ©tecter journÃ©e libre (fÃ©riÃ© + crÃ¨che fermÃ©e dans les 3 prochains jours)
+        # Détecter journée libre (férié + crèche fermée dans les 3 prochains jours)
         jours_service = obtenir_service_jours_speciaux()
         prochains = jours_service.prochains_jours_speciaux(nb=5)
         from datetime import timedelta
@@ -342,7 +342,7 @@ async def suggestions_activites_auto(
             for j in prochains
         )
 
-        # Collecter les actions jardin (plantes Ã  arroser, rÃ©coltes proches)
+        # Collecter les actions jardin (plantes à arroser, récoltes proches)
         jardin_activites: list[dict] = []
         try:
             from src.services.maison import obtenir_jardin_service
@@ -355,15 +355,15 @@ async def suggestions_activites_auto(
                 for p in jardin_svc.obtenir_recoltes_proches():
                     jardin_activites.append({"type": "recolte", "nom": getattr(p, "nom", str(p))})
         except Exception as e:
-            logger.warning("[famille] ActivitÃ©s jardin non chargÃ©es pour suggestions weekend: %s", e)
+            logger.warning("[famille] Activités jardin non chargées pour suggestions weekend: %s", e)
         prompt_extra = ""
         if journee_libre:
-            prompt_extra = " C'est une journÃ©e libre (fÃ©riÃ© ou crÃ¨che fermÃ©e), propose des activitÃ©s pour une journÃ©e complÃ¨te."
+            prompt_extra = " C'est une journée libre (férié ou crèche fermée), propose des activités pour une journée complète."
         if jardin_activites and type_effectif != "interieur":
             noms_jardin = ", ".join(a["nom"] for a in jardin_activites[:3])
-            prompt_extra += f" Le jardin a des tÃ¢ches Ã  faire ({noms_jardin}) : inclure 1 activitÃ© jardin avec Jules."
+            prompt_extra += f" Le jardin a des tâches à faire ({noms_jardin}) : inclure 1 activité jardin avec Jules."
 
-        # Appel au service IA activitÃ©s existant
+        # Appel au service IA activités existant
         service = obtenir_service_activites()
         if hasattr(service, "suggerer_activites_ia"):
             resultat = service.suggerer_activites_ia(
@@ -472,9 +472,9 @@ async def suggestions_activites_jules_contextuelles(
 
     return await executer_async(_query)
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# JULES â€” ALIMENTS EXCLUS (CT-09)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# JULES — ALIMENTS EXCLUS (CT-09)
+# ═══════════════════════════════════════════════════════════
 
 
 @router.get("/jules/aliments-exclus", responses=REPONSES_CRUD_LECTURE)
@@ -508,7 +508,7 @@ async def mettre_a_jour_aliments_exclus_jules(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Met Ã  jour la liste des aliments exclus pour Jules.
+    """Met à jour la liste des aliments exclus pour Jules.
 
     Body: {"aliments_exclus_jules": ["sel", "miel", ...]}
     """
@@ -517,7 +517,7 @@ async def mettre_a_jour_aliments_exclus_jules(
 
     aliments = payload.get("aliments_exclus_jules", [])
     if not isinstance(aliments, list):
-        raise HTTPException(status_code=422, detail="aliments_exclus_jules doit Ãªtre une liste")
+        raise HTTPException(status_code=422, detail="aliments_exclus_jules doit être une liste")
 
     def _update():
         with executer_avec_session() as session:
@@ -532,14 +532,14 @@ async def mettre_a_jour_aliments_exclus_jules(
                 session.add(pref)
             pref.aliments_exclus_jules = aliments
             session.commit()
-        return MessageResponse(message=f"{len(aliments)} aliment(s) exclus mis Ã  jour pour Jules")
+        return MessageResponse(message=f"{len(aliments)} aliment(s) exclus mis à jour pour Jules")
 
     return await executer_async(_update)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# JULES â€” COACHING HEBDOMADAIRE (CT-05)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# JULES — COACHING HEBDOMADAIRE (CT-05)
+# ═══════════════════════════════════════════════════════════
 
 
 @router.get("/jules/coaching-hebdo", responses=REPONSES_CRUD_LECTURE)
@@ -547,10 +547,10 @@ async def mettre_a_jour_aliments_exclus_jules(
 async def obtenir_coaching_hebdo_jules(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """GÃ©nÃ¨re le coaching hebdomadaire personnalisÃ© pour Jules (CT-05).
+    """Génère le coaching hebdomadaire personnalisé pour Jules (CT-05).
 
-    Retourne un bilan dÃ©veloppemental, 3 activitÃ©s et un conseil alimentation
-    adaptÃ©s Ã  l'Ã¢ge actuel de Jules.
+    Retourne un bilan développemental, 3 activités et un conseil alimentation
+    adaptés à l'âge actuel de Jules.
     """
     from src.core.models.user_preferences import PreferenceUtilisateur
     from src.services.famille.jules_ai import obtenir_jules_ai_service
@@ -576,9 +576,9 @@ async def obtenir_coaching_hebdo_jules(
     return await executer_async(_query)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # TIMELINE VIE FAMILIALE (MT-08)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @router.get("/timeline", responses=REPONSES_LISTE)
@@ -588,7 +588,7 @@ async def obtenir_timeline_famille(
     limite: int = Query(200, ge=1, le=500),
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """AgrÃ¨ge les Ã©vÃ©nements familiaux multi-modules en timeline chronologique."""
+    """Agrège les événements familiaux multi-modules en timeline chronologique."""
 
     def _query() -> dict[str, Any]:
         from src.core.models.famille import EvenementFamilial, Jalon
@@ -616,7 +616,7 @@ async def obtenir_timeline_famille(
                     }
                 )
 
-            # 2) Ã‰vÃ©nements familiaux
+            # 2) Événements familiaux
             evenements = (
                 session.query(EvenementFamilial)
                 .filter(EvenementFamilial.actif.is_(True))
@@ -639,10 +639,10 @@ async def obtenir_timeline_famille(
                     }
                 )
 
-            # 3) Projets maison terminÃ©s
+            # 3) Projets maison terminés
             projets = (
                 session.query(Projet)
-                .filter(Projet.statut.in_(["terminÃ©", "termine", "complete", "complet"]))
+                .filter(Projet.statut.in_(["terminé", "termine", "complete", "complet"]))
                 .order_by(Projet.date_fin_reelle.desc(), Projet.date_fin_prevue.desc())
                 .limit(limite)
                 .all()
@@ -665,7 +665,7 @@ async def obtenir_timeline_famille(
                     }
                 )
 
-            # 4) Matchs mÃ©morables (ROI >= 30% ou gain >= 50)
+            # 4) Matchs mémorables (ROI >= 30% ou gain >= 50)
             paris = session.query(PariSportif).order_by(PariSportif.cree_le.desc()).limit(limite).all()
             for p in paris:
                 mise = float(p.mise or 0)

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour NotificationJeuxService - Gestion des notifications jeux.
 """
 

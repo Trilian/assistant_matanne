@@ -105,7 +105,7 @@ class PreferenceNotification(TimestampMixin, Base):
     modules_actifs: Mapped[dict | None] = mapped_column(JSONB, default=dict)
     canal_prefere: Mapped[str] = mapped_column(String(20), default="push")
 
-    # Canaux par catégorie (Sprint 13 — W4)
+    # Canaux par catégorie (W4)
     # Structure : {"rappels": ["push", "ntfy"], "alertes": ["push", "ntfy", "email"], "resumes": ["email"]}
     canaux_par_categorie: Mapped[dict | None] = mapped_column(JSONB, default=dict)
 

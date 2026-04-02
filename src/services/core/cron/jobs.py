@@ -304,7 +304,7 @@ def _job_rappels_famille() -> None:
         nb = service.envoyer_rappels_du_jour()
         logger.info("Rappels famille : %d envoyé(s)", nb)
 
-        # Sprint 9 (MT-02): rappel proactif WhatsApp pour les rappels famille.
+        # (MT-02): rappel proactif WhatsApp pour les rappels famille.
         if nb > 0:
             dispatcher = get_dispatcher_notifications()
             _envoyer_notif_tous_users(
@@ -356,7 +356,7 @@ def _job_rappels_generaux() -> None:
         else:
             logger.debug("Rappels intelligents : aucun rappel actif")
 
-        # Sprint 11 (F3): rappel repas du jour avec ingrédients à sortir.
+        # (F3): rappel repas du jour avec ingrédients à sortir.
         try:
             aujourd_hui = date.today()
             with obtenir_contexte_db() as session:
@@ -596,7 +596,7 @@ def _job_rappel_courses_ntfy() -> None:
         if resultat.succes:
             logger.info("Rappel courses ntfy envoyé (%d articles)", nb_articles)
 
-            # Sprint 9 (MT-02): partage WhatsApp de la liste active.
+            # (MT-02): partage WhatsApp de la liste active.
             dispatcher = get_dispatcher_notifications()
             _envoyer_notif_tous_users(
                 dispatcher,
@@ -760,7 +760,7 @@ def _job_planning_semaine_si_vide() -> None:
             logger.info("J-03: planning déjà actif pour la semaine du %s", lundi_prochain)
             return
 
-        # Phase B (B3): Proposer un planning IA auto via WhatsApp avec boutons
+        #  Proposer un planning IA auto via WhatsApp avec boutons
         suggestions_ia = ""
         try:
             from src.core.ai import obtenir_client_ia
@@ -835,7 +835,7 @@ def _job_planning_semaine_si_vide() -> None:
 def _job_alertes_peremption_48h() -> None:
     """J-04: envoie les alertes de péremption à J+48h.
 
-    Sprint 13 — W3 : si péremption < 24h, envoie aussi un email critique.
+    W3 : si péremption < 24h, envoie aussi un email critique.
     """
     try:
         from datetime import date, timedelta
@@ -3405,7 +3405,7 @@ _REGISTRE_JOBS.update(
 )
 
 
-# ─── Phase B — Nouveaux jobs ─────────────────────────────────────────────────
+# ─── Jobs bridges inter-modules ─────────────────────────────────────────────────
 
 
 def _job_alertes_budget_seuil() -> None:
@@ -3585,14 +3585,14 @@ def _job_resume_hebdo_ia() -> None:
 
 _REGISTRE_JOBS.update(
     {
-        # Phase B — Nouveaux jobs
+        # Nouveaux jobs
         "alertes_budget_seuil": ("Alertes budget seuil (quotidien 20h)", _job_alertes_budget_seuil),
         "resume_hebdo_ia": ("Résumé hebdomadaire IA intelligent", _job_resume_hebdo_ia),
     }
 )
 
 
-# ─── Phase D — Nouveaux jobs CRON ─────────────────────────────────────────────
+# ─── Jobs backup et synchro ─────────────────────────────────────────────
 
 
 def _job_rappels_jardin_saisonniers() -> None:
@@ -3609,7 +3609,7 @@ def _job_backup_auto_hebdo_json() -> None:
 
 _REGISTRE_JOBS.update(
     {
-        # Phase D — Nouveaux jobs
+        # Nouveaux jobs
         "rappels_jardin_saisonniers": ("Rappels jardin saisonniers (lundi 07h)", _job_rappels_jardin_saisonniers),
         "verification_sante_systeme": ("Vérification santé système (horaire)", _job_verification_sante_systeme),
         "backup_auto_hebdo_json": ("Backup auto hebdo JSON (dim 04h)", _job_backup_auto_hebdo_json),

@@ -1,5 +1,5 @@
-﻿"""
-Routes API Famille â€” ActivitÃ©s familiales et suggestions IA.
+"""
+Routes API Famille — Activités familiales et suggestions IA.
 
 Sous-routeur inclus dans famille.py.
 """
@@ -28,30 +28,30 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Famille"])
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 # SCHEMAS PYDANTIC LOCAUX
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 class ParamsSuggestionsActivites(BaseModel):
-    """ParamÃ¨tres pour suggestions d'activitÃ©s IA"""
+    """Paramètres pour suggestions d'activités IA"""
 
-    age_mois: int = Field(..., ge=0, le=72, description="Ã‚ge de l'enfant en mois (0-72 mois)")
+    age_mois: int = Field(..., ge=0, le=72, description="Âge de l'enfant en mois (0-72 mois)")
     meteo: str = Field(
         default="mixte",
-        description="Type de mÃ©tÃ©o: pluie, soleil, nuageux, mixte, interieur, exterieur",
+        description="Type de météo: pluie, soleil, nuageux, mixte, interieur, exterieur",
     )
-    budget_max: float = Field(default=50.0, ge=0, le=500, description="Budget maximum par activitÃ©")
-    duree_min: int = Field(default=30, ge=5, le=300, description="DurÃ©e minimum en minutes")
-    duree_max: int = Field(default=120, ge=10, le=360, description="DurÃ©e maximum en minutes")
+    budget_max: float = Field(default=50.0, ge=0, le=500, description="Budget maximum par activité")
+    duree_min: int = Field(default=30, ge=5, le=300, description="Durée minimum en minutes")
+    duree_max: int = Field(default=120, ge=10, le=360, description="Durée maximum en minutes")
     preferences: list[str] | None = Field(
-        default=None, description="Tags de prÃ©fÃ©rences (creatif, sportif, educatif, sensoriel, etc.)"
+        default=None, description="Tags de préférences (creatif, sportif, educatif, sensoriel, etc.)"
     )
     nb_suggestions: int = Field(
-        default=5, ge=1, le=10, description="Nombre de suggestions souhaitÃ©es"
+        default=5, ge=1, le=10, description="Nombre de suggestions souhaitées"
     )
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
 
 
 @router.get("/activites", responses=REPONSES_LISTE)
@@ -67,10 +67,10 @@ async def lister_activites(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    Liste les activitÃ©s familiales avec pagination offset ou cursor.
+    Liste les activités familiales avec pagination offset ou cursor.
 
     Supporte deux modes de pagination:
-    - Offset: Utiliser page/page_size (dÃ©faut)
+    - Offset: Utiliser page/page_size (défaut)
     - Cursor: Utiliser cursor pour grandes collections
     """
     from src.core.models import ActiviteFamille
@@ -141,7 +141,7 @@ async def lister_activites(
 @router.get("/activites/{activite_id}", responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_activite(activite_id: int, user: dict[str, Any] = Depends(require_auth)):
-    """RÃ©cupÃ¨re une activitÃ© par son ID."""
+    """Récupère une activité par son ID."""
     from src.core.models import ActiviteFamille
 
     def _query():
@@ -150,7 +150,7 @@ async def obtenir_activite(activite_id: int, user: dict[str, Any] = Depends(requ
                 session.query(ActiviteFamille).filter(ActiviteFamille.id == activite_id).first()
             )
             if not activite:
-                raise HTTPException(status_code=404, detail="ActivitÃ© non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Activité non trouvée")
 
             return {
                 "id": activite.id,
@@ -178,21 +178,21 @@ async def suggerer_activites_ia(
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
-    GÃ©nÃ¨re des suggestions d'activitÃ©s personnalisÃ©es via IA.
+    Génère des suggestions d'activités personnalisées via IA.
     
-    Utilise JulesAIService avec parsing structurÃ© pour retourner des activitÃ©s
-    adaptÃ©es Ã  l'Ã¢ge de l'enfant, la mÃ©tÃ©o, le budget et les prÃ©fÃ©rences.
+    Utilise JulesAIService avec parsing structuré pour retourner des activités
+    adaptées à l'âge de l'enfant, la météo, le budget et les préférences.
     
-    **ParamÃ¨tres**:
-    - age_mois: Ã‚ge de l'enfant en mois (utilisÃ© pour adapter les suggestions)
-    - meteo: Type de mÃ©tÃ©o ou lieu (pluie/soleil/mixte/interieur/exterieur)
-    - budget_max: Budget maximum par activitÃ© en euros
-    - duree_min/duree_max: Fourchette de durÃ©e souhaitÃ©e
+    **Paramètres**:
+    - age_mois: Âge de l'enfant en mois (utilisé pour adapter les suggestions)
+    - meteo: Type de météo ou lieu (pluie/soleil/mixte/interieur/exterieur)
+    - budget_max: Budget maximum par activité en euros
+    - duree_min/duree_max: Fourchette de durée souhaitée
     - preferences: Tags optionnels (creatif, sportif, educatif, sensoriel, etc.)
     - nb_suggestions: Nombre de suggestions (1-10)
     
-    **Retour**: Liste structurÃ©e d'activitÃ©s avec nom, description, durÃ©e, budget, 
-    lieu, compÃ©tences, matÃ©riel nÃ©cessaire, niveau d'effort.
+    **Retour**: Liste structurée d'activités avec nom, description, durée, budget, 
+    lieu, compétences, matériel nécessaire, niveau d'effort.
     """
     from src.services.famille.jules_ai import obtenir_jules_ai_service
 
@@ -224,7 +224,7 @@ async def creer_activite(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """CrÃ©e une nouvelle activitÃ© familiale."""
+    """Crée une nouvelle activité familiale."""
     from src.core.models import ActiviteFamille
 
     def _query():
@@ -238,7 +238,7 @@ async def creer_activite(
                 lieu=payload.get("lieu"),
                 qui_participe=payload.get("qui_participe"),
                 cout_estime=payload.get("cout_estime"),
-                statut=payload.get("statut", "planifiÃ©"),
+                statut=payload.get("statut", "planifié"),
                 notes=payload.get("notes"),
             )
             session.add(activite)
@@ -262,7 +262,7 @@ async def modifier_activite(
     payload: dict[str, Any],
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Met Ã  jour une activitÃ© familiale."""
+    """Met à jour une activité familiale."""
     from src.core.models import ActiviteFamille
 
     def _query():
@@ -271,7 +271,7 @@ async def modifier_activite(
                 session.query(ActiviteFamille).filter(ActiviteFamille.id == activite_id).first()
             )
             if not activite:
-                raise HTTPException(status_code=404, detail="ActivitÃ© non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Activité non trouvée")
 
             for champ in ("titre", "description", "type_activite", "date_prevue",
                           "duree_heures", "lieu", "qui_participe", "cout_estime",
@@ -297,7 +297,7 @@ async def supprimer_activite(
     activite_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Supprime une activitÃ© familiale."""
+    """Supprime une activité familiale."""
     from src.core.models import ActiviteFamille
 
     def _query():
@@ -306,17 +306,17 @@ async def supprimer_activite(
                 session.query(ActiviteFamille).filter(ActiviteFamille.id == activite_id).first()
             )
             if not activite:
-                raise HTTPException(status_code=404, detail="ActivitÃ© non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Activité non trouvée")
             session.delete(activite)
             session.commit()
-            return MessageResponse(message=f"ActivitÃ© '{activite.titre}' supprimÃ©e")
+            return MessageResponse(message=f"Activité '{activite.titre}' supprimée")
 
     return await executer_async(_query)
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# SUGGESTIONS IA (Phase M3)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# SUGGESTIONS IA 
+# ═══════════════════════════════════════════════════════════
 
 
 @router.post("/weekend/suggestions-ia", responses=REPONSES_LISTE)
@@ -325,13 +325,13 @@ async def suggestions_weekend_ia(
     payload: SuggestionsWeekendRequest,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Suggestions d'activitÃ©s weekend avec mÃ©tÃ©o et Ã¢ge Jules auto-injectÃ©s."""
+    """Suggestions d'activités weekend avec météo et âge Jules auto-injectés."""
     from src.services.famille.jules import obtenir_service_jules
     from src.services.famille.weekend_ai import obtenir_weekend_ai_service
     from src.services.integrations.weather.service import obtenir_service_meteo
 
     async def _query():
-        # Auto-inject mÃ©tÃ©o
+        # Auto-inject météo
         meteo_service = obtenir_service_meteo()
         previsions = meteo_service.get_previsions(nb_jours=3)
         meteo_desc = "variable"
@@ -339,7 +339,7 @@ async def suggestions_weekend_ia(
             conditions = [p.condition for p in previsions[:3] if p.condition]
             meteo_desc = ", ".join(conditions[:2]) if conditions else "variable"
 
-        # Auto-inject Ã¢ge Jules
+        # Auto-inject âge Jules
         jules_service = obtenir_service_jules()
         age_mois = jules_service.get_age_mois(default=19)
 
@@ -362,7 +362,7 @@ async def suggestions_soiree_ia(
     payload: SuggestionsSoireeRequest,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
-    """Suggestions de soirÃ©es en couple via IA."""
+    """Suggestions de soirées en couple via IA."""
     from src.services.famille.soiree_ai import obtenir_service_soiree_ai
 
     async def _query():
@@ -378,7 +378,7 @@ async def suggestions_soiree_ia(
     return await _query()
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# ACHATS FAMILLE CRUD (Phase M4)
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# ACHATS FAMILLE CRUD 
+# ═══════════════════════════════════════════════════════════
 

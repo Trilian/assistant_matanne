@@ -325,7 +325,7 @@ async def get_prometheus_metrics(
     )
 
     # ─────────────────────────────────────────────────────────
-    # MÉTRIQUES PAR SERVICE (Sprint 6)
+    # MÉTRIQUES PAR SERVICE 
     # ─────────────────────────────────────────────────────────
     try:
         from src.services.core.service_metrics import exporter_prometheus_services

@@ -67,5 +67,5 @@ def obtenir_service_accueil_data() -> AccueilDataService:
     return get_accueil_data_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_accueil_data_service = obtenir_accueil_data_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_accueil_data_service = obtenir_accueil_data_service  # alias rétrocompatibilité 

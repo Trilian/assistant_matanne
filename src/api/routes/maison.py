@@ -6,8 +6,8 @@ Agrégateur : inclut 4 sous-routeurs thématiques via include_router() :
   → /projets, /projets/*
 - maison_entretien : Routines, tâches d'entretien, entretien saisonnier, santé appareils
   → /routines, /entretien, /entretien-saisonnier
-- maison_finances  : Artisans, contrats, garanties, alertes prédictives
-  → /artisans, /contrats, /garanties
+- maison_finances  : Artisans, alertes prédictives
+  → /artisans
 - maison_jardin    : Jardinage, stocks, nuisibles, calendrier semis
   → /jardin, /stocks, /nuisibles
 
@@ -52,7 +52,7 @@ router = APIRouter(prefix="/api/v1/maison", tags=["Maison"])
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# CONTEXTE MAISON (Phase X)
+# CONTEXTE MAISON 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -94,8 +94,7 @@ async def obtenir_alertes_maison(
     Obtient toutes les alertes maison.
     
     Retourne toutes les alertes (pas juste le top 8 du briefing):
-    - Garanties expirant
-    - Contrats (assurance, Ã©nergie, internet)
+
     - Diagnostics immobiliers
     - Entretien saisonnier
     

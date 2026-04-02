@@ -192,5 +192,5 @@ def obtenir_rappels_intelligents_service() -> RappelsIntelligentsService:
     return RappelsIntelligentsService()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_rappels_intelligents_service = obtenir_rappels_intelligents_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_rappels_intelligents_service = obtenir_rappels_intelligents_service  # alias rétrocompatibilité 

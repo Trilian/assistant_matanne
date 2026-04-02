@@ -209,5 +209,5 @@ def obtenir_service_meubles_crud() -> MeublesCrudService:
     return get_meubles_crud_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_meubles_crud_service = obtenir_meubles_crud_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_meubles_crud_service = obtenir_meubles_crud_service  # alias rétrocompatibilité 

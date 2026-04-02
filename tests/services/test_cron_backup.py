@@ -5,7 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 
-def test_jobs_schedule_inclut_jobs_phase_d() -> None:
+def test_jobs_schedule_inclut_jobs_backup() -> None:
     from src.services.core.cron.jobs_schedule import configurer_jobs_planifies
 
     mock_planifier = MagicMock()

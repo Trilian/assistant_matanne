@@ -754,5 +754,5 @@ def obtenir_entretien_service(client: ClientIA | None = None) -> EntretienServic
     return obtenir_service_entretien(client)
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_entretien_service = obtenir_entretien_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_entretien_service = obtenir_entretien_service  # alias rétrocompatibilité 

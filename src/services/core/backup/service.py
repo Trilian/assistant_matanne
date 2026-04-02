@@ -237,5 +237,5 @@ def obtenir_backup_service(config: BackupConfig | None = None) -> ServiceBackup:
     return obtenir_service_backup(config)
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_backup_service = obtenir_backup_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_backup_service = obtenir_backup_service  # alias rétrocompatibilité 

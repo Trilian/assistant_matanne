@@ -1,4 +1,4 @@
-"""Modèles Sprint 10 pour gamification et automations.
+"""Modèles pour gamification et automations.
 
 Contient:
 - PointsUtilisateur: points hebdo sport/nutrition/anti-gaspi

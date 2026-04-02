@@ -1,4 +1,4 @@
-﻿"""
+"""
 Routes API pour les recettes.
 
 CRUD complet pour les recettes avec pagination, filtres par catÃ©gorie,

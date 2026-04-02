@@ -213,5 +213,5 @@ def obtenir_service_cellier_crud() -> CellierCrudService:
     return get_cellier_crud_service()
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_cellier_crud_service = obtenir_cellier_crud_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_cellier_crud_service = obtenir_cellier_crud_service  # alias rétrocompatibilité 

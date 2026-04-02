@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour src/api/routes/webhooks.py
 
 Tests unitaires pour les routes webhooks.

@@ -1,5 +1,5 @@
 """
-Routes Phase B.6/B.7 — Améliorations intra-modules & flux utilisateur simplifiés.
+Routes Améliorations intra-modules & flux utilisateur simplifiés.
 
 Endpoints :
 - GET /api/v1/intra/routines-streak → Streak tracking routines (B6.5)
@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field
 from src.api.dependencies import require_auth
 from src.api.utils import executer_async, gerer_exception_api
 
-router = APIRouter(tags=["Phase B — Intra-modules & Flux"])
+router = APIRouter(tags=["Intra-modules & Flux"])
 
 
 # ── Schemas ──────────────────────────────────────────

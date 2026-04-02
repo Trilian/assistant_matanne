@@ -742,5 +742,5 @@ __all__ = [
 ]
 
 
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_pdf_export_service = obtenir_pdf_export_service  # alias rétrocompatibilité Sprint 12 A3
+# ─── Aliases rétrocompatibilité  ───────────────────────────────
+get_pdf_export_service = obtenir_pdf_export_service  # alias rétrocompatibilité 

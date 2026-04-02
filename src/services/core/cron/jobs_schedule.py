@@ -82,11 +82,11 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("purge_historique_jeux", CronTrigger(day=1, hour=3, minute=30), replace_existing=True)
     planifier_job("veille_emploi", CronTrigger(hour=7, minute=0), replace_existing=True)
 
-    # Phase B — Nouveaux jobs
+    # Nouveaux jobs
     planifier_job("alertes_budget_seuil", CronTrigger(hour=20, minute=0), replace_existing=True)
     planifier_job("resume_hebdo_ia", CronTrigger(day_of_week="sun", hour=20, minute=30), replace_existing=True)
 
-    # Phase D — Nouveaux jobs
+    # Nouveaux jobs
     planifier_job("rappels_jardin_saisonniers", CronTrigger(day_of_week="mon", hour=7, minute=0), replace_existing=True)
     planifier_job("verification_sante_systeme", CronTrigger(minute=0), replace_existing=True)
     planifier_job("backup_auto_hebdo_json", CronTrigger(day_of_week="sun", hour=4, minute=0), replace_existing=True)
