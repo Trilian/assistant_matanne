@@ -3,7 +3,7 @@
  * 
  * Fonctionnalités:
  * - 4 cartes métriques (ROI, Win Rate, Bénéfice, Nombre)
- * - Graphique évolution mensuelle (Chart.js)
+ * - Graphique évolution mensuelle (Recharts)
  * - Tableau patterns gagnants
  * - Recommandations personnalisées
  */
@@ -11,35 +11,22 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Line } from 'react-chartjs-2'
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
   Tooltip,
-  Legend,
-  Filler
-} from 'chart.js'
+  Legend
+} from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Badge } from '@/composants/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/composants/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/composants/ui/select'
 import { utiliserRequete } from '@/crochets/utiliser-api'
 import { TrendingUp, TrendingDown, Target, Trophy, AlertCircle } from 'lucide-react'
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-)
 
 interface StatsData {
   roi: {
@@ -102,69 +89,8 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
   const chartData = useMemo(() => {
     if (!data?.evolution) return null
 
-    return {
-      labels: data.evolution.map(e => e.mois),
-      datasets: [
-        {
-          label: 'Bénéfice (€)',
-          data: data.evolution.map(e => e.benefice),
-          borderColor: 'rgb(34, 197, 94)',
-          backgroundColor: 'rgba(34, 197, 94, 0.1)',
-          fill: true,
-          tension: 0.3
-        },
-        {
-          label: 'ROI (%)',
-          data: data.evolution.map(e => e.roi),
-          borderColor: 'rgb(59, 130, 246)',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          fill: true,
-          tension: 0.3,
-          yAxisID: 'y1'
-        }
-      ]
-    }
+    return data.evolution
   }, [data?.evolution])
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      mode: 'index' as const,
-      intersect: false
-    },
-    plugins: {
-      legend: {
-        position: 'top' as const
-      },
-      title: {
-        display: false
-      }
-    },
-    scales: {
-      y: {
-        type: 'linear' as const,
-        display: true,
-        position: 'left' as const,
-        title: {
-          display: true,
-          text: 'Bénéfice (€)'
-        }
-      },
-      y1: {
-        type: 'linear' as const,
-        display: true,
-        position: 'right' as const,
-        title: {
-          display: true,
-          text: 'ROI (%)'
-        },
-        grid: {
-          drawOnChartArea: false
-        }
-      }
-    }
-  }
 
   if (isLoading) {
     return (
@@ -303,7 +229,48 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
             <CardContent>
               {chartData && (
                 <div style={{ height: '300px' }}>
-                  <Line data={chartData} options={chartOptions} />
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 85%)" />
+                      <XAxis dataKey="mois" tick={{ fontSize: 11 }} />
+                      <YAxis
+                        yAxisId="benef"
+                        tick={{ fontSize: 11 }}
+                        tickFormatter={(v) => `${Number(v).toFixed(0)}€`}
+                      />
+                      <YAxis
+                        yAxisId="roi"
+                        orientation="right"
+                        tick={{ fontSize: 11 }}
+                        tickFormatter={(v) => `${Number(v).toFixed(0)}%`}
+                      />
+                      <Tooltip
+                        formatter={(value, name) => {
+                          if (name === 'ROI (%)') return [`${Number(value).toFixed(1)}%`, name]
+                          return [`${Number(value).toFixed(2)}€`, name]
+                        }}
+                      />
+                      <Legend />
+                      <Line
+                        yAxisId="benef"
+                        type="monotone"
+                        dataKey="benefice"
+                        name="Bénéfice (€)"
+                        stroke="rgb(34, 197, 94)"
+                        strokeWidth={2}
+                        dot={{ r: 3 }}
+                      />
+                      <Line
+                        yAxisId="roi"
+                        type="monotone"
+                        dataKey="roi"
+                        name="ROI (%)"
+                        stroke="rgb(59, 130, 246)"
+                        strokeWidth={2}
+                        dot={{ r: 3 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               )}
             </CardContent>

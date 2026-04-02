@@ -7,6 +7,20 @@ import { utiliserRequete } from '@/crochets/utiliser-api'
 import { obtenirPlanningAujourdhui, obtenirMeteo } from '@/bibliotheque/api/planning'
 import { obtenirTachesAujourdhui } from '@/bibliotheque/api/maison'
 
+interface RepasTablette {
+  id: number | string
+  type: string
+  nom: string
+  heure?: string
+}
+
+interface TacheTablette {
+  fait?: boolean
+  titre: string
+  categorie?: string
+  priorite?: string
+}
+
 /**
  * E2 — Widget Tablette Google
  * Page optimisée pour affichage tablette (zoom large, touches grandes)
@@ -61,8 +75,8 @@ export default function PageTablette() {
     return <Sun className="h-12 w-12 text-yellow-500" />
   }
 
-  const repasAujourdhui = planning?.repas?.[new Date().toISOString().split('T')[0]] || []
-  const tachePrioritaire = taches?.filter((t: any) => !t.fait)?.[0]
+  const repasAujourdhui: RepasTablette[] = planning?.repas?.[new Date().toISOString().split('T')[0]] || []
+  const tachePrioritaire = (taches as TacheTablette[] | undefined)?.filter((t) => !t.fait)?.[0]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4 flex flex-col gap-4">
@@ -90,7 +104,7 @@ export default function PageTablette() {
             {loadingPlanning ? (
               <p className="text-lg text-muted-foreground">Chargement...</p>
             ) : repasAujourdhui.length > 0 ? (
-              repasAujourdhui.map((repas: any) => (
+              repasAujourdhui.map((repas) => (
                 <div key={repas.id} className="p-3 rounded-lg bg-primary/10 border border-primary/20">
                   <p className="text-sm font-semibold text-muted-foreground">{repas.type}</p>
                   <p className="text-xl sm:text-2xl font-bold mt-1">{repas.nom}</p>

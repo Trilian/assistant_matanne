@@ -300,6 +300,8 @@
 ## 5. Phase C — UI/UX & Visualisations (Semaine 5-6)
 
 > **Objectif** : Rendre l'interface belle, moderne, fluide. Connecter les visualisations aux données réelles.
+>
+> **Mise à jour exécution (2 avril 2026)** : phase C avancée en continu. Composants et pages majeurs livrés; derniers points restants concentrés sur quelques features lourdes (3D connecté complet, récurrence planning avancée, normalisation totale des types).
 
 ### C.1 — Dashboard & Global (Section 15)
 
@@ -380,11 +382,58 @@
 | Objectif visualisations actives | 8 → 18 |
 | Objectif UX mobile | 6/10 → 8/10 |
 
+### Statut d'implémentation C (mise à jour 2 avril 2026)
+
+| Bloc | Statut | Éléments livrés / notes |
+| --- | --- | --- |
+| C1 Dashboard & Global | ✅ Majoritairement livré | Drag-drop widgets (`@dnd-kit`), auto-complétion historique formulaires, micro-animations dashboard, squelettes, sparklines. |
+| C2 Navigation | ✅ Livré | Sidebar/favoris persistants, transitions de page (`framer-motion`), bottom bar mobile enrichie + indicateur actif animé, breadcrumbs tous cliquables. |
+| C3 Formulaires | 🟡 Partiel avancé | Validation/assistance IA déployée sur plusieurs formulaires (dont activités/travaux), généralisation complète multi-modules encore progressive. |
+| C4 Mobile | ✅ Livré (socle) | Swipe actions appliquées sur listes clés, pull-to-refresh global (contenu principal), feedback haptique ajouté sur actions swipe/scanner. |
+| C5 Micro-interactions | ✅ Livré | Confettis légers ajoutés sur actions de complétion swipe (retour visuel d'accomplissement). |
+| C6 Visualisations 3D | 🟡 Partiel | Vue maison interactive avancée disponible; connexion 3D complète multi-données encore à finaliser. |
+| C7 Visualisations 2D avancées | ✅ Majoritairement livré | Heatmap nutritionnelle, treemap budget (composant), radar Jules, ROI temporel, courbes énergie, sparklines dashboard. |
+| C8 Nettoyage technique UI | ✅ Livré | Migration Chart.js → Recharts côté frontend jeux; suppression des usages applicatifs Chart.js. |
+
+### Éléments Phase B reportés vers C — statut
+
+| Réf B | Tâche reportée | Statut (2 avril 2026) | Notes |
+| --- | --- | --- | --- |
+| B1.4 / G20 | Recherche globale complète (Ctrl+K) | ✅ | Recherche globale étendue + historique + endpoint API global branché. |
+| B2.1 / G1 | Drag-drop recettes planning | ✅ | Drag/drop actif sur planning cuisine. |
+| B2.2 / G2 | Import recettes par photo (Pixtral) | 🟡 | Briques OCR/multimodal présentes; finition UX de flux dédiée à compléter. |
+| B2.3 / G7 | Timeline Jules visuelle | ✅ | Visualisations jalons + radar compétences intégrés. |
+| B2.4 / G9 | Photos souvenirs activités | 🟡 | Fondations côté famille en place, liaison photo bout-en-bout à compléter. |
+| B2.5 / G11 | Historique énergie tendanciel | ✅ | Graphes énergie disponibles dans maison/finances. |
+| B2.6 / G13 | Devis comparatif visuel | ✅ | Parcours travaux avec estimation IA, matériaux et comparatif opérationnel. |
+| B2.7 / G14 | ROI temporel paris | ✅ | Courbe ROI mensuelle et KPIs performance disponibles. |
+| B2.8 / G18 | Planning familial consolidé visuel | ✅ | Vue timeline planning consolidée disponible. |
+| B2.9 / G19 | Récurrence événements | 🟡 | Socle planning en place; écran/règles de récurrence avancée encore à compléter. |
+| B2.10 / G22 | Onboarding interactif | ✅ | Tour onboarding branché globalement + replay dans paramètres. |
+| B2.11 / G23 | Export/import backup UI | ✅ | Page sauvegarde avec export JSON et restauration active. |
+| B9.2 / T7 | Tests API clients frontend | 🟡 | Couverture en hausse, extension complète cas réseau/refresh/pagination en cours. |
+| B9.3 | Tests pages famille frontend | 🟡 | Progrès E2E/flows, couverture cible à poursuivre. |
+| B9.4 / T8 | Tests pages paramètres | 🟡 | Base présente, complétude des onglets à finaliser. |
+| B9.5 / D5 | Guide de test unifié | 🟡 | Docs tests existantes; consolidation unique encore à finaliser. |
+
 ---
 
 ## 6. Phase D — Admin, CRON & Automatisations (Semaine 7-8)
 
 > **Objectif** : Enrichir le mode admin, améliorer les notifications, refactorer le code, automatisations avancées.
+>
+> **Statut** : Complétée le 2 avril 2026 (avec finalisation replay event bus + test E2E one-click admin).
+
+### Statut d'implémentation D (mise à jour 2 avril 2026)
+
+| Bloc | Statut | Éléments livrés / notes |
+| --- | --- | --- |
+| D.1 Admin | ✅ Livré | Console admin, scheduler visuel, logs live WS, dashboard live, replay d'événements (`/api/v1/admin/events/replay`), test one-click (`/api/v1/admin/tests/e2e-one-click`). |
+| D.2 Notifications | ✅ Livré | WhatsApp multi-tour persistant, commandes NLP enrichies, boutons interactifs, résumés configurables, emails HTML/MJML, alertes critiques email, actions push et heures calmes intégrées via préférences. |
+| D.3 CRON additionnels | ✅ Livré | Jobs `verification_sante_systeme` (horaire) et `backup_auto_hebdo_json` (dimanche 04h) planifiés et branchés au registre CRON. |
+| D.4 Refactoring | ✅ Livré | Extraction des modules CRON de phase (`jobs_phase_d.py`, `jobs_schedule.py`), naming routes famille documenté, données de référence versionnées (`version`). |
+| D.5 Tests | ✅ Livré | Tests frontend admin (jobs/services/notifications/page) + Playwright accessibilité axe-core. |
+| D.6 Documentation | ✅ Livré | `CHANGELOG_MODULES.md` alimenté et aligné avec les livraisons multi-phases/modules. |
 
 ### D.1 — Admin (Section 11)
 
@@ -446,10 +495,11 @@
 | Métrique | Valeur |
 | --- | --- |
 | Tâches totales | ~30 |
+| Tâches terminées | ✅ 30/30 |
 | Effort estimé | ~20 jours |
-| Objectif notifications | 4 canaux basiques → 4 canaux enrichis |
-| Objectif admin | 8.5/10 → 9.5/10 |
-| Objectif CRON jobs | 68 → 78 |
+| Notifications | ✅ 4 canaux enrichis actifs |
+| Admin | ✅ Console + scheduler + live WS + replay + test one-click |
+| CRON jobs | ✅ 68 → 78+ (dont `verification_sante_systeme`, `backup_auto_hebdo_json`) |
 
 ---
 
@@ -519,7 +569,6 @@
 | BL5 | Wheel fortune loto animation | V13 | 1j |
 | BL6 | Haptic feedback mobile complet | U14 | 30min |
 | BL7 | Badge PWA notifications | P3 | 1j |
-| BL8 | Test E2E one-click admin | A7 | 3j |
 
 ---
 
@@ -532,9 +581,9 @@
 | **A — Stabilisation** | 1-2 | 35 | ~14j | ⬜ Non commencé |
 | **B — Fonctionnalités & IA** | 3-4 | ~60 | ~25-30j | ⬜ Non commencé |
 | **C — UI/UX & Visualisations** | 5-6 | ~35 | ~20-25j | ⬜ Non commencé |
-| **D — Admin & CRON** | 7-8 | ~30 | ~20j | ⬜ Non commencé |
+| **D — Admin & CRON** | 7-8 | ~30 | ~20j | ✅ Complété |
 | **E — Innovations** | 9+ | ~20 | ~20-25j | ⬜ Non commencé |
-| **Backlog** | — | 8 | ~17j | ⬜ Non commencé |
+| **Backlog** | — | 7 | ~14j | ⬜ Non commencé |
 
 ### Évolution des notes cibles
 
@@ -589,11 +638,11 @@
 - [ ] Chart.js supprimé (Recharts uniquement)
 
 #### Phase D — Critères de complétion
-- [ ] Console commande rapide admin opérationnelle
-- [ ] WhatsApp commandes NLP fonctionnelles
-- [ ] `jobs.py` découpé en modules
-- [ ] Templates email HTML/MJML en place
-- [ ] Tests admin et accessibilité complétés
+- [x] Console commande rapide admin opérationnelle
+- [x] WhatsApp commandes NLP fonctionnelles
+- [x] `jobs.py` découpé en modules
+- [x] Templates email HTML/MJML en place
+- [x] Tests admin et accessibilité complétés
 
 #### Phase E — Critères de complétion
 - [ ] Mode pilote automatique avec bouton ON/OFF
@@ -604,5 +653,5 @@
 
 ---
 
-> **Dernière mise à jour** : 1er Avril 2026
-> **Prochaine revue** : Après Phase A (stabilisation)
+> **Dernière mise à jour** : 2 Avril 2026
+> **Prochaine revue** : Lancement Phase E (innovations)

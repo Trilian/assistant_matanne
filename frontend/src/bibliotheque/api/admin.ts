@@ -262,6 +262,37 @@ export interface EventBusTriggerResponse {
   handlers_notifies: number
 }
 
+export interface EventBusReplayPayload {
+  event_id?: string
+  type_evenement?: string
+  limite?: number
+  source?: string
+}
+
+export interface EventBusReplayResponse {
+  status: string
+  replayes: Array<{
+    event_id: string
+    type: string
+    handlers_notifies: number
+  }>
+  total: number
+  handlers_notifies: number
+}
+
+export interface OneClickE2EAdminResponse {
+  status: string
+  workflow: string
+  user_id: string
+  mode: string
+  etapes: Array<{
+    etape: string
+    action: string
+    status: string
+  }>
+  total_etapes: number
+}
+
 export interface AiMetricsResponse {
   generated_at: string
   api: Record<string, unknown>
@@ -689,6 +720,18 @@ export async function declencherEvenementAdmin(
   payload: EventBusTriggerPayload,
 ): Promise<EventBusTriggerResponse> {
   const { data } = await clientApi.post('/api/v1/admin/events/trigger', payload)
+  return data
+}
+
+export async function rejouerEvenementAdmin(
+  payload: EventBusReplayPayload,
+): Promise<EventBusReplayResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/events/replay', payload)
+  return data
+}
+
+export async function lancerTestE2EOneClickAdmin(): Promise<OneClickE2EAdminResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/tests/e2e-one-click')
   return data
 }
 

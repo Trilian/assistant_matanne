@@ -93,20 +93,19 @@ export function FilAriane() {
           return (
             <span key={chemin} className="flex items-center gap-1">
               <ChevronRight className="h-3 w-3" />
-              {estDernier ? (
-                <span className="font-medium text-foreground">
-                  {estSegmentDynamique(segment) && titrePage
-                    ? titrePage
-                    : traduireSegment(segment)}
-                </span>
-              ) : (
-                <Link
-                  href={chemin}
-                  className="hover:text-foreground transition-colors"
-                >
-                  {traduireSegment(segment)}
-                </Link>
-              )}
+              <Link
+                href={chemin}
+                aria-current={estDernier ? "page" : undefined}
+                className={
+                  estDernier
+                    ? "font-medium text-foreground"
+                    : "hover:text-foreground transition-colors"
+                }
+              >
+                {estSegmentDynamique(segment) && titrePage
+                  ? titrePage
+                  : traduireSegment(segment)}
+              </Link>
             </span>
           );
         })}

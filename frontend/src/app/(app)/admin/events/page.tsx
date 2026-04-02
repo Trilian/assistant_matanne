@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Activity, Loader2, Play, RefreshCw } from "lucide-react";
+import { Activity, Loader2, Play, RefreshCw, RotateCcw } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Textarea } from "@/composants/ui/textarea";
 import { Badge } from "@/composants/ui/badge";
-import { declencherEvenementAdmin, lireEvenementsAdmin } from "@/bibliotheque/api/admin";
+import { declencherEvenementAdmin, lireEvenementsAdmin, rejouerEvenementAdmin } from "@/bibliotheque/api/admin";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 
 export default function PageAdminEvents() {
@@ -16,6 +16,7 @@ export default function PageAdminEvents() {
   const [source, setSource] = useState("admin");
   const [payloadTexte, setPayloadTexte] = useState("{}");
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
+  const [replayEnCoursId, setReplayEnCoursId] = useState<string | null>(null);
   const [retour, setRetour] = useState<{ ok: boolean; message: string } | null>(null);
 
   const { data, isLoading, refetch } = utiliserRequete(["admin", "events"], () =>
@@ -38,6 +39,23 @@ export default function PageAdminEvents() {
       setRetour({ ok: false, message: "Impossible d'emettre l'evenement. Verifiez le JSON du payload." });
     } finally {
       setEnvoiEnCours(false);
+    }
+  };
+
+  const rejouer = async (eventId: string) => {
+    setRetour(null);
+    setReplayEnCoursId(eventId);
+    try {
+      const result = await rejouerEvenementAdmin({ event_id: eventId, limite: 1 });
+      setRetour({
+        ok: true,
+        message: `Evenement rejoue (${result.handlers_notifies} handlers notifies).`,
+      });
+      await refetch();
+    } catch {
+      setRetour({ ok: false, message: "Impossible de rejouer cet evenement." });
+    } finally {
+      setReplayEnCoursId(null);
     }
   };
 
@@ -117,6 +135,21 @@ export default function PageAdminEvents() {
                   </div>
                   <div className="text-xs text-muted-foreground">source: {item.source}</div>
                   <pre className="text-xs bg-muted rounded p-2 overflow-auto">{JSON.stringify(item.data, null, 2)}</pre>
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => void rejouer(item.event_id)}
+                      disabled={replayEnCoursId === item.event_id}
+                    >
+                      {replayEnCoursId === item.event_id ? (
+                        <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                      ) : (
+                        <RotateCcw className="mr-2 h-3 w-3" />
+                      )}
+                      Rejouer
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

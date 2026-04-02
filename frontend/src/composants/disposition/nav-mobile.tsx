@@ -90,19 +90,27 @@ export function NavMobile() {
               aria-label={nom}
               aria-current={estActif ? "page" : undefined}
               className={cn(
-                "flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors",
+                "relative flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors",
                 estActif
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
               <span className="relative">
-                <Icone className="h-5 w-5" />
+                <Icone
+                  className={cn(
+                    "h-5 w-5 transition-transform duration-200",
+                    estActif ? "scale-110" : "scale-100"
+                  )}
+                />
                 {showBadge && (
                   <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-destructive border-2 border-background" />
                 )}
               </span>
               <span>{nom}</span>
+              {estActif && (
+                <span className="absolute bottom-0 h-0.5 w-8 rounded-full bg-primary animate-in fade-in zoom-in-50" />
+              )}
             </Link>
           );
         })}

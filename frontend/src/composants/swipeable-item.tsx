@@ -8,6 +8,8 @@
 
 import { useRef, useState, type ReactNode, type CSSProperties } from "react";
 import { Trash2, Check } from "lucide-react";
+import { declencherHaptique } from "@/bibliotheque/haptique";
+import { lancerConfettis } from "@/bibliotheque/confettis";
 
 interface SwipeableItemProps {
   /** Contenu principal de l'élément */
@@ -86,6 +88,7 @@ export function SwipeableItem({
       // Swipe gauche confirmé
       setTranslateX(-window.innerWidth);
       setActionDeclenche("left");
+      declencherHaptique("error");
       setTimeout(() => {
         setTranslateX(0);
         setIsAnimating(false);
@@ -96,6 +99,8 @@ export function SwipeableItem({
       // Swipe droit confirmé
       setActionDeclenche("right");
       setTranslateX(window.innerWidth);
+      declencherHaptique("success");
+      lancerConfettis({ particules: 16 });
       setTimeout(() => {
         setTranslateX(0);
         setIsAnimating(false);

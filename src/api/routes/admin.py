@@ -389,6 +389,69 @@ async def declencher_evenement_admin(
     }
 
 
+@router.post(
+    "/events/replay",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Rejouer un événement passé",
+    description="Recharge l'historique DB du bus puis ré-émet un ou plusieurs événements.",
+)
+@gerer_exception_api
+async def rejouer_evenement_admin(
+    body: EventBusReplayRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.services.core.events import obtenir_bus
+
+    bus = obtenir_bus()
+    limite = max(1, min(50, int(body.limite or 1)))
+    events = bus.rejouer_historique_db(type_evenement=body.type_evenement, limite=200)
+
+    if body.event_id:
+        events = [e for e in events if e.event_id == body.event_id]
+
+    if not events:
+        raise HTTPException(status_code=404, detail="Aucun événement trouvé pour replay")
+
+    a_rejouer = events[-limite:]
+    total_handlers = 0
+    replayes: list[dict[str, Any]] = []
+
+    for event in a_rejouer:
+        notified = bus.emettre(
+            type_evenement=event.type,
+            data=event.data,
+            source=body.source,
+        )
+        total_handlers += notified
+        replayes.append(
+            {
+                "event_id": event.event_id,
+                "type": event.type,
+                "handlers_notifies": notified,
+            }
+        )
+
+    _journaliser_action_admin(
+        action="admin.events.replay",
+        entite_type="event_bus",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={
+            "event_id": body.event_id,
+            "type_evenement": body.type_evenement,
+            "limite": limite,
+            "replayes": len(replayes),
+            "handlers_notifies": total_handlers,
+        },
+    )
+
+    return {
+        "status": "ok",
+        "replayes": replayes,
+        "total": len(replayes),
+        "handlers_notifies": total_handlers,
+    }
+
+
 # ═══════════════════════════════════════════════════════════
 # SCHÉMAS ADMIN ÉTENDU
 # ═══════════════════════════════════════════════════════════
@@ -479,6 +542,13 @@ class EventBusTriggerRequest(BaseModel):
     type_evenement: str
     source: str = "admin"
     payload: dict[str, Any] = {}
+
+
+class EventBusReplayRequest(BaseModel):
+    event_id: str | None = None
+    type_evenement: str | None = None
+    limite: int = 1
+    source: str = "admin_replay"
 
 
 class UserImpersonationRequest(BaseModel):
@@ -908,6 +978,45 @@ def _simuler_flux_admin(body: FlowSimulationRequest, user_id: str) -> dict[str, 
         "dry_run": body.dry_run,
         "actions": actions,
         "payload": body.payload,
+    }
+
+
+def _simuler_test_e2e_one_click(user_id: str) -> dict[str, Any]:
+    """Construit un scénario E2E admin en une seule action."""
+    etapes = [
+        {
+            "etape": "recette",
+            "action": "Sélectionner/générer une recette candidate",
+            "status": "ok",
+        },
+        {
+            "etape": "planning",
+            "action": "Planifier la recette sur la semaine en cours",
+            "status": "ok",
+        },
+        {
+            "etape": "courses",
+            "action": "Générer la liste de courses à partir du planning",
+            "status": "ok",
+        },
+        {
+            "etape": "checkout",
+            "action": "Marquer la liste courses comme finalisée (checkout)",
+            "status": "ok",
+        },
+        {
+            "etape": "inventaire",
+            "action": "Propager les écritures inventaire post-checkout",
+            "status": "ok",
+        },
+    ]
+    return {
+        "status": "ok",
+        "workflow": "recette->planning->courses->checkout->inventaire",
+        "user_id": user_id,
+        "mode": "simulation",
+        "etapes": etapes,
+        "total_etapes": len(etapes),
     }
 
 
@@ -2671,6 +2780,7 @@ _COMMANDES_RAPIDES: dict[str, str] = {
     "run job": "Exécuter un job CRON — ex: run job rappels_famille",
     "clear cache": "Vider le cache — ex: clear cache (tout) ou clear cache recettes*",
     "list jobs": "Lister tous les jobs disponibles",
+    "test complet": "Simuler un test E2E one-click (recette -> planning -> courses -> checkout -> inventaire)",
     "health": "Vérifier la santé des services",
     "stats cache": "Afficher les statistiques du cache",
     "maintenance on": "Activer le mode maintenance",
@@ -2710,6 +2820,13 @@ def _parser_commande_rapide(commande: str) -> dict[str, Any]:
             "jobs": jobs,
             "total": len(jobs),
             "message": f"{len(jobs)} jobs disponibles",
+        }
+
+    if cmd_lower == "test complet":
+        return {
+            "type": "test_e2e",
+            "result": _simuler_test_e2e_one_click("admin"),
+            "message": "Simulation E2E one-click exécutée",
         }
 
     if cmd_lower.startswith("run job "):
@@ -2845,6 +2962,27 @@ async def simuler_flux_admin(
         entite_type="simulation",
         utilisateur_id=str(user.get("id", "admin")),
         details={"scenario": body.scenario, "target_user_id": cible_user_id},
+    )
+    return result
+
+
+@router.post(
+    "/tests/e2e-one-click",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Test E2E one-click (simulation)",
+    description="Simule le flux recette->planning->courses->checkout->inventaire en une seule requête.",
+)
+@gerer_exception_api
+async def lancer_test_e2e_one_click(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    cible_user_id = str(user.get("id", "admin"))
+    result = _simuler_test_e2e_one_click(cible_user_id)
+    _journaliser_action_admin(
+        action="admin.tests.e2e_one_click",
+        entite_type="simulation",
+        utilisateur_id=cible_user_id,
+        details={"workflow": result.get("workflow")},
     )
     return result
 

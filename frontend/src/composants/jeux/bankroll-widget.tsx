@@ -1,19 +1,17 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Line } from 'react-chartjs-2'
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
   Tooltip,
   Legend,
-  Filler,
-  type TooltipItem,
-} from 'chart.js'
+  ReferenceLine,
+} from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Input } from '@/composants/ui/input'
 import { Label } from '@/composants/ui/label'
@@ -23,18 +21,6 @@ import { Slider } from '@/composants/ui/slider'
 import { utiliserRequete } from '@/crochets/utiliser-api'
 import { TrendingUp, TrendingDown, AlertTriangle, DollarSign, Info } from 'lucide-react'
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from '@/composants/ui/tooltip'
-
-// Enregistrer Chart.js
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-)
 
 interface SuggestionMise {
   mise_suggeree: number
@@ -128,66 +114,14 @@ export function BankrollWidget({
   const chartData = useMemo(() => {
     if (!bankrollData?.historique) return null
 
-    const labels = bankrollData.historique.map(h => {
+    return bankrollData.historique.map((h) => {
       const date = new Date(h.date)
-      return date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+      return {
+        ...h,
+        libelle: date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }),
+      }
     })
-
-    const data = bankrollData.historique.map(h => h.bankroll)
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: 'Bankroll (€)',
-          data,
-          borderColor: bankrollData.variation_totale >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)',
-          backgroundColor: bankrollData.variation_totale >= 0
-            ? 'rgba(34, 197, 94, 0.1)'
-            : 'rgba(239, 68, 68, 0.1)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 2,
-          pointHoverRadius: 5
-        },
-        {
-          label: 'Bankroll initiale',
-          data: Array(labels.length).fill(bankrollData.bankroll_initiale),
-          borderColor: 'rgb(148, 163, 184)',
-          borderDash: [5, 5],
-          fill: false,
-          pointRadius: 0
-        }
-      ]
-    }
   }, [bankrollData])
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: !compact,
-        position: 'top' as const
-      },
-      tooltip: {
-        callbacks: {
-          label: (context: TooltipItem<'line'>) => {
-            const valeur = typeof context.parsed.y === 'number' ? context.parsed.y.toFixed(2) : '0.00'
-            return `${context.dataset.label}: ${valeur}€`
-          }
-        }
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: false,
-        ticks: {
-          callback: (value: string | number) => `${value}€`
-        }
-      }
-    }
-  }
 
   if (loadingBankroll) {
     return (
@@ -365,7 +299,32 @@ export function BankrollWidget({
           <div className="space-y-2">
             <h3 className="font-semibold text-sm">Évolution bankroll (30 derniers jours)</h3>
             <div className="h-64">
-              <Line data={chartData} options={chartOptions} />
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 85%)" />
+                  <XAxis dataKey="libelle" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${Number(v).toFixed(0)}€`} />
+                  <Tooltip
+                    formatter={(value, name) => [`${Number(value).toFixed(2)}€`, String(name)]}
+                  />
+                  {!compact && <Legend />}
+                  <ReferenceLine
+                    y={bankrollData?.bankroll_initiale ?? 0}
+                    stroke="hsl(215 16% 55%)"
+                    strokeDasharray="5 5"
+                    label={{ value: 'Initiale', position: 'insideTopRight', fontSize: 10 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="bankroll"
+                    name="Bankroll"
+                    stroke={bankrollData && bankrollData.variation_totale >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'}
+                    strokeWidth={2}
+                    dot={{ r: 2 }}
+                    activeDot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
         )}
