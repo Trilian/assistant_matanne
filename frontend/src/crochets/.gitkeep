@@ -1,0 +1,229 @@
+/**
+ * ═══════════════════════════════════════════════════════════
+ * TanStack Query Hooks — Sprint 13 AI Services
+ * ═══════════════════════════════════════════════════════════
+ * 
+ * Custom React hooks wrapping mutations for all 6 Sprint 13 AI endpoints
+ * Uses TanStack Query v5 + Zustand notifications
+ */
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNotificationStore } from "../magasins/store-notifications";
+import {
+  predireConsommationInventaire,
+  analyserVarietePlanningRepas,
+  analyserImpactsMeteo,
+  analyserHabitudeFamille,
+  estimerProjetMaison,
+  analyserNutritionPersonne,
+  type PredictionConsommationRequest,
+  type PredictionConsommationResponse,
+  type AnalyseVarietePlanningRequest,
+  type AnalyseVarieteResponse,
+  type AnalyseImpactsMeteoRequest,
+  type MeteoContexte,
+  type AnalyseHabitudeRequest,
+  type AnalyseHabitudeResponse,
+  type EstimationProjetMaisonRequest,
+  type EstimationProjetResponse,
+  type DonneesNutritionPersonneRequest,
+  type DonneesNutritionnellesResponse,
+} from "../bibliotheque/api/ia-sprint13";
+
+// ═══════════════════════════════════════════════════════════
+// Helper: Show notification on mutation outcomes
+// ═══════════════════════════════════════════════════════════
+
+const montrerNotification = (
+  type: "success" | "error",
+  titre: string,
+  message: string
+) => {
+  const { ajouter } = useNotificationStore.getState();
+  ajouter({
+    id: Date.now().toString(),
+    titre,
+    message,
+    type,
+  });
+};
+
+// ═══════════════════════════════════════════════════════════
+// Hook 1: Predict Inventory Consumption
+// ═══════════════════════════════════════════════════════════
+
+export function utilisePredictionConsommation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: predireConsommationInventaire,
+    onSuccess: (data: PredictionConsommationResponse) => {
+      montrerNotification(
+        "success",
+        "Prédiction générée",
+        `Consommation estimée: ${data.prochaine_consommation_estimee_j}j`
+      );
+      // Invalidate inventory queries
+      queryClient.invalidateQueries({
+        queryKey: ["inventaire"],
+      });
+    },
+    onError: (error: Error) => {
+      montrerNotification(
+        "error",
+        "Erreur prédiction",
+        error.message || "Impossible générer la prédiction"
+      );
+    },
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Hook 2: Analyze Weekly Meal Variety
+// ═══════════════════════════════════════════════════════════
+
+export function utiliseAnalyseVarietePlanning() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: analyserVarietePlanningRepas,
+    onSuccess: (data: AnalyseVarieteResponse) => {
+      montrerNotification(
+        "success",
+        "Variété analysée",
+        `Score variété: ${data.variete_score}/100`
+      );
+      // Invalidate planning queries
+      queryClient.invalidateQueries({
+        queryKey: ["planning"],
+      });
+    },
+    onError: (error: Error) => {
+      montrerNotification(
+        "error",
+        "Erreur analyse",
+        error.message || "Impossible analyser la variété"
+      );
+    },
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Hook 3: Analyze Weather Impacts
+// ═══════════════════════════════════════════════════════════
+
+export function utiliseAnalyseImpactsMeteo() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: analyserImpactsMeteo,
+    onSuccess: (data: MeteoContexte[]) => {
+      montrerNotification(
+        "success",
+        "Impacts météo analysés",
+        `${data.length} jours analysés`
+      );
+      // Invalidate weather/outils queries
+      queryClient.invalidateQueries({
+        queryKey: ["meteo"],
+      });
+    },
+    onError: (error: Error) => {
+      montrerNotification(
+        "error",
+        "Erreur impacts",
+        error.message || "Impossible analyser les impacts"
+      );
+    },
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Hook 4: Analyze Family Habits
+// ═══════════════════════════════════════════════════════════
+
+export function utiliseAnalyseHabitudes() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: analyserHabitudeFamille,
+    onSuccess: (data: AnalyseHabitudeResponse) => {
+      montrerNotification(
+        "success",
+        "Habitude analysée",
+        `Compliance: ${Math.round(data.compliance_rate * 100)}%`
+      );
+      // Invalidate famille queries
+      queryClient.invalidateQueries({
+        queryKey: ["famille"],
+      });
+    },
+    onError: (error: Error) => {
+      montrerNotification(
+        "error",
+        "Erreur analyse habitude",
+        error.message || "Impossible analyser l'habitude"
+      );
+    },
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Hook 5: Estimate Home Project
+// ═══════════════════════════════════════════════════════════
+
+export function utiliseEstimationProjet() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: estimerProjetMaison,
+    onSuccess: (data: EstimationProjetResponse) => {
+      montrerNotification(
+        "success",
+        "Projet estimé",
+        `Coût: €${data.cout_estime_min}-${data.cout_estime_max}`
+      );
+      // Invalidate maison queries
+      queryClient.invalidateQueries({
+        queryKey: ["maison"],
+      });
+    },
+    onError: (error: Error) => {
+      montrerNotification(
+        "error",
+        "Erreur estimation",
+        error.message || "Impossible estimer le projet"
+      );
+    },
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// Hook 6: Analyze Nutrition Profile
+// ═══════════════════════════════════════════════════════════
+
+export function utiliseAnalyseNutrition() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: analyserNutritionPersonne,
+    onSuccess: (data: DonneesNutritionnellesResponse) => {
+      montrerNotification(
+        "success",
+        "Profil nutrition analysé",
+        `Calories: ${data.calories_journalieres_recommandees} kcal/j`
+      );
+      // Invalidate famille/nutrition queries
+      queryClient.invalidateQueries({
+        queryKey: ["famille", "nutrition"],
+      });
+    },
+    onError: (error: Error) => {
+      montrerNotification(
+        "error",
+        "Erreur nutrition",
+        error.message || "Impossible analyser la nutrition"
+      );
+    },
+  });
+}
