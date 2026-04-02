@@ -110,7 +110,7 @@ def sample_recette(db: Session) -> Recette:
 def sample_planning(db: Session) -> Planning:
     """Crée un planning actif de test."""
     planning = Planning(
-        nom="Semaine test", semaine_debut=date.today(), semaine_fin=date.today(), actif=True
+        nom="Semaine test", semaine_debut=date.today(), semaine_fin=date.today(), statut="actif"
     )
     db.add(planning)
     db.commit()
@@ -334,14 +334,14 @@ class TestObtenirPlanningActif:
         result = service_suggestions.obtenir_planning_actif()
         assert result is not None
         assert result.nom == "Semaine test"
-        assert result.actif is True
+        assert result.statut == "actif"
 
     def test_planning_inactif_non_retourne(
         self, db: Session, service_suggestions, patch_db_context
     ):
         """Test que planning inactif n'est pas retourné."""
         planning = Planning(
-            nom="Inactif", semaine_debut=date.today(), semaine_fin=date.today(), actif=False
+            nom="Inactif", semaine_debut=date.today(), semaine_fin=date.today(), statut="archive"
         )
         db.add(planning)
         db.commit()

@@ -466,7 +466,7 @@ class StatsPersonnellesService:
                 ).all()
                 
                 gains_paris = sum(p.gain for p in paris if p.gain)
-                mises_paris = sum(p.montant for p in paris)
+                mises_paris = sum(p.mise for p in paris)
                 
                 # Loto
                 filtres_loto = []

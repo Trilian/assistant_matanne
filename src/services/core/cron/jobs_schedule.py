@@ -24,7 +24,6 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("alertes_peremption_48h", CronTrigger(hour=6, minute=0), replace_existing=True)
     planifier_job("rapport_mensuel_budget", CronTrigger(day=1, hour=8, minute=15), replace_existing=True)
     planifier_job("score_weekend", CronTrigger(day_of_week="fri", hour=17, minute=0), replace_existing=True)
-    planifier_job("controle_contrats_garanties", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
     planifier_job("rapport_jardin", CronTrigger(day_of_week="wed", hour=20, minute=0), replace_existing=True)
     planifier_job("score_bien_etre_hebdo", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
     planifier_job("garmin_sync_matinal", CronTrigger(hour=6, minute=0), replace_existing=True)
@@ -71,8 +70,6 @@ def configurer_jobs_planifies(planifier_job) -> None:
     # Phase 8 — Jobs CRON additionnels
     planifier_job("rappel_documents_expirants", CronTrigger(hour=8, minute=0), replace_existing=True)
     planifier_job("rapport_mensuel_auto", CronTrigger(day=1, hour=8, minute=0), replace_existing=True)
-    planifier_job("sync_contrats_alertes", CronTrigger(day_of_week="mon", hour=9, minute=0), replace_existing=True)
-    planifier_job("check_garanties_expirant", CronTrigger(day_of_week="mon", hour=9, minute=15), replace_existing=True)
     planifier_job("bilan_energetique", CronTrigger(day=1, hour=8, minute=30), replace_existing=True)
     planifier_job("rappel_vaccins", CronTrigger(day_of_week="mon", hour=9, minute=0), replace_existing=True)
     planifier_job("sync_entretien_budget", CronTrigger(day=1, hour=6, minute=0), replace_existing=True)

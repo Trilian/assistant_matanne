@@ -5,7 +5,7 @@
 "use client";
 
 import Link from "next/link";
-import { Trophy, Ticket, Star, TrendingUp, AlertTriangle, ScanLine } from "lucide-react";
+import { Trophy, Ticket, Star, TrendingUp, AlertTriangle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -155,11 +155,6 @@ export default function PageJeux() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/jeux/ocr-ticket">
-            <Badge variant="outline" className="cursor-pointer gap-1">
-              <ScanLine className="h-3 w-3" /> OCR ticket
-            </Badge>
-          </Link>
           <Link href="/jeux/performance">
             <Badge variant="outline" className="cursor-pointer gap-1">
               <TrendingUp className="h-3 w-3" /> Performance

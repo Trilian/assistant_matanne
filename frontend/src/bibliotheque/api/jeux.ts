@@ -25,7 +25,6 @@ import type {
   AnalyseIA,
   BacktestResultat,
   NotificationJeux,
-  ResultatTicketOCRJeux,
 } from "@/types/jeux";
 
 // ─── Dashboard ────────────────────────────────────────────
@@ -325,18 +324,5 @@ export async function obtenirHistoriqueCotes(matchId: number): Promise<{
   message?: string;
 }> {
   const { data } = await clientApi.get(`/jeux/paris/cotes-historique/${matchId}`);
-  return data;
-}
-
-// ─── OCR Ticket Jeux ─────────────────────────────────────
-
-export async function analyserTicketJeuxOCR(file: File): Promise<ResultatTicketOCRJeux> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const { data } = await clientApi.post<ResultatTicketOCRJeux>(
-    "/jeux/ocr-ticket",
-    formData,
-    { headers: { "Content-Type": "multipart/form-data" } }
-  );
   return data;
 }

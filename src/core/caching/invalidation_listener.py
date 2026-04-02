@@ -52,12 +52,8 @@ def traiter_notification_cache(payload: str) -> None:
     for pattern in _PATTERNS_INVALIDATION:
         total_invalide += cache.invalidate(pattern=pattern)
 
-    # Le cache fichier L3 ne matche pas toujours les patterns legacy.
-    # On le purge explicitement pour éviter des lectures stales persistantes.
-    cache.clear(levels="l3")
-
     logger.info(
-        "🔄 Invalidation cache DB (%s, payload=%s): %s entrées invalidées + L3 purgé",
+        "🔄 Invalidation cache DB (%s, payload=%s): %s entrées invalidées",
         _CANAL_INVALIDATION,
         payload or "<vide>",
         total_invalide,

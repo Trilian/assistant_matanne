@@ -206,7 +206,7 @@ class TestServicePlanningPlanningComplet:
         mock_planning.nom = "Planning Test"
         mock_planning.semaine_debut = date(2024, 1, 15)
         mock_planning.semaine_fin = date(2024, 1, 21)
-        mock_planning.actif = True
+        mock_planning.statut = "actif"
         mock_planning.genere_par_ia = False
 
         mock_repas = MagicMock()
@@ -605,7 +605,7 @@ class TestServicePlanningGetPlanning:
     def test_get_planning_active(self, service):
         """Test get_planning pour le planning actif."""
         mock_planning = MagicMock()
-        mock_planning.actif = True
+        mock_planning.statut = "actif"
 
         mock_db = MagicMock()
         mock_db.query.return_value.options.return_value.filter.return_value.first.return_value = (

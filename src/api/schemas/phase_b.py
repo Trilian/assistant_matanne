@@ -8,7 +8,7 @@ suggestions IA diverses.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 
 # ═══════════════════════════════════════════════════════════
@@ -33,39 +33,6 @@ class PredictionCoursesResponse(BaseModel):
     """Réponse de prédiction de courses."""
     predictions: list[PredictionArticle] = []
     nb_total: int = 0
-
-    # Champs legacy (rétrocompatibilité tests/scripts)
-    nom: str | None = None
-    categorie: str | None = None
-    frequence_jours: float | None = None
-    score_confiance: float | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def _legacy_single_article(cls, data: object) -> object:
-        if not isinstance(data, dict):
-            return data
-
-        if "predictions" in data:
-            return data
-
-        nom = data.get("nom")
-        if not nom:
-            return data
-
-        categorie = data.get("categorie") or "Autre"
-        frequence = data.get("frequence_jours")
-        confiance = data.get("score_confiance") or 0.5
-        data["predictions"] = [
-            {
-                "nom": nom,
-                "categorie": categorie,
-                "frequence_jours": int(frequence) if frequence is not None else None,
-                "confiance": confiance,
-            }
-        ]
-        data["nb_total"] = data.get("nb_total") or 1
-        return data
 
 
 class HabitudesAchatResponse(BaseModel):

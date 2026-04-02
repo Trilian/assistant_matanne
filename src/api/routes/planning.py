@@ -447,10 +447,9 @@ async def valider_planning(
                 Planning.semaine_debut == planning.semaine_debut,
                 Planning.id != planning_id,
                 Planning.statut == "actif",
-            ).update({"statut": "archive", "actif": False})
+            ).update({"statut": "archive"})
 
             planning.statut = "actif"
-            planning.actif = True
             session.commit()
 
             return MessageResponse(

@@ -118,7 +118,7 @@ class ServicePlanning(
                     .selectinload(Repas.recette)
                     .selectinload(Recette.versions)
                 )
-                .filter(Planning.actif)
+                .filter(Planning.statut == "actif")
                 .order_by(Planning.semaine_debut.desc())
                 .first()
             )
@@ -180,7 +180,7 @@ class ServicePlanning(
             "nom": planning.nom,
             "semaine_debut": planning.semaine_debut.isoformat(),
             "semaine_fin": planning.semaine_fin.isoformat(),
-            "actif": planning.actif,
+            "actif": planning.statut == "actif",
             "genere_par_ia": planning.genere_par_ia,
             "repas_par_jour": repas_par_jour,
         }

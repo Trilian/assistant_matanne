@@ -54,7 +54,7 @@ class BudgetJeuxInteractionService:
                 PariSportif.date_pari >= debut_semaine,
                 PariSportif.date_pari <= fin_semaine,
             )
-            .with_entities(db.func.sum(PariSportif.montant))
+            .with_entities(db.func.sum(PariSportif.mise))
             .scalar() or 0.0
         )
 

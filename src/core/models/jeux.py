@@ -213,7 +213,6 @@ class PariSportif(CreeLeMixin, Base):
     __tablename__ = "jeux_paris_sportifs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    # Champs legacy conservés pour compatibilité tests et anciens callsites.
     user_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     match_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("jeux_matchs.id"), nullable=True
@@ -242,15 +241,6 @@ class PariSportif(CreeLeMixin, Base):
 
     def __repr__(self) -> str:
         return f"<Pari {self.prediction} @ {self.cote} - {self.statut}>"
-
-    @property
-    def montant(self) -> Decimal:
-        """Alias legacy de `mise`."""
-        return self.mise
-
-    @montant.setter
-    def montant(self, value: Decimal | float | int | None) -> None:
-        self.mise = Decimal(str(value or 0))
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -760,14 +750,6 @@ class CoteHistorique(CreeLeMixin, Base):
 
     # Relations
     match: Mapped["Match"] = relationship("Match")
-
-    def __init__(self, **kwargs):
-        # Compatibilité tests legacy qui passent seulement les trois cotes 1N2
-        if "cote" not in kwargs and kwargs.get("cote_domicile") is not None:
-            kwargs["cote"] = kwargs["cote_domicile"]
-        if "marche" not in kwargs:
-            kwargs["marche"] = "1"
-        super().__init__(**kwargs)
 
     def __repr__(self) -> str:
         return f"<Cote {self.bookmaker} {self.marche}={self.cote} @ {self.timestamp}>"

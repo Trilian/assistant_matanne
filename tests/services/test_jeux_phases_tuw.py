@@ -41,6 +41,8 @@ def test_cote_historique_model():
         # Creer historique cotes
         cote1 = CoteHistorique(
             match_id=match.id,
+            cote=1.85,
+            marche="1",
             cote_domicile=1.85,
             cote_nul=3.40,
             cote_exterieur=4.20,

@@ -592,7 +592,6 @@ _LABELS_JOBS: dict[str, str] = {
     "alertes_peremption_48h": "J-04 Alertes péremption 48h (06h00)",
     "rapport_mensuel_budget": "J-07 Rapport mensuel budget (1er/mois 08h15)",
     "score_weekend": "J-08 Score weekend (ven 17h00)",
-    "controle_contrats_garanties": "J-09 Contrats & garanties (1er/mois 09h00)",
     "rapport_jardin": "J-10 Rapport jardin hebdo (mer 20h00)",
     "score_bien_etre_hebdo": "J-11 Score bien-être hebdo (dim 20h00)",
         "sync_calendrier_scolaire": "INNO-14 Sync calendrier scolaire auto (05h30)",

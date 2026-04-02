@@ -42,7 +42,6 @@ class Planning(CreeLeMixin, Base):
         nom: Nom du planning
         semaine_debut: Date de début de semaine
         semaine_fin: Date de fin de semaine
-        actif: Si le planning est actif (legacy, remplacé par statut)
         statut: Statut du planning (propose, valide, actif)
         genere_par_ia: Si généré par l'IA
         notes: Notes supplémentaires
@@ -54,7 +53,6 @@ class Planning(CreeLeMixin, Base):
     nom: Mapped[str] = mapped_column(String(200), nullable=False)
     semaine_debut: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     semaine_fin: Mapped[date] = mapped_column(Date, nullable=False)
-    actif: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     statut: Mapped[str] = mapped_column(String(20), nullable=False, default="actif", index=True)
     genere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
     notes: Mapped[str | None] = mapped_column(Text)

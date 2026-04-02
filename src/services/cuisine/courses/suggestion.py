@@ -284,7 +284,7 @@ class ServiceCoursesIntelligentes(BaseAIService):
                 .selectinload(Recette.ingredients)
                 .selectinload(RecetteIngredient.ingredient),
             )
-            .filter(Planning.actif == True)
+            .filter(Planning.statut == "actif")
             .order_by(Planning.semaine_debut.desc())
             .first()
         )

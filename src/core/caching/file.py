@@ -150,10 +150,8 @@ class CacheFichierN3:
     def clear(self) -> None:
         """Vide le cache L3."""
         try:
-            # Nettoyer aussi d'anciens fichiers .cache (format pickle legacy)
-            for ext in ("*.json", "*.cache"):
-                for filepath in self.cache_dir.glob(ext):
-                    filepath.unlink()
+            for filepath in self.cache_dir.glob("*.json"):
+                filepath.unlink()
         except Exception as e:
             logger.debug(f"Erreur vidage cache L3: {e}")
 
