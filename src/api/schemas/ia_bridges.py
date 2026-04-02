@@ -1,5 +1,5 @@
 """
-Schémas Pydantic — Phase B fonctionnalités & IA.
+Schémas Pydantic — IA Bridges & fonctionnalités avancées.
 
 Couvre prédiction courses, prévision budget, résumé hebdo,
 diagnostic maison, planificateur adaptatif, bridges inter-modules,

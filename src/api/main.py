@@ -68,7 +68,7 @@ from src.api.routes import (
     habitat_router,
     garmin_router,
     ia_avancee_router,
-    innovations_router,
+    fonctionnalites_avancees_router,
     inventaire_router,
     jeux_router,
     maison_router,
@@ -84,7 +84,7 @@ from src.api.routes import (
     voyages_router,
     webhooks_router,
     predictions_router,
-    ia_phase_b_router,
+    ia_bridges_router,
     bridges_router,
     intra_flux_router,
 )
@@ -663,7 +663,7 @@ app.include_router(preferences_router)
 app.include_router(automations_router)
 app.include_router(anti_gaspillage_router)
 app.include_router(ia_avancee_router)
-app.include_router(innovations_router)
+app.include_router(fonctionnalites_avancees_router)
 app.include_router(export_router)
 app.include_router(utilitaires_router)
 app.include_router(recherche_router)
@@ -682,8 +682,8 @@ app.include_router(ws_projets_router)
 app.include_router(ws_admin_logs_router)
 app.include_router(admin_router)
 
-# Phase B — IA, Prédictions, Bridges
+# IA, Prédictions, Bridges
 app.include_router(predictions_router)
-app.include_router(ia_phase_b_router)
+app.include_router(ia_bridges_router)
 app.include_router(bridges_router)
 app.include_router(intra_flux_router)

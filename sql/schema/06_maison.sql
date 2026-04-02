@@ -568,80 +568,6 @@ CREATE TABLE objectifs_autonomie (
 );
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE contrats (
-    id SERIAL PRIMARY KEY,
-    type_contrat VARCHAR(30) NOT NULL CHECK (
-        type_contrat IN (
-            'electricite',
-            'gaz',
-            'eau',
-            'internet',
-            'telephone',
-            'mobile',
-            'assurance_habitation',
-            'assurance_auto',
-            'assurance_sante',
-            'abonnement',
-            'autre'
-        )
-    ),
-    fournisseur VARCHAR(100) NOT NULL,
-    reference_contrat VARCHAR(100),
-    date_debut DATE,
-    date_fin DATE,
-    date_renouvellement DATE,
-    montant_mensuel DECIMAL(10, 2),
-    montant_annuel DECIMAL(10, 2),
-    actif BOOLEAN DEFAULT TRUE,
-    tacite_reconduction BOOLEAN DEFAULT TRUE,
-    fichier_url TEXT,
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_contrats_type ON contrats(type_contrat);
-CREATE INDEX IF NOT EXISTS idx_contrats_actif ON contrats(actif);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE factures (
-    id SERIAL PRIMARY KEY,
-    contrat_id INTEGER REFERENCES contrats(id) ON DELETE CASCADE,
-    date_facture DATE NOT NULL,
-    date_echeance DATE,
-    periode_debut DATE,
-    periode_fin DATE,
-    montant_ht DECIMAL(10, 2),
-    montant_ttc DECIMAL(10, 2) NOT NULL,
-    conso_kwh DECIMAL(10, 2),
-    conso_m3 DECIMAL(10, 2),
-    payee BOOLEAN DEFAULT FALSE,
-    date_paiement DATE,
-    fichier_url TEXT,
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_factures_contrat ON factures(contrat_id);
-CREATE INDEX IF NOT EXISTS idx_factures_date ON factures(date_facture);
-CREATE INDEX IF NOT EXISTS idx_factures_payee ON factures(payee);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE comparatifs (
-    id SERIAL PRIMARY KEY,
-    contrat_id INTEGER REFERENCES contrats(id) ON DELETE CASCADE,
-    date_analyse DATE DEFAULT CURRENT_DATE,
-    fournisseur_suggere VARCHAR(100),
-    offre_nom VARCHAR(200),
-    economie_mensuelle DECIMAL(10, 2),
-    economie_annuelle DECIMAL(10, 2),
-    avantages TEXT,
-    inconvenients TEXT,
-    lien_offre TEXT,
-    applique BOOLEAN DEFAULT FALSE,
-    date_application DATE,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE depenses_home (
     id SERIAL PRIMARY KEY,
     date_depense DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -663,11 +589,7 @@ CREATE TABLE depenses_home (
     magasin VARCHAR(100),
     recurrent BOOLEAN DEFAULT FALSE,
     frequence_mois INTEGER,
-    contrat_id INTEGER REFERENCES contrats(id) ON DELETE
-    SET NULL,
-        facture_id INTEGER REFERENCES factures(id) ON DELETE
-    SET NULL,
-        cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_depenses_home_date ON depenses_home(date_depense);
 CREATE INDEX IF NOT EXISTS idx_depenses_home_categorie ON depenses_home(categorie);
@@ -685,38 +607,6 @@ CREATE TABLE budgets_home (
 -- ============================================================================
 -- PARTIE 5B : TABLES JEUX EXTENSIONS (Euromillions, Cotes, Mise Responsable)
 -- ============================================================================
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE contrats_maison (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(200) NOT NULL,
-    type_contrat VARCHAR(50) NOT NULL,
-    fournisseur VARCHAR(200) NOT NULL,
-    numero_contrat VARCHAR(100),
-    numero_client VARCHAR(100),
-    date_debut DATE NOT NULL,
-    date_fin DATE,
-    date_renouvellement DATE,
-    duree_engagement_mois INTEGER,
-    tacite_reconduction BOOLEAN DEFAULT TRUE,
-    preavis_resiliation_jours INTEGER,
-    date_limite_resiliation DATE,
-    montant_mensuel NUMERIC(10, 2),
-    montant_annuel NUMERIC(10, 2),
-    telephone VARCHAR(20),
-    email VARCHAR(200),
-    espace_client_url VARCHAR(500),
-    statut VARCHAR(30) DEFAULT 'actif',
-    alerte_jours_avant INTEGER DEFAULT 30,
-    alerte_active BOOLEAN DEFAULT TRUE,
-    notes TEXT,
-    document_path VARCHAR(500),
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_contrats_maison_type ON contrats_maison(type_contrat);
-CREATE INDEX IF NOT EXISTS ix_contrats_maison_statut ON contrats_maison(statut);
-CREATE INDEX IF NOT EXISTS ix_contrats_maison_renouvellement ON contrats_maison(date_renouvellement);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE artisans (
@@ -759,54 +649,6 @@ CREATE TABLE interventions_artisans (
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_interventions_artisans_artisan ON interventions_artisans(artisan_id);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE garanties (
-    id SERIAL PRIMARY KEY,
-    nom_appareil VARCHAR(200) NOT NULL,
-    marque VARCHAR(100),
-    modele VARCHAR(100),
-    numero_serie VARCHAR(100),
-    piece VARCHAR(50),
-    date_achat DATE NOT NULL,
-    lieu_achat VARCHAR(200),
-    prix_achat NUMERIC(10, 2),
-    preuve_achat_path VARCHAR(500),
-    duree_garantie_mois INTEGER DEFAULT 24,
-    date_fin_garantie DATE NOT NULL,
-    garantie_etendue BOOLEAN DEFAULT FALSE,
-    date_fin_garantie_etendue DATE,
-    statut VARCHAR(20) DEFAULT 'active',
-    alerte_jours_avant INTEGER DEFAULT 30,
-    alerte_active BOOLEAN DEFAULT TRUE,
-    cout_remplacement NUMERIC(10, 2),
-    notes TEXT,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_garanties_piece ON garanties(piece);
-CREATE INDEX IF NOT EXISTS ix_garanties_fin ON garanties(date_fin_garantie);
-CREATE INDEX IF NOT EXISTS ix_garanties_statut ON garanties(statut);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE incidents_sav (
-    id SERIAL PRIMARY KEY,
-    garantie_id INTEGER NOT NULL REFERENCES garanties(id) ON DELETE CASCADE,
-    date_incident DATE NOT NULL,
-    description TEXT NOT NULL,
-    sous_garantie BOOLEAN DEFAULT TRUE,
-    date_resolution DATE,
-    reparateur VARCHAR(200),
-    artisan_id INTEGER REFERENCES artisans(id),
-    cout_reparation NUMERIC(10, 2),
-    pris_en_charge BOOLEAN DEFAULT FALSE,
-    statut VARCHAR(20) DEFAULT 'ouvert',
-    notes TEXT,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_incidents_sav_garantie ON incidents_sav(garantie_id);
-CREATE INDEX IF NOT EXISTS ix_incidents_sav_statut ON incidents_sav(statut);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE articles_cellier (

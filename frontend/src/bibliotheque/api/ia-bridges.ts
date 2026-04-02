@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════
-// API Phase B — Prédictions, IA, Bridges, Flux
+// API IA Bridges — Prédictions, IA, Bridges, Flux
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";

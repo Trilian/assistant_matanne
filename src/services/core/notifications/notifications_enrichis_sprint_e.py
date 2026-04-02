@@ -1,11 +1,11 @@
-"""
-Service pour gérer les notifications enrichies du Sprint E.
+﻿"""
+Service pour gÃ©rer les notifications enrichies du Sprint E.
 
 Features:
 - E.1: WhatsApp flux courses semaine
-- E.2: WhatsApp rappel activité Jules
-- E.3: WhatsApp résultats paris
-- E.4: Préférences notification granulaires
+- E.2: WhatsApp rappel activitÃ© Jules
+- E.3: WhatsApp rÃ©sultats paris
+- E.4: PrÃ©fÃ©rences notification granulaires
 - E.5: Centre de notifications (historique)
 - E.9-E.16: Jobs CRON notification
 """
@@ -22,9 +22,9 @@ from src.services.core.registry import service_factory
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # E.1-E.3: HANDLERS WHATSAPP ENRICHIS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class HandlersWhatsAppEnrichis:
@@ -35,19 +35,19 @@ class HandlersWhatsAppEnrichis:
         """E.1: Envoie la liste de courses pour la semaine via WhatsApp.
         
         Template:
-        🛒 Courses semaine du [xx/xx]
+        ðŸ›’ Courses semaine du [xx/xx]
         
-        • Article 1 (rayon)
-        • Article 2 (rayon)
+        â€¢ Article 1 (rayon)
+        â€¢ Article 2 (rayon)
         ...
         
-        [Bouton] Ajouter... [Bouton] Éditer entire liste
+        [Bouton] Ajouter... [Bouton] Ã‰diter entire liste
         """
         try:
             from src.services.integrations.whatsapp import envoyer_liste_courses_partagee
 
             with obtenir_contexte_db() as session:
-                # Récupérer la liste de courses active
+                # RÃ©cupÃ©rer la liste de courses active
                 from src.core.models.courses import ListeCourses, ArticleCourses
 
                 today = date.today()
@@ -86,16 +86,16 @@ class HandlersWhatsAppEnrichis:
 
     @staticmethod
     async def envoyer_rappel_activite_jules(sender: str) -> bool:
-        """E.2: Envoie un rappel d'activité pour Jules via WhatsApp.
+        """E.2: Envoie un rappel d'activitÃ© pour Jules via WhatsApp.
         
         Template:
-        👶 Activité Jules de [jour]
+        ðŸ‘¶ ActivitÃ© Jules de [jour]
         
-        🎯 [Activité] - [durée]
-        📍 Lieu: [lieu]
-        🕒 Heure: [heure]
+        ðŸŽ¯ [ActivitÃ©] - [durÃ©e]
+        ðŸ“ Lieu: [lieu]
+        ðŸ•’ Heure: [heure]
         
-        Suggestion IA: [conseil développement]
+        Suggestion IA: [conseil dÃ©veloppement]
         """
         try:
             from src.services.integrations.whatsapp import envoyer_message_whatsapp
@@ -112,14 +112,14 @@ class HandlersWhatsAppEnrichis:
                 )
 
                 if not activities:
-                    logger.info("E.2: Aucune activité Jules programmée aujourd'hui")
+                    logger.info("E.2: Aucune activitÃ© Jules programmÃ©e aujourd'hui")
                     return False
 
-                lines = ["👶 *Activités Jules pour aujourd'hui*\n"]
+                lines = ["ðŸ‘¶ *ActivitÃ©s Jules pour aujourd'hui*\n"]
                 for activity in activities[:5]:
                     heure = activity.heure_debut.strftime("%H:%M") if activity.heure_debut else "?"
                     lines.append(
-                        f"🎯 {activity.nom} - {heure}\n"
+                        f"ðŸŽ¯ {activity.nom} - {heure}\n"
                         f"   Description: {activity.description or 'N/A'}"
                     )
 
@@ -131,15 +131,15 @@ class HandlersWhatsAppEnrichis:
 
     @staticmethod
     async def envoyer_resultats_paris(sender: str) -> bool:
-        """E.3: Envoie résultats des paris sportifs via WhatsApp.
+        """E.3: Envoie rÃ©sultats des paris sportifs via WhatsApp.
         
         Template:
-        ⚽ Résultats matchs
+        âš½ RÃ©sultats matchs
         
-        [Match 1] [Score] ✅/❌ [P&L]
-        [Match 2] [Score] ✅/❌ [P&L]
+        [Match 1] [Score] âœ…/âŒ [P&L]
+        [Match 2] [Score] âœ…/âŒ [P&L]
         
-        💰 Total: [bilan]
+        ðŸ’° Total: [bilan]
         """
         try:
             from src.services.integrations.whatsapp import envoyer_message_whatsapp
@@ -161,19 +161,19 @@ class HandlersWhatsAppEnrichis:
                     logger.info("E.3: Aucun pari cette semaine")
                     return False
 
-                lines = ["⚽ *Résultats paris semaine*\n"]
+                lines = ["âš½ *RÃ©sultats paris semaine*\n"]
                 total_pnl = 0
 
                 for pari in paris[:10]:
-                    result_emoji = "✅" if pari.gagne else "❌"
+                    result_emoji = "âœ…" if pari.gagne else "âŒ"
                     pnl = pari.montant_gagne - pari.mise if pari.gagne else -pari.mise
                     total_pnl += pnl
                     lines.append(
                         f"{result_emoji} {pari.description}: {pari.cote}x "
-                        f"({pari.mise}€ → {pnl:+.0f}€)"
+                        f"({pari.mise}â‚¬ â†’ {pnl:+.0f}â‚¬)"
                     )
 
-                lines.append(f"\n💰 *Total: {total_pnl:+.0f}€*")
+                lines.append(f"\nðŸ’° *Total: {total_pnl:+.0f}â‚¬*")
                 message = "\n".join(lines)
                 return await envoyer_message_whatsapp(sender, message)
         except Exception as e:
@@ -181,9 +181,9 @@ class HandlersWhatsAppEnrichis:
             return False
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # E.4-E.5: SERVICE NOTIFICATIONS ENRICHI
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class ServiceNotificationsEnrichis:
@@ -193,7 +193,7 @@ class ServiceNotificationsEnrichis:
         self.session = session
 
     def obtenir_preferences(self, user_id: str) -> dict[str, Any]:
-        """Récupère les préférences de notification granulaires (E.4)."""
+        """RÃ©cupÃ¨re les prÃ©fÃ©rences de notification granulaires (E.4)."""
         try:
             from src.core.models.notifications import PreferenceNotification
 
@@ -222,7 +222,7 @@ class ServiceNotificationsEnrichis:
     def mettre_a_jour_preferences(
         self, user_id: str, updates: dict[str, Any]
     ) -> bool:
-        """Met à jour les préférences (E.4)."""
+        """Met Ã  jour les prÃ©fÃ©rences (E.4)."""
         try:
             from src.core.models.notifications import PreferenceNotification
 
@@ -233,7 +233,7 @@ class ServiceNotificationsEnrichis:
             )
 
             if not prefs:
-                # Créer les pref par défaut
+                # CrÃ©er les pref par dÃ©faut
                 prefs = PreferenceNotification(user_id=user_id)
                 self.session.add(prefs)
 
@@ -246,7 +246,7 @@ class ServiceNotificationsEnrichis:
                 prefs.modules_actifs = updates["modules_actifs"]
 
             self.session.commit()
-            logger.info(f"E.4: Prefs mises à jour pour {user_id}")
+            logger.info(f"E.4: Prefs mises Ã  jour pour {user_id}")
             return True
         except Exception as e:
             logger.error(f"E.4 Erreur update prefs: {e}")
@@ -265,7 +265,7 @@ class ServiceNotificationsEnrichis:
     ) -> bool:
         """Enregistre une notification dans l'historique (E.5)."""
         try:
-            from src.core.models.notifications_sprint_e import HistoriqueNotification
+            from src.core.models.notifications_historique import HistoriqueNotification
 
             notif = HistoriqueNotification(
                 user_id=user_id,
@@ -279,7 +279,7 @@ class ServiceNotificationsEnrichis:
             )
             self.session.add(notif)
             self.session.commit()
-            logger.debug(f"E.5: Historique enregistré pour {user_id}")
+            logger.debug(f"E.5: Historique enregistrÃ© pour {user_id}")
             return True
         except Exception as e:
             logger.error(f"E.5 Erreur historique: {e}")
@@ -295,7 +295,7 @@ class ServiceNotificationsEnrichis:
     ) -> list[dict[str, Any]]:
         """Liste l'historique des notifications (E.5)."""
         try:
-            from src.core.models.notifications_sprint_e import HistoriqueNotification
+            from src.core.models.notifications_historique import HistoriqueNotification
 
             query = self.session.query(HistoriqueNotification).filter(
                 HistoriqueNotification.user_id == user_id
@@ -331,7 +331,7 @@ class ServiceNotificationsEnrichis:
     def marquer_comme_lu(self, notification_id: int) -> bool:
         """Marque une notification comme lue (E.5)."""
         try:
-            from src.core.models.notifications_sprint_e import HistoriqueNotification
+            from src.core.models.notifications_historique import HistoriqueNotification
 
             notif = self.session.query(HistoriqueNotification).filter_by(id=notification_id).first()
             if notif:
@@ -346,7 +346,7 @@ class ServiceNotificationsEnrichis:
     def marquer_tous_lus(self, user_id: str) -> bool:
         """Marque toutes les notifications comme lues (E.5)."""
         try:
-            from src.core.models.notifications_sprint_e import HistoriqueNotification
+            from src.core.models.notifications_historique import HistoriqueNotification
 
             self.session.query(HistoriqueNotification).filter(
                 HistoriqueNotification.user_id == user_id
@@ -360,7 +360,7 @@ class ServiceNotificationsEnrichis:
 
     @staticmethod
     def _prefs_par_defaut() -> dict[str, Any]:
-        """Retourne les préférences par défaut."""
+        """Retourne les prÃ©fÃ©rences par dÃ©faut."""
         return {
             "canal_prefere": "push",
             "canaux_par_categorie": {
@@ -373,9 +373,9 @@ class ServiceNotificationsEnrichis:
         }
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FACTORY
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @service_factory("service_notifications_enrichis", tags={"notifications", "sprint_e"})

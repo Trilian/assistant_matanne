@@ -1,5 +1,5 @@
 ﻿"""
-Routes API pour les Innovations - Phases 9 et 10 du planning.
+Routes API pour les Fonctionnalités Avancées.
 
 Endpoints :
 - GET  /api/v1/innovations/phase9/*           : Endpoints dedies IA avancee P9
@@ -22,7 +22,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas.errors import REPONSES_IA
-from src.api.schemas.innovations import (
+from src.api.schemas.fonctionnalites_avancees import (
     AlertesContextuellesResponse,
     JournalFamilialAutoResponse,
     ModePiloteAutomatiqueResponse,

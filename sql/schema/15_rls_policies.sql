@@ -104,8 +104,7 @@ shared_tables TEXT[] := ARRAY[
     'versions_pieces', 'couts_travaux', 'logs_statut_objets',
     'recoltes', 'objectifs_autonomie',
     -- Maison extensions
-    'contrats_maison', 'artisans', 'interventions_artisans', 'garanties',
-    'incidents_sav', 'articles_cellier', 'diagnostics_maison',
+    'artisans', 'interventions_artisans', 'articles_cellier', 'diagnostics_maison',
     'estimations_immobilieres', 'checklists_vacances', 'items_checklist',
     'traitements_nuisibles', 'devis_comparatifs', 'lignes_devis',
     'entretiens_saisonniers', 'releves_compteurs',

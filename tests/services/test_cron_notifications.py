@@ -1,5 +1,5 @@
 """
-Tests Phase 8 — Jobs CRON additionnels.
+Tests — Jobs CRON additionnels (notifications).
 
 Couvre src/services/core/cron/jobs.py :
 - P8-01: rappel_documents_expirants (quotidien)

@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, Query
 
 from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_LISTE
-from src.api.schemas.phase_b import (
+from src.api.schemas.ia_bridges import (
     DocumentsExpiresResponse,
     PlanningUnifieResponse,
 )

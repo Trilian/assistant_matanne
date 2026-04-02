@@ -15,15 +15,15 @@ import {
   obtenirScoreFamilleHebdo,
   obtenirSuggestionRepasGarmin,
   telechargerPdfBase64,
-} from "@/bibliotheque/api/innovations";
+} from "@/bibliotheque/api/avance";
 import { toast } from "sonner";
 
-export default function PageInnovations() {
+export default function PageAvance() {
   const invalider = utiliserInvalidation();
-  const { data: modePilote } = utiliserRequete(["innovations", "mode-pilote"], obtenirModePiloteAuto);
-  const { data: scoreFamille } = utiliserRequete(["innovations", "score-famille"], obtenirScoreFamilleHebdo);
-  const { data: journal } = utiliserRequete(["innovations", "journal-familial"], obtenirJournalFamilialAuto);
-  const { data: repasGarmin } = utiliserRequete(["innovations", "garmin-repas"], obtenirSuggestionRepasGarmin);
+  const { data: modePilote } = utiliserRequete(["avance", "mode-pilote"], obtenirModePiloteAuto);
+  const { data: scoreFamille } = utiliserRequete(["avance", "score-famille"], obtenirScoreFamilleHebdo);
+  const { data: journal } = utiliserRequete(["avance", "journal-familial"], obtenirJournalFamilialAuto);
+  const { data: repasGarmin } = utiliserRequete(["avance", "garmin-repas"], obtenirSuggestionRepasGarmin);
 
   const { mutate: basculerModePilote, isPending: basculeEnCours } = utiliserMutation(
     (actif: boolean) =>
@@ -33,7 +33,7 @@ export default function PageInnovations() {
       }),
     {
       onSuccess: (data) => {
-        invalider(["innovations", "mode-pilote"]);
+        invalider(["avance", "mode-pilote"]);
         toast.success(data.actif ? "Mode pilote active" : "Mode pilote desactive");
       },
       onError: () => {
@@ -65,8 +65,8 @@ export default function PageInnovations() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Innovations</h1>
-        <p className="text-muted-foreground">Phase E: pilote auto, score famille, journal et rapports intelligents.</p>
+        <h1 className="text-2xl font-bold tracking-tight">Fonctionnalités Avancées</h1>
+        <p className="text-muted-foreground">Pilote auto, score famille, journal et rapports intelligents.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

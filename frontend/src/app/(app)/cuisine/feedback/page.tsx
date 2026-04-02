@@ -10,7 +10,7 @@ import { Star, Send, Loader2, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Textarea } from "@/composants/ui/textarea";
-import { envoyerFeedbackSemaine, type FeedbackItem } from "@/bibliotheque/api/phase-b";
+import { envoyerFeedbackSemaine, type FeedbackItem } from "@/bibliotheque/api/ia-bridges";
 import { clientApi } from "@/bibliotheque/api/client";
 
 interface RepasData {

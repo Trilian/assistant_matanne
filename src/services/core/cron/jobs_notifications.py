@@ -1,7 +1,5 @@
 """
-Nouveaux jobs CRON pour Sprint E — Notifications enrichies.
-
-E.9-E.16: 8 nouveaux jobs CRON à ajouter à APScheduler
+Jobs CRON pour les notifications enrichies.
 """
 
 import logging
@@ -292,7 +290,7 @@ def job_nettoyage_notifications_anciennes() -> None:
         logger.info("E.13: Début nettoyage notifications anciennes")
 
         with obtenir_contexte_db() as session:
-            from src.core.models.notifications_sprint_e import HistoriqueNotification
+            from src.core.models.notifications_historique import HistoriqueNotification
 
             limite = datetime.now() - timedelta(days=90)
             anciennes = (

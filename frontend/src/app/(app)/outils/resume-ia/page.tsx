@@ -36,7 +36,7 @@ import {
   type DigestQuotidien,
   type FluxCuisine,
   type AnomalieBudget,
-} from "@/bibliotheque/api/phase-b";
+} from "@/bibliotheque/api/ia-bridges";
 
 export default function ResumeHebdoPage() {
   // ── Queries ──

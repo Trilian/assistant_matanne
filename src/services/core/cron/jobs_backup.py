@@ -1,4 +1,4 @@
-"""Jobs CRON de la phase D (admin & automatisations)."""
+"""Jobs CRON pour admin, backup et automatisations."""
 
 from __future__ import annotations
 

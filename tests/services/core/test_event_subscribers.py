@@ -1,4 +1,4 @@
-"""Tests ciblés Sprint D — événements inter-modules et subscribers business."""
+"""Tests ciblés — événements inter-modules et subscribers business."""
 
 # pyright: reportPrivateUsage=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportUnknownVariableType=false
 

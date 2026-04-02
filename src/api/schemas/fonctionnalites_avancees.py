@@ -1,5 +1,5 @@
 """
-Schémas Pydantic pour les routes Innovations — Phase 10.
+Schémas Pydantic pour les routes Fonctionnalités Avancées.
 """
 
 from __future__ import annotations

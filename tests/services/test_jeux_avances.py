@@ -1,5 +1,5 @@
 ﻿"""
-Test unitaire pour les nouvelles fonctionnalites jeux Phase T/U/W
+Test unitaire pour les fonctionnalités avancées jeux.
 """
 
 import pytest

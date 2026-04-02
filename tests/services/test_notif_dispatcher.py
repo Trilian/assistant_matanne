@@ -1,4 +1,4 @@
-"""Tests ciblés Phase 8 pour le dispatcher notifications."""
+"""Tests ciblés pour le dispatcher notifications."""
 
 from src.services.core.notifications.notif_dispatcher import DispatcherNotifications
 

@@ -230,12 +230,12 @@ export default function PageMaison() {
 
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Phase E - Innovations</CardTitle>
+          <CardTitle className="text-base">Fonctionnalités Avancées</CardTitle>
           <CardDescription>Accès rapide aux nouveautés différenciantes.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-2 md:grid-cols-3">
           <Button asChild variant="outline" size="sm">
-            <Link href="/innovations">Pilote auto & score famille</Link>
+            <Link href="/avance">Pilote auto & score famille</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link href="/maison/visualisation">Vue jardin 2D/3D</Link>

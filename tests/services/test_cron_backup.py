@@ -1,4 +1,4 @@
-"""Tests ciblés D10 pour modules cron extraits (jobs_schedule, jobs_phase_d)."""
+"""Tests ciblés pour modules cron extraits (jobs_schedule, jobs_backup)."""
 
 from __future__ import annotations
 
@@ -18,8 +18,8 @@ def test_jobs_schedule_inclut_jobs_phase_d() -> None:
     assert "prediction_courses_weekly" in ids
 
 
-def test_jobs_phase_d_backup_rotation_sans_exception(tmp_path, monkeypatch) -> None:
-    from src.services.core.cron import jobs_phase_d
+def test_jobs_backup_backup_rotation_sans_exception(tmp_path, monkeypatch) -> None:
+    from src.services.core.cron import jobs_backup
 
     class _FakeSession:
         def execute(self, _):
@@ -47,7 +47,7 @@ def test_jobs_phase_d_backup_rotation_sans_exception(tmp_path, monkeypatch) -> N
 
     monkeypatch.setattr("src.core.db.obtenir_contexte_db", _fake_db_ctx)
 
-    jobs_phase_d.executer_job_backup_auto_hebdo_json()
+    jobs_backup.executer_job_backup_auto_hebdo_json()
 
     backups = list((tmp_path / "data" / "exports" / "backup_auto").glob("backup_*.json"))
     assert len(backups) == 1

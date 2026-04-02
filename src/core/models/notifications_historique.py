@@ -1,5 +1,5 @@
 """
-Nouveaux modèles pour Sprint E — Notifications enrichies.
+Modèles pour l'historique des notifications enrichies.
 
 Contient :
 - HistoriqueNotification : Historique centralisé des notifications (E.5)

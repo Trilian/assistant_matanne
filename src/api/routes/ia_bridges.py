@@ -1,5 +1,5 @@
 """
-Routes API — Services IA Phase B.
+Routes API — Services IA Bridges.
 
 Prévision budget, résumé hebdo, diagnostic maison, planificateur adaptatif,
 batch cooking intelligent, conseils Jules, checklist voyage, scores écologiques,
@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, Query
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas.errors import REPONSES_IA, REPONSES_LISTE
-from src.api.schemas.phase_b import (
+from src.api.schemas.ia_bridges import (
     AnalyseNutritionnelleRequest,
     AnalyseNutritionnelleResponse,
     BatchCookingPlanRequest,

@@ -1,5 +1,5 @@
 """
-Tests Phase 9 — Gamification sport + nutrition.
+Tests — Gamification sport + nutrition.
 
 Couvre src/services/dashboard/badges_triggers.py :
 - 9.1: Triggers badges sport (pas/jour, sessions/semaine, calories brûlées)

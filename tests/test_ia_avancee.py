@@ -1,5 +1,5 @@
 """
-Tests Phase B — Services IA, Routes, Bridges, Intra-modules.
+Tests IA Avancée — Services IA, Routes, Bridges, Intra-modules.
 
 Couvre :
 - B4: Services IA (prédiction courses, résumé hebdo, budget, etc.)
@@ -328,8 +328,8 @@ class TestRoutesImport:
         from src.api.routes.predictions import router
         assert router is not None
 
-    def test_import_ia_phase_b_route(self):
-        from src.api.routes.ia_phase_b import router
+    def test_import_ia_bridges_route(self):
+        from src.api.routes.ia_bridges import router
         assert router is not None
 
     def test_import_bridges_route(self):
@@ -345,7 +345,7 @@ class TestSchemasPhaseB:
     """Tests des schémas Pydantic Phase B."""
 
     def test_import_schemas(self):
-        from src.api.schemas.phase_b import (
+        from src.api.schemas.ia_bridges import (
             PredictionCoursesResponse,
             PrevisionBudgetResponse,
             ResumeHebdoResponse,
@@ -356,7 +356,7 @@ class TestSchemasPhaseB:
         assert PrevisionBudgetResponse is not None
 
     def test_schema_validation(self):
-        from src.api.schemas.phase_b import PredictionCoursesResponse
+        from src.api.schemas.ia_bridges import PredictionCoursesResponse
 
         p = PredictionCoursesResponse(
             predictions=[],
