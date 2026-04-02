@@ -42,28 +42,34 @@ class GarminNutritionAdultesInteractionService:
                 - niveau_activite: Niveau détecté (sédentaire/modéré/actif)
                 - details: Explications et sources données
         """
-        from src.core.models import ProfilFamille, DonneesSanteGarmin
+        from src.core.models.users import ResumeQuotidienGarmin, ProfilUtilisateur
 
-        # Récupérer le profil
-        if profil_id:
-            profil = db.query(ProfilFamille).filter(ProfilFamille.id == profil_id).first()
-        else:
-            # Récupérer le premier adulte (Jules = 1 = enfant, donc id > 1)
-            profil = db.query(ProfilFamille).filter(ProfilFamille.id != 1).first()
-
-        if not profil:
+        # Récupérer le profil utilisateur
+        profil_utilisateur = db.query(ProfilUtilisateur).first()
+        if not profil_utilisateur:
             return {
-                "error": "Aucun profil adulte trouvé",
-                "calories_recommended": 2000,  # Défaut standard adulte
-                "macros": {"proteines": 60, "lipides": 70, "glucides": 250},
+                "profile_utilisateur_id": None,
+                "nom_profil": "Utilisateur",
+                "calories_recommended": 2000,
+                "calories_base": 1700,
+                "calories_bonus_activite": 300,
+                "macros": {"proteines_g": 125, "lipides_g": 56, "glucides_g": 250},
                 "niveau_activite": "modéré",
+                "pas_detectes": 0,
+                "calories_actives_detectees": 0,
+                "details": {
+                    "formule": "Valeur par défaut en absence de profil Garmin",
+                    "date_donnees": str(date_type.today()),
+                    "conseil": "Utiliser un objectif nutritionnel adulte équilibré par défaut.",
+                },
             }
 
         # Récupérer les données Garmin les plus récentes (dernier jour)
         donnees_garmin = (
-            db.query(DonneesSanteGarmin)
-            .filter(DonneesSanteGarmin.profil_id == profil.id, DonneesSanteGarmin.date == date_type.today())
-            .order_by(DonneesSanteGarmin.id.desc())
+            db.query(ResumeQuotidienGarmin)
+            .filter(ResumeQuotidienGarmin.user_id == profil_utilisateur.id, 
+                    ResumeQuotidienGarmin.date >= date_type.today())
+            .order_by(ResumeQuotidienGarmin.id.desc())
             .first()
         )
 
@@ -73,17 +79,17 @@ class GarminNutritionAdultesInteractionService:
             niveau_activite = "modéré"
             calories_bonus = 0
         else:
-            # Heuristique basée sur les étapes ou calories
-            etapes = donnees_garmin.etapes or 0
-            calories_brulees = donnees_garmin.calories_brulees or 0
+            # Heuristique basée sur les pas ou calories (colonnes Garmin)
+            pas = donnees_garmin.pas or 0
+            calories_brulees = donnees_garmin.calories_actives or 0
 
-            if etapes > 12000 or calories_brulees > 400:
+            if pas > 12000 or calories_brulees > 400:
                 niveau_activite = "très actif"
                 calories_bonus = 400
-            elif etapes > 8000 or calories_brulees > 250:
+            elif pas > 8000 or calories_brulees > 250:
                 niveau_activite = "actif"
                 calories_bonus = 250
-            elif etapes > 5000 or calories_brulees > 100:
+            elif pas > 5000 or calories_brulees > 100:
                 niveau_activite = "modéré"
                 calories_bonus = 100
             else:
@@ -106,8 +112,8 @@ class GarminNutritionAdultesInteractionService:
         )
 
         return {
-            "profil_id": profil.id,
-            "nom_profil": profil.nom,
+            "profile_utilisateur_id": profil_utilisateur.id,
+            "nom_profil": getattr(profil_utilisateur, 'email', 'Utilisateur'),
             "calories_recommended": calories_total,
             "calories_base": calories_base,
             "calories_bonus_activite": calories_bonus,
@@ -117,8 +123,8 @@ class GarminNutritionAdultesInteractionService:
                 "glucides_g": glucides_g,
             },
             "niveau_activite": niveau_activite,
-            "etapes_detectees": donnees_garmin.etapes if donnees_garmin else 0,
-            "calories_brulees_detectees": donnees_garmin.calories_brulees if donnees_garmin else 0,
+            "pas_detectes": donnees_garmin.pas if donnees_garmin else 0,
+            "calories_actives_detectees": donnees_garmin.calories_actives if donnees_garmin else 0,
             "details": {
                 "formule": "Harris-Benedict + bonus activité Garmin",
                 "date_donnees": str(date_type.today()),
@@ -143,12 +149,9 @@ class GarminNutritionAdultesInteractionService:
         Returns:
             Dict avec liste de recettes recommandées
         """
-        from src.core.models import Recette
+        from src.core.models.recettes import Recette
 
         besoins = self.calculer_besoins_nutritionnels_selon_activite(profil_id=profil_id, db=db)
-
-        if "error" in besoins:
-            return {"error": besoins["error"], "recettes_recommandees": []}
 
         niveau_activite = besoins.get("niveau_activite", "modéré")
 

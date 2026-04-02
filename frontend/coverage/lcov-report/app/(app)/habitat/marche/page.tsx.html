@@ -1,0 +1,430 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for app/(app)/habitat/marche/page.tsx</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../../prettify.css" />
+    <link rel="stylesheet" href="../../../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../../../index.html">All files</a> / <a href="index.html">app/(app)/habitat/marche</a> page.tsx</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">77.77% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>7/9</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">48.93% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>23/47</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">50% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>2/4</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">77.77% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>7/9</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line medium'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">"use client";
+&nbsp;
+import { useState } from "react";
+import { Building2, MapPinned } from "lucide-react";
+import { obtenirMarcheHabitat } from "@/bibliotheque/api/habitat";
+import { EntetePageHabitat } from "@/composants/habitat/entete-page-habitat";
+import { FiltresMarcheHabitat } from "@/composants/habitat/filtres-marche-habitat";
+import { GraphiquesMarcheHabitat } from "@/composants/habitat/graphiques-marche-habitat";
+import { Badge } from "@/composants/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
+import { utiliserRequete } from "@/crochets/utiliser-api";
+&nbsp;
+export default function MarcheHabitatPage() {
+  const [commune, setCommune] = useState("Annecy");
+  const [codePostal, setCodePostal] = useState("74000");
+  const [typeLocal, setTypeLocal] = useState("Maison");
+&nbsp;
+  const { data, refetch, isFetching } = utiliserRequete(
+    ["habitat", "marche", commune, codePostal, typeLocal]<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >,</span></span>
+    () =&gt; obtenirMarcheHabitat({ commune, code_postal: codePostal, type_local: typeLocal, limite: 180 })
+  );
+&nbsp;
+  return (
+    &lt;div className="space-y-6"&gt;
+      &lt;EntetePageHabitat
+        badge="H12 • Marche local"
+        titre="Marche Habitat"
+        description="Lecture du marche immobilier local a partir des transactions DVF publiques, avec historique de prix, volumes et reperes exploitables pour la veille Habitat."
+        stats={[
+          { label: "Transactions", valeur: `${data?.resume.nb_transactions ?? <span class="branch-1 cbranch-no" title="branch not covered" >0}` },</span>
+          { label: "Mediane m2", valeur: data?.resume.prix_m2_median ? `${Math.round(data.resume.prix_m2_median).toLocaleString("fr-FR")} EUR` : <span class="branch-1 cbranch-no" title="branch not covered" >"-" },</span>
+          { label: "Valeur mediane", valeur: data?.resume.valeur_mediane ? `${Math.round(data.resume.valeur_mediane).toLocaleString("fr-FR")} EUR` : <span class="branch-1 cbranch-no" title="branch not covered" >"-" },</span>
+          { label: "Ressource", valeur: data?.source.resource_title?.split(" - ")[0] ?? <span class="branch-1 cbranch-no" title="branch not covered" >"DVF" },</span>
+        ]}
+      /&gt;
+&nbsp;
+      &lt;div className="grid gap-4 xl:grid-cols-[0.92fr_1.08fr]"&gt;
+        &lt;FiltresMarcheHabitat
+          commune={commune}
+          codePostal={codePostal}
+          typeLocal={typeLocal}
+          isFetching={isFetching}
+          onCommuneChange={setCommune}
+          onCodePostalChange={setCodePostal}
+          onTypeLocalChange={setTypeLocal}
+<span class="fstat-no" title="function not covered" >          onRefresh={() =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >            void refetch();</span>
+          }}
+        /&gt;
+&nbsp;
+        &lt;Card&gt;
+          &lt;CardHeader&gt;
+            &lt;CardTitle className="text-base"&gt;Lecture rapide&lt;/CardTitle&gt;
+            &lt;CardDescription&gt;Points de repere directement reutilisables dans la veille et les arbitrages budget.&lt;/CardDescription&gt;
+          &lt;/CardHeader&gt;
+          &lt;CardContent className="grid gap-3 md:grid-cols-2"&gt;
+            &lt;div className="rounded-2xl border p-4"&gt;
+              &lt;p className="text-xs uppercase tracking-[0.18em] text-muted-foreground"&gt;Dernier mois charge&lt;/p&gt;
+              &lt;p className="mt-2 text-lg font-semibold"&gt;{data?.resume.dernier_mois?.mois ?? <span class="branch-1 cbranch-no" title="branch not covered" >"-"}&lt;/p&gt;</span>
+              &lt;p className="text-sm text-muted-foreground"&gt;
+                {data?.resume.dernier_mois?.transactions ?? <span class="branch-1 cbranch-no" title="branch not covered" >0} </span>transaction(s) · {data?.resume.dernier_mois?.prix_m2_median ? `${Math.round(data.resume.dernier_mois.prix_m2_median).toLocaleString("fr-FR")} EUR/m2` : <span class="branch-1 cbranch-no" title="branch not covered" >"prix indisponible"}</span>
+              &lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div className="rounded-2xl border p-4"&gt;
+              &lt;p className="text-xs uppercase tracking-[0.18em] text-muted-foreground"&gt;Surface mediane&lt;/p&gt;
+              &lt;p className="mt-2 text-lg font-semibold"&gt;{data?.resume.surface_mediane ? `${Math.round(data.resume.surface_mediane)} m2` : <span class="branch-1 cbranch-no" title="branch not covered" >"-"}&lt;/p&gt;</span>
+              &lt;p className="text-sm text-muted-foreground"&gt;Permet de cadrer rapidement les comparables Habitat.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div className="rounded-2xl border p-4 md:col-span-2"&gt;
+              &lt;div className="flex flex-wrap items-center gap-2"&gt;
+                &lt;Badge variant="secondary"&gt;&lt;MapPinned className="mr-1 h-3.5 w-3.5" /&gt; {data?.query.commune ?? <span class="branch-1 cbranch-no" title="branch not covered" >commune}&lt;/Badge&gt;</span>
+                &lt;Badge variant="secondary"&gt;{data?.query.code_postal ?? <span class="branch-1 cbranch-no" title="branch not covered" >codePostal}&lt;/Badge&gt;</span>
+                &lt;Badge variant="secondary"&gt;&lt;Building2 className="mr-1 h-3.5 w-3.5" /&gt; {data?.query.type_local ?? <span class="branch-1 cbranch-no" title="branch not covered" >typeLocal}&lt;/Badge&gt;</span>
+              &lt;/div&gt;
+              &lt;p className="mt-3 text-sm text-muted-foreground"&gt;
+                Source: {data?.source.resource_title ?? <span class="branch-1 cbranch-no" title="branch not covered" >"DVF data.gouv"}.</span> Les indicateurs sont calcules sur les transactions publiques filtrees pour la zone courante.
+              &lt;/p&gt;
+            &lt;/div&gt;
+          &lt;/CardContent&gt;
+        &lt;/Card&gt;
+      &lt;/div&gt;
+&nbsp;
+      &lt;GraphiquesMarcheHabitat historique={data?.historique ?? <span class="branch-1 cbranch-no" title="branch not covered" >[]}</span> repartition={data?.repartition_types ?? <span class="branch-1 cbranch-no" title="branch not covered" >[]} /&gt;</span>
+&nbsp;
+      &lt;Card&gt;
+        &lt;CardHeader&gt;
+          &lt;CardTitle className="text-base"&gt;Transactions recentes&lt;/CardTitle&gt;
+          &lt;CardDescription&gt;Extrait recent des ventes utilisees pour le calcul du marche local.&lt;/CardDescription&gt;
+        &lt;/CardHeader&gt;
+        &lt;CardContent className="space-y-3"&gt;
+          {(data?.transactions ?? <span class="branch-1 cbranch-no" title="branch not covered" >[])</span>.slice(0, 8).map((transaction) =&gt; (
+            &lt;div key={`${transaction.date_mutation}-${transaction.adresse ?? <span class="branch-1 cbranch-no" title="branch not covered" >transaction.commune}`} c</span>lassName="rounded-2xl border p-4"&gt;
+              &lt;div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"&gt;
+                &lt;div&gt;
+                  &lt;p className="font-medium"&gt;{transaction.adresse ?? <span class="branch-1 cbranch-no" title="branch not covered" >transaction.commune ?? <span class="branch-2 cbranch-no" title="branch not covered" >"</span>Transaction DVF"}&lt;/p&gt;</span>
+                  &lt;p className="text-sm text-muted-foreground"&gt;
+                    {transaction.date_mutation} · {transaction.type_local ?? <span class="branch-1 cbranch-no" title="branch not covered" >"Local"} </span>· {transaction.commune ?? <span class="branch-1 cbranch-no" title="branch not covered" >"Commune"}</span>
+                  &lt;/p&gt;
+                &lt;/div&gt;
+                &lt;div className="text-sm sm:text-right"&gt;
+                  &lt;p className="font-semibold"&gt;
+                    {transaction.valeur_fonciere ? `${Math.round(transaction.valeur_fonciere).toLocaleString("fr-FR")} EUR` : <span class="branch-1 cbranch-no" title="branch not covered" >"Montant indisponible"}</span>
+                  &lt;/p&gt;
+                  &lt;p className="text-muted-foreground"&gt;
+                    {transaction.prix_m2 ? `${Math.round(transaction.prix_m2).toLocaleString("fr-FR")} EUR/m2` : <span class="branch-1 cbranch-no" title="branch not covered" >"-"}</span>
+                  &lt;/p&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          ))}
+          {(data?.transactions ?? <span class="branch-1 cbranch-no" title="branch not covered" >[])</span>.length === 0 ? <span class="branch-0 cbranch-no" title="branch not covered" >&lt;p className="text-sm text-muted-foreground"&gt;Aucune transaction disponible pour ces filtres.&lt;/p&gt; : null}</span>
+        &lt;/CardContent&gt;
+      &lt;/Card&gt;
+    &lt;/div&gt;
+  );
+}</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-04-02T16:13:33.862Z
+            </div>
+        <script src="../../../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../../../sorter.js"></script>
+        <script src="../../../../block-navigation.js"></script>
+    </body>
+</html>
+    

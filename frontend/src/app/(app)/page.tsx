@@ -667,7 +667,8 @@ export default function PageAccueil() {
         <CardHeader>
           <CardTitle className="text-lg">Actions rapides</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
+          {/* Actions principales */}
           <div className="grid gap-2 grid-cols-2 sm:grid-cols-4">
             <Button variant="outline" asChild className="h-auto py-3 flex-col gap-1">
               <button
@@ -701,6 +702,34 @@ export default function PageAccueil() {
               <Link href="/focus">
                 <Zap className="h-5 w-5" />
                 <span className="text-xs">Mode focus</span>
+              </Link>
+            </Button>
+          </div>
+
+          {/* Actions secondaires pour flux rapide */}
+          <div className="grid gap-2 grid-cols-2 sm:grid-cols-4 pt-2 border-t">
+            <Button variant="ghost" asChild className="h-auto py-2 flex-col gap-1 text-xs">
+              <Link href="/cuisine/recettes">
+                <ChefHat className="h-4 w-4" />
+                <span className="text-xs">Ajouter recette</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild className="h-auto py-2 flex-col gap-1 text-xs">
+              <Link href="/cuisine/courses">
+                <ShoppingCart className="h-4 w-4" />
+                <span className="text-xs">Ajouter course</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild className="h-auto py-2 flex-col gap-1 text-xs">
+              <Link href="/maison/entretien">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-xs">Nouvelle tâche</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild className="h-auto py-2 flex-col gap-1 text-xs">
+              <Link href="/famille/budget">
+                <Euro className="h-4 w-4" />
+                <span className="text-xs">Budget</span>
               </Link>
             </Button>
           </div>

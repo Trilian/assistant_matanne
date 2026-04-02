@@ -128,7 +128,7 @@ Format JSON détaillé."""
             competences_requises=result.get("competences_requises", []),
             materiaux_principaux=result.get("materiaux_principaux", []),
             budget_materialisation=float(result.get("budget_materialisation", 500)),
-            budget_main_oeuvre=float(result.get("budget_main_oeuvre", 0)) or None,
+            budget_main_oeuvre=float(result.get("budget_main_oeuvre") or 0) if result.get("budget_main_oeuvre") else None,
             budget_total_min=float(result.get("budget_total_min", 500)),
             budget_total_max=float(result.get("budget_total_max", 2000)),
             risques=result.get("risques", []),

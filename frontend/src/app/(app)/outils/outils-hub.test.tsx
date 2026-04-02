@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import PageOutils from "@/app/(app)/outils/page";
 
 vi.mock("next/navigation", () => ({
@@ -13,16 +14,34 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+vi.mock("@/bibliotheque/api/avance", () => ({
+  obtenirModePiloteAuto: vi.fn().mockResolvedValue({
+    actif: true,
+    niveau_autonomie: "validation_requise",
+    actions: [],
+  }),
+  configurerModePiloteAuto: vi.fn().mockResolvedValue({
+    actif: true,
+    niveau_autonomie: "validation_requise",
+    actions: [],
+  }),
+}));
+
+function renderWithQuery(ui: React.ReactElement) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+}
+
 describe("PageOutils (Hub)", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("affiche le titre Outils", () => {
-    render(<PageOutils />);
+    renderWithQuery(<PageOutils />);
     expect(screen.getByText(/Outils/)).toBeInTheDocument();
   });
 
   it("affiche les 5 sections", () => {
-    render(<PageOutils />);
+    renderWithQuery(<PageOutils />);
     expect(screen.getByText("Chat IA")).toBeInTheDocument();
     expect(screen.getByText("Notes")).toBeInTheDocument();
     expect(screen.getByText("Météo")).toBeInTheDocument();
@@ -31,7 +50,7 @@ describe("PageOutils (Hub)", () => {
   });
 
   it("rend les liens corrects", () => {
-    render(<PageOutils />);
+    renderWithQuery(<PageOutils />);
     const links = screen.getAllByRole("link");
     const hrefs = links.map((l) => l.getAttribute("href"));
     expect(hrefs).toContain("/outils/chat-ia");

@@ -61,7 +61,7 @@ class InventaireAIService(BaseAIService):
             service_name="inventaire_ia",
         )
 
-    async def predire_consommation(
+    def predire_consommation(
         self,
         ingredient_nom: str,
         stock_actuel_kg: float,
@@ -100,7 +100,7 @@ Propose:
 3. Seuil de réapprovisionnement (= 3x consommation hebdo minimum)
 4. Raison courte"""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = self.call_with_dict_parsing_sync(
             prompt=prompt,
             system_prompt="Tu es expert en gestion des stocks alimentaires.",
         )
@@ -116,7 +116,7 @@ Propose:
             raison=result.get("raison", "Calcul basé sur historique"),
         )
 
-    async def analyse_rotation_fifo(
+    def analyse_rotation_fifo(
         self, ingredients_peremption: list[dict]
     ) -> list[ScoreRotationFIFO]:
         """
@@ -143,7 +143,7 @@ Pour chaque ingrédient, propose:
 
 Format: JSON liste"""
 
-        recommendations = await self.call_with_list_parsing_sync(
+        recommendations = self.call_with_list_parsing_sync(
             prompt=prompt,
             item_model=ScoreRotationFIFO,
             system_prompt="Tu es expert en gestion des périssables. Réponds en JSON structuré.",
@@ -152,7 +152,7 @@ Format: JSON liste"""
         # Trier par priorité décroissante (urgent d'abord)
         return sorted(recommendations, key=lambda x: -x.priorite_consommation)
 
-    async def suggerer_alerte_stock(
+    def suggerer_alerte_stock(
         self,
         articles_bas_stock: list[dict],
         budget_courses_proche: bool = False,
@@ -175,7 +175,7 @@ Courses planifiées: {'Oui, dans 2-3 jours' if budget_courses_proche else 'Non, 
 
 Message court (1-2 lignes) qui décrit l'urgence et propose une action."""
 
-        return await self.call_with_cache(
+        return self.call_with_cache(
             prompt=prompt,
             system_prompt="Tu es assistant de gestion de maison. Sois informatif mais bref.",
             max_tokens=200,

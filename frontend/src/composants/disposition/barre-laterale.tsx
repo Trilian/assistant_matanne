@@ -188,17 +188,6 @@ const LIENS: LienNav[] = [
       { nom: "Performance", chemin: "/jeux/performance", Icone: TrendingUp },
     ],
   },
-  {
-    nom: "IA Avancée",
-    chemin: "/ia-avancee",
-    Icone: Sparkles,
-    sousLiens: [
-      { nom: "Dashboard", chemin: "/ia-avancee", Icone: BarChart3 },
-      { nom: "Suggestions achats", chemin: "/ia-avancee/suggestions-achats", Icone: Lightbulb },
-      { nom: "Suggestions proactives", chemin: "/ia-avancee/suggestions-proactives", Icone: Zap },
-      { nom: "Comparateur recettes", chemin: "/ia-avancee/comparateur-recettes", Icone: BookOpen },
-    ],
-  },
 ];
 
 /**

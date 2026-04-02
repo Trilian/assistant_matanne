@@ -44,10 +44,11 @@ class InventaireBudgetInteractionService:
                 - items_a_renouveler: Liste des articles à racheter
                 - taux_couverture: % d'articles en stock vs période
         """
-        from src.core.models import Article, BudgetFamille
+        from src.core.models.famille import BudgetFamille
+        from src.core.models.inventaire import ArticleInventaire
 
         # Récupérer tous les articles en stock
-        articles_en_stock = db.query(Article).filter(Article.quantite > 0).all()
+        articles_en_stock = db.query(ArticleInventaire).filter(ArticleInventaire.quantite > 0).all()
 
         if not articles_en_stock:
             return {
@@ -64,7 +65,7 @@ class InventaireBudgetInteractionService:
         prix_moyen_par_cat = (
             db.query(
                 BudgetFamille.categorie,
-                func.avg(BudgetFamille.montant_unitaire),
+                func.avg(BudgetFamille.montant),
             )
             .filter(
                 BudgetFamille.date >= date_limite,
@@ -82,7 +83,7 @@ class InventaireBudgetInteractionService:
 
         for article in articles_en_stock:
             cat = article.categorie or "autres"
-            prix_unitaire = article.prix or prix_moyen_map.get(cat, 2.5)
+            prix_unitaire = article.prix_unitaire or prix_moyen_map.get(cat, 2.5)
 
             # Estimer jours restants : quantité * durée_moyenne_consommation
             # Hypothèse: 1 article = 3 jours de consommation par défaut
@@ -138,7 +139,7 @@ class InventaireBudgetInteractionService:
         Returns:
             Dict avec dépenses_par_cat, total, tickets_count
         """
-        from src.core.models import BudgetFamille
+        from src.core.models.famille import BudgetFamille
 
         date_limite = date_type.today() - timedelta(days=jours_lookback)
 

@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
+  CalendarDays,
   Clock,
   Users,
   ChefHat,
@@ -18,6 +19,7 @@ import {
   Printer,
   Baby,
   Share2,
+  ShoppingCart,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -138,7 +140,7 @@ export default function PageDetailRecette({
       </div>
 
       {/* En-tête */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+      <div className="flex flex-col gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             {recette.nom}
@@ -163,7 +165,25 @@ export default function PageDetailRecette({
             ))}
           </div>
         </div>
-        <div className="flex gap-2 shrink-0 print:hidden">
+
+        {/* Actions principales — Ajouter au planning et Ingrédients → Courses */}
+        <div className="flex flex-wrap gap-2 print:hidden">
+          <Button variant="default" asChild>
+            <Link href={`/cuisine/planning?ajouter_recette=${id}`}>
+              <CalendarDays className="mr-2 h-4 w-4" />
+              Ajouter au planning
+            </Link>
+          </Button>
+          <Button variant="default" asChild>
+            <Link href={`/cuisine/courses?ingredients=${id}`}>
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              Ingrédients → Courses
+            </Link>
+          </Button>
+        </div>
+
+        {/* Actions supplémentaires */}
+        <div className="flex gap-2 flex-wrap print:hidden">
           <Button variant="outline" size="sm" onClick={() => adapterPourJules(undefined)} disabled={enVersionJules}>
             <Baby className="mr-1 h-4 w-4" />
             {enVersionJules ? "Génération..." : "Version Jules"}

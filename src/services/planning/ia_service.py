@@ -72,7 +72,7 @@ class PlanningAIService(BaseAIService):
             service_name="planning_ia",
         )
 
-    async def analyser_variete_semaine(
+    def analyser_variete_semaine(
         self, planning_repas: list[dict]
     ) -> AnalyseVariete:
         """
@@ -101,7 +101,7 @@ class PlanningAIService(BaseAIService):
 
 Format JSON."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = self.call_with_dict_parsing_sync(
             prompt=prompt,
             system_prompt="Tu es nutritionniste expert. Évalue la variété de manière objective.",
         )
@@ -114,7 +114,7 @@ Format JSON."""
             recommandations=result.get("recommandations", []),
         )
 
-    async def optimiser_nutrition_semaine(
+    def optimiser_nutrition_semaine(
         self,
         planning_repas: list[dict],
         restrictions: Optional[list[str]] = None,
@@ -150,7 +150,7 @@ Analyse:
 
 Format JSON."""
 
-        result = await self.call_with_dict_parsing_sync(
+        result = self.call_with_dict_parsing_sync(
             prompt=prompt,
             system_prompt="Tu es diététicienne experte. Fournis une analyse nutritionnelle précise.",
         )
@@ -164,7 +164,7 @@ Format JSON."""
             aliments_a_limiter=result.get("aliments_a_limiter", []),
         )
 
-    async def suggerer_simplification(
+    def suggerer_simplification(
         self,
         planning_repas: list[dict],
         nb_heures_cuisine_max: int = 4,
@@ -198,12 +198,13 @@ Identifie:
 
 Format JSON."""
 
-        result = await self.call_with_dict_parsing_sync(
+
+        result = self.call_with_dict_parsing_sync(
             prompt=prompt,
-            system_prompt="Tu es expert culinaire pragmatique. Propose des simplifications réalistes sans sacrifier la variété.",
+            system_prompt="Tu es expert culinaire pragmatique. Propose des simplifications réalistes.",
         )
 
-        return SimplifcationSemaine(
+        return SimplificationSemaine(
             nb_recettes_complexes=int(result.get("nb_recettes_complexes", 0)),
             suggestions_simplification=result.get("suggestions_simplification", []),
             gain_temps_minutes=int(result.get("gain_temps_minutes", 0)),
@@ -211,7 +212,7 @@ Format JSON."""
             charge_globale=result.get("charge_globale", "normal"),
         )
 
-    async def suggerer_recettes_adaptees(
+    def suggerer_recettes_adaptees(
         self,
         contexte: str,
         nb_recettes: int = 3,
@@ -237,7 +238,7 @@ Critères:
 
 Liste format: "1. Recette A\n2. Recette B..."."""
 
-        result = await self.call_with_cache(
+        result = self.call_with_cache(
             prompt=prompt,
             system_prompt="Tu es chef culinaire pragmatique. Suggère des recettes réalistes et savoureuses.",
             max_tokens=300,

@@ -259,20 +259,20 @@ def test_nim4_action_stock_alert(test_db):
 @pytest.mark.integration
 def test_all_nim_services_registered():
     """Tous les NIM1-NIM4 services sont enregistrés dans la factory."""
-    from src.services.core.registry import get_service
+    from src.services.core.registry import registre
 
     # NIM1
-    service_nim1 = get_service("inventaire_budget")
+    service_nim1 = registre.obtenir("inventaire_budget")
     assert service_nim1 is not None
 
     # NIM2
-    service_nim2 = get_service("planning_jardin")
+    service_nim2 = registre.obtenir("planning_jardin")
     assert service_nim2 is not None
 
     # NIM3
-    service_nim3 = get_service("garmin_nutrition_adultes")
+    service_nim3 = registre.obtenir("garmin_nutrition_adultes")
     assert service_nim3 is not None
 
     # NIM4
-    service_nim4 = get_service("dashboard_actions_rapides")
+    service_nim4 = registre.obtenir("dashboard_actions_rapides")
     assert service_nim4 is not None

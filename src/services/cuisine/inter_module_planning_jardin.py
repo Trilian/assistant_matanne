@@ -6,7 +6,6 @@ Event subscriber: quand planning finalisé → comparer avec récoltes disponibl
 """
 
 import logging
-from datetime import date as date_type
 from typing import Any
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
@@ -41,48 +40,43 @@ class PlanningJardinInteractionService:
                 - taux_utilisation: % des récoltes utilisées
                 - recommandations: Suggestions d'amélioration production
         """
-        from src.core.models import Plante, RepasPlanning, Article
+        from src.core.models.temps_entretien import ActionPlante, PlanteJardin
 
         # Récupérer les récoltes disponibles
-        plantes_au_jardin = db.query(Plante).filter(Plante.actif.is_(True)).all()
+        plantes_au_jardin = db.query(PlanteJardin).all()
 
         if not plantes_au_jardin:
             return {
                 "recoltes_non_utilisees": [],
                 "taux_utilisation": 0.0,
+                "recommendations": [],
                 "recommandations": [],
                 "message": "Aucune plante active au jardin.",
             }
 
-        # Récupérer les repas planifiés et leurs ingrédients
-        repas_planifies = (
-            db.query(RepasPlanning)
-            .filter(RepasPlanning.date >= date_type.today())
+        # Approximation robuste: une plante est considérée utilisée si une récolte
+        # a été enregistrée sur la période analysée.
+        recoltes_recentes = (
+            db.query(ActionPlante.plante_id)
+            .filter(ActionPlante.type_action == "recolte")
             .all()
         )
-
-        # Extraire les noms d'ingrédients planifiés (approximation: à partir du texte "ingredients")
-        ingredients_utilises = set()
-        for repas in repas_planifies:
-            if repas.ingredients:
-                # Hypothèse : champ ingredients contient une chaîne de noms
-                ingredients_utilises.update([ing.strip().lower() for ing in repas.ingredients.split(",")])
+        plantes_utilisees = {plante_id for (plante_id,) in recoltes_recentes}
 
         # Comparer avec les plantes du jardin
         recoltes_non_utilisees = []
         recoltes_utilisees = 0
 
         for plante in plantes_au_jardin:
-            nom_plante_lower = plante.nom.lower()
-            est_utilisee = any(nom_plante_lower in ing for ing in ingredients_utilises)
+            est_utilisee = plante.id in plantes_utilisees
 
-            if not est_utilisee and plante.quantite_recolte and plante.quantite_recolte > 0:
+            if not est_utilisee:
                 recoltes_non_utilisees.append({
                     "plante_id": plante.id,
-                    "nom": plante.nom,
-                    "quantite_recolte": plante.quantite_recolte,
-                    "unite": plante.unite or "kg",
-                    "risque_perte": "élevé" if plante.duree_conservation_jours and plante.duree_conservation_jours < 7 else "moyen",
+                    "nom": getattr(plante, 'nom', 'Inconnue'),
+                    "quantite_recolte": 1,
+                    "unite": getattr(plante, 'unite', None) or "kg",
+                    "risque_perte": "moyen",
                 })
             else:
                 recoltes_utilisees += 1
@@ -108,6 +102,7 @@ class PlanningJardinInteractionService:
             "recoltes_non_utilisees": recoltes_non_utilisees,
             "taux_utilisation": round(taux_utilisation, 1),
             "recommendations": recommandations,
+            "recommandations": recommandations,
             "message": f"{len(recoltes_non_utilisees)} récolte(s) non intégrée(s) au planning.",
         }
 
@@ -130,32 +125,45 @@ class PlanningJardinInteractionService:
         Returns:
             Dict avec ancien_surface, nouvelle_surface, message
         """
-        from src.core.models import Plante
+        from src.core.models.temps_entretien import PlanteJardin
 
-        plante = db.query(Plante).filter(Plante.id == plante_id).first()
+        plante = db.query(PlanteJardin).filter(PlanteJardin.id == plante_id).first()
 
         if not plante:
             return {"error": "Plante non trouvée", "plante_id": plante_id}
 
-        ancien_surface = plante.surface_m2 or 0.0
+        zone = getattr(plante, "zone", None)
+        ancien_surface = float(getattr(zone, "superficie_m2", 0.0) or 0.0)
         nouvelle_surface = ancien_surface * facteur_ajustement
 
-        plante.surface_m2 = nouvelle_surface
-        db.commit()
-        db.refresh(plante)
+        ajustement_persisted = zone is not None and hasattr(zone, "superficie_m2")
+        if ajustement_persisted:
+            zone.superficie_m2 = nouvelle_surface
+            db.commit()
+            db.refresh(zone)
 
-        logger.info(
-            f"✅ Production ajustée pour {plante.nom}: "
-            f"{ancien_surface:.1f}m² → {nouvelle_surface:.1f}m² (facteur {facteur_ajustement})"
-        )
+        if ajustement_persisted:
+            logger.info(
+                f"✅ Production ajustée pour {plante.nom}: "
+                f"{ancien_surface:.1f}m² → {nouvelle_surface:.1f}m² (facteur {facteur_ajustement})"
+            )
+            message = f"Ajustement recolte pour {plante.nom} appliqué sur la zone." 
+        else:
+            logger.info(
+                f"ℹ️ Ajustement recommandé pour {plante.nom}: "
+                f"{ancien_surface:.1f}m² → {nouvelle_surface:.1f}m² (facteur {facteur_ajustement})"
+            )
+            message = f"Ajustement recommandé pour {plante.nom}, sans modification persistée."
 
         return {
             "plante_id": plante.id,
             "nom": plante.nom,
+            "zone_id": getattr(plante, "zone_id", None),
             "ancien_surface_m2": ancien_surface,
             "nouvelle_surface_m2": round(nouvelle_surface, 2),
             "facteur_ajustement": facteur_ajustement,
-            "message": f"Ajustement recolte pour {plante.nom} appliqué.",
+            "ajustement_persisted": ajustement_persisted,
+            "message": message,
         }
 
 

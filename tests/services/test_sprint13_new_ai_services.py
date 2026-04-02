@@ -26,8 +26,7 @@ class TestInventaireAIService:
         with patch("src.services.inventaire.ia_service.obtenir_client_ia"):
             return InventaireAIService()
 
-    @pytest.mark.asyncio
-    async def test_predire_consommation(self, service):
+    def test_predire_consommation(self, service):
         """Test prédiction de consommation"""
         service.call_with_dict_parsing_sync = Mock(
             return_value={
@@ -37,7 +36,7 @@ class TestInventaireAIService:
             }
         )
 
-        result = await service.predire_consommation(
+        result = service.predire_consommation(
             ingredient_nom="Tomate",
             stock_actuel_kg=2.0,
             historique_achat_mensuel=[
@@ -51,22 +50,18 @@ class TestInventaireAIService:
         assert result.stock_actuel_kg == 2.0
         assert result.consommation_hebdo_kg == 1.5
 
-    @pytest.mark.asyncio
-    async def test_analyse_rotation_fifo(self, service):
+    def test_analyse_rotation_fifo(self, service):
         """Test analyse FIFO"""
-        service.call_with_list_parsing_sync = AsyncMock(
-            return_value=[
-                {
-                    "ingredient_nom": "Yaourt",
-                    "date_expiration": datetime.now() + timedelta(days=2),
-                    "jours_avant_expiration": 2,
-                    "priorite_consommation": 5,
-                    "recommandation": "Urgent",
-                }
-            ]
-        )
+        mock_result = Mock()
+        mock_result.ingredient_nom = "Yaourt"
+        mock_result.date_expiration = datetime.now() + timedelta(days=2)
+        mock_result.jours_avant_expiration = 2
+        mock_result.priorite_consommation = 5
+        mock_result.recommandation = "Urgent"
 
-        result = await service.analyse_rotation_fifo(
+        service.call_with_list_parsing_sync = Mock(return_value=[mock_result])
+
+        result = service.analyse_rotation_fifo(
             [
                 {
                     "nom": "Yaourt",
@@ -89,7 +84,7 @@ class TestPlanningAIService:
     @pytest.mark.asyncio
     async def test_analyser_variete_semaine(self, service):
         """Test analyse de variété"""
-        service.call_with_dict_parsing_sync = AsyncMock(
+        service.call_with_dict_parsing_sync = Mock(
             return_value={
                 "score_variete": 75,
                 "proteins_bien_repartis": True,
@@ -122,7 +117,7 @@ class TestMeteoImpactAIService:
     @pytest.mark.asyncio
     async def test_analyser_impacts(self, service):
         """Test analyse impacts météo"""
-        service.call_with_list_parsing_sync = AsyncMock(return_value=[])
+        service.call_with_list_parsing_sync = Mock(return_value=[])
 
         previsions = [
             {
@@ -168,7 +163,7 @@ class TestHabitudesAIService:
     @pytest.mark.asyncio
     async def test_analyser_habitude(self, service):
         """Test analyse habitude"""
-        service.call_with_dict_parsing_sync = AsyncMock(
+        service.call_with_dict_parsing_sync = Mock(
             return_value={
                 "frequence_hebdo": 5,
                 "consistency": 0.71,
@@ -203,7 +198,7 @@ class TestProjetsMaisonAIService:
     @pytest.mark.asyncio
     async def test_estimer_projet(self, service):
         """Test estimation projet"""
-        service.call_with_dict_parsing_sync = AsyncMock(
+        service.call_with_dict_parsing_sync = Mock(
             return_value={
                 "complexite": "moyen",
                 "temps_jours": 3,
@@ -242,7 +237,7 @@ class TestNutritionFamilleAIService:
     @pytest.mark.asyncio
     async def test_analyser_nutrition_personne(self, service):
         """Test analyse nutrition"""
-        service.call_with_dict_parsing_sync = AsyncMock(
+        service.call_with_dict_parsing_sync = Mock(
             return_value={
                 "calories_moyenne": 2000,
                 "proteines_g": 50,

@@ -153,7 +153,7 @@ class DashboardActionsRapidesInteractionService:
         try:
             if action_id_lower == "budget_anomaly":
                 # Action: réviser le budget de la catégorie
-                from src.core.models import BudgetFamille
+                from src.core.models.finances import BudgetFamille
 
                 categorie = anomalie_data.get("categorie", "alimentation")
                 montant_limite = anomalie_data.get("montant_limite", 500)
@@ -177,35 +177,41 @@ class DashboardActionsRapidesInteractionService:
 
             elif action_id_lower == "stock_alert":
                 # Action: ajouter article à la liste de courses
-                from src.core.models import Article, ListeCourses, DetailListeCourses
+                from src.core.models.courses import ArticleCourses, ListeCourses
 
-                article_id = anomalie_data.get("article_id")
-                if not article_id:
+                ingredient_id = anomalie_data.get("article_id")  # Parfois nommé article_id
+                if not ingredient_id:
                     return {"action_id": action_id, "statut": "error", "message": "Article non trouvé"}
 
                 # Ajouter à la liste de courses par défaut (ID 1)
-                article = db.query(Article).filter(Article.id == article_id).first()
+                article = db.query(ArticleCourses).filter(ArticleCourses.ingredient_id == ingredient_id).first()
                 if not article:
-                    return {"action_id": action_id, "statut": "error", "message": "Article invalide"}
+                    liste = db.query(ListeCourses).filter(ListeCourses.id == 1).first()
+                    if not liste:
+                        return {"action_id": action_id, "statut": "error", "message": "Liste de courses non trouvée"}
 
-                liste = db.query(ListeCourses).filter(ListeCourses.id == 1).first()
-                if not liste:
-                    return {"action_id": action_id, "statut": "error", "message": "Liste de courses non trouvée"}
+                    # Créer un nouvel article de courses
+                    article = ArticleCourses(
+                        liste_id=liste.id,
+                        ingredient_id=ingredient_id,
+                        quantite_necessaire=1.0,
+                        priorite="moyenne",
+                        achete=False,
+                    )
+                    db.add(article)
+                    db.commit()
 
-                detail = DetailListeCourses(
-                    liste_id=liste.id,
-                    article_id=article.id,
-                    quantite=1,
-                    statut="non_acheté",
-                )
-                db.add(detail)
-                db.commit()
-
-                return {
-                    "action_id": action_id,
-                    "statut": "success",
-                    "message": f"{article.nom} ajouté à la liste de courses",
-                }
+                    return {
+                        "action_id": action_id,
+                        "statut": "success",
+                        "message": f"Article ajouté à la liste de courses",
+                    }
+                else:
+                    return {
+                        "action_id": action_id,
+                        "statut": "success",
+                        "message": "Article déjà dans la liste de courses",
+                    }
 
             elif action_id_lower == "expiration_alert":
                 # Action: suggérer des recettes avec les articles expirant
