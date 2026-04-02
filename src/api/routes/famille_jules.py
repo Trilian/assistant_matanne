@@ -611,7 +611,7 @@ async def obtenir_timeline_famille(
     def _query() -> dict[str, Any]:
         from src.core.models.famille import EvenementFamilial, Jalon
         from src.core.models.jeux import PariSportif
-        from src.core.models.maison import Projet
+        from src.core.models.maison import ElementJardin, JournalJardin, Projet
 
         with executer_avec_session() as session:
             elements: list[dict[str, Any]] = []
@@ -683,7 +683,45 @@ async def obtenir_timeline_famille(
                     }
                 )
 
-            # 4) Matchs mémorables (ROI >= 30% ou gain >= 50)
+            # 4) Journal jardin (arrosage, recolte, taille, etc.)
+            logs_jardin = (
+                session.query(JournalJardin)
+                .order_by(JournalJardin.date.desc(), JournalJardin.cree_le.desc())
+                .limit(limite)
+                .all()
+            )
+            for log in logs_jardin:
+                nom_element = None
+                if getattr(log, "garden_item", None):
+                    nom_element = getattr(log.garden_item, "nom", None)
+                if not nom_element and getattr(log, "garden_item_id", None):
+                    element = (
+                        session.query(ElementJardin)
+                        .filter(ElementJardin.id == log.garden_item_id)
+                        .first()
+                    )
+                    nom_element = element.nom if element else None
+
+                titre = f"Jardin: {log.action}"
+                if nom_element:
+                    titre = f"Jardin: {log.action} - {nom_element}"
+
+                elements.append(
+                    {
+                        "id": f"jardin-{log.id}",
+                        "categorie": "maison",
+                        "date": log.date.isoformat(),
+                        "titre": titre,
+                        "description": log.notes,
+                        "meta": {
+                            "type": "jardinage",
+                            "action": log.action,
+                            "element": nom_element,
+                        },
+                    }
+                )
+
+            # 5) Matchs mémorables (ROI >= 30% ou gain >= 50)
             paris = session.query(PariSportif).order_by(PariSportif.cree_le.desc()).limit(limite).all()
             for p in paris:
                 mise = float(p.mise or 0)

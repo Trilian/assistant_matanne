@@ -455,6 +455,61 @@ class ModeTabletteMagazineResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
+# SPRINT 23 — INNOVATIONS LONG TERME
+# ═══════════════════════════════════════════════════════════
+
+
+class CommandeWhatsApp(BaseModel):
+    """Commande textuelle WhatsApp supportée."""
+
+    commande: str = ""
+    action: str = ""
+
+
+class WhatsAppConversationnelResponse(BaseModel):
+    """Synthèse des commandes conversationnelles WhatsApp disponibles."""
+
+    actif: bool = True
+    nb_commandes: int = 0
+    commandes: list[CommandeWhatsApp] = Field(default_factory=list)
+
+
+class PrixIngredientCompare(BaseModel):
+    """Comparaison de prix pour un ingrédient fréquent."""
+
+    ingredient: str = ""
+    frequence_utilisation: int = 0
+    prix_historique_moyen_eur: float | None = None
+    prix_marche_eur: float | None = None
+    source_prix: str = "historique"
+    variation_pct: float | None = None
+    alerte_soldes: bool = False
+
+
+class ComparateurPrixAutomatiqueResponse(BaseModel):
+    """Veille prix automatique sur les ingrédients les plus fréquents."""
+
+    date_reference: str = ""
+    nb_ingredients_analyses: int = 0
+    ingredients: list[PrixIngredientCompare] = Field(default_factory=list)
+    nb_alertes: int = 0
+    alertes: list[str] = Field(default_factory=list)
+
+
+class EnergieTempsReelResponse(BaseModel):
+    """Vue énergie quasi temps-réel (Linky si disponible, sinon estimation)."""
+
+    linky_connecte: bool = False
+    source: str = "estimation"
+    horodatage: str = ""
+    puissance_instantanee_w: float | None = None
+    consommation_jour_estimee_kwh: float | None = None
+    consommation_mois_kwh: float | None = None
+    tendance: str = "stable"
+    alertes: list[str] = Field(default_factory=list)
+
+
+# ═══════════════════════════════════════════════════════════
 # 10.8 — VEILLE EMPLOI
 # ═══════════════════════════════════════════════════════════
 

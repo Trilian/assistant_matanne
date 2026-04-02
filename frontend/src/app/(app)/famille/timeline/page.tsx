@@ -64,7 +64,7 @@ export default function TimelineFamillePage() {
             Timeline vie familiale
           </h1>
           <p className="text-muted-foreground">
-            Jalons Jules, événements famille, projets maison et moments jeux marquants.
+            Jalons Jules, voyages et événements famille, projets maison, jardinage et moments jeux marquants.
           </p>
         </div>
         <Button variant="outline" onClick={exporterPDF}>

@@ -20,6 +20,8 @@ import json
 import logging
 import secrets
 import base64
+import os
+import re
 from datetime import UTC, date, datetime, timedelta
 from io import BytesIO
 from typing import Any
@@ -89,10 +91,15 @@ from .types import (
     BlocPlanificationAuto,
     CarteMagazineTablette,
     CarteVisuellePartageableResponse,
+    CommandeWhatsApp,
+    ComparateurPrixAutomatiqueResponse,
+    EnergieTempsReelResponse,
     EtapeBatchIntelligente,
     ModeTabletteMagazineResponse,
     PlanificationHebdoCompleteResponse,
+    PrixIngredientCompare,
     PreferenceApprise,
+    WhatsAppConversationnelResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -795,6 +802,179 @@ Retourne un JSON avec:
             cartes=cartes,
         )
 
+    @avec_cache(ttl=1800, key_func=lambda self: "s23_whatsapp_conversationnel")
+    @avec_gestion_erreurs(default_return=None)
+    def obtenir_capacites_whatsapp_conversationnelles(self) -> WhatsAppConversationnelResponse | None:
+        """S23 IN16 : expose les commandes textuelles WhatsApp opérationnelles."""
+        commandes = [
+            CommandeWhatsApp(commande="menu", action="Planning semaine"),
+            CommandeWhatsApp(commande="ce soir", action="Suggestion repas"),
+            CommandeWhatsApp(commande="courses", action="Liste de courses"),
+            CommandeWhatsApp(commande="frigo", action="Etat des stocks"),
+            CommandeWhatsApp(commande="ajoute [article]", action="Ajout article courses"),
+            CommandeWhatsApp(commande="budget", action="Résumé budget"),
+            CommandeWhatsApp(commande="jules", action="Résumé Jules"),
+            CommandeWhatsApp(commande="meteo", action="Météo du jour"),
+            CommandeWhatsApp(commande="energie", action="Résumé énergie"),
+            CommandeWhatsApp(commande="entretien", action="Entretien urgent"),
+        ]
+        return WhatsAppConversationnelResponse(
+            actif=True,
+            nb_commandes=len(commandes),
+            commandes=commandes,
+        )
+
+    @avec_cache(ttl=21600, key_func=lambda self, top_n: f"s23_comparateur_prix_{max(1, min(20, top_n))}_{date.today().isoformat()}")
+    @avec_gestion_erreurs(default_return=None)
+    def analyser_comparateur_prix_automatique(
+        self,
+        top_n: int = 20,
+    ) -> ComparateurPrixAutomatiqueResponse | None:
+        """S23 IN15 : compare les prix des ingrédients fréquents et détecte les soldes."""
+        limite = max(1, min(20, top_n))
+
+        from sqlalchemy import func
+
+        with obtenir_contexte_db() as session:
+            from src.core.models.courses import ArticleCourses
+            from src.core.models.inventaire import ArticleInventaire
+            from src.core.models.recettes import Ingredient
+
+            top_ingredients = (
+                session.query(
+                    Ingredient.nom,
+                    func.count(ArticleCourses.id).label("frequence"),
+                )
+                .join(ArticleCourses, ArticleCourses.ingredient_id == Ingredient.id)
+                .group_by(Ingredient.nom)
+                .order_by(func.count(ArticleCourses.id).desc())
+                .limit(limite)
+                .all()
+            )
+
+            prix_historiques_rows = (
+                session.query(
+                    Ingredient.nom,
+                    func.avg(ArticleInventaire.prix_unitaire).label("prix_moyen"),
+                )
+                .join(ArticleInventaire, ArticleInventaire.ingredient_id == Ingredient.id)
+                .filter(ArticleInventaire.prix_unitaire.isnot(None))
+                .group_by(Ingredient.nom)
+                .all()
+            )
+
+        prix_historiques = {
+            str(row[0]).lower(): float(row[1])
+            for row in prix_historiques_rows
+            if row and row[0] and row[1] is not None
+        }
+
+        ingredients: list[PrixIngredientCompare] = []
+        alertes: list[str] = []
+
+        for nom, frequence in top_ingredients:
+            nom_clean = str(nom)
+            prix_historique = prix_historiques.get(nom_clean.lower())
+            prix_marche, source = self._scraper_prix_marche_ingredient(nom_clean)
+
+            variation_pct: float | None = None
+            alerte_soldes = False
+            if prix_historique and prix_marche and prix_historique > 0:
+                variation_pct = round(((prix_marche - prix_historique) / prix_historique) * 100.0, 1)
+                alerte_soldes = variation_pct <= -10.0
+                if alerte_soldes:
+                    alertes.append(
+                        f"{nom_clean}: baisse détectée ({abs(variation_pct):.1f}% vs historique)"
+                    )
+
+            ingredients.append(
+                PrixIngredientCompare(
+                    ingredient=nom_clean,
+                    frequence_utilisation=int(frequence or 0),
+                    prix_historique_moyen_eur=round(prix_historique, 2) if prix_historique else None,
+                    prix_marche_eur=round(prix_marche, 2) if prix_marche else None,
+                    source_prix=source,
+                    variation_pct=variation_pct,
+                    alerte_soldes=alerte_soldes,
+                )
+            )
+
+        return ComparateurPrixAutomatiqueResponse(
+            date_reference=date.today().isoformat(),
+            nb_ingredients_analyses=len(ingredients),
+            ingredients=ingredients,
+            nb_alertes=len(alertes),
+            alertes=alertes,
+        )
+
+    @avec_cache(ttl=300, key_func=lambda self: f"s23_energie_temps_reel_{datetime.now(UTC).strftime('%Y%m%d%H%M')}")
+    @avec_gestion_erreurs(default_return=None)
+    def obtenir_tableau_bord_energie_temps_reel(self) -> EnergieTempsReelResponse | None:
+        """S23 IN12 : tableau énergie temps-réel (Linky si connecté, sinon estimation)."""
+        from sqlalchemy import func
+
+        with obtenir_contexte_db() as session:
+            from src.core.models.utilitaires import ReleveEnergie
+
+            aujourd_hui = date.today()
+            conso_mois = (
+                session.query(func.sum(ReleveEnergie.consommation))
+                .filter(
+                    ReleveEnergie.type_energie == "electricite",
+                    ReleveEnergie.annee == aujourd_hui.year,
+                    ReleveEnergie.mois == aujourd_hui.month,
+                )
+                .scalar()
+            )
+            conso_mois_prec = (
+                session.query(func.sum(ReleveEnergie.consommation))
+                .filter(
+                    ReleveEnergie.type_energie == "electricite",
+                    ReleveEnergie.annee == (aujourd_hui.year if aujourd_hui.month > 1 else aujourd_hui.year - 1),
+                    ReleveEnergie.mois == (aujourd_hui.month - 1 if aujourd_hui.month > 1 else 12),
+                )
+                .scalar()
+            )
+
+        consommation_mois = float(conso_mois or 0.0)
+        consommation_mois_prec = float(conso_mois_prec or 0.0)
+        jours_ecoules = max(1, date.today().day)
+        consommation_jour = round(consommation_mois / jours_ecoules, 2) if consommation_mois > 0 else None
+
+        puissance_linky = self._lire_puissance_linky_configuree()
+        linky_connecte = puissance_linky is not None
+        puissance_estimee = None
+        if consommation_jour is not None:
+            puissance_estimee = round((consommation_jour / 24.0) * 1000.0, 1)
+
+        puissance_finale = puissance_linky if puissance_linky is not None else puissance_estimee
+
+        if consommation_mois_prec <= 0:
+            tendance = "stable"
+        elif consommation_mois > consommation_mois_prec * 1.1:
+            tendance = "hausse"
+        elif consommation_mois < consommation_mois_prec * 0.9:
+            tendance = "baisse"
+        else:
+            tendance = "stable"
+
+        alertes: list[str] = []
+        if tendance == "hausse":
+            alertes.append("Consommation en hausse par rapport au mois précédent")
+        if puissance_finale is not None and puissance_finale > 4500:
+            alertes.append("Pic de puissance détecté: vérifier les appareils énergivores")
+
+        return EnergieTempsReelResponse(
+            linky_connecte=linky_connecte,
+            source="linky" if linky_connecte else "estimation_releves",
+            horodatage=datetime.now(UTC).isoformat(),
+            puissance_instantanee_w=puissance_finale,
+            consommation_jour_estimee_kwh=consommation_jour,
+            consommation_mois_kwh=round(consommation_mois, 2),
+            tendance=tendance,
+            alertes=alertes,
+        )
+
     # ═══════════════════════════════════════════════════════════
     # 10.4 — BILAN ANNUEL AUTOMATIQUE IA
     # ═══════════════════════════════════════════════════════════
@@ -1333,6 +1513,68 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
         if not habitudes:
             habitudes.append("Aucune habitude forte détectée pour le moment")
         return habitudes
+
+    def _scraper_prix_marche_ingredient(self, nom_ingredient: str) -> tuple[float | None, str]:
+        """Scrape un prix indicatif d'un ingrédient via OpenFoodFacts (best-effort)."""
+        try:
+            import httpx
+
+            with httpx.Client(timeout=1.2) as client:
+                response = client.get(
+                    "https://world.openfoodfacts.org/cgi/search.pl",
+                    params={
+                        "action": "process",
+                        "search_terms": nom_ingredient,
+                        "json": 1,
+                        "page_size": 6,
+                        "fields": "product_name,price",
+                    },
+                )
+                response.raise_for_status()
+                payload = response.json()
+
+            prix_detectes: list[float] = []
+            for produit in payload.get("products", []):
+                prix_brut = str(produit.get("price") or "").strip()
+                prix = self._extraire_prix_float(prix_brut)
+                if prix is not None and prix > 0:
+                    prix_detectes.append(prix)
+
+            if prix_detectes:
+                prix_detectes.sort()
+                mediane = prix_detectes[len(prix_detectes) // 2]
+                return float(mediane), "openfoodfacts"
+        except Exception:
+            logger.debug("Scraping prix indisponible pour %s", nom_ingredient, exc_info=True)
+
+        return None, "historique"
+
+    def _extraire_prix_float(self, valeur: str) -> float | None:
+        """Extrait un montant numérique depuis une chaîne de prix libre."""
+        if not valeur:
+            return None
+        normalisee = valeur.replace(",", ".")
+        match = re.search(r"(\d+(?:\.\d{1,2})?)", normalisee)
+        if not match:
+            return None
+        try:
+            return float(match.group(1))
+        except (TypeError, ValueError):
+            return None
+
+    def _lire_puissance_linky_configuree(self) -> float | None:
+        """Lit une puissance Linky instantanée depuis la configuration (intégration best-effort)."""
+        if os.getenv("LINKY_ENABLED", "false").lower() not in {"1", "true", "yes", "on"}:
+            return None
+
+        brute = os.getenv("LINKY_REALTIME_WATTS", "").strip()
+        if not brute:
+            return None
+
+        try:
+            return float(brute)
+        except ValueError:
+            return None
 
     def _jours_depuis_repas_poisson(self) -> int:
         """Retourne le nombre de jours depuis le dernier repas poisson (max 365)."""

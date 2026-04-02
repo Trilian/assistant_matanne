@@ -63,6 +63,9 @@ from src.api.schemas.fonctionnalites_avancees import (
     ModeVacancesConfigurationRequest,
     ModeVacancesResponse,
     PlanificationHebdoCompleteResponse,
+    ComparateurPrixAutomatiqueResponse,
+    EnergieTempsReelResponse,
+    WhatsAppConversationnelResponse,
 )
 from src.api.utils import gerer_exception_api
 
@@ -543,6 +546,52 @@ async def phasee_s22_mode_tablette_magazine(
     service = _get_service()
     result = service.obtenir_mode_tablette_magazine()
     return result or ModeTabletteMagazineResponse()
+
+
+@router.get(
+    "/phasee/s23/whatsapp-conversationnel",
+    response_model=WhatsAppConversationnelResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S23 IN16 WhatsApp conversationnel",
+)
+@gerer_exception_api
+async def phasee_s23_whatsapp_conversationnel(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    result = service.obtenir_capacites_whatsapp_conversationnelles()
+    return result or WhatsAppConversationnelResponse()
+
+
+@router.get(
+    "/phasee/s23/comparateur-prix-auto",
+    response_model=ComparateurPrixAutomatiqueResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S23 IN15 Comparateur prix automatique",
+)
+@gerer_exception_api
+async def phasee_s23_comparateur_prix_auto(
+    top_n: int = Query(20, ge=1, le=20),
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    result = service.analyser_comparateur_prix_automatique(top_n=top_n)
+    return result or ComparateurPrixAutomatiqueResponse()
+
+
+@router.get(
+    "/phasee/s23/energie-temps-reel",
+    response_model=EnergieTempsReelResponse,
+    responses=RESPONSES_IA_TYPED,
+    summary="S23 IN12 Tableau énergie temps-réel",
+)
+@gerer_exception_api
+async def phasee_s23_energie_temps_reel(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    service = _get_service()
+    result = service.obtenir_tableau_bord_energie_temps_reel()
+    return result or EnergieTempsReelResponse()
 
 
 @router.get(

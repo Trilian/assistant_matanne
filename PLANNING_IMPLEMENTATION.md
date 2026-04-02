@@ -1283,7 +1283,7 @@ def get_inventaire_ai_service() -> InventaireAIService:
 
 ---
 
-## 25. Sprint 23 — Innovations long terme
+## 25. Sprint 23 — Innovations long terme ✅ TERMINÉ
 
 > **Objectif** : Implémenter les innovations les plus ambitieuses
 > **Effort** : Élevé | **Impact** : Différenciation majeure
@@ -1300,10 +1300,23 @@ def get_inventaire_ai_service() -> InventaireAIService:
 
 ### Critères de validation
 
-- [ ] WhatsApp conversationnel : au moins 5 commandes textuelles fonctionnelles
-- [ ] Comparateur prix : scraping + alertes sur top 20 ingrédients
-- [ ] Énergie temps-réel si Linky connecté
-- [ ] Timeline enrichie avec tous les modules
+- [x] WhatsApp conversationnel : au moins 5 commandes textuelles fonctionnelles
+- [x] Comparateur prix : scraping + alertes sur top 20 ingrédients
+- [x] Énergie temps-réel si Linky connecté
+- [x] Timeline enrichie avec tous les modules
+
+### Statut d'implémentation Sprint 23
+
+- Backend: endpoints Sprint 23 exposés sur `/api/v1/innovations/phasee/s23/*`.
+    - `GET /whatsapp-conversationnel`
+    - `GET /comparateur-prix-auto?top_n=20`
+    - `GET /energie-temps-reel`
+- Service innovations: nouvelles capacités Sprint 23 implémentées dans `src/services/innovations/service.py`.
+    - Capacités conversationnelles WhatsApp (10 commandes textuelles documentées)
+    - Comparateur prix auto avec scraping best-effort OpenFoodFacts + alertes de soldes
+    - Tableau énergie quasi temps-réel (source Linky si configurée, sinon estimation sur relevés)
+- Timeline famille: enrichie avec les événements du journal jardin (`JournalJardin`) dans `src/api/routes/famille_jules.py`.
+- Tests API: couverture Sprint 23 ajoutée dans `tests/api/test_innovations.py`.
 
 ---
 
@@ -1602,7 +1615,7 @@ Les articles existants hériteront de la date actuelle lors de la migration SQL.
 - [x] Apprentissage préférences, planification auto, batch cooking IA, cartes visuelles, mode tablette
 
 ### Sprint 23 — Innovations long terme
-- [ ] WhatsApp conversationnel, comparateur prix, énergie temps-réel, timeline enrichie
+- [x] WhatsApp conversationnel, comparateur prix, énergie temps-réel, timeline enrichie
 
 ---
 

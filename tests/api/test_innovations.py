@@ -533,6 +533,89 @@ class TestSprint22Innovations:
 
 
 # ═══════════════════════════════════════════════════════════
+# Sprint 23 — Innovations long terme
+# ═══════════════════════════════════════════════════════════
+
+
+class TestSprint23Innovations:
+    """Tests des endpoints Sprint 23 (WhatsApp conversationnel, prix auto, énergie temps-réel)."""
+
+    def test_whatsapp_conversationnel(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import CommandeWhatsApp, WhatsAppConversationnelResponse
+
+        mock_innovations_service.obtenir_capacites_whatsapp_conversationnelles.return_value = WhatsAppConversationnelResponse(
+            actif=True,
+            nb_commandes=6,
+            commandes=[
+                CommandeWhatsApp(commande="menu", action="Planning"),
+                CommandeWhatsApp(commande="courses", action="Courses"),
+            ],
+        )
+
+        response = client.get(
+            "/api/v1/innovations/phasee/s23/whatsapp-conversationnel",
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["actif"] is True
+        assert data["nb_commandes"] >= 5
+
+    def test_comparateur_prix_auto(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import ComparateurPrixAutomatiqueResponse, PrixIngredientCompare
+
+        mock_innovations_service.analyser_comparateur_prix_automatique.return_value = ComparateurPrixAutomatiqueResponse(
+            date_reference="2026-04-02",
+            nb_ingredients_analyses=20,
+            ingredients=[
+                PrixIngredientCompare(
+                    ingredient="tomate",
+                    frequence_utilisation=12,
+                    prix_historique_moyen_eur=2.5,
+                    prix_marche_eur=2.0,
+                    source_prix="openfoodfacts",
+                    variation_pct=-20.0,
+                    alerte_soldes=True,
+                )
+            ],
+            nb_alertes=1,
+            alertes=["tomate: baisse détectée (20.0% vs historique)"],
+        )
+
+        response = client.get(
+            "/api/v1/innovations/phasee/s23/comparateur-prix-auto?top_n=20",
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["nb_ingredients_analyses"] == 20
+        assert data["nb_alertes"] >= 1
+
+    def test_energie_temps_reel(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import EnergieTempsReelResponse
+
+        mock_innovations_service.obtenir_tableau_bord_energie_temps_reel.return_value = EnergieTempsReelResponse(
+            linky_connecte=True,
+            source="linky",
+            horodatage="2026-04-02T10:15:00Z",
+            puissance_instantanee_w=3200.0,
+            consommation_jour_estimee_kwh=11.5,
+            consommation_mois_kwh=138.0,
+            tendance="stable",
+            alertes=[],
+        )
+
+        response = client.get(
+            "/api/v1/innovations/phasee/s23/energie-temps-reel",
+            headers=auth_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["source"] in {"linky", "estimation_releves"}
+        assert data["consommation_mois_kwh"] is not None
+
+
+# ═══════════════════════════════════════════════════════════
 # 10.25 — ADMIN RESET MODULE
 # ═══════════════════════════════════════════════════════════
 
