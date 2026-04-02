@@ -230,8 +230,8 @@ async def _traiter_message_texte(sender: str, texte: str) -> None:
     # Nouvelles commandes notifications
     elif texte_lower in ("jules", "b�b�", "bebe"):
         await _envoyer_resume_jules(sender)
-    elif texte_lower.startswith("ajouter "):
-        article = texte.strip()[8:].strip()
+    elif texte_lower.startswith("ajouter ") or texte_lower.startswith("ajoute "):
+        article = texte.strip().split(" ", 1)[1].strip() if " " in texte.strip() else ""
         await _ajouter_article_courses_nlp(sender, article)
     elif texte_lower == "budget":
         await _envoyer_resume_budget(sender)

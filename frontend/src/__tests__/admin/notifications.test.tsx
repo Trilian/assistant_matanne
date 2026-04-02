@@ -10,6 +10,17 @@ vi.mock("date-fns", () => ({
 vi.mock("@/bibliotheque/api/admin", () => ({
   envoyerNotificationTest: vi.fn(),
   envoyerNotificationTestTousCanaux: vi.fn(),
+  listerTemplatesNotifications: vi.fn(async () => ({
+    status: "ok",
+    templates: { whatsapp: [], email: [] },
+    total: 0,
+  })),
+  listerQueueNotifications: vi.fn(async () => ({
+    items: [],
+    total_users_pending: 0,
+  })),
+  relancerQueueNotifications: vi.fn(),
+  supprimerQueueNotifications: vi.fn(),
 }));
 
 import {

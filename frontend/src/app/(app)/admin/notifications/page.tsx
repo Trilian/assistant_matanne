@@ -29,6 +29,7 @@ import {
   envoyerNotificationTest,
   envoyerNotificationTestTousCanaux,
   listerQueueNotifications,
+  listerTemplatesNotifications,
   relancerQueueNotifications,
   supprimerQueueNotifications,
 } from "@/bibliotheque/api/admin";
@@ -60,6 +61,10 @@ export default function PageAdminNotifications() {
   const { data: queueData, refetch: rafraichirQueue } = utiliserRequete(
     ["admin", "notifications", "queue"],
     () => listerQueueNotifications({ limit: 30 })
+  );
+  const { data: templatesData } = utiliserRequete(
+    ["admin", "notifications", "templates"],
+    () => listerTemplatesNotifications()
   );
 
   const envoyerTest = async () => {
@@ -296,6 +301,40 @@ export default function PageAdminNotifications() {
                 </div>
               </div>
             ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Templates Sprint 16</CardTitle>
+            <CardDescription>
+              Templates WhatsApp et Email actuellement disponibles côté backend.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium">WhatsApp</p>
+              <div className="space-y-1">
+                {(templatesData?.templates?.whatsapp ?? []).map((t) => (
+                  <div key={t.id} className="text-sm flex items-center justify-between gap-2 rounded border p-2">
+                    <span>{t.label}</span>
+                    <Badge variant="outline">{t.trigger}</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Email</p>
+              <div className="space-y-1">
+                {(templatesData?.templates?.email ?? []).map((t) => (
+                  <div key={t.id} className="text-sm flex items-center justify-between gap-2 rounded border p-2">
+                    <span>{t.label}</span>
+                    <Badge variant="outline">{t.trigger}</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
           </CardContent>
         </Card>
 

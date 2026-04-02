@@ -178,4 +178,37 @@ describe("PageAdminJobs — exécution dry-run", () => {
       expect(screen.getByText("Erreur")).toBeInTheDocument();
     });
   });
+
+  it("affiche l'état terminé quand l'exécution réussit", async () => {
+    mockedApi.get.mockImplementation(async (url: string) => {
+      if (url === "/admin/jobs") {
+        return { data: JOBS_MOCK };
+      }
+      if (url.includes("/admin/jobs/") && url.endsWith("/logs")) {
+        return {
+          data: {
+            job_id: "job_push_quotidien",
+            nom: "Push quotidien 20h",
+            logs: [],
+            total: 0,
+          },
+        };
+      }
+      return { data: [] };
+    });
+    mockedApi.post.mockResolvedValue({ data: { status: "ok" } });
+
+    renderWithQuery(React.createElement(PageAdminJobs));
+
+    await waitFor(() => {
+      expect(screen.getByText("Push quotidien 20h")).toBeInTheDocument();
+    });
+
+    const runButton = screen.getByRole("button", { name: /Exécuter Push quotidien 20h/i });
+    fireEvent.click(runButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Terminé")).toBeInTheDocument();
+    });
+  });
 });

@@ -678,6 +678,27 @@ _LABELS_JOBS: dict[str, str] = {
     "job_nutrition_adultes_weekly": "S15.6 Bilan nutrition adultes Garmin (dim 20h15)",
     "job_briefing_matinal_push": "S15.7 Briefing matinal IA (07h00)",
     "job_jardin_feedback_planning": "S15.8 Feedback jardin → planning (dim 18h30)",
+    "s16_resume_weekend_whatsapp": "S16.3 Résumé weekend suggestions WhatsApp (ven 18h00)",
+    "s16_rappel_entretien_whatsapp": "S16.6 Rappel entretien maison WhatsApp (08h10)",
+    "s16_bilan_nutrition_whatsapp": "S16.5 Bilan nutrition semaine WhatsApp (dim 20h30)",
+    "s16_rapport_famille_mensuel": "S16.8 Rapport mensuel famille complet email/PDF (1er 09h00)",
+    "s16_rapport_maison_trimestriel": "S16.9 Rapport trimestriel maison email/PDF (T+1 09h10)",
+}
+
+_NOTIFICATION_TEMPLATES: dict[str, list[dict[str, str]]] = {
+    "whatsapp": [
+        {"id": "recette_du_jour", "label": "S16.1 Suggestion recette du jour", "trigger": "CRON 11:30"},
+        {"id": "diagnostic_maison", "label": "S16.2 Alerte diagnostic maison", "trigger": "Événement"},
+        {"id": "resume_weekend", "label": "S16.3 Résumé weekend suggestions", "trigger": "CRON ven 18:00"},
+        {"id": "budget_depassement", "label": "S16.4 Alerte budget dépassement", "trigger": "Événement"},
+        {"id": "bilan_nutrition", "label": "S16.5 Bilan nutrition semaine", "trigger": "CRON dim 20:30"},
+        {"id": "rappel_entretien", "label": "S16.6 Rappel entretien maison", "trigger": "CRON quotidien"},
+        {"id": "commande_vocale", "label": "S16.7 Commande vocale rapide", "trigger": "À la demande"},
+    ],
+    "email": [
+        {"id": "rapport_famille_mensuel_complet", "label": "S16.8 Rapport mensuel famille complet", "trigger": "Mensuel 1er 09:00"},
+        {"id": "rapport_maison_trimestriel", "label": "S16.9 Rapport trimestriel maison", "trigger": "Trimestriel"},
+    ],
 }
 
 # Vues SQL explicitement autorisées (lecture seule)
@@ -2153,6 +2174,23 @@ async def envoyer_notification_test_all(
         details={"inclure_whatsapp": body.inclure_whatsapp},
     )
     return result
+
+
+@router.get(
+    "/notifications/templates",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Lister les templates notifications admin",
+    description="Retourne les templates disponibles (WhatsApp + Email), incluant Sprint 16.",
+)
+@gerer_exception_api
+async def lister_templates_notifications(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    return {
+        "status": "ok",
+        "templates": _NOTIFICATION_TEMPLATES,
+        "total": sum(len(v) for v in _NOTIFICATION_TEMPLATES.values()),
+    }
 
 
 @router.get(

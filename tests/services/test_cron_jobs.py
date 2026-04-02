@@ -325,6 +325,30 @@ class TestSprint15DryRun:
 
         assert resultat["status"] == "dry_run"
         assert resultat["job_id"] == job_id
+
+
+class TestSprint16DryRun:
+    """Les jobs Sprint 16 doivent être exécutables en dry-run via le registre admin."""
+
+    @pytest.mark.parametrize(
+        "job_id",
+        [
+            "s16_resume_weekend_whatsapp",
+            "s16_rappel_entretien_whatsapp",
+            "s16_bilan_nutrition_whatsapp",
+            "s16_rapport_famille_mensuel",
+            "s16_rapport_maison_trimestriel",
+        ],
+    )
+    def test_job_sprint_16_supporte_dry_run(self, job_id):
+        """Chaque job Sprint 16 doit renvoyer un statut dry_run sans exécution réelle."""
+        from src.services.core.cron.jobs import executer_job_par_id
+
+        resultat = executer_job_par_id(job_id, dry_run=True)
+
+        assert resultat["status"] == "dry_run"
+        assert resultat["job_id"] == job_id
+        assert resultat["dry_run"] is True
         assert resultat["dry_run"] is True
 
 

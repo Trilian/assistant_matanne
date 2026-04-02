@@ -230,6 +230,21 @@ export interface NotificationTestAllPayload {
   inclure_whatsapp?: boolean
 }
 
+export interface NotificationTemplateInfo {
+  id: string
+  label: string
+  trigger: string
+}
+
+export interface NotificationTemplatesResponse {
+  status: string
+  templates: {
+    whatsapp: NotificationTemplateInfo[]
+    email: NotificationTemplateInfo[]
+  }
+  total: number
+}
+
 export interface NotificationTestAllResponse {
   resultats: Record<string, boolean>
   canaux_testes: string[]
@@ -727,6 +742,11 @@ export async function envoyerNotificationTestTousCanaux(
   payload: NotificationTestAllPayload,
 ): Promise<NotificationTestAllResponse> {
   const { data } = await clientApi.post('/api/v1/admin/notifications/test-all', payload)
+  return data
+}
+
+export async function listerTemplatesNotifications(): Promise<NotificationTemplatesResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/notifications/templates')
   return data
 }
 

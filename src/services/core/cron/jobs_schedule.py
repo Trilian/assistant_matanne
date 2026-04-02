@@ -100,3 +100,10 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("job_nutrition_adultes_weekly", CronTrigger(day_of_week="sun", hour=20, minute=15), replace_existing=True)
     planifier_job("job_briefing_matinal_push", CronTrigger(hour=7, minute=0), replace_existing=True)
     planifier_job("job_jardin_feedback_planning", CronTrigger(day_of_week="sun", hour=18, minute=30), replace_existing=True)
+
+    # Sprint 16 — Notifications WhatsApp et Email
+    planifier_job("s16_resume_weekend_whatsapp", CronTrigger(day_of_week="fri", hour=18, minute=0), replace_existing=True)
+    planifier_job("s16_rappel_entretien_whatsapp", CronTrigger(hour=8, minute=10), replace_existing=True)
+    planifier_job("s16_bilan_nutrition_whatsapp", CronTrigger(day_of_week="sun", hour=20, minute=30), replace_existing=True)
+    planifier_job("s16_rapport_famille_mensuel", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
+    planifier_job("s16_rapport_maison_trimestriel", CronTrigger(month="1,4,7,10", day=1, hour=9, minute=10), replace_existing=True)
