@@ -29,6 +29,10 @@ from src.services.utilitaires.assistant_proactif import (
     AssistantProactifService,
     obtenir_service_assistant_proactif,
 )
+from src.services.utilitaires.inter_module_dashboard_actions import (
+    DashboardActionsRapidesInteractionService,
+    get_dashboard_actions_rapides_service,
+)
 
 __all__ = [
     "NotesService",
@@ -42,6 +46,7 @@ __all__ = [
     "BriefingMatinalService",
     "ChatContexteMultiModuleService",
     "AssistantProactifService",
+    "DashboardActionsRapidesInteractionService",
     "obtenir_notes_service",
     "obtenir_journal_service",
     "obtenir_contacts_service",
@@ -53,4 +58,5 @@ __all__ = [
     "obtenir_service_briefing_matinal",
     "obtenir_service_chat_contexte",
     "obtenir_service_assistant_proactif",
+    "get_dashboard_actions_rapides_service",
 ]

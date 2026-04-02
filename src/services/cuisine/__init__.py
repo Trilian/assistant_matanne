@@ -91,4 +91,22 @@ def __getattr__(name: str):
         )
 
         return obtenir_service_saison_menu_interaction
+    if name == "get_inventaire_budget_service":
+        from src.services.cuisine.inter_module_inventaire_budget import (
+            get_inventaire_budget_service,
+        )
+
+        return get_inventaire_budget_service
+    if name == "get_planning_jardin_service":
+        from src.services.cuisine.inter_module_planning_jardin import (
+            get_planning_jardin_service,
+        )
+
+        return get_planning_jardin_service
+    if name == "get_garmin_nutrition_adultes_service":
+        from src.services.cuisine.inter_module_garmin_nutrition_adultes import (
+            get_garmin_nutrition_adultes_service,
+        )
+
+        return get_garmin_nutrition_adultes_service
     raise AttributeError(f"module 'src.services.cuisine' has no attribute '{name}'")

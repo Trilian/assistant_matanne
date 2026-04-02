@@ -485,7 +485,7 @@ async def enrichissement_contacts(
 )
 @gerer_exception_api
 async def tendances_loto(
-    jeu: str = Query("loto", regex="^(loto|euromillions)$", description="Type de jeu"),
+    jeu: str = Query("loto", pattern="^(loto|euromillions)$", description="Type de jeu"),
     user: dict[str, Any] = Depends(require_auth),
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):

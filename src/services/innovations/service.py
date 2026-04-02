@@ -31,6 +31,19 @@ from src.core.validation.sanitizer import NettoyeurEntrees
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
 
+from .famille_score import calculer_score_famille_hebdo as calculer_score_famille_hebdo_module
+from .journal_familial import (
+    generer_journal_familial_auto as generer_journal_familial_auto_module,
+    generer_journal_familial_pdf as generer_journal_familial_pdf_module,
+    generer_rapport_mensuel_pdf as generer_rapport_mensuel_pdf_module,
+)
+from .mode_pilote import (
+    configurer_mode_pilote_automatique as configurer_mode_pilote_automatique_module,
+    lire_config_mode_pilote as lire_config_mode_pilote_module,
+    normaliser_niveau_autonomie as normaliser_niveau_autonomie_module,
+    obtenir_mode_pilote_automatique as obtenir_mode_pilote_automatique_module,
+    proposer_repas_adapte_garmin as proposer_repas_adapte_garmin_module,
+)
 from .types import (
     AlertesContextuellesResponse,
     JournalFamilialAutoResponse,
@@ -97,37 +110,11 @@ class InnovationsService(BaseAIService):
     @staticmethod
     def _normaliser_niveau_autonomie(niveau: str | None) -> str:
         """Normalise le niveau d'autonomie du mode pilote."""
-        if not niveau:
-            return "validation_requise"
-        niveau_norm = niveau.strip().lower()
-        niveaux_valides = {"off", "proposee", "validation_requise", "semi_auto", "auto"}
-        if niveau_norm not in niveaux_valides:
-            return "validation_requise"
-        return niveau_norm
+        return normaliser_niveau_autonomie_module(niveau)
 
     def _lire_config_mode_pilote(self, user_id: int | None) -> tuple[bool, str]:
         """Lit la configuration du mode pilote depuis les préférences profil."""
-        if not user_id:
-            return True, "validation_requise"
-
-        try:
-            with obtenir_contexte_db() as session:
-                from src.core.models.users import ProfilUtilisateur
-
-                profil = session.get(ProfilUtilisateur, user_id)
-                if not profil:
-                    return True, "validation_requise"
-
-                preferences = dict(profil.preferences_modules or {})
-                innovations = dict(preferences.get("innovations") or {})
-                mode_pilote = dict(innovations.get("mode_pilote") or {})
-
-                actif = bool(mode_pilote.get("actif", True))
-                niveau = self._normaliser_niveau_autonomie(mode_pilote.get("niveau_autonomie"))
-                return actif, niveau
-        except Exception:
-            logger.warning("Lecture config mode pilote impossible", exc_info=True)
-            return True, "validation_requise"
+        return lire_config_mode_pilote_module(self, user_id)
 
     @avec_gestion_erreurs(default_return=None)
     def configurer_mode_pilote_automatique(
@@ -137,34 +124,12 @@ class InnovationsService(BaseAIService):
         niveau_autonomie: str = "validation_requise",
     ) -> ModePiloteAutomatiqueResponse | None:
         """Active/desactive le mode pilote et persiste la configuration utilisateur."""
-        if not user_id:
-            return self.obtenir_mode_pilote_automatique(user_id=None)
-
-        niveau_normalise = self._normaliser_niveau_autonomie(niveau_autonomie)
-
-        try:
-            with obtenir_contexte_db() as session:
-                from src.core.models.users import ProfilUtilisateur
-
-                profil = session.get(ProfilUtilisateur, user_id)
-                if not profil:
-                    return self.obtenir_mode_pilote_automatique(user_id=None)
-
-                preferences = dict(profil.preferences_modules or {})
-                innovations = dict(preferences.get("innovations") or {})
-                innovations["mode_pilote"] = {
-                    "actif": bool(actif),
-                    "niveau_autonomie": niveau_normalise,
-                    "updated_at": datetime.now(UTC).isoformat(),
-                }
-                preferences["innovations"] = innovations
-                profil.preferences_modules = preferences
-                session.add(profil)
-                session.commit()
-        except Exception:
-            logger.warning("Ecriture config mode pilote impossible", exc_info=True)
-
-        return self.obtenir_mode_pilote_automatique(user_id=user_id)
+        return configurer_mode_pilote_automatique_module(
+            self,
+            user_id=user_id,
+            actif=actif,
+            niveau_autonomie=niveau_autonomie,
+        )
 
     # ═══════════════════════════════════════════════════════════
     # PHASE 9 — IA AVANCÉE & INNOVATIONS
@@ -434,79 +399,7 @@ Retourne un JSON avec:
     @avec_gestion_erreurs(default_return=None)
     def obtenir_mode_pilote_automatique(self, user_id: int | None = None) -> ModePiloteAutomatiqueResponse | None:
         """E1 : mode pilote automatique (propositions + validations)."""
-        actif, niveau_autonomie = self._lire_config_mode_pilote(user_id)
-        if not actif:
-            return ModePiloteAutomatiqueResponse(
-                actif=False,
-                niveau_autonomie="off",
-                actions=[],
-                recommandations=[
-                    "Mode pilote desactive. Activez-le pour recevoir des propositions IA automatiques.",
-                ],
-            )
-
-        actions: list[ActionPiloteAutomatique] = []
-
-        try:
-            with obtenir_contexte_db() as session:
-                from sqlalchemy import func
-                from src.core.models import ArticleCourses, ListeCourses, Planning, Repas
-                from src.core.models.famille import Routine
-
-                planning_actif = session.query(Planning).filter(Planning.statut == "actif").first()
-                nb_repas = 0
-                if planning_actif:
-                    nb_repas = int(
-                        session.query(func.count(Repas.id)).filter(Repas.planning_id == planning_actif.id).scalar() or 0
-                    )
-                if nb_repas < 14:
-                    actions.append(ActionPiloteAutomatique(
-                        module="planning",
-                        action="proposer_generation_planning",
-                        statut="validation_requise",
-                        details="Planning incomplet : generation d'une semaine equilibree proposee.",
-                    ))
-
-                liste = (
-                    session.query(ListeCourses)
-                    .filter(ListeCourses.archivee.is_(False))
-                    .order_by(ListeCourses.id.desc())
-                    .first()
-                )
-                if liste:
-                    nb_articles = int(
-                        session.query(func.count(ArticleCourses.id))
-                        .filter(ArticleCourses.liste_id == liste.id, ArticleCourses.coche.is_(False))
-                        .scalar() or 0
-                    )
-                    if nb_articles < 8:
-                        actions.append(ActionPiloteAutomatique(
-                            module="courses",
-                            action="proposer_complement_liste",
-                            statut="validation_requise",
-                            details="Liste de courses courte : suggestion de complement depuis historique.",
-                        ))
-
-                routines = session.query(Routine).filter(Routine.actif.is_(True)).all()
-                if not routines:
-                    actions.append(ActionPiloteAutomatique(
-                        module="routines",
-                        action="activer_routines_defaut",
-                        statut="proposee",
-                        details="Aucune routine active detectee.",
-                    ))
-        except Exception:
-            logger.warning("Mode pilote automatique partiel", exc_info=True)
-
-        return ModePiloteAutomatiqueResponse(
-            actif=True,
-            niveau_autonomie=niveau_autonomie,
-            actions=actions,
-            recommandations=[
-                "Valider les actions proposees pour activer l'automatisation complete.",
-                "Configurer une plage horaire de pilotage (soir 20h recommande).",
-            ],
-        )
+        return obtenir_mode_pilote_automatique_module(self, user_id=user_id)
 
     @avec_gestion_erreurs(default_return=None)
     def proposer_repas_adapte_garmin(
@@ -514,177 +407,29 @@ Retourne un JSON avec:
         user_id: int | None = None,
     ) -> SuggestionRepasSoirResponse | None:
         """E4.2 : adapte la proposition de repas selon la depense Garmin du jour."""
-        calories_brulees = 0
-        try:
-            with obtenir_contexte_db() as session:
-                from src.core.models import Recette
-                from src.core.models.users import ProfilUtilisateur, ResumeQuotidienGarmin
-
-                profil_id = user_id
-                if not profil_id:
-                    profil = session.query(ProfilUtilisateur).order_by(ProfilUtilisateur.id.asc()).first()
-                    profil_id = profil.id if profil else None
-
-                if profil_id:
-                    resume = (
-                        session.query(ResumeQuotidienGarmin)
-                        .filter(ResumeQuotidienGarmin.user_id == profil_id)
-                        .order_by(ResumeQuotidienGarmin.date.desc())
-                        .first()
-                    )
-                    if resume:
-                        calories_brulees = int(resume.calories_actives or 0)
-
-                if calories_brulees >= 600:
-                    cible_max = 850
-                    strategie = "recharge"
-                elif calories_brulees >= 350:
-                    cible_max = 700
-                    strategie = "equilibre"
-                else:
-                    cible_max = 550
-                    strategie = "leger"
-
-                recettes = (
-                    session.query(Recette)
-                    .filter(Recette.calories.isnot(None), Recette.calories <= cible_max)
-                    .order_by(Recette.calories.desc())
-                    .limit(4)
-                    .all()
-                )
-                if not recettes:
-                    return self.suggerer_repas_ce_soir(temps_disponible_min=30, humeur="equilibre")
-
-                recette_principale = recettes[0]
-                alternatives = [r.nom for r in recettes[1:4]]
-                return SuggestionRepasSoirResponse(
-                    recette_suggeree=recette_principale.nom,
-                    raison=(
-                        f"Strategie {strategie} selon Garmin ({calories_brulees} kcal actives) "
-                        f"avec cible <= {cible_max} kcal."
-                    ),
-                    temps_total_estime_min=int(
-                        (recette_principale.temps_preparation or 0) + (recette_principale.temps_cuisson or 0)
-                    ),
-                    alternatives=alternatives,
-                )
-        except Exception:
-            logger.warning("Recommandation repas Garmin indisponible", exc_info=True)
-            return self.suggerer_repas_ce_soir(temps_disponible_min=25, humeur="rapide")
+        return proposer_repas_adapte_garmin_module(self, user_id=user_id)
 
     @avec_cache(ttl=1800, key_func=lambda self: "phase_e_score_famille_hebdo")
     @avec_gestion_erreurs(default_return=None)
     def calculer_score_famille_hebdo(self) -> ScoreFamilleHebdoResponse | None:
         """E3 : score famille hebdo composite (nutrition, depenses, activites, entretien)."""
-        score_nutrition = self._calculer_score_nutrition()
-        score_budget = self._calculer_score_budget()
-
-        score_activites = 50.0
-        score_entretien = 50.0
-        try:
-            with obtenir_contexte_db() as session:
-                from sqlalchemy import func
-                from src.core.models.famille import ActiviteFamille
-                from src.core.models.maison import TacheEntretien
-
-                debut = date.today() - timedelta(days=7)
-                nb_activites = int(
-                    session.query(func.count(ActiviteFamille.id))
-                    .filter(ActiviteFamille.date_prevue >= debut)
-                    .scalar() or 0
-                )
-                score_activites = min(100.0, nb_activites * 18.0)
-
-                nb_taches_faites = int(
-                    session.query(func.count(TacheEntretien.id))
-                    .filter(TacheEntretien.fait.is_(True), TacheEntretien.date_prevue >= debut)
-                    .scalar() or 0
-                )
-                score_entretien = min(100.0, nb_taches_faites * 12.5)
-        except Exception:
-            logger.warning("Score famille hebdo partiel", exc_info=True)
-
-        dimensions = [
-            DimensionScoreFamille(nom="Nutrition", score=round(score_nutrition, 1), poids=0.30),
-            DimensionScoreFamille(nom="Depenses", score=round(score_budget, 1), poids=0.25),
-            DimensionScoreFamille(nom="Activites", score=round(score_activites, 1), poids=0.25),
-            DimensionScoreFamille(nom="Entretien", score=round(score_entretien, 1), poids=0.20),
-        ]
-        global_score = round(sum(d.score * d.poids for d in dimensions), 1)
-        return ScoreFamilleHebdoResponse(
-            semaine_reference=date.today().isoformat(),
-            score_global=global_score,
-            dimensions=dimensions,
-            recommandations=self._generer_conseils_score_famille(dimensions),
-        )
+        return calculer_score_famille_hebdo_module(self)
 
     @avec_cache(ttl=3600, key_func=lambda self: "phase_e_journal_auto")
     @avec_gestion_erreurs(default_return=None)
     def generer_journal_familial_auto(self) -> JournalFamilialAutoResponse | None:
         """E8 : journal familial automatique hebdomadaire."""
-        contexte = self._collecter_contexte_mensuel()
-        prompt = f"""Redige un journal familial hebdomadaire court et chaleureux a partir du contexte:
-{contexte}
-
-Retourne un JSON avec:
-- semaine_reference
-- titre
-- resume
-- faits_marquants (3 a 5)
-- moments_joyeux (2 a 4)
-- points_attention (1 a 3)
-"""
-        return self.call_with_parsing_sync(
-            prompt=prompt,
-            response_model=JournalFamilialAutoResponse,
-            system_prompt="Tu es chroniqueur familial positif, concret et concis.",
-        )
+        return generer_journal_familial_auto_module(self)
 
     @avec_gestion_erreurs(default_return=None)
     def generer_journal_familial_pdf(self) -> RapportMensuelPdfResponse | None:
         """E8 : export PDF du journal familial automatique."""
-        journal = self.generer_journal_familial_auto()
-        if not journal:
-            return None
-        contenu = self._generer_pdf_simple(
-            titre=journal.titre or "Journal familial",
-            sections=[
-                ("Resume", [journal.resume]),
-                ("Faits marquants", journal.faits_marquants),
-                ("Moments joyeux", journal.moments_joyeux),
-                ("Points d'attention", journal.points_attention),
-            ],
-        )
-        return RapportMensuelPdfResponse(
-            mois_reference=journal.semaine_reference,
-            filename=f"journal_familial_{date.today().isoformat()}.pdf",
-            contenu_base64=contenu,
-        )
+        return generer_journal_familial_pdf_module(self)
 
     @avec_gestion_erreurs(default_return=None)
     def generer_rapport_mensuel_pdf(self, mois: str | None = None) -> RapportMensuelPdfResponse | None:
         """E9 : rapport mensuel PDF consolide avec narratif IA."""
-        mois_ref = mois or date.today().strftime("%Y-%m")
-        bilan = self.generer_resume_mensuel_ia()
-        score = self.calculer_score_famille_hebdo()
-        sections = [
-            ("Synthese IA", [bilan.resume_global] if bilan else ["Synthese indisponible"]),
-            ("Faits marquants", bilan.faits_marquants if bilan else []),
-            (
-                "Score famille hebdomadaire",
-                [f"Score global: {score.score_global}/100"] if score else ["Score indisponible"],
-            ),
-            ("Recommandations", bilan.recommandations if bilan else []),
-        ]
-        contenu = self._generer_pdf_simple(
-            titre=f"Rapport mensuel {mois_ref}",
-            sections=sections,
-        )
-        return RapportMensuelPdfResponse(
-            mois_reference=mois_ref,
-            filename=f"rapport_mensuel_{mois_ref}.pdf",
-            contenu_base64=contenu,
-        )
+        return generer_rapport_mensuel_pdf_module(self, mois=mois)
 
     # ═══════════════════════════════════════════════════════════
     # 10.4 — BILAN ANNUEL AUTOMATIQUE IA

@@ -111,3 +111,40 @@ def test_mode_digest_force_file_attente_sur_non_alertes():
 
     assert resultats == {"digest": True}
     assert len(dispatcher._digest_queue["u3"]) == 1
+
+
+def test_envoyer_evenement_failover_jusqu_whatsapp():
+    """En mode failover, l'envoi s'arrete au premier canal qui reussit."""
+    dispatcher = DispatcherTestable()
+    dispatcher.push_result = False
+    dispatcher.ntfy_result = False
+    dispatcher.whatsapp_result = True
+    dispatcher.email_result = True  # Ne doit pas etre tente apres succes WhatsApp
+
+    resultats = dispatcher.envoyer_evenement(
+        user_id="u4",
+        type_evenement="echec_cron_job",
+        message="Le cron digest a echoue",
+    )
+
+    assert resultats.get("push") is False
+    assert resultats.get("ntfy") is False
+    assert resultats.get("whatsapp") is True
+    assert "email" not in dispatcher.calls
+
+
+def test_vider_digest_envoie_resume_et_nettoie_file():
+    """La vidange digest envoie un resume puis purge la file si succes."""
+    dispatcher = DispatcherTestable()
+    dispatcher.email_result = False
+    dispatcher.whatsapp_result = True
+
+    dispatcher._digest_queue["u5"] = [
+        {"message": "Alerte 1"},
+        {"message": "Alerte 2"},
+    ]
+
+    resultats = dispatcher.vider_digest("u5")
+
+    assert resultats.get("whatsapp") is True
+    assert dispatcher._digest_queue["u5"] == []
