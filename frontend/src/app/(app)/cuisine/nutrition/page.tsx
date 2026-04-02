@@ -33,6 +33,7 @@ import {
   type NutritionHebdo,
 } from "@/bibliotheque/api/planning";
 import { HeatmapNutritionnel } from "@/composants/graphiques/heatmap-nutritionnel";
+import { RadarNutritionFamille } from "@/composants/graphiques/radar-nutrition-famille";
 
 // Objectifs quotidiens de référence (adulte moyen)
 const OBJECTIFS = {
@@ -226,6 +227,15 @@ export default function PageNutrition() {
             </CardHeader>
             <CardContent>
               <HeatmapNutritionnel donnees={donneesHeatmap} mois={3} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Radar nutritionnel famille</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RadarNutritionFamille totaux={data.totaux} nbJours={jours.length || 7} />
             </CardContent>
           </Card>
 

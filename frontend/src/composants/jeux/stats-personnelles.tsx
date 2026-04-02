@@ -231,7 +231,7 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
                 <div style={{ height: '300px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 85%)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="mois" tick={{ fontSize: 11 }} />
                       <YAxis
                         yAxisId="benef"
@@ -245,6 +245,11 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
                         tickFormatter={(v) => `${Number(v).toFixed(0)}%`}
                       />
                       <Tooltip
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--background))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "8px",
+                        }}
                         formatter={(value, name) => {
                           if (name === 'ROI (%)') return [`${Number(value).toFixed(1)}%`, name]
                           return [`${Number(value).toFixed(2)}€`, name]
@@ -256,7 +261,7 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
                         type="monotone"
                         dataKey="benefice"
                         name="Bénéfice (€)"
-                        stroke="rgb(34, 197, 94)"
+                        stroke="hsl(var(--chart-2))"
                         strokeWidth={2}
                         dot={{ r: 3 }}
                       />
@@ -265,7 +270,7 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
                         type="monotone"
                         dataKey="roi"
                         name="ROI (%)"
-                        stroke="rgb(59, 130, 246)"
+                        stroke="hsl(var(--chart-1))"
                         strokeWidth={2}
                         dot={{ r: 3 }}
                       />

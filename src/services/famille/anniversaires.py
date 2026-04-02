@@ -139,6 +139,19 @@ class ServiceAnniversaires(BaseService[AnniversaireFamille]):
                         jours_restants=jours_restants,
                     )
                 )
+                if jours_restants in (30, 14, 7, 1):
+                    try:
+                        obtenir_bus().emettre(
+                            "anniversaire.proche",
+                            {
+                                "anniversaire_id": anniv.id,
+                                "nom": anniv.nom,
+                                "jours_restants": jours_restants,
+                            },
+                            source="ServiceAnniversaires",
+                        )
+                    except Exception:
+                        pass
 
         return sorted(prochains, key=lambda a: a["jours_restants"])
 

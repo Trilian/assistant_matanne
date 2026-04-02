@@ -82,6 +82,7 @@ interface ComposantMinuteurProps {
 }
 
 function ComposantMinuteur({ repasSuggere, dureeSuggeree }: ComposantMinuteurProps) {
+  const searchParams = useSearchParams();
   const [dureeMinutes, setDureeMinutes] = useState(5);
   const [restant, setRestant] = useState(0);
   const [enMarche, setEnMarche] = useState(false);
@@ -97,6 +98,18 @@ function ComposantMinuteur({ repasSuggere, dureeSuggeree }: ComposantMinuteurPro
       setDureeMinutes(valeur);
     }
   }, [dureeSuggeree, enMarche, restant]);
+
+  useEffect(() => {
+    const minutesParam = searchParams.get("minutes");
+    if (!minutesParam || enMarche || restant > 0) {
+      return;
+    }
+
+    const minutes = Number(minutesParam);
+    if (Number.isFinite(minutes) && minutes >= 1 && minutes <= 999) {
+      setDureeMinutes(Math.round(minutes));
+    }
+  }, [enMarche, restant, searchParams]);
 
   const demarrer = useCallback(() => {
     const msFin = restant > 0 ? restant : dureeMinutes * 60 * 1000;

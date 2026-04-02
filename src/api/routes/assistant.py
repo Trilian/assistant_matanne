@@ -578,6 +578,15 @@ async def chat_assistant_contextuel(
             historique=payload.historique,
         )
 
+        _publier_evenement_assistant(
+            "chat.contexte.mis_a_jour",
+            {
+                "contexte": payload.contexte or "general",
+                "memoire_utilisee": min(5, len(payload.historique or [])),
+            },
+            source="chat_assistant",
+        )
+
         return {
             "reponse": reponse or "Je n'ai pas pu generer de reponse pour le moment.",
             "contexte": payload.contexte,

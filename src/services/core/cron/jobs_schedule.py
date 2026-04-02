@@ -90,3 +90,13 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("rappels_jardin_saisonniers", CronTrigger(day_of_week="mon", hour=7, minute=0), replace_existing=True)
     planifier_job("verification_sante_systeme", CronTrigger(minute=0), replace_existing=True)
     planifier_job("backup_auto_hebdo_json", CronTrigger(day_of_week="sun", hour=4, minute=0), replace_existing=True)
+
+    # Sprint 15 — CRON jobs manquants
+    planifier_job("job_expiration_recettes_suggestion", CronTrigger(hour=10, minute=0), replace_existing=True)
+    planifier_job("job_stock_prediction_reapprovisionnement", CronTrigger(day_of_week="mon", hour=8, minute=0), replace_existing=True)
+    planifier_job("job_variete_repas_alerte", CronTrigger(day_of_week="sun", hour=17, minute=0), replace_existing=True)
+    planifier_job("job_tendances_activites_famille", CronTrigger(day_of_week="sun", hour=19, minute=30), replace_existing=True)
+    planifier_job("job_energie_peak_detection", CronTrigger(hour=19, minute=0), replace_existing=True)
+    planifier_job("job_nutrition_adultes_weekly", CronTrigger(day_of_week="sun", hour=20, minute=15), replace_existing=True)
+    planifier_job("job_briefing_matinal_push", CronTrigger(hour=7, minute=0), replace_existing=True)
+    planifier_job("job_jardin_feedback_planning", CronTrigger(day_of_week="sun", hour=18, minute=30), replace_existing=True)

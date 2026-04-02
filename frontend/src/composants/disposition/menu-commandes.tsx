@@ -15,12 +15,18 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
+  CommandShortcut,
 } from "@/composants/ui/command";
 import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
 import { utiliserStoreUI } from "@/magasins/store-ui";
 import { PAGES_NAVIGATION, type PageNavigation } from "@/bibliotheque/pages-navigation";
 import { clientApi } from "@/bibliotheque/api/client";
-import { Search } from "lucide-react";
+import { creerListeCourses, ajouterArticle } from "@/bibliotheque/api/courses";
+import { creerNote } from "@/bibliotheque/api/outils";
+import { creerScenarioHabitat } from "@/bibliotheque/api/habitat";
+import { resetOnboarding } from "@/composants/disposition/tour-onboarding";
+import { toast } from "sonner";
+import { Search, Wand2, TimerReset, StickyNote, ShoppingCart, Home, Sparkles } from "lucide-react";
 
 type Page = PageNavigation;
 const PAGES = PAGES_NAVIGATION;
@@ -32,6 +38,43 @@ interface ResultatRecherche {
   description?: string;
   url: string;
   icone?: string;
+  categorie?: string;
+  statut?: string;
+}
+
+interface ActionUniverselle {
+  id: string;
+  titre: string;
+  description: string;
+  raccourci?: string;
+  motCle: string;
+  icone: ComponentType<{ className?: string }>;
+  executer: () => Promise<void> | void;
+}
+
+function normaliser(texte: string): string {
+  return texte
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+function extraireNomArticle(recherche: string): string | null {
+  const match = recherche.match(/ajout(?:e|er)?\s+(.+?)\s+(?:a|à)\s+la\s+liste/i);
+  if (!match?.[1]) {
+    return null;
+  }
+  return match[1].trim();
+}
+
+function extraireDureeMinuteur(recherche: string): number | null {
+  const match = recherche.match(/minuteur\s+(\d{1,3})/i);
+  if (!match?.[1]) {
+    return null;
+  }
+  const valeur = Number(match[1]);
+  return Number.isFinite(valeur) && valeur > 0 ? valeur : null;
 }
 
 /**
@@ -45,6 +88,7 @@ export function MenuCommandes() {
   const [recherche, setRecherche] = useState("");
   const [resultatsAPI, setResultatsAPI] = useState<ResultatRecherche[]>([]);
   const [chargementAPI, setChargementAPI] = useState(false);
+  const [actionEnCours, setActionEnCours] = useState<string | null>(null);
   const router = useRouter();
 
   // Cmd+K / Ctrl+K
@@ -100,6 +144,125 @@ export function MenuCommandes() {
     router.push(chemin);
   };
 
+  const executerAction = async (action: ActionUniverselle) => {
+    definirRecherche(false);
+    setActionEnCours(action.id);
+    try {
+      await action.executer();
+    } catch {
+      toast.error("Impossible d'exécuter cette action rapide");
+    } finally {
+      setActionEnCours(null);
+    }
+  };
+
+  const actionsUniverselles = useMemo<ActionUniverselle[]>(() => {
+    const terme = recherche.trim();
+    const articleRapide = extraireNomArticle(terme);
+    const dureeMinuteur = extraireDureeMinuteur(terme);
+
+    const actions: ActionUniverselle[] = [
+      {
+        id: "courses-nouvelle-liste",
+        titre: "Créer une nouvelle liste de courses",
+        description: "Ajoute immédiatement une liste active dans Cuisine > Courses.",
+        raccourci: "N",
+        motCle: "nouvelle liste courses shopping panier",
+        icone: ShoppingCart,
+        executer: async () => {
+          const liste = await creerListeCourses("Liste rapide");
+          toast.success(`Liste créée: ${liste.nom}`);
+          router.push(`/cuisine/courses?liste=${liste.id}`);
+        },
+      },
+      {
+        id: "note-rapide",
+        titre: "Créer une note rapide",
+        description: "Ouvre les notes avec un brouillon prêt à compléter.",
+        raccourci: "N",
+        motCle: "note memo brouillon rapide",
+        icone: StickyNote,
+        executer: async () => {
+          const titre = terme.length >= 3 ? terme.slice(0, 80) : "Note rapide";
+          const note = await creerNote({ titre, contenu: terme.length >= 3 ? terme : undefined, categorie: "general" });
+          toast.success(`Note créée: ${note.titre}`);
+          router.push("/outils/notes");
+        },
+      },
+      {
+        id: "scenario-habitat",
+        titre: "Créer un scénario Habitat brouillon",
+        description: "Ajoute un scénario brouillon pour arbitrer un projet logement.",
+        motCle: "scenario habitat maison logement brouillon",
+        icone: Home,
+        executer: async () => {
+          const scenario = await creerScenarioHabitat({
+            nom: terme.length >= 3 ? terme.slice(0, 120) : "Nouveau scénario",
+            description: terme.length >= 3 ? terme : "Créé depuis la palette de commandes",
+            statut: "brouillon",
+          });
+          toast.success(`Scénario créé: ${scenario.nom}`);
+          router.push("/habitat/scenarios");
+        },
+      },
+      {
+        id: "onboarding",
+        titre: "Rejouer l'onboarding guidé",
+        description: "Réinitialise le tour utilisateur pour revoir les 5 étapes clés.",
+        motCle: "onboarding tour guide decouverte replay",
+        icone: Sparkles,
+        executer: () => {
+          resetOnboarding();
+          router.refresh();
+          toast.success("Le tour d'onboarding sera réaffiché");
+        },
+      },
+    ];
+
+    if (articleRapide) {
+      actions.unshift({
+        id: "ajout-article-rapide",
+        titre: `Ajouter \"${articleRapide}\" à une liste de courses`,
+        description: "Crée d'abord une liste rapide, puis y ajoute l'article demandé.",
+        motCle: `ajoute ${articleRapide} a la liste courses rapide`,
+        icone: Wand2,
+        executer: async () => {
+          const liste = await creerListeCourses("Liste rapide");
+          await ajouterArticle(liste.id, { nom: articleRapide });
+          toast.success(`${articleRapide} ajouté à ${liste.nom}`);
+          router.push(`/cuisine/courses?liste=${liste.id}`);
+        },
+      });
+    }
+
+    if (dureeMinuteur) {
+      actions.unshift({
+        id: `minuteur-${dureeMinuteur}`,
+        titre: `Lancer un minuteur de ${dureeMinuteur} min`,
+        description: "Ouvre la page minuteur avec une durée préremplie.",
+        motCle: `minuteur ${dureeMinuteur} cuisson timer`,
+        icone: TimerReset,
+        executer: () => {
+          router.push(`/outils/minuteur?minutes=${dureeMinuteur}`);
+        },
+      });
+    }
+
+    return actions;
+  }, [definirRecherche, recherche, router]);
+
+  const actionsFiltrees = useMemo(() => {
+    const terme = normaliser(recherche);
+    if (!terme) {
+      return actionsUniverselles;
+    }
+
+    return actionsUniverselles.filter((action) => {
+      const corpus = normaliser(`${action.titre} ${action.description} ${action.motCle}`);
+      return corpus.includes(terme);
+    });
+  }, [actionsUniverselles, recherche]);
+
   // Grouper par catégorie
   const groupes = useMemo(() => {
     const map = new Map<string, Page[]>();
@@ -144,14 +307,51 @@ export function MenuCommandes() {
                 >
                   <span className="text-base shrink-0">{r.icone || "??"}</span>
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm">{r.titre}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{r.titre}</span>
+                      <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                        {r.type}
+                      </span>
+                    </div>
                     {r.description && (
                       <p className="text-xs text-muted-foreground truncate">{r.description}</p>
                     )}
+                    {(r.categorie || r.statut) && (
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {[r.categorie, r.statut].filter(Boolean).join(" · ")}
+                      </p>
+                    )}
                   </div>
-                  <span className="text-xs text-muted-foreground shrink-0">{r.type}</span>
+                  <CommandShortcut>Entrée</CommandShortcut>
                 </CommandItem>
               ))}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
+
+        {actionsFiltrees.length > 0 && (
+          <>
+            <CommandGroup heading="Actions rapides">
+              {actionsFiltrees.map((action) => {
+                const Icone = action.icone;
+                return (
+                  <CommandItem
+                    key={action.id}
+                    value={`action-${action.titre.toLowerCase()} ${action.motCle}`}
+                    onSelect={() => void executerAction(action)}
+                    className="flex items-center gap-2"
+                    disabled={actionEnCours === action.id}
+                  >
+                    <Icone className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium">{action.titre}</span>
+                      <p className="text-xs text-muted-foreground truncate">{action.description}</p>
+                    </div>
+                    {action.raccourci ? <CommandShortcut>{action.raccourci}</CommandShortcut> : null}
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
             <CommandSeparator />
           </>

@@ -45,6 +45,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { listerDepenses, obtenirStatsBudget, ajouterDepense, supprimerDepense } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 import { BudgetInsightsIA } from "@/composants/famille/budget-insights";
+import { TreemapBudget } from "@/composants/graphiques/treemap-budget";
+import { SankeyFluxFinanciers } from "@/composants/graphiques/sankey-flux-financiers";
 import { UploadTicket } from "@/composants/famille/upload-ticket";
 
 const CamembertBudget = dynamic(
@@ -127,6 +129,24 @@ export default function PageBudget() {
   const categoriesTriees = Object.entries(parCategorie).sort(
     ([, a], [, b]) => b - a
   );
+  const donneesTreemap = categoriesTriees.map(([nom, montant]) => ({
+    nom,
+    montant,
+    sous_categories: depenses
+      ?.filter((depense) => depense.categorie === nom)
+      .sort((a, b) => b.montant - a.montant)
+      .slice(0, 4)
+      .map((depense) => ({ nom: depense.libelle, montant: depense.montant })) ?? [],
+  }));
+  const donneesSankey = categoriesTriees.slice(0, 5).map(([nom, montant]) => ({
+    nom,
+    montant,
+    details: depenses
+      ?.filter((depense) => depense.categorie === nom)
+      .sort((a, b) => b.montant - a.montant)
+      .slice(0, 3)
+      .map((depense) => ({ nom: depense.libelle, montant: depense.montant })) ?? [],
+  }));
 
   return (
     <div className="space-y-6">
@@ -200,6 +220,34 @@ export default function PageBudget() {
           </CardContent>
         </Card>
       </div>
+
+      {!!categoriesTriees.length && (
+        <div className="grid gap-4 xl:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Treemap budget</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Vision surfacique des catégories et de leurs postes principaux.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <TreemapBudget donnees={donneesTreemap} hauteur={320} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Flux financiers</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Répartition du budget mensuel depuis le total vers les catégories puis les plus gros postes.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <SankeyFluxFinanciers donnees={donneesSankey} />
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Liste dépenses */}
       <div className="space-y-3">

@@ -75,6 +75,7 @@ import { ScanneurMultiCodes } from "@/composants/scanneur-multi-codes";
 import type { ArticleBarcode } from "@/bibliotheque/api/inventaire";
 import { EtiquetteQR } from "@/composants/cuisine/etiquette-qr";
 import type { LucideIcon } from "lucide-react";
+import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
 
 const EMPLACEMENTS: { id: string; label: string; icone: LucideIcon }[] = [
   { id: "Frigo", label: "Frigo", icone: Refrigerator },
@@ -116,6 +117,7 @@ export default function PageInventaire() {
   const [qrArticle, setQrArticle] = useState<ArticleInventaire | null>(null);
 
   const invalider = utiliserInvalidation();
+  const { planifierSuppression } = utiliserSuppressionAnnulable();
 
   const { data: articles, isLoading } = utiliserRequete(
     ["inventaire", ongletActif],
@@ -143,10 +145,18 @@ export default function PageInventaire() {
   const { mutate: supprimer } = utiliserMutation(
     (id: number) => supprimerArticleInventaire(id),
     {
-      onSuccess: () => { invalider(["inventaire"]); toast.success("Article supprimé"); },
+      onSuccess: () => { invalider(["inventaire"]); },
       onError: () => toast.error("Erreur lors de la suppression"),
     }
   );
+  const supprimerAvecUndo = (article: ArticleInventaire) => {
+    planifierSuppression(`inventaire-${article.id}`, {
+      libelle: article.nom,
+      onConfirmer: () => supprimer(article.id),
+      onErreur: () => toast.error("Erreur lors de la suppression"),
+    });
+  };
+
 
   const { mutate: lancerOCR, isPending: ocrEnCours } = utiliserMutation(
     (fichier: File) => detecterPhotoFrigoSansImport(fichier),
@@ -498,7 +508,7 @@ export default function PageInventaire() {
                                   variant="ghost"
                                   size="icon"
                                   className="h-7 w-7"
-                                  onClick={() => supprimer(a.id)}
+                                  onClick={() => supprimerAvecUndo(a)}
                                   aria-label="Supprimer l'article"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />

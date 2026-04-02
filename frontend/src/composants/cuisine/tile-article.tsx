@@ -39,6 +39,7 @@ interface TileArticleProps {
   unite?: string;
   categorie?: string;
   estCoche?: boolean;
+  estSelectionne?: boolean;
   onClick?: () => void;
   onLongPress?: () => void;
 }
@@ -49,6 +50,7 @@ export function TileArticle({
   unite,
   categorie,
   estCoche = false,
+  estSelectionne = false,
   onClick,
   onLongPress,
 }: TileArticleProps) {
@@ -65,11 +67,17 @@ export function TileArticle({
       className={cn(
         "relative flex flex-col items-center justify-center gap-1 rounded-xl p-3 w-full aspect-square transition-all",
         "border hover:shadow-md active:scale-95",
+        estSelectionne && "ring-2 ring-primary ring-offset-2",
         estCoche
           ? "bg-muted/50 opacity-60 border-muted"
           : couleur
       )}
     >
+      {estSelectionne && !estCoche && (
+        <div className="absolute top-1.5 left-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+          ✓
+        </div>
+      )}
       {estCoche && (
         <div className="absolute top-1.5 right-1.5 rounded-full bg-green-600 p-0.5">
           <Check className="h-3 w-3 text-white" />

@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Plus,
   ShoppingCart,
@@ -18,6 +18,9 @@ import {
   CheckCheck,
   Mic,
   MicOff,
+  CheckSquare,
+  Square,
+  Trash2,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -68,6 +71,8 @@ import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
 import { utiliserReconnaissanceVocale } from "@/crochets/utiliser-reconnaissance-vocale";
+import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
+import { utiliserRaccourcisPage } from "@/crochets/utiliser-raccourcis-page";
 
 /** Group articles by category for Bring!-style display */
 function grouperParCategorie(articles: ArticleCourses[]): Record<string, ArticleCourses[]> {
@@ -89,8 +94,12 @@ export default function PageCourses() {
   const [dialogueQr, setDialogueQr] = useState(false);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [chargementQr, setChargementQr] = useState(false);
+  const [modeSelection, setModeSelection] = useState(false);
+  const [articlesSelectionnes, setArticlesSelectionnes] = useState<Set<number>>(new Set());
+  const inputAjoutRef = useRef<HTMLInputElement | null>(null);
 
   const invalider = utiliserInvalidation();
+  const { planifierSuppression } = utiliserSuppressionAnnulable();
   const contexteInvitesActif = modeInvites.actif && modeInvites.nbInvites > 0;
   const evenementsModeInvites = useMemo(() => {
     const items = [...modeInvites.evenements];
@@ -237,8 +246,55 @@ export default function PageCourses() {
   const { mutate: supprimer } = utiliserMutation(
     (articleId: number) => supprimerArticle(listeSelectionnee!, articleId),
     {
-      onSuccess: () => { invalider(["courses"]); toast.success("Article supprimé"); },
+      onSuccess: () => { invalider(["courses"]); },
       onError: () => toast.error("Erreur lors de la suppression"),
+    }
+  );
+
+  const { mutateAsync: supprimerAsync } = utiliserMutation(
+    (articleId: number) => supprimerArticle(listeSelectionnee!, articleId)
+  );
+
+  const { mutate: cocherSelection, isPending: enCochageSelection } = utiliserMutation(
+    async () => {
+      if (!listeSelectionnee || articlesSelectionnes.size === 0) {
+        return { total: 0 };
+      }
+      const ids = Array.from(articlesSelectionnes);
+      await Promise.all(ids.map((id) => cocherArticle(listeSelectionnee, id, true)));
+      return { total: ids.length };
+    },
+    {
+      onSuccess: ({ total }) => {
+        invalider(["courses"]);
+        setArticlesSelectionnes(new Set());
+        setModeSelection(false);
+        if (total > 0) {
+          toast.success(`${total} article(s) cochés depuis la sélection`);
+        }
+      },
+      onError: () => toast.error("Erreur lors du cochage de la sélection"),
+    }
+  );
+
+  const { mutate: supprimerSelection, isPending: enSuppressionSelection } = utiliserMutation(
+    async () => {
+      const ids = Array.from(articlesSelectionnes);
+      for (const id of ids) {
+        await supprimerAsync(id);
+      }
+      return { total: ids.length };
+    },
+    {
+      onSuccess: ({ total }) => {
+        invalider(["courses"]);
+        setArticlesSelectionnes(new Set());
+        setModeSelection(false);
+        if (total > 0) {
+          toast.success(`${total} article(s) supprimés`);
+        }
+      },
+      onError: () => toast.error("Erreur lors de la suppression groupée"),
     }
   );
 
@@ -391,6 +447,63 @@ export default function PageCourses() {
   const articlesNonCoches = articles.filter((a) => !a.est_coche);
   const articlesCoches = articles.filter((a) => a.est_coche);
 
+  const basculerSelectionArticle = (articleId: number) => {
+    setArticlesSelectionnes((prev) => {
+      const suivant = new Set(prev);
+      if (suivant.has(articleId)) {
+        suivant.delete(articleId);
+      } else {
+        suivant.add(articleId);
+      }
+      return suivant;
+    });
+  };
+
+  const supprimerAvecUndo = (article: ArticleCourses) => {
+    planifierSuppression(`courses-${article.id}`, {
+      libelle: article.nom,
+      onConfirmer: async () => {
+        await supprimerAsync(article.id);
+        invalider(["courses"]);
+      },
+      onErreur: () => toast.error("Erreur lors de la suppression"),
+    });
+  };
+
+  useEffect(() => {
+    setArticlesSelectionnes((prev) => {
+      const idsDisponibles = new Set(articlesNonCoches.map((article) => article.id));
+      const filtres = Array.from(prev).filter((id) => idsDisponibles.has(id));
+      return filtres.length === prev.size ? prev : new Set(filtres);
+    });
+  }, [articlesNonCoches]);
+
+  utiliserRaccourcisPage([
+    {
+      touche: "n",
+      action: () => {
+        if (listeSelectionnee) {
+          setDialogueArticle(true);
+        }
+      },
+      actif: !!listeSelectionnee,
+    },
+    {
+      touche: "s",
+      action: () => inputAjoutRef.current?.focus(),
+      actif: !!listeSelectionnee,
+    },
+    {
+      touche: "Delete",
+      action: () => {
+        if (modeSelection && articlesSelectionnes.size > 0) {
+          supprimerSelection(undefined);
+        }
+      },
+      actif: modeSelection && articlesSelectionnes.size > 0,
+    },
+  ]);
+
   // Regrouper par catégorie
   const groupesNonCoches = useMemo(() => grouperParCategorie(articlesNonCoches), [articlesNonCoches]);
   const categoriesTriees = useMemo(() => Object.keys(groupesNonCoches).sort(), [groupesNonCoches]);
@@ -430,6 +543,17 @@ export default function PageCourses() {
         </div>
         {listeSelectionnee && (
           <div className="flex gap-2">
+            <Button
+              variant={modeSelection ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                setModeSelection((prev) => !prev);
+                setArticlesSelectionnes(new Set());
+              }}
+            >
+              {modeSelection ? <CheckSquare className="mr-1 h-4 w-4" /> : <Square className="mr-1 h-4 w-4" />}
+              Sélection multiple
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -664,6 +788,10 @@ export default function PageCourses() {
                 >
                   <Input
                     {...regArticle("nom")}
+                    ref={(element) => {
+                      regArticle("nom").ref(element);
+                      inputAjoutRef.current = element;
+                    }}
                     placeholder="+ Ajouter un article..."
                     className="flex-1"
                     disabled={enAjout}
@@ -698,6 +826,42 @@ export default function PageCourses() {
                     </Button>
                   )}
                 </form>
+
+                {modeSelection && (
+                  <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
+                    <span className="font-medium">{articlesSelectionnes.size} sélectionné(s)</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        if (articlesSelectionnes.size === articlesNonCoches.length) {
+                          setArticlesSelectionnes(new Set());
+                        } else {
+                          setArticlesSelectionnes(new Set(articlesNonCoches.map((article) => article.id)));
+                        }
+                      }}
+                    >
+                      {articlesSelectionnes.size === articlesNonCoches.length ? "Tout désélectionner" : "Tout sélectionner"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => cocherSelection(undefined)}
+                      disabled={articlesSelectionnes.size === 0 || enCochageSelection}
+                    >
+                      Cocher la sélection
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => supprimerSelection(undefined)}
+                      disabled={articlesSelectionnes.size === 0 || enSuppressionSelection}
+                    >
+                      <Trash2 className="mr-1 h-4 w-4" />
+                      Supprimer la sélection
+                    </Button>
+                  </div>
+                )}
 
                 {/* Affichage articles */}
                 {chargementDetail ? (
@@ -735,8 +899,21 @@ export default function PageCourses() {
                               quantite={a.quantite}
                               unite={a.unite}
                               categorie={a.categorie}
-                              onClick={() => cocher({ articleId: a.id, coche: true })}
-                              onLongPress={() => supprimer(a.id)}
+                              estSelectionne={articlesSelectionnes.has(a.id)}
+                              onClick={() => {
+                                if (modeSelection) {
+                                  basculerSelectionArticle(a.id);
+                                } else {
+                                  cocher({ articleId: a.id, coche: true });
+                                }
+                              }}
+                              onLongPress={() => {
+                                if (modeSelection) {
+                                  basculerSelectionArticle(a.id);
+                                } else {
+                                  supprimerAvecUndo(a);
+                                }
+                              }}
                             />
                           ))}
                         </div>

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
@@ -29,6 +29,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { schemaNote, type DonneesNote } from "@/bibliotheque/validateurs";
+import { utiliserBrouillonAuto } from "@/crochets/utiliser-brouillon-auto";
+import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
+import { utiliserRaccourcisPage } from "@/crochets/utiliser-raccourcis-page";
 
 const CATEGORIES = ["general", "travail", "personnel", "course", "idee"] as const;
 const COULEURS = [
@@ -63,6 +66,7 @@ export default function NotesPage() {
   const [champTags, setChampTags] = useState("");
 
   const invalider = utiliserInvalidation();
+  const { planifierSuppression } = utiliserSuppressionAnnulable();
 
   const { data: notes = [], isLoading } = utiliserRequete<Note[]>(
     ["outils", "notes", filtre, filtreTag, recherche],
@@ -93,6 +97,36 @@ export default function NotesPage() {
   });
 
   const tagsForm = (watch("tags") ?? []) as string[];
+  const brouillonNotes = watch();
+  const { valeurInitiale: brouillonInitial, effacerBrouillon } = utiliserBrouillonAuto<DonneesNote>({
+    cle: "draft:notes:nouvelle-note",
+    valeur: brouillonNotes as DonneesNote,
+    actif: dialogOuvert,
+  });
+
+  useEffect(() => {
+    if (!dialogOuvert || !brouillonInitial) {
+      return;
+    }
+
+    reset({
+      titre: brouillonInitial.titre ?? "",
+      contenu: brouillonInitial.contenu ?? "",
+      categorie: brouillonInitial.categorie ?? "general",
+      couleur: brouillonInitial.couleur ?? "#fef08a",
+      tags: brouillonInitial.tags ?? [],
+      epingle: brouillonInitial.epingle ?? false,
+      est_checklist: brouillonInitial.est_checklist ?? false,
+      items_checklist: brouillonInitial.items_checklist ?? [],
+    });
+  }, [brouillonInitial, dialogOuvert, reset]);
+
+  utiliserRaccourcisPage([
+    {
+      touche: "n",
+      action: () => setDialogOuvert(true),
+    },
+  ]);
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
     (data: DonneesNote) => creerNote({
@@ -113,6 +147,7 @@ export default function NotesPage() {
         setDialogOuvert(false);
         reset();
         setChampTags("");
+        effacerBrouillon();
       },
     }
   );
@@ -136,12 +171,19 @@ export default function NotesPage() {
     (id: number) => supprimerNote(id),
     {
       onSuccess: () => {
-        toast.success("Note supprimée");
         invalider(["outils", "notes"]);
         invalider(["outils", "notes", "tags"]);
       },
     }
   );
+
+  const supprimerAvecUndo = (note: Note) => {
+    planifierSuppression(`note-${note.id}`, {
+      libelle: note.titre,
+      onConfirmer: () => supprimer(note.id),
+      onErreur: () => toast.error("Erreur lors de la suppression"),
+    });
+  };
 
   const ajouterTagForm = () => {
     const nouveauxTags = champTags
@@ -327,7 +369,7 @@ export default function NotesPage() {
                   <Button variant="ghost" size="sm" onClick={() => archiver(n.id)}>
                     Archiver
                   </Button>
-                  <Button variant="ghost" size="sm" className="text-destructive" onClick={() => supprimer(n.id)}>
+                  <Button variant="ghost" size="sm" className="text-destructive" onClick={() => supprimerAvecUndo(n)}>
                     Supprimer
                   </Button>
                 </div>

@@ -301,10 +301,15 @@ export function BankrollWidget({
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 85%)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="libelle" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${Number(v).toFixed(0)}€`} />
                   <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--background))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                    }}
                     formatter={(value, name) => [`${Number(value).toFixed(2)}€`, String(name)]}
                   />
                   {!compact && <Legend />}
@@ -318,7 +323,7 @@ export function BankrollWidget({
                     type="monotone"
                     dataKey="bankroll"
                     name="Bankroll"
-                    stroke={bankrollData && bankrollData.variation_totale >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'}
+                    stroke={bankrollData && bankrollData.variation_totale >= 0 ? 'hsl(var(--chart-2))' : 'hsl(var(--destructive))'}
                     strokeWidth={2}
                     dot={{ r: 2 }}
                     activeDot={{ r: 4 }}

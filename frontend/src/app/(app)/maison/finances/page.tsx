@@ -39,6 +39,7 @@ import { toast } from "sonner";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
 import { TreemapBudget } from "@/composants/graphiques/treemap-budget";
 import { SwipeableItem } from "@/composants/swipeable-item";
+import { CalendrierEnergie } from "@/composants/graphiques/calendrier-energie";
 
 // Lazy-load Recharts pour éviter le SSR
 const LineChart = dynamic(() => import("recharts").then(m => m.LineChart), { ssr: false });
@@ -406,6 +407,18 @@ function OngletEnergie() {
         </Card>
       ) : (
         <Card><CardContent className="py-10 text-center text-muted-foreground"><Zap className="h-8 w-8 mx-auto mb-2 opacity-50" />Aucun historique</CardContent></Card>
+      )}
+
+      {!!releves?.length && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Calendrier énergie</CardTitle>
+            <CardDescription>Lecture rapide des relevés du mois courant.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CalendrierEnergie releves={releves.filter((releve) => releve.type_compteur === compteur)} />
+          </CardContent>
+        </Card>
       )}
 
       {/* Derniers relevés */}

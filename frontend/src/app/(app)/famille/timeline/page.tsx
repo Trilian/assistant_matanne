@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { CalendarDays, Download, Filter, Home, Baby, Users, Trophy } from "lucide-react";
 
 import { clientApi } from "@/bibliotheque/api/client";
+import { TimelineInteractive } from "@/composants/famille/timeline-interactive";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
@@ -95,6 +96,20 @@ export default function TimelineFamillePage() {
           ))}
         </CardContent>
       </Card>
+
+      {items.length > 0 ? (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Vue chronologique</CardTitle>
+            <CardDescription>
+              Lecture condensée des jalons et événements de la famille sur une frise zoomable.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TimelineInteractive items={items} />
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="relative ml-2 border-l pl-6 sm:ml-4 sm:pl-8">
         {isLoading ? (

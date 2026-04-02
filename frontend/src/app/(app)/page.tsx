@@ -62,6 +62,7 @@ import {
 } from "@/composants/dashboard/grille-dashboard-dnd";
 import { CompteurAnime } from "@/composants/dashboard/compteur-anime";
 import { Sparkline } from "@/composants/dashboard/sparkline";
+import { ComparateurTemporel } from "@/composants/dashboard/comparateur-temporel";
 import { obtenirScoreFamilleHebdo } from "@/bibliotheque/api/avance";
 
 const WIDGETS_DEFAUT = {
@@ -392,6 +393,8 @@ export default function PageAccueil() {
           </CardContent>
         </Card>
       )}
+
+      <ComparateurTemporel />
 
       <GrilleDashboardDnd
         ordre={ordreWidgets}

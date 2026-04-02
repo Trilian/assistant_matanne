@@ -611,6 +611,14 @@ _LABELS_JOBS: dict[str, str] = {
     "check_garmin_anomalies": "JOB-6 Anomalies Garmin (08h00)",
     "resume_jardin_saisonnier": "JOB-7 Résumé jardin saisonnier (1er 08h00)",
     "expiration_documents": "JOB-8 Expiration documents (09h00)",
+    "job_expiration_recettes_suggestion": "S15.1 Ingrédients expirants → suggestion recettes (10h00)",
+    "job_stock_prediction_reapprovisionnement": "S15.2 Prédiction réapprovisionnement inventaire (lun 08h00)",
+    "job_variete_repas_alerte": "S15.3 Alerte variété repas (dim 17h00)",
+    "job_tendances_activites_famille": "S15.4 Tendances activités famille (dim 19h30)",
+    "job_energie_peak_detection": "S15.5 Détection pics énergie (19h00)",
+    "job_nutrition_adultes_weekly": "S15.6 Bilan nutrition adultes Garmin (dim 20h15)",
+    "job_briefing_matinal_push": "S15.7 Briefing matinal IA (07h00)",
+    "job_jardin_feedback_planning": "S15.8 Feedback jardin → planning (dim 18h30)",
 }
 
 # Vues SQL explicitement autorisées (lecture seule)

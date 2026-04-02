@@ -53,6 +53,7 @@ import {
 } from "@/bibliotheque/api/batch-cooking";
 import { toast } from "sonner";
 import type { SessionBatchCooking } from "@/types/batch-cooking";
+import { TimelineBatchCooking } from "@/composants/cuisine/timeline-batch-cooking";
 
 const BADGES_STATUT: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   planifiee: { label: "Planifié", variant: "outline" },
@@ -69,6 +70,24 @@ const FILTRES_LOCALISATION: { valeur: FiltreLocalisation; label: string }[] = [
   { valeur: "frigo", label: "🧊 Frigo" },
   { valeur: "congelateur", label: "❄️ Congélateur" },
 ];
+
+function classeProgression(progression: number) {
+  const pourcentage = Math.max(0, Math.min(100, Math.round(progression / 10) * 10));
+  const classes: Record<number, string> = {
+    0: "w-0",
+    10: "w-[10%]",
+    20: "w-[20%]",
+    30: "w-[30%]",
+    40: "w-[40%]",
+    50: "w-[50%]",
+    60: "w-[60%]",
+    70: "w-[70%]",
+    80: "w-[80%]",
+    90: "w-[90%]",
+    100: "w-full",
+  };
+  return classes[pourcentage] ?? "w-0";
+}
 
 export default function PageBatchCooking() {
   const [dialogueCreation, setDialogueCreation] = useState(false);
@@ -156,6 +175,20 @@ export default function PageBatchCooking() {
           Nouvelle session
         </Button>
       </div>
+
+      {sessions.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Timeline de préparation</CardTitle>
+            <CardDescription>
+              Lecture animée des prochaines sessions et de leur progression.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TimelineBatchCooking sessions={sessions} />
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs defaultValue="sessions" className="space-y-4">
         <TabsList>
@@ -494,9 +527,7 @@ function SessionCard({
         {session.statut === "en_cours" && (
           <div className="w-full bg-secondary rounded-full h-2">
             <div
-              className="bg-primary rounded-full h-2 transition-all"
-              // eslint-disable-next-line react/no-unknown-property
-              style={{ width: `${Math.round(session.progression * 100)}%` }}
+              className={`bg-primary rounded-full h-2 transition-all ${classeProgression(Math.round(session.progression * 100))}`}
             />
           </div>
         )}

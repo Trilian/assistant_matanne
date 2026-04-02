@@ -44,6 +44,17 @@ def demarreur_cron():
 class TestJobsSchedules:
     """Vérifie que les jobs critiques sont enregistrés."""
 
+    JOBS_SPRINT_15 = {
+        "job_expiration_recettes_suggestion",
+        "job_stock_prediction_reapprovisionnement",
+        "job_variete_repas_alerte",
+        "job_tendances_activites_famille",
+        "job_energie_peak_detection",
+        "job_nutrition_adultes_weekly",
+        "job_briefing_matinal_push",
+        "job_jardin_feedback_planning",
+    }
+
     def test_job_rappels_famille_present(self, demarreur_cron):
         """rappels_famille doit être dans le scheduler."""
         job_ids = [j.id for j in demarreur_cron._scheduler.get_jobs()]
@@ -92,6 +103,11 @@ class TestJobsSchedules:
     def test_nombre_minimal_jobs(self, demarreur_cron):
         """Le scheduler doit contenir au moins 15 jobs enregistrés."""
         assert len(demarreur_cron._scheduler.get_jobs()) >= 15
+
+    def test_jobs_sprint_15_presents(self, demarreur_cron):
+        """Les 8 jobs du Sprint 15 doivent être enregistrés dans le scheduler."""
+        job_ids = {j.id for j in demarreur_cron._scheduler.get_jobs()}
+        assert self.JOBS_SPRINT_15.issubset(job_ids)
 
 
 # ═══════════════════════════════════════════════════════════
@@ -283,6 +299,291 @@ class TestPushContextuelSoir:
         # Nouveau comportement: push en canal primaire + fallback géré par stratégie
         assert "push" in call_kwargs.get("canaux", [])
         assert call_kwargs.get("strategie") == "failover"
+
+
+class TestSprint15DryRun:
+    """Les jobs Sprint 15 doivent être exécutables en dry-run via le registre admin."""
+
+    @pytest.mark.parametrize(
+        "job_id",
+        [
+            "job_expiration_recettes_suggestion",
+            "job_stock_prediction_reapprovisionnement",
+            "job_variete_repas_alerte",
+            "job_tendances_activites_famille",
+            "job_energie_peak_detection",
+            "job_nutrition_adultes_weekly",
+            "job_briefing_matinal_push",
+            "job_jardin_feedback_planning",
+        ],
+    )
+    def test_job_sprint_15_supporte_dry_run(self, job_id):
+        """Chaque job Sprint 15 doit renvoyer un statut dry_run sans exécution réelle."""
+        from src.services.core.cron.jobs import executer_job_par_id
+
+        resultat = executer_job_par_id(job_id, dry_run=True)
+
+        assert resultat["status"] == "dry_run"
+        assert resultat["job_id"] == job_id
+        assert resultat["dry_run"] is True
+
+
+class TestSprint15JobsDetailed:
+    """Tests unitaires fins des jobs Sprint 15."""
+
+    def test_job_expiration_recettes_suggestion_notifie_les_articles_urgents(self):
+        """Le job 15.1 doit notifier les produits bientôt expirants."""
+        from src.services.core.cron.jobs import _job_expiration_recettes_suggestion
+
+        mock_service = MagicMock()
+        mock_service.predire_peremptions_personnalisees.return_value = {
+            "items": [
+                {"nom": "Courgette"},
+                {"nom": "Yaourt"},
+            ]
+        }
+        mock_dispatcher = MagicMock()
+
+        with (
+            patch("src.services.cuisine.obtenir_service_prediction_peremption", return_value=mock_service),
+            patch(
+                "src.services.core.notifications.notif_dispatcher.get_dispatcher_notifications",
+                return_value=mock_dispatcher,
+            ),
+            patch("src.services.core.cron.jobs._envoyer_notif_tous_users", return_value={"push": True}) as mock_notif,
+        ):
+            _job_expiration_recettes_suggestion()
+
+        mock_service.predire_peremptions_personnalisees.assert_called_once_with(horizon_jours=2)
+        mock_notif.assert_called_once()
+        message = mock_notif.call_args.kwargs["message"]
+        assert "Courgette" in message
+        assert "Yaourt" in message
+
+    def test_job_stock_prediction_reapprovisionnement_notifie_les_articles_en_risque(self):
+        """Le job 15.2 doit signaler les articles à réapprovisionner."""
+        from src.services.core.cron.jobs import _job_stock_prediction_reapprovisionnement
+
+        articles = [
+            SimpleNamespace(nom="Lait", quantite=0.5, quantite_min=1.0, ingredient_id=1),
+            SimpleNamespace(nom="Pâtes", quantite=3.0, quantite_min=1.0, ingredient_id=2),
+        ]
+        mock_session = MagicMock()
+        mock_session.query.return_value.filter.return_value.order_by.return_value.limit.return_value.all.return_value = articles
+
+        mock_service_ia = MagicMock()
+        mock_service_ia.predire_consommation.side_effect = [
+            SimpleNamespace(seuil_reapprovisionnement_kg=1.0, jours_autonomie=3),
+            SimpleNamespace(seuil_reapprovisionnement_kg=0.5, jours_autonomie=20),
+        ]
+        mock_dispatcher = MagicMock()
+
+        @contextmanager
+        def _ctx():
+            yield mock_session
+
+        with (
+            patch("src.core.db.obtenir_contexte_db", return_value=_ctx()),
+            patch("src.services.inventaire.ia_service.get_inventaire_ai_service", return_value=mock_service_ia),
+            patch(
+                "src.services.core.notifications.notif_dispatcher.get_dispatcher_notifications",
+                return_value=mock_dispatcher,
+            ),
+            patch("src.services.core.cron.jobs._envoyer_notif_tous_users", return_value={"ntfy": True}) as mock_notif,
+        ):
+            _job_stock_prediction_reapprovisionnement()
+
+        assert mock_service_ia.predire_consommation.call_count == 2
+        mock_notif.assert_called_once()
+        assert "Lait" in mock_notif.call_args.kwargs["message"]
+
+    def test_job_variete_repas_alerte_notifie_si_score_faible(self):
+        """Le job 15.3 doit alerter quand la variété du planning est insuffisante."""
+        from src.services.core.cron.jobs import _job_variete_repas_alerte
+
+        repas = [
+            SimpleNamespace(date_repas=date(2026, 4, 2), type_repas="midi", recette=SimpleNamespace(nom="Poulet riz"), notes=None),
+            SimpleNamespace(date_repas=date(2026, 4, 3), type_repas="soir", recette=SimpleNamespace(nom="Poulet riz"), notes=None),
+            SimpleNamespace(date_repas=date(2026, 4, 4), type_repas="midi", recette=SimpleNamespace(nom="Poulet riz"), notes=None),
+        ]
+        mock_session = MagicMock()
+        mock_session.query.return_value.filter.return_value.order_by.return_value.all.return_value = repas
+
+        mock_planning_service = MagicMock()
+        mock_planning_service.analyser_variete_semaine.return_value = SimpleNamespace(
+            score_variete=35,
+            repetitions_problematiques=["Poulet riz"],
+            recommandations=["Ajouter une recette poisson ou végétarienne"],
+        )
+        mock_dispatcher = MagicMock()
+
+        @contextmanager
+        def _ctx():
+            yield mock_session
+
+        with (
+            patch("src.core.db.obtenir_contexte_db", return_value=_ctx()),
+            patch("src.services.planning.ia_service.PlanningAIService", return_value=mock_planning_service),
+            patch(
+                "src.services.core.notifications.notif_dispatcher.get_dispatcher_notifications",
+                return_value=mock_dispatcher,
+            ),
+            patch("src.services.core.cron.jobs._envoyer_notif_tous_users", return_value={"push": True}) as mock_notif,
+        ):
+            _job_variete_repas_alerte()
+
+        mock_planning_service.analyser_variete_semaine.assert_called_once()
+        mock_notif.assert_called_once()
+        assert "score 35/100" in mock_notif.call_args.kwargs["message"]
+
+    def test_job_tendances_activites_famille_compare_deux_semaines(self):
+        """Le job 15.4 doit comparer la semaine courante à la précédente."""
+        from src.services.core.cron.jobs import _job_tendances_activites_famille
+
+        query_courant = MagicMock()
+        query_courant.filter.return_value.all.return_value = [
+            SimpleNamespace(statut="termine"),
+            SimpleNamespace(statut="planifie"),
+            SimpleNamespace(statut="terminee"),
+        ]
+        query_precedent = MagicMock()
+        query_precedent.filter.return_value.all.return_value = [SimpleNamespace(statut="termine")]
+
+        mock_session = MagicMock()
+        mock_session.query.side_effect = [query_courant, query_precedent]
+        mock_dispatcher = MagicMock()
+
+        @contextmanager
+        def _ctx():
+            yield mock_session
+
+        with (
+            patch("src.core.db.obtenir_contexte_db", return_value=_ctx()),
+            patch(
+                "src.services.core.notifications.notif_dispatcher.get_dispatcher_notifications",
+                return_value=mock_dispatcher,
+            ),
+            patch("src.services.core.cron.jobs._envoyer_notif_tous_users", return_value={"ntfy": True}) as mock_notif,
+        ):
+            _job_tendances_activites_famille()
+
+        mock_notif.assert_called_once()
+        message = mock_notif.call_args.kwargs["message"]
+        assert "3 prévues, 2 terminées" in message
+        assert "hausse" in message
+
+    def test_job_energie_peak_detection_notifie_les_anomalies(self):
+        """Le job 15.5 doit agréger les anomalies énergie détectées."""
+        from src.services.core.cron.jobs import _job_energie_peak_detection
+
+        mock_service = MagicMock()
+        mock_service.analyser_anomalies.side_effect = [
+            {"anomalies": [{"explication": "pic anormal soirée"}]},
+            {"anomalies": []},
+            {"anomalies": [{"explication": "surconsommation eau"}]},
+        ]
+        mock_dispatcher = MagicMock()
+
+        with (
+            patch("src.services.maison.energie_anomalies_ia.obtenir_service_energie_anomalies_ia", return_value=mock_service),
+            patch(
+                "src.services.core.notifications.notif_dispatcher.get_dispatcher_notifications",
+                return_value=mock_dispatcher,
+            ),
+            patch("src.services.core.cron.jobs._envoyer_notif_tous_users", return_value={"push": True}) as mock_notif,
+        ):
+            _job_energie_peak_detection()
+
+        assert mock_service.analyser_anomalies.call_count == 3
+        mock_notif.assert_called_once()
+        assert "pic anormal soirée" in mock_notif.call_args.kwargs["message"]
+        assert "surconsommation eau" in mock_notif.call_args.kwargs["message"]
+
+    def test_job_nutrition_adultes_weekly_notifie_un_bilan(self):
+        """Le job 15.6 doit produire un bilan nutrition adulte à partir des besoins Garmin."""
+        from src.services.core.cron.jobs import _job_nutrition_adultes_weekly
+
+        mock_garmin = MagicMock()
+        mock_garmin.calculer_besoins_nutritionnels_selon_activite.return_value = {
+            "nom_profil": "Matanne",
+            "niveau_activite": "actif",
+            "pas_detectes": 12000,
+            "calories_actives_detectees": 450,
+            "calories_recommended": 2450,
+        }
+        mock_ai = MagicMock()
+        mock_ai.analyser_nutrition_personne = AsyncMock(return_value=SimpleNamespace(equilibre_score=88))
+        mock_dispatcher = MagicMock()
+
+        with (
+            patch("src.services.cuisine.inter_module_garmin_nutrition_adultes.get_garmin_nutrition_adultes_service", return_value=mock_garmin),
+            patch("src.services.cuisine.nutrition_famille_ia.get_nutrition_famille_ai_service", return_value=mock_ai),
+            patch(
+                "src.services.core.notifications.notif_dispatcher.get_dispatcher_notifications",
+                return_value=mock_dispatcher,
+            ),
+            patch("src.services.core.cron.jobs._envoyer_notif_tous_users", return_value={"push": True}) as mock_notif,
+        ):
+            _job_nutrition_adultes_weekly()
+
+        mock_garmin.calculer_besoins_nutritionnels_selon_activite.assert_called_once()
+        mock_ai.analyser_nutrition_personne.assert_awaited_once()
+        mock_notif.assert_called_once()
+        message = mock_notif.call_args.kwargs["message"]
+        assert "score 88/100" in message
+        assert "2450 kcal/jour" in message
+
+    def test_job_briefing_matinal_push_itere_sur_tous_les_utilisateurs(self):
+        """Le job 15.7 doit envoyer un briefing à chaque utilisateur actif."""
+        from src.services.core.cron.jobs import _job_briefing_matinal_push
+
+        mock_service = MagicMock()
+        mock_service.envoyer_briefing_notification.side_effect = [
+            {"notification": {"push": True}},
+            {"notification": None},
+        ]
+
+        with (
+            patch("src.services.utilitaires.obtenir_service_briefing_matinal", return_value=mock_service),
+            patch("src.services.core.cron.jobs._obtenir_user_ids_actifs", return_value=["u1", "u2"]),
+        ):
+            _job_briefing_matinal_push()
+
+        assert mock_service.envoyer_briefing_notification.call_count == 2
+        mock_service.envoyer_briefing_notification.assert_has_calls([
+            call(user_id="u1"),
+            call(user_id="u2"),
+        ])
+
+    def test_job_jardin_feedback_planning_notifie_les_recoltes_non_utilisees(self):
+        """Le job 15.8 doit notifier les récoltes à mieux intégrer au planning."""
+        from src.services.core.cron.jobs import _job_jardin_feedback_planning
+
+        mock_service = MagicMock()
+        mock_service.analyser_recoltes_non_utilisees.return_value = {
+            "recoltes_non_utilisees": [
+                {"nom": "Tomates"},
+                {"nom": "Courgettes"},
+            ],
+            "recommandations": ["Planifier une ratatouille la semaine prochaine"],
+        }
+        mock_dispatcher = MagicMock()
+
+        with (
+            patch("src.services.cuisine.inter_module_planning_jardin.get_planning_jardin_service", return_value=mock_service),
+            patch(
+                "src.services.core.notifications.notif_dispatcher.get_dispatcher_notifications",
+                return_value=mock_dispatcher,
+            ),
+            patch("src.services.core.cron.jobs._envoyer_notif_tous_users", return_value={"push": True}) as mock_notif,
+        ):
+            _job_jardin_feedback_planning()
+
+        mock_service.analyser_recoltes_non_utilisees.assert_called_once_with(semaines_lookback=4)
+        mock_notif.assert_called_once()
+        message = mock_notif.call_args.kwargs["message"]
+        assert "Tomates" in message
+        assert "Courgettes" in message
 
 
 # ═══════════════════════════════════════════════════════════

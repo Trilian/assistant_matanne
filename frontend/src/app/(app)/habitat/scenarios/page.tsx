@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BarChart3, PlusCircle } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/composants/ui/button";
 import { EntetePageHabitat } from "@/composants/habitat/entete-page-habitat";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
@@ -9,10 +10,26 @@ import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
 import { comparerScenariosHabitat, creerScenarioHabitat } from "@/bibliotheque/api/habitat";
+import { utiliserBrouillonAuto } from "@/crochets/utiliser-brouillon-auto";
+import { utiliserRaccourcisPage } from "@/crochets/utiliser-raccourcis-page";
 
 export default function ScenariosHabitatPage() {
   const [nom, setNom] = useState("");
   const [description, setDescription] = useState("");
+  const { valeurInitiale: brouillonInitial, effacerBrouillon } = utiliserBrouillonAuto({
+    cle: "draft:habitat:scenario",
+    valeur: { nom, description },
+    actif: true,
+  });
+
+  useEffect(() => {
+    if (!brouillonInitial) {
+      return;
+    }
+
+    setNom((prev) => prev || brouillonInitial.nom || "");
+    setDescription((prev) => prev || brouillonInitial.description || "");
+  }, [brouillonInitial]);
 
   const { data: scenarios, refetch } = utiliserRequete(
     ["habitat", "scenarios", "comparaison"],
@@ -23,9 +40,29 @@ export default function ScenariosHabitatPage() {
     onSuccess: () => {
       setNom("");
       setDescription("");
+      effacerBrouillon();
+      toast.success("Scénario créé");
       refetch();
     },
   });
+
+  utiliserRaccourcisPage([
+    {
+      touche: "n",
+      action: () => {
+        setNom("");
+        setDescription("");
+      },
+    },
+    {
+      touche: "s",
+      action: () => {
+        if (!isPending && nom.trim().length > 0) {
+          mutate({ nom, description, statut: "brouillon" });
+        }
+      },
+    },
+  ]);
 
   return (
     <div className="space-y-6">
@@ -68,6 +105,11 @@ export default function ScenariosHabitatPage() {
           >
             {isPending ? "Creation..." : "Creer"}
           </Button>
+          {(nom.trim().length > 0 || description.trim().length > 0) && (
+            <p className="text-xs text-muted-foreground">
+              Brouillon enregistré automatiquement. Raccourcis: N pour réinitialiser, S pour enregistrer.
+            </p>
+          )}
         </CardContent>
       </Card>
 

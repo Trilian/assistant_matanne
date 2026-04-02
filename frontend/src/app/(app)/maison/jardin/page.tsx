@@ -39,9 +39,11 @@ import {
   modifierEcoTip,
   supprimerEcoTip,
 } from "@/bibliotheque/api/maison";
+import { listerZonesJardinHabitat, obtenirResumeJardinHabitat } from "@/bibliotheque/api/habitat";
 import type { ActionEcologique } from "@/types/maison";
 import { toast } from "sonner";
 import { BoutonAchat } from "@/composants/bouton-achat";
+import { VueJardinInteractive } from "@/composants/maison/vue-jardin-interactive";
 
 const NOMS_MOIS = [
   "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
@@ -290,6 +292,14 @@ function ContenuJardin() {
     ["maison", "jardin", "semis", moisSemis],
     () => obtenirCalendrierSemis(Number(moisSemis))
   );
+  const { data: zonesJardin = [] } = utiliserRequete(
+    ["habitat", "jardin", "zones", "maison"],
+    () => listerZonesJardinHabitat()
+  );
+  const { data: resumeZones } = utiliserRequete(
+    ["habitat", "jardin", "resume", "maison"],
+    () => obtenirResumeJardinHabitat()
+  );
 
   const [chargerIA, setChargerIA] = useState(false);
   const { data: suggestionsIA, isLoading: chargementIA } = utiliserRequete(
@@ -348,6 +358,10 @@ function ContenuJardin() {
           )}
         </CardContent>
       </Card>
+
+      {zonesJardin.length > 0 ? (
+        <VueJardinInteractive zones={zonesJardin} resume={resumeZones} />
+      ) : null}
 
       <Tabs
         value={ongletActif}

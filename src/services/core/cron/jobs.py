@@ -2385,6 +2385,346 @@ def _job_astuce_anti_gaspillage() -> None:
         logger.exception("Erreur P7-16 astuce anti-gaspillage")
 
 
+def _job_expiration_recettes_suggestion() -> None:
+    """Sprint 15.1 — Propose des recettes pour consommer les produits bientôt périmés."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.cuisine import obtenir_service_prediction_peremption
+
+        service = obtenir_service_prediction_peremption()
+        predictions = service.predire_peremptions_personnalisees(horizon_jours=2)
+        items = predictions.get("items", []) if isinstance(predictions, dict) else []
+        if not items:
+            logger.info("Sprint 15.1: aucune péremption proche à traiter")
+            return
+
+        urgents = items[:5]
+        noms = [str(item.get("nom") or "article") for item in urgents]
+        message = (
+            "Produits à cuisiner rapidement: "
+            f"{', '.join(noms)}. "
+            "Idées: poêlée, soupe, quiche ou plat four pour éviter le gaspillage."
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        resultats = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push", "ntfy"],
+            titre="Recettes anti-gaspillage du jour",
+        )
+        logger.info("Sprint 15.1 exécuté: %d produit(s), notif=%s", len(urgents), resultats)
+    except Exception:
+        logger.exception("Erreur Sprint 15.1 expiration_recettes_suggestion")
+
+
+def _job_stock_prediction_reapprovisionnement() -> None:
+    """Sprint 15.2 — Prédit les réapprovisionnements hebdomadaires à surveiller."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleInventaire
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.inventaire.ia_service import get_inventaire_ai_service
+
+        service_ia = get_inventaire_ai_service()
+        alertes: list[str] = []
+
+        with obtenir_contexte_db() as session:
+            articles = (
+                session.query(ArticleInventaire)
+                .filter(ArticleInventaire.quantite > 0, ArticleInventaire.quantite_min > 0)
+                .order_by(ArticleInventaire.quantite.asc())
+                .limit(10)
+                .all()
+            )
+
+        if not articles:
+            logger.info("Sprint 15.2: aucun article d'inventaire à analyser")
+            return
+
+        for article in articles:
+            nom = getattr(article, "nom", None) or f"Ingrédient #{article.ingredient_id}"
+            prediction = service_ia.predire_consommation(
+                ingredient_nom=nom,
+                stock_actuel_kg=float(article.quantite or 0),
+                historique_achat_mensuel=[],
+            )
+            seuil = float(getattr(prediction, "seuil_reapprovisionnement_kg", 0.0) or 0.0)
+            jours = int(getattr(prediction, "jours_autonomie", 999) or 999)
+            if float(article.quantite or 0) <= seuil or jours <= 10:
+                alertes.append(f"{nom} (autonomie {jours}j)")
+
+        if not alertes:
+            logger.info("Sprint 15.2: aucune prédiction de réappro urgente")
+            return
+
+        dispatcher = get_dispatcher_notifications()
+        resultats = _envoyer_notif_tous_users(
+            dispatcher,
+            message=(
+                "Réapprovisionnement à anticiper cette semaine: "
+                f"{', '.join(alertes[:5])}."
+            ),
+            canaux=["ntfy", "push"],
+            titre="Prévision réapprovisionnement",
+        )
+        logger.info("Sprint 15.2 exécuté: %d alerte(s), notif=%s", len(alertes), resultats)
+    except Exception:
+        logger.exception("Erreur Sprint 15.2 stock_prediction_reapprovisionnement")
+
+
+def _job_variete_repas_alerte() -> None:
+    """Sprint 15.3 — Détecte une semaine de repas trop monotone."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import Repas
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.planning.ia_service import PlanningAIService
+
+        debut = date.today()
+        fin = debut + timedelta(days=6)
+        planning_repas: dict[str, dict[str, str]] = {}
+
+        with obtenir_contexte_db() as session:
+            repas = (
+                session.query(Repas)
+                .filter(Repas.date_repas >= debut, Repas.date_repas <= fin)
+                .order_by(Repas.date_repas.asc())
+                .all()
+            )
+
+        for item in repas:
+            cle = item.date_repas.isoformat()
+            entree = planning_repas.setdefault(cle, {"jour": cle})
+            nom = getattr(getattr(item, "recette", None), "nom", None) or getattr(item, "notes", None) or "Repas"
+            entree[str(getattr(item, "type_repas", "repas") or "repas")] = str(nom)
+
+        if len(planning_repas) < 3:
+            logger.info("Sprint 15.3: planning insuffisant pour analyser la variété")
+            return
+
+        analyse = PlanningAIService().analyser_variete_semaine(list(planning_repas.values()))
+        score = int(getattr(analyse, "score_variete", 50) or 50)
+        repetitions = getattr(analyse, "repetitions_problematiques", []) or []
+
+        if score >= 55 and not repetitions:
+            logger.info("Sprint 15.3: variété correcte (score=%d)", score)
+            return
+
+        recommandations = getattr(analyse, "recommandations", []) or []
+        message = (
+            f"Variété du planning à surveiller (score {score}/100). "
+            f"Répétitions: {', '.join(map(str, repetitions[:3])) or 'aucune précisée'}. "
+            f"Suggestion: {recommandations[0] if recommandations else 'ajouter une source de protéine différente.'}"
+        )
+
+        dispatcher = get_dispatcher_notifications()
+        resultats = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push", "ntfy"],
+            titre="Alerte variété repas",
+        )
+        logger.info("Sprint 15.3 exécuté: score=%d, notif=%s", score, resultats)
+    except Exception:
+        logger.exception("Erreur Sprint 15.3 variete_repas_alerte")
+
+
+def _job_tendances_activites_famille() -> None:
+    """Sprint 15.4 — Résume les tendances d'engagement des activités famille."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ActiviteFamille
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        debut_courant = aujourd_hui - timedelta(days=7)
+        debut_prec = aujourd_hui - timedelta(days=14)
+        fin_prec = aujourd_hui - timedelta(days=8)
+
+        with obtenir_contexte_db() as session:
+            activites_courantes = (
+                session.query(ActiviteFamille)
+                .filter(ActiviteFamille.date_prevue >= debut_courant, ActiviteFamille.date_prevue <= aujourd_hui)
+                .all()
+            )
+            activites_precedentes = (
+                session.query(ActiviteFamille)
+                .filter(ActiviteFamille.date_prevue >= debut_prec, ActiviteFamille.date_prevue <= fin_prec)
+                .all()
+            )
+
+        nb_courant = len(activites_courantes)
+        nb_precedent = len(activites_precedentes)
+        if nb_courant == 0 and nb_precedent == 0:
+            logger.info("Sprint 15.4: aucune activité à analyser")
+            return
+
+        statut_termines = {"termine", "terminée", "réalisé", "realise"}
+        terminees = sum(1 for a in activites_courantes if str(getattr(a, "statut", "")).lower() in statut_termines)
+        tendance = "stable"
+        if nb_courant > nb_precedent:
+            tendance = "hausse"
+        elif nb_courant < nb_precedent:
+            tendance = "baisse"
+
+        message = (
+            f"Activités famille sur 7 jours: {nb_courant} prévues, {terminees} terminées. "
+            f"Tendance vs semaine précédente: {tendance}."
+        )
+        dispatcher = get_dispatcher_notifications()
+        resultats = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["ntfy"],
+            titre="Tendances activités famille",
+        )
+        logger.info(
+            "Sprint 15.4 exécuté: courant=%d précédent=%d notif=%s",
+            nb_courant,
+            nb_precedent,
+            resultats,
+        )
+    except Exception:
+        logger.exception("Erreur Sprint 15.4 tendances_activites_famille")
+
+
+def _job_energie_peak_detection() -> None:
+    """Sprint 15.5 — Détecte les pics de consommation énergie du jour."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.maison.energie_anomalies_ia import obtenir_service_energie_anomalies_ia
+
+        service = obtenir_service_energie_anomalies_ia()
+        details = []
+        for type_energie in ("electricite", "gaz", "eau"):
+            resultat = service.analyser_anomalies(type_energie=type_energie, nb_mois=12, seuil_pct=20)
+            anomalies = resultat.get("anomalies", []) if isinstance(resultat, dict) else []
+            for anomalie in anomalies[:2]:
+                details.append(f"{type_energie}: {anomalie.get('explication', 'variation détectée')}")
+
+        if not details:
+            logger.info("Sprint 15.5: aucun pic énergie détecté")
+            return
+
+        dispatcher = get_dispatcher_notifications()
+        resultats = _envoyer_notif_tous_users(
+            dispatcher,
+            message=f"Pics de consommation détectés: {' | '.join(details[:3])}",
+            canaux=["push", "ntfy"],
+            titre="Alerte énergie",
+        )
+        logger.info("Sprint 15.5 exécuté: %d anomalie(s), notif=%s", len(details), resultats)
+    except Exception:
+        logger.exception("Erreur Sprint 15.5 energie_peak_detection")
+
+
+def _job_nutrition_adultes_weekly() -> None:
+    """Sprint 15.6 — Génère un bilan nutritionnel adulte hebdomadaire lié à Garmin."""
+    try:
+        import asyncio
+
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.cuisine.inter_module_garmin_nutrition_adultes import get_garmin_nutrition_adultes_service
+        from src.services.cuisine.nutrition_famille_ia import get_nutrition_famille_ai_service
+
+        service_garmin = get_garmin_nutrition_adultes_service()
+        besoins = service_garmin.calculer_besoins_nutritionnels_selon_activite()
+        if not besoins:
+            logger.info("Sprint 15.6: aucun besoin nutritionnel adulte calculé")
+            return
+
+        niveau = str(besoins.get("niveau_activite", "modere")).lower().replace(" ", "_")
+        mapping_niveau = {
+            "sédentaire": "sedentaire",
+            "sedentaire": "sedentaire",
+            "modéré": "modere",
+            "modere": "modere",
+            "actif": "actif",
+            "très_actif": "tres_actif",
+            "tres_actif": "tres_actif",
+        }
+        niveau_ia = mapping_niveau.get(niveau, "modere")
+
+        bilan = asyncio.run(
+            get_nutrition_famille_ai_service().analyser_nutrition_personne(
+                personne_nom=str(besoins.get("nom_profil", "Adulte principal")),
+                age_ans=35,
+                sexe="M",
+                activite_niveau=niveau_ia,
+                donnees_garmin_semaine={
+                    "pas": besoins.get("pas_detectes", 0),
+                    "calories_actives": besoins.get("calories_actives_detectees", 0),
+                },
+                recettes_semaine=[],
+            )
+        )
+
+        message = (
+            f"Bilan nutrition adulte: activité {niveau_ia}, score {bilan.equilibre_score}/100, "
+            f"objectif {int(besoins.get('calories_recommended', 0) or 0)} kcal/jour."
+        )
+        dispatcher = get_dispatcher_notifications()
+        resultats = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push", "ntfy"],
+            titre="Bilan nutrition adultes",
+        )
+        logger.info("Sprint 15.6 exécuté: score=%s notif=%s", bilan.equilibre_score, resultats)
+    except Exception:
+        logger.exception("Erreur Sprint 15.6 nutrition_adultes_weekly")
+
+
+def _job_briefing_matinal_push() -> None:
+    """Sprint 15.7 — Envoie le briefing matinal IA à tous les profils actifs."""
+    try:
+        from src.services.utilitaires import obtenir_service_briefing_matinal
+
+        service = obtenir_service_briefing_matinal()
+        utilisateurs = _obtenir_user_ids_actifs()
+        nb_envoyes = 0
+
+        for user_id in utilisateurs:
+            resultat = service.envoyer_briefing_notification(user_id=user_id)
+            if resultat.get("notification"):
+                nb_envoyes += 1
+
+        logger.info("Sprint 15.7 exécuté: briefing envoyé à %d utilisateur(s)", nb_envoyes)
+    except Exception:
+        logger.exception("Erreur Sprint 15.7 briefing_matinal_push")
+
+
+def _job_jardin_feedback_planning() -> None:
+    """Sprint 15.8 — Remonte les récoltes non utilisées dans le planning."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.cuisine.inter_module_planning_jardin import get_planning_jardin_service
+
+        resultat = get_planning_jardin_service().analyser_recoltes_non_utilisees(semaines_lookback=4)
+        recoltes = resultat.get("recoltes_non_utilisees", []) if isinstance(resultat, dict) else []
+        if not recoltes:
+            logger.info("Sprint 15.8: aucune récolte non utilisée détectée")
+            return
+
+        noms = [str(item.get("nom") or "récolte") for item in recoltes[:5]]
+        recommandations = resultat.get("recommandations", []) if isinstance(resultat, dict) else []
+        message = (
+            f"Récoltes à mieux intégrer au planning: {', '.join(noms)}. "
+            f"Conseil: {recommandations[0] if recommandations else 'prévoir une recette dédiée la semaine prochaine.'}"
+        )
+        dispatcher = get_dispatcher_notifications()
+        resultats = _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["ntfy", "push"],
+            titre="Feedback jardin → planning",
+        )
+        logger.info("Sprint 15.8 exécuté: %d récolte(s), notif=%s", len(recoltes), resultats)
+    except Exception:
+        logger.exception("Erreur Sprint 15.8 jardin_feedback_planning")
+
+
 _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     # Jobs existants
     "rappels_famille": ("Rappels famille quotidiens", _job_rappels_famille),
@@ -2439,6 +2779,23 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "resume_jardin_saisonnier": ("Résumé jardin saisonnier", _job_resume_jardin_saisonnier),
     "expiration_documents": ("Expiration documents", _job_expiration_documents),
     "sync_calendrier_scolaire": ("Sync calendrier scolaire auto", _job_sync_calendrier_scolaire),
+    "job_expiration_recettes_suggestion": (
+        "Suggestion recettes produits expirants",
+        _job_expiration_recettes_suggestion,
+    ),
+    "job_stock_prediction_reapprovisionnement": (
+        "Prédiction réapprovisionnement inventaire",
+        _job_stock_prediction_reapprovisionnement,
+    ),
+    "job_variete_repas_alerte": ("Alerte variété repas", _job_variete_repas_alerte),
+    "job_tendances_activites_famille": (
+        "Tendances activités famille",
+        _job_tendances_activites_famille,
+    ),
+    "job_energie_peak_detection": ("Détection pics énergie", _job_energie_peak_detection),
+    "job_nutrition_adultes_weekly": ("Bilan nutrition adultes hebdo", _job_nutrition_adultes_weekly),
+    "job_briefing_matinal_push": ("Briefing matinal IA", _job_briefing_matinal_push),
+    "job_jardin_feedback_planning": ("Feedback jardin vers planning", _job_jardin_feedback_planning),
 }
 
 

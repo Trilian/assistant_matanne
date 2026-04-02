@@ -179,6 +179,24 @@ async def creer_jalon(
             session.add(jalon)
             session.commit()
             session.refresh(jalon)
+
+            try:
+                from src.services.core.events import obtenir_bus
+
+                obtenir_bus().emettre(
+                    "jalon.ajoute",
+                    {
+                        "jalon_id": jalon.id,
+                        "titre": jalon.titre,
+                        "nom": jalon.titre,
+                        "enfant_id": enfant_id,
+                        "categorie": jalon.categorie,
+                    },
+                    source="famille_jules",
+                )
+            except Exception:
+                pass
+
             return {
                 "id": jalon.id,
                 "titre": jalon.titre,
