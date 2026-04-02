@@ -1,5 +1,4 @@
-﻿"""
-"""Routes API Export Backup — Export de données personnelles.
+﻿"""Routes API Export Backup - Export de données personnelles.
 
 Endpoints pour l'export de données (backup personnel) et la suppression de compte.
 """

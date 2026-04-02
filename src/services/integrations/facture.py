@@ -289,8 +289,4 @@ def obtenir_facture_ocr_service() -> FactureOCRService:
 
 def obtenir_service_ocr_facture() -> FactureOCRService:
     """Alias français pour le service OCR."""
-    return get_facture_ocr_service()
-
-
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_facture_ocr_service = obtenir_facture_ocr_service  # alias rétrocompatibilité Sprint 12 A3
+    return obtenir_facture_ocr_service()

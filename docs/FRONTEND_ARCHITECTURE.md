@@ -155,12 +155,12 @@ Configuration:
 - `frontend/vitest.config.ts`
 - seuils coverage actuels: lignes 50%, fonctions 50%, branches 40%, statements 50%
 
-Zones couvertes en phase 3:
+Zones couvertes:
 
 - composants critiques (formulaire recette, plan 3D, heatmap cotes)
 - hooks (CRUD dialog, websocket)
 
-Mise a jour phase 10:
+Etat actuel:
 
 - suites Vitest et Playwright actives
 - architecture App Router reste compatible Next.js 16

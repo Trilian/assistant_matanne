@@ -1,7 +1,7 @@
 # Documentation Index - MaTanne
 
 > Derniere mise a jour : 1 avril 2026.
-> Statut : index aligne avec la documentation consolidee de la phase 10 et les mises a jour du planning.
+> Statut : index aligne avec la documentation consolidee et les mises a jour du planning.
 
 ---
 

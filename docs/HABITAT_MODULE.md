@@ -1,6 +1,6 @@
 ﻿# Module Habitat — Documentation
 
-> **Dernière mise à jour** : 30 mars 2026 — Phase 10
+> **Dernière mise à jour** : 2 avril 2026
 
 ## Vue d'ensemble
 
@@ -53,9 +53,9 @@ frontend/src/app/(app)/habitat/
 | POST | `/api/v1/habitat/deco/suggestions` | Suggestions déco IA |
 | GET | `/api/v1/habitat/veille` | Résultats veille immobilière |
 
-## Veille emploi (Phase 10)
+## Veille emploi
 
-Le module Habitat intègre désormais la **veille emploi** via les innovations Phase 10 :
+Le module Habitat intègre désormais la **veille emploi** :
 
 - **Endpoint** : `POST /api/v1/innovations/veille-emploi`
 - **CRON** : `veille_emploi` — scan quotidien à 7h00

@@ -66,7 +66,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 | `POST` | `/api/v1/admin/jobs/{job_id}/run` | Déclencher un job manuellement (dry-run optionnel, rate-limited 5/min) |
 | `GET` | `/api/v1/admin/jobs/{job_id}/logs` | Historique des 50 dernières exécutions |
 | `GET` | `/api/v1/admin/jobs/history` | Historique paginé avec filtres |
-| `GET` | `/api/v1/admin/bridges/phase5/status` | Statut de tous les bridges Phase 5 (smoke + présence) |
+| `GET` | `/api/v1/admin/bridges/status` | Statut de tous les bridges (smoke + présence) |
 
 ### Notifications (4 endpoints)
 

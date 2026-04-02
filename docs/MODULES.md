@@ -15,7 +15,7 @@
 | **Jeux** | 4 | 1 routeur | `jeux/` | Paris sportifs, Loto, EuroMillions |
 | **Outils** | 6 | 1 routeur | `utilitaires/` | Chat IA, météo, convertisseur, minuteur, notes |
 | **Habitat** | 5 | 1 routeur | `habitat/` | Veille immo, scénarios, plans, déco, jardin |
-| **IA avancée / Innovations** | 16+ | 2 routeurs | `ia_avancee/`, `innovations/` | Endpoints IA avancés et fonctionnalités phase 9/10 |
+| **IA avancée / Innovations** | 16+ | 2 routeurs | `ia_avancee/`, `innovations/` | Endpoints IA avancés et fonctionnalités innovantes |
 | **Dashboard** | 1 | 1 routeur | `dashboard/` | Tableau de bord avec métriques agrégées |
 
 ---

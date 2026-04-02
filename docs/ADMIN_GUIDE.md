@@ -116,7 +116,7 @@ Référence: `src/api/routes/admin.py`
 
 ---
 
-## Roadmap admin (post phase 3)
+## Roadmap admin
 
 - persistance DB de l'historique jobs
 - mode dry-run des jobs

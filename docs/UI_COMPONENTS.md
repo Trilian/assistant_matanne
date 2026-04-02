@@ -2,7 +2,7 @@
 
 Guide des composants UI du frontend Next.js (shadcn/ui + composants layout).
 
-Snapshot phase 10:
+Snapshot:
 
 - 29 composants UI dans `frontend/src/composants/ui/`
 - 82 composants metier/layout hors dossier UI

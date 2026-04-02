@@ -9,11 +9,11 @@ Ce package regroupe tous les services d'intégration externe:
 Utilisation:
     from src.services.integrations import (
         BarcodeService,
-        get_barcode_service,
+        obtenir_service_codes_barres,
         OpenFoodFactsService,
-        get_openfoodfacts_service,
+        obtenir_openfoodfacts_service,
         FactureOCRService,
-        get_facture_ocr_service,
+        obtenir_facture_ocr_service,
     )
 """
 
@@ -32,7 +32,7 @@ from .codes_barres import (
     # Service
     BarcodeService,
     ScanResultat,
-    get_barcode_service,
+    obtenir_service_codes_barres,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -49,7 +49,7 @@ from .facture import (
     ResultatOCR,
     detecter_fournisseur,
     extraire_montant,
-    get_facture_ocr_service,
+    obtenir_facture_ocr_service,
 )
 
 # ═══════════════════════════════════════════════════════════
@@ -65,7 +65,7 @@ from .produit import (
     # Service
     OpenFoodFactsService,
     ProduitOpenFoodFacts,
-    get_openfoodfacts_service,
+    obtenir_openfoodfacts_service,
 )
 from .weather import (
     AlerteMeteo,
@@ -91,14 +91,14 @@ from .webhooks import (
 __all__ = [
     # Codes-barres
     "BarcodeService",
-    "get_barcode_service",
+    "obtenir_service_codes_barres",
     "BarcodeData",
     "BarcodeArticle",
     "BarcodeRecette",
     "ScanResultat",
     # OpenFoodFacts
     "OpenFoodFactsService",
-    "get_openfoodfacts_service",
+    "obtenir_openfoodfacts_service",
     "NutritionInfo",
     "ProduitOpenFoodFacts",
     "OPENFOODFACTS_API",
@@ -106,7 +106,7 @@ __all__ = [
     "CACHE_TTL",
     # Facture OCR
     "FactureOCRService",
-    "get_facture_ocr_service",
+    "obtenir_facture_ocr_service",
     "DonneesFacture",
     "ResultatOCR",
     "PATTERNS_FOURNISSEURS",

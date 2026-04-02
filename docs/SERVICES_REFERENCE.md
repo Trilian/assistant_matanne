@@ -2,7 +2,7 @@
 
 > Référence mise à jour des packages de services backend, des patterns de factories et des points d'entrée publics les plus utiles.
 
-## Snapshot Phase 10
+## Snapshot
 
 - Factories détectées (`@service_factory`): **169**
 - Domaine le plus dense: cuisine/maison/famille
@@ -283,7 +283,7 @@ Intégrations utiles repérées:
 - `obtenir_image_generator_service`
 - `obtenir_service_synchronisation_temps_reel`
 
-Intégrations phase 3 suivies en priorité:
+Intégrations suivies en priorité:
 
 - météo jardin: `src/services/integrations/weather/`
 - Google Calendar: `src/services/integrations/google_calendar.py`

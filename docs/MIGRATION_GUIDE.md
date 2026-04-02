@@ -4,7 +4,7 @@
 
 ---
 
-## Workflow schéma DB (Phase 10)
+## Workflow schéma DB
 
 **Source de vérité : `sql/schema/*.sql` régénère `sql/INIT_COMPLET.sql`**
 
@@ -37,9 +37,9 @@ Le workflow actif est SQL-first et modulaire :
 
 ---
 
-## Workflow SQL-first — Structure modulaire (Sprint H)
+## Workflow SQL-first — Structure modulaire
 
-**Structure depuis le Sprint H :**
+**Structure actuelle :**
 
 ```
 sql/
@@ -160,7 +160,7 @@ else:
 ### Vérification cohérence ORM ↔ SQL
 
 ```bash
-# Sprint 3 prévoir test automatique :
+# Test automatique de cohérence :
 python -c "
 import re
 from pathlib import Path

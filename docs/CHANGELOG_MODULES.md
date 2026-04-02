@@ -1,6 +1,6 @@
 # Changelog Modules
 
-> Historique fonctionnel consolide par grandes phases, sprints et domaines au 1er avril 2026.
+> Historique fonctionnel consolide par domaines au 1er avril 2026.
 
 ---
 
@@ -8,16 +8,16 @@
 
 | Periode | Portee principale | Resultat marquant |
 | --- | --- | --- |
-| Sprints 1 a 6 | Stabilisation initiale | correction des bugs critiques, premiers cron jobs, notifications/admin, 2FA, WhatsApp webhook |
-| Sprint 7 | SQL, tests, documentation | consolidation schema SQL, archive Alembic, nouveaux tests de non regression, nettoyage docs |
-| Sprint 8 | Inter-modules et dashboard | cellier-inventaire, score bien-etre, alertes meteo, widgets configurables, timeline famille |
-| Sprint 9 | IA avancee et canaux sortants | lots IA et cron avances identifies, une partie deja absorbee ensuite dans le backend |
-| Sprint 12 | Reorganisation architecture | split de routeurs, renommage massif des factories `obtenir_*_service`, generation types OpenAPI |
-| Phase 8 | Notifications | dispatcher unifie, failover multi-canal, throttling, digest queue, preferences utilisateur |
-| Sprint 14 | IA et cron etendus | lots IA IA1 a IA7, nouveaux jobs planifies et etat admin aligne |
-| Phase 10 | Documentation | reference technique revue, index complete, guides de testing, cron, notifications, admin, event bus |
+| Stabilisation initiale | Socle backend | correction des bugs critiques, premiers cron jobs, notifications/admin, 2FA, WhatsApp webhook |
+| Consolidation SQL | SQL, tests, documentation | consolidation schema SQL, archive Alembic, nouveaux tests de non regression, nettoyage docs |
+| Inter-modules et dashboard | Dashboard avance | cellier-inventaire, score bien-etre, alertes meteo, widgets configurables, timeline famille |
+| IA avancee et canaux sortants | IA, notifications | lots IA et cron avances identifies, une partie deja absorbee ensuite dans le backend |
+| Reorganisation architecture | Architecture | split de routeurs, renommage massif des factories `obtenir_*_service`, generation types OpenAPI |
+| Notifications multi-canal | Notifications | dispatcher unifie, failover multi-canal, throttling, digest queue, preferences utilisateur |
+| IA et cron etendus | IA, cron | lots IA IA1 a IA7, nouveaux jobs planifies et etat admin aligne |
+| Documentation consolidee | Documentation | reference technique revue, index complete, guides de testing, cron, notifications, admin, event bus |
 
-## Sprints 1 a 6
+## Stabilisation initiale
 
 - correction des bugs critiques push et stabilisation du socle backend
 - ajout progressif des briques notifications, admin et 2FA
@@ -25,7 +25,7 @@
 - activation des premiers jobs APScheduler pour les routines et synchronisations de base
 - premiers correctifs cuisine, Jules et dashboard livres en production
 
-## Sprint 7
+## Consolidation SQL et tests
 
 - migrations SQL historiques absorbees dans `sql/INIT_COMPLET.sql`
 - archive Alembic laissee en sauvegarde avec `alembic.ini.bak`
@@ -34,7 +34,7 @@
 - extension des tests push, admin, famille et creation de la page admin jobs
 - nettoyage de la documentation et remise a niveau du plan de travail
 
-## Sprint 8
+## Inter-modules et dashboard
 
 ### Cuisine et stocks
 
@@ -52,7 +52,7 @@
 
 - timeline de vie familiale agregee
 
-## Sprint 9
+## IA avancee et canaux sortants
 
 - cadrage du lot WhatsApp sortant proactif
 - cadrage du lot assistant vocal Web Speech API plus Mistral
@@ -60,7 +60,7 @@
 - cadrage des lots IA sur vacances, anomalies financieres, optimisation budget et diagnostic photo maison
 - une partie de ces chantiers a ete ensuite livree hors du sprint nominal, notamment via les refontes notifications, cron et automatisations
 
-## Sprint 12
+## Reorganisation architecture
 
 - decoupage des routeurs maison et famille pour reduire les fichiers trop volumineux
 - renommage de 96 factories vers le format `obtenir_*_service`
@@ -68,7 +68,7 @@
 - audit ORM/SQL, alignements des modeles et correction `ArticleCourses`
 - meilleure lisibilite de l'architecture services/modeles/routes
 
-## Phase 8 Notifications
+## Notifications multi-canal
 
 - introduction de `DispatcherNotifications` comme point d'entree unique
 - mapping des evenements vers les canaux par priorite
@@ -77,14 +77,14 @@
 - preferences utilisateur exposees via API et historisation des envois
 - couverture de tests dediee sur les canaux et sur le routage
 
-## Sprint 14
+## IA et cron etendus
 
 - livraison du lot IA IA1 a IA7
 - ajout ou extension des jobs J1, J3, J4, J5 et J6
 - mise a jour des libelles admin et des vues de supervision
 - suite de tests passee sur le perimetre documente en memoire projet
 
-## Phase 10 Documentation
+## Documentation consolidee
 
 - mise a jour de `CRON_JOBS.md` avec les 68 jobs connus, categories, horaires et endpoints admin
 - mise a jour de `NOTIFICATIONS.md` avec l'architecture multi-canal reelle

@@ -319,6 +319,3 @@ def obtenir_openfoodfacts_service() -> OpenFoodFactsService:
     """Factory pour obtenir le service OpenFoodFacts (alias anglais)."""
     return obtenir_service_openfoodfacts()
 
-
-# ─── Aliases rétrocompatibilité (Sprint 12 A3) ───────────────────────────────
-get_openfoodfacts_service = obtenir_openfoodfacts_service  # alias rétrocompatibilité Sprint 12 A3

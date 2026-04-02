@@ -1,8 +1,8 @@
 ﻿# 📡 API Reference — Assistant Matanne
 
-Documentation complète de l'API REST FastAPI, organisée par modules fonctionnels et vérifiée pendant la phase 10.
+Documentation complète de l'API REST FastAPI, organisée par modules fonctionnels.
 
-## Vérification Phase 10
+## Vérification
 
 - Audit code du 1 avril 2026: **622 handlers HTTP** détectés dans `src/api/routes/*.py`.
 - Le document reste organisé par modules fonctionnels pour la lisibilité.

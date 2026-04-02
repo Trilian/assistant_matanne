@@ -540,27 +540,43 @@ def test_recolte_jardin_declenche_suggestions_recettes(test_db):
 
 ---
 
-## 11. Sprint 9 — Documentation nettoyage et mise à jour
+## 11. Sprint 9 — Documentation nettoyage et mise à jour ✅
 
 > **Objectif** : Nettoyer la documentation existante des références legacy
 > **Effort** : Faible | **Impact** : Clarté documentation
 > **Dépend de** : Sprint 3
+> **Statut** : ✅ Terminé (2 avril 2026)
 
-### Documents à nettoyer
+### Documents nettoyés
 
-| # | Fichier | Problème | Action |
-|---|---|---|---|
-| 9.1 | `docs/CHANGELOG_MODULES.md` | Références phases/sprints historiques | Reformater par module, sans noms de phase |
-| 9.2 | `ROADMAP.md` | Références sprints 1-10 historiques | Mettre à jour avec le nouveau plan |
-| 9.3 | `docs/HABITAT_MODULE.md` | Référence "Phase 10" | Retirer référence |
-| 9.4 | `docs/GAMIFICATION.md` | Décrit gamification étendue (rejetée) | Réduire scope au sport/Garmin uniquement |
-| 9.5 | Documents avec "phase" dans les sections | ~5 fichiers | Remplacer par nom fonctionnel |
+| # | Fichier | Problème | Action | Statut |
+|---|---|---|---|---|
+| 9.1 | `docs/CHANGELOG_MODULES.md` | Références phases/sprints historiques | Reformaté par domaine fonctionnel | ✅ |
+| 9.2 | `ROADMAP.md` | Références sprints 1-10 historiques | Mis à jour avec le plan actuel | ✅ |
+| 9.3 | `docs/HABITAT_MODULE.md` | Référence "Phase 10" | Références retirées | ✅ |
+| 9.4 | `docs/GAMIFICATION.md` | Décrit gamification étendue (rejetée) | Déjà limité sport/Garmin — vérifié OK | ✅ |
+| 9.5 | Documents avec "phase" dans les sections | 13 fichiers nettoyés | Remplacé par noms fonctionnels | ✅ |
+
+### Fichiers supplémentaires nettoyés (9.5)
+
+- `docs/ADMIN_GUIDE.md` — "post phase 3" retiré
+- `docs/ADMIN_RUNBOOK.md` — "Phase 5" retiré de la route bridges
+- `docs/API_REFERENCE.md` — "phase 10" retiré
+- `docs/CRON_JOBS.md` — "Phase 7/8/10/B" remplacés par descriptions fonctionnelles
+- `docs/ERD_SCHEMA.md` — "Sprint H" et "phase 10" retirés
+- `docs/FRONTEND_ARCHITECTURE.md` — "phase 3" et "phase 10" retirés
+- `docs/INDEX.md` — "phase 10" retiré
+- `docs/MIGRATION_GUIDE.md` — "Phase 10", "Sprint H", "Sprint 3" retirés
+- `docs/MODULES.md` — "phase 9/10" retiré
+- `docs/SERVICES_REFERENCE.md` — "Phase 10" et "phase 3" retirés
+- `docs/TESTING_ADVANCED.md` — "Phase 10.11" retiré
+- `docs/UI_COMPONENTS.md` — "phase 10" retiré
 
 ### Critères de validation
 
-- [ ] `rg "Phase [0-9]|Sprint [0-9]" docs/` → aucune référence historique
-- [ ] `GAMIFICATION.md` mentionne uniquement sport/Garmin
-- [ ] `ROADMAP.md` aligné sur le nouveau plan
+- [x] `rg "Phase [0-9]|Sprint [0-9]" docs/` → aucune référence historique
+- [x] `GAMIFICATION.md` mentionne uniquement sport/Garmin
+- [x] `ROADMAP.md` aligné sur le nouveau plan
 
 ---
 
@@ -1175,9 +1191,9 @@ Les groupes suivants peuvent être travaillés en parallèle :
 - [ ] Couverture frontend ≥ 60%
 - [ ] `pytest` vert complet
 
-### Sprint 9 — Docs cleanup
-- [ ] 0 refs legacy dans `docs/`
-- [ ] `GAMIFICATION.md` réduit au sport
+### Sprint 9 — Docs cleanup ✅
+- [x] 0 refs legacy dans `docs/`
+- [x] `GAMIFICATION.md` réduit au sport
 
 ### Sprint 10 — Docs manquants
 - [ ] 4 guides créés

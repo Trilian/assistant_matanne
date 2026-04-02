@@ -237,7 +237,7 @@ class ServicePlanning(
             nom=f"Planning {semaine_debut.strftime('%d/%m')}",
             semaine_debut=semaine_debut,
             semaine_fin=semaine_fin,
-            actif=True,
+            statut="actif",
             genere_par_ia=genere_par_ia,
         )
         db.add(planning)
@@ -462,7 +462,7 @@ class ServicePlanning(
                 "nom": p.nom,
                 "debut": p.semaine_debut,
                 "fin": p.semaine_fin,
-                "actif": p.actif,
+                "actif": p.statut == "actif",
                 "genere_par_ia": p.genere_par_ia,
                 "nb_repas": len(p.repas) if hasattr(p, "repas") else 0,
             }

@@ -1,15 +1,15 @@
 ﻿# 📊 Schéma ERD - Modèles de Données Assistant Matanne
 
 > Diagramme Entity-Relationship des tables SQLAlchemy
-> Mise à jour Sprint H: 31 mars 2026
+> Mise à jour : 2 avril 2026
 
-## Référence Sprint H
+## Référence
 
 - Source de vérité SQL: `sql/schema/*.sql` (structure modulaire SQL-first)
 - Nombre de tables cible: 143
 - Ce document sert de vue fonctionnelle par domaines; la validation finale passe par le schéma SQL modulaire
 
-Validation phase 10 (1 avril 2026):
+Validation (1 avril 2026):
 
 - 143 tables ORM détectées dans `src/core/models/*.py` (hors `mixins.py`)
 - alignement maintenu avec `sql/schema/*.sql`
@@ -876,9 +876,9 @@ erDiagram
 
 ---
 
-## Addendum Phase 3
+## Addendum — Habitat et Garmin
 
-Cette section synthétise les ajouts de périmètre issus de la phase 3 du planning.
+Cette section synthétise les ajouts de périmètre pour l'habitat et l'intégration Garmin.
 
 ### Habitat
 

@@ -236,7 +236,7 @@ RULES:
                 nom=f"Planning {semaine_debut.strftime('%d/%m/%Y')}",
                 semaine_debut=semaine_debut,
                 semaine_fin=semaine_fin,
-                actif=True,
+                statut="actif",
                 genere_par_ia=False,  # Non généré par IA car fallback
             )
             db.add(planning)
@@ -281,7 +281,7 @@ RULES:
             nom=f"Planning {semaine_debut.strftime('%d/%m/%Y')}",
             semaine_debut=semaine_debut,
             semaine_fin=semaine_fin,
-            actif=True,
+            statut="actif",
             genere_par_ia=True,
         )
         db.add(planning)

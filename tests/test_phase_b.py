@@ -359,10 +359,8 @@ class TestSchemasPhaseB:
         from src.api.schemas.phase_b import PredictionCoursesResponse
 
         p = PredictionCoursesResponse(
-            nom="Lait",
-            categorie="Produits laitiers",
-            frequence_jours=7.0,
-            score_confiance=0.85,
+            predictions=[],
+            nb_total=0,
         )
-        assert p.nom == "Lait"
-        assert p.score_confiance == 0.85
+        assert p.predictions == []
+        assert p.nb_total == 0

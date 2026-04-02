@@ -1,6 +1,6 @@
 ﻿# Testing Advanced
 
-Guide d'execution pour le socle Phase 10.11:
+Guide d'execution pour le socle de tests avances:
 
 - mutation testing (mutmut)
 - contract testing OpenAPI (Schemathesis)

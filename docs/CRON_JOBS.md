@@ -179,10 +179,10 @@ Tous les jobs sont enregistrés dans le dictionnaire `_REGISTRE_JOBS` :
 Le registre est construit de manière incrémentale :
 
 1. Jobs initiaux (28 jobs de base)
-2. Ajouts Phase 7 (jobs cron supplémentaires)
-3. Ajouts Phase 8 (notifications, contrats, documents)
-4. Ajouts Phase 10 (innovations, gamification, automations)
-5. Ajouts Phase B (IA avancée, résumés narratifs)
+2. Jobs cron supplémentaires
+3. Jobs notifications, contrats et documents
+4. Jobs innovations, gamification et automations
+5. Jobs IA avancée et résumés narratifs
 
 Fonctions de gestion :
 
