@@ -270,8 +270,6 @@ def obtenir_service_bridges() -> BridgesInterModulesService:
     return BridgesInterModulesService()
 
 
-get_bridges_service = obtenir_service_bridges
-
 
 def enregistrer_bridges_subscribers() -> None:
     """Enregistre tous les subscribers de bridges inter-modules dans le bus."""

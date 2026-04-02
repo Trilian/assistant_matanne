@@ -200,5 +200,3 @@ def obtenir_service_prediction_courses() -> PredictionCoursesService:
     """Factory singleton pour le service de prédiction de courses."""
     return PredictionCoursesService()
 
-
-get_prediction_courses_service = obtenir_service_prediction_courses

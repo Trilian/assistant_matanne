@@ -121,5 +121,3 @@ def obtenir_service_diagnostic_maison() -> DiagnosticMaisonService:
     """Factory singleton."""
     return DiagnosticMaisonService()
 
-
-get_diagnostic_maison_service = obtenir_service_diagnostic_maison

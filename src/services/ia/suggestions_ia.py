@@ -289,5 +289,3 @@ def obtenir_service_suggestions_ia() -> SuggestionsIAService:
     """Factory singleton."""
     return SuggestionsIAService()
 
-
-get_suggestions_ia_service = obtenir_service_suggestions_ia

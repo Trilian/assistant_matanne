@@ -153,5 +153,3 @@ def obtenir_service_planificateur_adaptatif() -> PlanificateurAdaptatifService:
     """Factory singleton."""
     return PlanificateurAdaptatifService()
 
-
-get_planificateur_adaptatif_service = obtenir_service_planificateur_adaptatif

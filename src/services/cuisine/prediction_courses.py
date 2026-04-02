@@ -376,4 +376,3 @@ def obtenir_service_prediction_courses() -> ServicePredictionCourses:
     return ServicePredictionCourses()
 
 
-get_prediction_courses_service = obtenir_service_prediction_courses

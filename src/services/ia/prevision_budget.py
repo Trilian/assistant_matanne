@@ -264,5 +264,3 @@ def obtenir_service_prevision_budget() -> PrevisionBudgetService:
     """Factory singleton pour le service de prévision budget."""
     return PrevisionBudgetService()
 
-
-get_prevision_budget_service = obtenir_service_prevision_budget

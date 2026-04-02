@@ -154,5 +154,3 @@ def obtenir_service_resume_hebdo() -> ResumeHebdoService:
     """Factory singleton pour le service de résumé hebdomadaire."""
     return ResumeHebdoService()
 
-
-get_resume_hebdo_service = obtenir_service_resume_hebdo
