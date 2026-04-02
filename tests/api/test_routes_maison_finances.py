@@ -29,11 +29,6 @@ class TestRoutesMaisonFinances:
             ("GET", "/api/v1/maison/artisans", None),
             ("GET", "/api/v1/maison/artisans/stats", None),
             ("POST", "/api/v1/maison/artisans", {"nom": "Artisan Test", "metier": "plombier"}),
-            ("GET", "/api/v1/maison/contrats", None),
-            ("GET", "/api/v1/maison/contrats/alertes", None),
-            ("POST", "/api/v1/maison/contrats", {"nom": "Assurance", "type_contrat": "assurance"}),
-            ("GET", "/api/v1/maison/garanties", None),
-            ("GET", "/api/v1/maison/garanties/stats", None),
         ],
     )
     async def test_endpoints_existent(self, client, method, path, payload):

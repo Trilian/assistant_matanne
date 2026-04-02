@@ -43,10 +43,8 @@ import {
   statsHubMaison,
   obtenirBriefingMaison,
   envoyerRappelsMaison,
-  alertesPredictivesGaranties,
-  ouvrirDossierSAV,
 } from "@/bibliotheque/api/maison";
-import type { AlerteMaison, TacheJourMaison, AlertePredictiveGarantie } from "@/types/maison";
+import type { AlerteMaison, TacheJourMaison } from "@/types/maison";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
 import { CarteConseil, estDismissed } from "@/composants/maison/carte-conseil";
 import { obtenirConseilsIA } from "@/bibliotheque/api/maison";
@@ -59,17 +57,16 @@ const SECTIONS: Array<{ id: string; titre: string; description: string; chemin: 
   { id: "menage", titre: "Ménage", description: "Planning et guides ménage", chemin: "/maison/menage", Icone: SprayCan, statKey: null },
   { id: "jardin", titre: "Jardin", description: "Plantes, semis et éco-gestes", chemin: "/maison/jardin", Icone: Sprout, statKey: null },
   { id: "travaux", titre: "Travaux", description: "Projets, entretien et artisans", chemin: "/maison/travaux", Icone: Hammer, statKey: "projets_en_cours" as const },
-  { id: "equipements", titre: "Équipements", description: "Inventaire, garanties et domotique", chemin: "/maison/equipements", Icone: Boxes, statKey: "garanties_expirant" as const },
+  { id: "equipements", titre: "Équipements", description: "Inventaire et domotique", chemin: "/maison/equipements", Icone: Boxes, statKey: null },
   { id: "finances", titre: "Finances", description: "Charges, dépenses et énergie", chemin: "/maison/finances", Icone: Banknote, statKey: "depenses_mois" as const },
   { id: "artisans", titre: "Artisans", description: "Carnet de pros et interventions", chemin: "/maison/artisans", Icone: Wrench, statKey: null },
-  { id: "contrats", titre: "Contrats", description: "Abonnements et échéances", chemin: "/maison/contrats", Icone: FileText, statKey: "contrats_a_renouveler" as const },
   { id: "diagnostics", titre: "Diagnostics", description: "DPE, amiante, plomb", chemin: "/maison/diagnostics", Icone: ShieldCheck, statKey: "diagnostics_expirant" as const },
   { id: "provisions", titre: "Provisions", description: "Stocks et cellier", chemin: "/maison/provisions", Icone: Package, statKey: "stocks_en_alerte" as const },
   { id: "meubles", titre: "Meubles", description: "Wishlist et achats mobilier", chemin: "/maison/meubles", Icone: Sofa, statKey: null },
-  { id: "documents", titre: "Documents", description: "Contrats et diagnostics", chemin: "/maison/documents", Icone: FileText, statKey: "contrats_a_renouveler" as const },
+  { id: "documents", titre: "Documents", description: "Factures et diagnostics", chemin: "/maison/documents", Icone: FileText, statKey: "diagnostics_expirant" as const },
 ];
 
-type StatsKeys = "projets_en_cours" | "taches_en_retard" | "depenses_mois" | "stocks_en_alerte" | "contrats_a_renouveler" | "garanties_expirant" | "diagnostics_expirant";
+type StatsKeys = "projets_en_cours" | "taches_en_retard" | "depenses_mois" | "stocks_en_alerte" | "diagnostics_expirant";
 
 function formatStat(key: StatsKeys, val: number): string {
   if (key === "depenses_mois") return `${val.toFixed(0)} €`;
@@ -82,8 +79,6 @@ function labelStat(key: StatsKeys): string {
     taches_en_retard: "en retard",
     depenses_mois: "ce mois",
     stocks_en_alerte: "alertes",
-    contrats_a_renouveler: "à renouveler",
-    garanties_expirant: "expirent bientôt",
     diagnostics_expirant: "à renouveler",
   };
   return map[key] ?? "";
@@ -130,44 +125,9 @@ function CarteTache({ tache }: { tache: TacheJourMaison }) {
   );
 }
 
-function CartePredictive({ item }: { item: AlertePredictiveGarantie }) {
-  const variant = item.niveau === "CRITIQUE" || item.niveau === "HAUTE" ? "destructive" : "secondary";
-  const { mutate: ouvrirSAV, isPending: ouvertureSAV } = utiliserMutation(
-    () => ouvrirDossierSAV(item.garantie_id, item.action_recommandee, "hub_predictif")
-  );
-  return (
-    <div className="flex items-start gap-2 py-2">
-      <Link href={item.action_url} className="flex items-start gap-2 flex-1 min-w-0">
-        <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-500" />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium leading-tight">{item.nom_appareil}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{item.action_recommandee}</p>
-        </div>
-      </Link>
-      <div className="flex items-center gap-1.5 shrink-0">
-        <Badge variant={variant} className="text-xs">
-          {item.mois_restants_estimes <= 0 ? "Fin de vie" : `${item.mois_restants_estimes} mois`}
-        </Badge>
-        {(item.niveau === "CRITIQUE" || item.niveau === "HAUTE") && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-6 px-2 text-xs"
-            disabled={ouvertureSAV}
-            onClick={(e) => { e.stopPropagation(); ouvrirSAV(); }}
-          >
-            SAV
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function PageMaison() {
   const { data: stats } = utiliserRequete(["maison", "hub", "stats"], statsHubMaison);
   const { data: briefing } = utiliserRequete(["maison", "briefing"], obtenirBriefingMaison);
-  const { data: predictives } = utiliserRequete(["maison", "garanties", "predictives"], () => alertesPredictivesGaranties(12));
   const { data: conseilsIA } = utiliserRequete(
     ["maison", "conseils-ia"],
     obtenirConseilsIA,
@@ -199,7 +159,7 @@ export default function PageMaison() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">🏡 Maison</h1>
           <p className="text-muted-foreground">
-            {briefing?.resume ?? "Projets, jardin, entretien, cellier, contrats, garanties et plus"}
+            {briefing?.resume ?? "Projets, jardin, entretien, cellier et plus"}
           </p>
         </div>
         <Button
@@ -257,7 +217,6 @@ export default function PageMaison() {
           <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{stats.projets_en_cours}</p><p className="text-xs text-muted-foreground">Projets en cours</p></CardContent></Card>
           <Card><CardContent className="pt-4 text-center"><p className={`text-2xl font-bold ${stats.taches_en_retard > 0 ? "text-destructive" : ""}`}>{stats.taches_en_retard}</p><p className="text-xs text-muted-foreground">Tâches en retard</p></CardContent></Card>
           <Card><CardContent className="pt-4 text-center"><p className="text-2xl font-bold">{stats.depenses_mois.toFixed(0)} €</p><p className="text-xs text-muted-foreground">Dépenses du mois</p></CardContent></Card>
-          <Card><CardContent className="pt-4 text-center"><p className={`text-2xl font-bold ${stats.contrats_a_renouveler > 0 ? "text-amber-500" : ""}`}>{stats.contrats_a_renouveler}</p><p className="text-xs text-muted-foreground">Contrats actifs</p></CardContent></Card>
         </div>
       )}
 
@@ -416,7 +375,6 @@ export default function PageMaison() {
         </Card>
       )}
 
-      {/* Garanties — prédiction fin de vie */}
       {predictives && predictives.length > 0 && (
         <Card className="border-orange-200">
           <CardHeader className="pb-2">

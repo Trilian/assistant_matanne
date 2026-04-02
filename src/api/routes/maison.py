@@ -66,7 +66,7 @@ async def obtenir_briefing_maison(
     Obtient le briefing quotidien maison.
     
     AgrÃ¨ge 6 sources de donnÃ©es:
-    - Alertes (garanties, contrats, diagnostics, entretien)
+    - Alertes (diagnostics, entretien)
     - TÃ¢ches du jour (mÃ©nage, entretien, projets, jardin)
     - MÃ©tÃ©o (impact jardin & mÃ©nage)
     - Projets actifs
@@ -670,48 +670,6 @@ async def suggestions_renouvellement(
                     for o in objets
                 ],
                 "total": len(objets),
-            }
-
-    return await executer_async(_query)
-
-
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# FIN DE VIE GARANTIE
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-
-@router.get("/garanties/{garantie_id}/fin-vie", responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def fin_vie_garantie(
-    garantie_id: int,
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Calcule le ratio de fin de vie d'une garantie (0.0 â†’ 1.0)."""
-    from src.core.models.temps_entretien import Garantie
-    from src.api.utils import executer_avec_session
-    from datetime import datetime
-
-    def _query():
-        with executer_avec_session() as session:
-            g = session.get(Garantie, garantie_id)
-            if not g:
-                raise HTTPException(status_code=404, detail="Garantie introuvable")
-            now = date.today()
-            if not g.date_debut or not g.date_fin:
-                return {"garantie_id": garantie_id, "ratio": 0.0, "jours_restants": None}
-            total = (g.date_fin - g.date_debut).days
-            if total <= 0:
-                return {"garantie_id": garantie_id, "ratio": 1.0, "jours_restants": 0}
-            ecoule = (now - g.date_debut).days
-            ratio = min(1.0, max(0.0, ecoule / total))
-            jours_restants = max(0, (g.date_fin - now).days)
-            return {
-                "garantie_id": garantie_id,
-                "nom": g.nom,
-                "ratio": round(ratio, 3),
-                "jours_restants": jours_restants,
-                "date_fin": str(g.date_fin),
-                "alerte": ratio > 0.85,
             }
 
     return await executer_async(_query)

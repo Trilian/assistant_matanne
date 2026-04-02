@@ -116,8 +116,6 @@ export const PAGES_NAVIGATION: PageNavigation[] = [
   { nom: "Stocks", chemin: "/maison/stocks", categorie: "Maison - Stocks", Icone: Package, keywords: ["reserve", "cave"] },
   { nom: "Cellier", chemin: "/maison/cellier", categorie: "Maison - Stocks", Icone: Wine, keywords: ["vin", "bouteilles"] },
   { nom: "Artisans", chemin: "/maison/artisans", categorie: "Maison - Admin", Icone: Wrench, keywords: ["contacts", "pro"] },
-  { nom: "Contrats", chemin: "/maison/contrats", categorie: "Maison - Admin", Icone: FileText, keywords: ["assurance", "abonnement"] },
-  { nom: "Garanties", chemin: "/maison/garanties", categorie: "Maison - Admin", Icone: ShieldCheck, keywords: ["sav", "protection"] },
   { nom: "Diagnostics", chemin: "/maison/diagnostics", categorie: "Maison - Admin", Icone: ClipboardCheck, keywords: ["dpe", "controle"] },
   { nom: "Visualisation Maison", chemin: "/maison/visualisation", categorie: "Maison - Vue", Icone: Layers, keywords: ["plan", "vue"] },
   { nom: "Éco-Tips", chemin: "/maison/eco-tips", categorie: "Maison - Écologie", Icone: Leaf, keywords: ["economie", "energie"] },

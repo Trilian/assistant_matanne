@@ -233,75 +233,6 @@ export interface ResumeFinancierContrats {
 }
 
 // ═══════════════════════════════════════════════════════════
-// Types Garanties
-// ═══════════════════════════════════════════════════════════
-
-export interface Garantie {
-  id: number;
-  appareil: string;
-  nom?: string;
-  marque?: string;
-  numero_serie?: string;
-  numero?: string;
-  date_achat: string;
-  date_debut?: string;
-  date_fin_garantie: string;
-  date_fin?: string;
-  magasin?: string;
-  fournisseur?: string;
-  prix_achat?: number;
-  piece?: string;
-  document_url?: string;
-  statut: string;
-  notes?: string;
-}
-
-export interface IncidentSAV {
-  id: number;
-  garantie_id: number;
-  date: string;
-  description: string;
-  statut: string;
-  cout_reparation?: number;
-  reference_dossier?: string;
-  notes?: string;
-}
-
-export interface AlerteGarantie {
-  id: number;
-  appareil: string;
-  date_fin_garantie: string;
-  jours_restants: number;
-}
-
-export interface StatsGaranties {
-  total: number;
-  actives: number;
-  expirees: number;
-  valeur_totale: number;
-}
-
-export interface AlertePredictiveGarantie {
-  garantie_id: number;
-  nom_appareil: string;
-  piece?: string;
-  date_achat: string;
-  duree_vie_ans: number;
-  age_mois: number;
-  mois_restants_estimes: number;
-  niveau: "CRITIQUE" | "HAUTE" | "MOYENNE" | "BASSE";
-  action_recommandee: string;
-  action_url: string;
-}
-
-export interface ResultatDossierSAV {
-  incident_id: number;
-  message: string;
-  prochaine_action: string;
-  action_url: string;
-}
-
-// ═══════════════════════════════════════════════════════════
 // Types Diagnostics & Estimations
 // ═══════════════════════════════════════════════════════════
 
@@ -456,8 +387,6 @@ export interface ObjetMaison {
 export interface StatsHubMaison {
   projets_en_cours: number;
   taches_en_retard: number;
-  garanties_expirant: number;
-  contrats_a_renouveler: number;
   depenses_mois: number;
   stocks_en_alerte: number;
   articles_perimes: number;

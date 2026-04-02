@@ -40,7 +40,7 @@ class TestCourses:
             assert article.quantite_necessaire == 2.0
 
         def test_articlecourses_tablename(self):
-            assert ArticleCourses.__tablename__ == "liste_courses"
+            assert ArticleCourses.__tablename__ == "articles_courses"
 
     class TestModeleCourses:
         """Tests pour la classe ModeleCourses."""

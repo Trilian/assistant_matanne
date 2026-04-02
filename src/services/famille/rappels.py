@@ -220,7 +220,7 @@ class ServiceRappelsFamille:
             return []
 
     def _rappels_maison(self) -> list[dict[str, Any]]:
-        """Rappels maison agrégés (garanties, contrats, entretien en retard, cellier)."""
+        """Rappels maison agrégés (entretien en retard, cellier)."""
         rappels: list[dict[str, Any]] = []
         try:
             from src.services.maison.contexte_maison_service import get_contexte_maison_service

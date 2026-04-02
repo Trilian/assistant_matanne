@@ -2,7 +2,7 @@
 Tests pour src/api/routes/maison.py
 
 Tests unitaires des routes maison — projets, entretien, jardin, stocks,
-cellier, artisans, contrats, garanties, diagnostics, eco-tips, dépenses, etc.
+cellier, artisans, diagnostics, eco-tips, dépenses, etc.
 """
 
 from unittest.mock import MagicMock, patch
@@ -79,27 +79,6 @@ ARTISAN_TEST = {
     "telephone": "0612345678",
     "email": "dupont@plomberie.fr",
     "note_satisfaction": 4,
-}
-
-CONTRAT_TEST = {
-    "id": 1,
-    "nom": "Assurance habitation",
-    "type_contrat": "assurance",
-    "fournisseur": "MAIF",
-    "montant_mensuel": 42.50,
-    "date_debut": "2025-01-01",
-    "statut": "actif",
-}
-
-GARANTIE_TEST = {
-    "id": 1,
-    "nom": "Lave-vaisselle Bosch",
-    "appareil": "Lave-vaisselle",
-    "marque": "Bosch",
-    "date_achat": "2025-06-15",
-    "date_fin_garantie": "2027-06-15",
-    "statut": "active",
-    "piece": "cuisine",
 }
 
 DIAGNOSTIC_TEST = {
@@ -194,19 +173,6 @@ class TestEndpointsExistent:
             ("GET", "/api/v1/maison/artisans/1"),
             ("PATCH", "/api/v1/maison/artisans/1"),
             ("DELETE", "/api/v1/maison/artisans/1"),
-            # Contrats
-            ("GET", "/api/v1/maison/contrats"),
-            ("POST", "/api/v1/maison/contrats"),
-            ("GET", "/api/v1/maison/contrats/1"),
-            ("PATCH", "/api/v1/maison/contrats/1"),
-            ("DELETE", "/api/v1/maison/contrats/1"),
-            # Garanties
-            ("GET", "/api/v1/maison/garanties"),
-            ("POST", "/api/v1/maison/garanties"),
-            ("GET", "/api/v1/maison/garanties/1"),
-            ("PATCH", "/api/v1/maison/garanties/1"),
-            ("DELETE", "/api/v1/maison/garanties/1"),
-            ("POST", "/api/v1/maison/garanties/1/actions/ouvrir-dossier-sav"),
             # Diagnostics
             ("GET", "/api/v1/maison/diagnostics"),
             ("POST", "/api/v1/maison/diagnostics"),
@@ -225,7 +191,6 @@ class TestEndpointsExistent:
             ("PATCH", "/api/v1/maison/depenses/1"),
             ("DELETE", "/api/v1/maison/depenses/1"),
             # Charges
-            ("GET", "/api/v1/maison/charges"),
         ],
     )
     def test_endpoint_existe(self, client, method, path):
@@ -266,18 +231,6 @@ class TestSchemasMaison:
         p = ProjetCreate(nom="  Terrasse  ", statut="planifie")
         assert p.nom == "Terrasse"
 
-    def test_contrat_create_valide(self):
-        from src.api.schemas.maison import ContratCreate
-
-        c = ContratCreate(
-            nom="Assurance habitation",
-            type_contrat="assurance",
-            date_debut="2025-01-01",
-            statut="actif",
-        )
-        assert c.nom == "Assurance habitation"
-        assert c.type_contrat == "assurance"
-
     def test_depense_create_valide(self):
         from src.api.schemas.maison import DepenseMaisonCreate
 
@@ -302,28 +255,6 @@ class TestSchemasMaison:
         ip = InterventionPatch(description="Mise à jour")
         assert ip.description == "Mise à jour"
         assert ip.cout is None
-
-    def test_incident_sav_patch_valide(self):
-        from src.api.schemas.maison import IncidentSAVPatch
-
-        i = IncidentSAVPatch(statut="résolu")
-        assert i.statut == "résolu"
-
-    def test_stats_hub_response_valide(self):
-        from src.api.schemas.maison import StatsHubMaisonResponse
-
-        s = StatsHubMaisonResponse(
-            projets_en_cours=2,
-            taches_en_retard=3,
-            contrats_actifs=5,
-            garanties_expirant_bientot=1,
-            diagnostics_a_renouveler=0,
-            depenses_mois=1200.0,
-            stocks_en_alerte=2,
-            prochains_entretiens=4,
-        )
-        assert s.projets_en_cours == 2
-        assert s.depenses_mois == 1200.0
 
     def test_tache_entretien_create(self):
         from src.api.schemas.maison import TacheEntretienCreate
@@ -358,17 +289,6 @@ class TestSchemasMaison:
 
         a = ArtisanCreate(nom="Dupont", metier="plombier")
         assert a.metier == "plombier"
-
-    def test_garantie_create(self):
-        from src.api.schemas.maison import GarantieCreate
-
-        g = GarantieCreate(
-            nom="Lave-vaisselle",
-            appareil="Lave-vaisselle",
-            date_achat="2025-06-15",
-            date_fin_garantie="2027-06-15",
-        )
-        assert g.appareil == "Lave-vaisselle"
 
     def test_diagnostic_create(self):
         from src.api.schemas.maison import DiagnosticCreate
@@ -524,69 +444,6 @@ class TestRoutesArtisans:
         assert response.status_code in (200, 500)
 
 
-class TestRoutesContrats:
-    """Tests routes /api/v1/maison/contrats."""
-
-    def test_lister_contrats(self, client):
-        response = client.get("/api/v1/maison/contrats")
-        assert response.status_code in (200, 500)
-
-    def test_creer_contrat(self, client):
-        response = client.post(
-            "/api/v1/maison/contrats",
-            json={
-                "nom": "EDF Tempo",
-                "type_contrat": "énergie",
-                "date_debut": "2025-01-01",
-                "statut": "actif",
-            },
-        )
-        assert response.status_code in (200, 201, 500)
-
-    def test_alertes_contrats(self, client):
-        response = client.get("/api/v1/maison/contrats/alertes")
-        assert response.status_code in (200, 500)
-
-    def test_resume_financier(self, client):
-        response = client.get("/api/v1/maison/contrats/resume-financier")
-        assert response.status_code in (200, 500)
-
-
-class TestRoutesGaranties:
-    """Tests routes /api/v1/maison/garanties."""
-
-    def test_lister_garanties(self, client):
-        response = client.get("/api/v1/maison/garanties")
-        assert response.status_code in (200, 500)
-
-    def test_creer_garantie(self, client):
-        response = client.post(
-            "/api/v1/maison/garanties",
-            json={
-                "nom": "Four",
-                "appareil": "Four",
-                "date_achat": "2025-01-01",
-                "date_fin_garantie": "2027-01-01",
-            },
-        )
-        assert response.status_code in (200, 201, 500)
-
-    def test_alertes_garanties(self, client):
-        response = client.get("/api/v1/maison/garanties/alertes")
-        assert response.status_code in (200, 500)
-
-    def test_stats_garanties(self, client):
-        response = client.get("/api/v1/maison/garanties/stats")
-        assert response.status_code in (200, 500)
-
-    def test_ouvrir_dossier_sav(self, client):
-        response = client.post(
-            "/api/v1/maison/garanties/1/actions/ouvrir-dossier-sav",
-            json={"description": "Panne subite", "source": "test"},
-        )
-        assert response.status_code in (201, 404, 500)
-
-
 class TestRoutesDiagnostics:
     """Tests routes /api/v1/maison/diagnostics."""
 
@@ -646,14 +503,6 @@ class TestRoutesDepenses:
 
     def test_stats_depenses(self, client):
         response = client.get("/api/v1/maison/depenses/stats")
-        assert response.status_code in (200, 500)
-
-
-class TestRoutesCharges:
-    """Tests routes /api/v1/maison/charges."""
-
-    def test_lister_charges(self, client):
-        response = client.get("/api/v1/maison/charges")
         assert response.status_code in (200, 500)
 
 

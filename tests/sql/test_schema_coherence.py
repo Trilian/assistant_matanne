@@ -69,8 +69,6 @@ _TABLES_SQL_SANS_ORM: dict[str, str] = {
     "schema_migrations": "infrastructure — tracking des migrations appliquées",
     "albums_famille": "reference — album photo famille, accès direct via service",
     "budgets_home": "legacy — remplacé par budgets_maison (ORM BudgetMaison)",
-    "comparatifs": "reference — comparatifs produits/contrats, pas d'ORM requis",
-    "contrats": "legacy — remplacé par contrats_maison (ORM ContratMaison)",
     "depenses_home": "legacy — remplacé par depenses_maison (ORM DepenseMaison)",
     "factures": "reference — factures maison, accès direct via service",
     "objectifs_autonomie": "reference — objectifs autonomie Jules, accès direct via service",

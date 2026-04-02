@@ -65,7 +65,6 @@ class TestEventSubscribers:
         assert "budget.depassement" in events
         assert "inventaire.modification_importante" in events
         assert "recette.feedback" in events
-        assert "contrat.renouvellement" in events
         mod._subscribers_enregistres = False
 
     def test_subscriber_energie_cree_tache_entretien(self):
@@ -101,21 +100,3 @@ class TestEventSubscribers:
         patterns = [call.kwargs.get("pattern") for call in mock_cache.invalidate.call_args_list]
         assert "dashboard" in patterns
         assert "budget" in patterns
-
-    def test_subscriber_contrat_renouvellement_notifie(self):
-        from src.services.core.events.subscribers import _notifier_renouvellement_contrat
-
-        event = EvenementDomaine(
-            type="contrat.renouvellement",
-            data={"message": "2 contrats à renouveler"},
-            source="test",
-        )
-
-        with patch(
-            "src.services.core.notifications.notif_dispatcher.get_dispatcher_notifications"
-        ) as get_dispatcher:
-            dispatcher = MagicMock()
-            get_dispatcher.return_value = dispatcher
-            _notifier_renouvellement_contrat(event)
-
-        assert dispatcher.envoyer.called

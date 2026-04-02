@@ -27,7 +27,7 @@ const CATEGORIES = [
   {
     id: "alertes" as const,
     label: "Alertes critiques",
-    description: "Péremptions, garanties, dépassement budget…",
+    description: "Péremptions, dépassement budget…",
   },
   {
     id: "resumes" as const,

@@ -86,7 +86,6 @@ class ConnectionManager:
         self._connexions: dict[int, dict[str, WebSocket]] = defaultdict(dict)
         # {liste_id: {user_id: {"username": str, "connected_at": datetime}}}
         self._users: dict[int, dict[str, dict[str, Any]]] = defaultdict(dict)
-        self._lock = asyncio.Lock()
 
     async def connect(
         self,
@@ -98,12 +97,11 @@ class ConnectionManager:
         """Connecte un utilisateur à une liste."""
         await websocket.accept()
 
-        async with self._lock:
-            self._connexions[liste_id][user_id] = websocket
-            self._users[liste_id][user_id] = {
-                "username": username,
-                "connected_at": datetime.now(UTC).isoformat(),
-            }
+        self._connexions[liste_id][user_id] = websocket
+        self._users[liste_id][user_id] = {
+            "username": username,
+            "connected_at": datetime.now(UTC).isoformat(),
+        }
 
         logger.info(f"🔌 WS: {username} ({user_id}) connecté à liste #{liste_id}")
 
@@ -130,29 +128,35 @@ class ConnectionManager:
 
     async def disconnect(self, liste_id: int, user_id: str) -> None:
         """Déconnecte un utilisateur d'une liste."""
-        async with self._lock:
-            username = self._users[liste_id].get(user_id, {}).get("username", "Inconnu")
-            self._connexions[liste_id].pop(user_id, None)
-            self._users[liste_id].pop(user_id, None)
+        username = self._users.get(liste_id, {}).get(user_id, {}).get("username", "Inconnu")
+        self._connexions.get(liste_id, {}).pop(user_id, None)
+        self._users.get(liste_id, {}).pop(user_id, None)
 
-            # Nettoyer les listes vides
-            if not self._connexions[liste_id]:
-                del self._connexions[liste_id]
-            if not self._users[liste_id]:
-                del self._users[liste_id]
+        # Nettoyer les listes vides
+        if liste_id in self._connexions and not self._connexions[liste_id]:
+            del self._connexions[liste_id]
+        if liste_id in self._users and not self._users[liste_id]:
+            del self._users[liste_id]
 
         logger.info(f"🔌 WS: {username} ({user_id}) déconnecté de liste #{liste_id}")
 
-        # Notifier les autres
-        await self.broadcast(
-            liste_id,
-            {
-                "type": WSMessageType.USER_LEFT,
-                "user_id": user_id,
-                "username": username,
-                "timestamp": datetime.now(UTC).isoformat(),
-            },
-        )
+        # Notifier les autres en fire-and-forget pour éviter les deadlocks
+        # lors de la fermeture simultanée de connexions
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(
+                self.broadcast(
+                    liste_id,
+                    {
+                        "type": WSMessageType.USER_LEFT,
+                        "user_id": user_id,
+                        "username": username,
+                        "timestamp": datetime.now(UTC).isoformat(),
+                    },
+                )
+            )
+        except RuntimeError:
+            pass
 
     async def broadcast(
         self,
@@ -163,22 +167,21 @@ class ConnectionManager:
         """Envoie un message à tous les utilisateurs d'une liste."""
         connexions = self._connexions.get(liste_id, {})
 
-        tasks = []
-        for uid, ws in connexions.items():
+        for uid, ws in list(connexions.items()):
             if uid != exclude_user:
-                tasks.append(self._safe_send(ws, message))
-
-        if tasks:
-            await asyncio.gather(*tasks, return_exceptions=True)
+                await self._safe_send(ws, message)
 
     async def send_personal(self, websocket: WebSocket, message: dict[str, Any]) -> None:
         """Envoie un message à un client spécifique."""
         await self._safe_send(websocket, message)
 
     async def _safe_send(self, websocket: WebSocket, message: dict[str, Any]) -> None:
-        """Envoie un message avec gestion d'erreur."""
+        """Envoie un message avec gestion d'erreur et timeout."""
         try:
-            await websocket.send_json(message)
+            import anyio
+
+            with anyio.move_on_after(5.0):
+                await websocket.send_json(message)
         except Exception as e:
             logger.warning(f"Erreur envoi WS: {e}")
 

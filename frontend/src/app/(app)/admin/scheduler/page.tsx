@@ -71,7 +71,7 @@ function categoriserJob(id: string): string {
     return "Famille";
   if (id.includes("recette") || id.includes("courses") || id.includes("nutrition") || id.includes("peremption") || id.includes("batch") || id.includes("gaspillage") || id.includes("openfoodfacts") || id.includes("stock") || id.includes("inventaire") || id.includes("prediction_courses"))
     return "Cuisine";
-  if (id.includes("jardin") || id.includes("recolte") || id.includes("maison") || id.includes("entretien") || id.includes("energie") || id.includes("garantie") || id.includes("contrat") || id.includes("charge") || id.includes("habitat") || id.includes("projet"))
+  if (id.includes("jardin") || id.includes("recolte") || id.includes("maison") || id.includes("entretien") || id.includes("energie") || id.includes("charge") || id.includes("habitat") || id.includes("projet"))
     return "Maison";
   if (id.includes("jeux") || id.includes("loto") || id.includes("tirage") || id.includes("pari"))
     return "Jeux";

@@ -59,7 +59,6 @@ class TypeNotification(StrEnum):
 
     # Maison prédictive
     ALERTE_PREDICTIVE_MAISON = "maison_alerte_predictive"
-    ALERTE_GARANTIE = "maison_garantie_alerte"
 
     # Gamification
     BADGE_DEBLOQUE = "badge_debloque"

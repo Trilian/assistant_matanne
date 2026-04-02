@@ -329,13 +329,10 @@ class TestHistoriqueRecette:
             recette_id=1,
             date_cuisson=date(2024, 1, 15),
             portions_cuisinees=4,
-            note=5,
-            avis="Excellent!",
         )
 
         assert hist.date_cuisson == date(2024, 1, 15)
-        assert hist.note == 5
-        assert hist.avis == "Excellent!"
+        assert hist.portions_cuisinees == 4
 
     def test_historiquerecette_repr(self):
         """Test de la représentation string."""
@@ -343,7 +340,6 @@ class TestHistoriqueRecette:
             id=1,
             recette_id=1,
             date_cuisson=date(2024, 1, 15),
-            note=4,
         )
 
         repr_str = repr(hist)

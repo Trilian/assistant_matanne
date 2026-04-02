@@ -17,9 +17,7 @@ const mockStats = {
   projets_en_cours: 3,
   taches_en_retard: 1,
   depenses_mois: 450.5,
-  contrats_a_renouveler: 5,
   diagnostics_expirant: 0,
-  garanties_expirant: 2,
   stocks_en_alerte: 1,
 };
 
@@ -79,7 +77,6 @@ describe("PageMaison (Hub)", () => {
     expect(screen.getByText("Projets en cours")).toBeInTheDocument();
     expect(screen.getByText("Tâches en retard")).toBeInTheDocument();
     expect(screen.getByText("Dépenses du mois")).toBeInTheDocument();
-    expect(screen.getByText("Contrats actifs")).toBeInTheDocument();
   });
 
   it("affiche les sections maison", () => {

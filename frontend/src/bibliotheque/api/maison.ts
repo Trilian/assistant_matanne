@@ -410,147 +410,12 @@ export async function supprimerIntervention(id: number): Promise<void> {
   await clientApi.delete(`/maison/artisans/interventions/${id}`);
 }
 
-// ─── Contrats ─────────────────────────────────────────────
-
-export async function listerContrats(
-  typeContrat?: string,
-  statut?: string
-): Promise<Contrat[]> {
-  const params = new URLSearchParams();
-  if (typeContrat) params.set("type_contrat", typeContrat);
-  if (statut) params.set("statut", statut);
-  const qs = params.toString();
-  const { data } = await clientApi.get(`/maison/contrats${qs ? `?${qs}` : ""}`);
-  return data.items ?? data;
-}
-
 export async function obtenirContrat(id: number): Promise<Contrat> {
   const { data } = await clientApi.get<Contrat>(`/maison/contrats/${id}`);
   return data;
 }
 
-export async function creerContrat(contrat: Omit<Contrat, "id">): Promise<Contrat> {
-  const { data } = await clientApi.post<Contrat>("/maison/contrats", contrat);
-  return data;
-}
-
-export async function modifierContrat(
-  id: number,
-  contrat: Partial<Contrat>
-): Promise<Contrat> {
-  const { data } = await clientApi.patch<Contrat>(`/maison/contrats/${id}`, contrat);
-  return data;
-}
-
-export async function supprimerContrat(id: number): Promise<void> {
-  await clientApi.delete(`/maison/contrats/${id}`);
-}
-
-export async function alertesContrats(jours = 60): Promise<AlerteContrat[]> {
-  const { data } = await clientApi.get(`/maison/contrats/alertes?jours=${jours}`);
-  return data.items ?? data;
-}
-
-export async function resumeFinancierContrats(): Promise<ResumeFinancierContrats> {
-  const { data } = await clientApi.get<ResumeFinancierContrats>(
-    "/maison/contrats/resume-financier"
-  );
-  return data;
-}
-
 // ─── Garanties ────────────────────────────────────────────
-
-export async function listerGaranties(
-  statut?: string,
-  piece?: string
-): Promise<Garantie[]> {
-  const params = new URLSearchParams();
-  if (statut) params.set("statut", statut);
-  if (piece) params.set("piece", piece);
-  const qs = params.toString();
-  const { data } = await clientApi.get(`/maison/garanties${qs ? `?${qs}` : ""}`);
-  return data.items ?? data;
-}
-
-export async function obtenirGarantie(id: number): Promise<Garantie> {
-  const { data } = await clientApi.get<Garantie>(`/maison/garanties/${id}`);
-  return data;
-}
-
-export async function creerGarantie(garantie: Omit<Garantie, "id">): Promise<Garantie> {
-  const { data } = await clientApi.post<Garantie>("/maison/garanties", garantie);
-  return data;
-}
-
-export async function modifierGarantie(
-  id: number,
-  garantie: Partial<Garantie>
-): Promise<Garantie> {
-  const { data } = await clientApi.patch<Garantie>(`/maison/garanties/${id}`, garantie);
-  return data;
-}
-
-export async function supprimerGarantie(id: number): Promise<void> {
-  await clientApi.delete(`/maison/garanties/${id}`);
-}
-
-export async function alertesGaranties(jours = 60): Promise<AlerteGarantie[]> {
-  const { data } = await clientApi.get(`/maison/garanties/alertes?jours=${jours}`);
-  return data.items ?? data;
-}
-
-export async function statsGaranties(): Promise<StatsGaranties> {
-  const { data } = await clientApi.get<StatsGaranties>("/maison/garanties/stats");
-  return data;
-}
-
-export async function alertesPredictivesGaranties(horizonMois = 12): Promise<AlertePredictiveGarantie[]> {
-  const { data } = await clientApi.get<{ items: AlertePredictiveGarantie[] }>(
-    `/maison/garanties/alertes-predictives?horizon_mois=${horizonMois}`
-  );
-  return data.items ?? [];
-}
-
-export async function listerIncidents(garantieId: number): Promise<IncidentSAV[]> {
-  const { data } = await clientApi.get(`/maison/garanties/${garantieId}/incidents`);
-  return data.items ?? data;
-}
-
-export async function creerIncident(
-  garantieId: number,
-  incident: Omit<IncidentSAV, "id" | "garantie_id">
-): Promise<IncidentSAV> {
-  const { data } = await clientApi.post<IncidentSAV>(
-    `/maison/garanties/${garantieId}/incidents`,
-    incident
-  );
-  return data;
-}
-
-export async function modifierIncident(
-  id: number,
-  incident: Partial<IncidentSAV>
-): Promise<IncidentSAV> {
-  const { data } = await clientApi.patch<IncidentSAV>(
-    `/maison/garanties/incidents/${id}`,
-    incident
-  );
-  return data;
-}
-
-// ─── Action SAV 1-clic ────────────────────────────────────
-
-export async function ouvrirDossierSAV(
-  garantieId: number,
-  description?: string,
-  source: string = "frontend"
-): Promise<ResultatDossierSAV> {
-  const { data } = await clientApi.post<ResultatDossierSAV>(
-    `/maison/garanties/${garantieId}/actions/ouvrir-dossier-sav`,
-    { description, source }
-  );
-  return data;
-}
 
 // ─── Diagnostics & Estimations ────────────────────────────
 
@@ -1259,11 +1124,6 @@ export interface FinVieGarantie {
 }
 
 /** Évaluer la fin de vie d'une garantie (ratio 0.0 → 1.0) */
-export async function evaluerFinVieGarantie(garantieId: number): Promise<FinVieGarantie> {
-  const { data } = await clientApi.get<FinVieGarantie>(`/maison/garanties/${garantieId}/fin-vie`);
-  return data;
-}
-
 // ─── Routines — extensions ─────────────────────────────────
 
 export interface TacheRoutine {

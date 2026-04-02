@@ -3,8 +3,8 @@ Jobs cron — Ordonnanceur APScheduler pour l'automatisation quotidienne.
 
 Jobs déclarés :
 - 07h00 quotidien : Rappels famille (anniversaires, documents, crèche, jalons)
-- 08h00 quotidien : Rappels maison (garanties, contrats, entretien)
-- 08h30 quotidien : Rappels généraux (inventaire, garanties intelligentes)
+- 08h00 quotidien : Rappels maison (entretien, gel, cellier)
+- 08h30 quotidien : Rappels généraux (inventaire)
 - lundi 06h00    : Entretien saisonnier (vérification tâches de saison)
 """
 
@@ -321,7 +321,7 @@ def _job_rappels_famille() -> None:
 
 
 def _job_rappels_maison() -> None:
-    """Évalue et envoie les rappels maison du jour (garanties, contrats, entretien)."""
+    """Évalue et envoie les rappels maison du jour (entretien, gel, cellier)."""
     try:
         from src.services.maison.notifications_maison import NotificationsMaisonService
 
@@ -339,7 +339,7 @@ def _job_rappels_maison() -> None:
 
 
 def _job_rappels_generaux() -> None:
-    """Évalue les rappels GenericService (inventaire faible, garanties générales)."""
+    """Évalue les rappels GenericService (inventaire faible)."""
     try:
         from datetime import date
 
@@ -395,7 +395,7 @@ def _job_push_quotidien() -> None:
     """Envoie les alertes urgentes du jour via Web Push (VAPID) à tous les abonnés.
 
     Complète les notifications ntfy.sh avec des push navigateur pour :
-    - Rappels intelligents urgents (garanties, péremptions)
+    - Rappels intelligents urgents (péremptions)
     - Alertes jeux responsable (série de défaites ≥ 5)
     - Alertes prédictives maison
     """
@@ -3210,12 +3210,12 @@ def _job_sync_voyages_calendrier() -> None:
 def _job_sync_charges_dashboard() -> None:
     """P8-07c — Connexion inter-modules Charges → Dashboard.
 
-    Agrège les charges mensuelles (contrats actifs) et les pousse comme
+    Agrège les dépenses mensuelles et les pousse comme
     métriques dashboard pour la page d'accueil.
     """
     try:
         from src.core.db import obtenir_contexte_db
-        from src.core.models import Contrat, DepenseMaison
+        from src.core.models import DepenseMaison
         from src.services.core.events.bus import obtenir_bus
 
         aujourd_hui = date.today()
@@ -3223,16 +3223,6 @@ def _job_sync_charges_dashboard() -> None:
         annee = aujourd_hui.year
 
         with obtenir_contexte_db() as session:
-            # Total charges fixes mensuelles (contrats actifs)
-            charges_fixes = (
-                session.query(func.sum(Contrat.montant_mensuel))
-                .filter(
-                    Contrat.statut == "actif",
-                    Contrat.montant_mensuel.isnot(None),
-                )
-                .scalar()
-            ) or 0
-
             # Total dépenses maison du mois
             depenses_mois = (
                 session.query(func.sum(DepenseMaison.montant))
@@ -3240,25 +3230,16 @@ def _job_sync_charges_dashboard() -> None:
                 .scalar()
             ) or 0
 
-            # Nombre de contrats actifs
-            nb_contrats = (
-                session.query(Contrat)
-                .filter(Contrat.statut == "actif")
-                .count()
-            )
-
         bus = obtenir_bus()
         bus.emettre("dashboard.charges_update", {
-            "charges_fixes_mensuelles": float(charges_fixes),
             "depenses_mois": float(depenses_mois),
-            "nb_contrats_actifs": nb_contrats,
             "mois": mois,
             "annee": annee,
         }, source="cron.sync_charges_dashboard")
 
         logger.info(
-            "P8-07c sync_charges_dashboard: charges fixes=%s EUR, dépenses mois=%s EUR, %d contrat(s)",
-            float(charges_fixes), float(depenses_mois), nb_contrats,
+            "P8-07c sync_charges_dashboard: dépenses mois=%s EUR",
+            float(depenses_mois),
         )
     except Exception:
         logger.exception("Erreur P8-07c sync_charges_dashboard")

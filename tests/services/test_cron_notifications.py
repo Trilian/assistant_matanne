@@ -399,11 +399,7 @@ class TestSyncChargesDashboard:
         from src.services.core.cron.jobs import _job_sync_charges_dashboard
 
         mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.scalar.side_effect = [
-            Decimal("1200.00"),  # charges fixes
-            Decimal("850.00"),  # dépenses mois
-        ]
-        mock_session.query.return_value.filter.return_value.count.return_value = 8
+        mock_session.query.return_value.filter.return_value.scalar.return_value = Decimal("850.00")
 
         mock_bus = MagicMock()
 
@@ -419,9 +415,7 @@ class TestSyncChargesDashboard:
 
         mock_bus.emettre.assert_called_once()
         event_data = mock_bus.emettre.call_args[0][1]
-        assert event_data["charges_fixes_mensuelles"] == 1200.0
         assert event_data["depenses_mois"] == 850.0
-        assert event_data["nb_contrats_actifs"] == 8
 
 
 # ═══════════════════════════════════════════════════════════

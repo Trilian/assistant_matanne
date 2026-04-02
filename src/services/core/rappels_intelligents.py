@@ -2,7 +2,6 @@
 Service de rappels intelligents contextuels.
 
 Analyse les données de l'application et génère des alertes pertinentes:
-- Garanties qui expirent dans les 30 prochains jours
 - Stock d'inventaire sous le seuil minimum
 - Tâches d'entretien en retard
 """
@@ -13,7 +12,6 @@ import logging
 from datetime import date, timedelta
 
 from src.core.db import obtenir_contexte_db
-from src.core.models.contrats_artisans import Garantie
 from src.core.models.inventaire import ArticleInventaire
 from src.core.models.habitat import TacheEntretien
 from src.services.core.registry import service_factory
@@ -62,7 +60,6 @@ class RappelsIntelligentsService:
         """
         rappels: list[RappelItem] = []
 
-        rappels.extend(self._rappels_garanties())
         rappels.extend(self._rappels_inventaire())
         rappels.extend(self._rappels_entretien())
 
@@ -77,41 +74,6 @@ class RappelsIntelligentsService:
 
         logger.info(f"✅ {len(rappels)} rappel(s) généré(s)")
         return [r.to_dict() for r in rappels]
-
-    def _rappels_garanties(self) -> list[RappelItem]:
-        """Garanties expirant dans les 30 prochains jours."""
-        rappels = []
-        aujourd_hui = date.today()
-        limite = aujourd_hui + timedelta(days=30)
-
-        try:
-            with obtenir_contexte_db() as session:
-                garanties = (
-                    session.query(Garantie)
-                    .filter(
-                        Garantie.date_fin_garantie >= aujourd_hui,
-                        Garantie.date_fin_garantie <= limite,
-                    )
-                    .all()
-                )
-
-                for g in garanties:
-                    jours_restants = (g.date_fin_garantie - aujourd_hui).days
-                    priorite = "urgente" if jours_restants <= 7 else "haute"
-                    rappels.append(
-                        RappelItem(
-                            type_rappel="garantie",
-                            titre=f"Garantie expire bientôt : {g.nom_appareil}",
-                            description=f"La garantie expire dans {jours_restants} jour(s) ({g.date_fin_garantie.isoformat()}).",
-                            priorite=priorite,
-                            date_echeance=g.date_fin_garantie,
-                            lien="/maison/garanties",
-                        )
-                    )
-        except Exception:
-            logger.warning("Impossible de vérifier les garanties", exc_info=True)
-
-        return rappels
 
     def _rappels_inventaire(self) -> list[RappelItem]:
         """Articles d'inventaire sous le seuil minimum."""

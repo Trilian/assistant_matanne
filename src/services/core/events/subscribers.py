@@ -806,27 +806,6 @@ def _adapter_planning_sur_feedback_recette(event: EvenementDomaine) -> None:
         logger.warning("Échec flux D.5 feedback->planning: %s", e)
 
 
-def _notifier_renouvellement_contrat(event: EvenementDomaine) -> None:
-    """D.6: contrat en renouvellement -> notification multi-canal."""
-    try:
-        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
-
-        message = str(event.data.get("message") or "Contrats à renouveler prochainement")
-        dispatcher = get_dispatcher_notifications()
-        for user_id in ("matanne",):
-            dispatcher.envoyer(
-                user_id=user_id,
-                message=message,
-                canaux=["ntfy", "push", "email", "whatsapp"],
-                titre="Alerte renouvellement contrats",
-                type_email="alerte_critique",
-                alerte={"titre": "Alerte renouvellement contrats", "message": message},
-            )
-        logger.info("Sprint D.6: notification contrats envoyée")
-    except Exception as e:  # noqa: BLE001
-        logger.warning("Échec flux D.6 contrats->notifications: %s", e)
-
-
 def _declencher_agent_ia_proactif(event: EvenementDomaine) -> None:
     """I.15: déclenche l'agent proactif selon météo/planning/contexte EventBus."""
     try:
@@ -1078,8 +1057,6 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("recette.feedback", _adapter_planning_sur_feedback_recette, priority=80)
     compteur += 1
 
-    bus.souscrire("contrat.renouvellement", _notifier_renouvellement_contrat, priority=80)
-    compteur += 1
 
     # ── Sprint I.15 — Agent IA proactif EventBus ──
     bus.souscrire("meteo.*", _declencher_agent_ia_proactif, priority=70)
@@ -1135,6 +1112,5 @@ __all__ = [
     "_publier_alerte_dashboard_budget",
     "_mettre_a_jour_courses_predictives",
     "_adapter_planning_sur_feedback_recette",
-    "_notifier_renouvellement_contrat",
     "_declencher_agent_ia_proactif",
 ]

@@ -1,5 +1,5 @@
 """
-Tests API pour les Innovations — Phase 10 du planning.
+Tests API pour les fonctionnalités avancées.
 
 Couvre les 8 endpoints du routeur innovations + admin reset + WebSocket logs.
 """
@@ -19,7 +19,7 @@ import pytest
 @pytest.fixture
 def mock_innovations_service():
     """Mock du service InnovationsService."""
-    with patch("src.api.routes.innovations._get_service") as mock:
+    with patch("src.api.routes.fonctionnalites_avancees._get_service") as mock:
         service = MagicMock()
         mock.return_value = service
         yield service

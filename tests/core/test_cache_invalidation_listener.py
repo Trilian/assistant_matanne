@@ -38,7 +38,8 @@ def test_traiter_notification_invalide_patterns_et_l3(monkeypatch: MonkeyPatch):
         "semaine_ia_",
         "batch_",
     ]
-    assert fake_cache.clear_levels == ["l3"]
+    # L3 clear was removed — pattern invalidation is sufficient
+    assert fake_cache.clear_levels == []
 
 
 def test_extraire_payload_notification_objet():

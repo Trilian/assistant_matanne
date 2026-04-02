@@ -385,18 +385,6 @@ class EvenementInventaireModificationImportante:
     nb_articles_impactes: int = 0
     source_declenchement: str = ""
 
-
-@dataclass(frozen=True, slots=True)
-class EvenementContratRenouvellement:
-    """Émis quand des contrats arrivent en échéance (Sprint D.6)."""
-
-    TYPE: str = "contrat.renouvellement"
-
-    nb_contrats: int = 0
-    nb_garanties: int = 0
-    message: str = ""
-
-
 # ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS JEUX
 # ═══════════════════════════════════════════════════════════
@@ -532,7 +520,6 @@ REGISTRE_EVENEMENTS: dict[str, type] = {
     "recette.feedback": EvenementRecetteFeedback,
     "energie.anomalie": EvenementEnergieAnomalie,
     "inventaire.modification_importante": EvenementInventaireModificationImportante,
-    "contrat.renouvellement": EvenementContratRenouvellement,
     "jeux.sync_terminee": EvenementJeuxSyncTerminee,
     "service.error": EvenementErreurService,
 }
@@ -569,7 +556,6 @@ __all__ = [
     "EvenementRecetteFeedback",
     "EvenementEnergieAnomalie",
     "EvenementInventaireModificationImportante",
-    "EvenementContratRenouvellement",
     "EvenementJeuxSyncTerminee",
     "EvenementErreurService",
     # Registry
