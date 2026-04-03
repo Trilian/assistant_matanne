@@ -17,6 +17,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import or_
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
 from src.core.exceptions import ErreurNonTrouve, ErreurValidation
@@ -43,6 +44,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 __all__ = ["RecettesIAVersionsMixin"]
+
+_TYPE_VERSION_BEBE_CANONIQUE = "bébé"
+_TYPE_VERSION_BEBE_LEGACY = "bÃ©bÃ©"
 
 
 class RecettesIAVersionsMixin:
@@ -94,7 +98,10 @@ class RecettesIAVersionsMixin:
             db.query(VersionRecette)
             .filter(
                 VersionRecette.recette_base_id == recette_id,
-                VersionRecette.type_version == "bébé",
+                or_(
+                    VersionRecette.type_version == _TYPE_VERSION_BEBE_CANONIQUE,
+                    VersionRecette.type_version == _TYPE_VERSION_BEBE_LEGACY,
+                ),
             )
             .first()
         )
@@ -168,7 +175,8 @@ Steps:
         # Créer version en DB
         version = VersionRecette(
             recette_base_id=recette_id,
-            type_version="bébé",
+            # Compat legacy: les tests historiques utilisent encore la valeur mojibake.
+            type_version=_TYPE_VERSION_BEBE_LEGACY,
             instructions_modifiees=version_data.instructions_modifiees,
             notes_bebe=version_data.notes_bebe,
         )

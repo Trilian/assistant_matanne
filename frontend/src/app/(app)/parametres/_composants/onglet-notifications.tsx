@@ -15,7 +15,7 @@ const CANAUX_DISPONIBLES = [
   { id: "push", label: "Push navigateur", icon: Smartphone },
   { id: "ntfy", label: "Ntfy.sh", icon: Bell },
   { id: "email", label: "Email", icon: Mail },
-  { id: "whatsapp", label: "WhatsApp", icon: MessageCircle },
+  { id: "telegram", label: "Telegram", icon: MessageCircle },
 ] as const;
 
 const CATEGORIES = [

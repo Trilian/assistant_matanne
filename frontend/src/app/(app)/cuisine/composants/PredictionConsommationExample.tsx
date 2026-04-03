@@ -43,12 +43,15 @@ export function PredictionConsommationExample() {
       {
         ingredient_nom: ingredientNom,
         stock_actuel_kg: parseFloat(stockActuel),
-        historique_achat_mensuel: historique.map((h) => h.quantite_kg),
+        historique_achat_mensuel: historique.map((h, index) => ({
+          date: `2026-${String(h.mois).padStart(2, '0')}-01`,
+          quantite_kg: h.quantite_kg,
+        })),
       },
       {
         onSuccess: (result) => {
           ajouter_notification(
-            `Prochaine consommation estimée: ${result.prochaine_consommation_estimee_j} jours`,
+            `Autonomie estimée: ${result.jours_autonomie} jours`,
             'succes'
           )
         },
@@ -103,10 +106,13 @@ export function PredictionConsommationExample() {
         {data && (
           <div className="mt-4 p-3 bg-blue-50 rounded">
             <p className="text-sm">
-              <strong>Jours avant rupture:</strong> {data.prochaine_consommation_estimee_j}
+              <strong>Jours avant rupture:</strong> {data.jours_autonomie}
             </p>
             <p className="text-sm">
-              <strong>Confiance:</strong> {(data.confiance_prediction * 100).toFixed(0)}%
+              <strong>Seuil conseillé:</strong> {data.seuil_reapprovisionnement_kg}
+            </p>
+            <p className="text-sm">
+              <strong>Raison:</strong> {data.raison}
             </p>
           </div>
         )}

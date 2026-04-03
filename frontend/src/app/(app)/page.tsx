@@ -66,6 +66,7 @@ import { CompteurAnime } from "@/composants/dashboard/compteur-anime";
 import { Sparkline } from "@/composants/dashboard/sparkline";
 import { ComparateurTemporel } from "@/composants/dashboard/comparateur-temporel";
 import { obtenirScoreFamilleHebdo } from "@/bibliotheque/api/avance";
+import { obtenirInsightsQuotidiens } from "@/bibliotheque/api/avance";
 import { JaugeScoreBienEtre } from "@/composants/graphiques/jauge-score-bien-etre";
 
 const WIDGETS_DEFAUT = {
@@ -170,6 +171,11 @@ export default function PageAccueil() {
   const { data: anomaliesBudget } = utiliserRequete(
     ["famille", "budget", "anomalies"],
     obtenirAnomaliesBudget
+  );
+  const { data: insightsQuotidiens } = utiliserRequete(
+    ["dashboard", "insights-quotidiens"],
+    () => obtenirInsightsQuotidiens(2),
+    { staleTime: 10 * 60 * 1000 }
   );
 
   const alertesBudget = (anomaliesBudget?.anomalies ?? []).filter(
@@ -910,6 +916,33 @@ export default function PageAccueil() {
         </Card>
         </WidgetSortable>
       )}
+
+      {widgets.lecture_ia && insightsQuotidiens?.insights?.length ? (
+        <WidgetSortable id="lecture_ia_insights">
+        <Card className="border-sky-300/50 bg-sky-50/50 dark:border-sky-900/40 dark:bg-sky-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-sky-600" />
+              Insights IA du jour
+            </CardTitle>
+            <CardDescription>Signaux proactifs consolidés pour la journée.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {insightsQuotidiens.insights.map((insight, index) => (
+              <div key={`${insight.titre}-${index}`} className="rounded-md border bg-background/70 px-3 py-2">
+                <p className="text-sm font-medium">{insight.titre}</p>
+                <p className="text-xs text-muted-foreground mt-1">{insight.message}</p>
+                {insight.action_url ? (
+                  <Link href={insight.action_url} className="text-xs mt-1 inline-flex items-center gap-1 text-sky-700 hover:underline">
+                    Voir l'action <ArrowRight className="h-3 w-3" />
+                  </Link>
+                ) : null}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+        </WidgetSortable>
+      ) : null}
 
       {/* Rappels intelligents */}
       {widgets.rappels && rappelsData && rappelsData.total > 0 && (

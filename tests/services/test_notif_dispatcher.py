@@ -13,10 +13,13 @@ class DispatcherTestable(DispatcherNotifications):
         self.telegram_result = False
         self.email_result = False
         self.calls: list[str] = []
+        self.last_push_kwargs: dict | None = None
+        self.last_telegram_kwargs: dict | None = None
         self._prefs: dict[str, dict] = {}
 
     def _envoyer_push(self, user_id: str, message: str, **kwargs):
         self.calls.append("push")
+        self.last_push_kwargs = kwargs
         return self.push_result
 
     def _envoyer_ntfy(self, message: str, **kwargs):
@@ -25,6 +28,7 @@ class DispatcherTestable(DispatcherNotifications):
 
     def _envoyer_telegram(self, message: str, **kwargs):
         self.calls.append("telegram")
+        self.last_telegram_kwargs = kwargs
         return self.telegram_result
 
     def _envoyer_email(self, user_id: str, message: str, **kwargs):
@@ -148,3 +152,40 @@ def test_vider_digest_envoie_resume_et_nettoie_file():
 
     assert resultats.get("telegram") is True
     assert dispatcher._digest_queue["u5"] == []
+
+
+def test_action_url_relative_est_absolutisee():
+    """Une action relative devient une URL absolue pour les canaux externes."""
+    dispatcher = DispatcherTestable()
+
+    assert (
+        dispatcher._absolutiser_action_url("/cuisine/courses")
+        == "https://matanne.vercel.app/app/cuisine/courses"
+    )
+    assert (
+        dispatcher._absolutiser_action_url("/app/cuisine/planning")
+        == "https://matanne.vercel.app/app/cuisine/planning"
+    )
+
+
+def test_envoyer_transmet_cta_telegram_et_push():
+    """Le dispatcher propage les CTA vers Telegram et Push."""
+    dispatcher = DispatcherTestable()
+    dispatcher.telegram_result = True
+    dispatcher.push_result = True
+
+    resultats = dispatcher.envoyer(
+        user_id="u6",
+        message="Planning prêt",
+        canaux=["telegram", "push"],
+        action_url="/cuisine/planning",
+        action_label="Voir le planning",
+        boutons_telegram=[{"id": "planning_valider:42", "title": "Valider"}],
+    )
+
+    assert resultats["telegram"] is True
+    assert resultats["push"] is True
+    assert dispatcher.last_telegram_kwargs is not None
+    assert dispatcher.last_telegram_kwargs["boutons_telegram"][0]["id"] == "planning_valider:42"
+    assert dispatcher.last_push_kwargs is not None
+    assert dispatcher.last_push_kwargs["action_url"] == "/cuisine/planning"

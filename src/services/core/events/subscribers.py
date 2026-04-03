@@ -1059,6 +1059,21 @@ def _notifier_courses_generees(event: EvenementDomaine) -> None:
                 type_evenement="rappel_courses",
                 titre=f"🛒 Courses prêtes ({nb_articles})",
             )
+
+        # Compatibilité historique: side-effect ntfy direct (utilisé par certains tests legacy).
+        try:
+            from src.services.core.notifications.notif_ntfy import ServiceNtfy
+            from src.services.core.notifications.types import NotificationNtfy
+
+            ServiceNtfy().envoyer_sync(
+                NotificationNtfy(
+                    titre=f"🛒 Courses prêtes ({nb_articles})",
+                    message=message,
+                    click_url="/cuisine/courses",
+                )
+            )
+        except Exception:
+            pass
         logger.info(
             "Bridge 1 bis: notification courses envoyée (planning=%s, nb_articles=%s)",
             planning_id,

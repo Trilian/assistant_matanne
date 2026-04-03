@@ -5,7 +5,7 @@ Fonctionnalités core: appels API, cache, rate limiting, retry.
 Vision/OCR et streaming sont délégués aux mixins dédiés.
 """
 
-__all__ = ["ClientIA", "obtenir_client_ia"]
+__all__ = ["ClientIA", "CacheIA", "RateLimitIA", "obtenir_client_ia"]
 
 import asyncio
 import logging
@@ -20,6 +20,19 @@ from .streaming import StreamingMixin
 from .vision import VisionMixin
 
 logger = logging.getLogger(__name__)
+
+
+def __getattr__(name: str):
+    """Expose les utilitaires IA de facon lazy pour compatibilite des imports/tests."""
+    if name == "CacheIA":
+        from .cache import CacheIA
+
+        return CacheIA
+    if name == "RateLimitIA":
+        from .rate_limit import RateLimitIA
+
+        return RateLimitIA
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class ClientIA(VisionMixin, StreamingMixin):

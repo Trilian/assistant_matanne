@@ -270,10 +270,12 @@ def _build_inline_keyboard(boutons: list[dict[str, str]]) -> dict:
     """
     keyboard = []
     for bouton in boutons:
-        keyboard.append([{
-            "text": bouton["title"],
-            "callback_data": bouton["id"][:64],  # Telegram limite à 64 bytes
-        }])
+        item = {"text": bouton["title"]}
+        if bouton.get("url"):
+            item["url"] = bouton["url"]
+        else:
+            item["callback_data"] = bouton["id"][:64]  # Telegram limite à 64 bytes
+        keyboard.append([item])
     return {"inline_keyboard": keyboard}
 
 

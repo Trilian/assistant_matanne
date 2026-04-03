@@ -5,12 +5,19 @@ const API_PREFIX = "/api/v1/ia/modules";
 export interface PredictionConsommationRequest {
   ingredient_nom: string;
   stock_actuel_kg: number;
-  historique_achat_mensuel: number[];
+  historique_achat_mensuel: Array<{
+    date?: string;
+    quantite_kg?: number;
+  }>;
 }
 
 export interface PredictionConsommationResponse {
-  prochaine_consommation_estimee_j: number;
-  confiance_prediction: number;
+  ingredient_nom: string;
+  consommation_hebdo_kg: number;
+  stock_actuel_kg: number;
+  jours_autonomie: number;
+  seuil_reapprovisionnement_kg: number;
+  raison: string;
 }
 
 export interface MealPlanningDay {

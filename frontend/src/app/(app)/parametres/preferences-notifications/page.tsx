@@ -23,7 +23,7 @@ import { toast } from 'sonner'
  Preferences Notifications (E.4)
  * 
  * Configure:
- * - Canal prefere (push, email, ntfy, whatsapp)
+ * - Canal prefere (push, email, ntfy, telegram)
  * - Canaux par categorie (rappels, alertes, resumes)
  * - Heures silencieuses
  * - Max notifs/heure
@@ -48,7 +48,7 @@ const canaux = [
   { id: 'push', label: 'Push', description: 'Notifications navigateur' },
   { id: 'email', label: 'Email', description: 'Emails' },
   { id: 'ntfy', label: 'Ntfy', description: 'Notifications ntfy.sh' },
-  { id: 'whatsapp', label: 'WhatsApp', description: 'Messages WhatsApp' },
+  { id: 'telegram', label: 'Telegram', description: 'Messages Telegram' },
 ]
 
 const categories: Array<{ id: CategorieNotification; label: string; description: string }> = [
@@ -234,7 +234,7 @@ export default function PreferencesNotificationsPage() {
               <ul className="space-y-1 text-blue-800 list-disc list-inside">
                 <li>Les alertes critiques sont toujours envoyees en priorite</li>
                 <li>Les canaux multiples creent une cascade de fallback</li>
-                <li>WhatsApp pour les notifications temps reel (courses, Jules, resultats)</li>
+                <li>Telegram pour les notifications temps reel (courses, Jules, resultats)</li>
                 <li>Email pour les resumes et rapports importants</li>
               </ul>
             </div>

@@ -12,7 +12,7 @@ vi.mock("@/bibliotheque/api/admin", () => ({
   envoyerNotificationTestTousCanaux: vi.fn(),
   listerTemplatesNotifications: vi.fn(async () => ({
     status: "ok",
-    templates: { whatsapp: [], email: [] },
+    templates: { telegram: [], email: [] },
     total: 0,
   })),
   listerQueueNotifications: vi.fn(async () => ({
@@ -74,9 +74,9 @@ describe("PageAdminNotifications", () => {
 
   it("lance le test multi-canal et affiche le résumé", async () => {
     mockedEnvoyerNotificationTestTousCanaux.mockResolvedValue({
-      resultats: { ntfy: true, push: true, email: false, whatsapp: true },
-      canaux_testes: ["ntfy", "push", "email", "whatsapp"],
-      succes: ["ntfy", "push", "whatsapp"],
+      resultats: { ntfy: true, push: true, email: false, telegram: true },
+      canaux_testes: ["ntfy", "push", "email", "telegram"],
+      succes: ["ntfy", "push", "telegram"],
       echecs: ["email"],
       message: "Test multi-canal terminé.",
     });
@@ -94,12 +94,12 @@ describe("PageAdminNotifications", () => {
         expect.objectContaining({
           message: "Campagne multi-canal",
           titre: "Test Matanne",
-          inclure_whatsapp: true,
+          inclure_telegram: true,
         }),
       );
     });
 
     expect(screen.getByText(/test multi-canal terminé/i)).toBeInTheDocument();
-    expect(screen.getByText(/succès: ntfy, push, whatsapp/i)).toBeInTheDocument();
+    expect(screen.getByText(/succès: ntfy, push, telegram/i)).toBeInTheDocument();
   });
 });

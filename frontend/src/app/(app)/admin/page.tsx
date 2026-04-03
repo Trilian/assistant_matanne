@@ -127,7 +127,7 @@ export default function PageAdmin() {
   const [page, setPage] = useState(1);
   const invalider = utiliserInvalidation();
   // Notifications test
-  const [canalNotif, setCanalNotif] = useState<"ntfy" | "push" | "email" | "whatsapp">("ntfy");
+  const [canalNotif, setCanalNotif] = useState<"ntfy" | "push" | "email" | "telegram">("ntfy");
   const [messageNotif, setMessageNotif] = useState("");
   const [emailNotif, setEmailNotif] = useState("");
   const [envoyant, setEnvoyant] = useState(false);
@@ -296,7 +296,7 @@ export default function PageAdmin() {
           { href: "/admin/notifications-queue", icon: Inbox, label: "Queue Notifs", desc: "Flush digest" },
           { href: "/admin/feature-flags", icon: Flag, label: "Feature Flags", desc: "Runtime toggles" },
           { href: "/admin/cache", icon: DatabaseZap, label: "Cache dédié", desc: "Purge sélective" },
-          { href: "/admin/whatsapp-test", icon: MessageSquare, label: "WhatsApp test", desc: "Numéro cible" },
+          { href: "/admin/whatsapp-test", icon: MessageSquare, label: "Telegram test", desc: "Chat cible" },
           { href: "/admin/console", icon: Play, label: "Console rapide", desc: "Commandes admin" },
           { href: "/admin/scheduler", icon: Clock, label: "Scheduler visuel", desc: "Timeline CRON" },
           { href: "/admin/logs", icon: Activity, label: "Logs live", desc: "WebSocket temps réel" },
@@ -627,7 +627,7 @@ export default function PageAdmin() {
                     <SelectItem value="ntfy">ntfy.sh</SelectItem>
                     <SelectItem value="push">Web Push</SelectItem>
                     <SelectItem value="email">Email</SelectItem>
-                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                    <SelectItem value="telegram">Telegram</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

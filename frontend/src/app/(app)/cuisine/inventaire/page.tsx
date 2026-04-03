@@ -78,6 +78,7 @@ import type { LucideIcon } from "lucide-react";
 import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
 import { TreemapInventaire } from "@/composants/graphiques/treemap-inventaire";
 import { construireDonneesTreemapInventaire } from "@/bibliotheque/inventaire-treemap";
+import { predireConsommationInventaire } from "@/bibliotheque/api/ia-modules";
 
 const EMPLACEMENTS: { id: string; label: string; icone: LucideIcon }[] = [
   { id: "Frigo", label: "Frigo", icone: Refrigerator },
@@ -129,6 +130,26 @@ export default function PageInventaire() {
   const { data: alertes } = utiliserRequete(
     ["inventaire", "alertes"],
     obtenirAlertes
+  );
+
+  const articlePrediction = (articles ?? []).find(
+    (article) =>
+      (article.quantite ?? 0) > 0 &&
+      (article.est_bas || article.est_expire)
+  );
+
+  const { data: predictionStock } = utiliserRequete(
+    ["inventaire", "prediction-stock", String(articlePrediction?.id ?? "none")],
+    () =>
+      predireConsommationInventaire({
+        ingredient_nom: articlePrediction?.nom ?? "",
+        stock_actuel_kg: Number(articlePrediction?.quantite ?? 0),
+        historique_achat_mensuel: [],
+      }),
+    {
+      enabled: Boolean(articlePrediction?.id),
+      staleTime: 10 * 60 * 1000,
+    }
   );
 
   const { mutate: ajouter, isPending: enAjout } = utiliserMutation(
@@ -389,6 +410,35 @@ export default function PageInventaire() {
               Articles en stock bas ou bientôt périmés
             </CardDescription>
           </CardHeader>
+        </Card>
+      )}
+
+      {articlePrediction && predictionStock && (
+        <Card className="border-amber-300/60 bg-amber-50/60 dark:border-amber-900/40 dark:bg-amber-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              Prévision IA de réapprovisionnement
+            </CardTitle>
+            <CardDescription>
+              Anticipation pour l&apos;article le plus exposé dans l&apos;emplacement actif.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 md:grid-cols-3">
+            <div>
+              <p className="text-sm font-medium">{predictionStock.ingredient_nom}</p>
+              <p className="text-xs text-muted-foreground">Stock actuel: {predictionStock.stock_actuel_kg}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Autonomie estimée</p>
+              <p className="text-xs text-muted-foreground">{predictionStock.jours_autonomie} jour(s)</p>
+              <p className="text-xs text-muted-foreground">Seuil conseillé: {predictionStock.seuil_reapprovisionnement_kg}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Explication</p>
+              <p className="text-xs text-muted-foreground">{predictionStock.raison}</p>
+            </div>
+          </CardContent>
         </Card>
       )}
 

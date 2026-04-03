@@ -65,6 +65,19 @@ from src.api.utils import executer_async, executer_avec_session, gerer_exception
 router = APIRouter(prefix="/api/v1/courses", tags=["Courses"])
 
 
+def _etat_liste_response(liste: Any) -> str:
+    """Normalise l'etat expose par l'API pour les mocks et anciennes donnees."""
+    etat = getattr(liste, "etat", None)
+    if isinstance(etat, str) and etat:
+        return etat
+
+    statut = getattr(liste, "statut", None)
+    if isinstance(statut, str) and statut:
+        return statut
+
+    return "brouillon"
+
+
 def _calculer_multiplicateur_invites(nb_invites: int) -> float:
     """Applique la même logique de majoration que le moteur de prédiction."""
     if nb_invites <= 0:
@@ -137,7 +150,7 @@ async def lister_courses(
                     {
                         "id": liste.id,
                         "nom": liste.nom,
-                        "etat": liste.etat,
+                        "etat": _etat_liste_response(liste),
                         "items_count": len(liste.articles) if liste.articles else 0,
                         "created_at": liste.cree_le,
                     }
@@ -306,7 +319,7 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
             return {
                 "id": liste.id,
                 "nom": liste.nom,
-                "etat": liste.etat,
+                "etat": _etat_liste_response(liste),
                 "archivee": liste.archivee,
                 "created_at": liste.cree_le,
                 "items": [

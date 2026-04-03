@@ -52,6 +52,18 @@ from .types import (
 logger = logging.getLogger(__name__)
 
 
+def _normaliser_texte_mojibake(valeur: str | None) -> str | None:
+    """Corrige les textes UTF-8 mal decodes en latin-1 (ex: dÃ®ner -> dîner)."""
+    if not isinstance(valeur, str):
+        return valeur
+    if "Ã" not in valeur and "Â" not in valeur:
+        return valeur
+    try:
+        return valeur.encode("latin-1").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return valeur
+
+
 # ═══════════════════════════════════════════════════════════
 # SERVICE RECETTES UNIFIÉ (AVEC HÉRITAGE MULTIPLE)
 # ═══════════════════════════════════════════════════════════
@@ -202,6 +214,9 @@ class ServiceRecettes(
             data["temps_cuisson"] = 0
 
         # Normaliser categorie : NOT NULL en DB, dériver depuis type_repas si absent
+        data["type_repas"] = _normaliser_texte_mojibake(data.get("type_repas"))
+        data["saison"] = _normaliser_texte_mojibake(data.get("saison"))
+
         if not data.get("categorie"):
             _type_to_cat = {
                 "petit_déjeuner": "Petit-déjeuner",

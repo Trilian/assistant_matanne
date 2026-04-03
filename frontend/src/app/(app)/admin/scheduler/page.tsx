@@ -77,7 +77,7 @@ function categoriserJob(id: string): string {
     return "Jeux";
   if (id.includes("budget") || id.includes("depense"))
     return "Budget";
-  if (id.includes("notification") || id.includes("digest") || id.includes("push") || id.includes("whatsapp") || id.includes("rappel_courses"))
+  if (id.includes("notification") || id.includes("digest") || id.includes("push") || id.includes("telegram") || id.includes("whatsapp") || id.includes("rappel_courses"))
     return "Notifications";
   if (id.includes("garmin") || id.includes("meteo") || id.includes("calendrier") || id.includes("google") || id.includes("sync"))
     return "Sync";

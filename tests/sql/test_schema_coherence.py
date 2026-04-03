@@ -18,7 +18,20 @@ def _sql_tables() -> set[str]:
     sql_path = Path(__file__).resolve().parents[2] / "sql" / "INIT_COMPLET.sql"
     assert sql_path.exists(), f"INIT_COMPLET.sql introuvable : {sql_path}"
     sql = sql_path.read_text(encoding="utf-8")
-    return set(re.findall(r"CREATE TABLE\s+(?:IF NOT EXISTS\s+)?(\w+)", sql, re.IGNORECASE))
+
+    # Ignorer les lignes de commentaire pour éviter les faux positifs
+    # comme "CREATE TABLE dans ..." présent dans la documentation inline.
+    sql_sans_commentaires = "\n".join(
+        ligne for ligne in sql.splitlines() if not ligne.lstrip().startswith("--")
+    )
+
+    return set(
+        re.findall(
+            r"^\s*CREATE TABLE\s+(?:IF NOT EXISTS\s+)?(\w+)",
+            sql_sans_commentaires,
+            re.IGNORECASE | re.MULTILINE,
+        )
+    )
 
 
 def _orm_tables() -> list[tuple[str, str]]:

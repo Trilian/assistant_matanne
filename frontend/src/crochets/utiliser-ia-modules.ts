@@ -33,7 +33,7 @@ export function utilisePredictionConsommation() {
   return useMutation<PredictionConsommationResponse, Error, PredictionConsommationRequest>({
     mutationFn: predireConsommationInventaire,
     onSuccess: (data) => {
-      notifier("succes", `Consommation estimée: ${data.prochaine_consommation_estimee_j}j`);
+      notifier("succes", `Autonomie estimée: ${data.jours_autonomie}j`);
       queryClient.invalidateQueries({ queryKey: ["inventaire"] });
     },
     onError: (error) => {

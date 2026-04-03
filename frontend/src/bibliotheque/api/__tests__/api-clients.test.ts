@@ -187,3 +187,56 @@ describe("API planning", () => {
     expect(typeof exporterPlanningPdf).toBe("function");
   });
 });
+
+// ═══════════════════════════════════════════════════════════
+// telegram.ts
+// ═══════════════════════════════════════════════════════════
+
+describe("API telegram", () => {
+  let clientApi: ReturnType<typeof axios.create>;
+
+  beforeEach(() => {
+    vi.resetModules();
+    clientApi = axios.create() as unknown as ReturnType<typeof axios.create>;
+    // Réinitialiser toutes les queues mockResolvedValueOnce pour éviter la pollution entre tests
+    vi.mocked(clientApi.post).mockReset();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("envoyerPlanningTelegram appelle POST /telegram/envoyer-planning", async () => {
+    (clientApi.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { message: "planning_envoye", id: 42 },
+    });
+
+    const { envoyerPlanningTelegram } = await import(
+      "@/bibliotheque/api/telegram"
+    );
+    const result = await envoyerPlanningTelegram(42);
+
+    expect(clientApi.post).toHaveBeenCalledWith("/telegram/envoyer-planning", {
+      planning_id: 42,
+      contenu: undefined,
+    });
+    expect(result).toEqual({ message: "planning_envoye", id: 42 });
+  });
+
+  it("envoyerListeCoursesTelegram appelle POST /telegram/envoyer-courses", async () => {
+    (clientApi.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { message: "courses_envoyees", id: 15 },
+    });
+
+    const { envoyerListeCoursesTelegram } = await import(
+      "@/bibliotheque/api/telegram"
+    );
+    const result = await envoyerListeCoursesTelegram(15, "Courses semaine");
+
+    expect(clientApi.post).toHaveBeenCalledWith("/telegram/envoyer-courses", {
+      liste_id: 15,
+      nom_liste: "Courses semaine",
+    });
+    expect(result).toEqual({ message: "courses_envoyees", id: 15 });
+  });
+});

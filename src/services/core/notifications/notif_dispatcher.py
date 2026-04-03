@@ -21,6 +21,8 @@ from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
+_APP_BASE_URL = "https://matanne.vercel.app"
+
 _CANAUX_VALIDES = {"ntfy", "push", "email", "telegram", "whatsapp"}
 
 # Mapping catégorie notifications: événement -> catégorie + canaux cibles
@@ -348,17 +350,33 @@ class DispatcherNotifications:
         """Envoie via Web Push (VAPID)."""
         try:
             from src.services.core.notifications.notif_web_core import get_push_notification_service
+            from src.services.core.notifications.types import NotificationPush
 
             service = get_push_notification_service()
             titre = kwargs.get("titre", "Matanne")
+            action_url = self._absolutiser_action_url(kwargs.get("action_url"))
+            actions = kwargs.get("actions_push") or []
 
-            if hasattr(service, "creer_notification_generique"):
-                notif = service.creer_notification_generique(titre, message)
-                nb = service.envoyer_a_utilisateur(user_id, notif) if hasattr(
-                    service, "envoyer_a_utilisateur"
-                ) else service.envoyer_a_tous(notif)
-                return nb > 0
-            return False
+            if action_url and not actions:
+                actions = [{"action": "open", "title": kwargs.get("action_label", "Ouvrir")}]
+
+            notif = NotificationPush(
+                title=titre,
+                body=message,
+                url=action_url or "/",
+                data={
+                    **(kwargs.get("data") or {}),
+                    "action_url": action_url,
+                },
+                actions=actions,
+                tag=kwargs.get("tag"),
+                require_interaction=bool(kwargs.get("require_interaction", False)),
+            )
+
+            nb = service.envoyer_a_utilisateur(user_id, notif) if hasattr(
+                service, "envoyer_a_utilisateur"
+            ) else service.envoyer_a_tous(notif)
+            return nb > 0
         except Exception as e:
             logger.error("Erreur push web : %s", e)
             return False
@@ -374,6 +392,7 @@ class DispatcherNotifications:
             import asyncio
             from src.services.integrations.telegram import (
                 envoyer_message_telegram,
+                envoyer_message_interactif,
                 envoyer_liste_courses_partagee,
                 envoyer_rapport_hebdo_whatsapp,
                 envoyer_suggestion_recette_du_jour,
@@ -397,7 +416,11 @@ class DispatcherNotifications:
                 if type_message in {"liste_courses", "articles_courses"}:
                     articles = kwargs.get("articles", [message])
                     nom_liste = kwargs.get("nom_liste", "Courses")
-                    return await envoyer_liste_courses_partagee(articles, nom_liste)
+                    return await envoyer_liste_courses_partagee(
+                        articles,
+                        nom_liste,
+                        liste_id=kwargs.get("liste_id"),
+                    )
                 elif type_message == "rapport_hebdo":
                     return await envoyer_rapport_hebdo_whatsapp(message)
                 elif type_message == "recette_du_jour":
@@ -413,6 +436,21 @@ class DispatcherNotifications:
                 elif type_message == "rappel_entretien":
                     return await envoyer_rappel_entretien_maison(message)
                 else:
+                    boutons_telegram = kwargs.get("boutons_telegram")
+                    action_url = self._absolutiser_action_url(kwargs.get("action_url"))
+                    if action_url and not boutons_telegram:
+                        boutons_telegram = [{
+                            "id": "ouvrir_notification",
+                            "title": kwargs.get("action_label", "Ouvrir"),
+                            "url": action_url,
+                        }]
+
+                    if boutons_telegram:
+                        return await envoyer_message_interactif(
+                            destinataire,
+                            message,
+                            boutons_telegram,
+                        )
                     return await envoyer_message_telegram(destinataire, message)
 
             return asyncio.run(_send())
@@ -484,6 +522,18 @@ class DispatcherNotifications:
         except Exception as e:
             logger.debug("Impossible de récupérer email pour user_id=%s : %s", user_id, e)
         return None
+
+    def _absolutiser_action_url(self, action_url: Any) -> str | None:
+        """Convertit une URL relative interne en URL absolue pour les canaux externes."""
+        if not action_url or not isinstance(action_url, str):
+            return None
+        if action_url.startswith("http://") or action_url.startswith("https://"):
+            return action_url
+        if not action_url.startswith("/"):
+            action_url = f"/{action_url}"
+        if action_url.startswith("/app/"):
+            return f"{_APP_BASE_URL}{action_url}"
+        return f"{_APP_BASE_URL}/app{action_url}"
 
 
 # ─── Factory ───────────────────────────────────────────────────────────────────

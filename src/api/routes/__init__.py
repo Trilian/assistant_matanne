@@ -16,6 +16,7 @@ __all__ = [
     "calendriers_router",
     "courses_router",
     "dashboard_router",
+    "dashboard_accueil",
     "documents_router",
     "export_router",
 
@@ -84,6 +85,10 @@ _MODULES = {
     "intra_flux_router": ".intra_flux",
 }
 
+_MODULE_ALIASES = {
+    "dashboard_accueil": ".dashboard",
+}
+
 
 def __getattr__(name: str):
     if name in _MODULES:
@@ -91,4 +96,8 @@ def __getattr__(name: str):
 
         module = import_module(_MODULES[name], __name__)
         return module.router
+    if name in _MODULE_ALIASES:
+        from importlib import import_module
+
+        return import_module(_MODULE_ALIASES[name], __name__)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

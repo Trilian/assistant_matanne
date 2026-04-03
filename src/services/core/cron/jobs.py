@@ -606,6 +606,8 @@ def _job_rappel_courses_ntfy() -> None:
                 type_telegram="articles_courses",
                 articles=noms_articles or [f"{nb_articles} article(s) en attente"],
                 nom_liste="Courses en attente",
+                action_url="/cuisine/courses",
+                action_label="Ouvrir la liste",
                 titre="Courses",
             )
         else:
@@ -1017,6 +1019,8 @@ def _job_rapport_mensuel_budget() -> None:
                 "total_global": total_global,
             },
             type_telegram="rapport_hebdo",
+            action_url="/famille/budget",
+            action_label="Ouvrir le rapport",
         )
         logger.info("J-07 exécuté: %s", res)
     except Exception:
@@ -1951,6 +1955,8 @@ def _job_recap_weekend_dimanche_soir() -> None:
             canaux=["telegram", "push"],
             titre="Récap weekend",
             type_telegram="rapport_hebdo",
+            action_url="/cuisine/planning",
+            action_label="Voir la semaine",
         )
         logger.info("P7-01 exécuté: %s", res)
     except Exception:
@@ -2062,6 +2068,8 @@ def _job_rapport_budget_hebdo() -> None:
             canaux=["telegram"],
             titre="Rapport budget hebdo",
             type_telegram="rapport_hebdo",
+            action_url="/famille/budget",
+            action_label="Voir le budget",
         )
         logger.info("P7-05 exécuté: %s", res)
     except Exception:
@@ -2199,6 +2207,8 @@ def _job_recette_du_jour_push() -> None:
             canaux=["push", "telegram"],
             titre="Recette du jour",
             type_telegram="recette_du_jour",
+            action_url="/cuisine/planning",
+            action_label="Voir le repas",
         )
         logger.info("P7-10 exécuté: %s", res)
     except Exception:
@@ -2299,6 +2309,8 @@ def _job_rappel_entretien_telegram() -> None:
             canaux=["telegram"],
             titre="Rappel entretien",
             type_telegram="rappel_entretien",
+            action_url="/maison/entretien",
+            action_label="Voir les tâches",
         )
         logger.info("rappel_entretien_telegram exécuté")
     except Exception:
@@ -2321,6 +2333,8 @@ def _job_bilan_nutrition_telegram() -> None:
             canaux=["telegram"],
             titre="Bilan nutrition semaine",
             type_telegram="bilan_nutrition",
+            action_url="/cuisine/planning",
+            action_label="Voir la nutrition",
         )
         logger.info("bilan_nutrition_telegram exécuté")
     except Exception:

@@ -542,11 +542,11 @@ async def generer_courses_depuis_planning(event):
 
 | # | Module | Intégration | Description | Priorité | Statut |
 |---|--------|-------------|-------------|----------|--------|
-| 1 | Inventaire | Prédiction besoins stocks | Analyser l'historique de consommation pour prédire quand un produit sera épuisé | 🟡 Moyenne | ⬜ |
+| 1 | Inventaire | Prédiction besoins stocks | Analyser l'historique de consommation pour prédire quand un produit sera épuisé | 🟡 Moyenne | ✅ |
 | 2 | Maison | Optimisation planning entretien | L'IA analyse tâches, météo et propose un planning optimal | 🟡 Moyenne | ⬜ |
 | 3 | Jeux | Analyse tendances paris | Analyse cotes, value bets, couche narrative sur backtest existant | 🟡 Moyenne | ⬜ |
-| 4 | Famille | Journal automatique enrichi | Résumé journal quotidien à partir des événements (repas, activités, météo) | 🟢 Basse | ⬜ |
-| 5 | Dashboard | Insights proactifs | L'IA scanne les données et propose des insights non demandés | 🟢 Basse | ⬜ |
+| 4 | Famille | Journal automatique enrichi | Résumé journal quotidien à partir des événements (repas, activités, météo) | 🟢 Basse | ✅ |
+| 5 | Dashboard | Insights proactifs | L'IA scanne les données et propose des insights non demandés | 🟢 Basse | ✅ |
 | 6 | Jardin | Calendrier plantation IA | Proposer calendrier plantation par zone géo, saison, plantes existantes | 🟢 Basse | ⬜ |
 
 ### 5.2 Points IA backend non exposés en frontend
@@ -777,6 +777,21 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | Rappel anniversaire J-7 | 7j avant anniversaire | Notification + suggestions cadeaux IA | Famille | ⬜ |
 | Bilan mensuel auto | 1er du mois | Générer et envoyer bilan complet par email | Rapports | ⬜ |
 
+#### Notifications actionnables — progression avril 2026
+
+- Le dispatcher supporte `action_url` pour les notifications Push et Telegram.
+- Les messages Telegram supportent maintenant les boutons URL en plus des callbacks de validation.
+- **7 jobs CRON** ont maintenant un CTA `action_url` + `action_label` :
+  - MT-02 rappel courses → `/cuisine/courses` "Ouvrir la liste"
+  - P7-10 recette du jour → `/cuisine/planning` "Voir le repas"
+  - Rappel entretien → `/maison/entretien` "Voir les tâches"
+  - P7-05 rapport budget hebdo → `/famille/budget` "Voir le budget"
+  - J-07 rapport mensuel → `/famille/budget` "Ouvrir le rapport"
+  - Bilan nutrition → `/cuisine/planning` "Voir la nutrition"
+  - P7-01 récap weekend → `/cuisine/planning` "Voir la semaine"
+- Les tests couvrent la propagation des CTA et le flux API Telegram planning → courses.
+- **Tests frontend** : 2 tests Vitest pour `envoyerPlanningTelegram` et `envoyerListeCoursesTelegram` (13 tests total dans `api-clients.test.ts`).
+
 ### 7.5 Flux validation brouillon (v2)
 
 Le flux actuel (`src/services/ia/flux_utilisateur.py`, `src/api/routes/intra_flux.py`) détecte automatiquement l'étape mais ne propose pas de brouillon éditable et passe directement à la génération de courses.
@@ -848,8 +863,9 @@ Le flux actuel (`src/services/ia/flux_utilisateur.py`, `src/api/routes/intra_flu
 | 8 | Mode brouillon courses avec confirmation obligatoire | `frontend/src/app/(app)/cuisine/courses/page.tsx` | ✅ |
 | 9 | Migration SQL : `ALTER TABLE plannings ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/schema/17_migrations_absorbees.sql` | ✅ |
 | 10 | Migration SQL : `ALTER TABLE listes_courses ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/schema/17_migrations_absorbees.sql` | ✅ |
-| 11 | InlineKeyboardMarkup Telegram avec boutons ✅/✏️/🔄 | `src/services/integrations/telegram.py` | ⬜ |
-| 12 | Handler `callback_query` Telegram → endpoints validation | `src/api/routes/webhooks_telegram.py` | ⬜ |
+| 11 | InlineKeyboardMarkup Telegram avec boutons ✅/✏️/🔄 | `src/services/integrations/telegram.py` | ✅ |
+| 12 | Handler `callback_query` Telegram → endpoints validation | `src/api/routes/webhooks_telegram.py` | ✅ |
+| 13 | Tests d'intégration endpoints `/api/v1/telegram/envoyer-*` + smoke flow planning→courses | `tests/api/test_webhooks_telegram_endpoints.py` | ✅ |
 
 #### Sprint Phase 5.1 (2026-04-03)
 
@@ -875,7 +891,7 @@ Checklist sprint:
 
 > **Objectif** : Performance, bundle size, robustesse, rester en Free Railway ($0/mois).
 > **Prérequis** : Phase 5 terminée
-> **Statut** : 🟡 En cours — optimisations mémoire Railway de base livrées (cache L1 borné, lazy import IA, flag Prometheus, TTL cache IA 48h).
+> **Statut** : 🟡 En cours — optimisations mémoire Railway et UX Phase 6.2 livrées (cache L1 borné, lazy import IA, lazy registry, flag Prometheus, TTL cache IA 48h, optimistic updates, prefetch navigation).
 
 ### 8.1 Améliorations techniques
 
@@ -894,7 +910,7 @@ Ces optimisations sont nécessaires pour tenir sous 0.5 GB RAM (limite Railway F
 |---|-------------|-------------|-------------|----------|--------|
 | 1 | **Cache L1 mémoire borné** | Limiter `CacheMemoire` à 500 entrées max avec eviction LRU + plafond mémoire | -50-100 MB | `src/core/caching/memory.py` | ✅ |
 | 2 | **Lazy-load modèles IA** | `ClientIA` et dépendances cache/rate-limit chargés au premier appel, pas au démarrage | -30 MB | `src/core/ai/client.py` | ✅ |
-| 3 | **Import lazy services** | 138 factories importés au démarrage → passer en importlib lazy | -20 MB | `src/services/core/registry.py` | 🟡 |
+| 3 | **Import lazy services** | 138 factories importés au démarrage → passer en importlib lazy | -20 MB | `src/services/core/registry.py` | ✅ |
 | 4 | **1 worker uvicorn** | `uvicorn --workers 1` (déjà le cas) | Déjà OK | — | ✅ |
 | 5 | **Désactiver Prometheus** | Métriques Prometheus consomment mémoire → flag pour désactiver | -10 MB | `src/core/config/settings.py`, `src/api/main.py` | ✅ |
 
@@ -918,7 +934,7 @@ Ces optimisations sont nécessaires pour tenir sous 0.5 GB RAM (limite Railway F
 | Sprint | Périmètre | Livrables | Statut |
 |--------|-----------|-----------|--------|
 | 6.1 | Robustesse mémoire backend | Cache L1 borné (entries + bytes), lazy import dépendances IA, flag Prometheus activable, TTL cache IA 48h | ✅ |
-| 6.2 | Optimisations techniques frontend/backend | Import lazy services, optimistic updates CRUD prioritaires, prefetch navigation, revue bundle Three.js | 🟡 |
+| 6.2 | Optimisations techniques frontend/backend | Import lazy services, optimistic updates CRUD prioritaires, prefetch navigation, revue bundle Three.js | ✅ |
 | 6.3 | Validation avancée | E2E flux critiques, tests charge, tests PWA/offline et WebSocket | ⬜ |
 
 ### 8.7 Checklist Phase 6
@@ -930,7 +946,7 @@ Ces optimisations sont nécessaires pour tenir sous 0.5 GB RAM (limite Railway F
 | 3 | Activer un flag runtime pour désactiver `/metrics/prometheus` | ✅ |
 | 4 | Passer le TTL cache IA global à 48h | ✅ |
 | 5 | Documenter l'état d'avancement phase 6 (sprint + checklist) | ✅ |
-| 6 | Migrer l'enregistrement des services vers import lazy explicite | 🟡 |
+| 6 | Migrer l'enregistrement des services vers import lazy explicite | ✅ |
 | 7 | Ajouter optimistic updates sur les flux CRUD critiques | ✅ |
 | 8 | Ajouter prefetch sur la navigation principale | ✅ |
 | 9 | Finaliser les tests avancés phase 6 (E2E/charge/offline/SW) | ⬜ |

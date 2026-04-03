@@ -337,7 +337,7 @@ export default function PageAdminNotifications() {
           <CardHeader>
             <CardTitle>Templates notifications</CardTitle>
             <CardDescription>
-              Templates WhatsApp et Email actuellement disponibles côté backend.
+              Templates Telegram et Email actuellement disponibles côté backend.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

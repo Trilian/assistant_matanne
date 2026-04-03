@@ -83,6 +83,7 @@ export default function CentreNotificationsPage() {
     push: 'bg-blue-100 text-blue-800',
     email: 'bg-purple-100 text-purple-800',
     ntfy: 'bg-green-100 text-green-800',
+    telegram: 'bg-cyan-100 text-cyan-800',
     whatsapp: 'bg-cyan-100 text-cyan-800',
   }
 
