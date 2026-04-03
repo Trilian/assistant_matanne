@@ -138,51 +138,52 @@
 
 ---
 
-## 3. Code à supprimer
+## 3. Code à supprimer / transformer
 
-### 3.1 Module RGPD (complet)
+### 3.1 Module RGPD → Backup personnel
 
-L'utilisateur a explicitement dit : **"RGPD pas pertinent, c'est une app familiale privée"**.
+Supprimer le label et la logique RGPD, mais **conserver la possibilité de faire un backup** de ses données personnelles.
 
-| Type | Fichier à supprimer |
-|------|-------------------|
-| Route | `src/api/routes/rgpd.py` |
-| Schéma | `src/api/schemas/rgpd.py` |
-| Service | `src/services/core/utilisateur/rgpd.py` |
-| Client API | `frontend/src/bibliotheque/api/rgpd.ts` |
-| Page frontend | Section RGPD dans `parametres/_composants/onglet-donnees.tsx` |
-| Tests | `tests/api/test_rgpd.py` |
-| Données | `data/exports/export_rgpd_*.zip` (152 fichiers) |
-| Docs | Références RGPD dans `docs/user-guide/FAQ.md` |
+| Type | Action |
+|------|--------|
+| Route | Supprimer `src/api/routes/rgpd.py` — remplacer par un endpoint simplifié `POST /api/v1/export/backup` dans `export.py` |
+| Schéma | Supprimer `src/api/schemas/rgpd.py` — un simple `BackupResponse(url: str, date: datetime)` dans `export.py` suffit |
+| Service | Refactorer `src/services/core/utilisateur/rgpd.py` → extraire la logique d'export en ZIP dans un `backup_personnel.py`, supprimer tout le reste (droit à l'oubli, data summary, conformité) |
+| Client API | Supprimer `frontend/src/bibliotheque/api/rgpd.ts` — ajouter `exporterBackup()` dans `export.ts` |
+| Page frontend | Remplacer la section "Export RGPD" dans `parametres/onglet-donnees.tsx` par un simple bouton "Télécharger mon backup" sans mention RGPD |
+| Tests | Supprimer `tests/api/test_rgpd.py` — ajouter des tests backup dans `test_routes_export.py` |
+| Données | Supprimer les 152 fichiers `data/exports/export_rgpd_*.zip` (données de test) |
+| Docs | Retirer les mentions RGPD/conformité dans `docs/user-guide/FAQ.md`, garder la mention backup |
 | Enregistrement | Retirer `rgpd_router` de `src/api/main.py` et `routes/__init__.py` |
 
-> **Note** : Garder un export personnel simplifié (backup) dans les paramètres si souhaité, mais sans label RGPD.
+### 3.2 Module Garanties → Vérification garantie en cas de panne
 
-### 3.2 Module Garanties (complet)
+Supprimer le module complet de gestion des garanties (CRUD, alertes, incidents SAV) mais **garder une fonctionnalité simple** : pouvoir vérifier si un équipement est encore sous garantie quand il tombe en panne.
 
-L'utilisateur a dit : **"AUCUN intérêt pour les garanties"**.
+| Type | Action |
+|------|--------|
+| SQL | Simplifier : garder une colonne `date_achat` et `duree_garantie_mois` sur la table `equipements` (pas de table `garanties` séparée ni `incidents_sav`) |
+| Modèle ORM | Ajouter les champs `date_achat` et `duree_garantie_mois` sur le modèle Equipement existant, supprimer le modèle Garantie séparé |
+| Frontend | Remplacer `drawer-garantie.tsx` (stub) par un badge "Sous garantie ✅ / Hors garantie ❌" sur la fiche équipement, calculé à partir de `date_achat + duree_garantie_mois` |
+| Routes API | Supprimer les endpoints CRUD `/maison/garanties` — la garantie est juste un champ de l'équipement |
+| Schémas | Supprimer `AlerteGarantieResponse`, `GarantieCreate`, etc. — enrichir `EquipementResponse` avec `sous_garantie: bool` (calculé) |
+| CRON | Supprimer `controle_contrats_garanties`, `check_garanties_expirant` — pas d'alertes automatiques, juste une consultation à la demande |
+| Docs | Mettre à jour : "La garantie est visible sur la fiche équipement, pas de gestion dédiée" |
 
-| Type | Fichier/Section à supprimer |
-|------|----------------------------|
-| Composant | `frontend/src/composants/maison/drawer-garantie.tsx` (déjà stub) |
-| Routes API | Endpoints `/maison/garanties` (si encore dans routes) |
-| Schémas | `AlerteGarantieResponse`, `GarantieCreate`, `GarantiePatch`, `StatsGarantiesResponse` |
-| CRON | `controle_contrats_garanties`, `check_garanties_expirant` |
-| SQL | Tables `garanties`, `incidents_sav` |
-| Docs | Références garanties dans `docs/API_REFERENCE.md`, `docs/MODULES.md`, `docs/guides/maison/` |
+### 3.3 Module Contrats → Comparateur d'abonnements
 
-### 3.3 Module Contrats artisans / renouvellement
+Ne pas supprimer les contrats mais **recentrer** sur un comparateur d'abonnements pour les dépenses récurrentes du foyer. L'objectif : pouvoir comparer et changer ses abonnements (eau, électricité, gaz, assurances, chaudière, téléphone, internet).
 
-L'utilisateur a dit : **"Pas intéressé par les alertes de renouvellement de contrats"**.
-
-| Type | Fichier/Section à supprimer |
-|------|----------------------------|
-| Modèle | `src/core/models/contrats_artisans.py` |
-| Routes API | Endpoints `/maison/contrats` |
-| Schémas | `ResumeFinancierContratsResponse`, schémas contrats |
-| CRON | `sync_contrats_alertes` |
-| SQL | Tables `contrats`, `contrats_maison`, `factures`, `comparatifs` |
-| Docs | Références contrats dans guides maison et FAQ |
+| Type | Action |
+|------|--------|
+| Modèle | Renommer `contrats_artisans.py` → `abonnements.py`. Simplifier le modèle : `Abonnement(type, fournisseur, prix_mensuel, date_debut, date_fin_engagement, notes)`. Types : `eau`, `electricite`, `gaz`, `assurance_habitation`, `assurance_auto`, `chaudiere`, `telephone`, `internet` |
+| Routes API | Remplacer `/maison/contrats` → `/maison/abonnements` : CRUD simple + endpoint `GET /maison/abonnements/resume` (coût total mensuel par type) |
+| Frontend | Page dédiée `maison/abonnements/page.tsx` : tableau récapitulatif de tous les abonnements avec coût total, date de fin d'engagement, possibilité de noter un meilleur prix trouvé |
+| Comparateur | Ajouter un champ `meilleur_prix_trouve` et `fournisseur_alternatif` sur chaque abonnement pour noter les alternatives repérées manuellement |
+| IA (futur) | Potentiel : l'IA peut analyser les abonnements et suggérer des alternatives quand les engagements se terminent |
+| CRON | Remplacer `sync_contrats_alertes` par un rappel simple : "Engagement {type} se termine dans 30 jours — c'est le moment de comparer" |
+| SQL | Simplifier les tables : une seule table `abonnements` remplaçant `contrats`, `contrats_maison`, `factures`. Garder `comparatifs` renommé en `alternatives_abonnement` |
+| Docs | Mettre à jour la doc maison : section "Abonnements et comparateur" |
 
 ### 3.4 Code legacy à purger
 
@@ -708,9 +709,9 @@ L'admin peut déjà tester tous les canaux via `admin/notifications`. Améliorer
 
 > Objectif : codebase propre, sans dette technique, sans code mort.
 
-- [ ] Supprimer le module RGPD complet (routes, schemas, services, frontend, tests, docs, data)
-- [ ] Supprimer le module Garanties complet (routes, schemas, SQL, CRON, docs, composant stub)
-- [ ] Supprimer le module Contrats/Artisans (modèle, routes, schemas, SQL, CRON, docs)
+- [ ] RGPD → Backup : supprimer le module RGPD, refactorer en endpoint backup simplifié dans `export.py`, nettoyer frontend/tests/docs
+- [ ] Garanties → Simplifier : supprimer le CRUD garanties, garder juste `date_achat` + `duree_garantie_mois` sur Equipement, badge "sous garantie" sur la fiche
+- [ ] Contrats → Abonnements : renommer en `abonnements`, simplifier le modèle (eau, élec, gaz, assurances, chaudière, tel, internet), ajouter comparateur
 - [ ] Éclater `src/services/innovations/service.py` en 5 services focalisés puis supprimer le package
 - [ ] Renommer les 15 fichiers avec sprint/phase dans le nom (voir tableau section 2.4)
 - [ ] Nettoyer les 150+ commentaires contenant des noms de phases/sprints
@@ -721,9 +722,9 @@ L'admin peut déjà tester tous les canaux via `admin/notifications`. Améliorer
 - [ ] Éclater `admin.py` routes en 5 fichiers
 - [ ] Éclater `dashboard.py` routes en 3 fichiers
 - [ ] Nettoyer les 152 exports RGPD dans `data/exports/`
-- [ ] Nettoyer le SQL (tables garanties, contrats, triggers associés)
+- [ ] Nettoyer le SQL (simplifier tables garanties → champs sur equipements, renommer contrats → abonnements)
 - [ ] Régénérer `INIT_COMPLET.sql`
-- [ ] Mettre à jour les tests (supprimer tests modules supprimés, renommer tests sprint)
+- [ ] Mettre à jour les tests (adapter tests garanties/contrats/RGPD, renommer tests sprint)
 - [ ] Mettre à jour toute la documentation (retirer références modules supprimés, noms sprints)
 - [ ] Lancer `pytest` complet et fixer toute régression
 
