@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% set couleur_header = "#16a34a" %}
+{% set titre_header = "Vérification d'email" %}
+
+{% block contenu %}
+<h2>Vérifiez votre adresse email</h2>
+<p>Bienvenue sur Assistant Matanne ! Cliquez sur le lien ci-dessous pour confirmer votre email.</p>
+<p>
+  <a href="{{ lien }}" class="btn btn-success">Vérifier mon email</a>
+</p>
+<p style="color:#666;font-size:13px">Ce lien expire dans 24 heures.</p>
+{% endblock %}

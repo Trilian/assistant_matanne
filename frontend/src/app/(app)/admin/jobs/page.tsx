@@ -4,7 +4,7 @@
 
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Play, RefreshCw, Clock, CheckCircle2, XCircle, Loader2, FileText } from "lucide-react";
 import {
   Card,
@@ -94,7 +94,26 @@ interface JobHistoryResponse {
   pages_totales: number;
 }
 
+interface LiveAdminLogEntry {
+  type?: "log_entry";
+  timestamp: string;
+  level: string;
+  module: string;
+  message: string;
+}
+
 type RunStatus = "idle" | "running" | "success" | "error";
+
+function obtenirTokenAdmin(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem("access_token") ?? "";
+}
+
+function obtenirWsAdminBaseUrl(): string {
+  if (typeof window === "undefined") return "";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+  return apiUrl.replace(/^http/, "ws");
+}
 
 function formaterDate(iso: string | null): string {
   if (!iso) return "—";
@@ -120,6 +139,43 @@ export default function PageAdminJobs() {
   const [batchLoading, setBatchLoading] = useState<"morning" | "day" | "all" | null>(null);
   const [batchResultat, setBatchResultat] = useState<JobBatchResponse | null>(null);
   const [schedulesEdition, setSchedulesEdition] = useState<Record<string, string>>({});
+  const [logsTempsReel, setLogsTempsReel] = useState<LiveAdminLogEntry[]>([]);
+  const [streamConnecte, setStreamConnecte] = useState(false);
+  const [streamPause, setStreamPause] = useState(false);
+
+  useEffect(() => {
+    const token = obtenirTokenAdmin();
+    if (!token) {
+      setStreamConnecte(false);
+      return;
+    }
+
+    const websocket = new WebSocket(
+      `${obtenirWsAdminBaseUrl()}/api/v1/ws/admin/logs?token=${encodeURIComponent(token)}`,
+    );
+
+    websocket.onopen = () => setStreamConnecte(true);
+    websocket.onclose = () => setStreamConnecte(false);
+    websocket.onerror = () => setStreamConnecte(false);
+    websocket.onmessage = (event) => {
+      if (streamPause) {
+        return;
+      }
+      try {
+        const payload = JSON.parse(event.data) as LiveAdminLogEntry;
+        if (!payload?.message || !payload?.timestamp) {
+          return;
+        }
+        setLogsTempsReel((precedents) => [...precedents.slice(-79), payload]);
+      } catch {
+        // payload non JSON ignoré
+      }
+    };
+
+    return () => {
+      websocket.close();
+    };
+  }, [streamPause]);
 
   const {
     data: jobs,
@@ -498,6 +554,51 @@ export default function PageAdminJobs() {
               <p className="text-muted-foreground">Mode: {batchResultat.mode}</p>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Logs temps réel</CardTitle>
+          <CardDescription>
+            Suivi live des exécutions admin et des jobs sans passer par la console.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <Badge variant={streamConnecte ? "default" : "destructive"}>
+              {streamConnecte ? "Connecté" : "Déconnecté"}
+            </Badge>
+            <Button size="sm" variant="outline" onClick={() => setStreamPause((value) => !value)}>
+              {streamPause ? "Reprendre" : "Pause"}
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setLogsTempsReel([])}>
+              Vider
+            </Button>
+          </div>
+
+          <div className="rounded-lg border bg-muted/20 p-3">
+            {logsTempsReel.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                {streamConnecte ? "En attente de logs temps reel..." : "Aucun stream live disponible pour l'instant."}
+              </p>
+            ) : (
+              <div className="max-h-72 space-y-2 overflow-y-auto font-mono text-xs">
+                {logsTempsReel.slice().reverse().map((log, index) => (
+                  <div key={`${log.timestamp}-${index}`} className="rounded border bg-background px-2 py-1">
+                    <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
+                      <span>{formaterDate(log.timestamp)}</span>
+                      <Badge variant={log.level === "ERROR" || log.level === "CRITICAL" ? "destructive" : "secondary"}>
+                        {log.level}
+                      </Badge>
+                      <span>{log.module}</span>
+                    </div>
+                    <div className="mt-1 text-foreground">{log.message}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 

@@ -181,6 +181,8 @@ curl -X POST "https://api.telegram.org/bot<TOKEN>/sendMessage" \
 
 Si tu reçois le message sur Telegram → le bot fonctionne.
 
+> Pour la validation fonctionnelle complète du Sprint 5, voir aussi `docs/TELEGRAM_RECETTE_SPRINT5.md`.
+
 ### Test avec boutons interactifs
 
 ```bash

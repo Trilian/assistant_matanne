@@ -105,7 +105,9 @@ reportOptionalSubscript = "warning"
 [tool.mutmut]
 paths_to_mutate = ["src/services/dashboard"]
 tests_dir = ["tests/services/dashboard"]
-runner = "python -m pytest tests/services/dashboard -q"
+runner = "python -m pytest tests/services/dashboard -q --confcutdir=tests/services/dashboard"
+pytest_add_cli_args_test_selection = ["--confcutdir=tests/services/dashboard"]
+also_copy = ["src/core", "src/services/core", "src/services/integrations"]
 do_not_mutate = [
     "**/__init__.py",
     "**/types.py",

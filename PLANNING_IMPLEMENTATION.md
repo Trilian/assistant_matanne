@@ -453,6 +453,7 @@ sql/
 > **Objectif** : Tout marche tout seul, Telegram est le hub mobile
 > **Durée estimée** : 3-5 jours
 > **Prérequis** : Sprint 4 terminé (inter-modules en place)
+> **Statut avril 2026** : ✅ Complété après audit + finalisation Telegram conversationnel
 
 ### Extensions Telegram à ajouter
 
@@ -470,7 +471,7 @@ sql/
 | **T-10** | Réponses rapides | Répondre "OK" à une suggestion pour valider un repas |
 | **T-11** | `/aide` | Liste de toutes les commandes disponibles |
 
-### Jobs CRON manquants à ajouter
+### Jobs CRON identifiés lors de l'audit
 
 | Job | Déclencheur | Action |
 |-----|-------------|--------|
@@ -482,25 +483,35 @@ sql/
 | Vérification SSL/domaine | Mensuel | Alerter si certificat expire bientôt |
 | Comparateur prix abonnements | Mensuel | Scraper/API → alerter si offre moins chère |
 
+> **Audit** : les jobs critiques Sprint 5 côté santé/cache/backup/email étaient déjà présents dans la base de code. Le travail restant portait surtout sur le hub conversationnel Telegram.
+
 ### Tâches
 
-| # | Tâche | Détail | Effort | Priorité |
-|---|-------|--------|--------|----------|
-| 5.1 | **INNO-1 : Briefing matinal Telegram enrichi** | 1 message à 7h : météo + repas du jour + tâches + Jules + péremptions | 4h | 🔴 Critique |
-| 5.2 | **T-1 à T-8 : Commandes Telegram interactives** | 8 commandes avec réponses formatées | 6h | 🔴 Critique |
-| 5.3 | **T-9 : Menu principal avec sous-menus** | Bouton "Menu" → inline keyboard avec modules | 2h | 🟡 Important |
-| 5.4 | **Jobs manquants** | Santé services (15min), nettoyage cache (quotidien), backup BDD (quotidien), rapport anomalies (hebdo) | 4h | 🟡 Important |
-| 5.5 | **Implémenter envoi email** | Rapports mensuels en PDF par email (feature référencée mais non implémentée) | 4h | 🟡 Important |
-| 5.6 | **T-10 : Réponses rapides** | Répondre "OK" sur une suggestion pour valider (repas, courses) | 2h | 🟢 Souhaitable |
-| 5.7 | **T-11 : Commande `/aide`** | Liste dynamique de toutes les commandes disponibles | 1h | 🟢 Souhaitable |
+| # | Tâche | Détail | Effort | Priorité | Statut |
+|---|-------|--------|--------|----------|--------|
+| 5.1 | **INNO-1 : Briefing matinal Telegram enrichi** | 1 message à 7h : météo + repas du jour + tâches + Jules + péremptions | 4h | 🔴 Critique | ✅ Finalisé |
+| 5.2 | **T-1 à T-8 : Commandes Telegram interactives** | 8 commandes avec réponses formatées | 6h | 🔴 Critique | ✅ Finalisé |
+| 5.3 | **T-9 : Menu principal avec sous-menus** | Bouton "Menu" → inline keyboard avec modules | 2h | 🟡 Important | ✅ Finalisé |
+| 5.4 | **Jobs manquants** | Santé services (15min), nettoyage cache (quotidien), backup BDD (quotidien), rapport anomalies (hebdo) | 4h | 🟡 Important | ✅ Déjà présent après audit |
+| 5.5 | **Implémenter envoi email** | Rapports mensuels en PDF par email (feature référencée mais non implémentée) | 4h | 🟡 Important | ✅ Déjà présent après audit |
+| 5.6 | **T-10 : Réponses rapides** | Répondre "OK" sur une suggestion pour valider (repas, courses) | 2h | 🟢 Souhaitable | ✅ Finalisé |
+| 5.7 | **T-11 : Commande `/aide`** | Liste dynamique de toutes les commandes disponibles | 1h | 🟢 Souhaitable | ✅ Finalisé |
 
-### Critères de validation Sprint 5
+### Critères de validation Sprint 5 ✅
 
-- [ ] Briefing matinal Telegram reçu à 7h avec toutes les infos
-- [ ] 8 commandes Telegram fonctionnelles (`/planning`, `/courses`, etc.)
-- [ ] Menu principal avec sous-menus fonctionne
-- [ ] Job de santé services alerte si DB/Mistral/Telegram down
-- [ ] Tests sur les commandes Telegram
+- [x] Briefing matinal Telegram enrichi: météo + repas + tâches + Jules + péremptions
+- [x] 8 commandes Telegram fonctionnelles (`/planning`, `/courses`, `/ajout`, `/repas`, `/jules`, `/maison`, `/budget`, `/meteo`)
+- [x] Menu principal avec sous-menus fonctionne
+- [x] Réponse rapide `OK` valide un planning ou une liste en attente
+- [x] Commande `/aide` liste les commandes disponibles
+- [x] Job de santé services alerte si DB/Mistral/Telegram down
+- [x] Tests sur les commandes Telegram
+
+### Notes d'implémentation Sprint 5
+
+- `src/services/utilitaires/briefing_matinal.py` enrichi avec météo + Jules et envoi Telegram structuré.
+- `src/api/routes/webhooks_telegram.py` gère désormais les slash commands, le menu principal, les sous-menus, les réponses rapides `OK` et le toggle inline des articles de courses.
+- `tests/api/test_webhooks_telegram_endpoints.py` couvre les nouvelles routes de dispatch Telegram en plus des callbacks existants.
 
 ---
 
@@ -509,6 +520,7 @@ sql/
 > **Objectif** : Pouvoir tout tester en 1 clic, invisible pour l'utilisateur
 > **Durée estimée** : 2-3 jours
 > **Prérequis** : Sprint 5 terminé (jobs en place)
+> **Statut (03/04/2026)** : ✅ Complété après finalisation des écarts panel jobs/live logs/visibilité
 
 ### Améliorations du panel admin
 
@@ -527,25 +539,32 @@ sql/
 
 ### Tâches
 
-| # | Tâche | Détail | Effort | Priorité |
-|---|-------|--------|--------|----------|
-| 6.1 | **A-1 : Bouton "tous les jobs matin"** | Exécution séquentielle des 4-5 jobs du matin | 2h | 🔴 Critique |
-| 6.2 | **A-3 : Logs temps réel SSE** | Stream SSE → composant dans le panel admin | 4h | 🔴 Critique |
-| 6.3 | **A-10 : Conditionner visibilité panel** | `ENVIRONMENT=development` ou `admin.mode_test` flag uniquement | 30min | 🔴 Critique |
-| 6.4 | **A-4 : Historique exécutions** | Table des 50 dernières exécutions avec statut, durée, erreurs | 2h | 🟡 Important |
-| 6.5 | **A-5 : Bouton test notification** | Envoyer un message test sur tous les canaux | 1h | 🟡 Important |
-| 6.6 | **A-6 : Régénérer suggestions IA** | Forcer recalcul de toutes les suggestions | 1h | 🟡 Important |
-| 6.7 | **A-7 : Toggle mode démo** | Seed de données fictives réalistes | 2h | 🟢 Souhaitable |
-| 6.8 | **A-8 : Dry-run mode** | Exécution job sans side-effects, preview résultat | 2h | 🟢 Souhaitable |
-| 6.9 | **A-9 : Export état complet** | Dump JSON de toute la DB pour debug | 1h | 🟢 Souhaitable |
+| # | Tâche | Détail | Effort | Priorité | Statut |
+|---|-------|--------|--------|----------|--------|
+| 6.1 | **A-1 : Bouton "tous les jobs matin"** | Exécution séquentielle des 4-5 jobs du matin | 2h | 🔴 Critique | ✅ Finalisé |
+| 6.2 | **A-3 : Logs temps réel SSE** | Stream temps réel intégré au panel admin jobs, implémenté en WebSocket live | 4h | 🔴 Critique | ✅ Finalisé |
+| 6.3 | **A-10 : Conditionner visibilité panel** | `ENVIRONMENT=development` ou `admin.mode_test` flag uniquement | 30min | 🔴 Critique | ✅ Finalisé |
+| 6.4 | **A-4 : Historique exécutions** | Table des 50 dernières exécutions avec statut, durée, erreurs | 2h | 🟡 Important | ✅ Finalisé |
+| 6.5 | **A-5 : Bouton test notification** | Envoyer un message test sur tous les canaux | 1h | 🟡 Important | ✅ Finalisé |
+| 6.6 | **A-6 : Régénérer suggestions IA** | Forcer recalcul de toutes les suggestions | 1h | 🟡 Important | ✅ Finalisé |
+| 6.7 | **A-7 : Toggle mode démo** | Seed de données fictives réalistes | 2h | 🟢 Souhaitable | ✅ Variante livrée via seed dev/admin |
+| 6.8 | **A-8 : Dry-run mode** | Exécution job sans side-effects, preview résultat | 2h | 🟢 Souhaitable | ✅ Finalisé |
+| 6.9 | **A-9 : Export état complet** | Dump JSON de toute la DB pour debug | 1h | 🟢 Souhaitable | ✅ Finalisé |
 
-### Critères de validation Sprint 6
+### Critères de validation Sprint 6 ✅
 
-- [ ] Bouton "jobs matin" exécute tous les jobs séquentiellement
-- [ ] Logs apparaissent en temps réel dans le panel
-- [ ] Panel invisible quand `ENVIRONMENT=production`
-- [ ] Historique des 50 dernières exécutions visible
-- [ ] Notification test envoyée sur Telegram/ntfy
+- [x] Bouton "jobs matin" exécute tous les jobs séquentiellement
+- [x] Logs apparaissent en temps réel dans le panel jobs
+- [x] Panel invisible quand `ENVIRONMENT=production` sauf si `admin.mode_test` est actif
+- [x] Historique des 50 dernières exécutions visible
+- [x] Notification test envoyée sur Telegram/ntfy
+
+### Notes d'implémentation Sprint 6
+
+- `frontend/src/app/(app)/admin/jobs/page.tsx` expose désormais un panneau de logs live directement dans la page jobs en plus des logs historiques par job.
+- `frontend/src/composants/disposition/panneau-admin-flottant.tsx` masque désormais totalement le panneau hors environnements de dev/test, sauf si le flag runtime `admin.mode_test` est activé.
+- `src/api/routes/admin_helpers.py` ajoute l'action admin `ia.suggestions.regenerer` pour recalculer les suggestions recettes, activités et weekend depuis l'onglet Services.
+- Le sprint s'appuie aussi sur les briques déjà présentes: batch jobs du matin, simulation de journée, mode dry-run, notifications de test, export DB JSON et seed dev.
 
 ---
 

@@ -212,6 +212,26 @@ class TestWebhookTelegramCommandesSprint5:
         assert response.status_code == 200
         mock_ok.assert_awaited_once_with("123456")
 
+    def test_commande_planning_avec_suffixe_bot_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 3005,
+            "message": {
+                "message_id": 205,
+                "date": 1234567896,
+                "chat": {"id": 123456},
+                "text": "/planning@assistant_matanne_bot",
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._envoyer_planning_commande",
+            new_callable=AsyncMock,
+        ) as mock_planning:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_planning.assert_awaited_once_with("123456")
+
     def test_callback_menu_route_vers_handler(self, client: TestClient):
         payload = {
             "update_id": 3003,

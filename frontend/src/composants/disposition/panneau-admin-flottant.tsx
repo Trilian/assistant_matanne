@@ -11,14 +11,18 @@ import {
   listerJobs,
   lireFeatureFlags,
   lireModeMaintenance,
+  lireRuntimeConfig,
   obtenirLiveSnapshotAdmin,
 } from "@/bibliotheque/api/admin";
+
+const ENVIRONNEMENTS_DEV = new Set(["development", "dev", "local", "test", "testing"]);
 
 export function PanneauAdminFlottant() {
   const { utilisateur } = utiliserAuth();
   const estAdmin = utilisateur?.role === "admin";
 
   const [ouvert, setOuvert] = useState(false);
+  const [panelAutorise, setPanelAutorise] = useState(false);
   const [maintenance, setMaintenance] = useState(false);
   const [loading, setLoading] = useState(false);
   const [jobsCount, setJobsCount] = useState(0);
@@ -26,8 +30,42 @@ export function PanneauAdminFlottant() {
   const [requestsTotal, setRequestsTotal] = useState(0);
   const [aiQuota, setAiQuota] = useState("n/a");
 
+  useEffect(() => {
+    if (!estAdmin) {
+      setPanelAutorise(false);
+      return;
+    }
+
+    let actif = true;
+
+    const verifierEligibilite = async () => {
+      try {
+        const [flags, runtime] = await Promise.all([
+          lireFeatureFlags(),
+          lireRuntimeConfig(),
+        ]);
+        const environnement = String(
+          runtime.readonly?.env ?? process.env.NEXT_PUBLIC_ENVIRONMENT ?? "production",
+        ).toLowerCase();
+        const autorise = ENVIRONNEMENTS_DEV.has(environnement) || Boolean(flags.flags?.["admin.mode_test"]);
+        if (actif) {
+          setPanelAutorise(autorise);
+        }
+      } catch {
+        if (actif) {
+          setPanelAutorise(false);
+        }
+      }
+    };
+
+    void verifierEligibilite();
+    return () => {
+      actif = false;
+    };
+  }, [estAdmin]);
+
   const charger = useCallback(async () => {
-    if (!estAdmin) return;
+    if (!estAdmin || !panelAutorise) return;
     setLoading(true);
     try {
       const [jobs, flags, snapshot, maintenanceResp] = await Promise.all([
@@ -49,11 +87,11 @@ export function PanneauAdminFlottant() {
     } finally {
       setLoading(false);
     }
-  }, [estAdmin]);
+  }, [estAdmin, panelAutorise]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!estAdmin) return;
+      if (!estAdmin || !panelAutorise) return;
       if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a") {
         event.preventDefault();
         setOuvert((prev) => !prev);
@@ -61,15 +99,15 @@ export function PanneauAdminFlottant() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [estAdmin]);
+  }, [estAdmin, panelAutorise]);
 
   useEffect(() => {
-    if (ouvert && estAdmin) {
+    if (ouvert && estAdmin && panelAutorise) {
       charger();
     }
-  }, [ouvert, estAdmin, charger]);
+  }, [ouvert, estAdmin, panelAutorise, charger]);
 
-  if (!estAdmin) return null;
+  if (!estAdmin || !panelAutorise) return null;
 
   return (
     <>

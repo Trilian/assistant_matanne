@@ -180,6 +180,12 @@ def _catalogue_actions_services() -> list[dict[str, Any]]:
             "dry_run": True,
         },
         {
+            "id": "ia.suggestions.regenerer",
+            "service": "ia",
+            "description": "Forcer le recalcul des suggestions recettes, activités et weekend.",
+            "dry_run": True,
+        },
+        {
             "id": "cache.clear_all",
             "service": "cache",
             "description": "Vider le cache multi-niveaux.",
@@ -217,6 +223,55 @@ def _executer_action_service(
             else service.executer_automations_actives()
         )
         return {"status": "ok", "action_id": action_id, "result": result, "dry_run": dry_run}
+
+    if action_id == "ia.suggestions.regenerer":
+        try:
+            from src.core.caching import obtenir_cache
+
+            cache = obtenir_cache()
+            cache.invalidate(pattern="suggestions")
+            cache.invalidate(pattern="weekend")
+        except Exception:
+            logger.debug("Invalidation cache IA indisponible", exc_info=True)
+
+        if dry_run:
+            return {
+                "status": "dry_run",
+                "action_id": action_id,
+                "dry_run": True,
+                "result": {
+                    "message": "Simulation de régénération IA uniquement.",
+                    "cibles": ["recettes", "activites", "weekend"],
+                },
+            }
+
+        from src.api.utils import executer_avec_session
+
+        with executer_avec_session() as session:
+            from src.services.cuisine.inter_module_inventaire_planning import (
+                obtenir_service_inventaire_planning_interaction,
+            )
+            from src.services.famille.bridges_meteo_activites import (
+                obtenir_service_meteo_activites_interaction,
+            )
+            from src.services.famille.bridges_weekend_courses import (
+                obtenir_service_weekend_courses_interaction,
+            )
+
+            recettes = obtenir_service_inventaire_planning_interaction().suggerer_recettes_selon_stock(db=session)
+            activites = obtenir_service_meteo_activites_interaction().suggerer_activites_selon_meteo(db=session)
+            weekend = obtenir_service_weekend_courses_interaction().suggerer_fournitures_weekend(db=session)
+
+        return {
+            "status": "ok",
+            "action_id": action_id,
+            "dry_run": False,
+            "result": {
+                "recettes": recettes,
+                "activites": activites,
+                "weekend": weekend,
+            },
+        }
 
     if action_id == "cache.clear_all":
         if dry_run:

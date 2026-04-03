@@ -1,0 +1,81 @@
+<mjml>
+  <mj-head>
+    <mj-title>{{ sujet }}</mj-title>
+    <mj-attributes>
+      <mj-all font-family="Helvetica, Arial, sans-serif" />
+      <mj-text color="#111827" font-size="15px" line-height="1.5" />
+      <mj-section padding="0" />
+    </mj-attributes>
+    <mj-style inline="inline">
+      .kpi-card { border-radius: 10px; border: 1px solid #e5e7eb; }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#f3f4f6">
+    <mj-section background-color="#0f766e" padding="24px 24px 20px 24px">
+      <mj-column>
+        <mj-text color="#ccfbf1" font-size="12px" font-weight="600" text-transform="uppercase" letter-spacing="1px">
+          Assistant Matanne
+        </mj-text>
+        <mj-text color="#ffffff" font-size="24px" font-weight="700" padding-top="6px">
+          Rapport mensuel {{ mois }}
+        </mj-text>
+        <mj-text color="#99f6e4" font-size="14px" padding-top="2px">
+          Vue synthétique des dépenses du foyer
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="20px 24px">
+      <mj-column width="50%" css-class="kpi-card" padding="8px">
+        <mj-text color="#6b7280" font-size="12px">Dépenses totales</mj-text>
+        <mj-text color="#111827" font-size="22px" font-weight="700">{{ total_depenses }} €</mj-text>
+      </mj-column>
+      <mj-column width="50%" css-class="kpi-card" padding="8px">
+        <mj-text color="#6b7280" font-size="12px">Budget prévu</mj-text>
+        <mj-text color="#111827" font-size="22px" font-weight="700">{{ budget_prevu }} €</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="0 24px 20px 24px">
+      <mj-column>
+        {% if ecart > 0 %}
+        <mj-text color="#dc2626" font-size="16px" font-weight="600">
+          Écart: +{{ ecart }} € (au-dessus du budget)
+        </mj-text>
+        {% elif ecart < 0 %}
+        <mj-text color="#16a34a" font-size="16px" font-weight="600">
+          Écart: {{ ecart }} € (sous le budget)
+        </mj-text>
+        {% else %}
+        <mj-text color="#2563eb" font-size="16px" font-weight="600">
+          Écart: 0 € (objectif atteint)
+        </mj-text>
+        {% endif %}
+      </mj-column>
+    </mj-section>
+
+    {% if categories %}
+    <mj-section background-color="#ffffff" padding="0 24px 24px 24px">
+      <mj-column>
+        <mj-text font-size="16px" font-weight="700" color="#111827" padding-bottom="8px">
+          Détail par catégorie
+        </mj-text>
+        {% for c in categories %}
+        <mj-text padding="4px 0">
+          • {{ c.nom if c.nom is defined else c.get('nom', 'Catégorie') }}:
+          {{ c.montant if c.montant is defined else c.get('montant', 0) }} €
+        </mj-text>
+        {% endfor %}
+      </mj-column>
+    </mj-section>
+    {% endif %}
+
+    <mj-section background-color="#f9fafb" padding="14px 24px">
+      <mj-column>
+        <mj-text color="#6b7280" font-size="12px">
+          Email généré automatiquement par Assistant Matanne.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

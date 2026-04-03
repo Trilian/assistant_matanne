@@ -22,6 +22,15 @@ vi.mock("date-fns", () => ({
 }));
 
 vi.mock("@/bibliotheque/api/admin", () => ({
+  comparerDryRunVsRun: vi.fn().mockResolvedValue({
+    generated_at: "2026-04-03T10:00:00",
+    fenetre_heures: 168,
+    total: 0,
+    items: [],
+  }),
+  declencherJobAvecOptions: vi.fn(),
+  executerJobsDuMatin: vi.fn(),
+  executerTousLesJobs: vi.fn(),
   listerHistoriqueJobs: vi.fn().mockResolvedValue({
     items: [],
     total: 0,
@@ -29,12 +38,22 @@ vi.mock("@/bibliotheque/api/admin", () => ({
     par_page: 20,
     pages_totales: 1,
   }),
+  listerJobs: vi.fn(),
+  mettreAJourScheduleJob: vi.fn(),
+  relancerJobDepuisHistorique: vi.fn(),
+  simulerJourneeJobs: vi.fn(),
 }));
 
+import {
+  declencherJobAvecOptions,
+  listerJobs,
+} from "@/bibliotheque/api/admin";
 import { clientApi } from "@/bibliotheque/api/client";
 import PageAdminJobs from "@/app/(app)/admin/jobs/page";
 
 const mockedApi = vi.mocked(clientApi);
+const mockedDeclencherJobAvecOptions = vi.mocked(declencherJobAvecOptions);
+const mockedListerJobs = vi.mocked(listerJobs);
 
 function renderWithQuery(ui: React.ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -64,17 +83,23 @@ const JOBS_MOCK = [
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockedListerJobs.mockResolvedValue(JOBS_MOCK);
+  mockedDeclencherJobAvecOptions.mockResolvedValue({
+    status: "ok",
+    job_id: "job_push_quotidien",
+    message: "Job exécuté.",
+  });
 });
 
 describe("PageAdminJobs — rendu initial", () => {
   it("affiche un loader pendant le chargement", () => {
-    mockedApi.get.mockReturnValue(new Promise(() => {})); // never resolves
+    mockedListerJobs.mockReturnValue(new Promise(() => {})); // never resolves
     renderWithQuery(React.createElement(PageAdminJobs));
     expect(screen.getByText(/Chargement des jobs/i)).toBeDefined();
   });
 
   it("affiche la liste des jobs après chargement", async () => {
-    mockedApi.get.mockResolvedValue({ data: JOBS_MOCK });
+    mockedListerJobs.mockResolvedValue(JOBS_MOCK);
     renderWithQuery(React.createElement(PageAdminJobs));
 
     await waitFor(() => {
@@ -84,7 +109,7 @@ describe("PageAdminJobs — rendu initial", () => {
   });
 
   it("affiche le statut actif en badge", async () => {
-    mockedApi.get.mockResolvedValue({ data: JOBS_MOCK });
+    mockedListerJobs.mockResolvedValue(JOBS_MOCK);
     renderWithQuery(React.createElement(PageAdminJobs));
 
     await waitFor(() => {
@@ -95,7 +120,7 @@ describe("PageAdminJobs — rendu initial", () => {
 
 describe("PageAdminJobs — gestion erreur API", () => {
   it("gère gracieusement une erreur API", async () => {
-    mockedApi.get.mockRejectedValue(new Error("API indisponible"));
+    mockedListerJobs.mockRejectedValue(new Error("API indisponible"));
     renderWithQuery(React.createElement(PageAdminJobs));
 
     // La page ne doit pas planter
@@ -107,23 +132,12 @@ describe("PageAdminJobs — gestion erreur API", () => {
 
 describe("PageAdminJobs — exécution dry-run", () => {
   it("propage dry_run=true lors de l'exécution d'un job", async () => {
-    mockedApi.get.mockImplementation(async (url: string) => {
-      if (url === "/admin/jobs") {
-        return { data: JOBS_MOCK };
-      }
-      if (url.includes("/admin/jobs/") && url.endsWith("/logs")) {
-        return {
-          data: {
-            job_id: "job_push_quotidien",
-            nom: "Push quotidien 20h",
-            logs: [],
-            total: 0,
-          },
-        };
-      }
-      return { data: [] };
+    mockedListerJobs.mockResolvedValue(JOBS_MOCK);
+    mockedDeclencherJobAvecOptions.mockResolvedValue({
+      status: "dry_run",
+      job_id: "job_push_quotidien",
+      message: "Simulation OK",
     });
-    mockedApi.post.mockResolvedValue({ data: { status: "dry_run", dry_run: true } });
 
     renderWithQuery(React.createElement(PageAdminJobs));
 
@@ -131,39 +145,23 @@ describe("PageAdminJobs — exécution dry-run", () => {
       expect(screen.getByText("Push quotidien 20h")).toBeInTheDocument();
     });
 
-    const dryRunCheckbox = screen.getByRole("checkbox");
+    const dryRunCheckbox = screen.getAllByRole("checkbox")[0];
     fireEvent.click(dryRunCheckbox);
 
     const runButton = screen.getByRole("button", { name: /Exécuter Push quotidien 20h/i });
     fireEvent.click(runButton);
 
     await waitFor(() => {
-      expect(mockedApi.post).toHaveBeenCalledWith(
-        "/admin/jobs/job_push_quotidien/run",
-        null,
-        { params: { dry_run: true } },
+      expect(mockedDeclencherJobAvecOptions).toHaveBeenCalledWith(
+        "job_push_quotidien",
+        { dry_run: true, force: false },
       );
     });
   });
 
   it("affiche l'état erreur quand l'exécution du job échoue", async () => {
-    mockedApi.get.mockImplementation(async (url: string) => {
-      if (url === "/admin/jobs") {
-        return { data: JOBS_MOCK };
-      }
-      if (url.includes("/admin/jobs/") && url.endsWith("/logs")) {
-        return {
-          data: {
-            job_id: "job_push_quotidien",
-            nom: "Push quotidien 20h",
-            logs: [],
-            total: 0,
-          },
-        };
-      }
-      return { data: [] };
-    });
-    mockedApi.post.mockRejectedValue(new Error("échec exécution"));
+    mockedListerJobs.mockResolvedValue(JOBS_MOCK);
+    mockedDeclencherJobAvecOptions.mockRejectedValue(new Error("échec exécution"));
 
     renderWithQuery(React.createElement(PageAdminJobs));
 
@@ -180,23 +178,12 @@ describe("PageAdminJobs — exécution dry-run", () => {
   });
 
   it("affiche l'état terminé quand l'exécution réussit", async () => {
-    mockedApi.get.mockImplementation(async (url: string) => {
-      if (url === "/admin/jobs") {
-        return { data: JOBS_MOCK };
-      }
-      if (url.includes("/admin/jobs/") && url.endsWith("/logs")) {
-        return {
-          data: {
-            job_id: "job_push_quotidien",
-            nom: "Push quotidien 20h",
-            logs: [],
-            total: 0,
-          },
-        };
-      }
-      return { data: [] };
+    mockedListerJobs.mockResolvedValue(JOBS_MOCK);
+    mockedDeclencherJobAvecOptions.mockResolvedValue({
+      status: "ok",
+      job_id: "job_push_quotidien",
+      message: "Job exécuté.",
     });
-    mockedApi.post.mockResolvedValue({ data: { status: "ok" } });
 
     renderWithQuery(React.createElement(PageAdminJobs));
 

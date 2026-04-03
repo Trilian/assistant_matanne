@@ -78,6 +78,18 @@ def _extraire_article_depuis_commande(texte: str) -> str:
     return ""
 
 
+def _extraire_commande_telegram(texte: str) -> str:
+    """Extrait la commande Telegram en gérant le suffixe éventuel @botname."""
+    premier_mot = (texte or "").strip().split(maxsplit=1)
+    if not premier_mot:
+        return ""
+
+    commande = _normaliser_texte(premier_mot[0])
+    if commande.startswith("/") and "@" in commande:
+        return commande.split("@", 1)[0]
+    return commande
+
+
 def _extraire_id_depuis_callback(callback_data: str, prefix: str) -> int | None:
     """Extrait l'ID depuis le callback_data (format: 'prefix:ID').
     
@@ -1282,7 +1294,7 @@ async def recevoir_update_telegram(request: Request) -> MessageResponse:
         if await _traiter_reponse_rapide_ok(chat_id):
             return MessageResponse(message="ok", id=0)
 
-    commande = _normaliser_texte(texte.split(maxsplit=1)[0]) if texte else ""
+    commande = _extraire_commande_telegram(texte)
     if commande.startswith("/") or commande in {"menu", "aide", "help"}:
         if await _dispatcher_commande_telegram(chat_id, texte, commande):
             return MessageResponse(message="ok", id=0)

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% set couleur_header = "#f59e0b" %}
+{% set titre_header = "Digest notifications" %}
+
+{% block contenu %}
+<h2>🔔 Vos notifications en attente</h2>
+<p>Voici un résumé des {{ notifications|length }} notification{{ "s" if notifications|length > 1 else "" }} reçue{{ "s" if notifications|length > 1 else "" }} :</p>
+<ul>
+  {% for notif in notifications %}
+  <li>
+    <strong>{{ notif.timestamp }}</strong> — {{ notif.message }}
+    {% if notif.type_evenement %}
+    <span style="color:#6b7280;font-size:12px">({{ notif.type_evenement }})</span>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}
+
+{% block footer %}
+Envoyé automatiquement par Assistant Matanne — mode digest activé.
+{% endblock %}
