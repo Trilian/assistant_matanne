@@ -1,11 +1,11 @@
 ﻿"""
-Jobs cron â€” Ordonnanceur APScheduler pour l'automatisation quotidienne.
+Jobs cron — Ordonnanceur APScheduler pour l'automatisation quotidienne.
 
-Jobs dÃ©clarÃ©s :
-- 07h00 quotidien : Rappels famille (anniversaires, documents, crÃ¨che, jalons)
+Jobs déclarés :
+- 07h00 quotidien : Rappels famille (anniversaires, documents, crèche, jalons)
 - 08h00 quotidien : Rappels maison (entretien, gel, cellier)
-- 08h30 quotidien : Rappels gÃ©nÃ©raux (inventaire)
-- lundi 06h00    : Entretien saisonnier (vÃ©rification tÃ¢ches de saison)
+- 08h30 quotidien : Rappels généraux (inventaire)
+- lundi 06h00    : Entretien saisonnier (vérification tâches de saison)
 """
 
 import logging
@@ -32,11 +32,11 @@ _scheduler: BackgroundScheduler | None = None
 
 
 def _obtenir_user_ids_actifs() -> list[str]:
-    """RÃ©cupÃ¨re les identifiants de tous les utilisateurs actifs.
+    """Récupère les identifiants de tous les utilisateurs actifs.
 
     Interroge la table ``profils_utilisateurs`` pour obtenir les usernames.
     Si la DB est inaccessible, utilise la variable d'env ``CRON_DEFAULT_USER_IDS``
-    (liste sÃ©parÃ©e par des virgules) ou le fallback ``"matanne"``.
+    (liste séparée par des virgules) ou le fallback ``"matanne"``.
     """
     try:
         from src.core.db import obtenir_contexte_db
@@ -59,21 +59,21 @@ def _envoyer_notif_tous_users(
     canaux: list[str],
     **kwargs: object,
 ) -> dict[str, bool]:
-    """Envoie une notification Ã  tous les utilisateurs actifs."""
+    """Envoie une notification à tous les utilisateurs actifs."""
     resultats: dict[str, bool] = {}
     for user_id in _obtenir_user_ids_actifs():
         try:
             res = dispatcher.envoyer(user_id=user_id, message=message, canaux=canaux, **kwargs)  # type: ignore[union-attr]
             resultats.update(res or {})
         except Exception:
-            logger.debug("Ã‰chec envoi notification Ã  %s", user_id)
+            logger.debug("Échec envoi notification à %s", user_id)
     return resultats
 
 
 def _obtenir_admin_user_ids() -> list[str]:
-    """Retourne les identifiants admin pour les alertes d'Ã©chec de jobs.
+    """Retourne les identifiants admin pour les alertes d'échec de jobs.
 
-    PrioritÃ©:
+    Priorité:
     1) Variable d'env ``ADMIN_USER_IDS`` (csv)
     2) Fallback sur le 1er utilisateur actif
     """
@@ -96,7 +96,7 @@ def _creer_execution_job(
     source: str = "cron",
     triggered_by_user_id: str | None = None,
 ) -> int | None:
-    """InsÃ¨re une exÃ©cution dans ``job_executions`` (best-effort)."""
+    """Insère une exécution dans ``job_executions`` (best-effort)."""
     try:
         from src.core.db import obtenir_contexte_db
 
@@ -143,7 +143,7 @@ def _creer_execution_job(
             session.commit()
             return int(execution_id) if execution_id is not None else None
     except Exception:
-        logger.debug("Table job_executions indisponible (migration non appliquÃ©e?)", exc_info=True)
+        logger.debug("Table job_executions indisponible (migration non appliquée?)", exc_info=True)
         return None
 
 
@@ -155,7 +155,7 @@ def _finaliser_execution_job(
     error_message: str | None = None,
     output_logs: str | None = None,
 ) -> None:
-    """Met Ã  jour une exÃ©cution de job (best-effort)."""
+    """Met à jour une exécution de job (best-effort)."""
     if execution_id is None:
         return
 
@@ -191,13 +191,13 @@ def _finaliser_execution_job(
 
 
 def _notifier_echec_job_admin(job_id: str, job_name: str, erreur: str) -> None:
-    """Notifie les admins en push + email si un job Ã©choue."""
+    """Notifie les admins en push + email si un job échoue."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
         dispatcher = get_dispatcher_notifications()
         message = (
-            f"Le job '{job_name}' ({job_id}) a Ã©chouÃ©. "
+            f"Le job '{job_name}' ({job_id}) a échoué. "
             f"Erreur: {erreur[:300]}"
         )
         for admin_id in _obtenir_admin_user_ids():
@@ -213,7 +213,7 @@ def _notifier_echec_job_admin(job_id: str, job_name: str, erreur: str) -> None:
                 },
             )
     except Exception:
-        logger.exception("Impossible d'envoyer la notification d'Ã©chec job aux admins")
+        logger.exception("Impossible d'envoyer la notification d'échec job aux admins")
 
 
 def _executer_job_trace(
@@ -226,7 +226,7 @@ def _executer_job_trace(
     triggered_by_user_id: str | None = None,
     relancer_exception: bool = False,
 ) -> dict[str, str | int | bool]:
-    """ExÃ©cute un job avec traÃ§abilitÃ© complÃ¨te (historique + mÃ©triques)."""
+    """Exécute un job avec traçabilité complète (historique + métriques)."""
     started_at = datetime.now(UTC)
     t0 = time.perf_counter()
     execution_id = _creer_execution_job(
@@ -245,12 +245,12 @@ def _executer_job_trace(
             execution_id,
             status="dry_run",
             duration_ms=duration_ms,
-            output_logs="Simulation uniquement - aucune Ã©criture effectuÃ©e.",
+            output_logs="Simulation uniquement - aucune écriture effectuée.",
         )
         return {
             "status": "dry_run",
             "job_id": job_id,
-            "message": f"Job '{job_id}' simulÃ© (dry-run).",
+            "message": f"Job '{job_id}' simulé (dry-run).",
             "duration_ms": duration_ms,
             "dry_run": True,
         }
@@ -266,7 +266,7 @@ def _executer_job_trace(
         return {
             "status": "ok",
             "job_id": job_id,
-            "message": f"Job '{job_id}' exÃ©cutÃ©.",
+            "message": f"Job '{job_id}' exécuté.",
             "duration_ms": duration_ms,
             "dry_run": False,
         }
@@ -292,18 +292,18 @@ def _executer_job_trace(
         }
 
 
-# â”€â”€â”€ Jobs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── Jobs ─────────────────────────────────────────────────────────────────────
 
 
 def _job_rappels_famille() -> None:
-    """Ã‰value et envoie les rappels famille du jour (anniversaires, documents, crÃ¨che, jalons)."""
+    """Évalue et envoie les rappels famille du jour (anniversaires, documents, crèche, jalons)."""
     try:
         from src.services.famille.rappels import ServiceRappelsFamille
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
         service = ServiceRappelsFamille()
         nb = service.envoyer_rappels_du_jour()
-        logger.info("Rappels famille : %d envoyÃ©(s)", nb)
+        logger.info("Rappels famille : %d envoyé(s)", nb)
 
         # (MT-02): rappel proactif WhatsApp pour les rappels famille.
         if nb > 0:
@@ -311,8 +311,8 @@ def _job_rappels_famille() -> None:
             _envoyer_notif_tous_users(
                 dispatcher,
                 message=(
-                    f"{nb} rappel(s) famille aujourd'hui (anniversaires, documents, crÃ¨che, jalons). "
-                    "Ouvre l'application pour le dÃ©tail."
+                    f"{nb} rappel(s) famille aujourd'hui (anniversaires, documents, crèche, jalons). "
+                    "Ouvre l'application pour le détail."
                 ),
                 canaux=["telegram"],
                 titre="Rappels famille",
@@ -322,7 +322,7 @@ def _job_rappels_famille() -> None:
 
 
 def _job_rappels_maison() -> None:
-    """Ã‰value et envoie les rappels maison du jour (entretien, gel, cellier)."""
+    """Évalue et envoie les rappels maison du jour (entretien, gel, cellier)."""
     try:
         from src.services.maison.notifications_maison import NotificationsMaisonService
 
@@ -330,7 +330,7 @@ def _job_rappels_maison() -> None:
         result = service.evaluer_et_envoyer_rappels()
         if result:
             logger.info(
-                "Rappels maison : %d envoyÃ©(s), %d ignorÃ©(s), %d erreur(s)",
+                "Rappels maison : %d envoyé(s), %d ignoré(s), %d erreur(s)",
                 result.rappels_envoyes,
                 result.rappels_ignores,
                 len(result.erreurs),
@@ -340,7 +340,7 @@ def _job_rappels_maison() -> None:
 
 
 def _job_rappels_generaux() -> None:
-    """Ã‰value les rappels GenericService (inventaire faible)."""
+    """Évalue les rappels GenericService (inventaire faible)."""
     try:
         from datetime import date
 
@@ -357,7 +357,7 @@ def _job_rappels_generaux() -> None:
         else:
             logger.debug("Rappels intelligents : aucun rappel actif")
 
-        # (F3): rappel repas du jour avec ingrÃ©dients Ã  sortir.
+        # (F3): rappel repas du jour avec ingrédients à sortir.
         try:
             aujourd_hui = date.today()
             with obtenir_contexte_db() as session:
@@ -377,7 +377,7 @@ def _job_rappels_generaux() -> None:
                             ingredients.append(ri.ingredient.nom)
 
             if nom_recette:
-                ingredients_txt = ", ".join(ingredients[:5]) if ingredients else "vÃ©rifie la fiche recette"
+                ingredients_txt = ", ".join(ingredients[:5]) if ingredients else "vérifie la fiche recette"
 
                 dispatcher = get_dispatcher_notifications()
                 _envoyer_notif_tous_users(
@@ -393,12 +393,12 @@ def _job_rappels_generaux() -> None:
 
 
 def _job_push_quotidien() -> None:
-    """Envoie les alertes urgentes du jour via Web Push (VAPID) Ã  tous les abonnÃ©s.
+    """Envoie les alertes urgentes du jour via Web Push (VAPID) à tous les abonnés.
 
-    ComplÃ¨te les notifications ntfy.sh avec des push navigateur pour :
-    - Rappels intelligents urgents (pÃ©remptions)
-    - Alertes jeux responsable (sÃ©rie de dÃ©faites â‰¥ 5)
-    - Alertes prÃ©dictives maison
+    Complète les notifications ntfy.sh avec des push navigateur pour :
+    - Rappels intelligents urgents (péremptions)
+    - Alertes jeux responsable (série de défaites ≥ 5)
+    - Alertes prédictives maison
     """
     try:
         from src.services.core.notifications.notif_web_core import get_push_notification_service
@@ -406,42 +406,42 @@ def _job_push_quotidien() -> None:
 
         push_service = get_push_notification_service()
 
-        # B-01 : charger les abonnÃ©s actifs depuis la DB (pas depuis le cache mÃ©moire)
+        # B-01 : charger les abonnés actifs depuis la DB (pas depuis le cache mémoire)
         try:
             abonnes_db = push_service.charger_tous_abonnements_actifs_db()
         except Exception:
             abonnes_db = []
 
-        # Fallback sur le cache mÃ©moire si DB indisponible
+        # Fallback sur le cache mémoire si DB indisponible
         nb_abonnes = len(abonnes_db) if abonnes_db else len(push_service.obtenir_abonnes())
 
         if not nb_abonnes:
-            logger.debug("Push quotidien : aucun abonnÃ© actif, job ignorÃ©")
+            logger.debug("Push quotidien : aucun abonné actif, job ignoré")
             return
 
-        logger.debug("Push quotidien : %d abonnÃ©(s) actif(s)", nb_abonnes)
+        logger.debug("Push quotidien : %d abonné(s) actif(s)", nb_abonnes)
 
-        # â”€â”€ Rappels intelligents â”€â”€
+        # ── Rappels intelligents ──
         rappels_service = get_rappels_intelligents_service()
         rappels = rappels_service.evaluer_rappels()
         urgents = [r for r in rappels if getattr(r, "priorite", "normale") in ("haute", "critique")]
 
-        for rappel in urgents[:5]:  # limiter Ã  5 push par run
+        for rappel in urgents[:5]:  # limiter à 5 push par run
             titre = getattr(rappel, "titre", "Rappel")
             message = getattr(rappel, "message", "")
             nb_envoyes = push_service.envoyer_a_tous(
                 push_service.creer_notification_generique(titre, message)
             ) if hasattr(push_service, "creer_notification_generique") else 0
             if nb_envoyes:
-                logger.info("Push urgent '%s' â†’ %d utilisateur(s)", titre, nb_envoyes)
+                logger.info("Push urgent '%s' → %d utilisateur(s)", titre, nb_envoyes)
 
-        logger.info("Push quotidien terminÃ©")
+        logger.info("Push quotidien terminé")
     except Exception:
         logger.exception("Erreur lors du push quotidien")
 
 
 def _job_entretien_saisonnier() -> None:
-    """VÃ©rifie si des tÃ¢ches d'entretien saisonniÃ¨res doivent Ãªtre crÃ©Ã©es cette semaine."""
+    """Vérifie si des tâches d'entretien saisonnières doivent être créées cette semaine."""
     try:
         from src.services.maison import get_entretien_service
 
@@ -450,13 +450,13 @@ def _job_entretien_saisonnier() -> None:
             resultats = service.verifier_saison()
             logger.info("Entretien saisonnier : %s", resultats)
         else:
-            logger.warning("Entretien saisonnier : mÃ©thode verifier_saison non disponible")
+            logger.warning("Entretien saisonnier : méthode verifier_saison non disponible")
     except Exception:
-        logger.exception("Erreur lors de la vÃ©rification saisonniÃ¨re")
+        logger.exception("Erreur lors de la vérification saisonnière")
 
 
 def _job_enrichissement_catalogues() -> None:
-    """Enrichit les catalogues de rÃ©fÃ©rence via l'IA (1er du mois Ã  3h00)."""
+    """Enrichit les catalogues de référence via l'IA (1er du mois à 3h00)."""
     try:
         from src.services.maison.catalogue_enrichissement_service import (
             get_catalogue_enrichissement_service,
@@ -465,7 +465,7 @@ def _job_enrichissement_catalogues() -> None:
         service = get_catalogue_enrichissement_service()
         resultats = service.enrichir_tout()
         logger.info(
-            "Enrichissement catalogues terminÃ©: lessive=%d, domotique=%d, routines=%d, plantes=%d",
+            "Enrichissement catalogues terminé: lessive=%d, domotique=%d, routines=%d, plantes=%d",
             resultats.get("lessive", 0),
             resultats.get("domotique", 0),
             resultats.get("routines", 0),
@@ -476,22 +476,22 @@ def _job_enrichissement_catalogues() -> None:
 
 
 def _job_digest_ntfy() -> None:
-    """Envoie le digest quotidien ntfy.sh (rÃ©sumÃ© tÃ¢ches + rappels du jour) Ã  9h."""
+    """Envoie le digest quotidien ntfy.sh (résumé tâches + rappels du jour) à 9h."""
     try:
         from src.services.core.notifications.notif_ntfy import obtenir_service_ntfy
 
         service = obtenir_service_ntfy()
         resultat = service.envoyer_digest_quotidien_sync()
         if resultat.succes:
-            logger.info("Digest ntfy envoyÃ© : %s", resultat.message)
+            logger.info("Digest ntfy envoyé : %s", resultat.message)
         else:
-            logger.warning("Digest ntfy Ã©chouÃ© : %s", resultat.message)
+            logger.warning("Digest ntfy échoué : %s", resultat.message)
     except Exception:
         logger.exception("Erreur lors du digest ntfy")
 
 
 def _job_digest_whatsapp_matinal() -> None:
-    """Envoie le digest WhatsApp matinal (repas, tÃ¢ches, pÃ©remptions) Ã  07h30."""
+    """Envoie le digest WhatsApp matinal (repas, tâches, péremptions) à 07h30."""
     try:
         import asyncio
 
@@ -499,17 +499,17 @@ def _job_digest_whatsapp_matinal() -> None:
 
         resultat = asyncio.run(envoyer_digest_matinal())
         if resultat:
-            logger.info("Digest WhatsApp matinal envoyÃ©")
+            logger.info("Digest WhatsApp matinal envoyé")
         else:
-            logger.debug("Digest WhatsApp matinal non envoyÃ© (dÃ©sactivÃ©/non configurÃ©)")
+            logger.debug("Digest WhatsApp matinal non envoyé (désactivé/non configuré)")
     except Exception:
         logger.exception("Erreur lors du digest WhatsApp matinal")
 
 
 def _job_digest_notifications_queue() -> None:
-    """Vide les files digest en attente (Phase 8.4) et envoie les rÃ©sumÃ©s utilisateur.
+    """Vide les files digest en attente (Phase 8.4) et envoie les résumés utilisateur.
 
-    Ce job complÃ¨te le digest ntfy quotidien avec un flush multi-canal basÃ©
+    Ce job complète le digest ntfy quotidien avec un flush multi-canal basé
     sur les notifications mises en file d'attente par throttling/mode digest.
     """
     try:
@@ -519,7 +519,7 @@ def _job_digest_notifications_queue() -> None:
         user_ids = dispatcher.lister_users_digest_pending()
 
         if not user_ids:
-            logger.debug("Digest queue: aucun utilisateur Ã  traiter")
+            logger.debug("Digest queue: aucun utilisateur à traiter")
             return
 
         nb_succes = 0
@@ -533,10 +533,10 @@ def _job_digest_notifications_queue() -> None:
                     nb_echecs += 1
             except Exception:
                 nb_echecs += 1
-                logger.debug("Digest queue: Ã©chec flush pour %s", user_id, exc_info=True)
+                logger.debug("Digest queue: échec flush pour %s", user_id, exc_info=True)
 
         logger.info(
-            "Digest queue flush terminÃ©: %d utilisateur(s) traitÃ©(s), %d succÃ¨s, %d Ã©chec(s)",
+            "Digest queue flush terminé: %d utilisateur(s) traité(s), %d succès, %d échec(s)",
             len(user_ids),
             nb_succes,
             nb_echecs,
@@ -546,7 +546,7 @@ def _job_digest_notifications_queue() -> None:
 
 
 def _job_rappel_courses_ntfy() -> None:
-    """Envoie un rappel ntfy.sh pour les articles de courses en attente Ã  18h."""
+    """Envoie un rappel ntfy.sh pour les articles de courses en attente à 18h."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -555,7 +555,7 @@ def _job_rappel_courses_ntfy() -> None:
         noms_articles: list[str] = []
         try:
             with obtenir_contexte_db() as session:
-                # Compter les articles non achetÃ©s dans les listes actives
+                # Compter les articles non achetés dans les listes actives
                 from sqlalchemy import text
                 result = session.execute(
                     text(
@@ -578,7 +578,7 @@ def _job_rappel_courses_ntfy() -> None:
                 )
                 noms_articles = [str(r[0]) for r in top_rows.fetchall() if r and r[0]]
         except Exception:
-            logger.debug("Impossible de compter les articles en attente, rappel annulÃ©")
+            logger.debug("Impossible de compter les articles en attente, rappel annulé")
             return
 
         if nb_articles == 0:
@@ -595,7 +595,7 @@ def _job_rappel_courses_ntfy() -> None:
 
         resultat = asyncio.run(_envoyer())
         if resultat.succes:
-            logger.info("Rappel courses ntfy envoyÃ© (%d articles)", nb_articles)
+            logger.info("Rappel courses ntfy envoyé (%d articles)", nb_articles)
 
             # (MT-02): partage WhatsApp de la liste active.
             dispatcher = get_dispatcher_notifications()
@@ -609,13 +609,13 @@ def _job_rappel_courses_ntfy() -> None:
                 titre="Courses",
             )
         else:
-            logger.warning("Rappel courses ntfy Ã©chouÃ© : %s", resultat.message)
+            logger.warning("Rappel courses ntfy échoué : %s", resultat.message)
     except Exception:
         logger.exception("Erreur lors du rappel courses ntfy")
 
 
 def _job_push_contextuel_soir() -> None:
-    """Envoie un push contextuel du soir (planning de demain + mÃ©tÃ©o)."""
+    """Envoie un push contextuel du soir (planning de demain + météo)."""
     try:
         from datetime import date, timedelta
 
@@ -637,21 +637,21 @@ def _job_push_contextuel_soir() -> None:
         except Exception:
             logger.debug("Push contextuel: planning indisponible")
 
-        # 2) MÃ©tÃ©o du lendemain
-        meteo_txt = "mÃ©tÃ©o indisponible"
+        # 2) Météo du lendemain
+        meteo_txt = "météo indisponible"
         try:
             service_meteo = obtenir_service_meteo()
             previsions = service_meteo.get_previsions(nb_jours=2)
             if previsions:
                 prevision = previsions[1] if len(previsions) > 1 else previsions[0]
                 meteo_txt = (
-                    f"{prevision.condition}, {prevision.temperature_min:.0f}â€“"
-                    f"{prevision.temperature_max:.0f}Â°C"
+                    f"{prevision.condition}, {prevision.temperature_min:.0f}–"
+                    f"{prevision.temperature_max:.0f}°C"
                 )
         except Exception:
-            logger.debug("Push contextuel: mÃ©tÃ©o indisponible")
+            logger.debug("Push contextuel: météo indisponible")
 
-        # 3) Produits Ã  dÃ©congeler (heuristique sur emplacement congÃ©lateur)
+        # 3) Produits à décongeler (heuristique sur emplacement congélateur)
         a_decongeler = []
         try:
             with obtenir_contexte_db() as session:
@@ -663,17 +663,17 @@ def _job_push_contextuel_soir() -> None:
                 )
                 a_decongeler = [a.nom or "Article" for a in rows]
         except Exception:
-            logger.debug("Push contextuel: impossible de charger les articles congelÃ©s")
+            logger.debug("Push contextuel: impossible de charger les articles congelés")
 
-        repas_msg = " ; ".join(plats) if plats else "Aucun repas planifiÃ©"
+        repas_msg = " ; ".join(plats) if plats else "Aucun repas planifié"
         decongel_msg = (
-            f"Pense Ã  dÃ©congeler: {', '.join(a_decongeler)}."
+            f"Pense à décongeler: {', '.join(a_decongeler)}."
             if a_decongeler
             else ""
         )
         message = (
             f"Demain ({demain.isoformat()}) -> {repas_msg}. "
-            f"MÃ©tÃ©o: {meteo_txt}. {decongel_msg}"
+            f"Météo: {meteo_txt}. {decongel_msg}"
         ).strip()
 
         dispatcher = get_dispatcher_notifications()
@@ -682,15 +682,15 @@ def _job_push_contextuel_soir() -> None:
             message=message,
             canaux=["push"],
             strategie="failover",
-            titre="PrÃ©paration de demain",
+            titre="Préparation de demain",
         )
-        logger.info("Push contextuel soir envoyÃ©: %s", resultats)
+        logger.info("Push contextuel soir envoyé: %s", resultats)
     except Exception:
         logger.exception("Erreur lors du push contextuel soir")
 
 
 def _job_resume_hebdo() -> None:
-    """GÃ©nÃ¨re le rÃ©sumÃ© hebdomadaire et l'envoie via ntfy/email."""
+    """Génère le résumé hebdomadaire et l'envoie via ntfy/email."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
         from src.services.famille.resume_hebdo import obtenir_service_resume_hebdo
@@ -698,15 +698,15 @@ def _job_resume_hebdo() -> None:
         service = obtenir_service_resume_hebdo()
         resume = service.generer_resume_semaine_sync()
         texte = resume.resume_narratif or (
-            f"RÃ©sumÃ© semaine {resume.semaine}: score {resume.score_semaine}/100"
+            f"Résumé semaine {resume.semaine}: score {resume.score_semaine}/100"
         )
 
         dispatcher = get_dispatcher_notifications()
-        # ntfy, email et WhatsApp sont tous tentÃ©s. Le dispatcher rÃ©sout
+        # ntfy, email et WhatsApp sont tous tentés. Le dispatcher résout
         # l'email utilisateur depuis la DB quand aucun override n'est fourni.
         canaux = ["ntfy", "email", "telegram"]
         kwargs = {
-            "titre": f"RÃ©sumÃ© hebdomadaire {resume.semaine}",
+            "titre": f"Résumé hebdomadaire {resume.semaine}",
             "type_email": "resume_hebdo",
             "resume": {
                 "semaine": resume.semaine,
@@ -719,7 +719,7 @@ def _job_resume_hebdo() -> None:
             "type_evenement": "resume_hebdo",
         }
 
-        # Canal WhatsApp: rÃ©sumÃ© compact dÃ©diÃ©.
+        # Canal WhatsApp: résumé compact dédié.
         kwargs["type_telegram"] = "rapport_hebdo"
 
         resultats = _envoyer_notif_tous_users(
@@ -728,13 +728,13 @@ def _job_resume_hebdo() -> None:
             canaux=canaux,
             **kwargs,
         )
-        logger.info("RÃ©sumÃ© hebdo envoyÃ©: %s", resultats)
+        logger.info("Résumé hebdo envoyé: %s", resultats)
     except Exception:
-        logger.exception("Erreur lors du rÃ©sumÃ© hebdomadaire")
+        logger.exception("Erreur lors du résumé hebdomadaire")
 
 
 def _job_planning_semaine_si_vide() -> None:
-    """J-03 / B3: vÃ©rifie le planning semaine prochaine â€” si vide, propose un planning IA via WhatsApp."""
+    """J-03 / B3: vérifie le planning semaine prochaine — si vide, propose un planning IA via WhatsApp."""
     try:
         from datetime import date, timedelta
 
@@ -758,7 +758,7 @@ def _job_planning_semaine_si_vide() -> None:
             )
 
         if planning is not None:
-            logger.info("J-03: planning dÃ©jÃ  actif pour la semaine du %s", lundi_prochain)
+            logger.info("J-03: planning déjà actif pour la semaine du %s", lundi_prochain)
             return
 
         #  Proposer un planning IA auto via WhatsApp avec boutons
@@ -789,15 +789,15 @@ def _job_planning_semaine_si_vide() -> None:
 
             prompt = (
                 f"Propose un menu familial simple pour la semaine du {lundi_prochain:%d/%m} au {dimanche_prochain:%d/%m}. "
-                f"{'Utilise si possible ces ingrÃ©dients en stock: ' + inventaire_txt + '. ' if inventaire_txt else ''}"
-                "7 dÃ©jeuners + 7 dÃ®ners. Format concis: "
+                f"{'Utilise si possible ces ingrédients en stock: ' + inventaire_txt + '. ' if inventaire_txt else ''}"
+                "7 déjeuners + 7 dîners. Format concis: "
                 "Lundi midi: X / Lundi soir: Y etc."
             )
             reponse = client.appeler(
                 prompt=prompt,
                 system_prompt=(
-                    "Tu es un planificateur de repas familial. Propose des repas variÃ©s, "
-                    "Ã©quilibrÃ©s, adaptÃ©s Ã  une famille avec un enfant en bas Ã¢ge. "
+                    "Tu es un planificateur de repas familial. Propose des repas variés, "
+                    "équilibrés, adaptés à une famille avec un enfant en bas âge. "
                     "Sois concis et pratique."
                 ),
                 temperature=0.7,
@@ -813,7 +813,7 @@ def _job_planning_semaine_si_vide() -> None:
         if suggestions_ia:
             message += f"Voici une proposition IA:\n\n{suggestions_ia}\n\nTu valides ?"
         else:
-            message += "Pense Ã  gÃ©nÃ©rer le menu hebdo dans l'app."
+            message += "Pense à générer le menu hebdo dans l'app."
 
         dispatcher = get_dispatcher_notifications()
 
@@ -822,21 +822,21 @@ def _job_planning_semaine_si_vide() -> None:
             dispatcher,
             message=message,
             canaux=["telegram", "push"],
-            titre="Planning semaine Ã  gÃ©nÃ©rer",
+            titre="Planning semaine à générer",
             boutons_whatsapp=[
                 {"id": "planning_valider", "title": "Valider"},
                 {"id": "planning_regenerer", "title": "Autre proposition"},
             ] if suggestions_ia else None,
         )
-        logger.info("B3 planning auto: proposition envoyÃ©e pour semaine du %s", lundi_prochain)
+        logger.info("B3 planning auto: proposition envoyée pour semaine du %s", lundi_prochain)
     except Exception:
         logger.exception("Erreur job B3 planning auto")
 
 
 def _job_alertes_peremption_48h() -> None:
-    """J-04: envoie les alertes de pÃ©remption Ã  J+48h.
+    """J-04: envoie les alertes de péremption à J+48h.
 
-    W3 : si pÃ©remption < 24h, envoie aussi un email critique.
+    W3 : si péremption < 24h, envoie aussi un email critique.
     """
     try:
         from datetime import date, timedelta
@@ -867,7 +867,7 @@ def _job_alertes_peremption_48h() -> None:
             )
 
         if not articles:
-            logger.info("J-04: aucune pÃ©remption critique Ã  48h")
+            logger.info("J-04: aucune péremption critique à 48h")
             return
 
         lignes = [
@@ -875,9 +875,9 @@ def _job_alertes_peremption_48h() -> None:
             for a in articles
             if getattr(a, "date_peremption", None)
         ]
-        message = "Produits Ã  consommer sous 48h:\n" + "\n".join(lignes)
+        message = "Produits à consommer sous 48h:\n" + "\n".join(lignes)
 
-        # IM-9: proposer automatiquement des recettes "rescue" basÃ©es sur les produits urgents.
+        # IM-9: proposer automatiquement des recettes "rescue" basées sur les produits urgents.
         suggestions_recettes: list[str] = []
         try:
             noms_urgents = [a.nom.lower() for a in articles if getattr(a, "nom", None)]
@@ -899,13 +899,13 @@ def _job_alertes_peremption_48h() -> None:
 
         if suggestions_recettes:
             message += (
-                "\n\nRecettes suggÃ©rÃ©es: "
+                "\n\nRecettes suggérées: "
                 + ", ".join(suggestions_recettes)
                 + "."
-                + "\nTu peux gÃ©nÃ©rer plus d'idÃ©es via /api/v1/anti-gaspillage/suggestions-ia."
+                + "\nTu peux générer plus d'idées via /api/v1/anti-gaspillage/suggestions-ia."
             )
 
-        # DÃ©terminer si des produits expirent dans les 24h (alerte critique â†’ email)
+        # Déterminer si des produits expirent dans les 24h (alerte critique → email)
         articles_critiques_24h = [
             a for a in articles
             if getattr(a, "date_peremption", None) and a.date_peremption <= seuil_24h
@@ -913,22 +913,22 @@ def _job_alertes_peremption_48h() -> None:
 
         dispatcher = get_dispatcher_notifications()
         canaux = ["ntfy", "telegram"]
-        kwargs: dict = {"titre": "Alerte pÃ©remption 48h"}
+        kwargs: dict = {"titre": "Alerte péremption 48h"}
 
         if articles_critiques_24h:
-            # PÃ©remption < 24h â†’ email critique en plus
+            # Péremption < 24h → email critique en plus
             canaux = ["ntfy", "telegram", "email"]
             noms_critiques = ", ".join(a.nom for a in articles_critiques_24h[:5])
             kwargs.update({
                 "type_email": "alerte_critique",
                 "alerte": {
-                    "titre": "Alerte pÃ©remption urgente â€” < 24h",
+                    "titre": "Alerte péremption urgente — < 24h",
                     "message": f"Les produits suivants expirent aujourd'hui ou demain : {noms_critiques}. "
-                               "Consommez-les ou congÃ©lez-les rapidement.",
+                               "Consommez-les ou congélez-les rapidement.",
                     "lien": "http://localhost:3000/cuisine/inventaire",
                 },
             })
-            logger.info("J-04: %d produit(s) expirent sous 24h â†’ email critique envoyÃ©", len(articles_critiques_24h))
+            logger.info("J-04: %d produit(s) expirent sous 24h → email critique envoyé", len(articles_critiques_24h))
 
         res = _envoyer_notif_tous_users(
             dispatcher,
@@ -936,13 +936,13 @@ def _job_alertes_peremption_48h() -> None:
             canaux=canaux,
             **kwargs,
         )
-        logger.info("J-04 exÃ©cutÃ©: %s", res)
+        logger.info("J-04 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur job J-04")
 
 
 def _job_rapport_mensuel_budget() -> None:
-    """J-07: envoie un rapport mensuel consolidÃ© famille + maison + jeux."""
+    """J-07: envoie un rapport mensuel consolidé famille + maison + jeux."""
     try:
         from datetime import date, timedelta
 
@@ -997,7 +997,7 @@ def _job_rapport_mensuel_budget() -> None:
             f"Famille {float(total_famille):.2f} EUR, "
             f"Maison {float(total_maison):.2f} EUR, "
             f"Jeux net {net_jeux:.2f} EUR. "
-            f"Total dÃ©penses hors jeux: {total_global:.2f} EUR."
+            f"Total dépenses hors jeux: {total_global:.2f} EUR."
         )
 
         dispatcher = get_dispatcher_notifications()
@@ -1018,13 +1018,13 @@ def _job_rapport_mensuel_budget() -> None:
             },
             type_telegram="rapport_hebdo",
         )
-        logger.info("J-07 exÃ©cutÃ©: %s", res)
+        logger.info("J-07 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur job J-07")
 
 
 def _job_score_weekend() -> None:
-    """J-08: calcule un score weekend basÃ© sur activitÃ©s + mÃ©tÃ©o + contexte Jules."""
+    """J-08: calcule un score weekend basé sur activités + météo + contexte Jules."""
     try:
         from datetime import date, timedelta
 
@@ -1066,7 +1066,7 @@ def _job_score_weekend() -> None:
 
         message = (
             f"Score weekend: {score}/100. "
-            f"ActivitÃ©s prÃ©vues: {nb_activites}. MÃ©tÃ©o: {meteo_resume}."
+            f"Activités prévues: {nb_activites}. Météo: {meteo_resume}."
         )
         dispatcher = get_dispatcher_notifications()
         res = _envoyer_notif_tous_users(
@@ -1075,13 +1075,13 @@ def _job_score_weekend() -> None:
             canaux=["ntfy", "telegram"],
             titre="Score weekend",
         )
-        logger.info("J-08 exÃ©cutÃ©: %s", res)
+        logger.info("J-08 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur job J-08")
 
 
 def _job_rapport_jardin() -> None:
-    """J-10: rapport jardin hebdomadaire (arrosage + rÃ©coltes/semis)."""
+    """J-10: rapport jardin hebdomadaire (arrosage + récoltes/semis)."""
     try:
         from datetime import date, timedelta
 
@@ -1111,9 +1111,9 @@ def _job_rapport_jardin() -> None:
                 .all()
             )
 
-        action_txt = ", ".join(f"{a}:{n}" for a, n in actions[:4]) if actions else "aucune action loggÃ©e"
+        action_txt = ", ".join(f"{a}:{n}" for a, n in actions[:4]) if actions else "aucune action loggée"
         message = (
-            f"Jardin: {len(actifs)} Ã©lÃ©ment(s) actifs, {len(recoltes_proches)} rÃ©colte(s) prÃ©vues sous 7 jours. "
+            f"Jardin: {len(actifs)} élément(s) actifs, {len(recoltes_proches)} récolte(s) prévues sous 7 jours. "
             f"Journal 7j: {action_txt}."
         )
 
@@ -1124,13 +1124,13 @@ def _job_rapport_jardin() -> None:
             canaux=["ntfy", "telegram"],
             titre="Rapport jardin hebdo",
         )
-        logger.info("J-10 exÃ©cutÃ©: %s", res)
+        logger.info("J-10 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur job J-10")
 
 
 def _job_score_bien_etre_hebdo() -> None:
-    """J-11: calcule le score bien-Ãªtre hebdo et alerte en cas de dÃ©rive."""
+    """J-11: calcule le score bien-être hebdo et alerte en cas de dérive."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
         from src.services.dashboard.score_bienetre import get_score_bien_etre_service
@@ -1147,8 +1147,8 @@ def _job_score_bien_etre_hebdo() -> None:
             niveau = "attention"
 
         message = (
-            f"Score bien-Ãªtre hebdo: {score_global}/100 "
-            f"({trend:+.0f} pts vs semaine prÃ©cÃ©dente) - niveau {niveau}."
+            f"Score bien-être hebdo: {score_global}/100 "
+            f"({trend:+.0f} pts vs semaine précédente) - niveau {niveau}."
         )
 
         dispatcher = get_dispatcher_notifications()
@@ -1157,15 +1157,15 @@ def _job_score_bien_etre_hebdo() -> None:
             dispatcher,
             message=message,
             canaux=canaux,
-            titre="Score bien-Ãªtre hebdo",
+            titre="Score bien-être hebdo",
         )
-        logger.info("J-11 exÃ©cutÃ©: %s", res)
+        logger.info("J-11 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur job J-11")
 
 
 def _job_garmin_sync_matinal() -> None:
-    """Synchronise les donnÃ©es Garmin de tous les profils connectÃ©s (LT-01)."""
+    """Synchronise les données Garmin de tous les profils connectés (LT-01)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import ProfilUtilisateur
@@ -1184,25 +1184,25 @@ def _job_garmin_sync_matinal() -> None:
                     service.sync_user_data(user_id=profil.id, days_back=2, db=session)
                     nb_profils += 1
                 except Exception:
-                    logger.exception("Sync Garmin Ã©chouÃ©e pour le profil %s", profil.id)
-        logger.info("Sync Garmin matinale terminÃ©e (%d profil(s))", nb_profils)
+                    logger.exception("Sync Garmin échouée pour le profil %s", profil.id)
+        logger.info("Sync Garmin matinale terminée (%d profil(s))", nb_profils)
     except Exception:
         logger.exception("Erreur lors de la sync Garmin matinale")
 
 
 def _job_automations() -> None:
-    """ExÃ©cute pÃ©riodiquement les rÃ¨gles d'automation actives (LT-04)."""
+    """Exécute périodiquement les règles d'automation actives (LT-04)."""
     try:
         from src.services.utilitaires.automations_engine import get_moteur_automations_service
 
         result = get_moteur_automations_service().executer_automations_actives()
         logger.info(
-            "Automations exÃ©cutÃ©es: %s sur %s rÃ¨gle(s)",
+            "Automations exécutées: %s sur %s règle(s)",
             result.get("executed", 0),
             result.get("total", 0),
         )
     except Exception:
-        logger.exception("Erreur lors de l'exÃ©cution des automations")
+        logger.exception("Erreur lors de l'exécution des automations")
 
 
 def _job_points_famille_hebdo() -> None:
@@ -1211,9 +1211,9 @@ def _job_points_famille_hebdo() -> None:
         from src.services.dashboard.points_famille import get_points_famille_service
 
         points = get_points_famille_service().calculer_points()
-        logger.info("Points famille hebdo recalculÃ©s: %s", points.get("total_points", 0))
+        logger.info("Points famille hebdo recalculés: %s", points.get("total_points", 0))
 
-        # Phase 9: Ã©valuer et attribuer les badges + notifications
+        # Phase 9: évaluer et attribuer les badges + notifications
         from src.services.dashboard.badges_triggers import get_badges_triggers_service
 
         service = get_badges_triggers_service()
@@ -1226,29 +1226,29 @@ def _job_points_famille_hebdo() -> None:
 
 
 def _notifier_badges_debloques(badges: list[dict]) -> None:
-    """Envoie une notification push pour chaque badge dÃ©bloquÃ© (Phase 9)."""
+    """Envoie une notification push pour chaque badge débloqué (Phase 9)."""
     try:
         from src.services.core.notifications.notif_dispatcher import (
             get_dispatcher_notifications,
         )
 
         dispatcher = get_dispatcher_notifications()
-        noms = ", ".join(f"{b.get('emoji', 'ðŸ…')} {b['badge_label']}" for b in badges)
-        message = f"Nouveau(x) badge(s) dÃ©bloquÃ©(s) : {noms}"
+        noms = ", ".join(f"{b.get('emoji', '🏅')} {b['badge_label']}" for b in badges)
+        message = f"Nouveau(x) badge(s) débloqué(s) : {noms}"
 
         dispatcher.envoyer(
             user_id="1",
             message=message,
             type_evenement="badge_debloque",
-            titre="ðŸŽ¯ Badge dÃ©bloquÃ© !",
+            titre="🎯 Badge débloqué !",
         )
-        logger.info("Notification badges envoyÃ©e: %d badges", len(badges))
+        logger.info("Notification badges envoyée: %d badges", len(badges))
     except Exception:
         logger.exception("Erreur envoi notification badge")
 
 
 def _job_sync_google_calendar() -> None:
-    """J1 â€” Sync planning repas + activitÃ©s â†’ Google Calendar (quotidien 23h00)."""
+    """J1 — Sync planning repas + activités → Google Calendar (quotidien 23h00)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import CalendrierExterne
@@ -1276,17 +1276,17 @@ def _job_sync_google_calendar() -> None:
                     if result.success:
                         nb_syncs += 1
                     else:
-                        logger.warning("J1: sync Google Calendar Ã©chouÃ©e pour user %s: %s", user_id, result.message)
+                        logger.warning("J1: sync Google Calendar échouée pour user %s: %s", user_id, result.message)
             except Exception:
                 logger.exception("J1: erreur sync pour user %s", user_id)
 
-        logger.info("J1 sync_google_calendar terminÃ©e: %d calendrier(s) synchronisÃ©(s)", nb_syncs)
+        logger.info("J1 sync_google_calendar terminée: %d calendrier(s) synchronisé(s)", nb_syncs)
     except Exception:
         logger.exception("Erreur job J1 sync_google_calendar")
 
 
 def _job_alerte_stock_bas() -> None:
-    """J3 â€” Alerte stock bas : articles inventaire < seuil â†’ ajout auto liste courses (quotidien 07h00)."""
+    """J3 — Alerte stock bas : articles inventaire < seuil → ajout auto liste courses (quotidien 07h00)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import ArticleInventaire, ArticleCourses, ListeCourses
@@ -1309,7 +1309,7 @@ def _job_alerte_stock_bas() -> None:
                 logger.info("J3: aucun article en stock bas")
                 return
 
-            # Trouver ou crÃ©er la liste courses active du jour
+            # Trouver ou créer la liste courses active du jour
             aujourd_hui = date.today()
             liste = (
                 session.query(ListeCourses)
@@ -1328,7 +1328,7 @@ def _job_alerte_stock_bas() -> None:
                 session.add(liste)
                 session.flush()
 
-            # Ajouter les articles manquants (Ã©viter doublons)
+            # Ajouter les articles manquants (éviter doublons)
             ingredient_ids_existants: set[int] = {
                 ac.ingredient_id
                 for ac in session.query(ArticleCourses.ingredient_id)
@@ -1356,9 +1356,9 @@ def _job_alerte_stock_bas() -> None:
             session.commit()
 
         if nb_ajoutes > 0:
-            noms = [a.nom or f"IngrÃ©dient #{a.ingredient_id}" for a in articles_stock_bas[:5]]
+            noms = [a.nom or f"Ingrédient #{a.ingredient_id}" for a in articles_stock_bas[:5]]
             message = (
-                f"{nb_ajoutes} article(s) ajoutÃ©(s) automatiquement Ã  la liste courses "
+                f"{nb_ajoutes} article(s) ajouté(s) automatiquement à la liste courses "
                 f"(stock bas) : {', '.join(noms)}{'...' if len(articles_stock_bas) > 5 else ''}."
             )
             dispatcher = get_dispatcher_notifications()
@@ -1366,17 +1366,17 @@ def _job_alerte_stock_bas() -> None:
                 dispatcher,
                 message=message,
                 canaux=["ntfy"],
-                titre="Stock bas â€” courses mises Ã  jour",
+                titre="Stock bas — courses mises à jour",
             )
-            logger.info("J3: %d article(s) ajoutÃ©(s) Ã  la liste courses", nb_ajoutes)
+            logger.info("J3: %d article(s) ajouté(s) à la liste courses", nb_ajoutes)
         else:
-            logger.info("J3: aucun nouvel article Ã  ajouter (dÃ©jÃ  sur la liste)")
+            logger.info("J3: aucun nouvel article à ajouter (déjà sur la liste)")
     except Exception:
         logger.exception("Erreur job J3 alerte_stock_bas")
 
 
 def _job_archive_batches_expires() -> None:
-    """J4 â€” Archive les prÃ©parations batch cooking expirÃ©es (quotidien 02h00)."""
+    """J4 — Archive les préparations batch cooking expirées (quotidien 02h00)."""
     try:
         from datetime import datetime
 
@@ -1398,13 +1398,13 @@ def _job_archive_batches_expires() -> None:
             nb_archivees = result.rowcount
             session.commit()
 
-        logger.info("J4: %d prÃ©paration(s) batch expirÃ©e(s) archivÃ©e(s)", nb_archivees)
+        logger.info("J4: %d préparation(s) batch expirée(s) archivée(s)", nb_archivees)
     except Exception:
         logger.exception("Erreur job J4 archive_batches_expires")
 
 
 def _job_rapport_maison_mensuel() -> None:
-    """J5 â€” Rapport maison mensuel : projets actifs, entretiens N+30j, dÃ©penses mois N-1 (1er/mois 09h30)."""
+    """J5 — Rapport maison mensuel : projets actifs, entretiens N+30j, dépenses mois N-1 (1er/mois 09h30)."""
     try:
         from datetime import date, timedelta
 
@@ -1444,8 +1444,8 @@ def _job_rapport_maison_mensuel() -> None:
         message = (
             f"Rapport maison {mois:02d}/{annee}: "
             f"{nb_projets_actifs} projet(s) en cours, "
-            f"{entretiens_a_venir} entretien(s) planifiÃ©(s) dans 30j, "
-            f"dÃ©penses mois N-1: {float(total_depenses):.2f} EUR."
+            f"{entretiens_a_venir} entretien(s) planifié(s) dans 30j, "
+            f"dépenses mois N-1: {float(total_depenses):.2f} EUR."
         )
 
         import os
@@ -1468,13 +1468,13 @@ def _job_rapport_maison_mensuel() -> None:
 
         dispatcher = get_dispatcher_notifications()
         res = _envoyer_notif_tous_users(dispatcher, message=message, canaux=canaux, **kwargs)
-        logger.info("J5 rapport_maison_mensuel exÃ©cutÃ©: %s", res)
+        logger.info("J5 rapport_maison_mensuel exécuté: %s", res)
     except Exception:
         logger.exception("Erreur job J5 rapport_maison_mensuel")
 
 
 def _job_sync_openfoodfacts() -> None:
-    """J6 â€” Refresh cache OpenFoodFacts pour les articles scannÃ©s les 30 derniers jours (dim 03h00)."""
+    """J6 — Refresh cache OpenFoodFacts pour les articles scannés les 30 derniers jours (dim 03h00)."""
     try:
         from datetime import datetime, timedelta
 
@@ -1488,7 +1488,7 @@ def _job_sync_openfoodfacts() -> None:
         horizon = datetime.utcnow() - timedelta(days=30)
 
         with obtenir_contexte_db() as session:
-            # Articles scannÃ©s (avec code-barres) ajoutÃ©s ou modifiÃ©s dans les 30 derniers jours
+            # Articles scannés (avec code-barres) ajoutés ou modifiés dans les 30 derniers jours
             articles = (
                 session.query(ArticleInventaire)
                 .filter(
@@ -1530,18 +1530,18 @@ def _job_sync_openfoodfacts() -> None:
                     session.commit()
 
                 nb_maj += 1
-                # Respecter l'API publique OpenFoodFacts (throttle lÃ©ger)
+                # Respecter l'API publique OpenFoodFacts (throttle léger)
                 time.sleep(0.5)
             except Exception:
-                logger.debug("J6: impossible de mettre Ã  jour le code-barres %s", code, exc_info=True)
+                logger.debug("J6: impossible de mettre à jour le code-barres %s", code, exc_info=True)
 
-        logger.info("J6 sync_openfoodfacts terminÃ©e: %d produit(s) mis Ã  jour sur %d", nb_maj, len(codes_barres))
+        logger.info("J6 sync_openfoodfacts terminée: %d produit(s) mis à jour sur %d", nb_maj, len(codes_barres))
     except Exception:
         logger.exception("Erreur job J6 sync_openfoodfacts")
 
 
 def _job_prediction_courses_weekly() -> None:
-    """JOB-1 â€” PrÃ©-remplit la liste courses hebdomadaire selon l'historique."""
+    """JOB-1 — Pré-remplit la liste courses hebdomadaire selon l'historique."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import ArticleCourses, ListeCourses
@@ -1550,7 +1550,7 @@ def _job_prediction_courses_weekly() -> None:
 
         predictions = obtenir_service_prediction_courses().predire_articles(limite=30)
         if not predictions:
-            logger.info("JOB-1: aucune prÃ©diction courses disponible")
+            logger.info("JOB-1: aucune prédiction courses disponible")
             return
 
         with obtenir_contexte_db() as session:
@@ -1561,7 +1561,7 @@ def _job_prediction_courses_weekly() -> None:
                 .first()
             )
             if liste is None:
-                liste = ListeCourses(nom="Courses prÃ©dites", archivee=False)
+                liste = ListeCourses(nom="Courses prédites", archivee=False)
                 session.add(liste)
                 session.flush()
 
@@ -1600,9 +1600,9 @@ def _job_prediction_courses_weekly() -> None:
             dispatcher = get_dispatcher_notifications()
             _envoyer_notif_tous_users(
                 dispatcher,
-                message=f"{nb_ajoutes} article(s) prÃ©dit(s) ajoutÃ©(s) Ã  la liste courses.",
+                message=f"{nb_ajoutes} article(s) prédit(s) ajouté(s) à la liste courses.",
                 canaux=["ntfy", "push"],
-                titre="Courses hebdo prÃ©dites",
+                titre="Courses hebdo prédites",
             )
             from src.services.core.event_bus_mixin import emettre_evenement_simple
 
@@ -1614,13 +1614,13 @@ def _job_prediction_courses_weekly() -> None:
                 },
                 source="cron.prediction_courses_weekly",
             )
-        logger.info("JOB-1 exÃ©cutÃ©: %d article(s) ajoutÃ©(s)", nb_ajoutes)
+        logger.info("JOB-1 exécuté: %d article(s) ajouté(s)", nb_ajoutes)
     except Exception:
         logger.exception("Erreur JOB-1 prediction_courses_weekly")
 
 
 def _job_sync_jeux_budget() -> None:
-    """JOB-2 â€” Synchronise les gains/pertes jeux vers le budget famille."""
+    """JOB-2 — Synchronise les gains/pertes jeux vers le budget famille."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import BudgetFamille, PariSportif
@@ -1645,7 +1645,7 @@ def _job_sync_jeux_budget() -> None:
 
             net = float(gains) - float(mises)
             if net == 0:
-                logger.info("JOB-2: aucun mouvement jeux Ã  synchroniser")
+                logger.info("JOB-2: aucun mouvement jeux à synchroniser")
                 return
 
             existe = (
@@ -1669,13 +1669,13 @@ def _job_sync_jeux_budget() -> None:
                 )
                 session.commit()
 
-        logger.info("JOB-2 exÃ©cutÃ©: net jeux J-1 synchronisÃ© (%.2f EUR)", net)
+        logger.info("JOB-2 exécuté: net jeux J-1 synchronisé (%.2f EUR)", net)
     except Exception:
         logger.exception("Erreur JOB-2 sync_jeux_budget")
 
 
 def _job_analyse_nutrition_hebdo() -> None:
-    """JOB-3 â€” Analyse nutritionnelle hebdomadaire simple sur les repas planifiÃ©s."""
+    """JOB-3 — Analyse nutritionnelle hebdomadaire simple sur les repas planifiés."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import Recette, Repas
@@ -1693,7 +1693,7 @@ def _job_analyse_nutrition_hebdo() -> None:
             )
 
         if not rows:
-            logger.info("JOB-3: aucune donnÃ©e nutritionnelle sur la semaine")
+            logger.info("JOB-3: aucune donnée nutritionnelle sur la semaine")
             return
 
         nb = len(rows)
@@ -1704,9 +1704,9 @@ def _job_analyse_nutrition_hebdo() -> None:
 
         carences: list[str] = []
         if prot_moy < 15:
-            carences.append("protÃ©ines")
+            carences.append("protéines")
         if cal_moy < 350:
-            carences.append("apports Ã©nergÃ©tiques")
+            carences.append("apports énergétiques")
 
         msg_carences = (
             f" Carences possibles: {', '.join(carences)}." if carences else ""
@@ -1723,15 +1723,15 @@ def _job_analyse_nutrition_hebdo() -> None:
             canaux=["ntfy", "email"],
             titre="Analyse nutrition hebdo",
             type_email="resume_hebdo",
-            resume={"semaine": f"{debut.isoformat()} â†’ {aujourd_hui.isoformat()}", "resume_ia": message},
+            resume={"semaine": f"{debut.isoformat()} → {aujourd_hui.isoformat()}", "resume_ia": message},
         )
-        logger.info("JOB-3 exÃ©cutÃ©")
+        logger.info("JOB-3 exécuté")
     except Exception:
         logger.exception("Erreur JOB-3 analyse_nutrition_hebdo")
 
 
 def _job_alertes_energie() -> None:
-    """JOB-4 â€” DÃ©tection simple d'anomalies Ã©nergie (vs moyenne historique)."""
+    """JOB-4 — Détection simple d'anomalies énergie (vs moyenne historique)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import ReleveEnergie
@@ -1761,18 +1761,18 @@ def _job_alertes_energie() -> None:
                     alertes.append(f"{t}: {dernier:.1f} (> +25% vs {moyenne:.1f})")
 
         if not alertes:
-            logger.info("JOB-4: aucune anomalie Ã©nergie dÃ©tectÃ©e")
+            logger.info("JOB-4: aucune anomalie énergie détectée")
             return
 
-        message = "Anomalies Ã©nergie dÃ©tectÃ©es: " + "; ".join(alertes)
+        message = "Anomalies énergie détectées: " + "; ".join(alertes)
         dispatcher = get_dispatcher_notifications()
         _envoyer_notif_tous_users(
             dispatcher,
             message=message,
             canaux=["ntfy", "push", "email"],
-            titre="Alerte consommation Ã©nergie",
+            titre="Alerte consommation énergie",
             type_email="alerte_critique",
-            alerte={"titre": "Alerte consommation Ã©nergie", "message": message},
+            alerte={"titre": "Alerte consommation énergie", "message": message},
         )
         from src.services.core.event_bus_mixin import emettre_evenement_simple
 
@@ -1785,13 +1785,13 @@ def _job_alertes_energie() -> None:
             },
             source="cron.alertes_energie",
         )
-        logger.info("JOB-4 exÃ©cutÃ©: %d alerte(s)", len(alertes))
+        logger.info("JOB-4 exécuté: %d alerte(s)", len(alertes))
     except Exception:
         logger.exception("Erreur JOB-4 alertes_energie")
 
 
 def _job_nettoyage_logs() -> None:
-    """JOB-5 â€” Purge des logs d'audit/sÃ©curitÃ© > 90 jours."""
+    """JOB-5 — Purge des logs d'audit/sécurité > 90 jours."""
     try:
         from src.core.db import obtenir_contexte_db
 
@@ -1804,13 +1804,13 @@ def _job_nettoyage_logs() -> None:
             ).rowcount or 0
             session.commit()
 
-        logger.info("JOB-5 exÃ©cutÃ©: purge logs (audit=%s, securite=%s)", nb_audit, nb_secu)
+        logger.info("JOB-5 exécuté: purge logs (audit=%s, securite=%s)", nb_audit, nb_secu)
     except Exception:
         logger.exception("Erreur JOB-5 nettoyage_logs")
 
 
 def _job_check_garmin_anomalies() -> None:
-    """JOB-6 â€” Alerte si inactivitÃ© Garmin > 3 jours."""
+    """JOB-6 — Alerte si inactivité Garmin > 3 jours."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import ActiviteGarmin, ProfilUtilisateur
@@ -1835,15 +1835,15 @@ def _job_check_garmin_anomalies() -> None:
                     inactifs.append(profil.display_name or profil.username)
 
         if inactifs:
-            message = "Aucune activitÃ© Garmin depuis 3 jours: " + ", ".join(inactifs)
+            message = "Aucune activité Garmin depuis 3 jours: " + ", ".join(inactifs)
             dispatcher = get_dispatcher_notifications()
             _envoyer_notif_tous_users(
                 dispatcher,
                 message=message,
                 canaux=["ntfy", "push"],
-                titre="InactivitÃ© Garmin",
+                titre="Inactivité Garmin",
             )
-            logger.info("JOB-6 exÃ©cutÃ©: %d profil(s) inactif(s)", len(inactifs))
+            logger.info("JOB-6 exécuté: %d profil(s) inactif(s)", len(inactifs))
         else:
             logger.info("JOB-6: aucune anomalie Garmin")
     except Exception:
@@ -1851,7 +1851,7 @@ def _job_check_garmin_anomalies() -> None:
 
 
 def _job_resume_jardin_saisonnier() -> None:
-    """JOB-7 â€” RÃ©sumÃ© mensuel jardin avec recommandations synthÃ©tiques."""
+    """JOB-7 — Résumé mensuel jardin avec recommandations synthétiques."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import ElementJardin, JournalJardin
@@ -1870,9 +1870,9 @@ def _job_resume_jardin_saisonnier() -> None:
             )
 
         top_actions = ", ".join(f"{a}:{n}" for a, n in actions[:4]) if actions else "aucune"
-        recos = "Pense Ã  planifier arrosage + taille prÃ©ventive si hausse tempÃ©ratures."
+        recos = "Pense à planifier arrosage + taille préventive si hausse températures."
         message = (
-            f"Bilan jardin mensuel: {nb_elements} Ã©lÃ©ment(s) actif(s), actions: {top_actions}. "
+            f"Bilan jardin mensuel: {nb_elements} élément(s) actif(s), actions: {top_actions}. "
             f"Reco: {recos}"
         )
 
@@ -1881,28 +1881,28 @@ def _job_resume_jardin_saisonnier() -> None:
             dispatcher,
             message=message,
             canaux=["ntfy", "email"],
-            titre="RÃ©sumÃ© jardin saisonnier",
+            titre="Résumé jardin saisonnier",
             type_email="resume_hebdo",
             resume={"semaine": "bilan mois", "resume_ia": message},
         )
-        logger.info("JOB-7 exÃ©cutÃ©")
+        logger.info("JOB-7 exécuté")
     except Exception:
         logger.exception("Erreur JOB-7 resume_jardin_saisonnier")
 
 
 def _job_expiration_documents() -> None:
-    """JOB-8 â€” Rappels de documents proches d'expiration."""
+    """JOB-8 — Rappels de documents proches d'expiration."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
         from src.services.famille.documents import obtenir_service_documents
 
         alertes = obtenir_service_documents().obtenir_alertes_expiration(jours=30)
         if not alertes:
-            logger.info("JOB-8: aucun document Ã  renouveler")
+            logger.info("JOB-8: aucun document à renouveler")
             return
 
         noms = ", ".join(a.get("nom") or a.get("titre") or "document" for a in alertes[:5])
-        message = f"{len(alertes)} document(s) Ã  renouveler sous 30 jours: {noms}."
+        message = f"{len(alertes)} document(s) à renouveler sous 30 jours: {noms}."
         dispatcher = get_dispatcher_notifications()
         _envoyer_notif_tous_users(
             dispatcher,
@@ -1912,13 +1912,13 @@ def _job_expiration_documents() -> None:
             type_email="alerte_critique",
             alerte={"titre": "Expiration documents", "message": message},
         )
-        logger.info("JOB-8 exÃ©cutÃ©: %d alerte(s)", len(alertes))
+        logger.info("JOB-8 exécuté: %d alerte(s)", len(alertes))
     except Exception:
         logger.exception("Erreur JOB-8 expiration_documents")
 
 
 def _job_sync_calendrier_scolaire() -> None:
-    """INNO-14 â€” Resynchronise les calendriers scolaires auto actifs."""
+    """INNO-14 — Resynchronise les calendriers scolaires auto actifs."""
     try:
         from src.services.famille.calendrier_scolaire import (
             synchroniser_calendriers_scolaires_actifs,
@@ -1936,41 +1936,41 @@ def _job_sync_calendrier_scolaire() -> None:
 
 
 def _job_recap_weekend_dimanche_soir() -> None:
-    """P7-01 â€” Envoie un rÃ©cap weekend le dimanche 20h (WhatsApp + Push)."""
+    """P7-01 — Envoie un récap weekend le dimanche 20h (WhatsApp + Push)."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
         message = (
-            "RÃ©cap weekend: vÃ©rifie le planning de la semaine, les courses prioritaires "
-            "et les tÃ¢ches maison en attente."
+            "Récap weekend: vérifie le planning de la semaine, les courses prioritaires "
+            "et les tâches maison en attente."
         )
         dispatcher = get_dispatcher_notifications()
         res = _envoyer_notif_tous_users(
             dispatcher,
             message=message,
             canaux=["telegram", "push"],
-            titre="RÃ©cap weekend",
+            titre="Récap weekend",
             type_telegram="rapport_hebdo",
         )
-        logger.info("P7-01 exÃ©cutÃ©: %s", res)
+        logger.info("P7-01 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur P7-01 recap weekend")
 
 
 def _job_nettoyage_cache_7j() -> None:
-    """P7-02 â€” Nettoie le cache applicatif (quotidien 02h00)."""
+    """P7-02 — Nettoie le cache applicatif (quotidien 02h00)."""
     try:
         from src.core.caching import obtenir_cache
 
         cache = obtenir_cache()
         cache.clear(levels="all")
-        logger.info("P7-02 exÃ©cutÃ©: cache vidÃ©")
+        logger.info("P7-02 exécuté: cache vidé")
     except Exception:
         logger.exception("Erreur P7-02 nettoyage cache")
 
 
 def _job_backup_donnees_critiques() -> None:
-    """P7-03 â€” Snapshot JSON quotidien de tables critiques (01h00)."""
+    """P7-03 — Snapshot JSON quotidien de tables critiques (01h00)."""
     try:
         import json
         from pathlib import Path
@@ -1994,13 +1994,13 @@ def _job_backup_donnees_critiques() -> None:
             }
 
         fichier.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-        logger.info("P7-03 exÃ©cutÃ©: backup Ã©crit dans %s", fichier)
+        logger.info("P7-03 exécuté: backup écrit dans %s", fichier)
     except Exception:
         logger.exception("Erreur P7-03 backup donnees critiques")
 
 
 def _job_sync_tirages_loto_euromillions() -> None:
-    """P7-04 â€” Synchronise les tirages loteries (mardi + vendredi 22h)."""
+    """P7-04 — Synchronise les tirages loteries (mardi + vendredi 22h)."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
         from src.services.jeux.cron_jobs_loteries import scraper_resultats_fdj
@@ -2010,17 +2010,17 @@ def _job_sync_tirages_loto_euromillions() -> None:
         dispatcher = get_dispatcher_notifications()
         res = _envoyer_notif_tous_users(
             dispatcher,
-            message="Synchronisation tirages Loto/Euromillions terminÃ©e.",
+            message="Synchronisation tirages Loto/Euromillions terminée.",
             canaux=["push"],
-            titre="Tirages synchronisÃ©s",
+            titre="Tirages synchronisés",
         )
-        logger.info("P7-04 exÃ©cutÃ©: %s", res)
+        logger.info("P7-04 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur P7-04 sync tirages")
 
 
 def _job_rapport_budget_hebdo() -> None:
-    """P7-05 â€” Rapport budget hebdo le dimanche 18h (WhatsApp)."""
+    """P7-05 — Rapport budget hebdo le dimanche 18h (WhatsApp)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -2063,26 +2063,26 @@ def _job_rapport_budget_hebdo() -> None:
             titre="Rapport budget hebdo",
             type_telegram="rapport_hebdo",
         )
-        logger.info("P7-05 exÃ©cutÃ©: %s", res)
+        logger.info("P7-05 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur P7-05 rapport budget hebdo")
 
 
 def _job_maj_donnees_meteo() -> None:
-    """P7-06 â€” Met Ã  jour/prÃ©charge les donnÃ©es mÃ©tÃ©o (quotidien 06h00)."""
+    """P7-06 — Met à jour/précharge les données météo (quotidien 06h00)."""
     try:
         from src.services.integrations.weather import obtenir_service_meteo
 
         service_meteo = obtenir_service_meteo()
         previsions = service_meteo.get_previsions(nb_jours=7)
         nb = len(previsions or [])
-        logger.info("P7-06 exÃ©cutÃ©: %d prÃ©vision(s) mÃ©tÃ©o prÃ©chargÃ©e(s)", nb)
+        logger.info("P7-06 exécuté: %d prévision(s) météo préchargée(s)", nb)
     except Exception:
         logger.exception("Erreur P7-06 maj meteo")
 
 
 def _job_anniversaires_j30() -> None:
-    """P7-07 â€” Rappels anniversaires Ã  J-30 (quotidien 08h00)."""
+    """P7-07 — Rappels anniversaires à J-30 (quotidien 08h00)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -2105,7 +2105,7 @@ def _job_anniversaires_j30() -> None:
                 noms.append(" ".join(part for part in [row[1], row[0]] if part))
 
         if not noms:
-            logger.info("P7-07: aucun anniversaire Ã  J-30")
+            logger.info("P7-07: aucun anniversaire à J-30")
             return
 
         dispatcher = get_dispatcher_notifications()
@@ -2116,13 +2116,13 @@ def _job_anniversaires_j30() -> None:
             canaux=["push", "telegram"],
             titre="Anniversaires J-30",
         )
-        logger.info("P7-07 exÃ©cutÃ©: %s", res)
+        logger.info("P7-07 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur P7-07 anniversaires J-30")
 
 
 def _job_analyse_tendances_mensuelles() -> None:
-    """P7-08 â€” Analyse mensuelle des tendances dashboard (email)."""
+    """P7-08 — Analyse mensuelle des tendances dashboard (email)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -2145,7 +2145,7 @@ def _job_analyse_tendances_mensuelles() -> None:
 
         message = (
             f"Tendances mensuelles {today.month:02d}/{today.year}: "
-            f"{nb_rep} repas planifiÃ©s, {nb_courses} articles achetÃ©s."
+            f"{nb_rep} repas planifiés, {nb_courses} articles achetés."
         )
         dispatcher = get_dispatcher_notifications()
         res = _envoyer_notif_tous_users(
@@ -2156,22 +2156,22 @@ def _job_analyse_tendances_mensuelles() -> None:
             type_email="rapport_mensuel",
             rapport={"mois": f"{today.month:02d}/{today.year}", "resume": message},
         )
-        logger.info("P7-08 exÃ©cutÃ©: %s", res)
+        logger.info("P7-08 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur P7-08 analyse tendances")
 
 
 def _job_purge_logs_anciens_mensuelle() -> None:
-    """P7-09 â€” Purge mensuelle des logs anciens (1er du mois 03h00)."""
+    """P7-09 — Purge mensuelle des logs anciens (1er du mois 03h00)."""
     try:
         _job_nettoyage_logs()
-        logger.info("P7-09 exÃ©cutÃ©")
+        logger.info("P7-09 exécuté")
     except Exception:
         logger.exception("Erreur P7-09 purge logs")
 
 
 def _job_recette_du_jour_push() -> None:
-    """P7-10 â€” Push recette du jour (11h30) si planning actif."""
+    """P7-10 — Push recette du jour (11h30) si planning actif."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import Planning, Repas
@@ -2188,7 +2188,7 @@ def _job_recette_du_jour_push() -> None:
             )
 
         if not repas:
-            logger.debug("P7-10: pas de repas planifiÃ© aujourd'hui")
+            logger.debug("P7-10: pas de repas planifié aujourd'hui")
             return
 
         nom = repas.recette.nom if getattr(repas, "recette", None) else (repas.notes or "Repas du jour")
@@ -2200,13 +2200,13 @@ def _job_recette_du_jour_push() -> None:
             titre="Recette du jour",
             type_telegram="recette_du_jour",
         )
-        logger.info("P7-10 exÃ©cutÃ©: %s", res)
+        logger.info("P7-10 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur P7-10 recette du jour")
 
 
 def _job_resume_weekend_whatsapp() -> None:
-    """Sprint 16.3 â€” RÃ©sumÃ© suggestions weekend (vendredi 18h00)."""
+    """Sprint 16.3 — Résumé suggestions weekend (vendredi 18h00)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import ActiviteWeekend
@@ -2227,28 +2227,28 @@ def _job_resume_weekend_whatsapp() -> None:
 
         if activites:
             lignes = [
-                f"- {getattr(a, 'titre', 'ActivitÃ©')} ({getattr(a, 'date_prevue', '')})"
+                f"- {getattr(a, 'titre', 'Activité')} ({getattr(a, 'date_prevue', '')})"
                 for a in activites
             ]
             message = "Suggestions weekend:\n" + "\n".join(lignes)
         else:
-            message = "Aucune activitÃ© planifiÃ©e pour ce weekend. Veux-tu des suggestions IA ?"
+            message = "Aucune activité planifiée pour ce weekend. Veux-tu des suggestions IA ?"
 
         dispatcher = get_dispatcher_notifications()
         _envoyer_notif_tous_users(
             dispatcher,
             message=message,
             canaux=["telegram"],
-            titre="RÃ©sumÃ© weekend",
+            titre="Résumé weekend",
             type_telegram="resume_weekend",
         )
-        logger.info("Sprint 16.3 exÃ©cutÃ©")
+        logger.info("Sprint 16.3 exécuté")
     except Exception:
-        logger.exception("Erreur Sprint 16.3 rÃ©sumÃ© weekend WhatsApp")
+        logger.exception("Erreur Sprint 16.3 résumé weekend WhatsApp")
 
 
 def _job_rappel_entretien_whatsapp() -> None:
-    """Sprint 16.6 â€” Rappel entretien maison du jour (quotidien)."""
+    """Sprint 16.6 — Rappel entretien maison du jour (quotidien)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -2265,7 +2265,7 @@ def _job_rappel_entretien_whatsapp() -> None:
             ).fetchall()
 
         if not rows:
-            logger.debug("Sprint 16.6: aucune tÃ¢che entretien aujourd'hui")
+            logger.debug("Sprint 16.6: aucune tâche entretien aujourd'hui")
             return
 
         try:
@@ -2286,9 +2286,9 @@ def _job_rappel_entretien_whatsapp() -> None:
                     source="cron.jobs.rappel_entretien",
                 )
         except Exception:
-            logger.debug("Emission events entretien.tache_due ignorÃ©e", exc_info=True)
+            logger.debug("Emission events entretien.tache_due ignorée", exc_info=True)
 
-        message = "TÃ¢ches entretien Ã  faire aujourd'hui:\n" + "\n".join(
+        message = "Tâches entretien à faire aujourd'hui:\n" + "\n".join(
             f"- {r[0]}" for r in rows if r and r[0]
         )
 
@@ -2300,20 +2300,20 @@ def _job_rappel_entretien_whatsapp() -> None:
             titre="Rappel entretien",
             type_telegram="rappel_entretien",
         )
-        logger.info("Sprint 16.6 exÃ©cutÃ©")
+        logger.info("Sprint 16.6 exécuté")
     except Exception:
         logger.exception("Erreur Sprint 16.6 rappel entretien WhatsApp")
 
 
 def _job_bilan_nutrition_whatsapp() -> None:
-    """Sprint 16.5 â€” Bilan nutrition simplifiÃ© (dimanche 20h30)."""
+    """Sprint 16.5 — Bilan nutrition simplifié (dimanche 20h30)."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
         _job_analyse_nutrition_hebdo()
 
-        # Message compact WhatsApp complÃ©mentaire
-        message = "Bilan nutrition prÃªt. Ouvre la vue Nutrition pour les dÃ©tails et recommandations."
+        # Message compact WhatsApp complémentaire
+        message = "Bilan nutrition prêt. Ouvre la vue Nutrition pour les détails et recommandations."
         dispatcher = get_dispatcher_notifications()
         _envoyer_notif_tous_users(
             dispatcher,
@@ -2322,13 +2322,13 @@ def _job_bilan_nutrition_whatsapp() -> None:
             titre="Bilan nutrition semaine",
             type_telegram="bilan_nutrition",
         )
-        logger.info("Sprint 16.5 exÃ©cutÃ©")
+        logger.info("Sprint 16.5 exécuté")
     except Exception:
         logger.exception("Erreur Sprint 16.5 bilan nutrition WhatsApp")
 
 
 def _job_rapport_famille_mensuel_complet() -> None:
-    """Sprint 16.8 â€” Rapport mensuel famille complet (email + PDF)."""
+    """Sprint 16.8 — Rapport mensuel famille complet (email + PDF)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -2357,29 +2357,29 @@ def _job_rapport_famille_mensuel_complet() -> None:
 
         rapport = {
             "mois": f"{mois_ref.month:02d}/{mois_ref.year}",
-            "budget": f"{float(budget_total):.2f} EUR dÃ©pensÃ©s",
+            "budget": f"{float(budget_total):.2f} EUR dépensés",
             "nutrition": f"{int(repas_nb)} repas suivis",
             "maison": f"{int(projets_actifs)} projet(s) actif(s)",
-            "jardin": "Voir rapport jardin hebdo consolidÃ©",
+            "jardin": "Voir rapport jardin hebdo consolidé",
             "jules": "Suivi mensuel disponible dans le module Famille",
         }
 
         dispatcher = get_dispatcher_notifications()
         _envoyer_notif_tous_users(
             dispatcher,
-            message="Votre rapport famille mensuel complet est prÃªt.",
+            message="Votre rapport famille mensuel complet est prêt.",
             canaux=["email"],
             titre="Rapport mensuel famille complet",
             type_email="rapport_famille_mensuel_complet",
             rapport=rapport,
         )
-        logger.info("Sprint 16.8 exÃ©cutÃ©")
+        logger.info("Sprint 16.8 exécuté")
     except Exception:
         logger.exception("Erreur Sprint 16.8 rapport famille mensuel complet")
 
 
 def _job_rapport_maison_trimestriel() -> None:
-    """Sprint 16.9 â€” Rapport maison trimestriel (email + PDF)."""
+    """Sprint 16.9 — Rapport maison trimestriel (email + PDF)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -2408,10 +2408,10 @@ def _job_rapport_maison_trimestriel() -> None:
 
         rapport = {
             "trimestre": f"T{trimestre} {today.year}",
-            "projets": f"{int(projets)} projet(s) en cours/planifiÃ©s",
-            "energie": f"{float(energie):.1f} unitÃ©s consommÃ©es sur le trimestre",
-            "jardin": "SynthÃ¨se jardin disponible dans le module Maison",
-            "entretien": f"{int(entretiens)} tÃ¢che(s) d'entretien Ã  venir",
+            "projets": f"{int(projets)} projet(s) en cours/planifiés",
+            "energie": f"{float(energie):.1f} unités consommées sur le trimestre",
+            "jardin": "Synthèse jardin disponible dans le module Maison",
+            "entretien": f"{int(entretiens)} tâche(s) d'entretien à venir",
         }
 
         dispatcher = get_dispatcher_notifications()
@@ -2423,13 +2423,13 @@ def _job_rapport_maison_trimestriel() -> None:
             type_email="rapport_maison_trimestriel",
             rapport=rapport,
         )
-        logger.info("Sprint 16.9 exÃ©cutÃ©")
+        logger.info("Sprint 16.9 exécuté")
     except Exception:
         logger.exception("Erreur Sprint 16.9 rapport maison trimestriel")
 
 
 def _job_s21_rapport_mensuel_unifie_email() -> None:
-    """Sprint 21.5 â€” Envoi mensuel du rapport PDF unifiÃ© (email)."""
+    """Sprint 21.5 — Envoi mensuel du rapport PDF unifié (email)."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
         from src.services.innovations import get_innovations_service
@@ -2437,15 +2437,15 @@ def _job_s21_rapport_mensuel_unifie_email() -> None:
         service = get_innovations_service()
         rapport_pdf = service.generer_rapport_mensuel_pdf()
         if not rapport_pdf or not rapport_pdf.contenu_base64:
-            logger.warning("Sprint 21.5: rapport mensuel unifiÃ© indisponible")
+            logger.warning("Sprint 21.5: rapport mensuel unifié indisponible")
             return
 
         dispatcher = get_dispatcher_notifications()
         _envoyer_notif_tous_users(
             dispatcher,
-            message="Votre rapport mensuel unifiÃ© est prÃªt.",
+            message="Votre rapport mensuel unifié est prêt.",
             canaux=["email"],
-            titre="Rapport mensuel unifiÃ©",
+            titre="Rapport mensuel unifié",
             type_email="rapport_mensuel_unifie",
             rapport={
                 "mois_reference": rapport_pdf.mois_reference,
@@ -2453,13 +2453,13 @@ def _job_s21_rapport_mensuel_unifie_email() -> None:
                 "contenu_base64": rapport_pdf.contenu_base64,
             },
         )
-        logger.info("Sprint 21.5 exÃ©cutÃ©")
+        logger.info("Sprint 21.5 exécuté")
     except Exception:
-        logger.exception("Erreur Sprint 21.5 rapport mensuel unifiÃ©")
+        logger.exception("Erreur Sprint 21.5 rapport mensuel unifié")
 
 
 def _job_stock_critique_zero() -> None:
-    """P7-11 â€” Alerte stock critique (quantitÃ© 0) sur 3 canaux."""
+    """P7-11 — Alerte stock critique (quantité 0) sur 3 canaux."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import ArticleInventaire
@@ -2486,13 +2486,13 @@ def _job_stock_critique_zero() -> None:
             canaux=["push", "ntfy", "telegram"],
             titre="Stock critique",
         )
-        logger.info("P7-11 exÃ©cutÃ©: %s", res)
+        logger.info("P7-11 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur P7-11 stock critique")
 
 
 def _job_resultat_tirage_loto() -> None:
-    """P7-12 â€” Notification rÃ©sultat tirage (si grilles enregistrÃ©es)."""
+    """P7-12 — Notification résultat tirage (si grilles enregistrées)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models.jeux import GrilleEuromillions, GrilleLoto, TirageEuromillions, TirageLoto
@@ -2511,13 +2511,13 @@ def _job_resultat_tirage_loto() -> None:
             )
 
         if nb_grilles == 0:
-            logger.debug("P7-12: aucune grille enregistrÃ©e")
+            logger.debug("P7-12: aucune grille enregistrée")
             return
 
         date_loto = getattr(dernier_loto, "date_tirage", None)
         date_euro = getattr(dernier_euro, "date_tirage", None)
         message = (
-            f"RÃ©sultats tirages disponibles. Loto: {date_loto or 'n/a'}, "
+            f"Résultats tirages disponibles. Loto: {date_loto or 'n/a'}, "
             f"Euromillions: {date_euro or 'n/a'}."
         )
         dispatcher = get_dispatcher_notifications()
@@ -2525,15 +2525,15 @@ def _job_resultat_tirage_loto() -> None:
             dispatcher,
             message=message,
             canaux=["push", "telegram"],
-            titre="RÃ©sultat tirage",
+            titre="Résultat tirage",
         )
-        logger.info("P7-12 exÃ©cutÃ©: %s", res)
+        logger.info("P7-12 exécuté: %s", res)
     except Exception:
-        logger.exception("Erreur P7-12 rÃ©sultat tirage")
+        logger.exception("Erreur P7-12 résultat tirage")
 
 
 def _job_nouvelle_recette_saison() -> None:
-    """P7-13 â€” Push recette de saison (1er du mois Ã  11h)."""
+    """P7-13 — Push recette de saison (1er du mois à 11h)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import Recette
@@ -2545,7 +2545,7 @@ def _job_nouvelle_recette_saison() -> None:
         elif mois in (3, 4, 5):
             saison = "printemps"
         elif mois in (6, 7, 8):
-            saison = "Ã©tÃ©"
+            saison = "été"
         else:
             saison = "automne"
 
@@ -2568,13 +2568,13 @@ def _job_nouvelle_recette_saison() -> None:
             canaux=["push"],
             titre="Recette de saison",
         )
-        logger.info("P7-13 exÃ©cutÃ©: %s", res)
+        logger.info("P7-13 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur P7-13 recette saison")
 
 
 def _job_tache_jardin_saisonniere() -> None:
-    """P7-14 â€” Rappel de tÃ¢ches jardin saisonniÃ¨res (push + ntfy)."""
+    """P7-14 — Rappel de tâches jardin saisonnières (push + ntfy)."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
         from src.services.maison import get_entretien_service
@@ -2582,7 +2582,7 @@ def _job_tache_jardin_saisonniere() -> None:
         service = get_entretien_service()
         resultats = service.verifier_saison() if hasattr(service, "verifier_saison") else []
         message = (
-            f"TÃ¢ches jardin saisonniÃ¨res: {len(resultats) if isinstance(resultats, list) else 1} suggestion(s)."
+            f"Tâches jardin saisonnières: {len(resultats) if isinstance(resultats, list) else 1} suggestion(s)."
         )
 
         dispatcher = get_dispatcher_notifications()
@@ -2590,15 +2590,15 @@ def _job_tache_jardin_saisonniere() -> None:
             dispatcher,
             message=message,
             canaux=["push", "ntfy"],
-            titre="TÃ¢ches jardin saisonniÃ¨res",
+            titre="Tâches jardin saisonnières",
         )
-        logger.info("P7-14 exÃ©cutÃ©: %s", res)
+        logger.info("P7-14 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur P7-14 taches jardin")
 
 
 def _job_astuce_anti_gaspillage() -> None:
-    """P7-16 â€” Astuce anti-gaspillage si 3+ articles proches pÃ©remption."""
+    """P7-16 — Astuce anti-gaspillage si 3+ articles proches péremption."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import ArticleInventaire
@@ -2620,13 +2620,13 @@ def _job_astuce_anti_gaspillage() -> None:
             )
 
         if len(articles) < 3:
-            logger.debug("P7-16: moins de 3 articles proches pÃ©remption")
+            logger.debug("P7-16: moins de 3 articles proches péremption")
             return
 
         noms = ", ".join((a.nom or "article") for a in articles[:4])
         message = (
             f"Astuce anti-gaspillage: cuisine rapidement {noms}. "
-            "PrivilÃ©gie une soupe, une poÃªlÃ©e ou une salade composÃ©e."
+            "Privilégie une soupe, une poêlée ou une salade composée."
         )
         dispatcher = get_dispatcher_notifications()
         res = _envoyer_notif_tous_users(
@@ -2635,13 +2635,13 @@ def _job_astuce_anti_gaspillage() -> None:
             canaux=["push"],
             titre="Astuce anti-gaspillage",
         )
-        logger.info("P7-16 exÃ©cutÃ©: %s", res)
+        logger.info("P7-16 exécuté: %s", res)
     except Exception:
         logger.exception("Erreur P7-16 astuce anti-gaspillage")
 
 
 def _job_expiration_recettes_suggestion() -> None:
-    """Sprint 15.1 â€” Propose des recettes pour consommer les produits bientÃ´t pÃ©rimÃ©s."""
+    """Sprint 15.1 — Propose des recettes pour consommer les produits bientôt périmés."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
         from src.services.cuisine import obtenir_service_prediction_peremption
@@ -2650,15 +2650,15 @@ def _job_expiration_recettes_suggestion() -> None:
         predictions = service.predire_peremptions_personnalisees(horizon_jours=2)
         items = predictions.get("items", []) if isinstance(predictions, dict) else []
         if not items:
-            logger.info("Sprint 15.1: aucune pÃ©remption proche Ã  traiter")
+            logger.info("Sprint 15.1: aucune péremption proche à traiter")
             return
 
         urgents = items[:5]
         noms = [str(item.get("nom") or "article") for item in urgents]
         message = (
-            "Produits Ã  cuisiner rapidement: "
+            "Produits à cuisiner rapidement: "
             f"{', '.join(noms)}. "
-            "IdÃ©es: poÃªlÃ©e, soupe, quiche ou plat four pour Ã©viter le gaspillage."
+            "Idées: poêlée, soupe, quiche ou plat four pour éviter le gaspillage."
         )
 
         dispatcher = get_dispatcher_notifications()
@@ -2668,13 +2668,13 @@ def _job_expiration_recettes_suggestion() -> None:
             canaux=["push", "ntfy"],
             titre="Recettes anti-gaspillage du jour",
         )
-        logger.info("Sprint 15.1 exÃ©cutÃ©: %d produit(s), notif=%s", len(urgents), resultats)
+        logger.info("Sprint 15.1 exécuté: %d produit(s), notif=%s", len(urgents), resultats)
     except Exception:
         logger.exception("Erreur Sprint 15.1 expiration_recettes_suggestion")
 
 
 def _job_stock_prediction_reapprovisionnement() -> None:
-    """Sprint 15.2 â€” PrÃ©dit les rÃ©approvisionnements hebdomadaires Ã  surveiller."""
+    """Sprint 15.2 — Prédit les réapprovisionnements hebdomadaires à surveiller."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import ArticleInventaire
@@ -2694,11 +2694,11 @@ def _job_stock_prediction_reapprovisionnement() -> None:
             )
 
         if not articles:
-            logger.info("Sprint 15.2: aucun article d'inventaire Ã  analyser")
+            logger.info("Sprint 15.2: aucun article d'inventaire à analyser")
             return
 
         for article in articles:
-            nom = getattr(article, "nom", None) or f"IngrÃ©dient #{article.ingredient_id}"
+            nom = getattr(article, "nom", None) or f"Ingrédient #{article.ingredient_id}"
             prediction = service_ia.predire_consommation(
                 ingredient_nom=nom,
                 stock_actuel_kg=float(article.quantite or 0),
@@ -2710,26 +2710,26 @@ def _job_stock_prediction_reapprovisionnement() -> None:
                 alertes.append(f"{nom} (autonomie {jours}j)")
 
         if not alertes:
-            logger.info("Sprint 15.2: aucune prÃ©diction de rÃ©appro urgente")
+            logger.info("Sprint 15.2: aucune prédiction de réappro urgente")
             return
 
         dispatcher = get_dispatcher_notifications()
         resultats = _envoyer_notif_tous_users(
             dispatcher,
             message=(
-                "RÃ©approvisionnement Ã  anticiper cette semaine: "
+                "Réapprovisionnement à anticiper cette semaine: "
                 f"{', '.join(alertes[:5])}."
             ),
             canaux=["ntfy", "push"],
-            titre="PrÃ©vision rÃ©approvisionnement",
+            titre="Prévision réapprovisionnement",
         )
-        logger.info("Sprint 15.2 exÃ©cutÃ©: %d alerte(s), notif=%s", len(alertes), resultats)
+        logger.info("Sprint 15.2 exécuté: %d alerte(s), notif=%s", len(alertes), resultats)
     except Exception:
         logger.exception("Erreur Sprint 15.2 stock_prediction_reapprovisionnement")
 
 
 def _job_variete_repas_alerte() -> None:
-    """Sprint 15.3 â€” DÃ©tecte une semaine de repas trop monotone."""
+    """Sprint 15.3 — Détecte une semaine de repas trop monotone."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import Repas
@@ -2755,7 +2755,7 @@ def _job_variete_repas_alerte() -> None:
             entree[str(getattr(item, "type_repas", "repas") or "repas")] = str(nom)
 
         if len(planning_repas) < 3:
-            logger.info("Sprint 15.3: planning insuffisant pour analyser la variÃ©tÃ©")
+            logger.info("Sprint 15.3: planning insuffisant pour analyser la variété")
             return
 
         analyse = PlanningAIService().analyser_variete_semaine(list(planning_repas.values()))
@@ -2763,14 +2763,14 @@ def _job_variete_repas_alerte() -> None:
         repetitions = getattr(analyse, "repetitions_problematiques", []) or []
 
         if score >= 55 and not repetitions:
-            logger.info("Sprint 15.3: variÃ©tÃ© correcte (score=%d)", score)
+            logger.info("Sprint 15.3: variété correcte (score=%d)", score)
             return
 
         recommandations = getattr(analyse, "recommandations", []) or []
         message = (
-            f"VariÃ©tÃ© du planning Ã  surveiller (score {score}/100). "
-            f"RÃ©pÃ©titions: {', '.join(map(str, repetitions[:3])) or 'aucune prÃ©cisÃ©e'}. "
-            f"Suggestion: {recommandations[0] if recommandations else 'ajouter une source de protÃ©ine diffÃ©rente.'}"
+            f"Variété du planning à surveiller (score {score}/100). "
+            f"Répétitions: {', '.join(map(str, repetitions[:3])) or 'aucune précisée'}. "
+            f"Suggestion: {recommandations[0] if recommandations else 'ajouter une source de protéine différente.'}"
         )
 
         dispatcher = get_dispatcher_notifications()
@@ -2778,15 +2778,15 @@ def _job_variete_repas_alerte() -> None:
             dispatcher,
             message=message,
             canaux=["push", "ntfy"],
-            titre="Alerte variÃ©tÃ© repas",
+            titre="Alerte variété repas",
         )
-        logger.info("Sprint 15.3 exÃ©cutÃ©: score=%d, notif=%s", score, resultats)
+        logger.info("Sprint 15.3 exécuté: score=%d, notif=%s", score, resultats)
     except Exception:
         logger.exception("Erreur Sprint 15.3 variete_repas_alerte")
 
 
 def _job_tendances_activites_famille() -> None:
-    """Sprint 15.4 â€” RÃ©sume les tendances d'engagement des activitÃ©s famille."""
+    """Sprint 15.4 — Résume les tendances d'engagement des activités famille."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import ActiviteFamille
@@ -2812,10 +2812,10 @@ def _job_tendances_activites_famille() -> None:
         nb_courant = len(activites_courantes)
         nb_precedent = len(activites_precedentes)
         if nb_courant == 0 and nb_precedent == 0:
-            logger.info("Sprint 15.4: aucune activitÃ© Ã  analyser")
+            logger.info("Sprint 15.4: aucune activité à analyser")
             return
 
-        statut_termines = {"termine", "terminÃ©e", "rÃ©alisÃ©", "realise"}
+        statut_termines = {"termine", "terminée", "réalisé", "realise"}
         terminees = sum(1 for a in activites_courantes if str(getattr(a, "statut", "")).lower() in statut_termines)
         tendance = "stable"
         if nb_courant > nb_precedent:
@@ -2824,18 +2824,18 @@ def _job_tendances_activites_famille() -> None:
             tendance = "baisse"
 
         message = (
-            f"ActivitÃ©s famille sur 7 jours: {nb_courant} prÃ©vues, {terminees} terminÃ©es. "
-            f"Tendance vs semaine prÃ©cÃ©dente: {tendance}."
+            f"Activités famille sur 7 jours: {nb_courant} prévues, {terminees} terminées. "
+            f"Tendance vs semaine précédente: {tendance}."
         )
         dispatcher = get_dispatcher_notifications()
         resultats = _envoyer_notif_tous_users(
             dispatcher,
             message=message,
             canaux=["ntfy"],
-            titre="Tendances activitÃ©s famille",
+            titre="Tendances activités famille",
         )
         logger.info(
-            "Sprint 15.4 exÃ©cutÃ©: courant=%d prÃ©cÃ©dent=%d notif=%s",
+            "Sprint 15.4 exécuté: courant=%d précédent=%d notif=%s",
             nb_courant,
             nb_precedent,
             resultats,
@@ -2845,7 +2845,7 @@ def _job_tendances_activites_famille() -> None:
 
 
 def _job_energie_peak_detection() -> None:
-    """Sprint 15.5 â€” DÃ©tecte les pics de consommation Ã©nergie du jour."""
+    """Sprint 15.5 — Détecte les pics de consommation énergie du jour."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
         from src.services.maison.energie_anomalies_ia import obtenir_service_energie_anomalies_ia
@@ -2856,26 +2856,26 @@ def _job_energie_peak_detection() -> None:
             resultat = service.analyser_anomalies(type_energie=type_energie, nb_mois=12, seuil_pct=20)
             anomalies = resultat.get("anomalies", []) if isinstance(resultat, dict) else []
             for anomalie in anomalies[:2]:
-                details.append(f"{type_energie}: {anomalie.get('explication', 'variation dÃ©tectÃ©e')}")
+                details.append(f"{type_energie}: {anomalie.get('explication', 'variation détectée')}")
 
         if not details:
-            logger.info("Sprint 15.5: aucun pic Ã©nergie dÃ©tectÃ©")
+            logger.info("Sprint 15.5: aucun pic énergie détecté")
             return
 
         dispatcher = get_dispatcher_notifications()
         resultats = _envoyer_notif_tous_users(
             dispatcher,
-            message=f"Pics de consommation dÃ©tectÃ©s: {' | '.join(details[:3])}",
+            message=f"Pics de consommation détectés: {' | '.join(details[:3])}",
             canaux=["push", "ntfy"],
-            titre="Alerte Ã©nergie",
+            titre="Alerte énergie",
         )
-        logger.info("Sprint 15.5 exÃ©cutÃ©: %d anomalie(s), notif=%s", len(details), resultats)
+        logger.info("Sprint 15.5 exécuté: %d anomalie(s), notif=%s", len(details), resultats)
     except Exception:
         logger.exception("Erreur Sprint 15.5 energie_peak_detection")
 
 
 def _job_nutrition_adultes_weekly() -> None:
-    """Sprint 15.6 â€” GÃ©nÃ¨re un bilan nutritionnel adulte hebdomadaire liÃ© Ã  Garmin."""
+    """Sprint 15.6 — Génère un bilan nutritionnel adulte hebdomadaire lié à Garmin."""
     try:
         import asyncio
 
@@ -2886,17 +2886,17 @@ def _job_nutrition_adultes_weekly() -> None:
         service_garmin = get_garmin_nutrition_adultes_service()
         besoins = service_garmin.calculer_besoins_nutritionnels_selon_activite()
         if not besoins:
-            logger.info("Sprint 15.6: aucun besoin nutritionnel adulte calculÃ©")
+            logger.info("Sprint 15.6: aucun besoin nutritionnel adulte calculé")
             return
 
         niveau = str(besoins.get("niveau_activite", "modere")).lower().replace(" ", "_")
         mapping_niveau = {
-            "sÃ©dentaire": "sedentaire",
+            "sédentaire": "sedentaire",
             "sedentaire": "sedentaire",
-            "modÃ©rÃ©": "modere",
+            "modéré": "modere",
             "modere": "modere",
             "actif": "actif",
-            "trÃ¨s_actif": "tres_actif",
+            "très_actif": "tres_actif",
             "tres_actif": "tres_actif",
         }
         niveau_ia = mapping_niveau.get(niveau, "modere")
@@ -2916,7 +2916,7 @@ def _job_nutrition_adultes_weekly() -> None:
         )
 
         message = (
-            f"Bilan nutrition adulte: activitÃ© {niveau_ia}, score {bilan.equilibre_score}/100, "
+            f"Bilan nutrition adulte: activité {niveau_ia}, score {bilan.equilibre_score}/100, "
             f"objectif {int(besoins.get('calories_recommended', 0) or 0)} kcal/jour."
         )
         dispatcher = get_dispatcher_notifications()
@@ -2926,13 +2926,13 @@ def _job_nutrition_adultes_weekly() -> None:
             canaux=["push", "ntfy"],
             titre="Bilan nutrition adultes",
         )
-        logger.info("Sprint 15.6 exÃ©cutÃ©: score=%s notif=%s", bilan.equilibre_score, resultats)
+        logger.info("Sprint 15.6 exécuté: score=%s notif=%s", bilan.equilibre_score, resultats)
     except Exception:
         logger.exception("Erreur Sprint 15.6 nutrition_adultes_weekly")
 
 
 def _job_briefing_matinal_push() -> None:
-    """Sprint 15.7 â€” Envoie le briefing matinal IA Ã  tous les profils actifs."""
+    """Sprint 15.7 — Envoie le briefing matinal IA à tous les profils actifs."""
     try:
         from src.services.utilitaires import obtenir_service_briefing_matinal
 
@@ -2945,13 +2945,13 @@ def _job_briefing_matinal_push() -> None:
             if resultat.get("notification"):
                 nb_envoyes += 1
 
-        logger.info("Sprint 15.7 exÃ©cutÃ©: briefing envoyÃ© Ã  %d utilisateur(s)", nb_envoyes)
+        logger.info("Sprint 15.7 exécuté: briefing envoyé à %d utilisateur(s)", nb_envoyes)
     except Exception:
         logger.exception("Erreur Sprint 15.7 briefing_matinal_push")
 
 
 def _job_jardin_feedback_planning() -> None:
-    """Sprint 15.8 â€” Remonte les rÃ©coltes non utilisÃ©es dans le planning."""
+    """Sprint 15.8 — Remonte les récoltes non utilisées dans le planning."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
         from src.services.cuisine.inter_module_planning_jardin import get_planning_jardin_service
@@ -2959,23 +2959,23 @@ def _job_jardin_feedback_planning() -> None:
         resultat = get_planning_jardin_service().analyser_recoltes_non_utilisees(semaines_lookback=4)
         recoltes = resultat.get("recoltes_non_utilisees", []) if isinstance(resultat, dict) else []
         if not recoltes:
-            logger.info("Sprint 15.8: aucune rÃ©colte non utilisÃ©e dÃ©tectÃ©e")
+            logger.info("Sprint 15.8: aucune récolte non utilisée détectée")
             return
 
-        noms = [str(item.get("nom") or "rÃ©colte") for item in recoltes[:5]]
+        noms = [str(item.get("nom") or "récolte") for item in recoltes[:5]]
         recommandations = resultat.get("recommandations", []) if isinstance(resultat, dict) else []
         message = (
-            f"RÃ©coltes Ã  mieux intÃ©grer au planning: {', '.join(noms)}. "
-            f"Conseil: {recommandations[0] if recommandations else 'prÃ©voir une recette dÃ©diÃ©e la semaine prochaine.'}"
+            f"Récoltes à mieux intégrer au planning: {', '.join(noms)}. "
+            f"Conseil: {recommandations[0] if recommandations else 'prévoir une recette dédiée la semaine prochaine.'}"
         )
         dispatcher = get_dispatcher_notifications()
         resultats = _envoyer_notif_tous_users(
             dispatcher,
             message=message,
             canaux=["ntfy", "push"],
-            titre="Feedback jardin â†’ planning",
+            titre="Feedback jardin → planning",
         )
-        logger.info("Sprint 15.8 exÃ©cutÃ©: %d rÃ©colte(s), notif=%s", len(recoltes), resultats)
+        logger.info("Sprint 15.8 exécuté: %d récolte(s), notif=%s", len(recoltes), resultats)
     except Exception:
         logger.exception("Erreur Sprint 15.8 jardin_feedback_planning")
 
@@ -2993,22 +2993,22 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "digest_notifications_queue": ("Flush digest notifications", _job_digest_notifications_queue),
     "rappel_courses": ("Rappel courses ntfy.sh", _job_rappel_courses_ntfy),
     "push_contextuel_soir": ("Push contextuel soir", _job_push_contextuel_soir),
-    "resume_hebdo": ("RÃ©sumÃ© hebdomadaire", _job_resume_hebdo),
-    "planning_semaine_si_vide": ("VÃ©rification planning semaine suivante", _job_planning_semaine_si_vide),
-    "alertes_peremption_48h": ("Alertes pÃ©remption 48h", _job_alertes_peremption_48h),
+    "resume_hebdo": ("Résumé hebdomadaire", _job_resume_hebdo),
+    "planning_semaine_si_vide": ("Vérification planning semaine suivante", _job_planning_semaine_si_vide),
+    "alertes_peremption_48h": ("Alertes péremption 48h", _job_alertes_peremption_48h),
     "rapport_mensuel_budget": ("Rapport mensuel budget", _job_rapport_mensuel_budget),
     "score_weekend": ("Score weekend", _job_score_weekend),
     "rapport_jardin": ("Rapport jardin hebdo", _job_rapport_jardin),
-    "score_bien_etre_hebdo": ("Score bien-Ãªtre hebdo", _job_score_bien_etre_hebdo),
+    "score_bien_etre_hebdo": ("Score bien-être hebdo", _job_score_bien_etre_hebdo),
     "garmin_sync_matinal": ("Sync Garmin automatique matinale", _job_garmin_sync_matinal),
-    "automations_runner": ("ExÃ©cution automations", _job_automations),
+    "automations_runner": ("Exécution automations", _job_automations),
     "points_famille_hebdo": ("Calcul points famille hebdo", _job_points_famille_hebdo),
     "sync_google_calendar": ("Sync Google Calendar", _job_sync_google_calendar),
     "alerte_stock_bas": ("Alerte stock bas", _job_alerte_stock_bas),
-    "archive_batches_expires": ("Archivage batch expirÃ©", _job_archive_batches_expires),
+    "archive_batches_expires": ("Archivage batch expiré", _job_archive_batches_expires),
     "rapport_maison_mensuel": ("Rapport maison mensuel", _job_rapport_maison_mensuel),
     "sync_openfoodfacts": ("Sync cache OpenFoodFacts", _job_sync_openfoodfacts),
-    # Phase 7 â€” jobs ajoutÃ©s
+    # Phase 7 — jobs ajoutés
     "recap_weekend_dimanche_soir": ("Recap weekend dimanche soir", _job_recap_weekend_dimanche_soir),
     "nettoyage_cache_7j": ("Nettoyage cache 7 jours", _job_nettoyage_cache_7j),
     "backup_donnees_critiques": ("Backup donnees critiques", _job_backup_donnees_critiques),
@@ -3024,14 +3024,14 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "nouvelle_recette_saison": ("Nouvelle recette de saison", _job_nouvelle_recette_saison),
     "tache_jardin_saisonniere": ("Tache jardin saisonniere", _job_tache_jardin_saisonniere),
     "astuce_anti_gaspillage": ("Astuce anti-gaspillage", _job_astuce_anti_gaspillage),
-    # Jobs existants (conservÃ©s)
-    "prediction_courses_weekly": ("PrÃ©diction courses hebdo", _job_prediction_courses_weekly),
+    # Jobs existants (conservés)
+    "prediction_courses_weekly": ("Prédiction courses hebdo", _job_prediction_courses_weekly),
     "sync_jeux_budget": ("Sync jeux -> budget", _job_sync_jeux_budget),
     "analyse_nutrition_hebdo": ("Analyse nutrition hebdo", _job_analyse_nutrition_hebdo),
-    "alertes_energie": ("Alertes Ã©nergie", _job_alertes_energie),
+    "alertes_energie": ("Alertes énergie", _job_alertes_energie),
     "nettoyage_logs": ("Nettoyage logs > 90j", _job_nettoyage_logs),
     "check_garmin_anomalies": ("Anomalies Garmin", _job_check_garmin_anomalies),
-    "resume_jardin_saisonnier": ("RÃ©sumÃ© jardin saisonnier", _job_resume_jardin_saisonnier),
+    "resume_jardin_saisonnier": ("Résumé jardin saisonnier", _job_resume_jardin_saisonnier),
     "expiration_documents": ("Expiration documents", _job_expiration_documents),
     "sync_calendrier_scolaire": ("Sync calendrier scolaire auto", _job_sync_calendrier_scolaire),
     "job_expiration_recettes_suggestion": (
@@ -3039,15 +3039,15 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
         _job_expiration_recettes_suggestion,
     ),
     "job_stock_prediction_reapprovisionnement": (
-        "PrÃ©diction rÃ©approvisionnement inventaire",
+        "Prédiction réapprovisionnement inventaire",
         _job_stock_prediction_reapprovisionnement,
     ),
-    "job_variete_repas_alerte": ("Alerte variÃ©tÃ© repas", _job_variete_repas_alerte),
+    "job_variete_repas_alerte": ("Alerte variété repas", _job_variete_repas_alerte),
     "job_tendances_activites_famille": (
-        "Tendances activitÃ©s famille",
+        "Tendances activités famille",
         _job_tendances_activites_famille,
     ),
-    "job_energie_peak_detection": ("DÃ©tection pics Ã©nergie", _job_energie_peak_detection),
+    "job_energie_peak_detection": ("Détection pics énergie", _job_energie_peak_detection),
     "job_nutrition_adultes_weekly": ("Bilan nutrition adultes hebdo", _job_nutrition_adultes_weekly),
     "job_briefing_matinal_push": ("Briefing matinal IA", _job_briefing_matinal_push),
     "job_jardin_feedback_planning": ("Feedback jardin vers planning", _job_jardin_feedback_planning),
@@ -3055,7 +3055,7 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
 
 
 def lister_jobs_disponibles() -> list[str]:
-    """Retourne la liste des IDs de jobs exÃ©cutable par API admin."""
+    """Retourne la liste des IDs de jobs exécutable par API admin."""
     return sorted(_REGISTRE_JOBS.keys())
 
 
@@ -3067,7 +3067,7 @@ def executer_job_par_id(
     triggered_by_user_id: str | None = None,
     relancer_exception: bool = False,
 ) -> dict[str, str | int | bool]:
-    """ExÃ©cute un job connu avec instrumentation Phase 7."""
+    """Exécute un job connu avec instrumentation Phase 7."""
     if job_id not in _REGISTRE_JOBS:
         raise ValueError(f"Job inconnu: {job_id}")
 
@@ -3083,7 +3083,7 @@ def executer_job_par_id(
     )
 
 
-# â”€â”€â”€ Orchestrateur â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── Orchestrateur ────────────────────────────────────────────────────────────
 
 
 def _job_sync_routines_planning() -> None:
@@ -3182,7 +3182,7 @@ def _job_sync_routines_planning() -> None:
 
         if nb_crees or nb_conflits:
             logger.info(
-                "IM-10 sync routines->planning: %d Ã©vÃ©nement(s) crÃ©Ã©(s), %d conflit(s)",
+                "IM-10 sync routines->planning: %d événement(s) créé(s), %d conflit(s)",
                 nb_crees,
                 nb_conflits,
             )
@@ -3191,7 +3191,7 @@ def _job_sync_routines_planning() -> None:
 
 
 def _job_sync_recoltes_inventaire() -> None:
-    """IM-12: synchronise les rÃ©coltes du jardin vers l'inventaire cuisine."""
+    """IM-12: synchronise les récoltes du jardin vers l'inventaire cuisine."""
     try:
         from datetime import date, timedelta
 
@@ -3235,7 +3235,7 @@ def _job_sync_recoltes_inventaire() -> None:
                     ingredient = Ingredient(
                         nom=element.nom,
                         categorie="jardin",
-                        unite="piÃ¨ce",
+                        unite="pièce",
                     )
                     session.add(ingredient)
                     session.flush()
@@ -3267,7 +3267,7 @@ def _job_sync_recoltes_inventaire() -> None:
                         garden_item_id=element.id,
                         date=today,
                         action="sync_inventaire",
-                        notes="Synchronisation automatique rÃ©colte -> inventaire",
+                        notes="Synchronisation automatique récolte -> inventaire",
                     )
                 )
                 nb_sync += 1
@@ -3275,13 +3275,13 @@ def _job_sync_recoltes_inventaire() -> None:
             session.commit()
 
         if nb_sync:
-            logger.info("IM-12 sync rÃ©coltes->inventaire: %d rÃ©colte(s) synchronisÃ©e(s)", nb_sync)
+            logger.info("IM-12 sync récoltes->inventaire: %d récolte(s) synchronisée(s)", nb_sync)
     except Exception:
-        logger.exception("Erreur IM-12 sync rÃ©coltes->inventaire")
+        logger.exception("Erreur IM-12 sync récoltes->inventaire")
 
 
 def _job_suggestions_activites_meteo() -> None:
-    """IM-14: gÃ©nÃ¨re des suggestions d'activitÃ©s Ã  partir de la mÃ©tÃ©o et notifie la famille."""
+    """IM-14: génère des suggestions d'activités à partir de la météo et notifie la famille."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
         from src.services.integrations.weather.service import obtenir_service_meteo
@@ -3289,7 +3289,7 @@ def _job_suggestions_activites_meteo() -> None:
         service_meteo = obtenir_service_meteo()
         previsions = service_meteo.get_previsions(nb_jours=1)
         if not previsions:
-            logger.info("IM-14: mÃ©tÃ©o indisponible, suggestions non envoyÃ©es")
+            logger.info("IM-14: météo indisponible, suggestions non envoyées")
             return
 
         meteo = previsions[0]
@@ -3298,20 +3298,20 @@ def _job_suggestions_activites_meteo() -> None:
 
         if pluie:
             suggestions = [
-                "atelier peinture Ã  la maison",
-                "parcours motricitÃ© intÃ©rieur",
+                "atelier peinture à la maison",
+                "parcours motricité intérieur",
                 "lecture interactive + musique",
             ]
         else:
             suggestions = [
                 "balade au parc",
-                "atelier jardinage avec rÃ©colte",
-                "jeu d'eau / motricitÃ© extÃ©rieure",
+                "atelier jardinage avec récolte",
+                "jeu d'eau / motricité extérieure",
             ]
 
         message = (
-            f"MÃ©tÃ©o du jour: {getattr(meteo, 'condition', 'variable')}. "
-            f"IdÃ©es activitÃ©s famille: {', '.join(suggestions)}."
+            f"Météo du jour: {getattr(meteo, 'condition', 'variable')}. "
+            f"Idées activités famille: {', '.join(suggestions)}."
         )
 
         dispatcher = get_dispatcher_notifications()
@@ -3319,11 +3319,11 @@ def _job_suggestions_activites_meteo() -> None:
             dispatcher,
             message=message,
             canaux=["ntfy", "push"],
-            titre="Suggestions activitÃ©s selon mÃ©tÃ©o",
+            titre="Suggestions activités selon météo",
         )
-        logger.info("IM-14 suggestions mÃ©tÃ©o envoyÃ©es")
+        logger.info("IM-14 suggestions météo envoyées")
     except Exception:
-        logger.exception("Erreur IM-14 suggestions mÃ©tÃ©o")
+        logger.exception("Erreur IM-14 suggestions météo")
 
 
 def _job_sync_veille_habitat() -> None:
@@ -3344,13 +3344,13 @@ def _job_sync_veille_habitat() -> None:
         logger.exception("Erreur sync veille Habitat")
 
 
-# â”€â”€â”€ Phase 8 â€” Jobs CRON additionnels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── Phase 8 — Jobs CRON additionnels ─────────────────────────────────────────
 
 
 def _job_rappel_documents_expirants() -> None:
-    """P8-01 â€” Rappel quotidien des documents familiaux expirant sous 30/60/90 jours (8h).
+    """P8-01 — Rappel quotidien des documents familiaux expirant sous 30/60/90 jours (8h).
 
-    Envoie des notifications graduÃ©es selon l'urgence :
+    Envoie des notifications graduées selon l'urgence :
     - < 7 jours : email critique + push + ntfy
     - < 30 jours : push + ntfy + email
     - < 60/90 jours : ntfy seulement
@@ -3393,7 +3393,7 @@ def _job_rappel_documents_expirants() -> None:
                 dispatcher,
                 message=message,
                 canaux=["push", "ntfy", "email"],
-                titre="Documents urgents Ã  renouveler",
+                titre="Documents urgents à renouveler",
                 type_email="alerte_critique",
                 alerte={"titre": "Documents urgents", "message": message},
             )
@@ -3405,14 +3405,14 @@ def _job_rappel_documents_expirants() -> None:
                 dispatcher,
                 message=message,
                 canaux=["push", "ntfy"],
-                titre="Documents Ã  renouveler",
+                titre="Documents à renouveler",
             )
 
         if lointains:
             logger.info("P8-01: %d document(s) expirent entre 30 et 90 jours", len(lointains))
 
         logger.info(
-            "P8-01 exÃ©cutÃ©: %d urgent(s), %d proche(s), %d lointain(s)",
+            "P8-01 exécuté: %d urgent(s), %d proche(s), %d lointain(s)",
             len(urgents), len(proches), len(lointains),
         )
     except Exception:
@@ -3420,9 +3420,9 @@ def _job_rappel_documents_expirants() -> None:
 
 
 def _job_rapport_mensuel_auto() -> None:
-    """P8-02 â€” Rapport mensuel automatique consolidÃ© (1er/mois 8h).
+    """P8-02 — Rapport mensuel automatique consolidé (1er/mois 8h).
 
-    AgrÃ¨ge : dÃ©penses, projets maison, activitÃ©s famille, Ã©nergie, jardin, jeux.
+    Agrège : dépenses, projets maison, activités famille, énergie, jardin, jeux.
     """
     try:
         from src.core.db import obtenir_contexte_db
@@ -3441,7 +3441,7 @@ def _job_rapport_mensuel_auto() -> None:
         premier_mois_ref = date(annee, mois, 1)
 
         with obtenir_contexte_db() as session:
-            # DÃ©penses maison
+            # Dépenses maison
             total_depenses_maison = (
                 session.query(func.sum(DepenseMaison.montant))
                 .filter(DepenseMaison.mois == mois, DepenseMaison.annee == annee)
@@ -3459,7 +3459,7 @@ def _job_rapport_mensuel_auto() -> None:
             )
             budget_total = float(budget.budget_total) if budget and budget.budget_total else 0
 
-            # Ã‰nergie
+            # Énergie
             releves = (
                 session.query(ReleveEnergie)
                 .filter(ReleveEnergie.mois == mois, ReleveEnergie.annee == annee)
@@ -3468,14 +3468,14 @@ def _job_rapport_mensuel_auto() -> None:
             energie_txt = ", ".join(
                 f"{r.type_energie}: {float(r.consommation or 0):.1f} {r.unite}"
                 for r in releves
-            ) if releves else "aucun relevÃ©"
+            ) if releves else "aucun relevé"
 
         message = (
             f"Rapport mensuel {mois:02d}/{annee}: "
-            f"DÃ©penses maison: {float(total_depenses_maison):.2f} EUR"
+            f"Dépenses maison: {float(total_depenses_maison):.2f} EUR"
             f"{f' (budget: {budget_total:.2f} EUR)' if budget_total else ''}, "
             f"{nb_projets} projet(s) en cours, "
-            f"Ã‰nergie: {energie_txt}."
+            f"Énergie: {energie_txt}."
         )
 
         dispatcher = get_dispatcher_notifications()
@@ -3493,16 +3493,16 @@ def _job_rapport_mensuel_auto() -> None:
                 "energie": energie_txt,
             },
         )
-        logger.info("P8-02 rapport_mensuel_auto exÃ©cutÃ©")
+        logger.info("P8-02 rapport_mensuel_auto exécuté")
     except Exception:
         logger.exception("Erreur P8-02 rapport_mensuel_auto")
 
 
 def _job_bilan_energetique() -> None:
-    """P8-05 â€” Bilan Ã©nergÃ©tique mensuel (1er/mois 8h30).
+    """P8-05 — Bilan énergétique mensuel (1er/mois 8h30).
 
-    Compare la consommation du mois Ã©coulÃ© avec la mÃªme pÃ©riode l'annÃ©e prÃ©cÃ©dente
-    et la moyenne glissante 12 mois. Produit un rapport synthÃ©tique.
+    Compare la consommation du mois écoulé avec la même période l'année précédente
+    et la moyenne glissante 12 mois. Produit un rapport synthétique.
     """
     try:
         from src.core.db import obtenir_contexte_db
@@ -3538,7 +3538,7 @@ def _job_bilan_energetique() -> None:
                 montant = float(releve_actuel.montant or 0)
                 unite = releve_actuel.unite
 
-                # MÃªme mois annÃ©e prÃ©cÃ©dente
+                # Même mois année précédente
                 releve_n1 = (
                     session.query(ReleveEnergie)
                     .filter(
@@ -3576,29 +3576,29 @@ def _job_bilan_energetique() -> None:
                 bilans.append(bilan)
 
         if not bilans:
-            logger.info("P8-05: aucun relevÃ© Ã©nergie pour %02d/%d", mois, annee)
+            logger.info("P8-05: aucun relevé énergie pour %02d/%d", mois, annee)
             return
 
-        message = f"Bilan Ã©nergie {mois:02d}/{annee}: " + "; ".join(bilans)
+        message = f"Bilan énergie {mois:02d}/{annee}: " + "; ".join(bilans)
 
         dispatcher = get_dispatcher_notifications()
         _envoyer_notif_tous_users(
             dispatcher,
             message=message,
             canaux=["ntfy", "email"],
-            titre=f"Bilan Ã©nergÃ©tique {mois:02d}/{annee}",
+            titre=f"Bilan énergétique {mois:02d}/{annee}",
             type_email="rapport_mensuel",
             rapport={"mois": f"{mois:02d}/{annee}", "bilans": bilans},
         )
-        logger.info("P8-05 bilan_energetique exÃ©cutÃ©: %d type(s) d'Ã©nergie", len(bilans))
+        logger.info("P8-05 bilan_energetique exécuté: %d type(s) d'énergie", len(bilans))
     except Exception:
         logger.exception("Erreur P8-05 bilan_energetique")
 
 
 def _job_rappel_vaccins() -> None:
-    """P8-06 â€” Rappels vaccins hebdomadaire (lundi 9h).
+    """P8-06 — Rappels vaccins hebdomadaire (lundi 9h).
 
-    VÃ©rifie les rappels de vaccins prÃ©vus pour les 30 prochains jours
+    Vérifie les rappels de vaccins prévus pour les 30 prochains jours
     et les vaccins obligatoires non faits.
     """
     try:
@@ -3611,7 +3611,7 @@ def _job_rappel_vaccins() -> None:
         horizon_7j = aujourd_hui + timedelta(days=7)
 
         with obtenir_contexte_db() as session:
-            # Rappels de vaccins prÃ©vus dans les 30 prochains jours
+            # Rappels de vaccins prévus dans les 30 prochains jours
             rappels_proches = (
                 session.query(Vaccin)
                 .filter(
@@ -3637,7 +3637,7 @@ def _job_rappel_vaccins() -> None:
             )
 
         if not rappels_proches and not vaccins_en_retard:
-            logger.info("P8-06: aucun rappel vaccin Ã  signaler")
+            logger.info("P8-06: aucun rappel vaccin à signaler")
             return
 
         dispatcher = get_dispatcher_notifications()
@@ -3661,7 +3661,7 @@ def _job_rappel_vaccins() -> None:
                     f"{v.nom_vaccin} (J-{(v.rappel_prevu - aujourd_hui).days})"
                     for v in urgents[:5]
                 )
-                message = f"Vaccins Ã  faire cette semaine: {noms}."
+                message = f"Vaccins à faire cette semaine: {noms}."
                 _envoyer_notif_tous_users(
                     dispatcher,
                     message=message,
@@ -3671,16 +3671,16 @@ def _job_rappel_vaccins() -> None:
 
             if autres:
                 noms = ", ".join(f"{v.nom_vaccin}" for v in autres[:5])
-                message = f"{len(autres)} rappel(s) de vaccin(s) prÃ©vus sous 30 jours: {noms}."
+                message = f"{len(autres)} rappel(s) de vaccin(s) prévus sous 30 jours: {noms}."
                 _envoyer_notif_tous_users(
                     dispatcher,
                     message=message,
                     canaux=["ntfy"],
-                    titre="Rappels vaccins Ã  venir",
+                    titre="Rappels vaccins à venir",
                 )
 
         logger.info(
-            "P8-06 exÃ©cutÃ©: %d rappel(s) proche(s), %d en retard",
+            "P8-06 exécuté: %d rappel(s) proche(s), %d en retard",
             len(rappels_proches), len(vaccins_en_retard),
         )
     except Exception:
@@ -3688,10 +3688,10 @@ def _job_rappel_vaccins() -> None:
 
 
 def _job_sync_entretien_budget() -> None:
-    """P8-07a â€” Connexion inter-modules Entretien â†’ Budget.
+    """P8-07a — Connexion inter-modules Entretien → Budget.
 
-    Synchronise les coÃ»ts d'entretien rÃ©alisÃ©s vers les dÃ©penses maison.
-    AgrÃ¨ge les interventions terminÃ©es du mois Ã©coulÃ© non encore comptabilisÃ©es.
+    Synchronise les coûts d'entretien réalisés vers les dépenses maison.
+    Agrège les interventions terminées du mois écoulé non encore comptabilisées.
     """
     try:
         from src.core.db import obtenir_contexte_db
@@ -3706,7 +3706,7 @@ def _job_sync_entretien_budget() -> None:
         nb_syncs = 0
 
         with obtenir_contexte_db() as session:
-            # Interventions artisan facturÃ©es le mois prÃ©cÃ©dent
+            # Interventions artisan facturées le mois précédent
             interventions = (
                 session.query(InterventionArtisan)
                 .filter(
@@ -3719,7 +3719,7 @@ def _job_sync_entretien_budget() -> None:
             )
 
             for intervention in interventions:
-                # VÃ©rifier si dÃ©jÃ  sync via notes
+                # Vérifier si déjà sync via notes
                 ref = f"[intervention:{intervention.id}]"
                 existant = (
                     session.query(DepenseMaison)
@@ -3751,15 +3751,15 @@ def _job_sync_entretien_budget() -> None:
                     "annee": fin_mois_prec.year,
                 }, source="cron.sync_entretien_budget")
 
-        logger.info("P8-07a sync_entretien_budget: %d dÃ©pense(s) synchronisÃ©e(s)", nb_syncs)
+        logger.info("P8-07a sync_entretien_budget: %d dépense(s) synchronisée(s)", nb_syncs)
     except Exception:
         logger.exception("Erreur P8-07a sync_entretien_budget")
 
 
 def _job_sync_voyages_calendrier() -> None:
-    """P8-07b â€” Connexion inter-modules Voyages â†’ Calendrier.
+    """P8-07b — Connexion inter-modules Voyages → Calendrier.
 
-    CrÃ©e des Ã©vÃ©nements de planning pour les voyages planifiÃ©s
+    Crée des événements de planning pour les voyages planifiés
     qui ne sont pas encore dans le calendrier.
     """
     try:
@@ -3776,7 +3776,7 @@ def _job_sync_voyages_calendrier() -> None:
             voyages = (
                 session.query(Voyage)
                 .filter(
-                    Voyage.statut == "planifiÃ©",
+                    Voyage.statut == "planifié",
                     Voyage.date_depart >= aujourd_hui,
                     Voyage.date_depart <= horizon,
                 )
@@ -3796,11 +3796,11 @@ def _job_sync_voyages_calendrier() -> None:
                     continue
 
                 evenement = EvenementPlanning(
-                    titre=f"Voyage: {voyage.titre} â€” {voyage.destination}",
+                    titre=f"Voyage: {voyage.titre} — {voyage.destination}",
                     date_debut=datetime.combine(voyage.date_depart, datetime.min.time()),
                     date_fin=datetime.combine(voyage.date_retour, datetime.max.time().replace(microsecond=0)),
                     type_event="voyage",
-                    description=f"Voyage {voyage.type_voyage} Ã  {voyage.destination}. "
+                    description=f"Voyage {voyage.type_voyage} à {voyage.destination}. "
                                 f"Participants: {', '.join(voyage.participants or ['Famille'])}. {ref}",
                 )
                 session.add(evenement)
@@ -3814,16 +3814,16 @@ def _job_sync_voyages_calendrier() -> None:
                     "nb_evenements": nb_crees,
                 }, source="cron.sync_voyages_calendrier")
 
-        logger.info("P8-07b sync_voyages_calendrier: %d Ã©vÃ©nement(s) crÃ©Ã©(s)", nb_crees)
+        logger.info("P8-07b sync_voyages_calendrier: %d événement(s) créé(s)", nb_crees)
     except Exception:
         logger.exception("Erreur P8-07b sync_voyages_calendrier")
 
 
 def _job_sync_charges_dashboard() -> None:
-    """P8-07c â€” Connexion inter-modules Charges â†’ Dashboard.
+    """P8-07c — Connexion inter-modules Charges → Dashboard.
 
-    AgrÃ¨ge les dÃ©penses mensuelles et les pousse comme
-    mÃ©triques dashboard pour la page d'accueil.
+    Agrège les dépenses mensuelles et les pousse comme
+    métriques dashboard pour la page d'accueil.
     """
     try:
         from src.core.db import obtenir_contexte_db
@@ -3835,7 +3835,7 @@ def _job_sync_charges_dashboard() -> None:
         annee = aujourd_hui.year
 
         with obtenir_contexte_db() as session:
-            # Total dÃ©penses maison du mois
+            # Total dépenses maison du mois
             depenses_mois = (
                 session.query(func.sum(DepenseMaison.montant))
                 .filter(DepenseMaison.mois == mois, DepenseMaison.annee == annee)
@@ -3850,7 +3850,7 @@ def _job_sync_charges_dashboard() -> None:
         }, source="cron.sync_charges_dashboard")
 
         logger.info(
-            "P8-07c sync_charges_dashboard: dÃ©penses mois=%s EUR",
+            "P8-07c sync_charges_dashboard: dépenses mois=%s EUR",
             float(depenses_mois),
         )
     except Exception:
@@ -3860,13 +3860,13 @@ def _job_sync_charges_dashboard() -> None:
 _REGISTRE_JOBS.update(
     {
         "sync_routines_planning": ("Sync routines -> planning", _job_sync_routines_planning),
-        "sync_recoltes_inventaire": ("Sync rÃ©coltes -> inventaire", _job_sync_recoltes_inventaire),
-        "suggestions_activites_meteo": ("Suggestions activitÃ©s selon mÃ©tÃ©o", _job_suggestions_activites_meteo),
+        "sync_recoltes_inventaire": ("Sync récoltes -> inventaire", _job_sync_recoltes_inventaire),
+        "suggestions_activites_meteo": ("Suggestions activités selon météo", _job_suggestions_activites_meteo),
         "sync_veille_habitat": ("Sync veille habitat", _job_sync_veille_habitat),
-        # Phase 8 â€” Jobs CRON additionnels
+        # Phase 8 — Jobs CRON additionnels
         "rappel_documents_expirants": ("Rappel documents expirants (quotidien)", _job_rappel_documents_expirants),
-        "rapport_mensuel_auto": ("Rapport mensuel automatique consolidÃ©", _job_rapport_mensuel_auto),
-        "bilan_energetique": ("Bilan Ã©nergÃ©tique mensuel", _job_bilan_energetique),
+        "rapport_mensuel_auto": ("Rapport mensuel automatique consolidé", _job_rapport_mensuel_auto),
+        "bilan_energetique": ("Bilan énergétique mensuel", _job_bilan_energetique),
         "rappel_vaccins": ("Rappels vaccins", _job_rappel_vaccins),
         "sync_entretien_budget": ("Sync entretien -> budget", _job_sync_entretien_budget),
         "sync_voyages_calendrier": ("Sync voyages -> calendrier", _job_sync_voyages_calendrier),
@@ -3875,25 +3875,25 @@ _REGISTRE_JOBS.update(
 )
 
 
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# PHASE 10 â€” JOBS CRON INNOVATIONS
-# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# PHASE 10 — JOBS CRON INNOVATIONS
+# ═══════════════════════════════════════════════════════════
 
 
 def _job_optimisation_routines() -> None:
-    """P10-01 Analyse mensuelle de l'efficacitÃ© des routines â†’ suggestions IA."""
+    """P10-01 Analyse mensuelle de l'efficacité des routines → suggestions IA."""
     try:
         from src.services.innovations import get_innovations_service
 
         logger.info("P10-01 optimisation_routines: Analyse IA des routines")
-        # DÃ©clenche l'endpoint IA existant via le service
+        # Déclenche l'endpoint IA existant via le service
         service = get_innovations_service()
-        # RÃ©utilise l'optimisation routines IA de Phase 6
+        # Réutilise l'optimisation routines IA de Phase 6
         from src.services.ia_avancee import get_ia_avancee_service
         ia_service = get_ia_avancee_service()
         result = ia_service.optimiser_routines()
         nb = len(getattr(result, "routines", []) if result else [])
-        logger.info("P10-01 optimisation_routines: %d suggestion(s) gÃ©nÃ©rÃ©e(s)", nb)
+        logger.info("P10-01 optimisation_routines: %d suggestion(s) générée(s)", nb)
     except Exception:
         logger.exception("Erreur P10-01 optimisation_routines")
 
@@ -3904,7 +3904,7 @@ def _job_suggestions_saison() -> None:
         import json
         from pathlib import Path
 
-        logger.info("P10-02 suggestions_saison: Mise Ã  jour produits de saison")
+        logger.info("P10-02 suggestions_saison: Mise à jour produits de saison")
         fichier = Path("data/reference/produits_de_saison.json")
         if fichier.exists():
             data = json.loads(fichier.read_text(encoding="utf-8"))
@@ -3917,7 +3917,7 @@ def _job_suggestions_saison() -> None:
                 top_5 = produits[:5] if isinstance(produits, list) else []
                 _envoyer_notif_tous_users(
                     dispatcher,
-                    f"ðŸŒ¿ Produits de saison ce mois-ci : {', '.join(str(p) for p in top_5)}",
+                    f"🌿 Produits de saison ce mois-ci : {', '.join(str(p) for p in top_5)}",
                     canaux=["ntfy"],
                 )
         else:
@@ -3927,11 +3927,11 @@ def _job_suggestions_saison() -> None:
 
 
 def _job_purge_historique_jeux() -> None:
-    """P10-03 Archive les donnÃ©es de paris sportifs > 12 mois."""
+    """P10-03 Archive les données de paris sportifs > 12 mois."""
     try:
         from src.core.db import obtenir_contexte_db
 
-        logger.info("P10-03 purge_historique_jeux: Archivage donnÃ©es > 12 mois")
+        logger.info("P10-03 purge_historique_jeux: Archivage données > 12 mois")
         limite = datetime.now() - timedelta(days=365)
 
         with obtenir_contexte_db() as session:
@@ -3947,9 +3947,9 @@ def _job_purge_historique_jeux() -> None:
                     {"limite": limite},
                 )
                 session.commit()
-                logger.info("P10-03 purge_historique_jeux: %d pari(s) archivÃ©(s)", nb_anciens)
+                logger.info("P10-03 purge_historique_jeux: %d pari(s) archivé(s)", nb_anciens)
             else:
-                logger.info("P10-03 purge_historique_jeux: aucun pari ancien Ã  archiver")
+                logger.info("P10-03 purge_historique_jeux: aucun pari ancien à archiver")
     except Exception:
         logger.exception("Erreur P10-03 purge_historique_jeux")
 
@@ -3968,10 +3968,10 @@ def _job_veille_emploi() -> None:
             if dispatcher:
                 _envoyer_notif_tous_users(
                     dispatcher,
-                    f"ðŸ’¼ Veille emploi : {result.nb_offres_trouvees} nouvelle(s) offre(s) dÃ©tectÃ©e(s)",
+                    f"💼 Veille emploi : {result.nb_offres_trouvees} nouvelle(s) offre(s) détectée(s)",
                     canaux=["ntfy", "email"],
                 )
-            logger.info("P10-04 veille_emploi: %d offre(s) trouvÃ©e(s)", result.nb_offres_trouvees)
+            logger.info("P10-04 veille_emploi: %d offre(s) trouvée(s)", result.nb_offres_trouvees)
         else:
             logger.info("P10-04 veille_emploi: aucune nouvelle offre")
     except Exception:
@@ -3989,7 +3989,7 @@ def _obtenir_dispatcher():
 
 _REGISTRE_JOBS.update(
     {
-        # Phase 10 â€” Jobs CRON Innovations
+        # Phase 10 — Jobs CRON Innovations
         "optimisation_routines": ("Optimisation routines IA (mensuel)", _job_optimisation_routines),
         "suggestions_saison": ("Suggestions produits de saison (mensuel)", _job_suggestions_saison),
         "purge_historique_jeux": ("Purge historique jeux > 12 mois", _job_purge_historique_jeux),
@@ -3998,11 +3998,11 @@ _REGISTRE_JOBS.update(
 )
 
 
-# â”€â”€â”€ Jobs bridges inter-modules â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── Jobs bridges inter-modules ─────────────────────────────────────────────────
 
 
 def _job_alertes_budget_seuil() -> None:
-    """B4: Alertes budget seuil â€” quotidien 20h, catÃ©gorie > 80% du budget mensuel."""
+    """B4: Alertes budget seuil — quotidien 20h, catégorie > 80% du budget mensuel."""
     try:
         from decimal import Decimal
 
@@ -4016,7 +4016,7 @@ def _job_alertes_budget_seuil() -> None:
         debut_mois = aujourd_hui.replace(day=1)
 
         with obtenir_contexte_db() as session:
-            # RÃ©cupÃ©rer le budget mensuel courant
+            # Récupérer le budget mensuel courant
             budget_mensuel = (
                 session.query(BudgetMensuelDB)
                 .filter(BudgetMensuelDB.mois == debut_mois)
@@ -4024,10 +4024,10 @@ def _job_alertes_budget_seuil() -> None:
             )
 
             if not budget_mensuel or not budget_mensuel.budgets_par_categorie:
-                logger.info("B4: Aucun budget mensuel dÃ©fini pour %s", debut_mois)
+                logger.info("B4: Aucun budget mensuel défini pour %s", debut_mois)
                 return
 
-            # Calculer les dÃ©penses par catÃ©gorie ce mois
+            # Calculer les dépenses par catégorie ce mois
             depenses_par_cat = dict(
                 session.query(
                     Depense.categorie,
@@ -4054,17 +4054,17 @@ def _job_alertes_budget_seuil() -> None:
 
             if pourcentage >= 100:
                 alertes.append(
-                    f"ðŸ”´ {categorie}: {depense_val:.0f}â‚¬ / {budget_val:.0f}â‚¬ "
-                    f"({pourcentage:.0f}%) â€” BUDGET DÃ‰PASSÃ‰"
+                    f"🔴 {categorie}: {depense_val:.0f}€ / {budget_val:.0f}€ "
+                    f"({pourcentage:.0f}%) — BUDGET DÉPASSÉ"
                 )
             elif pourcentage >= 80:
                 alertes.append(
-                    f"ðŸŸ¡ {categorie}: {depense_val:.0f}â‚¬ / {budget_val:.0f}â‚¬ "
+                    f"🟡 {categorie}: {depense_val:.0f}€ / {budget_val:.0f}€ "
                     f"({pourcentage:.0f}%)"
                 )
 
         if not alertes:
-            logger.info("B4: Aucune catÃ©gorie > 80%% du budget")
+            logger.info("B4: Aucune catégorie > 80%% du budget")
             return
 
         message = "Alertes budget du mois:\n" + "\n".join(alertes)
@@ -4078,13 +4078,13 @@ def _job_alertes_budget_seuil() -> None:
             type_telegram="budget_depassement",
             type_telegram="budget_depassement",
         )
-        logger.info("B4: %d alerte(s) budget envoyÃ©e(s)", len(alertes))
+        logger.info("B4: %d alerte(s) budget envoyée(s)", len(alertes))
     except Exception:
         logger.exception("Erreur job B4 alertes budget seuil")
 
 
 def _job_coherence_planning_courses() -> None:
-    """VÃ©rifie la cohÃ©rence planning â†” courses (dimanche 19h)."""
+    """Vérifie la cohérence planning ↔ courses (dimanche 19h)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models.courses import ArticleCourses, ListeCourses
@@ -4132,7 +4132,7 @@ def _job_coherence_planning_courses() -> None:
                 )
 
         if nb_repas == 0:
-            logger.info("Phase3 CRON cohÃ©rence planningâ†”courses: aucun repas Ã  contrÃ´ler")
+            logger.info("Phase3 CRON cohérence planning↔courses: aucun repas à contrôler")
             return
 
         if nb_articles == 0:
@@ -4140,30 +4140,30 @@ def _job_coherence_planning_courses() -> None:
             _envoyer_notif_tous_users(
                 dispatcher,
                 message=(
-                    "âš ï¸ Planning actif dÃ©tectÃ© mais la liste de courses est vide. "
-                    "VÃ©rifie les ingrÃ©dients avant la semaine."
+                    "⚠️ Planning actif détecté mais la liste de courses est vide. "
+                    "Vérifie les ingrédients avant la semaine."
                 ),
                 canaux=["telegram", "push"],
-                titre="CohÃ©rence planning/courses",
+                titre="Cohérence planning/courses",
                 type_evenement="rappel_courses",
             )
-            logger.info("Phase3 CRON cohÃ©rence planningâ†”courses: alerte envoyÃ©e")
+            logger.info("Phase3 CRON cohérence planning↔courses: alerte envoyée")
             return
 
         logger.info(
-            "Phase3 CRON cohÃ©rence planningâ†”courses OK: %d repas planifiÃ©s, %d article(s) en liste",
+            "Phase3 CRON cohérence planning↔courses OK: %d repas planifiés, %d article(s) en liste",
             nb_repas,
             nb_articles,
         )
     except Exception:
-        logger.exception("Erreur job phase3 cohÃ©rence planningâ†”courses")
+        logger.exception("Erreur job phase3 cohérence planning↔courses")
 
 
 def _job_sync_resultats_paris_auto() -> None:
-    """Synchronise automatiquement les rÃ©sultats de paris aprÃ¨s les matchs."""
+    """Synchronise automatiquement les résultats de paris après les matchs."""
     try:
         executer_job_par_id("sync_jeux_budget", source="cron")
-        logger.info("Phase3 CRON sync_resultats_paris_auto exÃ©cutÃ©")
+        logger.info("Phase3 CRON sync_resultats_paris_auto exécuté")
     except Exception:
         logger.exception("Erreur job phase3 sync_resultats_paris_auto")
 
@@ -4172,7 +4172,7 @@ def _job_rapport_jardin_saisonnier() -> None:
     """Produit et diffuse le rapport jardin saisonnier (mensuel)."""
     try:
         _job_rapport_jardin()
-        logger.info("Phase3 CRON rapport_jardin_saisonnier exÃ©cutÃ©")
+        logger.info("Phase3 CRON rapport_jardin_saisonnier exécuté")
     except Exception:
         logger.exception("Erreur job phase3 rapport_jardin_saisonnier")
 
@@ -4200,22 +4200,22 @@ def _job_nettoyage_exports_anciens() -> None:
             except Exception:
                 logger.debug("Impossible de supprimer l'export %s", fichier, exc_info=True)
 
-        logger.info("Phase3 CRON nettoyage_exports_anciens: %d fichier(s) supprimÃ©(s)", supprimes)
+        logger.info("Phase3 CRON nettoyage_exports_anciens: %d fichier(s) supprimé(s)", supprimes)
     except Exception:
         logger.exception("Erreur job phase3 nettoyage_exports_anciens")
 
 
 def _job_health_check_services_ia() -> None:
-    """VÃ©rifie les services IA (Mistral, circuit breaker, etc.) toutes les 6h."""
+    """Vérifie les services IA (Mistral, circuit breaker, etc.) toutes les 6h."""
     try:
         _job_verification_sante_systeme()
-        logger.info("Phase3 CRON health_check_services_ia exÃ©cutÃ©")
+        logger.info("Phase3 CRON health_check_services_ia exécuté")
     except Exception:
         logger.exception("Erreur job phase3 health_check_services_ia")
 
 
 def _job_resume_hebdo_ia() -> None:
-    """B9: RÃ©sumÃ© hebdomadaire IA intelligent â€” narratif agrÃ©able."""
+    """B9: Résumé hebdomadaire IA intelligent — narratif agréable."""
     try:
         from datetime import timedelta
 
@@ -4230,7 +4230,7 @@ def _job_resume_hebdo_ia() -> None:
         debut_semaine = aujourd_hui - timedelta(days=aujourd_hui.weekday())
         fin_semaine = debut_semaine + timedelta(days=6)
 
-        # Collecter les donnÃ©es de la semaine
+        # Collecter les données de la semaine
         with obtenir_contexte_db() as session:
             nb_repas = (
                 session.query(func.count(Repas.id))
@@ -4265,36 +4265,36 @@ def _job_resume_hebdo_ia() -> None:
                 .all()
             )
 
-        # Construire le rÃ©sumÃ© avec l'IA
+        # Construire le résumé avec l'IA
         try:
             from src.core.ai import obtenir_client_ia
 
             client = obtenir_client_ia()
             prompt = (
-                f"RÃ©sumÃ© familial de la semaine du {debut_semaine:%d/%m} au {fin_semaine:%d/%m}:\n"
-                f"- {nb_repas} repas planifiÃ©s\n"
-                f"- {depenses_semaine:.0f}â‚¬ de dÃ©penses\n"
-                f"- Top catÃ©gories: {', '.join(f'{k}: {v:.0f}â‚¬' for k, v in top_categories.items())}\n"
-                "\nRÃ©dige un court rÃ©sumÃ© narratif agrÃ©able Ã  lire (3-4 phrases) "
+                f"Résumé familial de la semaine du {debut_semaine:%d/%m} au {fin_semaine:%d/%m}:\n"
+                f"- {nb_repas} repas planifiés\n"
+                f"- {depenses_semaine:.0f}€ de dépenses\n"
+                f"- Top catégories: {', '.join(f'{k}: {v:.0f}€' for k, v in top_categories.items())}\n"
+                "\nRédige un court résumé narratif agréable à lire (3-4 phrases) "
                 "pour une famille. Ton chaleureux et encourageant."
             )
             resume = client.appeler(
                 prompt=prompt,
                 system_prompt=(
                     "Tu es un assistant familial bienveillant. "
-                    "RÃ©dige des rÃ©sumÃ©s hebdomadaires chaleureux et motivants."
+                    "Rédige des résumés hebdomadaires chaleureux et motivants."
                 ),
                 temperature=0.7,
                 max_tokens=300,
             )
-            message = f"ðŸ“Š RÃ©sumÃ© de ta semaine:\n\n{resume.strip()}"
+            message = f"📊 Résumé de ta semaine:\n\n{resume.strip()}"
         except Exception:
-            logger.debug("IA indisponible pour rÃ©sumÃ© hebdo, fallback texte simple")
-            cats_txt = ", ".join(f"{k}: {v:.0f}â‚¬" for k, v in top_categories.items())
+            logger.debug("IA indisponible pour résumé hebdo, fallback texte simple")
+            cats_txt = ", ".join(f"{k}: {v:.0f}€" for k, v in top_categories.items())
             message = (
-                f"ðŸ“Š RÃ©sumÃ© semaine {debut_semaine:%d/%m} â†’ {fin_semaine:%d/%m}:\n"
-                f"- {nb_repas} repas planifiÃ©s\n"
-                f"- {depenses_semaine:.0f}â‚¬ de dÃ©penses ({cats_txt})"
+                f"📊 Résumé semaine {debut_semaine:%d/%m} → {fin_semaine:%d/%m}:\n"
+                f"- {nb_repas} repas planifiés\n"
+                f"- {depenses_semaine:.0f}€ de dépenses ({cats_txt})"
             )
 
         dispatcher = get_dispatcher_notifications()
@@ -4302,11 +4302,11 @@ def _job_resume_hebdo_ia() -> None:
             dispatcher,
             message=message,
             canaux=["telegram", "email"],
-            titre="RÃ©sumÃ© hebdomadaire",
+            titre="Résumé hebdomadaire",
         )
-        logger.info("B9: RÃ©sumÃ© hebdo IA envoyÃ©")
+        logger.info("B9: Résumé hebdo IA envoyé")
     except Exception:
-        logger.exception("Erreur job B9 rÃ©sumÃ© hebdo IA")
+        logger.exception("Erreur job B9 résumé hebdo IA")
 
 
 _REGISTRE_JOBS.update(
@@ -4314,29 +4314,29 @@ _REGISTRE_JOBS.update(
         # Nouveaux jobs
         "alertes_budget_seuil": ("Alertes budget seuil (quotidien 20h)", _job_alertes_budget_seuil),
         "coherence_planning_courses": (
-            "CohÃ©rence planningâ†”courses (dimanche 19h)",
+            "Cohérence planning↔courses (dimanche 19h)",
             _job_coherence_planning_courses,
         ),
         "sync_resultats_paris_auto": (
-            "Synchronisation rÃ©sultats paris (auto)",
+            "Synchronisation résultats paris (auto)",
             _job_sync_resultats_paris_auto,
         ),
         "rapport_jardin_saisonnier": ("Rapport jardin saisonnier (mensuel)", _job_rapport_jardin_saisonnier),
         "nettoyage_exports_anciens": ("Nettoyage exports > 30 jours", _job_nettoyage_exports_anciens),
         "health_check_services_ia": ("Health check services IA (6h)", _job_health_check_services_ia),
-        "resume_hebdo_ia": ("RÃ©sumÃ© hebdomadaire IA intelligent", _job_resume_hebdo_ia),
-        # Sprint 16 â€” Notifications WhatsApp et Email
-        "s16_resume_weekend_whatsapp": ("S16.3 RÃ©sumÃ© weekend suggestions WhatsApp", _job_resume_weekend_whatsapp),
+        "resume_hebdo_ia": ("Résumé hebdomadaire IA intelligent", _job_resume_hebdo_ia),
+        # Sprint 16 — Notifications WhatsApp et Email
+        "s16_resume_weekend_whatsapp": ("S16.3 Résumé weekend suggestions WhatsApp", _job_resume_weekend_whatsapp),
         "s16_rappel_entretien_whatsapp": ("S16.6 Rappel entretien maison WhatsApp", _job_rappel_entretien_whatsapp),
         "s16_bilan_nutrition_whatsapp": ("S16.5 Bilan nutrition semaine WhatsApp", _job_bilan_nutrition_whatsapp),
         "s16_rapport_famille_mensuel": ("S16.8 Rapport famille mensuel complet email/PDF", _job_rapport_famille_mensuel_complet),
         "s16_rapport_maison_trimestriel": ("S16.9 Rapport maison trimestriel email/PDF", _job_rapport_maison_trimestriel),
-        "s21_rapport_mensuel_unifie_email": ("S21.5 Rapport mensuel unifiÃ© email/PDF", _job_s21_rapport_mensuel_unifie_email),
+        "s21_rapport_mensuel_unifie_email": ("S21.5 Rapport mensuel unifié email/PDF", _job_s21_rapport_mensuel_unifie_email),
     }
 )
 
 
-# â”€â”€â”€ Jobs backup et synchro â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── Jobs backup et synchro ─────────────────────────────────────────────
 
 
 def _job_rappels_jardin_saisonniers() -> None:
@@ -4355,14 +4355,14 @@ _REGISTRE_JOBS.update(
     {
         # Nouveaux jobs
         "rappels_jardin_saisonniers": ("Rappels jardin saisonniers (lundi 07h)", _job_rappels_jardin_saisonniers),
-        "verification_sante_systeme": ("VÃ©rification santÃ© systÃ¨me (horaire)", _job_verification_sante_systeme),
+        "verification_sante_systeme": ("Vérification santé système (horaire)", _job_verification_sante_systeme),
         "backup_auto_hebdo_json": ("Backup auto hebdo JSON (dim 04h)", _job_backup_auto_hebdo_json),
     }
 )
 
 
-class DÃ©marreurCron:
-    """Enveloppe legÃ¨re autour de BackgroundScheduler pour un dÃ©marrage/arrÃªt propre."""
+class DémarreurCron:
+    """Enveloppe legère autour de BackgroundScheduler pour un démarrage/arrêt propre."""
 
     def __init__(self) -> None:
         self._scheduler = BackgroundScheduler(
@@ -4372,7 +4372,7 @@ class DÃ©marreurCron:
         self._configurer_jobs()
 
     def _planifier_job(self, job_id: str, trigger: CronTrigger, *, replace_existing: bool = False) -> None:
-        """Planifie un job en passant systÃ©matiquement par l'instrumentation Phase 7."""
+        """Planifie un job en passant systématiquement par l'instrumentation Phase 7."""
         nom = _REGISTRE_JOBS.get(job_id, (job_id, None))[0]
         self._scheduler.add_job(
             lambda _job_id=job_id: executer_job_par_id(_job_id, source="cron"),
@@ -4388,36 +4388,36 @@ class DÃ©marreurCron:
     def demarrer(self) -> None:
         if not self._scheduler.running:
             self._scheduler.start()
-            logger.info("Scheduler cron dÃ©marrÃ© (%d job(s))", len(self._scheduler.get_jobs()))
+            logger.info("Scheduler cron démarré (%d job(s))", len(self._scheduler.get_jobs()))
 
     def arreter(self) -> None:
         if self._scheduler.running:
             self._scheduler.shutdown(wait=False)
-            logger.info("Scheduler cron arrÃªtÃ©")
+            logger.info("Scheduler cron arrêté")
 
 
-# â”€â”€â”€ Helpers module-level â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ─── Helpers module-level ─────────────────────────────────────────────────────
 
-_demarreur: DÃ©marreurCron | None = None
+_demarreur: DémarreurCron | None = None
 
 
 def demarrer_scheduler() -> None:
-    """Initialise et dÃ©marre l'ordonnanceur global (appelÃ© depuis le lifespan FastAPI)."""
+    """Initialise et démarre l'ordonnanceur global (appelé depuis le lifespan FastAPI)."""
     global _demarreur
     try:
-        _demarreur = DÃ©marreurCron()
+        _demarreur = DémarreurCron()
         _demarreur.demarrer()
     except Exception:
-        logger.exception("Impossible de dÃ©marrer le scheduler cron")
+        logger.exception("Impossible de démarrer le scheduler cron")
 
 
 def arreter_scheduler() -> None:
-    """ArrÃªte proprement l'ordonnanceur (appelÃ© depuis le lifespan FastAPI Ã  l'arrÃªt)."""
+    """Arrête proprement l'ordonnanceur (appelé depuis le lifespan FastAPI à l'arrêt)."""
     global _demarreur
     if _demarreur is not None:
         try:
             _demarreur.arreter()
         except Exception:
-            logger.exception("Erreur Ã  l'arrÃªt du scheduler cron")
+            logger.exception("Erreur à l'arrêt du scheduler cron")
         finally:
             _demarreur = None

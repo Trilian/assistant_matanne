@@ -1,6 +1,6 @@
-﻿# Admin Guide â€” Assistant MaTanne
+﻿# Admin Guide — Assistant MaTanne
 
-> Guide opÃ©ratoire du module administration.
+> Guide opératoire du module administration.
 
 ---
 
@@ -11,31 +11,31 @@ Le module admin permet de:
 - superviser les services
 - lancer des jobs manuellement
 - tester les notifications
-- auditer l'activitÃ©
-- diagnostiquer les problÃ¨mes de cohÃ©rence/cache
+- auditer l'activité
+- diagnostiquer les problèmes de cohérence/cache
 
 ---
 
-## AccÃ¨s et sÃ©curitÃ©
+## Accès et sécurité
 
-Toutes les routes admin sont protÃ©gÃ©es par rÃ´le `admin`.
+Toutes les routes admin sont protégées par rôle `admin`.
 
-PrÃ©-requis:
+Pré-requis:
 
-- Ãªtre authentifiÃ©
-- possÃ©der le rÃ´le admin dans le profil
+- être authentifié
+- posséder le rôle admin dans le profil
 
-ContrÃ´les:
+Contrôles:
 
 - `Depends(require_role("admin"))`
-- rate limiting sur les actions sensibles (ex: exÃ©cution manuelle de jobs)
+- rate limiting sur les actions sensibles (ex: exécution manuelle de jobs)
 - audit log sur actions mutantes
 
 ---
 
 ## Endpoints principaux
 
-RÃ©fÃ©rence: `src/api/routes/admin.py`
+Référence: `src/api/routes/admin.py`
 
 - `GET /api/v1/admin/audit-logs`
 - `GET /api/v1/admin/audit-stats`
@@ -54,65 +54,65 @@ RÃ©fÃ©rence: `src/api/routes/admin.py`
 
 ---
 
-## ProcÃ©dures courantes
+## Procédures courantes
 
-### 1) VÃ©rifier la santÃ© des services
+### 1) Vérifier la santé des services
 
 1. Ouvrir la page admin services
 2. Appeler `GET /services/health`
-3. VÃ©rifier services en erreur ou dÃ©gradÃ©s
+3. Vérifier services en erreur ou dégradés
 
 ### 2) Lancer un job manuellement
 
 1. Aller sur la section jobs
 2. Identifier le job cible
-3. ExÃ©cuter `POST /jobs/{id}/run`
+3. Exécuter `POST /jobs/{id}/run`
 4. Consulter `GET /jobs/{id}/logs`
 
-### 3) Tester la chaÃ®ne de notifications
+### 3) Tester la chaîne de notifications
 
 1. Ouvrir l'outil de test notifications
-2. DÃ©clencher `POST /notifications/test`
-3. Valider la rÃ©ception par canal (ntfy/push/email/Telegram)
+2. Déclencher `POST /notifications/test`
+3. Valider la réception par canal (ntfy/push/email/Telegram)
 
-### 4) Vider le cache en sÃ©curitÃ©
+### 4) Vider le cache en sécurité
 
-1. VÃ©rifier les stats cache
-2. DÃ©clencher `POST /cache/clear`
-3. Re-vÃ©rifier les hit/miss aprÃ¨s quelques requÃªtes
+1. Vérifier les stats cache
+2. Déclencher `POST /cache/clear`
+3. Re-vérifier les hit/miss après quelques requêtes
 
 ---
 
 ## Diagnostic incidents
 
-### Jobs ne s'exÃ©cutent plus
+### Jobs ne s'exécutent plus
 
-- vÃ©rifier scheduler actif
-- vÃ©rifier logs job
-- tester dÃ©clenchement manuel
+- vérifier scheduler actif
+- vérifier logs job
+- tester déclenchement manuel
 - inspecter exceptions DB/externes
 
 ### Notifications absentes
 
 - lancer un test unitaire via route admin
-- vÃ©rifier configuration canal
-- vÃ©rifier quotas/rate limits
-- vÃ©rifier logs webhooks (Telegram)
+- vérifier configuration canal
+- vérifier quotas/rate limits
+- vérifier logs webhooks (Telegram)
 
-### IncohÃ©rence de donnÃ©es
+### Incohérence de données
 
-- exÃ©cuter `/db/coherence`
+- exécuter `/db/coherence`
 - recouper avec `scripts/audit_orm_sql.py`
-- valider les derniÃ¨res migrations SQL
+- valider les dernières migrations SQL
 
 ---
 
 ## Bonnes pratiques exploitation
 
-- privilÃ©gier le test manuel d'un job avant activation massive
-- garder une traÃ§abilitÃ© des actions admin sensibles
-- ne pas vider le cache pendant des opÃ©rations critiques
-- confirmer les permissions avant dÃ©sactivation d'utilisateurs
+- privilégier le test manuel d'un job avant activation massive
+- garder une traçabilité des actions admin sensibles
+- ne pas vider le cache pendant des opérations critiques
+- confirmer les permissions avant désactivation d'utilisateurs
 
 ---
 
@@ -121,5 +121,5 @@ RÃ©fÃ©rence: `src/api/routes/admin.py`
 - persistance DB de l'historique jobs
 - mode dry-run des jobs
 - simulateur de flux inter-modules
-- dashboard admin temps rÃ©el (latence, req/s, cache)
+- dashboard admin temps réel (latence, req/s, cache)
 

@@ -1,17 +1,17 @@
 ﻿# Troubleshooting
 
-> Guide rapide pour diagnostiquer les pannes les plus frÃ©quentes en dÃ©veloppement et en exploitation lÃ©gÃ¨re.
+> Guide rapide pour diagnostiquer les pannes les plus fréquentes en développement et en exploitation légère.
 
 ---
 
-## Backend ne dÃ©marre pas
+## Backend ne démarre pas
 
-VÃ©rifier:
+Vérifier:
 
 - la configuration `.env.local`
-- la disponibilitÃ© de `DATABASE_URL`
-- les imports rÃ©cents dans `src/api/main.py`
-- les traces liÃ©es au scheduler dans les logs de dÃ©marrage
+- la disponibilité de `DATABASE_URL`
+- les imports récents dans `src/api/main.py`
+- les traces liées au scheduler dans les logs de démarrage
 
 Commandes utiles:
 
@@ -22,96 +22,96 @@ python -c "from src.core.db import obtenir_moteur; obtenir_moteur().connect(); p
 
 ---
 
-## Frontend ne parle plus Ã  l'API
+## Frontend ne parle plus à l'API
 
-VÃ©rifier:
+Vérifier:
 
 - `NEXT_PUBLIC_API_URL`
-- que le backend Ã©coute bien sur `http://localhost:8000`
-- les rÃ¨gles CORS
-- l'Ã©tat d'authentification et le token cÃ´tÃ© frontend
+- que le backend écoute bien sur `http://localhost:8000`
+- les règles CORS
+- l'état d'authentification et le token côté frontend
 
 ---
 
 ## Scheduler ou jobs absents
 
-SymptÃ´mes:
+Symptômes:
 
 - page `/admin/jobs` vide
 - aucun job visible
-- notifications planifiÃ©es non envoyÃ©es
+- notifications planifiées non envoyées
 
-VÃ©rifications:
+Vérifications:
 
-- dÃ©marrage du scheduler dans `src/api/main.py`
-- configuration `DÃ©marreurCron` dans `src/services/core/cron/jobs.py`
+- démarrage du scheduler dans `src/api/main.py`
+- configuration `DémarreurCron` dans `src/services/core/cron/jobs.py`
 - logs backend au boot
 
 ---
 
-## Cache incohÃ©rent
+## Cache incohérent
 
-SymptÃ´mes:
+Symptômes:
 
-- donnÃ©es qui semblent figÃ©es
+- données qui semblent figées
 - suggestions qui ne se recalculent pas
-- tableau de bord en retard aprÃ¨s mutation
+- tableau de bord en retard après mutation
 
 Actions:
 
 - utiliser `/admin/services`
 - purger par motif avant de vider tout le cache
-- vÃ©rifier si le flux concernÃ© utilise `@avec_cache`
+- vérifier si le flux concerné utilise `@avec_cache`
 
 ---
 
-## Notifications non reÃ§ues
+## Notifications non reçues
 
-VÃ©rifier:
+Vérifier:
 
 - abonnement push actif
-- prÃ©fÃ©rences de canaux par catÃ©gorie
-- secrets email ou Telegram selon le canal visÃ©
+- préférences de canaux par catégorie
+- secrets email ou Telegram selon le canal visé
 - test canal depuis l'admin
 
 ---
 
 ## Garmin ou Google Calendar ne synchronisent pas
 
-VÃ©rifier:
+Vérifier:
 
-- connexions externes rÃ©ellement actives en base
+- connexions externes réellement actives en base
 - refresh tokens valides
 - exceptions par profil dans les logs backend
-- exÃ©cution manuelle du job correspondant depuis l'admin
+- exécution manuelle du job correspondant depuis l'admin
 
 ---
 
 ## Automations inactives
 
-VÃ©rifier:
+Vérifier:
 
-- qu'il existe des rÃ¨gles actives en base
-- que le dÃ©clencheur utilisÃ© est supportÃ© par le moteur
-- que l'action visÃ©e est prise en charge
+- qu'il existe des règles actives en base
+- que le déclencheur utilisé est supporté par le moteur
+- que l'action visée est prise en charge
 - que le job `automations_runner` tourne bien
 
 ---
 
 ## Page admin en erreur
 
-VÃ©rifier:
+Vérifier:
 
-- que l'utilisateur a bien le rÃ´le `admin`
-- que l'API admin rÃ©pond
+- que l'utilisateur a bien le rôle `admin`
+- que l'API admin répond
 - que les endpoints `jobs`, `services/health` et `users` ne renvoient pas d'erreur
 - le composant d'erreur `frontend/src/app/(app)/admin/error.tsx`
 
 ---
 
-## Tests cassÃ©s aprÃ¨s mise Ã  jour docs ou code
+## Tests cassés après mise à jour docs ou code
 
-VÃ©rifier:
+Vérifier:
 
 - backend: `pytest -v`
 - frontend: `cd frontend && npm test`
