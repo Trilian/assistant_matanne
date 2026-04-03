@@ -2,8 +2,8 @@
 Services Maison - Gestion intelligente de la maison et du jardin.
 
 Ce package regroupe tous les services pour:
-- Jardin: conseils IA, mÈtÈo, arrosage intelligent
-- Entretien: routines mÈnage, planification IA
+- Jardin: conseils IA, m√©t√©o, arrosage intelligent
+- Entretien: routines m√©nage, planification IA
 - Projets: estimation, pipeline achats/budget
 
 Architecture:
@@ -17,7 +17,7 @@ Architecture:
 from typing import TYPE_CHECKING
 
 # -----------------------------------------------------------
-# LAZY LOADING pour performance au dÈmarrage
+# LAZY LOADING pour performance au d√©marrage
 # -----------------------------------------------------------
 
 _SERVICES = {
@@ -29,7 +29,7 @@ _SERVICES = {
     "get_jardin_service": "jardin_service",
     "get_entretien_service": "entretien_service",
     "get_projets_service": "projets_service",
-    # Factories (franÁais)
+    # Factories (fran√ßais)
     "obtenir_service_jardin": "jardin_service",
     "obtenir_service_entretien": "entretien_service",
     "obtenir_service_projets": "projets_service",
@@ -67,7 +67,7 @@ _SERVICES = {
     "EstimationsCrudService": "diagnostics_crud_service",
     "get_estimations_crud_service": "diagnostics_crud_service",
     "obtenir_service_estimations_crud": "diagnostics_crud_service",
-    # Extensions CRUD services (nuisibles, devis, entretien saisonnier, relevÈs)
+    # Extensions CRUD services (nuisibles, devis, entretien saisonnier, relev√©s)
     "NuisiblesCrudService": "extensions_crud_service",
     "get_nuisibles_crud_service": "extensions_crud_service",
     "DevisCrudService": "extensions_crud_service",
@@ -84,7 +84,7 @@ _SERVICES = {
     "ContexteMaisonService": "contexte_maison_service",
     "get_contexte_maison_service": "contexte_maison_service",
     "obtenir_service_contexte_maison": "contexte_maison_service",
-    # Catalogue Entretien service (sync JSON ? t‚ches DB)
+    # Catalogue Entretien service (sync JSON ? t√¢ches DB)
     "CatalogueEntretienService": "catalogue_entretien_service",
     "get_catalogue_entretien_service": "catalogue_entretien_service",
     "obtenir_service_catalogue_entretien": "catalogue_entretien_service",
@@ -92,7 +92,7 @@ _SERVICES = {
     "NotificationsMaisonService": "notifications_maison",
     "get_notifications_maison_service": "notifications_maison",
     "obtenir_service_notifications_maison": "notifications_maison",
-    # Fiche T‚che service (catalogue + IA fallback)
+    # Fiche T√¢che service (catalogue + IA fallback)
     "FicheTacheService": "fiche_tache_service",
     "get_fiche_tache_service": "fiche_tache_service",
     "obtenir_service_fiche_tache": "fiche_tache_service",
@@ -208,7 +208,7 @@ __all__ = [
     "get_jardin_service",
     "get_entretien_service",
     "get_projets_service",
-    # Factories (franÁais)
+    # Factories (fran√ßais)
     "obtenir_service_jardin",
     "obtenir_service_entretien",
     "obtenir_service_projets",

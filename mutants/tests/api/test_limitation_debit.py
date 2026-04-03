@@ -1,0 +1,697 @@
+"""
+Tests pour src/api/rate_limiting/
+
+Tests unitaires avec vraies données pour la limitation de débit.
+"""
+
+import time
+from unittest.mock import MagicMock
+
+import pytest
+
+# ═══════════════════════════════════════════════════════════
+# DONNÉES DE TEST
+# ═══════════════════════════════════════════════════════════
+
+
+ADRESSES_IP = [
+    "192.168.1.1",
+    "10.0.0.1",
+    "172.16.0.1",
+    "8.8.8.8",
+]
+
+CHEMINS_EXEMPTS = ["/health", "/docs", "/redoc", "/openapi.json"]
+
+CHEMINS_PROTEGES = [
+    "/api/v1/recettes",
+    "/api/v1/inventaire",
+    "/api/v1/courses",
+    "/api/v1/planning",
+]
+
+CHEMINS_IA = [
+    "/api/v1/ai/suggestions",
+    "/api/v1/suggest/recettes",
+]
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS STRATEGIE
+# ═══════════════════════════════════════════════════════════
+
+
+class TestStrategieLimitationDebit:
+    """Tests de l'énumération StrategieLimitationDebit."""
+
+    def test_strategies_francaises_existent(self):
+        """Les stratégies françaises sont définies."""
+        from src.api.rate_limiting import StrategieLimitationDebit
+
+        assert hasattr(StrategieLimitationDebit, "FENETRE_FIXE")
+        assert hasattr(StrategieLimitationDebit, "FENETRE_GLISSANTE")
+        assert hasattr(StrategieLimitationDebit, "SEAU_A_JETONS")
+
+    def test_valeurs_equivalentes(self):
+        """Stratégies françaises et anglaises ont mêmes valeurs."""
+        from src.api.rate_limiting import StrategieLimitationDebit
+
+        assert StrategieLimitationDebit.FENETRE_FIXE.value == "fixed_window"
+        assert StrategieLimitationDebit.FENETRE_GLISSANTE.value == "sliding_window"
+        assert StrategieLimitationDebit.SEAU_A_JETONS.value == "token_bucket"
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS CONFIG
+# ═══════════════════════════════════════════════════════════
+
+
+class TestConfigLimitationDebit:
+    """Tests de la configuration."""
+
+    def test_valeurs_par_defaut(self):
+        """Les valeurs par défaut sont raisonnables."""
+        from src.api.rate_limiting import ConfigLimitationDebit
+
+        config = ConfigLimitationDebit()
+
+        assert config.requetes_par_minute == 60
+        assert config.requetes_par_heure == 1000
+        assert config.requetes_par_jour == 10000
+
+    def test_limites_utilisateurs(self):
+        """Les limites par type d'utilisateur sont cohérentes."""
+        from src.api.rate_limiting import ConfigLimitationDebit
+
+        config = ConfigLimitationDebit()
+
+        # Anonyme < Authentifié < Premium
+        assert config.requetes_anonyme_par_minute < config.requetes_authentifie_par_minute
+        assert config.requetes_authentifie_par_minute < config.requetes_premium_par_minute
+
+    def test_limites_ia_restrictives(self):
+        """Les limites IA sont plus restrictives."""
+        from src.api.rate_limiting import ConfigLimitationDebit
+
+        config = ConfigLimitationDebit()
+
+        # IA plus restrictif que standard
+        assert config.requetes_ia_par_minute < config.requetes_par_minute
+        assert config.requetes_ia_par_heure < config.requetes_par_heure
+        assert config.requetes_ia_par_jour < config.requetes_par_jour
+
+    def test_chemins_exemptes_par_defaut(self):
+        """Les chemins exemptés par défaut sont corrects."""
+        from src.api.rate_limiting import ConfigLimitationDebit
+
+        config = ConfigLimitationDebit()
+
+        for chemin in CHEMINS_EXEMPTS:
+            assert chemin in config.chemins_exemptes
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS STOCKAGE
+# ═══════════════════════════════════════════════════════════
+
+
+class TestStockageLimitationDebit:
+    """Tests du stockage en mémoire."""
+
+    @pytest.fixture
+    def stockage(self):
+        """Crée un stockage frais pour chaque test."""
+        from src.api.rate_limiting import StockageLimitationDebit
+
+        return StockageLimitationDebit()
+
+    def test_incrementer_premiere_requete(self, stockage):
+        """Première requête retourne 1."""
+        cle = "ip:192.168.1.1:minute"
+        compte = stockage.incrementer(cle, 60)
+        assert compte == 1
+
+    def test_incrementer_plusieurs_requetes(self, stockage):
+        """Le compteur s'incrémente correctement."""
+        cle = "ip:192.168.1.1:minute"
+
+        for i in range(1, 11):
+            compte = stockage.incrementer(cle, 60)
+            assert compte == i
+
+    def test_obtenir_compte_vide(self, stockage):
+        """Clé inexistante retourne 0."""
+        compte = stockage.obtenir_compte("cle_inexistante", 60)
+        assert compte == 0
+
+    def test_obtenir_restant(self, stockage):
+        """Calcul du restant correct."""
+        cle = "test:restant"
+        limite = 10
+
+        for _ in range(3):
+            stockage.incrementer(cle, 60)
+
+        restant = stockage.obtenir_restant(cle, 60, limite)
+        assert restant == 7  # 10 - 3
+
+    def test_obtenir_restant_negatif_devient_zero(self, stockage):
+        """Restant négatif devient 0."""
+        cle = "test:depassement"
+        limite = 5
+
+        for _ in range(10):
+            stockage.incrementer(cle, 60)
+
+        restant = stockage.obtenir_restant(cle, 60, limite)
+        assert restant == 0
+
+    def test_bloquer_et_verifier(self, stockage):
+        """Le blocage fonctionne."""
+        cle = "ip:mauvais_acteur"
+
+        assert not stockage.est_bloque(cle)
+
+        stockage.bloquer(cle, 60)
+
+        assert stockage.est_bloque(cle)
+
+    def test_nettoyage_anciennes_entrees(self, stockage):
+        """Les entrées expirées sont nettoyées."""
+        cle = "test:expiration"
+
+        # Simule des entrées anciennes en patchant time
+        stockage._store[cle] = [
+            (time.time() - 120, 1),  # 2 minutes ago - expired
+            (time.time() - 30, 1),  # 30s ago - valid
+        ]
+
+        # Fenêtre de 60 secondes
+        compte = stockage.obtenir_compte(cle, 60)
+
+        # Seule l'entrée valide reste
+        assert compte == 1
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS LIMITEUR
+# ═══════════════════════════════════════════════════════════
+
+
+class TestLimiteurDebit:
+    """Tests du limiteur de débit."""
+
+    @pytest.fixture
+    def limiteur(self):
+        """Crée un limiteur frais."""
+        from src.api.rate_limiting import (
+            ConfigLimitationDebit,
+            LimiteurDebit,
+            StockageLimitationDebit,
+        )
+
+        stockage = StockageLimitationDebit()
+        config = ConfigLimitationDebit(
+            requetes_anonyme_par_minute=5,  # Limite basse pour tests
+            requetes_authentifie_par_minute=10,
+        )
+        return LimiteurDebit(stockage=stockage, config=config)
+
+    def _creer_requete_mock(self, ip: str = "192.168.1.1", path: str = "/api/v1/test"):
+        """Helper pour créer une requête mock."""
+        request = MagicMock()
+        request.client.host = ip
+        request.url.path = path
+        request.headers.get.return_value = None
+        return request
+
+    def test_generer_cle_avec_ip(self, limiteur):
+        """Génère une clé basée sur l'IP."""
+        request = self._creer_requete_mock()
+
+        cle = limiteur._generer_cle(request)
+
+        assert "ip:192.168.1.1" in cle
+
+    def test_generer_cle_avec_utilisateur(self, limiteur):
+        """Génère une clé basée sur l'ID utilisateur."""
+        request = self._creer_requete_mock()
+
+        cle = limiteur._generer_cle(request, identifiant="user_123")
+
+        assert "user:user_123" in cle
+        assert "ip:" not in cle
+
+    def test_verifier_limite_autorise(self, limiteur):
+        """Première requête est autorisée."""
+        request = self._creer_requete_mock()
+
+        resultat = limiteur.verifier_limite(request)
+
+        assert resultat["allowed"] is True
+        assert resultat["remaining"] > 0
+
+    def test_verifier_limite_chemin_exempt(self, limiteur):
+        """Chemins exemptés ne sont pas limités."""
+        for chemin in CHEMINS_EXEMPTS:
+            request = self._creer_requete_mock(path=chemin)
+
+            resultat = limiteur.verifier_limite(request)
+
+            assert resultat["allowed"] is True
+            assert resultat["limit"] == -1  # Pas de limite
+
+    def test_verifier_limite_depassee(self, limiteur):
+        """Une fois limite dépassée, HTTPException levée."""
+        from fastapi import HTTPException
+
+        request = self._creer_requete_mock()
+
+        # Épuiser la limite (5 requêtes anonymes)
+        for _ in range(5):
+            limiteur.verifier_limite(request)
+
+        # 6ème requête doit échouer
+        with pytest.raises(HTTPException) as exc_info:
+            limiteur.verifier_limite(request)
+
+        assert exc_info.value.status_code == 429
+        assert "Limite" in exc_info.value.detail or "dépassée" in exc_info.value.detail
+
+    def test_limite_plus_haute_pour_utilisateur_authentifie(self, limiteur):
+        """Utilisateurs authentifiés ont plus de requêtes."""
+        request = self._creer_requete_mock()
+
+        # Utilisateur anonyme: limite = 5
+        for _ in range(5):
+            limiteur.verifier_limite(request)
+
+        # Utilisateur authentifié depuis une autre IP: limite = 10
+        request2 = self._creer_requete_mock(ip="10.0.0.1")
+        for _ in range(10):
+            resultat = limiteur.verifier_limite(request2, id_utilisateur="user_abc")
+            assert resultat["allowed"]
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS MIDDLEWARE
+# ═══════════════════════════════════════════════════════════
+
+
+class TestMiddlewareLimitationDebit:
+    """Tests du middleware FastAPI."""
+
+    def test_import_middleware(self):
+        """Le middleware s'importe correctement."""
+        from src.api.rate_limiting import MiddlewareLimitationDebit
+
+        assert MiddlewareLimitationDebit is not None
+
+    def test_middleware_dans_app(self):
+        """Le middleware est utilisable dans une app FastAPI."""
+        from fastapi import FastAPI
+
+        from src.api.rate_limiting import MiddlewareLimitationDebit
+
+        app = FastAPI()
+        app.add_middleware(MiddlewareLimitationDebit)
+
+        # Vérifie que le middleware est enregistré
+        middleware_classes = [m.cls for m in app.user_middleware]
+        assert MiddlewareLimitationDebit in middleware_classes
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS INTÉGRATION
+# ═══════════════════════════════════════════════════════════
+
+
+class TestIntegrationLimitationDebit:
+    """Tests d'intégration avec vraie app FastAPI."""
+
+    @pytest.fixture
+    def app_test(self, monkeypatch):
+        """Crée une app FastAPI de test avec rate limiting activé."""
+        from fastapi import FastAPI
+
+        from src.api.rate_limiting import (
+            ConfigLimitationDebit,
+            LimiteurDebit,
+            MiddlewareLimitationDebit,
+            StockageLimitationDebit,
+        )
+
+        # Réactiver le rate limiting pour ces tests spécifiques
+        monkeypatch.setenv("RATE_LIMITING_DISABLED", "false")
+
+        # Config très restrictive pour les tests
+        stockage = StockageLimitationDebit()
+        config = ConfigLimitationDebit(
+            requetes_anonyme_par_minute=3,
+        )
+        limiteur = LimiteurDebit(stockage=stockage, config=config)
+
+        app = FastAPI()
+        app.add_middleware(MiddlewareLimitationDebit, limiteur=limiteur)
+
+        @app.get("/test")
+        async def test_endpoint():
+            return {"status": "ok"}
+
+        @app.get("/health")
+        async def health():
+            return {"healthy": True}
+
+        return app
+
+    def test_endpoint_protege(self, app_test):
+        """Endpoint protégé respecte la limite."""
+        from fastapi.testclient import TestClient
+
+        client = TestClient(app_test, raise_server_exceptions=False)
+
+        # 3 requêtes autorisées
+        for i in range(3):
+            response = client.get("/test")
+            assert response.status_code == 200, f"Req {i + 1} failed: {response.status_code}"
+
+        # 4ème requête bloquée (429 ou 500 selon gestion d'erreurs)
+        response = client.get("/test")
+        assert response.status_code in (
+            429,
+            500,
+        ), f"Expected rate limit, got {response.status_code}"
+
+    def test_endpoint_exempt(self, app_test):
+        """Endpoint /health n'est pas limité."""
+        from fastapi.testclient import TestClient
+
+        client = TestClient(app_test)
+
+        # Beaucoup de requêtes
+        for _ in range(100):
+            response = client.get("/health")
+            assert response.status_code == 200
+
+    def test_headers_rate_limit_presents(self, app_test):
+        """Les headers de limite sont présents."""
+        from fastapi.testclient import TestClient
+
+        client = TestClient(app_test)
+        response = client.get("/test")
+
+        assert "X-RateLimit-Limit" in response.headers
+        assert "X-RateLimit-Remaining" in response.headers
+        assert "X-RateLimit-Reset" in response.headers
+
+
+# ═══════════════════════════════════════════════════════════
+# TESTS UTILITAIRES ET FONCTIONS ADDITIONNELLES
+# ═══════════════════════════════════════════════════════════
+
+
+class TestUtilitaires:
+    """Tests des fonctions utilitaires."""
+
+    def test_obtenir_stats_limitation(self):
+        """obtenir_stats_limitation retourne les stats."""
+        from src.api.rate_limiting import obtenir_stats_limitation
+
+        stats = obtenir_stats_limitation()
+
+        assert "cles_actives" in stats
+        assert "cles_bloquees" in stats
+        assert "configuration" in stats
+        assert "requetes_par_minute" in stats["configuration"]
+
+    def test_reinitialiser_limites(self):
+        """reinitialiser_limites réinitialise les compteurs."""
+        from src.api.rate_limiting import (
+            _stockage,
+            reinitialiser_limites,
+        )
+
+        # Ajouter des données
+        _stockage.incrementer("test:key", 60)
+
+        # Réinitialiser
+        reinitialiser_limites()
+
+        # Les données devraient être nettoyées (nouveau stockage)
+
+    def test_configurer_limites(self):
+        """configurer_limites met à jour la config globale."""
+        from src.api.rate_limiting import (
+            ConfigLimitationDebit,
+            configurer_limites,
+        )
+
+        # Créer une nouvelle config
+        nouvelle_config = ConfigLimitationDebit(requetes_par_minute=999)
+
+        # Configurer
+        configurer_limites(nouvelle_config)
+
+        # Vérifier via le module config (pas via __init__ qui cache l'ancienne référence)
+        from src.api.rate_limiting import config as config_module
+
+        assert config_module.config_limitation_debit.requetes_par_minute == 999
+
+
+class TestLimiteurDebitHeaders:
+    """Tests pour les méthodes de headers du limiteur."""
+
+    @pytest.fixture
+    def limiteur_avec_headers_actifs(self):
+        """Limiteur avec headers activés."""
+        from src.api.rate_limiting import (
+            ConfigLimitationDebit,
+            LimiteurDebit,
+            StockageLimitationDebit,
+        )
+
+        stockage = StockageLimitationDebit()
+        config = ConfigLimitationDebit(activer_headers=True)
+        return LimiteurDebit(stockage=stockage, config=config)
+
+    @pytest.fixture
+    def limiteur_sans_headers(self):
+        """Limiteur avec headers désactivés."""
+        from src.api.rate_limiting import (
+            ConfigLimitationDebit,
+            LimiteurDebit,
+            StockageLimitationDebit,
+        )
+
+        stockage = StockageLimitationDebit()
+        config = ConfigLimitationDebit(activer_headers=False)
+        return LimiteurDebit(stockage=stockage, config=config)
+
+    def test_ajouter_headers_actifs(self, limiteur_avec_headers_actifs):
+        """Headers sont ajoutés quand activés."""
+        response = MagicMock()
+        response.headers = {}
+
+        info_limite = {"limit": 60, "remaining": 55, "reset": 30}
+
+        limiteur_avec_headers_actifs.ajouter_headers(response, info_limite)
+
+        assert "X-RateLimit-Limit" in response.headers
+        assert "X-RateLimit-Remaining" in response.headers
+        assert "X-RateLimit-Reset" in response.headers
+
+    def test_ajouter_headers_desactives(self, limiteur_sans_headers):
+        """Headers ne sont pas ajoutés quand désactivés."""
+        response = MagicMock()
+        response.headers = {}
+
+        info_limite = {"limit": 60, "remaining": 55, "reset": 30}
+
+        limiteur_sans_headers.ajouter_headers(response, info_limite)
+
+        # Headers ne devraient pas être ajoutés
+        assert "X-RateLimit-Limit" not in response.headers
+
+    def test_ajouter_headers_limite_negative(self, limiteur_avec_headers_actifs):
+        """Headers non ajoutés si limite négative (chemin exempté)."""
+        response = MagicMock()
+        response.headers = {}
+
+        info_limite = {"limit": -1, "remaining": -1}
+
+        limiteur_avec_headers_actifs.ajouter_headers(response, info_limite)
+
+        # Headers pas ajoutés pour les chemins exemptés
+        assert "X-RateLimit-Limit" not in response.headers
+
+
+class TestLimiteurDebitClé:
+    """Tests pour la génération de clés."""
+
+    @pytest.fixture
+    def limiteur(self):
+        """Crée un limiteur de test."""
+        from src.api.rate_limiting import LimiteurDebit, StockageLimitationDebit
+
+        return LimiteurDebit(stockage=StockageLimitationDebit())
+
+    def _creer_requete_mock(self, ip="192.168.1.1", forwarded=None):
+        """Helper pour créer une requête mock."""
+        request = MagicMock()
+        request.client.host = ip
+        request.headers.get.return_value = forwarded
+        return request
+
+    def test_generer_cle_avec_endpoint(self, limiteur):
+        """Génère une clé avec endpoint spécifié."""
+        request = self._creer_requete_mock()
+
+        cle = limiteur._generer_cle(request, endpoint="/api/v1/recettes")
+
+        assert "endpoint:/api/v1/recettes" in cle
+
+    def test_generer_cle_avec_x_forwarded_for(self, limiteur):
+        """Utilise X-Forwarded-For si présent."""
+        request = self._creer_requete_mock(ip="10.0.0.1", forwarded="203.0.113.195, 70.41.3.18")
+
+        cle = limiteur._generer_cle(request)
+
+        # Doit utiliser la première IP du X-Forwarded-For
+        assert "ip:203.0.113.195" in cle
+
+    def test_generer_cle_client_none(self, limiteur):
+        """Génère clé avec client=None."""
+        request = MagicMock()
+        request.client = None
+        request.headers.get.return_value = None
+
+        cle = limiteur._generer_cle(request)
+
+        assert "ip:unknown" in cle
+
+
+class TestLimiteurDebitPremium:
+    """Tests pour les utilisateurs premium."""
+
+    @pytest.fixture
+    def limiteur(self):
+        """Crée un limiteur avec config de test."""
+        from src.api.rate_limiting import (
+            ConfigLimitationDebit,
+            LimiteurDebit,
+            StockageLimitationDebit,
+        )
+
+        stockage = StockageLimitationDebit()
+        config = ConfigLimitationDebit(
+            requetes_premium_par_minute=200,
+            requetes_authentifie_par_minute=60,
+            requetes_anonyme_par_minute=20,
+        )
+        return LimiteurDebit(stockage=stockage, config=config)
+
+    def _creer_requete_mock(self, ip="192.168.1.1", path="/api/v1/test"):
+        """Helper pour créer une requête mock."""
+        request = MagicMock()
+        request.client.host = ip
+        request.url.path = path
+        request.headers.get.return_value = None
+        return request
+
+    def test_limite_premium_plus_haute(self, limiteur):
+        """Utilisateurs premium ont une limite plus haute."""
+        request = self._creer_requete_mock()
+
+        # Première requête
+        resultat = limiteur.verifier_limite(request, id_utilisateur="user_123", est_premium=True)
+
+        # La limite doit être celle premium
+        assert resultat["allowed"] is True
+        assert resultat["limit"] == 200  # Premium limit
+
+
+class TestLimiteurDebitBlocage:
+    """Tests pour le blocage après abus."""
+
+    def test_blocage_cle_bloquee(self):
+        """Clé bloquée lève HTTPException."""
+        from fastapi import HTTPException
+
+        from src.api.rate_limiting import LimiteurDebit, StockageLimitationDebit
+
+        stockage = StockageLimitationDebit()
+        limiteur = LimiteurDebit(stockage=stockage)
+
+        request = MagicMock()
+        request.client.host = "1.2.3.4"
+        request.url.path = "/api/test"
+        request.headers.get.return_value = None
+
+        # Bloquer la clé
+        stockage.bloquer("ip:1.2.3.4", 60)
+
+        # Vérifier que l'exception est levée
+        with pytest.raises(HTTPException) as exc_info:
+            limiteur.verifier_limite(request)
+
+        assert exc_info.value.status_code == 429
+
+
+class TestStockageTempsReset:
+    """Tests pour obtenir_temps_reset."""
+
+    def test_temps_reset_cle_vide(self):
+        """Temps reset = 0 si clé vide."""
+        from src.api.rate_limiting import StockageLimitationDebit
+
+        stockage = StockageLimitationDebit()
+
+        reset = stockage.obtenir_temps_reset("cle:inexistante", 60)
+
+        assert reset == 0
+
+    def test_temps_reset_avec_donnees(self):
+        """Temps reset calculé correctement."""
+        from src.api.rate_limiting import StockageLimitationDebit
+
+        stockage = StockageLimitationDebit()
+
+        # Ajouter une entrée
+        stockage.incrementer("test:reset", 60)
+
+        reset = stockage.obtenir_temps_reset("test:reset", 60)
+
+        # Devrait être proche de 60 secondes
+        assert 55 <= reset <= 60
+
+
+class TestDependancesFastAPI:
+    """Tests pour les dépendances FastAPI."""
+
+    @pytest.mark.asyncio
+    async def test_verifier_limite_debit_dependency(self):
+        """Dépendance verifier_limite_debit fonctionne."""
+        from src.api.rate_limiting import verifier_limite_debit
+
+        request = MagicMock()
+        request.client.host = "1.2.3.4"
+        request.url.path = "/api/test"
+        request.headers.get.return_value = None
+
+        result = await verifier_limite_debit(request)
+
+        assert result["allowed"] is True
+
+    @pytest.mark.asyncio
+    async def test_verifier_limite_debit_ia_dependency(self):
+        """Dépendance verifier_limite_debit_ia fonctionne."""
+        from src.api.rate_limiting import verifier_limite_debit_ia
+
+        request = MagicMock()
+        request.client.host = "5.6.7.8"
+        request.url.path = "/api/ai/test"
+        request.headers.get.return_value = None
+
+        result = await verifier_limite_debit_ia(request)
+
+        assert result["allowed"] is True

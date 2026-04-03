@@ -1,13 +1,13 @@
 """
-Subscribers — Handlers d'événements enregistrés au démarrage.
+Subscribers â€” Handlers d'Ã©vÃ©nements enregistrÃ©s au dÃ©marrage.
 
-Ces subscribers réagissent aux événements domaine émis par les services
+Ces subscribers rÃ©agissent aux Ã©vÃ©nements domaine Ã©mis par les services
 pour effectuer des actions transversales :
-- Invalidation de cache quand les données changent
-- Enregistrement de métriques (compteurs, durées)
-- Logging structuré pour audit trail
+- Invalidation de cache quand les donnÃ©es changent
+- Enregistrement de mÃ©triques (compteurs, durÃ©es)
+- Logging structurÃ© pour audit trail
 
-Tous les handlers sont tolérants aux pannes (never crash the bus).
+Tous les handlers sont tolÃ©rants aux pannes (never crash the bus).
 """
 
 from __future__ import annotations
@@ -33,12 +33,12 @@ def _invalider_cache_recettes(event: EvenementDomaine) -> None:
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="recettes")
         logger.debug(
-            "Cache recettes invalidé (%d entrées) suite à %s",
+            "Cache recettes invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache recettes: %s", e)
+        logger.warning("Ã‰chec invalidation cache recettes: %s", e)
 
 
 def _invalider_cache_stock(event: EvenementDomaine) -> None:
@@ -50,28 +50,28 @@ def _invalider_cache_stock(event: EvenementDomaine) -> None:
         nb = cache.invalidate(pattern="inventaire")
         nb += cache.invalidate(pattern="stock")
         logger.debug(
-            "Cache stock invalidé (%d entrées) suite à %s",
+            "Cache stock invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache stock: %s", e)
+        logger.warning("Ã‰chec invalidation cache stock: %s", e)
 
 
 def _invalider_cache_courses(event: EvenementDomaine) -> None:
-    """Invalide le cache courses quand une liste est générée."""
+    """Invalide le cache courses quand une liste est gÃ©nÃ©rÃ©e."""
     try:
         from src.core.caching import obtenir_cache
 
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="courses")
         logger.debug(
-            "Cache courses invalidé (%d entrées) suite à %s",
+            "Cache courses invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache courses: %s", e)
+        logger.warning("Ã‰chec invalidation cache courses: %s", e)
 
 
 def _invalider_cache_entretien(event: EvenementDomaine) -> None:
@@ -82,12 +82,12 @@ def _invalider_cache_entretien(event: EvenementDomaine) -> None:
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="entretien")
         logger.debug(
-            "Cache entretien invalidé (%d entrées) suite à %s",
+            "Cache entretien invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache entretien: %s", e)
+        logger.warning("Ã‰chec invalidation cache entretien: %s", e)
 
 
 def _invalider_cache_planning(event: EvenementDomaine) -> None:
@@ -98,12 +98,12 @@ def _invalider_cache_planning(event: EvenementDomaine) -> None:
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="planning")
         logger.debug(
-            "Cache planning invalidé (%d entrées) suite à %s",
+            "Cache planning invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache planning: %s", e)
+        logger.warning("Ã‰chec invalidation cache planning: %s", e)
 
 
 def _invalider_cache_batch_cooking(event: EvenementDomaine) -> None:
@@ -114,28 +114,28 @@ def _invalider_cache_batch_cooking(event: EvenementDomaine) -> None:
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="batch_cooking")
         logger.debug(
-            "Cache batch_cooking invalidé (%d entrées) suite à %s",
+            "Cache batch_cooking invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache batch_cooking: %s", e)
+        logger.warning("Ã‰chec invalidation cache batch_cooking: %s", e)
 
 
 def _invalider_cache_activites(event: EvenementDomaine) -> None:
-    """Invalide le cache activités quand les activités changent."""
+    """Invalide le cache activitÃ©s quand les activitÃ©s changent."""
     try:
         from src.core.caching import obtenir_cache
 
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="activites")
         logger.debug(
-            "Cache activités invalidé (%d entrées) suite à %s",
+            "Cache activitÃ©s invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache activités: %s", e)
+        logger.warning("Ã‰chec invalidation cache activitÃ©s: %s", e)
 
 
 def _invalider_cache_routines(event: EvenementDomaine) -> None:
@@ -146,12 +146,12 @@ def _invalider_cache_routines(event: EvenementDomaine) -> None:
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="routines")
         logger.debug(
-            "Cache routines invalidé (%d entrées) suite à %s",
+            "Cache routines invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache routines: %s", e)
+        logger.warning("Ã‰chec invalidation cache routines: %s", e)
 
 
 def _invalider_cache_weekend(event: EvenementDomaine) -> None:
@@ -162,12 +162,12 @@ def _invalider_cache_weekend(event: EvenementDomaine) -> None:
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="weekend")
         logger.debug(
-            "Cache weekend invalidé (%d entrées) suite à %s",
+            "Cache weekend invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache weekend: %s", e)
+        logger.warning("Ã‰chec invalidation cache weekend: %s", e)
 
 
 def _invalider_cache_achats(event: EvenementDomaine) -> None:
@@ -178,32 +178,32 @@ def _invalider_cache_achats(event: EvenementDomaine) -> None:
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="achats")
         logger.debug(
-            "Cache achats invalidé (%d entrées) suite à %s",
+            "Cache achats invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache achats: %s", e)
+        logger.warning("Ã‰chec invalidation cache achats: %s", e)
 
 
 def _invalider_cache_food_log(event: EvenementDomaine) -> None:
-    """Invalide le cache food_log quand les entrées alimentaires changent."""
+    """Invalide le cache food_log quand les entrÃ©es alimentaires changent."""
     try:
         from src.core.caching import obtenir_cache
 
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="food_log")
         logger.debug(
-            "Cache food_log invalidé (%d entrées) suite à %s",
+            "Cache food_log invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache food_log: %s", e)
+        logger.warning("Ã‰chec invalidation cache food_log: %s", e)
 
 
 def _invalider_cache_depenses(event: EvenementDomaine) -> None:
-    """Invalide le cache dépenses quand les dépenses changent."""
+    """Invalide le cache dÃ©penses quand les dÃ©penses changent."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -211,28 +211,28 @@ def _invalider_cache_depenses(event: EvenementDomaine) -> None:
         nb = cache.invalidate(pattern="depenses")
         nb += cache.invalidate(pattern="budget")
         logger.debug(
-            "Cache dépenses/budget invalidé (%d entrées) suite à %s",
+            "Cache dÃ©penses/budget invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache dépenses: %s", e)
+        logger.warning("Ã‰chec invalidation cache dÃ©penses: %s", e)
 
 
 def _invalider_cache_jardin(event: EvenementDomaine) -> None:
-    """Invalide le cache jardin quand les éléments changent."""
+    """Invalide le cache jardin quand les Ã©lÃ©ments changent."""
     try:
         from src.core.caching import obtenir_cache
 
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="jardin")
         logger.debug(
-            "Cache jardin invalidé (%d entrées) suite à %s",
+            "Cache jardin invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache jardin: %s", e)
+        logger.warning("Ã‰chec invalidation cache jardin: %s", e)
 
 
 def _invalider_cache_projets(event: EvenementDomaine) -> None:
@@ -243,16 +243,16 @@ def _invalider_cache_projets(event: EvenementDomaine) -> None:
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="projets")
         logger.debug(
-            "Cache projets invalidé (%d entrées) suite à %s",
+            "Cache projets invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache projets: %s", e)
+        logger.warning("Ã‰chec invalidation cache projets: %s", e)
 
 
 def _invalider_cache_jeux(event: EvenementDomaine) -> None:
-    """Invalide le cache jeux quand les données sont synchronisées."""
+    """Invalide le cache jeux quand les donnÃ©es sont synchronisÃ©es."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -261,12 +261,12 @@ def _invalider_cache_jeux(event: EvenementDomaine) -> None:
         nb += cache.invalidate(pattern="paris")
         nb += cache.invalidate(pattern="loto")
         logger.debug(
-            "Cache jeux invalidé (%d entrées) suite à %s",
+            "Cache jeux invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache jeux: %s", e)
+        logger.warning("Ã‰chec invalidation cache jeux: %s", e)
 
 
 def _invalider_cache_budget(event: EvenementDomaine) -> None:
@@ -278,28 +278,28 @@ def _invalider_cache_budget(event: EvenementDomaine) -> None:
         nb = cache.invalidate(pattern="budget")
         nb += cache.invalidate(pattern="depenses")
         logger.debug(
-            "Cache budget invalidé (%d entrées) suite à %s",
+            "Cache budget invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache budget: %s", e)
+        logger.warning("Ã‰chec invalidation cache budget: %s", e)
 
 
 def _invalider_cache_sante(event: EvenementDomaine) -> None:
-    """Invalide le cache santé quand les données de santé changent."""
+    """Invalide le cache santÃ© quand les donnÃ©es de santÃ© changent."""
     try:
         from src.core.caching import obtenir_cache
 
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="sante")
         logger.debug(
-            "Cache santé invalidé (%d entrées) suite à %s",
+            "Cache santÃ© invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache santé: %s", e)
+        logger.warning("Ã‰chec invalidation cache santÃ©: %s", e)
 
 
 def _invalider_cache_loto(event: EvenementDomaine) -> None:
@@ -311,12 +311,12 @@ def _invalider_cache_loto(event: EvenementDomaine) -> None:
         nb = cache.invalidate(pattern="loto")
         nb += cache.invalidate(pattern="jeux")
         logger.debug(
-            "Cache loto invalidé (%d entrées) suite à %s",
+            "Cache loto invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache loto: %s", e)
+        logger.warning("Ã‰chec invalidation cache loto: %s", e)
 
 
 def _invalider_cache_paris(event: EvenementDomaine) -> None:
@@ -328,16 +328,16 @@ def _invalider_cache_paris(event: EvenementDomaine) -> None:
         nb = cache.invalidate(pattern="paris")
         nb += cache.invalidate(pattern="jeux")
         logger.debug(
-            "Cache paris invalidé (%d entrées) suite à %s",
+            "Cache paris invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache paris: %s", e)
+        logger.warning("Ã‰chec invalidation cache paris: %s", e)
 
 
 def _invalider_cache_anniversaires(event: EvenementDomaine) -> None:
-    """Invalide le cache anniversaires quand les données changent."""
+    """Invalide le cache anniversaires quand les donnÃ©es changent."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -345,20 +345,20 @@ def _invalider_cache_anniversaires(event: EvenementDomaine) -> None:
         nb = cache.invalidate(pattern="anniversaires")
         nb += cache.invalidate(pattern="checklists_anniversaire")
         logger.debug(
-            "Cache anniversaires invalidé (%d entrées) suite à %s",
+            "Cache anniversaires invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache anniversaires: %s", e)
+        logger.warning("Ã‰chec invalidation cache anniversaires: %s", e)
 
 
 def _proposer_checklist_anniversaire_proche(event: EvenementDomaine) -> None:
     """Synchronise automatiquement la checklist quand un anniversaire est proche (J-30/J-14/J-7).
 
-    Déclencheur : événement anniversaire.proche ou anniversaire.rappel avec
+    DÃ©clencheur : Ã©vÃ©nement anniversaire.proche ou anniversaire.rappel avec
     jours_restants dans la liste [30, 14, 7].
-    Tolère les pannes et n'échoue jamais.
+    TolÃ¨re les pannes et n'Ã©choue jamais.
     """
     try:
         jours = event.data.get("jours_restants")
@@ -377,16 +377,16 @@ def _proposer_checklist_anniversaire_proche(event: EvenementDomaine) -> None:
             force_recalcul_budget=False,
         )
         logger.info(
-            "Checklist anniversaire synchronisée automatiquement (id=%s, J-%s)",
+            "Checklist anniversaire synchronisÃ©e automatiquement (id=%s, J-%s)",
             anniversaire_id,
             jours,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec sync checklist anniversaire proche: %s", e)
+        logger.warning("Ã‰chec sync checklist anniversaire proche: %s", e)
 
 
 def _invalider_cache_suggestions_achats(event: EvenementDomaine) -> None:
-    """Invalide les caches de suggestions achats quand les préférences changent."""
+    """Invalide les caches de suggestions achats quand les prÃ©fÃ©rences changent."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -395,18 +395,18 @@ def _invalider_cache_suggestions_achats(event: EvenementDomaine) -> None:
         nb += cache.invalidate(pattern="suggestions_achats")
         nb += cache.invalidate(pattern="achats_ia")
         logger.debug(
-            "Cache suggestions achats invalidé (%d entrées) suite à %s",
+            "Cache suggestions achats invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache suggestions achats: %s", e)
+        logger.warning("Ã‰chec invalidation cache suggestions achats: %s", e)
 
 
 def _proposer_activites_sur_jalon(event: EvenementDomaine) -> None:
-    """Suggère des activités adaptées quand un jalon Jules est ajouté.
-    Déclencheur: jalons.ajoute avec user_id et age_mois dans event.data.
-    Tolère les pannes."""
+    """SuggÃ¨re des activitÃ©s adaptÃ©es quand un jalon Jules est ajoutÃ©.
+    DÃ©clencheur: jalons.ajoute avec user_id et age_mois dans event.data.
+    TolÃ¨re les pannes."""
     try:
         jalon_nom = event.data.get("nom", "")
         user_id = event.data.get("user_id")
@@ -414,20 +414,20 @@ def _proposer_activites_sur_jalon(event: EvenementDomaine) -> None:
             return
         from src.core.caching import obtenir_cache
         cache = obtenir_cache()
-        # Invalide les suggestions d'activités pour forcer un recalcul
+        # Invalide les suggestions d'activitÃ©s pour forcer un recalcul
         cache.invalidate(pattern="suggestions_activites")
         cache.invalidate(pattern="activites_ia")
         logger.info(
-            "Cache activités invalidé suite au jalon '%s' (user_id=%s)",
+            "Cache activitÃ©s invalidÃ© suite au jalon '%s' (user_id=%s)",
             jalon_nom, user_id,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec suggestion activités sur jalon: %s", e)
+        logger.warning("Ã‰chec suggestion activitÃ©s sur jalon: %s", e)
 
 
 def _invalider_cache_achats_sur_achat_effectue(event: EvenementDomaine) -> None:
-    """Invalide le cache budget et achats quand un achat est marqué effectué.
-    Déclencheur: achats.achete ou achat.achete.
+    """Invalide le cache budget et achats quand un achat est marquÃ© effectuÃ©.
+    DÃ©clencheur: achats.achete ou achat.achete.
     """
     try:
         from src.core.caching import obtenir_cache
@@ -436,16 +436,16 @@ def _invalider_cache_achats_sur_achat_effectue(event: EvenementDomaine) -> None:
         cache.invalidate(pattern="achats_famille")
         cache.invalidate(pattern="contexte_familial")
         logger.info(
-            "Cache budget+achats invalidé suite à un achat effectué (event=%s)",
+            "Cache budget+achats invalidÃ© suite Ã  un achat effectuÃ© (event=%s)",
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache budget sur achat: %s", e)
+        logger.warning("Ã‰chec invalidation cache budget sur achat: %s", e)
 
 
 def _invalider_cache_documents_expires(event: EvenementDomaine) -> None:
     """Invalide le cache rappels et contexte familial quand un document expire.
-    Déclencheur: documents.expire ou documents.proche_expiration.
+    DÃ©clencheur: documents.expire ou documents.proche_expiration.
     """
     try:
         from src.core.caching import obtenir_cache
@@ -453,11 +453,11 @@ def _invalider_cache_documents_expires(event: EvenementDomaine) -> None:
         cache.invalidate(pattern="rappels_famille")
         cache.invalidate(pattern="contexte_familial")
         logger.info(
-            "Cache rappels invalidé suite à expiration document (event=%s)",
+            "Cache rappels invalidÃ© suite Ã  expiration document (event=%s)",
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache documents expirés: %s", e)
+        logger.warning("Ã‰chec invalidation cache documents expirÃ©s: %s", e)
 
 
 # -----------------------------------------------------------
@@ -466,11 +466,11 @@ def _invalider_cache_documents_expires(event: EvenementDomaine) -> None:
 
 
 def _filtrer_suggestions_budget_serre(event: EvenementDomaine) -> None:
-    """Invalide le cache des suggestions achats quand le budget est marqué comme 'serré'.
+    """Invalide le cache des suggestions achats quand le budget est marquÃ© comme 'serrÃ©'.
 
-    Les suggestions seront recalculées au prochain appel en ne retenant
-    que les items de priorité 'essentiel'.
-    Déclencheur : budget.contrainte avec niveau in (serre, critique, depasse).
+    Les suggestions seront recalculÃ©es au prochain appel en ne retenant
+    que les items de prioritÃ© 'essentiel'.
+    DÃ©clencheur : budget.contrainte avec niveau in (serre, critique, depasse).
     """
     try:
         niveau = event.data.get("niveau", "")
@@ -484,20 +484,20 @@ def _filtrer_suggestions_budget_serre(event: EvenementDomaine) -> None:
         nb += cache.invalidate(pattern="suggestions_achats")
         nb += cache.invalidate(pattern="achats_ia")
         logger.info(
-            "Cache suggestions invalidé suite à budget '%s' (%d entrées, event=%s)",
+            "Cache suggestions invalidÃ© suite Ã  budget '%s' (%d entrÃ©es, event=%s)",
             niveau,
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec filtrage suggestions budget serré: %s", e)
+        logger.warning("Ã‰chec filtrage suggestions budget serrÃ©: %s", e)
 
 
 def _notifier_document_echeance_proche(event: EvenementDomaine) -> None:
     """Envoie une notification ntfy.sh quand un document expire dans les 30 jours.
 
-    Déclencheur : document.echeance_proche avec jours_restants <= 30 dans event.data.
-    Tolère les pannes — n'échoue jamais.
+    DÃ©clencheur : document.echeance_proche avec jours_restants <= 30 dans event.data.
+    TolÃ¨re les pannes â€” n'Ã©choue jamais.
     """
     try:
         jours = event.data.get("jours_restants")
@@ -510,10 +510,10 @@ def _notifier_document_echeance_proche(event: EvenementDomaine) -> None:
 
         service = ServiceNtfy()
         notification = NotificationNtfy(
-            titre=f"?? Document expirant bientôt — J-{jours}",
+            titre=f"?? Document expirant bientÃ´t â€” J-{jours}",
             message=(
                 f"{titre_doc} expire dans {jours} jour(s).\n"
-                "Pensez à le renouveler avant l'échéance."
+                "Pensez Ã  le renouveler avant l'Ã©chÃ©ance."
             ),
             priorite=4 if int(jours) <= 7 else 3,
             tags=["warning", "page_facing_up"],
@@ -521,22 +521,22 @@ def _notifier_document_echeance_proche(event: EvenementDomaine) -> None:
         )
         service.envoyer_sync(notification)
         logger.info(
-            "Notification ntfy envoyée pour document expirant (titre=%s, J-%s)",
+            "Notification ntfy envoyÃ©e pour document expirant (titre=%s, J-%s)",
             titre_doc,
             jours,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec notification document échéance proche: %s", e)
+        logger.warning("Ã‰chec notification document Ã©chÃ©ance proche: %s", e)
 
 
 def _notifier_jalon_ajoute_avec_activites(event: EvenementDomaine) -> None:
-    """Suggère des activités adaptées à l'âge et pousse une notification ntfy
-    quand un jalon Jules est ajouté.
+    """SuggÃ¨re des activitÃ©s adaptÃ©es Ã  l'Ã¢ge et pousse une notification ntfy
+    quand un jalon Jules est ajoutÃ©.
 
-    Invalide le cache des suggestions d'activités et envoie une notification ntfy
-    invitant l'utilisateur à consulter les nouvelles suggestions générées.
-    Déclencheur : jalon.ajoute avec nom et age_mois dans event.data.
-    Tolère les pannes — n'échoue jamais.
+    Invalide le cache des suggestions d'activitÃ©s et envoie une notification ntfy
+    invitant l'utilisateur Ã  consulter les nouvelles suggestions gÃ©nÃ©rÃ©es.
+    DÃ©clencheur : jalon.ajoute avec nom et age_mois dans event.data.
+    TolÃ¨re les pannes â€” n'Ã©choue jamais.
     """
     try:
         jalon_nom = event.data.get("nom", "Nouveau jalon")
@@ -550,17 +550,17 @@ def _notifier_jalon_ajoute_avec_activites(event: EvenementDomaine) -> None:
         cache.invalidate(pattern="suggestions_activites")
         cache.invalidate(pattern="activites_ia")
 
-        # Notification ntfy avec résumé
+        # Notification ntfy avec rÃ©sumÃ©
         from src.services.core.notifications.notif_ntfy import ServiceNtfy
         from src.services.core.notifications.types import NotificationNtfy
 
         age_str = f" ({age_mois} mois)" if age_mois else ""
         service = ServiceNtfy()
         notification = NotificationNtfy(
-            titre=f"?? Nouveau jalon Jules — {jalon_nom}",
+            titre=f"?? Nouveau jalon Jules â€” {jalon_nom}",
             message=(
-                f"Jules vient d'atteindre le jalon « {jalon_nom} »{age_str}.\n"
-                "Des suggestions d'activités adaptées à son âge sont disponibles."
+                f"Jules vient d'atteindre le jalon Â« {jalon_nom} Â»{age_str}.\n"
+                "Des suggestions d'activitÃ©s adaptÃ©es Ã  son Ã¢ge sont disponibles."
             ),
             priorite=3,
             tags=["baby", "sparkles"],
@@ -568,19 +568,19 @@ def _notifier_jalon_ajoute_avec_activites(event: EvenementDomaine) -> None:
         )
         service.envoyer_sync(notification)
         logger.info(
-            "Notification jalon envoyée (jalon=%s, age_mois=%s, user_id=%s)",
+            "Notification jalon envoyÃ©e (jalon=%s, age_mois=%s, user_id=%s)",
             jalon_nom,
             age_mois,
             user_id,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec notification jalon ajouté: %s", e)
+        logger.warning("Ã‰chec notification jalon ajoutÃ©: %s", e)
 
 
 
 
 def _enregistrer_metrique_evenement(event: EvenementDomaine) -> None:
-    """Enregistre une métrique pour chaque événement domaine émis."""
+    """Enregistre une mÃ©trique pour chaque Ã©vÃ©nement domaine Ã©mis."""
     try:
         from src.core.monitoring import MetriqueType, enregistrer_metrique
 
@@ -592,11 +592,11 @@ def _enregistrer_metrique_evenement(event: EvenementDomaine) -> None:
     except ImportError:
         pass  # Module monitoring optionnel
     except Exception as e:  # noqa: BLE001
-        logger.debug("Échec enregistrement métrique événement: %s", e)
+        logger.debug("Ã‰chec enregistrement mÃ©trique Ã©vÃ©nement: %s", e)
 
 
 def _enregistrer_erreur_service(event: EvenementDomaine) -> None:
-    """Enregistre les erreurs de service dans les métriques."""
+    """Enregistre les erreurs de service dans les mÃ©triques."""
     try:
         from src.core.monitoring import MetriqueType, enregistrer_metrique
 
@@ -616,7 +616,7 @@ def _enregistrer_erreur_service(event: EvenementDomaine) -> None:
     except ImportError:
         pass
     except Exception as e:  # noqa: BLE001
-        logger.debug("Échec enregistrement métrique erreur: %s", e)
+        logger.debug("Ã‰chec enregistrement mÃ©trique erreur: %s", e)
 
 
 # -----------------------------------------------------------
@@ -625,7 +625,7 @@ def _enregistrer_erreur_service(event: EvenementDomaine) -> None:
 
 
 def _logger_evenement_audit(event: EvenementDomaine) -> None:
-    """Log structuré de tous les événements domaine pour audit trail."""
+    """Log structurÃ© de tous les Ã©vÃ©nements domaine pour audit trail."""
     logger.info(
         "[AUDIT] %s | source=%s | data_keys=%s",
         event.type,
@@ -640,10 +640,10 @@ def _logger_evenement_audit(event: EvenementDomaine) -> None:
 
 
 def _livrer_webhooks(event: EvenementDomaine) -> None:
-    """Livre l'événement aux webhooks enregistrés (fire-and-forget).
+    """Livre l'Ã©vÃ©nement aux webhooks enregistrÃ©s (fire-and-forget).
 
-    N'échoue jamais — toute exception est capturée et loguée.
-    La livraison effective est déléguée au thread pool du WebhookService.
+    N'Ã©choue jamais â€” toute exception est capturÃ©e et loguÃ©e.
+    La livraison effective est dÃ©lÃ©guÃ©e au thread pool du WebhookService.
     """
     try:
         from src.services.integrations.webhooks import get_webhook_service
@@ -653,7 +653,7 @@ def _livrer_webhooks(event: EvenementDomaine) -> None:
     except ImportError:
         pass  # Module webhooks optionnel
     except Exception as e:  # noqa: BLE001
-        logger.debug("Échec livraison webhooks pour %s: %s", event.type, e)
+        logger.debug("Ã‰chec livraison webhooks pour %s: %s", event.type, e)
 
 
 # -----------------------------------------------------------
@@ -662,7 +662,7 @@ def _livrer_webhooks(event: EvenementDomaine) -> None:
 
 
 def _sync_entretien_vers_budget(event: EvenementDomaine) -> None:
-    """Invalide le cache budget quand une dépense d'entretien est synchronisée."""
+    """Invalide le cache budget quand une dÃ©pense d'entretien est synchronisÃ©e."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -671,15 +671,15 @@ def _sync_entretien_vers_budget(event: EvenementDomaine) -> None:
         nb += cache.invalidate(pattern="depenses")
         nb += cache.invalidate(pattern="dashboard")
         logger.debug(
-            "Cache budget/dashboard invalidé (%d entrées) suite à sync entretien",
+            "Cache budget/dashboard invalidÃ© (%d entrÃ©es) suite Ã  sync entretien",
             nb,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache entretien->budget: %s", e)
+        logger.warning("Ã‰chec invalidation cache entretien->budget: %s", e)
 
 
 def _sync_voyages_vers_planning(event: EvenementDomaine) -> None:
-    """Invalide le cache planning quand des voyages sont synchronisés."""
+    """Invalide le cache planning quand des voyages sont synchronisÃ©s."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -687,15 +687,15 @@ def _sync_voyages_vers_planning(event: EvenementDomaine) -> None:
         nb = cache.invalidate(pattern="planning")
         nb += cache.invalidate(pattern="calendrier")
         logger.debug(
-            "Cache planning/calendrier invalidé (%d entrées) suite à sync voyages",
+            "Cache planning/calendrier invalidÃ© (%d entrÃ©es) suite Ã  sync voyages",
             nb,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache voyages->planning: %s", e)
+        logger.warning("Ã‰chec invalidation cache voyages->planning: %s", e)
 
 
 def _sync_charges_vers_dashboard(event: EvenementDomaine) -> None:
-    """Invalide le cache dashboard quand les charges sont mises à jour."""
+    """Invalide le cache dashboard quand les charges sont mises Ã  jour."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -704,11 +704,11 @@ def _sync_charges_vers_dashboard(event: EvenementDomaine) -> None:
         nb += cache.invalidate(pattern="charges")
         nb += cache.invalidate(pattern="budget")
         logger.debug(
-            "Cache dashboard invalidé (%d entrées) suite à sync charges",
+            "Cache dashboard invalidÃ© (%d entrÃ©es) suite Ã  sync charges",
             nb,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache charges->dashboard: %s", e)
+        logger.warning("Ã‰chec invalidation cache charges->dashboard: %s", e)
 
 
 # -----------------------------------------------------------
@@ -717,7 +717,7 @@ def _sync_charges_vers_dashboard(event: EvenementDomaine) -> None:
 
 
 def _proposer_recettes_saison_depuis_recolte(event: EvenementDomaine) -> None:
-    """D.1: récolte jardin -> rafraîchir suggestions recettes/planning."""
+    """D.1: rÃ©colte jardin -> rafraÃ®chir suggestions recettes/planning."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -726,26 +726,26 @@ def _proposer_recettes_saison_depuis_recolte(event: EvenementDomaine) -> None:
         nb += cache.invalidate(pattern="planning")
         nb += cache.invalidate(pattern="suggestions")
         logger.info(
-            "Inter-modules: caches recettes/planning invalidés (%d) après %s",
+            "Inter-modules: caches recettes/planning invalidÃ©s (%d) aprÃ¨s %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec flux D.1 recolte->recettes: %s", e)
+        logger.warning("Ã‰chec flux D.1 recolte->recettes: %s", e)
 
 
 def _creer_tache_entretien_sur_anomalie_energie(event: EvenementDomaine) -> None:
-    """D.2: anomalie énergie -> création d'une tâche d'entretien auto."""
+    """D.2: anomalie Ã©nergie -> crÃ©ation d'une tÃ¢che d'entretien auto."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.core.models import TacheEntretien
 
         details = event.data.get("details") or []
-        message = event.data.get("message") or "Anomalie énergie détectée"
+        message = event.data.get("message") or "Anomalie Ã©nergie dÃ©tectÃ©e"
         with obtenir_contexte_db() as session:
             session.add(
                 TacheEntretien(
-                    nom="Vérifier anomalie énergie",
+                    nom="VÃ©rifier anomalie Ã©nergie",
                     description=str(message)[:500],
                     categorie="entretien",
                     priorite="haute",
@@ -755,13 +755,13 @@ def _creer_tache_entretien_sur_anomalie_energie(event: EvenementDomaine) -> None
                 )
             )
             session.commit()
-        logger.info("Inter-modules: tâche entretien créée après énergie.anomalie")
+        logger.info("Inter-modules: tÃ¢che entretien crÃ©Ã©e aprÃ¨s Ã©nergie.anomalie")
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec flux D.2 energie->entretien: %s", e)
+        logger.warning("Ã‰chec flux D.2 energie->entretien: %s", e)
 
 
 def _publier_alerte_dashboard_budget(event: EvenementDomaine) -> None:
-    """D.3: dépassement budget -> invalider dashboard/alertes."""
+    """D.3: dÃ©passement budget -> invalider dashboard/alertes."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -769,13 +769,13 @@ def _publier_alerte_dashboard_budget(event: EvenementDomaine) -> None:
         nb = cache.invalidate(pattern="dashboard")
         nb += cache.invalidate(pattern="budget")
         nb += cache.invalidate(pattern="alertes")
-        logger.info("Inter-modules: caches dashboard invalidés (%d)", nb)
+        logger.info("Inter-modules: caches dashboard invalidÃ©s (%d)", nb)
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec flux D.3 budget->dashboard: %s", e)
+        logger.warning("Ã‰chec flux D.3 budget->dashboard: %s", e)
 
 
 def _mettre_a_jour_courses_predictives(event: EvenementDomaine) -> None:
-    """D.4: inventaire impacté -> recalcul des suggestions prédictives."""
+    """D.4: inventaire impactÃ© -> recalcul des suggestions prÃ©dictives."""
     try:
         from src.services.cuisine.prediction_courses import obtenir_service_prediction_courses
 
@@ -787,9 +787,9 @@ def _mettre_a_jour_courses_predictives(event: EvenementDomaine) -> None:
         cache = obtenir_cache()
         cache.invalidate(pattern="courses")
         cache.invalidate(pattern="predictions")
-        logger.info("Inter-modules: prédictions courses recalculées")
+        logger.info("Inter-modules: prÃ©dictions courses recalculÃ©es")
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec flux D.4 inventaire->courses: %s", e)
+        logger.warning("Ã‰chec flux D.4 inventaire->courses: %s", e)
 
 
 def _adapter_planning_sur_feedback_recette(event: EvenementDomaine) -> None:
@@ -801,13 +801,13 @@ def _adapter_planning_sur_feedback_recette(event: EvenementDomaine) -> None:
         cache.invalidate(pattern="planning")
         cache.invalidate(pattern="recettes")
         cache.invalidate(pattern="suggestions")
-        logger.info("Inter-modules: invalidation planning après recette.feedback")
+        logger.info("Inter-modules: invalidation planning aprÃ¨s recette.feedback")
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec flux D.5 feedback->planning: %s", e)
+        logger.warning("Ã‰chec flux D.5 feedback->planning: %s", e)
 
 
 def _declencher_agent_ia_proactif(event: EvenementDomaine) -> None:
-    """I.15: déclenche l'agent proactif selon météo/planning/contexte EventBus."""
+    """I.15: dÃ©clenche l'agent proactif selon mÃ©tÃ©o/planning/contexte EventBus."""
     try:
         from src.services.utilitaires.assistant_proactif import (
             obtenir_service_assistant_proactif,
@@ -827,9 +827,9 @@ def _declencher_agent_ia_proactif(event: EvenementDomaine) -> None:
                 },
                 source="assistant_proactif",
             )
-        logger.info("I.15 agent proactif traité: %s -> %s", event.type, resultat.get("status"))
+        logger.info("I.15 agent proactif traitÃ©: %s -> %s", event.type, resultat.get("status"))
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec I.15 agent proactif: %s", e)
+        logger.warning("Ã‰chec I.15 agent proactif: %s", e)
 
 
 # -----------------------------------------------------------
@@ -838,7 +838,7 @@ def _declencher_agent_ia_proactif(event: EvenementDomaine) -> None:
 
 
 def _invalider_cache_predictions(event: EvenementDomaine) -> None:
-    """Invalide le cache prédictions quand de nouvelles prédictions sont générées."""
+    """Invalide le cache prÃ©dictions quand de nouvelles prÃ©dictions sont gÃ©nÃ©rÃ©es."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -846,16 +846,16 @@ def _invalider_cache_predictions(event: EvenementDomaine) -> None:
         nb = cache.invalidate(pattern="predictions")
         nb += cache.invalidate(pattern="courses")
         logger.debug(
-            "Cache predictions invalidé (%d entrées) suite à %s",
+            "Cache predictions invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache predictions: %s", e)
+        logger.warning("Ã‰chec invalidation cache predictions: %s", e)
 
 
 def _invalider_cache_resume(event: EvenementDomaine) -> None:
-    """Invalide le cache résumé hebdomadaire."""
+    """Invalide le cache rÃ©sumÃ© hebdomadaire."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -863,32 +863,32 @@ def _invalider_cache_resume(event: EvenementDomaine) -> None:
         nb = cache.invalidate(pattern="resume")
         nb += cache.invalidate(pattern="dashboard")
         logger.debug(
-            "Cache résumé invalidé (%d entrées) suite à %s",
+            "Cache rÃ©sumÃ© invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache résumé: %s", e)
+        logger.warning("Ã‰chec invalidation cache rÃ©sumÃ©: %s", e)
 
 
 def _invalider_cache_bridges(event: EvenementDomaine) -> None:
-    """Invalide le cache bridges quand un bridge inter-module est déclenché."""
+    """Invalide le cache bridges quand un bridge inter-module est dÃ©clenchÃ©."""
     try:
         from src.core.caching import obtenir_cache
 
         cache = obtenir_cache()
         nb = cache.invalidate(pattern="bridges")
         logger.debug(
-            "Cache bridges invalidé (%d entrées) suite à %s",
+            "Cache bridges invalidÃ© (%d entrÃ©es) suite Ã  %s",
             nb,
             event.type,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec invalidation cache bridges: %s", e)
+        logger.warning("Ã‰chec invalidation cache bridges: %s", e)
 
 
 def _bridge_recolte_vers_recettes(event: EvenementDomaine) -> None:
-    """Récolte jardin ? suggestion recettes via bridge IA."""
+    """RÃ©colte jardin ? suggestion recettes via bridge IA."""
     try:
         from src.services.ia.bridges import obtenir_service_bridges
 
@@ -897,25 +897,25 @@ def _bridge_recolte_vers_recettes(event: EvenementDomaine) -> None:
         quantite = event.data.get("quantite", 0)
         if nom:
             service.recolte_vers_recettes(ingredient=nom, quantite_kg=float(quantite))
-            logger.info("Bridge: récolte '%s' ? suggestions recettes", nom)
+            logger.info("Bridge: rÃ©colte '%s' ? suggestions recettes", nom)
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge recolte?recettes: %s", e)
+        logger.warning("Ã‰chec bridge recolte?recettes: %s", e)
 
 
 def _bridge_verifier_anomalies_budget(event: EvenementDomaine) -> None:
-    """Budget modifié ? vérification anomalies proactive."""
+    """Budget modifiÃ© ? vÃ©rification anomalies proactive."""
     try:
         from src.services.ia.bridges import obtenir_service_bridges
 
         service = obtenir_service_bridges()
         service.verifier_anomalies_budget_et_notifier()
-        logger.info("Bridge: vérification anomalies budget")
+        logger.info("Bridge: vÃ©rification anomalies budget")
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge budget?anomalies: %s", e)
+        logger.warning("Ã‰chec bridge budget?anomalies: %s", e)
 
 
 def _traiter_action_rapide_dashboard(event: EvenementDomaine) -> None:
-    """Dashboard action rapide ? invalider le cache dashboard et journaliser l'intention métier."""
+    """Dashboard action rapide ? invalider le cache dashboard et journaliser l'intention mÃ©tier."""
     try:
         from src.core.caching import obtenir_cache
 
@@ -930,7 +930,7 @@ def _traiter_action_rapide_dashboard(event: EvenementDomaine) -> None:
             nb,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec traitement dashboard.widget.action_rapide: %s", e)
+        logger.warning("Ã‰chec traitement dashboard.widget.action_rapide: %s", e)
 
 
 
@@ -940,11 +940,11 @@ def _traiter_action_rapide_dashboard(event: EvenementDomaine) -> None:
 
 
 def _generer_courses_depuis_planning(event: EvenementDomaine) -> None:
-    """Bridge 1: Planning validé ? génération automatique de la liste de courses.
+    """Bridge 1: Planning validÃ© ? gÃ©nÃ©ration automatique de la liste de courses.
 
-    Extrait les ingrédients du planning actif et les ajoute à la liste de courses.
-    Émet ensuite `courses.generees` pour déclencher les notifications aval.
-    Tolère les pannes — n'échoue jamais.
+    Extrait les ingrÃ©dients du planning actif et les ajoute Ã  la liste de courses.
+    Ã‰met ensuite `courses.generees` pour dÃ©clencher les notifications aval.
+    TolÃ¨re les pannes â€” n'Ã©choue jamais.
     """
     try:
         planning_id = event.data.get("planning_id")
@@ -955,17 +955,17 @@ def _generer_courses_depuis_planning(event: EvenementDomaine) -> None:
         from src.core.models import ArticleCourses, Ingredientx, Repas, Recette
 
         with obtenir_contexte_db() as session:
-            # Récupérer tous les repas du planning
+            # RÃ©cupÃ©rer tous les repas du planning
             repas_list = (
                 session.query(Repas)
                 .filter(Repas.planning_id == planning_id)
                 .all()
             )
             if not repas_list:
-                logger.info("Bridge 1: planning %s sans repas, courses non générées", planning_id)
+                logger.info("Bridge 1: planning %s sans repas, courses non gÃ©nÃ©rÃ©es", planning_id)
                 return
 
-            # Collecter les ingrédients de toutes les recettes
+            # Collecter les ingrÃ©dients de toutes les recettes
             ingredients_ajoutes = 0
             for repas in repas_list:
                 if not repas.recette_id:
@@ -973,12 +973,12 @@ def _generer_courses_depuis_planning(event: EvenementDomaine) -> None:
                 recette = session.query(Recette).filter(Recette.id == repas.recette_id).first()
                 if not recette:
                     continue
-                # Récupérer les ingrédients de la recette
+                # RÃ©cupÃ©rer les ingrÃ©dients de la recette
                 for ri in getattr(recette, "ingredients", []) or []:
                     ingredient_id = getattr(ri, "ingredient_id", None)
                     if not ingredient_id:
                         continue
-                    # Éviter les doublons : vérifier si déjà dans courses
+                    # Ã‰viter les doublons : vÃ©rifier si dÃ©jÃ  dans courses
                     existant = (
                         session.query(ArticleCourses)
                         .filter(ArticleCourses.ingredient_id == ingredient_id, ArticleCourses.achete.is_(False))
@@ -990,13 +990,13 @@ def _generer_courses_depuis_planning(event: EvenementDomaine) -> None:
                             quantite_necessaire=getattr(ri, "quantite", 1) or 1,
                             priorite="normale",
                             suggere_par_ia=False,
-                            notes=f"Ajouté auto depuis planning semaine du {event.data.get('semaine_debut', '')}",
+                            notes=f"AjoutÃ© auto depuis planning semaine du {event.data.get('semaine_debut', '')}",
                         ))
                         ingredients_ajoutes += 1
 
             session.commit()
 
-        # Émettre l'événement de confirmation
+        # Ã‰mettre l'Ã©vÃ©nement de confirmation
         if ingredients_ajoutes > 0:
             from .bus import obtenir_bus
             obtenir_bus().emettre(
@@ -1010,19 +1010,19 @@ def _generer_courses_depuis_planning(event: EvenementDomaine) -> None:
                 source="bridge_planning_courses",
             )
         logger.info(
-            "Bridge 1: planning %s ? %d articles ajoutés aux courses",
+            "Bridge 1: planning %s ? %d articles ajoutÃ©s aux courses",
             planning_id, ingredients_ajoutes,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge 1 planning?courses: %s", e)
+        logger.warning("Ã‰chec bridge 1 planning?courses: %s", e)
 
 
 def _notifier_courses_generees(event: EvenementDomaine) -> None:
-    """Bridge 1 bis: courses générées ? notification utilisateur.
+    """Bridge 1 bis: courses gÃ©nÃ©rÃ©es ? notification utilisateur.
 
-    Envoie une notification multi-canal après la génération automatique
+    Envoie une notification multi-canal aprÃ¨s la gÃ©nÃ©ration automatique
     de la liste de courses depuis le planning hebdomadaire.
-    Tolère les pannes — n'échoue jamais.
+    TolÃ¨re les pannes â€” n'Ã©choue jamais.
     """
     try:
         nb_articles = int(event.data.get("nb_articles", 0) or 0)
@@ -1033,8 +1033,8 @@ def _notifier_courses_generees(event: EvenementDomaine) -> None:
 
         dispatcher = get_dispatcher_notifications()
         message = (
-            f"Planning #{planning_id} validé ({semaine_debut}).\n"
-            f"La liste de courses est prête ({nb_articles} article(s))."
+            f"Planning #{planning_id} validÃ© ({semaine_debut}).\n"
+            f"La liste de courses est prÃªte ({nb_articles} article(s))."
         )
 
         # Best-effort sur les utilisateurs connus; fallback safe sur compte principal.
@@ -1057,17 +1057,17 @@ def _notifier_courses_generees(event: EvenementDomaine) -> None:
                 message=message,
                 canaux=["telegram", "push"],
                 type_evenement="rappel_courses",
-                titre=f"?? Courses prêtes ({nb_articles})",
+                titre=f"?? Courses prÃªtes ({nb_articles})",
             )
 
-        # Compatibilité historique: side-effect ntfy direct (utilisé par certains tests legacy).
+        # CompatibilitÃ© historique: side-effect ntfy direct (utilisÃ© par certains tests legacy).
         try:
             from src.services.core.notifications.notif_ntfy import ServiceNtfy
             from src.services.core.notifications.types import NotificationNtfy
 
             ServiceNtfy().envoyer_sync(
                 NotificationNtfy(
-                    titre=f"?? Courses prêtes ({nb_articles})",
+                    titre=f"?? Courses prÃªtes ({nb_articles})",
                     message=message,
                     click_url="/cuisine/courses",
                 )
@@ -1075,20 +1075,20 @@ def _notifier_courses_generees(event: EvenementDomaine) -> None:
         except Exception:
             pass
         logger.info(
-            "Bridge 1 bis: notification courses envoyée (planning=%s, nb_articles=%s)",
+            "Bridge 1 bis: notification courses envoyÃ©e (planning=%s, nb_articles=%s)",
             planning_id,
             nb_articles,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge 1 bis courses?notif: %s", e)
+        logger.warning("Ã‰chec bridge 1 bis courses?notif: %s", e)
 
 
 def _suggerer_recettes_anti_gaspi(event: EvenementDomaine) -> None:
-    """Bridge 2: Stock bientôt périmé ? suggestions recettes anti-gaspillage via IA.
+    """Bridge 2: Stock bientÃ´t pÃ©rimÃ© ? suggestions recettes anti-gaspillage via IA.
 
     Appelle le service anti-gaspillage pour identifier les recettes prioritaires
     et invalide le cache de la page anti-gaspillage.
-    Tolère les pannes — n'échoue jamais.
+    TolÃ¨re les pannes â€” n'Ã©choue jamais.
     """
     try:
         nom = event.data.get("nom", "")
@@ -1102,17 +1102,17 @@ def _suggerer_recettes_anti_gaspi(event: EvenementDomaine) -> None:
         cache.invalidate(pattern="anti_gaspillage")
         cache.invalidate(pattern="recettes")
 
-        # Notification push si article expire très bientôt (= 2 jours)
+        # Notification push si article expire trÃ¨s bientÃ´t (= 2 jours)
         if int(jours_restants) <= 2:
             from src.services.core.notifications.notif_ntfy import ServiceNtfy
             from src.services.core.notifications.types import NotificationNtfy
 
             service = ServiceNtfy()
             service.envoyer_sync(NotificationNtfy(
-                titre=f"?? {nom} expire bientôt (J-{jours_restants})",
+                titre=f"?? {nom} expire bientÃ´t (J-{jours_restants})",
                 message=(
                     f"{nom} expire dans {jours_restants} jour(s).\n"
-                    "Des recettes anti-gaspillage ont été calculées pour l'utiliser."
+                    "Des recettes anti-gaspillage ont Ã©tÃ© calculÃ©es pour l'utiliser."
                 ),
                 priorite=4,
                 tags=["warning", "knife_fork_plate"],
@@ -1120,19 +1120,19 @@ def _suggerer_recettes_anti_gaspi(event: EvenementDomaine) -> None:
             ))
 
         logger.info(
-            "Bridge 2: article '%s' (J-%s) ? anti-gaspi cache invalidé + notification",
+            "Bridge 2: article '%s' (J-%s) ? anti-gaspi cache invalidÃ© + notification",
             nom, jours_restants,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge 2 inventaire?anti_gaspi: %s", e)
+        logger.warning("Ã‰chec bridge 2 inventaire?anti_gaspi: %s", e)
 
 
 def _notifier_alerte_budget_push(event: EvenementDomaine) -> None:
-    """Bridge 3: Dépassement budget ? notification push + widget dashboard.
+    """Bridge 3: DÃ©passement budget ? notification push + widget dashboard.
 
-    Envoie une notification ntfy immédiate et invalide le cache dashboard
+    Envoie une notification ntfy immÃ©diate et invalide le cache dashboard
     pour forcer l'affichage de l'alerte dans les widgets.
-    Tolère les pannes — n'échoue jamais.
+    TolÃ¨re les pannes â€” n'Ã©choue jamais.
     """
     try:
         categorie = event.data.get("categorie", "")
@@ -1153,29 +1153,29 @@ def _notifier_alerte_budget_push(event: EvenementDomaine) -> None:
 
         service = ServiceNtfy()
         service.envoyer_sync(NotificationNtfy(
-            titre=f"?? Budget {categorie} dépassé ({pourcentage:.0f}%)",
+            titre=f"?? Budget {categorie} dÃ©passÃ© ({pourcentage:.0f}%)",
             message=(
-                f"Dépenses {categorie}: {depense:.0f}€ / {budget:.0f}€ prévu.\n"
-                "Consultez le tableau de bord pour les détails."
+                f"DÃ©penses {categorie}: {depense:.0f}â‚¬ / {budget:.0f}â‚¬ prÃ©vu.\n"
+                "Consultez le tableau de bord pour les dÃ©tails."
             ),
             priorite=4,
             tags=["rotating_light", "money_with_wings"],
             click_url="/famille/budget",
         ))
         logger.info(
-            "Bridge 3: budget.depassement ? notification push envoyée (catégorie=%s, %.0f%%)",
+            "Bridge 3: budget.depassement ? notification push envoyÃ©e (catÃ©gorie=%s, %.0f%%)",
             categorie, pourcentage,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge 3 budget?dashboard_push: %s", e)
+        logger.warning("Ã‰chec bridge 3 budget?dashboard_push: %s", e)
 
 
 def _enregistrer_jalon_depuis_activite(event: EvenementDomaine) -> None:
-    """Bridge 4: Activité famille terminée ? jalon Jules enregistré automatiquement.
+    """Bridge 4: ActivitÃ© famille terminÃ©e ? jalon Jules enregistrÃ© automatiquement.
 
-    Si l'activité est liée au développement de Jules (catégorie motricite/langage/social/eveil),
-    crée un jalon associé dans la timeline de suivi.
-    Tolère les pannes — n'échoue jamais.
+    Si l'activitÃ© est liÃ©e au dÃ©veloppement de Jules (catÃ©gorie motricite/langage/social/eveil),
+    crÃ©e un jalon associÃ© dans la timeline de suivi.
+    TolÃ¨re les pannes â€” n'Ã©choue jamais.
     """
     try:
         activite_id = event.data.get("activite_id", 0)
@@ -1183,7 +1183,7 @@ def _enregistrer_jalon_depuis_activite(event: EvenementDomaine) -> None:
         categorie = event.data.get("categorie", "")
         user_id = event.data.get("user_id")
 
-        # Catégories pertinentes pour Jules
+        # CatÃ©gories pertinentes pour Jules
         categories_jules = {"motricite", "langage", "social", "eveil", "developpement"}
         if categorie.lower() not in categories_jules:
             return
@@ -1195,7 +1195,7 @@ def _enregistrer_jalon_depuis_activite(event: EvenementDomaine) -> None:
         from datetime import date as _date
 
         with obtenir_contexte_db() as session:
-            # Vérifier qu'il n'existe pas déjà un jalon pour cette activité
+            # VÃ©rifier qu'il n'existe pas dÃ©jÃ  un jalon pour cette activitÃ©
             existant = (
                 session.query(JalonJules)
                 .filter(JalonJules.titre == nom)
@@ -1204,30 +1204,30 @@ def _enregistrer_jalon_depuis_activite(event: EvenementDomaine) -> None:
             if not existant:
                 session.add(JalonJules(
                     titre=nom,
-                    description=f"Jalon enregistré automatiquement depuis l'activité #{activite_id}",
+                    description=f"Jalon enregistrÃ© automatiquement depuis l'activitÃ© #{activite_id}",
                     date_atteinte=_date.today(),
                     categorie=categorie,
                     source="auto_bridge",
                 ))
                 session.commit()
-                # Émettre l'événement jalon
+                # Ã‰mettre l'Ã©vÃ©nement jalon
                 from .bus import obtenir_bus
                 obtenir_bus().emettre(
                     "jalon.ajoute",
                     {"nom": nom, "categorie": categorie, "user_id": user_id},
                     source="bridge_activite_jules",
                 )
-                logger.info("Bridge 4: activité '%s' ? jalon Jules créé auto", nom)
+                logger.info("Bridge 4: activitÃ© '%s' ? jalon Jules crÃ©Ã© auto", nom)
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge 4 activites?jules: %s", e)
+        logger.warning("Ã‰chec bridge 4 activites?jules: %s", e)
 
 
 def _sync_tache_deadline_vers_calendrier(event: EvenementDomaine) -> None:
-    """Bridge 5: Tâche projet avec deadline ? événement dans le calendrier entretien.
+    """Bridge 5: TÃ¢che projet avec deadline ? Ã©vÃ©nement dans le calendrier entretien.
 
-    Crée une tâche d'entretien planifiée pour la deadline du projet,
-    assurant sa visibilité dans le planning unifié.
-    Tolère les pannes — n'échoue jamais.
+    CrÃ©e une tÃ¢che d'entretien planifiÃ©e pour la deadline du projet,
+    assurant sa visibilitÃ© dans le planning unifiÃ©.
+    TolÃ¨re les pannes â€” n'Ã©choue jamais.
     """
     try:
         projet_nom = event.data.get("projet_nom", "")
@@ -1244,7 +1244,7 @@ def _sync_tache_deadline_vers_calendrier(event: EvenementDomaine) -> None:
         deadline = _date.fromisoformat(deadline_str)
 
         with obtenir_contexte_db() as session:
-            # Éviter les doublons
+            # Ã‰viter les doublons
             existant = (
                 session.query(TacheEntretien)
                 .filter(
@@ -1256,7 +1256,7 @@ def _sync_tache_deadline_vers_calendrier(event: EvenementDomaine) -> None:
             if not existant:
                 session.add(TacheEntretien(
                     nom=f"[Projet] {tache_nom}",
-                    description=f"Échéance projet « {projet_nom} » (id={projet_id})",
+                    description=f"Ã‰chÃ©ance projet Â« {projet_nom} Â» (id={projet_id})",
                     categorie="projets",
                     priorite="haute",
                     fait=False,
@@ -1271,19 +1271,19 @@ def _sync_tache_deadline_vers_calendrier(event: EvenementDomaine) -> None:
         cache.invalidate(pattern="calendrier")
 
         logger.info(
-            "Bridge 5: tâche '%s' (projet %s) ? calendrier entretien J=%s",
+            "Bridge 5: tÃ¢che '%s' (projet %s) ? calendrier entretien J=%s",
             tache_nom, projet_nom, deadline_str,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge 5 projets?calendrier: %s", e)
+        logger.warning("Ã‰chec bridge 5 projets?calendrier: %s", e)
 
 
 def _actualiser_stats_pl_dashboard(event: EvenementDomaine) -> None:
-    """Bridge 7: Résultat jeu enregistré ? mise à jour stats P&L dashboard.
+    """Bridge 7: RÃ©sultat jeu enregistrÃ© ? mise Ã  jour stats P&L dashboard.
 
     Invalide uniquement les caches jeux et dashboard pour forcer
-    un recalcul des statistiques profit/perte la prochaine requête.
-    Tolère les pannes — n'échoue jamais.
+    un recalcul des statistiques profit/perte la prochaine requÃªte.
+    TolÃ¨re les pannes â€” n'Ã©choue jamais.
     """
     try:
         type_jeu = event.data.get("type_jeu", "")
@@ -1302,27 +1302,27 @@ def _actualiser_stats_pl_dashboard(event: EvenementDomaine) -> None:
             from src.services.core.notifications.notif_ntfy import ServiceNtfy
             from src.services.core.notifications.types import NotificationNtfy
             ServiceNtfy().envoyer_sync(NotificationNtfy(
-                titre=f"?? Gain {type_jeu} : +{gain:.0f}€ !",
-                message=f"Mise: {mise:.0f}€ ? Gain: {gain:.0f}€. Stats P&L mises à jour.",
+                titre=f"?? Gain {type_jeu} : +{gain:.0f}â‚¬ !",
+                message=f"Mise: {mise:.0f}â‚¬ ? Gain: {gain:.0f}â‚¬. Stats P&L mises Ã  jour.",
                 priorite=3,
                 tags=["tada", "moneybag"],
                 click_url="/jeux",
             ))
 
         logger.info(
-            "Bridge 7: résultat %s ? dashboard P&L invalidé (gain=%.0f€, gagnant=%s)",
+            "Bridge 7: rÃ©sultat %s ? dashboard P&L invalidÃ© (gain=%.0fâ‚¬, gagnant=%s)",
             type_jeu, float(gain), est_gagnant,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge 7 jeux?dashboard: %s", e)
+        logger.warning("Ã‰chec bridge 7 jeux?dashboard: %s", e)
 
 
 def _suggerer_activites_weekend_meteo(event: EvenementDomaine) -> None:
-    """Bridge 8: Météo reçue ? suggestions d'activités weekend adaptées.
+    """Bridge 8: MÃ©tÃ©o reÃ§ue ? suggestions d'activitÃ©s weekend adaptÃ©es.
 
-    Invalide le cache weekend et utilise la condition météo pour
-    orienter les suggestions (intérieur si pluie, extérieur si soleil).
-    Tolère les pannes — n'échoue jamais.
+    Invalide le cache weekend et utilise la condition mÃ©tÃ©o pour
+    orienter les suggestions (intÃ©rieur si pluie, extÃ©rieur si soleil).
+    TolÃ¨re les pannes â€” n'Ã©choue jamais.
     """
     try:
         condition = event.data.get("condition", "")
@@ -1335,7 +1335,7 @@ def _suggerer_activites_weekend_meteo(event: EvenementDomaine) -> None:
         cache.invalidate(pattern="activites_ia")
         cache.invalidate(pattern="suggestions_activites")
 
-        # Déclencher le service weekend IA si mauvais temps prévu
+        # DÃ©clencher le service weekend IA si mauvais temps prÃ©vu
         if condition in ("pluie", "orage", "neige"):
             from src.services.famille.weekend_ai import get_weekend_ai_service
             service = get_weekend_ai_service()
@@ -1346,19 +1346,19 @@ def _suggerer_activites_weekend_meteo(event: EvenementDomaine) -> None:
                 )
 
         logger.info(
-            "Bridge 8: météo '%s' (%s°C) le %s ? suggestions weekend invalidées",
+            "Bridge 8: mÃ©tÃ©o '%s' (%sÂ°C) le %s ? suggestions weekend invalidÃ©es",
             condition, temperature_max, date_prevision,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge 8 meteo?activites_weekend: %s", e)
+        logger.warning("Ã‰chec bridge 8 meteo?activites_weekend: %s", e)
 
 
 def _envoyer_rappel_entretien_push(event: EvenementDomaine) -> None:
-    """Bridge 9: Tâche entretien due ? rappel push ntfy le matin.
+    """Bridge 9: TÃ¢che entretien due ? rappel push ntfy le matin.
 
-    Envoie une notification push pour rappeler la tâche d'entretien
-    planifiée pour aujourd'hui ou demain.
-    Tolère les pannes — n'échoue jamais.
+    Envoie une notification push pour rappeler la tÃ¢che d'entretien
+    planifiÃ©e pour aujourd'hui ou demain.
+    TolÃ¨re les pannes â€” n'Ã©choue jamais.
     """
     try:
         tache_id = event.data.get("tache_id", 0)
@@ -1375,34 +1375,34 @@ def _envoyer_rappel_entretien_push(event: EvenementDomaine) -> None:
         from src.services.core.notifications.types import NotificationNtfy
 
         ServiceNtfy().envoyer_sync(NotificationNtfy(
-            titre=f"?? Entretien à faire : {nom}",
+            titre=f"?? Entretien Ã  faire : {nom}",
             message=(
-                f"Tâche {categorie} planifiée pour {prochaine_fois}.\n"
-                "Consultez la liste complète des tâches maison."
+                f"TÃ¢che {categorie} planifiÃ©e pour {prochaine_fois}.\n"
+                "Consultez la liste complÃ¨te des tÃ¢ches maison."
             ),
             priorite=priorite_ntfy,
             tags=["house", "wrench"],
             click_url="/maison/entretien",
         ))
-        logger.info("Bridge 9: rappel entretien envoyé (tache_id=%s, nom=%s)", tache_id, nom)
+        logger.info("Bridge 9: rappel entretien envoyÃ© (tache_id=%s, nom=%s)", tache_id, nom)
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge 9 entretien?push: %s", e)
+        logger.warning("Ã‰chec bridge 9 entretien?push: %s", e)
 
 
 # -----------------------------------------------------------
-# ENREGISTREMENT — Appelé au bootstrap
+# ENREGISTREMENT â€” AppelÃ© au bootstrap
 # -----------------------------------------------------------
 
 _subscribers_enregistres = False
 
 
 def enregistrer_subscribers() -> int:
-    """Enregistre tous les subscribers sur le bus d'événements.
+    """Enregistre tous les subscribers sur le bus d'Ã©vÃ©nements.
 
-    Idempotent : ne s'exécute qu'une fois.
+    Idempotent : ne s'exÃ©cute qu'une fois.
 
     Returns:
-        Nombre de souscriptions créées.
+        Nombre de souscriptions crÃ©Ã©es.
     """
     global _subscribers_enregistres
     if _subscribers_enregistres:
@@ -1413,7 +1413,7 @@ def enregistrer_subscribers() -> int:
     bus = obtenir_bus()
     compteur = 0
 
-    # -- Cache invalidation (haute priorité) --
+    # -- Cache invalidation (haute prioritÃ©) --
     bus.souscrire("recette.*", _invalider_cache_recettes, priority=100)
     compteur += 1
     bus.souscrire("stock.*", _invalider_cache_stock, priority=100)
@@ -1463,25 +1463,25 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("anniversaire.rappel", _proposer_checklist_anniversaire_proche, priority=80)
     compteur += 1
 
-    # -- Préférences — invalider suggestions achats --
+    # -- PrÃ©fÃ©rences â€” invalider suggestions achats --
     bus.souscrire("preferences.mise_a_jour", _invalider_cache_suggestions_achats, priority=90)
     compteur += 1
     bus.souscrire("preferences.*", _invalider_cache_suggestions_achats, priority=90)
     compteur += 1
 
-    # -- Jalons Jules ? invalider suggestions activités --
+    # -- Jalons Jules ? invalider suggestions activitÃ©s --
     bus.souscrire("jalons.ajoute", _proposer_activites_sur_jalon, priority=70)
     compteur += 1
     bus.souscrire("jalons.*", _proposer_activites_sur_jalon, priority=70)
     compteur += 1
 
-    # -- Achat effectué ? invalider budget --
+    # -- Achat effectuÃ© ? invalider budget --
     bus.souscrire("achats.achete", _invalider_cache_achats_sur_achat_effectue, priority=90)
     compteur += 1
     bus.souscrire("achat.achete", _invalider_cache_achats_sur_achat_effectue, priority=90)
     compteur += 1
 
-    # -- Documents expirés ? invalider rappels --
+    # -- Documents expirÃ©s ? invalider rappels --
     bus.souscrire("documents.expire", _invalider_cache_documents_expires, priority=90)
     compteur += 1
     bus.souscrire("documents.proche_expiration", _invalider_cache_documents_expires, priority=90)
@@ -1489,29 +1489,29 @@ def enregistrer_subscribers() -> int:
 
     # -- Interactions intelligentes --
 
-    # Budget serré ? filtrer suggestions (invalider cache suggestions_*)
+    # Budget serrÃ© ? filtrer suggestions (invalider cache suggestions_*)
     bus.souscrire("budget.contrainte", _filtrer_suggestions_budget_serre, priority=85)
     compteur += 1
 
-    # Document échéance proche J-30 ? notification ntfy
+    # Document Ã©chÃ©ance proche J-30 ? notification ntfy
     bus.souscrire("document.echeance_proche", _notifier_document_echeance_proche, priority=80)
     compteur += 1
 
-    # Jalon Jules ajouté ? suggestions activités + notification ntfy
+    # Jalon Jules ajoutÃ© ? suggestions activitÃ©s + notification ntfy
     bus.souscrire("jalon.ajoute", _notifier_jalon_ajoute_avec_activites, priority=75)
     compteur += 1
 
     # -- Connexions inter-modules --
 
-    # Entretien ? Budget (sync dépenses)
+    # Entretien ? Budget (sync dÃ©penses)
     bus.souscrire("depenses.sync_entretien", _sync_entretien_vers_budget, priority=85)
     compteur += 1
 
-    # Voyages ? Calendrier (sync événements planning)
+    # Voyages ? Calendrier (sync Ã©vÃ©nements planning)
     bus.souscrire("planning.sync_voyages", _sync_voyages_vers_planning, priority=85)
     compteur += 1
 
-    # Charges ? Dashboard (mise à jour métriques)
+    # Charges ? Dashboard (mise Ã  jour mÃ©triques)
     bus.souscrire("dashboard.charges_update", _sync_charges_vers_dashboard, priority=85)
     compteur += 1
 
@@ -1558,9 +1558,9 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("dashboard.widget.action_rapide", _traiter_action_rapide_dashboard, priority=75)
     compteur += 1
 
-    # -- Bridges inter-modules (priorité 80) --
+    # -- Bridges inter-modules (prioritÃ© 80) --
 
-    # Bridge 1: Planning validé ? courses auto
+    # Bridge 1: Planning validÃ© ? courses auto
     bus.souscrire("planning.valide", _generer_courses_depuis_planning, priority=80)
     compteur += 1
     bus.souscrire("planning.semaine_validee", _generer_courses_depuis_planning, priority=80)
@@ -1568,41 +1568,41 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("courses.generees", _notifier_courses_generees, priority=79)
     compteur += 1
 
-    # Bridge 2: Inventaire péremption proche ? anti-gaspi IA
+    # Bridge 2: Inventaire pÃ©remption proche ? anti-gaspi IA
     bus.souscrire("inventaire.peremption_proche", _suggerer_recettes_anti_gaspi, priority=80)
     compteur += 1
 
-    # Bridge 3: Budget dépassement ? push notification
+    # Bridge 3: Budget dÃ©passement ? push notification
     bus.souscrire("budget.depassement", _notifier_alerte_budget_push, priority=78)
     compteur += 1
 
-    # Bridge 4: Activité terminée ? jalon Jules auto
+    # Bridge 4: ActivitÃ© terminÃ©e ? jalon Jules auto
     bus.souscrire("activites.terminee", _enregistrer_jalon_depuis_activite, priority=80)
     compteur += 1
 
-    # Bridge 5: Tâche projet deadline ? calendrier entretien
+    # Bridge 5: TÃ¢che projet deadline ? calendrier entretien
     bus.souscrire("projets.tache_deadline", _sync_tache_deadline_vers_calendrier, priority=80)
     compteur += 1
 
-    # Bridge 7: Résultat jeu ? dashboard P&L
+    # Bridge 7: RÃ©sultat jeu ? dashboard P&L
     bus.souscrire("paris.resultat_enregistre", _actualiser_stats_pl_dashboard, priority=80)
     compteur += 1
 
-    # Bridge 8: Météo reçue ? activités weekend
+    # Bridge 8: MÃ©tÃ©o reÃ§ue ? activitÃ©s weekend
     bus.souscrire("meteo.prevision_recue", _suggerer_activites_weekend_meteo, priority=80)
     compteur += 1
 
-    # Bridge 9: Tâche entretien due ? rappel push
+    # Bridge 9: TÃ¢che entretien due ? rappel push
     bus.souscrire("entretien.tache_due", _envoyer_rappel_entretien_push, priority=80)
     compteur += 1
 
-    # -- Métriques (priorité moyenne) --
+    # -- MÃ©triques (prioritÃ© moyenne) --
     bus.souscrire("*", _enregistrer_metrique_evenement, priority=50)
     compteur += 1
     bus.souscrire("service.error", _enregistrer_erreur_service, priority=50)
     compteur += 1
 
-    # -- Bridges inter-modules moyenne priorité (NIM5-NIM8) --
+    # -- Bridges inter-modules moyenne prioritÃ© (NIM5-NIM8) --
     try:
         from src.services.maison.inter_module_entretien_budget import (
             enregistrer_entretien_budget_subscribers,
@@ -1611,7 +1611,7 @@ def enregistrer_subscribers() -> int:
         enregistrer_entretien_budget_subscribers()
         compteur += 1
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec enregistrement bridge NIM5 Entretien?Budget: %s", e)
+        logger.warning("Ã‰chec enregistrement bridge NIM5 Entretien?Budget: %s", e)
 
     try:
         from src.services.cuisine.inter_module_courses_validation import (
@@ -1621,7 +1621,7 @@ def enregistrer_subscribers() -> int:
         enregistrer_courses_validation_subscribers()
         compteur += 1
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec enregistrement bridge NIM6 Courses?Planning: %s", e)
+        logger.warning("Ã‰chec enregistrement bridge NIM6 Courses?Planning: %s", e)
 
     try:
         from src.services.cuisine.inter_module_inventaire_fifo import (
@@ -1631,7 +1631,7 @@ def enregistrer_subscribers() -> int:
         enregistrer_inventaire_fifo_subscribers()
         compteur += 1
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec enregistrement bridge NIM7 Inventaire?FIFO: %s", e)
+        logger.warning("Ã‰chec enregistrement bridge NIM7 Inventaire?FIFO: %s", e)
 
     try:
         from src.services.utilitaires.bridges_chat_event_bus import (
@@ -1641,18 +1641,18 @@ def enregistrer_subscribers() -> int:
         enregistrer_chat_event_bus_subscribers()
         compteur += 1
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec enregistrement bridge NIM8 Chat?EventBus: %s", e)
+        logger.warning("Ã‰chec enregistrement bridge NIM8 Chat?EventBus: %s", e)
 
-    # -- Webhooks sortants (basse priorité, fire-and-forget) --
+    # -- Webhooks sortants (basse prioritÃ©, fire-and-forget) --
     bus.souscrire("*", _livrer_webhooks, priority=5)
     compteur += 1
 
-    # -- Audit logging (basse priorité) --
+    # -- Audit logging (basse prioritÃ©) --
     bus.souscrire("*", _logger_evenement_audit, priority=10)
     compteur += 1
 
     _subscribers_enregistres = True
-    logger.info("?? %d event subscribers enregistrés", compteur)
+    logger.info("?? %d event subscribers enregistrÃ©s", compteur)
     return compteur
 
 

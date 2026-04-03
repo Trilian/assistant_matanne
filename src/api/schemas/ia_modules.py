@@ -90,3 +90,36 @@ class PredictionEnergieResponse(BaseModel):
     nb_anomalies: int = 0
     score_risque_global: float = 0.0
     conseils: list[str] = Field(default_factory=list)
+
+
+class CalendrierSemisPersonnaliseResponse(BaseModel):
+    """Réponse IA-2: calendrier semis/récolte personnalisé selon météo locale."""
+
+    mois: int
+    region: str
+    meteo_resume: dict[str, Any] = Field(default_factory=dict)
+    a_semer: list[dict[str, Any]] = Field(default_factory=list)
+    a_planter: list[dict[str, Any]] = Field(default_factory=list)
+    a_recolter: list[dict[str, Any]] = Field(default_factory=list)
+    conseils_personnalises: list[str] = Field(default_factory=list)
+
+
+class EstimationRoiHabitatResponse(BaseModel):
+    """Réponse IA-4: estimation prix bien et ROI rénovation."""
+
+    prix_m2_reference: float = 0.0
+    valeur_estimee_bien: float = 0.0
+    budget_travaux: float = 0.0
+    plus_value_estimee: float = 0.0
+    roi_pct: float = 0.0
+    verdict: str = "neutre"
+    recommandations: list[str] = Field(default_factory=list)
+
+
+class EstimationComparaisonDevisResponse(BaseModel):
+    """Réponse IA-7: estimation et comparaison de devis artisans."""
+
+    projet_id: int | None = None
+    estimation_reference: dict[str, Any] = Field(default_factory=dict)
+    devis_analyses: list[dict[str, Any]] = Field(default_factory=list)
+    recommandation: dict[str, Any] = Field(default_factory=dict)

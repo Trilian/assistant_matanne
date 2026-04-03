@@ -106,7 +106,7 @@ class TestChatContexteMultiModule:
 
     def test_collecter_contexte_complet(self, engine):
         """Collecte le contexte de tous les modules disponibles."""
-        from src.services.utilitaires.inter_module_chat_contexte import (
+        from src.services.utilitaires.bridges_chat_contexte import (
             ChatContexteMultiModuleService,
         )
 
@@ -116,7 +116,7 @@ class TestChatContexteMultiModule:
 
     def test_contexte_resilient_aux_erreurs(self, engine):
         """Le collecteur ne bloque pas si un module Ã©choue."""
-        from src.services.utilitaires.inter_module_chat_contexte import (
+        from src.services.utilitaires.bridges_chat_contexte import (
             ChatContexteMultiModuleService,
         )
 
@@ -211,7 +211,7 @@ class TestVoyagesBudgetInteraction:
 
     def test_synchroniser_voyages_vers_budget(self, engine, db):
         """Synchronise les voyages vers le budget."""
-        from src.services.famille.inter_module_voyages_budget import (
+        from src.services.famille.bridges_voyages_budget import (
             VoyagesBudgetInteractionService,
         )
 
@@ -312,7 +312,7 @@ class TestCuisineInterModuleBridges:
         assert isinstance(result, dict)
 
     def test_saison_menu_retourne_dict(self, engine):
-        from src.services.cuisine.inter_module_saison_menu import (
+        from src.services.cuisine.bridges_saison_menu import (
             SaisonMenuInteractionService,
         )
 
@@ -325,7 +325,7 @@ class TestFamilleInterModuleBridges:
     """Tests des bridges famille bridges inter-modules."""
 
     def test_weekend_courses_retourne_dict(self, engine, db):
-        from src.services.famille.inter_module_weekend_courses import (
+        from src.services.famille.bridges_weekend_courses import (
             WeekendCoursesInteractionService,
         )
 
@@ -334,7 +334,7 @@ class TestFamilleInterModuleBridges:
         assert isinstance(result, dict)
 
     def test_documents_calendrier_retourne_dict(self, engine, db):
-        from src.services.famille.inter_module_documents_calendrier import (
+        from src.services.famille.bridges_documents_calendrier import (
             DocumentsCalendrierInteractionService,
         )
 
@@ -343,7 +343,7 @@ class TestFamilleInterModuleBridges:
         assert isinstance(result, dict)
 
     def test_meteo_activites_retourne_dict(self, engine, db):
-        from src.services.famille.inter_module_meteo_activites import (
+        from src.services.famille.bridges_meteo_activites import (
             MeteoActivitesInteractionService,
         )
 
@@ -371,7 +371,7 @@ class TestMaisonInterModuleBridges:
     """Tests des bridges maison bridges inter-modules."""
 
     def test_entretien_courses_retourne_dict(self, engine, db):
-        from src.services.maison.inter_module_entretien_courses import (
+        from src.services.maison.bridges_entretien_courses import (
             EntretienCoursesInteractionService,
         )
 
@@ -380,7 +380,7 @@ class TestMaisonInterModuleBridges:
         assert isinstance(result, dict)
 
     def test_charges_energie_retourne_dict(self, engine, db):
-        from src.services.maison.inter_module_charges_energie import (
+        from src.services.maison.bridges_charges_energie import (
             ChargesEnergieInteractionService,
         )
 
@@ -389,7 +389,7 @@ class TestMaisonInterModuleBridges:
         assert isinstance(result, dict)
 
     def test_jardin_entretien_retourne_dict(self, engine, db):
-        from src.services.maison.inter_module_jardin_entretien import (
+        from src.services.maison.bridges_jardin_entretien import (
             JardinEntretienInteractionService,
         )
 

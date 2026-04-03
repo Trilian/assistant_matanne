@@ -194,6 +194,68 @@ async def analyser_photo_frigo(
     return resultat.model_dump()
 
 
+@router.get("/menu-du-jour", responses=REPONSES_IA)
+@gerer_exception_api
+async def menu_du_jour(
+    repas: str = Query(
+        "diner",
+        pattern="^(petit_dejeuner|dejeuner|diner)$",
+        description="Type de repas (petit_dejeuner, dejeuner, diner)",
+    ),
+    nombre: int = Query(3, ge=1, le=5, description="Nombre de suggestions (1-5, défaut: 3)"),
+    user: dict = Depends(require_auth),
+    _rate_check: dict = Depends(verifier_limite_debit_ia),
+):
+    """
+    INNO-5: "Qu'est-ce qu'on mange ?" — 1 bouton = 3 suggestions contextuelles.
+
+    Retourne des suggestions de recettes basées sur:
+    - Stock disponible (inventaire + courses)
+    - Météo (si possible)
+    - Goûts détectés (historique)
+    - Derniers repas (éviter la répétition)
+    - Adaptations Jules (si applicable)
+
+    Args:
+        repas: Type de repas (petit_dejeuner, dejeuner, diner). Défaut: diner
+        nombre: Nombre de suggestions. Défaut: 3
+
+    Returns:
+        Liste de suggestions avec raison, temps de préparation, et ingrédients manquants
+    """
+    from src.services.cuisine.suggestions import obtenir_service_suggestions
+
+    service = obtenir_service_suggestions()
+
+    # Générer les suggestions
+    suggestions = service.suggerer_recettes(
+        contexte=None,  # Utilise le contexte auto-détecté
+        nb_suggestions=nombre,
+        inclure_decouvertes=True,
+    )
+
+    # Formater la réponse
+    return {
+        "suggestions": [
+            {
+                "recette_id": s.recette_id,
+                "nom": s.nom,
+                "raison": s.raison,
+                "temps_preparation": s.temps_preparation,
+                "difficulte": s.difficulte,
+                "ingredients_manquants": s.ingredients_manquants,
+                "score": round(s.score, 1),
+                "est_nouvelle": s.est_nouvelle,
+                "tags": s.tags,
+            }
+            for s in suggestions[:nombre]
+        ],
+        "repas": repas,
+        "nombre": min(nombre, len(suggestions)) if suggestions else 0,
+        "contexte": "Stock + historique personnalisé",
+    }
+
+
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PRÃ‰DICTIONS ML
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

@@ -19,7 +19,7 @@ __all__ = [
     "dashboard_accueil",
     "documents_router",
     "export_router",
-
+    "rapports_router",
     "famille_router",
     "habitat_router",
     "garmin_router",
@@ -58,6 +58,7 @@ _MODULES = {
     "dashboard_router": ".dashboard",
     "documents_router": ".documents",
     "export_router": ".export",
+    "rapports_router": ".rapports",
     "famille_router": ".famille",
     "habitat_router": ".habitat",
     "garmin_router": ".garmin",

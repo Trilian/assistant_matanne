@@ -1,4 +1,4 @@
-"""Routes admin — Jobs et Bridges."""
+"""Routes admin â€” Jobs et Bridges."""
 
 from __future__ import annotations
 
@@ -38,9 +38,9 @@ logger = logging.getLogger(__name__)
 @router.get(
     "/bridges/status",
     responses=REPONSES_AUTH_ADMIN,
-    summary="Statut opérationnel des bridges inter-modules",
+    summary="Statut opÃ©rationnel des bridges inter-modules",
     description=(
-        "Expose l'état opérationnel des 17 actions (bridges inter-modules et "
+        "Expose l'Ã©tat opÃ©rationnel des 17 actions (bridges inter-modules et "
         "interactions intra-modules) pour dashboard/admin."
     ),
 )
@@ -49,13 +49,13 @@ async def statut_bridges(
     inclure_smoke: bool = Query(
         True,
         description=(
-            "Exécute des checks smoke non destructifs sur les actions compatibles. "
-            "Les actions mutatives restent en vérification de présence."
+            "ExÃ©cute des checks smoke non destructifs sur les actions compatibles. "
+            "Les actions mutatives restent en vÃ©rification de prÃ©sence."
         ),
     ),
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict[str, Any]:
-    """Retourne un statut détaillé de tous les bridges/actions inter-modules."""
+    """Retourne un statut dÃ©taillÃ© de tous les bridges/actions inter-modules."""
     from src.api.utils import executer_async, executer_avec_session
 
     def _query() -> dict[str, Any]:
@@ -184,7 +184,7 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-03",
-                    "bridge": "inter_module_saison_menu.py",
+                    "bridge": "bridges_saison_menu.py",
                     "intitule": "Produits de saison -> Planning IA",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
@@ -196,8 +196,8 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-04",
-                    "bridge": "inter_module_meteo_activites.py",
-                    "intitule": "Météo -> Activités famille",
+                    "bridge": "bridges_meteo_activites.py",
+                    "intitule": "MÃ©tÃ©o -> ActivitÃ©s famille",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
                         "src.services.famille.bridges_meteo_activites",
@@ -221,7 +221,7 @@ async def statut_bridges(
                 {
                     "id": "P5-06",
                     "bridge": "bridges_charges_energie.py",
-                    "intitule": "Charges facture -> Analyse énergie",
+                    "intitule": "Charges facture -> Analyse Ã©nergie",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
                         "src.services.maison.bridges_charges_energie",
@@ -232,8 +232,8 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-07",
-                    "bridge": "inter_module_weekend_courses.py",
-                    "intitule": "Weekend activités -> Courses",
+                    "bridge": "bridges_weekend_courses.py",
+                    "intitule": "Weekend activitÃ©s -> Courses",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
                         "src.services.famille.bridges_weekend_courses",
@@ -244,7 +244,7 @@ async def statut_bridges(
                 },
                 {
                     "id": "P5-08",
-                    "bridge": "inter_module_documents_calendrier.py",
+                    "bridge": "bridges_documents_calendrier.py",
                     "intitule": "Documents expirants -> Calendrier",
                     "type_check": "presence",
                     "callable": lambda: hasattr(
@@ -331,7 +331,7 @@ async def statut_bridges(
                 {
                     "id": "P5-15",
                     "bridge": "inter_module_anniversaires_budget.py",
-                    "intitule": "Anniversaire J-14 -> Budget prévisionnel",
+                    "intitule": "Anniversaire J-14 -> Budget prÃ©visionnel",
                     "type_check": "presence",
                     "callable": lambda: hasattr(
                         __import__(
@@ -357,7 +357,7 @@ async def statut_bridges(
                 {
                     "id": "P5-17",
                     "bridge": "bridges_charges_energie.py",
-                    "intitule": "Charges augmentation -> Diagnostic énergie",
+                    "intitule": "Charges augmentation -> Diagnostic Ã©nergie",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
                         "src.services.maison.bridges_charges_energie",
@@ -387,7 +387,7 @@ async def statut_bridges(
                             "verification": "presence",
                             "statut": "operationnel",
                             "latence_ms": round((time.perf_counter() - debut) * 1000, 2),
-                            "details": "Factory et méthode disponibles.",
+                            "details": "Factory et mÃ©thode disponibles.",
                         }
                     else:
                         sortie = check["callable"]()
@@ -441,13 +441,13 @@ async def statut_bridges(
     response_model=list[JobInfoResponse],
     responses=REPONSES_AUTH_ADMIN,
     summary="Lister les jobs cron",
-    description="Retourne tous les jobs planifiés avec leur statut. Nécessite le rôle admin.",
+    description="Retourne tous les jobs planifiÃ©s avec leur statut. NÃ©cessite le rÃ´le admin.",
 )
 @gerer_exception_api
 async def lister_jobs(
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> list[dict]:
-    """Liste tous les jobs APScheduler et leur prochain déclenchement."""
+    """Liste tous les jobs APScheduler et leur prochain dÃ©clenchement."""
     try:
         from src.services.core.cron.jobs import _demarreur
 
@@ -474,17 +474,17 @@ async def lister_jobs(
 @router.post(
     "/jobs/{job_id}/run",
     responses=REPONSES_AUTH_ADMIN,
-    summary="Déclencher un job manuellement",
-    description="Exécute immédiatement le job indiqué. Nécessite le rôle admin. Rate-limited: 5 req/min.",
+    summary="DÃ©clencher un job manuellement",
+    description="ExÃ©cute immÃ©diatement le job indiquÃ©. NÃ©cessite le rÃ´le admin. Rate-limited: 5 req/min.",
 )
 @gerer_exception_api
 async def executer_job(
     job_id: str,
-    dry_run: bool = Query(False, description="Simuler le job sans exécution réelle"),
-    force: bool = Query(False, description="Ignore le rate-limit admin pour ce déclenchement"),
+    dry_run: bool = Query(False, description="Simuler le job sans exÃ©cution rÃ©elle"),
+    force: bool = Query(False, description="Ignore le rate-limit admin pour ce dÃ©clenchement"),
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict:
-    """Déclenche un job cron de façon asynchrone."""
+    """DÃ©clenche un job cron de faÃ§on asynchrone."""
     from src.api.utils import executer_async
 
     # Rate limiting : 5 triggers/min par admin
@@ -528,8 +528,8 @@ async def executer_job(
 @router.post(
     "/jobs/run-all",
     responses=REPONSES_AUTH_ADMIN,
-    summary="Exécuter tous les jobs",
-    description="Exécute séquentiellement tous les jobs enregistrés (dry-run possible).",
+    summary="ExÃ©cuter tous les jobs",
+    description="ExÃ©cute sÃ©quentiellement tous les jobs enregistrÃ©s (dry-run possible).",
 )
 @gerer_exception_api
 async def executer_tous_les_jobs(
@@ -610,7 +610,7 @@ async def executer_tous_les_jobs(
     "/jobs/{job_id}/schedule",
     responses=REPONSES_AUTH_ADMIN,
     summary="Modifier le schedule d'un job",
-    description="Met à jour dynamiquement le CronTrigger d'un job existant.",
+    description="Met Ã  jour dynamiquement le CronTrigger d'un job existant.",
 )
 @gerer_exception_api
 async def modifier_schedule_job(
@@ -663,7 +663,7 @@ async def modifier_schedule_job(
     "/jobs/run-morning-batch",
     responses=REPONSES_AUTH_ADMIN,
     summary='Lancer tous les jobs du matin',
-    description="Exécute en séquence les jobs planifiés entre 06:00 et 09:00.",
+    description="ExÃ©cute en sÃ©quence les jobs planifiÃ©s entre 06:00 et 09:00.",
 )
 @gerer_exception_api
 async def executer_jobs_matin(
@@ -728,8 +728,8 @@ async def executer_jobs_matin(
 @router.post(
     "/jobs/simulate-day",
     responses=REPONSES_AUTH_ADMIN,
-    summary='Simuler une journée de jobs',
-    description="Exécute séquentiellement les jobs disponibles d'une journée type en mode dry-run.",
+    summary='Simuler une journÃ©e de jobs',
+    description="ExÃ©cute sÃ©quentiellement les jobs disponibles d'une journÃ©e type en mode dry-run.",
 )
 @gerer_exception_api
 async def simuler_journee_jobs(
@@ -794,15 +794,15 @@ async def simuler_journee_jobs(
 @router.get(
     "/jobs/{job_id}/logs",
     responses=REPONSES_AUTH_ADMIN,
-    summary="Logs dernière exécution d'un job",
-    description="Retourne l'historique des déclenchements manuels du job. Nécessite le rôle admin.",
+    summary="Logs derniÃ¨re exÃ©cution d'un job",
+    description="Retourne l'historique des dÃ©clenchements manuels du job. NÃ©cessite le rÃ´le admin.",
 )
 @gerer_exception_api
 async def logs_job(
     job_id: str,
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict:
-    """Retourne les logs des N dernières exécutions manuelles du job."""
+    """Retourne les logs des N derniÃ¨res exÃ©cutions manuelles du job."""
     from src.api.utils import executer_avec_session
 
     logs_persistes: list[dict[str, Any]] = []
@@ -847,8 +847,8 @@ async def logs_job(
 @router.get(
     "/jobs/history",
     responses=REPONSES_AUTH_ADMIN,
-    summary="Historique des exécutions jobs",
-    description="Retourne l'historique paginé des exécutions de jobs avec filtres.",
+    summary="Historique des exÃ©cutions jobs",
+    description="Retourne l'historique paginÃ© des exÃ©cutions de jobs avec filtres.",
 )
 @gerer_exception_api
 async def historique_jobs(
@@ -856,11 +856,11 @@ async def historique_jobs(
     par_page: int = Query(25, ge=1, le=200),
     job_id: str | None = Query(None, description="Filtrer par identifiant de job"),
     status: str | None = Query(None, description="Filtrer par statut (success/failure/dry_run/...)"),
-    depuis: datetime | None = Query(None, description="Date de début (ISO 8601)"),
+    depuis: datetime | None = Query(None, description="Date de dÃ©but (ISO 8601)"),
     jusqu_a: datetime | None = Query(None, description="Date de fin (ISO 8601)"),
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict[str, Any]:
-    """Historique paginé/filtrable des lignes job_executions."""
+    """Historique paginÃ©/filtrable des lignes job_executions."""
     from src.api.utils import executer_avec_session
 
     offset = (page - 1) * par_page
@@ -945,7 +945,7 @@ async def historique_jobs(
     "/jobs/history/{execution_id}/retry",
     responses=REPONSES_AUTH_ADMIN,
     summary="Relancer un job depuis l'historique",
-    description="Récupère le job_id d'une exécution historique puis relance ce job.",
+    description="RÃ©cupÃ¨re le job_id d'une exÃ©cution historique puis relance ce job.",
 )
 @gerer_exception_api
 async def relancer_job_depuis_historique(
@@ -966,7 +966,7 @@ async def relancer_job_depuis_historique(
         ).mappings().first()
 
     if not row:
-        raise HTTPException(status_code=404, detail=f"Exécution #{execution_id} introuvable")
+        raise HTTPException(status_code=404, detail=f"ExÃ©cution #{execution_id} introuvable")
 
     job_id = str(row["job_id"])
     result = await executer_job(job_id=job_id, dry_run=dry_run, force=force, user=user)
@@ -982,8 +982,8 @@ async def relancer_job_depuis_historique(
 @router.get(
     "/jobs/compare-dry-run",
     responses=REPONSES_AUTH_ADMIN,
-    summary="Comparer dry-run et exécution réelle",
-    description="Compare les dernières exécutions dry-run et réelles par job.",
+    summary="Comparer dry-run et exÃ©cution rÃ©elle",
+    description="Compare les derniÃ¨res exÃ©cutions dry-run et rÃ©elles par job.",
 )
 @gerer_exception_api
 async def comparer_dry_run_vs_reel(

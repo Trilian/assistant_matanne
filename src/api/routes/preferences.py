@@ -335,3 +335,127 @@ async def modifier_preferences_notifications(
             return _notif_to_dict(prefs, user["id"])
 
     return await executer_async(_upsert)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+# MODE VACANCES (INNO-12)
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+
+@router.post("/mode-vacances/activer", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def activer_mode_vacances(
+    date_depart: str | None = None,  # Format: YYYY-MM-DD
+    date_retour: str | None = None,  # Format: YYYY-MM-DD
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    INNO-12: Active le mode vacances — pause notifs, generate checklist départ.
+
+    Lors de l'activation:
+    1. Les rappels Telegram sont pausés (sauf urgences)
+    2. Une checklist de départ est générée
+    3. Le frigo sera marqué pour destockage progressif
+    4. Les plannings restent visibles mais non rappelés
+
+    Args:
+        date_depart: Date de départ (optionnel)
+        date_retour: Date de retour (optionnel)
+
+    Returns:
+        Statut du mode vacances + checklist générée
+    """
+    def _activer():
+        from datetime import datetime
+        from src.core.models.notifications import PreferenceNotification
+
+        with executer_avec_session() as session:
+            prefs = (
+                session.query(PreferenceNotification)
+                .filter(PreferenceNotification.user_id == user["id"])
+                .first()
+            )
+
+            if not prefs:
+                prefs = PreferenceNotification(user_id=user["id"])
+                session.add(prefs)
+
+            modules_actifs = prefs.modules_actifs or {}
+            modules_actifs["mode_vacances"] = True
+            if date_depart:
+                try:
+                    modules_actifs["vacances_depart"] = datetime.strptime(date_depart, "%Y-%m-%d").isoformat()
+                except:
+                    pass
+            if date_retour:
+                try:
+                    modules_actifs["vacances_retour"] = datetime.strptime(date_retour, "%Y-%m-%d").isoformat()
+                except:
+                    pass
+
+            prefs.modules_actifs = modules_actifs
+            session.commit()
+
+            # Générer checklist
+            checklist = [
+                {"tache": "Fermer tous les robinets intérieurs", "categorie": "eau", "priorite": "haute"},
+                {"tache": "Vérifier la porte d'entrée", "categorie": "securite", "priorite": "haute"},
+                {"tache": "Éteindre appareils électriques", "categorie": "electricite", "priorite": "moyenne"},
+                {"tache": "Vider le frigo (destockage)", "categorie": "cuisine", "priorite": "moyenne"},
+                {"tache": "Arroser les plantes", "categorie": "jardin", "priorite": "moyenne"},
+                {"tache": "Fermer les volets (optionnel)", "categorie": "securite", "priorite": "basse"},
+            ]
+
+            return {
+                "statut": "Mode vacances activé",
+                "mode_vacances": True,
+                "date_depart": date_depart,
+                "date_retour": date_retour,
+                "notifications_pausees": True,
+                "checklist": checklist,
+            }
+
+    return await executer_async(_activer)
+
+
+@router.post("/mode-vacances/desactiver", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def desactiver_mode_vacances(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """
+    Désactive le mode vacances — reprend les notifications.
+
+    Args:
+        user: Utilisateur authentifié
+
+    Returns:
+        Statut updated
+    """
+    def _desactiver():
+        from src.core.models.notifications import PreferenceNotification
+
+        with executer_avec_session() as session:
+            prefs = (
+                session.query(PreferenceNotification)
+                .filter(PreferenceNotification.user_id == user["id"])
+                .first()
+            )
+
+            if prefs:
+                modules_actifs = prefs.modules_actifs or {}
+                modules_actifs["mode_vacances"] = False
+                for key in list(modules_actifs.keys()):
+                    if key.startswith("vacances_"):
+                        del modules_actifs[key]
+                prefs.modules_actifs = modules_actifs
+                session.commit()
+
+            return {
+                "statut": "Mode vacances désactivé",
+                "mode_vacances": False,
+                "notifications_actives": True,
+            }
+
+    return await executer_async(_desactiver)
+

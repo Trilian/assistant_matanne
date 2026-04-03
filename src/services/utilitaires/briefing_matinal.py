@@ -12,6 +12,7 @@ IM-P2-5: Chaque matin à 7h → digest personnalisé résumant :
 Configurable on/off par utilisateur (ne plaira pas forcément à tout le monde).
 """
 
+import html
 import logging
 from datetime import date, timedelta
 from typing import Any
@@ -49,8 +50,10 @@ class BriefingMatinalService(BaseAIService):
 
         # Collecter les données de chaque section
         collecteurs = [
+            ("meteo", self._section_meteo),
             ("repas", self._section_repas),
             ("taches_maison", self._section_taches),
+            ("jules", self._section_jules),
             ("anniversaires", self._section_anniversaires),
             ("documents", self._section_documents),
             ("budget", self._section_budget),
@@ -79,6 +82,29 @@ class BriefingMatinalService(BaseAIService):
         return briefing
 
     @avec_gestion_erreurs(default_return={})
+    def _section_meteo(self) -> dict[str, Any]:
+        """Météo du jour avec suggestion principale."""
+        from src.services.utilitaires.meteo_service import obtenir_meteo_service
+
+        meteo = obtenir_meteo_service().obtenir_meteo()
+        actuelle = getattr(meteo, "actuelle", None)
+        if not actuelle:
+            return {}
+
+        suggestion = None
+        suggestions = getattr(meteo, "suggestions", None) or []
+        if suggestions:
+            suggestion = suggestions[0]
+
+        return {
+            "ville": getattr(meteo, "ville", None),
+            "temperature": getattr(actuelle, "temperature", None),
+            "condition": getattr(actuelle, "condition", None),
+            "emoji": getattr(actuelle, "emoji", None),
+            "suggestion": suggestion,
+        }
+
+    @avec_gestion_erreurs(default_return={})
     @avec_session_db
     def _section_repas(self, *, db=None) -> dict[str, Any]:
         """Repas prévus aujourd'hui."""
@@ -98,10 +124,34 @@ class BriefingMatinalService(BaseAIService):
             "repas_du_jour": [
                 {
                     "type": getattr(r, "type_repas", "repas"),
-                    "recette": getattr(r, "recette_nom", "") or "Non précisé",
+                    "recette": (
+                        getattr(getattr(r, "recette", None), "nom", None)
+                        or getattr(r, "recette_nom", "")
+                        or "Non précisé"
+                    ),
                 }
                 for r in repas
             ],
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    def _section_jules(self) -> dict[str, Any]:
+        """Résumé rapide Jules: âge et prochains jalons."""
+        from src.services.famille.contexte import ContexteFamilleService
+        from src.services.famille.jules import obtenir_service_jules
+
+        service = obtenir_service_jules()
+        date_naissance = service.get_date_naissance_jules()
+        if not date_naissance:
+            return {}
+
+        age_mois = service.get_age_mois()
+        prochains_jalons = ContexteFamilleService()._prochains_jalons_oms(age_mois)
+
+        return {
+            "age_mois": age_mois,
+            "date_naissance": date_naissance.isoformat(),
+            "prochains_jalons": prochains_jalons,
         }
 
     @avec_gestion_erreurs(default_return={})
@@ -311,15 +361,29 @@ Termine par un petit mot d'encouragement."""
             )
 
             dispatcher = get_dispatcher_notifications()
-            resultats = dispatcher.envoyer(
+            resultats_push = dispatcher.envoyer(
                 user_id=user_id,
                 message=resume,
                 titre="☀️ Briefing matinal",
                 canaux=["push", "ntfy"],
             )
 
+            message_telegram = _formater_briefing_telegram(briefing)
+            resultat_telegram = dispatcher.envoyer(
+                user_id=user_id,
+                message=message_telegram,
+                titre="☀️ Briefing matinal",
+                canaux=["telegram"],
+            )
+
             logger.info(f"✅ Briefing matinal envoyé à {user_id}")
-            return {"briefing": briefing, "notification": resultats}
+            return {
+                "briefing": briefing,
+                "notification": {
+                    "push_ntfy": resultats_push,
+                    "telegram": resultat_telegram,
+                },
+            }
 
         except Exception as e:
             logger.warning(f"Envoi briefing notification échoué: {e}")
@@ -329,6 +393,16 @@ Termine par un petit mot d'encouragement."""
 def _formater_sections(sections: dict[str, Any]) -> str:
     """Formate les sections en texte lisible pour le prompt IA."""
     parties = []
+
+    if "meteo" in sections:
+        meteo = sections["meteo"]
+        condition = meteo.get("condition") or "variable"
+        temperature = meteo.get("temperature")
+        emoji = meteo.get("emoji") or "🌤️"
+        if temperature is not None:
+            parties.append(f"{emoji} Météo du jour : {condition}, {temperature}°C")
+        else:
+            parties.append(f"{emoji} Météo du jour : {condition}")
 
     if "repas" in sections:
         repas = sections["repas"]
@@ -366,6 +440,15 @@ def _formater_sections(sections: dict[str, Any]) -> str:
         if "total_mois" in budget:
             parties.append(f"💰 Budget du mois : {budget['total_mois']}€ dépensés (jour {budget.get('jour_du_mois', '?')})")
 
+    if "jules" in sections:
+        jules = sections["jules"]
+        age_mois = jules.get("age_mois")
+        jalons = jules.get("prochains_jalons") or []
+        if age_mois is not None and jalons:
+            parties.append(f"👶 Jules : {age_mois} mois, prochain jalon probable — {jalons[0]}")
+        elif age_mois is not None:
+            parties.append(f"👶 Jules : {age_mois} mois")
+
     if "inventaire_alertes" in sections:
         aujourd_hui = sections["inventaire_alertes"].get("expirent_aujourd_hui", [])
         expirants = sections["inventaire_alertes"].get("expirent_sous_48h", [])
@@ -377,6 +460,23 @@ def _formater_sections(sections: dict[str, Any]) -> str:
             parties.append(f"⚠️ Produits expirant sous 48h : {noms}")
 
     return "\n".join(parties) if parties else "Rien de particulier à signaler."
+
+
+def _formater_briefing_telegram(briefing: dict[str, Any]) -> str:
+    """Construit un message Telegram structuré à partir du briefing."""
+    sections = briefing.get("sections", {})
+    resume = str(briefing.get("resume_narratif", "") or "").strip()
+    corps = _formater_sections(sections)
+
+    lignes = ["☀️ <b>Briefing matinal</b>"]
+    if corps:
+        lignes.append("")
+        lignes.append(html.escape(corps))
+    if resume:
+        lignes.append("")
+        lignes.append(f"<i>{html.escape(resume)}</i>")
+
+    return "\n".join(lignes)
 
 
 @service_factory("briefing_matinal", tags={"outils", "ia", "notifications", "inter_module"})
