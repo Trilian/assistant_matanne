@@ -249,7 +249,7 @@ sql/
 > **Objectif** : Codebase propre, sans dette technique, sans code mort.
 > **Prérequis** : Aucun
 > **Validation** : `pytest` complet + `npm run build` frontend sans erreur
-> **Statut** : ✅ Complète — Tous les sprints (1.1-1.7) terminés. 4891 tests passent (24 pré-existants échouent), build frontend OK.
+> **Statut** : ✅ Complète — Tous les sprints (1.1-1.7) terminés, tous items fermés. 4841 tests passent (22 pré-existants échouent), build frontend OK.
 
 ### 3.1 Bugs et problèmes identifiés
 
@@ -419,10 +419,10 @@ sql/
 
 | # | Tâche | Statut |
 |---|-------|--------|
-| 1 | Nettoyer les 150+ commentaires de phases/sprints → noms fonctionnels | ⬜ |
-| 2 | Renommer cache keys : `"phase_e_score_famille_hebdo"` → `"score_famille_hebdo"` | ⬜ |
-| 3 | Renommer décorateurs métriques : `"innovations.p9.mange_ce_soir"` → `"cuisine.mange_ce_soir"` | ⬜ |
-| 4 | Renommer classes de test : `TestEventsPhaseB` → `TestEventsBridges` | ⬜ |
+| 1 | Nettoyer les 150+ commentaires de phases/sprints → noms fonctionnels | ✅ |
+| 2 | Renommer cache keys : `"phase_e_score_famille_hebdo"` → `"score_famille_hebdo"` | ✅ N/A — clé inexistante |
+| 3 | Renommer décorateurs métriques : `"innovations.p9.mange_ce_soir"` → `"cuisine.mange_ce_soir"` | ✅ N/A — pattern inexistant |
+| 4 | Renommer classes de test : `TestEventsPhaseB` → `TestEventsBridges` | ✅ N/A — classe inexistante |
 | 5 | Fusionner `utilitaires.ts` + `utils.ts` dans frontend → un seul `utils.ts` | ✅ |
 | 6 | Factoriser `bandeau-meteo.tsx` (doublon famille/maison) → `composants/partages/` | ✅ N/A — Pas de doublon (composants famille/maison utilisent des types différents) |
 | 7 | Supprimer `docs/SPRINT13_COMPLETION_SUMMARY.md` | ✅ |

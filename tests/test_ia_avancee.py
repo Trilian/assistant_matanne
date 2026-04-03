@@ -245,12 +245,12 @@ class TestCronJobsBridges:
     """Tests des cron jobs bridges inter-modules."""
 
     def test_configurer_jobs(self):
-        """configurer_jobs_phase_b s'exÃ©cute sans erreur."""
+        """configurer_jobs_bridges s'exÃ©cute sans erreur."""
         from apscheduler.schedulers.background import BackgroundScheduler
-        from src.services.core.cron_bridges import configurer_jobs_phase_b
+        from src.services.core.cron_bridges import configurer_jobs_bridges
 
         scheduler = BackgroundScheduler(timezone="Europe/Paris")
-        configurer_jobs_phase_b(scheduler)
+        configurer_jobs_bridges(scheduler)
 
         jobs = scheduler.get_jobs()
         assert len(jobs) >= 6  # Au moins 6 des 7 jobs
@@ -258,10 +258,10 @@ class TestCronJobsBridges:
     def test_jobs_ids_coherents(self):
         """Les job IDs sont bien ceux attendus."""
         from apscheduler.schedulers.background import BackgroundScheduler
-        from src.services.core.cron_bridges import configurer_jobs_phase_b
+        from src.services.core.cron_bridges import configurer_jobs_bridges
 
         scheduler = BackgroundScheduler(timezone="Europe/Paris")
-        configurer_jobs_phase_b(scheduler)
+        configurer_jobs_bridges(scheduler)
 
         job_ids = {j.id for j in scheduler.get_jobs()}
         expected_ids = {
