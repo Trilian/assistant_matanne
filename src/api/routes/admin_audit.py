@@ -17,6 +17,8 @@ from src.api.schemas.errors import REPONSES_AUTH_ADMIN
 from src.api.utils import gerer_exception_api
 
 from .admin_shared import (
+    EventBusReplayRequest,
+    EventBusTriggerRequest,
     _construire_pdf_audit,
     _journaliser_action_admin,
     _verifier_limite_admin,

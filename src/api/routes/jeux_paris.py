@@ -800,6 +800,7 @@ async def modifier_pari(
             sync_budget = False
             mise = Decimal(str(pari.mise or 0))
             gain = Decimal(str(pari.gain or 0))
+            event_payload: dict[str, Any] | None = None
 
             # IM-8 : synchroniser pertes + gains vers budget/finances avec logique idempotente.
             if statut_change and not pari.est_virtuel:
@@ -864,15 +865,41 @@ async def modifier_pari(
 
             session.commit()
             session.refresh(pari)
+
+            if statut_change and pari.statut in {"gagne", "perdu", "annule"}:
+                event_payload = {
+                    "pari_id": pari.id,
+                    "statut": pari.statut,
+                    "gain": float(pari.gain) if pari.gain else 0.0,
+                    "mise": float(pari.mise) if pari.mise else 0.0,
+                    "est_virtuel": bool(pari.est_virtuel),
+                }
+
             return {
                 "id": pari.id,
                 "statut": pari.statut,
                 "gain": float(pari.gain) if pari.gain else None,
                 "mise": float(pari.mise),
                 "sync_budget": sync_budget,
+                "_event_payload": event_payload,
             }
 
-    return await executer_async(_query)
+    resultat = await executer_async(_query)
+
+    event_payload = resultat.pop("_event_payload", None) if isinstance(resultat, dict) else None
+    if event_payload:
+        try:
+            from src.services.core.events import obtenir_bus
+
+            obtenir_bus().emettre(
+                "paris.resultat_enregistre",
+                event_payload,
+                source="api.jeux_paris.modifier_pari",
+            )
+        except Exception as exc:
+            logger.debug("Emission event paris.resultat_enregistre ignorée: %s", exc)
+
+    return resultat
 
 
 @router.delete("/paris/{pari_id}", responses=REPONSES_CRUD_SUPPRESSION)

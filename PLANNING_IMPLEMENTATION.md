@@ -44,7 +44,7 @@
 | **DevOps / Infrastructure** | 7/10 | Docker, Prometheus metrics, health checks, VAPID keys, service worker. Pas de CI/CD visible, pas de staging automatisé, pas de monitoring alerting production. |
 | **Sécurité** | 7.5/10 | JWT Bearer auth, rate limiting (60/min standard, 10/min IA), CORS, security headers middleware, sanitizer anti-XSS. Défauts : RLS à vérifier exhaustivement, pas d'audit de sécurité formel. |
 | **Performance** | 6.5/10 | Cache multi-niveaux, ETag middleware, QueuePool SQLAlchemy. Défauts : pas de bundle analysis, Three.js chargé en bloc, pas d'optimistic updates, pas de SSR pages publiques, pas de prefetch routes. |
-| **Inter-modules** | 7/10 | 6 bridges existants + EventBus pub/sub. Défauts : planning → courses pas automatique, inventaire → anti-gaspi non connecté, plusieurs bridges évidents manquants. |
+| **Inter-modules** | 8/10 | Bridges phase 2 branchés sur EventBus (planning→courses, inventaire→anti-gaspi, activités→jalons, projets→calendrier, jeux→dashboard, météo→weekend, entretien→rappels). Reste à renforcer la couverture de tests d'intégration bout-en-bout. |
 
 ### Note globale : **7.5/10**
 
@@ -472,6 +472,7 @@ sql/
 > **Objectif** : Les modules communiquent entre eux automatiquement via l'EventBus.
 > **Prérequis** : Phase 1 terminée
 > **Mécanisme** : EventBus `src/services/core/events/` avec subscribers dédiés
+> **Statut** : 🟡 En cours avancé — bridges phase 2 implémentés, validation tests E2E inter-modules à compléter.
 
 ### 4.1 Pattern de référence pour les bridges
 
@@ -489,31 +490,45 @@ async def generer_courses_depuis_planning(event):
 
 | # | Bridge | Source → Destination | Priorité | Statut |
 |---|--------|---------------------|----------|--------|
-| 1 | **Planning → Courses auto** | Planning semaine validé → Liste courses générée | 🔴 Haute | ⬜ |
-| 2 | **Inventaire → Anti-gaspi IA** | Stock bientôt périmé → Recettes de récupération IA | 🔴 Haute | ⬜ |
-| 3 | **Budget → Dashboard alertes** | Seuil budget dépassé → Notification + widget dashboard | 🔴 Haute | ⬜ |
-| 4 | **Activités → Timeline Jules** | Activité terminée → Jalon enregistré automatiquement | 🟡 Moyenne | ⬜ |
-| 5 | **Projets → Calendrier unifié** | Tâche projet avec deadline → Événement calendrier | 🟡 Moyenne | ⬜ |
-| 6 | **Jardin saison → Recettes** | Légumes de saison du jardin → Suggestions recettes | 🟡 Moyenne | ⬜ |
-| 7 | **Résultats jeux → Dashboard** | Résultat automatisé → Stats P&L auto | 🟡 Moyenne | ⬜ |
-| 8 | **Météo → Activités weekend** | Prévisions → Suggestions activités adaptées | 🟢 Basse | ⬜ |
-| 9 | **Entretien → Rappels push** | Tâche entretien due → Notification matin | 🟢 Basse | ⬜ |
+| 1 | **Planning → Courses auto** | Planning semaine validé → Liste courses générée | 🔴 Haute | ✅ |
+| 2 | **Inventaire → Anti-gaspi IA** | Stock bientôt périmé → Recettes de récupération IA | 🔴 Haute | ✅ |
+| 3 | **Budget → Dashboard alertes** | Seuil budget dépassé → Notification + widget dashboard | 🔴 Haute | ✅ |
+| 4 | **Activités → Timeline Jules** | Activité terminée → Jalon enregistré automatiquement | 🟡 Moyenne | ✅ |
+| 5 | **Projets → Calendrier unifié** | Tâche projet avec deadline → Événement calendrier | 🟡 Moyenne | ✅ |
+| 6 | **Jardin saison → Recettes** | Légumes de saison du jardin → Suggestions recettes | 🟡 Moyenne | ✅ |
+| 7 | **Résultats jeux → Dashboard** | Résultat automatisé → Stats P&L auto | 🟡 Moyenne | ✅ |
+| 8 | **Météo → Activités weekend** | Prévisions → Suggestions activités adaptées | 🟢 Basse | ✅ |
+| 9 | **Entretien → Rappels push** | Tâche entretien due → Notification matin | 🟢 Basse | ✅ |
 
 ### 4.3 Connexions IA à finaliser
 
 | # | Tâche | Détail | Priorité | Statut |
 |---|-------|--------|----------|--------|
-| 1 | **Photo frigo → recettes** | Connecter le composant `photo-frigo` existant frontend à l'IA vision backend. L'utilisateur photographie son frigo, l'IA identifie les ingrédients et propose des recettes. | 🔴 Haute | ⬜ |
-| 2 | **Adaptation recettes Jules** | Adapter automatiquement chaque recette pour Jules (sans sel, mixé, portions adaptées). Utiliser `data/reference/portions_age.json`. | 🔴 Haute | ⬜ |
+| 1 | **Photo frigo → recettes** | Connecter le composant `photo-frigo` existant frontend à l'IA vision backend. L'utilisateur photographie son frigo, l'IA identifie les ingrédients et propose des recettes. | 🔴 Haute | ✅ |
+| 2 | **Adaptation recettes Jules** | Adapter automatiquement chaque recette pour Jules (sans sel, mixé, portions adaptées). Utiliser `data/reference/portions_age.json`. | 🔴 Haute | ✅ |
 
 ### 4.4 Tests inter-modules
 
 | # | Tâche | Statut |
 |---|-------|--------|
-| 1 | Tests pour chaque nouveau bridge (événement émis → action exécutée) | ⬜ |
+| 1 | Tests pour chaque nouveau bridge (événement émis → action exécutée) | 🟡 |
 | 2 | Tests d'intégration : planning validé → courses générées → notification envoyée | ⬜ |
 | 3 | Tests bridge photo-frigo → recettes | ⬜ |
 | 4 | Tests adaptation recettes Jules (portions, restrictions) | ⬜ |
+
+### 4.5 Sprint Phase 2 — Checklist de livraison
+
+| # | Checklist sprint | Statut |
+|---|------------------|--------|
+| 1 | Événement planning validé émis depuis route API | ✅ |
+| 2 | Événement inventaire péremption émis depuis cron cuisine | ✅ |
+| 3 | Événement activité terminée enrichi (nom/catégorie) | ✅ |
+| 4 | Événement tâche projet deadline émis à la création de tâche | ✅ |
+| 5 | Événement résultat paris émis lors résolution | ✅ |
+| 6 | Événement météo reçu émis pour suggestions weekend | ✅ |
+| 7 | Événement tâche entretien due émis depuis cron rappel | ✅ |
+| 8 | API frontend planning: endpoint adapter Jules exposé | ✅ |
+| 9 | Régression bridges existants validée (`tests/inter_modules/test_bridges_base.py`) | ✅ |
 
 ---
 
@@ -817,7 +832,7 @@ Ces optimisations sont nécessaires pour tenir sous 0.5 GB RAM (limite Railway F
 
 | Module | Manque | Statut |
 |--------|--------|--------|
-| Bridges inter-modules | Tests pour les nouveaux bridges | ⬜ |
+| Bridges inter-modules | Tests pour les nouveaux bridges | 🟡 |
 | Admin panel | Tests endpoints trigger manuel | ⬜ |
 | WebSocket courses | Test annoté `@skip` — deadlock TestClient | ⬜ |
 | Mode hors-ligne | Aucun test sync offline | ⬜ |

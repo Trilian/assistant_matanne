@@ -298,6 +298,25 @@ class ProjetsCrudMixin:
             db.commit()
             logger.info(f"✅ Tâche '{nom}' ajoutée au projet {project_id}")
             self._emettre_modification("projets", project_id, nom, "tache_ajoutee")
+
+            if date_echeance:
+                projet_nom = ""
+                try:
+                    projet = db.query(Projet).get(project_id)
+                    projet_nom = projet.nom if projet else ""
+                except Exception:
+                    projet_nom = ""
+
+                obtenir_bus().emettre(
+                    "projets.tache_deadline",
+                    {
+                        "projet_id": project_id,
+                        "projet_nom": projet_nom,
+                        "tache_nom": nom,
+                        "deadline": date_echeance.isoformat(),
+                    },
+                    source="projets",
+                )
             return True
         except Exception as e:
             logger.error(f"Erreur ajout tâche: {e}")

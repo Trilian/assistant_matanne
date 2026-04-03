@@ -339,6 +339,21 @@ async def suggestions_weekend_ia(
             conditions = [p.condition for p in previsions[:3] if p.condition]
             meteo_desc = ", ".join(conditions[:2]) if conditions else "variable"
 
+            try:
+                from src.services.core.events import obtenir_bus
+
+                obtenir_bus().emettre(
+                    "meteo.prevision_recue",
+                    {
+                        "conditions": conditions,
+                        "nb_jours": len(previsions[:3]),
+                        "source": "weekend_suggestions",
+                    },
+                    source="api.famille_activites.weekend",
+                )
+            except Exception as exc:
+                logger.debug("Emission event meteo.prevision_recue ignorée: %s", exc)
+
         # Auto-inject âge Jules
         jules_service = obtenir_service_jules()
         age_mois = jules_service.get_age_mois(default=19)

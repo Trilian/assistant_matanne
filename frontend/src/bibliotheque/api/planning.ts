@@ -53,6 +53,18 @@ export async function validerPlanning(planningId: number): Promise<{ message: st
   return data;
 }
 
+/** Adapter tous les repas du planning pour Jules */
+export async function adapterPlanningJules(
+  planningId: number
+): Promise<{ message: string; id: number; data?: { nb_adapte?: number; nb_erreurs?: number } }> {
+  const { data } = await clientApi.post<{
+    message: string;
+    id: number;
+    data?: { nb_adapte?: number; nb_erreurs?: number };
+  }>(`/planning/${planningId}/adapter-jules`);
+  return data;
+}
+
 /** Marquer un repas comme consommé (décrémenter l'inventaire) */
 export async function marquerRepasConsomme(
   repasId: number,

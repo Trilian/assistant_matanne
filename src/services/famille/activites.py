@@ -121,7 +121,14 @@ class ServiceActivites(BaseService[ActiviteFamille]):
             db.commit()
             logger.info("Activité terminée: id=%d", activity_id)
             obtenir_bus().emettre(
-                "activites.terminee", {"id": activity_id}, source="ServiceActivites"
+                "activites.terminee",
+                {
+                    "id": activity_id,
+                    "activite_id": activity_id,
+                    "nom": activity.titre,
+                    "categorie": activity.type_activite or "",
+                },
+                source="ServiceActivites",
             )
             return True
         return False

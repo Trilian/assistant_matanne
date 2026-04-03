@@ -1497,6 +1497,8 @@ def enregistrer_subscribers() -> int:
     # Bridge 1: Planning validé → courses auto
     bus.souscrire("planning.valide", _generer_courses_depuis_planning, priority=80)
     compteur += 1
+    bus.souscrire("planning.semaine_validee", _generer_courses_depuis_planning, priority=80)
+    compteur += 1
 
     # Bridge 2: Inventaire péremption proche → anti-gaspi IA
     bus.souscrire("inventaire.peremption_proche", _suggerer_recettes_anti_gaspi, priority=80)

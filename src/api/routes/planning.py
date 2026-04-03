@@ -461,12 +461,42 @@ async def valider_planning(
             )
 
     resultat = await executer_async(_valider)
+    resultat_data = getattr(resultat, "data", None)
+    semaine_debut = resultat_data.get("semaine_debut") if isinstance(resultat_data, dict) else None
+
+    # Bridge phase 2: validation planning -> génération courses automatique.
+    try:
+        from src.services.core.events import obtenir_bus
+
+        payload_event = {
+            "planning_id": planning_id,
+            "semaine_debut": semaine_debut,
+            "user_id": user.get("sub", user.get("id")),
+        }
+
+        # Legacy event name currently wired in subscribers.
+        obtenir_bus().emettre(
+            "planning.valide",
+            payload_event,
+            source="api.planning.valider",
+        )
+
+        # Event name from planning documentation (phase 2).
+        obtenir_bus().emettre(
+            "planning.semaine_validee",
+            {
+                **payload_event,
+            },
+            source="api.planning.valider",
+        )
+    except Exception as exc:
+        logger.debug("Emission event planning.semaine_validee ignorée: %s", exc)
 
     # Notification WhatsApp best-effort après validation.
     try:
         from src.services.core.notifications import get_dispatcher_notifications
 
-        semaine = (resultat.data or {}).get("semaine_debut") if hasattr(resultat, "data") else None
+        semaine = semaine_debut
         message = (
             f"Planning semaine validé ({semaine}). "
             "La semaine est activée et prête pour les courses."

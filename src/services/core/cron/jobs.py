@@ -2267,6 +2267,26 @@ def _job_rappel_entretien_whatsapp() -> None:
             logger.debug("Sprint 16.6: aucune tâche entretien aujourd'hui")
             return
 
+        try:
+            from src.services.core.events import obtenir_bus
+
+            bus = obtenir_bus()
+            for idx, row in enumerate(rows, start=1):
+                titre = row[0] if row else None
+                if not titre:
+                    continue
+                bus.emettre(
+                    "entretien.tache_due",
+                    {
+                        "tache_id": idx,
+                        "nom": titre,
+                        "date_due": today.isoformat(),
+                    },
+                    source="cron.jobs.rappel_entretien",
+                )
+        except Exception:
+            logger.debug("Emission events entretien.tache_due ignorée", exc_info=True)
+
         message = "Tâches entretien à faire aujourd'hui:\n" + "\n".join(
             f"- {r[0]}" for r in rows if r and r[0]
         )

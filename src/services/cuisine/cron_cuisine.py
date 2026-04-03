@@ -60,6 +60,29 @@ def analyser_peremptions_matin():
                     f"{', '.join(a.nom for a in bientot[:5])}"
                 )
 
+            # Bridge phase 2: inventaire péremption -> anti-gaspi IA.
+            if a_risque:
+                try:
+                    from src.services.core.events import obtenir_bus
+
+                    bus = obtenir_bus()
+                    for article in a_risque:
+                        if not article.date_peremption:
+                            continue
+                        jours_restants = (article.date_peremption - aujourd_hui).days
+                        bus.emettre(
+                            "inventaire.peremption_proche",
+                            {
+                                "article_id": article.id,
+                                "nom": article.nom,
+                                "jours_restants": jours_restants,
+                                "date_peremption": article.date_peremption.isoformat(),
+                            },
+                            source="cron_cuisine.peremptions",
+                        )
+                except Exception as exc:
+                    logger.debug("Emission inventaire.peremption_proche ignorée: %s", exc)
+
             # Envoyer notifications push/WhatsApp
             if expires or bientot:
                 _notifier_peremptions(expires, bientot)
