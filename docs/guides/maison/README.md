@@ -29,7 +29,7 @@ Le module **Maison** centralise tout ce qui concerne la gestion physique et admi
 
 - notifications maison et rappels p?riodiques
 - rapport maison mensuel planifi?
-- gestion avanc?e des contrats, garanties, diagnostics, meubles et relev?s
+- gestion avanc?e des abonnements, diagnostics, meubles et relev?s
 - vue de contexte maison et catalogue d'entretien enrichi
 
 ---
@@ -85,7 +85,7 @@ suggestions = service.suggerer_projets_ia(budget=5000)
 - Alertes pour les t?ches en retard ou ? venir
 - Historique des interventions
 - Catalogue de t?ches pr?remplies avec fr?quences recommand?es
-- int?gration avec les jobs d'entretien et de contr?le de garanties
+- int?gration avec les jobs d'entretien
 
 ### Usage
 

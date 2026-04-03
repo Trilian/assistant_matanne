@@ -19,9 +19,8 @@ import type {
   Artisan,
   InterventionArtisan,
   StatsArtisans,
-  Contrat,
-  AlerteContrat,
-  ResumeFinancierContrats,
+  Abonnement,
+  ResumeAbonnements,
   DiagnosticImmobilier,
   EstimationImmobiliere,
   ActionEcologique,
@@ -404,37 +403,32 @@ export async function supprimerIntervention(id: number): Promise<void> {
   await clientApi.delete(`/maison/artisans/interventions/${id}`);
 }
 
-export async function obtenirContrat(id: number): Promise<Contrat> {
-  const { data } = await clientApi.get<Contrat>(`/maison/contrats/${id}`);
+export async function obtenirAbonnement(id: number): Promise<Abonnement> {
+  const { data } = await clientApi.get<Abonnement>(`/maison/abonnements/${id}`);
   return data;
 }
 
-export async function listerContrats(): Promise<Contrat[]> {
-  const { data } = await clientApi.get("/maison/contrats");
+export async function listerAbonnements(): Promise<Abonnement[]> {
+  const { data } = await clientApi.get("/maison/abonnements");
   return data.items ?? data;
 }
 
-export async function creerContrat(contrat: Omit<Contrat, "id">): Promise<Contrat> {
-  const { data } = await clientApi.post<Contrat>("/maison/contrats", contrat);
+export async function creerAbonnement(abo: Omit<Abonnement, "id">): Promise<Abonnement> {
+  const { data } = await clientApi.post<Abonnement>("/maison/abonnements", abo);
   return data;
 }
 
-export async function modifierContrat(id: number, contrat: Partial<Contrat>): Promise<Contrat> {
-  const { data } = await clientApi.patch<Contrat>(`/maison/contrats/${id}`, contrat);
+export async function modifierAbonnement(id: number, abo: Partial<Abonnement>): Promise<Abonnement> {
+  const { data } = await clientApi.patch<Abonnement>(`/maison/abonnements/${id}`, abo);
   return data;
 }
 
-export async function supprimerContrat(id: number): Promise<void> {
-  await clientApi.delete(`/maison/contrats/${id}`);
+export async function supprimerAbonnement(id: number): Promise<void> {
+  await clientApi.delete(`/maison/abonnements/${id}`);
 }
 
-export async function alertesContrats(jours = 90): Promise<AlerteContrat[]> {
-  const { data } = await clientApi.get(`/maison/contrats/alertes?jours=${jours}`);
-  return data.items ?? data;
-}
-
-export async function resumeFinancierContrats(): Promise<ResumeFinancierContrats> {
-  const { data } = await clientApi.get<ResumeFinancierContrats>("/maison/contrats/resume-financier");
+export async function resumeAbonnements(): Promise<ResumeAbonnements> {
+  const { data } = await clientApi.get<ResumeAbonnements>("/maison/abonnements/resume");
   return data;
 }
 

@@ -1,5 +1,5 @@
-"""
-Routes API Maison â€” Finances (dÃ©penses, contrats, artisans, garanties, etc.).
+﻿"""
+Routes API Maison - Finances (dépenses, abonnements, artisans, etc.).
 
 Sous-routeur inclus dans maison.py.
 """
@@ -185,6 +185,130 @@ async def supprimer_intervention(
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ═══════════════════════════════════════════════════════════
+# ABONNEMENTS (comparateur)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/abonnements", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_abonnements(
+    type_abonnement: str | None = Query(None, description="Filtrer par type"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Liste les abonnements maison."""
+    def _query():
+        with executer_avec_session() as session:
+            from src.core.models.abonnements import Abonnement
+            query = session.query(Abonnement)
+            if type_abonnement:
+                query = query.filter(Abonnement.type_abonnement == type_abonnement)
+            items = query.order_by(Abonnement.type_abonnement).all()
+            return {"items": [model_to_dict(a) for a in items]}
+    return await executer_async(_query)
+
+
+@router.get("/abonnements/resume", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def resume_abonnements(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Résumé financier des abonnements (total mensuel, annuel, par type)."""
+    def _query():
+        with executer_avec_session() as session:
+            from src.core.models.abonnements import Abonnement
+            abos = session.query(Abonnement).all()
+            total_mensuel = sum(float(a.prix_mensuel or 0) for a in abos)
+            par_type: dict[str, float] = {}
+            for a in abos:
+                t = a.type_abonnement
+                par_type[t] = par_type.get(t, 0) + float(a.prix_mensuel or 0)
+            return {
+                "total_mensuel": round(total_mensuel, 2),
+                "total_annuel": round(total_mensuel * 12, 2),
+                "par_type": {k: round(v, 2) for k, v in par_type.items()},
+            }
+    return await executer_async(_query)
+
+
+@router.get("/abonnements/{abonnement_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_abonnement(
+    abonnement_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Détail d'un abonnement."""
+    def _query():
+        with executer_avec_session() as session:
+            from src.core.models.abonnements import Abonnement
+            abo = session.query(Abonnement).get(abonnement_id)
+            if not abo:
+                raise HTTPException(status_code=404, detail="Abonnement introuvable")
+            return model_to_dict(abo)
+    return await executer_async(_query)
+
+
+@router.post("/abonnements", status_code=201, responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def creer_abonnement(
+    data: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée un abonnement."""
+    def _query():
+        with executer_avec_session() as session:
+            from src.core.models.abonnements import Abonnement
+            abo = Abonnement(**data)
+            session.add(abo)
+            session.commit()
+            session.refresh(abo)
+            return model_to_dict(abo)
+    return await executer_async(_query)
+
+
+@router.patch("/abonnements/{abonnement_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def modifier_abonnement(
+    abonnement_id: int,
+    data: dict[str, Any],
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Met à jour un abonnement."""
+    def _query():
+        with executer_avec_session() as session:
+            from src.core.models.abonnements import Abonnement
+            abo = session.query(Abonnement).get(abonnement_id)
+            if not abo:
+                raise HTTPException(status_code=404, detail="Abonnement introuvable")
+            for key, value in data.items():
+                if hasattr(abo, key):
+                    setattr(abo, key, value)
+            session.commit()
+            session.refresh(abo)
+            return model_to_dict(abo)
+    return await executer_async(_query)
+
+
+@router.delete("/abonnements/{abonnement_id}", responses=REPONSES_CRUD_SUPPRESSION)
+@gerer_exception_api
+async def supprimer_abonnement(
+    abonnement_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Supprime un abonnement."""
+    def _query():
+        with executer_avec_session() as session:
+            from src.core.models.abonnements import Abonnement
+            abo = session.query(Abonnement).get(abonnement_id)
+            if not abo:
+                raise HTTPException(status_code=404, detail="Abonnement introuvable")
+            session.delete(abo)
+            session.commit()
+            return MessageResponse(message="Abonnement supprimé")
+    return await executer_async(_query)
+
+
+
 # DIAGNOSTICS IMMOBILIERS & ESTIMATIONS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 

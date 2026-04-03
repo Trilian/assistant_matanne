@@ -43,8 +43,7 @@ Assistant Matanne est une application web moderne qui centralise la gestion fami
 - **Stocks** : Inventaire g�n�ral (produits m�nagers, etc.)
 - **Cellier** : Gestion de la cave � vin
 - **Artisans** : Coordonn�es et historique des interventions
-- **Contrats** : Gestion des contrats (assurance, abonnements)
-- **Garanties** : Suivi des garanties et factures
+- **Abonnements** : Comparateur d'abonnements (eau, électricité, gaz, assurances, téléphone, internet)
 - **Diagnostics** : Stockage des diagnostics immobiliers
 - **Visualisation** : Plan de la maison et visualisation des espaces
 - **�co-Tips** : Conseils �cologiques et �conomies d'�nergie

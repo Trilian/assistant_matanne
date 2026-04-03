@@ -178,6 +178,17 @@ class Parametres(BaseSettings):
     WHATSAPP_USER_NUMBER: str = ""
     """Numéro WhatsApp de l'utilisateur principal (format: 33612345678)."""
 
+    # ── Telegram Bot API ──
+
+    TELEGRAM_BOT_TOKEN: str = ""
+    """Token du bot Telegram."""
+
+    TELEGRAM_CHAT_ID: str = ""
+    """Chat ID Telegram principal (utilisateur ou groupe)."""
+
+    TELEGRAM_VERIFY_TOKEN: str = ""
+    """Token facultatif de validation webhook Telegram."""
+
     # ── OpenWeatherMap ──
 
     OPENWEATHER_API_KEY: str = ""

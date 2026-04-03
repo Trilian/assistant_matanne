@@ -6,6 +6,8 @@ import { Bell, CalendarCheck, CloudSun, ListTodo, UtensilsCrossed } from "lucide
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Badge } from "@/composants/ui/badge";
+import { Skeleton } from "@/composants/ui/skeleton";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirTableauBord } from "@/bibliotheque/api/tableau-bord";
 import { obtenirBriefingMaison } from "@/bibliotheque/api/maison";
@@ -18,9 +20,9 @@ type MeteoWidget = {
 };
 
 export default function FocusPage() {
-  const { data: dashboard } = utiliserRequete(["focus", "dashboard"], obtenirTableauBord);
-  const { data: briefingMaison } = utiliserRequete(["focus", "maison"], obtenirBriefingMaison);
-  const { data: rappelsFamille } = utiliserRequete(["focus", "rappels"], evaluerRappelsFamille);
+  const { data: dashboard, isLoading: chargementDashboard } = utiliserRequete(["focus", "dashboard"], obtenirTableauBord);
+  const { data: briefingMaison, isLoading: chargementMaison } = utiliserRequete(["focus", "maison"], obtenirBriefingMaison);
+  const { data: rappelsFamille, isLoading: chargementRappels } = utiliserRequete(["focus", "rappels"], evaluerRappelsFamille);
 
   const [meteo, setMeteo] = useState<MeteoWidget | null>(null);
 
@@ -78,7 +80,7 @@ export default function FocusPage() {
                 <p className="text-sm text-muted-foreground">{meteo.description}</p>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Meteo indisponible.</p>
+              <EtatVide Icone={CloudSun} titre="Meteo indisponible" description="Impossible de recuperer les previsions pour le moment." className="p-4" />
             )}
           </CardContent>
         </Card>
@@ -90,8 +92,13 @@ export default function FocusPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {repas.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Aucun repas planifie aujourd&apos;hui.</p>
+            {chargementDashboard ? (
+              <div className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : repas.length === 0 ? (
+              <EtatVide Icone={UtensilsCrossed} titre="Aucun repas planifie" description="Ajoute un repas depuis le planning de la semaine." className="p-4" />
             ) : (
               repas.map((item, idx) => (
                 <div key={`${item.type_repas}-${idx}`} className="rounded-md border px-3 py-2 text-sm">
@@ -110,8 +117,13 @@ export default function FocusPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {tachesMaison.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Rien d&apos;urgent cote maison.</p>
+            {chargementMaison ? (
+              <div className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : tachesMaison.length === 0 ? (
+              <EtatVide Icone={ListTodo} titre="Aucune tache urgente" description="La maison est a jour pour aujourd'hui." className="p-4" />
             ) : (
               tachesMaison.map((tache) => (
                 <div key={`${tache.nom}-${tache.id_source ?? 0}`} className="rounded-md border px-3 py-2 text-sm">
@@ -130,8 +142,13 @@ export default function FocusPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {rappelsUrgents.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Aucun rappel urgent.</p>
+            {chargementRappels ? (
+              <div className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : rappelsUrgents.length === 0 ? (
+              <EtatVide Icone={Bell} titre="Aucun rappel urgent" description="Rien de critique detecte actuellement." className="p-4" />
             ) : (
               rappelsUrgents.map((rappel, idx) => (
                 <div key={`${rappel.type}-${idx}`} className="rounded-md border px-3 py-2 text-sm">

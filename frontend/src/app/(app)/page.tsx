@@ -66,6 +66,7 @@ import { CompteurAnime } from "@/composants/dashboard/compteur-anime";
 import { Sparkline } from "@/composants/dashboard/sparkline";
 import { ComparateurTemporel } from "@/composants/dashboard/comparateur-temporel";
 import { obtenirScoreFamilleHebdo } from "@/bibliotheque/api/avance";
+import { JaugeScoreBienEtre } from "@/composants/graphiques/jauge-score-bien-etre";
 
 const WIDGETS_DEFAUT = {
   metriques: true,
@@ -696,10 +697,10 @@ export default function PageAccueil() {
 
       {widgets.score_bienetre && scoreBienEtre && (
         <WidgetSortable id="score_bienetre">
-        <Card className="border-purple-300/50 bg-purple-50/50 dark:border-purple-900/40 dark:bg-purple-950/20">
+        <Card className="border-cyan-300/50 bg-cyan-50/50 dark:border-cyan-900/40 dark:bg-cyan-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <Heart className="h-4 w-4 text-purple-500" />
+              <Heart className="h-4 w-4 text-cyan-600" />
               Score bien-être
             </CardTitle>
             <CardDescription>
@@ -709,13 +710,8 @@ export default function PageAccueil() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-4xl font-bold text-purple-600 dark:text-purple-400">
-                  {scoreBienEtre.score_global}
-                  <span className="text-lg text-muted-foreground">/100</span>
-                </p>
-              </div>
+            <div className="flex items-center justify-between gap-4">
+              <JaugeScoreBienEtre score={scoreBienEtre.score_global} />
               <div className="text-right text-xs text-muted-foreground space-y-1">
                 <p>🥗 Diversité: {scoreBienEtre.diversite_alimentaire}%</p>
                 <p>🏷️ Nutri-score: {scoreBienEtre.score_nutri}%</p>
@@ -724,10 +720,10 @@ export default function PageAccueil() {
             </div>
             <Progress
               value={Math.min(100, scoreBienEtre.score_global)}
-              className="mt-3 h-2"
+              className="mt-4 h-2"
             />
             {scoreFamilleHebdo && (
-              <div className="mt-3 rounded-md border border-purple-200/70 bg-background/70 p-2 text-xs">
+              <div className="mt-3 rounded-md border border-cyan-200/70 bg-background/70 p-2 text-xs">
                 <p className="font-medium">Score famille hebdo: {Math.round(scoreFamilleHebdo.score_global)}/100</p>
                 <p className="text-muted-foreground">{scoreFamilleHebdo.recommandations[0] ?? "Aucune recommandation."}</p>
               </div>

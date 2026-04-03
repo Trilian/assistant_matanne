@@ -24,14 +24,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
-  listerContrats, alertesContrats, resumeFinancierContrats, creerContrat, modifierContrat, supprimerContrat,
   listerDiagnostics, alertesDiagnostics, derniereEstimation, creerDiagnostic, modifierDiagnostic, supprimerDiagnostic,
 } from "@/bibliotheque/api/maison";
-import type { Contrat, DiagnosticImmobilier } from "@/types/maison";
+import type { DiagnosticImmobilier } from "@/types/maison";
 import { toast } from "sonner";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
 
-// ─── Onglet Contrats ──────────────────────────────────────────
+
 // ─── Onglet Diagnostics ───────────────────────────────────────
 function OngletDiagnostics() {
   const formsVide = { type_diagnostic: "", date_realisation: "", date_expiration: "", resultat: "", diagnostiqueur: "" };
@@ -164,13 +163,13 @@ function OngletDiagnostics() {
 function ContenuDocuments() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const tab = searchParams.get("tab") ?? "contrats";
+  const tab = searchParams.get("tab") ?? "diagnostics";
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">📄 Documents</h1>
-        <p className="text-muted-foreground">Contrats et diagnostics immobiliers</p>
+        <p className="text-muted-foreground">Diagnostics immobiliers</p>
       </div>
 
       <BandeauIA section="documents" />

@@ -21,28 +21,28 @@ from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
-_CANAUX_VALIDES = {"ntfy", "push", "email", "whatsapp"}
+_CANAUX_VALIDES = {"ntfy", "push", "email", "telegram", "whatsapp"}
 
 # Mapping Phase 8 (§11.4): événement -> catégorie + canaux cibles
 _MAPPING_EVENEMENTS_CANAUX: dict[str, dict[str, Any]] = {
     "peremption_j2": {"categorie": "alertes", "canaux": ["push", "ntfy"]},
-    "rappel_courses": {"categorie": "rappels", "canaux": ["push", "ntfy", "whatsapp"]},
-    "resume_hebdo": {"categorie": "resumes", "canaux": ["whatsapp", "email"]},
+    "rappel_courses": {"categorie": "rappels", "canaux": ["push", "ntfy", "telegram"]},
+    "resume_hebdo": {"categorie": "resumes", "canaux": ["telegram", "email"]},
     "rapport_budget_mensuel": {"categorie": "resumes", "canaux": ["email"]},
-    "anniversaire_j7": {"categorie": "rappels", "canaux": ["push", "ntfy", "whatsapp"]},
+    "anniversaire_j7": {"categorie": "rappels", "canaux": ["push", "ntfy", "telegram"]},
     "tache_entretien_urgente": {
         "categorie": "alertes",
-        "canaux": ["push", "ntfy", "whatsapp"],
+        "canaux": ["push", "ntfy", "telegram"],
     },
     "echec_cron_job": {
         "categorie": "alertes",
-        "canaux": ["push", "ntfy", "whatsapp", "email"],
+        "canaux": ["push", "ntfy", "telegram", "email"],
     },
     "document_expirant": {"categorie": "alertes", "canaux": ["push", "ntfy", "email"]},
     "recolte_jardin_prete": {"categorie": "rappels", "canaux": ["push", "ntfy"]},
     "badge_debloque": {"categorie": "rappels", "canaux": ["push", "ntfy"]},
-    "diagnostic_maison_alerte": {"categorie": "alertes", "canaux": ["whatsapp", "push", "email"]},
-    "budget_depassement": {"categorie": "alertes", "canaux": ["whatsapp", "push", "ntfy"]},
+    "diagnostic_maison_alerte": {"categorie": "alertes", "canaux": ["telegram", "push", "email"]},
+    "budget_depassement": {"categorie": "alertes", "canaux": ["telegram", "push", "ntfy"]},
 }
 
 
@@ -50,9 +50,10 @@ class DispatcherNotifications:
     """Dispatcher multi-canal : email / push / ntfy."""
 
     _FALLBACK_CANAUX: dict[str, list[str]] = {
-        "push": ["ntfy", "whatsapp", "email"],
-        "ntfy": ["push", "whatsapp", "email"],
-        "whatsapp": ["push", "email"],
+        "push": ["ntfy", "telegram", "email"],
+        "ntfy": ["push", "telegram", "email"],
+        "telegram": ["push", "email"],
+        "whatsapp": ["telegram", "push", "email"],
         "email": ["push", "ntfy"],
     }
 
@@ -127,8 +128,8 @@ class DispatcherNotifications:
                     resultats[canal] = self._envoyer_push(user_id, message, **kwargs)
                 elif canal == "email":
                     resultats[canal] = self._envoyer_email(user_id, message, **kwargs)
-                elif canal == "whatsapp":
-                    resultats[canal] = self._envoyer_whatsapp(message, **kwargs)
+                elif canal in {"telegram", "whatsapp"}:
+                    resultats[canal] = self._envoyer_telegram(message, **kwargs)
                 else:
                     logger.warning("Canal de notification inconnu : %s", canal)
                     resultats[canal] = False
@@ -184,7 +185,7 @@ class DispatcherNotifications:
         resultats = self.envoyer(
             user_id=user_id,
             message="\n".join(f"- {ligne}" for ligne in lignes),
-            canaux=["email", "whatsapp", "ntfy"],
+            canaux=["email", "telegram", "ntfy"],
             categorie="resumes",
             strategie="failover",
             forcer=True,
@@ -362,14 +363,17 @@ class DispatcherNotifications:
             logger.error("Erreur push web : %s", e)
             return False
 
-    # ─── Canal WhatsApp ─────────────────────────────────────────────────────────
+    # ─── Canal Telegram ─────────────────────────────────────────────────────────
 
-    def _envoyer_whatsapp(self, message: str, **kwargs: Any) -> bool:
-        """Envoie via WhatsApp Meta Cloud API."""
+    def _envoyer_telegram(self, message: str, **kwargs: Any) -> bool:
+        """Envoie via Telegram Bot API.
+
+        Le canal "whatsapp" est conservé comme alias de compatibilité vers Telegram.
+        """
         try:
             import asyncio
-            from src.services.integrations.whatsapp import (
-                envoyer_message_whatsapp,
+            from src.services.integrations.telegram import (
+                envoyer_message_telegram,
                 envoyer_liste_courses_partagee,
                 envoyer_rapport_hebdo_whatsapp,
                 envoyer_suggestion_recette_du_jour,
@@ -382,39 +386,43 @@ class DispatcherNotifications:
             from src.core.config import obtenir_parametres
 
             settings = obtenir_parametres()
-            destinataire = getattr(settings, "WHATSAPP_USER_NUMBER", None)
+            destinataire = getattr(settings, "TELEGRAM_CHAT_ID", None)
             if not destinataire:
-                logger.debug("WhatsApp : WHATSAPP_USER_NUMBER non configuré, canal ignoré")
+                logger.debug("Telegram : TELEGRAM_CHAT_ID non configuré, canal ignoré")
                 return False
 
-            type_wa = kwargs.get("type_whatsapp", "texte")
+            type_message = kwargs.get("type_telegram") or kwargs.get("type_whatsapp") or "texte"
 
             async def _send() -> bool:
-                if type_wa in {"liste_courses", "articles_courses"}:
+                if type_message in {"liste_courses", "articles_courses"}:
                     articles = kwargs.get("articles", [message])
                     nom_liste = kwargs.get("nom_liste", "Courses")
                     return await envoyer_liste_courses_partagee(articles, nom_liste)
-                elif type_wa == "rapport_hebdo":
+                elif type_message == "rapport_hebdo":
                     return await envoyer_rapport_hebdo_whatsapp(message)
-                elif type_wa == "recette_du_jour":
+                elif type_message == "recette_du_jour":
                     return await envoyer_suggestion_recette_du_jour(message)
-                elif type_wa == "diagnostic_maison":
+                elif type_message == "diagnostic_maison":
                     return await envoyer_alerte_diagnostic_maison(message)
-                elif type_wa == "resume_weekend":
+                elif type_message == "resume_weekend":
                     return await envoyer_resume_weekend_suggestions(message)
-                elif type_wa == "budget_depassement":
+                elif type_message == "budget_depassement":
                     return await envoyer_alerte_budget_depassement(message)
-                elif type_wa == "bilan_nutrition":
+                elif type_message == "bilan_nutrition":
                     return await envoyer_bilan_nutrition_semaine(message)
-                elif type_wa == "rappel_entretien":
+                elif type_message == "rappel_entretien":
                     return await envoyer_rappel_entretien_maison(message)
                 else:
-                    return await envoyer_message_whatsapp(destinataire, message)
+                    return await envoyer_message_telegram(destinataire, message)
 
             return asyncio.run(_send())
         except Exception as e:
-            logger.error("Erreur WhatsApp : %s", e)
+            logger.error("Erreur Telegram : %s", e)
             return False
+
+    def _envoyer_whatsapp(self, message: str, **kwargs: Any) -> bool:
+        """Alias rétrocompatible: redirige les envois WhatsApp vers Telegram."""
+        return self._envoyer_telegram(message, **kwargs)
 
     # ─── Canal email ────────────────────────────────────────────────────────────
 

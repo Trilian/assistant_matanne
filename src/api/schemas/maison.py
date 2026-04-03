@@ -228,6 +228,46 @@ class StatsCellierResponse(BaseModel):
     articles_perimes: int = 0
     articles_bientot_perimes: int = 0
 
+# Abonnements
+
+class AbonnementCreate(BaseModel):
+    type_abonnement: str = Field(..., max_length=50)
+    fournisseur: str = Field(..., max_length=200)
+    numero_contrat: str | None = Field(None, max_length=100)
+    prix_mensuel: float | None = Field(None, ge=0)
+    date_debut: _dt.date | None = None
+    date_fin_engagement: _dt.date | None = None
+    meilleur_prix_trouve: float | None = Field(None, ge=0)
+    fournisseur_alternatif: str | None = Field(None, max_length=200)
+    notes: str | None = None
+
+class AbonnementPatch(BaseModel):
+    type_abonnement: str | None = Field(None, max_length=50)
+    fournisseur: str | None = Field(None, max_length=200)
+    numero_contrat: str | None = Field(None, max_length=100)
+    prix_mensuel: float | None = Field(None, ge=0)
+    date_debut: _dt.date | None = None
+    date_fin_engagement: _dt.date | None = None
+    meilleur_prix_trouve: float | None = Field(None, ge=0)
+    fournisseur_alternatif: str | None = Field(None, max_length=200)
+    notes: str | None = None
+
+class AbonnementResponse(IdentifiedResponse):
+    type_abonnement: str
+    fournisseur: str
+    numero_contrat: str | None = None
+    prix_mensuel: float | None = None
+    date_debut: _dt.date | None = None
+    date_fin_engagement: _dt.date | None = None
+    meilleur_prix_trouve: float | None = None
+    fournisseur_alternatif: str | None = None
+    notes: str | None = None
+
+class ResumeAbonnements(BaseModel):
+    total_mensuel: float = 0
+    total_annuel: float = 0
+    par_type: dict[str, float] = {}
+
 # Artisans
 
 class ArtisanCreate(BaseModel, NomValidatorMixin):

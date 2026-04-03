@@ -72,6 +72,7 @@ import { BadgeNutriscore } from "@/composants/cuisine/badge-nutriscore";
 import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 import { CalendrierMensuel } from "@/composants/planning/calendrier-mensuel";
+import { CalendrierMosaiqueRepas } from "@/composants/planning/calendrier-mosaique-repas";
 import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
@@ -640,6 +641,10 @@ export default function PagePlanning() {
             );
           })}
         </div>
+      )}
+
+      {modeAffichage === "semaine" && !isLoading && (
+        <CalendrierMosaiqueRepas dates={datesSemaine} repasParJour={repasParJour} />
       )}
 
       {conflits && conflits.items.length > 0 && (

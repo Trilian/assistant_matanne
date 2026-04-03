@@ -6,6 +6,7 @@ import { FournisseurAuth } from "@/fournisseurs/fournisseur-auth";
 import { FournisseurTheme } from "@/fournisseurs/fournisseur-theme";
 import { Toaster } from "@/composants/ui/sonner";
 import { EnregistrementSW } from "@/composants/enregistrement-sw";
+import { TransitionGlobale } from "@/composants/disposition/transition-globale";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -55,7 +56,7 @@ export default function RootLayout({
           <FournisseurQuery>
             <FournisseurAuth>
               <TooltipProvider>
-                {children}
+                <TransitionGlobale>{children}</TransitionGlobale>
               </TooltipProvider>
             </FournisseurAuth>
           </FournisseurQuery>

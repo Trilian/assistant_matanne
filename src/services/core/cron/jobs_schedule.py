@@ -86,6 +86,13 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("alertes_budget_seuil", CronTrigger(hour=20, minute=0), replace_existing=True)
     planifier_job("resume_hebdo_ia", CronTrigger(day_of_week="sun", hour=20, minute=30), replace_existing=True)
 
+    # Phase 3 — Automatisations proactives
+    planifier_job("coherence_planning_courses", CronTrigger(day_of_week="sun", hour=19, minute=0), replace_existing=True)
+    planifier_job("sync_resultats_paris_auto", CronTrigger(hour="*/3", minute=10), replace_existing=True)
+    planifier_job("rapport_jardin_saisonnier", CronTrigger(day=1, hour=8, minute=0), replace_existing=True)
+    planifier_job("nettoyage_exports_anciens", CronTrigger(day_of_week="sun", hour=3, minute=0), replace_existing=True)
+    planifier_job("health_check_services_ia", CronTrigger(hour="*/6", minute=0), replace_existing=True)
+
     # Nouveaux jobs
     planifier_job("rappels_jardin_saisonniers", CronTrigger(day_of_week="mon", hour=7, minute=0), replace_existing=True)
     planifier_job("verification_sante_systeme", CronTrigger(minute=0), replace_existing=True)

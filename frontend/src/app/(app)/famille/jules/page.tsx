@@ -51,6 +51,7 @@ import {
   obtenirProfilJules,
   listerJalons,
   ajouterJalon,
+  obtenirCroissanceJules,
   obtenirAlimentsExclus,
   obtenirCoachingHebdo,
   sauvegarderAlimentsExclus,
@@ -72,6 +73,11 @@ const GraphiqueJalons = dynamic(
 
 const RadarSkillJules = dynamic(
   () => import("@/composants/graphiques/radar-skill-jules").then((m) => m.RadarSkillJules),
+  { ssr: false }
+);
+
+const GraphiqueCroissance = dynamic(
+  () => import("@/composants/famille/graphique-croissance").then((m) => m.GraphiqueCroissance),
   { ssr: false }
 );
 
@@ -146,6 +152,12 @@ export default function PageJules() {
   const { data: dashboardJour } = utiliserRequete(
     ["famille", "jules", "repas-jour"],
     obtenirTableauBord
+  );
+
+  const { data: croissanceJules, isLoading: chargementCroissance } = utiliserRequete(
+    ["famille", "jules", "croissance-oms"],
+    obtenirCroissanceJules,
+    { staleTime: 24 * 60 * 60 * 1000 }
   );
 
   const { mutate: ajouter, isPending: enAjout } = utiliserMutation(
@@ -369,6 +381,43 @@ export default function PageJules() {
           </CardContent>
         </Card>
       )}
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Progression competences</CardTitle>
+            <CardDescription>Vue radar basee sur les jalons saisis</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RadarSkillJules donnees={donneesRadar} />
+          </CardContent>
+        </Card>
+
+        {chargementCroissance ? (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Croissance OMS</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-[320px] w-full" />
+            </CardContent>
+          </Card>
+        ) : croissanceJules ? (
+          <GraphiqueCroissance
+            age_mois={croissanceJules.age_mois}
+            normes={croissanceJules.normes}
+          />
+        ) : (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Croissance OMS</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">Donnees de croissance indisponibles pour le moment.</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

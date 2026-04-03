@@ -203,30 +203,28 @@ export interface StatsArtisans {
 // Types Contrats
 // ═══════════════════════════════════════════════════════════
 
-export interface Contrat {
+export interface Abonnement {
   id: number;
-  nom: string;
-  type_contrat: string;
-  fournisseur?: string;
+  type_abonnement: string;
+  fournisseur: string;
   numero_contrat?: string;
-  montant_mensuel?: number;
-  montant_annuel?: number;
-  date_debut: string;
-  date_fin?: string;
-  date_resiliation?: string;
-  statut: string;
+  prix_mensuel?: number;
+  date_debut?: string;
+  date_fin_engagement?: string;
+  meilleur_prix_trouve?: number;
+  fournisseur_alternatif?: string;
   notes?: string;
 }
 
-export interface AlerteContrat {
+export interface AlerteAbonnement {
   id: number;
-  nom: string;
-  type_contrat: string;
-  date_fin: string;
+  type_abonnement: string;
+  fournisseur: string;
+  date_fin_engagement: string;
   jours_restants: number;
 }
 
-export interface ResumeFinancierContrats {
+export interface ResumeAbonnements {
   total_mensuel: number;
   total_annuel: number;
   par_type: Record<string, number>;

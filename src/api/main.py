@@ -90,6 +90,7 @@ from src.api.routes import (
 )
 from src.api.routes.auth import router as auth_router
 from src.api.routes.push import router as push_router
+from src.api.routes.webhooks_telegram import router as telegram_router
 from src.api.routes.webhooks_whatsapp import router as whatsapp_router
 from src.api.schemas.errors import REPONSE_500, REPONSES_AUTH_ADMIN
 from src.api.utils import (
@@ -641,6 +642,7 @@ app.include_router(courses_router)
 app.include_router(planning_router)
 app.include_router(push_router)
 app.include_router(webhooks_router)
+app.include_router(telegram_router)
 app.include_router(whatsapp_router)
 app.include_router(suggestions_router)
 

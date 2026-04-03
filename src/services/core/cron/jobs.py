@@ -13,6 +13,7 @@ import os
 import time
 from collections.abc import Callable
 from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -4071,14 +4072,146 @@ def _job_alertes_budget_seuil() -> None:
         _envoyer_notif_tous_users(
             dispatcher,
             message=message,
-            canaux=["push", "ntfy", "whatsapp"],
+            canaux=["push", "ntfy", "telegram"],
             titre="Alerte budget mensuel",
             type_evenement="budget_depassement",
             type_whatsapp="budget_depassement",
+            type_telegram="budget_depassement",
         )
         logger.info("B4: %d alerte(s) budget envoyée(s)", len(alertes))
     except Exception:
         logger.exception("Erreur job B4 alertes budget seuil")
+
+
+def _job_coherence_planning_courses() -> None:
+    """Vérifie la cohérence planning ↔ courses (dimanche 19h)."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.courses import ArticleCourses, ListeCourses
+        from src.core.models.planning import Planning, Repas
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        aujourd_hui = date.today()
+        debut_semaine = aujourd_hui - timedelta(days=aujourd_hui.weekday())
+        fin_semaine = debut_semaine + timedelta(days=6)
+
+        with obtenir_contexte_db() as session:
+            planning_actif = (
+                session.query(Planning)
+                .filter(Planning.statut == "actif")
+                .order_by(Planning.date_creation.desc())
+                .first()
+            )
+            nb_repas = 0
+            if planning_actif:
+                nb_repas = (
+                    session.query(Repas)
+                    .filter(
+                        Repas.planning_id == planning_actif.id,
+                        Repas.date_repas >= debut_semaine,
+                        Repas.date_repas <= fin_semaine,
+                    )
+                    .count()
+                )
+
+            liste_active = (
+                session.query(ListeCourses)
+                .filter(ListeCourses.archivee.is_(False))
+                .order_by(ListeCourses.date_creation.desc())
+                .first()
+            )
+            nb_articles = 0
+            if liste_active:
+                nb_articles = (
+                    session.query(ArticleCourses)
+                    .filter(
+                        ArticleCourses.liste_id == liste_active.id,
+                        ArticleCourses.achete.is_(False),
+                    )
+                    .count()
+                )
+
+        if nb_repas == 0:
+            logger.info("Phase3 CRON cohérence planning↔courses: aucun repas à contrôler")
+            return
+
+        if nb_articles == 0:
+            dispatcher = get_dispatcher_notifications()
+            _envoyer_notif_tous_users(
+                dispatcher,
+                message=(
+                    "⚠️ Planning actif détecté mais la liste de courses est vide. "
+                    "Vérifie les ingrédients avant la semaine."
+                ),
+                canaux=["telegram", "push"],
+                titre="Cohérence planning/courses",
+                type_evenement="rappel_courses",
+            )
+            logger.info("Phase3 CRON cohérence planning↔courses: alerte envoyée")
+            return
+
+        logger.info(
+            "Phase3 CRON cohérence planning↔courses OK: %d repas planifiés, %d article(s) en liste",
+            nb_repas,
+            nb_articles,
+        )
+    except Exception:
+        logger.exception("Erreur job phase3 cohérence planning↔courses")
+
+
+def _job_sync_resultats_paris_auto() -> None:
+    """Synchronise automatiquement les résultats de paris après les matchs."""
+    try:
+        executer_job_par_id("sync_jeux_budget", source="cron")
+        logger.info("Phase3 CRON sync_resultats_paris_auto exécuté")
+    except Exception:
+        logger.exception("Erreur job phase3 sync_resultats_paris_auto")
+
+
+def _job_rapport_jardin_saisonnier() -> None:
+    """Produit et diffuse le rapport jardin saisonnier (mensuel)."""
+    try:
+        _job_rapport_jardin()
+        logger.info("Phase3 CRON rapport_jardin_saisonnier exécuté")
+    except Exception:
+        logger.exception("Erreur job phase3 rapport_jardin_saisonnier")
+
+
+def _job_nettoyage_exports_anciens() -> None:
+    """Supprime les exports de plus de 30 jours (hebdo dimanche 03h)."""
+    try:
+        racine = Path(__file__).resolve().parents[4]
+        dossier_exports = racine / "data" / "exports"
+        if not dossier_exports.exists():
+            logger.info("Phase3 CRON nettoyage_exports_anciens: dossier exports absent")
+            return
+
+        seuil = datetime.now(UTC) - timedelta(days=30)
+        supprimes = 0
+
+        for fichier in dossier_exports.glob("**/*"):
+            if not fichier.is_file():
+                continue
+            try:
+                mtime = datetime.fromtimestamp(fichier.stat().st_mtime, UTC)
+                if mtime < seuil:
+                    fichier.unlink(missing_ok=True)
+                    supprimes += 1
+            except Exception:
+                logger.debug("Impossible de supprimer l'export %s", fichier, exc_info=True)
+
+        logger.info("Phase3 CRON nettoyage_exports_anciens: %d fichier(s) supprimé(s)", supprimes)
+    except Exception:
+        logger.exception("Erreur job phase3 nettoyage_exports_anciens")
+
+
+def _job_health_check_services_ia() -> None:
+    """Vérifie les services IA (Mistral, circuit breaker, etc.) toutes les 6h."""
+    try:
+        _job_verification_sante_systeme()
+        logger.info("Phase3 CRON health_check_services_ia exécuté")
+    except Exception:
+        logger.exception("Erreur job phase3 health_check_services_ia")
 
 
 def _job_resume_hebdo_ia() -> None:
@@ -4168,7 +4301,7 @@ def _job_resume_hebdo_ia() -> None:
         _envoyer_notif_tous_users(
             dispatcher,
             message=message,
-            canaux=["whatsapp", "email"],
+            canaux=["telegram", "email"],
             titre="Résumé hebdomadaire",
         )
         logger.info("B9: Résumé hebdo IA envoyé")
@@ -4180,6 +4313,17 @@ _REGISTRE_JOBS.update(
     {
         # Nouveaux jobs
         "alertes_budget_seuil": ("Alertes budget seuil (quotidien 20h)", _job_alertes_budget_seuil),
+        "coherence_planning_courses": (
+            "Cohérence planning↔courses (dimanche 19h)",
+            _job_coherence_planning_courses,
+        ),
+        "sync_resultats_paris_auto": (
+            "Synchronisation résultats paris (auto)",
+            _job_sync_resultats_paris_auto,
+        ),
+        "rapport_jardin_saisonnier": ("Rapport jardin saisonnier (mensuel)", _job_rapport_jardin_saisonnier),
+        "nettoyage_exports_anciens": ("Nettoyage exports > 30 jours", _job_nettoyage_exports_anciens),
+        "health_check_services_ia": ("Health check services IA (6h)", _job_health_check_services_ia),
         "resume_hebdo_ia": ("Résumé hebdomadaire IA intelligent", _job_resume_hebdo_ia),
         # Sprint 16 — Notifications WhatsApp et Email
         "s16_resume_weekend_whatsapp": ("S16.3 Résumé weekend suggestions WhatsApp", _job_resume_weekend_whatsapp),

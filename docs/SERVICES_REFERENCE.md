@@ -157,8 +157,7 @@ Services Habitat (sous-domaine maison avancé):
 CRUD spécialisés exposés:
 
 - artisans
-- contrats
-- garanties
+- abonnements
 - diagnostics
 - estimations
 - cellier
@@ -170,8 +169,7 @@ CRUD spécialisés exposés:
 Détail CRUD maison explicitement référencé:
 
 - `ArtisanCrudService`
-- `ContratMaisonCrudService`
-- `GarantieCrudService`
+- `AbonnementCrudService`
 - `DiagnosticMaisonCrudService`
 - `EstimationImmobiliereCrudService`
 - `DepenseMaisonCrudService`

@@ -55,7 +55,7 @@ class PreferencesResponse(PreferencesBase):
 # Préférences canaux de notification (W4)
 # ─────────────────────────────────────────────────────────
 
-_CANAUX_VALIDES = {"push", "ntfy", "email", "whatsapp"}
+_CANAUX_VALIDES = {"push", "ntfy", "email", "telegram", "whatsapp"}
 _CATEGORIES_VALIDES = {"rappels", "alertes", "resumes"}
 
 
@@ -63,7 +63,7 @@ class CanauxParCategorie(BaseModel):
     """Canaux activés par catégorie de notification.
 
     Chaque clé est une catégorie et la valeur est la liste des canaux actifs.
-    Canaux supportés : push, ntfy, email, whatsapp.
+    Canaux supportés : push, ntfy, email, telegram.
     Catégories : rappels, alertes, résumés.
     """
 
@@ -100,7 +100,7 @@ class PreferencesNotificationsBase(BaseModel):
     stock_alerte: bool = True
     meteo_alerte: bool = True
     budget_alerte: bool = True
-    canal_prefere: str = Field("push", description="Canal par défaut (push|ntfy|email|whatsapp)")
+    canal_prefere: str = Field("push", description="Canal par défaut (push|ntfy|email|telegram)")
     canaux_par_categorie: CanauxParCategorie = Field(default_factory=CanauxParCategorie)
     notifications_par_module: dict[str, bool] = Field(
         default_factory=lambda: {

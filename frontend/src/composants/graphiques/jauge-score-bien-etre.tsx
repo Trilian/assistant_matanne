@@ -2,10 +2,10 @@
 
 interface JaugeScoreBienEtreProps {
   score: number;
-  taille?: number;
 }
 
-export function JaugeScoreBienEtre({ score, taille = 132 }: JaugeScoreBienEtreProps) {
+export function JaugeScoreBienEtre({ score }: JaugeScoreBienEtreProps) {
+  const taille = 132;
   const scoreBorne = Math.max(0, Math.min(100, Math.round(score)));
   const stroke = 10;
   const rayon = (taille - stroke) / 2;
@@ -20,7 +20,7 @@ export function JaugeScoreBienEtre({ score, taille = 132 }: JaugeScoreBienEtrePr
         : "#ef4444";
 
   return (
-    <div className="relative" style={{ width: taille, height: taille }}>
+    <div className="relative h-[132px] w-[132px]">
       <svg width={taille} height={taille} className="-rotate-90">
         <circle
           cx={taille / 2}
@@ -41,7 +41,7 @@ export function JaugeScoreBienEtre({ score, taille = 132 }: JaugeScoreBienEtrePr
           strokeLinecap="round"
           strokeDasharray={circonference}
           strokeDashoffset={circonference - progression}
-          style={{ transition: "stroke-dashoffset 450ms ease-out" }}
+          className="transition-all duration-500 ease-out"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">

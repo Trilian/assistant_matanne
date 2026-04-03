@@ -35,7 +35,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
-  listerProjets, creerProjet, supprimerProjet, estimerProjetIA,
+  listerProjets, creerProjet, modifierProjet, supprimerProjet, estimerProjetIA,
   listerTachesEntretien, obtenirSanteAppareils, creerTacheEntretien, supprimerTacheEntretien,
   listerArtisans, creerArtisan, modifierArtisan, supprimerArtisan, statsArtisans,
 } from "@/bibliotheque/api/maison";
@@ -44,6 +44,7 @@ import { toast } from "sonner";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
 import { BoutonAchat } from "@/composants/bouton-achat";
 import { utiliserAutoCompletionMaison } from "@/crochets/utiliser-auto-completion-maison";
+import { KanbanProjets } from "@/composants/maison/kanban-projets";
 
 // ─── Couleurs ────────────────────────────────────────────────
 const COULEURS_STATUT: Record<string, string> = {
@@ -243,6 +244,16 @@ function OngletProjets() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["maison", "projets"] }); toast.success("Projet supprimé"); },
   });
 
+  const { mutate: deplacerProjet, isPending: deplacementStatutEnCours } = utiliserMutation(
+    ({ id, statut }: { id: number; statut: string }) => modifierProjet(id, { statut }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["maison", "projets"] });
+      },
+      onError: () => toast.error("Impossible de déplacer le projet"),
+    }
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -414,34 +425,46 @@ function OngletProjets() {
       ) : !projets?.length ? (
         <Card><CardContent className="py-10 text-center text-muted-foreground"><Hammer className="h-8 w-8 mx-auto mb-2 opacity-50" />Aucun projet{statut !== "tous" ? " dans ce statut" : ""}</CardContent></Card>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {projets.map((p) => (
-            <Card key={p.id}>
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-2">
-                  <CardTitle className="text-sm">{p.nom}</CardTitle>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => supprimer(p.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
-                </div>
-                <div className="flex gap-1.5 flex-wrap">
-                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${COULEURS_STATUT[p.statut] ?? ""}`}>{p.statut.replace("_", " ")}</span>
-                  {p.priorite && <Badge variant={COULEURS_PRIORITE[p.priorite] ?? "outline"} className="text-xs">{p.priorite}</Badge>}
-                </div>
-              </CardHeader>
-              {p.description && <CardContent className="pt-0 pb-2"><p className="text-xs text-muted-foreground line-clamp-2">{p.description}</p></CardContent>}
-              <CardContent className="pt-0 pb-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs h-7 gap-1"
-                  onClick={() => setEstimationProjetId(p.id)}
-                >
-                  <BotMessageSquare className="h-3.5 w-3.5" />
-                  Estimer avec l&apos;IA
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        statut === "tous" ? (
+          <KanbanProjets
+            projets={projets}
+            onSupprimer={(id) => supprimer(id)}
+            onEstimer={(id) => setEstimationProjetId(id)}
+            onDeplacerStatut={(projetId, statutCible) => {
+              deplacerProjet({ id: projetId, statut: statutCible });
+            }}
+            enCours={deplacementStatutEnCours}
+          />
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {projets.map((p) => (
+              <Card key={p.id}>
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-sm">{p.nom}</CardTitle>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive" onClick={() => supprimer(p.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                  </div>
+                  <div className="flex gap-1.5 flex-wrap">
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${COULEURS_STATUT[p.statut] ?? ""}`}>{p.statut.replace("_", " ")}</span>
+                    {p.priorite && <Badge variant={COULEURS_PRIORITE[p.priorite] ?? "outline"} className="text-xs">{p.priorite}</Badge>}
+                  </div>
+                </CardHeader>
+                {p.description && <CardContent className="pt-0 pb-2"><p className="text-xs text-muted-foreground line-clamp-2">{p.description}</p></CardContent>}
+                <CardContent className="pt-0 pb-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs h-7 gap-1"
+                    onClick={() => setEstimationProjetId(p.id)}
+                  >
+                    <BotMessageSquare className="h-3.5 w-3.5" />
+                    Estimer avec l&apos;IA
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )
       )}
 
       <SheetEstimationIA

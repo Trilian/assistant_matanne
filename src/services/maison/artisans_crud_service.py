@@ -9,7 +9,7 @@ import logging
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models.contrats_artisans import Artisan, InterventionArtisan
+from src.core.models.abonnements import Artisan, InterventionArtisan
 from src.core.monitoring import chronometre
 from src.services.core.base import BaseService
 from src.services.core.event_bus_mixin import EventBusMixin

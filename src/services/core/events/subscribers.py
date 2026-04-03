@@ -1020,7 +1020,7 @@ def _generer_courses_depuis_planning(event: EvenementDomaine) -> None:
 def _notifier_courses_generees(event: EvenementDomaine) -> None:
     """Bridge 1 bis: courses générées → notification utilisateur.
 
-    Envoie une notification ntfy informative après la génération automatique
+    Envoie une notification multi-canal après la génération automatique
     de la liste de courses depuis le planning hebdomadaire.
     Tolère les pannes — n'échoue jamais.
     """
@@ -1029,19 +1029,36 @@ def _notifier_courses_generees(event: EvenementDomaine) -> None:
         semaine_debut = event.data.get("semaine_debut", "")
         planning_id = event.data.get("planning_id", "")
 
-        from src.services.core.notifications.notif_ntfy import ServiceNtfy
-        from src.services.core.notifications.types import NotificationNtfy
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
-        ServiceNtfy().envoyer_sync(NotificationNtfy(
-            titre=f"🛒 Liste de courses générée ({nb_articles} article(s))",
-            message=(
-                f"Planning #{planning_id} validé ({semaine_debut}).\n"
-                "La liste de courses a été générée automatiquement."
-            ),
-            priorite=3,
-            tags=["shopping_cart", "white_check_mark"],
-            click_url="/cuisine/courses",
-        ))
+        dispatcher = get_dispatcher_notifications()
+        message = (
+            f"Planning #{planning_id} validé ({semaine_debut}).\n"
+            f"La liste de courses est prête ({nb_articles} article(s))."
+        )
+
+        # Best-effort sur les utilisateurs connus; fallback safe sur compte principal.
+        try:
+            from src.core.db import obtenir_contexte_db
+            from src.core.models import ProfilUtilisateur
+
+            with obtenir_contexte_db() as session:
+                usernames = [
+                    p.username
+                    for p in session.query(ProfilUtilisateur.username).all()
+                    if p.username
+                ]
+        except Exception:
+            usernames = ["matanne"]
+
+        for user_id in usernames or ["matanne"]:
+            dispatcher.envoyer(
+                user_id=user_id,
+                message=message,
+                canaux=["telegram", "push"],
+                type_evenement="rappel_courses",
+                titre=f"🛒 Courses prêtes ({nb_articles})",
+            )
         logger.info(
             "Bridge 1 bis: notification courses envoyée (planning=%s, nb_articles=%s)",
             planning_id,

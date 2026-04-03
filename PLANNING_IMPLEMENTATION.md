@@ -570,12 +570,12 @@ async def generer_courses_depuis_planning(event):
 
 | # | Job | Schedule | Description | Priorité | Statut |
 |---|-----|----------|-------------|----------|--------|
-| 1 | Cohérence planning ↔ courses | Dim 19h | Vérifier que tous les ingrédients du planning sont dans la liste de courses | 🔴 Haute | ⬜ |
-| 2 | Alerte budget instantanée | Quotidien 20h | Si dépenses > X% du budget prévu, notifier | 🔴 Haute | ⬜ |
-| 3 | Sync résultats paris auto | Après matchs | Récupérer résultats et mettre à jour les paris | 🟡 Moyenne | ⬜ |
-| 4 | Rapport jardin saisonnier | 1er/mois | Résumé : ce qu'il faut planter, récolter, entretenir | 🟡 Moyenne | ⬜ |
-| 5 | Nettoyage exports anciens | Hebdo dim 3h | Supprimer exports > 30 jours | 🟢 Basse | ⬜ |
-| 6 | Health check services IA | Toutes les 6h | Vérifier Mistral, alerter si circuit breaker ouvert | 🟢 Basse | ⬜ |
+| 1 | Cohérence planning ↔ courses | Dim 19h | Vérifier que tous les ingrédients du planning sont dans la liste de courses | 🔴 Haute | ✅ |
+| 2 | Alerte budget instantanée | Quotidien 20h | Si dépenses > X% du budget prévu, notifier | 🔴 Haute | ✅ |
+| 3 | Sync résultats paris auto | Après matchs | Récupérer résultats et mettre à jour les paris | 🟡 Moyenne | ✅ |
+| 4 | Rapport jardin saisonnier | 1er/mois | Résumé : ce qu'il faut planter, récolter, entretenir | 🟡 Moyenne | ✅ |
+| 5 | Nettoyage exports anciens | Hebdo dim 3h | Supprimer exports > 30 jours | 🟢 Basse | ✅ |
+| 6 | Health check services IA | Toutes les 6h | Vérifier Mistral, alerter si circuit breaker ouvert | 🟢 Basse | ✅ |
 
 ### 5.5 Notifications enrichies
 
@@ -583,13 +583,13 @@ async def generer_courses_depuis_planning(event):
 
 | # | Notification | Canal | Trigger | Priorité | Statut |
 |---|-------------|-------|---------|----------|--------|
-| 1 | "Recette du soir" rappel | Telegram + Push | 16h si repas planifié, avec lien recette | 🔴 Haute | ⬜ |
-| 2 | "Courses prêtes" | Telegram | Après génération auto courses | 🔴 Haute | ⬜ |
-| 3 | "Budget alerte" | Push + Email | Seuil dépassé (job CRON) | 🔴 Haute | ⬜ |
-| 4 | "Tâches entretien semaine" | Telegram lundi matin | Résumé tâches planifiées | 🟡 Moyenne | ⬜ |
-| 5 | "Résultats paris" | Push | Après sync résultats | 🟡 Moyenne | ⬜ |
-| 6 | "Jardin — actions du mois" | Email mensuel | Rapport jardin saisonnier | 🟢 Basse | ⬜ |
-| 7 | "Jules — jalon développement" | Push | Quand un jalon est atteint selon l'âge | 🟢 Basse | ⬜ |
+| 1 | "Recette du soir" rappel | Telegram + Push | 16h si repas planifié, avec lien recette | 🔴 Haute | ✅ |
+| 2 | "Courses prêtes" | Telegram | Après génération auto courses | 🔴 Haute | ✅ |
+| 3 | "Budget alerte" | Push + Email | Seuil dépassé (job CRON) | 🔴 Haute | ✅ |
+| 4 | "Tâches entretien semaine" | Telegram lundi matin | Résumé tâches planifiées | 🟡 Moyenne | ✅ |
+| 5 | "Résultats paris" | Push | Après sync résultats | 🟡 Moyenne | ✅ |
+| 6 | "Jardin — actions du mois" | Email mensuel | Rapport jardin saisonnier | 🟢 Basse | ✅ |
+| 7 | "Jules — jalon développement" | Push | Quand un jalon est atteint selon l'âge | 🟢 Basse | ✅ |
 
 ### 5.6 Commandes Telegram enrichies
 
@@ -625,7 +625,7 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | 3.2 | Infrastructure IA | Cache Redis L2 activable via `REDIS_URL`, fallback rate limiting Redis, couches offline déjà présentes | ✅ |
 | 3.3 | Streaming et UX temps réel | Endpoint SSE chat IA, client frontend de streaming, composant `stream-ia.tsx`, intégration page chat | ✅ |
 | 3.4 | Admin et observabilité | Log viewer temps réel admin via WebSocket, métriques/admin UI existantes, validation ciblée du chat | 🟡 |
-| 3.5 | Automatisations restantes | Jobs CRON complémentaires, notifications enrichies, commandes Telegram, actions admin avancées | ⬜ |
+| 3.5 | Automatisations restantes | Jobs CRON complémentaires, notifications enrichies, commandes Telegram, actions admin avancées | ✅ |
 
 ### 5.9 Checklist Phase 3
 
@@ -640,9 +640,9 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | 7 | Ajouter le rendu progressif côté frontend avec composant réutilisable | ✅ |
 | 8 | Conserver un fallback non-streaming pour le chat | ✅ |
 | 9 | Disposer d'un log viewer admin temps réel | ✅ |
-| 10 | Finaliser les jobs CRON proactifs listés en 5.4 | ⬜ |
-| 11 | Finaliser les notifications enrichies listées en 5.5 | ⬜ |
-| 12 | Remplacer complètement les commandes WhatsApp visées par Telegram enrichi | ⬜ |
+| 10 | Finaliser les jobs CRON proactifs listés en 5.4 | ✅ |
+| 11 | Finaliser les notifications enrichies listées en 5.5 | ✅ |
+| 12 | Remplacer complètement les commandes WhatsApp visées par Telegram enrichi | ✅ |
 
 ---
 
@@ -650,22 +650,23 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 
 > **Objectif** : Interface belle, fluide, avec des visualisations riches.
 > **Prérequis** : Phase 3 terminée
+> **Statut** : 🟡 En cours — Sprint 4.1 lancé (visualisations prioritaires branchées sur dashboard/cuisine/famille).
 
 ### 6.1 Nouvelles visualisations
 
 | # | Visualisation | Module | Technologie | Priorité | Statut |
 |---|--------------|--------|-------------|----------|--------|
-| 1 | Timeline interactive famille | Dashboard | D3 / Framer Motion | 🔴 Haute | ⬜ |
+| 1 | Timeline interactive famille | Dashboard | D3 / Framer Motion | 🔴 Haute | ✅ |
 | 2 | Kanban drag & drop projets | Maison/Travaux | DnD Kit | 🔴 Haute | ⬜ |
-| 3 | Graphique croissance Jules OMS | Famille/Jules | Recharts | 🔴 Haute | ⬜ |
-| 4 | Calendrier mosaïque repas | Cuisine/Planning | Grid CSS + images | 🔴 Haute | ⬜ |
-| 5 | Gauge score bien-être | Dashboard | SVG animé | 🟡 Moyenne | ⬜ |
+| 3 | Graphique croissance Jules OMS | Famille/Jules | Recharts | 🔴 Haute | ✅ |
+| 4 | Calendrier mosaïque repas | Cuisine/Planning | Grid CSS + images | 🔴 Haute | ✅ |
+| 5 | Gauge score bien-être | Dashboard | SVG animé | 🟡 Moyenne | ✅ |
 | 6 | Graphique budget vs réel | Famille/Budget | Recharts barres groupées | 🟡 Moyenne | ⬜ |
 | 7 | Treemap inventaire | Cuisine/Inventaire | D3 | 🟡 Moyenne | ⬜ |
 | 8 | Carte zones jardin 2D | Maison/Jardin | Canvas/SVG | 🟡 Moyenne | ⬜ |
-| 9 | Dashboard widgets configurables | Dashboard | DnD Kit | 🟡 Moyenne | ⬜ |
+| 9 | Dashboard widgets configurables | Dashboard | DnD Kit | 🟡 Moyenne | ✅ |
 | 10 | Animations transitions pages | Global | Framer Motion | 🟢 Basse | ⬜ |
-| 11 | Vue "focus du jour" | Ma Journée | Layout cards | 🟢 Basse | ⬜ |
+| 11 | Vue "focus du jour" | Ma Journée | Layout cards | 🟢 Basse | ✅ |
 
 ### 6.2 Améliorations design existant
 
@@ -673,10 +674,32 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 |---|-------------|--------|----------|--------|
 | 1 | Mode sombre cohérent | Audit toutes les pages, composants custom | 🔴 Haute | ⬜ |
 | 2 | Responsive mobile | Audit toutes les pages, vérifier débordements | 🔴 Haute | ⬜ |
-| 3 | Empty states | Illustrations/messages pour les pages vides au premier lancement | 🔴 Haute | ⬜ |
-| 4 | Loading skeletons | Remplacer spinners par skeletons shadcn partout | 🟡 Moyenne | ⬜ |
+| 3 | Empty states | Illustrations/messages pour les pages vides au premier lancement | 🔴 Haute | 🟡 |
+| 4 | Loading skeletons | Remplacer spinners par skeletons shadcn partout | 🟡 Moyenne | 🟡 |
 | 5 | Animations micro-interactions | Hover effects, click feedback, transitions douces | 🟡 Moyenne | ⬜ |
 | 6 | Confettis célébration | Utiliser `confettis.ts` existant pour jalons Jules, badges | 🟢 Basse | ⬜ |
+
+### 6.3 Sprint Phase 4.1 — Visualisations prioritaires
+
+| Sprint | Périmètre | Livrables | Statut |
+|--------|-----------|-----------|--------|
+| 4.1 | Visualisations UI critiques | Timeline interactive, croissance OMS Jules, calendrier mosaïque repas, jauge score bien-être, widgets dashboard configurables, vue focus du jour | ✅ |
+| 4.2 | UX design système | Empty states/skeletons homogènes, responsive mobile, mode sombre cohérent | 🟡 |
+| 4.3 | Interactions avancées | Kanban projets DnD, transitions pages Framer Motion, micro-interactions étendues | ⬜ |
+
+### 6.4 Checklist Phase 4
+
+| # | Checklist sprint | Statut |
+|---|------------------|--------|
+| 1 | Brancher la timeline interactive famille sur la page dédiée | ✅ |
+| 2 | Exposer le graphique croissance OMS sur l'écran Jules | ✅ |
+| 3 | Ajouter une vue mosaïque des repas sur le planning cuisine | ✅ |
+| 4 | Ajouter une jauge visuelle pour le score bien-être dashboard | ✅ |
+| 5 | Conserver le dashboard widgets configurables (DnD) | ✅ |
+| 6 | Conserver la vue focus du jour accessible depuis la navigation | ✅ |
+| 7 | Homogénéiser empty states + skeletons sur les écrans critiques | 🟡 |
+| 8 | Finaliser le Kanban projets drag & drop | ⬜ |
+| 9 | Finaliser les transitions globales Framer Motion | ⬜ |
 
 ---
 

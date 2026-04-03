@@ -36,6 +36,7 @@ import {
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import {
   Dialog,
   DialogContent,
@@ -542,7 +543,7 @@ export default function PageCourses() {
           <p className="text-muted-foreground">Gérez vos listes de courses</p>
         </div>
         {listeSelectionnee && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             <Button
               variant={modeSelection ? "default" : "outline"}
               size="sm"
@@ -648,9 +649,12 @@ export default function PageCourses() {
                 ))}
               </div>
             ) : !listes?.length ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Aucune liste de courses
-              </p>
+              <EtatVide
+                Icone={ShoppingCart}
+                titre="Aucune liste de courses"
+                description="Cree ta premiere liste pour commencer."
+                className="py-6"
+              />
             ) : (
               <div className="space-y-1">
                 {listes.map((l) => (
@@ -773,12 +777,12 @@ export default function PageCourses() {
           </CardHeader>
           <CardContent>
             {!listeSelectionnee ? (
-              <div className="flex flex-col items-center gap-4 py-12 text-center">
-                <ShoppingCart className="h-12 w-12 text-muted-foreground" />
-                <p className="text-muted-foreground">
-                  Sélectionnez ou créez une liste pour commencer
-                </p>
-              </div>
+              <EtatVide
+                Icone={ShoppingCart}
+                titre="Selectionnez une liste"
+                description="Choisissez une liste existante ou creez-en une nouvelle pour ajouter des articles."
+                className="py-10"
+              />
             ) : (
               <div className="space-y-4">
                 {/* Champ "Ajouter article" toujours visible (4.5) */}
@@ -871,9 +875,12 @@ export default function PageCourses() {
                     ))}
                   </div>
                 ) : articles.length === 0 ? (
-                  <div className="flex flex-col items-center gap-4 py-12">
-                    <p className="text-muted-foreground">Liste vide</p>
-                  </div>
+                  <EtatVide
+                    Icone={ShoppingCart}
+                    titre="Liste vide"
+                    description="Ajoutez un article via le champ rapide ou le scan code-barres."
+                    className="py-10"
+                  />
                 ) : (
                   <div className="space-y-6">
                     {/* Articles par catégorie */}

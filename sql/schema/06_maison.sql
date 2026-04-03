@@ -610,6 +610,25 @@ CREATE TABLE budgets_home (
 -- ============================================================================
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- Abonnements maison (eau, électricité, gaz, assurances, téléphone, internet)
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE abonnements (
+    id SERIAL PRIMARY KEY,
+    type_abonnement VARCHAR(50) NOT NULL,
+    fournisseur VARCHAR(200) NOT NULL,
+    numero_contrat VARCHAR(100),
+    prix_mensuel NUMERIC(10, 2),
+    date_debut DATE,
+    date_fin_engagement DATE,
+    meilleur_prix_trouve NUMERIC(10, 2),
+    fournisseur_alternatif VARCHAR(200),
+    notes TEXT,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_abonnements_type ON abonnements(type_abonnement);
+
+-- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE artisans (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(200) NOT NULL,

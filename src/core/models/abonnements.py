@@ -1,7 +1,8 @@
 """
-Modèles SQLAlchemy pour artisans.
+Modèles SQLAlchemy pour abonnements et artisans.
 
 Contient :
+- Abonnement : Abonnements maison (eau, électricité, gaz, assurances, etc.)
 - Artisan : Carnet d'adresses artisans
 - InterventionArtisan : Historique interventions
 """
@@ -50,6 +51,57 @@ class MetierArtisan(StrEnum):
     TERRASSIER = "terrassier"
     PISCINISTE = "pisciniste"
     AUTRE = "autre"
+
+
+class TypeAbonnement(StrEnum):
+    """Type d'abonnement maison."""
+
+    EAU = "eau"
+    ELECTRICITE = "electricite"
+    GAZ = "gaz"
+    ASSURANCE_HABITATION = "assurance_habitation"
+    ASSURANCE_AUTO = "assurance_auto"
+    CHAUDIERE = "chaudiere"
+    TELEPHONE = "telephone"
+    INTERNET = "internet"
+
+
+# ═══════════════════════════════════════════════════════════
+# ABONNEMENTS
+# ═══════════════════════════════════════════════════════════
+
+
+class Abonnement(TimestampMixin, Base):
+    """Abonnement maison (eau, électricité, gaz, assurances, téléphone, internet).
+
+    Permet de comparer les abonnements et de trouver de meilleures offres.
+    """
+
+    __tablename__ = "abonnements"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    # Type et fournisseur
+    type_abonnement: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    fournisseur: Mapped[str] = mapped_column(String(200), nullable=False)
+    numero_contrat: Mapped[str | None] = mapped_column(String(100))
+
+    # Coûts
+    prix_mensuel: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+
+    # Dates
+    date_debut: Mapped[date | None] = mapped_column(Date)
+    date_fin_engagement: Mapped[date | None] = mapped_column(Date)
+
+    # Comparateur
+    meilleur_prix_trouve: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+    fournisseur_alternatif: Mapped[str | None] = mapped_column(String(200))
+
+    # Notes
+    notes: Mapped[str | None] = mapped_column(Text)
+
+    def __repr__(self) -> str:
+        return f"<Abonnement(id={self.id}, type='{self.type_abonnement}', fournisseur='{self.fournisseur}')>"
 
 
 # ═══════════════════════════════════════════════════════════

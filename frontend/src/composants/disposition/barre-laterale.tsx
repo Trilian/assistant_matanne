@@ -153,7 +153,7 @@ const LIENS: LienNav[] = [
       { nom: "Diagnostics", chemin: "/maison/diagnostics", Icone: ClipboardCheck },
       // 💼 Admin & Finances
       { nom: "Finances", chemin: "/maison/finances", Icone: Banknote },
-      { nom: "Contrats", chemin: "/maison/contrats", Icone: FileText },
+      { nom: "Abonnements", chemin: "/maison/abonnements", Icone: FileText },
       { nom: "Provisions", chemin: "/maison/provisions", Icone: Package },
       { nom: "Documents", chemin: "/maison/documents", Icone: FileText },
     ],
