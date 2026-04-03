@@ -16,16 +16,23 @@ vi.mock("next/link", () => ({
 vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: () => ({
     data: {
-      repas_aujourd_hui: [{ type_repas: "déjeuner", recette_nom: "Pâtes" }],
+      repas_aujourd_hui: [{ type_repas: "dejeuner", recette_nom: "Pâtes" }],
       repas_semaine_count: 5,
       repas_consommes_semaine: 2,
       nb_recettes: 42,
       articles_courses_restants: 3,
       score_anti_gaspillage: 88,
       alertes_inventaire: 1,
-      repas_jules_aujourd_hui: [],
-      batch_en_cours: false,
-      batch_session_id: null,
+      repas_jules_aujourd_hui: [
+        {
+          type_repas: "dejeuner",
+          plat_jules: "Purée de carottes",
+          adaptation_auto: true,
+          notes_jules: "Version sans sel et texture lisse.",
+        },
+      ],
+      batch_en_cours: true,
+      batch_session_id: 12,
     },
     isLoading: false,
     error: null,
@@ -36,28 +43,35 @@ vi.mock("@/crochets/utiliser-api", () => ({
 describe("PageCuisine (Hub)", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("affiche le titre Cuisine", () => {
+  it("affiche le titre et les cartes de pilotage", () => {
     render(<PageCuisine />);
     expect(screen.getByRole("heading", { name: /Cuisine/ })).toBeInTheDocument();
-  });
-
-  it("affiche les sections du hub cuisine", () => {
-    render(<PageCuisine />);
-    expect(screen.getByText("Ma Semaine")).toBeInTheDocument();
-    expect(screen.getByText("Recettes")).toBeInTheDocument();
-    expect(screen.getByText("Courses")).toBeInTheDocument();
-    expect(screen.getByText("Frigo & Stock")).toBeInTheDocument();
-    expect(screen.getByText("Batch Cooking")).toBeInTheDocument();
-  });
-
-  it("affiche les stats du dashboard", () => {
-    render(<PageCuisine />);
     expect(screen.getByText("Repas aujourd'hui")).toBeInTheDocument();
     expect(screen.getByText("Articles à acheter")).toBeInTheDocument();
     expect(screen.getByText("Anti-gaspillage")).toBeInTheDocument();
+    expect(screen.getByText("Alertes stock")).toBeInTheDocument();
+    expect(screen.getByText("88%")).toBeInTheDocument();
   });
 
-  it("rend les liens vers les sous-pages", () => {
+  it("affiche la progression hebdomadaire et le badge de batch en cours", () => {
+    render(<PageCuisine />);
+    expect(screen.getByText("Progression de la semaine")).toBeInTheDocument();
+    expect(screen.getByText("2 / 5 repas consommés")).toBeInTheDocument();
+    expect(screen.getByText("40%")).toBeInTheDocument();
+    expect(screen.getByText(/42 recettes en bibliothèque/)).toBeInTheDocument();
+    expect(screen.getAllByText("En cours").length).toBeGreaterThan(0);
+    expect(screen.getByText(/Batch en cours/)).toBeInTheDocument();
+  });
+
+  it("affiche la carte Jules avec adaptation automatique et notes", () => {
+    render(<PageCuisine />);
+    expect(screen.getByText("Menu Jules aujourd'hui")).toBeInTheDocument();
+    expect(screen.getByText("Purée de carottes")).toBeInTheDocument();
+    expect(screen.getByText("Auto")).toBeInTheDocument();
+    expect(screen.getByText("Version sans sel et texture lisse.")).toBeInTheDocument();
+  });
+
+  it("rend les liens vers les sous-pages du hub", () => {
     render(<PageCuisine />);
     const links = screen.getAllByRole("link");
     const hrefs = links.map((l) => l.getAttribute("href"));
@@ -65,5 +79,6 @@ describe("PageCuisine (Hub)", () => {
     expect(hrefs).toContain("/cuisine/ma-semaine");
     expect(hrefs).toContain("/cuisine/courses");
     expect(hrefs).toContain("/cuisine/inventaire");
+    expect(hrefs).toContain("/cuisine/batch-cooking");
   });
 });

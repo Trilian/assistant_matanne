@@ -45,6 +45,11 @@ const mockBilanMensuel = {
 
 const mockConfigDashboard = { config_dashboard: {} };
 const mockAlertesContextuelles = { total: 0, items: [] };
+const mockHistoriqueActions = {
+  items: [
+    { widget_id: "metriques", action: "refresh", horodatage: "2026-04-03T08:00:00Z" },
+  ],
+};
 const mockAnomaliesBudget = {
   anomalies: [
     {
@@ -53,6 +58,13 @@ const mockAnomaliesBudget = {
       ecart_pourcent: 34,
       severite: "danger",
       description: "Dépenses courses en forte hausse.",
+    },
+    {
+      type: "pic",
+      categorie: "jeux",
+      ecart_pourcent: 12,
+      severite: "info",
+      description: "Variation mineure.",
     },
   ],
 };
@@ -78,6 +90,10 @@ const mockScoreBienEtre = {
   trend_semaine_precedente: 3,
   periode: { debut: "2026-01-01", fin: "2026-01-07" },
 };
+const mockScoreFamilleHebdo = {
+  score_global: 74,
+  recommandations: ["Poursuivre l'équilibre des repas."],
+};
 const mockScoreEcologique = {
   score_global: 73,
   niveau: "bon",
@@ -91,6 +107,11 @@ const mockScoreEcologique = {
     },
   },
   leviers_prioritaires: ["Réduire les produits proches de péremption."],
+};
+const mockInsightsQuotidiens = {
+  insights: [
+    { titre: "Anti-gaspi", resume: "Deux actions prioritaires aujourd'hui." },
+  ],
 };
 const mockFamille = { total: 0, items: [] };
 
@@ -110,14 +131,23 @@ vi.mock("@/crochets/utiliser-api", () => ({
     if (key[0] === "dashboard" && key[1] === "alertes-contextuelles") {
       return { data: mockAlertesContextuelles, isLoading: false, error: null };
     }
+    if (key[0] === "dashboard" && key[1] === "widgets-actions") {
+      return { data: mockHistoriqueActions, isLoading: false, error: null };
+    }
     if (key[0] === "dashboard" && key[1] === "points-famille") {
       return { data: mockPointsFamille, isLoading: false, error: null };
     }
     if (key[0] === "dashboard" && key[1] === "score-bienetre") {
       return { data: mockScoreBienEtre, isLoading: false, error: null };
     }
+    if (key[0] === "dashboard" && key[1] === "score-famille-hebdo") {
+      return { data: mockScoreFamilleHebdo, isLoading: false, error: null };
+    }
     if (key[0] === "dashboard" && key[1] === "score-ecologique") {
       return { data: mockScoreEcologique, isLoading: false, error: null };
+    }
+    if (key[0] === "dashboard" && key[1] === "insights-quotidiens") {
+      return { data: mockInsightsQuotidiens, isLoading: false, error: null };
     }
     if (key[0] === "famille" && key[1] === "budget" && key[2] === "anomalies") {
       return { data: mockAnomaliesBudget, isLoading: false, error: null };
@@ -127,7 +157,7 @@ vi.mock("@/crochets/utiliser-api", () => ({
     }
     return { data: null, isLoading: false, error: null };
   }),
-  utiliserMutation: () => ({ mutate: vi.fn() }),
+  utiliserMutation: () => ({ mutate: vi.fn(), mutateAsync: vi.fn() }),
   utiliserInvalidation: () => vi.fn(),
 }));
 
@@ -147,29 +177,38 @@ describe("DashboardPage", () => {
     vi.unstubAllGlobals();
   });
 
-  it("affiche le message de bienvenue", () => {
+  it("affiche les metriques de bienvenue et les actions rapides", () => {
     render(<DashboardPage />);
     expect(screen.getByText(/Bonjour.*Anne/)).toBeInTheDocument();
-  });
-
-  it("affiche les cartes metriques", () => {
-    render(<DashboardPage />);
     expect(screen.getByText("Repas aujourd'hui")).toBeInTheDocument();
     expect(screen.getByText("Articles à acheter")).toBeInTheDocument();
     expect(screen.getByText("Activités semaine")).toBeInTheDocument();
     expect(screen.getByText("Alertes entretien")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Courses du jour/i })).toHaveAttribute("href", "/cuisine/courses");
   });
 
-  it("affiche les widgets ecologie et suggestion", () => {
+  it("affiche les widgets de score famille, bien-être et écologie avec leurs valeurs", () => {
     render(<DashboardPage />);
+    expect(screen.getByText("Points famille")).toBeInTheDocument();
+    expect(screen.getByText("120")).toBeInTheDocument();
+    expect(screen.getByText("Bougeotte")).toBeInTheDocument();
+    expect(screen.getByText(/Score famille hebdo: 74\/100/)).toBeInTheDocument();
+    expect(screen.getByText("Poursuivre l'équilibre des repas.")).toBeInTheDocument();
     expect(screen.getByText("Score ecologique")).toBeInTheDocument();
-    expect(screen.getByText("Suggestion du soir")).toBeInTheDocument();
-    expect(screen.getByText("Poulet rôti aux légumes")).toBeInTheDocument();
+    expect(screen.getByText("Réduire les produits proches de péremption.")).toBeInTheDocument();
   });
 
-  it("affiche le widget alerte budget", () => {
+  it("filtre les anomalies budget sur les severites actionnables", () => {
     render(<DashboardPage />);
     expect(screen.getByText("Alerte budget")).toBeInTheDocument();
     expect(screen.getByText("Dépenses courses en forte hausse.")).toBeInTheDocument();
+    expect(screen.queryByText("Variation mineure.")).not.toBeInTheDocument();
+  });
+
+  it("affiche la suggestion du soir et la navigation associee", () => {
+    render(<DashboardPage />);
+    expect(screen.getByText("Suggestion du soir")).toBeInTheDocument();
+    expect(screen.getByText("Poulet rôti aux légumes")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Voir les recettes/i })).toHaveAttribute("href", "/cuisine/recettes");
   });
 });

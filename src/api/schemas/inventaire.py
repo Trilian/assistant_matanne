@@ -24,7 +24,7 @@ class InventaireItemBase(BaseModel, QuantiteStricteValidatorMixin):
     Utilisé pour tester la validation sans dépendance FK.
     """
 
-    nom: str
+    nom: str = Field(..., min_length=1, max_length=200)
     quantite: float = 1.0
 
     @field_validator("nom")
@@ -50,9 +50,9 @@ class InventaireItemCreate(BaseModel, QuantiteStricteValidatorMixin):
     ingredient_id: int
     quantite: float = 1.0
     quantite_min: float = 1.0
-    emplacement: str | None = None
+    emplacement: str | None = Field(None, max_length=100)
     date_peremption: datetime | None = None
-    code_barres: str | None = None
+    code_barres: str | None = Field(None, max_length=64)
     prix_unitaire: float | None = None
 
     @field_validator("ingredient_id")
@@ -88,6 +88,20 @@ class InventaireItemCreate(BaseModel, QuantiteStricteValidatorMixin):
             )
         return emplacement_normalise
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "ingredient_id": 12,
+                "quantite": 2,
+                "quantite_min": 1,
+                "emplacement": "Frigo",
+                "date_peremption": "2026-04-08T18:00:00",
+                "code_barres": "3270190204302",
+                "prix_unitaire": 1.89,
+            }
+        }
+    }
+
 
 # ═══════════════════════════════════════════════════════════
 # UPDATE (PATCH partiel)
@@ -102,14 +116,24 @@ class InventaireItemUpdate(BaseModel):
     car ils appartiennent au modèle Ingredient, pas à ArticleInventaire.
     """
 
-    model_config = {"extra": "forbid"}
+    model_config = {
+        "extra": "forbid",
+        "json_schema_extra": {
+            "example": {
+                "quantite": 1,
+                "quantite_min": 2,
+                "emplacement": "Placard",
+                "prix_unitaire": 2.1,
+            }
+        },
+    }
 
     ingredient_id: int | None = None
     quantite: float | None = None
     quantite_min: float | None = None
-    emplacement: str | None = None
+    emplacement: str | None = Field(None, max_length=100)
     date_peremption: datetime | None = None
-    code_barres: str | None = None
+    code_barres: str | None = Field(None, max_length=64)
     prix_unitaire: float | None = None
 
     @field_validator("quantite")
@@ -162,32 +186,53 @@ class InventaireItemResponse(BaseModel):
     ingredient_id: int
     quantite: float
     quantite_min: float
-    emplacement: str | None = None
+    emplacement: str | None = Field(None, max_length=100)
     date_peremption: datetime | None = None
-    code_barres: str | None = None
+    code_barres: str | None = Field(None, max_length=64)
     prix_unitaire: float | None = None
     derniere_maj: datetime | None = None
 
     # Champs résolus depuis la relation Ingredient
-    nom: str | None = None
-    unite: str | None = None
-    categorie: str | None = None
+    nom: str | None = Field(None, max_length=200)
+    unite: str | None = Field(None, max_length=30)
+    categorie: str | None = Field(None, max_length=100)
 
     # Données OpenFoodFacts (si code_barres enrichi)
-    nutriscore: str | None = None
-    ecoscore: str | None = None
+    nutriscore: str | None = Field(None, max_length=10)
+    ecoscore: str | None = Field(None, max_length=10)
     nova_group: int | None = None
 
-    model_config = {"from_attributes": True}
+    model_config = {
+        "from_attributes": True,
+        "json_schema_extra": {
+            "example": {
+                "id": 7,
+                "ingredient_id": 12,
+                "quantite": 2,
+                "quantite_min": 1,
+                "emplacement": "Frigo",
+                "date_peremption": "2026-04-08T18:00:00",
+                "code_barres": "3270190204302",
+                "prix_unitaire": 1.89,
+                "derniere_maj": "2026-04-03T09:15:00",
+                "nom": "Yaourt nature",
+                "unite": "pot",
+                "categorie": "frais",
+                "nutriscore": "A",
+                "ecoscore": "B",
+                "nova_group": 1,
+            }
+        },
+    }
 
 
 class ArticleConsolideResponse(BaseModel):
     """Vue consolidée des stocks cuisine + cellier."""
 
-    nom: str
-    nom_normalise: str
+    nom: str = Field(max_length=200)
+    nom_normalise: str = Field(max_length=200)
     quantite_totale: float
-    unite: str
+    unite: str = Field(max_length=30)
     categories: list[str] = Field(default_factory=list)
     emplacements: list[str] = Field(default_factory=list)
     sources: list[str] = Field(default_factory=list)  # cuisine | cellier
@@ -209,11 +254,17 @@ class ScanBatchRequest(BaseModel):
         description="Liste de codes-barres (max 50)",
     )
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {"codes": ["3270190204302", "3017620422003"]}
+        }
+    }
+
 
 class ArticleBatchTrouve(BaseModel):
     """Article d'inventaire trouvé pour un code-barres donné."""
 
-    code: str
+    code: str = Field(max_length=64)
     article: InventaireItemResponse
 
 
@@ -222,3 +273,33 @@ class ScanBatchResponse(BaseModel):
 
     trouves: list[ArticleBatchTrouve]
     inconnus: list[str]
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "trouves": [
+                    {
+                        "code": "3270190204302",
+                        "article": {
+                            "id": 7,
+                            "ingredient_id": 12,
+                            "quantite": 2,
+                            "quantite_min": 1,
+                            "emplacement": "Frigo",
+                            "date_peremption": null,
+                            "code_barres": "3270190204302",
+                            "prix_unitaire": 1.89,
+                            "derniere_maj": null,
+                            "nom": "Yaourt nature",
+                            "unite": "pot",
+                            "categorie": "frais",
+                            "nutriscore": "A",
+                            "ecoscore": "B",
+                            "nova_group": 1
+                        }
+                    }
+                ],
+                "inconnus": ["0000000000000"]
+            }
+        }
+    }

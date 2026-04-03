@@ -23,6 +23,25 @@ class PreferencesBase(BaseModel):
     robots: list[str] = Field(default_factory=list)
     magasins_preferes: list[str] = Field(default_factory=list)
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "nb_adultes": 2,
+                "jules_present": True,
+                "jules_age_mois": 18,
+                "temps_semaine": 30,
+                "temps_weekend": 60,
+                "aliments_exclus": ["arachides"],
+                "aliments_favoris": ["courgettes", "saumon"],
+                "poisson_par_semaine": 2,
+                "vegetarien_par_semaine": 1,
+                "viande_rouge_max": 2,
+                "robots": ["airfryer"],
+                "magasins_preferes": ["Biocoop", "Leclerc"],
+            }
+        }
+    }
+
 
 class PreferencesCreate(PreferencesBase):
     """Création de préférences — hérite tous les champs de PreferencesBase."""
@@ -49,6 +68,26 @@ class PreferencesResponse(PreferencesBase):
     """Réponse des préférences utilisateur."""
 
     user_id: str
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "user_id": "matanne",
+                "nb_adultes": 2,
+                "jules_present": True,
+                "jules_age_mois": 18,
+                "temps_semaine": 30,
+                "temps_weekend": 60,
+                "aliments_exclus": ["arachides"],
+                "aliments_favoris": ["courgettes", "saumon"],
+                "poisson_par_semaine": 2,
+                "vegetarien_par_semaine": 1,
+                "viande_rouge_max": 2,
+                "robots": ["airfryer"],
+                "magasins_preferes": ["Biocoop", "Leclerc"],
+            }
+        }
+    }
 
 
 # ─────────────────────────────────────────────────────────
@@ -100,7 +139,7 @@ class PreferencesNotificationsBase(BaseModel):
     stock_alerte: bool = True
     meteo_alerte: bool = True
     budget_alerte: bool = True
-    canal_prefere: str = Field("push", description="Canal par défaut (push|ntfy|email|telegram)")
+    canal_prefere: str = Field("push", description="Canal par défaut (push|ntfy|email|telegram)", max_length=20)
     canaux_par_categorie: CanauxParCategorie = Field(default_factory=CanauxParCategorie)
     notifications_par_module: dict[str, bool] = Field(
         default_factory=lambda: {
@@ -112,8 +151,8 @@ class PreferencesNotificationsBase(BaseModel):
         },
         description="Activer ou non les notifications par module",
     )
-    quiet_hours_start: str = Field("22:00", description="Heure début silence (HH:MM)")
-    quiet_hours_end: str = Field("07:00", description="Heure fin silence (HH:MM)")
+    quiet_hours_start: str = Field("22:00", description="Heure début silence (HH:MM)", max_length=5)
+    quiet_hours_end: str = Field("07:00", description="Heure fin silence (HH:MM)", max_length=5)
     max_par_heure: int = Field(5, ge=1, le=50, description="Limite d'envoi par heure")
     mode_digest: bool = Field(False, description="Activer la consolidation en digest")
     mode_vacances: bool = Field(False, description="Pause les notifications non essentielles")
@@ -121,6 +160,37 @@ class PreferencesNotificationsBase(BaseModel):
         True,
         description="Active la checklist voyage automatique quand le mode vacances est activé",
     )
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "courses_rappel": True,
+                "repas_suggestion": True,
+                "stock_alerte": True,
+                "meteo_alerte": True,
+                "budget_alerte": True,
+                "canal_prefere": "telegram",
+                "canaux_par_categorie": {
+                    "rappels": ["push", "telegram"],
+                    "alertes": ["push", "email", "telegram"],
+                    "resumes": ["email", "telegram"],
+                },
+                "notifications_par_module": {
+                    "cuisine": True,
+                    "famille": True,
+                    "maison": True,
+                    "planning": True,
+                    "jeux": True,
+                },
+                "quiet_hours_start": "22:00",
+                "quiet_hours_end": "07:00",
+                "max_par_heure": 5,
+                "mode_digest": False,
+                "mode_vacances": False,
+                "checklist_voyage_auto": True,
+            }
+        }
+    }
 
     @field_validator("canal_prefere")
     @classmethod
@@ -153,11 +223,11 @@ class PreferencesNotificationsUpdate(BaseModel):
     stock_alerte: bool | None = None
     meteo_alerte: bool | None = None
     budget_alerte: bool | None = None
-    canal_prefere: str | None = None
+    canal_prefere: str | None = Field(None, max_length=20)
     canaux_par_categorie: CanauxParCategorie | None = None
     notifications_par_module: dict[str, bool] | None = None
-    quiet_hours_start: str | None = None
-    quiet_hours_end: str | None = None
+    quiet_hours_start: str | None = Field(None, max_length=5)
+    quiet_hours_end: str | None = Field(None, max_length=5)
     max_par_heure: int | None = Field(default=None, ge=1, le=50)
     mode_digest: bool | None = None
     mode_vacances: bool | None = None
@@ -194,3 +264,35 @@ class PreferencesNotificationsResponse(PreferencesNotificationsBase):
     """Réponse des préférences de notification."""
 
     user_id: str | None = None
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "user_id": "matanne",
+                "courses_rappel": True,
+                "repas_suggestion": True,
+                "stock_alerte": True,
+                "meteo_alerte": True,
+                "budget_alerte": True,
+                "canal_prefere": "telegram",
+                "canaux_par_categorie": {
+                    "rappels": ["push", "telegram"],
+                    "alertes": ["push", "email", "telegram"],
+                    "resumes": ["email", "telegram"]
+                },
+                "notifications_par_module": {
+                    "cuisine": True,
+                    "famille": True,
+                    "maison": True,
+                    "planning": True,
+                    "jeux": True
+                },
+                "quiet_hours_start": "22:00",
+                "quiet_hours_end": "07:00",
+                "max_par_heure": 5,
+                "mode_digest": False,
+                "mode_vacances": False,
+                "checklist_voyage_auto": True
+            }
+        }
+    }
