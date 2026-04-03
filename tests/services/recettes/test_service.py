@@ -1,4 +1,4 @@
-"""Tests pour src/services/recettes/service.py"""
+﻿"""Tests pour src/services/recettes/service.py"""
 
 from unittest.mock import patch
 
@@ -19,9 +19,9 @@ from src.services.cuisine.recettes.service import (
     obtenir_service_recettes,
 )
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -32,22 +32,22 @@ def service():
 
 @pytest.fixture
 def sample_recette_data():
-    """Données pour créer une recette."""
+    """DonnÃ©es pour crÃ©er une recette."""
     return {
-        "nom": "Poulet rôti aux herbes",
-        "description": "Un délicieux poulet parfumé au thym et romarin",
+        "nom": "Poulet rÃ´ti aux herbes",
+        "description": "Un dÃ©licieux poulet parfumÃ© au thym et romarin",
         "temps_preparation": 15,
         "temps_cuisson": 60,
         "portions": 4,
         "difficulte": "facile",
-        "type_repas": "dîner",  # Avec accent
-        "saison": "toute_année",
+        "type_repas": "dÃ®ner",  # Avec accent
+        "saison": "toute_annÃ©e",
         "ingredients": [
             {"nom": "poulet", "quantite": 1.5, "unite": "kg"},
             {"nom": "thym", "quantite": 10, "unite": "g"},
         ],
         "etapes": [
-            {"description": "Préchauffer le four à 200°C"},
+            {"description": "PrÃ©chauffer le four Ã  200Â°C"},
             {"description": "Assaisonner le poulet"},
         ],
     }
@@ -55,7 +55,7 @@ def sample_recette_data():
 
 @pytest.fixture
 def recette_in_db(db: Session):
-    """Crée une recette en base."""
+    """CrÃ©e une recette en base."""
     recette = Recette(
         nom="Test Recette",
         description="Description test",
@@ -64,7 +64,7 @@ def recette_in_db(db: Session):
         portions=4,
         difficulte="moyen",
         type_repas="diner",
-        saison="toute_année",
+        saison="toute_annÃ©e",
     )
     db.add(recette)
     db.commit()
@@ -74,11 +74,11 @@ def recette_in_db(db: Session):
 
 @pytest.fixture
 def recette_with_ingredients(db: Session):
-    """Crée une recette avec ingrédients et étapes."""
-    # Créer recette
+    """CrÃ©e une recette avec ingrÃ©dients et Ã©tapes."""
+    # CrÃ©er recette
     recette = Recette(
-        nom="Recette Complète",
-        description="Une recette avec tous ses éléments",
+        nom="Recette ComplÃ¨te",
+        description="Une recette avec tous ses Ã©lÃ©ments",
         temps_preparation=20,
         temps_cuisson=30,
         portions=4,
@@ -89,8 +89,8 @@ def recette_with_ingredients(db: Session):
     db.add(recette)
     db.flush()
 
-    # Créer ingrédient
-    ingredient = Ingredient(nom="carotte", unite="g", categorie="Légumes")
+    # CrÃ©er ingrÃ©dient
+    ingredient = Ingredient(nom="carotte", unite="g", categorie="LÃ©gumes")
     db.add(ingredient)
     db.flush()
 
@@ -103,11 +103,11 @@ def recette_with_ingredients(db: Session):
     )
     db.add(ri)
 
-    # Étape
+    # Ã‰tape
     etape = EtapeRecette(
         recette_id=recette.id,
         ordre=1,
-        description="Éplucher les carottes",
+        description="Ã‰plucher les carottes",
         duree=5,
     )
     db.add(etape)
@@ -117,16 +117,16 @@ def recette_with_ingredients(db: Session):
     return recette
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS INITIALISATION
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestServiceRecettesInit:
     """Tests d'initialisation."""
 
     def test_init_creates_service(self):
-        """Test création instance."""
+        """Test crÃ©ation instance."""
         service = ServiceRecettes()
         assert service is not None
         assert service.cache_prefix == "recettes"
@@ -146,27 +146,27 @@ class TestServiceRecettesInit:
         registre.reinitialiser("recettes")
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CRUD
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestServiceRecettesCRUD:
-    """Tests opérations CRUD."""
+    """Tests opÃ©rations CRUD."""
 
     def test_get_by_type(self, service, db, recette_in_db, patch_db_context):
-        """Test récupération par type."""
+        """Test rÃ©cupÃ©ration par type."""
         result = service.get_by_type("diner")
         assert isinstance(result, list)
 
     def test_get_by_type_empty(self, service, patch_db_context):
-        """Test type sans résultats."""
+        """Test type sans rÃ©sultats."""
         result = service.get_by_type("petit_dejeuner")
         assert result == []
 
 
 class TestExportMethods:
-    """Tests des méthodes d'export."""
+    """Tests des mÃ©thodes d'export."""
 
     def test_export_to_csv_empty(self, service):
         """Test export CSV vide."""
@@ -175,13 +175,13 @@ class TestExportMethods:
         assert "nom" in result
 
     def test_export_to_csv_with_recettes(self, service, db, recette_in_db):
-        """Test export CSV avec données."""
+        """Test export CSV avec donnÃ©es."""
         result = service.export_to_csv([recette_in_db])
         assert "Test Recette" in result
         assert "diner" in result
 
     def test_export_to_csv_custom_separator(self, service, db, recette_in_db):
-        """Test export CSV séparateur personnalisé."""
+        """Test export CSV sÃ©parateur personnalisÃ©."""
         result = service.export_to_csv([recette_in_db], separator=";")
         assert ";" in result
 
@@ -191,21 +191,21 @@ class TestExportMethods:
         assert result == "[]"
 
     def test_export_to_json_with_recettes(self, service, recette_with_ingredients):
-        """Test export JSON avec données."""
+        """Test export JSON avec donnÃ©es."""
         import json
 
         result = service.export_to_json([recette_with_ingredients])
         data = json.loads(result)
 
         assert len(data) == 1
-        assert data[0]["nom"] == "Recette Complète"
+        assert data[0]["nom"] == "Recette ComplÃ¨te"
         assert "ingredients" in data[0]
         assert "etapes" in data[0]
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HISTORIQUE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestHistoriqueRecette:
@@ -217,11 +217,11 @@ class TestHistoriqueRecette:
             recette_id=recette_in_db.id,
             portions=2,
             note=4,
-            avis="Très bon",
+            avis="TrÃ¨s bon",
         )
         assert result is True
 
-        # Vérifier en base
+        # VÃ©rifier en base
         historique = (
             db.query(HistoriqueRecette)
             .filter(HistoriqueRecette.recette_id == recette_in_db.id)
@@ -237,8 +237,8 @@ class TestHistoriqueRecette:
         assert result is True
 
     def test_get_historique(self, service, db, recette_in_db, patch_db_context):
-        """Test récupération historique."""
-        # Créer historique
+        """Test rÃ©cupÃ©ration historique."""
+        # CrÃ©er historique
         service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=2)
         service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=4)
 
@@ -267,9 +267,9 @@ class TestHistoriqueRecette:
         assert result["note_moyenne"] == 4.5
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VERSIONS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestVersionsRecette:
@@ -281,33 +281,33 @@ class TestVersionsRecette:
         assert result == []
 
     def test_get_versions_with_data(self, service, db, recette_in_db, patch_db_context):
-        """Test versions avec données."""
-        # Créer version
+        """Test versions avec donnÃ©es."""
+        # CrÃ©er version
         version = VersionRecette(
             recette_base_id=recette_in_db.id,
-            type_version="bébé",
-            instructions_modifiees="Instructions adaptées",
-            notes_bebe="Notes pour bébé",
+            type_version="bÃ©bÃ©",
+            instructions_modifiees="Instructions adaptÃ©es",
+            notes_bebe="Notes pour bÃ©bÃ©",
         )
         db.add(version)
         db.commit()
 
         result = service.get_versions(recette_in_db.id)
         assert len(result) == 1
-        assert result[0].type_version == "bébé"
+        assert result[0].type_version == "bÃ©bÃ©"
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS HELPERS PRIVÉS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS HELPERS PRIVÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestHelpersPrives:
-    """Tests méthodes helpers."""
+    """Tests mÃ©thodes helpers."""
 
     def test_find_or_create_ingredient_existing(self, service, db):
         """Test find ingredient existant."""
-        # Créer d'abord
+        # CrÃ©er d'abord
         ing = Ingredient(nom="tomate", unite="pcs")
         db.add(ing)
         db.commit()
@@ -316,22 +316,22 @@ class TestHelpersPrives:
         assert result.id == ing.id
 
     def test_find_or_create_ingredient_new(self, service, db):
-        """Test création nouvel ingrédient."""
+        """Test crÃ©ation nouvel ingrÃ©dient."""
         result = service._find_or_create_ingredient(db, "nouvel_ingredient")
         assert result.nom == "nouvel_ingredient"
         assert result.id is not None
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS GÉNÉRATION IA (MOCKED)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS GÃ‰NÃ‰RATION IA (MOCKED)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenerationIA:
-    """Tests génération IA avec mocks."""
+    """Tests gÃ©nÃ©ration IA avec mocks."""
 
     def test_generer_recettes_ia_mocked(self, service):
-        """Test génération avec mock IA."""
+        """Test gÃ©nÃ©ration avec mock IA."""
         with patch.object(service, "call_with_list_parsing_sync") as mock_call:
             mock_call.return_value = []
 
@@ -341,7 +341,7 @@ class TestGenerationIA:
                 difficulte="facile",
             )
 
-            # La méthode doit être appelée
+            # La mÃ©thode doit Ãªtre appelÃ©e
             assert mock_call.called or result == []
 
     def test_generer_variantes_recette_ia_mocked(self, service):
@@ -350,20 +350,20 @@ class TestGenerationIA:
             mock_call.return_value = []
 
             result = service.generer_variantes_recette_ia(
-                nom_recette="Poulet rôti",
+                nom_recette="Poulet rÃ´ti",
                 nb_variantes=2,
             )
 
             assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS RECHERCHE AVANCÉE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS RECHERCHE AVANCÃ‰E
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRechercheAvancee:
-    """Tests recherche avancée."""
+    """Tests recherche avancÃ©e."""
 
     def test_search_advanced_basic(self, service, db, recette_in_db, patch_db_context):
         """Test recherche basique."""
@@ -373,11 +373,11 @@ class TestRechercheAvancee:
     def test_search_advanced_by_term(self, service, db, recette_in_db, patch_db_context):
         """Test recherche par terme."""
         result = service.search_advanced(term="Test")
-        # Peut trouver ou non selon l'implémentation
+        # Peut trouver ou non selon l'implÃ©mentation
         assert isinstance(result, list)
 
     def test_search_advanced_multi_criteria(self, service, db, recette_in_db, patch_db_context):
-        """Test recherche multi-critères."""
+        """Test recherche multi-critÃ¨res."""
         result = service.search_advanced(
             type_repas="diner",
             difficulte="moyen",
@@ -386,9 +386,9 @@ class TestRechercheAvancee:
         assert isinstance(result, list)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEdgeCases:
@@ -411,51 +411,51 @@ class TestEdgeCases:
         assert "nb_cuissons" in result or result == {}
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS CACHE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCacheService:
-    """Tests liés au cache."""
+    """Tests liÃ©s au cache."""
 
     def test_service_has_cache_prefix(self, service):
-        """Test préfixe cache défini."""
+        """Test prÃ©fixe cache dÃ©fini."""
         assert service.cache_prefix == "recettes"
 
     def test_service_has_cache_ttl(self, service):
-        """Test TTL cache défini."""
+        """Test TTL cache dÃ©fini."""
         assert service.cache_ttl == 3600
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS CRÉATION COMPLÈTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS CRÃ‰ATION COMPLÃˆTE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCreateComplete:
     """Tests pour create_complete."""
 
     def test_create_complete_basic(self, service, db, patch_db_context, sample_recette_data):
-        """Test création complète basique."""
+        """Test crÃ©ation complÃ¨te basique."""
         # Note: requires patch_db_context
         result = service.create_complete(sample_recette_data)
 
-        if result:  # Peut échouer si problème de contexte
+        if result:  # Peut Ã©chouer si problÃ¨me de contexte
             assert result.nom == sample_recette_data["nom"]
             assert result.id is not None
 
     def test_create_complete_with_string_ingredients(self, service, db, patch_db_context):
-        """Test création avec ingrédients comme dicts."""
+        """Test crÃ©ation avec ingrÃ©dients comme dicts."""
         data = {
             "nom": "Test stringified",
-            "description": "Recette test pour validation de données dict",
+            "description": "Recette test pour validation de donnÃ©es dict",
             "temps_preparation": 10,
             "temps_cuisson": 20,
             "portions": 4,
             "difficulte": "facile",
-            "type_repas": "dîner",  # Avec accent
-            "saison": "toute_année",
+            "type_repas": "dÃ®ner",  # Avec accent
+            "saison": "toute_annÃ©e",
             "ingredients": [
                 {"nom": "Test ingredient", "quantite": 1.0, "unite": "pcs"},
             ],
@@ -464,47 +464,47 @@ class TestCreateComplete:
             ],
         }
         result = service.create_complete(data)
-        # Le test peut échouer ou réussir selon le contexte
+        # Le test peut Ã©chouer ou rÃ©ussir selon le contexte
         assert result is None or result.nom == "Test stringified"
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS GET BY ID FULL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGetByIdFull:
     """Tests pour get_by_id_full."""
 
     def test_get_by_id_full_not_found(self, service, patch_db_context):
-        """Test ID non trouvé."""
+        """Test ID non trouvÃ©."""
         result = service.get_by_id_full(99999)
         assert result is None
 
     def test_get_by_id_full_found(self, service, db, recette_in_db, patch_db_context):
-        """Test récupération complète."""
+        """Test rÃ©cupÃ©ration complÃ¨te."""
         result = service.get_by_id_full(recette_in_db.id)
-        # Peut être None si eager loading pose problème
+        # Peut Ãªtre None si eager loading pose problÃ¨me
         if result:
             assert result.id == recette_in_db.id
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS VERSIONS IA (MOCKED)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestVersionsIA:
-    """Tests génération versions IA."""
+    """Tests gÃ©nÃ©ration versions IA."""
 
     def test_generer_version_bebe_recette_not_found(self, service, db, patch_db_context):
-        """Test version bébé recette non trouvée."""
+        """Test version bÃ©bÃ© recette non trouvÃ©e."""
         with pytest.raises((ErreurNonTrouve, ErreurValidation, ValueError)):
             # Doit lever ErreurNonTrouve ou retourner None
             service.generer_version_bebe(99999)
 
     def test_generer_version_batch_recette_not_found(self, service, db, patch_db_context):
-        """Test version batch cooking recette non trouvée."""
+        """Test version batch cooking recette non trouvÃ©e."""
         with pytest.raises((ErreurNonTrouve, ErreurValidation, ValueError)):
             service.generer_version_batch_cooking(99999)
 
@@ -514,13 +514,13 @@ class TestVersionsIA:
             service.generer_version_robot(recette_in_db.id, "robot_inexistant")
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS EXPORT AVANCÉS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS EXPORT AVANCÃ‰S
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExportAvances:
-    """Tests exports avancés."""
+    """Tests exports avancÃ©s."""
 
     def test_export_csv_multiple_recettes(self, service, db):
         """Test export CSV plusieurs recettes."""
@@ -533,7 +533,7 @@ class TestExportAvances:
                 portions=4,
                 difficulte="facile",
                 type_repas="diner",
-                saison="toute_année",
+                saison="toute_annÃ©e",
             )
             for i in range(1, 4)
         ]
@@ -555,16 +555,16 @@ class TestExportAvances:
         assert len(data) == 1
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS SERVICE MIXIN
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestServiceMixin:
     """Tests pour les mixins du service."""
 
     def test_service_is_base_ai_service(self, service):
-        """Test que le service hérite de BaseAIService."""
+        """Test que le service hÃ©rite de BaseAIService."""
         from src.services.core.base import BaseAIService
 
         assert isinstance(service, BaseAIService)
@@ -577,7 +577,7 @@ class TestServiceMixin:
 
     def test_build_recipe_context_basic(self, service):
         """Test construction de contexte recette."""
-        # S'assurer que la méthode existe
+        # S'assurer que la mÃ©thode existe
         if hasattr(service, "build_recipe_context"):
             context = service.build_recipe_context(
                 filters={"type_repas": "diner"},
@@ -587,24 +587,24 @@ class TestServiceMixin:
             assert isinstance(context, str)
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS VERSION IA - SUCCÈS (MOCKED)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS VERSION IA - SUCCÃˆS (MOCKED)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestVersionsIASuccess:
-    """Tests génération versions IA avec succès."""
+    """Tests gÃ©nÃ©ration versions IA avec succÃ¨s."""
 
     def test_generer_version_bebe_existing_returns_cached(
         self, service, db, recette_with_ingredients, patch_db_context
     ):
-        """Test version bébé existante retourne cache."""
-        # Créer version existante
+        """Test version bÃ©bÃ© existante retourne cache."""
+        # CrÃ©er version existante
         version = VersionRecette(
             recette_base_id=recette_with_ingredients.id,
-            type_version="bébé",
-            instructions_modifiees="Instructions bébé adaptées",
-            notes_bebe="Notes pour bébé",
+            type_version="bÃ©bÃ©",
+            instructions_modifiees="Instructions bÃ©bÃ© adaptÃ©es",
+            notes_bebe="Notes pour bÃ©bÃ©",
         )
         db.add(version)
         db.commit()
@@ -612,14 +612,14 @@ class TestVersionsIASuccess:
         # Appel doit retourner l'existante sans appeler IA
         result = service.generer_version_bebe(recette_with_ingredients.id)
         assert result is not None
-        assert result.type_version == "bébé"
-        assert result.instructions_modifiees == "Instructions bébé adaptées"
+        assert result.type_version == "bÃ©bÃ©"
+        assert result.instructions_modifiees == "Instructions bÃ©bÃ© adaptÃ©es"
 
     def test_generer_version_batch_existing_returns_cached(
         self, service, db, recette_with_ingredients, patch_db_context
     ):
         """Test version batch cooking existante retourne cache."""
-        # Créer version existante
+        # CrÃ©er version existante
         version = VersionRecette(
             recette_base_id=recette_with_ingredients.id,
             type_version="batch cooking",
@@ -637,7 +637,7 @@ class TestVersionsIASuccess:
         self, service, db, recette_with_ingredients, patch_db_context
     ):
         """Test version robot existante retourne cache."""
-        # Créer version existante pour cookeo
+        # CrÃ©er version existante pour cookeo
         version = VersionRecette(
             recette_base_id=recette_with_ingredients.id,
             type_version="robot_cookeo",
@@ -654,11 +654,11 @@ class TestVersionsIASuccess:
     def test_generer_version_robot_all_types(
         self, service, db, recette_with_ingredients, patch_db_context
     ):
-        """Test validité de tous les types de robots."""
+        """Test validitÃ© de tous les types de robots."""
         robot_types = ["cookeo", "monsieur_cuisine", "airfryer", "multicooker"]
 
         for robot_type in robot_types:
-            # Juste vérifier que le type est valide en créant version existante
+            # Juste vÃ©rifier que le type est valide en crÃ©ant version existante
             version = VersionRecette(
                 recette_base_id=recette_with_ingredients.id,
                 type_version=f"robot_{robot_type}",
@@ -667,35 +667,35 @@ class TestVersionsIASuccess:
             db.add(version)
         db.commit()
 
-        # Tous les types doivent être créés
+        # Tous les types doivent Ãªtre crÃ©Ã©s
         versions = service.get_versions(recette_with_ingredients.id)
         assert len(versions) == 4
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS RECHERCHE AVANCÉE - COVERAGE COMPLÈTE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS RECHERCHE AVANCÃ‰E - COVERAGE COMPLÃˆTE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRechercheAvanceeCoverage:
-    """Tests supplémentaires pour search_advanced."""
+    """Tests supplÃ©mentaires pour search_advanced."""
 
     def test_search_advanced_by_saison(self, service, db, recette_in_db, patch_db_context):
         """Test recherche par saison."""
-        result = service.search_advanced(saison="toute_année")
+        result = service.search_advanced(saison="toute_annÃ©e")
         assert isinstance(result, list)
 
     def test_search_advanced_by_difficulte(self, service, db, recette_in_db, patch_db_context):
-        """Test recherche par difficulté."""
+        """Test recherche par difficultÃ©."""
         result = service.search_advanced(difficulte="moyen")
         assert isinstance(result, list)
 
     def test_search_advanced_compatible_bebe_true(self, service, db, patch_db_context):
-        """Test recherche compatible bébé = True."""
-        # Créer recette compatible bébé
+        """Test recherche compatible bÃ©bÃ© = True."""
+        # CrÃ©er recette compatible bÃ©bÃ©
         recette = Recette(
-            nom="Purée bébé",
-            description="Purée de légumes pour bébé",
+            nom="PurÃ©e bÃ©bÃ©",
+            description="PurÃ©e de lÃ©gumes pour bÃ©bÃ©",
             temps_preparation=15,
             temps_cuisson=20,
             portions=2,
@@ -710,12 +710,12 @@ class TestRechercheAvanceeCoverage:
         assert isinstance(result, list)
 
     def test_search_advanced_compatible_bebe_false(self, service, db, patch_db_context):
-        """Test recherche compatible bébé = False."""
+        """Test recherche compatible bÃ©bÃ© = False."""
         result = service.search_advanced(compatible_bebe=False)
         assert isinstance(result, list)
 
     def test_search_advanced_all_filters(self, service, db, patch_db_context):
-        """Test recherche avec tous les filtres simultanément."""
+        """Test recherche avec tous les filtres simultanÃ©ment."""
         result = service.search_advanced(
             term="test",
             type_repas="diner",
@@ -728,21 +728,21 @@ class TestRechercheAvanceeCoverage:
         assert isinstance(result, list)
 
     def test_search_advanced_custom_limit(self, service, db, patch_db_context):
-        """Test recherche avec limite personnalisée."""
+        """Test recherche avec limite personnalisÃ©e."""
         result = service.search_advanced(limit=2)
         assert isinstance(result, list)
 
 
-# ═══════════════════════════════════════════════════════════
-# TESTS IA GENERATION - COVERAGE ÉTENDUE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# TESTS IA GENERATION - COVERAGE Ã‰TENDUE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenerationIACoverage:
-    """Tests génération IA avec paramètres variés."""
+    """Tests gÃ©nÃ©ration IA avec paramÃ¨tres variÃ©s."""
 
     def test_generer_recettes_ia_with_ingredients(self, service):
-        """Test génération avec liste d'ingrédients."""
+        """Test gÃ©nÃ©ration avec liste d'ingrÃ©dients."""
         with patch.object(service, "call_with_list_parsing_sync") as mock_call:
             mock_call.return_value = []
 
@@ -755,7 +755,7 @@ class TestGenerationIACoverage:
             assert result == []
 
     def test_generer_recettes_ia_difficulte_difficile(self, service):
-        """Test génération difficulté difficile."""
+        """Test gÃ©nÃ©ration difficultÃ© difficile."""
         with patch.object(service, "call_with_list_parsing_sync") as mock_call:
             mock_call.return_value = []
 
@@ -767,7 +767,7 @@ class TestGenerationIACoverage:
             assert result == []
 
     def test_generer_variantes_max(self, service):
-        """Test génération max variantes."""
+        """Test gÃ©nÃ©ration max variantes."""
         with patch.object(service, "call_with_list_parsing_sync") as mock_call:
             mock_call.return_value = []
 
@@ -778,43 +778,43 @@ class TestGenerationIACoverage:
             assert result == []
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS EXPORT / IMPORT - EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExportImportEdgeCases:
     """Tests edge cases pour export/import."""
 
     def test_export_csv_special_characters(self, service, db):
-        """Test export CSV avec caractères spéciaux."""
+        """Test export CSV avec caractÃ¨res spÃ©ciaux."""
         recette = Recette(
-            nom="Crème brûlée à l'orange",
+            nom="CrÃ¨me brÃ»lÃ©e Ã  l'orange",
             description='Description avec "guillemets" et virgule,',
             temps_preparation=30,
             temps_cuisson=45,
             portions=6,
             difficulte="moyen",
             type_repas="dessert",
-            saison="toute_année",
+            saison="toute_annÃ©e",
         )
         db.add(recette)
         db.commit()
 
         result = service.export_to_csv([recette])
-        assert "Crème brûlée" in result
+        assert "CrÃ¨me brÃ»lÃ©e" in result
 
     def test_export_json_no_ingredients(self, service, db):
-        """Test export JSON recette sans ingrédients."""
+        """Test export JSON recette sans ingrÃ©dients."""
         recette = Recette(
             nom="Recette simple",
-            description="Sans ingrédients",
+            description="Sans ingrÃ©dients",
             temps_preparation=10,
             temps_cuisson=0,
             portions=1,
             difficulte="facile",
             type_repas="gouter",
-            saison="toute_année",
+            saison="toute_annÃ©e",
         )
         db.add(recette)
         db.commit()
@@ -832,9 +832,9 @@ class TestExportImportEdgeCases:
         assert "        " in result  # 8 espaces
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS HISTORIQUE - EDGE CASES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestHistoriqueEdgeCases:
@@ -851,17 +851,17 @@ class TestHistoriqueEdgeCases:
         assert result is True
 
     def test_enregistrer_cuisson_note_zero(self, service, db, recette_in_db, patch_db_context):
-        """Test enregistrement avec note zéro."""
+        """Test enregistrement avec note zÃ©ro."""
         result = service.enregistrer_cuisson(
             recette_id=recette_in_db.id,
             note=0,
-            avis="Raté",
+            avis="RatÃ©",
         )
         assert result is True
 
     def test_get_historique_limit(self, service, db, recette_in_db, patch_db_context):
-        """Test historique avec limite personnalisée."""
-        # Créer plusieurs entrées
+        """Test historique avec limite personnalisÃ©e."""
+        # CrÃ©er plusieurs entrÃ©es
         for i in range(5):
             service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=i + 1)
 
@@ -870,7 +870,7 @@ class TestHistoriqueEdgeCases:
 
     def test_get_stats_with_null_notes(self, service, db, recette_in_db, patch_db_context):
         """Test stats avec notes nulles."""
-        # Entrées sans notes
+        # EntrÃ©es sans notes
         service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=2)
         service.enregistrer_cuisson(recette_id=recette_in_db.id, portions=3)
 
@@ -879,16 +879,16 @@ class TestHistoriqueEdgeCases:
         assert stats["note_moyenne"] is None  # Pas de notes
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS ERROR HANDLING
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestErrorHandling:
     """Tests gestion des erreurs."""
 
     def test_get_by_id_full_exception(self, service, db, patch_db_context):
-        """Test exception lors de la récupération."""
+        """Test exception lors de la rÃ©cupÃ©ration."""
         with patch.object(service, "get_by_id_full") as mock_method:
             mock_method.return_value = None
             result = service.get_by_id_full(1)
@@ -897,32 +897,32 @@ class TestErrorHandling:
     def test_get_by_type_exception(self, service, db, patch_db_context):
         """Test exception lors de get_by_type."""
         with patch("src.services.cuisine.recettes.service.logger"):
-            # Simuler une exception en mockant la méthode query
+            # Simuler une exception en mockant la mÃ©thode query
             result = service.get_by_type("invalid")
             assert isinstance(result, list)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS create_complete (PHASE 2 COVERAGE)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-class TestCreateCompletePhase2:
-    """Tests création complète de recettes - Phase 2."""
+class TestCreateCompleteRecette:
+    """Tests crÃ©ation complÃ¨te de recettes - Phase 2."""
 
     def test_create_complete_minimal(self, service, db, patch_db_context):
-        """Test création recette avec données minimales."""
+        """Test crÃ©ation recette avec donnÃ©es minimales."""
         data = {
-            "nom": "Pâtes au beurre simple",
-            "description": "Une recette simple de pâtes au beurre avec du parmesan",
+            "nom": "PÃ¢tes au beurre simple",
+            "description": "Une recette simple de pÃ¢tes au beurre avec du parmesan",
             "temps_preparation": 5,
             "temps_cuisson": 10,
             "portions": 2,
             "difficulte": "facile",
-            "type_repas": "dîner",  # Avec accent
-            "saison": "toute_année",
-            "ingredients": [{"nom": "pâtes", "quantite": 200, "unite": "g"}],
-            "etapes": [{"description": "Cuire les pâtes al dente"}],
+            "type_repas": "dÃ®ner",  # Avec accent
+            "saison": "toute_annÃ©e",
+            "ingredients": [{"nom": "pÃ¢tes", "quantite": 200, "unite": "g"}],
+            "etapes": [{"description": "Cuire les pÃ¢tes al dente"}],
         }
         from src.core.caching import obtenir_cache
 
@@ -930,25 +930,25 @@ class TestCreateCompletePhase2:
             result = service.create_complete(data)
 
         assert result is not None
-        assert result.nom == "Pâtes au beurre simple"
+        assert result.nom == "PÃ¢tes au beurre simple"
         assert result.temps_preparation == 5
 
     def test_create_complete_with_ingredients(self, service, db, patch_db_context):
-        """Test création recette avec ingrédients."""
+        """Test crÃ©ation recette avec ingrÃ©dients."""
         data = {
             "nom": "Omelette aux fines herbes",
-            "description": "Une omelette légère et parfumée aux herbes du jardin",
+            "description": "Une omelette lÃ©gÃ¨re et parfumÃ©e aux herbes du jardin",
             "temps_preparation": 5,
             "temps_cuisson": 5,
             "portions": 1,
             "difficulte": "facile",
-            "type_repas": "déjeuner",  # Avec accent
-            "saison": "toute_année",
+            "type_repas": "dÃ©jeuner",  # Avec accent
+            "saison": "toute_annÃ©e",
             "ingredients": [
                 {"nom": "oeufs", "quantite": 3, "unite": "pcs"},
                 {"nom": "ciboulette", "quantite": 10, "unite": "g"},
             ],
-            "etapes": [{"description": "Battre les oeufs et cuire à feu doux"}],
+            "etapes": [{"description": "Battre les oeufs et cuire Ã  feu doux"}],
         }
         from src.core.caching import obtenir_cache
 
@@ -960,20 +960,20 @@ class TestCreateCompletePhase2:
         assert len(result.ingredients) == 2
 
     def test_create_complete_with_etapes(self, service, db, patch_db_context):
-        """Test création recette avec étapes."""
+        """Test crÃ©ation recette avec Ã©tapes."""
         data = {
-            "nom": "Salade composée maison",
-            "description": "Une salade fraîche et colorée avec vinaigrette maison",
+            "nom": "Salade composÃ©e maison",
+            "description": "Une salade fraÃ®che et colorÃ©e avec vinaigrette maison",
             "temps_preparation": 15,
             "temps_cuisson": 0,
             "portions": 2,
             "difficulte": "facile",
-            "type_repas": "déjeuner",  # Avec accent
-            "saison": "été",  # Avec accent
+            "type_repas": "dÃ©jeuner",  # Avec accent
+            "saison": "Ã©tÃ©",  # Avec accent
             "ingredients": [{"nom": "salade", "quantite": 1, "unite": "pcs"}],
             "etapes": [
-                {"description": "Laver les légumes soigneusement"},
-                {"description": "Couper en morceaux réguliers"},
+                {"description": "Laver les lÃ©gumes soigneusement"},
+                {"description": "Couper en morceaux rÃ©guliers"},
                 {"description": "Assaisonner et servir frais"},
             ],
         }
@@ -984,21 +984,21 @@ class TestCreateCompletePhase2:
 
         assert result is not None
         assert len(result.etapes) == 3
-        # Vérifier l'ordre des étapes
+        # VÃ©rifier l'ordre des Ã©tapes
         etapes_ordonnees = sorted(result.etapes, key=lambda e: e.ordre)
-        assert "Laver les légumes" in etapes_ordonnees[0].description
+        assert "Laver les lÃ©gumes" in etapes_ordonnees[0].description
 
     def test_create_complete_full_recipe(self, service, db, patch_db_context):
-        """Test création recette complète avec ingrédients et étapes."""
+        """Test crÃ©ation recette complÃ¨te avec ingrÃ©dients et Ã©tapes."""
         data = {
             "nom": "Poulet basquaise",
-            "description": "Un classique du Sud-Ouest avec poulet et légumes",
+            "description": "Un classique du Sud-Ouest avec poulet et lÃ©gumes",
             "temps_preparation": 20,
             "temps_cuisson": 45,
             "portions": 4,
             "difficulte": "moyen",
-            "type_repas": "dîner",  # Avec accent
-            "saison": "toute_année",
+            "type_repas": "dÃ®ner",  # Avec accent
+            "saison": "toute_annÃ©e",
             "ingredients": [
                 {"nom": "poulet", "quantite": 1, "unite": "kg"},
                 {"nom": "poivrons", "quantite": 3, "unite": "pcs"},
@@ -1007,7 +1007,7 @@ class TestCreateCompletePhase2:
             "etapes": [
                 {"description": "Couper le poulet en morceaux"},
                 {"description": "Faire revenir dans l'huile d'olive"},
-                {"description": "Ajouter les légumes et mijoter"},
+                {"description": "Ajouter les lÃ©gumes et mijoter"},
             ],
         }
         from src.core.caching import obtenir_cache
@@ -1022,44 +1022,44 @@ class TestCreateCompletePhase2:
         assert len(result.etapes) == 3
 
     def test_create_complete_validation_error(self, service, db, patch_db_context):
-        """Test création avec données invalides lève ErreurValidation."""
+        """Test crÃ©ation avec donnÃ©es invalides lÃ¨ve ErreurValidation."""
         from src.core.exceptions import ErreurValidation
 
         data = {
             "nom": "X",  # Trop court (min 3)
             "description": "test",  # Trop court (min 10)
-            "temps_preparation": -5,  # Négatif
+            "temps_preparation": -5,  # NÃ©gatif
             "temps_cuisson": 10,
             "portions": 0,  # Invalide
             "difficulte": "impossible",  # Pattern invalide
             "type_repas": "diner",
-            "saison": "toute_année",
+            "saison": "toute_annÃ©e",
         }
 
-        # Le décorateur @avec_gestion_erreurs relève les ErreurValidation (hérite de ExceptionApp)
+        # Le dÃ©corateur @avec_gestion_erreurs relÃ¨ve les ErreurValidation (hÃ©rite de ExceptionApp)
         with pytest.raises(ErreurValidation):
             service.create_complete(data)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS generer_version_bebe (PHASE 2 COVERAGE)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererVersionBebe:
-    """Tests génération version bébé."""
+    """Tests gÃ©nÃ©ration version bÃ©bÃ©."""
 
     def test_generer_version_bebe_recette_not_found(self, service, db, patch_db_context):
-        """Test génération avec recette inexistante."""
+        """Test gÃ©nÃ©ration avec recette inexistante."""
         from src.core.exceptions import ErreurNonTrouve
 
-        # ID qui n'existe pas - le décorateur relève ErreurNonTrouve
+        # ID qui n'existe pas - le dÃ©corateur relÃ¨ve ErreurNonTrouve
         with pytest.raises(ErreurNonTrouve):
             service.generer_version_bebe(99999)
 
     def test_generer_version_bebe_existing_version(self, service, db, patch_db_context):
-        """Test génération quand version existe déjà."""
-        # Créer recette
+        """Test gÃ©nÃ©ration quand version existe dÃ©jÃ ."""
+        # CrÃ©er recette
         recette = Recette(
             nom="Compote pommes",
             description="Compote maison",
@@ -1068,47 +1068,47 @@ class TestGenererVersionBebe:
             portions=4,
             difficulte="facile",
             type_repas="gouter",
-            saison="toute_année",
+            saison="toute_annÃ©e",
         )
         db.add(recette)
         db.commit()
 
-        # Créer version bébé existante
+        # CrÃ©er version bÃ©bÃ© existante
         version_existante = VersionRecette(
             recette_base_id=recette.id,
-            type_version="bébé",
+            type_version="bÃ©bÃ©",
             instructions_modifiees="Mixer finement",
-            notes_bebe="Adapté dès 6 mois",
+            notes_bebe="AdaptÃ© dÃ¨s 6 mois",
         )
         db.add(version_existante)
         db.commit()
 
-        # Appeler génération - doit retourner version existante
+        # Appeler gÃ©nÃ©ration - doit retourner version existante
         result = service.generer_version_bebe(recette.id)
         assert result is not None
         assert result.id == version_existante.id
-        assert result.type_version == "bébé"
+        assert result.type_version == "bÃ©bÃ©"
 
     def test_generer_version_bebe_success_mocked(self, service, db, patch_db_context):
-        """Test génération version bébé avec IA mockée."""
+        """Test gÃ©nÃ©ration version bÃ©bÃ© avec IA mockÃ©e."""
         from src.services.cuisine.recettes.types import VersionBebeGeneree
 
-        # Créer recette avec ingrédients et étapes
+        # CrÃ©er recette avec ingrÃ©dients et Ã©tapes
         recette = Recette(
-            nom="Purée de légumes",
-            description="Purée maison aux légumes variés",
+            nom="PurÃ©e de lÃ©gumes",
+            description="PurÃ©e maison aux lÃ©gumes variÃ©s",
             temps_preparation=15,
             temps_cuisson=25,
             portions=4,
             difficulte="facile",
             type_repas="diner",
-            saison="toute_année",
+            saison="toute_annÃ©e",
         )
         db.add(recette)
         db.flush()
 
-        # Ajouter ingrédient
-        ing = Ingredient(nom="carotte", unite="g", categorie="Légumes")
+        # Ajouter ingrÃ©dient
+        ing = Ingredient(nom="carotte", unite="g", categorie="LÃ©gumes")
         db.add(ing)
         db.flush()
 
@@ -1120,19 +1120,19 @@ class TestGenererVersionBebe:
         )
         db.add(ri)
 
-        # Ajouter étape
+        # Ajouter Ã©tape
         etape = EtapeRecette(
             recette_id=recette.id,
             ordre=1,
-            description="Cuire les légumes",
+            description="Cuire les lÃ©gumes",
         )
         db.add(etape)
         db.commit()
 
         # Mock de l'appel IA
         mock_response = VersionBebeGeneree(
-            instructions_modifiees="Mixer très finement les légumes cuits",
-            notes_bebe="Adapté dès 8 mois. Sans sel ajouté.",
+            instructions_modifiees="Mixer trÃ¨s finement les lÃ©gumes cuits",
+            notes_bebe="AdaptÃ© dÃ¨s 8 mois. Sans sel ajoutÃ©.",
             age_minimum_mois=8,
         )
 
@@ -1140,17 +1140,17 @@ class TestGenererVersionBebe:
             result = service.generer_version_bebe(recette.id)
 
         assert result is not None
-        assert result.type_version == "bébé"
-        assert "Mixer très finement" in result.instructions_modifiees
+        assert result.type_version == "bÃ©bÃ©"
+        assert "Mixer trÃ¨s finement" in result.instructions_modifiees
 
     def test_generer_version_bebe_ia_returns_none(self, service, db, patch_db_context):
-        """Test génération quand l'IA retourne None."""
+        """Test gÃ©nÃ©ration quand l'IA retourne None."""
         from src.core.exceptions import ErreurValidation
 
-        # Créer recette
+        # CrÃ©er recette
         recette = Recette(
-            nom="Soupe de légumes",
-            description="Soupe maison aux légumes de saison",
+            nom="Soupe de lÃ©gumes",
+            description="Soupe maison aux lÃ©gumes de saison",
             temps_preparation=15,
             temps_cuisson=30,
             portions=4,
@@ -1161,7 +1161,7 @@ class TestGenererVersionBebe:
         db.add(recette)
         db.flush()
 
-        # Ajouter ingrédient minimal
+        # Ajouter ingrÃ©dient minimal
         ing = Ingredient(nom="poireau", unite="pcs")
         db.add(ing)
         db.flush()
@@ -1173,22 +1173,22 @@ class TestGenererVersionBebe:
         db.add(etape)
         db.commit()
 
-        # Mock qui retourne None - lève ErreurValidation
+        # Mock qui retourne None - lÃ¨ve ErreurValidation
         with patch.object(service, "call_with_parsing_sync", return_value=None):
             with pytest.raises(ErreurValidation):
                 service.generer_version_bebe(recette.id)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS generer_version_batch_cooking (PHASE 2 COVERAGE)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererVersionBatchCooking:
-    """Tests génération version batch cooking."""
+    """Tests gÃ©nÃ©ration version batch cooking."""
 
     def test_generer_version_batch_cooking_existing(self, service, db, patch_db_context):
-        """Test génération quand version batch existe déjà."""
+        """Test gÃ©nÃ©ration quand version batch existe dÃ©jÃ ."""
         recette = Recette(
             nom="Bolognaise",
             description="Sauce bolognaise traditionnelle",
@@ -1197,7 +1197,7 @@ class TestGenererVersionBatchCooking:
             portions=6,
             difficulte="moyen",
             type_repas="diner",
-            saison="toute_année",
+            saison="toute_annÃ©e",
         )
         db.add(recette)
         db.commit()
@@ -1206,7 +1206,7 @@ class TestGenererVersionBatchCooking:
         version = VersionRecette(
             recette_base_id=recette.id,
             type_version="batch cooking",
-            instructions_modifiees="Tripler les quantités",
+            instructions_modifiees="Tripler les quantitÃ©s",
             notes_bebe="Conservation 5 jours au frigo",
         )
         db.add(version)
@@ -1217,23 +1217,23 @@ class TestGenererVersionBatchCooking:
         assert result.id == version.id
 
     def test_generer_version_batch_cooking_success_mocked(self, service, db, patch_db_context):
-        """Test génération batch cooking avec IA mockée."""
+        """Test gÃ©nÃ©ration batch cooking avec IA mockÃ©e."""
         from src.services.cuisine.recettes.types import VersionBatchCookingGeneree
 
         recette = Recette(
             nom="Chili con carne",
-            description="Plat mexicain épicé",
+            description="Plat mexicain Ã©picÃ©",
             temps_preparation=25,
             temps_cuisson=90,
             portions=6,
             difficulte="moyen",
             type_repas="diner",
-            saison="toute_année",
+            saison="toute_annÃ©e",
         )
         db.add(recette)
         db.flush()
 
-        ing = Ingredient(nom="boeuf haché", unite="g")
+        ing = Ingredient(nom="boeuf hachÃ©", unite="g")
         db.add(ing)
         db.flush()
 
@@ -1245,12 +1245,12 @@ class TestGenererVersionBatchCooking:
         db.commit()
 
         mock_response = VersionBatchCookingGeneree(
-            instructions_modifiees="Multiplier par 3 les quantités. Cuire dans une grande marmite.",
+            instructions_modifiees="Multiplier par 3 les quantitÃ©s. Cuire dans une grande marmite.",
             nombre_portions_recommande=18,
             temps_preparation_total_heures=3.5,
-            conseils_conservation="Réfrigérateur: 5 jours dans contenants hermétiques",
+            conseils_conservation="RÃ©frigÃ©rateur: 5 jours dans contenants hermÃ©tiques",
             conseils_congelation="Congeler en portions individuelles. Conservation 3 mois.",
-            calendrier_preparation="Dimanche: préparation. Lundi-Vendredi: décongeler matin.",
+            calendrier_preparation="Dimanche: prÃ©paration. Lundi-Vendredi: dÃ©congeler matin.",
         )
 
         with patch.object(service, "call_with_parsing_sync", return_value=mock_response):
@@ -1259,7 +1259,7 @@ class TestGenererVersionBatchCooking:
         assert result is not None
         assert result.type_version == "batch cooking"
         assert "18" in result.notes_bebe  # Portions incluses dans notes
-        assert "3 mois" in result.notes_bebe  # Congélation incluse
+        assert "3 mois" in result.notes_bebe  # CongÃ©lation incluse
 
     def test_generer_version_batch_cooking_not_found(self, service, db, patch_db_context):
         """Test batch cooking avec recette inexistante."""
@@ -1269,21 +1269,21 @@ class TestGenererVersionBatchCooking:
             service.generer_version_batch_cooking(99999)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # TESTS generer_version_robot (PHASE 2 COVERAGE)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestGenererVersionRobot:
-    """Tests génération version robot culinaire."""
+    """Tests gÃ©nÃ©ration version robot culinaire."""
 
     def test_generer_version_robot_cookeo(self, service, db, patch_db_context):
-        """Test génération version Cookeo."""
+        """Test gÃ©nÃ©ration version Cookeo."""
         from src.services.cuisine.recettes.types import VersionRobotGeneree
 
         recette = Recette(
             nom="Boeuf bourguignon",
-            description="Plat mijoté traditionnel français",
+            description="Plat mijotÃ© traditionnel franÃ§ais",
             temps_preparation=30,
             temps_cuisson=180,
             portions=6,
@@ -1294,7 +1294,7 @@ class TestGenererVersionRobot:
         db.add(recette)
         db.flush()
 
-        ing = Ingredient(nom="boeuf à braiser", unite="g")
+        ing = Ingredient(nom="boeuf Ã  braiser", unite="g")
         db.add(ing)
         db.flush()
 
@@ -1306,14 +1306,14 @@ class TestGenererVersionRobot:
         db.commit()
 
         mock_response = VersionRobotGeneree(
-            instructions_modifiees="Mode rissolage 15min, puis mijoté 45min sous pression",
-            reglages_robot="Rissolage: 160°C, Mijoté: cuisson sous pression",
+            instructions_modifiees="Mode rissolage 15min, puis mijotÃ© 45min sous pression",
+            reglages_robot="Rissolage: 160Â°C, MijotÃ©: cuisson sous pression",
             temps_cuisson_adapte_minutes=60,
             conseils_preparation="Couper la viande en gros cubes de 4cm",
             etapes_specifiques=[
                 "Rissoler la viande 15 min",
-                "Ajouter légumes et liquide",
-                "Fermer et lancer mijoté 45 min",
+                "Ajouter lÃ©gumes et liquide",
+                "Fermer et lancer mijotÃ© 45 min",
             ],
         )
 
@@ -1325,18 +1325,18 @@ class TestGenererVersionRobot:
         assert "Cookeo" in result.notes_bebe
 
     def test_generer_version_robot_airfryer(self, service, db, patch_db_context):
-        """Test génération version Airfryer."""
+        """Test gÃ©nÃ©ration version Airfryer."""
         from src.services.cuisine.recettes.types import VersionRobotGeneree
 
         recette = Recette(
             nom="Poulet croustillant",
-            description="Poulet avec peau dorée et croustillante",
+            description="Poulet avec peau dorÃ©e et croustillante",
             temps_preparation=10,
             temps_cuisson=40,
             portions=4,
             difficulte="facile",
             type_repas="diner",
-            saison="toute_année",
+            saison="toute_annÃ©e",
         )
         db.add(recette)
         db.flush()
@@ -1353,12 +1353,12 @@ class TestGenererVersionRobot:
         db.commit()
 
         mock_response = VersionRobotGeneree(
-            instructions_modifiees="Cuire 25min à 180°C, retourner à mi-cuisson",
-            reglages_robot="180°C pendant 25 minutes",
+            instructions_modifiees="Cuire 25min Ã  180Â°C, retourner Ã  mi-cuisson",
+            reglages_robot="180Â°C pendant 25 minutes",
             temps_cuisson_adapte_minutes=25,
-            conseils_preparation="Sécher la peau du poulet pour un résultat croustillant",
+            conseils_preparation="SÃ©cher la peau du poulet pour un rÃ©sultat croustillant",
             etapes_specifiques=[
-                "Préchauffer l'airfryer 3 min à 180°C",
+                "PrÃ©chauffer l'airfryer 3 min Ã  180Â°C",
                 "Placer le poulet peau vers le haut",
                 "Cuire 12 min, retourner, cuire 13 min",
             ],
@@ -1371,12 +1371,12 @@ class TestGenererVersionRobot:
         assert result.type_version == "robot_airfryer"
 
     def test_generer_version_robot_multicooker(self, service, db, patch_db_context):
-        """Test génération version Multicooker."""
+        """Test gÃ©nÃ©ration version Multicooker."""
         from src.services.cuisine.recettes.types import VersionRobotGeneree
 
         recette = Recette(
             nom="Risotto aux champignons",
-            description="Risotto crémeux aux champignons de Paris",
+            description="Risotto crÃ©meux aux champignons de Paris",
             temps_preparation=10,
             temps_cuisson=25,
             portions=4,
@@ -1404,7 +1404,7 @@ class TestGenererVersionRobot:
             temps_cuisson_adapte_minutes=22,
             conseils_preparation="Verser tout le bouillon d'un coup",
             etapes_specifiques=[
-                "Mode sauté pour les oignons 3 min",
+                "Mode sautÃ© pour les oignons 3 min",
                 "Ajouter le riz, bouillon et champignons",
                 "Lancer programme risotto",
             ],
@@ -1417,12 +1417,12 @@ class TestGenererVersionRobot:
         assert result.type_version == "robot_multicooker"
 
     def test_generer_version_robot_monsieur_cuisine(self, service, db, patch_db_context):
-        """Test génération version Monsieur Cuisine."""
+        """Test gÃ©nÃ©ration version Monsieur Cuisine."""
         from src.services.cuisine.recettes.types import VersionRobotGeneree
 
         recette = Recette(
-            nom="Velouté de courgettes",
-            description="Soupe crémeuse aux courgettes",
+            nom="VeloutÃ© de courgettes",
+            description="Soupe crÃ©meuse aux courgettes",
             temps_preparation=10,
             temps_cuisson=20,
             portions=4,
@@ -1445,13 +1445,13 @@ class TestGenererVersionRobot:
         db.commit()
 
         mock_response = VersionRobotGeneree(
-            instructions_modifiees="Vitesse 1 à 100°C 15min, puis mixer vitesse 10",
-            reglages_robot="Cuisson: Vit 1, 100°C, 15min. Mixage: Vit 10, 30sec",
+            instructions_modifiees="Vitesse 1 Ã  100Â°C 15min, puis mixer vitesse 10",
+            reglages_robot="Cuisson: Vit 1, 100Â°C, 15min. Mixage: Vit 10, 30sec",
             temps_cuisson_adapte_minutes=16,
             conseils_preparation="Couper les courgettes en rondelles",
             etapes_specifiques=[
-                "Cuire 15 min vit 1 à 100°C",
-                "Mixer 30 sec vitesse progressive jusqu'à 10",
+                "Cuire 15 min vit 1 Ã  100Â°C",
+                "Mixer 30 sec vitesse progressive jusqu'Ã  10",
             ],
         )
 
@@ -1462,7 +1462,7 @@ class TestGenererVersionRobot:
         assert result.type_version == "robot_monsieur_cuisine"
 
     def test_generer_version_robot_invalid_type(self, service, db, patch_db_context):
-        """Test génération avec type de robot invalide."""
+        """Test gÃ©nÃ©ration avec type de robot invalide."""
         recette = Recette(
             nom="Test recette robot",
             description="Une recette pour tester les robots de cuisine",
@@ -1471,7 +1471,7 @@ class TestGenererVersionRobot:
             portions=2,
             difficulte="facile",
             type_repas="diner",
-            saison="toute_année",
+            saison="toute_annÃ©e",
         )
         db.add(recette)
         db.flush()
@@ -1487,7 +1487,7 @@ class TestGenererVersionRobot:
         db.add(etape)
         db.commit()
 
-        # Type invalide - lève ValueError
+        # Type invalide - lÃ¨ve ValueError
         with pytest.raises(ValueError):
             service.generer_version_robot(recette.id, robot_type="robot_inconnu")
 
@@ -1499,7 +1499,7 @@ class TestGenererVersionRobot:
             service.generer_version_robot(99999, robot_type="cookeo")
 
     def test_generer_version_robot_existing_version(self, service, db, patch_db_context):
-        """Test génération quand version robot existe déjà."""
+        """Test gÃ©nÃ©ration quand version robot existe dÃ©jÃ ."""
         recette = Recette(
             nom="Recette existante",
             description="Recette avec version robot existante",
@@ -1508,7 +1508,7 @@ class TestGenererVersionRobot:
             portions=4,
             difficulte="facile",
             type_repas="diner",
-            saison="toute_année",
+            saison="toute_annÃ©e",
         )
         db.add(recette)
         db.commit()
@@ -1518,7 +1518,7 @@ class TestGenererVersionRobot:
             recette_base_id=recette.id,
             type_version="robot_cookeo",
             instructions_modifiees="Version Cookeo existante",
-            notes_bebe="Réglages déjà définis",
+            notes_bebe="RÃ©glages dÃ©jÃ  dÃ©finis",
         )
         db.add(version)
         db.commit()

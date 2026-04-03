@@ -1,11 +1,11 @@
-"""
+﻿"""
 Cron jobs pour le module Paris Sportifs.
 
-4 jobs automatisés:
+4 jobs automatisÃ©s:
 1. Scraper cotes sportives: Toutes les 2h (The Odds API)
-2. Scraper résultats matchs: 1×/jour à 23h (API-Football)
-3. Détecter opportunités: Toutes les 30min (value bets)
-4. Analyser séries: 1×/jour à 9h (patterns cognitifs)
+2. Scraper rÃ©sultats matchs: 1Ã—/jour Ã  23h (API-Football)
+3. DÃ©tecter opportunitÃ©s: Toutes les 30min (value bets)
+4. Analyser sÃ©ries: 1Ã—/jour Ã  9h (patterns cognitifs)
 """
 
 import logging
@@ -16,30 +16,30 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
 from src.core.db import obtenir_contexte_db
-from src.core.exceptions import ErreurService
+from src.core.exceptions import ErreurServiceIA
 from src.core.models import Match, PariSportif
 
 logger = logging.getLogger(__name__)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # JOB 1: SCRAPER COTES SPORTIVES (The Odds API)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def scraper_cotes_sportives():
     """
     Scrape les cotes sportives via The Odds API.
     
-    Limite: 500 requêtes/mois (plan gratuit)
-    Fréquence: Toutes les 2h → 12×/jour = 360 requêtes/mois < 500
+    Limite: 500 requÃªtes/mois (plan gratuit)
+    FrÃ©quence: Toutes les 2h â†’ 12Ã—/jour = 360 requÃªtes/mois < 500
     
-    Implémente:
-    - Récupération des matchs à venir (J+7)
-    - Mise à jour des cotes (domicile/nul/extérieur)
+    ImplÃ©mente:
+    - RÃ©cupÃ©ration des matchs Ã  venir (J+7)
+    - Mise Ã  jour des cotes (domicile/nul/extÃ©rieur)
     - Identification des value bets (EV > 5%)
     """
-    logger.info("🔄 Début scraping cotes sportives (The Odds API)")
+    logger.info("ðŸ”„ DÃ©but scraping cotes sportives (The Odds API)")
     
     try:
         import httpx
@@ -49,10 +49,10 @@ def scraper_cotes_sportives():
         api_key = settings.THE_ODDS_API_KEY
         
         if not api_key:
-            logger.warning("⚠️ THE_ODDS_API_KEY non configurée - Job annulé")
+            logger.warning("âš ï¸ THE_ODDS_API_KEY non configurÃ©e - Job annulÃ©")
             return
         
-        # Requête API (exemple: Premier League)
+        # RequÃªte API (exemple: Premier League)
         url = "https://api.the-odds-api.com/v4/sports/soccer_epl/odds"
         params = {
             "apiKey": api_key,
@@ -65,7 +65,7 @@ def scraper_cotes_sportives():
         response.raise_for_status()
         
         data = response.json()
-        logger.info(f"📊 Récupéré {len(data)} matchs depuis The Odds API")
+        logger.info(f"ðŸ“Š RÃ©cupÃ©rÃ© {len(data)} matchs depuis The Odds API")
         
         # Traiter les matchs
         nb_inseres = 0
@@ -80,7 +80,7 @@ def scraper_cotes_sportives():
                     event.get("commence_time", "").replace("Z", "+00:00")
                 )
                 
-                # Extraire cotes (bookmaker 1 par défaut)
+                # Extraire cotes (bookmaker 1 par dÃ©faut)
                 bookmakers = event.get("bookmakers", [])
                 if not bookmakers:
                     continue
@@ -96,7 +96,7 @@ def scraper_cotes_sportives():
                 cote_nul = cote_mapping.get("Draw", 3.0)
                 cote_ext = cote_mapping.get(equipe_ext, 3.5)
                 
-                # Vérifier si match existe déjà
+                # VÃ©rifier si match existe dÃ©jÃ 
                 match_existant = session.query(Match).filter(
                     Match.equipe_domicile == equipe_dom,
                     Match.equipe_exterieur == equipe_ext,
@@ -104,17 +104,17 @@ def scraper_cotes_sportives():
                 ).first()
                 
                 if match_existant:
-                    # Mise à jour cotes
+                    # Mise Ã  jour cotes
                     match_existant.cote_domicile = cote_dom
                     match_existant.cote_nul = cote_nul
                     match_existant.cote_exterieur = cote_ext
                     nb_updates += 1
                 else:
-                    # Créer nouveau match
+                    # CrÃ©er nouveau match
                     nouveau_match = Match(
                         equipe_domicile=equipe_dom,
                         equipe_exterieur=equipe_ext,
-                        championnat="Premier League",  # À mapper dynamiquement
+                        championnat="Premier League",  # Ã€ mapper dynamiquement
                         date=commence_at.date(),
                         heure=commence_at.time(),
                         cote_domicile=cote_dom,
@@ -127,31 +127,31 @@ def scraper_cotes_sportives():
             
             session.commit()
         
-        logger.info(f"✅ Scraping cotes terminé: {nb_inseres} insérés, {nb_updates} mis à jour")
+        logger.info(f"âœ… Scraping cotes terminÃ©: {nb_inseres} insÃ©rÃ©s, {nb_updates} mis Ã  jour")
     
     except Exception as e:
-        logger.error(f"❌ Erreur scraping cotes: {e}", exc_info=True)
-        raise ErreurService(f"Échec scraping cotes: {e}")
+        logger.error(f"âŒ Erreur scraping cotes: {e}", exc_info=True)
+        raise ErreurServiceIA(f"Ã‰chec scraping cotes: {e}")
 
 
-# ═══════════════════════════════════════════════════════════
-# JOB 2: SCRAPER RÉSULTATS MATCHS (API-Football)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# JOB 2: SCRAPER RÃ‰SULTATS MATCHS (API-Football)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def scraper_resultats_matchs():
     """
-    Scrape les résultats des matchs via API-Football.
+    Scrape les rÃ©sultats des matchs via API-Football.
     
-    Limite: 100 requêtes/jour (plan gratuit)
-    Fréquence: 1×/jour à 23h → 30 requêtes/mois < 100
+    Limite: 100 requÃªtes/jour (plan gratuit)
+    FrÃ©quence: 1Ã—/jour Ã  23h â†’ 30 requÃªtes/mois < 100
     
-    Implémente:
-    - Récupération résultats matchs du jour
-    - Mise à jour statut paris (gagné/perdu)
+    ImplÃ©mente:
+    - RÃ©cupÃ©ration rÃ©sultats matchs du jour
+    - Mise Ã  jour statut paris (gagnÃ©/perdu)
     - Calcul gains automatique
     """
-    logger.info("🔄 Début scraping résultats matchs (API-Football)")
+    logger.info("ðŸ”„ DÃ©but scraping rÃ©sultats matchs (API-Football)")
     
     try:
         import httpx
@@ -161,10 +161,10 @@ def scraper_resultats_matchs():
         api_key = settings.API_FOOTBALL_KEY
         
         if not api_key:
-            logger.warning("⚠️ API_FOOTBALL_KEY non configurée - Job annulé")
+            logger.warning("âš ï¸ API_FOOTBALL_KEY non configurÃ©e - Job annulÃ©")
             return
         
-        # Requête résultats du jour
+        # RequÃªte rÃ©sultats du jour
         url = "https://v3.football.api-sports.io/fixtures"
         headers = {
             "x-apisports-key": api_key
@@ -179,7 +179,7 @@ def scraper_resultats_matchs():
         
         data = response.json()
         fixtures = data.get("response", [])
-        logger.info(f"📊 Récupéré {len(fixtures)} résultats depuis API-Football")
+        logger.info(f"ðŸ“Š RÃ©cupÃ©rÃ© {len(fixtures)} rÃ©sultats depuis API-Football")
         
         nb_paris_resolus = 0
         
@@ -200,19 +200,19 @@ def scraper_resultats_matchs():
                 if not match:
                     continue
                 
-                # Mettre à jour match
+                # Mettre Ã  jour match
                 match.score_domicile = score_dom
                 match.score_exterieur = score_ext
                 match.joue = True
                 
-                # Résoudre paris associés
+                # RÃ©soudre paris associÃ©s
                 paris_ouverts = session.query(PariSportif).filter(
                     PariSportif.match_id == match.id,
                     PariSportif.statut == "en_attente"
                 ).all()
                 
                 for pari in paris_ouverts:
-                    # Déterminer résultat
+                    # DÃ©terminer rÃ©sultat
                     if score_dom > score_ext:
                         resultat_reel = "victoire_domicile"
                     elif score_dom < score_ext:
@@ -220,7 +220,7 @@ def scraper_resultats_matchs():
                     else:
                         resultat_reel = "nul"
                     
-                    # Vérifier si pronostic correct
+                    # VÃ©rifier si pronostic correct
                     prediction_mapping = {
                         "domicile": "victoire_domicile",
                         "1": "victoire_domicile",
@@ -245,34 +245,34 @@ def scraper_resultats_matchs():
             
             session.commit()
         
-        logger.info(f"✅ Résultats traités: {nb_paris_resolus} paris résolus")
+        logger.info(f"âœ… RÃ©sultats traitÃ©s: {nb_paris_resolus} paris rÃ©solus")
     
     except Exception as e:
-        logger.error(f"❌ Erreur scraping résultats: {e}", exc_info=True)
-        raise ErreurService(f"Échec scraping résultats: {e}")
+        logger.error(f"âŒ Erreur scraping rÃ©sultats: {e}", exc_info=True)
+        raise ErreurServiceIA(f"Ã‰chec scraping rÃ©sultats: {e}")
 
 
-# ═══════════════════════════════════════════════════════════
-# JOB 3: DÉTECTER OPPORTUNITÉS (Value Bets)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# JOB 3: DÃ‰TECTER OPPORTUNITÃ‰S (Value Bets)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def detecter_opportunites():
     """
-    Analyse tous les matchs à venir pour détecter les value bets.
+    Analyse tous les matchs Ã  venir pour dÃ©tecter les value bets.
     
-    Fréquence: Toutes les 30min → 48×/jour
+    FrÃ©quence: Toutes les 30min â†’ 48Ã—/jour
     
-    Implémente:
+    ImplÃ©mente:
     - Calcul EV (expected value) pour chaque match
-    - Détection value bets (EV > 5%)
-    - Notification si opportunité > 10% EV
+    - DÃ©tection value bets (EV > 5%)
+    - Notification si opportunitÃ© > 10% EV
     """
-    logger.info("🔍 Début détection opportunités value bets")
+    logger.info("ðŸ” DÃ©but dÃ©tection opportunitÃ©s value bets")
     
     try:
         with obtenir_contexte_db() as session:
-            # Récupérer matchs avec prédictions IA
+            # RÃ©cupÃ©rer matchs avec prÃ©dictions IA
             matchs = session.query(Match).filter(
                 Match.joue == False,
                 Match.prediction_resultat.isnot(None),
@@ -302,55 +302,55 @@ def detecter_opportunites():
                         "confiance": match.prediction_confiance or 0
                     })
             
-            logger.info(f"✅ Détecté {len(value_bets)} value bets (EV > 5%)")
+            logger.info(f"âœ… DÃ©tectÃ© {len(value_bets)} value bets (EV > 5%)")
             
-            # Notifications pour opportunités exceptionnelles (EV > 10%)
+            # Notifications pour opportunitÃ©s exceptionnelles (EV > 10%)
             nb_notifications = 0
             for vb in value_bets:
                 if vb["ev"] > 0.10:
                     logger.warning(
-                        f"🔔 Opportunité exceptionnelle: {vb['equipe_dom']} vs {vb['equipe_ext']} "
+                        f"ðŸ”” OpportunitÃ© exceptionnelle: {vb['equipe_dom']} vs {vb['equipe_ext']} "
                         f"- Issue: {vb['issue']} - EV: {vb['ev']*100:.1f}%"
                     )
                     nb_notifications += 1
             
             if nb_notifications > 0:
-                logger.info(f"📨 {nb_notifications} notifications envoyées")
+                logger.info(f"ðŸ“¨ {nb_notifications} notifications envoyÃ©es")
     
     except Exception as e:
-        logger.error(f"❌ Erreur détection opportunités: {e}", exc_info=True)
+        logger.error(f"âŒ Erreur dÃ©tection opportunitÃ©s: {e}", exc_info=True)
 
 
-# ═══════════════════════════════════════════════════════════
-# JOB 4: ANALYSER SÉRIES (Patterns Cognitifs)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# JOB 4: ANALYSER SÃ‰RIES (Patterns Cognitifs)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def analyser_series():
     """
     Analyse les patterns de paris pour tous les utilisateurs.
     
-    Fréquence: 1×/jour à 9h
+    FrÃ©quence: 1Ã—/jour Ã  9h
     
-    Implémente:
-    - Détection hot hand fallacy
-    - Détection gambler's fallacy
-    - Détection régression vers la moyenne
+    ImplÃ©mente:
+    - DÃ©tection hot hand fallacy
+    - DÃ©tection gambler's fallacy
+    - DÃ©tection rÃ©gression vers la moyenne
     - Stockage des alertes pour affichage
     """
-    logger.info("📊 Début analyse séries patterns cognitifs")
+    logger.info("ðŸ“Š DÃ©but analyse sÃ©ries patterns cognitifs")
     
     try:
         from src.services.jeux.series_statistiques import SeriesStatistiquesService
         
         service = SeriesStatistiquesService()
         
-        # Récupérer tous les utilisateurs ayant des paris
+        # RÃ©cupÃ©rer tous les utilisateurs ayant des paris
         with obtenir_contexte_db() as session:
             users_ids = session.query(PariSportif.user_id).distinct().all()
             users_ids = [u[0] for u in users_ids if u[0]]
         
-        logger.info(f"👥 Analyse de {len(users_ids)} utilisateurs")
+        logger.info(f"ðŸ‘¥ Analyse de {len(users_ids)} utilisateurs")
         
         nb_alertes = 0
         
@@ -364,23 +364,23 @@ def analyser_series():
                     if resultat and resultat.alerte:
                         nb_alertes += 1
                         logger.warning(
-                            f"⚠️ User {user_id} - {key}: {resultat.message} "
-                            f"(Sévérité: {resultat.severite})"
+                            f"âš ï¸ User {user_id} - {key}: {resultat.message} "
+                            f"(SÃ©vÃ©ritÃ©: {resultat.severite})"
                         )
             
             except Exception as e:
                 logger.error(f"Erreur analyse user {user_id}: {e}")
                 continue
         
-        logger.info(f"✅ Analyse terminée: {nb_alertes} alertes détectées")
+        logger.info(f"âœ… Analyse terminÃ©e: {nb_alertes} alertes dÃ©tectÃ©es")
     
     except Exception as e:
-        logger.error(f"❌ Erreur analyse séries: {e}", exc_info=True)
+        logger.error(f"âŒ Erreur analyse sÃ©ries: {e}", exc_info=True)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONFIGURATION SCHEDULER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def configurer_jobs_paris(scheduler: Any) -> None:
@@ -399,37 +399,37 @@ def configurer_jobs_paris(scheduler: Any) -> None:
         replace_existing=True,
         max_instances=1
     )
-    logger.info("✅ Job 'Scraper cotes sportives' configuré (toutes les 2h)")
+    logger.info("âœ… Job 'Scraper cotes sportives' configurÃ© (toutes les 2h)")
     
-    # Job 2: Scraper résultats - 1×/jour à 23h
+    # Job 2: Scraper rÃ©sultats - 1Ã—/jour Ã  23h
     scheduler.add_job(
         scraper_resultats_matchs,
         trigger=CronTrigger(hour=23, minute=0),
         id="scraper_resultats_matchs",
-        name="Scraper résultats matchs (API-Football)",
+        name="Scraper rÃ©sultats matchs (API-Football)",
         replace_existing=True,
         max_instances=1
     )
-    logger.info("✅ Job 'Scraper résultats matchs' configuré (23h quotidien)")
+    logger.info("âœ… Job 'Scraper rÃ©sultats matchs' configurÃ© (23h quotidien)")
     
-    # Job 3: Détecter opportunités - Toutes les 30min
+    # Job 3: DÃ©tecter opportunitÃ©s - Toutes les 30min
     scheduler.add_job(
         detecter_opportunites,
         trigger=IntervalTrigger(minutes=30),
         id="detecter_opportunites",
-        name="Détecter opportunités value bets",
+        name="DÃ©tecter opportunitÃ©s value bets",
         replace_existing=True,
         max_instances=1
     )
-    logger.info("✅ Job 'Détecter opportunités' configuré (30min)")
+    logger.info("âœ… Job 'DÃ©tecter opportunitÃ©s' configurÃ© (30min)")
     
-    # Job 4: Analyser séries - 1×/jour à 9h
+    # Job 4: Analyser sÃ©ries - 1Ã—/jour Ã  9h
     scheduler.add_job(
         analyser_series,
         trigger=CronTrigger(hour=9, minute=0),
         id="analyser_series",
-        name="Analyser séries patterns cognitifs",
+        name="Analyser sÃ©ries patterns cognitifs",
         replace_existing=True,
         max_instances=1
     )
-    logger.info("✅ Job 'Analyser séries' configuré (9h quotidien)")
+    logger.info("âœ… Job 'Analyser sÃ©ries' configurÃ© (9h quotidien)")

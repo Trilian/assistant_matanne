@@ -933,6 +933,396 @@ def _traiter_action_rapide_dashboard(event: EvenementDomaine) -> None:
         logger.warning("Échec traitement dashboard.widget.action_rapide: %s", e)
 
 
+
+# ═══════════════════════════════════════════════════════════
+# PHASE 2 — BRIDGES INTER-MODULES
+# ═══════════════════════════════════════════════════════════
+
+
+def _generer_courses_depuis_planning(event: EvenementDomaine) -> None:
+    """Bridge 1: Planning validé → génération automatique de la liste de courses.
+
+    Extrait les ingrédients du planning actif et les ajoute à la liste de courses.
+    Émet ensuite `courses.generees` pour déclencher les notifications aval.
+    Tolère les pannes — n'échoue jamais.
+    """
+    try:
+        planning_id = event.data.get("planning_id")
+        if not planning_id:
+            return
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import ArticleCourses, Ingredientx, Repas, Recette
+
+        with obtenir_contexte_db() as session:
+            # Récupérer tous les repas du planning
+            repas_list = (
+                session.query(Repas)
+                .filter(Repas.planning_id == planning_id)
+                .all()
+            )
+            if not repas_list:
+                logger.info("Bridge 1: planning %s sans repas, courses non générées", planning_id)
+                return
+
+            # Collecter les ingrédients de toutes les recettes
+            ingredients_ajoutes = 0
+            for repas in repas_list:
+                if not repas.recette_id:
+                    continue
+                recette = session.query(Recette).filter(Recette.id == repas.recette_id).first()
+                if not recette:
+                    continue
+                # Récupérer les ingrédients de la recette
+                for ri in getattr(recette, "ingredients", []) or []:
+                    ingredient_id = getattr(ri, "ingredient_id", None)
+                    if not ingredient_id:
+                        continue
+                    # Éviter les doublons : vérifier si déjà dans courses
+                    existant = (
+                        session.query(ArticleCourses)
+                        .filter(ArticleCourses.ingredient_id == ingredient_id, ArticleCourses.achete.is_(False))
+                        .first()
+                    )
+                    if not existant:
+                        session.add(ArticleCourses(
+                            ingredient_id=ingredient_id,
+                            quantite_necessaire=getattr(ri, "quantite", 1) or 1,
+                            priorite="normale",
+                            suggere_par_ia=False,
+                            notes=f"Ajouté auto depuis planning semaine du {event.data.get('semaine_debut', '')}",
+                        ))
+                        ingredients_ajoutes += 1
+
+            session.commit()
+
+        # Émettre l'événement de confirmation
+        if ingredients_ajoutes > 0:
+            from .bus import obtenir_bus
+            obtenir_bus().emettre(
+                "courses.generees",
+                {
+                    "nb_articles": ingredients_ajoutes,
+                    "source": "planning",
+                    "planning_id": planning_id,
+                    "semaine_debut": event.data.get("semaine_debut", ""),
+                },
+                source="bridge_planning_courses",
+            )
+        logger.info(
+            "Bridge 1: planning %s → %d articles ajoutés aux courses",
+            planning_id, ingredients_ajoutes,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge 1 planning→courses: %s", e)
+
+
+def _suggerer_recettes_anti_gaspi(event: EvenementDomaine) -> None:
+    """Bridge 2: Stock bientôt périmé → suggestions recettes anti-gaspillage via IA.
+
+    Appelle le service anti-gaspillage pour identifier les recettes prioritaires
+    et invalide le cache de la page anti-gaspillage.
+    Tolère les pannes — n'échoue jamais.
+    """
+    try:
+        nom = event.data.get("nom", "")
+        jours_restants = event.data.get("jours_restants", 3)
+        article_id = event.data.get("article_id", 0)
+        if not nom:
+            return
+
+        from src.core.caching import obtenir_cache
+        cache = obtenir_cache()
+        cache.invalidate(pattern="anti_gaspillage")
+        cache.invalidate(pattern="recettes")
+
+        # Notification push si article expire très bientôt (≤ 2 jours)
+        if int(jours_restants) <= 2:
+            from src.services.core.notifications.notif_ntfy import ServiceNtfy
+            from src.services.core.notifications.types import NotificationNtfy
+
+            service = ServiceNtfy()
+            service.envoyer_sync(NotificationNtfy(
+                titre=f"⚠️ {nom} expire bientôt (J-{jours_restants})",
+                message=(
+                    f"{nom} expire dans {jours_restants} jour(s).\n"
+                    "Des recettes anti-gaspillage ont été calculées pour l'utiliser."
+                ),
+                priorite=4,
+                tags=["warning", "knife_fork_plate"],
+                click_url="/cuisine/anti-gaspillage",
+            ))
+
+        logger.info(
+            "Bridge 2: article '%s' (J-%s) → anti-gaspi cache invalidé + notification",
+            nom, jours_restants,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge 2 inventaire→anti_gaspi: %s", e)
+
+
+def _notifier_alerte_budget_push(event: EvenementDomaine) -> None:
+    """Bridge 3: Dépassement budget → notification push + widget dashboard.
+
+    Envoie une notification ntfy immédiate et invalide le cache dashboard
+    pour forcer l'affichage de l'alerte dans les widgets.
+    Tolère les pannes — n'échoue jamais.
+    """
+    try:
+        categorie = event.data.get("categorie", "")
+        depense = event.data.get("depense", 0.0)
+        budget = event.data.get("budget", 0.0)
+        pourcentage = event.data.get("pourcentage", 0.0)
+
+        # Invalider le dashboard
+        from src.core.caching import obtenir_cache
+        cache = obtenir_cache()
+        cache.invalidate(pattern="dashboard")
+        cache.invalidate(pattern="budget")
+        cache.invalidate(pattern="alertes")
+
+        # Envoyer une notification push
+        from src.services.core.notifications.notif_ntfy import ServiceNtfy
+        from src.services.core.notifications.types import NotificationNtfy
+
+        service = ServiceNtfy()
+        service.envoyer_sync(NotificationNtfy(
+            titre=f"🚨 Budget {categorie} dépassé ({pourcentage:.0f}%)",
+            message=(
+                f"Dépenses {categorie}: {depense:.0f}€ / {budget:.0f}€ prévu.\n"
+                "Consultez le tableau de bord pour les détails."
+            ),
+            priorite=4,
+            tags=["rotating_light", "money_with_wings"],
+            click_url="/famille/budget",
+        ))
+        logger.info(
+            "Bridge 3: budget.depassement → notification push envoyée (catégorie=%s, %.0f%%)",
+            categorie, pourcentage,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge 3 budget→dashboard_push: %s", e)
+
+
+def _enregistrer_jalon_depuis_activite(event: EvenementDomaine) -> None:
+    """Bridge 4: Activité famille terminée → jalon Jules enregistré automatiquement.
+
+    Si l'activité est liée au développement de Jules (catégorie motricite/langage/social/eveil),
+    crée un jalon associé dans la timeline de suivi.
+    Tolère les pannes — n'échoue jamais.
+    """
+    try:
+        activite_id = event.data.get("activite_id", 0)
+        nom = event.data.get("nom", "")
+        categorie = event.data.get("categorie", "")
+        user_id = event.data.get("user_id")
+
+        # Catégories pertinentes pour Jules
+        categories_jules = {"motricite", "langage", "social", "eveil", "developpement"}
+        if categorie.lower() not in categories_jules:
+            return
+        if not nom:
+            return
+
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.famille import JalonJules
+        from datetime import date as _date
+
+        with obtenir_contexte_db() as session:
+            # Vérifier qu'il n'existe pas déjà un jalon pour cette activité
+            existant = (
+                session.query(JalonJules)
+                .filter(JalonJules.titre == nom)
+                .first()
+            )
+            if not existant:
+                session.add(JalonJules(
+                    titre=nom,
+                    description=f"Jalon enregistré automatiquement depuis l'activité #{activite_id}",
+                    date_atteinte=_date.today(),
+                    categorie=categorie,
+                    source="auto_bridge",
+                ))
+                session.commit()
+                # Émettre l'événement jalon
+                from .bus import obtenir_bus
+                obtenir_bus().emettre(
+                    "jalon.ajoute",
+                    {"nom": nom, "categorie": categorie, "user_id": user_id},
+                    source="bridge_activite_jules",
+                )
+                logger.info("Bridge 4: activité '%s' → jalon Jules créé auto", nom)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge 4 activites→jules: %s", e)
+
+
+def _sync_tache_deadline_vers_calendrier(event: EvenementDomaine) -> None:
+    """Bridge 5: Tâche projet avec deadline → événement dans le calendrier entretien.
+
+    Crée une tâche d'entretien planifiée pour la deadline du projet,
+    assurant sa visibilité dans le planning unifié.
+    Tolère les pannes — n'échoue jamais.
+    """
+    try:
+        projet_nom = event.data.get("projet_nom", "")
+        tache_nom = event.data.get("tache_nom", "")
+        deadline_str = event.data.get("deadline", "")
+        projet_id = event.data.get("projet_id", 0)
+        if not (projet_nom and tache_nom and deadline_str):
+            return
+
+        from datetime import date as _date
+        from src.core.db import obtenir_contexte_db
+        from src.core.models import TacheEntretien
+
+        deadline = _date.fromisoformat(deadline_str)
+
+        with obtenir_contexte_db() as session:
+            # Éviter les doublons
+            existant = (
+                session.query(TacheEntretien)
+                .filter(
+                    TacheEntretien.nom == f"[Projet] {tache_nom}",
+                    TacheEntretien.prochaine_fois == deadline,
+                )
+                .first()
+            )
+            if not existant:
+                session.add(TacheEntretien(
+                    nom=f"[Projet] {tache_nom}",
+                    description=f"Échéance projet « {projet_nom} » (id={projet_id})",
+                    categorie="projets",
+                    priorite="haute",
+                    fait=False,
+                    prochaine_fois=deadline,
+                ))
+                session.commit()
+
+        # Invalider le cache calendrier/entretien
+        from src.core.caching import obtenir_cache
+        cache = obtenir_cache()
+        cache.invalidate(pattern="entretien")
+        cache.invalidate(pattern="calendrier")
+
+        logger.info(
+            "Bridge 5: tâche '%s' (projet %s) → calendrier entretien J=%s",
+            tache_nom, projet_nom, deadline_str,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge 5 projets→calendrier: %s", e)
+
+
+def _actualiser_stats_pl_dashboard(event: EvenementDomaine) -> None:
+    """Bridge 7: Résultat jeu enregistré → mise à jour stats P&L dashboard.
+
+    Invalide uniquement les caches jeux et dashboard pour forcer
+    un recalcul des statistiques profit/perte la prochaine requête.
+    Tolère les pannes — n'échoue jamais.
+    """
+    try:
+        type_jeu = event.data.get("type_jeu", "")
+        gain = event.data.get("gain", 0.0)
+        mise = event.data.get("mise", 0.0)
+        est_gagnant = event.data.get("est_gagnant", False)
+
+        from src.core.caching import obtenir_cache
+        cache = obtenir_cache()
+        cache.invalidate(pattern="jeux")
+        cache.invalidate(pattern="paris")
+        cache.invalidate(pattern="dashboard")
+
+        # Notification si gain significatif
+        if est_gagnant and float(gain) > 50:
+            from src.services.core.notifications.notif_ntfy import ServiceNtfy
+            from src.services.core.notifications.types import NotificationNtfy
+            ServiceNtfy().envoyer_sync(NotificationNtfy(
+                titre=f"🎉 Gain {type_jeu} : +{gain:.0f}€ !",
+                message=f"Mise: {mise:.0f}€ → Gain: {gain:.0f}€. Stats P&L mises à jour.",
+                priorite=3,
+                tags=["tada", "moneybag"],
+                click_url="/jeux",
+            ))
+
+        logger.info(
+            "Bridge 7: résultat %s → dashboard P&L invalidé (gain=%.0f€, gagnant=%s)",
+            type_jeu, float(gain), est_gagnant,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge 7 jeux→dashboard: %s", e)
+
+
+def _suggerer_activites_weekend_meteo(event: EvenementDomaine) -> None:
+    """Bridge 8: Météo reçue → suggestions d'activités weekend adaptées.
+
+    Invalide le cache weekend et utilise la condition météo pour
+    orienter les suggestions (intérieur si pluie, extérieur si soleil).
+    Tolère les pannes — n'échoue jamais.
+    """
+    try:
+        condition = event.data.get("condition", "")
+        temperature_max = event.data.get("temperature_max", 15.0)
+        date_prevision = event.data.get("date_prevision", "")
+
+        from src.core.caching import obtenir_cache
+        cache = obtenir_cache()
+        cache.invalidate(pattern="weekend")
+        cache.invalidate(pattern="activites_ia")
+        cache.invalidate(pattern="suggestions_activites")
+
+        # Déclencher le service weekend IA si mauvais temps prévu
+        if condition in ("pluie", "orage", "neige"):
+            from src.services.famille.weekend_ai import get_weekend_ai_service
+            service = get_weekend_ai_service()
+            if hasattr(service, "suggerer_activites_interieur"):
+                service.suggerer_activites_interieur(
+                    meteo=condition,
+                    temperature=float(temperature_max),
+                )
+
+        logger.info(
+            "Bridge 8: météo '%s' (%s°C) le %s → suggestions weekend invalidées",
+            condition, temperature_max, date_prevision,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge 8 meteo→activites_weekend: %s", e)
+
+
+def _envoyer_rappel_entretien_push(event: EvenementDomaine) -> None:
+    """Bridge 9: Tâche entretien due → rappel push ntfy le matin.
+
+    Envoie une notification push pour rappeler la tâche d'entretien
+    planifiée pour aujourd'hui ou demain.
+    Tolère les pannes — n'échoue jamais.
+    """
+    try:
+        tache_id = event.data.get("tache_id", 0)
+        nom = event.data.get("nom", "")
+        categorie = event.data.get("categorie", "")
+        prochaine_fois = event.data.get("prochaine_fois", "")
+        priorite = event.data.get("priorite", "normale")
+        if not nom:
+            return
+
+        priorite_ntfy = 4 if priorite == "haute" else 3
+
+        from src.services.core.notifications.notif_ntfy import ServiceNtfy
+        from src.services.core.notifications.types import NotificationNtfy
+
+        ServiceNtfy().envoyer_sync(NotificationNtfy(
+            titre=f"🏠 Entretien à faire : {nom}",
+            message=(
+                f"Tâche {categorie} planifiée pour {prochaine_fois}.\n"
+                "Consultez la liste complète des tâches maison."
+            ),
+            priorite=priorite_ntfy,
+            tags=["house", "wrench"],
+            click_url="/maison/entretien",
+        ))
+        logger.info("Bridge 9: rappel entretien envoyé (tache_id=%s, nom=%s)", tache_id, nom)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge 9 entretien→push: %s", e)
+
+
 # ═══════════════════════════════════════════════════════════
 # ENREGISTREMENT — Appelé au bootstrap
 # ═══════════════════════════════════════════════════════════
@@ -1100,6 +1490,41 @@ def enregistrer_subscribers() -> int:
     compteur += 1
 
     bus.souscrire("dashboard.widget.action_rapide", _traiter_action_rapide_dashboard, priority=75)
+    compteur += 1
+
+    # ── Métriques (priorité moyenne) ──
+    # ── Phase 2 — Bridges inter-modules (priorité 80) ──
+
+    # Bridge 1: Planning validé → courses auto
+    bus.souscrire("planning.valide", _generer_courses_depuis_planning, priority=80)
+    compteur += 1
+
+    # Bridge 2: Inventaire péremption proche → anti-gaspi IA
+    bus.souscrire("inventaire.peremption_proche", _suggerer_recettes_anti_gaspi, priority=80)
+    compteur += 1
+
+    # Bridge 3: Budget dépassement → push notification (complète D.3)
+    bus.souscrire("budget.depassement", _notifier_alerte_budget_push, priority=78)
+    compteur += 1
+
+    # Bridge 4: Activité terminée → jalon Jules auto
+    bus.souscrire("activites.terminee", _enregistrer_jalon_depuis_activite, priority=80)
+    compteur += 1
+
+    # Bridge 5: Tâche projet deadline → calendrier entretien
+    bus.souscrire("projets.tache_deadline", _sync_tache_deadline_vers_calendrier, priority=80)
+    compteur += 1
+
+    # Bridge 7: Résultat jeu → dashboard P&L
+    bus.souscrire("paris.resultat_enregistre", _actualiser_stats_pl_dashboard, priority=80)
+    compteur += 1
+
+    # Bridge 8: Météo reçue → activités weekend
+    bus.souscrire("meteo.prevision_recue", _suggerer_activites_weekend_meteo, priority=80)
+    compteur += 1
+
+    # Bridge 9: Tâche entretien due → rappel push
+    bus.souscrire("entretien.tache_due", _envoyer_rappel_entretien_push, priority=80)
     compteur += 1
 
     # ── Métriques (priorité moyenne) ──

@@ -482,6 +482,23 @@ async def valider_planning(
     except Exception as exc:
         logger.debug("Notification WhatsApp planning non envoyée: %s", exc)
 
+    # Bridge 1 — émettre planning.valide pour déclencher la génération automatique des courses
+    try:
+        from src.services.core.events import obtenir_bus
+
+        semaine = (resultat.data or {}).get("semaine_debut") if hasattr(resultat, "data") else ""
+        obtenir_bus().emettre(
+            "planning.valide",
+            {
+                "planning_id": planning_id,
+                "semaine_debut": semaine or "",
+                "generer_courses": True,
+            },
+            source="route_planning",
+        )
+    except Exception as exc:
+        logger.debug("Événement planning.valide non émis: %s", exc)
+
     return resultat
 
 

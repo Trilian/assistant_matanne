@@ -1,11 +1,11 @@
-"""
-Tests IA Avancée — Services IA, Routes, Bridges, Intra-modules.
+﻿"""
+Tests IA AvancÃ©e â€” Services IA, Routes, Bridges, Intra-modules.
 
 Couvre :
-- B4: Services IA (prédiction courses, résumé hebdo, budget, etc.)
+- B4: Services IA (prÃ©diction courses, rÃ©sumÃ© hebdo, budget, etc.)
 - B5: Bridges inter-modules
-- B6: Intra-modules (streak routines, énergie N/N-1, entretien)
-- B7: Flux utilisateur simplifiés
+- B6: Intra-modules (streak routines, Ã©nergie N/N-1, entretien)
+- B7: Flux utilisateur simplifiÃ©s
 - B8: CRON jobs Phase B
 """
 
@@ -14,13 +14,13 @@ from datetime import date, timedelta
 from unittest.mock import patch, MagicMock
 
 
-# ═══════════════════════════════════════════════════════════
-# B4 — SERVICES IA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# B4 â€” SERVICES IA
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPredictionCourses:
-    """Tests du service de prédiction de la prochaine liste de courses."""
+    """Tests du service de prÃ©diction de la prochaine liste de courses."""
 
     def test_import_service(self):
         """Le module s'importe correctement."""
@@ -33,19 +33,19 @@ class TestPredictionCourses:
         from src.services.ia.prediction_courses import obtenir_service_prediction_courses
         service = obtenir_service_prediction_courses()
         # Un DB mock minimal retournerait une liste vide
-        # On vérifie juste que la méthode existe et est callable
+        # On vÃ©rifie juste que la mÃ©thode existe et est callable
         assert hasattr(service, "predire_prochaine_liste")
         assert callable(service.predire_prochaine_liste)
 
     def test_analyser_habitudes_method_exists(self):
-        """La méthode analyser_habitudes existe."""
+        """La mÃ©thode analyser_habitudes existe."""
         from src.services.ia.prediction_courses import obtenir_service_prediction_courses
         service = obtenir_service_prediction_courses()
         assert hasattr(service, "analyser_habitudes")
 
 
 class TestPrevisionBudget:
-    """Tests du service de prévision budget."""
+    """Tests du service de prÃ©vision budget."""
 
     def test_import_service(self):
         """Le module s'importe correctement."""
@@ -54,7 +54,7 @@ class TestPrevisionBudget:
         assert service is not None
 
     def test_methodes_existent(self):
-        """Les méthodes principales existent."""
+        """Les mÃ©thodes principales existent."""
         from src.services.ia.prevision_budget import obtenir_service_prevision_budget
         service = obtenir_service_prevision_budget()
         assert hasattr(service, "prevision_fin_de_mois")
@@ -62,7 +62,7 @@ class TestPrevisionBudget:
         assert hasattr(service, "auto_categoriser_depense")
 
     def test_auto_categoriser_statique(self):
-        """La catégorisation statique fonctionne pour des cas connus."""
+        """La catÃ©gorisation statique fonctionne pour des cas connus."""
         from src.services.ia.prevision_budget import obtenir_service_prevision_budget
         service = obtenir_service_prevision_budget()
         result = service.auto_categoriser_depense("Carrefour Market")
@@ -71,7 +71,7 @@ class TestPrevisionBudget:
 
 
 class TestResumeHebdo:
-    """Tests du service de résumé hebdomadaire."""
+    """Tests du service de rÃ©sumÃ© hebdomadaire."""
 
     def test_import_service(self):
         """Le module s'importe correctement."""
@@ -80,7 +80,7 @@ class TestResumeHebdo:
         assert service is not None
 
     def test_methodes_existent(self):
-        """Les méthodes principales existent."""
+        """Les mÃ©thodes principales existent."""
         from src.services.ia.resume_hebdo import obtenir_service_resume_hebdo
         service = obtenir_service_resume_hebdo()
         assert hasattr(service, "collecter_donnees_semaine")
@@ -136,12 +136,12 @@ class TestSuggestionsIA:
             "optimisation_energie",
             "analyse_nutritionnelle",
         ]:
-            assert hasattr(service, method_name), f"Méthode {method_name} manquante"
+            assert hasattr(service, method_name), f"MÃ©thode {method_name} manquante"
 
 
-# ═══════════════════════════════════════════════════════════
-# B5 — BRIDGES INTER-MODULES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# B5 â€” BRIDGES INTER-MODULES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBridgesInterModules:
@@ -169,13 +169,13 @@ class TestBridgesInterModules:
         assert callable(enregistrer_bridges_subscribers)
 
 
-# ═══════════════════════════════════════════════════════════
-# B6 — INTRA-MODULES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# B6 â€” INTRA-MODULES
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestIntraModules:
-    """Tests des améliorations intra-modules."""
+    """Tests des amÃ©liorations intra-modules."""
 
     def test_streak_routines(self):
         """calculer_streak_routines retourne un dict."""
@@ -202,13 +202,13 @@ class TestIntraModules:
         assert isinstance(result, int)
 
 
-# ═══════════════════════════════════════════════════════════
-# B7 — FLUX UTILISATEUR
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# B7 â€” FLUX UTILISATEUR
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestFluxUtilisateur:
-    """Tests des flux utilisateur simplifiés."""
+    """Tests des flux utilisateur simplifiÃ©s."""
 
     def test_flux_cuisine_3_clics(self):
         """flux_cuisine_3_clics retourne un dict avec etape_actuelle."""
@@ -236,16 +236,16 @@ class TestFluxUtilisateur:
         assert result.get("nb_feedbacks") == 0
 
 
-# ═══════════════════════════════════════════════════════════
-# B8 — CRON JOBS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# B8 â€” CRON JOBS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCronJobsBridges:
     """Tests des cron jobs bridges inter-modules."""
 
     def test_configurer_jobs(self):
-        """configurer_jobs_phase_b s'exécute sans erreur."""
+        """configurer_jobs_phase_b s'exÃ©cute sans erreur."""
         from apscheduler.schedulers.background import BackgroundScheduler
         from src.services.core.cron_bridges import configurer_jobs_phase_b
 
@@ -276,13 +276,13 @@ class TestCronJobsBridges:
         assert expected_ids.issubset(job_ids), f"IDs manquants: {expected_ids - job_ids}"
 
 
-# ═══════════════════════════════════════════════════════════
-# EVENTS — Phase B
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# EVENTS â€” Phase B
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-class TestEventsPhaseB:
-    """Tests des événements Phase B."""
+class TestEventsIAPredictions:
+    """Tests des Ã©vÃ©nements Phase B."""
 
     def test_event_prediction_courses(self):
         from src.services.core.events.events import EvenementPredictionCourses
@@ -316,9 +316,9 @@ class TestEventsPhaseB:
         assert evt.TYPE == "bridge.meteo_entretien"
 
 
-# ═══════════════════════════════════════════════════════════
-# ROUTES — Phase B (smoke tests via import)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# ROUTES â€” Phase B (smoke tests via import)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestRoutesImport:
@@ -341,8 +341,8 @@ class TestRoutesImport:
         assert router is not None
 
 
-class TestSchemasPhaseB:
-    """Tests des schémas Pydantic Phase B."""
+class TestSchemasIABridges:
+    """Tests des schÃ©mas Pydantic Phase B."""
 
     def test_import_schemas(self):
         from src.api.schemas.ia_bridges import (

@@ -157,7 +157,28 @@ async def creer_projet(
                 "priorite": projet.priorite,
             }
 
-    return await executer_async(_query)
+    resultat = await executer_async(_query)
+
+    # Bridge 5 — émettre projets.tache_deadline si une deadline est précisée
+    try:
+        deadline = payload.get("date_fin_prevue")
+        if deadline:
+            from src.services.core.events import obtenir_bus
+            obtenir_bus().emettre(
+                "projets.tache_deadline",
+                {
+                    "projet_id": resultat.get("id", 0),
+                    "projet_nom": payload.get("nom", ""),
+                    "tache_nom": payload.get("nom", ""),
+                    "deadline": str(deadline),
+                },
+                source="route_maison_projets",
+            )
+    except Exception as _evt_exc:
+        import logging as _log
+        _log.getLogger(__name__).debug("Événement projets.tache_deadline non émis: %s", _evt_exc)
+
+    return resultat
 
 
 @router.patch("/projets/{projet_id}", responses=REPONSES_CRUD_LECTURE)

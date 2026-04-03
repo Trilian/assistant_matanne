@@ -872,7 +872,30 @@ async def modifier_pari(
                 "sync_budget": sync_budget,
             }
 
-    return await executer_async(_query)
+    resultat = await executer_async(_query)
+
+    # Bridge 7 — émettre paris.resultat_enregistre si statut final atteint
+    try:
+        statut_final = payload.get("statut", "")
+        if statut_final in ("gagne", "perdu"):
+            from src.services.core.events import obtenir_bus
+            gain_val = float(payload.get("gain", 0) or 0)
+            mise_val = float(resultat.get("mise", 0) or 0)
+            obtenir_bus().emettre(
+                "paris.resultat_enregistre",
+                {
+                    "element_id": pari_id,
+                    "type_jeu": "pari",
+                    "gain": gain_val,
+                    "mise": mise_val,
+                    "est_gagnant": statut_final == "gagne",
+                },
+                source="route_jeux_paris",
+            )
+    except Exception as _evt_exc:
+        logger.debug("Événement paris.resultat_enregistre non émis: %s", _evt_exc)
+
+    return resultat
 
 
 @router.delete("/paris/{pari_id}", responses=REPONSES_CRUD_SUPPRESSION)

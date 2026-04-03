@@ -1,4 +1,4 @@
-"""Tests unitaires pour les services inter-module bridges (P2-03).
+﻿"""Tests unitaires pour les services inter-module bridges (P2-03).
 
 Couvre les 12 bridges inter-modules:
 - CoursesBudgetInteractionService
@@ -21,16 +21,16 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CoursesBudget
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCoursesBudgetInteraction:
-    """Tests pour le bridge Courses → Budget."""
+    """Tests pour le bridge Courses â†’ Budget."""
 
     def test_synchroniser_total_positif(self, engine, db):
-        """Montant positif crée une dépense alimentation."""
+        """Montant positif crÃ©e une dÃ©pense alimentation."""
         from src.services.cuisine.inter_module_courses_budget import (
             CoursesBudgetInteractionService,
         )
@@ -42,7 +42,7 @@ class TestCoursesBudgetInteraction:
         assert result.get("montant") == 85.50 or result.get("message")
 
     def test_synchroniser_montant_nul(self, engine, db):
-        """Montant <= 0 ne crée pas de dépense."""
+        """Montant <= 0 ne crÃ©e pas de dÃ©pense."""
         from src.services.cuisine.inter_module_courses_budget import (
             CoursesBudgetInteractionService,
         )
@@ -54,7 +54,7 @@ class TestCoursesBudgetInteraction:
         assert "nul" in result.get("message", "").lower() or result == {}
 
     def test_synchroniser_montant_negatif(self, engine, db):
-        """Montant négatif est rejeté."""
+        """Montant nÃ©gatif est rejetÃ©."""
         from src.services.cuisine.inter_module_courses_budget import (
             CoursesBudgetInteractionService,
         )
@@ -66,13 +66,13 @@ class TestCoursesBudgetInteraction:
         assert "nul" in result.get("message", "").lower() or result == {}
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PeremptionRecettes
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestPeremptionRecettesInteraction:
-    """Tests pour le bridge Péremption → Recettes."""
+    """Tests pour le bridge PÃ©remption â†’ Recettes."""
 
     def test_suggerer_sans_produits_expirants(self, engine, db):
         """Sans produits expirants, retourne une liste vide."""
@@ -86,7 +86,7 @@ class TestPeremptionRecettesInteraction:
         assert result.get("produits_expirants") == [] or result.get("produits_expirants") is None or result == {}
 
     def test_jours_seuil_positif(self, engine, db):
-        """Le seuil de jours est respecté."""
+        """Le seuil de jours est respectÃ©."""
         from src.services.cuisine.inter_module_peremption_recettes import (
             PeremptionRecettesInteractionService,
         )
@@ -96,13 +96,13 @@ class TestPeremptionRecettesInteraction:
         assert isinstance(result, dict)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ChatContexteMultiModule
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestChatContexteMultiModule:
-    """Tests pour le bridge Chat IA → Contexte multi-module."""
+    """Tests pour le bridge Chat IA â†’ Contexte multi-module."""
 
     def test_collecter_contexte_complet(self, engine):
         """Collecte le contexte de tous les modules disponibles."""
@@ -115,24 +115,24 @@ class TestChatContexteMultiModule:
         assert isinstance(result, dict)
 
     def test_contexte_resilient_aux_erreurs(self, engine):
-        """Le collecteur ne bloque pas si un module échoue."""
+        """Le collecteur ne bloque pas si un module Ã©choue."""
         from src.services.utilitaires.inter_module_chat_contexte import (
             ChatContexteMultiModuleService,
         )
 
         service = ChatContexteMultiModuleService()
-        # Même si des modules sont indisponibles, ça retourne un dict
+        # MÃªme si des modules sont indisponibles, Ã§a retourne un dict
         result = service.collecter_contexte_complet()
         assert isinstance(result, dict)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # AnniversairesBudget
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAnniversairesBudgetInteraction:
-    """Tests pour le bridge Anniversaires → Budget."""
+    """Tests pour le bridge Anniversaires â†’ Budget."""
 
     def test_provisionner_budget_cadeaux(self, engine, db):
         """Provisionne le budget pour les anniversaires proches."""
@@ -159,37 +159,37 @@ class TestAnniversairesBudgetInteraction:
         assert isinstance(result, dict)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BudgetJeux
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBudgetJeuxInteraction:
-    """Tests pour le bridge Budget × Jeux."""
+    """Tests pour le bridge Budget Ã— Jeux."""
 
     def test_verifier_alerte_paris(self, engine, db):
-        """Vérifie l'import du service (modèle UserPreferences manquant)."""
+        """VÃ©rifie l'import du service (modÃ¨le UserPreferences manquant)."""
         from src.services.famille.inter_module_budget_jeux import (
             BudgetJeuxInteractionService,
         )
 
         service = BudgetJeuxInteractionService()
         # NOTE: Le service importe src.core.models.family.UserPreferences
-        # qui n'existe pas — bug pré-existant à corriger.
+        # qui n'existe pas â€” bug prÃ©-existant Ã  corriger.
         with pytest.raises(ModuleNotFoundError):
             service.verifier_alerte_paris_semaine(user_id="matanne", db=db)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DocumentsNotifications
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDocumentsNotificationsInteraction:
-    """Tests pour le bridge Documents → Notifications."""
+    """Tests pour le bridge Documents â†’ Notifications."""
 
     def test_verifier_documents_expirants(self, engine, db):
-        """Vérifie les documents expirants et envoie des notifications."""
+        """VÃ©rifie les documents expirants et envoie des notifications."""
         from src.services.famille.inter_module_documents_notifications import (
             DocumentsNotificationsInteractionService,
         )
@@ -201,13 +201,13 @@ class TestDocumentsNotificationsInteraction:
         assert isinstance(result, dict)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # VoyagesBudget
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestVoyagesBudgetInteraction:
-    """Tests pour le bridge Voyages → Budget."""
+    """Tests pour le bridge Voyages â†’ Budget."""
 
     def test_synchroniser_voyages_vers_budget(self, engine, db):
         """Synchronise les voyages vers le budget."""
@@ -222,16 +222,16 @@ class TestVoyagesBudgetInteraction:
         assert isinstance(result, dict)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # DiagnosticsIA
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestDiagnosticsIAInteraction:
-    """Tests pour le bridge Diagnostics IA × Artisans."""
+    """Tests pour le bridge Diagnostics IA Ã— Artisans."""
 
     def test_diagnostiquer_panne_retourne_dict(self):
-        """Le diagnostic retourne un dictionnaire structuré."""
+        """Le diagnostic retourne un dictionnaire structurÃ©."""
         from src.services.maison.inter_module_diagnostics_ia import (
             DiagnosticsIAArtisansService,
         )
@@ -241,17 +241,17 @@ class TestDiagnosticsIAInteraction:
         with patch.object(service, "_client", create=True):
             result = service.diagnostiquer_panne_photo(
                 image_url="test.jpg",
-                description_panne="Fuite d'eau sous l'évier",
+                description_panne="Fuite d'eau sous l'Ã©vier",
             )
             assert isinstance(result, (dict, str))
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Phase 5 bridges
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-class TestPhase5CuisineInteractions:
+class TestCuisineInterModuleBridges:
     """Tests des bridges cuisine phase 5."""
 
     def test_inventaire_planning_retourne_dict(self, engine, db):
@@ -282,7 +282,7 @@ class TestPhase5CuisineInteractions:
         assert isinstance(result, dict)
 
 
-class TestPhase5FamilleInteractions:
+class TestFamilleInterModuleBridges:
     """Tests des bridges famille phase 5."""
 
     def test_weekend_courses_retourne_dict(self, engine, db):
@@ -328,7 +328,7 @@ class TestPhase5FamilleInteractions:
             assert isinstance(result, dict)
 
 
-class TestPhase5MaisonInteractions:
+class TestMaisonInterModuleBridges:
     """Tests des bridges maison phase 5."""
 
     def test_entretien_courses_retourne_dict(self, engine, db):

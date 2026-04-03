@@ -1,5 +1,5 @@
-"""
-Tests API pour les fonctionnalités avancées.
+﻿"""
+Tests API pour les fonctionnalitÃ©s avancÃ©es.
 
 Couvre les 8 endpoints du routeur innovations + admin reset + WebSocket logs.
 """
@@ -12,9 +12,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Fixtures
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest.fixture
@@ -52,9 +52,9 @@ def client(app):
         yield c
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.4 — BILAN ANNUEL
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 10.4 â€” BILAN ANNUEL
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBilanAnnuel:
@@ -65,7 +65,7 @@ class TestBilanAnnuel:
 
         mock_innovations_service.generer_bilan_annuel.return_value = BilanAnnuelResponse(
             annee=2025,
-            resume_global="Bonne année familiale",
+            resume_global="Bonne annÃ©e familiale",
             sections=[SectionBilanAnnuel(titre="Cuisine", resume="150 recettes")],
             score_global=7.5,
             recommandations=["Planifier plus de repas"],
@@ -106,9 +106,9 @@ class TestBilanAnnuel:
         assert data["annee"] == 0  # Default BilanAnnuelResponse
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.5 — SCORE BIEN-ÊTRE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 10.5 â€” SCORE BIEN-ÃŠTRE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestScoreBienEtre:
@@ -141,9 +141,9 @@ class TestScoreBienEtre:
         assert response.status_code == 200
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.17 — ENRICHISSEMENT CONTACTS
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 10.17 â€” ENRICHISSEMENT CONTACTS
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestEnrichissementContacts:
@@ -158,7 +158,7 @@ class TestEnrichissementContacts:
                     contact_id=1,
                     nom="Marie Dupont",
                     categorie_suggeree="Famille",
-                    rappel_relationnel="À contacter",
+                    rappel_relationnel="Ã€ contacter",
                 )
             ],
             nb_contacts_analyses=10,
@@ -173,9 +173,9 @@ class TestEnrichissementContacts:
         assert data["nb_contacts_analyses"] == 10
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.18 — TENDANCES LOTO
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 10.18 â€” TENDANCES LOTO
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestTendancesLoto:
@@ -189,7 +189,7 @@ class TestTendancesLoto:
             nb_tirages_analyses=100,
             numeros_chauds=[TendanceLoto(numero=7, frequence=0.15, score_tendance=0.85)],
             combinaison_suggeree=[7, 12, 23, 31, 42],
-            analyse_ia="Le numéro 7 est le plus fréquent.",
+            analyse_ia="Le numÃ©ro 7 est le plus frÃ©quent.",
         )
 
         response = client.get(
@@ -213,9 +213,9 @@ class TestTendancesLoto:
         assert response.status_code == 200
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.19 — PARCOURS MAGASIN
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 10.19 â€” PARCOURS MAGASIN
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestParcoursMagasin:
@@ -241,9 +241,9 @@ class TestParcoursMagasin:
         assert data["nb_articles"] == 3
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.8 — VEILLE EMPLOI
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 10.8 â€” VEILLE EMPLOI
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestVeilleEmploi:
@@ -283,13 +283,13 @@ class TestVeilleEmploi:
         assert data["offres"][0]["titre"] == "RH Manager"
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.3 — MODE INVITÉ
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 10.3 â€” MODE INVITÃ‰
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestModeInvite:
-    """Tests pour le mode invité."""
+    """Tests pour le mode invitÃ©."""
 
     def test_creer_lien_invite(self, client, auth_headers, mock_innovations_service):
         from src.services.innovations.types import LienInviteResponse
@@ -299,12 +299,12 @@ class TestModeInvite:
             url="/invite/abc123",
             expire_dans_heures=48,
             modules_autorises=["repas", "routines"],
-            nom_invite="Mamie Françoise",
+            nom_invite="Mamie FranÃ§oise",
         )
 
         response = client.post(
             "/api/v1/innovations/invite/creer",
-            json={"nom_invite": "Mamie Françoise", "modules": ["repas", "routines"]},
+            json={"nom_invite": "Mamie FranÃ§oise", "modules": ["repas", "routines"]},
             headers=auth_headers,
         )
         assert response.status_code == 200
@@ -326,9 +326,9 @@ class TestModeInvite:
         mock_innovations_service.obtenir_donnees_invite.return_value = DonneesInviteResponse(
             enfant={"prenom": "Jules"},
             routines=[{"nom": "Routine du soir"}],
-            repas_semaine=[{"date": "2026-03-30", "type": "déjeuner", "recette": "Pâtes"}],
+            repas_semaine=[{"date": "2026-03-30", "type": "dÃ©jeuner", "recette": "PÃ¢tes"}],
             contacts_urgence=[{"nom": "Dr. Martin", "telephone": "0601020304"}],
-            notes="Accès invité",
+            notes="AccÃ¨s invitÃ©",
         )
 
         response = client.get("/api/v1/innovations/invite/abc123")
@@ -343,13 +343,13 @@ class TestModeInvite:
         assert response.status_code == 404
 
 
-# ═══════════════════════════════════════════════════════════
-# Sprint 21 — Innovations prioritaires
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Sprint 21 â€” Innovations prioritaires
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-class TestSprint21Innovations:
-    """Tests des endpoints Sprint 21 (mode vacances, insights, météo contextuelle)."""
+class TestVacationModeInnovations:
+    """Tests des endpoints Sprint 21 (mode vacances, insights, mÃ©tÃ©o contextuelle)."""
 
     def test_lire_mode_vacances(self, client, auth_headers, mock_innovations_service):
         from src.services.innovations.types import ModeVacancesResponse
@@ -359,7 +359,7 @@ class TestSprint21Innovations:
             checklist_voyage_auto=True,
             courses_mode_compact=True,
             entretien_suspendu=True,
-            recommandations=["Checklist voyage prête"],
+            recommandations=["Checklist voyage prÃªte"],
         )
 
         response = client.get("/api/v1/innovations/phasee/mode-vacances", headers=auth_headers)
@@ -376,7 +376,7 @@ class TestSprint21Innovations:
             checklist_voyage_auto=False,
             courses_mode_compact=False,
             entretien_suspendu=False,
-            recommandations=["Mode vacances désactivé"],
+            recommandations=["Mode vacances dÃ©sactivÃ©"],
         )
 
         response = client.post(
@@ -421,7 +421,7 @@ class TestSprint21Innovations:
             description="Partiellement nuageux",
             modules=[
                 MeteoImpactModule(module="cuisine", impact="Adapter les menus"),
-                MeteoImpactModule(module="famille", impact="Activités int/ext"),
+                MeteoImpactModule(module="famille", impact="ActivitÃ©s int/ext"),
             ],
         )
 
@@ -432,13 +432,13 @@ class TestSprint21Innovations:
         assert len(data["modules"]) >= 2
 
 
-# ═══════════════════════════════════════════════════════════
-# Sprint 22 — Innovations avancées
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Sprint 22 â€” Innovations avancÃ©es
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-class TestSprint22Innovations:
-    """Tests des endpoints Sprint 22 (préférences, planification auto, batch IA, cartes, tablette)."""
+class TestLearningPreferencesInnovations:
+    """Tests des endpoints Sprint 22 (prÃ©fÃ©rences, planification auto, batch IA, cartes, tablette)."""
 
     def test_preferences_apprises(self, client, auth_headers, mock_innovations_service):
         from src.services.innovations.types import ApprentissagePreferencesResponse, PreferenceApprise
@@ -532,13 +532,13 @@ class TestSprint22Innovations:
         assert len(data["cartes"]) >= 1
 
 
-# ═══════════════════════════════════════════════════════════
-# Sprint 23 — Innovations long terme
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# Sprint 23 â€” Innovations long terme
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-class TestSprint23Innovations:
-    """Tests des endpoints Sprint 23 (WhatsApp conversationnel, prix auto, énergie temps-réel)."""
+class TestWhatsAppEnergyInnovations:
+    """Tests des endpoints Sprint 23 (WhatsApp conversationnel, prix auto, Ã©nergie temps-rÃ©el)."""
 
     def test_whatsapp_conversationnel(self, client, auth_headers, mock_innovations_service):
         from src.services.innovations.types import CommandeWhatsApp, WhatsAppConversationnelResponse
@@ -579,7 +579,7 @@ class TestSprint23Innovations:
                 )
             ],
             nb_alertes=1,
-            alertes=["tomate: baisse détectée (20.0% vs historique)"],
+            alertes=["tomate: baisse dÃ©tectÃ©e (20.0% vs historique)"],
         )
 
         response = client.get(
@@ -615,9 +615,9 @@ class TestSprint23Innovations:
         assert data["consommation_mois_kwh"] is not None
 
 
-# ═══════════════════════════════════════════════════════════
-# 10.25 — ADMIN RESET MODULE
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 10.25 â€” ADMIN RESET MODULE
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAdminResetModule:
@@ -647,9 +647,9 @@ class TestAdminResetModule:
         assert response.status_code == 400
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Tests unitaires service InnovationsService
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestInnovationsServiceUnit:
@@ -676,7 +676,7 @@ class TestInnovationsServiceUnit:
         with patch.object(InnovationsService, "__init__", lambda x: None):
             service = InnovationsService()
             dimensions = [
-                DimensionBienEtre(nom="Sport", score=30, detail="Activité insuffisante"),
+                DimensionBienEtre(nom="Sport", score=30, detail="ActivitÃ© insuffisante"),
                 DimensionBienEtre(nom="Nutrition", score=90, detail="Excellent"),
             ]
             conseils = service._generer_conseils(dimensions)

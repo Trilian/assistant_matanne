@@ -10,12 +10,16 @@
 
 1. [Notation de l'app par catégorie](#1-notation-de-lapp-par-catégorie)
 2. [État des lieux — Inventaire complet](#2-état-des-lieux--inventaire-complet)
-3. [Phase 1 — Nettoyage et dette technique](#3-phase-1--nettoyage-et-dette-technique)
-4. [Phase 2 — Consolidation inter-modules](#4-phase-2--consolidation-inter-modules)
+3. [Phase 1 — Nettoyage et dette technique](#3-phase-1--nettoyage-et-dette-technique) *(en cours)*
+4. [Phase 2 — Consolidation inter-modules](#4-phase-2--consolidation-inter-modules) *(en cours)*
 5. [Phase 3 — IA et automatisations](#5-phase-3--ia-et-automatisations)
 6. [Phase 4 — UI/UX moderne](#6-phase-4--uiux-moderne)
-7. [Phase 5 — Simplification des flux](#7-phase-5--simplification-des-flux)
-8. [Phase 6 — Optimisation technique](#8-phase-6--optimisation-technique)
+7. [Phase 5 — Simplification des flux + Validation v2](#7-phase-5--simplification-des-flux--validation-v2)
+8. [Phase 6 — Optimisation technique + Railway](#8-phase-6--optimisation-technique--railway)
+9. [Migration WhatsApp → Telegram](#9-migration-whatsapp--telegram)
+10. [Flux utilisateur avec validation v2](#10-flux-utilisateur-avec-validation-v2)
+11. [Contraintes Railway Free ($0/mois)](#11-contraintes-railway-free-0mois)
+12. [Annexes — Détails techniques de référence](#12-annexes--détails-techniques-de-référence)
 9. [Annexes — Détails techniques de référence](#9-annexes--détails-techniques-de-référence)
 
 ---
@@ -559,23 +563,25 @@ async def generer_courses_depuis_planning(event):
 
 ### 5.5 Notifications enrichies
 
+> **Note** : Les canaux WhatsApp ci-dessous seront remplacés par Telegram après la migration (voir [section 9](#9-migration-whatsapp--telegram)).
+
 | # | Notification | Canal | Trigger | Priorité | Statut |
 |---|-------------|-------|---------|----------|--------|
-| 1 | "Recette du soir" rappel | WhatsApp + Push | 16h si repas planifié, avec lien recette | 🔴 Haute | ⬜ |
-| 2 | "Courses prêtes" | WhatsApp | Après génération auto courses | 🔴 Haute | ⬜ |
+| 1 | "Recette du soir" rappel | Telegram + Push | 16h si repas planifié, avec lien recette | 🔴 Haute | ⬜ |
+| 2 | "Courses prêtes" | Telegram | Après génération auto courses | 🔴 Haute | ⬜ |
 | 3 | "Budget alerte" | Push + Email | Seuil dépassé (job CRON) | 🔴 Haute | ⬜ |
-| 4 | "Tâches entretien semaine" | WhatsApp lundi matin | Résumé tâches planifiées | 🟡 Moyenne | ⬜ |
+| 4 | "Tâches entretien semaine" | Telegram lundi matin | Résumé tâches planifiées | 🟡 Moyenne | ⬜ |
 | 5 | "Résultats paris" | Push | Après sync résultats | 🟡 Moyenne | ⬜ |
 | 6 | "Jardin — actions du mois" | Email mensuel | Rapport jardin saisonnier | 🟢 Basse | ⬜ |
 | 7 | "Jules — jalon développement" | Push | Quand un jalon est atteint selon l'âge | 🟢 Basse | ⬜ |
 
-### 5.6 Commandes WhatsApp enrichies
+### 5.6 Commandes Telegram enrichies
 
-Ajouter des commandes en langage naturel :
+Ajouter des commandes en langage naturel (via Telegram Bot) :
 - "Qu'est-ce qu'on mange ce soir ?"
 - "Ajoute lait à la liste"
 - "Activité samedi ?"
-- Réponses interactives enrichies
+- Réponses interactives via InlineKeyboardMarkup (boutons illimités)
 
 ### 5.7 Améliorations admin
 
@@ -631,11 +637,11 @@ Ajouter des commandes en langage naturel :
 
 ---
 
-## 7. Phase 5 — Simplification des flux
+## 7. Phase 5 — Simplification des flux + Validation v2
 
-> **Objectif** : L'utilisateur fait le minimum, l'app fait le reste.
+> **Objectif** : L'utilisateur fait le minimum, l'app fait le reste. IA propose, utilisateur valide, app exécute.
 > **Prérequis** : Phase 4 terminée
-> **Principe** : L'utilisateur ne fait que l'essentiel, l'IA et les automatisations font le reste.
+> **Principe** : Les "3 clics" ne suppriment pas la validation — ils suppriment la **saisie**. L'utilisateur garde le contrôle mais ne tape rien.
 
 ### 7.1 Flux actuels vs flux simplifiés
 
@@ -644,7 +650,7 @@ Ajouter des commandes en langage naturel :
 | Planifier la semaine | 1. Aller dans planning 2. Choisir chaque repas 3. Valider 4. Aller dans courses 5. Ajouter ingrédients | 1. L'IA propose un planning 2. Valider/ajuster 3. Courses auto | 2-3 clics |
 | Ajouter une recette | 1. Aller dans recettes 2. Remplir formulaire complet | 1. Coller un lien ou décrire en texte 2. IA pré-remplit tout 3. Valider | 2-3 clics |
 | Gérer les courses | 1. Ouvrir liste 2. Cocher un par un 3. Retirer les cochés | 1. Articles viennent du planning auto 2. Vue par rayon 3. Swipe pour cocher | 1-2 gestes |
-| Saisir activité weekend | 1. Famille 2. Activités 3. Formulaire 4. Date/heure | 1. Via WhatsApp : "Ajoute parc samedi 14h" | 1 message |
+| Saisir activité weekend | 1. Famille 2. Activités 3. Formulaire 4. Date/heure | 1. Via Telegram : "Ajoute parc samedi 14h" | 1 message |
 | Vérifier budget | 1. Famille 2. Budget 3. Graphiques | 1. Widget dashboard + alerte push si anomalie | 0 action |
 
 ### 7.2 Tâches de simplification
@@ -656,7 +662,7 @@ Ajouter des commandes en langage naturel :
 | 3 | **Scan codes-barres → inventaire** | Composant `scanneur-multi-codes.tsx` + `@zxing/browser` existent. Connecter au service inventaire. | 🟡 Moyenne | ⬜ |
 | 4 | **Briefing vocal matin** | `bouton-vocal.tsx`, hooks `synthese-vocale`/`reconnaissance-vocale` existent. Briefing backend existe. Connecter. | 🟡 Moyenne | ⬜ |
 | 5 | **Widgets dashboard actionnables** | Chaque widget doit avoir un CTA direct (pas juste de l'info) | 🟡 Moyenne | ⬜ |
-| 6 | **Notifications actionnables** | Chaque notification push/WhatsApp doit avoir un lien direct | 🟡 Moyenne | ⬜ |
+| 6 | **Notifications actionnables** | Chaque notification push/Telegram doit avoir un lien direct | 🟡 Moyenne | ⬜ |
 | 7 | **Onboarding premier lancement** | `tour-onboarding.tsx` existe — vérifier le guidage | 🟢 Basse | ⬜ |
 | 8 | **Google Assistant deep linking** | Page `google-assistant/page.tsx` existe, doc setup aussi. Vérifier Actions on Google. | 🟢 Basse | ⬜ |
 | 9 | **PWA + offline** | `install-prompt.tsx`, `utiliser-hors-ligne.ts`, `enregistrement-sw.tsx` existent. Vérifier fonctionnel. | 🟢 Basse | ⬜ |
@@ -680,11 +686,84 @@ Ajouter des commandes en langage naturel :
 | Rappel anniversaire J-7 | 7j avant anniversaire | Notification + suggestions cadeaux IA | Famille | ⬜ |
 | Bilan mensuel auto | 1er du mois | Générer et envoyer bilan complet par email | Rapports | ⬜ |
 
+### 7.5 Flux validation brouillon (v2)
+
+Le flux actuel (`src/services/ia/flux_utilisateur.py`, `src/api/routes/intra_flux.py`) détecte automatiquement l'étape mais ne propose pas de brouillon éditable et passe directement à la génération de courses.
+
+**Nouveau flux cuisine : IA → Brouillon → Validation → Courses** :
+
+```
+Étape 1 — Proposition IA (automatique, dimanche soir ou à la demande)
+  └─ L'IA génère un planning semaine → statut "brouillon"
+  └─ Telegram : message avec boutons [✅ Valider] [✏️ Modifier] [🔄 Régénérer]
+  └─ Web : bandeau jaune "Brouillon — En attente de validation"
+
+Étape 2 — Validation utilisateur (OBLIGATOIRE, via web OU Telegram)
+  └─ Telegram : tap sur ✅ Valider ou écrire "Remplace mardi par du poisson"
+  └─ Web : clic sur bouton Valider / Modifier / Régénérer
+  └─ Statut passe à "validé" → déclenche étape 3
+
+Étape 3 — Courses générées (brouillon)
+  └─ Liste générée automatiquement depuis planning validé → statut "brouillon"
+  └─ Telegram : message avec [✅ Confirmer] [✏️ Ajouter] [❌ Refaire]
+  └─ Web : même pattern bandeau + boutons
+
+Étape 4 — Confirmation courses (OBLIGATOIRE)
+  └─ Telegram : tap ✅ Confirmer
+  └─ Web : clic Confirmer la liste
+  └─ Statut passe à "active" → mode courses (swipe pour cocher)
+```
+
+**Résultat** : 2 validations explicites (planning + courses), 0 saisie manuelle, 4 clics max.
+
+#### Modèle brouillon/validation par entité
+
+| Entité | Statuts | Qui crée | Qui valide |
+|--------|---------|----------|------------|
+| **Planning semaine** | `brouillon` → `valide` → `archive` | IA ou CRON | Utilisateur (web ou Telegram) |
+| **Liste de courses** | `brouillon` → `active` → `terminee` | Bridge depuis planning | Utilisateur (web ou Telegram) |
+| **Suggestions weekend** | `suggeree` → `planifiee` → `terminee` | IA | Utilisateur |
+| **Sessions batch cooking** | `brouillon` → `en_cours` → `termine` | IA | Utilisateur |
+
+**NE nécessitent PAS de validation** (informatifs) : alertes péremption, briefing matin, rappels entretien, insights budget, suggestions recettes ponctuelles.
+
+#### Règles validation par module
+
+| Module | IA propose | Validation obligatoire ? | Sans validation |
+|--------|-----------|--------------------------|------------------|
+| **Planning repas** | Planning semaine | ✅ Oui (web ou Telegram) | Non |
+| **Liste courses** | Articles depuis planning | ✅ Oui (web ou Telegram) | Non |
+| **Activités weekend** | Suggestions d'activités | ✅ Si ajouté au calendrier | Consulter = OK |
+| **Batch cooking** | Sessions proposées | ✅ Avant de lancer | Non |
+| **Suggestions recettes** | "Ce soir..." | ❌ Informatif | — |
+| **Alertes péremption** | Recettes anti-gaspi | ❌ Informatif | — |
+| **Briefing matin** | Résumé journée | ❌ Informatif | — |
+| **Entretien maison** | Tâches semaine | Optionnel (marquer planifié) | Rappels auto OK |
+| **Budget alerte** | Seuil dépassé | ❌ Informatif | — |
+
+#### Tâches techniques validation v2
+
+| # | Tâche | Fichiers | Statut |
+|---|-------|----------|--------|
+| 1 | Ajouter `etat: Mapped[str]` sur modèle Planning (brouillon/valide/archive) | `src/core/models/planning.py` | ⬜ |
+| 2 | Ajouter `etat: Mapped[str]` sur modèle ListeCourses (brouillon/active/terminee) | `src/core/models/courses.py` | ⬜ |
+| 3 | Modifier flux utilisateur : bloquer auto-progression, étape 2 = valider le brouillon | `src/services/ia/flux_utilisateur.py` | ⬜ |
+| 4 | Ajouter `POST /api/v1/planning/{id}/valider` et `POST /api/v1/planning/{id}/regenerer` | `src/api/routes/planning.py` | ⬜ |
+| 5 | Ajouter `POST /api/v1/courses/{id}/confirmer` | `src/api/routes/courses.py` | ⬜ |
+| 6 | Adapter flux B7 : ne pas auto-générer courses sans validation du planning | `src/api/routes/intra_flux.py` | ⬜ |
+| 7 | Bandeau brouillon/validé + boutons valider/modifier/régénérer (frontend planning) | Frontend planning page | ⬜ |
+| 8 | Mode brouillon courses avec confirmation obligatoire | Frontend courses page | ⬜ |
+| 9 | Migration SQL : `ALTER TABLE planning ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/` | ⬜ |
+| 10 | Migration SQL : `ALTER TABLE listes_courses ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/` | ⬜ |
+| 11 | InlineKeyboardMarkup Telegram avec boutons ✅/✏️/🔄 | `src/services/integrations/telegram.py` | ⬜ |
+| 12 | Handler `callback_query` Telegram → endpoints validation | `src/api/routes/webhooks_telegram.py` | ⬜ |
+| Bilan mensuel auto | 1er du mois | Générer et envoyer bilan complet par email | Rapports | ⬜ |
+
 ---
 
-## 8. Phase 6 — Optimisation technique
+## 8. Phase 6 — Optimisation technique + Railway
 
-> **Objectif** : Performance, bundle size, robustesse.
+> **Objectif** : Performance, bundle size, robustesse, rester en Free Railway ($0/mois).
 > **Prérequis** : Phase 5 terminée
 
 ### 8.1 Améliorations techniques
@@ -696,7 +775,34 @@ Ajouter des commandes en langage naturel :
 | 3 | **Optimistic updates** | TanStack Query supporte. Ajouter pour CRUD courant (cocher course, ajouter note). | UX | ⬜ |
 | 4 | **Prefetch routes** | Next.js 16 supporte. Ajouter sur les liens navigation fréquents. | Performance | ⬜ |
 
-### 8.2 Tests avancés
+### 8.2 Optimisations mémoire Railway — OBLIGATOIRES
+
+Ces optimisations sont nécessaires pour tenir sous 0.5 GB RAM (limite Railway Free).
+
+| # | Optimisation | Description | Gain estimé | Fichiers | Statut |
+|---|-------------|-------------|-------------|----------|--------|
+| 1 | **Cache L1 mémoire borné** | Limiter `CacheMemoire` à 500 entrées max avec eviction LRU | -50-100 MB | `src/core/caching/memory.py` | ⬜ |
+| 2 | **Lazy-load modèles IA** | `ClientIA`, `AnalyseurIA` instanciés au premier appel, pas au démarrage | -30 MB | `src/core/ai/client.py` | ⬜ |
+| 3 | **Import lazy services** | 138 factories importés au démarrage → passer en importlib lazy | -20 MB | `src/services/core/registry.py` | ⬜ |
+| 4 | **1 worker uvicorn** | `uvicorn --workers 1` (déjà le cas) | Déjà OK | — | ✅ |
+| 5 | **Désactiver Prometheus** | Métriques Prometheus consomment mémoire → flag pour désactiver | -10 MB | `src/api/prometheus.py` | ⬜ |
+
+### 8.3 Optimisations Mistral AI
+
+| Métrique | Valeur |
+|----------|--------|
+| Limite quotidienne | 100 appels/jour |
+| Limite horaire | 30 appels/heure |
+| Usage CRON actuel | ~0.29 appel/jour (<1%) |
+
+| # | Optimisation | Description | Statut |
+|---|-------------|-------------|--------|
+| 1 | Cache sémantique TTL 48h | Augmenter TTL du `CacheIA` à 48h pour suggestions récurrentes | ⬜ |
+| 2 | Batch prompts | Combiner résumé hebdo + planning IA dimanche en un seul prompt | ⬜ |
+| 3 | Fallback règles locales | Catégorisation ingrédients, calcul portions → règles Python | ⬜ |
+| 4 | Rate limit utilisateur | Limiter chat IA à 20 messages/jour/utilisateur | ⬜ |
+
+### 8.4 Tests avancés
 
 | # | Tâche | Statut |
 |---|-------|--------|
@@ -707,7 +813,7 @@ Ajouter des commandes en langage naturel :
 | 5 | Tests mode hors-ligne frontend | ⬜ |
 | 6 | Tests service worker PWA | ⬜ |
 
-### 8.3 Tests manquants identifiés
+### 8.5 Tests manquants identifiés
 
 | Module | Manque | Statut |
 |--------|--------|--------|
@@ -719,20 +825,204 @@ Ajouter des commandes en langage naturel :
 
 ---
 
-## 9. Annexes — Détails techniques de référence
+## 9. Migration WhatsApp → Telegram
 
-### A. WhatsApp — Commandes existantes
+> **Objectif** : Remplacer WhatsApp Business API (payant) par Telegram Bot API (100% gratuit, illimité).
+> **Prérequis** : Phase 3 terminée (notifications enrichies)
+> **Impact** : Réduit le coût mensuel de ~2.40€ à 0€, simplifie l'API, boutons illimités.
 
-- Planning du dimanche soir → feedback utilisateur
-- Alertes péremption quotidiennes
-- Briefing matin
-- Réponses interactives (state machine)
+### 9.1 Pourquoi Telegram remplace WhatsApp
 
-### B. Panneau admin flottant
+| Critère | WhatsApp Business API (Meta) | Telegram Bot API |
+|---------|------------------------------|------------------|
+| **Coût messages proactifs** | ~0.02€/msg (Utility) | **Gratuit, illimité** |
+| **Coût actuel** | ~2.40€/mois (4 msgs/jour) | **0€** |
+| **Fenêtre de réponse** | 24h max pour réponses gratuites | **Aucune limite** |
+| **Templates à approuver** | Oui (validation Meta, 24-48h) | **Non requis** |
+| **Boutons interactifs** | 3 max par message (reply buttons) | **Illimité** (inline keyboards) |
+| **Catégories de messages** | Service / Utility / Marketing / Auth | **Aucune catégorie** |
+| **API complexity** | Élevée (webhooks Meta, tokens multiples) | **Simple** (1 token, BotFather) |
+| **Disponibilité tablette** | WhatsApp Web (navigateur) | **App native Android + Web** |
+
+### 9.2 Mapping fonctions WhatsApp → Telegram
+
+| Fonction WhatsApp actuelle | Équivalent Telegram | Notes |
+|---------------------------|---------------------|-------|
+| `envoyer_message_whatsapp()` | `envoyer_message_telegram()` | `sendMessage` avec `parse_mode=HTML` |
+| `envoyer_message_interactif()` | `envoyer_message_interactif_telegram()` | `InlineKeyboardMarkup` (illimité vs 3 max) |
+| `envoyer_digest_matinal()` | `envoyer_digest_matinal()` | Même contenu, format Telegram |
+| `envoyer_planning_semaine()` | `envoyer_planning_semaine()` | + boutons ✅ Valider / ✏️ Modifier / 🔄 Régénérer |
+| `envoyer_alerte_peremption()` | `envoyer_alerte_peremption()` | + boutons "Recette anti-gaspi" |
+| `envoyer_liste_courses_partagee()` | `envoyer_liste_courses()` | + boutons ✅ Confirmer / ✏️ Ajouter |
+| `envoyer_message_liste()` | N/A | Telegram n'a pas de list menus → inline keyboards |
+| 6 fonctions Sprint 16 | Mêmes noms, transport Telegram | Recettes, diagnostic, weekend, budget, nutrition, entretien |
+
+**Principe** : mêmes signatures publiques → les CRON jobs et le dispatcher ne changent quasi pas.
+
+### 9.3 Architecture cible
+
+```
+src/services/integrations/
+├── telegram.py              # NOUVEAU — 14 fonctions publiques (remplace whatsapp.py)
+└── whatsapp.py              # SUPPRIMER après migration
+
+src/api/routes/
+├── webhooks_telegram.py     # NOUVEAU — webhook Telegram (updates + callback_query)
+└── webhooks_whatsapp.py     # SUPPRIMER après migration
+
+src/core/config/settings.py  # Remplacer META_WHATSAPP_* par TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID
+```
+
+### 9.4 Stratégie notifications par canal
+
+| Canal | Usage | Coût |
+|-------|-------|------|
+| **Telegram** | Digest matin, planning semaine, courses, weekend, entretien, nutrition, validation interactive, commandes conversationnelles | **$0** |
+| **Push Web** (VAPID) | Rappels rapides, alertes péremption, toutes notifications non interactives | **$0** |
+| **Email** (SMTP Supabase) | Bilan mensuel PDF, rapports | **$0** |
+| **In-app** (sonner) | Toasts, confirmations, micro-interactions | **$0** |
+
+### 9.5 Plan de migration étape par étape
+
+| # | Étape | Fichiers | Statut |
+|---|-------|----------|--------|
+| 1 | Créer bot Telegram via @BotFather, obtenir token | `.env.local` | ⬜ |
+| 2 | Créer `telegram.py` avec les 14 fonctions (mêmes signatures) | `src/services/integrations/telegram.py` | ⬜ |
+| 3 | Créer `webhooks_telegram.py` (réception messages + callback_query) | `src/api/routes/webhooks_telegram.py` | ⬜ |
+| 4 | Adapter le dispatcher de notifications : canal "telegram" | `src/services/core/notifications/notif_dispatcher.py` | ⬜ |
+| 5 | Adapter les notifications enrichies | `src/services/core/notifications/notifications_enrichies.py` | ⬜ |
+| 6 | Adapter l'engine d'automations | `src/services/utilitaires/automations_engine.py` | ⬜ |
+| 7 | Adapter la config | `src/core/config/settings.py` | ⬜ |
+| 8 | Adapter les 4 CRON jobs (imports) | `src/services/core/cron/jobs.py` | ⬜ |
+| 9 | Adapter le frontend admin (3 pages) | `frontend/src/app/(app)/admin/` | ⬜ |
+| 10 | Adapter les préférences notifications | `frontend/src/app/(app)/parametres/preferences-notifications/` | ⬜ |
+| 11 | Adapter les clients API frontend | `frontend/src/bibliotheque/api/admin.ts`, `avance.ts` | ⬜ |
+| 12 | Réécrire les tests | `tests/services/integrations/test_telegram_service.py` | ⬜ |
+| 13 | Écrire la documentation | `docs/TELEGRAM_SETUP.md`, `docs/TELEGRAM_COMMANDS.md` | ⬜ |
+| 14 | Supprimer les fichiers WhatsApp | `whatsapp.py`, `webhooks_whatsapp.py`, `WHATSAPP_*.md` | ⬜ |
+| 15 | Tester le flux complet (digest + validation + commandes) | Tests manuels + E2E | ⬜ |
+
+### 9.6 Concepts API Telegram — Référence
+
+```
+1. Créer le bot via @BotFather → obtenir TELEGRAM_BOT_TOKEN
+2. Récupérer le TELEGRAM_CHAT_ID (ton ID utilisateur)
+3. Envoyer des messages : POST https://api.telegram.org/bot{TOKEN}/sendMessage
+4. Boutons interactifs : InlineKeyboardMarkup dans le payload
+5. Recevoir les réponses : Webhook POST vers /api/v1/telegram/webhook
+6. Recevoir les clics boutons : callback_query dans le webhook
+```
+
+**Bibliothèque recommandée** : `python-telegram-bot` (async) ou appels HTTP directs via `httpx` (plus léger, cohérent avec le reste du code).
+
+---
+
+## 10. Flux utilisateur avec validation v2
+
+> Détail complet du modèle brouillon/validation. Les tâches d'implémentation sont dans la [Phase 5 section 7.5](#75-flux-validation-brouillon-v2).
+
+### 10.1 Pattern UI web de validation
+
+```
+┌─────────────────────────────────────────────┐
+│  ⚡ Brouillon — En attente de validation    │
+│                                             │
+│  [Contenu du planning / liste]              │
+│                                             │
+│  ┌─────────┐  ┌──────────┐  ┌───────────┐  │
+│  │✅ Valider│  │✏️ Modifier│  │🔄 Régénérer│ │
+│  └─────────┘  └──────────┘  └───────────┘  │
+└─────────────────────────────────────────────┘
+```
+
+- **Bandeau jaune** : brouillon en attente
+- **Bandeau vert** : validé
+- **Valider** : bouton principal, action en 1 clic
+- **Modifier** : édition inline (pas de navigation)
+- **Régénérer** : re-demander à l'IA une nouvelle proposition
+
+### 10.2 Pattern Telegram de validation
+
+```
+Bot envoie :
+  "🍽️ Planning semaine prêt !
+
+   🟡 Lundi midi : Poulet rôti, légumes grillés
+   🟡 Lundi soir : Salade César
+   🟡 Mardi midi : Pâtes carbonara
+   🟡 Mardi soir : Soupe de légumes
+   ...
+
+   [✅ Valider]  [✏️ Modifier]  [🔄 Régénérer]"
+
+→ Tap "✏️ Modifier"
+→ Bot : "Quel repas veux-tu changer ?"
+→ User : "Mardi soir → poisson grillé"
+→ Bot met à jour, renvoie le planning modifié avec les mêmes boutons
+→ Tap "✅ Valider"
+
+Bot envoie :
+  "🛒 Liste de courses (12 articles)
+   • Poulet 1.5kg
+   • Salade, parmesan, croûtons
+   • Spaghetti, œufs, guanciale
+   • Poisson blanc 400g
+   ...
+
+   [✅ Confirmer]  [✏️ Ajouter]  [❌ Refaire]"
+```
+
+Les `callback_query` Telegram sont routés vers les mêmes endpoints API que les boutons web.
+
+---
+
+## 11. Contraintes Railway Free ($0/mois)
+
+### 11.1 Limites Railway Free
+
+| Critère | Railway Free | Usage actuel |
+|---------|-------------|---------------|
+| Projets | 1 | 1 |
+| Services par projet | 3 | 1 (FastAPI) |
+| CPU par service | 1 vCPU | ~0.2 vCPU |
+| RAM par service | **0.5 GB** | ~300 MB |
+| Volume storage | 0.5 GB | Non utilisé (DB sur Supabase) |
+| **CRON jobs natifs** | **NON** | **85 jobs via APScheduler interne** (pas impacté) |
+| Custom domains | **0** | URL `*.railway.app` (OK pour usage perso) |
+| Build timeout | 10 min | OK |
+| Replicas | 1 | 1 |
+
+> **Point clé** : Les CRON jobs Railway natifs ne sont pas disponibles en Free. Mais les 85 jobs de l'app utilisent **APScheduler en interne** dans le process Python — ils tournent tant que le process FastAPI est actif.
+
+### 11.2 Risques et mitigations
+
+| Risque | Impact | Mitigation |
+|--------|--------|------------|
+| Service mis en sommeil si inactif | APScheduler s'arrête, plus de CRON | Healthcheck ping `/health` toutes les 5 min (déjà en place) |
+| 0.5 GB RAM max | FastAPI + APScheduler + cache L1 + 138 services | Optimisations mémoire Phase 6 (section 8.2) |
+| Pas de custom domain | URL = `*.railway.app` | Acceptable pour app familiale privée |
+| Build timeout 10 min | Builds longs échouent | Image Docker optimisée, multi-stage build |
+
+### 11.3 Budget mensuel total
+
+| Service | Coût |
+|---------|------|
+| Railway | **$0** (Free) |
+| Telegram Bot API | **$0** (gratuit illimité) |
+| Mistral AI | **$0** (free tier, <1% utilisé) |
+| Supabase | **$0** (free tier) |
+| Vercel | **$0** (free tier) |
+| **Total** | **$0/mois** |
+
+---
+
+## 12. Annexes — Détails techniques de référence
+
+### A. Panneau admin flottant
 
 `panneau-admin-flottant.tsx` — panneau visible uniquement en dev/admin pour accès rapide. Non visible utilisateur final.
 
-### C. Fichiers documentation à nettoyer
+### B. Fichiers documentation à nettoyer
 
 | Action | Fichiers |
 |--------|----------|
@@ -742,7 +1032,7 @@ Ajouter des commandes en langage naturel :
 | Convertir | `CHANGELOG_MODULES.md` → CHANGELOG fonctionnel |
 | Retirer | Mentions RGPD dans `user-guide/FAQ.md` |
 
-### D. Documentation plan — 44 fichiers actuels
+### C. Documentation plan — 44 fichiers actuels
 
 | Catégorie | Nombre | État |
 |-----------|--------|------|
@@ -753,7 +1043,7 @@ Ajouter des commandes en langage naturel :
 | Historique sprints | 4 | ❌ À supprimer |
 | Docs modules | 10 | ⚠️ Certains à nettoyer |
 
-### E. Sources de configuration
+### D. Sources de configuration
 
 | Priorité | Source |
 |----------|--------|
@@ -762,7 +1052,7 @@ Ajouter des commandes en langage naturel :
 | 3 | Fichier `.env` (fallback) |
 | 4 (basse) | Valeurs par défaut dans `src/core/constants.py` |
 
-### F. Récapitulatif des compteurs
+### E. Récapitulatif des compteurs
 
 | Élément | Total existant | À supprimer/modifier | Restant après Phase 1 |
 |---------|---------------|---------------------|----------------------|

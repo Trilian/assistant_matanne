@@ -1,4 +1,4 @@
-"""Tests ciblés — événements inter-modules et subscribers business."""
+﻿"""Tests ciblÃ©s â€” Ã©vÃ©nements inter-modules et subscribers business."""
 
 # pyright: reportPrivateUsage=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportUnknownVariableType=false
 
@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 from src.services.core.events.bus import EvenementDomaine
 
 
-class TestSprintDEvenements:
+class TestJardinEventsSubscribe:
     def test_jardin_recolte_emis_depuis_modification(self):
         from src.services.maison.jardin_crud_mixin import JardinCrudMixin
 
@@ -73,7 +73,7 @@ class TestEventSubscribers:
 
         event = EvenementDomaine(
             type="energie.anomalie",
-            data={"details": ["electricite: +35%"], "message": "Anomalie énergie détectée"},
+            data={"details": ["electricite: +35%"], "message": "Anomalie Ã©nergie dÃ©tectÃ©e"},
             source="test",
         )
 

@@ -1,5 +1,5 @@
-"""
-Tests simplifiés pour les 6 nouveaux services IA du Sprint 13.
+﻿"""
+Tests simplifiÃ©s pour les 6 nouveaux services IA du Sprint 13.
 """
 
 import pytest
@@ -32,41 +32,41 @@ from src.services.cuisine.nutrition_famille_ia import (
 )
 
 
-class TestSprintServices:
+class TestInventoryAIServices:
     """Tests simples pour les 6 services IA"""
 
     def test_inventaire_ai_service_creation(self):
-        """Test création du service inventaire"""
+        """Test crÃ©ation du service inventaire"""
         service = InventaireAIService()
         assert service is not None
         assert service.service_name == "inventaire_ia"
 
     def test_planning_ai_service_creation(self):
-        """Test création du service planning"""
+        """Test crÃ©ation du service planning"""
         service = PlanningAIService()
         assert service is not None
         assert service.service_name == "planning_ia"
 
     def test_meteo_impact_ai_service_creation(self):
-        """Test création du service météo"""
+        """Test crÃ©ation du service mÃ©tÃ©o"""
         service = MeteoImpactAIService()
         assert service is not None
         assert service.service_name == "meteo_impact"
 
     def test_habitudes_ai_service_creation(self):
-        """Test création du service habitudes"""
+        """Test crÃ©ation du service habitudes"""
         service = HabitudesAIService()
         assert service is not None
         assert service.service_name == "habitudes_ia"
 
     def test_projets_maison_ai_service_creation(self):
-        """Test création du service projets"""
+        """Test crÃ©ation du service projets"""
         service = ProjetsMaisonAIService()
         assert service is not None
         assert service.service_name == "projets_maison_ia"
 
     def test_nutrition_famille_ai_service_creation(self):
-        """Test création du service nutrition"""
+        """Test crÃ©ation du service nutrition"""
         service = NutritionFamilleAIService()
         assert service is not None
         assert service.service_name == "nutrition_famille_ia"
@@ -86,7 +86,7 @@ class TestFactoryFunctions:
         assert isinstance(service, PlanningAIService)
 
     def test_meteo_factory(self):
-        """Test factory météo"""
+        """Test factory mÃ©tÃ©o"""
         service = get_meteo_impact_ai_service()
         assert isinstance(service, MeteoImpactAIService)
 
@@ -107,23 +107,23 @@ class TestFactoryFunctions:
 
 
 class TestServiceInheritance:
-    """Tests d'héritage de BaseAIService"""
+    """Tests d'hÃ©ritage de BaseAIService"""
 
     def test_inventaire_inherits_base_ai_service(self):
-        """Vérifier héritage"""
+        """VÃ©rifier hÃ©ritage"""
         service = InventaireAIService()
         assert hasattr(service, "call_with_cache")
         assert hasattr(service, "call_with_dict_parsing_sync")
         assert hasattr(service, "call_with_list_parsing_sync")
 
     def test_planning_inherits_base_ai_service(self):
-        """Vérifier héritage"""
+        """VÃ©rifier hÃ©ritage"""
         service = PlanningAIService()
         assert hasattr(service, "call_with_cache")
         assert hasattr(service, "call_with_dict_parsing_sync")
 
     def test_all_services_have_cache_prefix(self):
-        """Vérifier tous les services ont un cache_prefix"""
+        """VÃ©rifier tous les services ont un cache_prefix"""
         services = [
             InventaireAIService(),
             PlanningAIService(),

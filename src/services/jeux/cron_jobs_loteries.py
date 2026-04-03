@@ -1,9 +1,9 @@
-"""
+﻿"""
 Cron jobs pour le module Loteries (Loto + Euromillions).
 
-2 jobs automatisés:
-1. Scraper résultats FDJ: 1×/jour à 21h30 (après tirages)
-2. Backtest grilles: 1×/jour à 22h (après scraping)
+2 jobs automatisÃ©s:
+1. Scraper rÃ©sultats FDJ: 1Ã—/jour Ã  21h30 (aprÃ¨s tirages)
+2. Backtest grilles: 1Ã—/jour Ã  22h (aprÃ¨s scraping)
 """
 
 import csv
@@ -16,7 +16,7 @@ from typing import Any
 from apscheduler.triggers.cron import CronTrigger
 
 from src.core.db import obtenir_contexte_db
-from src.core.exceptions import ErreurService
+from src.core.exceptions import ErreurServiceIA
 from src.core.models.jeux import TirageLoto, TirageEuromillions, GrilleLoto, GrilleEuromillions
 
 logger = logging.getLogger(__name__)
@@ -33,49 +33,49 @@ _FDJ_EUROMILLIONS_CSV_URL = (
     "1a2b3c4d-9876-4562-b3fc-2c963f66afq6"
 )
 
-# Timeout pour les requêtes HTTP vers FDJ
+# Timeout pour les requÃªtes HTTP vers FDJ
 _HTTP_TIMEOUT = 30
 
 
-# ═══════════════════════════════════════════════════════════
-# JOB 1: SCRAPER RÉSULTATS FDJ (Loto + Euromillions)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# JOB 1: SCRAPER RÃ‰SULTATS FDJ (Loto + Euromillions)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def scraper_resultats_fdj():
     """
-    Scrape les résultats des tirages Loto et Euromillions via l'API publique FDJ.
+    Scrape les rÃ©sultats des tirages Loto et Euromillions via l'API publique FDJ.
 
-    Fréquence: 1×/jour à 21h30 (après les tirages à 21h)
+    FrÃ©quence: 1Ã—/jour Ã  21h30 (aprÃ¨s les tirages Ã  21h)
 
-    Implémente:
-    - Téléchargement du fichier historique CSV depuis l'API FDJ
-    - Parsing des résultats (numéros + chance/étoiles + jackpot)
+    ImplÃ©mente:
+    - TÃ©lÃ©chargement du fichier historique CSV depuis l'API FDJ
+    - Parsing des rÃ©sultats (numÃ©ros + chance/Ã©toiles + jackpot)
     - Insertion des tirages manquants en base
-    - Gestion des erreurs réseau avec fallback
+    - Gestion des erreurs rÃ©seau avec fallback
     """
-    logger.info("🔄 Début scraping résultats FDJ (Loto + Euromillions)")
+    logger.info("ðŸ”„ DÃ©but scraping rÃ©sultats FDJ (Loto + Euromillions)")
 
     nb_loto = 0
     nb_euro = 0
 
     try:
         nb_loto = _scraper_tirages_loto()
-        logger.info(f"✅ Loto: {nb_loto} nouveau(x) tirage(s) inséré(s)")
+        logger.info(f"âœ… Loto: {nb_loto} nouveau(x) tirage(s) insÃ©rÃ©(s)")
     except Exception as e:
-        logger.error(f"❌ Erreur scraping Loto: {e}", exc_info=True)
+        logger.error(f"âŒ Erreur scraping Loto: {e}", exc_info=True)
 
     try:
         nb_euro = _scraper_tirages_euromillions()
-        logger.info(f"✅ Euromillions: {nb_euro} nouveau(x) tirage(s) inséré(s)")
+        logger.info(f"âœ… Euromillions: {nb_euro} nouveau(x) tirage(s) insÃ©rÃ©(s)")
     except Exception as e:
-        logger.error(f"❌ Erreur scraping Euromillions: {e}", exc_info=True)
+        logger.error(f"âŒ Erreur scraping Euromillions: {e}", exc_info=True)
 
-    logger.info(f"✅ Scraping FDJ terminé: {nb_loto} Loto + {nb_euro} Euromillions")
+    logger.info(f"âœ… Scraping FDJ terminÃ©: {nb_loto} Loto + {nb_euro} Euromillions")
 
 
 def _telecharger_csv_fdj(url: str) -> str:
-    """Télécharge un fichier CSV ou ZIP depuis l'API FDJ et retourne le contenu CSV."""
+    """TÃ©lÃ©charge un fichier CSV ou ZIP depuis l'API FDJ et retourne le contenu CSV."""
     import httpx
 
     response = httpx.get(url, timeout=_HTTP_TIMEOUT, follow_redirects=True)
@@ -88,7 +88,7 @@ def _telecharger_csv_fdj(url: str) -> str:
         with zipfile.ZipFile(io.BytesIO(response.content)) as zf:
             csv_files = [n for n in zf.namelist() if n.endswith(".csv")]
             if not csv_files:
-                raise ErreurService("Aucun fichier CSV trouvé dans l'archive ZIP FDJ")
+                raise ErreurServiceIA("Aucun fichier CSV trouvÃ© dans l'archive ZIP FDJ")
             return zf.read(csv_files[0]).decode("utf-8-sig")
 
     # Sinon, c'est directement un CSV
@@ -106,11 +106,11 @@ def _parser_date_fdj(date_str: str) -> date | None:
 
 
 def _scraper_tirages_loto() -> int:
-    """Télécharge et insère les tirages Loto manquants. Retourne le nombre inséré."""
+    """TÃ©lÃ©charge et insÃ¨re les tirages Loto manquants. Retourne le nombre insÃ©rÃ©."""
     csv_content = _telecharger_csv_fdj(_FDJ_LOTO_CSV_URL)
     reader = csv.DictReader(io.StringIO(csv_content), delimiter=";")
 
-    # Normaliser les noms de colonnes (le CSV FDJ utilise des noms variés)
+    # Normaliser les noms de colonnes (le CSV FDJ utilise des noms variÃ©s)
     tirages_a_inserer = []
     for row in reader:
         # Adapter selon les noms de colonnes FDJ connus
@@ -121,7 +121,7 @@ def _scraper_tirages_loto() -> int:
             continue
 
         try:
-            # Les colonnes de numéros FDJ sont nommées "boule_1" à "boule_5" + "numero_chance"
+            # Les colonnes de numÃ©ros FDJ sont nommÃ©es "boule_1" Ã  "boule_5" + "numero_chance"
             numeros = []
             for col_prefix in ("boule_", "Boule ", "numero_"):
                 for i in range(1, 6):
@@ -144,7 +144,7 @@ def _scraper_tirages_loto() -> int:
             jackpot = None
             if jackpot_str:
                 try:
-                    jackpot = int(float(str(jackpot_str).replace(",", ".").replace(" ", "").replace("€", "")))
+                    jackpot = int(float(str(jackpot_str).replace(",", ".").replace(" ", "").replace("â‚¬", "")))
                 except (ValueError, TypeError):
                     pass
 
@@ -165,10 +165,10 @@ def _scraper_tirages_loto() -> int:
                 "gagnants": gagnants,
             })
         except (ValueError, KeyError, TypeError) as e:
-            logger.debug(f"Ligne Loto ignorée : {e}")
+            logger.debug(f"Ligne Loto ignorÃ©e : {e}")
             continue
 
-    # Insérer les tirages manquants en base
+    # InsÃ©rer les tirages manquants en base
     nb_inseres = 0
     with obtenir_contexte_db() as session:
         for t in tirages_a_inserer:
@@ -194,13 +194,13 @@ def _scraper_tirages_loto() -> int:
 
         if nb_inseres > 0:
             session.commit()
-            logger.info(f"📥 {nb_inseres} tirage(s) Loto inséré(s)")
+            logger.info(f"ðŸ“¥ {nb_inseres} tirage(s) Loto insÃ©rÃ©(s)")
 
     return nb_inseres
 
 
 def _scraper_tirages_euromillions() -> int:
-    """Télécharge et insère les tirages Euromillions manquants. Retourne le nombre inséré."""
+    """TÃ©lÃ©charge et insÃ¨re les tirages Euromillions manquants. Retourne le nombre insÃ©rÃ©."""
     csv_content = _telecharger_csv_fdj(_FDJ_EUROMILLIONS_CSV_URL)
     reader = csv.DictReader(io.StringIO(csv_content), delimiter=";")
 
@@ -213,7 +213,7 @@ def _scraper_tirages_euromillions() -> int:
             continue
 
         try:
-            # Numéros principaux (5)
+            # NumÃ©ros principaux (5)
             numeros = []
             for col_prefix in ("boule_", "Boule ", "numero_"):
                 for i in range(1, 6):
@@ -226,9 +226,9 @@ def _scraper_tirages_euromillions() -> int:
             if len(numeros) != 5:
                 continue
 
-            # Étoiles (2)
+            # Ã‰toiles (2)
             etoiles = []
-            for col_prefix in ("etoile_", "Etoile ", "étoile_"):
+            for col_prefix in ("etoile_", "Etoile ", "Ã©toile_"):
                 for i in range(1, 3):
                     val = row.get(f"{col_prefix}{i}")
                     if val and val.strip().isdigit():
@@ -244,7 +244,7 @@ def _scraper_tirages_euromillions() -> int:
             jackpot = None
             if jackpot_str:
                 try:
-                    jackpot = int(float(str(jackpot_str).replace(",", ".").replace(" ", "").replace("€", "")))
+                    jackpot = int(float(str(jackpot_str).replace(",", ".").replace(" ", "").replace("â‚¬", "")))
                 except (ValueError, TypeError):
                     pass
 
@@ -269,10 +269,10 @@ def _scraper_tirages_euromillions() -> int:
                 "my_million": str(my_million).strip() if my_million else None,
             })
         except (ValueError, KeyError, TypeError) as e:
-            logger.debug(f"Ligne Euromillions ignorée : {e}")
+            logger.debug(f"Ligne Euromillions ignorÃ©e : {e}")
             continue
 
-    # Insérer les tirages manquants en base
+    # InsÃ©rer les tirages manquants en base
     nb_inseres = 0
     with obtenir_contexte_db() as session:
         for t in tirages_a_inserer:
@@ -300,30 +300,30 @@ def _scraper_tirages_euromillions() -> int:
 
         if nb_inseres > 0:
             session.commit()
-            logger.info(f"📥 {nb_inseres} tirage(s) Euromillions inséré(s)")
+            logger.info(f"ðŸ“¥ {nb_inseres} tirage(s) Euromillions insÃ©rÃ©(s)")
 
     return nb_inseres
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # JOB 2: BACKTEST GRILLES (Loto + Euromillions)
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def backtest_grilles():
     """
     Effectue le backtest de toutes les grilles en attente.
     
-    Fréquence: 1×/jour à 22h (après scraping des tirages)
+    FrÃ©quence: 1Ã—/jour Ã  22h (aprÃ¨s scraping des tirages)
     
-    Implémente:
+    ImplÃ©mente:
     - Comparaison grilles vs derniers tirages
-    - Calcul rang (1, 2, 3, etc.) selon nb bons numéros
-    - Calcul gain selon barème FDJ
-    - Mise à jour statut (gagnant/perdant)
+    - Calcul rang (1, 2, 3, etc.) selon nb bons numÃ©ros
+    - Calcul gain selon barÃ¨me FDJ
+    - Mise Ã  jour statut (gagnant/perdant)
     - Stats utilisateurs (ROI, win rate)
     """
-    logger.info("🔍 Début backtest grilles Loto + Euromillions")
+    logger.info("ðŸ” DÃ©but backtest grilles Loto + Euromillions")
     
     try:
         with obtenir_contexte_db() as session:
@@ -342,7 +342,7 @@ def backtest_grilles():
                 if not tirage:
                     continue
                 
-                # Comparer numéros
+                # Comparer numÃ©ros
                 numeros_grille = set(grille.numeros)
                 numeros_tirage = set(tirage.numeros)
                 nb_bons = len(numeros_grille & numeros_tirage)
@@ -350,10 +350,10 @@ def backtest_grilles():
                 # Chance
                 chance_ok = grille.numero_chance == tirage.numero_chance
                 
-                # Déterminer rang et gain
+                # DÃ©terminer rang et gain
                 rang, gain = _calculer_rang_gain_loto(nb_bons, chance_ok)
                 
-                # Mettre à jour grille
+                # Mettre Ã  jour grille
                 grille.backtest = {
                     "rang": rang,
                     "nb_bons": nb_bons,
@@ -382,12 +382,12 @@ def backtest_grilles():
                 if not tirage:
                     continue
                 
-                # Numéros
+                # NumÃ©ros
                 numeros_grille = set(grille.numeros)
                 numeros_tirage = set(tirage.numeros)
                 nb_bons_numeros = len(numeros_grille & numeros_tirage)
                 
-                # Étoiles
+                # Ã‰toiles
                 etoiles_grille = set(grille.etoiles)
                 etoiles_tirage = set(tirage.etoiles)
                 nb_bonnes_etoiles = len(etoiles_grille & etoiles_tirage)
@@ -412,18 +412,18 @@ def backtest_grilles():
             session.commit()
             
             logger.info(
-                f"✅ Backtest terminé: {nb_backtest_loto} grilles Loto, "
+                f"âœ… Backtest terminÃ©: {nb_backtest_loto} grilles Loto, "
                 f"{nb_backtest_euro} grilles Euromillions"
             )
     
     except Exception as e:
-        logger.error(f"❌ Erreur backtest grilles: {e}", exc_info=True)
-        raise ErreurService(f"Échec backtest: {e}")
+        logger.error(f"âŒ Erreur backtest grilles: {e}", exc_info=True)
+        raise ErreurServiceIA(f"Ã‰chec backtest: {e}")
 
 
 def _calculer_rang_gain_loto(nb_bons: int, chance_ok: bool) -> tuple[int, float]:
     """
-    Calcule le rang et le gain Loto selon barème FDJ.
+    Calcule le rang et le gain Loto selon barÃ¨me FDJ.
     
     Rang 1: 5 bons + chance
     Rang 2: 5 bons
@@ -435,10 +435,10 @@ def _calculer_rang_gain_loto(nb_bons: int, chance_ok: bool) -> tuple[int, float]
     Rang 8: 2 bons
     
     Returns:
-        (rang, gain_estimé)
+        (rang, gain_estimÃ©)
     """
     if nb_bons == 5 and chance_ok:
-        return (1, 1_000_000.0)  # Jackpot (estimé)
+        return (1, 1_000_000.0)  # Jackpot (estimÃ©)
     elif nb_bons == 5:
         return (2, 20_000.0)
     elif nb_bons == 4 and chance_ok:
@@ -459,7 +459,7 @@ def _calculer_rang_gain_loto(nb_bons: int, chance_ok: bool) -> tuple[int, float]
 
 def _calculer_rang_gain_euromillions(nb_bons_numeros: int, nb_bonnes_etoiles: int) -> tuple[int, float]:
     """
-    Calcule le rang et le gain Euromillions selon barème FDJ.
+    Calcule le rang et le gain Euromillions selon barÃ¨me FDJ.
     
     Rang 1: 5N + 2E
     Rang 2: 5N + 1E
@@ -473,7 +473,7 @@ def _calculer_rang_gain_euromillions(nb_bons_numeros: int, nb_bonnes_etoiles: in
     Rang 10: 2N + 0E
     
     Returns:
-        (rang, gain_estimé)
+        (rang, gain_estimÃ©)
     """
     if nb_bons_numeros == 5 and nb_bonnes_etoiles == 2:
         return (1, 10_000_000.0)  # Jackpot
@@ -502,9 +502,9 @@ def _calculer_rang_gain_euromillions(nb_bons_numeros: int, nb_bonnes_etoiles: in
         return (0, 0.0)
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CONFIGURATION SCHEDULER
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 def configurer_jobs_loteries(scheduler: Any) -> None:
@@ -514,18 +514,18 @@ def configurer_jobs_loteries(scheduler: Any) -> None:
     Args:
         scheduler: Instance APScheduler
     """
-    # Job 1: Scraper résultats FDJ - 1×/jour à 21h30
+    # Job 1: Scraper rÃ©sultats FDJ - 1Ã—/jour Ã  21h30
     scheduler.add_job(
         scraper_resultats_fdj,
         trigger=CronTrigger(hour=21, minute=30),
         id="scraper_resultats_fdj",
-        name="Scraper résultats FDJ (Loto + Euromillions)",
+        name="Scraper rÃ©sultats FDJ (Loto + Euromillions)",
         replace_existing=True,
         max_instances=1
     )
-    logger.info("✅ Job 'Scraper résultats FDJ' configuré (21h30 quotidien)")
+    logger.info("âœ… Job 'Scraper rÃ©sultats FDJ' configurÃ© (21h30 quotidien)")
     
-    # Job 2: Backtest grilles - 1×/jour à 22h
+    # Job 2: Backtest grilles - 1Ã—/jour Ã  22h
     scheduler.add_job(
         backtest_grilles,
         trigger=CronTrigger(hour=22, minute=0),
@@ -534,4 +534,4 @@ def configurer_jobs_loteries(scheduler: Any) -> None:
         replace_existing=True,
         max_instances=1
     )
-    logger.info("✅ Job 'Backtest grilles' configuré (22h quotidien)")
+    logger.info("âœ… Job 'Backtest grilles' configurÃ© (22h quotidien)")

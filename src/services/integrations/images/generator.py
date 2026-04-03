@@ -15,22 +15,15 @@ import requests
 from src.core.decorators import avec_resilience
 from src.services.core.registry import service_factory
 
-# Ré-exports pour backward compatibility (tests importent depuis generator.py)
-from .prompts import _construire_prompt_detaille, _construire_query_optimisee  # noqa: F401
-from .providers import (  # noqa: F401
+from .prompts import _construire_query_optimisee
+from .providers import (
     _generer_via_huggingface,
     _generer_via_leonardo,
     _generer_via_pollinations,
     _generer_via_replicate,
-)
-from .providers import (
-    _rechercher_image_pexels as _rechercher_image_pexels_impl,
-)
-from .providers import (
-    _rechercher_image_pixabay as _rechercher_image_pixabay_impl,
-)
-from .providers import (
-    _rechercher_image_unsplash as _rechercher_image_unsplash_impl,
+    _rechercher_image_pexels,
+    _rechercher_image_pixabay,
+    _rechercher_image_unsplash,
 )
 
 logger = logging.getLogger(__name__)
@@ -159,7 +152,7 @@ class ServiceGenerateurImages:
         # Priorité 3: Unsplash
         if UNSPLASH_API_KEY:
             try:
-                url = _rechercher_image_unsplash(nom_recette, search_query)
+                url = _rechercher_image_unsplash(nom_recette, search_query, api_key=UNSPLASH_API_KEY)
                 if url:
                     logger.info(f"✅ Image trouvée via Unsplash pour '{nom_recette}'")
                     return url
@@ -169,7 +162,7 @@ class ServiceGenerateurImages:
         # Priorité 4: Pexels
         if PEXELS_API_KEY:
             try:
-                url = _rechercher_image_pexels(nom_recette, search_query)
+                url = _rechercher_image_pexels(nom_recette, search_query, api_key=PEXELS_API_KEY)
                 if url:
                     logger.info(f"✅ Image trouvée via Pexels pour '{nom_recette}'")
                     return url
@@ -179,7 +172,7 @@ class ServiceGenerateurImages:
         # Priorité 5: Pixabay
         if PIXABAY_API_KEY:
             try:
-                url = _rechercher_image_pixabay(nom_recette, search_query)
+                url = _rechercher_image_pixabay(nom_recette, search_query, api_key=PIXABAY_API_KEY)
                 if url:
                     logger.info(f"✅ Image trouvée via Pixabay pour '{nom_recette}'")
                     return url
@@ -247,50 +240,5 @@ def obtenir_image_generator_service() -> ServiceGenerateurImages:
 
 
 def obtenir_service_generateur_images() -> ServiceGenerateurImages:
-    """Alias français pour get_image_generator_service."""
-    return get_image_generator_service()
-
-
-# ═══════════════════════════════════════════════════════════
-# FONCTIONS MODULE-LEVEL — Backward compatibility
-# (Ces fonctions délèguent au service singleton)
-# ═══════════════════════════════════════════════════════════
-
-
-@avec_resilience(retry=2, timeout_s=60, fallback=None)
-def generer_image_recette(
-    nom_recette: str, description: str = "", ingredients_list: list = None, type_plat: str = ""
-) -> str | None:
-    """Génère une image pour une recette (backward compat, délègue au service)."""
-    service = get_image_generator_service()
-    return service.generer_image_recette(nom_recette, description, ingredients_list, type_plat)
-
-
-def telecharger_image_depuis_url(url: str, nom_fichier: str) -> str | None:
-    """Télécharge une image depuis une URL (backward compat, délègue au service)."""
-    return ServiceGenerateurImages.telecharger_image(url, nom_fichier)
-
-
-# ═══════════════════════════════════════════════════════════
-# WRAPPERS RECHERCHE — Passent la clé API module-level aux providers
-# (backward compat: tests importent ces fonctions depuis generator.py)
-# ═══════════════════════════════════════════════════════════
-
-
-def _rechercher_image_pexels(nom_recette: str, search_query: str = "") -> str | None:
-    """Recherche image Pexels (délègue à providers.py)."""
-    return _rechercher_image_pexels_impl(nom_recette, search_query, api_key=PEXELS_API_KEY)
-
-
-def _rechercher_image_pixabay(nom_recette: str, search_query: str = "") -> str | None:
-    """Recherche image Pixabay (délègue à providers.py)."""
-    return _rechercher_image_pixabay_impl(nom_recette, search_query, api_key=PIXABAY_API_KEY)
-
-
-def _rechercher_image_unsplash(nom_recette: str, search_query: str = "") -> str | None:
-    """Recherche image Unsplash (délègue à providers.py)."""
-    return _rechercher_image_unsplash_impl(nom_recette, search_query, api_key=UNSPLASH_API_KEY)
-
-
-# ─── Aliases rétrocompatibilité  ───────────────────────────────
-get_image_generator_service = obtenir_image_generator_service  # alias rétrocompatibilité 
+    """Alias français pour obtenir_image_generator_service."""
+    return obtenir_image_generator_service()

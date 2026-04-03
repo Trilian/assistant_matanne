@@ -1,8 +1,8 @@
-"""
-CT-14 — Tests des routes admin et RGPD (Sprint 3)
+﻿"""
+CT-14 â€” Tests des routes admin et RGPD (Sprint 3)
 
 Tests couvrant:
-- Routes admin (audit-logs, audit-stats, audit-export) : contrôle de rôle
+- Routes admin (audit-logs, audit-stats, audit-export) : contrÃ´le de rÃ´le
 - Routes RGPD (export, data-summary, delete-account) : authentification + structure
 """
 
@@ -16,14 +16,14 @@ from typing import Any, cast
 from unittest.mock import patch
 
 
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # FIXTURES
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 @pytest_asyncio.fixture
 async def async_client():
-    """Client async avec override d'auth : rôle admin pour les tests admin/RGPD."""
+    """Client async avec override d'authÂ : rÃ´le admin pour les tests admin/RGPD."""
     from src.api.main import app
     from src.api.dependencies import require_auth
 
@@ -48,17 +48,17 @@ async def unauthenticated_client():
         yield client
 
 
-# ═══════════════════════════════════════════════════════════
-# CT-14 — Routes admin : contrôle du rôle
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CT-14 â€” Routes admin : contrÃ´le du rÃ´le
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestAdminAuditLogs:
-    """GET /api/v1/admin/audit-logs — accessible admin seulement."""
+    """GET /api/v1/admin/audit-logs â€” accessible admin seulement."""
 
     @pytest.mark.asyncio
     async def test_sans_auth_retourne_401_ou_403(self, unauthenticated_client: httpx.AsyncClient):
-        """L'endpoint doit refuser les requêtes sans token."""
+        """L'endpoint doit refuser les requÃªtes sans token."""
         response = await unauthenticated_client.get("/api/v1/admin/audit-logs")
         assert response.status_code in [401, 403, 404]
 
@@ -66,13 +66,13 @@ class TestAdminAuditLogs:
     async def test_avec_token_admin_retourne_200_ou_200(
         self, async_client: httpx.AsyncClient
     ):
-        """Avec un token admin valide, l'endpoint doit répondre."""
+        """Avec un token admin valide, l'endpoint doit rÃ©pondre."""
         response = await async_client.get("/api/v1/admin/audit-logs")
         assert response.status_code in [200, 401, 403, 404, 500]
 
     @pytest.mark.asyncio
     async def test_reponse_json(self, async_client: httpx.AsyncClient):
-        """Quand il retourne 200, la réponse doit être du JSON."""
+        """Quand il retourne 200, la rÃ©ponse doit Ãªtre du JSON."""
         response = await async_client.get("/api/v1/admin/audit-logs")
         if response.status_code == 200:
             data = response.json()
@@ -80,7 +80,7 @@ class TestAdminAuditLogs:
 
     @pytest.mark.asyncio
     async def test_pagination_params_acceptes(self, async_client: httpx.AsyncClient):
-        """Les paramètres de pagination doivent être acceptés."""
+        """Les paramÃ¨tres de pagination doivent Ãªtre acceptÃ©s."""
         response = await async_client.get(
             "/api/v1/admin/audit-logs?page=1&par_page=10"
         )
@@ -88,7 +88,7 @@ class TestAdminAuditLogs:
 
 
 class TestAdminAuditStats:
-    """GET /api/v1/admin/audit-stats — accessible admin seulement."""
+    """GET /api/v1/admin/audit-stats â€” accessible admin seulement."""
 
     @pytest.mark.asyncio
     async def test_sans_auth_retourne_401_ou_403(
@@ -104,7 +104,7 @@ class TestAdminAuditStats:
 
 
 class TestAdminAuditExport:
-    """GET /api/v1/admin/audit-export — export CSV admin."""
+    """GET /api/v1/admin/audit-export â€” export CSV admin."""
 
     @pytest.mark.asyncio
     async def test_sans_auth_retourne_401_ou_403(
@@ -123,7 +123,7 @@ class TestAdminAuditExport:
 
 
 class TestAdminJobsACL:
-    """GET /api/v1/admin/jobs* — contrôle d'accès admin."""
+    """GET /api/v1/admin/jobs* â€” contrÃ´le d'accÃ¨s admin."""
 
     @pytest.mark.asyncio
     async def test_jobs_sans_auth_refuse(self, unauthenticated_client: httpx.AsyncClient):
@@ -148,9 +148,9 @@ class TestAdminJobsACL:
     @pytest.mark.asyncio
     async def test_executer_job_dry_run_propage_flag(self, async_client: httpx.AsyncClient):
         with (
-            patch("src.api.routes.admin._verifier_limite_jobs"),
-            patch("src.api.routes.admin._ajouter_log_job"),
-            patch("src.api.routes.admin._journaliser_action_admin"),
+            patch("src.api.routes.admin_jobs._verifier_limite_jobs"),
+            patch("src.api.routes.admin_jobs._ajouter_log_job"),
+            patch("src.api.routes.admin_jobs._journaliser_action_admin"),
             patch(
                 "src.services.core.cron.jobs.lister_jobs_disponibles",
                 return_value=["rappels_famille"],
@@ -160,7 +160,7 @@ class TestAdminJobsACL:
                 return_value={
                     "status": "dry_run",
                     "job_id": "rappels_famille",
-                    "message": "Job 'rappels_famille' simulé (dry-run).",
+                    "message": "Job 'rappels_famille' simulÃ© (dry-run).",
                     "duration_ms": 7,
                     "dry_run": True,
                 },
@@ -214,9 +214,9 @@ class TestAdminJobsACL:
     @pytest.mark.asyncio
     async def test_executer_job_dry_run_sprint_15(self, async_client: httpx.AsyncClient):
         with (
-            patch("src.api.routes.admin._verifier_limite_jobs"),
-            patch("src.api.routes.admin._ajouter_log_job"),
-            patch("src.api.routes.admin._journaliser_action_admin"),
+            patch("src.api.routes.admin_jobs._verifier_limite_jobs"),
+            patch("src.api.routes.admin_jobs._ajouter_log_job"),
+            patch("src.api.routes.admin_jobs._journaliser_action_admin"),
             patch(
                 "src.services.core.cron.jobs.lister_jobs_disponibles",
                 return_value=["job_nutrition_adultes_weekly"],
@@ -226,7 +226,7 @@ class TestAdminJobsACL:
                 return_value={
                     "status": "dry_run",
                     "job_id": "job_nutrition_adultes_weekly",
-                    "message": "Job 'job_nutrition_adultes_weekly' simulé (dry-run).",
+                    "message": "Job 'job_nutrition_adultes_weekly' simulÃ© (dry-run).",
                     "duration_ms": 11,
                     "dry_run": True,
                 },
@@ -252,7 +252,7 @@ class TestAdminJobsACL:
     @pytest.mark.asyncio
     async def test_executer_job_inconnu_retourne_404(self, async_client: httpx.AsyncClient):
         with (
-            patch("src.api.routes.admin._verifier_limite_jobs"),
+            patch("src.api.routes.admin_jobs._verifier_limite_jobs"),
             patch(
                 "src.services.core.cron.jobs.lister_jobs_disponibles",
                 return_value=["job_briefing_matinal_push"],
@@ -266,7 +266,7 @@ class TestAdminJobsACL:
 
 
 class TestAdminSqlViewsACL:
-    """GET /api/v1/admin/sql-views* — contrôle d'accès admin."""
+    """GET /api/v1/admin/sql-views* â€” contrÃ´le d'accÃ¨s admin."""
 
     @pytest.mark.asyncio
     async def test_sql_views_sans_auth_refuse(self, unauthenticated_client: httpx.AsyncClient):
@@ -284,8 +284,8 @@ class TestAdminSqlViewsACL:
         assert response.status_code in [200, 401, 403, 404, 500]
 
 
-class TestAdminPhase7Endpoints:
-    """Endpoints complémentaires phase 7."""
+class TestAdminNotificationEndpoints:
+    """Endpoints complÃ©mentaires phase 7."""
 
     @pytest.mark.asyncio
     async def test_notification_test_all(self, async_client: httpx.AsyncClient):
@@ -345,8 +345,8 @@ class TestAdminPhase7Endpoints:
         assert isinstance(response.json(), dict)
 
 
-class TestAdminPhase5BridgesStatus:
-    """Endpoint statut opérationnel des bridges phase 5."""
+class TestAdminInterModuleBridgesStatus:
+    """Endpoint statut opÃ©rationnel des bridges phase 5."""
 
     @pytest.mark.asyncio
     async def test_status_phase5_presence_mode(self, async_client: httpx.AsyncClient):
@@ -363,7 +363,7 @@ class TestAdminPhase5BridgesStatus:
 
 
 class TestAdminRouterExiste:
-    """Vérifie que les routes admin sont bien enregistrées dans l'app."""
+    """VÃ©rifie que les routes admin sont bien enregistrÃ©es dans l'app."""
 
     def test_routes_admin_enregistrees(self):
         from src.api.main import app
@@ -373,8 +373,8 @@ class TestAdminRouterExiste:
         assert len(admin_paths) >= 2, f"Routes admin introuvables. Chemins: {paths[:20]}"
 
 
-class TestAdminSprintFEndpoints:
-    """Couverture des endpoints ajoutés pour le Sprint F."""
+class TestAdminNotificationsQueueEndpoints:
+    """Couverture des endpoints ajoutÃ©s pour le Sprint F."""
 
     @pytest.mark.asyncio
     async def test_notifications_queue_listing(self, async_client: httpx.AsyncClient):
@@ -470,7 +470,7 @@ class TestAdminQuickCommand:
             return_value={
                 "status": "dry_run",
                 "job_id": "rappels_famille",
-                "message": "simulé",
+                "message": "simulÃ©",
                 "duration_ms": 10,
                 "dry_run": True,
             },
@@ -500,19 +500,19 @@ class TestAdminQuickCommand:
         assert data.get("type") == "error"
 
 
-# ═══════════════════════════════════════════════════════════
-# CT-14 — Backup personnel
-# ═══════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# CT-14 â€” Backup personnel
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestBackupPersonnel:
-    """POST /api/v1/export/backup — export backup utilisateur."""
+    """POST /api/v1/export/backup â€” export backup utilisateur."""
 
     @pytest.mark.asyncio
     async def test_sans_auth_retourne_401_ou_200(
         self, unauthenticated_client: httpx.AsyncClient
     ):
-        """Le backup nécessite une authentification (ou dev mode accepte)."""
+        """Le backup nÃ©cessite une authentification (ou dev mode accepte)."""
         response = await unauthenticated_client.post("/api/v1/export/backup")
         assert response.status_code in [200, 401, 403, 500]
 

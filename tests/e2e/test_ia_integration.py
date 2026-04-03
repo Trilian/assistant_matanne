@@ -1,7 +1,7 @@
-"""
-═══════════════════════════════════════════════════════════
-Integration Tests — Sprint 13 Backend API (E2E)
-═══════════════════════════════════════════════════════════
+﻿"""
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+Integration Tests â€” Sprint 13 Backend API (E2E)
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 Tests that verify the full request-response flow of all 6 Sprint 13 AI endpoints
 from the FastAPI application perspective.
@@ -29,7 +29,7 @@ def auth_headers():
     return {"Authorization": "Bearer test-token-123"}
 
 
-class TestSprintE2E:
+class TestInventoryPredictionE2E:
     """End-to-end integration tests for Sprint 13 endpoints."""
 
     def test_predict_consommation_full_flow(self, client, auth_headers):
@@ -63,7 +63,7 @@ class TestSprintE2E:
                     "date": "2026-04-02",
                     "petit_dejeuner": "Oeufs",
                     "dejeuner": "Salade",
-                    "diner": "Pâtes",
+                    "diner": "PÃ¢tes",
                 }
             ]
         }
@@ -89,7 +89,7 @@ class TestSprintE2E:
             "previsions_7j": [
                 {
                     "date": "2026-04-02",
-                    "meteo": "Ensoleillé",
+                    "meteo": "EnsoleillÃ©",
                     "temperature_min": 10,
                     "temperature_max": 18,
                     "precipitation_mm": 0,
@@ -133,7 +133,7 @@ class TestSprintE2E:
             data = response.json()
             assert "compliance_rate" in data
             assert "tendance" in data
-            assert data["tendance"] in ["croissante", "stable", "décroissante"]
+            assert data["tendance"] in ["croissante", "stable", "dÃ©croissante"]
 
     def test_estimation_projet_full_flow(self, client, auth_headers):
         """Test full request-response for project estimation."""
@@ -141,7 +141,7 @@ class TestSprintE2E:
             "projet_description": "Repeindre la cuisine",
             "surface_m2": 15,
             "type_maison": "Maison ancienne",
-            "contraintes": ["Budget limité"],
+            "contraintes": ["Budget limitÃ©"],
         }
 
         with patch("src.api.routes.ia_modules.verifier_limite_debit_ia"):
@@ -166,7 +166,7 @@ class TestSprintE2E:
             "age_ans": 4,
             "sexe": "M",
             "activite_niveau": "intense",
-            "recettes_semaine": ["Pâtes", "Poulet", "Légumes"],
+            "recettes_semaine": ["PÃ¢tes", "Poulet", "LÃ©gumes"],
             "objectif_sante": "Croissance saine",
         }
 
@@ -186,7 +186,7 @@ class TestSprintE2E:
             assert "lipides_g_j" in data
 
 
-class TestSprintValidation:
+class TestInventoryPredictionValidation:
     """Input validation tests for Sprint 13 endpoints."""
 
     def test_invalid_saison_rejected(self, client, auth_headers):
@@ -195,7 +195,7 @@ class TestSprintValidation:
             "previsions_7j": [
                 {
                     "date": "2026-04-02",
-                    "meteo": "Ensoleillé",
+                    "meteo": "EnsoleillÃ©",
                     "temperature_min": 10,
                     "temperature_max": 18,
                     "precipitation_mm": 0,
@@ -237,7 +237,7 @@ class TestSprintValidation:
             "age_ans": 4,
             "sexe": "X",  # Invalid! Allowed: M, F
             "activite_niveau": "intense",
-            "recettes_semaine": ["Pâtes"],
+            "recettes_semaine": ["PÃ¢tes"],
             "objectif_sante": "Croissance",
         }
 
@@ -251,7 +251,7 @@ class TestSprintValidation:
         assert response.status_code in [400, 401, 422]
 
 
-class TestSprintRateLimiting:
+class TestInventoryPredictionRateLimiting:
     """Rate limiting tests for Sprint 13 endpoints (optional)."""
 
     def test_rate_limit_applied(self, client, auth_headers):
