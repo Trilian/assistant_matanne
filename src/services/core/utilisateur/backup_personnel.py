@@ -1,16 +1,13 @@
-"""
-Service RGPD — Export et suppression des données personnelles.
+"""Service Backup Personnel - Export des donnees utilisateur.
 
-Permet aux utilisateurs d'exercer leurs droits RGPD:
-- Droit d'accès : export de toutes les données personnelles
-- Droit à l'effacement : suppression complète du compte
-- Droit à la portabilité : export en formats standards (JSON, CSV)
+Permet d'exporter toutes les donnees personnelles en formats standards (JSON, CSV)
+pour archivage ou sauvegarde.
 
 Usage:
-    from src.services.core.utilisateur.rgpd import get_rgpd_service
+    from src.services.core.utilisateur.backup_personnel import obtenir_backup_service
 
-    service = get_rgpd_service()
-    zip_path = service.exporter_donnees_utilisateur(user_id="abc-123", db=session)
+    service = obtenir_backup_service()
+    zip_path = service.exporter_donnees_utilisateur(user_id="abc-123")
 """
 
 from __future__ import annotations
@@ -37,8 +34,8 @@ logger = logging.getLogger(__name__)
 _USER_ID_COLUMNS = frozenset({"user_id", "utilisateur_id", "profil_id"})
 
 
-class ServiceRGPD:
-    """Service de gestion des données personnelles (RGPD)."""
+class ServiceBackupPersonnel:
+    """Service d'export de données personnelles (backup)."""
 
     # Modèles contenant des données utilisateur avec leur colonne FK
     MODELS_USER_DATA: dict[str, tuple[Any, str]] = {}
@@ -161,7 +158,7 @@ class ServiceRGPD:
         # Créer le ZIP en mémoire
         export_dir = Path("data/exports")
         export_dir.mkdir(parents=True, exist_ok=True)
-        zip_path = export_dir / f"export_rgpd_{user_id[:8]}_{timestamp}.zip"
+        zip_path = export_dir / f"backup_{user_id[:8]}_{timestamp}.zip"
 
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
             # JSON complet
@@ -194,102 +191,13 @@ class ServiceRGPD:
             zf.writestr("metadata.json", json.dumps(meta, ensure_ascii=False, indent=2))
 
         logger.info(
-            f"Export RGPD créé pour user {user_id[:8]}: {zip_path} "
+            f"Backup créé pour user {user_id[:8]}: {zip_path} "
             f"({sum(len(v) for v in export_data.values())} éléments)"
         )
         return zip_path
 
-    @avec_gestion_erreurs(default_return=None, afficher_erreur=True)
-    @avec_session_db
-    def obtenir_resume_donnees(
-        self, user_id: str, db: Session = None
-    ) -> dict[str, Any]:
-        """
-        Retourne un résumé des données stockées pour un utilisateur.
 
-        Returns:
-            Dict avec categories (nom, nombre) et total_elements
-        """
-        categories = []
-        total = 0
-
-        for categorie, (model, user_col) in self.MODELS_USER_DATA.items():
-            try:
-                if not self._has_column(model, user_col):
-                    continue
-                col = getattr(model, user_col, None)
-                if col is None:
-                    continue
-                count = db.query(model).filter(col == user_id).count()
-                if count > 0:
-                    categories.append({"categorie": categorie, "nombre": count})
-                    total += count
-            except Exception as e:
-                logger.warning(f"Erreur comptage {categorie}: {e}")
-
-        return {
-            "user_id": user_id,
-            "categories": categories,
-            "total_elements": total,
-        }
-
-    @avec_gestion_erreurs(default_return=0, afficher_erreur=True)
-    @avec_session_db
-    def supprimer_compte(
-        self, user_id: str, db: Session = None
-    ) -> int:
-        """
-        Supprime toutes les données d'un utilisateur (droit à l'effacement).
-
-        Supprime en cascade : données liées d'abord, puis le profil.
-
-        Returns:
-            Nombre total d'éléments supprimés
-        """
-        total_deleted = 0
-
-        # Supprimer les données liées d'abord (ordre inverse d'importance)
-        # Le profil utilisateur est supprimé en dernier
-        categories_ordered = [
-            k for k in self.MODELS_USER_DATA.keys() if k != "profil"
-        ] + ["profil"]
-
-        for categorie in categories_ordered:
-            if categorie not in self.MODELS_USER_DATA:
-                continue
-
-            model, user_col = self.MODELS_USER_DATA[categorie]
-
-            try:
-                if not self._has_column(model, user_col):
-                    continue
-                col = getattr(model, user_col, None)
-                if col is None:
-                    continue
-
-                count = db.query(model).filter(col == user_id).delete(
-                    synchronize_session="fetch"
-                )
-                total_deleted += count
-                if count > 0:
-                    logger.info(f"RGPD suppression: {count} {categorie} pour user {user_id[:8]}")
-            except Exception as e:
-                logger.error(f"Erreur suppression {categorie}: {e}")
-
-        db.commit()
-
-        logger.info(
-            f"Compte supprimé (RGPD): user {user_id[:8]}, "
-            f"{total_deleted} éléments supprimés"
-        )
-        return total_deleted
-
-
-@service_factory("rgpd", tags={"utilisateur", "rgpd"})
-def obtenir_rgpd_service() -> ServiceRGPD:
-    """Retourne le service RGPD (singleton via registre)."""
-    return ServiceRGPD()
-
-
-# ─── Aliases rétrocompatibilité  ───────────────────────────────
-get_rgpd_service = obtenir_rgpd_service  # alias rétrocompatibilité 
+@service_factory("backup_personnel", tags={"utilisateur", "backup"})
+def obtenir_backup_service() -> ServiceBackupPersonnel:
+    """Retourne le service backup personnel (singleton via registre)."""
+    return ServiceBackupPersonnel()

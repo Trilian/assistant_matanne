@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // Provisions — Stocks · Cellier (fusionnés en tabs)
-// Phase 2B
+// Page provisions maison
 // ═══════════════════════════════════════════════════════════
 
 "use client";

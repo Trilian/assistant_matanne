@@ -5,7 +5,7 @@
 
 import { ExternalLink, ShoppingCart } from "lucide-react";
 import { Button } from "@/composants/ui/button";
-import { cn } from "@/bibliotheque/utilitaires";
+import { cn } from "@/bibliotheque/utils";
 
 interface BoutonAchatMaisonProps {
   url: string;

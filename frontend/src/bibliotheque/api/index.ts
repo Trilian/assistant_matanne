@@ -18,7 +18,7 @@ export * from "./documents";
 export * from "./habitat";
 export * from "./utilitaires";
 export * from "./calendriers";
-export * from "./ia-sprint13";
+export * from "./ia-modules";
 export * from "./preferences";
 export * from "./anti-gaspillage";
 export * from "./batch-cooking";

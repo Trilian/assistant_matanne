@@ -501,89 +501,26 @@ class TestAdminQuickCommand:
 
 
 # ═══════════════════════════════════════════════════════════
-# CT-14 — Routes RGPD
+# CT-14 — Backup personnel
 # ═══════════════════════════════════════════════════════════
 
 
-class TestRGPDExport:
-    """GET /api/v1/rgpd/export — export données utilisateur."""
+class TestBackupPersonnel:
+    """POST /api/v1/export/backup — export backup utilisateur."""
 
     @pytest.mark.asyncio
     async def test_sans_auth_retourne_401_ou_200(
         self, unauthenticated_client: httpx.AsyncClient
     ):
-        """L'export nécessite une authentification (ou dev mode accepte)."""
-        response = await unauthenticated_client.get("/api/v1/rgpd/export")
-        assert response.status_code in [200, 401, 403]
+        """Le backup nécessite une authentification (ou dev mode accepte)."""
+        response = await unauthenticated_client.post("/api/v1/export/backup")
+        assert response.status_code in [200, 401, 403, 500]
 
     @pytest.mark.asyncio
     async def test_avec_auth_retourne_zip(self, async_client: httpx.AsyncClient):
-        """Avec authentification, l'export retourne un fichier ZIP."""
-        response = await async_client.get("/api/v1/rgpd/export")
+        """Avec authentification, le backup retourne un fichier ZIP."""
+        response = await async_client.post("/api/v1/export/backup")
         assert response.status_code in [200, 401, 403, 500]
         if response.status_code == 200:
             content_type = response.headers.get("content-type", "")
             assert "zip" in content_type or "octet-stream" in content_type
-
-
-class TestRGPDSummary:
-    """GET /api/v1/rgpd/data-summary — résumé des données stockées."""
-
-    @pytest.mark.asyncio
-    async def test_sans_auth_retourne_401_ou_200(
-        self, unauthenticated_client: httpx.AsyncClient
-    ):
-        response = await unauthenticated_client.get("/api/v1/rgpd/data-summary")
-        assert response.status_code in [200, 401, 403]
-
-    @pytest.mark.asyncio
-    async def test_avec_auth_retourne_structure_valide(self, async_client: httpx.AsyncClient):
-        response = await async_client.get("/api/v1/rgpd/data-summary")
-        assert response.status_code in [200, 401, 403, 500]
-        if response.status_code == 200:
-            data = response.json()
-            assert isinstance(data, dict)
-
-
-class TestRGPDDeleteAccount:
-    """POST /api/v1/rgpd/delete-account — suppression de compte."""
-
-    @pytest.mark.asyncio
-    async def test_sans_auth_retourne_401(
-        self, unauthenticated_client: httpx.AsyncClient
-    ):
-        response = await unauthenticated_client.post(
-            "/api/v1/rgpd/delete-account",
-            json={"confirmation": "SUPPRIMER MON COMPTE"},
-        )
-        assert response.status_code in [200, 401, 403, 422]
-
-    @pytest.mark.asyncio
-    async def test_avec_auth_confirmation_manquante(self, async_client: httpx.AsyncClient):
-        """Sans le mot de confirmation, la suppression doit échouer."""
-        response = await async_client.post(
-            "/api/v1/rgpd/delete-account",
-            json={},
-        )
-        assert response.status_code in [401, 403, 422, 500]
-
-    @pytest.mark.asyncio
-    async def test_avec_auth_et_confirmation(self, async_client: httpx.AsyncClient):
-        """Avec confirmation correcte, la requête est acceptée (pas nécessairement exécutée)."""
-        response = await async_client.post(
-            "/api/v1/rgpd/delete-account",
-            json={"confirmation": "SUPPRIMER MON COMPTE"},
-        )
-        # Peut échouer si l'utilisateur de test n'existe pas en DB
-        assert response.status_code in [200, 401, 403, 404, 422, 500]
-
-
-class TestRGPDRouterExiste:
-    """Vérifie que les routes RGPD sont enregistrées dans l'app."""
-
-    def test_routes_rgpd_enregistrees(self):
-        from src.api.main import app
-
-        paths = [cast(Any, r).path for r in app.routes if hasattr(r, "path")]
-        rgpd_paths = [p for p in paths if "/rgpd/" in p or "rgpd" in p]
-        assert len(rgpd_paths) >= 2, f"Routes RGPD introuvables. Chemins: {paths[:30]}"

@@ -68,7 +68,7 @@ from src.api.routes import (
     habitat_router,
     garmin_router,
     ia_avancee_router,
-    ia_sprint13_router,
+    ia_modules_router,
     fonctionnalites_avancees_router,
     inventaire_router,
     jeux_router,
@@ -78,7 +78,6 @@ from src.api.routes import (
     preferences_router,
     recettes_router,
     recherche_router,
-    rgpd_router,
     suggestions_router,
     upload_router,
     utilitaires_router,
@@ -268,10 +267,6 @@ tags_metadata = [
     {
         "name": "Upload",
         "description": "Upload de fichiers vers Supabase Storage",
-    },
-    {
-        "name": "Export Backup",
-        "description": "Export de données personnelles (backup) et suppression de compte",
     },
 ]
 
@@ -664,7 +659,7 @@ app.include_router(preferences_router)
 app.include_router(automations_router)
 app.include_router(anti_gaspillage_router)
 app.include_router(ia_avancee_router)
-app.include_router(ia_sprint13_router)
+app.include_router(ia_modules_router)
 app.include_router(fonctionnalites_avancees_router)
 app.include_router(export_router)
 app.include_router(utilitaires_router)
@@ -673,7 +668,6 @@ app.include_router(voyages_router)
 app.include_router(garmin_router)
 app.include_router(documents_router)
 app.include_router(upload_router)
-app.include_router(rgpd_router)
 
 # Prometheus et WebSocket
 app.include_router(prometheus_router)

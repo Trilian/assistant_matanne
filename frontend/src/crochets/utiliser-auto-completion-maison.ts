@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // Hook auto-complétion maison — suggestions IA onBlur
-// Phase 11C
+// Auto-complétion maison
 // ═══════════════════════════════════════════════════════════
 
 import { useState } from "react";

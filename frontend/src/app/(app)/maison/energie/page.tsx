@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // Énergie Temps Réel — Tableau de bord Linky + estimations
-// Sprint 23 — IN12
+// Page énergie maison
 // ═══════════════════════════════════════════════════════════
 
 "use client";

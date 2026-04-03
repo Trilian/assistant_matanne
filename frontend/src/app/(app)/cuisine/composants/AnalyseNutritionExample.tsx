@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/src/composants/ui/select'
 import { useNotifications } from '@/src/magasins/store-notifications'
-import { utiliseAnalyseNutrition } from '@/src/crochets/utiliser-sprint13-ia'
+import { utiliseAnalyseNutrition } from '@/src/crochets/utiliser-ia-modules'
 
 /**
  * Example Component: Family Nutrition Analysis
@@ -52,7 +52,7 @@ export function AnalyseNutritionExample() {
     if (nouvelleRecette.trim()) {
       setRecettes([...recettes, nouvelleRecette])
       setNouvelleRecette('')
-      ajouter_notification('Recette ajoutée', 'success')
+      ajouter_notification('Recette ajoutée', 'succes')
     }
   }
 
@@ -64,7 +64,7 @@ export function AnalyseNutritionExample() {
     if (!nomPersonne || !age || !sexe || recettes.length === 0) {
       ajouter_notification(
         'Veuillez remplir tous les champs et ajouter au moins une recette',
-        'error'
+        'erreur'
       )
       return
     }
@@ -82,13 +82,13 @@ export function AnalyseNutritionExample() {
         onSuccess: (result) => {
           ajouter_notification(
             `${result.calories_journalieres_recommandees} kcal/jour`,
-            'success'
+            'succes'
           )
         },
         onError: () => {
           ajouter_notification(
             'Erreur lors de l\'analyse nutritionnelle',
-            'error'
+            'erreur'
           )
         },
       }

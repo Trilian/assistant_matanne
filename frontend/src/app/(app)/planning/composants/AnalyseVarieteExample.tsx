@@ -5,7 +5,7 @@ import { Button } from '@/src/composants/ui/button'
 import { Card } from '@/src/composants/ui/card'
 import { Input } from '@/src/composants/ui/input'
 import { useNotifications } from '@/src/magasins/store-notifications'
-import { utiliseAnalyseVarietePlanning } from '@/src/crochets/utiliser-sprint13-ia'
+import { utiliseAnalyseVarietePlanning } from '@/src/crochets/utiliser-ia-modules'
 
 /**
  * Example Component: Meal Variety Analysis
@@ -42,7 +42,7 @@ export function AnalyseVarieteExample() {
 
   const handleAnalyze = () => {
     if (jours.some((j) => !j.petit_dejeuner || !j.dejeuner || !j.diner)) {
-      ajouter_notification('Veuillez remplir tous les repas', 'error')
+      ajouter_notification('Veuillez remplir tous les repas', 'erreur')
       return
     }
 
@@ -52,11 +52,11 @@ export function AnalyseVarieteExample() {
         onSuccess: (result) => {
           ajouter_notification(
             `Variété: ${result.variete_score}/100 - ${result.equilibre_nutritionnel}`,
-            'success'
+            'succes'
           )
         },
         onError: () => {
-          ajouter_notification('Erreur lors de l\'analyse', 'error')
+          ajouter_notification('Erreur lors de l\'analyse', 'erreur')
         },
       }
     )

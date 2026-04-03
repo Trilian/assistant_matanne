@@ -5,7 +5,7 @@ import { Button } from '@/src/composants/ui/button'
 import { Card } from '@/src/composants/ui/card'
 import { Input } from '@/src/composants/ui/input'
 import { useNotifications } from '@/src/magasins/store-notifications'
-import { utiliseAnalyseHabitudes } from '@/src/crochets/utiliser-sprint13-ia'
+import { utiliseAnalyseHabitudes } from '@/src/crochets/utiliser-ia-modules'
 
 /**
  * Example Component: Family Habit Analysis
@@ -30,7 +30,7 @@ export function AnalyseHabitesExample() {
 
   const handleAnalyze = () => {
     if (!habitNom) {
-      ajouter_notification('Veuillez entrer le nom de l\'habitude', 'error')
+      ajouter_notification('Veuillez entrer le nom de l\'habitude', 'erreur')
       return
     }
 
@@ -44,11 +44,11 @@ export function AnalyseHabitesExample() {
         onSuccess: (result) => {
           ajouter_notification(
             `Compliance: ${(result.compliance_rate * 100).toFixed(0)}% - Tendance: ${result.tendance}`,
-            'success'
+            'succes'
           )
         },
         onError: () => {
-          ajouter_notification('Erreur lors de l\'analyse', 'error')
+          ajouter_notification('Erreur lors de l\'analyse', 'erreur')
         },
       }
     )

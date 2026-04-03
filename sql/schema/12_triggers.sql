@@ -12,8 +12,8 @@ tables_modifie_le TEXT [] := ARRAY [
         'contacts_famille', 'anniversaires_famille', 'evenements_familiaux',
         'voyages', 'checklists_voyage', 'documents_famille',
         -- Maison extensions
-        'contrats_maison', 'artisans', 'interventions_artisans', 'garanties',
-        'incidents_sav', 'articles_cellier', 'diagnostics_maison',
+        'artisans', 'interventions_artisans',
+        'articles_cellier', 'diagnostics_maison',
         'estimations_immobilieres', 'checklists_vacances', 'items_checklist',
         'traitements_nuisibles', 'devis_comparatifs', 'entretiens_saisonniers',
         -- Utilitaires

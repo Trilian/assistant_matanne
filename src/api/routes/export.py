@@ -261,3 +261,49 @@ async def restaurer_depuis_json(
         "total_enregistrements": getattr(result, "records_restored", 0),
     }
 
+
+# ═══════════════════════════════════════════════════════════
+# BACKUP PERSONNEL (ex-RGPD)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.post("/backup", responses=REPONSES_CRUD_CREATION)
+@gerer_exception_api
+async def exporter_backup_personnel(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """
+    Exporte toutes les données personnelles dans un fichier ZIP.
+
+    Le ZIP contient :
+    - `donnees.json` : toutes les données en JSON
+    - Un fichier CSV par catégorie de données
+    - `metadata.json` : métadonnées de l'export (date, nombre d'éléments)
+
+    Returns:
+        Fichier ZIP téléchargeable
+    """
+    from src.services.core.utilisateur.backup_personnel import obtenir_backup_service
+
+    service = obtenir_backup_service()
+    user_id = user.get("sub") or user.get("id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Identifiant utilisateur manquant")
+
+    def _export():
+        return service.exporter_donnees_utilisateur(user_id=user_id)
+
+    zip_path = await executer_async(_export)
+
+    if not zip_path or not zip_path.exists():
+        raise HTTPException(status_code=500, detail="Erreur lors de la génération du backup")
+
+    from fastapi.responses import FileResponse
+
+    return FileResponse(
+        path=str(zip_path),
+        media_type="application/zip",
+        filename=zip_path.name,
+        headers={"Content-Disposition": f'attachment; filename="{zip_path.name}"'},
+    )
+

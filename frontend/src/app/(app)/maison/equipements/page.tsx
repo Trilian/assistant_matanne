@@ -1,5 +1,4 @@
 // Page Équipements — Inventaire | Domotique
-// Phase 2 + Phase 7 enhancements
 
 "use client";
 

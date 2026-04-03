@@ -28,7 +28,7 @@ import {
   type EstimationProjetResponse,
   type DonneesNutritionPersonneRequest,
   type DonneesNutritionnellesResponse,
-} from "../bibliotheque/api/ia-sprint13";
+} from "../bibliotheque/api/ia-modules";
 
 // ═══════════════════════════════════════════════════════════
 // Helper: Show notification on mutation outcomes

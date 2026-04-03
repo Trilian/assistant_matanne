@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/src/composants/ui/select'
 import { useNotifications } from '@/src/magasins/store-notifications'
-import { utiliseAnalyseImpactsMeteo } from '@/src/crochets/utiliser-sprint13-ia'
+import { utiliseAnalyseImpactsMeteo } from '@/src/crochets/utiliser-ia-modules'
 
 /**
  * Example Component: Weather Impact Analysis
@@ -54,7 +54,7 @@ export function AnalyseMeteoExample() {
 
   const handleAnalyze = () => {
     if (previsions.some((p) => !p.meteo)) {
-      ajouter_notification('Veuillez remplir la météo', 'error')
+      ajouter_notification('Veuillez remplir la météo', 'erreur')
       return
     }
 
@@ -64,11 +64,11 @@ export function AnalyseMeteoExample() {
         onSuccess: (results) => {
           ajouter_notification(
             `${results.length} activités suggérées!`,
-            'success'
+            'succes'
           )
         },
         onError: () => {
-          ajouter_notification('Erreur lors de l\'analyse météo', 'error')
+          ajouter_notification('Erreur lors de l\'analyse météo', 'erreur')
         },
       }
     )

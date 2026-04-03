@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // Comparateur Prix — Top 20 ingrédients + veille automatique
-// Sprint 23 — IN15
+// Comparateur de prix
 // ═══════════════════════════════════════════════════════════
 
 "use client";

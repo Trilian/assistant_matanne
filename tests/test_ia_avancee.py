@@ -247,7 +247,7 @@ class TestCronJobsBridges:
     def test_configurer_jobs(self):
         """configurer_jobs_phase_b s'exécute sans erreur."""
         from apscheduler.schedulers.background import BackgroundScheduler
-        from src.services.core.cron_phase_b import configurer_jobs_phase_b
+        from src.services.core.cron_bridges import configurer_jobs_phase_b
 
         scheduler = BackgroundScheduler(timezone="Europe/Paris")
         configurer_jobs_phase_b(scheduler)
@@ -258,7 +258,7 @@ class TestCronJobsBridges:
     def test_jobs_ids_coherents(self):
         """Les job IDs sont bien ceux attendus."""
         from apscheduler.schedulers.background import BackgroundScheduler
-        from src.services.core.cron_phase_b import configurer_jobs_phase_b
+        from src.services.core.cron_bridges import configurer_jobs_phase_b
 
         scheduler = BackgroundScheduler(timezone="Europe/Paris")
         configurer_jobs_phase_b(scheduler)

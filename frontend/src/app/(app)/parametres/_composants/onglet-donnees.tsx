@@ -7,7 +7,7 @@ import { Label } from "@/composants/ui/label";
 import { Input } from "@/composants/ui/input";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
-import { utiliserInvalidation, utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
+import { utiliserInvalidation, utiliserMutation } from "@/crochets/utiliser-api";
 import { toast } from "sonner";
 
 export function OngletDonnees() {
@@ -15,51 +15,27 @@ export function OngletDonnees() {
   const [motDePasseBackup, setMotDePasseBackup] = useState("");
   const [fichierImport, setFichierImport] = useState<File | null>(null);
   const [motDePasseImport, setMotDePasseImport] = useState("");
-  const [texteConfirmation, setTexteConfirmation] = useState("");
-  const [motifSuppression, setMotifSuppression] = useState("");
-  const [suppressionOuverte, setSuppressionOuverte] = useState(false);
   const invalider = utiliserInvalidation();
 
-  const { data: resume, isLoading: chargementResume } = utiliserRequete(
-    ["rgpd", "resume"],
+  const backupZipMutation = utiliserMutation(
     async () => {
-      const { obtenirResumeDonnees } = await import("@/bibliotheque/api/rgpd");
-      return obtenirResumeDonnees();
-    }
-  );
-
-  const exportMutation = utiliserMutation(
-    async () => {
-      const { exporterDonnees } = await import("@/bibliotheque/api/rgpd");
-      return exporterDonnees();
+      const { clientApi } = await import("@/bibliotheque/api/client");
+      const { data } = await clientApi.post('/api/v1/export/backup', null, {
+        responseType: 'blob',
+      });
+      return data;
     },
     {
       onSuccess: (blob: Blob) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `mes-donnees-${new Date().toISOString().slice(0, 10)}.zip`;
+        a.download = `backup-matanne-${new Date().toISOString().slice(0, 10)}.zip`;
         a.click();
         URL.revokeObjectURL(url);
-        toast.success("Export téléchargé avec succès");
+        toast.success("Backup téléchargé avec succès");
       },
-      onError: () => toast.error("Erreur lors de l'export des données"),
-    }
-  );
-
-  const suppressionMutation = utiliserMutation(
-    async () => {
-      const { supprimerCompte } = await import("@/bibliotheque/api/rgpd");
-      return supprimerCompte(texteConfirmation, motifSuppression || undefined);
-    },
-    {
-      onSuccess: () => {
-        toast.success("Compte supprimé. Déconnexion...");
-        setTimeout(() => {
-          window.location.href = "/connexion";
-        }, 2000);
-      },
-      onError: () => toast.error("Erreur lors de la suppression du compte"),
+      onError: () => toast.error("Erreur lors de l'export du backup"),
     }
   );
 
@@ -187,102 +163,29 @@ export function OngletDonnees() {
         <div className="border-t pt-6 space-y-2">
           <Label className="flex items-center gap-2">
             <Download className="h-4 w-4" />
-            Export de vos données (RGPD)
+            Télécharger mon backup complet
           </Label>
           <p className="text-sm text-muted-foreground">
-            Téléchargez une archive ZIP contenant toutes vos données personnelles.
+            Téléchargez une archive ZIP contenant toutes vos données personnelles
+            (recettes, planning, courses, inventaire, famille, etc.).
           </p>
-          {resume && !chargementResume && (
-            <p className="text-xs text-muted-foreground">
-              {resume.total_elements} éléments répartis sur {resume.categories.length} catégories
-            </p>
-          )}
           <Button
             variant="outline"
-            onClick={() => exportMutation.mutate(undefined)}
-            disabled={exportMutation.isPending}
+            onClick={() => backupZipMutation.mutate(undefined)}
+            disabled={backupZipMutation.isPending}
           >
-            {exportMutation.isPending ? (
+            {backupZipMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Export en cours...
+                Backup en cours...
               </>
             ) : (
               <>
                 <Download className="mr-2 h-4 w-4" />
-                Télécharger mes données
+                Télécharger mon backup (ZIP)
               </>
             )}
           </Button>
-        </div>
-
-        <div className="border-t pt-6 space-y-4">
-          <Label className="flex items-center gap-2 text-destructive">
-            <Trash2 className="h-4 w-4" />
-            Supprimer mon compte
-          </Label>
-          <p className="text-sm text-muted-foreground">
-            Cette action est irréversible. Toutes vos données seront définitivement supprimées.
-          </p>
-          {!suppressionOuverte ? (
-            <Button
-              variant="destructive"
-              onClick={() => setSuppressionOuverte(true)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Supprimer mon compte
-            </Button>
-          ) : (
-            <div className="space-y-3 rounded-lg border border-destructive/50 p-4">
-              <div className="space-y-2">
-                <Label>Motif (optionnel)</Label>
-                <Input
-                  value={motifSuppression}
-                  onChange={(e) => setMotifSuppression(e.target.value)}
-                  placeholder="Pourquoi souhaitez-vous supprimer votre compte ?"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>
-                  Tapez <strong>SUPPRIMER MON COMPTE</strong> pour confirmer
-                </Label>
-                <Input
-                  value={texteConfirmation}
-                  onChange={(e) => setTexteConfirmation(e.target.value)}
-                  placeholder="SUPPRIMER MON COMPTE"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="destructive"
-                  disabled={
-                    texteConfirmation !== "SUPPRIMER MON COMPTE" ||
-                    suppressionMutation.isPending
-                  }
-                  onClick={() => suppressionMutation.mutate(undefined)}
-                >
-                  {suppressionMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Suppression...
-                    </>
-                  ) : (
-                    "Confirmer la suppression"
-                  )}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSuppressionOuverte(false);
-                    setTexteConfirmation("");
-                    setMotifSuppression("");
-                  }}
-                >
-                  Annuler
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

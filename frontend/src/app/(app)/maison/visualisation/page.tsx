@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // Visualisation Plan Maison — Vue 2D interactive des pièces
-// Phase 7 — Positionnement CSS absolu + mode édition drag & drop
+// Positionnement CSS absolu + mode édition drag & drop
 // ═══════════════════════════════════════════════════════════
 
 "use client";

@@ -5,7 +5,7 @@ import { Button } from '@/src/composants/ui/button'
 import { Card } from '@/src/composants/ui/card'
 import { Input } from '@/src/composants/ui/input'
 import { useNotifications } from '@/src/magasins/store-notifications'
-import { utilisePredictionConsommation } from '@/src/crochets/utiliser-sprint13-ia'
+import { utilisePredictionConsommation } from '@/src/crochets/utiliser-ia-modules'
 
 /**
  * Example Component: Inventory Prediction
@@ -35,7 +35,7 @@ export function PredictionConsommationExample() {
 
   const handleSubmit = () => {
     if (!ingredientNom || !stockActuel) {
-      ajouter_notification('Veuillez remplir tous les champs', 'error')
+      ajouter_notification('Veuillez remplir tous les champs', 'erreur')
       return
     }
 
@@ -49,13 +49,13 @@ export function PredictionConsommationExample() {
         onSuccess: (result) => {
           ajouter_notification(
             `Prochaine consommation estimée: ${result.prochaine_consommation_estimee_j} jours`,
-            'success'
+            'succes'
           )
         },
         onError: () => {
           ajouter_notification(
             'Erreur lors de la prédiction de consommation',
-            'error'
+            'erreur'
           )
         },
       }

@@ -6,7 +6,7 @@ import { Card } from '@/src/composants/ui/card'
 import { Input } from '@/src/composants/ui/input'
 import { Checkbox } from '@/src/composants/ui/checkbox'
 import { useNotifications } from '@/src/magasins/store-notifications'
-import { utiliseEstimationProjet } from '@/src/crochets/utiliser-sprint13-ia'
+import { utiliseEstimationProjet } from '@/src/crochets/utiliser-ia-modules'
 
 /**
  * Example Component: Home Project Estimation
@@ -41,7 +41,7 @@ export function EstimationProjetExample() {
 
   const handleEstimate = () => {
     if (!description || !surfaceM2) {
-      ajouter_notification('Veuillez remplir description et surface', 'error')
+      ajouter_notification('Veuillez remplir description et surface', 'erreur')
       return
     }
 
@@ -56,11 +56,11 @@ export function EstimationProjetExample() {
         onSuccess: (result) => {
           ajouter_notification(
             `Budget: €${result.cout_estime_min}-${result.cout_estime_max}`,
-            'success'
+            'succes'
           )
         },
         onError: () => {
-          ajouter_notification('Erreur lors de l\'estimation', 'error')
+          ajouter_notification('Erreur lors de l\'estimation', 'erreur')
         },
       }
     )

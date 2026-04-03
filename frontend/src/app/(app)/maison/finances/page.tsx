@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // Finances — Charges · Dépenses · Énergie (fusionnés en tabs)
-// Phase 2B
+// Page finances maison
 // ═══════════════════════════════════════════════════════════
 
 "use client";

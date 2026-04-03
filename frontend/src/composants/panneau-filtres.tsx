@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // PanneauFiltres — Panneau latéral de filtres réutilisable
-// Sprint 20.7 — Filtres avancés sidebar
+// Filtres avancés sidebar
 // ═══════════════════════════════════════════════════════════
 
 "use client";

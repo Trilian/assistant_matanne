@@ -76,7 +76,7 @@ def demarrer_scheduler() -> None:
     
     # Enregistrer les jobs bridges (prédictions, budget, jardin, Jules, nutrition)
     try:
-        from src.services.core.cron_phase_b import configurer_jobs_phase_b
+        from src.services.core.cron_bridges import configurer_jobs_phase_b
         configurer_jobs_phase_b(scheduler)
         logger.info("✅ Cron jobs bridges configurés")
     except Exception as e:

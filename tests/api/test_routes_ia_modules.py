@@ -40,9 +40,9 @@ def test_prediction_consommation_endpoint(client: TestClient) -> None:
         "raison": "Historique stable",
     }
 
-    with patch("src.api.routes.ia_sprint13._get_inventaire_ai_service", return_value=service):
+    with patch("src.api.routes.ia_modules._get_inventaire_ai_service", return_value=service):
         response = client.post(
-            "/api/v1/ia/sprint13/inventaire/prediction-consommation",
+            "/api/v1/ia/modules/inventaire/prediction-consommation",
             json={
                 "ingredient_nom": "Lait",
                 "stock_actuel_kg": 1.5,
@@ -65,9 +65,9 @@ def test_analyse_variete_endpoint(client: TestClient) -> None:
         "recommandations": ["Ajouter une journée végétarienne"],
     }
 
-    with patch("src.api.routes.ia_sprint13._get_planning_ai_service", return_value=service):
+    with patch("src.api.routes.ia_modules._get_planning_ai_service", return_value=service):
         response = client.post(
-            "/api/v1/ia/sprint13/planning/analyse-variete",
+            "/api/v1/ia/modules/planning/analyse-variete",
             json={
                 "planning_repas": [
                     {"jour": "lundi", "petit_dej": "yaourt", "midi": "poulet", "soir": "soupe"}
@@ -105,9 +105,9 @@ def test_analyse_impacts_meteo_endpoint(client: TestClient) -> None:
         ]
     )
 
-    with patch("src.api.routes.ia_sprint13._get_meteo_impact_ai_service", return_value=service):
+    with patch("src.api.routes.ia_modules._get_meteo_impact_ai_service", return_value=service):
         response = client.post(
-            "/api/v1/ia/sprint13/meteo/impacts",
+            "/api/v1/ia/modules/meteo/impacts",
             json={
                 "previsions_7j": [
                     {
@@ -144,9 +144,9 @@ def test_analyse_habitude_endpoint(client: TestClient) -> None:
         }
     )
 
-    with patch("src.api.routes.ia_sprint13._get_habitudes_ai_service", return_value=service):
+    with patch("src.api.routes.ia_modules._get_habitudes_ai_service", return_value=service):
         response = client.post(
-            "/api/v1/ia/sprint13/habitudes/analyse",
+            "/api/v1/ia/modules/habitudes/analyse",
             json={
                 "habitude_nom": "lecture",
                 "historique_7j": [{"date": "2026-04-01", "realise": True, "heure": "20:00"}],
@@ -180,9 +180,9 @@ def test_estimation_projet_endpoint(client: TestClient) -> None:
         }
     )
 
-    with patch("src.api.routes.ia_sprint13._get_projets_maison_ai_service", return_value=service):
+    with patch("src.api.routes.ia_modules._get_projets_maison_ai_service", return_value=service):
         response = client.post(
-            "/api/v1/ia/sprint13/maison/projets/estimation",
+            "/api/v1/ia/modules/maison/projets/estimation",
             json={
                 "projet_description": "Repeindre le salon en blanc cassé",
                 "surface_m2": 25,
@@ -213,9 +213,9 @@ def test_analyse_nutrition_personne_endpoint(client: TestClient) -> None:
         }
     )
 
-    with patch("src.api.routes.ia_sprint13._get_nutrition_famille_ai_service", return_value=service):
+    with patch("src.api.routes.ia_modules._get_nutrition_famille_ai_service", return_value=service):
         response = client.post(
-            "/api/v1/ia/sprint13/nutrition/personne",
+            "/api/v1/ia/modules/nutrition/personne",
             json={
                 "personne_nom": "Marie",
                 "age_ans": 35,
@@ -234,7 +234,7 @@ def test_analyse_nutrition_personne_endpoint(client: TestClient) -> None:
 
 def test_validation_saison_meteo(client: TestClient) -> None:
     response = client.post(
-        "/api/v1/ia/sprint13/meteo/impacts",
+        "/api/v1/ia/modules/meteo/impacts",
         json={
             "previsions_7j": [{"date": "2026-04-02"}],
             "saison": "mousson",
@@ -245,7 +245,7 @@ def test_validation_saison_meteo(client: TestClient) -> None:
 
 def test_validation_prediction_consommation_stock_negatif(client: TestClient) -> None:
     response = client.post(
-        "/api/v1/ia/sprint13/inventaire/prediction-consommation",
+        "/api/v1/ia/modules/inventaire/prediction-consommation",
         json={
             "ingredient_nom": "Lait",
             "stock_actuel_kg": -1,

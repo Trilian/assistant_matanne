@@ -39,7 +39,7 @@ async def obtenir_preferences_notifications(
     """Récupère les préférences notifications granulaires de l'utilisateur (E.4)."""
 
     def _get_prefs():
-        from src.services.core.notifications.notifications_enrichis_sprint_e import (
+        from src.services.core.notifications.notifications_enrichies import (
             ServiceNotificationsEnrichis,
         )
 
@@ -63,7 +63,7 @@ async def mettre_a_jour_preferences_notifications(
     """Met à jour les préférences notifications granulaires (E.4)."""
 
     def _update_prefs():
-        from src.services.core.notifications.notifications_enrichis_sprint_e import (
+        from src.services.core.notifications.notifications_enrichies import (
             ServiceNotificationsEnrichis,
         )
 
@@ -100,7 +100,7 @@ async def lister_historique_notifications(
     """Liste l'historique paginé des notifications (E.5)."""
 
     def _list_history():
-        from src.services.core.notifications.notifications_enrichis_sprint_e import (
+        from src.services.core.notifications.notifications_enrichies import (
             ServiceNotificationsEnrichis,
         )
 
@@ -144,7 +144,7 @@ async def marquer_notification_lue(
     """Marque une notification comme lue (E.5)."""
 
     def _mark_read():
-        from src.services.core.notifications.notifications_enrichis_sprint_e import (
+        from src.services.core.notifications.notifications_enrichies import (
             ServiceNotificationsEnrichis,
         )
 
@@ -172,7 +172,7 @@ async def marquer_tous_lus(
     """Marque toutes les notifications comme lues (E.5)."""
 
     def _mark_all_read():
-        from src.services.core.notifications.notifications_enrichis_sprint_e import (
+        from src.services.core.notifications.notifications_enrichies import (
             ServiceNotificationsEnrichis,
         )
 
@@ -201,7 +201,7 @@ async def stats_notifications(
     """Retourne des stats sur les notifications (E.5)."""
 
     def _get_stats():
-        from src.services.core.notifications.notifications_enrichis_sprint_e import (
+        from src.services.core.notifications.notifications_enrichies import (
             ServiceNotificationsEnrichis,
         )
 

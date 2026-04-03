@@ -1,4 +1,4 @@
-"""Routes API pour les nouveaux services IA du Sprint 13."""
+"""Routes API pour les services IA modulaires."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas.errors import REPONSES_IA
-from src.api.schemas.sprint13_ai import (
+from src.api.schemas.ia_modules import (
     AnalyseHabitudeRequest,
     AnalyseImpactsMeteoRequest,
     AnalyseNutritionPersonneRequest,
@@ -23,7 +23,7 @@ from src.services.inventaire.ia_service import PredictionConsommation
 from src.services.maison.projets_ia_service import EstimationProjet
 from src.services.planning.ia_service import AnalyseVariete
 
-router = APIRouter(prefix="/api/v1/ia/sprint13", tags=["IA"])
+router = APIRouter(prefix="/api/v1/ia/modules", tags=["IA"])
 
 
 def _get_inventaire_ai_service():

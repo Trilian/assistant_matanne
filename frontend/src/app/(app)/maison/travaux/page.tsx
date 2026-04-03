@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // Travaux — Projets · Entretien · Artisans (fusionnés en tabs)
-// Phase 2B
+// Page travaux maison
 // ═══════════════════════════════════════════════════════════
 
 "use client";

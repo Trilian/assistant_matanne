@@ -6,7 +6,7 @@ Integration Tests — Sprint 13 Backend API (E2E)
 Tests that verify the full request-response flow of all 6 Sprint 13 AI endpoints
 from the FastAPI application perspective.
 
-Run with: python -m pytest tests/e2e/test_sprint13_integration.py -v
+Run with: python -m pytest tests/e2e/test_ia_integration.py -v
 """
 
 import pytest
@@ -40,9 +40,9 @@ class TestSprintE2E:
             "historique_achat_mensuel": [2.5, 2.8, 2.2, 3.0, 2.9],
         }
 
-        with patch("src.api.routes.ia_sprint13.verifier_limite_debit_ia"):
+        with patch("src.api.routes.ia_modules.verifier_limite_debit_ia"):
             response = client.post(
-                "/api/v1/ia/sprint13/inventaire/prediction-consommation",
+                "/api/v1/ia/modules/inventaire/prediction-consommation",
                 json=payload,
                 headers=auth_headers,
             )
@@ -68,9 +68,9 @@ class TestSprintE2E:
             ]
         }
 
-        with patch("src.api.routes.ia_sprint13.verifier_limite_debit_ia"):
+        with patch("src.api.routes.ia_modules.verifier_limite_debit_ia"):
             response = client.post(
-                "/api/v1/ia/sprint13/planning/analyse-variete",
+                "/api/v1/ia/modules/planning/analyse-variete",
                 json=payload,
                 headers=auth_headers,
             )
@@ -98,9 +98,9 @@ class TestSprintE2E:
             "saison": "printemps",
         }
 
-        with patch("src.api.routes.ia_sprint13.verifier_limite_debit_ia"):
+        with patch("src.api.routes.ia_modules.verifier_limite_debit_ia"):
             response = client.post(
-                "/api/v1/ia/sprint13/meteo/impacts",
+                "/api/v1/ia/modules/meteo/impacts",
                 json=payload,
                 headers=auth_headers,
             )
@@ -121,9 +121,9 @@ class TestSprintE2E:
             "description_contexte": "Morning exercise routine",
         }
 
-        with patch("src.api.routes.ia_sprint13.verifier_limite_debit_ia"):
+        with patch("src.api.routes.ia_modules.verifier_limite_debit_ia"):
             response = client.post(
-                "/api/v1/ia/sprint13/habitudes/analyse",
+                "/api/v1/ia/modules/habitudes/analyse",
                 json=payload,
                 headers=auth_headers,
             )
@@ -144,9 +144,9 @@ class TestSprintE2E:
             "contraintes": ["Budget limité"],
         }
 
-        with patch("src.api.routes.ia_sprint13.verifier_limite_debit_ia"):
+        with patch("src.api.routes.ia_modules.verifier_limite_debit_ia"):
             response = client.post(
-                "/api/v1/ia/sprint13/maison/projets/estimation",
+                "/api/v1/ia/modules/maison/projets/estimation",
                 json=payload,
                 headers=auth_headers,
             )
@@ -170,9 +170,9 @@ class TestSprintE2E:
             "objectif_sante": "Croissance saine",
         }
 
-        with patch("src.api.routes.ia_sprint13.verifier_limite_debit_ia"):
+        with patch("src.api.routes.ia_modules.verifier_limite_debit_ia"):
             response = client.post(
-                "/api/v1/ia/sprint13/nutrition/personne",
+                "/api/v1/ia/modules/nutrition/personne",
                 json=payload,
                 headers=auth_headers,
             )
@@ -204,9 +204,9 @@ class TestSprintValidation:
             "saison": "invalid_saison",  # Invalid!
         }
 
-        with patch("src.api.routes.ia_sprint13.verifier_limite_debit_ia"):
+        with patch("src.api.routes.ia_modules.verifier_limite_debit_ia"):
             response = client.post(
-                "/api/v1/ia/sprint13/meteo/impacts",
+                "/api/v1/ia/modules/meteo/impacts",
                 json=payload,
                 headers=auth_headers,
             )
@@ -221,9 +221,9 @@ class TestSprintValidation:
             "historique_achat_mensuel": [2.5, 2.8, 2.2],
         }
 
-        with patch("src.api.routes.ia_sprint13.verifier_limite_debit_ia"):
+        with patch("src.api.routes.ia_modules.verifier_limite_debit_ia"):
             response = client.post(
-                "/api/v1/ia/sprint13/inventaire/prediction-consommation",
+                "/api/v1/ia/modules/inventaire/prediction-consommation",
                 json=payload,
                 headers=auth_headers,
             )
@@ -241,9 +241,9 @@ class TestSprintValidation:
             "objectif_sante": "Croissance",
         }
 
-        with patch("src.api.routes.ia_sprint13.verifier_limite_debit_ia"):
+        with patch("src.api.routes.ia_modules.verifier_limite_debit_ia"):
             response = client.post(
-                "/api/v1/ia/sprint13/nutrition/personne",
+                "/api/v1/ia/modules/nutrition/personne",
                 json=payload,
                 headers=auth_headers,
             )
@@ -266,7 +266,7 @@ class TestSprintRateLimiting:
         responses = []
         for _ in range(3):
             response = client.post(
-                "/api/v1/ia/sprint13/inventaire/prediction-consommation",
+                "/api/v1/ia/modules/inventaire/prediction-consommation",
                 json=payload,
                 headers=auth_headers,
             )
@@ -282,12 +282,12 @@ def test_all_endpoints_registered():
     client = TestClient(app)
 
     endpoints = [
-        "/api/v1/ia/sprint13/inventaire/prediction-consommation",
-        "/api/v1/ia/sprint13/planning/analyse-variete",
-        "/api/v1/ia/sprint13/meteo/impacts",
-        "/api/v1/ia/sprint13/habitudes/analyse",
-        "/api/v1/ia/sprint13/maison/projets/estimation",
-        "/api/v1/ia/sprint13/nutrition/personne",
+        "/api/v1/ia/modules/inventaire/prediction-consommation",
+        "/api/v1/ia/modules/planning/analyse-variete",
+        "/api/v1/ia/modules/meteo/impacts",
+        "/api/v1/ia/modules/habitudes/analyse",
+        "/api/v1/ia/modules/maison/projets/estimation",
+        "/api/v1/ia/modules/nutrition/personne",
     ]
 
     for endpoint in endpoints:

@@ -1,6 +1,6 @@
 import { clientApi } from "./client";
 
-const API_PREFIX = "/api/v1/ia/sprint13";
+const API_PREFIX = "/api/v1/ia/modules";
 
 export interface PredictionConsommationRequest {
   ingredient_nom: string;

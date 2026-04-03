@@ -21,7 +21,7 @@ import {
   type MeteoContexte,
   type PredictionConsommationRequest,
   type PredictionConsommationResponse,
-} from "@/bibliotheque/api/ia-sprint13";
+} from "@/bibliotheque/api/ia-modules";
 
 function notifier(type: "succes" | "erreur", message: string): void {
   utiliserStoreNotifications.getState().ajouter({ type, message });

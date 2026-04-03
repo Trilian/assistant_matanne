@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // CarteConseil — Carte conseil IA actionnable pour le hub Maison
-// Phase 0B
+// Carte conseil maison
 // ═══════════════════════════════════════════════════════════
 
 "use client";

@@ -120,80 +120,10 @@ class EuromillionsIAService(BaseAIService):
             "nb_tirages": int(base.get("nb_tirages", 0)),
         }
 
-    def _obtenir_stats(self) -> dict[str, Any]:
-        """Point d'extension legacy patchable dans les tests."""
-        return self.calculer_statistiques()
-
     def calculer_qualite_grille(self, numeros: list[int], etoiles: list[int]) -> float:
-        """Compatibilite legacy: calcule la qualite via l'analyse interne."""
+        """Calcule la qualite d'une grille via l'analyse de distribution."""
         distribution = self._analyser_distribution(numeros, etoiles)
         return self._calculer_qualite(distribution)
-
-    def _to_legacy_grille(self, grille: GrilleGeneree, strategie: str) -> dict[str, Any]:
-        """Convertit l'objet moderne vers le format dict historique."""
-        return {
-            "numeros": grille.numeros,
-            "etoiles": grille.etoiles,
-            "qualite": grille.qualite,
-            "strategie": strategie,
-            "explication": grille.explication,
-            "distribution": grille.distribution,
-        }
-
-    def generer_equilibree(self) -> dict[str, Any]:
-        """Compatibilite legacy: strategie equilibree."""
-        stats = self._normaliser_stats(self._obtenir_stats())
-        return self._to_legacy_grille(self.generer_grille_equilibree(stats), "equilibree")
-
-    def generer_frequences(self) -> dict[str, Any]:
-        """Compatibilite legacy: strategie frequences."""
-        stats = self._normaliser_stats(self._obtenir_stats())
-        return self._to_legacy_grille(self.generer_grille_frequences(stats), "frequences")
-
-    def generer_retards(self) -> dict[str, Any]:
-        """Compatibilite legacy: strategie retards."""
-        stats = self._normaliser_stats(self._obtenir_stats())
-        return self._to_legacy_grille(self.generer_grille_retards(stats), "retards")
-
-    def generer_ia_creative(self) -> dict[str, Any]:
-        """Compatibilite legacy: generation via appel HTTP mockable."""
-        stats = self._normaliser_stats(self._obtenir_stats())
-
-        try:
-            response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                timeout=10,
-                json={"messages": [{"role": "user", "content": "Generer une grille."}]},
-            )
-            data = response.json()
-            content = data["choices"][0]["message"]["content"]
-            payload = self._extract_json_from_text(content)
-
-            numeros = sorted(int(n) for n in payload.get("numeros", []))
-            etoiles = sorted(int(e) for e in payload.get("etoiles", []))
-            if len(numeros) != self.NB_NUMEROS or len(etoiles) != self.NB_ETOILES:
-                raise ValueError("Grille invalide depuis API")
-
-            qualite = self.calculer_qualite_grille(numeros, etoiles)
-            return {
-                "numeros": numeros,
-                "etoiles": etoiles,
-                "qualite": qualite,
-                "strategie": "ia_creative",
-            }
-        except Exception:
-            grille = self.generer_grille_equilibree(stats)
-            return self._to_legacy_grille(grille, "ia_creative")
-
-    def _extract_json_from_text(self, text: str) -> dict[str, Any]:
-        """Extrait le premier objet JSON valide d'un texte."""
-        start = text.find("{")
-        end = text.rfind("}")
-        if start == -1 or end == -1 or end <= start:
-            raise ValueError("Contenu JSON introuvable")
-        import json
-
-        return json.loads(text[start : end + 1])
     
     @avec_session_db
     def calculer_statistiques(
