@@ -16,8 +16,8 @@ import { clientApi } from "./client";
 export async function envoyerPlanningTelegram(
   planningId: number,
   planningTexte?: string
-): Promise<{ message: string; status: number }> {
-  const { data } = await clientApi.post<{ message: string; status: number }>(
+): Promise<{ message: string; id?: number | null }> {
+  const { data } = await clientApi.post<{ message: string; id?: number | null }>(
     "/telegram/envoyer-planning",
     {
       planning_id: planningId,
@@ -36,11 +36,11 @@ export async function envoyerPlanningTelegram(
  * - courses_ajouter:ID (lien web pour ajouter des articles)
  * - courses_refaire:ID (crée une nouvelle liste)
  */
-export async function envoyerListeCoursesTongram(
+export async function envoyerListeCoursesTelegram(
   listeId: number,
   nomListe?: string
-): Promise<{ message: string; status: number }> {
-  const { data } = await clientApi.post<{ message: string; status: number }>(
+): Promise<{ message: string; id?: number | null }> {
+  const { data } = await clientApi.post<{ message: string; id?: number | null }>(
     "/telegram/envoyer-courses",
     {
       liste_id: listeId,

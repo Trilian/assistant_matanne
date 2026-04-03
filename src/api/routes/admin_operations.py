@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from datetime import datetime, timedelta
 from typing import Any
@@ -21,6 +22,7 @@ from .admin_shared import (
     CachePurgeRequest,
     DesactiverUtilisateurRequest,
     NotificationTestAllRequest,
+    NotificationSimulationRequest,
     NotificationTestRequest,
     UserImpersonationRequest,
     UtilisateurAdminResponse,
@@ -200,6 +202,150 @@ async def lister_templates_notifications(
         "status": "ok",
         "templates": _NOTIFICATION_TEMPLATES,
         "total": sum(len(v) for v in _NOTIFICATION_TEMPLATES.values()),
+    }
+
+
+@router.get(
+    "/notifications/templates/{canal}/{template_id}/preview",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Prévisualiser un template de notification",
+    description="Construit un rendu texte simple d'un template avec variables de démonstration.",
+)
+@gerer_exception_api
+async def previsualiser_template_notification(
+    canal: str,
+    template_id: str,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    templates = _NOTIFICATION_TEMPLATES.get(canal, [])
+    template = next((t for t in templates if t.get("id") == template_id), None)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template introuvable")
+
+    contexte_demo = {
+        "prenom": "Alex",
+        "date": datetime.now().strftime("%d/%m/%Y"),
+        "heure": datetime.now().strftime("%H:%M"),
+        "module": "cuisine",
+        "action": "Ouvrir le planning",
+    }
+    message = (
+        f"[{template.get('label', template_id)}]\n"
+        f"Bonjour {contexte_demo['prenom']},\n"
+        f"Action suggérée: {contexte_demo['action']} ({contexte_demo['module']})\n"
+        f"Généré le {contexte_demo['date']} à {contexte_demo['heure']}."
+    )
+    return {
+        "status": "ok",
+        "canal": canal,
+        "template_id": template_id,
+        "trigger": template.get("trigger"),
+        "preview": message,
+        "contexte_demo": contexte_demo,
+    }
+
+
+@router.post(
+    "/notifications/simulate",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Simuler une notification",
+    description="Simule l'envoi d'une notification template (dry-run par défaut).",
+)
+@gerer_exception_api
+async def simuler_notification(
+    body: NotificationSimulationRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    templates = _NOTIFICATION_TEMPLATES.get(body.canal, [])
+    template = next((t for t in templates if t.get("id") == body.template_id), None)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template introuvable")
+
+    payload = {
+        "template_id": body.template_id,
+        "canal": body.canal,
+        "payload": body.payload,
+    }
+
+    if body.dry_run:
+        _journaliser_action_admin(
+            action="admin.notifications.simulate",
+            entite_type="notification",
+            utilisateur_id=str(user.get("id", "admin")),
+            details={"dry_run": True, **payload},
+        )
+        return {
+            "status": "ok",
+            "dry_run": True,
+            "template": template,
+            "message": "Simulation effectuée (aucun envoi réel).",
+            "payload": payload,
+        }
+
+    from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+    dispatcher = get_dispatcher_notifications()
+    message = f"[{template.get('label', body.template_id)}] Notification déclenchée depuis admin."
+    resultats = dispatcher.envoyer(
+        user_id=str(user.get("id", "admin")),
+        message=message,
+        canaux=[body.canal],
+        forcer=True,
+    )
+    _journaliser_action_admin(
+        action="admin.notifications.simulate",
+        entite_type="notification",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"dry_run": False, "resultats": resultats, **payload},
+    )
+    return {
+        "status": "ok",
+        "dry_run": False,
+        "template": template,
+        "resultats": resultats,
+        "payload": payload,
+    }
+
+
+@router.get(
+    "/notifications/history",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Historique livraison notifications",
+    description="Retourne les dernières actions notifications admin (audit).",
+)
+@gerer_exception_api
+async def historique_notifications(
+    limit: int = Query(50, ge=1, le=200),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.api.utils import executer_avec_session
+
+    with executer_avec_session() as session:
+        rows = session.execute(
+            text(
+                """
+                SELECT id, created_at, action, details
+                FROM audit_logs
+                WHERE action LIKE 'admin.notifications.%'
+                ORDER BY created_at DESC, id DESC
+                LIMIT :limit
+                """
+            ),
+            {"limit": limit},
+        ).mappings().all()
+
+    items = [
+        {
+            "id": int(r["id"]),
+            "created_at": r["created_at"].isoformat() if r.get("created_at") else None,
+            "action": r.get("action"),
+            "details": r.get("details") or {},
+        }
+        for r in rows
+    ]
+    return {
+        "items": items,
+        "total": len(items),
     }
 
 

@@ -202,7 +202,7 @@ Suggestions via Mistral AI (rate limité : 10 req/min).
 
 ## 👨‍👩‍👧‍👦 Famille — `/api/v1/famille` (37 endpoints)
 
-### Contexte familial (1) — Phase M
+### Contexte familial (1)
 
 | Méthode | Path | Params | Description |
 |---------|------|--------|-------------|
@@ -218,7 +218,7 @@ Suggestions via Mistral AI (rate limité : 10 req/min).
 | POST | `/famille/enfants/{id}/jalons` | Body: titre, description, categorie, date_atteint | Ajoute un jalon (201) |
 | DELETE | `/famille/enfants/{id}/jalons/{jalon_id}` | — | Supprime un jalon |
 
-### Activités (6) — Phase O : `suggestions_struct` pour pré-remplissage
+### Activités (6) — `suggestions_struct` pour pré-remplissage
 
 | Méthode | Path | Params | Description |
 |---------|------|--------|-------------|
@@ -238,7 +238,7 @@ Suggestions via Mistral AI (rate limité : 10 req/min).
 | POST | `/famille/budget` | Body: date, categorie, montant, magasin... | Ajoute dépense (201) |
 | DELETE | `/famille/budget/{id}` | — | Supprime |
 
-### Achats famille (3) — Phase P
+### Achats famille (3)
 
 | Méthode | Path | Params | Description |
 |---------|------|--------|-------------|
@@ -283,7 +283,7 @@ Suggestions via Mistral AI (rate limité : 10 req/min).
 | PATCH | `/famille/evenements/{id}` | Body: `EvenementFamilialPatch` | Met à jour |
 | DELETE | `/famille/evenements/{id}` | — | Supprime |
 
-### Journal familial (3) — Phase R
+### Journal familial (3)
 
 | Méthode | Path | Params | Description |
 |---------|------|--------|-------------|

@@ -19,6 +19,8 @@ from src.api.utils import gerer_exception_api
 from .admin_shared import (
     JobInfoResponse,
     JobsBulkRequest,
+    JobRunAllRequest,
+    JobScheduleUpdateRequest,
     JobsSimulationJourneeRequest,
     _LABELS_JOBS,
     _ajouter_log_job,
@@ -479,13 +481,15 @@ async def lister_jobs(
 async def executer_job(
     job_id: str,
     dry_run: bool = Query(False, description="Simuler le job sans exécution réelle"),
+    force: bool = Query(False, description="Ignore le rate-limit admin pour ce déclenchement"),
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict:
     """Déclenche un job cron de façon asynchrone."""
     from src.api.utils import executer_async
 
     # Rate limiting : 5 triggers/min par admin
-    _verifier_limite_jobs(str(user.get("id", "admin")))
+    if not force:
+        _verifier_limite_jobs(str(user.get("id", "admin")))
 
     from src.services.core.cron.jobs import executer_job_par_id, lister_jobs_disponibles
 
@@ -500,7 +504,7 @@ async def executer_job(
         resultat = executer_job_par_id(
             job_id,
             dry_run=dry_run,
-            source="manual",
+            source="manual_force" if force else "manual",
             triggered_by_user_id=str(user.get("id", "admin")),
             relancer_exception=True,
         )
@@ -516,9 +520,143 @@ async def executer_job(
         action="admin.job.run",
         entite_type="job",
         utilisateur_id=str(user.get("id", "admin")),
-        details={"job_id": job_id, "dry_run": dry_run},
+        details={"job_id": job_id, "dry_run": dry_run, "force": force},
     )
     return result
+
+
+@router.post(
+    "/jobs/run-all",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Exécuter tous les jobs",
+    description="Exécute séquentiellement tous les jobs enregistrés (dry-run possible).",
+)
+@gerer_exception_api
+async def executer_tous_les_jobs(
+    body: JobRunAllRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.api.utils import executer_async
+
+    def _run() -> dict[str, Any]:
+        from src.services.core.cron.jobs import executer_job_par_id, lister_jobs_disponibles
+
+        jobs_disponibles = list(lister_jobs_disponibles())
+        if not body.inclure_jobs_inactifs:
+            jobs_disponibles = [j for j in jobs_disponibles if not j.startswith("_")]
+
+        resultats: list[dict[str, Any]] = []
+        for job_id in jobs_disponibles:
+            debut = time.perf_counter()
+            try:
+                sortie = executer_job_par_id(
+                    job_id,
+                    dry_run=body.dry_run,
+                    source="admin_run_all_force" if body.force else "admin_run_all",
+                    triggered_by_user_id=str(user.get("id", "admin")),
+                    relancer_exception=True,
+                )
+                statut = str(sortie.get("status", "ok"))
+                resultats.append(
+                    {
+                        "job_id": job_id,
+                        "status": statut,
+                        "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
+                        "message": str(sortie.get("message", "")),
+                    }
+                )
+                _ajouter_log_job(job_id, "succes" if statut in {"ok", "dry_run", "success"} else "erreur", str(sortie))
+            except Exception as exc:
+                resultats.append(
+                    {
+                        "job_id": job_id,
+                        "status": "failure",
+                        "duration_ms": round((time.perf_counter() - debut) * 1000, 2),
+                        "message": str(exc),
+                    }
+                )
+                _ajouter_log_job(job_id, "erreur", str(exc))
+                if not body.continuer_sur_erreur:
+                    break
+
+        return {
+            "mode": "dry_run" if body.dry_run else "run",
+            "jobs_cibles": jobs_disponibles,
+            "total": len(resultats),
+            "succes": len([r for r in resultats if r["status"] in {"ok", "dry_run", "success"}]),
+            "echecs": len([r for r in resultats if r["status"] not in {"ok", "dry_run", "success"}]),
+            "items": resultats,
+        }
+
+    if not body.force:
+        _verifier_limite_jobs(str(user.get("id", "admin")))
+
+    result = await executer_async(_run)
+    _journaliser_action_admin(
+        action="admin.jobs.run_all",
+        entite_type="job_batch",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={
+            "dry_run": body.dry_run,
+            "continuer_sur_erreur": body.continuer_sur_erreur,
+            "inclure_jobs_inactifs": body.inclure_jobs_inactifs,
+            "force": body.force,
+        },
+    )
+    return result
+
+
+@router.put(
+    "/jobs/{job_id}/schedule",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Modifier le schedule d'un job",
+    description="Met à jour dynamiquement le CronTrigger d'un job existant.",
+)
+@gerer_exception_api
+async def modifier_schedule_job(
+    job_id: str,
+    body: JobScheduleUpdateRequest,
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from apscheduler.triggers.cron import CronTrigger
+    from src.services.core.cron.jobs import _demarreur
+
+    if _demarreur is None or not _demarreur._scheduler.running:
+        raise HTTPException(status_code=503, detail="Scheduler indisponible")
+
+    job = _demarreur._scheduler.get_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' introuvable")
+
+    parties = body.cron.split()
+    if len(parties) != 5:
+        raise HTTPException(status_code=422, detail="Format cron invalide. Attendu: 'm h dom mon dow'")
+
+    minute, heure, jour, mois, jour_semaine = parties
+    nouveau_trigger = CronTrigger(
+        minute=minute,
+        hour=heure,
+        day=jour,
+        month=mois,
+        day_of_week=jour_semaine,
+        timezone="Europe/Paris",
+    )
+    _demarreur._scheduler.reschedule_job(job_id, trigger=nouveau_trigger)
+
+    _journaliser_action_admin(
+        action="admin.jobs.schedule.update",
+        entite_type="job",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"job_id": job_id, "cron": body.cron},
+    )
+
+    job_mis_a_jour = _demarreur._scheduler.get_job(job_id)
+    return {
+        "status": "ok",
+        "job_id": job_id,
+        "schedule": str(job_mis_a_jour.trigger) if job_mis_a_jour else str(nouveau_trigger),
+        "prochain_run": job_mis_a_jour.next_run_time.isoformat() if job_mis_a_jour and job_mis_a_jour.next_run_time else None,
+    }
 
 
 @router.post(
@@ -801,6 +939,44 @@ async def historique_jobs(
         "par_page": par_page,
         "pages_totales": max(1, (total + par_page - 1) // par_page),
     }
+
+
+@router.post(
+    "/jobs/history/{execution_id}/retry",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Relancer un job depuis l'historique",
+    description="Récupère le job_id d'une exécution historique puis relance ce job.",
+)
+@gerer_exception_api
+async def relancer_job_depuis_historique(
+    execution_id: int,
+    dry_run: bool = Query(False, description="Relancer en dry-run"),
+    force: bool = Query(False, description="Ignore le rate-limit admin pour cette relance"),
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    from src.api.utils import executer_avec_session
+
+    if not force:
+        _verifier_limite_jobs(str(user.get("id", "admin")))
+
+    with executer_avec_session() as session:
+        row = session.execute(
+            text("SELECT id, job_id FROM job_executions WHERE id = :id LIMIT 1"),
+            {"id": execution_id},
+        ).mappings().first()
+
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Exécution #{execution_id} introuvable")
+
+    job_id = str(row["job_id"])
+    result = await executer_job(job_id=job_id, dry_run=dry_run, force=force, user=user)
+    _journaliser_action_admin(
+        action="admin.jobs.retry_from_history",
+        entite_type="job_execution",
+        utilisateur_id=str(user.get("id", "admin")),
+        details={"execution_id": execution_id, "job_id": job_id, "dry_run": dry_run, "force": force},
+    )
+    return result
 
 
 @router.get(

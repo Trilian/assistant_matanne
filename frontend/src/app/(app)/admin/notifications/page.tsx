@@ -28,16 +28,19 @@ import { Alert, AlertDescription, AlertTitle } from "@/composants/ui/alert";
 import {
   envoyerNotificationTest,
   envoyerNotificationTestTousCanaux,
+  listerHistoriqueNotifications,
   listerQueueNotifications,
   listerTemplatesNotifications,
+  previsualiserTemplateNotification,
   relancerQueueNotifications,
+  simulerNotificationAdmin,
   supprimerQueueNotifications,
 } from "@/bibliotheque/api/admin";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-type Canal = "ntfy" | "push" | "email" | "whatsapp";
+type Canal = "ntfy" | "push" | "email" | "telegram";
 
 interface HistoriqueNotif {
   canal: string;
@@ -57,6 +60,10 @@ export default function PageAdminNotifications() {
   const [resultatTous, setResultatTous] = useState<{ ok: boolean; message: string; details?: string } | null>(null);
   const [historique, setHistorique] = useState<HistoriqueNotif[]>([]);
   const [actionQueueUser, setActionQueueUser] = useState<string | null>(null);
+  const [templateCanal, setTemplateCanal] = useState<"telegram" | "email">("telegram");
+  const [templateId, setTemplateId] = useState("");
+  const [preview, setPreview] = useState("");
+  const [simulationRetour, setSimulationRetour] = useState("");
 
   const { data: queueData, refetch: rafraichirQueue } = utiliserRequete(
     ["admin", "notifications", "queue"],
@@ -65,6 +72,10 @@ export default function PageAdminNotifications() {
   const { data: templatesData } = utiliserRequete(
     ["admin", "notifications", "templates"],
     () => listerTemplatesNotifications()
+  );
+  const { data: historiqueAdmin, refetch: rafraichirHistoriqueAdmin } = utiliserRequete(
+    ["admin", "notifications", "history"],
+    () => listerHistoriqueNotifications(30)
   );
 
   const envoyerTest = async () => {
@@ -120,7 +131,7 @@ export default function PageAdminNotifications() {
         message,
         titre,
         email: email || undefined,
-        inclure_whatsapp: true,
+        inclure_telegram: true,
       });
       const details = `Succès: ${data.succes.join(", ") || "aucun"} · Échecs: ${data.echecs.join(", ") || "aucun"}`;
       setResultatTous({ ok: data.echecs.length === 0, message: data.message, details });
@@ -147,7 +158,26 @@ export default function PageAdminNotifications() {
     ntfy: "ntfy.sh (push natif)",
     push: "Web Push",
     email: "Email",
-    whatsapp: "WhatsApp",
+    telegram: "Telegram",
+  };
+
+  const templatesActifs = templatesData?.templates?.[templateCanal] ?? [];
+
+  const chargerPreview = async () => {
+    if (!templateId) return;
+    const data = await previsualiserTemplateNotification(templateCanal, templateId);
+    setPreview(data.preview);
+  };
+
+  const simulerTemplate = async () => {
+    if (!templateId) return;
+    const data = await simulerNotificationAdmin({
+      canal: templateCanal,
+      template_id: templateId,
+      dry_run: true,
+    });
+    setSimulationRetour(data.message ?? "Simulation effectuée.");
+    await rafraichirHistoriqueAdmin();
   };
 
   return (
@@ -182,7 +212,7 @@ export default function PageAdminNotifications() {
                   <SelectItem value="ntfy">ntfy.sh</SelectItem>
                   <SelectItem value="push">Web Push</SelectItem>
                   <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                  <SelectItem value="telegram">Telegram</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -279,11 +309,10 @@ export default function PageAdminNotifications() {
               { canal: "Web Push", vars: ["VAPID_PUBLIC_KEY", "VAPID_PRIVATE_KEY"] },
               { canal: "Email", vars: ["RESEND_API_KEY", "EMAIL_FROM"] },
               {
-                canal: "WhatsApp",
+                canal: "Telegram",
                 vars: [
-                  "META_WHATSAPP_TOKEN",
-                  "META_PHONE_NUMBER_ID",
-                  "WHATSAPP_USER_NUMBER",
+                  "TELEGRAM_BOT_TOKEN",
+                  "TELEGRAM_CHAT_ID",
                 ],
               },
             ].map(({ canal: c, vars }) => (
@@ -313,9 +342,9 @@ export default function PageAdminNotifications() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium">WhatsApp</p>
+              <p className="text-sm font-medium">Telegram</p>
               <div className="space-y-1">
-                {(templatesData?.templates?.whatsapp ?? []).map((t) => (
+                {(templatesData?.templates?.telegram ?? []).map((t) => (
                   <div key={t.id} className="text-sm flex items-center justify-between gap-2 rounded border p-2">
                     <span>{t.label}</span>
                     <Badge variant="outline">{t.trigger}</Badge>
@@ -334,6 +363,45 @@ export default function PageAdminNotifications() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            <div className="space-y-3 rounded-md border p-3">
+              <p className="text-sm font-medium">Prévisualisation / simulation</p>
+              <div className="grid gap-2 md:grid-cols-3">
+                <Select value={templateCanal} onValueChange={(value) => {
+                  setTemplateCanal(value as "telegram" | "email");
+                  setTemplateId("");
+                  setPreview("");
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Canal template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="telegram">Telegram</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={templateId} onValueChange={setTemplateId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templatesActifs.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => void chargerPreview()} disabled={!templateId}>
+                    Preview
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => void simulerTemplate()} disabled={!templateId}>
+                    Dry-run
+                  </Button>
+                </div>
+              </div>
+              {preview && <pre className="rounded bg-muted p-3 text-xs whitespace-pre-wrap">{preview}</pre>}
+              {simulationRetour && <p className="text-xs text-muted-foreground">{simulationRetour}</p>}
             </div>
           </CardContent>
         </Card>
@@ -454,6 +522,31 @@ export default function PageAdminNotifications() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Historique admin notifications</CardTitle>
+          <CardDescription>Dernières actions notifications journalisées côté backend.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {(historiqueAdmin?.items ?? []).map((item) => (
+              <div key={item.id} className="rounded-md border px-3 py-2 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium">{item.action}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {item.created_at ? format(new Date(item.created_at), "dd/MM HH:mm:ss", { locale: fr }) : "-"}
+                  </span>
+                </div>
+                <pre className="mt-2 whitespace-pre-wrap text-xs text-muted-foreground">{JSON.stringify(item.details, null, 2)}</pre>
+              </div>
+            ))}
+            {!(historiqueAdmin?.items?.length) && (
+              <p className="text-sm text-muted-foreground">Aucun historique backend disponible.</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

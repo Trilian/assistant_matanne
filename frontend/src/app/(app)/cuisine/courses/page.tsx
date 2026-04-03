@@ -63,6 +63,7 @@ import {
   obtenirPredictionsCourses,
   obtenirQrPartageListe,
 } from "@/bibliotheque/api/courses";
+import { envoyerListeCoursesTelegram } from "@/bibliotheque/api/telegram";
 import { schemaArticleCourses, type DonneesArticleCourses } from "@/bibliotheque/validateurs";
 import { toast } from "sonner";
 import type { ArticleCourses, ListeCourses } from "@/types/courses";
@@ -458,9 +459,19 @@ export default function PageCourses() {
   const { mutate: confirmer, isPending: enConfirmation } = utiliserMutation(
     () => confirmerCourses(listeSelectionnee!),
     {
-      onSuccess: () => {
+      onSuccess: async () => {
+        const idListe = listeSelectionnee;
         invalider(["courses"]);
         toast.success("Liste confirmée, vous pouvez maintenant cocher vos achats.");
+
+        if (idListe) {
+          try {
+            await envoyerListeCoursesTelegram(idListe);
+          } catch {
+            // Ne bloque pas l'action principale si Telegram échoue.
+            toast.info("Liste confirmée, notification Telegram non envoyée.");
+          }
+        }
       },
       onError: () => toast.error("Impossible de confirmer cette liste"),
     }

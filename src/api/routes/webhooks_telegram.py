@@ -16,7 +16,8 @@ import re
 import unicodedata
 from datetime import date, timedelta
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel
 
 from src.api.schemas import MessageResponse
 from src.api.utils import gerer_exception_api
@@ -24,6 +25,20 @@ from src.api.utils import gerer_exception_api
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/telegram", tags=["Telegram"])
+
+
+class EnvoyerPlanningTelegramRequest(BaseModel):
+    """Payload pour l'envoi manuel d'un planning via Telegram."""
+
+    planning_id: int
+    contenu: str | None = None
+
+
+class EnvoyerCoursesTelegramRequest(BaseModel):
+    """Payload pour l'envoi manuel d'une liste de courses via Telegram."""
+
+    liste_id: int
+    nom_liste: str | None = None
 
 
 def _normaliser_texte(texte: str) -> str:
@@ -467,6 +482,89 @@ async def _envoyer_activites_samedi(chat_id: str) -> None:
         chat_id,
         "🎯 <b>Activites prevues samedi</b>\n\n" + "\n".join(lignes),
     )
+
+
+@router.post("/envoyer-planning", response_model=MessageResponse)
+@gerer_exception_api
+async def envoyer_planning_telegram(payload: EnvoyerPlanningTelegramRequest) -> MessageResponse:
+    """Envoie un planning existant sur Telegram avec boutons interactifs."""
+    from src.api.utils import executer_async, executer_avec_session
+    from src.core.models.planning import Planning
+    from src.services.integrations.telegram import envoyer_planning_semaine
+
+    def _charger_planning() -> dict[str, object]:
+        with executer_avec_session() as session:
+            planning = session.query(Planning).filter(Planning.id == payload.planning_id).first()
+            if not planning:
+                raise HTTPException(status_code=404, detail="Planning non trouvé")
+
+            lignes = []
+            repas_tries = sorted(planning.repas, key=lambda item: (item.date_repas, item.type_repas))
+            for repas in repas_tries:
+                nom_recette = None
+                if getattr(repas, "recette", None) is not None:
+                    nom_recette = getattr(repas.recette, "nom", None)
+                lignes.append(
+                    f"• {repas.date_repas.strftime('%d/%m')} {repas.type_repas} : {nom_recette or 'Repas à préciser'}"
+                )
+
+            return {
+                "planning_id": planning.id,
+                "contenu": payload.contenu
+                or "\n".join(lignes)
+                or f"Planning {planning.nom} du {planning.semaine_debut.strftime('%d/%m')} au {planning.semaine_fin.strftime('%d/%m')}",
+            }
+
+    resultat = await executer_async(_charger_planning)
+    succes = await envoyer_planning_semaine(
+        str(resultat["contenu"]),
+        planning_id=int(resultat["planning_id"]),
+    )
+    if not succes:
+        raise HTTPException(status_code=502, detail="Envoi Telegram impossible")
+
+    return MessageResponse(message="planning_envoye", id=int(resultat["planning_id"]))
+
+
+@router.post("/envoyer-courses", response_model=MessageResponse)
+@gerer_exception_api
+async def envoyer_courses_telegram(payload: EnvoyerCoursesTelegramRequest) -> MessageResponse:
+    """Envoie une liste de courses existante sur Telegram avec boutons interactifs."""
+    from src.api.utils import executer_async, executer_avec_session
+    from src.core.models.courses import ListeCourses
+    from src.services.integrations.telegram import envoyer_liste_courses_partagee
+
+    def _charger_liste() -> dict[str, object]:
+        with executer_avec_session() as session:
+            liste = session.query(ListeCourses).filter(ListeCourses.id == payload.liste_id).first()
+            if not liste:
+                raise HTTPException(status_code=404, detail="Liste de courses non trouvée")
+
+            articles = []
+            for article in liste.articles:
+                ingredient = getattr(article, "ingredient", None)
+                nom_article = getattr(ingredient, "nom", None) or f"Article #{article.id}"
+                articles.append(nom_article)
+
+            if not articles:
+                raise HTTPException(status_code=400, detail="La liste ne contient aucun article")
+
+            return {
+                "liste_id": liste.id,
+                "nom_liste": payload.nom_liste or liste.nom,
+                "articles": articles,
+            }
+
+    resultat = await executer_async(_charger_liste)
+    succes = await envoyer_liste_courses_partagee(
+        list(resultat["articles"]),
+        nom_liste=str(resultat["nom_liste"]),
+        liste_id=int(resultat["liste_id"]),
+    )
+    if not succes:
+        raise HTTPException(status_code=502, detail="Envoi Telegram impossible")
+
+    return MessageResponse(message="courses_envoyees", id=int(resultat["liste_id"]))
 
 
 @router.post("/webhook", response_model=MessageResponse)

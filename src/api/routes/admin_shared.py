@@ -248,6 +248,25 @@ class JobsSimulationJourneeRequest(BaseModel):
     inclure_jobs_inactifs: bool = False
 
 
+class JobRunAllRequest(BaseModel):
+    dry_run: bool = False
+    continuer_sur_erreur: bool = True
+    inclure_jobs_inactifs: bool = False
+    force: bool = False
+
+
+class JobScheduleUpdateRequest(BaseModel):
+    # Format attendu: "minute heure jour_du_mois mois jour_semaine"
+    cron: str
+
+
+class NotificationSimulationRequest(BaseModel):
+    canal: Literal["ntfy", "push", "email", "telegram"]
+    template_id: str
+    dry_run: bool = True
+    payload: dict[str, Any] = {}
+
+
 
 # ═══════════════════════════════════════════════════════════
 # JOBS

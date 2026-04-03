@@ -120,14 +120,14 @@ class TestWebhookTelegramCallbacksEndpoint:
 
     def test_webhook_planning_callback_route(self, client):
         """Webhook accepte callback planning_valider:ID."""
-        with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock):
+        with patch("src.api.routes.webhooks_telegram._traiter_callback_planning", new_callable=AsyncMock):
             response = client.post("/api/v1/telegram/webhook", json=UPDATE_CALLBACK_PLANNING_VALIDER)
             # Ne doit pas échouer sur route invalide
             assert response.status_code in (200, 500)
 
     def test_webhook_courses_callback_route(self, client):
         """Webhook accepte callback courses_confirmer:ID."""
-        with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock):
+        with patch("src.api.routes.webhooks_telegram._traiter_callback_courses", new_callable=AsyncMock):
             response = client.post("/api/v1/telegram/webhook", json=UPDATE_CALLBACK_COURSES_CONFIRMER)
             assert response.status_code in (200, 500)
 
@@ -180,34 +180,28 @@ class TestPlanningCallbackValider:
     @pytest.mark.asyncio
     async def test_planning_valider_succes(self):
         """Callback valider transite planning brouillon → valide."""
-        # Créer un mock planning en brouillon
-        mock_planning = MagicMock()
-        mock_planning.id = 42
-        mock_planning.etat = "brouillon"
-
-        mock_session = MagicMock()
-        mock_session.query.return_value.filter.return_value.first.return_value = mock_planning
-
-        with patch("src.api.routes.webhooks_telegram.executer_async") as mock_execute:
-            with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+        with patch("src.api.utils.executer_async") as mock_execute:
+            with patch("src.services.integrations.telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+                with patch("src.services.integrations.telegram.modifier_message", new_callable=AsyncMock):
                 # Simuler le résultat de _valider()
-                mock_execute.return_value = {"message": "Planning validé", "id": 42, "status": 200}
+                    mock_execute.return_value = {"message": "Planning validé", "id": 42, "status": 200}
 
-                from src.api.routes.webhooks_telegram import _traiter_callback_planning
+                    from src.api.routes.webhooks_telegram import _traiter_callback_planning
 
-                await _traiter_callback_planning("planning_valider:42", "callback_123", 123456)
+                    await _traiter_callback_planning("planning_valider:42", "callback_123", 123456)
 
-                # Vérifier que repondre_callback_query a été appelé avec succès
-                mock_respond.assert_called_once()
-                call_args = mock_respond.call_args[0]
-                assert call_args[0] == "callback_123"
-                assert "✅" in call_args[1]
+                    # Vérifier que repondre_callback_query a été appelé avec succès
+                    mock_respond.assert_called_once()
+                    call_args = mock_respond.call_args
+                    assert call_args.args[0] == "callback_123"
+                    assert "✅" in call_args.args[1]
+                    assert call_args.kwargs["show_alert"] is False
 
     @pytest.mark.asyncio
     async def test_planning_valider_planning_inexistant(self):
         """Callback valider retourne erreur si planning n'existe pas."""
-        with patch("src.api.routes.webhooks_telegram.executer_async") as mock_execute:
-            with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+        with patch("src.api.utils.executer_async") as mock_execute:
+            with patch("src.services.integrations.telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
                 # Simuler planning inexistant
                 mock_execute.return_value = {"error": "Planning non trouvé", "status": 404}
 
@@ -217,8 +211,8 @@ class TestPlanningCallbackValider:
 
                 # Vérifier erreur
                 mock_respond.assert_called_once()
-                call_args = mock_respond.call_args[0]
-                assert call_args[2] is True  # show_alert = True
+                call_args = mock_respond.call_args
+                assert call_args.kwargs["show_alert"] is True
 
 
 class TestPlanningCallbackModifier:
@@ -227,15 +221,15 @@ class TestPlanningCallbackModifier:
     @pytest.mark.asyncio
     async def test_planning_modifier_envoie_url(self):
         """Callback modifier envoie URL web."""
-        with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+        with patch("src.services.integrations.telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
             from src.api.routes.webhooks_telegram import _traiter_callback_planning
 
             await _traiter_callback_planning("planning_modifier:42", "callback_124", 123456)
 
             # Vérifier que URL est renvoyée
             mock_respond.assert_called_once()
-            call_args = mock_respond.call_args[0]
-            assert "https://matanne.vercel.app" in call_args[1] or "lien" in call_args[1].lower()
+            call_args = mock_respond.call_args
+            assert "https://matanne.vercel.app" in call_args.args[1] or "lien" in call_args.args[1].lower()
 
 
 class TestPlanningCallbackRegenerer:
@@ -244,24 +238,20 @@ class TestPlanningCallbackRegenerer:
     @pytest.mark.asyncio
     async def test_planning_regenerer_cree_nouveau(self):
         """Callback regenerer crée nouveau planning en brouillon."""
-        # Créer un mock planning existant
-        mock_planning = MagicMock()
-        mock_planning.id = 42
-        mock_planning.etat = "brouillon"
-
-        with patch("src.api.routes.webhooks_telegram.executer_async") as mock_execute:
-            with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+        with patch("src.api.utils.executer_async") as mock_execute:
+            with patch("src.services.integrations.telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+                with patch("src.services.integrations.telegram.modifier_message", new_callable=AsyncMock):
                 # Simuler succès de régénération
-                mock_execute.return_value = {"message": "Planning régénéré", "id": 43, "status": 200}
+                    mock_execute.return_value = {"message": "Planning régénéré", "id": 43, "status": 200}
 
-                from src.api.routes.webhooks_telegram import _traiter_callback_planning
+                    from src.api.routes.webhooks_telegram import _traiter_callback_planning
 
-                await _traiter_callback_planning("planning_regenerer:42", "callback_125", 123456)
+                    await _traiter_callback_planning("planning_regenerer:42", "callback_125", 123456)
 
-                # Vérifier succès
-                mock_respond.assert_called_once()
-                call_args = mock_respond.call_args[0]
-                assert "✅" in call_args[1]
+                    # Vérifier succès
+                    mock_respond.assert_called_once()
+                    call_args = mock_respond.call_args
+                    assert "🔄" in call_args.args[1]
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -275,29 +265,26 @@ class TestCoursesCallbackConfirmer:
     @pytest.mark.asyncio
     async def test_courses_confirmer_succes(self):
         """Callback confirmer transite courses brouillon → active."""
-        mock_liste = MagicMock()
-        mock_liste.id = 15
-        mock_liste.etat = "brouillon"
-
-        with patch("src.api.routes.webhooks_telegram.executer_async") as mock_execute:
-            with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+        with patch("src.api.utils.executer_async") as mock_execute:
+            with patch("src.services.integrations.telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+                with patch("src.services.integrations.telegram.modifier_message", new_callable=AsyncMock):
                 # Simuler succès
-                mock_execute.return_value = {"message": "Courses confirmées", "id": 15, "status": 200}
+                    mock_execute.return_value = {"message": "Courses confirmées", "id": 15, "status": 200}
 
-                from src.api.routes.webhooks_telegram import _traiter_callback_courses
+                    from src.api.routes.webhooks_telegram import _traiter_callback_courses
 
-                await _traiter_callback_courses("courses_confirmer:15", "callback_201", 123456)
+                    await _traiter_callback_courses("courses_confirmer:15", "callback_201", 123456)
 
-                # Vérifier succès
-                mock_respond.assert_called_once()
-                call_args = mock_respond.call_args[0]
-                assert "✅" in call_args[1]
+                    # Vérifier succès
+                    mock_respond.assert_called_once()
+                    call_args = mock_respond.call_args
+                    assert "✅" in call_args.args[1]
 
     @pytest.mark.asyncio
     async def test_courses_confirmer_liste_inexistante(self):
         """Callback confirmer retourne erreur si liste n'existe pas."""
-        with patch("src.api.routes.webhooks_telegram.executer_async") as mock_execute:
-            with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+        with patch("src.api.utils.executer_async") as mock_execute:
+            with patch("src.services.integrations.telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
                 # Simuler liste inexistante
                 mock_execute.return_value = {"error": "Liste non trouvée", "status": 404}
 
@@ -307,8 +294,8 @@ class TestCoursesCallbackConfirmer:
 
                 # Vérifier erreur
                 mock_respond.assert_called_once()
-                call_args = mock_respond.call_args[0]
-                assert call_args[2] is True  # show_alert = True
+                call_args = mock_respond.call_args
+                assert call_args.kwargs["show_alert"] is True
 
 
 class TestCoursesCallbackAjouter:
@@ -317,15 +304,15 @@ class TestCoursesCallbackAjouter:
     @pytest.mark.asyncio
     async def test_courses_ajouter_envoie_url(self):
         """Callback ajouter envoie URL web."""
-        with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+        with patch("src.services.integrations.telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
             from src.api.routes.webhooks_telegram import _traiter_callback_courses
 
             await _traiter_callback_courses("courses_ajouter:15", "callback_202", 123456)
 
             # Vérifier que URL est renvoyée
             mock_respond.assert_called_once()
-            call_args = mock_respond.call_args[0]
-            assert "https://matanne.vercel.app" in call_args[1] or "lien" in call_args[1].lower()
+            call_args = mock_respond.call_args
+            assert "https://matanne.vercel.app" in call_args.args[1] or "lien" in call_args.args[1].lower()
 
 
 class TestCoursesCallbackRefaire:
@@ -334,19 +321,20 @@ class TestCoursesCallbackRefaire:
     @pytest.mark.asyncio
     async def test_courses_refaire_cree_nouveau(self):
         """Callback refaire crée nouvelle liste en brouillon."""
-        with patch("src.api.routes.webhooks_telegram.executer_async") as mock_execute:
-            with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+        with patch("src.api.utils.executer_async") as mock_execute:
+            with patch("src.services.integrations.telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+                with patch("src.services.integrations.telegram.modifier_message", new_callable=AsyncMock):
                 # Simuler succès
-                mock_execute.return_value = {"message": "Nouvelle liste créée", "id": 16, "status": 200}
+                    mock_execute.return_value = {"message": "Nouvelle liste créée", "id": 16, "status": 200}
 
-                from src.api.routes.webhooks_telegram import _traiter_callback_courses
+                    from src.api.routes.webhooks_telegram import _traiter_callback_courses
 
-                await _traiter_callback_courses("courses_refaire:15", "callback_203", 123456)
+                    await _traiter_callback_courses("courses_refaire:15", "callback_203", 123456)
 
-                # Vérifier succès
-                mock_respond.assert_called_once()
-                call_args = mock_respond.call_args[0]
-                assert "✅" in call_args[1]
+                    # Vérifier succès
+                    mock_respond.assert_called_once()
+                    call_args = mock_respond.call_args
+                    assert "🔄" in call_args.args[1]
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -360,16 +348,14 @@ class TestCallbackDispatcher:
     def test_dispatcher_route_planning_callbacks(self, client):
         """Dispatcher reconnait et route planning_* callbacks."""
         with patch("src.api.routes.webhooks_telegram._traiter_callback_planning", new_callable=AsyncMock):
-            with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock):
-                response = client.post("/api/v1/telegram/webhook", json=UPDATE_CALLBACK_PLANNING_VALIDER)
-                assert response.status_code in (200, 500)
+            response = client.post("/api/v1/telegram/webhook", json=UPDATE_CALLBACK_PLANNING_VALIDER)
+            assert response.status_code in (200, 500)
 
     def test_dispatcher_route_courses_callbacks(self, client):
         """Dispatcher reconnait et route courses_* callbacks."""
         with patch("src.api.routes.webhooks_telegram._traiter_callback_courses", new_callable=AsyncMock):
-            with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock):
-                response = client.post("/api/v1/telegram/webhook", json=UPDATE_CALLBACK_COURSES_CONFIRMER)
-                assert response.status_code in (200, 500)
+            response = client.post("/api/v1/telegram/webhook", json=UPDATE_CALLBACK_COURSES_CONFIRMER)
+            assert response.status_code in (200, 500)
 
     def test_dispatcher_backward_compatibility(self, client):
         """Dispatcher conserve backward compatibility avec callbacks legacy."""
@@ -384,7 +370,7 @@ class TestCallbackDispatcher:
             },
         }
 
-        with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock):
+        with patch("src.api.routes.webhooks_telegram._envoyer_repas_du_soir", new_callable=AsyncMock):
             response = client.post("/api/v1/telegram/webhook", json=legacy_callback)
             # Ne doit pas échouer
             assert response.status_code in (200, 500)
@@ -401,8 +387,8 @@ class TestCallbackErrorHandling:
     @pytest.mark.asyncio
     async def test_callback_exception_handling(self):
         """Exception dans callback est catchée et rapportée."""
-        with patch("src.api.routes.webhooks_telegram.executer_async") as mock_execute:
-            with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
+        with patch("src.api.utils.executer_async") as mock_execute:
+            with patch("src.services.integrations.telegram.repondre_callback_query", new_callable=AsyncMock) as mock_respond:
                 # Simuler exception
                 mock_execute.side_effect = Exception("DB Error")
 
@@ -412,8 +398,8 @@ class TestCallbackErrorHandling:
 
                 # Vérifier erreur est envoyée
                 mock_respond.assert_called_once()
-                call_args = mock_respond.call_args[0]
-                assert "❌" in call_args[1]
+                call_args = mock_respond.call_args
+                assert "❌" in call_args.args[1]
 
     def test_callback_missing_user_context(self, client):
         """Callback sans contexte utilisateur est rejeté."""
@@ -426,7 +412,6 @@ class TestCallbackErrorHandling:
             },
         }
 
-        with patch("src.api.routes.webhooks_telegram.repondre_callback_query", new_callable=AsyncMock):
-            response = client.post("/api/v1/telegram/webhook", json=bad_callback)
-            # Devrait être robuste face aux données mal formées
-            assert response.status_code in (200, 400, 422, 500)
+        response = client.post("/api/v1/telegram/webhook", json=bad_callback)
+        # Devrait être robuste face aux données mal formées
+        assert response.status_code in (200, 400, 422, 500)

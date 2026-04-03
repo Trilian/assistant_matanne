@@ -38,8 +38,13 @@ import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import {
   comparerDryRunVsRun,
+  declencherJobAvecOptions,
   executerJobsDuMatin,
+  executerTousLesJobs,
   listerHistoriqueJobs,
+  listerJobs,
+  mettreAJourScheduleJob,
+  relancerJobDepuisHistorique,
   simulerJourneeJobs,
   type JobCompareResponse,
   type JobBatchResponse,
@@ -106,21 +111,22 @@ export default function PageAdminJobs() {
   const [jobLogs, setJobLogs] = useState<Record<string, JobLogsResponse>>({});
   const [chargementLogs, setChargementLogs] = useState<Record<string, boolean>>({});
   const [modeDryRun, setModeDryRun] = useState(false);
+  const [modeForce, setModeForce] = useState(false);
   const [pageHistorique, setPageHistorique] = useState(1);
   const [filtreJobId, setFiltreJobId] = useState("");
   const [filtreStatus, setFiltreStatus] = useState("all");
   const [filtreDepuis, setFiltreDepuis] = useState("");
   const [filtreJusqua, setFiltreJusqua] = useState("");
-  const [batchLoading, setBatchLoading] = useState<"morning" | "day" | null>(null);
+  const [batchLoading, setBatchLoading] = useState<"morning" | "day" | "all" | null>(null);
   const [batchResultat, setBatchResultat] = useState<JobBatchResponse | null>(null);
+  const [schedulesEdition, setSchedulesEdition] = useState<Record<string, string>>({});
 
   const {
     data: jobs,
     isLoading,
     refetch,
   } = utiliserRequete(["admin", "jobs"], async (): Promise<JobInfo[]> => {
-    const { data } = await clientApi.get("/admin/jobs");
-    return data;
+    return listerJobs();
   });
 
   const { data: historique, isLoading: historiqueLoading } = utiliserRequete(
@@ -166,7 +172,7 @@ export default function PageAdminJobs() {
   const executerJob = async (jobId: string) => {
     setRunStatuts((s) => ({ ...s, [jobId]: "running" }));
     try {
-      await clientApi.post(`/admin/jobs/${jobId}/run`, null, { params: { dry_run: modeDryRun } });
+      await declencherJobAvecOptions(jobId, { dry_run: modeDryRun, force: modeForce });
       setRunStatuts((s) => ({ ...s, [jobId]: "success" }));
       // Rafraîchir les logs automatiquement après l'exécution
       chargerLogs(jobId);
@@ -174,6 +180,25 @@ export default function PageAdminJobs() {
     } catch {
       setRunStatuts((s) => ({ ...s, [jobId]: "error" }));
       setTimeout(() => setRunStatuts((s) => ({ ...s, [jobId]: "idle" })), 3000);
+    }
+  };
+
+  const lancerTousLesJobs = async () => {
+    setBatchLoading("all");
+    try {
+      const resultat = await executerTousLesJobs({
+        dry_run: modeDryRun,
+        continuer_sur_erreur: true,
+        force: modeForce,
+      });
+      setBatchResultat(resultat);
+      toast.success(`Exécution globale: ${resultat.succes} succès / ${resultat.echecs} échec(s)`);
+      refetch();
+      refetchComparaison();
+    } catch {
+      toast.error("Impossible d'exécuter tous les jobs");
+    } finally {
+      setBatchLoading(null);
     }
   };
 
@@ -232,6 +257,18 @@ export default function PageAdminJobs() {
     }
   };
 
+  const sauvegarderSchedule = async (jobId: string) => {
+    const cron = schedulesEdition[jobId]?.trim();
+    if (!cron) return;
+    try {
+      const resultat = await mettreAJourScheduleJob(jobId, cron);
+      toast.success(`Schedule mis à jour: ${resultat.schedule}`);
+      refetch();
+    } catch {
+      toast.error("Impossible de mettre à jour le schedule");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -250,6 +287,14 @@ export default function PageAdminJobs() {
               onChange={(e) => setModeDryRun(e.target.checked)}
             />
             Mode dry-run (simulation)
+          </label>
+          <label className="mt-2 ml-4 inline-flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+            <input
+              type="checkbox"
+              checked={modeForce}
+              onChange={(e) => setModeForce(e.target.checked)}
+            />
+            Forcer l'exécution
           </label>
         </div>
         <Button variant="outline" size="sm" onClick={() => refetch()} aria-label="Actualiser">
@@ -300,7 +345,20 @@ export default function PageAdminJobs() {
                         </TableCell>
                         <TableCell className="font-medium">{job.nom}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {job.schedule}
+                          <div className="space-y-2">
+                            <div>{job.schedule}</div>
+                            <div className="flex gap-2">
+                              <Input
+                                value={schedulesEdition[job.id] ?? ""}
+                                onChange={(e) => setSchedulesEdition((s) => ({ ...s, [job.id]: e.target.value }))}
+                                placeholder="m h dom mon dow"
+                                className="h-8 min-w-[180px] text-xs"
+                              />
+                              <Button size="sm" variant="ghost" onClick={() => void sauvegarderSchedule(job.id)}>
+                                Sauver
+                              </Button>
+                            </div>
+                          </div>
                         </TableCell>
                         <TableCell className="text-sm">
                           {formaterDate(job.prochain_run)}
@@ -421,6 +479,10 @@ export default function PageAdminJobs() {
             <Button onClick={lancerJobsMatin} disabled={batchLoading !== null}>
               {batchLoading === "morning" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
               Lancer tous les jobs du matin
+            </Button>
+            <Button variant="outline" onClick={lancerTousLesJobs} disabled={batchLoading !== null}>
+              {batchLoading === "all" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+              Tout exécuter
             </Button>
             <Button variant="outline" onClick={simulerJournee} disabled={batchLoading !== null}>
               {batchLoading === "day" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Clock className="mr-2 h-4 w-4" />}
@@ -591,6 +653,23 @@ export default function PageAdminJobs() {
                       </TableCell>
                       <TableCell className="max-w-[420px] truncate text-xs">
                         {entry.error_message || entry.output_logs || "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={async () => {
+                            try {
+                              await relancerJobDepuisHistorique(entry.id, { dry_run: modeDryRun, force: modeForce });
+                              toast.success("Job relancé depuis l'historique");
+                              refetch();
+                            } catch {
+                              toast.error("Impossible de relancer ce job");
+                            }
+                          }}
+                        >
+                          Relancer
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

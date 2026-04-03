@@ -66,7 +66,7 @@ Notes:
 ---
 
 ## 4) Mutation testing (mutmut)
-## 5) Conventions de nommage des tests (Sprint H)
+## 5) Conventions de nommage des tests
 
 ### Structure cible
 
@@ -143,10 +143,10 @@ Règles :
 | `api/test_admin.py` + `api/test_admin_routes.py` | Fusionner en `api/test_routes_admin.py` | 🟡 |
 | `services/test_automations_engine.py` | `services/automations/test_engine.py` | 🟢 |
 | `services/test_cron_jobs.py` | `services/cron/test_cron_jobs.py` | 🟢 |
-| `services/test_cron_phase8.py` | Fusionner dans `services/cron/test_cron_jobs.py` | 🟡 |
-| `services/test_gamification_phase9.py` | `services/gamification/test_gamification.py` | 🟢 |
-| `services/test_jeux_phases_tuw.py` | `services/jeux/test_phases_tuw.py` ou fusionner | 🟢 |
-| `services/test_notif_dispatcher_phase8.py` | `services/core/test_notif_dispatcher.py` | 🟡 |
+| `services/test_cron_legacy.py` | Fusionner dans `services/cron/test_cron_jobs.py` | 🟡 |
+| `services/test_gamification_legacy.py` | `services/gamification/test_gamification.py` | 🟢 |
+| `services/test_jeux_legacy.py` | `services/jeux/test_phases_tuw.py` ou fusionner | 🟢 |
+| `services/test_notif_dispatcher_legacy.py` | `services/core/test_notif_dispatcher.py` | 🟡 |
 | `services/test_recettes_enrichers.py` | `services/recettes/test_enrichers.py` | 🟢 |
 
 > ⚠️ Avant tout renommage : s'assurer que pytest discover toujours les tests (`pytest --collect-only`).

@@ -71,6 +71,13 @@ export interface JobBatchResponse {
   items: JobBatchItem[]
 }
 
+export interface JobScheduleUpdateResponse {
+  status: string
+  job_id: string
+  schedule: string
+  prochain_run: string | null
+}
+
 export interface JobCompareItem {
   job_id: string
   job_name: string
@@ -216,7 +223,7 @@ export interface UtilisateurAdmin {
 }
 
 export interface NotificationTestPayload {
-  canal: 'ntfy' | 'push' | 'email' | 'whatsapp'
+  canal: 'ntfy' | 'push' | 'email' | 'telegram'
   message: string
   email?: string
   numero_destinataire?: string
@@ -227,7 +234,7 @@ export interface NotificationTestAllPayload {
   message: string
   email?: string
   titre?: string
-  inclure_whatsapp?: boolean
+  inclure_telegram?: boolean
 }
 
 export interface NotificationTemplateInfo {
@@ -239,9 +246,46 @@ export interface NotificationTemplateInfo {
 export interface NotificationTemplatesResponse {
   status: string
   templates: {
-    whatsapp: NotificationTemplateInfo[]
+    telegram: NotificationTemplateInfo[]
     email: NotificationTemplateInfo[]
   }
+  total: number
+}
+
+export interface NotificationTemplatePreviewResponse {
+  status: string
+  canal: string
+  template_id: string
+  trigger?: string
+  preview: string
+  contexte_demo: Record<string, unknown>
+}
+
+export interface NotificationSimulationPayload {
+  canal: 'ntfy' | 'push' | 'email' | 'telegram'
+  template_id: string
+  dry_run?: boolean
+  payload?: Record<string, unknown>
+}
+
+export interface NotificationSimulationResponse {
+  status: string
+  dry_run: boolean
+  template: NotificationTemplateInfo
+  message?: string
+  resultats?: Record<string, boolean>
+  payload: Record<string, unknown>
+}
+
+export interface NotificationHistoryItem {
+  id: number
+  created_at: string | null
+  action: string
+  details: Record<string, unknown>
+}
+
+export interface NotificationHistoryResponse {
+  items: NotificationHistoryItem[]
   total: number
 }
 
@@ -556,6 +600,19 @@ export async function declencherJob(jobId: string): Promise<{ status: string; jo
   return data
 }
 
+export async function declencherJobAvecOptions(
+  jobId: string,
+  options?: { dry_run?: boolean; force?: boolean },
+): Promise<{ status: string; job_id: string; message: string }> {
+  const { data } = await clientApi.post(`/api/v1/admin/jobs/${jobId}/run`, null, {
+    params: {
+      dry_run: options?.dry_run ?? false,
+      force: options?.force ?? false,
+    },
+  })
+  return data
+}
+
 export async function obtenirLogsJob(jobId: string): Promise<JobLogsResponse> {
   const { data } = await clientApi.get(`/api/v1/admin/jobs/${jobId}/logs`)
   return data
@@ -584,6 +641,21 @@ export async function executerJobsDuMatin(options?: {
   return data
 }
 
+export async function executerTousLesJobs(options?: {
+  dry_run?: boolean
+  continuer_sur_erreur?: boolean
+  inclure_jobs_inactifs?: boolean
+  force?: boolean
+}): Promise<JobBatchResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/jobs/run-all', {
+    dry_run: options?.dry_run ?? false,
+    continuer_sur_erreur: options?.continuer_sur_erreur ?? true,
+    inclure_jobs_inactifs: options?.inclure_jobs_inactifs ?? false,
+    force: options?.force ?? false,
+  })
+  return data
+}
+
 export async function simulerJourneeJobs(options?: {
   dry_run?: boolean
   continuer_sur_erreur?: boolean
@@ -602,6 +674,27 @@ export async function comparerDryRunVsRun(params?: {
   depuis_heures?: number
 }): Promise<JobCompareResponse> {
   const { data } = await clientApi.get('/api/v1/admin/jobs/compare-dry-run', { params })
+  return data
+}
+
+export async function mettreAJourScheduleJob(
+  jobId: string,
+  cron: string,
+): Promise<JobScheduleUpdateResponse> {
+  const { data } = await clientApi.put(`/api/v1/admin/jobs/${jobId}/schedule`, { cron })
+  return data
+}
+
+export async function relancerJobDepuisHistorique(
+  executionId: number,
+  options?: { dry_run?: boolean; force?: boolean },
+): Promise<{ status: string; job_id: string; message: string }> {
+  const { data } = await clientApi.post(`/api/v1/admin/jobs/history/${executionId}/retry`, null, {
+    params: {
+      dry_run: options?.dry_run ?? false,
+      force: options?.force ?? false,
+    },
+  })
   return data
 }
 
@@ -765,6 +858,28 @@ export async function relancerQueueNotifications(userId: string): Promise<{ stat
 
 export async function supprimerQueueNotifications(userId: string): Promise<{ status: string; user_id: string; deleted: number }> {
   const { data } = await clientApi.delete(`/api/v1/admin/notifications/queue/${userId}`)
+  return data
+}
+
+export async function previsualiserTemplateNotification(
+  canal: string,
+  templateId: string,
+): Promise<NotificationTemplatePreviewResponse> {
+  const { data } = await clientApi.get(`/api/v1/admin/notifications/templates/${canal}/${templateId}/preview`)
+  return data
+}
+
+export async function simulerNotificationAdmin(
+  payload: NotificationSimulationPayload,
+): Promise<NotificationSimulationResponse> {
+  const { data } = await clientApi.post('/api/v1/admin/notifications/simulate', payload)
+  return data
+}
+
+export async function listerHistoriqueNotifications(
+  limit = 50,
+): Promise<NotificationHistoryResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/notifications/history', { params: { limit } })
   return data
 }
 

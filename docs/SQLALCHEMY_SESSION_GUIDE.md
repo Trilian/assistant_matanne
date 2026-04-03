@@ -249,14 +249,14 @@ def test_modifications_isolated():
 
 ---
 
-**Version:** 1.1 (Sprint H — avril 2026)
+**Version:** 1.1 (avril 2026)
 **Date initiale:** 30 Janvier 2026
 **Auteur:** GitHub Copilot
 **Pour:** Assistant Matanne Codebase
 
 ---
 
-## Mise à jour Sprint H — Patterns FastAPI
+## Mise à jour — Patterns FastAPI
 
 ### Pattern routes FastAPI (`executer_avec_session`)
 

@@ -558,6 +558,13 @@ async def generer_courses_depuis_planning(event):
 | Suggestions jardinage | Pas de widget jardin IA | ⬜ |
 | Recommandations proactives | Bannière existe mais contenu limité | ⬜ |
 
+#### Mise à jour Phase 5.2 — Telegram interactif
+
+- Boutons Telegram interactifs branchés sur les messages planning et courses avec callback_data au format `action:ID`.
+- Webhook Telegram relié aux transitions d'état planning (`brouillon` → `valide` / `archive`) et courses (`brouillon` → `active`).
+- Frontend relié à des endpoints dédiés pour envoyer les notifications Telegram après génération du planning et confirmation de la liste.
+- Couverture de tests ajoutée pour l'extraction d'ID, le dispatch des callbacks et les cas de succès/erreur principaux.
+
 ### 5.3 Streaming IA frontend
 
 | # | Tâche | Statut |
@@ -781,6 +788,7 @@ Le flux actuel (`src/services/ia/flux_utilisateur.py`, `src/api/routes/intra_flu
   └─ L'IA génère un planning semaine → statut "brouillon"
   └─ Telegram : message avec boutons [✅ Valider] [✏️ Modifier] [🔄 Régénérer]
   └─ Web : bandeau jaune "Brouillon — En attente de validation"
+  └─ Frontend : envoi automatique du planning généré vers Telegram avec `planning_id`
 
 Étape 2 — Validation utilisateur (OBLIGATOIRE, via web OU Telegram)
   └─ Telegram : tap sur ✅ Valider ou écrire "Remplace mardi par du poisson"
@@ -791,6 +799,7 @@ Le flux actuel (`src/services/ia/flux_utilisateur.py`, `src/api/routes/intra_flu
   └─ Liste générée automatiquement depuis planning validé → statut "brouillon"
   └─ Telegram : message avec [✅ Confirmer] [✏️ Ajouter] [❌ Refaire]
   └─ Web : même pattern bandeau + boutons
+  └─ Frontend : envoi automatique de la liste confirmée vers Telegram avec `liste_id`
 
 Étape 4 — Confirmation courses (OBLIGATOIRE)
   └─ Telegram : tap ✅ Confirmer
