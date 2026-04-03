@@ -1,7 +1,7 @@
-"""
+﻿"""
 Service inter-modules : Produits de saison -> Planning IA.
 
-Phase 5:
+Bridge inter-modules :
 - P5-03: favoriser les produits de saison dans le planning IA
 """
 

@@ -1,7 +1,7 @@
-"""
+﻿"""
 Service inter-modules : Jules croissance -> Planning nutrition.
 
-Phase 5:
+Bridge inter-modules :
 - P5-02: adapter portions/nutriments selon croissance de Jules
 - P5-14: adapter automatiquement les portions des recettes planifiees
 """

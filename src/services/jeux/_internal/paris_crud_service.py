@@ -1,7 +1,7 @@
-"""
+﻿"""
 ParisCrudService - Façade composée de mixins pour les paris sportifs.
 
-Refactorisé en 3 mixins (Phase 4 Audit, item 18 — split >500 LOC):
+Refactorisé en 3 mixins (Audit qualité — split >500 LOC):
 - paris_queries.py (lecture, ~300 LOC)
 - paris_mutations.py (écriture, ~140 LOC)
 - paris_sync.py (synchronisation API, ~200 LOC)

@@ -1,4 +1,4 @@
-"""Fonctions energie extraites du service innovations."""
+﻿"""Fonctions energie extraites du service innovations."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 def detecter_anomalies_energie(service) -> AnomaliesEnergieResponse | None:
-    """P9-04 : détecte des anomalies eau/gaz/électricité."""
+    """Anomalies énergie : détecte des anomalies eau/gaz/électricité."""
     from src.services.maison.energie_anomalies_ia import obtenir_service_energie_anomalies_ia
 
     service = obtenir_service_energie_anomalies_ia()
@@ -58,7 +58,7 @@ def comparer_fournisseurs_energie(
     prix_kwh_actuel_eur: float = 0.2516,
     abonnement_mensuel_eur: float = 14.0,
 ) -> ComparateurEnergieResponse | None:
-    """P9-09 : compare des offres énergie sur la base de la consommation."""
+    """Comparateur énergie : compare des offres énergie sur la base de la consommation."""
     conso = service._consommation_annuelle_kwh()
     cout_actuel = round(conso * prix_kwh_actuel_eur + abonnement_mensuel_eur * 12, 2)
 
@@ -112,7 +112,7 @@ def calculer_score_eco_responsable(service) -> ScoreEcoResponsableResponse | Non
     )
 
 def obtenir_tableau_bord_energie_temps_reel(service) -> EnergieTempsReelResponse | None:
-    """S23 IN12 : tableau énergie temps-réel (Linky si connecté, sinon estimation)."""
+    """Énergie temps-réel : tableau énergie temps-réel (Linky si connecté, sinon estimation)."""
     from sqlalchemy import func
 
     with obtenir_contexte_db() as session:

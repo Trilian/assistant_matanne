@@ -1,4 +1,4 @@
-"""Configuration centralisée des planifications CRON.
+﻿"""Configuration centralisée des planifications CRON.
 
 Ce module isole la matrice de scheduling pour réduire la taille de ``jobs.py``.
 """
@@ -36,7 +36,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("rapport_maison_mensuel", CronTrigger(day=1, hour=9, minute=30), replace_existing=True)
     planifier_job("sync_openfoodfacts", CronTrigger(day_of_week="sun", hour=3, minute=0), replace_existing=True)
 
-    # Phase 7 — Jobs CRON & notifications
+    # Jobs CRON & notifications
     planifier_job("recap_weekend_dimanche_soir", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
     planifier_job("nettoyage_cache_7j", CronTrigger(hour=2, minute=0), replace_existing=True)
     planifier_job("backup_donnees_critiques", CronTrigger(hour=1, minute=0), replace_existing=True)
@@ -67,7 +67,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("sync_recoltes_inventaire", CronTrigger(hour=6, minute=15), replace_existing=True)
     planifier_job("suggestions_activites_meteo", CronTrigger(hour=7, minute=15), replace_existing=True)
 
-    # Phase 8 — Jobs CRON additionnels
+    # Jobs connexions inter-modules
     planifier_job("rappel_documents_expirants", CronTrigger(hour=8, minute=0), replace_existing=True)
     planifier_job("rapport_mensuel_auto", CronTrigger(day=1, hour=8, minute=0), replace_existing=True)
     planifier_job("bilan_energetique", CronTrigger(day=1, hour=8, minute=30), replace_existing=True)
@@ -86,7 +86,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("alertes_budget_seuil", CronTrigger(hour=20, minute=0), replace_existing=True)
     planifier_job("resume_hebdo_ia", CronTrigger(day_of_week="sun", hour=20, minute=30), replace_existing=True)
 
-    # Phase 3 — Automatisations proactives
+    # Automatisations proactives
     planifier_job("coherence_planning_courses", CronTrigger(day_of_week="sun", hour=19, minute=0), replace_existing=True)
     planifier_job("sync_resultats_paris_auto", CronTrigger(hour="*/3", minute=10), replace_existing=True)
     planifier_job("rapport_jardin_saisonnier", CronTrigger(day=1, hour=8, minute=0), replace_existing=True)
@@ -98,7 +98,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("verification_sante_systeme", CronTrigger(minute=0), replace_existing=True)
     planifier_job("backup_auto_hebdo_json", CronTrigger(day_of_week="sun", hour=4, minute=0), replace_existing=True)
 
-    # Sprint 15 — CRON jobs manquants
+    # Jobs automatisation supplémentaires
     planifier_job("job_expiration_recettes_suggestion", CronTrigger(hour=10, minute=0), replace_existing=True)
     planifier_job("job_stock_prediction_reapprovisionnement", CronTrigger(day_of_week="mon", hour=8, minute=0), replace_existing=True)
     planifier_job("job_variete_repas_alerte", CronTrigger(day_of_week="sun", hour=17, minute=0), replace_existing=True)
@@ -108,12 +108,12 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("job_briefing_matinal_push", CronTrigger(hour=7, minute=0), replace_existing=True)
     planifier_job("job_jardin_feedback_planning", CronTrigger(day_of_week="sun", hour=18, minute=30), replace_existing=True)
 
-    # Sprint 16 — Notifications Telegram et Email
+    # Notifications Telegram et Email
     planifier_job("s16_resume_weekend_telegram", CronTrigger(day_of_week="fri", hour=18, minute=0), replace_existing=True)
     planifier_job("s16_rappel_entretien_telegram", CronTrigger(hour=8, minute=10), replace_existing=True)
     planifier_job("s16_bilan_nutrition_telegram", CronTrigger(day_of_week="sun", hour=20, minute=30), replace_existing=True)
     planifier_job("s16_rapport_famille_mensuel", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
     planifier_job("s16_rapport_maison_trimestriel", CronTrigger(month="1,4,7,10", day=1, hour=9, minute=10), replace_existing=True)
 
-    # Sprint 21 — Rapport mensuel unifié
+    # Rapport mensuel unifié
     planifier_job("s21_rapport_mensuel_unifie_email", CronTrigger(day=1, hour=9, minute=20), replace_existing=True)

@@ -1,5 +1,5 @@
-"""
-Schémas Pydantic pour les services IA avancée (Phase 6).
+﻿"""
+Schémas Pydantic pour les services IA avancée (modules IA avancée).
 
 Types de réponse utilisés par les 14 services IA.
 """

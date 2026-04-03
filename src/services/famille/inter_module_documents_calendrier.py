@@ -1,7 +1,7 @@
-"""
+﻿"""
 Service inter-modules : Documents expirants -> Calendrier.
 
-Phase 5:
+Bridge inter-modules :
 - P5-08: creer un evenement calendrier de renouvellement document
 """
 

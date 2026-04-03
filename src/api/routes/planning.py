@@ -1,4 +1,4 @@
-"""
+﻿"""
 Routes API pour le planning.
 
 Gestion du planning de repas hebdomadaire : consultation, création,
@@ -484,7 +484,7 @@ async def valider_planning(
     resultat_data = getattr(resultat, "data", None)
     semaine_debut = resultat_data.get("semaine_debut") if isinstance(resultat_data, dict) else None
 
-    # Bridge phase 2: validation planning -> génération courses automatique.
+    # Bridge inter-modules : validation planning -> génération courses automatique.
     try:
         from src.services.core.events import obtenir_bus
 
@@ -501,7 +501,7 @@ async def valider_planning(
             source="api.planning.valider",
         )
 
-        # Event name from planning documentation (phase 2).
+        # Événement bridge inter-modules.
         obtenir_bus().emettre(
             "planning.semaine_validee",
             {

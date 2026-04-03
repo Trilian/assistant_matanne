@@ -1,11 +1,11 @@
-"""
-Service Recettes Unifié (REFACTORING PHASE 3)
+﻿"""
+Service Recettes Unifié (service unifié)
 
 ✅ Utilise @avec_session_db et @avec_cache (Phase 1)
 ✅ Validation Pydantic centralisée (RecetteInput, etc.)
 ✅ Type hints complets pour meilleur IDE support
 ✅ Services testables
-✅ Mixins extraits pour réduire LOC (Phase 3)
+✅ Mixins extraits pour réduire LOC
 
 Service complet pour les recettes fusionnant :
 - recette_service.py (CRUD + recherche)

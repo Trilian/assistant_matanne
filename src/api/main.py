@@ -1,4 +1,4 @@
-"""
+﻿"""
 API REST FastAPI pour l'Assistant Matanne - Version Refactorée.
 
 Point d'entrée principal de l'API avec les middlewares et routers.
@@ -653,7 +653,7 @@ app.include_router(assistant_router)
 app.include_router(jeux_router)
 app.include_router(calendriers_router)
 
-# Nouveaux routers - Phase 2
+# Routers supplémentaires
 app.include_router(dashboard_router)
 app.include_router(batch_cooking_router)
 app.include_router(preferences_router)

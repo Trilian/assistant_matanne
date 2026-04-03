@@ -1,5 +1,5 @@
-"""
-Schémas Pydantic pour les routes IA avancée (Phase 6).
+﻿"""
+Schémas Pydantic pour les routes IA avancée (routing IA avancée).
 
 Réexporte les types du service + ajoute les schémas de requête API.
 """

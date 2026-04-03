@@ -1,5 +1,5 @@
-"""
-Service IA Avancée — Phase 6 du planning.
+﻿"""
+Service IA Avancée — modules IA avancée.
 
 Service central regroupant les 14 fonctionnalités IA proactives.
 Hérite de BaseAIService pour rate limiting + cache + circuit breaker auto.

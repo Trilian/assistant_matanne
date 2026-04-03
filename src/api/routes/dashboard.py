@@ -1,4 +1,4 @@
-"""
+﻿"""
 Routes API pour le tableau de bord.
 
 AgrÃ©gation des donnÃ©es de tous les modules pour la page d'accueil.
@@ -1044,7 +1044,7 @@ async def obtenir_points_famille(
 
 
 # ═══════════════════════════════════════════════════════════
-# GAMIFICATION — Badges & historique (Phase 9)
+# GAMIFICATION — Badges & historique
 # ═══════════════════════════════════════════════════════════
 
 

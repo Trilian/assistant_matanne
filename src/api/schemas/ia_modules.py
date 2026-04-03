@@ -1,4 +1,4 @@
-"""Schémas API pour les services IA du Sprint 13."""
+﻿"""Schémas API pour les services IA des modules IA."""
 
 from __future__ import annotations
 

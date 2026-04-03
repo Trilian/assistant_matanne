@@ -1,5 +1,5 @@
-"""
-Services Innovations — Phase 10 du planning.
+﻿"""
+Services Innovations — Innovations & IA du planning.
 
 Regroupe les services d'innovation et valeur ajoutée :
 - Bilan annuel automatique IA

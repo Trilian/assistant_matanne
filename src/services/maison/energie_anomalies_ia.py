@@ -1,4 +1,4 @@
-"""Service IA pour detection d'anomalies energie (Phase 6.4).
+﻿"""Service IA pour detection d'anomalies energie (détection anomalies énergie).
 
 Combine:
 - scoring heuristique d'anormalite par mois

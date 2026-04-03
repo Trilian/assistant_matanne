@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Innovations — Phases 9 et 10 du planning.
 
 Service central regroupant les fonctionnalités d'innovation :
@@ -155,7 +155,7 @@ class InnovationsService(BaseAIService):
         )
 
     # ═══════════════════════════════════════════════════════════
-    # PHASE 9 — IA AVANCÉE & INNOVATIONS
+    # IA AVANCÉE & INNOVATIONS
     # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return=None)
@@ -165,7 +165,7 @@ class InnovationsService(BaseAIService):
         temps_disponible_min: int = 30,
         humeur: str = "rapide",
     ) -> SuggestionRepasSoirResponse | None:
-        """P9-01 : suggère un repas du soir contextuel en une action."""
+        """Dîner express : suggère un repas du soir contextuel en une action."""
         return cuisine_ia.suggerer_repas_ce_soir(self)
 
     @avec_cache(ttl=3600, key_func=lambda self, periode_jours: f"p9_patterns_{periode_jours}")
@@ -174,13 +174,13 @@ class InnovationsService(BaseAIService):
         self,
         periode_jours: int = 90,
     ) -> PatternsAlimentairesResponse | None:
-        """P9-02 : analyse les patterns alimentaires récents."""
+        """Patterns alimentaires : analyse les patterns alimentaires récents."""
         return cuisine_ia.analyser_patterns_alimentaires(self)
 
     @avec_cache(ttl=1800, key_func=lambda self: "p9_coach_routines")
     @avec_gestion_erreurs(default_return=None)
     def coach_routines_ia(self) -> CoachRoutinesResponse | None:
-        """P9-03 : identifie les blocages routines et propose des ajustements."""
+        """Coach routines : identifie les blocages routines et propose des ajustements."""
         score, retard = self._score_routines_detail()
         blocages = [
             "Trop de routines au même moment",
@@ -200,13 +200,13 @@ class InnovationsService(BaseAIService):
     @avec_cache(ttl=1800, key_func=lambda self: "p9_anomalies_energie")
     @avec_gestion_erreurs(default_return=None)
     def detecter_anomalies_energie(self) -> AnomaliesEnergieResponse | None:
-        """P9-04 : détecte des anomalies eau/gaz/électricité."""
+        """Anomalies énergie : détecte des anomalies eau/gaz/électricité."""
         return energie_ia.detecter_anomalies_energie(self)
 
     @avec_cache(ttl=3600, key_func=lambda self: "p9_resume_mensuel")
     @avec_gestion_erreurs(default_return=None)
     def generer_resume_mensuel_ia(self) -> ResumeMensuelIAResponse | None:
-        """P9-06 : génère un résumé mensuel narratif multi-modules."""
+        """Résumé mensuel : génère un résumé mensuel narratif multi-modules."""
         contexte = self._collecter_contexte_mensuel()
         prompt = f"""À partir du contexte suivant, écris un résumé mensuel familial concis.
 
@@ -227,7 +227,7 @@ Retourne un JSON avec:
     @avec_cache(ttl=1800, key_func=lambda self: "p9_planning_jules")
     @avec_gestion_erreurs(default_return=None)
     def generer_planning_jules_adaptatif(self) -> PlanningJulesAdaptatifResponse | None:
-        """P9-08 : planning d'activités Jules ajusté âge + historique."""
+        """Planning Jules : planning d'activités Jules ajusté âge + historique."""
         activites = [
             {"titre": "Parcours motricité", "moment": "matin", "duree_minutes": 25, "en_interieur": True, "raison": "Développer coordination"},
             {"titre": "Sortie parc", "moment": "après-midi", "duree_minutes": 60, "en_interieur": False, "raison": "Dépense physique"},
@@ -249,7 +249,7 @@ Retourne un JSON avec:
         prix_kwh_actuel_eur: float = 0.2516,
         abonnement_mensuel_eur: float = 14.0,
     ) -> ComparateurEnergieResponse | None:
-        """P9-09 : compare des offres énergie sur la base de la consommation."""
+        """Comparateur énergie : compare des offres énergie sur la base de la consommation."""
         return energie_ia.comparer_fournisseurs_energie(self)
 
     @avec_cache(ttl=1800, key_func=lambda self: "p9_score_eco")
@@ -336,7 +336,7 @@ Retourne un JSON avec:
 
     @avec_gestion_erreurs(default_return=None)
     def obtenir_mode_vacances(self, user_id: str | None) -> ModeVacancesResponse | None:
-        """IN10 : lit l'etat du mode vacances utilisateur."""
+        """Mode vacances : lit l'etat du mode vacances utilisateur."""
         if not user_id:
             return ModeVacancesResponse()
 
@@ -378,7 +378,7 @@ Retourne un JSON avec:
         actif: bool,
         checklist_voyage_auto: bool = True,
     ) -> ModeVacancesResponse | None:
-        """IN10 : active/desactive le mode vacances dans les preferences notifications."""
+        """Mode vacances : active/desactive le mode vacances dans les preferences notifications."""
         if not user_id:
             return ModeVacancesResponse()
 
@@ -408,7 +408,7 @@ Retourne un JSON avec:
     @avec_cache(ttl=43200, key_func=lambda self, limite: f"s21_insights_{limite}_{date.today().isoformat()}")
     @avec_gestion_erreurs(default_return=None)
     def generer_insights_quotidiens(self, limite: int = 2) -> InsightsQuotidiensResponse | None:
-        """IN11 : génère 1-2 insights IA proactifs par jour (anti-spam)."""
+        """Insights IA : génère 1-2 insights IA proactifs par jour (anti-spam)."""
         limite_normalisee = 1 if limite <= 1 else 2
         insights: list[InsightQuotidien] = []
 
@@ -470,7 +470,7 @@ Retourne un JSON avec:
     @avec_cache(ttl=1800, key_func=lambda self: f"s21_meteo_cross_{date.today().isoformat()}")
     @avec_gestion_erreurs(default_return=None)
     def analyser_meteo_contextuelle(self) -> MeteoContextuelleResponse | None:
-        """IN4 : synthèse météo unique avec impacts cuisine/famille/maison/énergie."""
+        """Météo cross-module : synthèse météo unique avec impacts cuisine/famille/maison/énergie."""
         from src.services.utilitaires.meteo_service import obtenir_meteo_service
 
         meteo = obtenir_meteo_service().obtenir_meteo()
@@ -542,7 +542,7 @@ Retourne un JSON avec:
     @avec_cache(ttl=3600, key_func=lambda self, user_id: f"s22_preferences_{user_id or 'anon'}")
     @avec_gestion_erreurs(default_return=None)
     def analyser_preferences_apprises(self, user_id: str | None = None) -> ApprentissagePreferencesResponse | None:
-        """S22 IN1 : apprend des préférences stables et active leur influence après 2+ semaines."""
+        """Apprentissage préférences : apprend des préférences stables et active leur influence après 2+ semaines."""
         semaines_analysees, favoris, a_eviter = self._analyser_preferences_apprises(user_id=user_id)
         influence_active = semaines_analysees >= 2 and bool(favoris or a_eviter)
 
@@ -567,13 +567,13 @@ Retourne un JSON avec:
     @avec_cache(ttl=1800, key_func=lambda self, user_id: f"s22_planification_auto_{user_id or 'anon'}_{date.today().isoformat()}")
     @avec_gestion_erreurs(default_return=None)
     def generer_planification_hebdo_complete(self, user_id: str | None = None) -> PlanificationHebdoCompleteResponse | None:
-        """S22 IN9 : génère planning repas + courses + tâches maison + jardin en un seul bloc."""
+        """Planification auto : génère planning repas + courses + tâches maison + jardin en un seul bloc."""
         return cuisine_ia.generer_planification_hebdo_complete(self, user_id)
 
     @avec_cache(ttl=1800, key_func=lambda self, user_id: f"s22_batch_intelligent_{user_id or 'anon'}_{date.today().isoformat()}")
     @avec_gestion_erreurs(default_return=None)
     def proposer_batch_cooking_intelligent(self, user_id: str | None = None) -> BatchCookingIntelligentResponse | None:
-        """S22 IN13 : propose un plan batch cooking cohérent avec le planning de semaine."""
+        """Batch cooking IA : propose un plan batch cooking cohérent avec le planning de semaine."""
         return cuisine_ia.proposer_batch_cooking_intelligent(self, user_id)
 
     @avec_gestion_erreurs(default_return=None)
@@ -582,7 +582,7 @@ Retourne un JSON avec:
         type_carte: str = "planning",
         titre: str | None = None,
     ) -> CarteVisuellePartageableResponse | None:
-        """S22 IN17 : génère une carte visuelle exportable au format image (SVG base64)."""
+        """Carte visuelle : génère une carte visuelle exportable au format image (SVG base64)."""
         type_normalise = type_carte if type_carte in {"planning", "recette", "batch", "maison"} else "planning"
         titre_carte = _sanitiser(titre or f"Carte {type_normalise}", 120)
         lignes = self._contenu_carte_visuelle(type_carte=type_normalise)
@@ -603,13 +603,13 @@ Retourne un JSON avec:
     @avec_cache(ttl=900, key_func=lambda self: f"s22_tablette_magazine_{date.today().isoformat()}")
     @avec_gestion_erreurs(default_return=None)
     def obtenir_mode_tablette_magazine(self) -> ModeTabletteMagazineResponse | None:
-        """S22 IN7 : fournit une vue magazine condensée pour écran tablette."""
+        """Mode tablette : fournit une vue magazine condensée pour écran tablette."""
         return cuisine_ia.obtenir_mode_tablette_magazine(self)
 
     @avec_cache(ttl=1800, key_func=lambda self: "s23_telegram_conversationnel")
     @avec_gestion_erreurs(default_return=None)
     def obtenir_capacites_telegram_conversationnelles(self) -> TelegramConversationnelResponse | None:
-        """S23 IN16 : expose les commandes textuelles Telegram opérationnelles."""
+        """Telegram conversationnel : expose les commandes textuelles Telegram opérationnelles."""
         commandes = [
             CommandeTelegram(commande="menu", action="Planning semaine"),
             CommandeTelegram(commande="ce soir", action="Suggestion repas"),
@@ -634,13 +634,13 @@ Retourne un JSON avec:
         self,
         top_n: int = 20,
     ) -> ComparateurPrixAutomatiqueResponse | None:
-        """S23 IN15 : compare les prix des ingrédients fréquents et détecte les soldes."""
+        """Comparateur prix : compare les prix des ingrédients fréquents et détecte les soldes."""
         return cuisine_ia.analyser_comparateur_prix_automatique(self)
 
     @avec_cache(ttl=300, key_func=lambda self: f"s23_energie_temps_reel_{datetime.now(UTC).strftime('%Y%m%d%H%M')}")
     @avec_gestion_erreurs(default_return=None)
     def obtenir_tableau_bord_energie_temps_reel(self) -> EnergieTempsReelResponse | None:
-        """S23 IN12 : tableau énergie temps-réel (Linky si connecté, sinon estimation)."""
+        """Énergie temps-réel : tableau énergie temps-réel (Linky si connecté, sinon estimation)."""
         return energie_ia.obtenir_tableau_bord_energie_temps_reel(self)
 
     # ═══════════════════════════════════════════════════════════

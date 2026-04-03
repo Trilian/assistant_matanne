@@ -1,4 +1,4 @@
-"""
+﻿"""
 Dispatcher multi-canal pour les notifications.
 
 Centralise l'envoi de notifications sur tous les canaux disponibles :
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 _CANAUX_VALIDES = {"ntfy", "push", "email", "telegram", "whatsapp"}
 
-# Mapping Phase 8 (§11.4): événement -> catégorie + canaux cibles
+# Mapping catégorie notifications: événement -> catégorie + canaux cibles
 _MAPPING_EVENEMENTS_CANAUX: dict[str, dict[str, Any]] = {
     "peremption_j2": {"categorie": "alertes", "canaux": ["push", "ntfy"]},
     "rappel_courses": {"categorie": "rappels", "canaux": ["push", "ntfy", "telegram"]},
@@ -80,7 +80,7 @@ class DispatcherNotifications:
             user_id: Identifiant de l'utilisateur destinataire.
             message: Corps du message.
             canaux: Liste de canaux à utiliser. Si absent, dérivé de l'événement/prefs.
-            type_evenement: Type d'événement métier (mapping Phase 8).
+            type_evenement: Type d'événement métier (mapping catégorie).
             categorie: Catégorie métier (rappels|alertes|resumes).
             forcer: Si True, ignore les règles de throttling/digest.
             **kwargs: Paramètres supplémentaires par canal :

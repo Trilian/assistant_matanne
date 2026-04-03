@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service d'historique des actions utilisateur.
 
 Trace toutes les actions importantes effectuées par les utilisateurs
@@ -10,7 +10,7 @@ Fonctionnalités:
 - Timeline d'activité
 - Restauration d'états précédents
 
-Mixins extraits (Phase 3):
+Mixins extraits :
 - historique_queries.py: Consultation, statistiques, undo
 """
 

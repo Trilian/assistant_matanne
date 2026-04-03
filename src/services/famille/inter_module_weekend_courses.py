@@ -1,7 +1,7 @@
-"""
+﻿"""
 Service inter-modules : Weekend activites -> Courses.
 
-Phase 5:
+Bridge inter-modules :
 - P5-07: activites randonnee/pique-nique -> fournitures dans la liste courses
 """
 

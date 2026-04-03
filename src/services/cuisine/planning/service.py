@@ -1,5 +1,5 @@
-"""
-Service Planning de Base (REFACTORING PHASE 2)
+﻿"""
+Service Planning de Base (service de base)
 
 ✅ Utilise @avec_session_db et @avec_cache (Phase 1)
 ✅ Validation Pydantic centralisée

@@ -1,7 +1,7 @@
-"""
+﻿"""
 Service inter-modules : Charges facture -> Energie analyse.
 
-Phase 5:
+Bridge inter-modules :
 - P5-06/P5-17: facture +20% -> declencher analyse anomalie energie
 """
 

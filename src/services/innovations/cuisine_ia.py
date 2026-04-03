@@ -1,4 +1,4 @@
-"""Fonctions cuisine/repas extraites du service innovations."""
+﻿"""Fonctions cuisine/repas extraites du service innovations."""
 
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ def suggerer_repas_ce_soir(
     temps_disponible_min: int = 30,
     humeur: str = "rapide",
 ) -> SuggestionRepasSoirResponse | None:
-    """P9-01 : suggère un repas du soir contextuel en une action."""
+    """Dîner express : suggère un repas du soir contextuel en une action."""
     humeur_safe = _sanitiser(humeur, 50)
     candidates = service._recettes_rapides(temps_disponible_min)
     if not candidates:
@@ -60,7 +60,7 @@ def analyser_patterns_alimentaires(
     self,
     periode_jours: int = 90,
 ) -> PatternsAlimentairesResponse | None:
-    """P9-02 : analyse les patterns alimentaires récents."""
+    """Patterns alimentaires : analyse les patterns alimentaires récents."""
     top_recettes, score_diversite = service._patterns_recettes(periode_jours)
     recommandations = [
         "Ajouter 1 repas végétarien supplémentaire par semaine",
@@ -95,7 +95,7 @@ def appliquer_saisonnalite_intelligente(service) -> SaisonnaliteIntelligenteResp
     )
 
 def generer_planification_hebdo_complete(service, user_id: str | None = None) -> PlanificationHebdoCompleteResponse | None:
-    """S22 IN9 : génère planning repas + courses + tâches maison + jardin en un seul bloc."""
+    """Planification auto : génère planning repas + courses + tâches maison + jardin en un seul bloc."""
     semaine_debut = service._prochaine_semaine_lundi()
     semaine_fin = semaine_debut + timedelta(days=6)
 
@@ -118,7 +118,7 @@ def generer_planification_hebdo_complete(service, user_id: str | None = None) ->
     )
 
 def proposer_batch_cooking_intelligent(service, user_id: str | None = None) -> BatchCookingIntelligentResponse | None:
-    """S22 IN13 : propose un plan batch cooking cohérent avec le planning de semaine."""
+    """Batch cooking IA : propose un plan batch cooking cohérent avec le planning de semaine."""
     recettes = service._recettes_batch_cibles(limite=4)
     if not recettes:
         recettes = [
@@ -152,7 +152,7 @@ def proposer_batch_cooking_intelligent(service, user_id: str | None = None) -> B
     )
 
 def obtenir_mode_tablette_magazine(service) -> ModeTabletteMagazineResponse | None:
-    """S22 IN7 : fournit une vue magazine condensée pour écran tablette."""
+    """Mode tablette : fournit une vue magazine condensée pour écran tablette."""
     score_bien_etre = service.calculer_score_bien_etre() or ScoreBienEtreResponse(score_global=0.0)
     insights = service.generer_insights_quotidiens(limite=2) or InsightsQuotidiensResponse()
     meteo = service.analyser_meteo_contextuelle() or MeteoContextuelleResponse()
@@ -187,7 +187,7 @@ def analyser_comparateur_prix_automatique(
     self,
     top_n: int = 20,
 ) -> ComparateurPrixAutomatiqueResponse | None:
-    """S23 IN15 : compare les prix des ingrédients fréquents et détecte les soldes."""
+    """Comparateur prix : compare les prix des ingrédients fréquents et détecte les soldes."""
     limite = max(1, min(20, top_n))
 
     from sqlalchemy import func

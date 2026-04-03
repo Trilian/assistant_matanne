@@ -1,9 +1,9 @@
-"""Webhook Telegram pour les commandes en langage naturel.
+﻿"""Webhook Telegram pour les commandes en langage naturel.
 
 Endpoints:
 - POST /api/v1/telegram/webhook : reception des updates Telegram
 
-Commandes Phase 3:
+Commandes bot Telegram :
 - "Qu'est-ce qu'on mange ce soir ?"
 - "Ajoute lait a la liste"
 - "Activite samedi ?"

@@ -1,7 +1,7 @@
-"""
+﻿"""
 Synchronisation des paris sportifs avec les données API.
 
-Mixin extrait de ParisCrudService (Phase 4 Audit, item 18 — split >500 LOC).
+Mixin extrait de ParisCrudService (Audit qualité — split >500 LOC).
 Contient les méthodes de synchronisation API → BD.
 """
 

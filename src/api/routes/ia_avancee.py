@@ -1,5 +1,5 @@
-"""
-Routes API pour l'IA avancée — Phase 6 du planning.
+﻿"""
+Routes API pour l'IA avancée — routing IA avancée.
 
 14 endpoints IA proactifs et contextuels :
 - POST /suggestions-achats : Suggestions achats basées historique

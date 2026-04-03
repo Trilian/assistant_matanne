@@ -1,5 +1,5 @@
-"""
-Services IA Avancée — Phase 6 du planning.
+﻿"""
+Services IA Avancée — modules IA avancée.
 
 Regroupe les 14 services IA proactifs et contextuels :
 - Suggestions achats (historique consommation)

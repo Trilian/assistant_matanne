@@ -1,4 +1,4 @@
-"""
+﻿"""
 Subscribers — Handlers d'événements enregistrés au démarrage.
 
 Ces subscribers réagissent aux événements domaine émis par les services
@@ -657,7 +657,7 @@ def _livrer_webhooks(event: EvenementDomaine) -> None:
 
 
 # ═══════════════════════════════════════════════════════════
-# PHASE 8 — CONNEXIONS INTER-MODULES
+# CONNEXIONS INTER-MODULES
 # ═══════════════════════════════════════════════════════════
 
 
@@ -935,7 +935,7 @@ def _traiter_action_rapide_dashboard(event: EvenementDomaine) -> None:
 
 
 # ═══════════════════════════════════════════════════════════
-# PHASE 2 — BRIDGES INTER-MODULES
+# BRIDGES INTER-MODULES
 # ═══════════════════════════════════════════════════════════
 
 
@@ -1486,7 +1486,7 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("jalon.ajoute", _notifier_jalon_ajoute_avec_activites, priority=75)
     compteur += 1
 
-    # ── Phase 8 — Connexions inter-modules ──
+    # ── Connexions inter-modules ──
 
     # Entretien → Budget (sync dépenses)
     bus.souscrire("depenses.sync_entretien", _sync_entretien_vers_budget, priority=85)
@@ -1587,7 +1587,7 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("service.error", _enregistrer_erreur_service, priority=50)
     compteur += 1
 
-    # ── Sprint 12 — Bridges inter-modules moyenne priorité (NIM5-NIM8) ──
+    # ── Bridges inter-modules moyenne priorité (NIM5-NIM8) ──
     try:
         from src.services.maison.inter_module_entretien_budget import (
             enregistrer_entretien_budget_subscribers,

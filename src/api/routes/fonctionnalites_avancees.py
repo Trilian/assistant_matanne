@@ -1,4 +1,4 @@
-"""
+﻿"""
 Routes API pour les Fonctionnalités Avancées.
 
 Endpoints :
@@ -83,7 +83,7 @@ def _get_service():
 
 
 # ===========================================================
-# PHASE 9 - IA AVANCEE & INNOVATIONS
+# IA AVANCÉE & INNOVATIONS
 # ===========================================================
 
 
@@ -91,7 +91,7 @@ def _get_service():
     "/phase9/mange-ce-soir",
     response_model=SuggestionRepasSoirResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-01 Suggestion diner express",
+    summary="Suggestion diner express",
 )
 @gerer_exception_api
 async def p9_mange_ce_soir(
@@ -111,7 +111,7 @@ async def p9_mange_ce_soir(
     "/phase9/patterns-alimentaires",
     response_model=PatternsAlimentairesResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-02 Detection patterns alimentaires",
+    summary="Detection patterns alimentaires",
 )
 @gerer_exception_api
 async def p9_patterns_alimentaires(
@@ -127,7 +127,7 @@ async def p9_patterns_alimentaires(
     "/phase9/coach-routines",
     response_model=CoachRoutinesResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-03 Coach routines IA",
+    summary="Coach routines IA",
 )
 @gerer_exception_api
 async def p9_coach_routines(
@@ -142,7 +142,7 @@ async def p9_coach_routines(
     "/phase9/anomalies-energie",
     response_model=AnomaliesEnergieResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-04 Detection anomalies eau/gaz/elec",
+    summary="Detection anomalies eau/gaz/elec",
 )
 @gerer_exception_api
 async def p9_anomalies_energie(
@@ -157,7 +157,7 @@ async def p9_anomalies_energie(
     "/phase9/resume-mensuel",
     response_model=ResumeMensuelIAResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-06 Resume mensuel IA",
+    summary="Resume mensuel IA",
 )
 @gerer_exception_api
 async def p9_resume_mensuel(
@@ -173,7 +173,7 @@ async def p9_resume_mensuel(
     "/phase9/planning-jules-adaptatif",
     response_model=PlanningJulesAdaptatifResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-08 Planning Jules adaptatif",
+    summary="Planning Jules adaptatif",
 )
 @gerer_exception_api
 async def p9_planning_jules_adaptatif(
@@ -188,7 +188,7 @@ async def p9_planning_jules_adaptatif(
     "/phase9/comparateur-energie",
     response_model=ComparateurEnergieResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-09 Comparateur fournisseurs energie",
+    summary="Comparateur fournisseurs energie",
 )
 @gerer_exception_api
 async def p9_comparateur_energie(
@@ -385,7 +385,7 @@ async def phasee_rapport_mensuel_pdf(
     "/phasee/mode-vacances",
     response_model=ModeVacancesResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S21 IN10 Lecture mode vacances",
+    summary="Lecture mode vacances",
 )
 @gerer_exception_api
 async def phasee_lire_mode_vacances(
@@ -401,7 +401,7 @@ async def phasee_lire_mode_vacances(
     "/phasee/mode-vacances/config",
     response_model=ModeVacancesResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S21 IN10 Configuration mode vacances",
+    summary="Configuration mode vacances",
 )
 @gerer_exception_api
 async def phasee_configurer_mode_vacances(
@@ -422,7 +422,7 @@ async def phasee_configurer_mode_vacances(
     "/phasee/insights-quotidiens",
     response_model=InsightsQuotidiensResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S21 IN11 Insights IA proactifs quotidiens",
+    summary="Insights IA proactifs quotidiens",
 )
 @gerer_exception_api
 async def phasee_insights_quotidiens(
@@ -438,7 +438,7 @@ async def phasee_insights_quotidiens(
     "/phasee/meteo-contextuelle",
     response_model=MeteoContextuelleResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S21 IN4 Meteo contextuelle cross-module",
+    summary="Meteo contextuelle cross-module",
 )
 @gerer_exception_api
 async def phasee_meteo_contextuelle(
@@ -470,7 +470,7 @@ async def phasee_garmin_repas_adaptatif(
     "/phasee/s22/preferences-apprises",
     response_model=ApprentissagePreferencesResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S22 IN1 Apprentissage des preferences",
+    summary="Apprentissage des preferences",
 )
 @gerer_exception_api
 async def phasee_s22_preferences_apprises(
@@ -486,7 +486,7 @@ async def phasee_s22_preferences_apprises(
     "/phasee/s22/planification-auto",
     response_model=PlanificationHebdoCompleteResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S22 IN9 Planification hebdo complete automatique",
+    summary="Planification hebdo complete automatique",
 )
 @gerer_exception_api
 async def phasee_s22_planification_auto(
@@ -502,7 +502,7 @@ async def phasee_s22_planification_auto(
     "/phasee/s22/batch-cooking-intelligent",
     response_model=BatchCookingIntelligentResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S22 IN13 Suggestions batch cooking intelligentes",
+    summary="Suggestions batch cooking intelligentes",
 )
 @gerer_exception_api
 async def phasee_s22_batch_cooking_intelligent(
@@ -518,7 +518,7 @@ async def phasee_s22_batch_cooking_intelligent(
     "/phasee/s22/carte-visuelle",
     response_model=CarteVisuellePartageableResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S22 IN17 Carte visuelle partageable",
+    summary="Carte visuelle partageable",
 )
 @gerer_exception_api
 async def phasee_s22_carte_visuelle(
@@ -537,7 +537,7 @@ async def phasee_s22_carte_visuelle(
     "/phasee/s22/mode-tablette-magazine",
     response_model=ModeTabletteMagazineResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S22 IN7 Mode tablette magazine",
+    summary="Mode tablette magazine",
 )
 @gerer_exception_api
 async def phasee_s22_mode_tablette_magazine(
@@ -552,7 +552,7 @@ async def phasee_s22_mode_tablette_magazine(
     "/phasee/s23/telegram-conversationnel",
     response_model=TelegramConversationnelResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S23 IN16 Telegram conversationnel",
+    summary="Telegram conversationnel",
 )
 @gerer_exception_api
 async def phasee_s23_telegram_conversationnel(
@@ -567,7 +567,7 @@ async def phasee_s23_telegram_conversationnel(
     "/phasee/s23/comparateur-prix-auto",
     response_model=ComparateurPrixAutomatiqueResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S23 IN15 Comparateur prix automatique",
+    summary="Comparateur prix automatique",
 )
 @gerer_exception_api
 async def phasee_s23_comparateur_prix_auto(
@@ -583,7 +583,7 @@ async def phasee_s23_comparateur_prix_auto(
     "/phasee/s23/energie-temps-reel",
     response_model=EnergieTempsReelResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S23 IN12 Tableau énergie temps-réel",
+    summary="Tableau énergie temps-réel",
 )
 @gerer_exception_api
 async def phasee_s23_energie_temps_reel(

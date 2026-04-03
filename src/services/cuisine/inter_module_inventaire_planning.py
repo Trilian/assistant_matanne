@@ -1,7 +1,7 @@
-"""
+﻿"""
 Service inter-modules : Inventaire/Batch/Nutrition/Feedback -> Planning recettes.
 
-Phase 5:
+Bridge inter-modules :
 - P5-01/P5-09: prioriser les recettes selon le stock disponible
 - P5-10: exclure les articles en surplus des courses
 - P5-11: bloquer les jours batch cooking dans le planning

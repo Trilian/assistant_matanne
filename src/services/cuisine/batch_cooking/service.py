@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Batch Cooking - Gestion des sessions de préparation de repas en lot.
 
 Ce service gère :
@@ -321,7 +321,7 @@ class ServiceBatchCooking(
             source="batch_cooking",
         )
 
-        # Inter-module Phase 2: session terminée -> déduction inventaire.
+        # Bridge inter-modules : session terminée -> déduction inventaire.
         try:
             from src.services.cuisine.inter_module_batch_inventaire import (
                 obtenir_service_batch_inventaire_interaction,

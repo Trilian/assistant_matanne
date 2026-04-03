@@ -1,4 +1,4 @@
-"""
+﻿"""
 Mixins de timestamps pour les modèles SQLAlchemy.
 
 Fournit des mixins réutilisables pour les colonnes de date de création
@@ -17,7 +17,7 @@ Usage:
         __tablename__ = "mon_modele"
         ...
 
-Phase 4 Audit, item 20.
+Audit qualité — mixin modèles.
 """
 
 from datetime import datetime

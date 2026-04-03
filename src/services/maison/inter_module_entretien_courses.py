@@ -1,7 +1,7 @@
-"""
+﻿"""
 Service inter-modules : Entretien -> Courses.
 
-Phase 5:
+Bridge inter-modules :
 - P5-05: taches entretien necessitant un produit -> ajout/reco courses
 """
 

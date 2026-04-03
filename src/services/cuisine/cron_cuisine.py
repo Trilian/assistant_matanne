@@ -1,4 +1,4 @@
-"""
+﻿"""
 Cron jobs pour le module Cuisine.
 
 4 jobs automatisés :
@@ -60,7 +60,7 @@ def analyser_peremptions_matin():
                     f"{', '.join(a.nom for a in bientot[:5])}"
                 )
 
-            # Bridge phase 2: inventaire péremption -> anti-gaspi IA.
+            # Bridge inter-modules : inventaire péremption -> anti-gaspi IA.
             if a_risque:
                 try:
                     from src.services.core.events import obtenir_bus

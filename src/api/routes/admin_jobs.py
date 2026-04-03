@@ -1,4 +1,4 @@
-"""Routes admin — Jobs et Bridges."""
+﻿"""Routes admin — Jobs et Bridges."""
 
 from __future__ import annotations
 
@@ -36,9 +36,9 @@ logger = logging.getLogger(__name__)
 @router.get(
     "/bridges/phase5/status",
     responses=REPONSES_AUTH_ADMIN,
-    summary="Statut opérationnel des bridges Phase 5",
+    summary="Statut opérationnel des bridges inter-modules",
     description=(
-        "Expose l'état opérationnel des 17 actions Phase 5 (bridges inter-modules et "
+        "Expose l'état opérationnel des 17 actions (bridges inter-modules et "
         "interactions intra-modules) pour dashboard/admin."
     ),
 )
@@ -53,7 +53,7 @@ async def statut_bridges_phase5(
     ),
     user: dict[str, Any] = Depends(require_role("admin")),
 ) -> dict[str, Any]:
-    """Retourne un statut détaillé de tous les bridges/actions de la phase 5."""
+    """Retourne un statut détaillé de tous les bridges/actions inter-modules."""
     from src.api.utils import executer_async, executer_avec_session
 
     def _query() -> dict[str, Any]:

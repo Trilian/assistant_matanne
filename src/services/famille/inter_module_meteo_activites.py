@@ -1,7 +1,7 @@
-"""
+﻿"""
 Service inter-modules : Meteo -> Activites famille.
 
-Phase 5:
+Bridge inter-modules :
 - P5-04: pluie -> activites interieur, beau temps -> exterieur
 """
 

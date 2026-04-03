@@ -1,4 +1,4 @@
-"""
+﻿"""
 Client Telegram via Bot API (remplace WhatsApp Meta Cloud API).
 
 100% gratuit — aucune limite de messages, pas de catégories payantes.
@@ -547,7 +547,7 @@ async def envoyer_rapport_hebdo_whatsapp(texte_resume: str) -> bool:
 
 
 async def envoyer_suggestion_recette_du_jour(message: str) -> bool:
-    """Sprint 16.1 — Suggestion recette du jour."""
+    """Suggestion recette — Suggestion recette du jour."""
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
     if not chat_id:
@@ -556,7 +556,7 @@ async def envoyer_suggestion_recette_du_jour(message: str) -> bool:
 
 
 async def envoyer_alerte_diagnostic_maison(message: str) -> bool:
-    """Sprint 16.2 — Alerte diagnostic maison."""
+    """Alerte diagnostic maison — Alerte diagnostic maison."""
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
     if not chat_id:
@@ -572,7 +572,7 @@ async def envoyer_alerte_diagnostic_maison(message: str) -> bool:
 
 
 async def envoyer_resume_weekend_suggestions(message: str) -> bool:
-    """Sprint 16.3 — Résumé weekend suggestions."""
+    """Résumé weekend — Résumé weekend suggestions."""
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
     if not chat_id:
@@ -588,7 +588,7 @@ async def envoyer_resume_weekend_suggestions(message: str) -> bool:
 
 
 async def envoyer_alerte_budget_depassement(message: str) -> bool:
-    """Sprint 16.4 — Alerte budget dépassement."""
+    """Alerte budget — Alerte budget dépassement."""
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
     if not chat_id:
@@ -597,7 +597,7 @@ async def envoyer_alerte_budget_depassement(message: str) -> bool:
 
 
 async def envoyer_bilan_nutrition_semaine(message: str) -> bool:
-    """Sprint 16.5 — Bilan nutrition de la semaine."""
+    """Bilan nutrition — Bilan nutrition de la semaine."""
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
     if not chat_id:
@@ -606,7 +606,7 @@ async def envoyer_bilan_nutrition_semaine(message: str) -> bool:
 
 
 async def envoyer_rappel_entretien_maison(message: str) -> bool:
-    """Sprint 16.6 — Rappel entretien maison."""
+    """Rappel entretien — Rappel entretien maison."""
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
     if not chat_id:

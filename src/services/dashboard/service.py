@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service Accueil Data.
 
 Centralise les accès base de données pour le module accueil/dashboard.
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class AccueilDataService:
     """Service de données pour le dashboard accueil.
 
-    Note (S12): Service read-heavy standalone sans BaseService[T] — acceptable
+    Note (dashboard service): Service read-heavy standalone sans BaseService[T] — acceptable
     car il ne fait que de la lecture agrégée, pas de CRUD standard.
     """
 

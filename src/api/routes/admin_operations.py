@@ -1,4 +1,4 @@
-"""Routes admin — Opérations (Services, Notifications, IA, Cache, Utilisateurs)."""
+﻿"""Routes admin — Opérations (Services, Notifications, IA, Cache, Utilisateurs)."""
 
 from __future__ import annotations
 
@@ -190,7 +190,7 @@ async def envoyer_notification_test_all(
     "/notifications/templates",
     responses=REPONSES_AUTH_ADMIN,
     summary="Lister les templates notifications admin",
-    description="Retourne les templates disponibles (Telegram + Email), incluant Sprint 16.",
+    description="Retourne les templates disponibles (Telegram + Email).",
 )
 @gerer_exception_api
 async def lister_templates_notifications(

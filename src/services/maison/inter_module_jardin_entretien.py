@@ -1,7 +1,7 @@
-"""
+﻿"""
 Service inter-modules : Jardin saison -> Entretien automatique.
 
-Phase 5:
+Bridge inter-modules :
 - P5-16: generer des taches d'entretien saisonnier selon les plantes
 """
 

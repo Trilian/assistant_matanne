@@ -1,4 +1,4 @@
-"""
+﻿"""
 Service d'envoi d'emails transactionnels via Resend.
 
 Fonctionnalités :
@@ -260,7 +260,7 @@ class ServiceEmail:
         return buffer.getvalue()
 
     def envoyer_rapport_famille_mensuel_complet(self, email: str, rapport: dict[str, Any]) -> bool:
-        """Sprint 16.8 — Email mensuel famille avec PDF joint."""
+        """Rapport famille — Email mensuel famille avec PDF joint."""
         mois = str(rapport.get("mois", ""))
         html = self._render(
             "rapport_famille_mensuel_complet.html",
@@ -295,7 +295,7 @@ class ServiceEmail:
         )
 
     def envoyer_rapport_maison_trimestriel(self, email: str, rapport: dict[str, Any]) -> bool:
-        """Sprint 16.9 — Email trimestriel maison avec PDF joint."""
+        """Rapport maison — Email trimestriel maison avec PDF joint."""
         trimestre = str(rapport.get("trimestre", ""))
         html = self._render(
             "rapport_maison_trimestriel.html",
@@ -328,7 +328,7 @@ class ServiceEmail:
         )
 
     def envoyer_rapport_mensuel_unifie(self, email: str, rapport: dict[str, Any]) -> bool:
-        """Sprint 21.5 — Envoie le PDF mensuel unifié généré par le service innovations."""
+        """Rapport unifié — Envoie le PDF mensuel unifié généré par le service innovations."""
         mois_reference = str(rapport.get("mois_reference", ""))
         filename = str(rapport.get("filename", f"rapport_mensuel_{mois_reference or 'unifie'}.pdf"))
         contenu_base64 = str(rapport.get("contenu_base64", ""))

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Types Pydantic pour les services Innovations — Phase 10.
 """
 
@@ -129,7 +129,7 @@ class ParcoursOptimiseResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# PHASE 9 — IA AVANCÉE & INNOVATIONS
+# IA AVANCÉE & INNOVATIONS
 # ═══════════════════════════════════════════════════════════
 
 
@@ -370,7 +370,7 @@ class MeteoContextuelleResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# SPRINT 22 — INNOVATIONS AVANCÉES
+# INNOVATIONS AVANCÉES
 # ═══════════════════════════════════════════════════════════
 
 
@@ -455,7 +455,7 @@ class ModeTabletteMagazineResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# SPRINT 23 — INNOVATIONS LONG TERME
+# INNOVATIONS LONG TERME
 # ═══════════════════════════════════════════════════════════
 
 

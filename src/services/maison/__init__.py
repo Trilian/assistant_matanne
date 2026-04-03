@@ -1,4 +1,4 @@
-"""
+﻿"""
 Services Maison - Gestion intelligente de la maison et du jardin.
 
 Ce package regroupe tous les services pour:
@@ -99,7 +99,7 @@ _SERVICES = {
     # Catalogue Enrichissement service (IA enrichissement JSON)
     "CatalogueEnrichissementService": "catalogue_enrichissement_service",
     "get_catalogue_enrichissement_service": "catalogue_enrichissement_service",
-    # Inter-modules Phase 5
+    # Bridges inter-modules
     "ChargesEnergieInteractionService": "inter_module_charges_energie",
     "obtenir_service_charges_energie_interaction": "inter_module_charges_energie",
     "EntretienCoursesInteractionService": "inter_module_entretien_courses",
@@ -262,7 +262,7 @@ __all__ = [
     # Visualisation
     "VisualisationService",
     "get_visualisation_service",
-    # Inter-modules Phase 5
+    # Bridges inter-modules
     "ChargesEnergieInteractionService",
     "obtenir_service_charges_energie_interaction",
     "EntretienCoursesInteractionService",

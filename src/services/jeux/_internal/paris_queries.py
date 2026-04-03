@@ -1,7 +1,7 @@
-"""
+﻿"""
 Opérations de lecture pour les paris sportifs.
 
-Mixin extrait de ParisCrudService (Phase 4 Audit, item 18 — split >500 LOC).
+Mixin extrait de ParisCrudService (Audit qualité — split >500 LOC).
 Contient toutes les méthodes charger_* (queries + fallback BD).
 """
 
