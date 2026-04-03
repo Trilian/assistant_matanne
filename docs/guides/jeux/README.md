@@ -113,8 +113,8 @@ Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de 
 | GET | `/api/v1/jeux/loto/stats` | Stats globales (fréquences, total gains) |
 | GET | `/api/v1/jeux/loto/numeros-retard` | Numéros en retard (seuil 2σ) |
 | POST | `/api/v1/jeux/loto/generer-grille` | Générateur classique (statistique/aléatoire) |
-| POST | `/api/v1/jeux/loto/generer-grille-ia-ponderee` | **[Phase U]** Générateur IA (modes chauds/froids/équilibre) |
-| POST | `/api/v1/jeux/loto/analyser-grille` | **[Phase U]** Analyse critique IA d'une grille |
+| POST | `/api/v1/jeux/loto/generer-grille-ia-ponderee` | Générateur IA (modes chauds/froids/équilibre) |
+| POST | `/api/v1/jeux/loto/analyser-grille` | Analyse critique IA d'une grille |
 
 ### Euromillions
 
@@ -142,7 +142,6 @@ Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de 
 | POST | `/api/v1/jeux/analyse-ia` | Analyse IA générique (paris/loto) |
 | GET | `/api/v1/jeux/notifications` | Notifications jeux non lues |
 | POST | `/api/v1/jeux/notifications/{id}/lue` | Marquer notification comme lue |
-| POST | `/api/v1/jeux/ocr-ticket` | OCR ticket papier (Pixtral) |
 
 ---
 
@@ -180,11 +179,11 @@ Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de 
   gains?: number;
   est_virtuelle: boolean; // true si générée pour simulation
   strategie?: "statistique" | "aleatoire" | "ia";
-  mode_ia?: "chauds" | "froids" | "equilibre"; // Phase U
+  mode_ia?: "chauds" | "froids" | "equilibre";
 }
 ```
 
-### AnalyseGrilleIA (Phase U)
+### AnalyseGrilleIA
 
 ```typescript
 {
@@ -306,7 +305,7 @@ Même logique que Loto avec spécificités :
 - **Heatmap** : Séparé numéros principaux + étoiles
 - **Stats** : Fréquences, retards, tirages récents
 
-> 💡 **Note** : Le générateur IA pondéré n'est pas encore implémenté pour Euromillions (prévu Phase future). Actuellement disponible uniquement pour le Loto.
+> 💡 **Note** : Le générateur IA pondéré n'est pas disponible pour Euromillions. Il reste limité au Loto.
 
 ---
 

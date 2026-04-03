@@ -1,0 +1,60 @@
+{
+    "tests_by_mangled_function_name": {
+        "src.services.dashboard.anomalies_financieres.x\u01c1ServiceAnomaliesFinancieres\u01c1detecter_anomalies": [
+            "tests/services/dashboard/test_dashboard_unit_coverage.py::TestAnomaliesFinancieresCoverage::test_detecter_anomalies_trie_et_qualifie_les_variations"
+        ],
+        "src.services.dashboard.anomalies_financieres.x\u01c1ServiceAnomaliesFinancieres\u01c1_generer_resume_ia": [
+            "tests/services/dashboard/test_dashboard_unit_coverage.py::TestAnomaliesFinancieresCoverage::test_generer_resume_ia_retombe_sur_un_resume_local_si_ia_absente",
+            "tests/services/dashboard/test_dashboard_unit_coverage.py::TestAnomaliesFinancieresCoverage::test_generer_resume_ia_sans_anomalie_retourne_un_fallback_stable"
+        ],
+        "src.services.dashboard.score_bienetre.x\u01c1ScoreBienEtreService\u01c1_calculer_periode": [
+            "tests/services/dashboard/test_dashboard_unit_coverage.py::TestScoreBienEtreCoverage::test_calculer_periode_agrege_repas_activites_et_garmin"
+        ],
+        "src.services.dashboard.resume_famille_ia.x\u01c1ResumeFamilleIAService\u01c1generer_resume_hebdo": [
+            "tests/services/dashboard/test_dashboard_unit_coverage.py::TestResumeHebdoCoverage::test_generer_resume_hebdo_retourne_le_fallback_local_si_l_ia_ne_repond_pas"
+        ],
+        "src.services.dashboard.points_famille.x\u01c1PointsFamilleService\u01c1_sauvegarder_points_hebdo": [
+            "tests/services/dashboard/test_dashboard_unit_coverage.py::TestPointsFamilleCoverage::test_calculer_points_agrege_scores_et_persiste_un_snapshot",
+            "tests/services/dashboard/test_dashboard_unit_coverage.py::TestPointsFamilleCoverage::test_sauvegarder_points_hebdo_cree_snapshot_et_badges"
+        ],
+        "src.services.dashboard.badges_triggers.x_obtenir_catalogue_badges": [
+            "tests/services/dashboard/test_dashboard_unit_coverage.py::TestBadgesTriggersCoverage::test_catalogue_badges_expose_les_metadonnees"
+        ],
+        "src.services.dashboard.resume_famille_ia.x\u01c1ResumeFamilleIAService\u01c1__init__": [
+            "tests/services/dashboard/test_resume_famille_ia.py::TestResumeFamilleIAService::test_init"
+        ]
+    },
+    "duration_by_test": {
+        "tests/services/dashboard/test_dashboard_services.py::TestMoisRef::test_creation": 0.0005742309999732242,
+        "tests/services/dashboard/test_dashboard_services.py::TestResumeAnomaliesIA::test_creation_vide": 0.0003903159999936179,
+        "tests/services/dashboard/test_dashboard_services.py::TestResumeAnomaliesIA::test_creation_complete": 0.0011361740000666032,
+        "tests/services/dashboard/test_dashboard_services.py::TestServiceAnomaliesFinancieres::test_mois_precedents_mars": 0.000814605000073243,
+        "tests/services/dashboard/test_dashboard_services.py::TestServiceAnomaliesFinancieres::test_mois_precedents_janvier_rollover": 0.0005498079998460526,
+        "tests/services/dashboard/test_dashboard_services.py::TestServiceAnomaliesFinancieres::test_mois_precedents_fevrier_rollover": 0.0015800459999582017,
+        "tests/services/dashboard/test_dashboard_services.py::TestServiceAnomaliesFinancieres::test_normaliser_categorie_courses": 0.00093805100004829,
+        "tests/services/dashboard/test_dashboard_services.py::TestServiceAnomaliesFinancieres::test_normaliser_categorie_energie": 0.0005432159998690622,
+        "tests/services/dashboard/test_dashboard_services.py::TestServiceAnomaliesFinancieres::test_normaliser_categorie_loisirs": 0.0007396720000087953,
+        "tests/services/dashboard/test_dashboard_services.py::TestServiceAnomaliesFinancieres::test_normaliser_categorie_autre": 0.0005270169999676,
+        "tests/services/dashboard/test_dashboard_services.py::TestScoreBienEtreService::test_nutri_points_mapping": 0.0008259039999529705,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestAnomaliesFinancieresCoverage::test_detecter_anomalies_trie_et_qualifie_les_variations": 0.0007914870000149676,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestAnomaliesFinancieresCoverage::test_generer_resume_ia_sans_anomalie_retourne_un_fallback_stable": 0.0006891970000424408,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestAnomaliesFinancieresCoverage::test_generer_resume_ia_retombe_sur_un_resume_local_si_ia_absente": 0.001899370000160161,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestScoreBienEtreCoverage::test_calculer_periode_agrege_repas_activites_et_garmin": 0.3768878889999314,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestScoreBienEtreCoverage::test_calculer_score_ajoute_tendance_et_periode": 0.000689906000047813,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestResumeHebdoCoverage::test_generer_resume_hebdo_retourne_le_fallback_local_si_l_ia_ne_repond_pas": 0.001506618999883358,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestAccueilDataCoverage::test_get_taches_en_retard_formate_les_taches": 0.0006030109999528577,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestPointsFamilleCoverage::test_sauvegarder_points_hebdo_cree_snapshot_et_badges": 0.00040779699986615014,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestPointsFamilleCoverage::test_calculer_points_agrege_scores_et_persiste_un_snapshot": 0.10798732399996425,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestBadgesTriggersCoverage::test_catalogue_badges_expose_les_metadonnees": 0.0008951909999268537,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestBadgesTriggersCoverage::test_jours_consecutifs_pas_gere_les_series_et_ruptures": 0.0004992970001467256,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestBadgesTriggersCoverage::test_obtenir_badges_utilisateur_marque_les_badges_obtenus": 0.0010702250000349522,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestBadgesTriggersCoverage::test_obtenir_historique_points_reinverse_l_ordre_chronologique": 0.0007770919999074977,
+        "tests/services/dashboard/test_dashboard_unit_coverage.py::TestBadgesTriggersCoverage::test_evaluer_et_attribuer_recompense_les_badges_attendus": 0.0018541840000807497,
+        "tests/services/dashboard/test_resume_famille_ia.py::TestResumeHebdoIAResponse::test_creation_vide": 0.0004379759999437738,
+        "tests/services/dashboard/test_resume_famille_ia.py::TestResumeHebdoIAResponse::test_creation_complete": 0.00034542800005965546,
+        "tests/services/dashboard/test_resume_famille_ia.py::TestResumeHebdoIAResponse::test_score_validation": 0.0005243640000571759,
+        "tests/services/dashboard/test_resume_famille_ia.py::TestResumeFamilleIAService::test_init": 0.000734843000032015,
+        "tests/services/dashboard/test_resume_famille_ia.py::TestResumeFamilleIAService::test_collecter_contexte_dep_sans_crash": 0.0007733249999546388
+    },
+    "stats_time": 2.077659531
+}

@@ -148,7 +148,7 @@ npm run test:visual
 
 Guide detaille:
 
-- `docs/TESTING_ADVANCED.md`
+- `docs/TESTING.md`
 
 ---
 

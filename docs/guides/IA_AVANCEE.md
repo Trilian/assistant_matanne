@@ -7,7 +7,7 @@
 
 ---
 
-## Vue d'ensemble ? Les 14 outils IA
+## Vue d'ensemble ? Les 13 outils IA
 
 | # | Endpoint | M?thode | Description | Multimodal |
 | --- | ---------- | --------- | ------------- | ----------- |
@@ -18,13 +18,12 @@
 | 5 | `/idees-cadeaux` | POST | Id?es cadeaux personnalis?es pour anniversaire | Non |
 | 6 | `/analyse-photo` | POST | Analyse photo multi-usage (contexte auto-d?tect?) | ? Image |
 | 7 | `/optimisation-routines` | GET | Suggestions d'optimisation des routines m?nag?res | Non |
-| 8 | `/analyse-document` | POST | Analyse document par photo (OCR + extraction donn?es) | ? Image |
-| 9 | `/estimation-travaux` | POST | Estimation co?t travaux par photo | ? Image |
-| 10 | `/planning-voyage` | POST | Planning voyage complet (itin?raire, budget, checklist) | Non |
-| 11 | `/recommandations-energie` | GET | ?conomies d'?nergie bas?es sur consommation r?elle | Non |
-| 12 | `/prediction-pannes` | GET | Pr?diction pannes ?quipements (historique entretien) | Non |
-| 13 | `/suggestions-proactives` | GET | Suggestions proactives multi-modules contextuelles | Non |
-| 14 | `/adaptations-meteo` | POST | Adaptations planning selon m?t?o (repas, activit?s) | Non |
+| 8 | `/estimation-travaux` | POST | Estimation co?t travaux par photo | ? Image |
+| 9 | `/planning-voyage` | POST | Planning voyage complet (itin?raire, budget, checklist) | Non |
+| 10 | `/recommandations-energie` | GET | ?conomies d'?nergie bas?es sur consommation r?elle | Non |
+| 11 | `/prediction-pannes` | GET | Pr?diction pannes ?quipements (historique entretien) | Non |
+| 12 | `/suggestions-proactives` | GET | Suggestions proactives multi-modules contextuelles | Non |
+| 13 | `/adaptations-meteo` | POST | Adaptations planning selon m?t?o (repas, activit?s) | Non |
 
 ---
 
@@ -145,27 +144,7 @@ Analyse les routines existantes et sugg?re des optimisations (temps, fr?quence, 
 
 ---
 
-### 8. Analyse document ? POST `/analyse-document`
-
-OCR + extraction structur?e depuis photo d'un document (facture, contrat, ordonnance).
-
-**Body** : `UploadFile` (JPG/PNG, max 10MB)  
-**R?ponse** : `DocumentAnalyse`
-```json
-{
-  "type_document": "facture",
-  "donn?es_extraites": {
-    "montant": 127.50,
-    "date": "2026-03-15",
-    "fournisseur": "EDF"
-  },
-  "texte_brut": "..."
-}
-```
-
----
-
-### 9. Estimation travaux ? POST `/estimation-travaux`
+### 8. Estimation travaux ? POST `/estimation-travaux`
 
 Estime le co?t de travaux ? partir d'une photo.
 
@@ -183,7 +162,7 @@ Estime le co?t de travaux ? partir d'une photo.
 
 ---
 
-### 10. Planning voyage ? POST `/planning-voyage`
+### 9. Planning voyage ? POST `/planning-voyage`
 
 G?n?re un planning voyage d?taill? avec itin?raire, budget et checklist.
 
@@ -202,7 +181,7 @@ G?n?re un planning voyage d?taill? avec itin?raire, budget et checklist.
 
 ---
 
-### 11. Recommandations ?nergie ? GET `/recommandations-energie`
+### 10. Recommandations ?nergie ? GET `/recommandations-energie`
 
 Analyse la consommation ?nerg?tique et recommande des ?conomies.
 
@@ -218,7 +197,7 @@ Analyse la consommation ?nerg?tique et recommande des ?conomies.
 
 ---
 
-### 12. Pr?diction pannes ? GET `/prediction-pannes`
+### 11. Pr?diction pannes ? GET `/prediction-pannes`
 
 Pr?dit les ?quipements susceptibles de tomber en panne bas? sur l'historique d'entretien.
 
@@ -226,7 +205,7 @@ Pr?dit les ?quipements susceptibles de tomber en panne bas? sur l'historique d'e
 
 ---
 
-### 13. Suggestions proactives ? GET `/suggestions-proactives`
+### 12. Suggestions proactives ? GET `/suggestions-proactives`
 
 Point d'entr?e multi-modules ? retourne des suggestions contextuelles depuis tous les domaines.
 
@@ -242,7 +221,7 @@ Point d'entr?e multi-modules ? retourne des suggestions contextuelles depuis tou
 
 ---
 
-### 14. Adaptations m?t?o ? POST `/adaptations-meteo`
+### 13. Adaptations m?t?o ? POST `/adaptations-meteo`
 
 Adapte les activit?s et repas planifi?s selon la m?t?o pr?vue.
 

@@ -1,21 +1,36 @@
 {
     "exit_code_by_key": {
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_1": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_2": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_3": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_4": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_5": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_6": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_7": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_8": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_9": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_10": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_11": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_12": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_13": null,
-        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_14": null
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_1": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_2": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_3": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_4": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_5": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_6": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_7": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_8": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_9": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_10": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_11": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_12": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_13": 33,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_14": 33
     },
     "durations_by_key": {},
     "type_check_error_by_key": {},
-    "estimated_durations_by_key": {}
+    "estimated_durations_by_key": {
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_1": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_2": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_3": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_4": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_5": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_6": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_7": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_8": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_9": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_10": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_11": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_12": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_13": 0,
+        "services.dashboard.badges_triggers.x_obtenir_catalogue_badges__mutmut_14": 0
+    }
 }

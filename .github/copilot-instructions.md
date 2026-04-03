@@ -18,6 +18,11 @@ Hub de gestion familiale en production avec modules pour:
 - 🎮 Jeux (paris sportifs, loto)
 - 📊 Tableau de bord familial avec métriques
 
+Décisions transverses à respecter:
+
+- Telegram remplace WhatsApp pour les usages conversationnels/proactifs
+- Ne pas documenter ni réintroduire des fonctionnalités OCR / scan de tickets comme features actives
+
 **Architecture**: API REST FastAPI (backend Python) + SPA Next.js 16 (App Router, Turbopack). Modèles SQLAlchemy modulaires dans `core/models/` (22 fichiers). Codebase en français (noms variables, commentaires, docstrings). Marqueur `py.typed` (PEP 561).
 
 ---
@@ -348,6 +353,7 @@ def get_mon_service() -> MonService:
 - **Mistral AI**: Client à `src/core/ai/client.py`, configuré dans `src/core/config/`. Tous les appels IA passent par `BaseAIService` avec limitation de débit et cache intégrés.
 - **Supabase PostgreSQL**: Connexion via `DATABASE_URL` depuis `.env.local`. Format: `postgresql://user:password@host/db`
 - **Supabase Auth**: Authentification utilisateur via Supabase GoTrue, tokens JWT API créés côté backend
+- **Telegram Bot API**: Canal conversationnel et notifications interactives supporté côté intégrations
 - **Limites de débit**: `AI_RATE_LIMIT_DAILY`, `AI_RATE_LIMIT_HOURLY` définis dans `src/core/constants.py`. Rate limiting API: 60 req/min standard, 10 req/min IA.
 
 ### Intégration du service IA
@@ -555,6 +561,10 @@ Clé: `conftest.py` fournit des fixtures de base de données SQLite en mémoire 
 | `src/core/monitoring/` | Métriques & performance |
 | `src/services/core/registry.py` | Registre de services + @service_factory |
 | `src/services/core/base/` | BaseAIService, mixins IA, streaming, protocols |
+| `docs/CHANGELOG.md` | Historique synthétique des jalons du projet |
+| `docs/DEPRECATED.md` | Fonctionnalités retirées / refusées et raisons |
+| `docs/ADMIN_MODE.md` | Guide d'exploitation du mode admin |
+| `docs/AUTOMATION_GUIDE.md` | Vue d'ensemble des jobs planifiés et automations |
 | `pyproject.toml` | Dépendances Python, config test, règles de linting |
 
 ### Frontend

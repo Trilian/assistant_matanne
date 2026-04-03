@@ -1,6 +1,6 @@
 # Telegram Setup — Assistant MaTanne
 
-> Configuration de l'intégration Telegram Bot API (remplace WhatsApp Meta).
+> Configuration de l'intégration Telegram Bot API pour les notifications conversationnelles.
 > 100% gratuit — aucune limite de messages, pas de catégories payantes.
 
 ---
@@ -236,18 +236,12 @@ Types d'updates gérés :
 
 ---
 
-## Différences avec WhatsApp
+## Pourquoi Telegram Bot
 
-| Aspect | WhatsApp Meta | Telegram Bot |
-|--------|--------------|--------------|
-| Coût messages proactifs | ~0.02€/msg | **Gratuit** |
-| Boutons par message | 3 max | **Illimité** |
-| Fenêtre de réponse | 24h | **Aucune** |
-| Templates à approuver | Oui (24-48h) | **Non** |
-| Format texte | Markdown limité (`*bold*`) | **HTML** (`<b>`, `<i>`, `<code>`) |
-| Webhook setup | Meta Dashboard (complexe) | **1 curl** |
-| Fichiers/photos | Oui | Oui |
-| Token | Multiples (app, phone, verify) | **1 seul** (BotFather) |
+- messages proactifs sans coût par message
+- boutons interactifs sans fenêtre de 24h
+- webhook simple à configurer
+- format HTML suffisant pour les messages applicatifs
 
 ---
 
@@ -290,6 +284,6 @@ curl "https://api.telegram.org/bot<TOKEN>/deleteWebhook"
 - [ ] Test envoi message proactif OK
 - [ ] Test boutons interactifs OK
 - [ ] Test digest matinal OK
-- [ ] CRON jobs adaptés (imports telegram au lieu de whatsapp)
+- [ ] CRON jobs adaptés au canal Telegram
 - [ ] Dispatcher notifications adapté (canal "telegram")
-- [ ] Ancien code WhatsApp supprimé
+- [ ] Ancien code canal legacy supprimé

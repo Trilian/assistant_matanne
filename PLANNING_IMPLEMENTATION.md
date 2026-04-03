@@ -318,7 +318,7 @@ sql/
 > **Objectif** : Couverture confiance sur les flux critiques
 > **Durée estimée** : 5-7 jours
 > **Prérequis** : Sprint 1 terminé (code propre)
-> **Statut au 2026-04-03** : En cours, avec une base déjà plus avancée que l'audit initial sur plusieurs sous-tâches.
+> **Statut au 2026-04-05** : En cours, avec progression nette sur les tests comportementaux frontend, la couverture ciblée du dashboard et l'industrialisation du flux `mutmut` sous WSL.
 
 ### État actuel des tests
 
@@ -338,21 +338,22 @@ sql/
 |---|-------|--------|--------|----------|--------|
 | 3.1 | **Tests WebSocket courses** | Connexion, messages, synchronisation multi-user, déconnexion/reconnexion | 4h | 🔴 Critique | 🟡 Avancé — backend largement couvert, fallback HTTP et hooks frontend renforcés ; `user_left` reste non automatisé côté prod |
 | 3.2 | **Tests E2E parcours complet** | Login → créer recette → planifier → courses → cocher articles | 8h | 🔴 Critique | 🟡 Avancé — parcours Playwright transactionnel mocké ajouté |
-| 3.3 | **Tests frontend composants clés** | Formulaire recette, planning hebdomadaire, dashboard DnD | 8h | 🟡 Important | 🟠 Partiel — progression: lots `maison/visualisation`, `formulaire-recette` et `planning-repas` renforcés en tests comportementaux ; d'autres écrans restent encore trop proches du stub |
+| 3.3 | **Tests frontend composants clés** | Formulaire recette, planning hebdomadaire, dashboard DnD | 8h | 🟡 Important | 🟡 Avancé — lots `maison/visualisation`, `formulaire-recette`, `planning-repas` et `grille-dashboard-dnd` renforcés en tests comportementaux ; d'autres écrans restent encore trop proches du stub |
 | 3.4 | **Tests inter-modules E2E** | Jardin récolte → suggestion recette → ajout courses | 4h | 🟡 Important | 🟠 Partiel — specs présentes, scénario jardin → recette → courses à durcir |
 | 3.5 | **Tests de charge API** | k6 ou locust sur les 5 endpoints critiques (100 req/s) | 4h | 🟡 Important | ✅ Baseline présente via `tests/load/k6_baseline.js` |
 | 3.6 | **Contract tests OpenAPI** | Valider que l'API respecte les schemas (schemathesis) | 4h | 🟢 Souhaitable | ✅ En place sur `/health` + CI |
 | 3.7 | **PWA / Service Worker tests** | Installation, cache offline, sync en ligne | 4h | 🟢 Souhaitable | ✅ Couverture existante côté service worker |
-| 3.8 | **Mutation testing** | Lancer mutmut (configuré mais inutilisé) | 2h | 🟢 Souhaitable | 🟠 Relancé via WSL mais environnement Linux incomplet (`python3-venv`/`pip` absents), exécution mutmut toujours bloquée |
+| 3.8 | **Mutation testing** | Lancer mutmut (configuré mais inutilisé) | 2h | 🟢 Souhaitable | 🟠 Partiel — exécution `mutmut` désormais reproductible sous WSL sur `src/services/dashboard`, mais la sortie courante remonte `977` mutants en `no tests`, donc résultat encore non exploitable pour piloter la qualité |
 
 ### Checklist d'avancement Sprint 3
 
 - [x] Renforcer les tests backend du module `websocket_courses` avec le fallback HTTP (`poll` et `action`)
 - [x] Ajouter des tests frontend réels sur les hooks WebSocket (`utiliser-websocket` et `useWebSocketCourses`)
 - [x] Ajouter un parcours Playwright mocké : recette → planification → courses → cochage → inventaire
-- [ ] Remplacer les tests frontend encore trop superficiels sur les composants clés (formulaire recette, planning hebdo, dashboard) — lots visualisation maison + formulaire recette + planning hebdo traités
+- [x] Renforcer la couverture ciblée du périmètre `src/services/dashboard` pour fiabiliser le mutation testing — `30 passed`, couverture locale `81.22%`
+- [ ] Remplacer les tests frontend encore trop superficiels sur les composants clés (formulaire recette, planning hebdo, dashboard) — lots visualisation maison + formulaire recette + planning hebdo + dashboard DnD traités
 - [ ] Rejouer une validation de couverture backend globale pour confirmer le maintien à `>= 80%` — relance faite (03/04/2026): suite stable (`4919 passed`, `3 skipped`), couverture observée `48.86%` (objectif non atteint)
-- [ ] Lancer et exploiter `mutmut` dans un flux reproductible — nouvelle tentative (03/04/2026): WSL détecté, mais impossible de créer l'environnement de test (`python3-venv`/`pip` manquants)
+- [ ] Lancer et exploiter `mutmut` dans un flux reproductible — WSL outillé, runner isolé sur `tests/services/dashboard`, exécution complète atteinte ; blocage restant: `mutmut results` marque `977` mutants en `no tests`
 
 ### Critères de validation Sprint 3
 
@@ -944,14 +945,32 @@ sql/
 | 9.7 | **Ajouter exemples Swagger** | `example` sur tous les schemas Pydantic pour documentation interactive | 4h | 🟢 Souhaitable |
 | 9.8 | **Ajouter `max_length` sur strings** | Contraintes de longueur sur les champs texte des schemas | 2h | 🟢 Souhaitable |
 
+### Statut au 3 avril 2026
+
+- [x] 9.1 `docs/CHANGELOG.md` créé
+- [x] 9.2 `docs/DEPRECATED.md` créé
+- [x] 9.3 `docs/ADMIN_MODE.md` créé
+- [x] 9.4 `docs/AUTOMATION_GUIDE.md` créé
+- [x] 9.5 `.github/copilot-instructions.md` mis à jour
+- [x] 9.6 `README.md` mis à jour
+- [ ] 9.7 Exemples Swagger homogènes sur tous les schémas Pydantic
+- [ ] 9.8 Contraintes `max_length` homogènes sur tous les champs texte
+
+### Nettoyage documentaire effectué
+
+- références OCR retirées des guides actifs et déplacées vers `docs/DEPRECATED.md`
+- références `Phase ...` retirées des guides `famille` et `jeux`
+- références documentaires cassées corrigées (`API_SCHEMAS`, `TESTING_ADVANCED`)
+- FAQ utilisateur alignée avec les flux actifs (plus de WhatsApp/OCR documentés comme features)
+
 ### Critères de validation Sprint 9
 
-- [ ] CHANGELOG couvre toutes les versions/sprints passés
-- [ ] DEPRECATED liste toutes les features retirées avec raisons
-- [ ] `grep -r "OCR" docs/` ne renvoie que le fichier DEPRECATED
-- [ ] `grep -r "Phase [A-Z]" docs/` ne renvoie rien
-- [ ] README reflète l'état actuel du projet
-- [ ] copilot-instructions.md est à jour
+- [x] CHANGELOG couvre toutes les versions/sprints passés
+- [x] DEPRECATED liste toutes les features retirées avec raisons
+- [x] `grep -r "OCR" docs/` ne renvoie plus que l'historique de dépréciation attendu
+- [x] `grep -r "Phase [A-Z]" docs/guides/` ne renvoie plus rien sur les guides actifs concernés
+- [x] README reflète l'état actuel du projet
+- [x] copilot-instructions.md est à jour
 
 ---
 

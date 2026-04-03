@@ -77,7 +77,7 @@ analyse = service.analyser_developpement(age_mois=18, jalons_atteints=[...])
 - Cat?gorisation (sport, culture, plein-air, cr?atif?)
 - Association ? des membres de la famille
 - Vue calendrier des activit?s planifi?es
-- **Phase O ? Suggestions IA avec pr?-remplissage** : `POST /famille/activites/suggestions-ia-auto` retourne `suggestions_struct` (liste d'objets pr?-remplissables) pour injecter directement dans le formulaire de cr?ation
+- **Suggestions IA avec pr?-remplissage** : `POST /famille/activites/suggestions-ia-auto` retourne `suggestions_struct` (liste d'objets pr?-remplissables) pour injecter directement dans le formulaire de cr?ation
 - contribution au r?sum? hebdomadaire et au dashboard
 
 ### Usage
@@ -86,7 +86,7 @@ analyse = service.analyser_developpement(age_mois=18, jalons_atteints=[...])
 /famille/activites
 ```
 
-### Pr?-remplissage rapide (Phase O)
+### Pr?-remplissage rapide
 
 Le bouton **"Suggestions IA"** dans l'en-t?te ouvre un dialogue :
 1. L'API d?tecte la m?t?o locale automatiquement
@@ -101,7 +101,7 @@ R?ponse: { suggestions: string, suggestions_struct: [{titre, description, type, 
 
 ---
 
-## Achats famille ? Phase P
+## Achats famille
 
 ### Fonctionnalit?s
 
@@ -116,7 +116,7 @@ R?ponse: { suggestions: string, suggestions_struct: [{titre, description, type, 
 /famille/achats
 ```
 
-### Suggestions IA proactives (Phase P)
+### Suggestions IA proactives
 
 Le bouton **"G?n?rer des suggestions proactives"** appelle l'API qui :
 1. D?tecte les anniversaires dans les 30 prochains jours
@@ -234,7 +234,7 @@ suggestions = service.suggerer_activites_weekend(
 - Entr?es associ?es ? une date et un auteur
 - Recherche dans les entr?es pass?es
 - Synth?se hebdomadaire g?n?r?e par IA
-- **Phase R ? R?sum?s IA sauvegard?s** : les entr?es avec tag `resume-ia` sont affich?es dans une section d?di?e "R?sum?s IA r?cents" en haut de la timeline
+- **R?sum?s IA sauvegard?s** : les entr?es avec tag `resume-ia` sont affich?es dans une section d?di?e "R?sum?s IA r?cents" en haut de la timeline
 
 ### Usage
 
@@ -242,7 +242,7 @@ suggestions = service.suggerer_activites_weekend(
 /famille/journal
 ```
 
-### R?sum?s IA (Phase R)
+### R?sum?s IA
 
 Le bouton "R?sum? IA semaine" appelle `POST /famille/journal/ia-semaine` (ou l'alias `resumer-semaine`). Le r?sum? est **automatiquement sauvegard?** comme entr?e journal avec tag `resume-ia` + humeur `bien`. Il appara?t dans la section "R?sum?s IA r?cents" (max 3 derniers affich?s).
 

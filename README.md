@@ -2,6 +2,8 @@
 
 > Hub de gestion familiale intelligent propulsé par l'IA
 
+Telegram est le canal conversationnel supporté. Les anciennes pistes WhatsApp/OCR ne font plus partie du périmètre actif.
+
 [![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![Next.js](https://img.shields.io/badge/Next.js-16.2-black.svg)](https://nextjs.org)
@@ -99,6 +101,17 @@ assistant_matanne/
 
 ---
 
+## 📚 Documentation prioritaire
+
+- `docs/CHANGELOG.md` : historique synthétique des jalons du projet
+- `docs/DEPRECATED.md` : fonctionnalités retirées ou refusées et leurs raisons
+- `docs/ADMIN_MODE.md` : mode admin, triggers manuels, flags et exploitation runtime
+- `docs/AUTOMATION_GUIDE.md` : vue d'ensemble des jobs planifiés et du moteur d'automations
+- `docs/CRON_JOBS.md` : référence détaillée des IDs de jobs et de leurs horaires
+- `docs/TESTING.md` : guide de test unifié backend/frontend/E2E
+
+---
+
 ## ⚙️ Configuration
 
 ### Variables d'environnement (.env.local)
@@ -191,7 +204,7 @@ Documentation interactive après démarrage du backend :
 
 ---
 
-## � Déploiement
+## 🚀 Déploiement
 
 L'application est déployée sur **3 services** :
 

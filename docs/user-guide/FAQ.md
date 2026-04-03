@@ -158,7 +158,7 @@ Oui, plusieurs options :
 
 **M�thode 3 : Import PDF**
 1. T�l�chargez un PDF de recette
-2. L'OCR extrait le texte automatiquement
+2. Le contenu exploitable est analys� pour pr�-remplir les champs
 3. V�rifiez les champs d�tect�s
 
 ### Comment importer des recettes depuis Marmiton / 750g ?
@@ -197,7 +197,7 @@ V�rifiez :
 
 1. Cr�ez une liste de courses (Cuisine ? Courses)
 2. Cliquez sur **"Partager"**
-3. Envoyez le **lien de partage** par email/SMS/WhatsApp
+3. Envoyez le **lien de partage** par email/SMS/Telegram
 4. Votre conjoint ouvre le lien (connexion requise)
 5. La liste est synchronis�e en temps r�el (WebSocket)
 6. Chacun peut cocher/ajouter/retirer des articles instantan�ment

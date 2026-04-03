@@ -6,7 +6,7 @@ Documentation complète de l'API REST FastAPI, organisée par modules fonctionne
 
 - Audit code du 1 avril 2026: **622 handlers HTTP** détectés dans `src/api/routes/*.py`.
 - Le document reste organisé par modules fonctionnels pour la lisibilité.
-- Référence stricte des schémas de réponse: voir `docs/API_SCHEMAS.md` (auto-généré).
+- Référence stricte des schémas de réponse: voir l'OpenAPI FastAPI (`/docs`, `/redoc`) et les schémas Pydantic de `src/api/schemas/`.
 
 ## Vue d'ensemble
 
