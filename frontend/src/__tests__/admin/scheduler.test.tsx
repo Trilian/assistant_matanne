@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
@@ -62,7 +62,7 @@ describe("PageAdminScheduler", () => {
     mockedApi.post.mockResolvedValue({ data: { status: "ok" } });
   });
 
-  it("affiche les jobs Sprint 15 et la catégorie calculée", async () => {
+  it("affiche les jobs jobs automatisation et la catégorie calculée", async () => {
     renderWithQuery(React.createElement(PageAdminScheduler));
 
     await waitFor(() => {

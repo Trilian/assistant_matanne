@@ -247,12 +247,12 @@ class TestDiagnosticsIAInteraction:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Phase 5 bridges
+# Bridges inter-modules
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestCuisineInterModuleBridges:
-    """Tests des bridges cuisine phase 5."""
+    """Tests des bridges cuisine bridges inter-modules."""
 
     def test_inventaire_planning_retourne_dict(self, engine, db):
         from src.services.cuisine.inter_module_inventaire_planning import (
@@ -283,7 +283,7 @@ class TestCuisineInterModuleBridges:
 
 
 class TestFamilleInterModuleBridges:
-    """Tests des bridges famille phase 5."""
+    """Tests des bridges famille bridges inter-modules."""
 
     def test_weekend_courses_retourne_dict(self, engine, db):
         from src.services.famille.inter_module_weekend_courses import (
@@ -329,7 +329,7 @@ class TestFamilleInterModuleBridges:
 
 
 class TestMaisonInterModuleBridges:
-    """Tests des bridges maison phase 5."""
+    """Tests des bridges maison bridges inter-modules."""
 
     def test_entretien_courses_retourne_dict(self, engine, db):
         from src.services.maison.inter_module_entretien_courses import (

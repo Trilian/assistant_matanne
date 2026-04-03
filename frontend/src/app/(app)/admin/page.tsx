@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Page Admin — Audit Logs
 // ═══════════════════════════════════════════════════════════
 
@@ -321,7 +321,7 @@ export default function PageAdmin() {
       {bridgesPhase5?.resume && (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Bridges Phase 5</CardTitle>
+            <CardTitle className="text-base">Bridges inter-modules</CardTitle>
             <CardDescription>
               {bridgesPhase5.resume.mode_verification} · {bridgesPhase5.resume.total_actions} action(s)
             </CardDescription>

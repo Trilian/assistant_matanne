@@ -1,9 +1,9 @@
 ﻿"""
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-Integration Tests â€” Sprint 13 Backend API (E2E)
+Integration Tests â€” modules IA Backend API (E2E)
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-Tests that verify the full request-response flow of all 6 Sprint 13 AI endpoints
+Tests that verify the full request-response flow of all 6 modules IA AI endpoints
 from the FastAPI application perspective.
 
 Run with: python -m pytest tests/e2e/test_ia_integration.py -v
@@ -30,7 +30,7 @@ def auth_headers():
 
 
 class TestInventoryPredictionE2E:
-    """End-to-end integration tests for Sprint 13 endpoints."""
+    """End-to-end integration tests for modules IA endpoints."""
 
     def test_predict_consommation_full_flow(self, client, auth_headers):
         """Test full request-response for inventory prediction."""
@@ -187,7 +187,7 @@ class TestInventoryPredictionE2E:
 
 
 class TestInventoryPredictionValidation:
-    """Input validation tests for Sprint 13 endpoints."""
+    """Input validation tests for modules IA endpoints."""
 
     def test_invalid_saison_rejected(self, client, auth_headers):
         """Test that invalid saison value is rejected."""
@@ -252,7 +252,7 @@ class TestInventoryPredictionValidation:
 
 
 class TestInventoryPredictionRateLimiting:
-    """Rate limiting tests for Sprint 13 endpoints (optional)."""
+    """Rate limiting tests for modules IA endpoints (optional)."""
 
     def test_rate_limit_applied(self, client, auth_headers):
         """Test that rate limiting is applied to AI endpoints."""

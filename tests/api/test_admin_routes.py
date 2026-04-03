@@ -1,5 +1,5 @@
 ﻿"""
-CT-14 â€” Tests des routes admin et RGPD (Sprint 3)
+CT-14 â€” Tests des routes admin et RGPD (admin)
 
 Tests couvrant:
 - Routes admin (audit-logs, audit-stats, audit-export) : contrÃ´le de rÃ´le
@@ -181,7 +181,7 @@ class TestAdminJobsACL:
         )
 
     @pytest.mark.asyncio
-    async def test_jobs_liste_inclut_job_sprint_15_si_scheduler_actif(self, async_client: httpx.AsyncClient):
+    async def test_jobs_liste_inclut_job_automatisation_si_scheduler_actif(self, async_client: httpx.AsyncClient):
         class FakeScheduler:
             running = True
 
@@ -212,7 +212,7 @@ class TestAdminJobsACL:
         assert data[0]["statut"] == "inactif"
 
     @pytest.mark.asyncio
-    async def test_executer_job_dry_run_sprint_15(self, async_client: httpx.AsyncClient):
+    async def test_executer_job_dry_run_automatisation(self, async_client: httpx.AsyncClient):
         with (
             patch("src.api.routes.admin_jobs._verifier_limite_jobs"),
             patch("src.api.routes.admin_jobs._ajouter_log_job"),
@@ -285,7 +285,7 @@ class TestAdminSqlViewsACL:
 
 
 class TestAdminNotificationEndpoints:
-    """Endpoints complÃ©mentaires phase 7."""
+    """Endpoints complÃ©mentaires CRON."""
 
     @pytest.mark.asyncio
     async def test_notification_test_all(self, async_client: httpx.AsyncClient):
@@ -346,15 +346,15 @@ class TestAdminNotificationEndpoints:
 
 
 class TestAdminInterModuleBridgesStatus:
-    """Endpoint statut opÃ©rationnel des bridges phase 5."""
+    """Endpoint statut opÃ©rationnel des bridges bridges inter-modules."""
 
     @pytest.mark.asyncio
     async def test_status_phase5_presence_mode(self, async_client: httpx.AsyncClient):
-        response = await async_client.get("/api/v1/admin/bridges/phase5/status?inclure_smoke=false")
+        response = await async_client.get("/api/v1/admin/bridges/status?inclure_smoke=false")
         assert response.status_code == 200
 
         data = response.json()
-        assert data.get("phase") == "phase_5"
+        assert data.get("phase") == "bridges_inter_modules"
         assert "resume" in data
         assert data["resume"].get("total_actions") == 17
         assert data["resume"].get("mode_verification") == "presence_only"

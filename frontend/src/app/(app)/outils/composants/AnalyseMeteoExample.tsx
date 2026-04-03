@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Button } from '@/src/composants/ui/button'
@@ -17,7 +17,7 @@ import { utiliseAnalyseImpactsMeteo } from '@/src/crochets/utiliser-ia-modules'
 /**
  * Example Component: Weather Impact Analysis
  * ────────────────────────────────────────────
- * Demonstrates the Sprint 13 IA hook for suggesting activities based on weather
+ * Demonstrates the IA hook for suggesting activities based on weather
  * Located in: frontend/src/app/(app)/outils/composants/AnalyseMeteoExample.tsx
  *
  * Usage:

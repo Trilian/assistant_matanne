@@ -1,4 +1,4 @@
-"""Tests Sprint 8 Event Bus (API + flux E2E publication->action)."""
+﻿"""Tests Event Bus Event Bus (API + flux E2E publication->action)."""
 
 from __future__ import annotations
 

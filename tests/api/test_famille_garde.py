@@ -1,5 +1,5 @@
-"""
-CT-07b — Tests des routes famille/garde et planning (Sprint 3)
+﻿"""
+CT-07b — Tests des routes famille/garde et planning (routes famille/garde)
 
 Tests couvrant:
 - GET  /api/v1/famille/config/garde    : lecture config crèche

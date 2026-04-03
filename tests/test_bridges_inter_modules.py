@@ -1,5 +1,5 @@
-"""
-Tests pour les bridges inter-modules Sprint 12 (NIM5-NIM8).
+﻿"""
+Tests pour les bridges inter-modules bridges inter-modules (NIM5-NIM8).
 """
 
 import pytest

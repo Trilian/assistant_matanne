@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour les routes dépenses et énergie.
 
 Tests des endpoints dépenses (CRUD complet), relevés énergie,
@@ -38,7 +38,7 @@ class TestDepensesCRUD:
         response = client.post(
             "/api/v1/maison/depenses",
             json={
-                "libelle": "Test Sprint 9",
+                "libelle": "Test dépense énergie",
                 "montant": 42.50,
                 "categorie": "courses",
                 "date": "2026-04-15",

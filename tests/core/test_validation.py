@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests unifiés pour src/core/validation.py
 
 Fusion de:
@@ -624,7 +624,7 @@ class TestValiderModele:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# SECTION 12: TESTS valider_formulaire_streamlit — SUPPRIMÉ (Sprint 14a)
+# SECTION 12: TESTS valider_formulaire_streamlit — SUPPRIMÉ (supprimé)
 # La fonction valider_formulaire_streamlit a été supprimée car Streamlit
 # n'est plus utilisé. Voir SECTION 13 pour valider_et_nettoyer_formulaire.
 # ═══════════════════════════════════════════════════════════════════════════════

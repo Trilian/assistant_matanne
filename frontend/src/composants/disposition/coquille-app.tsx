@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Coquille App — Conteneur principal responsive
 // ═══════════════════════════════════════════════════════════
 
@@ -60,10 +60,10 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
       {/* FAB chat IA flottant (AC2) */}
       <FabChatIA />
 
-      {/* FAB actions rapides mobiles (Phase 4) */}
+      {/* FAB actions rapides mobiles  */}
       <FabActionsRapides />
 
-      {/* FAB assistant vocal global (Sprint 8) */}
+      {/* FAB assistant vocal global  */}
       <FabAssistantVocal />
 
       {/* Minuteur flottant (AC2) */}

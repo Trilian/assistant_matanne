@@ -1,4 +1,4 @@
-"""Tests Sprint 6: bridges inter-modules.
+﻿"""Tests bridges inter-modules de base. bridges inter-modules.
 
 Objectif: couvrir 23 bridges existants avec des tests integration legers
 et stables (retour structurel, comportement de base).

@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Page Admin — Services, Cache, Flags & Re-sync
 // ═══════════════════════════════════════════════════════════
 
@@ -558,7 +558,7 @@ export default function PageAdminServices() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Bridges Phase 5</CardTitle>
+              <CardTitle>Bridges inter-modules</CardTitle>
               <CardDescription>
                 {chargementBridgesPhase5
                   ? "Chargement..."
@@ -619,7 +619,7 @@ export default function PageAdminServices() {
                 </div>
               ) : (
                 !chargementBridgesPhase5 && (
-                  <p className="text-sm text-muted-foreground">Aucun statut bridge Phase 5 disponible.</p>
+                  <p className="text-sm text-muted-foreground">Aucun statut bridge inter-modules disponible.</p>
                 )
               )}
             </CardContent>

@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // API Tableau de bord
 // ═══════════════════════════════════════════════════════════
 
@@ -261,7 +261,7 @@ export async function obtenirBudgetUnifieDashboard(): Promise<BudgetUnifieDashbo
   const { data } = await clientApi.get<BudgetUnifieDashboard>("/dashboard/budget-unifie");
   return data;
 }
-// ─── Gamification — Badges & historique (Phase 9) ──────────────
+// ─── Gamification — Badges & historique  ──────────────
 
 export interface BadgeDefinition {
   badge_type: string;

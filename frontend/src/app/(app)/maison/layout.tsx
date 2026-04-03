@@ -1,6 +1,6 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Layout Maison — Présent sur toutes les pages /maison/*
-// Inclut l'assistant IA flottant (Phase 10)
+// Inclut l'assistant IA flottant 
 // ═══════════════════════════════════════════════════════════
 
 import { AssistantFlottant } from "@/composants/maison/assistant-flottant";

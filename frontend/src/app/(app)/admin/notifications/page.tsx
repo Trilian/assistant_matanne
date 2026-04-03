@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Page Admin — Notifications
 // ═══════════════════════════════════════════════════════════
 
@@ -306,7 +306,7 @@ export default function PageAdminNotifications() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Templates Sprint 16</CardTitle>
+            <CardTitle>Templates notifications</CardTitle>
             <CardDescription>
               Templates WhatsApp et Email actuellement disponibles côté backend.
             </CardDescription>

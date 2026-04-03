@@ -1,4 +1,4 @@
-"""Tests Sprint 8 pour EnergieAnomaliesIAService."""
+﻿"""Tests EnergieAnomaliesIAService pour EnergieAnomaliesIAService."""
 
 from __future__ import annotations
 

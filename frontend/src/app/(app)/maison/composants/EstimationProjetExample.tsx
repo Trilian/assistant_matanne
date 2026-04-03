@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Button } from '@/src/composants/ui/button'
@@ -11,7 +11,7 @@ import { utiliseEstimationProjet } from '@/src/crochets/utiliser-ia-modules'
 /**
  * Example Component: Home Project Estimation
  * ────────────────────────────────────────────
- * Demonstrates the Sprint 13 IA hook for estimating home project costs & duration
+ * Demonstrates the IA hook for estimating home project costs & duration
  * Located in: frontend/src/app/(app)/maison/composants/EstimationProjetExample.tsx
  *
  * Usage:

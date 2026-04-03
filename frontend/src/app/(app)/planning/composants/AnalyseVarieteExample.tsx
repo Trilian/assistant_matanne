@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Button } from '@/src/composants/ui/button'
@@ -10,7 +10,7 @@ import { utiliseAnalyseVarietePlanning } from '@/src/crochets/utiliser-ia-module
 /**
  * Example Component: Meal Variety Analysis
  * ──────────────────────────────────────────
- * Demonstrates the Sprint 13 IA hook for analyzing meal variety over a week
+ * Demonstrates the IA hook for analyzing meal variety over a week
  * Located in: frontend/src/app/(app)/planning/composants/AnalyseVarieteExample.tsx
  *
  * Usage:

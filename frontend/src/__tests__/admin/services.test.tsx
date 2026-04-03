@@ -142,7 +142,7 @@ describe("PageAdminServices", () => {
       security: { events_1h: 2 },
     });
     mockedObtenirStatutBridgesPhase5.mockResolvedValue({
-      phase: "phase_5",
+      phase: "bridges_inter_modules",
       generated_at: "2026-03-30T12:00:00",
       execution_ms: 12.4,
       statut_global: "operationnel",

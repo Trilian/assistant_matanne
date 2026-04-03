@@ -2428,7 +2428,7 @@ def _job_rapport_maison_trimestriel() -> None:
         logger.exception("Erreur rapport_maison_trimestriel rapport maison trimestriel")
 
 
-def _job_s21_rapport_mensuel_unifie_email() -> None:
+def _job_rapport_mensuel_unifie_email() -> None:
     """Rapport mensuel unifié — Envoi mensuel du rapport PDF unifié (email)."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -4330,7 +4330,7 @@ _REGISTRE_JOBS.update(
         "s16_bilan_nutrition_telegram": ("Bilan nutrition semaine Telegram", _job_bilan_nutrition_telegram),
         "s16_rapport_famille_mensuel": ("Rapport famille mensuel complet email/PDF", _job_rapport_famille_mensuel_complet),
         "s16_rapport_maison_trimestriel": ("Rapport maison trimestriel email/PDF", _job_rapport_maison_trimestriel),
-        "s21_rapport_mensuel_unifie_email": ("Rapport mensuel unifié email/PDF", _job_s21_rapport_mensuel_unifie_email),
+        "s21_rapport_mensuel_unifie_email": ("Rapport mensuel unifié email/PDF", _job_rapport_mensuel_unifie_email),
     }
 )
 

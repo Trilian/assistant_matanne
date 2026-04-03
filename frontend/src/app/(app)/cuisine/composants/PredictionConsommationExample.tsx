@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Button } from '@/src/composants/ui/button'
@@ -10,7 +10,7 @@ import { utilisePredictionConsommation } from '@/src/crochets/utiliser-ia-module
 /**
  * Example Component: Inventory Prediction
  * ─────────────────────────────────────────
- * Demonstrates the Sprint 13 IA hook for predicting ingredient consumption
+ * Demonstrates the IA hook for predicting ingredient consumption
  * Located in: frontend/src/app/(app)/cuisine/composants/PredictionConsommationExample.tsx
  *
  * Usage:

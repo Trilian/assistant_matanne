@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // API Preferences — Paramètres utilisateur
 // ═══════════════════════════════════════════════════════════
 
@@ -42,7 +42,7 @@ export async function modifierPreferences(
   return data;
 }
 
-// ─── Préférences canaux de notification (Sprint 13 — W4) ─────────────────────
+// ─── Préférences canaux de notification (canaux notification) ─────────────────────
 
 export interface CanauxParCategorie {
   rappels: string[];

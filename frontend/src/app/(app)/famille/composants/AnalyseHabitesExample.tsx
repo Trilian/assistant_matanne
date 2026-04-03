@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Button } from '@/src/composants/ui/button'
@@ -10,7 +10,7 @@ import { utiliseAnalyseHabitudes } from '@/src/crochets/utiliser-ia-modules'
 /**
  * Example Component: Family Habit Analysis
  * ──────────────────────────────────────────
- * Demonstrates the Sprint 13 IA hook for tracking & analyzing family habits
+ * Demonstrates the IA hook for tracking & analyzing family habits
  * Located in: frontend/src/app/(app)/famille/composants/AnalyseHabitesExample.tsx
  *
  * Usage:

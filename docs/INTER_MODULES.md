@@ -89,7 +89,7 @@ Les interactions cross-module reposent sur :
 ### Endpoint admin de statut
 
 ```http
-GET /api/v1/admin/bridges/phase5/status?inclure_smoke=true
+GET /api/v1/admin/bridges/status?inclure_smoke=true
 ```
 
 Retourne par bridge : `id`, `bridge`, `intitulé`, `vérification`, `statut`, `latence_ms`, `détails`.

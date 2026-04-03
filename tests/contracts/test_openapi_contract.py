@@ -1,4 +1,4 @@
-"""Tests de contrat OpenAPI (Phase 10.11).
+﻿"""Tests de contrat OpenAPI (contrat OpenAPI).
 
 Utilise Schemathesis sur endpoint public `/health` pour valider
 la conformité entre spec OpenAPI et réponse réelle ASGI.

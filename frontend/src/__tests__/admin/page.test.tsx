@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+﻿import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
@@ -85,7 +85,7 @@ describe("PageAdmin", () => {
     });
 
     mockedObtenirStatutBridgesPhase5.mockResolvedValue({
-      phase: "phase_5",
+      phase: "bridges_inter_modules",
       generated_at: "2026-04-01T09:00:00",
       execution_ms: 11.2,
       statut_global: "operationnel",
@@ -100,11 +100,11 @@ describe("PageAdmin", () => {
     });
   });
 
-  it("affiche la synthese bridges phase 5 et le lien vers le detail", async () => {
+  it("affiche la synthese Bridges inter-modules et le lien vers le detail", async () => {
     renderWithQuery(React.createElement(PageAdmin));
 
     await waitFor(() => {
-      expect(screen.getByText(/Bridges Phase 5/i)).toBeInTheDocument();
+      expect(screen.getByText(/Bridges inter-modules/i)).toBeInTheDocument();
     });
 
     expect(screen.getByText(/presence_only/i)).toBeInTheDocument();

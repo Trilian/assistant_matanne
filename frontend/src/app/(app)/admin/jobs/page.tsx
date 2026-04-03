@@ -411,7 +411,7 @@ export default function PageAdminJobs() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Actions groupées Sprint 17</CardTitle>
+          <CardTitle>Actions groupées Actions groupées</CardTitle>
           <CardDescription>
             Exécution groupée des jobs du matin et simulation d&apos;une journée type.
           </CardDescription>

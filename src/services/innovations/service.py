@@ -405,7 +405,7 @@ Retourne un JSON avec:
 
         return self.obtenir_mode_vacances(user_id=user_id)
 
-    @avec_cache(ttl=43200, key_func=lambda self, limite: f"s21_insights_{limite}_{date.today().isoformat()}")
+    @avec_cache(ttl=43200, key_func=lambda self, limite: f"insights_quotidiens_{limite}_{date.today().isoformat()}")
     @avec_gestion_erreurs(default_return=None)
     def generer_insights_quotidiens(self, limite: int = 2) -> InsightsQuotidiensResponse | None:
         """Insights IA : génère 1-2 insights IA proactifs par jour (anti-spam)."""
@@ -467,7 +467,7 @@ Retourne un JSON avec:
             insights=insights,
         )
 
-    @avec_cache(ttl=1800, key_func=lambda self: f"s21_meteo_cross_{date.today().isoformat()}")
+    @avec_cache(ttl=1800, key_func=lambda self: f"meteo_cross_module_{date.today().isoformat()}")
     @avec_gestion_erreurs(default_return=None)
     def analyser_meteo_contextuelle(self) -> MeteoContextuelleResponse | None:
         """Météo cross-module : synthèse météo unique avec impacts cuisine/famille/maison/énergie."""
@@ -539,7 +539,7 @@ Retourne un JSON avec:
             modules=modules,
         )
 
-    @avec_cache(ttl=3600, key_func=lambda self, user_id: f"s22_preferences_{user_id or 'anon'}")
+    @avec_cache(ttl=3600, key_func=lambda self, user_id: f"preferences_apprises_{user_id or 'anon'}")
     @avec_gestion_erreurs(default_return=None)
     def analyser_preferences_apprises(self, user_id: str | None = None) -> ApprentissagePreferencesResponse | None:
         """Apprentissage préférences : apprend des préférences stables et active leur influence après 2+ semaines."""
@@ -564,13 +564,13 @@ Retourne un JSON avec:
             ajustements_suggestions=ajustements,
         )
 
-    @avec_cache(ttl=1800, key_func=lambda self, user_id: f"s22_planification_auto_{user_id or 'anon'}_{date.today().isoformat()}")
+    @avec_cache(ttl=1800, key_func=lambda self, user_id: f"planification_auto_{user_id or 'anon'}_{date.today().isoformat()}")
     @avec_gestion_erreurs(default_return=None)
     def generer_planification_hebdo_complete(self, user_id: str | None = None) -> PlanificationHebdoCompleteResponse | None:
         """Planification auto : génère planning repas + courses + tâches maison + jardin en un seul bloc."""
         return cuisine_ia.generer_planification_hebdo_complete(self, user_id)
 
-    @avec_cache(ttl=1800, key_func=lambda self, user_id: f"s22_batch_intelligent_{user_id or 'anon'}_{date.today().isoformat()}")
+    @avec_cache(ttl=1800, key_func=lambda self, user_id: f"batch_intelligent_{user_id or 'anon'}_{date.today().isoformat()}")
     @avec_gestion_erreurs(default_return=None)
     def proposer_batch_cooking_intelligent(self, user_id: str | None = None) -> BatchCookingIntelligentResponse | None:
         """Batch cooking IA : propose un plan batch cooking cohérent avec le planning de semaine."""
@@ -600,13 +600,13 @@ Retourne un JSON avec:
             },
         )
 
-    @avec_cache(ttl=900, key_func=lambda self: f"s22_tablette_magazine_{date.today().isoformat()}")
+    @avec_cache(ttl=900, key_func=lambda self: f"tablette_magazine_{date.today().isoformat()}")
     @avec_gestion_erreurs(default_return=None)
     def obtenir_mode_tablette_magazine(self) -> ModeTabletteMagazineResponse | None:
         """Mode tablette : fournit une vue magazine condensée pour écran tablette."""
         return cuisine_ia.obtenir_mode_tablette_magazine(self)
 
-    @avec_cache(ttl=1800, key_func=lambda self: "s23_telegram_conversationnel")
+    @avec_cache(ttl=1800, key_func=lambda self: "telegram_conversationnel")
     @avec_gestion_erreurs(default_return=None)
     def obtenir_capacites_telegram_conversationnelles(self) -> TelegramConversationnelResponse | None:
         """Telegram conversationnel : expose les commandes textuelles Telegram opérationnelles."""

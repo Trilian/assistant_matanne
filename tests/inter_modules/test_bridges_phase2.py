@@ -1,4 +1,4 @@
-"""Tests Phase 2 — bridges EventBus inter-modules.
+﻿"""Tests Bridges EventBus inter-modules — bridges EventBus inter-modules.
 
 Ces tests ciblent:
 - l'émission d'événements planning lors de la validation,

@@ -60,7 +60,7 @@ class TestSchemaCoherence:
 
 
 # CT-10 — Tables SQL sans modèle ORM (orphelines connues)
-# Audit Sprint 7 : ces tables existent dans INIT_COMPLET.sql mais n'ont pas de modèle ORM.
+# Audit qualité : ces tables existent dans INIT_COMPLET.sql mais n'ont pas de modèle ORM.
 # Chaque table est documentée avec sa catégorie :
 #   - infrastructure : tables système (schema_migrations…)
 #   - reference      : catalogues statiques lus par des services sans ORM
@@ -91,7 +91,7 @@ class TestOrphanSQLTables:
         orm_tables = {m.class_.__tablename__ for m in Base.registry.mappers}
         orphans = sql_tables - orm_tables - set(_TABLES_SQL_SANS_ORM.keys())
         assert not orphans, (
-            f"Nouvelles tables SQL sans modèle ORM détectées (Sprint 7 — CT-10) :\n"
+            f"Nouvelles tables SQL sans modèle ORM détectées (audit CT-10) :\n"
             f"{sorted(orphans)}\n"
             f"→ Ajouter un modèle ORM ou documenter dans _TABLES_SQL_SANS_ORM."
         )

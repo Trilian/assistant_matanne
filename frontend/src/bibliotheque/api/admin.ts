@@ -615,7 +615,7 @@ export async function obtenirSanteServices(): Promise<ServiceHealthResponse> {
 export async function obtenirStatutBridgesPhase5(params?: {
   inclure_smoke?: boolean
 }): Promise<StatutBridgesPhase5Response> {
-  const { data } = await clientApi.get('/api/v1/admin/bridges/phase5/status', { params })
+  const { data } = await clientApi.get('/api/v1/admin/bridges/status', { params })
   return data
 }
 

@@ -1,5 +1,5 @@
-"""
-CT-14 - Tests des routes IA avancée (Phase 6)
+﻿"""
+CT-14 - Tests des routes IA avancée (IA avancée)
 
 Couvre src/api/routes/ia_avancee.py — 14 endpoints :
 - GET  /api/v1/ia-avancee/suggestions-achats

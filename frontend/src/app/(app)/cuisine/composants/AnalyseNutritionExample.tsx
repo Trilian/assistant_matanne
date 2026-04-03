@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Button } from '@/src/composants/ui/button'
@@ -17,7 +17,7 @@ import { utiliseAnalyseNutrition } from '@/src/crochets/utiliser-ia-modules'
 /**
  * Example Component: Family Nutrition Analysis
  * ──────────────────────────────────────────────
- * Demonstrates the Sprint 13 IA hook for analyzing nutritional requirements
+ * Demonstrates the IA hook for analyzing nutritional requirements
  * Located in: frontend/src/app/(app)/cuisine/composants/AnalyseNutritionExample.tsx
  *
  * Usage:

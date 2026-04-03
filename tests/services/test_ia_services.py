@@ -1,5 +1,5 @@
 """
-Tests pour les 6 nouveaux services IA du Sprint 13.
+Tests pour les 6 nouveaux services IA (modules IA).
 """
 
 import pytest

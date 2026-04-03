@@ -1,4 +1,4 @@
-"""Tests unitaires pour src/services/utilitaires/automations_engine.py (Phase 3.5)."""
+﻿"""Tests unitaires pour src/services/utilitaires/automations_engine.py (moteur automations)."""
 
 from __future__ import annotations
 

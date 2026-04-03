@@ -1,14 +1,14 @@
-"""
+﻿"""
 Tests — Jobs CRON additionnels (notifications).
 
 Couvre src/services/core/cron/jobs.py :
-- P8-01: rappel_documents_expirants (quotidien)
-- P8-02: rapport_mensuel_auto (mensuel)
-- P8-05: bilan_energetique (mensuel)
-- P8-06: rappel_vaccins (hebdo)
-- P8-07a: sync_entretien_budget
-- P8-07b: sync_voyages_calendrier
-- P8-07c: sync_charges_dashboard
+- rappel_documents: rappel_documents_expirants (quotidien)
+- rapport_mensuel: rapport_mensuel_auto (mensuel)
+- bilan_energetique: bilan_energetique (mensuel)
+- rappel_vaccins: rappel_vaccins (hebdo)
+- sync_entretien_budget: sync_entretien_budget
+- sync_voyages_calendrier: sync_voyages_calendrier
+- sync_charges_dashboard: sync_charges_dashboard
 
 Tests inter-modules dans src/services/core/events/subscribers.py :
 - Entretien → Budget
@@ -139,7 +139,7 @@ class TestRappelDocumentsExpirants:
 
 
 # ═══════════════════════════════════════════════════════════
-# P8-02 — Rapport mensuel auto
+# rapport_mensuel — Rapport mensuel auto
 # ═══════════════════════════════════════════════════════════
 
 
@@ -183,7 +183,7 @@ class TestRapportMensuelAuto:
 
 
 # ═══════════════════════════════════════════════════════════
-# P8-05 — Bilan énergétique
+# bilan_energetique — Bilan énergétique
 # ═══════════════════════════════════════════════════════════
 
 
@@ -225,7 +225,7 @@ class TestBilanEnergetique:
 
 
 # ═══════════════════════════════════════════════════════════
-# P8-06 — Rappels vaccins
+# rappel_vaccins — Rappels vaccins
 # ═══════════════════════════════════════════════════════════
 
 
@@ -300,7 +300,7 @@ class TestRappelVaccins:
 
 
 # ═══════════════════════════════════════════════════════════
-# P8-07a — Sync entretien → budget
+# sync_entretien_budget — Sync entretien → budget
 # ═══════════════════════════════════════════════════════════
 
 
@@ -342,7 +342,7 @@ class TestSyncEntretienBudget:
 
 
 # ═══════════════════════════════════════════════════════════
-# P8-07b — Sync voyages → calendrier
+# sync_voyages_calendrier — Sync voyages → calendrier
 # ═══════════════════════════════════════════════════════════
 
 
@@ -388,7 +388,7 @@ class TestSyncVoyagesCalendrier:
 
 
 # ═══════════════════════════════════════════════════════════
-# P8-07c — Sync charges → dashboard
+# sync_charges_dashboard — Sync charges → dashboard
 # ═══════════════════════════════════════════════════════════
 
 

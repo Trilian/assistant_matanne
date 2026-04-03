@@ -34,7 +34,7 @@ from .admin_shared import (
 logger = logging.getLogger(__name__)
 
 @router.get(
-    "/bridges/phase5/status",
+    "/bridges/status",
     responses=REPONSES_AUTH_ADMIN,
     summary="Statut opérationnel des bridges inter-modules",
     description=(
@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
     ),
 )
 @gerer_exception_api
-async def statut_bridges_phase5(
+async def statut_bridges(
     inclure_smoke: bool = Query(
         True,
         description=(
@@ -417,7 +417,7 @@ async def statut_bridges_phase5(
         statut_global = "operationnel" if indisponibles == 0 else "degrade"
 
         return {
-            "phase": "phase_5",
+            "phase": "bridges_inter_modules",
             "generated_at": datetime.now().isoformat(),
             "execution_ms": round((time.perf_counter() - debut_global) * 1000, 2),
             "statut_global": statut_global,

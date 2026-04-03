@@ -391,7 +391,7 @@ def _obtenir_user_ids() -> list[str]:
 # ═══════════════════════════════════════════════════════════
 
 
-def configurer_jobs_phase_b(scheduler: BackgroundScheduler) -> None:
+def configurer_jobs_bridges(scheduler: BackgroundScheduler) -> None:
     """Enregistre les 8 cron jobs bridges dans le scheduler."""
 
     # B8.1: Prédiction courses — Vendredi 16h

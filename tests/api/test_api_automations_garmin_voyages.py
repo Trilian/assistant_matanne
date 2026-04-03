@@ -1,5 +1,5 @@
-"""
-Tests API cibles Sprint 10.
+﻿"""
+Tests API cibles automations Garmin/voyages.
 
 Couvre:
 - POST /api/v1/automations/{id}/executer-maintenant

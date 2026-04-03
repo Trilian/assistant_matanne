@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests pour src/api/routes/suggestions.py
 
 Tests d'intégration pour les routes de suggestions IA:
@@ -478,7 +478,7 @@ class TestSuggestionsPayloadExact:
 
 
 class TestMetricsProtection:
-    """Tests de sécurité pour l'endpoint /metrics (Phase 1 Item 4)."""
+    """Tests de sécurité pour l'endpoint /metrics (sécurité /metrics)."""
 
     def test_metrics_returns_data_for_admin(self, client):
         """Un admin peut accéder aux métriques."""
@@ -539,7 +539,7 @@ class TestMetricsProtection:
 
 
 class TestJWTRateLimitingSecurity:
-    """Tests de sécurité pour la validation JWT dans le rate limiting (Phase 1 Item 3)."""
+    """Tests de sécurité pour la validation JWT dans le rate limiting (validation JWT rate limiting)."""
 
     def test_forged_token_not_accepted(self):
         """Un JWT forgé (non signé) n'extrait pas d'user_id via le rate limiting middleware."""

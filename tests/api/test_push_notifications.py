@@ -1,10 +1,10 @@
-"""
-CT-13 - Tests des notifications push (Sprint 3)
+﻿"""
+CT-13 - Tests des notifications push (notifications push)
 
 Tests couvrant:
-- Endpoint VAPID public key (B-02 Sprint 1)
-- Jobs scheduler digest_ntfy et rappel_courses (B-03 Sprint 1)
-- Persistance en DB lors d'un abonnement (B-01 Sprint 1)
+- Endpoint VAPID public key (clé VAPID)
+- Jobs scheduler digest_ntfy et rappel_courses (jobs digest/rappel)
+- Persistance en DB lors d'un abonnement (persistance abonnement)
 - Desabonnement (supprimer_abonnement)
 """
 

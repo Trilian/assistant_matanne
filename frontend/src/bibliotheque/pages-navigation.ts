@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // Pages Navigation — Source unique de toutes les pages de l'app
 // Utilisé par : MenuCommandes (Ctrl+K), BoutonEpingler (étoile),
 //              BarreLaterale (section Récents)
@@ -143,7 +143,7 @@ export const PAGES_NAVIGATION: PageNavigation[] = [
   { nom: "Paramètres", chemin: "/parametres", categorie: "Configuration", Icone: Settings },
   { nom: "Planning", chemin: "/planning", categorie: "Configuration", Icone: CalendarRange },
 
-  // IA Avancée — Phase 6
+  // IA Avancée
   { nom: "IA Avancée", chemin: "/ia-avancee", categorie: "IA", Icone: Sparkles, keywords: ["intelligence artificielle", "suggestions", "optimisation", "ai"] },
   { nom: "Suggestions Achats", chemin: "/ia-avancee/suggestions-achats", categorie: "IA", Icone: ShoppingCart, keywords: ["shopping", "liste", "courses"] },
   { nom: "Planning Adaptatif", chemin: "/ia-avancee/planning-adaptatif", categorie: "IA", Icone: CalendarDays, keywords: ["repas", "menu", "semaine"] },

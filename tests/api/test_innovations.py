@@ -344,12 +344,12 @@ class TestModeInvite:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Sprint 21 â€” Innovations prioritaires
+# Innovations prioritaires â€” Innovations prioritaires
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestVacationModeInnovations:
-    """Tests des endpoints Sprint 21 (mode vacances, insights, mÃ©tÃ©o contextuelle)."""
+    """Tests des endpoints Innovations prioritaires (mode vacances, insights, mÃ©tÃ©o contextuelle)."""
 
     def test_lire_mode_vacances(self, client, auth_headers, mock_innovations_service):
         from src.services.innovations.types import ModeVacancesResponse
@@ -433,12 +433,12 @@ class TestVacationModeInnovations:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Sprint 22 â€” Innovations avancÃ©es
+# Innovations avancées â€” Innovations avancÃ©es
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestLearningPreferencesInnovations:
-    """Tests des endpoints Sprint 22 (prÃ©fÃ©rences, planification auto, batch IA, cartes, tablette)."""
+    """Tests des endpoints Innovations avancées (prÃ©fÃ©rences, planification auto, batch IA, cartes, tablette)."""
 
     def test_preferences_apprises(self, client, auth_headers, mock_innovations_service):
         from src.services.innovations.types import ApprentissagePreferencesResponse, PreferenceApprise
@@ -533,12 +533,12 @@ class TestLearningPreferencesInnovations:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# Sprint 23 â€” Innovations long terme
+# Innovations long terme â€” Innovations long terme
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestTelegramEnergyInnovations:
-    """Tests des endpoints Sprint 23 (Telegram conversationnel, prix auto, Ã©nergie temps-rÃ©el)."""
+    """Tests des endpoints Innovations long terme (Telegram conversationnel, prix auto, Ã©nergie temps-rÃ©el)."""
 
     def test_telegram_conversationnel(self, client, auth_headers, mock_innovations_service):
         from src.services.innovations.types import CommandeTelegram, TelegramConversationnelResponse

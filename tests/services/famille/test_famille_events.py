@@ -1,5 +1,5 @@
-"""
-Tests Sprint 14 — Publications de l'Event Bus manquantes.
+﻿"""
+Tests Event Bus famille — Publications de l'Event Bus manquantes.
 
 Couvre les trois nouvelles émissions d'événements ajoutées:
 - jalon.ajoute  (famille_jules.py → creer_jalon)

@@ -1,4 +1,4 @@
-"""Tests Sprint 11: bridges inter-modules haute priorité (NIM1-NIM4).
+﻿"""Tests bridges inter-modules haute priorité (NIM1-NIM4). bridges inter-modules haute priorité (NIM1-NIM4).
 
 Objectif: tester les 4 nouveaux bridges:
 - NIM1: Inventaire → Budget alimentation prévisionnel

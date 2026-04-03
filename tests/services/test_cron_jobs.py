@@ -1,4 +1,4 @@
-"""
+﻿"""
 
 T3 â€” Tests jobs cron APScheduler.
 
@@ -90,7 +90,7 @@ class TestJobsSchedules:
 
 
 
-    JOBS_SPRINT_15 = {
+    JOBS_AUTOMATISATION = {
 
         "job_expiration_recettes_suggestion",
 
@@ -210,13 +210,13 @@ class TestJobsSchedules:
 
 
 
-    def test_jobs_sprint_15_presents(self, demarreur_cron):
+    def test_JOBS_AUTOMATISATION_presents(self, demarreur_cron):
 
-        """Les 8 jobs du Sprint 15 doivent Ãªtre enregistrÃ©s dans le scheduler."""
+        """Les 8 jobs du jobs automatisation doivent Ãªtre enregistrÃ©s dans le scheduler."""
 
         job_ids = {j.id for j in demarreur_cron._scheduler.get_jobs()}
 
-        assert self.JOBS_SPRINT_15.issubset(job_ids)
+        assert self.JOBS_AUTOMATISATION.issubset(job_ids)
 
 
 
@@ -606,7 +606,7 @@ class TestPushContextuelSoir:
 
 class TestExpirationJobsDryRun:
 
-    """Les jobs Sprint 15 doivent Ãªtre exÃ©cutables en dry-run via le registre admin."""
+    """Les jobs jobs automatisation doivent Ãªtre exÃ©cutables en dry-run via le registre admin."""
 
 
 
@@ -638,7 +638,7 @@ class TestExpirationJobsDryRun:
 
     def test_job_sprint_15_supporte_dry_run(self, job_id):
 
-        """Chaque job Sprint 15 doit renvoyer un statut dry_run sans exÃ©cution rÃ©elle."""
+        """Chaque job jobs automatisation doit renvoyer un statut dry_run sans exÃ©cution rÃ©elle."""
 
         from src.services.core.cron.jobs import executer_job_par_id
 
@@ -658,7 +658,7 @@ class TestExpirationJobsDryRun:
 
 class TestWeekendWeeklyReportJobsDryRun:
 
-    """Les jobs Sprint 16 doivent Ãªtre exÃ©cutables en dry-run via le registre admin."""
+    """Les jobs notifications Telegram/Email doivent Ãªtre exÃ©cutables en dry-run via le registre admin."""
 
 
 
@@ -684,7 +684,7 @@ class TestWeekendWeeklyReportJobsDryRun:
 
     def test_job_sprint_16_supporte_dry_run(self, job_id):
 
-        """Chaque job Sprint 16 doit renvoyer un statut dry_run sans exÃ©cution rÃ©elle."""
+        """Chaque job notifications Telegram/Email doit renvoyer un statut dry_run sans exÃ©cution rÃ©elle."""
 
         from src.services.core.cron.jobs import executer_job_par_id
 
@@ -708,7 +708,7 @@ class TestWeekendWeeklyReportJobsDryRun:
 
 class TestExpirationJobsDetailed:
 
-    """Tests unitaires fins des jobs Sprint 15."""
+    """Tests unitaires fins des jobs jobs automatisation."""
 
 
 
@@ -1430,7 +1430,7 @@ class TestCronErrorHandling:
 
 class TestDigestQueueCron:
 
-    """Tests du flush automatique de la queue digest notifications (Phase 8.4)."""
+    """Tests du flush automatique de la queue digest notifications (digest notifications)."""
 
 
 
@@ -1506,7 +1506,7 @@ class TestDigestTelegramMatinalCron:
 
 class TestJobExecutionsPersistence:
 
-    """Tests ciblÃ©s Phase 7: persistance explicite dans job_executions."""
+    """Tests ciblÃ©s CRON: persistance explicite dans job_executions."""
 
 
 

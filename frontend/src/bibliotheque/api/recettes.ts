@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════
 // API Recettes
 // ═══════════════════════════════════════════════════════════
 
@@ -147,7 +147,7 @@ export async function partagerRecette(recetteId: number, dureeHeures = 48): Prom
 
 /** Exporter la recette en PDF */
 export async function exporterRecettePdf(recetteId: number): Promise<void> {
-  // Endpoint dédié sprint 11: /api/v1/recettes/{id}/export-pdf
+  // Endpoint dédié dédié: /api/v1/recettes/{id}/export-pdf
   const response = await clientApi.get(`/recettes/${recetteId}/export-pdf`, {
     responseType: "blob",
   });
