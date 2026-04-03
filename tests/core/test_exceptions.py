@@ -1,9 +1,9 @@
-﻿"""
+"""
 Tests pour le module exceptions.py.
 
 Tests couverts:
 - Toutes les classes d'exceptions
-- MÃ©thodes to_dict, __str__, __repr__
+- Méthodes to_dict, __str__, __repr__
 - Fonctions de validation (exiger_champs, valider_type, exiger_plage)
 """
 
@@ -32,7 +32,7 @@ class TestExceptionApp:
     """Tests pour la classe ExceptionApp de base."""
 
     def test_creation_simple(self):
-        """Test crÃ©ation avec message seul."""
+        """Test création avec message seul."""
         exc = ExceptionApp("Test error")
 
         assert exc.message == "Test error"
@@ -41,7 +41,7 @@ class TestExceptionApp:
         assert exc.code_erreur == "APP_ERROR"
 
     def test_creation_complete(self):
-        """Test crÃ©ation avec tous les paramÃ¨tres."""
+        """Test création avec tous les paramètres."""
         exc = ExceptionApp(
             message="Technical error",
             details={"key": "value"},
@@ -89,13 +89,13 @@ class TestExceptionApp:
         assert exc_info.value.message == "Test raise"
 
     def test_inherits_from_exception(self):
-        """Test hÃ©ritage de Exception."""
+        """Test héritage de Exception."""
         exc = ExceptionApp("Test")
         assert isinstance(exc, Exception)
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS EXCEPTIONS SPÃ‰CIALISÃ‰ES
+# TESTS EXCEPTIONS SPÀ‰CIALISÀ‰ES
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
@@ -103,12 +103,12 @@ class TestErreurValidation:
     """Tests pour ErreurValidation."""
 
     def test_code_erreur_default(self):
-        """Test code erreur par dÃ©faut."""
+        """Test code erreur par défaut."""
         exc = ErreurValidation("Invalid data")
         assert exc.code_erreur == "VALIDATION_ERROR"
 
     def test_inherits_exception_app(self):
-        """Test hÃ©ritage de ExceptionApp."""
+        """Test héritage de ExceptionApp."""
         exc = ErreurValidation("Invalid")
         assert isinstance(exc, ExceptionApp)
 
@@ -123,14 +123,14 @@ class TestErreurNonTrouve:
     """Tests pour ErreurNonTrouve."""
 
     def test_code_erreur_default(self):
-        """Test code erreur par dÃ©faut."""
+        """Test code erreur par défaut."""
         exc = ErreurNonTrouve("Resource not found")
         assert exc.code_erreur == "NOT_FOUND"
 
     def test_with_details(self):
-        """Test avec dÃ©tails."""
+        """Test avec détails."""
         exc = ErreurNonTrouve(
-            "Recette non trouvÃ©e",
+            "Recette non trouvée",
             details={"id": 123, "table": "recettes"},
         )
 
@@ -142,7 +142,7 @@ class TestErreurBaseDeDonnees:
     """Tests pour ErreurBaseDeDonnees."""
 
     def test_code_erreur_default(self):
-        """Test code erreur par dÃ©faut."""
+        """Test code erreur par défaut."""
         exc = ErreurBaseDeDonnees("Connection failed")
         assert exc.code_erreur == "DATABASE_ERROR"
 
@@ -156,12 +156,12 @@ class TestErreurServiceIA:
     """Tests pour ErreurServiceIA."""
 
     def test_code_erreur_default(self):
-        """Test code erreur par dÃ©faut."""
+        """Test code erreur par défaut."""
         exc = ErreurServiceIA("API error")
         assert exc.code_erreur == "AI_SERVICE_ERROR"
 
     def test_with_api_details(self):
-        """Test avec dÃ©tails API."""
+        """Test avec détails API."""
         exc = ErreurServiceIA(
             "Timeout",
             details={"endpoint": "/chat", "timeout": 30},
@@ -175,12 +175,12 @@ class TestErreurLimiteDebit:
     """Tests pour ErreurLimiteDebit."""
 
     def test_code_erreur_default(self):
-        """Test code erreur par dÃ©faut."""
+        """Test code erreur par défaut."""
         exc = ErreurLimiteDebit("Rate limit exceeded")
         assert exc.code_erreur == "RATE_LIMIT_EXCEEDED"
 
     def test_with_rate_details(self):
-        """Test avec dÃ©tails de rate limit."""
+        """Test avec détails de rate limit."""
         exc = ErreurLimiteDebit(
             "Limite atteinte",
             details={
@@ -198,7 +198,7 @@ class TestErreurServiceExterne:
     """Tests pour ErreurServiceExterne."""
 
     def test_code_erreur_default(self):
-        """Test code erreur par dÃ©faut."""
+        """Test code erreur par défaut."""
         exc = ErreurServiceExterne("External API failed")
         assert exc.code_erreur == "EXTERNAL_SERVICE_ERROR"
 
@@ -207,12 +207,12 @@ class TestErreurConfiguration:
     """Tests pour ErreurConfiguration."""
 
     def test_code_erreur_default(self):
-        """Test code erreur par dÃ©faut."""
+        """Test code erreur par défaut."""
         exc = ErreurConfiguration("Missing env var")
         assert exc.code_erreur == "CONFIGURATION_ERROR"
 
     def test_with_config_details(self):
-        """Test avec dÃ©tails de configuration."""
+        """Test avec détails de configuration."""
         exc = ErreurConfiguration(
             "DATABASE_URL manquant",
             details={"variable": "DATABASE_URL", "required": True},
@@ -232,7 +232,7 @@ class TestExigerChamps:
     """Tests pour la fonction exiger_champs."""
 
     def test_all_fields_present(self):
-        """Test avec tous les champs prÃ©sents."""
+        """Test avec tous les champs présents."""
         data = {"nom": "Tarte", "temps": 30, "portions": 4}
 
         # Ne doit pas lever d'exception
@@ -249,7 +249,7 @@ class TestExigerChamps:
         assert exc_info.value.details["champs_manquants"] == ["portions"]
 
     def test_empty_field_treated_as_missing(self):
-        """Test champ vide traitÃ© comme manquant."""
+        """Test champ vide traité comme manquant."""
         data = {"nom": "Tarte", "temps": 30, "portions": ""}
 
         with pytest.raises(ErreurValidation) as exc_info:
@@ -258,7 +258,7 @@ class TestExigerChamps:
         assert "portions" in exc_info.value.details["champs_manquants"]
 
     def test_none_field_treated_as_missing(self):
-        """Test champ None traitÃ© comme manquant."""
+        """Test champ None traité comme manquant."""
         data = {"nom": "Tarte", "temps": None}
 
         with pytest.raises(ErreurValidation) as exc_info:
@@ -279,7 +279,7 @@ class TestExigerChamps:
         assert "difficulte" in manquants
 
     def test_message_utilisateur_formatted(self):
-        """Test message utilisateur formatÃ©."""
+        """Test message utilisateur formaté."""
         data = {"nom": "Tarte"}
 
         with pytest.raises(ErreurValidation) as exc_info:
@@ -288,7 +288,7 @@ class TestExigerChamps:
         assert "Champs obligatoires manquants" in exc_info.value.message_utilisateur
 
     def test_default_nom_objet(self):
-        """Test nom objet par dÃ©faut."""
+        """Test nom objet par défaut."""
         data = {}
 
         with pytest.raises(ErreurValidation) as exc_info:
@@ -304,10 +304,10 @@ class TestExigerChamps:
         exiger_champs(data, [], "test")
 
     def test_zero_value_accepted(self):
-        """Test valeur 0 acceptÃ©e (truthy test)."""
+        """Test valeur 0 acceptée (truthy test)."""
         data = {"count": 0}
 
-        # 0 est falsy, donc sera traitÃ© comme manquant
+        # 0 est falsy, donc sera traité comme manquant
         with pytest.raises(ErreurValidation):
             exiger_champs(data, ["count"], "test")
 
@@ -339,7 +339,7 @@ class TestValiderType:
         assert "int" in str(exc_info.value)
 
     def test_multiple_types_accepted(self):
-        """Test avec plusieurs types acceptÃ©s."""
+        """Test avec plusieurs types acceptés."""
         # Ne doit pas lever d'exception
         valider_type(42, (int, str), "value")
         valider_type("hello", (int, str), "value")
@@ -352,7 +352,7 @@ class TestValiderType:
         assert "int ou str" in str(exc_info.value)
 
     def test_details_populated(self):
-        """Test dÃ©tails remplis."""
+        """Test détails remplis."""
         with pytest.raises(ErreurValidation) as exc_info:
             valider_type([1, 2], str, "data")
 
@@ -362,11 +362,11 @@ class TestValiderType:
         assert details["type_recu"] == "list"
 
     def test_default_nom_param(self):
-        """Test nom paramÃ¨tre par dÃ©faut."""
+        """Test nom paramètre par défaut."""
         with pytest.raises(ErreurValidation) as exc_info:
             valider_type(42, str)
 
-        assert "paramÃ¨tre" in str(exc_info.value)
+        assert "paramètre" in str(exc_info.value)
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -422,14 +422,14 @@ class TestExigerPlage:
             exiger_plage(0.5, minimum=1.0)
 
     def test_negative_range(self):
-        """Test avec plage nÃ©gative."""
+        """Test avec plage négative."""
         exiger_plage(-5, minimum=-10, maximum=-1)
 
         with pytest.raises(ErreurValidation):
             exiger_plage(0, minimum=-10, maximum=-1)
 
     def test_default_nom_param(self):
-        """Test nom paramÃ¨tre par dÃ©faut."""
+        """Test nom paramètre par défaut."""
         with pytest.raises(ErreurValidation) as exc_info:
             exiger_plage(100, maximum=10)
 
@@ -437,15 +437,15 @@ class TestExigerPlage:
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# TESTS D'INTÃ‰GRATION
+# TESTS D'INTÀ‰GRATION
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class TestExceptionsIntegration:
-    """Tests d'intÃ©gration des exceptions."""
+    """Tests d'intégration des exceptions."""
 
     def test_exception_hierarchy(self):
-        """Test hiÃ©rarchie des exceptions."""
+        """Test hiérarchie des exceptions."""
         exc = ErreurValidation("Test")
 
         assert isinstance(exc, ErreurValidation)

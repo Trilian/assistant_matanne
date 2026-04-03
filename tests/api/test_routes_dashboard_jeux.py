@@ -116,12 +116,12 @@ class TestEndpointsDashboard:
         response = await client.get("/api/v1/dashboard/score-ecologique")
         assert response.status_code not in (404, 405)
 
-    @patch("src.api.routes.dashboard.executer_async")
+    @patch("src.api.routes.dashboard_accueil.executer_async")
     async def test_dashboard_cuisine_format(self, mock_exec, client):
         """GET /api/v1/dashboard/cuisine retourne les bonnes clés."""
         mock_exec.side_effect = lambda fn: fn()
 
-        with patch("src.api.routes.dashboard.executer_avec_session") as mock_session:
+        with patch("src.api.routes.dashboard_accueil.executer_avec_session") as mock_session:
             mock_ctx = MagicMock()
             mock_ctx.__enter__ = MagicMock(return_value=MagicMock())
             mock_ctx.__exit__ = MagicMock(return_value=False)
@@ -192,8 +192,8 @@ class TestEndpointsJeux:
 class TestFormatDashboard:
     """Vérifie le format de la réponse dashboard."""
 
-    @patch("src.api.routes.dashboard.executer_avec_session")
-    @patch("src.api.routes.dashboard.executer_async")
+    @patch("src.api.routes.dashboard_accueil.executer_avec_session")
+    @patch("src.api.routes.dashboard_accueil.executer_async")
     async def test_dashboard_format_complet(self, mock_exec, mock_session, client):
         """Le dashboard retourne statistiques, budget, activités, alertes."""
         mock_exec.side_effect = lambda fn: fn()
@@ -227,8 +227,8 @@ class TestFormatDashboard:
         assert "recettes_total" in data["statistiques"]
         assert "total_mois" in data["budget_mois"]
 
-    @patch("src.api.routes.dashboard.executer_avec_session")
-    @patch("src.api.routes.dashboard.executer_async")
+    @patch("src.api.routes.dashboard_accueil.executer_avec_session")
+    @patch("src.api.routes.dashboard_accueil.executer_async")
     async def test_budget_unifie_format(self, mock_exec, mock_session, client):
         """Le budget unifié retourne famille/maison/jeux/totaux."""
         mock_exec.side_effect = lambda fn: fn()
@@ -251,8 +251,8 @@ class TestFormatDashboard:
         assert "jeux" in data
         assert "totaux" in data
 
-    @patch("src.api.routes.dashboard.executer_avec_session")
-    @patch("src.api.routes.dashboard.executer_async")
+    @patch("src.api.routes.dashboard_accueil.executer_avec_session")
+    @patch("src.api.routes.dashboard_accueil.executer_async")
     async def test_score_ecologique_format(self, mock_exec, mock_session, client):
         """Le score écologique retourne score global + modules."""
         mock_exec.side_effect = lambda fn: fn()
