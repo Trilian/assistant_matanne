@@ -19,6 +19,37 @@ from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
+from typing import Annotated
+from typing import Callable
+from typing import ClassVar
+
+MutantDict = Annotated[dict[str, Callable], "Mutant"] # type: ignore
+
+
+def _mutmut_trampoline(orig, mutants, call_args, call_kwargs, self_arg = None): # type: ignore
+    """Forward call to original or mutated function, depending on the environment"""
+    import os # type: ignore
+    mutant_under_test = os.environ['MUTANT_UNDER_TEST'] # type: ignore
+    if mutant_under_test == 'fail': # type: ignore
+        from mutmut.__main__ import MutmutProgrammaticFailException # type: ignore
+        raise MutmutProgrammaticFailException('Failed programmatically')       # type: ignore
+    elif mutant_under_test == 'stats': # type: ignore
+        from mutmut.__main__ import record_trampoline_hit # type: ignore
+        record_trampoline_hit(orig.__module__ + '.' + orig.__name__) # type: ignore
+        # (for class methods, orig is bound and thus does not need the explicit self argument)
+        result = orig(*call_args, **call_kwargs) # type: ignore
+        return result # type: ignore
+    prefix = orig.__module__ + '.' + orig.__name__ + '__mutmut_' # type: ignore
+    if not mutant_under_test.startswith(prefix): # type: ignore
+        result = orig(*call_args, **call_kwargs) # type: ignore
+        return result # type: ignore
+    mutant_name = mutant_under_test.rpartition('.')[-1] # type: ignore
+    if self_arg is not None: # type: ignore
+        # call to a class method where self is not bound
+        result = mutants[mutant_name](self_arg, *call_args, **call_kwargs) # type: ignore
+    else:
+        result = mutants[mutant_name](*call_args, **call_kwargs) # type: ignore
+    return result # type: ignore
 
 
 # ═══════════════════════════════════════════════════════════
@@ -159,6 +190,12 @@ TOUS_LES_BADGES = BADGES_SPORT + BADGES_NUTRITION
 
 
 def obtenir_catalogue_badges() -> list[dict[str, Any]]:
+    args = []# type: ignore
+    kwargs = {}# type: ignore
+    return _mutmut_trampoline(x_obtenir_catalogue_badges__mutmut_orig, x_obtenir_catalogue_badges__mutmut_mutants, args, kwargs, None)
+
+
+def x_obtenir_catalogue_badges__mutmut_orig() -> list[dict[str, Any]]:
     """Retourne le catalogue complet des badges avec métadonnées."""
     return [
         {
@@ -172,6 +209,248 @@ def obtenir_catalogue_badges() -> list[dict[str, Any]]:
         }
         for b in TOUS_LES_BADGES
     ]
+
+
+def x_obtenir_catalogue_badges__mutmut_1() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "XXbadge_typeXX": b.badge_type,
+            "badge_label": b.badge_label,
+            "categorie": b.categorie,
+            "emoji": b.emoji,
+            "description": b.description,
+            "seuil": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_2() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "BADGE_TYPE": b.badge_type,
+            "badge_label": b.badge_label,
+            "categorie": b.categorie,
+            "emoji": b.emoji,
+            "description": b.description,
+            "seuil": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_3() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "XXbadge_labelXX": b.badge_label,
+            "categorie": b.categorie,
+            "emoji": b.emoji,
+            "description": b.description,
+            "seuil": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_4() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "BADGE_LABEL": b.badge_label,
+            "categorie": b.categorie,
+            "emoji": b.emoji,
+            "description": b.description,
+            "seuil": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_5() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "badge_label": b.badge_label,
+            "XXcategorieXX": b.categorie,
+            "emoji": b.emoji,
+            "description": b.description,
+            "seuil": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_6() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "badge_label": b.badge_label,
+            "CATEGORIE": b.categorie,
+            "emoji": b.emoji,
+            "description": b.description,
+            "seuil": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_7() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "badge_label": b.badge_label,
+            "categorie": b.categorie,
+            "XXemojiXX": b.emoji,
+            "description": b.description,
+            "seuil": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_8() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "badge_label": b.badge_label,
+            "categorie": b.categorie,
+            "EMOJI": b.emoji,
+            "description": b.description,
+            "seuil": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_9() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "badge_label": b.badge_label,
+            "categorie": b.categorie,
+            "emoji": b.emoji,
+            "XXdescriptionXX": b.description,
+            "seuil": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_10() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "badge_label": b.badge_label,
+            "categorie": b.categorie,
+            "emoji": b.emoji,
+            "DESCRIPTION": b.description,
+            "seuil": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_11() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "badge_label": b.badge_label,
+            "categorie": b.categorie,
+            "emoji": b.emoji,
+            "description": b.description,
+            "XXseuilXX": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_12() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "badge_label": b.badge_label,
+            "categorie": b.categorie,
+            "emoji": b.emoji,
+            "description": b.description,
+            "SEUIL": b.seuil,
+            "unite": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_13() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "badge_label": b.badge_label,
+            "categorie": b.categorie,
+            "emoji": b.emoji,
+            "description": b.description,
+            "seuil": b.seuil,
+            "XXuniteXX": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+
+def x_obtenir_catalogue_badges__mutmut_14() -> list[dict[str, Any]]:
+    """Retourne le catalogue complet des badges avec métadonnées."""
+    return [
+        {
+            "badge_type": b.badge_type,
+            "badge_label": b.badge_label,
+            "categorie": b.categorie,
+            "emoji": b.emoji,
+            "description": b.description,
+            "seuil": b.seuil,
+            "UNITE": b.unite,
+        }
+        for b in TOUS_LES_BADGES
+    ]
+
+x_obtenir_catalogue_badges__mutmut_mutants : ClassVar[MutantDict] = { # type: ignore
+'x_obtenir_catalogue_badges__mutmut_1': x_obtenir_catalogue_badges__mutmut_1, 
+    'x_obtenir_catalogue_badges__mutmut_2': x_obtenir_catalogue_badges__mutmut_2, 
+    'x_obtenir_catalogue_badges__mutmut_3': x_obtenir_catalogue_badges__mutmut_3, 
+    'x_obtenir_catalogue_badges__mutmut_4': x_obtenir_catalogue_badges__mutmut_4, 
+    'x_obtenir_catalogue_badges__mutmut_5': x_obtenir_catalogue_badges__mutmut_5, 
+    'x_obtenir_catalogue_badges__mutmut_6': x_obtenir_catalogue_badges__mutmut_6, 
+    'x_obtenir_catalogue_badges__mutmut_7': x_obtenir_catalogue_badges__mutmut_7, 
+    'x_obtenir_catalogue_badges__mutmut_8': x_obtenir_catalogue_badges__mutmut_8, 
+    'x_obtenir_catalogue_badges__mutmut_9': x_obtenir_catalogue_badges__mutmut_9, 
+    'x_obtenir_catalogue_badges__mutmut_10': x_obtenir_catalogue_badges__mutmut_10, 
+    'x_obtenir_catalogue_badges__mutmut_11': x_obtenir_catalogue_badges__mutmut_11, 
+    'x_obtenir_catalogue_badges__mutmut_12': x_obtenir_catalogue_badges__mutmut_12, 
+    'x_obtenir_catalogue_badges__mutmut_13': x_obtenir_catalogue_badges__mutmut_13, 
+    'x_obtenir_catalogue_badges__mutmut_14': x_obtenir_catalogue_badges__mutmut_14
+}
+x_obtenir_catalogue_badges__mutmut_orig.__name__ = 'x_obtenir_catalogue_badges'
 
 
 # ═══════════════════════════════════════════════════════════
