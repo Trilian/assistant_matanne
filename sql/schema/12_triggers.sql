@@ -89,3 +89,5 @@ CREATE TRIGGER trg_repas_planning_notify
     AFTER INSERT OR UPDATE OR DELETE ON repas_planning
     FOR EACH ROW EXECUTE FUNCTION notify_planning_changed();
 -- ============================================================================
+
+-- Source: 13_views.sql

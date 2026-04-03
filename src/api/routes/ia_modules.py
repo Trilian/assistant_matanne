@@ -12,6 +12,9 @@ from src.api.schemas.ia_modules import (
     AnalyseImpactsMeteoRequest,
     AnalyseNutritionPersonneRequest,
     AnalyseVarietePlanningRequest,
+    BilanMensuelNarratifResponse,
+    DiagnosticPlanteJardinRequest,
+    DiagnosticPlanteJardinResponse,
     EstimationProjetMaisonRequest,
     PredictionConsommationRequest,
 )
@@ -180,3 +183,50 @@ async def analyser_nutrition_personne(
         recettes_semaine=body.recettes_semaine,
         objectif_sante=body.objectif_sante,
     )
+
+
+@router.post(
+    "/jardin/diagnostic-plante",
+    response_model=DiagnosticPlanteJardinResponse,
+    responses=REPONSES_IA,
+    summary="Diagnostiquer une plante à partir d'une photo",
+)
+@gerer_exception_api
+async def diagnostiquer_plante_jardin(
+    body: DiagnosticPlanteJardinRequest,
+    user: dict = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+) -> DiagnosticPlanteJardinResponse:
+    from src.services.maison.jardin_service import obtenir_jardin_service
+
+    service = obtenir_jardin_service()
+    diagnostic = await service.diagnostiquer_plante(
+        image_base64=body.image_base64,
+        description=body.description,
+    )
+    return DiagnosticPlanteJardinResponse(
+        plante_identifiee=diagnostic.plante_identifiee,
+        etat=diagnostic.etat.value if hasattr(diagnostic.etat, "value") else str(diagnostic.etat),
+        problemes_detectes=list(diagnostic.problemes_detectes or []),
+        traitements_suggeres=list(diagnostic.traitements_suggeres or []),
+        confiance=float(diagnostic.confiance or 0.0),
+    )
+
+
+@router.get(
+    "/rapports/bilan-mensuel",
+    response_model=BilanMensuelNarratifResponse,
+    responses=REPONSES_IA,
+    summary="Générer le bilan mensuel narratif multi-modules",
+)
+@gerer_exception_api
+async def generer_bilan_mensuel_narratif(
+    mois: str | None = None,
+    user: dict = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+) -> BilanMensuelNarratifResponse:
+    from src.services.rapports.bilan_mensuel import obtenir_bilan_mensuel_service
+
+    service = obtenir_bilan_mensuel_service()
+    bilan = await service.generer_bilan(mois=mois)
+    return BilanMensuelNarratifResponse(**bilan)

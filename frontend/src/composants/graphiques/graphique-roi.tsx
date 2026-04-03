@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
+import { COULEURS_GRAPHIQUES } from "@/bibliotheque/theme-graphiques";
 
 interface PointROI {
   index: number;
@@ -25,11 +26,11 @@ export function GraphiqueROI({ donnees }: { donnees: PointROI[] }) {
         <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
         <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v} €`} />
         <Tooltip formatter={(value) => [`${Number(value).toFixed(2)} €`, "Cumul"]} />
-        <ReferenceLine y={0} stroke="hsl(0, 0%, 60%)" strokeDasharray="3 3" />
+        <ReferenceLine y={0} stroke={COULEURS_GRAPHIQUES.reference} strokeDasharray="3 3" />
         <Line
           type="monotone"
           dataKey="cumul"
-          stroke="hsl(210, 70%, 50%)"
+          stroke={COULEURS_GRAPHIQUES.accent4}
           strokeWidth={2}
           dot={false}
           activeDot={{ r: 4 }}

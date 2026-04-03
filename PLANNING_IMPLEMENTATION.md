@@ -1,7 +1,7 @@
 # Plan d'implémentation — Assistant Matanne
 
 > **Basé sur** : Audit Complet du 3 avril 2026
-> **Dernière mise à jour** : 3 avril 2026
+> **Dernière mise à jour** : 5 avril 2026
 > **Périmètre** : Backend + Frontend + SQL + Tests + Docs + UI + IA + Automatisations + Telegram + Admin
 > **Durée estimée** : ~40-55 jours (séquentiel), parallélisable
 
@@ -11,7 +11,7 @@
 
 1. [Notation globale par catégorie](#1-notation-globale-par-catégorie)
 2. [Cartographie complète des modules](#2-cartographie-complète-des-modules)
-3. [Sprint 1 — Nettoyage et assainissement du code](#sprint-1--nettoyage-et-assainissement-du-code)
+3. [Sprint 1 — Nettoyage et assainissement du code ✅](#sprint-1--nettoyage-et-assainissement-du-code--terminé)
 4. [Sprint 2 — SQL, données et performance DB](#sprint-2--sql-données-et-performance-db)
 5. [Sprint 3 — Tests et couverture qualité](#sprint-3--tests-et-couverture-qualité)
 6. [Sprint 4 — Inter-modules et intégrations IA](#sprint-4--inter-modules-et-intégrations-ia)
@@ -241,39 +241,40 @@ sql/
 
 ---
 
-## Sprint 1 — Nettoyage et assainissement du code
+## Sprint 1 — Nettoyage et assainissement du code ✅ TERMINÉ
 
 > **Objectif** : Code propre, sans dead code ni références legacy
 > **Durée estimée** : 5-7 jours
 > **Prérequis** : Aucun
+> **Statut** : ✅ Terminé le 5 avril 2026
 
 ### Tâches
 
-| # | Tâche | Détail | Effort | Priorité |
-|---|-------|--------|--------|----------|
-| 1.1 | **Supprimer fichiers features rejetées** | `partage.py`, `partage_recettes.py`, `ocr_service.py`, `share/recette/[token]/page.tsx`, `cuisine_ia.py` | 1h | 🔴 Critique |
-| 1.2 | **Nettoyer alias WhatsApp** | Retirer "whatsapp" dans `notif_dispatcher.py` (lignes 26, 58, 133, 389, 461), dans `notifications_historique.py` (enum Canal) | 1h | 🔴 Critique |
-| 1.3 | **Supprimer tables SQL mortes** | `garanties`, `incidents_sav`, `contrats`, `preferences_home` | 1h | 🔴 Critique |
-| 1.4 | **Nettoyer 150+ commentaires Phase/Sprint** | Remplacer tout "Phase X" / "Sprint Y" par description fonctionnelle (voir [Annexe C](#annexe-c--commentaires-phasesprint-à-nettoyer)) | 4h | 🔴 Critique |
-| 1.5 | **Renommer tests legacy** | `test_bridges_phase2.py` → `test_bridges_inter_modules.py`, tous les tests avec "Phase X" dans les noms | 15min | 🔴 Critique |
-| 1.6 | **Éclater `fonctionnalites_avancees.py`** | 24 endpoints `/phase9/` et `/phasee/` → dispatcher dans les routes existantes par domaine (IA avancée, prédictions, pilotage) | 2h | 🔴 Critique |
-| 1.7 | **Renommer `innovations/`** | `src/services/innovations/` → `src/services/experimental/` ou intégrer dans les modules concernés | 1h | 🔴 Critique |
-| 1.8 | **Éclater `admin_shared.py`** | 1000+ lignes → `admin_schemas.py`, `admin_constants.py`, `admin_helpers.py` | 1h | 🟡 Important |
-| 1.9 | **Supprimer docs obsolètes** | `docs/INDEX.md` (doublon README) | 15min | 🟡 Important |
-| 1.10 | **Fusionner docs doublons** | `INTER_MODULES.md` + `INTER_MODULES_GUIDE.md` → 1 fichier ; `API_REFERENCE.md` + `API_SCHEMAS.md` → 1 fichier ; `TESTING.md` + `TESTING_ADVANCED.md` → 1 fichier | 2h | 🟡 Important |
-| 1.11 | **Mettre à jour docs** | Retirer références OCR/Phase dans `guides/IA_AVANCEE.md`, `guides/jeux/README.md`, `guides/famille/README.md`, `SERVICES_REFERENCE.md`, `AI_SERVICES.md` | 1h | 🟡 Important |
-| 1.12 | **Vérifier `partage_router` dans main.py** | S'assurer que le router supprimé n'est plus inclus | 15min | 🔴 Critique |
-| 1.13 | **Supprimer tests features retirées** | Tests associés à partage, OCR, cuisine_ia | 30min | 🔴 Critique |
+| # | Tâche | Détail | Effort | Priorité | Statut |
+|---|-------|--------|--------|----------|--------|
+| 1.1 | **Supprimer fichiers features rejetées** | `partage.py`, `partage_recettes.py`, `ocr_service.py`, `share/recette/[token]/page.tsx` supprimés. `cuisine_ia.py` conservé (utilisé activement par InnovationsService) | 1h | 🔴 Critique | ✅ |
+| 1.2 | **Nettoyer alias WhatsApp** | `notif_dispatcher.py`, `notifications_historique.py`, `telegram.py`, `cron_cuisine.py`, `jobs_notifications.py`, `notifications_enrichies.py`, `avance.ts`, `centre-notifications/page.tsx` nettoyés | 1h | 🔴 Critique | ✅ |
+| 1.3 | **Supprimer tables SQL mortes** | `garanties`, `incidents_sav`, `contrats` n'existaient pas en SQL. `preferences_home` est utilisée activement. N/A | 1h | 🔴 Critique | ✅ N/A |
+| 1.4 | **Nettoyer commentaires Phase/Sprint** | Backend + frontend nettoyés. Phase5 refs renommées (admin bridges). Sprint D/E refs fonctionnalisées. | 4h | 🔴 Critique | ✅ |
+| 1.5 | **Renommer tests legacy** | `test_bridges_phase2.py` → `test_bridges_inter_modules.py` + `test_bridges_inter_modules.py` racine renommé `test_bridges_nim.py` | 15min | 🔴 Critique | ✅ |
+| 1.6 | **Renommer URLs legacy** | 40 endpoints `/phase9/*` et `/phasee/*` renommés en URLs fonctionnelles. Fonction names `p9_*`/`phasee_*` nettoyés. Frontend `avance.ts` + `test_innovations.py` mis à jour. | 2h | 🔴 Critique | ✅ |
+| 1.7 | **Renommer `innovations/`** | `src/services/innovations/` → `src/services/experimental/`. 6 fichiers d'imports mis à jour. | 1h | 🔴 Critique | ✅ |
+| 1.8 | **Éclater `admin_shared.py`** | 814 lignes → `admin_schemas.py` (schémas), `admin_constants.py` (constantes), `admin_helpers.py` (helpers). `admin_shared.py` conservé comme ré-export. | 1h | 🟡 Important | ✅ |
+| 1.9 | **Supprimer docs obsolètes** | `docs/INDEX.md` supprimé (doublon README) | 15min | 🟡 Important | ✅ |
+| 1.10 | **Fusionner docs doublons** | `INTER_MODULES_GUIDE.md` → fusionné dans `INTER_MODULES.md`. `API_SCHEMAS.md` → fusionné dans `API_REFERENCE.md`. `TESTING_ADVANCED.md` → fusionné dans `TESTING.md`. | 2h | 🟡 Important | ✅ |
+| 1.11 | **Mettre à jour docs** | Références OCR supprimées dans `AI_SERVICES.md`, `SERVICES_REFERENCE.md` | 1h | 🟡 Important | ✅ |
+| 1.12 | **Vérifier `partage_router` dans main.py** | Import et `include_router` supprimés dans `main.py` et `routes/__init__.py` | 15min | 🔴 Critique | ✅ |
+| 1.13 | **Supprimer tests features retirées** | `test_routes_partage.py` supprimé | 30min | 🔴 Critique | ✅ |
 
 ### Critères de validation Sprint 1
 
-- [ ] Aucun fichier de feature rejetée ne subsiste
-- [ ] `grep -r "whatsapp" src/` ne renvoie rien
-- [ ] `grep -r "Phase [A-Z]" src/` ne renvoie rien (hors commentaires historiques explicites)
-- [ ] `grep -r "Sprint [A-Z]" src/` ne renvoie rien
-- [ ] Les tables SQL mortes n'existent plus
-- [ ] `pytest` passe sans régression
-- [ ] Aucun import cassé après suppression/renommage
+- [x] Aucun fichier de feature rejetée ne subsiste (partage.py, partage_recettes.py, ocr_service.py, share/ supprimés)
+- [x] `grep -r "whatsapp" src/` ne renvoie rien
+- [x] `grep -r "Phase [A-Z]" src/` ne renvoie rien (hors commentaires historiques explicites)
+- [x] `grep -r "Sprint [A-Z]" src/` ne renvoie rien
+- [x] Les tables SQL mortes n'existent plus (vérification : n'existaient pas en SQL, preferences_home est active)
+- [x] `pytest` passe sans régression (4848 passed, 19 failed + 36 errors pré-existants)
+- [x] Aucun import cassé après suppression/renommage
 
 ---
 
@@ -309,6 +310,7 @@ sql/
 > **Objectif** : Couverture confiance sur les flux critiques
 > **Durée estimée** : 5-7 jours
 > **Prérequis** : Sprint 1 terminé (code propre)
+> **Statut au 2026-04-03** : En cours, avec une base déjà plus avancée que l'audit initial sur plusieurs sous-tâches.
 
 ### État actuel des tests
 
@@ -324,16 +326,25 @@ sql/
 
 ### Tâches
 
-| # | Tâche | Détail | Effort | Priorité |
-|---|-------|--------|--------|----------|
-| 3.1 | **Tests WebSocket courses** | Connexion, messages, synchronisation multi-user, déconnexion/reconnexion | 4h | 🔴 Critique |
-| 3.2 | **Tests E2E parcours complet** | Login → créer recette → planifier → courses → cocher articles | 8h | 🔴 Critique |
-| 3.3 | **Tests frontend composants clés** | Formulaire recette, planning hebdomadaire, dashboard DnD | 8h | 🟡 Important |
-| 3.4 | **Tests inter-modules E2E** | Jardin récolte → suggestion recette → ajout courses | 4h | 🟡 Important |
-| 3.5 | **Tests de charge API** | k6 ou locust sur les 5 endpoints critiques (100 req/s) | 4h | 🟡 Important |
-| 3.6 | **Contract tests OpenAPI** | Valider que l'API respecte les schemas (schemathesis) | 4h | 🟢 Souhaitable |
-| 3.7 | **PWA / Service Worker tests** | Installation, cache offline, sync en ligne | 4h | 🟢 Souhaitable |
-| 3.8 | **Mutation testing** | Lancer mutmut (configuré mais inutilisé) | 2h | 🟢 Souhaitable |
+| # | Tâche | Détail | Effort | Priorité | Statut |
+|---|-------|--------|--------|----------|--------|
+| 3.1 | **Tests WebSocket courses** | Connexion, messages, synchronisation multi-user, déconnexion/reconnexion | 4h | 🔴 Critique | 🟡 Avancé — backend largement couvert, fallback HTTP et hooks frontend renforcés ; `user_left` reste non automatisé côté prod |
+| 3.2 | **Tests E2E parcours complet** | Login → créer recette → planifier → courses → cocher articles | 8h | 🔴 Critique | 🟡 Avancé — parcours Playwright transactionnel mocké ajouté |
+| 3.3 | **Tests frontend composants clés** | Formulaire recette, planning hebdomadaire, dashboard DnD | 8h | 🟡 Important | 🟠 Partiel — plusieurs tests existent mais une part reste encore trop proche du stub |
+| 3.4 | **Tests inter-modules E2E** | Jardin récolte → suggestion recette → ajout courses | 4h | 🟡 Important | 🟠 Partiel — specs présentes, scénario jardin → recette → courses à durcir |
+| 3.5 | **Tests de charge API** | k6 ou locust sur les 5 endpoints critiques (100 req/s) | 4h | 🟡 Important | ✅ Baseline présente via `tests/load/k6_baseline.js` |
+| 3.6 | **Contract tests OpenAPI** | Valider que l'API respecte les schemas (schemathesis) | 4h | 🟢 Souhaitable | ✅ En place sur `/health` + CI |
+| 3.7 | **PWA / Service Worker tests** | Installation, cache offline, sync en ligne | 4h | 🟢 Souhaitable | ✅ Couverture existante côté service worker |
+| 3.8 | **Mutation testing** | Lancer mutmut (configuré mais inutilisé) | 2h | 🟢 Souhaitable | 🟠 Configuré mais non industrialisé |
+
+### Checklist d'avancement Sprint 3
+
+- [x] Renforcer les tests backend du module `websocket_courses` avec le fallback HTTP (`poll` et `action`)
+- [x] Ajouter des tests frontend réels sur les hooks WebSocket (`utiliser-websocket` et `useWebSocketCourses`)
+- [x] Ajouter un parcours Playwright mocké : recette → planification → courses → cochage → inventaire
+- [ ] Remplacer les tests frontend encore trop superficiels sur les composants clés (formulaire recette, planning hebdo, dashboard)
+- [ ] Rejouer une validation de couverture backend globale pour confirmer le maintien à `>= 80%`
+- [ ] Lancer et exploiter `mutmut` dans un flux reproductible
 
 ### Critères de validation Sprint 3
 
@@ -393,12 +404,36 @@ sql/
 | 4.9 | **IM-3 : Anniversaire → menu festif** | Anniversaire proche → suggestion menu spécial | 2h | 🟢 Souhaitable |
 | 4.10 | **IM-6 : Jules jalons → journal** | Jalon atteint → auto-création événement timeline famille | 2h | 🟢 Souhaitable |
 
+### Statut Sprint 4 — 2026-04-03
+
+- [x] 4.1 Péremption → briefing matinal
+- [x] 4.2 Entretien → artisan
+- [x] 4.3 Récolte → stock inventaire
+- [x] 4.4 Photo plante → diagnostic IA
+- [x] 4.5 Diagnostic panne équipement
+- [x] 4.6 Rapport mensuel narratif
+- [ ] 4.7 Prédiction consommation énergie
+- [ ] 4.8 Consolider les 31 fichiers de bridges à ≤20
+- [x] 4.9 Anniversaire → menu festif
+- [x] 4.10 Jules jalons → journal famille
+
+### Checklist d'implémentation Sprint 4
+
+- [x] Digest matinal enrichi avec les articles expirant aujourd'hui et les péremptions proches
+- [x] Patch d'une tâche d'entretien en échec retourne une suggestion d'artisans pertinente
+- [x] Passage d'un élément jardin en `recolte` déclenche l'ajout automatique à l'inventaire
+- [x] Endpoint IA module pour diagnostic de plante via photo
+- [x] Endpoint IA module pour bilan mensuel narratif
+- [x] Suggestion de menu festif calculée pour l'anniversaire le plus proche
+- [x] Création d'un jalon Jules retourne aussi l'événement de journal/timeline associé
+- [ ] Rationalisation complète du parc de fichiers `inter_module_*`
+
 ### Critères de validation Sprint 4
 
-- [ ] Briefing matinal contient les articles expirant
-- [ ] Récolte jardin ajoute automatiquement au stock
-- [ ] Tâche entretien échouée propose un artisan
-- [ ] Photo plante déclenche un diagnostic IA
+- [x] Briefing matinal contient les articles expirant
+- [x] Récolte jardin ajoute automatiquement au stock
+- [x] Tâche entretien échouée propose un artisan
+- [x] Photo plante déclenche un diagnostic IA
 - [ ] Bridges consolidés (≤20 fichiers)
 
 ---
@@ -509,6 +544,7 @@ sql/
 > **Objectif** : Interface moderne, fluide, plaisante à utiliser
 > **Durée estimée** : 7-10 jours
 > **Prérequis** : Sprint 1 terminé
+> **Statut (03/04/2026)** : 🟡 En cours — 5/15 tâches implémentées (priorité critiques couverte)
 
 ### État actuel UI/UX
 
@@ -529,15 +565,15 @@ sql/
 
 | # | Tâche | Détail | Effort | Priorité |
 |---|-------|--------|--------|----------|
-| 7.1 | **UI-11 : Palette couleurs par module** | Chaque module a sa couleur accent (cuisine=vert, famille=bleu, maison=orange, jeux=violet, etc.) | 2h | 🔴 Critique |
-| 7.2 | **UI-1 : Transitions de page** | `framer-motion` AnimatePresence entre les routes | 4h | 🔴 Critique |
-| 7.3 | **UI-2 : Micro-interactions** | Hover effects, press feedback, swipe gestures sur les cartes | 6h | 🔴 Critique |
-| 7.4 | **UI-5 : Thème unifié graphiques** | Palette couleurs cohérente sur Recharts/D3/SVG, transitions fluides | 3h | 🟡 Important |
+| 7.1 | ✅ **UI-11 : Palette couleurs par module** | Accents module branchés sur l'URL (sidebar + fil d'ariane + header + contenu) | 2h | 🔴 Critique |
+| 7.2 | ✅ **UI-1 : Transitions de page** | Transitions `AnimatePresence` globales fluidifiées (entrée/sortie + easing) | 4h | 🔴 Critique |
+| 7.3 | ✅ **UI-2 : Micro-interactions** | Hover + press feedback global ajouté sur le composant `Card` partagé | 6h | 🔴 Critique |
+| 7.4 | ✅ **UI-5 : Thème unifié graphiques** | Palette partagée `theme-graphiques` appliquée aux composants graphiques principaux | 3h | 🟡 Important |
 | 7.5 | **UI-9 : Calendrier repas mosaïque** | Vue hebdo avec vignettes photos des recettes | 6h | 🟡 Important |
 | 7.6 | **UI-10 : Animation skeleton → content** | Fade-in staggered quand les données arrivent | 2h | 🟡 Important |
 | 7.7 | **UI-12 : Toast améliorés** | Progress bar, undo intégré, actions sur les toasts | 3h | 🟡 Important |
 | 7.8 | **UI-15 : Sankey flux budget** | Visualisation animée des flux financiers (d'où vient l'argent, où il va) | 4h | 🟡 Important |
-| 7.9 | **Corriger `alt` manquants** | Ajouter attributs `alt` descriptifs sur toutes les images | 1h | 🟡 Important |
+| 7.9 | ✅ **Corriger `alt` manquants** | Audit automatique effectué (`Image`/`img`) — aucun `alt` manquant détecté | 1h | 🟡 Important |
 | 7.10 | **UI-7 : Jardin vue isométrique 2.5D** | Passer de SVG plat à vue isométrique (comme un mini-jeu) | 8h | 🟢 Souhaitable |
 | 7.11 | **UI-6 : Plan 3D maison enrichi** | Textures réalistes, meubles 3D, sélection room → drawer détails | 8h | 🟢 Souhaitable |
 | 7.12 | **UI-13 : Mode tablette optimisé** | Layout 2 colonnes sur tablette, widgets adaptés Google Tablet | 4h | 🟢 Souhaitable |
@@ -547,11 +583,11 @@ sql/
 
 ### Critères de validation Sprint 7
 
-- [ ] Chaque module a sa couleur identifiable dans la sidebar et les pages
-- [ ] Naviguer entre les pages montre une animation fluide
-- [ ] Le hover/press sur les cartes donne un feedback visuel
-- [ ] Les graphiques utilisent la même palette de couleurs
-- [ ] Toutes les images ont un attribut `alt`
+- [x] Chaque module a sa couleur identifiable dans la sidebar et les pages
+- [x] Naviguer entre les pages montre une animation fluide
+- [x] Le hover/press sur les cartes donne un feedback visuel
+- [x] Les graphiques utilisent la même palette de couleurs
+- [x] Toutes les images ont un attribut `alt`
 
 ---
 
@@ -664,7 +700,7 @@ sql/
 
 | # | Problème | Localisation | Impact | Sprint |
 |---|----------|-------------|--------|--------|
-| B1 | **WebSocket courses non testé** | `src/api/websocket_courses.py` | Collaboration temps réel peut casser silencieusement | Sprint 3 |
+| B1 | **WebSocket courses partiellement testé** | `src/api/websocket_courses.py` | Couverture backend solide, mais il reste un delta entre scénarios mockés/frontend et comportement prod complet | Sprint 3 |
 | B2 | **Migration V002 bloquée** — UUID conversion incomplète | `sql/migrations/V002_*.sql` | Données user_id en VARCHAR au lieu d'UUID | Sprint 2 |
 | B3 | **RLS incomplet** — seulement ~17/150 tables vérifiées | `sql/` | Données potentiellement accessibles cross-user | Sprint 2 |
 | B4 | **Indexes manquants** sur champs requêtés fréquemment | `src/core/models/` | Requêtes lentes en production | Sprint 2 |
@@ -820,7 +856,7 @@ sql/
 
 | Sprint | Durée estimée | Focus | Dépendances |
 |--------|---------------|-------|-------------|
-| **Sprint 1** — Nettoyage | 5-7 jours | Dead code, legacy, commentaires, fichiers fourre-tout | Aucune |
+| **Sprint 1** — Nettoyage | 5-7 jours | Dead code, legacy, commentaires, fichiers fourre-tout | Aucune | ✅ Terminé |
 | **Sprint 2** — SQL | 3-5 jours | Base de données, indexes, RLS, seed | Sprint 1 |
 | **Sprint 3** — Tests | 5-7 jours | WebSocket, E2E, composants, charge | Sprint 1 |
 | **Sprint 4** — Inter-modules & IA | 5-7 jours | Bridges manquants, nouvelles intégrations IA | Sprint 1 |

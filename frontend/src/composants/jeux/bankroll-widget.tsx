@@ -21,6 +21,7 @@ import { Slider } from '@/composants/ui/slider'
 import { utiliserRequete } from '@/crochets/utiliser-api'
 import { TrendingUp, TrendingDown, AlertTriangle, DollarSign, Info } from 'lucide-react'
 import { Tooltip as TooltipUI, TooltipContent, TooltipProvider, TooltipTrigger } from '@/composants/ui/tooltip'
+import { COULEURS_GRAPHIQUES } from '@/bibliotheque/theme-graphiques'
 
 interface SuggestionMise {
   mise_suggeree: number
@@ -301,13 +302,13 @@ export function BankrollWidget({
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="libelle" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${Number(v).toFixed(0)}€`} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
+                      backgroundColor: "var(--background)",
+                      border: "1px solid var(--border)",
                       borderRadius: "8px",
                     }}
                     formatter={(value, name) => [`${Number(value).toFixed(2)}€`, String(name)]}
@@ -323,7 +324,7 @@ export function BankrollWidget({
                     type="monotone"
                     dataKey="bankroll"
                     name="Bankroll"
-                    stroke={bankrollData && bankrollData.variation_totale >= 0 ? 'hsl(var(--chart-2))' : 'hsl(var(--destructive))'}
+                    stroke={bankrollData && bankrollData.variation_totale >= 0 ? COULEURS_GRAPHIQUES.accent1 : 'var(--destructive)'}
                     strokeWidth={2}
                     dot={{ r: 2 }}
                     activeDot={{ r: 4 }}

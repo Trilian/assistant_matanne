@@ -166,3 +166,5 @@ CREATE POLICY "authenticated_deny_logs_securite"
     USING (false)
     WITH CHECK (false);
 -- ============================================================================
+
+-- Source: 16_seed_data.sql

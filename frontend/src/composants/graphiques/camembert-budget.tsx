@@ -1,17 +1,9 @@
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { PALETTE_GRAPHIQUES } from "@/bibliotheque/theme-graphiques";
 
-const COULEURS = [
-  "hsl(210, 70%, 50%)",
-  "hsl(340, 70%, 50%)",
-  "hsl(150, 60%, 40%)",
-  "hsl(40, 80%, 50%)",
-  "hsl(270, 60%, 55%)",
-  "hsl(20, 75%, 50%)",
-  "hsl(180, 55%, 45%)",
-  "hsl(0, 65%, 50%)",
-];
+const COULEURS = PALETTE_GRAPHIQUES;
 
 interface DonneeCategorie {
   nom: string;

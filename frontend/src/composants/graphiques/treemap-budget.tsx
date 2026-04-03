@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import { cn } from "@/bibliotheque/utils";
+import { PALETTE_GRAPHIQUES } from "@/bibliotheque/theme-graphiques";
 
 export interface DonneeCategorieTreemap {
   nom: string;
@@ -22,18 +23,7 @@ interface TreemapBudgetProps {
   hauteur?: number;
 }
 
-const COULEURS = [
-  "hsl(210, 70%, 50%)",
-  "hsl(340, 70%, 50%)",
-  "hsl(150, 60%, 40%)",
-  "hsl(40, 80%, 50%)",
-  "hsl(270, 60%, 55%)",
-  "hsl(20, 75%, 50%)",
-  "hsl(180, 55%, 45%)",
-  "hsl(0, 65%, 50%)",
-  "hsl(120, 50%, 45%)",
-  "hsl(300, 50%, 50%)",
-];
+const COULEURS = PALETTE_GRAPHIQUES;
 
 interface RectTreemap {
   x: number;

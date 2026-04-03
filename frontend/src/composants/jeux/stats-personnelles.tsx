@@ -27,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/composants/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/composants/ui/select'
 import { utiliserRequete } from '@/crochets/utiliser-api'
 import { TrendingUp, TrendingDown, Target, Trophy, AlertCircle } from 'lucide-react'
+import { COULEURS_GRAPHIQUES } from '@/bibliotheque/theme-graphiques'
 
 interface StatsData {
   roi: {
@@ -261,7 +262,7 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
                         type="monotone"
                         dataKey="benefice"
                         name="Bénéfice (€)"
-                        stroke="hsl(var(--chart-2))"
+                        stroke={COULEURS_GRAPHIQUES.accent1}
                         strokeWidth={2}
                         dot={{ r: 3 }}
                       />
@@ -270,7 +271,7 @@ export function StatsPersonnelles({ userId }: StatsPersonnellesProps) {
                         type="monotone"
                         dataKey="roi"
                         name="ROI (%)"
-                        stroke="hsl(var(--chart-1))"
+                        stroke={COULEURS_GRAPHIQUES.accent2}
                         strokeWidth={2}
                         dot={{ r: 3 }}
                       />

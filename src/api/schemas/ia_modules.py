@@ -55,3 +55,28 @@ class AnalyseNutritionPersonneRequest(BaseModel):
     donnees_garmin_semaine: dict[str, Any] | None = None
     recettes_semaine: list[str] = Field(default_factory=list)
     objectif_sante: str = Field(default="maintien", max_length=50)
+
+
+class DiagnosticPlanteJardinRequest(BaseModel):
+    """Requête de diagnostic plante via photo."""
+
+    image_base64: str = Field(..., min_length=16)
+    description: str = Field(default="", max_length=1000)
+
+
+class DiagnosticPlanteJardinResponse(BaseModel):
+    """Réponse structurée pour le diagnostic d'une plante."""
+
+    plante_identifiee: str | None = None
+    etat: str = "attention"
+    problemes_detectes: list[str] = Field(default_factory=list)
+    traitements_suggeres: list[str] = Field(default_factory=list)
+    confiance: float = Field(default=0.0, ge=0.0, le=1.0)
+
+
+class BilanMensuelNarratifResponse(BaseModel):
+    """Réponse du bilan mensuel narratif Sprint 4."""
+
+    mois: str
+    donnees: dict[str, Any] = Field(default_factory=dict)
+    synthese_ia: str = ""

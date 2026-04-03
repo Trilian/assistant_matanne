@@ -197,12 +197,23 @@ async def creer_jalon(
             except Exception:
                 pass
 
+            journal_evenement = None
+            try:
+                from src.services.ia.bridges import obtenir_service_bridges
+
+                journal_evenement = obtenir_service_bridges().jalon_vers_evenement_familial(
+                    jalon_id=jalon.id
+                )
+            except Exception:
+                journal_evenement = None
+
             return {
                 "id": jalon.id,
                 "titre": jalon.titre,
                 "categorie": jalon.categorie,
                 "date_atteint": jalon.date_atteint.isoformat(),
                 "enfant_id": enfant_id,
+                "journal_evenement": journal_evenement,
             }
 
     return await executer_async(_query)

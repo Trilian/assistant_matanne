@@ -162,11 +162,25 @@ async def modifier_element_jardin(
 
             session.commit()
             session.refresh(element)
+
+            bridge_inventaire = None
+            action = str(payload.get("action", "")).lower()
+            statut = str(payload.get("statut", element.statut or "")).lower()
+            if action == "recolte" or statut == "recolte":
+                from src.services.ia.bridges import obtenir_service_bridges
+
+                bridge_inventaire = obtenir_service_bridges().recolte_vers_stock_inventaire(
+                    element_id=element.id,
+                    quantite=float(payload.get("quantite_recoltee", 1.0) or 1.0),
+                    emplacement=str(payload.get("emplacement_inventaire", "Frigo") or "Frigo"),
+                )
+
             return {
                 "id": element.id,
                 "nom": element.nom,
                 "type": element.type,
                 "statut": element.statut,
+                "bridge_inventaire": bridge_inventaire,
             }
 
     return await executer_async(_query)

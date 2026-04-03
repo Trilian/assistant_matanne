@@ -84,6 +84,19 @@ async def recolte_recettes(
     }
 
 
+@router.get("/anniversaire-menu-festif", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def anniversaire_menu_festif(
+    jours_horizon: int = Query(14, ge=1, le=60, description="Horizon en jours"),
+    user: dict = Depends(require_auth),
+):
+    """Suggère un menu festif pour l'anniversaire le plus proche."""
+    from src.services.ia.bridges import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.anniversaire_vers_menu_festif(jours_horizon=jours_horizon)
+
+
 @router.post("/meteo-entretien", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def meteo_entretien(

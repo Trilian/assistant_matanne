@@ -15,6 +15,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { COULEURS_GRAPHIQUES } from "@/bibliotheque/theme-graphiques";
 
 interface DonneeRadarJules {
   categorie: string;
@@ -46,10 +47,10 @@ export function RadarSkillJules({ donnees, ageMois }: RadarSkillJulesProps) {
       )}
       <ResponsiveContainer width="100%" height={280}>
         <RadarChart cx="50%" cy="50%" outerRadius="75%" data={donnees}>
-          <PolarGrid stroke="hsl(210, 10%, 80%)" />
+          <PolarGrid stroke={COULEURS_GRAPHIQUES.grille} />
           <PolarAngleAxis
             dataKey="label"
-            tick={{ fontSize: 12, fill: "hsl(210, 10%, 40%)" }}
+            tick={{ fontSize: 12, fill: COULEURS_GRAPHIQUES.muted }}
           />
           <PolarRadiusAxis
             angle={90}
@@ -60,16 +61,16 @@ export function RadarSkillJules({ donnees, ageMois }: RadarSkillJulesProps) {
           <Radar
             name="Jules"
             dataKey="jules"
-            stroke="hsl(210, 70%, 50%)"
-            fill="hsl(210, 70%, 50%)"
+            stroke={COULEURS_GRAPHIQUES.accent2}
+            fill={COULEURS_GRAPHIQUES.accent2}
             fillOpacity={0.3}
             strokeWidth={2}
           />
           <Radar
             name="Norme OMS"
             dataKey="norme_oms"
-            stroke="hsl(150, 60%, 40%)"
-            fill="hsl(150, 60%, 40%)"
+            stroke={COULEURS_GRAPHIQUES.accent1}
+            fill={COULEURS_GRAPHIQUES.accent1}
             fillOpacity={0.1}
             strokeWidth={1.5}
             strokeDasharray="5 5"

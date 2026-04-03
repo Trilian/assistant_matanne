@@ -50,6 +50,69 @@ class TestRoutesFamilleJules:
         response = await func(path, json=payload) if payload is not None else await func(path)
         assert response.status_code not in (404, 405)
 
+    async def test_creation_jalon_retourne_evenement_journal(self, client, monkeypatch):
+        from datetime import date
+
+        class _Enfant:
+            id = 1
+
+        class _Jalon:
+            id = 15
+            titre = "Premier pas"
+            categorie = "motricite"
+            date_atteint = date(2026, 4, 3)
+
+        class _Query:
+            def __init__(self, resultat):
+                self._resultat = resultat
+
+            def filter(self, *_args, **_kwargs):
+                return self
+
+            def first(self):
+                return self._resultat
+
+        class _Session:
+            def __init__(self):
+                self._calls = 0
+
+            def query(self, *_args, **_kwargs):
+                self._calls += 1
+                return _Query(_Enfant() if self._calls == 1 else _Jalon())
+
+            def add(self, _obj):
+                return None
+
+            def commit(self):
+                return None
+
+            def refresh(self, _obj):
+                return None
+
+        @contextmanager
+        def _session_fausse():
+            yield _Session()
+
+        class _Bus:
+            def emettre(self, *_args, **_kwargs):
+                return 1
+
+        class _Bridge:
+            def jalon_vers_evenement_familial(self, **_kwargs):
+                return {"evenement_id": 99, "titre": "Jalon Jules: Premier pas"}
+
+        monkeypatch.setattr("src.api.routes.famille_jules.executer_avec_session", _session_fausse)
+        monkeypatch.setattr("src.services.core.events.obtenir_bus", lambda: _Bus())
+        monkeypatch.setattr("src.services.ia.bridges.obtenir_service_bridges", lambda: _Bridge())
+
+        response = await client.post(
+            "/api/v1/famille/enfants/1/jalons",
+            json={"titre": "Premier pas", "categorie": "motricite"},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["journal_evenement"]["evenement_id"] == 99
+
 
 class TestTimelineEnrichieJardin:
     """Timeline familiale — vérification de l'enrichissement avec le journal jardin."""

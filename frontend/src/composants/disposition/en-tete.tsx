@@ -7,6 +7,7 @@
 import { Search, Moon, Sun, LogOut, User, Link2, SlidersHorizontal } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/composants/ui/button";
 import { utiliserStoreUI } from "@/magasins/store-ui";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
@@ -25,11 +26,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/composants/ui/tooltip";
+import { getModuleThemeClass, obtenirModuleDepuisPathname } from "@/bibliotheque/theme-modules";
+import { cn } from "@/bibliotheque/utils";
 
 /**
  * Barre supérieure de l'application — recherche globale, bascule de thème, menu profil.
  */
 export function EnTete() {
+  const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const { basculerRecherche } = utiliserStoreUI();
   const { utilisateur, deconnecter } = utiliserAuth();
@@ -73,7 +77,12 @@ export function EnTete() {
           Maintenance en cours: certaines fonctionnalités peuvent être temporairement ralenties.
         </div>
       )}
-      <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:px-6">
+      <header
+        className={cn(
+          "flex h-14 items-center gap-4 border-b bg-background px-4 md:px-6 module-header-accent",
+          getModuleThemeClass(obtenirModuleDepuisPathname(pathname))
+        )}
+      >
       {/* Titre mobile */}
       <span className="text-lg font-semibold md:hidden">🏠 Matanne</span>
 

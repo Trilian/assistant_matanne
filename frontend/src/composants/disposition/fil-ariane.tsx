@@ -10,6 +10,8 @@ import { ChevronRight, Home } from "lucide-react";
 import { BoutonEpingler } from "./bouton-epingler";
 import { TooltipProvider } from "@/composants/ui/tooltip";
 import { utiliserStoreUI } from "@/magasins/store-ui";
+import { getModuleThemeClass, obtenirModuleDepuisPathname } from "@/bibliotheque/theme-modules";
+import { cn } from "@/bibliotheque/utils";
 
 /** Retourne true si le segment ressemble à un ID dynamique (numérique ou UUID) */
 function estSegmentDynamique(segment: string): boolean {
@@ -74,6 +76,7 @@ function traduireSegment(segment: string): string {
  */
 export function FilAriane() {
   const pathname = usePathname();
+  const moduleActif = obtenirModuleDepuisPathname(pathname);
   const segments = pathname.split("/").filter(Boolean);
   const { titrePage } = utiliserStoreUI();
 
@@ -96,11 +99,12 @@ export function FilAriane() {
               <Link
                 href={chemin}
                 aria-current={estDernier ? "page" : undefined}
-                className={
+                className={cn(
                   estDernier
-                    ? "font-medium text-foreground"
-                    : "hover:text-foreground transition-colors"
-                }
+                    ? "font-medium module-accent-text"
+                    : "hover:text-foreground transition-colors",
+                  estDernier && getModuleThemeClass(moduleActif)
+                )}
               >
                 {estSegmentDynamique(segment) && titrePage
                   ? titrePage

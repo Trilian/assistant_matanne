@@ -19,6 +19,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_ingredients_nom ON ingredients(nom);
 CREATE INDEX IF NOT EXISTS ix_ingredients_categorie ON ingredients(categorie);
 CREATE INDEX IF NOT EXISTS ix_ingredients_saison ON ingredients(saison);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE recettes (
     id SERIAL PRIMARY KEY,
@@ -84,6 +85,7 @@ CREATE INDEX IF NOT EXISTS ix_recettes_compatible_cookeo ON recettes(compatible_
 CREATE INDEX IF NOT EXISTS ix_recettes_compatible_monsieur_cuisine ON recettes(compatible_monsieur_cuisine);
 CREATE INDEX IF NOT EXISTS ix_recettes_compatible_airfryer ON recettes(compatible_airfryer);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE plannings (
     id SERIAL PRIMARY KEY,
@@ -99,6 +101,7 @@ CREATE TABLE plannings (
 CREATE INDEX IF NOT EXISTS ix_plannings_semaine_debut ON plannings(semaine_debut);
 CREATE INDEX IF NOT EXISTS ix_plannings_etat ON plannings(etat);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE listes_courses (
     id SERIAL PRIMARY KEY,
@@ -111,6 +114,7 @@ CREATE TABLE listes_courses (
 );
 CREATE INDEX IF NOT EXISTS ix_listes_courses_etat ON listes_courses(etat);
 CREATE INDEX IF NOT EXISTS ix_listes_courses_archivee ON listes_courses(archivee);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE modeles_courses (
@@ -127,6 +131,7 @@ CREATE INDEX IF NOT EXISTS ix_modeles_courses_nom ON modeles_courses(nom);
 CREATE INDEX IF NOT EXISTS ix_modeles_courses_utilisateur_id ON modeles_courses(utilisateur_id);
 CREATE INDEX IF NOT EXISTS ix_modeles_courses_actif ON modeles_courses(actif);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE templates_semaine (
     id SERIAL PRIMARY KEY,
@@ -136,6 +141,7 @@ CREATE TABLE templates_semaine (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE config_batch_cooking (
@@ -154,6 +160,7 @@ CREATE TABLE config_batch_cooking (
     CONSTRAINT ck_config_batch_objectif_positif CHECK (objectif_portions_semaine > 0)
 );
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE recette_ingredients (
     id SERIAL PRIMARY KEY,
@@ -169,6 +176,7 @@ CREATE TABLE recette_ingredients (
 CREATE INDEX IF NOT EXISTS ix_recette_ingredients_recette ON recette_ingredients(recette_id);
 CREATE INDEX IF NOT EXISTS ix_recette_ingredients_ingredient ON recette_ingredients(ingredient_id);
 CREATE INDEX IF NOT EXISTS idx_recette_ingredients_ingredient_id ON recette_ingredients(ingredient_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE etapes_recette (
@@ -187,6 +195,7 @@ CREATE TABLE etapes_recette (
 );
 CREATE INDEX IF NOT EXISTS ix_etapes_recette_recette ON etapes_recette(recette_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE versions_recette (
     id SERIAL PRIMARY KEY,
@@ -202,6 +211,7 @@ CREATE TABLE versions_recette (
 );
 CREATE INDEX IF NOT EXISTS ix_versions_recette_base ON versions_recette(recette_base_id);
 CREATE INDEX IF NOT EXISTS ix_versions_recette_type ON versions_recette(type_version);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE historique_recettes (
@@ -225,6 +235,7 @@ CREATE TABLE historique_recettes (
 CREATE INDEX IF NOT EXISTS ix_historique_recettes_recette ON historique_recettes(recette_id);
 CREATE INDEX IF NOT EXISTS ix_historique_recettes_date ON historique_recettes(date_cuisson);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE repas_batch (
     id SERIAL PRIMARY KEY,
@@ -246,6 +257,7 @@ CREATE INDEX IF NOT EXISTS ix_batch_meals_recette ON repas_batch(recette_id);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_date_prep ON repas_batch(date_preparation);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_date_peremption ON repas_batch(date_peremption);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE retours_recettes (
     id SERIAL PRIMARY KEY,
@@ -261,6 +273,7 @@ CREATE TABLE retours_recettes (
 CREATE INDEX IF NOT EXISTS ix_recipe_feedbacks_user ON retours_recettes(user_id);
 CREATE INDEX IF NOT EXISTS ix_recipe_feedbacks_recette ON retours_recettes(recette_id);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_user_recipe_feedback ON retours_recettes(user_id, recette_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE inventaire (
@@ -288,6 +301,7 @@ CREATE INDEX IF NOT EXISTS ix_inventaire_derniere_maj ON inventaire(derniere_maj
 CREATE UNIQUE INDEX IF NOT EXISTS uq_code_barres ON inventaire(code_barres);
 CREATE INDEX IF NOT EXISTS ix_inventaire_code_barres ON inventaire(code_barres);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE historique_inventaire (
     id SERIAL PRIMARY KEY,
@@ -314,6 +328,7 @@ CREATE INDEX IF NOT EXISTS ix_historique_inventaire_ingredient ON historique_inv
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_type ON historique_inventaire(type_modification);
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_date ON historique_inventaire(date_modification);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE articles_courses (
     id SERIAL PRIMARY KEY,
@@ -338,6 +353,7 @@ CREATE INDEX IF NOT EXISTS ix_articles_courses_priorite ON articles_courses(prio
 CREATE INDEX IF NOT EXISTS ix_articles_courses_achete ON articles_courses(achete);
 CREATE INDEX IF NOT EXISTS ix_articles_courses_cree_le ON articles_courses(cree_le);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE articles_modeles (
     id SERIAL PRIMARY KEY,
@@ -361,6 +377,7 @@ CREATE TABLE articles_modeles (
 );
 CREATE INDEX IF NOT EXISTS ix_articles_modeles_modele ON articles_modeles(modele_id);
 CREATE INDEX IF NOT EXISTS ix_articles_modeles_ingredient ON articles_modeles(ingredient_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE repas (
@@ -398,6 +415,7 @@ CREATE INDEX IF NOT EXISTS ix_repas_recette ON repas(recette_id);
 CREATE INDEX IF NOT EXISTS ix_repas_date ON repas(date_repas);
 CREATE INDEX IF NOT EXISTS ix_repas_type ON repas(type_repas);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE elements_templates (
     id SERIAL PRIMARY KEY,
@@ -416,6 +434,7 @@ CREATE TABLE elements_templates (
     )
 );
 CREATE INDEX IF NOT EXISTS idx_template_jour ON elements_templates(template_id, jour_semaine);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE sessions_batch_cooking (
@@ -453,6 +472,7 @@ CREATE INDEX IF NOT EXISTS ix_sessions_batch_statut ON sessions_batch_cooking(st
 CREATE INDEX IF NOT EXISTS ix_sessions_batch_planning ON sessions_batch_cooking(planning_id);
 CREATE INDEX IF NOT EXISTS idx_session_date_statut ON sessions_batch_cooking(date_session, statut);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE etapes_batch_cooking (
     id SERIAL PRIMARY KEY,
@@ -486,6 +506,7 @@ CREATE TABLE etapes_batch_cooking (
 CREATE INDEX IF NOT EXISTS ix_etapes_batch_session ON etapes_batch_cooking(session_id);
 CREATE INDEX IF NOT EXISTS ix_etapes_batch_recette ON etapes_batch_cooking(recette_id);
 CREATE INDEX IF NOT EXISTS idx_etape_session_ordre ON etapes_batch_cooking(session_id, ordre);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE preparations_batch (
@@ -523,36 +544,4 @@ CREATE INDEX IF NOT EXISTS ix_prep_batch_consomme ON preparations_batch(consomme
 CREATE INDEX IF NOT EXISTS idx_prep_localisation_peremption ON preparations_batch(localisation, date_peremption);
 CREATE INDEX IF NOT EXISTS idx_prep_consomme_peremption ON preparations_batch(consomme, date_peremption);
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Table congélation — persistance des articles congelés (P3-05)
--- Remplace le stockage mémoire de congelation.py
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS batch_cooking_congelation (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(200) NOT NULL,
-    date_congelation DATE NOT NULL DEFAULT CURRENT_DATE,
-    date_limite DATE NOT NULL,
-    portions INTEGER NOT NULL DEFAULT 1,
-    categorie VARCHAR(50) NOT NULL DEFAULT 'autre',
-    recette_id INTEGER,
-    session_id INTEGER,
-    notes TEXT,
-    consomme BOOLEAN NOT NULL DEFAULT FALSE,
-    date_consommation DATE,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_congelation_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-    CONSTRAINT fk_congelation_session FOREIGN KEY (session_id) REFERENCES sessions_batch_cooking(id) ON DELETE SET NULL,
-    CONSTRAINT ck_congelation_portions_positive CHECK (portions > 0),
-    CONSTRAINT ck_congelation_categorie CHECK (categorie IN (
-        'viande', 'poisson', 'legume', 'fruit', 'plat_cuisine',
-        'soupe', 'sauce', 'pain', 'patisserie', 'herbes', 'autre'
-    ))
-);
-CREATE INDEX IF NOT EXISTS ix_congelation_date_limite ON batch_cooking_congelation(date_limite);
-CREATE INDEX IF NOT EXISTS ix_congelation_categorie ON batch_cooking_congelation(categorie);
-CREATE INDEX IF NOT EXISTS ix_congelation_consomme ON batch_cooking_congelation(consomme);
-CREATE INDEX IF NOT EXISTS ix_congelation_recette ON batch_cooking_congelation(recette_id);
-CREATE INDEX IF NOT EXISTS idx_congelation_consomme_limite ON batch_cooking_congelation(consomme, date_limite)
-    WHERE consomme = FALSE;
 

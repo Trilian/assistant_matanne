@@ -120,12 +120,22 @@
 
 /* ─── Design tokens domaine ───────────────────────────── */
 :root {
+  --principal: oklch(0.66 0.14 245);
   --cuisine: oklch(0.75 0.15 55);
-  --famille: oklch(0.70 0.15 330);
-  --maison: oklch(0.65 0.12 145);
+  --famille: oklch(0.68 0.15 245);
+  --maison: oklch(0.74 0.16 60);
+  --habitat: oklch(0.7 0.12 200);
   --jeux: oklch(0.72 0.18 265);
   --outils: oklch(0.60 0.10 230);
   --planning: oklch(0.68 0.14 35);
+  --ia: oklch(0.72 0.16 285);
+  --parametres: oklch(0.62 0.09 230);
+  --admin: oklch(0.58 0.2 24);
+  --chart-accent-1: var(--cuisine);
+  --chart-accent-2: var(--famille);
+  --chart-accent-3: var(--maison);
+  --chart-accent-4: var(--jeux);
+  --chart-accent-5: var(--planning);
   --spacing-page: 1.5rem;
   --spacing-section: 1rem;
 
@@ -153,12 +163,22 @@
 }
 
 .dark {
+  --principal: oklch(0.78 0.12 245);
   --cuisine: oklch(0.80 0.12 55);
-  --famille: oklch(0.78 0.12 330);
-  --maison: oklch(0.75 0.10 145);
+  --famille: oklch(0.78 0.11 245);
+  --maison: oklch(0.81 0.13 60);
+  --habitat: oklch(0.78 0.1 200);
   --jeux: oklch(0.78 0.15 265);
   --outils: oklch(0.72 0.08 230);
   --planning: oklch(0.76 0.11 35);
+  --ia: oklch(0.79 0.14 285);
+  --parametres: oklch(0.75 0.08 230);
+  --admin: oklch(0.74 0.16 24);
+  --chart-accent-1: var(--cuisine);
+  --chart-accent-2: var(--famille);
+  --chart-accent-3: var(--maison);
+  --chart-accent-4: var(--jeux);
+  --chart-accent-5: var(--planning);
 
   --room-salon: #60a5fa;
   --room-cuisine: #fbbf24;
@@ -246,5 +266,71 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer components {
+  .module-theme-principal {
+    --module-accent: var(--principal);
+  }
+
+  .module-theme-cuisine {
+    --module-accent: var(--cuisine);
+  }
+
+  .module-theme-famille {
+    --module-accent: var(--famille);
+  }
+
+  .module-theme-maison {
+    --module-accent: var(--maison);
+  }
+
+  .module-theme-habitat {
+    --module-accent: var(--habitat);
+  }
+
+  .module-theme-jeux {
+    --module-accent: var(--jeux);
+  }
+
+  .module-theme-outils {
+    --module-accent: var(--outils);
+  }
+
+  .module-theme-planning {
+    --module-accent: var(--planning);
+  }
+
+  .module-theme-ia {
+    --module-accent: var(--ia);
+  }
+
+  .module-theme-parametres {
+    --module-accent: var(--parametres);
+  }
+
+  .module-theme-admin {
+    --module-accent: var(--admin);
+  }
+
+  .module-accent-text {
+    color: var(--module-accent, var(--primary));
+  }
+
+  .module-accent-bg {
+    background-color: color-mix(in oklch, var(--module-accent, var(--primary)) 20%, transparent);
+  }
+
+  .module-accent-border {
+    border-color: color-mix(in oklch, var(--module-accent, var(--primary)) 45%, transparent);
+  }
+
+  .module-header-accent {
+    border-bottom-color: color-mix(in oklch, var(--module-accent, var(--primary)) 35%, var(--border));
+  }
+
+  .module-top-strip {
+    background: linear-gradient(90deg, transparent, var(--module-accent, var(--primary)), transparent);
   }
 }

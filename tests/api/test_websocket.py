@@ -13,9 +13,11 @@ Teste le module src/api/websocket_courses.py:
 
 from __future__ import annotations
 
+from collections import defaultdict
+from unittest.mock import AsyncMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, patch
 
 
 @pytest.fixture(autouse=True)
@@ -25,10 +27,12 @@ def _reset_ws_manager():
     from src.api.websocket_courses import ConnectionManager
 
     ws_mod._manager = ConnectionManager()
+    ws_mod._change_sequences = defaultdict(list)
     # Désactive _persist_change pour éviter les deadlocks asyncio.to_thread + sync TestClient
-    with patch.object(ws_mod, "_persist_change", new_callable=AsyncMock):
-        yield
+    with patch.object(ws_mod, "_persist_change", new_callable=AsyncMock) as persist_mock:
+        yield persist_mock
     ws_mod._manager = ConnectionManager()
+    ws_mod._change_sequences = defaultdict(list)
 
 
 @pytest.fixture
@@ -505,3 +509,97 @@ class TestWebSocketEdgeCases:
                 assert len(received) == 3
                 assert all(d.get("type") == "sync" for d in received)
                 assert all(d.get("action") == "item_added" for d in received)
+
+
+# ═══════════════════════════════════════════════════════════
+# FALLBACK HTTP POLLING / ACTION
+# ═══════════════════════════════════════════════════════════
+
+
+@pytest.mark.websocket
+class TestWebSocketFallbackHTTP:
+    """Tests du fallback HTTP polling/action pour les courses."""
+
+    def test_poll_retourne_uniquement_les_nouveaux_changements(self, ws_client: TestClient):
+        """Le polling ne retourne que les changements après since_seq."""
+        import src.api.websocket_courses as ws_mod
+
+        ws_mod._change_sequences[70].extend(
+            [
+                {"seq": 1, "type": "sync", "action": "item_added", "item": {"nom": "Pommes"}},
+                {"seq": 2, "type": "sync", "action": "item_checked", "item_id": 1, "checked": True},
+            ]
+        )
+
+        response = ws_client.get("/api/v1/ws/courses/70/poll", params={"since_seq": 1})
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["current_seq"] == 2
+        assert data["users"] == []
+        assert len(data["changes"]) == 1
+        assert data["changes"][0]["seq"] == 2
+        assert data["changes"][0]["action"] == "item_checked"
+
+    def test_poll_retourne_les_utilisateurs_connectes(self, ws_client: TestClient):
+        """Le fallback retourne aussi la présence utilisateur."""
+        with ws_client.websocket_connect(_ws_url(71, "presence", "Présence")) as ws:
+            ws.receive_json()
+
+            response = ws_client.get("/api/v1/ws/courses/71/poll", params={"since_seq": 0})
+
+            assert response.status_code == 200
+            data = response.json()
+            assert data["current_seq"] == 0
+            assert len(data["users"]) == 1
+            assert data["users"][0]["user_id"] == "presence"
+
+    def test_post_action_persiste_la_sequence_et_broadcaste(
+        self,
+        ws_client: TestClient,
+        _reset_ws_manager: AsyncMock,
+    ):
+        """Le fallback REST notifie les clients WS et alimente le polling."""
+        with ws_client.websocket_connect(_ws_url(72, "receveur", "Receveur")) as ws:
+            ws.receive_json()
+
+            response = ws_client.post(
+                "/api/v1/ws/courses/72/action",
+                params={"user_id": "sender", "username": "Envoyeur"},
+                json={
+                    "action": "item_added",
+                    "item": {"nom": "Lait", "quantite": 2},
+                },
+            )
+
+            assert response.status_code == 200
+            assert response.json() == {"success": True, "seq": 1}
+            _reset_ws_manager.assert_awaited_once()
+
+            sync = ws.receive_json()
+            assert sync["type"] == "sync"
+            assert sync["action"] == "item_added"
+            assert sync["user_id"] == "sender"
+            assert sync["username"] == "Envoyeur"
+            assert sync["item"]["nom"] == "Lait"
+
+            poll = ws_client.get("/api/v1/ws/courses/72/poll", params={"since_seq": 0})
+            assert poll.status_code == 200
+            poll_data = poll.json()
+            assert poll_data["current_seq"] == 1
+            assert len(poll_data["changes"]) == 1
+            assert poll_data["changes"][0]["action"] == "item_added"
+
+    def test_post_action_inconnue_retourne_un_echec(self, ws_client: TestClient):
+        """Le fallback REST refuse les actions non supportées."""
+        response = ws_client.post(
+            "/api/v1/ws/courses/73/action",
+            params={"user_id": "sender", "username": "Envoyeur"},
+            json={"action": "unsupported_action"},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "error": "Action inconnue: unsupported_action",
+            "success": False,
+        }

@@ -9,13 +9,14 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { COULEURS_GRAPHIQUES } from "@/bibliotheque/theme-graphiques";
 
 const COULEURS_CATEGORIES: Record<string, string> = {
-  motricite: "hsl(210, 70%, 50%)",
-  langage: "hsl(340, 70%, 50%)",
-  cognitif: "hsl(270, 60%, 55%)",
-  social: "hsl(150, 60%, 40%)",
-  autre: "hsl(40, 80%, 50%)",
+  motricite: COULEURS_GRAPHIQUES.accent2,
+  langage: COULEURS_GRAPHIQUES.accent4,
+  cognitif: COULEURS_GRAPHIQUES.accent5,
+  social: COULEURS_GRAPHIQUES.accent1,
+  autre: COULEURS_GRAPHIQUES.accent3,
 };
 
 interface DonneeJalon {
@@ -39,7 +40,7 @@ export function GraphiqueJalons({ donnees }: { donnees: DonneeJalon[] }) {
           {donnees.map((d, i) => (
             <Cell
               key={i}
-              fill={COULEURS_CATEGORIES[d.categorie] ?? "hsl(210, 10%, 60%)"}
+              fill={COULEURS_CATEGORIES[d.categorie] ?? COULEURS_GRAPHIQUES.muted}
             />
           ))}
         </Bar>

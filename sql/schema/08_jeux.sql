@@ -22,6 +22,7 @@ CREATE TABLE jeux_equipes (
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_tirages_loto (
     id SERIAL PRIMARY KEY,
@@ -38,6 +39,7 @@ CREATE TABLE jeux_tirages_loto (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_tirages_loto_date ON jeux_tirages_loto(date_tirage);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_stats_loto (
     id SERIAL PRIMARY KEY,
@@ -51,6 +53,7 @@ CREATE TABLE jeux_stats_loto (
     paires_frequentes JSONB,
     nb_tirages_analyses INTEGER NOT NULL DEFAULT 0
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_historique (
@@ -66,6 +69,7 @@ CREATE TABLE jeux_historique (
     predictions_totales INTEGER NOT NULL DEFAULT 0,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_series (
@@ -85,6 +89,7 @@ CREATE INDEX IF NOT EXISTS ix_jeux_series_type_jeu_championnat ON jeux_series(ty
 CREATE INDEX IF NOT EXISTS ix_jeux_series_type_jeu_marche ON jeux_series(type_jeu, marche);
 CREATE INDEX IF NOT EXISTS ix_jeux_series_value ON jeux_series((frequence * serie_actuelle) DESC);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_configuration (
     id SERIAL PRIMARY KEY,
@@ -93,6 +98,7 @@ CREATE TABLE jeux_configuration (
     description TEXT,
     modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_matchs (
@@ -122,6 +128,7 @@ CREATE TABLE jeux_matchs (
     CONSTRAINT fk_jeux_matchs_ext FOREIGN KEY (equipe_exterieur_id) REFERENCES jeux_equipes(id)
 );
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_paris_sportifs (
     id SERIAL PRIMARY KEY,
@@ -142,6 +149,7 @@ CREATE INDEX IF NOT EXISTS ix_jeux_paris_match_id ON jeux_paris_sportifs(match_i
 CREATE INDEX IF NOT EXISTS ix_jeux_paris_statut ON jeux_paris_sportifs(statut);
 CREATE INDEX IF NOT EXISTS ix_jeux_paris_cree_le ON jeux_paris_sportifs(cree_le);
 CREATE INDEX IF NOT EXISTS idx_paris_match_date ON jeux_paris_sportifs(match_id, cree_le);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_grilles_loto (
@@ -165,6 +173,7 @@ CREATE TABLE jeux_grilles_loto (
     CONSTRAINT fk_jeux_grilles_tirage FOREIGN KEY (tirage_id) REFERENCES jeux_tirages_loto(id)
 );
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_alertes (
     id SERIAL PRIMARY KEY,
@@ -186,6 +195,7 @@ CREATE TABLE jeux_alertes (
 CREATE INDEX IF NOT EXISTS ix_jeux_alertes_notifie ON jeux_alertes(notifie)
 WHERE notifie = FALSE;
 CREATE INDEX IF NOT EXISTS ix_jeux_alertes_resultat ON jeux_alertes(resultat_verifie, resultat_correct);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_tirages_euromillions (
@@ -222,6 +232,7 @@ CREATE TABLE jeux_tirages_euromillions (
 );
 CREATE INDEX IF NOT EXISTS idx_tirages_euromillions_date ON jeux_tirages_euromillions(date_tirage DESC);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_grilles_euromillions (
     id SERIAL PRIMARY KEY,
@@ -239,6 +250,7 @@ CREATE TABLE jeux_grilles_euromillions (
 CREATE INDEX IF NOT EXISTS idx_grilles_euromillions_tirage ON jeux_grilles_euromillions(tirage_id);
 CREATE INDEX IF NOT EXISTS idx_grilles_euromillions_date ON jeux_grilles_euromillions(cree_le DESC);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_stats_euromillions (
     id SERIAL PRIMARY KEY,
@@ -253,6 +265,7 @@ CREATE TABLE jeux_stats_euromillions (
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE (date_calcul)
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_cotes_historique (
@@ -269,4 +282,13 @@ CREATE TABLE jeux_cotes_historique (
 CREATE INDEX IF NOT EXISTS idx_cotes_hist_match ON jeux_cotes_historique(match_id);
 CREATE INDEX IF NOT EXISTS idx_cotes_hist_timestamp ON jeux_cotes_historique(timestamp_cote DESC);
 CREATE INDEX IF NOT EXISTS idx_cotes_hist_bookmaker ON jeux_cotes_historique(bookmaker);
+
+
+-- Source: 09_notifications.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Tables Notifications
+-- ============================================================================
+-- Contient : abonnements_push, preferences_notifications, webhooks_abonnements,
+--            historique_notifications
+-- ============================================================================
 

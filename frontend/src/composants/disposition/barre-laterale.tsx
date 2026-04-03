@@ -66,6 +66,7 @@ import {
 } from "@/composants/ui/tooltip";
 import { FavorisRapides } from "./favoris-rapides";
 import type { RappelFamille } from "@/types/famille";
+import { getModuleThemeClass, obtenirModuleDepuisPathname } from "@/bibliotheque/theme-modules";
 
 interface CategorieNav {
   label: string;
@@ -253,6 +254,8 @@ export function BarreLaterale() {
     router.prefetch(chemin);
   };
 
+  const classeModule = (chemin: string) => getModuleThemeClass(obtenirModuleDepuisPathname(chemin));
+
   return (
     <aside
       className={cn(
@@ -338,9 +341,10 @@ export function BarreLaterale() {
                 onMouseEnter={() => prefetchRoute(lien.chemin)}
                 onFocus={() => prefetchRoute(lien.chemin)}
                 className={cn(
-                  "flex flex-1 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "flex flex-1 items-center gap-3 rounded-md border border-transparent px-3 py-2 text-sm font-medium transition-colors",
+                  classeModule(lien.chemin),
                   estActif
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    ? "module-accent-bg module-accent-text module-accent-border"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                 )}
               >
@@ -412,9 +416,10 @@ export function BarreLaterale() {
                                   onFocus={() => prefetchRoute(sous.chemin)}
                                   aria-label={sous.nom}
                                   className={cn(
-                                    "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
+                                    "flex items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-xs transition-colors",
+                                    classeModule(sous.chemin),
                                     sousActif
-                                      ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                      ? "module-accent-bg module-accent-text module-accent-border font-medium"
                                       : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground"
                                   )}
                                 >
@@ -438,9 +443,10 @@ export function BarreLaterale() {
                             onFocus={() => prefetchRoute(sous.chemin)}
                             aria-label={sous.nom}
                             className={cn(
-                              "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
+                              "flex items-center gap-2 rounded-md border border-transparent px-2 py-1.5 text-xs transition-colors",
+                              classeModule(sous.chemin),
                               sousActif
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                                ? "module-accent-bg module-accent-text module-accent-border font-medium"
                                 : "text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground"
                             )}
                           >
@@ -465,9 +471,10 @@ export function BarreLaterale() {
             onMouseEnter={() => prefetchRoute("/admin")}
             onFocus={() => prefetchRoute("/admin")}
             className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "flex items-center gap-3 rounded-md border border-transparent px-3 py-2 text-sm font-medium transition-colors",
+              classeModule("/admin"),
               pathname.startsWith("/admin")
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                ? "module-accent-bg module-accent-text module-accent-border"
                 : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
             )}
           >

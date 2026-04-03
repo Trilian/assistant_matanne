@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/composants/ui/button";
 import { cn } from "@/bibliotheque/utils";
+import { PALETTE_GRAPHIQUES } from "@/bibliotheque/theme-graphiques";
 
 export interface DonneeInventaireTreemap {
   nom: string;
@@ -27,16 +28,7 @@ interface RectTreemap {
   couleur: string;
 }
 
-const COULEURS = [
-  "hsl(161, 64%, 42%)",
-  "hsl(213, 80%, 52%)",
-  "hsl(29, 94%, 52%)",
-  "hsl(342, 75%, 48%)",
-  "hsl(264, 65%, 56%)",
-  "hsl(190, 68%, 42%)",
-  "hsl(84, 63%, 38%)",
-  "hsl(8, 76%, 55%)",
-];
+const COULEURS = PALETTE_GRAPHIQUES;
 
 function calculerTreemap(
   donnees: DonneeInventaireTreemap[],

@@ -3,7 +3,7 @@
 -- ============================================================================
 -- Contient : notes_memos, journal_bord, contacts_utiles, liens_favoris,
 --            mots_de_passe_maison, presse_papier_entrees, releves_energie,
---            voyages, checklists_voyage, templates_checklist, minuteur_sessions
+--            voyages, checklists_voyage, templates_checklist
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE voyages (
@@ -29,6 +29,7 @@ CREATE TABLE voyages (
 CREATE INDEX IF NOT EXISTS ix_voyages_depart ON voyages(date_depart);
 CREATE INDEX IF NOT EXISTS ix_voyages_statut ON voyages(statut);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE templates_checklist (
     id SERIAL PRIMARY KEY,
@@ -40,6 +41,7 @@ CREATE TABLE templates_checklist (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_templates_type ON templates_checklist(type_voyage);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE checklists_voyage (
@@ -55,6 +57,7 @@ CREATE TABLE checklists_voyage (
     SET NULL
 );
 CREATE INDEX IF NOT EXISTS ix_checklists_voyage ON checklists_voyage(voyage_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE notes_memos (
@@ -74,6 +77,7 @@ CREATE INDEX IF NOT EXISTS idx_notes_memos_epingle ON notes_memos(epingle)
 WHERE epingle = TRUE;
 CREATE INDEX IF NOT EXISTS idx_notes_memos_archive ON notes_memos(archive);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE journal_bord (
     id BIGSERIAL PRIMARY KEY,
@@ -89,6 +93,7 @@ CREATE TABLE journal_bord (
     modifie_le TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_journal_date ON journal_bord(date_entree DESC);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE contacts_utiles (
@@ -106,6 +111,7 @@ CREATE TABLE contacts_utiles (
 CREATE INDEX IF NOT EXISTS idx_contacts_utiles_categorie ON contacts_utiles(categorie);
 CREATE INDEX IF NOT EXISTS idx_contacts_utiles_nom ON contacts_utiles(nom);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE liens_favoris (
     id BIGSERIAL PRIMARY KEY,
@@ -118,6 +124,7 @@ CREATE TABLE liens_favoris (
     modifie_le TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_liens_categorie ON liens_favoris(categorie);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE mots_de_passe_maison (
@@ -132,6 +139,7 @@ CREATE TABLE mots_de_passe_maison (
 );
 CREATE INDEX IF NOT EXISTS idx_mdp_categorie ON mots_de_passe_maison(categorie);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE presse_papier_entrees (
     id BIGSERIAL PRIMARY KEY,
@@ -140,6 +148,7 @@ CREATE TABLE presse_papier_entrees (
     cree_le TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_pp_cree_le ON presse_papier_entrees(cree_le DESC);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE releves_energie (
@@ -155,22 +164,4 @@ CREATE TABLE releves_energie (
 CREATE INDEX IF NOT EXISTS idx_energie_categorie ON releves_energie(categorie);
 CREATE INDEX IF NOT EXISTS idx_energie_date ON releves_energie(date_releve DESC);
 
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE minuteur_sessions (
-    id BIGSERIAL PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
-    label VARCHAR(200) NOT NULL,
-    duree_secondes INTEGER NOT NULL CHECK (duree_secondes > 0),
-    recette_id INTEGER REFERENCES recettes(id) ON DELETE SET NULL,
-    date_debut TIMESTAMP,
-    date_fin TIMESTAMP,
-    terminee BOOLEAN DEFAULT FALSE,
-    active BOOLEAN DEFAULT FALSE,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_minuteur_user_id ON minuteur_sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_minuteur_active ON minuteur_sessions(active);
-CREATE INDEX IF NOT EXISTS idx_minuteur_cree_le ON minuteur_sessions(cree_le DESC);
--- ============================================================================
 

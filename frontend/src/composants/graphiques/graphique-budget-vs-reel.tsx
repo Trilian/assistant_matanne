@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { COULEURS_GRAPHIQUES } from "@/bibliotheque/theme-graphiques";
 
 export interface DonneeBudgetVsReel {
   categorie: string;
@@ -57,8 +58,8 @@ export function GraphiqueBudgetVsReel({
             ]}
           />
           <Legend formatter={(value: string) => (value === "reel" ? "Réel" : "Prévu")} />
-          <Bar dataKey="prevu" fill="hsl(var(--muted-foreground))" radius={[6, 6, 0, 0]} />
-          <Bar dataKey="reel" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+          <Bar dataKey="prevu" fill={COULEURS_GRAPHIQUES.muted} radius={[6, 6, 0, 0]} />
+          <Bar dataKey="reel" fill={COULEURS_GRAPHIQUES.accent1} radius={[6, 6, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

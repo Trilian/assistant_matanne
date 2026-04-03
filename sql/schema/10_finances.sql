@@ -39,6 +39,7 @@ CREATE INDEX IF NOT EXISTS ix_depenses_categorie ON depenses(categorie);
 CREATE INDEX IF NOT EXISTS ix_depenses_date ON depenses(date);
 CREATE INDEX IF NOT EXISTS ix_depenses_user_id ON depenses(user_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE budgets_mensuels (
     id BIGSERIAL PRIMARY KEY,
@@ -54,6 +55,7 @@ CREATE TABLE budgets_mensuels (
 CREATE INDEX IF NOT EXISTS ix_budgets_mensuels_mois ON budgets_mensuels(mois);
 CREATE INDEX IF NOT EXISTS ix_budgets_mensuels_user ON budgets_mensuels(user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_budget_mois_user ON budgets_mensuels(mois, user_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE calendriers_externes (
@@ -72,6 +74,7 @@ CREATE TABLE calendriers_externes (
 );
 CREATE INDEX IF NOT EXISTS ix_calendriers_externes_provider ON calendriers_externes(provider);
 CREATE INDEX IF NOT EXISTS ix_calendriers_externes_user ON calendriers_externes(user_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE configs_calendriers_externes (
@@ -95,6 +98,7 @@ CREATE TABLE configs_calendriers_externes (
 CREATE INDEX IF NOT EXISTS ix_external_cal_user ON configs_calendriers_externes(user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_user_calendar ON configs_calendriers_externes(user_id, provider, name);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE evenements_calendrier (
     id BIGSERIAL PRIMARY KEY,
@@ -117,4 +121,14 @@ CREATE TABLE evenements_calendrier (
 CREATE INDEX IF NOT EXISTS ix_evenements_calendrier_date ON evenements_calendrier(date_debut);
 CREATE INDEX IF NOT EXISTS ix_evenements_calendrier_user ON evenements_calendrier(user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_event_uid_user ON evenements_calendrier(uid, user_id);
+
+
+-- Source: 11_utilitaires.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Tables Utilitaires
+-- ============================================================================
+-- Contient : notes_memos, journal_bord, contacts_utiles, liens_favoris,
+--            mots_de_passe_maison, presse_papier_entrees, releves_energie,
+--            voyages, checklists_voyage, templates_checklist, minuteur_sessions
+-- ============================================================================
 

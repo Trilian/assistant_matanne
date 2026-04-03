@@ -267,12 +267,22 @@ async def modifier_tache_entretien(
 
             session.commit()
             session.refresh(tache)
+
+            suggestion_artisans = None
+            if payload.get("echec") is True or payload.get("statut_resolution") == "echec":
+                from src.services.ia.bridges import obtenir_service_bridges
+
+                suggestion_artisans = obtenir_service_bridges().entretien_echoue_vers_artisans(
+                    tache_id=tache.id
+                )
+
             return {
                 "id": tache.id,
                 "nom": tache.nom,
                 "fait": tache.fait,
                 "derniere_fois": tache.derniere_fois.isoformat() if tache.derniere_fois else None,
                 "prochaine_fois": tache.prochaine_fois.isoformat() if tache.prochaine_fois else None,
+                "suggestion_artisans": suggestion_artisans,
             }
 
     return await executer_async(_query)

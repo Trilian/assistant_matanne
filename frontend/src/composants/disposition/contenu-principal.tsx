@@ -8,6 +8,8 @@ import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
+import { getModuleThemeClass, obtenirModuleDepuisPathname } from "@/bibliotheque/theme-modules";
+import { cn } from "@/bibliotheque/utils";
 
 /**
  * Enveloppe le contenu de la page avec une animation fade-in à chaque navigation.
@@ -15,6 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
  */
 export function ContenuPrincipal({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const moduleActif = obtenirModuleDepuisPathname(pathname);
   const queryClient = useQueryClient();
   const mainRef = useRef<HTMLElement | null>(null);
   const startYRef = useRef<number | null>(null);
@@ -57,12 +60,17 @@ export function ContenuPrincipal({ children }: { children: React.ReactNode }) {
   return (
     <main
       ref={mainRef}
-      className="relative flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6"
+      className={cn(
+        "relative flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6",
+        getModuleThemeClass(moduleActif)
+      )}
       id="contenu-principal"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
+      <div className="module-top-strip pointer-events-none absolute left-0 right-0 top-0 h-0.5" />
+
       <div
         className={`pointer-events-none absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-full border bg-background/90 px-3 py-1 text-xs text-muted-foreground shadow-sm transition-all ${
           distanceTirage > 0 || rafraichissementEnCours

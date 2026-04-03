@@ -1,12 +1,9 @@
 -- ============================================================================
 -- ASSISTANT MATANNE — Tables Habitat
 -- ============================================================================
--- Contient : habitat_scenarios, habitat_criteres, habitat_criteres_immo,
---            habitat_annonces, habitat_plans, habitat_pieces,
---            habitat_modifications_plan, habitat_projets_deco, habitat_zones_jardin
--- Origine : Migration V007__module_habitat.sql (absorbée Phase 3)
+-- Contient : habitat_scenarios, habitat_plans, habitat_pieces,
+--            habitat_criteres_immo, habitat_annonces, habitat_projets_deco
 -- ============================================================================
-
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_scenarios (
     id SERIAL PRIMARY KEY,
@@ -26,6 +23,7 @@ CREATE TABLE IF NOT EXISTS habitat_scenarios (
 CREATE INDEX IF NOT EXISTS idx_habitat_scenarios_statut ON habitat_scenarios(statut);
 CREATE INDEX IF NOT EXISTS idx_habitat_scenarios_score ON habitat_scenarios(score_global);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_criteres (
     id SERIAL PRIMARY KEY,
@@ -37,6 +35,7 @@ CREATE TABLE IF NOT EXISTS habitat_criteres (
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_habitat_criteres_scenario ON habitat_criteres(scenario_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_criteres_immo (
@@ -58,6 +57,7 @@ CREATE TABLE IF NOT EXISTS habitat_criteres_immo (
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_annonces (
@@ -88,6 +88,7 @@ CREATE INDEX IF NOT EXISTS idx_habitat_annonces_statut ON habitat_annonces(statu
 CREATE INDEX IF NOT EXISTS idx_habitat_annonces_source ON habitat_annonces(source);
 CREATE INDEX IF NOT EXISTS idx_habitat_annonces_ville ON habitat_annonces(ville);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_plans (
     id SERIAL PRIMARY KEY,
@@ -105,6 +106,7 @@ CREATE TABLE IF NOT EXISTS habitat_plans (
     modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_habitat_plans_type ON habitat_plans(type_plan);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_pieces (
@@ -127,6 +129,7 @@ CREATE TABLE IF NOT EXISTS habitat_pieces (
 );
 CREATE INDEX IF NOT EXISTS idx_habitat_pieces_plan ON habitat_pieces(plan_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_modifications_plan (
     id SERIAL PRIMARY KEY,
@@ -137,6 +140,7 @@ CREATE TABLE IF NOT EXISTS habitat_modifications_plan (
     acceptee BOOLEAN,
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_projets_deco (
@@ -153,6 +157,7 @@ CREATE TABLE IF NOT EXISTS habitat_projets_deco (
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_zones_jardin (
@@ -175,4 +180,13 @@ CREATE TABLE IF NOT EXISTS habitat_zones_jardin (
     modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_habitat_zones_jardin_plan ON habitat_zones_jardin(plan_id);
+
+
+-- Source: 08_jeux.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Tables Jeux
+-- ============================================================================
+-- Contient : jeux_equipes, jeux_matchs, paris_sportifs, loto, euromillions,
+--            séries, alertes, cotes_historique
+-- ============================================================================
 

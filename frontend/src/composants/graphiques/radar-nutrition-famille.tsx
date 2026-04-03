@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { COULEURS_GRAPHIQUES } from "@/bibliotheque/theme-graphiques";
 
 const OBJECTIFS_JOUR = {
   calories: 2000,
@@ -51,22 +52,22 @@ export function RadarNutritionFamille({
   return (
     <ResponsiveContainer width="100%" height={320}>
       <RadarChart data={data} outerRadius="72%">
-        <PolarGrid stroke="hsl(0 0% 82%)" />
+        <PolarGrid stroke={COULEURS_GRAPHIQUES.grille} />
         <PolarAngleAxis dataKey="label" tick={{ fontSize: 12 }} />
         <PolarRadiusAxis tick={{ fontSize: 10 }} />
         <Radar
           dataKey="famille"
           name="Réalisé"
-          stroke="hsl(160 84% 32%)"
-          fill="hsl(160 84% 32%)"
+          stroke={COULEURS_GRAPHIQUES.accent1}
+          fill={COULEURS_GRAPHIQUES.accent1}
           fillOpacity={0.28}
           strokeWidth={2}
         />
         <Radar
           dataKey="cible"
           name="Objectif"
-          stroke="hsl(215 90% 55%)"
-          fill="hsl(215 90% 55%)"
+          stroke={COULEURS_GRAPHIQUES.accent2}
+          fill={COULEURS_GRAPHIQUES.accent2}
           fillOpacity={0.08}
           strokeWidth={2}
           strokeDasharray="5 5"

@@ -35,7 +35,7 @@ DEFAULT_OUTPUT = ROOT / "sql" / "INIT_COMPLET.sql"
 # Ordre de concaténation des fichiers (numérotation préfixe comme ordre naturel)
 # Les fichiers sont triés alphabétiquement par nom, ce qui respecte l'ordre numérique.
 # Pour garantir la bonne gestion des dépendances FK, l'ordre des domaines est:
-#   systeme → cuisine → famille → maison → habitat → jeux → notifications → finances → utilitaires
+#   systeme → cuisine → famille → maison (06a-06e) → habitat → jeux → notifications → finances → utilitaires
 
 EXPECTED_FILES = [
     "01_extensions.sql",       # BEGIN; extensions
@@ -43,7 +43,11 @@ EXPECTED_FILES = [
     "03_systeme.sql",          # Tables système (FK source pour beaucoup d'autres)
     "04_cuisine.sql",          # Tables cuisine
     "05_famille.sql",          # Tables famille (dépend de systeme)
-    "06_maison.sql",           # Tables maison (dépend de systeme)
+    "06a_projets.sql",         # Maison: projets & routines
+    "06b_entretien.sql",       # Maison: entretien & organisation
+    "06c_jardin.sql",          # Maison: jardin & autonomie
+    "06d_equipements.sql",     # Maison: équipements & travaux
+    "06e_energie.sql",         # Maison: énergie & charges
     "07_habitat.sql",          # Tables habitat (dépend de maison)
     "08_jeux.sql",             # Tables jeux
     "09_notifications.sql",    # Tables notifications (dépend de systeme)

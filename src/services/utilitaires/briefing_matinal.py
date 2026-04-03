@@ -223,6 +223,15 @@ class BriefingMatinalService(BaseAIService):
         aujourd_hui = date.today()
         seuil = aujourd_hui + timedelta(days=2)
 
+        expirant_aujourdhui = (
+            db.query(ArticleInventaire)
+            .filter(
+                ArticleInventaire.date_peremption == aujourd_hui,
+                ArticleInventaire.quantite > 0,
+            )
+            .all()
+        )
+
         expirants = (
             db.query(ArticleInventaire)
             .filter(
@@ -238,6 +247,10 @@ class BriefingMatinalService(BaseAIService):
             return {}
 
         return {
+            "expirent_aujourd_hui": [
+                {"nom": a.nom, "date_peremption": a.date_peremption.isoformat()}
+                for a in expirant_aujourdhui[:5]
+            ],
             "expirent_sous_48h": [
                 {"nom": a.nom, "date_peremption": a.date_peremption.isoformat()}
                 for a in expirants[:5]
@@ -354,8 +367,12 @@ def _formater_sections(sections: dict[str, Any]) -> str:
             parties.append(f"💰 Budget du mois : {budget['total_mois']}€ dépensés (jour {budget.get('jour_du_mois', '?')})")
 
     if "inventaire_alertes" in sections:
+        aujourd_hui = sections["inventaire_alertes"].get("expirent_aujourd_hui", [])
         expirants = sections["inventaire_alertes"].get("expirent_sous_48h", [])
-        if expirants:
+        if aujourd_hui:
+            noms = ", ".join(a["nom"] for a in aujourd_hui[:4])
+            parties.append(f"🥕 À consommer aujourd'hui : {noms}")
+        elif expirants:
             noms = ", ".join(a["nom"] for a in expirants[:3])
             parties.append(f"⚠️ Produits expirant sous 48h : {noms}")
 

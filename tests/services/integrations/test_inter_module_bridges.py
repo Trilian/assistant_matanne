@@ -246,6 +246,45 @@ class TestDiagnosticsIAInteraction:
             assert isinstance(result, (dict, str))
 
 
+class TestSprint4Bridges:
+    """Tests ciblés Sprint 4 pour le service bridges consolidé."""
+
+    def test_anniversaire_vers_menu_festif_retourne_dict(self, engine, db):
+        from src.core.models.famille import AnniversaireFamille
+        from src.services.ia.bridges import BridgesInterModulesService
+
+        anniversaire = AnniversaireFamille(
+            nom_personne="Jules",
+            date_naissance=date.today(),
+            relation="enfant",
+        )
+        db.add(anniversaire)
+        db.commit()
+
+        result = BridgesInterModulesService().anniversaire_vers_menu_festif(jours_horizon=7, db=db)
+        assert isinstance(result, dict)
+        assert result.get("anniversaire", {}).get("nom_personne") == "Jules"
+
+    def test_entretien_echoue_vers_artisans_retourne_structure(self, engine, db):
+        from src.core.models.abonnements import Artisan
+        from src.core.models.habitat import TacheEntretien
+        from src.services.ia.bridges import BridgesInterModulesService
+
+        tache = TacheEntretien(
+            nom="Réparer fuite évier",
+            categorie="reparation",
+            description="Fuite sous l'évier de cuisine",
+            piece="cuisine",
+        )
+        artisan = Artisan(nom="Plomberie Martin", metier="plombier", recommande=True, note=5)
+        db.add_all([tache, artisan])
+        db.commit()
+
+        result = BridgesInterModulesService().entretien_echoue_vers_artisans(tache_id=tache.id, db=db)
+        assert result.get("nb_artisans", 0) >= 1
+        assert result.get("artisans", [])[0]["metier"] == "plombier"
+
+
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # Bridges inter-modules
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

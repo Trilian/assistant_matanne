@@ -1,7 +1,7 @@
 """
 Service Inter-Modules — Bridges entre modules.
 
-Connecte les modules via l'event bus pour :
+Connecte les modules via l'event bus et des helpers métier pour :
 - B5.1: Récolte jardin → Recettes semaine suivante
 - B5.2: Budget anomalie → Notification proactive
 - B5.3: Documents expirés → Dashboard alerte
@@ -9,6 +9,7 @@ Connecte les modules via l'event bus pour :
 - B5.6: Voyages → Inventaire (déstockage)
 - B5.7: Anniversaire proche → Suggestions cadeaux IA
 - B5.8: Météo → Entretien maison
+- S4: Entretien → artisans, récolte → stock, anniversaire → menu, jalon → journal
 """
 
 import logging
@@ -26,6 +27,42 @@ logger = logging.getLogger(__name__)
 
 class BridgesInterModulesService:
     """Service de bridges inter-modules."""
+
+    def _detecter_metiers_depuis_tache(self, tache: object) -> list[str]:
+        """Déduit les métiers d'artisans à partir d'une tâche d'entretien."""
+        contenu = " ".join(
+            str(getattr(tache, champ, "") or "")
+            for champ in ("nom", "description", "categorie", "piece")
+        ).lower()
+
+        correspondances = {
+            "plombier": ["plomb", "fuite", "robinet", "canalisation", "wc", "eau"],
+            "plombier-chauffagiste": ["chaudiere", "chauffage", "radiateur", "chauffe-eau"],
+            "électricien": ["electric", "prise", "tableau", "lum", "ampoule", "disjonct"],
+            "couvreur": ["toit", "toiture", "gouttiere", "gouttière"],
+            "menuisier": ["porte", "fenetre", "fenêtre", "volet", "placard"],
+            "peintre": ["peinture", "mur", "plafond"],
+            "serrurier": ["serrure", "verrou", "porte bloquee", "porte bloquée"],
+            "jardinier": ["jardin", "haie", "pelouse", "taille", "arbre"],
+        }
+
+        metiers = [
+            metier
+            for metier, mots_cles in correspondances.items()
+            if any(mot in contenu for mot in mots_cles)
+        ]
+        return metiers or ["artisan multi-services"]
+
+    def _prioriser_artisans(self, artisans: list[object]) -> list[object]:
+        """Ordonne les artisans recommandés par pertinence."""
+        return sorted(
+            artisans,
+            key=lambda artisan: (
+                not bool(getattr(artisan, "recommande", True)),
+                -(getattr(artisan, "note", 0) or 0),
+                str(getattr(artisan, "nom", "")).lower(),
+            ),
+        )
 
     # ── B5.1: Récolte jardin → Suggestions recettes ────────
 
@@ -104,6 +141,59 @@ class BridgesInterModulesService:
             for d in documents
         ]
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def entretien_echoue_vers_artisans(
+        self,
+        tache_id: int,
+        db: Session | None = None,
+    ) -> dict:
+        """Propose des artisans adaptés pour une tâche d'entretien en échec."""
+        from src.core.models.abonnements import Artisan
+        from src.core.models.habitat import TacheEntretien
+
+        tache = db.query(TacheEntretien).filter(TacheEntretien.id == tache_id).first()
+        if not tache:
+            return {}
+
+        metiers = self._detecter_metiers_depuis_tache(tache)
+        artisans: list[Artisan] = []
+        for metier in metiers:
+            artisans.extend(
+                db.query(Artisan).filter(Artisan.metier.ilike(f"%{metier}%")).all()
+            )
+
+        if not artisans and "artisan multi-services" not in metiers:
+            artisans = db.query(Artisan).filter(Artisan.metier.ilike("%multi%")).all()
+
+        artisans_uniques = list({artisan.id: artisan for artisan in artisans}.values())
+        artisans_tries = self._prioriser_artisans(artisans_uniques)
+
+        return {
+            "tache": {
+                "id": tache.id,
+                "nom": tache.nom,
+                "categorie": tache.categorie,
+                "piece": tache.piece,
+            },
+            "metiers_recommandes": metiers,
+            "artisans": [
+                {
+                    "id": artisan.id,
+                    "nom": artisan.nom,
+                    "entreprise": artisan.entreprise,
+                    "metier": artisan.metier,
+                    "specialite": artisan.specialite,
+                    "telephone": artisan.telephone,
+                    "email": artisan.email,
+                    "note": artisan.note,
+                    "recommande": artisan.recommande,
+                }
+                for artisan in artisans_tries[:5]
+            ],
+            "nb_artisans": len(artisans_tries),
+        }
+
     # ── B5.5: Entretien récurrent → Planning unifié ─────────
 
     @avec_gestion_erreurs(default_return=[])
@@ -166,6 +256,175 @@ class BridgesInterModulesService:
             })
 
         return anomalies
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def recolte_vers_stock_inventaire(
+        self,
+        element_id: int,
+        quantite: float = 1.0,
+        emplacement: str = "Frigo",
+        db: Session | None = None,
+    ) -> dict:
+        """Ajoute automatiquement une récolte jardin à l'inventaire."""
+        from src.core.models import ArticleInventaire, ElementJardin, Ingredient
+
+        element = db.query(ElementJardin).filter(ElementJardin.id == element_id).first()
+        if not element:
+            return {}
+
+        ingredient = (
+            db.query(Ingredient)
+            .filter(func.lower(Ingredient.nom) == element.nom.lower())
+            .first()
+        )
+
+        if ingredient is None:
+            categorie = "Légumes"
+            if "fruit" in (element.type or "").lower():
+                categorie = "Fruits"
+            ingredient = Ingredient(nom=element.nom, categorie=categorie, unite="pcs")
+            db.add(ingredient)
+            db.flush()
+
+        article = (
+            db.query(ArticleInventaire)
+            .filter(ArticleInventaire.ingredient_id == ingredient.id)
+            .first()
+        )
+
+        quantite_ajoutee = max(0.1, quantite)
+        action = "mise_a_jour"
+        if article:
+            article.quantite = float(article.quantite or 0) + quantite_ajoutee
+            article.emplacement = article.emplacement or emplacement
+        else:
+            article = ArticleInventaire(
+                ingredient_id=ingredient.id,
+                quantite=quantite_ajoutee,
+                quantite_min=1.0,
+                emplacement=emplacement,
+            )
+            db.add(article)
+            action = "creation"
+
+        db.commit()
+        db.refresh(article)
+
+        return {
+            "element_id": element.id,
+            "element_nom": element.nom,
+            "ingredient_id": ingredient.id,
+            "article_inventaire_id": article.id,
+            "quantite_ajoutee": quantite_ajoutee,
+            "quantite_totale": float(article.quantite or 0),
+            "emplacement": article.emplacement,
+            "action": action,
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def anniversaire_vers_menu_festif(
+        self,
+        jours_horizon: int = 14,
+        db: Session | None = None,
+    ) -> dict:
+        """Suggère un menu festif pour l'anniversaire le plus proche."""
+        from src.core.models import AnniversaireFamille
+        from src.core.models.recettes import Recette
+
+        anniversaires = sorted(
+            [a for a in db.query(AnniversaireFamille).all() if 0 <= a.jours_restants <= jours_horizon],
+            key=lambda anniversaire: anniversaire.jours_restants,
+        )
+        if not anniversaires:
+            return {}
+
+        cible = anniversaires[0]
+        recettes = (
+            db.query(Recette)
+            .filter(
+                func.lower(Recette.nom).contains("gateau")
+                | func.lower(Recette.nom).contains("gâteau")
+                | func.lower(Recette.nom).contains("tarte")
+                | func.lower(Recette.categorie).contains("dessert")
+            )
+            .limit(6)
+            .all()
+        )
+
+        suggestions = [
+            {
+                "id": recette.id,
+                "nom": recette.nom,
+                "categorie": recette.categorie,
+                "type_repas": recette.type_repas,
+                "temps_total": recette.temps_total,
+            }
+            for recette in recettes
+        ]
+        if not suggestions:
+            suggestions = [
+                {"id": None, "nom": "Gâteau maison festif", "categorie": "Dessert", "type_repas": "dessert", "temps_total": 90},
+                {"id": None, "nom": "Buffet apéritif familial", "categorie": "Plat", "type_repas": "dîner", "temps_total": 45},
+            ]
+
+        return {
+            "anniversaire": {
+                "id": cible.id,
+                "nom_personne": cible.nom_personne,
+                "jours_restants": cible.jours_restants,
+                "age": cible.age,
+            },
+            "menu_festif": suggestions,
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def jalon_vers_evenement_familial(
+        self,
+        jalon_id: int,
+        db: Session | None = None,
+    ) -> dict:
+        """Crée un événement familial à partir d'un jalon Jules."""
+        from src.core.models.famille import EvenementFamilial, Jalon, ProfilEnfant
+
+        jalon = db.query(Jalon).filter(Jalon.id == jalon_id).first()
+        if not jalon:
+            return {}
+
+        enfant = db.query(ProfilEnfant).filter(ProfilEnfant.id == jalon.child_id).first()
+        titre = f"Jalon Jules: {jalon.titre}"
+
+        evenement = (
+            db.query(EvenementFamilial)
+            .filter(
+                EvenementFamilial.titre == titre,
+                EvenementFamilial.date_evenement == jalon.date_atteint,
+                EvenementFamilial.type_evenement == "jalon_jules",
+            )
+            .first()
+        )
+
+        if evenement is None:
+            evenement = EvenementFamilial(
+                titre=titre,
+                date_evenement=jalon.date_atteint,
+                type_evenement="jalon_jules",
+                recurrence="unique",
+                notes=jalon.description or jalon.notes,
+                participants=[enfant.name] if enfant else ["Jules"],
+            )
+            db.add(evenement)
+            db.commit()
+            db.refresh(evenement)
+
+        return {
+            "jalon_id": jalon.id,
+            "evenement_id": evenement.id,
+            "titre": evenement.titre,
+            "date_evenement": evenement.date_evenement.isoformat(),
+        }
 
     # ── B5.8: Météo → Entretien maison ──────────────────────
 

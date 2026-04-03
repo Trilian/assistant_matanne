@@ -15,7 +15,11 @@ Structure générée:
     ├── 03_systeme.sql           → Tables système (migrations, profils, config)
     ├── 04_cuisine.sql           → Tables cuisine (recettes, inventaire, courses, planning)
     ├── 05_famille.sql           → Tables famille (profils enfants, activités, santé, Garmin)
-    ├── 06_maison.sql            → Tables maison (projets, jardin, entretien, stocks)
+    ├── 06a_projets.sql          → Maison : projets et routines
+    ├── 06b_entretien.sql        → Maison : entretien et organisation
+    ├── 06c_jardin.sql           → Maison : jardin et autonomie
+    ├── 06d_equipements.sql      → Maison : équipements, travaux et diagnostics
+    ├── 06e_energie.sql          → Maison : énergie, abonnements et charges
     ├── 07_habitat.sql           → Tables habitat (scénarios, plans, annonces)
     ├── 08_jeux.sql              → Tables jeux (paris, loto, euromillions)
     ├── 09_notifications.sql     → Tables notifications (push, webhooks, préférences)
@@ -106,54 +110,59 @@ TABLE_DOMAIN: dict[str, str] = {
     "anniversaires_famille": "famille",
     "evenements_familiaux": "famille",
     "documents_famille": "famille",
-    # --- MAISON ---
-    "projets": "maison",
-    "routines": "maison",
-    "elements_jardin": "maison",
-    "meubles": "maison",
-    "depenses_maison": "maison",
-    "actions_ecologiques": "maison",
-    "taches_entretien": "maison",
-    "stocks_maison": "maison",
-    "plans_jardin": "maison",
-    "pieces_maison": "maison",
-    "taches_projets": "maison",
-    "taches_routines": "maison",
-    "journaux_jardin": "maison",
-    "zones_jardin": "maison",
-    "plantes_jardin": "maison",
-    "actions_plantes": "maison",
-    "objets_maison": "maison",
-    "sessions_travail": "maison",
-    "versions_pieces": "maison",
-    "couts_travaux": "maison",
-    "logs_statut_objets": "maison",
-    "preferences_home": "maison",
-    "taches_home": "maison",
-    "stats_home": "maison",
-    "plantes_catalogue": "maison",
-    "recoltes": "maison",
-    "objectifs_autonomie": "maison",
-    "contrats": "maison",
-    "factures": "maison",
-    "comparatifs": "maison",
-    "depenses_home": "maison",
-    "budgets_home": "maison",
-    "contrats_maison": "maison",
-    "artisans": "maison",
-    "interventions_artisans": "maison",
-    "garanties": "maison",
-    "incidents_sav": "maison",
-    "articles_cellier": "maison",
-    "diagnostics_maison": "maison",
-    "estimations_immobilieres": "maison",
-    "checklists_vacances": "maison",
-    "items_checklist": "maison",
-    "traitements_nuisibles": "maison",
-    "devis_comparatifs": "maison",
-    "lignes_devis": "maison",
-    "entretiens_saisonniers": "maison",
-    "releves_compteurs": "maison",
+    # --- MAISON : PROJETS & ROUTINES ---
+    "projets": "maison_projets",
+    "routines": "maison_projets",
+    "taches_projets": "maison_projets",
+    "taches_routines": "maison_projets",
+    # --- MAISON : ENTRETIEN & ORGANISATION ---
+    "taches_entretien": "maison_entretien",
+    "preferences_home": "maison_entretien",
+    "taches_home": "maison_entretien",
+    "stats_home": "maison_entretien",
+    "checklists_vacances": "maison_entretien",
+    "items_checklist": "maison_entretien",
+    # --- MAISON : JARDIN & AUTONOMIE ---
+    "elements_jardin": "maison_jardin",
+    "plans_jardin": "maison_jardin",
+    "journaux_jardin": "maison_jardin",
+    "zones_jardin": "maison_jardin",
+    "plantes_jardin": "maison_jardin",
+    "actions_plantes": "maison_jardin",
+    "plantes_catalogue": "maison_jardin",
+    "recoltes": "maison_jardin",
+    "objectifs_autonomie": "maison_jardin",
+    # --- MAISON : EQUIPEMENTS & TRAVAUX ---
+    "meubles": "maison_equipements",
+    "stocks_maison": "maison_equipements",
+    "pieces_maison": "maison_equipements",
+    "objets_maison": "maison_equipements",
+    "sessions_travail": "maison_equipements",
+    "versions_pieces": "maison_equipements",
+    "couts_travaux": "maison_equipements",
+    "logs_statut_objets": "maison_equipements",
+    "artisans": "maison_equipements",
+    "interventions_artisans": "maison_equipements",
+    "articles_cellier": "maison_equipements",
+    "diagnostics_maison": "maison_equipements",
+    "estimations_immobilieres": "maison_equipements",
+    "traitements_nuisibles": "maison_equipements",
+    "devis_comparatifs": "maison_equipements",
+    "lignes_devis": "maison_equipements",
+    # --- MAISON : ENERGIE & CHARGES ---
+    "depenses_maison": "maison_energie",
+    "actions_ecologiques": "maison_energie",
+    "depenses_home": "maison_energie",
+    "budgets_home": "maison_energie",
+    "entretiens_saisonniers": "maison_energie",
+    "releves_compteurs": "maison_energie",
+    "abonnements": "maison_energie",
+    "contrats": "maison_energie",
+    "factures": "maison_energie",
+    "comparatifs": "maison_energie",
+    "contrats_maison": "maison_energie",
+    "garanties": "maison_equipements",
+    "incidents_sav": "maison_equipements",
     # --- HABITAT ---
     "habitat_scenarios": "habitat",
     "habitat_criteres": "habitat",
@@ -230,12 +239,39 @@ DOMAIN_HEADERS: dict[str, str] = {
 --            santé, jalons, contacts, documents, anniversaires
 -- ============================================================================
 """,
-    "maison": """\
+    "maison_projets": """\
 -- ============================================================================
--- ASSISTANT MATANNE — Tables Maison
+-- ASSISTANT MATANNE — Maison : Projets & Routines
 -- ============================================================================
--- Contient : projets, routines, jardin, entretien, stocks, pièces,
---            objets, artisans, contrats, énergie, maison extensions
+-- Contient : projets, routines, tâches projet, tâches routine
+-- ============================================================================
+""",
+    "maison_entretien": """\
+-- ============================================================================
+-- ASSISTANT MATANNE — Maison : Entretien & Organisation
+-- ============================================================================
+-- Contient : entretien, préférences home, tâches home, stats, checklists
+-- ============================================================================
+""",
+    "maison_jardin": """\
+-- ============================================================================
+-- ASSISTANT MATANNE — Maison : Jardin & Autonomie
+-- ============================================================================
+-- Contient : jardin, plans, zones, plantes, récoltes, autonomie alimentaire
+-- ============================================================================
+""",
+    "maison_equipements": """\
+-- ============================================================================
+-- ASSISTANT MATANNE — Maison : Equipements & Travaux
+-- ============================================================================
+-- Contient : meubles, stocks, pièces, objets, artisans, devis, diagnostics
+-- ============================================================================
+""",
+    "maison_energie": """\
+-- ============================================================================
+-- ASSISTANT MATANNE — Maison : Energie & Charges
+-- ============================================================================
+-- Contient : dépenses, abonnements, écologie, entretiens saisonniers, compteurs
 -- ============================================================================
 """,
     "habitat": """\
@@ -287,7 +323,11 @@ GENERATION_ORDER = [
     ("03_systeme.sql", "Tables système"),
     ("04_cuisine.sql", "Tables cuisine"),
     ("05_famille.sql", "Tables famille"),
-    ("06_maison.sql", "Tables maison"),
+    ("06a_projets.sql", "Maison : projets & routines"),
+    ("06b_entretien.sql", "Maison : entretien & organisation"),
+    ("06c_jardin.sql", "Maison : jardin & autonomie"),
+    ("06d_equipements.sql", "Maison : équipements & travaux"),
+    ("06e_energie.sql", "Maison : énergie & charges"),
     ("07_habitat.sql", "Tables habitat"),
     ("08_jeux.sql", "Tables jeux"),
     ("09_notifications.sql", "Tables notifications"),
@@ -367,8 +407,18 @@ def split_into_sections(lines: list[str]) -> dict[str, str]:
 def assign_table_blocks_to_domains(tables_sql: str) -> dict[str, list[str]]:
     """Assigne chaque bloc CREATE TABLE au domaine approprié."""
     domain_blocks: dict[str, list[str]] = {
-        "systeme": [], "cuisine": [], "famille": [], "maison": [],
-        "habitat": [], "jeux": [], "notifications": [], "finances": [],
+        "systeme": [],
+        "cuisine": [],
+        "famille": [],
+        "maison_projets": [],
+        "maison_entretien": [],
+        "maison_jardin": [],
+        "maison_equipements": [],
+        "maison_energie": [],
+        "habitat": [],
+        "jeux": [],
+        "notifications": [],
+        "finances": [],
         "utilitaires": [],
     }
 
@@ -477,7 +527,11 @@ BEGIN;
         "systeme": "03_systeme.sql",
         "cuisine": "04_cuisine.sql",
         "famille": "05_famille.sql",
-        "maison": "06_maison.sql",
+        "maison_projets": "06a_projets.sql",
+        "maison_entretien": "06b_entretien.sql",
+        "maison_jardin": "06c_jardin.sql",
+        "maison_equipements": "06d_equipements.sql",
+        "maison_energie": "06e_energie.sql",
         "habitat": "07_habitat.sql",
         "jeux": "08_jeux.sql",
         "notifications": "09_notifications.sql",

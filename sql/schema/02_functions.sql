@@ -62,3 +62,13 @@ ORDER BY mois,
 END;
 $$ LANGUAGE plpgsql;
 -- ============================================================================
+
+-- Source: 03_systeme.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Tables Système
+-- ============================================================================
+-- Contient : schema_migrations, profils_utilisateurs, preferences_utilisateurs,
+--            config_meteo, alertes_meteo, sauvegardes, historique_actions,
+--            etats_persistants, gamification, automations, logs_securite,
+--            job_executions, openfoodfacts_cache
+-- ============================================================================
