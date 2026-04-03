@@ -22,7 +22,13 @@ class ErrorResponse(BaseModel):
         ```
     """
 
-    detail: str = Field(description="Message d'erreur descriptif")
+    detail: str = Field(description="Message d'erreur descriptif", max_length=500)
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {"detail": "Recette non trouvée"}
+        }
+    }
 
 
 class ReponsePaginee(BaseModel, Generic[T]):
@@ -34,10 +40,22 @@ class ReponsePaginee(BaseModel, Generic[T]):
     page_size: int = Field(description="Taille de page")
     pages: int = Field(description="Nombre total de pages")
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {"items": [], "total": 0, "page": 1, "page_size": 20, "pages": 0}
+        }
+    }
+
 
 class MessageResponse(BaseModel):
     """Réponse avec message simple."""
 
-    message: str
+    message: str = Field(max_length=300)
     id: int | None = None
     details: dict[str, Any] | None = None
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {"message": "Élément créé avec succès", "id": 42, "details": {"source": "api"}}
+        }
+    }

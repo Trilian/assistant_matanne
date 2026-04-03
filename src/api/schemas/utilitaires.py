@@ -4,6 +4,8 @@ Schémas Pydantic pour les utilitaires (notes, journal, contacts, liens, mots de
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -19,7 +21,7 @@ class NoteBase(BaseModel):
     couleur: str | None = Field(None, max_length=20)
     epingle: bool = False
     est_checklist: bool = False
-    items_checklist: list[dict] | None = None
+    items_checklist: list[dict[str, Any]] | None = None
     tags: list[str] = Field(default_factory=list)
 
     model_config = {
@@ -31,7 +33,7 @@ class NoteBase(BaseModel):
                 "couleur": "jaune",
                 "epingle": True,
                 "est_checklist": False,
-                "items_checklist": null,
+                "items_checklist": None,
                 "tags": ["courses", "urgent"],
             }
         }
@@ -60,7 +62,7 @@ class NoteResponse(BaseModel):
     couleur: str | None = Field(None, max_length=20)
     epingle: bool = False
     est_checklist: bool = False
-    items_checklist: list[dict] | None = None
+    items_checklist: list[dict[str, Any]] | None = None
     tags: list[str] = Field(default_factory=list)
     archive: bool = False
     cree_le: str | None = None
@@ -75,7 +77,7 @@ class NoteResponse(BaseModel):
                 "couleur": "jaune",
                 "epingle": True,
                 "est_checklist": False,
-                "items_checklist": null,
+                "items_checklist": None,
                 "tags": ["courses", "urgent"],
                 "archive": False,
                 "cree_le": "2026-04-03T08:10:00",
@@ -444,7 +446,7 @@ class MinuteurResponse(BaseModel):
                 "duree_secondes": 1800,
                 "recette_id": 42,
                 "date_debut": "2026-04-03T19:00:00",
-                "date_fin": null,
+                "date_fin": None,
                 "terminee": False,
                 "active": True,
             }

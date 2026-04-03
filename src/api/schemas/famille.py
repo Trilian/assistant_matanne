@@ -4,6 +4,8 @@ Schémas Pydantic pour la famille (anniversaires, événements familiaux).
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 from pydantic import BaseModel, Field
 
 
@@ -58,7 +60,7 @@ class AnniversaireResponse(BaseModel):
     relation: str = Field(max_length=50)
     rappel_jours_avant: list[int] = Field(default=[7, 1, 0])
     idees_cadeaux: str | None = Field(None, max_length=1000)
-    historique_cadeaux: list[dict] | None = None
+    historique_cadeaux: list[dict[str, Any]] | None = None
     notes: str | None = Field(None, max_length=2000)
     actif: bool = True
     age: int | None = None
@@ -201,7 +203,7 @@ class MeteoActuelle(BaseModel):
     condition: str | None = None
     precipitation_mm: float | None = None
     vent_km_h: float | None = None
-    previsions_7j: list[dict] = Field(default_factory=list)
+    previsions_7j: list[dict[str, Any]] = Field(default_factory=lambda: cast(list[dict[str, Any]], []))
 
 
 class JourSpecialResponse(BaseModel):
@@ -257,13 +259,13 @@ class AchatUrgent(BaseModel):
 
 class ContexteFamilialResponse(BaseModel):
     meteo: MeteoActuelle | None = None
-    jours_speciaux: list[JourSpecialResponse] = Field(default_factory=list)
-    anniversaires_proches: list[AnniversaireContexte] = Field(default_factory=list)
+    jours_speciaux: list[JourSpecialResponse] = Field(default_factory=lambda: cast(list[JourSpecialResponse], []))
+    anniversaires_proches: list[AnniversaireContexte] = Field(default_factory=lambda: cast(list[AnniversaireContexte], []))
     jules: JulesContexte | None = None
-    documents_expirants: list[DocumentExpirant] = Field(default_factory=list)
-    routines_du_moment: list[RoutineContexte] = Field(default_factory=list)
-    activites_a_venir: list[ActiviteContexte] = Field(default_factory=list)
-    achats_urgents: list[AchatUrgent] = Field(default_factory=list)
+    documents_expirants: list[DocumentExpirant] = Field(default_factory=lambda: cast(list[DocumentExpirant], []))
+    routines_du_moment: list[RoutineContexte] = Field(default_factory=lambda: cast(list[RoutineContexte], []))
+    activites_a_venir: list[ActiviteContexte] = Field(default_factory=lambda: cast(list[ActiviteContexte], []))
+    achats_urgents: list[AchatUrgent] = Field(default_factory=lambda: cast(list[AchatUrgent], []))
 
 
 # ═══════════════════════════════════════════════════════════
@@ -350,7 +352,7 @@ class AchatResponse(BaseModel):
                 "categorie": "jules_vetements",
                 "priorite": "haute",
                 "prix_estime": 28.0,
-                "prix_reel": null,
+                "prix_reel": None,
                 "taille": "24",
                 "magasin": "Decathlon",
                 "url": "https://example.com/bottes-jules",
@@ -358,11 +360,11 @@ class AchatResponse(BaseModel):
                 "age_recommande_mois": 24,
                 "suggere_par": "saison",
                 "achete": False,
-                "date_achat": null,
+                "date_achat": None,
                 "pour_qui": "jules",
                 "a_revendre": True,
                 "prix_revente_estime": 10.0,
-                "vendu_le": null,
+                "vendu_le": None,
             }
         }
     }
@@ -505,7 +507,7 @@ class SemainesFermetureCreche(BaseModel):
 
 
 class ConfigGardeRequest(BaseModel):
-    semaines_fermeture: list[SemainesFermetureCreche] = Field(default_factory=list)
+    semaines_fermeture: list[SemainesFermetureCreche] = Field(default_factory=lambda: cast(list[SemainesFermetureCreche], []))
     nom_creche: str = Field(default="", max_length=200)
     zone_academique: str = Field(default="B", description="Zone A, B ou C", max_length=1)
 
@@ -523,7 +525,7 @@ class ConfigGardeRequest(BaseModel):
 
 
 class ConfigGardeResponse(BaseModel):
-    semaines_fermeture: list[dict] = Field(default_factory=list)
+    semaines_fermeture: list[dict[str, Any]] = Field(default_factory=lambda: cast(list[dict[str, Any]], []))
     nom_creche: str = ""
     zone_academique: str = "B"
     annee_courante: int | None = None
@@ -532,13 +534,13 @@ class ConfigGardeResponse(BaseModel):
 class PreferencesFamilleRequest(BaseModel):
     """Préférences personnelles des adultes (tailles, style, intérêts)."""
 
-    taille_vetements_anne: dict = Field(default_factory=dict, description="Ex: {tee_shirt: 'M', pantalon: '38', pointure: '39'}")
-    taille_vetements_mathieu: dict = Field(default_factory=dict)
-    style_achats_anne: dict = Field(default_factory=dict, description="Ex: {prefere_made_france: true, prefere_qualite: true, budget_piece_max: 80}")
-    style_achats_mathieu: dict = Field(default_factory=dict)
+    taille_vetements_anne: dict[str, Any] = Field(default_factory=dict, description="Ex: {tee_shirt: 'M', pantalon: '38', pointure: '39'}")
+    taille_vetements_mathieu: dict[str, Any] = Field(default_factory=dict)
+    style_achats_anne: dict[str, Any] = Field(default_factory=dict, description="Ex: {prefere_made_france: true, prefere_qualite: true, budget_piece_max: 80}")
+    style_achats_mathieu: dict[str, Any] = Field(default_factory=dict)
     interets_gaming: list[str] = Field(default_factory=list, description="Ex: ['Nintendo Switch', 'jeux de société']")
     interets_culture: list[str] = Field(default_factory=list, description="Ex: ['cinéma', 'expositions', 'concerts']")
-    equipement_activites: dict = Field(default_factory=dict, description="Équipements sportifs disponibles")
+    equipement_activites: dict[str, Any] = Field(default_factory=dict, description="Équipements sportifs disponibles")
 
 
 class PreferencesFamilleResponse(PreferencesFamilleRequest):

@@ -338,12 +338,12 @@ sql/
 |---|-------|--------|--------|----------|--------|
 | 3.1 | **Tests WebSocket courses** | Connexion, messages, synchronisation multi-user, déconnexion/reconnexion | 4h | 🔴 Critique | 🟡 Avancé — backend largement couvert, fallback HTTP et hooks frontend renforcés ; `user_left` reste non automatisé côté prod |
 | 3.2 | **Tests E2E parcours complet** | Login → créer recette → planifier → courses → cocher articles | 8h | 🔴 Critique | 🟡 Avancé — parcours Playwright transactionnel mocké ajouté |
-| 3.3 | **Tests frontend composants clés** | Formulaire recette, planning hebdomadaire, dashboard DnD | 8h | 🟡 Important | 🟡 Avancé — lots `maison/visualisation`, `formulaire-recette`, `planning-repas` et `grille-dashboard-dnd` renforcés en tests comportementaux ; d'autres écrans restent encore trop proches du stub |
+| 3.3 | **Tests frontend composants clés** | Formulaire recette, planning hebdomadaire, dashboard DnD | 8h | 🟡 Important | 🟡 Avancé — lots `maison/visualisation`, `formulaire-recette`, `planning-repas`, `grille-dashboard-dnd`, hubs `dashboard`, `cuisine` et `maison` renforcés en tests comportementaux ; d'autres écrans restent encore trop proches du stub |
 | 3.4 | **Tests inter-modules E2E** | Jardin récolte → suggestion recette → ajout courses | 4h | 🟡 Important | 🟠 Partiel — specs présentes, scénario jardin → recette → courses à durcir |
 | 3.5 | **Tests de charge API** | k6 ou locust sur les 5 endpoints critiques (100 req/s) | 4h | 🟡 Important | ✅ Baseline présente via `tests/load/k6_baseline.js` |
 | 3.6 | **Contract tests OpenAPI** | Valider que l'API respecte les schemas (schemathesis) | 4h | 🟢 Souhaitable | ✅ En place sur `/health` + CI |
 | 3.7 | **PWA / Service Worker tests** | Installation, cache offline, sync en ligne | 4h | 🟢 Souhaitable | ✅ Couverture existante côté service worker |
-| 3.8 | **Mutation testing** | Lancer mutmut (configuré mais inutilisé) | 2h | 🟢 Souhaitable | 🟠 Partiel — exécution `mutmut` désormais reproductible sous WSL sur `src/services/dashboard`, mais la sortie courante remonte `977` mutants en `no tests`, donc résultat encore non exploitable pour piloter la qualité |
+| 3.8 | **Mutation testing** | Lancer mutmut (configuré mais inutilisé) | 2h | 🟢 Souhaitable | 🟡 Avancé — flux WSL reproductible, patch repo `scripts/qualite/patch_mutmut_src_prefix.py` + `max_stack_depth = -1` validés ; dernier run dashboard: `655` mutants tués, `322` en `no tests`, `0` survivant |
 
 ### Checklist d'avancement Sprint 3
 
@@ -353,7 +353,8 @@ sql/
 - [x] Renforcer la couverture ciblée du périmètre `src/services/dashboard` pour fiabiliser le mutation testing — `30 passed`, couverture locale `81.22%`
 - [ ] Remplacer les tests frontend encore trop superficiels sur les composants clés (formulaire recette, planning hebdo, dashboard) — lots visualisation maison + formulaire recette + planning hebdo + dashboard DnD traités
 - [ ] Rejouer une validation de couverture backend globale pour confirmer le maintien à `>= 80%` — relance faite (03/04/2026): suite stable (`4919 passed`, `3 skipped`), couverture observée `48.86%` (objectif non atteint)
-- [ ] Lancer et exploiter `mutmut` dans un flux reproductible — WSL outillé, runner isolé sur `tests/services/dashboard`, exécution complète atteinte ; blocage restant: `mutmut results` marque `977` mutants en `no tests`
+- [x] Lancer `mutmut` dans un flux reproductible sur le périmètre dashboard — WSL outillé, runner isolé, patch repo `scripts/qualite/patch_mutmut_src_prefix.py` appliqué dans l'environnement, résultat exploitable: `655` mutants tués, `322` `no tests`, `0` survivant
+- [ ] Réduire les `322` mutants `no tests` restants sur `src/services/dashboard` — priorité aux fonctions encore peu ou pas couvertes (`collecter_*`, `__init__`, contexte IA)
 
 ### Critères de validation Sprint 3
 
@@ -954,7 +955,9 @@ sql/
 - [x] 9.5 `.github/copilot-instructions.md` mis à jour
 - [x] 9.6 `README.md` mis à jour
 - [ ] 9.7 Exemples Swagger homogènes sur tous les schémas Pydantic
+  Avancement : exemples ajoutés sur `auth`, `anti_gaspillage`, `batch_cooking`, `calendriers`, `common`, `export`, `famille`, `inventaire`, `planning`, `preferences`, `push`, `recettes`, `suggestions`, `utilitaires`, `webhooks`
 - [ ] 9.8 Contraintes `max_length` homogènes sur tous les champs texte
+  Avancement : contraintes ajoutées sur les mêmes schémas prioritaires ; homogénéisation encore à finir sur quelques schémas secondaires (`courses`, `dashboard`, `maison`, etc.)
 
 ### Nettoyage documentaire effectué
 
@@ -962,6 +965,7 @@ sql/
 - références `Phase ...` retirées des guides `famille` et `jeux`
 - références documentaires cassées corrigées (`API_SCHEMAS`, `TESTING_ADVANCED`)
 - FAQ utilisateur alignée avec les flux actifs (plus de WhatsApp/OCR documentés comme features)
+- schémas Pydantic principaux enrichis avec exemples Swagger et contraintes de longueur sur les champs texte les plus exposés
 
 ### Critères de validation Sprint 9
 
@@ -971,6 +975,7 @@ sql/
 - [x] `grep -r "Phase [A-Z]" docs/guides/` ne renvoie plus rien sur les guides actifs concernés
 - [x] README reflète l'état actuel du projet
 - [x] copilot-instructions.md est à jour
+- [x] Validation statique OK sur les schémas modifiés pendant la phase Sprint 9 (lots documentaires et lots Swagger/max_length)
 
 ---
 

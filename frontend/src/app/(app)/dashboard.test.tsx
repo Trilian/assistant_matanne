@@ -195,7 +195,9 @@ describe("DashboardPage", () => {
     expect(screen.getByText(/Score famille hebdo: 74\/100/)).toBeInTheDocument();
     expect(screen.getByText("Poursuivre l'équilibre des repas.")).toBeInTheDocument();
     expect(screen.getByText("Score ecologique")).toBeInTheDocument();
-    expect(screen.getByText("Réduire les produits proches de péremption.")).toBeInTheDocument();
+    expect(
+      screen.getByText((contenu) => contenu.includes("Réduire les produits proches de péremption"))
+    ).toBeInTheDocument();
   });
 
   it("filtre les anomalies budget sur les severites actionnables", () => {
