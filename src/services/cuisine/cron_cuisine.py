@@ -64,26 +64,6 @@ def analyser_peremptions_matin():
             if expires or bientot:
                 _notifier_peremptions(expires, bientot)
 
-            # Bridge 2 — émettre un événement par article bientôt périmé
-            try:
-                from src.services.core.events import obtenir_bus
-                bus = obtenir_bus()
-                for article in bientot:
-                    jours = (article.date_peremption - aujourd_hui).days
-                    bus.emettre(
-                        "inventaire.peremption_proche",
-                        {
-                            "article_id": article.id,
-                            "nom": article.nom,
-                            "jours_restants": jours,
-                            "quantite": float(article.quantite) if article.quantite else 0.0,
-                            "unite": article.unite or "pcs",
-                        },
-                        source="cron_peremptions",
-                    )
-            except Exception as _bus_exc:
-                logger.debug("Événements peremption_proche non émis: %s", _bus_exc)
-
             logger.info(f"✅ Analyse péremptions terminée : {len(expires)} expirés, {len(bientot)} à risque")
 
     except Exception as e:

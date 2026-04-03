@@ -37,14 +37,6 @@ from .events import (
     EvenementRecettePlanifiee,
     EvenementSanteModifie,
     EvenementStockModifie,
-    # Phase 2 — bridges inter-modules
-    EvenementPlanningValide,
-    EvenementStockPeremptionProche,
-    EvenementActiviteTerminee,
-    EvenementProjetTacheDeadline,
-    EvenementMeteoRecue,
-    EvenementEntretienTacheDue,
-    EvenementJeuxResultatEnregistre,
 )
 from .subscribers import enregistrer_subscribers
 
@@ -65,14 +57,6 @@ __all__ = [
     "EvenementLotoModifie",
     "EvenementParisModifie",
     "EvenementErreurService",
-    # Phase 2
-    "EvenementPlanningValide",
-    "EvenementStockPeremptionProche",
-    "EvenementActiviteTerminee",
-    "EvenementProjetTacheDeadline",
-    "EvenementMeteoRecue",
-    "EvenementEntretienTacheDue",
-    "EvenementJeuxResultatEnregistre",
     # Subscribers
     "enregistrer_subscribers",
 ]

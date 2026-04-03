@@ -12,14 +12,14 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_session_db
-from src.core.exceptions import ErreurServiceIA
+from src.core.exceptions import ErreurService
 from src.core.models.jeux import PariSportif, GrilleLoto, GrilleEuromillions
 from src.services.core.analytics import obtenir_analytics
 from src.services.jeux.bankroll_manager import get_bankroll_manager
 
 logger = logging.getLogger(__name__)
 
-# Constantes de statuts pour les requÃªtes SQLAlchemy
+# Constantes de statuts pour les requêtes SQLAlchemy
 _STATUTS_RESOLUS: list[str] = ["gagnant", "perdant", "gagne", "perdu"]
 _STATUTS_GAGNANTS: list[str] = ["gagnant", "gagne"]
 
@@ -33,11 +33,11 @@ class StatsPersonnellesService:
     """
     Service d'analyse des performances personnelles.
     
-    FonctionnalitÃ©s:
+    Fonctionnalités:
     - ROI global (Return on Investment)
     - Win rate par type de jeu
-    - Meilleurs patterns (stratÃ©gies, types paris)
-    - Ã‰volution mensuelle
+    - Meilleurs patterns (stratégies, types paris)
+    - Évolution mensuelle
     - Analyse comparative
     """
     
@@ -46,12 +46,12 @@ class StatsPersonnellesService:
         """
         Calcule le ROI global sur tous les jeux.
         
-        ROI = (Gains totaux - Mises totales) / Mises totales Ã— 100
+        ROI = (Gains totaux - Mises totales) / Mises totales × 100
         
         Args:
             user_id: ID utilisateur
-            jours: PÃ©riode d'analyse (dÃ©faut: 30 jours)
-            session: Session DB (injectÃ©e par dÃ©corateur)
+            jours: Période d'analyse (défaut: 30 jours)
+            session: Session DB (injectée par décorateur)
         
         Returns:
             {
@@ -63,7 +63,7 @@ class StatsPersonnellesService:
                 "nb_grilles": int
             }
         """
-        logger.info(f"ðŸ“Š Calcul ROI global pour user {user_id} sur {jours} jours")
+        logger.info(f"📊 Calcul ROI global pour user {user_id} sur {jours} jours")
         
         date_debut = datetime.now() - timedelta(days=jours)
         
@@ -117,7 +117,7 @@ class StatsPersonnellesService:
             gains_euro = sum(g.backtest.get("gain", 0) for g in grilles_euro if g.backtest)
             mises_euro = len(grilles_euro) * 2.5  # Prix 1 grille Euromillions
             
-            # AgrÃ©gation
+            # Agrégation
             gains_totaux = gains_paris + gains_loto + gains_euro
             mises_totales = mises_paris + mises_loto + mises_euro
             
@@ -135,21 +135,21 @@ class StatsPersonnellesService:
                 "periode_jours": jours
             }
             
-            logger.info(f"âœ… ROI calculÃ©: {roi:.2f}% (bÃ©nÃ©fice {benefice_net:.2f}â‚¬)")
+            logger.info(f"✅ ROI calculé: {roi:.2f}% (bénéfice {benefice_net:.2f}€)")
             return result
         
         except Exception as e:
-            logger.error(f"âŒ Erreur calcul ROI: {e}", exc_info=True)
-            raise ErreurServiceIA(f"Ã‰chec calcul ROI: {e}")
+            logger.error(f"❌ Erreur calcul ROI: {e}", exc_info=True)
+            raise ErreurService(f"Échec calcul ROI: {e}")
     
     @avec_session_db
     def calculer_win_rate(self, user_id: int, jours: int = 30, session: Session | None = None) -> dict[str, Any]:
         """
-        Calcule le win rate (taux de rÃ©ussite) par type de jeu.
+        Calcule le win rate (taux de réussite) par type de jeu.
         
         Args:
             user_id: ID utilisateur
-            jours: PÃ©riode d'analyse
+            jours: Période d'analyse
             session: Session DB
         
         Returns:
@@ -162,7 +162,7 @@ class StatsPersonnellesService:
                 "nb_total": int
             }
         """
-        logger.info(f"ðŸ“ˆ Calcul win rate pour user {user_id}")
+        logger.info(f"📈 Calcul win rate pour user {user_id}")
         
         date_debut = datetime.now() - timedelta(days=jours)
         
@@ -267,12 +267,12 @@ class StatsPersonnellesService:
                 "periode_jours": jours
             }
             
-            logger.info(f"âœ… Win rate: {win_rate_global:.2f}% ({nb_gagnants}/{nb_total})")
+            logger.info(f"✅ Win rate: {win_rate_global:.2f}% ({nb_gagnants}/{nb_total})")
             return result
         
         except Exception as e:
-            logger.error(f"âŒ Erreur calcul win rate: {e}", exc_info=True)
-            raise ErreurServiceIA(f"Ã‰chec calcul win rate: {e}")
+            logger.error(f"❌ Erreur calcul win rate: {e}", exc_info=True)
+            raise ErreurService(f"Échec calcul win rate: {e}")
     
     @avec_session_db
     def analyser_patterns_gagnants(self, user_id: int, jours: int = 90, session: Session | None = None) -> dict[str, Any]:
@@ -281,7 +281,7 @@ class StatsPersonnellesService:
         
         Args:
             user_id: ID utilisateur
-            jours: PÃ©riode d'analyse
+            jours: Période d'analyse
             session: Session DB
         
         Returns:
@@ -293,7 +293,7 @@ class StatsPersonnellesService:
                 "recommandations": list[str]
             }
         """
-        logger.info(f"ðŸ” Analyse patterns gagnants pour user {user_id}")
+        logger.info(f"🔍 Analyse patterns gagnants pour user {user_id}")
         
         date_debut = datetime.now() - timedelta(days=jours)
         
@@ -323,7 +323,7 @@ class StatsPersonnellesService:
                         meilleur_roi = roi
                         meilleur_type = type_pari
             
-            # StratÃ©gies Loto (skip gracieux si champs legacy absents)
+            # Stratégies Loto (skip gracieux si champs legacy absents)
             strategies_loto = []
             if all(_has_attr(GrilleLoto, attr) for attr in ("strategie", "backtest", "user_id", "date_creation")):
                 loto_statut_filter = (
@@ -348,7 +348,7 @@ class StatsPersonnellesService:
                     max_gains_loto = gains
                     meilleure_strat_loto = strat
             
-            # StratÃ©gies Euromillions (skip gracieux si champs legacy absents)
+            # Stratégies Euromillions (skip gracieux si champs legacy absents)
             strategies_euro = []
             if all(
                 _has_attr(GrilleEuromillions, attr)
@@ -386,12 +386,12 @@ class StatsPersonnellesService:
             
             if meilleure_strat_loto:
                 recommandations.append(
-                    f"StratÃ©gie Loto la plus rentable: {meilleure_strat_loto}"
+                    f"Stratégie Loto la plus rentable: {meilleure_strat_loto}"
                 )
             
             if meilleure_strat_euro:
                 recommandations.append(
-                    f"StratÃ©gie Euromillions la plus rentable: {meilleure_strat_euro}"
+                    f"Stratégie Euromillions la plus rentable: {meilleure_strat_euro}"
                 )
             
             result = {
@@ -403,21 +403,21 @@ class StatsPersonnellesService:
                 "periode_jours": jours
             }
             
-            logger.info(f"âœ… Patterns analysÃ©s: {len(recommandations)} recommandations")
+            logger.info(f"✅ Patterns analysés: {len(recommandations)} recommandations")
             return result
         
         except Exception as e:
-            logger.error(f"âŒ Erreur analyse patterns: {e}", exc_info=True)
-            raise ErreurServiceIA(f"Ã‰chec analyse patterns: {e}")
+            logger.error(f"❌ Erreur analyse patterns: {e}", exc_info=True)
+            raise ErreurService(f"Échec analyse patterns: {e}")
     
     @avec_session_db
     def obtenir_evolution_mensuelle(self, user_id: int, mois: int = 6, session: Session | None = None) -> dict[str, Any]:
         """
-        Calcule l'Ã©volution mensuelle du ROI et du bÃ©nÃ©fice.
+        Calcule l'évolution mensuelle du ROI et du bénéfice.
         
         Args:
             user_id: ID utilisateur
-            mois: Nombre de mois Ã  analyser
+            mois: Nombre de mois à analyser
             session: Session DB
         
         Returns:
@@ -434,14 +434,14 @@ class StatsPersonnellesService:
                 ]
             }
         """
-        logger.info(f"ðŸ“† Calcul Ã©volution mensuelle pour user {user_id}")
+        logger.info(f"📆 Calcul évolution mensuelle pour user {user_id}")
         
         evolution = []
         date_reference = datetime.now()
         
         try:
             for i in range(mois):
-                # Calculer dÃ©but/fin du mois
+                # Calculer début/fin du mois
                 mois_courant = date_reference.month - i
                 annee_courante = date_reference.year
                 
@@ -524,9 +524,9 @@ class StatsPersonnellesService:
             # Inverser pour avoir ordre chronologique
             evolution.reverse()
             
-            logger.info(f"âœ… Ã‰volution calculÃ©e pour {len(evolution)} mois")
+            logger.info(f"✅ Évolution calculée pour {len(evolution)} mois")
             return {"evolution": evolution}
         
         except Exception as e:
-            logger.error(f"âŒ Erreur calcul Ã©volution: {e}", exc_info=True)
-            raise ErreurServiceIA(f"Ã‰chec calcul Ã©volution: {e}")
+            logger.error(f"❌ Erreur calcul évolution: {e}", exc_info=True)
+            raise ErreurService(f"Échec calcul évolution: {e}")

@@ -6,7 +6,7 @@ import pytest_asyncio
 from fastapi import FastAPI
 
 from src.api.dependencies import require_auth
-from src.api.routes.dashboard_accueil import router
+from src.api.routes.dashboard import router
 
 pytestmark = pytest.mark.asyncio(loop_scope="function")
 

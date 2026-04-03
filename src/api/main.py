@@ -61,9 +61,7 @@ from src.api.routes import (
     batch_cooking_router,
     calendriers_router,
     courses_router,
-    dashboard_accueil_router,
-    dashboard_gamification_router,
-    dashboard_widgets_router,
+    dashboard_router,
     documents_router,
     export_router,
     famille_router,
@@ -655,9 +653,7 @@ app.include_router(jeux_router)
 app.include_router(calendriers_router)
 
 # Nouveaux routers - Phase 2
-app.include_router(dashboard_accueil_router)
-app.include_router(dashboard_gamification_router)
-app.include_router(dashboard_widgets_router)
+app.include_router(dashboard_router)
 app.include_router(batch_cooking_router)
 app.include_router(preferences_router)
 app.include_router(automations_router)

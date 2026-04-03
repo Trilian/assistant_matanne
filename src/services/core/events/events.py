@@ -401,122 +401,6 @@ class EvenementJeuxSyncTerminee:
     nb_alertes: int = 0
 
 
-@dataclass(frozen=True, slots=True)
-class EvenementJeuxResultatEnregistre:
-    """Émis quand un résultat de pari/loto est enregistré — déclenche MAJ dashboard P&L."""
-
-    TYPE: str = "paris.resultat_enregistre"
-
-    element_id: int = 0
-    type_jeu: str = ""  # "pari", "loto", "euromillions"
-    gain: float = 0.0
-    mise: float = 0.0
-    est_gagnant: bool = False
-
-
-# ═══════════════════════════════════════════════════════════
-# ÉVÉNEMENTS PLANNING — PHASE 2
-# ═══════════════════════════════════════════════════════════
-
-
-@dataclass(frozen=True, slots=True)
-class EvenementPlanningValide:
-    """Émis quand un planning hebdomadaire est validé → déclenche génération courses."""
-
-    TYPE: str = "planning.valide"
-
-    planning_id: int = 0
-    semaine_debut: str = ""  # "YYYY-MM-DD"
-    nb_repas: int = 0
-    generer_courses: bool = True
-
-
-# ═══════════════════════════════════════════════════════════
-# ÉVÉNEMENTS INVENTAIRE — PHASE 2
-# ═══════════════════════════════════════════════════════════
-
-
-@dataclass(frozen=True, slots=True)
-class EvenementStockPeremptionProche:
-    """Émis quand des articles expirent dans moins de N jours → anti-gaspi IA."""
-
-    TYPE: str = "inventaire.peremption_proche"
-
-    article_id: int = 0
-    nom: str = ""
-    jours_restants: int = 0
-    quantite: float = 0.0
-    unite: str = ""
-
-
-# ═══════════════════════════════════════════════════════════
-# ÉVÉNEMENTS FAMILLE — PHASE 2
-# ═══════════════════════════════════════════════════════════
-
-
-@dataclass(frozen=True, slots=True)
-class EvenementActiviteTerminee:
-    """Émis quand une activité famille est marquée terminée → jalon Jules auto."""
-
-    TYPE: str = "activites.terminee"
-
-    activite_id: int = 0
-    nom: str = ""
-    categorie: str = ""  # "motricite", "langage", "social", "eveil", "loisir"
-    user_id: str = ""
-
-
-# ═══════════════════════════════════════════════════════════
-# ÉVÉNEMENTS PROJETS — PHASE 2
-# ═══════════════════════════════════════════════════════════
-
-
-@dataclass(frozen=True, slots=True)
-class EvenementProjetTacheDeadline:
-    """Émis quand une tâche projet a une deadline → événement calendrier entretien."""
-
-    TYPE: str = "projets.tache_deadline"
-
-    projet_id: int = 0
-    projet_nom: str = ""
-    tache_nom: str = ""
-    deadline: str = ""  # "YYYY-MM-DD"
-
-
-# ═══════════════════════════════════════════════════════════
-# ÉVÉNEMENTS MÉTÉO — PHASE 2
-# ═══════════════════════════════════════════════════════════
-
-
-@dataclass(frozen=True, slots=True)
-class EvenementMeteoRecue:
-    """Émis quand les prévisions météo sont reçues → suggestions activités weekend."""
-
-    TYPE: str = "meteo.prevision_recue"
-
-    condition: str = ""  # "soleil", "pluie", "nuageux", "orage", "neige"
-    temperature_max: float = 0.0
-    date_prevision: str = ""  # "YYYY-MM-DD"
-
-
-# ═══════════════════════════════════════════════════════════
-# ÉVÉNEMENTS ENTRETIEN — PHASE 2
-# ═══════════════════════════════════════════════════════════
-
-
-@dataclass(frozen=True, slots=True)
-class EvenementEntretienTacheDue:
-    """Émis quand une tâche d'entretien maison arrive à échéance → rappel push."""
-
-    TYPE: str = "entretien.tache_due"
-
-    tache_id: int = 0
-    nom: str = ""
-    categorie: str = ""
-    prochaine_fois: str = ""  # "YYYY-MM-DD"
-    priorite: str = "normale"  # "haute", "normale", "basse"
-
-
 # ═══════════════════════════════════════════════════════════
 # ÉVÉNEMENTS SYSTÈME
 # ═══════════════════════════════════════════════════════════
@@ -638,14 +522,6 @@ REGISTRE_EVENEMENTS: dict[str, type] = {
     "inventaire.modification_importante": EvenementInventaireModificationImportante,
     "jeux.sync_terminee": EvenementJeuxSyncTerminee,
     "service.error": EvenementErreurService,
-    # Phase 2 — Bridges inter-modules
-    "planning.valide": EvenementPlanningValide,
-    "inventaire.peremption_proche": EvenementStockPeremptionProche,
-    "activites.terminee": EvenementActiviteTerminee,
-    "projets.tache_deadline": EvenementProjetTacheDeadline,
-    "meteo.prevision_recue": EvenementMeteoRecue,
-    "entretien.tache_due": EvenementEntretienTacheDue,
-    "paris.resultat_enregistre": EvenementJeuxResultatEnregistre,
 }
 
 
@@ -682,14 +558,6 @@ __all__ = [
     "EvenementInventaireModificationImportante",
     "EvenementJeuxSyncTerminee",
     "EvenementErreurService",
-    # Phase 2 — Nouveaux événements
-    "EvenementJeuxResultatEnregistre",
-    "EvenementPlanningValide",
-    "EvenementStockPeremptionProche",
-    "EvenementActiviteTerminee",
-    "EvenementProjetTacheDeadline",
-    "EvenementMeteoRecue",
-    "EvenementEntretienTacheDue",
     # Registry
     "REGISTRE_EVENEMENTS",
 ]

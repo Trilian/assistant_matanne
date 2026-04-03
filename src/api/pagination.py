@@ -427,3 +427,11 @@ def appliquer_cursor_filter_avec_tri_stable(
     # Appliquer le filtre normal
     query = appliquer_cursor_filter(query, cursor, model_class, cursor_field, secondary_field)
     return query, True
+
+
+# Gardez l'API originale pour la compatibilité
+def _get_attr(obj: Any, name: str) -> Any:
+    """Récupère un attribut d'un objet ou d'un dict."""
+    if isinstance(obj, dict):
+        return obj.get(name)
+    return getattr(obj, name, None)

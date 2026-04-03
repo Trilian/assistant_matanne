@@ -1492,8 +1492,7 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("dashboard.widget.action_rapide", _traiter_action_rapide_dashboard, priority=75)
     compteur += 1
 
-    # ── Métriques (priorité moyenne) ──
-    # ── Phase 2 — Bridges inter-modules (priorité 80) ──
+    # ── Bridges inter-modules (priorité 80) ──
 
     # Bridge 1: Planning validé → courses auto
     bus.souscrire("planning.valide", _generer_courses_depuis_planning, priority=80)
@@ -1503,7 +1502,7 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("inventaire.peremption_proche", _suggerer_recettes_anti_gaspi, priority=80)
     compteur += 1
 
-    # Bridge 3: Budget dépassement → push notification (complète D.3)
+    # Bridge 3: Budget dépassement → push notification
     bus.souscrire("budget.depassement", _notifier_alerte_budget_push, priority=78)
     compteur += 1
 

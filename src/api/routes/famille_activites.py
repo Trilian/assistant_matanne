@@ -288,27 +288,7 @@ async def modifier_activite(
                 "date_prevue": activite.date_prevue.isoformat(),
             }
 
-    resultat = await executer_async(_query)
-
-    # Bridge 4 — émettre activites.terminee pour enregistrer un jalon Jules si pertinent
-    try:
-        if payload.get("statut") in ("terminé", "terminee", "done", "completed"):
-            from src.services.core.events import obtenir_bus
-            obtenir_bus().emettre(
-                "activites.terminee",
-                {
-                    "activite_id": activite_id,
-                    "nom": resultat.get("titre", ""),
-                    "categorie": payload.get("type_activite", payload.get("categorie", "")),
-                    "user_id": user.get("sub", ""),
-                },
-                source="route_famille_activites",
-            )
-    except Exception as _evt_exc:
-        import logging as _log
-        _log.getLogger(__name__).debug("Événement activites.terminee non émis: %s", _evt_exc)
-
-    return resultat
+    return await executer_async(_query)
 
 
 @router.delete("/activites/{activite_id}", responses=REPONSES_CRUD_SUPPRESSION)

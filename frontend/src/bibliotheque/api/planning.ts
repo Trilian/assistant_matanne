@@ -167,25 +167,8 @@ export async function obtenirSemaineUnifiee(dateDebut?: string): Promise<Semaine
 /** Planning du jour — extrait de la semaine courante */
 export async function obtenirPlanningAujourdhui(): Promise<PlanningSemaine> {
   return obtenirPlanningSemaine();
-// ─── Adaptation Jules ──────────────────────────────────────
-}
-export interface ResultatAdaptationJules {
-  message: string;
-  id?: number;
-  data?: {
-    nb_adapte: number;
-    nb_erreurs: number;
-    details: { repas_id: number; statut: string; version_jules?: string }[];
-  };
 }
 
-/** Adapter tous les repas d'un planning pour Jules (IM1 — IA nutrition pédiatrique) */
-export async function adapterPlanningJules(planningId: number): Promise<ResultatAdaptationJules> {
-  const { data } = await clientApi.post<ResultatAdaptationJules>(
-    `/planning/${planningId}/adapter-jules`
-  );
-  return data;
-}
 /** Météo courante (stub — à connecter à un service météo) */
 export async function obtenirMeteo(): Promise<{ temperature: number; condition: string; humidity?: number } | null> {
   return null;

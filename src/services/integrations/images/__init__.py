@@ -12,13 +12,17 @@ from .generator import (
     PIXABAY_API_KEY,
     UNSPLASH_API_KEY,
     ServiceGenerateurImages,
-    obtenir_image_generator_service,
+    generer_image_recette,
+    get_image_generator_service,
     obtenir_service_generateur_images,
+    telecharger_image_depuis_url,
 )
 
 __all__ = [
     "ServiceGenerateurImages",
-    "obtenir_image_generator_service",
+    "generer_image_recette",
+    "telecharger_image_depuis_url",
+    "get_image_generator_service",
     "obtenir_service_generateur_images",
     "LEONARDO_API_KEY",
     "PEXELS_API_KEY",

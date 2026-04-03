@@ -17,12 +17,9 @@ from src.api.schemas.errors import REPONSES_AUTH_ADMIN
 from src.api.utils import gerer_exception_api
 
 from .admin_shared import (
-    AdminAIConsoleRequest,
     CachePurgeRequest,
-    DesactiverUtilisateurRequest,
-    NotificationTestAllRequest,
+    CacheStatsResponse,
     NotificationTestRequest,
-    UserImpersonationRequest,
     UtilisateurAdminResponse,
     _NOTIFICATION_TEMPLATES,
     _admin_timestamps,
