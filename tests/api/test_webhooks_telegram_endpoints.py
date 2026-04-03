@@ -166,3 +166,102 @@ class TestSmokeFluxPlanningCoursesTelegram:
         assert response_envoi_courses.status_code == 200
         assert response_callback_courses.status_code == 200
         assert mock_callback.await_count == 2
+
+
+class TestWebhookTelegramCommandesSprint5:
+    """Tests ciblés sur les commandes Telegram du sprint 5."""
+
+    def test_commande_planning_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 3001,
+            "message": {
+                "message_id": 201,
+                "date": 1234567892,
+                "chat": {"id": 123456},
+                "text": "/planning",
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._envoyer_planning_commande",
+            new_callable=AsyncMock,
+        ) as mock_planning:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_planning.assert_awaited_once_with("123456")
+
+    def test_reponse_rapide_ok_declenche_validation(self, client: TestClient):
+        payload = {
+            "update_id": 3002,
+            "message": {
+                "message_id": 202,
+                "date": 1234567893,
+                "chat": {"id": 123456},
+                "text": "OK",
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._traiter_reponse_rapide_ok",
+            new_callable=AsyncMock,
+        ) as mock_ok:
+            mock_ok.return_value = True
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_ok.assert_awaited_once_with("123456")
+
+    def test_callback_menu_route_vers_handler(self, client: TestClient):
+        payload = {
+            "update_id": 3003,
+            "callback_query": {
+                "id": "callback_menu_1",
+                "from": {"id": 123456, "is_bot": False},
+                "chat_instance": "1234567890",
+                "data": "menu_cuisine",
+                "message": {
+                    "message_id": 203,
+                    "date": 1234567894,
+                    "chat": {"id": 123456},
+                },
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._traiter_callback_menu",
+            new_callable=AsyncMock,
+        ) as mock_menu:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_menu.assert_awaited_once_with("menu_cuisine", "callback_menu_1", "123456")
+
+    def test_callback_toggle_article_route_vers_handler(self, client: TestClient):
+        payload = {
+            "update_id": 3004,
+            "callback_query": {
+                "id": "callback_courses_1",
+                "from": {"id": 123456, "is_bot": False},
+                "chat_instance": "1234567890",
+                "data": "courses_toggle_article:18",
+                "message": {
+                    "message_id": 204,
+                    "date": 1234567895,
+                    "chat": {"id": 123456},
+                },
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._traiter_callback_toggle_article",
+            new_callable=AsyncMock,
+        ) as mock_toggle:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_toggle.assert_awaited_once_with(
+            "courses_toggle_article:18",
+            "callback_courses_1",
+            "123456",
+        )
