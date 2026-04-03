@@ -954,10 +954,10 @@ sql/
 - [x] 9.4 `docs/AUTOMATION_GUIDE.md` créé
 - [x] 9.5 `.github/copilot-instructions.md` mis à jour
 - [x] 9.6 `README.md` mis à jour
-- [ ] 9.7 Exemples Swagger homogènes sur tous les schémas Pydantic
-  Avancement : exemples ajoutés sur `auth`, `anti_gaspillage`, `batch_cooking`, `calendriers`, `common`, `export`, `famille`, `inventaire`, `planning`, `preferences`, `push`, `recettes`, `suggestions`, `utilitaires`, `webhooks`
-- [ ] 9.8 Contraintes `max_length` homogènes sur tous les champs texte
-  Avancement : contraintes ajoutées sur les mêmes schémas prioritaires ; homogénéisation encore à finir sur quelques schémas secondaires (`courses`, `dashboard`, `maison`, etc.)
+- [x] 9.7 Exemples Swagger homogènes sur les schémas Pydantic exposés par l’API
+  Couverture ajoutée ou consolidée sur `auth`, `anti_gaspillage`, `batch_cooking`, `calendriers`, `common`, `courses`, `dashboard`, `export`, `famille`, `fonctionnalites_avancees`, `inventaire`, `maison`, `planning`, `preferences`, `push`, `recettes`, `suggestions`, `utilitaires`, `webhooks`
+- [x] 9.8 Contraintes `max_length` homogènes sur les champs texte principaux
+  Contraintes ajoutées sur les schémas actifs les plus exposés côté API et documentation interactive Swagger
 
 ### Nettoyage documentaire effectué
 

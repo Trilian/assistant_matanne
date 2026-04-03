@@ -119,6 +119,20 @@ class StockCreate(BaseModel, NomValidatorMixin):
     emplacement: str | None = Field(None, max_length=200)
     prix_unitaire: float | None = Field(None, ge=0)
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "nom": "Pastilles lave-vaisselle",
+                "categorie": "entretien",
+                "quantite": 12,
+                "unite": "unités",
+                "seuil_alerte": 5,
+                "emplacement": "cellier",
+                "prix_unitaire": 0.18,
+            }
+        }
+    }
+
 class StockPatch(BaseModel):
     nom: str | None = Field(None, max_length=200)
     categorie: str | None = Field(None, max_length=100)
@@ -129,14 +143,30 @@ class StockPatch(BaseModel):
     prix_unitaire: float | None = Field(None, ge=0)
 
 class StockResponse(IdentifiedResponse):
-    nom: str
-    categorie: str | None = None
+    nom: str = Field(max_length=200)
+    categorie: str | None = Field(None, max_length=100)
     quantite: float = 0
-    unite: str | None = None
+    unite: str | None = Field(None, max_length=50)
     seuil_alerte: float = 0
-    emplacement: str | None = None
+    emplacement: str | None = Field(None, max_length=200)
     prix_unitaire: float | None = None
     en_alerte: bool = False
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "id": 14,
+                "nom": "Pastilles lave-vaisselle",
+                "categorie": "entretien",
+                "quantite": 12,
+                "unite": "unités",
+                "seuil_alerte": 5,
+                "emplacement": "cellier",
+                "prix_unitaire": 0.18,
+                "en_alerte": False,
+            }
+        }
+    }
 
 # Meubles
 
@@ -239,7 +269,23 @@ class AbonnementCreate(BaseModel):
     date_fin_engagement: _dt.date | None = None
     meilleur_prix_trouve: float | None = Field(None, ge=0)
     fournisseur_alternatif: str | None = Field(None, max_length=200)
-    notes: str | None = None
+    notes: str | None = Field(None, max_length=1000)
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "type_abonnement": "electricite",
+                "fournisseur": "EDF",
+                "numero_contrat": "AB-2026-001",
+                "prix_mensuel": 82.5,
+                "date_debut": "2025-11-01",
+                "date_fin_engagement": "2026-11-01",
+                "meilleur_prix_trouve": 76.9,
+                "fournisseur_alternatif": "TotalEnergies",
+                "notes": "Comparer au renouvellement annuel.",
+            }
+        }
+    }
 
 class AbonnementPatch(BaseModel):
     type_abonnement: str | None = Field(None, max_length=50)
@@ -250,18 +296,35 @@ class AbonnementPatch(BaseModel):
     date_fin_engagement: _dt.date | None = None
     meilleur_prix_trouve: float | None = Field(None, ge=0)
     fournisseur_alternatif: str | None = Field(None, max_length=200)
-    notes: str | None = None
+    notes: str | None = Field(None, max_length=1000)
 
 class AbonnementResponse(IdentifiedResponse):
-    type_abonnement: str
-    fournisseur: str
-    numero_contrat: str | None = None
+    type_abonnement: str = Field(max_length=50)
+    fournisseur: str = Field(max_length=200)
+    numero_contrat: str | None = Field(None, max_length=100)
     prix_mensuel: float | None = None
     date_debut: _dt.date | None = None
     date_fin_engagement: _dt.date | None = None
     meilleur_prix_trouve: float | None = None
-    fournisseur_alternatif: str | None = None
-    notes: str | None = None
+    fournisseur_alternatif: str | None = Field(None, max_length=200)
+    notes: str | None = Field(None, max_length=1000)
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "id": 5,
+                "type_abonnement": "electricite",
+                "fournisseur": "EDF",
+                "numero_contrat": "AB-2026-001",
+                "prix_mensuel": 82.5,
+                "date_debut": "2025-11-01",
+                "date_fin_engagement": "2026-11-01",
+                "meilleur_prix_trouve": 76.9,
+                "fournisseur_alternatif": "TotalEnergies",
+                "notes": "Comparer au renouvellement annuel.",
+            }
+        }
+    }
 
 class ResumeAbonnements(BaseModel):
     total_mensuel: float = 0
@@ -665,38 +728,52 @@ class StatsHubMaisonResponse(BaseModel):
 # Briefing Maison (contexte quotidien)
 
 class AlerteMaisonResponse(BaseModel):
-    type: str
-    niveau: str
-    titre: str
-    message: str
-    action_suggeree: str | None = None
+    type: str = Field(max_length=50)
+    niveau: str = Field(max_length=30)
+    titre: str = Field(max_length=200)
+    message: str = Field(max_length=1000)
+    action_suggeree: str | None = Field(None, max_length=300)
     date_limite: _dt.date | None = None
     metadata: dict = Field(default_factory=dict)
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "type": "entretien",
+                "niveau": "attention",
+                "titre": "Filtre chaudière à vérifier",
+                "message": "Le filtre chaudière dépasse la fréquence recommandée.",
+                "action_suggeree": "Planifier une vérification ce week-end",
+                "date_limite": "2026-04-12",
+                "metadata": {"piece": "buanderie"},
+            }
+        }
+    }
+
 class TacheJourResponse(BaseModel):
-    nom: str
-    categorie: str = "entretien"
+    nom: str = Field(max_length=200)
+    categorie: str = Field("entretien", max_length=50)
     duree_estimee_min: int | None = None
-    priorite: str = "moyenne"
-    source: str = ""
+    priorite: str = Field("moyenne", max_length=30)
+    source: str = Field("", max_length=100)
     fait: bool = False
     id_source: int | None = None
 
 class MeteoResumeResponse(BaseModel):
     temperature_min: float | None = None
     temperature_max: float | None = None
-    description: str = ""
+    description: str = Field("", max_length=300)
     precipitation_mm: float = 0
-    impact_jardin: str | None = None
-    impact_menage: str | None = None
+    impact_jardin: str | None = Field(None, max_length=300)
+    impact_menage: str | None = Field(None, max_length=300)
 
 class BriefingMaisonResponse(BaseModel):
     date: _dt.date
-    resume: str = ""
+    resume: str = Field("", max_length=2000)
     taches_jour: list[str] = Field(default_factory=list)
     taches_jour_detail: list[TacheJourResponse] = Field(default_factory=list)
     alertes: list[AlerteMaisonResponse] = Field(default_factory=list)
-    meteo_impact: str | None = None
+    meteo_impact: str | None = Field(None, max_length=500)
     meteo: MeteoResumeResponse | None = None
     projets_actifs: list[str] = Field(default_factory=list)
     priorites: list[str] = Field(default_factory=list)
@@ -706,11 +783,43 @@ class BriefingMaisonResponse(BaseModel):
     cellier_alertes: list[dict] = Field(default_factory=list)
     energie_anomalies: list[dict] = Field(default_factory=list)
 
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "date": "2026-04-03",
+                "resume": "Journée calme avec un point entretien et une alerte stock.",
+                "taches_jour": ["Sortir les poubelles", "Vérifier le filtre chaudière"],
+                "taches_jour_detail": [{"nom": "Vérifier le filtre chaudière", "categorie": "entretien", "duree_estimee_min": 20, "priorite": "haute", "source": "routine", "fait": False, "id_source": 8}],
+                "alertes": [{"type": "entretien", "niveau": "attention", "titre": "Filtre chaudière à vérifier", "message": "Le filtre chaudière dépasse la fréquence recommandée.", "action_suggeree": "Planifier une vérification ce week-end", "date_limite": "2026-04-12", "metadata": {"piece": "buanderie"}}],
+                "meteo_impact": "Temps sec, bon créneau pour arroser le jardin en soirée.",
+                "meteo": {"temperature_min": 8, "temperature_max": 17, "description": "éclaircies", "precipitation_mm": 0, "impact_jardin": "Arrosage utile", "impact_menage": None},
+                "projets_actifs": ["Réaménagement chambre Jules"],
+                "priorites": ["Racheter du liquide vaisselle"],
+                "eco_score_jour": 78,
+                "entretiens_saisonniers": [],
+                "jardin": [],
+                "cellier_alertes": [],
+                "energie_anomalies": [],
+            }
+        }
+    }
+
 class PreferencesMenageRequest(BaseModel):
     jours_off: list[str] = Field(default_factory=list)
-    creneau_horaire: str | None = None
-    intensite: str = Field("normal", pattern="^(leger|normal|intensif)$")
+    creneau_horaire: str | None = Field(None, max_length=50)
+    intensite: str = Field("normal", pattern="^(leger|normal|intensif)$", max_length=20)
     responsables: list[str] = Field(default_factory=list)
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "jours_off": ["samedi"],
+                "creneau_horaire": "18:00-19:00",
+                "intensite": "normal",
+                "responsables": ["Anne", "Mathieu"],
+            }
+        }
+    }
 
 class PlanningSemaineResponse(BaseModel):
     date_debut: _dt.date

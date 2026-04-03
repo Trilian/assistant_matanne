@@ -11,17 +11,20 @@ dist/
 
 # Virtual Environment
 .venv/
+.venv*/
 venv/
 ENV/
 env/
 
-# Pytest
+# Pytest / mutation testing
 .pytest_cache/
 .coverage
 htmlcov/
 coverage*.json
 cov_*.json
 cov_*.txt
+mutants/
+.mutmut-cache/
 
 # Mypy
 .mypy_cache/

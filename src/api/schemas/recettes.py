@@ -239,7 +239,7 @@ class RecetteResponse(RecetteBase, IdentifiedResponse):
                     }
                 ],
                 "est_favori": True,
-                "url_source": null,
+                "url_source": None,
                 "compatible_cookeo": False,
                 "compatible_monsieur_cuisine": False,
                 "compatible_airfryer": True,
