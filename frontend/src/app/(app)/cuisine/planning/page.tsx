@@ -62,6 +62,7 @@ import {
 } from "@/bibliotheque/api/planning";
 import { toast } from "sonner";
 import { genererCoursesDepuisPlanning, type GenererCoursesResult } from "@/bibliotheque/api/courses";
+import { envoyerPlanningTelegram } from "@/bibliotheque/api/telegram";
 import { genererSessionDepuisPlanning } from "@/bibliotheque/api/batch-cooking";
 import type { GenererSessionDepuisPlanningResult } from "@/types/batch-cooking";
 import type {
@@ -241,9 +242,18 @@ export default function PagePlanning() {
             : undefined,
       }),
     {
-      onSuccess: () => {
+      onSuccess: async (resultat) => {
         invalider(["planning"]);
         toast.success("Planning généré par l'IA !");
+
+        if (resultat?.planning_id) {
+          try {
+            await envoyerPlanningTelegram(resultat.planning_id);
+          } catch {
+            // Ne bloque pas le flux principal si Telegram échoue.
+            toast.info("Planning généré, notification Telegram non envoyée.");
+          }
+        }
       },
       onError: () => toast.error("Erreur lors de la génération IA"),
     }

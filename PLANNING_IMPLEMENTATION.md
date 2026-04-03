@@ -438,14 +438,14 @@ sql/
 
 | # | Tâche | Statut |
 |---|-------|--------|
-| 1 | Supprimer tables `garanties`, `incidents_sav` dans `06_maison.sql` | ⬜ |
-| 2 | Remplacer tables `contrats`, `contrats_maison`, `factures` → `abonnements` | ⬜ |
-| 3 | Renommer `comparatifs` → `alternatives_abonnement` | ⬜ |
-| 4 | Vérifier et nettoyer `10_finances.sql` (refs contrats) | ⬜ |
+| 1 | Supprimer tables `garanties`, `incidents_sav` dans `06_maison.sql` | ✅ |
+| 2 | Remplacer tables `contrats`, `contrats_maison`, `factures` → `abonnements` | ✅ |
+| 3 | Renommer `comparatifs` → `alternatives_abonnement` | ✅ N/A — absorbé par le modèle `abonnements` (`meilleur_prix_trouve`, `fournisseur_alternatif`) |
+| 4 | Vérifier et nettoyer `10_finances.sql` (refs contrats) | ✅ |
 | 5 | Nettoyer `12_triggers.sql` (triggers garanties/contrats) | ✅ |
 | 6 | Nettoyer `15_rls_policies.sql` (policies tables supprimées) | ✅ |
-| 7 | Lancer `python scripts/audit_orm_sql.py` pour détecter désalignements | ⬜ |
-| 8 | Régénérer `INIT_COMPLET.sql` | ⬜ |
+| 7 | Lancer `python scripts/audit_orm_sql.py` pour détecter désalignements | ✅ |
+| 8 | Régénérer `INIT_COMPLET.sql` | ✅ |
 
 ---
 
@@ -455,13 +455,13 @@ sql/
 |---|-------|--------|
 | 1 | Supprimer/adapter tests modules supprimés (RGPD, garanties, contrats) | ✅ |
 | 2 | Renommer tests avec noms de sprint → noms fonctionnels | ✅ |
-| 3 | Mettre à jour classes de test (noms de phase → fonctionnels) | ⬜ |
-| 4 | Nettoyer `docs/API_REFERENCE.md` (retirer garanties, contrats, RGPD) | ⬜ |
-| 5 | Nettoyer `docs/API_SCHEMAS.md` (idem) | ⬜ |
-| 6 | Mettre à jour `docs/MODULES.md` (retirer modules supprimés) | ⬜ |
-| 7 | Mettre à jour `docs/CRON_JOBS.md` (retirer jobs supprimés) | ⬜ |
-| 8 | Mettre à jour `docs/guides/maison/` (retirer garanties/contrats) | ⬜ |
-| 9 | Mettre à jour `docs/INDEX.md` (refléter nouvelle structure) | ⬜ |
+| 3 | Mettre à jour classes de test (noms de phase → fonctionnels) | ✅ |
+| 4 | Nettoyer `docs/API_REFERENCE.md` (retirer garanties, contrats, RGPD) | ✅ N/A — pas de références restantes à nettoyer |
+| 5 | Nettoyer `docs/API_SCHEMAS.md` (idem) | ✅ |
+| 6 | Mettre à jour `docs/MODULES.md` (retirer modules supprimés) | ✅ |
+| 7 | Mettre à jour `docs/CRON_JOBS.md` (retirer jobs supprimés) | ✅ N/A — pas de jobs supprimés référencés |
+| 8 | Mettre à jour `docs/guides/maison/` (retirer garanties/contrats) | ✅ N/A — guide aligné (badge garantie conservé, pas de section contrats legacy) |
+| 9 | Mettre à jour `docs/INDEX.md` (refléter nouvelle structure) | ✅ |
 | 10 | Lancer `pytest` complet — fixer toute régression | ✅ |
 | 11 | Lancer `npm run build` frontend — fixer toute erreur | ✅ |
 

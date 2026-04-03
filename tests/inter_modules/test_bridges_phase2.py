@@ -26,7 +26,7 @@ class _BusFaux:
 
 
 @pytest.mark.asyncio
-async def test_valider_planning_emet_events_phase2(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_valider_planning_emet_events_inter_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     from src.api.routes import planning as routes_planning
 
     bus = _BusFaux()

@@ -457,8 +457,13 @@ async def modifier_message(
 # FONCTIONS MÉTIER (mêmes signatures que whatsapp.py)
 # ═══════════════════════════════════════════════════════════
 
-async def envoyer_planning_semaine(planning_texte: str) -> bool:
-    """Envoie le planning semaine avec boutons de validation."""
+async def envoyer_planning_semaine(planning_texte: str, planning_id: int | None = None) -> bool:
+    """Envoie le planning semaine avec boutons de validation.
+    
+    Args:
+        planning_texte: Texte formaté du planning à afficher
+        planning_id: ID du planning (optionnel pour Phase 5.2 - callbacks avec ID)
+    """
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
 
@@ -468,14 +473,26 @@ async def envoyer_planning_semaine(planning_texte: str) -> bool:
 
     message = f"🍽️ <b>Planning repas de la semaine</b>\n\n{planning_texte}"
 
-    return await envoyer_message_interactif(
-        destinataire=chat_id,
-        corps=message,
-        boutons=[
+    # Callbacks avec planning_id pour Phase 5.2 (max 64 bytes par callback_data)
+    # Format: "planning_valider:ID", "planning_modifier:ID", "planning_regenerer:ID"
+    if planning_id:
+        boutons = [
+            {"id": f"planning_valider:{planning_id}", "title": "✅ Valider"},
+            {"id": f"planning_modifier:{planning_id}", "title": "✏️ Modifier"},
+            {"id": f"planning_regenerer:{planning_id}", "title": "🔄 Régénérer"},
+        ]
+    else:
+        # Backward compat: callbacks sans ID (anciens flux)
+        boutons = [
             {"id": "planning_valider", "title": "✅ Valider"},
             {"id": "planning_modifier", "title": "✏️ Modifier"},
             {"id": "planning_regenerer", "title": "🔄 Régénérer"},
-        ],
+        ]
+
+    return await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps=message,
+        boutons=boutons,
     )
 
 
@@ -505,8 +522,18 @@ async def envoyer_rappel_creche(message_creche: str) -> bool:
     return await envoyer_message_telegram(chat_id, message)
 
 
-async def envoyer_liste_courses_partagee(articles: list[str], nom_liste: str = "Courses") -> bool:
-    """Envoie la liste de courses active via Telegram."""
+async def envoyer_liste_courses_partagee(
+    articles: list[str],
+    nom_liste: str = "Courses",
+    liste_id: int | None = None,
+) -> bool:
+    """Envoie la liste de courses active via Telegram avec boutons interactifs.
+    
+    Args:
+        articles: Liste d'articles à afficher
+        nom_liste: Nom de la liste (ex: "Courses lundi")
+        liste_id: ID de la liste (optionnel pour Phase 5.2 - callbacks avec ID)
+    """
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
 
@@ -516,14 +543,25 @@ async def envoyer_liste_courses_partagee(articles: list[str], nom_liste: str = "
     lignes = "\n".join(f"☐ {a}" for a in articles[:30])
     message = f"🛒 <b>{nom_liste}</b>\n\n{lignes}"
 
-    return await envoyer_message_interactif(
-        destinataire=chat_id,
-        corps=message,
-        boutons=[
+    # Callbacks avec liste_id pour Phase 5.2
+    if liste_id:
+        boutons = [
+            {"id": f"courses_confirmer:{liste_id}", "title": "✅ Confirmer"},
+            {"id": f"courses_ajouter:{liste_id}", "title": "✏️ Ajouter"},
+            {"id": f"courses_refaire:{liste_id}", "title": "❌ Refaire"},
+        ]
+    else:
+        # Backward compat: callbacks sans ID
+        boutons = [
             {"id": "courses_confirmer", "title": "✅ Confirmer"},
             {"id": "courses_ajouter", "title": "✏️ Ajouter"},
             {"id": "courses_refaire", "title": "❌ Refaire"},
-        ],
+        ]
+
+    return await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps=message,
+        boutons=boutons,
     )
 
 

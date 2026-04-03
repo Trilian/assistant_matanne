@@ -99,7 +99,7 @@
 ### Fonctionnalités
 
 - **Projets** — Gestion projets maison (tâches, timeline, budget, ROI)
-- **Charges** — Abonnements, factures, comparatifs
+- **Charges** — Abonnements, alternatives fournisseurs, suivi des échéances
 - **Dépenses** — Suivi dépenses maison par catégorie
 - **Énergie** — Relevés compteurs, consommation, prévisions IA
 - **Entretien** — Tâches entretien, entretiens saisonniers, artisans

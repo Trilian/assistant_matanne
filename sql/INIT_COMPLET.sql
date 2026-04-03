@@ -2,7 +2,7 @@
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
 -- Version    : 3.1 (régénéré automatiquement)
--- Généré le  : 2026-04-03 10:18 UTC
+-- Généré le  : 2026-04-03 12:47 UTC
 -- Source     : sql/schema/*.sql (18 fichiers, ~4902 lignes)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
@@ -3954,7 +3954,7 @@ ORDER BY d.jour;
 -- ============================================================================
 -- Index composites et index de performance ajoutés après V005.
 -- Contraintes CHECK pour les enums VARCHAR (V005 absorbé).
--- La majorité des index sont définis inline dans les fichiers
+-- La majorité des index sont inline avec les CREATE TABLE dans les fichiers
 -- de domaine (03-11). Ce fichier contient uniquement les index additionnels.
 -- ============================================================================
 

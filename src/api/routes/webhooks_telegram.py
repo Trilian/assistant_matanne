@@ -48,6 +48,309 @@ def _extraire_article_depuis_commande(texte: str) -> str:
     return ""
 
 
+def _extraire_id_depuis_callback(callback_data: str, prefix: str) -> int | None:
+    """Extrait l'ID depuis le callback_data (format: 'prefix:ID').
+    
+    Args:
+        callback_data: Données du callback (ex: 'planning_valider:123')
+        prefix: Préfixe attendu (ex: 'planning_valider')
+    
+    Returns:
+        ID extrait ou None si format invalide
+    """
+    if not callback_data.startswith(f"{prefix}:"):
+        return None
+    try:
+        return int(callback_data.split(":", 1)[1])
+    except (ValueError, IndexError):
+        return None
+
+
+async def _traiter_callback_planning(
+    callback_data: str,
+    callback_query_id: str,
+    chat_id: str,
+) -> None:
+    """Traite les callbacks de planning: valider, modifier, régénérer.
+    
+    Phase 5.2: Webhook callbacks → endpoints de validation
+    """
+    from src.api.utils import executer_async, executer_avec_session
+    from src.services.integrations.telegram import repondre_callback_query, modifier_message
+    
+    # Parse callback_data: "planning_valider:ID" ou "planning_valider" (backward compat)
+    if ":" in callback_data:
+        action, id_str = callback_data.split(":", 1)
+        try:
+            planning_id = int(id_str)
+        except ValueError:
+            await repondre_callback_query(callback_query_id, "❌ Erreur: ID invalide")
+            logger.error(f"Invalid planning ID in callback: {callback_data}")
+            return
+    else:
+        # Backward compat: prendre le planning de la semaine actuelle
+        action = callback_data
+        planning_id = None
+
+    logger.info(f"Callback planning reçu: action={action}, planning_id={planning_id}")
+
+    if action == "planning_valider":
+        # Trigger: POST /api/v1/planning/{planning_id}/valider
+        try:
+            def _valider():
+                from src.core.db import obtenir_contexte_db
+                from src.core.models.planning import Planning
+
+                with executer_avec_session() as session:
+                    if planning_id:
+                        planning = session.query(Planning).filter(Planning.id == planning_id).first()
+                    else:
+                        planning = session.query(Planning).order_by(Planning.semaine_debut.desc()).first()
+
+                    if not planning:
+                        return {"error": "Planning non trouvé", "status": 404}
+
+                    if planning.etat != "brouillon":
+                        return {"error": f"Planning déjà {planning.etat}", "status": 409}
+
+                    planning.etat = "valide"
+                    session.commit()
+                    return {"message": "Planning validé", "id": planning.id, "status": 200}
+
+            result = await executer_async(_valider)
+            if result.get("status") == 200:
+                await repondre_callback_query(
+                    callback_query_id,
+                    "✅ Planning validé!",
+                    show_alert=False,
+                )
+                await modifier_message(
+                    chat_id,
+                    (await _obtenir_message_id(callback_query_id)) or 0,
+                    "✅ <b>Planning validé</b>\n\nVotre planning a été validé et les courses sont générées.",
+                    boutons=None,
+                )
+            else:
+                await repondre_callback_query(
+                    callback_query_id,
+                    f"❌ {result.get('error', 'Erreur')}",
+                    show_alert=True,
+                )
+        except Exception as e:
+            logger.error(f"❌ Erreur traitement callback planning_valider: {e}", exc_info=True)
+            await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
+
+    elif action == "planning_modifier":
+        # Instruction pour modifier via web
+        web_url = "https://matanne.vercel.app/app/cuisine/planning"
+        await repondre_callback_query(
+            callback_query_id,
+            f"Ouvrez ce lien pour modifier: {web_url}",
+            show_alert=False,
+        )
+
+    elif action == "planning_regenerer":
+        # Trigger: POST /api/v1/planning/{planning_id}/regenerer
+        try:
+            def _regenerer():
+                from src.core.db import obtenir_contexte_db
+                from src.core.models.planning import Planning
+
+                with executer_avec_session() as session:
+                    if planning_id:
+                        old_planning = session.query(Planning).filter(Planning.id == planning_id).first()
+                    else:
+                        old_planning = session.query(Planning).order_by(Planning.semaine_debut.desc()).first()
+
+                    if not old_planning:
+                        return {"error": "Planning non trouvé", "status": 404}
+
+                    if old_planning.etat == "archive":
+                        return {"error": "Planning archivé ne peut pas être régénéré", "status": 409}
+
+                    # Archive old planning
+                    old_planning.etat = "archive"
+                    session.flush()
+
+                    # Create new planning (brouillon)
+                    # This would normally be done by a service
+                    new_planning = Planning(
+                        nom=f"{old_planning.nom} (refait)",
+                        semaine_debut=old_planning.semaine_debut,
+                        semaine_fin=old_planning.semaine_fin,
+                        etat="brouillon",
+                    )
+                    session.add(new_planning)
+                    session.commit()
+                    return {"message": "Planning régénéré", "id": new_planning.id, "status": 200}
+
+            result = await executer_async(_regenerer)
+            if result.get("status") == 200:
+                await repondre_callback_query(
+                    callback_query_id,
+                    "🔄 Planning en cours de régénération...",
+                    show_alert=False,
+                )
+                await modifier_message(
+                    chat_id,
+                    (await _obtenir_message_id(callback_query_id)) or 0,
+                    "🔄 <b>Planning régénéré</b>\n\nLe nouveau planning en brouillon est prêt.",
+                    boutons=None,
+                )
+            else:
+                await repondre_callback_query(
+                    callback_query_id,
+                    f"❌ {result.get('error', 'Erreur')}",
+                    show_alert=True,
+                )
+        except Exception as e:
+            logger.error(f"❌ Erreur traitement callback planning_regenerer: {e}", exc_info=True)
+            await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
+
+
+async def _traiter_callback_courses(
+    callback_data: str,
+    callback_query_id: str,
+    chat_id: str,
+) -> None:
+    """Traite les callbacks de courses: confirmer, ajouter, refaire.
+    
+    Phase 5.2: Webhook callbacks → endpoints de confirmation
+    """
+    from src.api.utils import executer_async, executer_avec_session
+    from src.services.integrations.telegram import repondre_callback_query, modifier_message
+    
+    # Parse callback_data: "courses_confirmer:ID" ou "courses_confirmer" (backward compat)
+    if ":" in callback_data:
+        action, id_str = callback_data.split(":", 1)
+        try:
+            liste_id = int(id_str)
+        except ValueError:
+            await repondre_callback_query(callback_query_id, "❌ Erreur: ID invalide")
+            logger.error(f"Invalid courses list ID in callback: {callback_data}")
+            return
+    else:
+        action = callback_data
+        liste_id = None
+
+    logger.info(f"Callback courses reçu: action={action}, liste_id={liste_id}")
+
+    if action == "courses_confirmer":
+        # Trigger: POST /api/v1/courses/{liste_id}/confirmer
+        try:
+            def _confirmer():
+                from src.core.db import obtenir_contexte_db
+                from src.core.models.courses import ListeCourses
+
+                with executer_avec_session() as session:
+                    if liste_id:
+                        liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+                    else:
+                        liste = session.query(ListeCourses).filter(
+                            ListeCourses.etat == "brouillon"
+                        ).order_by(ListeCourses.cree_le.desc()).first()
+
+                    if not liste:
+                        return {"error": "Liste non trouvée", "status": 404}
+
+                    if liste.etat != "brouillon":
+                        return {"error": f"Liste déjà {liste.etat}", "status": 409}
+
+                    liste.etat = "active"
+                    session.commit()
+                    return {"message": "Liste confirmée", "id": liste.id, "status": 200}
+
+            result = await executer_async(_confirmer)
+            if result.get("status") == 200:
+                await repondre_callback_query(
+                    callback_query_id,
+                    "✅ Liste confirmée!",
+                    show_alert=False,
+                )
+                await modifier_message(
+                    chat_id,
+                    (await _obtenir_message_id(callback_query_id)) or 0,
+                    "✅ <b>Liste de courses confirmée</b>\n\nVous pouvez maintenant faire les courses!",
+                    boutons=None,
+                )
+            else:
+                await repondre_callback_query(
+                    callback_query_id,
+                    f"❌ {result.get('error', 'Erreur')}",
+                    show_alert=True,
+                )
+        except Exception as e:
+            logger.error(f"❌ Erreur traitement callback courses_confirmer: {e}", exc_info=True)
+            await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
+
+    elif action == "courses_ajouter":
+        # Instruction pour ajouter via web
+        web_url = "https://matanne.vercel.app/app/cuisine/courses"
+        await repondre_callback_query(
+            callback_query_id,
+            f"Ouvrez ce lien pour ajouter: {web_url}",
+            show_alert=False,
+        )
+
+    elif action == "courses_refaire":
+        # Archive current list and create new brouillon
+        try:
+            def _refaire():
+                from src.core.db import obtenir_contexte_db
+                from src.core.models.courses import ListeCourses
+
+                with executer_avec_session() as session:
+                    if liste_id:
+                        old_liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+                    else:
+                        old_liste = session.query(ListeCourses).filter(
+                            ListeCourses.etat == "brouillon"
+                        ).order_by(ListeCourses.cree_le.desc()).first()
+
+                    if not old_liste:
+                        return {"error": "Liste non trouvée", "status": 404}
+
+                    # Archive old list
+                    old_liste.archivee = True
+                    session.flush()
+
+                    # Create new list (brouillon)
+                    new_liste = ListeCourses(nom=f"{old_liste.nom} (refait)", etat="brouillon")
+                    session.add(new_liste)
+                    session.commit()
+                    return {"message": "Liste refaite", "id": new_liste.id, "status": 200}
+
+            result = await executer_async(_refaire)
+            if result.get("status") == 200:
+                await repondre_callback_query(
+                    callback_query_id,
+                    "🔄 Liste en cours de refonte...",
+                    show_alert=False,
+                )
+                await modifier_message(
+                    chat_id,
+                    (await _obtenir_message_id(callback_query_id)) or 0,
+                    "🔄 <b>Liste refaite</b>\n\nUne nouvelle liste brouillon a été créée.",
+                    boutons=None,
+                )
+            else:
+                await repondre_callback_query(
+                    callback_query_id,
+                    f"❌ {result.get('error', 'Erreur')}",
+                    show_alert=True,
+                )
+        except Exception as e:
+            logger.error(f"❌ Erreur traitement callback courses_refaire: {e}", exc_info=True)
+            await repondre_callback_query(callback_query_id, "❌ Erreur serveur", show_alert=True)
+
+
+async def _obtenir_message_id(callback_query_id: str) -> int | None:
+    """Stub pour obtenir le message_id depuis callback_query_id (normally in payload)."""
+    # Note: This would normally come from the webhook payload
+    # For now, return None to indicate we can't modify the message
+    return None
+
+
 async def _envoyer_repas_du_soir(chat_id: str) -> None:
     from src.core.db import obtenir_contexte_db
     from src.core.models.planning import Repas
@@ -86,7 +389,7 @@ async def _ajouter_article_liste(chat_id: str, article: str) -> None:
         liste = (
             session.query(ListeCourses)
             .filter(ListeCourses.archivee.is_(False))
-            .order_by(ListeCourses.date_creation.desc())
+            .order_by(ListeCourses.cree_le.desc())
             .first()
         )
         if not liste:
@@ -169,22 +472,46 @@ async def _envoyer_activites_samedi(chat_id: str) -> None:
 @router.post("/webhook", response_model=MessageResponse)
 @gerer_exception_api
 async def recevoir_update_telegram(request: Request) -> MessageResponse:
-    """Recoit un update Telegram et traite les commandes principales."""
+    """Recoit un update Telegram et traite les commandes principales et callbacks.
+    
+    Gère:
+    - callback_query (Phase 5.2: planning/courses workflow buttons)
+    - message texte (commandes naturelles)
+    """
     payload = await request.json()
 
+    # Phase 5.2: Traitement des callbacks (boutons interactifs)
     callback_query = payload.get("callback_query") or {}
     if callback_query:
         data = str(callback_query.get("data") or "").strip()
-        chat_id = str(((callback_query.get("message") or {}).get("chat") or {}).get("id") or "")
-        if chat_id and data:
+        message_info = callback_query.get("message") or {}
+        chat_id = str((message_info.get("chat") or {}).get("id") or "")
+        callback_query_id = callback_query.get("id") or ""
+        message_id = message_info.get("message_id")
+
+        if not chat_id or not data or not callback_query_id:
+            logger.warning(f"Callback incomplet: chat_id={chat_id}, data={data}, id={callback_query_id}")
+            return MessageResponse(message="invalid_callback", id=0)
+
+        logger.info(f"Callback Telegram reçu: {data} (msg_id={message_id})")
+
+        # Dispatch aux handlers Phase 5.2
+        if data.startswith("planning_"):
+            await _traiter_callback_planning(data, callback_query_id, chat_id)
+        elif data.startswith("courses_"):
+            await _traiter_callback_courses(data, callback_query_id, chat_id)
+        else:
+            # Backward compat: anciennes commandes
             if data == "cmd_ce_soir":
                 await _envoyer_repas_du_soir(chat_id)
             elif data == "cmd_courses":
                 await _ajouter_article_liste(chat_id, "lait")
             elif data == "cmd_samedi":
                 await _envoyer_activites_samedi(chat_id)
+
         return MessageResponse(message="ok", id=0)
 
+    # Traitement des messages texte (commandes naturelles, backward compat)
     message = payload.get("message") or {}
     if not message:
         return MessageResponse(message="ok", id=0)

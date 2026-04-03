@@ -349,7 +349,7 @@ class TestAdminInterModuleBridgesStatus:
     """Endpoint statut opÃ©rationnel des bridges bridges inter-modules."""
 
     @pytest.mark.asyncio
-    async def test_status_phase5_presence_mode(self, async_client: httpx.AsyncClient):
+    async def test_status_bridges_presence_mode(self, async_client: httpx.AsyncClient):
         response = await async_client.get("/api/v1/admin/bridges/status?inclure_smoke=false")
         assert response.status_code == 200
 

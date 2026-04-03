@@ -636,7 +636,7 @@ class TestExpirationJobsDryRun:
 
     )
 
-    def test_job_sprint_15_supporte_dry_run(self, job_id):
+    def test_job_automatisation_supporte_dry_run(self, job_id):
 
         """Chaque job jobs automatisation doit renvoyer un statut dry_run sans exÃ©cution rÃ©elle."""
 
@@ -682,7 +682,7 @@ class TestWeekendWeeklyReportJobsDryRun:
 
     )
 
-    def test_job_sprint_16_supporte_dry_run(self, job_id):
+    def test_job_notifications_supporte_dry_run(self, job_id):
 
         """Chaque job notifications Telegram/Email doit renvoyer un statut dry_run sans exÃ©cution rÃ©elle."""
 
