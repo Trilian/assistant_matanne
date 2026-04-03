@@ -933,7 +933,7 @@ async def generer_depuis_planning(
                 })
 
             # 5) Créer la ListeCourses + ArticleCourses
-            liste = ListeCourses(nom=data.nom_liste, archivee=False)
+            liste = ListeCourses(nom=data.nom_liste, archivee=False, etat="brouillon")
             session.add(liste)
             session.flush()
 
@@ -995,6 +995,44 @@ async def generer_depuis_planning(
             }
 
     return await executer_async(_generate)
+
+
+@router.post(
+    "/{liste_id}/confirmer",
+    response_model=MessageResponse,
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def confirmer_courses(
+    liste_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Confirme une liste brouillon pour la passer en mode courses actif."""
+    from src.core.models import ListeCourses
+
+    def _confirmer() -> MessageResponse:
+        with executer_avec_session() as session:
+            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+            if not liste:
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
+
+            if liste.etat == "terminee":
+                raise HTTPException(
+                    status_code=409,
+                    detail="Cette liste est déjà terminée et ne peut plus être confirmée",
+                )
+
+            liste.etat = "active"
+            liste.archivee = False
+            session.commit()
+
+            return MessageResponse(
+                message="Liste confirmée et activée",
+                id=liste_id,
+                data={"etat": liste.etat},
+            )
+
+    return await executer_async(_confirmer)
 
 
 @router.delete("/{liste_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
@@ -1107,7 +1145,7 @@ async def valider_courses(
     liste_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Valide une liste de courses : incrémente l'inventaire + met à jour l'historique d'achats.
+    """Finalise une liste active : incrémente inventaire + met à jour historique d'achats.
 
     Pour chaque article coché :
     - Incrémente l'article correspondant dans l'inventaire (ou le crée)
@@ -1190,7 +1228,8 @@ async def valider_courses(
                             )
                         )
 
-            # Archiver la liste
+            # Finaliser la liste
+            liste.etat = "terminee"
             liste.archivee = True
             session.commit()
 

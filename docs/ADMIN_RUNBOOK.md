@@ -72,7 +72,7 @@ Protection : route API via `require_role("admin")` + layout frontend via `admin/
 
 | Méthode | Route | Usage |
 | --------- | ------- | ------- |
-| `POST` | `/api/v1/admin/notifications/test` | Test sur un canal (ntfy/push/email/whatsapp) |
+| `POST` | `/api/v1/admin/notifications/test` | Test sur un canal (ntfy/push/email/Telegram) |
 | `POST` | `/api/v1/admin/notifications/test-all` | Test multi-canal avec failover |
 | `GET` | `/api/v1/admin/notifications/channels` | Canaux configurés + statut |
 | `GET` | `/api/v1/admin/notifications/queue` | File d'attente notifications digest |
@@ -214,7 +214,7 @@ Points d'attention :
 
 - `push` nécessite un abonnement navigateur actif
 - `email` nécessite config Resend valide
-- `whatsapp` dépend de la config Meta Cloud API
+- `Telegram` dépend de la config Telegram Bot API
 
 ### Gestion utilisateurs
 
@@ -276,3 +276,4 @@ Simule le flux inter-module sans effets de bord (utile pour valider le wiring).
 - `docs/NOTIFICATIONS.md` — Système de notifications
 - `docs/TROUBLESHOOTING.md` — Guide de dépannage
 - `docs/DEVELOPER_SETUP.md` — Setup développeur
+

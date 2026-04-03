@@ -21,7 +21,7 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from .base import Base
 from .mixins import CreeLeMixin, TimestampMixin
@@ -53,7 +53,8 @@ class Planning(CreeLeMixin, Base):
     nom: Mapped[str] = mapped_column(String(200), nullable=False)
     semaine_debut: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     semaine_fin: Mapped[date] = mapped_column(Date, nullable=False)
-    statut: Mapped[str] = mapped_column(String(20), nullable=False, default="actif", index=True)
+    etat: Mapped[str] = mapped_column(String(20), nullable=False, default="brouillon", index=True)
+    statut = synonym("etat")
     genere_par_ia: Mapped[bool] = mapped_column(Boolean, default=False)
     notes: Mapped[str | None] = mapped_column(Text)
 
@@ -64,18 +65,21 @@ class Planning(CreeLeMixin, Base):
 
     def __init__(self, **kwargs):
         # Compat historique: certains appels utilisent encore `actif=True/False`.
+        statut = kwargs.pop("statut", None)
         actif = kwargs.pop("actif", None)
-        if actif is not None and "statut" not in kwargs:
-            kwargs["statut"] = "actif" if bool(actif) else "inactif"
+        if statut is not None and "etat" not in kwargs:
+            kwargs["etat"] = statut
+        if actif is not None and "etat" not in kwargs:
+            kwargs["etat"] = "valide" if bool(actif) else "archive"
         super().__init__(**kwargs)
 
     @property
     def actif(self) -> bool:
-        return self.statut == "actif"
+        return self.etat in {"actif", "valide"}
 
     @actif.setter
     def actif(self, value: bool) -> None:
-        self.statut = "actif" if bool(value) else "inactif"
+        self.etat = "valide" if bool(value) else "archive"
 
     def __repr__(self) -> str:
         return f"<Planning(id={self.id}, nom='{self.nom}')>"

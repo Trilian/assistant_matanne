@@ -1,6 +1,6 @@
-# Admin Guide — Assistant MaTanne
+﻿# Admin Guide â€” Assistant MaTanne
 
-> Guide opératoire du module administration.
+> Guide opÃ©ratoire du module administration.
 
 ---
 
@@ -11,31 +11,31 @@ Le module admin permet de:
 - superviser les services
 - lancer des jobs manuellement
 - tester les notifications
-- auditer l'activité
-- diagnostiquer les problèmes de cohérence/cache
+- auditer l'activitÃ©
+- diagnostiquer les problÃ¨mes de cohÃ©rence/cache
 
 ---
 
-## Accès et sécurité
+## AccÃ¨s et sÃ©curitÃ©
 
-Toutes les routes admin sont protégées par rôle `admin`.
+Toutes les routes admin sont protÃ©gÃ©es par rÃ´le `admin`.
 
-Pré-requis:
+PrÃ©-requis:
 
-- être authentifié
-- posséder le rôle admin dans le profil
+- Ãªtre authentifiÃ©
+- possÃ©der le rÃ´le admin dans le profil
 
-Contrôles:
+ContrÃ´les:
 
 - `Depends(require_role("admin"))`
-- rate limiting sur les actions sensibles (ex: exécution manuelle de jobs)
+- rate limiting sur les actions sensibles (ex: exÃ©cution manuelle de jobs)
 - audit log sur actions mutantes
 
 ---
 
 ## Endpoints principaux
 
-Référence: `src/api/routes/admin.py`
+RÃ©fÃ©rence: `src/api/routes/admin.py`
 
 - `GET /api/v1/admin/audit-logs`
 - `GET /api/v1/admin/audit-stats`
@@ -54,65 +54,65 @@ Référence: `src/api/routes/admin.py`
 
 ---
 
-## Procédures courantes
+## ProcÃ©dures courantes
 
-### 1) Vérifier la santé des services
+### 1) VÃ©rifier la santÃ© des services
 
 1. Ouvrir la page admin services
 2. Appeler `GET /services/health`
-3. Vérifier services en erreur ou dégradés
+3. VÃ©rifier services en erreur ou dÃ©gradÃ©s
 
 ### 2) Lancer un job manuellement
 
 1. Aller sur la section jobs
 2. Identifier le job cible
-3. Exécuter `POST /jobs/{id}/run`
+3. ExÃ©cuter `POST /jobs/{id}/run`
 4. Consulter `GET /jobs/{id}/logs`
 
-### 3) Tester la chaîne de notifications
+### 3) Tester la chaÃ®ne de notifications
 
 1. Ouvrir l'outil de test notifications
-2. Déclencher `POST /notifications/test`
-3. Valider la réception par canal (ntfy/push/email/WhatsApp)
+2. DÃ©clencher `POST /notifications/test`
+3. Valider la rÃ©ception par canal (ntfy/push/email/Telegram)
 
-### 4) Vider le cache en sécurité
+### 4) Vider le cache en sÃ©curitÃ©
 
-1. Vérifier les stats cache
-2. Déclencher `POST /cache/clear`
-3. Re-vérifier les hit/miss après quelques requêtes
+1. VÃ©rifier les stats cache
+2. DÃ©clencher `POST /cache/clear`
+3. Re-vÃ©rifier les hit/miss aprÃ¨s quelques requÃªtes
 
 ---
 
 ## Diagnostic incidents
 
-### Jobs ne s'exécutent plus
+### Jobs ne s'exÃ©cutent plus
 
-- vérifier scheduler actif
-- vérifier logs job
-- tester déclenchement manuel
+- vÃ©rifier scheduler actif
+- vÃ©rifier logs job
+- tester dÃ©clenchement manuel
 - inspecter exceptions DB/externes
 
 ### Notifications absentes
 
 - lancer un test unitaire via route admin
-- vérifier configuration canal
-- vérifier quotas/rate limits
-- vérifier logs webhooks (WhatsApp)
+- vÃ©rifier configuration canal
+- vÃ©rifier quotas/rate limits
+- vÃ©rifier logs webhooks (Telegram)
 
-### Incohérence de données
+### IncohÃ©rence de donnÃ©es
 
-- exécuter `/db/coherence`
+- exÃ©cuter `/db/coherence`
 - recouper avec `scripts/audit_orm_sql.py`
-- valider les dernières migrations SQL
+- valider les derniÃ¨res migrations SQL
 
 ---
 
 ## Bonnes pratiques exploitation
 
-- privilégier le test manuel d'un job avant activation massive
-- garder une traçabilité des actions admin sensibles
-- ne pas vider le cache pendant des opérations critiques
-- confirmer les permissions avant désactivation d'utilisateurs
+- privilÃ©gier le test manuel d'un job avant activation massive
+- garder une traÃ§abilitÃ© des actions admin sensibles
+- ne pas vider le cache pendant des opÃ©rations critiques
+- confirmer les permissions avant dÃ©sactivation d'utilisateurs
 
 ---
 
@@ -121,4 +121,5 @@ Référence: `src/api/routes/admin.py`
 - persistance DB de l'historique jobs
 - mode dry-run des jobs
 - simulateur de flux inter-modules
-- dashboard admin temps réel (latence, req/s, cache)
+- dashboard admin temps rÃ©el (latence, req/s, cache)
+

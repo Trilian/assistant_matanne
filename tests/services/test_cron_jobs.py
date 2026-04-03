@@ -988,7 +988,7 @@ class TestExpirationJobsDetailed:
 
         message = mock_notif.call_args.kwargs["message"]
 
-        assert "3 prÃ©vues, 1 terminÃ©es" in message
+        assert "3 prévues, 1 terminées" in message
 
         assert "hausse" in message
 

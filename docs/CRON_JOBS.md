@@ -37,36 +37,36 @@ BackgroundScheduler(
 
 | ID | Horaire | Objet | Canaux |
 | ---- | --------- | ------- | -------- |
-| `rappels_famille` | Quotidien 07:00 | Rappels anniversaires, documents, crèche, jalons | WhatsApp |
+| `rappels_famille` | Quotidien 07:00 | Rappels anniversaires, documents, crèche, jalons | Telegram |
 | `rappels_maison` | Quotidien 08:00 | Entretien maison | Service interne |
 | `rappels_generaux` | Quotidien 08:30 | Rappels intelligents : stock bas | ntfy + push |
 | `push_quotidien` | Quotidien 09:00 | Push Web urgents (VAPID) | push |
 | `digest_ntfy` | Quotidien 09:00 | Digest quotidien ntfy.sh (tâches + rappels) | ntfy |
-| `digest_whatsapp_matinal` | Quotidien 07:30 | Digest matinal (repas, tâches, péremptions) | WhatsApp |
+| `digest_Telegram_matinal` | Quotidien 07:30 | Digest matinal (repas, tâches, péremptions) | Telegram |
 | `digest_notifications_queue` | Toutes les 2h à :05 | Flush file d'attente digest (notifications throttlées) | Multi-canal |
-| `rappel_courses` | Quotidien 18:00 | Rappel articles en attente dans la liste de courses | ntfy + WhatsApp |
+| `rappel_courses` | Quotidien 18:00 | Rappel articles en attente dans la liste de courses | ntfy + Telegram |
 | `push_contextuel_soir` | Quotidien 18:00 | Préparation du lendemain (planning + météo) | push + ntfy |
-| `anniversaires_j30` | Quotidien 08:00 | Anniversaires dans les 30 prochains jours | push + WhatsApp |
+| `anniversaires_j30` | Quotidien 08:00 | Anniversaires dans les 30 prochains jours | push + Telegram |
 | `recette_du_jour_push` | Quotidien 11:30 | Recette du jour (si planning actif) | push |
-| `resultat_tirage_loto` | Mar/Ven après 22:15 | Notification résultats tirage | push + WhatsApp |
+| `resultat_tirage_loto` | Mar/Ven après 22:15 | Notification résultats tirage | push + Telegram |
 
 ### Résumés hebdomadaires (6 jobs)
 
 | ID | Horaire | Objet | Canaux |
 | ---- | --------- | ------- | -------- |
-| `resume_hebdo` | Lundi 07:30 | Résumé hebdomadaire agrégé | ntfy + email + WhatsApp |
-| `resume_hebdo_ia` | Dimanche 20:30 | Résumé narratif IA de la semaine | WhatsApp + email |
-| `score_weekend` | Vendredi 17:00 | Score weekend (activités + météo + contexte Jules) | ntfy + WhatsApp |
-| `score_bien_etre_hebdo` | Dimanche 20:00 | Score bien-être hebdomadaire | ntfy + WhatsApp (si alerte) |
-| `rapport_jardin` | Mercredi 20:00 | Rapport jardin (arrosage + récoltes/plantations) | ntfy + WhatsApp |
-| `rapport_budget_hebdo` | Dimanche 18:00 | Résumé budget hebdomadaire | WhatsApp |
+| `resume_hebdo` | Lundi 07:30 | Résumé hebdomadaire agrégé | ntfy + email + Telegram |
+| `resume_hebdo_ia` | Dimanche 20:30 | Résumé narratif IA de la semaine | Telegram + email |
+| `score_weekend` | Vendredi 17:00 | Score weekend (activités + météo + contexte Jules) | ntfy + Telegram |
+| `score_bien_etre_hebdo` | Dimanche 20:00 | Score bien-être hebdomadaire | ntfy + Telegram (si alerte) |
+| `rapport_jardin` | Mercredi 20:00 | Rapport jardin (arrosage + récoltes/plantations) | ntfy + Telegram |
+| `rapport_budget_hebdo` | Dimanche 18:00 | Résumé budget hebdomadaire | Telegram |
 
 ### Rapports mensuels et analyses (9 jobs)
 
 | ID | Horaire | Objet | Canaux |
 | ---- | --------- | ------- | -------- |
-| `rapport_mensuel_budget` | Le 1er à 08:15 | Rapport budget mensuel (famille + maison + jeux) | ntfy + email + WhatsApp |
-| `rapport_mensuel_auto` | Le 1er à 08:00 | Rapport mensuel consolidé automatique | ntfy + email + WhatsApp |
+| `rapport_mensuel_budget` | Le 1er à 08:15 | Rapport budget mensuel (famille + maison + jeux) | ntfy + email + Telegram |
+| `rapport_mensuel_auto` | Le 1er à 08:00 | Rapport mensuel consolidé automatique | ntfy + email + Telegram |
 | `rapport_maison_mensuel` | Le 1er à 09:30 | Synthèse maison (projets actifs, entretien 30j, dépenses) | ntfy + email |
 | `bilan_energetique` | Le 1er à 08:30 | Bilan énergie mensuel (conso, comparaison N-1) | ntfy + email |
 | `analyse_tendances_mensuelles` | Le 1er à 09:00 | Analyse tendances mensuelles | email |
@@ -77,9 +77,9 @@ BackgroundScheduler(
 
 | ID | Horaire | Objet | Canaux |
 | ---- | --------- | ------- | -------- |
-| `alertes_peremption_48h` | Quotidien 06:00 | Alertes péremption 48h (email si <24h critique) | ntfy + WhatsApp + email (si urgent) |
+| `alertes_peremption_48h` | Quotidien 06:00 | Alertes péremption 48h (email si <24h critique) | ntfy + Telegram + email (si urgent) |
 | `alerte_stock_bas` | Quotidien 07:00 | Stock bas : ajout auto à la liste de courses | ntfy |
-| `stock_critique_zero` | Toutes les 3h à :00 | Alerte stock critique (quantité ≤ 0) | push + ntfy + WhatsApp |
+| `stock_critique_zero` | Toutes les 3h à :00 | Alerte stock critique (quantité ≤ 0) | push + ntfy + Telegram |
 | `astuce_anti_gaspillage` | Quotidien 12:00 | Astuce anti-gaspillage si 3+ articles proches péremption | push |
 | `archive_batches_expires` | Quotidien 02:00 | Archivage préparations batch cooking expirées | Service interne |
 | `sync_openfoodfacts` | Dimanche 03:00 | Refresh cache OpenFoodFacts (articles scannés, 30j) | Service interne |
@@ -88,7 +88,7 @@ BackgroundScheduler(
 
 | ID | Horaire | Objet | Canaux |
 | ---- | --------- | ------- | -------- |
-| `planning_semaine_si_vide` | Dimanche 19:00 | J-3 : vérifie planning, propose menu IA si vide | WhatsApp + push |
+| `planning_semaine_si_vide` | Dimanche 19:00 | J-3 : vérifie planning, propose menu IA si vide | Telegram + push |
 | `sync_google_calendar` | Quotidien 23:00 | Sync planning repas + activités → Google Calendar | Service interne |
 | `sync_routines_planning` | Quotidien 05:45 | Sync routines actives dans planning quotidien | Service interne |
 | `sync_calendrier_scolaire` | Quotidien 05:30 | Resync calendriers scolaires actifs | Service interne |
@@ -114,7 +114,7 @@ BackgroundScheduler(
 | ---- | --------- | ------- | -------- |
 | `prediction_courses_weekly` | Dimanche 10:00 | Pré-remplissage liste courses depuis historique | ntfy + push |
 | `analyse_nutrition_hebdo` | Dimanche 20:00 | Analyse nutritionnelle simple sur repas planifiés | ntfy + email |
-| `recap_weekend_dimanche_soir` | Dimanche 20:00 | Récap weekend dimanche soir | WhatsApp + push |
+| `recap_weekend_dimanche_soir` | Dimanche 20:00 | Récap weekend dimanche soir | Telegram + push |
 | `suggestions_saison` | Le 1er à 09:00 | Mise en avant produits de saison du mois | ntfy |
 | `nouvelle_recette_saison` | Le 1er à 11:00 | Push recette saisonnière du mois | push |
 
@@ -134,7 +134,7 @@ BackgroundScheduler(
 
 | ID | Horaire | Objet | Canaux |
 | ---- | --------- | ------- | -------- |
-| `rappel_vaccins` | Lundi 09:00 | Rappels vaccins (horizon 30j + retards) | push + ntfy + WhatsApp |
+| `rappel_vaccins` | Lundi 09:00 | Rappels vaccins (horizon 30j + retards) | push + ntfy + Telegram |
 | `rappel_documents_expirants` | Quotidien 08:00 | Rappels documents famille expirants (urgence graduée) | push + ntfy + email |
 | `check_garmin_anomalies` | Quotidien 08:00 | Alerte si inactivité Garmin > 3 jours | ntfy + push |
 
@@ -279,3 +279,4 @@ Fonctions internes :
 - Notification d'échec admin partielle (via `_notifier_echec_job_admin()`, pas systématique)
 
 Ces points sont identifiés dans le planning pour amélioration future.
+

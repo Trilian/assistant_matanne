@@ -657,7 +657,7 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | # | Visualisation | Module | Technologie | Priorité | Statut |
 |---|--------------|--------|-------------|----------|--------|
 | 1 | Timeline interactive famille | Dashboard | D3 / Framer Motion | 🔴 Haute | ✅ |
-| 2 | Kanban drag & drop projets | Maison/Travaux | DnD Kit | 🔴 Haute | ⬜ |
+| 2 | Kanban drag & drop projets | Maison/Travaux | DnD Kit | 🔴 Haute | ✅ |
 | 3 | Graphique croissance Jules OMS | Famille/Jules | Recharts | 🔴 Haute | ✅ |
 | 4 | Calendrier mosaïque repas | Cuisine/Planning | Grid CSS + images | 🔴 Haute | ✅ |
 | 5 | Gauge score bien-être | Dashboard | SVG animé | 🟡 Moyenne | ✅ |
@@ -665,18 +665,18 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | 7 | Treemap inventaire | Cuisine/Inventaire | D3 | 🟡 Moyenne | ⬜ |
 | 8 | Carte zones jardin 2D | Maison/Jardin | Canvas/SVG | 🟡 Moyenne | ⬜ |
 | 9 | Dashboard widgets configurables | Dashboard | DnD Kit | 🟡 Moyenne | ✅ |
-| 10 | Animations transitions pages | Global | Framer Motion | 🟢 Basse | ⬜ |
+| 10 | Animations transitions pages | Global | Framer Motion | 🟢 Basse | ✅ |
 | 11 | Vue "focus du jour" | Ma Journée | Layout cards | 🟢 Basse | ✅ |
 
 ### 6.2 Améliorations design existant
 
 | # | Amélioration | Détail | Priorité | Statut |
 |---|-------------|--------|----------|--------|
-| 1 | Mode sombre cohérent | Audit toutes les pages, composants custom | 🔴 Haute | ⬜ |
-| 2 | Responsive mobile | Audit toutes les pages, vérifier débordements | 🔴 Haute | ⬜ |
-| 3 | Empty states | Illustrations/messages pour les pages vides au premier lancement | 🔴 Haute | 🟡 |
-| 4 | Loading skeletons | Remplacer spinners par skeletons shadcn partout | 🟡 Moyenne | 🟡 |
-| 5 | Animations micro-interactions | Hover effects, click feedback, transitions douces | 🟡 Moyenne | ⬜ |
+| 1 | Mode sombre cohérent | Audit toutes les pages, composants custom | 🔴 Haute | ✅ |
+| 2 | Responsive mobile | Audit toutes les pages, vérifier débordements | 🔴 Haute | ✅ |
+| 3 | Empty states | Illustrations/messages pour les pages vides au premier lancement | 🔴 Haute | ✅ |
+| 4 | Loading skeletons | Remplacer spinners par skeletons shadcn partout | 🟡 Moyenne | ✅ |
+| 5 | Animations micro-interactions | Hover effects, click feedback, transitions douces | 🟡 Moyenne | ✅ |
 | 6 | Confettis célébration | Utiliser `confettis.ts` existant pour jalons Jules, badges | 🟢 Basse | ⬜ |
 
 ### 6.3 Sprint Phase 4.1 — Visualisations prioritaires
@@ -684,8 +684,8 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | Sprint | Périmètre | Livrables | Statut |
 |--------|-----------|-----------|--------|
 | 4.1 | Visualisations UI critiques | Timeline interactive, croissance OMS Jules, calendrier mosaïque repas, jauge score bien-être, widgets dashboard configurables, vue focus du jour | ✅ |
-| 4.2 | UX design système | Empty states/skeletons homogènes, responsive mobile, mode sombre cohérent | 🟡 |
-| 4.3 | Interactions avancées | Kanban projets DnD, transitions pages Framer Motion, micro-interactions étendues | ⬜ |
+| 4.2 | UX design système | Empty states/skeletons homogènes, responsive mobile, mode sombre cohérent | ✅ |
+| 4.3 | Interactions avancées | Kanban projets DnD, transitions pages Framer Motion, micro-interactions étendues | ✅ |
 
 ### 6.4 Checklist Phase 4
 

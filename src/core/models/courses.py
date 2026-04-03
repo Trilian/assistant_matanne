@@ -22,7 +22,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from .base import Base, utc_now
 from .mixins import CreeLeMixin, TimestampMixin
@@ -50,6 +50,8 @@ class ListeCourses(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     nom: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    etat: Mapped[str] = mapped_column(String(20), nullable=False, default="brouillon", index=True)
+    statut = synonym("etat")
     archivee: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     cree_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, index=True)
     modifie_le: Mapped[datetime] = mapped_column(DateTime, default=utc_now, onupdate=utc_now)
@@ -61,6 +63,10 @@ class ListeCourses(Base):
 
     def __repr__(self) -> str:
         return f"<ListeCourses(id={self.id}, nom='{self.nom}')>"
+
+    @property
+    def est_terminee(self) -> bool:
+        return self.etat == "terminee"
 
 
 class ArticleCourses(CreeLeMixin, Base):

@@ -430,9 +430,10 @@ async def valider_planning(
     planning_id: int,
     user: dict[str, Any] = Depends(require_auth),
 ) -> MessageResponse:
-    """Valide un planning proposé et le rend actif.
+    """Valide un planning brouillon et active la génération des courses.
 
-    Désactive tout planning actif précédent pour la même semaine.
+    Le planning passe à l'état ``valide``. Les autres plannings validés de la
+    même semaine sont archivés.
     """
     from src.core.models import Planning
 
@@ -446,17 +447,18 @@ async def valider_planning(
             session.query(Planning).filter(
                 Planning.semaine_debut == planning.semaine_debut,
                 Planning.id != planning_id,
-                Planning.statut == "actif",
-            ).update({"statut": "archive"})
+                Planning.etat.in_(["valide", "actif"]),
+            ).update({"etat": "archive"})
 
-            planning.statut = "actif"
+            planning.etat = "valide"
             session.commit()
 
             return MessageResponse(
-                message="Planning validé et activé",
+                message="Planning validé",
                 id=planning_id,
                 data={
                     "semaine_debut": planning.semaine_debut.isoformat() if planning.semaine_debut else None,
+                    "etat": planning.etat,
                 },
             )
 
@@ -492,7 +494,7 @@ async def valider_planning(
     except Exception as exc:
         logger.debug("Emission event planning.semaine_validee ignorée: %s", exc)
 
-    # Notification WhatsApp best-effort après validation.
+    # Notification Telegram best-effort après validation.
     try:
         from src.services.core.notifications import get_dispatcher_notifications
 
@@ -505,14 +507,62 @@ async def valider_planning(
         dispatcher.envoyer(
             user_id=user.get("sub", ""),
             message=message,
-            canaux=["whatsapp"],
+            canaux=["telegram"],
             titre="Planning validé",
             strategie="failover",
         )
     except Exception as exc:
-        logger.debug("Notification WhatsApp planning non envoyée: %s", exc)
+        logger.debug("Notification Telegram planning non envoyée: %s", exc)
 
     return resultat
+
+
+@router.post(
+    "/{planning_id}/regenerer",
+    response_model=MessageResponse,
+    responses=REPONSES_CRUD_ECRITURE,
+)
+@gerer_exception_api
+async def regenerer_planning(
+    planning_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Régénère un planning en conservant la semaine, puis remet en brouillon."""
+    from src.services.cuisine.planning import obtenir_service_planning
+
+    def _regenerer() -> MessageResponse:
+        from src.core.models import Planning
+
+        with executer_avec_session() as session:
+            planning_courant = session.query(Planning).filter(Planning.id == planning_id).first()
+            if not planning_courant:
+                raise HTTPException(status_code=404, detail="Planning non trouvé")
+
+            semaine_debut = planning_courant.semaine_debut
+            planning_courant.etat = "archive"
+            session.commit()
+
+        service = obtenir_service_planning()
+        nouveau = service.generer_planning_ia(semaine_debut=semaine_debut, preferences={})
+        if not nouveau:
+            raise HTTPException(status_code=503, detail="Impossible de régénérer le planning")
+
+        with executer_avec_session() as session:
+            planning_nouveau = session.query(Planning).filter(Planning.id == nouveau.id).first()
+            if planning_nouveau:
+                planning_nouveau.etat = "brouillon"
+                session.commit()
+
+        return MessageResponse(
+            message="Nouveau brouillon généré",
+            id=nouveau.id,
+            data={
+                "semaine_debut": semaine_debut.isoformat(),
+                "planning_source_id": planning_id,
+            },
+        )
+
+    return await executer_async(_regenerer)
 
 
 @router.post(
@@ -883,7 +933,12 @@ async def generer_planning_ia(
 
         # Reconstruire la réponse dans le même format que GET /semaine
         with executer_avec_session() as session:
-            from src.core.models import Repas
+            from src.core.models import Planning, Repas
+
+            planning_db = session.query(Planning).filter(Planning.id == planning_obj.id).first()
+            if planning_db and planning_db.etat != "brouillon":
+                planning_db.etat = "brouillon"
+                session.commit()
 
             date_fin = semaine_debut + timedelta(days=7)
             repas = (

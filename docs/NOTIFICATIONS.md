@@ -17,7 +17,7 @@
 | **ntfy** | `src/services/core/notifications/notif_ntfy.py` | Push ntfy.sh |
 | **Push Web** | `src/services/core/notifications/notif_web_core.py` | Web Push VAPID |
 | **Email** | `src/services/core/notifications/notif_email.py` | Email via Resend |
-| **WhatsApp** | `src/services/integrations/whatsapp.py` | WhatsApp via Meta Cloud API |
+| **Telegram** | `src/services/integrations/Telegram.py` | Telegram via Telegram Bot API |
 | **Templates push** | `src/services/core/notifications/notif_web_templates.py` | Templates push prédéfinies |
 | **Persistence** | `src/services/core/notifications/notif_web_persistence.py` | Stockage abonnements push |
 | **Inventaire** | `src/services/core/notifications/inventaire.py` | Alertes inventaire locales |
@@ -41,7 +41,7 @@
 | **ntfy** | [ntfy.sh](https://ntfy.sh) | Push alertes immédiates (topic: `matanne-famille`) | Topic par défaut dans `types.py` |
 | **push** | Web Push API (VAPID) | Notifications navigateur | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_EMAIL` |
 | **email** | [Resend](https://resend.com) | Résumés, rapports, alertes longues | `RESEND_API_KEY`, `EMAIL_FROM`, `FRONTEND_URL` |
-| **whatsapp** | Meta Cloud API | Rappels contextuels, digests (1000 conv/mois tier gratuit) | `META_WHATSAPP_TOKEN`, `META_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_USER_NUMBER` |
+| **Telegram** | Telegram Bot API | Rappels contextuels, digests (1000 conv/mois tier gratuit) | `META_Telegram_TOKEN`, `META_PHONE_NUMBER_ID`, `Telegram_VERIFY_TOKEN`, `Telegram_USER_NUMBER` |
 
 ---
 
@@ -51,9 +51,9 @@ Le dispatcher implémente un **failover en cascade** pour la fiabilité :
 
 ```python
 _FALLBACK_CANAUX = {
-    "push":     ["ntfy", "whatsapp", "email"],
-    "ntfy":     ["push", "whatsapp", "email"],
-    "whatsapp": ["push", "email"],
+    "push":     ["ntfy", "Telegram", "email"],
+    "ntfy":     ["push", "Telegram", "email"],
+    "Telegram": ["push", "email"],
     "email":    ["push", "ntfy"],
 }
 ```
@@ -79,11 +79,11 @@ Le dispatcher résout les canaux dans cet **ordre de priorité** :
 ```python
 _MAPPING_EVENEMENTS_CANAUX = {
     "peremption_j2":             {"categorie": "alertes",  "canaux": ["push", "ntfy"]},
-    "rappel_courses":            {"categorie": "rappels",  "canaux": ["push", "ntfy", "whatsapp"]},
-    "resume_hebdo":              {"categorie": "resumes",  "canaux": ["whatsapp", "email"]},
+    "rappel_courses":            {"categorie": "rappels",  "canaux": ["push", "ntfy", "Telegram"]},
+    "resume_hebdo":              {"categorie": "resumes",  "canaux": ["Telegram", "email"]},
     "rapport_budget_mensuel":    {"categorie": "resumes",  "canaux": ["email"]},
-    "anniversaire_j7":           {"categorie": "rappels",  "canaux": ["push", "ntfy", "whatsapp"]},
-    "tache_entretien_urgente":   {"categorie": "alertes",  "canaux": ["push", "ntfy", "whatsapp"]},
+    "anniversaire_j7":           {"categorie": "rappels",  "canaux": ["push", "ntfy", "Telegram"]},
+    "tache_entretien_urgente":   {"categorie": "alertes",  "canaux": ["push", "ntfy", "Telegram"]},
     # ... 10+ mappings configurés
 }
 ```
@@ -195,7 +195,7 @@ Interface frontend : page paramètres `frontend/src/app/(app)/parametres/page.ts
 
 ---
 
-## Rate limiting WhatsApp
+## Rate limiting Telegram
 
 - **Par destinataire** : 10 messages/heure
 - **Global quotidien** : 100 messages/jour
@@ -225,12 +225,12 @@ Interface frontend : page paramètres `frontend/src/app/(app)/parametres/page.ts
 | `DELETE` | `/api/v1/webhooks/{id}` | Supprimer webhook |
 | `POST` | `/api/v1/webhooks/{id}/test` | Tester connectivité |
 
-### WhatsApp (réception)
+### Telegram (réception)
 
 | Méthode | Route | Usage |
 | --------- | ------- | ------- |
-| `GET` | `/api/v1/whatsapp/webhook` | Vérification Meta (challenge) |
-| `POST` | `/api/v1/whatsapp/webhook` | Réception messages + réponses boutons |
+| `GET` | `/api/v1/Telegram/webhook` | Vérification Meta (challenge) |
+| `POST` | `/api/v1/Telegram/webhook` | Réception messages + réponses boutons |
 
 ### Admin notifications
 
@@ -319,5 +319,6 @@ dispatcher.vider_digest("user1")
 - Tous les envois canal wrappés en `try-except` → log erreur, retourne `False`
 - Failover garantit au moins un succès si configuré
 - File digest préserve les messages throttlés (pas de perte)
-- Rate limits WhatsApp vérifiés en DB d'abord, fallback in-memory
+- Rate limits Telegram vérifiés en DB d'abord, fallback in-memory
 - Config email manquante → skip gracieux du canal email
+

@@ -50,8 +50,9 @@ def flux_cuisine_3_clics(planning_id: int | None = None) -> dict:
                 .filter(
                     Planning.semaine_debut >= lundi,
                     Planning.semaine_debut <= dimanche,
-                    Planning.statut == "actif",
+                    Planning.etat.in_(["brouillon", "valide", "actif"]),
                 )
+                .order_by(Planning.cree_le.desc())
                 .first()
             )
 
@@ -65,29 +66,78 @@ def flux_cuisine_3_clics(planning_id: int | None = None) -> dict:
                 ],
             }
 
+        if planning.etat == "brouillon":
+            return {
+                "etape_actuelle": "valider_planning",
+                "planning": {
+                    "id": planning.id,
+                    "semaine": str(planning.semaine_debut),
+                    "etat": planning.etat,
+                },
+                "courses": None,
+                "actions_suivantes": [
+                    {
+                        "action": "valider_planning",
+                        "label": "Valider le brouillon planning",
+                        "url": f"/api/v1/planning/{planning.id}/valider",
+                    },
+                    {
+                        "action": "regenerer_planning",
+                        "label": "Régénérer le brouillon",
+                        "url": f"/api/v1/planning/{planning.id}/regenerer",
+                    },
+                ],
+            }
+
         # Étape 2: Vérifier la liste de courses
         liste = (
             session.query(ListeCourses)
             .filter(
-                ListeCourses.statut == "active",
+                ListeCourses.etat.in_(["brouillon", "active"]),
             )
-            .order_by(ListeCourses.date_creation.desc())
+            .order_by(ListeCourses.cree_le.desc())
             .first()
         )
 
         if not liste:
             return {
                 "etape_actuelle": "generer_courses",
-                "planning": {"id": planning.id, "semaine": str(planning.semaine_debut)},
+                "planning": {
+                    "id": planning.id,
+                    "semaine": str(planning.semaine_debut),
+                    "etat": planning.etat,
+                },
                 "courses": None,
                 "actions_suivantes": [
                     {"action": "generer_courses", "label": "Générer la liste de courses", "url": f"/api/v1/courses/generer-depuis-planning/{planning.id}"},
                 ],
             }
 
+        if liste.etat == "brouillon":
+            return {
+                "etape_actuelle": "confirmer_courses",
+                "planning": {
+                    "id": planning.id,
+                    "semaine": str(planning.semaine_debut),
+                    "etat": planning.etat,
+                },
+                "courses": {
+                    "id": liste.id,
+                    "etat": liste.etat,
+                    "articles": len(liste.articles or []),
+                },
+                "actions_suivantes": [
+                    {
+                        "action": "confirmer_courses",
+                        "label": "Confirmer la liste de courses",
+                        "url": f"/api/v1/courses/{liste.id}/confirmer",
+                    },
+                ],
+            }
+
         # Étape 3: Vérifier l'état du checkout
         nb_articles = len(liste.articles) if hasattr(liste, 'articles') else 0
-        nb_coches = sum(1 for a in (liste.articles or []) if a.coche) if hasattr(liste, 'articles') else 0
+        nb_coches = sum(1 for a in (liste.articles or []) if a.achete) if hasattr(liste, 'articles') else 0
 
         if nb_coches < nb_articles:
             return {

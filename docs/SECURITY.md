@@ -38,7 +38,7 @@ Reference securite applicative (backend + frontend).
 
 ## Integrations externes
 
-- WhatsApp webhook avec verification `hub.verify_token`.
+- Telegram webhook avec verification `hub.verify_token`.
 - Webhooks sortants executes avec gestion d'erreurs resiliente.
 - Sentry active via DSN uniquement si configure.
 
@@ -48,3 +48,4 @@ Reference securite applicative (backend + frontend).
 - Verifier la presence des secrets critiques.
 - Verifier les roles admin minimaux.
 - Verifier CORS et rate limits apres ajout d'endpoint.
+

@@ -48,7 +48,7 @@ Composants :
 | `generer_rapport_pdf` | Notifie qu'un rapport PDF est prêt |
 | `archiver` | Désactive la règle après exécution |
 | `notifier` | Notification ntfy + push |
-| `envoyer_whatsapp` | Notification WhatsApp |
+| `envoyer_Telegram` | Notification Telegram |
 | `envoyer_email` | Notification email |
 
 ---
@@ -136,7 +136,7 @@ Actions supplémentaires ciblées:
 
 - `creer_tache_planning`
 - `envoyer_email`
-- `envoyer_whatsapp`
+- `envoyer_Telegram`
 - `declencher_webhook`
 
 Améliorations structurelles prévues:
@@ -144,3 +144,4 @@ Améliorations structurelles prévues:
 - historique persistant des exécutions
 - mode dry-run
 - meilleure observabilité des erreurs par règle
+

@@ -20,6 +20,7 @@ import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
@@ -423,7 +424,15 @@ function OngletProjets() {
       {isLoading ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[1,2,3].map(i => <Skeleton key={i} className="h-32" />)}</div>
       ) : !projets?.length ? (
-        <Card><CardContent className="py-10 text-center text-muted-foreground"><Hammer className="h-8 w-8 mx-auto mb-2 opacity-50" />Aucun projet{statut !== "tous" ? " dans ce statut" : ""}</CardContent></Card>
+        <Card>
+          <CardContent className="py-6">
+            <EtatVide
+              Icone={Hammer}
+              titre={`Aucun projet${statut !== "tous" ? " dans ce statut" : ""}`}
+              description="Ajoutez un projet ou changez le filtre pour voir plus d'elements."
+            />
+          </CardContent>
+        </Card>
       ) : (
         statut === "tous" ? (
           <KanbanProjets
