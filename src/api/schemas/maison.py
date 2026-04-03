@@ -575,12 +575,20 @@ class ObjetCreate(BaseModel, NomValidatorMixin):
     type: str | None = Field(None, max_length=100)
     position_x: float | None = None
     position_y: float | None = None
+    date_achat: _dt.date | None = None
+    duree_garantie_mois: int | None = Field(None, ge=0, le=120)
+    marque: str | None = Field(None, max_length=100)
+    modele: str | None = Field(None, max_length=100)
 
 class ObjetPatch(BaseModel):
     nom: str | None = Field(None, max_length=200)
     type: str | None = Field(None, max_length=100)
     position_x: float | None = None
     position_y: float | None = None
+    date_achat: _dt.date | None = None
+    duree_garantie_mois: int | None = Field(None, ge=0, le=120)
+    marque: str | None = Field(None, max_length=100)
+    modele: str | None = Field(None, max_length=100)
 
 class PieceResponse(IdentifiedResponse):
     nom: str
@@ -598,6 +606,11 @@ class ObjetResponse(IdentifiedResponse):
     type: str | None = None
     position_x: float | None = None
     position_y: float | None = None
+    date_achat: _dt.date | None = None
+    duree_garantie_mois: int | None = None
+    marque: str | None = None
+    modele: str | None = None
+    sous_garantie: bool | None = None
 
 # Hub Stats
 

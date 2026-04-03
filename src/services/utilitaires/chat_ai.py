@@ -98,6 +98,25 @@ class ChatAIService(BaseAIService):
             service_name="chat_ia",
         )
 
+    def _construire_prompt(
+        self,
+        message: str,
+        historique: list[dict[str, str]] | None = None,
+    ) -> str:
+        if historique:
+            conversation = "\n".join(
+                f"{'Utilisateur' if m['role'] == 'user' else 'Assistant'}: {m['contenu']}"
+                for m in historique[-5:]
+            )
+            return f"""Historique de la conversation:
+{conversation}
+
+Utilisateur: {message}
+
+Réponds de manière cohérente avec la conversation précédente."""
+
+        return message
+
     def envoyer_message(
         self,
         message: str,
@@ -116,27 +135,29 @@ class ChatAIService(BaseAIService):
             Réponse de l'IA ou None si échec
         """
         system_prompt = SYSTEM_PROMPTS.get(contexte, SYSTEM_PROMPTS["general"])
-
-        # Construire le prompt avec historique
-        if historique:
-            conversation = "\n".join(
-                f"{'Utilisateur' if m['role'] == 'user' else 'Assistant'}: {m['contenu']}"
-                for m in historique[-5:]  # Memoire conversationnelle courte (IA4)
-            )
-            prompt = f"""Historique de la conversation:
-{conversation}
-
-Utilisateur: {message}
-
-Réponds de manière cohérente avec la conversation précédente."""
-        else:
-            prompt = message
+        prompt = self._construire_prompt(message, historique)
 
         return self.call_with_cache_sync(
             prompt=prompt,
             system_prompt=system_prompt,
             max_tokens=1000,
             use_cache=False,  # Pas de cache pour les messages conversationnels
+        )
+
+    def streamer_message(
+        self,
+        message: str,
+        contexte: ContexteChat = "general",
+        historique: list[dict[str, str]] | None = None,
+    ):
+        """Retourne les morceaux de réponse IA au fil de l'eau."""
+        system_prompt = SYSTEM_PROMPTS.get(contexte, SYSTEM_PROMPTS["general"])
+        prompt = self._construire_prompt(message, historique)
+
+        yield from self.call_with_streaming_sync(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            max_tokens=1000,
         )
 
     def envoyer_message_contextualise(

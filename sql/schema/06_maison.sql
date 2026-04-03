@@ -310,6 +310,7 @@ CREATE TABLE objets_maison (
     statut VARCHAR(50) DEFAULT 'fonctionne',
     priorite_remplacement VARCHAR(20),
     date_achat DATE,
+    duree_garantie_mois INTEGER,
     prix_achat NUMERIC(10, 2),
     prix_remplacement_estime NUMERIC(10, 2),
     marque VARCHAR(100),

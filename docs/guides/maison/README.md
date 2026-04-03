@@ -205,20 +205,20 @@ class ReleveEnergie(Base):
 
 ---
 
-## Contrats & Garanties
+## Abonnements
 
-### Fonctionnalit?s
+### Fonctionnalités
 
-- Archivage des contrats (assurance, ?nergie, internet, abonnements)
-- Dates d'?ch?ance avec alertes de renouvellement J-30
-- Garanties ?quipements avec dates d'expiration
-- Export PDF des r?capitulatifs
+- Comparateur d'abonnements (eau, électricité, gaz, assurances, téléphone, internet)
+- Coût total mensuel et annuel
+- Date fin engagement avec rappel J-30
+- Garanties équipements : badge "Sous garantie ✅ / Hors garantie ❌" sur fiche équipement
 
 ### Usage
 
 ```
-/maison/contrats  
-/maison/garanties
+/maison/abonnements
+/maison/equipements  (badge garantie sur chaque objet)
 ```
 
 ---

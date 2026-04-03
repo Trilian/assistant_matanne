@@ -1017,6 +1017,40 @@ def _generer_courses_depuis_planning(event: EvenementDomaine) -> None:
         logger.warning("Échec bridge 1 planning→courses: %s", e)
 
 
+def _notifier_courses_generees(event: EvenementDomaine) -> None:
+    """Bridge 1 bis: courses générées → notification utilisateur.
+
+    Envoie une notification ntfy informative après la génération automatique
+    de la liste de courses depuis le planning hebdomadaire.
+    Tolère les pannes — n'échoue jamais.
+    """
+    try:
+        nb_articles = int(event.data.get("nb_articles", 0) or 0)
+        semaine_debut = event.data.get("semaine_debut", "")
+        planning_id = event.data.get("planning_id", "")
+
+        from src.services.core.notifications.notif_ntfy import ServiceNtfy
+        from src.services.core.notifications.types import NotificationNtfy
+
+        ServiceNtfy().envoyer_sync(NotificationNtfy(
+            titre=f"🛒 Liste de courses générée ({nb_articles} article(s))",
+            message=(
+                f"Planning #{planning_id} validé ({semaine_debut}).\n"
+                "La liste de courses a été générée automatiquement."
+            ),
+            priorite=3,
+            tags=["shopping_cart", "white_check_mark"],
+            click_url="/cuisine/courses",
+        ))
+        logger.info(
+            "Bridge 1 bis: notification courses envoyée (planning=%s, nb_articles=%s)",
+            planning_id,
+            nb_articles,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge 1 bis courses→notif: %s", e)
+
+
 def _suggerer_recettes_anti_gaspi(event: EvenementDomaine) -> None:
     """Bridge 2: Stock bientôt périmé → suggestions recettes anti-gaspillage via IA.
 
@@ -1498,6 +1532,8 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("planning.valide", _generer_courses_depuis_planning, priority=80)
     compteur += 1
     bus.souscrire("planning.semaine_validee", _generer_courses_depuis_planning, priority=80)
+    compteur += 1
+    bus.souscrire("courses.generees", _notifier_courses_generees, priority=79)
     compteur += 1
 
     # Bridge 2: Inventaire péremption proche → anti-gaspi IA

@@ -379,6 +379,11 @@ export interface ObjetMaison {
   statut?: string;
   position_x?: number;
   position_y?: number;
+  date_achat?: string;
+  duree_garantie_mois?: number;
+  marque?: string;
+  modele?: string;
+  sous_garantie?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════

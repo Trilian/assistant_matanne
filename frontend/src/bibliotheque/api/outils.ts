@@ -2,6 +2,7 @@
 // API Outils
 // ═══════════════════════════════════════════════════════════════
 
+import { URL_API, PREFIXE_API } from "@/bibliotheque/constantes";
 import { clientApi } from "./client";
 import type { Note, NoteCreate, NotePatch } from "@/types/outils";
 
@@ -78,6 +79,19 @@ export interface ActionRapide {
   message: string;
 }
 
+interface EvenementStreamChat {
+  type: "chunk" | "done" | "error";
+  content?: string;
+  message?: string;
+  contexte?: ContexteChat;
+}
+
+export interface OptionsStreamChat {
+  signal?: AbortSignal;
+  onChunk: (chunk: string, contenuComplet: string) => void;
+  onDone?: () => void;
+}
+
 /** Envoyer un message au chat IA */
 export async function envoyerMessageChat(
   payload: MessageChatRequest
@@ -87,6 +101,90 @@ export async function envoyerMessageChat(
     payload
   );
   return data;
+}
+
+/** Streamer une réponse du chat IA via SSE. */
+export async function streamerMessageChat(
+  payload: MessageChatRequest,
+  options: OptionsStreamChat
+): Promise<void> {
+  const headers = new Headers({
+    "Content-Type": "application/json",
+    Accept: "text/event-stream",
+  });
+
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+  }
+
+  const response = await fetch(`${URL_API}${PREFIXE_API}/utilitaires/chat/message/stream`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+    credentials: "include",
+    signal: options.signal,
+  });
+
+  if (!response.ok || !response.body) {
+    throw new Error("Streaming chat indisponible");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let contenuComplet = "";
+
+  const traiterEvenement = (brut: string) => {
+    const data = brut
+      .split("\n")
+      .filter((ligne) => ligne.startsWith("data:"))
+      .map((ligne) => ligne.slice(5).trim())
+      .join("\n");
+
+    if (!data) {
+      return;
+    }
+
+    const evenement = JSON.parse(data) as EvenementStreamChat;
+
+    if (evenement.type === "chunk" && typeof evenement.content === "string") {
+      contenuComplet += evenement.content;
+      options.onChunk(evenement.content, contenuComplet);
+      return;
+    }
+
+    if (evenement.type === "error") {
+      throw new Error(evenement.message || "Erreur streaming chat IA");
+    }
+
+    if (evenement.type === "done") {
+      options.onDone?.();
+    }
+  };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
+
+    let separateur = buffer.indexOf("\n\n");
+    while (separateur !== -1) {
+      const brut = buffer.slice(0, separateur);
+      buffer = buffer.slice(separateur + 2);
+      traiterEvenement(brut);
+      separateur = buffer.indexOf("\n\n");
+    }
+
+    if (done) {
+      break;
+    }
+  }
+
+  if (buffer.trim()) {
+    traiterEvenement(buffer);
+  }
 }
 
 /** Obtenir les actions rapides pour un contexte */

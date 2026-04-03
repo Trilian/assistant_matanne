@@ -2344,6 +2344,7 @@ CREATE TABLE objets_maison (
     statut VARCHAR(50) DEFAULT 'fonctionne',
     priorite_remplacement VARCHAR(20),
     date_achat DATE,
+    duree_garantie_mois INTEGER,
     prix_achat NUMERIC(10, 2),
     prix_remplacement_estime NUMERIC(10, 2),
     marque VARCHAR(100),
@@ -3803,8 +3804,8 @@ tables_modifie_le TEXT [] := ARRAY [
         'contacts_famille', 'anniversaires_famille', 'evenements_familiaux',
         'voyages', 'checklists_voyage', 'documents_famille',
         -- Maison extensions
-        'contrats_maison', 'artisans', 'interventions_artisans', 'garanties',
-        'incidents_sav', 'articles_cellier', 'diagnostics_maison',
+        'artisans', 'interventions_artisans',
+        'articles_cellier', 'diagnostics_maison',
         'estimations_immobilieres', 'checklists_vacances', 'items_checklist',
         'traitements_nuisibles', 'devis_comparatifs', 'entretiens_saisonniers',
         -- Utilitaires
@@ -3820,7 +3821,7 @@ tables_modifie_le TEXT [] := ARRAY [
         'plans_jardin', 'zones_jardin', 'plantes_jardin',
         'pieces_maison', 'objets_maison',
         'preferences_home', 'taches_home', 'objectifs_autonomie',
-        'contrats', 'budgets_home'
+        'budgets_home'
     ];
 BEGIN FOREACH t IN ARRAY tables_modifie_le LOOP EXECUTE format(
     'DROP TRIGGER IF EXISTS trigger_update_modifie_le ON %I',
@@ -4259,8 +4260,8 @@ shared_tables TEXT[] := ARRAY[
     'versions_pieces', 'couts_travaux', 'logs_statut_objets',
     'recoltes', 'objectifs_autonomie',
     -- Maison extensions
-    'contrats_maison', 'artisans', 'interventions_artisans', 'garanties',
-    'incidents_sav', 'articles_cellier', 'diagnostics_maison',
+    'artisans', 'interventions_artisans',
+    'articles_cellier', 'diagnostics_maison',
     'estimations_immobilieres', 'checklists_vacances', 'items_checklist',
     'traitements_nuisibles', 'devis_comparatifs', 'lignes_devis',
     'entretiens_saisonniers', 'releves_compteurs',

@@ -106,6 +106,11 @@ function OngletInventaire() {
                         {obj.statut.replace(/_/g, " ")}
                       </Badge>
                     )}
+                    {obj.sous_garantie !== undefined && obj.sous_garantie !== null && (
+                      <Badge variant={obj.sous_garantie ? "default" : "secondary"} className="text-[10px]">
+                        {obj.sous_garantie ? "✅ Sous garantie" : "❌ Hors garantie"}
+                      </Badge>
+                    )}
                     {tachesRoutines && tachesRoutines.length > 0 && (
                       <Select onValueChange={(v) => associer({ objetId: obj.id, tacheId: v ? Number(v) : null })}>
                         <SelectTrigger className="h-7 w-32 text-xs">

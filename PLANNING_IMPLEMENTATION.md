@@ -511,10 +511,10 @@ async def generer_courses_depuis_planning(event):
 
 | # | Tâche | Statut |
 |---|-------|--------|
-| 1 | Tests pour chaque nouveau bridge (événement émis → action exécutée) | 🟡 |
-| 2 | Tests d'intégration : planning validé → courses générées → notification envoyée | ⬜ |
-| 3 | Tests bridge photo-frigo → recettes | ⬜ |
-| 4 | Tests adaptation recettes Jules (portions, restrictions) | ⬜ |
+| 1 | Tests pour chaque nouveau bridge (événement émis → action exécutée) | ✅ |
+| 2 | Tests d'intégration : planning validé → courses générées → notification envoyée | ✅ |
+| 3 | Tests bridge photo-frigo → recettes | ✅ |
+| 4 | Tests adaptation recettes Jules (portions, restrictions) | ✅ |
 
 ### 4.5 Sprint Phase 2 — Checklist de livraison
 
@@ -536,6 +536,7 @@ async def generer_courses_depuis_planning(event):
 
 > **Objectif** : L'IA anticipe et réduit le travail manuel.
 > **Prérequis** : Phase 2 terminée
+> **Statut** : 🟡 En progression — briques majeures déjà livrées côté code: suggestions IA activités, analyse budget, OCR mutualisé, chat IA multi-contexte, cache Redis L2, logs admin temps réel. Streaming chat frontend/backend finalisé dans cette passe.
 
 ### 5.1 Nouvelles intégrations IA
 
@@ -561,9 +562,9 @@ async def generer_courses_depuis_planning(event):
 
 | # | Tâche | Statut |
 |---|-------|--------|
-| 1 | Implémenter le rendu progressif côté frontend pour les réponses IA | ⬜ |
-| 2 | Connecter au streaming Mistral backend (déjà supporté) | ⬜ |
-| 3 | Composant réutilisable `stream-ia.tsx` avec animation typing | ⬜ |
+| 1 | Implémenter le rendu progressif côté frontend pour les réponses IA | ✅ |
+| 2 | Connecter au streaming Mistral backend (déjà supporté) | ✅ |
+| 3 | Composant réutilisable `stream-ia.tsx` avec animation typing | ✅ |
 
 ### 5.4 Nouveaux jobs CRON
 
@@ -603,7 +604,7 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | # | Amélioration | Priorité | Statut |
 |---|-------------|----------|--------|
 | 1 | Bouton "Tout exécuter" — séquence de jobs (planning → courses → notifications) | 🔴 Haute | ⬜ |
-| 2 | Log viewer temps réel — WebSocket logs serveur | 🔴 Haute | ⬜ |
+| 2 | Log viewer temps réel — WebSocket logs serveur | 🔴 Haute | ✅ |
 | 3 | Mode `--force` bypass conditions sur trigger jobs | 🟡 Moyenne | ⬜ |
 | 4 | Log détaillé visible admin UI avec résultats du job | 🟡 Moyenne | ⬜ |
 | 5 | Bouton "Relancer" sur chaque job dans admin/scheduler | 🟡 Moyenne | ⬜ |
@@ -615,6 +616,33 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | 11 | Mode maintenance toggle | 🟢 Basse | ⬜ |
 | 12 | Métriques IA détaillées — graphiques tokens, coût, cache hits | 🟢 Basse | ⬜ |
 | 13 | Modifier schedule jobs depuis admin UI | 🟢 Basse | ⬜ |
+
+### 5.8 Sprint Phase 3 — Découpage opérationnel
+
+| Sprint | Périmètre | Livrables | Statut |
+|--------|-----------|-----------|--------|
+| 3.1 | IA exposée au frontend | Suggestions activités IA, analyse budget IA, OCR documents/finances/jeux, chat IA multi-contexte | ✅ |
+| 3.2 | Infrastructure IA | Cache Redis L2 activable via `REDIS_URL`, fallback rate limiting Redis, couches offline déjà présentes | ✅ |
+| 3.3 | Streaming et UX temps réel | Endpoint SSE chat IA, client frontend de streaming, composant `stream-ia.tsx`, intégration page chat | ✅ |
+| 3.4 | Admin et observabilité | Log viewer temps réel admin via WebSocket, métriques/admin UI existantes, validation ciblée du chat | 🟡 |
+| 3.5 | Automatisations restantes | Jobs CRON complémentaires, notifications enrichies, commandes Telegram, actions admin avancées | ⬜ |
+
+### 5.9 Checklist Phase 3
+
+| # | Checklist sprint | Statut |
+|---|------------------|--------|
+| 1 | Exposer les suggestions d'activités IA côté frontend | ✅ |
+| 2 | Exposer l'analyse budget IA côté frontend | ✅ |
+| 3 | Mutualiser l'OCR tickets/factures et le brancher sur les écrans métier | ✅ |
+| 4 | Livrer le chat IA multi-contexte avec actions rapides | ✅ |
+| 5 | Activer le cache Redis L2 côté backend quand `REDIS_URL` est présent | ✅ |
+| 6 | Ajouter le streaming chat côté backend | ✅ |
+| 7 | Ajouter le rendu progressif côté frontend avec composant réutilisable | ✅ |
+| 8 | Conserver un fallback non-streaming pour le chat | ✅ |
+| 9 | Disposer d'un log viewer admin temps réel | ✅ |
+| 10 | Finaliser les jobs CRON proactifs listés en 5.4 | ⬜ |
+| 11 | Finaliser les notifications enrichies listées en 5.5 | ⬜ |
+| 12 | Remplacer complètement les commandes WhatsApp visées par Telegram enrichi | ⬜ |
 
 ---
 

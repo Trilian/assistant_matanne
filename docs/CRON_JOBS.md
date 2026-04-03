@@ -38,8 +38,8 @@ BackgroundScheduler(
 | ID | Horaire | Objet | Canaux |
 | ---- | --------- | ------- | -------- |
 | `rappels_famille` | Quotidien 07:00 | Rappels anniversaires, documents, crèche, jalons | WhatsApp |
-| `rappels_maison` | Quotidien 08:00 | Garanties, contrats, entretien | Service interne |
-| `rappels_generaux` | Quotidien 08:30 | Rappels intelligents : stock bas, garanties | ntfy + push |
+| `rappels_maison` | Quotidien 08:00 | Entretien maison | Service interne |
+| `rappels_generaux` | Quotidien 08:30 | Rappels intelligents : stock bas | ntfy + push |
 | `push_quotidien` | Quotidien 09:00 | Push Web urgents (VAPID) | push |
 | `digest_ntfy` | Quotidien 09:00 | Digest quotidien ntfy.sh (tâches + rappels) | ntfy |
 | `digest_whatsapp_matinal` | Quotidien 07:30 | Digest matinal (repas, tâches, péremptions) | WhatsApp |
@@ -68,8 +68,6 @@ BackgroundScheduler(
 | `rapport_mensuel_budget` | Le 1er à 08:15 | Rapport budget mensuel (famille + maison + jeux) | ntfy + email + WhatsApp |
 | `rapport_mensuel_auto` | Le 1er à 08:00 | Rapport mensuel consolidé automatique | ntfy + email + WhatsApp |
 | `rapport_maison_mensuel` | Le 1er à 09:30 | Synthèse maison (projets actifs, entretien 30j, dépenses) | ntfy + email |
-| `controle_contrats_garanties` | Le 1er à 09:00 | Contrôle contrats/garanties (horizon 3 mois) | ntfy + WhatsApp + email (si urgent) |
-| `check_garanties_expirant` | Lundi 09:15 | Garanties expirant sous 60 jours | ntfy + email (si <14j) |
 | `bilan_energetique` | Le 1er à 08:30 | Bilan énergie mensuel (conso, comparaison N-1) | ntfy + email |
 | `analyse_tendances_mensuelles` | Le 1er à 09:00 | Analyse tendances mensuelles | email |
 | `resume_jardin_saisonnier` | Le 1er à 08:00 | Résumé jardin mensuel + recommandations | ntfy + email |

@@ -394,21 +394,6 @@ Module le plus vaste — gestion complète du foyer.
 | PATCH | `/maison/contrats/{id}` | Body: dict | Met à jour |
 | DELETE | `/maison/contrats/{id}` | — | Supprime |
 
-### Garanties (10)
-
-| Méthode | Path | Params | Description |
-|---------|------|--------|-------------|
-| GET | `/maison/garanties` | `statut?`, `piece?` | Liste garanties |
-| GET | `/maison/garanties/alertes` | `jours=60` (1-365) | Garanties expirant |
-| GET | `/maison/garanties/stats` | — | Stats garanties |
-| GET | `/maison/garanties/{id}` | — | Détail |
-| POST | `/maison/garanties` | Body: dict | Enregistre (201) |
-| PATCH | `/maison/garanties/{id}` | Body: dict | Met à jour |
-| DELETE | `/maison/garanties/{id}` | — | Supprime |
-| GET | `/maison/garanties/{id}/incidents` | — | Incidents SAV |
-| POST | `/maison/garanties/{id}/incidents` | Body: dict | Enregistre incident (201) |
-| PATCH | `/maison/garanties/incidents/{id}` | Body: dict | Met à jour incident |
-
 ### Diagnostics immobiliers (6)
 
 | Méthode | Path | Params | Description |

@@ -5,9 +5,11 @@ CRUD pour: notes, journal de bord, contacts utiles, liens favoris,
 mots de passe maison, relevÃ©s Ã©nergie.
 """
 
+import json
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
@@ -83,6 +85,76 @@ async def envoyer_message_chat(
         "reponse": reponse or "DÃ©solÃ©, je n'ai pas pu gÃ©nÃ©rer de rÃ©ponse. RÃ©essayez.",
         "contexte": payload.contexte,
     }
+
+
+@router.post("/chat/message/stream")
+@gerer_exception_api
+async def streamer_message_chat(
+    payload: MessageChatRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> StreamingResponse:
+    """Diffuse la réponse du chat IA via SSE pour un rendu progressif."""
+    from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
+
+    def _format_sse(data: dict[str, Any]) -> str:
+        return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
+
+    def _stream():
+        service = obtenir_chat_ai_service()
+        a_emis_du_contenu = False
+
+        try:
+            for chunk in service.streamer_message(
+                message=payload.message,
+                contexte=payload.contexte,
+                historique=payload.historique if payload.historique else None,
+            ):
+                if not chunk:
+                    continue
+
+                a_emis_du_contenu = True
+                yield _format_sse(
+                    {
+                        "type": "chunk",
+                        "content": chunk,
+                        "contexte": payload.contexte,
+                    }
+                )
+
+            if not a_emis_du_contenu:
+                reponse = service.envoyer_message(
+                    message=payload.message,
+                    contexte=payload.contexte,
+                    historique=payload.historique if payload.historique else None,
+                )
+                if reponse:
+                    yield _format_sse(
+                        {
+                            "type": "chunk",
+                            "content": reponse,
+                            "contexte": payload.contexte,
+                        }
+                    )
+
+            yield _format_sse({"type": "done", "contexte": payload.contexte})
+        except Exception as exc:
+            yield _format_sse(
+                {
+                    "type": "error",
+                    "message": str(exc) or "Erreur streaming chat IA",
+                    "contexte": payload.contexte,
+                }
+            )
+
+    return StreamingResponse(
+        _stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.get("/chat/actions-rapides")

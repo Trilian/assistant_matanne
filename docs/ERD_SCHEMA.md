@@ -626,51 +626,6 @@ erDiagram
 
     Artisan ||--o{ InterventionArtisan : "interventions"
 
-    %% ═══════════════════════════════════════════════════
-    %% GARANTIES & SAV
-    %% ═══════════════════════════════════════════════════
-
-    Garantie {
-        int id PK
-        string nom_appareil
-        string marque
-        string modele
-        string numero_serie
-        string piece
-        date date_achat
-        string lieu_achat
-        decimal prix_achat
-        string preuve_achat_path
-        int duree_garantie_mois
-        date date_fin_garantie
-        boolean garantie_etendue
-        date date_fin_garantie_etendue
-        string statut
-        int alerte_jours_avant
-        boolean alerte_active
-        decimal cout_remplacement
-        text notes
-        datetime created_at
-        datetime updated_at
-    }
-
-    IncidentSAV {
-        int id PK
-        int garantie_id FK
-        date date_incident
-        text description
-        boolean sous_garantie
-        date date_resolution
-        string reparateur
-        int artisan_id FK
-        decimal cout_reparation
-        boolean pris_en_charge
-        datetime created_at
-        datetime updated_at
-    }
-
-    Garantie ||--o{ IncidentSAV : "incidents"
-    Artisan ||--o{ IncidentSAV : "réparations"
 ```
 
 ## Notifications & Intégrations

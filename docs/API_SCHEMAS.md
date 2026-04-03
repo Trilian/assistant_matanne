@@ -257,7 +257,6 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 | ActionEcoCreate | 6 |
 | ActionEcoPatch | 7 |
 | AlerteContratResponse | 5 |
-| AlerteGarantieResponse | 4 |
 | AlerteMaisonResponse | 7 |
 | AlertePeremptionResponse | 5 |
 | ArticleCellierCreate | 10 |
@@ -281,10 +280,6 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 | EstimationCreate | 6 |
 | EstimationPatch | 6 |
 | FicheTacheResponse | 9 |
-| GarantieCreate | 10 |
-| GarantiePatch | 10 |
-| IncidentSAVCreate | 7 |
-| IncidentSAVPatch | 6 |
 | InterventionCreate | 6 |
 | InterventionPatch | 5 |
 | LigneDevisCreate | 3 |
@@ -292,8 +287,8 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 | MeteoResumeResponse | 6 |
 | MeubleCreate | 8 |
 | MeublePatch | 8 |
-| ObjetCreate | 5 |
-| ObjetPatch | 4 |
+| ObjetCreate | 9 |
+| ObjetPatch | 8 |
 | PieceCreate | 8 |
 | PiecePatch | 8 |
 | PlanningSemaineResponse | 3 |
@@ -306,7 +301,6 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 | StatsArtisansResponse | 4 |
 | StatsCellierResponse | 5 |
 | StatsDepensesResponse | 5 |
-| StatsGarantiesResponse | 4 |
 | StatsHubMaisonResponse | 8 |
 | StockCreate | 7 |
 | StockPatch | 7 |

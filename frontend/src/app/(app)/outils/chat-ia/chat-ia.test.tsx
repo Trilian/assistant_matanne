@@ -16,6 +16,9 @@ vi.mock("@/crochets/utiliser-api", () => ({
 
 vi.mock("@/bibliotheque/api/outils", () => ({
   obtenirSuggestionsRecettes: vi.fn(),
+  obtenirActionsRapides: vi.fn().mockResolvedValue({ actions: [], contexte: "general" }),
+  envoyerMessageChat: vi.fn(),
+  streamerMessageChat: vi.fn(),
 }));
 
 vi.mock("@/composants/ui/scroll-area", () => {

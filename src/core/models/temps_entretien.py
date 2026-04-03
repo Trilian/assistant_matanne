@@ -396,6 +396,7 @@ class ObjetMaison(TimestampMixin, Base):
 
     # Infos achat
     date_achat: Mapped[date | None] = mapped_column(Date)
+    duree_garantie_mois: Mapped[int | None] = mapped_column(Integer)
     prix_achat: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     prix_remplacement_estime: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
 
@@ -406,6 +407,16 @@ class ObjetMaison(TimestampMixin, Base):
 
     # Relations
     piece: Mapped["PieceMaison"] = relationship(back_populates="objets", foreign_keys=[piece_id])
+
+    @property
+    def sous_garantie(self) -> bool | None:
+        """Calcule si l'objet est encore sous garantie (date_achat + durée)."""
+        if self.date_achat is None or self.duree_garantie_mois is None:
+            return None
+        from dateutil.relativedelta import relativedelta
+
+        fin_garantie = self.date_achat + relativedelta(months=self.duree_garantie_mois)
+        return date.today() <= fin_garantie
 
     def __repr__(self) -> str:
         return f"<ObjetMaison(id={self.id}, nom='{self.nom}', statut='{self.statut}')>"

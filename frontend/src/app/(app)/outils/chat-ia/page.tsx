@@ -21,10 +21,10 @@ import {
   Sparkles,
   Loader2,
 } from "lucide-react";
-import { utiliserMutation } from "@/crochets/utiliser-api";
 import {
   envoyerMessageChat,
   obtenirActionsRapides,
+  streamerMessageChat,
 } from "@/bibliotheque/api/outils";
 import type {
   ContexteChat,
@@ -34,6 +34,9 @@ import type { MessageChat } from "@/types/outils";
 import { toast } from "sonner";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { BoutonVocal } from "@/composants/ui/bouton-vocal";
+import { StreamIA } from "@/composants/ia/stream-ia";
+
+type MessageChatAffiche = MessageChat & { streaming?: boolean };
 
 const CONTEXTES: { id: ContexteChat; label: string; icon: typeof Bot; color: string }[] = [
   { id: "general", label: "Général", icon: Bot, color: "bg-primary/10 text-primary" },
@@ -44,9 +47,10 @@ const CONTEXTES: { id: ContexteChat; label: string; icon: typeof Bot; color: str
 ];
 
 export default function ChatIAPage() {
-  const [messages, setMessages] = useState<MessageChat[]>([]);
+  const [messages, setMessages] = useState<MessageChatAffiche[]>([]);
   const [saisie, setSaisie] = useState("");
   const [contexte, setContexte] = useState<ContexteChat>("general");
+  const [isPending, setIsPending] = useState(false);
   const refScroll = useRef<HTMLDivElement>(null);
 
   const { data: actionsData } = utiliserRequete(
@@ -55,33 +59,6 @@ export default function ChatIAPage() {
   );
   const actions: ActionRapide[] = actionsData?.actions ?? [];
 
-  const { mutate: envoyer, isPending } = utiliserMutation(
-    async (question: string) => {
-      const historique = messages.map((m) => ({
-        role: m.role,
-        contenu: m.contenu,
-      }));
-      return envoyerMessageChat({
-        message: question,
-        contexte,
-        historique,
-      });
-    },
-    {
-      onSuccess: (data) => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            contenu: data.reponse,
-            horodatage: new Date().toISOString(),
-          },
-        ]);
-      },
-      onError: () => toast.error("Erreur lors de l'envoi"),
-    }
-  );
-
   useEffect(() => {
     refScroll.current?.scrollTo({
       top: refScroll.current.scrollHeight,
@@ -89,25 +66,122 @@ export default function ChatIAPage() {
     });
   }, [messages]);
 
+  function mettreAJourMessageAssistant(
+    horodatage: string,
+    contenu: string,
+    streaming: boolean
+  ) {
+    setMessages((prev) =>
+      prev.map((message) =>
+        message.horodatage === horodatage
+          ? { ...message, contenu, streaming }
+          : message
+      )
+    );
+  }
+
+  function finaliserMessageAssistant(horodatage: string) {
+    setMessages((prev) =>
+      prev.map((message) =>
+        message.horodatage === horodatage
+          ? { ...message, streaming: false }
+          : message
+      )
+    );
+  }
+
+  async function lancerConversation(
+    question: string,
+    horodatageAssistant: string,
+    historique: Array<{ role: "user" | "assistant"; contenu: string }>
+  ) {
+    setIsPending(true);
+
+    try {
+      await streamerMessageChat(
+        {
+          message: question,
+          contexte,
+          historique,
+        },
+        {
+          onChunk: (_chunk, contenuComplet) => {
+            mettreAJourMessageAssistant(horodatageAssistant, contenuComplet, true);
+          },
+          onDone: () => {
+            finaliserMessageAssistant(horodatageAssistant);
+          },
+        }
+      );
+    } catch {
+      try {
+        const data = await envoyerMessageChat({
+          message: question,
+          contexte,
+          historique,
+        });
+
+        mettreAJourMessageAssistant(horodatageAssistant, data.reponse, false);
+      } catch {
+        mettreAJourMessageAssistant(
+          horodatageAssistant,
+          "Désolé, je n'ai pas pu générer de réponse. Réessayez.",
+          false
+        );
+        toast.error("Erreur lors de l'envoi");
+      }
+    } finally {
+      setIsPending(false);
+    }
+  }
+
   function gererEnvoi(e: React.FormEvent) {
     e.preventDefault();
     const texte = saisie.trim();
     if (!texte || isPending) return;
 
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", contenu: texte, horodatage: new Date().toISOString() },
-    ]);
+    const messageUtilisateur: MessageChatAffiche = {
+      role: "user",
+      contenu: texte,
+      horodatage: new Date().toISOString(),
+    };
+    const messageAssistant: MessageChatAffiche = {
+      role: "assistant",
+      contenu: "",
+      horodatage: `${messageUtilisateur.horodatage}-assistant`,
+      streaming: true,
+    };
+    const historique = [...messages, messageUtilisateur].map((m) => ({
+      role: m.role,
+      contenu: m.contenu,
+    }));
+
+    setMessages((prev) => [...prev, messageUtilisateur, messageAssistant]);
     setSaisie("");
-    envoyer(texte);
+    void lancerConversation(texte, messageAssistant.horodatage, historique);
   }
 
   function gererActionRapide(msg: string) {
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", contenu: msg, horodatage: new Date().toISOString() },
-    ]);
-    envoyer(msg);
+    if (isPending) return;
+
+    const messageUtilisateur: MessageChatAffiche = {
+      role: "user",
+      contenu: msg,
+      horodatage: new Date().toISOString(),
+    };
+    const messageAssistant: MessageChatAffiche = {
+      role: "assistant",
+      contenu: "",
+      horodatage: `${messageUtilisateur.horodatage}-assistant`,
+      streaming: true,
+    };
+    const historique = [...messages, messageUtilisateur].map((m) => ({
+      role: m.role,
+      contenu: m.contenu,
+    }));
+
+    setMessages((prev) => [...prev, messageUtilisateur, messageAssistant]);
+    void lancerConversation(msg, messageAssistant.horodatage, historique);
   }
 
   function changerContexte(ctx: ContexteChat) {
@@ -207,11 +281,15 @@ export default function ChatIAPage() {
                           : "bg-muted"
                       }`}
                     >
-                      {m.contenu}
+                      {m.role === "assistant" ? (
+                        <StreamIA contenu={m.contenu} enCours={Boolean(m.streaming)} />
+                      ) : (
+                        m.contenu
+                      )}
                     </div>
                   </div>
                 ))}
-                {isPending && (
+                {isPending && messages.every((message) => !message.streaming) && (
                   <div className="flex justify-start">
                     <div className="bg-muted rounded-xl px-4 py-2.5 flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />

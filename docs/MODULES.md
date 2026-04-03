@@ -10,7 +10,7 @@
 |--------|-------|-----------|---------|-------------|
 | **Cuisine** | 7 | 6 routeurs | `cuisine/`, `planning/`, `inventaire/` | Recettes, planning repas, courses, inventaire, batch cooking, anti-gaspillage |
 | **Famille** | 10 | 1 routeur | `famille/` | Jules (suivi enfant), activités, routines, budget, weekend, anniversaires, contacts, documents, journal |
-| **Maison** | 9 | 1 routeur | `maison/` | Projets, charges, dépenses, énergie, entretien, jardin, stocks, cellier, artisans, contrats, garanties, diagnostics |
+| **Maison** | 9 | 1 routeur | `maison/` | Projets, charges, dépenses, énergie, entretien, jardin, stocks, cellier, artisans, abonnements, diagnostics |
 | **Planning** | 2 | 1 routeur | `planning/` | Hub planning, timeline |
 | **Jeux** | 4 | 1 routeur | `jeux/` | Paris sportifs, Loto, EuroMillions |
 | **Outils** | 6 | 1 routeur | `utilitaires/` | Chat IA, météo, convertisseur, minuteur, notes |
@@ -107,8 +107,7 @@
 - **Stocks** — Stock maison (non-alimentaire)
 - **Cellier** — Articles cellier (cave, réserves)
 - **Artisans** — Carnet adresses professionnels, interventions
-- **Contrats** — Assurances, abonnements, résiliation
-- **Garanties** — Garanties appareils, SAV, incidents
+- **Abonnements** — Comparateur abonnements (eau, électricité, gaz, assurances, téléphone, internet)
 - **Diagnostics** — DPE, amiante, estimations immobilières
 
 ### Architecture
@@ -119,7 +118,7 @@
 | Schémas | `src/api/schemas/maison.py` |
 | Services | `src/services/maison/` (service) |
 | Modèles ORM | `src/core/models/maison.py`, `habitat.py`, `maison_extensions.py`, `contrats_artisans.py`, `jardin.py`, `temps_entretien.py` |
-| Frontend | `frontend/src/app/(app)/maison/` (projets, charges, depenses, energie, entretien, jardin, stocks + cellier, artisans, contrats, garanties, diagnostics) |
+| Frontend | `frontend/src/app/(app)/maison/` (projets, charges, depenses, energie, entretien, jardin, stocks + cellier, artisans, abonnements, diagnostics) |
 
 ---
 

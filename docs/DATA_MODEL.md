@@ -12,7 +12,7 @@ Vue fonctionnelle du modele de donnees.
 
 - Cuisine: recettes, ingredients, planning repas, courses, batch cooking.
 - Famille: profils enfants, activites, routines, anniversaires, achats.
-- Maison/Habitat: projets, entretien, depenses, artisans, garanties, plans habitat.
+- Maison/Habitat: projets, entretien, depenses, artisans, abonnements, plans habitat.
 - Jeux: paris, loto, euromillions, stats et historiques.
 - Utilitaires/Systeme: notes, journal, contacts, energie, logs, sauvegardes.
 - Integrations: calendriers externes, tokens Garmin, notifications.
@@ -24,7 +24,7 @@ Vue fonctionnelle du modele de donnees.
 - Courses -> Articles courses (+ modeles).
 - Profils enfants -> Jalons / activites / bien-etre.
 - Projets maison -> taches projets.
-- Contrats/artisans/garanties/interventions lies entre eux.
+- Artisans/interventions lies entre eux.
 
 ## Tables notables recentes
 
