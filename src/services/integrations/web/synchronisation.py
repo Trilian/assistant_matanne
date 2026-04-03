@@ -531,6 +531,7 @@ def obtenir_realtime_sync_service() -> RealtimeSyncService:
 __all__ = [
     "RealtimeSyncService",
     "obtenir_service_synchronisation_temps_reel",
+    "obtenir_realtime_sync_service",
     "get_realtime_sync_service",
     "SyncEvent",
     "SyncEventType",

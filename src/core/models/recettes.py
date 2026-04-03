@@ -392,12 +392,15 @@ class HistoriqueRecette(CreeLeMixin, Base):
     )
     date_cuisson: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     portions_cuisinees: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    note: Mapped[int | None] = mapped_column(Integer)
+    avis: Mapped[str | None] = mapped_column(Text)
 
     # Relations
     recette: Mapped["Recette"] = relationship(back_populates="historique")
 
     __table_args__ = (
         CheckConstraint("portions_cuisinees > 0", name="ck_portions_cuisinees_positive"),
+        CheckConstraint("note IS NULL OR (note >= 0 AND note <= 5)", name="ck_historique_note_valide"),
     )
 
     @property

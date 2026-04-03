@@ -153,6 +153,46 @@ export interface ModeTabletteMagazineResponse {
   cartes: CarteMagazineTablette[];
 }
 
+export interface CommandeWhatsApp {
+  commande: string;
+  action: string;
+}
+
+export interface WhatsAppConversationnelResponse {
+  actif: boolean;
+  nb_commandes: number;
+  commandes: CommandeWhatsApp[];
+}
+
+export interface PrixIngredientCompare {
+  ingredient: string;
+  frequence_utilisation: number;
+  prix_historique_moyen_eur: number | null;
+  prix_marche_eur: number | null;
+  source_prix: string;
+  variation_pct: number | null;
+  alerte_soldes: boolean;
+}
+
+export interface ComparateurPrixAutomatiqueResponse {
+  date_reference: string;
+  nb_ingredients_analyses: number;
+  ingredients: PrixIngredientCompare[];
+  nb_alertes: number;
+  alertes: string[];
+}
+
+export interface EnergieTempsReelResponse {
+  linky_connecte: boolean;
+  source: string;
+  horodatage: string;
+  puissance_instantanee_w: number | null;
+  consommation_jour_estimee_kwh: number | null;
+  consommation_mois_kwh: number | null;
+  tendance: string;
+  alertes: string[];
+}
+
 export async function obtenirModePiloteAuto(): Promise<ModePiloteAutoResponse> {
   const { data } = await clientApi.get("/api/v1/innovations/phasee/mode-pilote");
   return data;
@@ -242,6 +282,23 @@ export async function genererCarteVisuellePartageable(payload: {
 
 export async function obtenirModeTabletteMagazine(): Promise<ModeTabletteMagazineResponse> {
   const { data } = await clientApi.get("/api/v1/innovations/phasee/s22/mode-tablette-magazine");
+  return data;
+}
+
+export async function obtenirWhatsAppConversationnel(): Promise<WhatsAppConversationnelResponse> {
+  const { data } = await clientApi.get("/api/v1/innovations/phasee/s23/whatsapp-conversationnel");
+  return data;
+}
+
+export async function obtenirComparateurPrixAuto(topN = 20): Promise<ComparateurPrixAutomatiqueResponse> {
+  const { data } = await clientApi.get("/api/v1/innovations/phasee/s23/comparateur-prix-auto", {
+    params: { top_n: topN },
+  });
+  return data;
+}
+
+export async function obtenirEnergieTempsReel(): Promise<EnergieTempsReelResponse> {
+  const { data } = await clientApi.get("/api/v1/innovations/phasee/s23/energie-temps-reel");
   return data;
 }
 

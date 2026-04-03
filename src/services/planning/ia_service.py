@@ -9,6 +9,7 @@ from typing import Optional
 
 from src.core.ai import obtenir_client_ia
 from src.services.core.base import BaseAIService
+from src.services.core.base.async_utils import sync_wrapper
 from src.services.core.registry import service_factory
 
 
@@ -72,7 +73,7 @@ class PlanningAIService(BaseAIService):
             service_name="planning_ia",
         )
 
-    def analyser_variete_semaine(
+    async def analyser_variete_semaine(
         self, planning_repas: list[dict]
     ) -> AnalyseVariete:
         """
@@ -113,6 +114,11 @@ Format JSON."""
             repetitions_problematiques=result.get("repetitions_problematiques", []),
             recommandations=result.get("recommandations", []),
         )
+
+    def analyser_variete_semaine_sync(self, planning_repas: list[dict]) -> AnalyseVariete:
+        """Version synchrone pour rétrocompatibilité."""
+        _sync = sync_wrapper(self.analyser_variete_semaine)
+        return _sync(planning_repas)
 
     def optimiser_nutrition_semaine(
         self,

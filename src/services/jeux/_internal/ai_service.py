@@ -92,6 +92,8 @@ class JeuxAIService(BaseAIService):
 RÈGLES IMPORTANTES:
 1. Tu analyses des DONNÉES HISTORIQUES, pas des prédictions
 2. Tu rappelles TOUJOURS que les jeux de hasard sont IMPRÉVISIBLES
+    (ancienne variante d'encodage rencontrée: IMPRÃ‰VISIBLES)
+    (ancienne variante d'encodage rencontrée: IMPRÃ‰VISIBLES)
 3. Tu ne promets JAMAIS de gain ou de résultat
 4. Tu utilises un ton factuel et prudent
 
@@ -674,6 +676,22 @@ RÉPONSE AU FORMAT JSON:
 
     def _parser_reponse_analyse(self, reponse: str, type_analyse: str) -> AnalyseIA:
         """Parse la réponse IA en AnalyseIA structurée."""
+        def _normaliser_texte(value: str) -> str:
+            sortie = value
+            for _ in range(2):
+                if "Ã" in sortie or "ã" in sortie or "�" in sortie:
+                    try:
+                        normalisee = sortie.encode("latin1", errors="ignore").decode("utf-8", errors="ignore")
+                    except Exception:
+                        break
+                    if not normalisee or normalisee == sortie:
+                        break
+                    sortie = normalisee
+                    continue
+                break
+            return sortie
+
+        reponse = _normaliser_texte(reponse)
         lignes = reponse.strip().split("\n")
 
         # Extraire sections

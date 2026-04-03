@@ -117,9 +117,9 @@ class TestEuromillionsIAService:
         assert len(grille["etoiles"]) == 2
         assert grille["strategie"] == "frequences"
         
-        # Top fréquences = 1,2,3,4,5 (selon mock)
-        # Devrait contenir au moins quelques numéros fréquents
-        assert any(n in [1, 2, 3, 4, 5] for n in grille["numeros"])
+        # Avec le mock, numeros_chauds = [1..10] (top-10 par fréq décroissante)
+        # Les 5 numéros doivent tous venir du pool chauds
+        assert all(1 <= n <= 10 for n in grille["numeros"])
     
     @patch('src.services.jeux.euromillions_ia.EuromillionsIAService._obtenir_stats')
     def test_generer_retards(self, mock_obtenir_stats, service, mock_stats):

@@ -13,6 +13,8 @@ import re
 from dataclasses import dataclass, field
 from datetime import date
 
+from src.core.ai.client import ClientIA
+
 logger = logging.getLogger(__name__)
 
 
@@ -96,8 +98,6 @@ def scanner_ticket_vision(image_base64: str) -> TicketCaisse:
         TicketCaisse parsé
     """
     try:
-        from src.core.ai.client import ClientIA
-
         client = ClientIA()
 
         # Appel vision Pixtral

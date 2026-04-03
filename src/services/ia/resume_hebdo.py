@@ -149,8 +149,8 @@ Réponds en JSON:
 # ═══════════════════════════════════════════════════════════
 
 
-@service_factory("resume_hebdo", tags={"ia", "dashboard"})
+@service_factory("resume_hebdo_ia", tags={"ia", "dashboard"})
 def obtenir_service_resume_hebdo() -> ResumeHebdoService:
-    """Factory singleton pour le service de résumé hebdomadaire."""
+    """Factory singleton pour le service de résumé hebdomadaire (module IA)."""
     return ResumeHebdoService()
 

@@ -321,10 +321,10 @@ def obtenir_jules_ai_service() -> JulesAIService:
 
 
 # Alias anglais
-def obtenir_jules_ai_service() -> JulesAIService:
+def get_jules_ai_service() -> JulesAIService:
     """English alias for obtenir_jules_ai_service."""
     return obtenir_jules_ai_service()
 
 
 # ─── Aliases rétrocompatibilité  ───────────────────────────────
-get_jules_ai_service = obtenir_jules_ai_service  # alias rétrocompatibilité 
+obtenir_service_jules_ai = obtenir_jules_ai_service  # alias rétrocompatibilité

@@ -26,6 +26,7 @@ Pour routes/__init__.py, "famille_router": ".famille" reste inchangé.
 """
 
 from datetime import date
+from inspect import isawaitable
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
@@ -1000,12 +1001,14 @@ async def generer_annonce_lbc(
     from src.services.famille.achats_ia import obtenir_service_achats_ia
 
     service = obtenir_service_achats_ia()
-    texte = await service.generer_annonce_lbc(
+    texte = service.generer_annonce_lbc(
         nom=payload.nom,
         description=payload.description,
         etat_usage=payload.etat_usage,
         prix_cible=payload.prix_cible,
     )
+    if isawaitable(texte):
+        texte = await texte
     return {"annonce": texte}
 
 
@@ -1020,7 +1023,7 @@ async def generer_annonce_vinted(
     from src.services.famille.achats_ia import obtenir_service_achats_ia
 
     service = obtenir_service_achats_ia()
-    texte = await service.generer_annonce_vinted(
+    texte = service.generer_annonce_vinted(
         nom=payload.nom,
         description=payload.description,
         etat_usage=payload.etat_usage,
@@ -1029,6 +1032,8 @@ async def generer_annonce_vinted(
         taille=payload.taille,
         categorie_vinted=payload.categorie_vinted,
     )
+    if isawaitable(texte):
+        texte = await texte
     return {"annonce": texte}
 
 
@@ -1565,6 +1570,59 @@ async def envoyer_rappels_famille(
         service = obtenir_service_rappels_famille()
         nb_envoyes = service.envoyer_rappels_du_jour()
         return {"envoyes": nb_envoyes, "message": f"{nb_envoyes} rappel(s) envoyé(s)"}
+
+    return await executer_async(_query)
+
+
+@router.get("/budget", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def lister_depenses_compat(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(50, ge=1, le=200),
+    categorie: str | None = Query(None),
+    date_debut: date | None = Query(None),
+    date_fin: date | None = Query(None),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Route budget directe pour compatibilité des tests legacy sur famille.py."""
+    from src.core.models import BudgetFamille
+
+    def _query():
+        with executer_avec_session() as session:
+            query = session.query(BudgetFamille)
+
+            if categorie:
+                query = query.filter(BudgetFamille.categorie == categorie)
+            if date_debut:
+                query = query.filter(BudgetFamille.date >= date_debut)
+            if date_fin:
+                query = query.filter(BudgetFamille.date <= date_fin)
+
+            total = query.count()
+            items = (
+                query.order_by(BudgetFamille.date.desc())
+                .offset((page - 1) * page_size)
+                .limit(page_size)
+                .all()
+            )
+
+            return {
+                "items": [
+                    {
+                        "id": d.id,
+                        "date": d.date.isoformat(),
+                        "categorie": d.categorie,
+                        "description": d.description,
+                        "montant": d.montant,
+                        "magasin": d.magasin,
+                        "est_recurrent": d.est_recurrent,
+                    }
+                    for d in items
+                ],
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+            }
 
     return await executer_async(_query)
 

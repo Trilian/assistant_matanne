@@ -3988,7 +3988,7 @@ ORDER BY d.jour;
 -- ============================================================================
 -- Index composites et index de performance ajoutés après V005.
 -- Contraintes CHECK pour les enums VARCHAR (V005 absorbé).
--- La majorité des index sont inline avec les CREATE TABLE dans les fichiers
+-- La majorité des index sont inline avec les déclarations de tables dans les fichiers
 -- de domaine (03-11). Ce fichier contient uniquement les index additionnels.
 -- ============================================================================
 

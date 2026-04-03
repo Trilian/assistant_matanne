@@ -297,7 +297,7 @@ class TestDashboardWidgetActionRapide:
 
             import asyncio
 
-            result = asyncio.get_event_loop().run_until_complete(
+            result = asyncio.run(
                 enregistrer_action_widget(payload, user=mock_user)
             )
 

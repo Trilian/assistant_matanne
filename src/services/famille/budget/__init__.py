@@ -21,6 +21,7 @@ from .schemas import (
 from .service import (
     BudgetService,
     get_budget_service,
+    get_budget_service as obtenir_budget_service,
     obtenir_service_budget,
 )
 from .utils import (
@@ -69,6 +70,7 @@ __all__ = [
     # Service
     "BudgetService",
     "get_budget_service",
+    "obtenir_budget_service",
     "obtenir_service_budget",
     # Utils - Conversion
     "db_entry_to_depense",

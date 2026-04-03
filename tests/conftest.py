@@ -510,6 +510,23 @@ def patch_db_context(db):
 
 
 @pytest.fixture(autouse=True)
+def reset_maintenance_mode():
+    """Réinitialise le flag de maintenance avant et après chaque test.
+
+    Empêche le test test_maintenance_toggle (qui active le mode maintenance)
+    de polluer les tests suivants avec des réponses 503.
+    On fixe _maintenance_loaded=True pour éviter de re-interroger la DB
+    à chaque requête (ce qui casserait les tests qui moquent la DB).
+    """
+    import src.api.main as main_module
+    main_module._maintenance_flag = False
+    main_module._maintenance_loaded = True  # Pas de re-lecture DB pendant le test
+    yield
+    main_module._maintenance_flag = False
+    main_module._maintenance_loaded = True
+
+
+@pytest.fixture(autouse=True)
 def mock_mistral_api(monkeypatch):
     """Mock Mistral AI API for all tests."""
 

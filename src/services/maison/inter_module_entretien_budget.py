@@ -125,6 +125,7 @@ class EntretienBudgetBridgeService:
         return [
             {
                 "id": d.id,
+                "categorie": d.categorie,
                 "montant": float(d.montant),
                 "mois": d.mois,
                 "annee": d.annee,

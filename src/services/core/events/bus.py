@@ -23,6 +23,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Protocol, runtime_checkable
 
+from src.core.db import obtenir_contexte_db
+
 logger = logging.getLogger(__name__)
 
 
@@ -368,7 +370,6 @@ class BusEvenements:
         Utilise la table etats_persistants avec namespace="event_bus".
         """
         try:
-            from src.core.db import obtenir_contexte_db
             from src.core.models.persistent_state import EtatPersistantDB
 
             with obtenir_contexte_db() as session:
@@ -405,7 +406,6 @@ class BusEvenements:
             Liste des événements retrouvés
         """
         try:
-            from src.core.db import obtenir_contexte_db
             from src.core.models.persistent_state import EtatPersistantDB
 
             with obtenir_contexte_db() as session:

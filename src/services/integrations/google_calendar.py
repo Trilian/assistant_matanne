@@ -69,8 +69,10 @@ async def echanger_code_oauth(code: str) -> dict | None:
             },
         )
 
-        if resp.status_code != 200:
-            logger.error(f"❌ Échec échange OAuth Google : {resp.text}")
+        try:
+            resp.raise_for_status()
+        except Exception:
+            logger.error(f"❌ Échec échange OAuth Google : {getattr(resp, 'text', '')}")
             return None
 
         tokens = resp.json()

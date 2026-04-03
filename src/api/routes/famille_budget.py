@@ -18,12 +18,26 @@ from src.api.schemas.errors import (
     REPONSES_CRUD_SUPPRESSION,
     REPONSES_LISTE,
 )
-from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
+from src.api.utils import gerer_exception_api
 
 import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Famille"])
+
+
+def executer_avec_session():
+    """Compat tests: délègue au module parent famille pour patch centralisé."""
+    from src.api.routes import famille as famille_routes
+
+    return famille_routes.executer_avec_session()
+
+
+async def executer_async(func):
+    """Compat tests: délègue au module parent famille pour patch centralisé."""
+    from src.api.routes import famille as famille_routes
+
+    return await famille_routes.executer_async(func)
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # BUDGET FAMILIAL

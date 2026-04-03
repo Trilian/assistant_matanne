@@ -121,7 +121,7 @@ class TestMasquageNumero:
         ):
             mock_params.return_value.META_WHATSAPP_TOKEN = "test-token"
             mock_params.return_value.META_PHONE_NUMBER_ID = "12345"
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 envoyer_message_whatsapp(numero, "Test message")
             )
 
@@ -158,7 +158,7 @@ class TestMasquageNumero:
         ):
             mock_params.return_value.META_WHATSAPP_TOKEN = "test-token"
             mock_params.return_value.META_PHONE_NUMBER_ID = "12345"
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 envoyer_message_whatsapp(numero, "Test message")
             )
 

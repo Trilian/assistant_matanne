@@ -153,7 +153,15 @@ class BioLocalTagger:
         if fichier.exists():
             with open(fichier, encoding="utf-8") as f:
                 data = json.load(f)
-                return {p["nom"].lower(): p["mois"] for p in data}
+                if isinstance(data, dict):
+                    items = data.get("produits", data.get("items", []))
+                else:
+                    items = data
+                return {
+                    str(p.get("nom", "")).lower(): list(p.get("mois", []))
+                    for p in items
+                    if isinstance(p, dict) and p.get("nom")
+                }
         return {}
 
     def tag(self, recipe: ImportedRecipe) -> dict[str, Any]:

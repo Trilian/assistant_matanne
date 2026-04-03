@@ -10,6 +10,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import StreamingResponse
+from sqlalchemy import func
 
 from src.api.dependencies import require_auth
 from src.api.schemas import (
@@ -138,7 +139,8 @@ def _sauvegarder_etapes(session, recette_id: int, instructions: list[str]) -> No
 
 def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
     """SÃ©rialise une Recette ORM en RecetteResponse avec relations."""
-    from src.core.models import RecetteIngredient
+    from sqlalchemy import func as sql_func
+    from src.core.models import HistoriqueRecette, RecetteIngredient
     from src.core.models.user_preferences import RetourRecette
 
     # Charger ingrÃ©dients avec le nom depuis la table Ingredient
@@ -176,7 +178,7 @@ def _serialiser_recette(db_recette, session, user: dict) -> RecetteResponse:
     est_favori = retour.feedback == "like" if retour else False
 
     derniere_cuisson = (
-        session.query(func.max(HistoriqueRecette.date_cuisson))
+        session.query(sql_func.max(HistoriqueRecette.date_cuisson))
         .filter(HistoriqueRecette.recette_id == db_recette.id)
         .scalar()
     )
@@ -353,7 +355,7 @@ async def obtenir_recette(recette_id: int, user: dict[str, Any] = Depends(requir
             )
 
             if not recette:
-                raise HTTPException(status_code=404, detail="Recette non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Recette non trouvée")
 
             return _serialiser_recette(recette, session, user)
 
@@ -532,7 +534,7 @@ async def modifier_partiellement_recette(
             if not donnees:
                 raise HTTPException(
                     status_code=422,
-                    detail="Aucun champ Ã  mettre Ã  jour fourni",
+                    detail="Aucun champ à mettre à jour fourni",
                 )
 
             ingredients_data = donnees.pop("ingredients", None)
@@ -571,14 +573,14 @@ async def supprimer_recette(recette_id: int, user: dict[str, Any] = Depends(requ
     """Supprime une recette.
 
     Args:
-        recette_id: ID de la recette Ã  supprimer
+        recette_id: ID de la recette à supprimer
 
     Returns:
         Message de confirmation
 
     Raises:
-        401: Non authentifiÃ©
-        404: Recette non trouvÃ©e
+        401: Non authentifié
+        404: Recette non trouvée
 
     Example:
         ```
@@ -586,7 +588,7 @@ async def supprimer_recette(recette_id: int, user: dict[str, Any] = Depends(requ
         Authorization: Bearer <token>
 
         Response:
-        {"message": "Recette 42 supprimÃ©e", "id": 42}
+        {"message": "Recette 42 supprimée", "id": 42}
         ```
     """
     from src.core.models import Recette
@@ -596,12 +598,12 @@ async def supprimer_recette(recette_id: int, user: dict[str, Any] = Depends(requ
             db_recette = session.query(Recette).filter(Recette.id == recette_id).first()
 
             if not db_recette:
-                raise HTTPException(status_code=404, detail="Recette non trouvÃ©e")
+                raise HTTPException(status_code=404, detail="Recette non trouvée")
 
             session.delete(db_recette)
             session.commit()
 
-            return MessageResponse(message=f"Recette {recette_id} supprimÃ©e", id=recette_id)
+            return MessageResponse(message=f"Recette {recette_id} supprimée", id=recette_id)
 
     return await executer_async(_delete)
 

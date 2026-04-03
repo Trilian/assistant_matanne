@@ -50,7 +50,7 @@ class ArticleInventaire(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     ingredient_id: Mapped[int] = mapped_column(
-        ForeignKey("ingredients.id", ondelete="CASCADE"), nullable=False, unique=True, index=True
+        ForeignKey("ingredients.id", ondelete="CASCADE"), nullable=False, index=True
     )
     quantite: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
     quantite_min: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)

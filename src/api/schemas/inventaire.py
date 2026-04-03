@@ -65,12 +65,28 @@ class InventaireItemCreate(BaseModel, QuantiteStricteValidatorMixin):
     @field_validator("emplacement")
     @classmethod
     def validate_emplacement(cls, v: str | None) -> str | None:
-        if v is not None and v not in EMPLACEMENTS_INVENTAIRE:
+        if v is None:
+            return v
+
+        normalisations = {
+            "frigo": "Frigo",
+            "refrigerateur": "Frigo",
+            "réfrigérateur": "Frigo",
+            "congelateur tiroir": "Congélateur Tiroir",
+            "congélateur tiroir": "Congélateur Tiroir",
+            "congelateur coffre": "Congélateur Coffre",
+            "congélateur coffre": "Congélateur Coffre",
+            "cellier": "Cellier",
+            "placard": "Placard",
+        }
+        emplacement_normalise = normalisations.get(v.strip().lower(), v)
+
+        if emplacement_normalise not in EMPLACEMENTS_INVENTAIRE:
             raise ValueError(
                 f"Emplacement invalide: '{v}'. "
                 f"Valeurs acceptées: {', '.join(EMPLACEMENTS_INVENTAIRE)}"
             )
-        return v
+        return emplacement_normalise
 
 
 # ═══════════════════════════════════════════════════════════
@@ -106,12 +122,28 @@ class InventaireItemUpdate(BaseModel):
     @field_validator("emplacement")
     @classmethod
     def validate_emplacement(cls, v: str | None) -> str | None:
-        if v is not None and v not in EMPLACEMENTS_INVENTAIRE:
+        if v is None:
+            return v
+
+        normalisations = {
+            "frigo": "Frigo",
+            "refrigerateur": "Frigo",
+            "réfrigérateur": "Frigo",
+            "congelateur tiroir": "Congélateur Tiroir",
+            "congélateur tiroir": "Congélateur Tiroir",
+            "congelateur coffre": "Congélateur Coffre",
+            "congélateur coffre": "Congélateur Coffre",
+            "cellier": "Cellier",
+            "placard": "Placard",
+        }
+        emplacement_normalise = normalisations.get(v.strip().lower(), v)
+
+        if emplacement_normalise not in EMPLACEMENTS_INVENTAIRE:
             raise ValueError(
                 f"Emplacement invalide: '{v}'. "
                 f"Valeurs acceptées: {', '.join(EMPLACEMENTS_INVENTAIRE)}"
             )
-        return v
+        return emplacement_normalise
 
 
 # ═══════════════════════════════════════════════════════════

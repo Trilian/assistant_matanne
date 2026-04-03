@@ -10,6 +10,7 @@ chaque fichier à taille raisonnable tout en conservant la même API publique.
 """
 
 import json
+import inspect
 import logging
 from datetime import datetime
 from typing import Any
@@ -168,12 +169,17 @@ class BaseAIService(
             temperature=temp,
         ):
             try:
-                response = await self.client.appeler(
+                maybe_response = self.client.appeler(
                     prompt=prompt,
                     prompt_systeme=system_prompt,
                     temperature=temp,
                     max_tokens=max_tokens,
                     utiliser_cache=False,  # On gère le cache nous-mêmes
+                )
+                response = (
+                    await maybe_response
+                    if inspect.isawaitable(maybe_response)
+                    else maybe_response
                 )
                 self.circuit_breaker._enregistrer_succes()
             except Exception as e:

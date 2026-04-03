@@ -129,7 +129,12 @@ class CoursesValidationBridgeService:
 
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
-    def valider_achete_vs_planifie(self, liste_courses_id: int, db: Session | None = None) -> dict:
+    def valider_achete_vs_planifie(
+        self,
+        liste_courses_id: int | None = None,
+        liste_id: int | None = None,
+        db: Session | None = None,
+    ) -> dict:
         """Valide que tout ce qui était planifié a été acheté (ou remplacé).
 
         Returns:
@@ -138,11 +143,15 @@ class CoursesValidationBridgeService:
         from src.core.models.courses import ArticleCourses, ListeCourses
 
         try:
-            liste = db.query(ListeCourses).filter_by(id=liste_courses_id).first()
+            cible_id = liste_courses_id if liste_courses_id is not None else liste_id
+            if cible_id is None:
+                return {"erreur": "liste_courses_id requis"}
+
+            liste = db.query(ListeCourses).filter_by(id=cible_id).first()
             if not liste:
                 return {"erreur": "Liste non trouvée"}
 
-            articles = db.query(ArticleCourses).filter_by(liste_id=liste_courses_id).all()
+            articles = db.query(ArticleCourses).filter_by(liste_id=cible_id).all()
 
             total = len(articles)
             achetes = sum(1 for a in articles if a.achete)

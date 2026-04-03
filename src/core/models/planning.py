@@ -62,6 +62,21 @@ class Planning(CreeLeMixin, Base):
         back_populates="planning", cascade="all, delete-orphan"
     )
 
+    def __init__(self, **kwargs):
+        # Compat historique: certains appels utilisent encore `actif=True/False`.
+        actif = kwargs.pop("actif", None)
+        if actif is not None and "statut" not in kwargs:
+            kwargs["statut"] = "actif" if bool(actif) else "inactif"
+        super().__init__(**kwargs)
+
+    @property
+    def actif(self) -> bool:
+        return self.statut == "actif"
+
+    @actif.setter
+    def actif(self, value: bool) -> None:
+        self.statut = "actif" if bool(value) else "inactif"
+
     def __repr__(self) -> str:
         return f"<Planning(id={self.id}, nom='{self.nom}')>"
 

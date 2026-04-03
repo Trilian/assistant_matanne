@@ -5,6 +5,7 @@ Estimation complexité/timeline, budget prévisionnel, matching artisans.
 """
 
 from datetime import datetime
+import inspect
 from pydantic import BaseModel, Field
 from typing import Optional, Literal
 
@@ -115,10 +116,18 @@ Fournis:
 
 Format JSON détaillé."""
 
-        result = await self.call_with_dict_parsing(
-            prompt=prompt,
-            system_prompt="Tu es expert en rénovation maison (15+ ans expérience). Sois réaliste dans estimations.",
-        )
+        parser_sync = getattr(self, "call_with_dict_parsing_sync", None)
+        if callable(parser_sync):
+            maybe_result = parser_sync(
+                prompt=prompt,
+                system_prompt="Tu es expert en rénovation maison (15+ ans expérience). Sois réaliste dans estimations.",
+            )
+            result = await maybe_result if inspect.isawaitable(maybe_result) else maybe_result
+        else:
+            result = await self.call_with_dict_parsing(
+                prompt=prompt,
+                system_prompt="Tu es expert en rénovation maison (15+ ans expérience). Sois réaliste dans estimations.",
+            )
 
         return EstimationProjet(
             projet_nom=projet_description.split("\n")[0][:50],
