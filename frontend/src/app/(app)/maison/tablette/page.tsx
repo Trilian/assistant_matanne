@@ -80,21 +80,21 @@ export default function PageTablette() {
   const tachePrioritaire = (taches as TacheTablette[] | undefined)?.filter((t) => !t.fait)?.[0]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4 flex flex-col gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4 md:p-6 lg:p-8 flex flex-col gap-4">
       {/* Heure actuelle — Grande affichage */}
-      <div className="text-center py-6">
-        <p className="text-6xl font-bold text-primary">
+      <div className="text-center py-4 md:py-6">
+        <p className="text-6xl font-bold text-primary md:text-7xl">
           {formatterHeure(heureActuelle)}
         </p>
-        <p className="text-xl text-muted-foreground mt-2">
+        <p className="text-xl text-muted-foreground mt-2 md:text-2xl">
           {heureActuelle.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>
       </div>
 
-      {/* Grille 2x2 responsive */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+      {/* Grille optimisée tablette */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 auto-rows-fr">
         {/* Repas du jour */}
-        <Card className="h-full border-2 shadow-lg">
+        <Card className="h-full border-2 shadow-lg md:row-span-2">
           <CardHeader className="pb-2 sm:pb-3">
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
               <Utensils className="h-8 w-8 sm:h-10 sm:w-10" />
@@ -106,7 +106,7 @@ export default function PageTablette() {
               <p className="text-lg text-muted-foreground">Chargement...</p>
             ) : repasAujourdhui.length > 0 ? (
               repasAujourdhui.map((repas) => (
-                <div key={repas.id} className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                <div key={repas.id} className="p-4 rounded-lg bg-primary/10 border border-primary/20">
                   <p className="text-sm font-semibold text-muted-foreground">{repas.type}</p>
                   <p className="text-xl sm:text-2xl font-bold mt-1">{repas.nom}</p>
                   {repas.heure && (
@@ -141,7 +141,7 @@ export default function PageTablette() {
                 )}
                 {tachePrioritaire.priorite && (
                   <div className="mt-3 inline-block px-3 py-1 rounded-full bg-destructive/20 text-sm font-semibold">
-                    Priority: {tachePrioritaire.priorite}
+                    Priorité: {tachePrioritaire.priorite}
                   </div>
                 )}
               </div>
@@ -173,7 +173,7 @@ export default function PageTablette() {
         </Card>
 
         {/* Minuteur */}
-        <Card className="h-full border-2 shadow-lg">
+        <Card className="h-full border-2 shadow-lg md:row-span-2">
           <CardHeader className="pb-2 sm:pb-3">
             <CardTitle className="text-xl sm:text-2xl flex items-center gap-3">
               <Clock className="h-8 w-8 sm:h-10 sm:w-10" />
@@ -189,14 +189,14 @@ export default function PageTablette() {
               onChange={(e) => setSecondesRestantes(parseInt(e.target.value || '0') * 60)}
               disabled={minuteurActif}
               placeholder="Minutes"
-              className="w-full text-center text-2xl sm:text-3xl rounded-lg border-2 border-primary p-3 font-bold"
+              className="w-full text-center text-2xl sm:text-3xl rounded-lg border-2 border-primary p-4 font-bold min-h-14"
             />
             <p className="text-4xl sm:text-5xl font-bold text-primary">
               {formatterMinuteur(secondesRestantes)}
             </p>
             <button
               onClick={() => setMinuteurActif(!minuteurActif)}
-              className={`w-full px-6 py-3 rounded-lg text-lg font-bold transition ${
+              className={`w-full px-6 py-4 rounded-lg text-lg font-bold transition min-h-14 ${
                 minuteurActif
                   ? 'bg-destructive text-white hover:bg-destructive/90'
                   : 'bg-primary text-white hover:bg-primary/90'

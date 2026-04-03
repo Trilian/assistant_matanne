@@ -1,7 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import PageVisualisation from "./page";
+
+const mockPush = vi.fn();
+const mockInvalidateQueries = vi.fn();
+const mockMutate = vi.fn();
+
+const piecesMock = [
+  {
+    id: 1,
+    nom: "Salon",
+    etage: 0,
+    surface_m2: 25,
+    position_x: 120,
+    position_y: 90,
+    largeur: 180,
+    hauteur: 130,
+    couleur: "#34d399",
+    objets: [{ id: 10, nom: "TV", type: "electronique", statut: "hors_service" }],
+  },
+];
 
 vi.mock("next/dynamic", () => ({
   default: () => {
@@ -59,20 +79,39 @@ vi.mock("@/composants/ui/collapsible", () => ({
 }));
 
 vi.mock("@tanstack/react-query", () => ({
-  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
 }));
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
+  useRouter: () => ({ push: mockPush, back: vi.fn() }),
   usePathname: () => "/maison/visualisation",
 }));
 
 vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: vi.fn().mockImplementation((key: string[]) => {
-    if (key.includes("etages")) return { data: [0, 1], isLoading: false };
-    return { data: [{ id: 1, nom: "Salon", surface: 25, etage: 0 }], isLoading: false };
+    if (key.includes("etages")) {
+      return { data: [0, 1], isLoading: false };
+    }
+
+    if (key.includes("entretien")) {
+      return {
+        data: [{ id: 1, piece: "Salon", fait: false, prochaine_fois: "2024-01-01" }],
+        isLoading: false,
+      };
+    }
+
+    if (key.includes("detail")) {
+      return {
+        data: {
+          objets: [{ id: 10, nom: "TV", type: "electronique", statut: "hors_service" }],
+        },
+        isLoading: false,
+      };
+    }
+
+    return { data: piecesMock, isLoading: false };
   }),
-  utiliserMutation: () => ({ mutate: vi.fn(), isPending: false }),
+  utiliserMutation: () => ({ mutate: mockMutate, isPending: false }),
 }));
 
 vi.mock("@/bibliotheque/api/maison", () => ({
@@ -87,14 +126,32 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe.skip("PageVisualisation", () => {
+describe("PageVisualisation", () => {
   it("affiche le titre Plan de la maison", () => {
     render(<PageVisualisation />);
     expect(screen.getByText(/Plan de la maison/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Salon$/i })).toBeInTheDocument();
   });
 
-  it("affiche la description", () => {
+  it("active le mode édition", async () => {
+    const user = userEvent.setup();
     render(<PageVisualisation />);
-    expect(screen.getByText(/Vue interactive/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /Modifier positions/i }));
+
+    expect(screen.getByRole("button", { name: /Édition active/i })).toBeInTheDocument();
+  });
+
+  it("ouvre les détails d'une pièce et permet la navigation d'action", async () => {
+    const user = userEvent.setup();
+    render(<PageVisualisation />);
+
+    await user.click(screen.getByRole("button", { name: /^Salon$/i }));
+
+    expect(screen.getByText(/Ménage rapide/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Entretien rapide/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /Entretien rapide/i }));
+    expect(mockPush).toHaveBeenCalledWith("/maison/travaux?tab=entretien");
   });
 });

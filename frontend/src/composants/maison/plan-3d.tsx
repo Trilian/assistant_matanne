@@ -32,6 +32,15 @@ interface Plan3DProps {
   donneesParPiece?: Record<number, DonneesPiece3D>;
 }
 
+interface BlocMobilier {
+  x: number;
+  z: number;
+  w: number;
+  d: number;
+  h: number;
+  color: string;
+}
+
 function couleurHex(piece: PieceMaison): string {
   if (piece.couleur) return piece.couleur;
   const nom = piece.nom.toLowerCase();
@@ -72,8 +81,37 @@ function PieceBox({ piece, selectionne, onClick, donnees }: {
   const couleurEffective = aTachesRetard ? "#ef4444" : color;
   const opacity = hovered ? 0.9 : selectionne ? 0.95 : aTachesRetard ? 0.65 : 0.75;
 
+  const mobilier: BlocMobilier[] = (() => {
+    const nom = piece.nom.toLowerCase();
+    if (nom.includes("cuisine")) {
+      return [
+        { x: -w * 0.24, z: 0, w: w * 0.28, d: d * 0.78, h: 0.32, color: "#e2e8f0" },
+        { x: w * 0.18, z: -d * 0.18, w: w * 0.2, d: d * 0.24, h: 0.16, color: "#f8fafc" },
+      ];
+    }
+    if (nom.includes("chambre")) {
+      return [
+        { x: 0, z: -d * 0.08, w: w * 0.6, d: d * 0.38, h: 0.22, color: "#ddd6fe" },
+      ];
+    }
+    if (nom.includes("salon")) {
+      return [
+        { x: -w * 0.12, z: 0, w: w * 0.52, d: d * 0.24, h: 0.2, color: "#fde68a" },
+        { x: w * 0.22, z: d * 0.22, w: w * 0.16, d: d * 0.16, h: 0.1, color: "#fef3c7" },
+      ];
+    }
+    if (nom.includes("bureau")) {
+      return [{ x: 0, z: 0, w: w * 0.45, d: d * 0.2, h: 0.18, color: "#bfdbfe" }];
+    }
+    return [];
+  })();
+
   return (
     <group position={[cx, cy, cz]} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+      <mesh position={[0, -h / 2 + 0.04, 0]} receiveShadow>
+        <boxGeometry args={[w * 0.96, 0.08, d * 0.96]} />
+        <meshStandardMaterial color="#f8fafc" roughness={0.9} metalness={0.02} />
+      </mesh>
       <mesh
         onPointerEnter={() => setHovered(true)}
         onPointerLeave={() => setHovered(false)}
@@ -85,6 +123,8 @@ function PieceBox({ piece, selectionne, onClick, donnees }: {
           color={couleurEffective}
           transparent
           opacity={opacity}
+          roughness={0.45}
+          metalness={0.05}
           wireframe={false}
         />
       </mesh>
@@ -106,6 +146,17 @@ function PieceBox({ piece, selectionne, onClick, donnees }: {
       >
         {piece.nom}
       </Text>
+      {mobilier.map((bloc, index) => (
+        <mesh
+          key={`${piece.id}-mobilier-${index}`}
+          position={[bloc.x, -h / 2 + bloc.h / 2 + 0.08, bloc.z]}
+          castShadow
+          receiveShadow
+        >
+          <boxGeometry args={[bloc.w, bloc.h, bloc.d]} />
+          <meshStandardMaterial color={bloc.color} roughness={0.8} metalness={0.03} />
+        </mesh>
+      ))}
       {/* Badge tâches en retard */}
       {aTachesRetard && (
         <Html position={[w / 2 - 0.1, h / 2 + 0.4, -d / 2 + 0.1]} distanceFactor={6}>
@@ -144,9 +195,9 @@ function PieceBox({ piece, selectionne, onClick, donnees }: {
 
 function Sol() {
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} receiveShadow>
       <planeGeometry args={[PLAN_W * SCALE + 2, PLAN_H * SCALE + 2]} />
-      <meshStandardMaterial color="#f8fafc" />
+      <meshStandardMaterial color="#ecfdf5" roughness={0.95} metalness={0} />
     </mesh>
   );
 }

@@ -80,3 +80,13 @@ class BilanMensuelNarratifResponse(BaseModel):
     mois: str
     donnees: dict[str, Any] = Field(default_factory=dict)
     synthese_ia: str = ""
+
+
+class PredictionEnergieResponse(BaseModel):
+    """Réponse IA-10: prédiction de consommation énergie + conseils."""
+
+    mois_reference: str
+    predictions: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    nb_anomalies: int = 0
+    score_risque_global: float = 0.0
+    conseils: list[str] = Field(default_factory=list)

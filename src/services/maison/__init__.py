@@ -1,24 +1,24 @@
-﻿"""
+"""
 Services Maison - Gestion intelligente de la maison et du jardin.
 
 Ce package regroupe tous les services pour:
-- Jardin: conseils IA, météo, arrosage intelligent
-- Entretien: routines ménage, planification IA
+- Jardin: conseils IA, m�t�o, arrosage intelligent
+- Entretien: routines m�nage, planification IA
 - Projets: estimation, pipeline achats/budget
 
 Architecture:
     services/maison/
-    ├── schemas.py              # Pydantic models
-    ├── jardin_service.py       # JardinService + JardinierIA
-    ├── entretien_service.py    # EntretienService + CalendrierIA
-    └── projets_service.py      # ProjetsService + EstimateurIA
+    +-- schemas.py              # Pydantic models
+    +-- jardin_service.py       # JardinService + JardinierIA
+    +-- entretien_service.py    # EntretienService + CalendrierIA
+    +-- projets_service.py      # ProjetsService + EstimateurIA
 """
 
 from typing import TYPE_CHECKING
 
-# ═══════════════════════════════════════════════════════════
-# LAZY LOADING pour performance au démarrage
-# ═══════════════════════════════════════════════════════════
+# -----------------------------------------------------------
+# LAZY LOADING pour performance au d�marrage
+# -----------------------------------------------------------
 
 _SERVICES = {
     # Services principaux
@@ -29,7 +29,7 @@ _SERVICES = {
     "get_jardin_service": "jardin_service",
     "get_entretien_service": "entretien_service",
     "get_projets_service": "projets_service",
-    # Factories (français)
+    # Factories (fran�ais)
     "obtenir_service_jardin": "jardin_service",
     "obtenir_service_entretien": "entretien_service",
     "obtenir_service_projets": "projets_service",
@@ -67,7 +67,7 @@ _SERVICES = {
     "EstimationsCrudService": "diagnostics_crud_service",
     "get_estimations_crud_service": "diagnostics_crud_service",
     "obtenir_service_estimations_crud": "diagnostics_crud_service",
-    # Extensions CRUD services (nuisibles, devis, entretien saisonnier, relevés)
+    # Extensions CRUD services (nuisibles, devis, entretien saisonnier, relev�s)
     "NuisiblesCrudService": "extensions_crud_service",
     "get_nuisibles_crud_service": "extensions_crud_service",
     "DevisCrudService": "extensions_crud_service",
@@ -84,7 +84,7 @@ _SERVICES = {
     "ContexteMaisonService": "contexte_maison_service",
     "get_contexte_maison_service": "contexte_maison_service",
     "obtenir_service_contexte_maison": "contexte_maison_service",
-    # Catalogue Entretien service (sync JSON → tâches DB)
+    # Catalogue Entretien service (sync JSON ? t�ches DB)
     "CatalogueEntretienService": "catalogue_entretien_service",
     "get_catalogue_entretien_service": "catalogue_entretien_service",
     "obtenir_service_catalogue_entretien": "catalogue_entretien_service",
@@ -92,7 +92,7 @@ _SERVICES = {
     "NotificationsMaisonService": "notifications_maison",
     "get_notifications_maison_service": "notifications_maison",
     "obtenir_service_notifications_maison": "notifications_maison",
-    # Fiche Tâche service (catalogue + IA fallback)
+    # Fiche T�che service (catalogue + IA fallback)
     "FicheTacheService": "fiche_tache_service",
     "get_fiche_tache_service": "fiche_tache_service",
     "obtenir_service_fiche_tache": "fiche_tache_service",
@@ -100,12 +100,12 @@ _SERVICES = {
     "CatalogueEnrichissementService": "catalogue_enrichissement_service",
     "get_catalogue_enrichissement_service": "catalogue_enrichissement_service",
     # Bridges inter-modules
-    "ChargesEnergieInteractionService": "inter_module_charges_energie",
-    "obtenir_service_charges_energie_interaction": "inter_module_charges_energie",
-    "EntretienCoursesInteractionService": "inter_module_entretien_courses",
-    "obtenir_service_entretien_courses_interaction": "inter_module_entretien_courses",
-    "JardinEntretienInteractionService": "inter_module_jardin_entretien",
-    "obtenir_service_jardin_entretien_interaction": "inter_module_jardin_entretien",
+    "ChargesEnergieInteractionService": "bridges_charges_energie",
+    "obtenir_service_charges_energie_interaction": "bridges_charges_energie",
+    "EntretienCoursesInteractionService": "bridges_entretien_courses",
+    "obtenir_service_entretien_courses_interaction": "bridges_entretien_courses",
+    "JardinEntretienInteractionService": "bridges_jardin_entretien",
+    "obtenir_service_jardin_entretien_interaction": "bridges_jardin_entretien",
 }
 
 _SCHEMAS = {
@@ -208,7 +208,7 @@ __all__ = [
     "get_jardin_service",
     "get_entretien_service",
     "get_projets_service",
-    # Factories (français)
+    # Factories (fran�ais)
     "obtenir_service_jardin",
     "obtenir_service_entretien",
     "obtenir_service_projets",
@@ -270,3 +270,4 @@ __all__ = [
     "JardinEntretienInteractionService",
     "obtenir_service_jardin_entretien_interaction",
 ]
+

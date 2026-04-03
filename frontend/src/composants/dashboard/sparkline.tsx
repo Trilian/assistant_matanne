@@ -5,6 +5,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { motion } from "framer-motion";
 
 interface SparklineProps {
   donnees: number[];
@@ -80,19 +81,25 @@ export function Sparkline({
       className="inline-block"
     >
       {remplissage && cheminRemplissage && (
-        <path
+        <motion.path
           d={cheminRemplissage}
           fill={couleurEffective}
           opacity={0.1}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.14 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
         />
       )}
-      <path
+      <motion.path
         d={chemin}
         fill="none"
         stroke={couleurEffective}
         strokeWidth={1.5}
         strokeLinecap="round"
         strokeLinejoin="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.65, ease: "easeOut" }}
       />
     </svg>
   );

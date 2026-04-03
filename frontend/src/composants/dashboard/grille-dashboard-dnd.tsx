@@ -47,7 +47,7 @@ function WidgetSortable({
   } = useSortable({ id });
 
   return (
-    <div ref={setNodeRef} className={cn("group relative", isDragging && "opacity-50") }>
+    <div ref={setNodeRef} className={cn("group relative animate-widget-enter", isDragging && "opacity-50") }>
       <button
         type="button"
         className={cn(

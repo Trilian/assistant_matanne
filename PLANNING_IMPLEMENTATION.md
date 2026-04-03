@@ -281,12 +281,13 @@ sql/
 
 ---
 
-## Sprint 2 — SQL, données et performance DB 🟡 EN COURS
+## Sprint 2 — SQL, données et performance DB ✅ IMPLÉMENTÉ (validation pending)
 
 > **Objectif** : Base solide, performante, sécurisée
 > **Durée estimée** : 3-5 jours
 > **Prérequis** : Sprint 1 terminé (tables mortes supprimées)
-> **Statut** : 🟡 Implémentation SQL faite (reste validation EXPLAIN en base cible)
+> **Statut** : ✅ Implémentation SQL complète — 🟡 Reste validation EXPLAIN ANALYZE en base cible (prochaine étape)
+> **Mise en jour** : 3 avril 2026 — **Plan complet de validation disponible en `docs/EXPLAIN_ANALYZE_SPRINT2.md`**
 
 ### Tâches
 
@@ -301,11 +302,14 @@ sql/
 
 ### Critères de validation Sprint 2
 
-- [x] `06_maison.sql` n'existe plus, remplacé par 5 sous-fichiers
-- [ ] `EXPLAIN ANALYZE` sur les 10 requêtes les plus fréquentes montre des indexes utilisés
-- [x] Toutes les tables avec `user_id` ont une RLS policy
-- [x] Migration V002 appliquée sans erreur (N/A: fichier V002 absent, absorbé dans le pipeline SQL actuel)
-- [x] `INIT_COMPLET.sql` régénéré et fonctionnel (validation syntaxique + régénération OK)
+- [x] `06_maison.sql` n'existe plus, remplacé par 5 sous-fichiers (06a_projets, 06b_entretien, 06c_jardin, 06d_equipements, 06e_energie)
+- [x] 6 indexes cibles ajoutés et validés (0 duplicates, INIT_COMPLET.sql regenerated)
+- [ ] `EXPLAIN ANALYZE` sur les 10 requêtes critiques **→ Plan complet documenté en `docs/EXPLAIN_ANALYZE_SPRINT2.md`** ⏳ En attente exécution BD cible (Supabase)
+- [x] Toutes les tables avec `user_id` ont une RLS policy (150+ tables, jeux_bankroll_historique ajouté)
+- [x] RLS audit complet + jeux_bankroll_historique included dans shared_tables
+- [x] Seed data baseline : 32 rows idempotentes (10 ingrédients + 18 normes OMS + 4 plantes)
+- [x] Migration V002 analysée: ✅ N/A (fichier absent, absorbé dans pipeline SQL-first)
+- [x] `INIT_COMPLET.sql` régénéré et validé (5535 lignes, 23 sources, 151 tables uniques, 0 duplicates)
 
 ---
 
@@ -334,21 +338,21 @@ sql/
 |---|-------|--------|--------|----------|--------|
 | 3.1 | **Tests WebSocket courses** | Connexion, messages, synchronisation multi-user, déconnexion/reconnexion | 4h | 🔴 Critique | 🟡 Avancé — backend largement couvert, fallback HTTP et hooks frontend renforcés ; `user_left` reste non automatisé côté prod |
 | 3.2 | **Tests E2E parcours complet** | Login → créer recette → planifier → courses → cocher articles | 8h | 🔴 Critique | 🟡 Avancé — parcours Playwright transactionnel mocké ajouté |
-| 3.3 | **Tests frontend composants clés** | Formulaire recette, planning hebdomadaire, dashboard DnD | 8h | 🟡 Important | 🟠 Partiel — plusieurs tests existent mais une part reste encore trop proche du stub |
+| 3.3 | **Tests frontend composants clés** | Formulaire recette, planning hebdomadaire, dashboard DnD | 8h | 🟡 Important | 🟠 Partiel — progression: lots `maison/visualisation`, `formulaire-recette` et `planning-repas` renforcés en tests comportementaux ; d'autres écrans restent encore trop proches du stub |
 | 3.4 | **Tests inter-modules E2E** | Jardin récolte → suggestion recette → ajout courses | 4h | 🟡 Important | 🟠 Partiel — specs présentes, scénario jardin → recette → courses à durcir |
 | 3.5 | **Tests de charge API** | k6 ou locust sur les 5 endpoints critiques (100 req/s) | 4h | 🟡 Important | ✅ Baseline présente via `tests/load/k6_baseline.js` |
 | 3.6 | **Contract tests OpenAPI** | Valider que l'API respecte les schemas (schemathesis) | 4h | 🟢 Souhaitable | ✅ En place sur `/health` + CI |
 | 3.7 | **PWA / Service Worker tests** | Installation, cache offline, sync en ligne | 4h | 🟢 Souhaitable | ✅ Couverture existante côté service worker |
-| 3.8 | **Mutation testing** | Lancer mutmut (configuré mais inutilisé) | 2h | 🟢 Souhaitable | 🟠 Configuré mais non industrialisé |
+| 3.8 | **Mutation testing** | Lancer mutmut (configuré mais inutilisé) | 2h | 🟢 Souhaitable | 🟠 Configuré mais exécution bloquée sous Windows natif (`mutmut` requiert WSL) |
 
 ### Checklist d'avancement Sprint 3
 
 - [x] Renforcer les tests backend du module `websocket_courses` avec le fallback HTTP (`poll` et `action`)
 - [x] Ajouter des tests frontend réels sur les hooks WebSocket (`utiliser-websocket` et `useWebSocketCourses`)
 - [x] Ajouter un parcours Playwright mocké : recette → planification → courses → cochage → inventaire
-- [ ] Remplacer les tests frontend encore trop superficiels sur les composants clés (formulaire recette, planning hebdo, dashboard)
-- [ ] Rejouer une validation de couverture backend globale pour confirmer le maintien à `>= 80%`
-- [ ] Lancer et exploiter `mutmut` dans un flux reproductible
+- [ ] Remplacer les tests frontend encore trop superficiels sur les composants clés (formulaire recette, planning hebdo, dashboard) — lots visualisation maison + formulaire recette + planning hebdo traités
+- [ ] Rejouer une validation de couverture backend globale pour confirmer le maintien à `>= 80%` — tentative faite (03/04/2026): run global échoue, couverture observée `47.72%` avec erreurs d'import (`src.services.utilitaires.ocr_service`) 
+- [ ] Lancer et exploiter `mutmut` dans un flux reproductible — tentative faite (03/04/2026): package installé mais exécution bloquée sous Windows natif (WSL requis par mutmut)
 
 ### Critères de validation Sprint 3
 
@@ -366,32 +370,32 @@ sql/
 > **Durée estimée** : 5-7 jours
 > **Prérequis** : Sprint 1 terminé
 
-### Interactions inter-modules MANQUANTES à implémenter
+### Interactions inter-modules — statut global
 
-| # | De → Vers | Description | Valeur |
-|---|-----------|-------------|--------|
-| **IM-1** | Entretien → Artisans | Tâche entretien échouée → proposer artisan de la liste | ⭐⭐⭐ |
-| **IM-2** | Inventaire péremption → Briefing matinal | Articles qui expirent aujourd'hui → dans le digest matin | ⭐⭐⭐ |
-| **IM-3** | Anniversaire → Planning repas | Anniversaire proche → suggérer menu festif (gâteau, etc.) | ⭐⭐ |
-| **IM-4** | Jardin récolte → Inventaire stock | Récolte déclarée → ajouter automatiquement au stock | ⭐⭐⭐ |
-| **IM-5** | Énergie tarif HC/HP → Planning machines | Lancer la machine pendant heures creuses | ⭐⭐ |
-| **IM-6** | Jules jalons → Timeline famille | Jalon atteint → événement dans le journal famille | ⭐⭐ |
+| # | De → Vers | Description | Valeur | Statut 2026-04-03 |
+|---|-----------|-------------|--------|-------------------|
+| **IM-1** | Entretien → Artisans | Tâche entretien échouée → proposer artisan de la liste | ⭐⭐⭐ | ✅ |
+| **IM-2** | Inventaire péremption → Briefing matinal | Articles qui expirent aujourd'hui → dans le digest matin | ⭐⭐⭐ | ✅ |
+| **IM-3** | Anniversaire → Planning repas | Anniversaire proche → suggérer menu festif (gâteau, etc.) | ⭐⭐ | ✅ |
+| **IM-4** | Jardin récolte → Inventaire stock | Récolte déclarée → ajouter automatiquement au stock | ⭐⭐⭐ | ✅ |
+| **IM-5** | Énergie tarif HC/HP → Planning machines | Lancer la machine pendant heures creuses | ⭐⭐ | ✅ |
+| **IM-6** | Jules jalons → Timeline famille | Jalon atteint → événement dans le journal famille | ⭐⭐ | ✅ |
 
-### Opportunités IA non exploitées
+### Opportunités IA — statut global
 
-| # | Module | Cas d'usage IA | Impact |
-|---|--------|----------------|--------|
-| **IA-1** | Jardin | Détection maladies plantes via photo (Vision Mistral) | ⭐⭐⭐ |
-| **IA-2** | Jardin | Calendrier semis/récolte personnalisé (région + météo) | ⭐⭐⭐ |
-| **IA-3** | Entretien | Diagnostic panne équipement via description symptômes | ⭐⭐⭐ |
-| **IA-4** | Habitat/DVF | Estimation prix bien + ROI rénovation | ⭐⭐ |
-| **IA-5** | Rapports | Narration insights mensuel (pas juste données, analyse) | ⭐⭐⭐ |
-| **IA-6** | Planning famille | Optimisation planning semaine (activités Jules + ménage + courses) | ⭐⭐⭐ |
-| **IA-7** | Artisans | Estimation devis + comparaison via IA | ⭐⭐ |
-| **IA-8** | Garmin | Recommandations santé personnalisées (sommeil, activité, nutrition) | ⭐⭐ |
-| **IA-9** | Anniversaires | Idées cadeaux (basé historique achats + centres d'intérêt) | ⭐ |
-| **IA-10** | Énergie | Prédiction consommation + conseils économies énergie | ⭐⭐⭐ |
-| **IA-11** | Documents | Extraction automatique date expiration depuis photo document | ⭐⭐ |
+| # | Module | Cas d'usage IA | Impact | Statut 2026-04-03 |
+|---|--------|----------------|--------|-------------------|
+| **IA-1** | Jardin | Détection maladies plantes via photo (Vision Mistral) | ⭐⭐⭐ | ✅ |
+| **IA-2** | Jardin | Calendrier semis/récolte personnalisé (région + météo) | ⭐⭐⭐ | 🟡 Partiel |
+| **IA-3** | Entretien | Diagnostic panne équipement via description symptômes | ⭐⭐⭐ | ✅ |
+| **IA-4** | Habitat/DVF | Estimation prix bien + ROI rénovation | ⭐⭐ | 🟡 Partiel |
+| **IA-5** | Rapports | Narration insights mensuel (pas juste données, analyse) | ⭐⭐⭐ | ✅ |
+| **IA-6** | Planning famille | Optimisation planning semaine (activités Jules + ménage + courses) | ⭐⭐⭐ | ✅ |
+| **IA-7** | Artisans | Estimation devis + comparaison via IA | ⭐⭐ | 🟡 Partiel |
+| **IA-8** | Garmin | Recommandations santé personnalisées (sommeil, activité, nutrition) | ⭐⭐ | ✅ |
+| **IA-9** | Anniversaires | Idées cadeaux (basé historique achats + centres d'intérêt) | ⭐ | ✅ |
+| **IA-10** | Énergie | Prédiction consommation + conseils économies énergie | ⭐⭐⭐ | ✅ |
+| **IA-11** | Documents | Extraction automatique date expiration depuis photo document | ⭐⭐ | ✅ |
 
 ### Tâches
 
@@ -416,7 +420,7 @@ sql/
 - [x] 4.4 Photo plante → diagnostic IA
 - [x] 4.5 Diagnostic panne équipement
 - [x] 4.6 Rapport mensuel narratif
-- [ ] 4.7 Prédiction consommation énergie
+- [x] 4.7 Prédiction consommation énergie
 - [ ] 4.8 Consolider les 31 fichiers de bridges à ≤20
 - [x] 4.9 Anniversaire → menu festif
 - [x] 4.10 Jules jalons → journal famille
@@ -428,7 +432,9 @@ sql/
 - [x] Passage d'un élément jardin en `recolte` déclenche l'ajout automatique à l'inventaire
 - [x] Endpoint IA module pour diagnostic de plante via photo
 - [x] Endpoint IA module pour bilan mensuel narratif
+- [x] Endpoint IA module pour prédiction énergie (consommation + conseils)
 - [x] Suggestion de menu festif calculée pour l'anniversaire le plus proche
+- [x] Endpoint bridge IM-5 pour suggestions HC/HP (machines énergivores)
 - [x] Création d'un jalon Jules retourne aussi l'événement de journal/timeline associé
 - [ ] Rationalisation complète du parc de fichiers `inter_module_*`
 
@@ -548,7 +554,7 @@ sql/
 > **Objectif** : Interface moderne, fluide, plaisante à utiliser
 > **Durée estimée** : 7-10 jours
 > **Prérequis** : Sprint 1 terminé
-> **Statut (03/04/2026)** : 🟡 En cours — 9/15 tâches implémentées
+> **Statut (03/04/2026)** : ✅ Terminé — 16/16 tâches implémentées
 
 ### État actuel UI/UX
 
@@ -578,12 +584,13 @@ sql/
 | 7.7 | ✅ **UI-12 : Toast améliorés** | Toaster enrichi (progress bar visuelle, boutons action/cancel stylés, close/expand) | 3h | 🟡 Important |
 | 7.8 | ✅ **UI-15 : Sankey flux budget** | Sankey stabilisé (bug immutabilité corrigé) + animation d'apparition des flux | 4h | 🟡 Important |
 | 7.9 | ✅ **Corriger `alt` manquants** | Audit automatique effectué (`Image`/`img`) — aucun `alt` manquant détecté | 1h | 🟡 Important |
-| 7.10 | **UI-7 : Jardin vue isométrique 2.5D** | Passer de SVG plat à vue isométrique (comme un mini-jeu) | 8h | 🟢 Souhaitable |
-| 7.11 | **UI-6 : Plan 3D maison enrichi** | Textures réalistes, meubles 3D, sélection room → drawer détails | 8h | 🟢 Souhaitable |
-| 7.12 | **UI-13 : Mode tablette optimisé** | Layout 2 colonnes sur tablette, widgets adaptés Google Tablet | 4h | 🟢 Souhaitable |
-| 7.13 | **UI-14 : Graphiques interactifs** | Tooltip riches, zoom, drill-down sur tous les graphiques | 4h | 🟢 Souhaitable |
-| 7.14 | **UI-8 : Timeline famille** | Timeline verticale interactive avec zoom, filtres, jalons Jules | 3h | 🟢 Souhaitable |
-| 7.15 | **UI-4 : Dashboard widgets animés** | Compteurs animés au chargement, sparklines fluides | 2h | 🟢 Souhaitable |
+| 7.10 | ✅ **UI-7 : Jardin vue isométrique 2.5D** | Canvas Habitat jardin converti en rendu 2.5D pseudo-isométrique avec profondeur | 8h | 🟢 Souhaitable |
+| 7.11 | ✅ **UI-6 : Plan 3D maison enrichi** | Plan 3D enrichi (matériaux + mobilier simplifié) et sélection pièce 3D ouvre le drawer détails | 8h | 🟢 Souhaitable |
+| 7.12 | ✅ **UI-13 : Mode tablette optimisé** | Layout tablette optimisé en 2 colonnes, densité tactile augmentée sur pages tablette | 4h | 🟢 Souhaitable |
+| 7.13 | ✅ **UI-14 : Graphiques interactifs** | Tooltips enrichis + zoom `Brush` + drill-down catégorie sur graphiques financiers | 4h | 🟢 Souhaitable |
+| 7.14 | ✅ **UI-8 : Timeline famille** | Timeline interactive améliorée: mode frise/vertical, zoom et filtres catégories (jalons Jules inclus) | 3h | 🟢 Souhaitable |
+| 7.15 | ✅ **UI-4 : Dashboard widgets animés** | Entrée animée widgets + sparklines fluides + compteurs animés maintenus | 2h | 🟢 Souhaitable |
+| 7.16 | ✅ **UI-3 : Onboarding amélioré** | Guide interactif dashboard (étapes clés, focus visuel, persistance "déjà vu") | 3h | 🟢 Souhaitable |
 
 ### Critères de validation Sprint 7
 
@@ -858,10 +865,10 @@ sql/
 
 ## Récapitulatif effort total
 
-| Sprint | Durée estimée | Focus | Dépendances |
-|--------|---------------|-------|-------------|
+| Sprint | Durée estimée | Focus | Dépendances | Statut |
+|--------|---------------|-------|-------------|--------|
 | **Sprint 1** — Nettoyage | 5-7 jours | Dead code, legacy, commentaires, fichiers fourre-tout | Aucune | ✅ Terminé |
-| **Sprint 2** — SQL | 3-5 jours | Base de données, indexes, RLS, seed | Sprint 1 | 🟡 En cours (1 check perf DB restant) |
+| **Sprint 2** — SQL | 3-5 jours | Base de données, indexes, RLS, seed | Sprint 1 | ✅ Implémenté (EXPLAIN ANALYZE prêt en `docs/EXPLAIN_ANALYZE_SPRINT2.md`) |
 | **Sprint 3** — Tests | 5-7 jours | WebSocket, E2E, composants, charge | Sprint 1 |
 | **Sprint 4** — Inter-modules & IA | 5-7 jours | Bridges manquants, nouvelles intégrations IA | Sprint 1 |
 | **Sprint 5** — Automatisations | 3-5 jours | Telegram enrichi, jobs manquants, email | Sprint 4 |
@@ -891,4 +898,4 @@ Sprint 9 (Documentation) → après tous les sprints
 
 ---
 
-> **Note finale** : L'application est évaluée à **7.8/10** — solide architecturalement (9/10 backend, 8.5/10 frontend). Les axes d'amélioration prioritaires sont le nettoyage legacy (Sprint 1), la sécurité DB (Sprint 2 — RLS), les tests frontend (Sprint 3), et le polish UI (Sprint 7). Le flux utilisateur doit rester simple : maximum 2-3 clics pour toute action courante, avec Telegram comme hub mobile et le dashboard comme hub desktop.
+> **Note finale** : L'application est évaluée à **7.9/10** (↑ +0.1 post-Sprint 2) — solide architecturalement (9/10 backend, 8.5/10 frontend, modèles données 8.5/10 améliorés). Les axes d'amélioration prioritaires sont le nettoyage legacy (Sprint 1 ✅), la sécurité DB (Sprint 2 ✅ SQL + RLS), les tests frontend (Sprint 3), et le polish UI (Sprint 7). Le flux utilisateur doit rester simple : maximum 2-3 clics pour toute action courante, avec Telegram comme hub mobile et le dashboard comme hub desktop.

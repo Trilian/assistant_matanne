@@ -1,8 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import PagePlanningRepas from "./page";
+
+vi.mock("@/composants/planning/calendrier-mensuel", () => ({
+  CalendrierMensuel: ({ mois }: { mois: string }) => (
+    <div data-testid="calendrier-mensuel">Mois: {mois}</div>
+  ),
+}));
+
+vi.mock("@/composants/planning/calendrier-mosaique-repas", () => ({
+  CalendrierMosaiqueRepas: () => <div data-testid="calendrier-mosaique" />,
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
@@ -13,6 +24,9 @@ vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: vi.fn().mockImplementation((key: string[]) => {
     if (key[0] === "famille") return { data: [], isLoading: false };
     if (key[0] === "calendriers") return { data: [], isLoading: false };
+    if (key[0] === "planning" && key[1] === "mensuel") {
+      return { data: { mois: "2026-04", par_jour: {} }, isLoading: false };
+    }
     if (key[0] === "planning" && key[1] === "nutrition") {
       return { data: null, isLoading: false };
     }
@@ -74,5 +88,19 @@ describe("PagePlanningRepas", () => {
     renderWithQuery(<PagePlanningRepas />);
     expect(screen.getByText("Lundi")).toBeInTheDocument();
     expect(screen.getByText("Dimanche")).toBeInTheDocument();
+  });
+
+  it("bascule entre vue semaine et vue mois", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<PagePlanningRepas />);
+
+    expect(screen.getByText("Lundi")).toBeInTheDocument();
+    expect(screen.queryByTestId("calendrier-mensuel")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Mois$/i }));
+    expect(screen.getByTestId("calendrier-mensuel")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Semaine$/i }));
+    expect(screen.getByText("Lundi")).toBeInTheDocument();
   });
 });

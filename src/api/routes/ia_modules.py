@@ -16,6 +16,7 @@ from src.api.schemas.ia_modules import (
     DiagnosticPlanteJardinRequest,
     DiagnosticPlanteJardinResponse,
     EstimationProjetMaisonRequest,
+    PredictionEnergieResponse,
     PredictionConsommationRequest,
 )
 from src.api.utils import gerer_exception_api
@@ -230,3 +231,75 @@ async def generer_bilan_mensuel_narratif(
     service = obtenir_bilan_mensuel_service()
     bilan = await service.generer_bilan(mois=mois)
     return BilanMensuelNarratifResponse(**bilan)
+
+
+@router.get(
+    "/energie/prediction-consommation",
+    response_model=PredictionEnergieResponse,
+    responses=REPONSES_IA,
+    summary="Prédire la consommation énergie et proposer des conseils",
+)
+@gerer_exception_api
+async def predire_consommation_energie(
+    nb_mois: int = 12,
+    user: dict = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+) -> PredictionEnergieResponse:
+    from datetime import date
+
+    from src.services.maison.energie_anomalies_ia import obtenir_service_energie_anomalies_ia
+
+    service = obtenir_service_energie_anomalies_ia()
+    types_compteurs = ("electricite", "gaz", "eau")
+    predictions: dict[str, dict[str, object]] = {}
+    total_anomalies = 0
+    scores: list[float] = []
+
+    for type_compteur in types_compteurs:
+        analyse = service.analyser_anomalies(
+            type_compteur=type_compteur,
+            nb_mois=max(3, min(24, nb_mois)),
+            seuil_pct=20.0,
+        )
+        points = list(analyse.get("points", []))
+        moyenne = float(analyse.get("moyenne", 0.0) or 0.0)
+        score = float(analyse.get("score_anormalite_global", 0.0) or 0.0)
+        scores.append(score)
+
+        derniere_conso = float(points[-1].get("conso", 0.0) or 0.0) if points else 0.0
+        avant_derniere = float(points[-2].get("conso", 0.0) or 0.0) if len(points) > 1 else derniere_conso
+
+        if avant_derniere > 0 and derniere_conso > avant_derniere * 1.08:
+            tendance = "hausse"
+        elif avant_derniere > 0 and derniere_conso < avant_derniere * 0.92:
+            tendance = "baisse"
+        else:
+            tendance = "stable"
+
+        predictions[type_compteur] = {
+            "consommation_dernier_mois": round(derniere_conso, 2),
+            "consommation_moyenne": round(moyenne, 2),
+            "prediction_mois_suivant": round((derniere_conso * 0.6) + (moyenne * 0.4), 2),
+            "tendance": tendance,
+            "score_risque": round(score, 1),
+            "nb_anomalies": int(analyse.get("nb_anomalies", 0) or 0),
+        }
+        total_anomalies += int(analyse.get("nb_anomalies", 0) or 0)
+
+    conseils: list[str] = []
+    if predictions.get("electricite", {}).get("tendance") == "hausse":
+        conseils.append("Programmer les appareils énergivores sur les heures creuses.")
+    if predictions.get("eau", {}).get("nb_anomalies", 0):
+        conseils.append("Vérifier les fuites potentielles et les usages anormaux en eau.")
+    if predictions.get("gaz", {}).get("tendance") == "hausse":
+        conseils.append("Contrôler la régulation chauffage et l'isolation des pièces principales.")
+    if not conseils:
+        conseils.append("Consommation globalement stable: poursuivre le suivi mensuel.")
+
+    return PredictionEnergieResponse(
+        mois_reference=date.today().strftime("%Y-%m"),
+        predictions=predictions,
+        nb_anomalies=total_anomalies,
+        score_risque_global=round(sum(scores) / max(1, len(scores)), 1),
+        conseils=conseils,
+    )

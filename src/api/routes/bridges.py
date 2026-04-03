@@ -97,6 +97,18 @@ async def anniversaire_menu_festif(
     return service.anniversaire_vers_menu_festif(jours_horizon=jours_horizon)
 
 
+@router.get("/energie-heures-creuses", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def energie_heures_creuses(
+    user: dict = Depends(require_auth),
+):
+    """IM-5: Recommande les créneaux HC/HP pour les machines énergivores."""
+    from src.services.ia.bridges import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.energie_hc_hp_vers_planning_machines()
+
+
 @router.post("/meteo-entretien", responses=REPONSES_LISTE)
 @gerer_exception_api
 async def meteo_entretien(

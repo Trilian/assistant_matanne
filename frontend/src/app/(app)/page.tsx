@@ -109,6 +109,34 @@ type HistoireFamille = {
   }>;
 };
 
+const ETAPES_ONBOARDING = [
+  {
+    id: "metriques",
+    titre: "Métriques clés",
+    description: "Vue instantanée des indicateurs du jour: repas, courses, activités et alertes.",
+  },
+  {
+    id: "actions_rapides",
+    titre: "Actions rapides",
+    description: "Lance les actions les plus fréquentes en 1 clic.",
+  },
+  {
+    id: "rappels",
+    titre: "Rappels intelligents",
+    description: "Les points d'attention du moment, avec accès direct aux actions.",
+  },
+  {
+    id: "checklist",
+    titre: "Checklist du jour",
+    description: "Valide tes tâches sans quitter le tableau de bord.",
+  },
+  {
+    id: "depenses",
+    titre: "Suivi budget",
+    description: "Dépenses mensuelles et aperçu annuel en lecture rapide.",
+  },
+] as const;
+
 function obtenirStyleActionDashboard(action: string | null): string {
   const valeur = (action ?? "").toLowerCase();
   if (valeur.includes("valider") || valeur.includes("afficher") || valeur.includes("refresh")) {
@@ -189,6 +217,9 @@ export default function PageAccueil() {
   const [actionPushTraitee, setActionPushTraitee] = useState(false);
   const [filtreWidgetJournal, setFiltreWidgetJournal] = useState("all");
   const [filtreActionJournal, setFiltreActionJournal] = useState("all");
+  const [onboardingDejaVu, setOnboardingDejaVu] = utiliserStockageLocal("dashboard-onboarding-vu", false);
+  const [onboardingOuvert, setOnboardingOuvert] = useState(false);
+  const [etapeOnboardingIndex, setEtapeOnboardingIndex] = useState(0);
 
   const ORDRE_WIDGETS_DEFAUT = Object.keys(WIDGETS_DEFAUT);
   const [ordreWidgets, setOrdreWidgets] = utiliserStockageLocal<string[]>(
@@ -400,6 +431,44 @@ export default function PageAccueil() {
     };
   }, []);
 
+  useEffect(() => {
+    if (onboardingDejaVu || onboardingOuvert) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      setOnboardingOuvert(true);
+      setEtapeOnboardingIndex(0);
+    }, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [onboardingDejaVu, onboardingOuvert]);
+
+  useEffect(() => {
+    if (!onboardingOuvert) {
+      return;
+    }
+
+    const etape = ETAPES_ONBOARDING[etapeOnboardingIndex];
+    const element = document.querySelector(`[data-tour="${etape.id}"]`);
+    if (element instanceof HTMLElement) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [etapeOnboardingIndex, onboardingOuvert]);
+
+  const etapeCourante = ETAPES_ONBOARDING[etapeOnboardingIndex];
+
+  function classeTour(etapeId: (typeof ETAPES_ONBOARDING)[number]["id"]): string {
+    if (!onboardingOuvert || etapeCourante.id !== etapeId) {
+      return "";
+    }
+    return "ring-2 ring-primary ring-offset-2 rounded-xl transition-shadow";
+  }
+
+  function terminerOnboarding() {
+    setOnboardingOuvert(false);
+    setOnboardingDejaVu(true);
+  }
+
   function basculerWidget(cle: ClesWidget) {
     const prochain = { ...widgets, [cle]: !widgets[cle] };
     setWidgets(prochain);
@@ -432,6 +501,16 @@ export default function PageAccueil() {
           aria-label="Personnaliser le tableau de bord"
         >
           <Settings2 className="h-5 w-5" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setOnboardingOuvert(true);
+            setEtapeOnboardingIndex(0);
+          }}
+        >
+          Guide
         </Button>
       </div>
 
@@ -783,13 +862,18 @@ export default function PageAccueil() {
       {/* Cartes métriques */}
       {widgets.metriques && (
       <WidgetSortable id="metriques">
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      <div data-tour="metriques" className={`grid gap-4 grid-cols-2 lg:grid-cols-4 ${classeTour("metriques")}`}>
         <CarteMetrique
           titre="Repas aujourd'hui"
           valeur={data?.repas_aujourd_hui.length ?? 0}
           icone={<ChefHat className="h-4 w-4" />}
           lien="/cuisine/planning"
           chargement={isLoading}
+          sparkline={[
+            Math.max(0, (data?.repas_aujourd_hui.length ?? 0) - 2),
+            Math.max(0, (data?.repas_aujourd_hui.length ?? 0) - 1),
+            data?.repas_aujourd_hui.length ?? 0,
+          ]}
         />
         <CarteMetrique
           titre="Articles à acheter"
@@ -797,6 +881,11 @@ export default function PageAccueil() {
           icone={<ShoppingCart className="h-4 w-4" />}
           lien="/cuisine/courses"
           chargement={isLoading}
+          sparkline={[
+            Math.max(0, (data?.articles_courses_restants ?? 0) - 3),
+            Math.max(0, (data?.articles_courses_restants ?? 0) - 1),
+            data?.articles_courses_restants ?? 0,
+          ]}
         />
         <CarteMetrique
           titre="Activités semaine"
@@ -804,6 +893,11 @@ export default function PageAccueil() {
           icone={<CalendarDays className="h-4 w-4" />}
           lien="/planning"
           chargement={isLoading}
+          sparkline={[
+            Math.max(0, (data?.activites_semaine ?? 0) - 2),
+            Math.max(0, (data?.activites_semaine ?? 0) - 1),
+            data?.activites_semaine ?? 0,
+          ]}
         />
         <CarteMetrique
           titre="Alertes entretien"
@@ -812,6 +906,11 @@ export default function PageAccueil() {
           lien="/maison/entretien"
           chargement={isLoading}
           alerte={(data?.taches_entretien_urgentes ?? 0) > 0}
+          sparkline={[
+            Math.max(0, (data?.taches_entretien_urgentes ?? 0) + 1),
+            Math.max(0, data?.taches_entretien_urgentes ?? 0),
+            data?.taches_entretien_urgentes ?? 0,
+          ]}
         />
       </div>
       </WidgetSortable>
@@ -820,7 +919,7 @@ export default function PageAccueil() {
       {/* Actions rapides */}
       {widgets.actions_rapides && (
       <WidgetSortable id="actions_rapides">
-      <Card>
+      <Card data-tour="actions_rapides" className={classeTour("actions_rapides")}>
         <CardHeader>
           <CardTitle className="text-lg">Actions rapides</CardTitle>
         </CardHeader>
@@ -947,7 +1046,7 @@ export default function PageAccueil() {
       {/* Rappels intelligents */}
       {widgets.rappels && rappelsData && rappelsData.total > 0 && (
         <WidgetSortable id="rappels">
-        <Card className="border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/20">
+        <Card data-tour="rappels" className={`border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/20 ${classeTour("rappels")}`}>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
               <Bell className="h-5 w-5 text-orange-500" />
@@ -976,7 +1075,7 @@ export default function PageAccueil() {
       {/* Checklist du jour */}
       {widgets.checklist_jour && (
         <WidgetSortable id="checklist_jour">
-        <Card>
+        <Card data-tour="checklist" className={classeTour("checklist")}>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Checklist du jour</CardTitle>
             <CardDescription>
@@ -1057,7 +1156,7 @@ export default function PageAccueil() {
       {/* Aperçu financier */}
       {widgets.depenses && statsDepenses && (
         <WidgetSortable id="depenses">
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div data-tour="depenses" className={`grid gap-4 grid-cols-1 md:grid-cols-2 ${classeTour("depenses")}`}>
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -1148,6 +1247,36 @@ export default function PageAccueil() {
       )}
 
       </GrilleDashboardDnd>
+
+      {onboardingOuvert && (
+        <div className="fixed bottom-4 right-4 z-50 w-[320px] rounded-xl border bg-background/95 p-4 shadow-xl backdrop-blur">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            Étape {etapeOnboardingIndex + 1}/{ETAPES_ONBOARDING.length}
+          </p>
+          <p className="mt-1 font-semibold">{etapeCourante.titre}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{etapeCourante.description}</p>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={etapeOnboardingIndex === 0}
+              onClick={() => setEtapeOnboardingIndex((index) => Math.max(0, index - 1))}
+            >
+              Précédent
+            </Button>
+            {etapeOnboardingIndex < ETAPES_ONBOARDING.length - 1 ? (
+              <Button size="sm" onClick={() => setEtapeOnboardingIndex((index) => Math.min(ETAPES_ONBOARDING.length - 1, index + 1))}>
+                Suivant
+              </Button>
+            ) : (
+              <Button size="sm" onClick={terminerOnboarding}>Terminer</Button>
+            )}
+          </div>
+          <Button size="sm" variant="ghost" className="mt-2 w-full" onClick={terminerOnboarding}>
+            Passer le guide
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1180,7 +1309,7 @@ function CarteMetrique({
 }) {
   return (
     <Link href={lien}>
-      <Card className={alerte ? "border-destructive/50" : "hover:bg-accent/50 transition-colors"}>
+      <Card className={alerte ? "border-destructive/50 animate-widget-enter" : "hover:bg-accent/50 transition-colors animate-widget-enter"}>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             {titre}

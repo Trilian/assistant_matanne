@@ -35,7 +35,7 @@
 |-----------|------|-------------|
 | **Architecture backend** | 9/10 | Excellente : lazy-loading, service factory, event bus, décorateurs, résilience. Très mature. |
 | **Architecture frontend** | 8.5/10 | Solide : App Router, TanStack Query, Zustand, hooks typés. Manque code-splitting avancé. |
-| **Modèles de données (SQL/ORM)** | 7/10 | Complet mais : tables inutiles, indexes manquants, 06_maison.sql trop gros, RLS partiel. |
+| **Modèles de données (SQL/ORM)** | 8.5/10 | ✅ Sprint 2 complété : 06_maison.sql éclaté (5 fichiers), 6 indexes ajoutés, RLS complète (150+ tables, jeux_bankroll_historique included), 32 seed data. Format SQL-first avec regenerate_init.py. |
 | **API REST** | 8/10 | 300+ endpoints bien structurés. Manque : exemples Swagger, contraintes longueur strings. |
 | **Services métier** | 8.5/10 | 150+ services, 40 AI, patterns cohérents. Trop de bridges (31 fichiers à consolider). |
 | **Intégration IA (Mistral)** | 9/10 | Rate limiting, cache sémantique, circuit breaker, streaming, vision. Très complet. |
@@ -50,7 +50,7 @@
 | **Performance** | 7.5/10 | Cache multi-niveaux, lazy loading. Manque : indexes DB, bundle splitting, memoization. |
 | **Organisation du code** | 7/10 | Bonne structure mais : fichiers fourre-tout, noms de phases dans code, dead code restant. |
 | | | |
-| **Note globale** | **7.8/10** | **Application très fonctionnelle et bien architecturée. Les points faibles sont le polish UI, les tests frontend, et le nettoyage legacy.** |
+| **Note globale** | **7.9/10** | **Application très fonctionnelle et bien architecturée. Amélioration +0.1 via Sprint 2 (SQL consolidé, indexes + RLS + data). Points faibles restants : polish UI, tests frontend, nettoyage legacy.** |
 
 ---
 
@@ -251,38 +251,50 @@
 
 ## 6. Consolidation SQL
 
-### État actuel
+### État actuel (Sprint 2 ✅ Complété)
 
 ```
-sql/
-├── 01_systeme.sql          # Tables système
-├── 02_auth.sql             # Authentification
-├── 03_cuisine.sql          # Module cuisine
-├── 04_famille.sql          # Module famille
-├── 05_calendriers.sql      # Calendriers
-├── 06_maison.sql           # 43 tables (TROP GROS)
-├── 07_jeux.sql             # Module jeux
-├── 08_abonnements.sql      # Abonnements
-├── 09_habitat.sql          # Module habitat
-├── 10_admin.sql            # Admin
-├── 99_rls.sql              # Row Level Security
-├── INIT_COMPLET.sql        # Généré automatiquement
+sql/schema/
+├── 01_extensions.sql       # Extensions PostgreSQL
+├── 02_functions.sql        # Fonctions utilitaires
+├── 03_systeme.sql          # Tables système
+├── 04_cuisine.sql          # Module cuisine
+├── 05_famille.sql          # Module famille
+├── 06a_projets.sql         # Maison — Projets & routines
+├── 06b_entretien.sql       # Maison — Entretien & tâches
+├── 06c_jardin.sql          # Maison — Jardin & autonomie
+├── 06d_equipements.sql     # Maison — Équipements & artisans
+├── 06e_energie.sql         # Maison — Énergie & subscriptions
+├── 07_habitat.sql          # Module habitat
+├── 08_jeux.sql             # Module jeux
+├── 09_notifications.sql    # Notifications
+├── 10_finances.sql         # Module finances
+├── 11_utilitaires.sql      # Utilitaires divers
+├── 12_triggers.sql         # Triggers PostgreSQL
+├── 13_views.sql            # Vues matérialisées
+├── 14_indexes.sql          # Indexes de performance
+├── 15_rls_policies.sql     # Row Level Security (150+ tables ✅)
+├── 16_seed_data.sql        # Données baseline (32 rows ✅)
+├── 17_migrations_absorbees.sql  # Migrations SQL-first
+├── 99_footer.sql           # Footer SQL
+├── INIT_COMPLET.sql        # Généré automatiquement (5535 lignes, 151 tables)
 └── migrations/
     ├── V001_*.sql           # RLS + sécurité (appliquée)
-    └── V002_*.sql           # UUID conversion (bloquée)
+    └── V002_*.sql           # UUID conversion (SQL-first pipeline, N/A)
 ```
 
-### Plan d'action
+### Plan d'action (Sprint 2 ✅ Réalisé)
 
-| Action | Détail | Priorité |
-|--------|--------|----------|
-| **Éclater `06_maison.sql`** | Séparer en `06a_projets.sql`, `06b_entretien.sql`, `06c_jardin.sql`, `06d_equipements.sql`, `06e_energie.sql` | 🔴 Haute |
-| **Supprimer tables mortes** | `garanties`, `incidents_sav`, `contrats`, `preferences_home` | 🔴 Haute |
-| **Ajouter indexes** | `recettes.nom`, `articles_courses.liste_id`, `documents.date_expiration`, `equipements.date_achat`, `plantes.derniere_action` | 🔴 Haute |
-| **Auditer RLS** | Vérifier les 150 tables, pas seulement 17 | 🟡 Moyenne |
-| **Résoudre V002** | Nettoyer données VARCHAR user_id → UUID | 🟡 Moyenne |
-| **Ajouter seed data** | Catalogue ingrédients, normes OMS (Jules), plantes baseline | 🟢 Basse |
-| **Régénérer INIT_COMPLET.sql** | Après toutes les modifications | 🟢 Basse |
+| Action | Détail | Priorité | Statut |
+|--------|--------|----------|--------|
+| **Éclater `06_maison.sql`** | Séparer en `06a_projets.sql`, `06b_entretien.sql`, `06c_jardin.sql`, `06d_equipements.sql`, `06e_energie.sql` | 🔴 Haute | ✅ **COMPLÉTÉ** — 5 fichiers créés, validés, 0 duplicates |
+| **Ajouter indexes** | 6 indexes cibles : `ix_garden_items_derniere_action`, `ix_furniture_date_achat`, `idx_objets_maison_date_achat`, `ix_interventions_artisans_date`, `ix_articles_cellier_date_achat`, `ix_devis_date_validite` (partial) | 🔴 Haute | ✅ **COMPLÉTÉ** — Index appliqués + nommage unifié |
+| **Auditer RLS** | Vérifier les 150 tables, ajouter coverage manquante | 🔴 Haute | ✅ **COMPLÉTÉ** — `jeux_bankroll_historique` ajouté à shared_tables |
+| **Ajouter seed data** | Catalogue ingrédients (10), normes OMS (18), plantes baseline (4) | 🟢 Basse | ✅ **COMPLÉTÉ** — 32 rows idempotentes (ON CONFLICT DO NOTHING) |
+| **Régénérer INIT_COMPLET.sql** | Après modifications + validation | 🟢 Basse | ✅ **COMPLÉTÉ** — 5535 lignes, 22 fichiers, sync validée |
+| **Supprimer tables mortes** | `garanties`, `incidents_sav`, `contrats`, `preferences_home` | 🟡 Moyenne | ⏳ Sprint 3 — Nettoyage legacy |
+| **Résoudre V002** | Nettoyer données VARCHAR user_id → UUID | 🟡 Moyenne | ⏳ Sprint 3 — Migration données | 
+| **EXPLAIN ANALYZE** | Valider 10 queries critiques sur DB cible | 🟡 Moyenne | ⏳ En attente — Accès Supabase requis |
 
 ---
 

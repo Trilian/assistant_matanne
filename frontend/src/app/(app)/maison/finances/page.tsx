@@ -50,6 +50,7 @@ const YAxis = dynamic(() => import("recharts").then(m => m.YAxis), { ssr: false 
 const CartesianGrid = dynamic(() => import("recharts").then(m => m.CartesianGrid), { ssr: false });
 const Tooltip = dynamic(() => import("recharts").then(m => m.Tooltip), { ssr: false });
 const ResponsiveContainer = dynamic(() => import("recharts").then(m => m.ResponsiveContainer), { ssr: false });
+const Brush = dynamic(() => import("recharts").then(m => m.Brush), { ssr: false });
 
 // ─── Onglet Charges ───────────────────────────────────────────
 function OngletCharges() {
@@ -408,8 +409,21 @@ function OngletEnergie() {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis dataKey="mois" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} unit={` ${unites[compteur]}`} />
-                  <Tooltip formatter={(v) => [`${Number(v ?? 0)} ${unites[compteur]}`, "Consommation"]} />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null;
+                      const valeurTooltip = Number(payload[0]?.value ?? 0);
+
+                      return (
+                        <div className="rounded-lg border bg-background/95 px-3 py-2 text-xs shadow-lg backdrop-blur">
+                          <p className="font-semibold">{String(label)}</p>
+                          <p className="text-muted-foreground">Consommation: {valeurTooltip.toFixed(1)} {unites[compteur]}</p>
+                        </div>
+                      );
+                    }}
+                  />
                   <Line type="monotone" dataKey="consommation" stroke={couleurs[compteur]} strokeWidth={2} dot={false} />
+                  <Brush dataKey="mois" height={20} stroke={couleurs[compteur]} travellerWidth={8} />
                 </LineChart>
               </ResponsiveContainer>
             </div>

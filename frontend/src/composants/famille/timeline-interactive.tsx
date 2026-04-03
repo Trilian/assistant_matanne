@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Baby, CalendarDays, Home, Trophy, Users } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Button } from "@/composants/ui/button";
 import { Slider } from "@/composants/ui/slider";
 import { cn } from "@/bibliotheque/utils";
 
@@ -59,10 +60,22 @@ export function TimelineInteractive({
 }) {
   const [zoom, setZoom] = useState([2]);
   const [selectionId, setSelectionId] = useState<string | null>(items[0]?.id ?? null);
+  const [mode, setMode] = useState<"horizontale" | "verticale">("horizontale");
+  const [categoriesVisibles, setCategoriesVisibles] = useState<Array<EvenementTimelineInteractive["categorie"]>>([
+    "jules",
+    "maison",
+    "famille",
+    "jeux",
+  ]);
+
+  const itemsFiltres = useMemo(
+    () => items.filter((item) => categoriesVisibles.includes(item.categorie)),
+    [categoriesVisibles, items]
+  );
 
   const itemsTries = useMemo(
-    () => [...items].sort((a, b) => a.date.localeCompare(b.date)),
-    [items]
+    () => [...itemsFiltres].sort((a, b) => a.date.localeCompare(b.date)),
+    [itemsFiltres]
   );
 
   const bornes = useMemo(() => {
@@ -81,7 +94,9 @@ export function TimelineInteractive({
   }, [itemsTries]);
 
   const largeurParJour = 22 + zoom[0] * 18;
+  const hauteurParEvenement = 54 + zoom[0] * 14;
   const largeurCanvas = Math.max(720, bornes.totalJours * largeurParJour + 160);
+  const hauteurCanvasVerticale = Math.max(360, itemsTries.length * hauteurParEvenement + 60);
   const selection = itemsTries.find((item) => item.id === selectionId) ?? itemsTries[0] ?? null;
 
   const marqueursMois = useMemo(() => {
@@ -122,62 +137,116 @@ export function TimelineInteractive({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border bg-muted/20">
-        <svg width={largeurCanvas} height="320" className="block min-w-full">
-          <line x1="80" x2={largeurCanvas - 32} y1="148" y2="148" stroke="hsl(var(--border))" strokeWidth="1" />
+      <div className="flex flex-wrap items-center gap-2">
+        <Button size="sm" variant={mode === "horizontale" ? "default" : "outline"} onClick={() => setMode("horizontale")}>
+          Frise
+        </Button>
+        <Button size="sm" variant={mode === "verticale" ? "default" : "outline"} onClick={() => setMode("verticale")}>
+          Timeline verticale
+        </Button>
+        {(["jules", "maison", "famille", "jeux"] as const).map((categorie) => {
+          const active = categoriesVisibles.includes(categorie);
+          return (
+            <Button
+              key={categorie}
+              size="sm"
+              variant={active ? "secondary" : "outline"}
+              onClick={() => {
+                setCategoriesVisibles((current) => {
+                  if (current.includes(categorie)) {
+                    const suivant = current.filter((item) => item !== categorie);
+                    return suivant.length ? suivant : current;
+                  }
+                  return [...current, categorie];
+                });
+              }}
+              className="capitalize"
+            >
+              {categorie}
+            </Button>
+          );
+        })}
+      </div>
 
-          {marqueursMois.map((marqueur) => (
-            <g key={marqueur.cle} transform={`translate(${marqueur.x} 18)`}>
-              <line x1="0" x2="0" y1="0" y2="12" stroke="hsl(var(--border))" strokeWidth="1" />
-              <text x="0" y="28" className="fill-muted-foreground text-[11px]">
-                {marqueur.label}
-              </text>
-            </g>
-          ))}
+      {mode === "horizontale" ? (
+        <div className="overflow-x-auto rounded-xl border bg-muted/20">
+          <svg width={largeurCanvas} height="320" className="block min-w-full">
+            <line x1="80" x2={largeurCanvas - 32} y1="148" y2="148" stroke="hsl(var(--border))" strokeWidth="1" />
 
-          {Object.entries(CONFIG_CATEGORIE).map(([cle, config]) => (
-            <g key={cle} transform={`translate(12 ${100 + config.ligne * 44})`}>
-              <text x="0" y="0" className="fill-muted-foreground text-[12px] capitalize">
-                {cle}
-              </text>
-            </g>
-          ))}
-
-          {itemsTries.map((item) => {
-            const config = CONFIG_CATEGORIE[item.categorie];
-            const x = differenceJours(bornes.debut, normaliserDate(item.date)) * largeurParJour + 80;
-            const y = 96 + config.ligne * 44;
-            const estSelectionne = item.id === selection?.id;
-
-            return (
-              <g
-                key={item.id}
-                transform={`translate(${x} ${y})`}
-                className="cursor-pointer"
-                onClick={() => setSelectionId(item.id)}
-              >
-                <circle
-                  cx="0"
-                  cy="0"
-                  r={estSelectionne ? 22 : 18}
-                  fill="hsl(var(--background))"
-                  stroke={config.couleur}
-                  strokeWidth={estSelectionne ? 3 : 2}
-                />
-                <text x="0" y="4" textAnchor="middle" fill={config.couleur} className="text-[12px] font-semibold">
-                  {item.categorie === "jules" ? "J" : item.categorie === "maison" ? "M" : item.categorie === "famille" ? "F" : "G"}
-                </text>
-                <text x="0" y="34" textAnchor="middle" className="fill-foreground text-[11px] font-medium">
-                  {item.titre.length > 18 ? `${item.titre.slice(0, 18)}…` : item.titre}
-                </text>
-                <text x="0" y="50" textAnchor="middle" className="fill-muted-foreground text-[10px]">
-                  {new Date(item.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+            {marqueursMois.map((marqueur) => (
+              <g key={marqueur.cle} transform={`translate(${marqueur.x} 18)`}>
+                <line x1="0" x2="0" y1="0" y2="12" stroke="hsl(var(--border))" strokeWidth="1" />
+                <text x="0" y="28" className="fill-muted-foreground text-[11px]">
+                  {marqueur.label}
                 </text>
               </g>
-            );
-          })}
-        </svg>
-      </div>
+            ))}
+
+            {Object.entries(CONFIG_CATEGORIE).map(([cle, config]) => (
+              <g key={cle} transform={`translate(12 ${100 + config.ligne * 44})`}>
+                <text x="0" y="0" className="fill-muted-foreground text-[12px] capitalize">
+                  {cle}
+                </text>
+              </g>
+            ))}
+
+            {itemsTries.map((item) => {
+              const config = CONFIG_CATEGORIE[item.categorie];
+              const x = differenceJours(bornes.debut, normaliserDate(item.date)) * largeurParJour + 80;
+              const y = 96 + config.ligne * 44;
+              const estSelectionne = item.id === selection?.id;
+
+              return (
+                <g
+                  key={item.id}
+                  transform={`translate(${x} ${y})`}
+                  className="cursor-pointer"
+                  onClick={() => setSelectionId(item.id)}
+                >
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r={estSelectionne ? 22 : 18}
+                    fill="hsl(var(--background))"
+                    stroke={config.couleur}
+                    strokeWidth={estSelectionne ? 3 : 2}
+                  />
+                  <text x="0" y="4" textAnchor="middle" fill={config.couleur} className="text-[12px] font-semibold">
+                    {item.categorie === "jules" ? "J" : item.categorie === "maison" ? "M" : item.categorie === "famille" ? "F" : "G"}
+                  </text>
+                  <text x="0" y="34" textAnchor="middle" className="fill-foreground text-[11px] font-medium">
+                    {item.titre.length > 18 ? `${item.titre.slice(0, 18)}…` : item.titre}
+                  </text>
+                  <text x="0" y="50" textAnchor="middle" className="fill-muted-foreground text-[10px]">
+                    {new Date(item.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      ) : (
+        <div className="overflow-auto rounded-xl border bg-muted/20 p-3">
+          <svg width="100%" height={hauteurCanvasVerticale} className="block min-w-[320px]">
+            <line x1="130" x2="130" y1="20" y2={hauteurCanvasVerticale - 20} stroke="hsl(var(--border))" strokeWidth="2" />
+            {itemsTries.map((item, index) => {
+              const y = 34 + index * hauteurParEvenement;
+              const config = CONFIG_CATEGORIE[item.categorie];
+              return (
+                <g key={item.id} className="cursor-pointer" onClick={() => setSelectionId(item.id)}>
+                  <text x="8" y={y + 4} className="fill-muted-foreground text-[11px]">
+                    {new Date(item.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}
+                  </text>
+                  <circle cx="130" cy={y} r={item.id === selection?.id ? 11 : 8} fill="hsl(var(--background))" stroke={config.couleur} strokeWidth={item.id === selection?.id ? 3 : 2} />
+                  <text x="150" y={y + 4} className="fill-foreground text-[12px] font-medium">
+                    {item.titre}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      )}
 
       {selection ? (
         <Card>

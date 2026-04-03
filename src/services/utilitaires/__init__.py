@@ -21,7 +21,7 @@ from src.services.utilitaires.briefing_matinal import (
     BriefingMatinalService,
     obtenir_service_briefing_matinal,
 )
-from src.services.utilitaires.inter_module_chat_contexte import (
+from src.services.utilitaires.bridges_chat_contexte import (
     ChatContexteMultiModuleService,
     obtenir_service_chat_contexte,
 )
@@ -29,7 +29,7 @@ from src.services.utilitaires.assistant_proactif import (
     AssistantProactifService,
     obtenir_service_assistant_proactif,
 )
-from src.services.utilitaires.inter_module_dashboard_actions import (
+from src.services.utilitaires.bridges_dashboard_actions import (
     DashboardActionsRapidesInteractionService,
     get_dashboard_actions_rapides_service,
 )
@@ -60,3 +60,4 @@ __all__ = [
     "obtenir_service_assistant_proactif",
     "get_dashboard_actions_rapides_service",
 ]
+

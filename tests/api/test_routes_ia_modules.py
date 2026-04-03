@@ -253,3 +253,37 @@ def test_validation_prediction_consommation_stock_negatif(client: TestClient) ->
         },
     )
     assert response.status_code == 422
+
+
+def test_prediction_consommation_energie_endpoint(client: TestClient) -> None:
+    service = MagicMock()
+    service.analyser_anomalies.side_effect = [
+        {
+            "points": [{"mois": "2026-02", "conso": 420.0}, {"mois": "2026-03", "conso": 460.0}],
+            "moyenne": 440.0,
+            "score_anormalite_global": 26.0,
+            "nb_anomalies": 1,
+        },
+        {
+            "points": [{"mois": "2026-02", "conso": 120.0}, {"mois": "2026-03", "conso": 110.0}],
+            "moyenne": 115.0,
+            "score_anormalite_global": 10.0,
+            "nb_anomalies": 0,
+        },
+        {
+            "points": [{"mois": "2026-02", "conso": 85.0}, {"mois": "2026-03", "conso": 93.0}],
+            "moyenne": 89.0,
+            "score_anormalite_global": 18.0,
+            "nb_anomalies": 1,
+        },
+    ]
+
+    with patch("src.services.maison.energie_anomalies_ia.obtenir_service_energie_anomalies_ia", return_value=service):
+        response = client.get("/api/v1/ia/modules/energie/prediction-consommation?nb_mois=12")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["mois_reference"]
+    assert payload["predictions"]["electricite"]["tendance"] == "hausse"
+    assert payload["predictions"]["gaz"]["tendance"] == "baisse"
+    assert payload["nb_anomalies"] == 2

@@ -86,7 +86,7 @@ def __getattr__(name: str):
 
         return obtenir_service_jules_nutrition_interaction
     if name == "obtenir_service_saison_menu_interaction":
-        from src.services.cuisine.inter_module_saison_menu import (
+        from src.services.cuisine.bridges_saison_menu import (
             obtenir_service_saison_menu_interaction,
         )
 
@@ -110,3 +110,4 @@ def __getattr__(name: str):
 
         return get_garmin_nutrition_adultes_service
     raise AttributeError(f"module 'src.services.cuisine' has no attribute '{name}'")
+

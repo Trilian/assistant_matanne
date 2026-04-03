@@ -106,7 +106,7 @@ export default function WidgetTablettePage() {
           </div>
         </header>
 
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           <article className="rounded-2xl border border-zinc-700/60 bg-zinc-900/70 p-5">
             <div className="mb-4 flex items-center gap-2 text-emerald-300">
               <Utensils className="h-5 w-5" />
@@ -143,7 +143,7 @@ export default function WidgetTablettePage() {
               <Clock3 className="h-5 w-5" />
               <h2 className="text-lg font-medium">Agenda rapide</h2>
             </div>
-            <ul className="space-y-2 text-base text-zinc-100">
+            <ul className="space-y-2 text-base text-zinc-100 md:text-lg">
               {repasAujourdhui
                 .slice(0, 3)
                 .map((repas: { id?: number | string; type_repas?: string; recette_nom?: string }, index: number) => (
@@ -160,12 +160,12 @@ export default function WidgetTablettePage() {
               <Timer className="h-5 w-5" />
               <h2 className="text-lg font-medium">Timer cuisine</h2>
             </div>
-            <p className="text-3xl font-semibold">{formatTimer(timerSecondes)}</p>
+            <p className="text-4xl font-semibold md:text-5xl">{formatTimer(timerSecondes)}</p>
             <div className="mt-3 flex gap-2">
               <button
                 type="button"
                 onClick={() => setTimerActif((precedent) => !precedent)}
-                className="rounded-md bg-emerald-500 px-3 py-2 text-sm font-medium text-zinc-950"
+                className="rounded-md bg-emerald-500 px-4 py-3 text-base font-semibold text-zinc-950"
               >
                 {timerActif ? 'Pause' : 'Demarrer'}
               </button>
@@ -175,7 +175,7 @@ export default function WidgetTablettePage() {
                   setTimerActif(false)
                   setTimerSecondes(25 * 60)
                 }}
-                className="rounded-md border border-zinc-500 px-3 py-2 text-sm"
+                className="rounded-md border border-zinc-500 px-4 py-3 text-base"
               >
                 Reinitialiser
               </button>

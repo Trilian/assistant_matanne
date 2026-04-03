@@ -426,6 +426,21 @@ class BridgesInterModulesService:
             "date_evenement": evenement.date_evenement.isoformat(),
         }
 
+    @avec_gestion_erreurs(default_return={})
+    def energie_hc_hp_vers_planning_machines(self) -> dict:
+        """IM-5: Propose la meilleure fenêtre HC/HP pour lancer les machines."""
+        from src.services.maison.inter_module_energie_cuisine import (
+            obtenir_service_energie_cuisine_interaction,
+        )
+
+        service = obtenir_service_energie_cuisine_interaction()
+        recommandations = service.obtenir_suggestions_heures_creuses()
+        return {
+            "interaction": "IM-5",
+            "description": "Tarif HC/HP vers planning machines",
+            **recommandations,
+        }
+
     # ── B5.8: Météo → Entretien maison ──────────────────────
 
     @avec_gestion_erreurs(default_return=[])

@@ -63,21 +63,42 @@ export default function JardinHabitatPage() {
       <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Canvas paysager</CardTitle>
-            <CardDescription>Les positions viennent des coordonnées enregistrées dans Habitat.</CardDescription>
+            <CardTitle className="text-base">Canvas paysager 2.5D</CardTitle>
+            <CardDescription>Vue isométrique légère pour lire les volumes des zones de jardin.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="relative h-[420px] overflow-hidden rounded-xl border bg-[linear-gradient(180deg,#f6fff6_0%,#ebf7ef_100%)]">
-              {(zones ?? []).map((zone) => (
-                <button
-                  key={zone.id}
-                  type="button"
-                  onClick={() => setSelection(zone)}
-                  className={`absolute rounded-xl border border-emerald-700/30 bg-emerald-500/20 text-left shadow-sm transition hover:bg-emerald-500/30 ${classePourValeur(zone.position_x ?? 5, "left")} ${classePourValeur(zone.position_y ?? 5, "top")} ${classePourValeur(zone.largeur ?? 18, "width")} ${classePourValeur(zone.longueur ?? 16, "height")}`}
-                >
-                  <span className="block p-2 text-xs font-medium text-emerald-950">{zone.nom}</span>
-                </button>
-              ))}
+            <div className="relative h-[420px] overflow-hidden rounded-xl border bg-[radial-gradient(circle_at_20%_10%,#f8fff6_0%,#e7f5e9_52%,#d9ead9_100%)] [perspective:1200px]">
+              <div className="absolute inset-0 [transform:rotateX(58deg)_rotateZ(-42deg)_scale(1.04)] [transform-origin:center_58%]">
+                {(zones ?? []).map((zone) => {
+                  const left = classePourValeur(zone.position_x ?? 10, "left");
+                  const top = classePourValeur(zone.position_y ?? 10, "top");
+                  const width = classePourValeur(zone.largeur ?? 18, "width");
+                  const height = classePourValeur(zone.longueur ?? 16, "height");
+                  const active = zone.id === zoneActive?.id;
+
+                  return (
+                    <button
+                      key={zone.id}
+                      type="button"
+                      onClick={() => setSelection(zone)}
+                      className={`absolute z-20 text-left transition-transform hover:scale-[1.02] focus-visible:outline-none ${left} ${top} ${width} ${height}`}
+                    >
+                      <span
+                        className={`absolute inset-0 rounded-lg border ${active ? "border-emerald-900/70" : "border-emerald-700/35"} ${active ? "bg-emerald-500/50" : "bg-emerald-400/30"}`}
+                      />
+                      <span
+                        className={`absolute left-[4%] top-[100%] h-[16%] w-[96%] origin-top-left skew-x-[-40deg] rounded-b-md ${active ? "bg-emerald-900/45" : "bg-emerald-900/30"}`}
+                      />
+                      <span
+                        className={`absolute left-[100%] top-[4%] h-[96%] w-[14%] origin-top-left skew-y-[-40deg] rounded-r-md ${active ? "bg-emerald-800/45" : "bg-emerald-800/30"}`}
+                      />
+                      <span className="relative z-30 block p-2 text-xs font-semibold text-emerald-950 drop-shadow-sm">
+                        {zone.nom}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
               {(zones ?? []).length === 0 && (
                 <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                   Aucune zone jardin disponible.
