@@ -11,7 +11,7 @@
 5. [?nergie](#?nergie)
 6. [Artisans](#artisans)
 7. [Stocks & Cellier](#stocks--cellier)
-8. [Contrats & Garanties](#contrats--garanties)
+8. [Abonnements](#abonnements)
 9. [Diagnostics](#diagnostics)
 10. [API Reference](#api-reference)
 
