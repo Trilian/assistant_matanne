@@ -42,11 +42,11 @@ export function utiliserRequete<T>(
  * Mutation wrapper avec invalidation automatique.
  * Usage: `utiliserMutation(mutationFn, { onSuccess: () => ... })`
  */
-export function utiliserMutation<TData, TVariables = void>(
+export function utiliserMutation<TData, TVariables = void, TContext = unknown>(
   fn: (variables: TVariables) => Promise<TData>,
-  options?: Partial<UseMutationOptions<TData, Error, TVariables>>
+  options?: Partial<UseMutationOptions<TData, Error, TVariables, TContext>>
 ) {
-  return useMutation<TData, Error, TVariables>({
+  return useMutation<TData, Error, TVariables, TContext>({
     mutationFn: fn,
     onError: (error) => toast.error(error.message || "Une erreur est survenue"),
     ...options,

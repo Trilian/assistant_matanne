@@ -127,7 +127,7 @@ from src.services.innovations.types import (  # noqa: E402
     ModeVacancesResponse,
     ComparateurPrixAutomatiqueResponse,
     EnergieTempsReelResponse,
-    WhatsAppConversationnelResponse,
+    TelegramConversationnelResponse,
 )
 
 __all__ = [
@@ -171,7 +171,7 @@ __all__ = [
     "ModeVacancesResponse",
     "InsightsQuotidiensResponse",
     "MeteoContextuelleResponse",
-    "WhatsAppConversationnelResponse",
+    "TelegramConversationnelResponse",
     "ComparateurPrixAutomatiqueResponse",
     "EnergieTempsReelResponse",
 ]

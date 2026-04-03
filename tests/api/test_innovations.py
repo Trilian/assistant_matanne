@@ -537,23 +537,23 @@ class TestLearningPreferencesInnovations:
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-class TestWhatsAppEnergyInnovations:
-    """Tests des endpoints Sprint 23 (WhatsApp conversationnel, prix auto, Ã©nergie temps-rÃ©el)."""
+class TestTelegramEnergyInnovations:
+    """Tests des endpoints Sprint 23 (Telegram conversationnel, prix auto, Ã©nergie temps-rÃ©el)."""
 
-    def test_whatsapp_conversationnel(self, client, auth_headers, mock_innovations_service):
-        from src.services.innovations.types import CommandeWhatsApp, WhatsAppConversationnelResponse
+    def test_telegram_conversationnel(self, client, auth_headers, mock_innovations_service):
+        from src.services.innovations.types import CommandeTelegram, TelegramConversationnelResponse
 
-        mock_innovations_service.obtenir_capacites_whatsapp_conversationnelles.return_value = WhatsAppConversationnelResponse(
+        mock_innovations_service.obtenir_capacites_telegram_conversationnelles.return_value = TelegramConversationnelResponse(
             actif=True,
             nb_commandes=6,
             commandes=[
-                CommandeWhatsApp(commande="menu", action="Planning"),
-                CommandeWhatsApp(commande="courses", action="Courses"),
+                CommandeTelegram(commande="menu", action="Planning"),
+                CommandeTelegram(commande="courses", action="Courses"),
             ],
         )
 
         response = client.get(
-            "/api/v1/innovations/phasee/s23/whatsapp-conversationnel",
+            "/api/v1/innovations/phasee/s23/telegram-conversationnel",
             headers=auth_headers,
         )
         assert response.status_code == 200

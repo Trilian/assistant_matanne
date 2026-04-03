@@ -23,14 +23,14 @@ import { toast } from "sonner";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
 
 const TYPES_ABONNEMENT = [
-  { value: "eau", label: "Eau" },
-  { value: "electricite", label: "Électricité" },
-  { value: "gaz", label: "Gaz" },
-  { value: "assurance_habitation", label: "Assurance habitation" },
-  { value: "assurance_auto", label: "Assurance auto" },
-  { value: "chaudiere", label: "Chaudière" },
-  { value: "telephone", label: "Téléphone" },
-  { value: "internet", label: "Internet" },
+  { valeur: "eau", label: "Eau" },
+  { valeur: "electricite", label: "Électricité" },
+  { valeur: "gaz", label: "Gaz" },
+  { valeur: "assurance_habitation", label: "Assurance habitation" },
+  { valeur: "assurance_auto", label: "Assurance auto" },
+  { valeur: "chaudiere", label: "Chaudière" },
+  { valeur: "telephone", label: "Téléphone" },
+  { valeur: "internet", label: "Internet" },
 ];
 
 function ContenuAbonnements() {
@@ -154,7 +154,7 @@ function ContenuAbonnements() {
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium">{abo.fournisseur}</p>
                         <Badge variant="secondary" className="text-[10px]">
-                          {TYPES_ABONNEMENT.find(t => t.value === abo.type_abonnement)?.label ?? abo.type_abonnement}
+                          {TYPES_ABONNEMENT.find(t => t.valeur === abo.type_abonnement)?.label ?? abo.type_abonnement}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">

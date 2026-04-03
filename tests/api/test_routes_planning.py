@@ -283,7 +283,7 @@ class TestPlanningPayloadExact:
             nom="Semaine test",
             semaine_debut=date(2026, 2, 9),
             semaine_fin=date(2026, 2, 15),
-            actif=True,
+            etat="valide",
         )
         db.add(planning)
         db.commit()
@@ -445,7 +445,7 @@ class TestPlanningPayloadExact:
             nom="Semaine test",
             semaine_debut=date(2026, 2, 10),
             semaine_fin=date(2026, 2, 16),
-            actif=True,
+            etat="valide",
         )
         db.add(planning)
         db.commit()
@@ -481,7 +481,7 @@ class TestPlanningPayloadExact:
             nom="Semaine test",
             semaine_debut=date(2026, 2, 10),
             semaine_fin=date(2026, 2, 16),
-            actif=True,
+            etat="valide",
         )
         db.add(planning)
         db.commit()
@@ -517,7 +517,7 @@ class TestPlanningPayloadExact:
             nom="Semaine test",
             semaine_debut=date(2026, 2, 10),
             semaine_fin=date(2026, 2, 16),
-            actif=True,
+            etat="valide",
         )
         db.add(planning)
         db.commit()

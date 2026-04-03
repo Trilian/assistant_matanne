@@ -183,7 +183,7 @@ export default function PagePlanning() {
   );
 
   const { data: fluxCuisine } = utiliserRequete(
-    ["flux", "cuisine", planning?.planning_id ?? "courant"],
+    ["flux", "cuisine", planning?.planning_id ? String(planning.planning_id) : "courant"],
     () => obtenirFluxCuisine(planning?.planning_id),
     { staleTime: 30 * 1000 }
   );

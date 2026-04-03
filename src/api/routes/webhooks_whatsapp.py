@@ -1,11 +1,18 @@
 """
-Webhook WhatsApp pour la reception des messages entrants Meta Cloud API.
+⚠️  DEPRECATED: Webhook WhatsApp — Migration vers Telegram en cours.
 
-Endpoints:
+Ce module reste actif pour la compatibilité backward, mais tous les appels
+envoient maintenant via Telegram (src/services/integrations/telegram).
+NOUVEAU: Utilisez src/api/routes/webhooks_telegram.py pour Telegram natif.
+
+Routes DEPRECATED (legacy):
 - GET  /api/v1/whatsapp/webhook : verification Meta (challenge)
 - POST /api/v1/whatsapp/webhook : reception messages et reponses boutons
 
-Machine d'etat conversationnelle:
+Note: Les intégrations WhatsApp Meta ne sont plus actives.
+Migration complète vers Telegram (gratuit, illimité).
+
+Machine d'etat conversationnelle (redirigée vers Telegram):
 - "planning_valider" : valide le planning propose
 - "planning_modifier" : demande quel repas modifier
 - "planning_regenerer" : relance la generation IA
@@ -110,7 +117,7 @@ async def recevoir_message_whatsapp(request: Request) -> MessageResponse:
 
 async def _traiter_action_bouton(sender: str, action_id: str) -> None:
     """Traite une reponse bouton WhatsApp."""
-    from src.services.integrations.whatsapp import (
+    from src.services.integrations.telegram import (
         effacer_etat_conversation,
         envoyer_message_whatsapp,
         sauvegarder_etat_conversation,
@@ -171,7 +178,7 @@ async def _traiter_action_bouton(sender: str, action_id: str) -> None:
 
 async def _traiter_message_texte(sender: str, texte: str) -> None:
     """Traite un message texte libre."""
-    from src.services.integrations.whatsapp import (
+    from src.services.integrations.telegram import (
         charger_etat_conversation,
         effacer_etat_conversation,
         envoyer_message_whatsapp,
@@ -300,7 +307,7 @@ async def _envoyer_planning_courant(sender: str) -> None:
 
     from src.core.db import obtenir_contexte_db
     from src.core.models.planning import Planning, Repas
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         aujourd_hui = date.today()
@@ -342,7 +349,7 @@ async def _envoyer_suggestion_ce_soir(sender: str) -> None:
 
     from src.core.db import obtenir_contexte_db
     from src.core.models.planning import Repas
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         repas = (
@@ -366,7 +373,7 @@ async def _envoyer_liste_courses(sender: str) -> None:
     """Envoie la liste de courses active."""
     from src.core.db import obtenir_contexte_db
     from src.core.models.courses import ArticleCourses, ListeCourses
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         liste = (
@@ -395,7 +402,7 @@ async def _envoyer_liste_courses(sender: str) -> None:
         if len(articles) > 20:
             msg += f"\n\n... et {len(articles) - 20} autres"
 
-        from src.services.integrations.whatsapp import envoyer_message_interactif
+        from src.services.integrations.telegram import envoyer_message_interactif
 
         await envoyer_message_interactif(
             destinataire=sender,
@@ -413,7 +420,7 @@ async def _envoyer_alerte_stocks(sender: str) -> None:
 
     from src.core.db import obtenir_contexte_db
     from src.core.models import ArticleInventaire
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         aujourd_hui = date.today()
@@ -460,7 +467,7 @@ async def _regenerer_planning_ia(sender: str) -> None:
     import asyncio
     from datetime import date, timedelta
 
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     try:
         from src.services.cuisine import obtenir_planning_service
@@ -515,7 +522,7 @@ async def _envoyer_resume_jules(sender: str) -> None:
     from datetime import date, timedelta
 
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         hier = date.today() - timedelta(days=1)
@@ -579,7 +586,7 @@ async def _ajouter_article_courses_legacy(sender: str, nom_article: str) -> None
 
     nom_propre = SanitiseurDonnees.nettoyer_texte(nom_article)[:100]
     if not nom_propre:
-        from src.services.integrations.whatsapp import envoyer_message_whatsapp
+        from src.services.integrations.telegram import envoyer_message_whatsapp
         await envoyer_message_whatsapp(sender, "? Nom d'article invalide.")
         return
 
@@ -592,7 +599,7 @@ async def _envoyer_resume_budget(sender: str) -> None:
     from datetime import date
 
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         try:
@@ -639,7 +646,7 @@ async def _envoyer_anniversaires_proches(sender: str) -> None:
     from datetime import date, timedelta
 
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         try:
@@ -689,7 +696,7 @@ async def _envoyer_anniversaires_proches(sender: str) -> None:
 async def _envoyer_fiche_recette(sender: str, nom_recette: str) -> None:
     """Envoie la fiche d'une recette avec ses ingr�dients."""
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         try:
@@ -728,7 +735,7 @@ async def _envoyer_taches_retard(sender: str) -> None:
     from datetime import date
 
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         try:
@@ -760,7 +767,7 @@ async def _envoyer_taches_retard(sender: str) -> None:
 async def _envoyer_aide_admin(sender: str) -> None:
     """Envoie la liste des commandes admin (acc�s limit�)."""
     from src.core.config import obtenir_parametres
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     settings = obtenir_parametres()
     # V�rifier que l'exp�diteur est le num�ro admin configur�
@@ -796,7 +803,7 @@ async def _envoyer_aide_admin(sender: str) -> None:
 
 async def _envoyer_meteo(sender: str) -> None:
     """Envoie les pr�visions m�t�o du jour."""
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     try:
         import os
@@ -841,7 +848,7 @@ async def _envoyer_meteo(sender: str) -> None:
 async def _envoyer_resume_jardin(sender: str) -> None:
     """Envoie le r�sum� de l'�tat du jardin (plantes, arrosage, r�coltes)."""
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         try:
@@ -901,7 +908,7 @@ async def _envoyer_resume_jardin(sender: str) -> None:
 async def _envoyer_resume_energie(sender: str) -> None:
     """Envoie un r�sum� de la consommation d'�nergie du mois en cours."""
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         try:
@@ -941,7 +948,7 @@ async def _envoyer_resume_energie(sender: str) -> None:
 async def _envoyer_entretien_urgent(sender: str) -> None:
     """Envoie les t�ches d'entretien urgentes ou en retard."""
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         try:
@@ -970,7 +977,7 @@ async def _envoyer_entretien_urgent(sender: str) -> None:
                     emoji = "??" if priorite == "urgente" else "??"
                     lignes.append(f"  {emoji} {titre} (�ch�ance: {echeance or 'N/A'})")
 
-                from src.services.integrations.whatsapp import envoyer_message_interactif
+                from src.services.integrations.telegram import envoyer_message_interactif
 
                 await envoyer_message_interactif(
                     destinataire=sender,
@@ -995,7 +1002,7 @@ async def _traiter_commande_nlp(sender: str, texte: str) -> None:
     - "qu'est-ce qu'on mange ce soir ?" ? planning_ce_soir
     - "est-ce qu'il nous reste du beurre ?" ? stock
     """
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     try:
         from src.core.ai import obtenir_client_ia
@@ -1107,7 +1114,7 @@ async def _traiter_commande_nlp(sender: str, texte: str) -> None:
 
 async def _ajouter_article_courses_nlp(sender: str, article: str, *, silencieux: bool = False) -> None:
     """Ajoute un article � la liste de courses active (NLP)."""
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     try:
         from src.core.db import obtenir_contexte_db
@@ -1176,7 +1183,7 @@ async def _ajouter_article_courses_nlp(sender: str, article: str, *, silencieux:
 
 async def _chercher_stock_article(sender: str, article: str) -> None:
     """Recherche un article sp�cifique dans l'inventaire."""
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     try:
         from src.core.db import obtenir_contexte_db
@@ -1223,7 +1230,7 @@ async def _envoyer_detail_journee(sender: str) -> None:
     from datetime import date
 
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     aujourd_hui = date.today()
     sections: list[str] = []
@@ -1301,7 +1308,7 @@ async def _envoyer_detail_journee(sender: str) -> None:
 async def _marquer_courses_achetees(sender: str) -> None:
     """Marque tous les articles de la liste active comme achet�s."""
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         try:
@@ -1335,7 +1342,7 @@ async def _marquer_courses_achetees(sender: str) -> None:
 async def _partager_liste_courses(sender: str) -> None:
     """Partage la liste de courses sous forme de texte format�."""
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         try:
@@ -1389,7 +1396,7 @@ async def _partager_liste_courses(sender: str) -> None:
 async def _marquer_entretien_fait(sender: str) -> None:
     """Marque la t�che d'entretien la plus urgente comme termin�e."""
     from src.core.db import obtenir_contexte_db
-    from src.services.integrations.whatsapp import envoyer_message_whatsapp
+    from src.services.integrations.telegram import envoyer_message_whatsapp
 
     with obtenir_contexte_db() as session:
         try:

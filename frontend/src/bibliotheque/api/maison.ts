@@ -1107,6 +1107,8 @@ export interface ObjetInventaire {
   prix_achat?: number;
   prix_remplacement_estime?: number;
   notes?: string;
+  duree_garantie_mois?: number;
+  sous_garantie?: boolean;
 }
 
 export interface PieceAvecObjets {

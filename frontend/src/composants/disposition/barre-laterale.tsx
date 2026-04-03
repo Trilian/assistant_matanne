@@ -48,8 +48,6 @@ import {
   Wrench,
   ClipboardCheck,
   Map,
-  Sparkles,
-  BarChart3,
   Lightbulb,
   Zap,
 } from "lucide-react";

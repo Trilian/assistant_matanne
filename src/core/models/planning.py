@@ -63,6 +63,18 @@ class Planning(CreeLeMixin, Base):
         back_populates="planning", cascade="all, delete-orphan"
     )
 
+    def _lire_actif(self) -> bool:
+        return self.etat in {"actif", "valide"}
+
+    def _ecrire_actif(self, value: bool | str) -> None:
+        if isinstance(value, str):
+            self.etat = value
+            return
+        self.etat = "valide" if bool(value) else "archive"
+
+    # Compat historique: autorise `Planning(..., actif=True)` dans l'ancien code.
+    actif = synonym("etat", descriptor=property(_lire_actif, _ecrire_actif))
+
     def __repr__(self) -> str:
         return f"<Planning(id={self.id}, nom='{self.nom}')>"
 

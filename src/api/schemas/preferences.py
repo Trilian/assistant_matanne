@@ -55,7 +55,7 @@ class PreferencesResponse(PreferencesBase):
 # Préférences canaux de notification (W4)
 # ─────────────────────────────────────────────────────────
 
-_CANAUX_VALIDES = {"push", "ntfy", "email", "telegram", "whatsapp"}
+_CANAUX_VALIDES = {"push", "ntfy", "email", "telegram"}
 _CATEGORIES_VALIDES = {"rappels", "alertes", "resumes"}
 
 

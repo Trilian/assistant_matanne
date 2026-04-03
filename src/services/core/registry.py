@@ -24,9 +24,12 @@ Usage:
 from __future__ import annotations
 
 import functools
+import importlib
+import ast
 import logging
 import threading
 import time
+from pathlib import Path
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -94,6 +97,8 @@ class ServiceRegistry:
     def __init__(self):
         self._entries: dict[str, _ServiceEntry] = {}
         self._global_lock = threading.Lock()
+        self._index_lazy_factories: dict[str, list[str]] = {}
+        self._index_lazy_construit = False
 
     # ───────────────────────────────────────────────────────
     # ENREGISTREMENT
@@ -181,6 +186,10 @@ class ServiceRegistry:
         """
         entry = self._entries.get(nom)
         if entry is None:
+            self._essayer_enregistrement_lazy(nom)
+            entry = self._entries.get(nom)
+
+        if entry is None:
             raise KeyError(
                 f"Service '{nom}' non enregistré. "
                 f"Services disponibles: {list(self._entries.keys())}"
@@ -192,6 +201,90 @@ class ServiceRegistry:
                 entry.access_count += 1
                 entry.last_accessed = datetime.now()
             return entry.instance
+
+    def _essayer_enregistrement_lazy(self, nom_service: str) -> None:
+        """Tente d'enregistrer un service manquant via import lazy des modules services.
+
+        Le scan AST des fichiers est exécuté à la demande pour construire un index
+        service -> module, puis seul le(s) module(s) candidat(s) sont importés.
+        """
+        if nom_service in self._entries:
+            return
+
+        if not self._index_lazy_construit:
+            self._construire_index_lazy_factories()
+
+        modules_candidats = self._index_lazy_factories.get(nom_service, [])
+        if not modules_candidats:
+            return
+
+        for module_name in modules_candidats:
+            if nom_service in self._entries:
+                return
+
+            try:
+                importlib.import_module(module_name)
+            except Exception:
+                # Les modules non importables ne doivent pas bloquer la découverte.
+                logger.debug("Import lazy ignoré pour %s", module_name, exc_info=True)
+
+        if nom_service in self._entries:
+            logger.debug("Service '%s' enregistré via import lazy ciblé", nom_service)
+
+    def _construire_index_lazy_factories(self) -> None:
+        """Construit un index service_factory(name) -> module Python sans importer les modules."""
+        if self._index_lazy_construit:
+            return
+
+        racine_repo = Path(__file__).resolve().parents[3]
+        racine_services = racine_repo / "src" / "services"
+        index: dict[str, list[str]] = {}
+
+        if not racine_services.exists():
+            self._index_lazy_construit = True
+            self._index_lazy_factories = index
+            return
+
+        for fichier in racine_services.rglob("*.py"):
+            if fichier.name == "__init__.py":
+                continue
+
+            try:
+                code = fichier.read_text(encoding="utf-8")
+                arbre = ast.parse(code)
+            except Exception:
+                continue
+
+            services_trouves: set[str] = set()
+
+            for noeud in ast.walk(arbre):
+                if not isinstance(noeud, ast.Call):
+                    continue
+
+                est_factory = False
+                if isinstance(noeud.func, ast.Name) and noeud.func.id == "service_factory":
+                    est_factory = True
+                elif isinstance(noeud.func, ast.Attribute) and noeud.func.attr == "service_factory":
+                    est_factory = True
+
+                if not est_factory or not noeud.args:
+                    continue
+
+                premier_arg = noeud.args[0]
+                if isinstance(premier_arg, ast.Constant) and isinstance(premier_arg.value, str):
+                    services_trouves.add(premier_arg.value)
+
+            if not services_trouves:
+                continue
+
+            relatif = fichier.relative_to(racine_repo).with_suffix("")
+            module_name = ".".join(relatif.parts)
+
+            for nom_service in services_trouves:
+                index.setdefault(nom_service, []).append(module_name)
+
+        self._index_lazy_factories = index
+        self._index_lazy_construit = True
 
         # Slow path — double-checked locking
         with entry.lock:

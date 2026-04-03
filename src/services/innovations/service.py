@@ -92,7 +92,7 @@ from .types import (
     BlocPlanificationAuto,
     CarteMagazineTablette,
     CarteVisuellePartageableResponse,
-    CommandeWhatsApp,
+    CommandeTelegram,
     ComparateurPrixAutomatiqueResponse,
     EnergieTempsReelResponse,
     EtapeBatchIntelligente,
@@ -100,7 +100,7 @@ from .types import (
     PlanificationHebdoCompleteResponse,
     PrixIngredientCompare,
     PreferenceApprise,
-    WhatsAppConversationnelResponse,
+    TelegramConversationnelResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -606,23 +606,23 @@ Retourne un JSON avec:
         """S22 IN7 : fournit une vue magazine condensée pour écran tablette."""
         return cuisine_ia.obtenir_mode_tablette_magazine(self)
 
-    @avec_cache(ttl=1800, key_func=lambda self: "s23_whatsapp_conversationnel")
+    @avec_cache(ttl=1800, key_func=lambda self: "s23_telegram_conversationnel")
     @avec_gestion_erreurs(default_return=None)
-    def obtenir_capacites_whatsapp_conversationnelles(self) -> WhatsAppConversationnelResponse | None:
-        """S23 IN16 : expose les commandes textuelles WhatsApp opérationnelles."""
+    def obtenir_capacites_telegram_conversationnelles(self) -> TelegramConversationnelResponse | None:
+        """S23 IN16 : expose les commandes textuelles Telegram opérationnelles."""
         commandes = [
-            CommandeWhatsApp(commande="menu", action="Planning semaine"),
-            CommandeWhatsApp(commande="ce soir", action="Suggestion repas"),
-            CommandeWhatsApp(commande="courses", action="Liste de courses"),
-            CommandeWhatsApp(commande="frigo", action="Etat des stocks"),
-            CommandeWhatsApp(commande="ajoute [article]", action="Ajout article courses"),
-            CommandeWhatsApp(commande="budget", action="Résumé budget"),
-            CommandeWhatsApp(commande="jules", action="Résumé Jules"),
-            CommandeWhatsApp(commande="meteo", action="Météo du jour"),
-            CommandeWhatsApp(commande="energie", action="Résumé énergie"),
-            CommandeWhatsApp(commande="entretien", action="Entretien urgent"),
+            CommandeTelegram(commande="menu", action="Planning semaine"),
+            CommandeTelegram(commande="ce soir", action="Suggestion repas"),
+            CommandeTelegram(commande="courses", action="Liste de courses"),
+            CommandeTelegram(commande="frigo", action="Etat des stocks"),
+            CommandeTelegram(commande="ajoute [article]", action="Ajout article courses"),
+            CommandeTelegram(commande="budget", action="Résumé budget"),
+            CommandeTelegram(commande="jules", action="Résumé Jules"),
+            CommandeTelegram(commande="meteo", action="Météo du jour"),
+            CommandeTelegram(commande="energie", action="Résumé énergie"),
+            CommandeTelegram(commande="entretien", action="Entretien urgent"),
         ]
-        return WhatsAppConversationnelResponse(
+        return TelegramConversationnelResponse(
             actif=True,
             nb_commandes=len(commandes),
             commandes=commandes,

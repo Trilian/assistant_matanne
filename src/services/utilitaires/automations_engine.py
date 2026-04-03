@@ -245,12 +245,12 @@ class MoteurAutomationsService:
             return 1
         return 0
 
-    def _executer_action_envoyer_whatsapp(self, action: dict[str, Any], user_id: int) -> int:
+    def _executer_action_envoyer_telegram(self, action: dict[str, Any], user_id: int) -> int:
         dispatcher = get_dispatcher_notifications()
         resultats = dispatcher.envoyer(
             user_id=str(user_id),
             message=str(action.get("message", "Automation déclenchée.")),
-            canaux=["whatsapp"],
+            canaux=["telegram"],
             titre=str(action.get("titre", "Automation")),
         )
         return 1 if any(bool(v) for v in resultats.values()) else 0
@@ -399,8 +399,8 @@ class MoteurAutomationsService:
             executed = self._executer_action_archiver(action, regle)
         elif type_action == "notifier":
             executed = self._executer_action_notifier(action, items, regle.user_id)
-        elif type_action == "envoyer_whatsapp":
-            executed = self._executer_action_envoyer_whatsapp(action, regle.user_id)
+        elif type_action == "envoyer_telegram":
+            executed = self._executer_action_envoyer_telegram(action, regle.user_id)
         elif type_action == "envoyer_email":
             executed = self._executer_action_envoyer_email(action, regle.user_id)
         else:

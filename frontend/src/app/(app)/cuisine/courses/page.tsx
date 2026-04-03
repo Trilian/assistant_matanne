@@ -224,12 +224,22 @@ export default function PageCourses() {
     }
   );
 
-  const { mutate: ajouter, isPending: enAjout } = utiliserMutation(
+  type ContexteArticle = {
+    precedentListes?: unknown;
+    precedentDetail?: unknown;
+    idTemp: number;
+  };
+
+  const { mutate: ajouter, isPending: enAjout } = utiliserMutation<
+    ArticleCourses,
+    DonneesArticleCourses,
+    ContexteArticle
+  >(
     (donnees: DonneesArticleCourses) =>
       ajouterArticle(listeSelectionnee!, donnees),
     {
       onMutate: async (donnees) => {
-        if (!listeSelectionnee) return {};
+        if (!listeSelectionnee) return { idTemp: 0 };
 
         const cleListes = ["courses"];
         const cleDetail = ["courses", String(listeSelectionnee)];
@@ -339,7 +349,7 @@ export default function PageCourses() {
     }
   );
 
-  const { mutate: supprimer } = utiliserMutation(
+  const { mutateAsync: supprimerAsync } = utiliserMutation(
     (articleId: number) => supprimerArticle(listeSelectionnee!, articleId),
     {
       onMutate: async (articleId) => {
@@ -379,7 +389,6 @@ export default function PageCourses() {
 
         return { precedentListes, precedentDetail };
       },
-      onSuccess: () => { invalider(["courses"]); },
       onError: (_err, _variables, contexte) => {
         if (contexte?.precedentListes) {
           queryClient.setQueryData(["courses"], contexte.precedentListes);
@@ -387,13 +396,8 @@ export default function PageCourses() {
         if (contexte?.precedentDetail && listeSelectionnee) {
           queryClient.setQueryData(["courses", String(listeSelectionnee)], contexte.precedentDetail);
         }
-        toast.error("Erreur lors de la suppression");
       },
     }
-  );
-
-  const { mutateAsync: supprimerAsync } = utiliserMutation(
-    (articleId: number) => supprimerArticle(listeSelectionnee!, articleId)
   );
 
   const { mutate: cocherSelection, isPending: enCochageSelection } = utiliserMutation(

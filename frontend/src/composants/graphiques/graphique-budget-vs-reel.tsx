@@ -51,12 +51,12 @@ export function GraphiqueBudgetVsReel({
           <XAxis dataKey="categorie" tick={{ fontSize: 12 }} interval={0} angle={-20} textAnchor="end" height={56} />
           <YAxis tickFormatter={(value: number) => `${Math.round(value)} €`} tick={{ fontSize: 12 }} />
           <Tooltip
-            formatter={(value: number, name: string) => [
-              `${Number(value).toFixed(2)} €`,
-              name === "reel" ? "Reel" : "Prevu",
+            formatter={(value, name) => [
+              typeof value === "number" ? `${value.toFixed(2)} €` : "—",
+              name === "reel" ? "Réel" : "Prévu",
             ]}
           />
-          <Legend formatter={(value: string) => (value === "reel" ? "Reel" : "Prevu")} />
+          <Legend formatter={(value: string) => (value === "reel" ? "Réel" : "Prévu")} />
           <Bar dataKey="prevu" fill="hsl(var(--muted-foreground))" radius={[6, 6, 0, 0]} />
           <Bar dataKey="reel" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
         </BarChart>

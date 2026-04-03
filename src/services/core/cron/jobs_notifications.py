@@ -96,7 +96,7 @@ def job_prediction_courses_hebdo() -> None:
             dispatcher.envoyer(
                 user_id="1",
                 message=message,
-                canaux=["email", "whatsapp"],
+                canaux=["email", "telegram"],
                 titre="📋 Liste courses prédictive",
                 type_email="alerte_critique",
             )

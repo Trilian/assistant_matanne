@@ -366,7 +366,7 @@ class ServiceNotificationsEnrichis:
             "canaux_par_categorie": {
                 "rappels": ["push", "ntfy"],
                 "alertes": ["push", "ntfy", "email"],
-                "resumes": ["email", "whatsapp"],
+                "resumes": ["email", "telegram"],
             },
             "modules_actifs": {"max_par_heure": 5},
             "quiet_hours": {"debut": "22:00", "fin": "07:00"},

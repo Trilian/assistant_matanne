@@ -65,7 +65,7 @@ from src.api.schemas.fonctionnalites_avancees import (
     PlanificationHebdoCompleteResponse,
     ComparateurPrixAutomatiqueResponse,
     EnergieTempsReelResponse,
-    WhatsAppConversationnelResponse,
+    TelegramConversationnelResponse,
 )
 from src.api.utils import gerer_exception_api
 
@@ -549,18 +549,18 @@ async def phasee_s22_mode_tablette_magazine(
 
 
 @router.get(
-    "/phasee/s23/whatsapp-conversationnel",
-    response_model=WhatsAppConversationnelResponse,
+    "/phasee/s23/telegram-conversationnel",
+    response_model=TelegramConversationnelResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="S23 IN16 WhatsApp conversationnel",
+    summary="S23 IN16 Telegram conversationnel",
 )
 @gerer_exception_api
-async def phasee_s23_whatsapp_conversationnel(
+async def phasee_s23_telegram_conversationnel(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
-    result = service.obtenir_capacites_whatsapp_conversationnelles()
-    return result or WhatsAppConversationnelResponse()
+    result = service.obtenir_capacites_telegram_conversationnelles()
+    return result or TelegramConversationnelResponse()
 
 
 @router.get(
