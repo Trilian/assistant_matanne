@@ -27,7 +27,7 @@ import { useNotificationsJeux } from "@/crochets/utiliser-notifications-jeux";
  * le fil d'ariane, la zone de contenu scrollable et la navigation mobile.
  */
 export function CoquilleApp({ children }: { children: React.ReactNode }) {
-  // Activer les notifications jeux (Phase W)
+  // Activer les notifications jeux
   useNotificationsJeux();
 
   return (

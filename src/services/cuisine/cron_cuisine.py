@@ -83,7 +83,7 @@ def analyser_peremptions_matin():
                 except Exception as exc:
                     logger.debug("Emission inventaire.peremption_proche ignorée: %s", exc)
 
-            # Envoyer notifications push/WhatsApp
+            # Envoyer notifications push/Telegram
             if expires or bientot:
                 _notifier_peremptions(expires, bientot)
 
@@ -198,7 +198,7 @@ def _notifier_peremptions(expires: list, bientot: list) -> None:
 
 
 def _notifier_planning_manquant(lundi_prochain: date) -> None:
-    """Envoie un rappel push/WhatsApp pour planifier les repas de la semaine."""
+    """Envoie un rappel push/Telegram pour planifier les repas de la semaine."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 

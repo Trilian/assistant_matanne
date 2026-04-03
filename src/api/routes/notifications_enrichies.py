@@ -1,5 +1,5 @@
 """
-Routes API pour Sprint E — Notifications enrichies.
+Routes API pour les notifications enrichies.
 
 Endpoints:
 - E.4: Gérer les préférences notifications granulaires

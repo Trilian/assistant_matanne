@@ -2446,7 +2446,7 @@ def _job_rapport_mensuel_unifie_email() -> None:
     """Rapport mensuel unifié — Envoi mensuel du rapport PDF unifié (email)."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
-        from src.services.innovations import get_innovations_service
+        from src.services.experimental import get_innovations_service
 
         service = get_innovations_service()
         rapport_pdf = service.generer_rapport_mensuel_pdf()
@@ -3897,7 +3897,7 @@ _REGISTRE_JOBS.update(
 def _job_optimisation_routines() -> None:
     """Analyse mensuelle de l'efficacité des routines → suggestions IA."""
     try:
-        from src.services.innovations import get_innovations_service
+        from src.services.experimental import get_innovations_service
 
         logger.info("optimisation_routines: Analyse IA des routines")
         # Déclenche l'endpoint IA existant via le service
@@ -3971,7 +3971,7 @@ def _job_purge_historique_jeux() -> None:
 def _job_veille_emploi() -> None:
     """Veille emploi quotidienne multi-sites avec alertes."""
     try:
-        from src.services.innovations import get_innovations_service
+        from src.services.experimental import get_innovations_service
 
         logger.info("Veille_emploi: Scan quotidien offres d'emploi")
         service = get_innovations_service()

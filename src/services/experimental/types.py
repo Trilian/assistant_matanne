@@ -1,5 +1,5 @@
 ﻿"""
-Types Pydantic pour les services Innovations — Phase 10.
+Types Pydantic pour les services Innovations.
 """
 
 from __future__ import annotations

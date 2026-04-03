@@ -20,7 +20,7 @@ vi.mock("recharts", () => ({
 }));
 
 vi.mock("@/bibliotheque/api/admin", () => ({
-  obtenirStatutBridgesPhase5: vi.fn(),
+  obtenirStatutBridges: vi.fn(),
 }));
 
 vi.mock("@/bibliotheque/api/client", () => ({
@@ -30,11 +30,11 @@ vi.mock("@/bibliotheque/api/client", () => ({
   },
 }));
 
-import { obtenirStatutBridgesPhase5 } from "@/bibliotheque/api/admin";
+import { obtenirStatutBridges } from "@/bibliotheque/api/admin";
 import { clientApi } from "@/bibliotheque/api/client";
 import PageAdmin from "@/app/(app)/admin/page";
 
-const mockedObtenirStatutBridgesPhase5 = vi.mocked(obtenirStatutBridgesPhase5);
+const mockedObtenirStatutBridges = vi.mocked(obtenirStatutBridges);
 const mockedClientApiGet = vi.mocked(clientApi.get);
 
 function renderWithQuery(ui: React.ReactElement) {
@@ -84,7 +84,7 @@ describe("PageAdmin", () => {
       return { data: {} };
     });
 
-    mockedObtenirStatutBridgesPhase5.mockResolvedValue({
+    mockedObtenirStatutBridges.mockResolvedValue({
       phase: "bridges_inter_modules",
       generated_at: "2026-04-01T09:00:00",
       execution_ms: 11.2,

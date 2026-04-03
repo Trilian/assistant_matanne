@@ -1,5 +1,5 @@
 ﻿"""
-Client Telegram via Bot API (remplace WhatsApp Meta Cloud API).
+Client Telegram via Bot API.
 
 100% gratuit — aucune limite de messages, pas de catégories payantes.
 Boutons interactifs illimités (InlineKeyboardMarkup).
@@ -36,7 +36,7 @@ TELEGRAM_API_BASE = "https://api.telegram.org"
 # rate limit interne pour éviter de spammer l'utilisateur.
 # ═══════════════════════════════════════════════════════════
 
-_LIMITE_PAR_HEURE = 30  # Plus permissif que WhatsApp (gratuit)
+_LIMITE_PAR_HEURE = 30  # Gratuit, pas de limite officielle
 _LIMITE_PAR_JOUR = 200
 
 # In-memory fallback
@@ -346,7 +346,7 @@ async def envoyer_message_interactif(
         destinataire: Chat ID Telegram
         corps: Texte principal du message (HTML supporté)
         boutons: Liste de {"id": "callback_data", "title": "Texte bouton"}
-                 Pas de limite de nombre (contrairement à WhatsApp : max 3)
+                 Pas de limite de nombre sur les boutons inline.
     """
     settings = obtenir_parametres()
 
@@ -456,7 +456,7 @@ async def modifier_message(
 
 
 # ═══════════════════════════════════════════════════════════
-# FONCTIONS MÉTIER (mêmes signatures que whatsapp.py)
+# FONCTIONS MÉTIER
 # ═══════════════════════════════════════════════════════════
 
 async def envoyer_planning_semaine(planning_texte: str, planning_id: int | None = None) -> bool:

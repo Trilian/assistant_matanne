@@ -712,7 +712,7 @@ def _sync_charges_vers_dashboard(event: EvenementDomaine) -> None:
 
 
 # ═══════════════════════════════════════════════════════════
-# SPRINT D — INTERACTIONS INTER-MODULES
+# INTERACTIONS INTER-MODULES (EventBus)
 # ═══════════════════════════════════════════════════════════
 
 
@@ -726,7 +726,7 @@ def _proposer_recettes_saison_depuis_recolte(event: EvenementDomaine) -> None:
         nb += cache.invalidate(pattern="planning")
         nb += cache.invalidate(pattern="suggestions")
         logger.info(
-            "Sprint D.1: caches recettes/planning invalidés (%d) après %s",
+            "Inter-modules: caches recettes/planning invalidés (%d) après %s",
             nb,
             event.type,
         )
@@ -755,7 +755,7 @@ def _creer_tache_entretien_sur_anomalie_energie(event: EvenementDomaine) -> None
                 )
             )
             session.commit()
-        logger.info("Sprint D.2: tâche entretien créée après énergie.anomalie")
+        logger.info("Inter-modules: tâche entretien créée après énergie.anomalie")
     except Exception as e:  # noqa: BLE001
         logger.warning("Échec flux D.2 energie->entretien: %s", e)
 
@@ -769,7 +769,7 @@ def _publier_alerte_dashboard_budget(event: EvenementDomaine) -> None:
         nb = cache.invalidate(pattern="dashboard")
         nb += cache.invalidate(pattern="budget")
         nb += cache.invalidate(pattern="alertes")
-        logger.info("Sprint D.3: caches dashboard invalidés (%d)", nb)
+        logger.info("Inter-modules: caches dashboard invalidés (%d)", nb)
     except Exception as e:  # noqa: BLE001
         logger.warning("Échec flux D.3 budget->dashboard: %s", e)
 
@@ -787,7 +787,7 @@ def _mettre_a_jour_courses_predictives(event: EvenementDomaine) -> None:
         cache = obtenir_cache()
         cache.invalidate(pattern="courses")
         cache.invalidate(pattern="predictions")
-        logger.info("Sprint D.4: prédictions courses recalculées")
+        logger.info("Inter-modules: prédictions courses recalculées")
     except Exception as e:  # noqa: BLE001
         logger.warning("Échec flux D.4 inventaire->courses: %s", e)
 
@@ -801,7 +801,7 @@ def _adapter_planning_sur_feedback_recette(event: EvenementDomaine) -> None:
         cache.invalidate(pattern="planning")
         cache.invalidate(pattern="recettes")
         cache.invalidate(pattern="suggestions")
-        logger.info("Sprint D.5: invalidation planning après recette.feedback")
+        logger.info("Inter-modules: invalidation planning après recette.feedback")
     except Exception as e:  # noqa: BLE001
         logger.warning("Échec flux D.5 feedback->planning: %s", e)
 
@@ -1515,7 +1515,7 @@ def enregistrer_subscribers() -> int:
     bus.souscrire("dashboard.charges_update", _sync_charges_vers_dashboard, priority=85)
     compteur += 1
 
-    # ── Sprint D — Inter-modules EventBus enrichi ──
+    # ── Inter-modules EventBus enrichi ──
 
     bus.souscrire("jardin.recolte", _proposer_recettes_saison_depuis_recolte, priority=80)
     compteur += 1
@@ -1533,7 +1533,7 @@ def enregistrer_subscribers() -> int:
     compteur += 1
 
 
-    # ── Sprint I.15 — Agent IA proactif EventBus ──
+    # ── Agent IA proactif EventBus ──
     bus.souscrire("meteo.*", _declencher_agent_ia_proactif, priority=70)
     compteur += 1
     bus.souscrire("planning.*", _declencher_agent_ia_proactif, priority=70)

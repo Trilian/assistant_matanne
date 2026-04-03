@@ -93,7 +93,7 @@ class CarteVisuelleRequest(BaseModel):
 
 # ── Responses (re-exports depuis types) ──
 
-from src.services.innovations.types import (  # noqa: E402
+from src.services.experimental.types import (  # noqa: E402
     ModePiloteAutomatiqueResponse,
     ScoreFamilleHebdoResponse,
     JournalFamilialAutoResponse,

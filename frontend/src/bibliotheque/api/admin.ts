@@ -501,7 +501,7 @@ export interface VueSqlDataResponse {
   pages_totales: number
 }
 
-export interface StatutBridgePhase5Item {
+export interface StatutBridgeItem {
   id: string
   bridge: string
   intitule: string
@@ -511,7 +511,7 @@ export interface StatutBridgePhase5Item {
   details: string
 }
 
-export interface StatutBridgesPhase5Response {
+export interface StatutBridgesResponse {
   phase: string
   generated_at: string
   execution_ms: number
@@ -523,7 +523,7 @@ export interface StatutBridgesPhase5Response {
     taux_operationnel_pct: number
     mode_verification: string
   }
-  items: StatutBridgePhase5Item[]
+  items: StatutBridgeItem[]
 }
 
 // ─── Audit Logs ────────────────────────────────────────────
@@ -705,9 +705,9 @@ export async function obtenirSanteServices(): Promise<ServiceHealthResponse> {
   return data
 }
 
-export async function obtenirStatutBridgesPhase5(params?: {
+export async function obtenirStatutBridges(params?: {
   inclure_smoke?: boolean
-}): Promise<StatutBridgesPhase5Response> {
+}): Promise<StatutBridgesResponse> {
   const { data } = await clientApi.get('/api/v1/admin/bridges/status', { params })
   return data
 }

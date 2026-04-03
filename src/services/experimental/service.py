@@ -1,5 +1,5 @@
 ﻿"""
-Service Innovations — Phases 9 et 10 du planning.
+Service Innovations — fonctionnalités avancées et IA.
 
 Service central regroupant les fonctionnalités d'innovation :
 - 10.4 Bilan annuel automatique IA
@@ -47,7 +47,7 @@ from .mode_pilote import (
     obtenir_mode_pilote_automatique as obtenir_mode_pilote_automatique_module,
     proposer_repas_adapte_garmin as proposer_repas_adapte_garmin_module,
 )
-from . import cuisine_ia, energie_ia, bien_etre
+from . import energie_ia, bien_etre
 from .types import (
     AlertesContextuellesResponse,
     JournalFamilialAutoResponse,

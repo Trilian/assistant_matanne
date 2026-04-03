@@ -24,7 +24,7 @@ def job_prediction_courses_hebdo() -> None:
     - Planning repas validé (si existe)
     - Stock actuel
     
-    Envoi: Email + WhatsApp
+    Envoi: Email + Telegram
     """
     try:
         logger.info("E.9: Début prédiction courses hebdo")

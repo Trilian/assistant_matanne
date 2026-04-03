@@ -73,7 +73,6 @@ from src.api.routes import (
     inventaire_router,
     jeux_router,
     maison_router,
-    partage_router,
     planning_router,
     preferences_router,
     recettes_router,
@@ -636,7 +635,6 @@ async def get_api_metrics(user: dict = Depends(require_role("admin"))):
 
 app.include_router(auth_router)
 app.include_router(recettes_router)
-app.include_router(partage_router)
 app.include_router(inventaire_router)
 app.include_router(courses_router)
 app.include_router(planning_router)

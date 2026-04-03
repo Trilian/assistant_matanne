@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 _APP_BASE_URL = "https://matanne.vercel.app"
 
-_CANAUX_VALIDES = {"ntfy", "push", "email", "telegram", "whatsapp"}
+_CANAUX_VALIDES = {"ntfy", "push", "email", "telegram"}
 
 # Mapping catégorie notifications: événement -> catégorie + canaux cibles
 _MAPPING_EVENEMENTS_CANAUX: dict[str, dict[str, Any]] = {
@@ -55,7 +55,6 @@ class DispatcherNotifications:
         "push": ["ntfy", "telegram", "email"],
         "ntfy": ["push", "telegram", "email"],
         "telegram": ["push", "email"],
-        "whatsapp": ["telegram", "push", "email"],
         "email": ["push", "ntfy"],
     }
 
@@ -130,7 +129,7 @@ class DispatcherNotifications:
                     resultats[canal] = self._envoyer_push(user_id, message, **kwargs)
                 elif canal == "email":
                     resultats[canal] = self._envoyer_email(user_id, message, **kwargs)
-                elif canal in {"telegram", "whatsapp"}:
+                elif canal == "telegram":
                     resultats[canal] = self._envoyer_telegram(message, **kwargs)
                 else:
                     logger.warning("Canal de notification inconnu : %s", canal)
@@ -384,10 +383,7 @@ class DispatcherNotifications:
     # ─── Canal Telegram ─────────────────────────────────────────────────────────
 
     def _envoyer_telegram(self, message: str, **kwargs: Any) -> bool:
-        """Envoie via Telegram Bot API.
-
-        Le canal "whatsapp" est conservé comme alias de compatibilité vers Telegram.
-        """
+        """Envoie via Telegram Bot API."""
         try:
             import asyncio
             from src.services.integrations.telegram import (
@@ -410,7 +406,7 @@ class DispatcherNotifications:
                 logger.debug("Telegram : TELEGRAM_CHAT_ID non configuré, canal ignoré")
                 return False
 
-            type_message = kwargs.get("type_telegram") or kwargs.get("type_whatsapp") or "texte"
+            type_message = kwargs.get("type_telegram") or "texte"
 
             async def _send() -> bool:
                 if type_message in {"liste_courses", "articles_courses"}:
@@ -457,10 +453,6 @@ class DispatcherNotifications:
         except Exception as e:
             logger.error("Erreur Telegram : %s", e)
             return False
-
-    def _envoyer_whatsapp(self, message: str, **kwargs: Any) -> bool:
-        """Alias rétrocompatible: redirige les envois WhatsApp vers Telegram."""
-        return self._envoyer_telegram(message, **kwargs)
 
     # ─── Canal email ────────────────────────────────────────────────────────────
 

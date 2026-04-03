@@ -212,7 +212,7 @@ function DrawerMatchDetail({
           </div>
         ) : null}
 
-        {/* Évolution des cotes (Phase T) */}
+        {/* Évolution des cotes */}
         {chCotes ? (
           <Skeleton className="h-40 mt-4" />
         ) : historiqueCotes && historiqueCotes.nb_points > 0 ? (

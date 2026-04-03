@@ -47,7 +47,7 @@ import { utiliserRequete } from "@/crochets/utiliser-api";
 import {
   type FlowSimulationResponse,
   type LiveSnapshotResponse,
-  type StatutBridgesPhase5Response,
+  type StatutBridgesResponse,
   type ServiceHealthResponse,
   exporterConfigAdmin,
   exporterDbJson,
@@ -62,7 +62,7 @@ import {
   listerResyncTargets,
   obtenirLiveSnapshotAdmin,
   obtenirDashboardAdmin,
-  obtenirStatutBridgesPhase5,
+  obtenirStatutBridges,
   obtenirSanteServices,
   obtenirStatsCache,
   purgerCache,
@@ -174,12 +174,12 @@ export default function PageAdminServices() {
   );
 
   const {
-    data: statutBridgesPhase5,
-    isLoading: chargementBridgesPhase5,
-    refetch: actualiserBridgesPhase5,
+    data: statutBridges,
+    isLoading: chargementBridges,
+    refetch: actualiserBridges,
   } = utiliserRequete(
-    ["admin", "bridges-phase5-status"],
-    (): Promise<StatutBridgesPhase5Response> => obtenirStatutBridgesPhase5({ inclure_smoke: false }),
+    ["admin", "bridges-status"],
+    (): Promise<StatutBridgesResponse> => obtenirStatutBridges({ inclure_smoke: false }),
     { refetchInterval: 30000 },
   );
 
@@ -229,7 +229,7 @@ export default function PageAdminServices() {
     actualiserConfig();
     actualiserResync();
     actualiserLive();
-    actualiserBridgesPhase5();
+    actualiserBridges();
   };
 
   const exporterConfig = async () => {
@@ -560,36 +560,36 @@ export default function PageAdminServices() {
             <CardHeader>
               <CardTitle>Bridges inter-modules</CardTitle>
               <CardDescription>
-                {chargementBridgesPhase5
+                {chargementBridges
                   ? "Chargement..."
-                  : statutBridgesPhase5
-                    ? `Mode ${statutBridgesPhase5.resume.mode_verification} • ${statutBridgesPhase5.resume.total_actions} action(s)`
+                  : statutBridges
+                    ? `Mode ${statutBridges.resume.mode_verification} • ${statutBridges.resume.total_actions} action(s)`
                     : "-"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {statutBridgesPhase5?.resume && (
+              {statutBridges?.resume && (
                 <div className="grid gap-4 md:grid-cols-4">
                   <Card>
                     <CardHeader className="pb-2"><CardTitle className="text-sm">Statut global</CardTitle></CardHeader>
-                    <CardContent>{badgeStatut(statutBridgesPhase5.statut_global)}</CardContent>
+                    <CardContent>{badgeStatut(statutBridges.statut_global)}</CardContent>
                   </Card>
                   <Card>
                     <CardHeader className="pb-2"><CardTitle className="text-sm">Opérationnelles</CardTitle></CardHeader>
-                    <CardContent><span className="text-2xl font-bold text-green-600">{statutBridgesPhase5.resume.operationnelles}</span></CardContent>
+                    <CardContent><span className="text-2xl font-bold text-green-600">{statutBridges.resume.operationnelles}</span></CardContent>
                   </Card>
                   <Card>
                     <CardHeader className="pb-2"><CardTitle className="text-sm">Indisponibles</CardTitle></CardHeader>
-                    <CardContent><span className="text-2xl font-bold">{statutBridgesPhase5.resume.indisponibles}</span></CardContent>
+                    <CardContent><span className="text-2xl font-bold">{statutBridges.resume.indisponibles}</span></CardContent>
                   </Card>
                   <Card>
                     <CardHeader className="pb-2"><CardTitle className="text-sm">Taux opérationnel</CardTitle></CardHeader>
-                    <CardContent><span className="text-2xl font-bold">{statutBridgesPhase5.resume.taux_operationnel_pct.toFixed(2)}%</span></CardContent>
+                    <CardContent><span className="text-2xl font-bold">{statutBridges.resume.taux_operationnel_pct.toFixed(2)}%</span></CardContent>
                   </Card>
                 </div>
               )}
 
-              {statutBridgesPhase5?.items?.length ? (
+              {statutBridges?.items?.length ? (
                 <div className="overflow-x-auto rounded-md border">
                   <Table>
                     <TableHeader>
@@ -602,7 +602,7 @@ export default function PageAdminServices() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {statutBridgesPhase5.items.map((item) => (
+                      {statutBridges.items.map((item) => (
                         <TableRow key={item.id}>
                           <TableCell>
                             <p className="font-mono text-xs">{item.id}</p>
@@ -618,7 +618,7 @@ export default function PageAdminServices() {
                   </Table>
                 </div>
               ) : (
-                !chargementBridgesPhase5 && (
+                !chargementBridges && (
                   <p className="text-sm text-muted-foreground">Aucun statut bridge inter-modules disponible.</p>
                 )
               )}

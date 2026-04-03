@@ -1,11 +1,11 @@
 """
-Service pour gÃ©rer les notifications enrichies du Sprint E.
+Service pour gérer les notifications enrichies.
 
 Features:
-- E.1: WhatsApp flux courses semaine
-- E.2: WhatsApp rappel activitÃ© Jules
-- E.3: WhatsApp rÃ©sultats paris
-- E.4: PrÃ©fÃ©rences notification granulaires
+- E.1: Telegram flux courses semaine
+- E.2: Telegram rappel activité Jules
+- E.3: Telegram résultats paris
+- E.4: Préférences notification granulaires
 - E.5: Centre de notifications (historique)
 - E.9-E.16: Jobs CRON notification
 """
@@ -23,16 +23,16 @@ logger = logging.getLogger(__name__)
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-# E.1-E.3: HANDLERS WHATSAPP ENRICHIS
+# E.1-E.3: HANDLERS TELEGRAM ENRICHIS
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
 class HandlersTelegramEnrichis:
-    """Handlers pour les flux WhatsApp enrichis (E.1-E.3)."""
+    """Handlers pour les flux Telegram enrichis (E.1-E.3)."""
 
     @staticmethod
     async def envoyer_flux_courses_semaine(sender: str) -> bool:
-        """E.1: Envoie la liste de courses pour la semaine via WhatsApp.
+        """E.1: Envoie la liste de courses pour la semaine via Telegram.
         
         Template:
         ðŸ›’ Courses semaine du [xx/xx]
@@ -75,7 +75,7 @@ class HandlersTelegramEnrichis:
                 # Formatter les articles
                 articles_formatted = [f"{a.nom} ({a.rayon_magasin or 'Autre'})" for a in articles]
 
-                # Envoyer via WhatsApp
+                # Envoyer via Telegram
                 return await envoyer_liste_courses_partagee(
                     articles=articles_formatted,
                     nom_liste=f"Courses {today.strftime('%d/%m')}",
@@ -86,7 +86,7 @@ class HandlersTelegramEnrichis:
 
     @staticmethod
     async def envoyer_rappel_activite_jules(sender: str) -> bool:
-        """E.2: Envoie un rappel d'activitÃ© pour Jules via WhatsApp.
+        """E.2: Envoie un rappel d'activité pour Jules via Telegram.
         
         Template:
         ðŸ‘¶ ActivitÃ© Jules de [jour]
@@ -131,7 +131,7 @@ class HandlersTelegramEnrichis:
 
     @staticmethod
     async def envoyer_resultats_paris(sender: str) -> bool:
-        """E.3: Envoie rÃ©sultats des paris sportifs via WhatsApp.
+        """E.3: Envoie résultats des paris sportifs via Telegram.
         
         Template:
         âš½ RÃ©sultats matchs

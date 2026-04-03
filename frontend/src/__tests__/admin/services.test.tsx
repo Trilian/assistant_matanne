@@ -23,7 +23,7 @@ vi.mock("@/bibliotheque/api/admin", () => ({
   obtenirDashboardAdmin: vi.fn(),
   obtenirLiveSnapshotAdmin: vi.fn(),
   obtenirSanteServices: vi.fn(),
-  obtenirStatutBridgesPhase5: vi.fn(),
+  obtenirStatutBridges: vi.fn(),
   obtenirStatsCache: vi.fn(),
   purgerCache: vi.fn(),
   sauvegarderFeatureFlags: vi.fn(),
@@ -42,7 +42,7 @@ import {
   obtenirDashboardAdmin,
   obtenirLiveSnapshotAdmin,
   obtenirSanteServices,
-  obtenirStatutBridgesPhase5,
+  obtenirStatutBridges,
   obtenirStatsCache,
   simulerFluxAdmin,
 } from "@/bibliotheque/api/admin";
@@ -57,7 +57,7 @@ const mockedListerResyncTargets = vi.mocked(listerResyncTargets);
 const mockedObtenirDashboardAdmin = vi.mocked(obtenirDashboardAdmin);
 const mockedObtenirLiveSnapshotAdmin = vi.mocked(obtenirLiveSnapshotAdmin);
 const mockedObtenirSanteServices = vi.mocked(obtenirSanteServices);
-const mockedObtenirStatutBridgesPhase5 = vi.mocked(obtenirStatutBridgesPhase5);
+const mockedObtenirStatutBridges = vi.mocked(obtenirStatutBridges);
 const mockedObtenirStatsCache = vi.mocked(obtenirStatsCache);
 const mockedSimulerFluxAdmin = vi.mocked(simulerFluxAdmin);
 
@@ -141,7 +141,7 @@ describe("PageAdminServices", () => {
       jobs: { last_24h: { success: 5, dry_run: 1 } },
       security: { events_1h: 2 },
     });
-    mockedObtenirStatutBridgesPhase5.mockResolvedValue({
+    mockedObtenirStatutBridges.mockResolvedValue({
       phase: "bridges_inter_modules",
       generated_at: "2026-03-30T12:00:00",
       execution_ms: 12.4,

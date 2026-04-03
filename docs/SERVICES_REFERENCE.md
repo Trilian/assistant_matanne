@@ -236,7 +236,6 @@ Services confirmés:
 - mots de passe
 - presse-papiers
 - énergie
-- OCR
 - météo
 - chat IA
 - import et export utilitaires
@@ -248,7 +247,6 @@ Factories fréquentes:
 - `obtenir_journal_service`
 - `obtenir_contacts_service`
 - `obtenir_energie_service`
-- `obtenir_ocr_service`
 - `obtenir_meteo_service`
 - `obtenir_chat_ai_service`
 - `obtenir_moteur_automations_service`

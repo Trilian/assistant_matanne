@@ -1,8 +1,7 @@
-﻿"""
+"""
 Routes API pour les Fonctionnalités Avancées.
 
 Endpoints :
-- GET  /api/v1/innovations/phase9/*           : Endpoints dedies IA avancee P9
 - POST /api/v1/innovations/bilan-annuel        : Bilan annuel IA
 - GET  /api/v1/innovations/score-bien-etre      : Score bien-etre familial
 - GET  /api/v1/innovations/enrichissement-contacts : Enrichissement contacts IA
@@ -77,7 +76,7 @@ RESPONSES_IA_TYPED = cast(dict[int | str, dict[str, Any]], REPONSES_IA)
 
 def _get_service():
     """Lazy-load le service Innovations."""
-    from src.services.innovations import get_innovations_service
+    from src.services.experimental import get_innovations_service
 
     return get_innovations_service()
 
@@ -88,13 +87,13 @@ def _get_service():
 
 
 @router.post(
-    "/phase9/mange-ce-soir",
+    "/mange-ce-soir",
     response_model=SuggestionRepasSoirResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Suggestion diner express",
 )
 @gerer_exception_api
-async def p9_mange_ce_soir(
+async def mange_ce_soir(
     body: MangeCeSoirRequest,
     user: dict[str, Any] = Depends(require_auth),
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
@@ -108,13 +107,13 @@ async def p9_mange_ce_soir(
 
 
 @router.get(
-    "/phase9/patterns-alimentaires",
+    "/patterns-alimentaires",
     response_model=PatternsAlimentairesResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Detection patterns alimentaires",
 )
 @gerer_exception_api
-async def p9_patterns_alimentaires(
+async def patterns_alimentaires(
     periode_jours: int = Query(90, ge=30, le=365),
     user: dict[str, Any] = Depends(require_auth),
 ):
@@ -124,13 +123,13 @@ async def p9_patterns_alimentaires(
 
 
 @router.get(
-    "/phase9/coach-routines",
+    "/coach-routines",
     response_model=CoachRoutinesResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Coach routines IA",
 )
 @gerer_exception_api
-async def p9_coach_routines(
+async def coach_routines(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -139,13 +138,13 @@ async def p9_coach_routines(
 
 
 @router.get(
-    "/phase9/anomalies-energie",
+    "/anomalies-energie",
     response_model=AnomaliesEnergieResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Detection anomalies eau/gaz/elec",
 )
 @gerer_exception_api
-async def p9_anomalies_energie(
+async def anomalies_energie(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -154,13 +153,13 @@ async def p9_anomalies_energie(
 
 
 @router.get(
-    "/phase9/resume-mensuel",
+    "/resume-mensuel",
     response_model=ResumeMensuelIAResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Resume mensuel IA",
 )
 @gerer_exception_api
-async def p9_resume_mensuel(
+async def resume_mensuel(
     user: dict[str, Any] = Depends(require_auth),
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
@@ -170,13 +169,13 @@ async def p9_resume_mensuel(
 
 
 @router.get(
-    "/phase9/planning-jules-adaptatif",
+    "/planning-jules-adaptatif",
     response_model=PlanningJulesAdaptatifResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Planning Jules adaptatif",
 )
 @gerer_exception_api
-async def p9_planning_jules_adaptatif(
+async def planning_jules_adaptatif(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -185,13 +184,13 @@ async def p9_planning_jules_adaptatif(
 
 
 @router.post(
-    "/phase9/comparateur-energie",
+    "/comparateur-energie",
     response_model=ComparateurEnergieResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Comparateur fournisseurs energie",
 )
 @gerer_exception_api
-async def p9_comparateur_energie(
+async def comparateur_energie(
     body: ComparateurEnergieRequest,
     user: dict[str, Any] = Depends(require_auth),
 ):
@@ -204,13 +203,13 @@ async def p9_comparateur_energie(
 
 
 @router.get(
-    "/phase9/score-eco-responsable",
+    "/score-eco-responsable",
     response_model=ScoreEcoResponsableResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-10 Score eco-responsable",
+    summary="Score eco-responsable",
 )
 @gerer_exception_api
-async def p9_score_eco_responsable(
+async def score_eco_responsable(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -219,13 +218,13 @@ async def p9_score_eco_responsable(
 
 
 @router.get(
-    "/phase9/saisonnalite-intelligente",
+    "/saisonnalite-intelligente",
     response_model=SaisonnaliteIntelligenteResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-11 Saisonnalite intelligente",
+    summary="Saisonnalite intelligente",
 )
 @gerer_exception_api
-async def p9_saisonnalite_intelligente(
+async def saisonnalite_intelligente(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -234,13 +233,13 @@ async def p9_saisonnalite_intelligente(
 
 
 @router.get(
-    "/phase9/apprentissage-habitudes",
+    "/apprentissage-habitudes",
     response_model=ApprentissageHabitudesResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-12 Apprentissage continu habitudes",
+    summary="Apprentissage continu habitudes",
 )
 @gerer_exception_api
-async def p9_apprentissage_habitudes(
+async def apprentissage_habitudes(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -249,13 +248,13 @@ async def p9_apprentissage_habitudes(
 
 
 @router.get(
-    "/phase9/retrospective-annuelle",
+    "/retrospective-annuelle",
     response_model=BilanAnnuelResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-13 Retrospective annuelle IA",
+    summary="Retrospective annuelle IA",
 )
 @gerer_exception_api
-async def p9_retrospective_annuelle(
+async def retrospective_annuelle(
     annee: int | None = Query(None, ge=2020, le=2100),
     user: dict[str, Any] = Depends(require_auth),
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
@@ -266,13 +265,13 @@ async def p9_retrospective_annuelle(
 
 
 @router.get(
-    "/phase9/alertes-contextuelles",
+    "/alertes-contextuelles",
     response_model=AlertesContextuellesResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-14 Alertes intelligentes contextuelles",
+    summary="Alertes intelligentes contextuelles",
 )
 @gerer_exception_api
-async def p9_alertes_contextuelles(
+async def alertes_contextuelles(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -281,13 +280,13 @@ async def p9_alertes_contextuelles(
 
 
 @router.get(
-    "/phasee/mode-pilote",
+    "/mode-pilote",
     response_model=ModePiloteAutomatiqueResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="E1 Mode pilote automatique",
+    summary="Mode pilote automatique",
 )
 @gerer_exception_api
-async def phasee_mode_pilote(
+async def mode_pilote(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -298,13 +297,13 @@ async def phasee_mode_pilote(
 
 
 @router.post(
-    "/phasee/mode-pilote/config",
+    "/mode-pilote/config",
     response_model=ModePiloteAutomatiqueResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="E1 Config mode pilote automatique",
+    summary="Config mode pilote automatique",
 )
 @gerer_exception_api
-async def phasee_configurer_mode_pilote(
+async def configurer_mode_pilote(
     body: ModePiloteConfigurationRequest,
     user: dict[str, Any] = Depends(require_auth),
 ):
@@ -320,13 +319,13 @@ async def phasee_configurer_mode_pilote(
 
 
 @router.get(
-    "/phasee/score-famille-hebdo",
+    "/score-famille-hebdo",
     response_model=ScoreFamilleHebdoResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="E3 Score famille hebdomadaire",
+    summary="Score famille hebdomadaire",
 )
 @gerer_exception_api
-async def phasee_score_famille_hebdo(
+async def score_famille_hebdo(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -335,13 +334,13 @@ async def phasee_score_famille_hebdo(
 
 
 @router.get(
-    "/phasee/journal-familial",
+    "/journal-familial",
     response_model=JournalFamilialAutoResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="E8 Journal familial automatique",
+    summary="Journal familial automatique",
 )
 @gerer_exception_api
-async def phasee_journal_familial(
+async def journal_familial(
     user: dict[str, Any] = Depends(require_auth),
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
@@ -351,13 +350,13 @@ async def phasee_journal_familial(
 
 
 @router.get(
-    "/phasee/journal-familial/pdf",
+    "/journal-familial/pdf",
     response_model=RapportMensuelPdfResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="E8 Export PDF journal familial",
+    summary="Export PDF journal familial",
 )
 @gerer_exception_api
-async def phasee_journal_familial_pdf(
+async def journal_familial_pdf(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -366,13 +365,13 @@ async def phasee_journal_familial_pdf(
 
 
 @router.get(
-    "/phasee/rapport-mensuel/pdf",
+    "/rapport-mensuel/pdf",
     response_model=RapportMensuelPdfResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="E9 Rapport mensuel PDF",
+    summary="Rapport mensuel PDF",
 )
 @gerer_exception_api
-async def phasee_rapport_mensuel_pdf(
+async def rapport_mensuel_pdf(
     mois: str | None = Query(None, description="Format YYYY-MM"),
     user: dict[str, Any] = Depends(require_auth),
 ):
@@ -382,13 +381,13 @@ async def phasee_rapport_mensuel_pdf(
 
 
 @router.get(
-    "/phasee/mode-vacances",
+    "/mode-vacances",
     response_model=ModeVacancesResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Lecture mode vacances",
 )
 @gerer_exception_api
-async def phasee_lire_mode_vacances(
+async def lire_mode_vacances(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -398,13 +397,13 @@ async def phasee_lire_mode_vacances(
 
 
 @router.post(
-    "/phasee/mode-vacances/config",
+    "/mode-vacances/config",
     response_model=ModeVacancesResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Configuration mode vacances",
 )
 @gerer_exception_api
-async def phasee_configurer_mode_vacances(
+async def configurer_mode_vacances(
     body: ModeVacancesConfigurationRequest,
     user: dict[str, Any] = Depends(require_auth),
 ):
@@ -419,13 +418,13 @@ async def phasee_configurer_mode_vacances(
 
 
 @router.get(
-    "/phasee/insights-quotidiens",
+    "/insights-quotidiens",
     response_model=InsightsQuotidiensResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Insights IA proactifs quotidiens",
 )
 @gerer_exception_api
-async def phasee_insights_quotidiens(
+async def insights_quotidiens(
     limite: int = Query(2, ge=1, le=2, description="1 ou 2 insights maximum par jour"),
     user: dict[str, Any] = Depends(require_auth),
 ):
@@ -435,13 +434,13 @@ async def phasee_insights_quotidiens(
 
 
 @router.get(
-    "/phasee/meteo-contextuelle",
+    "/meteo-contextuelle",
     response_model=MeteoContextuelleResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Meteo contextuelle cross-module",
 )
 @gerer_exception_api
-async def phasee_meteo_contextuelle(
+async def meteo_contextuelle(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -450,13 +449,13 @@ async def phasee_meteo_contextuelle(
 
 
 @router.get(
-    "/phasee/garmin-repas-adaptatif",
+    "/garmin-repas-adaptatif",
     response_model=SuggestionRepasSoirResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="E4.2 Repas adapte a la depense Garmin",
+    summary="Repas adapte a la depense Garmin",
 )
 @gerer_exception_api
-async def phasee_garmin_repas_adaptatif(
+async def garmin_repas_adaptatif(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -467,13 +466,13 @@ async def phasee_garmin_repas_adaptatif(
 
 
 @router.get(
-    "/phasee/s22/preferences-apprises",
+    "/preferences-apprises",
     response_model=ApprentissagePreferencesResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Apprentissage des preferences",
 )
 @gerer_exception_api
-async def phasee_s22_preferences_apprises(
+async def preferences_apprises(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -483,13 +482,13 @@ async def phasee_s22_preferences_apprises(
 
 
 @router.get(
-    "/phasee/s22/planification-auto",
+    "/planification-auto",
     response_model=PlanificationHebdoCompleteResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Planification hebdo complete automatique",
 )
 @gerer_exception_api
-async def phasee_s22_planification_auto(
+async def planification_auto(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -499,13 +498,13 @@ async def phasee_s22_planification_auto(
 
 
 @router.get(
-    "/phasee/s22/batch-cooking-intelligent",
+    "/batch-cooking-intelligent",
     response_model=BatchCookingIntelligentResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Suggestions batch cooking intelligentes",
 )
 @gerer_exception_api
-async def phasee_s22_batch_cooking_intelligent(
+async def batch_cooking_intelligent(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -515,13 +514,13 @@ async def phasee_s22_batch_cooking_intelligent(
 
 
 @router.post(
-    "/phasee/s22/carte-visuelle",
+    "/carte-visuelle",
     response_model=CarteVisuellePartageableResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Carte visuelle partageable",
 )
 @gerer_exception_api
-async def phasee_s22_carte_visuelle(
+async def carte_visuelle(
     body: CarteVisuelleRequest,
     user: dict[str, Any] = Depends(require_auth),
 ):
@@ -534,13 +533,13 @@ async def phasee_s22_carte_visuelle(
 
 
 @router.get(
-    "/phasee/s22/mode-tablette-magazine",
+    "/mode-tablette-magazine",
     response_model=ModeTabletteMagazineResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Mode tablette magazine",
 )
 @gerer_exception_api
-async def phasee_s22_mode_tablette_magazine(
+async def mode_tablette_magazine(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -549,13 +548,13 @@ async def phasee_s22_mode_tablette_magazine(
 
 
 @router.get(
-    "/phasee/s23/telegram-conversationnel",
+    "/telegram-conversationnel",
     response_model=TelegramConversationnelResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Telegram conversationnel",
 )
 @gerer_exception_api
-async def phasee_s23_telegram_conversationnel(
+async def telegram_conversationnel(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -564,13 +563,13 @@ async def phasee_s23_telegram_conversationnel(
 
 
 @router.get(
-    "/phasee/s23/comparateur-prix-auto",
+    "/comparateur-prix-auto",
     response_model=ComparateurPrixAutomatiqueResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Comparateur prix automatique",
 )
 @gerer_exception_api
-async def phasee_s23_comparateur_prix_auto(
+async def comparateur_prix_auto(
     top_n: int = Query(20, ge=1, le=20),
     user: dict[str, Any] = Depends(require_auth),
 ):
@@ -580,13 +579,13 @@ async def phasee_s23_comparateur_prix_auto(
 
 
 @router.get(
-    "/phasee/s23/energie-temps-reel",
+    "/energie-temps-reel",
     response_model=EnergieTempsReelResponse,
     responses=RESPONSES_IA_TYPED,
     summary="Tableau énergie temps-réel",
 )
 @gerer_exception_api
-async def phasee_s23_energie_temps_reel(
+async def energie_temps_reel(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -595,13 +594,13 @@ async def phasee_s23_energie_temps_reel(
 
 
 @router.get(
-    "/phase9/tableau-sante-foyer",
+    "/tableau-sante-foyer",
     response_model=ScoreBienEtreResponse,
     responses=RESPONSES_IA_TYPED,
-    summary="P9-15 Tableau de bord sante foyer",
+    summary="Tableau de bord sante foyer",
 )
 @gerer_exception_api
-async def p9_tableau_sante_foyer(
+async def tableau_sante_foyer(
     user: dict[str, Any] = Depends(require_auth),
 ):
     service = _get_service()
@@ -610,7 +609,7 @@ async def p9_tableau_sante_foyer(
 
 
 # ===========================================================
-# 10.4 - BILAN ANNUEL AUTOMATIQUE IA
+# BILAN ANNUEL AUTOMATIQUE IA
 # ===========================================================
 
 
@@ -635,7 +634,7 @@ async def bilan_annuel(
 
 
 # ===========================================================
-# 10.5 - SCORE BIEN-ETRE FAMILIAL
+# SCORE BIEN-ETRE FAMILIAL
 # ===========================================================
 
 
@@ -658,7 +657,7 @@ async def score_bien_etre(
 
 
 # ===========================================================
-# 10.17 - ENRICHISSEMENT CONTACTS IA
+# ENRICHISSEMENT CONTACTS IA
 # ===========================================================
 
 
@@ -682,7 +681,7 @@ async def enrichissement_contacts(
 
 
 # ===========================================================
-# 10.18 - ANALYSE TENDANCES LOTO
+# ANALYSE TENDANCES LOTO
 # ===========================================================
 
 
@@ -707,7 +706,7 @@ async def tendances_loto(
 
 
 # ===========================================================
-# 10.19 - OPTIMISATION PARCOURS MAGASIN
+# OPTIMISATION PARCOURS MAGASIN
 # ===========================================================
 
 
@@ -732,7 +731,7 @@ async def parcours_magasin(
 
 
 # ===========================================================
-# 10.8 - VEILLE EMPLOI
+# VEILLE EMPLOI
 # ===========================================================
 
 
@@ -749,7 +748,7 @@ async def veille_emploi(
     _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
 ):
     """Execute la veille emploi avec criteres configurables."""
-    from src.services.innovations.types import CriteresVeilleEmploi
+    from src.services.experimental.types import CriteresVeilleEmploi
 
     criteres = CriteresVeilleEmploi(
         domaine=body.domaine,
@@ -767,7 +766,7 @@ async def veille_emploi(
 
 
 # ===========================================================
-# 10.3 - MODE INVITE
+# MODE INVITE
 # ===========================================================
 
 

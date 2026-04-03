@@ -378,14 +378,11 @@ Dashboard ↔ Actions       ✅ Actions rapides cross-module
 | # | De → Vers | Description | Valeur |
 |---|-----------|-------------|--------|
 | **IM-1** | Entretien → Artisans | Tâche échouée → proposer artisan de la liste | ⭐⭐⭐ |
-| **IM-2** | Météo → Entretien maison | Alerte tempête → urgence entretien (gouttières, volets) | ⭐⭐⭐ |
-| **IM-3** | Documents expiration → Comparateur abonnements | Document expiré → relancer comparaison (assurance, etc.) | ⭐⭐ |
-| **IM-4** | Inventaire péremption → Briefing matinal | Articles qui expirent aujourd'hui → dans le digest matin | ⭐⭐⭐ |
-| **IM-5** | Anniversaire → Planning repas | Anniversaire proche → suggérer menu festif (gâteau, etc.) | ⭐⭐ |
-| **IM-6** | Jardin récolte → Inventaire stock | Récolte déclarée → ajouter automatiquement au stock | ⭐⭐⭐ |
-| **IM-7** | Énergie tarif HC/HP → Planning machines | Lancer la machine pendant heures creuses | ⭐⭐ |
-| **IM-8** | Budget anomalie → Telegram alerte | Dépassement budget → notification immédiate Telegram | ⭐⭐⭐ |
-| **IM-9** | Jules jalons → Timeline famille | Jalon atteint → événement dans le journal famille | ⭐⭐ |
+| **IM-2** | Inventaire péremption → Briefing matinal | Articles qui expirent aujourd'hui → dans le digest matin | ⭐⭐⭐ |
+| **IM-3** | Anniversaire → Planning repas | Anniversaire proche → suggérer menu festif (gâteau, etc.) | ⭐⭐ |
+| **IM-4** | Jardin récolte → Inventaire stock | Récolte déclarée → ajouter automatiquement au stock | ⭐⭐⭐ |
+| **IM-5** | Énergie tarif HC/HP → Planning machines | Lancer la machine pendant heures creuses | ⭐⭐ |
+| **IM-6** | Jules jalons → Timeline famille | Jalon atteint → événement dans le journal famille | ⭐⭐ |
 
 ---
 
@@ -413,14 +410,13 @@ IA avancée : 4 services IA (suggestions, planificateur, prévisions, résumé)
 | **IA-2** | **Jardin** | Calendrier semis/récolte personnalisé (région + météo) | ⭐⭐⭐ |
 | **IA-3** | **Entretien** | Diagnostic panne équipement via description symptômes | ⭐⭐⭐ |
 | **IA-4** | **Habitat/DVF** | Estimation prix bien + ROI rénovation | ⭐⭐ |
-| **IA-5** | **Notes** | Résumé automatique de notes longues | ⭐⭐ |
-| **IA-6** | **Rapports** | Narration insights mensuel (pas juste données, analyse) | ⭐⭐⭐ |
-| **IA-7** | **Planning famille** | Optimisation planning semaine (activités Jules + ménage + courses) | ⭐⭐⭐ |
-| **IA-8** | **Artisans** | Estimation devis + comparaison via IA | ⭐⭐ |
-| **IA-9** | **Garmin** | Recommandations santé personnalisées (sommeil, activité, nutrition) | ⭐⭐ |
-| **IA-10** | **Anniversaires** | Idées cadeaux (basé historique achats + centres d'intérêt) | ⭐ |
-| **IA-11** | **Énergie** | Prédiction consommation + conseils économies énergie | ⭐⭐⭐ |
-| **IA-12** | **Documents** | Extraction automatique date expiration depuis photo document | ⭐⭐ |
+| **IA-5** | **Rapports** | Narration insights mensuel (pas juste données, analyse) | ⭐⭐⭐ |
+| **IA-6** | **Planning famille** | Optimisation planning semaine (activités Jules + ménage + courses) | ⭐⭐⭐ |
+| **IA-7** | **Artisans** | Estimation devis + comparaison via IA | ⭐⭐ |
+| **IA-8** | **Garmin** | Recommandations santé personnalisées (sommeil, activité, nutrition) | ⭐⭐ |
+| **IA-9** | **Anniversaires** | Idées cadeaux (basé historique achats + centres d'intérêt) | ⭐ |
+| **IA-10** | **Énergie** | Prédiction consommation + conseils économies énergie | ⭐⭐⭐ |
+| **IA-11** | **Documents** | Extraction automatique date expiration depuis photo document | ⭐⭐ |
 
 ---
 
@@ -626,7 +622,7 @@ Alertes bien couvertes : péremption, budget, entretien, nutrition, planning, co
 | **INNO-11** | **Bilan de fin de mois** | Rapport IA narratif : "Ce mois-ci vous avez..." (budget, repas, Jules, maison) | 4h |
 | **INNO-12** | **Mode vacances** | Activation → pause des rappels, checklist départ, destockage frigo auto | 6h |
 | **INNO-13** | **Routines intelligentes** | IA apprend les habitudes → propose d'automatiser les routines récurrentes | 8h |
-| **INNO-14** | **Alertes produits rappelés** | Vérifier via API rappel.conso.gouv.fr si un produit en stock est rappelé | 4h |
+
 | **INNO-15** | **Multi-device sync indicator** | Pastille "en cours d'édition sur un autre appareil" (courses, planning) | 4h |
 
 ---
@@ -684,11 +680,10 @@ Alertes bien couvertes : péremption, budget, entretien, nutrition, planning, co
 
 | # | Tâche | Effort | Priorité |
 |---|-------|--------|----------|
-| 4.1 | IM-4 : Péremption inventaire → briefing matinal | 2h | 🔴 |
+| 4.1 | IM-2 : Péremption inventaire → briefing matinal | 2h | 🔴 |
 | 4.2 | IM-1 : Entretien échoué → proposer artisan | 3h | 🔴 |
-| 4.3 | IM-6 : Récolte jardin → stock inventaire automatique | 3h | 🔴 |
-| 4.4 | IM-8 : Budget anomalie → alerte Telegram immédiate | 2h | 🔴 |
-| 4.5 | IA-1 : Photo plante → diagnostic maladie (Vision Mistral) | 4h | 🟡 |
+| 4.3 | IM-4 : Récolte jardin → stock inventaire automatique | 3h | 🔴 |
+| 4.4 | IA-1 : Photo plante → diagnostic maladie (Vision Mistral) | 4h | 🟡 |
 | 4.6 | IA-3 : Diagnostic panne équipement via IA | 3h | 🟡 |
 | 4.7 | IA-6 : Rapport mensuel narratif IA | 3h | 🟡 |
 | 4.8 | IA-11 : Prédiction consommation énergie | 4h | 🟢 |
@@ -755,7 +750,6 @@ Alertes bien couvertes : péremption, budget, entretien, nutrition, planning, co
 | 8.6 | INNO-12 : Mode vacances (pause rappels, checklist départ) | 6h | 🟡 |
 | 8.7 | INNO-6 : Planning familial unifié (calendrier unique) | 8h | 🟢 |
 | 8.8 | INNO-7 : Photo frigo → inventaire IA (Vision) | 6h | 🟢 |
-| 8.9 | INNO-14 : Alertes produits rappelés (rappel.conso.gouv.fr) | 4h | 🟢 |
 
 ### Sprint 9 — Documentation finale (2-3 jours)
 

@@ -30,7 +30,7 @@ class HistoriqueNotification(TimestampMixin, Base):
 
     Attributes:
         user_id: Utilisateur destinataire
-        canal: Canal utilisé (ntfy, push, email, whatsapp)
+        canal: Canal utilisé (ntfy, push, email, telegram)
         titre: Titre de la notification
         message: Contenu
         type_evenement: Type événement métier
@@ -47,7 +47,7 @@ class HistoriqueNotification(TimestampMixin, Base):
     user_id: Mapped[str] = mapped_column(String(255), index=True)
 
     # Contenu
-    canal: Mapped[str] = mapped_column(String(20))  # ntfy, push, email, whatsapp
+    canal: Mapped[str] = mapped_column(String(20))  # ntfy, push, email, telegram
     titre: Mapped[str] = mapped_column(String(500))
     message: Mapped[str] = mapped_column(Text)
     type_evenement: Mapped[str | None] = mapped_column(String(100), nullable=True)

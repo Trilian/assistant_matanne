@@ -152,7 +152,7 @@ class EvenementJardinModifie:
 
 @dataclass(frozen=True, slots=True)
 class EvenementJardinRecolte:
-    """Émis quand une récolte jardin est validée (Sprint D.1)."""
+    """Émis quand une récolte jardin est validée."""
 
     TYPE: str = "jardin.recolte"
 
@@ -236,7 +236,7 @@ class EvenementBudgetModifie:
 
 @dataclass(frozen=True, slots=True)
 class EvenementBudgetDepassement:
-    """Émis quand une catégorie budgétaire dépasse son seuil (Sprint D.3)."""
+    """Émis quand une catégorie budgétaire dépasse son seuil."""
 
     TYPE: str = "budget.depassement"
 
@@ -357,7 +357,7 @@ class EvenementPlanningModifie:
 
 @dataclass(frozen=True, slots=True)
 class EvenementRecetteFeedback:
-    """Émis quand un feedback recette utilisateur est enregistré (Sprint D.5)."""
+    """Émis quand un feedback recette utilisateur est enregistré."""
 
     TYPE: str = "recette.feedback"
 
@@ -368,7 +368,7 @@ class EvenementRecetteFeedback:
 
 @dataclass(frozen=True, slots=True)
 class EvenementEnergieAnomalie:
-    """Émis quand une anomalie énergie est détectée (Sprint D.2)."""
+    """Émis quand une anomalie énergie est détectée."""
 
     TYPE: str = "energie.anomalie"
 
@@ -378,7 +378,7 @@ class EvenementEnergieAnomalie:
 
 @dataclass(frozen=True, slots=True)
 class EvenementInventaireModificationImportante:
-    """Émis quand un changement inventaire impacte les courses (Sprint D.4)."""
+    """Émis quand un changement inventaire impacte les courses."""
 
     TYPE: str = "inventaire.modification_importante"
 

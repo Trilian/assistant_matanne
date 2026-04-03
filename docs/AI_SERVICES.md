@@ -39,7 +39,7 @@ Capacités transverses fournies par `BaseAIService`:
 | Jeux | `JeuxAIService` | analyses paris et opportunités |
 | Maison | services projets / jardin / conseiller | conseils et enrichissement ciblé |
 | Outils | `ChatAIService` | chat conversationnel multi-contexte |
-| Intégrations | `MultiModalAIService` | OCR, analyse image, multimodal |
+| Intégrations | `MultiModalAIService` | analyse image, multimodal |
 
 ---
 
