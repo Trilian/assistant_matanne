@@ -1,6 +1,7 @@
-# WhatsApp Commands
+# WhatsApp Commands (Deprecated)
 
-Reference des commandes conversationnelles WhatsApp.
+Documentation obsolète des commandes conversationnelles WhatsApp.
+Référence active: commandes Telegram via le webhook `/api/v1/telegram/webhook`.
 
 ## Endpoints webhook
 

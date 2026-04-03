@@ -118,9 +118,10 @@ export interface SuggestionEntretien {
 
 export interface FluxCuisine {
   etape_actuelle: string;
-  planning: { id: number; semaine: string } | null;
+  planning: { id: number; semaine: string; etat?: string } | null;
   courses: {
     id: number;
+    etat?: string;
     articles: number;
     coches: number;
     progression: number;

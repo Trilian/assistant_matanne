@@ -29,7 +29,7 @@ tables_modifie_le TEXT [] := ARRAY [
         'plans_jardin', 'zones_jardin', 'plantes_jardin',
         'pieces_maison', 'objets_maison',
         'preferences_home', 'taches_home', 'objectifs_autonomie',
-        'contrats', 'budgets_home'
+        'abonnements', 'budgets_home'
     ];
 BEGIN FOREACH t IN ARRAY tables_modifie_le LOOP EXECUTE format(
     'DROP TRIGGER IF EXISTS trigger_update_modifie_le ON %I',

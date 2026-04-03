@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -72,6 +72,13 @@ export function NavMobile() {
 
   const estSurPlus = PLUS_PREFIXES.some((p) => pathname.startsWith(p));
 
+  useEffect(() => {
+    if (!plusOuvert) return;
+    for (const item of PLUS_ITEMS) {
+      router.prefetch(item.chemin);
+    }
+  }, [plusOuvert, router]);
+
   return (
     <>
       <nav
@@ -87,6 +94,8 @@ export function NavMobile() {
             <Link
               key={chemin}
               href={chemin}
+              onMouseEnter={() => router.prefetch(chemin)}
+              onTouchStart={() => router.prefetch(chemin)}
               aria-label={nom}
               aria-current={estActif ? "page" : undefined}
               className={cn(
@@ -141,6 +150,7 @@ export function NavMobile() {
               return (
                 <button
                   key={chemin}
+                  onMouseEnter={() => router.prefetch(chemin)}
                   onClick={() => {
                     router.push(chemin);
                     setPlusOuvert(false);

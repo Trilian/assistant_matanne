@@ -64,11 +64,11 @@ export function ContenuPrincipal({ children }: { children: React.ReactNode }) {
       onTouchEnd={onTouchEnd}
     >
       <div
-        className="pointer-events-none absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-full border bg-background/90 px-3 py-1 text-xs text-muted-foreground shadow-sm transition-all"
-        style={{
-          opacity: distanceTirage > 0 || rafraichissementEnCours ? 1 : 0,
-          transform: `translate(-50%, ${Math.min(distanceTirage, 42)}px)`,
-        }}
+        className={`pointer-events-none absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-full border bg-background/90 px-3 py-1 text-xs text-muted-foreground shadow-sm transition-all ${
+          distanceTirage > 0 || rafraichissementEnCours
+            ? "translate-y-8 opacity-100"
+            : "translate-y-0 opacity-0"
+        }`}
       >
         {rafraichissementEnCours ? "Mise a jour..." : "Tirer pour rafraichir"}
       </div>

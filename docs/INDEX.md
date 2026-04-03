@@ -3,7 +3,6 @@
 > Derniere mise a jour : 2 avril 2026.
 > Statut : index aligne avec la documentation consolidee et les mises a jour du planning.
 
-
 ## Documents principaux
 
 | Document | Description | Statut |
@@ -31,7 +30,8 @@
 | [INTER_MODULES_GUIDE.md](./INTER_MODULES_GUIDE.md) | guide de creation de bridges inter-modules | nouveau 2026-04-02 |
 | [AI_SERVICES.md](./AI_SERVICES.md) | reference des services IA | current |
 | [AI_INTEGRATION_GUIDE.md](./AI_INTEGRATION_GUIDE.md) | guide d integration pour creer un service IA BaseAIService | nouveau 2026-04-02 |
-| [WHATSAPP_COMMANDS.md](./WHATSAPP_COMMANDS.md) | commandes conversationnelles WhatsApp | current |
+| [TELEGRAM_SETUP.md](./TELEGRAM_SETUP.md) | configuration bot Telegram et webhook | mis a jour 2026-04-03 |
+| [WHATSAPP_COMMANDS.md](./WHATSAPP_COMMANDS.md) | commandes conversationnelles WhatsApp (obsolete, migration Telegram) | legacy |
 | [PERFORMANCE.md](./PERFORMANCE.md) | performance et capacite | current |
 | [CHANGELOG_MODULES.md](./CHANGELOG_MODULES.md) | historique transversal par phase, sprint et domaine | mis a jour 2026-04-01 |
 | [AUTOMATIONS.md](./AUTOMATIONS.md) | moteur Si Alors, triggers, actions et API | mis a jour 2026-04-01 |

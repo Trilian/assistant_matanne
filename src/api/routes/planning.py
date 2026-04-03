@@ -443,6 +443,24 @@ async def valider_planning(
             if not planning:
                 raise HTTPException(status_code=404, detail="Planning non trouvé")
 
+            if planning.etat == "valide":
+                return MessageResponse(
+                    message="Planning déjà validé",
+                    id=planning_id,
+                    data={
+                        "semaine_debut": planning.semaine_debut.isoformat()
+                        if planning.semaine_debut
+                        else None,
+                        "etat": planning.etat,
+                    },
+                )
+
+            if planning.etat != "brouillon":
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"Le planning ne peut pas être validé depuis l'état '{planning.etat}'",
+                )
+
             # Désactiver les plannings actifs de la même semaine
             session.query(Planning).filter(
                 Planning.semaine_debut == planning.semaine_debut,
@@ -537,6 +555,12 @@ async def regenerer_planning(
             planning_courant = session.query(Planning).filter(Planning.id == planning_id).first()
             if not planning_courant:
                 raise HTTPException(status_code=404, detail="Planning non trouvé")
+
+            if planning_courant.etat == "archive":
+                raise HTTPException(
+                    status_code=409,
+                    detail="Impossible de régénérer un planning archivé",
+                )
 
             semaine_debut = planning_courant.semaine_debut
             planning_courant.etat = "archive"

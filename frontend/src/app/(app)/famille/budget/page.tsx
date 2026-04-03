@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Wallet,
@@ -42,12 +42,20 @@ import {
 import dynamic from "next/dynamic";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
-import { listerDepenses, obtenirStatsBudget, ajouterDepense, supprimerDepense } from "@/bibliotheque/api/famille";
+import {
+  listerDepenses,
+  obtenirStatsBudget,
+  ajouterDepense,
+  supprimerDepense,
+  obtenirPredictionsBudget,
+} from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 import { BudgetInsightsIA } from "@/composants/famille/budget-insights";
 import { TreemapBudget } from "@/composants/graphiques/treemap-budget";
 import { SankeyFluxFinanciers } from "@/composants/graphiques/sankey-flux-financiers";
 import { UploadTicket } from "@/composants/famille/upload-ticket";
+import { GraphiqueBudgetVsReel } from "@/composants/graphiques/graphique-budget-vs-reel";
+import { lancerConfettis } from "@/bibliotheque/confettis";
 
 const CamembertBudget = dynamic(
   () => import("@/composants/graphiques/camembert-budget").then((m) => m.CamembertBudget),
@@ -124,6 +132,12 @@ export default function PageBudget() {
       )
   );
 
+  const { data: predictionBudget } = utiliserRequete(
+    ["famille", "budget", "predictions"],
+    obtenirPredictionsBudget,
+    { staleTime: 5 * 60 * 1000 }
+  );
+
   const totalMois = stats?.total_mois ?? 0;
   const parCategorie = stats?.par_categorie ?? {};
   const categoriesTriees = Object.entries(parCategorie).sort(
@@ -147,6 +161,34 @@ export default function PageBudget() {
       .slice(0, 3)
       .map((depense) => ({ nom: depense.libelle, montant: depense.montant })) ?? [],
   }));
+
+  const donneesBudgetVsReel = useMemo(() => {
+    const previsions = predictionBudget?.predictions?.par_categorie ?? [];
+    if (!previsions.length || !categoriesTriees.length) return [];
+
+    const reelParCategorie = new Map(categoriesTriees);
+
+    return previsions
+      .map((prevision) => ({
+        categorie: prevision.categorie,
+        prevu: prevision.montant_prevu,
+        reel: reelParCategorie.get(prevision.categorie) ?? 0,
+      }))
+      .sort((a, b) => b.prevu - a.prevu)
+      .slice(0, 6);
+  }, [predictionBudget?.predictions?.par_categorie, categoriesTriees]);
+
+  const celebrationEffectuee = useRef(false);
+  useEffect(() => {
+    const totalPrevu = predictionBudget?.predictions?.total_prevu ?? 0;
+    if (celebrationEffectuee.current || totalMois <= 0 || totalPrevu <= 0) return;
+
+    // Celebration quand le reel reste sous la projection IA du mois.
+    if (totalMois <= totalPrevu) {
+      lancerConfettis({ particules: 22 });
+      celebrationEffectuee.current = true;
+    }
+  }, [predictionBudget?.predictions?.total_prevu, totalMois]);
 
   return (
     <div className="space-y-6">
@@ -247,6 +289,20 @@ export default function PageBudget() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {!!donneesBudgetVsReel.length && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Budget prevu vs reel</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Comparaison par categorie entre projection IA et depenses reelles du mois.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <GraphiqueBudgetVsReel donnees={donneesBudgetVsReel} hauteur={320} />
+          </CardContent>
+        </Card>
       )}
 
       {/* Liste dépenses */}

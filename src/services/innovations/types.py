@@ -459,19 +459,19 @@ class ModeTabletteMagazineResponse(BaseModel):
 # ═══════════════════════════════════════════════════════════
 
 
-class CommandeWhatsApp(BaseModel):
-    """Commande textuelle WhatsApp supportée."""
+class CommandeTelegram(BaseModel):
+    """Commande textuelle Telegram supportée."""
 
     commande: str = ""
     action: str = ""
 
 
-class WhatsAppConversationnelResponse(BaseModel):
-    """Synthèse des commandes conversationnelles WhatsApp disponibles."""
+class TelegramConversationnelResponse(BaseModel):
+    """Synthèse des commandes conversationnelles Telegram disponibles."""
 
     actif: bool = True
     nb_commandes: int = 0
-    commandes: list[CommandeWhatsApp] = Field(default_factory=list)
+    commandes: list[CommandeTelegram] = Field(default_factory=list)
 
 
 class PrixIngredientCompare(BaseModel):

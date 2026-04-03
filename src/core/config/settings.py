@@ -239,6 +239,9 @@ class Parametres(BaseSettings):
     SEUIL_PAGE_LENTE: float = SEUIL_PAGE_LENTE
     """Seuil en secondes au-delà duquel une page est considérée lente (défaut: 2.0s)."""
 
+    ENABLE_PROMETHEUS_METRICS: bool = True
+    """Active l'endpoint Prometheus `/metrics/prometheus` (désactiver en environnement contraint)."""
+
     # ═══════════════════════════════════════════════════════════════════
     # FAMILLE - ALERTES
     # ═══════════════════════════════════════════════════════════════════

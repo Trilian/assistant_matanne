@@ -305,7 +305,7 @@ def _job_rappels_famille() -> None:
         nb = service.envoyer_rappels_du_jour()
         logger.info("Rappels famille : %d envoyé(s)", nb)
 
-        # (MT-02): rappel proactif WhatsApp pour les rappels famille.
+        # (MT-02): rappel proactif Telegram pour les rappels famille.
         if nb > 0:
             dispatcher = get_dispatcher_notifications()
             _envoyer_notif_tous_users(
@@ -490,20 +490,20 @@ def _job_digest_ntfy() -> None:
         logger.exception("Erreur lors du digest ntfy")
 
 
-def _job_digest_whatsapp_matinal() -> None:
-    """Envoie le digest WhatsApp matinal (repas, tâches, péremptions) à 07h30."""
+def _job_digest_telegram_matinal() -> None:
+    """Envoie le digest Telegram matinal (repas, tâches, péremptions) à 07h30."""
     try:
         import asyncio
 
-        from src.services.integrations.whatsapp import envoyer_digest_matinal
+        from src.services.integrations.telegram import envoyer_digest_matinal
 
         resultat = asyncio.run(envoyer_digest_matinal())
         if resultat:
-            logger.info("Digest WhatsApp matinal envoyé")
+            logger.info("Digest Telegram matinal envoyé")
         else:
-            logger.debug("Digest WhatsApp matinal non envoyé (désactivé/non configuré)")
+            logger.debug("Digest Telegram matinal non envoyé (désactivé/non configuré)")
     except Exception:
-        logger.exception("Erreur lors du digest WhatsApp matinal")
+        logger.exception("Erreur lors du digest Telegram matinal")
 
 
 def _job_digest_notifications_queue() -> None:
@@ -597,7 +597,7 @@ def _job_rappel_courses_ntfy() -> None:
         if resultat.succes:
             logger.info("Rappel courses ntfy envoyé (%d articles)", nb_articles)
 
-            # (MT-02): partage WhatsApp de la liste active.
+            # (MT-02): partage Telegram de la liste active.
             dispatcher = get_dispatcher_notifications()
             _envoyer_notif_tous_users(
                 dispatcher,
@@ -702,7 +702,7 @@ def _job_resume_hebdo() -> None:
         )
 
         dispatcher = get_dispatcher_notifications()
-        # ntfy, email et WhatsApp sont tous tentés. Le dispatcher résout
+        # ntfy, email et Telegram sont tous tentés. Le dispatcher résout
         # l'email utilisateur depuis la DB quand aucun override n'est fourni.
         canaux = ["ntfy", "email", "telegram"]
         kwargs = {
@@ -719,7 +719,7 @@ def _job_resume_hebdo() -> None:
             "type_evenement": "resume_hebdo",
         }
 
-        # Canal WhatsApp: résumé compact dédié.
+        # Canal Telegram: résumé compact dédié.
         kwargs["type_telegram"] = "rapport_hebdo"
 
         resultats = _envoyer_notif_tous_users(
@@ -734,7 +734,7 @@ def _job_resume_hebdo() -> None:
 
 
 def _job_planning_semaine_si_vide() -> None:
-    """J-03 / B3: vérifie le planning semaine prochaine — si vide, propose un planning IA via WhatsApp."""
+    """J-03 / B3: vérifie le planning semaine prochaine — si vide, propose un planning IA via Telegram."""
     try:
         from datetime import date, timedelta
 
@@ -761,7 +761,7 @@ def _job_planning_semaine_si_vide() -> None:
             logger.info("J-03: planning déjà actif pour la semaine du %s", lundi_prochain)
             return
 
-        #  Proposer un planning IA auto via WhatsApp avec boutons
+        #  Proposer un planning IA auto via Telegram avec boutons
         suggestions_ia = ""
         try:
             from src.core.ai import obtenir_client_ia
@@ -817,13 +817,13 @@ def _job_planning_semaine_si_vide() -> None:
 
         dispatcher = get_dispatcher_notifications()
 
-        # Envoyer avec boutons interactifs WhatsApp si possible
+        # Envoyer avec boutons interactifs Telegram si possible
         _envoyer_notif_tous_users(
             dispatcher,
             message=message,
             canaux=["telegram", "push"],
             titre="Planning semaine à générer",
-            boutons_whatsapp=[
+            boutons_telegram=[
                 {"id": "planning_valider", "title": "Valider"},
                 {"id": "planning_regenerer", "title": "Autre proposition"},
             ] if suggestions_ia else None,
@@ -1936,7 +1936,7 @@ def _job_sync_calendrier_scolaire() -> None:
 
 
 def _job_recap_weekend_dimanche_soir() -> None:
-    """P7-01 — Envoie un récap weekend le dimanche 20h (WhatsApp + Push)."""
+    """P7-01 — Envoie un récap weekend le dimanche 20h (Telegram + Push)."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
@@ -2020,7 +2020,7 @@ def _job_sync_tirages_loto_euromillions() -> None:
 
 
 def _job_rapport_budget_hebdo() -> None:
-    """P7-05 — Rapport budget hebdo le dimanche 18h (WhatsApp)."""
+    """P7-05 — Rapport budget hebdo le dimanche 18h (Telegram)."""
     try:
         from src.core.db import obtenir_contexte_db
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -2205,7 +2205,7 @@ def _job_recette_du_jour_push() -> None:
         logger.exception("Erreur P7-10 recette du jour")
 
 
-def _job_resume_weekend_whatsapp() -> None:
+def _job_resume_weekend_telegram() -> None:
     """Sprint 16.3 — Résumé suggestions weekend (vendredi 18h00)."""
     try:
         from src.core.db import obtenir_contexte_db
@@ -2244,10 +2244,10 @@ def _job_resume_weekend_whatsapp() -> None:
         )
         logger.info("Sprint 16.3 exécuté")
     except Exception:
-        logger.exception("Erreur Sprint 16.3 résumé weekend WhatsApp")
+        logger.exception("Erreur Sprint 16.3 résumé weekend Telegram")
 
 
-def _job_rappel_entretien_whatsapp() -> None:
+def _job_rappel_entretien_telegram() -> None:
     """Sprint 16.6 — Rappel entretien maison du jour (quotidien)."""
     try:
         from src.core.db import obtenir_contexte_db
@@ -2302,17 +2302,17 @@ def _job_rappel_entretien_whatsapp() -> None:
         )
         logger.info("Sprint 16.6 exécuté")
     except Exception:
-        logger.exception("Erreur Sprint 16.6 rappel entretien WhatsApp")
+        logger.exception("Erreur Sprint 16.6 rappel entretien Telegram")
 
 
-def _job_bilan_nutrition_whatsapp() -> None:
+def _job_bilan_nutrition_telegram() -> None:
     """Sprint 16.5 — Bilan nutrition simplifié (dimanche 20h30)."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
 
         _job_analyse_nutrition_hebdo()
 
-        # Message compact WhatsApp complémentaire
+        # Message compact Telegram complémentaire
         message = "Bilan nutrition prêt. Ouvre la vue Nutrition pour les détails et recommandations."
         dispatcher = get_dispatcher_notifications()
         _envoyer_notif_tous_users(
@@ -2324,7 +2324,7 @@ def _job_bilan_nutrition_whatsapp() -> None:
         )
         logger.info("Sprint 16.5 exécuté")
     except Exception:
-        logger.exception("Erreur Sprint 16.5 bilan nutrition WhatsApp")
+        logger.exception("Erreur Sprint 16.5 bilan nutrition Telegram")
 
 
 def _job_rapport_famille_mensuel_complet() -> None:
@@ -2989,7 +2989,7 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "push_quotidien": ("Notifications Web Push quotidiennes", _job_push_quotidien),
     "enrichissement_catalogues": ("Enrichissement mensuel catalogues IA", _job_enrichissement_catalogues),
     "digest_ntfy": ("Digest quotidien ntfy.sh", _job_digest_ntfy),
-    "digest_whatsapp_matinal": ("Digest WhatsApp matinal", _job_digest_whatsapp_matinal),
+    "digest_telegram_matinal": ("Digest Telegram matinal", _job_digest_telegram_matinal),
     "digest_notifications_queue": ("Flush digest notifications", _job_digest_notifications_queue),
     "rappel_courses": ("Rappel courses ntfy.sh", _job_rappel_courses_ntfy),
     "push_contextuel_soir": ("Push contextuel soir", _job_push_contextuel_soir),
@@ -4076,7 +4076,6 @@ def _job_alertes_budget_seuil() -> None:
             titre="Alerte budget mensuel",
             type_evenement="budget_depassement",
             type_telegram="budget_depassement",
-            type_telegram="budget_depassement",
         )
         logger.info("B4: %d alerte(s) budget envoyée(s)", len(alertes))
     except Exception:
@@ -4325,10 +4324,10 @@ _REGISTRE_JOBS.update(
         "nettoyage_exports_anciens": ("Nettoyage exports > 30 jours", _job_nettoyage_exports_anciens),
         "health_check_services_ia": ("Health check services IA (6h)", _job_health_check_services_ia),
         "resume_hebdo_ia": ("Résumé hebdomadaire IA intelligent", _job_resume_hebdo_ia),
-        # Sprint 16 — Notifications WhatsApp et Email
-        "s16_resume_weekend_whatsapp": ("S16.3 Résumé weekend suggestions WhatsApp", _job_resume_weekend_whatsapp),
-        "s16_rappel_entretien_whatsapp": ("S16.6 Rappel entretien maison WhatsApp", _job_rappel_entretien_whatsapp),
-        "s16_bilan_nutrition_whatsapp": ("S16.5 Bilan nutrition semaine WhatsApp", _job_bilan_nutrition_whatsapp),
+        # Sprint 16 — Notifications Telegram et Email
+        "s16_resume_weekend_telegram": ("S16.3 Résumé weekend suggestions Telegram", _job_resume_weekend_telegram),
+        "s16_rappel_entretien_telegram": ("S16.6 Rappel entretien maison Telegram", _job_rappel_entretien_telegram),
+        "s16_bilan_nutrition_telegram": ("S16.5 Bilan nutrition semaine Telegram", _job_bilan_nutrition_telegram),
         "s16_rapport_famille_mensuel": ("S16.8 Rapport famille mensuel complet email/PDF", _job_rapport_famille_mensuel_complet),
         "s16_rapport_maison_trimestriel": ("S16.9 Rapport maison trimestriel email/PDF", _job_rapport_maison_trimestriel),
         "s21_rapport_mensuel_unifie_email": ("S21.5 Rapport mensuel unifié email/PDF", _job_s21_rapport_mensuel_unifie_email),

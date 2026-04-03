@@ -1,6 +1,6 @@
 ﻿# ?? Guide Module Maison
 
-> Ce guide couvre la gestion compl?te de la maison dans MaTanne : projets, entretien, jardin, ?nergie, artisans, stocks, contrats, diagnostics.
+> Ce guide couvre la gestion complète de la maison dans MaTanne : projets, entretien, jardin, énergie, artisans, stocks, abonnements, diagnostics.
 
 ## Table des mati?res
 
@@ -254,6 +254,6 @@ class ReleveEnergie(Base):
 | GET    | `/api/v1/maison/energie`        | Relev?s d'?nergie              |
 | POST   | `/api/v1/maison/energie`        | Nouveau relev?                 |
 | GET    | `/api/v1/maison/artisans`       | Liste des artisans             |
-| GET    | `/api/v1/maison/contrats`       | Contrats en cours              |
+| GET    | `/api/v1/maison/abonnements`    | Abonnements en cours           |
 
 Voir [API_REFERENCE.md](../API_REFERENCE.md) pour la documentation compl?te.

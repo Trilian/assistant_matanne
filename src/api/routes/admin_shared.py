@@ -144,7 +144,7 @@ class UtilisateurAdminResponse(BaseModel):
 
 
 class NotificationTestRequest(BaseModel):
-    canal: Literal["ntfy", "push", "email", "whatsapp"]
+    canal: Literal["ntfy", "push", "email", "telegram"]
     message: str
     email: str | None = None
     numero_destinataire: str | None = None
@@ -155,7 +155,7 @@ class NotificationTestAllRequest(BaseModel):
     message: str
     email: str | None = None
     titre: str = "Test multi-canal Matanne"
-    inclure_whatsapp: bool = True
+    inclure_telegram: bool = True
 
 
 class CachePurgeRequest(BaseModel):
@@ -299,15 +299,15 @@ _LABELS_JOBS: dict[str, str] = {
     "job_nutrition_adultes_weekly": "S15.6 Bilan nutrition adultes Garmin (dim 20h15)",
     "job_briefing_matinal_push": "S15.7 Briefing matinal IA (07h00)",
     "job_jardin_feedback_planning": "S15.8 Feedback jardin → planning (dim 18h30)",
-    "s16_resume_weekend_whatsapp": "S16.3 Résumé weekend suggestions WhatsApp (ven 18h00)",
-    "s16_rappel_entretien_whatsapp": "S16.6 Rappel entretien maison WhatsApp (08h10)",
-    "s16_bilan_nutrition_whatsapp": "S16.5 Bilan nutrition semaine WhatsApp (dim 20h30)",
+    "s16_resume_weekend_telegram": "S16.3 Résumé weekend suggestions Telegram (ven 18h00)",
+    "s16_rappel_entretien_telegram": "S16.6 Rappel entretien maison Telegram (08h10)",
+    "s16_bilan_nutrition_telegram": "S16.5 Bilan nutrition semaine Telegram (dim 20h30)",
     "s16_rapport_famille_mensuel": "S16.8 Rapport mensuel famille complet email/PDF (1er 09h00)",
     "s16_rapport_maison_trimestriel": "S16.9 Rapport trimestriel maison email/PDF (T+1 09h10)",
 }
 
 _NOTIFICATION_TEMPLATES: dict[str, list[dict[str, str]]] = {
-    "whatsapp": [
+    "telegram": [
         {"id": "recette_du_jour", "label": "S16.1 Suggestion recette du jour", "trigger": "CRON 11:30"},
         {"id": "diagnostic_maison", "label": "S16.2 Alerte diagnostic maison", "trigger": "Événement"},
         {"id": "resume_weekend", "label": "S16.3 Résumé weekend suggestions", "trigger": "CRON ven 18:00"},

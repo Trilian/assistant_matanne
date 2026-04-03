@@ -68,8 +68,8 @@ class TestBankrollManager:
         
         validation = manager.valider_mise(20.0, 1000.0)
         
-        assert validation["autorise"] is True
-        assert validation.get("alerte") is False or validation.get("alerte") is None
+        assert validation.autorise is True
+        assert validation.niveau_risque != "eleve"
     
     def test_valider_mise_alerte_3_pct(self):
         """Test seuil alerte 3%."""
@@ -78,9 +78,9 @@ class TestBankrollManager:
         # 35€ / 1000€ = 3.5% → alerte
         validation = manager.valider_mise(35.0, 1000.0, seuil=0.03)
         
-        assert validation["autorise"] is True
-        assert validation["alerte"] is True
-        assert "élevée" in validation["raison"].lower() or "3%" in validation["raison"]
+        assert validation.autorise is True
+        assert validation.niveau_risque == "eleve"
+        assert "élevée" in validation.raison.lower() or "3%" in validation.raison
     
     def test_valider_mise_hard_cap_5_pct(self):
         """Test hard cap 5%."""
@@ -89,8 +89,8 @@ class TestBankrollManager:
         # 60€ / 1000€ = 6% → bloqué
         validation = manager.valider_mise(60.0, 1000.0)
         
-        assert validation["autorise"] is False
-        assert "5%" in validation["raison"] or "cap" in validation["raison"].lower()
+        assert validation.autorise is False
+        assert "5%" in validation.raison or "cap" in validation.raison.lower()
     
     def test_valider_mise_limite_exacte_5_pct(self):
         """Test limite exacte 5%."""
@@ -101,7 +101,7 @@ class TestBankrollManager:
         
         # Devrait être autorisé (≤ 5%) ou bloqué selon implémentation stricte
         # Vérifier cohérence
-        assert isinstance(validation["autorise"], bool)
+        assert isinstance(validation.autorise, bool)
     
     @pytest.mark.integration
     def test_obtenir_historique_vide(self):

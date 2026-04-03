@@ -172,13 +172,13 @@ class TestJobsSchedules:
 
 
 
-    def test_job_digest_whatsapp_matinal_present(self, demarreur_cron):
+    def test_job_digest_telegram_matinal_present(self, demarreur_cron):
 
-        """digest_whatsapp_matinal doit Ãªtre dans le scheduler."""
+        """digest_telegram_matinal doit Ãªtre dans le scheduler."""
 
         job_ids = [j.id for j in demarreur_cron._scheduler.get_jobs()]
 
-        assert "digest_whatsapp_matinal" in job_ids
+        assert "digest_telegram_matinal" in job_ids
 
 
 
@@ -668,11 +668,11 @@ class TestWeekendWeeklyReportJobsDryRun:
 
         [
 
-            "s16_resume_weekend_whatsapp",
+            "s16_resume_weekend_telegram",
 
-            "s16_rappel_entretien_whatsapp",
+            "s16_rappel_entretien_telegram",
 
-            "s16_bilan_nutrition_whatsapp",
+            "s16_bilan_nutrition_telegram",
 
             "s16_rapport_famille_mensuel",
 
@@ -1472,29 +1472,29 @@ class TestDigestQueueCron:
 
 
 
-class TestDigestWhatsappMatinalCron:
+class TestDigestTelegramMatinalCron:
 
-    """Tests du job digest WhatsApp matinal."""
+    """Tests du job digest Telegram matinal."""
 
 
 
-    def test_job_digest_whatsapp_matinal_appelle_integration(self):
+    def test_job_digest_telegram_matinal_appelle_integration(self):
 
         """Le job doit appeler envoyer_digest_matinal()."""
 
-        from src.services.core.cron.jobs import _job_digest_whatsapp_matinal
+        from src.services.core.cron.jobs import _job_digest_telegram_matinal
 
 
 
         with patch(
 
-            "src.services.integrations.whatsapp.envoyer_digest_matinal",
+            "src.services.integrations.telegram.envoyer_digest_matinal",
 
             new=AsyncMock(return_value=True),
 
         ) as mock_digest:
 
-            _job_digest_whatsapp_matinal()
+            _job_digest_telegram_matinal()
 
 
 

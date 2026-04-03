@@ -350,16 +350,6 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 | RecettePatch | 10 |
 | VersionRecetteResponse | 9 |
 
-## rgpd
-
-| Classe | Champs annotes |
-| --- | ---: |
-| ExportRGPDResponse | 3 |
-| ResumeDonnees | 2 |
-| ResumeDonneesResponse | 3 |
-| SuppressionCompteRequest | 2 |
-| SuppressionCompteResponse | 3 |
-
 ## suggestions
 
 | Classe | Champs annotes |

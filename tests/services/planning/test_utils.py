@@ -711,7 +711,7 @@ class TestValidateMealSelection:
 
     def test_valid_selection(self):
         """Sélection valide."""
-        selection = {"jour_0": 1, "jour_1": 2}
+        selection = {"jour_0_soir": 1, "jour_1_soir": 2}
         available = [1, 2, 3, 4, 5]
         result, errors = validate_meal_selection(selection, available)
         assert result is True
@@ -719,7 +719,7 @@ class TestValidateMealSelection:
 
     def test_invalid_recipe_id(self):
         """ID de recette invalide."""
-        selection = {"jour_0": 999}
+        selection = {"jour_0_soir": 999}
         available = [1, 2, 3]
         result, errors = validate_meal_selection(selection, available)
         assert result is False

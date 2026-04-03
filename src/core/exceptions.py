@@ -29,8 +29,6 @@ __all__ = [
     "exiger_existence",
     "exiger_plage",
     "exiger_longueur",
-    # Alias rétrocompatibles
-    "valider_plage",
 ]
 
 from typing import Any

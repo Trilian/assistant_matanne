@@ -1,6 +1,7 @@
-# WhatsApp Setup — Assistant MaTanne
+# WhatsApp Setup — Assistant MaTanne (Deprecated)
 
-> Configuration de l'intégration WhatsApp Business Cloud API.
+> Documentation obsolète. La migration cible est Telegram Bot API.
+> Utiliser en priorité `docs/TELEGRAM_SETUP.md`.
 
 ---
 

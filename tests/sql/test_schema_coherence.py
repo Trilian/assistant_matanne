@@ -67,10 +67,8 @@ class TestSchemaCoherence:
 #   - legacy         : anciens noms remplacés par une table ORM correctement nommée
 _TABLES_SQL_SANS_ORM: dict[str, str] = {
     "schema_migrations": "infrastructure — tracking des migrations appliquées",
-    "comparatifs": "reference — table analytique alimentée par ETL SQL",
     "budgets_home": "legacy — remplacé par budgets_maison (ORM BudgetMaison)",
     "depenses_home": "legacy — remplacé par depenses_maison (ORM DepenseMaison)",
-    "factures": "reference — factures maison, accès direct via service",
     "job_executions": "infrastructure — journal d'exécution des jobs admin/cron",
     "objectifs_autonomie": "reference — objectifs autonomie Jules, accès direct via service",
     "plantes_catalogue": "reference — catalogue plantes jardin (ref JSON), pas d'ORM requis",

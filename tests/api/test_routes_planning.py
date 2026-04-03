@@ -134,12 +134,70 @@ class TestPlanningCreationDB:
         from src.core.models import Planning
         today = date.today()
         start_of_week = today - timedelta(days=today.weekday())
-        planning = Planning(nom="Planning test", semaine_debut=start_of_week, semaine_fin=start_of_week + timedelta(days=6), actif=True)
+        planning = Planning(nom="Planning test", semaine_debut=start_of_week, semaine_fin=start_of_week + timedelta(days=6), etat="valide")
         db.add(planning)
         db.commit()
         tomorrow = (today + timedelta(days=1)).isoformat()
         response = await client.post("/api/v1/planning/repas", json={"type_repas": "diner", "date_repas": tomorrow})
         assert response.status_code in (200, 500)
+
+
+class TestValidationPlanningV2:
+    pytestmark = [pytest.mark.asyncio(loop_scope="function")]
+
+    async def test_valider_planning_brouillon_passe_a_valide(self, client, db):
+        from src.core.models import Planning
+
+        lundi = date.today() - timedelta(days=date.today().weekday())
+        planning = Planning(
+            nom="Planning brouillon",
+            semaine_debut=lundi,
+            semaine_fin=lundi + timedelta(days=6),
+            etat="brouillon",
+        )
+        db.add(planning)
+        db.commit()
+        db.refresh(planning)
+
+        response = await client.post(f"/api/v1/planning/{planning.id}/valider")
+        assert response.status_code == 200
+
+        db.refresh(planning)
+        assert planning.etat == "valide"
+
+    async def test_valider_planning_archive_retourne_409(self, client, db):
+        from src.core.models import Planning
+
+        lundi = date.today() - timedelta(days=date.today().weekday())
+        planning = Planning(
+            nom="Planning archive",
+            semaine_debut=lundi,
+            semaine_fin=lundi + timedelta(days=6),
+            etat="archive",
+        )
+        db.add(planning)
+        db.commit()
+        db.refresh(planning)
+
+        response = await client.post(f"/api/v1/planning/{planning.id}/valider")
+        assert response.status_code == 409
+
+    async def test_regenerer_planning_archive_retourne_409(self, client, db):
+        from src.core.models import Planning
+
+        lundi = date.today() - timedelta(days=date.today().weekday())
+        planning = Planning(
+            nom="Planning archive",
+            semaine_debut=lundi,
+            semaine_fin=lundi + timedelta(days=6),
+            etat="archive",
+        )
+        db.add(planning)
+        db.commit()
+        db.refresh(planning)
+
+        response = await client.post(f"/api/v1/planning/{planning.id}/regenerer")
+        assert response.status_code == 409
 
 
 class TestSchemasPlanningCoverage:

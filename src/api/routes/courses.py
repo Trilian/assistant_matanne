@@ -137,6 +137,7 @@ async def lister_courses(
                     {
                         "id": liste.id,
                         "nom": liste.nom,
+                        "etat": liste.etat,
                         "items_count": len(liste.articles) if liste.articles else 0,
                         "created_at": liste.cree_le,
                     }
@@ -305,6 +306,7 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
             return {
                 "id": liste.id,
                 "nom": liste.nom,
+                "etat": liste.etat,
                 "archivee": liste.archivee,
                 "created_at": liste.cree_le,
                 "items": [
@@ -1020,6 +1022,19 @@ async def confirmer_courses(
                 raise HTTPException(
                     status_code=409,
                     detail="Cette liste est déjà terminée et ne peut plus être confirmée",
+                )
+
+            if liste.etat == "active":
+                return MessageResponse(
+                    message="La liste est déjà active",
+                    id=liste_id,
+                    data={"etat": liste.etat},
+                )
+
+            if liste.etat != "brouillon":
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"Transition invalide depuis l'état '{liste.etat}'",
                 )
 
             liste.etat = "active"

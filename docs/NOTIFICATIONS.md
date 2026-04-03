@@ -30,7 +30,7 @@
 | `AbonnementPush` | `abonnements_push` | `src/core/models/notifications.py` |
 | `PreferenceNotification` | `preferences_notifications` | `src/core/models/notifications.py` |
 | `WebhookAbonnement` | `webhooks_abonnements` | `src/core/models/notifications.py` |
-| `HistoriqueNotification` | `historique_notifications` | `src/core/models/notifications_sprint_e.py` |
+| `HistoriqueNotification` | `historique_notifications` | `src/core/models/notifications_historique.py` |
 
 ---
 

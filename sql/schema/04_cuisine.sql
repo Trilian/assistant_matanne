@@ -90,29 +90,27 @@ CREATE TABLE plannings (
     nom VARCHAR(200) NOT NULL,
     semaine_debut DATE NOT NULL,
     semaine_fin DATE NOT NULL,
-    actif BOOLEAN NOT NULL DEFAULT FALSE,
+    etat VARCHAR(20) NOT NULL DEFAULT 'brouillon',
     genere_par_ia BOOLEAN NOT NULL DEFAULT FALSE,
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_plannings_semaine_debut ON plannings(semaine_debut);
+CREATE INDEX IF NOT EXISTS ix_plannings_etat ON plannings(etat);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE listes_courses (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
-    semaine_du DATE,
-    statut VARCHAR(50) NOT NULL DEFAULT 'active',
-    budget_estime FLOAT,
-    budget_reel FLOAT,
-    magasin_principal VARCHAR(200),
+    etat VARCHAR(20) NOT NULL DEFAULT 'brouillon',
+    archivee BOOLEAN NOT NULL DEFAULT FALSE,
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS ix_listes_courses_semaine ON listes_courses(semaine_du);
-CREATE INDEX IF NOT EXISTS ix_listes_courses_statut ON listes_courses(statut);
+CREATE INDEX IF NOT EXISTS ix_listes_courses_etat ON listes_courses(etat);
+CREATE INDEX IF NOT EXISTS ix_listes_courses_archivee ON listes_courses(archivee);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE modeles_courses (

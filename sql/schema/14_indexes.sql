@@ -38,9 +38,31 @@ ALTER TABLE repas
         'collation', 'autre'
     ));
 
-ALTER TABLE listes_courses
-    ADD CONSTRAINT IF NOT EXISTS ck_listes_courses_statut
-    CHECK (statut IN ('active', 'en_cours', 'completee', 'archivee', 'annulee'));
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'listes_courses' AND column_name = 'etat'
+    ) THEN
+        ALTER TABLE listes_courses
+            ADD CONSTRAINT IF NOT EXISTS ck_listes_courses_etat
+            CHECK (etat IN ('brouillon', 'active', 'terminee'));
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'plannings' AND column_name = 'etat'
+    ) THEN
+        ALTER TABLE plannings
+            ADD CONSTRAINT IF NOT EXISTS ck_plannings_etat
+            CHECK (etat IN ('brouillon', 'valide', 'archive'));
+    END IF;
+END $$;
 
 ALTER TABLE recettes
     ADD CONSTRAINT IF NOT EXISTS ck_recettes_difficulte

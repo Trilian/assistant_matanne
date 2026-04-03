@@ -84,7 +84,7 @@ async def sante_services(
     "/notifications/test",
     responses=REPONSES_AUTH_ADMIN,
     summary="Envoyer une notification de test",
-    description="Envoie une notification sur le canal spécifié (ntfy/push/email/whatsapp). Nécessite le rôle admin.",
+    description="Envoie une notification sur le canal spécifié (ntfy/push/email/telegram). Nécessite le rôle admin.",
 )
 @gerer_exception_api
 async def envoyer_notification_test(
@@ -95,24 +95,24 @@ async def envoyer_notification_test(
     from src.api.utils import executer_async
 
     def _send():
-        if body.canal == "whatsapp":
+        if body.canal == "telegram":
             import asyncio
 
             from src.core.config import obtenir_parametres
-            from src.services.integrations.whatsapp import envoyer_message_whatsapp
+            from src.services.integrations.telegram import envoyer_message_telegram
 
             parametres = obtenir_parametres()
-            destinataire = body.numero_destinataire or parametres.WHATSAPP_USER_NUMBER or ""
+            destinataire = body.numero_destinataire or parametres.TELEGRAM_CHAT_ID or ""
             if not destinataire:
                 raise HTTPException(
                     status_code=422,
-                    detail="Aucun numéro WhatsApp de destination configuré.",
+                    detail="Aucun chat Telegram de destination configuré.",
                 )
 
-            result = asyncio.run(envoyer_message_whatsapp(destinataire=destinataire, texte=body.message))
+            result = asyncio.run(envoyer_message_telegram(destinataire=destinataire, texte=body.message))
             return {
-                "resultats": {"whatsapp": result},
-                "message": "Notification WhatsApp de test envoyée." if result else "Échec envoi WhatsApp.",
+                "resultats": {"telegram": result},
+                "message": "Notification Telegram de test envoyée." if result else "Échec envoi Telegram.",
             }
 
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -152,8 +152,8 @@ async def envoyer_notification_test_all(
 
         dispatcher = get_dispatcher_notifications()
         canaux = ["ntfy", "push", "email"]
-        if body.inclure_whatsapp:
-            canaux.append("whatsapp")
+        if body.inclure_telegram:
+            canaux.append("telegram")
 
         kwargs: dict[str, Any] = {"titre": body.titre, "strategie": "parallel"}
         if body.email:
@@ -181,7 +181,7 @@ async def envoyer_notification_test_all(
         action="admin.notifications.test_all",
         entite_type="notification",
         utilisateur_id=str(user.get("id", "admin")),
-        details={"inclure_whatsapp": body.inclure_whatsapp},
+        details={"inclure_telegram": body.inclure_telegram},
     )
     return result
 
@@ -190,7 +190,7 @@ async def envoyer_notification_test_all(
     "/notifications/templates",
     responses=REPONSES_AUTH_ADMIN,
     summary="Lister les templates notifications admin",
-    description="Retourne les templates disponibles (WhatsApp + Email), incluant Sprint 16.",
+    description="Retourne les templates disponibles (Telegram + Email), incluant Sprint 16.",
 )
 @gerer_exception_api
 async def lister_templates_notifications(

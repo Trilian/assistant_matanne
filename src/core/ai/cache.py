@@ -51,7 +51,7 @@ class CacheIA:
     """Préfixe des indexes sémantiques par couple (modèle, système)."""
 
     TTL_PAR_DEFAUT = CACHE_TTL_IA
-    """TTL par défaut pour réponses IA (1h)."""
+    """TTL par défaut pour réponses IA (48h)."""
 
     INDEX_SEMANTIQUE_MAX = 300
     """Nombre max d'entrées mémorisées pour la recherche sémantique."""

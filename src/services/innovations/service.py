@@ -159,7 +159,7 @@ class InnovationsService(BaseAIService):
     # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return=None)
-    @chronometre("innovations.p9.mange_ce_soir", seuil_alerte_ms=8000)
+    @chronometre("cuisine.mange_ce_soir", seuil_alerte_ms=8000)
     def suggerer_repas_ce_soir(
         self,
         temps_disponible_min: int = 30,
@@ -312,13 +312,13 @@ Retourne un JSON avec:
         """E4.2 : adapte la proposition de repas selon la depense Garmin du jour."""
         return proposer_repas_adapte_garmin_module(self, user_id=user_id)
 
-    @avec_cache(ttl=1800, key_func=lambda self: "phase_e_score_famille_hebdo")
+    @avec_cache(ttl=1800, key_func=lambda self: "score_famille_hebdo")
     @avec_gestion_erreurs(default_return=None)
     def calculer_score_famille_hebdo(self) -> ScoreFamilleHebdoResponse | None:
         """E3 : score famille hebdo composite (nutrition, depenses, activites, entretien)."""
         return calculer_score_famille_hebdo_module(self)
 
-    @avec_cache(ttl=3600, key_func=lambda self: "phase_e_journal_auto")
+    @avec_cache(ttl=3600, key_func=lambda self: "journal_auto")
     @avec_gestion_erreurs(default_return=None)
     def generer_journal_familial_auto(self) -> JournalFamilialAutoResponse | None:
         """E8 : journal familial automatique hebdomadaire."""
@@ -649,7 +649,7 @@ Retourne un JSON avec:
 
     @avec_cache(ttl=86400, key_func=lambda self, annee: f"bilan_annuel_{annee}")
     @avec_gestion_erreurs(default_return=None)
-    @chronometre("innovations.bilan_annuel", seuil_alerte_ms=15000)
+    @chronometre("rapports.bilan_annuel", seuil_alerte_ms=15000)
     def generer_bilan_annuel(self, annee: int | None = None) -> BilanAnnuelResponse | None:
         """Génère un bilan annuel complet basé sur toutes les données de l'année."""
         if annee is None:
@@ -690,7 +690,7 @@ Retourne un JSON :
 
     @avec_cache(ttl=1800, key_func=lambda self: "score_bien_etre")
     @avec_gestion_erreurs(default_return=None)
-    @chronometre("innovations.score_bien_etre", seuil_alerte_ms=5000)
+    @chronometre("famille.score_bien_etre", seuil_alerte_ms=5000)
     def calculer_score_bien_etre(self) -> ScoreBienEtreResponse | None:
         """Calcule le score bien-être familial composite (0-100).
 
@@ -708,7 +708,7 @@ Retourne un JSON :
 
     @avec_cache(ttl=3600, key_func=lambda self: "enrichissement_contacts")
     @avec_gestion_erreurs(default_return=None)
-    @chronometre("innovations.enrichissement_contacts", seuil_alerte_ms=10000)
+    @chronometre("famille.enrichissement_contacts", seuil_alerte_ms=10000)
     def enrichir_contacts(self) -> EnrichissementContactsResponse | None:
         """Enrichit les contacts avec suggestions de catégorisation et rappels relationnels."""
         contexte = self._collecter_contexte_contacts()
@@ -743,7 +743,7 @@ Règles :
 
     @avec_cache(ttl=7200, key_func=lambda self, jeu: f"tendances_loto_{jeu}")
     @avec_gestion_erreurs(default_return=None)
-    @chronometre("innovations.tendances_loto", seuil_alerte_ms=10000)
+    @chronometre("jeux.tendances_loto", seuil_alerte_ms=10000)
     def analyser_tendances_loto(self, jeu: str = "loto") -> AnalyseTendancesLotoResponse | None:
         """Analyse les tendances statistiques des tirages Loto ou EuroMillions."""
         contexte = self._collecter_contexte_tirages(jeu)
@@ -779,7 +779,7 @@ Règles :
     # ═══════════════════════════════════════════════════════════
 
     @avec_gestion_erreurs(default_return=None)
-    @chronometre("innovations.parcours_magasin", seuil_alerte_ms=5000)
+    @chronometre("courses.parcours_magasin", seuil_alerte_ms=5000)
     def optimiser_parcours_magasin(
         self, liste_id: int | None = None
     ) -> ParcoursOptimiseResponse | None:
@@ -792,7 +792,7 @@ Règles :
 
     @avec_cache(ttl=3600, key_func=lambda self, criteres: f"veille_emploi_{hash(str(criteres))}")
     @avec_gestion_erreurs(default_return=None)
-    @chronometre("innovations.veille_emploi", seuil_alerte_ms=15000)
+    @chronometre("maison.veille_emploi", seuil_alerte_ms=15000)
     def executer_veille_emploi(
         self, criteres: CriteresVeilleEmploi | None = None
     ) -> VeilleEmploiResponse | None:

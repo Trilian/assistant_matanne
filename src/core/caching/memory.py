@@ -7,6 +7,8 @@ Cache ultra rapide (accès O(1)):
 """
 
 import logging
+import pickle
+import sys
 import threading
 from collections import OrderedDict
 
@@ -29,6 +31,7 @@ class CacheMemoireN1:
         self._lock = threading.RLock()
         self.max_entries = max_entries
         self.max_size_bytes = int(max_size_mb * 1024 * 1024)
+        self._current_size_bytes = 0
 
     def get(self, key: str) -> EntreeCache | None:
         """Récupère une entrée du cache L1."""
@@ -50,17 +53,27 @@ class CacheMemoireN1:
     def set(self, key: str, entry: EntreeCache) -> None:
         """Stocke une entrée dans le cache L1."""
         with self._lock:
-            # Éviction LRU si nécessaire — O(1) via popitem(last=False)
-            while len(self._cache) >= self.max_entries:
-                self._cache.popitem(last=False)
+            # Si la clé existe déjà, retirer d'abord son poids mémoire.
+            ancien = self._cache.get(key)
+            if ancien is not None:
+                self._current_size_bytes -= self._estimer_taille_entree(ancien)
+                self._remove(key)
 
             self._cache[key] = entry
             self._cache.move_to_end(key)
+            self._current_size_bytes += self._estimer_taille_entree(entry)
+
+            # Éviction LRU combinée: nombre d'entrées ET budget mémoire.
+            while self._cache and (
+                len(self._cache) > self.max_entries or self._current_size_bytes > self.max_size_bytes
+            ):
+                _, entree_evincée = self._cache.popitem(last=False)
+                self._current_size_bytes -= self._estimer_taille_entree(entree_evincée)
 
     def invalidate(self, pattern: str | None = None, tags: list[str] | None = None) -> int:
         """Invalide des entrées par pattern ou tags."""
         with self._lock:
-            to_remove = []
+            to_remove: list[str] = []
 
             for key, entry in self._cache.items():
                 if pattern and pattern in key:
@@ -77,6 +90,7 @@ class CacheMemoireN1:
         """Vide le cache L1."""
         with self._lock:
             self._cache.clear()
+            self._current_size_bytes = 0
 
     def cleanup_expired(self) -> int:
         """Supprime toutes les entrées expirées.
@@ -94,14 +108,26 @@ class CacheMemoireN1:
         """Supprime une entrée — O(1)."""
         self._cache.pop(key, None)
 
+    def _estimer_taille_entree(self, entry: EntreeCache) -> int:
+        """Estime la taille mémoire d'une entrée de cache en bytes."""
+        try:
+            return len(pickle.dumps(entry, protocol=pickle.HIGHEST_PROTOCOL))
+        except Exception:
+            return sys.getsizeof(entry)
+
     @property
     def size(self) -> int:
         return len(self._cache)
 
-    def obtenir_statistiques(self) -> dict:
+    def obtenir_statistiques(self) -> dict[str, float | int]:
         """Statistiques du cache L1."""
         return {
             "entries": len(self._cache),
             "max_entries": self.max_entries,
-            "usage_percent": len(self._cache) / self.max_entries * 100,
+            "size_bytes": self._current_size_bytes,
+            "max_size_bytes": self.max_size_bytes,
+            "usage_memory_percent": (
+                self._current_size_bytes / self.max_size_bytes * 100 if self.max_size_bytes > 0 else 0
+            ),
+            "usage_percent": len(self._cache) / self.max_entries * 100 if self.max_entries > 0 else 0,
         }

@@ -103,6 +103,7 @@ from src.api.versioning import VersionMiddleware
 from src.api.websocket import ws_notes_router, ws_planning_router, ws_projets_router
 from src.api.websocket.admin_logs import router as ws_admin_logs_router
 from src.api.websocket_courses import router as websocket_router
+from src.core.config import obtenir_parametres
 from src.core.monitoring.health import StatutSante, verifier_sante_globale
 
 logger = logging.getLogger(__name__)
@@ -672,7 +673,10 @@ app.include_router(documents_router)
 app.include_router(upload_router)
 
 # Prometheus et WebSocket
-app.include_router(prometheus_router)
+if obtenir_parametres().ENABLE_PROMETHEUS_METRICS:
+    app.include_router(prometheus_router)
+else:
+    logger.info("Prometheus désactivé (ENABLE_PROMETHEUS_METRICS=false)")
 app.include_router(websocket_router)
 app.include_router(ws_planning_router)
 app.include_router(ws_notes_router)

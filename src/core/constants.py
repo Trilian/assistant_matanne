@@ -24,7 +24,7 @@ DB_CONNECTION_TIMEOUT = 10
 CACHE_TTL_RECETTES = 3600
 """TTL cache recettes (1h). Utilisé comme défaut dans config/settings.py."""
 
-CACHE_TTL_IA = 3600
+CACHE_TTL_IA = 172800
 """TTL cache réponses IA (1h)."""
 
 CACHE_MAX_SIZE = 100

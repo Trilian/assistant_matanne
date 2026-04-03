@@ -41,18 +41,6 @@ class ValidationMise:
     pourcentage_bankroll: float
     niveau_risque: str  # "normal", "eleve", "tres_eleve"
 
-    def __getitem__(self, key: str):
-        """Compatibilite legacy: acces type dictionnaire dans anciens tests."""
-        if key == "alerte":
-            return self.niveau_risque == "eleve"
-        return getattr(self, key)
-
-    def get(self, key: str, default=None):
-        """Compatibilite legacy: API dict.get()."""
-        if key == "alerte":
-            return self.niveau_risque == "eleve"
-        return getattr(self, key, default)
-
 
 class BankrollManager:
     """

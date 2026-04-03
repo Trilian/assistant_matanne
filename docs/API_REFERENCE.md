@@ -382,17 +382,17 @@ Module le plus vaste — gestion complète du foyer.
 | POST | `/maison/artisans/{id}/interventions` | Body: dict | Enregistre intervention (201) |
 | DELETE | `/maison/artisans/interventions/{id}` | — | Supprime intervention |
 
-### Contrats (7)
+### Abonnements (7)
 
 | Méthode | Path | Params | Description |
 |---------|------|--------|-------------|
-| GET | `/maison/contrats` | `type_contrat?`, `statut?` | Liste contrats |
-| GET | `/maison/contrats/alertes` | `jours=60` (1-365) | Renouvellements à venir |
-| GET | `/maison/contrats/resume-financier` | — | Résumé financier |
-| GET | `/maison/contrats/{id}` | — | Détail |
-| POST | `/maison/contrats` | Body: dict | Crée (201) |
-| PATCH | `/maison/contrats/{id}` | Body: dict | Met à jour |
-| DELETE | `/maison/contrats/{id}` | — | Supprime |
+| GET | `/maison/abonnements` | `type_abonnement?`, `statut?` | Liste abonnements |
+| GET | `/maison/abonnements/alertes` | `jours=60` (1-365) | Renouvellements à venir |
+| GET | `/maison/abonnements/resume-financier` | — | Résumé financier |
+| GET | `/maison/abonnements/{id}` | — | Détail |
+| POST | `/maison/abonnements` | Body: dict | Crée (201) |
+| PATCH | `/maison/abonnements/{id}` | Body: dict | Met à jour |
+| DELETE | `/maison/abonnements/{id}` | — | Supprime |
 
 ### Diagnostics immobiliers (6)
 

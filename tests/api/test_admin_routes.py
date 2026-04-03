@@ -291,11 +291,11 @@ class TestAdminNotificationEndpoints:
     async def test_notification_test_all(self, async_client: httpx.AsyncClient):
         with patch(
             "src.services.core.notifications.notif_dispatcher.DispatcherNotifications.envoyer",
-            return_value={"ntfy": True, "push": True, "email": False, "whatsapp": True},
+            return_value={"ntfy": True, "push": True, "email": False, "telegram": True},
         ):
             response = await async_client.post(
                 "/api/v1/admin/notifications/test-all",
-                json={"message": "hello", "email": "admin@example.com", "inclure_whatsapp": True},
+                json={"message": "hello", "email": "admin@example.com", "inclure_telegram": True},
             )
 
         assert response.status_code == 200

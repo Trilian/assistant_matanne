@@ -58,7 +58,7 @@ Le **dashboard** est votre page d'accueil. Il affiche :
 ### Widgets principaux
 - **?? Prochaines activit�s** : Activit�s familiales � venir
 - **??? Planning de la semaine** : Aper�u des repas planifi�s
-- **?? Alertes** : Rappels importants (dates de p�remption, contrats � renouveler, etc.)
+- **🔔 Alertes** : Rappels importants (dates de péremption, abonnements à renouveler, etc.)
 - **?? Budget du mois** : Graphique des d�penses
 
 ### Navigation

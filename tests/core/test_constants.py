@@ -64,7 +64,7 @@ class TestCacheConstants:
             constants.CACHE_TTL_RECETTES,
             constants.CACHE_TTL_IA,
         ]:
-            assert 1 <= ttl <= 86400
+            assert 1 <= ttl <= 172800
 
 
 # ═══════════════════════════════════════════════════════════

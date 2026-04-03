@@ -15,7 +15,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("push_quotidien", CronTrigger(hour=9, minute=0))
     planifier_job("enrichissement_catalogues", CronTrigger(day=1, hour=3, minute=0))
     planifier_job("digest_ntfy", CronTrigger(hour=9, minute=0), replace_existing=True)
-    planifier_job("digest_whatsapp_matinal", CronTrigger(hour=7, minute=30), replace_existing=True)
+    planifier_job("digest_telegram_matinal", CronTrigger(hour=7, minute=30), replace_existing=True)
     planifier_job("digest_notifications_queue", CronTrigger(hour="*/2", minute=5), replace_existing=True)
     planifier_job("rappel_courses", CronTrigger(hour=18, minute=0), replace_existing=True)
     planifier_job("push_contextuel_soir", CronTrigger(hour=18, minute=0), replace_existing=True)
@@ -108,10 +108,10 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("job_briefing_matinal_push", CronTrigger(hour=7, minute=0), replace_existing=True)
     planifier_job("job_jardin_feedback_planning", CronTrigger(day_of_week="sun", hour=18, minute=30), replace_existing=True)
 
-    # Sprint 16 — Notifications WhatsApp et Email
-    planifier_job("s16_resume_weekend_whatsapp", CronTrigger(day_of_week="fri", hour=18, minute=0), replace_existing=True)
-    planifier_job("s16_rappel_entretien_whatsapp", CronTrigger(hour=8, minute=10), replace_existing=True)
-    planifier_job("s16_bilan_nutrition_whatsapp", CronTrigger(day_of_week="sun", hour=20, minute=30), replace_existing=True)
+    # Sprint 16 — Notifications Telegram et Email
+    planifier_job("s16_resume_weekend_telegram", CronTrigger(day_of_week="fri", hour=18, minute=0), replace_existing=True)
+    planifier_job("s16_rappel_entretien_telegram", CronTrigger(hour=8, minute=10), replace_existing=True)
+    planifier_job("s16_bilan_nutrition_telegram", CronTrigger(day_of_week="sun", hour=20, minute=30), replace_existing=True)
     planifier_job("s16_rapport_famille_mensuel", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
     planifier_job("s16_rapport_maison_trimestriel", CronTrigger(month="1,4,7,10", day=1, hour=9, minute=10), replace_existing=True)
 

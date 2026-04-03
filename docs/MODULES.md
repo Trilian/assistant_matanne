@@ -99,7 +99,7 @@
 ### Fonctionnalités
 
 - **Projets** — Gestion projets maison (tâches, timeline, budget, ROI)
-- **Charges** — Contrats, factures, comparatifs
+- **Charges** — Abonnements, factures, comparatifs
 - **Dépenses** — Suivi dépenses maison par catégorie
 - **Énergie** — Relevés compteurs, consommation, prévisions IA
 - **Entretien** — Tâches entretien, entretiens saisonniers, artisans
@@ -117,7 +117,7 @@
 | Routes API | `src/api/routes/maison.py` |
 | Schémas | `src/api/schemas/maison.py` |
 | Services | `src/services/maison/` (service) |
-| Modèles ORM | `src/core/models/maison.py`, `habitat.py`, `maison_extensions.py`, `contrats_artisans.py`, `jardin.py`, `temps_entretien.py` |
+| Modèles ORM | `src/core/models/maison.py`, `habitat.py`, `maison_extensions.py`, `abonnements.py`, `jardin.py`, `temps_entretien.py` |
 | Frontend | `frontend/src/app/(app)/maison/` (projets, charges, depenses, energie, entretien, jardin, stocks + cellier, artisans, abonnements, diagnostics) |
 
 ---

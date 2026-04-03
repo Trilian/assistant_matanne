@@ -302,7 +302,7 @@ class TestServicePlanningCreerAvecChoix:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_recette
 
         _result = service.creer_planning_avec_choix(
-            semaine_debut=date(2024, 1, 15), recettes_selection={"jour_0": 1}, db=mock_db
+            semaine_debut=date(2024, 1, 15), recettes_selection={"jour_0_soir": 1}, db=mock_db
         )
         # Vérifie que la méthode a été appelée
         assert mock_db.add.called
@@ -313,7 +313,7 @@ class TestServicePlanningCreerAvecChoix:
         mock_db.query.return_value.filter.return_value.first.return_value = None
 
         _result = service.creer_planning_avec_choix(
-            semaine_debut=date(2024, 1, 15), recettes_selection={"jour_0": 999}, db=mock_db
+            semaine_debut=date(2024, 1, 15), recettes_selection={"jour_0_soir": 999}, db=mock_db
         )
         # La méthode continue même si recette non trouvée
 

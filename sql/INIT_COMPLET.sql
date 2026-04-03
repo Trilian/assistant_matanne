@@ -2,8 +2,8 @@
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
 -- Version    : 3.1 (régénéré automatiquement)
--- Généré le  : 2026-04-01 19:48 UTC
--- Source     : sql/schema/*.sql (18 fichiers, ~5000 lignes)
+-- Généré le  : 2026-04-03 10:18 UTC
+-- Source     : sql/schema/*.sql (18 fichiers, ~4902 lignes)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
@@ -817,19 +817,10 @@ CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_check
 -- 5.06 OBJECTIFS_AUTONOMIE
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 5.07 CONTRATS
+-- 5.07 DEPENSES_HOME
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 5.08 FACTURES (→ contrats)
-
--- ─────────────────────────────────────────────────────────────────────────────
--- 5.09 COMPARATIFS (→ contrats)
-
--- ─────────────────────────────────────────────────────────────────────────────
--- 5.10 DEPENSES_HOME (→ contrats, factures)
-
--- ─────────────────────────────────────────────────────────────────────────────
--- 5.11 BUDGETS_HOME
+-- 5.08 BUDGETS_HOME
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5B.01 JEUX_TIRAGES_EUROMILLIONS
@@ -869,7 +860,7 @@ CREATE INDEX IF NOT EXISTS idx_bankroll_historique_user ON jeux_bankroll_histori
 -- 5C.02 INTERVENTIONS_ARTISANS (→ artisans)
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 5C.03 ARTICLES_CELLIER
+-- 5C.06 ARTICLES_CELLIER
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.07 DIAGNOSTICS_MAISON
@@ -1013,29 +1004,27 @@ CREATE TABLE plannings (
     nom VARCHAR(200) NOT NULL,
     semaine_debut DATE NOT NULL,
     semaine_fin DATE NOT NULL,
-    actif BOOLEAN NOT NULL DEFAULT FALSE,
+    etat VARCHAR(20) NOT NULL DEFAULT 'brouillon',
     genere_par_ia BOOLEAN NOT NULL DEFAULT FALSE,
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_plannings_semaine_debut ON plannings(semaine_debut);
+CREATE INDEX IF NOT EXISTS ix_plannings_etat ON plannings(etat);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE listes_courses (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
-    semaine_du DATE,
-    statut VARCHAR(50) NOT NULL DEFAULT 'active',
-    budget_estime FLOAT,
-    budget_reel FLOAT,
-    magasin_principal VARCHAR(200),
+    etat VARCHAR(20) NOT NULL DEFAULT 'brouillon',
+    archivee BOOLEAN NOT NULL DEFAULT FALSE,
     notes TEXT,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
-CREATE INDEX IF NOT EXISTS ix_listes_courses_semaine ON listes_courses(semaine_du);
-CREATE INDEX IF NOT EXISTS ix_listes_courses_statut ON listes_courses(statut);
+CREATE INDEX IF NOT EXISTS ix_listes_courses_etat ON listes_courses(etat);
+CREATE INDEX IF NOT EXISTS ix_listes_courses_archivee ON listes_courses(archivee);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE modeles_courses (
@@ -2036,7 +2025,7 @@ CREATE INDEX IF NOT EXISTS ix_documents_membre ON documents_famille(membre_famil
 -- ASSISTANT MATANNE — Tables Maison
 -- ============================================================================
 -- Contient : projets, routines, jardin, entretien, stocks, pièces,
---            objets, artisans, contrats, énergie, maison extensions
+--            objets, artisans, énergie, maison extensions
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE projets (
@@ -2603,45 +2592,6 @@ CREATE TABLE objectifs_autonomie (
 );
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE factures (
-    id SERIAL PRIMARY KEY,
-    contrat_id INTEGER,
-    date_facture DATE NOT NULL,
-    date_echeance DATE,
-    periode_debut DATE,
-    periode_fin DATE,
-    montant_ht DECIMAL(10, 2),
-    montant_ttc DECIMAL(10, 2) NOT NULL,
-    conso_kwh DECIMAL(10, 2),
-    conso_m3 DECIMAL(10, 2),
-    payee BOOLEAN DEFAULT FALSE,
-    date_paiement DATE,
-    fichier_url TEXT,
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_factures_contrat ON factures(contrat_id);
-CREATE INDEX IF NOT EXISTS idx_factures_date ON factures(date_facture);
-CREATE INDEX IF NOT EXISTS idx_factures_payee ON factures(payee);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE comparatifs (
-    id SERIAL PRIMARY KEY,
-    contrat_id INTEGER REFERENCES contrats(id) ON DELETE CASCADE,
-    date_analyse DATE DEFAULT CURRENT_DATE,
-    fournisseur_suggere VARCHAR(100),
-    offre_nom VARCHAR(200),
-    economie_mensuelle DECIMAL(10, 2),
-    economie_annuelle DECIMAL(10, 2),
-    avantages TEXT,
-    inconvenients TEXT,
-    lien_offre TEXT,
-    applique BOOLEAN DEFAULT FALSE,
-    date_application DATE,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE depenses_home (
     id SERIAL PRIMARY KEY,
     date_depense DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -2663,11 +2613,7 @@ CREATE TABLE depenses_home (
     magasin VARCHAR(100),
     recurrent BOOLEAN DEFAULT FALSE,
     frequence_mois INTEGER,
-    contrat_id INTEGER REFERENCES contrats(id) ON DELETE
-    SET NULL,
-        facture_id INTEGER REFERENCES factures(id) ON DELETE
-    SET NULL,
-        cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_depenses_home_date ON depenses_home(date_depense);
 CREATE INDEX IF NOT EXISTS idx_depenses_home_categorie ON depenses_home(categorie);
@@ -2685,6 +2631,25 @@ CREATE TABLE budgets_home (
 -- ============================================================================
 -- PARTIE 5B : TABLES JEUX EXTENSIONS (Euromillions, Cotes, Mise Responsable)
 -- ============================================================================
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Abonnements maison (eau, électricité, gaz, assurances, téléphone, internet)
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE abonnements (
+    id SERIAL PRIMARY KEY,
+    type_abonnement VARCHAR(50) NOT NULL,
+    fournisseur VARCHAR(200) NOT NULL,
+    numero_contrat VARCHAR(100),
+    prix_mensuel NUMERIC(10, 2),
+    date_debut DATE,
+    date_fin_engagement DATE,
+    meilleur_prix_trouve NUMERIC(10, 2),
+    fournisseur_alternatif VARCHAR(200),
+    notes TEXT,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_abonnements_type ON abonnements(type_abonnement);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE artisans (
@@ -3821,7 +3786,7 @@ tables_modifie_le TEXT [] := ARRAY [
         'plans_jardin', 'zones_jardin', 'plantes_jardin',
         'pieces_maison', 'objets_maison',
         'preferences_home', 'taches_home', 'objectifs_autonomie',
-        'budgets_home'
+        'abonnements', 'budgets_home'
     ];
 BEGIN FOREACH t IN ARRAY tables_modifie_le LOOP EXECUTE format(
     'DROP TRIGGER IF EXISTS trigger_update_modifie_le ON %I',
@@ -3989,7 +3954,7 @@ ORDER BY d.jour;
 -- ============================================================================
 -- Index composites et index de performance ajoutés après V005.
 -- Contraintes CHECK pour les enums VARCHAR (V005 absorbé).
--- La majorité des index sont inline avec les déclarations de tables dans les fichiers
+-- La majorité des index sont définis inline dans les fichiers
 -- de domaine (03-11). Ce fichier contient uniquement les index additionnels.
 -- ============================================================================
 
@@ -4024,9 +3989,31 @@ ALTER TABLE repas
         'collation', 'autre'
     ));
 
-ALTER TABLE listes_courses
-    ADD CONSTRAINT IF NOT EXISTS ck_listes_courses_statut
-    CHECK (statut IN ('active', 'en_cours', 'completee', 'archivee', 'annulee'));
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'listes_courses' AND column_name = 'etat'
+    ) THEN
+        ALTER TABLE listes_courses
+            ADD CONSTRAINT IF NOT EXISTS ck_listes_courses_etat
+            CHECK (etat IN ('brouillon', 'active', 'terminee'));
+    END IF;
+END $$;
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'plannings' AND column_name = 'etat'
+    ) THEN
+        ALTER TABLE plannings
+            ADD CONSTRAINT IF NOT EXISTS ck_plannings_etat
+            CHECK (etat IN ('brouillon', 'valide', 'archive'));
+    END IF;
+END $$;
 
 ALTER TABLE recettes
     ADD CONSTRAINT IF NOT EXISTS ck_recettes_difficulte
@@ -4260,8 +4247,7 @@ shared_tables TEXT[] := ARRAY[
     'versions_pieces', 'couts_travaux', 'logs_statut_objets',
     'recoltes', 'objectifs_autonomie',
     -- Maison extensions
-    'artisans', 'interventions_artisans',
-    'articles_cellier', 'diagnostics_maison',
+    'artisans', 'interventions_artisans', 'articles_cellier', 'diagnostics_maison',
     'estimations_immobilieres', 'checklists_vacances', 'items_checklist',
     'traitements_nuisibles', 'devis_comparatifs', 'lignes_devis',
     'entretiens_saisonniers', 'releves_compteurs',
@@ -4292,7 +4278,7 @@ readonly_tables TEXT[] := ARRAY[
     'normes_oms', 'plantes_catalogue',
     -- Legacy migration tables (read-only, données historiques)
     'preferences_home', 'taches_home', 'stats_home',
-    'factures', 'comparatifs', 'depenses_home', 'budgets_home'
+    'factures', 'depenses_home', 'budgets_home'
 ];
 BEGIN FOREACH t IN ARRAY readonly_tables LOOP
     EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
@@ -4898,23 +4884,62 @@ GRANT USAGE,
 
 -- Source: 17_migrations_absorbees.sql
 -- ============================================================================
--- ASSISTANT MATANNE — Migrations absorbées (V001-V007)
+-- ASSISTANT MATANNE — Migrations absorbees (SQL-first)
 -- ============================================================================
--- Ce fichier documente les migrations qui ont été absorbées dans les fichiers
--- schema/ principaux. Il ne contient plus de SQL exécutable.
---
--- Historique des absorptions :
---   V001 : Index manquants         → absorbé dans 14_indexes.sql
---   V002 : Trigger modifie_le      → absorbé dans 12_triggers.sql
---   V003 : canaux_par_categorie    → absorbé dans 09_notifications.sql
---   V004 : logs_securite + RLS     → absorbé dans 03_systeme.sql + 15_rls_policies.sql
---   V005 : Consolidation SQL       → absorbé dans 14_indexes.sql (CHECK, comments, cleanup)
---   V006 : job_executions          → absorbé dans 03_systeme.sql
---   V007 : Module habitat          → absorbé dans 07_habitat.sql
---   V008 : minuteur_sessions       → absorbé dans 11_utilitaires.sql
---
--- Les fichiers originaux sont conservés dans sql/migrations/ pour référence.
+-- Objectif: conserver un script idempotent pour aligner les schemas existants
+-- avec les conventions actuelles quand les colonnes ont evolue.
 -- ============================================================================
+
+-- Phase 5: workflow validation v2 (planning + courses)
+
+-- Plannings: ajoute `etat` si absent, puis migre depuis `actif` si present.
+ALTER TABLE plannings
+    ADD COLUMN IF NOT EXISTS etat VARCHAR(20) NOT NULL DEFAULT 'brouillon';
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'plannings' AND column_name = 'actif'
+    ) THEN
+        UPDATE plannings
+        SET etat = CASE
+            WHEN actif IS TRUE THEN 'valide'
+            ELSE 'archive'
+        END
+        WHERE etat = 'brouillon';
+    END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS ix_plannings_etat ON plannings(etat);
+
+-- Listes de courses: ajoute `etat` et `archivee`, puis migre depuis `statut` si present.
+ALTER TABLE listes_courses
+    ADD COLUMN IF NOT EXISTS etat VARCHAR(20) NOT NULL DEFAULT 'brouillon';
+
+ALTER TABLE listes_courses
+    ADD COLUMN IF NOT EXISTS archivee BOOLEAN NOT NULL DEFAULT FALSE;
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'listes_courses' AND column_name = 'statut'
+    ) THEN
+        UPDATE listes_courses
+        SET etat = CASE
+            WHEN statut IN ('active', 'en_cours') THEN 'active'
+            WHEN statut IN ('completee', 'archivee') THEN 'terminee'
+            ELSE 'brouillon'
+        END
+        WHERE etat = 'brouillon';
+    END IF;
+END $$;
+
+CREATE INDEX IF NOT EXISTS ix_listes_courses_etat ON listes_courses(etat);
+CREATE INDEX IF NOT EXISTS ix_listes_courses_archivee ON listes_courses(archivee);
 
 -- Source: 99_footer.sql
 -- ============================================================================

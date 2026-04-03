@@ -307,6 +307,35 @@ class TestCoursesItemsDB:
             assert response.status_code in (200, 201, 500)
 
 
+class TestValidationCoursesV2:
+    """Tests du workflow brouillon -> active -> terminee."""
+
+    def test_confirmer_liste_brouillon(self, client, db):
+        from src.core.models import ListeCourses
+
+        liste = ListeCourses(nom="Liste brouillon", etat="brouillon", archivee=False)
+        db.add(liste)
+        db.commit()
+        db.refresh(liste)
+
+        response = client.post(f"/api/v1/courses/{liste.id}/confirmer")
+        assert response.status_code == 200
+
+        db.refresh(liste)
+        assert liste.etat == "active"
+
+    def test_confirmer_liste_terminee_refuse(self, client, db):
+        from src.core.models import ListeCourses
+
+        liste = ListeCourses(nom="Liste terminee", etat="terminee", archivee=True)
+        db.add(liste)
+        db.commit()
+        db.refresh(liste)
+
+        response = client.post(f"/api/v1/courses/{liste.id}/confirmer")
+        assert response.status_code == 409
+
+
 # ═══════════════════════════════════════════════════════════
 # TESTS ADDITIONNELS POUR COUVERTURE
 # ═══════════════════════════════════════════════════════════

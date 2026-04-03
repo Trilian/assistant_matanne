@@ -103,7 +103,7 @@ BackgroundScheduler(
 | `sync_recoltes_inventaire` | Quotidien 06:15 | Auto-sync récoltes jardin → inventaire cuisine | Service interne |
 | `suggestions_activites_meteo` | Quotidien 07:15 | Suggestions activités selon prévisions météo | ntfy + push |
 | `sync_veille_habitat` | Quotidien 12:15 | Sync alertes emploi habitat + push meilleurs résultats | Service interne |
-| `sync_contrats_alertes` | Lundi 09:00 | Sync contrats + alertes hebdo (horizon 60j) | ntfy + push |
+| `sync_abonnements_alertes` | Lundi 09:00 | Sync abonnements + alertes hebdo (horizon 60j) | ntfy + push |
 | `sync_charges_dashboard` | Quotidien 07:30 | Sync charges fixes vers métriques dashboard | Service interne |
 | `sync_entretien_budget` | Le 1er à 06:00 | Sync coûts entretien mois précédent → dépenses | Service interne |
 | `sync_tirages_loto_euromillions` | Mar/Ven 22:00 | Sync tirages Loto/EuroMillions | push |
@@ -178,7 +178,7 @@ Le registre est construit de manière incrémentale :
 
 1. Jobs initiaux (28 jobs de base)
 2. Jobs cron supplémentaires
-3. Jobs notifications, contrats et documents
+3. Jobs notifications, abonnements et documents
 4. Jobs innovations, gamification et automations
 5. Jobs IA avancée et résumés narratifs
 

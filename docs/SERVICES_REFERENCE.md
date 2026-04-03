@@ -319,12 +319,11 @@ Voir aussi `docs/AI_SERVICES.md` pour le détail fonctionnel.
 ---
 
 ## Références associées
-
 - `docs/ARCHITECTURE.md`
 - `docs/AI_SERVICES.md`
 - `docs/INTER_MODULES.md`
 - `docs/CRON_JOBS.md`
 - `docs/FRONTEND_ARCHITECTURE.md`
 - `docs/ADMIN_GUIDE.md`
-- `docs/WHATSAPP_SETUP.md`
+- `docs/TELEGRAM_SETUP.md`
 

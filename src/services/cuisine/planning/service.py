@@ -248,30 +248,13 @@ class ServicePlanning(
         for idx, jour_name in enumerate(jours_semaine):
             date_jour = semaine_debut + timedelta(days=idx)
 
-            # Support both formats: "jour_0" (legacy) and "jour_0_midi"/"jour_0_soir"
             type_repas_map = {"midi": "déjeuner", "soir": "dîner"}
-            legacy_key = f"jour_{idx}"
 
-            if legacy_key in recettes_selection:
-                # Legacy format: one recipe per day
-                recette_id = recettes_selection[legacy_key]
-                recette = db.query(Recette).filter(Recette.id == recette_id).first()
-                if recette:
-                    repas = Repas(
-                        planning_id=planning.id,
-                        recette_id=recette.id,
-                        date_repas=date_jour,
-                        type_repas="dîner",
-                        notes=f"Repas du {jour_name}",
-                    )
-                    db.add(repas)
-            else:
-                # New format: midi/soir per day
-                for slot, type_db in type_repas_map.items():
-                    slot_key = f"jour_{idx}_{slot}"
-                    recette_id = recettes_selection.get(slot_key)
-                    if not recette_id:
-                        continue
+            for slot, type_db in type_repas_map.items():
+                slot_key = f"jour_{idx}_{slot}"
+                recette_id = recettes_selection.get(slot_key)
+                if not recette_id:
+                    continue
 
                     recette = db.query(Recette).filter(Recette.id == recette_id).first()
                     if not recette:

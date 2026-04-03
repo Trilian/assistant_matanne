@@ -16,8 +16,6 @@ import httpx
 
 from ..config import obtenir_parametres
 from ..exceptions import ErreurLimiteDebit, ErreurServiceIA
-from .cache import CacheIA
-from .rate_limit import RateLimitIA
 from .streaming import StreamingMixin
 from .vision import VisionMixin
 
@@ -102,6 +100,10 @@ class ClientIA(VisionMixin, StreamingMixin):
         """
         # Charger la config au moment du premier appel (lazy loading)
         self._ensure_config_loaded()
+
+        # Lazy imports pour réduire la mémoire au démarrage.
+        from .cache import CacheIA
+        from .rate_limit import RateLimitIA
 
         # Vérifier rate limit
         peut_appeler, message_erreur = RateLimitIA.peut_appeler()

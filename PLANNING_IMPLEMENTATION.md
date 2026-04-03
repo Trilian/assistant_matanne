@@ -650,7 +650,7 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 
 > **Objectif** : Interface belle, fluide, avec des visualisations riches.
 > **Prérequis** : Phase 3 terminée
-> **Statut** : 🟡 En cours — Sprint 4.1 lancé (visualisations prioritaires branchées sur dashboard/cuisine/famille).
+> **Statut** : ✅ Terminée — visualisations UI/UX Phase 4 finalisées (budget vs réel, treemap inventaire, carte jardin 2D, confettis).
 
 ### 6.1 Nouvelles visualisations
 
@@ -661,9 +661,9 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | 3 | Graphique croissance Jules OMS | Famille/Jules | Recharts | 🔴 Haute | ✅ |
 | 4 | Calendrier mosaïque repas | Cuisine/Planning | Grid CSS + images | 🔴 Haute | ✅ |
 | 5 | Gauge score bien-être | Dashboard | SVG animé | 🟡 Moyenne | ✅ |
-| 6 | Graphique budget vs réel | Famille/Budget | Recharts barres groupées | 🟡 Moyenne | ⬜ |
-| 7 | Treemap inventaire | Cuisine/Inventaire | D3 | 🟡 Moyenne | ⬜ |
-| 8 | Carte zones jardin 2D | Maison/Jardin | Canvas/SVG | 🟡 Moyenne | ⬜ |
+| 6 | Graphique budget vs réel | Famille/Budget | Recharts barres groupées | 🟡 Moyenne | ✅ |
+| 7 | Treemap inventaire | Cuisine/Inventaire | D3 | 🟡 Moyenne | ✅ |
+| 8 | Carte zones jardin 2D | Maison/Jardin | Canvas/SVG | 🟡 Moyenne | ✅ |
 | 9 | Dashboard widgets configurables | Dashboard | DnD Kit | 🟡 Moyenne | ✅ |
 | 10 | Animations transitions pages | Global | Framer Motion | 🟢 Basse | ✅ |
 | 11 | Vue "focus du jour" | Ma Journée | Layout cards | 🟢 Basse | ✅ |
@@ -677,7 +677,7 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | 3 | Empty states | Illustrations/messages pour les pages vides au premier lancement | 🔴 Haute | ✅ |
 | 4 | Loading skeletons | Remplacer spinners par skeletons shadcn partout | 🟡 Moyenne | ✅ |
 | 5 | Animations micro-interactions | Hover effects, click feedback, transitions douces | 🟡 Moyenne | ✅ |
-| 6 | Confettis célébration | Utiliser `confettis.ts` existant pour jalons Jules, badges | 🟢 Basse | ⬜ |
+| 6 | Confettis célébration | Utiliser `confettis.ts` existant pour jalons Jules, badges | 🟢 Basse | ✅ |
 
 ### 6.3 Sprint Phase 4.1 — Visualisations prioritaires
 
@@ -697,9 +697,9 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | 4 | Ajouter une jauge visuelle pour le score bien-être dashboard | ✅ |
 | 5 | Conserver le dashboard widgets configurables (DnD) | ✅ |
 | 6 | Conserver la vue focus du jour accessible depuis la navigation | ✅ |
-| 7 | Homogénéiser empty states + skeletons sur les écrans critiques | 🟡 |
-| 8 | Finaliser le Kanban projets drag & drop | ⬜ |
-| 9 | Finaliser les transitions globales Framer Motion | ⬜ |
+| 7 | Homogénéiser empty states + skeletons sur les écrans critiques | ✅ |
+| 8 | Finaliser le Kanban projets drag & drop | ✅ |
+| 9 | Finaliser les transitions globales Framer Motion | ✅ |
 
 ---
 
@@ -811,19 +811,36 @@ Le flux actuel (`src/services/ia/flux_utilisateur.py`, `src/api/routes/intra_flu
 
 | # | Tâche | Fichiers | Statut |
 |---|-------|----------|--------|
-| 1 | Ajouter `etat: Mapped[str]` sur modèle Planning (brouillon/valide/archive) | `src/core/models/planning.py` | ⬜ |
-| 2 | Ajouter `etat: Mapped[str]` sur modèle ListeCourses (brouillon/active/terminee) | `src/core/models/courses.py` | ⬜ |
-| 3 | Modifier flux utilisateur : bloquer auto-progression, étape 2 = valider le brouillon | `src/services/ia/flux_utilisateur.py` | ⬜ |
-| 4 | Ajouter `POST /api/v1/planning/{id}/valider` et `POST /api/v1/planning/{id}/regenerer` | `src/api/routes/planning.py` | ⬜ |
-| 5 | Ajouter `POST /api/v1/courses/{id}/confirmer` | `src/api/routes/courses.py` | ⬜ |
-| 6 | Adapter flux B7 : ne pas auto-générer courses sans validation du planning | `src/api/routes/intra_flux.py` | ⬜ |
-| 7 | Bandeau brouillon/validé + boutons valider/modifier/régénérer (frontend planning) | Frontend planning page | ⬜ |
-| 8 | Mode brouillon courses avec confirmation obligatoire | Frontend courses page | ⬜ |
-| 9 | Migration SQL : `ALTER TABLE planning ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/` | ⬜ |
-| 10 | Migration SQL : `ALTER TABLE listes_courses ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/` | ⬜ |
+| 1 | Ajouter `etat: Mapped[str]` sur modèle Planning (brouillon/valide/archive) | `src/core/models/planning.py` | ✅ |
+| 2 | Ajouter `etat: Mapped[str]` sur modèle ListeCourses (brouillon/active/terminee) | `src/core/models/courses.py` | ✅ |
+| 3 | Modifier flux utilisateur : bloquer auto-progression, étape 2 = valider le brouillon | `src/services/ia/flux_utilisateur.py` | ✅ |
+| 4 | Ajouter `POST /api/v1/planning/{id}/valider` et `POST /api/v1/planning/{id}/regenerer` | `src/api/routes/planning.py` | ✅ |
+| 5 | Ajouter `POST /api/v1/courses/{id}/confirmer` | `src/api/routes/courses.py` | ✅ |
+| 6 | Adapter flux B7 : ne pas auto-générer courses sans validation du planning | `src/services/ia/flux_utilisateur.py` + `src/api/routes/intra_flux.py` | ✅ |
+| 7 | Bandeau brouillon/validé + boutons valider/modifier/régénérer (frontend planning) | `frontend/src/app/(app)/cuisine/planning/page.tsx` | ✅ |
+| 8 | Mode brouillon courses avec confirmation obligatoire | `frontend/src/app/(app)/cuisine/courses/page.tsx` | ✅ |
+| 9 | Migration SQL : `ALTER TABLE plannings ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/schema/17_migrations_absorbees.sql` | ✅ |
+| 10 | Migration SQL : `ALTER TABLE listes_courses ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/schema/17_migrations_absorbees.sql` | ✅ |
 | 11 | InlineKeyboardMarkup Telegram avec boutons ✅/✏️/🔄 | `src/services/integrations/telegram.py` | ⬜ |
 | 12 | Handler `callback_query` Telegram → endpoints validation | `src/api/routes/webhooks_telegram.py` | ⬜ |
-| Bilan mensuel auto | 1er du mois | Générer et envoyer bilan complet par email | Rapports | ⬜ |
+
+#### Sprint Phase 5.1 (2026-04-03)
+
+Objectif sprint: livrer le workflow validation v2 web+API (planning/courses) avec compatibilité ascendante.
+
+Checklist sprint:
+
+- [x] Etats `etat` sur modèles Planning et ListeCourses (compat `statut` conservée)
+- [x] Endpoints planning `valider` et `regenerer`
+- [x] Endpoint courses `confirmer`
+- [x] Flux cuisine B7 aligné sur brouillon -> validation -> confirmation
+- [x] Bandeau + actions de validation dans la page planning
+- [x] Mode brouillon explicite + confirmation obligatoire dans la page courses
+- [x] Schéma SQL source aligné (`sql/schema/04_cuisine.sql`)
+- [x] Migration SQL absorbée idempotente (`sql/schema/17_migrations_absorbees.sql`)
+- [x] `sql/INIT_COMPLET.sql` régénéré depuis `sql/schema/*`
+- [ ] Boutons Telegram interactifs (phase 5.2)
+- [ ] Handler callback Telegram vers endpoints validation (phase 5.2)
 
 ---
 
@@ -831,6 +848,7 @@ Le flux actuel (`src/services/ia/flux_utilisateur.py`, `src/api/routes/intra_flu
 
 > **Objectif** : Performance, bundle size, robustesse, rester en Free Railway ($0/mois).
 > **Prérequis** : Phase 5 terminée
+> **Statut** : 🟡 En cours — optimisations mémoire Railway de base livrées (cache L1 borné, lazy import IA, flag Prometheus, TTL cache IA 48h).
 
 ### 8.1 Améliorations techniques
 
@@ -847,11 +865,11 @@ Ces optimisations sont nécessaires pour tenir sous 0.5 GB RAM (limite Railway F
 
 | # | Optimisation | Description | Gain estimé | Fichiers | Statut |
 |---|-------------|-------------|-------------|----------|--------|
-| 1 | **Cache L1 mémoire borné** | Limiter `CacheMemoire` à 500 entrées max avec eviction LRU | -50-100 MB | `src/core/caching/memory.py` | ⬜ |
-| 2 | **Lazy-load modèles IA** | `ClientIA`, `AnalyseurIA` instanciés au premier appel, pas au démarrage | -30 MB | `src/core/ai/client.py` | ⬜ |
-| 3 | **Import lazy services** | 138 factories importés au démarrage → passer en importlib lazy | -20 MB | `src/services/core/registry.py` | ⬜ |
+| 1 | **Cache L1 mémoire borné** | Limiter `CacheMemoire` à 500 entrées max avec eviction LRU + plafond mémoire | -50-100 MB | `src/core/caching/memory.py` | ✅ |
+| 2 | **Lazy-load modèles IA** | `ClientIA` et dépendances cache/rate-limit chargés au premier appel, pas au démarrage | -30 MB | `src/core/ai/client.py` | ✅ |
+| 3 | **Import lazy services** | 138 factories importés au démarrage → passer en importlib lazy | -20 MB | `src/services/core/registry.py` | 🟡 |
 | 4 | **1 worker uvicorn** | `uvicorn --workers 1` (déjà le cas) | Déjà OK | — | ✅ |
-| 5 | **Désactiver Prometheus** | Métriques Prometheus consomment mémoire → flag pour désactiver | -10 MB | `src/api/prometheus.py` | ⬜ |
+| 5 | **Désactiver Prometheus** | Métriques Prometheus consomment mémoire → flag pour désactiver | -10 MB | `src/core/config/settings.py`, `src/api/main.py` | ✅ |
 
 ### 8.3 Optimisations Mistral AI
 
@@ -863,10 +881,32 @@ Ces optimisations sont nécessaires pour tenir sous 0.5 GB RAM (limite Railway F
 
 | # | Optimisation | Description | Statut |
 |---|-------------|-------------|--------|
-| 1 | Cache sémantique TTL 48h | Augmenter TTL du `CacheIA` à 48h pour suggestions récurrentes | ⬜ |
+| 1 | Cache sémantique TTL 48h | Augmenter TTL du `CacheIA` à 48h pour suggestions récurrentes | ✅ |
 | 2 | Batch prompts | Combiner résumé hebdo + planning IA dimanche en un seul prompt | ⬜ |
 | 3 | Fallback règles locales | Catégorisation ingrédients, calcul portions → règles Python | ⬜ |
 | 4 | Rate limit utilisateur | Limiter chat IA à 20 messages/jour/utilisateur | ⬜ |
+
+### 8.6 Sprint Phase 6.1 — Railway memory first
+
+| Sprint | Périmètre | Livrables | Statut |
+|--------|-----------|-----------|--------|
+| 6.1 | Robustesse mémoire backend | Cache L1 borné (entries + bytes), lazy import dépendances IA, flag Prometheus activable, TTL cache IA 48h | ✅ |
+| 6.2 | Optimisations techniques frontend/backend | Import lazy services, optimistic updates CRUD prioritaires, prefetch navigation, revue bundle Three.js | 🟡 |
+| 6.3 | Validation avancée | E2E flux critiques, tests charge, tests PWA/offline et WebSocket | ⬜ |
+
+### 8.7 Checklist Phase 6
+
+| # | Checklist sprint | Statut |
+|---|------------------|--------|
+| 1 | Borne L1 cache sur 500 entrées max et budget mémoire | ✅ |
+| 2 | Charger les dépendances IA coûteuses au premier appel | ✅ |
+| 3 | Activer un flag runtime pour désactiver `/metrics/prometheus` | ✅ |
+| 4 | Passer le TTL cache IA global à 48h | ✅ |
+| 5 | Documenter l'état d'avancement phase 6 (sprint + checklist) | ✅ |
+| 6 | Migrer l'enregistrement des services vers import lazy explicite | 🟡 |
+| 7 | Ajouter optimistic updates sur les flux CRUD critiques | ✅ |
+| 8 | Ajouter prefetch sur la navigation principale | ✅ |
+| 9 | Finaliser les tests avancés phase 6 (E2E/charge/offline/SW) | ⬜ |
 
 ### 8.4 Tests avancés
 

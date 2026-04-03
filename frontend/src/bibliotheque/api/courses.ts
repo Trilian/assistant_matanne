@@ -5,22 +5,75 @@
 import { clientApi } from "./client";
 import type { ListeCourses, ArticleCourses, CreerArticleDTO } from "@/types/courses";
 
+type ListeCoursesResumeApi = {
+  id: number;
+  nom: string;
+  etat?: string;
+  items_count?: number;
+  created_at?: string;
+};
+
+type ListeCoursesDetailApi = {
+  id: number;
+  nom: string;
+  etat?: string;
+  archivee?: boolean;
+  created_at?: string;
+  items: Array<{
+    id: number;
+    nom: string;
+    quantite?: number;
+    coche?: boolean;
+    categorie?: string;
+  }>;
+};
+
 /** Lister toutes les listes de courses */
 export async function listerListesCourses(): Promise<ListeCourses[]> {
-  const { data } = await clientApi.get<ListeCourses[]>("/courses");
-  return data;
+  const { data } = await clientApi.get<{
+    items: ListeCoursesResumeApi[];
+  }>("/courses");
+
+  return (data.items ?? []).map((liste) => ({
+    id: liste.id,
+    nom: liste.nom,
+    etat: liste.etat ?? "brouillon",
+    date_creation: liste.created_at ?? new Date().toISOString(),
+    est_terminee: (liste.etat ?? "") === "terminee",
+    articles: [],
+    nombre_articles: liste.items_count ?? 0,
+    nombre_coche: 0,
+  }));
 }
 
 /** Obtenir une liste par ID */
 export async function obtenirListeCourses(id: number): Promise<ListeCourses> {
-  const { data } = await clientApi.get<ListeCourses>(`/courses/${id}`);
-  return data;
+  const { data } = await clientApi.get<ListeCoursesDetailApi>(`/courses/${id}`);
+
+  const articles = (data.items ?? []).map((item) => ({
+    id: item.id,
+    nom: item.nom,
+    quantite: item.quantite,
+    categorie: item.categorie,
+    est_coche: Boolean(item.coche),
+  }));
+
+  return {
+    id: data.id,
+    nom: data.nom,
+    etat: data.etat ?? "brouillon",
+    date_creation: data.created_at ?? new Date().toISOString(),
+    est_terminee: (data.etat ?? "") === "terminee",
+    articles,
+    nombre_articles: articles.length,
+    nombre_coche: articles.filter((article) => article.est_coche).length,
+  };
 }
 
 /** Créer une nouvelle liste */
 export async function creerListeCourses(nom: string): Promise<ListeCourses> {
-  const { data } = await clientApi.post<ListeCourses>("/courses", { nom });
-  return data;
+  const { data } = await clientApi.post<{ id: number }>("/courses", { nom });
+  return obtenirListeCourses(data.id);
 }
 
 /** Ajouter un article à une liste */
@@ -28,11 +81,16 @@ export async function ajouterArticle(
   listeId: number,
   article: CreerArticleDTO
 ): Promise<ArticleCourses> {
-  const { data } = await clientApi.post<ArticleCourses>(
-    `/courses/${listeId}/articles`,
+  const { data } = await clientApi.post<{ id: number }>(
+    `/courses/${listeId}/items`,
     article
   );
-  return data;
+  const detail = await obtenirListeCourses(listeId);
+  const cree = detail.articles.find((item) => item.id === data.id);
+  if (!cree) {
+    throw new Error("Article créé introuvable dans la liste");
+  }
+  return cree;
 }
 
 /** Cocher/décocher un article */
@@ -41,11 +99,24 @@ export async function cocherArticle(
   articleId: number,
   estCoche: boolean
 ): Promise<ArticleCourses> {
-  const { data } = await clientApi.patch<ArticleCourses>(
-    `/courses/${listeId}/articles/${articleId}`,
-    { est_coche: estCoche }
-  );
-  return data;
+  const detail = await obtenirListeCourses(listeId);
+  const courant = detail.articles.find((item) => item.id === articleId);
+  if (!courant) {
+    throw new Error("Article introuvable");
+  }
+
+  await clientApi.put(`/courses/${listeId}/items/${articleId}`, {
+    nom: courant.nom,
+    quantite: courant.quantite ?? 1,
+    unite: courant.unite,
+    categorie: courant.categorie,
+    coche: estCoche,
+  });
+
+  return {
+    ...courant,
+    est_coche: estCoche,
+  };
 }
 
 /** Supprimer un article */
@@ -53,7 +124,7 @@ export async function supprimerArticle(
   listeId: number,
   articleId: number
 ): Promise<void> {
-  await clientApi.delete(`/courses/${listeId}/articles/${articleId}`);
+  await clientApi.delete(`/courses/${listeId}/items/${articleId}`);
 }
 
 /** Résultat de la génération de courses depuis planning */
@@ -213,6 +284,14 @@ export async function analyserTicketCaisse(
 export async function validerCourses(listeId: number): Promise<{ message: string; id: number }> {
   const { data } = await clientApi.post<{ message: string; id: number }>(
     `/courses/${listeId}/valider`
+  );
+  return data;
+}
+
+/** Confirmer une liste brouillon (brouillon -> active) */
+export async function confirmerCourses(listeId: number): Promise<{ message: string; id: number }> {
+  const { data } = await clientApi.post<{ message: string; id: number }>(
+    `/courses/${listeId}/confirmer`
   );
   return data;
 }

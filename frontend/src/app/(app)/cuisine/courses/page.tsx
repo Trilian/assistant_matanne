@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
@@ -55,6 +56,7 @@ import {
   ajouterArticle,
   cocherArticle,
   supprimerArticle,
+  confirmerCourses,
   validerCourses,
   obtenirSuggestionsBioLocal,
   obtenirRecurrentsSuggeres,
@@ -63,7 +65,7 @@ import {
 } from "@/bibliotheque/api/courses";
 import { schemaArticleCourses, type DonneesArticleCourses } from "@/bibliotheque/validateurs";
 import { toast } from "sonner";
-import type { ArticleCourses } from "@/types/courses";
+import type { ArticleCourses, ListeCourses } from "@/types/courses";
 import { ScanneurMultiCodes } from "@/composants/scanneur-multi-codes";
 import type { ArticleBarcode } from "@/bibliotheque/api/inventaire";
 import { TileArticle } from "@/composants/cuisine/tile-article";
@@ -100,6 +102,7 @@ export default function PageCourses() {
   const inputAjoutRef = useRef<HTMLInputElement | null>(null);
 
   const invalider = utiliserInvalidation();
+  const queryClient = useQueryClient();
   const { planifierSuppression } = utiliserSuppressionAnnulable();
   const contexteInvitesActif = modeInvites.actif && modeInvites.nbInvites > 0;
   const evenementsModeInvites = useMemo(() => {
@@ -225,13 +228,62 @@ export default function PageCourses() {
     (donnees: DonneesArticleCourses) =>
       ajouterArticle(listeSelectionnee!, donnees),
     {
+      onMutate: async (donnees) => {
+        if (!listeSelectionnee) return {};
+
+        const cleListes = ["courses"];
+        const cleDetail = ["courses", String(listeSelectionnee)];
+
+        await queryClient.cancelQueries({ queryKey: cleListes });
+        await queryClient.cancelQueries({ queryKey: cleDetail });
+
+        const precedentListes = queryClient.getQueryData(cleListes);
+        const precedentDetail = queryClient.getQueryData(cleDetail);
+
+        const articleTemp: ArticleCourses = {
+          id: -Date.now(),
+          nom: donnees.nom,
+          quantite: donnees.quantite,
+          unite: donnees.unite,
+          categorie: donnees.categorie,
+          est_coche: false,
+        };
+
+        queryClient.setQueryData<ListeCourses | undefined>(cleDetail, (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            articles: [...old.articles, articleTemp],
+            nombre_articles: old.nombre_articles + 1,
+          };
+        });
+
+        queryClient.setQueryData<ListeCourses[] | undefined>(cleListes, (old) => {
+          if (!old) return old;
+          return old.map((liste) =>
+            liste.id === listeSelectionnee
+              ? { ...liste, nombre_articles: liste.nombre_articles + 1 }
+              : liste
+          );
+        });
+
+        return { precedentListes, precedentDetail, idTemp: articleTemp.id };
+      },
       onSuccess: () => {
         invalider(["courses"]);
         setDialogueArticle(false);
         resetArticle();
         toast.success("Article ajouté");
       },
-      onError: () => toast.error("Erreur lors de l'ajout"),
+      onError: (_err, _variables, contexte) => {
+        if (contexte?.precedentListes) {
+          queryClient.setQueryData(["courses"], contexte.precedentListes);
+        }
+        if (contexte?.precedentDetail && listeSelectionnee) {
+          queryClient.setQueryData(["courses", String(listeSelectionnee)], contexte.precedentDetail);
+        }
+        toast.error("Erreur lors de l'ajout");
+      },
     }
   );
 
@@ -239,16 +291,104 @@ export default function PageCourses() {
     ({ articleId, coche }: { articleId: number; coche: boolean }) =>
       cocherArticle(listeSelectionnee!, articleId, coche),
     {
+      onMutate: async ({ articleId, coche }) => {
+        if (!listeSelectionnee) return {};
+
+        const cleListes = ["courses"];
+        const cleDetail = ["courses", String(listeSelectionnee)];
+
+        await queryClient.cancelQueries({ queryKey: cleListes });
+        await queryClient.cancelQueries({ queryKey: cleDetail });
+
+        const precedentListes = queryClient.getQueryData(cleListes);
+        const precedentDetail = queryClient.getQueryData(cleDetail);
+
+        queryClient.setQueryData<ListeCourses | undefined>(cleDetail, (old) => {
+          if (!old) return old;
+          const article = old.articles.find((a) => a.id === articleId);
+          if (!article || article.est_coche === coche) return old;
+
+          return {
+            ...old,
+            articles: old.articles.map((a) => (a.id === articleId ? { ...a, est_coche: coche } : a)),
+            nombre_coche: old.nombre_coche + (coche ? 1 : -1),
+          };
+        });
+
+        queryClient.setQueryData<ListeCourses[] | undefined>(cleListes, (old) => {
+          if (!old) return old;
+          return old.map((liste) =>
+            liste.id === listeSelectionnee
+              ? { ...liste, nombre_coche: liste.nombre_coche + (coche ? 1 : -1) }
+              : liste
+          );
+        });
+
+        return { precedentListes, precedentDetail };
+      },
       onSuccess: () => invalider(["courses"]),
-      onError: () => toast.error("Erreur lors de la mise à jour"),
+      onError: (_err, _variables, contexte) => {
+        if (contexte?.precedentListes) {
+          queryClient.setQueryData(["courses"], contexte.precedentListes);
+        }
+        if (contexte?.precedentDetail && listeSelectionnee) {
+          queryClient.setQueryData(["courses", String(listeSelectionnee)], contexte.precedentDetail);
+        }
+        toast.error("Erreur lors de la mise à jour");
+      },
     }
   );
 
   const { mutate: supprimer } = utiliserMutation(
     (articleId: number) => supprimerArticle(listeSelectionnee!, articleId),
     {
+      onMutate: async (articleId) => {
+        if (!listeSelectionnee) return {};
+
+        const cleListes = ["courses"];
+        const cleDetail = ["courses", String(listeSelectionnee)];
+
+        await queryClient.cancelQueries({ queryKey: cleListes });
+        await queryClient.cancelQueries({ queryKey: cleDetail });
+
+        const precedentListes = queryClient.getQueryData(cleListes);
+        const precedentDetail = queryClient.getQueryData(cleDetail);
+
+        queryClient.setQueryData<ListeCourses | undefined>(cleDetail, (old) => {
+          if (!old) return old;
+          const article = old.articles.find((a) => a.id === articleId);
+          if (!article) return old;
+          return {
+            ...old,
+            articles: old.articles.filter((a) => a.id !== articleId),
+            nombre_articles: Math.max(0, old.nombre_articles - 1),
+            nombre_coche: article.est_coche ? Math.max(0, old.nombre_coche - 1) : old.nombre_coche,
+          };
+        });
+
+        queryClient.setQueryData<ListeCourses[] | undefined>(cleListes, (old) => {
+          if (!old) return old;
+          return old.map((liste) => {
+            if (liste.id !== listeSelectionnee) return liste;
+            return {
+              ...liste,
+              nombre_articles: Math.max(0, liste.nombre_articles - 1),
+            };
+          });
+        });
+
+        return { precedentListes, precedentDetail };
+      },
       onSuccess: () => { invalider(["courses"]); },
-      onError: () => toast.error("Erreur lors de la suppression"),
+      onError: (_err, _variables, contexte) => {
+        if (contexte?.precedentListes) {
+          queryClient.setQueryData(["courses"], contexte.precedentListes);
+        }
+        if (contexte?.precedentDetail && listeSelectionnee) {
+          queryClient.setQueryData(["courses", String(listeSelectionnee)], contexte.precedentDetail);
+        }
+        toast.error("Erreur lors de la suppression");
+      },
     }
   );
 
@@ -308,6 +448,17 @@ export default function PageCourses() {
         toast.success("Courses validées ! Stock mis à jour.");
       },
       onError: () => toast.error("Erreur lors de la validation"),
+    }
+  );
+
+  const { mutate: confirmer, isPending: enConfirmation } = utiliserMutation(
+    () => confirmerCourses(listeSelectionnee!),
+    {
+      onSuccess: () => {
+        invalider(["courses"]);
+        toast.success("Liste confirmée, vous pouvez maintenant cocher vos achats.");
+      },
+      onError: () => toast.error("Impossible de confirmer cette liste"),
     }
   );
 
@@ -544,6 +695,20 @@ export default function PageCourses() {
         </div>
         {listeSelectionnee && (
           <div className="flex gap-2 overflow-x-auto pb-1">
+            {detailListe?.etat === "brouillon" && (
+              <Button
+                size="sm"
+                onClick={() => confirmer(undefined)}
+                disabled={enConfirmation}
+              >
+                {enConfirmation ? (
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="mr-1 h-4 w-4" />
+                )}
+                Confirmer la liste
+              </Button>
+            )}
             <Button
               variant={modeSelection ? "default" : "outline"}
               size="sm"
@@ -580,7 +745,12 @@ export default function PageCourses() {
               size="sm"
               variant="secondary"
               onClick={() => finaliserCourses(undefined)}
-              disabled={enFinalisationCourses || enCochageGlobal || enCochageCategorie}
+              disabled={
+                enFinalisationCourses ||
+                enCochageGlobal ||
+                enCochageCategorie ||
+                detailListe?.etat === "brouillon"
+              }
             >
               {enFinalisationCourses ? (
                 <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -592,7 +762,12 @@ export default function PageCourses() {
             <Button
               size="sm"
               onClick={() => valider(undefined)}
-              disabled={enValidation || articlesNonCoches.length > 0 || enFinalisationCourses}
+              disabled={
+                enValidation ||
+                articlesNonCoches.length > 0 ||
+                enFinalisationCourses ||
+                detailListe?.etat === "brouillon"
+              }
             >
               {enValidation ? (
                 <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -785,6 +960,12 @@ export default function PageCourses() {
               />
             ) : (
               <div className="space-y-4">
+                {detailListe?.etat === "brouillon" && (
+                  <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                    Cette liste est en brouillon. Confirmez-la avant de finaliser les courses.
+                  </div>
+                )}
+
                 {/* Champ "Ajouter article" toujours visible (4.5) */}
                 <form 
                   onSubmit={submitArticle((data) => ajouter(data))}

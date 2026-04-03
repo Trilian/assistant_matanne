@@ -30,6 +30,7 @@ class ListeCoursesResume(BaseModel):
 
     id: int
     nom: str
+    etat: str = "brouillon"
     items_count: int = 0
     created_at: datetime | None = None
 
@@ -49,6 +50,7 @@ class ListeCoursesResponse(BaseModel):
 
     id: int
     nom: str
+    etat: str = "brouillon"
     archivee: bool = False
     created_at: datetime | None = None
     items: list[ArticleResponse] = Field(default_factory=list)

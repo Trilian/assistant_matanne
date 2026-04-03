@@ -5,6 +5,7 @@
 export interface ListeCourses {
   id: number;
   nom: string;
+  etat: "brouillon" | "active" | "terminee" | string;
   date_creation: string;
   est_terminee: boolean;
   articles: ArticleCourses[];

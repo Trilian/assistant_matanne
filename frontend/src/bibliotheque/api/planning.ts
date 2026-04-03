@@ -53,6 +53,18 @@ export async function validerPlanning(planningId: number): Promise<{ message: st
   return data;
 }
 
+/** Régénérer un planning (archive l'ancien et crée un nouveau brouillon) */
+export async function regenererPlanning(
+  planningId: number
+): Promise<{ message: string; id: number; data?: { semaine_debut?: string; planning_source_id?: number } }> {
+  const { data } = await clientApi.post<{
+    message: string;
+    id: number;
+    data?: { semaine_debut?: string; planning_source_id?: number };
+  }>(`/planning/${planningId}/regenerer`);
+  return data;
+}
+
 /** Adapter tous les repas du planning pour Jules */
 export async function adapterPlanningJules(
   planningId: number

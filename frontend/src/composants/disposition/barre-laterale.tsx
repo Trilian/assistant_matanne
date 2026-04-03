@@ -6,7 +6,7 @@
 
 import { createElement, useMemo, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { utiliserStockageLocal } from "@/crochets/utiliser-stockage-local";
 import { PAGES_NAVIGATION, type PageNavigation } from "@/bibliotheque/pages-navigation";
 import {
@@ -196,6 +196,7 @@ const LIENS: LienNav[] = [
  */
 export function BarreLaterale() {
   const pathname = usePathname();
+  const router = useRouter();
   const { sidebarOuverte, basculerSidebar } = utiliserStoreUI();
   const { utilisateur } = utiliserAuth();
   const estAdmin = utilisateur?.role === "admin";
@@ -250,6 +251,10 @@ export function BarreLaterale() {
       .slice(0, 3);
   }, [historiqueChemins]);
 
+  const prefetchRoute = (chemin: string) => {
+    router.prefetch(chemin);
+  };
+
   return (
     <aside
       className={cn(
@@ -298,6 +303,8 @@ export function BarreLaterale() {
                 <Link
                   key={page.chemin}
                   href={page.chemin}
+                  onMouseEnter={() => prefetchRoute(page.chemin)}
+                  onFocus={() => prefetchRoute(page.chemin)}
                   className={cn(
                     "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
                     estActif
@@ -330,6 +337,8 @@ export function BarreLaterale() {
             <div className="flex items-center">
               <Link
                 href={lien.chemin}
+                onMouseEnter={() => prefetchRoute(lien.chemin)}
+                onFocus={() => prefetchRoute(lien.chemin)}
                 className={cn(
                   "flex flex-1 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   estActif
@@ -401,6 +410,8 @@ export function BarreLaterale() {
                                 <Link
                                   key={sous.chemin}
                                   href={sous.chemin}
+                                  onMouseEnter={() => prefetchRoute(sous.chemin)}
+                                  onFocus={() => prefetchRoute(sous.chemin)}
                                   aria-label={sous.nom}
                                   className={cn(
                                     "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
@@ -425,6 +436,8 @@ export function BarreLaterale() {
                           <Link
                             key={sous.chemin}
                             href={sous.chemin}
+                            onMouseEnter={() => prefetchRoute(sous.chemin)}
+                            onFocus={() => prefetchRoute(sous.chemin)}
                             aria-label={sous.nom}
                             className={cn(
                               "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
@@ -451,6 +464,8 @@ export function BarreLaterale() {
         {estAdmin && (
           <Link
             href="/admin"
+            onMouseEnter={() => prefetchRoute("/admin")}
+            onFocus={() => prefetchRoute("/admin")}
             className={cn(
               "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
               pathname.startsWith("/admin")

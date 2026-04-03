@@ -53,6 +53,8 @@ import {
   definirRepas,
   supprimerRepas,
   genererPlanningSemaine,
+  validerPlanning,
+  regenererPlanning,
   exporterPlanningIcal,
   exporterPlanningPdf,
   obtenirNutritionHebdo,
@@ -76,6 +78,7 @@ import { CalendrierMosaiqueRepas } from "@/composants/planning/calendrier-mosaiq
 import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
+import { obtenirFluxCuisine } from "@/bibliotheque/api/ia-bridges";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
@@ -179,6 +182,12 @@ export default function PagePlanning() {
     { staleTime: 10 * 60 * 1000 }
   );
 
+  const { data: fluxCuisine } = utiliserRequete(
+    ["flux", "cuisine", planning?.planning_id ?? "courant"],
+    () => obtenirFluxCuisine(planning?.planning_id),
+    { staleTime: 30 * 1000 }
+  );
+
   const contexteInvitesActif = modeInvites.actif && modeInvites.nbInvites > 0;
   const evenementsModeInvites = useMemo(() => {
     const items = [...modeInvites.evenements];
@@ -257,6 +266,30 @@ export default function PagePlanning() {
         toast.success(`${result.total_articles} articles ajoutés !`);
       },
       onError: () => toast.error("Erreur lors de la génération des courses"),
+    }
+  );
+
+  const { mutate: validerBrouillonPlanning, isPending: enValidationPlanning } = utiliserMutation(
+    (planningId: number) => validerPlanning(planningId),
+    {
+      onSuccess: () => {
+        invalider(["planning"]);
+        invalider(["flux", "cuisine"]);
+        toast.success("Planning validé, vous pouvez confirmer la liste de courses ensuite.");
+      },
+      onError: () => toast.error("Impossible de valider ce planning"),
+    }
+  );
+
+  const { mutate: regenererBrouillonPlanning, isPending: enRegenerationPlanning } = utiliserMutation(
+    (planningId: number) => regenererPlanning(planningId),
+    {
+      onSuccess: () => {
+        invalider(["planning"]);
+        invalider(["flux", "cuisine"]);
+        toast.success("Nouveau brouillon généré");
+      },
+      onError: () => toast.error("Impossible de régénérer le planning"),
     }
   );
 
@@ -504,6 +537,47 @@ export default function PagePlanning() {
         description="Adaptez le nombre de portions, la génération IA et la liste de courses pour une réception ou un repas élargi."
       />
 
+      {fluxCuisine?.etape_actuelle === "valider_planning" && fluxCuisine.planning && (
+        <Card className="border-amber-300 bg-amber-50/60">
+          <CardContent className="py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-amber-900">Brouillon planning en attente de validation</p>
+              <p className="text-xs text-amber-800/90">
+                Validez ce brouillon pour debloquer la generation et la confirmation des courses.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                onClick={() => validerBrouillonPlanning(fluxCuisine.planning!.id)}
+                disabled={enValidationPlanning || enRegenerationPlanning}
+              >
+                {enValidationPlanning ? "Validation..." : "Valider"}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const cible = document.querySelector("[data-planning-grid]");
+                  cible?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                disabled={enValidationPlanning || enRegenerationPlanning}
+              >
+                Modifier
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => regenererBrouillonPlanning(fluxCuisine.planning!.id)}
+                disabled={enValidationPlanning || enRegenerationPlanning}
+              >
+                {enRegenerationPlanning ? "Regeneration..." : "Regenerer"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* ─── Grille Planning ─── */}
       {modeAffichage === "mois" ? (
         chargementMensuel ? (
@@ -518,7 +592,7 @@ export default function PagePlanning() {
           ))}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2" data-planning-grid>
           {datesSemaine.map((date, idx) => {
             const dateObj = new Date(date);
             const estAujourdhui =

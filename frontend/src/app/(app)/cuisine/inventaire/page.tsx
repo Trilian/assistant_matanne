@@ -76,6 +76,8 @@ import type { ArticleBarcode } from "@/bibliotheque/api/inventaire";
 import { EtiquetteQR } from "@/composants/cuisine/etiquette-qr";
 import type { LucideIcon } from "lucide-react";
 import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
+import { TreemapInventaire } from "@/composants/graphiques/treemap-inventaire";
+import { construireDonneesTreemapInventaire } from "@/bibliotheque/inventaire-treemap";
 
 const EMPLACEMENTS: { id: string; label: string; icone: LucideIcon }[] = [
   { id: "Frigo", label: "Frigo", icone: Refrigerator },
@@ -285,6 +287,7 @@ export default function PageInventaire() {
   });
 
   const nbAlertes = alertes?.length ?? 0;
+  const donneesTreemap = construireDonneesTreemapInventaire(articles ?? []);
 
   return (
     <div className="space-y-6">
@@ -386,6 +389,20 @@ export default function PageInventaire() {
               Articles en stock bas ou bientôt périmés
             </CardDescription>
           </CardHeader>
+        </Card>
+      )}
+
+      {!!donneesTreemap.length && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Treemap inventaire</CardTitle>
+            <CardDescription>
+              Vue surfacique des categories et principaux articles pour l&apos;emplacement actif.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TreemapInventaire donnees={donneesTreemap} hauteur={300} />
+          </CardContent>
         </Card>
       )}
 

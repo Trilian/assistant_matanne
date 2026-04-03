@@ -128,14 +128,14 @@ Le compte familial multi-utilisateurs est pr�vu pour une future version.
 
 ### Comment supprimer mon compte ?
 
-Envoyez un email � **support@assistant-matanne.fr** avec objet "Suppression de compte". Toutes vos donn�es seront effac�es sous 48h conform�ment au RGPD.
+Envoyez un email à **support@assistant-matanne.fr** avec objet "Suppression de compte". Toutes vos données seront effacées sous 48h.
 
 ### Puis-je exporter mes donn�es ?
 
 Oui, plusieurs options :
 - **Export PDF** : Planning, courses, recettes, budget (bouton "Exporter" disponible)
 - **Export JSON** : API endpoint `/api/v1/export/all` (n�cessite authentification)
-- **Export RGPD** : Contactez support@assistant-matanne.fr pour export complet
+- **Export complet** : Contactez support@assistant-matanne.fr pour export complet
 
 ---
 
@@ -300,19 +300,19 @@ La synchronisation bidirectionnelle est pr�vue pour une future version.
    - **�volution** : Comparaison ann�e N vs ann�e N-1
 4. Recevez des **�co-Tips** personnalis�s pour r�duire votre consommation
 
-### Comment g�rer les contrats de la maison ?
+### Comment gérer les abonnements de la maison ?
 
-1. Maison ? Contrats
-2. Ajoutez vos contrats :
-   - **Type** : Assurance, abonnement, maintenance
+1. Maison → Abonnements
+2. Ajoutez vos abonnements :
+   - **Type** : Eau, électricité, gaz, assurance, téléphone, internet
    - **Nom** : Ex: "Assurance habitation Allianz"
    - **Fournisseur** : Nom de l'entreprise
-   - **Date d�but** / **Date fin**
+   - **Date début** / **Date fin**
    - **Montant** : Montant mensuel ou annuel
    - **Renouvellement automatique** : Oui/Non
 3. Activez les **rappels** :
-   - 30 jours avant �ch�ance : Notification "Contrat � renouveler"
-4. Stockez les **documents** (PDF du contrat)
+   - 30 jours avant échéance : Notification "Abonnement à renouveler"
+4. Stockez les **documents** (PDF de l'abonnement)
 
 ### Comment suivre les coordonn�es des artisans ?
 
@@ -362,7 +362,7 @@ Oui, l'IA n'est pas parfaite � 100%. Cas possibles :
 - Les requ�tes vers Mistral AI sont **anonymis�es**
 - Aucune donn�e personnelle n'est envoy�e (seulement le contexte n�cessaire)
 - Nous n'entra�nons pas de mod�le sur vos donn�es
-- Mistral AI ne stocke pas vos requ�tes au-del� de 30 jours (politique RGPD)
+- Mistral AI ne stocke pas vos requêtes au-delà de 30 jours
 
 ### Puis-je d�sactiver l'IA ?
 

@@ -575,7 +575,15 @@ function OngletEntretien() {
             </Card>
           ))}
           {!tachesNormales.length && !tachesEnRetard.length && (
-            <Card><CardContent className="py-10 text-center text-muted-foreground"><SprayCan className="h-8 w-8 mx-auto mb-2 opacity-50" />Aucune tâche d&apos;entretien</CardContent></Card>
+            <Card>
+              <CardContent className="py-6">
+                <EtatVide
+                  Icone={SprayCan}
+                  titre="Aucune tache d'entretien"
+                  description="Ajoutez une tache recurrente pour lancer votre routine maison."
+                />
+              </CardContent>
+            </Card>
           )}
         </div>
       )}
@@ -639,7 +647,15 @@ function OngletArtisans() {
       {isLoading ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[1,2,3].map(i => <Skeleton key={i} className="h-28" />)}</div>
       ) : !artisans?.length ? (
-        <Card><CardContent className="py-10 text-center text-muted-foreground"><Wrench className="h-8 w-8 mx-auto mb-2 opacity-50" />Aucun artisan enregistré</CardContent></Card>
+        <Card>
+          <CardContent className="py-6">
+            <EtatVide
+              Icone={Wrench}
+              titre="Aucun artisan enregistre"
+              description="Ajoutez vos contacts de confiance pour les interventions maison."
+            />
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {artisans.map((a) => (
