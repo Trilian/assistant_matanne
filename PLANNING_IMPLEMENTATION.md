@@ -44,7 +44,7 @@
 | **DevOps / Infrastructure** | 7/10 | Docker, Prometheus metrics, health checks, VAPID keys, service worker. Pas de CI/CD visible, pas de staging automatisé, pas de monitoring alerting production. |
 | **Sécurité** | 7.5/10 | JWT Bearer auth, rate limiting (60/min standard, 10/min IA), CORS, security headers middleware, sanitizer anti-XSS. Défauts : RLS à vérifier exhaustivement, pas d'audit de sécurité formel. |
 | **Performance** | 6.5/10 | Cache multi-niveaux, ETag middleware, QueuePool SQLAlchemy. Défauts : pas de bundle analysis, Three.js chargé en bloc, pas d'optimistic updates, pas de SSR pages publiques, pas de prefetch routes. |
-| **Inter-modules** | 8/10 | Bridges phase 2 branchés sur EventBus (planning→courses, inventaire→anti-gaspi, activités→jalons, projets→calendrier, jeux→dashboard, météo→weekend, entretien→rappels). Reste à renforcer la couverture de tests d'intégration bout-en-bout. |
+| **Inter-modules** | 7/10 | 6 bridges existants + EventBus pub/sub. Défauts : planning → courses pas automatique, inventaire → anti-gaspi non connecté, plusieurs bridges évidents manquants. |
 
 ### Note globale : **7.5/10**
 
@@ -249,7 +249,7 @@ sql/
 > **Objectif** : Codebase propre, sans dette technique, sans code mort.
 > **Prérequis** : Aucun
 > **Validation** : `pytest` complet + `npm run build` frontend sans erreur
-> **Statut** : ✅ Complète — Tous les sprints (1.1-1.7) terminés, tous items fermés. 4841 tests passent (22 pré-existants échouent), build frontend OK.
+> **Statut** : 🟡 En cours — Sprints 1.1 (partiel), 1.3, 1.4 (partiel), 1.5 (partiel), 1.6 (partiel), 1.7 (partiel) complétés. Sprint 1.2 reporté. ✅ 4907 tests passent, build frontend OK.
 
 ### 3.1 Bugs et problèmes identifiés
 
@@ -308,41 +308,41 @@ sql/
 | 5 | Supprimer `frontend/src/bibliotheque/api/rgpd.ts`, ajouter `exporterBackup()` dans `export.ts` | Client API | ✅ |
 | 6 | Modifier `parametres/onglet-donnees.tsx` : remplacer section RGPD par bouton "Télécharger mon backup" | Frontend | ✅ |
 | 7 | Supprimer `tests/api/test_rgpd.py`, ajouter tests backup dans `test_routes_export.py` | Tests | ✅ |
-| 8 | Supprimer les 152 fichiers `data/exports/export_rgpd_*.zip` | Données | ✅ |
-| 9 | Retirer mentions RGPD dans `docs/user-guide/FAQ.md`, garder backup | Docs | ✅ |
+| 8 | Supprimer les 152 fichiers `data/exports/export_rgpd_*.zip` | Données | ⬜ |
+| 9 | Retirer mentions RGPD dans `docs/user-guide/FAQ.md`, garder backup | Docs | ⬜ |
 | 10 | Retirer `rgpd_router` de `src/api/main.py` et `routes/__init__.py` | Enregistrement | ✅ |
 
 ##### 1.1.2 Garanties → Badge sur fiche équipement
 
 | # | Tâche | Fichiers | Statut |
 |---|-------|----------|--------|
-| 1 | Simplifier SQL : supprimer tables `garanties`, `incidents_sav` | SQL | ✅ |
-| 2 | Garder colonnes `date_achat` et `duree_garantie_mois` sur table `equipements` | SQL | ✅ |
-| 3 | Ajouter champs sur modèle ORM `Equipement`, supprimer modèle `Garantie` séparé | Modèle | ✅ |
-| 4 | Supprimer endpoints CRUD `/maison/garanties` | Route API | ✅ |
-| 5 | Supprimer `AlerteGarantieResponse`, `GarantieCreate`, etc., enrichir `EquipementResponse` avec `sous_garantie: bool` (calculé) | Schéma | ✅ |
-| 6 | Remplacer `drawer-garantie.tsx` (stub) par badge "Sous garantie ✅ / Hors garantie ❌" sur fiche équipement | Frontend | ✅ |
-| 7 | Supprimer jobs CRON `controle_contrats_garanties`, `check_garanties_expirant` | CRON | ✅ |
-| 8 | Mettre à jour docs maison | Docs | ✅ |
+| 1 | Simplifier SQL : supprimer tables `garanties`, `incidents_sav` | SQL | ⬜ |
+| 2 | Garder colonnes `date_achat` et `duree_garantie_mois` sur table `equipements` | SQL | ⬜ |
+| 3 | Ajouter champs sur modèle ORM `Equipement`, supprimer modèle `Garantie` séparé | Modèle | ⬜ |
+| 4 | Supprimer endpoints CRUD `/maison/garanties` | Route API | ⬜ |
+| 5 | Supprimer `AlerteGarantieResponse`, `GarantieCreate`, etc., enrichir `EquipementResponse` avec `sous_garantie: bool` (calculé) | Schéma | ⬜ |
+| 6 | Remplacer `drawer-garantie.tsx` (stub) par badge "Sous garantie ✅ / Hors garantie ❌" sur fiche équipement | Frontend | ⬜ |
+| 7 | Supprimer jobs CRON `controle_contrats_garanties`, `check_garanties_expirant` | CRON | ⬜ |
+| 8 | Mettre à jour docs maison | Docs | ⬜ |
 
 ##### 1.1.3 Contrats → Comparateur d'abonnements
 
 | # | Tâche | Fichiers | Statut |
 |---|-------|----------|--------|
-| 1 | Renommer modèle `contrats_artisans.py` → `abonnements.py`. Simplifier : `Abonnement(type, fournisseur, prix_mensuel, date_debut, date_fin_engagement, notes)` | Modèle | ✅ |
-| 2 | Types : `eau`, `electricite`, `gaz`, `assurance_habitation`, `assurance_auto`, `chaudiere`, `telephone`, `internet` | Modèle | ✅ |
-| 3 | Ajouter champs `meilleur_prix_trouve`, `fournisseur_alternatif` | Modèle | ✅ |
-| 4 | Remplacer routes `/maison/contrats` → `/maison/abonnements` : CRUD + `GET /maison/abonnements/resume` | Route API | ✅ |
-| 5 | Simplifier SQL : une table `abonnements` remplaçant `contrats`, `contrats_maison`, `factures`. Renommer `comparatifs` → `alternatives_abonnement` | SQL | ✅ |
-| 6 | Créer page `maison/abonnements/page.tsx` : tableau récap, coût total, date fin engagement | Frontend | ✅ |
-| 7 | Remplacer job `sync_contrats_alertes` par rappel simple "Engagement se termine dans 30 jours" | CRON | ✅ |
-| 8 | Mettre à jour docs maison | Docs | ✅ |
+| 1 | Renommer modèle `contrats_artisans.py` → `abonnements.py`. Simplifier : `Abonnement(type, fournisseur, prix_mensuel, date_debut, date_fin_engagement, notes)` | Modèle | ⬜ |
+| 2 | Types : `eau`, `electricite`, `gaz`, `assurance_habitation`, `assurance_auto`, `chaudiere`, `telephone`, `internet` | Modèle | ⬜ |
+| 3 | Ajouter champs `meilleur_prix_trouve`, `fournisseur_alternatif` | Modèle | ⬜ |
+| 4 | Remplacer routes `/maison/contrats` → `/maison/abonnements` : CRUD + `GET /maison/abonnements/resume` | Route API | ⬜ |
+| 5 | Simplifier SQL : une table `abonnements` remplaçant `contrats`, `contrats_maison`, `factures`. Renommer `comparatifs` → `alternatives_abonnement` | SQL | ⬜ |
+| 6 | Créer page `maison/abonnements/page.tsx` : tableau récap, coût total, date fin engagement | Frontend | ⬜ |
+| 7 | Remplacer job `sync_contrats_alertes` par rappel simple "Engagement se termine dans 30 jours" | CRON | ⬜ |
+| 8 | Mettre à jour docs maison | Docs | ⬜ |
 
 ---
 
 #### Sprint 1.2 — Éclater les fichiers fourre-tout
 
-> **✅ Terminé** — admin.py éclaté en 5 fichiers (admin_shared, admin_audit, admin_jobs, admin_operations, admin_infra), dashboard.py éclaté en 3 fichiers (dashboard_accueil, dashboard_gamification, dashboard_widgets), innovations/service.py extrait en 3 sous-modules (cuisine_ia, energie_ia, bien_etre). Tous les tests passent.
+> **⏳ Reporté** — Analyse complète réalisée : admin.py (57 endpoints, 8 domaines mappés), innovations/service.py (77 méthodes, 5 services cibles), dashboard.py (20 endpoints, 3 modules). Refactoring dédié prévu en session séparée pour minimiser les risques de régression.
 
 ##### 1.2.1 Éclater `innovations/service.py` (999 lignes → 5 services)
 
@@ -404,14 +404,14 @@ sql/
 
 | # | Tâche | Statut |
 |---|-------|--------|
-| 1 | Supprimer champs "legacy" dans les modèles ORM, migrer colonnes | ✅ |
-| 2 | Supprimer validateur `_legacy_single_article` et ancien format | ✅ N/A — fichier inexistant |
+| 1 | Supprimer champs "legacy" dans les modèles ORM, migrer colonnes | ⬜ |
+| 2 | Supprimer validateur `_legacy_single_article` et ancien format | ⬜ |
 | 3 | Supprimer `TypeNotificationLegacy` mapping, utiliser types modernes | ✅ |
 | 4 | Supprimer `_to_legacy_grille()` et shims jeux, adapter callers | ✅ |
-| 5 | Supprimer `cleanup_legacy_cache()`, support pickle → JSON only | ✅ N/A — fonction inexistante |
-| 6 | Supprimer support ancien format "jour_0" planning, garder "jour_0_midi/soir" | ✅ |
-| 7 | Supprimer fonctions deprecated dans `core/exceptions.py` | ✅ |
-| 8 | Supprimer ré-exports rétrocompat images, mettre à jour imports | ✅ |
+| 5 | Supprimer `cleanup_legacy_cache()`, support pickle → JSON only | ⬜ |
+| 6 | Supprimer support ancien format "jour_0" planning, garder "jour_0_midi/soir" | ⬜ |
+| 7 | Supprimer fonctions deprecated dans `core/exceptions.py` | ⬜ |
+| 8 | Supprimer ré-exports rétrocompat images, mettre à jour imports | ⬜ |
 
 ---
 
@@ -419,10 +419,10 @@ sql/
 
 | # | Tâche | Statut |
 |---|-------|--------|
-| 1 | Nettoyer les 150+ commentaires de phases/sprints → noms fonctionnels | ✅ |
-| 2 | Renommer cache keys : `"phase_e_score_famille_hebdo"` → `"score_famille_hebdo"` | ✅ N/A — clé inexistante |
-| 3 | Renommer décorateurs métriques : `"innovations.p9.mange_ce_soir"` → `"cuisine.mange_ce_soir"` | ✅ N/A — pattern inexistant |
-| 4 | Renommer classes de test : `TestEventsPhaseB` → `TestEventsBridges` | ✅ N/A — classe inexistante |
+| 1 | Nettoyer les 150+ commentaires de phases/sprints → noms fonctionnels | ⬜ |
+| 2 | Renommer cache keys : `"phase_e_score_famille_hebdo"` → `"score_famille_hebdo"` | ⬜ |
+| 3 | Renommer décorateurs métriques : `"innovations.p9.mange_ce_soir"` → `"cuisine.mange_ce_soir"` | ⬜ |
+| 4 | Renommer classes de test : `TestEventsPhaseB` → `TestEventsBridges` | ⬜ |
 | 5 | Fusionner `utilitaires.ts` + `utils.ts` dans frontend → un seul `utils.ts` | ✅ |
 | 6 | Factoriser `bandeau-meteo.tsx` (doublon famille/maison) → `composants/partages/` | ✅ N/A — Pas de doublon (composants famille/maison utilisent des types différents) |
 | 7 | Supprimer `docs/SPRINT13_COMPLETION_SUMMARY.md` | ✅ |
@@ -438,14 +438,14 @@ sql/
 
 | # | Tâche | Statut |
 |---|-------|--------|
-| 1 | Supprimer tables `garanties`, `incidents_sav` dans `06_maison.sql` | ✅ |
-| 2 | Remplacer tables `contrats`, `contrats_maison`, `factures` → `abonnements` | ✅ |
-| 3 | Renommer `comparatifs` → `alternatives_abonnement` | ✅ N/A — absorbé par le modèle `abonnements` (`meilleur_prix_trouve`, `fournisseur_alternatif`) |
-| 4 | Vérifier et nettoyer `10_finances.sql` (refs contrats) | ✅ |
+| 1 | Supprimer tables `garanties`, `incidents_sav` dans `06_maison.sql` | ⬜ |
+| 2 | Remplacer tables `contrats`, `contrats_maison`, `factures` → `abonnements` | ⬜ |
+| 3 | Renommer `comparatifs` → `alternatives_abonnement` | ⬜ |
+| 4 | Vérifier et nettoyer `10_finances.sql` (refs contrats) | ⬜ |
 | 5 | Nettoyer `12_triggers.sql` (triggers garanties/contrats) | ✅ |
 | 6 | Nettoyer `15_rls_policies.sql` (policies tables supprimées) | ✅ |
-| 7 | Lancer `python scripts/audit_orm_sql.py` pour détecter désalignements | ✅ |
-| 8 | Régénérer `INIT_COMPLET.sql` | ✅ |
+| 7 | Lancer `python scripts/audit_orm_sql.py` pour détecter désalignements | ⬜ |
+| 8 | Régénérer `INIT_COMPLET.sql` | ⬜ |
 
 ---
 
@@ -455,13 +455,13 @@ sql/
 |---|-------|--------|
 | 1 | Supprimer/adapter tests modules supprimés (RGPD, garanties, contrats) | ✅ |
 | 2 | Renommer tests avec noms de sprint → noms fonctionnels | ✅ |
-| 3 | Mettre à jour classes de test (noms de phase → fonctionnels) | ✅ |
-| 4 | Nettoyer `docs/API_REFERENCE.md` (retirer garanties, contrats, RGPD) | ✅ N/A — pas de références restantes à nettoyer |
-| 5 | Nettoyer `docs/API_SCHEMAS.md` (idem) | ✅ |
-| 6 | Mettre à jour `docs/MODULES.md` (retirer modules supprimés) | ✅ |
-| 7 | Mettre à jour `docs/CRON_JOBS.md` (retirer jobs supprimés) | ✅ N/A — pas de jobs supprimés référencés |
-| 8 | Mettre à jour `docs/guides/maison/` (retirer garanties/contrats) | ✅ N/A — guide aligné (badge garantie conservé, pas de section contrats legacy) |
-| 9 | Mettre à jour `docs/INDEX.md` (refléter nouvelle structure) | ✅ |
+| 3 | Mettre à jour classes de test (noms de phase → fonctionnels) | ⬜ |
+| 4 | Nettoyer `docs/API_REFERENCE.md` (retirer garanties, contrats, RGPD) | ⬜ |
+| 5 | Nettoyer `docs/API_SCHEMAS.md` (idem) | ⬜ |
+| 6 | Mettre à jour `docs/MODULES.md` (retirer modules supprimés) | ⬜ |
+| 7 | Mettre à jour `docs/CRON_JOBS.md` (retirer jobs supprimés) | ⬜ |
+| 8 | Mettre à jour `docs/guides/maison/` (retirer garanties/contrats) | ⬜ |
+| 9 | Mettre à jour `docs/INDEX.md` (refléter nouvelle structure) | ⬜ |
 | 10 | Lancer `pytest` complet — fixer toute régression | ✅ |
 | 11 | Lancer `npm run build` frontend — fixer toute erreur | ✅ |
 
@@ -472,7 +472,6 @@ sql/
 > **Objectif** : Les modules communiquent entre eux automatiquement via l'EventBus.
 > **Prérequis** : Phase 1 terminée
 > **Mécanisme** : EventBus `src/services/core/events/` avec subscribers dédiés
-> **Statut** : 🟡 En cours avancé — bridges phase 2 implémentés, validation tests E2E inter-modules à compléter.
 
 ### 4.1 Pattern de référence pour les bridges
 
@@ -490,45 +489,31 @@ async def generer_courses_depuis_planning(event):
 
 | # | Bridge | Source → Destination | Priorité | Statut |
 |---|--------|---------------------|----------|--------|
-| 1 | **Planning → Courses auto** | Planning semaine validé → Liste courses générée | 🔴 Haute | ✅ |
-| 2 | **Inventaire → Anti-gaspi IA** | Stock bientôt périmé → Recettes de récupération IA | 🔴 Haute | ✅ |
-| 3 | **Budget → Dashboard alertes** | Seuil budget dépassé → Notification + widget dashboard | 🔴 Haute | ✅ |
-| 4 | **Activités → Timeline Jules** | Activité terminée → Jalon enregistré automatiquement | 🟡 Moyenne | ✅ |
-| 5 | **Projets → Calendrier unifié** | Tâche projet avec deadline → Événement calendrier | 🟡 Moyenne | ✅ |
-| 6 | **Jardin saison → Recettes** | Légumes de saison du jardin → Suggestions recettes | 🟡 Moyenne | ✅ |
-| 7 | **Résultats jeux → Dashboard** | Résultat automatisé → Stats P&L auto | 🟡 Moyenne | ✅ |
-| 8 | **Météo → Activités weekend** | Prévisions → Suggestions activités adaptées | 🟢 Basse | ✅ |
-| 9 | **Entretien → Rappels push** | Tâche entretien due → Notification matin | 🟢 Basse | ✅ |
+| 1 | **Planning → Courses auto** | Planning semaine validé → Liste courses générée | 🔴 Haute | ⬜ |
+| 2 | **Inventaire → Anti-gaspi IA** | Stock bientôt périmé → Recettes de récupération IA | 🔴 Haute | ⬜ |
+| 3 | **Budget → Dashboard alertes** | Seuil budget dépassé → Notification + widget dashboard | 🔴 Haute | ⬜ |
+| 4 | **Activités → Timeline Jules** | Activité terminée → Jalon enregistré automatiquement | 🟡 Moyenne | ⬜ |
+| 5 | **Projets → Calendrier unifié** | Tâche projet avec deadline → Événement calendrier | 🟡 Moyenne | ⬜ |
+| 6 | **Jardin saison → Recettes** | Légumes de saison du jardin → Suggestions recettes | 🟡 Moyenne | ⬜ |
+| 7 | **Résultats jeux → Dashboard** | Résultat automatisé → Stats P&L auto | 🟡 Moyenne | ⬜ |
+| 8 | **Météo → Activités weekend** | Prévisions → Suggestions activités adaptées | 🟢 Basse | ⬜ |
+| 9 | **Entretien → Rappels push** | Tâche entretien due → Notification matin | 🟢 Basse | ⬜ |
 
 ### 4.3 Connexions IA à finaliser
 
 | # | Tâche | Détail | Priorité | Statut |
 |---|-------|--------|----------|--------|
-| 1 | **Photo frigo → recettes** | Connecter le composant `photo-frigo` existant frontend à l'IA vision backend. L'utilisateur photographie son frigo, l'IA identifie les ingrédients et propose des recettes. | 🔴 Haute | ✅ |
-| 2 | **Adaptation recettes Jules** | Adapter automatiquement chaque recette pour Jules (sans sel, mixé, portions adaptées). Utiliser `data/reference/portions_age.json`. | 🔴 Haute | ✅ |
+| 1 | **Photo frigo → recettes** | Connecter le composant `photo-frigo` existant frontend à l'IA vision backend. L'utilisateur photographie son frigo, l'IA identifie les ingrédients et propose des recettes. | 🔴 Haute | ⬜ |
+| 2 | **Adaptation recettes Jules** | Adapter automatiquement chaque recette pour Jules (sans sel, mixé, portions adaptées). Utiliser `data/reference/portions_age.json`. | 🔴 Haute | ⬜ |
 
 ### 4.4 Tests inter-modules
 
 | # | Tâche | Statut |
 |---|-------|--------|
-| 1 | Tests pour chaque nouveau bridge (événement émis → action exécutée) | ✅ |
-| 2 | Tests d'intégration : planning validé → courses générées → notification envoyée | ✅ |
-| 3 | Tests bridge photo-frigo → recettes | ✅ |
-| 4 | Tests adaptation recettes Jules (portions, restrictions) | ✅ |
-
-### 4.5 Sprint Phase 2 — Checklist de livraison
-
-| # | Checklist sprint | Statut |
-|---|------------------|--------|
-| 1 | Événement planning validé émis depuis route API | ✅ |
-| 2 | Événement inventaire péremption émis depuis cron cuisine | ✅ |
-| 3 | Événement activité terminée enrichi (nom/catégorie) | ✅ |
-| 4 | Événement tâche projet deadline émis à la création de tâche | ✅ |
-| 5 | Événement résultat paris émis lors résolution | ✅ |
-| 6 | Événement météo reçu émis pour suggestions weekend | ✅ |
-| 7 | Événement tâche entretien due émis depuis cron rappel | ✅ |
-| 8 | API frontend planning: endpoint adapter Jules exposé | ✅ |
-| 9 | Régression bridges existants validée (`tests/inter_modules/test_bridges_base.py`) | ✅ |
+| 1 | Tests pour chaque nouveau bridge (événement émis → action exécutée) | ⬜ |
+| 2 | Tests d'intégration : planning validé → courses générées → notification envoyée | ⬜ |
+| 3 | Tests bridge photo-frigo → recettes | ⬜ |
+| 4 | Tests adaptation recettes Jules (portions, restrictions) | ⬜ |
 
 ---
 
@@ -536,17 +521,16 @@ async def generer_courses_depuis_planning(event):
 
 > **Objectif** : L'IA anticipe et réduit le travail manuel.
 > **Prérequis** : Phase 2 terminée
-> **Statut** : 🟡 En progression — briques majeures déjà livrées côté code: suggestions IA activités, analyse budget, OCR mutualisé, chat IA multi-contexte, cache Redis L2, logs admin temps réel. Streaming chat frontend/backend finalisé dans cette passe.
 
 ### 5.1 Nouvelles intégrations IA
 
 | # | Module | Intégration | Description | Priorité | Statut |
 |---|--------|-------------|-------------|----------|--------|
-| 1 | Inventaire | Prédiction besoins stocks | Analyser l'historique de consommation pour prédire quand un produit sera épuisé | 🟡 Moyenne | ✅ |
+| 1 | Inventaire | Prédiction besoins stocks | Analyser l'historique de consommation pour prédire quand un produit sera épuisé | 🟡 Moyenne | ⬜ |
 | 2 | Maison | Optimisation planning entretien | L'IA analyse tâches, météo et propose un planning optimal | 🟡 Moyenne | ⬜ |
 | 3 | Jeux | Analyse tendances paris | Analyse cotes, value bets, couche narrative sur backtest existant | 🟡 Moyenne | ⬜ |
-| 4 | Famille | Journal automatique enrichi | Résumé journal quotidien à partir des événements (repas, activités, météo) | 🟢 Basse | ✅ |
-| 5 | Dashboard | Insights proactifs | L'IA scanne les données et propose des insights non demandés | 🟢 Basse | ✅ |
+| 4 | Famille | Journal automatique enrichi | Résumé journal quotidien à partir des événements (repas, activités, météo) | 🟢 Basse | ⬜ |
+| 5 | Dashboard | Insights proactifs | L'IA scanne les données et propose des insights non demandés | 🟢 Basse | ⬜ |
 | 6 | Jardin | Calendrier plantation IA | Proposer calendrier plantation par zone géo, saison, plantes existantes | 🟢 Basse | ⬜ |
 
 ### 5.2 Points IA backend non exposés en frontend
@@ -558,31 +542,24 @@ async def generer_courses_depuis_planning(event):
 | Suggestions jardinage | Pas de widget jardin IA | ⬜ |
 | Recommandations proactives | Bannière existe mais contenu limité | ⬜ |
 
-#### Mise à jour Phase 5.2 — Telegram interactif
-
-- Boutons Telegram interactifs branchés sur les messages planning et courses avec callback_data au format `action:ID`.
-- Webhook Telegram relié aux transitions d'état planning (`brouillon` → `valide` / `archive`) et courses (`brouillon` → `active`).
-- Frontend relié à des endpoints dédiés pour envoyer les notifications Telegram après génération du planning et confirmation de la liste.
-- Couverture de tests ajoutée pour l'extraction d'ID, le dispatch des callbacks et les cas de succès/erreur principaux.
-
 ### 5.3 Streaming IA frontend
 
 | # | Tâche | Statut |
 |---|-------|--------|
-| 1 | Implémenter le rendu progressif côté frontend pour les réponses IA | ✅ |
-| 2 | Connecter au streaming Mistral backend (déjà supporté) | ✅ |
-| 3 | Composant réutilisable `stream-ia.tsx` avec animation typing | ✅ |
+| 1 | Implémenter le rendu progressif côté frontend pour les réponses IA | ⬜ |
+| 2 | Connecter au streaming Mistral backend (déjà supporté) | ⬜ |
+| 3 | Composant réutilisable `stream-ia.tsx` avec animation typing | ⬜ |
 
 ### 5.4 Nouveaux jobs CRON
 
 | # | Job | Schedule | Description | Priorité | Statut |
 |---|-----|----------|-------------|----------|--------|
-| 1 | Cohérence planning ↔ courses | Dim 19h | Vérifier que tous les ingrédients du planning sont dans la liste de courses | 🔴 Haute | ✅ |
-| 2 | Alerte budget instantanée | Quotidien 20h | Si dépenses > X% du budget prévu, notifier | 🔴 Haute | ✅ |
-| 3 | Sync résultats paris auto | Après matchs | Récupérer résultats et mettre à jour les paris | 🟡 Moyenne | ✅ |
-| 4 | Rapport jardin saisonnier | 1er/mois | Résumé : ce qu'il faut planter, récolter, entretenir | 🟡 Moyenne | ✅ |
-| 5 | Nettoyage exports anciens | Hebdo dim 3h | Supprimer exports > 30 jours | 🟢 Basse | ✅ |
-| 6 | Health check services IA | Toutes les 6h | Vérifier Mistral, alerter si circuit breaker ouvert | 🟢 Basse | ✅ |
+| 1 | Cohérence planning ↔ courses | Dim 19h | Vérifier que tous les ingrédients du planning sont dans la liste de courses | 🔴 Haute | ⬜ |
+| 2 | Alerte budget instantanée | Quotidien 20h | Si dépenses > X% du budget prévu, notifier | 🔴 Haute | ⬜ |
+| 3 | Sync résultats paris auto | Après matchs | Récupérer résultats et mettre à jour les paris | 🟡 Moyenne | ⬜ |
+| 4 | Rapport jardin saisonnier | 1er/mois | Résumé : ce qu'il faut planter, récolter, entretenir | 🟡 Moyenne | ⬜ |
+| 5 | Nettoyage exports anciens | Hebdo dim 3h | Supprimer exports > 30 jours | 🟢 Basse | ⬜ |
+| 6 | Health check services IA | Toutes les 6h | Vérifier Mistral, alerter si circuit breaker ouvert | 🟢 Basse | ⬜ |
 
 ### 5.5 Notifications enrichies
 
@@ -590,13 +567,13 @@ async def generer_courses_depuis_planning(event):
 
 | # | Notification | Canal | Trigger | Priorité | Statut |
 |---|-------------|-------|---------|----------|--------|
-| 1 | "Recette du soir" rappel | Telegram + Push | 16h si repas planifié, avec lien recette | 🔴 Haute | ✅ |
-| 2 | "Courses prêtes" | Telegram | Après génération auto courses | 🔴 Haute | ✅ |
-| 3 | "Budget alerte" | Push + Email | Seuil dépassé (job CRON) | 🔴 Haute | ✅ |
-| 4 | "Tâches entretien semaine" | Telegram lundi matin | Résumé tâches planifiées | 🟡 Moyenne | ✅ |
-| 5 | "Résultats paris" | Push | Après sync résultats | 🟡 Moyenne | ✅ |
-| 6 | "Jardin — actions du mois" | Email mensuel | Rapport jardin saisonnier | 🟢 Basse | ✅ |
-| 7 | "Jules — jalon développement" | Push | Quand un jalon est atteint selon l'âge | 🟢 Basse | ✅ |
+| 1 | "Recette du soir" rappel | Telegram + Push | 16h si repas planifié, avec lien recette | 🔴 Haute | ⬜ |
+| 2 | "Courses prêtes" | Telegram | Après génération auto courses | 🔴 Haute | ⬜ |
+| 3 | "Budget alerte" | Push + Email | Seuil dépassé (job CRON) | 🔴 Haute | ⬜ |
+| 4 | "Tâches entretien semaine" | Telegram lundi matin | Résumé tâches planifiées | 🟡 Moyenne | ⬜ |
+| 5 | "Résultats paris" | Push | Après sync résultats | 🟡 Moyenne | ⬜ |
+| 6 | "Jardin — actions du mois" | Email mensuel | Rapport jardin saisonnier | 🟢 Basse | ⬜ |
+| 7 | "Jules — jalon développement" | Push | Quand un jalon est atteint selon l'âge | 🟢 Basse | ⬜ |
 
 ### 5.6 Commandes Telegram enrichies
 
@@ -611,7 +588,7 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | # | Amélioration | Priorité | Statut |
 |---|-------------|----------|--------|
 | 1 | Bouton "Tout exécuter" — séquence de jobs (planning → courses → notifications) | 🔴 Haute | ⬜ |
-| 2 | Log viewer temps réel — WebSocket logs serveur | 🔴 Haute | ✅ |
+| 2 | Log viewer temps réel — WebSocket logs serveur | 🔴 Haute | ⬜ |
 | 3 | Mode `--force` bypass conditions sur trigger jobs | 🟡 Moyenne | ⬜ |
 | 4 | Log détaillé visible admin UI avec résultats du job | 🟡 Moyenne | ⬜ |
 | 5 | Bouton "Relancer" sur chaque job dans admin/scheduler | 🟡 Moyenne | ⬜ |
@@ -624,107 +601,39 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | 12 | Métriques IA détaillées — graphiques tokens, coût, cache hits | 🟢 Basse | ⬜ |
 | 13 | Modifier schedule jobs depuis admin UI | 🟢 Basse | ⬜ |
 
-### 5.8 Sprint Phase 3 — Découpage opérationnel
-
-| Sprint | Périmètre | Livrables | Statut |
-|--------|-----------|-----------|--------|
-| 3.1 | IA exposée au frontend | Suggestions activités IA, analyse budget IA, OCR documents/finances/jeux, chat IA multi-contexte | ✅ |
-| 3.2 | Infrastructure IA | Cache Redis L2 activable via `REDIS_URL`, fallback rate limiting Redis, couches offline déjà présentes | ✅ |
-| 3.3 | Streaming et UX temps réel | Endpoint SSE chat IA, client frontend de streaming, composant `stream-ia.tsx`, intégration page chat | ✅ |
-| 3.4 | Admin et observabilité | Log viewer temps réel admin via WebSocket, métriques/admin UI existantes, validation ciblée du chat | 🟡 |
-| 3.5 | Automatisations restantes | Jobs CRON complémentaires, notifications enrichies, commandes Telegram, actions admin avancées | ✅ |
-
-### 5.9 Checklist Phase 3
-
-| # | Checklist sprint | Statut |
-|---|------------------|--------|
-| 1 | Exposer les suggestions d'activités IA côté frontend | ✅ |
-| 2 | Exposer l'analyse budget IA côté frontend | ✅ |
-| 3 | Mutualiser l'OCR tickets/factures et le brancher sur les écrans métier | ✅ |
-| 4 | Livrer le chat IA multi-contexte avec actions rapides | ✅ |
-| 5 | Activer le cache Redis L2 côté backend quand `REDIS_URL` est présent | ✅ |
-| 6 | Ajouter le streaming chat côté backend | ✅ |
-| 7 | Ajouter le rendu progressif côté frontend avec composant réutilisable | ✅ |
-| 8 | Conserver un fallback non-streaming pour le chat | ✅ |
-| 9 | Disposer d'un log viewer admin temps réel | ✅ |
-| 10 | Finaliser les jobs CRON proactifs listés en 5.4 | ✅ |
-| 11 | Finaliser les notifications enrichies listées en 5.5 | ✅ |
-| 12 | Remplacer complètement les commandes WhatsApp visées par Telegram enrichi | ✅ |
-
 ---
 
 ## 6. Phase 4 — UI/UX moderne
 
 > **Objectif** : Interface belle, fluide, avec des visualisations riches.
 > **Prérequis** : Phase 3 terminée
-> **Statut** : ✅ Terminée — visualisations UI/UX Phase 4 finalisées (budget vs réel, treemap inventaire, carte jardin 2D, confettis).
 
 ### 6.1 Nouvelles visualisations
 
 | # | Visualisation | Module | Technologie | Priorité | Statut |
 |---|--------------|--------|-------------|----------|--------|
-| 1 | Timeline interactive famille | Dashboard | D3 / Framer Motion | 🔴 Haute | ✅ |
-| 2 | Kanban drag & drop projets | Maison/Travaux | DnD Kit | 🔴 Haute | ✅ |
-| 3 | Graphique croissance Jules OMS | Famille/Jules | Recharts | 🔴 Haute | ✅ |
-| 4 | Calendrier mosaïque repas | Cuisine/Planning | Grid CSS + images | 🔴 Haute | ✅ |
-| 5 | Gauge score bien-être | Dashboard | SVG animé | 🟡 Moyenne | ✅ |
-| 6 | Graphique budget vs réel | Famille/Budget | Recharts barres groupées | 🟡 Moyenne | ✅ |
-| 7 | Treemap inventaire | Cuisine/Inventaire | D3 | 🟡 Moyenne | ✅ |
-| 8 | Carte zones jardin 2D | Maison/Jardin | Canvas/SVG | 🟡 Moyenne | ✅ |
-| 9 | Dashboard widgets configurables | Dashboard | DnD Kit | 🟡 Moyenne | ✅ |
-| 10 | Animations transitions pages | Global | Framer Motion | 🟢 Basse | ✅ |
-| 11 | Vue "focus du jour" | Ma Journée | Layout cards | 🟢 Basse | ✅ |
+| 1 | Timeline interactive famille | Dashboard | D3 / Framer Motion | 🔴 Haute | ⬜ |
+| 2 | Kanban drag & drop projets | Maison/Travaux | DnD Kit | 🔴 Haute | ⬜ |
+| 3 | Graphique croissance Jules OMS | Famille/Jules | Recharts | 🔴 Haute | ⬜ |
+| 4 | Calendrier mosaïque repas | Cuisine/Planning | Grid CSS + images | 🔴 Haute | ⬜ |
+| 5 | Gauge score bien-être | Dashboard | SVG animé | 🟡 Moyenne | ⬜ |
+| 6 | Graphique budget vs réel | Famille/Budget | Recharts barres groupées | 🟡 Moyenne | ⬜ |
+| 7 | Treemap inventaire | Cuisine/Inventaire | D3 | 🟡 Moyenne | ⬜ |
+| 8 | Carte zones jardin 2D | Maison/Jardin | Canvas/SVG | 🟡 Moyenne | ⬜ |
+| 9 | Dashboard widgets configurables | Dashboard | DnD Kit | 🟡 Moyenne | ⬜ |
+| 10 | Animations transitions pages | Global | Framer Motion | 🟢 Basse | ⬜ |
+| 11 | Vue "focus du jour" | Ma Journée | Layout cards | 🟢 Basse | ⬜ |
 
 ### 6.2 Améliorations design existant
 
 | # | Amélioration | Détail | Priorité | Statut |
 |---|-------------|--------|----------|--------|
-| 1 | Mode sombre cohérent | Audit toutes les pages, composants custom | 🔴 Haute | ✅ |
-| 2 | Responsive mobile | Audit toutes les pages, vérifier débordements | 🔴 Haute | ✅ |
-| 3 | Empty states | Illustrations/messages pour les pages vides au premier lancement | 🔴 Haute | ✅ |
-| 4 | Loading skeletons | Remplacer spinners par skeletons shadcn partout | 🟡 Moyenne | ✅ |
-| 5 | Animations micro-interactions | Hover effects, click feedback, transitions douces | 🟡 Moyenne | ✅ |
-| 6 | Confettis célébration | Utiliser `confettis.ts` existant pour jalons Jules, badges | 🟢 Basse | ✅ |
-
-### 6.3 Sprint Phase 4.1 — Visualisations prioritaires
-
-| Sprint | Périmètre | Livrables | Statut |
-|--------|-----------|-----------|--------|
-| 4.1 | Visualisations UI critiques | Timeline interactive, croissance OMS Jules, calendrier mosaïque repas, jauge score bien-être, widgets dashboard configurables, vue focus du jour | ✅ |
-| 4.2 | UX design système | Empty states/skeletons homogènes, responsive mobile, mode sombre cohérent | ✅ |
-| 4.3 | Interactions avancées | Kanban projets DnD, transitions pages Framer Motion, micro-interactions étendues | ✅ |
-
-### 6.4 Checklist Phase 4
-
-| # | Checklist sprint | Statut |
-|---|------------------|--------|
-| 1 | Brancher la timeline interactive famille sur la page dédiée | ✅ |
-| 2 | Exposer le graphique croissance OMS sur l'écran Jules | ✅ |
-| 3 | Ajouter une vue mosaïque des repas sur le planning cuisine | ✅ |
-| 4 | Ajouter une jauge visuelle pour le score bien-être dashboard | ✅ |
-| 5 | Conserver le dashboard widgets configurables (DnD) | ✅ |
-| 6 | Conserver la vue focus du jour accessible depuis la navigation | ✅ |
-| 7 | Homogénéiser empty states + skeletons sur les écrans critiques | ✅ |
-| 8 | Finaliser le Kanban projets drag & drop | ✅ |
-| 9 | Finaliser les transitions globales Framer Motion | ✅ |
-| 10 | **Graphique budget vs réel (Recharts)** — intégré page famille/budget avec confettis | ✅ |
-| 11 | **Treemap inventaire (D3 SVG)** — intégré page cuisine/inventaire avec drill-down | ✅ |
-| 12 | **Full frontend build validation** — `npm run build` passe sans erreurs TypeScript | ✅ |
-
-### 6.5 Corrections TypeScript Phase 4
-
-**Détails des corrections effectuées pour passer la validation du build complete :**
-
-| Fichier | Correction | Type |
-|---------|-----------|------|
-| `src/crochets/utiliser-api.ts` | Ajout du type générique `TContext` au wrapper `utiliserMutation` | Type générique |
-| `src/app/(app)/cuisine/courses/page.tsx` | Typage des contextes de mutation avec `ContexteArticle` | Type générique |
-| `src/app/(app)/cuisine/planning/page.tsx` | Conversion `planning_id` en string pour les clés de cache | Type cohérence |
-| `src/app/(app)/maison/abonnements/page.tsx` | Correction `TYPES_ABONNEMENT`: `value` → `valeur` pour OptionChamp | Breaking change type |
-| `src/bibliotheque/api/maison.ts` | Ajout propriété `sous_garantie?: boolean` à `ObjetInventaire` | Propriété manquante |
-| `src/composants/graphiques/graphique-budget-vs-reel.tsx` | Correction type `formatter` Recharts Tooltip (sans typage explicite) | Recharts generic |
-
-**Build result :** ✅ `next build` complete, 0 TypeScript errors, production bundle generated
+| 1 | Mode sombre cohérent | Audit toutes les pages, composants custom | 🔴 Haute | ⬜ |
+| 2 | Responsive mobile | Audit toutes les pages, vérifier débordements | 🔴 Haute | ⬜ |
+| 3 | Empty states | Illustrations/messages pour les pages vides au premier lancement | 🔴 Haute | ⬜ |
+| 4 | Loading skeletons | Remplacer spinners par skeletons shadcn partout | 🟡 Moyenne | ⬜ |
+| 5 | Animations micro-interactions | Hover effects, click feedback, transitions douces | 🟡 Moyenne | ⬜ |
+| 6 | Confettis célébration | Utiliser `confettis.ts` existant pour jalons Jules, badges | 🟢 Basse | ⬜ |
 
 ---
 
@@ -777,21 +686,6 @@ Ajouter des commandes en langage naturel (via Telegram Bot) :
 | Rappel anniversaire J-7 | 7j avant anniversaire | Notification + suggestions cadeaux IA | Famille | ⬜ |
 | Bilan mensuel auto | 1er du mois | Générer et envoyer bilan complet par email | Rapports | ⬜ |
 
-#### Notifications actionnables — progression avril 2026
-
-- Le dispatcher supporte `action_url` pour les notifications Push et Telegram.
-- Les messages Telegram supportent maintenant les boutons URL en plus des callbacks de validation.
-- **7 jobs CRON** ont maintenant un CTA `action_url` + `action_label` :
-  - MT-02 rappel courses → `/cuisine/courses` "Ouvrir la liste"
-  - P7-10 recette du jour → `/cuisine/planning` "Voir le repas"
-  - Rappel entretien → `/maison/entretien` "Voir les tâches"
-  - P7-05 rapport budget hebdo → `/famille/budget` "Voir le budget"
-  - J-07 rapport mensuel → `/famille/budget` "Ouvrir le rapport"
-  - Bilan nutrition → `/cuisine/planning` "Voir la nutrition"
-  - P7-01 récap weekend → `/cuisine/planning` "Voir la semaine"
-- Les tests couvrent la propagation des CTA et le flux API Telegram planning → courses.
-- **Tests frontend** : 2 tests Vitest pour `envoyerPlanningTelegram` et `envoyerListeCoursesTelegram` (13 tests total dans `api-clients.test.ts`).
-
 ### 7.5 Flux validation brouillon (v2)
 
 Le flux actuel (`src/services/ia/flux_utilisateur.py`, `src/api/routes/intra_flux.py`) détecte automatiquement l'étape mais ne propose pas de brouillon éditable et passe directement à la génération de courses.
@@ -803,7 +697,6 @@ Le flux actuel (`src/services/ia/flux_utilisateur.py`, `src/api/routes/intra_flu
   └─ L'IA génère un planning semaine → statut "brouillon"
   └─ Telegram : message avec boutons [✅ Valider] [✏️ Modifier] [🔄 Régénérer]
   └─ Web : bandeau jaune "Brouillon — En attente de validation"
-  └─ Frontend : envoi automatique du planning généré vers Telegram avec `planning_id`
 
 Étape 2 — Validation utilisateur (OBLIGATOIRE, via web OU Telegram)
   └─ Telegram : tap sur ✅ Valider ou écrire "Remplace mardi par du poisson"
@@ -814,7 +707,6 @@ Le flux actuel (`src/services/ia/flux_utilisateur.py`, `src/api/routes/intra_flu
   └─ Liste générée automatiquement depuis planning validé → statut "brouillon"
   └─ Telegram : message avec [✅ Confirmer] [✏️ Ajouter] [❌ Refaire]
   └─ Web : même pattern bandeau + boutons
-  └─ Frontend : envoi automatique de la liste confirmée vers Telegram avec `liste_id`
 
 Étape 4 — Confirmation courses (OBLIGATOIRE)
   └─ Telegram : tap ✅ Confirmer
@@ -853,37 +745,19 @@ Le flux actuel (`src/services/ia/flux_utilisateur.py`, `src/api/routes/intra_flu
 
 | # | Tâche | Fichiers | Statut |
 |---|-------|----------|--------|
-| 1 | Ajouter `etat: Mapped[str]` sur modèle Planning (brouillon/valide/archive) | `src/core/models/planning.py` | ✅ |
-| 2 | Ajouter `etat: Mapped[str]` sur modèle ListeCourses (brouillon/active/terminee) | `src/core/models/courses.py` | ✅ |
-| 3 | Modifier flux utilisateur : bloquer auto-progression, étape 2 = valider le brouillon | `src/services/ia/flux_utilisateur.py` | ✅ |
-| 4 | Ajouter `POST /api/v1/planning/{id}/valider` et `POST /api/v1/planning/{id}/regenerer` | `src/api/routes/planning.py` | ✅ |
-| 5 | Ajouter `POST /api/v1/courses/{id}/confirmer` | `src/api/routes/courses.py` | ✅ |
-| 6 | Adapter flux B7 : ne pas auto-générer courses sans validation du planning | `src/services/ia/flux_utilisateur.py` + `src/api/routes/intra_flux.py` | ✅ |
-| 7 | Bandeau brouillon/validé + boutons valider/modifier/régénérer (frontend planning) | `frontend/src/app/(app)/cuisine/planning/page.tsx` | ✅ |
-| 8 | Mode brouillon courses avec confirmation obligatoire | `frontend/src/app/(app)/cuisine/courses/page.tsx` | ✅ |
-| 9 | Migration SQL : `ALTER TABLE plannings ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/schema/17_migrations_absorbees.sql` | ✅ |
-| 10 | Migration SQL : `ALTER TABLE listes_courses ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/schema/17_migrations_absorbees.sql` | ✅ |
-| 11 | InlineKeyboardMarkup Telegram avec boutons ✅/✏️/🔄 | `src/services/integrations/telegram.py` | ✅ |
-| 12 | Handler `callback_query` Telegram → endpoints validation | `src/api/routes/webhooks_telegram.py` | ✅ |
-| 13 | Tests d'intégration endpoints `/api/v1/telegram/envoyer-*` + smoke flow planning→courses | `tests/api/test_webhooks_telegram_endpoints.py` | ✅ |
-
-#### Sprint Phase 5.1 (2026-04-03)
-
-Objectif sprint: livrer le workflow validation v2 web+API (planning/courses) avec compatibilité ascendante.
-
-Checklist sprint:
-
-- [x] Etats `etat` sur modèles Planning et ListeCourses (compat `statut` conservée)
-- [x] Endpoints planning `valider` et `regenerer`
-- [x] Endpoint courses `confirmer`
-- [x] Flux cuisine B7 aligné sur brouillon -> validation -> confirmation
-- [x] Bandeau + actions de validation dans la page planning
-- [x] Mode brouillon explicite + confirmation obligatoire dans la page courses
-- [x] Schéma SQL source aligné (`sql/schema/04_cuisine.sql`)
-- [x] Migration SQL absorbée idempotente (`sql/schema/17_migrations_absorbees.sql`)
-- [x] `sql/INIT_COMPLET.sql` régénéré depuis `sql/schema/*`
-- [ ] Boutons Telegram interactifs (phase 5.2)
-- [ ] Handler callback Telegram vers endpoints validation (phase 5.2)
+| 1 | Ajouter `etat: Mapped[str]` sur modèle Planning (brouillon/valide/archive) | `src/core/models/planning.py` | ⬜ |
+| 2 | Ajouter `etat: Mapped[str]` sur modèle ListeCourses (brouillon/active/terminee) | `src/core/models/courses.py` | ⬜ |
+| 3 | Modifier flux utilisateur : bloquer auto-progression, étape 2 = valider le brouillon | `src/services/ia/flux_utilisateur.py` | ⬜ |
+| 4 | Ajouter `POST /api/v1/planning/{id}/valider` et `POST /api/v1/planning/{id}/regenerer` | `src/api/routes/planning.py` | ⬜ |
+| 5 | Ajouter `POST /api/v1/courses/{id}/confirmer` | `src/api/routes/courses.py` | ⬜ |
+| 6 | Adapter flux B7 : ne pas auto-générer courses sans validation du planning | `src/api/routes/intra_flux.py` | ⬜ |
+| 7 | Bandeau brouillon/validé + boutons valider/modifier/régénérer (frontend planning) | Frontend planning page | ⬜ |
+| 8 | Mode brouillon courses avec confirmation obligatoire | Frontend courses page | ⬜ |
+| 9 | Migration SQL : `ALTER TABLE planning ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/` | ⬜ |
+| 10 | Migration SQL : `ALTER TABLE listes_courses ADD COLUMN etat VARCHAR(20) DEFAULT 'brouillon'` | `sql/` | ⬜ |
+| 11 | InlineKeyboardMarkup Telegram avec boutons ✅/✏️/🔄 | `src/services/integrations/telegram.py` | ⬜ |
+| 12 | Handler `callback_query` Telegram → endpoints validation | `src/api/routes/webhooks_telegram.py` | ⬜ |
+| Bilan mensuel auto | 1er du mois | Générer et envoyer bilan complet par email | Rapports | ⬜ |
 
 ---
 
@@ -891,7 +765,6 @@ Checklist sprint:
 
 > **Objectif** : Performance, bundle size, robustesse, rester en Free Railway ($0/mois).
 > **Prérequis** : Phase 5 terminée
-> **Statut** : 🟡 En cours — optimisations mémoire Railway et UX Phase 6.2 livrées (cache L1 borné, lazy import IA, lazy registry, flag Prometheus, TTL cache IA 48h, optimistic updates, prefetch navigation).
 
 ### 8.1 Améliorations techniques
 
@@ -908,11 +781,11 @@ Ces optimisations sont nécessaires pour tenir sous 0.5 GB RAM (limite Railway F
 
 | # | Optimisation | Description | Gain estimé | Fichiers | Statut |
 |---|-------------|-------------|-------------|----------|--------|
-| 1 | **Cache L1 mémoire borné** | Limiter `CacheMemoire` à 500 entrées max avec eviction LRU + plafond mémoire | -50-100 MB | `src/core/caching/memory.py` | ✅ |
-| 2 | **Lazy-load modèles IA** | `ClientIA` et dépendances cache/rate-limit chargés au premier appel, pas au démarrage | -30 MB | `src/core/ai/client.py` | ✅ |
-| 3 | **Import lazy services** | 138 factories importés au démarrage → passer en importlib lazy | -20 MB | `src/services/core/registry.py` | ✅ |
+| 1 | **Cache L1 mémoire borné** | Limiter `CacheMemoire` à 500 entrées max avec eviction LRU | -50-100 MB | `src/core/caching/memory.py` | ⬜ |
+| 2 | **Lazy-load modèles IA** | `ClientIA`, `AnalyseurIA` instanciés au premier appel, pas au démarrage | -30 MB | `src/core/ai/client.py` | ⬜ |
+| 3 | **Import lazy services** | 138 factories importés au démarrage → passer en importlib lazy | -20 MB | `src/services/core/registry.py` | ⬜ |
 | 4 | **1 worker uvicorn** | `uvicorn --workers 1` (déjà le cas) | Déjà OK | — | ✅ |
-| 5 | **Désactiver Prometheus** | Métriques Prometheus consomment mémoire → flag pour désactiver | -10 MB | `src/core/config/settings.py`, `src/api/main.py` | ✅ |
+| 5 | **Désactiver Prometheus** | Métriques Prometheus consomment mémoire → flag pour désactiver | -10 MB | `src/api/prometheus.py` | ⬜ |
 
 ### 8.3 Optimisations Mistral AI
 
@@ -924,32 +797,10 @@ Ces optimisations sont nécessaires pour tenir sous 0.5 GB RAM (limite Railway F
 
 | # | Optimisation | Description | Statut |
 |---|-------------|-------------|--------|
-| 1 | Cache sémantique TTL 48h | Augmenter TTL du `CacheIA` à 48h pour suggestions récurrentes | ✅ |
+| 1 | Cache sémantique TTL 48h | Augmenter TTL du `CacheIA` à 48h pour suggestions récurrentes | ⬜ |
 | 2 | Batch prompts | Combiner résumé hebdo + planning IA dimanche en un seul prompt | ⬜ |
 | 3 | Fallback règles locales | Catégorisation ingrédients, calcul portions → règles Python | ⬜ |
 | 4 | Rate limit utilisateur | Limiter chat IA à 20 messages/jour/utilisateur | ⬜ |
-
-### 8.6 Sprint Phase 6.1 — Railway memory first
-
-| Sprint | Périmètre | Livrables | Statut |
-|--------|-----------|-----------|--------|
-| 6.1 | Robustesse mémoire backend | Cache L1 borné (entries + bytes), lazy import dépendances IA, flag Prometheus activable, TTL cache IA 48h | ✅ |
-| 6.2 | Optimisations techniques frontend/backend | Import lazy services, optimistic updates CRUD prioritaires, prefetch navigation, revue bundle Three.js | ✅ |
-| 6.3 | Validation avancée | E2E flux critiques, tests charge, tests PWA/offline et WebSocket | ⬜ |
-
-### 8.7 Checklist Phase 6
-
-| # | Checklist sprint | Statut |
-|---|------------------|--------|
-| 1 | Borne L1 cache sur 500 entrées max et budget mémoire | ✅ |
-| 2 | Charger les dépendances IA coûteuses au premier appel | ✅ |
-| 3 | Activer un flag runtime pour désactiver `/metrics/prometheus` | ✅ |
-| 4 | Passer le TTL cache IA global à 48h | ✅ |
-| 5 | Documenter l'état d'avancement phase 6 (sprint + checklist) | ✅ |
-| 6 | Migrer l'enregistrement des services vers import lazy explicite | ✅ |
-| 7 | Ajouter optimistic updates sur les flux CRUD critiques | ✅ |
-| 8 | Ajouter prefetch sur la navigation principale | ✅ |
-| 9 | Finaliser les tests avancés phase 6 (E2E/charge/offline/SW) | ⬜ |
 
 ### 8.4 Tests avancés
 
@@ -966,7 +817,7 @@ Ces optimisations sont nécessaires pour tenir sous 0.5 GB RAM (limite Railway F
 
 | Module | Manque | Statut |
 |--------|--------|--------|
-| Bridges inter-modules | Tests pour les nouveaux bridges | 🟡 |
+| Bridges inter-modules | Tests pour les nouveaux bridges | ⬜ |
 | Admin panel | Tests endpoints trigger manuel | ⬜ |
 | WebSocket courses | Test annoté `@skip` — deadlock TestClient | ⬜ |
 | Mode hors-ligne | Aucun test sync offline | ⬜ |
