@@ -202,6 +202,32 @@ class ServiceRegistry:
                 entry.last_accessed = datetime.now()
             return entry.instance
 
+        # Slow path — double-checked locking
+        with entry.lock:
+            # Re-vérifier après obtention du lock
+            if entry.instance is None:
+                if entry.factory is None:
+                    raise ValueError(f"Service '{nom}' n'a ni instance ni factory")
+
+                start = time.perf_counter()
+                try:
+                    entry.instance = entry.factory()
+                    entry.created_at = datetime.now()
+                    duration_ms = (time.perf_counter() - start) * 1000
+                    logger.info(
+                        f"📦 Service créé: {nom} ({entry.factory.__name__}) — {duration_ms:.1f}ms"
+                    )
+                except Exception as e:
+                    logger.error(
+                        f"❌ Erreur création service '{nom}': {e}",
+                        exc_info=True,
+                    )
+                    raise
+
+            entry.access_count += 1
+            entry.last_accessed = datetime.now()
+            return entry.instance
+
     def _essayer_enregistrement_lazy(self, nom_service: str) -> None:
         """Tente d'enregistrer un service manquant via import lazy des modules services.
 

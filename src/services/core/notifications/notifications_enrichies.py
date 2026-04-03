@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-class HandlersWhatsAppEnrichis:
+class HandlersTelegramEnrichis:
     """Handlers pour les flux WhatsApp enrichis (E.1-E.3)."""
 
     @staticmethod
@@ -44,7 +44,7 @@ class HandlersWhatsAppEnrichis:
         [Bouton] Ajouter... [Bouton] Ã‰diter entire liste
         """
         try:
-            from src.services.integrations.whatsapp import envoyer_liste_courses_partagee
+            from src.services.integrations.telegram import envoyer_liste_courses_partagee
 
             with obtenir_contexte_db() as session:
                 # RÃ©cupÃ©rer la liste de courses active
@@ -98,7 +98,7 @@ class HandlersWhatsAppEnrichis:
         Suggestion IA: [conseil dÃ©veloppement]
         """
         try:
-            from src.services.integrations.whatsapp import envoyer_message_whatsapp
+            from src.services.integrations.telegram import envoyer_message_telegram
 
             with obtenir_contexte_db() as session:
                 from src.core.models.famille import ActiviteJules
@@ -124,7 +124,7 @@ class HandlersWhatsAppEnrichis:
                     )
 
                 message = "\n".join(lines)
-                return await envoyer_message_whatsapp(sender, message)
+                return await envoyer_message_telegram(sender, message)
         except Exception as e:
             logger.error(f"E.2 Erreur : {e}")
             return False
@@ -142,7 +142,7 @@ class HandlersWhatsAppEnrichis:
         ðŸ’° Total: [bilan]
         """
         try:
-            from src.services.integrations.whatsapp import envoyer_message_whatsapp
+            from src.services.integrations.telegram import envoyer_message_telegram
 
             with obtenir_contexte_db() as session:
                 from src.core.models.jeux import PariSportif
@@ -175,7 +175,7 @@ class HandlersWhatsAppEnrichis:
 
                 lines.append(f"\nðŸ’° *Total: {total_pnl:+.0f}â‚¬*")
                 message = "\n".join(lines)
-                return await envoyer_message_whatsapp(sender, message)
+                return await envoyer_message_telegram(sender, message)
         except Exception as e:
             logger.error(f"E.3 Erreur : {e}")
             return False

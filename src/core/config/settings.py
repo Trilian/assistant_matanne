@@ -164,22 +164,6 @@ class Parametres(BaseSettings):
     GOOGLE_REDIRECT_URI: str = ""
     """URI de redirection OAuth2 Google."""
 
-    # ── WhatsApp Meta Business API [DEPRECATED] ──
-    # Migration en cours vers Telegram (gratuit, pas de limites payantes).
-    # Les paramètres sont conservés pour la compatibilité backward uniquement.
-
-    META_WHATSAPP_TOKEN: str = ""
-    """[DEPRECATED] Token d'accès Meta WhatsApp Business API — migrer vers TELEGRAM_BOT_TOKEN."""
-
-    META_PHONE_NUMBER_ID: str = ""
-    """[DEPRECATED] ID du numéro de téléphone Meta WhatsApp Business — non utilisé."""
-
-    WHATSAPP_VERIFY_TOKEN: str = ""
-    """[DEPRECATED] Token de vérification pour le webhook WhatsApp — non utilisé."""
-
-    WHATSAPP_USER_NUMBER: str = ""
-    """[DEPRECATED] Numéro WhatsApp de l'utilisateur principal — utiliser TELEGRAM_CHAT_ID à la place."""
-
     # ── Telegram Bot API ──
 
     TELEGRAM_BOT_TOKEN: str = ""

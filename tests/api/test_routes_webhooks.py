@@ -165,25 +165,25 @@ class TestRoutesWebhooksEdgeCases:
 # ═══════════════════════════════════════════════════════════
 
 
-class TestWhatsAppStateMachine:
+class TestTelegramStateMachine:
     """Tests pour la gestion d'état conversation WhatsApp."""
 
     def test_charger_etat_inexistant_retourne_vide(self):
         """Charger un état pour un destinataire inconnu retourne un dict vide ou None."""
-        from src.services.integrations.whatsapp import charger_etat_conversation
+        from src.services.integrations.telegram import charger_etat_conversation
 
         etat = charger_etat_conversation("destinataire_inconnu_test")
         assert etat is None or etat == {}
 
     def test_sauvegarder_et_charger_etat(self):
         """Sauvegarder puis charger un état fonctionne."""
-        from src.services.integrations.whatsapp import (
+        from src.services.integrations.telegram import (
             charger_etat_conversation,
             sauvegarder_etat_conversation,
             effacer_etat_conversation,
         )
 
-        dest = "test_user_whatsapp_state"
+        dest = "test_user_telegram_state"
         try:
             etat_input = {"etape": "attente_creneau_modification", "data": {"recette_id": 42}}
             sauvegarder_etat_conversation(dest, etat_input)
@@ -200,13 +200,13 @@ class TestWhatsAppStateMachine:
 
     def test_effacer_etat_conversation(self):
         """Effacer un état le rend non-chargeable."""
-        from src.services.integrations.whatsapp import (
+        from src.services.integrations.telegram import (
             charger_etat_conversation,
             effacer_etat_conversation,
             sauvegarder_etat_conversation,
         )
 
-        dest = "test_user_whatsapp_effacer"
+        dest = "test_user_telegram_effacer"
         try:
             sauvegarder_etat_conversation(dest, {"etape": "test"})
             effacer_etat_conversation(dest)
