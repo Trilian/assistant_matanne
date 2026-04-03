@@ -136,7 +136,9 @@ describe("utiliserWebSocket", () => {
     const ws = MockWebSocket.instances[0];
 
     act(() => {
+      ws.readyState = MockWebSocket.CLOSED;
       result.current.envoyer({ action: "queued" });
+      ws.readyState = MockWebSocket.OPEN;
       ws.open();
       result.current.envoyer({ action: "live" });
     });

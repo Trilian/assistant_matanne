@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import { cn } from "@/bibliotheque/utils";
 import type { RepasPlanning, TypeRepas } from "@/types/planning";
 
 const COULEUR_TYPE: Record<TypeRepas, string> = {
@@ -28,6 +29,15 @@ function trouverRepasParType(repasJour: RepasPlanning[], type: TypeRepas): Repas
   return repasJour.find((repas) => repas.type_repas === type);
 }
 
+function getVignetteRepas(repas: RepasPlanning | undefined): string {
+  if (!repas) {
+    return "";
+  }
+
+  const seed = `${repas.recette_id ?? "sans-id"}-${repas.recette_nom ?? repas.notes ?? "repas"}`;
+  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/420/260`;
+}
+
 export function CalendrierMosaiqueRepas({ dates, repasParJour }: CalendrierMosaiqueRepasProps) {
   return (
     <Card>
@@ -49,14 +59,31 @@ export function CalendrierMosaiqueRepas({ dates, repasParJour }: CalendrierMosai
               <div className="space-y-1.5">
                 {TYPES.map((type) => {
                   const repas = trouverRepasParType(repasJour, type);
+                  const vignette = getVignetteRepas(repas);
                   return (
                     <div
                       key={`${date}-${type}`}
-                      className={`rounded-md px-2 py-1.5 text-[11px] ${COULEUR_TYPE[type]}`}
+                      className={cn(
+                        "relative overflow-hidden rounded-md px-2 py-1.5 text-[11px]",
+                        repas ? "text-white" : COULEUR_TYPE[type]
+                      )}
                       title={repas?.recette_nom || repas?.notes || `${LABEL_TYPE[type]} non planifie`}
                     >
-                      <p className="font-semibold">{LABEL_TYPE[type]}</p>
-                      <p className="truncate opacity-85">{repas?.recette_nom || repas?.notes || "Non planifie"}</p>
+                      {repas && vignette && (
+                        <img
+                          src={vignette}
+                          alt={`Vignette recette ${repas.recette_nom ?? repas.notes ?? LABEL_TYPE[type]}`}
+                          className="absolute inset-0 h-full w-full object-cover"
+                          loading="lazy"
+                        />
+                      )}
+
+                      {repas && <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/45 to-black/20" />}
+
+                      <div className="relative">
+                        <p className="font-semibold">{LABEL_TYPE[type]}</p>
+                        <p className="truncate opacity-90">{repas?.recette_nom || repas?.notes || "Non planifie"}</p>
+                      </div>
                     </div>
                   );
                 })}

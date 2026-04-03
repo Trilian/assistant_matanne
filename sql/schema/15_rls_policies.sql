@@ -97,7 +97,7 @@ shared_tables TEXT[] := ARRAY[
     'jeux_tirages_loto', 'jeux_grilles_loto', 'jeux_stats_loto',
     'jeux_historique', 'jeux_series', 'jeux_alertes', 'jeux_configuration',
     'jeux_tirages_euromillions', 'jeux_grilles_euromillions', 'jeux_stats_euromillions',
-    'jeux_cotes_historique',
+    'jeux_cotes_historique', 'jeux_bankroll_historique',
     -- Temps Entretien & Jardin
     'plans_jardin', 'zones_jardin', 'plantes_jardin', 'actions_plantes',
     'pieces_maison', 'objets_maison', 'sessions_travail',

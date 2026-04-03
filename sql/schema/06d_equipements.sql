@@ -30,6 +30,7 @@ CREATE TABLE meubles (
 CREATE INDEX IF NOT EXISTS ix_furniture_piece ON meubles(piece);
 CREATE INDEX IF NOT EXISTS ix_furniture_statut ON meubles(statut);
 CREATE INDEX IF NOT EXISTS ix_furniture_priorite ON meubles(priorite);
+CREATE INDEX IF NOT EXISTS ix_furniture_date_achat ON meubles(date_achat);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -92,6 +93,7 @@ CREATE TABLE objets_maison (
 CREATE INDEX IF NOT EXISTS idx_objets_maison_piece ON objets_maison(piece_id);
 CREATE INDEX IF NOT EXISTS idx_objets_maison_categorie ON objets_maison(categorie);
 CREATE INDEX IF NOT EXISTS idx_objets_maison_statut ON objets_maison(statut);
+CREATE INDEX IF NOT EXISTS idx_objets_maison_date_achat ON objets_maison(date_achat);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -228,6 +230,7 @@ CREATE TABLE interventions_artisans (
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_interventions_artisans_artisan ON interventions_artisans(artisan_id);
+CREATE INDEX IF NOT EXISTS ix_interventions_artisans_date ON interventions_artisans(date_intervention);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -253,6 +256,7 @@ CREATE TABLE articles_cellier (
 CREATE INDEX IF NOT EXISTS ix_articles_cellier_categorie ON articles_cellier(categorie);
 CREATE INDEX IF NOT EXISTS ix_articles_cellier_code_barres ON articles_cellier(code_barres);
 CREATE INDEX IF NOT EXISTS ix_articles_cellier_dlc ON articles_cellier(dlc);
+CREATE INDEX IF NOT EXISTS ix_articles_cellier_date_achat ON articles_cellier(date_achat);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -360,6 +364,8 @@ CREATE TABLE devis_comparatifs (
 CREATE INDEX IF NOT EXISTS ix_devis_projet ON devis_comparatifs(projet_id);
 CREATE INDEX IF NOT EXISTS ix_devis_artisan ON devis_comparatifs(artisan_id);
 CREATE INDEX IF NOT EXISTS ix_devis_statut ON devis_comparatifs(statut);
+CREATE INDEX IF NOT EXISTS ix_devis_date_validite ON devis_comparatifs(date_validite)
+    WHERE date_validite IS NOT NULL;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

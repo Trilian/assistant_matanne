@@ -75,10 +75,11 @@ class TestRoutesFamilleJules:
         class _Session:
             def __init__(self):
                 self._calls = 0
+                self._jalon = _Jalon()
 
             def query(self, *_args, **_kwargs):
                 self._calls += 1
-                return _Query(_Enfant() if self._calls == 1 else _Jalon())
+                return _Query(_Enfant() if self._calls == 1 else self._jalon)
 
             def add(self, _obj):
                 return None
@@ -87,6 +88,9 @@ class TestRoutesFamilleJules:
                 return None
 
             def refresh(self, _obj):
+                # La DB convertit normalement en date; on simule ce comportement.
+                if hasattr(_obj, "date_atteint") and isinstance(_obj.date_atteint, str):
+                    _obj.date_atteint = date.fromisoformat(_obj.date_atteint)
                 return None
 
         @contextmanager
@@ -110,7 +114,7 @@ class TestRoutesFamilleJules:
             json={"titre": "Premier pas", "categorie": "motricite"},
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 201
         assert response.json()["journal_evenement"]["evenement_id"] == 99
 
 

@@ -2,8 +2,8 @@
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
 -- Version    : 3.1 (régénéré automatiquement)
--- Généré le  : 2026-04-03 12:47 UTC
--- Source     : sql/schema/*.sql (18 fichiers, ~4902 lignes)
+-- Généré le  : 2026-04-03 17:30 UTC
+-- Source     : sql/schema/*.sql (22 fichiers, ~5468 lignes)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
@@ -107,6 +107,16 @@ $$ LANGUAGE plpgsql;
 --            etats_persistants, gamification, automations, logs_securite,
 --            job_executions, openfoodfacts_cache
 -- ============================================================================
+
+-- Source: 03_systeme.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Tables Système
+-- ============================================================================
+-- Contient : schema_migrations, profils_utilisateurs, preferences_utilisateurs,
+--            config_meteo, alertes_meteo, sauvegardes, historique_actions,
+--            etats_persistants, gamification, automations, logs_securite,
+--            job_executions, openfoodfacts_cache
+-- ============================================================================
 -- PARTIE 2 : TABLE DE SUIVI DES MIGRATIONS
 -- ============================================================================
 CREATE TABLE schema_migrations (
@@ -120,11 +130,14 @@ CREATE TABLE schema_migrations (
 -- PARTIE 3 : TABLES AUTONOMES (sans dépendances FK)
 -- ============================================================================
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.01 INGREDIENTS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.02 USER_PROFILES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE profils_utilisateurs (
@@ -156,80 +169,106 @@ CREATE TABLE profils_utilisateurs (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_profils_username ON profils_utilisateurs(username);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.03 RECETTES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.04 PLANNINGS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.05 LISTES_COURSES (en-tête)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.06 MODELES_COURSES
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.07 CHILD_PROFILES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.08 HEALTH_ROUTINES
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.09 HEALTH_OBJECTIVES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.10 PROJECTS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.11 ROUTINES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.12 GARDEN_ITEMS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.13 TEMPLATES_SEMAINE
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.14 CONFIG_BATCH_COOKING
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.15 JEUX_EQUIPES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.16 JEUX_TIRAGES_LOTO
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.17 JEUX_STATS_LOTO
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.18 JEUX_HISTORIQUE
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.19 JEUX_SERIES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.20 JEUX_CONFIGURATION
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.21 WEEKEND_ACTIVITIES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.22 FAMILY_PURCHASES
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.23 FAMILY_ACTIVITIES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.24 FAMILY_BUDGETS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.25 SHOPPING_ITEMS_FAMILLE
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.25b HISTORIQUE_ACHATS (apprentissage fréquence IA)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.26 CALENDAR_EVENTS
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE evenements_planning (
@@ -259,23 +298,30 @@ CREATE INDEX IF NOT EXISTS ix_calendar_events_type ON evenements_planning(type_e
 CREATE INDEX IF NOT EXISTS idx_date_type ON evenements_planning(date_debut, type_event);
 CREATE INDEX IF NOT EXISTS idx_date_range ON evenements_planning(date_debut, date_fin);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.27 FURNITURE
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.28 HOUSE_EXPENSES
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.29 ECO_ACTIONS
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.30 MAINTENANCE_TASKS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.31 HOUSE_STOCKS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.32 USER_PREFERENCES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE preferences_utilisateurs (
@@ -309,8 +355,10 @@ CREATE TABLE preferences_utilisateurs (
 CREATE UNIQUE INDEX IF NOT EXISTS uq_user_preferences_user_id ON preferences_utilisateurs(user_id);
 CREATE INDEX IF NOT EXISTS ix_user_preferences_user_id ON preferences_utilisateurs(user_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.33 OPENFOODFACTS_CACHE
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE openfoodfacts_cache (
@@ -331,14 +379,18 @@ CREATE TABLE openfoodfacts_cache (
 CREATE UNIQUE INDEX IF NOT EXISTS uq_openfoodfacts_code ON openfoodfacts_cache(code_barres);
 CREATE INDEX IF NOT EXISTS ix_openfoodfacts_code ON openfoodfacts_cache(code_barres);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.34 DEPENSES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.35 BUDGETS_MENSUELS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.36 ALERTES_METEO
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE alertes_meteo (
@@ -359,8 +411,10 @@ CREATE INDEX IF NOT EXISTS ix_alertes_meteo_type ON alertes_meteo(type_alerte);
 CREATE INDEX IF NOT EXISTS ix_alertes_meteo_date ON alertes_meteo(date_debut);
 CREATE INDEX IF NOT EXISTS ix_alertes_meteo_user ON alertes_meteo(user_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.37 CONFIG_METEO
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE config_meteo (
@@ -378,8 +432,10 @@ CREATE TABLE config_meteo (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_config_meteo_user ON config_meteo(user_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.38 BACKUPS
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE sauvegardes (
@@ -397,8 +453,10 @@ CREATE TABLE sauvegardes (
 CREATE INDEX IF NOT EXISTS ix_backups_user ON sauvegardes(user_id);
 CREATE INDEX IF NOT EXISTS ix_backups_cree_le ON sauvegardes(cree_le);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.39 ACTION_HISTORY
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE historique_actions (
@@ -437,20 +495,26 @@ CREATE INDEX IF NOT EXISTS idx_action_history_action_type ON historique_actions(
 CREATE INDEX IF NOT EXISTS idx_action_history_cree_le ON historique_actions(cree_le DESC);
 CREATE INDEX IF NOT EXISTS idx_action_history_entity ON historique_actions(entity_type, entity_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.40 CALENDRIERS_EXTERNES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.41 PUSH_SUBSCRIPTIONS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.42 NOTIFICATION_PREFERENCES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.42b WEBHOOKS_ABONNEMENTS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.42c ETATS_PERSISTANTS
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS etats_persistants (
@@ -465,29 +529,38 @@ CREATE TABLE IF NOT EXISTS etats_persistants (
 CREATE INDEX IF NOT EXISTS ix_pstate_namespace ON etats_persistants(namespace);
 CREATE INDEX IF NOT EXISTS ix_pstate_user ON etats_persistants(user_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.43 EXTERNAL_CALENDAR_CONFIGS
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.44 PLANS_JARDIN
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 3.45 PIECES_MAISON
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.01 GARMIN_TOKENS (→ profils_utilisateurs)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.02 GARMIN_ACTIVITIES (→ profils_utilisateurs)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.03 GARMIN_DAILY_SUMMARIES (→ profils_utilisateurs)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.04 FOOD_LOGS (→ profils_utilisateurs)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.04B GAMIFICATION_POINTS (→ profils_utilisateurs)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE points_utilisateurs (
@@ -507,8 +580,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_points_user_semaine ON points_utilisateurs(
 CREATE INDEX IF NOT EXISTS ix_points_utilisateurs_user ON points_utilisateurs(user_id);
 CREATE INDEX IF NOT EXISTS ix_points_utilisateurs_semaine ON points_utilisateurs(semaine_debut);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.04C GAMIFICATION_BADGES (→ profils_utilisateurs)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE badges_utilisateurs (
@@ -525,8 +600,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_badges_user_type_date ON badges_utilisateur
 CREATE INDEX IF NOT EXISTS ix_badges_utilisateurs_user ON badges_utilisateurs(user_id);
 CREATE INDEX IF NOT EXISTS ix_badges_utilisateurs_type ON badges_utilisateurs(badge_type);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.04D AUTOMATIONS (→ profils_utilisateurs)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE automations (
@@ -545,8 +622,10 @@ CREATE TABLE automations (
 CREATE INDEX IF NOT EXISTS ix_automations_user ON automations(user_id);
 CREATE INDEX IF NOT EXISTS ix_automations_active ON automations(active);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.04E JOB_EXECUTIONS (historique cron & exécutions manuelles admin)
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS job_executions (
     id BIGSERIAL PRIMARY KEY,
@@ -569,8 +648,10 @@ CREATE INDEX IF NOT EXISTS ix_job_executions_started_at ON job_executions(starte
 CREATE INDEX IF NOT EXISTS ix_job_executions_created_at ON job_executions(created_at DESC);
 CREATE INDEX IF NOT EXISTS ix_job_executions_job_started ON job_executions(job_id, started_at DESC);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.04F IA_SUGGESTIONS_HISTORIQUE (historique des suggestions IA — P3-06)
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS ia_suggestions_historique (
     id BIGSERIAL PRIMARY KEY,
@@ -603,120 +684,159 @@ CREATE INDEX IF NOT EXISTS ix_ia_suggestions_acceptee ON ia_suggestions_historiq
     WHERE acceptee IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_ia_suggestions_user_type_date ON ia_suggestions_historique(user_id, type_suggestion, cree_le DESC);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.05 RECETTE_INGREDIENTS (→ recettes, ingredients)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.06 ETAPES_RECETTE (→ recettes)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.07 VERSIONS_RECETTE (→ recettes)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.08 HISTORIQUE_RECETTES (→ recettes)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.09 BATCH_MEALS (→ recettes)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.10 RECIPE_FEEDBACKS (→ recettes)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.11 INVENTAIRE (→ ingredients)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.12 HISTORIQUE_INVENTAIRE (→ inventaire, ingredients)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.13 ARTICLES_COURSES (→ listes_courses, ingredients) — Sprint 12 A5
 -- Anciennement liste_courses. Renommé en articles_courses pour cohérence.
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.14 ARTICLES_MODELES (→ modeles_courses, ingredients)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.15 REPAS (→ plannings, recettes)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.16 TEMPLATE_ITEMS (→ templates_semaine)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.17 WELLBEING_ENTRIES (→ profils_enfants)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.18 MILESTONES (→ profils_enfants)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.19 HEALTH_ENTRIES (→ routines_sante)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.20 PROJECT_TASKS (→ projets)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.21 ROUTINE_TASKS (→ routines)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.22 GARDEN_LOGS (→ elements_jardin)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.23 JEUX_MATCHS (→ jeux_equipes)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.24 JEUX_PARIS_SPORTIFS (→ jeux_matchs)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.25 JEUX_GRILLES_LOTO (→ jeux_tirages_loto)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.26 JEUX_ALERTES (→ jeux_series)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.27 SESSIONS_BATCH_COOKING (→ plannings)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.28 ETAPES_BATCH_COOKING (→ sessions_batch_cooking, recettes)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.29 PREPARATIONS_BATCH (→ sessions_batch_cooking, recettes)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.30 EVENEMENTS_CALENDRIER (→ calendriers_externes)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.31 ZONES_JARDIN (→ plans_jardin)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.32 PLANTES_JARDIN (→ zones_jardin)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.33 ACTIONS_PLANTES (→ plantes_jardin)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.34 OBJETS_MAISON (→ pieces_maison)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.35 SESSIONS_TRAVAIL
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.36 VERSIONS_PIECES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.37 COUTS_TRAVAUX (→ versions_pieces)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.38 LOGS_STATUT_OBJETS
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX VACCINS (→ profils_enfants) — Carnet de santé numérique
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX RENDEZ_VOUS_MEDICAUX — Suivi médical famille
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX MESURES_CROISSANCE (→ profils_enfants) — Courbes OMS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX NORMES_OMS — Référentiel percentiles
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE normes_oms (
@@ -736,14 +856,18 @@ CREATE TABLE normes_oms (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_normes_oms ON normes_oms(sexe, type_mesure, age_mois);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX CONTACTS_FAMILLE — Répertoire familial
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX ANNIVERSAIRES_FAMILLE — Dates importantes et rappels
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX CHECKLISTS_ANNIVERSAIRE — Listes de tâches pour préparer les anniversaires
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE checklists_anniversaire (
@@ -783,59 +907,78 @@ CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_categorie ON items_ch
 CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_fait ON items_checklist_anniversaire(fait);
 CREATE INDEX IF NOT EXISTS ix_items_checklist_anniversaire_source ON items_checklist_anniversaire(source);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX EVENEMENTS_FAMILIAUX — Calendrier partagé
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX VOYAGES — Mode voyage famille
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX TEMPLATES_CHECKLIST — Templates de checklists réutilisables
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX CHECKLISTS_VOYAGE (→ voyages, templates_checklist)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 4.XX DOCUMENTS_FAMILLE — Coffre-fort numérique
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.01 PREFERENCES_HOME
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.02 TACHES_HOME (→ zones_jardin, pieces_maison)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.03 STATS_HOME
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.04 PLANTES_CATALOGUE
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.05 RECOLTES (→ plantes_jardin, zones_jardin)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.06 OBJECTIFS_AUTONOMIE
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.07 DEPENSES_HOME
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5.08 BUDGETS_HOME
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5B.01 JEUX_TIRAGES_EUROMILLIONS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5B.02 JEUX_GRILLES_EUROMILLIONS (→ jeux_tirages_euromillions)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5B.03 JEUX_STATS_EUROMILLIONS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5B.04 JEUX_COTES_HISTORIQUE (→ jeux_matchs)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- BANKROLL HISTORIQUE (CT-09 Sprint 4)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_bankroll_historique (
@@ -853,62 +996,187 @@ CREATE INDEX IF NOT EXISTS idx_bankroll_historique_user ON jeux_bankroll_histori
 -- PARTIE 5C : TABLES MAISON EXTENSIONS (artisans, cellier, diagnostics, etc.)
 -- ============================================================================
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.01 ARTISANS
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.02 INTERVENTIONS_ARTISANS (→ artisans)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.06 ARTICLES_CELLIER
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.07 DIAGNOSTICS_MAISON
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.08 ESTIMATIONS_IMMOBILIERES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.09 CHECKLISTS_VACANCES
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.10 ITEMS_CHECKLIST (→ checklists_vacances)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.11 TRAITEMENTS_NUISIBLES (→ artisans)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.12 DEVIS_COMPARATIFS (→ projets, artisans)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.13 LIGNES_DEVIS (→ devis_comparatifs)
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.14 ENTRETIENS_SAISONNIERS (→ artisans)
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5C.15 RELEVES_COMPTEURS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.01 NOTES_MEMOS
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.02 JOURNAL_BORD
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.03 CONTACTS_UTILES
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.04 LIENS_FAVORIS
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.05 MOTS_DE_PASSE_MAISON
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.06 PRESSE_PAPIER_ENTREES
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 5D.07 RELEVES_ENERGIE
+
+
+-- Source: 04_cuisine.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Tables Cuisine
+-- ============================================================================
+-- Contient : ingredients, recettes, inventaire, listes_courses, plannings,
+--            modeles_courses, templates_semaine, batch_cooking, ...
+-- ============================================================================
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Table congélation — persistance des articles congelés (P3-05)
+-- Remplace le stockage mémoire de congelation.py
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS batch_cooking_congelation (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(200) NOT NULL,
+    date_congelation DATE NOT NULL DEFAULT CURRENT_DATE,
+    date_limite DATE NOT NULL,
+    portions INTEGER NOT NULL DEFAULT 1,
+    categorie VARCHAR(50) NOT NULL DEFAULT 'autre',
+    recette_id INTEGER,
+    session_id INTEGER,
+    notes TEXT,
+    consomme BOOLEAN NOT NULL DEFAULT FALSE,
+    date_consommation DATE,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_congelation_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_congelation_session FOREIGN KEY (session_id) REFERENCES sessions_batch_cooking(id) ON DELETE SET NULL,
+    CONSTRAINT ck_congelation_portions_positive CHECK (portions > 0),
+    CONSTRAINT ck_congelation_categorie CHECK (categorie IN (
+        'viande', 'poisson', 'legume', 'fruit', 'plat_cuisine',
+        'soupe', 'sauce', 'pain', 'patisserie', 'herbes', 'autre'
+    ))
+);
+CREATE INDEX IF NOT EXISTS ix_congelation_date_limite ON batch_cooking_congelation(date_limite);
+CREATE INDEX IF NOT EXISTS ix_congelation_categorie ON batch_cooking_congelation(categorie);
+CREATE INDEX IF NOT EXISTS ix_congelation_consomme ON batch_cooking_congelation(consomme);
+CREATE INDEX IF NOT EXISTS ix_congelation_recette ON batch_cooking_congelation(recette_id);
+CREATE INDEX IF NOT EXISTS idx_congelation_consomme_limite ON batch_cooking_congelation(consomme, date_limite)
+    WHERE consomme = FALSE;
+
+
+-- Source: 05_famille.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Tables Famille
+-- ============================================================================
+-- Contient : profils_enfants, activités_famille, budgets_famille, Garmin,
+--            santé, jalons, contacts, documents, anniversaires
+-- ============================================================================
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Abonnements maison (eau, électricité, gaz, assurances, téléphone, internet)
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE historique_notifications (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    canal VARCHAR(20) NOT NULL,
+    titre VARCHAR(500) NOT NULL,
+    message TEXT NOT NULL,
+    type_evenement VARCHAR(100),
+    categorie VARCHAR(50) NOT NULL DEFAULT 'autres',
+    lu BOOLEAN NOT NULL DEFAULT FALSE,
+    action_effectuee VARCHAR(255),
+    metadata JSONB DEFAULT '{}'::jsonb,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_user ON historique_notifications(user_id);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_lu ON historique_notifications(user_id, lu);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_categorie ON historique_notifications(categorie);
+CREATE INDEX IF NOT EXISTS ix_historique_notifications_cree_le ON historique_notifications(cree_le DESC);
+
+
+-- Source: 10_finances.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Tables Finances
+-- ============================================================================
+-- Contient : depenses, budgets_mensuels, calendriers_externes,
+--            configs_calendriers_externes, evenements_calendrier
+-- ============================================================================
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE minuteur_sessions (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    label VARCHAR(200) NOT NULL,
+    duree_secondes INTEGER NOT NULL CHECK (duree_secondes > 0),
+    recette_id INTEGER REFERENCES recettes(id) ON DELETE SET NULL,
+    date_debut TIMESTAMP,
+    date_fin TIMESTAMP,
+    terminee BOOLEAN DEFAULT FALSE,
+    active BOOLEAN DEFAULT FALSE,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_minuteur_user_id ON minuteur_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_minuteur_active ON minuteur_sessions(active);
+CREATE INDEX IF NOT EXISTS idx_minuteur_cree_le ON minuteur_sessions(cree_le DESC);
+-- ============================================================================
+
+
+-- Source: 12_triggers.sql
 
 
 -- Source: 04_cuisine.sql
@@ -932,6 +1200,7 @@ CREATE TABLE ingredients (
 CREATE UNIQUE INDEX IF NOT EXISTS uq_ingredients_nom ON ingredients(nom);
 CREATE INDEX IF NOT EXISTS ix_ingredients_categorie ON ingredients(categorie);
 CREATE INDEX IF NOT EXISTS ix_ingredients_saison ON ingredients(saison);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE recettes (
@@ -998,6 +1267,7 @@ CREATE INDEX IF NOT EXISTS ix_recettes_compatible_cookeo ON recettes(compatible_
 CREATE INDEX IF NOT EXISTS ix_recettes_compatible_monsieur_cuisine ON recettes(compatible_monsieur_cuisine);
 CREATE INDEX IF NOT EXISTS ix_recettes_compatible_airfryer ON recettes(compatible_airfryer);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE plannings (
     id SERIAL PRIMARY KEY,
@@ -1013,6 +1283,7 @@ CREATE TABLE plannings (
 CREATE INDEX IF NOT EXISTS ix_plannings_semaine_debut ON plannings(semaine_debut);
 CREATE INDEX IF NOT EXISTS ix_plannings_etat ON plannings(etat);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE listes_courses (
     id SERIAL PRIMARY KEY,
@@ -1025,6 +1296,7 @@ CREATE TABLE listes_courses (
 );
 CREATE INDEX IF NOT EXISTS ix_listes_courses_etat ON listes_courses(etat);
 CREATE INDEX IF NOT EXISTS ix_listes_courses_archivee ON listes_courses(archivee);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE modeles_courses (
@@ -1041,6 +1313,7 @@ CREATE INDEX IF NOT EXISTS ix_modeles_courses_nom ON modeles_courses(nom);
 CREATE INDEX IF NOT EXISTS ix_modeles_courses_utilisateur_id ON modeles_courses(utilisateur_id);
 CREATE INDEX IF NOT EXISTS ix_modeles_courses_actif ON modeles_courses(actif);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE templates_semaine (
     id SERIAL PRIMARY KEY,
@@ -1050,6 +1323,7 @@ CREATE TABLE templates_semaine (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE config_batch_cooking (
@@ -1068,6 +1342,7 @@ CREATE TABLE config_batch_cooking (
     CONSTRAINT ck_config_batch_objectif_positif CHECK (objectif_portions_semaine > 0)
 );
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE recette_ingredients (
     id SERIAL PRIMARY KEY,
@@ -1083,6 +1358,7 @@ CREATE TABLE recette_ingredients (
 CREATE INDEX IF NOT EXISTS ix_recette_ingredients_recette ON recette_ingredients(recette_id);
 CREATE INDEX IF NOT EXISTS ix_recette_ingredients_ingredient ON recette_ingredients(ingredient_id);
 CREATE INDEX IF NOT EXISTS idx_recette_ingredients_ingredient_id ON recette_ingredients(ingredient_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE etapes_recette (
@@ -1101,6 +1377,7 @@ CREATE TABLE etapes_recette (
 );
 CREATE INDEX IF NOT EXISTS ix_etapes_recette_recette ON etapes_recette(recette_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE versions_recette (
     id SERIAL PRIMARY KEY,
@@ -1116,6 +1393,7 @@ CREATE TABLE versions_recette (
 );
 CREATE INDEX IF NOT EXISTS ix_versions_recette_base ON versions_recette(recette_base_id);
 CREATE INDEX IF NOT EXISTS ix_versions_recette_type ON versions_recette(type_version);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE historique_recettes (
@@ -1139,6 +1417,7 @@ CREATE TABLE historique_recettes (
 CREATE INDEX IF NOT EXISTS ix_historique_recettes_recette ON historique_recettes(recette_id);
 CREATE INDEX IF NOT EXISTS ix_historique_recettes_date ON historique_recettes(date_cuisson);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE repas_batch (
     id SERIAL PRIMARY KEY,
@@ -1160,6 +1439,7 @@ CREATE INDEX IF NOT EXISTS ix_batch_meals_recette ON repas_batch(recette_id);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_date_prep ON repas_batch(date_preparation);
 CREATE INDEX IF NOT EXISTS ix_batch_meals_date_peremption ON repas_batch(date_peremption);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE retours_recettes (
     id SERIAL PRIMARY KEY,
@@ -1175,6 +1455,7 @@ CREATE TABLE retours_recettes (
 CREATE INDEX IF NOT EXISTS ix_recipe_feedbacks_user ON retours_recettes(user_id);
 CREATE INDEX IF NOT EXISTS ix_recipe_feedbacks_recette ON retours_recettes(recette_id);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_user_recipe_feedback ON retours_recettes(user_id, recette_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE inventaire (
@@ -1202,6 +1483,7 @@ CREATE INDEX IF NOT EXISTS ix_inventaire_derniere_maj ON inventaire(derniere_maj
 CREATE UNIQUE INDEX IF NOT EXISTS uq_code_barres ON inventaire(code_barres);
 CREATE INDEX IF NOT EXISTS ix_inventaire_code_barres ON inventaire(code_barres);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE historique_inventaire (
     id SERIAL PRIMARY KEY,
@@ -1228,6 +1510,7 @@ CREATE INDEX IF NOT EXISTS ix_historique_inventaire_ingredient ON historique_inv
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_type ON historique_inventaire(type_modification);
 CREATE INDEX IF NOT EXISTS ix_historique_inventaire_date ON historique_inventaire(date_modification);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE articles_courses (
     id SERIAL PRIMARY KEY,
@@ -1252,6 +1535,7 @@ CREATE INDEX IF NOT EXISTS ix_articles_courses_priorite ON articles_courses(prio
 CREATE INDEX IF NOT EXISTS ix_articles_courses_achete ON articles_courses(achete);
 CREATE INDEX IF NOT EXISTS ix_articles_courses_cree_le ON articles_courses(cree_le);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE articles_modeles (
     id SERIAL PRIMARY KEY,
@@ -1275,6 +1559,7 @@ CREATE TABLE articles_modeles (
 );
 CREATE INDEX IF NOT EXISTS ix_articles_modeles_modele ON articles_modeles(modele_id);
 CREATE INDEX IF NOT EXISTS ix_articles_modeles_ingredient ON articles_modeles(ingredient_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE repas (
@@ -1312,6 +1597,7 @@ CREATE INDEX IF NOT EXISTS ix_repas_recette ON repas(recette_id);
 CREATE INDEX IF NOT EXISTS ix_repas_date ON repas(date_repas);
 CREATE INDEX IF NOT EXISTS ix_repas_type ON repas(type_repas);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE elements_templates (
     id SERIAL PRIMARY KEY,
@@ -1330,6 +1616,7 @@ CREATE TABLE elements_templates (
     )
 );
 CREATE INDEX IF NOT EXISTS idx_template_jour ON elements_templates(template_id, jour_semaine);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE sessions_batch_cooking (
@@ -1367,6 +1654,7 @@ CREATE INDEX IF NOT EXISTS ix_sessions_batch_statut ON sessions_batch_cooking(st
 CREATE INDEX IF NOT EXISTS ix_sessions_batch_planning ON sessions_batch_cooking(planning_id);
 CREATE INDEX IF NOT EXISTS idx_session_date_statut ON sessions_batch_cooking(date_session, statut);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE etapes_batch_cooking (
     id SERIAL PRIMARY KEY,
@@ -1400,6 +1688,7 @@ CREATE TABLE etapes_batch_cooking (
 CREATE INDEX IF NOT EXISTS ix_etapes_batch_session ON etapes_batch_cooking(session_id);
 CREATE INDEX IF NOT EXISTS ix_etapes_batch_recette ON etapes_batch_cooking(recette_id);
 CREATE INDEX IF NOT EXISTS idx_etape_session_ordre ON etapes_batch_cooking(session_id, ordre);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE preparations_batch (
@@ -1437,38 +1726,6 @@ CREATE INDEX IF NOT EXISTS ix_prep_batch_consomme ON preparations_batch(consomme
 CREATE INDEX IF NOT EXISTS idx_prep_localisation_peremption ON preparations_batch(localisation, date_peremption);
 CREATE INDEX IF NOT EXISTS idx_prep_consomme_peremption ON preparations_batch(consomme, date_peremption);
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Table congélation — persistance des articles congelés (P3-05)
--- Remplace le stockage mémoire de congelation.py
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS batch_cooking_congelation (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(200) NOT NULL,
-    date_congelation DATE NOT NULL DEFAULT CURRENT_DATE,
-    date_limite DATE NOT NULL,
-    portions INTEGER NOT NULL DEFAULT 1,
-    categorie VARCHAR(50) NOT NULL DEFAULT 'autre',
-    recette_id INTEGER,
-    session_id INTEGER,
-    notes TEXT,
-    consomme BOOLEAN NOT NULL DEFAULT FALSE,
-    date_consommation DATE,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_congelation_recette FOREIGN KEY (recette_id) REFERENCES recettes(id) ON DELETE SET NULL,
-    CONSTRAINT fk_congelation_session FOREIGN KEY (session_id) REFERENCES sessions_batch_cooking(id) ON DELETE SET NULL,
-    CONSTRAINT ck_congelation_portions_positive CHECK (portions > 0),
-    CONSTRAINT ck_congelation_categorie CHECK (categorie IN (
-        'viande', 'poisson', 'legume', 'fruit', 'plat_cuisine',
-        'soupe', 'sauce', 'pain', 'patisserie', 'herbes', 'autre'
-    ))
-);
-CREATE INDEX IF NOT EXISTS ix_congelation_date_limite ON batch_cooking_congelation(date_limite);
-CREATE INDEX IF NOT EXISTS ix_congelation_categorie ON batch_cooking_congelation(categorie);
-CREATE INDEX IF NOT EXISTS ix_congelation_consomme ON batch_cooking_congelation(consomme);
-CREATE INDEX IF NOT EXISTS ix_congelation_recette ON batch_cooking_congelation(recette_id);
-CREATE INDEX IF NOT EXISTS idx_congelation_consomme_limite ON batch_cooking_congelation(consomme, date_limite)
-    WHERE consomme = FALSE;
 
 
 -- Source: 05_famille.sql
@@ -1490,6 +1747,7 @@ CREATE TABLE profils_enfants (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE routines_sante (
     id SERIAL PRIMARY KEY,
@@ -1505,6 +1763,7 @@ CREATE TABLE routines_sante (
 );
 CREATE INDEX IF NOT EXISTS ix_health_routines_type ON routines_sante(type_routine);
 CREATE INDEX IF NOT EXISTS ix_health_routines_actif ON routines_sante(actif);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE objectifs_sante (
@@ -1526,6 +1785,7 @@ CREATE TABLE objectifs_sante (
 );
 CREATE INDEX IF NOT EXISTS ix_health_objectives_categorie ON objectifs_sante(categorie);
 CREATE INDEX IF NOT EXISTS ix_health_objectives_statut ON objectifs_sante(statut);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE activites_weekend (
@@ -1564,6 +1824,7 @@ CREATE INDEX IF NOT EXISTS ix_weekend_activities_type ON activites_weekend(type_
 CREATE INDEX IF NOT EXISTS ix_weekend_activities_date ON activites_weekend(date_prevue);
 CREATE INDEX IF NOT EXISTS ix_weekend_activities_statut ON activites_weekend(statut);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE achats_famille (
     id SERIAL PRIMARY KEY,
@@ -1593,6 +1854,7 @@ CREATE INDEX IF NOT EXISTS ix_family_purchases_categorie ON achats_famille(categ
 CREATE INDEX IF NOT EXISTS ix_family_purchases_priorite ON achats_famille(priorite);
 CREATE INDEX IF NOT EXISTS ix_family_purchases_achete ON achats_famille(achete);
 CREATE INDEX IF NOT EXISTS ix_achats_famille_pour_qui ON achats_famille(pour_qui);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE activites_famille (
@@ -1624,6 +1886,7 @@ CREATE INDEX IF NOT EXISTS ix_family_activities_type ON activites_famille(type_a
 CREATE INDEX IF NOT EXISTS ix_family_activities_date ON activites_famille(date_prevue);
 CREATE INDEX IF NOT EXISTS ix_family_activities_statut ON activites_famille(statut);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE budgets_famille (
     id SERIAL PRIMARY KEY,
@@ -1640,6 +1903,7 @@ CREATE TABLE budgets_famille (
 );
 CREATE INDEX IF NOT EXISTS ix_family_budgets_date ON budgets_famille(date);
 CREATE INDEX IF NOT EXISTS ix_family_budgets_categorie ON budgets_famille(categorie);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE articles_achats_famille (
@@ -1659,6 +1923,7 @@ CREATE INDEX IF NOT EXISTS ix_shopping_items_liste ON articles_achats_famille(li
 CREATE INDEX IF NOT EXISTS ix_shopping_items_actif ON articles_achats_famille(actif);
 CREATE INDEX IF NOT EXISTS ix_shopping_items_date ON articles_achats_famille(date_ajout);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE historique_achats (
     id SERIAL PRIMARY KEY,
@@ -1672,6 +1937,7 @@ CREATE TABLE historique_achats (
 CREATE INDEX IF NOT EXISTS ix_historique_achats_nom ON historique_achats(article_nom);
 CREATE INDEX IF NOT EXISTS ix_historique_achats_date ON historique_achats(derniere_achat);
 CREATE INDEX IF NOT EXISTS ix_historique_achats_nom_date ON historique_achats(article_nom, derniere_achat);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE garmin_tokens (
@@ -1687,6 +1953,7 @@ CREATE TABLE garmin_tokens (
     CONSTRAINT fk_garmin_tokens_user FOREIGN KEY (user_id) REFERENCES profils_utilisateurs(id) ON DELETE CASCADE
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_garmin_tokens_user_id ON garmin_tokens(user_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE activites_garmin (
@@ -1714,6 +1981,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_garmin_activity_id ON activites_garmin(garm
 CREATE INDEX IF NOT EXISTS ix_garmin_activities_user ON activites_garmin(user_id);
 CREATE INDEX IF NOT EXISTS ix_garmin_activities_type ON activites_garmin(type_activite);
 CREATE INDEX IF NOT EXISTS ix_garmin_activities_date ON activites_garmin(date_debut);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE resumes_quotidiens_garmin (
@@ -1744,6 +2012,7 @@ CREATE INDEX IF NOT EXISTS ix_garmin_daily_user ON resumes_quotidiens_garmin(use
 CREATE INDEX IF NOT EXISTS ix_garmin_daily_date ON resumes_quotidiens_garmin(date);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_garmin_daily_user_date ON resumes_quotidiens_garmin(user_id, date);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE journaux_alimentaires (
     id SERIAL PRIMARY KEY,
@@ -1771,6 +2040,7 @@ CREATE TABLE journaux_alimentaires (
 CREATE INDEX IF NOT EXISTS ix_food_logs_user ON journaux_alimentaires(user_id);
 CREATE INDEX IF NOT EXISTS ix_food_logs_date ON journaux_alimentaires(date);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE entrees_bien_etre (
     id SERIAL PRIMARY KEY,
@@ -1787,6 +2057,7 @@ CREATE TABLE entrees_bien_etre (
 CREATE INDEX IF NOT EXISTS ix_wellbeing_child ON entrees_bien_etre(child_id);
 CREATE INDEX IF NOT EXISTS ix_wellbeing_username ON entrees_bien_etre(username);
 CREATE INDEX IF NOT EXISTS ix_wellbeing_date ON entrees_bien_etre(date);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jalons (
@@ -1809,6 +2080,7 @@ CREATE INDEX IF NOT EXISTS ix_milestones_child ON jalons(child_id);
 CREATE INDEX IF NOT EXISTS idx_jalons_profil_id ON jalons(child_id);
 CREATE INDEX IF NOT EXISTS ix_milestones_categorie ON jalons(categorie);
 CREATE INDEX IF NOT EXISTS ix_milestones_date ON jalons(date_atteint);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE entrees_sante (
@@ -1844,6 +2116,7 @@ CREATE TABLE entrees_sante (
 CREATE INDEX IF NOT EXISTS ix_health_entries_routine ON entrees_sante(routine_id);
 CREATE INDEX IF NOT EXISTS ix_health_entries_date ON entrees_sante(date);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE vaccins (
     id SERIAL PRIMARY KEY,
@@ -1862,6 +2135,7 @@ CREATE TABLE vaccins (
 );
 CREATE INDEX IF NOT EXISTS ix_vaccins_child ON vaccins(child_id);
 CREATE INDEX IF NOT EXISTS ix_vaccins_rappel ON vaccins(rappel_prevu);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE rendez_vous_medicaux (
@@ -1883,6 +2157,7 @@ CREATE TABLE rendez_vous_medicaux (
 CREATE INDEX IF NOT EXISTS ix_rdv_child ON rendez_vous_medicaux(child_id);
 CREATE INDEX IF NOT EXISTS ix_rdv_date ON rendez_vous_medicaux(date_rdv);
 CREATE INDEX IF NOT EXISTS ix_rdv_membre ON rendez_vous_medicaux(membre_famille);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE mesures_croissance (
@@ -1908,6 +2183,7 @@ CREATE TABLE mesures_croissance (
 );
 CREATE INDEX IF NOT EXISTS ix_croissance_child ON mesures_croissance(child_id);
 CREATE INDEX IF NOT EXISTS ix_croissance_date ON mesures_croissance(date_mesure);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE contacts_famille (
@@ -1939,6 +2215,7 @@ CREATE INDEX IF NOT EXISTS ix_contacts_categorie ON contacts_famille(categorie);
 CREATE INDEX IF NOT EXISTS ix_contacts_urgence ON contacts_famille(est_urgence)
 WHERE est_urgence = TRUE;
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE anniversaires_famille (
     id SERIAL PRIMARY KEY,
@@ -1952,6 +2229,7 @@ CREATE TABLE anniversaires_famille (
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_anniversaires_date ON anniversaires_famille(date_naissance);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE evenements_familiaux (
@@ -1985,6 +2263,7 @@ CREATE TABLE evenements_familiaux (
 );
 CREATE INDEX IF NOT EXISTS ix_evenements_date_debut ON evenements_familiaux(date_debut);
 CREATE INDEX IF NOT EXISTS ix_evenements_type ON evenements_familiaux(type_evenement);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE documents_famille (
@@ -2027,6 +2306,14 @@ CREATE INDEX IF NOT EXISTS ix_documents_membre ON documents_famille(membre_famil
 -- Contient : projets, routines, jardin, entretien, stocks, pièces,
 --            objets, artisans, énergie, maison extensions
 -- ============================================================================
+
+
+-- Source: 06a_projets.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Maison : Projets & Routines
+-- ============================================================================
+-- Contient : projets, routines, tâches projet, tâches routine
+-- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE projets (
     id SERIAL PRIMARY KEY,
@@ -2043,6 +2330,7 @@ CREATE TABLE projets (
 );
 CREATE INDEX IF NOT EXISTS ix_projects_statut ON projets(statut);
 CREATE INDEX IF NOT EXISTS ix_projects_categorie ON projets(categorie);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE routines (
@@ -2061,94 +2349,47 @@ CREATE TABLE routines (
 CREATE INDEX IF NOT EXISTS ix_routines_type ON routines(type_routine);
 CREATE INDEX IF NOT EXISTS ix_routines_actif ON routines(actif);
 
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE elements_jardin (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(200) NOT NULL,
-    type_plante VARCHAR(100) NOT NULL,
-    emplacement VARCHAR(200),
-    date_plantation DATE,
-    frequence_arrosage VARCHAR(50),
-    derniere_action DATE,
-    statut VARCHAR(50) NOT NULL DEFAULT 'actif',
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_garden_items_type ON elements_jardin(type_plante);
-CREATE INDEX IF NOT EXISTS ix_garden_items_statut ON elements_jardin(statut);
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE meubles (
+CREATE TABLE taches_projets (
     id SERIAL PRIMARY KEY,
+    project_id INTEGER NOT NULL,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
-    piece VARCHAR(50) NOT NULL,
-    categorie VARCHAR(100),
-    prix_estime NUMERIC(10, 2),
-    prix_max NUMERIC(10, 2),
-    prix_reel NUMERIC(10, 2),
-    statut VARCHAR(20) NOT NULL DEFAULT 'souhaite',
-    priorite VARCHAR(20) NOT NULL DEFAULT 'normale',
-    magasin VARCHAR(200),
-    url VARCHAR(500),
-    reference VARCHAR(100),
-    largeur_cm INTEGER,
-    hauteur_cm INTEGER,
-    profondeur_cm INTEGER,
-    date_souhait DATE NOT NULL DEFAULT CURRENT_DATE,
-    date_achat DATE,
-    notes TEXT,
+    statut VARCHAR(50) NOT NULL DEFAULT 'à_faire',
+    priorite VARCHAR(50) NOT NULL DEFAULT 'moyenne',
+    date_echeance DATE,
+    assigne_a VARCHAR(200),
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    CONSTRAINT fk_project_tasks_project FOREIGN KEY (project_id) REFERENCES projets(id) ON DELETE CASCADE
 );
-CREATE INDEX IF NOT EXISTS ix_furniture_piece ON meubles(piece);
-CREATE INDEX IF NOT EXISTS ix_furniture_statut ON meubles(statut);
-CREATE INDEX IF NOT EXISTS ix_furniture_priorite ON meubles(priorite);
+CREATE INDEX IF NOT EXISTS ix_project_tasks_project ON taches_projets(project_id);
+CREATE INDEX IF NOT EXISTS ix_project_tasks_statut ON taches_projets(statut);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE depenses_maison (
+CREATE TABLE taches_routines (
     id SERIAL PRIMARY KEY,
-    categorie VARCHAR(50) NOT NULL,
-    mois INTEGER NOT NULL,
-    annee INTEGER NOT NULL,
-    montant NUMERIC(10, 2) NOT NULL,
-    consommation FLOAT,
-    unite_consommation VARCHAR(20),
-    fournisseur VARCHAR(200),
-    numero_contrat VARCHAR(100),
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    CONSTRAINT ck_house_mois_valide CHECK (
-        mois >= 1
-        AND mois <= 12
-    ),
-    CONSTRAINT ck_house_montant_positif CHECK (montant >= 0),
-    CONSTRAINT ck_house_consommation_positive CHECK (
-        consommation IS NULL
-        OR consommation >= 0
-    )
-);
-CREATE INDEX IF NOT EXISTS ix_house_expenses_categorie ON depenses_maison(categorie);
-CREATE INDEX IF NOT EXISTS ix_house_expenses_annee ON depenses_maison(annee);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE actions_ecologiques (
-    id SERIAL PRIMARY KEY,
+    routine_id INTEGER NOT NULL,
     nom VARCHAR(200) NOT NULL,
     description TEXT,
-    type_action VARCHAR(50) NOT NULL,
-    ancien_produit VARCHAR(200),
-    nouveau_produit VARCHAR(200),
-    cout_ancien_mensuel NUMERIC(10, 2),
-    cout_nouveau_initial NUMERIC(10, 2),
-    economie_mensuelle NUMERIC(10, 2),
-    date_debut DATE NOT NULL DEFAULT CURRENT_DATE,
-    actif BOOLEAN NOT NULL DEFAULT TRUE,
+    ordre INTEGER NOT NULL DEFAULT 1,
+    heure_prevue VARCHAR(5),
+    fait_le DATE,
     notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_routine_tasks_routine FOREIGN KEY (routine_id) REFERENCES routines(id) ON DELETE CASCADE
 );
-CREATE INDEX IF NOT EXISTS ix_eco_actions_type ON actions_ecologiques(type_action);
+CREATE INDEX IF NOT EXISTS ix_routine_tasks_routine ON taches_routines(routine_id);
 
+
+
+-- Source: 06b_entretien.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Maison : Entretien & Organisation
+-- ============================================================================
+-- Contient : entretien, préférences home, tâches home, stats, checklists
+-- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE taches_entretien (
     id SERIAL PRIMARY KEY,
@@ -2172,268 +2413,6 @@ CREATE INDEX IF NOT EXISTS ix_maintenance_tasks_categorie ON taches_entretien(ca
 CREATE INDEX IF NOT EXISTS ix_maintenance_tasks_prochaine ON taches_entretien(prochaine_fois);
 CREATE INDEX IF NOT EXISTS ix_maintenance_tasks_fait ON taches_entretien(fait);
 
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE stocks_maison (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(200) NOT NULL,
-    categorie VARCHAR(100) NOT NULL,
-    quantite INTEGER NOT NULL DEFAULT 0,
-    unite VARCHAR(20) NOT NULL DEFAULT 'unité',
-    seuil_alerte INTEGER NOT NULL DEFAULT 1,
-    emplacement VARCHAR(200),
-    prix_unitaire NUMERIC(10, 2),
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_house_stocks_categorie ON stocks_maison(categorie);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE plans_jardin (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL,
-    largeur NUMERIC(6, 2) NOT NULL,
-    hauteur NUMERIC(6, 2) NOT NULL,
-    description TEXT,
-    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_plans_jardin_nom ON plans_jardin(nom);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE pieces_maison (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL,
-    etage INTEGER DEFAULT 0,
-    superficie_m2 NUMERIC(6, 2),
-    type_piece VARCHAR(50),
-    description TEXT,
-    position_x INTEGER DEFAULT 0,
-    position_y INTEGER DEFAULT 0,
-    largeur_px INTEGER DEFAULT 100,
-    hauteur_px INTEGER DEFAULT 100,
-    cree_le TIMESTAMP DEFAULT NOW(),
-    modifie_le TIMESTAMP DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_pieces_maison_type ON pieces_maison(type_piece);
--- ============================================================================
--- PARTIE 4 : TABLES AVEC DÉPENDANCES FK
--- ============================================================================
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE taches_projets (
-    id SERIAL PRIMARY KEY,
-    project_id INTEGER NOT NULL,
-    nom VARCHAR(200) NOT NULL,
-    description TEXT,
-    statut VARCHAR(50) NOT NULL DEFAULT 'à_faire',
-    priorite VARCHAR(50) NOT NULL DEFAULT 'moyenne',
-    date_echeance DATE,
-    assigne_a VARCHAR(200),
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_project_tasks_project FOREIGN KEY (project_id) REFERENCES projets(id) ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS ix_project_tasks_project ON taches_projets(project_id);
-CREATE INDEX IF NOT EXISTS ix_project_tasks_statut ON taches_projets(statut);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE taches_routines (
-    id SERIAL PRIMARY KEY,
-    routine_id INTEGER NOT NULL,
-    nom VARCHAR(200) NOT NULL,
-    description TEXT,
-    ordre INTEGER NOT NULL DEFAULT 1,
-    heure_prevue VARCHAR(5),
-    fait_le DATE,
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_routine_tasks_routine FOREIGN KEY (routine_id) REFERENCES routines(id) ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS ix_routine_tasks_routine ON taches_routines(routine_id);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE journaux_jardin (
-    id SERIAL PRIMARY KEY,
-    garden_item_id INTEGER,
-    date DATE NOT NULL DEFAULT CURRENT_DATE,
-    action VARCHAR(200) NOT NULL,
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_garden_logs_item FOREIGN KEY (garden_item_id) REFERENCES elements_jardin(id) ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS ix_garden_logs_item ON journaux_jardin(garden_item_id);
-CREATE INDEX IF NOT EXISTS ix_garden_logs_date ON journaux_jardin(date);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE zones_jardin (
-    id SERIAL PRIMARY KEY,
-    plan_id INTEGER,
-    nom VARCHAR(100) NOT NULL,
-    type_zone VARCHAR(50) NOT NULL,
-    superficie_m2 NUMERIC(8, 2),
-    exposition VARCHAR(10),
-    type_sol VARCHAR(50),
-    arrosage_auto BOOLEAN DEFAULT FALSE,
-    description TEXT,
-    -- Positions 2D (canvas)
-    position_x INTEGER DEFAULT 0,
-    position_y INTEGER DEFAULT 0,
-    largeur_px INTEGER DEFAULT 100,
-    hauteur_px INTEGER DEFAULT 100,
-    couleur VARCHAR(20) DEFAULT '#4CAF50',
-    cree_le TIMESTAMP DEFAULT NOW(),
-    modifie_le TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT fk_zones_jardin_plan_id FOREIGN KEY (plan_id) REFERENCES plans_jardin(id) ON DELETE
-    SET NULL
-);
-CREATE INDEX IF NOT EXISTS idx_zones_jardin_type ON zones_jardin(type_zone);
-CREATE INDEX IF NOT EXISTS idx_zones_jardin_plan_id ON zones_jardin(plan_id);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE plantes_jardin (
-    id SERIAL PRIMARY KEY,
-    zone_id INTEGER NOT NULL,
-    nom VARCHAR(100) NOT NULL,
-    variete VARCHAR(100),
-    etat VARCHAR(20) DEFAULT 'bon',
-    date_plantation DATE,
-    mois_semis VARCHAR(100),
-    mois_recolte VARCHAR(100),
-    arrosage VARCHAR(50),
-    notes TEXT,
-    position_x NUMERIC(8, 2),
-    position_y NUMERIC(8, 2),
-    cree_le TIMESTAMP DEFAULT NOW(),
-    modifie_le TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT fk_plantes_jardin_zone FOREIGN KEY (zone_id) REFERENCES zones_jardin(id) ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS idx_plantes_jardin_zone ON plantes_jardin(zone_id);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE actions_plantes (
-    id SERIAL PRIMARY KEY,
-    plante_id INTEGER NOT NULL,
-    type_action VARCHAR(50) NOT NULL,
-    date_action DATE NOT NULL DEFAULT CURRENT_DATE,
-    quantite NUMERIC(8, 2),
-    notes TEXT,
-    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_actions_plantes_plante_id FOREIGN KEY (plante_id) REFERENCES plantes_jardin(id) ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS idx_actions_plantes_plante_id ON actions_plantes(plante_id);
-CREATE INDEX IF NOT EXISTS idx_actions_plantes_type_action ON actions_plantes(type_action);
-CREATE INDEX IF NOT EXISTS idx_actions_plantes_date_action ON actions_plantes(date_action);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE objets_maison (
-    id SERIAL PRIMARY KEY,
-    piece_id INTEGER NOT NULL,
-    nom VARCHAR(200) NOT NULL,
-    categorie VARCHAR(50),
-    statut VARCHAR(50) DEFAULT 'fonctionne',
-    priorite_remplacement VARCHAR(20),
-    date_achat DATE,
-    duree_garantie_mois INTEGER,
-    prix_achat NUMERIC(10, 2),
-    prix_remplacement_estime NUMERIC(10, 2),
-    marque VARCHAR(100),
-    modele VARCHAR(100),
-    notes TEXT,
-    cree_le TIMESTAMP DEFAULT NOW(),
-    modifie_le TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT fk_objets_maison_piece FOREIGN KEY (piece_id) REFERENCES pieces_maison(id) ON DELETE CASCADE
-);
-CREATE INDEX IF NOT EXISTS idx_objets_maison_piece ON objets_maison(piece_id);
-CREATE INDEX IF NOT EXISTS idx_objets_maison_categorie ON objets_maison(categorie);
-CREATE INDEX IF NOT EXISTS idx_objets_maison_statut ON objets_maison(statut);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE sessions_travail (
-    id SERIAL PRIMARY KEY,
-    type_activite VARCHAR(50) NOT NULL,
-    zone_jardin_id INTEGER,
-    piece_id INTEGER,
-    description TEXT,
-    debut TIMESTAMP NOT NULL,
-    fin TIMESTAMP,
-    duree_minutes INTEGER,
-    notes TEXT,
-    difficulte INTEGER,
-    satisfaction INTEGER,
-    cree_le TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT ck_sessions_duree_positive CHECK (
-        duree_minutes IS NULL
-        OR duree_minutes >= 0
-    ),
-    CONSTRAINT ck_difficulte_range CHECK (
-        difficulte IS NULL
-        OR (
-            difficulte >= 1
-            AND difficulte <= 5
-        )
-    ),
-    CONSTRAINT ck_satisfaction_range CHECK (
-        satisfaction IS NULL
-        OR (
-            satisfaction >= 1
-            AND satisfaction <= 5
-        )
-    )
-);
-CREATE INDEX IF NOT EXISTS idx_sessions_travail_type ON sessions_travail(type_activite);
-CREATE INDEX IF NOT EXISTS idx_sessions_travail_zone ON sessions_travail(zone_jardin_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_travail_piece ON sessions_travail(piece_id);
-CREATE INDEX IF NOT EXISTS idx_sessions_travail_type_debut ON sessions_travail(type_activite, debut);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE versions_pieces (
-    id SERIAL PRIMARY KEY,
-    piece_id INTEGER NOT NULL REFERENCES pieces_maison(id) ON DELETE CASCADE,
-    version INTEGER NOT NULL,
-    type_modification VARCHAR(50) NOT NULL,
-    titre VARCHAR(200) NOT NULL,
-    description TEXT,
-    date_modification DATE NOT NULL,
-    cout_total NUMERIC(10, 2),
-    photo_avant_url VARCHAR(500),
-    photo_apres_url VARCHAR(500),
-    cree_le TIMESTAMP DEFAULT NOW(),
-    cree_par VARCHAR(100)
-);
-CREATE INDEX IF NOT EXISTS idx_versions_pieces_piece ON versions_pieces(piece_id);
-CREATE INDEX IF NOT EXISTS idx_versions_pieces_piece_version ON versions_pieces(piece_id, version);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE couts_travaux (
-    id SERIAL PRIMARY KEY,
-    version_id INTEGER NOT NULL,
-    categorie VARCHAR(50) NOT NULL,
-    libelle VARCHAR(200) NOT NULL,
-    montant NUMERIC(10, 2) NOT NULL,
-    fournisseur VARCHAR(200),
-    facture_ref VARCHAR(100),
-    date_paiement DATE,
-    cree_le TIMESTAMP DEFAULT NOW(),
-    CONSTRAINT fk_couts_travaux_version FOREIGN KEY (version_id) REFERENCES versions_pieces(id) ON DELETE CASCADE,
-    CONSTRAINT ck_cout_montant_positif CHECK (montant >= 0)
-);
-CREATE INDEX IF NOT EXISTS idx_couts_travaux_version ON couts_travaux(version_id);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE logs_statut_objets (
-    id SERIAL PRIMARY KEY,
-    objet_id INTEGER NOT NULL,
-    ancien_statut VARCHAR(50),
-    nouveau_statut VARCHAR(50) NOT NULL,
-    raison TEXT,
-    prix_estime NUMERIC(10, 2),
-    priorite VARCHAR(20),
-    ajoute_courses BOOLEAN DEFAULT FALSE,
-    ajoute_budget BOOLEAN DEFAULT FALSE,
-    date_changement TIMESTAMP DEFAULT NOW(),
-    change_par VARCHAR(100)
-);
-CREATE INDEX IF NOT EXISTS idx_logs_statut_objet ON logs_statut_objets(objet_id);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE preferences_home (
@@ -2450,6 +2429,7 @@ CREATE TABLE preferences_home (
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE taches_home (
@@ -2496,6 +2476,7 @@ CREATE INDEX IF NOT EXISTS idx_taches_home_statut ON taches_home(statut);
 CREATE INDEX IF NOT EXISTS idx_taches_home_date_due ON taches_home(date_due);
 CREATE INDEX IF NOT EXISTS idx_taches_home_source ON taches_home(source, source_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE stats_home (
     id SERIAL PRIMARY KEY,
@@ -2519,6 +2500,157 @@ CREATE TABLE stats_home (
     UNIQUE(date, domaine)
 );
 CREATE INDEX IF NOT EXISTS idx_stats_home_date ON stats_home(date);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE checklists_vacances (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(200) NOT NULL,
+    type_voyage VARCHAR(50) NOT NULL,
+    destination VARCHAR(200),
+    duree_jours INTEGER,
+    date_depart DATE,
+    date_retour DATE,
+    terminee BOOLEAN DEFAULT FALSE,
+    archivee BOOLEAN DEFAULT FALSE,
+    notes TEXT,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_checklists_type_voyage ON checklists_vacances(type_voyage);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE items_checklist (
+    id SERIAL PRIMARY KEY,
+    checklist_id INTEGER NOT NULL REFERENCES checklists_vacances(id) ON DELETE CASCADE,
+    libelle VARCHAR(300) NOT NULL,
+    categorie VARCHAR(50) NOT NULL,
+    ordre INTEGER DEFAULT 0,
+    fait BOOLEAN DEFAULT FALSE,
+    responsable VARCHAR(50),
+    quand VARCHAR(20),
+    notes TEXT,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_items_checklist_checklist ON items_checklist(checklist_id);
+
+
+
+-- Source: 06c_jardin.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Maison : Jardin & Autonomie
+-- ============================================================================
+-- Contient : jardin, plans, zones, plantes, récoltes, autonomie alimentaire
+-- ============================================================================
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE elements_jardin (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(200) NOT NULL,
+    type_plante VARCHAR(100) NOT NULL,
+    emplacement VARCHAR(200),
+    date_plantation DATE,
+    frequence_arrosage VARCHAR(50),
+    derniere_action DATE,
+    statut VARCHAR(50) NOT NULL DEFAULT 'actif',
+    notes TEXT,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_garden_items_type ON elements_jardin(type_plante);
+CREATE INDEX IF NOT EXISTS ix_garden_items_statut ON elements_jardin(statut);
+CREATE INDEX IF NOT EXISTS ix_garden_items_derniere_action ON elements_jardin(derniere_action);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE plans_jardin (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    largeur NUMERIC(6, 2) NOT NULL,
+    hauteur NUMERIC(6, 2) NOT NULL,
+    description TEXT,
+    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_plans_jardin_nom ON plans_jardin(nom);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE journaux_jardin (
+    id SERIAL PRIMARY KEY,
+    garden_item_id INTEGER,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    action VARCHAR(200) NOT NULL,
+    notes TEXT,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_garden_logs_item FOREIGN KEY (garden_item_id) REFERENCES elements_jardin(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS ix_garden_logs_item ON journaux_jardin(garden_item_id);
+CREATE INDEX IF NOT EXISTS ix_garden_logs_date ON journaux_jardin(date);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE zones_jardin (
+    id SERIAL PRIMARY KEY,
+    plan_id INTEGER,
+    nom VARCHAR(100) NOT NULL,
+    type_zone VARCHAR(50) NOT NULL,
+    superficie_m2 NUMERIC(8, 2),
+    exposition VARCHAR(10),
+    type_sol VARCHAR(50),
+    arrosage_auto BOOLEAN DEFAULT FALSE,
+    description TEXT,
+    -- Positions 2D (canvas)
+    position_x INTEGER DEFAULT 0,
+    position_y INTEGER DEFAULT 0,
+    largeur_px INTEGER DEFAULT 100,
+    hauteur_px INTEGER DEFAULT 100,
+    couleur VARCHAR(20) DEFAULT '#4CAF50',
+    cree_le TIMESTAMP DEFAULT NOW(),
+    modifie_le TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_zones_jardin_plan_id FOREIGN KEY (plan_id) REFERENCES plans_jardin(id) ON DELETE
+    SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_zones_jardin_type ON zones_jardin(type_zone);
+CREATE INDEX IF NOT EXISTS idx_zones_jardin_plan_id ON zones_jardin(plan_id);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE plantes_jardin (
+    id SERIAL PRIMARY KEY,
+    zone_id INTEGER NOT NULL,
+    nom VARCHAR(100) NOT NULL,
+    variete VARCHAR(100),
+    etat VARCHAR(20) DEFAULT 'bon',
+    date_plantation DATE,
+    mois_semis VARCHAR(100),
+    mois_recolte VARCHAR(100),
+    arrosage VARCHAR(50),
+    notes TEXT,
+    position_x NUMERIC(8, 2),
+    position_y NUMERIC(8, 2),
+    cree_le TIMESTAMP DEFAULT NOW(),
+    modifie_le TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_plantes_jardin_zone FOREIGN KEY (zone_id) REFERENCES zones_jardin(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_plantes_jardin_zone ON plantes_jardin(zone_id);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE actions_plantes (
+    id SERIAL PRIMARY KEY,
+    plante_id INTEGER NOT NULL,
+    type_action VARCHAR(50) NOT NULL,
+    date_action DATE NOT NULL DEFAULT CURRENT_DATE,
+    quantite NUMERIC(8, 2),
+    notes TEXT,
+    cree_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_actions_plantes_plante_id FOREIGN KEY (plante_id) REFERENCES plantes_jardin(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_actions_plantes_plante_id ON actions_plantes(plante_id);
+CREATE INDEX IF NOT EXISTS idx_actions_plantes_type_action ON actions_plantes(type_action);
+CREATE INDEX IF NOT EXISTS idx_actions_plantes_date_action ON actions_plantes(date_action);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE plantes_catalogue (
@@ -2549,6 +2681,7 @@ CREATE TABLE plantes_catalogue (
 );
 CREATE INDEX IF NOT EXISTS idx_plantes_catalogue_famille ON plantes_catalogue(famille);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE recoltes (
     id SERIAL PRIMARY KEY,
@@ -2568,6 +2701,7 @@ CREATE TABLE recoltes (
 );
 CREATE INDEX IF NOT EXISTS idx_recoltes_date ON recoltes(date_recolte);
 CREATE INDEX IF NOT EXISTS idx_recoltes_legume ON recoltes(legume);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE objectifs_autonomie (
@@ -2591,65 +2725,198 @@ CREATE TABLE objectifs_autonomie (
     modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+
+
+-- Source: 06d_equipements.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Maison : Equipements & Travaux
+-- ============================================================================
+-- Contient : meubles, stocks, pièces, objets, artisans, devis, diagnostics
+-- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE depenses_home (
+CREATE TABLE meubles (
     id SERIAL PRIMARY KEY,
-    date_depense DATE NOT NULL DEFAULT CURRENT_DATE,
-    montant DECIMAL(10, 2) NOT NULL,
-    categorie VARCHAR(50) NOT NULL CHECK (
-        categorie IN (
-            'jardin',
-            'entretien',
-            'energie',
-            'travaux',
-            'equipement',
-            'decoration',
-            'assurance',
-            'autre'
+    nom VARCHAR(200) NOT NULL,
+    description TEXT,
+    piece VARCHAR(50) NOT NULL,
+    categorie VARCHAR(100),
+    prix_estime NUMERIC(10, 2),
+    prix_max NUMERIC(10, 2),
+    prix_reel NUMERIC(10, 2),
+    statut VARCHAR(20) NOT NULL DEFAULT 'souhaite',
+    priorite VARCHAR(20) NOT NULL DEFAULT 'normale',
+    magasin VARCHAR(200),
+    url VARCHAR(500),
+    reference VARCHAR(100),
+    largeur_cm INTEGER,
+    hauteur_cm INTEGER,
+    profondeur_cm INTEGER,
+    date_souhait DATE NOT NULL DEFAULT CURRENT_DATE,
+    date_achat DATE,
+    notes TEXT,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_furniture_piece ON meubles(piece);
+CREATE INDEX IF NOT EXISTS ix_furniture_statut ON meubles(statut);
+CREATE INDEX IF NOT EXISTS ix_furniture_priorite ON meubles(priorite);
+CREATE INDEX IF NOT EXISTS ix_furniture_date_achat ON meubles(date_achat);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE stocks_maison (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(200) NOT NULL,
+    categorie VARCHAR(100) NOT NULL,
+    quantite INTEGER NOT NULL DEFAULT 0,
+    unite VARCHAR(20) NOT NULL DEFAULT 'unité',
+    seuil_alerte INTEGER NOT NULL DEFAULT 1,
+    emplacement VARCHAR(200),
+    prix_unitaire NUMERIC(10, 2),
+    notes TEXT,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_house_stocks_categorie ON stocks_maison(categorie);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE pieces_maison (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    etage INTEGER DEFAULT 0,
+    superficie_m2 NUMERIC(6, 2),
+    type_piece VARCHAR(50),
+    description TEXT,
+    position_x INTEGER DEFAULT 0,
+    position_y INTEGER DEFAULT 0,
+    largeur_px INTEGER DEFAULT 100,
+    hauteur_px INTEGER DEFAULT 100,
+    cree_le TIMESTAMP DEFAULT NOW(),
+    modifie_le TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_pieces_maison_type ON pieces_maison(type_piece);
+-- ============================================================================
+-- PARTIE 4 : TABLES AVEC DÉPENDANCES FK
+-- ============================================================================
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE objets_maison (
+    id SERIAL PRIMARY KEY,
+    piece_id INTEGER NOT NULL,
+    nom VARCHAR(200) NOT NULL,
+    categorie VARCHAR(50),
+    statut VARCHAR(50) DEFAULT 'fonctionne',
+    priorite_remplacement VARCHAR(20),
+    date_achat DATE,
+    duree_garantie_mois INTEGER,
+    prix_achat NUMERIC(10, 2),
+    prix_remplacement_estime NUMERIC(10, 2),
+    marque VARCHAR(100),
+    modele VARCHAR(100),
+    notes TEXT,
+    cree_le TIMESTAMP DEFAULT NOW(),
+    modifie_le TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_objets_maison_piece FOREIGN KEY (piece_id) REFERENCES pieces_maison(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_objets_maison_piece ON objets_maison(piece_id);
+CREATE INDEX IF NOT EXISTS idx_objets_maison_categorie ON objets_maison(categorie);
+CREATE INDEX IF NOT EXISTS idx_objets_maison_statut ON objets_maison(statut);
+CREATE INDEX IF NOT EXISTS idx_objets_maison_date_achat ON objets_maison(date_achat);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE sessions_travail (
+    id SERIAL PRIMARY KEY,
+    type_activite VARCHAR(50) NOT NULL,
+    zone_jardin_id INTEGER,
+    piece_id INTEGER,
+    description TEXT,
+    debut TIMESTAMP NOT NULL,
+    fin TIMESTAMP,
+    duree_minutes INTEGER,
+    notes TEXT,
+    difficulte INTEGER,
+    satisfaction INTEGER,
+    cree_le TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT ck_sessions_duree_positive CHECK (
+        duree_minutes IS NULL
+        OR duree_minutes >= 0
+    ),
+    CONSTRAINT ck_difficulte_range CHECK (
+        difficulte IS NULL
+        OR (
+            difficulte >= 1
+            AND difficulte <= 5
         )
     ),
-    sous_categorie VARCHAR(50),
+    CONSTRAINT ck_satisfaction_range CHECK (
+        satisfaction IS NULL
+        OR (
+            satisfaction >= 1
+            AND satisfaction <= 5
+        )
+    )
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_travail_type ON sessions_travail(type_activite);
+CREATE INDEX IF NOT EXISTS idx_sessions_travail_zone ON sessions_travail(zone_jardin_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_travail_piece ON sessions_travail(piece_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_travail_type_debut ON sessions_travail(type_activite, debut);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE versions_pieces (
+    id SERIAL PRIMARY KEY,
+    piece_id INTEGER NOT NULL REFERENCES pieces_maison(id) ON DELETE CASCADE,
+    version INTEGER NOT NULL,
+    type_modification VARCHAR(50) NOT NULL,
+    titre VARCHAR(200) NOT NULL,
     description TEXT,
-    magasin VARCHAR(100),
-    recurrent BOOLEAN DEFAULT FALSE,
-    frequence_mois INTEGER,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    date_modification DATE NOT NULL,
+    cout_total NUMERIC(10, 2),
+    photo_avant_url VARCHAR(500),
+    photo_apres_url VARCHAR(500),
+    cree_le TIMESTAMP DEFAULT NOW(),
+    cree_par VARCHAR(100)
 );
-CREATE INDEX IF NOT EXISTS idx_depenses_home_date ON depenses_home(date_depense);
-CREATE INDEX IF NOT EXISTS idx_depenses_home_categorie ON depenses_home(categorie);
+CREATE INDEX IF NOT EXISTS idx_versions_pieces_piece ON versions_pieces(piece_id);
+CREATE INDEX IF NOT EXISTS idx_versions_pieces_piece_version ON versions_pieces(piece_id, version);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE budgets_home (
+CREATE TABLE couts_travaux (
     id SERIAL PRIMARY KEY,
-    categorie VARCHAR(50) NOT NULL UNIQUE,
-    montant_mensuel DECIMAL(10, 2) NOT NULL,
-    alerte_pourcent INTEGER DEFAULT 80,
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    version_id INTEGER NOT NULL,
+    categorie VARCHAR(50) NOT NULL,
+    libelle VARCHAR(200) NOT NULL,
+    montant NUMERIC(10, 2) NOT NULL,
+    fournisseur VARCHAR(200),
+    facture_ref VARCHAR(100),
+    date_paiement DATE,
+    cree_le TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_couts_travaux_version FOREIGN KEY (version_id) REFERENCES versions_pieces(id) ON DELETE CASCADE,
+    CONSTRAINT ck_cout_montant_positif CHECK (montant >= 0)
 );
--- ============================================================================
--- PARTIE 5B : TABLES JEUX EXTENSIONS (Euromillions, Cotes, Mise Responsable)
--- ============================================================================
+CREATE INDEX IF NOT EXISTS idx_couts_travaux_version ON couts_travaux(version_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- Abonnements maison (eau, électricité, gaz, assurances, téléphone, internet)
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE abonnements (
+CREATE TABLE logs_statut_objets (
     id SERIAL PRIMARY KEY,
-    type_abonnement VARCHAR(50) NOT NULL,
-    fournisseur VARCHAR(200) NOT NULL,
-    numero_contrat VARCHAR(100),
-    prix_mensuel NUMERIC(10, 2),
-    date_debut DATE,
-    date_fin_engagement DATE,
-    meilleur_prix_trouve NUMERIC(10, 2),
-    fournisseur_alternatif VARCHAR(200),
-    notes TEXT,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
+    objet_id INTEGER NOT NULL,
+    ancien_statut VARCHAR(50),
+    nouveau_statut VARCHAR(50) NOT NULL,
+    raison TEXT,
+    prix_estime NUMERIC(10, 2),
+    priorite VARCHAR(20),
+    ajoute_courses BOOLEAN DEFAULT FALSE,
+    ajoute_budget BOOLEAN DEFAULT FALSE,
+    date_changement TIMESTAMP DEFAULT NOW(),
+    change_par VARCHAR(100)
 );
-CREATE INDEX IF NOT EXISTS idx_abonnements_type ON abonnements(type_abonnement);
+CREATE INDEX IF NOT EXISTS idx_logs_statut_objet ON logs_statut_objets(objet_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE artisans (
@@ -2675,6 +2942,7 @@ CREATE TABLE artisans (
 );
 CREATE INDEX IF NOT EXISTS ix_artisans_metier ON artisans(metier);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE interventions_artisans (
     id SERIAL PRIMARY KEY,
@@ -2692,6 +2960,8 @@ CREATE TABLE interventions_artisans (
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_interventions_artisans_artisan ON interventions_artisans(artisan_id);
+CREATE INDEX IF NOT EXISTS ix_interventions_artisans_date ON interventions_artisans(date_intervention);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE articles_cellier (
@@ -2716,6 +2986,8 @@ CREATE TABLE articles_cellier (
 CREATE INDEX IF NOT EXISTS ix_articles_cellier_categorie ON articles_cellier(categorie);
 CREATE INDEX IF NOT EXISTS ix_articles_cellier_code_barres ON articles_cellier(code_barres);
 CREATE INDEX IF NOT EXISTS ix_articles_cellier_dlc ON articles_cellier(dlc);
+CREATE INDEX IF NOT EXISTS ix_articles_cellier_date_achat ON articles_cellier(date_achat);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE diagnostics_maison (
@@ -2744,6 +3016,7 @@ CREATE TABLE diagnostics_maison (
 CREATE INDEX IF NOT EXISTS ix_diagnostics_type ON diagnostics_maison(type_diagnostic);
 CREATE INDEX IF NOT EXISTS ix_diagnostics_validite ON diagnostics_maison(date_validite);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE estimations_immobilieres (
     id SERIAL PRIMARY KEY,
@@ -2767,38 +3040,6 @@ CREATE TABLE estimations_immobilieres (
     modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE checklists_vacances (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(200) NOT NULL,
-    type_voyage VARCHAR(50) NOT NULL,
-    destination VARCHAR(200),
-    duree_jours INTEGER,
-    date_depart DATE,
-    date_retour DATE,
-    terminee BOOLEAN DEFAULT FALSE,
-    archivee BOOLEAN DEFAULT FALSE,
-    notes TEXT,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_checklists_type_voyage ON checklists_vacances(type_voyage);
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE items_checklist (
-    id SERIAL PRIMARY KEY,
-    checklist_id INTEGER NOT NULL REFERENCES checklists_vacances(id) ON DELETE CASCADE,
-    libelle VARCHAR(300) NOT NULL,
-    categorie VARCHAR(50) NOT NULL,
-    ordre INTEGER DEFAULT 0,
-    fait BOOLEAN DEFAULT FALSE,
-    responsable VARCHAR(50),
-    quand VARCHAR(20),
-    notes TEXT,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_items_checklist_checklist ON items_checklist(checklist_id);
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE traitements_nuisibles (
@@ -2824,6 +3065,7 @@ CREATE TABLE traitements_nuisibles (
 );
 CREATE INDEX IF NOT EXISTS ix_traitements_type ON traitements_nuisibles(type_nuisible);
 CREATE INDEX IF NOT EXISTS ix_traitements_prochain ON traitements_nuisibles(date_prochain_traitement);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE devis_comparatifs (
@@ -2852,6 +3094,9 @@ CREATE TABLE devis_comparatifs (
 CREATE INDEX IF NOT EXISTS ix_devis_projet ON devis_comparatifs(projet_id);
 CREATE INDEX IF NOT EXISTS ix_devis_artisan ON devis_comparatifs(artisan_id);
 CREATE INDEX IF NOT EXISTS ix_devis_statut ON devis_comparatifs(statut);
+CREATE INDEX IF NOT EXISTS ix_devis_date_validite ON devis_comparatifs(date_validite)
+    WHERE date_validite IS NOT NULL;
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE lignes_devis (
@@ -2866,6 +3111,121 @@ CREATE TABLE lignes_devis (
     cree_le TIMESTAMP NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_lignes_devis_devis ON lignes_devis(devis_id);
+
+
+
+-- Source: 06e_energie.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Maison : Energie & Charges
+-- ============================================================================
+-- Contient : dépenses, abonnements, écologie, entretiens saisonniers, compteurs
+-- ============================================================================
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE depenses_maison (
+    id SERIAL PRIMARY KEY,
+    categorie VARCHAR(50) NOT NULL,
+    mois INTEGER NOT NULL,
+    annee INTEGER NOT NULL,
+    montant NUMERIC(10, 2) NOT NULL,
+    consommation FLOAT,
+    unite_consommation VARCHAR(20),
+    fournisseur VARCHAR(200),
+    numero_contrat VARCHAR(100),
+    notes TEXT,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT ck_house_mois_valide CHECK (
+        mois >= 1
+        AND mois <= 12
+    ),
+    CONSTRAINT ck_house_montant_positif CHECK (montant >= 0),
+    CONSTRAINT ck_house_consommation_positive CHECK (
+        consommation IS NULL
+        OR consommation >= 0
+    )
+);
+CREATE INDEX IF NOT EXISTS ix_house_expenses_categorie ON depenses_maison(categorie);
+CREATE INDEX IF NOT EXISTS ix_house_expenses_annee ON depenses_maison(annee);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE actions_ecologiques (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(200) NOT NULL,
+    description TEXT,
+    type_action VARCHAR(50) NOT NULL,
+    ancien_produit VARCHAR(200),
+    nouveau_produit VARCHAR(200),
+    cout_ancien_mensuel NUMERIC(10, 2),
+    cout_nouveau_initial NUMERIC(10, 2),
+    economie_mensuelle NUMERIC(10, 2),
+    date_debut DATE NOT NULL DEFAULT CURRENT_DATE,
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
+    notes TEXT,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS ix_eco_actions_type ON actions_ecologiques(type_action);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE depenses_home (
+    id SERIAL PRIMARY KEY,
+    date_depense DATE NOT NULL DEFAULT CURRENT_DATE,
+    montant DECIMAL(10, 2) NOT NULL,
+    categorie VARCHAR(50) NOT NULL CHECK (
+        categorie IN (
+            'jardin',
+            'entretien',
+            'energie',
+            'travaux',
+            'equipement',
+            'decoration',
+            'assurance',
+            'autre'
+        )
+    ),
+    sous_categorie VARCHAR(50),
+    description TEXT,
+    magasin VARCHAR(100),
+    recurrent BOOLEAN DEFAULT FALSE,
+    frequence_mois INTEGER,
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_depenses_home_date ON depenses_home(date_depense);
+CREATE INDEX IF NOT EXISTS idx_depenses_home_categorie ON depenses_home(categorie);
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE budgets_home (
+    id SERIAL PRIMARY KEY,
+    categorie VARCHAR(50) NOT NULL UNIQUE,
+    montant_mensuel DECIMAL(10, 2) NOT NULL,
+    alerte_pourcent INTEGER DEFAULT 80,
+    notes TEXT,
+    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+-- ============================================================================
+-- PARTIE 5B : TABLES JEUX EXTENSIONS (Euromillions, Cotes, Mise Responsable)
+-- ============================================================================
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE abonnements (
+    id SERIAL PRIMARY KEY,
+    type_abonnement VARCHAR(50) NOT NULL,
+    fournisseur VARCHAR(200) NOT NULL,
+    numero_contrat VARCHAR(100),
+    prix_mensuel NUMERIC(10, 2),
+    date_debut DATE,
+    date_fin_engagement DATE,
+    meilleur_prix_trouve NUMERIC(10, 2),
+    fournisseur_alternatif VARCHAR(200),
+    notes TEXT,
+    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_abonnements_type ON abonnements(type_abonnement);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE entretiens_saisonniers (
@@ -2895,6 +3255,7 @@ CREATE INDEX IF NOT EXISTS ix_entretiens_saisonniers_categorie ON entretiens_sai
 CREATE INDEX IF NOT EXISTS ix_entretiens_saisonniers_saison ON entretiens_saisonniers(saison);
 CREATE INDEX IF NOT EXISTS ix_entretiens_saisonniers_prochaine ON entretiens_saisonniers(date_prochaine);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE releves_compteurs (
     id SERIAL PRIMARY KEY,
@@ -2915,21 +3276,17 @@ CREATE TABLE releves_compteurs (
 );
 CREATE INDEX IF NOT EXISTS ix_releves_type ON releves_compteurs(type_compteur);
 CREATE INDEX IF NOT EXISTS ix_releves_date ON releves_compteurs(date_releve);
--- ============================================================================
--- PARTIE 5D : TABLES UTILITAIRES (notes, journal, contacts, liens, etc.)
--- ============================================================================
+
+
 
 
 -- Source: 07_habitat.sql
 -- ============================================================================
 -- ASSISTANT MATANNE — Tables Habitat
 -- ============================================================================
--- Contient : habitat_scenarios, habitat_criteres, habitat_criteres_immo,
---            habitat_annonces, habitat_plans, habitat_pieces,
---            habitat_modifications_plan, habitat_projets_deco, habitat_zones_jardin
--- Origine : Migration V007__module_habitat.sql (absorbée Phase 3)
+-- Contient : habitat_scenarios, habitat_plans, habitat_pieces,
+--            habitat_criteres_immo, habitat_annonces, habitat_projets_deco
 -- ============================================================================
-
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_scenarios (
     id SERIAL PRIMARY KEY,
@@ -2949,6 +3306,7 @@ CREATE TABLE IF NOT EXISTS habitat_scenarios (
 CREATE INDEX IF NOT EXISTS idx_habitat_scenarios_statut ON habitat_scenarios(statut);
 CREATE INDEX IF NOT EXISTS idx_habitat_scenarios_score ON habitat_scenarios(score_global);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_criteres (
     id SERIAL PRIMARY KEY,
@@ -2960,6 +3318,7 @@ CREATE TABLE IF NOT EXISTS habitat_criteres (
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_habitat_criteres_scenario ON habitat_criteres(scenario_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_criteres_immo (
@@ -2981,6 +3340,7 @@ CREATE TABLE IF NOT EXISTS habitat_criteres_immo (
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_annonces (
@@ -3011,6 +3371,7 @@ CREATE INDEX IF NOT EXISTS idx_habitat_annonces_statut ON habitat_annonces(statu
 CREATE INDEX IF NOT EXISTS idx_habitat_annonces_source ON habitat_annonces(source);
 CREATE INDEX IF NOT EXISTS idx_habitat_annonces_ville ON habitat_annonces(ville);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_plans (
     id SERIAL PRIMARY KEY,
@@ -3028,6 +3389,7 @@ CREATE TABLE IF NOT EXISTS habitat_plans (
     modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_habitat_plans_type ON habitat_plans(type_plan);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_pieces (
@@ -3050,6 +3412,7 @@ CREATE TABLE IF NOT EXISTS habitat_pieces (
 );
 CREATE INDEX IF NOT EXISTS idx_habitat_pieces_plan ON habitat_pieces(plan_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_modifications_plan (
     id SERIAL PRIMARY KEY,
@@ -3060,6 +3423,7 @@ CREATE TABLE IF NOT EXISTS habitat_modifications_plan (
     acceptee BOOLEAN,
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_projets_deco (
@@ -3076,6 +3440,7 @@ CREATE TABLE IF NOT EXISTS habitat_projets_deco (
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS habitat_zones_jardin (
@@ -3107,6 +3472,15 @@ CREATE INDEX IF NOT EXISTS idx_habitat_zones_jardin_plan ON habitat_zones_jardin
 -- Contient : jeux_equipes, jeux_matchs, paris_sportifs, loto, euromillions,
 --            séries, alertes, cotes_historique
 -- ============================================================================
+
+
+-- Source: 08_jeux.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Tables Jeux
+-- ============================================================================
+-- Contient : jeux_equipes, jeux_matchs, paris_sportifs, loto, euromillions,
+--            séries, alertes, cotes_historique
+-- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_equipes (
     id SERIAL PRIMARY KEY,
@@ -3125,6 +3499,7 @@ CREATE TABLE jeux_equipes (
     modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_tirages_loto (
     id SERIAL PRIMARY KEY,
@@ -3141,6 +3516,7 @@ CREATE TABLE jeux_tirages_loto (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_tirages_loto_date ON jeux_tirages_loto(date_tirage);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_stats_loto (
     id SERIAL PRIMARY KEY,
@@ -3154,6 +3530,7 @@ CREATE TABLE jeux_stats_loto (
     paires_frequentes JSONB,
     nb_tirages_analyses INTEGER NOT NULL DEFAULT 0
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_historique (
@@ -3169,6 +3546,7 @@ CREATE TABLE jeux_historique (
     predictions_totales INTEGER NOT NULL DEFAULT 0,
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_series (
@@ -3188,6 +3566,7 @@ CREATE INDEX IF NOT EXISTS ix_jeux_series_type_jeu_championnat ON jeux_series(ty
 CREATE INDEX IF NOT EXISTS ix_jeux_series_type_jeu_marche ON jeux_series(type_jeu, marche);
 CREATE INDEX IF NOT EXISTS ix_jeux_series_value ON jeux_series((frequence * serie_actuelle) DESC);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_configuration (
     id SERIAL PRIMARY KEY,
@@ -3196,6 +3575,7 @@ CREATE TABLE jeux_configuration (
     description TEXT,
     modifie_le TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_matchs (
@@ -3225,6 +3605,7 @@ CREATE TABLE jeux_matchs (
     CONSTRAINT fk_jeux_matchs_ext FOREIGN KEY (equipe_exterieur_id) REFERENCES jeux_equipes(id)
 );
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_paris_sportifs (
     id SERIAL PRIMARY KEY,
@@ -3245,6 +3626,7 @@ CREATE INDEX IF NOT EXISTS ix_jeux_paris_match_id ON jeux_paris_sportifs(match_i
 CREATE INDEX IF NOT EXISTS ix_jeux_paris_statut ON jeux_paris_sportifs(statut);
 CREATE INDEX IF NOT EXISTS ix_jeux_paris_cree_le ON jeux_paris_sportifs(cree_le);
 CREATE INDEX IF NOT EXISTS idx_paris_match_date ON jeux_paris_sportifs(match_id, cree_le);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_grilles_loto (
@@ -3268,6 +3650,7 @@ CREATE TABLE jeux_grilles_loto (
     CONSTRAINT fk_jeux_grilles_tirage FOREIGN KEY (tirage_id) REFERENCES jeux_tirages_loto(id)
 );
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_alertes (
     id SERIAL PRIMARY KEY,
@@ -3289,6 +3672,7 @@ CREATE TABLE jeux_alertes (
 CREATE INDEX IF NOT EXISTS ix_jeux_alertes_notifie ON jeux_alertes(notifie)
 WHERE notifie = FALSE;
 CREATE INDEX IF NOT EXISTS ix_jeux_alertes_resultat ON jeux_alertes(resultat_verifie, resultat_correct);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_tirages_euromillions (
@@ -3325,6 +3709,7 @@ CREATE TABLE jeux_tirages_euromillions (
 );
 CREATE INDEX IF NOT EXISTS idx_tirages_euromillions_date ON jeux_tirages_euromillions(date_tirage DESC);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_grilles_euromillions (
     id SERIAL PRIMARY KEY,
@@ -3342,6 +3727,7 @@ CREATE TABLE jeux_grilles_euromillions (
 CREATE INDEX IF NOT EXISTS idx_grilles_euromillions_tirage ON jeux_grilles_euromillions(tirage_id);
 CREATE INDEX IF NOT EXISTS idx_grilles_euromillions_date ON jeux_grilles_euromillions(cree_le DESC);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_stats_euromillions (
     id SERIAL PRIMARY KEY,
@@ -3356,6 +3742,7 @@ CREATE TABLE jeux_stats_euromillions (
     cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE (date_calcul)
 );
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE jeux_cotes_historique (
@@ -3381,6 +3768,14 @@ CREATE INDEX IF NOT EXISTS idx_cotes_hist_bookmaker ON jeux_cotes_historique(boo
 -- Contient : abonnements_push, preferences_notifications, webhooks_abonnements,
 --            historique_notifications
 -- ============================================================================
+
+
+-- Source: 09_notifications.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Tables Notifications
+-- ============================================================================
+-- Contient : abonnements_push, preferences_notifications, webhooks_abonnements
+-- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE abonnements_push (
     id BIGSERIAL PRIMARY KEY,
@@ -3396,6 +3791,7 @@ CREATE TABLE abonnements_push (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_push_subscriptions_endpoint ON abonnements_push(endpoint);
 CREATE INDEX IF NOT EXISTS ix_push_subscriptions_user ON abonnements_push(user_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE preferences_notifications (
@@ -3417,6 +3813,7 @@ CREATE TABLE preferences_notifications (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS uq_notification_prefs_user ON preferences_notifications(user_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS webhooks_abonnements (
     id BIGSERIAL PRIMARY KEY,
@@ -3433,25 +3830,6 @@ CREATE TABLE IF NOT EXISTS webhooks_abonnements (
 );
 CREATE INDEX IF NOT EXISTS ix_webhooks_user ON webhooks_abonnements(user_id);
 
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE historique_notifications (
-    id BIGSERIAL PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
-    canal VARCHAR(20) NOT NULL,
-    titre VARCHAR(500) NOT NULL,
-    message TEXT NOT NULL,
-    type_evenement VARCHAR(100),
-    categorie VARCHAR(50) NOT NULL DEFAULT 'autres',
-    lu BOOLEAN NOT NULL DEFAULT FALSE,
-    action_effectuee VARCHAR(255),
-    metadata JSONB DEFAULT '{}'::jsonb,
-    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS ix_historique_notifications_user ON historique_notifications(user_id);
-CREATE INDEX IF NOT EXISTS ix_historique_notifications_lu ON historique_notifications(user_id, lu);
-CREATE INDEX IF NOT EXISTS ix_historique_notifications_categorie ON historique_notifications(categorie);
-CREATE INDEX IF NOT EXISTS ix_historique_notifications_cree_le ON historique_notifications(cree_le DESC);
 
 
 -- Source: 10_finances.sql
@@ -3496,6 +3874,7 @@ CREATE INDEX IF NOT EXISTS ix_depenses_categorie ON depenses(categorie);
 CREATE INDEX IF NOT EXISTS ix_depenses_date ON depenses(date);
 CREATE INDEX IF NOT EXISTS ix_depenses_user_id ON depenses(user_id);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE budgets_mensuels (
     id BIGSERIAL PRIMARY KEY,
@@ -3511,6 +3890,7 @@ CREATE TABLE budgets_mensuels (
 CREATE INDEX IF NOT EXISTS ix_budgets_mensuels_mois ON budgets_mensuels(mois);
 CREATE INDEX IF NOT EXISTS ix_budgets_mensuels_user ON budgets_mensuels(user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_budget_mois_user ON budgets_mensuels(mois, user_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE calendriers_externes (
@@ -3529,6 +3909,7 @@ CREATE TABLE calendriers_externes (
 );
 CREATE INDEX IF NOT EXISTS ix_calendriers_externes_provider ON calendriers_externes(provider);
 CREATE INDEX IF NOT EXISTS ix_calendriers_externes_user ON calendriers_externes(user_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE configs_calendriers_externes (
@@ -3551,6 +3932,7 @@ CREATE TABLE configs_calendriers_externes (
 );
 CREATE INDEX IF NOT EXISTS ix_external_cal_user ON configs_calendriers_externes(user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS uq_user_calendar ON configs_calendriers_externes(user_id, provider, name);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE evenements_calendrier (
@@ -3584,6 +3966,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_event_uid_user ON evenements_calendrier(uid
 --            mots_de_passe_maison, presse_papier_entrees, releves_energie,
 --            voyages, checklists_voyage, templates_checklist, minuteur_sessions
 -- ============================================================================
+
+
+-- Source: 11_utilitaires.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Tables Utilitaires
+-- ============================================================================
+-- Contient : notes_memos, journal_bord, contacts_utiles, liens_favoris,
+--            mots_de_passe_maison, presse_papier_entrees, releves_energie,
+--            voyages, checklists_voyage, templates_checklist
+-- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE voyages (
     id SERIAL PRIMARY KEY,
@@ -3608,6 +4000,7 @@ CREATE TABLE voyages (
 CREATE INDEX IF NOT EXISTS ix_voyages_depart ON voyages(date_depart);
 CREATE INDEX IF NOT EXISTS ix_voyages_statut ON voyages(statut);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE templates_checklist (
     id SERIAL PRIMARY KEY,
@@ -3619,6 +4012,7 @@ CREATE TABLE templates_checklist (
     cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS ix_templates_type ON templates_checklist(type_voyage);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE checklists_voyage (
@@ -3634,6 +4028,7 @@ CREATE TABLE checklists_voyage (
     SET NULL
 );
 CREATE INDEX IF NOT EXISTS ix_checklists_voyage ON checklists_voyage(voyage_id);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE notes_memos (
@@ -3653,6 +4048,7 @@ CREATE INDEX IF NOT EXISTS idx_notes_memos_epingle ON notes_memos(epingle)
 WHERE epingle = TRUE;
 CREATE INDEX IF NOT EXISTS idx_notes_memos_archive ON notes_memos(archive);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE journal_bord (
     id BIGSERIAL PRIMARY KEY,
@@ -3668,6 +4064,7 @@ CREATE TABLE journal_bord (
     modifie_le TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_journal_date ON journal_bord(date_entree DESC);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE contacts_utiles (
@@ -3685,6 +4082,7 @@ CREATE TABLE contacts_utiles (
 CREATE INDEX IF NOT EXISTS idx_contacts_utiles_categorie ON contacts_utiles(categorie);
 CREATE INDEX IF NOT EXISTS idx_contacts_utiles_nom ON contacts_utiles(nom);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE liens_favoris (
     id BIGSERIAL PRIMARY KEY,
@@ -3697,6 +4095,7 @@ CREATE TABLE liens_favoris (
     modifie_le TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_liens_categorie ON liens_favoris(categorie);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE mots_de_passe_maison (
@@ -3711,6 +4110,7 @@ CREATE TABLE mots_de_passe_maison (
 );
 CREATE INDEX IF NOT EXISTS idx_mdp_categorie ON mots_de_passe_maison(categorie);
 
+
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE presse_papier_entrees (
     id BIGSERIAL PRIMARY KEY,
@@ -3719,6 +4119,7 @@ CREATE TABLE presse_papier_entrees (
     cree_le TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_pp_cree_le ON presse_papier_entrees(cree_le DESC);
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE releves_energie (
@@ -3734,24 +4135,6 @@ CREATE TABLE releves_energie (
 CREATE INDEX IF NOT EXISTS idx_energie_categorie ON releves_energie(categorie);
 CREATE INDEX IF NOT EXISTS idx_energie_date ON releves_energie(date_releve DESC);
 
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE minuteur_sessions (
-    id BIGSERIAL PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
-    label VARCHAR(200) NOT NULL,
-    duree_secondes INTEGER NOT NULL CHECK (duree_secondes > 0),
-    recette_id INTEGER REFERENCES recettes(id) ON DELETE SET NULL,
-    date_debut TIMESTAMP,
-    date_fin TIMESTAMP,
-    terminee BOOLEAN DEFAULT FALSE,
-    active BOOLEAN DEFAULT FALSE,
-    cree_le TIMESTAMP NOT NULL DEFAULT NOW(),
-    modifie_le TIMESTAMP NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_minuteur_user_id ON minuteur_sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_minuteur_active ON minuteur_sessions(active);
-CREATE INDEX IF NOT EXISTS idx_minuteur_cree_le ON minuteur_sessions(cree_le DESC);
--- ============================================================================
 
 
 -- Source: 12_triggers.sql
@@ -3846,6 +4229,8 @@ CREATE TRIGGER trg_repas_planning_notify
     AFTER INSERT OR UPDATE OR DELETE ON repas_planning
     FOR EACH ROW EXECUTE FUNCTION notify_planning_changed();
 -- ============================================================================
+
+-- Source: 13_views.sql
 
 -- Source: 13_views.sql
 -- PARTIE 7 : VUES UTILES
@@ -4141,6 +4526,38 @@ CREATE INDEX IF NOT EXISTS ix_etat_persistant_namespace_user
     ON etat_persistant(namespace, user_id);
 
 -- Source: 15_rls_policies.sql
+
+-- Source: 14_indexes.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Index supplémentaires
+-- ============================================================================
+-- Index composites et index de performance ajoutés après V005.
+-- La majorité des index sont inline avec les CREATE TABLE dans les fichiers
+-- de domaine (03-11). Ce fichier contient uniquement les index additionnels.
+-- ============================================================================
+
+-- Consolidation V005 : Index composites porte-parole performance
+CREATE INDEX IF NOT EXISTS ix_repas_planning_date ON repas(planning_id, date_repas);
+CREATE INDEX IF NOT EXISTS ix_repas_planning_type ON repas(planning_id, type_repas);
+CREATE INDEX IF NOT EXISTS ix_articles_courses_liste_achete ON articles_courses(liste_id, achete);
+CREATE INDEX IF NOT EXISTS ix_articles_courses_liste_priorite ON articles_courses(liste_id, priorite);
+CREATE INDEX IF NOT EXISTS ix_inventaire_peremption_quantite ON inventaire(date_peremption, quantite)
+    WHERE date_peremption IS NOT NULL;
+CREATE INDEX IF NOT EXISTS ix_historique_inventaire_ingredient_date ON historique_inventaire(ingredient_id, date_modification);
+CREATE INDEX IF NOT EXISTS ix_listes_courses_statut_semaine ON listes_courses(statut, semaine_du);
+CREATE INDEX IF NOT EXISTS ix_plannings_actif_semaine ON plannings(actif, semaine_debut) WHERE actif = TRUE;
+
+-- Index migration V001-V004 (absorbés)
+CREATE INDEX IF NOT EXISTS idx_articles_inventaire_peremption
+    ON articles_inventaire(date_peremption);
+CREATE INDEX IF NOT EXISTS idx_repas_planning_planning_date
+    ON repas_planning(planning_id, date_repas);
+CREATE INDEX IF NOT EXISTS idx_historique_actions_user_date
+    ON historique_actions(user_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_paris_sportifs_statut_user
+    ON paris_sportifs(statut, user_id);
+
+-- Source: 15_rls_policies.sql
 -- PARTIE 9 : ROW LEVEL SECURITY (RLS)
 -- ============================================================================
 -- Stratégie RLS :
@@ -4240,7 +4657,7 @@ shared_tables TEXT[] := ARRAY[
     'jeux_tirages_loto', 'jeux_grilles_loto', 'jeux_stats_loto',
     'jeux_historique', 'jeux_series', 'jeux_alertes', 'jeux_configuration',
     'jeux_tirages_euromillions', 'jeux_grilles_euromillions', 'jeux_stats_euromillions',
-    'jeux_cotes_historique',
+    'jeux_cotes_historique', 'jeux_bankroll_historique',
     -- Temps Entretien & Jardin
     'plans_jardin', 'zones_jardin', 'plantes_jardin', 'actions_plantes',
     'pieces_maison', 'objets_maison', 'sessions_travail',
@@ -4311,6 +4728,8 @@ CREATE POLICY "authenticated_deny_logs_securite"
 -- ============================================================================
 
 -- Source: 16_seed_data.sql
+
+-- Source: 16_seed_data.sql
 -- PARTIE 10 : DONNÉES DE RÉFÉRENCE
 -- ============================================================================
 -- Profils utilisateurs par défaut (Anne & Mathieu)
@@ -4378,6 +4797,132 @@ VALUES (
         NOW(),
         NOW()
     ) ON CONFLICT (username) DO NOTHING;
+
+-- Catalogue de base d'ingrédients
+INSERT INTO ingredients (nom, categorie, unite, calories_pour_100g, saison, allergene)
+VALUES ('Tomate', 'Légumes', 'g', 18, 'été', FALSE),
+    ('Courgette', 'Légumes', 'g', 17, 'été', FALSE),
+    ('Carotte', 'Légumes', 'g', 41, 'automne', FALSE),
+    ('Pomme de terre', 'Féculents', 'g', 77, 'toute_année', FALSE),
+    ('Poulet', 'Protéines', 'g', 165, 'toute_année', FALSE),
+    ('Saumon', 'Protéines', 'g', 208, 'toute_année', FALSE),
+    ('Riz complet', 'Féculents', 'g', 111, 'toute_année', FALSE),
+    ('Lentilles', 'Légumineuses', 'g', 116, 'toute_année', FALSE),
+    ('Yaourt nature', 'Produits laitiers', 'g', 63, 'toute_année', TRUE),
+    ('Banane', 'Fruits', 'g', 89, 'toute_année', FALSE)
+ON CONFLICT (nom) DO NOTHING;
+
+-- Référentiel OMS minimal (développement Jules)
+INSERT INTO normes_oms (sexe, type_mesure, age_mois, p3, p15, p50, p85, p97)
+VALUES
+    ('garcon', 'poids', 0, 2.50, 2.90, 3.30, 3.90, 4.40),
+    ('garcon', 'poids', 6, 6.40, 6.90, 7.90, 9.00, 9.90),
+    ('garcon', 'poids', 12, 7.70, 8.40, 9.60, 10.90, 12.10),
+    ('fille', 'poids', 0, 2.40, 2.80, 3.20, 3.70, 4.20),
+    ('fille', 'poids', 6, 5.80, 6.40, 7.30, 8.30, 9.20),
+    ('fille', 'poids', 12, 7.00, 7.70, 8.90, 10.10, 11.30),
+    ('garcon', 'taille', 0, 46.50, 48.20, 49.90, 51.60, 53.20),
+    ('garcon', 'taille', 6, 63.00, 65.10, 67.60, 70.20, 72.20),
+    ('garcon', 'taille', 12, 71.00, 73.40, 76.10, 79.00, 81.30),
+    ('fille', 'taille', 0, 45.70, 47.40, 49.10, 50.80, 52.40),
+    ('fille', 'taille', 6, 61.10, 63.30, 65.70, 68.40, 70.40),
+    ('fille', 'taille', 12, 69.20, 71.60, 74.00, 77.10, 79.60),
+    ('garcon', 'perimetre_cranien', 0, 32.10, 33.30, 34.50, 35.70, 36.80),
+    ('garcon', 'perimetre_cranien', 6, 41.10, 42.20, 43.30, 44.40, 45.40),
+    ('garcon', 'perimetre_cranien', 12, 43.10, 44.20, 45.30, 46.30, 47.20),
+    ('fille', 'perimetre_cranien', 0, 31.60, 32.80, 34.00, 35.10, 36.20),
+    ('fille', 'perimetre_cranien', 6, 40.10, 41.30, 42.40, 43.50, 44.50),
+    ('fille', 'perimetre_cranien', 12, 42.20, 43.30, 44.40, 45.40, 46.30)
+ON CONFLICT (sexe, type_mesure, age_mois) DO NOTHING;
+
+-- Catalogue plantes baseline
+INSERT INTO plantes_catalogue (
+        nom,
+        nom_latin,
+        famille,
+        mois_semis_interieur,
+        mois_semis_exterieur,
+        mois_plantation,
+        mois_recolte,
+        espacement_cm,
+        profondeur_semis_cm,
+        jours_germination,
+        jours_jusqu_recolte,
+        arrosage,
+        exposition,
+        rendement_kg_m2,
+        besoin_famille_4_kg_an
+    )
+VALUES (
+        'Tomate',
+        'Solanum lycopersicum',
+        'Solanacées',
+        '[2,3,4]'::jsonb,
+        '[4,5]'::jsonb,
+        '[4,5]'::jsonb,
+        '[7,8,9]'::jsonb,
+        50,
+        1,
+        8,
+        85,
+        'regulier',
+        'soleil',
+        4.00,
+        40.00
+    ),
+    (
+        'Courgette',
+        'Cucurbita pepo',
+        'Cucurbitacées',
+        '[3,4]'::jsonb,
+        '[4,5]'::jsonb,
+        '[5,6]'::jsonb,
+        '[7,8,9]'::jsonb,
+        80,
+        2,
+        7,
+        75,
+        'regulier',
+        'soleil',
+        3.50,
+        25.00
+    ),
+    (
+        'Carotte',
+        'Daucus carota',
+        'Apiacées',
+        '[2,3]'::jsonb,
+        '[3,4,5,6]'::jsonb,
+        '[3,4,5,6]'::jsonb,
+        '[6,7,8,9,10]'::jsonb,
+        8,
+        1,
+        12,
+        95,
+        'modere',
+        'soleil',
+        2.20,
+        20.00
+    ),
+    (
+        'Haricot vert',
+        'Phaseolus vulgaris',
+        'Fabacées',
+        '[4,5]'::jsonb,
+        '[5,6,7]'::jsonb,
+        '[5,6,7]'::jsonb,
+        '[7,8,9]'::jsonb,
+        30,
+        2,
+        8,
+        60,
+        'regulier',
+        'soleil',
+        1.80,
+        15.00
+    )
+ON CONFLICT (nom) DO NOTHING;
+
 -- Configuration jeux par défaut
 INSERT INTO jeux_configuration (cle, valeur, description)
 VALUES (
@@ -4940,6 +5485,35 @@ END $$;
 
 CREATE INDEX IF NOT EXISTS ix_listes_courses_etat ON listes_courses(etat);
 CREATE INDEX IF NOT EXISTS ix_listes_courses_archivee ON listes_courses(archivee);
+
+-- Source: 99_footer.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Vérification finale & COMMIT
+-- ============================================================================
+
+-- Grants Supabase (déjà dans seed_data, ici pour réexécution idempotente)
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+
+-- Vérification finale
+SELECT tablename,
+    (SELECT COUNT(*) FROM information_schema.columns c
+     WHERE c.table_name = t.tablename) AS nb_colonnes
+FROM pg_tables t
+WHERE schemaname = 'public'
+ORDER BY tablename;
+
+COMMIT;
+
+-- Source: 17_migrations_absorbees.sql
+-- ============================================================================
+-- ASSISTANT MATANNE — Migrations absorbées (V005-V007)
+-- ============================================================================
+-- Ce fichier contient les changements des migrations V005, V006, V007
+-- qui ont été absorbés dans le script principal.
+-- Contexte : stratégie SQL-first (pas d'Alembic auto).
+-- ============================================================================
+
 
 -- Source: 99_footer.sql
 -- ============================================================================

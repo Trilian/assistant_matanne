@@ -65,6 +65,132 @@ VALUES (
         NOW(),
         NOW()
     ) ON CONFLICT (username) DO NOTHING;
+
+-- Catalogue de base d'ingrédients
+INSERT INTO ingredients (nom, categorie, unite, calories_pour_100g, saison, allergene)
+VALUES ('Tomate', 'Légumes', 'g', 18, 'été', FALSE),
+    ('Courgette', 'Légumes', 'g', 17, 'été', FALSE),
+    ('Carotte', 'Légumes', 'g', 41, 'automne', FALSE),
+    ('Pomme de terre', 'Féculents', 'g', 77, 'toute_année', FALSE),
+    ('Poulet', 'Protéines', 'g', 165, 'toute_année', FALSE),
+    ('Saumon', 'Protéines', 'g', 208, 'toute_année', FALSE),
+    ('Riz complet', 'Féculents', 'g', 111, 'toute_année', FALSE),
+    ('Lentilles', 'Légumineuses', 'g', 116, 'toute_année', FALSE),
+    ('Yaourt nature', 'Produits laitiers', 'g', 63, 'toute_année', TRUE),
+    ('Banane', 'Fruits', 'g', 89, 'toute_année', FALSE)
+ON CONFLICT (nom) DO NOTHING;
+
+-- Référentiel OMS minimal (développement Jules)
+INSERT INTO normes_oms (sexe, type_mesure, age_mois, p3, p15, p50, p85, p97)
+VALUES
+    ('garcon', 'poids', 0, 2.50, 2.90, 3.30, 3.90, 4.40),
+    ('garcon', 'poids', 6, 6.40, 6.90, 7.90, 9.00, 9.90),
+    ('garcon', 'poids', 12, 7.70, 8.40, 9.60, 10.90, 12.10),
+    ('fille', 'poids', 0, 2.40, 2.80, 3.20, 3.70, 4.20),
+    ('fille', 'poids', 6, 5.80, 6.40, 7.30, 8.30, 9.20),
+    ('fille', 'poids', 12, 7.00, 7.70, 8.90, 10.10, 11.30),
+    ('garcon', 'taille', 0, 46.50, 48.20, 49.90, 51.60, 53.20),
+    ('garcon', 'taille', 6, 63.00, 65.10, 67.60, 70.20, 72.20),
+    ('garcon', 'taille', 12, 71.00, 73.40, 76.10, 79.00, 81.30),
+    ('fille', 'taille', 0, 45.70, 47.40, 49.10, 50.80, 52.40),
+    ('fille', 'taille', 6, 61.10, 63.30, 65.70, 68.40, 70.40),
+    ('fille', 'taille', 12, 69.20, 71.60, 74.00, 77.10, 79.60),
+    ('garcon', 'perimetre_cranien', 0, 32.10, 33.30, 34.50, 35.70, 36.80),
+    ('garcon', 'perimetre_cranien', 6, 41.10, 42.20, 43.30, 44.40, 45.40),
+    ('garcon', 'perimetre_cranien', 12, 43.10, 44.20, 45.30, 46.30, 47.20),
+    ('fille', 'perimetre_cranien', 0, 31.60, 32.80, 34.00, 35.10, 36.20),
+    ('fille', 'perimetre_cranien', 6, 40.10, 41.30, 42.40, 43.50, 44.50),
+    ('fille', 'perimetre_cranien', 12, 42.20, 43.30, 44.40, 45.40, 46.30)
+ON CONFLICT (sexe, type_mesure, age_mois) DO NOTHING;
+
+-- Catalogue plantes baseline
+INSERT INTO plantes_catalogue (
+        nom,
+        nom_latin,
+        famille,
+        mois_semis_interieur,
+        mois_semis_exterieur,
+        mois_plantation,
+        mois_recolte,
+        espacement_cm,
+        profondeur_semis_cm,
+        jours_germination,
+        jours_jusqu_recolte,
+        arrosage,
+        exposition,
+        rendement_kg_m2,
+        besoin_famille_4_kg_an
+    )
+VALUES (
+        'Tomate',
+        'Solanum lycopersicum',
+        'Solanacées',
+        '[2,3,4]'::jsonb,
+        '[4,5]'::jsonb,
+        '[4,5]'::jsonb,
+        '[7,8,9]'::jsonb,
+        50,
+        1,
+        8,
+        85,
+        'regulier',
+        'soleil',
+        4.00,
+        40.00
+    ),
+    (
+        'Courgette',
+        'Cucurbita pepo',
+        'Cucurbitacées',
+        '[3,4]'::jsonb,
+        '[4,5]'::jsonb,
+        '[5,6]'::jsonb,
+        '[7,8,9]'::jsonb,
+        80,
+        2,
+        7,
+        75,
+        'regulier',
+        'soleil',
+        3.50,
+        25.00
+    ),
+    (
+        'Carotte',
+        'Daucus carota',
+        'Apiacées',
+        '[2,3]'::jsonb,
+        '[3,4,5,6]'::jsonb,
+        '[3,4,5,6]'::jsonb,
+        '[6,7,8,9,10]'::jsonb,
+        8,
+        1,
+        12,
+        95,
+        'modere',
+        'soleil',
+        2.20,
+        20.00
+    ),
+    (
+        'Haricot vert',
+        'Phaseolus vulgaris',
+        'Fabacées',
+        '[4,5]'::jsonb,
+        '[5,6,7]'::jsonb,
+        '[5,6,7]'::jsonb,
+        '[7,8,9]'::jsonb,
+        30,
+        2,
+        8,
+        60,
+        'regulier',
+        'soleil',
+        1.80,
+        15.00
+    )
+ON CONFLICT (nom) DO NOTHING;
+
 -- Configuration jeux par défaut
 INSERT INTO jeux_configuration (cle, valeur, description)
 VALUES (

@@ -159,19 +159,6 @@ CREATE TABLE releves_compteurs (
 );
 CREATE INDEX IF NOT EXISTS ix_releves_type ON releves_compteurs(type_compteur);
 CREATE INDEX IF NOT EXISTS ix_releves_date ON releves_compteurs(date_releve);
--- ============================================================================
--- PARTIE 5D : TABLES UTILITAIRES (notes, journal, contacts, liens, etc.)
--- ============================================================================
 
-
--- Source: 07_habitat.sql
--- ============================================================================
--- ASSISTANT MATANNE — Tables Habitat
--- ============================================================================
--- Contient : habitat_scenarios, habitat_criteres, habitat_criteres_immo,
---            habitat_annonces, habitat_plans, habitat_pieces,
---            habitat_modifications_plan, habitat_projets_deco, habitat_zones_jardin
--- Origine : Migration V007__module_habitat.sql (absorbée Phase 3)
--- ============================================================================
 
 

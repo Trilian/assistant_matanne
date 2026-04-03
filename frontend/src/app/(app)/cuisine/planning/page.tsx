@@ -82,6 +82,7 @@ import { listerEvenements } from "@/bibliotheque/api/calendriers";
 import { obtenirFluxCuisine } from "@/bibliotheque/api/ia-bridges";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+const STAGGER_DELAYS = ["delay-0", "delay-75", "delay-150", "delay-200", "delay-300", "delay-500", "delay-700"];
 const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
   { valeur: "petit_dejeuner", label: "Petit-déj", emoji: "🌅" },
   { valeur: "dejeuner", label: "Déjeuner", emoji: "☀️" },
@@ -593,12 +594,14 @@ export default function PagePlanning() {
         chargementMensuel ? (
           <Skeleton className="h-[520px] w-full" />
         ) : planningMensuel ? (
-          <CalendrierMensuel mois={planningMensuel.mois} parJour={planningMensuel.par_jour} />
+          <div className="animate-in fade-in slide-in-from-bottom-1 duration-500">
+            <CalendrierMensuel mois={planningMensuel.mois} parJour={planningMensuel.par_jour} />
+          </div>
         ) : null
       ) : isLoading ? (
         <div className="grid gap-2">
           {Array.from({ length: 7 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full" />
+            <Skeleton key={i} className={`h-24 w-full animate-in fade-in slide-in-from-bottom-1 duration-500 ${STAGGER_DELAYS[i % STAGGER_DELAYS.length]}`} />
           ))}
         </div>
       ) : (
@@ -611,7 +614,7 @@ export default function PagePlanning() {
             return (
               <Card
                 key={date}
-                className={estAujourdhui ? "border-primary" : ""}
+                className={`${estAujourdhui ? "border-primary" : ""} animate-in fade-in slide-in-from-bottom-1 duration-500 ${STAGGER_DELAYS[idx % STAGGER_DELAYS.length]}`}
               >
                 <CardHeader className="py-2 px-4">
                   <div className="flex items-center justify-between">
@@ -728,7 +731,9 @@ export default function PagePlanning() {
       )}
 
       {modeAffichage === "semaine" && !isLoading && (
-        <CalendrierMosaiqueRepas dates={datesSemaine} repasParJour={repasParJour} />
+        <div className="animate-in fade-in slide-in-from-bottom-1 duration-500 delay-300">
+          <CalendrierMosaiqueRepas dates={datesSemaine} repasParJour={repasParJour} />
+        </div>
       )}
 
       {conflits && conflits.items.length > 0 && (

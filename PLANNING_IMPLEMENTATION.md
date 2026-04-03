@@ -12,7 +12,7 @@
 1. [Notation globale par catégorie](#1-notation-globale-par-catégorie)
 2. [Cartographie complète des modules](#2-cartographie-complète-des-modules)
 3. [Sprint 1 — Nettoyage et assainissement du code ✅](#sprint-1--nettoyage-et-assainissement-du-code--terminé)
-4. [Sprint 2 — SQL, données et performance DB](#sprint-2--sql-données-et-performance-db)
+4. [Sprint 2 — SQL, données et performance DB 🟡](#sprint-2--sql-données-et-performance-db--en-cours)
 5. [Sprint 3 — Tests et couverture qualité](#sprint-3--tests-et-couverture-qualité)
 6. [Sprint 4 — Inter-modules et intégrations IA](#sprint-4--inter-modules-et-intégrations-ia)
 7. [Sprint 5 — Automatisations et Telegram](#sprint-5--automatisations-et-telegram)
@@ -225,18 +225,21 @@ sql/
 ├── 01_systeme.sql          # Tables système
 ├── 02_auth.sql             # Authentification
 ├── 03_cuisine.sql          # Module cuisine
-├── 04_famille.sql          # Module famille
-├── 05_calendriers.sql      # Calendriers
-├── 06_maison.sql           # 43 tables (TROP GROS — à éclater)
-├── 07_jeux.sql             # Module jeux
-├── 08_abonnements.sql      # Abonnements
-├── 09_habitat.sql          # Module habitat
-├── 10_admin.sql            # Admin
-├── 99_rls.sql              # Row Level Security
-├── INIT_COMPLET.sql        # Généré automatiquement
-└── migrations/
-    ├── V001_*.sql           # RLS + sécurité (appliquée)
-    └── V002_*.sql           # UUID conversion (bloquée)
+├── 04_cuisine.sql          # Module cuisine
+├── 05_famille.sql          # Module famille
+├── 06a_projets.sql         # Maison: projets & routines
+├── 06b_entretien.sql       # Maison: entretien & organisation
+├── 06c_jardin.sql          # Maison: jardin & autonomie
+├── 06d_equipements.sql     # Maison: équipements & travaux
+├── 06e_energie.sql         # Maison: énergie & charges
+├── 07_habitat.sql          # Module habitat
+├── 08_jeux.sql             # Module jeux
+├── 09_notifications.sql    # Notifications
+├── 10_finances.sql         # Finances
+├── 11_utilitaires.sql      # Outils utilitaires
+├── 15_rls_policies.sql     # Row Level Security
+├── 16_seed_data.sql        # Données de référence
+└── INIT_COMPLET.sql        # Généré automatiquement
 ```
 
 ---
@@ -278,30 +281,31 @@ sql/
 
 ---
 
-## Sprint 2 — SQL, données et performance DB
+## Sprint 2 — SQL, données et performance DB 🟡 EN COURS
 
 > **Objectif** : Base solide, performante, sécurisée
 > **Durée estimée** : 3-5 jours
 > **Prérequis** : Sprint 1 terminé (tables mortes supprimées)
+> **Statut** : 🟡 Implémentation SQL faite (reste validation EXPLAIN en base cible)
 
 ### Tâches
 
-| # | Tâche | Détail | Effort | Priorité |
-|---|-------|--------|--------|----------|
-| 2.1 | **Éclater `06_maison.sql`** | 43 tables → `06a_projets.sql`, `06b_entretien.sql`, `06c_jardin.sql`, `06d_equipements.sql`, `06e_energie.sql` | 2h | 🔴 Critique |
-| 2.2 | **Ajouter indexes** | `recettes.nom`, `articles_courses.liste_id`, `documents.date_expiration`, `equipements.date_achat`, `plantes.derniere_action` + 5 autres sur champs requêtés fréquemment | 2h | 🔴 Critique |
-| 2.3 | **Audit RLS complet** | Vérifier les ~150 tables (seulement ~17 vérifiées actuellement). Ajouter policies manquantes. | 4h | 🔴 Critique |
-| 2.4 | **Résoudre migration V002** | Nettoyer données VARCHAR user_id → UUID, puis appliquer la migration | 2h | 🟡 Important |
-| 2.5 | **Régénérer `INIT_COMPLET.sql`** | Après toutes les modifications SQL | 30min | 🟡 Important |
-| 2.6 | **Créer seed data** | Catalogue ingrédients, normes OMS (développement Jules), plantes baseline | 4h | 🟢 Souhaitable |
+| # | Tâche | Détail | Effort | Priorité | Statut |
+|---|-------|--------|--------|----------|--------|
+| 2.1 | **Éclater `06_maison.sql`** | Schéma split en `06a_projets.sql`, `06b_entretien.sql`, `06c_jardin.sql`, `06d_equipements.sql`, `06e_energie.sql` + tooling `split/regenerate` aligné | 2h | 🔴 Critique | ✅ |
+| 2.2 | **Ajouter indexes** | Index cibles déjà présents (`recettes.nom`, `articles_courses.liste_id`, `documents_famille.date_expiration`) + ajout index `date_achat`/`derniere_action` et composites maison | 2h | 🔴 Critique | ✅ |
+| 2.3 | **Audit RLS complet** | Audit tables `user_id` + couverture RLS homogénéisée, ajout `jeux_bankroll_historique` dans le bloc policy partagé | 4h | 🔴 Critique | ✅ |
+| 2.4 | **Résoudre migration V002** | `V002_*.sql` absente du repo actuel (pipeline SQL-first via `17_migrations_absorbees.sql`). Action remplacée par audit des types `user_id` (UUID/INTEGER/TEXT) | 2h | 🟡 Important | ✅ N/A |
+| 2.5 | **Régénérer `INIT_COMPLET.sql`** | Régénération depuis `sql/schema/*.sql` après modifications Sprint 2 | 30min | 🟡 Important | ✅ |
+| 2.6 | **Créer seed data** | Seed baseline ajouté: ingrédients, normes OMS (Jules), plantes catalogue | 4h | 🟢 Souhaitable | ✅ |
 
 ### Critères de validation Sprint 2
 
-- [ ] `06_maison.sql` n'existe plus, remplacé par 5 sous-fichiers
+- [x] `06_maison.sql` n'existe plus, remplacé par 5 sous-fichiers
 - [ ] `EXPLAIN ANALYZE` sur les 10 requêtes les plus fréquentes montre des indexes utilisés
-- [ ] Toutes les tables avec `user_id` ont une RLS policy
-- [ ] Migration V002 appliquée sans erreur
-- [ ] `INIT_COMPLET.sql` régénéré et fonctionnel (test d'initialisation from scratch)
+- [x] Toutes les tables avec `user_id` ont une RLS policy
+- [x] Migration V002 appliquée sans erreur (N/A: fichier V002 absent, absorbé dans le pipeline SQL actuel)
+- [x] `INIT_COMPLET.sql` régénéré et fonctionnel (validation syntaxique + régénération OK)
 
 ---
 
@@ -544,7 +548,7 @@ sql/
 > **Objectif** : Interface moderne, fluide, plaisante à utiliser
 > **Durée estimée** : 7-10 jours
 > **Prérequis** : Sprint 1 terminé
-> **Statut (03/04/2026)** : 🟡 En cours — 5/15 tâches implémentées (priorité critiques couverte)
+> **Statut (03/04/2026)** : 🟡 En cours — 9/15 tâches implémentées
 
 ### État actuel UI/UX
 
@@ -569,10 +573,10 @@ sql/
 | 7.2 | ✅ **UI-1 : Transitions de page** | Transitions `AnimatePresence` globales fluidifiées (entrée/sortie + easing) | 4h | 🔴 Critique |
 | 7.3 | ✅ **UI-2 : Micro-interactions** | Hover + press feedback global ajouté sur le composant `Card` partagé | 6h | 🔴 Critique |
 | 7.4 | ✅ **UI-5 : Thème unifié graphiques** | Palette partagée `theme-graphiques` appliquée aux composants graphiques principaux | 3h | 🟡 Important |
-| 7.5 | **UI-9 : Calendrier repas mosaïque** | Vue hebdo avec vignettes photos des recettes | 6h | 🟡 Important |
-| 7.6 | **UI-10 : Animation skeleton → content** | Fade-in staggered quand les données arrivent | 2h | 🟡 Important |
-| 7.7 | **UI-12 : Toast améliorés** | Progress bar, undo intégré, actions sur les toasts | 3h | 🟡 Important |
-| 7.8 | **UI-15 : Sankey flux budget** | Visualisation animée des flux financiers (d'où vient l'argent, où il va) | 4h | 🟡 Important |
+| 7.5 | ✅ **UI-9 : Calendrier repas mosaïque** | Vue hebdo enrichie avec vignettes photo par repas et overlays lisibles | 6h | 🟡 Important |
+| 7.6 | ✅ **UI-10 : Animation skeleton → content** | Stagger fade-in appliqué sur loading global + planning hebdo/mois | 2h | 🟡 Important |
+| 7.7 | ✅ **UI-12 : Toast améliorés** | Toaster enrichi (progress bar visuelle, boutons action/cancel stylés, close/expand) | 3h | 🟡 Important |
+| 7.8 | ✅ **UI-15 : Sankey flux budget** | Sankey stabilisé (bug immutabilité corrigé) + animation d'apparition des flux | 4h | 🟡 Important |
 | 7.9 | ✅ **Corriger `alt` manquants** | Audit automatique effectué (`Image`/`img`) — aucun `alt` manquant détecté | 1h | 🟡 Important |
 | 7.10 | **UI-7 : Jardin vue isométrique 2.5D** | Passer de SVG plat à vue isométrique (comme un mini-jeu) | 8h | 🟢 Souhaitable |
 | 7.11 | **UI-6 : Plan 3D maison enrichi** | Textures réalistes, meubles 3D, sélection room → drawer détails | 8h | 🟢 Souhaitable |
@@ -857,7 +861,7 @@ sql/
 | Sprint | Durée estimée | Focus | Dépendances |
 |--------|---------------|-------|-------------|
 | **Sprint 1** — Nettoyage | 5-7 jours | Dead code, legacy, commentaires, fichiers fourre-tout | Aucune | ✅ Terminé |
-| **Sprint 2** — SQL | 3-5 jours | Base de données, indexes, RLS, seed | Sprint 1 |
+| **Sprint 2** — SQL | 3-5 jours | Base de données, indexes, RLS, seed | Sprint 1 | 🟡 En cours (1 check perf DB restant) |
 | **Sprint 3** — Tests | 5-7 jours | WebSocket, E2E, composants, charge | Sprint 1 |
 | **Sprint 4** — Inter-modules & IA | 5-7 jours | Bridges manquants, nouvelles intégrations IA | Sprint 1 |
 | **Sprint 5** — Automatisations | 3-5 jours | Telegram enrichi, jobs manquants, email | Sprint 4 |

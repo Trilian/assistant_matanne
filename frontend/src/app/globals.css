@@ -333,4 +333,50 @@
   .module-top-strip {
     background: linear-gradient(90deg, transparent, var(--module-accent, var(--primary)), transparent);
   }
+
+  .cn-toast {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cn-toast::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: color-mix(in oklch, var(--primary) 70%, white);
+    transform-origin: left;
+    animation: toast-progress 5s linear forwards;
+    opacity: 0.9;
+  }
+
+  .cn-toast-action,
+  .cn-toast-cancel {
+    border-radius: calc(var(--radius) - 2px);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  .cn-toast-action {
+    background: color-mix(in oklch, var(--primary) 15%, transparent);
+    color: var(--foreground);
+  }
+
+  .cn-toast-cancel {
+    background: color-mix(in oklch, var(--muted) 85%, transparent);
+    color: var(--muted-foreground);
+  }
+}
+
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
 }

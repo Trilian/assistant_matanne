@@ -18,6 +18,7 @@ CREATE TABLE elements_jardin (
 );
 CREATE INDEX IF NOT EXISTS ix_garden_items_type ON elements_jardin(type_plante);
 CREATE INDEX IF NOT EXISTS ix_garden_items_statut ON elements_jardin(statut);
+CREATE INDEX IF NOT EXISTS ix_garden_items_derniere_action ON elements_jardin(derniere_action);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

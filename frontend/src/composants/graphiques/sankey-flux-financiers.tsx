@@ -49,6 +49,19 @@ export function SankeyFluxFinanciers({
     [details, hauteur]
   );
 
+  const detailsParCategorie = useMemo(() => {
+    const tailles = categories.map((categorie) => (categorie.details ?? []).slice(0, 3).length);
+    const offsets = tailles.map((_, index) => tailles.slice(0, index).reduce((acc, v) => acc + v, 0));
+
+    return categories.map((categorie, categorieIndex) => {
+      const baseIndex = offsets[categorieIndex] ?? 0;
+      return (categorie.details ?? []).slice(0, 3).map((detail, detailIndex) => ({
+        detail,
+        segment: detailsLayout[baseIndex + detailIndex],
+      }));
+    });
+  }, [categories, detailsLayout]);
+
   if (!categories.length || total <= 0) {
     return (
       <div className="flex h-[280px] items-center justify-center text-sm text-muted-foreground">
@@ -56,8 +69,6 @@ export function SankeyFluxFinanciers({
       </div>
     );
   }
-
-  let detailIndex = 0;
 
   return (
     <svg viewBox={`0 0 760 ${hauteur}`} className="h-auto w-full">
@@ -74,7 +85,7 @@ export function SankeyFluxFinanciers({
         const y = bloc.y;
         const h = Math.max(28, bloc.h);
 
-        const detailsCategorie = (categorie.details ?? []).slice(0, 3);
+        const detailsCategorie = detailsParCategorie[index] ?? [];
         const valeurSourceY = y + h / 2;
 
         return (
@@ -85,14 +96,13 @@ export function SankeyFluxFinanciers({
               stroke="rgba(14, 116, 144, 0.18)"
               strokeWidth={Math.max(14, (categorie.montant / total) * 96)}
               strokeLinecap="round"
+              className="animate-in fade-in duration-700"
             />
-            <rect x="280" y={y} width="160" height={h} rx="16" fill="rgba(16, 185, 129, 0.16)" stroke="rgba(5, 150, 105, 0.35)" />
+            <rect x="280" y={y} width="160" height={h} rx="16" fill="rgba(16, 185, 129, 0.16)" stroke="rgba(5, 150, 105, 0.35)" className="animate-in fade-in duration-500" />
             <text x="296" y={y + 24} className="fill-foreground text-[13px] font-medium">{categorie.nom}</text>
             <text x="296" y={y + 42} className="fill-muted-foreground text-[12px]">{categorie.montant.toFixed(0)} €</text>
 
-            {detailsCategorie.map((detail) => {
-              const segment = detailsLayout[detailIndex];
-              detailIndex += 1;
+            {detailsCategorie.map(({ detail, segment }) => {
               const detailY = segment?.y ?? y;
               const detailH = Math.max(24, segment?.h ?? 24);
               const sourceY = y + h / 2;
