@@ -603,16 +603,27 @@
 
 ---
 
-## Phase 9 — UI/UX & visualisations
+## Phase 9 — UI/UX & visualisations 🚧 SPRINT CŒUR LIVRÉ
 
 > **Objectif** : Interface fluide, simple, riche visuellement
-> **Durée estimée** : 7-10 jours
+> **Durée estimée** : 7-10 jours → **Sprint cœur livré le 4 avril 2026**
 > **Prérequis** : Phase 2 terminée (code propre)
 > **Impact** : Expérience utilisateur, plaisir d'utilisation
+> **Statut** : ✅ **socle UI/UX déployé et vérifié** ; restent le Gantt maison, la carte jardin 2D et le polish dark mode global.
 
 ### Visualisations existantes (voir [Annexe K](#annexe-k--visualisations-existantes--améliorations-ui))
 
 14 composants de visualisation déjà en place (3D maison, jardin SVG, heatmaps D3, Sankey, treemaps, radars, sparklines, Kanban DnD, dashboard DnD, timeline batch cooking).
+
+### Sprint UI/UX — 4 avril 2026
+
+- ✅ `frontend/src/composants/planning/calendrier-mosaique-repas.tsx` intégré dans `/cuisine/planning` avec vignettes photo par repas
+- ✅ tableau de bord rendu personnalisable : widgets réordonnables via `GrilleDashboardDnd` + ordre persistant
+- ✅ flux rapide `Planifier ma semaine` déjà branché au dashboard avec génération du planning puis de la liste de courses
+- ✅ `frontend/src/app/(app)/famille/jules/page.tsx` enrichi d'une frise "story" des derniers jalons, en complément de `famille/timeline`
+- ✅ `frontend/src/app/(app)/cuisine/tablette/page.tsx` transformé en vrai mode cuisine tablette : données planning/recette/courses réelles, minuteur géant, raccourcis clavier et gros contrôles
+- ✅ `frontend/src/composants/cuisine/timeline-batch-cooking.tsx` exploité comme barre de progression animée pour le batch cooking
+- ✅ accessibilité renforcée : zone `aria-live` pour les courses temps réel + cases à cocher labellisées sur le mode tablette
 
 ### Améliorations UI proposées
 
@@ -655,28 +666,35 @@
 
 | # | Tâche | Détail | Effort | Priorité |
 |---|-------|--------|--------|----------|
-| 9.1 | **UI1 : Calendrier repas mosaïque** | Vue semaine avec photos miniatures des recettes | 4h | 🔴 Critique |
-| 9.2 | **UI4 : Dashboard personnalisable** | Choix et réorganisation des widgets par l'utilisateur | 6h | 🔴 Critique |
-| 9.3 | **UI5 : Timeline Jules** | Timeline verticale avec photos et jalons, style story | 4h | 🔴 Critique |
-| 9.4 | **UI6 : Mode cuisine tablette** | Vue épurée: gros texte, gros boutons, minuteurs intégrés | 4h | 🔴 Critique |
-| 9.5 | **F1-F5 : Simplification flux** | 5 flux simplifiés (voir ci-dessus) | 6h | 🔴 Critique |
+| 9.1 | ✅ **UI1 : Calendrier repas mosaïque** | `CalendrierMosaiqueRepas` branché dans `/cuisine/planning` avec vignettes photo | 4h | 🔴 Livré |
+| 9.2 | ✅ **UI4 : Dashboard personnalisable** | widgets réordonnables via `GrilleDashboardDnd`, ordre persistant côté client | 6h | 🔴 Livré |
+| 9.3 | ✅ **UI5 : Timeline Jules** | story scroll sur `famille/jules` + frise complète `famille/timeline` | 4h | 🔴 Livré |
+| 9.4 | ✅ **UI6 : Mode cuisine tablette** | page `cuisine/tablette` alimentée par planning/recette/courses réels, minuteur et raccourcis | 4h | 🔴 Livré |
+| 9.5 | ✅ **F1-F5 : Simplification flux** | dashboard 1 clic "Planifier ma semaine", ajout au planning depuis recette, parcours focus rapide | 6h | 🔴 Livré |
 | 9.6 | **UI13 : Planning colonnes** | Style Google Calendar (colonnes jours, blocs horaires) | 4h | 🟡 Important |
 | 9.7 | **UI14 : Gantt projets maison** | Diagramme de Gantt avec dépendances | 4h | 🟡 Important |
-| 9.8 | **UI8 : Progress bar batch** | Barre animée avec étapes en cours/passées/à venir | 2h | 🟡 Important |
-| 9.9 | **UI10 : Dark mode amélioré** | Revue contraste, couleurs accent, readability | 2h | 🟡 Important |
-| 9.10 | **Accessibilité G10-G12** | `aria-live`, `aria-describedby`, `htmlFor` | 2h | 🟡 Important |
+| 9.8 | ✅ **UI8 : Progress bar batch** | barre animée sur `TimelineBatchCooking` avec étapes et progression | 2h | 🟡 Livré |
+| 9.9 | **UI10 : Dark mode amélioré** | harmonisation globale restante ; surfaces phase 9 principales déjà contrastées | 2h | 🟡 En cours |
+| 9.10 | ✅ **Accessibilité G10-G12** | `aria-live` sur les courses temps réel + labels explicites sur le mode tablette | 2h | 🟡 Livré |
 | 9.11 | **UI9 : Micro-interactions** | Framer Motion transitions pages, ajouts panier, validations | 4h | 🟢 Souhaitable |
 | 9.12 | **UI2 : Carte jardin améliorée** | Zones colorées par état (planté, récolté, vide) | 3h | 🟢 Souhaitable |
 
 ### Critères de validation
 
-- [ ] Calendrier repas affiche les photos miniatures
-- [ ] Widgets dashboard réorganisables par drag-n-drop
-- [ ] Timeline Jules fonctionnelle avec jalons et photos
-- [ ] Mode cuisine utilisable sur tablette (Google Tablet)
-- [ ] "Planifier ma semaine" en 1 clic depuis le dashboard
-- [ ] `aria-live` sur le composant courses WebSocket
-- [ ] Dark mode sans problème de contraste
+- [x] Calendrier repas affiche les photos miniatures
+- [x] Widgets dashboard réorganisables par drag-n-drop
+- [x] Timeline Jules fonctionnelle avec jalons et vue story
+- [x] Mode cuisine utilisable sur tablette (Google Tablet)
+- [x] "Planifier ma semaine" en 1 clic depuis le dashboard
+- [x] `aria-live` sur le composant courses temps réel
+- [ ] Revue finale dark mode globale terminée sur l'ensemble de l'app
+
+### Checklist de sprint — preuve de vérification
+
+- [x] `get_errors` sur `frontend/src/app/(app)/cuisine/tablette/page.tsx`, `frontend/src/app/(app)/famille/jules/page.tsx` et `frontend/src/app/(app)/cuisine/courses/page.tsx` → **OK** (0 erreur de compilation)
+- [x] `npx eslint "src/app/(app)/cuisine/tablette/page.tsx" "src/app/(app)/famille/jules/page.tsx" "src/app/(app)/cuisine/courses/page.tsx"` → **OK** (aucune sortie, exit 0)
+- [x] `npm test -- --run "src/app/(app)/planning/planning.test.tsx" "src/app/(app)/dashboard.test.tsx"` → **OK** (`2` fichiers, `5` tests passés)
+- [ ] `npm run lint` global → encore bloqué par des erreurs legacy hors phase 9 (`frontend/e2e/cuisine-complet.spec.ts`, `src/app/(app)/outils/composants/AnalyseMeteoExample.tsx`)
 
 ---
 
@@ -1187,7 +1205,7 @@ sql/schema/
 | **Phase 6** — Inter-modules | 3-4 jours | 9 nouveaux bridges |
 | **Phase 7** — IA & automations | 4-5 jours | 10 opportunités IA, 7 jobs, 5 automations |
 | **Phase 8** — Telegram & email | 3-4 jours | 8 commandes, interactions enrichies, emails |
-| **Phase 9** — UI/UX | 7-10 jours | 14 améliorations, accessibilité, simplification flux |
+| **Phase 9** — UI/UX | 7-10 jours | ✅ Sprint cœur livré (planning mosaïque, dashboard DnD, Jules story, mode tablette, accessibilité) |
 | **Phase 10** — Admin | 2-3 jours | Simulateur date, données test, smoke test bridges |
 | **Phase 11** — Innovations | 3-5 jours | Quick Add, Score foyer, Google Calendar |
 | | | |

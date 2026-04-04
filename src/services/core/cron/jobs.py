@@ -2952,6 +2952,160 @@ def _job_jardin_feedback_planning() -> None:
         logger.exception("Erreur feedback_jardin jardin_feedback_planning")
 
 
+def _job_phase7_briefing_matinal_ia() -> None:
+    """J1 — Résumé matinal personnalisé (Telegram 7h)."""
+    _job_briefing_matinal_push()
+
+
+def _job_phase7_comparateur_abonnements() -> None:
+    """J2 — Compare les abonnements maison et met en avant les économies potentielles."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.abonnements import Abonnement
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+
+        ratios = {
+            "eau": 0.97,
+            "electricite": 0.92,
+            "gaz": 0.91,
+            "assurance_habitation": 0.88,
+            "assurance_auto": 0.89,
+            "chaudiere": 0.93,
+            "telephone": 0.87,
+            "internet": 0.90,
+        }
+        alternatives = {
+            "eau": "veille locale",
+            "electricite": "offre marché énergie",
+            "gaz": "offre gaz indexée",
+            "assurance_habitation": "comparateur habitation",
+            "assurance_auto": "comparateur auto",
+            "chaudiere": "contrat entretien concurrent",
+            "telephone": "forfait concurrent",
+            "internet": "FAI alternatif",
+        }
+
+        opportunites: list[str] = []
+        with obtenir_contexte_db() as session:
+            abonnements = session.query(Abonnement).order_by(Abonnement.type_abonnement.asc()).all()
+            for abonnement in abonnements:
+                prix_actuel = float(abonnement.prix_mensuel or 0)
+                if prix_actuel <= 0:
+                    continue
+                type_abo = str(abonnement.type_abonnement or "autre").lower()
+                meilleur_prix = float(abonnement.meilleur_prix_trouve or 0)
+                fournisseur_alt = abonnement.fournisseur_alternatif or alternatives.get(type_abo, "offre alternative")
+                if meilleur_prix <= 0 or meilleur_prix >= prix_actuel:
+                    meilleur_prix = round(prix_actuel * ratios.get(type_abo, 0.94), 2)
+                economie = round(prix_actuel - meilleur_prix, 2)
+                if economie >= 1:
+                    opportunites.append(
+                        f"• {type_abo.replace('_', ' ')} → {fournisseur_alt}: {meilleur_prix:.2f} €/mois (gain estimé {economie:.2f} €)"
+                    )
+
+        if not opportunites:
+            logger.info("comparateur_abonnements: aucune économie notable détectée")
+            return
+
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message="Comparateur abonnements — pistes d’économies du mois :\n" + "\n".join(opportunites[:5]),
+            canaux=["push", "email"],
+            titre="Comparateur abonnements",
+        )
+        logger.info("comparateur_abonnements exécuté: %d opportunité(s)", len(opportunites))
+    except Exception:
+        logger.exception("Erreur job comparateur_abonnements")
+
+
+def _job_phase7_rapport_nutritionnel_jules() -> None:
+    """J4 — Résumé nutritionnel hebdomadaire de Jules."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.cuisine.inter_module_jules_nutrition import obtenir_service_jules_nutrition_interaction
+
+        resultat = obtenir_service_jules_nutrition_interaction().adapter_planning_nutrition_jules(jours_horizon=7)
+        recommandations = resultat.get("recommandations", []) if isinstance(resultat, dict) else []
+        if not recommandations:
+            logger.info("rapport_nutritionnel_jules: aucun contenu à notifier")
+            return
+
+        message = "Jules — point nutrition de la semaine :\n- " + "\n- ".join(recommandations[:4])
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push", "telegram"],
+            titre="Rapport nutrition Jules",
+        )
+        logger.info("rapport_nutritionnel_jules exécuté")
+    except Exception:
+        logger.exception("Erreur job rapport_nutritionnel_jules")
+
+
+def _job_phase7_nettoyage_notifications_30j() -> None:
+    """J5 — Purge l’historique des notifications de plus de 30 jours."""
+    try:
+        from src.core.db import obtenir_contexte_db
+        from src.core.models.notifications_historique import HistoriqueNotification
+
+        with obtenir_contexte_db() as session:
+            limite = datetime.now() - timedelta(days=30)
+            nb_supprimees = (
+                session.query(HistoriqueNotification)
+                .filter(HistoriqueNotification.created_at < limite)
+                .delete()
+            )
+            session.commit()
+        logger.info("nettoyage_notifications_30j exécuté: %d notification(s) supprimée(s)", nb_supprimees)
+    except Exception:
+        logger.exception("Erreur job nettoyage_notifications_30j")
+
+
+def _job_phase7_prediction_depenses() -> None:
+    """J6 — Prédiction budget de fin de mois à mi-parcours."""
+    try:
+        from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
+        from src.services.ia_avancee import get_ia_avancee_service
+
+        prediction = get_ia_avancee_service().prevoir_depenses_fin_mois()
+        if prediction is None:
+            logger.info("prediction_depenses: aucun résultat IA")
+            return
+
+        message = (
+            f"Prévision fin de mois: {prediction.prevision_fin_mois:.2f} € pour un budget de "
+            f"{prediction.budget_mensuel:.2f} € (tendance: {prediction.tendance})."
+        )
+        dispatcher = get_dispatcher_notifications()
+        _envoyer_notif_tous_users(
+            dispatcher,
+            message=message,
+            canaux=["push", "email"],
+            titre="Prédiction dépenses",
+        )
+        logger.info("prediction_depenses exécuté: prévision=%.2f", prediction.prevision_fin_mois)
+    except Exception:
+        logger.exception("Erreur job prediction_depenses")
+
+
+def _job_phase7_alerte_plantes_arrosage() -> None:
+    """J7 — Alerte arrosage / protection des plantes selon la météo."""
+    try:
+        from .jobs_notifications import job_alerte_meteo_jardin
+
+        job_alerte_meteo_jardin()
+        logger.info("alerte_plantes_arrosage exécuté")
+    except Exception:
+        logger.exception("Erreur job alerte_plantes_arrosage")
+
+
+def _job_phase7_sync_tirages_euromillions() -> None:
+    """J8 — Synchronisation des résultats Euromillions."""
+    _job_sync_tirages_loto_euromillions()
+
+
 _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     # Jobs existants
     "rappels_famille": ("Rappels famille quotidiens", _job_rappels_famille),
@@ -3022,6 +3176,14 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "job_nutrition_adultes_weekly": ("Bilan nutrition adultes hebdo", _job_nutrition_adultes_weekly),
     "job_briefing_matinal_push": ("Briefing matinal IA", _job_briefing_matinal_push),
     "job_jardin_feedback_planning": ("Feedback jardin vers planning", _job_jardin_feedback_planning),
+    # Phase 7 — IA & automations
+    "briefing_matinal_ia": ("Résumé matinal IA", _job_phase7_briefing_matinal_ia),
+    "comparateur_abonnements": ("Comparateur abonnements", _job_phase7_comparateur_abonnements),
+    "rapport_nutritionnel_jules": ("Rapport nutritionnel Jules", _job_phase7_rapport_nutritionnel_jules),
+    "nettoyage_notifications_30j": ("Nettoyage notifications 30 jours", _job_phase7_nettoyage_notifications_30j),
+    "prediction_depenses": ("Prédiction dépenses fin de mois", _job_phase7_prediction_depenses),
+    "alerte_plantes_arrosage": ("Alerte plantes / arrosage", _job_phase7_alerte_plantes_arrosage),
+    "sync_tirages_euromillions": ("Sync tirages Euromillions", _job_phase7_sync_tirages_euromillions),
 }
 
 

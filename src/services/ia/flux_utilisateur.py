@@ -309,11 +309,12 @@ def marquer_tache_fait_avec_prochaine(tache_id: int) -> dict:
 
 
 @avec_gestion_erreurs(default_return={})
-def enregistrer_feedback_semaine(feedbacks: list[dict]) -> dict:
+def enregistrer_feedback_semaine(feedbacks: list[dict], db=None) -> dict:
     """Enregistre les feedbacks de fin de semaine pour améliorer l'IA.
 
     Args:
         feedbacks: Liste de dict {"recette_id": int, "note": 1-5, "commentaire": str, "mange": bool}
+        db: Session SQLAlchemy optionnelle pour réutiliser une transaction existante
 
     Returns:
         {"nb_feedbacks": N, "score_moyen": float}
@@ -323,9 +324,9 @@ def enregistrer_feedback_semaine(feedbacks: list[dict]) -> dict:
     if not feedbacks:
         return {"nb_feedbacks": 0, "score_moyen": 0}
 
-    notes = []
+    def _traiter_session(session) -> list[int]:
+        notes_locales: list[int] = []
 
-    with obtenir_contexte_db() as session:
         for fb in feedbacks:
             recette_id = fb.get("recette_id")
             note = int(fb.get("note", 3) or 3)
@@ -377,9 +378,15 @@ def enregistrer_feedback_semaine(feedbacks: list[dict]) -> dict:
                 source="feedback_semaine",
             )
 
-            notes.append(note)
+            notes_locales.append(note)
 
         session.commit()
+        return notes_locales
+
+    notes = _traiter_session(db) if db is not None else []
+    if db is None:
+        with obtenir_contexte_db() as session:
+            notes = _traiter_session(session)
 
     score_moyen = sum(notes) / len(notes) if notes else 0
 

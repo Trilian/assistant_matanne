@@ -300,7 +300,7 @@ async def adaptation_recette(
         except Exception:
             stock_disponible = []
 
-    resultats = suggérer_substitutions_recette(
+    resultats = suggerer_substitutions_recette(
         [
             {
                 "nom": body.ingredient_manquant,

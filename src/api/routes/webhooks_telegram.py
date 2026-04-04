@@ -11,6 +11,7 @@ Commandes bot Telegram :
 
 from __future__ import annotations
 
+import asyncio
 import html
 import logging
 import re
@@ -30,11 +31,19 @@ router = APIRouter(prefix="/api/v1/telegram", tags=["Telegram"])
 
 COMMANDES_TELEGRAM: tuple[tuple[str, str], ...] = (
     ("/planning", "Afficher le planning repas de la semaine"),
-    ("/courses", "Afficher la liste de courses avec cases à cocher"),
+    ("/courses", "Afficher la liste de courses avec actions rapides"),
+    ("/inventaire", "Voir le frigo avec alertes de péremption"),
+    ("/recette [nom]", "Trouver une recette rapide et ses ingrédients"),
+    ("/batch", "Résumé du batch cooking en cours ou planifié"),
     ("/ajout [article]", "Ajouter un article à la liste de courses"),
-    ("/repas [midi|soir]", "Voir le repas du jour ou ouvrir la modification"),
+    ("/repas [midi|soir]", "Voir le repas du jour et répondre au mini-sondage"),
     ("/jules", "Résumé Jules: âge et jalons du moment"),
     ("/maison", "Tâches maison du jour"),
+    ("/jardin", "Tâches jardin et récoltes à venir"),
+    ("/energie", "KPIs énergie du mois / de l’année"),
+    ("/rappels", "Voir tous les rappels groupés"),
+    ("/timer [Xmin]", "Lancer un minuteur Telegram"),
+    ("/note [texte]", "Créer une note rapide"),
     ("/budget", "Résumé budget du mois en cours"),
     ("/meteo", "Météo du jour et impact sur les activités"),
     ("/menu", "Ouvrir le menu principal Telegram"),

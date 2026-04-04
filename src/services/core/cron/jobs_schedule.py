@@ -40,6 +40,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("nettoyage_cache_7j", CronTrigger(hour=2, minute=0), replace_existing=True)
     planifier_job("backup_donnees_critiques", CronTrigger(hour=1, minute=0), replace_existing=True)
     planifier_job("sync_tirages_loto_euromillions", CronTrigger(day_of_week="tue,fri", hour=22, minute=0), replace_existing=True)
+    planifier_job("sync_tirages_euromillions", CronTrigger(day_of_week="tue,fri", hour=22, minute=30), replace_existing=True)
     planifier_job("rapport_budget_hebdo", CronTrigger(day_of_week="sun", hour=18, minute=0), replace_existing=True)
     planifier_job("maj_donnees_meteo", CronTrigger(hour=6, minute=0), replace_existing=True)
     planifier_job("anniversaires_j30", CronTrigger(hour=8, minute=0), replace_existing=True)
@@ -106,6 +107,14 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("job_nutrition_adultes_weekly", CronTrigger(day_of_week="sun", hour=20, minute=15), replace_existing=True)
     planifier_job("job_briefing_matinal_push", CronTrigger(hour=7, minute=0), replace_existing=True)
     planifier_job("job_jardin_feedback_planning", CronTrigger(day_of_week="sun", hour=18, minute=30), replace_existing=True)
+
+    # Phase 7 — IA & automations (roadmap planning_implementation)
+    planifier_job("briefing_matinal_ia", CronTrigger(hour=7, minute=0), replace_existing=True)
+    planifier_job("comparateur_abonnements", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
+    planifier_job("rapport_nutritionnel_jules", CronTrigger(day_of_week="sun", hour=19, minute=0), replace_existing=True)
+    planifier_job("nettoyage_notifications_30j", CronTrigger(day=1, hour=2, minute=30), replace_existing=True)
+    planifier_job("prediction_depenses", CronTrigger(day=15, hour=8, minute=30), replace_existing=True)
+    planifier_job("alerte_plantes_arrosage", CronTrigger(hour=8, minute=0), replace_existing=True)
 
     # Notifications Telegram et Email
     planifier_job("s16_resume_weekend_telegram", CronTrigger(day_of_week="fri", hour=18, minute=0), replace_existing=True)

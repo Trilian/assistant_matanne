@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Workflow, Play } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
@@ -21,11 +21,36 @@ type Automation = {
 export default function PageAutomations() {
   const invalider = utiliserInvalidation();
   const [nom, setNom] = useState("");
+  const initialisationAutoFaite = useRef(false);
 
   const { data: automations } = utiliserRequete(["automations"], async () => {
     const { data } = await clientApi.get<{ items: Automation[] }>("/automations");
     return data.items;
   });
+
+  const { mutate: initialiser } = utiliserMutation(
+    async () => {
+      await clientApi.post<{ total: number }>("/automations/init")
+    },
+    {
+      onSuccess: () => {
+        invalider(["automations"])
+      },
+      onError: () => {
+        initialisationAutoFaite.current = true
+      },
+    }
+  )
+
+  useEffect(() => {
+    if (automations === undefined || initialisationAutoFaite.current) {
+      return
+    }
+    if (automations.length === 0) {
+      initialisationAutoFaite.current = true
+      initialiser(undefined)
+    }
+  }, [automations, initialiser])
 
   const { mutate: creer, isPending } = utiliserMutation(
     async () => {

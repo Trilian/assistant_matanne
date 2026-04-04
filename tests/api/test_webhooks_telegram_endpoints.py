@@ -285,3 +285,157 @@ class TestWebhookTelegramCommandesSprint5:
             "callback_courses_1",
             "123456",
         )
+
+
+class TestWebhookTelegramCommandesPhase8:
+    """Tests ciblés sur les commandes Telegram ajoutées en phase 8."""
+
+    def test_commande_inventaire_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 3101,
+            "message": {
+                "message_id": 211,
+                "date": 1234567900,
+                "chat": {"id": 123456},
+                "text": "/inventaire",
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._envoyer_inventaire_commande",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456")
+
+    def test_commande_recette_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 3102,
+            "message": {
+                "message_id": 212,
+                "date": 1234567901,
+                "chat": {"id": 123456},
+                "text": "/recette gratin dauphinois",
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._envoyer_recette_commande",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456", "gratin dauphinois")
+
+    def test_commande_rappels_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 3103,
+            "message": {
+                "message_id": 213,
+                "date": 1234567902,
+                "chat": {"id": 123456},
+                "text": "/rappels",
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._envoyer_rappels_groupes",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456")
+
+    def test_commande_timer_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 3104,
+            "message": {
+                "message_id": 214,
+                "date": 1234567903,
+                "chat": {"id": 123456},
+                "text": "/timer 15",
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._lancer_minuteur_telegram",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456", "15")
+
+    def test_commande_note_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 3105,
+            "message": {
+                "message_id": 215,
+                "date": 1234567904,
+                "chat": {"id": 123456},
+                "text": "/note penser au drive",
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._creer_note_rapide_telegram",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456", "penser au drive")
+
+    def test_callback_article_statut_route_vers_handler(self, client: TestClient):
+        payload = {
+            "update_id": 3106,
+            "callback_query": {
+                "id": "callback_courses_2",
+                "from": {"id": 123456, "is_bot": False},
+                "chat_instance": "1234567890",
+                "data": "courses_action:reporter:18",
+                "message": {
+                    "message_id": 216,
+                    "date": 1234567905,
+                    "chat": {"id": 123456},
+                },
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._traiter_callback_action_article",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("courses_action:reporter:18", "callback_courses_2", "123456")
+
+    def test_callback_sondage_repas_route_vers_handler(self, client: TestClient):
+        payload = {
+            "update_id": 3107,
+            "callback_query": {
+                "id": "callback_repas_1",
+                "from": {"id": 123456, "is_bot": False},
+                "chat_instance": "1234567890",
+                "data": "repas_sondage:soir",
+                "message": {
+                    "message_id": 217,
+                    "date": 1234567906,
+                    "chat": {"id": 123456},
+                },
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._traiter_callback_sondage_repas",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("repas_sondage:soir", "callback_repas_1", "123456")
