@@ -16,7 +16,6 @@ from src.services.utilitaires.service import (
     obtenir_notes_service,
     obtenir_presse_papiers_service,
 )
-from src.services.utilitaires.ocr_service import OCRService, obtenir_ocr_service
 from src.services.utilitaires.briefing_matinal import (
     BriefingMatinalService,
     obtenir_service_briefing_matinal,
@@ -42,7 +41,6 @@ __all__ = [
     "MotsDePasseService",
     "PressePapiersService",
     "EnergieService",
-    "OCRService",
     "BriefingMatinalService",
     "ChatContexteMultiModuleService",
     "AssistantProactifService",
@@ -54,7 +52,6 @@ __all__ = [
     "obtenir_mots_de_passe_service",
     "obtenir_presse_papiers_service",
     "obtenir_energie_service",
-    "obtenir_ocr_service",
     "obtenir_service_briefing_matinal",
     "obtenir_service_chat_contexte",
     "obtenir_service_assistant_proactif",

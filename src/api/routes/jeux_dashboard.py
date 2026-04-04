@@ -552,7 +552,7 @@ async def resume_mensuel(
                     "points_faibles": points_faibles or ["Performances Ã  amÃ©liorer"],
                     "recommandations": [
                         "Continuez Ã  privilÃ©gier les value bets avec edge > 5%",
-                        "Respectez votre budget mensuel de jeu responsable",
+                        "Fixez-vous un budget mensuel et respectez-le",
                     ],
                     "kpis": kpis,
                 }
@@ -563,38 +563,6 @@ async def resume_mensuel(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # ANALYSE IA
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-
-
-@router.post("/ocr-ticket", responses=REPONSES_CRUD_CREATION)
-@gerer_exception_api
-async def analyser_ticket_ocr_jeux(
-    file: UploadFile = File(..., description="Photo du ticket de jeu (JPEG/PNG/WebP)"),
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Analyse OCR d'un ticket loto/euromillions via IA vision."""
-    contenu = await file.read()
-    from src.services.utilitaires.ocr_service import obtenir_ocr_service
-
-    service = obtenir_ocr_service()
-    try:
-        service.valider_upload_image(file.content_type, contenu, "JPEG, PNG, WebP")
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    resultat = service.extraire_ticket(contenu)
-
-    if not resultat:
-        return {
-            "success": False,
-            "message": "Analyse OCR impossible. Essayez une photo plus nette et bien cadrÃ©e.",
-            "donnees": None,
-        }
-
-    return {
-        "success": True,
-        "message": "Ticket analysÃ© avec succÃ¨s",
-        "donnees": service.formater_donnees_jeux(resultat),
-    }
 
 
 @router.post("/analyse-ia", responses=REPONSES_CRUD_CREATION)

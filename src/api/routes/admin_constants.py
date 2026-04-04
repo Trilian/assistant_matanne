@@ -32,7 +32,6 @@ _LABELS_JOBS: dict[str, str] = {
     "sync_calendrier_scolaire": "INNO-14 Sync calendrier scolaire auto (05h30)",
     "garmin_sync_matinal": "Sync Garmin automatique matinale (06h00)",
     "automations_runner": "Exécution automations (toutes les 5 min)",
-    "points_famille_hebdo": "Calcul points famille hebdo (dim 20h00)",
     "sync_google_calendar": "J1 Sync Google Calendar (quotidien 23h00)",
     "alerte_stock_bas": "J3 Alerte stock bas → liste courses (07h00)",
     "archive_batches_expires": "J4 Archivage préparations batch expirées (02h00)",

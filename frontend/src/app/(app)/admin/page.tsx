@@ -296,7 +296,7 @@ export default function PageAdmin() {
           { href: "/admin/notifications-queue", icon: Inbox, label: "Queue Notifs", desc: "Flush digest" },
           { href: "/admin/feature-flags", icon: Flag, label: "Feature Flags", desc: "Runtime toggles" },
           { href: "/admin/cache", icon: DatabaseZap, label: "Cache dédié", desc: "Purge sélective" },
-          { href: "/admin/whatsapp-test", icon: MessageSquare, label: "Telegram test", desc: "Chat cible" },
+          { href: "/admin/telegram-test", icon: MessageSquare, label: "Telegram test", desc: "Chat cible" },
           { href: "/admin/console", icon: Play, label: "Console rapide", desc: "Commandes admin" },
           { href: "/admin/scheduler", icon: Clock, label: "Scheduler visuel", desc: "Timeline CRON" },
           { href: "/admin/logs", icon: Activity, label: "Logs live", desc: "WebSocket temps réel" },

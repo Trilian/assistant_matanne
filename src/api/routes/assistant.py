@@ -84,8 +84,7 @@ def _publier_evenement_assistant(
 
         obtenir_bus().emettre(type_evenement, data, source=source)
     except Exception:
-        # L'API ne doit jamais échouer à cause du bus d'événements.
-        pass
+        logger.debug("Échec publication événement assistant %s (non bloquant)", type_evenement)
 
 
 def _rendre_commande_depuis_intent(intent: str, slots: dict[str, Any]) -> str:

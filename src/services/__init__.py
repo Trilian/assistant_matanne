@@ -22,7 +22,7 @@ Importez directement depuis les sous-packages:
     # Utilisateur (auth, historique)
     from src.services.core.utilisateur import AuthService, get_auth_service
 
-    # Intégrations (barcode, OCR, OpenFoodFacts)
+    # Intégrations (barcode, OpenFoodFacts)
     from src.services.integrations import BarcodeService, get_barcode_service
 
     # Backup

@@ -4,7 +4,7 @@ Routes API pour la famille.
 Agrégateur : inclut 3 sous-routeurs thématiques via include_router() :
 - famille_jules      : Profils enfants, jalons, croissance, coaching IA
   → /enfants, /jules/*
-- famille_budget     : Dépenses, analyse IA, prédictions, OCR ticket
+- famille_budget     : Dépenses, analyse IA, prédictions
   → /budget, /budget/*
 - famille_activites  : Activités familiales, suggestions IA (weekend, soirée)
   → /activites, /weekend/*, /soiree/*
@@ -46,7 +46,6 @@ from src.api.schemas.famille import (
     AchatCreate,
     AchatPatch,
     AnnonceIBCRequest,
-    AnnonceVintedRequest,
     AnniversaireCreate,
     ChecklistAnniversaireItemCreate,
     ChecklistAnniversaireItemPatch,
@@ -1006,31 +1005,6 @@ async def generer_annonce_lbc(
         description=payload.description,
         etat_usage=payload.etat_usage,
         prix_cible=payload.prix_cible,
-    )
-    if isawaitable(texte):
-        texte = await texte
-    return {"annonce": texte}
-
-
-@router.post("/achats/{achat_id}/annonce-vinted", responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def generer_annonce_vinted(
-    achat_id: int,
-    payload: AnnonceVintedRequest,
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Génère une annonce Vinted pour un article à revendre."""
-    from src.services.famille.achats_ia import obtenir_service_achats_ia
-
-    service = obtenir_service_achats_ia()
-    texte = service.generer_annonce_vinted(
-        nom=payload.nom,
-        description=payload.description,
-        etat_usage=payload.etat_usage,
-        prix_cible=payload.prix_cible,
-        marque=payload.marque,
-        taille=payload.taille,
-        categorie_vinted=payload.categorie_vinted,
     )
     if isawaitable(texte):
         texte = await texte

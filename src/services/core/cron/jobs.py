@@ -1209,48 +1209,6 @@ def _job_automations() -> None:
         logger.exception("Erreur lors de l'exécution des automations")
 
 
-def _job_points_famille_hebdo() -> None:
-    """Calcule les points famille hebdo (LT-02, dim 20h00)."""
-    try:
-        from src.services.dashboard.points_famille import get_points_famille_service
-
-        points = get_points_famille_service().calculer_points()
-        logger.info("Points famille hebdo recalculés: %s", points.get("total_points", 0))
-
-        # Évaluer et attribuer les badges + notifications
-        from src.services.dashboard.badges_triggers import get_badges_triggers_service
-
-        service = get_badges_triggers_service()
-        nouveaux = service.evaluer_et_attribuer()
-
-        if nouveaux:
-            _notifier_badges_debloques(nouveaux)
-    except Exception:
-        logger.exception("Erreur lors du calcul des points famille hebdo")
-
-
-def _notifier_badges_debloques(badges: list[dict]) -> None:
-    """Envoie une notification push pour chaque badge débloqué (badges & gamification)."""
-    try:
-        from src.services.core.notifications.notif_dispatcher import (
-            get_dispatcher_notifications,
-        )
-
-        dispatcher = get_dispatcher_notifications()
-        noms = ", ".join(f"{b.get('emoji', '🏅')} {b['badge_label']}" for b in badges)
-        message = f"Nouveau(x) badge(s) débloqué(s) : {noms}"
-
-        dispatcher.envoyer(
-            user_id="1",
-            message=message,
-            type_evenement="badge_debloque",
-            titre="🎯 Badge débloqué !",
-        )
-        logger.info("Notification badges envoyée: %d badges", len(badges))
-    except Exception:
-        logger.exception("Erreur envoi notification badge")
-
-
 def _job_sync_google_calendar() -> None:
     """J1 — Sync planning repas + activités → Google Calendar (quotidien 23h00)."""
     try:
@@ -3016,7 +2974,6 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "score_bien_etre_hebdo": ("Score bien-être hebdo", _job_score_bien_etre_hebdo),
     "garmin_sync_matinal": ("Sync Garmin automatique matinale", _job_garmin_sync_matinal),
     "automations_runner": ("Exécution automations", _job_automations),
-    "points_famille_hebdo": ("Calcul points famille hebdo", _job_points_famille_hebdo),
     "sync_google_calendar": ("Sync Google Calendar", _job_sync_google_calendar),
     "alerte_stock_bas": ("Alerte stock bas", _job_alerte_stock_bas),
     "archive_batches_expires": ("Archivage batch expiré", _job_archive_batches_expires),

@@ -318,57 +318,6 @@ Format attendu:
             max_tokens=500,
         )
 
-    async def generer_annonce_vinted(
-        self,
-        nom: str,
-        description: str | None = None,
-        etat_usage: str = "bon état",
-        prix_cible: float | None = None,
-        marque: str | None = None,
-        taille: str | None = None,
-        categorie_vinted: str | None = None,
-    ) -> str:
-        """Génère une annonce Vinted optimisée (format court et orienté mode)."""
-        prix_str = f"Prix : {prix_cible}€" if prix_cible else "Prix : à définir"
-        desc_str = f"\nDétails produit : {description}" if description else ""
-        marque_str = f"Marque : {marque}" if marque else "Marque : non précisée"
-        taille_str = f"Taille : {taille}" if taille else "Taille : non précisée"
-        categorie_str = (
-            f"Catégorie Vinted : {categorie_vinted}"
-            if categorie_vinted
-            else "Catégorie Vinted : vêtement/autre"
-        )
-
-        prompt = f"""Génère une annonce Vinted optimisée pour vendre cet article.
-
-Article : {nom}{desc_str}
-État : {etat_usage}
-{prix_str}
-{marque_str}
-{taille_str}
-{categorie_str}
-
-Format attendu:
-**TITRE** (max 50 caractères, style Vinted)
-
-**DESCRIPTION**
-[2-4 phrases courtes : état, matière/style, envoi/remise, défauts éventuels]
-
-**FICHE VINTED**
-- Marque : ...
-- Taille : ...
-- État : ...
-- Catégorie : ...
-- Prix conseillé : X€
-
-**TAGS** : #tag1 #tag2 #tag3"""
-
-        return await self.call_with_cache(
-            prompt=prompt,
-            system_prompt="Tu es expert en rédaction d'annonces Vinted. Réponds en français, ton clair, direct, vendeur.",
-            max_tokens=450,
-        )
-
 
 # ═══════════════════════════════════════════════════════════
 # FACTORY

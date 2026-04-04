@@ -762,7 +762,7 @@ async def sauvegarder_config_dashboard(
                 source="dashboard",
             )
         except Exception:
-            pass
+            logger.debug("Échec publication événement config_update dashboard (non bloquant)")
 
         return {
             "message": "Configuration dashboard sauvegardée",
@@ -1023,123 +1023,8 @@ async def obtenir_tendances_ia(
     return await executer_async(_query)
 
 
-@router.get(
-    "/points-famille",
-    responses=REPONSES_LISTE,
-    summary="Points famille gamification",
-)
-@gerer_exception_api
-async def obtenir_points_famille(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Retourne les points famille consolidÃ©s (sport, alimentation, anti-gaspi)."""
-
-    def _query():
-        from src.services.dashboard.points_famille import obtenir_points_famille_service
-
-        service = obtenir_points_famille_service()
-        return service.calculer_points()
-
-    return await executer_async(_query)
 
 
-# ═══════════════════════════════════════════════════════════
-# GAMIFICATION — Badges & historique
-# ═══════════════════════════════════════════════════════════
-
-
-@router.get(
-    "/badges/catalogue",
-    responses=REPONSES_LISTE,
-    summary="Catalogue des badges sport + nutrition",
-)
-@gerer_exception_api
-async def obtenir_catalogue_badges(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Retourne le catalogue complet des badges disponibles."""
-    from src.services.dashboard.badges_triggers import obtenir_catalogue_badges as catalogue
-
-    return {"items": catalogue(), "total": len(catalogue())}
-
-
-@router.get(
-    "/badges/utilisateur",
-    responses=REPONSES_LISTE,
-    summary="Badges d'un utilisateur avec progression",
-)
-@gerer_exception_api
-async def obtenir_badges_utilisateur(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Retourne les badges d'un utilisateur avec leur état de progression."""
-
-    def _query():
-        from src.services.dashboard.badges_triggers import obtenir_badges_triggers_service
-
-        service = obtenir_badges_triggers_service()
-        user_id = user.get("user_id") or user.get("id", 1)
-        badges = service.obtenir_badges_utilisateur(user_id=int(user_id))
-        obtenus = [b for b in badges if b.get("obtenu")]
-        return {
-            "items": badges,
-            "total": len(badges),
-            "obtenus": len(obtenus),
-        }
-
-    return await executer_async(_query)
-
-
-@router.post(
-    "/badges/evaluer",
-    responses=REPONSES_LISTE,
-    summary="Évaluer et attribuer les badges mérités",
-)
-@gerer_exception_api
-async def evaluer_badges(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Évalue les conditions de badges et attribue ceux mérités."""
-
-    def _query():
-        from src.services.dashboard.badges_triggers import obtenir_badges_triggers_service
-
-        service = obtenir_badges_triggers_service()
-        nouveaux = service.evaluer_et_attribuer()
-        return {
-            "nouveaux_badges": nouveaux,
-            "total_nouveaux": len(nouveaux),
-        }
-
-    return await executer_async(_query)
-
-
-@router.get(
-    "/historique-points",
-    responses=REPONSES_LISTE,
-    summary="Historique des points sur N semaines",
-)
-@gerer_exception_api
-async def obtenir_historique_points(
-    nb_semaines: int = 8,
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Retourne l'évolution des points sport + nutrition sur N semaines."""
-
-    def _query():
-        from src.services.dashboard.badges_triggers import obtenir_badges_triggers_service
-
-        service = obtenir_badges_triggers_service()
-        user_id = user.get("user_id") or user.get("id", 1)
-        historique = service.obtenir_historique_points(
-            user_id=int(user_id), nb_semaines=nb_semaines
-        )
-        return {"items": historique, "total": len(historique)}
-
-    return await executer_async(_query)
-
-
-# ═══════════════════════════════════════════════════════════
 # B8: Documents expirés — widget dashboard
 # ═══════════════════════════════════════════════════════════
 
@@ -1261,7 +1146,7 @@ async def enregistrer_action_widget(
             source="dashboard",
         )
     except Exception:
-        pass
+        logger.debug("Échec publication événement action_rapide widget (non bloquant)")
 
     return {
         "widget_id": payload.widget_id,

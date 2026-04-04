@@ -3,6 +3,7 @@ Modèles SQLAlchemy pour le domaine Jeux (Paris sportifs, Loto & Euromillions)
 """
 
 import enum
+import os
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
@@ -359,7 +360,12 @@ class StatistiquesLoto(Base):
 
 @event.listens_for(PariSportif, "before_insert")
 def _assurer_match_placeholder(_mapper, connection, target: PariSportif) -> None:
-    """Crée un match/équipes placeholder si un test injecte un match_id inexistant."""
+    """Crée un match/équipes placeholder si un test injecte un match_id inexistant.
+
+    Ne s'exécute qu'en environnement de test pour éviter de polluer la production.
+    """
+    if not os.getenv("PYTEST_CURRENT_TEST"):
+        return
     if target.match_id is None:
         return
 

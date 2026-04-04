@@ -409,38 +409,6 @@ async def anomalies_budget(
     return {"anomalies": [a.model_dump() for a in anomalies]}
 
 
-@router.post("/budget/ocr-ticket", responses=REPONSES_CRUD_CREATION)
-@gerer_exception_api
-async def analyser_ticket_ocr(
-    file: UploadFile,
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Analyse un ticket/facture par OCR IA et extrait les donnÃ©es."""
-    contenu = await file.read()
-    from src.services.utilitaires.ocr_service import obtenir_ocr_service
-
-    service = obtenir_ocr_service()
-    try:
-        service.valider_upload_image(file.content_type, contenu, "JPEG, PNG")
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    resultat = service.extraire_ticket(contenu)
-
-    if not resultat:
-        return {
-            "success": False,
-            "message": "Impossible d'extraire les donnÃ©es du ticket. Essayez avec une image plus nette.",
-            "donnees": None,
-        }
-
-    return {
-        "success": True,
-        "message": "Ticket analysÃ© avec succÃ¨s",
-        "donnees": service.formater_donnees_budget(resultat),
-    }
-
-
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # SHOPPING FAMILIAL
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

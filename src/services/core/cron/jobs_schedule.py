@@ -28,7 +28,6 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("score_bien_etre_hebdo", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
     planifier_job("garmin_sync_matinal", CronTrigger(hour=6, minute=0), replace_existing=True)
     planifier_job("automations_runner", CronTrigger(minute="*/5"), replace_existing=True)
-    planifier_job("points_famille_hebdo", CronTrigger(day_of_week="sun", hour=20, minute=0), replace_existing=True)
     planifier_job("sync_google_calendar", CronTrigger(hour=23, minute=0), replace_existing=True)
     planifier_job("sync_veille_habitat", CronTrigger(hour=12, minute=15), replace_existing=True)
     planifier_job("alerte_stock_bas", CronTrigger(hour=7, minute=0), replace_existing=True)

@@ -600,34 +600,6 @@ class AnnonceIBCResponse(BaseModel):
     annonce: str = Field(..., description="Texte de l'annonce LBC en markdown")
 
 
-class AnnonceVintedRequest(BaseModel):
-    nom: str = Field(..., min_length=1, max_length=200)
-    description: str = Field(default="", max_length=1000)
-    etat_usage: str = Field(default="bon", description="neuf, excellent, bon, correct, usage", max_length=30)
-    prix_cible: float | None = None
-    marque: str | None = Field(default=None, max_length=80)
-    taille: str | None = Field(default=None, max_length=40)
-    categorie_vinted: str | None = Field(default=None, max_length=80)
-
-    model_config = {
-        "json_schema_extra": {
-            "example": {
-                "nom": "Manteau bébé mi-saison",
-                "description": "Très bon état, porté quelques semaines.",
-                "etat_usage": "excellent",
-                "prix_cible": 18.0,
-                "marque": "Petit Bateau",
-                "taille": "18 mois",
-                "categorie_vinted": "manteaux",
-            }
-        }
-    }
-
-
-class AnnonceVintedResponse(BaseModel):
-    annonce: str = Field(..., description="Texte de l'annonce Vinted en markdown")
-
-
 class PrefillReventeResponse(BaseModel):
     """Données pré-remplies pour l'annonce de revente d'un achat."""
 

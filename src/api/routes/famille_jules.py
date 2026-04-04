@@ -195,7 +195,7 @@ async def creer_jalon(
                     source="famille_jules",
                 )
             except Exception:
-                pass
+                logger.debug("Échec publication événement jalon %s (non bloquant)", jalon.id)
 
             journal_evenement = None
             try:
@@ -205,6 +205,7 @@ async def creer_jalon(
                     jalon_id=jalon.id
                 )
             except Exception:
+                logger.debug("Échec bridge jalon→événement familial (non bloquant)")
                 journal_evenement = None
 
             return {

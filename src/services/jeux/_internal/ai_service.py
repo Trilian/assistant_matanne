@@ -438,7 +438,7 @@ FORMAT ATTENDU (JSON):
             "points_faibles": points_faibles or ["Performances à améliorer"],
             "recommandations": [
                 "Continuez à privilégier les value bets avec edge > 5%",
-                "Respectez votre budget mensuel de jeu responsable",
+                "Fixez-vous un budget mensuel et respectez-le",
                 "Analysez vos performances par championnat et type de pari",
             ],
             "kpis": kpis,

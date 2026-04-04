@@ -126,18 +126,6 @@ class ResumeFamilleIAService(BaseAIService):
             }
             contexte["budget"] = {"depenses_mois": float(depenses_mois)}
 
-        # Score Jules (gamification famille)
-        try:
-            from src.services.dashboard.points_famille import obtenir_points_famille_service
-
-            points = obtenir_points_famille_service().calculer_points() or {}
-            contexte["score_jules"] = {
-                "total_points": int(points.get("total_points", 0)),
-                "badges": points.get("badges", []),
-            }
-        except Exception:
-            contexte["score_jules"] = {"total_points": 0, "badges": []}
-
         # Meteo (3 prochains jours)
         try:
             from src.services.integrations.weather import obtenir_service_meteo

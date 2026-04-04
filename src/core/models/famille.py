@@ -13,7 +13,7 @@ Contient :
 """
 
 from datetime import date, datetime, time
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import (
     Boolean,
@@ -32,6 +32,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base, utc_now
 from .mixins import CreeLeMixin
+
+if TYPE_CHECKING:
+    from src.core.models.carnet_sante import MesureCroissance, RendezVousMedical, Vaccin
 
 # ═══════════════════════════════════════════════════════════
 # PROFIL ENFANT
@@ -71,20 +74,18 @@ class ProfilEnfant(CreeLeMixin, Base):
         back_populates="child", cascade="all, delete-orphan"
     )
     # Use fully-qualified target names for relationships defined in other modules
-    vaccins: Mapped[list["src.core.models.carnet_sante.Vaccin"]] = relationship(  # noqa: F821
+    vaccins: Mapped[list["Vaccin"]] = relationship(
         "src.core.models.carnet_sante.Vaccin", back_populates="enfant", cascade="all, delete-orphan"
     )
-    rendez_vous: Mapped[list["src.core.models.carnet_sante.RendezVousMedical"]] = relationship(  # noqa: F821
+    rendez_vous: Mapped[list["RendezVousMedical"]] = relationship(
         "src.core.models.carnet_sante.RendezVousMedical",
         back_populates="enfant",
         cascade="all, delete-orphan",
     )
-    mesures_croissance: Mapped[list["src.core.models.carnet_sante.MesureCroissance"]] = (
-        relationship(  # noqa: F821
-            "src.core.models.carnet_sante.MesureCroissance",
-            back_populates="enfant",
-            cascade="all, delete-orphan",
-        )
+    mesures_croissance: Mapped[list["MesureCroissance"]] = relationship(
+        "src.core.models.carnet_sante.MesureCroissance",
+        back_populates="enfant",
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self) -> str:

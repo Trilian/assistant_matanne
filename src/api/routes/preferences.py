@@ -385,13 +385,13 @@ async def activer_mode_vacances(
             if date_depart:
                 try:
                     modules_actifs["vacances_depart"] = datetime.strptime(date_depart, "%Y-%m-%d").isoformat()
-                except:
-                    pass
+                except (ValueError, TypeError):
+                    logger.warning("Format date_depart invalide: %s (attendu YYYY-MM-DD)", date_depart)
             if date_retour:
                 try:
                     modules_actifs["vacances_retour"] = datetime.strptime(date_retour, "%Y-%m-%d").isoformat()
-                except:
-                    pass
+                except (ValueError, TypeError):
+                    logger.warning("Format date_retour invalide: %s (attendu YYYY-MM-DD)", date_retour)
 
             prefs.modules_actifs = modules_actifs
             session.commit()
