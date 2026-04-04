@@ -7,6 +7,7 @@ visible depuis la base configurée.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from importlib import import_module
 from pathlib import Path
 import re
 from typing import Any
@@ -40,6 +41,7 @@ def _extraire_tables_depuis_fichiers_sql() -> set[str]:
 
 
 def _extraire_tables_metadata() -> set[str]:
+    import_module("src.core.models")
     return {nom.split(".")[-1] for nom in Base.metadata.tables.keys()}
 
 
@@ -128,7 +130,7 @@ def formater_schema_diff_console(diff: dict[str, Any]) -> str:
         ("missing_in_db", "Manquantes en DB"),
         ("extra_in_db", "Supplémentaires en DB"),
     ):
-        valeurs = diff.get(cle) or []
+        valeurs: list[str] = list(diff.get(cle) or [])
         lignes.append(f"- {libelle}: {', '.join(valeurs) if valeurs else 'aucune'}")
 
     if diff.get("column_differences"):

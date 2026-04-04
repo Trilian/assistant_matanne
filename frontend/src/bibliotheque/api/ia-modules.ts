@@ -133,6 +133,21 @@ export interface DonneesNutritionnellesResponse {
   notes_personnalisees?: string;
 }
 
+export interface CalendrierSemisPersonnaliseResponse {
+  mois: number;
+  region: string;
+  meteo_resume: {
+    temp_moy_max: number;
+    temp_moy_min: number;
+    pluie_7j_mm: number;
+    suggestions_meteo: string[];
+  };
+  a_semer: Array<{ nom: string; type?: string }>;
+  a_planter: Array<{ nom: string; type?: string }>;
+  a_recolter: Array<{ nom: string; type?: string }>;
+  conseils_personnalises: string[];
+}
+
 export async function predireConsommationInventaire(
   body: PredictionConsommationRequest
 ): Promise<PredictionConsommationResponse> {
@@ -198,5 +213,18 @@ export async function analyserNutritionPersonne(
   body: DonneesNutritionPersonneRequest
 ): Promise<DonneesNutritionnellesResponse> {
   const { data } = await clientApi.post<DonneesNutritionnellesResponse>(`${API_PREFIX}/nutrition/personne`, body);
+  return data;
+}
+
+export async function obtenirCalendrierSemisPersonnalise(params?: {
+  region?: string;
+  mois?: number;
+  latitude?: number;
+  longitude?: number;
+}): Promise<CalendrierSemisPersonnaliseResponse> {
+  const { data } = await clientApi.get<CalendrierSemisPersonnaliseResponse>(
+    `${API_PREFIX}/jardin/calendrier-personnalise`,
+    { params }
+  );
   return data;
 }

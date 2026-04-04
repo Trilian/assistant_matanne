@@ -48,9 +48,8 @@ async def recherche_globale(
 
     _logger = logging.getLogger(__name__)
     
-    def _search():
-        user_id = user.get("sub") or user.get("id") or "dev"
-        resultats = []
+    def _search() -> list[dict[str, Any]]:
+        resultats: list[dict[str, Any]] = []
         
         with executer_avec_session() as session:
             # Pattern de recherche (fuzzy - insensible à la casse)
@@ -313,7 +312,7 @@ async def recherche_globale(
                 score += 10
             return score, titre
 
-        resultats_tries = sorted(resultats, key=_score_resultat, reverse=True)
+        resultats_tries: list[dict[str, Any]] = sorted(resultats, key=_score_resultat, reverse=True)
         return resultats_tries[:limit]
     
     return await executer_async(_search)

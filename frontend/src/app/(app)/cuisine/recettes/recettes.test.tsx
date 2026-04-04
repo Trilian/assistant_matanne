@@ -38,6 +38,7 @@ const mockRecettes = {
       difficulte: "Facile",
       temps_preparation: 30,
       portions: 6,
+      ingredients: [{ nom: "pommes" }, { nom: "farine" }],
     },
     {
       id: 2,
@@ -47,6 +48,7 @@ const mockRecettes = {
       difficulte: "Facile",
       temps_preparation: 20,
       portions: 4,
+      ingredients: [{ nom: "carottes" }, { nom: "poireaux" }],
     },
   ],
   total: 2,
@@ -54,9 +56,29 @@ const mockRecettes = {
   pages: 1,
 };
 
+const mockDoublons = {
+  items: [
+    {
+      recette_source: { id: 1, nom: "Tarte aux pommes" },
+      recette_proche: { id: 3, nom: "Tarte pommes rapide" },
+      score_similarite: 0.88,
+      raisons: ["Nom très proche", "Base d'ingrédients similaire"],
+    },
+  ],
+  total: 1,
+};
+
 vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: (queryKey: unknown) => {
     const key = Array.isArray(queryKey) ? queryKey.join(":") : "";
+
+    if (key.includes("doublons")) {
+      return {
+        data: mockDoublons,
+        isLoading: false,
+        error: null,
+      };
+    }
 
     if (key.includes("semaine")) {
       return {
@@ -111,5 +133,11 @@ describe("RecettesPage", () => {
   it("contient le filtre catégorie", () => {
     render(<RecettesPage />);
     expect(screen.getByText("Toutes")).toBeInTheDocument();
+  });
+
+  it("affiche la carte de doublons potentiels", () => {
+    render(<RecettesPage />);
+    expect(screen.getByText(/Doublons potentiels/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tarte pommes rapide/i)).toBeInTheDocument();
   });
 });

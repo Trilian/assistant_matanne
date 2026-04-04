@@ -39,8 +39,26 @@ const mockCalendrier = {
   a_recolter: [],
 };
 
+const mockCalendrierIA = {
+  mois: 4,
+  region: "Maison",
+  meteo_resume: {
+    temp_moy_max: 19,
+    temp_moy_min: 8,
+    pluie_7j_mm: 12,
+    suggestions_meteo: ["Temps doux pour les semis"],
+  },
+  a_semer: [{ nom: "Carottes" }],
+  a_planter: [{ nom: "Tomates" }],
+  a_recolter: [{ nom: "Radis" }],
+  conseils_personnalises: ["Conditions favorables pour lancer les semis ce week-end."],
+};
+
 vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: vi.fn().mockImplementation((key: string[]) => {
+    if (key.includes("calendrier-personnalise")) {
+      return { data: mockCalendrierIA, isLoading: false, error: null };
+    }
     if (key.includes("semis")) {
       return { data: mockCalendrier, isLoading: false, error: null };
     }
@@ -75,5 +93,11 @@ describe("JardinPage", () => {
   it("affiche la description du jardin", () => {
     render(<JardinPage />);
     expect(screen.getByText(/calendrier des semis/)).toBeInTheDocument();
+  });
+
+  it("affiche la vision IA locale pour les semis et récoltes", () => {
+    render(<JardinPage />);
+    expect(screen.getByText(/Vision IA locale/i)).toBeInTheDocument();
+    expect(screen.getByText(/Conditions favorables pour lancer les semis/i)).toBeInTheDocument();
   });
 });

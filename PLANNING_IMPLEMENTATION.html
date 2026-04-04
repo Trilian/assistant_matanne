@@ -979,7 +979,7 @@
 
       <div class="card" style="border-color:rgba(249,115,22,.35);background:rgba(15,23,42,.45)">
         <h3>Statut d'exécution — Mise à jour du 4 avril 2026</h3>
-        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 2 terminée</span> La vague qualité/sécurité est désormais soldée : chiffrement au stockage sur le coffre-fort maison, couverture frontend vérifiée (hooks/stores/navigation), documentation API/sécurité régénérée, catalogue de consolidation des bridges legacy exposé via l'API/admin, redistribution du legacy <code>test_innovations.py</code> et référentiel vaccinal Jules réaligné sur les rappels à partir de 6 ans.</p>
+        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 2 terminée</span> La vague qualité/sécurité est désormais soldée : chiffrement au stockage sur le coffre-fort maison, couverture frontend vérifiée (hooks/stores/navigation), documentation API/sécurité régénérée, catalogue de consolidation des bridges legacy exposé via l'API/admin, redistribution du legacy <code>test_innovations.py</code>, clôture de l'audit SQL legacy (<code>normes_oms</code>, <code>preferences_home</code>, <code>depenses_home</code>, <code>budgets_home</code>) et référentiel vaccinal Jules réaligné sur les rappels à partir de 6 ans.</p>
         <table>
           <tr><th>Sprint</th><th>Statut</th><th>Livré</th><th>Reste à faire</th></tr>
           <tr>
@@ -1008,22 +1008,22 @@
           <li>✅ <code>tests/api/test_routes_utilitaires.py</code> couvre la création et le rechiffrement des secrets maison.</li>
           <li>✅ Tests frontend ajoutés pour les composants structurants de navigation et de coquille applicative.</li>
           <li>✅ <code>docs/API_SCHEMAS.md</code> régénéré (322 schémas) et <code>docs/OWASP_AUDIT.md</code> ajouté.</li>
-          <li>✅ Audit SQL legacy déjà consolidé dans la vague schéma et recoupé avec le suivi Phase 2.</li>
+          <li>✅ Audit SQL legacy finalisé : <code>normes_oms</code>, <code>preferences_home</code>, <code>depenses_home</code> et <code>budgets_home</code> retirées du schéma actif ; <code>factures</code> conservée pour les usages utiles hors OCR.</li>
           <li>✅ Les 11 bridges legacy sont désormais catalogués et vérifiés via les endpoints <code>/api/v1/bridges/catalogue</code> et <code>/api/v1/admin/bridges/status</code>.</li>
           <li>✅ Le legacy <code>tests/api/test_innovations.py</code> a été redistribué en fichiers de domaine (<code>test_routes_innovations.py</code>, <code>test_routes_innovations_admin.py</code>, <code>tests/services/ia_avancee/test_innovations_service.py</code>).</li>
           <li>✅ <code>data/reference/calendrier_vaccinal_fr.json</code> et <code>ServiceCarnetSante</code> sont désormais limités aux rappels vaccins à partir de 6 ans, conformément à la config Jules.</li>
-          <li>✅ Vérification fraîche effectuée : <code>pytest ...</code> → <code>120 passed in 5.06s</code> et <code>npx vitest run ...</code> → <code>9 files passed, 50 tests passed</code>.</li>
+          <li>✅ Vérification fraîche effectuée : <code>python -m pytest tests/sql/test_schema_coherence.py -q</code> → <code>147 passed in 4.08s</code> ; <code>npm exec vitest run ...</code> → <code>5 files passed, 20 tests passed</code> ; lint ciblé frontend OK.</li>
         </ul>
       </div>
 
-      <h4 style="color:var(--orange);margin-bottom:12px;">2.1 — Audit & nettoyage Tables SQL legacy (Impact: DB +0.5) <span class="badge b-ok">Audit consolidé</span></h4>
+      <h4 style="color:var(--orange);margin-bottom:12px;">2.1 — Audit & nettoyage Tables SQL legacy (Impact: DB +0.5) <span class="badge b-ok">Clôturé</span></h4>
       <table class="cleanup-table">
         <tr><th>Table</th><th>Contexte</th><th>Action</th></tr>
-        <tr><td>normes_oms</td><td>Courbe croissance retirée</td><td><span class="badge b-err">Auditer → supprimer si inutilisée</span></td></tr>
-        <tr><td>preferences_home</td><td>Table legacy</td><td><span class="badge b-warn">Auditer → migrer ou supprimer</span></td></tr>
-        <tr><td>factures</td><td>OCR retiré</td><td><span class="badge b-warn">Auditer → garder si utile hors OCR</span></td></tr>
-        <tr><td>depenses_home</td><td>Legacy → depenses_maison?</td><td><span class="badge b-warn">Auditer → renommer ou supprimer</span></td></tr>
-        <tr><td>budgets_home</td><td>Legacy → budgets_famille?</td><td><span class="badge b-warn">Auditer → renommer ou supprimer</span></td></tr>
+        <tr><td>normes_oms</td><td>Courbe croissance retirée</td><td><span class="badge b-ok">Supprimée du schéma actif</span></td></tr>
+        <tr><td>preferences_home</td><td>Table legacy</td><td><span class="badge b-ok">Retirée → <code>preferences_utilisateurs</code></span></td></tr>
+        <tr><td>factures</td><td>OCR retiré</td><td><span class="badge b-ok">Conservée : utile hors OCR</span></td></tr>
+        <tr><td>depenses_home</td><td>Legacy → depenses_maison</td><td><span class="badge b-ok">Retirée du SQL consolidé</span></td></tr>
+        <tr><td>budgets_home</td><td>Legacy → budgets actifs API</td><td><span class="badge b-ok">Retirée du SQL consolidé</span></td></tr>
       </table>
 
       <h4 style="color:var(--orange);margin-top:24px;margin-bottom:12px;">2.2 — Consolider 11 Bridges Legacy (Impact: Organisation +0.5) <span class="badge b-ok">Livré</span></h4>
@@ -1061,13 +1061,13 @@
         <tr><td>Données vaccination &lt;6 mois</td><td><code>calendrier_vaccinal_fr.json</code> et <code>ServiceCarnetSante</code> limités aux rappels 6 ans+ selon spec Jules</td><td>✅ Corrigé</td></tr>
       </table>
 
-      <h4 style="color:var(--orange);margin-top:24px;margin-bottom:12px;">2.5 — Gaps Backend ↔ Frontend (Impact: Architecture +0.5)</h4>
+      <h4 style="color:var(--orange);margin-top:24px;margin-bottom:12px;">2.5 — Gaps Backend ↔ Frontend (Impact: Architecture +0.5) <span class="badge b-ok">Reliquat prioritaire résorbé</span></h4>
       <table>
         <tr><th>Gap</th><th>Backend</th><th>Frontend</th><th>Action</th></tr>
         <tr><td>Services experimental/ non exposés</td><td>9 services</td><td>Page /avance/ parcellaire</td><td>Exposer via API domaine (fait en Phase 1)</td></tr>
-        <tr><td>WebSocket notes/projets/admin</td><td>4 handlers</td><td>Pas utilisés partout</td><td>Activer collab temps réel</td></tr>
-        <tr><td>Bridges inter-modules</td><td>11 bridges legacy</td><td>Pas de visualisation</td><td>Dashboard bridges si consolidés</td></tr>
-        <tr><td>Extension Chrome</td><td>API compatible</td><td>Pas de page gestion</td><td>Page paramètres extension</td></tr>
+        <tr><td>WebSocket notes/projets/admin</td><td>4 handlers</td><td>Planning et projets affichent désormais l’état live/fallback</td><td><span class="badge b-ok">Synchro temps réel activée sur les vues prioritaires</span></td></tr>
+        <tr><td>Bridges inter-modules</td><td>11 bridges legacy</td><td>Visualisation déjà disponible côté admin/services</td><td><span class="badge b-ok">Dashboard bridges actif</span></td></tr>
+        <tr><td>Extension Chrome</td><td>API compatible + bridge Drive</td><td>Section dédiée livrée dans <code>Paramètres &gt; Intégrations</code></td><td><span class="badge b-ok">Page de gestion ajoutée</span></td></tr>
       </table>
     </div>
   </div>
@@ -1501,7 +1501,7 @@
       <table>
         <tr><th>Tâche</th><th>Détails</th></tr>
         <tr><td>Enrichir mode hors-ligne</td><td>Sync queue pour actions offline (Service Worker + IndexedDB) visible dans <code>Paramètres &gt; Données</code> — <span class="badge b-ok">✅ Livré</span></td></tr>
-        <tr><td>Extension Chrome README</td><td>Documentation déjà présente dans <code>extension-chrome/README.md</code> — <span class="badge b-ok">✅ Livré</span></td></tr>
+        <tr><td>Extension Chrome README</td><td>Documentation déjà présente dans <code>extension-chrome/README.md</code> et section de configuration livrée dans <code>Paramètres &gt; Intégrations</code> — <span class="badge b-ok">✅ Livré</span></td></tr>
         <tr><td>Consolider repo memory</td><td>Historique centralisé via <code>/memories/repo/historique_implantation_avril2026.md</code> — <span class="badge b-ok">✅ Livré</span></td></tr>
         <tr><td>Undo/Redo actions critiques</td><td>Suppression annulable activée sur le planning repas — <span class="badge b-ok">✅ Livré</span></td></tr>
         <tr><td>Tableau de bord personnalisable</td><td>Drag-and-drop widgets existant conservé et affiné — <span class="badge b-ok">✅ Actif</span></td></tr>

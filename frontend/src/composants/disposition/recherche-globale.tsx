@@ -195,7 +195,7 @@ export function RechercheGlobale() {
       open={rechercheOuverte} 
       onOpenChange={definirRecherche}
       title="Recherche globale"
-      description="Recherchez des recettes, projets, activités, notes et contacts"
+      description="Recherchez à travers la cuisine, la famille, la maison, les documents et les notes"
     >
       <Command shouldFilter={false}>
         <CommandInput

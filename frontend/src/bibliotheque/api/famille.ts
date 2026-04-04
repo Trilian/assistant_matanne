@@ -602,6 +602,16 @@ export async function convertirWeekendEnActivite(
   return data;
 }
 
+export interface SuggestionActiviteSoir {
+  meteo: string;
+  temperature_c?: number | null;
+  niveau_energie: "douce" | "moderee" | "dynamique";
+  recommandation: string;
+  raison: string;
+  alternatives: string[];
+  source: string[];
+}
+
 /** Suggestions soirée couple IA */
 export async function obtenirSuggestionsSoiree(params?: {
   budget?: number;
@@ -610,6 +620,12 @@ export async function obtenirSuggestionsSoiree(params?: {
   region?: string;
 }): Promise<{ suggestions: string }> {
   const { data } = await clientApi.post("/famille/soiree/suggestions-ia", params ?? {});
+  return data;
+}
+
+/** Suggestion d'activité du soir contextualisée par Garmin et météo */
+export async function obtenirSuggestionActiviteSoir(): Promise<SuggestionActiviteSoir> {
+  const { data } = await clientApi.get<SuggestionActiviteSoir>("/famille/activites/suggestion-soir");
   return data;
 }
 

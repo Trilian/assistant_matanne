@@ -59,6 +59,14 @@ export interface SuggestionRecette {
   raison?: string;
 }
 
+export interface DoublonRecette {
+  recette_source: { id: number; nom: string };
+  recette_proche: { id: number; nom: string };
+  score_similarite: number;
+  raisons: string[];
+  ingredients_communs?: string[];
+}
+
 export type FeedbackRecette = "like" | "neutral" | "dislike";
 
 export interface RetourRecettePayload {

@@ -14,6 +14,7 @@ import {
   Layers,
   ServerCrash,
   ArrowRight,
+  Eye,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -69,6 +70,8 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { GrapheReseauModules } from "@/composants/admin/graphe-reseau-modules";
+import { ZoneTableauResponsive } from "@/composants/ui/zone-tableau-responsive";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import type { ObjetDonnees } from "@/types/commun";
 
 interface LogAudit {
@@ -117,6 +120,27 @@ interface SecurityLog {
   source: string;
 }
 
+interface SchemaDiffResponse {
+  status: "ok" | "warning" | "error";
+  generated_at: string;
+  summary: {
+    sql_tables: number;
+    metadata_tables: number;
+    db_tables: number;
+    column_differences: number;
+  };
+  sql_only: string[];
+  metadata_only: string[];
+  missing_in_db: string[];
+  extra_in_db: string[];
+  column_differences: Array<{
+    table: string;
+    missing_columns: string[];
+    extra_columns: string[];
+  }>;
+  db_error?: string;
+}
+
 const COULEURS = [
   "#2563eb", "#16a34a", "#d97706", "#dc2626", "#7c3aed",
   "#0891b2", "#db2777", "#65a30d",
@@ -137,6 +161,11 @@ export default function PageAdmin() {
   const [patternCache, setPatternCache] = useState("*");
   const [purgeant, setPurgeant] = useState(false);
   const [resultatCache, setResultatCache] = useState<string | null>(null);
+  const [utilisateurCible, setUtilisateurCible] = useState("");
+  const [dureeSimulation, setDureeSimulation] = useState("2");
+  const [raisonSimulation, setRaisonSimulation] = useState("Vérification du rendu utilisateur");
+  const [simulationEnCours, setSimulationEnCours] = useState(false);
+  const [resultatSimulation, setResultatSimulation] = useState<string | null>(null);
 
   const { data: logs, isLoading } = utiliserRequete(
     ["admin", "audit-logs", String(page), filtreAction, filtreEntite],
@@ -181,6 +210,15 @@ export default function PageAdmin() {
     }
   );
 
+  const { data: schemaDiff } = utiliserRequete(
+    ["admin", "schema-diff"],
+    async (): Promise<SchemaDiffResponse> => {
+      const { data } = await clientApi.get("/admin/schema-diff");
+      return data;
+    },
+    { refetchInterval: 60000 }
+  );
+
   const { data: bridgesStatus } = utiliserRequete(
     ["admin", "bridges-status", "presence-only"],
     async () => obtenirStatutBridges({ inclure_smoke: false }),
@@ -218,6 +256,47 @@ export default function PageAdmin() {
       setResultatCache("❌ Erreur lors de la purge du cache.");
     } finally {
       setPurgeant(false);
+    }
+  };
+
+  const simulerSessionUtilisateur = async () => {
+    if (!utilisateurCible) {
+      setResultatSimulation("Choisissez d'abord un utilisateur cible.");
+      return;
+    }
+
+    setSimulationEnCours(true);
+    setResultatSimulation(null);
+    try {
+      const { data } = await clientApi.post(`/admin/users/${utilisateurCible}/impersonate`, {
+        duree_heures: Number(dureeSimulation),
+        raison: raisonSimulation,
+      });
+
+      if (typeof window !== "undefined") {
+        const tokenAdmin = localStorage.getItem("access_token");
+        if (tokenAdmin) {
+          localStorage.setItem("admin_access_token", tokenAdmin);
+        }
+        localStorage.setItem(
+          "impersonation_meta",
+          JSON.stringify({
+            targetUserId: data.utilisateur?.id ?? utilisateurCible,
+            targetEmail: data.utilisateur?.email ?? "",
+            reason: raisonSimulation,
+            expiresAt: new Date(Date.now() + Number(data.expires_in ?? 3600) * 1000).toISOString(),
+          })
+        );
+        localStorage.setItem("access_token", data.access_token);
+        window.location.href = "/";
+        return;
+      }
+
+      setResultatSimulation("Token d'aperçu généré, mais l'activation automatique n'a pas pu démarrer.");
+    } catch {
+      setResultatSimulation("❌ Impossible d'ouvrir le mode “voir en tant que user”.");
+    } finally {
+      setSimulationEnCours(false);
     }
   };
 
@@ -412,6 +491,44 @@ export default function PageAdmin() {
             </div>
           )}
 
+          {schemaDiff && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Diff schéma SQL</CardTitle>
+                <CardDescription>Écart entre fichiers SQL, metadata ORM et base active.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant={schemaDiff.status === "ok" ? "default" : "secondary"}>
+                    {schemaDiff.status === "ok" ? "Aligné" : schemaDiff.status === "warning" ? "À vérifier" : "Erreur DB"}
+                  </Badge>
+                  <Badge variant="outline">SQL {schemaDiff.summary.sql_tables}</Badge>
+                  <Badge variant="outline">ORM {schemaDiff.summary.metadata_tables}</Badge>
+                  <Badge variant="outline">DB {schemaDiff.summary.db_tables}</Badge>
+                  <Badge variant="outline">Colonnes diff {schemaDiff.summary.column_differences}</Badge>
+                </div>
+                <div className="grid gap-2 md:grid-cols-2">
+                  {[
+                    { titre: "Manquantes en DB", items: schemaDiff.missing_in_db },
+                    { titre: "Supplémentaires en DB", items: schemaDiff.extra_in_db },
+                    { titre: "SQL uniquement", items: schemaDiff.sql_only },
+                    { titre: "ORM uniquement", items: schemaDiff.metadata_only },
+                  ].map((bloc) => (
+                    <div key={bloc.titre} className="rounded-md border p-2.5">
+                      <p className="text-xs font-medium">{bloc.titre}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {bloc.items.length ? bloc.items.join(", ") : "Aucun écart"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                {schemaDiff.db_error ? (
+                  <p className="text-xs text-destructive">{schemaDiff.db_error}</p>
+                ) : null}
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Événements sécurité récents</CardTitle>
@@ -518,7 +635,7 @@ export default function PageAdmin() {
                 <p className="py-4 text-center text-muted-foreground text-sm">Chargement…</p>
               ) : logs && logs.items.length > 0 ? (
                 <>
-                  <div className="overflow-x-auto rounded-md border">
+                  <ZoneTableauResponsive containerClassName="rounded-md border">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -527,6 +644,7 @@ export default function PageAdmin() {
                           <TableHead className="w-28">Entité</TableHead>
                           <TableHead className="w-20">ID</TableHead>
                           <TableHead>Source</TableHead>
+                          <TableHead>Détail</TableHead>
                           <TableHead className="w-28">Utilisateur</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -546,6 +664,11 @@ export default function PageAdmin() {
                               {log.entite_id != null ? String(log.entite_id) : "—"}
                             </TableCell>
                             <TableCell className="text-xs text-muted-foreground">{log.source || "—"}</TableCell>
+                            <TableCell className="max-w-xs text-xs text-muted-foreground">
+                              {Object.keys(log.details || {}).length
+                                ? JSON.stringify(log.details).slice(0, 90)
+                                : "—"}
+                            </TableCell>
                             <TableCell className="text-xs font-mono">
                               {log.utilisateur_id ? log.utilisateur_id.slice(0, 8) + "…" : "—"}
                             </TableCell>
@@ -553,7 +676,7 @@ export default function PageAdmin() {
                         ))}
                       </TableBody>
                     </Table>
-                  </div>
+                  </ZoneTableauResponsive>
                   {logs.pages_totales > 1 && (
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">
@@ -569,7 +692,12 @@ export default function PageAdmin() {
                   )}
                 </>
               ) : (
-                <p className="py-4 text-center text-muted-foreground text-sm">Aucun log trouvé</p>
+                <EtatVide
+                  Icone={Activity}
+                  titre="Aucun log trouvé"
+                  description="Aucun événement ne correspond aux filtres actuels."
+                  className="py-6"
+                />
               )}
             </CardContent>
           </Card>
@@ -724,7 +852,65 @@ export default function PageAdmin() {
         </TabsContent>
 
         {/* ── Onglet Utilisateurs ─────────────────────────────────── */}
-        <TabsContent value="users" className="mt-4">
+        <TabsContent value="users" className="mt-4 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />Voir en tant que user
+              </CardTitle>
+              <CardDescription>
+                Ouvre une session temporaire côté frontend pour vérifier le rendu réel d&apos;un compte utilisateur.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <div className="space-y-1 md:col-span-2">
+                <Label htmlFor="utilisateur-cible">Utilisateur cible</Label>
+                <Select value={utilisateurCible} onValueChange={setUtilisateurCible}>
+                  <SelectTrigger id="utilisateur-cible">
+                    <SelectValue placeholder="Choisir un utilisateur" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(utilisateurs ?? []).map((u) => (
+                      <SelectItem key={`impersonate-${u.id}`} value={u.id}>
+                        {u.email} · {u.role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="duree-simulation">Durée</Label>
+                <Select value={dureeSimulation} onValueChange={setDureeSimulation}>
+                  <SelectTrigger id="duree-simulation">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 heure</SelectItem>
+                    <SelectItem value="2">2 heures</SelectItem>
+                    <SelectItem value="4">4 heures</SelectItem>
+                    <SelectItem value="8">8 heures</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="raison-simulation">Contexte</Label>
+                <Input
+                  id="raison-simulation"
+                  value={raisonSimulation}
+                  onChange={(e) => setRaisonSimulation(e.target.value)}
+                  placeholder="Support / QA / debug"
+                />
+              </div>
+              <div className="md:col-span-2 xl:col-span-4 flex flex-wrap items-center gap-3">
+                <Button onClick={simulerSessionUtilisateur} disabled={!utilisateurCible || simulationEnCours}>
+                  {simulationEnCours ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Eye className="mr-2 h-4 w-4" />}
+                  Ouvrir l'aperçu utilisateur
+                </Button>
+                {resultatSimulation ? <p className="text-sm text-muted-foreground">{resultatSimulation}</p> : null}
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -740,7 +926,7 @@ export default function PageAdmin() {
             </CardHeader>
             <CardContent>
               {utilisateurs && utilisateurs.length > 0 ? (
-                <div className="overflow-x-auto rounded-md border">
+                <ZoneTableauResponsive containerClassName="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -775,11 +961,14 @@ export default function PageAdmin() {
                       ))}
                     </TableBody>
                   </Table>
-                </div>
+                </ZoneTableauResponsive>
               ) : (
-                <p className="text-center py-8 text-muted-foreground text-sm">
-                  Aucun utilisateur trouvé.
-                </p>
+                <EtatVide
+                  Icone={Users}
+                  titre="Aucun utilisateur trouvé"
+                  description="Aucun compte n&apos;est disponible dans l&apos;environnement courant."
+                  className="py-6"
+                />
               )}
             </CardContent>
           </Card>

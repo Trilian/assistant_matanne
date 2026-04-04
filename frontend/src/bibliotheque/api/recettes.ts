@@ -4,7 +4,7 @@
 
 import { clientApi } from "./client";
 import type { ReponsePaginee } from "@/types/api";
-import type { Recette, CreerRecetteDTO, SuggestionRecette } from "@/types/recettes";
+import type { Recette, CreerRecetteDTO, DoublonRecette, SuggestionRecette } from "@/types/recettes";
 
 /** Lister les recettes (paginé) */
 export async function listerRecettes(
@@ -85,9 +85,23 @@ export async function listerRecettesSaisonnieres(
   return data;
 }
 
+export interface ReponseDoublonsRecettes {
+  items: DoublonRecette[];
+  total: number;
+  seuil: number;
+}
+
 /** Lister les recettes planifiées pour cette semaine */
 export async function listerRecettesSemaine(): Promise<Recette[]> {
   const { data } = await clientApi.get<Recette[]>("/recettes/planifiees-semaine");
+  return data;
+}
+
+/** Détecter les recettes potentiellement en doublon dans la collection */
+export async function obtenirDoublonsRecettes(seuil = 0.72): Promise<ReponseDoublonsRecettes> {
+  const { data } = await clientApi.get<ReponseDoublonsRecettes>("/recettes/doublons", {
+    params: { seuil },
+  });
   return data;
 }
 

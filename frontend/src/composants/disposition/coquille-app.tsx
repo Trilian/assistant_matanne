@@ -18,6 +18,7 @@ import { BarreProgression } from "./barre-progression";
 import { ContenuPrincipal } from "./contenu-principal";
 import { BandeauSuggestionProactive } from "./bandeau-suggestion-proactive";
 import { BandeauHorsLigne } from "./bandeau-hors-ligne";
+import { BandeauImpersonation } from "./bandeau-impersonation";
 import { PanneauAdminFlottant } from "./panneau-admin-flottant";
 import { InstallPrompt } from "@/composants/pwa/install-prompt";
 import { useNotificationsJeux } from "@/crochets/utiliser-notifications-jeux";
@@ -41,6 +42,7 @@ export function CoquilleApp({ children }: { children: React.ReactNode }) {
       {/* Zone principale */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <EnTete />
+        <BandeauImpersonation />
         <BandeauHorsLigne />
         <FilAriane />
         <BandeauSuggestionProactive />

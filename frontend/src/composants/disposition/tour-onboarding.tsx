@@ -29,9 +29,51 @@ import {
   ArrowRight,
   ArrowLeft,
   X,
+  MessageCircle,
+  Rocket,
+  CheckCircle2,
 } from 'lucide-react'
 
 const STORAGE_KEY = 'matanne-onboarding-complete'
+
+type EtatOnboardingStocke = {
+  completed: boolean
+  lastStep: number
+  completedAt?: string | null
+}
+
+function lireEtatOnboarding(): EtatOnboardingStocke | null {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  const raw = localStorage.getItem(STORAGE_KEY)
+  if (!raw) {
+    return null
+  }
+
+  if (raw === 'true') {
+    return { completed: true, lastStep: 0 }
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<EtatOnboardingStocke>
+    return {
+      completed: Boolean(parsed.completed),
+      lastStep: Math.max(0, Number(parsed.lastStep ?? 0)),
+      completedAt: parsed.completedAt ?? null,
+    }
+  } catch {
+    return null
+  }
+}
+
+function sauvegarderEtatOnboarding(etat: EtatOnboardingStocke) {
+  if (typeof window === 'undefined') {
+    return
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(etat))
+}
 
 /**
  * Étapes du tour d'onboarding
@@ -174,6 +216,32 @@ const ETAPES_TOUR = [
     ),
   },
   {
+    titre: 'Démarrage recommandé 🚀',
+    description: 'Les 3 actions qui donnent le plus de valeur dès le départ',
+    icone: Rocket,
+    lien: '/parametres/preferences-notifications',
+    contenu: (
+      <div className="space-y-3">
+        {[
+          'Configurer Telegram pour recevoir les résumés utiles et les actions rapides.',
+          'Créer ou importer 2 à 3 recettes, puis générer un premier planning.',
+          'Ajouter vos abonnements/contrats maison pour comparer les coûts annuels.',
+        ].map((item) => (
+          <div key={item} className="flex items-start gap-3 rounded-lg bg-muted/60 p-3">
+            <CheckCircle2 className="mt-0.5 size-4 text-emerald-600" />
+            <p className="text-sm">{item}</p>
+          </div>
+        ))}
+        <div className="flex items-start gap-3 rounded-lg border border-dashed p-3">
+          <MessageCircle className="mt-0.5 size-4 text-sky-600" />
+          <p className="text-xs text-muted-foreground">
+            Astuce : activez d&apos;abord Telegram si vous voulez des rappels simples et gratuits depuis l&apos;app.
+          </p>
+        </div>
+      </div>
+    ),
+  },
+  {
     titre: 'Astuces & Raccourcis ⌨️',
     description: 'Gagnez du temps avec ces raccourcis',
     icone: ArrowRight,
@@ -230,7 +298,6 @@ export function TourOnboarding({ forcer = false, onTerminer }: TourOnboardingPro
   const [ouvert, setOuvert] = React.useState(false)
   const [etapeActuelle, setEtapeActuelle] = React.useState(0)
 
-  const estPremiereFois = typeof window !== 'undefined' && !localStorage.getItem(STORAGE_KEY)
   const etape = ETAPES_TOUR[etapeActuelle]
   const estDerniereEtape = etapeActuelle === ETAPES_TOUR.length - 1
   const Icone = etape.icone
@@ -239,10 +306,31 @@ export function TourOnboarding({ forcer = false, onTerminer }: TourOnboardingPro
    * Initialise le tour au premier chargement
    */
   React.useEffect(() => {
-    if (forcer || estPremiereFois) {
+    const etat = lireEtatOnboarding()
+
+    if (forcer) {
+      setEtapeActuelle(Math.min(etat?.lastStep ?? 0, ETAPES_TOUR.length - 1))
+      setOuvert(true)
+      return
+    }
+
+    if (!etat?.completed) {
+      setEtapeActuelle(Math.min(etat?.lastStep ?? 0, ETAPES_TOUR.length - 1))
       setOuvert(true)
     }
-  }, [forcer, estPremiereFois])
+  }, [forcer])
+
+  React.useEffect(() => {
+    if (!ouvert) {
+      return
+    }
+
+    sauvegarderEtatOnboarding({
+      completed: false,
+      lastStep: etapeActuelle,
+      completedAt: null,
+    })
+  }, [etapeActuelle, ouvert])
 
   /**
    * Passe à l'étape suivante
@@ -266,9 +354,11 @@ export function TourOnboarding({ forcer = false, onTerminer }: TourOnboardingPro
    * Termine le tour
    */
   const terminer = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, 'true')
-    }
+    sauvegarderEtatOnboarding({
+      completed: true,
+      lastStep: 0,
+      completedAt: new Date().toISOString(),
+    })
     setOuvert(false)
     setEtapeActuelle(0)
     onTerminer?.()
@@ -367,9 +457,8 @@ export function useOnboardingComplete() {
   const [complete, setComplete] = React.useState(false)
 
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setComplete(!!localStorage.getItem(STORAGE_KEY))
-    }
+    const etat = lireEtatOnboarding()
+    setComplete(Boolean(etat?.completed))
   }, [])
 
   return complete
