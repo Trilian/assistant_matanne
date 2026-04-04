@@ -762,14 +762,14 @@ export default function PageAccueil() {
         <WidgetSortable id="points_famille">
         <Card className="border-emerald-300/50 bg-emerald-50/50 dark:border-emerald-900/40 dark:bg-emerald-950/20">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Points famille</CardTitle>
-            <CardDescription>Gamification sport, alimentation et anti-gaspi</CardDescription>
+            <CardTitle className="text-base">Suivi hebdo</CardTitle>
+            <CardDescription>Sport, alimentation et anti-gaspi en un coup d'œil</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-end justify-between">
               <div>
                 <p className="text-3xl font-bold">{pointsFamille.total_points}</p>
-                <p className="text-xs text-muted-foreground">points cumulés</p>
+                <p className="text-xs text-muted-foreground">indicateur cumulé</p>
               </div>
               <div className="text-right text-xs text-muted-foreground space-y-1">
                 <p>Sport: {pointsFamille.sport}</p>

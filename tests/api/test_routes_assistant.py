@@ -236,6 +236,109 @@ class TestCommandeVocaleCasMetier:
 # ═══════════════════════════════════════════════════════════
 
 
+class TestChatAssistantContextuel:
+    """POST /api/v1/assistant/chat — régression endpoint IA contextuel."""
+
+    @pytest.mark.asyncio
+    async def test_chat_contextuel_retourne_reponse_et_contexte(self, async_client: httpx.AsyncClient, monkeypatch):
+        """Le chat assistant renvoie une réponse IA enrichie avec le contexte métier."""
+
+        class _ScalarQuery:
+            def filter(self, *_args, **_kwargs):
+                return self
+
+            def scalar(self):
+                return 2
+
+        class _Session:
+            def query(self, *_args, **_kwargs):
+                return _ScalarQuery()
+
+        @contextmanager
+        def _ctx():
+            yield _Session()
+
+        class _PointsService:
+            def calculer_points(self):
+                return {"total_points": 12, "badges": ["chef-famille"]}
+
+        class _ChatService:
+            def envoyer_message_contextualise(self, **_kwargs):
+                return "Réponse test contextuelle"
+
+        monkeypatch.setattr("src.api.routes.assistant.executer_avec_session", _ctx)
+        monkeypatch.setattr(
+            "src.services.dashboard.points_famille.obtenir_points_famille_service",
+            lambda: _PointsService(),
+        )
+        monkeypatch.setattr(
+            "src.services.utilitaires.chat_ai.obtenir_chat_ai_service",
+            lambda: _ChatService(),
+        )
+
+        response = await async_client.post(
+            "/api/v1/assistant/chat",
+            json={
+                "message": "Que prévoir cette semaine ?",
+                "contexte": "planning",
+                "historique": [{"role": "user", "content": f"msg {i}"} for i in range(7)],
+            },
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["reponse"] == "Réponse test contextuelle"
+        assert data["contexte"] == "planning"
+        assert data["memoire_utilisee"] == 5
+        assert data["contexte_metier"]["planning"]["repas_7j"] == 2
+        assert data["contexte_metier"]["score_jules"]["total_points"] == 12
+
+    @pytest.mark.asyncio
+    async def test_chat_contextuel_fallback_si_service_retourne_vide(self, async_client: httpx.AsyncClient, monkeypatch):
+        """Si le service IA renvoie vide, l'endpoint répond avec le message de fallback."""
+
+        class _ScalarQuery:
+            def filter(self, *_args, **_kwargs):
+                return self
+
+            def scalar(self):
+                return 0
+
+        class _Session:
+            def query(self, *_args, **_kwargs):
+                return _ScalarQuery()
+
+        @contextmanager
+        def _ctx():
+            yield _Session()
+
+        class _PointsService:
+            def calculer_points(self):
+                return {}
+
+        class _ChatService:
+            def envoyer_message_contextualise(self, **_kwargs):
+                return ""
+
+        monkeypatch.setattr("src.api.routes.assistant.executer_avec_session", _ctx)
+        monkeypatch.setattr(
+            "src.services.dashboard.points_famille.obtenir_points_famille_service",
+            lambda: _PointsService(),
+        )
+        monkeypatch.setattr(
+            "src.services.utilitaires.chat_ai.obtenir_chat_ai_service",
+            lambda: _ChatService(),
+        )
+
+        response = await async_client.post(
+            "/api/v1/assistant/chat",
+            json={"message": "Salut", "contexte": "general", "historique": []},
+        )
+
+        assert response.status_code == 200
+        assert response.json()["reponse"] == "Je n'ai pas pu generer de reponse pour le moment."
+
+
 class TestExemplesCommandes:
     """GET /api/v1/assistant/commande-vocale/exemples."""
 

@@ -6,7 +6,7 @@ import { Volume2, VolumeX } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
 import { Badge } from '@/composants/ui/badge'
-import { obtenirSuggestionsProactives, type SuggestionsProactivesResponse } from '@/bibliotheque/api/ia_avancee'
+import { obtenirSuggestionsProactives, type SuggestionsProactivesResponse } from '@/bibliotheque/api/ia-avancee'
 import { utiliserSyntheseVocale } from '@/crochets/utiliser-synthese-vocale'
 import { toast } from 'sonner'
 

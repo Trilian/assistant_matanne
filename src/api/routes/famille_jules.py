@@ -537,6 +537,58 @@ async def mettre_a_jour_aliments_exclus_jules(
 
 
 # ═══════════════════════════════════════════════════════════
+# JULES — NUTRITION (PORTIONS ADAPTÉES)
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get("/jules/nutrition", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_nutrition_jules(
+    jours_horizon: int = Query(7, ge=1, le=30, description="Horizon en jours"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les recommandations nutritionnelles et portions adaptées pour Jules.
+
+    Connecte le profil Jules au service nutrition inter-modules pour fournir :
+    - Recommandations nutritionnelles selon l'âge
+    - Portions adaptées sur le planning actif
+    - Aliments exclus
+    """
+    from src.core.models.user_preferences import PreferenceUtilisateur
+    from src.services.cuisine.inter_module_jules_nutrition import (
+        obtenir_service_jules_nutrition_interaction,
+    )
+    from sqlalchemy import select as sa_select
+
+    def _query() -> dict[str, Any]:
+        service = obtenir_service_jules_nutrition_interaction()
+        recommandations = service.adapter_planning_nutrition_jules(jours_horizon=jours_horizon)
+        portions = service.adapter_portions_recettes_planifiees(jours_horizon=jours_horizon)
+
+        with executer_avec_session() as session:
+            user_id = user.get("sub", user.get("id", "dev"))
+            pref = session.execute(
+                sa_select(PreferenceUtilisateur).where(
+                    PreferenceUtilisateur.user_id == user_id
+                )
+            ).scalar_one_or_none()
+            aliments_exclus = pref.aliments_exclus_jules if pref else []
+
+        return {
+            "age_mois": recommandations.get("age_mois", 0),
+            "recommandations": recommandations.get("recommandations", []),
+            "portions": {
+                "portion_jules": portions.get("portion_jules", 0),
+                "repas_mis_a_jour": portions.get("repas_mis_a_jour", 0),
+            },
+            "aliments_exclus": aliments_exclus,
+            "message": recommandations.get("message", ""),
+        }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
 # JULES — COACHING HEBDOMADAIRE (CT-05)
 # ═══════════════════════════════════════════════════════════
 

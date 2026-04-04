@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
 import { Input } from '@/composants/ui/input'
-import { estimerTravaux, type EstimationTravauxResponse } from '@/bibliotheque/api/ia_avancee'
+import { estimerTravaux, type EstimationTravauxResponse } from '@/bibliotheque/api/ia-avancee'
 import { toast } from 'sonner'
 
 export default function EstimationTravauxPage() {

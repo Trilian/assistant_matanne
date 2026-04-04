@@ -14,7 +14,7 @@ import type {
   SuggestionsAchatsResponse,
   SuggestionsIdeasResponse,
   SuggestionsProactivesResponse,
-} from '@/types/ia_avancee'
+} from '@/types/ia-avancee'
 
 const API_PREFIX = '/api/v1/ia-avancee'
 

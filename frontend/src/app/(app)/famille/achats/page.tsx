@@ -45,7 +45,6 @@ import {
   supprimerAchat,
   marquerAchatVendu,
   genererAnnonceLBC,
-  genererAnnonceVinted,
   obtenirSuggestionsAchatsEnrichies,
 } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
@@ -89,7 +88,7 @@ export default function PageAchats() {
   const [annonceItem, setAnnonceItem] = useState<AchatFamille | null>(null);
   const [annonceTexte, setAnnonceTexte] = useState<string | null>(null);
   const [annonceChargement, setAnnonceChargement] = useState(false);
-  const [plateformeAnnonce, setPlateformeAnnonce] = useState<"lbc" | "vinted">("lbc");
+  const [plateformeAnnonce, setPlateformeAnnonce] = useState<"lbc">("lbc");
 
   const { data: achats = [] } = useQuery({
     queryKey: ["famille", "achats", "page"],
@@ -178,39 +177,21 @@ export default function PageAchats() {
     });
   };
 
-  const plateformeRecommandee = (item: AchatFamille): "lbc" | "vinted" => {
-    const categorie = (item.categorie ?? "").toLowerCase();
-    if (["vetements", "jouets", "livres"].includes(categorie)) {
-      return "vinted";
-    }
-    return "lbc";
-  };
+  const plateformeRecommandee = (_item: AchatFamille): "lbc" => "lbc";
 
-  const ouvrirDialogueAnnonce = async (item: AchatFamille, plateforme: "lbc" | "vinted") => {
-    setPlateformeAnnonce(plateforme);
+  const ouvrirDialogueAnnonce = async (item: AchatFamille) => {
+    setPlateformeAnnonce("lbc");
     setAnnonceItem(item);
     setAnnonceTexte(null);
     setAnnonceChargement(true);
     try {
-      if (plateforme === "vinted") {
-        const result = await genererAnnonceVinted(item.id, {
-          nom: item.nom,
-          description: item.description ?? "",
-          etat_usage: "bon",
-          prix_cible: item.prix_revente_estime ?? item.prix_reel ?? undefined,
-          taille: item.taille,
-          categorie_vinted: item.categorie,
-        });
-        setAnnonceTexte(result.annonce);
-      } else {
-        const result = await genererAnnonceLBC(item.id, {
-          nom: item.nom,
-          description: item.description ?? "",
-          etat_usage: "bon",
-          prix_cible: item.prix_revente_estime ?? item.prix_reel ?? undefined,
-        });
-        setAnnonceTexte(result.annonce);
-      }
+      const result = await genererAnnonceLBC(item.id, {
+        nom: item.nom,
+        description: item.description ?? "",
+        etat_usage: "bon",
+        prix_cible: item.prix_revente_estime ?? item.prix_reel ?? undefined,
+      });
+      setAnnonceTexte(result.annonce);
     } catch { toast.error("Impossible de generer l annonce"); } finally { setAnnonceChargement(false); }
   };
 
@@ -455,10 +436,9 @@ export default function PageAchats() {
                 <span className="flex-1 font-medium">{a.nom}</span>
                 {a.prix_revente_estime && <span className="text-xs text-muted-foreground">~{a.prix_revente_estime} euros</span>}
                 <Badge variant="outline" className="text-xs">
-                  Reco: {plateformeRecommandee(a) === "vinted" ? "Vinted" : "LBC"}
+                  Reco: {plateformeRecommandee(a) === "lbc" ? "LeBonCoin" : "Revente"}
                 </Badge>
-                <Button size="sm" variant="outline" onClick={() => ouvrirDialogueAnnonce(a, "lbc")} className="text-xs h-7">Annonce LBC</Button>
-                <Button size="sm" variant="outline" onClick={() => ouvrirDialogueAnnonce(a, "vinted")} className="text-xs h-7">Annonce Vinted</Button>
+                <Button size="sm" variant="outline" onClick={() => ouvrirDialogueAnnonce(a)} className="text-xs h-7">Generer annonce</Button>
                 <Button size="sm" variant="ghost" onClick={() => mutVendu.mutate(a.id)} title="Marquer vendu">
                   <Check className="h-4 w-4 text-green-600" />
                 </Button>
@@ -470,7 +450,7 @@ export default function PageAchats() {
 
       <Dialog open={!!annonceItem} onOpenChange={(o) => { if (!o) { setAnnonceItem(null); setAnnonceTexte(null); } }}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Annonce {plateformeAnnonce === "vinted" ? "Vinted" : "LeBonCoin"} - {annonceItem?.nom}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Annonce {plateformeAnnonce === "lbc" ? "LeBonCoin" : "Revente"} - {annonceItem?.nom}</DialogTitle></DialogHeader>
           {annonceChargement ? (
             <p className="text-sm text-muted-foreground py-4 text-center">Generation en cours...</p>
           ) : annonceTexte ? (

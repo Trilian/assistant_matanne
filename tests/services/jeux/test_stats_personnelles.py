@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from src.services.jeux.stats_personnelles import StatsPersonnellesService
 from src.core.models.jeux import PariSportif, GrilleLoto, GrilleEuromillions
 from src.core.db import obtenir_contexte_db
+from tests.services.jeux.conftest import creer_match_test
 
 
 class TestStatsPersonnellesService:
@@ -49,6 +50,10 @@ class TestStatsPersonnellesService:
         with obtenir_contexte_db() as session:
             # Nettoyer données test
             session.query(PariSportif).filter(PariSportif.user_id == user_id_test).delete()
+            
+            # Créer matchs de test
+            for mid in (1, 2, 3):
+                creer_match_test(session, mid)
             
             # Créer 3 paris: 2 gagnants, 1 perdant
             paris = [
@@ -123,6 +128,10 @@ class TestStatsPersonnellesService:
             # Nettoyer
             session.query(PariSportif).filter(PariSportif.user_id == user_id_test).delete()
             
+            # Créer matchs de test
+            for mid in range(5):
+                creer_match_test(session, mid)
+            
             # 3 gagnants / 5 total = 60%
             statuts = ["gagnant", "gagnant", "gagnant", "perdant", "perdant"]
             
@@ -170,6 +179,10 @@ class TestStatsPersonnellesService:
         with obtenir_contexte_db() as session:
             # Nettoyer
             session.query(PariSportif).filter(PariSportif.user_id == user_id_test).delete()
+            
+            # Créer matchs de test
+            for mid in (1, 2, 3):
+                creer_match_test(session, mid)
             
             # Type "1" très rentable: 2 gagnés
             paris_type_1 = [
@@ -254,6 +267,10 @@ class TestStatsPersonnellesService:
         with obtenir_contexte_db() as session:
             # Nettoyer
             session.query(PariSportif).filter(PariSportif.user_id == user_id_test).delete()
+            
+            # Créer matchs de test
+            for mid in (1, 2):
+                creer_match_test(session, mid)
             
             # Mois courant: 1 gagnant
             pari_courant = PariSportif(

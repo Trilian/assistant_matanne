@@ -3176,7 +3176,7 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "job_nutrition_adultes_weekly": ("Bilan nutrition adultes hebdo", _job_nutrition_adultes_weekly),
     "job_briefing_matinal_push": ("Briefing matinal IA", _job_briefing_matinal_push),
     "job_jardin_feedback_planning": ("Feedback jardin vers planning", _job_jardin_feedback_planning),
-    # Phase 7 — IA & automations
+    # Jobs IA et automatisations avancées
     "briefing_matinal_ia": ("Résumé matinal IA", _job_phase7_briefing_matinal_ia),
     "comparateur_abonnements": ("Comparateur abonnements", _job_phase7_comparateur_abonnements),
     "rapport_nutritionnel_jules": ("Rapport nutritionnel Jules", _job_phase7_rapport_nutritionnel_jules),
@@ -4009,7 +4009,7 @@ _REGISTRE_JOBS.update(
 
 
 # ═══════════════════════════════════════════════════════════
-# JOBS CRON D'INNOVATIONS
+# JOBS CRON TRANSVERSES
 # ═══════════════════════════════════════════════════════════
 
 

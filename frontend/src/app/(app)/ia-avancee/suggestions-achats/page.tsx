@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/composants/ui/button'
 import { Input } from '@/composants/ui/input'
 import { Badge } from '@/composants/ui/badge'
-import { obtenirSuggestionsAchats, type SuggestionsAchatsResponse } from '@/bibliotheque/api/ia_avancee'
+import { obtenirSuggestionsAchats, type SuggestionsAchatsResponse } from '@/bibliotheque/api/ia-avancee'
 import { toast } from 'sonner'
 
 export default function SuggestionsAchatsPage() {

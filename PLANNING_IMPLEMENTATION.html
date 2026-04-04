@@ -1,0 +1,2298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistant Matanne — Planning d'Implémentation Complet</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --bg3: #334155;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --accent3: #06b6d4;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --orange: #f97316;
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --border: #475569;
+    --card: #1e293b;
+    --pink: #ec4899;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* Navigation */
+  .nav { position: fixed; top: 0; left: 0; width: 300px; height: 100vh; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; z-index: 100; padding: 1rem 0; }
+  .nav-title { padding: 0.5rem 1.5rem 0.3rem; font-size: 1.15rem; font-weight: 800; color: var(--accent); }
+  .nav-subtitle { padding: 0 1.5rem 0.8rem; font-size: 0.7rem; color: var(--text2); border-bottom: 1px solid var(--border); margin-bottom: 0.5rem; }
+  .nav-section { padding: 0.4rem 1.5rem 0.15rem; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent3); margin-top: 0.6rem; font-weight: 700; }
+  .nav a { display: block; padding: 0.28rem 1.5rem; color: var(--text2); text-decoration: none; font-size: 0.8rem; transition: all 0.15s; border-left: 3px solid transparent; }
+  .nav a:hover { color: var(--text); background: var(--bg3); border-left-color: var(--accent); }
+  .nav a.active { color: var(--accent); border-left-color: var(--accent); background: rgba(59,130,246,0.08); }
+
+  /* Main */
+  .main { margin-left: 300px; padding: 2rem 3rem 4rem; max-width: 1300px; }
+
+  /* Hero */
+  .hero { background: linear-gradient(135deg, #1e40af, #7c3aed, #db2777); border-radius: 18px; padding: 2.5rem 3rem; margin-bottom: 2.5rem; position: relative; overflow: hidden; }
+  .hero::after { content: ''; position: absolute; top: -50%; right: -20%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%); border-radius: 50%; }
+  .hero h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 0.3rem; position: relative; z-index: 1; }
+  .hero .subtitle { font-size: 1rem; opacity: 0.85; margin-bottom: 0.3rem; position: relative; z-index: 1; }
+  .hero .date { font-size: 0.85rem; opacity: 0.65; position: relative; z-index: 1; }
+  .hero .stats-row { display: flex; gap: 1.2rem; margin-top: 1.5rem; flex-wrap: wrap; position: relative; z-index: 1; }
+  .hero .stat { background: rgba(255,255,255,0.12); backdrop-filter: blur(10px); padding: 0.7rem 1rem; border-radius: 12px; min-width: 120px; border: 1px solid rgba(255,255,255,0.1); }
+  .hero .stat-val { font-size: 1.5rem; font-weight: 800; }
+  .hero .stat-label { font-size: 0.7rem; opacity: 0.75; }
+
+  /* Sections */
+  section { margin-bottom: 3rem; scroll-margin-top: 1rem; }
+  h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 1.2rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 0.5rem; }
+  h3 { font-size: 1.1rem; font-weight: 700; margin: 1.2rem 0 0.6rem; color: var(--accent3); }
+  h4 { font-size: 0.95rem; font-weight: 600; margin: 0.8rem 0 0.4rem; color: var(--text2); }
+
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem 1.5rem; margin-bottom: 1rem; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+  .card-sm { background: var(--bg3); border-radius: 10px; padding: 0.9rem 1.1rem; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 14px; overflow: hidden; margin-bottom: 1rem; }
+  thead { background: var(--bg3); }
+  th { padding: 0.7rem 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text2); font-weight: 700; }
+  td { padding: 0.55rem 1rem; border-top: 1px solid var(--border); font-size: 0.83rem; }
+  tr:hover td { background: rgba(59,130,246,0.04); }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 6px; font-size: 0.68rem; font-weight: 700; }
+  .badge-ok { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-warn { background: rgba(234,179,8,0.15); color: var(--yellow); }
+  .badge-error { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge-info { background: rgba(59,130,246,0.15); color: var(--accent); }
+  .badge-purple { background: rgba(139,92,246,0.15); color: var(--accent2); }
+  .badge-pink { background: rgba(236,72,153,0.15); color: var(--pink); }
+  .badge-cyan { background: rgba(6,182,212,0.15); color: var(--accent3); }
+
+  /* Scores */
+  .score-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+  .score-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.2rem; text-align: center; transition: transform 0.2s, border-color 0.2s; }
+  .score-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+  .score-val { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.02em; }
+  .score-label { font-size: 0.88rem; color: var(--text2); margin-top: 0.2rem; font-weight: 600; }
+  .score-bar { height: 6px; border-radius: 3px; background: var(--bg3); margin-top: 0.6rem; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 3px; transition: width 1s ease-out; }
+  .score-desc { font-size: 0.72rem; color: var(--text2); margin-top: 0.5rem; line-height: 1.4; }
+
+  /* Flow */
+  .flow { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.5rem 0; }
+  .flow-step { background: var(--bg3); padding: 0.45rem 0.75rem; border-radius: 8px; font-size: 0.78rem; white-space: nowrap; }
+  .flow-arrow { color: var(--accent); font-weight: 800; font-size: 0.9rem; }
+
+  /* Module map */
+  .module-map { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+  .module-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem 1.3rem; transition: transform 0.15s, border-color 0.15s; }
+  .module-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .module-icon { font-size: 2rem; margin-bottom: 0.4rem; }
+  .module-name { font-weight: 800; font-size: 1.05rem; margin-bottom: 0.25rem; }
+  .module-desc { font-size: 0.78rem; color: var(--text2); margin-bottom: 0.5rem; }
+  .module-stats { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+  /* Priority */
+  .priority-critical { border-left: 5px solid var(--red); }
+  .priority-high { border-left: 5px solid var(--orange); }
+  .priority-medium { border-left: 5px solid var(--yellow); }
+  .priority-low { border-left: 5px solid var(--green); }
+  .priority-evolution { border-left: 5px solid var(--accent2); }
+
+  /* Plan items */
+  .plan-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; transition: background 0.15s; }
+  .plan-item:hover { background: var(--bg3); }
+  .plan-item .title { font-weight: 600; font-size: 0.88rem; flex: 1; }
+  .plan-item .meta { display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0; }
+  .plan-item .effort { font-size: 0.7rem; color: var(--text2); white-space: nowrap; }
+
+  /* Phase header */
+  .phase-header { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.2rem 1.5rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 1.2rem; }
+  .phase-number { font-size: 2.5rem; font-weight: 900; min-width: 60px; text-align: center; }
+  .phase-info h3 { margin: 0; font-size: 1.15rem; color: var(--text); }
+  .phase-info p { font-size: 0.82rem; color: var(--text2); margin-top: 0.2rem; }
+  .phase-info .phase-tags { margin-top: 0.4rem; }
+
+  /* Diagram */
+  .arch-diagram { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.76rem; line-height: 1.4; overflow-x: auto; white-space: pre; color: var(--text2); }
+  .arch-diagram .hl { color: var(--accent); font-weight: 700; }
+  .arch-diagram .hl2 { color: var(--accent2); font-weight: 700; }
+  .arch-diagram .hl3 { color: var(--green); }
+
+  /* Tags */
+  .tag-list { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+  .tag { padding: 0.12rem 0.5rem; background: var(--bg3); border-radius: 5px; font-size: 0.7rem; color: var(--text2); }
+
+  /* Collapsible */
+  details { margin-bottom: 0.5rem; }
+  summary { cursor: pointer; padding: 0.6rem 1rem; background: var(--bg3); border-radius: 8px; font-weight: 600; font-size: 0.88rem; user-select: none; transition: background 0.15s; }
+  summary:hover { background: var(--border); }
+  details[open] summary { border-radius: 8px 8px 0 0; background: var(--border); }
+  details > div, details > .card { border-top: none; border-radius: 0 0 8px 8px; }
+
+  /* Lists */
+  ul.clean { list-style: none; }
+  ul.clean li { padding: 0.3rem 0; padding-left: 1.2rem; position: relative; font-size: 0.83rem; }
+  ul.clean li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+
+  /* Gantt-like timeline */
+  .timeline { position: relative; padding-left: 2rem; }
+  .timeline::before { content: ''; position: absolute; left: 0.9rem; top: 0; bottom: 0; width: 3px; background: var(--border); border-radius: 2px; }
+  .timeline-item { position: relative; margin-bottom: 1.5rem; }
+  .timeline-dot { position: absolute; left: -1.55rem; top: 0.4rem; width: 14px; height: 14px; border-radius: 50%; border: 3px solid; }
+  .timeline-content { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.2rem; }
+  .timeline-content h4 { margin: 0 0 0.3rem; }
+
+  /* Progress */
+  .progress-container { display: flex; align-items: center; gap: 0.8rem; margin: 0.5rem 0; }
+  .progress-bar { flex: 1; height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; }
+  .progress-label { font-size: 0.75rem; color: var(--text2); min-width: 40px; }
+
+  /* Checklist */
+  .checklist { list-style: none; }
+  .checklist li { padding: 0.35rem 0; font-size: 0.83rem; display: flex; align-items: center; gap: 0.5rem; }
+  .check { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; }
+  .check.done { background: var(--green); border-color: var(--green); position: relative; }
+  .check.done::after { content: '✓'; position: absolute; left: 1px; top: -2px; font-size: 0.7rem; color: white; font-weight: 800; }
+
+  /* Responsive */
+  @media (max-width: 1000px) {
+    .nav { display: none; }
+    .main { margin-left: 0; padding: 1rem; }
+    .card-grid, .score-grid { grid-template-columns: 1fr; }
+    .hero { padding: 1.5rem; }
+    .hero h1 { font-size: 1.5rem; }
+  }
+
+  code { background: var(--bg3); padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.8rem; font-family: 'Consolas', monospace; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 7px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text2); }
+
+  /* Separator */
+  .sep { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+  /* Tooltip */
+  .tip { position: relative; cursor: help; border-bottom: 1px dotted var(--text2); }
+  .tip:hover::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--bg3); color: var(--text); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.72rem; white-space: nowrap; z-index: 10; }
+
+  /* Global note widget */
+  .global-note { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1)); border: 2px solid var(--accent); border-radius: 18px; padding: 2rem; text-align: center; margin: 1.5rem 0; }
+  .global-note .big { font-size: 4.5rem; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .global-note .label { font-size: 1.1rem; color: var(--text2); font-weight: 600; }
+  .global-note .verdict { font-size: 0.9rem; color: var(--text2); margin-top: 0.5rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+  /* Estimation block */
+  .estimation-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.8rem; margin: 1rem 0; }
+  .estimation-card { background: var(--bg3); border-radius: 10px; padding: 0.8rem; text-align: center; }
+  .estimation-card .val { font-size: 1.3rem; font-weight: 800; }
+  .estimation-card .lbl { font-size: 0.7rem; color: var(--text2); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- NAVIGATION -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-title">📋 Planning Implémentation</div>
+  <div class="nav-subtitle">Assistant Matanne — 4 avril 2026 — Basé sur l'Analyse Complète</div>
+
+  <div class="nav-section">🎯 Vue d'ensemble</div>
+  <a href="#notes">Notes par catégorie</a>
+  <a href="#stats">Statistiques du projet</a>
+  <a href="#architecture">Architecture globale</a>
+
+  <div class="nav-section">📦 Inventaire des modules</div>
+  <a href="#mod-cuisine">🍽️ Cuisine</a>
+  <a href="#mod-famille">👨‍👩‍👦 Famille</a>
+  <a href="#mod-maison">🏡 Maison</a>
+  <a href="#mod-habitat">🏘️ Habitat</a>
+  <a href="#mod-jeux">🎮 Jeux</a>
+  <a href="#mod-outils">🛠️ Outils</a>
+  <a href="#mod-planning">📅 Planning</a>
+  <a href="#mod-admin">🔧 Admin</a>
+
+  <div class="nav-section">🔍 Audit complet</div>
+  <a href="#bugs">🐛 Bugs & Endpoints cassés</a>
+  <a href="#gaps">⚠️ Gaps fonctionnels</a>
+  <a href="#cleanup">🧹 Nettoyage à faire</a>
+  <a href="#sql-audit">💾 Audit SQL</a>
+  <a href="#tests-audit">🧪 Audit Tests</a>
+  <a href="#docs-audit">📚 Audit Documentation</a>
+
+  <div class="nav-section">🔗 Évolutions identifiées</div>
+  <a href="#inter-modules">Interactions inter-modules</a>
+  <a href="#ia-opportunities">🤖 Opportunités IA</a>
+  <a href="#automation">⚡ Jobs & CRON</a>
+  <a href="#telegram-plan">📱 Telegram & Notifications</a>
+  <a href="#admin-improvements">🎛️ Mode admin</a>
+  <a href="#ui-plan">🎨 Améliorations UI/UX</a>
+  <a href="#legacy-removal">🗑️ Suppression legacy</a>
+  <a href="#innovations">💡 Innovations</a>
+
+  <div class="nav-section">📋 Plan d'implémentation</div>
+  <a href="#phase1">✅ Phase 1 — Critiques (Terminée)</a>
+  <a href="#phase2">🟠 Phase 2 — Nettoyage</a>
+  <a href="#phase3">🟡 Phase 3 — Tests & Docs</a>
+  <a href="#phase4">🟢 Phase 4 — Inter-modules</a>
+  <a href="#phase5">🔵 Phase 5 — IA & Automations</a>
+  <a href="#phase6">🟣 Phase 6 — UI/UX</a>
+  <a href="#phase7">⚪ Phase 7 — Admin & Dev</a>
+  <a href="#recap">📊 Récapitulatif global</a>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- MAIN CONTENT -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="main">
+
+<!-- ============================================================== -->
+<!-- HERO -->
+<!-- ============================================================== -->
+<div class="hero" id="top">
+  <h1>Planning d'Implémentation Complet</h1>
+  <div class="subtitle">Basé sur le Rapport d'Analyse Complète — Assistant Matanne</div>
+  <div class="date">Généré le 4 avril 2026 · 7 phases · 43 tâches · Notation complète par catégorie</div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val">500+</div><div class="stat-label">Endpoints REST</div></div>
+    <div class="stat"><div class="stat-val">50+</div><div class="stat-label">Pages Frontend</div></div>
+    <div class="stat"><div class="stat-val">100+</div><div class="stat-label">Modèles ORM</div></div>
+    <div class="stat"><div class="stat-val">150+</div><div class="stat-label">Composants React</div></div>
+    <div class="stat"><div class="stat-val">239</div><div class="stat-label">Fichiers de tests</div></div>
+    <div class="stat"><div class="stat-val">7</div><div class="stat-label">Modules métier</div></div>
+    <div class="stat"><div class="stat-val">68</div><div class="stat-label">CRON Jobs</div></div>
+    <div class="stat"><div class="stat-val">7.4</div><div class="stat-label">Note globale /10</div></div>
+  </div>
+</div>
+
+
+<!-- ╔═══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                  NOTES PAR CATÉGORIE                         ║ -->
+<!-- ╚═══════════════════════════════════════════════════════════════╝ -->
+<section id="notes">
+<h2>🎯 Notes par Catégorie — Évaluation de l'Application</h2>
+
+<div class="score-grid">
+  <div class="score-card">
+    <div class="score-val" style="color: var(--green)">8.5</div>
+    <div class="score-label">Architecture Backend</div>
+    <div class="score-bar"><div class="score-fill" style="width:85%; background: linear-gradient(90deg, var(--green), #4ade80)"></div></div>
+    <div class="score-desc">FastAPI + SQLAlchemy 2.0 + décorateurs + factories. Séparation routes/services/models exemplaire. Middlewares bien empilés. Pattern @service_factory solide.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--green)">8.0</div>
+    <div class="score-label">Architecture Frontend</div>
+    <div class="score-bar"><div class="score-fill" style="width:80%; background: linear-gradient(90deg, var(--green), #4ade80)"></div></div>
+    <div class="score-desc">Next.js 16 App Router, TanStack Query v5, Zustand 5. Composants bien organisés, hooks customs pertinents. API clients par domaine. PWA installable.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--yellow)">6.5</div>
+    <div class="score-label">Qualité du Code</div>
+    <div class="score-bar"><div class="score-fill" style="width:65%; background: linear-gradient(90deg, var(--yellow), var(--orange))"></div></div>
+    <div class="score-desc">~150 commentaires phase/sprint à nettoyer, 4 endpoints cassés (pass), features deprecated toujours présentes. Code fonctionnel mais dette technique accumulée.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--yellow)">7.0</div>
+    <div class="score-label">Couverture Tests</div>
+    <div class="score-bar"><div class="score-fill" style="width:70%; background: linear-gradient(90deg, var(--yellow), var(--green))"></div></div>
+    <div class="score-desc">239 fichiers tests, bon coverage core/API. Batch cooking entièrement skippé. E2E minimal. Inter-modules bien testés (21+ fichiers).</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--green)">8.0</div>
+    <div class="score-label">Documentation</div>
+    <div class="score-bar"><div class="score-fill" style="width:80%; background: linear-gradient(90deg, var(--green), #4ade80)"></div></div>
+    <div class="score-desc">45+ fichiers docs, guides par module, API reference. Quelques refs stale dans SERVICES_REFERENCE. Guides utilisateur et modules complets.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--green)">7.5</div>
+    <div class="score-label">Base de Données</div>
+    <div class="score-bar"><div class="score-fill" style="width:75%; background: linear-gradient(90deg, var(--green), var(--yellow))"></div></div>
+    <div class="score-desc">~130 tables, RLS, triggers, 60+ triggers modifie_le. Duplication indexes 13/14, migration V002 commentée, fichier 17 vide. Schema globalement solide.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--green)">8.0</div>
+    <div class="score-label">UI / Design System</div>
+    <div class="score-bar"><div class="score-fill" style="width:80%; background: linear-gradient(90deg, var(--green), #4ade80)"></div></div>
+    <div class="score-desc">shadcn/ui + Tailwind v4, 3D (Three.js), Recharts + D3, heatmaps, Sankey, radar. Dark/Light mode. Command palette. Très riche visuellement.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--yellow)">7.0</div>
+    <div class="score-label">Sécurité</div>
+    <div class="score-bar"><div class="score-fill" style="width:70%; background: linear-gradient(90deg, var(--yellow), var(--green))"></div></div>
+    <div class="score-desc">JWT Bearer, RLS Supabase, rate limiting (60/10 req/min), CORS, security headers, XSS sanitizer. Quelques except:pass critiques à corriger.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--green)">7.5</div>
+    <div class="score-label">Intégrations Externes</div>
+    <div class="score-bar"><div class="score-fill" style="width:75%; background: linear-gradient(90deg, var(--green), var(--yellow))"></div></div>
+    <div class="score-desc">Mistral AI, Telegram Bot, Garmin, Google Calendar, WebSocket collaboration. Solide mais certaines intégrations restent en stub.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--yellow)">6.0</div>
+    <div class="score-label">Organisation Fichiers</div>
+    <div class="score-bar"><div class="score-fill" style="width:60%; background: linear-gradient(90deg, var(--orange), var(--yellow))"></div></div>
+    <div class="score-desc">Fichiers innovations/fonctionnalites_avancees fourre-tout. Commentaires phase/sprint. normes_oms.json à supprimer. Routeurs à éclater.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--green)">8.5</div>
+    <div class="score-label">Richesse Fonctionnelle</div>
+    <div class="score-bar"><div class="score-fill" style="width:85%; background: linear-gradient(90deg, var(--green), #4ade80)"></div></div>
+    <div class="score-desc">7 modules métier, 50+ pages, batch cooking, anti-gaspi, 3D, IA, WebSocket collab, offline, PWA. Impressionnant pour un projet personnel.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--green)">7.5</div>
+    <div class="score-label">Expérience Utilisateur</div>
+    <div class="score-bar"><div class="score-fill" style="width:75%; background: linear-gradient(90deg, var(--green), var(--yellow))"></div></div>
+    <div class="score-desc">Sidebar, mobile nav, onboarding tour, command palette, voice, offline banner. Certains flux trop longs (planning, ajout recette). Bottom sheets à ajouter.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--green)">8.0</div>
+    <div class="score-label">IA & Intelligence</div>
+    <div class="score-bar"><div class="score-fill" style="width:80%; background: linear-gradient(90deg, var(--green), #4ade80)"></div></div>
+    <div class="score-desc">Mistral AI intégré dans 10+ features (suggestions, planning, anti-gaspi, paris, jardin, énergie). BaseAIService avec rate limiting + cache. Chat IA stub à corriger.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--yellow)">7.0</div>
+    <div class="score-label">Automatisations</div>
+    <div class="score-bar"><div class="score-fill" style="width:70%; background: linear-gradient(90deg, var(--yellow), var(--green))"></div></div>
+    <div class="score-desc">68 CRON jobs, APScheduler, event bus (32 types), 21+ bridges inter-modules. Les automations sont riches mais le briefing matin et les rappels intelligents manquent.</div>
+  </div>
+
+  <div class="score-card">
+    <div class="score-val" style="color: var(--green)">7.5</div>
+    <div class="score-label">DevOps & Monitoring</div>
+    <div class="score-bar"><div class="score-fill" style="width:75%; background: linear-gradient(90deg, var(--green), var(--yellow))"></div></div>
+    <div class="score-desc">Prometheus, health checks, Docker, Sentry, Vercel/Railway. Panneau admin flottant. WebSocket admin logs. Mode simulation à ajouter.</div>
+  </div>
+</div>
+
+<!-- Note globale -->
+<div class="global-note">
+  <div class="big">7.4 / 10</div>
+  <div class="label">Note Globale — Moyenne Pondérée</div>
+  <div class="verdict">
+    Application très riche et ambitieuse. L'architecture est solide, les fonctionnalités sont impressionnantes pour un projet personnel.
+    Les points à améliorer sont principalement le <strong>nettoyage du code legacy</strong> (commentaires, features deprecated),
+    la <strong>correction des endpoints cassés</strong>, et la <strong>consolidation des tests</strong>.
+    L'IA et les intégrations sont bien pensées mais certaines restent en stub.
+  </div>
+</div>
+</section>
+
+
+<!-- ╔═══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                STATISTIQUES GLOBALES                         ║ -->
+<!-- ╚═══════════════════════════════════════════════════════════════╝ -->
+<section id="stats">
+<h2>📈 Statistiques Globales du Projet</h2>
+<div class="card-grid">
+  <div class="card">
+    <h4>Backend Python</h4>
+    <table>
+      <tr><td>Fichiers routes API</td><td><strong>59</strong></td></tr>
+      <tr><td>Endpoints REST</td><td><strong>~500-550</strong></td></tr>
+      <tr><td>WebSocket handlers</td><td><strong>5</strong></td></tr>
+      <tr><td>Schémas Pydantic</td><td><strong>36</strong> (26 API + 10 validation)</td></tr>
+      <tr><td>Modèles SQLAlchemy</td><td><strong>100+</strong> classes (31 fichiers)</td></tr>
+      <tr><td>Services</td><td><strong>60+</strong> fichiers (15 packages)</td></tr>
+      <tr><td>Middlewares</td><td><strong>6</strong></td></tr>
+      <tr><td>Décorateurs custom</td><td><strong>5</strong></td></tr>
+      <tr><td>Commandes manage.py</td><td><strong>25+</strong></td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Frontend Next.js</h4>
+    <table>
+      <tr><td>Pages</td><td><strong>50+</strong></td></tr>
+      <tr><td>Composants total</td><td><strong>150+</strong></td></tr>
+      <tr><td>Composants UI (shadcn)</td><td><strong>30+</strong></td></tr>
+      <tr><td>Composants Layout</td><td><strong>23</strong></td></tr>
+      <tr><td>Composants Métier</td><td><strong>100+</strong></td></tr>
+      <tr><td>API Clients</td><td><strong>29</strong></td></tr>
+      <tr><td>Hooks custom</td><td><strong>20</strong></td></tr>
+      <tr><td>Stores Zustand</td><td><strong>4</strong></td></tr>
+      <tr><td>Validateurs Zod</td><td><strong>7</strong> fichiers</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Infrastructure & Données</h4>
+    <table>
+      <tr><td>Tables SQL</td><td><strong>~130</strong></td></tr>
+      <tr><td>Fichiers SQL schema</td><td><strong>23</strong></td></tr>
+      <tr><td>Fichiers tests</td><td><strong>239</strong></td></tr>
+      <tr><td>Fichiers docs</td><td><strong>45+</strong></td></tr>
+      <tr><td>Scripts utilitaires</td><td><strong>17</strong></td></tr>
+      <tr><td>Données référence</td><td><strong>17</strong> JSON/CSV</td></tr>
+      <tr><td>CRON jobs configurés</td><td><strong>68</strong></td></tr>
+      <tr><td>Event Bus events</td><td><strong>32</strong> types</td></tr>
+      <tr><td>Bridges inter-modules</td><td><strong>21+</strong></td></tr>
+    </table>
+  </div>
+</div>
+</section>
+
+
+<!-- ╔═══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                ARCHITECTURE GLOBALE                          ║ -->
+<!-- ╚═══════════════════════════════════════════════════════════════╝ -->
+<section id="architecture">
+<h2>🏗️ Architecture Globale</h2>
+
+<div class="arch-diagram">
+<span class="hl">┌─────────────────────────────────────────────────────────────────────┐</span>
+<span class="hl">│                        FRONTEND (Next.js 16)                        │</span>
+<span class="hl">│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ │</span>
+<span class="hl">│  │ 🍽 Cuisine│ │👨‍👩‍👦Famille│ │ 🏡 Maison│ │ 🎮 Jeux  │ │🛠️ Outils │ │</span>
+<span class="hl">│  └─────┬────┘ └─────┬────┘ └─────┬────┘ └────┬─────┘ └────┬─────┘ │</span>
+<span class="hl">│        │            │            │           │            │        │</span>
+<span class="hl">│  ┌─────┴────────────┴────────────┴───────────┴────────────┴─────┐  │</span>
+<span class="hl">│  │  Hooks (TanStack Query) │ Stores (Zustand) │ API Clients (Axios)│</span>
+<span class="hl">│  └─────────────────────────┴──────────────────┴────────────────┘  │</span>
+<span class="hl">└───────────────────────────────┬─────────────────────────────────────┘</span>
+                                │ REST API + WebSocket
+<span class="hl2">┌───────────────────────────────┴─────────────────────────────────────┐</span>
+<span class="hl2">│                        BACKEND (FastAPI)                            │</span>
+<span class="hl2">│  ┌──────────────────────────────────────────────────────────────┐   │</span>
+<span class="hl2">│  │  Middlewares: CORS → Rate Limit → Version → ETag → Metrics  │   │</span>
+<span class="hl2">│  └──────────────────────────┬───────────────────────────────────┘   │</span>
+<span class="hl2">│  ┌──────────────────────────┴───────────────────────────────────┐   │</span>
+<span class="hl2">│  │  Routes (59 fichiers) → Schemas Pydantic → Dependencies Auth │   │</span>
+<span class="hl2">│  └──────────────────────────┬───────────────────────────────────┘   │</span>
+<span class="hl2">│  ┌──────────────────────────┴───────────────────────────────────┐   │</span>
+<span class="hl2">│  │  Services (60+ fichiers) → BaseAIService → Event Bus         │   │</span>
+<span class="hl2">│  └──────────────────────────┬───────────────────────────────────┘   │</span>
+<span class="hl2">│  ┌──────────────────────────┴───────────────────────────────────┐   │</span>
+<span class="hl2">│  │  Core: Models(100+) │ Cache(L1→L3) │ AI(Mistral) │ Resilience│   │</span>
+<span class="hl2">│  └──────────────────────────┬───────────────────────────────────┘   │</span>
+<span class="hl2">└───────────────────────────────┬─────────────────────────────────────┘</span>
+                                │
+<span class="hl3">┌───────────────────────────────┴─────────────────────────────────────┐</span>
+<span class="hl3">│  Supabase PostgreSQL │ Mistral AI │ Telegram │ Garmin │ Google Cal   │</span>
+<span class="hl3">└─────────────────────────────────────────────────────────────────────┘</span>
+</div>
+
+<div class="card" style="margin-top: 1rem;">
+  <h4>Stack technique</h4>
+  <div class="tag-list">
+    <span class="badge badge-info">Python 3.13+</span>
+    <span class="badge badge-info">FastAPI</span>
+    <span class="badge badge-info">SQLAlchemy 2.0</span>
+    <span class="badge badge-info">Pydantic v2</span>
+    <span class="badge badge-purple">Next.js 16</span>
+    <span class="badge badge-purple">React 19</span>
+    <span class="badge badge-purple">TypeScript 5</span>
+    <span class="badge badge-purple">Tailwind CSS v4</span>
+    <span class="badge badge-cyan">Supabase PostgreSQL</span>
+    <span class="badge badge-cyan">Mistral AI</span>
+    <span class="badge badge-ok">TanStack Query v5</span>
+    <span class="badge badge-ok">Zustand 5</span>
+    <span class="badge badge-ok">Zod 4</span>
+    <span class="badge badge-ok">shadcn/ui</span>
+    <span class="badge badge-pink">Framer Motion</span>
+    <span class="badge badge-pink">Three.js</span>
+    <span class="badge badge-pink">Recharts / D3</span>
+  </div>
+</div>
+</section>
+
+<hr class="sep">
+
+
+<!-- ╔═══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                    MODULES — INVENTAIRE                      ║ -->
+<!-- ╚═══════════════════════════════════════════════════════════════╝ -->
+
+<!-- === CUISINE === -->
+<section id="mod-cuisine">
+<h2>🍽️ Module Cuisine</h2>
+<div class="card">
+  <h3>Fonctionnalités actuelles</h3>
+  <div class="card-grid">
+    <div class="card-sm">
+      <strong>Recettes</strong>
+      <ul class="clean">
+        <li>CRUD complet (créer, modifier, supprimer, lister)</li>
+        <li>Import URL/PDF (parsing automatique)</li>
+        <li>Recherche avancée (ingrédients, saison, temps, robot)</li>
+        <li>Suggestions IA (Mistral) contextuelle</li>
+        <li>Versioning des recettes</li>
+        <li>Évaluation et feedback</li>
+        <li>Recettes saisonnières</li>
+        <li>Nutri-Score / Eco-Score</li>
+        <li>Adaptation Jules (sans sel, mixée)</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Planning Repas</strong>
+      <ul class="clean">
+        <li>Planification semaine complète</li>
+        <li>Génération IA du planning</li>
+        <li>Équilibre nutritionnel automatique</li>
+        <li>Détection de conflits</li>
+        <li>Alternatives rapides</li>
+        <li>Planification mensuelle</li>
+        <li>Portions adaptées Jules</li>
+        <li>Marquage repas consommés</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Courses</strong>
+      <ul class="clean">
+        <li>Listes multiples avec articles</li>
+        <li>Tri par magasin (Bio Coop, Carrefour...)</li>
+        <li>WebSocket temps réel (collaboration)</li>
+        <li>Génération depuis planning</li>
+        <li>Sync Carrefour Drive</li>
+        <li>Mode hors-ligne</li>
+        <li>Optimisation parcours magasin</li>
+        <li>QR code / code-barres</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Inventaire / Stock</strong>
+      <ul class="clean">
+        <li>Frigo + cellier + garage</li>
+        <li>Alertes péremption</li>
+        <li>Historique des stocks</li>
+        <li>Vue consolidée</li>
+        <li>Import bulk (photo)</li>
+        <li>FIFO tracking</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Batch Cooking</strong>
+      <ul class="clean">
+        <li>Sessions de préparation</li>
+        <li>Génération depuis planning</li>
+        <li>Timeline visuelle</li>
+        <li>Suivi consommation préparations</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Anti-Gaspillage</strong>
+      <ul class="clean">
+        <li>Score anti-gaspillage</li>
+        <li>Recettes de sauvetage IA</li>
+        <li>Historique et badges</li>
+        <li>Alertes produits proches péremption</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Flux Utilisateur Principal</h3>
+  <div class="flow">
+    <span class="flow-step">📅 Planifier semaine</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">🤖 IA suggère recettes</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">✅ Valider planning</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">🛒 Générer liste courses</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">🏪 Trier par magasin</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">✓ Cocher en magasin</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">📦 MAJ inventaire</span>
+  </div>
+
+  <h3>Pages Frontend</h3>
+  <div class="tag-list">
+    <span class="tag">Hub cuisine</span><span class="tag">Ma semaine</span><span class="tag">Recettes (liste/détail/nouveau/modifier)</span>
+    <span class="tag">Recettes rapides</span><span class="tag">Courses</span><span class="tag">Planning</span><span class="tag">Inventaire</span>
+    <span class="tag">Frigo / Photo frigo</span><span class="tag">Nutrition</span><span class="tag">Batch cooking</span>
+    <span class="tag">Anti-gaspillage</span><span class="tag">Comparateur prix</span><span class="tag">Feedback</span><span class="tag">Mode tablette</span>
+  </div>
+
+  <h3>Endpoints API</h3>
+  <div class="tag-list">
+    <span class="badge badge-info">recettes.py</span><span class="badge badge-info">courses.py</span><span class="badge badge-info">planning.py</span>
+    <span class="badge badge-info">inventaire.py</span><span class="badge badge-info">batch_cooking.py</span><span class="badge badge-info">anti_gaspillage.py</span>
+    <span class="badge badge-info">suggestions.py</span><span class="badge badge-info">preferences.py</span>
+  </div>
+</div>
+</section>
+
+<!-- === FAMILLE === -->
+<section id="mod-famille">
+<h2>👨‍👩‍👦 Module Famille</h2>
+<div class="card">
+  <h3>Fonctionnalités actuelles</h3>
+  <div class="card-grid">
+    <div class="card-sm">
+      <strong>Jules (Suivi enfant)</strong>
+      <ul class="clean">
+        <li>Profil développemental</li>
+        <li>Jalons et étapes clés</li>
+        <li>Alimentation adaptée (portions, sans sel)</li>
+        <li>Carnet de santé (vaccinations, allergies)</li>
+        <li>Consultations médicales</li>
+        <li>Activités et développement</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Budget Famille</strong>
+      <ul class="clean">
+        <li>Catégories de dépenses</li>
+        <li>Limites mensuelles par catégorie</li>
+        <li>Alertes dépassement</li>
+        <li>Graphiques tendances</li>
+        <li>Anomalies IA</li>
+        <li>Comparaison mois à mois</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Routines</strong>
+      <ul class="clean">
+        <li>Routines matin/soir</li>
+        <li>Tâches assignées</li>
+        <li>Streaks (séries)</li>
+        <li>Modèles par défaut</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Vie Familiale</strong>
+      <ul class="clean">
+        <li>Activités (sorties, sport, événements)</li>
+        <li>Anniversaires et rappels</li>
+        <li>Contacts et urgences</li>
+        <li>Documents (école, médical, admin)</li>
+        <li>Calendriers partagés</li>
+        <li>Journal familial</li>
+        <li>Timeline interactive</li>
+        <li>Voyages et itinéraires</li>
+        <li>Weekend IA (suggestions sorties)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Flux Utilisateur</h3>
+  <div class="flow">
+    <span class="flow-step">🏠 Dashboard famille</span><span class="flow-arrow">→</span>
+    <span class="flow-step">📊 Voir budget</span><span class="flow-arrow">→</span>
+    <span class="flow-step">💰 Ajouter dépense</span><span class="flow-arrow">→</span>
+    <span class="flow-step">⚠️ Alerte si dépassé</span>
+  </div>
+  <div class="flow" style="margin-top:0.3rem">
+    <span class="flow-step">👶 Page Jules</span><span class="flow-arrow">→</span>
+    <span class="flow-step">📋 Voir jalons</span><span class="flow-arrow">→</span>
+    <span class="flow-step">➕ Ajouter jalon</span><span class="flow-arrow">→</span>
+    <span class="flow-step">💉 MAJ vaccins</span>
+  </div>
+
+  <h3>Pages Frontend</h3>
+  <div class="tag-list">
+    <span class="tag">Hub famille</span><span class="tag">Jules</span><span class="tag">Budget</span><span class="tag">Routines</span>
+    <span class="tag">Activités</span><span class="tag">Achats</span><span class="tag">Contacts</span><span class="tag">Documents</span>
+    <span class="tag">Calendriers</span><span class="tag">Anniversaires</span><span class="tag">Weekend</span><span class="tag">Voyages</span>
+    <span class="tag">Timeline</span><span class="tag">Journal</span><span class="tag">Gamification</span>
+  </div>
+</div>
+</section>
+
+<!-- === MAISON === -->
+<section id="mod-maison">
+<h2>🏡 Module Maison</h2>
+<div class="card">
+  <h3>Fonctionnalités actuelles</h3>
+  <div class="card-grid">
+    <div class="card-sm">
+      <strong>Projets & Travaux</strong>
+      <ul class="clean">
+        <li>CRUD projets avec budget</li>
+        <li>Timeline GANTT interactif</li>
+        <li>Kanban board (tâches)</li>
+        <li>Estimation IA coûts</li>
+        <li>Artisans et devis</li>
+        <li>Suivi progression</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Entretien & Ménage</strong>
+      <ul class="clean">
+        <li>Routines par pièce</li>
+        <li>Tâches saisonnières</li>
+        <li>Rappels périodiques</li>
+        <li>Guide produits ménagers</li>
+        <li>Timer appareils</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Jardin</strong>
+      <ul class="clean">
+        <li>Zones et cultures</li>
+        <li>Calendrier semis/récolte</li>
+        <li>Prédictions IA</li>
+        <li>Vue interactive jardin</li>
+        <li>Catalogue plantes</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Équipements & Énergie</strong>
+      <ul class="clean">
+        <li>Inventaire meubles/appareils</li>
+        <li>Garanties et dates d'achat</li>
+        <li>Suivi consommation énergie</li>
+        <li>Anomalies IA énergie</li>
+        <li>Diagnostics immobilier</li>
+        <li>Stocks cellier/garage</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Finances Maison</strong>
+      <ul class="clean">
+        <li>Abonnements (eau, élec, téléphone...)</li>
+        <li>Comparateur abonnements</li>
+        <li>Dépenses par catégorie</li>
+        <li>Eco-tips IA</li>
+        <li>Artisans favoris</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Visualisation</strong>
+      <ul class="clean">
+        <li>Plans 3D (Three.js)</li>
+        <li>Vue interactive maison</li>
+        <li>Street view maison</li>
+        <li>Décoration / inspiration</li>
+      </ul>
+    </div>
+  </div>
+  <h3>Pages Frontend</h3>
+  <div class="tag-list">
+    <span class="tag">Hub maison</span><span class="tag">Travaux (GANTT)</span><span class="tag">Ménage</span>
+    <span class="tag">Jardin</span><span class="tag">Déco</span><span class="tag">Plans 3D</span><span class="tag">Diagnostics</span>
+    <span class="tag">Provisions</span><span class="tag">Visualisation 3D</span><span class="tag">Documents maison</span>
+  </div>
+</div>
+</section>
+
+<!-- === HABITAT === -->
+<section id="mod-habitat">
+<h2>🏘️ Module Habitat</h2>
+<div class="card">
+  <ul class="clean">
+    <li>Analyse marché immobilier (données DVF)</li>
+    <li>Veille immo (alertes annonces)</li>
+    <li>Scénarios comparatifs (achat/location)</li>
+    <li>Estimations immobilières</li>
+    <li>Plans et visualisation</li>
+    <li>Inspiration déco</li>
+    <li>Graphiques marché (prix m², tendances)</li>
+  </ul>
+  <h3>Pages Frontend</h3>
+  <div class="tag-list">
+    <span class="tag">Hub habitat</span><span class="tag">Marché</span><span class="tag">Veille immo</span>
+    <span class="tag">Scénarios</span><span class="tag">Déco</span>
+  </div>
+</div>
+</section>
+
+<!-- === JEUX === -->
+<section id="mod-jeux">
+<h2>🎮 Module Jeux</h2>
+<div class="card">
+  <div class="card-grid">
+    <div class="card-sm">
+      <strong>Paris Sportifs</strong>
+      <ul class="clean">
+        <li>Tracker paris (mise, cote, résultat)</li>
+        <li>Prédictions IA matchs</li>
+        <li>Value bets détection</li>
+        <li>Statistiques personnelles</li>
+        <li>Bankroll management</li>
+        <li>Heatmap cotes</li>
+        <li>Tableau expert matchs</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Loto & EuroMillions</strong>
+      <ul class="clean">
+        <li>Générateur de grilles</li>
+        <li>Grilles IA pondérées</li>
+        <li>Heatmap fréquences numéros</li>
+        <li>Backtesting stratégies</li>
+        <li>Historique tirages</li>
+        <li>Tableaux expert</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Dashboard Jeux</strong>
+      <ul class="clean">
+        <li>Statistiques globales</li>
+        <li>Historique résultats</li>
+        <li>ROI par stratégie</li>
+        <li>Notifications matchs</li>
+      </ul>
+    </div>
+  </div>
+  <p style="font-size:0.8rem; color:var(--text2); margin-top:0.5rem;">⚠️ Budget jeux séparé du budget famille (décision volontaire)</p>
+</div>
+</section>
+
+<!-- === OUTILS === -->
+<section id="mod-outils">
+<h2>🛠️ Module Outils</h2>
+<div class="card">
+  <div class="card-grid">
+    <div class="card-sm">
+      <strong>Chat IA</strong>
+      <ul class="clean">
+        <li>Assistant multi-contexte</li>
+        <li>Streaming réponses</li>
+        <li>Historique conversations</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Utilitaires</strong>
+      <ul class="clean">
+        <li>Notes avec tags</li>
+        <li>Convertisseur d'unités</li>
+        <li>Minuteur cuisine</li>
+        <li>Météo</li>
+        <li>Journal personnel</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Automatisations</strong>
+      <ul class="clean">
+        <li>Règles SI/ALORS</li>
+        <li>68 CRON jobs</li>
+        <li>Triggers événements</li>
+        <li>Centre de notifications</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Voix & Assistants</strong>
+      <ul class="clean">
+        <li>Reconnaissance vocale</li>
+        <li>Synthèse vocale</li>
+        <li>Google Assistant</li>
+        <li>Résumé IA</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- === PLANNING === -->
+<section id="mod-planning">
+<h2>📅 Module Planning</h2>
+<div class="card">
+  <ul class="clean">
+    <li>Hub planning global (tous modules)</li>
+    <li>Timeline avec dépendances</li>
+    <li>Vue hebdo "Ma Semaine" (repas + activités + tâches)</li>
+    <li>Vue quotidienne "Ma Journée"</li>
+    <li>Calendrier mensuel</li>
+    <li>Focus mode (sans distraction)</li>
+    <li>Widget tablette</li>
+  </ul>
+  <h3>Pages Frontend</h3>
+  <div class="tag-list">
+    <span class="tag">Hub planning</span><span class="tag">Timeline</span><span class="tag">Ma semaine</span>
+    <span class="tag">Ma journée</span><span class="tag">Focus</span><span class="tag">Widget tablette</span>
+  </div>
+</div>
+</section>
+
+<!-- === ADMIN === -->
+<section id="mod-admin">
+<h2>🔧 Module Admin</h2>
+<div class="card">
+  <div class="card-grid">
+    <div class="card-sm">
+      <strong>Gestion</strong>
+      <ul class="clean">
+        <li>Utilisateurs et rôles</li>
+        <li>Audit trail</li>
+        <li>Logs sécurité</li>
+        <li>Permissions</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Infrastructure</strong>
+      <ul class="clean">
+        <li>Health checks système</li>
+        <li>Monitoring Prometheus</li>
+        <li>Métriques temps réel (WebSocket)</li>
+        <li>Migrations DB</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Jobs & Automations</strong>
+      <ul class="clean">
+        <li>CRON jobs (catalogue 68 jobs)</li>
+        <li>Scheduling APScheduler</li>
+        <li>Exécution manuelle jobs</li>
+        <li>Status et historique</li>
+      </ul>
+    </div>
+    <div class="card-sm">
+      <strong>Opérations</strong>
+      <ul class="clean">
+        <li>Nettoyage DB</li>
+        <li>Backup/Restore</li>
+        <li>Reset</li>
+        <li>Panneau admin flottant</li>
+      </ul>
+    </div>
+  </div>
+  <h3>Routes Admin</h3>
+  <div class="tag-list">
+    <span class="badge badge-purple">admin.py</span><span class="badge badge-purple">admin_audit.py</span>
+    <span class="badge badge-purple">admin_infra.py</span><span class="badge badge-purple">admin_jobs.py</span>
+    <span class="badge badge-purple">admin_operations.py</span>
+  </div>
+</div>
+</section>
+
+
+<hr class="sep">
+
+
+<!-- ╔═══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                        AUDIT COMPLET                         ║ -->
+<!-- ╚═══════════════════════════════════════════════════════════════╝ -->
+
+<!-- === BUGS === -->
+<section id="bugs">
+<h2>🐛 Bugs & Endpoints Cassés</h2>
+
+<div class="card priority-critical">
+  <h4><span class="badge badge-error">CRITIQUE</span> Endpoints avec <code>pass</code> (stub vide)</h4>
+  <table>
+    <thead><tr><th>Fichier</th><th>Endpoint</th><th>Impact</th></tr></thead>
+    <tbody>
+      <tr><td>routes/assistant.py L88</td><td><code>POST /chat</code></td><td>Chat IA ne fait rien, retourne vide</td></tr>
+      <tr><td>routes/famille_jules.py L198</td><td><code>GET /jules/nutrition</code></td><td>Nutrition Jules silencieusement cassée</td></tr>
+      <tr><td>routes/preferences.py L389</td><td><code>PUT /preferences/...</code></td><td>Sauvegarde préférences échoue silencieusement</td></tr>
+      <tr><td>routes/preferences.py L394</td><td><code>PUT /preferences/...</code></td><td>Idem — 2 endpoints cassés</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card priority-critical">
+  <h4><span class="badge badge-error">CRITIQUE</span> Erreurs silencieuses (<code>except: pass</code>)</h4>
+  <table>
+    <thead><tr><th>Fichier</th><th>Ligne</th><th>Impact</th></tr></thead>
+    <tbody>
+      <tr><td>routes/dashboard.py</td><td>L765</td><td>Erreurs dashboard avalées — aucun feedback utilisateur</td></tr>
+      <tr><td>routes/dashboard.py</td><td>L1264</td><td>Idem — bugs masqués en production</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card priority-high">
+  <h4><span class="badge badge-warn">MOYEN</span> Code problématique</h4>
+  <table>
+    <thead><tr><th>Fichier</th><th>Issue</th></tr></thead>
+    <tbody>
+      <tr><td>models/jeux.py L361</td><td>Générateur de données factices en production — masque les vrais bugs</td></tr>
+      <tr><td>models/systeme.py</td><td>Nom de classe confus : <code>SauvegardeMoelleOsseuseDB</code></td></tr>
+      <tr><td>frontend/api/planning.ts L196</td><td>Méthode stub <code>harnessTablierMeteo()</code> non implémentée</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card priority-high">
+  <h4><span class="badge badge-warn">MOYEN</span> Tests batch cooking — tous skippés</h4>
+  <p style="font-size:0.83rem; color:var(--text2);">~15 tests dans <code>tests/services/batch_cooking/</code> marqués <code>pytest.skip()</code> — deadlock WebSocket avec TestClient. Aucune couverture batch cooking.</p>
+</div>
+</section>
+
+<!-- === GAPS === -->
+<section id="gaps">
+<h2>⚠️ Gaps & Manques Fonctionnels</h2>
+<div class="card-grid">
+  <div class="card priority-critical">
+    <h4>Chat IA non fonctionnel</h4>
+    <p style="font-size:0.82rem; color:var(--text2);">L'endpoint <code>/chat</code> contient un <code>pass</code>. Toute la page Chat IA côté frontend appelle un endpoint vide.</p>
+  </div>
+  <div class="card priority-critical">
+    <h4>Nutrition Jules incomplète</h4>
+    <p style="font-size:0.82rem; color:var(--text2);">L'endpoint nutrition Jules renvoie une réponse vide. L'adaptation des repas pour Jules (sans sel, mixé) n'est pas connectée au backend.</p>
+  </div>
+  <div class="card priority-high">
+    <h4>Préférences non sauvegardées</h4>
+    <p style="font-size:0.82rem; color:var(--text2);">2 endpoints PUT préférences ne font rien. Les préférences utilisateur s'affichent mais ne persistent pas.</p>
+  </div>
+  <div class="card priority-high">
+    <h4>Tests E2E minimaux</h4>
+    <p style="font-size:0.82rem; color:var(--text2);">Playwright configuré mais très peu de scénarios E2E écrits. Les flux critiques (login → planning → courses) ne sont pas testés bout en bout.</p>
+  </div>
+  <div class="card priority-medium">
+    <h4>Migration user_id incomplète</h4>
+    <p style="font-size:0.82rem; color:var(--text2);">V002 (VARCHAR→UUID) commentée. En dev les user_ids sont des strings "dev-user" au lieu d'UUIDs.</p>
+  </div>
+  <div class="card priority-low">
+    <h4>Service Worker (PWA) partiel</h4>
+    <p style="font-size:0.82rem; color:var(--text2);">Le composant d'enregistrement SW existe mais la couverture offline est partielle (principalement courses).</p>
+  </div>
+</div>
+</section>
+
+<!-- === CLEANUP === -->
+<section id="cleanup">
+<h2>🧹 Nettoyage à Faire</h2>
+
+<div class="card priority-critical">
+  <h4><span class="badge badge-error">150+</span> Commentaires phase/sprint dans le code</h4>
+  <p style="font-size:0.83rem; color:var(--text2);">Commentaires du type <code># Phase 3.2</code>, <code>// Sprint 8</code>, <code># phase 5</code> dispersés dans :</p>
+  <div class="tag-list" style="margin-top:0.5rem;">
+    <span class="tag">Backend Python (services, models, routes)</span>
+    <span class="tag">Frontend TypeScript (components, hooks, stores)</span>
+    <span class="tag">Fichiers SQL</span>
+  </div>
+  <p style="font-size:0.78rem; color:var(--text2); margin-top:0.5rem;"><strong>Action :</strong> Remplacer par des commentaires fonctionnels décrivant ce que fait le code.</p>
+</div>
+
+<div class="card priority-critical">
+  <h4><span class="badge badge-error">SUPPRIMER</span> Features deprecated toujours en code</h4>
+  <table>
+    <thead><tr><th>Feature</th><th>Localisation</th><th>Raison suppression</th></tr></thead>
+    <tbody>
+      <tr><td>OCR / Scan tickets</td><td>routes, services, schemas</td><td>Rejeté par l'utilisateur — trop contraignant</td></tr>
+      <tr><td>Intégration Vinted</td><td>schemas, services/achats_ia.py</td><td>Rejeté — pas pertinent pour budget alimentaire</td></tr>
+      <tr><td>Gamification familiale</td><td>models, routes, page frontend</td><td>Limité à Garmin/sport uniquement</td></tr>
+      <tr><td>Jeu responsable</td><td>Résidus dans jeux routes</td><td>Supprimé volontairement du scope</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card priority-high">
+  <h4><span class="badge badge-warn">RENOMMER</span> Fichiers/routes fourre-tout</h4>
+  <table>
+    <thead><tr><th>Actuel</th><th>Problème</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td><code>innovations*.py</code> (5 routeurs)</td><td>Nom non descriptif</td><td>Renommer selon le domaine réel ou fusionner</td></tr>
+      <tr><td><code>fonctionnalites_avancees.py</code></td><td>Fourre-tout, 16+ endpoints mélangés</td><td>Éclater dans les modules appropriés</td></tr>
+      <tr><td><code>ia_avancee.py</code></td><td>Redondant avec ia_modules.py et ia_bridges.py</td><td>Consolider en 1-2 fichiers IA</td></tr>
+      <tr><td><code>admin/whatsapp-test/</code></td><td>Nommé WhatsApp mais c'est Telegram</td><td>Renommer en <code>telegram-test/</code></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card priority-medium">
+  <h4><span class="badge badge-warn">SUPPRIMER</span> Données obsolètes</h4>
+  <table>
+    <thead><tr><th>Fichier</th><th>Raison</th></tr></thead>
+    <tbody>
+      <tr><td><code>data/reference/normes_oms.json</code></td><td>Courbes croissance OMS rejetées — garder uniquement vaccins/jalons</td></tr>
+      <tr><td><code>AUDIT_ET_PLAN_AMELIORATION.md</code></td><td>Doublon — archiver après implémentation</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card priority-low">
+  <h4><span class="badge badge-ok">CONSOLIDER</span> Pages frontend surdimensionnées</h4>
+  <table>
+    <thead><tr><th>Fichier</th><th>Lignes</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td><code>cuisine/courses/page.tsx</code></td><td>1200+</td><td>Extraire composants dans fichiers dédiés</td></tr>
+      <tr><td><code>maison/travaux/page.tsx</code></td><td>730+</td><td>Extraire onglets en composants</td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<!-- === SQL AUDIT === -->
+<section id="sql-audit">
+<h2>💾 Audit SQL</h2>
+<div class="card">
+  <h3>Structure actuelle (22 fichiers schema + INIT_COMPLET.sql)</h3>
+  <table>
+    <thead><tr><th>Fichier</th><th>Contenu</th><th>Statut</th></tr></thead>
+    <tbody>
+      <tr><td>01_extensions.sql</td><td>Extensions PostgreSQL</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>02_functions.sql</td><td>Fonctions trigger + helpers</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>03_systeme.sql</td><td>Tables système, auth, config</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>04_cuisine.sql</td><td>Cuisine (recettes, inventaire, courses, planning)</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>05_famille.sql</td><td>Famille (enfants, activités, budgets, santé)</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>06a-06e</td><td>Maison (projets, entretien, jardin, équipements, énergie)</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>07_habitat.sql</td><td>Habitat (pièces, meubles, diagnostics)</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>08_jeux.sql</td><td>Jeux (paris, loto, matchs)</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>09_notifications.sql</td><td>Historique notifications</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>10_finances.sql</td><td>Finances, calendriers, événements</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>11_utilitaires.sql</td><td>Notes, journal, contacts</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>12_triggers.sql</td><td>~60 triggers modifie_le</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>13_views.sql</td><td>Vues + indexes dupliqués</td><td><span class="badge badge-warn">⚠️ Duplication</span></td></tr>
+      <tr><td>14_indexes.sql</td><td>~50 indexes, duplication avec 13</td><td><span class="badge badge-warn">⚠️ Duplication</span></td></tr>
+      <tr><td>15_rls_policies.sql</td><td>Politiques RLS par table</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>16_seed_data.sql</td><td>Données de référence</td><td><span class="badge badge-ok">OK</span></td></tr>
+      <tr><td>17_migrations_absorbees.sql</td><td><strong>VIDE</strong></td><td><span class="badge badge-error">⚠️ Vide</span></td></tr>
+      <tr><td>99_footer.sql</td><td>COMMIT + version</td><td><span class="badge badge-ok">OK</span></td></tr>
+    </tbody>
+  </table>
+  <h3>Actions SQL recommandées</h3>
+  <ul class="clean">
+    <li><strong>Fusionner 13 + 14</strong> : Regrouper vues et indexes dans un seul fichier sans duplication</li>
+    <li><strong>Compléter ou supprimer fichier 17</strong> : Documenter les migrations absorbées ou supprimer</li>
+    <li><strong>Standardiser user_id</strong> : Résoudre le VARCHAR vs UUID (migration V002)</li>
+    <li><strong>Régénérer INIT_COMPLET.sql</strong> : Après nettoyage</li>
+  </ul>
+</div>
+</section>
+
+<!-- === TESTS AUDIT === -->
+<section id="tests-audit">
+<h2>🧪 Audit Tests</h2>
+<div class="card">
+  <h3>Couverture par module</h3>
+  <table>
+    <thead><tr><th>Module</th><th>Fichiers tests</th><th>Statut</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Core (config, cache, db, decorators)</td><td>18</td><td><span class="badge badge-ok">Bon</span></td><td>AI, cache, resilience bien couverts</td></tr>
+      <tr><td>API Routes</td><td>59</td><td><span class="badge badge-ok">Bon</span></td><td>Chaque routeur a ses tests</td></tr>
+      <tr><td>Services Cuisine</td><td>15+</td><td><span class="badge badge-ok">Bon</span></td><td>Recettes, planning, suggestions</td></tr>
+      <tr><td>Services Famille</td><td>10+</td><td><span class="badge badge-ok">Bon</span></td><td>Jules, activités, budget</td></tr>
+      <tr><td>Services Maison</td><td>15+</td><td><span class="badge badge-ok">Bon</span></td><td>Projets, entretien, jardin</td></tr>
+      <tr><td>Batch Cooking</td><td>~15</td><td><span class="badge badge-error">SKIPPÉ</span></td><td>Tous skip() — deadlock WebSocket/TestClient</td></tr>
+      <tr><td>Inter-modules</td><td>21+</td><td><span class="badge badge-ok">Bon</span></td><td>Bridges testés</td></tr>
+      <tr><td>Contrats OpenAPI</td><td>Existants</td><td><span class="badge badge-info">Base</span></td><td>Schemathesis validation contrat</td></tr>
+      <tr><td>E2E (Playwright)</td><td>Minimal</td><td><span class="badge badge-warn">Faible</span></td><td>Playwright configuré, peu de scénarios</td></tr>
+      <tr><td>Load/Perf</td><td>Existants</td><td><span class="badge badge-info">Base</span></td><td>Benchmarks basiques</td></tr>
+      <tr><td>SQL Cohérence</td><td>1</td><td><span class="badge badge-ok">Bon</span></td><td>Vérifie ORM ↔ SQL tables</td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<!-- === DOCS AUDIT === -->
+<section id="docs-audit">
+<h2>📚 Audit Documentation</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Catégorie</th><th>Fichiers</th><th>Statut</th></tr></thead>
+    <tbody>
+      <tr><td>Architecture & Patterns</td><td>ARCHITECTURE.md, PATTERNS.md, DATA_MODEL.md, ERD_SCHEMA.md</td><td><span class="badge badge-ok">À jour</span></td></tr>
+      <tr><td>API Reference</td><td>API_REFERENCE.md (200+ endpoints)</td><td><span class="badge badge-ok">À jour</span></td></tr>
+      <tr><td>Admin</td><td>ADMIN_GUIDE, ADMIN_MODE, ADMIN_QUICK_REFERENCE, ADMIN_RUNBOOK</td><td><span class="badge badge-ok">À jour</span></td></tr>
+      <tr><td>IA</td><td>AI_INTEGRATION_GUIDE.md, AI_SERVICES.md</td><td><span class="badge badge-ok">À jour</span></td></tr>
+      <tr><td>Automations</td><td>AUTOMATIONS.md, AUTOMATION_GUIDE.md, CRON_JOBS.md, CRON_DEVELOPMENT.md, EVENT_BUS.md</td><td><span class="badge badge-ok">À jour</span></td></tr>
+      <tr><td>Frontend</td><td>FRONTEND_ARCHITECTURE.md, DESIGN_SYSTEM.md, UI_COMPONENTS.md</td><td><span class="badge badge-ok">À jour</span></td></tr>
+      <tr><td>Deployment</td><td>DEPLOYMENT.md, DEVELOPER_SETUP.md, Docker config</td><td><span class="badge badge-ok">À jour</span></td></tr>
+      <tr><td>Modules</td><td>MODULES.md, INTER_MODULES.md, INTER_MODULES_MAP.md, HABITAT_MODULE.md</td><td><span class="badge badge-ok">À jour</span></td></tr>
+      <tr><td>Services</td><td>SERVICES_REFERENCE.md</td><td><span class="badge badge-warn">Refs potentiellement stale</span></td></tr>
+      <tr><td>Deprecated</td><td>DEPRECATED.md</td><td><span class="badge badge-ok">Précis</span></td></tr>
+      <tr><td>Tests</td><td>TESTING.md</td><td><span class="badge badge-ok">À jour</span></td></tr>
+      <tr><td>Guides user</td><td>docs/user-guide/ (FAQ, getting-started)</td><td><span class="badge badge-ok">À jour</span></td></tr>
+      <tr><td>Guides modules</td><td>docs/guides/ (8 sous-dossiers)</td><td><span class="badge badge-ok">À jour</span></td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+
+<hr class="sep">
+
+
+<!-- ╔═══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                  ÉVOLUTIONS IDENTIFIÉES                      ║ -->
+<!-- ╚═══════════════════════════════════════════════════════════════╝ -->
+
+<!-- === INTER-MODULES === -->
+<section id="inter-modules">
+<h2>🔗 Interactions Inter-Modules</h2>
+<div class="card">
+  <h3>Bridges existants (21+)</h3>
+  <table>
+    <thead><tr><th>Source</th><th>Destination</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td>🍽 Planning</td><td>🛒 Courses</td><td><span class="badge badge-ok">Actif</span></td><td>Génération automatique liste courses depuis planning</td></tr>
+      <tr><td>🍽 Recettes</td><td>📦 Inventaire</td><td><span class="badge badge-ok">Actif</span></td><td>Vérification stock avant planification</td></tr>
+      <tr><td>🍽 Recettes</td><td>👶 Jules</td><td><span class="badge badge-warn">Partiel</span></td><td>Adaptation recettes (endpoint stub)</td></tr>
+      <tr><td>📦 Inventaire</td><td>🗑️ Anti-gaspi</td><td><span class="badge badge-ok">Actif</span></td><td>Alertes péremption → recettes sauvetage</td></tr>
+      <tr><td>🌱 Jardin</td><td>🍽 Recettes</td><td><span class="badge badge-ok">Actif</span></td><td>Récoltes → recettes de saison</td></tr>
+      <tr><td>🏠 Entretien</td><td>🛒 Courses</td><td><span class="badge badge-ok">Actif</span></td><td>Produits ménagers nécessaires → liste courses</td></tr>
+      <tr><td>💰 Budget</td><td>🍽 Courses</td><td><span class="badge badge-ok">Actif</span></td><td>Estimation coût courses</td></tr>
+      <tr><td>📅 Calendrier</td><td>🍽 Planning</td><td><span class="badge badge-ok">Actif</span></td><td>Événements → adaptation planning repas</td></tr>
+      <tr><td>🌤️ Météo</td><td>🌱 Jardin</td><td><span class="badge badge-ok">Actif</span></td><td>Prévisions → alertes jardin</td></tr>
+      <tr><td>🏋️ Garmin</td><td>🍽 Nutrition</td><td><span class="badge badge-info">Base</span></td><td>Dépense calorique → suggestions repas</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Nouveaux bridges proposés</h3>
+  <table>
+    <thead><tr><th>Source</th><th>Destination</th><th>Bénéfice</th><th>Complexité</th></tr></thead>
+    <tbody>
+      <tr><td>🌱 Jardin</td><td>📦 Inventaire</td><td>Récoltes auto-ajoutées à l'inventaire</td><td><span class="badge badge-ok">Faible</span></td></tr>
+      <tr><td>🏠 Garanties</td><td>📄 Documents</td><td>Facture liée à l'équipement</td><td><span class="badge badge-ok">Faible</span></td></tr>
+      <tr><td>🍽 Batch cooking</td><td>📦 Inventaire</td><td>Prépas déduites de l'inventaire</td><td><span class="badge badge-info">Moyen</span></td></tr>
+      <tr><td>🌤️ Météo</td><td>🍽 Planning</td><td>Météo → suggestion BBQ / soupe</td><td><span class="badge badge-info">Moyen</span></td></tr>
+      <tr><td>🛒 Courses actuelles</td><td>💰 Budget</td><td>Estimation budget courses temps réel</td><td><span class="badge badge-info">Moyen</span></td></tr>
+      <tr><td>🏋️ Garmin activité</td><td>👶 Jules activités</td><td>Stats sport familiales</td><td><span class="badge badge-ok">Faible</span></td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<!-- === IA OPPORTUNITIES === -->
+<section id="ia-opportunities">
+<h2>🤖 Opportunités IA</h2>
+<div class="card">
+  <h3>IA déjà implémentée</h3>
+  <div class="tag-list">
+    <span class="badge badge-ok">Suggestions recettes</span>
+    <span class="badge badge-ok">Génération planning</span>
+    <span class="badge badge-ok">Weekend suggestions</span>
+    <span class="badge badge-ok">Anti-gaspillage recettes</span>
+    <span class="badge badge-ok">Estimation projets maison</span>
+    <span class="badge badge-ok">Prédictions paris/loto</span>
+    <span class="badge badge-ok">Anomalies énergie</span>
+    <span class="badge badge-ok">Eco-tips</span>
+    <span class="badge badge-ok">Diagnostic maison</span>
+    <span class="badge badge-warn">Chat IA (endpoint stub!)</span>
+  </div>
+
+  <h3>Nouvelles opportunités IA</h3>
+  <table>
+    <thead><tr><th>Domaine</th><th>Feature IA</th><th>Description</th><th>Impact</th></tr></thead>
+    <tbody>
+      <tr><td>🍽 Cuisine</td><td>Menu IA saisonnier intelligent</td><td>Croiser météo + saison + inventaire + historique pour planifier automatiquement</td><td><span class="badge badge-ok">Fort</span></td></tr>
+      <tr><td>🍽 Cuisine</td><td>Photo → Inventaire</td><td>Photo frigo → IA identifie les produits et met à jour l'inventaire</td><td><span class="badge badge-ok">Fort</span></td></tr>
+      <tr><td>👨‍👩‍👦 Famille</td><td>Résumé hebdo familial IA</td><td>Digest textuel de la semaine (repas, dépenses, activités, tâches)</td><td><span class="badge badge-ok">Fort</span></td></tr>
+      <tr><td>🏡 Maison</td><td>Prédiction pannes</td><td>Croiser âge appareil + historique pannes pour prédire maintenances</td><td><span class="badge badge-info">Moyen</span></td></tr>
+      <tr><td>🌱 Jardin</td><td>Identification plantes photo</td><td>Photo plante/maladie → diagnostic IA</td><td><span class="badge badge-info">Moyen</span></td></tr>
+      <tr><td>💰 Budget</td><td>Prévision dépenses mensuelles</td><td>IA prédit le budget fin de mois basé sur tendances</td><td><span class="badge badge-ok">Fort</span></td></tr>
+      <tr><td>📅 Planning</td><td>Suggestion journée optimale</td><td>IA arrange la journée (repas + tâches + activités)</td><td><span class="badge badge-info">Moyen</span></td></tr>
+      <tr><td>🏡 Maison</td><td>Comparateur auto abonnements</td><td>IA scrape offres et suggère changements (eau, élec, internet)</td><td><span class="badge badge-ok">Fort</span></td></tr>
+      <tr><td>📱 Telegram</td><td>Briefing matin proactif</td><td>IA compose message Telegram avec météo + repas + tâches + alertes</td><td><span class="badge badge-ok">Fort</span></td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<!-- === AUTOMATION === -->
+<section id="automation">
+<h2>⚡ Jobs Automatiques & CRON</h2>
+<div class="card">
+  <h3>68 jobs existants — APScheduler via lifespan API</h3>
+
+  <h3>Nouveaux jobs recommandés</h3>
+  <table>
+    <thead><tr><th>Job</th><th>Fréquence</th><th>Description</th><th>Module</th></tr></thead>
+    <tbody>
+      <tr><td>Briefing matin Telegram</td><td>Quotidien 7h</td><td>Message Telegram avec météo + repas + tâches + alertes</td><td>Global</td></tr>
+      <tr><td>Rappel courses</td><td>Hebdo (vendredi 17h)</td><td>Si liste courses non vide, envoyer rappel Telegram</td><td>Courses</td></tr>
+      <tr><td>Digest hebdo famille</td><td>Dimanche 20h</td><td>Résumé IA de la semaine envoyé par email/Telegram</td><td>Famille</td></tr>
+      <tr><td>Vérif péremptions</td><td>Quotidien 9h</td><td>Scanner inventaire, alerter produits &lt;3 jours</td><td>Inventaire</td></tr>
+      <tr><td>Sync calendrier</td><td>Toutes les 6h</td><td>Synchroniser Google Calendar ↔ calendrier interne</td><td>Calendrier</td></tr>
+      <tr><td>MAJ données DVF</td><td>Mensuel</td><td>Rafraîchir données marché immobilier</td><td>Habitat</td></tr>
+      <tr><td>Auto-archivage notes</td><td>Mensuel</td><td>Archiver notes anciennes non modifiées</td><td>Outils</td></tr>
+      <tr><td>Nettoyage cache</td><td>Hebdo</td><td>Purger L3 cache expiré</td><td>Infra</td></tr>
+      <tr><td>Stats jardin saison</td><td>Hebdo</td><td>Bilan récoltes semaine + suggestions plantation</td><td>Jardin</td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<!-- === TELEGRAM === -->
+<section id="telegram-plan">
+<h2>📱 Telegram, Email & Notifications</h2>
+<div class="card">
+  <h3>Canal Telegram existant</h3>
+  <ul class="clean">
+    <li>Bot Telegram configuré avec webhooks</li>
+    <li>Boutons interactifs</li>
+    <li>Envoi recettes avec ingrédients</li>
+    <li>Notifications push</li>
+  </ul>
+
+  <h3>Améliorations Telegram proposées</h3>
+  <table>
+    <thead><tr><th>Feature</th><th>Description</th><th>Interaction</th></tr></thead>
+    <tbody>
+      <tr><td>Briefing matin</td><td>Météo + repas jour + tâches urgentes + compteur courses</td><td>Boutons: "Voir planning" / "Modifier repas"</td></tr>
+      <tr><td>Alerte péremption</td><td>"🥛 Lait expire demain ! Suggestion: crêpes"</td><td>Boutons: "Voir recette" / "Ajouter courses" / "Ignorer"</td></tr>
+      <tr><td>Rappel routine soir</td><td>"🌙 N'oublie pas: bain Jules + préparer sac école"</td><td>Boutons: "Fait ✅" / "Reporter"</td></tr>
+      <tr><td>Résultat pari</td><td>"⚽ PSG-OM terminé 2-1 — pari [gagné/perdu]"</td><td>Bouton: "Voir stats"</td></tr>
+      <tr><td>Rappel arrosage jardin</td><td>"🌱 Pas de pluie prévue demain, penser à arroser"</td><td>Bouton: "Fait ✅"</td></tr>
+      <tr><td>Suggestion weekend</td><td>"🎯 Idée sortie: Zoo de Vincennes (météo ☀️ 22°)"</td><td>Boutons: "Réserver" / "Autre idée"</td></tr>
+      <tr><td>Ask & Answer rapide</td><td>Envoyer question libre → IA répond en contexte</td><td>Réponse texte + boutons actions</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Email (en complément)</h3>
+  <ul class="clean">
+    <li>Digest hebdo familial (résumé semaine + stats)</li>
+    <li>Export PDF courses/planning par email</li>
+    <li>Alertes sécurité (connexion, changement mot de passe)</li>
+    <li>Récapitulatif mensuel budget</li>
+  </ul>
+</div>
+</section>
+
+<!-- === ADMIN === -->
+<section id="admin-improvements">
+<h2>🎛️ Mode Admin — Améliorations</h2>
+<div class="card">
+  <h3>Existant</h3>
+  <ul class="clean">
+    <li>Panneau admin flottant (frontend)</li>
+    <li>51 routes admin documentées</li>
+    <li>Exécution manuelle CRON jobs via API</li>
+    <li>WebSocket admin logs temps réel</li>
+  </ul>
+
+  <h3>Améliorations proposées</h3>
+  <table>
+    <thead><tr><th>Feature</th><th>Description</th><th>But</th></tr></thead>
+    <tbody>
+      <tr><td>Bouton "Lancer job" par module</td><td>Bouton pour chaque job CRON dans panneau admin</td><td>Tester les automations à la demande</td></tr>
+      <tr><td>Mode simulation</td><td>Exécuter un job sans persister les résultats</td><td>Vérifier avant exécution réelle</td></tr>
+      <tr><td>Trigger Telegram test</td><td>Message Telegram de test depuis l'admin</td><td>Débugger les notifications</td></tr>
+      <tr><td>Forcer sync externes</td><td>Boutons: Sync Garmin / Calendrier / Refresh météo</td><td>Mettre à jour sans attendre le CRON</td></tr>
+      <tr><td>Console IA test</td><td>Prompt IA → réponse brute</td><td>Tester les prompts et le parsing</td></tr>
+      <tr><td>Seed data rapide</td><td>Remplir rapidement un module vide</td><td>Demo / test</td></tr>
+      <tr><td>Purge cache sélective</td><td>Invalider le cache d'un module spécifique</td><td>Forcer le refresh</td></tr>
+      <tr><td>Export logs filtré</td><td>Logs filtrés par module/date</td><td>Debug production</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.78rem; color:var(--text2); margin-top:0.5rem;">
+    <strong>Important :</strong> Tout admin reste invisible pour l'utilisateur final. Panneau activable uniquement avec rôle admin + raccourci clavier.
+  </p>
+</div>
+</section>
+
+<!-- === UI/UX === -->
+<section id="ui-plan">
+<h2>🎨 Améliorations UI/UX</h2>
+<div class="card">
+  <h3>Points forts actuels</h3>
+  <div class="tag-list">
+    <span class="badge badge-ok">shadcn/ui + Tailwind v4</span>
+    <span class="badge badge-ok">Dark/Light mode</span>
+    <span class="badge badge-ok">Responsive mobile</span>
+    <span class="badge badge-ok">Framer Motion animations</span>
+    <span class="badge badge-ok">3D Three.js (plans maison)</span>
+    <span class="badge badge-ok">Recharts + D3 graphiques</span>
+    <span class="badge badge-ok">Leaflet maps</span>
+    <span class="badge badge-ok">Command palette (Cmd+K)</span>
+    <span class="badge badge-ok">Drag-and-drop widgets dashboard</span>
+    <span class="badge badge-ok">PWA installable</span>
+  </div>
+
+  <h3>Améliorations visuelles proposées</h3>
+  <table>
+    <thead><tr><th>Zone</th><th>Amélioration</th><th>Technologie</th><th>Impact UX</th></tr></thead>
+    <tbody>
+      <tr><td>Dashboard</td><td>Widgets animés avec sparklines et micro-interactions</td><td>Framer Motion + Recharts</td><td><span class="badge badge-ok">Fort</span></td></tr>
+      <tr><td>Planning</td><td>Calendar drag-and-drop (glisser recettes sur les jours)</td><td>@dnd-kit</td><td><span class="badge badge-ok">Fort</span></td></tr>
+      <tr><td>Courses</td><td>Swipe-to-check sur mobile (à polir)</td><td>Framer Motion gestures</td><td><span class="badge badge-info">Moyen</span></td></tr>
+      <tr><td>Jardin</td><td>Vue top-down interactive avec zones cliquables</td><td>SVG + D3 / Canvas</td><td><span class="badge badge-ok">Fort</span></td></tr>
+      <tr><td>Budget</td><td>Graphe Sankey interactif avec drill-down</td><td>D3 Sankey (enrichir)</td><td><span class="badge badge-info">Moyen</span></td></tr>
+      <tr><td>Recettes</td><td>Mode cuisine step-by-step plein écran + voix</td><td>Fullscreen API + Speech</td><td><span class="badge badge-ok">Fort</span></td></tr>
+      <tr><td>Maison 3D</td><td>Navigation pièce par pièce avec équipements cliquables</td><td>Three.js + @react-three</td><td><span class="badge badge-info">Moyen</span></td></tr>
+      <tr><td>Jules</td><td>Timeline verticale illustrée (jalons avec icônes)</td><td>Framer Motion timeline</td><td><span class="badge badge-ok">Fort</span></td></tr>
+      <tr><td>Global</td><td>Transitions de page fluides (shared layout)</td><td>Framer Motion layout</td><td><span class="badge badge-info">Moyen</span></td></tr>
+      <tr><td>Global</td><td>Skeleton loading cohérent sur toutes les pages</td><td>shadcn/ui Skeleton</td><td><span class="badge badge-info">Moyen</span></td></tr>
+      <tr><td>Mobile</td><td>Bottom sheet natif pour les actions</td><td>Sheet shadcn amélioré</td><td><span class="badge badge-ok">Fort</span></td></tr>
+      <tr><td>Tablette</td><td>Layout split-view (liste + détail côte à côte)</td><td>CSS Grid responsive</td><td><span class="badge badge-ok">Fort</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Simplification flux utilisateur</h3>
+  <table>
+    <thead><tr><th>Flux actuel</th><th>Problème</th><th>Proposition</th></tr></thead>
+    <tbody>
+      <tr><td>Planifier semaine</td><td>Trop d'étapes entre suggestion IA et validation</td><td>Suggestion → Preview → Valider en 3 clics max</td></tr>
+      <tr><td>Ajouter recette</td><td>Formulaire long (15+ champs)</td><td>Mode rapide (nom + ingrédients) + mode détaillé</td></tr>
+      <tr><td>Créer liste courses</td><td>Clic "Générer" puis "Trier" puis "Exporter"</td><td>Tout en une seule action avec confirmation</td></tr>
+      <tr><td>Ajouter dépense budget</td><td>Naviguer vers module budget</td><td>Quick-add depuis n'importe quel module</td></tr>
+      <tr><td>Marquer tâche faite</td><td>Ouvrir le module, trouver la tâche</td><td>Swipe sur notification ou bouton Telegram</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.8rem; color:var(--text2); margin-top:0.5rem;">
+    <strong>Principe :</strong> Maximum 3 clics pour une action courante. L'utilisateur pilote, valide ce qui est nécessaire, mais le flux est minimal.
+  </p>
+</div>
+</section>
+
+<!-- === LEGACY REMOVAL === -->
+<section id="legacy-removal">
+<h2>🗑️ Suppression Legacy & Rétrocompatibilité</h2>
+<div class="card">
+  <table>
+    <thead><tr><th>Élément</th><th>Type</th><th>Localisation</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td>Commentaires <code># Phase X</code>, <code>// Sprint N</code></td><td>Commentaires</td><td>Backend + Frontend + SQL (~150)</td><td>Supprimer ou remplacer</td></tr>
+      <tr><td>Routes <code>innovations*.py</code> (5 fichiers)</td><td>Routes fourre-tout</td><td>src/api/routes/</td><td>Éclater dans modules métier</td></tr>
+      <tr><td>Route <code>fonctionnalites_avancees.py</code></td><td>Route fourre-tout</td><td>src/api/routes/</td><td>Éclater dans modules métier</td></tr>
+      <tr><td>Schéma <code>fonctionnalites_avancees.py</code></td><td>Schéma fourre-tout</td><td>src/api/schemas/</td><td>Éclater dans schémas domaine</td></tr>
+      <tr><td>OCR / Scan tickets (résiduel)</td><td>Feature rejetée</td><td>Routes, services, schemas</td><td>Supprimer complètement</td></tr>
+      <tr><td>Intégration Vinted (résiduel)</td><td>Feature rejetée</td><td>Services, schemas</td><td>Supprimer complètement</td></tr>
+      <tr><td>Gamification familiale (hors Garmin)</td><td>Feature restreinte</td><td>Models, routes, page frontend</td><td>Garder Garmin/sport, supprimer reste</td></tr>
+      <tr><td>Jeu responsable (résidus)</td><td>Feature supprimée</td><td>Routes jeux</td><td>Supprimer les résidus</td></tr>
+      <tr><td><code>normes_oms.json</code></td><td>Données rejetées</td><td>data/reference/</td><td>Supprimer</td></tr>
+      <tr><td><code>AUDIT_ET_PLAN_AMELIORATION.md</code></td><td>Doc historique</td><td>Racine</td><td>Archiver</td></tr>
+      <tr><td><code>admin/whatsapp-test/</code></td><td>Nom incorrect</td><td>Frontend pages</td><td>Renommer en telegram-test/</td></tr>
+      <tr><td>Migration V002 commentée</td><td>SQL incomplet</td><td>sql/</td><td>Compléter ou documenter</td></tr>
+      <tr><td>Fichier 17_migrations_absorbees.sql</td><td>Fichier vide</td><td>sql/schema/</td><td>Compléter ou supprimer</td></tr>
+      <tr><td>Index dupliqués 13/14</td><td>Duplication SQL</td><td>sql/schema/</td><td>Fusionner</td></tr>
+    </tbody>
+  </table>
+</div>
+</section>
+
+<!-- === INNOVATIONS === -->
+<section id="innovations">
+<h2>💡 Axes d'Innovation Supplémentaires</h2>
+<div class="card">
+  <h3>Innovations techniques</h3>
+  <div class="card-grid">
+    <div class="card-sm">
+      <strong>🔄 Sync offline avancée</strong>
+      <p style="font-size:0.78rem; color:var(--text2)">Étendre le mode offline au-delà des courses : planning, notes, tâches ménage disponibles hors-ligne et sync au retour.</p>
+    </div>
+    <div class="card-sm">
+      <strong>📊 Analytics embarqués</strong>
+      <p style="font-size:0.78rem; color:var(--text2)">Tableau comparatif : ce mois vs mois dernier pour chaque module (repas, dépenses, tâches complétées, etc.)</p>
+    </div>
+    <div class="card-sm">
+      <strong>🎯 Scoring foyer unifié</strong>
+      <p style="font-size:0.78rem; color:var(--text2)">Score composite unique : nutrition + budget + entretien + activités. Affiché en dashboard. Pas de gamification, juste un indicateur.</p>
+    </div>
+  </div>
+
+  <h3>Innovations fonctionnelles</h3>
+  <div class="card-grid">
+    <div class="card-sm">
+      <strong>📸 Photo → Action</strong>
+      <p style="font-size:0.78rem; color:var(--text2)">Photo frigo → inventaire auto. Photo plante → diagnostic. Photo document → archivage. Un seul geste, l'IA fait le reste.</p>
+    </div>
+    <div class="card-sm">
+      <strong>📅 Planning adaptatif</strong>
+      <p style="font-size:0.78rem; color:var(--text2)">Le planning se réajuste si un repas est sauté, un événement annulé ou la météo change. L'utilisateur valide.</p>
+    </div>
+    <div class="card-sm">
+      <strong>🔔 Notifications contextuelles</strong>
+      <p style="font-size:0.78rem; color:var(--text2)">Adapter le message au moment : "Il est 17h, on lance les pâtes ?" plutôt que "Rappel : dîner".</p>
+    </div>
+    <div class="card-sm">
+      <strong>📱 Widget Quick-Actions</strong>
+      <p style="font-size:0.78rem; color:var(--text2)">Widget tablette avec les 5 actions les plus fréquentes, apprises par l'usage.</p>
+    </div>
+    <div class="card-sm">
+      <strong>🏪 Intégration Drive/Click & Collect</strong>
+      <p style="font-size:0.78rem; color:var(--text2)">Étendre sync Carrefour Drive : auto-remplir le panier en ligne depuis la liste validée.</p>
+    </div>
+    <div class="card-sm">
+      <strong>🗓️ Vue calendrier unifié</strong>
+      <p style="font-size:0.78rem; color:var(--text2)">Un seul calendrier montrant : repas + activités + tâches entretien + RDV + alertes. Vue mois/semaine/jour.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+
+<hr class="sep">
+
+
+<!-- ╔═══════════════════════════════════════════════════════════════════╗ -->
+<!-- ║             PLAN D'IMPLÉMENTATION — 7 PHASES                    ║ -->
+<!-- ╚═══════════════════════════════════════════════════════════════════╝ -->
+
+<!-- ══════════════ PHASE 1 ══════════════ -->
+<section id="phase1">
+<div class="phase-header priority-critical" style="border-left: 4px solid var(--green);">
+  <div class="phase-number" style="color: var(--green);">✓</div>
+  <div class="phase-info">
+    <h3>Corrections Critiques — <span style="color: var(--green);">Terminée</span></h3>
+    <p>Corriger les bugs bloquants, endpoints cassés et failles de sécurité qui impactent directement les utilisateurs.</p>
+    <div class="phase-tags">
+      <span class="badge badge-ok">4/4 tâches terminées</span>
+      <span class="badge badge-ok">Terminée</span>
+      <span class="badge badge-info">Backend</span>
+    </div>
+  </div>
+</div>
+
+<div class="plan-item" style="background: var(--bg2); border-left: 3px solid var(--green);">
+  <span class="title">✅ 1.1 — Corriger 4 endpoints <code>pass</code> (chat IA, nutrition Jules, 2x préférences)</span>
+  <span class="meta">
+    <span class="badge badge-ok">Terminée</span>
+  </span>
+</div>
+<div class="card" style="margin-left: 1rem; border-left: 3px solid var(--green);">
+  <ul class="checklist">
+    <li><span class="check done"></span><code>POST /chat</code> — Déjà implémenté (appel Mistral + contexte cross-module, L432-540 assistant.py)</li>
+    <li><span class="check done"></span><code>GET /jules/nutrition</code> — Nouveau endpoint créé dans famille_jules.py avec service JulesNutritionInteractionService</li>
+    <li><span class="check done"></span><code>PUT /preferences/...</code> — Déjà implémenté avec persistance DB via session</li>
+  </ul>
+</div>
+
+<div class="plan-item" style="background: var(--bg2); border-left: 3px solid var(--green);">
+  <span class="title">✅ 1.2 — Supprimer les <code>except: pass</code> dans dashboard.py + batch_cooking.py</span>
+  <span class="meta">
+    <span class="badge badge-ok">Terminée</span>
+  </span>
+</div>
+<div class="card" style="margin-left: 1rem; border-left: 3px solid var(--green); display: none;">
+  <ul class="checklist">
+    <li><span class="check done"></span>dashboard.py — Déjà corrigé (logger.debug en place)</li>
+    <li><span class="check done"></span>batch_cooking.py L312 — Ajout logging au lieu de <code>except Exception: pass</code></li>
+  </ul>
+</div>
+
+<div class="plan-item" style="background: var(--bg2); border-left: 3px solid var(--green);">
+  <span class="title">✅ 1.3 — Supprimer le générateur de données factices (models/jeux.py L361)</span>
+  <span class="meta">
+    <span class="badge badge-ok">Terminée</span>
+  </span>
+</div>
+<div class="card" style="margin-left: 1rem; border-left: 3px solid var(--green); display: none;">
+  <ul class="checklist">
+    <li><span class="check done"></span>Event listener <code>@event.listens_for(PariSportif, "before_insert")</code> supprimé de jeux.py</li>
+    <li><span class="check done"></span>Imports inutilisés nettoyés (<code>os</code>, <code>event</code>, <code>select</code>)</li>
+    <li><span class="check done"></span>Fixtures de test créées dans <code>tests/services/jeux/conftest.py</code> (helper <code>creer_match_test</code>)</li>
+    <li><span class="check done"></span>4 tests d'intégration mis à jour pour créer les Match/Equipe avant insertion PariSportif</li>
+  </ul>
+</div>
+
+<div class="plan-item" style="background: var(--bg2); border-left: 3px solid var(--green);">
+  <span class="title">✅ 1.4 — Corriger tests batch cooking (résoudre deadlock WebSocket)</span>
+  <span class="meta">
+    <span class="badge badge-ok">Terminée</span>
+  </span>
+</div>
+<div class="card" style="margin-left: 1rem; border-left: 3px solid var(--green); display: none;">
+  <ul class="checklist">
+    <li><span class="check done"></span>45/45 tests batch cooking passent (aucun skip)</li>
+    <li><span class="check done"></span>Problème de deadlock WebSocket déjà résolu dans un sprint précédent</li>
+  </ul>
+</div>
+
+<!-- Sprint log Phase 1 -->
+<div class="card" style="margin-top: 1rem; border-left: 3px solid var(--green);">
+  <h4 style="color: var(--green);">📋 Journal Phase 1 — Implémenté le 7 juillet 2025</h4>
+  <p style="font-size: 0.82rem; color: var(--text2); margin-bottom: 0.5rem;">Constat : la majorité des tâches 1.1 et 1.4 étaient déjà corrigées lors de sprints antérieurs.</p>
+  <table style="font-size: 0.8rem; width: 100%;">
+    <thead><tr><th>Tâche</th><th>Action</th><th>Fichiers modifiés</th></tr></thead>
+    <tbody>
+      <tr><td>1.1 POST /chat</td><td>Déjà implémenté — aucune action</td><td>—</td></tr>
+      <tr><td>1.1 GET /jules/nutrition</td><td>Endpoint créé</td><td>src/api/routes/famille_jules.py</td></tr>
+      <tr><td>1.1 PUT /preferences</td><td>Déjà implémenté — aucune action</td><td>—</td></tr>
+      <tr><td>1.2 except:pass dashboard</td><td>Déjà corrigé (logger.debug) — aucune action</td><td>—</td></tr>
+      <tr><td>1.2 except:pass batch_cooking</td><td>Ajout logging</td><td>src/api/routes/batch_cooking.py</td></tr>
+      <tr><td>1.3 Fake data jeux</td><td>Listener supprimé + tests adaptés</td><td>src/core/models/jeux.py, tests/services/jeux/conftest.py, tests/services/jeux/test_stats_personnelles.py</td></tr>
+      <tr><td>1.4 Tests batch cooking</td><td>Déjà 45/45 OK — aucune action</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size: 0.8rem; margin-top: 0.5rem;"><strong>Tests validés :</strong> 27/27 jeux ✅ — 45/45 batch cooking ✅</p>
+</div>
+</section>
+
+
+<!-- ══════════════ PHASE 2 ══════════════ -->
+<section id="phase2">
+<div class="phase-header priority-high">
+  <div class="phase-number" style="color: var(--orange);">2</div>
+  <div class="phase-info">
+    <h3>Nettoyage & Organisation du Code</h3>
+    <p>Supprimer le code legacy, nettoyer les commentaires de phase/sprint, réorganiser les fichiers fourre-tout.</p>
+    <div class="phase-tags">
+      <span class="badge badge-warn">8 tâches</span>
+      <span class="badge badge-ok">6 clôturées</span>
+      <span class="badge badge-info">Sprint MAJ · 04/04/2026</span>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top: 0.75rem; border-left: 4px solid var(--green);">
+  <h4>✅ Statut sprint — Phase 2</h4>
+  <div class="progress-container">
+    <span class="progress-label">Avancement</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 70%; background: linear-gradient(90deg, var(--orange), var(--green));"></div></div>
+    <span class="progress-label">70%</span>
+  </div>
+  <ul class="checklist" style="margin-top: 0.75rem;">
+    <li><span class="check done"></span> `innovations_*.py` déjà éclatés et agrégés via `src/api/routes/innovations.py`</li>
+    <li><span class="check done"></span> `fonctionnalites_avancees` remplacé côté routes par l’agrégateur d’innovations</li>
+    <li><span class="check done"></span> Nettoyage des reliquats de commentaires phase/sprint dans le code actif restant</li>
+    <li><span class="check done"></span> Route admin renommée en `telegram-test`</li>
+    <li><span class="check done"></span> Nommage frontend IA harmonisé en kebab-case (`ia-avancee`)</li>
+    <li><span class="check done"></span> `data/reference/normes_oms.json` supprimé du référentiel actif</li>
+    <li><span class="check done"></span> Consolidation SQL validée (`13_views.sql`, `17_migrations_absorbees.sql`, audit ORM↔SQL)</li>
+    <li><span class="check"></span> Nettoyage legacy profond OCR / pages surdimensionnées encore à finaliser</li>
+  </ul>
+</div>
+
+<div class="plan-item priority-high">
+  <span class="title">2.1 — Supprimer 150+ commentaires phase/sprint dans tout le codebase</span>
+  <span class="meta">
+    <span class="effort">~3h</span>
+    <span class="badge badge-warn">Important</span>
+  </span>
+</div>
+<div class="card" style="margin-left: 1rem; border-left: 3px solid var(--orange);">
+  <p style="font-size: 0.82rem; color: var(--text2);">Rechercher <code># Phase</code>, <code>// Sprint</code>, <code># phase</code>, <code>// Phase</code> dans backend Python, frontend TypeScript et fichiers SQL. Remplacer par des commentaires fonctionnels ou supprimer.</p>
+</div>
+
+<div class="plan-item priority-high">
+  <span class="title">2.2 — Supprimer code OCR / Vinted / gamification familiale / jeu responsable</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-warn">Important</span>
+  </span>
+</div>
+
+<div class="plan-item priority-high">
+  <span class="title">2.3 — Éclater innovations*.py (5 fichiers) dans les modules métier</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-warn">Important</span>
+  </span>
+</div>
+
+<div class="plan-item priority-high">
+  <span class="title">2.4 — Éclater fonctionnalites_avancees.py (route + schéma) dans les modules</span>
+  <span class="meta">
+    <span class="effort">~3h</span>
+    <span class="badge badge-warn">Important</span>
+  </span>
+</div>
+
+<div class="plan-item priority-high">
+  <span class="title">2.5 — Renommer admin/whatsapp-test/ → telegram-test/</span>
+  <span class="meta">
+    <span class="effort">~15min</span>
+    <span class="badge badge-ok">Rapide</span>
+  </span>
+</div>
+
+<div class="plan-item priority-high">
+  <span class="title">2.6 — Supprimer data/reference/normes_oms.json</span>
+  <span class="meta">
+    <span class="effort">~5min</span>
+    <span class="badge badge-ok">Rapide</span>
+  </span>
+</div>
+
+<div class="plan-item priority-high">
+  <span class="title">2.7 — Fusionner SQL 13/14 (indexes dupliqués) + compléter/supprimer fichier 17</span>
+  <span class="meta">
+    <span class="effort">~2h</span>
+    <span class="badge badge-warn">Important</span>
+  </span>
+</div>
+
+<div class="plan-item priority-high">
+  <span class="title">2.8 — Extraire composants des pages surdimensionnées (courses 1200+, travaux 730+)</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-warn">Moyen</span>
+  </span>
+</div>
+</section>
+
+
+<!-- ══════════════ PHASE 3 ══════════════ -->
+<section id="phase3">
+<div class="phase-header priority-medium">
+  <div class="phase-number" style="color: var(--yellow);">3</div>
+  <div class="phase-info">
+    <h3>Tests & Documentation</h3>
+    <p>Compléter la couverture de tests, ajouter les scénarios E2E critiques, mettre à jour la documentation.</p>
+    <div class="phase-tags">
+      <span class="badge badge-warn">5 tâches</span>
+      <span class="badge badge-warn">Haute priorité</span>
+      <span class="badge badge-info">Tests + Docs</span>
+    </div>
+  </div>
+</div>
+
+<div class="plan-item priority-medium">
+  <span class="title">3.1 — Ajouter tests E2E critiques (login → dashboard → planning → courses → inventaire)</span>
+  <span class="meta">
+    <span class="effort">~6h</span>
+    <span class="badge badge-warn">Important</span>
+  </span>
+</div>
+
+<div class="plan-item priority-medium">
+  <span class="title">3.2 — Tester que les endpoints corrigés (Phase 1) ne régressent plus</span>
+  <span class="meta">
+    <span class="effort">~2h</span>
+    <span class="badge badge-warn">Important</span>
+  </span>
+</div>
+
+<div class="plan-item priority-medium">
+  <span class="title">3.3 — Mettre à jour SERVICES_REFERENCE.md (vérifier tous services listés)</span>
+  <span class="meta">
+    <span class="effort">~2h</span>
+    <span class="badge badge-info">Moyen</span>
+  </span>
+</div>
+
+<div class="plan-item priority-medium">
+  <span class="title">3.4 — Nettoyer CHANGELOG.md des références phases/sprints</span>
+  <span class="meta">
+    <span class="effort">~1h</span>
+    <span class="badge badge-info">Moyen</span>
+  </span>
+</div>
+
+<div class="plan-item priority-medium">
+  <span class="title">3.5 — Vérifier cohérence ORM ↔ SQL pour les ~130 tables</span>
+  <span class="meta">
+    <span class="effort">~3h</span>
+    <span class="badge badge-info">Moyen</span>
+  </span>
+</div>
+</section>
+
+
+<!-- ══════════════ PHASE 4 ══════════════ -->
+<section id="phase4">
+<div class="phase-header priority-low">
+  <div class="phase-number" style="color: var(--green);">4</div>
+  <div class="phase-info">
+    <h3>Interactions Inter-Modules</h3>
+    <p>Ajouter les nouveaux bridges entre modules pour enrichir l'écosystème et automatiser les flux.</p>
+    <div class="phase-tags">
+      <span class="badge badge-ok">4 tâches</span>
+      <span class="badge badge-info">Moyen</span>
+      <span class="badge badge-info">Backend + Services</span>
+    </div>
+  </div>
+</div>
+
+<div class="plan-item priority-low">
+  <span class="title">4.1 — Bridge Jardin → Inventaire (récoltes auto-ajoutées)</span>
+  <span class="meta">
+    <span class="effort">~2h</span>
+    <span class="badge badge-ok">Faible</span>
+  </span>
+</div>
+
+<div class="plan-item priority-low">
+  <span class="title">4.2 — Bridge Garanties → Documents (lien facture à l'équipement)</span>
+  <span class="meta">
+    <span class="effort">~2h</span>
+    <span class="badge badge-ok">Faible</span>
+  </span>
+</div>
+
+<div class="plan-item priority-low">
+  <span class="title">4.3 — Bridge Batch cooking → Inventaire (prépas déduites du stock)</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-info">Moyen</span>
+  </span>
+</div>
+
+<div class="plan-item priority-low">
+  <span class="title">4.4 — Bridge Météo → Planning repas (BBQ si beau temps, soupe si froid)</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-info">Moyen</span>
+  </span>
+</div>
+</section>
+
+
+<!-- ══════════════ PHASE 5 ══════════════ -->
+<section id="phase5">
+<div class="phase-header priority-evolution">
+  <div class="phase-number" style="color: var(--accent);">5</div>
+  <div class="phase-info">
+    <h3>IA & Automatisations</h3>
+    <p>Implémenter les nouvelles features IA, les CRON jobs intelligents, et les notifications Telegram proactives.</p>
+    <div class="phase-tags">
+      <span class="badge badge-purple">8 tâches</span>
+      <span class="badge badge-info">Moyen</span>
+      <span class="badge badge-purple">IA + Telegram + Jobs</span>
+    </div>
+  </div>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">5.1 — Implémenter le vrai Chat IA (endpoint assistant.py avec Mistral streaming)</span>
+  <span class="meta">
+    <span class="effort">~6h</span>
+    <span class="badge badge-purple">IA</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">5.2 — Briefing matin Telegram (météo + repas + tâches + alertes du jour)</span>
+  <span class="meta">
+    <span class="effort">~6h</span>
+    <span class="badge badge-purple">IA+Telegram</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">5.3 — Digest hebdo familial IA (résumé de la semaine)</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-purple">IA</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">5.4 — Photo frigo → MAJ inventaire IA (multimodal Mistral)</span>
+  <span class="meta">
+    <span class="effort">~8h</span>
+    <span class="badge badge-purple">IA</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">5.5 — Prédiction budget fin de mois (IA tendances)</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-purple">IA</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">5.6 — Planning adaptatif (réajustement auto si repas sauté / météo change)</span>
+  <span class="meta">
+    <span class="effort">~6h</span>
+    <span class="badge badge-purple">IA</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">5.7 — Notifications contextuelles intelligentes ("Il est 17h, on lance les pâtes ?")</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-purple">IA+Telegram</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">5.8 — Nouveaux CRON jobs (9 jobs proposés : rappel courses, vérif péremptions, etc.)</span>
+  <span class="meta">
+    <span class="effort">~6h</span>
+    <span class="badge badge-info">Jobs</span>
+  </span>
+</div>
+</section>
+
+
+<!-- ══════════════ PHASE 6 ══════════════ -->
+<section id="phase6">
+<div class="phase-header priority-evolution">
+  <div class="phase-number" style="color: var(--accent2);">6</div>
+  <div class="phase-info">
+    <h3>UI/UX & Modernisation</h3>
+    <p>Améliorer l'interface, simplifier les flux utilisateur, ajouter des animations et des vues interactives.</p>
+    <div class="phase-tags">
+      <span class="badge badge-purple">9 tâches</span>
+      <span class="badge badge-purple">Évolution</span>
+      <span class="badge badge-pink">Frontend</span>
+    </div>
+  </div>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">6.1 — Dashboard widgets animés + sparklines + micro-interactions</span>
+  <span class="meta">
+    <span class="effort">~6h</span>
+    <span class="badge badge-pink">UI</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">6.2 — Planning drag-and-drop recettes (@dnd-kit)</span>
+  <span class="meta">
+    <span class="effort">~8h</span>
+    <span class="badge badge-pink">UI</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">6.3 — Mode cuisine step-by-step plein écran (Fullscreen + Speech)</span>
+  <span class="meta">
+    <span class="effort">~6h</span>
+    <span class="badge badge-pink">UI</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">6.4 — Jardin vue top-down interactive (SVG + D3)</span>
+  <span class="meta">
+    <span class="effort">~6h</span>
+    <span class="badge badge-pink">UI</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">6.5 — Timeline Jules illustrée (jalons avec icônes, Framer Motion)</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-pink">UI</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">6.6 — Bottom sheets mobiles (remplacement dialogs)</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-pink">UI</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">6.7 — Layout split-view tablette (liste + détail côte à côte)</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-pink">UI</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">6.8 — Skeleton loading cohérent sur toutes les pages</span>
+  <span class="meta">
+    <span class="effort">~3h</span>
+    <span class="badge badge-pink">UI</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">6.9 — Transitions de page fluides (Framer Motion shared layout)</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-pink">UI</span>
+  </span>
+</div>
+</section>
+
+
+<!-- ══════════════ PHASE 7 ══════════════ -->
+<section id="phase7">
+<div class="phase-header priority-evolution">
+  <div class="phase-number" style="color: var(--text2);">7</div>
+  <div class="phase-info">
+    <h3>Admin & Mode Développeur</h3>
+    <p>Améliorer les outils admin pour le développement, le debugging et l'exploitation de l'application.</p>
+    <div class="phase-tags">
+      <span class="badge badge-info">6 tâches</span>
+      <span class="badge badge-purple">Évolution</span>
+      <span class="badge badge-info">Admin</span>
+    </div>
+  </div>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">7.1 — Boutons "Lancer job" par module dans panneau admin</span>
+  <span class="meta">
+    <span class="effort">~3h</span>
+    <span class="badge badge-info">Admin</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">7.2 — Mode simulation (dry-run) pour les jobs CRON</span>
+  <span class="meta">
+    <span class="effort">~4h</span>
+    <span class="badge badge-info">Admin</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">7.3 — Console IA test (prompt → réponse brute dans l'admin)</span>
+  <span class="meta">
+    <span class="effort">~3h</span>
+    <span class="badge badge-info">Admin</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">7.4 — Trigger Telegram test direct depuis admin</span>
+  <span class="meta">
+    <span class="effort">~2h</span>
+    <span class="badge badge-info">Admin</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">7.5 — Forcer sync externes (Garmin, calendrier, météo)</span>
+  <span class="meta">
+    <span class="effort">~3h</span>
+    <span class="badge badge-info">Admin</span>
+  </span>
+</div>
+
+<div class="plan-item priority-evolution">
+  <span class="title">7.6 — Export logs filtrées par module/date</span>
+  <span class="meta">
+    <span class="effort">~3h</span>
+    <span class="badge badge-info">Admin</span>
+  </span>
+</div>
+</section>
+
+
+<hr class="sep">
+
+
+<!-- ╔═══════════════════════════════════════════════════════════════╗ -->
+<!-- ║               RÉCAPITULATIF GLOBAL                           ║ -->
+<!-- ╚═══════════════════════════════════════════════════════════════╝ -->
+<section id="recap">
+<h2>📊 Récapitulatif Global du Planning</h2>
+
+<div class="card" style="border-color: var(--accent);">
+  <table>
+    <thead><tr><th>Phase</th><th>Titre</th><th>Tâches</th><th>Effort estimé</th><th>Priorité</th><th>Focus</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span style="color:var(--red); font-weight:800;">1</span></td>
+        <td>Corrections critiques</td>
+        <td><strong>4</strong></td>
+        <td>~8.5h</td>
+        <td><span class="badge badge-error">Immédiat</span></td>
+        <td>Bugs critiques, endpoints cassés, sécurité</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--orange); font-weight:800;">2</span></td>
+        <td>Nettoyage & Organisation</td>
+        <td><strong>8</strong></td>
+        <td>~20h</td>
+        <td><span class="badge badge-warn">Haut</span></td>
+        <td>Code legacy, commentaires, fichiers fourre-tout, SQL</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--yellow); font-weight:800;">3</span></td>
+        <td>Tests & Documentation</td>
+        <td><strong>5</strong></td>
+        <td>~14h</td>
+        <td><span class="badge badge-warn">Haut</span></td>
+        <td>E2E, couverture tests, docs stale</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--green); font-weight:800;">4</span></td>
+        <td>Inter-modules</td>
+        <td><strong>4</strong></td>
+        <td>~12h</td>
+        <td><span class="badge badge-info">Moyen</span></td>
+        <td>Bridges jardin/inventaire, batch/inventaire, météo/planning</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--accent); font-weight:800;">5</span></td>
+        <td>IA & Automatisations</td>
+        <td><strong>8</strong></td>
+        <td>~44h</td>
+        <td><span class="badge badge-info">Moyen</span></td>
+        <td>Chat IA, briefing Telegram, photo→inventaire, CRON</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--accent2); font-weight:800;">6</span></td>
+        <td>UI/UX & Modernisation</td>
+        <td><strong>9</strong></td>
+        <td>~45h</td>
+        <td><span class="badge badge-purple">Évolution</span></td>
+        <td>Dashboard, DnD, mode cuisine, bottom sheets, skeleton</td>
+      </tr>
+      <tr>
+        <td><span style="color:var(--text2); font-weight:800;">7</span></td>
+        <td>Admin & Mode dev</td>
+        <td><strong>6</strong></td>
+        <td>~18h</td>
+        <td><span class="badge badge-purple">Évolution</span></td>
+        <td>Boutons jobs, simulation, console IA, export logs</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr style="background: var(--bg3);">
+        <td colspan="2"><strong>Total</strong></td>
+        <td><strong>44 tâches</strong></td>
+        <td><strong>~161h</strong></td>
+        <td colspan="2"></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<div class="estimation-grid">
+  <div class="estimation-card">
+    <div class="val" style="color: var(--red);">8.5h</div>
+    <div class="lbl">Phase 1 — Critiques</div>
+  </div>
+  <div class="estimation-card">
+    <div class="val" style="color: var(--orange);">20h</div>
+    <div class="lbl">Phase 2 — Nettoyage</div>
+  </div>
+  <div class="estimation-card">
+    <div class="val" style="color: var(--yellow);">14h</div>
+    <div class="lbl">Phase 3 — Tests & Docs</div>
+  </div>
+  <div class="estimation-card">
+    <div class="val" style="color: var(--green);">12h</div>
+    <div class="lbl">Phase 4 — Inter-modules</div>
+  </div>
+  <div class="estimation-card">
+    <div class="val" style="color: var(--accent);">44h</div>
+    <div class="lbl">Phase 5 — IA & Auto</div>
+  </div>
+  <div class="estimation-card">
+    <div class="val" style="color: var(--accent2);">45h</div>
+    <div class="lbl">Phase 6 — UI/UX</div>
+  </div>
+  <div class="estimation-card">
+    <div class="val" style="color: var(--text2);">18h</div>
+    <div class="lbl">Phase 7 — Admin</div>
+  </div>
+  <div class="estimation-card" style="border: 2px solid var(--accent);">
+    <div class="val" style="color: var(--accent);">~161h</div>
+    <div class="lbl">Total estimé</div>
+  </div>
+</div>
+
+<!-- Progression visuelle par phase -->
+<div class="card" style="margin-top: 1.5rem;">
+  <h4>Répartition de l'effort</h4>
+  <div class="progress-container">
+    <span class="progress-label">Phase 1</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: var(--green);"></div></div>
+    <span class="progress-label">100% ✅</span>
+  </div>
+  <div class="progress-container">
+    <span class="progress-label">Phase 2</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 70%; background: var(--orange);"></div></div>
+    <span class="progress-label">70%</span>
+  </div>
+  <div class="progress-container">
+    <span class="progress-label">Phase 3</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 9%; background: var(--yellow);"></div></div>
+    <span class="progress-label">9%</span>
+  </div>
+  <div class="progress-container">
+    <span class="progress-label">Phase 4</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 7%; background: var(--green);"></div></div>
+    <span class="progress-label">7%</span>
+  </div>
+  <div class="progress-container">
+    <span class="progress-label">Phase 5</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 27%; background: var(--accent);"></div></div>
+    <span class="progress-label">27%</span>
+  </div>
+  <div class="progress-container">
+    <span class="progress-label">Phase 6</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 28%; background: var(--accent2);"></div></div>
+    <span class="progress-label">28%</span>
+  </div>
+  <div class="progress-container">
+    <span class="progress-label">Phase 7</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 11%; background: var(--text2);"></div></div>
+    <span class="progress-label">11%</span>
+  </div>
+</div>
+
+<!-- Note finale -->
+<div class="global-note" style="margin-top: 2rem;">
+  <div class="big">7.4 → 9.0+</div>
+  <div class="label">Objectif après implémentation complète</div>
+  <div class="verdict">
+    En complétant les 7 phases de ce planning, l'application passera d'une note de <strong>7.4/10</strong> à un objectif de <strong>9.0+/10</strong>.
+    Les phases 1-3 (corrections + nettoyage + tests) représentent seulement <strong>26% de l'effort</strong> mais apportent le gain de qualité le plus important.
+    Les phases 5-6 (IA + UI) représentent <strong>55% de l'effort</strong> et apportent les gains fonctionnels les plus visibles pour l'utilisateur.
+  </div>
+</div>
+
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- FOOTER -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div style="text-align:center; padding: 3rem 0 2rem; color: var(--text2); font-size: 0.78rem; border-top: 1px solid var(--border); margin-top: 3rem;">
+  <strong>Assistant Matanne — Planning d'Implémentation Complet</strong><br>
+  Basé sur le Rapport d'Analyse Complète — Généré le 4 avril 2026<br>
+  Backend: FastAPI + Python 3.13 | Frontend: Next.js 16 + React 19 | DB: Supabase PostgreSQL<br>
+  <span style="color: var(--accent); font-weight: 700;">44 tâches · 7 phases · ~161h d'effort estimé · Note actuelle: 7.4/10</span>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// Smooth scroll for nav links
+document.querySelectorAll('.nav a').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+// Active nav highlighting on scroll
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(section => {
+    const sectionTop = section.offsetTop - 100;
+    if (scrollY >= sectionTop) current = section.getAttribute('id');
+  });
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === '#' + current) link.classList.add('active');
+  });
+});
+
+// Animate progress bars on scroll
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.score-fill, .progress-fill').forEach(bar => {
+        const w = bar.style.width;
+        bar.style.width = '0%';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => { bar.style.width = w; });
+        });
+      });
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.score-grid, .progress-container').forEach(el => observer.observe(el));
+
+// Collapsible cards
+document.querySelectorAll('.plan-item').forEach(item => {
+  item.style.cursor = 'pointer';
+  const next = item.nextElementSibling;
+  if (next && next.classList.contains('card') && next.style.marginLeft) {
+    next.style.display = 'none';
+    item.addEventListener('click', () => {
+      next.style.display = next.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+});
+</script>
+
+</body>
+</html>

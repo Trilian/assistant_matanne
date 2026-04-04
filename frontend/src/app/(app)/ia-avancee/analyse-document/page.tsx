@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
-import { analyserDocument, type AnalyseDocumentPhotoResponse } from '@/bibliotheque/api/ia_avancee'
+import { analyserDocument, type AnalyseDocumentPhotoResponse } from '@/bibliotheque/api/ia-avancee'
 import { toast } from 'sonner'
 
 export default function AnalyseDocumentPage() {
@@ -36,8 +36,8 @@ export default function AnalyseDocumentPage() {
 
   return (
     <div className="space-y-6">
-      <div><h1 className="text-3xl font-bold">Analyse document</h1><p className="text-muted-foreground">OCR et classement automatique d’un document photographié.</p></div>
-      <Card><CardHeader><CardTitle>Importer un document</CardTitle><CardDescription>Facture, contrat, document administratif ou ordonnance.</CardDescription></CardHeader><CardContent className="space-y-4"><input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />{file && <div className="space-y-2 rounded-md border p-3"><p className="text-sm text-muted-foreground">Fichier sélectionné: {file.name}</p>{apercu && <img src={apercu} alt="Aperçu document" className="max-h-64 w-full rounded-md object-cover" />}</div>}<Button onClick={analyser} disabled={!file || chargement}>{chargement ? 'Analyse...' : 'Analyser le document'}</Button></CardContent></Card>
+      <div><h1 className="text-3xl font-bold">Analyse document</h1><p className="text-muted-foreground">Analyse et classement automatique d’un document photographié.</p></div>
+      <Card><CardHeader><CardTitle>Importer un document</CardTitle><CardDescription>Facture, contrat, document administratif ou ordonnance.</CardDescription></CardHeader><CardContent className="space-y-4"><input type="file" title="Choisir un document à analyser" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />{file && <div className="space-y-2 rounded-md border p-3"><p className="text-sm text-muted-foreground">Fichier sélectionné: {file.name}</p>{apercu && <img src={apercu} alt="Aperçu document" className="max-h-64 w-full rounded-md object-cover" />}</div>}<Button onClick={analyser} disabled={!file || chargement}>{chargement ? 'Analyse...' : 'Analyser le document'}</Button></CardContent></Card>
       {!resultat && !chargement && (
         <Card>
           <CardHeader><CardTitle>En attente d'analyse</CardTitle></CardHeader>

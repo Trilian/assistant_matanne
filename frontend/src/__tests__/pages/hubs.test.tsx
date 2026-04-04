@@ -25,7 +25,7 @@ vi.mock("@/bibliotheque/api/avance", () => ({
   }),
 }));
 
-vi.mock("@/bibliotheque/api/ia_avancee", () => ({
+vi.mock("@/bibliotheque/api/ia-avancee", () => ({
   obtenirPrevisionDepenses: vi.fn().mockResolvedValue({ prevision_fin_mois: 1800 }),
   obtenirRecommandationsEnergie: vi.fn().mockResolvedValue({ recommandations: [{ id: 1 }] }),
   obtenirPredictionPannes: vi.fn().mockResolvedValue({ predictions: [{ id: 1 }] }),

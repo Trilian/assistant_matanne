@@ -168,14 +168,15 @@ export default function PageDocuments() {
             variant="outline"
             onClick={() => document.getElementById("ocr-input")?.click()}
             disabled={scanEnCours}
-            title="Scanner un document via OCR"
+            title="Analyser un document photo"
           >
             <ScanLine className="h-4 w-4 mr-2" />
-            {scanEnCours ? "Scan..." : "Scanner"}
+            {scanEnCours ? "Analyse..." : "Analyser"}
           </Button>
           <input
             id="ocr-input"
             type="file"
+            title="Choisir un document à analyser"
             accept="image/jpeg,image/png,image/webp"
             className="hidden"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) scannerDocument(f); e.target.value = ""; }}
@@ -355,6 +356,7 @@ export default function PageDocuments() {
           <div>
             <Label>Catégorie</Label>
             <select
+              title="Catégorie du document"
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               value={form.categorie}
               onChange={(e) => setForm({ ...form, categorie: e.target.value })}

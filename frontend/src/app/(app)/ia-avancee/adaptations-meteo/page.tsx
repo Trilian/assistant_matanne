@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
 import { Textarea } from '@/composants/ui/textarea'
-import { obtenirAdaptationsMeteo, type AdaptationPlanningMeteoResponse } from '@/bibliotheque/api/ia_avancee'
+import { obtenirAdaptationsMeteo, type AdaptationPlanningMeteoResponse } from '@/bibliotheque/api/ia-avancee'
 import { toast } from 'sonner'
 
 export default function AdaptationsMeteoPage() {

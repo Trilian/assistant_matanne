@@ -116,6 +116,53 @@ class TestRoutesFamilleJules:
         assert response.status_code == 201
         assert response.json()["journal_evenement"]["evenement_id"] == 99
 
+    async def test_jules_nutrition_retourne_recommandations_et_portions(self, client):
+        """GET /jules/nutrition renvoie les recommandations, portions et aliments exclus."""
+
+        class _ServiceNutrition:
+            def adapter_planning_nutrition_jules(self, jours_horizon: int = 7):
+                assert jours_horizon == 5
+                return {
+                    "age_mois": 19,
+                    "recommandations": ["Limiter le sel", "Textures adaptées"],
+                    "message": "Planning adapté pour Jules.",
+                }
+
+            def adapter_portions_recettes_planifiees(self, jours_horizon: int = 7):
+                assert jours_horizon == 5
+                return {
+                    "portion_jules": 0.7,
+                    "repas_mis_a_jour": 3,
+                }
+
+        pref = MagicMock()
+        pref.aliments_exclus_jules = ["miel", "sel"]
+
+        session = MagicMock()
+        session.execute.return_value.scalar_one_or_none.return_value = pref
+
+        @contextmanager
+        def _session_fausse():
+            yield session
+
+        with patch(
+            "src.api.routes.famille_jules.executer_avec_session",
+            _session_fausse,
+        ), patch(
+            "src.services.cuisine.inter_module_jules_nutrition.obtenir_service_jules_nutrition_interaction",
+            lambda: _ServiceNutrition(),
+        ):
+            response = await client.get("/api/v1/famille/jules/nutrition?jours_horizon=5")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["age_mois"] == 19
+        assert data["recommandations"] == ["Limiter le sel", "Textures adaptées"]
+        assert data["portions"]["portion_jules"] == 0.7
+        assert data["portions"]["repas_mis_a_jour"] == 3
+        assert data["aliments_exclus"] == ["miel", "sel"]
+        assert "adapté" in data["message"].lower()
+
 
 class TestTimelineEnrichieJardin:
     """Timeline familiale — vérification de l'enrichissement avec le journal jardin."""

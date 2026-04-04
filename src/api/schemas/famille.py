@@ -583,8 +583,8 @@ class PrefillReventeResponse(BaseModel):
     """Données pré-remplies pour l'annonce de revente d'un achat."""
 
     achat_id: int
-    plateforme: str = Field(..., description="vinted ou lbc", max_length=30)
-    plateforme_libelle: str = Field(..., description="Vinted ou LeBonCoin", max_length=50)
+    plateforme: str = Field(..., description="plateforme de revente recommandée", max_length=30)
+    plateforme_libelle: str = Field(..., description="Libellé lisible pour la plateforme recommandée", max_length=50)
     marque: str | None = Field(None, max_length=80)
     taille: str | None = Field(None, max_length=40)
     prix_suggere: float | None = None
@@ -595,13 +595,13 @@ class PrefillReventeResponse(BaseModel):
         "json_schema_extra": {
             "example": {
                 "achat_id": 14,
-                "plateforme": "vinted",
-                "plateforme_libelle": "Vinted",
+                "plateforme": "lbc",
+                "plateforme_libelle": "LeBonCoin",
                 "marque": "Petit Bateau",
                 "taille": "18 mois",
                 "prix_suggere": 18.0,
                 "pour_qui": "jules",
-                "raisons": ["bonne demande sur la taille", "marque recherchée"],
+                "raisons": ["revente familiale locale privilégiée", "marque recherchée"],
             }
         }
     }

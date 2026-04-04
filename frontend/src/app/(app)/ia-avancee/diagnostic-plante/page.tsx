@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
 import { Badge } from '@/composants/ui/badge'
-import { diagnostiquerPlante, type DiagnosticPlantResponse } from '@/bibliotheque/api/ia_avancee'
+import { diagnostiquerPlante, type DiagnosticPlantResponse } from '@/bibliotheque/api/ia-avancee'
 import { toast } from 'sonner'
 
 export default function DiagnosticPlantePage() {

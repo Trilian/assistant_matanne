@@ -10,7 +10,7 @@ import {
   obtenirPredictionPannes,
   obtenirRecommandationsEnergie,
   obtenirSuggestionsProactives,
-} from '@/bibliotheque/api/ia_avancee'
+} from '@/bibliotheque/api/ia-avancee'
 
 const OUTILS = [
   { titre: 'Suggestions achats', description: 'Historique de consommation et réapprovisionnement.', chemin: '/ia-avancee/suggestions-achats', icone: '🛒' },
@@ -20,7 +20,7 @@ const OUTILS = [
   { titre: 'Idées cadeaux', description: 'Suggestions personnalisées selon le profil.', chemin: '/ia-avancee/idees-cadeaux', icone: '🎁' },
   { titre: 'Analyse photo', description: 'Détection automatique du contexte et actions.', chemin: '/ia-avancee/analyse-photo', icone: '📸' },
   { titre: 'Optimisation routines', description: 'Gains de temps pour les routines du foyer.', chemin: '/ia-avancee/optimisation-routines', icone: '⚙️' },
-  { titre: 'Analyse document', description: 'OCR et classement des documents photo.', chemin: '/ia-avancee/analyse-document', icone: '📄' },
+  { titre: 'Analyse document', description: 'Analyse et classement des documents photo.', chemin: '/ia-avancee/analyse-document', icone: '📄' },
   { titre: 'Estimation travaux', description: 'Budget et difficulté à partir d’une photo.', chemin: '/ia-avancee/estimation-travaux', icone: '🔨' },
   { titre: 'Planning voyage', description: 'Itinéraire, checklist et adaptation enfant.', chemin: '/ia-avancee/planning-voyage', icone: '✈️' },
   { titre: 'Recommandations énergie', description: 'Plan d’économie d’énergie ciblé.', chemin: '/ia-avancee/recommandations-energie', icone: '⚡' },

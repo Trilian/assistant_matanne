@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import os
 from datetime import date, timedelta
@@ -13,6 +14,8 @@ from pydantic import BaseModel, Field
 from src.api.dependencies import require_auth
 from src.api.schemas.errors import REPONSES_CRUD_CREATION, REPONSES_CRUD_LECTURE
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/assistant", tags=["Assistant"])
 

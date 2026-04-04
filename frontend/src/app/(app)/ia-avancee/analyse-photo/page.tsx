@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
-import { analyserPhotoMultiUsage, type AnalysePhotoMultiResponse } from '@/bibliotheque/api/ia_avancee'
+import { analyserPhotoMultiUsage, type AnalysePhotoMultiResponse } from '@/bibliotheque/api/ia-avancee'
 import { toast } from 'sonner'
 
 export default function AnalysePhotoPage() {

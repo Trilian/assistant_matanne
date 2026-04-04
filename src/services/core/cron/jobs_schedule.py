@@ -76,7 +76,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("sync_voyages_calendrier", CronTrigger(hour=6, minute=30), replace_existing=True)
     planifier_job("sync_charges_dashboard", CronTrigger(hour=7, minute=30), replace_existing=True)
 
-    # Jobs CRON d'innovations
+    # Jobs CRON transverses
     planifier_job("optimisation_routines", CronTrigger(day=15, hour=10, minute=0), replace_existing=True)
     planifier_job("suggestions_saison", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
     planifier_job("purge_historique_jeux", CronTrigger(day=1, hour=3, minute=30), replace_existing=True)
@@ -108,7 +108,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("job_briefing_matinal_push", CronTrigger(hour=7, minute=0), replace_existing=True)
     planifier_job("job_jardin_feedback_planning", CronTrigger(day_of_week="sun", hour=18, minute=30), replace_existing=True)
 
-    # Phase 7 — IA & automations (roadmap planning_implementation)
+    # Jobs IA et automatisations avancées
     planifier_job("briefing_matinal_ia", CronTrigger(hour=7, minute=0), replace_existing=True)
     planifier_job("comparateur_abonnements", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
     planifier_job("rapport_nutritionnel_jules", CronTrigger(day_of_week="sun", hour=19, minute=0), replace_existing=True)

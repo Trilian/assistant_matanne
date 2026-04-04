@@ -4,7 +4,10 @@ Routes API pour le batch cooking.
 CRUD complet pour les sessions, étapes et préparations batch cooking.
 """
 
+import logging
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -309,7 +312,7 @@ async def modifier_session(
                         source="api.batch_cooking.patch",
                     )
                 except Exception:
-                    pass
+                    logger.debug("Échec publication événement batch_cooking.termine (non bloquant)")
 
             return _serialiser_session(s)
 

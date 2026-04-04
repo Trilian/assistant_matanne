@@ -22,7 +22,7 @@ export * from "./ia-modules";
 export * from "./preferences";
 export * from "./anti-gaspillage";
 export * from "./batch-cooking";
-export * from "./ia_avancee";
+export * from "./ia-avancee";
 export * from "./push";
 export * from "./export";
 export * from "./assistant";

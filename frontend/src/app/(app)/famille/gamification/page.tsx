@@ -116,9 +116,9 @@ export default function PageGamificationFamille() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Points famille</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Suivi sport & habitudes</h1>
         <p className="text-muted-foreground">
-          Gamification sport, alimentation et anti-gaspillage pour suivre la dynamique hebdomadaire.
+          Vue hebdomadaire du sport, de l'alimentation et de l'anti-gaspi, sans logique de gamification familiale.
         </p>
       </div>
 

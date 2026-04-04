@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
-import { obtenirOptimisationRoutines, type OptimisationRoutinesResponse } from '@/bibliotheque/api/ia_avancee'
+import { obtenirOptimisationRoutines, type OptimisationRoutinesResponse } from '@/bibliotheque/api/ia-avancee'
 import { toast } from 'sonner'
 
 export default function OptimisationRoutinesPage() {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
-import { obtenirPredictionPannes, type PredictionPannesResponse } from '@/bibliotheque/api/ia_avancee'
+import { obtenirPredictionPannes, type PredictionPannesResponse } from '@/bibliotheque/api/ia-avancee'
 import { toast } from 'sonner'
 
 export default function PredictionPannesPage() {

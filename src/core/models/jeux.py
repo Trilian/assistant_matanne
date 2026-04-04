@@ -3,7 +3,6 @@ Modèles SQLAlchemy pour le domaine Jeux (Paris sportifs, Loto & Euromillions)
 """
 
 import enum
-import os
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
@@ -19,8 +18,6 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
-    event,
-    select,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -356,51 +353,6 @@ class StatistiquesLoto(Base):
 
     # Méta
     nb_tirages_analyses: Mapped[int] = mapped_column(Integer, default=0)
-
-
-@event.listens_for(PariSportif, "before_insert")
-def _assurer_match_placeholder(_mapper, connection, target: PariSportif) -> None:
-    """Crée un match/équipes placeholder si un test injecte un match_id inexistant.
-
-    Ne s'exécute qu'en environnement de test pour éviter de polluer la production.
-    """
-    if not os.getenv("PYTEST_CURRENT_TEST"):
-        return
-    if target.match_id is None:
-        return
-
-    match_exists = connection.execute(
-        select(Match.id).where(Match.id == target.match_id)
-    ).scalar_one_or_none()
-    if match_exists is not None:
-        return
-
-    equipe_dom_id = target.match_id * 10 + 1
-    equipe_ext_id = target.match_id * 10 + 2
-
-    for equipe_id, suffixe in ((equipe_dom_id, "DOM"), (equipe_ext_id, "EXT")):
-        equipe_exists = connection.execute(
-            select(Equipe.id).where(Equipe.id == equipe_id)
-        ).scalar_one_or_none()
-        if equipe_exists is None:
-            connection.execute(
-                Equipe.__table__.insert().values(
-                    id=equipe_id,
-                    nom=f"Equipe {suffixe} {target.match_id}",
-                    championnat="Test",
-                )
-            )
-
-    connection.execute(
-        Match.__table__.insert().values(
-            id=target.match_id,
-            equipe_domicile_id=equipe_dom_id,
-            equipe_exterieur_id=equipe_ext_id,
-            championnat="Test",
-            date_match=date.today(),
-            joue=False,
-        )
-    )
 
 
 # ═══════════════════════════════════════════════════════════════════

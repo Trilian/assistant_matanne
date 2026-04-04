@@ -123,7 +123,6 @@ const LIENS: LienNav[] = [
       { nom: "Contacts", chemin: "/famille/contacts", Icone: Contact },
       { nom: "Documents", chemin: "/famille/documents", Icone: FileText },
       { nom: "Garmin", chemin: "/famille/garmin", Icone: Activity },
-      { nom: "Gamification", chemin: "/famille/gamification", Icone: Trophy },
       { nom: "Config", chemin: "/famille/config", Icone: Settings },
     ],
     // Catégories pour regroupement visuel des sous-liens
@@ -131,7 +130,7 @@ const LIENS: LienNav[] = [
       { label: "Enfant", debut: 0, fin: 3 },
       { label: "Budget & Achats", debut: 3, fin: 5 },
       { label: "Événements", debut: 5, fin: 7 },
-      { label: "Organisation", debut: 7, fin: 12 },
+      { label: "Organisation", debut: 7, fin: 11 },
     ],
   },
   {

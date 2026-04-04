@@ -1030,13 +1030,6 @@ async def marquer_achat_vendu(
     return await executer_async(_query)
 
 
-# ─── Catégories orientées Vinted ──────────────────────────
-_CATEGORIES_VINTED = frozenset({
-    "jules_vetements", "nous_vetements", "vetements", "chaussures",
-    "jouets", "jules_jouets", "livres", "livres_jouets",
-})
-
-
 @router.get("/achats/{achat_id}/prefill-revente", response_model=PrefillReventeResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def prefill_revente_achat(
@@ -1046,7 +1039,7 @@ async def prefill_revente_achat(
     """Retourne les données pré-remplies pour l'annonce de revente d'un achat.
 
     Déduit:
-    - plateforme recommandée (Vinted pour vêtements/jouets/livres, LBC sinon)
+    - la plateforme de revente familiale recommandée
     - marque/taille depuis les préférences famille ou l'achat lui-même
     - prix conseillé (40% du prix d'achat par défaut)
     """
@@ -1060,8 +1053,8 @@ async def prefill_revente_achat(
 
             categorie = achat.categorie or ""
             pour_qui = getattr(achat, "pour_qui", "famille") or "famille"
-            plateforme = "vinted" if categorie in _CATEGORIES_VINTED else "lbc"
-            plateforme_libelle = "Vinted" if plateforme == "vinted" else "LeBonCoin"
+            plateforme = "lbc"
+            plateforme_libelle = "LeBonCoin"
 
             # Prefill taille depuis les préférences famille ou l'achat
             taille = achat.taille
@@ -1098,14 +1091,9 @@ async def prefill_revente_achat(
                 logger.warning("[famille] Préférences taille non récupérées: %s", e)
 
             # Raison choix plateforme
-            if plateforme == "vinted":
-                raisons.append(
-                    f"Catégorie '{categorie}' → Vinted recommandée (vêtements, jouets, livres)"
-                )
-            else:
-                raisons.append(
-                    f"Catégorie '{categorie}' → LeBonCoin recommandé (divers, électronique, mobilier)"
-                )
+            raisons.append(
+                f"Catégorie '{categorie}' → LeBonCoin recommandé pour une revente familiale locale et simple"
+            )
 
             # Prix conseillé
             base_prix = achat.prix_reel or achat.prix_estime

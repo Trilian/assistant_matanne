@@ -699,26 +699,6 @@ export async function genererAnnonceLBC(
   return data;
 }
 
-/** Générer une annonce Vinted pour un article */
-export async function genererAnnonceVinted(
-  id: number,
-  payload: {
-    nom: string;
-    description?: string;
-    etat_usage?: string;
-    prix_cible?: number;
-    marque?: string;
-    taille?: string;
-    categorie_vinted?: string;
-  }
-): Promise<{ annonce: string }> {
-  const { data } = await clientApi.post<{ annonce: string }>(
-    `/famille/achats/${id}/annonce-vinted`,
-    payload
-  );
-  return data;
-}
-
 /** Marquer une routine comme complétée aujourd'hui */
 export async function completerRoutine(
   id: number
