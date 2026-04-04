@@ -317,6 +317,27 @@ export interface ConfigAdminExport {
   runtime_config: Record<string, unknown>
 }
 
+export interface ConfigDiffSectionItem {
+  key: string
+  status: 'unchanged' | 'changed' | 'added' | 'removed'
+  current: unknown
+  default: unknown
+}
+
+export interface ConfigDiffSection {
+  total: number
+  changed: string[]
+  added: string[]
+  removed: string[]
+  items: ConfigDiffSectionItem[]
+}
+
+export interface ConfigDiffResponse {
+  generated_at: string
+  feature_flags: ConfigDiffSection
+  runtime_config: ConfigDiffSection
+}
+
 export interface ConfigAdminImportPayload {
   feature_flags?: Record<string, boolean>
   runtime_config?: Record<string, unknown>
@@ -660,11 +681,13 @@ export async function simulerJourneeJobs(options?: {
   dry_run?: boolean
   continuer_sur_erreur?: boolean
   inclure_jobs_inactifs?: boolean
-}): Promise<JobBatchResponse> {
+  date_reference?: string
+}): Promise<JobBatchResponse & { date_reference?: string; jobs_cibles?: string[] }> {
   const { data } = await clientApi.post('/api/v1/admin/jobs/simulate-day', {
     dry_run: options?.dry_run ?? true,
     continuer_sur_erreur: options?.continuer_sur_erreur ?? true,
     inclure_jobs_inactifs: options?.inclure_jobs_inactifs ?? false,
+    date_reference: options?.date_reference,
   })
   return data
 }
@@ -793,7 +816,7 @@ export async function forcerResync(
 }
 
 export async function lancerSeedDev(
-  scope: 'recettes_standard' = 'recettes_standard',
+  scope: 'recettes_standard' | 'demo_complet' = 'recettes_standard',
   dryRun = false,
 ): Promise<Record<string, unknown>> {
   const { data } = await clientApi.post(
@@ -924,6 +947,11 @@ export async function importerConfigAdmin(
   payload: ConfigAdminImportPayload,
 ): Promise<{ status: string; feature_flags: Record<string, boolean>; runtime_config: Record<string, unknown> }> {
   const { data } = await clientApi.post('/api/v1/admin/config/import', payload)
+  return data
+}
+
+export async function obtenirDiffConfigAdmin(): Promise<ConfigDiffResponse> {
+  const { data } = await clientApi.get('/api/v1/admin/config/diff')
   return data
 }
 

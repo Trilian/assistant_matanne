@@ -188,7 +188,8 @@ def test_phase6_i10_feedback_note_basse_exclut_la_recette(test_db: Session) -> N
                 "mange": False,
                 "user_id": "u-phase6",
             }
-        ]
+        ],
+        db=test_db,
     )
 
     assert resultat["nb_feedbacks"] == 1
@@ -203,6 +204,7 @@ def test_phase6_i10_feedback_note_basse_exclut_la_recette(test_db: Session) -> N
 
     exclusions = obtenir_service_inventaire_planning_interaction().filtrer_recettes_mal_notees(
         seuil_note=3,
+        user_id="u-phase6",
         db=test_db,
     )
     ids_exclus = {item["recette_id"] for item in exclusions["recettes_exclues"]}

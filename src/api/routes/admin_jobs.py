@@ -739,13 +739,40 @@ async def simuler_journee_jobs(
     from src.api.utils import executer_async
 
     def _run() -> dict[str, Any]:
-        from src.services.core.cron.jobs import executer_job_par_id, lister_jobs_disponibles
+        from src.services.core.cron.jobs import _demarreur, executer_job_par_id, lister_jobs_disponibles
+
+        if body.date_reference:
+            date_reference = datetime.fromisoformat(body.date_reference.replace("Z", "+00:00"))
+            if getattr(date_reference, "tzinfo", None):
+                date_reference = date_reference.replace(tzinfo=None)
+        else:
+            date_reference = datetime.now()
 
         jobs_disponibles = list(lister_jobs_disponibles())
+        jobs_cibles = list(jobs_disponibles)
         resultats: list[dict[str, Any]] = []
         debut_journee = datetime.now()
+        fenetre_debut = date_reference.replace(hour=0, minute=0, second=0, microsecond=0)
+        fenetre_fin = fenetre_debut + timedelta(days=1)
 
-        for job_id in jobs_disponibles:
+        if body.date_reference and _demarreur is not None and _demarreur._scheduler.running:
+            ids_planifies: list[str] = []
+            for job in _demarreur._scheduler.get_jobs():
+                if not body.inclure_jobs_inactifs and job.next_run_time is None:
+                    continue
+                try:
+                    prochain = job.trigger.get_next_fire_time(None, fenetre_debut - timedelta(seconds=1))
+                except Exception:
+                    prochain = None
+                if prochain is not None:
+                    prochain_compare = prochain.replace(tzinfo=None) if getattr(prochain, "tzinfo", None) else prochain
+                    if fenetre_debut <= prochain_compare <= fenetre_fin:
+                        ids_planifies.append(job.id)
+
+            if ids_planifies:
+                jobs_cibles = [job_id for job_id in jobs_disponibles if job_id in set(ids_planifies)]
+
+        for job_id in jobs_cibles:
             debut = time.perf_counter()
             try:
                 sortie = executer_job_par_id(
@@ -773,6 +800,12 @@ async def simuler_journee_jobs(
 
         return {
             "mode": "dry_run" if body.dry_run else "run",
+            "date_reference": date_reference.isoformat(),
+            "fenetre": {
+                "debut": fenetre_debut.isoformat(),
+                "fin": fenetre_fin.isoformat(),
+            },
+            "jobs_cibles": jobs_cibles,
             "started_at": debut_journee.isoformat(),
             "ended_at": datetime.now().isoformat(),
             "total": len(resultats),
@@ -786,7 +819,11 @@ async def simuler_journee_jobs(
         action="admin.jobs.day_simulation.run",
         entite_type="job_batch",
         utilisateur_id=str(user.get("id", "admin")),
-        details={"dry_run": body.dry_run, "continuer_sur_erreur": body.continuer_sur_erreur},
+        details={
+            "dry_run": body.dry_run,
+            "continuer_sur_erreur": body.continuer_sur_erreur,
+            "date_reference": body.date_reference,
+        },
     )
     return result
 

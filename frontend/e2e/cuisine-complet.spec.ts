@@ -680,7 +680,7 @@ test.describe("Cuisine - Parcours complet", () => {
   test("Naviguer entre tous les modules cuisine", async ({ page }) => {
     await configurerContexteCuisineComplet(page);
 
-    const modules = [
+    const routesCuisine = [
       "/cuisine",
       "/cuisine/recettes",
       "/cuisine/planning",
@@ -688,9 +688,9 @@ test.describe("Cuisine - Parcours complet", () => {
       "/cuisine/inventaire",
     ];
 
-    for (const module of modules) {
-      await page.goto(module);
-      await expect(page).toHaveURL(new RegExp(module));
+    for (const routeCuisine of routesCuisine) {
+      await page.goto(routeCuisine);
+      await expect(page).toHaveURL(new RegExp(routeCuisine));
       await expect(page.locator("body")).toBeVisible();
     }
   });

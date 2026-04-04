@@ -222,6 +222,7 @@ class InventairePlanningInteractionService:
         self,
         *,
         seuil_note: int = 3,
+        user_id: str | None = None,
         db=None,
     ) -> dict[str, Any]:
         """P5-13: retourne les recettes a exclure des suggestions (note < seuil)."""
@@ -233,15 +234,15 @@ class InventairePlanningInteractionService:
             else_=3.0,
         )
 
-        rows = (
-            db.query(
-                RetourRecette.recette_id,
-                func.avg(score_feedback).label("note_moyenne"),
-                func.count(RetourRecette.id).label("nb_retours"),
-            )
-            .group_by(RetourRecette.recette_id)
-            .all()
+        query = db.query(
+            RetourRecette.recette_id,
+            func.avg(score_feedback).label("note_moyenne"),
+            func.count(RetourRecette.id).label("nb_retours"),
         )
+        if user_id:
+            query = query.filter(RetourRecette.user_id == user_id)
+
+        rows = query.group_by(RetourRecette.recette_id).all()
 
         exclues = [
             {

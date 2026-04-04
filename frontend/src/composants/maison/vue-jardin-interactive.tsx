@@ -12,6 +12,42 @@ function clampPosition(value: number | undefined, fallback: number) {
   return Math.max(4, Math.min(84, numeric));
 }
 
+function obtenirEtatZone(zone: ZoneJardinHabitat): "plante" | "amenagement" | "libre" {
+  if ((zone.plantes?.length ?? 0) > 0) {
+    return "plante";
+  }
+  if ((zone.amenagements?.length ?? 0) > 0) {
+    return "amenagement";
+  }
+  return "libre";
+}
+
+function couleursZone(zone: ZoneJardinHabitat, active: boolean) {
+  const etat = obtenirEtatZone(zone);
+
+  if (etat === "plante") {
+    return {
+      fill: active ? "rgba(16, 185, 129, 0.42)" : "rgba(16, 185, 129, 0.22)",
+      stroke: active ? "rgba(6, 95, 70, 0.95)" : "rgba(6, 95, 70, 0.5)",
+      label: "Planté",
+    };
+  }
+
+  if (etat === "amenagement") {
+    return {
+      fill: active ? "rgba(245, 158, 11, 0.4)" : "rgba(245, 158, 11, 0.2)",
+      stroke: active ? "rgba(146, 64, 14, 0.95)" : "rgba(146, 64, 14, 0.45)",
+      label: "À aménager",
+    };
+  }
+
+  return {
+    fill: active ? "rgba(148, 163, 184, 0.35)" : "rgba(148, 163, 184, 0.16)",
+    stroke: active ? "rgba(51, 65, 85, 0.85)" : "rgba(51, 65, 85, 0.35)",
+    label: "Libre",
+  };
+}
+
 export function VueJardinInteractive({
   zones,
   resume,
@@ -39,11 +75,16 @@ export function VueJardinInteractive({
             Vue jardin 2D interactive
           </CardTitle>
           <CardDescription>
-            Zones cliquables, surface estimée et prochaine lecture visuelle du jardin.
+            Zones cliquables et colorées par état pour repérer d’un coup d’œil le planté, l’aménagement et le libre.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-hidden rounded-2xl border bg-[radial-gradient(circle_at_top,#f4fff1,#e3f5de_58%,#d6ecd0)]">
+          <div className="mb-3 flex flex-wrap gap-2">
+            <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">Planté</Badge>
+            <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">À aménager</Badge>
+            <Badge variant="secondary" className="bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-200">Libre</Badge>
+          </div>
+          <div className="overflow-hidden rounded-2xl border bg-[radial-gradient(circle_at_top,#f4fff1,#e3f5de_58%,#d6ecd0)] dark:border-emerald-950/40 dark:bg-[radial-gradient(circle_at_top,#173324,#112017_58%,#0b150e)]">
             <svg viewBox="0 0 100 100" className="h-[320px] w-full" preserveAspectRatio="none">
               {zones.map((zone) => {
                 const left = clampPosition(zone.position_x, 10);
@@ -51,27 +92,39 @@ export function VueJardinInteractive({
                 const width = Math.max(14, Math.min(34, Number(zone.largeur ?? 18)));
                 const height = Math.max(12, Math.min(30, Number(zone.longueur ?? 16)));
                 const active = zone.id === zoneActive?.id;
+                const palette = couleursZone(zone, active);
 
                 return (
-                  <g key={zone.id} onClick={() => setSelectionId(zone.id)} className="cursor-pointer">
+                  <g
+                    key={zone.id}
+                    onClick={() => setSelectionId(zone.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setSelectionId(zone.id);
+                      }
+                    }}
+                    className="cursor-pointer"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Sélectionner la zone ${zone.nom}`}
+                  >
                     <rect
                       x={left}
                       y={top}
                       width={width}
                       height={height}
                       rx="4"
-                      fill={active ? "rgba(16, 185, 129, 0.35)" : "rgba(16, 185, 129, 0.18)"}
-                      stroke={active ? "rgba(6, 95, 70, 0.8)" : "rgba(6, 95, 70, 0.35)"}
+                      fill={palette.fill}
+                      stroke={palette.stroke}
                       strokeWidth={active ? 0.8 : 0.4}
                     />
-                    <text x={left + 2} y={top + 5} className="fill-emerald-950 text-[3.2px] font-semibold">
+                    <text x={left + 2} y={top + 5} className="fill-emerald-950 dark:fill-emerald-100 text-[3.2px] font-semibold">
                       {zone.nom}
                     </text>
-                    {zone.type_zone ? (
-                      <text x={left + 2} y={top + 9} className="fill-emerald-900 text-[2.5px]">
-                        {zone.type_zone}
-                      </text>
-                    ) : null}
+                    <text x={left + 2} y={top + 9} className="fill-emerald-900 dark:fill-emerald-50 text-[2.5px]">
+                      {palette.label}
+                    </text>
                   </g>
                 );
               })}
@@ -105,6 +158,7 @@ export function VueJardinInteractive({
                 <p className="text-sm text-muted-foreground">{zoneActive.type_zone ?? "Type libre"}</p>
               </div>
               <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary">{couleursZone(zoneActive, true).label}</Badge>
                 {zoneActive.surface_m2 ? <Badge variant="secondary">{Math.round(zoneActive.surface_m2)} m2</Badge> : null}
                 {zoneActive.budget_estime ? <Badge variant="outline">{Math.round(zoneActive.budget_estime)} €</Badge> : null}
                 {zoneActive.plantes?.length ? <Badge variant="outline">{zoneActive.plantes.length} plantes</Badge> : null}

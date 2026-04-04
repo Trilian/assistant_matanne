@@ -38,7 +38,6 @@ import {
   Cake,
   Contact,
   Layers,
-  Shield,
   Plane,
   Activity,
   CalendarRange,
@@ -53,7 +52,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
-import { utiliserAuth } from "@/crochets/utiliser-auth";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { evaluerRappelsFamille } from "@/bibliotheque/api/famille";
 import { Badge } from "@/composants/ui/badge";
@@ -197,8 +195,6 @@ export function BarreLaterale() {
   const pathname = usePathname();
   const router = useRouter();
   const { sidebarOuverte, basculerSidebar } = utiliserStoreUI();
-  const { utilisateur } = utiliserAuth();
-  const estAdmin = utilisateur?.role === "admin";
 
   const { data: rappelsData } = utiliserRequete<{ rappels: RappelFamille[]; total: number }>(
     ["famille", "rappels", "badge"],
@@ -462,27 +458,9 @@ export function BarreLaterale() {
         })}
       </nav>
 
-      {/* Paramètres en bas */}
+      {/* Séparateur bas — l’accès admin reste disponible via URL directe et Ctrl+Shift+A */}
       <Separator />
-      <div className="p-2 space-y-0.5">
-        {estAdmin && (
-          <Link
-            href="/admin"
-            onMouseEnter={() => prefetchRoute("/admin")}
-            onFocus={() => prefetchRoute("/admin")}
-            className={cn(
-              "flex items-center gap-3 rounded-md border border-transparent px-3 py-2 text-sm font-medium transition-colors",
-              classeModule("/admin"),
-              pathname.startsWith("/admin")
-                ? "module-accent-bg module-accent-text module-accent-border"
-                : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
-            )}
-          >
-            <Shield className="h-5 w-5 shrink-0" />
-            {sidebarOuverte && <span>Admin</span>}
-          </Link>
-        )}
-      </div>
+      <div className="p-2 space-y-0.5" />
     </aside>
   );
 }

@@ -67,7 +67,7 @@ class ConfigImportRequest(BaseModel):
 
 
 class SeedDataRequest(BaseModel):
-    scope: Literal["recettes_standard"] = "recettes_standard"
+    scope: Literal["recettes_standard", "demo_complet"] = "recettes_standard"
 
 
 class FlowSimulationRequest(BaseModel):
@@ -128,6 +128,7 @@ class JobsSimulationJourneeRequest(BaseModel):
     dry_run: bool = True
     continuer_sur_erreur: bool = True
     inclure_jobs_inactifs: bool = False
+    date_reference: str | None = None
 
 
 class JobRunAllRequest(BaseModel):

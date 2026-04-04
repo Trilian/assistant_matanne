@@ -455,6 +455,31 @@ async def modifier_message(
         return False
 
 
+async def telecharger_fichier_telegram(file_id: str) -> bytes | None:
+    """Télécharge un fichier Telegram à partir de son `file_id`."""
+    settings = obtenir_parametres()
+    if not settings.TELEGRAM_BOT_TOKEN or not file_id:
+        return None
+
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            reponse_meta = await client.post(_get_bot_url("getFile"), json={"file_id": file_id})
+            reponse_meta.raise_for_status()
+            data = reponse_meta.json()
+            file_path = ((data or {}).get("result") or {}).get("file_path")
+            if not file_path:
+                logger.warning("Téléchargement Telegram impossible: file_path absent")
+                return None
+
+            url_fichier = f"{TELEGRAM_API_BASE}/file/bot{settings.TELEGRAM_BOT_TOKEN}/{file_path}"
+            reponse_fichier = await client.get(url_fichier)
+            reponse_fichier.raise_for_status()
+            return reponse_fichier.content
+    except Exception as exc:
+        logger.error("❌ Erreur téléchargement fichier Telegram: %s", exc)
+        return None
+
+
 # ═══════════════════════════════════════════════════════════
 # FONCTIONS MÉTIER
 # ═══════════════════════════════════════════════════════════

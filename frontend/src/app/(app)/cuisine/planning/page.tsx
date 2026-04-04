@@ -76,6 +76,7 @@ import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
 import { ConvertisseurInline } from "@/composants/cuisine/convertisseur-inline";
 import { CalendrierMensuel } from "@/composants/planning/calendrier-mensuel";
 import { CalendrierMosaiqueRepas } from "@/composants/planning/calendrier-mosaique-repas";
+import { CalendrierColonnesPlanning } from "@/composants/planning/calendrier-colonnes-planning";
 import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
@@ -731,8 +732,9 @@ export default function PagePlanning() {
       )}
 
       {modeAffichage === "semaine" && !isLoading && (
-        <div className="animate-in fade-in slide-in-from-bottom-1 duration-500 delay-300">
+        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-1 duration-500 delay-300">
           <CalendrierMosaiqueRepas dates={datesSemaine} repasParJour={repasParJour} />
+          <CalendrierColonnesPlanning dates={datesSemaine} repasParJour={repasParJour} />
         </div>
       )}
 

@@ -45,7 +45,7 @@ import {
 } from "@/composants/ui/table";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import {
-  type FlowSimulationResponse,
+  type ConfigDiffResponse,
   type LiveSnapshotResponse,
   type StatutBridgesResponse,
   type ServiceHealthResponse,
@@ -60,6 +60,7 @@ import {
   lireRuntimeConfig,
   listerActionsServices,
   listerResyncTargets,
+  obtenirDiffConfigAdmin,
   obtenirLiveSnapshotAdmin,
   obtenirDashboardAdmin,
   obtenirStatutBridges,
@@ -69,6 +70,7 @@ import {
   sauvegarderFeatureFlags,
   sauvegarderRuntimeConfig,
   simulerFluxAdmin,
+  simulerJourneeJobs,
   testerConsoleIA,
   viderCache,
 } from "@/bibliotheque/api/admin";
@@ -111,10 +113,13 @@ export default function PageAdminServices() {
 
   const [seedLoading, setSeedLoading] = useState(false);
   const [seedResultat, setSeedResultat] = useState<string | null>(null);
+  const [seedScope, setSeedScope] = useState<"recettes_standard" | "demo_complet">("demo_complet");
+  const [inclureSmokeBridges, setInclureSmokeBridges] = useState(false);
   const [simulationScenario, setSimulationScenario] = useState<"peremption_j2" | "document_expirant" | "echec_cron_job" | "rappel_courses" | "resume_hebdo">("peremption_j2");
   const [simulationMessage, setSimulationMessage] = useState("");
+  const [dateSimulationReference, setDateSimulationReference] = useState(() => new Date().toISOString().slice(0, 16));
   const [simulationLoading, setSimulationLoading] = useState(false);
-  const [simulationResultat, setSimulationResultat] = useState<FlowSimulationResponse | null>(null);
+  const [simulationResultat, setSimulationResultat] = useState<Record<string, unknown> | null>(null);
   const [iaPrompt, setIaPrompt] = useState("");
   const [iaResponse, setIaResponse] = useState("");
   const [iaLoading, setIaLoading] = useState(false);
@@ -178,9 +183,14 @@ export default function PageAdminServices() {
     isLoading: chargementBridges,
     refetch: actualiserBridges,
   } = utiliserRequete(
-    ["admin", "bridges-status"],
-    (): Promise<StatutBridgesResponse> => obtenirStatutBridges({ inclure_smoke: false }),
+    ["admin", "bridges-status", inclureSmokeBridges ? "smoke" : "presence"],
+    (): Promise<StatutBridgesResponse> => obtenirStatutBridges({ inclure_smoke: inclureSmokeBridges }),
     { refetchInterval: 30000 },
+  );
+
+  const { data: configDiff, refetch: actualiserDiffConfig } = utiliserRequete(
+    ["admin", "config-diff"],
+    (): Promise<ConfigDiffResponse> => obtenirDiffConfigAdmin(),
   );
 
   useEffect(() => {
@@ -227,6 +237,7 @@ export default function PageAdminServices() {
     actualiserActions();
     actualiserFlags();
     actualiserConfig();
+    actualiserDiffConfig();
     actualiserResync();
     actualiserLive();
     actualiserBridges();
@@ -260,6 +271,7 @@ export default function PageAdminServices() {
       setConfigResultat("OK: configuration importée.");
       actualiserFlags();
       actualiserConfig();
+      actualiserDiffConfig();
       actualiserDashboard();
     } catch {
       setConfigResultat("JSON invalide ou import impossible.");
@@ -319,6 +331,7 @@ export default function PageAdminServices() {
       await sauvegarderFeatureFlags(flagsLocal);
       setFlagsResultat("OK: feature flags sauvegardés.");
       actualiserFlags();
+      actualiserDiffConfig();
       actualiserDashboard();
     } catch {
       setFlagsResultat("Erreur de sauvegarde des feature flags.");
@@ -335,6 +348,7 @@ export default function PageAdminServices() {
       await sauvegarderRuntimeConfig(parsed);
       setConfigResultat("OK: configuration runtime sauvegardée.");
       actualiserConfig();
+      actualiserDiffConfig();
     } catch {
       setConfigResultat("JSON invalide ou erreur de sauvegarde.");
     } finally {
@@ -360,7 +374,7 @@ export default function PageAdminServices() {
     setSeedLoading(true);
     setSeedResultat(null);
     try {
-      const data = await lancerSeedDev("recettes_standard", dryRun);
+      const data = await lancerSeedDev(seedScope, dryRun);
       setSeedResultat(`OK: ${String(data.message ?? "Seed terminé")}`);
     } catch {
       setSeedResultat("Erreur seed (autorisé uniquement en dev/test). ");
@@ -377,7 +391,23 @@ export default function PageAdminServices() {
         message: simulationMessage || undefined,
         dry_run: true,
       });
-      setSimulationResultat(data);
+      setSimulationResultat(data as Record<string, unknown>);
+    } catch {
+      setSimulationResultat(null);
+    } finally {
+      setSimulationLoading(false);
+    }
+  };
+
+  const lancerSimulationDate = async () => {
+    setSimulationLoading(true);
+    try {
+      const data = await simulerJourneeJobs({
+        dry_run: true,
+        continuer_sur_erreur: true,
+        date_reference: dateSimulationReference ? new Date(dateSimulationReference).toISOString() : undefined,
+      });
+      setSimulationResultat(data as Record<string, unknown>);
     } catch {
       setSimulationResultat(null);
     } finally {
@@ -558,14 +588,25 @@ export default function PageAdminServices() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Bridges inter-modules</CardTitle>
-              <CardDescription>
-                {chargementBridges
-                  ? "Chargement..."
-                  : statutBridges
-                    ? `Mode ${statutBridges.resume.mode_verification} • ${statutBridges.resume.total_actions} action(s)`
-                    : "-"}
-              </CardDescription>
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <CardTitle>Bridges inter-modules</CardTitle>
+                  <CardDescription>
+                    {chargementBridges
+                      ? "Chargement..."
+                      : statutBridges
+                        ? `Mode ${statutBridges.resume.mode_verification} • ${statutBridges.resume.total_actions} action(s)`
+                        : "-"}
+                  </CardDescription>
+                </div>
+                <Button
+                  variant={inclureSmokeBridges ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setInclureSmokeBridges((prev) => !prev)}
+                >
+                  {inclureSmokeBridges ? "Revenir en présence" : "Lancer le smoke test"}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {statutBridges?.resume && (
@@ -599,6 +640,7 @@ export default function PageAdminServices() {
                         <TableHead>Vérification</TableHead>
                         <TableHead>Statut</TableHead>
                         <TableHead>Latence</TableHead>
+                        <TableHead>Détail</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -612,6 +654,7 @@ export default function PageAdminServices() {
                           <TableCell>{item.verification}</TableCell>
                           <TableCell>{badgeStatut(item.statut)}</TableCell>
                           <TableCell>{item.latence_ms.toFixed(2)} ms</TableCell>
+                          <TableCell className="max-w-xs text-xs text-muted-foreground">{item.details}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -853,6 +896,27 @@ export default function PageAdminServices() {
               )}
             </CardContent>
           </Card>
+
+          {configDiff && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Diff actuel vs défaut</CardTitle>
+                <CardDescription>
+                  {configDiff.feature_flags.changed.length} flag(s) modifié(s) • {configDiff.runtime_config.changed.length} valeur(s) runtime modifiée(s)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Feature flags</p>
+                  <pre className="text-xs bg-muted rounded p-3 overflow-auto max-h-64">{JSON.stringify(configDiff.feature_flags, null, 2)}</pre>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Runtime config</p>
+                  <pre className="text-xs bg-muted rounded p-3 overflow-auto max-h-64">{JSON.stringify(configDiff.runtime_config, null, 2)}</pre>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="resync" className="mt-4 space-y-4">
@@ -898,9 +962,22 @@ export default function PageAdminServices() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><FlaskConical className="h-4 w-4" />Seed data dev</CardTitle>
-              <CardDescription>Injection de recettes standard en environnement de dev/test.</CardDescription>
+              <CardDescription>Injection de recettes standard ou d’un jeu de démo réaliste multi-modules.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              <div className="space-y-1">
+                <Label htmlFor="seed-scope">Scope</Label>
+                <select
+                  id="seed-scope"
+                  aria-label="Scope de seed admin"
+                  className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  value={seedScope}
+                  onChange={(e) => setSeedScope(e.target.value as typeof seedScope)}
+                >
+                  <option value="demo_complet">Démo complète (famille + cuisine + maison)</option>
+                  <option value="recettes_standard">Recettes standard</option>
+                </select>
+              </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => lancerSeed(true)} disabled={seedLoading}>
                   {seedLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -1000,9 +1077,33 @@ export default function PageAdminServices() {
                   placeholder="Optionnel: surcharge du message simulé"
                 />
               </div>
-              <Button onClick={lancerSimulation} disabled={simulationLoading}>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={lancerSimulation} disabled={simulationLoading}>
+                  {simulationLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+                  Lancer la simulation
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Simulateur de date des jobs</CardTitle>
+              <CardDescription>Tester les jobs hebdo/mensuels comme si on était à une date donnée.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1 max-w-sm">
+                <Label htmlFor="date-simulation-admin">Date de référence</Label>
+                <Input
+                  id="date-simulation-admin"
+                  type="datetime-local"
+                  value={dateSimulationReference}
+                  onChange={(e) => setDateSimulationReference(e.target.value)}
+                />
+              </div>
+              <Button variant="outline" onClick={lancerSimulationDate} disabled={simulationLoading}>
                 {simulationLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
-                Lancer la simulation
+                Simuler les jobs à cette date
               </Button>
               {simulationResultat && (
                 <pre className="text-xs bg-muted rounded p-3 overflow-auto max-h-96">{JSON.stringify(simulationResultat, null, 2)}</pre>

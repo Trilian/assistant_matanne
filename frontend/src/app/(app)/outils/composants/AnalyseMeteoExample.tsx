@@ -13,6 +13,7 @@ import {
 } from '@/src/composants/ui/select'
 import { useNotifications } from '@/src/magasins/store-notifications'
 import { utiliseAnalyseImpactsMeteo } from '@/src/crochets/utiliser-ia-modules'
+import type { MeteoContexte } from '@/src/bibliotheque/api/ia-modules'
 
 /**
  * Example Component: Weather Impact Analysis
@@ -156,7 +157,7 @@ export function AnalyseMeteoExample() {
 
       {data && (
         <div className="mt-4 space-y-2">
-          {data.map((day: any, idx: number) => (
+          {data.map((day: MeteoContexte, idx: number) => (
             <div key={idx} className="p-3 bg-blue-50 rounded">
               <p className="text-sm font-semibold">{day.date}</p>
               <p className="text-sm">

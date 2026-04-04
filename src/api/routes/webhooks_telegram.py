@@ -200,6 +200,8 @@ async def _envoyer_menu_module(chat_id: str, module_id: str) -> None:
             "boutons": [
                 {"id": "action_planning", "title": "📅 Planning semaine"},
                 {"id": "action_courses", "title": "🛒 Liste de courses"},
+                {"id": "action_inventaire", "title": "🥫 Inventaire"},
+                {"id": "action_batch", "title": "🍱 Batch cooking"},
                 {"id": "action_repas_midi", "title": "☀️ Repas midi"},
                 {"id": "action_repas_soir", "title": "🌙 Repas ce soir"},
             ],
@@ -216,6 +218,9 @@ async def _envoyer_menu_module(chat_id: str, module_id: str) -> None:
             "titre": "🏠 <b>Maison</b>",
             "boutons": [
                 {"id": "action_maison", "title": "🧹 Tâches du jour"},
+                {"id": "action_jardin", "title": "🌿 Jardin"},
+                {"id": "action_energie", "title": "⚡ Énergie"},
+                {"id": "action_rappels", "title": "⏰ Rappels"},
                 {"id": "action_budget", "title": "💰 Budget maison/famille"},
             ],
         },
@@ -223,6 +228,8 @@ async def _envoyer_menu_module(chat_id: str, module_id: str) -> None:
             "titre": "🧰 <b>Outils</b>",
             "boutons": [
                 {"id": "action_meteo", "title": "🌦️ Météo"},
+                {"id": "action_timer_10", "title": "⏱️ Timer 10 min"},
+                {"id": "action_note_modele", "title": "📝 Note rapide"},
                 {"id": "menu_aide", "title": "❓ Aide"},
             ],
         },
@@ -325,23 +332,43 @@ async def _envoyer_courses_commande(chat_id: str, liste_id: int | None = None) -
 
         lignes = []
         boutons: list[dict[str, str]] = []
-        for article in articles[:8]:
+        for article in articles[:6]:
             nom_article = getattr(getattr(article, "ingredient", None), "nom", None) or f"Article #{article.id}"
-            prefixe = "☑️" if article.achete else "☐"
-            lignes.append(f"{prefixe} {html.escape(str(nom_article))}")
-            boutons.append(
-                {
-                    "id": f"courses_toggle_article:{article.id}",
-                    "title": f"{prefixe} {str(nom_article)[:28]}",
-                }
-            )
+            prefixe, statut = _resume_statut_article(article)
+            lignes.append(f"{prefixe} {html.escape(str(nom_article))} <i>({html.escape(statut)})</i>")
+
+            if article.achete:
+                boutons.append(
+                    {
+                        "id": f"courses_toggle_article:{article.id}",
+                        "title": f"↩️ Décocher {str(nom_article)[:20]}",
+                    }
+                )
+            else:
+                boutons.extend(
+                    [
+                        {
+                            "id": f"courses_action:achete:{article.id}",
+                            "title": f"✅ {str(nom_article)[:22]}",
+                        },
+                        {
+                            "id": f"courses_action:manquant:{article.id}",
+                            "title": f"❌ {str(nom_article)[:22]}",
+                        },
+                        {
+                            "id": f"courses_action:reporter:{article.id}",
+                            "title": f"🔄 {str(nom_article)[:22]}",
+                        },
+                    ]
+                )
 
         if not lignes:
             lignes.append("La liste est vide pour le moment.")
 
         boutons.extend(
             [
-                {"id": f"courses_confirmer:{liste.id}", "title": "✅ Confirmer"},
+                {"id": f"courses_confirmer:{liste.id}", "title": "✅ Confirmer la liste"},
+                {"url": _obtenir_url_app("/cuisine/courses"), "title": "🛒 Ouvrir les courses"},
                 {"id": "menu_retour", "title": "🏠 Menu principal"},
             ]
         )
@@ -351,7 +378,11 @@ async def _envoyer_courses_commande(chat_id: str, liste_id: int | None = None) -
             {"type": "courses_confirmation", "liste_id": liste.id},
         )
 
-        message = f"🛒 <b>{html.escape(liste.nom)}</b>\n\n" + "\n".join(lignes)
+        message = (
+            f"🛒 <b>{html.escape(liste.nom)}</b>\n\n"
+            + "\n".join(lignes)
+            + "\n\nChoisissez une action rapide : ✅ acheté • ❌ pas trouvé • 🔄 reporter"
+        )
 
     await envoyer_message_interactif(
         destinataire=chat_id,
@@ -392,8 +423,11 @@ async def _envoyer_repas_moment(chat_id: str, type_repas: str | None = None) -> 
 
     await envoyer_message_interactif(
         destinataire=chat_id,
-        corps="🍽️ <b>Repas du jour</b>\n\n" + "\n".join(lignes),
+        corps="🍽️ <b>Repas du jour</b>\n\n" + "\n".join(lignes) + "\n\nQu'est-ce qui vous ferait plaisir ?",
         boutons=[
+            {"id": "repas_sondage:midi", "title": "☀️ Plutôt simple"},
+            {"id": "repas_sondage:soir", "title": "🌙 Réconfortant"},
+            {"id": "repas_sondage:surprise", "title": "🎲 Surprise"},
             {"id": "action_planning", "title": "📅 Ouvrir le planning"},
             {"id": "menu_retour", "title": "🏠 Menu principal"},
         ],
@@ -545,6 +579,548 @@ async def _envoyer_meteo_telegram(chat_id: str) -> None:
     )
 
 
+def _obtenir_url_app(chemin: str) -> str:
+    chemin_normalise = chemin if chemin.startswith("/") else f"/{chemin}"
+    return f"https://matanne.vercel.app/app{chemin_normalise}"
+
+
+def _extraire_mois_depuis_texte(texte: str | None) -> set[int]:
+    valeurs: set[int] = set()
+    for brute in re.findall(r"\d{1,2}", texte or ""):
+        valeur = int(brute)
+        if 1 <= valeur <= 12:
+            valeurs.add(valeur)
+    return valeurs
+
+
+def _emoji_peremption(date_peremption: date | None) -> str:
+    if date_peremption is None:
+        return "⚪"
+    delta = (date_peremption - date.today()).days
+    if delta <= 1:
+        return "🔴"
+    if delta <= 3:
+        return "🟡"
+    return "🟢"
+
+
+def _resume_statut_article(article) -> tuple[str, str]:
+    note_normalisee = _normaliser_texte(getattr(article, "notes", "") or "")
+    if getattr(article, "achete", False):
+        return "✅", "acheté"
+    if "pas trouve" in note_normalisee or "introuvable" in note_normalisee:
+        return "❌", "pas trouvé"
+    if "report" in note_normalisee or "plus tard" in note_normalisee:
+        return "🔄", "reporté"
+    return "⬜", "à acheter"
+
+
+async def _envoyer_inventaire_commande(chat_id: str) -> None:
+    from src.core.db import obtenir_contexte_db
+    from src.core.models.inventaire import ArticleInventaire
+    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+
+    with obtenir_contexte_db() as session:
+        articles = (
+            session.query(ArticleInventaire)
+            .filter(ArticleInventaire.quantite > 0)
+            .all()
+        )
+
+    articles_tries = sorted(
+        articles,
+        key=lambda article: (
+            getattr(article, "date_peremption", None) is None,
+            getattr(article, "date_peremption", None) or date.max,
+            (getattr(article, "nom", None) or "").lower(),
+        ),
+    )
+
+    if not articles_tries:
+        await envoyer_message_telegram(chat_id, "🥫 Inventaire vide pour le moment.")
+        return
+
+    lignes = ["🥫 <b>Inventaire / frigo</b>"]
+    for article in articles_tries[:8]:
+        nom = getattr(article, "nom", None) or f"Article #{article.id}"
+        quantite = f"{float(getattr(article, 'quantite', 0) or 0):g}"
+        unite = getattr(article, "unite", None) or ""
+        peremption = getattr(article, "date_peremption", None)
+        infos = [f"{quantite} {unite}".strip()]
+        if peremption:
+            infos.append(f"à consommer avant le {peremption.strftime('%d/%m')}")
+        if getattr(article, "emplacement", None):
+            infos.append(str(article.emplacement))
+        if getattr(article, "est_stock_bas", False):
+            infos.append("stock bas")
+        lignes.append(f"{_emoji_peremption(peremption)} {html.escape(str(nom))} — {html.escape(' • '.join(filter(None, infos)))}")
+
+    lignes.append("")
+    lignes.append("Légende : 🟢 OK • 🟡 à surveiller • 🔴 urgent")
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"id": "action_rappels", "title": "⏰ Voir les rappels"},
+            {"url": _obtenir_url_app("/cuisine/inventaire"), "title": "🥫 Ouvrir l'inventaire"},
+            {"id": "menu_cuisine", "title": "🍽️ Menu Cuisine"},
+        ],
+    )
+
+
+async def _envoyer_recette_commande(chat_id: str, recherche: str | None = None) -> None:
+    from src.core.db import obtenir_contexte_db
+    from src.core.models.recettes import Recette
+    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+
+    terme = (recherche or "").strip()
+    with obtenir_contexte_db() as session:
+        requete = session.query(Recette)
+        if terme:
+            recette = (
+                requete.filter(Recette.nom.ilike(f"%{terme}%"))
+                .order_by(Recette.est_rapide.desc(), Recette.compatible_bebe.desc(), Recette.id.desc())
+                .first()
+            )
+        else:
+            recette = (
+                requete.filter(Recette.est_rapide.is_(True))
+                .order_by(Recette.compatible_bebe.desc(), Recette.id.desc())
+                .first()
+            ) or requete.order_by(Recette.id.desc()).first()
+
+    if recette is None:
+        await envoyer_message_telegram(chat_id, "🍽️ Aucune recette trouvée pour cette recherche.")
+        return
+
+    ingredients = []
+    for item in getattr(recette, "ingredients", [])[:8]:
+        nom = getattr(getattr(item, "ingredient", None), "nom", None) or "Ingrédient"
+        quantite = getattr(item, "quantite", None)
+        unite = getattr(item, "unite", None) or ""
+        prefixe = f"{float(quantite):g} " if quantite is not None else ""
+        ingredients.append(f"• {html.escape(prefixe + str(unite)).strip()} {html.escape(str(nom))}".replace("•  ", "• "))
+
+    tags = ", ".join(recette.tags[:4]) if getattr(recette, "tags", None) else "familiale"
+    lignes = [
+        f"🍽️ <b>{html.escape(str(recette.nom))}</b>",
+        f"⏱️ {recette.temps_total} min • 👨‍👩‍👦 {recette.portions} portions • {html.escape(tags)}",
+    ]
+    if getattr(recette, "description", None):
+        lignes.append("")
+        lignes.append(html.escape(str(recette.description))[:240])
+    if ingredients:
+        lignes.append("")
+        lignes.append("<b>Ingrédients</b>")
+        lignes.extend(ingredients)
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"id": "action_planning", "title": "📅 Voir le planning"},
+            {"url": _obtenir_url_app("/cuisine/recettes"), "title": "📖 Ouvrir les recettes"},
+            {"id": "menu_cuisine", "title": "🍽️ Menu Cuisine"},
+        ],
+    )
+
+
+async def _envoyer_resume_batch_cooking(chat_id: str) -> None:
+    from src.services.cuisine.batch_cooking import obtenir_service_batch_cooking
+    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+
+    service = obtenir_service_batch_cooking()
+    session_active = service.get_session_active()
+    prochaine = None
+    if session_active is None:
+        sessions = service.obtenir_sessions_planifiees(
+            date_debut=date.today(),
+            date_fin=date.today() + timedelta(days=14),
+        )
+        prochaine = sessions[0] if sessions else None
+
+    cible = session_active or prochaine
+    if cible is None:
+        await envoyer_message_telegram(chat_id, "🍱 Aucun batch cooking en cours ou planifié pour le moment.")
+        return
+
+    etat = getattr(cible, "statut", "planifiee")
+    date_session = getattr(cible, "date_session", None)
+    heure = getattr(cible, "heure_debut", None)
+    nb_recettes = len(getattr(cible, "recettes_selectionnees", []) or [])
+    nb_etapes = len(getattr(cible, "etapes", []) or [])
+
+    lignes = ["🍱 <b>Batch cooking</b>"]
+    lignes.append(f"Session : <b>{html.escape(str(getattr(cible, 'nom', 'Batch')))}</b>")
+    if date_session:
+        lignes.append(f"📅 {date_session.strftime('%d/%m/%Y')}")
+    if heure:
+        lignes.append(f"🕒 Début prévu : {heure.strftime('%H:%M')}")
+    lignes.append(f"Statut : <b>{html.escape(str(etat))}</b>")
+    lignes.append(f"Recettes : {nb_recettes} • Étapes : {nb_etapes}")
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"url": _obtenir_url_app("/cuisine/batch-cooking"), "title": "🍱 Ouvrir batch cooking"},
+            {"id": "menu_cuisine", "title": "🍽️ Menu Cuisine"},
+        ],
+    )
+
+
+async def _envoyer_resume_jardin(chat_id: str) -> None:
+    from src.core.db import obtenir_contexte_db
+    from src.core.models.habitat import TacheEntretien
+    from src.core.models.temps_entretien import PlanteJardin
+    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+
+    mois_courant = date.today().month
+    mois_prochain = 1 if mois_courant == 12 else mois_courant + 1
+
+    with obtenir_contexte_db() as session:
+        taches = (
+            session.query(TacheEntretien)
+            .filter(TacheEntretien.categorie == "jardin", TacheEntretien.fait.is_(False))
+            .order_by(TacheEntretien.prochaine_fois.asc(), TacheEntretien.id.asc())
+            .limit(5)
+            .all()
+        )
+        plantes = session.query(PlanteJardin).order_by(PlanteJardin.nom.asc()).limit(12).all()
+
+    recoltes = [
+        plante
+        for plante in plantes
+        if {mois_courant, mois_prochain} & _extraire_mois_depuis_texte(getattr(plante, "mois_recolte", None))
+    ]
+
+    if not taches and not recoltes:
+        await envoyer_message_telegram(chat_id, "🌿 Aucun rappel jardin urgent pour le moment.")
+        return
+
+    lignes = ["🌿 <b>Jardin</b>"]
+    if taches:
+        lignes.append("")
+        lignes.append("<b>Prochaines tâches</b>")
+        for tache in taches[:4]:
+            echeance = (
+                tache.prochaine_fois.strftime('%d/%m')
+                if getattr(tache, "prochaine_fois", None)
+                else "à planifier"
+            )
+            lignes.append(f"• {html.escape(str(tache.nom))} — {echeance}")
+    if recoltes:
+        lignes.append("")
+        lignes.append("<b>Récoltes proches</b>")
+        for plante in recoltes[:4]:
+            etat = getattr(plante, "etat", "bon")
+            lignes.append(f"• {html.escape(str(plante.nom))} — état {html.escape(str(etat))}")
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"url": _obtenir_url_app("/maison/jardin"), "title": "🌿 Ouvrir le jardin"},
+            {"id": "menu_maison", "title": "🏠 Menu Maison"},
+        ],
+    )
+
+
+async def _envoyer_resume_energie(chat_id: str) -> None:
+    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+    from src.services.utilitaires import obtenir_energie_service
+
+    totaux = obtenir_energie_service().totaux_annuels(date.today().year)
+    if not totaux:
+        await envoyer_message_telegram(chat_id, "⚡ Aucun relevé énergie disponible pour le moment.")
+        return
+
+    libelles = {
+        "electricite": "⚡ Électricité",
+        "gaz": "🔥 Gaz",
+        "eau": "💧 Eau",
+    }
+    lignes = [f"⚡ <b>Énergie {date.today().year}</b>"]
+    for type_energie, valeurs in sorted(totaux.items()):
+        consommation = float(valeurs.get("total_consommation", 0) or 0)
+        montant = float(valeurs.get("total_montant", 0) or 0)
+        lignes.append(
+            f"• {libelles.get(type_energie, type_energie.title())} : {consommation:g} — {montant:.2f}€"
+        )
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"url": _obtenir_url_app("/maison/energie"), "title": "⚡ Ouvrir énergie"},
+            {"id": "menu_maison", "title": "🏠 Menu Maison"},
+        ],
+    )
+
+
+async def _envoyer_rappels_groupes(chat_id: str) -> None:
+    from src.core.db import obtenir_contexte_db
+    from src.core.models.habitat import TacheEntretien
+    from src.core.models.inventaire import ArticleInventaire
+    from src.core.models.utilitaires import NoteMemo
+    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+
+    aujourd_hui = date.today()
+    maintenant = datetime.utcnow()
+
+    with obtenir_contexte_db() as session:
+        taches = (
+            session.query(TacheEntretien)
+            .filter(
+                TacheEntretien.fait.is_(False),
+                TacheEntretien.prochaine_fois.isnot(None),
+                TacheEntretien.prochaine_fois <= aujourd_hui + timedelta(days=2),
+            )
+            .order_by(TacheEntretien.prochaine_fois.asc(), TacheEntretien.id.asc())
+            .limit(4)
+            .all()
+        )
+        peremptions = (
+            session.query(ArticleInventaire)
+            .filter(
+                ArticleInventaire.quantite > 0,
+                ArticleInventaire.date_peremption.isnot(None),
+                ArticleInventaire.date_peremption <= aujourd_hui + timedelta(days=2),
+            )
+            .order_by(ArticleInventaire.date_peremption.asc(), ArticleInventaire.id.asc())
+            .limit(4)
+            .all()
+        )
+        notes = (
+            session.query(NoteMemo)
+            .filter(
+                NoteMemo.archive.is_(False),
+                NoteMemo.rappel_date.isnot(None),
+                NoteMemo.rappel_date <= maintenant + timedelta(days=1),
+            )
+            .order_by(NoteMemo.rappel_date.asc(), NoteMemo.id.asc())
+            .limit(3)
+            .all()
+        )
+
+    if not taches and not peremptions and not notes:
+        await envoyer_message_telegram(chat_id, "⏰ Aucun rappel en attente pour le moment.")
+        return
+
+    lignes = ["⏰ <b>Rappels en attente</b>"]
+    if taches:
+        lignes.append("")
+        lignes.append("<b>Maison / entretien</b>")
+        for tache in taches:
+            date_label = tache.prochaine_fois.strftime('%d/%m') if tache.prochaine_fois else "bientôt"
+            lignes.append(f"• {html.escape(str(tache.nom))} — {date_label}")
+    if peremptions:
+        lignes.append("")
+        lignes.append("<b>Inventaire</b>")
+        for article in peremptions:
+            nom = getattr(article, "nom", None) or f"Article #{article.id}"
+            date_label = article.date_peremption.strftime('%d/%m') if article.date_peremption else "sans date"
+            lignes.append(f"• {html.escape(str(nom))} — {date_label}")
+    if notes:
+        lignes.append("")
+        lignes.append("<b>Notes & pense-bêtes</b>")
+        for note in notes:
+            date_label = note.rappel_date.strftime('%d/%m %H:%M') if note.rappel_date else "à voir"
+            lignes.append(f"• {html.escape(str(note.titre))} — {date_label}")
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"id": "action_maison", "title": "🏠 Tâches maison"},
+            {"id": "action_inventaire", "title": "🥫 Inventaire"},
+            {"url": _obtenir_url_app("/outils/notes"), "title": "📝 Ouvrir les notes"},
+        ],
+    )
+
+
+async def _notifier_fin_minuteur(chat_id: str, minutes: int) -> None:
+    from src.services.integrations.telegram import envoyer_message_interactif
+
+    await asyncio.sleep(minutes * 60)
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps=f"⏰ <b>Minuteur terminé</b> — {minutes} min écoulées.",
+        boutons=[
+            {"id": "action_repas_soir", "title": "🍽️ Voir le repas"},
+            {"id": "menu_retour", "title": "🏠 Menu principal"},
+        ],
+    )
+
+
+async def _lancer_minuteur_telegram(chat_id: str, argument: str) -> None:
+    from src.services.integrations.telegram import envoyer_message_telegram
+
+    match = re.search(r"(\d{1,3})", argument or "")
+    if not match:
+        await envoyer_message_telegram(chat_id, "⏱️ Utilise par exemple <code>/timer 15</code>.")
+        return
+
+    minutes = max(1, min(int(match.group(1)), 180))
+    asyncio.create_task(_notifier_fin_minuteur(chat_id, minutes))
+    await envoyer_message_telegram(chat_id, f"⏱️ Minuteur lancé pour <b>{minutes} min</b>.")
+
+
+async def _creer_note_rapide_telegram(chat_id: str, texte_note: str) -> None:
+    from src.services.integrations.telegram import envoyer_message_telegram
+    from src.services.utilitaires import obtenir_notes_service
+
+    contenu = (texte_note or "").strip()
+    if not contenu:
+        await envoyer_message_telegram(chat_id, "📝 Utilise <code>/note ton texte</code> pour créer un pense-bête.")
+        return
+
+    note = obtenir_notes_service().creer(
+        titre=(contenu[:57] + "...") if len(contenu) > 60 else contenu,
+        contenu=contenu,
+        categorie="telegram",
+        couleur="#FFF7CC",
+        epingle=False,
+        est_checklist=False,
+    )
+    await envoyer_message_telegram(chat_id, f"📝 Note créée avec succès (#{note.id}).")
+
+
+async def _traiter_callback_action_article(
+    callback_data: str,
+    callback_query_id: str,
+    chat_id: str,
+) -> None:
+    from src.api.utils import executer_async, executer_avec_session
+    from src.services.integrations.telegram import repondre_callback_query
+
+    morceaux = callback_data.split(":")
+    if len(morceaux) != 3:
+        await repondre_callback_query(callback_query_id, "❌ Action invalide", show_alert=True)
+        return
+
+    _, action, article_brut = morceaux
+    try:
+        article_id = int(article_brut)
+    except ValueError:
+        await repondre_callback_query(callback_query_id, "❌ Article invalide", show_alert=True)
+        return
+
+    def _appliquer_action() -> dict[str, object]:
+        from src.core.models.courses import ArticleCourses
+
+        with executer_avec_session() as session:
+            article = session.query(ArticleCourses).filter(ArticleCourses.id == article_id).first()
+            if not article:
+                return {"status": 404, "error": "Article non trouvé"}
+
+            nom_article = getattr(getattr(article, "ingredient", None), "nom", None) or f"Article #{article.id}"
+            if action == "achete":
+                article.achete = True
+                article.achete_le = datetime.utcnow()
+                article.notes = "Validé depuis Telegram"
+                message = f"✅ {nom_article} acheté"
+            elif action == "manquant":
+                article.achete = False
+                article.achete_le = None
+                article.notes = "Pas trouvé en magasin (Telegram)"
+                message = f"❌ {nom_article} marqué comme introuvable"
+            elif action == "reporter":
+                article.achete = False
+                article.achete_le = None
+                article.notes = "À reporter / vérifier plus tard (Telegram)"
+                message = f"🔄 {nom_article} reporté"
+            else:
+                return {"status": 400, "error": "Action inconnue"}
+
+            session.commit()
+            return {"status": 200, "message": message, "liste_id": article.liste_id}
+
+    resultat = await executer_async(_appliquer_action)
+    if resultat.get("status") != 200:
+        await repondre_callback_query(
+            callback_query_id,
+            f"❌ {resultat.get('error', 'Erreur')}",
+            show_alert=True,
+        )
+        return
+
+    await repondre_callback_query(callback_query_id, str(resultat.get("message") or "✅ OK"), show_alert=False)
+    await _envoyer_courses_commande(chat_id, liste_id=int(resultat["liste_id"]))
+
+
+async def _traiter_callback_sondage_repas(
+    callback_data: str,
+    callback_query_id: str,
+    chat_id: str,
+) -> None:
+    from src.services.integrations.telegram import envoyer_message_telegram, repondre_callback_query
+
+    choix = callback_data.split(":", 1)[1] if ":" in callback_data else "surprise"
+    libelles = {
+        "midi": "un repas plutôt simple pour midi",
+        "soir": "un dîner réconfortant pour ce soir",
+        "surprise": "une idée surprise",
+    }
+    message = libelles.get(choix, choix)
+    await repondre_callback_query(callback_query_id, "🍽️ Préférence notée", show_alert=False)
+    await envoyer_message_telegram(chat_id, f"🍽️ Bien noté, vous avez envie de {html.escape(message)}.")
+
+
+async def _traiter_photo_frigo_telegram(chat_id: str, photos: list[dict[str, object]]) -> None:
+    from src.services.cuisine.photo_frigo import obtenir_photo_frigo_service
+    from src.services.integrations.telegram import (
+        envoyer_message_interactif,
+        envoyer_message_telegram,
+        telecharger_fichier_telegram,
+    )
+
+    if not photos:
+        await envoyer_message_telegram(chat_id, "📸 Photo reçue, mais le fichier est introuvable.")
+        return
+
+    photo = max(photos, key=lambda item: int(item.get("file_size") or 0))
+    file_id = str(photo.get("file_id") or "")
+    if not file_id:
+        await envoyer_message_telegram(chat_id, "📸 Photo reçue, mais le fichier est incomplet.")
+        return
+
+    await envoyer_message_telegram(chat_id, "📸 Photo du frigo reçue, j’analyse les ingrédients…")
+    image_bytes = await telecharger_fichier_telegram(file_id)
+    if not image_bytes:
+        await envoyer_message_telegram(chat_id, "📸 Analyse indisponible : téléchargement Telegram impossible.")
+        return
+
+    resultat = await obtenir_photo_frigo_service().analyser_photo_frigo(image_bytes)
+    if not resultat.ingredients_detectes and not resultat.recettes_db and not resultat.recettes_suggerees:
+        await envoyer_message_telegram(chat_id, "📸 Je n’ai pas détecté assez d’ingrédients exploitables sur cette photo.")
+        return
+
+    ingredients = ", ".join(ingredient.nom for ingredient in resultat.ingredients_detectes[:6]) or "aucun"
+    recettes = [recette.nom for recette in resultat.recettes_db[:3]] or [
+        recette.nom for recette in resultat.recettes_suggerees[:3]
+    ]
+    lignes = [
+        "📸 <b>Analyse photo frigo</b>",
+        f"Ingrédients détectés : {html.escape(ingredients)}",
+    ]
+    if recettes:
+        lignes.append("")
+        lignes.append("<b>Idées de recettes</b>")
+        lignes.extend(f"• {html.escape(str(nom))}" for nom in recettes[:3])
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"id": "action_courses", "title": "🛒 Voir les courses"},
+            {"id": "action_planning", "title": "🍽️ Voir le planning"},
+            {"url": _obtenir_url_app("/cuisine/recettes"), "title": "📖 Ouvrir les recettes"},
+        ],
+    )
+
+
 async def _traiter_callback_toggle_article(
     callback_data: str,
     callback_query_id: str,
@@ -625,10 +1201,24 @@ async def _traiter_callback_menu(
         await _envoyer_repas_moment(chat_id, "midi")
     elif callback_data == "action_repas_soir":
         await _envoyer_repas_moment(chat_id, "soir")
+    elif callback_data == "action_inventaire":
+        await _envoyer_inventaire_commande(chat_id)
+    elif callback_data == "action_batch":
+        await _envoyer_resume_batch_cooking(chat_id)
     elif callback_data == "action_jules":
         await _envoyer_resume_jules(chat_id)
     elif callback_data == "action_maison":
         await _envoyer_taches_maison(chat_id)
+    elif callback_data == "action_jardin":
+        await _envoyer_resume_jardin(chat_id)
+    elif callback_data == "action_energie":
+        await _envoyer_resume_energie(chat_id)
+    elif callback_data == "action_rappels":
+        await _envoyer_rappels_groupes(chat_id)
+    elif callback_data == "action_note_modele":
+        await _creer_note_rapide_telegram(chat_id, "Pense-bête Telegram")
+    elif callback_data == "action_timer_10":
+        await _lancer_minuteur_telegram(chat_id, "10")
     elif callback_data == "action_budget":
         await _envoyer_resume_budget(chat_id)
     elif callback_data == "action_meteo":
@@ -726,11 +1316,29 @@ async def _dispatcher_commande_telegram(chat_id: str, texte: str, normalise: str
     if normalise in {"/courses", "/course"}:
         await _envoyer_courses_commande(chat_id)
         return True
+    if normalise == "/inventaire":
+        await _envoyer_inventaire_commande(chat_id)
+        return True
+    if normalise == "/recette":
+        await _envoyer_recette_commande(chat_id, argument)
+        return True
+    if normalise == "/batch":
+        await _envoyer_resume_batch_cooking(chat_id)
+        return True
     if normalise == "/jules":
         await _envoyer_resume_jules(chat_id)
         return True
     if normalise == "/maison":
         await _envoyer_taches_maison(chat_id)
+        return True
+    if normalise == "/jardin":
+        await _envoyer_resume_jardin(chat_id)
+        return True
+    if normalise == "/energie":
+        await _envoyer_resume_energie(chat_id)
+        return True
+    if normalise == "/rappels":
+        await _envoyer_rappels_groupes(chat_id)
         return True
     if normalise == "/budget":
         await _envoyer_resume_budget(chat_id)
@@ -749,6 +1357,12 @@ async def _dispatcher_commande_telegram(chat_id: str, texte: str, normalise: str
             await _envoyer_repas_moment(chat_id, "soir")
         else:
             await _envoyer_repas_moment(chat_id)
+        return True
+    if normalise.startswith("/timer"):
+        await _lancer_minuteur_telegram(chat_id, argument)
+        return True
+    if normalise.startswith("/note"):
+        await _creer_note_rapide_telegram(chat_id, argument)
         return True
 
     return False
@@ -1269,6 +1883,10 @@ async def recevoir_update_telegram(request: Request) -> MessageResponse:
         # Dispatch vers le handler correspondant.
         if data.startswith("courses_toggle_article:"):
             await _traiter_callback_toggle_article(data, callback_query_id, chat_id)
+        elif data.startswith("courses_action:"):
+            await _traiter_callback_action_article(data, callback_query_id, chat_id)
+        elif data.startswith("repas_sondage:"):
+            await _traiter_callback_sondage_repas(data, callback_query_id, chat_id)
         elif data.startswith("planning_"):
             await _traiter_callback_planning(data, callback_query_id, chat_id)
         elif data.startswith("courses_"):
@@ -1292,7 +1910,13 @@ async def recevoir_update_telegram(request: Request) -> MessageResponse:
         return MessageResponse(message="ok", id=0)
 
     chat_id = str((message.get("chat") or {}).get("id") or "")
+    photos = message.get("photo") or []
     texte = str(message.get("text") or "").strip()
+
+    if chat_id and photos:
+        await _traiter_photo_frigo_telegram(chat_id, list(photos))
+        return MessageResponse(message="ok", id=0)
+
     if not chat_id or not texte:
         return MessageResponse(message="ok", id=0)
 

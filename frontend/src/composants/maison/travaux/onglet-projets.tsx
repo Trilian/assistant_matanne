@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, BotMessageSquare, Hammer, Plus, Trash2 } from "lucide-react";
+import { BotMessageSquare, Hammer, Plus, Trash2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Badge } from "@/composants/ui/badge";
@@ -23,6 +23,7 @@ import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
 import { utiliserAutoCompletionMaison } from "@/crochets/utiliser-auto-completion-maison";
 import { KanbanProjets } from "@/composants/maison/kanban-projets";
 import { creerProjet, listerProjets, modifierProjet, supprimerProjet } from "@/bibliotheque/api/maison";
+import { GanttProjets } from "@/composants/maison/travaux/gantt-projets";
 import { toast } from "sonner";
 
 import { SheetEstimationIA } from "./sheet-estimation-ia";
@@ -271,6 +272,8 @@ export function OngletProjets() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {!isLoading && !!projets?.length ? <GanttProjets projets={projets} /> : null}
 
       {isLoading ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-32" />)}</div>

@@ -433,6 +433,67 @@ class TestAdminNotificationsQueueEndpoints:
         assert data["scope"] == "recettes_standard"
 
     @pytest.mark.asyncio
+    async def test_seed_dev_demo_complet_dry_run(self, async_client: httpx.AsyncClient):
+        class _Parametres:
+            ENV = "development"
+
+        with patch("src.core.config.obtenir_parametres", return_value=_Parametres()):
+            response = await async_client.post(
+                "/api/v1/admin/seed/dev?dry_run=true",
+                json={"scope": "demo_complet"},
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "dry_run"
+        assert data["scope"] == "demo_complet"
+        assert "resume" in data
+
+    @pytest.mark.asyncio
+    async def test_config_diff_expose_variations(self, async_client: httpx.AsyncClient):
+        response = await async_client.get("/api/v1/admin/config/diff")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "feature_flags" in data
+        assert "runtime_config" in data
+        assert "changed" in data["feature_flags"]
+        assert "changed" in data["runtime_config"]
+
+    @pytest.mark.asyncio
+    async def test_jobs_simulate_day_accepts_date_reference(self, async_client: httpx.AsyncClient):
+        with (
+            patch(
+                "src.services.core.cron.jobs.lister_jobs_disponibles",
+                return_value=["rappels_famille"],
+            ),
+            patch(
+                "src.services.core.cron.jobs.executer_job_par_id",
+                return_value={
+                    "status": "dry_run",
+                    "job_id": "rappels_famille",
+                    "message": "simulation date OK",
+                    "duration_ms": 5,
+                    "dry_run": True,
+                },
+            ),
+        ):
+            response = await async_client.post(
+                "/api/v1/admin/jobs/simulate-day",
+                json={
+                    "dry_run": True,
+                    "continuer_sur_erreur": True,
+                    "date_reference": "2026-05-01T08:00:00",
+                },
+            )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["date_reference"].startswith("2026-05-01")
+        assert data["mode"] == "dry_run"
+        assert data["jobs_cibles"] == ["rappels_famille"]
+
+    @pytest.mark.asyncio
     async def test_jobs_history_pagine_filtres(self, async_client: httpx.AsyncClient):
         response = await async_client.get(
             "/api/v1/admin/jobs/history",

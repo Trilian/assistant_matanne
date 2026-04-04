@@ -326,6 +326,7 @@ def enregistrer_feedback_semaine(feedbacks: list[dict], db=None) -> dict:
 
     def _traiter_session(session) -> list[int]:
         notes_locales: list[int] = []
+        evenements_feedback: list[dict[str, object]] = []
 
         for fb in feedbacks:
             recette_id = fb.get("recette_id")
@@ -361,12 +362,7 @@ def enregistrer_feedback_semaine(feedbacks: list[dict], db=None) -> dict:
 
             retour.contexte = f"note={note}/5"
             retour.notes = commentaire[:1000] if commentaire else retour.notes
-
-            # Émettre événement de feedback pour l'IA
-            from src.services.core.events.bus import obtenir_bus
-
-            obtenir_bus().emettre(
-                "recette.feedback",
+            evenements_feedback.append(
                 {
                     "recette_id": recette_id,
                     "note": note,
@@ -374,13 +370,19 @@ def enregistrer_feedback_semaine(feedbacks: list[dict], db=None) -> dict:
                     "commentaire": commentaire,
                     "feedback": feedback,
                     "user_id": user_id,
-                },
-                source="feedback_semaine",
+                }
             )
-
             notes_locales.append(note)
 
         session.commit()
+
+        if evenements_feedback:
+            from src.services.core.events.bus import obtenir_bus
+
+            bus = obtenir_bus()
+            for evenement in evenements_feedback:
+                bus.emettre("recette.feedback", evenement, source="feedback_semaine")
+
         return notes_locales
 
     notes = _traiter_session(db) if db is not None else []

@@ -350,6 +350,66 @@ class TestWebhookTelegramCommandesPhase8:
         assert response.status_code == 200
         mock_handler.assert_awaited_once_with("123456")
 
+    def test_commande_batch_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 31031,
+            "message": {
+                "message_id": 2131,
+                "date": 12345679021,
+                "chat": {"id": 123456},
+                "text": "/batch",
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._envoyer_resume_batch_cooking",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456")
+
+    def test_commande_jardin_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 31032,
+            "message": {
+                "message_id": 2132,
+                "date": 12345679022,
+                "chat": {"id": 123456},
+                "text": "/jardin",
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._envoyer_resume_jardin",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456")
+
+    def test_commande_energie_declenche_le_handler(self, client: TestClient):
+        payload = {
+            "update_id": 31033,
+            "message": {
+                "message_id": 2133,
+                "date": 12345679023,
+                "chat": {"id": 123456},
+                "text": "/energie",
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._envoyer_resume_energie",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456")
+
     def test_commande_timer_declenche_le_handler(self, client: TestClient):
         payload = {
             "update_id": 3104,
@@ -439,3 +499,26 @@ class TestWebhookTelegramCommandesPhase8:
 
         assert response.status_code == 200
         mock_handler.assert_awaited_once_with("repas_sondage:soir", "callback_repas_1", "123456")
+
+    def test_message_photo_route_vers_handler_ia(self, client: TestClient):
+        payload = {
+            "update_id": 3108,
+            "message": {
+                "message_id": 218,
+                "date": 1234567907,
+                "chat": {"id": 123456},
+                "photo": [
+                    {"file_id": "file_small", "width": 90, "height": 90},
+                    {"file_id": "file_large", "width": 1280, "height": 720},
+                ],
+            },
+        }
+
+        with patch(
+            "src.api.routes.webhooks_telegram._traiter_photo_frigo_telegram",
+            new_callable=AsyncMock,
+        ) as mock_handler:
+            response = client.post("/api/v1/telegram/webhook", json=payload)
+
+        assert response.status_code == 200
+        mock_handler.assert_awaited_once_with("123456", payload["message"]["photo"])

@@ -616,6 +616,72 @@ async def importer_config_admin(
     return {"status": "ok", **result}
 
 
+def _construire_diff_config(
+    valeurs_actuelles: dict[str, Any],
+    valeurs_par_defaut: dict[str, Any],
+) -> dict[str, Any]:
+    """Construit un diff simple entre la config actuelle et la config par défaut."""
+    items: list[dict[str, Any]] = []
+    changed: list[str] = []
+    added: list[str] = []
+    removed: list[str] = []
+
+    for cle in sorted(set(valeurs_par_defaut) | set(valeurs_actuelles)):
+        present_default = cle in valeurs_par_defaut
+        present_current = cle in valeurs_actuelles
+        valeur_defaut = valeurs_par_defaut.get(cle)
+        valeur_actuelle = valeurs_actuelles.get(cle)
+
+        if not present_default and present_current:
+            statut = "added"
+            added.append(cle)
+        elif present_default and not present_current:
+            statut = "removed"
+            removed.append(cle)
+        elif valeur_actuelle != valeur_defaut:
+            statut = "changed"
+            changed.append(cle)
+        else:
+            statut = "unchanged"
+
+        items.append(
+            {
+                "key": cle,
+                "status": statut,
+                "current": valeur_actuelle,
+                "default": valeur_defaut,
+            }
+        )
+
+    return {
+        "total": len(items),
+        "changed": changed,
+        "added": added,
+        "removed": removed,
+        "items": items,
+    }
+
+
+@router.get(
+    "/config/diff",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Comparer la configuration actuelle au défaut",
+    description="Retourne le diff des feature flags et de la config runtime par rapport aux valeurs par défaut.",
+)
+@gerer_exception_api
+async def comparer_config_admin(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    feature_flags = _lire_namespace_persistant(_NAMESPACE_FEATURE_FLAGS, _FEATURE_FLAGS_PAR_DEFAUT)
+    runtime_config = _lire_namespace_persistant(_NAMESPACE_RUNTIME_CONFIG, _RUNTIME_CONFIG_PAR_DEFAUT)
+
+    return {
+        "generated_at": datetime.now().isoformat(),
+        "feature_flags": _construire_diff_config(feature_flags, _FEATURE_FLAGS_PAR_DEFAUT),
+        "runtime_config": _construire_diff_config(runtime_config, _RUNTIME_CONFIG_PAR_DEFAUT),
+    }
+
+
 # ═══════════════════════════════════════════════════════════
 # D1 — Console commande rapide admin
 # ═══════════════════════════════════════════════════════════
@@ -991,40 +1057,93 @@ async def injecter_seed_dev(
     if env not in {"development", "dev", "test"}:
         raise HTTPException(status_code=403, detail="Le seed est autorisé uniquement en dev/test.")
 
-    if body.scope != "recettes_standard":
+    scopes_supportes = {"recettes_standard", "demo_complet"}
+    if body.scope not in scopes_supportes:
         raise HTTPException(status_code=422, detail=f"Scope seed non supporté: {body.scope}")
 
     seed_file = Path("data/seed/recettes_standard.json")
+    resume_demo = {
+        "utilisateurs": 1,
+        "profils": 2,
+        "ingredients": 26,
+        "recettes": 4,
+        "inventaire": 11,
+        "repas_planifies": 7,
+        "profil_enfant": 1,
+        "routines": 1,
+        "projets": 2,
+        "plantes": 4,
+        "notifications": 4,
+    }
+
     if dry_run:
-        total = 0
-        try:
-            payload = json.loads(seed_file.read_text(encoding="utf-8"))
-            total = len(payload.get("recettes_standard", []))
-        except Exception:
+        if body.scope == "recettes_standard":
             total = 0
+            try:
+                payload = json.loads(seed_file.read_text(encoding="utf-8"))
+                total = len(payload.get("recettes_standard", []))
+            except Exception:
+                total = 0
+
+            return {
+                "status": "dry_run",
+                "scope": body.scope,
+                "file": str(seed_file),
+                "recettes_detectees": total,
+                "message": "Simulation uniquement - aucune écriture DB.",
+            }
 
         return {
             "status": "dry_run",
             "scope": body.scope,
-            "file": str(seed_file),
-            "recettes_detectees": total,
-            "message": "Simulation uniquement - aucune écriture DB.",
+            "resume": resume_demo,
+            "estimated_duration_seconds": 8,
+            "message": "Simulation du seed complet : création d'un jeu réaliste multi-modules sans écriture DB.",
         }
 
-    from scripts.db.import_recettes import importer_recettes_standard
+    if body.scope == "recettes_standard":
+        from scripts.db.import_recettes import importer_recettes_standard
 
-    imported = int(importer_recettes_standard())
+        imported = int(importer_recettes_standard())
+        _journaliser_action_admin(
+            action="admin.seed.run",
+            entite_type="seed",
+            utilisateur_id=str(user.get("id", "admin")),
+            details={"scope": body.scope, "imported": imported},
+        )
+        return {
+            "status": "ok",
+            "scope": body.scope,
+            "imported": imported,
+            "message": f"Seed terminé ({imported} recette(s) importée(s)).",
+        }
+
+    from scripts.db import seed_data as seed_demo
+
+    debut = time.perf_counter()
+    user_id = seed_demo.seed_users()
+    seed_demo.seed_ingredients()
+    seed_demo.seed_recipes()
+    seed_demo.seed_inventory()
+    seed_demo.seed_batch_meals()
+    seed_demo.seed_child_and_family()
+    seed_demo.seed_projects()
+    seed_demo.seed_garden()
+    seed_demo.seed_notifications(user_id)
+    duree_ms = round((time.perf_counter() - debut) * 1000, 2)
+
     _journaliser_action_admin(
         action="admin.seed.run",
         entite_type="seed",
         utilisateur_id=str(user.get("id", "admin")),
-        details={"scope": body.scope, "imported": imported},
+        details={"scope": body.scope, "resume": resume_demo, "duration_ms": duree_ms},
     )
     return {
         "status": "ok",
         "scope": body.scope,
-        "imported": imported,
-        "message": f"Seed terminé ({imported} recette(s) importée(s)).",
+        "resume": resume_demo,
+        "duration_ms": duree_ms,
+        "message": "Seed complet de démonstration injecté avec succès.",
     }
 
 

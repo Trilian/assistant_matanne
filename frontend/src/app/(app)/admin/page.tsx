@@ -340,7 +340,7 @@ export default function PageAdmin() {
         </Card>
       )}
 
-      {bridgesPhase5?.items?.length ? (
+      {bridgesStatus?.items?.length ? (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Graphe réseau des modules</CardTitle>
