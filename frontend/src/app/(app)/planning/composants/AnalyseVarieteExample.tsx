@@ -51,7 +51,7 @@ export function AnalyseVarieteExample() {
       {
         onSuccess: (result) => {
           ajouter_notification(
-            `Variété: ${result.variete_score}/100 - ${result.equilibre_nutritionnel}`,
+            `Variété: ${result.score_variete}/100 - ${result.types_cuisines.join(', ')}`,
             'succes'
           )
         },
@@ -121,13 +121,13 @@ export function AnalyseVarieteExample() {
       {data && (
         <div className="mt-4 p-3 bg-green-50 rounded">
           <p className="text-sm font-semibold">
-            Score Variété: {data.variete_score}/100
+            Score Variété: {data.score_variete}/100
           </p>
           <p className="text-sm">
-            Équilibre: {data.equilibre_nutritionnel}
+            Protéines bien réparties: {data.proteins_bien_repartis ? 'oui' : 'non'}
           </p>
           <p className="text-sm">
-            Catégories: {data.categories_presentes.join(', ')}
+            Types de cuisines: {data.types_cuisines.join(', ')}
           </p>
         </div>
       )}

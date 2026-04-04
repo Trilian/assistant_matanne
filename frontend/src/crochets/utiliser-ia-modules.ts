@@ -8,7 +8,9 @@ import {
   analyserNutritionPersonne,
   analyserVarietePlanningRepas,
   estimerProjetMaison,
+  optimiserNutritionPlanningRepas,
   predireConsommationInventaire,
+  suggererSimplificationPlanningRepas,
   type AnalyseHabitudeRequest,
   type AnalyseHabitudeResponse,
   type AnalyseImpactsMeteoRequest,
@@ -19,8 +21,12 @@ import {
   type EstimationProjetMaisonRequest,
   type EstimationProjetResponse,
   type MeteoContexte,
+  type OptimisationNutritionPlanningRequest,
+  type OptimisationNutritionPlanningResponse,
   type PredictionConsommationRequest,
   type PredictionConsommationResponse,
+  type SimplificationPlanningRequest,
+  type SimplificationPlanningResponse,
 } from "@/bibliotheque/api/ia-modules";
 
 function notifier(type: "succes" | "erreur", message: string): void {
@@ -48,11 +54,48 @@ export function utiliseAnalyseVarietePlanning() {
   return useMutation<AnalyseVarieteResponse, Error, AnalyseVarietePlanningRequest>({
     mutationFn: analyserVarietePlanningRepas,
     onSuccess: (data) => {
-      notifier("succes", `Score variété: ${data.variete_score}/100`);
+      notifier("succes", `Score variété: ${data.score_variete}/100`);
       queryClient.invalidateQueries({ queryKey: ["planning"] });
     },
     onError: (error) => {
       notifier("erreur", error.message || "Impossible d'analyser la variété");
+    },
+  });
+}
+
+export function utiliseOptimisationNutritionPlanning() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    OptimisationNutritionPlanningResponse,
+    Error,
+    OptimisationNutritionPlanningRequest
+  >({
+    mutationFn: optimiserNutritionPlanningRepas,
+    onSuccess: (data) => {
+      notifier(
+        "succes",
+        `Fruits & légumes: ${Math.round(data.fruits_legumes_quota * 100)}% de l'objectif`
+      );
+      queryClient.invalidateQueries({ queryKey: ["planning", "nutrition"] });
+    },
+    onError: (error) => {
+      notifier("erreur", error.message || "Impossible d'optimiser la nutrition du planning");
+    },
+  });
+}
+
+export function utiliseSimplificationPlanning() {
+  const queryClient = useQueryClient();
+
+  return useMutation<SimplificationPlanningResponse, Error, SimplificationPlanningRequest>({
+    mutationFn: suggererSimplificationPlanningRepas,
+    onSuccess: (data) => {
+      notifier("succes", `Gain estimé: ${data.gain_temps_minutes} min`);
+      queryClient.invalidateQueries({ queryKey: ["planning"] });
+    },
+    onError: (error) => {
+      notifier("erreur", error.message || "Impossible de simplifier la semaine");
     },
   });
 }

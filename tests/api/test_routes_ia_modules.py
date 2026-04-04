@@ -57,13 +57,15 @@ def test_prediction_consommation_endpoint(client: TestClient) -> None:
 
 def test_analyse_variete_endpoint(client: TestClient) -> None:
     service = MagicMock()
-    service.analyser_variete_semaine.return_value = {
-        "score_variete": 78,
-        "proteins_bien_repartis": True,
-        "types_cuisines": ["française", "asiatique"],
-        "repetitions_problematiques": [],
-        "recommandations": ["Ajouter une journée végétarienne"],
-    }
+    service.analyser_variete_semaine = AsyncMock(
+        return_value={
+            "score_variete": 78,
+            "proteins_bien_repartis": True,
+            "types_cuisines": ["française", "asiatique"],
+            "repetitions_problematiques": [],
+            "recommandations": ["Ajouter une journée végétarienne"],
+        }
+    )
 
     with patch("src.api.routes.ia_modules._get_planning_ai_service", return_value=service):
         response = client.post(
@@ -77,7 +79,71 @@ def test_analyse_variete_endpoint(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert response.json()["score_variete"] == 78
-    service.analyser_variete_semaine.assert_called_once()
+    service.analyser_variete_semaine.assert_awaited_once()
+
+
+def test_optimisation_nutrition_planning_endpoint(client: TestClient) -> None:
+    service = MagicMock()
+    service.optimiser_nutrition_semaine.return_value = {
+        "calories_jour": {"lundi": 2100},
+        "proteines_equilibree": True,
+        "fruits_legumes_quota": 0.86,
+        "equilibre_fibre": True,
+        "aliments_a_privilegier": ["légumineuses", "légumes verts"],
+        "aliments_a_limiter": ["desserts ultra-sucrés"],
+    }
+
+    with patch("src.api.routes.ia_modules._get_planning_ai_service", return_value=service):
+        response = client.post(
+            "/api/v1/ia/modules/planning/optimisation-nutrition",
+            json={
+                "planning_repas": [
+                    {"jour": "lundi", "petit_dej": "yaourt", "midi": "poulet", "soir": "soupe"}
+                ],
+                "restrictions": ["sans alcool"],
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["proteines_equilibree"] is True
+    assert response.json()["fruits_legumes_quota"] == 0.86
+    service.optimiser_nutrition_semaine.assert_called_once_with(
+        [
+            {"jour": "lundi", "petit_dej": "yaourt", "midi": "poulet", "soir": "soupe"}
+        ],
+        restrictions=["sans alcool"],
+    )
+
+
+def test_suggestions_simplification_planning_endpoint(client: TestClient) -> None:
+    service = MagicMock()
+    service.suggerer_simplification.return_value = {
+        "nb_recettes_complexes": 3,
+        "suggestions_simplification": ["Remplacer le mercredi par un one-pot"],
+        "gain_temps_minutes": 55,
+        "recettes_simples_substitution": ["Pâtes aux légumes"],
+        "charge_globale": "chargé",
+    }
+
+    with patch("src.api.routes.ia_modules._get_planning_ai_service", return_value=service):
+        response = client.post(
+            "/api/v1/ia/modules/planning/suggestions-simplification",
+            json={
+                "planning_repas": [
+                    {"jour": "lundi", "petit_dej": "yaourt", "midi": "poulet", "soir": "soupe"}
+                ],
+                "nb_heures_cuisine_max": 4,
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.json()["charge_globale"] == "chargé"
+    service.suggerer_simplification.assert_called_once_with(
+        [
+            {"jour": "lundi", "petit_dej": "yaourt", "midi": "poulet", "soir": "soupe"}
+        ],
+        nb_heures_cuisine_max=4,
+    )
 
 
 def test_analyse_impacts_meteo_endpoint(client: TestClient) -> None:

@@ -24,8 +24,10 @@ from src.api.schemas.ia_modules import (
     EstimationComparaisonDevisResponse,
     EstimationProjetMaisonRequest,
     EstimationRoiHabitatResponse,
+    OptimisationNutritionPlanningRequest,
     PredictionEnergieResponse,
     PredictionConsommationRequest,
+    SuggestionSimplificationPlanningRequest,
 )
 from src.api.utils import gerer_exception_api
 from src.core.models.abonnements import Artisan
@@ -36,7 +38,7 @@ from src.services.integrations.habitudes_ia import AnalyseHabitude
 from src.services.integrations.meteo_impact_ai import MeteoContexte
 from src.services.inventaire.ia_service import PredictionConsommation
 from src.services.maison.projets_ia_service import EstimationProjet
-from src.services.planning.ia_service import AnalyseVariete
+from src.services.planning.ia_service import AnalyseVariete, OptimisationNutrition, SimplificationSemaine
 from src.services.utilitaires.meteo_service import MeteoService
 
 router = APIRouter(prefix="/api/v1/ia/modules", tags=["IA"])
@@ -134,7 +136,45 @@ async def analyser_variete_planning(
     _rate: dict = Depends(verifier_limite_debit_ia),
 ) -> AnalyseVariete:
     service = _get_planning_ai_service()
-    return service.analyser_variete_semaine(body.planning_repas)
+    return await service.analyser_variete_semaine(body.planning_repas)
+
+
+@router.post(
+    "/planning/optimisation-nutrition",
+    response_model=OptimisationNutrition,
+    responses=REPONSES_IA,
+    summary="Optimiser l'équilibre nutritionnel d'un planning de repas",
+)
+@gerer_exception_api
+async def optimiser_nutrition_planning(
+    body: OptimisationNutritionPlanningRequest,
+    user: dict = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+) -> OptimisationNutrition:
+    service = _get_planning_ai_service()
+    return service.optimiser_nutrition_semaine(
+        body.planning_repas,
+        restrictions=body.restrictions or None,
+    )
+
+
+@router.post(
+    "/planning/suggestions-simplification",
+    response_model=SimplificationSemaine,
+    responses=REPONSES_IA,
+    summary="Suggérer une simplification du planning pour une semaine chargée",
+)
+@gerer_exception_api
+async def suggerer_simplification_planning(
+    body: SuggestionSimplificationPlanningRequest,
+    user: dict = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+) -> SimplificationSemaine:
+    service = _get_planning_ai_service()
+    return service.suggerer_simplification(
+        body.planning_repas,
+        nb_heures_cuisine_max=body.nb_heures_cuisine_max,
+    )
 
 
 @router.post(

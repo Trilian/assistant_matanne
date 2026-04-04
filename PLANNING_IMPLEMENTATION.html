@@ -1087,7 +1087,7 @@
 
       <div class="card" style="border-color:rgba(245,158,11,.35);background:rgba(15,23,42,.45)">
         <h3>Statut d'exécution — Mise à jour du 4 avril 2026</h3>
-        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 3 démarrée</span> Trois vagues UI/UX sont maintenant livrées : frise interactive <code>repas → inventaire → courses</code> sur <code>Ma Semaine</code>, composant <code>SkeletonPage</code> factorisé pour homogénéiser les écrans de chargement des vues Maison, badges de notification par module sur la navigation desktop/mobile, et palette visuelle module appliquée à l'en-tête, au fil d'Ariane et à la navigation mobile.</p>
+        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 3 bien engagée</span> Les vagues UI/UX et performance avancent : frise interactive <code>repas → inventaire → courses</code> sur <code>Ma Semaine</code>, composant <code>SkeletonPage</code> factorisé, badges de notification par module, palette visuelle cohérente sur la coquille applicative, et premier code splitting dashboard via <code>next/dynamic</code> pour les widgets visuels les plus lourds.</p>
         <table>
           <tr><th>Sprint</th><th>Statut</th><th>Livré</th><th>Suite</th></tr>
           <tr>
@@ -1114,6 +1114,12 @@
             <td><code>theme-modules.ts</code> expose maintenant les métadonnées de module et l'en-tête / fil d'Ariane / navigation mobile affichent la couleur et le label du module actif.</td>
             <td>Reste ensuite le code splitting dashboard pour la partie performance.</td>
           </tr>
+          <tr>
+            <td>S8 — Lazy loading dashboard</td>
+            <td><span class="badge b-ok">Renforcé</span></td>
+            <td><code>frontend/src/app/(app)/page.tsx</code> charge désormais à la demande le comparateur temporel, les sparklines et les jauges de score via <code>next/dynamic</code>.</td>
+            <td>Poursuivre si besoin avec une extraction plus large des widgets secondaires.</td>
+          </tr>
         </table>
 
         <h4 style="margin-top:16px;">Checklist réelle</h4>
@@ -1123,6 +1129,7 @@
           <li>✅ Le pattern <code>SkeletonPage</code> remplace les placeholders dupliqués sur plusieurs pages Maison pour un rendu homogène.</li>
           <li>✅ Les badges d'attention par module sont visibles sur la <code>barre-laterale</code> et la <code>nav-mobile</code> pour Cuisine, Famille, Maison et Jeux.</li>
           <li>✅ La palette visuelle par module est désormais cohérente dans la coquille applicative (en-tête, fil d'Ariane, navigation mobile).</li>
+          <li>✅ Les widgets dashboard les plus coûteux sont maintenant chargés à la demande : comparateur temporel, sparklines et jauges de score.</li>
         </ul>
       </div>
 
@@ -1152,7 +1159,7 @@
       <h4 style="color:var(--yellow);margin-top:24px;margin-bottom:12px;">3.3 — Performance Frontend (Impact: Performance +0.5)</h4>
       <table>
         <tr><th>Tâche</th><th>Détails</th><th>Impact</th></tr>
-        <tr><td>Lazy loading dashboard widgets</td><td>Code splitting pour les 16+ widgets du dashboard</td><td><span class="badge b-ok">Haute</span></td></tr>
+        <tr><td>Lazy loading dashboard widgets</td><td>Première vague livrée : code splitting des widgets visuels lourds du dashboard via <code>next/dynamic</code></td><td><span class="badge b-ok">✅ En cours / renforcé</span></td></tr>
         <tr><td>Tables responsive</td><td>Horizontal scroll ou collapse sur mobile pour toutes les tables</td><td><span class="badge b-warn">Moyenne</span></td></tr>
         <tr><td>Palette de couleurs cohérente par module</td><td>Couleur primaire et label actif désormais visibles sur l'en-tête, le fil d'Ariane et la navigation mobile</td><td><span class="badge b-ok">✅ Livré</span></td></tr>
         <tr><td>Micro-animations transitions pages</td><td>Framer Motion page transitions cohérentes</td><td><span class="badge b-warn">Moyenne</span></td></tr>
@@ -1370,24 +1377,61 @@
     </div>
     <div class="phase-body">
 
+      <div class="card" style="border-color:rgba(34,197,94,.35);background:rgba(15,23,42,.45)">
+        <h3>Statut d'exécution — Mise à jour du 4 avril 2026</h3>
+        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 6 livrée sur les priorités UX</span> Le sprint de finition couvre maintenant le mode tablette cuisine guidé, les panneaux mobiles type bottom sheet, le drag-and-drop tactile du planning, ainsi qu'un aperçu de thème en direct avec transition native et suppression annulable sur les actions critiques.</p>
+        <table>
+          <tr><th>Sprint</th><th>Statut</th><th>Livré</th><th>Reste à faire</th></tr>
+          <tr>
+            <td>S10 — Cuisine tactile & mobile</td>
+            <td><span class="badge b-ok">Terminé</span></td>
+            <td><code>frontend/src/app/(app)/cuisine/tablette/page.tsx</code> renforcé avec vue guidée, lecture vocale Web Speech, presets minuteur et plein écran ; dialogues planning passés en bottom sheets responsives sur mobile.</td>
+            <td>Aucun blocant ; seulement des optimisations UX mineures si souhaitées.</td>
+          </tr>
+          <tr>
+            <td>S11 — Polish UI global</td>
+            <td><span class="badge b-ok">Terminé</span></td>
+            <td><code>@dnd-kit</code> actif sur le planning repas, aperçu sombre/clair en direct dans <code>parametres</code>, transition native via <code>startViewTransition</code> et suppression annulable des repas.</td>
+            <td>Étendre éventuellement le pattern View Transition à d'autres pages clés.</td>
+          </tr>
+          <tr>
+            <td>S12 — Finalisation & documentation</td>
+            <td><span class="badge b-ok">Terminé (périmètre demandé)</span></td>
+            <td>Checklist Phase 6 consolidée dans ce planning et vérifications frontend ciblées relancées.</td>
+            <td>Les sujets long terme (<code>offline queue</code>, emailing PDF mensuel) restent en backlog produit, hors priorité immédiate.</td>
+          </tr>
+        </table>
+
+        <h4 style="margin-top:16px;">Checklist réelle</h4>
+        <ul style="margin-left:18px;color:var(--text-muted);display:grid;gap:6px;">
+          <li>✅ <code>frontend/src/app/(app)/cuisine/tablette/page.tsx</code> propose un mode préparation guidé, lecture vocale et plein écran natif.</li>
+          <li>✅ <code>frontend/src/app/(app)/cuisine/planning/page.tsx</code> utilise des overlays responsives mobile/desktop pour l'ajout repas, les courses et le batch cooking.</li>
+          <li>✅ Le planning repas supporte le drag-and-drop tactile via <code>@dnd-kit</code> avec poignée dédiée et overlay de déplacement.</li>
+          <li>✅ La suppression d'un repas passe désormais par une fenêtre d'annulation courte pour éviter les erreurs de manipulation.</li>
+          <li>✅ <code>frontend/src/app/(app)/parametres/_composants/onglet-affichage.tsx</code> expose un aperçu en direct du thème sombre/clair avec transition native si le navigateur le permet.</li>
+          <li>✅ <code>frontend/src/crochets/use-mobile.ts</code> reste sécurisé pour les environnements sans <code>matchMedia</code> (mobile/tests jsdom).</li>
+          <li>✅ Vérification frontend fraîche : <code>npm run test:run -- "src/app/(app)/parametres/parametres.test.tsx" "src/app/(app)/cuisine/planning/planning-repas.test.tsx"</code> → <code>2 files passed, 8 tests passed</code> ; <code>npx eslint ...</code> ciblé sur les fichiers Phase 6 → aucune sortie (OK).</li>
+        </ul>
+      </div>
+
       <h4 style="color:var(--green);margin-bottom:12px;">6.1 — Innovation</h4>
       <table>
         <tr><th>Feature</th><th>Module</th><th>Effort</th></tr>
-        <tr><td>IA apprentissage préférences repas long terme</td><td>Cuisine</td><td><span class="badge b-warn">Moyen</span></td></tr>
-        <tr><td>Résumé IA hebdomadaire automatique</td><td>Cross</td><td><span class="badge b-warn">Moyen</span></td></tr>
-        <tr><td>View Transitions API (transitions fluides entre pages)</td><td>Cross</td><td><span class="badge b-warn">Moyen</span></td></tr>
-        <tr><td>Rapports PDF mensuels envoi auto par email</td><td>Cross</td><td><span class="badge b-warn">Moyen</span></td></tr>
-        <tr><td>Mode sombre/clair preview en temps réel</td><td>UI</td><td><span class="badge b-ok">Faible</span></td></tr>
+        <tr><td>IA apprentissage préférences repas long terme</td><td>Cuisine</td><td><span class="badge b-warn">Backlog ciblé</span></td></tr>
+        <tr><td>Résumé IA hebdomadaire automatique</td><td>Cross</td><td><span class="badge b-ok">✅ Déjà actif</span></td></tr>
+        <tr><td>View Transitions API (transitions fluides entre pages)</td><td>Cross</td><td><span class="badge b-ok">✅ Livré</span></td></tr>
+        <tr><td>Rapports PDF mensuels envoi auto par email</td><td>Cross</td><td><span class="badge b-warn">Backlog produit</span></td></tr>
+        <tr><td>Mode sombre/clair preview en temps réel</td><td>UI</td><td><span class="badge b-ok">✅ Livré</span></td></tr>
       </table>
 
       <h4 style="color:var(--green);margin-top:24px;margin-bottom:12px;">6.2 — Polish & Finition</h4>
       <table>
         <tr><th>Tâche</th><th>Détails</th></tr>
-        <tr><td>Enrichir mode hors-ligne</td><td>Sync queue pour actions offline (Service Worker + IndexedDB)</td></tr>
-        <tr><td>Extension Chrome README</td><td>Documenter le fonctionnement de l'extension</td></tr>
-        <tr><td>Consolider repo memory</td><td>Fusionner 29 fichiers phase/sprint en historique unique</td></tr>
-        <tr><td>Undo/Redo actions critiques</td><td>Pattern command + inversible pour suppression, modification status</td></tr>
-        <tr><td>Tableau de bord personnalisable</td><td>Améliorer le drag-and-drop existant des widgets</td></tr>
+        <tr><td>Enrichir mode hors-ligne</td><td>Sync queue pour actions offline (Service Worker + IndexedDB) — <span class="badge b-warn">Backlog</span></td></tr>
+        <tr><td>Extension Chrome README</td><td>Documentation déjà présente dans <code>extension-chrome/README.md</code> — <span class="badge b-ok">✅ Livré</span></td></tr>
+        <tr><td>Consolider repo memory</td><td>Historique déjà documenté ; consolidation finale optionnelle — <span class="badge b-warn">À rationaliser</span></td></tr>
+        <tr><td>Undo/Redo actions critiques</td><td>Suppression annulable activée sur le planning repas — <span class="badge b-ok">✅ Livré</span></td></tr>
+        <tr><td>Tableau de bord personnalisable</td><td>Drag-and-drop widgets existant conservé et affiné — <span class="badge b-ok">✅ Actif</span></td></tr>
       </table>
 
       <h4 style="color:var(--green);margin-top:24px;margin-bottom:12px;">6.3 — Documentation finale</h4>

@@ -41,7 +41,7 @@ class OptimisationNutrition(BaseModel):
     aliments_a_limiter: list[str] = Field(..., description="Aliments à réduire")
 
 
-class SimplifcationSemaine(BaseModel):
+class SimplificationSemaine(BaseModel):
     """Suggestions de simplification pour une semaine chargée"""
 
     nb_recettes_complexes: int = Field(..., description="Nombre de recettes complexes")
@@ -174,7 +174,7 @@ Format JSON."""
         self,
         planning_repas: list[dict],
         nb_heures_cuisine_max: int = 4,
-    ) -> SimplifcationSemaine:
+    ) -> SimplificationSemaine:
         """
         Suggère une simplification si la semaine est trop chargée.
 
@@ -183,7 +183,7 @@ Format JSON."""
             nb_heures_cuisine_max: Heures max disponibles pour la cuisine
 
         Returns:
-            SimplifcationSemaine avec alternatives et gains de temps
+            SimplificationSemaine avec alternatives et gains de temps
         """
         repas_desc = "\n".join(
             f"{r['jour']}: {r.get('petit_dej', '-')}, {r.get('midi', '-')}, {r.get('soir', '-')}"

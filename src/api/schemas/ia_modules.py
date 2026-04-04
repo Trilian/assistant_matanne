@@ -21,6 +21,20 @@ class AnalyseVarietePlanningRequest(BaseModel):
     planning_repas: list[dict[str, Any]] = Field(..., min_length=1)
 
 
+class OptimisationNutritionPlanningRequest(BaseModel):
+    """Requête d'optimisation nutritionnelle du planning."""
+
+    planning_repas: list[dict[str, Any]] = Field(..., min_length=1)
+    restrictions: list[str] = Field(default_factory=list)
+
+
+class SuggestionSimplificationPlanningRequest(BaseModel):
+    """Requête de simplification d'une semaine de repas."""
+
+    planning_repas: list[dict[str, Any]] = Field(..., min_length=1)
+    nb_heures_cuisine_max: int = Field(default=4, ge=1, le=24)
+
+
 class AnalyseImpactsMeteoRequest(BaseModel):
     """Requête d'analyse des impacts météo."""
 

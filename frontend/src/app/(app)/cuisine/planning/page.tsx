@@ -80,6 +80,7 @@ import { CalendrierMensuel } from "@/composants/planning/calendrier-mensuel";
 import { CalendrierMosaiqueRepas } from "@/composants/planning/calendrier-mosaique-repas";
 import { CalendrierColonnesPlanning } from "@/composants/planning/calendrier-colonnes-planning";
 import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
+import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
 import { obtenirFluxCuisine } from "@/bibliotheque/api/ia-bridges";
@@ -185,7 +186,7 @@ function CarteRepasDraggable({
 }: {
   repas: RepasPlanning;
   label: string;
-  onRetirer: (id: number) => void;
+  onRetirer: (repas: RepasPlanning) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useDraggable({
     id: construireIdRepasPlanning(repas.id),
@@ -240,7 +241,7 @@ function CarteRepasDraggable({
           variant="ghost"
           size="icon"
           className="h-5 w-5"
-          onClick={() => onRetirer(repas.id)}
+          onClick={() => onRetirer(repas)}
           aria-label="Retirer le repas"
         >
           <X className="h-3 w-3" />
@@ -267,7 +268,7 @@ function CaseRepasPlanning({
   repas?: RepasPlanning;
   repasGlisse: RepasPlanning | null;
   onAjouter: (date: string, type: TypeRepas) => void;
-  onRetirer: (id: number) => void;
+  onRetirer: (repas: RepasPlanning) => void;
 }) {
   const { isOver, setNodeRef } = useDroppable({
     id: construireIdCasePlanning(date, type),
@@ -333,6 +334,7 @@ export default function PagePlanning() {
   );
 
   const invalider = utiliserInvalidation();
+  const { planifierSuppression } = utiliserSuppressionAnnulable({ ttlMs: 8000 });
   const dateDebut = getLundiDeSemaine(offsetSemaine);
   const datesSemaine = getDatesDeSemaine(dateDebut);
   const moisDate = new Date();
@@ -421,13 +423,25 @@ export default function PagePlanning() {
     }
   );
 
-  const { mutate: retirerRepas } = utiliserMutation(supprimerRepas, {
+  const { mutate: confirmerSuppressionRepas } = utiliserMutation(supprimerRepas, {
     onSuccess: () => {
       invalider(["planning"]);
       toast.success("Repas retiré");
     },
     onError: () => toast.error("Erreur lors de la suppression"),
   });
+
+  const retirerRepas = useCallback(
+    (repas: RepasPlanning) => {
+      const libelle = repas.recette_nom || repas.notes || `${repas.type_repas} du ${repas.date_repas || repas.date}`;
+      planifierSuppression(`repas-${repas.id}`, {
+        libelle,
+        onConfirmer: () => confirmerSuppressionRepas(repas.id),
+        onErreur: () => toast.error("Erreur lors de la suppression"),
+      });
+    },
+    [confirmerSuppressionRepas, planifierSuppression]
+  );
 
   const { mutate: genererIA, isPending: enGeneration } = utiliserMutation(
     () =>

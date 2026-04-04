@@ -5,6 +5,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import PagePlanningRepas from "./page";
 
+const mockPlanifierSuppression = vi.fn();
+const dateRepasTest = (() => {
+  const now = new Date();
+  const jour = now.getDay();
+  const diff = jour === 0 ? -6 : 1 - jour;
+  const lundi = new Date(now);
+  lundi.setDate(now.getDate() + diff);
+  return lundi.toISOString().split("T")[0];
+})();
+
 vi.mock("@/composants/planning/calendrier-mensuel", () => ({
   CalendrierMensuel: ({ mois }: { mois: string }) => (
     <div data-testid="calendrier-mensuel">Mois: {mois}</div>
@@ -40,10 +50,30 @@ vi.mock("@/crochets/utiliser-api", () => ({
     if (key[0] === "planning" && key[1] === "suggestions") {
       return { data: [], isLoading: false };
     }
-    return { data: { repas: [] }, isLoading: false };
+    return {
+      data: {
+        repas: [
+          {
+            id: 42,
+            date: dateRepasTest,
+            date_repas: dateRepasTest,
+            type_repas: "diner",
+            recette_nom: "Lasagnes maison",
+            notes: "Lasagnes maison",
+            portions: 4,
+            nutri_score: "b",
+          },
+        ],
+      },
+      isLoading: false,
+    };
   }),
   utiliserMutation: () => ({ mutate: vi.fn(), isPending: false }),
   utiliserInvalidation: () => vi.fn(),
+}));
+
+vi.mock("@/crochets/utiliser-suppression-annulable", () => ({
+  utiliserSuppressionAnnulable: () => ({ planifierSuppression: mockPlanifierSuppression }),
 }));
 
 vi.mock("@/bibliotheque/api/planning", () => ({
@@ -106,5 +136,14 @@ describe("PagePlanningRepas", () => {
 
     await user.click(screen.getByRole("button", { name: /^Semaine$/i }));
     expect(screen.getByText("Lundi")).toBeInTheDocument();
+  });
+
+  it("planifie une suppression annulable lors du retrait d'un repas", async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<PagePlanningRepas />);
+
+    await user.click(screen.getByRole("button", { name: /retirer le repas/i }));
+
+    expect(mockPlanifierSuppression).toHaveBeenCalledTimes(1);
   });
 });

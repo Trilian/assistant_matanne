@@ -20,6 +20,7 @@ import {
   Heart,
   Leaf,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -65,12 +66,40 @@ import {
   WidgetSortable,
 } from "@/composants/dashboard/grille-dashboard-dnd";
 import { CompteurAnime } from "@/composants/dashboard/compteur-anime";
-import { Sparkline } from "@/composants/dashboard/sparkline";
-import { ComparateurTemporel } from "@/composants/dashboard/comparateur-temporel";
 import { obtenirScoreFamilleHebdo } from "@/bibliotheque/api/avance";
 import { obtenirInsightsQuotidiens } from "@/bibliotheque/api/avance";
-import { JaugeScoreBienEtre } from "@/composants/graphiques/jauge-score-bien-etre";
-import { JaugeScoreFoyer } from "@/composants/dashboard/graphiques/jauge-score-foyer";
+
+const ComparateurTemporelLazy = dynamic(
+  () => import("@/composants/dashboard/comparateur-temporel").then((m) => m.ComparateurTemporel),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-48 w-full" />,
+  }
+);
+
+const SparklineLazy = dynamic(
+  () => import("@/composants/dashboard/sparkline").then((m) => m.Sparkline),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-10 w-24" />,
+  }
+);
+
+const JaugeScoreBienEtreLazy = dynamic(
+  () => import("@/composants/graphiques/jauge-score-bien-etre").then((m) => m.JaugeScoreBienEtre),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-28 w-28 rounded-full" />,
+  }
+);
+
+const JaugeScoreFoyerLazy = dynamic(
+  () => import("@/composants/dashboard/graphiques/jauge-score-foyer").then((m) => m.JaugeScoreFoyer),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-40 w-full" />,
+  }
+);
 
 const WIDGETS_DEFAUT = {
   metriques: true,
@@ -551,7 +580,7 @@ export default function PageAccueil() {
         </Card>
       )}
 
-      <ComparateurTemporel />
+      <ComparateurTemporelLazy />
 
       <GrilleDashboardDnd
         ordre={ordreWidgets}
@@ -573,7 +602,7 @@ export default function PageAccueil() {
       >
 
       {widgets.meteo && meteo && (
-        <WidgetSortable id="meteo">
+        <WidgetSortable key="meteo" id="meteo">
         <Card className="border-blue-300/50 bg-blue-50/50 dark:border-blue-800/40 dark:bg-blue-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Météo rapide</CardTitle>
@@ -596,7 +625,7 @@ export default function PageAccueil() {
       )}
 
       {widgets.histoire_famille && histoireFamille && histoireFamille.total > 0 && (
-        <WidgetSortable id="histoire_famille">
+        <WidgetSortable key="histoire_famille" id="histoire_famille">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Aujourd&apos;hui dans notre histoire</CardTitle>
@@ -619,7 +648,7 @@ export default function PageAccueil() {
       )}
 
       {widgets.alertes_contextuelles && alertesContextuelles && alertesContextuelles.total > 0 && (
-        <WidgetSortable id="alertes_contextuelles">
+        <WidgetSortable key="alertes_contextuelles" id="alertes_contextuelles">
         <Card className="border-amber-300/60 bg-amber-50/50 dark:border-amber-900/40 dark:bg-amber-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Alertes contextuelles</CardTitle>
@@ -642,7 +671,7 @@ export default function PageAccueil() {
       )}
 
       {widgets.journal_actions_dashboard && (
-        <WidgetSortable id="journal_actions_dashboard">
+        <WidgetSortable key="journal_actions_dashboard" id="journal_actions_dashboard">
         <Card className="border-slate-300/60 bg-slate-50/60 dark:border-slate-800/40 dark:bg-slate-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Journal actions dashboard</CardTitle>
@@ -718,7 +747,7 @@ export default function PageAccueil() {
       )}
 
       {widgets.alerte_budget && alertesBudget.length > 0 && (
-        <WidgetSortable id="alerte_budget">
+        <WidgetSortable key="alerte_budget" id="alerte_budget">
         <Card className="border-red-300/60 bg-red-50/50 dark:border-red-900/40 dark:bg-red-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -759,7 +788,7 @@ export default function PageAccueil() {
       )}
 
       {widgets.points_famille && pointsFamille && (
-        <WidgetSortable id="points_famille">
+        <WidgetSortable key="points_famille" id="points_famille">
         <Card className="border-emerald-300/50 bg-emerald-50/50 dark:border-emerald-900/40 dark:bg-emerald-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Suivi hebdo</CardTitle>
@@ -790,7 +819,7 @@ export default function PageAccueil() {
       )}
 
       {widgets.score_foyer && scoreFoyer && (
-        <WidgetSortable id="score_foyer">
+        <WidgetSortable key="score_foyer" id="score_foyer">
         <Card className="border-indigo-300/50 bg-indigo-50/50 dark:border-indigo-900/40 dark:bg-indigo-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -805,7 +834,7 @@ export default function PageAccueil() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <JaugeScoreFoyer score={scoreFoyer.score_global} composantes={scoreFoyer.composantes} />
+            <JaugeScoreFoyerLazy score={scoreFoyer.score_global} composantes={scoreFoyer.composantes} />
             {scoreFoyer.leviers_prioritaires.length > 0 && (
               <div className="rounded-md border border-indigo-200/70 bg-background/70 p-2 text-xs space-y-1">
                 <p className="font-medium">Leviers d&apos;amélioration :</p>
@@ -820,7 +849,7 @@ export default function PageAccueil() {
       )}
 
       {widgets.score_bienetre && scoreBienEtre && (
-        <WidgetSortable id="score_bienetre">
+        <WidgetSortable key="score_bienetre" id="score_bienetre">
         <Card className="border-cyan-300/50 bg-cyan-50/50 dark:border-cyan-900/40 dark:bg-cyan-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -835,7 +864,7 @@ export default function PageAccueil() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between gap-4">
-              <JaugeScoreBienEtre score={scoreBienEtre.score_global} />
+              <JaugeScoreBienEtreLazy score={scoreBienEtre.score_global} />
               <div className="text-right text-xs text-muted-foreground space-y-1">
                 <p>🥗 Diversité: {scoreBienEtre.diversite_alimentaire}%</p>
                 <p>🏷️ Nutri-score: {scoreBienEtre.score_nutri}%</p>
@@ -858,7 +887,7 @@ export default function PageAccueil() {
       )}
 
       {widgets.score_ecologique && scoreEcologique && (
-        <WidgetSortable id="score_ecologique">
+        <WidgetSortable key="score_ecologique" id="score_ecologique">
         <Card className="border-lime-300/50 bg-lime-50/60 dark:border-lime-900/40 dark:bg-lime-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
@@ -900,7 +929,7 @@ export default function PageAccueil() {
 
       {/* Cartes métriques */}
       {widgets.metriques && (
-      <WidgetSortable id="metriques">
+      <WidgetSortable key="metriques" id="metriques">
       <div data-tour="metriques" className={`grid gap-4 grid-cols-2 lg:grid-cols-4 ${classeTour("metriques")}`}>
         <CarteMetrique
           titre="Repas aujourd'hui"
@@ -957,7 +986,7 @@ export default function PageAccueil() {
 
       {/* Actions rapides */}
       {widgets.actions_rapides && (
-      <WidgetSortable id="actions_rapides">
+      <WidgetSortable key="actions_rapides" id="actions_rapides">
       <Card data-tour="actions_rapides" className={classeTour("actions_rapides")}>
         <CardHeader>
           <CardTitle className="text-lg">Actions rapides</CardTitle>
@@ -1035,7 +1064,7 @@ export default function PageAccueil() {
 
       {/* Suggestion dîner IA */}
       {widgets.lecture_ia && data?.suggestion_diner && (
-        <WidgetSortable id="lecture_ia">
+        <WidgetSortable key="lecture_ia" id="lecture_ia">
         <Card className="border-primary/20 bg-primary/5">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -1056,7 +1085,7 @@ export default function PageAccueil() {
       )}
 
       {widgets.lecture_ia && insightsQuotidiens?.insights?.length ? (
-        <WidgetSortable id="lecture_ia_insights">
+        <WidgetSortable key="lecture_ia_insights" id="lecture_ia_insights">
         <Card className="border-sky-300/50 bg-sky-50/50 dark:border-sky-900/40 dark:bg-sky-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -1084,7 +1113,7 @@ export default function PageAccueil() {
 
       {/* Rappels intelligents */}
       {widgets.rappels && rappelsData && rappelsData.total > 0 && (
-        <WidgetSortable id="rappels">
+        <WidgetSortable key="rappels" id="rappels">
         <Card data-tour="rappels" className={`border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/20 ${classeTour("rappels")}`}>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -1113,7 +1142,7 @@ export default function PageAccueil() {
 
       {/* Checklist du jour */}
       {widgets.checklist_jour && (
-        <WidgetSortable id="checklist_jour">
+        <WidgetSortable key="checklist_jour" id="checklist_jour">
         <Card data-tour="checklist" className={classeTour("checklist")}>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg">Checklist du jour</CardTitle>
@@ -1194,7 +1223,7 @@ export default function PageAccueil() {
 
       {/* Aperçu financier */}
       {widgets.depenses && statsDepenses && (
-        <WidgetSortable id="depenses">
+        <WidgetSortable key="depenses" id="depenses">
         <div data-tour="depenses" className={`grid gap-4 grid-cols-1 md:grid-cols-2 ${classeTour("depenses")}`}>
           <Card>
             <CardHeader className="pb-2">
@@ -1263,7 +1292,7 @@ export default function PageAccueil() {
 
       {/* Bilan mensuel IA */}
       {widgets.bilan_mensuel && bilanMensuel?.synthese_ia && (
-        <WidgetSortable id="bilan_mensuel">
+        <WidgetSortable key="bilan_mensuel" id="bilan_mensuel">
         <Card className="border-primary/20 bg-primary/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -1364,7 +1393,7 @@ function CarteMetrique({
                 <CompteurAnime valeur={valeur} />
               </p>
               {sparkline && sparkline.length >= 2 && (
-                <Sparkline
+                <SparklineLazy
                   donnees={sparkline}
                   couleur={alerte ? "hsl(0, 72%, 51%)" : "hsl(210, 70%, 50%)"}
                   couleurNegatif="hsl(0, 72%, 51%)"

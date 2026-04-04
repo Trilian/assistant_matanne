@@ -21,10 +21,14 @@ export interface PredictionConsommationResponse {
 }
 
 export interface MealPlanningDay {
-  date: string;
-  petit_dejeuner: string;
-  dejeuner: string;
-  diner: string;
+  jour?: string;
+  date?: string;
+  petit_dej?: string;
+  petit_dejeuner?: string;
+  midi?: string;
+  dejeuner?: string;
+  soir?: string;
+  diner?: string;
 }
 
 export interface AnalyseVarietePlanningRequest {
@@ -32,9 +36,38 @@ export interface AnalyseVarietePlanningRequest {
 }
 
 export interface AnalyseVarieteResponse {
-  variete_score: number;
-  equilibre_nutritionnel: string;
-  categories_presentes: string[];
+  score_variete: number;
+  proteins_bien_repartis: boolean;
+  types_cuisines: string[];
+  repetitions_problematiques: string[];
+  recommandations: string[];
+}
+
+export interface OptimisationNutritionPlanningRequest {
+  planning_repas: MealPlanningDay[];
+  restrictions?: string[];
+}
+
+export interface OptimisationNutritionPlanningResponse {
+  calories_jour: Record<string, number>;
+  proteines_equilibree: boolean;
+  fruits_legumes_quota: number;
+  equilibre_fibre: boolean;
+  aliments_a_privilegier: string[];
+  aliments_a_limiter: string[];
+}
+
+export interface SimplificationPlanningRequest {
+  planning_repas: MealPlanningDay[];
+  nb_heures_cuisine_max?: number;
+}
+
+export interface SimplificationPlanningResponse {
+  nb_recettes_complexes: number;
+  suggestions_simplification: string[];
+  gain_temps_minutes: number;
+  recettes_simples_substitution: string[];
+  charge_globale: string;
 }
 
 export interface MeteoContexte {
@@ -115,6 +148,26 @@ export async function analyserVarietePlanningRepas(
 ): Promise<AnalyseVarieteResponse> {
   const { data } = await clientApi.post<AnalyseVarieteResponse>(
     `${API_PREFIX}/planning/analyse-variete`,
+    body
+  );
+  return data;
+}
+
+export async function optimiserNutritionPlanningRepas(
+  body: OptimisationNutritionPlanningRequest
+): Promise<OptimisationNutritionPlanningResponse> {
+  const { data } = await clientApi.post<OptimisationNutritionPlanningResponse>(
+    `${API_PREFIX}/planning/optimisation-nutrition`,
+    body
+  );
+  return data;
+}
+
+export async function suggererSimplificationPlanningRepas(
+  body: SimplificationPlanningRequest
+): Promise<SimplificationPlanningResponse> {
+  const { data } = await clientApi.post<SimplificationPlanningResponse>(
+    `${API_PREFIX}/planning/suggestions-simplification`,
     body
   );
   return data;

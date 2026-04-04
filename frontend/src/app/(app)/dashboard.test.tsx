@@ -189,7 +189,7 @@ describe("DashboardPage", () => {
 
   it("affiche les widgets de score famille, bien-être et écologie avec leurs valeurs", () => {
     render(<DashboardPage />);
-    expect(screen.getByText("Points famille")).toBeInTheDocument();
+    expect(screen.getByText("Suivi hebdo")).toBeInTheDocument();
     expect(screen.getByText("120")).toBeInTheDocument();
     expect(screen.getByText("Bougeotte")).toBeInTheDocument();
     expect(screen.getByText(/Score famille hebdo: 74\/100/)).toBeInTheDocument();
