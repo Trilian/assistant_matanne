@@ -88,7 +88,7 @@ export function DialogueArticleCourses({
               Ajouter
             </Button>
           </div>
-        </form>
+        </motion.form>
       </DialogContent>
     </Dialog>
   );

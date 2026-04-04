@@ -15,6 +15,7 @@ class SuggestionRecetteItem(BaseModel):
     nom: str = Field(description="Nom de la recette suggérée", max_length=200)
     description: str | None = Field(None, description="Description courte", max_length=500)
     temps_preparation: int | None = Field(None, description="Temps de préparation en minutes")
+    raison: str | None = Field(None, description="Justification IA de la suggestion", max_length=300)
 
     model_config = {
         "json_schema_extra": {
@@ -22,6 +23,7 @@ class SuggestionRecetteItem(BaseModel):
                 "nom": "One pot pâtes saumon épinards",
                 "description": "Un dîner rapide en une seule casserole.",
                 "temps_preparation": 20,
+                "raison": "Saumon en stock, recette rapide pour un soir de semaine.",
             }
         }
     }
@@ -42,6 +44,7 @@ class SuggestionsRecettesResponse(BaseModel):
                         "nom": "One pot pâtes saumon épinards",
                         "description": "Un dîner rapide en une seule casserole.",
                         "temps_preparation": 20,
+                        "raison": "Saumon en stock, recette rapide pour un soir de semaine.",
                     }
                 ],
                 "contexte": "Soirs de semaine, 3 personnes, recettes rapides avec Jules.",

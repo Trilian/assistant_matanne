@@ -3,7 +3,14 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";
-import type { ListeCourses, ArticleCourses, CreerArticleDTO } from "@/types/courses";
+import type {
+  ListeCourses,
+  ArticleCourses,
+  CreerArticleDTO,
+  ArticlesParMagasin,
+  ArticleDrive,
+  CorrespondanceDrive,
+} from "@/types/courses";
 
 type ListeCoursesResumeApi = {
   id: number;
@@ -25,6 +32,7 @@ type ListeCoursesDetailApi = {
     quantite?: number;
     coche?: boolean;
     categorie?: string;
+    magasin_cible?: string;
   }>;
 };
 
@@ -56,6 +64,7 @@ export async function obtenirListeCourses(id: number): Promise<ListeCourses> {
     quantite: item.quantite,
     categorie: item.categorie,
     est_coche: Boolean(item.coche),
+    magasin_cible: item.magasin_cible,
   }));
 
   return {
@@ -376,4 +385,81 @@ export async function obtenirQrPartageListe(
     responseType: "blob",
   });
   return data as Blob;
+}
+
+// ─── Multi-magasins ───────────────────────────────────────
+
+/** Récupérer les articles d'une liste groupés par magasin */
+export async function obtenirArticlesParMagasin(
+  listeId: number,
+  magasin?: string
+): Promise<ArticlesParMagasin> {
+  const params = magasin ? `?magasin=${encodeURIComponent(magasin)}` : "";
+  const { data } = await clientApi.get<ArticlesParMagasin>(
+    `/courses/${listeId}/par-magasin${params}`
+  );
+  return data;
+}
+
+/** Récupérer les articles Carrefour Drive enrichis avec correspondances */
+export async function obtenirArticlesDrive(
+  listeId: number
+): Promise<ArticleDrive[]> {
+  const { data } = await clientApi.get<ArticleDrive[]>(
+    `/courses/${listeId}/articles-drive`
+  );
+  return data;
+}
+
+// ─── Correspondances Carrefour Drive ──────────────────────
+
+/** Lister les correspondances article → produit Carrefour Drive */
+export async function listerCorrespondancesDrive(
+  actifOnly = true
+): Promise<CorrespondanceDrive[]> {
+  const { data } = await clientApi.get<CorrespondanceDrive[]>(
+    `/courses/correspondances-drive`,
+    { params: { actif_only: actifOnly } }
+  );
+  return data;
+}
+
+/** Créer ou mettre à jour une correspondance Drive (upsert) */
+export async function creerCorrespondanceDrive(
+  payload: Omit<CorrespondanceDrive, "id" | "nb_utilisations" | "actif">
+): Promise<CorrespondanceDrive> {
+  const { data } = await clientApi.post<CorrespondanceDrive>(
+    `/courses/correspondances-drive`,
+    payload
+  );
+  return data;
+}
+
+/** Désactiver une correspondance Drive */
+export async function supprimerCorrespondanceDrive(
+  correspondanceId: number
+): Promise<void> {
+  await clientApi.delete(`/courses/correspondances-drive/${correspondanceId}`);
+}
+
+/** Mettre à jour le magasin cible d'un article */
+export async function modifierMagasinArticle(
+  listeId: number,
+  articleId: number,
+  magasinCible: string | null
+): Promise<ArticleCourses> {
+  const detail = await obtenirListeCourses(listeId);
+  const courant = detail.articles.find((item) => item.id === articleId);
+  if (!courant) throw new Error("Article introuvable");
+
+  await clientApi.put(`/courses/${listeId}/items/${articleId}`, {
+    nom: courant.nom,
+    quantite: courant.quantite ?? 1,
+    unite: courant.unite,
+    categorie: courant.categorie,
+    coche: courant.est_coche,
+    magasin_cible: magasinCible,
+  });
+
+  return { ...courant, magasin_cible: magasinCible ?? undefined };
 }
