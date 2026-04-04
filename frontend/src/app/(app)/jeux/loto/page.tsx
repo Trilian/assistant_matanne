@@ -131,7 +131,7 @@ export default function LotoPage() {
         {numerosPrefill.length === 5 && (
           <Card className="border-emerald-300">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Pré-remplissage depuis OCR ticket</CardTitle>
+              <CardTitle className="text-base">Pré-remplissage rapide d'une grille</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-1.5 items-center">

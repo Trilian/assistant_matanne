@@ -627,6 +627,8 @@ async def pieces_avec_objets(
                     "prix_achat": float(o.prix_achat) if o.prix_achat else None,
                     "prix_remplacement_estime": float(o.prix_remplacement_estime) if o.prix_remplacement_estime else None,
                     "notes": o.notes,
+                    "duree_garantie_mois": o.duree_garantie_mois,
+                    "sous_garantie": o.sous_garantie,
                 })
             return {"pieces": [{"piece": k, "objets": v} for k, v in par_piece.items()], "total": len(objets)}
 
@@ -666,6 +668,8 @@ async def suggestions_renouvellement(
                         "prix_remplacement_estime": float(o.prix_remplacement_estime) if o.prix_remplacement_estime else None,
                         "marque": o.marque,
                         "modele": o.modele,
+                        "duree_garantie_mois": o.duree_garantie_mois,
+                        "sous_garantie": o.sous_garantie,
                     }
                     for o in objets
                 ],

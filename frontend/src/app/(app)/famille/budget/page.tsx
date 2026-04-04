@@ -12,7 +12,6 @@ import {
   Filter,
   Plus,
   Trash2,
-  ScanLine,
 } from "lucide-react";
 import {
   Card,
@@ -53,7 +52,6 @@ import { toast } from "sonner";
 import { BudgetInsightsIA } from "@/composants/famille/budget-insights";
 import { TreemapBudget } from "@/composants/graphiques/treemap-budget";
 import { SankeyFluxFinanciers } from "@/composants/graphiques/sankey-flux-financiers";
-import { UploadTicket } from "@/composants/famille/upload-ticket";
 import { GraphiqueBudgetVsReel } from "@/composants/graphiques/graphique-budget-vs-reel";
 import { lancerConfettis } from "@/bibliotheque/confettis";
 
@@ -77,7 +75,6 @@ const CATEGORIES_BUDGET = [
 export default function PageBudget() {
   const [categorieFiltre, setCategorieFiltre] = useState("tous");
   const [dialogOuvert, setDialogOuvert] = useState(false);
-  const [dialogScanner, setDialogScanner] = useState(false);
   const [montant, setMontant] = useState("");
   const [categorie, setCategorie] = useState("alimentation");
   const [description, setDescription] = useState("");
@@ -206,20 +203,12 @@ export default function PageBudget() {
           <Link href="/famille/activites">
             <Button variant="outline" size="sm">Voir activités</Button>
           </Link>
-          <Button variant="outline" size="sm" onClick={() => setDialogScanner(true)}>
-            <ScanLine className="h-4 w-4 mr-1" />
-            Scanner ticket
+          <Button size="sm" onClick={() => setDialogOuvert(true)}>
+            <Plus className="h-4 w-4 mr-1" />
+            Ajouter une dépense
           </Button>
         </div>
       </div>
-
-      <UploadTicket
-        ouvert={dialogScanner}
-        onFermer={() => setDialogScanner(false)}
-        onCreerDepense={(dep) => {
-          mutationAjouter.mutate(dep);
-        }}
-      />
 
       {/* Résumé mensuel */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

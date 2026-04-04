@@ -106,6 +106,8 @@ _SERVICES = {
     "obtenir_service_entretien_courses_interaction": "bridges_entretien_courses",
     "JardinEntretienInteractionService": "bridges_jardin_entretien",
     "obtenir_service_jardin_entretien_interaction": "bridges_jardin_entretien",
+    "GarantiesDocumentsInteractionService": "inter_module_garanties_documents",
+    "obtenir_service_garanties_documents_interaction": "inter_module_garanties_documents",
 }
 
 _SCHEMAS = {

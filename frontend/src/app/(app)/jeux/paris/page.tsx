@@ -251,7 +251,10 @@ export default function ParisPage() {
   const [seuilBacktest, setSeuilBacktest] = useState("2");
   const [nbBacktest, setNbBacktest] = useState("120");
 
-  const sourceOCR = useMemo(() => searchParams.get("source_ocr") === "1", [searchParams]);
+  const sourcePrefill = useMemo(
+    () => searchParams.get("prefill") === "1" || searchParams.get("source_ocr") === "1",
+    [searchParams]
+  );
 
   const queryClient = useQueryClient();
 
@@ -338,7 +341,7 @@ export default function ParisPage() {
   );
 
   useEffect(() => {
-    if (!sourceOCR) return;
+    if (!sourcePrefill) return;
 
     const typePariParam = searchParams.get("type_pari");
     const predictionParam = searchParams.get("prediction");
@@ -353,7 +356,7 @@ export default function ParisPage() {
     if (matchParam) setMatchId(matchParam);
 
     setDialogOuvert(true);
-  }, [sourceOCR, searchParams]);
+  }, [sourcePrefill, searchParams]);
 
   const matchParId = new Map(matchs.map((m) => [m.id, m]));
 
@@ -392,9 +395,9 @@ export default function ParisPage() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Nouveau pari</DialogTitle></DialogHeader>
-            {sourceOCR && (
+            {sourcePrefill && (
               <div className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
-                Pré-remplissage OCR appliqué. Vérifiez le match, la cote et la mise avant validation.
+                Pré-remplissage automatique appliqué. Vérifiez le match, la cote et la mise avant validation.
               </div>
             )}
             <form

@@ -292,7 +292,7 @@ async def optimisation_routines(
 
 
 # ═══════════════════════════════════════════════════════════
-# 6.8 — ANALYSE DOCUMENT OCR
+# 6.8 — ANALYSE DOCUMENT PHOTO
 # ═══════════════════════════════════════════════════════════
 
 
@@ -300,7 +300,7 @@ async def optimisation_routines(
     "/analyse-document",
     response_model=DocumentAnalyse,
     responses=REPONSES_IA,
-    summary="Analyse document photo (OCR + classement auto)",
+    summary="Analyse document photo avec classement automatique",
 )
 @gerer_exception_api
 async def analyse_document(
@@ -308,7 +308,7 @@ async def analyse_document(
     user: dict = Depends(require_auth),
     _rate: dict = Depends(verifier_limite_debit_ia),
 ):
-    """Analyse un document photographié via OCR et le classifie."""
+    """Analyse un document photographié et propose son classement."""
     image_bytes = await _lire_image(file)
     service = _get_service()
     result = service.analyser_document_photo(image_bytes)

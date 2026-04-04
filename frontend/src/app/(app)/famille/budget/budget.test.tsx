@@ -28,10 +28,6 @@ vi.mock("@/composants/famille/budget-insights", () => ({
   BudgetInsightsIA: () => <div data-testid="budget-insights-ia">Insights IA</div>,
 }));
 
-vi.mock("@/composants/famille/upload-ticket", () => ({
-  UploadTicket: () => null,
-}));
-
 const mockStats = {
   total_mois: 1250,
   categories: [

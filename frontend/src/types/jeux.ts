@@ -226,29 +226,6 @@ export interface BacktestResultat {
   avertissement: string;
 }
 
-// ─── OCR Tickets Jeux ────────────────────────────────────
-
-export interface LigneTicketOCRJeux {
-  description: string;
-  quantite: number;
-  prix_unitaire: number | null;
-  prix_total: number;
-}
-
-export interface DonneesTicketOCRJeux {
-  point_vente: string | null;
-  date_achat: string | null;
-  lignes: LigneTicketOCRJeux[];
-  total: number | null;
-  mode_paiement: string | null;
-}
-
-export interface ResultatTicketOCRJeux {
-  success: boolean;
-  message: string;
-  donnees: DonneesTicketOCRJeux | null;
-}
-
 // ─── Résumé mensuel ───────────────────────────────────────
 
 export interface ResumeMensuel {

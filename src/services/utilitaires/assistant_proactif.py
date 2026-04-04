@@ -102,10 +102,12 @@ class AssistantProactifService:
         event_lower = event_type.lower()
 
         if event_lower.startswith("meteo."):
-            suggestions.extend(self._suggestions_meteo(data))
+            suggestions.extend(self._suggestions_meteo(data, event_type=event_lower))
+            suggestions.extend(self._suggestions_planning_adaptatif(event_type=event_lower, data=data))
 
         if event_lower.startswith("planning."):
-            suggestions.extend(self._suggestions_planning(data))
+            suggestions.extend(self._suggestions_planning(data, event_type=event_lower))
+            suggestions.extend(self._suggestions_planning_adaptatif(event_type=event_lower, data=data))
 
         if event_lower == "budget.depassement":
             suggestions.append(
@@ -125,7 +127,7 @@ class AssistantProactifService:
 
         return suggestions
 
-    def _suggestions_meteo(self, data: dict[str, Any]) -> list[dict[str, Any]]:
+    def _suggestions_meteo(self, data: dict[str, Any], event_type: str | None = None) -> list[dict[str, Any]]:
         suggestions: list[dict[str, Any]] = []
         condition = str(data.get("condition") or data.get("description") or "").lower()
         temperature = data.get("temperature")
@@ -156,9 +158,10 @@ class AssistantProactifService:
             )
         return suggestions
 
-    def _suggestions_planning(self, data: dict[str, Any]) -> list[dict[str, Any]]:
+    def _suggestions_planning(self, data: dict[str, Any], event_type: str | None = None) -> list[dict[str, Any]]:
         suggestions: list[dict[str, Any]] = []
         charge = data.get("charge_score")
+        event_type = str(event_type or "").lower()
 
         if isinstance(charge, (int, float)) and charge >= 70:
             suggestions.append(
@@ -185,6 +188,68 @@ class AssistantProactifService:
                     "source": "eventbus",
                 }
             )
+
+        if "repas_saute" in event_type or data.get("repas_saute"):
+            repas_nom = str(data.get("repas_nom") or "le repas prévu").strip()
+            suggestions.append(
+                {
+                    "module": "planning",
+                    "titre": "Réajuster le planning du soir",
+                    "message": f"{repas_nom} a été sauté : décale les ingrédients périssables et bascule sur une option rapide.",
+                    "action_url": "/cuisine/planning",
+                    "priorite": "haute",
+                    "contexte": "Repas sauté / imprévu",
+                    "source": "eventbus",
+                }
+            )
+        return suggestions
+
+    def _suggestions_planning_adaptatif(self, event_type: str, data: dict[str, Any]) -> list[dict[str, Any]]:
+        """Complète les suggestions avec un vrai réajustement de planning via l'IA avancée."""
+        suggestions: list[dict[str, Any]] = []
+        try:
+            ia = get_ia_avancee_service()
+            meteo = data if event_type.startswith("meteo.") else None
+            budget_restant = data.get("budget_restant")
+            adaptation = ia.generer_planning_adaptatif(
+                meteo=meteo,
+                budget_restant=budget_restant if isinstance(budget_restant, (int, float)) else None,
+            )
+            if adaptation is None:
+                return suggestions
+
+            if adaptation.recommandations:
+                suggestions.append(
+                    {
+                        "module": "planning",
+                        "titre": "Réajustement IA du planning",
+                        "message": adaptation.recommandations[0],
+                        "action_url": "/cuisine/planning",
+                        "priorite": "haute",
+                        "contexte": f"Événement {event_type}",
+                        "source": "planning_adaptatif",
+                    }
+                )
+
+            if adaptation.repas_suggerees:
+                premier_repas = adaptation.repas_suggerees[0]
+                jour = str(premier_repas.get("jour") or "Prochain créneau")
+                repas = str(premier_repas.get("repas") or "Option rapide")
+                raison = str(premier_repas.get("raison") or "rééquilibrage du planning")
+                suggestions.append(
+                    {
+                        "module": "cuisine",
+                        "titre": "Option repas de secours",
+                        "message": f"{jour} : {repas} — {raison}.",
+                        "action_url": "/cuisine/planning",
+                        "priorite": "normale",
+                        "contexte": "Planning adaptatif",
+                        "source": "planning_adaptatif",
+                    }
+                )
+        except Exception as e:  # noqa: BLE001
+            logger.debug("I.15: planning adaptatif indisponible pour %s: %s", event_type, e)
+
         return suggestions
 
     def _suggestions_snapshot_global(self) -> list[dict[str, Any]]:

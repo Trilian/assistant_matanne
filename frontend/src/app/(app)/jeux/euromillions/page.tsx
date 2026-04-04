@@ -105,8 +105,8 @@ export default function EuromillionsPage() {
   const mutationEnregistrer = utiliserMutation(
     () => creerGrilleEuromillions(numerosPrefill, etoilesPrefill, true),
     {
-      onSuccess: () => toast.success("Grille OCR enregistrée"),
-      onError: () => toast.error("Impossible d'enregistrer la grille OCR"),
+      onSuccess: () => toast.success("Grille enregistrée"),
+      onError: () => toast.error("Impossible d'enregistrer la grille"),
     }
   );
 
@@ -159,7 +159,7 @@ export default function EuromillionsPage() {
         {prefillDisponible && (
           <Card className="border-emerald-300">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Pré-remplissage depuis OCR ticket</CardTitle>
+              <CardTitle className="text-base">Pré-remplissage rapide d'une grille</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-1 items-center">

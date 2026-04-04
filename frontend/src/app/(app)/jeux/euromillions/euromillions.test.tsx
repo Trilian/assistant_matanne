@@ -55,11 +55,11 @@ vi.mock("@/composants/jeux/backtest-euromillions-vue", () => ({
 }));
 
 describe("EuromillionsPage", () => {
-  it("affiche le pré-remplissage OCR quand query params présents", () => {
+  it("affiche le pré-remplissage rapide quand des paramètres sont présents", () => {
     render(<EuromillionsPage />);
 
     expect(screen.getByRole("heading", { level: 1, name: /Euromillions/i })).toBeInTheDocument();
-    expect(screen.getByText(/Pré-remplissage depuis OCR ticket/i)).toBeInTheDocument();
+    expect(screen.getByText(/Pré-remplissage rapide d'une grille/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Enregistrer cette grille/i })).toBeInTheDocument();
   });
 });

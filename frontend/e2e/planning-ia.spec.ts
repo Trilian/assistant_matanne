@@ -1,11 +1,172 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 // ═══════════════════════════════════════════════════════════
 // E2E — Flux planning repas
 // ═══════════════════════════════════════════════════════════
 
+async function preparerContextePlanning(page: Page) {
+  await page.context().addCookies([
+    {
+      name: "access_token",
+      value: "e2e-dev-token",
+      domain: "localhost",
+      path: "/",
+      httpOnly: false,
+      sameSite: "Lax",
+    },
+    {
+      name: "access_token",
+      value: "e2e-dev-token",
+      domain: "127.0.0.1",
+      path: "/",
+      httpOnly: false,
+      sameSite: "Lax",
+    },
+  ]);
+
+  await page.addInitScript(() => {
+    window.localStorage.setItem("access_token", "e2e-dev-token");
+    window.localStorage.setItem("matanne-onboarding-complete", "true");
+  });
+
+  await page.route("**/api/v1/**", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    const path = url.pathname;
+
+    if (path === "/api/v1/auth/me") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ id: 42, email: "e2e@local", nom: "E2E Local", role: "membre" }),
+      });
+      return;
+    }
+
+    if (path === "/api/v1/auth/refresh") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ access_token: "e2e-dev-token", token_type: "bearer" }),
+      });
+      return;
+    }
+
+    if (path === "/api/v1/planning/semaine") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          planning_id: 10,
+          semaine_debut: "2026-04-06",
+          semaine_fin: "2026-04-12",
+          repas: [
+            {
+              id: 1,
+              date: "2026-04-06",
+              date_repas: "2026-04-06",
+              type_repas: "dejeuner",
+              recette_id: 11,
+              recette_nom: "Salade tiede",
+              notes: "Salade tiede",
+              portions: 2,
+              nutri_score: "A",
+            },
+            {
+              id: 2,
+              date: "2026-04-06",
+              date_repas: "2026-04-06",
+              type_repas: "diner",
+              recette_id: 12,
+              recette_nom: "Soupe maison",
+              notes: "Soupe maison",
+              portions: 2,
+              nutri_score: "B",
+            },
+          ],
+        }),
+      });
+      return;
+    }
+
+    if (path === "/api/v1/planning/mensuel") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ mois: "2026-04", par_jour: {} }),
+      });
+      return;
+    }
+
+    if (path === "/api/v1/planning/conflits") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ resume: "Aucun conflit", items: [] }),
+      });
+      return;
+    }
+
+    if (path === "/api/v1/planning/nutrition-hebdo") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          semaine_debut: "2026-04-06",
+          semaine_fin: "2026-04-12",
+          totaux: { calories: 0, proteines: 0, lipides: 0, glucides: 0 },
+          moyenne_calories_par_jour: 0,
+          par_jour: {},
+          nb_repas_sans_donnees: 0,
+          nb_repas_total: 0,
+        }),
+      });
+      return;
+    }
+
+    if (path === "/api/v1/planning/suggestions-rapides") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ suggestions: [] }),
+      });
+      return;
+    }
+
+    if (path === "/api/v1/famille/evenements") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ items: [] }),
+      });
+      return;
+    }
+
+    if (path === "/api/v1/calendriers/evenements") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([]),
+      });
+      return;
+    }
+
+    if (path === "/api/v1/flux/cuisine-3-clics") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ etape_actuelle: null, planning: null }),
+      });
+      return;
+    }
+
+    await route.continue();
+  });
+}
+
 test.describe("Planning repas", () => {
   test.beforeEach(async ({ page }) => {
+    await preparerContextePlanning(page);
     await page.goto("/cuisine/planning");
     await expect(page.locator("h1")).toBeVisible({ timeout: 10000 });
   });
@@ -52,6 +213,10 @@ test.describe("Planning repas", () => {
 });
 
 test.describe("Planning activités", () => {
+  test.beforeEach(async ({ page }) => {
+    await preparerContextePlanning(page);
+  });
+
   test("page planning se charge correctement", async ({ page }) => {
     await page.goto("/planning");
     await expect(page.locator("h1")).toBeVisible({ timeout: 10000 });

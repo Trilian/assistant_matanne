@@ -616,6 +616,32 @@ def _job_rappel_courses_ntfy() -> None:
         logger.exception("Erreur lors du rappel courses ntfy")
 
 
+def _construire_conseil_cuisine(repas_info: dict[str, object]) -> str | None:
+    """Construit un conseil d'action concret pour lancer le repas au bon moment."""
+    nom = str(repas_info.get("nom") or "").strip()
+    if not nom:
+        return None
+
+    temps_total = repas_info.get("temps_total")
+    if not isinstance(temps_total, int) or temps_total <= 0:
+        nom_lower = nom.lower()
+        if any(mot in nom_lower for mot in ("pâtes", "pates", "omelette", "salade", "wrap")):
+            temps_total = 15
+        elif any(mot in nom_lower for mot in ("gratin", "lasagne", "rôti", "roti", "curry", "tajine")):
+            temps_total = 45
+        else:
+            temps_total = 25
+
+    type_repas = str(repas_info.get("type_repas") or "repas").lower()
+    nom_affiche = nom.lower()
+
+    if type_repas == "diner" and temps_total <= 20:
+        return f"💡 Il est 17h, on lance {nom_affiche} ? Compter ~{temps_total} min."
+    if temps_total <= 30:
+        return f"💡 {nom} est une bonne option rapide pour demain (~{temps_total} min)."
+    return f"💡 {nom} demande un peu d'anticipation (~{temps_total} min) : sortir les ingrédients en avance." 
+
+
 def _job_push_contextuel_soir() -> None:
     """Envoie un push contextuel du soir (planning de demain + météo)."""
     try:
@@ -630,12 +656,30 @@ def _job_push_contextuel_soir() -> None:
 
         # 1) Planning du lendemain
         plats = []
+        repas_contextuels: list[dict[str, object]] = []
         try:
             with obtenir_contexte_db() as session:
                 repas_demain = session.query(Repas).filter(Repas.date_repas == demain).all()
                 for r in repas_demain:
-                    nom = r.recette.nom if getattr(r, "recette", None) else (r.notes or "Repas")
+                    recette = getattr(r, "recette", None)
+                    nom = recette.nom if recette and getattr(recette, "nom", None) else (r.notes or "Repas")
+                    temps_total = None
+                    if recette is not None:
+                        temps_total = getattr(recette, "temps_total", None)
+                        if callable(temps_total):
+                            temps_total = temps_total()
+                        if not isinstance(temps_total, int):
+                            prep = int(getattr(recette, "temps_preparation", 0) or 0)
+                            cuisson = int(getattr(recette, "temps_cuisson", 0) or 0)
+                            temps_total = prep + cuisson if (prep or cuisson) else None
                     plats.append(f"{r.type_repas}: {nom}")
+                    repas_contextuels.append(
+                        {
+                            "type_repas": getattr(r, "type_repas", "repas"),
+                            "nom": nom,
+                            "temps_total": temps_total,
+                        }
+                    )
         except Exception:
             logger.debug("Push contextuel: planning indisponible")
 
@@ -673,10 +717,25 @@ def _job_push_contextuel_soir() -> None:
             if a_decongeler
             else ""
         )
-        message = (
-            f"Demain ({demain.isoformat()}) -> {repas_msg}. "
-            f"Météo: {meteo_txt}. {decongel_msg}"
-        ).strip()
+        priorite = next(
+            (
+                repas
+                for repas in repas_contextuels
+                if str(repas.get("type_repas") or "").lower() == "diner"
+            ),
+            repas_contextuels[0] if repas_contextuels else None,
+        )
+        conseil_cuisine = _construire_conseil_cuisine(priorite) if priorite else None
+
+        fragments = [
+            f"Demain ({demain.isoformat()}) -> {repas_msg}.",
+            f"Météo: {meteo_txt}.",
+        ]
+        if decongel_msg:
+            fragments.append(decongel_msg)
+        if conseil_cuisine:
+            fragments.append(conseil_cuisine)
+        message = " ".join(fragment.strip() for fragment in fragments if fragment).strip()
 
         dispatcher = get_dispatcher_notifications()
         resultats = _envoyer_notif_tous_users(
@@ -3326,86 +3385,14 @@ def _job_sync_routines_planning() -> None:
 def _job_sync_recoltes_inventaire() -> None:
     """IM-12: synchronise les récoltes du jardin vers l'inventaire cuisine."""
     try:
-        from datetime import date, timedelta
+        from src.services.cuisine.inter_module_jardin_inventaire import (
+            obtenir_service_jardin_inventaire_interaction,
+        )
 
-        from sqlalchemy import func
-
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import ArticleInventaire, ElementJardin, Ingredient, JournalJardin
-
-        today = date.today()
-        nb_sync = 0
-
-        with obtenir_contexte_db() as session:
-            recoltes = (
-                session.query(ElementJardin)
-                .filter(
-                    ElementJardin.statut == "actif",
-                    ElementJardin.date_recolte_prevue.isnot(None),
-                    ElementJardin.date_recolte_prevue <= today,
-                )
-                .all()
-            )
-
-            for element in recoltes:
-                deja_sync = (
-                    session.query(JournalJardin.id)
-                    .filter(
-                        JournalJardin.garden_item_id == element.id,
-                        JournalJardin.action == "sync_inventaire",
-                    )
-                    .first()
-                )
-                if deja_sync:
-                    continue
-
-                ingredient = (
-                    session.query(Ingredient)
-                    .filter(func.lower(Ingredient.nom) == (element.nom or "").lower())
-                    .first()
-                )
-                if ingredient is None:
-                    ingredient = Ingredient(
-                        nom=element.nom,
-                        categorie="jardin",
-                        unite="pièce",
-                    )
-                    session.add(ingredient)
-                    session.flush()
-
-                article = (
-                    session.query(ArticleInventaire)
-                    .filter(ArticleInventaire.ingredient_id == ingredient.id)
-                    .first()
-                )
-                if article:
-                    article.quantite = float(article.quantite or 0) + 1.0
-                    if not article.emplacement:
-                        article.emplacement = "jardin"
-                    if not article.date_peremption:
-                        article.date_peremption = today + timedelta(days=5)
-                else:
-                    session.add(
-                        ArticleInventaire(
-                            ingredient_id=ingredient.id,
-                            quantite=1.0,
-                            quantite_min=1.0,
-                            emplacement="jardin",
-                            date_peremption=today + timedelta(days=5),
-                        )
-                    )
-
-                session.add(
-                    JournalJardin(
-                        garden_item_id=element.id,
-                        date=today,
-                        action="sync_inventaire",
-                        notes="Synchronisation automatique récolte -> inventaire",
-                    )
-                )
-                nb_sync += 1
-
-            session.commit()
+        resultat = obtenir_service_jardin_inventaire_interaction().synchroniser_recoltes_a_venir(
+            horizon_jours=0,
+        )
+        nb_sync = int(resultat.get("nb_recoltes_sync", 0)) if isinstance(resultat, dict) else 0
 
         if nb_sync:
             logger.info("IM-12 sync récoltes->inventaire: %d récolte(s) synchronisée(s)", nb_sync)

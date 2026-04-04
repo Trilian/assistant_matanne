@@ -33,6 +33,11 @@ class DocumentPatch(BaseModel):
     tags: list[str] | None = None
 
 
+class DocumentGarantieLiaisonRequest(BaseModel):
+    document_id: int = Field(..., ge=1)
+    objet_id: int = Field(..., ge=1)
+
+
 class DocumentResponse(BaseModel):
     id: int
     titre: str

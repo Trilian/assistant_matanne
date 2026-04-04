@@ -73,6 +73,18 @@ def __getattr__(name: str):
         )
 
         return obtenir_service_batch_inventaire_interaction
+    if name == "obtenir_service_jardin_inventaire_interaction":
+        from src.services.cuisine.inter_module_jardin_inventaire import (
+            obtenir_service_jardin_inventaire_interaction,
+        )
+
+        return obtenir_service_jardin_inventaire_interaction
+    if name == "obtenir_service_meteo_planning_interaction":
+        from src.services.cuisine.inter_module_meteo_planning import (
+            obtenir_service_meteo_planning_interaction,
+        )
+
+        return obtenir_service_meteo_planning_interaction
     if name == "obtenir_service_inventaire_planning_interaction":
         from src.services.cuisine.inter_module_inventaire_planning import (
             obtenir_service_inventaire_planning_interaction,

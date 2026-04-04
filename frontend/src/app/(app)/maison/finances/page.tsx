@@ -10,7 +10,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
   Receipt, Banknote, Zap, Plus, Trash2, Pencil,
-  TrendingUp, TrendingDown, Droplets, Flame, Upload,
+  TrendingUp, TrendingDown, Droplets, Flame,
 } from "lucide-react";
 import {
   Card, CardContent, CardHeader, CardTitle, CardDescription,
@@ -32,7 +32,6 @@ import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import {
   listerCharges,
   listerDepensesMaison, creerDepenseMaison, modifierDepenseMaison, supprimerDepenseMaison, statsDepensesMaison,
-  importerDepensesDepuisTicket,
   creerReleve, supprimerReleve, listerReleves, historiqueEnergie, obtenirPrevisionsEnergie,
 } from "@/bibliotheque/api/maison";
 import type { DepenseMaison } from "@/types/maison";
@@ -111,10 +110,6 @@ function OngletCharges() {
 function OngletDepenses() {
   const formsVide = { libelle: "", montant: "", categorie: "", date: "", fournisseur: "", recurrence: "", notes: "" };
   const [form, setForm] = useState(formsVide);
-  const [fichierTicket, setFichierTicket] = useState<File | null>(null);
-  const [apercuTicket, setApercuTicket] = useState<DepenseMaison[] | null>(null);
-  const [dialogImportOuvert, setDialogImportOuvert] = useState(false);
-  const [metaImport, setMetaImport] = useState<{ magasin?: string; confiance_ocr?: number }>({});
   const queryClient = useQueryClient();
   const { dialogOuvert, setDialogOuvert, enEdition, ouvrirCreation, ouvrirEdition, fermerDialog } =
     utiliserDialogCrud<DepenseMaison>({
@@ -153,32 +148,6 @@ function OngletDepenses() {
     });
   };
 
-  const { mutate: analyserTicket, isPending: analyseEnCours } = utiliserMutation(
-    (file: File) => importerDepensesDepuisTicket(file, false),
-    {
-      onSuccess: (result) => {
-        setApercuTicket(result.depenses ?? []);
-        setMetaImport({ magasin: result.magasin, confiance_ocr: result.confiance_ocr });
-        setDialogImportOuvert(true);
-      },
-      onError: () => toast.error("Impossible d'analyser le ticket"),
-    }
-  );
-
-  const { mutate: confirmerImport, isPending: importEnCours } = utiliserMutation(
-    (file: File) => importerDepensesDepuisTicket(file, true),
-    {
-      onSuccess: (result) => {
-        invalider();
-        setDialogImportOuvert(false);
-        setFichierTicket(null);
-        setApercuTicket(null);
-        toast.success(`${result.nb_importees ?? 0} dépenses importées`);
-      },
-      onError: () => toast.error("Échec de l'import des dépenses"),
-    }
-  );
-
   const soumettre = () => {
     const payload = { libelle: form.libelle, montant: Number(form.montant), categorie: form.categorie || undefined, date: form.date || undefined, fournisseur: form.fournisseur || undefined, recurrence: form.recurrence || undefined, notes: form.notes || undefined };
     if (enEdition) modifier({ id: enEdition.id, data: payload });
@@ -215,28 +184,7 @@ function OngletDepenses() {
       )}
 
       <div className="flex justify-end">
-        <div className="flex items-center gap-2">
-          <label className="inline-flex">
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                setFichierTicket(file);
-                analyserTicket(file);
-              }}
-            />
-            <Button size="sm" variant="outline" disabled={analyseEnCours} asChild>
-              <span>
-                <Upload className="mr-2 h-4 w-4" />
-                {analyseEnCours ? "Analyse..." : "Importer depuis photo"}
-              </span>
-            </Button>
-          </label>
-          <Button size="sm" onClick={ouvrirCreation}><Plus className="mr-2 h-4 w-4" />Ajouter une dépense</Button>
-        </div>
+        <Button size="sm" onClick={ouvrirCreation}><Plus className="mr-2 h-4 w-4" />Ajouter une dépense</Button>
       </div>
       <datalist id="depenses-libelles">
         {suggestionsLibelles.map((item) => (
@@ -295,47 +243,6 @@ function OngletDepenses() {
         enChargement={enCreation || enModif}
       />
 
-      {dialogImportOuvert && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-2xl">
-            <CardHeader>
-              <CardTitle className="text-base">Aperçu import ticket</CardTitle>
-              <CardDescription>
-                {metaImport.magasin ? `Magasin: ${metaImport.magasin}` : "Magasin non détecté"}
-                {metaImport.confiance_ocr != null && ` · Confiance OCR: ${(metaImport.confiance_ocr * 100).toFixed(0)}%`}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {!apercuTicket?.length ? (
-                <p className="text-sm text-muted-foreground">Aucune dépense exploitable détectée.</p>
-              ) : (
-                <div className="max-h-72 overflow-y-auto space-y-2">
-                  {apercuTicket.map((d, idx) => (
-                    <div key={`import-${idx}`} className="rounded-md border p-2 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{d.libelle}</p>
-                        <p className="text-xs text-muted-foreground truncate">{d.categorie ?? "courses"}</p>
-                      </div>
-                      <p className="text-sm font-semibold whitespace-nowrap">{Number(d.montant ?? 0).toFixed(2)} €</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setDialogImportOuvert(false)}>Annuler</Button>
-                <Button
-                  disabled={!fichierTicket || !apercuTicket?.length || importEnCours}
-                  onClick={() => {
-                    if (fichierTicket) confirmerImport(fichierTicket);
-                  }}
-                >
-                  {importEnCours ? "Import..." : `Importer ${apercuTicket?.length ?? 0} dépenses`}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }

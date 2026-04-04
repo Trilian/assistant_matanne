@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 import os
@@ -9,6 +10,7 @@ from datetime import date, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
@@ -146,6 +148,98 @@ def _extraire_payload_google_assistant(payload: dict[str, Any]) -> tuple[str, di
         slots = {}
 
     return intent.strip(), slots, str(langue)
+
+
+def _normaliser_historique_chat(historique: list[dict[str, str]] | None) -> list[dict[str, str]]:
+    """Normalise l'historique pour accepter `content` et `contenu`."""
+    normalise: list[dict[str, str]] = []
+    for message in historique or []:
+        role = str(message.get("role") or "user")
+        contenu = str(message.get("contenu") or message.get("content") or "")
+        normalise.append({"role": role, "contenu": contenu})
+    return normalise
+
+
+def _collecter_contexte_metier_chat() -> dict[str, Any]:
+    """Construit le contexte métier injecté dans le chat IA."""
+    from sqlalchemy import func
+
+    from src.core.models import (
+        ActiviteFamille,
+        ArticleInventaire,
+        BudgetFamille,
+        EvenementPlanning,
+        Repas,
+    )
+    from src.services.dashboard.points_famille import obtenir_points_famille_service
+
+    today = date.today()
+    horizon = today + timedelta(days=7)
+    debut_mois = today.replace(day=1)
+
+    with executer_avec_session() as session:
+        contexte_metier = {
+            "planning": {
+                "repas_7j": int(
+                    session.query(func.count(Repas.id))
+                    .filter(Repas.date_repas >= today, Repas.date_repas <= horizon)
+                    .scalar()
+                    or 0
+                ),
+                "activites_7j": int(
+                    session.query(func.count(ActiviteFamille.id))
+                    .filter(
+                        ActiviteFamille.date_prevue >= today,
+                        ActiviteFamille.date_prevue <= horizon,
+                    )
+                    .scalar()
+                    or 0
+                ),
+                "evenements_7j": int(
+                    session.query(func.count(EvenementPlanning.id))
+                    .filter(
+                        EvenementPlanning.date_debut >= today,
+                        EvenementPlanning.date_debut <= horizon,
+                    )
+                    .scalar()
+                    or 0
+                ),
+            },
+            "inventaire": {
+                "stock_bas": int(
+                    session.query(func.count(ArticleInventaire.id))
+                    .filter(ArticleInventaire.quantite < ArticleInventaire.quantite_min)
+                    .scalar()
+                    or 0
+                ),
+                "peremptions_7j": int(
+                    session.query(func.count(ArticleInventaire.id))
+                    .filter(
+                        ArticleInventaire.date_peremption.isnot(None),
+                        ArticleInventaire.date_peremption >= today,
+                        ArticleInventaire.date_peremption <= horizon,
+                    )
+                    .scalar()
+                    or 0
+                ),
+            },
+            "budget": {
+                "depenses_mois": float(
+                    session.query(func.sum(BudgetFamille.montant))
+                    .filter(BudgetFamille.date >= debut_mois)
+                    .scalar()
+                    or 0.0
+                )
+            },
+            "score_jules": {},
+        }
+
+    points = obtenir_points_famille_service().calculer_points() or {}
+    contexte_metier["score_jules"] = {
+        "total_points": int(points.get("total_points", 0)),
+        "badges": points.get("badges", []),
+    }
+    return contexte_metier
 
 
 def _executer_commande_assistant(texte: str, source: str = "assistant_api") -> dict[str, Any]:
@@ -444,98 +538,24 @@ async def chat_assistant_contextuel(
     """Chat IA avec contexte cross-module (planning, inventaire, budget, score Jules, evenements)."""
 
     def _query() -> dict[str, Any]:
-        from sqlalchemy import func
-
-        from src.core.models import (
-            ActiviteFamille,
-            ArticleInventaire,
-            BudgetFamille,
-            EvenementPlanning,
-            Repas,
-        )
-        from src.services.dashboard.points_famille import obtenir_points_famille_service
         from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
 
-        today = date.today()
-        horizon = today + timedelta(days=7)
-        debut_mois = today.replace(day=1)
-
-        with executer_avec_session() as session:
-            contexte_metier = {
-                "planning": {
-                    "repas_7j": int(
-                        session.query(func.count(Repas.id))
-                        .filter(Repas.date_repas >= today, Repas.date_repas <= horizon)
-                        .scalar()
-                        or 0
-                    ),
-                    "activites_7j": int(
-                        session.query(func.count(ActiviteFamille.id))
-                        .filter(
-                            ActiviteFamille.date_prevue >= today,
-                            ActiviteFamille.date_prevue <= horizon,
-                        )
-                        .scalar()
-                        or 0
-                    ),
-                    "evenements_7j": int(
-                        session.query(func.count(EvenementPlanning.id))
-                        .filter(
-                            EvenementPlanning.date_debut >= today,
-                            EvenementPlanning.date_debut <= horizon,
-                        )
-                        .scalar()
-                        or 0
-                    ),
-                },
-                "inventaire": {
-                    "stock_bas": int(
-                        session.query(func.count(ArticleInventaire.id))
-                        .filter(ArticleInventaire.quantite < ArticleInventaire.quantite_min)
-                        .scalar()
-                        or 0
-                    ),
-                    "peremptions_7j": int(
-                        session.query(func.count(ArticleInventaire.id))
-                        .filter(
-                            ArticleInventaire.date_peremption.isnot(None),
-                            ArticleInventaire.date_peremption >= today,
-                            ArticleInventaire.date_peremption <= horizon,
-                        )
-                        .scalar()
-                        or 0
-                    ),
-                },
-                "budget": {
-                    "depenses_mois": float(
-                        session.query(func.sum(BudgetFamille.montant))
-                        .filter(BudgetFamille.date >= debut_mois)
-                        .scalar()
-                        or 0.0
-                    )
-                },
-                "score_jules": {},
-            }
-
-        points = obtenir_points_famille_service().calculer_points() or {}
-        contexte_metier["score_jules"] = {
-            "total_points": int(points.get("total_points", 0)),
-            "badges": points.get("badges", []),
-        }
+        contexte_metier = _collecter_contexte_metier_chat()
+        historique = _normaliser_historique_chat(payload.historique)
 
         service = obtenir_chat_ai_service()
         reponse = service.envoyer_message_contextualise(
             message=payload.message,
             contexte_metier=contexte_metier,
             contexte=payload.contexte if payload.contexte else "general",
-            historique=payload.historique,
+            historique=historique,
         )
 
         _publier_evenement_assistant(
             "chat.contexte.mis_a_jour",
             {
                 "contexte": payload.contexte or "general",
-                "memoire_utilisee": min(5, len(payload.historique or [])),
+                "memoire_utilisee": min(5, len(historique)),
             },
             source="chat_assistant",
         )
@@ -543,11 +563,70 @@ async def chat_assistant_contextuel(
         return {
             "reponse": reponse or "Je n'ai pas pu generer de reponse pour le moment.",
             "contexte": payload.contexte,
-            "memoire_utilisee": min(5, len(payload.historique or [])),
+            "memoire_utilisee": min(5, len(historique)),
             "contexte_metier": contexte_metier,
         }
 
     return await executer_async(_query)
+
+
+@router.post(
+    "/chat/stream",
+    summary="Chat IA contextuel en streaming SSE",
+)
+@gerer_exception_api
+async def chat_assistant_contextuel_stream(
+    payload: AssistantChatRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> StreamingResponse:
+    """Diffuse la réponse IA au fil de l'eau via Server-Sent Events."""
+    from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
+
+    contexte_metier = _collecter_contexte_metier_chat()
+    historique = _normaliser_historique_chat(payload.historique)
+    service = obtenir_chat_ai_service()
+
+    _publier_evenement_assistant(
+        "chat.streaming.demarre",
+        {
+            "contexte": payload.contexte or "general",
+            "memoire_utilisee": min(5, len(historique)),
+        },
+        source="chat_assistant_stream",
+    )
+
+    def _stream() -> Any:
+        yield (
+            "event: context\n"
+            f"data: {json.dumps({'contexte': payload.contexte or 'general', 'memoire_utilisee': min(5, len(historique))}, ensure_ascii=False)}\n\n"
+        )
+
+        a_emit_un_token = False
+        try:
+            for chunk in service.streamer_message(
+                message=payload.message,
+                contexte=payload.contexte if payload.contexte else "general",
+                historique=historique,
+            ):
+                texte = str(chunk or "")
+                if not texte.strip():
+                    continue
+                a_emit_un_token = True
+                yield f"event: token\ndata: {texte}\n\n"
+        except Exception as exc:
+            logger.warning("Streaming chat assistant interrompu: %s", exc)
+            yield "event: error\ndata: Le streaming IA a été interrompu.\n\n"
+
+        if not a_emit_un_token:
+            yield "event: token\ndata: Je n'ai pas pu generer de reponse pour le moment.\n\n"
+
+        yield f"event: done\ndata: {json.dumps({'status': 'completed'}, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(
+        _stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.get(

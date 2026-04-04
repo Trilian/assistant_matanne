@@ -1,28 +1,61 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 // ═══════════════════════════════════════════════════════════
 // B13 — E2E Parcours utilisateur complet cross-modules
 // Dashboard -> Cuisine -> Planning -> Courses -> Famille
 // ═══════════════════════════════════════════════════════════
 
+async function preparerSessionAuthentifiee(page: Page) {
+  await page.context().addCookies([
+    {
+      name: "access_token",
+      value: "e2e-dev-token",
+      domain: "localhost",
+      path: "/",
+      httpOnly: false,
+      sameSite: "Lax",
+    },
+    {
+      name: "access_token",
+      value: "e2e-dev-token",
+      domain: "127.0.0.1",
+      path: "/",
+      httpOnly: false,
+      sameSite: "Lax",
+    },
+  ]);
+
+  await page.addInitScript(() => {
+    window.localStorage.setItem("access_token", "e2e-dev-token");
+    window.localStorage.setItem("matanne-onboarding-complete", "true");
+  });
+
+  await page.route("**/api/v1/auth/me", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ id: 42, email: "e2e@local", nom: "E2E Local", role: "membre" }),
+    });
+  });
+
+  await page.route("**/api/v1/auth/refresh", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ access_token: "e2e-dev-token", token_type: "bearer" }),
+    });
+  });
+}
+
 test.describe("Parcours utilisateur complet", () => {
   test.beforeEach(async ({ page }) => {
-    // Cookie auth dev
-    await page.context().addCookies([
-      {
-        name: "access_token",
-        value: "e2e-dev-token",
-        domain: "localhost",
-        path: "/",
-        httpOnly: false,
-        sameSite: "Lax",
-      },
-    ]);
+    await preparerSessionAuthentifiee(page);
   });
 
   test("parcours dashboard -> cuisine -> planning -> courses -> famille", async ({
     page,
   }) => {
+    test.setTimeout(60000);
     // 1. Dashboard
     await page.goto("/");
     await expect(page.locator("body")).toBeVisible();

@@ -18,6 +18,7 @@ import {
   ShoppingCart,
   CookingPot,
   CalendarDays,
+  GripVertical,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -83,6 +84,19 @@ import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
 import { obtenirFluxCuisine } from "@/bibliotheque/api/ia-bridges";
 import { useIsMobile } from "@/crochets/use-mobile";
+import {
+  closestCenter,
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const STAGGER_DELAYS = ["delay-0", "delay-75", "delay-150", "delay-200", "delay-300", "delay-500", "delay-700"];
@@ -156,6 +170,140 @@ function getDatesDeSemaine(dateDebut: string): string[] {
   return dates;
 }
 
+function construireIdCasePlanning(date: string, type: TypeRepas): string {
+  return `case::${date}::${type}`;
+}
+
+function construireIdRepasPlanning(repasId: number): string {
+  return `repas::${repasId}`;
+}
+
+function CarteRepasDraggable({
+  repas,
+  label,
+  onRetirer,
+}: {
+  repas: RepasPlanning;
+  label: string;
+  onRetirer: (id: number) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useDraggable({
+    id: construireIdRepasPlanning(repas.id),
+    data: { repasId: repas.id },
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center justify-between gap-1 rounded-md bg-background/80 ${isDragging ? "opacity-60 shadow-lg ring-2 ring-primary/30" : ""}`}
+    >
+      <div className="flex items-center gap-1 min-w-0 flex-1">
+        <button
+          type="button"
+          className="rounded p-0.5 text-muted-foreground hover:bg-muted touch-none"
+          aria-label={`Déplacer ${repas.recette_nom || repas.notes || label}`}
+          {...listeners}
+          {...attributes}
+        >
+          <GripVertical className="h-3 w-3" />
+        </button>
+        <span className="font-medium text-foreground truncate">
+          {repas.recette_nom || repas.notes || "—"}
+        </span>
+        {repas.nutri_score && <BadgeNutriscore grade={repas.nutri_score} />}
+      </div>
+      <div className="flex items-center gap-0.5 shrink-0">
+        <ConvertisseurInline className="h-5 px-1" />
+        <Button
+          asChild
+          variant="ghost"
+          size="icon"
+          className="h-5 w-5"
+          title="Lancer un minuteur lié à ce repas"
+        >
+          <a
+            href={`/outils/minuteur?repas=${encodeURIComponent(
+              repas.recette_nom || repas.notes || label
+            )}&duree=${repas.type_repas === "diner" ? 35 : repas.type_repas === "dejeuner" ? 30 : 15}`}
+            aria-label="Ouvrir le minuteur pour ce repas"
+          >
+            <Clock className="h-3 w-3" />
+          </a>
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-5 w-5"
+          onClick={() => onRetirer(repas.id)}
+          aria-label="Retirer le repas"
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function CaseRepasPlanning({
+  date,
+  type,
+  label,
+  emoji,
+  repas,
+  repasGlisse,
+  onAjouter,
+  onRetirer,
+}: {
+  date: string;
+  type: TypeRepas;
+  label: string;
+  emoji: string;
+  repas?: RepasPlanning;
+  repasGlisse: RepasPlanning | null;
+  onAjouter: (date: string, type: TypeRepas) => void;
+  onRetirer: (id: number) => void;
+}) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: construireIdCasePlanning(date, type),
+    data: { date, type },
+  });
+
+  const dateSource = (repasGlisse?.date_repas || repasGlisse?.date || "").split("T")[0];
+  const estCibleDrop = Boolean(repasGlisse) && !(dateSource === date && repasGlisse?.type_repas === type);
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`min-h-[48px] rounded-md border border-dashed p-2 text-xs transition-colors ${
+        isOver || estCibleDrop ? "border-primary/50 bg-primary/5" : "border-muted-foreground/25"
+      }`}
+    >
+      <div className="text-muted-foreground mb-1">
+        {emoji} {label}
+      </div>
+      {repas ? (
+        <CarteRepasDraggable repas={repas} label={label} onRetirer={onRetirer} />
+      ) : (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 w-full text-xs"
+          onClick={() => onAjouter(date, type)}
+        >
+          <Plus className="h-3 w-3 mr-1" />
+          Ajouter
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export default function PagePlanning() {
   const { contexte: modeInvites, mettreAJour: mettreAJourModeInvites, reinitialiser: reinitialiserModeInvites } = utiliserModeInvites();
   const [modeAffichage, setModeAffichage] = useState<"semaine" | "mois">("semaine");
@@ -175,6 +323,14 @@ export default function PagePlanning() {
   const [batchResultat, setBatchResultat] = useState<GenererSessionDepuisPlanningResult | null>(null);
   const [choixModePrepa, setChoixModePrepa] = useState(false);
   const [repasGlisse, setRepasGlisse] = useState<RepasPlanning | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    })
+  );
 
   const invalider = utiliserInvalidation();
   const dateDebut = getLundiDeSemaine(offsetSemaine);
@@ -400,11 +556,12 @@ export default function PagePlanning() {
   }
 
   const deplacerRepas = useCallback(
-    async (dateCible: string, typeCible: TypeRepas) => {
-      if (!repasGlisse) return;
+    async (dateCible: string, typeCible: TypeRepas, repasSource?: RepasPlanning | null) => {
+      const repasActif = repasSource ?? repasGlisse;
+      if (!repasActif) return;
 
-      const dateSource = (repasGlisse.date_repas || repasGlisse.date || "").split("T")[0];
-      if (dateSource === dateCible && repasGlisse.type_repas === typeCible) {
+      const dateSource = (repasActif.date_repas || repasActif.date || "").split("T")[0];
+      if (dateSource === dateCible && repasActif.type_repas === typeCible) {
         setRepasGlisse(null);
         return;
       }
@@ -413,12 +570,12 @@ export default function PagePlanning() {
         await definirRepas({
           date: dateCible,
           type_repas: typeCible,
-          recette_id: repasGlisse.recette_id,
-          notes: repasGlisse.notes ?? repasGlisse.recette_nom,
-          portions: repasGlisse.portions,
+          recette_id: repasActif.recette_id,
+          notes: repasActif.notes ?? repasActif.recette_nom,
+          portions: repasActif.portions,
         });
 
-        await supprimerRepas(repasGlisse.id);
+        await supprimerRepas(repasActif.id);
         invalider(["planning"]);
         toast.success("Repas déplacé");
       } catch {
@@ -428,6 +585,37 @@ export default function PagePlanning() {
       }
     },
     [repasGlisse, invalider]
+  );
+
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const repasId = Number(String(event.active.id).replace("repas::", ""));
+      const repas = planning?.repas?.find((item) => item.id === repasId) ?? null;
+      setRepasGlisse(repas);
+    },
+    [planning?.repas]
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      const repasId = Number(String(active.id).replace("repas::", ""));
+      const repas = planning?.repas?.find((item) => item.id === repasId) ?? repasGlisse;
+
+      if (!over || !repas) {
+        setRepasGlisse(null);
+        return;
+      }
+
+      const [prefixe, dateCible, typeCible] = String(over.id).split("::");
+      if (prefixe !== "case" || !dateCible || !typeCible) {
+        setRepasGlisse(null);
+        return;
+      }
+
+      void deplacerRepas(dateCible, typeCible as TypeRepas, repas);
+    },
+    [deplacerRepas, planning?.repas, repasGlisse]
   );
 
   const choisirRecette = useCallback(
@@ -651,129 +839,74 @@ export default function PagePlanning() {
           ))}
         </div>
       ) : (
-        <div className="space-y-2" data-planning-grid>
-          {datesSemaine.map((date, idx) => {
-            const dateObj = new Date(date);
-            const estAujourdhui =
-              date === new Date().toISOString().split("T")[0];
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={() => setRepasGlisse(null)}
+        >
+          <div className="space-y-2" data-planning-grid>
+            <p className="text-xs text-muted-foreground px-1">
+              Astuce : utilisez la poignée <GripVertical className="inline h-3 w-3" /> pour déplacer un repas par glisser-déposer, y compris sur mobile.
+            </p>
+            {datesSemaine.map((date, idx) => {
+              const dateObj = new Date(date);
+              const estAujourdhui =
+                date === new Date().toISOString().split("T")[0];
 
-            return (
-              <Card
-                key={date}
-                className={`${estAujourdhui ? "border-primary" : ""} animate-in fade-in slide-in-from-bottom-1 duration-500 ${STAGGER_DELAYS[idx % STAGGER_DELAYS.length]}`}
-              >
-                <CardHeader className="py-2 px-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-medium">
-                      {JOURS[idx]}{" "}
-                      <span className="text-muted-foreground font-normal">
-                        {dateObj.toLocaleDateString("fr-FR", {
-                          day: "numeric",
-                          month: "short",
-                        })}
-                      </span>
-                    </CardTitle>
-                    {estAujourdhui && (
-                      <Badge variant="default" className="text-xs">
-                        Aujourd'hui
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="py-2 px-4">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {TYPES_REPAS.map(({ valeur, label, emoji }) => {
-                      const repas = trouverRepas(date, valeur);
-                      const estCibleDrop =
-                        !!repasGlisse &&
-                        (repasGlisse.date_repas || repasGlisse.date || "").split("T")[0] !== date;
-
-                      return (
-                        <div
+              return (
+                <Card
+                  key={date}
+                  className={`${estAujourdhui ? "border-primary" : ""} animate-in fade-in slide-in-from-bottom-1 duration-500 ${STAGGER_DELAYS[idx % STAGGER_DELAYS.length]}`}
+                >
+                  <CardHeader className="py-2 px-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium">
+                        {JOURS[idx]}{" "}
+                        <span className="text-muted-foreground font-normal">
+                          {dateObj.toLocaleDateString("fr-FR", {
+                            day: "numeric",
+                            month: "short",
+                          })}
+                        </span>
+                      </CardTitle>
+                      {estAujourdhui && (
+                        <Badge variant="default" className="text-xs">
+                          Aujourd'hui
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="py-2 px-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {TYPES_REPAS.map(({ valeur, label, emoji }) => (
+                        <CaseRepasPlanning
                           key={valeur}
-                          className={`min-h-[48px] rounded-md border border-dashed p-2 text-xs transition-colors ${
-                            estCibleDrop
-                              ? "border-primary/40 bg-primary/5"
-                              : "border-muted-foreground/25"
-                          }`}
-                          onDragOver={(e) => {
-                            if (repasGlisse) {
-                              e.preventDefault();
-                              e.dataTransfer.dropEffect = "move";
-                            }
-                          }}
-                          onDrop={() => deplacerRepas(date, valeur)}
-                        >
-                          <div className="text-muted-foreground mb-1">
-                            {emoji} {label}
-                          </div>
-                          {repas ? (
-                            <div
-                              className="flex items-center justify-between gap-1"
-                              draggable
-                              onDragStart={(e) => {
-                                setRepasGlisse(repas);
-                                e.dataTransfer.effectAllowed = "move";
-                              }}
-                              onDragEnd={() => setRepasGlisse(null)}
-                            >
-                              <div className="flex items-center gap-1 min-w-0">
-                                <span className="font-medium text-foreground truncate">
-                                  {repas.recette_nom || repas.notes || "—"}
-                                </span>
-                                {repas.nutri_score && (
-                                  <BadgeNutriscore grade={repas.nutri_score} />
-                                )}
-                              </div>
-                              <div className="flex items-center gap-0.5 shrink-0">
-                                <ConvertisseurInline className="h-5 px-1" />
-                                <Button
-                                  asChild
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-5 w-5"
-                                  title="Lancer un minuteur lié à ce repas"
-                                >
-                                  <a
-                                    href={`/outils/minuteur?repas=${encodeURIComponent(
-                                      repas.recette_nom || repas.notes || label
-                                    )}&duree=${repas.type_repas === "diner" ? 35 : repas.type_repas === "dejeuner" ? 30 : 15}`}
-                                    aria-label="Ouvrir le minuteur pour ce repas"
-                                  >
-                                    <Clock className="h-3 w-3" />
-                                  </a>
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-5 w-5"
-                                  onClick={() => retirerRepas(repas.id)}
-                                  aria-label="Retirer le repas"
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ) : (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-full text-xs"
-                              onClick={() => ouvrirDialogue(date, valeur)}
-                            >
-                              <Plus className="h-3 w-3 mr-1" />
-                              Ajouter
-                            </Button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                          date={date}
+                          type={valeur}
+                          label={label}
+                          emoji={emoji}
+                          repas={trouverRepas(date, valeur)}
+                          repasGlisse={repasGlisse}
+                          onAjouter={ouvrirDialogue}
+                          onRetirer={retirerRepas}
+                        />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+          <DragOverlay>
+            {repasGlisse ? (
+              <div className="rounded-md border bg-background px-3 py-2 text-sm shadow-xl">
+                {repasGlisse.recette_nom || repasGlisse.notes || "Repas"}
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
 
       {modeAffichage === "semaine" && !isLoading && (

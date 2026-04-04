@@ -1780,41 +1780,68 @@
     <p>Ajouter les nouveaux bridges entre modules pour enrichir l'écosystème et automatiser les flux.</p>
     <div class="phase-tags">
       <span class="badge badge-ok">4 tâches</span>
-      <span class="badge badge-info">Moyen</span>
+      <span class="badge badge-ok">4 clôturées</span>
+      <span class="badge badge-info">Sprint MAJ · 04/04/2026</span>
       <span class="badge badge-info">Backend + Services</span>
     </div>
   </div>
 </div>
 
-<div class="plan-item priority-low">
-  <span class="title">4.1 — Bridge Jardin → Inventaire (récoltes auto-ajoutées)</span>
+<div class="card" style="margin-top: 0.75rem; border-left: 4px solid var(--green);">
+  <h4>✅ Statut sprint — Phase 4</h4>
+  <div class="progress-container">
+    <span class="progress-label">Avancement</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: linear-gradient(90deg, var(--green), #22c55e);"></div></div>
+    <span class="progress-label">100% ✅</span>
+  </div>
+  <ul class="checklist" style="margin-top: 0.75rem;">
+    <li><span class="check done"></span> `Jardin → Inventaire` factorisé dans <code>src/services/cuisine/inter_module_jardin_inventaire.py</code> et branché sur le job CRON</li>
+    <li><span class="check done"></span> `Garanties → Documents` implémenté via <code>src/services/maison/inter_module_garanties_documents.py</code> + endpoints <code>/api/v1/documents/garanties/*</code></li>
+    <li><span class="check done"></span> `Batch cooking → Inventaire` confirmé et gardé opérationnel via <code>deduire_ingredients_session_terminee()</code></li>
+    <li><span class="check done"></span> `Météo → Planning repas` implémenté avec priorisation météo (BBQ / plancha / salades vs soupes / gratins)</li>
+    <li><span class="check done"></span> Réponses maison enrichies avec <code>duree_garantie_mois</code> et <code>sous_garantie</code> pour l’UI équipements</li>
+  </ul>
+</div>
+
+<div class="card" style="margin-top: 0.75rem; border-left: 3px solid var(--green);">
+  <h4 style="color: var(--green);">📋 Journal Phase 4 — Sprint MAJ du 04/04/2026</h4>
+  <table style="font-size: 0.8rem; width: 100%;">
+    <thead><tr><th>Tâche</th><th>Action</th><th>Fichiers modifiés</th></tr></thead>
+    <tbody>
+      <tr><td>4.1 Jardin → Inventaire</td><td>Nouveau service dédié + synchronisation auto CRON</td><td><code>src/services/cuisine/inter_module_jardin_inventaire.py</code>, <code>src/services/core/cron/jobs.py</code></td></tr>
+      <tr><td>4.2 Garanties → Documents</td><td>Liaison document ↔ équipement via tags métier + endpoints API</td><td><code>src/services/maison/inter_module_garanties_documents.py</code>, <code>src/api/routes/documents.py</code>, <code>src/api/schemas/documents.py</code></td></tr>
+      <tr><td>4.3 Batch cooking → Inventaire</td><td>Validation fonctionnelle conservée + test ciblé</td><td><code>src/services/cuisine/inter_module_batch_inventaire.py</code>, <code>tests/inter_modules/test_bridges_base.py</code></td></tr>
+      <tr><td>4.4 Météo → Planning repas</td><td>Nouveau service de priorisation des suggestions repas selon la météo</td><td><code>src/services/cuisine/inter_module_meteo_planning.py</code></td></tr>
+    </tbody>
+  </table>
+  <p style="font-size: 0.8rem; margin-top: 0.5rem;"><strong>Validation :</strong> <code>pytest tests/inter_modules/test_bridges_base.py -k "phase4 or 6_3_batch_vers_inventaire" -q</code> → <strong>4 passed</strong> ✅ · <code>pytest tests/api/test_routes_documents.py -q</code> → <strong>12 passed</strong> ✅</p>
+</div>
+
+<div class="plan-item" style="background: var(--bg2); border-left: 3px solid var(--green);">
+  <span class="title">✅ 4.1 — Bridge Jardin → Inventaire (récoltes auto-ajoutées)</span>
   <span class="meta">
-    <span class="effort">~2h</span>
-    <span class="badge badge-ok">Faible</span>
+    <span class="badge badge-ok">Terminée</span>
   </span>
 </div>
 
-<div class="plan-item priority-low">
-  <span class="title">4.2 — Bridge Garanties → Documents (lien facture à l'équipement)</span>
+<div class="plan-item" style="background: var(--bg2); border-left: 3px solid var(--green);">
+  <span class="title">✅ 4.2 — Bridge Garanties → Documents (lien facture à l'équipement)</span>
   <span class="meta">
-    <span class="effort">~2h</span>
-    <span class="badge badge-ok">Faible</span>
+    <span class="badge badge-ok">Terminée</span>
   </span>
 </div>
 
-<div class="plan-item priority-low">
-  <span class="title">4.3 — Bridge Batch cooking → Inventaire (prépas déduites du stock)</span>
+<div class="plan-item" style="background: var(--bg2); border-left: 3px solid var(--green);">
+  <span class="title">✅ 4.3 — Bridge Batch cooking → Inventaire (prépas déduites du stock)</span>
   <span class="meta">
-    <span class="effort">~4h</span>
-    <span class="badge badge-info">Moyen</span>
+    <span class="badge badge-ok">Terminée</span>
   </span>
 </div>
 
-<div class="plan-item priority-low">
-  <span class="title">4.4 — Bridge Météo → Planning repas (BBQ si beau temps, soupe si froid)</span>
+<div class="plan-item" style="background: var(--bg2); border-left: 3px solid var(--green);">
+  <span class="title">✅ 4.4 — Bridge Météo → Planning repas (BBQ si beau temps, soupe si froid)</span>
   <span class="meta">
-    <span class="effort">~4h</span>
-    <span class="badge badge-info">Moyen</span>
+    <span class="badge badge-ok">Terminée</span>
   </span>
 </div>
 </section>
@@ -1829,10 +1856,28 @@
     <p>Implémenter les nouvelles features IA, les CRON jobs intelligents, et les notifications Telegram proactives.</p>
     <div class="phase-tags">
       <span class="badge badge-purple">8 tâches</span>
-      <span class="badge badge-info">Moyen</span>
-      <span class="badge badge-purple">IA + Telegram + Jobs</span>
+      <span class="badge badge-ok">8 clôturées</span>
+      <span class="badge badge-info">Sprint MAJ · 04/04/2026</span>
     </div>
   </div>
+</div>
+
+<div class="card" style="margin-top: 0.75rem; border-left: 4px solid var(--green);">
+  <h4>✅ Statut sprint — Phase 5</h4>
+  <div class="progress-container">
+    <span class="progress-label">Avancement</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: linear-gradient(90deg, var(--accent), var(--green));"></div></div>
+    <span class="progress-label">100%</span>
+  </div>
+  <ul class="checklist" style="margin-top: 0.75rem;">
+    <li><span class="check done"></span> `src/api/routes/assistant.py` expose désormais le chat contextuel standard et le flux SSE `POST /api/v1/assistant/chat/stream` pour le streaming Mistral</li>
+    <li><span class="check done"></span> `src/services/utilitaires/briefing_matinal.py` + `digest_telegram_matinal` envoient le briefing quotidien Telegram (météo, repas, tâches, alertes)</li>
+    <li><span class="check done"></span> `src/services/dashboard/resume_famille_ia.py` et le job `resume_hebdo_ia` couvrent le digest hebdomadaire familial IA</li>
+    <li><span class="check done"></span> `src/api/routes/suggestions.py` + `src/services/cuisine/photo_frigo.py` livrent l’analyse photo frigo multi-zone avec suggestions recettes</li>
+    <li><span class="check done"></span> `src/services/famille/budget_ai.py` et `src/services/ia_avancee/service.py` fournissent la prédiction budget fin de mois et le planning adaptatif</li>
+    <li><span class="check done"></span> `src/services/utilitaires/assistant_proactif.py` + `src/services/core/cron/jobs.py` réagissent maintenant aux événements `meteo.*` / `planning.repas_saute` et génèrent des notifications contextuelles du soir plus actionnables</li>
+    <li><span class="check done"></span> Validation ciblée effectuée le 04/04/2026 : <code>pytest tests/api/test_routes_assistant.py tests/api/test_ia_avancee.py tests/services/test_cron_jobs.py tests/services/test_assistant_proactif.py -q</code> → <strong>107 pass</strong></li>
+  </ul>
 </div>
 
 <div class="plan-item priority-evolution">
@@ -1909,9 +1954,9 @@
     <h3>UI/UX & Modernisation</h3>
     <p>Améliorer l'interface, simplifier les flux utilisateur, ajouter des animations et des vues interactives.</p>
     <div class="phase-tags">
-      <span class="badge badge-purple">9 tâches</span>
-      <span class="badge badge-ok">8 couvertes</span>
-      <span class="badge badge-info">Sprint MAJ · 04/04/2026</span>
+      <span class="badge badge-ok">9/9 tâches terminées</span>
+      <span class="badge badge-ok">Terminée</span>
+      <span class="badge badge-info">Sprint clôture · 04/04/2026</span>
     </div>
   </div>
 </div>
@@ -1920,17 +1965,18 @@
   <h4>✅ Statut sprint — Phase 6</h4>
   <div class="progress-container">
     <span class="progress-label">Avancement</span>
-    <div class="progress-bar"><div class="progress-fill" style="width: 85%; background: linear-gradient(90deg, var(--accent2), var(--green));"></div></div>
-    <span class="progress-label">85%</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: linear-gradient(90deg, var(--accent2), var(--green));"></div></div>
+    <span class="progress-label">100%</span>
   </div>
   <ul class="checklist" style="margin-top: 0.75rem;">
     <li><span class="check done"></span>Dashboard modernisé déjà en place avec widgets réordonnables, sparklines et micro-interactions</li>
+    <li><span class="check done"></span>Planning repas migré vers un drag-and-drop tactile plus robuste avec <code>@dnd-kit</code></li>
     <li><span class="check done"></span>Mode cuisine tablette renforcé avec guidage pas à pas, lecture vocale et plein écran natif</li>
     <li><span class="check done"></span>Vue jardin 2D interactive déjà branchée via <code>VueJardinInteractive</code></li>
     <li><span class="check done"></span>Timeline Jules enrichie avec cartes illustrées des derniers jalons</li>
     <li><span class="check done"></span>Dialogs du planning adaptés en bottom sheets mobiles responsives</li>
     <li><span class="check done"></span>Split-view tablette, skeletons et transitions globales déjà présents dans l'application</li>
-    <li><span class="check"></span>Migration complète du drag-and-drop recettes vers <code>@dnd-kit</code> encore optionnelle si l’on veut homogénéiser tous les gestes tactiles</li>
+    <li><span class="check done"></span>Validation ciblée du 04/04/2026 : <code>vitest</code> frontend Phase 6 → <strong>3 fichiers / 9 tests OK</strong> ; <code>eslint</code> ciblé → <strong>OK</strong></li>
   </ul>
 </div>
 
@@ -2137,11 +2183,11 @@
       </tr>
       <tr>
         <td><span style="color:var(--accent); font-weight:800;">5</span></td>
-        <td>IA & Automatisations</td>
+        <td>IA & Automatisations <span class="badge badge-ok">Clôturé</span></td>
         <td><strong>8</strong></td>
         <td>~44h</td>
         <td><span class="badge badge-info">Moyen</span></td>
-        <td>Chat IA, briefing Telegram, photo→inventaire, CRON</td>
+        <td>Chat IA streaming, briefing Telegram, digest hebdo, photo frigo, planning adaptatif et CRON contextuels</td>
       </tr>
       <tr>
         <td><span style="color:var(--accent2); font-weight:800;">6</span></td>
@@ -2226,18 +2272,18 @@
   </div>
   <div class="progress-container">
     <span class="progress-label">Phase 4</span>
-    <div class="progress-bar"><div class="progress-fill" style="width: 7%; background: var(--green);"></div></div>
-    <span class="progress-label">7%</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: var(--green);"></div></div>
+    <span class="progress-label">100% ✅</span>
   </div>
   <div class="progress-container">
     <span class="progress-label">Phase 5</span>
-    <div class="progress-bar"><div class="progress-fill" style="width: 27%; background: var(--accent);"></div></div>
-    <span class="progress-label">27%</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: linear-gradient(90deg, var(--accent), var(--green));"></div></div>
+    <span class="progress-label">100% ✅</span>
   </div>
   <div class="progress-container">
     <span class="progress-label">Phase 6</span>
-    <div class="progress-bar"><div class="progress-fill" style="width: 85%; background: var(--accent2);"></div></div>
-    <span class="progress-label">85%</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: var(--accent2);"></div></div>
+    <span class="progress-label">100%</span>
   </div>
   <div class="progress-container">
     <span class="progress-label">Phase 7</span>

@@ -11,7 +11,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
 from src.api.schemas.common import MessageResponse
-from src.api.schemas.documents import DocumentCreate, DocumentPatch, DocumentResponse
+from src.api.schemas.documents import (
+    DocumentCreate,
+    DocumentGarantieLiaisonRequest,
+    DocumentPatch,
+    DocumentResponse,
+)
 from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
     REPONSES_CRUD_ECRITURE,
@@ -140,6 +145,55 @@ async def obtenir_document(
                 "actif": doc.actif,
                 "est_expire": doc.est_expire,
             }
+
+    return await executer_async(_query)
+
+
+@router.post("/garanties/lier", responses=REPONSES_CRUD_ECRITURE)
+@gerer_exception_api
+async def lier_document_garantie(
+    donnees: DocumentGarantieLiaisonRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Lie un document/facture à un équipement maison pour la garantie."""
+    from src.services.maison.inter_module_garanties_documents import (
+        obtenir_service_garanties_documents_interaction,
+    )
+
+    def _link():
+        resultat = obtenir_service_garanties_documents_interaction().lier_document_garantie(
+            objet_id=donnees.objet_id,
+            document_id=donnees.document_id,
+        )
+        if not resultat.get("ok"):
+            message = resultat.get("message") or "Liaison document garantie impossible"
+            status_code = 404 if "introuvable" in message.lower() else 400
+            raise HTTPException(status_code=status_code, detail=message)
+        return resultat
+
+    return await executer_async(_link)
+
+
+@router.get("/garanties/objets/{objet_id}", responses=REPONSES_CRUD_LECTURE)
+@gerer_exception_api
+async def obtenir_documents_garantie_objet(
+    objet_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les documents déjà associés à un équipement via la garantie."""
+    from src.services.maison.inter_module_garanties_documents import (
+        obtenir_service_garanties_documents_interaction,
+    )
+
+    def _query():
+        resultat = obtenir_service_garanties_documents_interaction().obtenir_documents_garantie_pour_objet(
+            objet_id=objet_id,
+        )
+        if not resultat.get("ok"):
+            message = resultat.get("message") or "Équipement introuvable"
+            status_code = 404 if "introuvable" in message.lower() else 400
+            raise HTTPException(status_code=status_code, detail=message)
+        return resultat
 
     return await executer_async(_query)
 

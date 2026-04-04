@@ -92,3 +92,16 @@ class TestRoutesDocuments:
         """DELETE /api/v1/documents/{id} existe."""
         response = client.delete("/api/v1/documents/999999")
         assert response.status_code in (200, 204, 404, 500)
+
+    def test_lier_document_garantie_endpoint(self, client):
+        """POST /api/v1/documents/garanties/lier existe."""
+        response = client.post(
+            "/api/v1/documents/garanties/lier",
+            json={"document_id": 1, "objet_id": 1},
+        )
+        assert response.status_code in (200, 404, 422, 500)
+
+    def test_obtenir_documents_garantie_objet_endpoint(self, client):
+        """GET /api/v1/documents/garanties/objets/{objet_id} existe."""
+        response = client.get("/api/v1/documents/garanties/objets/1")
+        assert response.status_code in (200, 404, 500)
