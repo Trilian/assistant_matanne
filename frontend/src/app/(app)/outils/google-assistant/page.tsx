@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Bot, Play, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/composants/ui/badge'
@@ -20,24 +20,22 @@ export default function GoogleAssistantPage() {
   const [slotsTexte, setSlotsTexte] = useState<string>('{}')
   const [reponse, setReponse] = useState<string>('')
 
-  async function chargerIntents() {
+  const chargerIntents = useCallback(async () => {
     setChargement(true)
     try {
       const data = await listerIntentsGoogleAssistant()
       setIntents(data.intents)
-      if (data.intents.length > 0 && !intentActif) {
-        setIntentActif(data.intents[0].intent)
-      }
+      setIntentActif((courant) => courant || data.intents[0]?.intent || '')
     } catch {
       toast.error('Impossible de charger les intents Google Assistant')
     } finally {
       setChargement(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     void chargerIntents()
-  }, [])
+  }, [chargerIntents])
 
   const slotsRequis = useMemo(
     () => intents.find((i) => i.intent === intentActif)?.slots ?? [],

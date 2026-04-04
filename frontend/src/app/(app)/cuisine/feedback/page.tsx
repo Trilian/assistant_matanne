@@ -7,7 +7,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Star, Send, Loader2, CheckCircle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Card, CardContent } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Textarea } from "@/composants/ui/textarea";
 import { envoyerFeedbackSemaine, type FeedbackItem } from "@/bibliotheque/api/ia-bridges";

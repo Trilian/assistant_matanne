@@ -4,7 +4,6 @@ import { BotMessageSquare, AlertTriangle, CheckCircle2 } from "lucide-react";
 
 import { Skeleton } from "@/composants/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/composants/ui/sheet";
-import { Button } from "@/composants/ui/button";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { estimerProjetIA } from "@/bibliotheque/api/maison";
 import { BoutonAchat } from "@/composants/bouton-achat";

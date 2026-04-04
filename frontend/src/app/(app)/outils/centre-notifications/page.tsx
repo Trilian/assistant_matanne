@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
 import { Badge } from '@/composants/ui/badge'
 import { Bell, Check } from 'lucide-react'
@@ -33,7 +33,6 @@ interface Notification {
 export default function CentreNotificationsPage() {
   const [page, setPage] = useState(1)
   const [nonLuSeulement, setNonLuSeulement] = useState(false)
-  const [selectedNotif, setSelectedNotif] = useState<number | null>(null)
 
   // Recuperer l'historique
   const { data: historique, isLoading, refetch } = useQuery({
@@ -64,7 +63,7 @@ export default function CentreNotificationsPage() {
     try {
       await clientApi.post(`/api/v1/notifications/historique/${notifId}/marquer-lu`)
       refetch()
-    } catch (error) {
+    } catch {
       toast.error('Erreur lors du marquage de la notification')
     }
   }
@@ -74,7 +73,7 @@ export default function CentreNotificationsPage() {
     try {
       await clientApi.post('/api/v1/notifications/historique/marquer-tous-lus')
       refetch()
-    } catch (error) {
+    } catch {
       toast.error('Erreur lors du marquage des notifications')
     }
   }

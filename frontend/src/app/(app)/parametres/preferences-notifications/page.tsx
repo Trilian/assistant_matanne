@@ -1,19 +1,10 @@
 ﻿'use client'
 
-import { useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Button } from '@/composants/ui/button'
-import { Switch } from '@/composants/ui/switch'
 import { Label } from '@/composants/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/composants/ui/select'
 import { CheckCircle2, AlertCircle } from 'lucide-react'
 import { clientApi } from '@/bibliotheque/api/client'
 import { toast } from 'sonner'
@@ -58,8 +49,6 @@ const categories: Array<{ id: CategorieNotification; label: string; description:
 ]
 
 export default function PreferencesNotificationsPage() {
-  const [isEditing, setIsEditing] = useState(false)
-
   // Recuperer les preferences actuelles
   const { data: currentPrefs, isLoading } = useQuery({
     queryKey: ['notification-preferences'],
@@ -79,7 +68,6 @@ export default function PreferencesNotificationsPage() {
       toast.success('Preferences mises a jour', {
         description: 'Vos preferences de notifications ont ete sauvegardees.',
       })
-      setIsEditing(false)
     },
     onError: () => {
       toast.error('Erreur', {
@@ -88,7 +76,7 @@ export default function PreferencesNotificationsPage() {
     },
   })
 
-  const { register, watch, handleSubmit, reset } = useForm<PreferencesFormData>({
+  const { register, handleSubmit, reset } = useForm<PreferencesFormData>({
     defaultValues: currentPrefs || {
       canal_prefere: 'push',
       canaux_par_categorie: {

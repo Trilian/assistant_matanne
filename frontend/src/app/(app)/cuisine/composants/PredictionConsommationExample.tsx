@@ -28,7 +28,7 @@ interface HistoriqueAchat {
 export function PredictionConsommationExample() {
   const [ingredientNom, setIngredientNom] = useState('')
   const [stockActuel, setStockActuel] = useState('')
-  const [historique, setHistorique] = useState<HistoriqueAchat[]>([])
+  const [historique] = useState<HistoriqueAchat[]>([])
 
   const { mutate: predireConsommation, isPending, data } = utilisePredictionConsommation()
   const { ajouter_notification } = useNotifications()
@@ -43,7 +43,7 @@ export function PredictionConsommationExample() {
       {
         ingredient_nom: ingredientNom,
         stock_actuel_kg: parseFloat(stockActuel),
-        historique_achat_mensuel: historique.map((h, index) => ({
+        historique_achat_mensuel: historique.map((h) => ({
           date: `2026-${String(h.mois).padStart(2, '0')}-01`,
           quantite_kg: h.quantite_kg,
         })),

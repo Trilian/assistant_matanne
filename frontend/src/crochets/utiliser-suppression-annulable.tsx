@@ -16,11 +16,13 @@ export function utiliserSuppressionAnnulable({ ttlMs = 10000 }: OptionsSuppressi
   const suppressionsRef = useRef<Map<string, SuppressionEnAttente>>(new Map());
 
   useEffect(() => {
+    const suppressions = suppressionsRef.current;
+
     return () => {
-      for (const suppression of suppressionsRef.current.values()) {
+      for (const suppression of suppressions.values()) {
         clearTimeout(suppression.timer);
       }
-      suppressionsRef.current.clear();
+      suppressions.clear();
     };
   }, []);
 

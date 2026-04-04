@@ -48,10 +48,8 @@ import {
   declencherJobAvecOptions,
   listerJobs,
 } from "@/bibliotheque/api/admin";
-import { clientApi } from "@/bibliotheque/api/client";
 import PageAdminJobs from "@/app/(app)/admin/jobs/page";
 
-const mockedApi = vi.mocked(clientApi);
 const mockedDeclencherJobAvecOptions = vi.mocked(declencherJobAvecOptions);
 const mockedListerJobs = vi.mocked(listerJobs);
 

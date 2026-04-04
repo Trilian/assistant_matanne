@@ -11,8 +11,7 @@ test.describe("Recherche globale - Parcours utilisateur", () => {
     // Essayer d'ouvrir la recherche globale avec Ctrl+K
     await page.keyboard.press("Control+K");
 
-    // Attendre que le dialog de recherche se montre (optionnel)
-    const searchDialog = page.locator('[role="dialog"]');
+    // Attendre que l'input de recherche se montre (optionnel)
     const searchInput = page.locator('input[type="search"], input[placeholder*="Rechercher"]');
 
     // Vérifier si la recherche est ouverte (peut être un button ou input)

@@ -114,13 +114,19 @@ export default function PageRecettes() {
     () => listerRecettesSaisonnieres(1, 0),
     { staleTime: 10 * 60 * 1000 }
   );
-  const idsSaison = new Set((dataSaison?.items ?? []).map((r) => r.id));
+  const idsSaison = useMemo(
+    () => new Set((dataSaison?.items ?? []).map((r) => r.id)),
+    [dataSaison]
+  );
 
   const { data: planifiees } = utiliserRequete(
     ["recettes", "semaine"],
     listerRecettesSemaine
   );
-  const idsPlanifies = new Set((planifiees ?? []).map((r) => r.id));
+  const idsPlanifies = useMemo(
+    () => new Set((planifiees ?? []).map((r) => r.id)),
+    [planifiees]
+  );
 
   const mutationPlanifier = utiliserMutationAvecInvalidation(
     (id: number) => planifierRecetteSemaine(id),
@@ -134,7 +140,7 @@ export default function PageRecettes() {
     { onSuccess: () => toast.success("Recette retirée du menu de la semaine") }
   );
 
-  const recettes = data?.items ?? [];
+  const recettes = useMemo(() => data?.items ?? [], [data]);
   const totalPages = data?.pages_totales ?? 1;
 
   // Filtrage client par appareil

@@ -28,7 +28,6 @@ import { creerScenarioHabitat } from "@/bibliotheque/api/habitat";
 import { resetOnboarding } from "@/composants/disposition/tour-onboarding";
 import { toast } from "sonner";
 import {
-  Search,
   Wand2,
   TimerReset,
   StickyNote,
@@ -331,7 +330,7 @@ export function MenuCommandes() {
     }
 
     return actions;
-  }, [definirRecherche, recherche, router]);
+  }, [recherche, router]);
 
   const actionsFiltrees = useMemo(() => {
     const terme = normaliser(recherche);

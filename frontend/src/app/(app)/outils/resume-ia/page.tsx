@@ -4,8 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   Brain,
   TrendingUp,
@@ -31,11 +30,6 @@ import {
   obtenirDigestQuotidien,
   obtenirFluxCuisine,
   obtenirAnomaliesBudget,
-  type PrevisionBudget,
-  type PredictionCourses,
-  type DigestQuotidien,
-  type FluxCuisine,
-  type AnomalieBudget,
 } from "@/bibliotheque/api/ia-bridges";
 
 export default function ResumeHebdoPage() {

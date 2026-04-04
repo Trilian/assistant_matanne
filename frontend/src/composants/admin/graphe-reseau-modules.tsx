@@ -175,10 +175,10 @@ export function GrapheReseauModules({ width = 1000, height = 800 }: GrapheReseau
             .on('drag', dragged)
             .on('end', dragended)
         )
-      .on('mouseover', function(_d: any) {
+      .on('mouseover', function() {
         d3.select(this).transition().attr('r', 40).attr('stroke-width', 3)
       })
-      .on('mouseout', function(_d: any) {
+      .on('mouseout', function() {
         d3.select(this).transition().attr('r', 30).attr('stroke-width', 2)
       })
 

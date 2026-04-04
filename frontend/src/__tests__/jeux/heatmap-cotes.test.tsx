@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { HeatmapCotes } from "@/composants/jeux/heatmap-cotes";
 
 vi.mock("next/dynamic", () => ({
-  default: (loader: () => unknown) => {
+  default: () => {
     const MockComponent = ({ children }: { children?: React.ReactNode }) => (
       <div data-testid="dynamic-chart">{children}</div>
     );

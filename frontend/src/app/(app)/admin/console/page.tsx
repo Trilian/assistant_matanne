@@ -5,7 +5,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Terminal, Send, Loader2, ArrowUp, HelpCircle } from "lucide-react";
+import { Terminal, Send, Loader2, HelpCircle } from "lucide-react";
 import {
   Card,
   CardContent,

@@ -62,7 +62,7 @@ export function GrilleIAPonderee({ onGenerer, onAnalyser }: GrilleIAGenereeProps
         confiance: result.confiance,
       });
       toast.success("Grille IA générée avec succès");
-    } catch (err) {
+    } catch {
       toast.error("Erreur lors de la génération de la grille");
     } finally {
       setLoading(false);
@@ -77,7 +77,7 @@ export function GrilleIAPonderee({ onGenerer, onAnalyser }: GrilleIAGenereeProps
       const result = await onAnalyser(grille.numeros, grille.numero_chance);
       setAnalyse(result);
       toast.success("Analyse complétée");
-    } catch (err) {
+    } catch {
       toast.error("Erreur lors de l'analyse");
     } finally {
       setLoading(false);

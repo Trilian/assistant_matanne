@@ -24,7 +24,7 @@ import {
 } from "@/composants/ui/select";
 import { utiliserRequete, utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { listerNotes, creerNote, modifierNote, supprimerNote, listerTagsNotes } from "@/bibliotheque/api/outils";
-import type { Note, NoteCreate } from "@/types/outils";
+import type { Note } from "@/types/outils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";

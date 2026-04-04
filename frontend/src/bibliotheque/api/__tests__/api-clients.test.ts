@@ -144,11 +144,8 @@ describe("API courses", () => {
 // ═══════════════════════════════════════════════════════════
 
 describe("API planning", () => {
-  let clientApi: ReturnType<typeof axios.create>;
-
   beforeEach(() => {
     vi.resetModules();
-    clientApi = axios.create() as unknown as ReturnType<typeof axios.create>;
   });
 
   afterEach(() => {
