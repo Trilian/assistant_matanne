@@ -23,15 +23,16 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
-import { utiliserRequete } from "@/crochets/utiliser-api";
-import { evaluerRappelsFamille } from "@/bibliotheque/api/famille";
+import { utiliserBadgesModules } from "@/crochets/utiliser-badges-modules";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/composants/ui/sheet";
-import type { RappelFamille } from "@/types/famille";
+import { Badge } from "@/composants/ui/badge";
+import { getModuleThemeClass, obtenirModuleDepuisPathname } from "@/bibliotheque/theme-modules";
 
 // 4 onglets principaux
 const ITEMS = [
@@ -63,14 +64,17 @@ export function NavMobile() {
   const router = useRouter();
   const [plusOuvert, setPlusOuvert] = useState(false);
 
-  const { data: rappelsData } = utiliserRequete<{ rappels: RappelFamille[]; total: number }>(
-    ["famille", "rappels", "badge"],
-    evaluerRappelsFamille,
-    { staleTime: 5 * 60 * 1000, refetchInterval: 10 * 60 * 1000 }
-  );
-  const nbRappelsDanger = rappelsData?.rappels?.filter((r) => r.priorite === "danger").length ?? 0;
+  const { badges, badgePlus } = utiliserBadgesModules();
 
   const estSurPlus = PLUS_PREFIXES.some((p) => pathname.startsWith(p));
+  const obtenirBadgeNavigation = (chemin: string) => {
+    if (chemin === "/cuisine") return badges.cuisine;
+    if (chemin === "/famille") return badges.famille;
+    if (chemin === "/maison") return badges.maison;
+    if (chemin === "/jeux") return badges.jeux;
+    return 0;
+  };
+  const formaterBadge = (valeur: number) => (valeur > 9 ? "9+" : String(valeur));
 
   useEffect(() => {
     if (!plusOuvert) return;
@@ -88,7 +92,8 @@ export function NavMobile() {
         {ITEMS.map(({ nom, chemin, Icone }) => {
           const estActif =
             chemin === "/" ? pathname === "/" : pathname.startsWith(chemin);
-          const showBadge = chemin === "/famille" && nbRappelsDanger > 0;
+          const badgeCount = obtenirBadgeNavigation(chemin);
+          const showBadge = badgeCount > 0;
 
           return (
             <Link
@@ -100,8 +105,9 @@ export function NavMobile() {
               aria-current={estActif ? "page" : undefined}
               className={cn(
                 "relative flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors",
+                getModuleThemeClass(obtenirModuleDepuisPathname(chemin)),
                 estActif
-                  ? "text-primary"
+                  ? "module-accent-text"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -113,12 +119,14 @@ export function NavMobile() {
                   )}
                 />
                 {showBadge && (
-                  <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-destructive border-2 border-background" />
+                  <span className="absolute -top-2 -right-2 inline-flex min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-semibold text-destructive-foreground">
+                    {formaterBadge(badgeCount)}
+                  </span>
                 )}
               </span>
               <span>{nom}</span>
               {estActif && (
-                <span className="absolute bottom-0 h-0.5 w-8 rounded-full bg-primary animate-in fade-in zoom-in-50" />
+                <span className="absolute bottom-0 h-0.5 w-8 rounded-full module-top-strip animate-in fade-in zoom-in-50" />
               )}
             </Link>
           );
@@ -129,11 +137,19 @@ export function NavMobile() {
           onClick={() => setPlusOuvert(true)}
           aria-label="Plus de sections"
           className={cn(
-            "flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors",
-            estSurPlus ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            "relative flex flex-1 flex-col items-center gap-1 py-2 text-xs transition-colors",
+            getModuleThemeClass(obtenirModuleDepuisPathname(pathname)),
+            estSurPlus ? "module-accent-text" : "text-muted-foreground hover:text-foreground"
           )}
         >
-          <MoreHorizontal className="h-5 w-5" />
+          <span className="relative">
+            <MoreHorizontal className="h-5 w-5" />
+            {badgePlus > 0 && (
+              <span className="absolute -top-2 -right-2 inline-flex min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-semibold text-destructive-foreground">
+                {formaterBadge(badgePlus)}
+              </span>
+            )}
+          </span>
           <span>Plus</span>
         </button>
       </nav>
@@ -143,10 +159,14 @@ export function NavMobile() {
         <SheetContent side="bottom" className="h-auto rounded-t-2xl pb-8 md:hidden">
           <SheetHeader className="mb-5">
             <SheetTitle className="text-base font-semibold">Navigation</SheetTitle>
+            <SheetDescription>
+              Accès rapide aux sections secondaires avec leurs badges d'attention.
+            </SheetDescription>
           </SheetHeader>
           <div className="grid grid-cols-2 gap-3">
             {PLUS_ITEMS.map(({ nom, chemin, Icone }) => {
               const estActif = pathname.startsWith(chemin);
+              const badgeCount = obtenirBadgeNavigation(chemin);
               return (
                 <button
                   key={chemin}
@@ -162,7 +182,14 @@ export function NavMobile() {
                       : "hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
-                  <Icone className="h-7 w-7" />
+                  <div className="relative">
+                    <Icone className="h-7 w-7" />
+                    {badgeCount > 0 && (
+                      <Badge variant="destructive" className="absolute -right-5 -top-3 h-5 min-w-5 px-1 text-[10px]">
+                        {formaterBadge(badgeCount)}
+                      </Badge>
+                    )}
+                  </div>
                   {nom}
                 </button>
               );

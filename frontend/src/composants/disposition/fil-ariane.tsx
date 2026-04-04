@@ -10,7 +10,7 @@ import { ChevronRight, Home } from "lucide-react";
 import { BoutonEpingler } from "./bouton-epingler";
 import { TooltipProvider } from "@/composants/ui/tooltip";
 import { utiliserStoreUI } from "@/magasins/store-ui";
-import { getModuleThemeClass, obtenirModuleDepuisPathname } from "@/bibliotheque/theme-modules";
+import { getModuleThemeClass, obtenirMetaModule, obtenirModuleDepuisPathname } from "@/bibliotheque/theme-modules";
 import { cn } from "@/bibliotheque/utils";
 
 /** Retourne true si le segment ressemble à un ID dynamique (numérique ou UUID) */
@@ -77,6 +77,7 @@ function traduireSegment(segment: string): string {
 export function FilAriane() {
   const pathname = usePathname();
   const moduleActif = obtenirModuleDepuisPathname(pathname);
+  const metaModule = obtenirMetaModule(moduleActif);
   const segments = pathname.split("/").filter(Boolean);
   const { titrePage } = utiliserStoreUI();
 
@@ -85,7 +86,13 @@ export function FilAriane() {
 
   return (
     <TooltipProvider>
-      <nav aria-label="Fil d'Ariane" className="flex items-center gap-1 text-sm text-muted-foreground px-4 md:px-6 py-2">
+      <nav
+        aria-label="Fil d'Ariane"
+        className={cn(
+          "flex items-center gap-1 px-4 py-2 text-sm text-muted-foreground md:px-6",
+          getModuleThemeClass(moduleActif)
+        )}
+      >
         <Link href="/" className="hover:text-foreground transition-colors" aria-label="Accueil">
           <Home className="h-4 w-4" />
         </Link>
@@ -114,8 +121,10 @@ export function FilAriane() {
           );
         })}
         
-        {/* Bouton épingler page */}
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <span className="hidden rounded-full border px-2 py-0.5 text-[11px] font-medium md:inline-flex module-accent-bg module-accent-text module-accent-border">
+            {`Module actif : ${metaModule.label}`}
+          </span>
           <BoutonEpingler />
         </div>
       </nav>

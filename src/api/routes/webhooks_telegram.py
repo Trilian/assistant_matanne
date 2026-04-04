@@ -32,19 +32,24 @@ router = APIRouter(prefix="/api/v1/telegram", tags=["Telegram"])
 COMMANDES_TELEGRAM: tuple[tuple[str, str], ...] = (
     ("/planning", "Afficher le planning repas de la semaine"),
     ("/courses", "Afficher la liste de courses avec actions rapides"),
+    ("/courses_live", "Ouvrir la liste interactive avec boutons inline"),
     ("/inventaire", "Voir le frigo avec alertes de péremption"),
     ("/recette [nom]", "Trouver une recette rapide et ses ingrédients"),
     ("/batch", "Résumé du batch cooking en cours ou planifié"),
     ("/ajout [article]", "Ajouter un article à la liste de courses"),
+    ("/ajouter_course [article]", "Ajouter un article à la liste active"),
     ("/repas [midi|soir]", "Voir le repas du jour et répondre au mini-sondage"),
     ("/jules", "Résumé Jules: âge et jalons du moment"),
     ("/maison", "Tâches maison du jour"),
     ("/jardin", "Tâches jardin et récoltes à venir"),
+    ("/weekend", "Suggestions et activités du prochain weekend"),
     ("/energie", "KPIs énergie du mois / de l’année"),
     ("/rappels", "Voir tous les rappels groupés"),
     ("/timer [Xmin]", "Lancer un minuteur Telegram"),
     ("/note [texte]", "Créer une note rapide"),
     ("/budget", "Résumé budget du mois en cours"),
+    ("/rapport", "Résumé hebdomadaire de la famille"),
+    ("/photo", "Recevoir l’aide pour analyser une photo du frigo ou de la maison"),
     ("/meteo", "Météo du jour et impact sur les activités"),
     ("/menu", "Ouvrir le menu principal Telegram"),
     ("/aide", "Lister toutes les commandes disponibles"),
@@ -859,6 +864,148 @@ async def _envoyer_resume_energie(chat_id: str) -> None:
     )
 
 
+async def _envoyer_resume_weekend(chat_id: str) -> None:
+    from src.services.famille.weekend import obtenir_service_weekend
+    from src.services.famille.weekend_ai import obtenir_weekend_ai_service
+    from src.services.integrations.telegram import envoyer_message_interactif
+
+    service = obtenir_service_weekend()
+    samedi, dimanche = service.get_next_weekend()
+    activites = service.lister_activites_weekend(samedi, dimanche) or {}
+    budget = service.get_budget_weekend(samedi, dimanche) or {"estime": 0, "reel": 0}
+
+    samedi_activites = activites.get("saturday", []) or []
+    dimanche_activites = activites.get("sunday", []) or []
+
+    lignes = [f"🎡 <b>Weekend {samedi.strftime('%d/%m')} → {dimanche.strftime('%d/%m')}</b>"]
+
+    if samedi_activites or dimanche_activites:
+        for libelle, items in (("Samedi", samedi_activites), ("Dimanche", dimanche_activites)):
+            if not items:
+                continue
+            lignes.append("")
+            lignes.append(f"<b>{libelle}</b>")
+            for activite in items[:3]:
+                titre = html.escape(str(getattr(activite, "titre", "Activité")))
+                details: list[str] = [titre]
+                heure = getattr(activite, "heure_debut", None)
+                cout = getattr(activite, "cout_estime", None)
+                if heure:
+                    details.append(heure.strftime('%H:%M'))
+                if isinstance(cout, int | float) and cout:
+                    details.append(f"{float(cout):.0f}€")
+                lignes.append(f"• {' — '.join(details)}")
+
+        lignes.append("")
+        lignes.append(f"💸 Budget estimé : {float(budget.get('estime', 0) or 0):.0f}€")
+    else:
+        suggestion = ""
+        try:
+            suggestion = await obtenir_weekend_ai_service().suggerer_activites(
+                meteo="variable",
+                age_enfant_mois=36,
+                budget=60,
+                region="France",
+                nb_suggestions=3,
+            )
+        except Exception as exc:
+            logger.warning("Impossible de générer les suggestions weekend Telegram: %s", exc)
+
+        lignes.append("")
+        lignes.append("Aucune activité n'est encore planifiée.")
+        if suggestion:
+            suggestion_compacte = html.escape(suggestion.strip())
+            if len(suggestion_compacte) > 900:
+                suggestion_compacte = suggestion_compacte[:900].rstrip() + "…"
+            lignes.append("")
+            lignes.append(suggestion_compacte)
+        else:
+            lignes.append("💡 Ouvre le module Famille pour préparer le prochain weekend.")
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"url": _obtenir_url_app("/famille"), "title": "🎡 Ouvrir Famille"},
+            {"id": "menu_famille", "title": "👶 Menu Famille"},
+        ],
+    )
+
+
+async def _envoyer_rapport_hebdo(chat_id: str) -> None:
+    from src.services.famille.resume_hebdo import obtenir_service_resume_hebdo
+    from src.services.integrations.telegram import envoyer_message_interactif, envoyer_message_telegram
+
+    try:
+        resume = obtenir_service_resume_hebdo().generer_resume_semaine_sync()
+    except Exception as exc:
+        logger.warning("Impossible de générer le résumé hebdo Telegram: %s", exc)
+        await envoyer_message_telegram(chat_id, "📋 Le résumé hebdo n'est pas disponible pour le moment.")
+        return
+
+    lignes = [
+        f"📋 <b>Résumé hebdo {html.escape(str(getattr(resume, 'semaine', '')))}</b>",
+        f"⭐ Score semaine : <b>{int(getattr(resume, 'score_semaine', 0) or 0)}/100</b>",
+    ]
+
+    repas = getattr(resume, "repas", None)
+    if repas is not None:
+        lignes.append(
+            f"🍽️ Repas : {int(getattr(repas, 'nb_repas_realises', 0) or 0)}/"
+            f"{int(getattr(repas, 'nb_repas_planifies', 0) or 0)} réalisés"
+        )
+
+    budget = getattr(resume, "budget", None)
+    if budget is not None:
+        lignes.append(f"💸 Dépenses : {float(getattr(budget, 'total_depenses', 0) or 0):.2f}€")
+
+    activites = getattr(resume, "activites", None)
+    if activites is not None:
+        lignes.append(f"🎯 Activités : {int(getattr(activites, 'nb_activites', 0) or 0)}")
+
+    taches = getattr(resume, "taches", None)
+    if taches is not None:
+        lignes.append(
+            f"🧰 Tâches : {int(getattr(taches, 'nb_taches_realisees', 0) or 0)} faites • "
+            f"{int(getattr(taches, 'nb_taches_en_retard', 0) or 0)} en retard"
+        )
+
+    narratif = str(getattr(resume, "resume_narratif", "") or "").strip()
+    if narratif:
+        narratif_echappe = html.escape(narratif)
+        if len(narratif_echappe) > 900:
+            narratif_echappe = narratif_echappe[:900].rstrip() + "…"
+        lignes.append("")
+        lignes.append(narratif_echappe)
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps="\n".join(lignes),
+        boutons=[
+            {"url": _obtenir_url_app("/famille"), "title": "📋 Ouvrir Famille"},
+            {"id": "menu_principal", "title": "🏠 Menu principal"},
+        ],
+    )
+
+
+async def _envoyer_aide_photo_telegram(chat_id: str) -> None:
+    from src.services.integrations.telegram import envoyer_message_interactif
+
+    await envoyer_message_interactif(
+        destinataire=chat_id,
+        corps=(
+            "📸 <b>Aide photo</b>\n\n"
+            "Envoie directement une photo du <b>frigo</b>, d'une <b>plante</b> ou d'une <b>pièce de la maison</b> "
+            "et je te répondrai avec une analyse rapide."
+        ),
+        boutons=[
+            {"url": _obtenir_url_app("/cuisine/inventaire"), "title": "🥫 Ouvrir l'inventaire"},
+            {"url": _obtenir_url_app("/maison/jardin"), "title": "🌿 Ouvrir le jardin"},
+            {"id": "menu_principal", "title": "🏠 Menu principal"},
+        ],
+    )
+
+
 async def _envoyer_rappels_groupes(chat_id: str) -> None:
     from src.core.db import obtenir_contexte_db
     from src.core.models.habitat import TacheEntretien
@@ -1313,7 +1460,7 @@ async def _dispatcher_commande_telegram(chat_id: str, texte: str, normalise: str
     if normalise == "/planning":
         await _envoyer_planning_commande(chat_id)
         return True
-    if normalise in {"/courses", "/course"}:
+    if normalise in {"/courses", "/course", "/courses_live"}:
         await _envoyer_courses_commande(chat_id)
         return True
     if normalise == "/inventaire":
@@ -1334,6 +1481,9 @@ async def _dispatcher_commande_telegram(chat_id: str, texte: str, normalise: str
     if normalise == "/jardin":
         await _envoyer_resume_jardin(chat_id)
         return True
+    if normalise == "/weekend":
+        await _envoyer_resume_weekend(chat_id)
+        return True
     if normalise == "/energie":
         await _envoyer_resume_energie(chat_id)
         return True
@@ -1343,10 +1493,16 @@ async def _dispatcher_commande_telegram(chat_id: str, texte: str, normalise: str
     if normalise == "/budget":
         await _envoyer_resume_budget(chat_id)
         return True
+    if normalise == "/rapport":
+        await _envoyer_rapport_hebdo(chat_id)
+        return True
+    if normalise == "/photo":
+        await _envoyer_aide_photo_telegram(chat_id)
+        return True
     if normalise == "/meteo":
         await _envoyer_meteo_telegram(chat_id)
         return True
-    if normalise.startswith("/ajout"):
+    if normalise.startswith("/ajout") or normalise.startswith("/ajouter_course"):
         await _ajouter_article_liste(chat_id, argument)
         return True
     if normalise.startswith("/repas"):

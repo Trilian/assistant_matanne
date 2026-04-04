@@ -11,6 +11,20 @@ export type ModuleThemeKey =
   | "parametres"
   | "admin";
 
+const META_MODULE: Record<ModuleThemeKey, { label: string; emoji: string }> = {
+  principal: { label: "Accueil", emoji: "🏠" },
+  cuisine: { label: "Cuisine", emoji: "🍽️" },
+  famille: { label: "Famille", emoji: "👨‍👩‍👦" },
+  maison: { label: "Maison", emoji: "🏡" },
+  habitat: { label: "Habitat", emoji: "🗺️" },
+  jeux: { label: "Jeux", emoji: "🎯" },
+  outils: { label: "Outils", emoji: "🛠️" },
+  planning: { label: "Planning", emoji: "📅" },
+  ia: { label: "IA avancée", emoji: "✨" },
+  parametres: { label: "Paramètres", emoji: "⚙️" },
+  admin: { label: "Admin", emoji: "🔐" },
+};
+
 const PREFIXES_MODULE: Array<{ prefix: string; module: ModuleThemeKey }> = [
   { prefix: "/cuisine", module: "cuisine" },
   { prefix: "/famille", module: "famille" },
@@ -38,4 +52,8 @@ export function getAccentVarName(moduleKey: ModuleThemeKey): string {
 
 export function getModuleThemeClass(moduleKey: ModuleThemeKey): string {
   return `module-theme-${moduleKey}`;
+}
+
+export function obtenirMetaModule(moduleKey: ModuleThemeKey): { label: string; emoji: string } {
+  return META_MODULE[moduleKey] ?? META_MODULE.principal;
 }

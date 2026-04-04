@@ -67,6 +67,7 @@ import {
 import { toast } from "sonner";
 import { GrilleWidgets } from "@/composants/disposition/grille-widgets";
 import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
+import { CarteActionsAdminModule } from "@/composants/disposition/carte-actions-admin-module";
 import type { ContexteFamilial, RappelFamille } from "@/types/famille";
 
 const MODULES = [
@@ -265,6 +266,28 @@ export default function PageFamille() {
   return (
     <div className="space-y-8">
       <CarteNotificationsModule moduleKey="famille" moduleLabel="Famille" />
+
+      <CarteActionsAdminModule
+        moduleLabel="Famille"
+        description="Lancement manuel des jobs Jules, weekend et résumé hebdo depuis le hub."
+        jobs={[
+          {
+            id: "rapport_nutritionnel_jules",
+            label: "Rapport nutrition Jules",
+            hint: "Bilan hebdo Jules",
+          },
+          {
+            id: "score_weekend",
+            label: "Score weekend",
+            hint: "Suggestions activités / météo",
+          },
+          {
+            id: "s16_resume_weekend_telegram",
+            label: "Résumé weekend Telegram",
+            hint: "Digest du vendredi 18h",
+          },
+        ]}
+      />
 
       {/* En-tête */}
       <div>

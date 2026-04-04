@@ -1087,7 +1087,7 @@
 
       <div class="card" style="border-color:rgba(245,158,11,.35);background:rgba(15,23,42,.45)">
         <h3>Statut d'exécution — Mise à jour du 4 avril 2026</h3>
-        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 3 démarrée</span> Première vague UI/UX livrée : frise interactive <code>repas → inventaire → courses</code> sur <code>Ma Semaine</code> et composant <code>SkeletonPage</code> factorisé pour homogénéiser les écrans de chargement des vues Maison.</p>
+        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 3 démarrée</span> Trois vagues UI/UX sont maintenant livrées : frise interactive <code>repas → inventaire → courses</code> sur <code>Ma Semaine</code>, composant <code>SkeletonPage</code> factorisé pour homogénéiser les écrans de chargement des vues Maison, badges de notification par module sur la navigation desktop/mobile, et palette visuelle module appliquée à l'en-tête, au fil d'Ariane et à la navigation mobile.</p>
         <table>
           <tr><th>Sprint</th><th>Statut</th><th>Livré</th><th>Suite</th></tr>
           <tr>
@@ -1102,6 +1102,18 @@
             <td><code>frontend/src/composants/cuisine/frise-flux-cuisine.tsx</code> expose désormais le parcours planning → inventaire → courses → récap avec métriques hebdo.</td>
             <td>Poursuivre avec la palette module et la cohérence visuelle cross-module.</td>
           </tr>
+          <tr>
+            <td>S6 — Badges navigation module</td>
+            <td><span class="badge b-ok">Terminé</span></td>
+            <td><code>utiliser-badges-modules.ts</code> alimente les badges Cuisine / Famille / Maison / Jeux dans <code>barre-laterale</code> et <code>nav-mobile</code>.</td>
+            <td>Élargir ensuite les indicateurs aux autres zones si de nouveaux signaux métier apparaissent.</td>
+          </tr>
+          <tr>
+            <td>S7 — Palette module cohérente</td>
+            <td><span class="badge b-ok">Terminé</span></td>
+            <td><code>theme-modules.ts</code> expose maintenant les métadonnées de module et l'en-tête / fil d'Ariane / navigation mobile affichent la couleur et le label du module actif.</td>
+            <td>Reste ensuite le code splitting dashboard pour la partie performance.</td>
+          </tr>
         </table>
 
         <h4 style="margin-top:16px;">Checklist réelle</h4>
@@ -1109,6 +1121,8 @@
           <li>✅ La frise interactive <code>repas → inventaire → courses</code> est maintenant visible sur <code>frontend/src/app/(app)/cuisine/ma-semaine/page.tsx</code>.</li>
           <li>✅ Les métriques de semaine (repas planifiés, stock, alertes, liste générée, synthèse nutritionnelle) sont regroupées dans un composant réutilisable.</li>
           <li>✅ Le pattern <code>SkeletonPage</code> remplace les placeholders dupliqués sur plusieurs pages Maison pour un rendu homogène.</li>
+          <li>✅ Les badges d'attention par module sont visibles sur la <code>barre-laterale</code> et la <code>nav-mobile</code> pour Cuisine, Famille, Maison et Jeux.</li>
+          <li>✅ La palette visuelle par module est désormais cohérente dans la coquille applicative (en-tête, fil d'Ariane, navigation mobile).</li>
         </ul>
       </div>
 
@@ -1140,14 +1154,14 @@
         <tr><th>Tâche</th><th>Détails</th><th>Impact</th></tr>
         <tr><td>Lazy loading dashboard widgets</td><td>Code splitting pour les 16+ widgets du dashboard</td><td><span class="badge b-ok">Haute</span></td></tr>
         <tr><td>Tables responsive</td><td>Horizontal scroll ou collapse sur mobile pour toutes les tables</td><td><span class="badge b-warn">Moyenne</span></td></tr>
-        <tr><td>Palette de couleurs cohérente par module</td><td>Définir couleur primaire par module (cuisine=green, famille=blue, etc.)</td><td><span class="badge b-warn">Moyenne</span></td></tr>
+        <tr><td>Palette de couleurs cohérente par module</td><td>Couleur primaire et label actif désormais visibles sur l'en-tête, le fil d'Ariane et la navigation mobile</td><td><span class="badge b-ok">✅ Livré</span></td></tr>
         <tr><td>Micro-animations transitions pages</td><td>Framer Motion page transitions cohérentes</td><td><span class="badge b-warn">Moyenne</span></td></tr>
       </table>
 
       <h4 style="color:var(--yellow);margin-top:24px;margin-bottom:12px;">3.4 — Features UI Manquantes (Impact: UI +0.5)</h4>
       <table>
         <tr><th>Feature</th><th>Module</th><th>Effort</th></tr>
-        <tr><td>Notification in-app badge par module</td><td>UI (sidebar)</td><td><span class="badge b-ok">Faible</span></td></tr>
+        <tr><td>Notification in-app badge par module</td><td>UI (sidebar + nav mobile)</td><td><span class="badge b-ok">✅ Livré</span></td></tr>
         <tr><td>Export CSV/Excel des données</td><td>Cross-module</td><td><span class="badge b-ok">Faible</span></td></tr>
         <tr><td>Badge "sous garantie" sur fiche équipement</td><td>Maison</td><td><span class="badge b-ok">Faible</span></td></tr>
         <tr><td>Onboarding utilisateur amélioré</td><td>UI</td><td><span class="badge b-warn">Moyen</span></td></tr>
@@ -1172,6 +1186,39 @@
     </div>
     <div class="phase-body">
 
+      <div class="card" style="border-color:rgba(59,130,246,.35);background:rgba(15,23,42,.45)">
+        <h3>Statut d'exécution — Mise à jour du 4 avril 2026</h3>
+        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 4 livrée (priorités hautes)</span> Le canal Telegram couvre désormais les commandes prévues dans le planning (<code>/courses_live</code>, <code>/ajouter_course</code>, <code>/weekend</code>, <code>/rapport</code>, <code>/photo</code>) et les hubs <code>Cuisine</code>, <code>Famille</code> et <code>Maison</code> exposent maintenant des actions admin contextuelles pour déclencher les jobs clés sans quitter le module.</p>
+        <table>
+          <tr><th>Sprint</th><th>Statut</th><th>Livré</th><th>Reste à faire</th></tr>
+          <tr>
+            <td>S7 — Telegram enrichi</td>
+            <td><span class="badge b-ok">Terminé</span></td>
+            <td>23 commandes/aliases exposés, <code>/courses_live</code> sur la liste interactive, aide <code>/photo</code> et résumés <code>/weekend</code> / <code>/rapport</code> branchés sur les services métiers.</td>
+            <td>Affinage optionnel des prompts IA uniquement, sans blocage fonctionnel.</td>
+          </tr>
+          <tr>
+            <td>S8 — Admin contextuel & métier</td>
+            <td><span class="badge b-ok">Terminé (priorités hautes)</span></td>
+            <td>Carte <code>CarteActionsAdminModule</code> ajoutée sur les hubs <code>cuisine</code>, <code>famille</code> et <code>maison</code> ; accès rapides vers <code>/admin/jobs</code>, <code>/admin/services</code> et <code>/admin/feature-flags</code> ; comparateur d'abonnements déjà visible côté Maison.</td>
+            <td>Le mode « voir en tant que user » et le diff schéma SQL restent des conforts secondaires à traiter séparément si souhaité.</td>
+          </tr>
+        </table>
+
+        <h4 style="margin-top:16px;">Checklist réelle</h4>
+        <ul style="margin-left:18px;color:var(--text-muted);display:grid;gap:6px;">
+          <li>✅ Les commandes/aliases <code>/courses_live</code>, <code>/ajouter_course</code>, <code>/weekend</code>, <code>/rapport</code> et <code>/photo</code> sont maintenant gérés dans <code>src/api/routes/webhooks_telegram.py</code>.</li>
+          <li>✅ <code>/courses_live</code> réutilise la liste interactive existante avec boutons inline de confirmation / ajout / refaire.</li>
+          <li>✅ <code>/weekend</code> consolide le planning du prochain weekend et déclenche un fallback IA si aucune activité n'est planifiée.</li>
+          <li>✅ <code>/rapport</code> génère un résumé hebdo compact depuis <code>src/services/famille/resume_hebdo.py</code>.</li>
+          <li>✅ <code>/photo</code> fournit une aide explicite côté Telegram, tandis que l'analyse de photos reçues reste active via le webhook.</li>
+          <li>✅ La carte <code>CarteActionsAdminModule</code> est visible sur les hubs <code>frontend/src/app/(app)/cuisine/page.tsx</code>, <code>famille/page.tsx</code> et <code>maison/page.tsx</code>.</li>
+          <li>✅ Les accès rapides admin Phase 4 (jobs, seed data / dashboard live, feature flags) sont désormais exposés directement depuis les hubs concernés.</li>
+          <li>✅ Vérification backend effectuée : <code>pytest tests/api/test_webhooks_telegram_endpoints.py tests/api/test_webhooks_telegram_callbacks.py -q</code> → <code>46 passed in 3.03s</code>.</li>
+          <li>✅ Vérification frontend effectuée : <code>npm run lint -- src/composants/disposition/carte-actions-admin-module.tsx "src/app/(app)/cuisine/page.tsx" "src/app/(app)/maison/page.tsx" "src/app/(app)/famille/page.tsx"</code> → aucune erreur.</li>
+        </ul>
+      </div>
+
       <h4 style="color:var(--accent);margin-bottom:12px;">4.1 — Nouvelles Commandes Telegram</h4>
       <table>
         <tr><th>Commande existante</th><th>Statut</th></tr>
@@ -1188,7 +1235,7 @@
         <tr><td>/ajouter_course [article]</td><td>Ajouter un article aux courses par texte</td><td><span class="badge b-ok">Haute</span></td></tr>
         <tr><td>/courses_live</td><td>Liste courses avec boutons ✅ inline — un tap pour cocher/décocher, temps réel</td><td><span class="badge b-ok">Haute</span></td></tr>
         <tr><td>/recette [ingrédients]</td><td>Suggestion recette avec ingrédients du frigo</td><td><span class="badge b-ok">Haute</span></td></tr>
-        <tr><td>/photo [envoi photo]</td><td>Analyse photo IA (plante, frigo, document)</td><td><span class="badge b-ok">Haute</span></td></tr>
+        <tr><td>/photo [envoi photo]</td><td>Analyse photo IA (plante, frigo, pièce maison)</td><td><span class="badge b-ok">Haute</span></td></tr>
         <tr><td>/budget</td><td>Résumé budget du mois</td><td><span class="badge b-warn">Moyenne</span></td></tr>
         <tr><td>/jardin</td><td>Tâches jardin du jour</td><td><span class="badge b-warn">Moyenne</span></td></tr>
         <tr><td>/note [texte]</td><td>Créer une note rapide</td><td><span class="badge b-warn">Moyenne</span></td></tr>
@@ -1654,9 +1701,9 @@
   <div class="card">
     <h3>État Actuel → Cible</h3>
     <div class="kpi-row">
-      <div class="kpi-item"><div class="kpi-val" style="color:var(--yellow)">6</div><div class="kpi-label">Commandes actuelles</div></div>
-      <div class="kpi-item"><div class="kpi-val" style="color:var(--green)">15+</div><div class="kpi-label">Commandes cible</div></div>
-      <div class="kpi-item"><div class="kpi-val" style="color:var(--purple)">+9</div><div class="kpi-label">Nouvelles (Phase 4)</div></div>
+      <div class="kpi-item"><div class="kpi-val" style="color:var(--green)">23</div><div class="kpi-label">Commandes actives</div></div>
+      <div class="kpi-item"><div class="kpi-val" style="color:var(--green)">15+</div><div class="kpi-label">Cible Phase 4</div></div>
+      <div class="kpi-item"><div class="kpi-val" style="color:var(--purple)">+17</div><div class="kpi-label">Ajouts livrés</div></div>
       <div class="kpi-item"><div class="kpi-val" style="color:var(--cyan)">3</div><div class="kpi-label">Emails auto planifiés</div></div>
     </div>
   </div>

@@ -52,8 +52,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
 import { utiliserStoreUI } from "@/magasins/store-ui";
-import { utiliserRequete } from "@/crochets/utiliser-api";
-import { evaluerRappelsFamille } from "@/bibliotheque/api/famille";
+import { utiliserBadgesModules } from "@/crochets/utiliser-badges-modules";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Separator } from "@/composants/ui/separator";
@@ -63,7 +62,6 @@ import {
   TooltipTrigger,
 } from "@/composants/ui/tooltip";
 import { FavorisRapides } from "./favoris-rapides";
-import type { RappelFamille } from "@/types/famille";
 import { getModuleThemeClass, obtenirModuleDepuisPathname } from "@/bibliotheque/theme-modules";
 
 interface CategorieNav {
@@ -195,12 +193,7 @@ export function BarreLaterale() {
   const router = useRouter();
   const { sidebarOuverte, basculerSidebar } = utiliserStoreUI();
 
-  const { data: rappelsData } = utiliserRequete<{ rappels: RappelFamille[]; total: number }>(
-    ["famille", "rappels", "badge"],
-    evaluerRappelsFamille,
-    { staleTime: 5 * 60 * 1000, refetchInterval: 10 * 60 * 1000 }
-  );
-  const nbRappelsDanger = rappelsData?.rappels?.filter((r) => r.priorite === "danger").length ?? 0;
+  const { badges } = utiliserBadgesModules();
 
   const [sectionsOuvertes, setSectionsOuvertes] = useState<Set<string>>(() => {
     // Charger les sections sauvegardées depuis localStorage
@@ -250,6 +243,14 @@ export function BarreLaterale() {
   };
 
   const classeModule = (chemin: string) => getModuleThemeClass(obtenirModuleDepuisPathname(chemin));
+  const obtenirBadgeNavigation = (chemin: string) => {
+    if (chemin === "/cuisine") return badges.cuisine;
+    if (chemin === "/famille") return badges.famille;
+    if (chemin === "/maison") return badges.maison;
+    if (chemin === "/jeux") return badges.jeux;
+    return 0;
+  };
+  const formaterBadge = (valeur: number) => (valeur > 9 ? "9+" : String(valeur));
 
   return (
     <aside
@@ -329,6 +330,8 @@ export function BarreLaterale() {
           const aSousliens = lien.sousLiens && lien.sousLiens.length > 0;
           const estOuverte = sectionsOuvertes.has(lien.chemin);
 
+          const nbBadge = obtenirBadgeNavigation(lien.chemin);
+
           const boutonPrincipal = (
             <div className="flex items-center">
               <Link
@@ -343,11 +346,16 @@ export function BarreLaterale() {
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                 )}
               >
-                {createElement(IconeLien, { className: "h-5 w-5 shrink-0" })}
+                <span className="relative shrink-0">
+                  {createElement(IconeLien, { className: "h-5 w-5 shrink-0" })}
+                  {!sidebarOuverte && nbBadge > 0 && (
+                    <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-background bg-destructive" />
+                  )}
+                </span>
                 {sidebarOuverte && <span className="truncate" title={lien.nom}>{lien.nom}</span>}
-                {sidebarOuverte && lien.chemin === "/famille" && nbRappelsDanger > 0 && (
-                  <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1 text-xs flex items-center justify-center shrink-0">
-                    {nbRappelsDanger}
+                {sidebarOuverte && nbBadge > 0 && (
+                  <Badge variant={lien.chemin === "/famille" ? "destructive" : "secondary"} className="ml-auto h-5 min-w-5 px-1 text-xs flex items-center justify-center shrink-0">
+                    {formaterBadge(nbBadge)}
                   </Badge>
                 )}
               </Link>

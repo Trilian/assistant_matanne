@@ -28,6 +28,7 @@ import { Progress } from "@/composants/ui/progress";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirDashboardCuisine } from "@/bibliotheque/api/tableau-bord";
 import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
+import { CarteActionsAdminModule } from "@/composants/disposition/carte-actions-admin-module";
 
 const SECTIONS = [
   {
@@ -95,6 +96,28 @@ export default function PageCuisine() {
       </div>
 
       <CarteNotificationsModule moduleKey="cuisine" moduleLabel="Cuisine" />
+
+      <CarteActionsAdminModule
+        moduleLabel="Cuisine"
+        description="Relance rapide des automations cuisine et accès au cockpit admin de la phase 4."
+        jobs={[
+          {
+            id: "briefing_matinal_ia",
+            label: "Briefing matinal IA",
+            hint: "Synthèse Telegram du matin",
+          },
+          {
+            id: "resume_hebdo",
+            label: "Résumé hebdo",
+            hint: "Bilan famille/cuisine de la semaine",
+          },
+          {
+            id: "resume_hebdo_ia",
+            label: "Résumé hebdo IA",
+            hint: "Version enrichie par IA",
+          },
+        ]}
+      />
 
       {/* Cockpit KPIs */}
       {dashboard && (

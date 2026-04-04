@@ -67,7 +67,7 @@ describe("EnTete", () => {
     expect(await screen.findByText(/Maintenance en cours/i)).toBeInTheDocument();
   });
 
-  it("ouvre la recherche, bascule le thème et expose le menu profil", async () => {
+  it("ouvre la recherche, bascule le thème, expose le menu profil et affiche le module actif", async () => {
     render(<EnTete />);
 
     fireEvent.click(screen.getAllByRole("button", { name: /rechercher/i })[0]);
@@ -78,6 +78,7 @@ describe("EnTete", () => {
 
     expect(screen.getByRole("button", { name: /mon profil/i })).toBeInTheDocument();
     expect(screen.getByText("MC")).toBeInTheDocument();
+    expect(screen.getByText("Module Cuisine")).toBeInTheDocument();
     expect(mockDeconnecter).not.toHaveBeenCalled();
   });
 });
@@ -88,7 +89,7 @@ describe("FilAriane", () => {
     vi.clearAllMocks();
   });
 
-  it("traduit les segments de l'URL et remplace un identifiant dynamique par le titre courant", () => {
+  it("traduit les segments de l'URL, remplace un identifiant dynamique et affiche le module actif", () => {
     mockPathname = "/cuisine/recettes/42";
     mockTitrePage = "Gratin dauphinois";
 
@@ -98,6 +99,7 @@ describe("FilAriane", () => {
     expect(screen.getByText("Cuisine")).toBeInTheDocument();
     expect(screen.getByText("Recettes")).toBeInTheDocument();
     expect(screen.getByText("Gratin dauphinois")).toBeInTheDocument();
+    expect(screen.getByText("Module actif : Cuisine")).toBeInTheDocument();
     expect(screen.queryByText("42")).not.toBeInTheDocument();
   });
 

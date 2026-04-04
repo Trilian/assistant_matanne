@@ -49,6 +49,7 @@ import { BandeauIA } from "@/composants/maison/bandeau-ia";
 import { CarteConseil, estDismissed } from "@/composants/maison/carte-conseil";
 import { obtenirConseilsIA } from "@/bibliotheque/api/maison";
 import { CarteNotificationsModule } from "@/composants/disposition/carte-notifications-module";
+import { CarteActionsAdminModule } from "@/composants/disposition/carte-actions-admin-module";
 import { utiliserSyntheseVocale } from "@/crochets/utiliser-synthese-vocale";
 
 // Sections consolidées — 9 modules
@@ -207,6 +208,28 @@ export default function PageMaison() {
       </Card>
 
       <CarteNotificationsModule moduleKey="maison" moduleLabel="Maison" />
+
+      <CarteActionsAdminModule
+        moduleLabel="Maison"
+        description="Déclenchement manuel des jobs maison, abonnements et jardin directement depuis le hub."
+        jobs={[
+          {
+            id: "comparateur_abonnements",
+            label: "Comparateur abonnements",
+            hint: "Opportunités d'économies maison",
+          },
+          {
+            id: "alerte_plantes_arrosage",
+            label: "Alerte arrosage",
+            hint: "Rappels jardin / entretien",
+          },
+          {
+            id: "s16_rappel_entretien_telegram",
+            label: "Rappel entretien Telegram",
+            hint: "Push maison ciblé",
+          },
+        ]}
+      />
 
       {/* Bandeau IA */}
       <BandeauIA section="general" />

@@ -26,7 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/composants/ui/tooltip";
-import { getModuleThemeClass, obtenirModuleDepuisPathname } from "@/bibliotheque/theme-modules";
+import { getModuleThemeClass, obtenirMetaModule, obtenirModuleDepuisPathname } from "@/bibliotheque/theme-modules";
 import { cn } from "@/bibliotheque/utils";
 
 /**
@@ -69,6 +69,8 @@ export function EnTete() {
         .toUpperCase()
         .slice(0, 2)
     : "?";
+  const moduleActif = obtenirModuleDepuisPathname(pathname);
+  const metaModule = obtenirMetaModule(moduleActif);
 
   return (
     <>
@@ -80,11 +82,21 @@ export function EnTete() {
       <header
         className={cn(
           "flex h-14 items-center gap-4 border-b bg-background px-4 md:px-6 module-header-accent",
-          getModuleThemeClass(obtenirModuleDepuisPathname(pathname))
+          getModuleThemeClass(moduleActif)
         )}
       >
       {/* Titre mobile */}
-      <span className="text-lg font-semibold md:hidden">🏠 Matanne</span>
+      <span className="text-lg font-semibold md:hidden">{metaModule.emoji} Matanne</span>
+
+      <div
+        className={cn(
+          "hidden items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium md:inline-flex module-accent-bg module-accent-text module-accent-border",
+          getModuleThemeClass(moduleActif)
+        )}
+      >
+        <span aria-hidden="true">{metaModule.emoji}</span>
+        <span>{`Module ${metaModule.label}`}</span>
+      </div>
 
       {/* Barre de recherche */}
       <Button
