@@ -1,7 +1,7 @@
 -- ============================================================================
 -- ASSISTANT MATANNE — Maison : Entretien & Organisation
 -- ============================================================================
--- Contient : entretien, préférences home, tâches home, stats, checklists
+-- Contient : entretien, préférences home legacy, checklists vacances
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE taches_entretien (
@@ -45,74 +45,9 @@ CREATE TABLE preferences_home (
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE taches_home (
-    id SERIAL PRIMARY KEY,
-    domaine VARCHAR(20) NOT NULL CHECK (
-        domaine IN ('jardin', 'entretien', 'charges', 'depenses')
-    ),
-    type_tache VARCHAR(50) NOT NULL,
-    titre VARCHAR(200) NOT NULL,
-    description TEXT,
-    duree_min INTEGER DEFAULT 15,
-    priorite VARCHAR(20) DEFAULT 'normale' CHECK (
-        priorite IN (
-            'urgente',
-            'haute',
-            'normale',
-            'basse',
-            'optionnelle'
-        )
-    ),
-    date_due DATE,
-    date_faite DATE,
-    statut VARCHAR(20) DEFAULT 'a_faire' CHECK (
-        statut IN (
-            'a_faire',
-            'en_cours',
-            'fait',
-            'reporte',
-            'annule'
-        )
-    ),
-    generee_auto BOOLEAN DEFAULT FALSE,
-    source VARCHAR(50),
-    source_id INTEGER,
-    zone_jardin_id INTEGER REFERENCES zones_jardin(id) ON DELETE
-    SET NULL,
-        piece_id INTEGER REFERENCES pieces_maison(id) ON DELETE
-    SET NULL,
-        cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_taches_home_domaine ON taches_home(domaine);
-CREATE INDEX IF NOT EXISTS idx_taches_home_statut ON taches_home(statut);
-CREATE INDEX IF NOT EXISTS idx_taches_home_date_due ON taches_home(date_due);
-CREATE INDEX IF NOT EXISTS idx_taches_home_source ON taches_home(source, source_id);
-
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE stats_home (
-    id SERIAL PRIMARY KEY,
-    date DATE NOT NULL,
-    domaine VARCHAR(20) NOT NULL CHECK (
-        domaine IN (
-            'jardin',
-            'entretien',
-            'charges',
-            'depenses',
-            'total'
-        )
-    ),
-    temps_prevu_min INTEGER DEFAULT 0,
-    temps_reel_min INTEGER DEFAULT 0,
-    taches_prevues INTEGER DEFAULT 0,
-    taches_completees INTEGER DEFAULT 0,
-    taches_reportees INTEGER DEFAULT 0,
-    score_jour INTEGER DEFAULT 0,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(date, domaine)
-);
-CREATE INDEX IF NOT EXISTS idx_stats_home_date ON stats_home(date);
+-- Les anciennes tables `taches_home` et `stats_home` ont été retirées du schéma
+-- actif : les besoins courants passent désormais par `taches_entretien` et les
+-- vues SQL de planning maison.
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

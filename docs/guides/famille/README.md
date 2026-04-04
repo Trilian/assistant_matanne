@@ -39,12 +39,11 @@ Le module **Famille** centralise le suivi du d?veloppement de l'enfant et la vie
 
 ### Fonctionnalit?s
 
-- Suivi des **jalons de d?veloppement** (motricit?, langage, social) par rapport aux normes OMS
-- **Courbes de croissance** (poids, taille, p?rim?tre cr?nien) avec visualisation graphique
+- Suivi des **jalons de d?veloppement** (motricit?, langage, social)
 - **Carnet de sant?** : vaccinations, consultations, ordonnances
 - **Diversification alimentaire** : suivi des aliments introduits et r?actions
 - Suggestions IA personnalis?es sur le d?veloppement
-- Alertes sur les jalons en retard
+- Alertes sur les jalons importants
 - int?gration avec les suggestions d'activit?s via invalidation de cache et notifications
 
 ### Usage
@@ -55,7 +54,6 @@ Le module **Famille** centralise le suivi du d?veloppement de l'enfant et la vie
 
 ### Donn?es de r?f?rence
 
-- `data/reference/normes_oms.json` ? normes de croissance OMS (0-5 ans)
 - `data/reference/calendrier_vaccinal_fr.json` ? calendrier vaccinal France 2026
 
 ### Services IA

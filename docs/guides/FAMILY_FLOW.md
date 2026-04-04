@@ -5,7 +5,7 @@ Flux cible: Jules + activites + routines + budget.
 ## 1. Profil Jules
 
 - Completer profil enfant (age, preferences).
-- Consulter jalons et courbe de croissance.
+- Consulter les jalons et repères du moment.
 - Ajouter nouveaux jalons quand necessaire.
 
 ## 2. Activites

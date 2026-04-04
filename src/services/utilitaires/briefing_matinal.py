@@ -146,7 +146,7 @@ class BriefingMatinalService(BaseAIService):
             return {}
 
         age_mois = service.get_age_mois()
-        prochains_jalons = ContexteFamilleService()._prochains_jalons_oms(age_mois)
+        prochains_jalons = ContexteFamilleService()._prochains_jalons_developpement(age_mois)
 
         return {
             "age_mois": age_mois,

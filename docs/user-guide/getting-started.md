@@ -140,9 +140,9 @@ Le **dashboard** est votre page d'accueil. Il affiche :
 2. Ajoutez les **jalons** :
    - Premier sourire, premiers pas, premi�res dents...
    - Date + description + photo optionnelle
-3. Consultez la **courbe de croissance** :
-   - Poids, taille, p�rim�tre cr�nien
-   - Comparaison avec les percentiles OMS
+3. Consultez les **jalons et repères du moment** :
+   - Motricité, langage, social
+   - Coaching hebdo et recommandations adaptées
 4. Suivez le **calendrier vaccinal** :
    - Vaccins recommand�s par �ge
    - Statut (� faire / fait)

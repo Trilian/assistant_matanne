@@ -37,7 +37,6 @@ class TestRoutesFamilleJules:
                 {"titre": "Premier mot", "categorie": "langage"},
             ),
             ("DELETE", "/api/v1/famille/enfants/1/jalons/1", None),
-            ("GET", "/api/v1/famille/jules/croissance", None),
             (
                 "POST",
                 "/api/v1/famille/activites/suggestions-ia-auto",

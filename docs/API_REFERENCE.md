@@ -869,7 +869,6 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 | ConfigGardeRequest | 3 |
 | ConfigGardeResponse | 4 |
 | ContexteFamilialResponse | 8 |
-| CroissanceResponse | 2 |
 | DocumentExpirant | 3 |
 | EvenementFamilialBase | 7 |
 | EvenementFamilialPatch | 8 |
@@ -879,7 +878,6 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 | JulesContexte | 3 |
 | MarquerAchetePayload | 1 |
 | MeteoActuelle | 7 |
-| PercentilesOMS | 5 |
 | PreferencesFamilleRequest | 7 |
 | PrefillReventeResponse | 8 |
 | RappelFamilleResponse | 6 |

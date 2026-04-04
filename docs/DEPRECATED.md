@@ -26,6 +26,15 @@
 
 ---
 
+## Suivi Jules — croissance physique
+
+| Fonctionnalité retirée | Statut | Remplacement | Raison |
+| --- | --- | --- | --- |
+| courbe de croissance Jules (poids, taille, périmètre, percentiles OMS) | retiré | jalons de développement, alimentation, activités, vaccins | hors besoin produit, ne plus reproposer |
+| références OMS de poids/taille/IMC dans la doc active | retiré | repères d'âge simplifiés si nécessaire | éviter de réintroduire un suivi non souhaité |
+
+---
+
 ## Partage, social et exports non prioritaires
 
 | Fonctionnalité retirée | Statut | Remplacement | Raison |
@@ -63,4 +72,4 @@
 
 - toute nouvelle doc active doit éviter de réintroduire ces fonctionnalités comme si elles étaient supportées
 - si une référence historique est nécessaire, elle doit pointer vers ce document
-- toute proposition produit doit respecter : Telegram-only, pas d'OCR, pas de social public, budgets jeux/famille séparés
+- toute proposition produit doit respecter : Telegram-only, pas d'OCR, pas de social public, budgets jeux/famille séparés, pas de courbe de croissance/percentiles OMS pour Jules

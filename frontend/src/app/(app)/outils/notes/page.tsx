@@ -28,7 +28,7 @@ import type { Note, NoteCreate } from "@/types/outils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { schemaNote, type DonneesNote } from "@/bibliotheque/validateurs";
+import { schemaNote, type DonneesNote } from "@/bibliotheque/validateurs-utilitaires";
 import { utiliserBrouillonAuto } from "@/crochets/utiliser-brouillon-auto";
 import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
 import { utiliserRaccourcisPage } from "@/crochets/utiliser-raccourcis-page";

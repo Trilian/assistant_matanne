@@ -247,28 +247,37 @@
 ## Phase 3 — Consolidation SQL & données
 
 > **Objectif** : Base propre, indexes validés, tables orphelines supprimées
-> **Durée estimée** : 1-2 jours
+> **Durée estimée** : 1-2 jours → **Réalisé** : 4 avril 2026
 > **Prérequis** : Phase 1 terminée (tables gamification traitées)
 > **Impact** : Performance DB, propreté schéma
+> **Statut** : ✅ **Terminée et vérifiée**
+
+### Sprint SQL — 4 avril 2026
+
+- ✅ `13_views.sql` nettoyé : plus aucun `CREATE INDEX`, vues conservées uniquement
+- ✅ vues maison basculées sur `taches_entretien` au lieu des tables legacy `taches_home` / `stats_home`
+- ✅ `17_migrations_absorbees.sql` rempli avec le nettoyage idempotent des reliquats SQL (`archive_articles`, `journal_sante`, `stats_home`, `taches_home`)
+- ✅ ajout du script `scripts/analysis/audit_orm_sql.py` pour rejouer l’audit ORM↔SQL hors pytest
+- ✅ `INIT_COMPLET.sql` régénéré et validé — SHA256 : `3537E08CBFEAFBAE917D978E55E228CBEDCC579E1D321F372E0329B7E4C73F1C`
 
 ### Tâches
 
 | # | Tâche | Détail | Effort | Priorité |
 |---|-------|--------|--------|----------|
-| 3.1 | **Dédupliquer indexes SQL** | `13_views.sql` L107-129 dupliquent `14_indexes.sql` → tout dans `14_indexes.sql` uniquement (S1, B13) | 30min | 🔴 Critique |
-| 3.2 | **Résoudre fichier 17 vide** | `17_migrations_absorbees.sql` — y mettre les V005-V007 ou supprimer (S2, B14) | 15min | 🟡 Important |
-| 3.3 | **Drop tables orphelines** | `stats_home`, `taches_home`, `archive_articles`, `journal_sante` — valider qu'aucun code ne les utilise, puis DROP (S3, L8) | 1h | 🔴 Critique |
-| 3.4 | **Drop tables gamification** | Si limitée au Garmin : `badges`, `points`, `historique_gamification` → DROP ou limiter (S4) | 30min | 🔴 Critique |
-| 3.5 | **Régénérer `INIT_COMPLET.sql`** | `python scripts/db/regenerate_init.py` après tous les nettoyages (S5) | 15min | 🟡 Important |
-| 3.6 | **Audit ORM↔SQL final** | `python scripts/analysis/audit_orm_sql.py` + `pytest tests/sql/test_schema_coherence.py` (S6) | 15min | 🟡 Important |
+| 3.1 | ✅ **Dédupliquer indexes SQL** | `13_views.sql` nettoyé ; tous les indexes restent centralisés dans `14_indexes.sql` (S1, B13) | 30min | 🔴 Critique |
+| 3.2 | ✅ **Résoudre fichier 17 vide** | `17_migrations_absorbees.sql` contient désormais les nettoyages V005-V007 et les `DROP IF EXISTS` legacy (S2, B14) | 15min | 🟡 Important |
+| 3.3 | ✅ **Drop tables orphelines** | retrait du schéma actif de `stats_home` / `taches_home` + nettoyage idempotent de `archive_articles` et `journal_sante` (S3, L8) | 1h | 🔴 Critique |
+| 3.4 | ✅ **Valider la gamification SQL** | Conformité confirmée : seules `points_utilisateurs` et `badges_utilisateurs` (sport/nutrition/Garmin) sont conservées ; aucune table générique legacy `badges` / `points` / `historique_gamification` active (S4) | 30min | 🔴 Critique |
+| 3.5 | ✅ **Régénérer `INIT_COMPLET.sql`** | `python scripts/db/regenerate_init.py` exécuté après nettoyage ; fichier recompilé avec succès (S5) | 15min | 🟡 Important |
+| 3.6 | ✅ **Audit ORM↔SQL final** | `python scripts/analysis/audit_orm_sql.py` + `pytest tests/sql/test_schema_coherence.py -q` validés (S6) | 15min | 🟡 Important |
 
 ### Critères de validation
 
-- [ ] `grep -n "CREATE INDEX" sql/schema/13_views.sql` ne remonte plus d'index
-- [ ] `17_migrations_absorbees.sql` résolu (contenu ou supprimé)
-- [ ] Tables orphelines supprimées
-- [ ] `test_schema_coherence.py` passe à 100%
-- [ ] `INIT_COMPLET.sql` régénéré et hash SHA256 mis à jour
+- [x] `grep -n "CREATE INDEX" sql/schema/13_views.sql` ne remonte plus d'index
+- [x] `17_migrations_absorbees.sql` résolu (contenu idempotent ajouté)
+- [x] Tables orphelines ciblées supprimées du schéma actif / nettoyées pour migration
+- [x] `test_schema_coherence.py` passe à 100% (`146 passed`)
+- [x] `INIT_COMPLET.sql` régénéré et hash SHA256 mis à jour (`3537E08CBFEAFBAE917D978E55E228CBEDCC579E1D321F372E0329B7E4C73F1C`)
 
 ---
 
@@ -853,7 +862,7 @@
 | Source → Cible | Bridge | Déclencheur |
 |----------------|--------|-------------|
 | Inventaire → Planning | `inter_module_inventaire_planning.py` | Stock bas → suggestions recettes |
-| Jules croissance → Planning | `inter_module_jules_nutrition.py` | Jalon Jules → adapter portions |
+| Profil Jules → Planning | `inter_module_jules_nutrition.py` | Repères Jules → adapter portions |
 | Saisonnalité → Planning IA | `inter_module_saison_menu.py` | Changement mois → suggestions saisonnières |
 | Courses total → Budget | `inter_module_courses_budget.py` | Achat validé → sync budget alimentation |
 | Batch cooking → Stock | `inter_module_batch_inventaire.py` | Session terminée → déduire ingrédients |
@@ -1108,22 +1117,22 @@
 ```
 sql/schema/
 ├── 01_users.sql        →  22_automations.sql  (22 fichiers ordonnés)
-├── 13_views.sql        (⚠️ contient des index dupliqués)
-├── 14_indexes.sql      (index principaux)
-├── 17_migrations_absorbees.sql  (⚠️ vide)
-└── INIT_COMPLET.sql    (compilé, régénéré par script SHA256)
+├── 13_views.sql        (✅ vues uniquement, sans index dupliqué)
+├── 14_indexes.sql      (index principaux centralisés)
+├── 17_migrations_absorbees.sql  (✅ consolidé et idempotent)
+└── INIT_COMPLET.sql    (compilé, régénéré + SHA256 vérifié)
 ```
 
 ### Actions
 
 | # | Action | Détail | Phase |
 |---|--------|--------|-------|
-| S1 | Dédupliquer indexes | `13_views.sql` L107-129 → tout dans `14_indexes.sql` | Phase 3 |
-| S2 | Résoudre fichier 17 | Remplir ou supprimer `17_migrations_absorbees.sql` | Phase 3 |
-| S3 | Drop tables orphelines | `stats_home`, `taches_home`, `archive_articles`, `journal_sante` | Phase 3 |
-| S4 | Drop tables gamification | Si limitée au Garmin : `badges`, `points`, `historique_gamification` | Phase 3 |
-| S5 | Régénérer INIT_COMPLET.sql | `python scripts/db/regenerate_init.py` | Phase 3 |
-| S6 | Audit ORM↔SQL | `pytest tests/sql/test_schema_coherence.py` | Phase 3 |
+| S1 | ✅ Dédupliquer indexes | `13_views.sql` nettoyé → index conservés uniquement dans `14_indexes.sql` | Phase 3 |
+| S2 | ✅ Résoudre fichier 17 | `17_migrations_absorbees.sql` rempli avec le nettoyage absorbé | Phase 3 |
+| S3 | ✅ Drop tables orphelines | `stats_home`, `taches_home`, `archive_articles`, `journal_sante` nettoyées/supprimées | Phase 3 |
+| S4 | ✅ Valider la gamification SQL | plus aucune table générique legacy `badges` / `points` / `historique_gamification` active | Phase 3 |
+| S5 | ✅ Régénérer INIT_COMPLET.sql | `python scripts/db/regenerate_init.py` exécuté avec succès | Phase 3 |
+| S6 | ✅ Audit ORM↔SQL | `python scripts/analysis/audit_orm_sql.py` + `pytest tests/sql/test_schema_coherence.py -q` | Phase 3 |
 
 ---
 
@@ -1135,7 +1144,7 @@ sql/schema/
 |-------|---------------|-------|
 | **Phase 1** — Corrections critiques ✅ | 1 jour | Bugs `pass`, suppression OCR/Vinted/gamif/legacy |
 | **Phase 2** — Nettoyage nommage | 3-4 jours | 150+ commentaires, renommages, fichiers fourre-tout |
-| **Phase 3** — SQL | 1-2 jours | Index, tables orphelines, cohérence ORM |
+| **Phase 3** — SQL ✅ | 1 jour | Déduplication indexes, nettoyage legacy, audit ORM↔SQL |
 | **Phase 4** — Tests | 5-7 jours | Batch cooking, routes, bridges, E2E |
 | **Phase 5** — Documentation | 2-3 jours | Fusions, INTER_MODULES_MAP, DEPRECATED |
 | **Phase 6** — Inter-modules | 3-4 jours | 9 nouveaux bridges |

@@ -32,6 +32,11 @@ from src.services.utilitaires.bridges_dashboard_actions import (
     DashboardActionsRapidesInteractionService,
     get_dashboard_actions_rapides_service,
 )
+from src.services.utilitaires.bridges_chat_event_bus import (
+    ChatEventBusBridgeService,
+    enregistrer_chat_event_bus_subscribers,
+    obtenir_chat_event_bus_bridge,
+)
 
 __all__ = [
     "NotesService",
@@ -45,6 +50,7 @@ __all__ = [
     "ChatContexteMultiModuleService",
     "AssistantProactifService",
     "DashboardActionsRapidesInteractionService",
+    "ChatEventBusBridgeService",
     "obtenir_notes_service",
     "obtenir_journal_service",
     "obtenir_contacts_service",
@@ -56,5 +62,7 @@ __all__ = [
     "obtenir_service_chat_contexte",
     "obtenir_service_assistant_proactif",
     "get_dashboard_actions_rapides_service",
+    "obtenir_chat_event_bus_bridge",
+    "enregistrer_chat_event_bus_subscribers",
 ]
 

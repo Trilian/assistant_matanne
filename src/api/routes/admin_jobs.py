@@ -76,7 +76,7 @@ async def statut_bridges(
                         "src.services.cuisine.inter_module_jules_nutrition",
                         fromlist=["obtenir_service_jules_nutrition_interaction"],
                     ).obtenir_service_jules_nutrition_interaction(),
-                    "adapter_planning_nutrition_selon_croissance",
+                    "adapter_planning_nutrition_jules",
                 ),
                 "P5-03": lambda: hasattr(
                     __import__(
@@ -173,14 +173,14 @@ async def statut_bridges(
                 {
                     "id": "P5-02",
                     "bridge": "inter_module_jules_nutrition.py",
-                    "intitule": "Jules croissance -> Planning nutrition",
+                    "intitule": "Jules profil -> Planning nutrition",
                     "type_check": "smoke",
                     "callable": lambda: __import__(
                         "src.services.cuisine.inter_module_jules_nutrition",
                         fromlist=["obtenir_service_jules_nutrition_interaction"],
                     )
                     .obtenir_service_jules_nutrition_interaction()
-                    .adapter_planning_nutrition_selon_croissance(db=session),
+                    .adapter_planning_nutrition_jules(db=session),
                 },
                 {
                     "id": "P5-03",
@@ -318,7 +318,7 @@ async def statut_bridges(
                 {
                     "id": "P5-14",
                     "bridge": "inter_module_jules_nutrition.py",
-                    "intitule": "Jules croissance -> Portions recettes",
+                    "intitule": "Jules profil -> Portions recettes",
                     "type_check": "presence",
                     "callable": lambda: hasattr(
                         __import__(

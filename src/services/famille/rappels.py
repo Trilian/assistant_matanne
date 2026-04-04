@@ -6,7 +6,7 @@ Rappels supportés :
 - Documents expirants (J-30 info, J-7 warning, J-1 danger)
 - Fermetures crèche (J-3)
 - Jours fériés / ponts (J-5)
-- Jalons OMS de Jules (mensuel)
+- Jalons de développement de Jules (mensuel)
 """
 
 import logging
@@ -192,7 +192,7 @@ class ServiceRappelsFamille:
             return []
 
     def _rappels_jalons_jules(self, aujourd_hui: date) -> list[dict[str, Any]]:
-        """Rappels jalons OMS attendus pour l'âge de Jules."""
+        """Rappels des repères de développement attendus pour l'âge de Jules."""
         try:
             from src.services.famille.contexte import obtenir_service_contexte_familial
             from src.services.famille.jules import obtenir_service_jules
@@ -203,7 +203,7 @@ class ServiceRappelsFamille:
                 return []
 
             contexte_service = obtenir_service_contexte_familial()
-            jalons = contexte_service._prochains_jalons_oms(age_mois)
+            jalons = contexte_service._prochains_jalons_developpement(age_mois)
 
             if jalons:
                 return [{

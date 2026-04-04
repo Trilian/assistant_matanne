@@ -25,6 +25,7 @@ Usage:
     }));
 """
 
+import asyncio
 import json
 import logging
 from collections import defaultdict
@@ -131,18 +132,27 @@ class ConnectionManager:
         self._connexions.get(liste_id, {}).pop(user_id, None)
         self._users.get(liste_id, {}).pop(user_id, None)
 
+        logger.info(f"🔌 WS: {username} ({user_id}) déconnecté de liste #{liste_id}")
+
+        # Notifier les autres utilisateurs avant de supprimer les conteneurs vides.
+        # Les envois sont protégés par un timeout dans _safe_send pour éviter les
+        # blocages quand un client se ferme au même moment.
+        await self.broadcast(
+            liste_id,
+            {
+                "type": WSMessageType.USER_LEFT,
+                "user_id": user_id,
+                "username": username,
+                "timestamp": datetime.now(UTC).isoformat(),
+            },
+            exclude_user=user_id,
+        )
+
         # Nettoyer les listes vides
         if liste_id in self._connexions and not self._connexions[liste_id]:
             del self._connexions[liste_id]
         if liste_id in self._users and not self._users[liste_id]:
             del self._users[liste_id]
-
-        logger.info(f"🔌 WS: {username} ({user_id}) déconnecté de liste #{liste_id}")
-
-        # Note: on ne broadcast PAS user_left ici car cela provoque des deadlocks
-        # avec le TestClient sync de Starlette (les send_json bloquent quand les
-        # connexions se ferment en cascade). En production, le client détecte la
-        # déconnexion via onclose/onerror et rafraîchit la liste des utilisateurs.
 
     async def broadcast(
         self,
@@ -162,9 +172,11 @@ class ConnectionManager:
         await self._safe_send(websocket, message)
 
     async def _safe_send(self, websocket: WebSocket, message: dict[str, Any]) -> None:
-        """Envoie un message avec gestion d'erreur."""
+        """Envoie un message avec garde-fou contre les sockets bloquées."""
         try:
-            await websocket.send_json(message)
+            await asyncio.wait_for(websocket.send_json(message), timeout=1.0)
+        except TimeoutError:
+            logger.warning("Timeout envoi WS: socket non réactive")
         except Exception as e:
             logger.warning(f"Erreur envoi WS: {e}")
 

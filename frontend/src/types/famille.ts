@@ -269,19 +269,3 @@ export interface RappelFamille {
   click_url?: string;
 }
 
-// ═══════════════════════════════════════════════════════════
-// Croissance OMS (Phase R)
-// ═══════════════════════════════════════════════════════════
-
-export interface PercentilesOMS {
-  P3?: number;
-  P15?: number;
-  P50?: number;
-  P85?: number;
-  P97?: number;
-}
-
-export interface CroissanceData {
-  age_mois: number;
-  normes: Record<string, PercentilesOMS>;
-}

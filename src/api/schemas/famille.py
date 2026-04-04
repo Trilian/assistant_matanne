@@ -475,27 +475,6 @@ class RappelFamilleResponse(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════
-# CROISSANCE OMS 
-# ═══════════════════════════════════════════════════════════
-
-
-class PercentilesOMS(BaseModel):
-    P3: float | None = None
-    P15: float | None = None
-    P50: float | None = None
-    P85: float | None = None
-    P97: float | None = None
-
-
-class CroissanceResponse(BaseModel):
-    age_mois: int
-    normes: dict[str, PercentilesOMS] = Field(
-        default_factory=dict,
-        description="Normes OMS par mesure (poids, taille, perimetre_cranien)",
-    )
-
-
-# ═══════════════════════════════════════════════════════════
 # CONFIG GARDE 
 # ═══════════════════════════════════════════════════════════
 

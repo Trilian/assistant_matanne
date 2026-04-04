@@ -249,37 +249,6 @@ async def supprimer_jalon(
 # ═══════════════════════════════════════════════════════════
 # ACTIVITÉS FAMILIALES
 # ═══════════════════════════════════════════════════════════
-# CROISSANCE OMS 
-# ═══════════════════════════════════════════════════════════
-
-
-@router.get("/jules/croissance", responses=REPONSES_CRUD_LECTURE)
-@gerer_exception_api
-async def obtenir_croissance_jules(
-    user: dict[str, Any] = Depends(require_auth),
-) -> dict[str, Any]:
-    """Retourne les normes OMS de croissance pour l'âge de Jules."""
-    from src.services.famille.contexte import obtenir_service_contexte_familial
-    from src.services.famille.jules import obtenir_service_jules
-
-    def _query():
-        jules_service = obtenir_service_jules()
-        if not jules_service.get_date_naissance_jules():
-            raise HTTPException(status_code=404, detail="Profil Jules non trouvé")
-        age_mois = jules_service.get_age_mois()
-
-        contexte_service = obtenir_service_contexte_familial()
-        normes = contexte_service.obtenir_croissance_oms(age_mois, sexe="M")
-
-        return {
-            "age_mois": age_mois,
-            "normes": normes,
-        }
-
-    return await executer_async(_query)
-
-
-# ═══════════════════════════════════════════════════════════
 # SUGGESTIONS ACTIVITÉS SIMPLIFIÉES 
 # ═══════════════════════════════════════════════════════════
 

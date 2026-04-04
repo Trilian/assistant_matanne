@@ -308,7 +308,7 @@ class TestCuisineInterModuleBridges:
         )
 
         service = JulesNutritionInteractionService()
-        result = service.adapter_planning_nutrition_selon_croissance(db=db)
+        result = service.adapter_planning_nutrition_jules(db=db)
         assert isinstance(result, dict)
 
     def test_saison_menu_retourne_dict(self, engine):

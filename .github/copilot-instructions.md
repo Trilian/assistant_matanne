@@ -22,6 +22,7 @@ Décisions transverses à respecter:
 
 - Telegram remplace WhatsApp pour les usages conversationnels/proactifs
 - Ne pas documenter ni réintroduire des fonctionnalités OCR / scan de tickets comme features actives
+- Ne pas proposer ni réintroduire la courbe de croissance de Jules ni les références OMS de poids/taille/IMC ; conserver jalons, alimentation, activités et suivi vaccinal
 
 **Architecture**: API REST FastAPI (backend Python) + SPA Next.js 16 (App Router, Turbopack). Modèles SQLAlchemy modulaires dans `core/models/` (22 fichiers). Codebase en français (noms variables, commentaires, docstrings). Marqueur `py.typed` (PEP 561).
 

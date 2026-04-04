@@ -403,7 +403,7 @@ async def _envoyer_resume_jules(chat_id: str) -> None:
         return
 
     age_mois = service.get_age_mois()
-    prochains_jalons = ContexteFamilleService()._prochains_jalons_oms(age_mois)
+    prochains_jalons = ContexteFamilleService()._prochains_jalons_developpement(age_mois)
     lignes = [f"👶 <b>Jules</b>", f"Âge: <b>{age_mois} mois</b>"]
     if prochains_jalons:
         lignes.append("")

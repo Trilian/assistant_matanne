@@ -571,7 +571,6 @@ import type {
   ContexteFamilial,
   AchatFamille,
   RappelFamille,
-  CroissanceData,
 } from "@/types/famille";
 
 /** Obtenir le contexte familial complet (1 seul appel) */
@@ -891,16 +890,6 @@ export async function envoyerRappels(): Promise<{
   message: string;
 }> {
   const { data } = await clientApi.post("/famille/rappels/envoyer");
-  return data;
-}
-
-// ─── Croissance OMS (Phase R) ───────────────────────────
-
-/** Obtenir les données de croissance Jules + normes OMS */
-export async function obtenirCroissanceJules(): Promise<CroissanceData> {
-  const { data } = await clientApi.get<CroissanceData>(
-    "/famille/jules/croissance"
-  );
   return data;
 }
 

@@ -68,7 +68,7 @@ import {
 import {
   schemaArticleInventaire,
   type DonneesArticleInventaire,
-} from "@/bibliotheque/validateurs";
+} from "@/bibliotheque/validateurs-cuisine";
 import { toast } from "sonner";
 import type { ArticleInventaire } from "@/types/inventaire";
 import { ScanneurMultiCodes } from "@/composants/scanneur-multi-codes";

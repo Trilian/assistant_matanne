@@ -2,7 +2,7 @@
 Routes API pour la famille.
 
 Agrégateur : inclut 3 sous-routeurs thématiques via include_router() :
-- famille_jules      : Profils enfants, jalons, croissance, coaching IA
+- famille_jules      : Profils enfants, jalons, coaching IA
   → /enfants, /jules/*
 - famille_budget     : Dépenses, analyse IA, prédictions
   → /budget, /budget/*

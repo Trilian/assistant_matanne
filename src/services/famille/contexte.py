@@ -5,7 +5,7 @@ Fournit un snapshot contextuel de la vie familiale :
 - Météo actuelle et prévisions 7j
 - Jours fériés / ponts / fermetures crèche proches
 - Anniversaires dans les 14 prochains jours
-- Profil Jules (âge, prochains jalons OMS)
+- Profil Jules (âge, prochains repères de développement)
 - Documents expirant dans 30 jours
 - Routines du moment
 - Activités à venir (7j)
@@ -24,17 +24,17 @@ from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
-# Chemin vers les normes OMS
-_NORMES_OMS_PATH = Path(__file__).resolve().parents[3] / "data" / "reference" / "normes_oms.json"
+# Référentiel de développement Jules
+_REFERENTIEL_JULES_PATH = Path(__file__).resolve().parents[3] / "data" / "reference" / "normes_oms.json"
 
 
-def _charger_normes_oms() -> dict[str, Any]:
-    """Charge les normes OMS depuis le fichier JSON."""
+def _charger_referentiel_jules() -> dict[str, Any]:
+    """Charge le référentiel de développement utilisé pour Jules."""
     try:
-        with open(_NORMES_OMS_PATH, encoding="utf-8") as f:
+        with open(_REFERENTIEL_JULES_PATH, encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
-        logger.warning("Impossible de charger normes_oms.json: %s", e)
+        logger.warning("Impossible de charger le référentiel Jules: %s", e)
         return {}
 
 
@@ -46,13 +46,13 @@ class ContexteFamilialService:
     """
 
     def __init__(self):
-        self._normes_oms: dict[str, Any] | None = None
+        self._referentiel_jules: dict[str, Any] | None = None
 
     @property
-    def normes_oms(self) -> dict[str, Any]:
-        if self._normes_oms is None:
-            self._normes_oms = _charger_normes_oms()
-        return self._normes_oms
+    def referentiel_jules(self) -> dict[str, Any]:
+        if self._referentiel_jules is None:
+            self._referentiel_jules = _charger_referentiel_jules()
+        return self._referentiel_jules
 
     # ═══════════════════════════════════════════════════════════
     # AGRÉGATION PRINCIPALE
@@ -170,7 +170,7 @@ class ContexteFamilialService:
             return []
 
     def _section_jules(self, aujourd_hui: date) -> dict[str, Any] | None:
-        """Profil Jules + prochains jalons OMS attendus."""
+        """Profil Jules + prochains repères de développement attendus."""
         try:
             from src.services.famille.jules import obtenir_service_jules
 
@@ -180,9 +180,7 @@ class ContexteFamilialService:
                 return None
 
             age_mois = service.get_age_mois()
-
-            # Prochains jalons OMS attendus
-            prochains_jalons = self._prochains_jalons_oms(age_mois)
+            prochains_jalons = self._prochains_jalons_developpement(age_mois)
 
             return {
                 "age_mois": age_mois,
@@ -303,25 +301,23 @@ class ContexteFamilialService:
             return []
 
     # ═══════════════════════════════════════════════════════════
-    # HELPERS OMS
+    # HELPERS JULES
     # ═══════════════════════════════════════════════════════════
 
-    def _prochains_jalons_oms(self, age_mois: int) -> list[str]:
-        """Retourne les prochains jalons OMS attendus pour cet âge."""
-        normes = self.normes_oms
-        if not normes:
+    def _prochains_jalons_developpement(self, age_mois: int) -> list[str]:
+        """Retourne les prochains repères de développement attendus pour cet âge."""
+        referentiel = self.referentiel_jules
+        if not referentiel:
             return []
 
         jalons = []
-        # Chercher dans les étapes de développement par tranche d'âge
-        etapes = normes.get("etapes_developpement", normes.get("milestones", {}))
+        etapes = referentiel.get("etapes_developpement", referentiel.get("milestones", {}))
         if isinstance(etapes, dict):
             for tranche, desc_list in etapes.items():
                 try:
                     age_tranche = int(tranche.split("_")[0]) if "_" in tranche else int(tranche)
                 except (ValueError, IndexError):
                     continue
-                # Jalons attendus dans les 3 prochains mois
                 if age_mois <= age_tranche <= age_mois + 3:
                     if isinstance(desc_list, list):
                         jalons.extend(desc_list[:3])
@@ -329,30 +325,6 @@ class ContexteFamilialService:
                         jalons.append(desc_list)
 
         return jalons[:5]
-
-    def obtenir_croissance_oms(self, age_mois: int, sexe: str = "M") -> dict[str, Any]:
-        """Retourne les courbes OMS pour un âge et sexe donnés."""
-        normes = self.normes_oms
-        if not normes:
-            return {}
-
-        cle_sexe = "garcons" if sexe == "M" else "filles"
-        result: dict[str, Any] = {}
-
-        for mesure in ("poids", "taille", "perimetre_cranien"):
-            donnees = normes.get(cle_sexe, {}).get(mesure, {})
-            if not donnees:
-                continue
-            percentiles: dict[str, float | None] = {}
-            for p in ("P3", "P15", "P50", "P85", "P97"):
-                valeurs = donnees.get(p, [])
-                if isinstance(valeurs, list) and age_mois < len(valeurs):
-                    percentiles[p] = valeurs[age_mois]
-                else:
-                    percentiles[p] = None
-            result[mesure] = percentiles
-
-        return result
 
 
 # ═══════════════════════════════════════════════════════════
@@ -366,5 +338,6 @@ def obtenir_service_contexte_familial() -> ContexteFamilialService:
     return ContexteFamilialService()
 
 
-# Alias anglais
+# Alias de compatibilité
+ContexteFamilleService = ContexteFamilialService
 get_contexte_familial_service = obtenir_service_contexte_familial

@@ -87,8 +87,6 @@ _TABLES_SQL_SANS_ORM: dict[str, str] = {
     "plantes_catalogue": "reference — catalogue plantes jardin (ref JSON), pas d'ORM requis",
     "preferences_home": "legacy — remplacé par preferences_utilisateurs",
     "recoltes": "reference — récoltes jardin, accès direct via service",
-    "stats_home": "legacy — stats calculées, pas d'ORM requis",
-    "taches_home": "legacy — remplacé par taches_maison (ORM TacheMaison)",
 }
 
 

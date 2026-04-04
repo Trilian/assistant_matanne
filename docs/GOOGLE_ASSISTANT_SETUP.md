@@ -77,7 +77,6 @@ Si `GOOGLE_ASSISTANT_WEBHOOK_SECRET` est defini, le header suivant devient oblig
 
 4. Cote backend, les intents supportes actuels sont:
 - `courses_ajouter_article`
-- `jules_enregistrer_poids`
 - `planning_resume_demain`
 - `routines_creer_rappel`
 

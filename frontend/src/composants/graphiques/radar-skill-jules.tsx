@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════
-// Radar Skill Jules — Motricité, Langage, Social, Cognitif vs normes OMS
-// Superposition du profil Jules et de la moyenne OMS
+// Radar Skill Jules — Motricité, Langage, Social, Cognitif
+// Superposition du profil Jules et de repères d'âge simplifiés
 // ═══════════════════════════════════════════════════════════
 
 "use client";
@@ -21,7 +21,7 @@ interface DonneeRadarJules {
   categorie: string;
   label: string;
   jules: number; // score 0-100
-  norme_oms: number; // score 0-100 (moyenne OMS pour l'âge)
+  repere_age: number; // score 0-100 (repère simplifié selon l'âge)
 }
 
 interface RadarSkillJulesProps {
@@ -42,7 +42,7 @@ export function RadarSkillJules({ donnees, ageMois }: RadarSkillJulesProps) {
     <div className="space-y-1">
       {ageMois && (
         <p className="text-xs text-muted-foreground text-center">
-          Comparaison à {ageMois} mois — Normes OMS
+          Comparaison à {ageMois} mois — repères d'âge
         </p>
       )}
       <ResponsiveContainer width="100%" height={280}>
@@ -67,8 +67,8 @@ export function RadarSkillJules({ donnees, ageMois }: RadarSkillJulesProps) {
             strokeWidth={2}
           />
           <Radar
-            name="Norme OMS"
-            dataKey="norme_oms"
+            name="Repère d'âge"
+            dataKey="repere_age"
             stroke={COULEURS_GRAPHIQUES.accent1}
             fill={COULEURS_GRAPHIQUES.accent1}
             fillOpacity={0.1}

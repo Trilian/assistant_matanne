@@ -46,12 +46,6 @@ INTENTS_GOOGLE_ASSISTANT: dict[str, dict[str, Any]] = {
         "template": "ajoute du {article} à la liste",
         "action_attendue": "courses.ajout",
     },
-    "jules_enregistrer_poids": {
-        "description": "Enregistrer le poids de Jules",
-        "slots": ["poids_kg"],
-        "template": "jules pèse {poids_kg} kg",
-        "action_attendue": "jules.croissance",
-    },
     "planning_resume_demain": {
         "description": "Résumer le planning de demain",
         "slots": [],
@@ -158,12 +152,10 @@ def _executer_commande_assistant(texte: str, source: str = "assistant_api") -> d
         Ingredient,
         ListeCourses,
         Planning,
-        ProfilEnfant,
         Repas,
         Routine,
         TacheRoutine,
     )
-    from src.core.models.carnet_sante import MesureCroissance
 
     texte_lower = texte.lower()
     with executer_avec_session() as session:
@@ -205,51 +197,6 @@ def _executer_commande_assistant(texte: str, source: str = "assistant_api") -> d
                 "action": "courses.ajout",
                 "message": f"{nom_article.title()} a été ajouté à la liste {liste.nom}.",
                 "details": {"liste_id": liste.id, "article_id": article.id},
-            }
-            _publier_evenement_assistant(
-                "assistant.commande_executee",
-                {"texte": texte, "action": resultat["action"]},
-                source=source,
-            )
-            return resultat
-
-        poids_match = re.search(
-            r"jules\s+p[eè]se\s+(?P<poids>\d+(?:[\.,]\d+)?)\s*kg",
-            texte_lower,
-        )
-        if poids_match:
-            poids = float(poids_match.group("poids").replace(",", "."))
-            enfant = (
-                session.query(ProfilEnfant)
-                .filter(ProfilEnfant.actif.is_(True))
-                .order_by(ProfilEnfant.id.asc())
-                .first()
-            )
-            if enfant is None:
-                raise HTTPException(status_code=404, detail="Profil Jules introuvable")
-
-            age_mois = None
-            if enfant.date_of_birth:
-                age_mois = max(
-                    0,
-                    (date.today().year - enfant.date_of_birth.year) * 12
-                    + date.today().month
-                    - enfant.date_of_birth.month,
-                )
-
-            mesure = MesureCroissance(
-                enfant_id=enfant.id,
-                date_mesure=date.today(),
-                poids_kg=poids,
-                age_mois=age_mois,
-                notes="Ajout via assistant vocal",
-            )
-            session.add(mesure)
-            session.commit()
-            resultat = {
-                "action": "jules.croissance",
-                "message": f"Mesure enregistrée: Jules pèse {poids:.1f} kg.",
-                "details": {"mesure_id": mesure.id},
             }
             _publier_evenement_assistant(
                 "assistant.commande_executee",
@@ -323,7 +270,7 @@ def _executer_commande_assistant(texte: str, source: str = "assistant_api") -> d
 
         return {
             "action": "incomprise",
-            "message": "Commande comprise mais non exécutable pour l'instant. Essayez avec une liste de courses, le poids de Jules, un rappel, ou le planning de demain.",
+            "message": "Commande comprise mais non exécutable pour l'instant. Essayez avec une liste de courses, un rappel, ou le planning de demain.",
             "details": {"texte": texte},
         }
 
@@ -342,7 +289,6 @@ async def interpreter_commande_vocale(
 
     Intentions actuellement gérées:
     - Ajouter un article à la liste de courses
-    - Ajouter une mesure de croissance Jules
     - Créer un rappel simple via routine
     - Résumer le planning de demain
     """

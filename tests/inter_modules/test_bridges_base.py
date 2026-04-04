@@ -96,7 +96,7 @@ def test_bridge_6_8_jules_vers_nutrition(test_db):
     from src.services.cuisine.inter_module_jules_nutrition import JulesNutritionInteractionService
 
     service = JulesNutritionInteractionService()
-    result = service.adapter_planning_nutrition_selon_croissance(db=test_db)
+    result = service.adapter_planning_nutrition_jules(db=test_db)
     assert isinstance(result, dict)
     assert "message" in result
 

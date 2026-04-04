@@ -128,7 +128,6 @@ class TestWebSocketPresence:
                 assert joined["username"] == "Deuxième"
                 assert "timestamp" in joined
 
-    @pytest.mark.skip(reason="Disconnect broadcast deadlocks in sync TestClient — tested manually")
     def test_user_left_broadcast(self, ws_client: TestClient):
         """Quand un utilisateur se déconnecte, les autres reçoivent user_left."""
         with ws_client.websocket_connect(_ws_url(4, "stayer", "Restant")) as ws1:

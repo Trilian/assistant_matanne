@@ -230,12 +230,12 @@ Oui, via CSV :
 2. Onglet **"Jalons"** :
    - Ajoutez les �tapes importantes (premier sourire, premiers pas...)
    - Date + description + photo optionnelle
-3. Onglet **"Croissance"** :
-   - Entrez poids, taille, p�rim�tre cr�nien
-   - Visualisez la courbe compar�e aux percentiles OMS
-4. Onglet **"Sant�"** :
+3. Blocs **"Jalons"**, **"Aliments exclus"** et **"Coaching hebdo"** :
+   - Ajoutez les étapes importantes du développement
+   - Gardez les adaptations repas utiles pour Jules
+4. Onglet **"Santé"** :
    - Suivez les vaccins (statut + rappels)
-   - Notez les consultations m�dicales
+   - Notez les consultations médicales
 
 ### Comment obtenir des suggestions d'activit�s weekend ?
 

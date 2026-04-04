@@ -211,7 +211,7 @@ class RapportsService:
         # Jules
         sections["jules"] = (
             f"Le développement de Jules progresse bien. Vous avez consacré du temps à ses activités "
-            f"et jalons de croissance. Continuez à documenter ces moments importants pour suivre sa progression."
+            f"et à ses jalons de développement. Continuez à documenter ces moments importants pour suivre sa progression."
         )
 
         # Maison

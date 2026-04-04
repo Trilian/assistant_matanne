@@ -28,7 +28,7 @@ tables_modifie_le TEXT [] := ARRAY [
         'configs_calendriers_externes', 'evenements_calendrier',
         'plans_jardin', 'zones_jardin', 'plantes_jardin',
         'pieces_maison', 'objets_maison',
-        'preferences_home', 'taches_home', 'objectifs_autonomie',
+        'preferences_home', 'objectifs_autonomie',
         'abonnements', 'budgets_home'
     ];
 BEGIN FOREACH t IN ARRAY tables_modifie_le LOOP EXECUTE format(

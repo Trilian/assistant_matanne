@@ -19,7 +19,59 @@ logger = logging.getLogger(__name__)
 
 
 class JulesNutritionInteractionService:
-    """Bridge Jules croissance -> planning nutrition/portions."""
+    """Bridge Jules -> planning nutrition/portions."""
+
+    @staticmethod
+    def _calculer_age_mois(jules: Any) -> int:
+        """Calcule un âge en mois à partir du profil Jules."""
+        if not getattr(jules, "date_of_birth", None):
+            return 0
+
+        aujourd_hui = date_type.today()
+        naissance = jules.date_of_birth
+        correction = 1 if aujourd_hui.day < naissance.day else 0
+        return max(
+            0,
+            (aujourd_hui.year - naissance.year) * 12
+            + aujourd_hui.month
+            - naissance.month
+            - correction,
+        )
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def adapter_planning_nutrition_jules(
+        self,
+        *,
+        jours_horizon: int = 7,
+        db=None,
+    ) -> dict[str, Any]:
+        """Produit des recommandations nutritionnelles à partir du profil actuel de Jules."""
+        from src.core.models import ProfilEnfant
+
+        jules = db.query(ProfilEnfant).filter(ProfilEnfant.name == "Jules", ProfilEnfant.actif.is_(True)).first()
+        if not jules:
+            return {"recommandations": [], "message": "Profil Jules introuvable."}
+
+        age_mois = self._calculer_age_mois(jules)
+        recommandations = []
+
+        if age_mois < 12:
+            recommandations.append("Conserver des textures très souples et introduire les nouveautés progressivement.")
+        elif age_mois < 24:
+            recommandations.append("Maintenir des textures adaptées et proposer des repas variés sur la semaine.")
+        else:
+            recommandations.append("Prévoir des portions enfant simples, variées et faciles à partager avec la famille.")
+
+        recommandations.append("Respecter les aliments exclus et éviter le sel ajouté dans la version Jules.")
+        recommandations.append(f"Horizon de planification nutritionnelle: {jours_horizon} jours.")
+
+        return {
+            "enfant_id": jules.id,
+            "age_mois": age_mois,
+            "recommandations": recommandations,
+            "message": "Recommandations nutritionnelles générées.",
+        }
 
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
@@ -29,40 +81,8 @@ class JulesNutritionInteractionService:
         jours_horizon: int = 7,
         db=None,
     ) -> dict[str, Any]:
-        """P5-02: produit des recommandations nutritionnelles a partir de la derniere mesure."""
-        from src.core.models import MesureCroissance, ProfilEnfant
-
-        jules = db.query(ProfilEnfant).filter(ProfilEnfant.name == "Jules", ProfilEnfant.actif.is_(True)).first()
-        if not jules:
-            return {"recommandations": [], "message": "Profil Jules introuvable."}
-
-        mesure = (
-            db.query(MesureCroissance)
-            .filter(MesureCroissance.enfant_id == jules.id)
-            .order_by(MesureCroissance.date_mesure.desc())
-            .first()
-        )
-        if not mesure:
-            return {"recommandations": [], "message": "Aucune mesure de croissance disponible."}
-
-        recommandations = []
-        age_mois = mesure.age_mois or 0
-        if age_mois < 24:
-            recommandations.append("Maintenir des textures adaptees et une densite energetique elevee.")
-        if mesure.poids_kg and mesure.poids_kg < 10:
-            recommandations.append("Verifier un apport proteine/energie suffisant sur les 7 prochains jours.")
-        if mesure.imc_calcule and mesure.imc_calcule > 18:
-            recommandations.append("Favoriser legumes/fibres et limiter les desserts sucres repetitifs.")
-
-        recommandations.append(f"Horizon de planification nutritionnelle: {jours_horizon} jours.")
-
-        return {
-            "enfant_id": jules.id,
-            "age_mois": age_mois,
-            "derniere_mesure": mesure.date_mesure.isoformat() if mesure.date_mesure else None,
-            "recommandations": recommandations,
-            "message": "Recommandations nutritionnelles generees.",
-        }
+        """Alias historique conservé pour compatibilité."""
+        return self.adapter_planning_nutrition_jules(jours_horizon=jours_horizon, db=db)
 
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
@@ -72,21 +92,14 @@ class JulesNutritionInteractionService:
         jours_horizon: int = 7,
         db=None,
     ) -> dict[str, Any]:
-        """P5-14: ajuste automatiquement portion_ajustee sur les repas planifies."""
-        from src.core.models import MesureCroissance, Planning, ProfilEnfant, Repas
+        """Ajuste automatiquement portion_ajustee sur les repas planifiés selon l'âge de Jules."""
+        from src.core.models import Planning, ProfilEnfant, Repas
 
         jules = db.query(ProfilEnfant).filter(ProfilEnfant.name == "Jules", ProfilEnfant.actif.is_(True)).first()
         if not jules:
             return {"repas_mis_a_jour": 0, "message": "Profil Jules introuvable."}
 
-        mesure = (
-            db.query(MesureCroissance)
-            .filter(MesureCroissance.enfant_id == jules.id)
-            .order_by(MesureCroissance.date_mesure.desc())
-            .first()
-        )
-        if not mesure:
-            return {"repas_mis_a_jour": 0, "message": "Aucune mesure de croissance disponible."}
+        age_mois = self._calculer_age_mois(jules)
 
         aujourd_hui = date_type.today()
         fin = aujourd_hui + timedelta(days=jours_horizon)
@@ -98,9 +111,9 @@ class JulesNutritionInteractionService:
         if not planning:
             return {"repas_mis_a_jour": 0, "message": "Aucun planning actif."}
 
-        if (mesure.age_mois or 0) < 18:
+        if age_mois < 18:
             portion_jules = 1
-        elif (mesure.age_mois or 0) < 36:
+        elif age_mois < 36:
             portion_jules = 2
         else:
             portion_jules = 3
@@ -128,7 +141,8 @@ class JulesNutritionInteractionService:
         return {
             "repas_mis_a_jour": maj,
             "portion_jules": portion_jules,
-            "message": f"{maj} repas ajustes pour Jules.",
+            "age_mois": age_mois,
+            "message": f"{maj} repas ajustés pour Jules.",
         }
 
 

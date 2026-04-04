@@ -27,7 +27,7 @@ Les interactions cross-module reposent sur :
 | Bridge | Source → Destination | Méthodes clés |
 | -------- | --------------------- | --------------- |
 | `inter_module_inventaire_planning.py` | Inventaire → Planning recettes | `suggerer_recettes_selon_stock()`, `exclure_articles_surplus()`, `blocker_batch_jours()`, `analyser_equilibre_nutritionnel()`, `filtrer_recettes_mal_notees()` |
-| `inter_module_jules_nutrition.py` | Croissance Jules → Portions planning | `adapter_planning_nutrition_selon_croissance()`, `adapter_portions_recettes_planifiees()` |
+| `inter_module_jules_nutrition.py` | Profil Jules → Portions planning | `adapter_planning_nutrition_jules()`, `adapter_portions_recettes_planifiees()` |
 | `inter_module_saison_menu.py` | Saisonnalité → Planning IA | `obtenir_contexte_saisonnier_planning()` |
 | `inter_module_courses_budget.py` | Total courses → Budget alimentation | `synchroniser_total_courses_vers_budget()`, `estimer_budget_courses_mensuel()` |
 | `inter_module_batch_inventaire.py` | Batch cooking terminé → Déduction stock | `deduire_ingredients_session_terminee()` |

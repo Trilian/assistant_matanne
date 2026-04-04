@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/composants/ui/select";
-import { schemaRecette, type DonneesRecette } from "@/bibliotheque/validateurs";
+import { schemaRecette, type DonneesRecette } from "@/bibliotheque/validateurs-cuisine";
 import { utiliserMutation, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { creerRecette, genererDepuisPhoto, modifierRecette } from "@/bibliotheque/api/recettes";
 import type { Recette } from "@/types/recettes";
