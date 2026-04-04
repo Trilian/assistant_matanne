@@ -15,6 +15,8 @@ import {
   Cookie,
   ShoppingBag,
   Check,
+  Link2,
+  Search,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
@@ -41,6 +43,7 @@ interface TileArticleProps {
   unite?: string;
   categorie?: string;
   magasinCible?: string | null;
+  driveMappe?: boolean;
   estCoche?: boolean;
   estSelectionne?: boolean;
   onClick?: () => void;
@@ -53,6 +56,7 @@ export function TileArticle({
   unite,
   categorie,
   magasinCible,
+  driveMappe,
   estCoche = false,
   estSelectionne = false,
   onClick,
@@ -105,6 +109,19 @@ export function TileArticle({
         </span>
       )}
       {magasinCible ? <BadgeMagasin magasin={magasinCible} /> : null}
+      {magasinCible === "carrefour_drive" && (
+        <div
+          className={cn(
+            "flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px]",
+            driveMappe
+              ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+              : "border-amber-300 bg-amber-50 text-amber-700"
+          )}
+        >
+          {driveMappe ? <Link2 className="h-3 w-3" /> : <Search className="h-3 w-3" />}
+          {driveMappe ? "Mappé" : "À mapper"}
+        </div>
+      )}
     </motion.button>
   );
 }

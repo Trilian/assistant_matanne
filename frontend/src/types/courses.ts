@@ -23,6 +23,7 @@ export interface ArticleCourses {
   prix_estime?: number;
   magasin?: string;
   magasin_cible?: string;
+  drive_mappe?: boolean;
   ordre?: number;
 }
 
@@ -66,6 +67,7 @@ export interface CorrespondanceDrive {
 export interface ArticleDrive {
   id: number;
   nom: string;
+  ingredient_id?: number | null;
   quantite: number;
   coche: boolean;
   categorie?: string | null;

@@ -368,7 +368,6 @@
 
 - [x] `.venv-1\\Scripts\\python.exe -m pytest -q --tb=short` → **OK** (`4966 passed in 88.71s`, sans warning ni skip)
 - [x] `cd frontend && npm run test:e2e -- --project=chromium --grep "Naviguer entre tous les modules cuisine"` → **OK** (`1 passed in 21.3s`)
-- [x] `cd frontend && npx vitest run --reporter=verbose "src/app/(app)/cuisine"` → **OK** (`10 fichiers, 27 tests passés`)
 - [x] `file_search "tests/**/*phase*"` + `file_search "tests/**/*sprint*"` → **0 résultat**
 - [x] `tests/contracts/test_openapi_contract.py` toujours présent ; skip local explicite si `schemathesis` n’est pas installé
 

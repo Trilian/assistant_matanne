@@ -308,6 +308,7 @@ class ArticleDriveResponse(BaseModel):
 
     id: int
     nom: str
+    ingredient_id: int | None = None
     quantite: float
     coche: bool = False
     categorie: str | None = None

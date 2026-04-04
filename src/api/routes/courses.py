@@ -1870,6 +1870,7 @@ async def obtenir_articles_drive(
                 item: dict[str, Any] = {
                     "id": a.id,
                     "nom": nom,
+                    "ingredient_id": a.ingredient_id,
                     "quantite": a.quantite_necessaire,
                     "coche": a.achete,
                     "categorie": a.rayon_magasin,

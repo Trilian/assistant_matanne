@@ -255,6 +255,7 @@ export function PanneauDetailCourses({
                           unite={article.unite}
                           categorie={article.categorie}
                           magasinCible={article.magasin_cible}
+                          driveMappe={article.drive_mappe}
                           estSelectionne={articlesSelectionnes.has(article.id)}
                           onClick={() => {
                             if (modeSelection) {
@@ -294,6 +295,7 @@ export function PanneauDetailCourses({
                           unite={article.unite}
                           categorie={article.categorie}
                           magasinCible={article.magasin_cible}
+                          driveMappe={article.drive_mappe}
                           estCoche
                           onClick={() => onCocherArticle(article.id, false)}
                         />

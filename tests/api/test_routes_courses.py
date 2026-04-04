@@ -534,3 +534,31 @@ class TestCoursesMagasinsDriveDB:
         listing = client.get("/api/v1/courses/correspondances-drive")
         assert listing.status_code == 200
         assert any(item["produit_drive_id"] == payload["produit_drive_id"] for item in listing.json())
+
+    def test_articles_drive_expose_ingredient_id(self, client, db):
+        from src.core.models import Ingredient, ListeCourses
+
+        ingredient = Ingredient(nom="Papier toilette", categorie="entretien", unite="pcs")
+        db.add(ingredient)
+        db.commit()
+        db.refresh(ingredient)
+
+        liste = ListeCourses(nom="Liste drive")
+        db.add(liste)
+        db.commit()
+        db.refresh(liste)
+
+        client.post(
+            f"/api/v1/courses/{liste.id}/items",
+            json={
+                "nom": ingredient.nom,
+                "quantite": 2.0,
+                "categorie": "entretien",
+                "magasin_cible": "carrefour_drive",
+            },
+        )
+
+        response = client.get(f"/api/v1/courses/{liste.id}/articles-drive")
+        assert response.status_code == 200
+        data = response.json()
+        assert data[0]["ingredient_id"] == ingredient.id

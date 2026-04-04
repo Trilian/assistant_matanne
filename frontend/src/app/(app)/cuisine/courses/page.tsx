@@ -4,12 +4,13 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CheckCheck,
   CheckCircle2,
   CheckSquare,
   Leaf,
+  Link2,
   Loader2,
   QrCode,
   Square,
@@ -21,11 +22,15 @@ import { DialogueArticleCourses } from "@/composants/courses/dialogue-article-co
 import { DialogueQrCourses } from "@/composants/courses/dialogue-qr-courses";
 import { FiltreMagasins } from "@/composants/courses/filtre-magasins";
 import { PanneauBioLocal } from "@/composants/courses/panneau-bio-local";
+import { PanneauCorrespondancesDrive } from "@/composants/courses/panneau-correspondances-drive";
 import { PanneauDetailCourses } from "@/composants/courses/panneau-detail-courses";
 import { PanneauListesCourses } from "@/composants/courses/panneau-listes-courses";
 import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
 import { ScanneurMultiCodes } from "@/composants/scanneur-multi-codes";
+import { obtenirArticlesDrive } from "@/bibliotheque/api/courses";
 import { envoyerCoursesMagasinTelegram } from "@/bibliotheque/api/telegram";
+import { PREFIXE_API, URL_API } from "@/bibliotheque/constantes";
+import { utiliserRequete } from "@/crochets/utiliser-api";
 import { utiliserPageCourses } from "@/crochets/utiliser-page-courses";
 import type { MagasinCible } from "@/types/courses";
 
@@ -78,9 +83,6 @@ export default function PageCourses() {
     erreursArticle,
     articles,
     articlesNonCoches,
-    articlesCoches,
-    groupesNonCoches,
-    categoriesTriees,
     ouvrirQrPartage,
     telechargerQr,
     creerListe,
@@ -103,6 +105,14 @@ export default function PageCourses() {
   // ─── Filtre par magasin ─────────────────────────────────
   const [magasinActif, setMagasinActif] = useState<string | null>(null);
   const [enEnvoiTelegram, setEnEnvoiTelegram] = useState(false);
+  const [extensionDriveDisponible, setExtensionDriveDisponible] = useState(false);
+  const [afficherCorrespondancesDrive, setAfficherCorrespondancesDrive] = useState(false);
+
+  const { data: articlesDrive = [] } = utiliserRequete(
+    ["courses", "articles-drive", String(listeSelectionnee)],
+    () => obtenirArticlesDrive(listeSelectionnee!),
+    { enabled: listeSelectionnee !== null }
+  );
 
   const compteursMagasins = useMemo(() => {
     const compteurs: Record<string, number> = {};
@@ -113,10 +123,30 @@ export default function PageCourses() {
     return compteurs;
   }, [articles]);
 
+  const articlesAvecStatutDrive = useMemo(() => {
+    const idsMappes = new Set(
+      articlesDrive.filter((article) => Boolean(article.correspondance?.produit_drive_id)).map((article) => article.id)
+    );
+
+    return articles.map((article) => ({
+      ...article,
+      drive_mappe: article.magasin_cible === "carrefour_drive" ? idsMappes.has(article.id) : undefined,
+    }));
+  }, [articles, articlesDrive]);
+
+  const driveStats = useMemo(() => {
+    const driveArticles = articlesAvecStatutDrive.filter((article) => article.magasin_cible === "carrefour_drive");
+    const mappes = driveArticles.filter((article) => article.drive_mappe).length;
+    return {
+      mappes,
+      aMapper: Math.max(0, driveArticles.length - mappes),
+    };
+  }, [articlesAvecStatutDrive]);
+
   const articlesFiltres = useMemo(() => {
-    if (!magasinActif) return articles;
-    return articles.filter((a) => a.magasin_cible === magasinActif);
-  }, [articles, magasinActif]);
+    if (!magasinActif) return articlesAvecStatutDrive;
+    return articlesAvecStatutDrive.filter((a) => a.magasin_cible === magasinActif);
+  }, [articlesAvecStatutDrive, magasinActif]);
 
   const articlesNonCochesFiltres = useMemo(
     () => articlesFiltres.filter((a) => !a.est_coche),
@@ -157,9 +187,60 @@ export default function PageCourses() {
     }
   };
 
+  useEffect(() => {
+    const estPret = document.documentElement.dataset.assistantMatanneDriveBridge === "ready";
+    if (estPret) {
+      setExtensionDriveDisponible(true);
+    }
+
+    const handleBridgeReady = () => setExtensionDriveDisponible(true);
+    const handleDriveResult = (event: Event) => {
+      const detail = (event as CustomEvent<{ ok?: boolean; total?: number; mappes?: number; recherches?: number; error?: string }>).detail;
+      if (!detail) return;
+
+      if (detail.ok) {
+        toast.success(
+          `Drive lancé : ${detail.mappes ?? 0} produit(s) mappé(s), ${detail.recherches ?? 0} recherche(s) ouverte(s).`
+        );
+      } else if (detail.error) {
+        toast.error(`Extension Drive : ${detail.error}`);
+      }
+    };
+
+    window.addEventListener("assistant-matanne-drive-bridge-ready", handleBridgeReady);
+    window.addEventListener("assistant-matanne-drive-sync-result", handleDriveResult as EventListener);
+
+    return () => {
+      window.removeEventListener("assistant-matanne-drive-bridge-ready", handleBridgeReady);
+      window.removeEventListener("assistant-matanne-drive-sync-result", handleDriveResult as EventListener);
+    };
+  }, []);
+
   const handleSyncDrive = () => {
+    if (!listeSelectionnee) return;
+
+    const apiBaseUrl = `${URL_API}${PREFIXE_API}`;
+    const apiToken = typeof window !== "undefined" ? window.localStorage.getItem("access_token") : null;
+
+    if (extensionDriveDisponible) {
+      window.postMessage(
+        {
+          source: "assistant-matanne",
+          type: "SYNC_CARREFOUR_DRIVE",
+          payload: {
+            listeId: listeSelectionnee,
+            apiBaseUrl,
+            apiToken,
+          },
+        },
+        window.location.origin
+      );
+      toast.info("Demande envoyée à l'extension Carrefour Drive...");
+      return;
+    }
+
     window.open("https://www.carrefour.fr/courses-en-ligne", "_blank", "noopener,noreferrer");
-    toast.info("Carrefour Drive ouvert. L'extension peut maintenant ajouter les articles mappés.");
+    toast.info("Carrefour Drive ouvert. Installe l'extension pour l'ajout automatique en 1 clic.");
   };
 
   const messageTempsReel = !listeSelectionnee
@@ -230,6 +311,15 @@ export default function PageCourses() {
             </Button>
 
             <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAfficherCorrespondancesDrive((valeur) => !valeur)}
+            >
+              <Link2 className="mr-1 h-4 w-4" />
+              Correspondances Drive
+            </Button>
+
+            <Button
               size="sm"
               variant="secondary"
               onClick={() => finaliserCourses(undefined)}
@@ -295,6 +385,7 @@ export default function PageCourses() {
         <FiltreMagasins
           compteurs={compteursMagasins}
           magasinActif={magasinActif}
+          driveStats={driveStats}
           onChangerMagasin={setMagasinActif}
           onEnvoyerTelegram={handleEnvoyerTelegram}
           onSyncDrive={handleSyncDrive}
@@ -378,6 +469,8 @@ export default function PageCourses() {
       {panneauBio && bioLocal && bioLocal.suggestions.length > 0 && (
         <PanneauBioLocal bioLocal={bioLocal} />
       )}
+
+      {afficherCorrespondancesDrive && <PanneauCorrespondancesDrive />}
 
       <DialogueArticleCourses
         ouvert={dialogueArticle}

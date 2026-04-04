@@ -13,6 +13,7 @@ import {
 type FiltreMagasinsProps = {
   compteurs: Record<string, number>;
   magasinActif: string | null;
+  driveStats?: { mappes: number; aMapper: number };
   onChangerMagasin: (magasin: string | null) => void;
   onEnvoyerTelegram?: (magasin: MagasinCible) => void;
   onSyncDrive?: () => void;
@@ -28,6 +29,7 @@ const MAGASINS_ORDRE: MagasinCible[] = [
 export function FiltreMagasins({
   compteurs,
   magasinActif,
+  driveStats,
   onChangerMagasin,
   onEnvoyerTelegram,
   onSyncDrive,
@@ -98,15 +100,23 @@ export function FiltreMagasins({
             )}
 
           {magasinActif === "carrefour_drive" && onSyncDrive && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onSyncDrive}
-              disabled={(compteurs["carrefour_drive"] ?? 0) === 0}
-            >
-              <ShoppingCart className="mr-1 h-4 w-4" />
-              🛒 Ajouter au Drive
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onSyncDrive}
+                disabled={(compteurs["carrefour_drive"] ?? 0) === 0}
+              >
+                <ShoppingCart className="mr-1 h-4 w-4" />
+                🛒 Ajouter au Drive
+              </Button>
+              {driveStats && (
+                <div className="flex gap-2 text-xs">
+                  <Badge className="bg-emerald-100 text-emerald-800">{driveStats.mappes} mappé(s)</Badge>
+                  <Badge className="bg-amber-100 text-amber-800">{driveStats.aMapper} à mapper</Badge>
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}

@@ -7,6 +7,9 @@
   "host_permissions": [
     "https://www.carrefour.fr/*",
     "https://*.carrefour.fr/*",
+    "http://localhost:3000/*",
+    "http://127.0.0.1:3000/*",
+    "https://*.vercel.app/*",
     "http://localhost:8000/*",
     "http://127.0.0.1:8000/*",
     "https://*.up.railway.app/*"
@@ -19,6 +22,15 @@
     "service_worker": "background.js"
   },
   "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*",
+        "https://*.vercel.app/*"
+      ],
+      "js": ["bridge.js"],
+      "run_at": "document_idle"
+    },
     {
       "matches": ["https://www.carrefour.fr/*", "https://*.carrefour.fr/*"],
       "js": ["content.js"],
