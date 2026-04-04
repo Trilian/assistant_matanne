@@ -382,15 +382,29 @@ export default function PageCourses() {
       />
 
       {listeSelectionnee && (
-        <FiltreMagasins
-          compteurs={compteursMagasins}
-          magasinActif={magasinActif}
-          driveStats={driveStats}
-          onChangerMagasin={setMagasinActif}
-          onEnvoyerTelegram={handleEnvoyerTelegram}
-          onSyncDrive={handleSyncDrive}
-          enEnvoiTelegram={enEnvoiTelegram}
-        />
+        <>
+          <FiltreMagasins
+            compteurs={compteursMagasins}
+            magasinActif={magasinActif}
+            driveStats={driveStats}
+            onChangerMagasin={setMagasinActif}
+            onEnvoyerTelegram={handleEnvoyerTelegram}
+            onSyncDrive={handleSyncDrive}
+            enEnvoiTelegram={enEnvoiTelegram}
+          />
+
+          {magasinActif === "carrefour_drive" && (
+            <div className="rounded-lg border border-dashed bg-muted/30 px-4 py-3 text-sm">
+              <p className="font-medium">Guide rapide Carrefour Drive</p>
+              <ol className="mt-2 list-decimal space-y-1 pl-5 text-muted-foreground">
+                <li>Ajoute ou filtre tes articles sur <strong>Carrefour Drive</strong>.</li>
+                <li>Clique sur <strong>Ajouter au Drive</strong>.</li>
+                <li>Si un article est <strong>À mapper</strong>, choisis le bon produit Carrefour une fois.</li>
+                <li>Au clic sur <strong>Ajouter au panier</strong>, la correspondance est mémorisée automatiquement.</li>
+              </ol>
+            </div>
+          )}
+        </>
       )}
 
       <div className="grid gap-6 lg:grid-cols-3">

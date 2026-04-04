@@ -20,6 +20,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
 
+  if (message?.type === "REMAP_FROM_APP") {
+    forcerRemappage(message.payload || {})
+      .then((resultat) => sendResponse(resultat))
+      .catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+
   return false;
 });
 
@@ -94,6 +101,29 @@ async function lancerSync(articles) {
   }
 
   return { ouverts: articles.length };
+}
+
+async function forcerRemappage(payload) {
+  const article = payload?.article;
+  if (!article?.nom) {
+    throw new Error("Article manquant pour le remappage.");
+  }
+
+  await chrome.storage.local.set({
+    drivePendingSearchArticles: [article],
+    driveSyncQueue: [],
+  });
+
+  const query = encodeURIComponent(article.nom);
+  const ancre = `#assistant-matanne=${encodeURIComponent(article.nom)}`;
+  const url = `https://www.carrefour.fr/s?q=${query}${ancre}`;
+  await chrome.tabs.create({ url, active: true });
+
+  return {
+    ok: true,
+    recherches: 1,
+    remap: true,
+  };
 }
 
 async function ouvrirRecherches(articles) {

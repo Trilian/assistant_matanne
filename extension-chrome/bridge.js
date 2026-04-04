@@ -7,13 +7,18 @@ window.addEventListener("message", (event) => {
   }
 
   const data = event.data;
-  if (!data || data.source !== "assistant-matanne" || data.type !== "SYNC_CARREFOUR_DRIVE") {
+  if (!data || data.source !== "assistant-matanne") {
+    return;
+  }
+
+  const typeMessage = data.type === "REMAP_CARREFOUR_DRIVE" ? "REMAP_FROM_APP" : data.type === "SYNC_CARREFOUR_DRIVE" ? "SYNC_FROM_APP" : null;
+  if (!typeMessage) {
     return;
   }
 
   chrome.runtime.sendMessage(
     {
-      type: "SYNC_FROM_APP",
+      type: typeMessage,
       payload: data.payload || {},
     },
     (response) => {

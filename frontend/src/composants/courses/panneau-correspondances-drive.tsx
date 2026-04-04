@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Link2Off, RefreshCcw, Trash2 } from "lucide-react";
+import { ExternalLink, Link2, Link2Off, RefreshCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supprimerCorrespondanceDrive } from "@/bibliotheque/api/courses";
@@ -28,6 +28,37 @@ import { listerCorrespondancesDrive } from "@/bibliotheque/api/courses";
 type PanneauCorrespondancesDriveProps = {
   visible?: boolean;
 };
+
+function lancerRemappageDepuisExtension(correspondance: CorrespondanceDrive) {
+  if (typeof window === "undefined") {
+    toast.error("Le remappage n'est disponible que dans le navigateur.");
+    return;
+  }
+
+  const apiBaseUrl = `${window.location.origin}/api/v1`.replace("/connexion/api/v1", "/api/v1");
+  const apiToken = window.localStorage.getItem("access_token");
+
+  window.postMessage(
+    {
+      source: "assistant-matanne",
+      type: "REMAP_CARREFOUR_DRIVE",
+      payload: {
+        apiBaseUrl,
+        apiToken,
+        article: {
+          id: correspondance.id,
+          nom: correspondance.nom_article,
+          ingredient_id: correspondance.ingredient_id,
+          quantite: correspondance.quantite_par_defaut,
+          categorie: "carrefour_drive",
+        },
+      },
+    },
+    window.location.origin
+  );
+
+  toast.info(`Recherche Carrefour ouverte pour remapper « ${correspondance.nom_article} ».`);
+}
 
 export function PanneauCorrespondancesDrive({ visible = true }: PanneauCorrespondancesDriveProps) {
   const invalider = utiliserInvalidation();
@@ -66,6 +97,15 @@ export function PanneauCorrespondancesDrive({ visible = true }: PanneauCorrespon
         </Button>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 rounded-lg border border-dashed bg-muted/30 px-4 py-3 text-sm">
+          <p className="font-medium">Comment ça marche ?</p>
+          <ol className="mt-2 list-decimal space-y-1 pl-5 text-muted-foreground">
+            <li>Un premier choix manuel sur Carrefour crée la correspondance automatiquement.</li>
+            <li>Ensuite, l’article est ajouté directement au Drive sans re-choix.</li>
+            <li>Le bouton <strong>Forcer remappage</strong> relance une recherche si le produit a changé.</li>
+          </ol>
+        </div>
+
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Chargement des correspondances…</p>
         ) : !correspondances?.length ? (
@@ -118,6 +158,14 @@ export function PanneauCorrespondancesDrive({ visible = true }: PanneauCorrespon
                           Sans lien
                         </Button>
                       )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => lancerRemappageDepuisExtension(correspondance)}
+                      >
+                        <Link2 className="mr-1 h-4 w-4" />
+                        Forcer remappage
+                      </Button>
                       <Button
                         size="sm"
                         variant="destructive"
