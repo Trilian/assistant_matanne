@@ -26,6 +26,11 @@ vi.mock("@/bibliotheque/api/documents", () => ({
   creerDocument: vi.fn(),
   modifierDocument: vi.fn(),
   supprimerDocument: vi.fn(),
+  extraireDocumentOCR: vi.fn(),
+}));
+
+vi.mock("@/bibliotheque/api/ia-avancee", () => ({
+  analyserDocument: vi.fn(),
 }));
 
 function renderWithQuery(ui: React.ReactElement) {
@@ -50,5 +55,6 @@ describe("PageDocuments", () => {
   it("affiche le bouton ajouter", () => {
     renderWithQuery(<PageDocuments />);
     expect(screen.getByText("Ajouter")).toBeInTheDocument();
+    expect(screen.getByText(/préremplit le formulaire/i)).toBeInTheDocument();
   });
 });

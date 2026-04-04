@@ -34,6 +34,7 @@ import {
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { ZoneTableauResponsive } from "@/composants/ui/zone-tableau-responsive";
 import {
   Dialog,
@@ -521,13 +522,19 @@ export default function PageInventaire() {
               </div>
             ) : articlesFiltres.length === 0 ? (
               <Card>
-                <CardContent className="flex flex-col items-center gap-4 py-12">
-                  <Package className="h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground">Aucun article dans {e.label}</p>
-                  <Button variant="outline" onClick={() => setDialogueAjout(true)}>
-                    <Plus className="mr-1 h-4 w-4" />
-                    Ajouter un article
-                  </Button>
+                <CardContent className="py-6">
+                  <EtatVide
+                    Icone={Package}
+                    titre={`Aucun article dans ${e.label}`}
+                    description="Ajoute un premier produit pour suivre ton stock et les alertes de péremption."
+                    action={
+                      <Button variant="outline" onClick={() => setDialogueAjout(true)}>
+                        <Plus className="mr-1 h-4 w-4" />
+                        Ajouter un article
+                      </Button>
+                    }
+                    className="border-0 bg-muted/20 py-6"
+                  />
                 </CardContent>
               </Card>
             ) : (

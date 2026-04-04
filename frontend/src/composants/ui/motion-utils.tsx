@@ -1,6 +1,6 @@
 "use client";
 
-import { type HTMLMotionProps, type Variants, motion } from "framer-motion";
+import { type HTMLMotionProps, type Variants, motion, useReducedMotion } from "framer-motion";
 import { forwardRef, type ReactNode } from "react";
 
 // ═══════════════════════════════════════════════════════════
@@ -88,3 +88,41 @@ export const PopAnime = forwardRef<HTMLDivElement, PopAnimeProps>(
     );
   }
 );
+
+interface SectionRevealProps extends HTMLMotionProps<"section"> {
+  children: ReactNode;
+  delay?: number;
+  staggerChildren?: number;
+}
+
+export function SectionReveal({
+  children,
+  delay = 0,
+  staggerChildren = 0.04,
+  ...props
+}: SectionRevealProps) {
+  const reduireAnimations = useReducedMotion();
+
+  const variantesSection: Variants = {
+    hidden: {
+      opacity: 0,
+      y: reduireAnimations ? 0 : 10,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: reduireAnimations ? 0 : 0.24,
+        delay: reduireAnimations ? 0 : delay,
+        staggerChildren: reduireAnimations ? 0 : staggerChildren,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+  };
+
+  return (
+    <motion.section initial="hidden" animate="visible" variants={variantesSection} {...props}>
+      {children}
+    </motion.section>
+  );
+}

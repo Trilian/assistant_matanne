@@ -25,6 +25,7 @@ import {
 import { Switch } from "@/composants/ui/switch";
 import { Badge } from "@/composants/ui/badge";
 import { toast } from "sonner";
+import { ItemAnime, SectionReveal } from "@/composants/ui/motion-utils";
 import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
 import { configurerModePiloteAuto, obtenirModePiloteAuto } from "@/bibliotheque/api/avance";
 
@@ -65,58 +66,64 @@ export default function PageOutils() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">🔧 Outils</h1>
-        <p className="text-muted-foreground">
-          Chat IA, notes, météo et utilitaires
-        </p>
-      </div>
+      <SectionReveal>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">🔧 Outils</h1>
+          <p className="text-muted-foreground">
+            Chat IA, notes, météo et utilitaires
+          </p>
+        </div>
+      </SectionReveal>
 
-      <Card className="border-sky-300/60 bg-sky-50/50 dark:border-sky-900/50 dark:bg-sky-950/20">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Bot className="h-4 w-4 text-sky-600" />
-            Mode Pilote Automatique
-          </CardTitle>
-          <CardDescription>
-            Pilotage IA centralisé côté outils.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">Niveau: {modePilote?.niveau_autonomie ?? "validation_requise"}</Badge>
-            <span className="text-xs text-muted-foreground">Actions: {modePilote?.actions?.length ?? 0}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm">Actif</span>
-            <Switch
-              checked={Boolean(modePilote?.actif)}
-              disabled={basculeModePiloteEnCours}
-              onCheckedChange={(actif) => basculerModePilote(actif)}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <SectionReveal delay={0.04}>
+        <Card className="border-sky-300/60 bg-sky-50/50 dark:border-sky-900/50 dark:bg-sky-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Bot className="h-4 w-4 text-sky-600" />
+              Mode Pilote Automatique
+            </CardTitle>
+            <CardDescription>
+              Pilotage IA centralisé côté outils.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">Niveau: {modePilote?.niveau_autonomie ?? "validation_requise"}</Badge>
+              <span className="text-xs text-muted-foreground">Actions: {modePilote?.actions?.length ?? 0}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Actif</span>
+              <Switch
+                checked={Boolean(modePilote?.actif)}
+                disabled={basculeModePiloteEnCours}
+                onCheckedChange={(actif) => basculerModePilote(actif)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </SectionReveal>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {SECTIONS.map(({ titre, description, chemin, Icone }) => (
-          <Link key={chemin} href={chemin}>
-            <Card className="hover:bg-accent/50 transition-colors h-full">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-primary/10 p-2">
-                    <Icone className="h-5 w-5 text-primary" />
+      <SectionReveal delay={0.08} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {SECTIONS.map(({ titre, description, chemin, Icone }, index) => (
+          <ItemAnime key={chemin} index={index}>
+            <Link href={chemin}>
+              <Card className="h-full transition-all hover:-translate-y-0.5 hover:bg-accent/50 hover:shadow-md">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-primary/10 p-2">
+                      <Icone className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">{titre}</CardTitle>
+                      <CardDescription className="text-sm">{description}</CardDescription>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle className="text-base">{titre}</CardTitle>
-                    <CardDescription className="text-sm">{description}</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-            </Card>
-          </Link>
+                </CardHeader>
+              </Card>
+            </Link>
+          </ItemAnime>
         ))}
-      </div>
+      </SectionReveal>
     </div>
   );
 }

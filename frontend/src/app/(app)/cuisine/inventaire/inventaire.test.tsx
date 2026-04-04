@@ -9,7 +9,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/cuisine/inventaire",
 }));
 
-const mockArticles = [
+let articlesCourants = [
   { id: 1, nom: "Tomates", categorie: "Légumes", quantite: 5, unite: "kg", date_peremption: "2025-02-01" },
   { id: 2, nom: "Lait", categorie: "Laitier", quantite: 2, unite: "L", date_peremption: "2025-01-20" },
 ];
@@ -17,7 +17,7 @@ const mockArticles = [
 vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: vi.fn().mockImplementation((key: string[]) => {
     if (key.includes("alertes")) return { data: [], isLoading: false };
-    return { data: mockArticles, isLoading: false };
+    return { data: articlesCourants, isLoading: false };
   }),
   utiliserMutation: () => ({ mutate: vi.fn(), isPending: false }),
   utiliserInvalidation: () => vi.fn(),
@@ -36,7 +36,13 @@ function renderWithQuery(ui: React.ReactElement) {
 }
 
 describe("PageInventaire", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    articlesCourants = [
+      { id: 1, nom: "Tomates", categorie: "Légumes", quantite: 5, unite: "kg", date_peremption: "2025-02-01" },
+      { id: 2, nom: "Lait", categorie: "Laitier", quantite: 2, unite: "L", date_peremption: "2025-01-20" },
+    ];
+  });
 
   it("affiche le titre Inventaire", () => {
     renderWithQuery(<PageInventaire />);
@@ -55,5 +61,13 @@ describe("PageInventaire", () => {
   it("affiche les catégories de filtre", () => {
     renderWithQuery(<PageInventaire />);
     expect(screen.getAllByText("Tous").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("affiche un état vide guidé quand l'inventaire est vide", () => {
+    articlesCourants = [];
+    renderWithQuery(<PageInventaire />);
+
+    expect(screen.getByText(/Aucun article dans/i)).toBeInTheDocument();
+    expect(screen.getByText(/Ajoute un premier produit pour suivre ton stock/i)).toBeInTheDocument();
   });
 });

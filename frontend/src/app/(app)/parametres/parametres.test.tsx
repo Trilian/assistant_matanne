@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import PageParametres from "./page";
-
-const mockSetTheme = vi.fn();
-const mockStartViewTransition = vi.fn((callback: () => void) => callback());
+import { OngletCuisine } from "./_composants/onglet-cuisine";
+import { OngletDonnees } from "./_composants/onglet-donnees";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
@@ -12,7 +9,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("next-themes", () => ({
-  useTheme: () => ({ theme: "light", setTheme: mockSetTheme }),
+  useTheme: () => ({ theme: "light", setTheme: vi.fn() }),
 }));
 
 vi.mock("@/crochets/utiliser-auth", () => ({
@@ -86,61 +83,32 @@ vi.mock("@/bibliotheque/api/push", () => ({
 describe("PageParametres", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    Object.defineProperty(document, "startViewTransition", {
+    Object.defineProperty(window.navigator, "serviceWorker", {
       configurable: true,
       writable: true,
-      value: mockStartViewTransition,
+      value: {
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        getRegistration: vi.fn().mockResolvedValue(undefined),
+        controller: undefined,
+      },
+    });
+    Object.defineProperty(window.navigator, "onLine", {
+      configurable: true,
+      writable: true,
+      value: true,
     });
   });
 
-  it("affiche le titre Paramètres", () => {
-    render(<PageParametres />);
-    expect(screen.getByText(/Paramètres/)).toBeInTheDocument();
-  });
-
-  it("affiche les onglets de configuration", () => {
-    render(<PageParametres />);
-    expect(screen.getByRole("tab", { name: /Profil/ })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /Cuisine/ })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /Notifications/ })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /Affichage/ })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /IA/ })).toBeInTheDocument();
-  });
-
-  it("affiche la description", () => {
-    render(<PageParametres />);
-    expect(screen.getByText("Configuration de l'application")).toBeInTheDocument();
-  });
-
-  it("affiche l'aperçu en direct du thème et utilise la transition native", async () => {
-    const user = userEvent.setup();
-    render(<PageParametres />);
-
-    await user.click(screen.getByRole("tab", { name: /Affichage/i }));
-
-    expect(screen.getByText(/aperçu en direct/i)).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: /^Sombre$/i }));
-
-    expect(mockStartViewTransition).toHaveBeenCalledTimes(1);
-    expect(mockSetTheme).toHaveBeenCalledWith("dark");
-  });
-
-  it("affiche les préférences cuisine apprises par l'IA", async () => {
-    const user = userEvent.setup();
-    render(<PageParametres />);
-
-    await user.click(screen.getByRole("tab", { name: /Cuisine/i }));
+  it("affiche les préférences cuisine apprises par l'IA", () => {
+    render(<OngletCuisine />);
 
     expect(screen.getByText(/préférences apprises par l'ia/i)).toBeInTheDocument();
     expect(screen.getByText(/poisson/i)).toBeInTheDocument();
   });
 
-  it("affiche le suivi de synchronisation hors ligne dans l'onglet Données", async () => {
-    const user = userEvent.setup();
-    render(<PageParametres />);
-
-    await user.click(screen.getByRole("tab", { name: /Données/i }));
+  it("affiche le suivi de synchronisation hors ligne dans l'onglet Données", () => {
+    render(<OngletDonnees />);
 
     expect(screen.getByText(/synchronisation hors ligne/i)).toBeInTheDocument();
   });

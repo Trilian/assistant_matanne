@@ -62,6 +62,7 @@ import { BankrollWidget } from "@/composants/jeux/bankroll-widget";
 import { DetectionPatternModal } from "@/composants/jeux/detection-pattern-modal";
 import { StatsPersonnelles } from "@/composants/jeux/stats-personnelles";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { utiliserAuth } from "@/crochets/utiliser-auth";
 
 const GraphiqueROI = dynamic(
@@ -614,7 +615,12 @@ export default function ParisPage() {
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
           ) : paris.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">Aucun pari trouvé</p>
+            <EtatVide
+              Icone={TrendingUp}
+              titre="Aucun pari trouvé"
+              description="Crée un premier pari depuis le tableau expert ou ajuste le filtre de statut."
+              className="border-0 bg-muted/20 py-8"
+            />
           ) : (
             <Table>
               <TableHeader>

@@ -1087,7 +1087,7 @@
 
       <div class="card" style="border-color:rgba(245,158,11,.35);background:rgba(15,23,42,.45)">
         <h3>Statut d'exécution — Mise à jour du 4 avril 2026</h3>
-        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 3 bien engagée</span> Les vagues UI/UX et performance avancent : frise interactive <code>repas → inventaire → courses</code> sur <code>Ma Semaine</code>, composant <code>SkeletonPage</code> factorisé, badges de notification par module, palette visuelle cohérente sur la coquille applicative, et premier code splitting dashboard via <code>next/dynamic</code> pour les widgets visuels les plus lourds.</p>
+        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 3 bien engagée</span> Les vagues UI/UX et performance avancent : frise interactive <code>repas → inventaire → courses</code> sur <code>Ma Semaine</code>, composant <code>SkeletonPage</code> factorisé, badges de notification par module, palette visuelle cohérente sur la coquille applicative, code splitting dashboard via <code>next/dynamic</code> pour les widgets visuels les plus lourds, harmonisation des états vides sur les écrans Cuisine / Jeux prioritaires, et maintenant des animations d’apparition plus cohérentes sur les hubs Outils / Préférences IA / IA avancée.</p>
         <table>
           <tr><th>Sprint</th><th>Statut</th><th>Livré</th><th>Suite</th></tr>
           <tr>
@@ -1120,6 +1120,24 @@
             <td><code>frontend/src/app/(app)/page.tsx</code> charge désormais à la demande le comparateur temporel, les sparklines et les jauges de score via <code>next/dynamic</code>, avec sécurisation du journal d'actions pour supprimer les warnings React liés aux clés manquantes.</td>
             <td>Poursuivre si besoin avec une extraction plus large des widgets secondaires.</td>
           </tr>
+          <tr>
+            <td>S9 — Tables responsive mobile</td>
+            <td><span class="badge b-ok">Lancé</span></td>
+            <td>Le nouveau composant <code>frontend/src/composants/ui/zone-tableau-responsive.tsx</code> ajoute une aide de balayage mobile et une largeur scrollable claire sur les vues denses prioritaires : <code>cuisine/inventaire</code> et <code>tableau-matchs-expert</code>.</td>
+            <td>Étendre progressivement ce pattern aux autres tableaux métier lourds.</td>
+          </tr>
+          <tr>
+            <td>S10 — Empty states cohérents</td>
+            <td><span class="badge b-ok">Lancé</span></td>
+            <td><code>EtatVide</code> a été déployé sur plusieurs écrans clés : <code>cuisine/inventaire</code>, <code>cuisine/nutrition</code>, <code>jeux</code>, <code>jeux/paris</code> et <code>tableau-matchs-expert</code> avec messages guidés et CTA homogènes.</td>
+            <td>Poursuivre le même nettoyage sur les vues secondaires restantes.</td>
+          </tr>
+          <tr>
+            <td>S11 — Micro-animations hubs</td>
+            <td><span class="badge b-ok">Lancé</span></td>
+            <td>Le wrapper <code>SectionReveal</code> a été ajouté à <code>motion-utils.tsx</code> puis appliqué sur <code>/outils</code>, <code>/outils/preferences-apprises</code> et <code>/ia-avancee</code> avec apparition progressive des sections/cartes.</td>
+            <td>Étendre ensuite ces reveal sections aux hubs secondaires si besoin.</td>
+          </tr>
         </table>
 
         <h4 style="margin-top:16px;">Checklist réelle</h4>
@@ -1131,6 +1149,9 @@
           <li>✅ La palette visuelle par module est désormais cohérente dans la coquille applicative (en-tête, fil d'Ariane, navigation mobile).</li>
           <li>✅ Les widgets dashboard les plus coûteux sont maintenant chargés à la demande : comparateur temporel, sparklines et jauges de score.</li>
           <li>✅ Le widget <code>Journal actions dashboard</code> gère désormais proprement les cas de <code>event_id</code>/<code>timestamp</code> manquants, sans warning React au rendu.</li>
+          <li>✅ Les tableaux métier prioritaires exposent maintenant une aide mobile explicite pour balayer horizontalement et consulter toutes les colonnes.</li>
+          <li>✅ Les écrans vides prioritaires Cuisine / Jeux utilisent désormais un pattern commun via <code>EtatVide</code> avec message explicite et action de rebond.</li>
+          <li>✅ Les hubs <code>Outils</code>, <code>Préférences IA</code> et <code>IA avancée</code> bénéficient maintenant d’une apparition progressive cohérente des sections et cartes via <code>SectionReveal</code>.</li>
         </ul>
       </div>
 
@@ -1139,7 +1160,7 @@
         <tr><th>Tâche</th><th>Détails</th></tr>
         <tr><td>Pattern unifié skeleton</td><td><code>SkeletonPage</code> réutilisable livré et branché sur les vues Maison prioritaires ; extension progressive au reste du front</td></tr>
         <tr><td>Error boundaries cohérents</td><td>Standardiser les pages d'erreur par module</td></tr>
-        <tr><td>Empty states</td><td>Design cohérent pour les états vides (pas de données)</td></tr>
+        <tr><td>Empty states</td><td>Première vague harmonisée via <code>EtatVide</code> sur les vues Cuisine / Jeux prioritaires ; extension progressive au reste du front</td></tr>
       </table>
 
       <h4 style="color:var(--yellow);margin-top:24px;margin-bottom:12px;">3.2 — Nouvelles Visualisations (Impact: UI +1) <span class="badge b-ok">Renforcé</span></h4>
@@ -1161,9 +1182,9 @@
       <table>
         <tr><th>Tâche</th><th>Détails</th><th>Impact</th></tr>
         <tr><td>Lazy loading dashboard widgets</td><td>Première vague livrée : code splitting des widgets visuels lourds du dashboard via <code>next/dynamic</code>, puis nettoyage du widget journal pour éliminer les warnings React lors des tests</td><td><span class="badge b-ok">✅ En cours / renforcé</span></td></tr>
-        <tr><td>Tables responsive</td><td>Horizontal scroll ou collapse sur mobile pour toutes les tables</td><td><span class="badge b-warn">Moyenne</span></td></tr>
+        <tr><td>Tables responsive</td><td>Première vague livrée : composant <code>ZoneTableauResponsive</code> + aide de balayage mobile branchée sur <code>inventaire</code> et <code>tableau-matchs-expert</code></td><td><span class="badge b-ok">✅ Lancé</span></td></tr>
         <tr><td>Palette de couleurs cohérente par module</td><td>Couleur primaire et label actif désormais visibles sur l'en-tête, le fil d'Ariane et la navigation mobile</td><td><span class="badge b-ok">✅ Livré</span></td></tr>
-        <tr><td>Micro-animations transitions pages</td><td>Framer Motion page transitions cohérentes</td><td><span class="badge b-warn">Moyenne</span></td></tr>
+        <tr><td>Micro-animations transitions pages</td><td>Première vague livrée : composant <code>SectionReveal</code> + animations progressives sur les hubs <code>Outils</code>, <code>Préférences IA</code> et <code>IA avancée</code></td><td><span class="badge b-ok">✅ Lancé</span></td></tr>
       </table>
 
       <h4 style="color:var(--yellow);margin-top:24px;margin-bottom:12px;">3.4 — Features UI Manquantes (Impact: UI +0.5)</h4>
@@ -1299,7 +1320,7 @@
 
       <div class="card" style="border-color:rgba(168,85,247,.35);background:rgba(15,23,42,.45)">
         <h3>Statut d'exécution — Mise à jour du 4 avril 2026</h3>
-        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 5 livrée sur les priorités UX IA</span> Les fondations IA/automations étaient déjà présentes dans le backend, et le sprint a été poursuivi avec la mise en production visible du panneau <code>Analyse IA de la semaine</code> sur <code>frontend/src/app/(app)/cuisine/planning/page.tsx</code> ainsi que de la page <code>/outils/preferences-apprises</code>, branchés sur des usages concrets : variété, équilibre nutritionnel, simplification de la charge cuisine et visualisation des goûts réellement appris par l&apos;IA.</p>
+        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 5 livrée sur les priorités UX IA</span> Les fondations IA/automations étaient déjà présentes dans le backend, et le sprint couvre désormais trois usages visibles : le panneau <code>Analyse IA de la semaine</code> sur <code>frontend/src/app/(app)/cuisine/planning/page.tsx</code>, la page <code>/outils/preferences-apprises</code> et l&apos;auto-catégorisation des documents depuis <code>/famille/documents</code> avec préremplissage du formulaire après analyse photo.</p>
         <table>
           <tr><th>Sprint</th><th>Statut</th><th>Livré</th><th>Reste à faire</th></tr>
           <tr>
@@ -1315,10 +1336,10 @@
             <td>Optionnel : pousser ensuite les mêmes insights vers Telegram ou vers le dashboard global.</td>
           </tr>
           <tr>
-            <td>S10 — Préférences apprises visibles</td>
+            <td>S10 — Préférences + documents intelligents</td>
             <td><span class="badge b-ok">Terminé (priorité UX)</span></td>
-            <td>Page <code>/outils/preferences-apprises</code> ajoutée, avec affichage des favoris / évitements détectés et liens rapides depuis les hubs <code>Outils</code> et <code>IA Avancée</code>.</td>
-            <td>Reste volontairement hors blocage : auto-catégorisation documents au dépôt, semis/récolte prédictifs, fatigue Garmin du soir, doublons recettes.</td>
+            <td>Page <code>/outils/preferences-apprises</code> ajoutée, avec affichage des favoris / évitements détectés, et flux <code>/famille/documents</code> enrichi : analyse photo, catégorie suggérée et formulaire prérempli.</td>
+            <td>Reste volontairement hors blocage : semis/récolte prédictifs, fatigue Garmin du soir, doublons recettes et règles Si→Alors secondaires.</td>
           </tr>
         </table>
 
@@ -1331,8 +1352,10 @@
           <li>✅ Nouvelle carte <code>Analyse IA de la semaine</code> sur le planning cuisine avec score variété, quota fruits/légumes et gain de temps estimé.</li>
           <li>✅ Nouvelle page <code>frontend/src/app/(app)/outils/preferences-apprises/page.tsx</code> pour exposer les préférences apprises par l&apos;IA (favoris, évitements, ajustements suggérés).</li>
           <li>✅ Les hubs <code>frontend/src/app/(app)/outils/page.tsx</code> et <code>frontend/src/app/(app)/ia-avancee/page.tsx</code> pointent désormais vers cette vue dédiée.</li>
-          <li>✅ Vérification backend effectuée : <code>pytest tests/api/test_routes_ia_modules.py tests/api/test_webhooks_telegram_endpoints.py tests/api/test_webhooks_telegram_callbacks.py -q</code> → <code>60 passed in 3.86s</code>.</li>
-          <li>✅ Vérification frontend effectuée : <code>npm run lint -- "src/app/(app)/outils/page.tsx" "src/app/(app)/outils/preferences-apprises/page.tsx" "src/app/(app)/ia-avancee/page.tsx" "src/app/(app)/outils/outils-hub.test.tsx"</code> + <code>npx vitest run "src/app/(app)/outils/outils-hub.test.tsx"</code> → <code>3 passed</code>, aucune erreur ESLint.</li>
+          <li>✅ <code>frontend/src/app/(app)/famille/documents/page.tsx</code> utilise maintenant l&apos;analyse IA pour suggérer la catégorie d&apos;un document et préremplir le formulaire avant création.</li>
+          <li>✅ <code>POST /api/v1/documents</code> applique une heuristique de catégorie côté backend lorsque le document arrive encore en <code>administratif</code> par défaut.</li>
+          <li>✅ Vérification backend effectuée : <code>pytest tests/api/test_routes_documents.py tests/api/test_routes_ia_modules.py tests/api/test_webhooks_telegram_endpoints.py tests/api/test_webhooks_telegram_callbacks.py -q</code> → <code>73 passed in 5.11s</code>.</li>
+          <li>✅ Vérification frontend effectuée : <code>npm run lint -- "src/app/(app)/famille/documents/page.tsx" "src/app/(app)/famille/documents/documents.test.tsx" "src/bibliotheque/api/documents.ts"</code> + <code>npx vitest run "src/app/(app)/famille/documents/documents.test.tsx"</code> → <code>3 passed</code>, aucune erreur ESLint.</li>
         </ul>
       </div>
 

@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { ZoneTableauResponsive } from "@/composants/ui/zone-tableau-responsive";
 import { CSVLink } from "react-csv";
 
@@ -329,12 +330,17 @@ export function TableauMatchsExpert({
           <p className="text-sm text-muted-foreground">Erreur lors du chargement des matchs</p>
         </div>
       ) : matchs.length === 0 ? (
-        <div className="text-center py-12 border rounded-lg bg-muted/20">
-          <p className="text-muted-foreground">Aucun match trouvé avec ces filtres</p>
-          <Button variant="link" onClick={reinitialiserFiltres} className="mt-2">
-            Réinitialiser les filtres
-          </Button>
-        </div>
+        <EtatVide
+          Icone={AlertTriangle}
+          titre="Aucun match trouvé"
+          description="Ajuste les filtres ou relance la recherche pour élargir la sélection."
+          action={
+            <Button variant="outline" size="sm" onClick={reinitialiserFiltres}>
+              Réinitialiser les filtres
+            </Button>
+          }
+          className="border-muted-foreground/20 bg-muted/20 py-12"
+        />
       ) : (
         <ZoneTableauResponsive containerClassName="border rounded-lg overflow-auto">
           <table className="w-full min-w-[900px]">

@@ -19,6 +19,7 @@ import {
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { ItemAnime, SectionReveal } from "@/composants/ui/motion-utils";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirPreferencesApprises } from "@/bibliotheque/api/avance";
 
@@ -40,23 +41,26 @@ export default function PagePreferencesApprises() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Brain className="h-6 w-6 text-violet-600" />
-            Préférences IA apprises
-          </h1>
-          <p className="text-muted-foreground">
-            Visualisez ce que l&apos;IA retient réellement des goûts et habitudes de la famille.
-          </p>
+      <SectionReveal>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+              <Brain className="h-6 w-6 text-violet-600" />
+              Préférences IA apprises
+            </h1>
+            <p className="text-muted-foreground">
+              Visualisez ce que l&apos;IA retient réellement des goûts et habitudes de la famille.
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => void refetch()} disabled={isFetching}>
+            <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+            Actualiser
+          </Button>
         </div>
-        <Button variant="outline" size="sm" onClick={() => void refetch()} disabled={isFetching}>
-          <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-          Actualiser
-        </Button>
-      </div>
+      </SectionReveal>
 
-      <Card className="border-violet-300/60 bg-violet-50/40 dark:border-violet-900/50 dark:bg-violet-950/10">
+      <SectionReveal delay={0.04}>
+        <Card className="border-violet-300/60 bg-violet-50/40 dark:border-violet-900/50 dark:bg-violet-950/10">
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-violet-600" />
@@ -92,10 +96,12 @@ export default function PagePreferencesApprises() {
             </>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      </SectionReveal>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
+      <SectionReveal delay={0.08} className="grid gap-4 lg:grid-cols-2">
+        <ItemAnime>
+          <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Heart className="h-4 w-4 text-rose-500" />
@@ -120,9 +126,11 @@ export default function PagePreferencesApprises() {
               <p className="text-sm text-muted-foreground">Pas encore assez de signaux positifs pour dégager un favori stable.</p>
             )}
           </CardContent>
-        </Card>
+          </Card>
+        </ItemAnime>
 
-        <Card>
+        <ItemAnime index={1}>
+          <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <TriangleAlert className="h-4 w-4 text-amber-500" />
@@ -147,10 +155,12 @@ export default function PagePreferencesApprises() {
               <p className="text-sm text-muted-foreground">Aucun signal négatif stable n&apos;a été détecté pour le moment.</p>
             )}
           </CardContent>
-        </Card>
-      </div>
+          </Card>
+        </ItemAnime>
+      </SectionReveal>
 
-      <Card>
+      <SectionReveal delay={0.12}>
+        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <ChefHat className="h-4 w-4 text-emerald-600" />
@@ -182,7 +192,8 @@ export default function PagePreferencesApprises() {
             </Button>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </SectionReveal>
     </div>
   );
 }

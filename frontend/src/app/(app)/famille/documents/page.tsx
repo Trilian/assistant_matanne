@@ -42,6 +42,7 @@ import {
 } from "@/bibliotheque/api/documents";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import { toast } from "sonner";
+import { analyserDocument, type AnalyseDocumentPhotoResponse } from "@/bibliotheque/api/ia-avancee";
 import type { ObjetDonnees } from "@/types/commun";
 
 const CATEGORIES = [
@@ -59,6 +60,33 @@ const FORM_INITIAL: CreerDocumentDTO = {
   notes: "",
 };
 
+function normaliserCategorieDocument(categorie?: string | null): string {
+  const valeur = (categorie ?? "administratif").toLowerCase();
+  if (valeur.includes("sant") || valeur.includes("ordonnance") || valeur.includes("medical")) {
+    return "sante";
+  }
+  if (
+    valeur.includes("maison") ||
+    valeur.includes("facture") ||
+    valeur.includes("garantie") ||
+    valeur.includes("travaux") ||
+    valeur.includes("energie")
+  ) {
+    return "maison";
+  }
+  return "administratif";
+}
+
+function construireNotesDepuisAnalyse(resultat: AnalyseDocumentPhotoResponse): string {
+  const lignes = [
+    resultat.emetteur ? `Émetteur : ${resultat.emetteur}` : null,
+    resultat.montant != null ? `Montant : ${resultat.montant} €` : null,
+    ...(resultat.informations_cles ?? []).slice(0, 4),
+  ].filter(Boolean);
+
+  return lignes.join(" • ");
+}
+
 export default function PageDocuments() {
   const [categorieFiltre, setCategorieFiltre] = useState<string | undefined>();
   const [recherche, setRecherche] = useState("");
@@ -67,6 +95,7 @@ export default function PageDocuments() {
   const [form, setForm] = useState<CreerDocumentDTO>(FORM_INITIAL);
   const [scanEnCours, setScanEnCours] = useState(false);
   const [resultatsOCR, setResultatsOCR] = useState<ObjetDonnees | null>(null);
+  const [analyseIA, setAnalyseIA] = useState<AnalyseDocumentPhotoResponse | null>(null);
 
   const invalider = utiliserInvalidation();
 
@@ -78,7 +107,15 @@ export default function PageDocuments() {
   const mutationCreer = utiliserMutation(
     (dto: CreerDocumentDTO) => creerDocument(dto),
     {
-      onSuccess: () => { invalider(["documents"]); fermerDialog(); toast.success("Document créé"); },
+      onSuccess: (resultat) => {
+        invalider(["documents"]);
+        fermerDialog();
+        if (resultat?.categorie_auto_detectee && resultat.categorie_suggeree) {
+          toast.success(`Document créé — catégorie suggérée : ${resultat.categorie_suggeree}`);
+        } else {
+          toast.success("Document créé");
+        }
+      },
       onError: () => toast.error("Erreur lors de la création"),
     }
   );
@@ -102,11 +139,15 @@ export default function PageDocuments() {
 
   function ouvrirCreation() {
     setEnEdition(null);
+    setAnalyseIA(null);
+    setResultatsOCR(null);
     setForm(FORM_INITIAL);
     setDialogOuvert(true);
   }
 
   function ouvrirEdition(doc: DocumentFamille) {
+    setAnalyseIA(null);
+    setResultatsOCR(null);
     setEnEdition(doc);
     setForm({
       titre: doc.titre,
@@ -127,12 +168,43 @@ export default function PageDocuments() {
   async function scannerDocument(fichier: File) {
     setScanEnCours(true);
     setResultatsOCR(null);
+    setAnalyseIA(null);
     try {
-      const res = await extraireDocumentOCR(fichier);
-      setResultatsOCR(res.donnees);
-      toast.success("Document scanné avec succès");
+      const analyse = await analyserDocument(fichier);
+      const categorieNormalisee = normaliserCategorieDocument(
+        analyse.categorie_suggeree || analyse.type_document
+      );
+      const notesAnalyse = construireNotesDepuisAnalyse(analyse);
+
+      setAnalyseIA(analyse);
+      setForm({
+        ...FORM_INITIAL,
+        titre: analyse.titre || fichier.name.replace(/\.[^.]+$/, ""),
+        categorie: categorieNormalisee,
+        date_document: analyse.date_document ?? "",
+        notes: notesAnalyse,
+      });
+      setDialogOuvert(true);
+      toast.success(`Analyse terminée — catégorie suggérée : ${categorieNormalisee}`);
     } catch {
-      toast.error("Erreur lors du scan du document");
+      try {
+        const res = await extraireDocumentOCR(fichier);
+        setResultatsOCR(res.donnees);
+        setForm((actuel) => ({
+          ...actuel,
+          titre: actuel.titre || fichier.name.replace(/\.[^.]+$/, ""),
+          notes:
+            actuel.notes ||
+            Object.values(res.donnees ?? {})
+              .filter((valeur) => typeof valeur === "string" || typeof valeur === "number")
+              .slice(0, 4)
+              .join(" • "),
+        }));
+        setDialogOuvert(true);
+        toast.success("Document scanné avec succès");
+      } catch {
+        toast.error("Erreur lors du scan du document");
+      }
     } finally {
       setScanEnCours(false);
     }
@@ -163,6 +235,9 @@ export default function PageDocuments() {
           <p className="text-muted-foreground">
             Stockage et gestion des documents familiaux
           </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Le bouton <strong>Analyser</strong> propose maintenant une catégorie IA et préremplit le formulaire.
+          </p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -189,13 +264,50 @@ export default function PageDocuments() {
         </div>
       </div>
 
-      {/* Résultats OCR */}
+      {/* Résultats IA / OCR */}
+      {analyseIA && (
+        <Card className="border-violet-500/30 bg-violet-50/50 dark:bg-violet-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <ScanLine className="h-4 w-4 text-violet-500" />
+              Suggestion IA prête
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              <Badge>{normaliserCategorieDocument(analyseIA.categorie_suggeree || analyseIA.type_document)}</Badge>
+              <Badge variant="outline">{analyseIA.type_document}</Badge>
+            </div>
+            <div className="text-sm space-y-1">
+              <p><strong>Titre suggéré :</strong> {analyseIA.titre}</p>
+              {analyseIA.emetteur && <p><strong>Émetteur :</strong> {analyseIA.emetteur}</p>}
+              {analyseIA.montant != null && <p><strong>Montant :</strong> {analyseIA.montant} €</p>}
+            </div>
+            {analyseIA.actions_suggerees?.length > 0 && (
+              <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
+                {analyseIA.actions_suggerees.slice(0, 3).map((action) => (
+                  <li key={action}>{action}</li>
+                ))}
+              </ul>
+            )}
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => setDialogOuvert(true)}>
+                Ouvrir le formulaire prérempli
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setAnalyseIA(null)}>
+                Masquer la suggestion
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {resultatsOCR && (
         <Card className="border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/20">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <ScanLine className="h-4 w-4 text-blue-500" />
-              Résultats de scan
+              Résultats OCR bruts
             </CardTitle>
           </CardHeader>
           <CardContent>

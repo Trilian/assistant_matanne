@@ -4,6 +4,7 @@ Tests pour src/api/routes/documents.py
 Tests unitaires pour les routes documents famille.
 """
 
+from contextlib import contextmanager
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -82,6 +83,37 @@ class TestRoutesDocuments:
         """POST /api/v1/documents existe."""
         response = client.post("/api/v1/documents", json=DOCUMENT_CREATE)
         assert response.status_code in (200, 201, 422, 500)
+
+    def test_creer_document_auto_categorise_depuis_titre(self, client):
+        """Le backend suggère une catégorie pertinente lors de la création."""
+        session = MagicMock()
+        capture = {}
+
+        def _add(doc):
+            capture["doc"] = doc
+            doc.id = 42
+
+        session.add.side_effect = _add
+
+        @contextmanager
+        def _ctx():
+            yield session
+
+        with patch("src.api.routes.documents.executer_avec_session", _ctx):
+            response = client.post(
+                "/api/v1/documents",
+                json={
+                    "titre": "Ordonnance Jules",
+                    "categorie": "administratif",
+                    "membre_famille": "Jules",
+                    "notes": "Consultation pediatre et renouvellement traitement",
+                },
+            )
+
+        assert response.status_code == 201
+        assert capture["doc"].categorie == "sante"
+        assert response.json()["categorie_suggeree"] == "sante"
+        assert response.json()["categorie_auto_detectee"] is True
 
     def test_modifier_document_endpoint(self, client):
         """PATCH /api/v1/documents/{id} existe."""

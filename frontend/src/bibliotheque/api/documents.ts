@@ -44,6 +44,14 @@ export interface DocumentGarantieObjetResult {
   message?: string;
 }
 
+export interface DocumentMutationResult {
+  message: string;
+  id: number;
+  categorie_suggeree?: string;
+  categorie_auto_detectee?: boolean;
+  tags_suggeres?: string[];
+}
+
 export async function listerDocuments(
   categorie?: string,
   search?: string
@@ -55,16 +63,16 @@ export async function listerDocuments(
   return data;
 }
 
-export async function creerDocument(dto: CreerDocumentDTO): Promise<DocumentFamille> {
-  const { data } = await clientApi.post("/documents", dto);
+export async function creerDocument(dto: CreerDocumentDTO): Promise<DocumentMutationResult> {
+  const { data } = await clientApi.post<DocumentMutationResult>("/documents", dto);
   return data;
 }
 
 export async function modifierDocument(
   id: number,
   dto: Partial<CreerDocumentDTO>
-): Promise<DocumentFamille> {
-  const { data } = await clientApi.patch(`/documents/${id}`, dto);
+): Promise<DocumentMutationResult> {
+  const { data } = await clientApi.patch<DocumentMutationResult>(`/documents/${id}`, dto);
   return data;
 }
 

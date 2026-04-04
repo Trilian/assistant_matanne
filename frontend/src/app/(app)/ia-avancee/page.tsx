@@ -11,6 +11,7 @@ import {
   obtenirRecommandationsEnergie,
   obtenirSuggestionsProactives,
 } from '@/bibliotheque/api/ia-avancee'
+import { ItemAnime, SectionReveal } from '@/composants/ui/motion-utils'
 
 const OUTILS = [
   { titre: 'Suggestions achats', description: 'Historique de consommation et réapprovisionnement.', chemin: '/ia-avancee/suggestions-achats', icone: '🛒' },
@@ -39,18 +40,21 @@ export default function IAAvanceePage() {
 
   return (
     <div className="space-y-6 pb-8">
-      <div className="space-y-3 rounded-lg border border-amber-200 bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 p-6">
-        <div className="flex items-center gap-3">
-          <Sparkles className="h-8 w-8 text-amber-600" />
-          <div>
-            <h1 className="text-3xl font-bold">IA Avancée</h1>
-            <p className="text-muted-foreground">Un hub de 14 outils IA contextuels réellement actionnables.</p>
+      <SectionReveal>
+        <div className="space-y-3 rounded-lg border border-amber-200 bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 p-6">
+          <div className="flex items-center gap-3">
+            <Sparkles className="h-8 w-8 text-amber-600" />
+            <div>
+              <h1 className="text-3xl font-bold">IA Avancée</h1>
+              <p className="text-muted-foreground">Un hub de 14 outils IA contextuels réellement actionnables.</p>
+            </div>
           </div>
         </div>
-      </div>
+      </SectionReveal>
 
       {suggestions && suggestions.suggestions.length > 0 && (
-        <Card className="border-amber-200 bg-amber-50/70">
+        <SectionReveal delay={0.04}>
+          <Card className="border-amber-200 bg-amber-50/70">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-amber-900"><AlertTriangle className="h-5 w-5" /> Suggestions proactives</CardTitle>
           </CardHeader>
@@ -61,39 +65,69 @@ export default function IAAvanceePage() {
               ))}
             </ul>
           </CardContent>
-        </Card>
+          </Card>
+        </SectionReveal>
       )}
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><TrendingUp className="h-4 w-4" /> Dépenses prévues</CardTitle></CardHeader>
-          <CardContent><div className="text-3xl font-bold">{depenses ? `${depenses.prevision_fin_mois.toFixed(0)} €` : '—'}</div><p className="text-xs text-muted-foreground">Projection de fin de mois</p></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Zap className="h-4 w-4" /> Recos énergie</CardTitle></CardHeader>
-          <CardContent><div className="text-3xl font-bold">{energie?.recommandations.length ?? 0}</div><p className="text-xs text-muted-foreground">Actions priorisées</p></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><AlertTriangle className="h-4 w-4" /> Risques pannes</CardTitle></CardHeader>
-          <CardContent><div className="text-3xl font-bold">{pannes?.predictions.length ?? 0}</div><p className="text-xs text-muted-foreground">Equipements surveillés</p></CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {OUTILS.map((outil) => (
-          <Card key={outil.chemin} className="transition-shadow hover:shadow-md">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg"><span className="text-2xl">{outil.icone}</span>{outil.titre}</CardTitle>
-              <CardDescription>{outil.description}</CardDescription>
+      <SectionReveal delay={0.08} className="grid gap-4 md:grid-cols-3">
+        <ItemAnime>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <TrendingUp className="h-4 w-4" /> Dépenses prévues
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <Button asChild className="w-full">
-                <Link href={outil.chemin}>Ouvrir l’outil</Link>
-              </Button>
+              <div className="text-3xl font-bold">{depenses ? `${depenses.prevision_fin_mois.toFixed(0)} €` : '—'}</div>
+              <p className="text-xs text-muted-foreground">Projection de fin de mois</p>
             </CardContent>
           </Card>
+        </ItemAnime>
+        <ItemAnime index={1}>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Zap className="h-4 w-4" /> Recos énergie
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{energie?.recommandations.length ?? 0}</div>
+              <p className="text-xs text-muted-foreground">Actions priorisées</p>
+            </CardContent>
+          </Card>
+        </ItemAnime>
+        <ItemAnime index={2}>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <AlertTriangle className="h-4 w-4" /> Risques pannes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{pannes?.predictions.length ?? 0}</div>
+              <p className="text-xs text-muted-foreground">Equipements surveillés</p>
+            </CardContent>
+          </Card>
+        </ItemAnime>
+      </SectionReveal>
+
+      <SectionReveal delay={0.12} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {OUTILS.map((outil, index) => (
+          <ItemAnime key={outil.chemin} index={index}>
+            <Card className="transition-all hover:-translate-y-0.5 hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg"><span className="text-2xl">{outil.icone}</span>{outil.titre}</CardTitle>
+                <CardDescription>{outil.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild className="w-full">
+                  <Link href={outil.chemin}>Ouvrir l’outil</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </ItemAnime>
         ))}
-      </div>
+      </SectionReveal>
     </div>
   )
 }

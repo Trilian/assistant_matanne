@@ -6,6 +6,7 @@ CRUD pour les documents familiaux (carnet de santé, assurance, etc.)
 
 from datetime import date
 from typing import Any
+from unicodedata import normalize
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -27,6 +28,64 @@ from src.api.schemas.errors import (
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
 
 router = APIRouter(prefix="/api/v1/documents", tags=["Documents"])
+
+
+def _normaliser_texte_document(*valeurs: str | None) -> str:
+    """Normalise le texte libre pour faciliter les règles de catégorisation."""
+    texte = " ".join(valeur.strip() for valeur in valeurs if isinstance(valeur, str) and valeur.strip())
+    return normalize("NFKD", texte).encode("ascii", "ignore").decode("ascii").lower()
+
+
+def _suggerer_categorie_document(
+    titre: str,
+    notes: str | None = None,
+    fichier_nom: str | None = None,
+) -> tuple[str, list[str]]:
+    """Retourne la catégorie la plus probable et quelques tags suggérés."""
+    texte = _normaliser_texte_document(titre, notes, fichier_nom)
+    if not texte:
+        return "administratif", []
+
+    regles: list[tuple[str, tuple[str, ...], list[str]]] = [
+        (
+            "sante",
+            (
+                "ordonnance",
+                "pediatre",
+                "medecin",
+                "consultation",
+                "vaccin",
+                "sante",
+                "pharmacie",
+                "analyse",
+            ),
+            ["sante", "medical"],
+        ),
+        (
+            "maison",
+            (
+                "facture",
+                "devis",
+                "chaudiere",
+                "travaux",
+                "garantie",
+                "energie",
+                "electricite",
+                "gaz",
+                "eau",
+                "habitation",
+                "loyer",
+                "bail",
+            ),
+            ["maison", "suivi"],
+        ),
+    ]
+
+    for categorie, mots_cles, tags in regles:
+        if any(mot in texte for mot in mots_cles):
+            return categorie, tags
+
+    return "administratif", []
 
 
 @router.get("", responses=REPONSES_LISTE)
@@ -208,23 +267,44 @@ async def creer_document(
 
     def _create():
         with executer_avec_session() as session:
+            categorie_suggeree, tags_suggeres = _suggerer_categorie_document(
+                donnees.titre,
+                donnees.notes,
+                donnees.fichier_nom,
+            )
+            categorie_initiale = (donnees.categorie or "administratif").strip() or "administratif"
+            categorie_finale = categorie_initiale
+            categorie_auto_detectee = False
+
+            if categorie_initiale == "administratif" and categorie_suggeree != "administratif":
+                categorie_finale = categorie_suggeree
+                categorie_auto_detectee = True
+
+            tags_final = list(dict.fromkeys([*(donnees.tags or []), *tags_suggeres]))
+
             doc = DocumentFamille(
                 titre=donnees.titre,
-                categorie=donnees.categorie,
+                categorie=categorie_finale,
                 membre_famille=donnees.membre_famille,
                 fichier_url=donnees.fichier_url,
                 fichier_nom=donnees.fichier_nom,
                 date_document=donnees.date_document,
                 date_expiration=donnees.date_expiration,
                 notes=donnees.notes,
-                tags=donnees.tags,
+                tags=tags_final,
                 rappel_expiration_jours=donnees.rappel_expiration_jours,
             )
             session.add(doc)
             session.commit()
             session.refresh(doc)
 
-            return {"message": "Document créé", "id": doc.id}
+            return {
+                "message": "Document créé",
+                "id": doc.id,
+                "categorie_suggeree": categorie_suggeree,
+                "categorie_auto_detectee": categorie_auto_detectee,
+                "tags_suggeres": tags_suggeres,
+            }
 
     return await executer_async(_create)
 

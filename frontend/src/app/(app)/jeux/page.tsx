@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/composants/ui/tabs";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirDashboardJeux } from "@/bibliotheque/api/jeux";
 import type { DashboardJeux, ValueBet, SerieJeux, NumeroRetard } from "@/types/jeux";
@@ -33,11 +34,12 @@ function SectionOpportunites({
   const hasContent = valueBets.length > 0 || series.length > 0 || lotoRetard.length > 0;
   if (!hasContent) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center text-muted-foreground">
-          Aucune opportunité aujourd&apos;hui
-        </CardContent>
-      </Card>
+      <EtatVide
+        Icone={Star}
+        titre="Aucune opportunité aujourd'hui"
+        description="Les value bets et séries actives reviendront dès qu'un signal intéressant sera détecté."
+        className="bg-muted/20 py-8"
+      />
     );
   }
   return (
@@ -182,7 +184,12 @@ export default function PageJeux() {
                 lotoRetard={dashboard.loto_retard ?? []}
               />
             ) : (
-              <Card><CardContent className="py-6 text-sm text-muted-foreground">Aucune donnée opportunité</CardContent></Card>
+              <EtatVide
+                Icone={Trophy}
+                titre="Données opportunités indisponibles"
+                description="Le tableau de bord jeux n'a pas encore remonté de signaux exploitables."
+                className="bg-muted/20 py-6"
+              />
             );
           }
           if (item.id === "ia") {

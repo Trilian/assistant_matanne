@@ -26,6 +26,7 @@ import { Button } from "@/composants/ui/button";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { Progress } from "@/composants/ui/progress";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { SwipeableItem } from "@/composants/swipeable-item";
 import {
@@ -322,12 +323,18 @@ export default function PageNutrition() {
         </>
       ) : (
         <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">
-            Aucune donnée nutritionnelle pour cette semaine.
-            <br />
-            <Link href="/cuisine/planning" className="text-primary underline mt-2 inline-block">
-              Planifier des repas
-            </Link>
+          <CardContent className="py-6">
+            <EtatVide
+              Icone={AlertCircle}
+              titre="Aucune donnée nutritionnelle"
+              description="Planifie quelques repas cette semaine pour obtenir le suivi macros et les visualisations." 
+              action={
+                <Link href="/cuisine/planning" className="text-primary underline mt-1 inline-block">
+                  Planifier des repas
+                </Link>
+              }
+              className="border-0 bg-muted/20 py-6"
+            />
           </CardContent>
         </Card>
       )}
