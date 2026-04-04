@@ -90,16 +90,17 @@ class RecettesIASuggestionsMixin:
 
 OUTPUT ONLY THIS JSON (no other text, no markdown, no code blocks):
 
-{{"items": [{{"nom": "Poulet Rôti", "description": "Tender roasted chicken with herbs", "temps_preparation": 15, "temps_cuisson": 60, "portions": 4, "difficulte": "facile", "type_repas": "diner", "saison": "toute_année", "ingredients": [{{"nom": "chicken", "quantite": 1.5, "unite": "kg"}}, {{"nom": "olive oil", "quantite": 3, "unite": "tbsp"}}], "etapes": [{{"description": "Prepare chicken"}}, {{"description": "Season and roast"}}]}}]}}
+{{"items": [{{"nom": "Poulet Rôti", "description": "Tender roasted chicken with herbs", "raison": "Classique familial, ingrédients simples de saison", "temps_preparation": 15, "temps_cuisson": 60, "portions": 4, "difficulte": "facile", "type_repas": "diner", "saison": "toute_année", "ingredients": [{{"nom": "chicken", "quantite": 1.5, "unite": "kg"}}, {{"nom": "olive oil", "quantite": 3, "unite": "tbsp"}}], "etapes": [{{"description": "Prepare chicken"}}, {{"description": "Season and roast"}}]}}]}}
 
 RULES:
 1. Return ONLY valid JSON - nothing before or after
 2. Generate {nb_recettes} different recipes
-3. All fields required: nom, description, temps_preparation, temps_cuisson, portions, difficulte, type_repas, saison, ingredients, etapes
-4. ingredients: array of {{nom, quantite, unite}}
-5. etapes: array of {{description}}
-6. difficulte values: facile, moyen, difficile
-7. No explanations, no text, ONLY JSON"""
+3. All fields required: nom, description, raison, temps_preparation, temps_cuisson, portions, difficulte, type_repas, saison, ingredients, etapes
+4. raison: a short sentence explaining WHY this recipe is suggested (ingredients available, season, variety, etc.)
+5. ingredients: array of {{nom, quantite, unite}}
+6. etapes: array of {{description}}
+7. difficulte values: facile, moyen, difficile
+8. No explanations, no text, ONLY JSON"""
 
         logger.info(f"🤖 Generating {nb_recettes} recipe suggestions")
 

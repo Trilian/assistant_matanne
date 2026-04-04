@@ -57,6 +57,34 @@ export async function obtenirSuggestions(contexte: string): Promise<SuggestionRe
 
 // ─── Planification "cette semaine" ───────────────────────
 
+/** Recettes saisonnières — ingrédients de saison */
+export interface RecetteSaisonniere extends Recette {
+  nb_ingredients_saison: number;
+  nb_ingredients_total: number;
+  score_saison: number;
+}
+
+export interface ReponseSaisonnieres {
+  items: RecetteSaisonniere[];
+  total: number;
+  page: number;
+  page_size: number;
+  pages_totales: number;
+  mois: number;
+  produits_saison: string[];
+}
+
+/** Lister les recettes de saison */
+export async function listerRecettesSaisonnieres(
+  page = 1,
+  mois = 0
+): Promise<ReponseSaisonnieres> {
+  const { data } = await clientApi.get<ReponseSaisonnieres>("/recettes/saisonnieres", {
+    params: { page, mois },
+  });
+  return data;
+}
+
 /** Lister les recettes planifiées pour cette semaine */
 export async function listerRecettesSemaine(): Promise<Recette[]> {
   const { data } = await clientApi.get<Recette[]>("/recettes/planifiees-semaine");

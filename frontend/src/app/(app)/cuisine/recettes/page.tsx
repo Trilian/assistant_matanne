@@ -19,6 +19,7 @@ import {
   Flame,
   Wind,
   Star,
+  Leaf,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/composants/ui/button";
@@ -38,6 +39,7 @@ import { utiliserDelai } from "@/crochets/utiliser-delai";
 import {
   listerRecettes,
   listerRecettesSemaine,
+  listerRecettesSaisonnieres,
   planifierRecetteSemaine,
   deplanifierRecetteSemaine,
 } from "@/bibliotheque/api/recettes";
@@ -98,12 +100,21 @@ export default function PageRecettes() {
   const [filtresAppareils, setFiltresAppareils] = useState<Set<CleAppareil>>(new Set());
     const [filtresFavoris, setFiltresFavoris] = useState(false);
     const [filtreTempsMax, setFiltreTempsMax] = useState<number | null>(null);
+    const [filtreSaison, setFiltreSaison] = useState(false);
   const rechercheDelayee = utiliserDelai(recherche, 300);
 
   const { data, isLoading } = utiliserRequete(
     ["recettes", String(page), rechercheDelayee, categorie],
     () => listerRecettes(page, 20, rechercheDelayee || undefined)
   );
+
+  // IDs des recettes de saison (pour badge)
+  const { data: dataSaison } = utiliserRequete(
+    ["recettes", "saisonnieres"],
+    () => listerRecettesSaisonnieres(1, 0),
+    { staleTime: 10 * 60 * 1000 }
+  );
+  const idsSaison = new Set((dataSaison?.items ?? []).map((r) => r.id));
 
   const { data: planifiees } = utiliserRequete(
     ["recettes", "semaine"],
@@ -139,9 +150,10 @@ export default function PageRecettes() {
       }
       if (filtresFavoris && !r.est_favori) return false;
       if (filtreTempsMax !== null && tempsTotal(r) > filtreTempsMax) return false;
+      if (filtreSaison && !idsSaison.has(r.id)) return false;
       return true;
     });
-  }, [recettes, filtresAppareils, filtresFavoris, filtreTempsMax]);
+  }, [recettes, filtresAppareils, filtresFavoris, filtreTempsMax, filtreSaison, idsSaison]);
 
   const toggleAppareil = (cle: CleAppareil) => {
     setFiltresAppareils((prev) => {
@@ -155,11 +167,13 @@ export default function PageRecettes() {
   const nombreFiltresActifs =
     (filtresFavoris ? 1 : 0) +
     (filtreTempsMax !== null ? 1 : 0) +
+    (filtreSaison ? 1 : 0) +
     filtresAppareils.size;
 
   const reinitialiserFiltres = () => {
     setFiltresFavoris(false);
     setFiltreTempsMax(null);
+    setFiltreSaison(false);
     setFiltresAppareils(new Set());
   };
 
@@ -226,6 +240,9 @@ export default function PageRecettes() {
             <div className="flex flex-wrap gap-2">
               <BoutonFiltre actif={filtresFavoris} onClick={() => setFiltresFavoris((v) => !v)} className="gap-1.5">
                 <Star className="h-3 w-3" />Favoris uniquement
+              </BoutonFiltre>
+              <BoutonFiltre actif={filtreSaison} onClick={() => setFiltreSaison((v) => !v)} className="gap-1.5">
+                <Leaf className="h-3 w-3" />De saison
               </BoutonFiltre>
             </div>
           </SectionFiltre>
@@ -412,6 +429,14 @@ export default function PageRecettes() {
 
                     {/* Appareils compatibles */}
                     <ApplianceBadges recette={recette} />
+
+                    {/* Badge saisonnalité */}
+                    {idsSaison.has(recette.id) && (
+                      <Badge variant="outline" className="text-[10px] gap-0.5 px-1 py-0 text-green-600 border-green-300">
+                        <Leaf className="h-2.5 w-2.5" />
+                        De saison
+                      </Badge>
+                    )}
                   </CardContent>
                   </Card>
                 </Link>

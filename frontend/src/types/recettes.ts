@@ -56,6 +56,7 @@ export interface SuggestionRecette {
   temps_total: number;
   difficulte: string;
   ingredients_principaux: string[];
+  raison?: string;
 }
 
 export type FeedbackRecette = "like" | "neutral" | "dislike";

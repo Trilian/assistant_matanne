@@ -637,6 +637,84 @@ async def lister_recettes_semaine(user: dict[str, Any] = Depends(require_auth)):
     return await executer_async(_query)
 
 
+@router.get("/saisonnieres", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def recettes_saisonnieres(
+    mois: int = Query(0, ge=0, le=12, description="Mois (1-12). 0 = mois courant"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les recettes dont les ingrédients principaux sont de saison (11.5).
+
+    Croise les ingrédients des recettes avec le calendrier saisonnier
+    et retourne les recettes triées par score de saisonnalité.
+    """
+    import json
+    from pathlib import Path
+
+    from src.core.models.recettes import Recette, RecetteIngredient
+
+    mois_cible = mois if mois > 0 else date.today().month
+    fichier = Path(__file__).resolve().parents[3] / "data" / "reference" / "produits_de_saison.json"
+
+    def _query():
+        # Charger produits de saison
+        produits_saison: set[str] = set()
+        if fichier.exists():
+            data = json.loads(fichier.read_text(encoding="utf-8"))
+            for p in data.get("produits", []):
+                if mois_cible in p.get("mois", []):
+                    produits_saison.add(p["nom"].lower())
+
+        with executer_avec_session() as session:
+            recettes = session.query(Recette).all()
+            scored: list[tuple[Any, int, int]] = []
+
+            for r in recettes:
+                ingredients = (
+                    session.query(RecetteIngredient)
+                    .filter(RecetteIngredient.recette_id == r.id)
+                    .all()
+                )
+                nb_total = len(ingredients)
+                if nb_total == 0:
+                    continue
+                nb_saison = sum(
+                    1 for ing in ingredients
+                    if any(ps in (ing.nom or "").lower() for ps in produits_saison)
+                )
+                if nb_saison > 0:
+                    scored.append((r, nb_saison, nb_total))
+
+            # Trier par ratio saisonnier décroissant
+            scored.sort(key=lambda x: x[1] / x[2], reverse=True)
+
+            total = len(scored)
+            start = (page - 1) * page_size
+            page_items = scored[start:start + page_size]
+
+            return {
+                "items": [
+                    {
+                        **_serialiser_recette(r, session, user).model_dump(),
+                        "nb_ingredients_saison": nb_s,
+                        "nb_ingredients_total": nb_t,
+                        "score_saison": round(nb_s / nb_t * 100),
+                    }
+                    for r, nb_s, nb_t in page_items
+                ],
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+                "pages_totales": (total + page_size - 1) // page_size,
+                "mois": mois_cible,
+                "produits_saison": sorted(produits_saison)[:20],
+            }
+
+    return await executer_async(_query)
+
+
 @router.get("/depuis-jardin", response_model=dict, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def suggestions_recettes_depuis_jardin(

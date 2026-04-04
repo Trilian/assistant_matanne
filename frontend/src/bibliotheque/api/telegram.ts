@@ -49,3 +49,23 @@ export async function envoyerListeCoursesTelegram(
   );
   return data;
 }
+
+/**
+ * Envoyer une sous-liste de courses filtrée par magasin via Telegram.
+ * Idéal pour Bio Coop / Grand Frais avant de se rendre en magasin physique.
+ */
+export async function envoyerCoursesMagasinTelegram(
+  listeId: number,
+  magasin: string,
+  nomListe?: string
+): Promise<{ message: string; id?: number | null }> {
+  const { data } = await clientApi.post<{ message: string; id?: number | null }>(
+    "/telegram/envoyer-courses-magasin",
+    {
+      liste_id: listeId,
+      magasin,
+      nom_liste: nomListe || undefined,
+    }
+  );
+  return data;
+}

@@ -4,6 +4,7 @@
 
 "use client";
 
+import { useMemo, useState } from "react";
 import {
   CheckCheck,
   CheckCircle2,
@@ -13,16 +14,20 @@ import {
   QrCode,
   Square,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/composants/ui/button";
 import { DialogueArticleCourses } from "@/composants/courses/dialogue-article-courses";
 import { DialogueQrCourses } from "@/composants/courses/dialogue-qr-courses";
+import { FiltreMagasins } from "@/composants/courses/filtre-magasins";
 import { PanneauBioLocal } from "@/composants/courses/panneau-bio-local";
 import { PanneauDetailCourses } from "@/composants/courses/panneau-detail-courses";
 import { PanneauListesCourses } from "@/composants/courses/panneau-listes-courses";
 import { CarteModeInvites } from "@/composants/cuisine/carte-mode-invites";
 import { ScanneurMultiCodes } from "@/composants/scanneur-multi-codes";
+import { envoyerCoursesMagasinTelegram } from "@/bibliotheque/api/telegram";
 import { utiliserPageCourses } from "@/crochets/utiliser-page-courses";
+import type { MagasinCible } from "@/types/courses";
 
 export default function PageCourses() {
   const {
@@ -94,6 +99,46 @@ export default function PageCourses() {
     demarrerEcoute,
     arreterEcoute,
   } = utiliserPageCourses();
+
+  // ─── Filtre par magasin ─────────────────────────────────
+  const [magasinActif, setMagasinActif] = useState<string | null>(null);
+  const [enEnvoiTelegram, setEnEnvoiTelegram] = useState(false);
+
+  const compteursMagasins = useMemo(() => {
+    const compteurs: Record<string, number> = {};
+    for (const article of articles) {
+      const cle = article.magasin_cible || "non_assigne";
+      compteurs[cle] = (compteurs[cle] ?? 0) + 1;
+    }
+    return compteurs;
+  }, [articles]);
+
+  const articlesFiltres = useMemo(() => {
+    if (!magasinActif) return articles;
+    return articles.filter((a) => a.magasin_cible === magasinActif);
+  }, [articles, magasinActif]);
+
+  const articlesNonCochesFiltres = useMemo(
+    () => articlesFiltres.filter((a) => !a.est_coche),
+    [articlesFiltres]
+  );
+
+  const handleEnvoyerTelegram = async (magasin: MagasinCible) => {
+    if (!listeSelectionnee) return;
+    setEnEnvoiTelegram(true);
+    try {
+      await envoyerCoursesMagasinTelegram(listeSelectionnee, magasin);
+      toast.success("Liste envoyée sur Telegram");
+    } catch {
+      toast.error("Erreur lors de l'envoi Telegram");
+    } finally {
+      setEnEnvoiTelegram(false);
+    }
+  };
+
+  const handleSyncDrive = () => {
+    toast.info("Ouvrez l'extension Chrome Carrefour Drive pour synchroniser le panier.");
+  };
 
   const messageTempsReel = !listeSelectionnee
     ? "Sélectionnez une liste pour activer le suivi et les annonces en temps réel."

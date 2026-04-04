@@ -209,7 +209,7 @@
 | Source → Cible | Bridge | Déclencheur |
 |----------------|--------|-------------|
 | Inventaire → Planning | `inter_module_inventaire_planning.py` | Stock bas → suggestions recettes avec ce qu'on a |
-| Profil Jules → Planning | `inter_module_jules_nutrition.py` | Repères Jules → adapter portions recettes |
+| Jules croissance → Planning | `inter_module_jules_nutrition.py` | Jalon Jules → adapter portions recettes |
 | Saisonnalité → Planning IA | `inter_module_saison_menu.py` | Changement de mois → suggestions saisonnières |
 | Courses total → Budget | `inter_module_courses_budget.py` | Achat validé → sync budget catégorie alimentation |
 | Batch cooking → Stock | `inter_module_batch_inventaire.py` | Session terminée → déduire ingrédients |
