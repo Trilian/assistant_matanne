@@ -446,8 +446,13 @@ async def chat_assistant_contextuel(
     def _query() -> dict[str, Any]:
         from sqlalchemy import func
 
-        from src.core.models import ActiviteFamille, ArticleInventaire, BudgetFamille, Repas
-        from src.core.models.calendrier import EvenementPlanning
+        from src.core.models import (
+            ActiviteFamille,
+            ArticleInventaire,
+            BudgetFamille,
+            EvenementPlanning,
+            Repas,
+        )
         from src.services.dashboard.points_famille import obtenir_points_famille_service
         from src.services.utilitaires.chat_ai import obtenir_chat_ai_service
 

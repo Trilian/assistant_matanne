@@ -6,6 +6,7 @@ et stables (retour structurel, comportement de base).
 
 from __future__ import annotations
 
+from datetime import date, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -269,3 +270,102 @@ def test_bridge_6_23_meteo_vers_entretien_bridge_ia(test_db):
         db=test_db,
     )
     assert isinstance(result, list)
+
+
+@pytest.mark.integration
+def test_bridge_phase4_jardin_vers_inventaire_sync_recolte(test_db):
+    from src.core.models import ElementJardin, JournalJardin
+    from src.services.cuisine.inter_module_jardin_inventaire import (
+        JardinInventaireInteractionService,
+    )
+
+    element = ElementJardin(nom="Tomates cerises", type="legume", statut="actif")
+    test_db.add(element)
+    test_db.commit()
+    test_db.refresh(element)
+
+    service = JardinInventaireInteractionService()
+    result = service.synchroniser_recolte_vers_inventaire(
+        element_id=element.id,
+        quantite=2.5,
+        db=test_db,
+    )
+
+    assert result["ok"] is True
+    assert result["element_nom"] == "Tomates cerises"
+    assert result["quantite_ajoutee"] == 2.5
+    assert result["action"] in {"creation", "mise_a_jour"}
+
+    logs = test_db.query(JournalJardin).filter_by(garden_item_id=element.id).all()
+    assert any(log.action == "sync_inventaire" for log in logs)
+
+
+@pytest.mark.integration
+def test_bridge_phase4_garanties_vers_documents_lie_facture_a_objet(test_db):
+    from src.core.models import DocumentFamille, ObjetMaison, PieceMaison
+    from src.services.maison.inter_module_garanties_documents import (
+        GarantiesDocumentsInteractionService,
+    )
+
+    piece = PieceMaison(nom="Cuisine", etage=0)
+    test_db.add(piece)
+    test_db.flush()
+
+    objet = ObjetMaison(
+        piece_id=piece.id,
+        nom="Lave-vaisselle",
+        categorie="electromenager",
+        statut="fonctionne",
+        date_achat=date.today() - timedelta(days=30),
+        duree_garantie_mois=24,
+    )
+    document = DocumentFamille(
+        titre="Facture lave-vaisselle",
+        categorie="administratif",
+        membre_famille="Famille",
+        tags=[],
+        actif=True,
+    )
+    test_db.add_all([objet, document])
+    test_db.commit()
+    test_db.refresh(objet)
+    test_db.refresh(document)
+
+    service = GarantiesDocumentsInteractionService()
+    result = service.lier_document_garantie(
+        objet_id=objet.id,
+        document_id=document.id,
+        db=test_db,
+    )
+
+    test_db.refresh(document)
+    assert result["ok"] is True
+    assert result["objet"]["nom"] == "Lave-vaisselle"
+    assert "garantie" in (document.tags or [])
+    assert f"equipement:{objet.id}" in (document.tags or [])
+    assert result["objet"]["sous_garantie"] is True
+
+
+@pytest.mark.integration
+def test_bridge_phase4_meteo_vers_planning_priorise_selon_temperature():
+    from src.services.cuisine.inter_module_meteo_planning import (
+        MeteoPlanningInteractionService,
+    )
+
+    service = MeteoPlanningInteractionService()
+
+    chaud = service.prioriser_suggestions_selon_meteo(
+        ["Soupe de légumes", "BBQ poulet", "Salade grecque"],
+        temperature=30,
+        description="grand soleil",
+    )
+    froid = service.prioriser_suggestions_selon_meteo(
+        ["BBQ poulet", "Soupe de légumes", "Salade grecque"],
+        temperature=4,
+        description="pluie froide",
+    )
+
+    assert chaud["suggestions_priorisees"][0] in {"BBQ poulet", "Salade grecque"}
+    assert "grillade" in chaud["types_recommandes"] or "salade" in chaud["types_recommandes"]
+    assert froid["suggestions_priorisees"][0] == "Soupe de légumes"
+    assert "soupe" in froid["types_recommandes"]

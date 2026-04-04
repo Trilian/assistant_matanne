@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, type ReactNode } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -34,6 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/composants/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/composants/ui/sheet";
 import { Input } from "@/composants/ui/input";
 import {
   Tabs,
@@ -81,6 +82,7 @@ import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
 import { obtenirFluxCuisine } from "@/bibliotheque/api/ia-bridges";
+import { useIsMobile } from "@/crochets/use-mobile";
 
 const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 const STAGGER_DELAYS = ["delay-0", "delay-75", "delay-150", "delay-200", "delay-300", "delay-500", "delay-700"];
@@ -90,6 +92,49 @@ const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
   { valeur: "gouter", label: "Goûter", emoji: "🍪" },
   { valeur: "diner", label: "Dîner", emoji: "🌙" },
 ];
+
+function ResponsiveOverlay({
+  open,
+  onOpenChange,
+  title,
+  children,
+  contentClassName,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  children: ReactNode;
+  contentClassName?: string;
+}) {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent
+          side="bottom"
+          className={`max-h-[92vh] overflow-y-auto rounded-t-3xl border-x-0 border-b-0 px-0 ${contentClassName ?? ""}`}
+        >
+          <SheetHeader className="pb-2">
+            <SheetTitle>{title}</SheetTitle>
+          </SheetHeader>
+          <div className="px-4 pb-4">{children}</div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className={contentClassName}>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        {children}
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function getLundiDeSemaine(offset: number): string {
   const now = new Date();
@@ -802,311 +847,311 @@ export default function PagePlanning() {
       )}
 
       {/* ─── Dialogue ajout repas avec sélecteur de recettes ─── */}
-      <Dialog open={dialogueOuvert} onOpenChange={setDialogueOuvert}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Ajouter un repas</DialogTitle>
-          </DialogHeader>
-          {repasEnCours && (
-            <p className="text-sm text-muted-foreground -mt-2">
-              {JOURS[datesSemaine.indexOf(repasEnCours.date)]}{" "}
-              {new Date(repasEnCours.date).toLocaleDateString("fr-FR", {
-                day: "numeric",
-                month: "long",
-              })}{" "}
-              — {TYPES_REPAS.find((t) => t.valeur === repasEnCours.type_repas)?.emoji}{" "}
-              {TYPES_REPAS.find((t) => t.valeur === repasEnCours.type_repas)?.label}
-            </p>
-          )}
-          <Tabs value={ongletDialogue} onValueChange={(v) => setOngletDialogue(v as "suggestions" | "libre")}>
-            <TabsList className="w-full">
-              <TabsTrigger value="suggestions" className="flex-1">
-                <Search className="h-3.5 w-3.5 mr-1.5" />
-                Recettes
-              </TabsTrigger>
-              <TabsTrigger value="libre" className="flex-1">
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
-                Texte libre
-              </TabsTrigger>
-            </TabsList>
+      <ResponsiveOverlay
+        open={dialogueOuvert}
+        onOpenChange={setDialogueOuvert}
+        title="Ajouter un repas"
+        contentClassName="sm:max-w-lg"
+      >
+        {repasEnCours && (
+          <p className="text-sm text-muted-foreground -mt-2">
+            {JOURS[datesSemaine.indexOf(repasEnCours.date)]}{" "}
+            {new Date(repasEnCours.date).toLocaleDateString("fr-FR", {
+              day: "numeric",
+              month: "long",
+            })}{" "}
+            — {TYPES_REPAS.find((t) => t.valeur === repasEnCours.type_repas)?.emoji}{" "}
+            {TYPES_REPAS.find((t) => t.valeur === repasEnCours.type_repas)?.label}
+          </p>
+        )}
+        <Tabs value={ongletDialogue} onValueChange={(v) => setOngletDialogue(v as "suggestions" | "libre")}>
+          <TabsList className="w-full">
+            <TabsTrigger value="suggestions" className="flex-1">
+              <Search className="h-3.5 w-3.5 mr-1.5" />
+              Recettes
+            </TabsTrigger>
+            <TabsTrigger value="libre" className="flex-1">
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              Texte libre
+            </TabsTrigger>
+          </TabsList>
 
-            {/* ─── Onglet suggestions de recettes ─── */}
-            <TabsContent value="suggestions" className="space-y-3 mt-3">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Rechercher une recette..."
-                  value={rechercheRecette}
-                  onChange={(e) => setRechercheRecette(e.target.value)}
-                  className="flex-1"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  title="Surprise du chef — choisit une recette au hasard"
-                  disabled={!suggestions || suggestions.length === 0 || enAjout}
-                  onClick={() => {
-                    if (!suggestions || suggestions.length === 0) return;
-                    const idx = Math.floor(Math.random() * suggestions.length);
-                    choisirRecette(suggestions[idx]);
-                  }}
-                >
-                  🎲
-                </Button>
-              </div>
-              <div className="max-h-64 overflow-y-auto space-y-1.5">
-                {chargeSuggestions ? (
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-14 w-full" />
-                  ))
-                ) : suggestionsFiltrees.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-6">
-                    Aucune recette trouvée
-                  </p>
-                ) : (
-                  suggestionsFiltrees.map((recette) => (
-                    <button
-                      key={recette.id}
-                      onClick={() => choisirRecette(recette)}
-                      disabled={enAjout}
-                      className="w-full flex items-center justify-between rounded-md border p-3 text-left hover:bg-accent transition-colors disabled:opacity-50"
-                    >
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">{recette.nom}</p>
-                        {recette.categorie && (
-                          <Badge variant="outline" className="text-[10px] mt-0.5">
-                            {recette.categorie}
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0 ml-2">
-                        {recette.temps_total > 0 && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {recette.temps_total} min
-                          </span>
-                        )}
-                        <ConvertisseurInline />
-                      </div>
-                    </button>
-                  ))
-                )}
-              </div>
-            </TabsContent>
-
-            {/* ─── Onglet texte libre ─── */}
-            <TabsContent value="libre" className="space-y-4 mt-3">
+          {/* ─── Onglet suggestions de recettes ─── */}
+          <TabsContent value="suggestions" className="space-y-3 mt-3">
+            <div className="flex gap-2">
               <Input
-                value={notesRepas}
-                onChange={(e) => setNotesRepas(e.target.value)}
-                placeholder="Ex: Quiche lorraine"
+                placeholder="Rechercher une recette..."
+                value={rechercheRecette}
+                onChange={(e) => setRechercheRecette(e.target.value)}
+                className="flex-1"
               />
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setDialogueOuvert(false)}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  disabled={enAjout || !notesRepas.trim()}
-                  onClick={() => {
-                    if (repasEnCours) {
-                      ajouterRepas({
-                        date: repasEnCours.date,
-                        type_repas: repasEnCours.type_repas,
-                        notes: notesRepas,
-                      });
-                    }
-                  }}
-                >
-                  {enAjout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Ajouter
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </DialogContent>
-      </Dialog>
+              <Button
+                variant="outline"
+                size="sm"
+                title="Surprise du chef — choisit une recette au hasard"
+                disabled={!suggestions || suggestions.length === 0 || enAjout}
+                onClick={() => {
+                  if (!suggestions || suggestions.length === 0) return;
+                  const idx = Math.floor(Math.random() * suggestions.length);
+                  choisirRecette(suggestions[idx]);
+                }}
+              >
+                🎲
+              </Button>
+            </div>
+            <div className="max-h-64 overflow-y-auto space-y-1.5">
+              {chargeSuggestions ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-14 w-full" />
+                ))
+              ) : suggestionsFiltrees.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  Aucune recette trouvée
+                </p>
+              ) : (
+                suggestionsFiltrees.map((recette) => (
+                  <button
+                    key={recette.id}
+                    onClick={() => choisirRecette(recette)}
+                    disabled={enAjout}
+                    className="w-full flex items-center justify-between rounded-md border p-3 text-left hover:bg-accent transition-colors disabled:opacity-50"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{recette.nom}</p>
+                      {recette.categorie && (
+                        <Badge variant="outline" className="text-[10px] mt-0.5">
+                          {recette.categorie}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                      {recette.temps_total > 0 && (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {recette.temps_total} min
+                        </span>
+                      )}
+                      <ConvertisseurInline />
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </TabsContent>
+
+          {/* ─── Onglet texte libre ─── */}
+          <TabsContent value="libre" className="space-y-4 mt-3">
+            <Input
+              value={notesRepas}
+              onChange={(e) => setNotesRepas(e.target.value)}
+              placeholder="Ex: Quiche lorraine"
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setDialogueOuvert(false)}
+              >
+                Annuler
+              </Button>
+              <Button
+                disabled={enAjout || !notesRepas.trim()}
+                onClick={() => {
+                  if (repasEnCours) {
+                    ajouterRepas({
+                      date: repasEnCours.date,
+                      type_repas: repasEnCours.type_repas,
+                      notes: notesRepas,
+                    });
+                  }
+                }}
+              >
+                {enAjout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Ajouter
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </ResponsiveOverlay>
 
       {/* ─── Dialogue résultat courses ─── */}
-      <Dialog open={coursesDialogue} onOpenChange={setCoursesDialogue}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>🛒 Liste de courses générée</DialogTitle>
-          </DialogHeader>
-          {coursesResultat && (
-            <div className="space-y-4">
-              <div className="text-sm space-y-1">
-                <p className="font-medium">
-                  ✅ {coursesResultat.total_articles} articles ajoutés
+      <ResponsiveOverlay
+        open={coursesDialogue}
+        onOpenChange={setCoursesDialogue}
+        title="🛒 Liste de courses générée"
+        contentClassName="sm:max-w-md"
+      >
+        {coursesResultat && (
+          <div className="space-y-4">
+            <div className="text-sm space-y-1">
+              <p className="font-medium">
+                ✅ {coursesResultat.total_articles} articles ajoutés
+              </p>
+              {coursesResultat.contexte && coursesResultat.contexte.nb_invites > 0 && (
+                <p className="text-muted-foreground">
+                  👥 Quantités ajustées pour {coursesResultat.contexte.nb_invites} invité(s)
                 </p>
-                {coursesResultat.contexte && coursesResultat.contexte.nb_invites > 0 && (
-                  <p className="text-muted-foreground">
-                    👥 Quantités ajustées pour {coursesResultat.contexte.nb_invites} invité(s)
-                  </p>
-                )}
-                {coursesResultat.articles_en_stock > 0 && (
-                  <p className="text-muted-foreground">
-                    📦 {coursesResultat.articles_en_stock} articles déjà en stock (non ajoutés)
-                  </p>
-                )}
-              </div>
-              {Object.keys(coursesResultat.par_rayon).length > 0 && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Par rayon :</p>
-                  <div className="grid grid-cols-2 gap-1">
-                    {Object.entries(coursesResultat.par_rayon).map(([rayon, count]) => (
-                      <div key={rayon} className="flex items-center justify-between text-sm rounded-md bg-muted/50 px-2 py-1">
-                        <span className="capitalize truncate">{rayon.replace(/_/g, " ")}</span>
-                        <Badge variant="secondary" className="ml-1 text-xs">{count}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               )}
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => setCoursesDialogue(false)}>
-                  Fermer
-                </Button>
-                <Button
-                  onClick={() => {
-                    setCoursesDialogue(false);
-                    window.location.href = `/cuisine/courses`;
-                  }}
-                >
-                  Voir la liste
-                </Button>
-              </div>
+              {coursesResultat.articles_en_stock > 0 && (
+                <p className="text-muted-foreground">
+                  📦 {coursesResultat.articles_en_stock} articles déjà en stock (non ajoutés)
+                </p>
+              )}
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            {Object.keys(coursesResultat.par_rayon).length > 0 && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Par rayon :</p>
+                <div className="grid grid-cols-2 gap-1">
+                  {Object.entries(coursesResultat.par_rayon).map(([rayon, count]) => (
+                    <div key={rayon} className="flex items-center justify-between text-sm rounded-md bg-muted/50 px-2 py-1">
+                      <span className="capitalize truncate">{rayon.replace(/_/g, " ")}</span>
+                      <Badge variant="secondary" className="ml-1 text-xs">{count}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setCoursesDialogue(false)}>
+                Fermer
+              </Button>
+              <Button
+                onClick={() => {
+                  setCoursesDialogue(false);
+                  window.location.href = `/cuisine/courses`;
+                }}
+              >
+                Voir la liste
+              </Button>
+            </div>
+          </div>
+        )}
+      </ResponsiveOverlay>
 
       {/* ─── Dialogue résultat batch ─── */}
-      <Dialog open={batchDialogue} onOpenChange={setBatchDialogue}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>🍳 Session batch créée</DialogTitle>
-          </DialogHeader>
-          {batchResultat && (
-            <div className="space-y-4">
-              <div className="text-sm space-y-1">
-                <p className="font-medium">
-                  ✅ {batchResultat.nom}
-                </p>
-                <p className="text-muted-foreground">
-                  📖 {batchResultat.nb_recettes} recette{batchResultat.nb_recettes > 1 ? "s" : ""} sélectionnée{batchResultat.nb_recettes > 1 ? "s" : ""}
-                </p>
-                <p className="text-muted-foreground">
-                  ⏱️ Durée estimée : {batchResultat.duree_estimee} minutes
-                </p>
+      <ResponsiveOverlay
+        open={batchDialogue}
+        onOpenChange={setBatchDialogue}
+        title="🍳 Session batch créée"
+        contentClassName="sm:max-w-md"
+      >
+        {batchResultat && (
+          <div className="space-y-4">
+            <div className="text-sm space-y-1">
+              <p className="font-medium">
+                ✅ {batchResultat.nom}
+              </p>
+              <p className="text-muted-foreground">
+                📖 {batchResultat.nb_recettes} recette{batchResultat.nb_recettes > 1 ? "s" : ""} sélectionnée{batchResultat.nb_recettes > 1 ? "s" : ""}
+              </p>
+              <p className="text-muted-foreground">
+                ⏱️ Durée estimée : {batchResultat.duree_estimee} minutes
+              </p>
+            </div>
+            {batchResultat.robots_utilises.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Robots compatibles :</p>
+                <div className="flex flex-wrap gap-1">
+                  {batchResultat.robots_utilises.map((robot) => (
+                    <Badge key={robot} variant="outline" className="text-xs">
+                      {robot}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-              {batchResultat.robots_utilises.length > 0 && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Robots compatibles :</p>
-                  <div className="flex flex-wrap gap-1">
-                    {batchResultat.robots_utilises.map((robot) => (
-                      <Badge key={robot} variant="outline" className="text-xs">
-                        {robot}
-                      </Badge>
-                    ))}
-                  </div>
+            )}
+            {batchResultat.recettes.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Recettes :</p>
+                <div className="max-h-40 overflow-y-auto space-y-1">
+                  {batchResultat.recettes.map((r) => (
+                    <div
+                      key={r.id}
+                      className="text-sm rounded-md bg-muted/50 px-2 py-1"
+                    >
+                      {r.nom} ({r.portions} portions)
+                    </div>
+                  ))}
                 </div>
-              )}
-              {batchResultat.recettes.length > 0 && (
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Recettes :</p>
-                  <div className="max-h-40 overflow-y-auto space-y-1">
-                    {batchResultat.recettes.map((r) => (
-                      <div
-                        key={r.id}
-                        className="text-sm rounded-md bg-muted/50 px-2 py-1"
-                      >
-                        {r.nom} ({r.portions} portions)
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => setBatchDialogue(false)}>
-                  Fermer
-                </Button>
-                <Button
-                  onClick={() => {
-                    setBatchDialogue(false);
-                    window.location.href = `/cuisine/batch-cooking/${batchResultat.session_id}`;
-                  }}
-                >
-                  Voir la session
-                </Button>
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setBatchDialogue(false)}>
+                Fermer
+              </Button>
+              <Button
+                onClick={() => {
+                  setBatchDialogue(false);
+                  window.location.href = `/cuisine/batch-cooking/${batchResultat.session_id}`;
+                }}
+              >
+                Voir la session
+              </Button>
+            </div>
+          </div>
+        )}
+      </ResponsiveOverlay>
+      {/* ─── Dialog choix mode préparation ─── */}
+      <ResponsiveOverlay
+        open={choixModePrepa}
+        onOpenChange={setChoixModePrepa}
+        title="🍳 Mode de préparation"
+        contentClassName="sm:max-w-md"
+      >
+        <div className="space-y-3 pt-2">
+          <p className="text-sm text-muted-foreground">
+            Choisissez comment vous souhaitez préparer les repas de cette semaine.
+          </p>
+
+          {/* Option 1 : Batch cooking */}
+          <button
+            className="w-full text-left rounded-lg border p-4 hover:bg-accent transition-colors group"
+            onClick={() => {
+              setChoixModePrepa(false);
+              genererBatch(undefined);
+            }}
+            disabled={enGenerationBatch}
+          >
+            <div className="flex items-start gap-3">
+              <div className="rounded-md bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors shrink-0">
+                <CookingPot className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm">Batch Cooking</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Préparez tout en une seule session le week-end. Idéal pour gagner du temps en semaine.
+                </p>
+                {enGenerationBatch && (
+                  <p className="text-xs text-primary mt-1 flex items-center gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Génération en cours…
+                  </p>
+                )}
               </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
-      {/* ─── Dialog choix mode préparation ─── */}
-      <Dialog open={choixModePrepa} onOpenChange={setChoixModePrepa}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>🍳 Mode de préparation</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 pt-2">
-            <p className="text-sm text-muted-foreground">
-              Choisissez comment vous souhaitez préparer les repas de cette semaine.
-            </p>
+          </button>
 
-            {/* Option 1 : Batch cooking */}
-            <button
-              className="w-full text-left rounded-lg border p-4 hover:bg-accent transition-colors group"
-              onClick={() => {
-                setChoixModePrepa(false);
-                genererBatch(undefined);
-              }}
-              disabled={enGenerationBatch}
-            >
-              <div className="flex items-start gap-3">
-                <div className="rounded-md bg-primary/10 p-2 group-hover:bg-primary/20 transition-colors shrink-0">
-                  <CookingPot className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-semibold text-sm">Batch Cooking</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Préparez tout en une seule session le week-end. Idéal pour gagner du temps en semaine.
-                  </p>
-                  {enGenerationBatch && (
-                    <p className="text-xs text-primary mt-1 flex items-center gap-1">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Génération en cours…
-                    </p>
-                  )}
-                </div>
+          {/* Option 2 : Jour par jour */}
+          <button
+            className="w-full text-left rounded-lg border p-4 hover:bg-accent transition-colors group"
+            onClick={() => {
+              setChoixModePrepa(false);
+              window.location.href = "/cuisine/ma-semaine";
+            }}
+          >
+            <div className="flex items-start gap-3">
+              <div className="rounded-md bg-orange-100 dark:bg-orange-900/30 p-2 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/50 transition-colors shrink-0">
+                <CalendarDays className="h-5 w-5 text-orange-600 dark:text-orange-400" />
               </div>
-            </button>
-
-            {/* Option 2 : Jour par jour */}
-            <button
-              className="w-full text-left rounded-lg border p-4 hover:bg-accent transition-colors group"
-              onClick={() => {
-                setChoixModePrepa(false);
-                window.location.href = "/cuisine/ma-semaine";
-              }}
-            >
-              <div className="flex items-start gap-3">
-                <div className="rounded-md bg-orange-100 dark:bg-orange-900/30 p-2 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/50 transition-colors shrink-0">
-                  <CalendarDays className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-                </div>
-                <div>
-                  <p className="font-semibold text-sm">Jour par jour</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Suivez le wizard "Ma Semaine" pour préparer chaque jour avec flexibilité.
-                  </p>
-                </div>
+              <div>
+                <p className="font-semibold text-sm">Jour par jour</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Suivez le wizard "Ma Semaine" pour préparer chaque jour avec flexibilité.
+                </p>
               </div>
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+            </div>
+          </button>
+        </div>
+      </ResponsiveOverlay>
     </div>
   );
 }

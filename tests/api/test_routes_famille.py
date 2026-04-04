@@ -416,7 +416,7 @@ class TestAchatsFormats:
 class TestPrefillRevente:
     @patch("src.api.routes.famille.executer_avec_session")
     @patch("src.api.routes.famille.executer_async")
-    async def test_prefill_vetements_retourne_vinted(self, mock_exec, mock_session, client):
+    async def test_prefill_vetements_retourne_lbc(self, mock_exec, mock_session, client):
         mock_exec.side_effect = lambda fn: fn()
         mock_achat = creer_mock({**ACHAT_TEST, "categorie": "jules_vetements", "prix_reel": 30.0})
 
@@ -431,7 +431,7 @@ class TestPrefillRevente:
         response = await client.get("/api/v1/famille/achats/1/prefill-revente")
         assert response.status_code == 200
         data = response.json()
-        assert data["plateforme"] == "vinted"
+        assert data["plateforme"] == "lbc"
         assert data["prix_suggere"] == pytest.approx(12.0)
 
     @patch("src.api.routes.famille.executer_avec_session")
@@ -481,14 +481,14 @@ class TestSchemasAchat:
 
         item = PrefillReventeResponse(
             achat_id=1,
-            plateforme="vinted",
-            plateforme_libelle="Vinted",
+            plateforme="lbc",
+            plateforme_libelle="LeBonCoin",
             taille="3A",
             prix_suggere=12.0,
             pour_qui="jules",
-            raisons=["Vetements -> Vinted"],
+            raisons=["Revente familiale locale"],
         )
-        assert item.plateforme == "vinted"
+        assert item.plateforme == "lbc"
         assert item.raisons
 
 

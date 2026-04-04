@@ -177,8 +177,6 @@ export default function PageAchats() {
     });
   };
 
-  const plateformeRecommandee = (_item: AchatFamille): "lbc" => "lbc";
-
   const ouvrirDialogueAnnonce = async (item: AchatFamille) => {
     setPlateformeAnnonce("lbc");
     setAnnonceItem(item);
@@ -436,7 +434,7 @@ export default function PageAchats() {
                 <span className="flex-1 font-medium">{a.nom}</span>
                 {a.prix_revente_estime && <span className="text-xs text-muted-foreground">~{a.prix_revente_estime} euros</span>}
                 <Badge variant="outline" className="text-xs">
-                  Reco: {plateformeRecommandee(a) === "lbc" ? "LeBonCoin" : "Revente"}
+                  Reco: LeBonCoin
                 </Badge>
                 <Button size="sm" variant="outline" onClick={() => ouvrirDialogueAnnonce(a)} className="text-xs h-7">Generer annonce</Button>
                 <Button size="sm" variant="ghost" onClick={() => mutVendu.mutate(a.id)} title="Marquer vendu">

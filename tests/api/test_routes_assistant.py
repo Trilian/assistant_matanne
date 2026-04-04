@@ -339,6 +339,63 @@ class TestChatAssistantContextuel:
         assert response.json()["reponse"] == "Je n'ai pas pu generer de reponse pour le moment."
 
 
+class TestChatAssistantStreaming:
+    """POST /api/v1/assistant/chat/stream — flux SSE pour le chat IA."""
+
+    @pytest.mark.asyncio
+    async def test_chat_streaming_retourne_un_flux_sse(self, async_client: httpx.AsyncClient, monkeypatch):
+        """Le endpoint streaming doit renvoyer des événements SSE avec les morceaux IA."""
+
+        class _ScalarQuery:
+            def filter(self, *_args, **_kwargs):
+                return self
+
+            def scalar(self):
+                return 1
+
+        class _Session:
+            def query(self, *_args, **_kwargs):
+                return _ScalarQuery()
+
+        @contextmanager
+        def _ctx():
+            yield _Session()
+
+        class _PointsService:
+            def calculer_points(self):
+                return {"total_points": 5, "badges": ["tempo"]}
+
+        class _ChatService:
+            def streamer_message(self, **_kwargs):
+                yield "Bonjour "
+                yield "depuis le flux"
+
+        monkeypatch.setattr("src.api.routes.assistant.executer_avec_session", _ctx)
+        monkeypatch.setattr(
+            "src.services.dashboard.points_famille.obtenir_points_famille_service",
+            lambda: _PointsService(),
+        )
+        monkeypatch.setattr(
+            "src.services.utilitaires.chat_ai.obtenir_chat_ai_service",
+            lambda: _ChatService(),
+        )
+
+        response = await async_client.post(
+            "/api/v1/assistant/chat/stream",
+            json={
+                "message": "Raconte-moi le planning de demain",
+                "contexte": "planning",
+                "historique": [{"role": "user", "content": "Bonjour"}],
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("text/event-stream")
+        assert "event: token" in response.text
+        assert "Bonjour" in response.text
+        assert "event: done" in response.text
+
+
 class TestExemplesCommandes:
     """GET /api/v1/assistant/commande-vocale/exemples."""
 

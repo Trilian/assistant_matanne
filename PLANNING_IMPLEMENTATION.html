@@ -1910,10 +1910,28 @@
     <p>Améliorer l'interface, simplifier les flux utilisateur, ajouter des animations et des vues interactives.</p>
     <div class="phase-tags">
       <span class="badge badge-purple">9 tâches</span>
-      <span class="badge badge-purple">Évolution</span>
-      <span class="badge badge-pink">Frontend</span>
+      <span class="badge badge-ok">8 couvertes</span>
+      <span class="badge badge-info">Sprint MAJ · 04/04/2026</span>
     </div>
   </div>
+</div>
+
+<div class="card" style="margin-top: 0.75rem; border-left: 4px solid var(--accent2);">
+  <h4>✅ Statut sprint — Phase 6</h4>
+  <div class="progress-container">
+    <span class="progress-label">Avancement</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 85%; background: linear-gradient(90deg, var(--accent2), var(--green));"></div></div>
+    <span class="progress-label">85%</span>
+  </div>
+  <ul class="checklist" style="margin-top: 0.75rem;">
+    <li><span class="check done"></span>Dashboard modernisé déjà en place avec widgets réordonnables, sparklines et micro-interactions</li>
+    <li><span class="check done"></span>Mode cuisine tablette renforcé avec guidage pas à pas, lecture vocale et plein écran natif</li>
+    <li><span class="check done"></span>Vue jardin 2D interactive déjà branchée via <code>VueJardinInteractive</code></li>
+    <li><span class="check done"></span>Timeline Jules enrichie avec cartes illustrées des derniers jalons</li>
+    <li><span class="check done"></span>Dialogs du planning adaptés en bottom sheets mobiles responsives</li>
+    <li><span class="check done"></span>Split-view tablette, skeletons et transitions globales déjà présents dans l'application</li>
+    <li><span class="check"></span>Migration complète du drag-and-drop recettes vers <code>@dnd-kit</code> encore optionnelle si l’on veut homogénéiser tous les gestes tactiles</li>
+  </ul>
 </div>
 
 <div class="plan-item priority-evolution">
@@ -1999,10 +2017,27 @@
     <p>Améliorer les outils admin pour le développement, le debugging et l'exploitation de l'application.</p>
     <div class="phase-tags">
       <span class="badge badge-info">6 tâches</span>
-      <span class="badge badge-purple">Évolution</span>
-      <span class="badge badge-info">Admin</span>
+      <span class="badge badge-ok">6 clôturées</span>
+      <span class="badge badge-info">Sprint MAJ · 04/04/2026</span>
     </div>
   </div>
+</div>
+
+<div class="card" style="margin-top: 0.75rem; border-left: 4px solid var(--green);">
+  <h4>✅ Statut sprint — Phase 7</h4>
+  <div class="progress-container">
+    <span class="progress-label">Avancement</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: linear-gradient(90deg, var(--text2), var(--green));"></div></div>
+    <span class="progress-label">100%</span>
+  </div>
+  <ul class="checklist" style="margin-top: 0.75rem;">
+    <li><span class="check done"></span> `admin/jobs` permet le déclenchement manuel par job, l'exécution batch et la simulation d'une journée complète en <code>dry_run</code></li>
+    <li><span class="check done"></span> `admin/services` expose la console IA de test, les métriques live et les actions techniques de diagnostic</li>
+    <li><span class="check done"></span> Les tests Telegram / notifications multi-canaux sont disponibles côté admin pour déboguer rapidement les envois</li>
+    <li><span class="check done"></span> Les resync externes Garmin / calendrier / météo sont déclenchables à la demande via les actions d'infrastructure</li>
+    <li><span class="check done"></span> L'export des logs d'audit reste filtrable par module, action et période depuis les écrans admin</li>
+    <li><span class="check done"></span> Validation ciblée effectuée le 04/04/2026 : <code>pytest tests/api/test_admin_routes.py -q</code> → <strong>41 pass</strong> ; <code>frontend npm test -- --run ...admin...</code> → <strong>25 pass</strong></li>
+  </ul>
 </div>
 
 <div class="plan-item priority-evolution">
@@ -2118,11 +2153,11 @@
       </tr>
       <tr>
         <td><span style="color:var(--text2); font-weight:800;">7</span></td>
-        <td>Admin & Mode dev</td>
+        <td>Admin & Mode dev <span class="badge badge-ok">Clôturé</span></td>
         <td><strong>6</strong></td>
         <td>~18h</td>
         <td><span class="badge badge-purple">Évolution</span></td>
-        <td>Boutons jobs, simulation, console IA, export logs</td>
+        <td>Boutons jobs, simulation, console IA, Telegram test, resync et export logs</td>
       </tr>
     </tbody>
     <tfoot>
@@ -2201,13 +2236,13 @@
   </div>
   <div class="progress-container">
     <span class="progress-label">Phase 6</span>
-    <div class="progress-bar"><div class="progress-fill" style="width: 28%; background: var(--accent2);"></div></div>
-    <span class="progress-label">28%</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 85%; background: var(--accent2);"></div></div>
+    <span class="progress-label">85%</span>
   </div>
   <div class="progress-container">
     <span class="progress-label">Phase 7</span>
-    <div class="progress-bar"><div class="progress-fill" style="width: 11%; background: var(--text2);"></div></div>
-    <span class="progress-label">11%</span>
+    <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: linear-gradient(90deg, var(--text2), var(--green));"></div></div>
+    <span class="progress-label">100% ✅</span>
   </div>
 </div>
 

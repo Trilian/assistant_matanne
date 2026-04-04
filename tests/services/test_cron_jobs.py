@@ -532,6 +532,21 @@ class TestPushContextuelSoir:
 
     """Tests _job_push_contextuel_soir."""
 
+    def test_construire_conseil_cuisine_met_en_avant_le_bon_timing(self):
+        """Un dîner rapide doit produire un conseil d'action contextuel exploitable."""
+        from src.services.core.cron.jobs import _construire_conseil_cuisine
+
+        conseil = _construire_conseil_cuisine(
+            {
+                "type_repas": "diner",
+                "nom": "Pâtes au pesto",
+                "temps_total": 18,
+            }
+        )
+
+        assert conseil is not None
+        assert "lance" in conseil.lower()
+        assert "pâtes" in conseil.lower()
 
 
     def test_push_soir_appelle_dispatcher(self):

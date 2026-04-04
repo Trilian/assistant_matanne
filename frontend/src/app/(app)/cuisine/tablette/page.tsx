@@ -1,15 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ChefHat,
+  ChevronLeft,
+  ChevronRight,
   Clock,
+  Maximize,
+  Minimize,
   Pause,
   Play,
   RefreshCw,
   ShoppingCart,
   UtensilsCrossed,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 import { listerListesCourses, obtenirListeCourses } from "@/bibliotheque/api/courses";
@@ -21,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { utiliserRequete } from "@/crochets/utiliser-api";
+import { utiliserSyntheseVocale } from "@/crochets/utiliser-synthese-vocale";
 import type { RepasPlanning } from "@/types/planning";
 
 const HEURES_REPAS: Record<string, number> = {
@@ -71,11 +78,15 @@ function libelleTypeRepas(type: RepasPlanning["type_repas"] | undefined): string
 }
 
 export default function PageTabletteCuisine() {
+  const conteneurRef = useRef<HTMLDivElement | null>(null);
   const [layout, setLayout] = useState<"split" | "focus">("split");
   const [actif, setActif] = useState(false);
   const [tempsRestant, setTempsRestant] = useState(30 * 60);
   const [ingredientsCoches, setIngredientsCoches] = useState<Record<string, boolean>>({});
   const [articlesCoches, setArticlesCoches] = useState<Record<string, boolean>>({});
+  const [etapeCourante, setEtapeCourante] = useState(0);
+  const [estPleinEcran, setEstPleinEcran] = useState(false);
+  const { estSupporte: syntheseSupportee, enLecture: syntheseEnCours, lire, arreter } = utiliserSyntheseVocale({ rate: 0.95 });
   const lundiCourant = useMemo(() => obtenirLundiCourant(), []);
 
   const {
@@ -117,11 +128,22 @@ export default function PageTabletteCuisine() {
 
   useEffect(() => {
     setIngredientsCoches({});
-  }, [recette?.id, repasCourant?.id]);
+    setEtapeCourante(0);
+    arreter();
+  }, [recette?.id, repasCourant?.id, arreter]);
 
   useEffect(() => {
     setArticlesCoches({});
   }, [listeActive?.id]);
+
+  useEffect(() => {
+    const gererChangementPleinEcran = () => {
+      setEstPleinEcran(Boolean(document.fullscreenElement));
+    };
+
+    document.addEventListener("fullscreenchange", gererChangementPleinEcran);
+    return () => document.removeEventListener("fullscreenchange", gererChangementPleinEcran);
+  }, []);
 
   useEffect(() => {
     if (!actif || tempsRestant <= 0) {
@@ -182,6 +204,34 @@ export default function PageTabletteCuisine() {
       "Servez dès que la texture et l'assaisonnement sont prêts.",
     ];
   }, [recette?.instructions, repasCourant?.notes]);
+
+  const etapeActive = etapes[Math.min(etapeCourante, Math.max(etapes.length - 1, 0))] ?? "Préparez les ingrédients et placez-les à portée de main.";
+
+  const lireEtapeCourante = () => {
+    if (syntheseEnCours) {
+      arreter();
+      return;
+    }
+
+    lire(`Étape ${Math.min(etapeCourante + 1, etapes.length)}. ${etapeActive}`);
+  };
+
+  const basculerPleinEcran = async () => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen?.();
+        return;
+      }
+
+      await conteneurRef.current?.requestFullscreen();
+    } catch {
+      // Le plein écran natif reste optionnel selon le navigateur.
+    }
+  };
 
   const presetsTimer = useMemo(
     () =>
@@ -250,6 +300,56 @@ export default function PageTabletteCuisine() {
               <div className="rounded-xl border bg-muted/40 p-3">
                 <p className="text-xs uppercase text-muted-foreground">Portions</p>
                 <p className="mt-1 text-lg font-semibold">{recette?.portions ?? repasCourant?.portions ?? 4}</p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-orange-200 bg-orange-50/70 p-4 dark:border-orange-900/40 dark:bg-orange-950/20">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-200">
+                    Mode guidé pas à pas
+                  </p>
+                  <p className="mt-2 text-base font-medium">{etapeActive}</p>
+                </div>
+                <Badge variant="secondary">
+                  Étape {Math.min(etapeCourante + 1, etapes.length)} / {etapes.length}
+                </Badge>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    arreter();
+                    setEtapeCourante((precedent) => Math.max(0, precedent - 1));
+                  }}
+                  disabled={etapeCourante === 0}
+                >
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                  Précédente
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    arreter();
+                    setEtapeCourante((precedent) => Math.min(etapes.length - 1, precedent + 1));
+                  }}
+                  disabled={etapeCourante >= etapes.length - 1}
+                >
+                  Suivante
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+                {syntheseSupportee ? (
+                  <Button type="button" size="sm" onClick={lireEtapeCourante}>
+                    {syntheseEnCours ? <VolumeX className="mr-1 h-4 w-4" /> : <Volume2 className="mr-1 h-4 w-4" />}
+                    {syntheseEnCours ? "Arrêter la lecture" : "Lire l'étape"}
+                  </Button>
+                ) : (
+                  <Badge variant="outline">Lecture vocale indisponible</Badge>
+                )}
               </div>
             </div>
 
@@ -431,7 +531,11 @@ export default function PageTabletteCuisine() {
   );
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-orange-50 via-background to-background text-foreground dark:from-slate-950 dark:via-slate-950 dark:to-black">
+    <div
+      ref={conteneurRef}
+      data-fullscreen={estPleinEcran ? "true" : "false"}
+      className="fixed inset-0 flex flex-col bg-gradient-to-br from-orange-50 via-background to-background text-foreground dark:from-slate-950 dark:via-slate-950 dark:to-black"
+    >
       <div className="border-b bg-orange-600/95 px-5 py-3 text-white backdrop-blur">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -449,7 +553,17 @@ export default function PageTabletteCuisine() {
               className="text-white hover:bg-orange-700"
               onClick={() => setLayout((precedent) => (precedent === "split" ? "focus" : "split"))}
             >
-              {layout === "split" ? "Plein écran" : "Vue scindée"}
+              {layout === "split" ? "Mode focus" : "Vue scindée"}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-white hover:bg-orange-700"
+              aria-pressed={estPleinEcran}
+              onClick={() => void basculerPleinEcran()}
+            >
+              {estPleinEcran ? <Minimize className="mr-2 h-4 w-4" /> : <Maximize className="mr-2 h-4 w-4" />}
+              {estPleinEcran ? "Quitter le plein écran" : "Plein écran natif"}
             </Button>
             <Button
               size="sm"
