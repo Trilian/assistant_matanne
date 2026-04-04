@@ -141,7 +141,7 @@ export interface EvenementFamilial {
 }
 
 // ═══════════════════════════════════════════════════════════
-// Contexte Familial (Phase M/N)
+// Contexte familial partagé
 // ═══════════════════════════════════════════════════════════
 
 export interface MeteoActuelle {
@@ -224,7 +224,7 @@ export interface ContexteFamilial {
 }
 
 // ═══════════════════════════════════════════════════════════
-// Achats Famille (Phase M4/P)
+// Achats famille
 // ═══════════════════════════════════════════════════════════
 
 export interface AchatFamille {
@@ -257,7 +257,7 @@ export interface SuggestionAchat {
 }
 
 // ═══════════════════════════════════════════════════════════
-// Rappels (Phase Q)
+// Rappels
 // ═══════════════════════════════════════════════════════════
 
 export interface RappelFamille {

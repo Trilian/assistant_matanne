@@ -1,15 +1,15 @@
-# EXPLAIN ANALYZE — Sprint 2 Index Validation
+# EXPLAIN ANALYZE — Validation des index
 
 > **Date**: 3 avril 2026
-> **Objectif**: Valider que les 6 indexes ajoutés en Sprint 2 améliorent réellement les performances
-> **Scope**: 10 requêtes critiques du path utilisateur
+> **Objectif**: Valider que les 6 index ajoutés lors de la vague performance améliorent réellement les performances
+> **Scope**: 10 requêtes critiques du parcours utilisateur
 > **Prérequis**: Accès Supabase PostgreSQL + données réalistes (mini-seed ou copie d'export)
 
 ---
 
 ## 1. Vue d'ensemble
 
-### Indexes ajoutés en Sprint 2
+### Index ajoutés lors de la vague performance
 
 | Index | Table | Colonne(s) | Type | Utilité |
 |-------|-------|-----------|------|---------|
@@ -113,39 +113,30 @@ SELECT r.id, r.nom, r.duree_minutes, r.temps_preparation,
 
 ---
 
-### Query 4: Profil Jules — croissance vs normes OMS
+### Query 4: Profil Jules — jalons + alimentation
 
 **Domaine**: Famille — Jules
-**Utilisateur flow**: Page `/famille/jules` charge le profil + calcule percentiles
-**Index associé**: 📊 `normes_oms` indexed sur `(sexe, type_mesure, age_mois)` ?
-**Hypothèse**: Lookup table normalisée, petite mais utilisée fréquemment
+**Utilisateur flow**: Page `/famille/jules` charge le profil, les derniers jalons et le contexte repas
+**Index associé**: 📊 `jalons(child_id, date_jalon)`
+**Hypothèse**: flux centré sur le développement quotidien et l'alimentation, sans suivi anthropométrique
 
 ```sql
 EXPLAIN ANALYZE
-SELECT m.id, m.date_mesure, m.type_mesure, m.valeur,
-       ROUND((m.valeur / no.p50 * 100)::numeric, 1) as percentile_observé,
-       CASE 
-        WHEN m.valeur < no.p15 THEN 'très_petit'
-        WHEN m.valeur < no.p50 THEN 'petit'
-        WHEN m.valeur > no.p85 THEN 'grand'
-        ELSE 'normal'
-       END as classification
-    FROM mesures_jules m
-    LEFT JOIN normes_oms no 
-      ON m.type_mesure = no.type_mesure
-         AND no.sexe = 'garcon'  -- Jules gender
-         AND no.age_mois = (DATE_PART('year', CURRENT_DATE) - DATE_PART('year', m.date_naissance)) * 12
-               + DATE_PART('month', CURRENT_DATE) - DATE_PART('month', m.date_naissance)
-    WHERE m.jules_id = :jules_id
-    ORDER BY m.date_mesure DESC
-    LIMIT 50;
+SELECT j.id,
+       j.titre,
+       j.categorie,
+       j.date_jalon,
+       j.description
+  FROM jalons j
+ WHERE j.child_id = :child_id
+ ORDER BY j.date_jalon DESC
+ LIMIT 30;
 ```
 
 **À vérifier dans EXPLAIN ANALYZE**:
-- LEFT JOIN normes_oms : utilise-t-il un index composite sur (sexe, type_mesure, age_mois)?
-- Calcul age_mois INLINE : peut-il bénéficier d'une colonne dénormalisée?
-- Performance acceptée pour historique (50 mesures × 3 types = 150 rows top)
-- Temps total < 100ms acceptable
+- Index Scan sur `jalons.child_id` + tri par date
+- LIMIT suffisant pour l'historique visible dans l'UI
+- Temps total < 50ms acceptable
 
 ---
 
@@ -354,14 +345,14 @@ SELECT a.id, a.nom, a.date_activite, a.heure_debut, a.responsable,
 - [ ] JSON/text des 10 EXPLAIN ANALYZE plans aggregés en `.sql` file
 - [ ] Tableau récapitulatif : Query | Index Used | Execution Time | Recommendation
 - [ ] Indexes utilisés avec succès : ✅ Valider en PLANNING_IMPLEMENTATION.md
-- [ ] Indexes NON utilisés : Documenter pour Sprint 3 (peut être droppé ou réanalysé)
+- [ ] Index non utilisés : documenter pour la prochaine passe d'optimisation (peut être droppé ou réanalysé)
 - [ ] Opportunities d'optimisation notées (ex: GIN index recettes nom si ILIKE lent)
 
 ---
 
 ## 4. Résultats attendus
 
-### Scénarios optimistes (✅ objectifs Sprint 2)
+### Scénarios optimistes (✅ objectifs de validation)
 
 | Index | Query | Résultat attendu |
 |-------|-------|------------------|
@@ -390,14 +381,14 @@ SELECT a.id, a.nom, a.date_activite, a.heure_debut, a.responsable,
 
 ### Stockage des résultats
 
-Placer les fichiers EXPLAIN ANALYZE dans : `data/explain_analyze_sprint2/`
+Placer les fichiers EXPLAIN ANALYZE dans : `data/performance_queries/`
 
 ```
-data/explain_analyze_sprint2/
+data/performance_queries/
 ├── 01_planning_repas.json
 ├── 02_articles_courses.json
 ├── 03_recherche_recettes.json
-├── 04_jules_croissance.json
+├── 04_jules_jalons_alimentation.json
 ├── 05_dashboard_stats.json
 ├── 06_jardin_actif.json
 ├── 07_projets_kanban.json
@@ -415,7 +406,7 @@ Après validation :
 - [ ] `EXPLAIN ANALYZE` sur 10 queries critiques exécuté
 - [x] **6/6 indexes utilisés avec succès** (après validation)
 - [x] Aucune query > 300ms (sauf BI dashboard)
-- [ ] Résultats documentés dans `data/explain_analyze_sprint2/`
+- [ ] Résultats documentés dans `data/performance_queries/`
 ```
 
 ---
@@ -465,5 +456,5 @@ Index Scan using ix_garden_items_derniere_action on elements_jardin ej
 
 ---
 
-**Mis à jour** : Sprint 2 — 3 avril 2026
-**Prochaine étape** : Exécution sur Supabase target (en attente du planificateur/utilisateur)
+**Mis à jour** : 3 avril 2026
+**Prochaine étape** : Exécution sur Supabase cible (en attente du planificateur/utilisateur)

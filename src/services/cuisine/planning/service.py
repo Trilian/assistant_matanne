@@ -1,7 +1,7 @@
 ﻿"""
 Service Planning de Base (service de base)
 
-✅ Utilise @avec_session_db et @avec_cache (Phase 1)
+✅ Utilise @avec_session_db et @avec_cache
 ✅ Validation Pydantic centralisée
 ✅ Type hints complets pour meilleur IDE support
 ✅ Services testables

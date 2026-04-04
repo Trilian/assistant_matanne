@@ -4,7 +4,7 @@ Service IA Achats Famille - Suggestions d'achats automatiques.
 Suggère via Mistral :
 - Cadeaux d'anniversaire (basé sur âge, relation, historique)
 - Achats saisonniers (vêtements, équipements enfant)
-- Achats liés aux jalons OMS (chaussures marche, etc.)
+- Achats liés aux jalons de développement (chaussures marche, etc.)
 """
 
 import logging

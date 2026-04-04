@@ -239,44 +239,27 @@ class TestTriggersBadgesNutrition:
 
 
 class TestNotificationsBadges:
-    """Tests des notifications push pour badges débloqués."""
+    """Tests des notifications et métadonnées badges conservées."""
 
-    def test_notification_badge_envoye(self):
-        """Le dispatcher doit être appelé quand des badges sont débloqués."""
-        from src.services.core.cron.jobs import _notifier_badges_debloques
+    def test_catalogue_badges_expose_label_et_emoji(self):
+        """Le catalogue des badges doit rester exploitable côté notifications/UI."""
+        from src.services.dashboard.badges_triggers import obtenir_catalogue_badges
 
-        mock_dispatcher = MagicMock()
-        mock_dispatcher.envoyer.return_value = {}
+        catalogue = obtenir_catalogue_badges()
 
-        with patch(
-            "src.services.core.notifications.notif_dispatcher.get_dispatcher_notifications",
-            return_value=mock_dispatcher,
-        ):
-            _notifier_badges_debloques([
-                {"badge_label": "Sportif assidu", "emoji": "💪", "badge_type": "sportif_hebdo"},
-                {"badge_label": "Zéro gaspi", "emoji": "♻️", "badge_type": "zero_gaspi"},
-            ])
+        assert catalogue
+        assert all(item["badge_label"] for item in catalogue)
+        assert all(item["emoji"] for item in catalogue)
+        assert all(item["badge_type"] for item in catalogue)
 
-        mock_dispatcher.envoyer.assert_called_once()
-        call_kwargs = mock_dispatcher.envoyer.call_args[1]
-        assert "badge_debloque" == call_kwargs.get("type_evenement")
-        assert "Sportif assidu" in call_kwargs.get("message", "")
-        assert "Zéro gaspi" in call_kwargs.get("message", "")
+    def test_categories_badges_limitees_a_sport_et_nutrition(self):
+        """La gamification générale famille ne doit pas réapparaître."""
+        from src.services.dashboard.badges_triggers import obtenir_catalogue_badges
 
-    def test_notification_badge_vide(self):
-        """Aucune notification si la liste est vide."""
-        from src.services.core.cron.jobs import _notifier_badges_debloques
+        categories = {item["categorie"] for item in obtenir_catalogue_badges()}
 
-        mock_dispatcher = MagicMock()
-
-        with patch(
-            "src.services.core.notifications.notif_dispatcher.get_dispatcher_notifications",
-            return_value=mock_dispatcher,
-        ):
-            _notifier_badges_debloques([])
-
-        # Message envoyé avec liste vide mais pas de crash
-        mock_dispatcher.envoyer.assert_called_once()
+        assert categories <= {"sport", "nutrition"}
+        assert "famille" not in categories
 
     def test_badge_debloque_dans_mapping_dispatcher(self):
         """L'événement badge_debloque doit être dans le mapping du dispatcher."""
@@ -325,69 +308,26 @@ class TestHistoriquePoints:
 
 
 class TestCronJobIntegration:
-    """Tests d'intégration du job CRON points_famille_hebdo + badges."""
+    """Tests d'intégration alignés avec la gamification sport/nutrition actuelle."""
 
-    def test_job_present_dans_registre(self):
-        """Le job points_famille_hebdo doit être dans le registre."""
+    def test_job_legacy_points_famille_absent_du_registre(self):
+        """L'ancien job famille ne doit pas être réintroduit."""
         from src.services.core.cron.jobs import lister_jobs_disponibles
 
         jobs = lister_jobs_disponibles()
-        assert "points_famille_hebdo" in jobs
+        assert "points_famille_hebdo" not in jobs
 
-    def test_job_appelle_badges(self):
-        """Le job doit appeler evaluer_et_attribuer après le calcul des points."""
-        from src.services.core.cron.jobs import _job_points_famille_hebdo
+    def test_jobs_nutrition_restent_presents(self):
+        """Les jobs encore supportés pour la nutrition doivent rester exposés."""
+        from src.services.core.cron.jobs import lister_jobs_disponibles
 
-        mock_points_service = MagicMock()
-        mock_points_service.calculer_points.return_value = {"total_points": 500}
+        jobs = lister_jobs_disponibles()
+        assert "analyse_nutrition_hebdo" in jobs
+        assert "job_nutrition_adultes_weekly" in jobs
 
-        mock_badges_service = MagicMock()
-        mock_badges_service.evaluer_et_attribuer.return_value = []
+    def test_helpers_legacy_points_famille_non_exportes(self):
+        """Les helpers privés supprimés ne doivent plus exister dans le module cron."""
+        import src.services.core.cron.jobs as cron_jobs
 
-        with (
-            patch(
-                "src.services.dashboard.points_famille.get_points_famille_service",
-                return_value=mock_points_service,
-            ),
-            patch(
-                "src.services.dashboard.badges_triggers.get_badges_triggers_service",
-                return_value=mock_badges_service,
-            ),
-        ):
-            _job_points_famille_hebdo()
-
-        mock_points_service.calculer_points.assert_called_once()
-        mock_badges_service.evaluer_et_attribuer.assert_called_once()
-
-    def test_job_notifie_si_nouveaux_badges(self):
-        """Le job doit envoyer une notification si de nouveaux badges sont attribués."""
-        from src.services.core.cron.jobs import _job_points_famille_hebdo
-
-        badge_nouveau = {"badge_label": "Sportif assidu", "emoji": "💪", "badge_type": "sportif_hebdo"}
-
-        mock_points_service = MagicMock()
-        mock_points_service.calculer_points.return_value = {"total_points": 500}
-
-        mock_badges_service = MagicMock()
-        mock_badges_service.evaluer_et_attribuer.return_value = [badge_nouveau]
-
-        mock_dispatcher = MagicMock()
-        mock_dispatcher.envoyer.return_value = {}
-
-        with (
-            patch(
-                "src.services.dashboard.points_famille.get_points_famille_service",
-                return_value=mock_points_service,
-            ),
-            patch(
-                "src.services.dashboard.badges_triggers.get_badges_triggers_service",
-                return_value=mock_badges_service,
-            ),
-            patch(
-                "src.services.core.notifications.notif_dispatcher.get_dispatcher_notifications",
-                return_value=mock_dispatcher,
-            ),
-        ):
-            _job_points_famille_hebdo()
-
-        mock_dispatcher.envoyer.assert_called_once()
+        assert not hasattr(cron_jobs, "_job_points_famille_hebdo")
+        assert not hasattr(cron_jobs, "_notifier_badges_debloques")

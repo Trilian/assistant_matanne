@@ -1,10 +1,10 @@
 """
-Service Carnet de Santé - Vaccinations, RDV médicaux, courbes de croissance.
+Service Carnet de Santé - Vaccinations, RDV médicaux et suivi santé.
 
 Opérations:
 - CRUD vaccinations avec rappels
 - Suivi des rendez-vous médicaux
-- Mesures de croissance et positionnement OMS
+- Mesures de santé privées si besoin
 - Alertes vaccins et RDV à venir
 """
 
@@ -13,13 +13,13 @@ import logging
 from datetime import date as date_type
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any
 
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs, avec_session_db
-from src.core.models import MesureCroissance, NormeOMS, RendezVousMedical, Vaccin
+from src.core.models import MesureCroissance, RendezVousMedical, Vaccin
 from src.core.monitoring import chronometre
 from src.services.core.base import BaseService
 from src.services.core.events import obtenir_bus
@@ -30,28 +30,17 @@ logger = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).resolve().parents[3] / "data"
 
 
-class PositionOMSDict(TypedDict):
-    """Positionnement de la mesure sur les courbes OMS."""
-
-    percentile_estime: str
-    zone: str  # "normal", "attention", "alerte"
-    p3: float
-    p50: float
-    p97: float
-
-
 class ServiceCarnetSante(BaseService[Vaccin]):
     """Service de gestion du carnet de santé numérique.
 
-    Hérite de BaseService[Vaccin] pour le CRUD générique sur les vaccins.
-    Inclut la gestion des RDV médicaux, mesures de croissance,
-    et le positionnement sur les courbes OMS.
+    Hérite de `BaseService[Vaccin]` pour le CRUD générique sur les vaccins.
+    Inclut la gestion des RDV médicaux et d'un suivi santé léger,
+    sans exposition de courbes de référence dans le produit.
     """
 
     def __init__(self):
         super().__init__(model=Vaccin, cache_ttl=600)
         self._calendrier_vaccinal: list[dict[str, Any]] | None = None
-        self._normes_oms: dict[str, Any] | None = None
 
     # ═══════════════════════════════════════════════════════════
     # DONNÉES DE RÉFÉRENCE
@@ -69,18 +58,6 @@ class ServiceCarnetSante(BaseService[Vaccin]):
                 logger.warning("Fichier calendrier vaccinal non trouvé: %s", chemin)
                 self._calendrier_vaccinal = []
         return self._calendrier_vaccinal
-
-    def _charger_normes_oms(self) -> dict[str, Any]:
-        """Charge les normes OMS depuis le fichier JSON."""
-        if self._normes_oms is None:
-            chemin = DATA_DIR / "reference" / "normes_oms.json"
-            if chemin.exists():
-                with open(chemin, encoding="utf-8") as f:
-                    self._normes_oms = json.load(f)
-            else:
-                logger.warning("Fichier normes OMS non trouvé: %s", chemin)
-                self._normes_oms = {}
-        return self._normes_oms
 
     # ═══════════════════════════════════════════════════════════
     # VACCINATIONS
@@ -183,7 +160,7 @@ class ServiceCarnetSante(BaseService[Vaccin]):
         return query.order_by(RendezVousMedical.date_rdv.desc()).all()
 
     # ═══════════════════════════════════════════════════════════
-    # MESURES DE CROISSANCE
+    # MESURES DE SUIVI
     # ═══════════════════════════════════════════════════════════
 
     @chronometre("carnet_sante.mesures_enfant", seuil_alerte_ms=1000)
@@ -193,7 +170,7 @@ class ServiceCarnetSante(BaseService[Vaccin]):
     def obtenir_mesures(
         self, child_id: int, *, db: Session | None = None
     ) -> list[MesureCroissance]:
-        """Récupère les mesures de croissance d'un enfant."""
+        """Récupère les mesures de suivi santé d'un enfant."""
         if db is None:
             return []
         return (
@@ -208,7 +185,7 @@ class ServiceCarnetSante(BaseService[Vaccin]):
     def ajouter_mesure(
         self, data: dict[str, Any], *, db: Session | None = None
     ) -> MesureCroissance | None:
-        """Ajoute une mesure de croissance."""
+        """Ajoute une mesure ponctuelle au suivi santé."""
         if db is None:
             return None
         mesure = MesureCroissance(**data)
@@ -222,65 +199,6 @@ class ServiceCarnetSante(BaseService[Vaccin]):
             source="ServiceCarnetSante",
         )
         return mesure
-
-    def positionner_sur_oms(
-        self,
-        sexe: str,
-        type_mesure: str,
-        age_mois: float,
-        valeur: float,
-    ) -> PositionOMSDict | None:
-        """Positionne une mesure par rapport aux normes OMS.
-
-        Args:
-            sexe: "garcon" ou "fille"
-            type_mesure: "poids", "taille" ou "perimetre_cranien"
-            age_mois: Âge en mois
-            valeur: Valeur mesurée
-
-        Returns:
-            Dict avec percentile estimé et zone ou None si données manquantes.
-        """
-        normes = self._charger_normes_oms()
-        cle_sexe = "garcons" if sexe == "garcon" else "filles"
-        donnees = normes.get(cle_sexe, {}).get(type_mesure, [])
-
-        if not donnees:
-            return None
-
-        # Trouver la tranche d'âge la plus proche
-        plus_proche = min(donnees, key=lambda d: abs(d["age_mois"] - age_mois))
-
-        p3 = plus_proche["p3"]
-        p15 = plus_proche["p15"]
-        p50 = plus_proche["p50"]
-        p85 = plus_proche["p85"]
-        p97 = plus_proche["p97"]
-
-        # Estimer la zone
-        if valeur < p3:
-            zone = "alerte"
-            percentile = "<P3"
-        elif valeur < p15:
-            zone = "attention"
-            percentile = "P3-P15"
-        elif valeur <= p85:
-            zone = "normal"
-            percentile = "P15-P85"
-        elif valeur <= p97:
-            zone = "attention"
-            percentile = "P85-P97"
-        else:
-            zone = "alerte"
-            percentile = ">P97"
-
-        return PositionOMSDict(
-            percentile_estime=percentile,
-            zone=zone,
-            p3=p3,
-            p50=p50,
-            p97=p97,
-        )
 
     # ═══════════════════════════════════════════════════════════
     # STATISTIQUES
@@ -315,13 +233,8 @@ class ServiceCarnetSante(BaseService[Vaccin]):
         return {
             "nb_vaccins": nb_vaccins,
             "derniere_mesure": {
-                "poids": float(derniere_mesure.poids_kg)
-                if derniere_mesure and derniere_mesure.poids_kg
-                else None,
-                "taille": float(derniere_mesure.taille_cm)
-                if derniere_mesure and derniere_mesure.taille_cm
-                else None,
                 "date": derniere_mesure.date_mesure.isoformat() if derniere_mesure else None,
+                "notes": derniere_mesure.notes if derniere_mesure else None,
             },
             "prochain_rdv": {
                 "specialite": prochain_rdv.specialite if prochain_rdv else None,
@@ -362,7 +275,7 @@ class ServiceCarnetSante(BaseService[Vaccin]):
     def lister_mesures(
         self, child_id: int | None = None, *, db: Session | None = None
     ) -> list[MesureCroissance]:
-        """Alias historique: retourne mesures de croissance (optionnellement pour un enfant)."""
+        """Alias historique: retourne les mesures de suivi (optionnellement pour un enfant)."""
         if db is None:
             return []
         query = db.query(MesureCroissance).order_by(MesureCroissance.date_mesure.desc())

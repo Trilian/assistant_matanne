@@ -51,7 +51,7 @@ describe("PageActivites", () => {
     expect(screen.getByText("Piscine")).toBeInTheDocument();
   });
 
-  // Phase O — Pré-remplissage via suggestions structurées
+  // Pré-remplissage via suggestions structurées
   it("affiche le bouton Suggestions IA", () => {
     renderWithQuery(<PageActivites />);
     // Le bouton dans l'en-tête qui ouvre le dialogue IA

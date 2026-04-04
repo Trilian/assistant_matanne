@@ -75,7 +75,7 @@ def configurer_jobs_planifies(planifier_job) -> None:
     planifier_job("sync_voyages_calendrier", CronTrigger(hour=6, minute=30), replace_existing=True)
     planifier_job("sync_charges_dashboard", CronTrigger(hour=7, minute=30), replace_existing=True)
 
-    # Phase 10 — Jobs CRON Innovations
+    # Jobs CRON d'innovations
     planifier_job("optimisation_routines", CronTrigger(day=15, hour=10, minute=0), replace_existing=True)
     planifier_job("suggestions_saison", CronTrigger(day=1, hour=9, minute=0), replace_existing=True)
     planifier_job("purge_historique_jeux", CronTrigger(day=1, hour=3, minute=30), replace_existing=True)

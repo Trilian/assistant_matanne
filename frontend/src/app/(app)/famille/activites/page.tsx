@@ -83,7 +83,7 @@ export default function PageActivites() {
   const [typeFiltre, setTypeFiltre] = useState("tous");
   const [dialogueCreation, setDialogueCreation] = useState(false);
   const [dialogueSuggestions, setDialogueSuggestions] = useState(false);
-  // PHASE C — Auto-prefill states
+  // États dédiés au pré-remplissage automatique
   const [infoPrefill, setInfoPrefill] = useState<string | null>(null);
   const [prefillDismiss, setPrefillDismiss] = useState(false);
   const [suggestionsIA, setSuggestionsIA] = useState<string>("");
@@ -177,7 +177,7 @@ export default function PageActivites() {
     toast.success("Suggestion injectée dans le formulaire");
   };
 
-  // PHASE C — Auto-prefill à l'ouverture du dialog si suggestions disponibles et contexte détecté
+  // Pré-remplir le dialogue à l'ouverture si le contexte est détecté.
   useEffect(() => {
     if (
       dialogueCreation &&
@@ -319,7 +319,7 @@ export default function PageActivites() {
               });
             }}
           >
-            {/* PHASE C — Info banner auto-prefill */}
+            {/* Bannière d'information pour le pré-remplissage automatique */}
             {infoPrefill && !prefillDismiss && (
               <div className="flex items-center justify-between rounded-md bg-blue-50 dark:bg-blue-950/30 px-3 py-2 text-xs text-blue-700 dark:text-blue-300 mb-3">
                 <span>💡 Pré-rempli automatiquement ({infoPrefill})</span>
@@ -426,7 +426,7 @@ export default function PageActivites() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialogue suggestions IA (simplifié — Phase O) */}
+      {/* Dialogue simplifié des suggestions IA */}
       <Dialog open={dialogueSuggestions} onOpenChange={setDialogueSuggestions}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>

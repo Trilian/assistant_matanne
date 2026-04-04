@@ -343,7 +343,7 @@ export default function PageAdmin() {
       {bridgesPhase5?.items?.length ? (
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Graphe Réseau Modules (Phase E5)</CardTitle>
+            <CardTitle className="text-base">Graphe réseau des modules</CardTitle>
             <CardDescription>Visualisation D3.js force-directed des 21 modules et leurs 21+ inter-connections.</CardDescription>
           </CardHeader>
           <CardContent>

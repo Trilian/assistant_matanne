@@ -4,7 +4,7 @@ import { useEffect, useCallback } from "react";
 import { toast } from "sonner";
 
 /**
- * Hook pour gérer les notifications Web Push jeux (Phase W)
+ * Hook pour gérer les notifications Web Push liées aux jeux.
  * 
  * Écoute les événements service worker et affiche les toasts
  * pour les résultats de paris et tirages loto.

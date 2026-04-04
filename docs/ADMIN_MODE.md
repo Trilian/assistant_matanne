@@ -167,7 +167,8 @@ Le mode test rend l'admin plus verbeux et desserre certains garde-fous de diagno
 
 ## Liens utiles
 
+- `docs/ADMIN_QUICK_REFERENCE.md`
 - `docs/ADMIN_RUNBOOK.md`
 - `docs/CRON_JOBS.md`
-- `docs/AUTOMATION_GUIDE.md`
+- `docs/AUTOMATIONS.md`
 - `docs/MONITORING.md`

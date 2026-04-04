@@ -12,10 +12,8 @@ Fournit un snapshot contextuel de la vie familiale :
 - Achats urgents (top 5)
 """
 
-import json
 import logging
 from datetime import date, datetime, timedelta
-from pathlib import Path
 from typing import Any
 
 from src.core.decorators import avec_cache, avec_gestion_erreurs
@@ -24,18 +22,36 @@ from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
-# Référentiel de développement Jules
-_REFERENTIEL_JULES_PATH = Path(__file__).resolve().parents[3] / "data" / "reference" / "normes_oms.json"
+# Référentiel simplifié de développement Jules
+_REFERENTIEL_JULES: dict[str, Any] = {
+    "etapes_developpement": {
+        "12": [
+            "Explorer à son rythme la motricité fine et les jeux d'imitation.",
+            "Renforcer les routines de repas et de sommeil avec des repères simples.",
+        ],
+        "18": [
+            "Encourager le langage du quotidien avec livres, chansons et échanges courts.",
+            "Proposer des activités sensorielles et des jeux de manipulation.",
+        ],
+        "24": [
+            "Favoriser l'autonomie dans les gestes simples et les repas partagés.",
+            "Introduire des activités calmes, créatives et des routines stables.",
+        ],
+        "30": [
+            "Stimuler les interactions sociales, les histoires et les jeux symboliques.",
+            "Continuer les repères alimentaires et les activités de plein air.",
+        ],
+        "36": [
+            "Consolider les routines, l'expression verbale et les jeux coopératifs.",
+            "Maintenir un suivi léger centré sur jalons, activités et bien-être.",
+        ],
+    }
+}
 
 
 def _charger_referentiel_jules() -> dict[str, Any]:
-    """Charge le référentiel de développement utilisé pour Jules."""
-    try:
-        with open(_REFERENTIEL_JULES_PATH, encoding="utf-8") as f:
-            return json.load(f)
-    except Exception as e:
-        logger.warning("Impossible de charger le référentiel Jules: %s", e)
-        return {}
+    """Retourne le référentiel simplifié de jalons utilisé pour Jules."""
+    return _REFERENTIEL_JULES
 
 
 class ContexteFamilialService:

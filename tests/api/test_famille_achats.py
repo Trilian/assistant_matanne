@@ -424,12 +424,12 @@ class TestSuggestionsIAEnrichies:
 
 
 # ═══════════════════════════════════════════════════════════
-# POST /api/v1/famille/achats/{id}/annonce-vinted
+# Endpoint Vinted retiré du produit
 # ═══════════════════════════════════════════════════════════
 
 
-class TestAnnonceVinted:
-    """Tests pour POST /api/v1/famille/achats/{id}/annonce-vinted."""
+class TestAnnonceVintedSupprimee:
+    """Le endpoint Vinted ne doit plus être exposé."""
 
     PAYLOAD_VINTED = {
         "nom": "Pull Jules 18 mois Petit Bateau",
@@ -442,29 +442,20 @@ class TestAnnonceVinted:
     }
 
     @pytest.mark.asyncio
-    async def test_generer_annonce_retourne_200(self, async_client: httpx.AsyncClient):
-        """Génération annonce Vinted valide → 200 avec texte."""
-        mock_ia_service = MagicMock()
-        mock_ia_service.generer_annonce_vinted = MagicMock(
-            return_value="Pull Petit Bateau 18 mois…"
+    async def test_endpoint_supprime_retourne_404(self, async_client: httpx.AsyncClient):
+        """Même avec un payload valide, l'ancien endpoint Vinted reste inactif."""
+        response = await async_client.post(
+            "/api/v1/famille/achats/1/annonce-vinted",
+            json=self.PAYLOAD_VINTED,
         )
 
-        with patch(
-            "src.services.famille.achats_ia.obtenir_service_achats_ia",
-            return_value=mock_ia_service,
-        ):
-            response = await async_client.post(
-                "/api/v1/famille/achats/1/annonce-vinted",
-                json=self.PAYLOAD_VINTED,
-            )
-
-        assert response.status_code == 200
-        data = response.json()
-        assert "annonce" in data
+        assert response.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_generer_annonce_appelle_service(self, async_client: httpx.AsyncClient):
-        """Le service est bien appelé avec marque et taille."""
+    async def test_endpoint_supprime_n_appelle_pas_le_service(
+        self, async_client: httpx.AsyncClient
+    ):
+        """Aucun service legacy ne doit être invoqué pour une feature supprimée."""
         mock_ia_service = MagicMock()
         mock_ia_service.generer_annonce_vinted = MagicMock(return_value="Annonce test")
 
@@ -472,35 +463,10 @@ class TestAnnonceVinted:
             "src.services.famille.achats_ia.obtenir_service_achats_ia",
             return_value=mock_ia_service,
         ):
-            await async_client.post(
+            response = await async_client.post(
                 "/api/v1/famille/achats/1/annonce-vinted",
                 json=self.PAYLOAD_VINTED,
             )
 
-        mock_ia_service.generer_annonce_vinted.assert_called_once()
-        call_kwargs = mock_ia_service.generer_annonce_vinted.call_args
-        assert call_kwargs.kwargs.get("marque") == "Petit Bateau"
-
-    @pytest.mark.asyncio
-    async def test_payload_minimal_sans_marque_retourne_200_ou_422(
-        self, async_client: httpx.AsyncClient
-    ):
-        """Annonce sans champs optionnels (marque/taille/categorie) → accepté ou validation."""
-        mock_ia_service = MagicMock()
-        mock_ia_service.generer_annonce_vinted = MagicMock(return_value="Annonce minimale")
-
-        with patch(
-            "src.services.famille.achats_ia.obtenir_service_achats_ia",
-            return_value=mock_ia_service,
-        ):
-            response = await async_client.post(
-                "/api/v1/famille/achats/1/annonce-vinted",
-                json={
-                    "nom": "Tshirt",
-                    "description": "Bon état.",
-                    "etat_usage": "bon",
-                    "prix_cible": 5.0,
-                },
-            )
-
-        assert response.status_code in [200, 422]
+        assert response.status_code == 404
+        mock_ia_service.generer_annonce_vinted.assert_not_called()

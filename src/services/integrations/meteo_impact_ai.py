@@ -163,7 +163,7 @@ Format: "🎯 Activité 1 (25 min, intérieur)\n📝 Description..."."""
             conditions: Conditions
             humidite: % humidité (0-100)
             temperature: (min, max) en °C
-            phase_jardin: Phase de croissance
+            phase_jardin: Stade de croissance
 
         Returns:
             Conseils jardin pratiques

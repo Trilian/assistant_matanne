@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════
-// API Telegram — Intégration Phase 5.2
+// API Telegram — intégration des actions interactives
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";

@@ -62,7 +62,7 @@
 
 ### Fonctionnalités
 
-- **Jules** — Suivi développement enfant : jalons, bien-être, courbes croissance, vaccins, rendez-vous médicaux
+- **Jules** — Suivi développement enfant : jalons, bien-être, alimentation, vaccins, rendez-vous médicaux
 - **Activités** — Activités familiales, planification, historique
 - **Routines** — Routines quotidiennes (matin/soir), tâches
 - **Budget famille** — Achats familiaux, suivi dépenses, catégories

@@ -565,7 +565,7 @@ export async function supprimerEvenementFamilial(
   await clientApi.delete(`/famille/evenements/${id}`);
 }
 
-// ─── Contexte Familial (Phase M) ─────────────────────────
+// ─── Contexte familial ───────────────────────────────────
 
 import type {
   ContexteFamilial,
@@ -579,7 +579,7 @@ export async function obtenirContexteFamilial(): Promise<ContexteFamilial> {
   return data;
 }
 
-// ─── Suggestions IA (Phase M3) ───────────────────────────
+// ─── Suggestions IA ──────────────────────────────────────
 
 /** Suggestions weekend avec météo auto-injectée */
 export async function obtenirSuggestionsWeekend(params?: {
@@ -612,7 +612,7 @@ export async function obtenirSuggestionsSoiree(params?: {
   return data;
 }
 
-/** Suggestions activités avec météo auto (Phase O) */
+/** Suggestions d'activités avec météo automatique */
 export async function obtenirSuggestionsActivitesAuto(params?: {
   budget_max?: number;
   duree_max_heures?: number;
@@ -633,7 +633,7 @@ export async function obtenirSuggestionsActivitesAuto(params?: {
   return data;
 }
 
-// ─── Achats Famille CRUD (Phase M4/P) ────────────────────
+// ─── Achats famille CRUD ─────────────────────────────────
 
 /** Lister les achats (route canonique) */
 export async function listerAchats(params?: {
@@ -810,7 +810,7 @@ export async function obtenirSuggestionsSejourIA(payload: {
   return data;
 }
 
-/** Suggestions IA achats/cadeaux (Phase P) */
+/** Suggestions IA pour les achats et cadeaux */
 export interface SuggestionAchat {
   titre: string;
   description: string;
@@ -873,7 +873,7 @@ export async function obtenirSuggestionsAchatsEnrichies(payload: {
   return data;
 }
 
-// ─── Rappels (Phase Q) ──────────────────────────────────
+// ─── Rappels ─────────────────────────────────────────────
 
 /** Évaluer les rappels du jour */
 export async function evaluerRappelsFamille(): Promise<{

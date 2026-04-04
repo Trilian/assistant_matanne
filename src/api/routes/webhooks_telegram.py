@@ -751,8 +751,8 @@ async def _traiter_callback_planning(
     chat_id: str,
 ) -> None:
     """Traite les callbacks de planning: valider, modifier, régénérer.
-    
-    Phase 5.2: Webhook callbacks → endpoints de validation
+
+    Relie les boutons Telegram aux endpoints de validation du planning.
     """
     from src.api.utils import executer_async, executer_avec_session
     from src.services.integrations.telegram import repondre_callback_query, modifier_message
@@ -893,8 +893,8 @@ async def _traiter_callback_courses(
     chat_id: str,
 ) -> None:
     """Traite les callbacks de courses: confirmer, ajouter, refaire.
-    
-    Phase 5.2: Webhook callbacks → endpoints de confirmation
+
+    Relie les boutons Telegram aux endpoints de confirmation de liste.
     """
     from src.api.utils import executer_async, executer_avec_session
     from src.services.integrations.telegram import repondre_callback_query, modifier_message
@@ -1235,14 +1235,14 @@ async def envoyer_courses_telegram(payload: EnvoyerCoursesTelegramRequest) -> Me
 @gerer_exception_api
 async def recevoir_update_telegram(request: Request) -> MessageResponse:
     """Recoit un update Telegram et traite les commandes principales et callbacks.
-    
+
     Gère:
-    - callback_query (Phase 5.2: planning/courses workflow buttons)
-    - message texte (commandes naturelles)
+    - callback_query pour les boutons planning et courses
+    - message texte pour les commandes naturelles
     """
     payload = await request.json()
 
-    # Phase 5.2: Traitement des callbacks (boutons interactifs)
+    # Traitement des callbacks issus des boutons interactifs.
     callback_query = payload.get("callback_query") or {}
     if callback_query:
         data = str(callback_query.get("data") or "").strip()
@@ -1257,7 +1257,7 @@ async def recevoir_update_telegram(request: Request) -> MessageResponse:
 
         logger.info(f"Callback Telegram reçu: {data} (msg_id={message_id})")
 
-        # Dispatch aux handlers Phase 5.2
+        # Dispatch vers le handler correspondant.
         if data.startswith("courses_toggle_article:"):
             await _traiter_callback_toggle_article(data, callback_query_id, chat_id)
         elif data.startswith("planning_"):

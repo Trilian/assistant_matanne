@@ -17,7 +17,7 @@
 | **Contrats API** | Schemathesis | `pyproject.toml` | `pytest tests/contracts/` |
 | **Performance** | benchmarks internes | `tests/benchmarks/` | `pytest tests/benchmarks/ -m benchmark` |
 | **Load** | k6 | `tests/load/k6_baseline.js` | `k6 run tests/load/k6_baseline.js` |
-| **Recette manuelle** | Telegram Sprint 5 | `docs/TELEGRAM_RECETTE_SPRINT5.md` | `pytest tests/api/test_webhooks_telegram_endpoints.py tests/api/test_webhooks_telegram_callbacks.py -q` |
+| **Recette manuelle** | Telegram | `docs/TELEGRAM_RECETTES.md` | `pytest tests/api/test_webhooks_telegram_endpoints.py tests/api/test_webhooks_telegram_callbacks.py -q` |
 
 ---
 
@@ -383,9 +383,9 @@ pytest tests/sql/test_schema_coherence.py
 
 Vérifie l'alignement ORM ↔ SQL.
 
-### Recette manuelle Telegram Sprint 5
+### Recette manuelle Telegram
 
-Référence de validation manuelle: `docs/TELEGRAM_RECETTE_SPRINT5.md`
+Référence de validation manuelle: `docs/TELEGRAM_RECETTES.md`
 
 Cette recette couvre:
 

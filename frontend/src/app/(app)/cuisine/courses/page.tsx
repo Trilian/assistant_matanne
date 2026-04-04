@@ -27,23 +27,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
-import { Label } from "@/composants/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/composants/ui/card";
-import { Badge } from "@/composants/ui/badge";
-import { Skeleton } from "@/composants/ui/skeleton";
-import { EtatVide } from "@/composants/ui/etat-vide";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/composants/ui/dialog";
+import { DialogueArticleCourses } from "@/composants/courses/dialogue-article-courses";
+import { DialogueQrCourses } from "@/composants/courses/dialogue-qr-courses";
+import { PanneauBioLocal } from "@/composants/courses/panneau-bio-local";
+import { PanneauDetailCourses } from "@/composants/courses/panneau-detail-courses";
+import { PanneauListesCourses } from "@/composants/courses/panneau-listes-courses";
 import {
   utiliserRequete,
   utiliserMutation,
@@ -804,458 +792,92 @@ export default function PageCourses() {
       />
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Panel listes */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Mes listes</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <form
-              className="flex gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (nomNouvelleListe.trim()) creerListe(nomNouvelleListe.trim());
-              }}
-            >
-              <Input
-                placeholder="Nouvelle liste..."
-                value={nomNouvelleListe}
-                onChange={(e) => setNomNouvelleListe(e.target.value)}
-              />
-              <Button
-                type="submit"
-                size="icon"
-                disabled={enCreationListe || !nomNouvelleListe.trim()}
-                aria-label="Créer la liste"
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </form>
+        <PanneauListesCourses
+          nomNouvelleListe={nomNouvelleListe}
+          enCreationListe={enCreationListe}
+          chargementListes={chargementListes}
+          listeSelectionnee={listeSelectionnee}
+          listes={listes}
+          suggestionsInvites={suggestionsInvites}
+          predictionsInvites={predictionsInvites}
+          recurrents={recurrents}
+          onNomNouvelleListeChange={setNomNouvelleListe}
+          onCreerListe={() => creerListe(nomNouvelleListe.trim())}
+          onSelectionnerListe={setListeSelectionnee}
+          onAjouterRecurrent={(articleNom, categorie) =>
+            ajouter({ nom: articleNom, categorie })
+          }
+          onAjouterPrediction={(prediction) =>
+            ajouter({
+              nom: prediction.article_nom,
+              quantite: prediction.quantite_suggeree,
+              unite: prediction.unite_suggeree,
+              categorie: prediction.categorie ?? prediction.rayon_magasin ?? undefined,
+            })
+          }
+        />
 
-            {chargementListes ? (
-              <div className="space-y-2">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
-                ))}
-              </div>
-            ) : !listes?.length ? (
-              <EtatVide
-                Icone={ShoppingCart}
-                titre="Aucune liste de courses"
-                description="Cree ta premiere liste pour commencer."
-                className="py-6"
-              />
-            ) : (
-              <div className="space-y-1">
-                {listes.map((l) => (
-                  <button
-                    key={l.id}
-                    onClick={() => setListeSelectionnee(l.id)}
-                    className={`w-full text-left rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent ${
-                      listeSelectionnee === l.id ? "bg-accent" : ""
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium truncate">{l.nom}</span>
-                      <Badge variant="secondary" className="text-xs">
-                        {l.nombre_coche}/{l.nombre_articles}
-                      </Badge>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Récurrents suggérés */}
-            {recurrents && recurrents.suggestions.length > 0 && listeSelectionnee && (
-              <div className="border-t pt-3 mt-3">
-                <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                  <RotateCcw className="h-3 w-3" />
-                  Achats récurrents
-                </p>
-                <div className="space-y-1">
-                  {recurrents.suggestions.slice(0, 5).map((r) => (
-                    <button
-                      key={r.article_nom}
-                      className="w-full text-left text-xs rounded px-2 py-1 hover:bg-accent transition-colors"
-                      onClick={() =>
-                        ajouter({ nom: r.article_nom, categorie: r.categorie ?? undefined })
-                      }
-                    >
-                      <span className="font-medium">{r.article_nom}</span>
-                      <span className="text-muted-foreground ml-1">
-                        +{r.retard_jours}j retard
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {listeSelectionnee && predictionsInvites && predictionsInvites.items.length > 0 && (
-              <div className="border-t pt-3 mt-3">
-                <p className="text-xs font-medium text-muted-foreground mb-2">
-                  Suggestions invites
-                </p>
-                <div className="space-y-2">
-                  {predictionsInvites.items.slice(0, 5).map((prediction) => (
-                    <button
-                      key={`${prediction.article_nom}-${prediction.quantite_suggeree}`}
-                      className="w-full rounded-md border px-2 py-2 text-left hover:bg-accent transition-colors"
-                      onClick={() =>
-                        ajouter({
-                          nom: prediction.article_nom,
-                          quantite: prediction.quantite_suggeree,
-                          unite: prediction.unite_suggeree,
-                          categorie:
-                            prediction.categorie ?? prediction.rayon_magasin ?? undefined,
-                        })
-                      }
-                    >
-                      <div className="flex items-center justify-between gap-2 text-xs">
-                        <span className="font-medium text-foreground">
-                          {prediction.article_nom}
-                        </span>
-                        <span className="text-muted-foreground">
-                          x{prediction.quantite_suggeree} {prediction.unite_suggeree}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[11px] text-muted-foreground">
-                        Confiance {Math.round(prediction.confiance_contextualisee * 100)}%
-                        {prediction.contexte_applique.raisons.length > 0 && (
-                          <span>
-                            {" "}· {prediction.contexte_applique.raisons.join(", ")}
-                          </span>
-                        )}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Panel articles — Bring!-style tiles */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-lg">
-                {detailListe?.nom ?? "Sélectionner une liste"}
-              </CardTitle>
-              {detailListe && (
-                <CardDescription>
-                  {articlesNonCoches.length} restant(s) sur{" "}
-                  {articles.length} article(s)
-                </CardDescription>
-              )}
-            </div>
-            <div className="flex gap-1">
-              {listeSelectionnee && (
-                <>
-                  <Button size="sm" variant="outline" onClick={() => setScanneurOuvert(true)}>
-                    <ScanLine className="mr-1 h-4 w-4" />
-                    Scanner
-                  </Button>
-                  <Button size="sm" onClick={() => setDialogueArticle(true)}>
-                    <Plus className="mr-1 h-4 w-4" />
-                    Article
-                  </Button>
-                </>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {!listeSelectionnee ? (
-              <EtatVide
-                Icone={ShoppingCart}
-                titre="Selectionnez une liste"
-                description="Choisissez une liste existante ou creez-en une nouvelle pour ajouter des articles."
-                className="py-10"
-              />
-            ) : (
-              <div className="space-y-4">
-                {detailListe?.etat === "brouillon" && (
-                  <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-                    Cette liste est en brouillon. Confirmez-la avant de finaliser les courses.
-                  </div>
-                )}
-
-                {/* Champ "Ajouter article" toujours visible (4.5) */}
-                <form 
-                  onSubmit={submitArticle((data) => ajouter(data))}
-                  className="flex gap-2 sticky top-0 bg-card pb-3 z-10 border-b"
-                >
-                  <Input
-                    {...regArticle("nom")}
-                    ref={(element) => {
-                      regArticle("nom").ref(element);
-                      inputAjoutRef.current = element;
-                    }}
-                    placeholder="+ Ajouter un article..."
-                    className="flex-1"
-                    disabled={enAjout}
-                  />
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={enAjout}
-                    aria-label="Ajouter l'article"
-                  >
-                    {enAjout ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Plus className="h-4 w-4" />
-                    )}
-                  </Button>
-                  {estSupporte && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={enEcoute ? "secondary" : "outline"}
-                      aria-label="Saisie vocale"
-                      onClick={() => {
-                        if (enEcoute) {
-                          arreterEcoute();
-                        } else {
-                          demarrerEcoute();
-                        }
-                      }}
-                    >
-                      {enEcoute ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                    </Button>
-                  )}
-                </form>
-
-                {modeSelection && (
-                  <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
-                    <span className="font-medium">{articlesSelectionnes.size} sélectionné(s)</span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        if (articlesSelectionnes.size === articlesNonCoches.length) {
-                          setArticlesSelectionnes(new Set());
-                        } else {
-                          setArticlesSelectionnes(new Set(articlesNonCoches.map((article) => article.id)));
-                        }
-                      }}
-                    >
-                      {articlesSelectionnes.size === articlesNonCoches.length ? "Tout désélectionner" : "Tout sélectionner"}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => cocherSelection(undefined)}
-                      disabled={articlesSelectionnes.size === 0 || enCochageSelection}
-                    >
-                      Cocher la sélection
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => supprimerSelection(undefined)}
-                      disabled={articlesSelectionnes.size === 0 || enSuppressionSelection}
-                    >
-                      <Trash2 className="mr-1 h-4 w-4" />
-                      Supprimer la sélection
-                    </Button>
-                  </div>
-                )}
-
-                {/* Affichage articles */}
-                {chargementDetail ? (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                    {Array.from({ length: 10 }).map((_, i) => (
-                      <Skeleton key={i} className="aspect-square rounded-xl" />
-                    ))}
-                  </div>
-                ) : articles.length === 0 ? (
-                  <EtatVide
-                    Icone={ShoppingCart}
-                    titre="Liste vide"
-                    description="Ajoutez un article via le champ rapide ou le scan code-barres."
-                    className="py-10"
-                  />
-                ) : (
-                  <div className="space-y-6">
-                    {/* Articles par catégorie */}
-                    {categoriesTriees.map((cat) => (
-                      <div key={cat}>
-                        <div className="mb-2 flex items-center justify-between gap-2">
-                          <h3 className="text-sm font-semibold">{cat}</h3>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 px-2 text-xs"
-                            onClick={() => cocherCategorie(cat)}
-                            disabled={enCochageCategorie || enFinalisationCourses}
-                          >
-                            Cocher catégorie
-                          </Button>
-                        </div>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                          {groupesNonCoches[cat].map((a) => (
-                            <TileArticle
-                              key={a.id}
-                              nom={a.nom}
-                              quantite={a.quantite}
-                              unite={a.unite}
-                              categorie={a.categorie}
-                              estSelectionne={articlesSelectionnes.has(a.id)}
-                              onClick={() => {
-                                if (modeSelection) {
-                                  basculerSelectionArticle(a.id);
-                                } else {
-                                  cocher({ articleId: a.id, coche: true });
-                                }
-                              }}
-                              onLongPress={() => {
-                                if (modeSelection) {
-                                  basculerSelectionArticle(a.id);
-                                } else {
-                                  supprimerAvecUndo(a);
-                                }
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-
-                    {/* Articles cochés */}
-                    {articlesCoches.length > 0 && (
-                      <div>
-                        <h3 className="text-sm font-semibold text-muted-foreground mb-2">
-                          Complétés ({articlesCoches.length})
-                        </h3>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                          {articlesCoches.map((a) => (
-                            <TileArticle
-                              key={a.id}
-                              nom={a.nom}
-                              quantite={a.quantite}
-                              unite={a.unite}
-                              categorie={a.categorie}
-                              estCoche
-                              onClick={() => cocher({ articleId: a.id, coche: false })}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <PanneauDetailCourses
+          listeSelectionnee={listeSelectionnee}
+          detailListe={detailListe}
+          chargementDetail={chargementDetail}
+          enAjout={enAjout}
+          estSupporte={estSupporte}
+          enEcoute={enEcoute}
+          modeSelection={modeSelection}
+          enCochageSelection={enCochageSelection}
+          enSuppressionSelection={enSuppressionSelection}
+          enCochageCategorie={enCochageCategorie}
+          enFinalisationCourses={enFinalisationCourses}
+          articles={articles}
+          articlesNonCoches={articlesNonCoches}
+          articlesCoches={articlesCoches}
+          categoriesTriees={categoriesTriees}
+          groupesNonCoches={groupesNonCoches}
+          articlesSelectionnes={articlesSelectionnes}
+          inputAjoutRef={inputAjoutRef}
+          erreursArticle={erreursArticle}
+          regArticle={regArticle}
+          submitArticle={submitArticle}
+          onAjouterArticle={(data) => ajouter(data)}
+          onToggleVocal={() => {
+            if (enEcoute) {
+              arreterEcoute();
+            } else {
+              demarrerEcoute();
+            }
+          }}
+          onOuvrirScanneur={() => setScanneurOuvert(true)}
+          onOuvrirDialogueArticle={() => setDialogueArticle(true)}
+          onBasculerSelectionArticle={basculerSelectionArticle}
+          onBasculerToutSelectionner={() => {
+            if (articlesSelectionnes.size === articlesNonCoches.length) {
+              setArticlesSelectionnes(new Set());
+            } else {
+              setArticlesSelectionnes(new Set(articlesNonCoches.map((article) => article.id)));
+            }
+          }}
+          onCocherSelection={() => cocherSelection(undefined)}
+          onSupprimerSelection={() => supprimerSelection(undefined)}
+          onCocherCategorie={(categorie) => cocherCategorie(categorie)}
+          onCocherArticle={(articleId, coche) => cocher({ articleId, coche })}
+          onSupprimerArticle={supprimerAvecUndo}
+        />
       </div>
 
-      {/* Panel Bio & Local */}
       {panneauBio && bioLocal && bioLocal.suggestions.length > 0 && (
-        <Card className="border-green-300 bg-green-50 dark:border-green-800 dark:bg-green-950">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2 text-green-700 dark:text-green-300">
-              <Leaf className="h-4 w-4" />
-              Suggestions Bio & Local — {bioLocal.mois}
-            </CardTitle>
-            <CardDescription className="text-green-600 dark:text-green-400">
-              {bioLocal.nb_en_saison} article(s) de saison dans votre liste
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {bioLocal.suggestions.map((s) => (
-                <div
-                  key={s.article_id}
-                  className="flex items-center justify-between rounded-lg border border-green-200 dark:border-green-800 px-3 py-2 text-sm"
-                >
-                  <div>
-                    <span className="font-medium">{s.nom}</span>
-                    <div className="flex gap-1 mt-0.5">
-                      {s.en_saison && <Badge variant="secondary" className="text-[10px]">🌱 Saison</Badge>}
-                      {s.bio_disponible && <Badge variant="secondary" className="text-[10px]">🌿 Bio</Badge>}
-                      {s.local_disponible && <Badge variant="secondary" className="text-[10px]">📍 Local</Badge>}
-                    </div>
-                  </div>
-                  {s.alternative_bio && (
-                    <span className="text-xs text-muted-foreground">→ {s.alternative_bio}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <PanneauBioLocal bioLocal={bioLocal} />
       )}
 
-      {/* Dialogue ajout article */}
-      <Dialog open={dialogueArticle} onOpenChange={setDialogueArticle}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Ajouter un article</DialogTitle>
-          </DialogHeader>
-          <form
-            onSubmit={submitArticle((data) => ajouter(data))}
-            className="space-y-4"
-          >
-            <div className="space-y-2">
-              <Label htmlFor="nom-article">Nom *</Label>
-              <Input
-                id="nom-article"
-                {...regArticle("nom")}
-                placeholder="Ex: Tomates"
-              />
-              {erreursArticle.nom && (
-                <p className="text-sm text-destructive">
-                  {erreursArticle.nom.message}
-                </p>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="qte-article">Quantité</Label>
-                <Input
-                  id="qte-article"
-                  type="number"
-                  min={0}
-                  step="any"
-                  {...regArticle("quantite")}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="unite-article">Unité</Label>
-                <Input
-                  id="unite-article"
-                  {...regArticle("unite")}
-                  placeholder="kg, L, pièces..."
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cat-article">Catégorie</Label>
-              <Input
-                id="cat-article"
-                {...regArticle("categorie")}
-                placeholder="Fruits, Légumes, Viande..."
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setDialogueArticle(false)}
-              >
-                Annuler
-              </Button>
-              <Button type="submit" disabled={enAjout}>
-                {enAjout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Ajouter
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <DialogueArticleCourses
+        ouvert={dialogueArticle}
+        enAjout={enAjout}
+        erreursArticle={erreursArticle}
+        regArticle={regArticle}
+        submitArticle={submitArticle}
+        onOpenChange={setDialogueArticle}
+        onAjouterArticle={(data) => ajouter(data)}
+      />
 
       <ScanneurMultiCodes
         ouvert={scanneurOuvert}
@@ -1264,44 +886,23 @@ export default function PageCourses() {
         labelImporter="Ajouter à la liste"
       />
 
-      <Dialog
-        open={dialogueQr}
+      <DialogueQrCourses
+        ouvert={dialogueQr}
+        qrUrl={qrUrl}
+        chargementQr={chargementQr}
+        onTelecharger={telechargerQr}
         onOpenChange={(ouvert) => {
           setDialogueQr(ouvert);
           if (!ouvert) {
             setQrUrl((precedent) => {
-              if (precedent) URL.revokeObjectURL(precedent);
+              if (precedent) {
+                URL.revokeObjectURL(precedent);
+              }
               return null;
             });
           }
         }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>QR de partage</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Scannez ce QR pour ouvrir la version texte de votre liste de courses.
-            </p>
-            <div className="flex justify-center rounded-lg border p-4 min-h-48 items-center">
-              {chargementQr ? (
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              ) : qrUrl ? (
-                <img src={qrUrl} alt="QR liste de courses" className="h-52 w-52" />
-              ) : (
-                <p className="text-sm text-muted-foreground">QR indisponible</p>
-              )}
-            </div>
-            <div className="flex justify-end">
-              <Button variant="outline" onClick={telechargerQr} disabled={!qrUrl}>
-                <Download className="mr-1 h-4 w-4" />
-                Télécharger
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      />
     </div>
   );
 }

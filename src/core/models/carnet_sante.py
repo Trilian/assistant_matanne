@@ -4,8 +4,7 @@ Modèles pour le carnet de santé numérique.
 Contient :
 - Vaccin : Vaccinations avec calendrier et rappels
 - RendezVousMedical : RDV médicaux (pédiatre, généraliste, spécialiste)
-- MesureCroissance : Mesures taille/poids/périmètre crânien
-- NormeOMS : Données de référence OMS (percentiles poids/taille/PC/IMC)
+- MesureCroissance : Mesures ponctuelles de suivi santé
 """
 
 from datetime import date, datetime
@@ -130,12 +129,12 @@ class RendezVousMedical(CreeLeMixin, Base):
 
 
 # ═══════════════════════════════════════════════════════════
-# MESURES DE CROISSANCE
+# MESURES DE SUIVI SANTÉ
 # ═══════════════════════════════════════════════════════════
 
 
 class MesureCroissance(CreeLeMixin, Base):
-    """Mesure physique d'un enfant (courbe de croissance).
+    """Mesure ponctuelle de santé pour un enfant.
 
     Attributes:
         enfant_id: ID du profil enfant
@@ -182,58 +181,3 @@ class MesureCroissance(CreeLeMixin, Base):
             f"poids={self.poids_kg}kg, taille={self.taille_cm}cm)>"
         )
 
-
-# ═══════════════════════════════════════════════════════════
-# NORMES OMS (DONNÉES DE RÉFÉRENCE)
-# ═══════════════════════════════════════════════════════════
-
-
-class NormeOMS(Base):
-    """Données de référence OMS pour les courbes de croissance.
-
-    Percentiles P3, P15, P50, P85, P97 par sexe, âge et type de mesure.
-    Table pré-remplie avec les données OMS standards (0-36 mois).
-
-    Attributes:
-        sexe: M ou F
-        age_mois: Âge en mois (0-36)
-        type_mesure: Type (poids, taille, perimetre_cranien, imc)
-        p3: Percentile 3
-        p15: Percentile 15
-        p50: Percentile 50 (médiane)
-        p85: Percentile 85
-        p97: Percentile 97
-    """
-
-    __tablename__ = "normes_oms"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    sexe: Mapped[str] = mapped_column(String(1), nullable=False, index=True)  # M ou F
-    age_mois: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
-    type_mesure: Mapped[str] = mapped_column(
-        String(50), nullable=False, index=True
-    )  # poids, taille, perimetre_cranien, imc
-    p3: Mapped[float] = mapped_column(Float, nullable=False)
-    p15: Mapped[float] = mapped_column(Float, nullable=False)
-    p50: Mapped[float] = mapped_column(Float, nullable=False)
-    p85: Mapped[float] = mapped_column(Float, nullable=False)
-    p97: Mapped[float] = mapped_column(Float, nullable=False)
-
-    __table_args__ = (
-        CheckConstraint("sexe IN ('M', 'F')", name="ck_norme_sexe"),
-        CheckConstraint("age_mois >= 0 AND age_mois <= 60", name="ck_norme_age_range"),
-        CheckConstraint(
-            "type_mesure IN ('poids', 'taille', 'perimetre_cranien', 'imc')",
-            name="ck_norme_type_mesure",
-        ),
-        CheckConstraint(
-            "p3 <= p15 AND p15 <= p50 AND p50 <= p85 AND p85 <= p97",
-            name="ck_norme_percentiles_ordre",
-        ),
-    )
-
-    def __repr__(self) -> str:
-        return (
-            f"<NormeOMS(sexe='{self.sexe}', age_mois={self.age_mois}, "
-            f"type='{self.type_mesure}', p50={self.p50})>"
-        )

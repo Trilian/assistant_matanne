@@ -1,9 +1,9 @@
 /**
  * ═══════════════════════════════════════════════════════════
- * TanStack Query Hooks — Sprint 13 AI Services
+ * TanStack Query hooks for AI services.
  * ═══════════════════════════════════════════════════════════
  * 
- * Custom React hooks wrapping mutations for all 6 Sprint 13 AI endpoints
+ * Custom React hooks wrapping the AI mutations exposed by the app.
  * Uses TanStack Query v5 + Zustand notifications
  */
 

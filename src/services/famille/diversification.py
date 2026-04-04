@@ -55,7 +55,7 @@ class RecommandationDiversification:
 
 
 # ═══════════════════════════════════════════════════════════
-# CATALOGUE DIVERSIFICATION (OMS + recommandations pédiatre FR)
+# CATALOGUE DIVERSIFICATION (repères pédiatriques FR + recommandations alimentaires)
 # ═══════════════════════════════════════════════════════════
 
 CATALOGUE_ALIMENTS: list[AlimentBebe] = [

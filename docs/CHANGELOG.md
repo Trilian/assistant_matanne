@@ -6,7 +6,7 @@
 
 ---
 
-## 2026-04-03 - Sprint 9 documentation finale
+## 2026-04-03 - Documentation finale et nettoyage
 
 ### Ajouté
 
@@ -19,7 +19,7 @@
 
 - `README.md` aligné sur l'état actuel du projet et enrichi avec les guides de référence prioritaires
 - `.github/copilot-instructions.md` aligné avec l'état actuel du périmètre produit
-- `PLANNING_IMPLEMENTATION.md` mis à jour avec le statut réel du sprint 9
+- `PLANNING_IMPLEMENTATION.md` mis à jour avec le statut réel de la vague documentation
 - nettoyage des références documentaires obsolètes dans les guides IA, jeux, famille et FAQ
 
 ### Nettoyage

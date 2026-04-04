@@ -1,6 +1,6 @@
-# Recette Manuelle Telegram — Sprint 5
+# Recette Manuelle Telegram
 
-> Validation manuelle du hub mobile Telegram après implémentation du Sprint 5.
+> Validation manuelle du hub mobile Telegram.
 >
 > Portée : commandes slash, menus, callbacks inline, réponses rapides, fallback conversationnel.
 
@@ -24,7 +24,7 @@ Fichiers utiles :
 
 ---
 
-## Commandes Sprint 5
+## Commandes principales
 
 ### `/aide`
 
@@ -314,7 +314,7 @@ pytest tests/api/test_webhooks_telegram_endpoints.py tests/api/test_webhooks_tel
 
 La recette est considérée conforme si :
 
-- toutes les commandes Sprint 5 répondent sans erreur
+- toutes les commandes documentées répondent sans erreur
 - les menus et callbacks Telegram fonctionnent
 - les réponses rapides valident les flux prévus
 - les fallbacks historiques restent opérationnels

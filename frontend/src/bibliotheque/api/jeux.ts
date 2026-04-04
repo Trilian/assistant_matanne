@@ -154,7 +154,7 @@ export async function genererGrilleLoto(
   return data;
 }
 
-/** Générer grille Loto avec IA pondérée (Phase U) */
+/** Générer une grille Loto avec IA pondérée */
 export async function genererGrilleIAPonderee(
   mode: "chauds" | "froids" | "equilibre" = "equilibre",
   sauvegarder = false
@@ -173,7 +173,7 @@ export async function genererGrilleIAPonderee(
   return data;
 }
 
-/** Analyser une grille Loto joueur avec IA (Phase U) */
+/** Analyser une grille Loto joueur avec IA */
 export async function analyserGrilleJoueur(
   numeros: number[],
   numeroChance: number
@@ -307,7 +307,7 @@ export async function marquerNotificationLue(id: string): Promise<void> {
   await clientApi.post(`/jeux/notifications/${id}/lue`);
 }
 
-// ─── Historique cotes (Phase T - Heatmap) ────────────────
+// ─── Historique des cotes et heatmap ─────────────────────
 
 export async function obtenirHistoriqueCotes(matchId: number): Promise<{
   match_id: number;

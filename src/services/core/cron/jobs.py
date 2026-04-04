@@ -3847,7 +3847,7 @@ _REGISTRE_JOBS.update(
 
 
 # ═══════════════════════════════════════════════════════════
-# PHASE 10 — JOBS CRON INNOVATIONS
+# JOBS CRON D'INNOVATIONS
 # ═══════════════════════════════════════════════════════════
 
 
@@ -3960,7 +3960,7 @@ def _obtenir_dispatcher():
 
 _REGISTRE_JOBS.update(
     {
-        # Phase 10 — Jobs CRON Innovations
+        # Jobs CRON d'innovations
         "optimisation_routines": ("Optimisation routines IA (mensuel)", _job_optimisation_routines),
         "suggestions_saison": ("Suggestions produits de saison (mensuel)", _job_suggestions_saison),
         "purge_historique_jeux": ("Purge historique jeux > 12 mois", _job_purge_historique_jeux),

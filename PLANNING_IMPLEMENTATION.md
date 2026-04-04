@@ -259,6 +259,7 @@
 - ✅ `17_migrations_absorbees.sql` rempli avec le nettoyage idempotent des reliquats SQL (`archive_articles`, `journal_sante`, `stats_home`, `taches_home`)
 - ✅ ajout du script `scripts/analysis/audit_orm_sql.py` pour rejouer l’audit ORM↔SQL hors pytest
 - ✅ `INIT_COMPLET.sql` régénéré et validé — SHA256 : `3537E08CBFEAFBAE917D978E55E228CBEDCC579E1D321F372E0329B7E4C73F1C`
+- ✅ vérification finale rejouée le 4 avril 2026 : audit ORM↔SQL OK, aucune orpheline non documentée, `146 passed` sur `tests/sql/test_schema_coherence.py`
 
 ### Tâches
 
@@ -278,6 +279,12 @@
 - [x] Tables orphelines ciblées supprimées du schéma actif / nettoyées pour migration
 - [x] `test_schema_coherence.py` passe à 100% (`146 passed`)
 - [x] `INIT_COMPLET.sql` régénéré et hash SHA256 mis à jour (`3537E08CBFEAFBAE917D978E55E228CBEDCC579E1D321F372E0329B7E4C73F1C`)
+
+### Checklist de clôture — preuve de vérification
+
+- [x] `python scripts/analysis/audit_orm_sql.py` → **OK** (`149` tables SQL, `141` tables ORM, `0` nouvelle orpheline, `11` instructions SQL dans `17_migrations_absorbees.sql`)
+- [x] `pytest tests/sql/test_schema_coherence.py -q` → **OK** (`146 passed in 4.19s`)
+- [x] `Get-FileHash sql/INIT_COMPLET.sql -Algorithm SHA256` → **OK** (`3537E08CBFEAFBAE917D978E55E228CBEDCC579E1D321F372E0329B7E4C73F1C`)
 
 ---
 

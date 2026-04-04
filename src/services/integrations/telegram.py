@@ -464,7 +464,7 @@ async def envoyer_planning_semaine(planning_texte: str, planning_id: int | None 
     
     Args:
         planning_texte: Texte formaté du planning à afficher
-        planning_id: ID du planning (optionnel pour Phase 5.2 - callbacks avec ID)
+        planning_id: ID du planning pour générer des callbacks ciblés
     """
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
@@ -475,7 +475,7 @@ async def envoyer_planning_semaine(planning_texte: str, planning_id: int | None 
 
     message = f"🍽️ <b>Planning repas de la semaine</b>\n\n{planning_texte}"
 
-    # Callbacks avec planning_id pour Phase 5.2 (max 64 bytes par callback_data)
+    # Callbacks avec planning_id pour cibler la bonne semaine (max 64 bytes par callback_data)
     # Format: "planning_valider:ID", "planning_modifier:ID", "planning_regenerer:ID"
     if planning_id:
         boutons = [
@@ -534,7 +534,7 @@ async def envoyer_liste_courses_partagee(
     Args:
         articles: Liste d'articles à afficher
         nom_liste: Nom de la liste (ex: "Courses lundi")
-        liste_id: ID de la liste (optionnel pour Phase 5.2 - callbacks avec ID)
+        liste_id: ID de la liste pour générer des callbacks ciblés
     """
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
@@ -545,7 +545,7 @@ async def envoyer_liste_courses_partagee(
     lignes = "\n".join(f"☐ {a}" for a in articles[:30])
     message = f"🛒 <b>{nom_liste}</b>\n\n{lignes}"
 
-    # Callbacks avec liste_id pour Phase 5.2
+    # Callbacks avec liste_id pour cibler la bonne liste.
     if liste_id:
         boutons = [
             {"id": f"courses_confirmer:{liste_id}", "title": "✅ Confirmer"},

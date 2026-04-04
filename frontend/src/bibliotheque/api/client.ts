@@ -33,7 +33,7 @@ clientApi.interceptors.request.use(
 );
 
 // ─── Intercepteur réponse : gestion erreurs + refresh token ───
-// Phase A3: Sérialisation des refreshs pour éviter les race conditions
+// Sérialiser les refreshs pour éviter les race conditions.
 let isRefreshing = false;
 let refreshSubscribers: ((token: string) => void)[] = [];
 
@@ -59,7 +59,7 @@ clientApi.interceptors.response.use(
     ) {
       (requeteOriginale as ReturnType<typeof Object.assign> & { _retry?: boolean })._retry = true;
 
-      // Phase A3: Si un refresh est déjà en cours, attendre son résultat
+      // Si un refresh est déjà en cours, attendre son résultat.
       if (isRefreshing) {
         return new Promise((resolve) => {
           addRefreshSubscriber((newToken: string) => {

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════
-// Page Config Famille — Phase Refonte
+// Page configuration famille
 // Tabs: Anniversaires | Routines | Contacts | Documents | Calendriers | Garde | Préférences
 // ═══════════════════════════════════════════════════════════
 

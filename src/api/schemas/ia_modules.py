@@ -75,7 +75,7 @@ class DiagnosticPlanteJardinResponse(BaseModel):
 
 
 class BilanMensuelNarratifResponse(BaseModel):
-    """Réponse du bilan mensuel narratif Sprint 4."""
+    """Réponse du bilan mensuel narratif."""
 
     mois: str
     donnees: dict[str, Any] = Field(default_factory=dict)

@@ -23,7 +23,7 @@ Assistant Matanne est une application web moderne qui centralise la gestion fami
 - **Anti-Gaspillage** : Suggestions pour utiliser les restes
 
 ### ???????? **Famille**
-- **Jules** : Suivi du d�veloppement de l'enfant (jalons, vaccins, croissance)
+- **Jules** : Suivi du développement de l'enfant (jalons, alimentation, vaccins, activités)
 - **Activit�s** : Gestion des activit�s familiales et emploi du temps
 - **Routines** : Routines quotidiennes et habitudes
 - **Budget** : Suivi des d�penses familiales

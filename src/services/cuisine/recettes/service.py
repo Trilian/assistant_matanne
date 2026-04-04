@@ -1,7 +1,7 @@
 ﻿"""
 Service Recettes Unifié (service unifié)
 
-✅ Utilise @avec_session_db et @avec_cache (Phase 1)
+✅ Utilise @avec_session_db et @avec_cache
 ✅ Validation Pydantic centralisée (RecetteInput, etc.)
 ✅ Type hints complets pour meilleur IDE support
 ✅ Services testables

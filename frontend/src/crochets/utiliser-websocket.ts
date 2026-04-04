@@ -28,9 +28,9 @@ interface OptionsWebSocket {
   maxTentatives?: number
   /** Intervalle heartbeat en ms (défaut: 30000) */
   intervalleHeartbeat?: number
-  /** URL de fallback HTTP polling (Phase A2) */
+  /** URL de fallback pour le polling HTTP */
   urlPollingFallback?: string | null
-  /** URL de fallback HTTP action (Phase A2) */
+  /** URL de fallback pour les actions HTTP */
   urlActionFallback?: string | null
   /** Intervalle polling en ms (défaut: 3000) */
   intervallePolling?: number
@@ -47,7 +47,7 @@ interface RetourWebSocket {
   dernierMessage: MessageWS | null
   /** Erreur de connexion */
   erreur: string | null
-  /** Mode de connexion actuel (Phase A2) */
+  /** Mode de connexion actuel */
   mode: 'websocket' | 'polling' | 'deconnecte'
 }
 
@@ -170,7 +170,7 @@ export function utiliserWebSocket({
         const backoff = delaiReconnexion * Math.pow(2, tentativesRef.current - 1)
         reconnexionRef.current = setTimeout(connecter, Math.min(backoff, 30000))
       } else if (urlPollingFallback) {
-        // Phase A2: basculer en mode polling HTTP
+        // Basculer en mode polling HTTP si la socket échoue.
         setMode('polling')
         setErreur(null)
         demarrerPolling()
@@ -187,7 +187,7 @@ export function utiliserWebSocket({
     wsRef.current = ws
   }, [url, delaiReconnexion, maxTentatives, demarrerHeartbeat, arreterHeartbeat])
 
-  // Phase A2: Polling HTTP fallback
+  // Fallback en polling HTTP quand le WebSocket n'est pas disponible.
   const arreterPolling = useCallback(() => {
     if (pollingRef.current) {
       clearInterval(pollingRef.current)
@@ -253,7 +253,7 @@ export function utiliserWebSocket({
         wsRef.current.send(JSON.stringify(pending))
       }
     } else if (mode === 'polling' && urlActionFallback) {
-      // Phase A2: Fallback HTTP POST
+      // Envoyer l'action via HTTP quand le fallback est actif.
       void fetch(urlActionFallback, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

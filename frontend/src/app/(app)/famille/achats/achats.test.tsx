@@ -46,7 +46,7 @@ function renderWithQuery(ui: React.ReactElement) {
   return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
 }
 
-describe("PageAchats (Phase P)", () => {
+describe("PageAchats", () => {
   beforeEach(() => vi.clearAllMocks());
 
   const ouvrirSuggestionsIA = () => {

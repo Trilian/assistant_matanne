@@ -159,7 +159,6 @@ class TestEndpointsExistent:
             ("POST", "/api/v1/famille/achats/1/vendu"),
             ("GET", "/api/v1/famille/achats/1/prefill-revente"),
             ("POST", "/api/v1/famille/achats/1/annonce-lbc"),
-            ("POST", "/api/v1/famille/achats/1/annonce-vinted"),
             ("GET", "/api/v1/famille/anniversaires/1/checklist-auto"),
             ("POST", "/api/v1/famille/anniversaires/1/checklist-auto/synchroniser"),
             ("GET", "/api/v1/famille/anniversaires/1/checklists"),
@@ -176,6 +175,17 @@ class TestEndpointsExistent:
             for route in router.routes
             if hasattr(route, "methods")
         ), f"Route introuvable: {method} {path}"
+
+    def test_endpoint_annonce_vinted_absent(self):
+        """Le endpoint Vinted a été retiré et ne doit pas réapparaître."""
+        from src.api.routes.famille import router
+
+        assert not any(
+            route.path_regex.match("/api/v1/famille/achats/1/annonce-vinted")
+            and "POST" in route.methods
+            for route in router.routes
+            if hasattr(route, "methods")
+        )
 
 
 class TestSchemasFamille:

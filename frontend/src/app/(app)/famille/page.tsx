@@ -1,5 +1,5 @@
 ﻿// ═══════════════════════════════════════════════════════════
-// Hub Famille Intelligent — Phase Refonte
+// Hub famille intelligent
 // ═══════════════════════════════════════════════════════════
 
 "use client";
@@ -178,7 +178,7 @@ export default function PageFamille() {
   };
 
   const [hasShownToast, setHasShownToast] = useState(false);
-  // PHASE B2 — Suggestions IA Achats (nouveau hook)
+  // Suggestions IA pour les achats
   const mutationSuggestionsAchats = useMutation({
     mutationFn: () => obtenirSuggestionsAchatsEnrichies({ triggers: ['hub_rapide'] }),
   });

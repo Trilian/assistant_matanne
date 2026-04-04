@@ -64,7 +64,7 @@ _MODULES = {
     "garmin_router": ".garmin",
     "ia_avancee_router": ".ia_avancee",
     "ia_modules_router": ".ia_modules",
-    "fonctionnalites_avancees_router": ".fonctionnalites_avancees",
+    "fonctionnalites_avancees_router": ".innovations",
     "inventaire_router": ".inventaire",
     "jeux_router": ".jeux",
     "maison_router": ".maison",

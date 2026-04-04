@@ -115,7 +115,7 @@ def _sanitiser(texte: str, max_len: int = 200) -> str:
 
 
 class InnovationsService(BaseAIService):
-    """Service Innovations — Phase 10.
+    """Service d'innovations métier.
 
     Hérite de BaseAIService : rate limiting, cache sémantique,
     circuit breaker et parsing JSON/Pydantic automatiques.

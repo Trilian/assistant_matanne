@@ -1,8 +1,8 @@
 ﻿"""
-Service inter-modules : Jules croissance -> Planning nutrition.
+Service inter-modules : profil Jules -> planning nutrition.
 
 Bridge inter-modules :
-- P5-02: adapter portions/nutriments selon croissance de Jules
+- P5-02: adapter portions/nutriments selon l'âge et les habitudes de Jules
 - P5-14: adapter automatiquement les portions des recettes planifiees
 """
 
@@ -75,13 +75,13 @@ class JulesNutritionInteractionService:
 
     @avec_gestion_erreurs(default_return={})
     @avec_session_db
-    def adapter_planning_nutrition_selon_croissance(
+    def adapter_planning_nutrition_selon_age(
         self,
         *,
         jours_horizon: int = 7,
         db=None,
     ) -> dict[str, Any]:
-        """Alias historique conservé pour compatibilité."""
+        """Alias de compatibilité orienté âge plutôt que croissance."""
         return self.adapter_planning_nutrition_jules(jours_horizon=jours_horizon, db=db)
 
     @avec_gestion_erreurs(default_return={})
