@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import PageEquipements from "./page";
 
@@ -49,6 +49,30 @@ let mockDocumentsGarantie = {
   ],
 };
 
+const mockDocumentsDisponibles = {
+  items: [
+    {
+      id: 9,
+      titre: "Facture SAV Bosch",
+      categorie: "administratif",
+      tags: [],
+      actif: true,
+      est_expire: false,
+    },
+    {
+      id: 10,
+      titre: "Bon de livraison cuisine",
+      categorie: "administratif",
+      tags: [],
+      actif: true,
+      est_expire: false,
+    },
+  ],
+  total: 2,
+};
+
+const mutateMock = vi.fn();
+
 vi.mock("@/crochets/utiliser-api", () => ({
   utiliserRequete: vi.fn((cle: string[]) => {
     if (cle[0] === "maison" && cle[1] === "inventaire") {
@@ -63,9 +87,12 @@ vi.mock("@/crochets/utiliser-api", () => ({
     if (cle[0] === "documents" && cle[1] === "garantie") {
       return { data: mockDocumentsGarantie, isLoading: false };
     }
+    if (cle[0] === "documents" && cle[1] === "liste") {
+      return { data: mockDocumentsDisponibles, isLoading: false };
+    }
     return { data: undefined, isLoading: false };
   }),
-  utiliserMutation: () => ({ mutate: vi.fn() }),
+  utiliserMutation: () => ({ mutate: mutateMock, isPending: false }),
 }));
 
 vi.mock("@/bibliotheque/api/maison", () => ({
@@ -80,6 +107,8 @@ vi.mock("@/bibliotheque/api/documents", () => ({
   obtenirDocumentsGarantieObjet: vi.fn((objetId: number) =>
     Promise.resolve({ ...mockDocumentsGarantie, objet: { id: objetId, nom: "Lave-vaisselle" } })
   ),
+  listerDocuments: vi.fn(() => Promise.resolve(mockDocumentsDisponibles)),
+  lierDocumentGarantie: vi.fn(),
 }));
 
 function renderWithQuery(ui: React.ReactElement) {
@@ -90,6 +119,7 @@ function renderWithQuery(ui: React.ReactElement) {
 describe("PageEquipements", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mutateMock.mockClear();
     mockDocumentsGarantie = {
       ok: true,
       nb_documents: 1,
@@ -117,5 +147,14 @@ describe("PageEquipements", () => {
     renderWithQuery(<PageEquipements />);
 
     expect(screen.getByText(/Lier une facture/i)).toBeInTheDocument();
+  });
+
+  it("permet de choisir un document existant depuis la fiche équipement", () => {
+    renderWithQuery(<PageEquipements />);
+
+    fireEvent.click(screen.getByRole("button", { name: /lier un document existant/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Facture SAV Bosch/i }));
+
+    expect(mutateMock).toHaveBeenCalledWith({ documentId: 9, objetId: 1 });
   });
 });
