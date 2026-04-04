@@ -36,10 +36,13 @@ from .common import (
 from .courses import (
     ArticleGenereResume,
     ArticleResponse,
+    ArticleDriveResponse,
     CheckoutArticleRequest,
     CheckoutArticleResult,
     CheckoutCoursesRequest,
     CheckoutCoursesResponse,
+    CorrespondanceDriveCreate,
+    CorrespondanceDriveResponse,
     CourseItemBase,
     CourseListCreate,
     GenererCoursesRequest,
@@ -341,6 +344,9 @@ __all__ = [
     "CheckoutCoursesResponse",
     "ScanBarcodeCheckoutRequest",
     "ScanBarcodeCheckoutResponse",
+    "CorrespondanceDriveCreate",
+    "CorrespondanceDriveResponse",
+    "ArticleDriveResponse",
     # Planning
     "GenererPlanningRequest",
     "RepasBase",

@@ -40,10 +40,13 @@ def _store_idempotency(key: str | None, result: Any) -> None:
 
 from src.api.dependencies import require_auth
 from src.api.schemas import (
+    ArticleDriveResponse,
     CourseItemBase,
     CourseListCreate,
     CheckoutCoursesResponse,
     CheckoutCoursesRequest,
+    CorrespondanceDriveCreate,
+    CorrespondanceDriveResponse,
     GenererCoursesRequest,
     GenererCoursesResponse,
     ListeCoursesResponse,
@@ -262,12 +265,19 @@ async def ajouter_article(
                 session.add(ingredient)
                 session.flush()
 
+            # Auto-assignation magasin si non spécifié
+            magasin = item.magasin_cible
+            if not magasin and item.categorie:
+                from src.core.constants import CATEGORIE_VERS_MAGASIN
+                magasin = CATEGORIE_VERS_MAGASIN.get(item.categorie.lower())
+
             article = ArticleCourses(
                 liste_id=liste_id,
                 ingredient_id=ingredient.id,
                 quantite_necessaire=item.quantite or 1.0,
                 priorite="moyenne",
                 rayon_magasin=item.categorie,
+                magasin_cible=magasin,
             )
             session.add(article)
             session.commit()
@@ -329,6 +339,7 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
                         "quantite": a.quantite_necessaire,
                         "coche": a.achete,
                         "categorie": a.rayon_magasin,
+                        "magasin_cible": a.magasin_cible,
                     }
                     for a in (liste.articles or [])
                 ],
@@ -541,6 +552,8 @@ async def modifier_article(
             article.achete = item.coche
             if item.categorie:
                 article.rayon_magasin = item.categorie
+            if item.magasin_cible is not None:
+                article.magasin_cible = item.magasin_cible
             session.commit()
 
             return MessageResponse(message="Article mis à jour", id=item_id)
@@ -1607,6 +1620,66 @@ async def enregistrer_feedback_prediction_courses(
             "article_nom": payload.article_nom,
             "accepte": payload.accepte,
         }
+
+    return await executer_async(_query)
+
+
+# ═══════════════════════════════════════════════════════════
+# FILTRAGE PAR MAGASIN
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/{liste_id}/par-magasin",
+    responses=REPONSES_CRUD_LECTURE,
+    summary="Articles groupés par magasin",
+)
+@gerer_exception_api
+async def obtenir_articles_par_magasin(
+    liste_id: int,
+    magasin: str | None = Query(None, max_length=50, description="Filtrer par magasin spécifique"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne les articles d'une liste groupés par magasin cible.
+
+    Sans paramètre ``magasin``, retourne tous les articles groupés.
+    Avec ``magasin``, retourne uniquement les articles de ce magasin.
+    """
+    from src.core.models import ArticleCourses, ListeCourses
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+            if not liste:
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
+
+            query = session.query(ArticleCourses).filter(ArticleCourses.liste_id == liste_id)
+            if magasin:
+                query = query.filter(ArticleCourses.magasin_cible == magasin)
+
+            articles = query.order_by(ArticleCourses.achete.asc(), ArticleCourses.id.asc()).all()
+
+            groupes: dict[str, list[dict[str, Any]]] = {}
+            for a in articles:
+                cle = a.magasin_cible or "non_assigne"
+                if cle not in groupes:
+                    groupes[cle] = []
+                groupes[cle].append({
+                    "id": a.id,
+                    "nom": a.ingredient.nom if a.ingredient else "Article",
+                    "quantite": a.quantite_necessaire,
+                    "coche": a.achete,
+                    "categorie": a.rayon_magasin,
+                    "magasin_cible": a.magasin_cible,
+                })
+
+            return {
+                "liste_id": liste.id,
+                "nom": liste.nom,
+                "magasins": groupes,
+                "total_articles": len(articles),
+                "compteurs": {k: len(v) for k, v in groupes.items()},
+            }
 
     return await executer_async(_query)
 

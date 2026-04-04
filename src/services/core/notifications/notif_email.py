@@ -327,6 +327,25 @@ class ServiceEmail:
             attachments=[attachment],
         )
 
+    def envoyer_confirmation_backup(self, email: str, backup: dict[str, Any]) -> bool:
+        """Envoie un email de confirmation après un backup automatique réussi."""
+        date_backup = str(backup.get("date", ""))
+        filename = str(backup.get("filename", ""))
+        total_rows = backup.get("total_rows", 0)
+        tables_sauvegardees = backup.get("tables_count", 0)
+        taille_fichier = str(backup.get("taille_fichier", ""))
+
+        html = self._render(
+            "confirmation_backup.html",
+            sujet="Confirmation backup automatique",
+            date_backup=date_backup,
+            filename=filename,
+            total_rows=total_rows,
+            tables_sauvegardees=tables_sauvegardees,
+            taille_fichier=taille_fichier,
+        )
+        return self._envoyer(email, f"💾 Backup confirmé {date_backup} — Matanne", html)
+
     def envoyer_rapport_mensuel_unifie(self, email: str, rapport: dict[str, Any]) -> bool:
         """Rapport unifié — Envoie le PDF mensuel unifié généré par le service innovations."""
         mois_reference = str(rapport.get("mois_reference", ""))

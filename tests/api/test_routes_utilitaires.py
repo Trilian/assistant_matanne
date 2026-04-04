@@ -10,8 +10,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 import pytest_asyncio
 
-pytestmark = pytest.mark.asyncio(loop_scope="function")
-
 
 # ═══════════════════════════════════════════════════════════
 # DONNÉES DE TEST
@@ -116,6 +114,7 @@ def creer_mock(data: dict) -> MagicMock:
 # ═══════════════════════════════════════════════════════════
 
 
+@pytest.mark.asyncio(loop_scope="function")
 class TestEndpointsExistent:
     """Vérifie que les endpoints utilitaires existent (pas 404/405)."""
 
@@ -314,6 +313,7 @@ class TestSchemasUtilitaires:
 # ═══════════════════════════════════════════════════════════
 
 
+@pytest.mark.asyncio(loop_scope="function")
 class TestFormatsReponses:
     """Vérifie le format des réponses JSON des endpoints."""
 

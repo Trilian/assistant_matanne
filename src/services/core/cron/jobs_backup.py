@@ -256,6 +256,31 @@ def executer_job_backup_auto_hebdo_json() -> None:
         filepath.write_text(json.dumps(backup_payload, ensure_ascii=False, indent=2), encoding="utf-8")
         logger.info("D7: Backup JSON créé: %s (%d lignes, %d tables)", filename, total_rows, len(export_data))
 
+        # Envoyer email de confirmation backup
+        try:
+            taille_octets = filepath.stat().st_size
+            if taille_octets >= 1_048_576:
+                taille_str = f"{taille_octets / 1_048_576:.1f} Mo"
+            else:
+                taille_str = f"{taille_octets / 1024:.0f} Ko"
+
+            dispatcher = get_dispatcher_notifications()
+            dispatcher.envoyer(
+                user_id="admin",
+                message=f"Backup hebdomadaire réussi: {filename} ({total_rows} lignes)",
+                canaux=["email"],
+                type_email="confirmation_backup",
+                backup={
+                    "date": aujourd_hui.isoformat(),
+                    "filename": filename,
+                    "total_rows": total_rows,
+                    "tables_count": len(export_data),
+                    "taille_fichier": taille_str,
+                },
+            )
+        except Exception:
+            logger.debug("D7: Email de confirmation backup non envoyé (non bloquant)")
+
         backups = sorted(backup_dir.glob("backup_*.json"), reverse=True)
         for old_backup in backups[4:]:
             old_backup.unlink()

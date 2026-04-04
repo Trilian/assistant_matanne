@@ -684,6 +684,27 @@ async def obtenir_score_bien_etre(
 
 
 @router.get(
+    "/score-foyer",
+    responses=REPONSES_LISTE,
+    summary="Score foyer composite",
+    description="Indicateur unifié du foyer : nutrition (40%) + budget (25%) + entretien (20%) + routines (15%).",
+)
+@gerer_exception_api
+async def obtenir_score_foyer(
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Retourne le score foyer composite pour la semaine courante."""
+
+    def _query():
+        from src.services.dashboard.score_foyer import obtenir_score_foyer_service
+
+        service = obtenir_score_foyer_service()
+        return service.calculer_score()
+
+    return await executer_async(_query)
+
+
+@router.get(
     "/score-ecologique",
     responses=REPONSES_LISTE,
     summary="Score écologique transversal",

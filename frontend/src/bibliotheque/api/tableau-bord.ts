@@ -199,6 +199,29 @@ export async function obtenirScoreEcologique(): Promise<ScoreEcologique> {
   return data;
 }
 
+// ─── Score foyer composite ──────────────────────────────────────────
+
+export interface ScoreFoyer {
+  score_global: number;
+  niveau: "excellent" | "bon" | "vigilance" | "critique";
+  trend_semaine_precedente: number;
+  composantes: {
+    nutrition: number;
+    budget: number;
+    entretien: number;
+    routines: number;
+  };
+  details: Record<string, number>;
+  leviers_prioritaires: string[];
+  periode: { debut: string; fin: string };
+}
+
+/** Obtenir le score foyer composite (nutrition + budget + entretien + routines) */
+export async function obtenirScoreFoyer(): Promise<ScoreFoyer> {
+  const { data } = await clientApi.get<ScoreFoyer>("/dashboard/score-foyer");
+  return data;
+}
+
 // ─── Score bien-être global (MT-03) ─────────────────────────────────
 
 export interface ScoreBienEtre {

@@ -23,10 +23,23 @@ import { PAGES_NAVIGATION, type PageNavigation } from "@/bibliotheque/pages-navi
 import { clientApi } from "@/bibliotheque/api/client";
 import { creerListeCourses, ajouterArticle } from "@/bibliotheque/api/courses";
 import { creerNote } from "@/bibliotheque/api/outils";
+import { creerRecette } from "@/bibliotheque/api/recettes";
 import { creerScenarioHabitat } from "@/bibliotheque/api/habitat";
 import { resetOnboarding } from "@/composants/disposition/tour-onboarding";
 import { toast } from "sonner";
-import { Search, Wand2, TimerReset, StickyNote, ShoppingCart, Home, Sparkles } from "lucide-react";
+import {
+  Search,
+  Wand2,
+  TimerReset,
+  StickyNote,
+  ShoppingCart,
+  Home,
+  Sparkles,
+  ChefHat,
+  CalendarPlus,
+  Wrench,
+  Users,
+} from "lucide-react";
 
 type Page = PageNavigation;
 const PAGES = PAGES_NAVIGATION;
@@ -75,6 +88,11 @@ function extraireDureeMinuteur(recherche: string): number | null {
   }
   const valeur = Number(match[1]);
   return Number.isFinite(valeur) && valeur > 0 ? valeur : null;
+}
+
+function extraireNomRecette(recherche: string): string | null {
+  const match = recherche.match(/recette\s+(.{3,80})/i);
+  return match?.[1]?.trim() ?? null;
 }
 
 /**
@@ -160,8 +178,57 @@ export function MenuCommandes() {
     const terme = recherche.trim();
     const articleRapide = extraireNomArticle(terme);
     const dureeMinuteur = extraireDureeMinuteur(terme);
+    const nomRecette = extraireNomRecette(terme);
 
     const actions: ActionUniverselle[] = [
+      {
+        id: "recette-rapide",
+        titre: "Ajouter une recette rapide",
+        description: "Crée une nouvelle recette et ouvre sa fiche pour compléter.",
+        raccourci: "R",
+        motCle: "recette recipe ajouter creer nouvelle plat cuisine",
+        icone: ChefHat,
+        executer: async () => {
+          const nom = terme.length >= 3 ? terme.slice(0, 120) : "Nouvelle recette";
+          const recette = await creerRecette({ nom, description: "" });
+          toast.success(`Recette créée: ${recette.nom}`);
+          router.push(`/cuisine/recettes/${recette.id}`);
+        },
+      },
+      {
+        id: "planifier-semaine",
+        titre: "Planifier ma semaine repas",
+        description: "Lance la génération IA du planning de la semaine.",
+        raccourci: "P",
+        motCle: "planifier semaine planning repas generer menu",
+        icone: CalendarPlus,
+        executer: () => {
+          router.push("/cuisine/planning?action=generer");
+          toast.success("Ouverture du planning...");
+        },
+      },
+      {
+        id: "tache-maison",
+        titre: "Ajouter une tâche maison",
+        description: "Ouvre l'entretien pour créer une nouvelle tâche.",
+        motCle: "tache maison entretien reparation bricolage travaux",
+        icone: Wrench,
+        executer: () => {
+          router.push("/maison/entretien?nouvelle=true");
+          toast.success("Ouverture de l'entretien...");
+        },
+      },
+      {
+        id: "activite-famille",
+        titre: "Ajouter une activité famille",
+        description: "Ouvre les activités pour planifier une nouvelle sortie.",
+        motCle: "activite famille sortie loisir weekend jules",
+        icone: Users,
+        executer: () => {
+          router.push("/famille/activites?nouvelle=true");
+          toast.success("Ouverture des activités...");
+        },
+      },
       {
         id: "courses-nouvelle-liste",
         titre: "Créer une nouvelle liste de courses",
@@ -244,6 +311,21 @@ export function MenuCommandes() {
         icone: TimerReset,
         executer: () => {
           router.push(`/outils/minuteur?minutes=${dureeMinuteur}`);
+        },
+      });
+    }
+
+    if (nomRecette) {
+      actions.unshift({
+        id: "recette-nommee",
+        titre: `Créer la recette \"${nomRecette}\"`,
+        description: "Crée directement une recette avec ce nom.",
+        motCle: `recette ${nomRecette} creer ajouter`,
+        icone: ChefHat,
+        executer: async () => {
+          const recette = await creerRecette({ nom: nomRecette, description: "" });
+          toast.success(`Recette créée: ${recette.nom}`);
+          router.push(`/cuisine/recettes/${recette.id}`);
         },
       });
     }

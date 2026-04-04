@@ -17,6 +17,7 @@ class CourseItemBase(BaseModel, NomValidatorMixin, QuantiteValidatorMixin):
     unite: str | None = Field(None, max_length=20)
     categorie: str | None = Field(None, max_length=100)
     coche: bool = False
+    magasin_cible: str | None = Field(None, max_length=50, description="Magasin cible (bio_coop, grand_frais, carrefour_drive, autre)")
 
     model_config = {
         "json_schema_extra": {
@@ -26,6 +27,7 @@ class CourseItemBase(BaseModel, NomValidatorMixin, QuantiteValidatorMixin):
                 "unite": "briques",
                 "categorie": "produits_frais",
                 "coche": False,
+                "magasin_cible": "carrefour_drive",
             }
         }
     }
@@ -73,6 +75,7 @@ class ArticleResponse(BaseModel):
     quantite: float
     coche: bool = False
     categorie: str | None = Field(None, max_length=100)
+    magasin_cible: str | None = Field(None, max_length=50)
 
 
 class ListeCoursesResponse(BaseModel):
@@ -253,3 +256,59 @@ class GenererCoursesResponse(BaseModel):
             }
         }
     }
+
+
+# ═══════════════════════════════════════════════════════════
+# CORRESPONDANCES CARREFOUR DRIVE
+# ═══════════════════════════════════════════════════════════
+
+
+class CorrespondanceDriveCreate(BaseModel):
+    """Création/mise à jour d'une correspondance article → produit Carrefour Drive."""
+
+    nom_article: str = Field(..., min_length=1, max_length=200)
+    ingredient_id: int | None = None
+    produit_drive_id: str = Field(..., min_length=1, max_length=100)
+    produit_drive_nom: str = Field(..., min_length=1, max_length=300)
+    produit_drive_ean: str | None = Field(None, max_length=50)
+    produit_drive_url: str | None = Field(None, max_length=500)
+    quantite_par_defaut: float = Field(1.0, gt=0)
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "nom_article": "Lessive",
+                "produit_drive_id": "3274080005003",
+                "produit_drive_nom": "Lessive liquide Skip Active Clean 37 lavages",
+                "produit_drive_ean": "3274080005003",
+                "produit_drive_url": "https://www.carrefour.fr/p/lessive-liquide-skip-3274080005003",
+                "quantite_par_defaut": 1.0,
+            }
+        }
+    }
+
+
+class CorrespondanceDriveResponse(BaseModel):
+    """Réponse pour une correspondance Drive."""
+
+    id: int
+    nom_article: str
+    ingredient_id: int | None = None
+    produit_drive_id: str
+    produit_drive_nom: str
+    produit_drive_ean: str | None = None
+    produit_drive_url: str | None = None
+    quantite_par_defaut: float = 1.0
+    nb_utilisations: int = 0
+    actif: bool = True
+
+
+class ArticleDriveResponse(BaseModel):
+    """Article de liste enrichi avec sa correspondance Drive."""
+
+    id: int
+    nom: str
+    quantite: float
+    coche: bool = False
+    categorie: str | None = None
+    correspondance: CorrespondanceDriveResponse | None = None

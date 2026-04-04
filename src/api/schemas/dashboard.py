@@ -77,3 +77,58 @@ class DonneesTableauBord(BaseModel):
             }
         }
     }
+
+
+class ComposantesScoreFoyer(BaseModel):
+    """Sous-scores du score foyer."""
+
+    nutrition: int = Field(description="Score nutrition 0-100")
+    budget: int = Field(description="Score budget 0-100")
+    entretien: int = Field(description="Score entretien 0-100")
+    routines: int = Field(description="Score routines 0-100")
+
+
+class PeriodeScore(BaseModel):
+    """Période d'un score."""
+
+    debut: str = Field(description="Date de début ISO")
+    fin: str = Field(description="Date de fin ISO")
+
+
+class ScoreFoyerResponse(BaseModel):
+    """Score foyer composite : nutrition + budget + entretien + routines."""
+
+    score_global: int = Field(description="Score composite 0-100")
+    niveau: str = Field(description="excellent | bon | vigilance | critique")
+    trend_semaine_precedente: int = Field(description="Évolution vs semaine précédente")
+    composantes: ComposantesScoreFoyer
+    details: dict[str, Any] = Field(default_factory=dict)
+    leviers_prioritaires: list[str] = Field(default_factory=list)
+    periode: PeriodeScore
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "score_global": 72,
+                "niveau": "bon",
+                "trend_semaine_precedente": 5,
+                "composantes": {
+                    "nutrition": 78,
+                    "budget": 70,
+                    "entretien": 65,
+                    "routines": 60,
+                },
+                "details": {
+                    "nutrition_pct": 78,
+                    "budget_pct": 70,
+                    "entretien_pct": 65,
+                    "routines_pct": 60,
+                },
+                "leviers_prioritaires": [
+                    "Compléter les routines actives",
+                    "Réaliser les tâches d'entretien en retard",
+                ],
+                "periode": {"debut": "2026-03-30", "fin": "2026-04-05"},
+            }
+        }
+    }

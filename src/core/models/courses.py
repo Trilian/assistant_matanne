@@ -236,3 +236,53 @@ class HistoriqueAchats(Base):
 
     def __repr__(self) -> str:
         return f"<HistoriqueAchats(article={self.article_nom}, freq={self.frequence_jours}j)>"
+
+
+# ═══════════════════════════════════════════════════════════
+# CORRESPONDANCES CARREFOUR DRIVE
+# ═══════════════════════════════════════════════════════════
+
+
+class CorrespondanceDrive(TimestampMixin, Base):
+    """Mapping entre un article de la liste et un produit Carrefour Drive.
+
+    Permet de réutiliser les correspondances article → produit Drive
+    pour l'ajout automatique au panier via l'extension Chrome.
+
+    Attributes:
+        ingredient_id: ID de l'ingrédient (optionnel)
+        nom_article: Nom libre si pas d'ingrédient associé
+        produit_drive_id: ID du produit sur Carrefour Drive
+        produit_drive_nom: Nom affiché sur Carrefour Drive
+        produit_drive_ean: Code EAN du produit
+        produit_drive_url: URL du produit sur carrefour.fr
+        quantite_par_defaut: Quantité par défaut à ajouter
+        nb_utilisations: Compteur d'utilisations
+        actif: Si la correspondance est toujours valide
+    """
+
+    __tablename__ = "correspondances_drive"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    ingredient_id: Mapped[int | None] = mapped_column(
+        ForeignKey("ingredients.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    nom_article: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    produit_drive_id: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    produit_drive_nom: Mapped[str] = mapped_column(String(300), nullable=False)
+    produit_drive_ean: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    produit_drive_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    quantite_par_defaut: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
+    nb_utilisations: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    actif: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
+
+    # Relations
+    ingredient: Mapped["Ingredient | None"] = relationship("Ingredient", foreign_keys=[ingredient_id])
+
+    __table_args__ = (
+        Index("ix_correspondances_drive_article_produit", "nom_article", "produit_drive_id", unique=True),
+        CheckConstraint("quantite_par_defaut > 0", name="ck_correspondance_drive_quantite_positive"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<CorrespondanceDrive(article={self.nom_article}, produit={self.produit_drive_nom})>"

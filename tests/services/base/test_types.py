@@ -16,10 +16,10 @@ from sqlalchemy.orm import Session, declarative_base, sessionmaker
 # BASE DE TEST POUR INTÉGRATION
 # ═══════════════════════════════════════════════════════════
 
-TestBase = declarative_base()
+BaseModeleTest = declarative_base()
 
 
-class ItemModel(TestBase):
+class ItemModel(BaseModeleTest):
     """Modèle de test pour intégration SQLite."""
 
     __tablename__ = "test_items"
@@ -78,12 +78,12 @@ def mock_db():
 def integration_db():
     """Session SQLite en mémoire pour tests d'intégration."""
     engine = create_engine("sqlite:///:memory:", echo=False)
-    TestBase.metadata.create_all(engine)
+    BaseModeleTest.metadata.create_all(engine)
     SessionLocal = sessionmaker(bind=engine)
     session = SessionLocal()
     yield session
     session.close()
-    TestBase.metadata.drop_all(engine)
+    BaseModeleTest.metadata.drop_all(engine)
 
 
 @pytest.fixture

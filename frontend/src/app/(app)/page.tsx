@@ -6,6 +6,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  Activity,
   ChefHat,
   ShoppingCart,
   CalendarDays,
@@ -41,6 +42,7 @@ import {
   obtenirPointsFamille,
   obtenirScoreEcologique,
   obtenirScoreBienEtre,
+  obtenirScoreFoyer,
   obtenirTableauBord,
   sauvegarderConfigDashboard,
 } from "@/bibliotheque/api/tableau-bord";
@@ -68,6 +70,7 @@ import { ComparateurTemporel } from "@/composants/dashboard/comparateur-temporel
 import { obtenirScoreFamilleHebdo } from "@/bibliotheque/api/avance";
 import { obtenirInsightsQuotidiens } from "@/bibliotheque/api/avance";
 import { JaugeScoreBienEtre } from "@/composants/graphiques/jauge-score-bien-etre";
+import { JaugeScoreFoyer } from "@/composants/dashboard/graphiques/jauge-score-foyer";
 
 const WIDGETS_DEFAUT = {
   metriques: true,
@@ -82,6 +85,7 @@ const WIDGETS_DEFAUT = {
   histoire_famille: true,
   alertes_contextuelles: true,
   points_famille: true,
+  score_foyer: true,
   score_bienetre: true,
   score_ecologique: true,
   journal_actions_dashboard: true,
@@ -186,6 +190,11 @@ export default function PageAccueil() {
   const { data: scoreBienEtre } = utiliserRequete(
     ["dashboard", "score-bienetre"],
     obtenirScoreBienEtre
+  );
+  const { data: scoreFoyer } = utiliserRequete(
+    ["dashboard", "score-foyer"],
+    obtenirScoreFoyer,
+    { staleTime: 5 * 60 * 1000 }
   );
   const { data: scoreEcologique } = utiliserRequete(
     ["dashboard", "score-ecologique"],
@@ -772,6 +781,36 @@ export default function PageAccueil() {
               <div className="flex flex-wrap gap-2 text-xs">
                 {pointsFamille.badges.map((badge) => (
                   <span key={badge} className="rounded-full border px-2 py-1">{badge}</span>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+        </WidgetSortable>
+      )}
+
+      {widgets.score_foyer && scoreFoyer && (
+        <WidgetSortable id="score_foyer">
+        <Card className="border-indigo-300/50 bg-indigo-50/50 dark:border-indigo-900/40 dark:bg-indigo-950/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Activity className="h-4 w-4 text-indigo-600" />
+              Score foyer
+            </CardTitle>
+            <CardDescription>
+              Semaine du {new Date(scoreFoyer.periode.debut).toLocaleDateString("fr-FR")} ·{" "}
+              Niveau {scoreFoyer.niveau} ·{" "}
+              {scoreFoyer.trend_semaine_precedente >= 0 ? "+" : ""}
+              {scoreFoyer.trend_semaine_precedente} pts
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <JaugeScoreFoyer score={scoreFoyer.score_global} composantes={scoreFoyer.composantes} />
+            {scoreFoyer.leviers_prioritaires.length > 0 && (
+              <div className="rounded-md border border-indigo-200/70 bg-background/70 p-2 text-xs space-y-1">
+                <p className="font-medium">Leviers d&apos;amélioration :</p>
+                {scoreFoyer.leviers_prioritaires.map((levier, i) => (
+                  <p key={i} className="text-muted-foreground">• {levier}</p>
                 ))}
               </div>
             )}
