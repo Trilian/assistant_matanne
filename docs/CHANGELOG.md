@@ -6,7 +6,7 @@
 
 ---
 
-## 2026-04-04 - Consolidation documentaire phase 5
+## 2026-04-04 - Consolidation documentaire et validation des tests
 
 ### Ajouté
 
@@ -22,6 +22,8 @@
 - `scripts/README.md` complété pour couvrir les scripts racine, SQL, analyse et qualité
 - `docs/DEPRECATED.md`, `docs/TESTING.md`, `docs/TELEGRAM_SETUP.md`, `docs/TELEGRAM_RECETTES.md`, `docs/PERFORMANCE_QUERIES.md` nettoyés des références legacy cassées
 - `README.md` et `docs/ADMIN_MODE.md` réalignés avec les nouveaux guides prioritaires
+- `docs/SERVICES_REFERENCE.md` revérifié contre les exports réels des packages `planning`, `dashboard` et `utilitaires`
+- stabilisation des tests E2E critiques (`parcours-utilisateur`, `planning-ia`) et ajout de tests de régression API pour l'assistant, Jules et les préférences
 
 ---
 
@@ -139,10 +141,9 @@
 
 ## Repères historiques couverts
 
-- phases fondatrices `A` à `H` : structuration backend, services, documentation et complétion progressive
-- sprints `1` à `5` : base produit, hardening SQL/tests, premiers flux Telegram et rapports
-- sprints `6` à `9` : consolidation modules, admin, documentation et nettoyage
-- sprints `10` à `16` : admin avancé, jobs, notifications Telegram/email, IA et automatisations proactives
-- sprints `17` à `19` : stabilisation, finalisations documentaires et alignement global
+- structuration initiale du backend, des services transversaux et de la documentation
+- consolidation progressive des modules métier, du socle SQL et de la couverture de tests
+- extension de l'administration, des jobs planifiés, des notifications Telegram/email et de l'observabilité
+- stabilisation finale, nettoyage documentaire et alignement global du dépôt
 
 Pour les détails techniques par zone, voir aussi `docs/ARCHITECTURE.md`, `docs/CRON_JOBS.md`, `docs/ADMIN_RUNBOOK.md` et `docs/SERVICES_REFERENCE.md`.

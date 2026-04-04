@@ -217,14 +217,15 @@ test.describe("Planning activités", () => {
     await preparerContextePlanning(page);
   });
 
-  test("page planning se charge correctement", async ({ page }) => {
-    await page.goto("/planning");
-    await expect(page.locator("h1")).toBeVisible({ timeout: 10000 });
+  test("page planning redirige vers le planning cuisine", async ({ page }) => {
+    await page.goto("/planning", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/cuisine\/planning/);
+    await expect(page.getByRole("heading", { name: /planning repas/i })).toBeVisible({ timeout: 10000 });
   });
 
   test("navigation semaine avec boutons flèche", async ({ page }) => {
-    await page.goto("/planning");
-    await expect(page.locator("h1")).toBeVisible({ timeout: 10000 });
+    await page.goto("/cuisine/planning", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: /planning repas/i })).toBeVisible({ timeout: 10000 });
 
     const boutonPrec = page.getByRole("button", { name: /semaine précédente/i });
     const boutonSuiv = page.getByRole("button", { name: /semaine suivante/i });

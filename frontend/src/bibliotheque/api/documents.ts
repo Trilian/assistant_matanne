@@ -30,6 +30,19 @@ export interface CreerDocumentDTO {
   tags?: string[];
 }
 
+export interface DocumentGarantieObjetResult {
+  ok: boolean;
+  objet?: {
+    id: number;
+    nom: string;
+    sous_garantie?: boolean | null;
+    jours_restants_garantie?: number | null;
+  };
+  documents: DocumentFamille[];
+  nb_documents: number;
+  message?: string;
+}
+
 export async function listerDocuments(
   categorie?: string,
   search?: string
@@ -56,6 +69,26 @@ export async function modifierDocument(
 
 export async function supprimerDocument(id: number): Promise<void> {
   await clientApi.delete(`/documents/${id}`);
+}
+
+export async function obtenirDocumentsGarantieObjet(
+  objetId: number
+): Promise<DocumentGarantieObjetResult> {
+  const { data } = await clientApi.get<DocumentGarantieObjetResult>(
+    `/documents/garanties/objets/${objetId}`
+  );
+  return data;
+}
+
+export async function lierDocumentGarantie(
+  documentId: number,
+  objetId: number
+): Promise<DocumentGarantieObjetResult> {
+  const { data } = await clientApi.post<DocumentGarantieObjetResult>(
+    "/documents/garanties/lier",
+    { document_id: documentId, objet_id: objetId }
+  );
+  return data;
 }
 
 // ─── OCR ────────────────────────────────────────────────────

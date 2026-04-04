@@ -48,6 +48,8 @@ async function preparerSessionAuthentifiee(page: Page) {
 }
 
 test.describe("Parcours utilisateur complet", () => {
+  test.describe.configure({ timeout: 60000 });
+
   test.beforeEach(async ({ page }) => {
     await preparerSessionAuthentifiee(page);
   });

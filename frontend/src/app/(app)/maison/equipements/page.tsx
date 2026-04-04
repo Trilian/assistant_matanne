@@ -5,8 +5,8 @@
 import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-  Boxes, Wifi, ChevronDown, Plus, Pencil, Trash2,
-  AlertTriangle, Link2,
+  Boxes, Wifi, ChevronDown,
+  AlertTriangle, Link2, FileText, ExternalLink,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
@@ -14,23 +14,169 @@ import { Skeleton } from "@/composants/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/composants/ui/collapsible";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
-import { Progress } from "@/composants/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/composants/ui/select";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
 import { BoutonAchat } from "@/composants/bouton-achat";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { useQueryClient } from "@tanstack/react-query";
-import { utiliserDialogCrud } from "@/crochets/utiliser-crud";
-import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
-import { Input } from "@/composants/ui/input";
-import { Label } from "@/composants/ui/label";
-import { utiliserAutoCompletionMaison } from "@/crochets/utiliser-auto-completion-maison";
 import { toast } from "sonner";
 import {
   obtenirAstucesDomotique,
   obtenirPiecesAvecObjets, obtenirSuggestionsRenouvellement,
   listerToutesLesTachesRoutines, associerRoutineObjet,
 } from "@/bibliotheque/api/maison";
+import {
+  lierDocumentGarantie,
+  listerDocuments,
+  obtenirDocumentsGarantieObjet,
+} from "@/bibliotheque/api/documents";
+
+function ResumeDocumentsGarantie({
+  objetId,
+  nomObjet,
+  sousGarantie,
+}: {
+  objetId: number;
+  nomObjet: string;
+  sousGarantie?: boolean;
+}) {
+  const [selectionVisible, setSelectionVisible] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data, isLoading } = utiliserRequete(
+    ["documents", "garantie", String(objetId)],
+    () => obtenirDocumentsGarantieObjet(objetId),
+    { enabled: objetId > 0 }
+  );
+  const { data: documentsDisponibles, isLoading: chargementDisponibles } = utiliserRequete(
+    ["documents", "liste", String(objetId)],
+    () => listerDocuments(),
+    { enabled: selectionVisible }
+  );
+
+  const { mutate: lierDocumentExistant, isPending: liaisonEnCours } = utiliserMutation(
+    ({ documentId, objetId }: { documentId: number; objetId: number }) =>
+      lierDocumentGarantie(documentId, objetId),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["documents", "garantie", String(objetId)] });
+        toast.success("Document de garantie lié");
+        setSelectionVisible(false);
+      },
+    }
+  );
+
+  const documents = data?.documents ?? [];
+  const documentsCandidats = (documentsDisponibles?.items ?? []).filter(
+    (doc) => !(doc.tags ?? []).includes(`equipement:${objetId}`)
+  );
+
+  if (isLoading && sousGarantie) {
+    return <p className="mt-1 text-xs text-muted-foreground">Vérification des justificatifs…</p>;
+  }
+
+  const actionLiaison = (
+    <div className="mt-2 space-y-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-7 text-xs"
+        onClick={() => setSelectionVisible((value) => !value)}
+      >
+        <Link2 className="h-3 w-3 mr-1" />
+        {selectionVisible ? "Masquer la sélection" : "Lier un document existant"}
+      </Button>
+
+      {selectionVisible && (
+        <div className="rounded-md border bg-muted/30 p-2 space-y-2">
+          {chargementDisponibles ? (
+            <p className="text-xs text-muted-foreground">Chargement des documents…</p>
+          ) : documentsCandidats.length ? (
+            <div className="flex flex-wrap gap-2">
+              {documentsCandidats.slice(0, 5).map((doc) => (
+                <Button
+                  key={doc.id}
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="h-7 max-w-full text-xs"
+                  disabled={liaisonEnCours}
+                  onClick={() => lierDocumentExistant({ documentId: doc.id, objetId })}
+                >
+                  <FileText className="h-3 w-3 mr-1" />
+                  <span className="truncate">{doc.titre}</span>
+                </Button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Aucun document récent trouvé pour liaison directe.
+            </p>
+          )}
+          <a
+            href={`/famille/documents?search=${encodeURIComponent(nomObjet)}`}
+            className="inline-flex items-center gap-1 text-xs text-primary underline underline-offset-2"
+          >
+            Voir tous les documents
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        </div>
+      )}
+    </div>
+  );
+
+  if (!documents.length) {
+    if (!sousGarantie) return null;
+
+    return (
+      <div className="mt-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-700">
+            <AlertTriangle className="h-3 w-3 mr-1" />
+            Aucun justificatif lié
+          </Badge>
+          <a
+            href={`/famille/documents?search=${encodeURIComponent(nomObjet)}`}
+            className="text-xs text-primary underline underline-offset-2"
+          >
+            Lier une facture
+          </a>
+        </div>
+        {actionLiaison}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-1">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="outline" className="text-[10px]">
+          <FileText className="h-3 w-3 mr-1" />
+          {data?.nb_documents ?? documents.length} document{(data?.nb_documents ?? documents.length) > 1 ? "s" : ""} lié{(data?.nb_documents ?? documents.length) > 1 ? "s" : ""}
+        </Badge>
+        {documents.slice(0, 2).map((doc) => {
+          const href = doc.fichier_url || `/famille/documents?search=${encodeURIComponent(doc.titre)}`;
+          const estExterne = Boolean(doc.fichier_url);
+
+          return (
+            <a
+              key={doc.id}
+              href={href}
+              target={estExterne ? "_blank" : undefined}
+              rel={estExterne ? "noreferrer" : undefined}
+              className="inline-flex items-center gap-1 text-xs text-primary underline underline-offset-2"
+            >
+              {doc.titre}
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          );
+        })}
+      </div>
+      {actionLiaison}
+    </div>
+  );
+}
 
 // ─── Onglet Inventaire ───────────────────────────────────────
 function OngletInventaire() {
@@ -94,41 +240,48 @@ function OngletInventaire() {
               </CardHeader>
               <CardContent className="pt-0 space-y-2">
                 {objets.map((obj) => (
-                  <div key={obj.id} className="flex items-center gap-2 py-1.5 border-b last:border-0">
+                  <div key={obj.id} className="flex items-start gap-2 py-1.5 border-b last:border-0">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">{obj.nom}</p>
                       <p className="text-xs text-muted-foreground">
                         {obj.marque}{obj.modele ? ` ${obj.modele}` : ""}{obj.categorie ? ` · ${obj.categorie}` : ""}
                       </p>
+                      <ResumeDocumentsGarantie
+                        objetId={obj.id}
+                        nomObjet={obj.nom}
+                        sousGarantie={obj.sous_garantie ?? undefined}
+                      />
                     </div>
-                    {obj.statut && (
-                      <Badge variant={obj.statut === "hors_service" ? "destructive" : obj.statut === "a_remplacer" ? "secondary" : "outline"} className="text-[10px]">
-                        {obj.statut.replace(/_/g, " ")}
-                      </Badge>
-                    )}
-                    {obj.sous_garantie !== undefined && obj.sous_garantie !== null && (
-                      <Badge variant={obj.sous_garantie ? "default" : "secondary"} className="text-[10px]">
-                        {obj.sous_garantie ? "✅ Sous garantie" : "❌ Hors garantie"}
-                      </Badge>
-                    )}
-                    {tachesRoutines && tachesRoutines.length > 0 && (
-                      <Select onValueChange={(v) => associer({ objetId: obj.id, tacheId: v ? Number(v) : null })}>
-                        <SelectTrigger className="h-7 w-32 text-xs">
-                          <Link2 className="h-3 w-3 mr-1" />
-                          <SelectValue placeholder="Routine" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tachesRoutines.map(t => (
-                            <SelectItem key={t.id} value={String(t.id)} className="text-xs">
-                              {t.routine_nom ? `${t.routine_nom} → ` : ""}{t.nom}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {(obj.statut === "hors_service" || obj.statut === "a_remplacer") && (
-                      <BoutonAchat article={{ nom: obj.nom }} taille="xs" />
-                    )}
+                    <div className="flex items-center justify-end gap-2 flex-wrap shrink-0">
+                      {obj.statut && (
+                        <Badge variant={obj.statut === "hors_service" ? "destructive" : obj.statut === "a_remplacer" ? "secondary" : "outline"} className="text-[10px]">
+                          {obj.statut.replace(/_/g, " ")}
+                        </Badge>
+                      )}
+                      {obj.sous_garantie !== undefined && obj.sous_garantie !== null && (
+                        <Badge variant={obj.sous_garantie ? "default" : "secondary"} className="text-[10px]">
+                          {obj.sous_garantie ? "✅ Sous garantie" : "❌ Hors garantie"}
+                        </Badge>
+                      )}
+                      {tachesRoutines && tachesRoutines.length > 0 && (
+                        <Select onValueChange={(v) => associer({ objetId: obj.id, tacheId: v ? Number(v) : null })}>
+                          <SelectTrigger className="h-7 w-32 text-xs">
+                            <Link2 className="h-3 w-3 mr-1" />
+                            <SelectValue placeholder="Routine" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {tachesRoutines.map(t => (
+                              <SelectItem key={t.id} value={String(t.id)} className="text-xs">
+                                {t.routine_nom ? `${t.routine_nom} → ` : ""}{t.nom}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                      {(obj.statut === "hors_service" || obj.statut === "a_remplacer") && (
+                        <BoutonAchat article={{ nom: obj.nom }} taille="xs" />
+                      )}
+                    </div>
                   </div>
                 ))}
               </CardContent>

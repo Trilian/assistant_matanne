@@ -7,6 +7,7 @@
 - Factories détectées (`@service_factory`): **169**
 - Domaine le plus dense: cuisine/maison/famille
 - Registre central: `src/services/core/registry.py`
+- Validation documentaire du **04/04/2026**: exports `planning`, `dashboard` et `utilitaires` revérifiés contre leurs `__init__.py`
 
 ---
 
@@ -209,19 +210,21 @@ Rôle:
 
 ## Domaine Dashboard
 
-Exports confirmés:
+Exports confirmés / revérifiés:
 
-- `obtenir_accueil_data_service`
-- `obtenir_score_bien_etre_service`
+- `get_accueil_data_service`
+- `get_score_bien_etre_service`
+- `obtenir_score_foyer_service`
 - `obtenir_service_resume_famille_ia`
 - `obtenir_service_anomalies_financieres`
-- `obtenir_points_famille_service`
+- `obtenir_points_famille_service` reste disponible via `src/services/dashboard/points_famille.py`
 
 Rôle:
 
 - agrégation de données multi-modules
 - métriques d'accueil
 - résumés IA et anomalies budgétaires
+- score foyer et score bien-être
 
 ---
 
