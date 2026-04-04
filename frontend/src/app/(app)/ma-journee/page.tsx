@@ -28,6 +28,8 @@ import {
 import { Button } from "@/composants/ui/button";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { SkeletonPage } from "@/composants/ui/skeleton-page";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirTableauBord } from "@/bibliotheque/api/tableau-bord";
 import { obtenirTachesJourMaison, modifierTacheEntretien } from "@/bibliotheque/api/maison";
@@ -156,6 +158,15 @@ export default function PageMaJournee() {
   const salutation =
     heure < 12 ? "Bonjour" : heure < 18 ? "Bon après-midi" : "Bonsoir";
 
+  if (chargementDashboard && !dashboard) {
+    return (
+      <SkeletonPage
+        ariaLabel="Chargement de ma journée"
+        lignes={["h-8 w-48", "h-24 w-full", "h-40 w-full"]}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* En-tête jour */}
@@ -236,12 +247,17 @@ export default function PageMaJournee() {
               <Skeleton className="h-10 w-full" />
             </div>
           ) : repas.length === 0 ? (
-            <div className="text-center py-4">
-              <p className="text-sm text-muted-foreground mb-2">Aucun repas planifié</p>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/cuisine/ma-semaine">Planifier mes repas</Link>
-              </Button>
-            </div>
+            <EtatVide
+              Icone={ChefHat}
+              titre="Aucun repas planifié"
+              description="Complétez le planning hebdomadaire pour afficher les repas du jour ici."
+              className="p-4"
+              action={
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/cuisine/ma-semaine">Planifier mes repas</Link>
+                </Button>
+              }
+            />
           ) : (
             <div className="space-y-2">
               {repas.map((r, i) => (
@@ -270,15 +286,22 @@ export default function PageMaJournee() {
       </Card>
 
       {/* Routines du matin */}
-      {routinesMatin.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Sun className="h-4 w-4 text-amber-500" />
-              Routine du matin
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Sun className="h-4 w-4 text-amber-500" />
+            Routine du matin
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {routinesMatin.length === 0 ? (
+            <EtatVide
+              Icone={Sun}
+              titre="Aucune routine matin"
+              description="Ajoutez une routine pour afficher les étapes clés du réveil ici."
+              className="p-4"
+            />
+          ) : (
             <div className="space-y-1.5">
               {routinesMatin[0].etapes.map((etape) => (
                 <div
@@ -303,9 +326,9 @@ export default function PageMaJournee() {
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
       {/* Tâches du jour */}
       <Card>
@@ -322,9 +345,12 @@ export default function PageMaJournee() {
         </CardHeader>
         <CardContent>
           {taches.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-3">
-              Aucune tâche pour aujourd&apos;hui ✨
-            </p>
+            <EtatVide
+              Icone={CheckCircle2}
+              titre="Aucune tâche pour aujourd'hui ✨"
+              description="La journée est légère côté maison et entretien."
+              className="p-4"
+            />
           ) : (
             <div className="space-y-2">
               {taches.map((tache) => (
@@ -378,16 +404,16 @@ export default function PageMaJournee() {
       </Card>
 
       {/* Activités prévues */}
-      {activites && activites.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <RotateCw className="h-4 w-4" />
-              Activités prévues
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {activites.map((a) => (
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <RotateCw className="h-4 w-4" />
+            Activités prévues
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {activites && activites.length > 0 ? (
+            activites.map((a) => (
               <div
                 key={a.id}
                 className="flex items-center justify-between rounded-md border px-3 py-2"
@@ -405,21 +431,35 @@ export default function PageMaJournee() {
                   )}
                 </div>
               </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+            ))
+          ) : (
+            <EtatVide
+              Icone={RotateCw}
+              titre="Aucune activité prévue"
+              description="Ajoutez une sortie ou un moment en famille pour enrichir la journée."
+              className="p-4"
+            />
+          )}
+        </CardContent>
+      </Card>
 
       {/* Routines du soir */}
-      {routinesSoir.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <RotateCw className="h-4 w-4 text-indigo-500" />
-              Routine du soir
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <RotateCw className="h-4 w-4 text-indigo-500" />
+            Routine du soir
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {routinesSoir.length === 0 ? (
+            <EtatVide
+              Icone={RotateCw}
+              titre="Aucune routine soir"
+              description="Ajoutez une routine du soir pour retrouver ici les dernières étapes utiles avant la nuit."
+              className="p-4"
+            />
+          ) : (
             <div className="space-y-1.5">
               {routinesSoir[0].etapes.map((etape) => (
                 <div
@@ -444,9 +484,9 @@ export default function PageMaJournee() {
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

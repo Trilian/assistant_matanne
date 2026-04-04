@@ -38,7 +38,8 @@ import {
   CardDescription,
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
-import { Skeleton } from "@/composants/ui/skeleton";
+import { SkeletonPage } from "@/composants/ui/skeleton-page";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import {
   Dialog,
   DialogContent,
@@ -245,25 +246,22 @@ export default function PageActivites() {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-36" />
-          ))}
-        </div>
+        <SkeletonPage
+          ariaLabel="Chargement des activités familiales"
+          lignes={["h-8 w-40", "h-10 w-48", "h-36 w-full"]}
+        />
       ) : !activites?.length ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12">
-            <CalendarHeart className="h-12 w-12 text-muted-foreground" />
-            <p className="text-muted-foreground">Aucune activité planifiée</p>
-            <Button
-              variant="outline"
-              onClick={() => setDialogueCreation(true)}
-            >
+        <EtatVide
+          Icone={CalendarHeart}
+          titre="Aucune activité planifiée"
+          description="Ajoutez une sortie, un jeu ou un moment en famille pour remplir le planning des prochains jours."
+          action={
+            <Button variant="outline" onClick={() => setDialogueCreation(true)}>
               <Plus className="mr-1 h-4 w-4" />
               Planifier une activité
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
         <div className="space-y-6">
           {/* À venir */}

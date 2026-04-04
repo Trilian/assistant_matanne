@@ -26,7 +26,8 @@ import {
   CardDescription,
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
-import { Skeleton } from "@/composants/ui/skeleton";
+import { SkeletonPage } from "@/composants/ui/skeleton-page";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import {
   Dialog,
   DialogContent,
@@ -139,25 +140,22 @@ export default function PageRoutines() {
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-48" />
-          ))}
-        </div>
+        <SkeletonPage
+          ariaLabel="Chargement des routines familiales"
+          lignes={["h-8 w-32", "h-10 w-44", "h-48 w-full"]}
+        />
       ) : !routines?.length ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12">
-            <ListChecks className="h-12 w-12 text-muted-foreground" />
-            <p className="text-muted-foreground">Aucune routine définie</p>
-            <Button
-              variant="outline"
-              onClick={() => setDialogueCreation(true)}
-            >
+        <EtatVide
+          Icone={ListChecks}
+          titre="Aucune routine définie"
+          description="Créez une routine du matin, du soir ou de journée pour structurer les habitudes familiales."
+          action={
+            <Button variant="outline" onClick={() => setDialogueCreation(true)}>
               <Plus className="mr-1 h-4 w-4" />
               Créer une routine
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
         <div className="grid gap-6 lg:grid-cols-3">
           {groupes.map(({ type: t, label, Icone, items }) => (
@@ -170,11 +168,12 @@ export default function PageRoutines() {
                 </Badge>
               </div>
               {items.length === 0 ? (
-                <Card>
-                  <CardContent className="py-6 text-center text-sm text-muted-foreground">
-                    Aucune routine {label.toLowerCase()}
-                  </CardContent>
-                </Card>
+                <EtatVide
+                  Icone={Icone}
+                  titre={`Aucune routine ${label.toLowerCase()}`}
+                  description="Cette plage est libre pour le moment. Vous pouvez ajouter une routine adaptée à ce moment de la journée."
+                  className="p-6"
+                />
               ) : (
                 items.map((r) => (
                   <RoutineCard
