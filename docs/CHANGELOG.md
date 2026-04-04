@@ -6,6 +6,25 @@
 
 ---
 
+## 2026-04-04 - Consolidation documentaire phase 5
+
+### Ajouté
+
+- création de `docs/INTER_MODULES_MAP.md`
+- création de `docs/ADMIN_QUICK_REFERENCE.md`
+- création de `docs/guides/README.md`
+- création du répertoire `data/performance_queries/` pour les traces EXPLAIN ANALYZE
+
+### Mis à jour
+
+- `docs/AUTOMATIONS.md` consolidé comme référence principale des jobs + automations
+- `docs/CRON_JOBS.md` enrichi avec la checklist de développement et de maintenance
+- `scripts/README.md` complété pour couvrir les scripts racine, SQL, analyse et qualité
+- `docs/DEPRECATED.md`, `docs/TESTING.md`, `docs/TELEGRAM_SETUP.md`, `docs/TELEGRAM_RECETTES.md`, `docs/PERFORMANCE_QUERIES.md` nettoyés des références legacy cassées
+- `README.md` et `docs/ADMIN_MODE.md` réalignés avec les nouveaux guides prioritaires
+
+---
+
 ## 2026-04-03 - Documentation finale et nettoyage
 
 ### Ajouté

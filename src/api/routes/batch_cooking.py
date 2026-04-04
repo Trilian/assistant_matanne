@@ -287,11 +287,30 @@ async def modifier_session(
             if not updates:
                 raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour")
 
+            ancien_statut = s.statut
             for key, value in updates.items():
                 setattr(s, key, value)
 
             session.commit()
             session.refresh(s)
+
+            if ancien_statut != "terminee" and s.statut == "terminee":
+                try:
+                    from src.services.core.events import obtenir_bus
+
+                    obtenir_bus().emettre(
+                        "batch_cooking.termine",
+                        {
+                            "session_id": s.id,
+                            "planning_id": s.planning_id,
+                            "recettes_selectionnees": s.recettes_selectionnees or [],
+                            "date_session": s.date_session.isoformat() if s.date_session else None,
+                        },
+                        source="api.batch_cooking.patch",
+                    )
+                except Exception:
+                    pass
+
             return _serialiser_session(s)
 
     return await executer_async(_update)

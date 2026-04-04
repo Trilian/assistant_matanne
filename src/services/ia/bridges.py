@@ -490,6 +490,414 @@ class BridgesInterModulesService:
 
         return alertes
 
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def generer_courses_auto_depuis_planning(
+        self,
+        planning_id: int,
+        semaine_debut: date | str | None = None,
+        db: Session | None = None,
+    ) -> dict:
+        """I1: génère automatiquement une liste de courses depuis un planning validé."""
+        from sqlalchemy import func
+
+        from src.core.models import (
+            ArticleCourses,
+            ArticleInventaire,
+            Ingredient,
+            ListeCourses,
+            Planning,
+        )
+        from src.core.models.planning import Repas
+        from src.core.models.recettes import RecetteIngredient
+
+        planning = db.query(Planning).filter(Planning.id == planning_id).first()
+        if not planning:
+            return {}
+
+        if isinstance(semaine_debut, str) and semaine_debut:
+            try:
+                semaine_ref = date.fromisoformat(semaine_debut)
+            except ValueError:
+                semaine_ref = planning.semaine_debut
+        else:
+            semaine_ref = semaine_debut or planning.semaine_debut
+
+        nom_liste = f"Courses auto planning #{planning.id} ({semaine_ref.isoformat()})"
+        liste = (
+            db.query(ListeCourses)
+            .filter(
+                ListeCourses.nom == nom_liste,
+                ListeCourses.archivee.is_(False),
+            )
+            .order_by(ListeCourses.id.desc())
+            .first()
+        )
+        if liste is None:
+            liste = ListeCourses(nom=nom_liste, archivee=False, etat="brouillon")
+            db.add(liste)
+            db.flush()
+
+        repas_list = db.query(Repas).filter(Repas.planning_id == planning.id).all()
+        recette_ids: set[int] = set()
+        for repas in repas_list:
+            for recette_id in (
+                repas.recette_id,
+                repas.entree_recette_id,
+                repas.dessert_recette_id,
+                repas.dessert_jules_recette_id,
+            ):
+                if recette_id:
+                    recette_ids.add(recette_id)
+
+        if not recette_ids:
+            return {
+                "planning_id": planning.id,
+                "liste_id": liste.id,
+                "nb_articles": 0,
+                "articles_en_stock": 0,
+                "message": "Aucune recette liée au planning validé.",
+            }
+
+        ingredients = (
+            db.query(
+                RecetteIngredient.ingredient_id,
+                func.sum(RecetteIngredient.quantite).label("quantite_totale"),
+                Ingredient.nom,
+                Ingredient.categorie,
+                Ingredient.unite,
+            )
+            .join(Ingredient, Ingredient.id == RecetteIngredient.ingredient_id)
+            .filter(RecetteIngredient.recette_id.in_(recette_ids))
+            .group_by(
+                RecetteIngredient.ingredient_id,
+                Ingredient.nom,
+                Ingredient.categorie,
+                Ingredient.unite,
+            )
+            .all()
+        )
+
+        nb_articles = 0
+        articles_en_stock = 0
+
+        for row in ingredients:
+            quantite_voulue = float(row.quantite_totale or 1)
+            inventaire = (
+                db.query(ArticleInventaire)
+                .filter(ArticleInventaire.ingredient_id == row.ingredient_id)
+                .order_by(ArticleInventaire.quantite.desc())
+                .first()
+            )
+            quantite_en_stock = float(getattr(inventaire, "quantite", 0) or 0)
+            if quantite_en_stock >= quantite_voulue:
+                articles_en_stock += 1
+                continue
+
+            quantite_a_acheter = max(0.1, quantite_voulue - quantite_en_stock)
+            article = (
+                db.query(ArticleCourses)
+                .filter(
+                    ArticleCourses.liste_id == liste.id,
+                    ArticleCourses.ingredient_id == row.ingredient_id,
+                    ArticleCourses.achete.is_(False),
+                )
+                .first()
+            )
+
+            if article:
+                article.quantite_necessaire = float(article.quantite_necessaire or 0) + quantite_a_acheter
+                if not article.rayon_magasin:
+                    article.rayon_magasin = row.categorie or "Autre"
+                nb_articles += 1
+                continue
+
+            db.add(
+                ArticleCourses(
+                    liste_id=liste.id,
+                    ingredient_id=row.ingredient_id,
+                    quantite_necessaire=quantite_a_acheter,
+                    rayon_magasin=row.categorie or "Autre",
+                    priorite="moyenne",
+                    suggere_par_ia=False,
+                    notes=f"Ajout automatique depuis le planning #{planning.id}",
+                )
+            )
+            nb_articles += 1
+
+        db.commit()
+        db.refresh(liste)
+
+        return {
+            "planning_id": planning.id,
+            "liste_id": liste.id,
+            "nom_liste": liste.nom,
+            "nb_articles": nb_articles,
+            "articles_en_stock": articles_en_stock,
+            "semaine_debut": semaine_ref.isoformat() if semaine_ref else None,
+            "message": f"{nb_articles} article(s) ajoutés à la liste auto.",
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def synchroniser_entretien_termine_vers_fiche(
+        self,
+        tache_id: int,
+        db: Session | None = None,
+    ) -> dict:
+        """I5: met à jour la fiche d'entretien après validation d'une tâche."""
+        from src.core.models.habitat import TacheEntretien
+        from src.core.models.maison_extensions import EntretienSaisonnier
+
+        tache = db.query(TacheEntretien).filter(TacheEntretien.id == tache_id).first()
+        if not tache:
+            return {}
+
+        date_realisation = tache.derniere_fois or date.today()
+        tokens = [mot for mot in (tache.nom or "").lower().replace("-", " ").split() if len(mot) >= 4]
+        fiches = db.query(EntretienSaisonnier).all()
+        fiches_cibles = [
+            fiche
+            for fiche in fiches
+            if fiche.nom and any(token in fiche.nom.lower() for token in tokens)
+        ]
+
+        if not fiches_cibles:
+            mois = date_realisation.month
+            if mois in {12, 1, 2}:
+                saison = "hiver"
+            elif mois in {3, 4, 5}:
+                saison = "printemps"
+            elif mois in {6, 7, 8}:
+                saison = "ete"
+            else:
+                saison = "automne"
+
+            categorie = (tache.categorie or "entretien").lower()
+            if categorie not in {"chauffage", "plomberie", "toiture", "jardin", "piscine", "securite"}:
+                categorie = "securite" if "secur" in categorie else "jardin" if "jardin" in categorie else "chauffage"
+
+            fiche = EntretienSaisonnier(
+                nom=tache.nom,
+                categorie=categorie,
+                saison=saison,
+                frequence="annuel",
+                alerte_active=True,
+            )
+            db.add(fiche)
+            db.flush()
+            fiches_cibles = [fiche]
+
+        correspondance_frequences = {
+            "hebdomadaire": 7,
+            "mensuel": 30,
+            "trimestriel": 90,
+            "semestriel": 180,
+            "annuel": 365,
+        }
+
+        for fiche in fiches_cibles:
+            fiche.date_derniere_realisation = date_realisation
+            fiche.fait_cette_annee = date_realisation.year == date.today().year
+            nb_jours = correspondance_frequences.get((fiche.frequence or "annuel").lower(), 365)
+            fiche.date_prochaine = date_realisation + timedelta(days=nb_jours)
+            note_auto = f"Mis à jour automatiquement depuis la tâche #{tache.id} ({tache.nom})"
+            fiche.notes = note_auto if not fiche.notes else f"{fiche.notes}\n{note_auto}"
+
+        db.commit()
+
+        return {
+            "tache_id": tache.id,
+            "nb_fiches_mises_a_jour": len(fiches_cibles),
+            "date_realisation": date_realisation.isoformat(),
+            "message": f"{len(fiches_cibles)} fiche(s) d'entretien synchronisée(s).",
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def pre_remplir_planning_depuis_batch(
+        self,
+        session_id: int,
+        db: Session | None = None,
+    ) -> dict:
+        """I6: marque les repas du planning comme déjà préparés après un batch cooking."""
+        from sqlalchemy import or_
+
+        from src.core.models import SessionBatchCooking
+        from src.core.models.planning import Repas
+
+        session_batch = db.query(SessionBatchCooking).filter(SessionBatchCooking.id == session_id).first()
+        if not session_batch:
+            return {}
+
+        recette_ids = [int(recette_id) for recette_id in (session_batch.recettes_selectionnees or []) if recette_id]
+        if not session_batch.planning_id or not recette_ids:
+            return {
+                "session_id": session_batch.id,
+                "planning_id": session_batch.planning_id,
+                "nb_repas_mis_a_jour": 0,
+                "message": "Aucun repas à pré-remplir pour cette session.",
+            }
+
+        repas = (
+            db.query(Repas)
+            .filter(Repas.planning_id == session_batch.planning_id)
+            .filter(
+                or_(
+                    Repas.recette_id.in_(recette_ids),
+                    Repas.entree_recette_id.in_(recette_ids),
+                    Repas.dessert_recette_id.in_(recette_ids),
+                    Repas.dessert_jules_recette_id.in_(recette_ids),
+                )
+            )
+            .all()
+        )
+
+        note_batch = f"Préparé en batch le {(session_batch.date_session or date.today()).isoformat()}"
+        nb_mis_a_jour = 0
+        for repas_item in repas:
+            repas_item.prepare = True
+            if note_batch not in (repas_item.notes or ""):
+                repas_item.notes = note_batch if not repas_item.notes else f"{repas_item.notes}\n{note_batch}"
+            nb_mis_a_jour += 1
+
+        db.commit()
+
+        return {
+            "session_id": session_batch.id,
+            "planning_id": session_batch.planning_id,
+            "nb_repas_mis_a_jour": nb_mis_a_jour,
+            "message": f"{nb_mis_a_jour} repas pré-rempli(s) depuis le batch.",
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def appliquer_feedback_recette_sur_suggestions(
+        self,
+        recette_id: int,
+        *,
+        note: int | None = None,
+        feedback: str | None = None,
+        user_id: str | None = None,
+        commentaire: str | None = None,
+        db: Session | None = None,
+    ) -> dict:
+        """I10: convertit le feedback recette en signal exploitable pour les suggestions."""
+        from src.core.models import Recette
+        from src.core.models.user_preferences import RetourRecette
+
+        recette = db.query(Recette).filter(Recette.id == recette_id).first()
+        if not recette:
+            return {}
+
+        feedback_normalise = (feedback or "").strip().lower()
+        if feedback_normalise not in {"like", "dislike", "neutral"}:
+            if note is not None and int(note) <= 2:
+                feedback_normalise = "dislike"
+            elif note is not None and int(note) >= 4:
+                feedback_normalise = "like"
+            else:
+                feedback_normalise = "neutral"
+
+        utilisateur = user_id or "system"
+        retour = (
+            db.query(RetourRecette)
+            .filter(RetourRecette.user_id == utilisateur, RetourRecette.recette_id == recette_id)
+            .first()
+        )
+        if retour is None:
+            retour = RetourRecette(user_id=utilisateur, recette_id=recette_id, feedback=feedback_normalise)
+            db.add(retour)
+        else:
+            retour.feedback = feedback_normalise
+
+        if note is not None:
+            retour.contexte = f"note={int(note)}/5"
+        if commentaire:
+            retour.notes = commentaire[:1000]
+
+        db.commit()
+
+        poids = {"like": 2, "neutral": 0, "dislike": -3}[feedback_normalise]
+        return {
+            "recette_id": recette_id,
+            "user_id": utilisateur,
+            "feedback": feedback_normalise,
+            "poids_suggestion": poids,
+            "exclure_des_suggestions": feedback_normalise == "dislike",
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def integrer_budget_mensuel_dans_rapport(
+        self,
+        *,
+        mois: int | None = None,
+        annee: int | None = None,
+        db: Session | None = None,
+    ) -> dict:
+        """I4: résume le budget du mois pour l'injecter dans le rapport famille."""
+        from src.core.models.famille import BudgetFamille
+
+        aujourd_hui = date.today()
+        mois_cible = mois or aujourd_hui.month
+        annee_cible = annee or aujourd_hui.year
+
+        lignes = (
+            db.query(BudgetFamille)
+            .filter(
+                func.extract("month", BudgetFamille.date) == mois_cible,
+                func.extract("year", BudgetFamille.date) == annee_cible,
+            )
+            .all()
+        )
+        total = round(sum(float(ligne.montant or 0) for ligne in lignes), 2)
+        repartition: dict[str, float] = {}
+        for ligne in lignes:
+            categorie = ligne.categorie or "autre"
+            repartition[categorie] = round(repartition.get(categorie, 0.0) + float(ligne.montant or 0), 2)
+
+        return {
+            "mois": mois_cible,
+            "annee": annee_cible,
+            "total_depenses": total,
+            "nb_lignes": len(lignes),
+            "repartition": repartition,
+        }
+
+    @avec_gestion_erreurs(default_return={})
+    @avec_session_db
+    def resumer_depenses_retour_voyage(
+        self,
+        voyage_id: int | None = None,
+        db: Session | None = None,
+    ) -> dict:
+        """I9: produit un résumé synthétique du budget d'un voyage terminé."""
+        from src.core.models.voyage import Voyage
+
+        query = db.query(Voyage)
+        if voyage_id is not None:
+            query = query.filter(Voyage.id == voyage_id)
+        else:
+            query = query.filter(Voyage.statut.in_(["termine", "terminé", "en_cours"]))
+
+        voyage = query.order_by(Voyage.date_retour.desc()).first()
+        if not voyage:
+            return {}
+
+        budget_prevu = float(voyage.budget_prevu or 0)
+        budget_reel = float(voyage.budget_reel or 0)
+        ecart = round(budget_reel - budget_prevu, 2)
+        return {
+            "voyage_id": voyage.id,
+            "titre": voyage.titre,
+            "destination": voyage.destination,
+            "budget_prevu": budget_prevu,
+            "budget_reel": budget_reel,
+            "ecart_budget": ecart,
+            "statut": voyage.statut,
+        }
+
 
 # ═══════════════════════════════════════════════════════════
 # EVENT HANDLERS (subscribers)

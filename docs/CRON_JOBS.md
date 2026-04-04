@@ -1,8 +1,8 @@
 ﻿# Cron Jobs
 
-> Référence complète des 68 tâches planifiées APScheduler — horaires, canaux, dépendances et procédures de diagnostic.
+> Référence consolidée des tâches planifiées APScheduler — horaires, canaux, dépendances, diagnostic et guide de développement.
 >
-> **Dernière mise à jour** : 1er avril 2026
+> **Dernière mise à jour** : 4 avril 2026 — ce document absorbe l'ancien `docs/CRON_DEVELOPMENT.md`.
 
 ---
 
@@ -207,6 +207,42 @@ Fallback : variable `CRON_DEFAULT_USER_IDS` (CSV) si la base n'est pas disponibl
 | `CRON_DEFAULT_USER_IDS` | IDs utilisateurs fallback (CSV) | `"matanne"` |
 | `ADMIN_USER_IDS` | IDs admin pour alertes d'échec (CSV) | Premier utilisateur actif |
 | `ENVIRONMENT` | Mode dev/prod (affecte logging) | `"production"` |
+
+---
+
+## Développement et maintenance des jobs
+
+### Ajouter ou modifier un job
+
+1. implémenter la fonction métier dans `src/services/core/cron/jobs.py`
+2. enregistrer le job dans le registre central
+3. déclarer ou ajuster son horaire dans `src/services/core/cron/jobs_schedule.py`
+4. prévoir un `dry_run` ou une exécution sans effet de bord si le job est mutatif
+5. compléter la couverture de tests et cette documentation
+
+### Exemple minimal
+
+```python
+from datetime import datetime
+
+
+def job_expiration_recettes_suggestion() -> dict:
+    """Détecte les ingrédients proches de péremption et prépare une suggestion recette."""
+    items = []
+    return {
+        "executed_at": datetime.utcnow().isoformat(),
+        "items_detectes": len(items),
+        "status": "ok",
+    }
+```
+
+### Checklist avant merge
+
+- [ ] ID de job explicite et unique
+- [ ] Horaire documenté dans `jobs_schedule.py`
+- [ ] `dry_run` disponible si besoin
+- [ ] Test unitaire et/ou intégration présent
+- [ ] Impact métier et canaux notifiés documentés ici
 
 ---
 

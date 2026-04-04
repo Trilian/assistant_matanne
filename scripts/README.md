@@ -6,6 +6,26 @@ Scripts utilitaires pour le développement, le déploiement et la maintenance d'
 
 ---
 
+## Racine du dossier `scripts/`
+
+### `measure_ram.py`
+
+Mesure la consommation mémoire du démarrage backend en simulant la charge Railway Free (`config`, modèles, app FastAPI, cache, IA, scheduler).
+
+```bash
+python scripts/measure_ram.py
+```
+
+### `audit_orm_sql.py`
+
+Audit rapide de cohérence entre les tables ORM SQLAlchemy (`src/core/models/`) et les `CREATE TABLE` présents dans `sql/INIT_COMPLET.sql`.
+
+```bash
+python scripts/audit_orm_sql.py
+```
+
+---
+
 ## _archive/ *(scripts legacy, non exécutés en routine)*
 
 Scripts historiques conservés pour audit/référence. Voir `scripts/_archive/README.md`.
@@ -28,6 +48,22 @@ Audit rapide des métriques du codebase : nombre de fichiers Python et lignes de
 
 ```bash
 python scripts/analysis/audit_metrics.py
+```
+
+### `audit_orm_sql.py`
+
+Version détaillée de l'audit ORM ↔ SQL utilisée pendant la consolidation du schéma. Produit un inventaire plus complet que le wrapper racine.
+
+```bash
+python scripts/analysis/audit_orm_sql.py
+```
+
+### `generate_api_schemas_doc.py`
+
+Génère `docs/API_SCHEMAS.md` à partir des classes Pydantic déclarées dans `src/api/schemas/*.py`.
+
+```bash
+python scripts/analysis/generate_api_schemas_doc.py
 ```
 
 ---
@@ -55,6 +91,16 @@ python scripts/db/deploy_supabase.py --check      # Vérifie les migrations en a
 python scripts/db/deploy_supabase.py --deploy     # Applique les migrations
 python scripts/db/deploy_supabase.py --status     # Affiche l'état des migrations
 python scripts/db/deploy_supabase.py --rollback   # Annule la dernière migration
+```
+
+### `backup_database.py`
+
+Crée, liste, restaure ou nettoie les sauvegardes JSON/ZIP de la base via le service de backup interne.
+
+```bash
+python scripts/db/backup_database.py backup
+python scripts/db/backup_database.py list
+python scripts/db/backup_database.py restore sauvegardes/<fichier>
 ```
 
 ### `import_recettes.py`
@@ -85,6 +131,35 @@ Génère des données de démonstration réalistes : jardin, bien-être, plannin
 python manage.py seed-demo
 # ou directement :
 python scripts/db/seed_data.py
+```
+
+### `regenerate_init.py`
+
+Régénère `sql/INIT_COMPLET.sql` à partir de `sql/schema/*.sql` et peut vérifier que le fichier monolithique est à jour.
+
+```bash
+python scripts/db/regenerate_init.py
+python scripts/db/regenerate_init.py --check
+```
+
+### `split_init_sql.py`
+
+Fait l'opération inverse : découpe le script monolithique `INIT_COMPLET.sql` en fichiers par domaine dans `sql/schema/`.
+
+```bash
+python scripts/db/split_init_sql.py
+```
+
+---
+
+## qualite/ *(outils de maintenance ponctuels)*
+
+### `patch_mutmut_src_prefix.py`
+
+Corrige les préfixes `src.` attendus par les outils de mutation testing / qualité lorsque l'arborescence a évolué.
+
+```bash
+python scripts/qualite/patch_mutmut_src_prefix.py
 ```
 
 ---

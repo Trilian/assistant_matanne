@@ -16,7 +16,7 @@ from collections import Counter
 from datetime import date as date_type, timedelta
 from typing import Any
 
-from sqlalchemy import func
+from sqlalchemy import case, func
 
 from src.core.decorators import avec_gestion_erreurs, avec_session_db
 from src.services.core.registry import service_factory
@@ -227,10 +227,16 @@ class InventairePlanningInteractionService:
         """P5-13: retourne les recettes a exclure des suggestions (note < seuil)."""
         from src.core.models import RetourRecette
 
+        score_feedback = case(
+            (RetourRecette.feedback == "like", 5.0),
+            (RetourRecette.feedback == "dislike", 1.0),
+            else_=3.0,
+        )
+
         rows = (
             db.query(
                 RetourRecette.recette_id,
-                func.avg(RetourRecette.note).label("note_moyenne"),
+                func.avg(score_feedback).label("note_moyenne"),
                 func.count(RetourRecette.id).label("nb_retours"),
             )
             .group_by(RetourRecette.recette_id)

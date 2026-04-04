@@ -277,6 +277,23 @@ def marquer_tache_fait_avec_prochaine(tache_id: int) -> dict:
 
         session.commit()
 
+        try:
+            from src.services.core.events.bus import obtenir_bus
+
+            obtenir_bus().emettre(
+                "entretien.tache_terminee",
+                {
+                    "tache_id": tache.id,
+                    "nom": tache.nom,
+                    "categorie": tache.categorie,
+                    "date_realisation": date.today().isoformat(),
+                    "prochaine_fois": str(prochaine),
+                },
+                source="flux_utilisateur",
+            )
+        except Exception:
+            logger.debug("Émission entretien.tache_terminee ignorée", exc_info=True)
+
         return {
             "tache_id": tache.id,
             "nom": tache.nom,
@@ -301,7 +318,7 @@ def enregistrer_feedback_semaine(feedbacks: list[dict]) -> dict:
     Returns:
         {"nb_feedbacks": N, "score_moyen": float}
     """
-    from src.core.models.planning import Repas
+    from src.core.models.user_preferences import RetourRecette
 
     if not feedbacks:
         return {"nb_feedbacks": 0, "score_moyen": 0}
@@ -311,25 +328,58 @@ def enregistrer_feedback_semaine(feedbacks: list[dict]) -> dict:
     with obtenir_contexte_db() as session:
         for fb in feedbacks:
             recette_id = fb.get("recette_id")
-            note = fb.get("note", 3)
-            mange = fb.get("mange", True)
+            note = int(fb.get("note", 3) or 3)
+            mange = bool(fb.get("mange", True))
+            commentaire = fb.get("commentaire", "")
+            user_id = str(fb.get("user_id") or "system")
 
-            if recette_id:
-                # Émettre événement de feedback pour l'IA
-                from src.services.core.events.bus import obtenir_bus
+            if not recette_id:
+                continue
 
-                obtenir_bus().emettre(
-                    "recette.feedback",
-                    {
-                        "recette_id": recette_id,
-                        "note": note,
-                        "mange": mange,
-                        "commentaire": fb.get("commentaire", ""),
-                    },
-                    source="feedback_semaine",
+            if note <= 2 or not mange:
+                feedback = "dislike"
+            elif note >= 4:
+                feedback = "like"
+            else:
+                feedback = "neutral"
+
+            retour = (
+                session.query(RetourRecette)
+                .filter(RetourRecette.user_id == user_id, RetourRecette.recette_id == recette_id)
+                .first()
+            )
+            if retour is None:
+                retour = RetourRecette(
+                    user_id=user_id,
+                    recette_id=recette_id,
+                    feedback=feedback,
                 )
+                session.add(retour)
+            else:
+                retour.feedback = feedback
 
-                notes.append(note)
+            retour.contexte = f"note={note}/5"
+            retour.notes = commentaire[:1000] if commentaire else retour.notes
+
+            # Émettre événement de feedback pour l'IA
+            from src.services.core.events.bus import obtenir_bus
+
+            obtenir_bus().emettre(
+                "recette.feedback",
+                {
+                    "recette_id": recette_id,
+                    "note": note,
+                    "mange": mange,
+                    "commentaire": commentaire,
+                    "feedback": feedback,
+                    "user_id": user_id,
+                },
+                source="feedback_semaine",
+            )
+
+            notes.append(note)
+
+        session.commit()
 
     score_moyen = sum(notes) / len(notes) if notes else 0
 

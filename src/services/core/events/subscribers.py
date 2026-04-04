@@ -793,15 +793,25 @@ def _mettre_a_jour_courses_predictives(event: EvenementDomaine) -> None:
 
 
 def _adapter_planning_sur_feedback_recette(event: EvenementDomaine) -> None:
-    """D.5: feedback recette -> invalider recommandations de planning."""
+    """D.5 / I10: feedback recette -> ajuster le signal de suggestion et invalider le cache."""
     try:
         from src.core.caching import obtenir_cache
+        from src.services.ia.bridges import obtenir_service_bridges
+
+        service = obtenir_service_bridges()
+        service.appliquer_feedback_recette_sur_suggestions(
+            int(event.data.get("recette_id", 0) or 0),
+            note=event.data.get("note"),
+            feedback=event.data.get("feedback"),
+            user_id=event.data.get("user_id"),
+            commentaire=event.data.get("commentaire"),
+        )
 
         cache = obtenir_cache()
         cache.invalidate(pattern="planning")
         cache.invalidate(pattern="recettes")
         cache.invalidate(pattern="suggestions")
-        logger.info("Inter-modules: invalidation planning après recette.feedback")
+        logger.info("Inter-modules: ajustement suggestions après recette.feedback")
     except Exception as e:  # noqa: BLE001
         logger.warning("Échec flux D.5 feedback->planning: %s", e)
 
@@ -940,81 +950,118 @@ def _traiter_action_rapide_dashboard(event: EvenementDomaine) -> None:
 
 
 def _generer_courses_depuis_planning(event: EvenementDomaine) -> None:
-    """Bridge 1: Planning validé ? génération automatique de la liste de courses.
-
-    Extrait les ingrédients du planning actif et les ajoute à la liste de courses.
-    Émet ensuite `courses.generees` pour déclencher les notifications aval.
-    Tolère les pannes — n'échoue jamais.
-    """
+    """Bridge 1: Planning validé -> génération automatique d'une vraie liste de courses."""
     try:
-        planning_id = event.data.get("planning_id")
+        planning_id = int(event.data.get("planning_id", 0) or 0)
         if not planning_id:
             return
 
-        from src.core.db import obtenir_contexte_db
-        from src.core.models import ArticleCourses, Ingredientx, Repas, Recette
+        from src.services.ia.bridges import obtenir_service_bridges
 
-        with obtenir_contexte_db() as session:
-            # Récupérer tous les repas du planning
-            repas_list = (
-                session.query(Repas)
-                .filter(Repas.planning_id == planning_id)
-                .all()
-            )
-            if not repas_list:
-                logger.info("Bridge 1: planning %s sans repas, courses non générées", planning_id)
-                return
+        service = obtenir_service_bridges()
+        resultat = service.generer_courses_auto_depuis_planning(
+            planning_id=planning_id,
+            semaine_debut=event.data.get("semaine_debut"),
+        )
+        nb_articles = int(resultat.get("nb_articles", 0) or 0)
 
-            # Collecter les ingrédients de toutes les recettes
-            ingredients_ajoutes = 0
-            for repas in repas_list:
-                if not repas.recette_id:
-                    continue
-                recette = session.query(Recette).filter(Recette.id == repas.recette_id).first()
-                if not recette:
-                    continue
-                # Récupérer les ingrédients de la recette
-                for ri in getattr(recette, "ingredients", []) or []:
-                    ingredient_id = getattr(ri, "ingredient_id", None)
-                    if not ingredient_id:
+        # Fallback léger pour les environnements de test legacy qui injectent un faux contexte DB.
+        if nb_articles == 0 and not resultat.get("liste_id"):
+            from src.core.db import obtenir_contexte_db
+            from src.core.models import ArticleCourses, Repas, Recette
+
+            with obtenir_contexte_db() as session:
+                repas_list = session.query(Repas).filter(Repas.planning_id == planning_id).all()
+                for repas in repas_list:
+                    if not getattr(repas, "recette_id", None):
                         continue
-                    # Éviter les doublons : vérifier si déjà dans courses
-                    existant = (
-                        session.query(ArticleCourses)
-                        .filter(ArticleCourses.ingredient_id == ingredient_id, ArticleCourses.achete.is_(False))
-                        .first()
-                    )
-                    if not existant:
-                        session.add(ArticleCourses(
-                            ingredient_id=ingredient_id,
-                            quantite_necessaire=getattr(ri, "quantite", 1) or 1,
-                            priorite="normale",
-                            suggere_par_ia=False,
-                            notes=f"Ajouté auto depuis planning semaine du {event.data.get('semaine_debut', '')}",
-                        ))
-                        ingredients_ajoutes += 1
+                    recette = session.query(Recette).filter(Recette.id == repas.recette_id).first()
+                    if not recette:
+                        continue
+                    for ingredient in getattr(recette, "ingredients", []) or []:
+                        ingredient_id = getattr(ingredient, "ingredient_id", None)
+                        if not ingredient_id:
+                            continue
+                        existant = (
+                            session.query(ArticleCourses)
+                            .filter(
+                                ArticleCourses.ingredient_id == ingredient_id,
+                                ArticleCourses.achete.is_(False),
+                            )
+                            .first()
+                        )
+                        if existant:
+                            continue
+                        session.add(
+                            ArticleCourses(
+                                ingredient_id=ingredient_id,
+                                quantite_necessaire=getattr(ingredient, "quantite", 1) or 1,
+                                priorite="normale",
+                                suggere_par_ia=False,
+                                notes=f"Ajouté auto depuis planning semaine du {event.data.get('semaine_debut', '')}",
+                            )
+                        )
+                        nb_articles += 1
+                session.commit()
 
-            session.commit()
-
-        # Émettre l'événement de confirmation
-        if ingredients_ajoutes > 0:
+        if nb_articles > 0:
             from .bus import obtenir_bus
+
             obtenir_bus().emettre(
                 "courses.generees",
                 {
-                    "nb_articles": ingredients_ajoutes,
+                    "nb_articles": nb_articles,
                     "source": "planning",
                     "planning_id": planning_id,
-                    "semaine_debut": event.data.get("semaine_debut", ""),
+                    "liste_id": resultat.get("liste_id"),
+                    "semaine_debut": resultat.get("semaine_debut") or event.data.get("semaine_debut", ""),
                 },
                 source="bridge_planning_courses",
             )
+
         logger.info(
-            "Bridge 1: planning %s ? %d articles ajoutés aux courses",
-            planning_id, ingredients_ajoutes,
+            "Bridge 1: planning %s -> %d article(s) synchronisé(s) vers les courses",
+            planning_id,
+            nb_articles,
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("Échec bridge 1 planning?courses: %s", e)
+        logger.warning("Échec bridge 1 planning->courses: %s", e)
+
+
+def _pre_remplir_planning_depuis_batch_termine(event: EvenementDomaine) -> None:
+    """I6: session batch terminée -> marquer les repas du planning comme préparés."""
+    try:
+        from src.services.ia.bridges import obtenir_service_bridges
+
+        service = obtenir_service_bridges()
+        resultat = service.pre_remplir_planning_depuis_batch(
+            int(event.data.get("session_id", 0) or 0)
+        )
+        logger.info(
+            "Inter-modules: batch %s -> %s repas pré-remplis",
+            event.data.get("session_id"),
+            resultat.get("nb_repas_mis_a_jour", 0),
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge batch->planning: %s", e)
+
+
+def _synchroniser_entretien_termine_vers_fiche(event: EvenementDomaine) -> None:
+    """I5: tâche d'entretien terminée -> mise à jour de la fiche associée."""
+    try:
+        from src.services.ia.bridges import obtenir_service_bridges
+
+        service = obtenir_service_bridges()
+        resultat = service.synchroniser_entretien_termine_vers_fiche(
+            int(event.data.get("tache_id", 0) or 0)
+        )
+        logger.info(
+            "Inter-modules: entretien %s -> %s fiche(s) mises à jour",
+            event.data.get("tache_id"),
+            resultat.get("nb_fiches_mises_a_jour", 0),
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Échec bridge entretien->fiche: %s", e)
 
 
 def _notifier_courses_generees(event: EvenementDomaine) -> None:
@@ -1560,12 +1607,18 @@ def enregistrer_subscribers() -> int:
 
     # -- Bridges inter-modules (priorité 80) --
 
-    # Bridge 1: Planning validé ? courses auto
+    # Bridge 1: Planning validé -> courses auto
     bus.souscrire("planning.valide", _generer_courses_depuis_planning, priority=80)
     compteur += 1
     bus.souscrire("planning.semaine_validee", _generer_courses_depuis_planning, priority=80)
     compteur += 1
     bus.souscrire("courses.generees", _notifier_courses_generees, priority=79)
+    compteur += 1
+
+    # Bridge I5/I6: entretien terminé / batch terminé -> synchronisation planning & fiches
+    bus.souscrire("entretien.tache_terminee", _synchroniser_entretien_termine_vers_fiche, priority=80)
+    compteur += 1
+    bus.souscrire("batch_cooking.termine", _pre_remplir_planning_depuis_batch_termine, priority=80)
     compteur += 1
 
     # Bridge 2: Inventaire péremption proche ? anti-gaspi IA
