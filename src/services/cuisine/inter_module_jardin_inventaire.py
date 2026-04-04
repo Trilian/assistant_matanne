@@ -201,7 +201,7 @@ class JardinInventaireInteractionService:
 
 @service_factory(
     "jardin_inventaire_interaction",
-    tags={"cuisine", "jardin", "inventaire", "phase4"},
+    tags={"cuisine", "jardin", "inventaire", "bridge"},
 )
 def obtenir_service_jardin_inventaire_interaction() -> JardinInventaireInteractionService:
     """Factory pour le bridge Jardin → Inventaire."""

@@ -6,6 +6,22 @@ Documentation auto-generee depuis `src/api/schemas/*.py`.
 - Nombre total de classes BaseModel: 322
 - Nombre de modules schemas: 26
 
+## Complément Phase 6 — Endpoints métier actifs
+
+Les schémas ci-dessous sont déjà présents dans `src/api/schemas/fonctionnalites_avancees.py` et correspondent aux alias métier actuellement utilisés par le frontend Phase 6 :
+
+| Endpoint | Route | Modèle principal |
+|---|---|---|
+| `GET /api/v1/preferences/apprentissage-habitudes` | `src/api/routes/preferences.py` | `ApprentissageHabitudesResponse` |
+| `GET /api/v1/preferences/preferences-apprises` | `src/api/routes/preferences.py` | `ApprentissagePreferencesResponse` |
+| `GET /api/v1/preferences/mode-pilote` | `src/api/routes/preferences.py` | `ModePiloteAutomatiqueResponse` |
+| `POST /api/v1/preferences/mode-pilote/config` | `src/api/routes/preferences.py` | `ModePiloteConfigurationRequest` + `ModePiloteAutomatiqueResponse` |
+| `GET /api/v1/rapports/resume-mensuel` | `src/api/routes/rapports.py` | `ResumeMensuelIAResponse` |
+| `GET /api/v1/rapports/rapport-mensuel/pdf` | `src/api/routes/rapports.py` | `RapportMensuelPdfResponse` |
+| `GET /api/v1/innovations/rapport-mensuel/pdf` | `src/api/routes/innovations.py` | `RapportMensuelPdfResponse` |
+
+> **Note** : le routeur `innovations.py` est désormais la façade consolidée des anciennes routes d'innovation, tandis que les usages produit visibles passent surtout par `preferences.py` et `rapports.py`.
+
 ## anti_gaspillage
 
 | Classe | Champs annotes |

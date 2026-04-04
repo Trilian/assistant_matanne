@@ -15,6 +15,7 @@ import { SkeletonPage } from "@/composants/ui/skeleton-page";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/composants/ui/collapsible";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
+import { BoutonExportCsv } from "@/composants/ui/bouton-export-csv";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/composants/ui/select";
 import { BandeauIA } from "@/composants/maison/bandeau-ia";
 import { BoutonAchat } from "@/composants/bouton-achat";
@@ -202,9 +203,38 @@ function OngletInventaire() {
 
   const pieces = inventaire?.pieces ?? [];
   const suggCount = suggestions?.total ?? 0;
+  const csvEquipements = pieces.flatMap(({ piece, objets }) =>
+    objets.map((obj) => ({
+      Pièce: piece,
+      Équipement: obj.nom,
+      Marque: obj.marque ?? "—",
+      Modèle: obj.modele ?? "—",
+      Catégorie: obj.categorie ?? "—",
+      Statut: obj.statut ? obj.statut.replace(/_/g, " ") : "—",
+      "Date achat": obj.date_achat ?? "—",
+      "Durée garantie (mois)": obj.duree_garantie_mois ?? "—",
+      Garantie:
+        obj.sous_garantie === true
+          ? "Sous garantie"
+          : obj.sous_garantie === false
+            ? "Hors garantie"
+            : "Non renseignée",
+    }))
+  );
 
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">
+          {csvEquipements.length} équipement{csvEquipements.length > 1 ? "s" : ""} exportable{csvEquipements.length > 1 ? "s" : ""}
+        </p>
+        <BoutonExportCsv
+          data={csvEquipements}
+          filename={`equipements-maison-${new Date().toISOString().split("T")[0]}.csv`}
+          label="Export CSV"
+        />
+      </div>
+
       {suggCount > 0 && (
         <Card className="border-amber-300">
           <CardContent className="py-3">

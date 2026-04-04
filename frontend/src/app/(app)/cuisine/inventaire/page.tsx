@@ -36,6 +36,7 @@ import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { EtatVide } from "@/composants/ui/etat-vide";
 import { ZoneTableauResponsive } from "@/composants/ui/zone-tableau-responsive";
+import { BoutonExportCsv } from "@/composants/ui/bouton-export-csv";
 import {
   Dialog,
   DialogContent,
@@ -311,6 +312,19 @@ export default function PageInventaire() {
 
   const nbAlertes = alertes?.length ?? 0;
   const donneesTreemap = construireDonneesTreemapInventaire(articles ?? []);
+  const csvInventaire = articlesFiltres.map((article) => ({
+    Emplacement: article.emplacement ?? ongletActif,
+    Article: article.nom,
+    Catégorie: article.categorie ?? "—",
+    Quantité: article.quantite,
+    Unité: article.unite ?? "",
+    "Date péremption": article.date_peremption
+      ? new Date(article.date_peremption).toLocaleDateString("fr-FR")
+      : "—",
+    État: article.est_expire ? "Périmé" : article.est_bas ? "Stock bas" : "OK",
+    Nutriscore: article.nutriscore?.toUpperCase() ?? "",
+    Ecoscore: article.ecoscore?.toUpperCase() ?? "",
+  }));
 
   return (
     <div className="space-y-6">
@@ -336,6 +350,11 @@ export default function PageInventaire() {
             )}
             Photo frigo
           </Button>
+          <BoutonExportCsv
+            data={csvInventaire}
+            filename={`inventaire-${ongletActif.toLowerCase().replaceAll(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.csv`}
+            label="Export CSV"
+          />
           <Button onClick={() => setDialogueAjout(true)}>
             <Plus className="mr-1 h-4 w-4" />
             Ajouter

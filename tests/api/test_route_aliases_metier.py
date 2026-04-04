@@ -1,4 +1,4 @@
-"""Tests de régression pour la redistribution des routes phase 1."""
+"""Tests de régression pour la redistribution des routes métier."""
 
 from unittest.mock import MagicMock, patch
 
@@ -40,10 +40,7 @@ def mock_innovations_service():
     service.detecter_anomalies_energie.return_value = None
     service.generer_bilan_annuel.return_value = None
 
-    with (
-        patch("src.services.experimental.get_innovations_service", return_value=service),
-        patch("src.services.ia_avancee.get_innovations_service", return_value=service, create=True),
-    ):
+    with patch("src.services.ia_avancee.get_innovations_service", return_value=service, create=True):
         yield service
 
 

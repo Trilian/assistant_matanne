@@ -63,6 +63,12 @@ describe("PageInventaire", () => {
     expect(screen.getAllByText("Tous").length).toBeGreaterThanOrEqual(1);
   });
 
+  it("propose un export CSV compatible Excel", () => {
+    renderWithQuery(<PageInventaire />);
+
+    expect(screen.getByRole("link", { name: /export csv/i })).toBeInTheDocument();
+  });
+
   it("affiche un état vide guidé quand l'inventaire est vide", () => {
     articlesCourants = [];
     renderWithQuery(<PageInventaire />);

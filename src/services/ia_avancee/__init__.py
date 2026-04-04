@@ -22,14 +22,7 @@ from .service import (
     IAAvanceeService,
     get_ia_avancee_service,
 )
-from src.services.experimental import InnovationsService
-
-
-def get_innovations_service() -> InnovationsService:
-    """Délègue dynamiquement au namespace historique pour préserver la rétrocompatibilité."""
-    from src.services.experimental import get_innovations_service as _get_innovations_service
-
-    return _get_innovations_service()
+from .innovations_service import InnovationsService, get_innovations_service
 
 __all__ = [
     "IAAvanceeService",

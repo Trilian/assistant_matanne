@@ -163,7 +163,7 @@ class GarantiesDocumentsInteractionService:
 
 @service_factory(
     "garanties_documents_interaction",
-    tags={"maison", "garanties", "documents", "phase4"},
+    tags={"maison", "garanties", "documents", "bridge"},
 )
 def obtenir_service_garanties_documents_interaction() -> GarantiesDocumentsInteractionService:
     """Factory pour le bridge Garanties → Documents."""

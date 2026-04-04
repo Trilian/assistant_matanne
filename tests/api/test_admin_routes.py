@@ -358,9 +358,9 @@ class TestAdminInterModuleBridgesStatus:
         assert "resume" in data
         assert data["resume"].get("total_actions") == 17
         assert data["resume"].get("mode_verification") == "presence_only"
-        assert data["consolidation_phase2"].get("total_legacy") == 11
-        assert data["consolidation_phase2"].get("consolides") == 11
-        assert data["consolidation_phase2"].get("statut") == "termine"
+        assert data["consolidation_bridges"].get("total_legacy") == 11
+        assert data["consolidation_bridges"].get("consolides") == 11
+        assert data["consolidation_bridges"].get("statut") == "termine"
         assert isinstance(data.get("items"), list)
         assert len(data["items"]) == 17
 

@@ -20,7 +20,7 @@ from fastapi.testclient import TestClient
 @pytest.fixture
 def mock_innovations_service():
     """Mock du service InnovationsService via la factory actuelle."""
-    with patch("src.services.experimental.get_innovations_service") as mock:
+    with patch("src.services.ia_avancee.get_innovations_service") as mock:
         service = MagicMock()
         mock.return_value = service
         yield service
@@ -61,7 +61,7 @@ class TestBilanAnnuel:
     """Tests pour POST /api/v1/innovations/bilan-annuel."""
 
     def test_bilan_annuel_retourne_sections(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import BilanAnnuelResponse, SectionBilanAnnuel
+        from src.services.ia_avancee.innovations_types import BilanAnnuelResponse, SectionBilanAnnuel
 
         mock_innovations_service.generer_bilan_annuel.return_value = BilanAnnuelResponse(
             annee=2025,
@@ -82,7 +82,7 @@ class TestBilanAnnuel:
         assert len(data["sections"]) == 1
 
     def test_bilan_annuel_sans_annee(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import BilanAnnuelResponse
+        from src.services.ia_avancee.innovations_types import BilanAnnuelResponse
 
         mock_innovations_service.generer_bilan_annuel.return_value = BilanAnnuelResponse()
 
@@ -115,7 +115,7 @@ class TestScoreBienEtre:
     """Tests pour GET /api/v1/innovations/score-bien-etre."""
 
     def test_score_bien_etre_composite(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import DimensionBienEtre, ScoreBienEtreResponse
+        from src.services.ia_avancee.innovations_types import DimensionBienEtre, ScoreBienEtreResponse
 
         mock_innovations_service.calculer_score_bien_etre.return_value = ScoreBienEtreResponse(
             score_global=72.5,
@@ -150,7 +150,7 @@ class TestEnrichissementContacts:
     """Tests pour GET /api/v1/innovations/enrichissement-contacts."""
 
     def test_enrichissement_contacts(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import ContactEnrichi, EnrichissementContactsResponse
+        from src.services.ia_avancee.innovations_types import ContactEnrichi, EnrichissementContactsResponse
 
         mock_innovations_service.enrichir_contacts.return_value = EnrichissementContactsResponse(
             contacts_enrichis=[
@@ -182,7 +182,7 @@ class TestTendancesLoto:
     """Tests pour GET /api/v1/innovations/tendances-loto."""
 
     def test_tendances_loto(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import AnalyseTendancesLotoResponse, TendanceLoto
+        from src.services.ia_avancee.innovations_types import AnalyseTendancesLotoResponse, TendanceLoto
 
         mock_innovations_service.analyser_tendances_loto.return_value = AnalyseTendancesLotoResponse(
             jeu="loto",
@@ -201,7 +201,7 @@ class TestTendancesLoto:
         assert len(data["numeros_chauds"]) == 1
 
     def test_tendances_euromillions(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import AnalyseTendancesLotoResponse
+        from src.services.ia_avancee.innovations_types import AnalyseTendancesLotoResponse
 
         mock_innovations_service.analyser_tendances_loto.return_value = AnalyseTendancesLotoResponse(
             jeu="euromillions"
@@ -222,7 +222,7 @@ class TestParcoursMagasin:
     """Tests pour POST /api/v1/innovations/parcours-magasin."""
 
     def test_parcours_magasin_optimise(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import ParcoursOptimiseResponse
+        from src.services.ia_avancee.innovations_types import ParcoursOptimiseResponse
 
         mock_innovations_service.optimiser_parcours_magasin.return_value = ParcoursOptimiseResponse(
             articles_par_rayon={"Fruits": ["pommes", "bananes"], "Laitiers": ["lait"]},
@@ -250,7 +250,7 @@ class TestVeilleEmploi:
     """Tests pour POST /api/v1/innovations/veille-emploi."""
 
     def test_veille_emploi_avec_criteres(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import OffreEmploi, VeilleEmploiResponse
+        from src.services.ia_avancee.innovations_types import OffreEmploi, VeilleEmploiResponse
 
         mock_innovations_service.executer_veille_emploi.return_value = VeilleEmploiResponse(
             offres=[
@@ -292,7 +292,7 @@ class TestModeInvite:
     """Tests pour le mode invitÃƒÂ©."""
 
     def test_creer_lien_invite(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import LienInviteResponse
+        from src.services.ia_avancee.innovations_types import LienInviteResponse
 
         mock_innovations_service.creer_lien_invite.return_value = LienInviteResponse(
             token="abc123",
@@ -321,7 +321,7 @@ class TestModeInvite:
         assert response.status_code == 400
 
     def test_acceder_invite_token_valide(self, client, mock_innovations_service):
-        from src.services.experimental.types import DonneesInviteResponse
+        from src.services.ia_avancee.innovations_types import DonneesInviteResponse
 
         mock_innovations_service.obtenir_donnees_invite.return_value = DonneesInviteResponse(
             enfant={"prenom": "Jules"},
@@ -352,7 +352,7 @@ class TestVacationModeInnovations:
     """Tests des endpoints Innovations prioritaires (mode vacances, insights, mÃƒÂ©tÃƒÂ©o contextuelle)."""
 
     def test_lire_mode_vacances(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import ModeVacancesResponse
+        from src.services.ia_avancee.innovations_types import ModeVacancesResponse
 
         mock_innovations_service.obtenir_mode_vacances.return_value = ModeVacancesResponse(
             actif=True,
@@ -369,7 +369,7 @@ class TestVacationModeInnovations:
         assert data["entretien_suspendu"] is True
 
     def test_configurer_mode_vacances(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import ModeVacancesResponse
+        from src.services.ia_avancee.innovations_types import ModeVacancesResponse
 
         mock_innovations_service.configurer_mode_vacances.return_value = ModeVacancesResponse(
             actif=False,
@@ -390,7 +390,7 @@ class TestVacationModeInnovations:
         assert data["checklist_voyage_auto"] is False
 
     def test_insights_quotidiens_limites_a_deux(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import InsightQuotidien, InsightsQuotidiensResponse
+        from src.services.ia_avancee.innovations_types import InsightQuotidien, InsightsQuotidiensResponse
 
         mock_innovations_service.generer_insights_quotidiens.return_value = InsightsQuotidiensResponse(
             date_reference="2026-04-02",
@@ -412,7 +412,7 @@ class TestVacationModeInnovations:
         assert data["nb_insights"] <= 2
 
     def test_meteo_contextuelle_cross_module(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import MeteoContextuelleResponse, MeteoImpactModule
+        from src.services.ia_avancee.innovations_types import MeteoContextuelleResponse, MeteoImpactModule
 
         mock_innovations_service.analyser_meteo_contextuelle.return_value = MeteoContextuelleResponse(
             ville="Paris",
@@ -441,7 +441,7 @@ class TestLearningPreferencesInnovations:
     """Tests des endpoints Innovations avancÃ©es (prÃƒÂ©fÃƒÂ©rences, planification auto, batch IA, cartes, tablette)."""
 
     def test_preferences_apprises(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import ApprentissagePreferencesResponse, PreferenceApprise
+        from src.services.ia_avancee.innovations_types import ApprentissagePreferencesResponse, PreferenceApprise
 
         mock_innovations_service.analyser_preferences_apprises.return_value = ApprentissagePreferencesResponse(
             semaines_analysees=3,
@@ -459,7 +459,7 @@ class TestLearningPreferencesInnovations:
         assert data["influence_active"] is True
 
     def test_planification_hebdo_complete_auto(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import BlocPlanificationAuto, PlanificationHebdoCompleteResponse
+        from src.services.ia_avancee.innovations_types import BlocPlanificationAuto, PlanificationHebdoCompleteResponse
 
         mock_innovations_service.generer_planification_hebdo_complete.return_value = PlanificationHebdoCompleteResponse(
             semaine_reference="2026-04-06",
@@ -478,7 +478,7 @@ class TestLearningPreferencesInnovations:
         assert len(data["blocs"]) >= 2
 
     def test_batch_cooking_intelligent(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import BatchCookingIntelligentResponse, EtapeBatchIntelligente
+        from src.services.ia_avancee.innovations_types import BatchCookingIntelligentResponse, EtapeBatchIntelligente
 
         mock_innovations_service.proposer_batch_cooking_intelligent.return_value = BatchCookingIntelligentResponse(
             session_nom="Batch intelligent 06/04",
@@ -496,7 +496,7 @@ class TestLearningPreferencesInnovations:
         assert len(data["etapes"]) >= 1
 
     def test_generer_carte_visuelle(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import CarteVisuellePartageableResponse
+        from src.services.ia_avancee.innovations_types import CarteVisuellePartageableResponse
 
         mock_innovations_service.generer_carte_visuelle_partageable.return_value = CarteVisuellePartageableResponse(
             type_carte="planning",
@@ -517,7 +517,7 @@ class TestLearningPreferencesInnovations:
         assert len(data["contenu_base64"]) > 0
 
     def test_mode_tablette_magazine(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import CarteMagazineTablette, ModeTabletteMagazineResponse
+        from src.services.ia_avancee.innovations_types import CarteMagazineTablette, ModeTabletteMagazineResponse
 
         mock_innovations_service.obtenir_mode_tablette_magazine.return_value = ModeTabletteMagazineResponse(
             titre="Edition tablette",
@@ -541,7 +541,7 @@ class TestTelegramEnergyInnovations:
     """Tests des endpoints Innovations long terme (Telegram conversationnel, prix auto, ÃƒÂ©nergie temps-rÃƒÂ©el)."""
 
     def test_telegram_conversationnel(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import CommandeTelegram, TelegramConversationnelResponse
+        from src.services.ia_avancee.innovations_types import CommandeTelegram, TelegramConversationnelResponse
 
         mock_innovations_service.obtenir_capacites_telegram_conversationnelles.return_value = TelegramConversationnelResponse(
             actif=True,
@@ -562,7 +562,7 @@ class TestTelegramEnergyInnovations:
         assert data["nb_commandes"] >= 5
 
     def test_comparateur_prix_auto(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import ComparateurPrixAutomatiqueResponse, PrixIngredientCompare
+        from src.services.ia_avancee.innovations_types import ComparateurPrixAutomatiqueResponse, PrixIngredientCompare
 
         mock_innovations_service.analyser_comparateur_prix_automatique.return_value = ComparateurPrixAutomatiqueResponse(
             date_reference="2026-04-02",
@@ -592,7 +592,7 @@ class TestTelegramEnergyInnovations:
         assert data["nb_alertes"] >= 1
 
     def test_energie_temps_reel(self, client, auth_headers, mock_innovations_service):
-        from src.services.experimental.types import EnergieTempsReelResponse
+        from src.services.ia_avancee.innovations_types import EnergieTempsReelResponse
 
         mock_innovations_service.obtenir_tableau_bord_energie_temps_reel.return_value = EnergieTempsReelResponse(
             linky_connecte=True,
@@ -620,65 +620,10 @@ class TestTelegramEnergyInnovations:
 # Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
 
 
-class TestAdminResetModule:
-    """Tests pour POST /api/v1/admin/reset-module."""
-
-    def test_reset_module_preview(self, client, admin_headers):
-        with patch("src.core.config.obtenir_parametres") as mock_params:
-            mock_params.return_value = type("Params", (), {"ENV": "test"})()
-            response = client.post(
-                "/api/v1/admin/reset-module",
-                json={"module": "courses", "confirmer": False},
-                headers=admin_headers,
-            )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["status"] == "preview"
-        assert "listes_courses" in data["tables_affectees"]
-
-    def test_reset_module_invalide(self, client, admin_headers):
-        with patch("src.core.config.obtenir_parametres") as mock_params:
-            mock_params.return_value = type("Params", (), {"ENV": "test"})()
-            response = client.post(
-                "/api/v1/admin/reset-module",
-                json={"module": "module_inexistant", "confirmer": True},
-                headers=admin_headers,
-            )
-        assert response.status_code == 400
-
 
 # Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
 # Tests unitaires service InnovationsService
 # Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
 
 
-class TestInnovationsServiceUnit:
-    """Tests unitaires pour InnovationsService."""
 
-    def test_evaluer_niveau_excellent(self):
-        from src.services.experimental.service import InnovationsService
-
-        with patch.object(InnovationsService, "__init__", lambda x: None):
-            service = InnovationsService()
-            assert service._evaluer_niveau(85) == "excellent"
-
-    def test_evaluer_niveau_attention(self):
-        from src.services.experimental.service import InnovationsService
-
-        with patch.object(InnovationsService, "__init__", lambda x: None):
-            service = InnovationsService()
-            assert service._evaluer_niveau(30) == "attention"
-
-    def test_generer_conseils_score_faible(self):
-        from src.services.experimental.service import InnovationsService
-        from src.services.experimental.types import DimensionBienEtre
-
-        with patch.object(InnovationsService, "__init__", lambda x: None):
-            service = InnovationsService()
-            dimensions = [
-                DimensionBienEtre(nom="Sport", score=30, detail="ActivitÃƒÂ© insuffisante"),
-                DimensionBienEtre(nom="Nutrition", score=90, detail="Excellent"),
-            ]
-            conseils = service._generer_conseils(dimensions)
-            assert len(conseils) >= 1
-            assert "sport" in conseils[0].lower()

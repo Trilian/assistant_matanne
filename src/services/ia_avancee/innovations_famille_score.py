@@ -8,7 +8,7 @@ from typing import Any
 
 from src.core.db import obtenir_contexte_db
 
-from .types import DimensionScoreFamille, ScoreFamilleHebdoResponse
+from .innovations_types import DimensionScoreFamille, ScoreFamilleHebdoResponse
 
 logger = logging.getLogger(__name__)
 

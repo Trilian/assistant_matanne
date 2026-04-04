@@ -347,6 +347,17 @@ frontend/src/
 └── middleware.ts       # Next.js middleware (auth route protection)
 ```
 
+## Consolidation Phase 6 — Avril 2026
+
+La vague de finition Phase 6 est désormais documentée autour de quatre axes visibles en production :
+
+- **Routeur d'innovations consolidé** : `src/api/routes/innovations.py` centralise les alias historiques liés aux rapports IA, au mode pilote, aux préférences apprises et aux fonctionnalités transverses, tout en gardant la rétrocompatibilité des endpoints `/api/v1/innovations/...`.
+- **Préférences apprises & pilotage IA** : `src/api/routes/preferences.py` expose les endpoints métier `apprentissage-habitudes`, `preferences-apprises` et `mode-pilote`, utilisés côté frontend dans `Paramètres > Cuisine`.
+- **Offline/PWA visible côté UI** : `frontend/public/sw.js` gère la file IndexedDB, la synchronisation différée et les messages `GET_SYNC_QUEUE_STATUS` / `REPLAY_SYNC_QUEUE`, maintenant exposés dans `Paramètres > Données`.
+- **Polish UX final** : le planning repas tactile (`frontend/src/app/(app)/cuisine/planning/page.tsx`), le mode tablette cuisine (`frontend/src/app/(app)/cuisine/tablette/page.tsx`) et l'aperçu temps réel du thème (`frontend/src/app/(app)/parametres/_composants/onglet-affichage.tsx`) matérialisent les finitions produit livrées en Phase 6.
+
+Les rapports PDF mensuels restent disponibles via `src/api/routes/rapports.py` et la page `frontend/src/app/(app)/avance/page.tsx`, avec envoi automatique maintenu par les jobs planifiés du backend.
+
 ## Sécurité
 
 ### Row Level Security (RLS)

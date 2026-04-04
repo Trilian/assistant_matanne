@@ -126,6 +126,21 @@ npm test
 npx next build
 ```
 
+### Vérification rapide Phase 6 (UI, offline, rapports)
+
+```bash
+# Frontend : paramètres, planning tactile, mode tablette
+cd frontend
+npm run test:run -- "src/app/(app)/parametres/parametres.test.tsx" "src/app/(app)/cuisine/planning/planning-repas.test.tsx" "src/app/(app)/cuisine/tablette/page.test.tsx"
+npx eslint "src/app/(app)/parametres/_composants/onglet-affichage.tsx" "src/app/(app)/parametres/_composants/onglet-cuisine.tsx" "src/app/(app)/parametres/_composants/onglet-donnees.tsx" "src/app/(app)/cuisine/planning/page.tsx" "src/app/(app)/cuisine/tablette/page.tsx"
+
+# Backend : endpoints préférences / innovations / rapports
+cd ..
+pytest tests/api/test_routes_preferences.py tests/api/test_routes_innovations.py -q
+```
+
+Pour les scénarios PWA/hors-ligne, voir aussi `docs/guides/PWA_OFFLINE.md` et vérifier depuis le navigateur que `Paramètres > Données` remonte bien l'état de la file de synchronisation.
+
 E2E:
 
 ```bash

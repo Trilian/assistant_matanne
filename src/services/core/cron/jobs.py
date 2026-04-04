@@ -2463,7 +2463,7 @@ def _job_rapport_mensuel_unifie_email() -> None:
     """Rapport mensuel unifié — Envoi mensuel du rapport PDF unifié (email)."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
-        from src.services.experimental import get_innovations_service
+        from src.services.ia_avancee import get_innovations_service
 
         service = get_innovations_service()
         rapport_pdf = service.generer_rapport_mensuel_pdf()
@@ -4003,7 +4003,7 @@ _REGISTRE_JOBS.update(
 def _job_optimisation_routines() -> None:
     """Analyse mensuelle de l'efficacité des routines → suggestions IA."""
     try:
-        from src.services.experimental import get_innovations_service
+        from src.services.ia_avancee import get_innovations_service
 
         logger.info("optimisation_routines: Analyse IA des routines")
         # Déclenche l'endpoint IA existant via le service
@@ -4077,7 +4077,7 @@ def _job_purge_historique_jeux() -> None:
 def _job_veille_emploi() -> None:
     """Veille emploi quotidienne multi-sites avec alertes."""
     try:
-        from src.services.experimental import get_innovations_service
+        from src.services.ia_avancee import get_innovations_service
 
         logger.info("Veille_emploi: Scan quotidien offres d'emploi")
         service = get_innovations_service()
@@ -4251,7 +4251,7 @@ def _job_coherence_planning_courses() -> None:
                 )
 
         if nb_repas == 0:
-            logger.info("Phase3 CRON cohérence planning↔courses: aucun repas à contrôler")
+            logger.info("CRON cohérence planning↔courses : aucun repas à contrôler")
             return
 
         if nb_articles == 0:
@@ -4266,34 +4266,34 @@ def _job_coherence_planning_courses() -> None:
                 titre="Cohérence planning/courses",
                 type_evenement="rappel_courses",
             )
-            logger.info("Phase3 CRON cohérence planning↔courses: alerte envoyée")
+            logger.info("CRON cohérence planning↔courses : alerte envoyée")
             return
 
         logger.info(
-            "Phase3 CRON cohérence planning↔courses OK: %d repas planifiés, %d article(s) en liste",
+            "CRON cohérence planning↔courses OK : %d repas planifiés, %d article(s) en liste",
             nb_repas,
             nb_articles,
         )
     except Exception:
-        logger.exception("Erreur job phase3 cohérence planning↔courses")
+        logger.exception("Erreur job cohérence planning↔courses")
 
 
 def _job_sync_resultats_paris_auto() -> None:
     """Synchronise automatiquement les résultats de paris après les matchs."""
     try:
         executer_job_par_id("sync_jeux_budget", source="cron")
-        logger.info("Phase3 CRON sync_resultats_paris_auto exécuté")
+        logger.info("CRON sync_resultats_paris_auto exécuté")
     except Exception:
-        logger.exception("Erreur job phase3 sync_resultats_paris_auto")
+        logger.exception("Erreur job sync_resultats_paris_auto")
 
 
 def _job_rapport_jardin_saisonnier() -> None:
     """Produit et diffuse le rapport jardin saisonnier (mensuel)."""
     try:
         _job_rapport_jardin()
-        logger.info("Phase3 CRON rapport_jardin_saisonnier exécuté")
+        logger.info("CRON rapport_jardin_saisonnier exécuté")
     except Exception:
-        logger.exception("Erreur job phase3 rapport_jardin_saisonnier")
+        logger.exception("Erreur job rapport_jardin_saisonnier")
 
 
 def _job_nettoyage_exports_anciens() -> None:
@@ -4302,7 +4302,7 @@ def _job_nettoyage_exports_anciens() -> None:
         racine = Path(__file__).resolve().parents[4]
         dossier_exports = racine / "data" / "exports"
         if not dossier_exports.exists():
-            logger.info("Phase3 CRON nettoyage_exports_anciens: dossier exports absent")
+            logger.info("CRON nettoyage_exports_anciens : dossier exports absent")
             return
 
         seuil = datetime.now(UTC) - timedelta(days=30)
@@ -4319,18 +4319,18 @@ def _job_nettoyage_exports_anciens() -> None:
             except Exception:
                 logger.debug("Impossible de supprimer l'export %s", fichier, exc_info=True)
 
-        logger.info("Phase3 CRON nettoyage_exports_anciens: %d fichier(s) supprimé(s)", supprimes)
+        logger.info("CRON nettoyage_exports_anciens : %d fichier(s) supprimé(s)", supprimes)
     except Exception:
-        logger.exception("Erreur job phase3 nettoyage_exports_anciens")
+        logger.exception("Erreur job nettoyage_exports_anciens")
 
 
 def _job_health_check_services_ia() -> None:
     """Vérifie les services IA (Mistral, circuit breaker, etc.) toutes les 6h."""
     try:
         _job_verification_sante_systeme()
-        logger.info("Phase3 CRON health_check_services_ia exécuté")
+        logger.info("CRON health_check_services_ia exécuté")
     except Exception:
-        logger.exception("Erreur job phase3 health_check_services_ia")
+        logger.exception("Erreur job health_check_services_ia")
 
 
 def _job_resume_hebdo_ia() -> None:

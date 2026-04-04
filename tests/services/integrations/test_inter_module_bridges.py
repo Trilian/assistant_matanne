@@ -246,8 +246,8 @@ class TestDiagnosticsIAInteraction:
             assert isinstance(result, (dict, str))
 
 
-class TestSprint4Bridges:
-    """Tests ciblés Sprint 4 pour le service bridges consolidé."""
+class TestBridgesConsolides:
+    """Tests ciblés pour le service bridges consolidé."""
 
     def test_anniversaire_vers_menu_festif_retourne_dict(self, engine, db):
         from src.core.models.famille import AnniversaireFamille

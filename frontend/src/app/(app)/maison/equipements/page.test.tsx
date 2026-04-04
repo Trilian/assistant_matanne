@@ -142,6 +142,12 @@ describe("PageEquipements", () => {
     expect(screen.getByText(/Facture lave-vaisselle/i)).toBeInTheDocument();
   });
 
+  it("propose un export CSV de l'inventaire maison", () => {
+    renderWithQuery(<PageEquipements />);
+
+    expect(screen.getByRole("link", { name: /export csv/i })).toBeInTheDocument();
+  });
+
   it("propose de lier une facture quand aucun document n'est associé", () => {
     mockDocumentsGarantie = { ok: true, nb_documents: 0, documents: [] };
     renderWithQuery(<PageEquipements />);

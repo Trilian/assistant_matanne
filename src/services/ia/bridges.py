@@ -9,7 +9,7 @@ Connecte les modules via l'event bus et des helpers métier pour :
 - B5.6: Voyages → Inventaire (déstockage)
 - B5.7: Anniversaire proche → Suggestions cadeaux IA
 - B5.8: Météo → Entretien maison
-- S4: Entretien → artisans, récolte → stock, anniversaire → menu, jalon → journal
+- Consolidation bridges: entretien → artisans, récolte → stock, anniversaire → menu, jalon → journal
 """
 
 import importlib
@@ -25,7 +25,7 @@ from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
 
-CATALOGUE_BRIDGES_PHASE2: list[dict[str, str]] = [
+CATALOGUE_BRIDGES_CONSOLIDES: list[dict[str, str]] = [
     {
         "groupe": "utilitaires",
         "flux": "Dashboard → Actions rapides",
@@ -134,10 +134,10 @@ class BridgesInterModulesService:
             ),
         )
 
-    def obtenir_catalogue_consolidation_phase2(self) -> dict[str, object]:
-        """Expose l'état des bridges legacy consolidés durant la phase 2."""
+    def obtenir_catalogue_consolidation(self) -> dict[str, object]:
+        """Expose l'état consolidé des bridges legacy et canoniques."""
         items: list[dict[str, object]] = []
-        for definition in CATALOGUE_BRIDGES_PHASE2:
+        for definition in CATALOGUE_BRIDGES_CONSOLIDES:
             disponible = True
             try:
                 importlib.import_module(str(definition["module_legacy"]))

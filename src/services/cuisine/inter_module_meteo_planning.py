@@ -131,7 +131,7 @@ class MeteoPlanningInteractionService:
 
 @service_factory(
     "meteo_planning_interaction",
-    tags={"cuisine", "planning", "meteo", "phase4"},
+    tags={"cuisine", "planning", "meteo", "bridge"},
 )
 def obtenir_service_meteo_planning_interaction() -> MeteoPlanningInteractionService:
     """Factory pour le bridge Météo → Planning repas."""

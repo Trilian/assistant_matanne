@@ -23,7 +23,7 @@ def client() -> TestClient:
     app.dependency_overrides.pop(require_auth, None)
 
 
-def test_catalogue_bridges_expose_la_consolidation_phase2(client: TestClient) -> None:
+def test_catalogue_bridges_expose_la_consolidation(client: TestClient) -> None:
     response = client.get("/api/v1/bridges/catalogue")
 
     assert response.status_code == 200

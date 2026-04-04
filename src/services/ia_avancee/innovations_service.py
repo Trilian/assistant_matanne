@@ -34,21 +34,23 @@ from src.core.validation.sanitizer import NettoyeurEntrees
 from src.services.core.base import BaseAIService
 from src.services.core.registry import service_factory
 
-from .famille_score import calculer_score_famille_hebdo as calculer_score_famille_hebdo_module
-from .journal_familial import (
+from .innovations_famille_score import calculer_score_famille_hebdo as calculer_score_famille_hebdo_module
+from .innovations_journal import (
     generer_journal_familial_auto as generer_journal_familial_auto_module,
     generer_journal_familial_pdf as generer_journal_familial_pdf_module,
     generer_rapport_mensuel_pdf as generer_rapport_mensuel_pdf_module,
 )
-from .mode_pilote import (
+from .innovations_mode_pilote import (
     configurer_mode_pilote_automatique as configurer_mode_pilote_automatique_module,
     lire_config_mode_pilote as lire_config_mode_pilote_module,
     normaliser_niveau_autonomie as normaliser_niveau_autonomie_module,
     obtenir_mode_pilote_automatique as obtenir_mode_pilote_automatique_module,
     proposer_repas_adapte_garmin as proposer_repas_adapte_garmin_module,
 )
-from . import bien_etre, cuisine_ia, energie_ia
-from .types import (
+from . import innovations_bien_etre as bien_etre
+from . import innovations_cuisine as cuisine_ia
+from . import innovations_energie as energie_ia
+from .innovations_types import (
     AlertesContextuellesResponse,
     JournalFamilialAutoResponse,
     ModePiloteAutomatiqueResponse,
@@ -1457,7 +1459,7 @@ Note : génère 3 à 5 offres fictives mais réalistes basées sur le marché ac
             return []
 
 
-@service_factory("innovations", tags={"phase10", "ia"})
+@service_factory("innovations", tags={"innovations", "ia"})
 def get_innovations_service() -> InnovationsService:
     """Factory pour le service Innovations (singleton via registre)."""
     return InnovationsService()

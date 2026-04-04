@@ -47,13 +47,26 @@ class ServiceCarnetSante(BaseService[Vaccin]):
     # ═══════════════════════════════════════════════════════════
 
     def _charger_calendrier_vaccinal(self) -> list[dict[str, Any]]:
-        """Charge le calendrier vaccinal français depuis le fichier JSON."""
+        """Charge le calendrier vaccinal de référence, limité aux rappels à partir de 6 ans."""
         if self._calendrier_vaccinal is None:
             chemin = DATA_DIR / "reference" / "calendrier_vaccinal_fr.json"
             if chemin.exists():
                 with open(chemin, encoding="utf-8") as f:
                     data = json.load(f)
-                self._calendrier_vaccinal = data.get("vaccins", [])
+
+                vaccins = data.get("vaccins", [])
+                calendrier_filtre: list[dict[str, Any]] = []
+                for vaccin in vaccins:
+                    doses = [
+                        dose
+                        for dose in vaccin.get("doses", [])
+                        if int(dose.get("age_mois", 0) or 0) >= 72
+                    ]
+                    if not doses:
+                        continue
+                    calendrier_filtre.append({**vaccin, "doses": doses})
+
+                self._calendrier_vaccinal = calendrier_filtre
             else:
                 logger.warning("Fichier calendrier vaccinal non trouvé: %s", chemin)
                 self._calendrier_vaccinal = []

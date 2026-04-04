@@ -64,7 +64,7 @@ async def statut_bridges(
 
         from src.services.ia.bridges import obtenir_service_bridges
 
-        catalogue_phase2 = obtenir_service_bridges().obtenir_catalogue_consolidation_phase2()
+        catalogue_bridges = obtenir_service_bridges().obtenir_catalogue_consolidation()
 
         with executer_avec_session() as session:
             presence_fallbacks: dict[str, Any] = {
@@ -434,7 +434,7 @@ async def statut_bridges(
                 "taux_operationnel_pct": round((operationnels / total) * 100, 2) if total else 0.0,
                 "mode_verification": "smoke+presence" if inclure_smoke else "presence_only",
             },
-            "consolidation_phase2": catalogue_phase2["resume"],
+            "consolidation_bridges": catalogue_bridges["resume"],
             "items": sorted(resultats, key=lambda r: r["id"]),
         }
 

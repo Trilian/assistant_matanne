@@ -19,9 +19,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/composants/ui/dropdown-menu";
-import { 
-  Download, 
-  Filter, 
+import {
+  Filter,
   AlertTriangle,
   MoreVertical,
   Eye,
@@ -31,7 +30,7 @@ import { utiliserRequete } from "@/crochets/utiliser-api";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { EtatVide } from "@/composants/ui/etat-vide";
 import { ZoneTableauResponsive } from "@/composants/ui/zone-tableau-responsive";
-import { CSVLink } from "react-csv";
+import { BoutonExportCsv } from "@/composants/ui/bouton-export-csv";
 
 export interface MatchExpert {
   id: number;
@@ -196,16 +195,11 @@ export function TableauMatchsExpert({
             {matchs.length} match{matchs.length > 1 ? "s" : ""}
           </span>
           
-          <CSVLink
+          <BoutonExportCsv
             data={csvData}
             filename={`matchs-expert-${new Date().toISOString().split("T")[0]}.csv`}
-            className="inline-flex"
-          >
-            <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
-            </Button>
-          </CSVLink>
+            label="Export CSV"
+          />
         </div>
       </div>
 

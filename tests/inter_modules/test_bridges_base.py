@@ -273,7 +273,7 @@ def test_bridge_6_23_meteo_vers_entretien_bridge_ia(test_db):
 
 
 @pytest.mark.integration
-def test_bridge_phase4_jardin_vers_inventaire_sync_recolte(test_db):
+def test_bridge_jardin_vers_inventaire_sync_recolte(test_db):
     from src.core.models import ElementJardin, JournalJardin
     from src.services.cuisine.inter_module_jardin_inventaire import (
         JardinInventaireInteractionService,
@@ -301,7 +301,7 @@ def test_bridge_phase4_jardin_vers_inventaire_sync_recolte(test_db):
 
 
 @pytest.mark.integration
-def test_bridge_phase4_garanties_vers_documents_lie_facture_a_objet(test_db):
+def test_bridge_garanties_vers_documents_lie_facture_a_objet(test_db):
     from src.core.models import DocumentFamille, ObjetMaison, PieceMaison
     from src.services.maison.inter_module_garanties_documents import (
         GarantiesDocumentsInteractionService,
@@ -347,7 +347,7 @@ def test_bridge_phase4_garanties_vers_documents_lie_facture_a_objet(test_db):
 
 
 @pytest.mark.integration
-def test_bridge_phase4_meteo_vers_planning_priorise_selon_temperature():
+def test_bridge_meteo_vers_planning_priorise_selon_temperature():
     from src.services.cuisine.inter_module_meteo_planning import (
         MeteoPlanningInteractionService,
     )
