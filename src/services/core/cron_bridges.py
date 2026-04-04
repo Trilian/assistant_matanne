@@ -1,7 +1,7 @@
 """
 Cron jobs bridges — Prédictions, alertes, consolidation.
 
-8 nouveaux jobs :
+9 nouveaux jobs :
 1. prediction_courses_hebdo — Vendredi 16h
 2. planning_auto_semaine — Dimanche 19h
 3. alertes_budget_seuil — Quotidien 20h
@@ -10,6 +10,7 @@ Cron jobs bridges — Prédictions, alertes, consolidation.
 6. sync_budget_consolidation — Quotidien 22h
 7. tendances_nutrition_hebdo — Dimanche 18h
 8. rappel_activite_jules — Quotidien 09h
+9. sync_google_calendar — Quotidien 23h
 """
 
 import logging
@@ -369,6 +370,51 @@ def sync_budget_consolidation():
 
 
 # ═══════════════════════════════════════════════════════════
+# JOB 9: SYNC GOOGLE CALENDAR (Quotidien 23h)
+# ═══════════════════════════════════════════════════════════
+
+
+def sync_google_calendar():
+    """Synchronise le planning repas avec Google Calendar (11.3)."""
+    logger.info("🔄 Sync Google Calendar quotidienne")
+
+    try:
+        from src.core.models import CalendrierExterne
+
+        user_ids_connectes: list[str] = []
+        with obtenir_contexte_db() as session:
+            cals = (
+                session.query(CalendrierExterne)
+                .filter(
+                    CalendrierExterne.provider == "google",
+                    CalendrierExterne.enabled.is_(True),
+                )
+                .all()
+            )
+            user_ids_connectes = [str(c.user_id) for c in cals]
+
+        if not user_ids_connectes:
+            logger.info("ℹ️ Aucun utilisateur connecté à Google Calendar")
+            return
+
+        from src.services.famille.calendrier import get_calendar_sync_service
+
+        service = get_calendar_sync_service()
+
+        for user_id in user_ids_connectes:
+            try:
+                result = service.sync_google_calendar(user_id)
+                imported = result.imported if result else 0
+                exported = result.exported if result else 0
+                logger.info(f"✅ Google sync user {user_id}: {imported} importés, {exported} exportés")
+            except Exception as e:
+                logger.error(f"❌ Google sync user {user_id}: {e}")
+
+    except Exception as e:
+        logger.error(f"❌ Erreur sync Google Calendar: {e}", exc_info=True)
+
+
+# ═══════════════════════════════════════════════════════════
 # HELPER
 # ═══════════════════════════════════════════════════════════
 
@@ -392,7 +438,7 @@ def _obtenir_user_ids() -> list[str]:
 
 
 def configurer_jobs_bridges(scheduler: BackgroundScheduler) -> None:
-    """Enregistre les 8 cron jobs bridges dans le scheduler."""
+    """Enregistre les 9 cron jobs bridges dans le scheduler."""
 
     # B8.1: Prédiction courses — Vendredi 16h
     scheduler.add_job(
@@ -457,4 +503,13 @@ def configurer_jobs_bridges(scheduler: BackgroundScheduler) -> None:
         replace_existing=True,
     )
 
-    logger.info("✅ 7 cron jobs bridges configurés")
+    # 11.3: Sync Google Calendar — Quotidien 23h
+    scheduler.add_job(
+        sync_google_calendar,
+        trigger=CronTrigger(hour=23, minute=0),
+        id="sync_google_calendar",
+        name="Synchronisation Google Calendar quotidienne",
+        replace_existing=True,
+    )
+
+    logger.info("✅ 8 cron jobs bridges configurés")

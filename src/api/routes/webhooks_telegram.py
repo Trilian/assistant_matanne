@@ -19,7 +19,7 @@ import unicodedata
 from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.api.schemas import MessageResponse
 from src.api.utils import gerer_exception_api
@@ -1813,6 +1813,21 @@ async def envoyer_planning_telegram(payload: EnvoyerPlanningTelegramRequest) -> 
     return MessageResponse(message="planning_envoye", id=int(resultat["planning_id"]))
 
 
+class EnvoyerCoursesMagasinRequest(BaseModel):
+    """Payload pour l'envoi d'une sous-liste de courses par magasin via Telegram."""
+
+    liste_id: int
+    magasin: str = Field(..., min_length=1, max_length=50, description="Magasin cible (bio_coop, grand_frais, etc.)")
+    nom_liste: str | None = None
+
+
+LIBELLES_MAGASINS: dict[str, str] = {
+    "bio_coop": "🥬 Bio Coop",
+    "grand_frais": "🧀 Grand Frais",
+    "carrefour_drive": "🛒 Carrefour Drive",
+}
+
+
 @router.post("/envoyer-courses", response_model=MessageResponse)
 @gerer_exception_api
 async def envoyer_courses_telegram(payload: EnvoyerCoursesTelegramRequest) -> MessageResponse:
@@ -1852,6 +1867,71 @@ async def envoyer_courses_telegram(payload: EnvoyerCoursesTelegramRequest) -> Me
         raise HTTPException(status_code=502, detail="Envoi Telegram impossible")
 
     return MessageResponse(message="courses_envoyees", id=int(resultat["liste_id"]))
+
+
+@router.post("/envoyer-courses-magasin", response_model=MessageResponse)
+@gerer_exception_api
+async def envoyer_courses_par_magasin(payload: EnvoyerCoursesMagasinRequest) -> MessageResponse:
+    """Envoie sur Telegram les articles d'une liste filtrés par magasin cible.
+
+    Idéal pour envoyer la sous-liste Bio Coop ou Grand Frais sur le téléphone
+    avant d'aller en magasin physique.
+    """
+    from src.api.utils import executer_async, executer_avec_session
+    from src.core.models.courses import ArticleCourses, ListeCourses
+    from src.services.integrations.telegram import envoyer_liste_courses_partagee
+
+    def _charger_articles() -> dict[str, object]:
+        with executer_avec_session() as session:
+            liste = session.query(ListeCourses).filter(ListeCourses.id == payload.liste_id).first()
+            if not liste:
+                raise HTTPException(status_code=404, detail="Liste de courses non trouvée")
+
+            articles_db = (
+                session.query(ArticleCourses)
+                .filter(
+                    ArticleCourses.liste_id == liste.id,
+                    ArticleCourses.magasin_cible == payload.magasin,
+                    ArticleCourses.achete.is_(False),
+                )
+                .order_by(ArticleCourses.rayon_magasin, ArticleCourses.id)
+                .all()
+            )
+
+            articles = []
+            for article in articles_db:
+                ingredient = getattr(article, "ingredient", None)
+                nom = getattr(ingredient, "nom", None) or f"Article #{article.id}"
+                qte = article.quantite_necessaire
+                unite = getattr(ingredient, "unite", "") or ""
+                ligne = f"{nom} ({qte} {unite})".strip() if qte != 1 else nom
+                articles.append(ligne)
+
+            if not articles:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Aucun article non acheté pour le magasin '{payload.magasin}'",
+                )
+
+            libelle = LIBELLES_MAGASINS.get(payload.magasin, payload.magasin)
+            nom_liste = payload.nom_liste or f"{libelle} — {liste.nom}"
+
+            return {
+                "liste_id": liste.id,
+                "nom_liste": nom_liste,
+                "articles": articles,
+            }
+
+    resultat = await executer_async(_charger_articles)
+    succes = await envoyer_liste_courses_partagee(
+        list(resultat["articles"]),
+        nom_liste=str(resultat["nom_liste"]),
+        liste_id=int(resultat["liste_id"]),
+    )
+    if not succes:
+        raise HTTPException(status_code=502, detail="Envoi Telegram impossible")
+
+    return MessageResponse(message="courses_magasin_envoyees", id=int(resultat["liste_id"]))
 
 
 @router.post("/webhook", response_model=MessageResponse)

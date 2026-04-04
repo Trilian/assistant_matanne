@@ -13,6 +13,7 @@ from fastapi.responses import Response
 
 from src.api.dependencies import require_auth
 from src.api.schemas import (
+    GenererPlanningRequest,
     MessageResponse,
     PlanningSemaineResponse,
     RepasCreate,
@@ -790,7 +791,7 @@ async def obtenir_alternatives_repas(
 @router.post("/generer", response_model=PlanningSemaineResponse)
 @gerer_exception_api
 async def generer_planning_ia(
-    body: "GenererPlanningRequest | None" = None,
+    body: GenererPlanningRequest | None = None,
     user: dict[str, Any] = Depends(require_auth),
 ) -> dict[str, Any]:
     """
@@ -823,7 +824,6 @@ async def generer_planning_ia(
     """
     from datetime import date
 
-    from src.api.schemas.planning import GenererPlanningRequest
     from src.services.cuisine.planning import obtenir_service_planning
 
     if body is None:

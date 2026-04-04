@@ -1,5 +1,6 @@
 import type { FieldErrors, UseFormHandleSubmit, UseFormRegister } from "react-hook-form";
 import { Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 import { Button } from "@/composants/ui/button";
 import {

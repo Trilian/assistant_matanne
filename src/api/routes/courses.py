@@ -1683,3 +1683,214 @@ async def obtenir_articles_par_magasin(
 
     return await executer_async(_query)
 
+
+# ═══════════════════════════════════════════════════════════
+# CORRESPONDANCES CARREFOUR DRIVE
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/correspondances-drive",
+    response_model=list[CorrespondanceDriveResponse],
+    responses=REPONSES_LISTE,
+    summary="Lister les correspondances Drive",
+)
+@gerer_exception_api
+async def lister_correspondances_drive(
+    actif_only: bool = Query(True, description="Uniquement les correspondances actives"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> list[dict[str, Any]]:
+    """Retourne la liste des correspondances article → produit Carrefour Drive."""
+    from src.core.models.courses import CorrespondanceDrive
+
+    def _query() -> list[dict[str, Any]]:
+        with executer_avec_session() as session:
+            query = session.query(CorrespondanceDrive)
+            if actif_only:
+                query = query.filter(CorrespondanceDrive.actif.is_(True))
+            correspondances = query.order_by(CorrespondanceDrive.nom_article).all()
+            return [
+                {
+                    "id": c.id,
+                    "nom_article": c.nom_article,
+                    "ingredient_id": c.ingredient_id,
+                    "produit_drive_id": c.produit_drive_id,
+                    "produit_drive_nom": c.produit_drive_nom,
+                    "produit_drive_ean": c.produit_drive_ean,
+                    "produit_drive_url": c.produit_drive_url,
+                    "quantite_par_defaut": c.quantite_par_defaut,
+                    "nb_utilisations": c.nb_utilisations,
+                    "actif": c.actif,
+                }
+                for c in correspondances
+            ]
+
+    return await executer_async(_query)
+
+
+@router.post(
+    "/correspondances-drive",
+    response_model=CorrespondanceDriveResponse,
+    responses=REPONSES_CRUD_CREATION,
+    summary="Créer/mettre à jour une correspondance Drive",
+    status_code=201,
+)
+@gerer_exception_api
+async def creer_correspondance_drive(
+    payload: CorrespondanceDriveCreate,
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Crée ou met à jour une correspondance article → produit Carrefour Drive.
+
+    Si une correspondance existe déjà pour ce nom_article + produit_drive_id,
+    elle est mise à jour (upsert).
+    """
+    from src.core.models.courses import CorrespondanceDrive
+
+    def _upsert() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            existante = (
+                session.query(CorrespondanceDrive)
+                .filter(
+                    CorrespondanceDrive.nom_article == payload.nom_article,
+                    CorrespondanceDrive.produit_drive_id == payload.produit_drive_id,
+                )
+                .first()
+            )
+
+            if existante:
+                existante.produit_drive_nom = payload.produit_drive_nom
+                existante.produit_drive_ean = payload.produit_drive_ean
+                existante.produit_drive_url = payload.produit_drive_url
+                existante.quantite_par_defaut = payload.quantite_par_defaut
+                existante.ingredient_id = payload.ingredient_id
+                existante.actif = True
+                existante.nb_utilisations += 1
+                session.commit()
+                c = existante
+            else:
+                c = CorrespondanceDrive(
+                    nom_article=payload.nom_article,
+                    ingredient_id=payload.ingredient_id,
+                    produit_drive_id=payload.produit_drive_id,
+                    produit_drive_nom=payload.produit_drive_nom,
+                    produit_drive_ean=payload.produit_drive_ean,
+                    produit_drive_url=payload.produit_drive_url,
+                    quantite_par_defaut=payload.quantite_par_defaut,
+                    nb_utilisations=1,
+                )
+                session.add(c)
+                session.commit()
+
+            return {
+                "id": c.id,
+                "nom_article": c.nom_article,
+                "ingredient_id": c.ingredient_id,
+                "produit_drive_id": c.produit_drive_id,
+                "produit_drive_nom": c.produit_drive_nom,
+                "produit_drive_ean": c.produit_drive_ean,
+                "produit_drive_url": c.produit_drive_url,
+                "quantite_par_defaut": c.quantite_par_defaut,
+                "nb_utilisations": c.nb_utilisations,
+                "actif": c.actif,
+            }
+
+    return await executer_async(_upsert)
+
+
+@router.delete(
+    "/correspondances-drive/{correspondance_id}",
+    responses=REPONSES_CRUD_SUPPRESSION,
+    summary="Supprimer une correspondance Drive",
+)
+@gerer_exception_api
+async def supprimer_correspondance_drive(
+    correspondance_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> MessageResponse:
+    """Désactive une correspondance Drive (soft delete)."""
+    from src.core.models.courses import CorrespondanceDrive
+
+    def _delete() -> MessageResponse:
+        with executer_avec_session() as session:
+            c = session.query(CorrespondanceDrive).filter(CorrespondanceDrive.id == correspondance_id).first()
+            if not c:
+                raise HTTPException(status_code=404, detail="Correspondance non trouvée")
+            c.actif = False
+            session.commit()
+            return MessageResponse(message="Correspondance désactivée", id=correspondance_id)
+
+    return await executer_async(_delete)
+
+
+@router.get(
+    "/{liste_id}/articles-drive",
+    response_model=list[ArticleDriveResponse],
+    responses=REPONSES_CRUD_LECTURE,
+    summary="Articles Carrefour Drive enrichis",
+)
+@gerer_exception_api
+async def obtenir_articles_drive(
+    liste_id: int,
+    user: dict[str, Any] = Depends(require_auth),
+) -> list[dict[str, Any]]:
+    """Retourne les articles 'carrefour_drive' d'une liste, enrichis avec leurs correspondances Drive."""
+    from src.core.models import ArticleCourses, ListeCourses
+    from src.core.models.courses import CorrespondanceDrive
+
+    def _query() -> list[dict[str, Any]]:
+        with executer_avec_session() as session:
+            liste = session.query(ListeCourses).filter(ListeCourses.id == liste_id).first()
+            if not liste:
+                raise HTTPException(status_code=404, detail="Liste non trouvée")
+
+            articles = (
+                session.query(ArticleCourses)
+                .filter(
+                    ArticleCourses.liste_id == liste_id,
+                    ArticleCourses.magasin_cible == "carrefour_drive",
+                )
+                .order_by(ArticleCourses.achete.asc(), ArticleCourses.id.asc())
+                .all()
+            )
+
+            resultats = []
+            for a in articles:
+                nom = a.ingredient.nom if a.ingredient else "Article"
+                # Chercher la correspondance Drive par nom
+                correspondance = (
+                    session.query(CorrespondanceDrive)
+                    .filter(
+                        CorrespondanceDrive.nom_article == nom,
+                        CorrespondanceDrive.actif.is_(True),
+                    )
+                    .first()
+                )
+
+                item: dict[str, Any] = {
+                    "id": a.id,
+                    "nom": nom,
+                    "quantite": a.quantite_necessaire,
+                    "coche": a.achete,
+                    "categorie": a.rayon_magasin,
+                    "correspondance": None,
+                }
+                if correspondance:
+                    item["correspondance"] = {
+                        "id": correspondance.id,
+                        "nom_article": correspondance.nom_article,
+                        "ingredient_id": correspondance.ingredient_id,
+                        "produit_drive_id": correspondance.produit_drive_id,
+                        "produit_drive_nom": correspondance.produit_drive_nom,
+                        "produit_drive_ean": correspondance.produit_drive_ean,
+                        "produit_drive_url": correspondance.produit_drive_url,
+                        "quantite_par_defaut": correspondance.quantite_par_defaut,
+                        "nb_utilisations": correspondance.nb_utilisations,
+                        "actif": correspondance.actif,
+                    }
+                resultats.append(item)
+
+            return resultats
+
+    return await executer_async(_query)
+

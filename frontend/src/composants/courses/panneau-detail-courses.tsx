@@ -4,6 +4,7 @@ import type {
   UseFormHandleSubmit,
   UseFormRegister,
 } from "react-hook-form";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   CheckSquare,
   Loader2,
@@ -27,6 +28,7 @@ import {
 import { EtatVide } from "@/composants/ui/etat-vide";
 import { Input } from "@/composants/ui/input";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { ItemAnime } from "@/composants/ui/motion-utils";
 import { TileArticle } from "@/composants/cuisine/tile-article";
 import type { ArticleCourses, ListeCourses } from "@/types/courses";
 
@@ -142,9 +144,11 @@ export function PanneauDetailCourses({
               </div>
             )}
 
-            <form
+            <motion.form
               onSubmit={submitArticle((data) => onAjouterArticle(data))}
               className="sticky top-0 z-10 flex gap-2 border-b bg-card pb-3"
+              animate={erreursArticle.nom ? { x: [0, -6, 6, -4, 4, 0] } : { x: 0 }}
+              transition={{ duration: 0.35 }}
             >
               <Input
                 {...regArticle("nom")}
@@ -174,7 +178,7 @@ export function PanneauDetailCourses({
                   {enEcoute ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                 </Button>
               )}
-            </form>
+            </motion.form>
 
             {modeSelection && (
               <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
@@ -235,7 +239,9 @@ export function PanneauDetailCourses({
                       </Button>
                     </div>
                     <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-                      {groupesNonCoches[categorie].map((article) => (
+                      <AnimatePresence mode="popLayout">
+                      {groupesNonCoches[categorie].map((article, idx) => (
+                        <ItemAnime key={article.id} index={idx}>
                         <TileArticle
                           key={article.id}
                           nom={article.nom}
@@ -258,7 +264,9 @@ export function PanneauDetailCourses({
                             }
                           }}
                         />
+                        </ItemAnime>
                       ))}
+                      </AnimatePresence>
                     </div>
                   </div>
                 ))}
@@ -269,7 +277,9 @@ export function PanneauDetailCourses({
                       Complétés ({articlesCoches.length})
                     </h3>
                     <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
-                      {articlesCoches.map((article) => (
+                      <AnimatePresence mode="popLayout">
+                      {articlesCoches.map((article, idx) => (
+                        <ItemAnime key={article.id} index={idx}>
                         <TileArticle
                           key={article.id}
                           nom={article.nom}
@@ -279,7 +289,9 @@ export function PanneauDetailCourses({
                           estCoche
                           onClick={() => onCocherArticle(article.id, false)}
                         />
+                        </ItemAnime>
                       ))}
+                      </AnimatePresence>
                     </div>
                   </div>
                 )}

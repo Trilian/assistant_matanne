@@ -4,6 +4,7 @@
 
 "use client";
 
+import { motion } from "framer-motion";
 import {
   Apple,
   Beef,
@@ -57,16 +58,19 @@ export function TileArticle({
   const { icone: Icone, couleur } = ICONES_CATEGORIES[categorie ?? ""] ?? DEFAUT;
 
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
       onContextMenu={(e) => {
         e.preventDefault();
         onLongPress?.();
       }}
+      whileTap={{ scale: 0.92 }}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      layout
       className={cn(
-        "relative flex flex-col items-center justify-center gap-1 rounded-xl p-3 w-full aspect-square transition-all",
-        "border hover:shadow-md active:scale-95",
+        "relative flex flex-col items-center justify-center gap-1 rounded-xl p-3 w-full aspect-square transition-colors",
+        "border hover:shadow-md",
         estSelectionne && "ring-2 ring-primary ring-offset-2",
         estCoche
           ? "bg-muted/50 opacity-60 border-muted"
@@ -97,6 +101,6 @@ export function TileArticle({
           {quantite}{unite ? ` ${unite}` : ""}
         </span>
       )}
-    </button>
+    </motion.button>
   );
 }

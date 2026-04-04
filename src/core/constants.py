@@ -202,6 +202,58 @@ EMPLACEMENTS_INVENTAIRE: list[str] = [
 EMPLACEMENT_DEFAUT: str = "Frigo"
 """Emplacement par défaut pour les nouveaux articles."""
 
+# ═══════════════════════════════════════════════════════════
+# COURSES — MAGASINS
+# ═══════════════════════════════════════════════════════════
+
+MAGASINS_DISPONIBLES: list[str] = [
+    "bio_coop",
+    "grand_frais",
+    "carrefour_drive",
+]
+"""Magasins configurés pour la répartition des courses."""
+
+CATEGORIE_VERS_MAGASIN: dict[str, str] = {
+    # Bio Coop — fruits et légumes bio, gâteaux sains
+    "fruits": "bio_coop",
+    "légumes": "bio_coop",
+    "fruits et légumes": "bio_coop",
+    "fruits_legumes": "bio_coop",
+    "bio": "bio_coop",
+    "gâteaux bio": "bio_coop",
+    "biscuits bio": "bio_coop",
+    # Grand Frais — produits frais, viande, poisson, fromage
+    "produits frais": "grand_frais",
+    "produits_frais": "grand_frais",
+    "viande": "grand_frais",
+    "viandes": "grand_frais",
+    "poisson": "grand_frais",
+    "poissons": "grand_frais",
+    "fromage": "grand_frais",
+    "fromages": "grand_frais",
+    "crèmerie": "grand_frais",
+    "charcuterie": "grand_frais",
+    "boucherie": "grand_frais",
+    "traiteur": "grand_frais",
+    # Carrefour Drive — entretien, hygiène, conserves, boissons, surgelés, épicerie
+    "entretien": "carrefour_drive",
+    "hygiène": "carrefour_drive",
+    "hygiene": "carrefour_drive",
+    "produits ménagers": "carrefour_drive",
+    "lessive": "carrefour_drive",
+    "conserves": "carrefour_drive",
+    "boissons": "carrefour_drive",
+    "surgelés": "carrefour_drive",
+    "surgeles": "carrefour_drive",
+    "épicerie": "carrefour_drive",
+    "epicerie": "carrefour_drive",
+    "petit déjeuner": "carrefour_drive",
+    "bébé": "carrefour_drive",
+    "papeterie": "carrefour_drive",
+    "droguerie": "carrefour_drive",
+}
+"""Mapping catégorie d'article → magasin par défaut."""
+
 OBJECTIF_PAS_QUOTIDIEN_DEFAUT: int = 10_000
 """Objectif de pas quotidien par défaut."""
 
@@ -252,4 +304,7 @@ __all__ = [
     # Inventaire
     "EMPLACEMENTS_INVENTAIRE",
     "EMPLACEMENT_DEFAUT",
+    # Courses — Magasins
+    "MAGASINS_DISPONIBLES",
+    "CATEGORIE_VERS_MAGASIN",
 ]

@@ -248,6 +248,32 @@ class ClientIA(VisionMixin, StreamingMixin):
     # HELPERS SYNCHRONES
     # ═══════════════════════════════════════════════════════════
 
+    def obtenir_suggestions(
+        self,
+        prompt: str,
+        prompt_systeme: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 1000,
+        utiliser_cache: bool = True,
+    ) -> str:
+        """Retourne des suggestions textuelles via un wrapper synchrone de compatibilité."""
+        from src.core.async_utils import executer_async
+
+        try:
+            reponse = executer_async(
+                self.appeler(
+                    prompt=prompt,
+                    prompt_systeme=prompt_systeme,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    utiliser_cache=utiliser_cache,
+                )
+            )
+            return reponse or "Suggestions indisponibles pour le moment."
+        except Exception as exc:
+            logger.warning("Fallback obtenir_suggestions activé: %s", exc)
+            return "Suggestions indisponibles pour le moment."
+
     def generer_json(
         self,
         prompt: str,

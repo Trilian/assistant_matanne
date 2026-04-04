@@ -5,6 +5,7 @@ Couvre les fonctionnalités de communication avec l'API Mistral.
 """
 
 import json
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -149,14 +150,17 @@ class TestRateLimitIA:
 class TestClientIAIntegration:
     """Tests d'intégration du client IA."""
 
-    def test_client_real_api_call(self):
-        """Test un appel réel à l'API Mistral."""
-        try:
-            if ClientIA is None:
-                pytest.skip("ClientIA non importable")
+    def test_client_obtenir_suggestions_retourne_un_texte(self):
+        """Le wrapper sync de compatibilité retourne bien le texte de l'IA."""
+        assert ClientIA is not None
 
-            client = ClientIA()
+        client = ClientIA()
+        with patch.object(
+            client,
+            "appeler",
+            new=AsyncMock(return_value="Une recette est une préparation culinaire."),
+        ) as mock_appeler:
             response = client.obtenir_suggestions("Qu'est-ce qui est une recette?")
-            assert response is not None
-        except Exception as e:
-            pytest.skip(f"API non disponible: {e}")
+
+        assert response == "Une recette est une préparation culinaire."
+        mock_appeler.assert_awaited_once()
