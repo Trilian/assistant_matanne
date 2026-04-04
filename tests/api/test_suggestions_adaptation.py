@@ -1,4 +1,4 @@
-"""Tests ciblés phase 7 — adaptation recette et automations par défaut."""
+"""Tests ciblés — adaptation recette et automations par défaut."""
 
 from fastapi.testclient import TestClient
 import pytest
@@ -48,11 +48,11 @@ def test_adaptation_recette_propose_une_substitution_connue(client: TestClient):
     assert data["meilleure_en_stock"]["ingredient_substitut"] == "yaourt nature"
 
 
-def test_automations_phase7_par_defaut_contient_cinq_regles():
-    """La phase 7 initialise bien les 5 règles A1 à A5."""
-    from src.api.routes.automations import _automations_phase7_par_defaut
+def test_automations_par_defaut_contiennent_cinq_regles():
+    """Les automations par défaut initialisent bien les 5 règles A1 à A5."""
+    from src.api.routes.automations import _automations_par_defaut
 
-    regles = _automations_phase7_par_defaut()
+    regles = _automations_par_defaut()
 
     assert len(regles) == 5
     noms = {regle["nom"] for regle in regles}

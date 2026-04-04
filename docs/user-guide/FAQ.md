@@ -425,7 +425,7 @@ Pas encore. L'auto-h�bergement est pr�vu pour Q3 2026 avec :
 
 ### Comment proposer une fonctionnalit� ?
 
-1. Consultez la [roadmap](../../ROADMAP.md) pour voir si c'est d�j� pr�vu
+1. Consultez le [planning d'implémentation](../../PLANNING_IMPLEMENTATION.html) pour voir si c'est déjà prévu
 2. Ouvrez une **feature request** sur GitHub (� venir)
 3. Ou envoyez un email � **features@assistant-matanne.fr**
 

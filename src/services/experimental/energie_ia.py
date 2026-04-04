@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
@@ -59,7 +60,7 @@ def comparer_fournisseurs_energie(
     abonnement_mensuel_eur: float = 14.0,
 ) -> ComparateurEnergieResponse | None:
     """Comparateur énergie : compare des offres énergie sur la base de la consommation."""
-    conso = service._consommation_annuelle_kwh()
+    conso = self._consommation_annuelle_kwh()
     cout_actuel = round(conso * prix_kwh_actuel_eur + abonnement_mensuel_eur * 12, 2)
 
     offres = [

@@ -51,8 +51,8 @@ def _charger_automations(session, user: dict[str, Any]):
     return profil, automations
 
 
-def _automations_phase7_par_defaut() -> list[dict[str, Any]]:
-    """Jeu de règles par défaut pour la phase 7 (IA & automations)."""
+def _automations_par_defaut() -> list[dict[str, Any]]:
+    """Jeu de règles par défaut pour les automations IA."""
     return [
         {
             "nom": "A1 — Recette mal notée → exclure des suggestions",
@@ -107,7 +107,7 @@ def _migrer_automations_depuis_preferences(session, profil) -> list:
     preferences_modules = profil.preferences_modules or {}
     automations_pref = list(preferences_modules.get("automations", []))
     if not automations_pref:
-        automations_pref = _automations_phase7_par_defaut()
+        automations_pref = _automations_par_defaut()
 
     for item in automations_pref:
         session.add(

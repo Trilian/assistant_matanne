@@ -1,14 +1,9 @@
 ﻿"""
-Services Innovations — Innovations & IA du planning.
+Couche de compatibilité pour les innovations historiques.
 
-Regroupe les services d'innovation et valeur ajoutée :
-- Bilan annuel automatique IA
-- Score bien-être familial composite
-- Enrichissement contacts IA
-- Analyse tendances Loto/Euromillions
-- Optimisation parcours magasin IA
-- Veille emploi multi-sites
-- Mode invité (lien partageable)
+Le point d'entrée recommandé passe désormais par les packages métier
+(`src.services.cuisine`, `famille`, `maison`, `rapports`, `ia_avancee`).
+Ce module reste conservé pour la rétrocompatibilité des imports existants.
 """
 
 from .service import (

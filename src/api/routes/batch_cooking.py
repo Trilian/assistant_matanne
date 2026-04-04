@@ -19,6 +19,8 @@ from src.api.schemas.batch_cooking import (
     SessionBatchPatch,
     SessionBatchResponse,
 )
+from src.api.schemas.errors import REPONSES_IA
+from src.api.schemas.fonctionnalites_avancees import BatchCookingIntelligentResponse
 from src.api.schemas.common import MessageResponse, ReponsePaginee
 from src.api.schemas.errors import (
     REPONSES_CRUD_CREATION,
@@ -33,8 +35,21 @@ from src.api.utils import (
     executer_avec_session,
     gerer_exception_api,
 )
+from src.services.cuisine.innovations_service import obtenir_service_innovations_cuisine
 
 router = APIRouter(prefix="/api/v1/batch-cooking", tags=["Batch Cooking"])
+
+
+@router.get("/intelligent", response_model=BatchCookingIntelligentResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def suggestions_batch_cooking_intelligentes(
+    user: dict[str, Any] = Depends(require_auth),
+) -> BatchCookingIntelligentResponse:
+    """Alias métier pour les suggestions de batch cooking intelligentes."""
+    service = obtenir_service_innovations_cuisine()
+    user_id = str(user.get("id") or "")
+    result = service.proposer_batch_cooking_intelligent(user_id=user_id)
+    return result or BatchCookingIntelligentResponse()
 
 
 def _serialiser_session(s: Any) -> dict[str, Any]:

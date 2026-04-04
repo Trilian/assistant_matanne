@@ -168,8 +168,8 @@ class TestSmokeFluxPlanningCoursesTelegram:
         assert mock_callback.await_count == 2
 
 
-class TestWebhookTelegramCommandesSprint5:
-    """Tests ciblés sur les commandes Telegram du sprint 5."""
+class TestTelegramCommandes:
+    """Tests ciblés sur les commandes Telegram de base."""
 
     def test_commande_planning_declenche_le_handler(self, client: TestClient):
         payload = {
@@ -287,8 +287,8 @@ class TestWebhookTelegramCommandesSprint5:
         )
 
 
-class TestWebhookTelegramCommandesPhase8:
-    """Tests ciblés sur les commandes Telegram ajoutées en phase 8."""
+class TestTelegramCommandesEnrichies:
+    """Tests ciblés sur les commandes Telegram enrichies."""
 
     def test_commande_inventaire_declenche_le_handler(self, client: TestClient):
         payload = {

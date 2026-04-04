@@ -32,6 +32,7 @@ __all__ = [
     "event_bus_mixin",
     "service_health",
     "service_metrics",
+    "innovations_service",
 ]
 
 
@@ -103,6 +104,10 @@ def __getattr__(name: str):
         from src.services.core.backup import obtenir_service_backup
 
         return obtenir_service_backup
+    if name == "obtenir_service_innovations_core":
+        from src.services.core.innovations_service import obtenir_service_innovations_core
+
+        return obtenir_service_innovations_core
 
     # Notifications
     if name == "obtenir_service_notifications":

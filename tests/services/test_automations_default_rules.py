@@ -1,4 +1,4 @@
-"""Tests unitaires phase 7 pour les nouvelles actions du moteur d'automations."""
+"""Tests unitaires des règles par défaut du moteur d'automations."""
 
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -21,7 +21,7 @@ def _regle(
     )
 
 
-class TestAutomationsPhase7:
+class TestAutomationsDefaut:
     def test_feedback_recette_negatif_ajuste_les_suggestions(self):
         from src.services.utilitaires.automations_engine import MoteurAutomationsService
 

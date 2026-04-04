@@ -33,6 +33,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
+from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.pagination import appliquer_cursor_filter, construire_reponse_cursor, decoder_cursor
 from src.api.schemas.common import MessageResponse, ReponsePaginee
 from src.api.schemas.errors import (
@@ -41,6 +42,7 @@ from src.api.schemas.errors import (
     REPONSES_CRUD_LECTURE,
     REPONSES_CRUD_SUPPRESSION,
     REPONSES_LISTE,
+    REPONSES_IA,
 )
 from src.api.schemas.famille import (
     AchatCreate,
@@ -66,12 +68,107 @@ from src.api.schemas.famille import (
     SuggestionsSejourRequest,
     SuggestionsWeekendRequest,
 )
+from src.api.schemas.fonctionnalites_avancees import (
+    CoachRoutinesResponse,
+    EnrichissementContactsResponse,
+    ModeVacancesConfigurationRequest,
+    ModeVacancesResponse,
+    PlanningJulesAdaptatifResponse,
+    ScoreBienEtreResponse,
+    ScoreFamilleHebdoResponse,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
+from src.services.famille.innovations_service import obtenir_service_innovations_famille
 
 import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/famille", tags=["Famille"])
+
+
+@router.get("/coach-routines", response_model=CoachRoutinesResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def coach_routines_ia(
+    user: dict[str, Any] = Depends(require_auth),
+) -> CoachRoutinesResponse:
+    """Alias métier pour le coach routines IA famille."""
+    service = obtenir_service_innovations_famille()
+    result = service.coach_routines_ia()
+    return result or CoachRoutinesResponse()
+
+
+@router.get("/planning-jules-adaptatif", response_model=PlanningJulesAdaptatifResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def planning_jules_adaptatif(
+    user: dict[str, Any] = Depends(require_auth),
+) -> PlanningJulesAdaptatifResponse:
+    """Alias métier pour le planning Jules adaptatif."""
+    service = obtenir_service_innovations_famille()
+    result = service.generer_planning_jules_adaptatif()
+    return result or PlanningJulesAdaptatifResponse()
+
+
+@router.get("/score-famille-hebdo", response_model=ScoreFamilleHebdoResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def score_famille_hebdomadaire(
+    user: dict[str, Any] = Depends(require_auth),
+) -> ScoreFamilleHebdoResponse:
+    """Alias métier pour le score famille hebdomadaire."""
+    service = obtenir_service_innovations_famille()
+    result = service.calculer_score_famille_hebdo()
+    return result or ScoreFamilleHebdoResponse()
+
+
+@router.get("/mode-vacances", response_model=ModeVacancesResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def obtenir_mode_vacances(
+    user: dict[str, Any] = Depends(require_auth),
+) -> ModeVacancesResponse:
+    """Alias métier pour la lecture du mode vacances."""
+    service = obtenir_service_innovations_famille()
+    user_id = str(user.get("id") or "")
+    result = service.obtenir_mode_vacances(user_id=user_id)
+    return result or ModeVacancesResponse()
+
+
+@router.post("/mode-vacances/config", response_model=ModeVacancesResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def modifier_mode_vacances(
+    body: ModeVacancesConfigurationRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> ModeVacancesResponse:
+    """Alias métier pour la configuration du mode vacances."""
+    service = obtenir_service_innovations_famille()
+    user_id = str(user.get("id") or "")
+    result = service.configurer_mode_vacances(
+        user_id=user_id,
+        actif=body.actif,
+        checklist_voyage_auto=body.checklist_voyage_auto,
+    )
+    return result or ModeVacancesResponse(actif=body.actif, checklist_voyage_auto=body.checklist_voyage_auto)
+
+
+@router.get("/tableau-sante-foyer", response_model=ScoreBienEtreResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def tableau_sante_foyer(
+    user: dict[str, Any] = Depends(require_auth),
+) -> ScoreBienEtreResponse:
+    """Alias métier pour le tableau de santé du foyer."""
+    service = obtenir_service_innovations_famille()
+    result = service.calculer_score_bien_etre()
+    return result or ScoreBienEtreResponse()
+
+
+@router.get("/enrichissement-contacts", response_model=EnrichissementContactsResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def obtenir_enrichissement_contacts(
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
+) -> EnrichissementContactsResponse:
+    """Alias métier pour l'enrichissement des contacts familiaux."""
+    service = obtenir_service_innovations_famille()
+    result = service.enrichir_contacts()
+    return result or EnrichissementContactsResponse()
 
 
 # ═══════════════════════════════════════════════════════════

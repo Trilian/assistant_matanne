@@ -8,7 +8,7 @@ from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from src.core.db import obtenir_contexte_db
-from src.core.decorators import avec_cache, avec_gestion_erreurs
+from src.core.validation.sanitizer import NettoyeurEntrees
 
 from .types import (
     BatchCookingIntelligentResponse,
@@ -16,16 +16,24 @@ from .types import (
     CarteMagazineTablette,
     ComparateurPrixAutomatiqueResponse,
     EtapeBatchIntelligente,
+    InsightsQuotidiensResponse,
+    MeteoContextuelleResponse,
     ModeTabletteMagazineResponse,
     ParcoursOptimiseResponse,
     PatternsAlimentairesResponse,
     PlanificationHebdoCompleteResponse,
     PrixIngredientCompare,
     SaisonnaliteIntelligenteResponse,
+    ScoreBienEtreResponse,
     SuggestionRepasSoirResponse,
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _sanitiser(texte: str, max_len: int = 50) -> str:
+    """Nettoie un texte libre avant de l'injecter dans une suggestion."""
+    return NettoyeurEntrees.nettoyer_chaine(str(texte), longueur_max=max_len)
 
 
 def suggerer_repas_ce_soir(
@@ -35,7 +43,7 @@ def suggerer_repas_ce_soir(
 ) -> SuggestionRepasSoirResponse | None:
     """Dîner express : suggère un repas du soir contextuel en une action."""
     humeur_safe = _sanitiser(humeur, 50)
-    candidates = service._recettes_rapides(temps_disponible_min)
+    candidates = self._recettes_rapides(temps_disponible_min)
     if not candidates:
         return SuggestionRepasSoirResponse(
             recette_suggeree="Omelette légumes + salade",
@@ -61,7 +69,7 @@ def analyser_patterns_alimentaires(
     periode_jours: int = 90,
 ) -> PatternsAlimentairesResponse | None:
     """Patterns alimentaires : analyse les patterns alimentaires récents."""
-    top_recettes, score_diversite = service._patterns_recettes(periode_jours)
+    top_recettes, score_diversite = self._patterns_recettes(periode_jours)
     recommandations = [
         "Ajouter 1 repas végétarien supplémentaire par semaine",
         "Varier davantage les sources de protéines",
@@ -232,7 +240,7 @@ def analyser_comparateur_prix_automatique(
     for nom, frequence in top_ingredients:
         nom_clean = str(nom)
         prix_historique = prix_historiques.get(nom_clean.lower())
-        prix_marche, source = service._scraper_prix_marche_ingredient(nom_clean)
+        prix_marche, source = self._scraper_prix_marche_ingredient(nom_clean)
 
         variation_pct: float | None = None
         alerte_soldes = False

@@ -296,8 +296,8 @@ curl https://assistant-matanne-api.up.railway.app/health
 
 | Document | Description |
 | --- | --- |
-| [STATUS_PHASES.md](STATUS_PHASES.md) | **État des 28 phases (A-AC)** — Audit complet de l'implémentation par module |
-| [ROADMAP.md](ROADMAP.md) | **Feuille de route** — Priorités court/moyen/long terme + mapping phases |
+| [PLANNING_IMPLEMENTATION.html](PLANNING_IMPLEMENTATION.html) | **Plan d'implémentation** — Phases, checklist et statut d'avancement |
+| [docs/CHANGELOG.md](docs/CHANGELOG.md) | **Journal des évolutions** — Historique synthétique des livraisons |
 
 ### Documentation technique
 

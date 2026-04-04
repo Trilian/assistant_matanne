@@ -1,6 +1,6 @@
-"""Tests ciblés pour la phase 6 — bridges inter-modules.
+"""Tests ciblés des bridges inter-modules.
 
-Ces tests couvrent les bridges ajoutés/fiabilisés pour :
+Ces tests couvrent les bridges ajoutés ou fiabilisés pour :
 - I1 Planning validé → Courses auto
 - I5 Entretien terminé → mise à jour de la fiche d'entretien
 - I6 Batch cooking terminé → pré-remplissage du planning
@@ -15,13 +15,13 @@ import pytest
 from sqlalchemy.orm import Session
 
 
-def _creer_recette_avec_ingredient(test_db: Session, nom: str = "Recette phase 6"):
+def _creer_recette_avec_ingredient(test_db: Session, nom: str = "Recette bridge"):
     from src.core.models import Ingredient, Recette
     from src.core.models.recettes import RecetteIngredient
 
     recette = Recette(
         nom=nom,
-        description="Recette de test phase 6",
+        description="Recette de test bridge",
         temps_preparation=20,
         temps_cuisson=15,
         portions=4,
@@ -49,14 +49,14 @@ def _creer_recette_avec_ingredient(test_db: Session, nom: str = "Recette phase 6
 
 
 @pytest.mark.integration
-def test_phase6_i1_generer_courses_auto_depuis_planning_cree_une_liste(test_db: Session) -> None:
+def test_generer_courses_auto_depuis_planning_cree_une_liste(test_db: Session) -> None:
     from src.core.models import ListeCourses, Planning, Repas
     from src.services.ia.bridges import obtenir_service_bridges
 
     recette, ingredient = _creer_recette_avec_ingredient(test_db, nom="Chili express")
     lundi = date.today() - timedelta(days=date.today().weekday())
     planning = Planning(
-        nom="Semaine test phase 6",
+        nom="Semaine test bridges",
         semaine_debut=lundi,
         semaine_fin=lundi + timedelta(days=6),
         etat="valide",
@@ -91,7 +91,7 @@ def test_phase6_i1_generer_courses_auto_depuis_planning_cree_une_liste(test_db: 
 
 
 @pytest.mark.integration
-def test_phase6_i5_entretien_termine_met_a_jour_la_fiche_associee(test_db: Session) -> None:
+def test_entretien_termine_met_a_jour_la_fiche_associee(test_db: Session) -> None:
     from src.core.models.habitat import TacheEntretien
     from src.core.models.maison_extensions import EntretienSaisonnier
     from src.services.ia.bridges import obtenir_service_bridges
@@ -123,7 +123,7 @@ def test_phase6_i5_entretien_termine_met_a_jour_la_fiche_associee(test_db: Sessi
 
 
 @pytest.mark.integration
-def test_phase6_i6_batch_termine_pre_remplit_les_repas_du_planning(test_db: Session) -> None:
+def test_batch_termine_pre_remplit_les_repas_du_planning(test_db: Session) -> None:
     from src.core.models import Planning, Repas, SessionBatchCooking
     from src.services.ia.bridges import obtenir_service_bridges
 
@@ -170,7 +170,7 @@ def test_phase6_i6_batch_termine_pre_remplit_les_repas_du_planning(test_db: Sess
 
 
 @pytest.mark.integration
-def test_phase6_i10_feedback_note_basse_exclut_la_recette(test_db: Session) -> None:
+def test_feedback_note_basse_exclut_la_recette(test_db: Session) -> None:
     from src.core.models.user_preferences import RetourRecette
     from src.services.cuisine.inter_module_inventaire_planning import (
         obtenir_service_inventaire_planning_interaction,
@@ -186,7 +186,7 @@ def test_phase6_i10_feedback_note_basse_exclut_la_recette(test_db: Session) -> N
                 "note": 1,
                 "commentaire": "À ne pas reproposer",
                 "mange": False,
-                "user_id": "u-phase6",
+                "user_id": "u-bridges",
             }
         ],
         db=test_db,
@@ -196,7 +196,7 @@ def test_phase6_i10_feedback_note_basse_exclut_la_recette(test_db: Session) -> N
 
     retour = (
         test_db.query(RetourRecette)
-        .filter(RetourRecette.recette_id == recette.id, RetourRecette.user_id == "u-phase6")
+        .filter(RetourRecette.recette_id == recette.id, RetourRecette.user_id == "u-bridges")
         .first()
     )
     assert retour is not None
@@ -204,7 +204,7 @@ def test_phase6_i10_feedback_note_basse_exclut_la_recette(test_db: Session) -> N
 
     exclusions = obtenir_service_inventaire_planning_interaction().filtrer_recettes_mal_notees(
         seuil_note=3,
-        user_id="u-phase6",
+        user_id="u-bridges",
         db=test_db,
     )
     ids_exclus = {item["recette_id"] for item in exclusions["recettes_exclues"]}

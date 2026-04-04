@@ -14,7 +14,15 @@ Préfixe parent : /api/v1/jeux
 Pour routes/__init__.py, "jeux_router": ".jeux" reste inchangé.
 """
 
-from fastapi import APIRouter
+from typing import Any
+
+from fastapi import APIRouter, Depends, Query
+
+from src.api.dependencies import require_auth
+from src.api.schemas.errors import REPONSES_IA
+from src.api.schemas.fonctionnalites_avancees import AnalyseTendancesLotoResponse
+from src.api.utils import gerer_exception_api
+from src.services.jeux.innovations_service import obtenir_service_innovations_jeux
 
 from .jeux_paris import router as paris_router
 from .jeux_loto import router as loto_router
@@ -22,6 +30,18 @@ from .jeux_euromillions import router as euromillions_router
 from .jeux_dashboard import router as dashboard_router
 
 router = APIRouter(prefix="/api/v1/jeux", tags=["Jeux"])
+
+
+@router.get("/tendances-loto", response_model=AnalyseTendancesLotoResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def tendances_loto(
+    type_jeu: str = Query("loto", pattern="^(loto|euromillions)$"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> AnalyseTendancesLotoResponse:
+    """Alias métier pour l'analyse des tendances Loto / Euromillions."""
+    service = obtenir_service_innovations_jeux()
+    result = service.analyser_tendances_loto(type_jeu=type_jeu)
+    return result or AnalyseTendancesLotoResponse()
 
 router.include_router(paris_router, tags=["Jeux — Paris"])
 router.include_router(loto_router, tags=["Jeux — Loto"])

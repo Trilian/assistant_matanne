@@ -17,7 +17,7 @@ def creer_router_innovations(*tags: str) -> APIRouter:
 
 
 def get_innovations_service():
-    """Charge paresseusement le service d'innovations pour éviter les imports coûteux."""
-    from src.services.experimental import get_innovations_service
+    """Charge paresseusement le service d'innovations via le namespace stable `ia_avancee`."""
+    from src.services.ia_avancee import get_innovations_service
 
     return get_innovations_service()

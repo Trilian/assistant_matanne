@@ -44,6 +44,14 @@ router = APIRouter(prefix="/api/v1/utilitaires", tags=["Utilitaires"])
 HistoriqueChatItem = dict[str, str]
 
 
+def _chiffrer_valeur_mot_de_passe(valeur: str) -> str:
+    """Chiffre une valeur sensible avant stockage en base."""
+    from src.api.auth import _obtenir_api_secret
+    from src.services.utilitaires import obtenir_mots_de_passe_service
+
+    return obtenir_mots_de_passe_service().chiffrer(valeur, _obtenir_api_secret())
+
+
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # CHAT IA MULTI-CONTEXTE
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -816,7 +824,7 @@ async def creer_mot_de_passe(
                 nom=donnees.nom,
                 categorie=donnees.categorie,
                 identifiant=donnees.identifiant,
-                valeur_chiffree=donnees.valeur,
+                valeur_chiffree=_chiffrer_valeur_mot_de_passe(donnees.valeur),
                 notes=donnees.notes,
             )
             session.add(mdp)
@@ -854,9 +862,10 @@ async def modifier_mot_de_passe(
             if not updates:
                 raise HTTPException(status_code=422, detail="Aucun champ Ã  mettre Ã  jour")
 
-            # Le champ "valeur" dans le schema â†’ "valeur_chiffree" dans le modÃ¨le
+            # Le champ "valeur" dans le schéma correspond à une valeur claire,
+            # il doit donc être chiffré avant stockage dans le modèle.
             if "valeur" in updates:
-                updates["valeur_chiffree"] = updates.pop("valeur")
+                updates["valeur_chiffree"] = _chiffrer_valeur_mot_de_passe(updates.pop("valeur"))
 
             for key, value in updates.items():
                 setattr(mdp, key, value)

@@ -3011,12 +3011,12 @@ def _job_jardin_feedback_planning() -> None:
         logger.exception("Erreur feedback_jardin jardin_feedback_planning")
 
 
-def _job_phase7_briefing_matinal_ia() -> None:
+def _job_briefing_matinal_ia() -> None:
     """J1 — Résumé matinal personnalisé (Telegram 7h)."""
     _job_briefing_matinal_push()
 
 
-def _job_phase7_comparateur_abonnements() -> None:
+def _job_comparateur_abonnements() -> None:
     """J2 — Compare les abonnements maison et met en avant les économies potentielles."""
     try:
         from src.core.db import obtenir_contexte_db
@@ -3078,7 +3078,7 @@ def _job_phase7_comparateur_abonnements() -> None:
         logger.exception("Erreur job comparateur_abonnements")
 
 
-def _job_phase7_rapport_nutritionnel_jules() -> None:
+def _job_rapport_nutritionnel_jules() -> None:
     """J4 — Résumé nutritionnel hebdomadaire de Jules."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -3103,7 +3103,7 @@ def _job_phase7_rapport_nutritionnel_jules() -> None:
         logger.exception("Erreur job rapport_nutritionnel_jules")
 
 
-def _job_phase7_nettoyage_notifications_30j() -> None:
+def _job_nettoyage_notifications() -> None:
     """J5 — Purge l’historique des notifications de plus de 30 jours."""
     try:
         from src.core.db import obtenir_contexte_db
@@ -3122,7 +3122,7 @@ def _job_phase7_nettoyage_notifications_30j() -> None:
         logger.exception("Erreur job nettoyage_notifications_30j")
 
 
-def _job_phase7_prediction_depenses() -> None:
+def _job_prediction_depenses() -> None:
     """J6 — Prédiction budget de fin de mois à mi-parcours."""
     try:
         from src.services.core.notifications.notif_dispatcher import get_dispatcher_notifications
@@ -3149,7 +3149,7 @@ def _job_phase7_prediction_depenses() -> None:
         logger.exception("Erreur job prediction_depenses")
 
 
-def _job_phase7_alerte_plantes_arrosage() -> None:
+def _job_alerte_plantes_arrosage() -> None:
     """J7 — Alerte arrosage / protection des plantes selon la météo."""
     try:
         from .jobs_notifications import job_alerte_meteo_jardin
@@ -3160,7 +3160,7 @@ def _job_phase7_alerte_plantes_arrosage() -> None:
         logger.exception("Erreur job alerte_plantes_arrosage")
 
 
-def _job_phase7_sync_tirages_euromillions() -> None:
+def _job_sync_tirages_euromillions() -> None:
     """J8 — Synchronisation des résultats Euromillions."""
     _job_sync_tirages_loto_euromillions()
 
@@ -3236,13 +3236,13 @@ _REGISTRE_JOBS: dict[str, tuple[str, Callable[[], None]]] = {
     "job_briefing_matinal_push": ("Briefing matinal IA", _job_briefing_matinal_push),
     "job_jardin_feedback_planning": ("Feedback jardin vers planning", _job_jardin_feedback_planning),
     # Jobs IA et automatisations avancées
-    "briefing_matinal_ia": ("Résumé matinal IA", _job_phase7_briefing_matinal_ia),
-    "comparateur_abonnements": ("Comparateur abonnements", _job_phase7_comparateur_abonnements),
-    "rapport_nutritionnel_jules": ("Rapport nutritionnel Jules", _job_phase7_rapport_nutritionnel_jules),
-    "nettoyage_notifications_30j": ("Nettoyage notifications 30 jours", _job_phase7_nettoyage_notifications_30j),
-    "prediction_depenses": ("Prédiction dépenses fin de mois", _job_phase7_prediction_depenses),
-    "alerte_plantes_arrosage": ("Alerte plantes / arrosage", _job_phase7_alerte_plantes_arrosage),
-    "sync_tirages_euromillions": ("Sync tirages Euromillions", _job_phase7_sync_tirages_euromillions),
+    "briefing_matinal_ia": ("Résumé matinal IA", _job_briefing_matinal_ia),
+    "comparateur_abonnements": ("Comparateur abonnements", _job_comparateur_abonnements),
+    "rapport_nutritionnel_jules": ("Rapport nutritionnel Jules", _job_rapport_nutritionnel_jules),
+    "nettoyage_notifications_30j": ("Nettoyage notifications 30 jours", _job_nettoyage_notifications),
+    "prediction_depenses": ("Prédiction dépenses fin de mois", _job_prediction_depenses),
+    "alerte_plantes_arrosage": ("Alerte plantes / arrosage", _job_alerte_plantes_arrosage),
+    "sync_tirages_euromillions": ("Sync tirages Euromillions", _job_sync_tirages_euromillions),
 }
 
 

@@ -13,6 +13,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 
 from src.api.dependencies import require_auth
+from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas import (
     MessageResponse,
     RecetteCreate,
@@ -26,6 +27,13 @@ from src.api.schemas.errors import (
     REPONSES_CRUD_LECTURE,
     REPONSES_CRUD_SUPPRESSION,
     REPONSES_LISTE,
+    REPONSES_IA,
+)
+from src.api.schemas.fonctionnalites_avancees import (
+    MangeCeSoirRequest,
+    PatternsAlimentairesResponse,
+    SaisonnaliteIntelligenteResponse,
+    SuggestionRepasSoirResponse,
 )
 from src.api.utils import (
     construire_reponse_paginee,
@@ -33,8 +41,61 @@ from src.api.utils import (
     executer_avec_session,
     gerer_exception_api,
 )
+from src.services.cuisine.innovations_service import obtenir_service_innovations_cuisine
 
 router = APIRouter(prefix="/api/v1/recettes", tags=["Recettes"])
+
+
+@router.post("/mange-ce-soir", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def manger_ce_soir(
+    body: MangeCeSoirRequest,
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
+) -> SuggestionRepasSoirResponse:
+    """Alias métier de la suggestion dîner express historiquement exposée via /innovations."""
+    service = obtenir_service_innovations_cuisine()
+    result = service.suggerer_repas_ce_soir(
+        temps_disponible_min=body.temps_disponible_min,
+        humeur=body.humeur,
+    )
+    return result or SuggestionRepasSoirResponse()
+
+
+@router.get("/patterns-alimentaires", response_model=PatternsAlimentairesResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def obtenir_patterns_alimentaires(
+    periode_jours: int = Query(90, ge=30, le=365),
+    user: dict[str, Any] = Depends(require_auth),
+) -> PatternsAlimentairesResponse:
+    """Alias métier pour l'analyse des habitudes alimentaires."""
+    service = obtenir_service_innovations_cuisine()
+    result = service.analyser_patterns_alimentaires(periode_jours=periode_jours)
+    return result or PatternsAlimentairesResponse()
+
+
+@router.get("/saisonnalite-intelligente", response_model=SaisonnaliteIntelligenteResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def obtenir_saisonnalite_intelligente(
+    user: dict[str, Any] = Depends(require_auth),
+) -> SaisonnaliteIntelligenteResponse:
+    """Alias métier pour la saisonnalité intelligente des recettes."""
+    service = obtenir_service_innovations_cuisine()
+    result = service.appliquer_saisonnalite_intelligente()
+    return result or SaisonnaliteIntelligenteResponse()
+
+
+@router.get("/garmin-repas-adaptatif", response_model=SuggestionRepasSoirResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def obtenir_repas_adaptatif_garmin(
+    user: dict[str, Any] = Depends(require_auth),
+) -> SuggestionRepasSoirResponse:
+    """Alias métier pour l'adaptation des repas à la dépense Garmin."""
+    service = obtenir_service_innovations_cuisine()
+    user_id_raw = user.get("id")
+    user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
+    result = service.proposer_repas_adapte_garmin(user_id=user_id)
+    return result or SuggestionRepasSoirResponse()
 
 
 @router.post("/{recette_id}/partager", responses=REPONSES_CRUD_CREATION)

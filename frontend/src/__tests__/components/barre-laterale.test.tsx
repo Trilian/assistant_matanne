@@ -4,6 +4,7 @@ import { BarreLaterale } from "@/composants/disposition/barre-laterale";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",
+  useRouter: () => ({ prefetch: vi.fn() }),
 }));
 
 vi.mock("@/crochets/utiliser-auth", () => ({

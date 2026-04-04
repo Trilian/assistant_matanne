@@ -1,6 +1,6 @@
 # Guide — Audit des Index de Base de Données
 
-> **Mise à jour** : Sprint H (Avril 2026)  
+> **Dernière mise à jour** : Avril 2026  
 > **Scope** : PostgreSQL (Supabase) — 143 tables, ~80+ index existants  
 > **Objectif** : Documenter l'état des index, identifier les lacunes, recommander les ajouts prioritaires
 

@@ -69,12 +69,13 @@ from src.api.routes import (
     garmin_router,
     ia_avancee_router,
     ia_modules_router,
-    fonctionnalites_avancees_router,
+    innovations_router,
     inventaire_router,
     jeux_router,
     maison_router,
     planning_router,
     preferences_router,
+    rapports_router,
     recettes_router,
     recherche_router,
     suggestions_router,
@@ -655,11 +656,12 @@ app.include_router(calendriers_router)
 app.include_router(dashboard_router)
 app.include_router(batch_cooking_router)
 app.include_router(preferences_router)
+app.include_router(rapports_router)
 app.include_router(automations_router)
 app.include_router(anti_gaspillage_router)
 app.include_router(ia_avancee_router)
 app.include_router(ia_modules_router)
-app.include_router(fonctionnalites_avancees_router)
+app.include_router(innovations_router)
 app.include_router(export_router)
 app.include_router(utilitaires_router)
 app.include_router(recherche_router)

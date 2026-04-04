@@ -47,7 +47,7 @@ from .mode_pilote import (
     obtenir_mode_pilote_automatique as obtenir_mode_pilote_automatique_module,
     proposer_repas_adapte_garmin as proposer_repas_adapte_garmin_module,
 )
-from . import energie_ia, bien_etre
+from . import bien_etre, cuisine_ia, energie_ia
 from .types import (
     AlertesContextuellesResponse,
     JournalFamilialAutoResponse,
@@ -635,7 +635,7 @@ Retourne un JSON avec:
         top_n: int = 20,
     ) -> ComparateurPrixAutomatiqueResponse | None:
         """Comparateur prix : compare les prix des ingrédients fréquents et détecte les soldes."""
-        return cuisine_ia.analyser_comparateur_prix_automatique(self)
+        return cuisine_ia.analyser_comparateur_prix_automatique(self, top_n=top_n)
 
     @avec_cache(ttl=300, key_func=lambda self: f"s23_energie_temps_reel_{datetime.now(UTC).strftime('%Y%m%d%H%M')}")
     @avec_gestion_erreurs(default_return=None)

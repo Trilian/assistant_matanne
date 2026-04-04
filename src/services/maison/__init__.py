@@ -92,6 +92,9 @@ _SERVICES = {
     "NotificationsMaisonService": "notifications_maison",
     "get_notifications_maison_service": "notifications_maison",
     "obtenir_service_notifications_maison": "notifications_maison",
+    # Innovations maison / énergie consolidées
+    "ServiceInnovationsMaison": "innovations_service",
+    "obtenir_service_innovations_maison": "innovations_service",
     # Fiche Tâche service (catalogue + IA fallback)
     "FicheTacheService": "fiche_tache_service",
     "get_fiche_tache_service": "fiche_tache_service",

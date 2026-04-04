@@ -23,13 +23,28 @@ from src.api.schemas.errors import (
     REPONSES_CRUD_ECRITURE,
     REPONSES_CRUD_SUPPRESSION,
     REPONSES_LISTE,
+    REPONSES_IA,
 )
+from src.api.schemas.fonctionnalites_avancees import PlanificationHebdoCompleteResponse
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
+from src.services.cuisine.innovations_service import obtenir_service_innovations_cuisine
 
 import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/planning", tags=["Planning"])
+
+
+@router.get("/planification-auto", response_model=PlanificationHebdoCompleteResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def planification_automatique(
+    user: dict[str, Any] = Depends(require_auth),
+) -> PlanificationHebdoCompleteResponse:
+    """Alias métier pour la planification hebdomadaire automatique."""
+    service = obtenir_service_innovations_cuisine()
+    user_id = str(user.get("id") or "")
+    result = service.generer_planification_hebdo_complete(user_id=user_id)
+    return result or PlanificationHebdoCompleteResponse()
 
 
 @router.get("/mensuel", responses=REPONSES_LISTE)

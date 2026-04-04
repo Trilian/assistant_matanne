@@ -8,6 +8,7 @@ from typing import Any, cast
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
+from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas.habitat import (
     AnnonceHabitatCreate,
     CritereImmoCreate,
@@ -24,6 +25,12 @@ from src.api.schemas.habitat import (
     SynchronisationVeilleHabitatCreate,
     ZoneJardinHabitatCreate,
     ZoneJardinHabitatPatch,
+)
+from src.api.schemas.fonctionnalites_avancees import (
+    AnomaliesEnergieResponse,
+    ComparateurEnergieRequest,
+    ComparateurEnergieResponse,
+    EnergieTempsReelResponse,
 )
 from src.api.schemas.common import MessageResponse
 from src.api.schemas.errors import (
@@ -45,6 +52,7 @@ from src.core.models.habitat_projet import (
 )
 from src.services.habitat.deco_service import obtenir_service_deco_habitat
 from src.services.habitat.dvf_service import obtenir_service_dvf_habitat
+from src.services.habitat.innovations_service import obtenir_service_innovations_habitat
 from src.services.habitat.plans_ai_service import obtenir_service_plans_habitat
 from src.services.habitat.scenarios_service import obtenir_service_scenarios_habitat
 from src.services.habitat.veille_service import obtenir_service_veille_habitat
@@ -83,6 +91,44 @@ async def habitat_hub(user: dict[str, Any] = Depends(require_auth)) -> dict[str,
             }
 
     return await executer_async(_query)
+
+
+@router.get("/anomalies-energie", response_model=AnomaliesEnergieResponse, responses=REPONSES_CRUD_LECTURE_TYPED)
+@gerer_exception_api
+async def obtenir_anomalies_energie(
+    user: dict[str, Any] = Depends(require_auth),
+) -> AnomaliesEnergieResponse:
+    """Alias métier pour la détection d'anomalies énergie."""
+    service = obtenir_service_innovations_habitat()
+    result = service.detecter_anomalies_energie()
+    return result or AnomaliesEnergieResponse()
+
+
+@router.post("/comparateur-energie", response_model=ComparateurEnergieResponse, responses=REPONSES_CRUD_CREATION_TYPED)
+@gerer_exception_api
+async def comparer_fournisseurs_energie(
+    body: ComparateurEnergieRequest,
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict[str, Any] = Depends(verifier_limite_debit_ia),
+) -> ComparateurEnergieResponse:
+    """Alias métier pour le comparateur de fournisseurs énergie."""
+    service = obtenir_service_innovations_habitat()
+    result = service.comparer_fournisseurs_energie(
+        prix_kwh_actuel_eur=body.prix_kwh_actuel_eur,
+        abonnement_mensuel_eur=body.abonnement_mensuel_eur,
+    )
+    return result or ComparateurEnergieResponse()
+
+
+@router.get("/energie-temps-reel", response_model=EnergieTempsReelResponse, responses=REPONSES_CRUD_LECTURE_TYPED)
+@gerer_exception_api
+async def obtenir_energie_temps_reel(
+    user: dict[str, Any] = Depends(require_auth),
+) -> EnergieTempsReelResponse:
+    """Alias métier pour le tableau énergie temps réel."""
+    service = obtenir_service_innovations_habitat()
+    result = service.obtenir_tableau_bord_energie_temps_reel()
+    return result or EnergieTempsReelResponse()
 
 
 @router.post("/veille/synchroniser", status_code=201, responses=REPONSES_CRUD_CREATION_TYPED)

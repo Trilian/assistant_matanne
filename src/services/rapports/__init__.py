@@ -23,6 +23,10 @@ from src.services.rapports.generation import (
     ServiceRapportsPDF,
     obtenir_service_rapports_pdf,
 )
+from src.services.rapports.innovations_service import (
+    ServiceInnovationsRapports,
+    obtenir_service_innovations_rapports,
+)
 from src.services.rapports.types import (
     AnalyseGaspillage,
     DonneesCoursesPDF,
@@ -51,4 +55,6 @@ __all__ = [
     "obtenir_service_export_pdf",
     "ServiceRapportsPDF",
     "obtenir_service_rapports_pdf",
+    "ServiceInnovationsRapports",
+    "obtenir_service_innovations_rapports",
 ]

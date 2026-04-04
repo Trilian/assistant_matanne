@@ -78,7 +78,7 @@ Scopes recommandés :
 Exemples :
   feat(jeux): ajouter backtest stratégie paris
   fix(courses): corriger déduplication articles identiques
-  docs(h): créer guide IA avancée sprint H
+  docs(frontend): créer guide IA avancée
   chore: mettre à jour mistralai 1.3.0
 ```
 

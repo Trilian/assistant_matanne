@@ -8,18 +8,79 @@ W4 : ajout endpoints préférences canaux de notification.
 from typing import Any, cast
 
 import logging
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from src.api.dependencies import require_auth
-from src.api.schemas.errors import REPONSES_CRUD_ECRITURE, REPONSES_CRUD_LECTURE
+from src.api.schemas.errors import REPONSES_CRUD_ECRITURE, REPONSES_CRUD_LECTURE, REPONSES_IA
 from src.api.schemas.preferences import (
     PreferencesCreate,
     PreferencesPatch,
     PreferencesNotificationsUpdate,
 )
+from src.api.schemas.fonctionnalites_avancees import (
+    ApprentissageHabitudesResponse,
+    ApprentissagePreferencesResponse,
+    ModePiloteAutomatiqueResponse,
+    ModePiloteConfigurationRequest,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
+from src.services.core.innovations_service import obtenir_service_innovations_core
 
 router = APIRouter(prefix="/api/v1/preferences", tags=["Préférences"])
+
+
+@router.get("/apprentissage-habitudes", responses=REPONSES_IA)
+@gerer_exception_api
+async def apprentissage_habitudes(
+    user: dict[str, Any] = Depends(require_auth),
+) -> ApprentissageHabitudesResponse:
+    """Alias métier pour l'apprentissage continu des habitudes utilisateur."""
+    service = obtenir_service_innovations_core()
+    result = service.apprendre_habitudes_utilisateur()
+    return result or ApprentissageHabitudesResponse()
+
+
+@router.get("/mode-pilote", responses=REPONSES_IA)
+@gerer_exception_api
+async def lire_mode_pilote(
+    user: dict[str, Any] = Depends(require_auth),
+) -> ModePiloteAutomatiqueResponse:
+    """Alias métier pour la lecture du mode pilote automatique."""
+    service = obtenir_service_innovations_core()
+    user_id_raw = user.get("id")
+    user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
+    result = service.obtenir_mode_pilote_automatique(user_id=user_id)
+    return result or ModePiloteAutomatiqueResponse()
+
+
+@router.post("/mode-pilote/config", responses=REPONSES_IA)
+@gerer_exception_api
+async def configurer_mode_pilote(
+    body: ModePiloteConfigurationRequest,
+    user: dict[str, Any] = Depends(require_auth),
+) -> ModePiloteAutomatiqueResponse:
+    """Alias métier pour la configuration du mode pilote automatique."""
+    service = obtenir_service_innovations_core()
+    user_id_raw = user.get("id")
+    user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
+    result = service.configurer_mode_pilote_automatique(
+        user_id=user_id,
+        actif=body.actif,
+        niveau_autonomie=body.niveau_autonomie,
+    )
+    return result or ModePiloteAutomatiqueResponse(actif=body.actif)
+
+
+@router.get("/preferences-apprises", responses=REPONSES_IA)
+@gerer_exception_api
+async def preferences_apprises(
+    user: dict[str, Any] = Depends(require_auth),
+) -> ApprentissagePreferencesResponse:
+    """Alias métier pour les préférences apprises par l'IA."""
+    service = obtenir_service_innovations_core()
+    user_id = str(user.get("id") or "")
+    result = service.analyser_preferences_apprises(user_id=user_id)
+    return result or ApprentissagePreferencesResponse()
 
 logger = logging.getLogger(__name__)
 

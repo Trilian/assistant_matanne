@@ -500,11 +500,11 @@ class EnergieTempsReelResponse(BaseModel):
     """Vue énergie quasi temps-réel (Linky si disponible, sinon estimation)."""
 
     linky_connecte: bool = False
-    source: str = "estimation"
+    source: str = "estimation_releves"
     horodatage: str = ""
     puissance_instantanee_w: float | None = None
-    consommation_jour_estimee_kwh: float | None = None
-    consommation_mois_kwh: float | None = None
+    consommation_jour_estimee_kwh: float | None = 0.0
+    consommation_mois_kwh: float | None = 0.0
     tendance: str = "stable"
     alertes: list[str] = Field(default_factory=list)
 

@@ -217,7 +217,7 @@ erDiagram
 
 ---
 
-## Validation Sprint H
+## Dernière validation — Avril 2026
 
 - Vérification manuelle: alignement avec l'organisation SQL modulaire (`sql/schema/`)
 - Référence migration: `docs/MIGRATION_GUIDE.md`

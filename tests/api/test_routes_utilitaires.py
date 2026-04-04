@@ -384,3 +384,66 @@ class TestFormatsReponses:
         data = response.json()
         assert "items" in data
         assert data["items"][0]["type_energie"] == "electricite"
+
+    @patch("src.api.routes.utilitaires.executer_avec_session")
+    @patch("src.api.routes.utilitaires.executer_async")
+    async def test_creer_mot_de_passe_chiffre_la_valeur(self, mock_exec, mock_session, client):
+        """La création chiffre la valeur en clair avant stockage."""
+        from src.api.auth import _obtenir_api_secret
+        from src.services.utilitaires.service import MotsDePasseService
+
+        mock_exec.side_effect = lambda fn: fn()
+
+        ctx = MagicMock()
+        ctx.__enter__ = MagicMock(return_value=MagicMock())
+        ctx.__exit__ = MagicMock(return_value=False)
+        session = ctx.__enter__()
+        session.add.side_effect = lambda instance: setattr(session, "dernier_mdp", instance)
+        session.refresh.side_effect = lambda instance: setattr(instance, "id", 7)
+        mock_session.return_value = ctx
+
+        response = await client.post(
+            "/api/v1/utilitaires/passwords",
+            json={"nom": "WiFi invité", "categorie": "reseau", "valeur": "super-secret"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["valeur_chiffree"] != "super-secret"
+        assert session.dernier_mdp.valeur_chiffree == data["valeur_chiffree"]
+        assert (
+            MotsDePasseService().dechiffrer(data["valeur_chiffree"], _obtenir_api_secret())
+            == "super-secret"
+        )
+
+    @patch("src.api.routes.utilitaires.executer_avec_session")
+    @patch("src.api.routes.utilitaires.executer_async")
+    async def test_modifier_mot_de_passe_rechiffre_la_valeur(self, mock_exec, mock_session, client):
+        """Une mise à jour de valeur remplace le secret clair par une valeur chiffrée."""
+        from src.api.auth import _obtenir_api_secret
+        from src.services.utilitaires.service import MotsDePasseService
+
+        mock_exec.side_effect = lambda fn: fn()
+        mdp = creer_mock(MOT_DE_PASSE_TEST)
+
+        ctx = MagicMock()
+        ctx.__enter__ = MagicMock(return_value=MagicMock())
+        ctx.__exit__ = MagicMock(return_value=False)
+        session = ctx.__enter__()
+        session.query.return_value.filter.return_value.first.return_value = mdp
+        session.refresh.side_effect = lambda instance: instance
+        mock_session.return_value = ctx
+
+        response = await client.patch(
+            "/api/v1/utilitaires/passwords/1",
+            json={"valeur": "nouveau-secret", "notes": "Mis à jour"},
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data["valeur_chiffree"] != "nouveau-secret"
+        assert data["notes"] == "Mis à jour"
+        assert (
+            MotsDePasseService().dechiffrer(data["valeur_chiffree"], _obtenir_api_secret())
+            == "nouveau-secret"
+        )

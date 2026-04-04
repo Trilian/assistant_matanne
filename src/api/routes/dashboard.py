@@ -12,13 +12,66 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func
 
 from src.api.dependencies import require_auth
-from src.api.schemas.errors import REPONSES_LISTE
+from src.api.rate_limiting import verifier_limite_debit_ia
+from src.api.schemas.errors import REPONSES_IA, REPONSES_LISTE
+from src.api.schemas.fonctionnalites_avancees import (
+    AlertesContextuellesResponse,
+    InsightsQuotidiensResponse,
+    MeteoContextuelleResponse,
+    TelegramConversationnelResponse,
+)
 from src.api.utils import executer_async, executer_avec_session, gerer_exception_api
+from src.services.core.innovations_service import obtenir_service_innovations_core
 
 import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["Tableau de bord"])
+
+
+@router.get("/alertes-contextuelles", response_model=AlertesContextuellesResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def obtenir_alertes_contextuelles(
+    user: dict[str, Any] = Depends(require_auth),
+) -> AlertesContextuellesResponse:
+    """Alias métier pour les alertes contextuelles IA."""
+    service = obtenir_service_innovations_core()
+    result = service.generer_alertes_contextuelles()
+    return result or AlertesContextuellesResponse()
+
+
+@router.get("/insights-quotidiens", response_model=InsightsQuotidiensResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def obtenir_insights_quotidiens(
+    limite: int = Query(2, ge=1, le=2, description="1 ou 2 insights maximum par jour"),
+    user: dict[str, Any] = Depends(require_auth),
+) -> InsightsQuotidiensResponse:
+    """Alias métier pour les insights quotidiens IA."""
+    service = obtenir_service_innovations_core()
+    result = service.generer_insights_quotidiens(limite=limite)
+    return result or InsightsQuotidiensResponse(limite_journaliere=limite)
+
+
+@router.get("/meteo-contextuelle", response_model=MeteoContextuelleResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def obtenir_meteo_contextuelle(
+    user: dict[str, Any] = Depends(require_auth),
+) -> MeteoContextuelleResponse:
+    """Alias métier pour la météo contextuelle cross-module."""
+    service = obtenir_service_innovations_core()
+    result = service.analyser_meteo_contextuelle()
+    return result or MeteoContextuelleResponse()
+
+
+@router.get("/telegram-conversationnel", response_model=TelegramConversationnelResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def obtenir_telegram_conversationnel(
+    user: dict[str, Any] = Depends(require_auth),
+) -> TelegramConversationnelResponse:
+    """Alias métier pour les capacités Telegram conversationnelles."""
+    service = obtenir_service_innovations_core()
+    result = service.obtenir_capacites_telegram_conversationnelles()
+    return result or TelegramConversationnelResponse()
 
 
 def _score_lettre_vers_points(note: str | None) -> int | None:

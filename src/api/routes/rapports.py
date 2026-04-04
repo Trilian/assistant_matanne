@@ -12,11 +12,142 @@ from fastapi import APIRouter, Depends, Query
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
 from src.api.schemas.errors import REPONSES_IA
+from src.api.schemas.fonctionnalites_avancees import (
+    BilanAnnuelRequest,
+    BilanAnnuelResponse,
+    CarteVisuellePartageableResponse,
+    CarteVisuelleRequest,
+    JournalFamilialAutoResponse,
+    ModeTabletteMagazineResponse,
+    RapportMensuelPdfResponse,
+    ResumeMensuelIAResponse,
+    ScoreBienEtreResponse,
+    ScoreEcoResponsableResponse,
+)
 from src.api.utils import executer_async, gerer_exception_api
+from src.services.rapports.innovations_service import obtenir_service_innovations_rapports
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/rapports", tags=["Rapports IA"])
+
+
+@router.get("/resume-mensuel", response_model=ResumeMensuelIAResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def resume_mensuel_ia(
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+):
+    """Alias métier du résumé mensuel IA historiquement servi via /innovations."""
+    service = obtenir_service_innovations_rapports()
+    result = service.generer_resume_mensuel_ia()
+    return result or ResumeMensuelIAResponse()
+
+
+@router.get("/retrospective-annuelle", response_model=BilanAnnuelResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def retrospective_annuelle_ia(
+    annee: int | None = Query(None, ge=2020, le=2100),
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+):
+    """Alias métier de la rétrospective annuelle IA."""
+    service = obtenir_service_innovations_rapports()
+    result = service.generer_bilan_annuel(annee=annee)
+    return result or BilanAnnuelResponse()
+
+
+@router.get("/journal-familial", response_model=JournalFamilialAutoResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def journal_familial_ia(
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+):
+    """Alias métier du journal familial automatique."""
+    service = obtenir_service_innovations_rapports()
+    result = service.generer_journal_familial_auto()
+    return result or JournalFamilialAutoResponse()
+
+
+@router.get("/journal-familial/pdf", response_model=RapportMensuelPdfResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def journal_familial_pdf_ia(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Alias métier du PDF de journal familial."""
+    service = obtenir_service_innovations_rapports()
+    result = service.generer_journal_familial_pdf()
+    return result or RapportMensuelPdfResponse()
+
+
+@router.get("/rapport-mensuel/pdf", response_model=RapportMensuelPdfResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def rapport_mensuel_pdf_ia(
+    mois: str | None = Query(None, description="Format YYYY-MM"),
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Alias métier du rapport mensuel PDF."""
+    service = obtenir_service_innovations_rapports()
+    result = service.generer_rapport_mensuel_pdf(mois=mois)
+    return result or RapportMensuelPdfResponse()
+
+
+@router.post("/bilan-annuel", response_model=BilanAnnuelResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def bilan_annuel_ia(
+    body: BilanAnnuelRequest,
+    user: dict[str, Any] = Depends(require_auth),
+    _rate: dict = Depends(verifier_limite_debit_ia),
+):
+    """Alias métier du bilan annuel complet IA."""
+    service = obtenir_service_innovations_rapports()
+    result = service.generer_bilan_annuel(annee=body.annee)
+    return result or BilanAnnuelResponse()
+
+
+@router.get("/score-bien-etre", response_model=ScoreBienEtreResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def score_bien_etre_ia(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Alias métier du score bien-être familial composite."""
+    service = obtenir_service_innovations_rapports()
+    result = service.calculer_score_bien_etre()
+    return result or ScoreBienEtreResponse()
+
+
+@router.get("/score-eco-responsable", response_model=ScoreEcoResponsableResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def score_eco_responsable_ia(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Alias métier du score éco-responsable."""
+    service = obtenir_service_innovations_rapports()
+    result = service.calculer_score_eco_responsable()
+    return result or ScoreEcoResponsableResponse()
+
+
+@router.post("/carte-visuelle", response_model=CarteVisuellePartageableResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def carte_visuelle_ia(
+    body: CarteVisuelleRequest,
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Alias métier de la carte visuelle partageable."""
+    service = obtenir_service_innovations_rapports()
+    result = service.generer_carte_visuelle_partageable(type_carte=body.type_carte, titre=body.titre)
+    return result or CarteVisuellePartageableResponse(type_carte=body.type_carte)
+
+
+@router.get("/mode-tablette-magazine", response_model=ModeTabletteMagazineResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def mode_tablette_magazine_ia(
+    user: dict[str, Any] = Depends(require_auth),
+):
+    """Alias métier du mode tablette magazine."""
+    service = obtenir_service_innovations_rapports()
+    result = service.obtenir_mode_tablette_magazine()
+    return result or ModeTabletteMagazineResponse()
 
 
 @router.get("/bilan-mois", responses=REPONSES_IA)

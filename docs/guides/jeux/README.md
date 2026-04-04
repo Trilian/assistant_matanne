@@ -241,7 +241,7 @@ Lors de la création d'un pari, cliquez sur un match pour ouvrir le **drawer de 
 ### Tests
 
 ```bash
-# Backend — 10 tests unitaires Phases T/U/W
+# Backend — Tests unitaires du module jeux
 pytest tests/services/test_jeux_phases_tuw.py -v
 
 # Frontend — Tests composants jeux
@@ -252,14 +252,13 @@ cd frontend && npm test -- jeux
 
 ## Ressources complémentaires
 
-- [FINALISATION_PHASES_TUW.md](FINALISATION_PHASES_TUW.md) : Guide technique implémentation Phases T/U/W
 - [API_REFERENCE.md](../../API_REFERENCE.md) : Documentation OpenAPI complète
 - [MODULES.md](../../MODULES.md) : Architecture générale modules
-- [STATUS_PHASES.md](../../STATUS_PHASES.md) : État d'avancement projet (Phases S-W ✅)
+- [CHANGELOG.md](../../CHANGELOG.md) : Historique des évolutions du module
 
 ---
 
-**Dernière mise à jour** : 27 mars 2026 — Module Jeux 100% complet (backend + frontend + UI + docs)iers tirages)
+**Dernière mise à jour** : Avril 2026 — Module Jeux complet (backend + frontend + UI + docs)iers tirages)
 2. **Mode Froids** : Mise sur les numéros en retard (loi des séries)
 3. **Mode Équilibré** : Mix 60% chauds + 40% froids (recommandé)
 

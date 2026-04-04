@@ -1,4 +1,4 @@
-"""Agrège les routeurs d'innovations découpés par domaine."""
+"""Agrège les routeurs d'innovations comme couche de compatibilité rétrocompatible."""
 
 from __future__ import annotations
 

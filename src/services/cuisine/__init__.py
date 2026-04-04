@@ -14,6 +14,7 @@ __all__ = [
     "courses",
     "suggestions",
     "batch_cooking",
+    "innovations_service",
 ]
 
 
@@ -47,6 +48,10 @@ def __getattr__(name: str):
         from src.services.cuisine.batch_cooking import obtenir_service_batch_cooking
 
         return obtenir_service_batch_cooking
+    if name == "obtenir_service_innovations_cuisine":
+        from src.services.cuisine.innovations_service import obtenir_service_innovations_cuisine
+
+        return obtenir_service_innovations_cuisine
     if name == "obtenir_service_prediction_courses":
         from src.services.cuisine.prediction_courses import obtenir_service_prediction_courses
 

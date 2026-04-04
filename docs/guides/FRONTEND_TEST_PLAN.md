@@ -1,4 +1,4 @@
-# Plan complet — Tests unit Frontend (H.14)
+# Plan complet — Tests unit frontend
 
 ## Objectif
 
@@ -12,7 +12,7 @@ Structurer une couverture de tests unitaires et d'intégration légère sur 3 ax
 
 1. Hooks métier critiques
 2. Stores globaux
-3. Composants extraits (Sprint H)
+3. Composants extraits prioritaires
 4. Pages avec état complexe
 
 ## 1) Hooks
@@ -50,7 +50,7 @@ Structurer une couverture de tests unitaires et d'intégration légère sur 3 ax
 - Persistance et rehydratation
 - Reset global après logout
 
-## 3) Composants (Sprint H)
+## 3) Composants prioritaires
 
 ### Nouveaux composants habitat
 
@@ -91,7 +91,7 @@ Structurer une couverture de tests unitaires et d'intégration légère sur 3 ax
 
 ## Matrice de couverture cible
 
-| Zone | Actuel | Cible Sprint I |
+| Zone | Actuel | Cible |
 | ---- | ------ | -------------- |
 | Hooks | moyen | élevé |
 | Stores | moyen | élevé |

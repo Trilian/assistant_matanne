@@ -1,6 +1,6 @@
 # Automation Guide (fusionné)
 
-> Ce mémo historique a été absorbé dans la documentation consolidée de phase 5.
+> Ce mémo historique a été absorbé dans la documentation consolidée actuelle.
 
 ---
 

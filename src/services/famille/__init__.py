@@ -46,6 +46,7 @@ __all__ = [
     "rappels",
     "achats_ia",
     "checklists_anniversaire",
+    "innovations_service",
 ]
 
 
@@ -121,6 +122,10 @@ def __getattr__(name: str):
         from src.services.famille.soiree_ai import obtenir_service_soiree_ai
 
         return obtenir_service_soiree_ai
+    if name == "obtenir_service_innovations_famille":
+        from src.services.famille.innovations_service import obtenir_service_innovations_famille
+
+        return obtenir_service_innovations_famille
     if name in ("obtenir_service_contexte_familial", "get_contexte_familial_service"):
         from src.services.famille.contexte import obtenir_service_contexte_familial
 
