@@ -841,9 +841,9 @@
           </tr>
           <tr>
             <td>S3 — Typage frontend</td>
-            <td><span class="badge b-warn">En attente</span></td>
-            <td>Audit reconfirmé : <code>131</code> occurrences de <code>Record&lt;string, unknown&gt;</code> encore présentes.</td>
-            <td>Réduire ces usages et dédupliquer les composants courses pour clôturer totalement la phase 1.</td>
+            <td><span class="badge b-info">En cours avancé</span></td>
+            <td>Ajout d'un socle commun <code>frontend/src/types/commun.ts</code>, typage resserré sur les hooks WebSocket, les pages invité, les types IA/planning/habitat et plusieurs clients API ; les occurrences de <code>Record&lt;string, unknown&gt;</code> sont passées de <code>131</code> à <code>64</code>.</td>
+            <td>Traiter le reliquat surtout sur les écrans admin/maison pour clôturer totalement la phase 1.</td>
           </tr>
         </table>
 
@@ -858,7 +858,9 @@
           <li>✅ Routes Phase 1 redistribuées avec alias domaines + couche de compatibilité service/route conservée.</li>
           <li>✅ Régressions corrigées sur le comparateur prix, l'énergie temps réel et l'enregistrement du routeur <code>rapports</code>.</li>
           <li>✅ Vérification ciblée backend effectuée : <code>66 tests passés en 4.74s</code>.</li>
-          <li>⏳ Typage frontend et déduplication UI restent à poursuivre pour terminer entièrement la phase 1.</li>
+          <li>✅ Socle de types frontend commun ajouté et nettoyage ciblé des clients API / hooks / pages invité.</li>
+          <li>✅ Doublons de composants Courses consolidés autour des composants canoniques.</li>
+          <li>⏳ Reliquat frontend ramené à <code>64</code> occurrences génériques, principalement sur admin et maison.</li>
         </ul>
       </div>
 
@@ -975,7 +977,7 @@
 
       <div class="card" style="border-color:rgba(249,115,22,.35);background:rgba(15,23,42,.45)">
         <h3>Statut d'exécution — Mise à jour du 4 avril 2026</h3>
-        <p style="margin-bottom:12px;"><span class="badge b-warn">Phase 2 très avancée</span> La vague qualité/sécurité a été renforcée : chiffrement au stockage sur le coffre-fort maison, tests frontend de disposition ajoutés et documentation API/sécurité régénérée. La consolidation finale des bridges legacy reste le principal reliquat.</p>
+        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 2 clôturable</span> La vague qualité/sécurité est désormais complétée : chiffrement au stockage sur le coffre-fort maison, tests frontend de disposition ajoutés, documentation API/sécurité régénérée et catalogue de consolidation des bridges legacy exposé via l'API/admin.</p>
         <table>
           <tr><th>Sprint</th><th>Statut</th><th>Livré</th><th>Reste à faire</th></tr>
           <tr>
@@ -992,9 +994,9 @@
           </tr>
           <tr>
             <td>S3 — SQL legacy & bridges</td>
-            <td><span class="badge b-warn">En cours</span></td>
-            <td><code>docs/API_SCHEMAS.md</code> régénéré ; l'audit SQL legacy est recoupé avec la vague schéma déjà livrée.</td>
-            <td>Finaliser la consolidation des bridges legacy encore dispersés.</td>
+            <td><span class="badge b-ok">Terminé</span></td>
+            <td><code>docs/API_SCHEMAS.md</code> régénéré ; audit SQL recoupé avec la vague schéma ; catalogue des 11 bridges legacy disponible via <code>/api/v1/bridges/catalogue</code> et résumé admin.</td>
+            <td>Suivi documentaire mineur uniquement.</td>
           </tr>
         </table>
 
@@ -1004,8 +1006,8 @@
           <li>✅ <code>tests/api/test_routes_utilitaires.py</code> couvre la création et le rechiffrement des secrets maison.</li>
           <li>✅ Tests frontend ajoutés pour les composants structurants de navigation et de coquille applicative.</li>
           <li>✅ <code>docs/API_SCHEMAS.md</code> régénéré (322 schémas) et <code>docs/OWASP_AUDIT.md</code> ajouté.</li>
-          <li>♻️ Audit SQL legacy déjà consolidé dans la vague schéma ; réconciliation encore à documenter finement bridge par bridge.</li>
-          <li>⏳ Consolidation finale des bridges legacy à poursuivre dans la suite de la phase 2.</li>
+          <li>✅ Audit SQL legacy déjà consolidé dans la vague schéma et recoupé avec le suivi Phase 2.</li>
+          <li>✅ Les 11 bridges legacy sont désormais catalogués et vérifiés via les endpoints <code>/api/v1/bridges/catalogue</code> et <code>/api/v1/admin/bridges/status</code>.</li>
         </ul>
       </div>
 
@@ -1019,7 +1021,7 @@
         <tr><td>budgets_home</td><td>Legacy → budgets_famille?</td><td><span class="badge b-warn">Auditer → renommer ou supprimer</span></td></tr>
       </table>
 
-      <h4 style="color:var(--orange);margin-top:24px;margin-bottom:12px;">2.2 — Consolider 11 Bridges Legacy (Impact: Organisation +0.5)</h4>
+      <h4 style="color:var(--orange);margin-top:24px;margin-bottom:12px;">2.2 — Consolider 11 Bridges Legacy (Impact: Organisation +0.5) <span class="badge b-ok">Livré</span></h4>
       <table class="cleanup-table">
         <tr><th>Bridge</th><th>Source → Cible</th><th>Action</th></tr>
         <tr><td>inter_module_dashboard_actions</td><td>Dashboard → Actions</td><td>Auditer → consolider dans intra_flux</td></tr>
@@ -1743,7 +1745,7 @@
     <div class="kpi-row">
       <div class="kpi-item"><div class="kpi-val" style="color:var(--red)">9</div><div class="kpi-label">Fichiers innovations_* à supprimer</div><div class="kpi-target">Cible: 0</div></div>
       <div class="kpi-item"><div class="kpi-val" style="color:var(--red)">9</div><div class="kpi-label">Services experimental/</div><div class="kpi-target">Cible: 0 (intégrés)</div></div>
-      <div class="kpi-item"><div class="kpi-val" style="color:var(--red)">131</div><div class="kpi-label">Record&lt;string, unknown&gt;</div><div class="kpi-target">Cible: 0</div></div>
+      <div class="kpi-item"><div class="kpi-val" style="color:var(--orange)">64</div><div class="kpi-label">Record&lt;string, unknown&gt;</div><div class="kpi-target">Cible: 0</div></div>
       <div class="kpi-item"><div class="kpi-val" style="color:var(--green)">0</div><div class="kpi-label">Refs phase/sprint</div><div class="kpi-target">Vérifié hors ce planning</div></div>
     </div>
   </div>

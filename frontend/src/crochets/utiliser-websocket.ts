@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { ObjetDonnees, ValeurDonnee } from '@/types/commun'
 
 // ═══════════════════════════════════════════════════════════
 // TYPES
@@ -14,7 +15,7 @@ interface UtilisateurConnecte {
 
 interface MessageWS {
   type: string
-  [cle: string]: unknown
+  [cle: string]: ValeurDonnee
 }
 
 interface OptionsWebSocket {
@@ -42,7 +43,7 @@ interface RetourWebSocket {
   /** Liste des utilisateurs connectés */
   utilisateurs: UtilisateurConnecte[]
   /** Envoyer un message JSON */
-  envoyer: (message: Record<string, unknown>) => void
+  envoyer: (message: ObjetDonnees) => void
   /** Dernier message reçu */
   dernierMessage: MessageWS | null
   /** Erreur de connexion */
@@ -77,7 +78,7 @@ export function utiliserWebSocket({
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const gestionnairesRef = useRef(gestionnaires)
-  const pendingActionsRef = useRef<Record<string, unknown>[]>([])
+  const pendingActionsRef = useRef<ObjetDonnees[]>([])
   const lastSeqRef = useRef(0)
 
   // Garder les gestionnaires à jour sans recréer la connexion
@@ -185,6 +186,8 @@ export function utiliserWebSocket({
     }
 
     wsRef.current = ws
+    // La callback de connexion pilote volontairement la reconnexion et le basculement polling.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, delaiReconnexion, maxTentatives, demarrerHeartbeat, arreterHeartbeat])
 
   // Fallback en polling HTTP quand le WebSocket n'est pas disponible.
@@ -243,7 +246,7 @@ export function utiliserWebSocket({
     }
   }, [url, connecter, arreterHeartbeat, arreterPolling])
 
-  const envoyer = useCallback((message: Record<string, unknown>) => {
+  const envoyer = useCallback((message: ObjetDonnees) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       // Mode WebSocket : envoi direct + flush de la queue
       wsRef.current.send(JSON.stringify(message))

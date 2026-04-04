@@ -23,6 +23,17 @@ def client() -> TestClient:
     app.dependency_overrides.pop(require_auth, None)
 
 
+def test_catalogue_bridges_expose_la_consolidation_phase2(client: TestClient) -> None:
+    response = client.get("/api/v1/bridges/catalogue")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["resume"]["total_legacy"] == 11
+    assert payload["resume"]["consolides"] == 11
+    assert payload["resume"]["statut"] == "termine"
+    assert any(item["flux"] == "Chat IA → Event Bus" for item in payload["items"])
+
+
 def test_energie_heures_creuses_endpoint(client: TestClient) -> None:
     service = MagicMock()
     service.energie_hc_hp_vers_planning_machines.return_value = {

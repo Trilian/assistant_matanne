@@ -1,3 +1,5 @@
+import type { ListeObjetsDonnees, ObjetDonnees } from "@/types/commun"
+
 export interface SuggestionAchat {
   nom: string
   raison: string
@@ -14,10 +16,10 @@ export interface SuggestionsAchatsResponse {
 
 export interface PlanningAdaptatifResponse {
   recommandations: string[]
-  repas_suggerees: Array<Record<string, unknown>>
-  activites_suggerees: Array<Record<string, unknown>>
+  repas_suggerees: ListeObjetsDonnees
+  activites_suggerees: ListeObjetsDonnees
   score_adaptation: number
-  contexte_utilise: Record<string, unknown>
+  contexte_utilise: ObjetDonnees
 }
 
 export interface DiagnosticPlantResponse {
@@ -63,7 +65,7 @@ export interface SuggestionsIdeasResponse {
 export interface AnalysePhotoMultiResponse {
   contexte_detecte: string
   resume: string
-  details: Record<string, unknown>
+  details: ObjetDonnees
   actions_suggerees: string[]
   confiance: number
 }
@@ -183,6 +185,6 @@ export interface AdaptationMeteo {
 
 export interface AdaptationPlanningMeteoResponse {
   adaptations: AdaptationMeteo[]
-  meteo_resume: Record<string, unknown>
+  meteo_resume: ObjetDonnees
   date_prevision?: string | null
 }

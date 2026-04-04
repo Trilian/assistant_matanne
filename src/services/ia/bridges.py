@@ -12,6 +12,7 @@ Connecte les modules via l'event bus et des helpers métier pour :
 - S4: Entretien → artisans, récolte → stock, anniversaire → menu, jalon → journal
 """
 
+import importlib
 import logging
 from datetime import date, timedelta
 
@@ -23,6 +24,75 @@ from src.services.core.events.bus import EvenementDomaine
 from src.services.core.registry import service_factory
 
 logger = logging.getLogger(__name__)
+
+CATALOGUE_BRIDGES_PHASE2: list[dict[str, str]] = [
+    {
+        "groupe": "utilitaires",
+        "flux": "Dashboard → Actions rapides",
+        "module_legacy": "src.services.utilitaires.inter_module_dashboard_actions",
+        "module_canonique": "src.services.utilitaires.bridges_dashboard_actions",
+    },
+    {
+        "groupe": "utilitaires",
+        "flux": "Chat IA → Event Bus",
+        "module_legacy": "src.services.utilitaires.inter_module_chat_event_bus",
+        "module_canonique": "src.services.utilitaires.bridges_chat_event_bus",
+    },
+    {
+        "groupe": "utilitaires",
+        "flux": "Chat → Contexte multi-modules",
+        "module_legacy": "src.services.utilitaires.inter_module_chat_contexte",
+        "module_canonique": "src.services.utilitaires.bridges_chat_contexte",
+    },
+    {
+        "groupe": "famille",
+        "flux": "Weekend → Courses",
+        "module_legacy": "src.services.famille.inter_module_weekend_courses",
+        "module_canonique": "src.services.famille.bridges_weekend_courses",
+    },
+    {
+        "groupe": "famille",
+        "flux": "Voyages → Budget",
+        "module_legacy": "src.services.famille.inter_module_voyages_budget",
+        "module_canonique": "src.services.famille.bridges_voyages_budget",
+    },
+    {
+        "groupe": "famille",
+        "flux": "Météo → Activités",
+        "module_legacy": "src.services.famille.inter_module_meteo_activites",
+        "module_canonique": "src.services.famille.bridges_meteo_activites",
+    },
+    {
+        "groupe": "famille",
+        "flux": "Documents → Calendrier",
+        "module_legacy": "src.services.famille.inter_module_documents_calendrier",
+        "module_canonique": "src.services.famille.bridges_documents_calendrier",
+    },
+    {
+        "groupe": "cuisine",
+        "flux": "Saison → Menu",
+        "module_legacy": "src.services.cuisine.inter_module_saison_menu",
+        "module_canonique": "src.services.cuisine.bridges_saison_menu",
+    },
+    {
+        "groupe": "maison",
+        "flux": "Jardin → Entretien",
+        "module_legacy": "src.services.maison.inter_module_jardin_entretien",
+        "module_canonique": "src.services.maison.bridges_jardin_entretien",
+    },
+    {
+        "groupe": "maison",
+        "flux": "Entretien → Courses",
+        "module_legacy": "src.services.maison.inter_module_entretien_courses",
+        "module_canonique": "src.services.maison.bridges_entretien_courses",
+    },
+    {
+        "groupe": "maison",
+        "flux": "Charges → Énergie",
+        "module_legacy": "src.services.maison.inter_module_charges_energie",
+        "module_canonique": "src.services.maison.bridges_charges_energie",
+    },
+]
 
 
 class BridgesInterModulesService:
@@ -63,6 +133,39 @@ class BridgesInterModulesService:
                 str(getattr(artisan, "nom", "")).lower(),
             ),
         )
+
+    def obtenir_catalogue_consolidation_phase2(self) -> dict[str, object]:
+        """Expose l'état des bridges legacy consolidés durant la phase 2."""
+        items: list[dict[str, object]] = []
+        for definition in CATALOGUE_BRIDGES_PHASE2:
+            disponible = True
+            try:
+                importlib.import_module(str(definition["module_legacy"]))
+                importlib.import_module(str(definition["module_canonique"]))
+            except Exception:
+                disponible = False
+
+            items.append({
+                **definition,
+                "statut": "consolide" if disponible else "a_verifier",
+                "mode": "compat_legacy",
+                "disponible": disponible,
+            })
+
+        total = len(items)
+        consolides = sum(1 for item in items if item["disponible"])
+        groupes = sorted({str(item["groupe"]) for item in items})
+
+        return {
+            "resume": {
+                "total_legacy": total,
+                "consolides": consolides,
+                "reste_a_traiter": max(total - consolides, 0),
+                "groupes": groupes,
+                "statut": "termine" if consolides == total else "en_cours",
+            },
+            "items": items,
+        }
 
     # ── B5.1: Récolte jardin → Suggestions recettes ────────
 

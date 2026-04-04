@@ -1,4 +1,5 @@
 import { clientApi } from './client'
+import type { ObjetDonnees } from '@/types/commun'
 
 export type AssistantIntent = {
   intent: string
@@ -14,7 +15,7 @@ export type AssistantExecutionResponse = {
   resultat: {
     action: string
     message: string
-    details?: Record<string, unknown>
+    details?: ObjetDonnees
   }
 }
 

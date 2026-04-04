@@ -5,6 +5,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from './client'
+import type { ListeObjetsDonnees, ObjetDonnees, ValeurDonnee } from '@/types/commun'
 
 // ─── Types ─────────────────────────────────────────────────
 
@@ -114,7 +115,7 @@ export interface AuditLogEntry {
   utilisateur_id: string | null
   entite_type: string
   entite_id: number | string | null
-  details: Record<string, unknown>
+  details: ObjetDonnees
 }
 
 export interface AuditLogsResponse {
@@ -126,7 +127,7 @@ export interface AuditLogsResponse {
 }
 
 export interface AuditStatsResponse {
-  [key: string]: unknown
+  [key: string]: ValeurDonnee
 }
 
 export interface SecurityLogEntry {
@@ -154,8 +155,8 @@ export interface ServiceHealthResponse {
   instantiated: number
   healthy: number
   erreurs: string[]
-  services: Record<string, unknown>
-  metriques?: Record<string, unknown>
+  services: ObjetDonnees
+  metriques?: ObjetDonnees
 }
 
 export interface AdminDashboardResponse {
@@ -166,8 +167,8 @@ export interface AdminDashboardResponse {
     inactifs: number
   }
   services: ServiceHealthResponse
-  metriques_services: Record<string, unknown>
-  cache: Record<string, unknown>
+  metriques_services: ObjetDonnees
+  cache: ObjetDonnees
   security: {
     events_24h: number
   }
@@ -193,8 +194,8 @@ export interface FeatureFlagsResponse {
 }
 
 export interface RuntimeConfigResponse {
-  values: Record<string, unknown>
-  readonly: Record<string, unknown>
+  values: ObjetDonnees
+  readonly: ObjetDonnees
 }
 
 export interface ResyncTarget {
@@ -258,7 +259,7 @@ export interface NotificationTemplatePreviewResponse {
   template_id: string
   trigger?: string
   preview: string
-  contexte_demo: Record<string, unknown>
+  contexte_demo: ObjetDonnees
 }
 
 export interface NotificationSimulationPayload {
@@ -314,7 +315,7 @@ export interface NotificationQueueResponse {
 export interface ConfigAdminExport {
   exported_at: string
   feature_flags: Record<string, boolean>
-  runtime_config: Record<string, unknown>
+  runtime_config: ObjetDonnees
 }
 
 export interface ConfigDiffSectionItem {
@@ -340,7 +341,7 @@ export interface ConfigDiffResponse {
 
 export interface ConfigAdminImportPayload {
   feature_flags?: Record<string, boolean>
-  runtime_config?: Record<string, unknown>
+  runtime_config?: ObjetDonnees
   merge?: boolean
 }
 
@@ -356,7 +357,7 @@ export interface FlowSimulationResponse {
   scenario: string
   user_id: string
   dry_run: boolean
-  actions: Array<Record<string, unknown>>
+  actions: ListeObjetsDonnees
   payload: Record<string, unknown>
 }
 
@@ -419,10 +420,10 @@ export interface OneClickE2EAdminResponse {
 
 export interface AiMetricsResponse {
   generated_at: string
-  api: Record<string, unknown>
-  rate_limit: Record<string, unknown>
-  cache: Record<string, unknown>
-  monitoring: Record<string, unknown>
+  api: ObjetDonnees
+  rate_limit: ObjetDonnees
+  cache: ObjetDonnees
+  monitoring: ObjetDonnees
   cout_estime_eur: number
   cout_eur_1k_tokens: number
 }
@@ -455,8 +456,8 @@ export interface LiveSnapshotResponse {
       p95_ms: number
       tracked_endpoints: number
     }
-    rate_limiting: Record<string, unknown>
-    ai: Record<string, unknown>
+    rate_limiting: ObjetDonnees
+    ai: ObjetDonnees
   }
   cache: Record<string, unknown>
   jobs: {
@@ -489,7 +490,7 @@ export interface AiConsoleResponse {
 export interface DbExportResponse {
   format: 'json'
   exported_at: string
-  tables: Record<string, Array<Record<string, unknown>>>
+  tables: Record<string, ListeObjetsDonnees>
   total_tables: number
 }
 
@@ -515,7 +516,7 @@ export interface VuesSqlResponse {
 
 export interface VueSqlDataResponse {
   view: string
-  items: Record<string, unknown>[]
+  items: ListeObjetsDonnees
   total: number
   page: number
   page_size: number
@@ -747,7 +748,7 @@ export async function listerActionsServices(): Promise<ServiceActionsResponse> {
 
 export async function executerActionService(
   actionId: string,
-  options?: { dry_run?: boolean; params?: Record<string, unknown> },
+  options?: { dry_run?: boolean; params?: ObjetDonnees },
 ): Promise<{ status: string; action_id: string; dry_run?: boolean; result: unknown }> {
   const { data } = await clientApi.post(
     `/api/v1/admin/services/actions/${actionId}/run`,
@@ -792,8 +793,8 @@ export async function lireRuntimeConfig(): Promise<RuntimeConfigResponse> {
 }
 
 export async function sauvegarderRuntimeConfig(
-  values: Record<string, unknown>,
-): Promise<{ status: string; values: Record<string, unknown> }> {
+  values: ObjetDonnees,
+): Promise<{ status: string; values: ObjetDonnees }> {
   const { data } = await clientApi.put('/api/v1/admin/runtime-config', { values })
   return data
 }
@@ -849,7 +850,7 @@ export async function desactiverUtilisateur(
 
 export async function envoyerNotificationTest(
   payload: NotificationTestPayload,
-): Promise<{ resultats: Record<string, unknown>; message: string }> {
+): Promise<{ resultats: ObjetDonnees; message: string }> {
   const { data } = await clientApi.post('/api/v1/admin/notifications/test', payload)
   return data
 }
@@ -915,7 +916,7 @@ export interface QuickCommandResponse {
   commandes?: Record<string, string>
   jobs?: string[]
   total?: number
-  result?: Record<string, unknown>
+  result?: ObjetDonnees
   pattern?: string
   nb_invalidees?: number
   enabled?: boolean
@@ -945,7 +946,7 @@ export async function exporterConfigAdmin(): Promise<ConfigAdminExport> {
 
 export async function importerConfigAdmin(
   payload: ConfigAdminImportPayload,
-): Promise<{ status: string; feature_flags: Record<string, boolean>; runtime_config: Record<string, unknown> }> {
+): Promise<{ status: string; feature_flags: Record<string, boolean>; runtime_config: ObjetDonnees }> {
   const { data } = await clientApi.post('/api/v1/admin/config/import', payload)
   return data
 }
@@ -1033,7 +1034,7 @@ export async function exporterDbJson(): Promise<DbExportResponse> {
 }
 
 export async function importerDbJson(
-  tables: Record<string, Array<Record<string, unknown>>>,
+  tables: Record<string, ListeObjetsDonnees>,
   merge = false,
 ): Promise<DbImportResponse> {
   const { data } = await clientApi.post('/api/v1/admin/db/import', { tables, merge })

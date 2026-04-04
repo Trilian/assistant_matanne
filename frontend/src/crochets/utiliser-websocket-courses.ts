@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
+import type { ObjetDonnees } from "@/types/commun";
 
 interface WSMessage {
   type: string;
@@ -16,7 +17,7 @@ interface UseWebSocketCoursesOptions {
 interface UseWebSocketCoursesReturn {
   connected: boolean;
   users: { user_id: string; username: string }[];
-  send: (action: string, data?: Record<string, unknown>) => void;
+  send: (action: string, data?: ObjetDonnees) => void;
   cocherArticle: (itemId: number, checked: boolean) => void;
   ajouterArticle: (nom: string, quantite?: number) => void;
   supprimerArticle: (itemId: number) => void;
@@ -44,7 +45,7 @@ export function useWebSocketCourses({
   const onUsersChangeRef = useRef(onUsersChange);
   onUsersChangeRef.current = onUsersChange;
 
-  const send = useCallback((action: string, data: Record<string, unknown> = {}) => {
+  const send = useCallback((action: string, data: ObjetDonnees = {}) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ action, ...data }));
     }

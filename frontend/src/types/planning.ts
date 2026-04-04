@@ -2,6 +2,8 @@
 // Types Planning
 // ═══════════════════════════════════════════════════════════
 
+import type { ObjetDonnees } from "@/types/commun";
+
 export type TypeRepas = "petit_dejeuner" | "dejeuner" | "gouter" | "diner";
 
 export interface RepasPlanning {
@@ -45,8 +47,8 @@ export interface ConflitPlanning {
   message: string;
   date_jour: string;
   suggestion?: string | null;
-  evenement_1?: Record<string, unknown> | null;
-  evenement_2?: Record<string, unknown> | null;
+  evenement_1?: ObjetDonnees | null;
+  evenement_2?: ObjetDonnees | null;
 }
 
 export interface RapportConflitsPlanning {
@@ -79,5 +81,5 @@ export interface GenererPlanningParams {
   date_debut?: string;
   nb_jours?: number;
   nb_personnes?: number;
-  preferences?: Record<string, unknown>;
+  preferences?: ObjetDonnees;
 }

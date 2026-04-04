@@ -208,7 +208,7 @@ class TestAdminJobsACL:
         data = response.json()
         assert len(data) == 1
         assert data[0]["id"] == "job_briefing_matinal_push"
-        assert data[0]["nom"] == "S15.7 Briefing matinal IA (07h00)"
+        assert data[0]["nom"] == "Briefing matinal IA (07h00)"
         assert data[0]["statut"] == "inactif"
 
     @pytest.mark.asyncio
@@ -358,6 +358,9 @@ class TestAdminInterModuleBridgesStatus:
         assert "resume" in data
         assert data["resume"].get("total_actions") == 17
         assert data["resume"].get("mode_verification") == "presence_only"
+        assert data["consolidation_phase2"].get("total_legacy") == 11
+        assert data["consolidation_phase2"].get("consolides") == 11
+        assert data["consolidation_phase2"].get("statut") == "termine"
         assert isinstance(data.get("items"), list)
         assert len(data["items"]) == 17
 

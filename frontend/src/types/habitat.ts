@@ -93,7 +93,7 @@ export interface ZoneJardinHabitat {
   position_y?: number;
   largeur?: number;
   longueur?: number;
-  donnees_canvas?: Record<string, unknown>;
+  donnees_canvas?: import("@/types/commun").ObjetDonnees;
   plantes?: string[];
   amenagements?: string[];
   budget_estime?: number;

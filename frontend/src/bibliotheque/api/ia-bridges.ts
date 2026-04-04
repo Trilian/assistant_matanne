@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";
+import type { ObjetDonnees } from "@/types/commun";
 
 // ── Types ────────────────────────────────────────────
 
@@ -41,7 +42,7 @@ export interface AnomalieBudget {
 export interface ResumeHebdo {
   semaine: string;
   resume: string;
-  sections: Record<string, unknown>;
+  sections: ObjetDonnees;
 }
 
 export interface DiagnosticMaison {
@@ -53,32 +54,32 @@ export interface DiagnosticMaison {
 }
 
 export interface PlanningAdapte {
-  planning: Record<string, unknown>;
-  contexte: Record<string, unknown>;
+  planning: ObjetDonnees;
+  contexte: ObjetDonnees;
 }
 
 export interface BatchCookingPlan {
-  plan: Record<string, unknown>;
+  plan: ObjetDonnees;
 }
 
 export interface ConseilJules {
-  conseils: Record<string, unknown>;
+  conseils: ObjetDonnees;
 }
 
 export interface ChecklistVoyage {
-  checklist: Record<string, unknown>;
+  checklist: ObjetDonnees;
 }
 
 export interface ScoreEcologique {
-  score: Record<string, unknown>;
+  score: ObjetDonnees;
 }
 
 export interface AnalyseNutritionnelle {
-  analyse: Record<string, unknown>;
+  analyse: ObjetDonnees;
 }
 
 export interface OptimisationEnergie {
-  recommandations: Record<string, unknown>;
+  recommandations: ObjetDonnees;
 }
 
 export interface StreakRoutine {

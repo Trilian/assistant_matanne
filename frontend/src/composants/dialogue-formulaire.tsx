@@ -15,6 +15,7 @@ import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Textarea } from "@/composants/ui/textarea";
+import type { ObjetDonnees } from "@/types/commun";
 
 interface OptionChamp {
   valeur: string;
@@ -41,13 +42,13 @@ interface DialogueFormulaireProps {
   description?: string;
   children?: ReactNode;
   champs?: ChampFormulaire[];
-  valeurInitiale?: object;
+  valeurInitiale?: ObjetDonnees;
   onClose?: () => void;
   onFermer?: () => void;
   onChangerOuvert?: (ouvert: boolean) => void;
   onOuvertChange?: (ouvert: boolean) => void;
   onSubmit?: () => void;
-  onSoumettre?: (donnees: Record<string, unknown>) => void;
+  onSoumettre?: (donnees: ObjetDonnees) => void;
   enCours?: boolean;
   chargement?: boolean;
   enChargement?: boolean;
@@ -74,17 +75,17 @@ export function DialogueFormulaire({
   texteBouton = "Enregistrer",
   stockageSuggestionsCle = "dialogue-formulaire-suggestions",
 }: DialogueFormulaireProps) {
-  const [valeursInternes, setValeursInternes] = useState<Record<string, unknown>>({});
+  const [valeursInternes, setValeursInternes] = useState<ObjetDonnees>({});
   const [suggestions, setSuggestions] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     if (!ouvert || !champs) return;
 
     setValeursInternes(
-      champs.reduce<Record<string, unknown>>((acc, champ) => {
+      champs.reduce<ObjetDonnees>((acc, champ) => {
         const cle = champ.id ?? champ.nom;
         if (!cle) return acc;
-        acc[cle] = champ.value ?? champ.defaut ?? (valeurInitiale as Record<string, unknown> | undefined)?.[cle] ?? "";
+        acc[cle] = champ.value ?? champ.defaut ?? valeurInitiale?.[cle] ?? "";
         return acc;
       }, {})
     );
@@ -142,7 +143,7 @@ export function DialogueFormulaire({
     }
 
     if (onSoumettre) {
-      const donnees = (champs ?? []).reduce<Record<string, unknown>>((acc, champ) => {
+      const donnees = (champs ?? []).reduce<ObjetDonnees>((acc, champ) => {
         acc[obtenirCle(champ)] = obtenirValeur(champ);
         return acc;
       }, {});

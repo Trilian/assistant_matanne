@@ -4,12 +4,13 @@ import { useParams } from "next/navigation";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { clientApi } from "@/bibliotheque/api/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import type { ListeObjetsDonnees, ObjetDonnees } from "@/types/commun";
 
 interface DonneesInvite {
-  enfant: Record<string, unknown>;
-  routines: Array<Record<string, unknown>>;
-  repas_semaine: Array<Record<string, unknown>>;
-  contacts_urgence: Array<Record<string, unknown>>;
+  enfant: ObjetDonnees;
+  routines: ListeObjetsDonnees;
+  repas_semaine: ListeObjetsDonnees;
+  contacts_urgence: ListeObjetsDonnees;
   notes: string;
 }
 

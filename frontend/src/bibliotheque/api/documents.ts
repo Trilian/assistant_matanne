@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";
+import type { ObjetDonnees } from "@/types/commun";
 
 export interface DocumentFamille {
   id: number;
@@ -95,7 +96,7 @@ export async function lierDocumentGarantie(
 
 export interface ResultatOCR {
   type_document: string;
-  donnees: Record<string, unknown>;
+  donnees: ObjetDonnees;
 }
 
 /**

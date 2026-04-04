@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";
+import type { ObjetDonnees } from "@/types/commun";
 
 // ─── Types ────────────────────────────────────────────────
 
@@ -126,7 +127,7 @@ export async function listerEnergie(params?: {
 }
 
 export async function creerReleveEnergie(
-  donnees: Record<string, unknown>
+  donnees: ObjetDonnees
 ) {
   const { data } = await clientApi.post("/utilitaires/energie", donnees);
   return data;
@@ -134,7 +135,7 @@ export async function creerReleveEnergie(
 
 export async function modifierReleveEnergie(
   id: number,
-  donnees: Record<string, unknown>
+  donnees: ObjetDonnees
 ) {
   const { data } = await clientApi.patch(`/utilitaires/energie/${id}`, donnees);
   return data;

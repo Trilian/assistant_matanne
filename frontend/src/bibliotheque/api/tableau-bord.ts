@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";
+import type { ObjetDonnees } from "@/types/commun";
 
 export interface DonneesTableauBord {
   repas_aujourd_hui: { type_repas: string; recette_nom?: string }[];
@@ -67,7 +68,7 @@ export interface ConfigDashboard {
 export interface WidgetActionPayload {
   widget_id: string;
   action: string;
-  donnees?: Record<string, unknown>;
+  donnees?: ObjetDonnees;
 }
 
 export interface WidgetActionResponse {
@@ -83,7 +84,7 @@ export interface WidgetActionHistoriqueItem {
   timestamp: string;
   widget_id: string | null;
   action: string | null;
-  donnees: Record<string, unknown>;
+  donnees: ObjetDonnees;
 }
 
 export interface WidgetActionHistoriqueResponse {
@@ -305,7 +306,7 @@ export interface HistoriquePoints {
   points_alimentation: number;
   points_anti_gaspi: number;
   total_points: number;
-  details: Record<string, unknown>;
+  details: ObjetDonnees;
 }
 
 /** Obtenir le catalogue complet des badges sport + nutrition */

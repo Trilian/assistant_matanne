@@ -22,6 +22,18 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/bridges", tags=["Bridges Inter-Modules"])
 
 
+@router.get("/catalogue", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def catalogue_bridges(
+    user: dict = Depends(require_auth),
+):
+    """Expose le catalogue consolidé des bridges legacy/stables de la phase 2."""
+    from src.services.ia.bridges import obtenir_service_bridges
+
+    service = obtenir_service_bridges()
+    return service.obtenir_catalogue_consolidation_phase2()
+
+
 @router.get("/documents-expires", response_model=DocumentsExpiresResponse, responses=REPONSES_LISTE)
 @gerer_exception_api
 async def documents_expires(

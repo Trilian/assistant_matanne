@@ -1,4 +1,5 @@
 import { clientApi } from './client'
+import type { ObjetDonnees } from '@/types/commun'
 import type {
   AdaptationPlanningMeteoResponse,
   AnalyseDocumentPhotoResponse,
@@ -27,7 +28,7 @@ export interface IdeesCadeauxPayload {
 }
 
 export interface PlanningAdaptatifPayload {
-  meteo?: Record<string, unknown> | null
+  meteo?: ObjetDonnees | null
   budget_restant?: number | null
 }
 
@@ -136,7 +137,7 @@ export async function obtenirSuggestionsProactives(): Promise<SuggestionsProacti
 }
 
 export async function obtenirAdaptationsMeteo(
-  previsions_meteo: Record<string, unknown>
+  previsions_meteo: ObjetDonnees
 ): Promise<AdaptationPlanningMeteoResponse> {
   const { data } = await clientApi.post<AdaptationPlanningMeteoResponse>(`${API_PREFIX}/adaptations-meteo`, {
     previsions_meteo,
