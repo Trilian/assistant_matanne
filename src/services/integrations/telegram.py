@@ -484,12 +484,17 @@ async def telecharger_fichier_telegram(file_id: str) -> bytes | None:
 # FONCTIONS MÉTIER
 # ═══════════════════════════════════════════════════════════
 
-async def envoyer_planning_semaine(planning_texte: str, planning_id: int | None = None) -> bool:
+async def envoyer_planning_semaine(
+    planning_texte: str,
+    planning_id: int | None = None,
+    resume_ia: str | None = None,
+) -> bool:
     """Envoie le planning semaine avec boutons de validation.
-    
+
     Args:
         planning_texte: Texte formaté du planning à afficher
         planning_id: ID du planning pour générer des callbacks ciblés
+        resume_ia: Synthèse courte expliquant le fil conducteur du planning
     """
     settings = obtenir_parametres()
     chat_id = settings.TELEGRAM_CHAT_ID
@@ -498,7 +503,12 @@ async def envoyer_planning_semaine(planning_texte: str, planning_id: int | None 
         logger.debug("TELEGRAM_CHAT_ID non configuré")
         return False
 
-    message = f"🍽️ <b>Planning repas de la semaine</b>\n\n{planning_texte}"
+    sections = ["🍽️ <b>Planning repas de la semaine</b>"]
+    if resume_ia:
+        sections.append(f"🧠 <i>Lecture IA</i> : {resume_ia}")
+    sections.append(planning_texte)
+    sections.append("Utilisez les boutons ci-dessous pour valider, modifier ou régénérer rapidement.")
+    message = "\n\n".join(section for section in sections if section)
 
     # Callbacks avec planning_id pour cibler la bonne semaine (max 64 bytes par callback_data)
     # Format: "planning_valider:ID", "planning_modifier:ID", "planning_regenerer:ID"

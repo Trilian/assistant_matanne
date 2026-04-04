@@ -80,14 +80,17 @@ class TestSchemaCoherence:
 #   - legacy         : anciens noms remplacés par une table ORM correctement nommée
 _TABLES_SQL_SANS_ORM: dict[str, str] = {
     "schema_migrations": "infrastructure — tracking des migrations appliquées",
-    "budgets_home": "legacy — remplacé par budgets_maison (ORM BudgetMaison)",
-    "depenses_home": "legacy — remplacé par depenses_maison (ORM DepenseMaison)",
     "job_executions": "infrastructure — journal d'exécution des jobs admin/cron",
     "objectifs_autonomie": "reference — objectifs autonomie Jules, accès direct via service",
-    "normes_oms": "legacy/reference — reliquat historique des courbes OMS, fonctionnalité croissance non active",
     "plantes_catalogue": "reference — catalogue plantes jardin (ref JSON), pas d'ORM requis",
-    "preferences_home": "legacy — remplacé par preferences_utilisateurs",
     "recoltes": "reference — récoltes jardin, accès direct via service",
+}
+
+_TABLES_SQL_RETIREES = {
+    "budgets_home",
+    "depenses_home",
+    "normes_oms",
+    "preferences_home",
 }
 
 
@@ -116,4 +119,14 @@ class TestOrphanSQLTables:
             f"Tables documentées comme orphelines mais absentes de SQL :\n"
             f"{sorted(tables_disparues)}\n"
             f"→ Retirer ces entrées de _TABLES_SQL_SANS_ORM."
+        )
+
+    def test_tables_legacy_retires_ne_reapparaissent_pas(self):
+        """Les anciennes tables migrées/supprimées ne doivent plus revenir dans INIT_COMPLET.sql."""
+        sql_tables = _sql_tables()
+        tables_revenues = _TABLES_SQL_RETIREES & sql_tables
+        assert not tables_revenues, (
+            f"Tables legacy retirées mais encore présentes dans le SQL :\n"
+            f"{sorted(tables_revenues)}\n"
+            f"→ Garder uniquement les tables métier actives (`depenses_maison`, `preferences_utilisateurs`, etc.)."
         )

@@ -835,26 +835,10 @@ CREATE INDEX IF NOT EXISTS idx_ia_suggestions_user_type_date ON ia_suggestions_h
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.XX NORMES_OMS — Référentiel percentiles
-
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE normes_oms (
-    id SERIAL PRIMARY KEY,
-    sexe VARCHAR(10) NOT NULL,
-    type_mesure VARCHAR(30) NOT NULL,
-    age_mois NUMERIC(5, 1) NOT NULL,
-    p3 NUMERIC(6, 2) NOT NULL,
-    p15 NUMERIC(6, 2) NOT NULL,
-    p50 NUMERIC(6, 2) NOT NULL,
-    p85 NUMERIC(6, 2) NOT NULL,
-    p97 NUMERIC(6, 2) NOT NULL,
-    CONSTRAINT ck_normes_sexe CHECK (sexe IN ('garcon', 'fille')),
-    CONSTRAINT ck_normes_type CHECK (
-        type_mesure IN ('poids', 'taille', 'perimetre_cranien')
-    )
-);
-CREATE UNIQUE INDEX IF NOT EXISTS uq_normes_oms ON normes_oms(sexe, type_mesure, age_mois);
+-- 4.XX NORMES_OMS — Retirée du schéma actif
+-- La courbe de croissance OMS n'est plus une fonctionnalité produit exposée.
+-- Le suivi Jules reste centré sur les jalons, l'alimentation, les activités
+-- et le carnet vaccinal à partir de 6 ans.
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -2412,7 +2396,7 @@ CREATE INDEX IF NOT EXISTS ix_routine_tasks_routine ON taches_routines(routine_i
 -- ============================================================================
 -- ASSISTANT MATANNE — Maison : Entretien & Organisation
 -- ============================================================================
--- Contient : entretien, préférences home legacy, checklists vacances
+-- Contient : entretien, checklists vacances
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE taches_entretien (
@@ -2439,20 +2423,8 @@ CREATE INDEX IF NOT EXISTS ix_maintenance_tasks_fait ON taches_entretien(fait);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE preferences_home (
-    id SERIAL PRIMARY KEY,
-    max_taches_jour INTEGER DEFAULT 3,
-    max_heures_jour DECIMAL(4, 2) DEFAULT 2.0,
-    heures_jardin JSONB DEFAULT '[7, 8, 18, 19]',
-    heures_menage JSONB DEFAULT '[9, 10, 14, 15]',
-    heures_admin JSONB DEFAULT '[20, 21]',
-    jours_jardin JSONB DEFAULT '[6, 7]',
-    jours_menage JSONB DEFAULT '[6]',
-    notification_matin BOOLEAN DEFAULT TRUE,
-    heure_briefing INTEGER DEFAULT 7,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- La table legacy `preferences_home` a été retirée : les préférences passent
+-- désormais par `preferences_utilisateurs` et la configuration applicative.
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -3126,43 +3098,9 @@ CREATE INDEX IF NOT EXISTS ix_eco_actions_type ON actions_ecologiques(type_actio
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE depenses_home (
-    id SERIAL PRIMARY KEY,
-    date_depense DATE NOT NULL DEFAULT CURRENT_DATE,
-    montant DECIMAL(10, 2) NOT NULL,
-    categorie VARCHAR(50) NOT NULL CHECK (
-        categorie IN (
-            'jardin',
-            'entretien',
-            'energie',
-            'travaux',
-            'equipement',
-            'decoration',
-            'assurance',
-            'autre'
-        )
-    ),
-    sous_categorie VARCHAR(50),
-    description TEXT,
-    magasin VARCHAR(100),
-    recurrent BOOLEAN DEFAULT FALSE,
-    frequence_mois INTEGER,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_depenses_home_date ON depenses_home(date_depense);
-CREATE INDEX IF NOT EXISTS idx_depenses_home_categorie ON depenses_home(categorie);
-
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE budgets_home (
-    id SERIAL PRIMARY KEY,
-    categorie VARCHAR(50) NOT NULL UNIQUE,
-    montant_mensuel DECIMAL(10, 2) NOT NULL,
-    alerte_pourcent INTEGER DEFAULT 80,
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- Les anciennes tables `depenses_home` et `budgets_home` ont été retirées.
+-- Les usages actifs passent par `depenses_maison`, les abonnements et les
+-- agrégations budgétaires exposées côté API.
 -- ============================================================================
 -- PARTIE 5B : TABLES JEUX EXTENSIONS (Euromillions, Cotes, Mise Responsable)
 -- ============================================================================
@@ -4127,8 +4065,7 @@ tables_modifie_le TEXT [] := ARRAY [
         'configs_calendriers_externes', 'evenements_calendrier',
         'plans_jardin', 'zones_jardin', 'plantes_jardin',
         'pieces_maison', 'objets_maison',
-        'preferences_home', 'objectifs_autonomie',
-        'abonnements', 'budgets_home'
+        'objectifs_autonomie', 'abonnements'
     ];
 BEGIN FOREACH t IN ARRAY tables_modifie_le LOOP EXECUTE format(
     'DROP TRIGGER IF EXISTS trigger_update_modifie_le ON %I',
@@ -4483,10 +4420,7 @@ DO $$
 DECLARE t TEXT;
 readonly_tables TEXT[] := ARRAY[
     'schema_migrations',
-    'normes_oms', 'plantes_catalogue',
-    -- Legacy migration tables (read-only, données historiques)
-    'preferences_home',
-    'factures', 'depenses_home', 'budgets_home'
+    'plantes_catalogue'
 ];
 BEGIN FOREACH t IN ARRAY readonly_tables LOOP
     EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);
@@ -4603,28 +4537,8 @@ VALUES ('Tomate', 'Légumes', 'g', 18, 'été', FALSE),
     ('Banane', 'Fruits', 'g', 89, 'toute_année', FALSE)
 ON CONFLICT (nom) DO NOTHING;
 
--- Référentiel OMS minimal (développement Jules)
-INSERT INTO normes_oms (sexe, type_mesure, age_mois, p3, p15, p50, p85, p97)
-VALUES
-    ('garcon', 'poids', 0, 2.50, 2.90, 3.30, 3.90, 4.40),
-    ('garcon', 'poids', 6, 6.40, 6.90, 7.90, 9.00, 9.90),
-    ('garcon', 'poids', 12, 7.70, 8.40, 9.60, 10.90, 12.10),
-    ('fille', 'poids', 0, 2.40, 2.80, 3.20, 3.70, 4.20),
-    ('fille', 'poids', 6, 5.80, 6.40, 7.30, 8.30, 9.20),
-    ('fille', 'poids', 12, 7.00, 7.70, 8.90, 10.10, 11.30),
-    ('garcon', 'taille', 0, 46.50, 48.20, 49.90, 51.60, 53.20),
-    ('garcon', 'taille', 6, 63.00, 65.10, 67.60, 70.20, 72.20),
-    ('garcon', 'taille', 12, 71.00, 73.40, 76.10, 79.00, 81.30),
-    ('fille', 'taille', 0, 45.70, 47.40, 49.10, 50.80, 52.40),
-    ('fille', 'taille', 6, 61.10, 63.30, 65.70, 68.40, 70.40),
-    ('fille', 'taille', 12, 69.20, 71.60, 74.00, 77.10, 79.60),
-    ('garcon', 'perimetre_cranien', 0, 32.10, 33.30, 34.50, 35.70, 36.80),
-    ('garcon', 'perimetre_cranien', 6, 41.10, 42.20, 43.30, 44.40, 45.40),
-    ('garcon', 'perimetre_cranien', 12, 43.10, 44.20, 45.30, 46.30, 47.20),
-    ('fille', 'perimetre_cranien', 0, 31.60, 32.80, 34.00, 35.10, 36.20),
-    ('fille', 'perimetre_cranien', 6, 40.10, 41.30, 42.40, 43.50, 44.50),
-    ('fille', 'perimetre_cranien', 12, 42.20, 43.30, 44.40, 45.40, 46.30)
-ON CONFLICT (sexe, type_mesure, age_mois) DO NOTHING;
+-- Référentiel OMS retiré du seed de base : la courbe de croissance n'est plus
+-- une fonctionnalité active dans l'application.
 
 -- Catalogue plantes baseline
 INSERT INTO plantes_catalogue (
@@ -4742,19 +4656,8 @@ VALUES (
         'Jours de sync loto'
     ),
     ('sync_loto_hour', '21:30', 'Heure de sync loto') ON CONFLICT (cle) DO NOTHING;
--- Préférences maison par défaut
-INSERT INTO preferences_home (id, max_taches_jour, max_heures_jour)
-VALUES (1, 3, 2.0) ON CONFLICT (id) DO NOTHING;
--- Budgets maison par défaut
-INSERT INTO budgets_home (categorie, montant_mensuel, alerte_pourcent)
-VALUES ('jardin', 100.00, 80),
-    ('entretien', 50.00, 80),
-    ('energie', 200.00, 90),
-    ('travaux', 150.00, 80),
-    ('equipement', 100.00, 80),
-    ('decoration', 50.00, 80),
-    ('assurance', 150.00, 95),
-    ('autre', 50.00, 80) ON CONFLICT (categorie) DO NOTHING;
+-- Les seeds `preferences_home` et `budgets_home` ont été retirés avec les
+-- anciennes tables legacy correspondantes.
 -- Objectifs autonomie alimentaire
 INSERT INTO objectifs_autonomie (legume, besoin_kg_an, surface_ideale_m2)
 VALUES ('Tomate', 40.00, 8.00),

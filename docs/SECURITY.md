@@ -41,6 +41,13 @@ Reference securite applicative (backend + frontend).
 - Telegram webhook avec verification `hub.verify_token`.
 - Webhooks sortants executes avec gestion d'erreurs resiliente.
 - Sentry active via DSN uniquement si configure.
+- Extension Chrome Carrefour Drive: permissions a garder minimales et revue manuelle a chaque evolution du `manifest.json`.
+
+## Revue periodique
+
+- Revoir les dependances backend/frontend a chaque sprint de maintenance (updates de securite, breaking changes, paquets non maintenus).
+- Verifier les permissions OAuth / webhooks / extension navigateur apres chaque nouvelle integration.
+- Revalider les headers de securite et les secrets critiques apres toute modification de config ou de deploiement.
 
 ## Checklist rapide
 

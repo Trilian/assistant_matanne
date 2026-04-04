@@ -724,26 +724,10 @@ CREATE INDEX IF NOT EXISTS idx_ia_suggestions_user_type_date ON ia_suggestions_h
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- 4.XX NORMES_OMS — Référentiel percentiles
-
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE normes_oms (
-    id SERIAL PRIMARY KEY,
-    sexe VARCHAR(10) NOT NULL,
-    type_mesure VARCHAR(30) NOT NULL,
-    age_mois NUMERIC(5, 1) NOT NULL,
-    p3 NUMERIC(6, 2) NOT NULL,
-    p15 NUMERIC(6, 2) NOT NULL,
-    p50 NUMERIC(6, 2) NOT NULL,
-    p85 NUMERIC(6, 2) NOT NULL,
-    p97 NUMERIC(6, 2) NOT NULL,
-    CONSTRAINT ck_normes_sexe CHECK (sexe IN ('garcon', 'fille')),
-    CONSTRAINT ck_normes_type CHECK (
-        type_mesure IN ('poids', 'taille', 'perimetre_cranien')
-    )
-);
-CREATE UNIQUE INDEX IF NOT EXISTS uq_normes_oms ON normes_oms(sexe, type_mesure, age_mois);
+-- 4.XX NORMES_OMS — Retirée du schéma actif
+-- La courbe de croissance OMS n'est plus une fonctionnalité produit exposée.
+-- Le suivi Jules reste centré sur les jalons, l'alimentation, les activités
+-- et le carnet vaccinal à partir de 6 ans.
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

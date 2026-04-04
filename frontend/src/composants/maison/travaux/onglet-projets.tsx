@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BotMessageSquare, Hammer, Plus, Trash2 } from "lucide-react";
+import { BotMessageSquare, Hammer, Plus, Trash2, Wifi, WifiOff } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Badge } from "@/composants/ui/badge";
@@ -21,6 +21,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/composants/ui/skeleton";
 import { utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
 import { utiliserAutoCompletionMaison } from "@/crochets/utiliser-auto-completion-maison";
+import { utiliserWebSocket } from "@/crochets/utiliser-websocket";
+import { utiliserAuth } from "@/crochets/utiliser-auth";
 import { KanbanProjets } from "@/composants/maison/kanban-projets";
 import { creerProjet, listerProjets, modifierProjet, supprimerProjet } from "@/bibliotheque/api/maison";
 import { GanttProjets } from "@/composants/maison/travaux/gantt-projets";
@@ -53,6 +55,36 @@ export function OngletProjets() {
   const [tachesSelectionnees, setTachesSelectionnees] = useState<string[]>([]);
   const [estimationProjetId, setEstimationProjetId] = useState<number | null>(null);
   const queryClient = useQueryClient();
+  const { utilisateur } = utiliserAuth();
+  const identifiantPresence = String(utilisateur?.id ?? utilisateur?.email ?? "maison-projets");
+  const nomPresence = String(utilisateur?.nom ?? "Maison");
+  const baseWs = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/^http/, "ws");
+  const {
+    connecte: synchroActive,
+    utilisateurs: collaborateurs,
+    envoyer: diffuserProjet,
+    mode: modeSynchro,
+  } = utiliserWebSocket({
+    url: `${baseWs}/api/v1/ws/projets/1?user=${encodeURIComponent(identifiantPresence)}&username=${encodeURIComponent(nomPresence)}`,
+    gestionnaires: {
+      tache_added: (message) => {
+        if (String(message.user_id ?? "") !== identifiantPresence) {
+          queryClient.invalidateQueries({ queryKey: ["maison", "projets"] });
+        }
+      },
+      tache_moved: (message) => {
+        if (String(message.user_id ?? "") !== identifiantPresence) {
+          queryClient.invalidateQueries({ queryKey: ["maison", "projets"] });
+        }
+      },
+      tache_removed: (message) => {
+        if (String(message.user_id ?? "") !== identifiantPresence) {
+          queryClient.invalidateQueries({ queryKey: ["maison", "projets"] });
+        }
+      },
+    },
+    maxTentatives: 3,
+  });
   const { autoCompleter } = utiliserAutoCompletionMaison("travaux_projets");
 
   const suggestionsTaches = [
@@ -80,6 +112,7 @@ export function OngletProjets() {
   const { mutate: creer, isPending: enCreation } = utiliserMutation(creerProjet, {
     onSuccess: (nouveauProjet) => {
       queryClient.invalidateQueries({ queryKey: ["maison", "projets"] });
+      diffuserProjet({ action: "tache_added", data: { projet_id: nouveauProjet.id, statut: nouveauProjet.statut } });
       setDialogOuvert(false);
       reinitialiserWizard();
       toast.success("Projet créé");
@@ -94,8 +127,9 @@ export function OngletProjets() {
   });
 
   const { mutate: supprimer } = utiliserMutation(supprimerProjet, {
-    onSuccess: () => {
+    onSuccess: (_resultat, projetId) => {
       queryClient.invalidateQueries({ queryKey: ["maison", "projets"] });
+      diffuserProjet({ action: "tache_removed", data: { projet_id: projetId } });
       toast.success("Projet supprimé");
     },
   });
@@ -103,8 +137,9 @@ export function OngletProjets() {
   const { mutate: deplacerProjet, isPending: deplacementStatutEnCours } = utiliserMutation(
     ({ id, statut }: { id: number; statut: string }) => modifierProjet(id, { statut }),
     {
-      onSuccess: () => {
+      onSuccess: (_resultat, variables) => {
         queryClient.invalidateQueries({ queryKey: ["maison", "projets"] });
+        diffuserProjet({ action: "tache_moved", data: { projet_id: variables.id, statut: variables.statut } });
       },
       onError: () => toast.error("Impossible de déplacer le projet"),
     }
@@ -113,6 +148,16 @@ export function OngletProjets() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant={synchroActive ? "default" : modeSynchro === "polling" ? "secondary" : "outline"}>
+            {synchroActive ? (
+              <span className="inline-flex items-center gap-1"><Wifi className="h-3 w-3" /> Live</span>
+            ) : (
+              <span className="inline-flex items-center gap-1"><WifiOff className="h-3 w-3" /> {modeSynchro === "polling" ? "Fallback" : "Hors ligne"}</span>
+            )}
+          </Badge>
+          <Badge variant="outline">{collaborateurs.length} connecté(s)</Badge>
+        </div>
         <Select value={statut} onValueChange={setStatut}>
           <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
           <SelectContent>

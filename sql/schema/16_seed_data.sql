@@ -80,28 +80,8 @@ VALUES ('Tomate', 'Légumes', 'g', 18, 'été', FALSE),
     ('Banane', 'Fruits', 'g', 89, 'toute_année', FALSE)
 ON CONFLICT (nom) DO NOTHING;
 
--- Référentiel OMS minimal (développement Jules)
-INSERT INTO normes_oms (sexe, type_mesure, age_mois, p3, p15, p50, p85, p97)
-VALUES
-    ('garcon', 'poids', 0, 2.50, 2.90, 3.30, 3.90, 4.40),
-    ('garcon', 'poids', 6, 6.40, 6.90, 7.90, 9.00, 9.90),
-    ('garcon', 'poids', 12, 7.70, 8.40, 9.60, 10.90, 12.10),
-    ('fille', 'poids', 0, 2.40, 2.80, 3.20, 3.70, 4.20),
-    ('fille', 'poids', 6, 5.80, 6.40, 7.30, 8.30, 9.20),
-    ('fille', 'poids', 12, 7.00, 7.70, 8.90, 10.10, 11.30),
-    ('garcon', 'taille', 0, 46.50, 48.20, 49.90, 51.60, 53.20),
-    ('garcon', 'taille', 6, 63.00, 65.10, 67.60, 70.20, 72.20),
-    ('garcon', 'taille', 12, 71.00, 73.40, 76.10, 79.00, 81.30),
-    ('fille', 'taille', 0, 45.70, 47.40, 49.10, 50.80, 52.40),
-    ('fille', 'taille', 6, 61.10, 63.30, 65.70, 68.40, 70.40),
-    ('fille', 'taille', 12, 69.20, 71.60, 74.00, 77.10, 79.60),
-    ('garcon', 'perimetre_cranien', 0, 32.10, 33.30, 34.50, 35.70, 36.80),
-    ('garcon', 'perimetre_cranien', 6, 41.10, 42.20, 43.30, 44.40, 45.40),
-    ('garcon', 'perimetre_cranien', 12, 43.10, 44.20, 45.30, 46.30, 47.20),
-    ('fille', 'perimetre_cranien', 0, 31.60, 32.80, 34.00, 35.10, 36.20),
-    ('fille', 'perimetre_cranien', 6, 40.10, 41.30, 42.40, 43.50, 44.50),
-    ('fille', 'perimetre_cranien', 12, 42.20, 43.30, 44.40, 45.40, 46.30)
-ON CONFLICT (sexe, type_mesure, age_mois) DO NOTHING;
+-- Référentiel OMS retiré du seed de base : la courbe de croissance n'est plus
+-- une fonctionnalité active dans l'application.
 
 -- Catalogue plantes baseline
 INSERT INTO plantes_catalogue (
@@ -219,19 +199,8 @@ VALUES (
         'Jours de sync loto'
     ),
     ('sync_loto_hour', '21:30', 'Heure de sync loto') ON CONFLICT (cle) DO NOTHING;
--- Préférences maison par défaut
-INSERT INTO preferences_home (id, max_taches_jour, max_heures_jour)
-VALUES (1, 3, 2.0) ON CONFLICT (id) DO NOTHING;
--- Budgets maison par défaut
-INSERT INTO budgets_home (categorie, montant_mensuel, alerte_pourcent)
-VALUES ('jardin', 100.00, 80),
-    ('entretien', 50.00, 80),
-    ('energie', 200.00, 90),
-    ('travaux', 150.00, 80),
-    ('equipement', 100.00, 80),
-    ('decoration', 50.00, 80),
-    ('assurance', 150.00, 95),
-    ('autre', 50.00, 80) ON CONFLICT (categorie) DO NOTHING;
+-- Les seeds `preferences_home` et `budgets_home` ont été retirés avec les
+-- anciennes tables legacy correspondantes.
 -- Objectifs autonomie alimentaire
 INSERT INTO objectifs_autonomie (legume, besoin_kg_an, surface_ideale_m2)
 VALUES ('Tomate', 40.00, 8.00),

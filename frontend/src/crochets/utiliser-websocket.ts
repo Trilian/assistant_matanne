@@ -105,12 +105,25 @@ export function utiliserWebSocket({
   const connecter = useCallback(() => {
     if (!url) return
 
+    if (typeof window === 'undefined' || typeof window.WebSocket !== 'function') {
+      setConnecte(false)
+      if (urlPollingFallback) {
+        setMode('polling')
+        setErreur(null)
+        demarrerPolling()
+      } else {
+        setMode('deconnecte')
+        setErreur(null)
+      }
+      return
+    }
+
     // Fermer l'ancienne connexion
     if (wsRef.current) {
       wsRef.current.close()
     }
 
-    const ws = new WebSocket(url)
+    const ws = new window.WebSocket(url)
 
     ws.onopen = () => {
       setConnecte(true)

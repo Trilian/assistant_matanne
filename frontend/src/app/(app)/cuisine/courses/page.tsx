@@ -402,6 +402,9 @@ export default function PageCourses() {
                 <li>Si un article est <strong>À mapper</strong>, choisis le bon produit Carrefour une fois.</li>
                 <li>Au clic sur <strong>Ajouter au panier</strong>, la correspondance est mémorisée automatiquement.</li>
               </ol>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Configuration détaillée : <strong>Paramètres → Intégrations</strong>.
+              </p>
             </div>
           )}
         </>

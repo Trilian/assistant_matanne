@@ -1943,25 +1943,40 @@ async def envoyer_planning_telegram(payload: EnvoyerPlanningTelegramRequest) -> 
 
             lignes = []
             repas_tries = sorted(planning.repas, key=lambda item: (item.date_repas, item.type_repas))
+            noms_recettes: list[str] = []
             for repas in repas_tries:
                 nom_recette = None
                 if getattr(repas, "recette", None) is not None:
                     nom_recette = getattr(repas.recette, "nom", None)
+                nom_affiche = nom_recette or "Repas à préciser"
+                noms_recettes.append(str(nom_affiche))
                 lignes.append(
-                    f"• {repas.date_repas.strftime('%d/%m')} {repas.type_repas} : {nom_recette or 'Repas à préciser'}"
+                    f"• {repas.date_repas.strftime('%d/%m')} {repas.type_repas} : {nom_affiche}"
                 )
+
+            noms_uniques = {nom.lower() for nom in noms_recettes if nom}
+            mots_reconfort = ("soupe", "gratin", "curry", "mijot", "potage", "parmentier")
+            resume_parts: list[str] = []
+            if any(any(mot in nom.lower() for mot in mots_reconfort) for nom in noms_recettes):
+                resume_parts.append("semaine plutôt réconfortante, adaptée au temps frais")
+            if noms_recettes and len(noms_uniques) == len(noms_recettes):
+                resume_parts.append("bonne variété de repas sans doublon direct")
+            elif noms_recettes:
+                resume_parts.append("quelques répétitions utiles pour simplifier les courses")
 
             return {
                 "planning_id": planning.id,
                 "contenu": payload.contenu
                 or "\n".join(lignes)
                 or f"Planning {planning.nom} du {planning.semaine_debut.strftime('%d/%m')} au {planning.semaine_fin.strftime('%d/%m')}",
+                "resume_ia": " • ".join(resume_parts[:2]),
             }
 
     resultat = await executer_async(_charger_planning)
     succes = await envoyer_planning_semaine(
         str(resultat["contenu"]),
         planning_id=int(resultat["planning_id"]),
+        resume_ia=str(resultat.get("resume_ia") or ""),
     )
     if not succes:
         raise HTTPException(status_code=502, detail="Envoi Telegram impossible")

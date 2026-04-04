@@ -192,6 +192,21 @@ def check_db():
     run_cmd("python scripts/db/deploy_supabase.py --check")
 
 
+def schema_diff():
+    """Compare le schéma SQL, l'ORM et la base active."""
+    print("[DB] Analyse du diff de schéma...")
+    try:
+        from src.core.db.schema_diff import formater_schema_diff_console, generer_schema_diff
+
+        diff = generer_schema_diff()
+        print(formater_schema_diff_console(diff))
+        if diff.get("status") == "error":
+            sys.exit(1)
+    except Exception as e:
+        print(f"[ERROR] Erreur schema diff: {e}")
+        sys.exit(1)
+
+
 def seed_recipes():
     """Importe les recettes depuis le fichier JSON"""
     print("[SEED] Import des recettes...")
@@ -302,6 +317,7 @@ Base de données:
   reset-supabase       [FIRE] Reset COMPLET Supabase (DANGER)
   deploy-schema        Déploie le schéma SQL vers Supabase
   check-db             Vérifie la connexion Supabase
+  schema-diff          Compare SQL, ORM et base active
   seed-recipes         Importe les recettes standard
   seed-demo            Charge les données de démo
   backup               Crée un backup de la base de données
@@ -340,6 +356,7 @@ COMMANDS = {
     "reset-supabase": reset_supabase,
     "deploy-schema": deploy_schema,
     "check-db": check_db,
+    "schema-diff": schema_diff,
     "seed-recipes": seed_recipes,
     "seed-demo": seed_demo,
     "backup": backup_db,

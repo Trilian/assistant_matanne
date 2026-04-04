@@ -112,8 +112,11 @@ export function OngletCuisine() {
             <Input type="number" min={1} max={10} value={form.nb_adultes} onChange={(e) => setForm({ ...form, nb_adultes: Number(e.target.value) })} />
           </div>
           <div className="space-y-1">
-            <Label>Jules présent</Label>
+            <Label htmlFor="jules-present-select">Jules présent</Label>
             <select
+              id="jules-present-select"
+              aria-label="Jules présent"
+              title="Jules présent"
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
               value={form.jules_present ? "oui" : "non"}
               onChange={(e) => setForm({ ...form, jules_present: e.target.value === "oui" })}

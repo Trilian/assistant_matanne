@@ -402,7 +402,6 @@ export default function PageAnniversaires() {
                     <div className="h-2 rounded-full bg-muted overflow-hidden">
                       <div
                         className="h-full bg-primary rounded-full transition-all"
-                        // eslint-disable-next-line react/no-unknown-property
                         style={{ width: `${checklistActive.taux_completion}%` }}
                       />
                     </div>
@@ -423,7 +422,6 @@ export default function PageAnniversaires() {
                       <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                         <div
                           className="h-full bg-primary/70 rounded-full transition-all"
-                          // eslint-disable-next-line react/no-unknown-property
                           style={{ width: `${pctCat}%` }}
                         />
                       </div>

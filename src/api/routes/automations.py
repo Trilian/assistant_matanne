@@ -97,6 +97,46 @@ def _automations_par_defaut() -> list[dict[str, Any]]:
             },
             "active": True,
         },
+        {
+            "nom": "A6 — Froid marqué → suggestion repas chauds",
+            "declencheur": {"type": "meteo_alerte", "mot_cle": "froid"},
+            "action": {
+                "type": "envoyer_telegram",
+                "titre": "Repas chauds recommandés",
+                "message": "Températures fraîches détectées : privilégier soupes, gratins ou plats mijotés cette semaine.",
+            },
+            "active": True,
+        },
+        {
+            "nom": "A7 — Anniversaire proche → rappel + idées cadeaux",
+            "declencheur": {"type": "anniversaire_proche", "jours": 14},
+            "action": {
+                "type": "envoyer_telegram",
+                "titre": "Anniversaire à préparer",
+                "message": "Un anniversaire approche dans les 2 semaines : pense au cadeau, au budget et au créneau à réserver.",
+            },
+            "active": True,
+        },
+        {
+            "nom": "A8 — Inactivité Garmin → activité douce suggérée",
+            "declencheur": {"type": "garmin_inactivite", "jours": 3},
+            "action": {
+                "type": "notifier",
+                "titre": "Bouger en douceur",
+                "message": "Peu d’activité détectée récemment : une marche calme ou une sortie légère ce soir peut relancer l’énergie.",
+            },
+            "active": True,
+        },
+        {
+            "nom": "A9 — Projet maison en retard → rappel artisan",
+            "declencheur": {"type": "tache_en_retard"},
+            "action": {
+                "type": "envoyer_telegram",
+                "titre": "Projet maison à relancer",
+                "message": "Un projet maison prend du retard : replanifier une étape clé ou contacter un artisan peut débloquer la situation.",
+            },
+            "active": True,
+        },
     ]
 
 

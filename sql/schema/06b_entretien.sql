@@ -1,7 +1,7 @@
 -- ============================================================================
 -- ASSISTANT MATANNE — Maison : Entretien & Organisation
 -- ============================================================================
--- Contient : entretien, préférences home legacy, checklists vacances
+-- Contient : entretien, checklists vacances
 -- ============================================================================
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE taches_entretien (
@@ -28,20 +28,8 @@ CREATE INDEX IF NOT EXISTS ix_maintenance_tasks_fait ON taches_entretien(fait);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE preferences_home (
-    id SERIAL PRIMARY KEY,
-    max_taches_jour INTEGER DEFAULT 3,
-    max_heures_jour DECIMAL(4, 2) DEFAULT 2.0,
-    heures_jardin JSONB DEFAULT '[7, 8, 18, 19]',
-    heures_menage JSONB DEFAULT '[9, 10, 14, 15]',
-    heures_admin JSONB DEFAULT '[20, 21]',
-    jours_jardin JSONB DEFAULT '[6, 7]',
-    jours_menage JSONB DEFAULT '[6]',
-    notification_matin BOOLEAN DEFAULT TRUE,
-    heure_briefing INTEGER DEFAULT 7,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- La table legacy `preferences_home` a été retirée : les préférences passent
+-- désormais par `preferences_utilisateurs` et la configuration applicative.
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

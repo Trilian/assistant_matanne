@@ -78,6 +78,44 @@ async def sante_services(
 
 
 # ═══════════════════════════════════════════════════════════
+# SCHÉMA SQL / DIFF
+# ═══════════════════════════════════════════════════════════
+
+
+@router.get(
+    "/schema-diff",
+    responses=REPONSES_AUTH_ADMIN,
+    summary="Comparer le schéma SQL attendu et la base active",
+    description="Retourne un diff synthétique entre les fichiers SQL, la metadata ORM et la base configurée.",
+)
+@gerer_exception_api
+async def obtenir_schema_diff_admin(
+    user: dict[str, Any] = Depends(require_role("admin")),
+) -> dict[str, Any]:
+    """Expose un diff lisible du schéma pour l'admin."""
+    from src.api.utils import executer_async
+
+    def _diff() -> dict[str, Any]:
+        from src.core.db.schema_diff import generer_schema_diff
+
+        diff = generer_schema_diff()
+        _journaliser_action_admin(
+            action="admin.schema.diff",
+            entite_type="schema_sql",
+            utilisateur_id=str(user.get("id", "admin")),
+            details={
+                "status": diff.get("status"),
+                "missing_in_db": len(diff.get("missing_in_db") or []),
+                "extra_in_db": len(diff.get("extra_in_db") or []),
+                "column_differences": len(diff.get("column_differences") or []),
+            },
+        )
+        return diff
+
+    return await executer_async(_diff)
+
+
+# ═══════════════════════════════════════════════════════════
 # NOTIFICATIONS TEST
 # ═══════════════════════════════════════════════════════════
 

@@ -132,10 +132,7 @@ DO $$
 DECLARE t TEXT;
 readonly_tables TEXT[] := ARRAY[
     'schema_migrations',
-    'normes_oms', 'plantes_catalogue',
-    -- Legacy migration tables (read-only, données historiques)
-    'preferences_home',
-    'factures', 'depenses_home', 'budgets_home'
+    'plantes_catalogue'
 ];
 BEGIN FOREACH t IN ARRAY readonly_tables LOOP
     EXECUTE format('ALTER TABLE IF EXISTS public.%I ENABLE ROW LEVEL SECURITY', t);

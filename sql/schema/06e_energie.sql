@@ -50,43 +50,9 @@ CREATE INDEX IF NOT EXISTS ix_eco_actions_type ON actions_ecologiques(type_actio
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE depenses_home (
-    id SERIAL PRIMARY KEY,
-    date_depense DATE NOT NULL DEFAULT CURRENT_DATE,
-    montant DECIMAL(10, 2) NOT NULL,
-    categorie VARCHAR(50) NOT NULL CHECK (
-        categorie IN (
-            'jardin',
-            'entretien',
-            'energie',
-            'travaux',
-            'equipement',
-            'decoration',
-            'assurance',
-            'autre'
-        )
-    ),
-    sous_categorie VARCHAR(50),
-    description TEXT,
-    magasin VARCHAR(100),
-    recurrent BOOLEAN DEFAULT FALSE,
-    frequence_mois INTEGER,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_depenses_home_date ON depenses_home(date_depense);
-CREATE INDEX IF NOT EXISTS idx_depenses_home_categorie ON depenses_home(categorie);
-
-
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE budgets_home (
-    id SERIAL PRIMARY KEY,
-    categorie VARCHAR(50) NOT NULL UNIQUE,
-    montant_mensuel DECIMAL(10, 2) NOT NULL,
-    alerte_pourcent INTEGER DEFAULT 80,
-    notes TEXT,
-    cree_le TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    modifie_le TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- Les anciennes tables `depenses_home` et `budgets_home` ont été retirées.
+-- Les usages actifs passent par `depenses_maison`, les abonnements et les
+-- agrégations budgétaires exposées côté API.
 -- ============================================================================
 -- PARTIE 5B : TABLES JEUX EXTENSIONS (Euromillions, Cotes, Mise Responsable)
 -- ============================================================================

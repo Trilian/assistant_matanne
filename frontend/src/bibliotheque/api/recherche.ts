@@ -7,9 +7,20 @@ import { clientApi } from './client'
 /**
  * Type de résultat de recherche unifié
  */
+export type TypeResultatRecherche =
+  | 'recette'
+  | 'projet'
+  | 'activite'
+  | 'note'
+  | 'contact'
+  | 'plante'
+  | 'document'
+  | 'abonnement'
+  | 'entretien'
+
 export interface ResultatRecherche {
-  /** Type d'entité (recette, projet, activite, note, contact) */
-  type: 'recette' | 'projet' | 'activite' | 'note' | 'contact'
+  /** Type d'entité (recette, projet, activite, note, contact, plante, document, abonnement, entretien) */
+  type: TypeResultatRecherche
   /** ID de l'entité */
   id: number
   /** Titre principal */
@@ -32,14 +43,15 @@ export interface ResultatRecherche {
  */
 export async function rechercheGlobale(
   query: string,
-  limit: number = 20
+  limit: number = 20,
+  types?: TypeResultatRecherche[]
 ): Promise<ResultatRecherche[]> {
   if (query.length < 2) {
     throw new Error('Le terme de recherche doit contenir au moins 2 caractères')
   }
 
   const { data } = await clientApi.get<ResultatRecherche[]>('/api/v1/recherche/global', {
-    params: { q: query, limit }
+    params: { q: query, limit, types: types?.length ? types.join(',') : undefined }
   })
 
   return data

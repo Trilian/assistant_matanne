@@ -332,7 +332,6 @@ export default function PageVisualisation() {
               <Skeleton className="h-[400px] w-full rounded-lg" />
             ) : mode3D && pieces && pieces.length > 0 ? (
               /* ── Vue 3D ── */
-              // eslint-disable-next-line
               <div className="rounded-lg overflow-hidden" style={{ height: 480 }}>
                 <Plan3D
                   pieces={pieces}
@@ -351,7 +350,6 @@ export default function PageVisualisation() {
                 <div
                   ref={planRef}
                   className={`relative bg-muted/30 rounded-lg border-2 ${modeEdition ? "border-primary/40 border-dashed" : "border-dashed border-muted"} overflow-hidden`}
-                  // eslint-disable-next-line
                   style={{ width: "100%", aspectRatio: `${PLAN_W}/${PLAN_H}`, maxWidth: PLAN_W }}
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
@@ -387,7 +385,6 @@ export default function PageVisualisation() {
                           ${modeEdition ? "cursor-grab active:cursor-grabbing hover:shadow-lg hover:z-10" : "cursor-pointer hover:shadow-md hover:z-10"}
                           ${pieceSelectionnee?.id === piece.id ? "ring-2 ring-primary ring-offset-1 z-10" : ""}
                         `}
-                        // eslint-disable-next-line
                         style={{
                           left, top, width, height,
                           backgroundColor: couleurPiece(piece),
@@ -417,12 +414,10 @@ export default function PageVisualisation() {
                       <button
                         key={piece.id}
                         className={`relative rounded-lg border-2 p-3 text-left transition-all cursor-pointer hover:shadow-md hover:scale-[1.02] ${pieceSelectionnee?.id === piece.id ? "border-primary ring-2 ring-primary/30 shadow-lg" : "border-border hover:border-primary/50"}`}
-                        // eslint-disable-next-line
                         style={{ backgroundColor: couleurPiece(piece), borderColor: pieceSelectionnee?.id === piece.id ? undefined : couleurBord(piece) }}
                         onClick={() => { setPieceSelectionnee(piece); setSheetPieceOuverte(true); setMenageOuvert(false); }}
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          {/* eslint-disable-next-line */}
                           <Square className="h-3 w-3" style={{ color: couleurBord(piece) }} fill={couleurBord(piece)} /> {/* calculated color */}
                           <span className="font-medium text-sm truncate">{piece.nom}</span>
                         </div>
@@ -515,7 +510,6 @@ export default function PageVisualisation() {
                     className={`flex items-center gap-2 text-xs w-full text-left rounded px-1 py-0.5 hover:bg-accent transition-colors ${pieceSelectionnee?.id === piece.id ? "bg-accent font-medium" : ""}`}
                     onClick={() => { setPieceSelectionnee(piece); setSheetPieceOuverte(true); setMenageOuvert(false); }}
                   >
-                      {/* eslint-disable-next-line */}
                     <div className="h-3 w-3 rounded-sm border shrink-0" style={{ backgroundColor: couleurPiece(piece), borderColor: couleurBord(piece) }} />
                     <span>{piece.nom}</span>
                   </button>
@@ -551,7 +545,6 @@ export default function PageVisualisation() {
             <>
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
-                  {/* eslint-disable-next-line */}
                   <Square className="h-4 w-4" style={{ color: couleurBord(pieceSelectionnee) }} fill={couleurBord(pieceSelectionnee)} />
                   {pieceSelectionnee.nom}
                 </SheetTitle>

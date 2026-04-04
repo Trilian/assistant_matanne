@@ -19,7 +19,7 @@ import {
   CommandItem,
 } from '@/composants/ui/command'
 import { utiliserStoreUI } from '@/magasins/store-ui'
-import { rechercheGlobale, type ResultatRecherche } from '@/bibliotheque/api/recherche'
+import { rechercheGlobale, type ResultatRecherche, type TypeResultatRecherche } from '@/bibliotheque/api/recherche'
 import { toast } from 'sonner'
 import {
   ChefHat,
@@ -28,6 +28,10 @@ import {
   StickyNote,
   UserCircle,
   Loader2,
+  Sprout,
+  FolderOpen,
+  Receipt,
+  Wrench,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -40,6 +44,10 @@ const ICONES_PAR_TYPE: Record<string, LucideIcon> = {
   activite: Users,
   note: StickyNote,
   contact: UserCircle,
+  plante: Sprout,
+  document: FolderOpen,
+  abonnement: Receipt,
+  entretien: Wrench,
 }
 
 /**
@@ -51,7 +59,23 @@ const LABELS_PAR_TYPE: Record<string, string> = {
   activite: 'Activités',
   note: 'Notes',
   contact: 'Contacts',
+  plante: 'Jardin',
+  document: 'Documents',
+  abonnement: 'Abonnements',
+  entretien: 'Entretien',
 }
+
+const FILTRES_RECHERCHE: Array<{
+  id: string
+  label: string
+  types?: TypeResultatRecherche[]
+}> = [
+  { id: 'all', label: 'Tout' },
+  { id: 'cuisine', label: 'Cuisine', types: ['recette'] },
+  { id: 'famille', label: 'Famille', types: ['activite', 'contact', 'document'] },
+  { id: 'maison', label: 'Maison', types: ['projet', 'plante', 'abonnement', 'entretien'] },
+  { id: 'outils', label: 'Outils', types: ['note'] },
+]
 
 export function RechercheGlobale() {
   const router = useRouter()
@@ -60,6 +84,7 @@ export function RechercheGlobale() {
   const [query, setQuery] = React.useState('')
   const [resultats, setResultats] = React.useState<ResultatRecherche[]>([])
   const [enChargement, setEnChargement] = React.useState(false)
+  const [filtreActif, setFiltreActif] = React.useState<string>('all')
 
   // Debounce pour éviter les requêtes excessives
   const timeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined)
@@ -67,7 +92,7 @@ export function RechercheGlobale() {
   /**
    * Effectue la recherche avec debouncing
    */
-  const effectuerRecherche = React.useCallback(async (terme: string) => {
+  const effectuerRecherche = React.useCallback(async (terme: string, filtreId: string = 'all') => {
     // Clear previous timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
@@ -83,7 +108,8 @@ export function RechercheGlobale() {
     timeoutRef.current = setTimeout(async () => {
       setEnChargement(true)
       try {
-        const donnees = await rechercheGlobale(terme, 20)
+        const filtre = FILTRES_RECHERCHE.find((item) => item.id === filtreId)
+        const donnees = await rechercheGlobale(terme, 20, filtre?.types)
         setResultats(donnees)
       } catch {
         toast.error('La recherche a échoué. Veuillez réessayer.')
@@ -99,7 +125,7 @@ export function RechercheGlobale() {
    */
   const handleQueryChange = (value: string) => {
     setQuery(value)
-    effectuerRecherche(value)
+    effectuerRecherche(value, filtreActif)
   }
 
   /**
@@ -157,6 +183,13 @@ export function RechercheGlobale() {
     }
   }, [])
 
+  const changerFiltre = (filtreId: string) => {
+    setFiltreActif(filtreId)
+    if (query.length >= 2) {
+      effectuerRecherche(query, filtreId)
+    }
+  }
+
   return (
     <CommandDialog 
       open={rechercheOuverte} 
@@ -170,6 +203,22 @@ export function RechercheGlobale() {
           value={query}
           onValueChange={handleQueryChange}
         />
+        <div className="flex flex-wrap gap-2 border-b px-3 py-2">
+          {FILTRES_RECHERCHE.map((filtre) => (
+            <button
+              key={filtre.id}
+              type="button"
+              onClick={() => changerFiltre(filtre.id)}
+              className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                filtreActif === filtre.id
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              {filtre.label}
+            </button>
+          ))}
+        </div>
         <CommandList>
           <CommandEmpty>
             {enChargement ? (
@@ -197,13 +246,18 @@ export function RechercheGlobale() {
                     className="cursor-pointer"
                   >
                     <Icone className="mr-2 size-4" />
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-medium">{resultat.titre}</span>
-                      {resultat.description && (
-                        <span className="text-xs text-muted-foreground">
-                          {resultat.description}
-                        </span>
-                      )}
+                    <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
+                      <div className="flex min-w-0 flex-col gap-0.5">
+                        <span className="font-medium truncate">{resultat.titre}</span>
+                        {resultat.description && (
+                          <span className="text-xs text-muted-foreground line-clamp-2">
+                            {resultat.description}
+                          </span>
+                        )}
+                      </div>
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                        {LABELS_PAR_TYPE[resultat.type] ?? resultat.type}
+                      </span>
                     </div>
                   </CommandItem>
                 ))}

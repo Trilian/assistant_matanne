@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState, useMemo, useCallback, type ReactNode } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef, type ReactNode } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -19,6 +19,8 @@ import {
   CookingPot,
   CalendarDays,
   GripVertical,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { Button } from "@/composants/ui/button";
 import {
@@ -81,6 +83,8 @@ import { CalendrierMosaiqueRepas } from "@/composants/planning/calendrier-mosaiq
 import { CalendrierColonnesPlanning } from "@/composants/planning/calendrier-colonnes-planning";
 import { utiliserModeInvites } from "@/crochets/utiliser-mode-invites";
 import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
+import { utiliserWebSocket } from "@/crochets/utiliser-websocket";
+import { utiliserAuth } from "@/crochets/utiliser-auth";
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
 import { obtenirFluxCuisine } from "@/bibliotheque/api/ia-bridges";
@@ -206,16 +210,28 @@ function CarteRepasDraggable({
     id: construireIdRepasPlanning(repas.id),
     data: { repasId: repas.id },
   });
+  const carteRef = useRef<HTMLDivElement | null>(null);
 
-  const style = {
-    transform: CSS.Translate.toString(transform),
-    transition,
-  };
+  const definirRefs = useCallback(
+    (node: HTMLDivElement | null) => {
+      setNodeRef(node);
+      carteRef.current = node;
+    },
+    [setNodeRef]
+  );
+
+  useEffect(() => {
+    if (!carteRef.current) {
+      return;
+    }
+
+    carteRef.current.style.transform = CSS.Translate.toString(transform);
+    carteRef.current.style.transition = transition ?? "";
+  }, [transform, transition]);
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
+      ref={definirRefs}
       className={`flex items-center justify-between gap-1 rounded-md bg-background/80 ${isDragging ? "opacity-60 shadow-lg ring-2 ring-primary/30" : ""}`}
     >
       <div className="flex items-center gap-1 min-w-0 flex-1">
@@ -321,6 +337,7 @@ function CaseRepasPlanning({
 
 export default function PagePlanning() {
   const { contexte: modeInvites, mettreAJour: mettreAJourModeInvites, reinitialiser: reinitialiserModeInvites } = utiliserModeInvites();
+  const { utilisateur } = utiliserAuth();
   const [modeAffichage, setModeAffichage] = useState<"semaine" | "mois">("semaine");
   const [offsetSemaine, setOffsetSemaine] = useState(0);
   const [offsetMois, setOffsetMois] = useState(0);
@@ -355,6 +372,44 @@ export default function PagePlanning() {
   const moisDate = new Date();
   moisDate.setMonth(moisDate.getMonth() + offsetMois);
   const moisSelectionne = `${moisDate.getFullYear()}-${String(moisDate.getMonth() + 1).padStart(2, "0")}`;
+  const identifiantPresencePlanning = String(utilisateur?.id ?? utilisateur?.email ?? "planning-local");
+  const nomPresencePlanning = String(utilisateur?.nom ?? "Membre du foyer");
+  const baseWsPlanning = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/^http/, "ws");
+  const salonPlanningId = Number(dateDebut.replaceAll("-", ""));
+  const {
+    connecte: synchroPlanningActive,
+    utilisateurs: participantsPlanning,
+    envoyer: diffuserPlanning,
+    mode: modeSynchroPlanning,
+  } = utiliserWebSocket({
+    url: `${baseWsPlanning}/api/v1/ws/planning/${salonPlanningId}?user=${encodeURIComponent(identifiantPresencePlanning)}&username=${encodeURIComponent(nomPresencePlanning)}`,
+    gestionnaires: {
+      repas_added: (message) => {
+        if (String(message.user_id ?? "") !== identifiantPresencePlanning) {
+          invalider(["planning"]);
+          invalider(["planning", "nutrition"]);
+        }
+      },
+      repas_updated: (message) => {
+        if (String(message.user_id ?? "") !== identifiantPresencePlanning) {
+          invalider(["planning"]);
+          invalider(["planning", "nutrition"]);
+        }
+      },
+      repas_removed: (message) => {
+        if (String(message.user_id ?? "") !== identifiantPresencePlanning) {
+          invalider(["planning"]);
+          invalider(["planning", "nutrition"]);
+        }
+      },
+      slot_swapped: (message) => {
+        if (String(message.user_id ?? "") !== identifiantPresencePlanning) {
+          invalider(["planning"]);
+        }
+      },
+    },
+    maxTentatives: 3,
+  });
 
   // ─── Requêtes ───
   const { data: planning, isLoading } = utiliserRequete(
@@ -428,19 +483,27 @@ export default function PagePlanning() {
   const { mutate: ajouterRepas, isPending: enAjout } = utiliserMutation(
     (dto: CreerRepasPlanningDTO) => definirRepas(dto),
     {
-      onSuccess: () => {
+      onSuccess: (_resultat, dto) => {
         invalider(["planning"]);
         setDialogueOuvert(false);
         setNotesRepas("");
+        diffuserPlanning({
+          action: "repas_added",
+          data: { date: dto.date, type_repas: dto.type_repas },
+        });
         toast.success("Repas ajouté");
       },
       onError: () => toast.error("Erreur lors de l'ajout"),
     }
   );
 
-  const { mutate: confirmerSuppressionRepas } = utiliserMutation(supprimerRepas, {
-    onSuccess: () => {
+  const { mutate: confirmerSuppressionRepas } = utiliserMutation((repas: RepasPlanning) => supprimerRepas(repas.id), {
+    onSuccess: (_resultat, repas) => {
       invalider(["planning"]);
+      diffuserPlanning({
+        action: "repas_removed",
+        data: { repas_id: repas.id, date: repas.date_repas || repas.date, type_repas: repas.type_repas },
+      });
       toast.success("Repas retiré");
     },
     onError: () => toast.error("Erreur lors de la suppression"),
@@ -451,7 +514,7 @@ export default function PagePlanning() {
       const libelle = repas.recette_nom || repas.notes || `${repas.type_repas} du ${repas.date_repas || repas.date}`;
       planifierSuppression(`repas-${repas.id}`, {
         libelle,
-        onConfirmer: () => confirmerSuppressionRepas(repas.id),
+        onConfirmer: () => confirmerSuppressionRepas(repas),
         onErreur: () => toast.error("Erreur lors de la suppression"),
       });
     },
@@ -653,6 +716,16 @@ export default function PagePlanning() {
 
         await supprimerRepas(repasActif.id);
         invalider(["planning"]);
+        diffuserPlanning({
+          action: "slot_swapped",
+          data: {
+            repas_id: repasActif.id,
+            date_source: dateSource,
+            type_source: repasActif.type_repas,
+            date_cible: dateCible,
+            type_cible: typeCible,
+          },
+        });
         toast.success("Repas déplacé");
       } catch {
         toast.error("Impossible de déplacer ce repas");
@@ -660,7 +733,7 @@ export default function PagePlanning() {
         setRepasGlisse(null);
       }
     },
-    [repasGlisse, invalider]
+    [repasGlisse, invalider, diffuserPlanning]
   );
 
   const handleDragStart = useCallback(
@@ -737,6 +810,16 @@ export default function PagePlanning() {
           <p className="text-muted-foreground capitalize">
             {modeAffichage === "semaine" ? moisLabel : moisLabelComplet}
           </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <Badge variant={synchroPlanningActive ? "default" : modeSynchroPlanning === "polling" ? "secondary" : "outline"}>
+              {synchroPlanningActive ? (
+                <span className="inline-flex items-center gap-1"><Wifi className="h-3 w-3" /> Synchro live</span>
+              ) : (
+                <span className="inline-flex items-center gap-1"><WifiOff className="h-3 w-3" /> {modeSynchroPlanning === "polling" ? "Fallback réseau" : "Hors temps réel"}</span>
+              )}
+            </Badge>
+            <Badge variant="outline">{participantsPlanning.length} participant(s)</Badge>
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="rounded-md border p-0.5 flex items-center gap-0.5">
