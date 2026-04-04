@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carrefour Drive Sync</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <header>
+        <h1>🛒 Carrefour Drive</h1>
+        <p>Synchronise les articles mappés depuis Assistant Matanne.</p>
+      </header>
+
+      <section class="bloc">
+        <label>
+          URL API
+          <input id="apiBaseUrl" type="url" placeholder="http://localhost:8000/api/v1" />
+        </label>
+        <label>
+          Token API
+          <input id="apiToken" type="password" placeholder="Bearer ..." />
+        </label>
+        <label>
+          ID liste de courses
+          <input id="listeId" type="number" min="1" placeholder="12" />
+        </label>
+      </section>
+
+      <section class="actions">
+        <button id="chargerBtn" class="primary">Charger les articles Drive</button>
+        <button id="ouvrirDriveBtn">Ouvrir Carrefour Drive</button>
+        <button id="syncMappedBtn">Ajouter les produits mappés</button>
+        <button id="ouvrirRecherchesBtn">Ouvrir les recherches manquantes</button>
+      </section>
+
+      <section class="bloc">
+        <div class="status" id="status">Prêt.</div>
+        <ul id="articlesList" class="articles"></ul>
+      </section>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

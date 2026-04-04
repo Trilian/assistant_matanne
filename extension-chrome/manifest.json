@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Assistant Matanne - Carrefour Drive Sync",
+  "version": "0.1.0",
+  "description": "Synchronise les articles Carrefour Drive depuis la liste de courses Assistant Matanne.",
+  "permissions": ["storage", "tabs", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://www.carrefour.fr/*",
+    "https://*.carrefour.fr/*",
+    "http://localhost:8000/*",
+    "http://127.0.0.1:8000/*",
+    "https://*.up.railway.app/*"
+  ],
+  "action": {
+    "default_title": "Carrefour Drive Sync",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.carrefour.fr/*", "https://*.carrefour.fr/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

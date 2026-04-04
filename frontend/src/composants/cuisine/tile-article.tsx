@@ -18,6 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/bibliotheque/utils";
+import { BadgeMagasin } from "@/composants/courses/badge-magasin";
 
 const ICONES_CATEGORIES: Record<string, { icone: LucideIcon; couleur: string }> = {
   "Fruits": { icone: Apple, couleur: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" },
@@ -39,6 +40,7 @@ interface TileArticleProps {
   quantite?: number;
   unite?: string;
   categorie?: string;
+  magasinCible?: string | null;
   estCoche?: boolean;
   estSelectionne?: boolean;
   onClick?: () => void;
@@ -50,6 +52,7 @@ export function TileArticle({
   quantite,
   unite,
   categorie,
+  magasinCible,
   estCoche = false,
   estSelectionne = false,
   onClick,
@@ -101,6 +104,7 @@ export function TileArticle({
           {quantite}{unite ? ` ${unite}` : ""}
         </span>
       )}
+      {magasinCible ? <BadgeMagasin magasin={magasinCible} /> : null}
     </motion.button>
   );
 }

@@ -48,6 +48,7 @@ type PanneauDetailCoursesProps = {
   articlesNonCoches: ArticleCourses[];
   articlesCoches: ArticleCourses[];
   categoriesTriees: string[];
+  magasinActif?: string | null;
   groupesNonCoches: Record<string, ArticleCourses[]>;
   articlesSelectionnes: Set<number>;
   inputAjoutRef: RefObject<HTMLInputElement | null>;
@@ -83,6 +84,7 @@ export function PanneauDetailCourses({
   articlesNonCoches,
   articlesCoches,
   categoriesTriees,
+  magasinActif,
   groupesNonCoches,
   articlesSelectionnes,
   inputAjoutRef,
@@ -218,8 +220,12 @@ export function PanneauDetailCourses({
             ) : articles.length === 0 ? (
               <EtatVide
                 Icone={ShoppingCart}
-                titre="Liste vide"
-                description="Ajoutez un article via le champ rapide ou le scan code-barres."
+                titre={magasinActif ? "Aucun article pour ce magasin" : "Liste vide"}
+                description={
+                  magasinActif
+                    ? "Ajoutez des articles pour ce magasin ou changez le filtre actif."
+                    : "Ajoutez un article via le champ rapide ou le scan code-barres."
+                }
                 className="py-10"
               />
             ) : (
@@ -248,6 +254,7 @@ export function PanneauDetailCourses({
                           quantite={article.quantite}
                           unite={article.unite}
                           categorie={article.categorie}
+                          magasinCible={article.magasin_cible}
                           estSelectionne={articlesSelectionnes.has(article.id)}
                           onClick={() => {
                             if (modeSelection) {
@@ -286,6 +293,7 @@ export function PanneauDetailCourses({
                           quantite={article.quantite}
                           unite={article.unite}
                           categorie={article.categorie}
+                          magasinCible={article.magasin_cible}
                           estCoche
                           onClick={() => onCocherArticle(article.id, false)}
                         />

@@ -463,3 +463,74 @@ class TestCoursesArchivageDB:
 
         response = client.put(f"/api/v1/courses/{liste.id}/unarchive")
         assert response.status_code in (200, 404, 405, 500)
+
+
+class TestCoursesMagasinsDriveDB:
+    """Tests du découpage multi-magasins et des correspondances Drive."""
+
+    def test_ajouter_item_avec_magasin_cible_restitue_dans_detail(self, client, db):
+        from src.core.models import ListeCourses
+
+        liste = ListeCourses(nom="Liste multi-magasins")
+        db.add(liste)
+        db.commit()
+        db.refresh(liste)
+
+        creation = client.post(
+            f"/api/v1/courses/{liste.id}/items",
+            json={
+                "nom": "Pommes bio",
+                "quantite": 1.0,
+                "categorie": "fruits",
+                "magasin_cible": "bio_coop",
+            },
+        )
+        assert creation.status_code in (200, 201)
+
+        response = client.get(f"/api/v1/courses/{liste.id}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["items"][0]["magasin_cible"] == "bio_coop"
+
+    def test_filtrage_articles_par_magasin(self, client, db):
+        from src.core.models import ListeCourses
+
+        liste = ListeCourses(nom="Liste filtre magasin")
+        db.add(liste)
+        db.commit()
+        db.refresh(liste)
+
+        client.post(
+            f"/api/v1/courses/{liste.id}/items",
+            json={"nom": "Carottes", "quantite": 1.0, "categorie": "fruits", "magasin_cible": "bio_coop"},
+        )
+        client.post(
+            f"/api/v1/courses/{liste.id}/items",
+            json={"nom": "Lessive", "quantite": 1.0, "categorie": "entretien", "magasin_cible": "carrefour_drive"},
+        )
+
+        response = client.get(f"/api/v1/courses/{liste.id}/par-magasin?magasin=carrefour_drive")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total_articles"] == 1
+        assert data["compteurs"]["carrefour_drive"] == 1
+        assert data["magasins"]["carrefour_drive"][0]["nom"] == "Lessive"
+
+    def test_crud_correspondance_drive(self, client):
+        payload = {
+            "nom_article": "Lessive",
+            "produit_drive_id": "prod-123",
+            "produit_drive_nom": "Lessive test Carrefour",
+            "produit_drive_ean": "3274080005003",
+            "produit_drive_url": "https://www.carrefour.fr/p/lessive-test",
+            "quantite_par_defaut": 1.0,
+        }
+
+        creation = client.post("/api/v1/courses/correspondances-drive", json=payload)
+        assert creation.status_code == 201
+        cree = creation.json()
+        assert cree["produit_drive_id"] == payload["produit_drive_id"]
+
+        listing = client.get("/api/v1/courses/correspondances-drive")
+        assert listing.status_code == 200
+        assert any(item["produit_drive_id"] == payload["produit_drive_id"] for item in listing.json())

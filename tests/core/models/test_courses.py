@@ -9,6 +9,7 @@ from src.core.models.courses import (
     ArticleCourses,
     ModeleCourses,
     ArticleModele,
+    CorrespondanceDrive,
 )
 
 
@@ -74,3 +75,20 @@ class TestCourses:
 
         def test_articlemodele_tablename(self):
             assert ArticleModele.__tablename__ == "articles_modeles"
+
+    class TestCorrespondanceDrive:
+        """Tests pour la classe CorrespondanceDrive."""
+
+        def test_correspondance_drive_creation(self):
+            correspondance = CorrespondanceDrive(
+                nom_article="Lessive",
+                produit_drive_id="prod-123",
+                produit_drive_nom="Lessive Carrefour",
+                quantite_par_defaut=1.0,
+            )
+            assert correspondance.nom_article == "Lessive"
+            assert correspondance.produit_drive_id == "prod-123"
+            assert correspondance.quantite_par_defaut == 1.0
+
+        def test_correspondance_drive_tablename(self):
+            assert CorrespondanceDrive.__tablename__ == "correspondances_drive"

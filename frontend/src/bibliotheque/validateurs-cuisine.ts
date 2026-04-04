@@ -27,6 +27,7 @@ export const schemaArticleCourses = z.object({
   unite: z.string().optional(),
   categorie: z.string().optional(),
   prix_estime: z.coerce.number().min(0).optional(),
+  magasin_cible: z.string().optional(),
 });
 
 export const schemaArticleInventaire = z.object({

@@ -123,6 +123,27 @@ export default function PageCourses() {
     [articlesFiltres]
   );
 
+  const articlesCochesFiltres = useMemo(
+    () => articlesFiltres.filter((a) => a.est_coche),
+    [articlesFiltres]
+  );
+
+  const groupesNonCochesFiltres = useMemo(() => {
+    return articlesNonCochesFiltres.reduce<Record<string, typeof articlesNonCochesFiltres>>(
+      (acc, article) => {
+        const categorie = article.categorie || "Autre";
+        (acc[categorie] ??= []).push(article);
+        return acc;
+      },
+      {}
+    );
+  }, [articlesNonCochesFiltres]);
+
+  const categoriesTrieesFiltrees = useMemo(
+    () => Object.keys(groupesNonCochesFiltres).sort(),
+    [groupesNonCochesFiltres]
+  );
+
   const handleEnvoyerTelegram = async (magasin: MagasinCible) => {
     if (!listeSelectionnee) return;
     setEnEnvoiTelegram(true);
@@ -137,7 +158,8 @@ export default function PageCourses() {
   };
 
   const handleSyncDrive = () => {
-    toast.info("Ouvrez l'extension Chrome Carrefour Drive pour synchroniser le panier.");
+    window.open("https://www.carrefour.fr/courses-en-ligne", "_blank", "noopener,noreferrer");
+    toast.info("Carrefour Drive ouvert. L'extension peut maintenant ajouter les articles mappés.");
   };
 
   const messageTempsReel = !listeSelectionnee
@@ -269,6 +291,17 @@ export default function PageCourses() {
         description="Le contexte invité alimente les suggestions d'achats et les quantités recommandées pour la liste active."
       />
 
+      {listeSelectionnee && (
+        <FiltreMagasins
+          compteurs={compteursMagasins}
+          magasinActif={magasinActif}
+          onChangerMagasin={setMagasinActif}
+          onEnvoyerTelegram={handleEnvoyerTelegram}
+          onSyncDrive={handleSyncDrive}
+          enEnvoiTelegram={enEnvoiTelegram}
+        />
+      )}
+
       <div className="grid gap-6 lg:grid-cols-3">
         <PanneauListesCourses
           nomNouvelleListe={nomNouvelleListe}
@@ -305,11 +338,12 @@ export default function PageCourses() {
           enSuppressionSelection={enSuppressionSelection}
           enCochageCategorie={enCochageCategorie}
           enFinalisationCourses={enFinalisationCourses}
-          articles={articles}
-          articlesNonCoches={articlesNonCoches}
-          articlesCoches={articlesCoches}
-          categoriesTriees={categoriesTriees}
-          groupesNonCoches={groupesNonCoches}
+          articles={articlesFiltres}
+          articlesNonCoches={articlesNonCochesFiltres}
+          articlesCoches={articlesCochesFiltres}
+          categoriesTriees={categoriesTrieesFiltrees}
+          magasinActif={magasinActif}
+          groupesNonCoches={groupesNonCochesFiltres}
           articlesSelectionnes={articlesSelectionnes}
           inputAjoutRef={inputAjoutRef}
           erreursArticle={erreursArticle}
@@ -327,10 +361,10 @@ export default function PageCourses() {
           onOuvrirDialogueArticle={() => setDialogueArticle(true)}
           onBasculerSelectionArticle={basculerSelectionArticle}
           onBasculerToutSelectionner={() => {
-            if (articlesSelectionnes.size === articlesNonCoches.length) {
+            if (articlesSelectionnes.size === articlesNonCochesFiltres.length) {
               setArticlesSelectionnes(new Set());
             } else {
-              setArticlesSelectionnes(new Set(articlesNonCoches.map((article) => article.id)));
+              setArticlesSelectionnes(new Set(articlesNonCochesFiltres.map((article) => article.id)));
             }
           }}
           onCocherSelection={() => cocherSelection(undefined)}

@@ -65,8 +65,7 @@ export function FiltreMagasins({
               onClick={() => onChangerMagasin(estActif ? null : magasin)}
               className={estActif ? "" : ""}
             >
-              <span className="mr-1">{LIBELLES_MAGASINS[magasin].charAt(0)}</span>
-              {LIBELLES_MAGASINS[magasin].slice(2)}
+              {LIBELLES_MAGASINS[magasin]}
               {count > 0 && (
                 <Badge
                   variant="secondary"

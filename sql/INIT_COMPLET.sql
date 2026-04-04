@@ -2,8 +2,8 @@
 -- ASSISTANT MATANNE — SCRIPT D'INITIALISATION COMPLET
 -- ============================================================================
 -- Version    : 3.1 (régénéré automatiquement)
--- Généré le  : 2026-04-04 04:39 UTC
--- Source     : sql/schema/*.sql (22 fichiers, ~5256 lignes)
+-- Généré le  : 2026-04-04 06:26 UTC
+-- Source     : sql/schema/*.sql (22 fichiers, ~5280 lignes)
 -- Cible      : Supabase PostgreSQL
 -- ============================================================================
 --
@@ -1559,6 +1559,30 @@ CREATE TABLE articles_modeles (
 );
 CREATE INDEX IF NOT EXISTS ix_articles_modeles_modele ON articles_modeles(modele_id);
 CREATE INDEX IF NOT EXISTS ix_articles_modeles_ingredient ON articles_modeles(ingredient_id);
+
+
+-- ─── Correspondances Carrefour Drive ──────────────────────────────────────────
+CREATE TABLE correspondances_drive (
+    id SERIAL PRIMARY KEY,
+    ingredient_id INTEGER,
+    nom_article VARCHAR(200) NOT NULL,
+    produit_drive_id VARCHAR(100) NOT NULL,
+    produit_drive_nom VARCHAR(300) NOT NULL,
+    produit_drive_ean VARCHAR(50),
+    produit_drive_url VARCHAR(500),
+    quantite_par_defaut FLOAT NOT NULL DEFAULT 1.0,
+    nb_utilisations INTEGER NOT NULL DEFAULT 0,
+    actif BOOLEAN NOT NULL DEFAULT TRUE,
+    cree_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    modifie_le TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_correspondances_drive_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE SET NULL,
+    CONSTRAINT ck_correspondance_drive_quantite_positive CHECK (quantite_par_defaut > 0)
+);
+CREATE INDEX IF NOT EXISTS ix_correspondances_drive_nom_article ON correspondances_drive(nom_article);
+CREATE INDEX IF NOT EXISTS ix_correspondances_drive_produit_id ON correspondances_drive(produit_drive_id);
+CREATE INDEX IF NOT EXISTS ix_correspondances_drive_ingredient ON correspondances_drive(ingredient_id);
+CREATE INDEX IF NOT EXISTS ix_correspondances_drive_actif ON correspondances_drive(actif);
+CREATE UNIQUE INDEX IF NOT EXISTS ix_correspondances_drive_article_produit ON correspondances_drive(nom_article, produit_drive_id);
 
 
 -- ─────────────────────────────────────────────────────────────────────────────

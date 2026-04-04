@@ -15,6 +15,10 @@ vi.mock("@/composants/planning/calendrier-mosaique-repas", () => ({
   CalendrierMosaiqueRepas: () => <div data-testid="calendrier-mosaique" />,
 }));
 
+vi.mock("@/composants/planning/calendrier-colonnes-planning", () => ({
+  CalendrierColonnesPlanning: () => <div data-testid="calendrier-colonnes" />,
+}));
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
   usePathname: () => "/cuisine/planning",
@@ -81,7 +85,7 @@ describe("PagePlanningRepas", () => {
 
   it("affiche le titre Planning Repas", () => {
     renderWithQuery(<PagePlanningRepas />);
-    expect(screen.getByText(/Planning/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /planning repas/i })).toBeInTheDocument();
   });
 
   it("affiche les jours de la semaine", () => {

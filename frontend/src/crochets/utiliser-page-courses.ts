@@ -185,6 +185,7 @@ export function utiliserPageCourses() {
           quantite: donnees.quantite,
           unite: donnees.unite,
           categorie: donnees.categorie,
+          magasin_cible: donnees.magasin_cible,
           est_coche: false,
         };
 
@@ -494,6 +495,7 @@ export function utiliserPageCourses() {
               quantite: article.quantite,
               unite: article.unite,
               categorie: article.categorie,
+              magasin_cible: article.magasin_cible,
             }),
           ),
         );

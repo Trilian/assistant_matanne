@@ -212,7 +212,7 @@ async def creer_liste(data: CourseListCreate, user: dict[str, Any] = Depends(req
 
 
 @router.post(
-    "/{liste_id}/items",
+    "/{liste_id:int}/items",
     response_model=MessageResponse,
     status_code=201,
     responses=REPONSES_CRUD_CREATION,
@@ -287,7 +287,7 @@ async def ajouter_article(
     return await executer_async(_add)
 
 
-@router.get("/{liste_id}", response_model=ListeCoursesResponse, responses=REPONSES_CRUD_LECTURE)
+@router.get("/{liste_id:int}", response_model=ListeCoursesResponse, responses=REPONSES_CRUD_LECTURE)
 @gerer_exception_api
 async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
@@ -348,7 +348,7 @@ async def obtenir_liste(liste_id: int, user: dict[str, Any] = Depends(require_au
     return await executer_async(_get)
 
 
-@router.get("/{liste_id}/export")
+@router.get("/{liste_id:int}/export")
 @gerer_exception_api
 async def exporter_liste_texte(
     liste_id: int,
@@ -406,7 +406,7 @@ async def exporter_liste_texte(
     return await executer_async(_export)
 
 
-@router.get("/{liste_id}/share-qr")
+@router.get("/{liste_id:int}/share-qr")
 @gerer_exception_api
 async def generer_qr_partage_liste(
     liste_id: int,
@@ -501,7 +501,7 @@ async def modifier_liste(
 
 
 @router.put(
-    "/{liste_id}/items/{item_id}", response_model=MessageResponse, responses=REPONSES_CRUD_ECRITURE
+    "/{liste_id:int}/items/{item_id:int}", response_model=MessageResponse, responses=REPONSES_CRUD_ECRITURE
 )
 @gerer_exception_api
 async def modifier_article(
@@ -562,7 +562,7 @@ async def modifier_article(
 
 
 @router.post(
-    "/{liste_id}/checkout-items",
+    "/{liste_id:int}/checkout-items",
     response_model=CheckoutCoursesResponse,
     responses=REPONSES_CRUD_ECRITURE,
 )
@@ -718,7 +718,7 @@ async def checkout_articles(
 
 
 @router.post(
-    "/{liste_id}/scan-barcode-checkout",
+    "/{liste_id:int}/scan-barcode-checkout",
     response_model=ScanBarcodeCheckoutResponse,
     responses=REPONSES_CRUD_ECRITURE,
 )
@@ -1026,7 +1026,7 @@ async def generer_depuis_planning(
 
 
 @router.post(
-    "/{liste_id}/confirmer",
+    "/{liste_id:int}/confirmer",
     response_model=MessageResponse,
     responses=REPONSES_CRUD_ECRITURE,
 )
@@ -1076,7 +1076,7 @@ async def confirmer_courses(
     return await executer_async(_confirmer)
 
 
-@router.delete("/{liste_id}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
+@router.delete("/{liste_id:int}", response_model=MessageResponse, responses=REPONSES_CRUD_SUPPRESSION)
 @gerer_exception_api
 async def supprimer_liste(liste_id: int, user: dict[str, Any] = Depends(require_auth)):
     """
@@ -1119,7 +1119,7 @@ async def supprimer_liste(liste_id: int, user: dict[str, Any] = Depends(require_
 
 
 @router.delete(
-    "/{liste_id}/items/{item_id}",
+    "/{liste_id:int}/items/{item_id:int}",
     response_model=MessageResponse,
     responses=REPONSES_CRUD_SUPPRESSION,
 )
@@ -1177,7 +1177,7 @@ async def supprimer_article(
 
 
 @router.post(
-    "/{liste_id}/valider",
+    "/{liste_id:int}/valider",
     response_model=MessageResponse,
     responses=REPONSES_CRUD_ECRITURE,
 )
@@ -1283,7 +1283,7 @@ async def valider_courses(
 
 
 @router.get(
-    "/{liste_id}/bio-local",
+    "/{liste_id:int}/bio-local",
     responses=REPONSES_LISTE,
 )
 @gerer_exception_api
@@ -1630,7 +1630,7 @@ async def enregistrer_feedback_prediction_courses(
 
 
 @router.get(
-    "/{liste_id}/par-magasin",
+    "/{liste_id:int}/par-magasin",
     responses=REPONSES_CRUD_LECTURE,
     summary="Articles groupés par magasin",
 )
@@ -1824,7 +1824,7 @@ async def supprimer_correspondance_drive(
 
 
 @router.get(
-    "/{liste_id}/articles-drive",
+    "/{liste_id:int}/articles-drive",
     response_model=list[ArticleDriveResponse],
     responses=REPONSES_CRUD_LECTURE,
     summary="Articles Carrefour Drive enrichis",
