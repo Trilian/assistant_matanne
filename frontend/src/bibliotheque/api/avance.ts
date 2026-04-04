@@ -105,6 +105,12 @@ export interface ApprentissagePreferencesResponse {
   ajustements_suggestions: string[];
 }
 
+export interface ApprentissageHabitudesResponse {
+  habitudes_detectees: string[];
+  ajustements_systeme: string[];
+  niveau_confiance: number;
+}
+
 export interface BlocPlanificationAuto {
   titre: string;
   items: string[];
@@ -254,6 +260,11 @@ export async function obtenirInsightsQuotidiens(limite = 2): Promise<InsightsQuo
 
 export async function obtenirMeteoContextuelle(): Promise<MeteoContextuelleResponse> {
   const { data } = await clientApi.get("/api/v1/innovations/meteo-contextuelle");
+  return data;
+}
+
+export async function obtenirApprentissageHabitudes(): Promise<ApprentissageHabitudesResponse> {
+  const { data } = await clientApi.get("/api/v1/preferences/apprentissage-habitudes");
   return data;
 }
 

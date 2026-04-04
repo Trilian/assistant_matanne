@@ -84,6 +84,14 @@ import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-an
 import { listerEvenementsFamiliaux } from "@/bibliotheque/api/famille";
 import { listerEvenements } from "@/bibliotheque/api/calendriers";
 import { obtenirFluxCuisine } from "@/bibliotheque/api/ia-bridges";
+import {
+  analyserVarietePlanningRepas,
+  optimiserNutritionPlanningRepas,
+  suggererSimplificationPlanningRepas,
+  type AnalyseVarieteResponse,
+  type OptimisationNutritionPlanningResponse,
+  type SimplificationPlanningResponse,
+} from "@/bibliotheque/api/ia-modules";
 import { useIsMobile } from "@/crochets/use-mobile";
 import {
   closestCenter,
@@ -107,6 +115,12 @@ const TYPES_REPAS: { valeur: TypeRepas; label: string; emoji: string }[] = [
   { valeur: "gouter", label: "Goûter", emoji: "🍪" },
   { valeur: "diner", label: "Dîner", emoji: "🌙" },
 ];
+
+type AnalysePlanningIaResultat = {
+  variete: AnalyseVarieteResponse;
+  nutrition: OptimisationNutritionPlanningResponse;
+  simplification: SimplificationPlanningResponse;
+};
 
 function ResponsiveOverlay({
   open,
@@ -324,6 +338,7 @@ export default function PagePlanning() {
   const [batchResultat, setBatchResultat] = useState<GenererSessionDepuisPlanningResult | null>(null);
   const [choixModePrepa, setChoixModePrepa] = useState(false);
   const [repasGlisse, setRepasGlisse] = useState<RepasPlanning | null>(null);
+  const [analysePlanningIa, setAnalysePlanningIa] = useState<AnalysePlanningIaResultat | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -496,6 +511,34 @@ export default function PagePlanning() {
     }
   );
 
+  const { mutate: analyserPlanningIA, isPending: enAnalysePlanningIA } = utiliserMutation(
+    async () => {
+      if (planningPourAnalyseIa.length === 0) {
+        throw new Error("Ajoutez au moins un repas sur la semaine avant l'analyse IA.");
+      }
+
+      const [variete, nutritionIA, simplification] = await Promise.all([
+        analyserVarietePlanningRepas({ planning_repas: planningPourAnalyseIa }),
+        optimiserNutritionPlanningRepas({ planning_repas: planningPourAnalyseIa }),
+        suggererSimplificationPlanningRepas({
+          planning_repas: planningPourAnalyseIa,
+          nb_heures_cuisine_max: 4,
+        }),
+      ]);
+
+      return { variete, nutrition: nutritionIA, simplification };
+    },
+    {
+      onSuccess: (resultat) => {
+        setAnalysePlanningIa(resultat);
+        toast.success("Analyse IA du planning prête");
+      },
+      onError: (erreur) => {
+        toast.error(erreur instanceof Error ? erreur.message : "Erreur lors de l'analyse IA");
+      },
+    }
+  );
+
   const { mutate: validerBrouillonPlanning, isPending: enValidationPlanning } = utiliserMutation(
     (planningId: number) => validerPlanning(planningId),
     {
@@ -556,6 +599,25 @@ export default function PagePlanning() {
     }
     return map;
   }, [planning]);
+
+  const planningPourAnalyseIa = useMemo(() => {
+    return datesSemaine
+      .map((date, index) => {
+        const repasDuJour = repasParJour[date] ?? [];
+        const trouverLibelle = (type: TypeRepas) => {
+          const repas = repasDuJour.find((item) => item.type_repas === type);
+          return repas?.recette_nom || repas?.notes || "";
+        };
+
+        return {
+          jour: JOURS[index].toLowerCase(),
+          petit_dej: trouverLibelle("petit_dejeuner"),
+          midi: trouverLibelle("dejeuner"),
+          soir: trouverLibelle("diner"),
+        };
+      })
+      .filter((jour) => Boolean(jour.petit_dej || jour.midi || jour.soir));
+  }, [datesSemaine, repasParJour]);
 
   function trouverRepas(date: string, type: TypeRepas): RepasPlanning | undefined {
     return repasParJour[date]?.find((r) => r.type_repas === type);
@@ -954,6 +1016,109 @@ export default function PagePlanning() {
                 </div>
               </div>
             ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {modeAffichage === "semaine" && (
+        <Card className="border-violet-200/70 bg-violet-50/40 dark:border-violet-900/50 dark:bg-violet-950/10">
+          <CardHeader className="pb-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle className="text-base">🧠 Analyse IA de la semaine</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Vérifiez en un clic la variété, l'équilibre nutritionnel et la charge cuisine du planning actuel.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => analyserPlanningIA(undefined)}
+                disabled={enAnalysePlanningIA || planningPourAnalyseIa.length === 0}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                {enAnalysePlanningIA ? "Analyse..." : "Analyser la semaine"}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {analysePlanningIa ? (
+              <>
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div className="rounded-lg border bg-background/80 p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Variété</p>
+                    <p className="mt-1 text-2xl font-bold text-violet-600">{analysePlanningIa.variete.score_variete}/100</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {analysePlanningIa.variete.types_cuisines.length} styles culinaires détectés
+                    </p>
+                  </div>
+                  <div className="rounded-lg border bg-background/80 p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Fruits & légumes</p>
+                    <p className="mt-1 text-2xl font-bold text-emerald-600">
+                      {Math.round(analysePlanningIa.nutrition.fruits_legumes_quota * 100)}%
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">Objectif hebdo estimé</p>
+                  </div>
+                  <div className="rounded-lg border bg-background/80 p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">Charge cuisine</p>
+                    <p className="mt-1 text-2xl font-bold text-amber-600">
+                      {analysePlanningIa.simplification.gain_temps_minutes} min
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Gain potentiel ({analysePlanningIa.simplification.charge_globale})
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant={analysePlanningIa.variete.proteins_bien_repartis ? "default" : "secondary"}>
+                    Protéines {analysePlanningIa.variete.proteins_bien_repartis ? "bien réparties" : "à renforcer"}
+                  </Badge>
+                  <Badge variant={analysePlanningIa.nutrition.equilibre_fibre ? "default" : "secondary"}>
+                    Fibres {analysePlanningIa.nutrition.equilibre_fibre ? "OK" : "à surveiller"}
+                  </Badge>
+                  <Badge variant="outline">
+                    {analysePlanningIa.simplification.nb_recettes_complexes} recette(s) complexes
+                  </Badge>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-lg border bg-background/80 p-3 space-y-2">
+                    <p className="text-sm font-semibold">À privilégier</p>
+                    <p className="text-xs text-muted-foreground">
+                      {analysePlanningIa.nutrition.aliments_a_privilegier.join(" · ") || "RAS"}
+                    </p>
+                    {analysePlanningIa.variete.recommandations.length > 0 && (
+                      <>
+                        <p className="text-sm font-semibold pt-1">Idées de variété</p>
+                        <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+                          {analysePlanningIa.variete.recommandations.slice(0, 3).map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </div>
+                  <div className="rounded-lg border bg-background/80 p-3 space-y-2">
+                    <p className="text-sm font-semibold">Charge & simplification</p>
+                    <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+                      {analysePlanningIa.simplification.suggestions_simplification.slice(0, 3).map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                    {analysePlanningIa.variete.repetitions_problematiques.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        Répétitions à surveiller : {analysePlanningIa.variete.repetitions_problematiques.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Lancez l'analyse pour obtenir un score de variété, un bilan nutritionnel et des suggestions de simplification.
+              </p>
+            )}
           </CardContent>
         </Card>
       )}

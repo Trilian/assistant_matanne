@@ -34,6 +34,7 @@ import {
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { ZoneTableauResponsive } from "@/composants/ui/zone-tableau-responsive";
 import {
   Dialog,
   DialogContent,
@@ -532,8 +533,8 @@ export default function PageInventaire() {
             ) : (
               <Card>
                 <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                  <ZoneTableauResponsive className="p-3 pb-0" containerClassName="overflow-auto">
+                    <table className="w-full min-w-[720px] text-sm">
                       <thead>
                         <tr className="border-b">
                           <th className="text-left p-3 font-medium">Article</th>
@@ -586,7 +587,7 @@ export default function PageInventaire() {
                         ))}
                       </tbody>
                     </table>
-                  </div>
+                  </ZoneTableauResponsive>
                 </CardContent>
               </Card>
             )}

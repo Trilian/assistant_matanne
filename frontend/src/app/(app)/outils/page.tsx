@@ -13,6 +13,7 @@ import {
   ArrowRightLeft,
   Mic,
   Bot,
+  Brain,
 } from "lucide-react";
 import {
   Card,
@@ -29,6 +30,7 @@ import { configurerModePiloteAuto, obtenirModePiloteAuto } from "@/bibliotheque/
 
 const SECTIONS = [
   { titre: "Chat IA", description: "Assistant intelligent", chemin: "/outils/chat-ia", Icone: Sparkles },
+  { titre: "Préférences IA", description: "Ce que l'IA a appris des goûts famille", chemin: "/outils/preferences-apprises", Icone: Brain },
   { titre: "Assistant vocal", description: "Commandes à la voix", chemin: "/outils/assistant-vocal", Icone: Mic },
   { titre: "Google Assistant", description: "Tester intents/actions", chemin: "/outils/google-assistant", Icone: Sparkles },
   { titre: "Notes", description: "Bloc-notes rapide", chemin: "/outils/notes", Icone: StickyNote },

@@ -47,8 +47,17 @@ const mockConfigDashboard = { config_dashboard: {} };
 const mockAlertesContextuelles = { total: 0, items: [] };
 const mockHistoriqueActions = {
   items: [
-    { widget_id: "metriques", action: "refresh", horodatage: "2026-04-03T08:00:00Z" },
+    {
+      event_id: "evt-dashboard-1",
+      type: "widget.action",
+      source: "dashboard",
+      widget_id: "metriques",
+      action: "refresh",
+      timestamp: "2026-04-03T08:00:00Z",
+      donnees: {},
+    },
   ],
+  total: 1,
 };
 const mockAnomaliesBudget = {
   anomalies: [

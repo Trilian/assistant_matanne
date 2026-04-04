@@ -240,6 +240,27 @@ self.addEventListener("notificationclick", (event) => {
 
 // ─── Background Sync (mutations hors-ligne) ─────────────────
 
+self.addEventListener("message", (event) => {
+  const message = event.data || {};
+
+  if (message.type === "GET_SYNC_QUEUE_STATUS") {
+    event.waitUntil((async () => {
+      try {
+        const db = await ouvrirIDB();
+        const tx = db.transaction("queue", "readonly");
+        const pending = await storeCount(tx.objectStore("queue"));
+        await notifierClients({ type: "SYNC_QUEUE_UPDATED", pending });
+      } catch {
+        await notifierClients({ type: "SYNC_QUEUE_UPDATED", pending: 0 });
+      }
+    })());
+    return;
+  }
+
+  if (message.type === "REPLAY_SYNC_QUEUE") {
+    event.waitUntil(rejouerFileDAttente());
+  }
+});
 
 /**
  * Lorsque la connectivité est rétablie, rejoue les requêtes

@@ -43,10 +43,13 @@ describe("PageInventaire", () => {
     expect(screen.getByText(/Inventaire/)).toBeInTheDocument();
   });
 
-  it("affiche les articles en stock", () => {
+  it("affiche les articles en stock et l'aide mobile du tableau", () => {
     renderWithQuery(<PageInventaire />);
     expect(screen.getByText("Tomates")).toBeInTheDocument();
     expect(screen.getByText("Lait")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Balayer horizontalement pour voir toutes les colonnes/i)
+    ).toBeInTheDocument();
   });
 
   it("affiche les catégories de filtre", () => {

@@ -717,29 +717,37 @@ export default function PageAccueil() {
             ) : itemsJournalFiltres.length === 0 ? (
               <p className="text-sm text-muted-foreground">Aucune action pour ces filtres.</p>
             ) : (
-              itemsJournalFiltres.slice(0, 6).map((item) => (
-                <div
-                  key={item.event_id}
-                  className="rounded-md border bg-background/70 px-3 py-2"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-medium flex items-center gap-2">
-                      <span
-                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${obtenirStyleActionDashboard(item.action)}`}
-                      >
-                        {item.action ?? "action"}
+              itemsJournalFiltres.slice(0, 6).map((item, index) => {
+                const cleItem =
+                  item.event_id ||
+                  `${item.widget_id ?? "dashboard"}-${item.action ?? "action"}-${item.timestamp ?? index}`;
+                const horodatage =
+                  item.timestamp && !Number.isNaN(Date.parse(item.timestamp))
+                    ? new Date(item.timestamp).toLocaleString("fr-FR")
+                    : "Horodatage indisponible";
+
+                return (
+                  <div
+                    key={cleItem}
+                    className="rounded-md border bg-background/70 px-3 py-2"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-medium flex items-center gap-2">
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] ${obtenirStyleActionDashboard(item.action)}`}
+                        >
+                          {item.action ?? "action"}
+                        </span>
+                        <span>{item.widget_id ?? "dashboard"}</span>
+                      </p>
+                      <span className="text-[11px] uppercase text-muted-foreground">
+                        {item.source || "dashboard"}
                       </span>
-                      <span>{item.widget_id ?? "dashboard"}</span>
-                    </p>
-                    <span className="text-[11px] uppercase text-muted-foreground">
-                      {item.source || "dashboard"}
-                    </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{horodatage}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(item.timestamp).toLocaleString("fr-FR")}
-                  </p>
-                </div>
-              ))
+                );
+              })
             )}
           </CardContent>
         </Card>

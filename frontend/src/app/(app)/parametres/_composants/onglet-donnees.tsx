@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Download, Loader2, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Download, Loader2, RefreshCw, Trash2, Wifi, WifiOff } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Label } from "@/composants/ui/label";
 import { Input } from "@/composants/ui/input";
@@ -15,6 +15,10 @@ export function OngletDonnees() {
   const [motDePasseBackup, setMotDePasseBackup] = useState("");
   const [fichierImport, setFichierImport] = useState<File | null>(null);
   const [motDePasseImport, setMotDePasseImport] = useState("");
+  const [estEnLigne, setEstEnLigne] = useState(true);
+  const [syncDisponible, setSyncDisponible] = useState(false);
+  const [fileSyncEnAttente, setFileSyncEnAttente] = useState(0);
+  const [syncEnCours, setSyncEnCours] = useState(false);
   const invalider = utiliserInvalidation();
 
   const backupZipMutation = utiliserMutation(
@@ -39,6 +43,76 @@ export function OngletDonnees() {
     }
   );
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    setEstEnLigne(window.navigator.onLine);
+
+    const mettreAJourReseau = () => setEstEnLigne(window.navigator.onLine);
+    const gererMessageServiceWorker = (event: MessageEvent<{ type?: string; pending?: number }>) => {
+      if (event.data?.type === "SYNC_QUEUE_UPDATED" || event.data?.type === "SYNC_QUEUE_FLUSHED") {
+        setFileSyncEnAttente(Number(event.data?.pending ?? 0));
+        setSyncEnCours(false);
+      }
+    };
+
+    window.addEventListener("online", mettreAJourReseau);
+    window.addEventListener("offline", mettreAJourReseau);
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", gererMessageServiceWorker);
+      navigator.serviceWorker.getRegistration().then((registration) => {
+        const worker = registration?.active ?? navigator.serviceWorker.controller;
+        setSyncDisponible(Boolean(worker));
+        worker?.postMessage({ type: "GET_SYNC_QUEUE_STATUS" });
+      }).catch(() => setSyncDisponible(false));
+    }
+
+    return () => {
+      window.removeEventListener("online", mettreAJourReseau);
+      window.removeEventListener("offline", mettreAJourReseau);
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.removeEventListener("message", gererMessageServiceWorker);
+      }
+    };
+  }, []);
+
+  const demanderEtatSync = async () => {
+    if (!("serviceWorker" in navigator)) {
+      toast.info("Synchronisation hors ligne indisponible sur ce navigateur");
+      return;
+    }
+    const registration = await navigator.serviceWorker.getRegistration();
+    const worker = registration?.active ?? navigator.serviceWorker.controller;
+    if (!worker) {
+      setSyncDisponible(false);
+      toast.info("Service Worker non actif pour le moment");
+      return;
+    }
+    setSyncDisponible(true);
+    worker.postMessage({ type: "GET_SYNC_QUEUE_STATUS" });
+  };
+
+  const relancerSynchronisation = async () => {
+    if (!("serviceWorker" in navigator)) {
+      toast.info("Synchronisation hors ligne indisponible sur ce navigateur");
+      return;
+    }
+    const registration = await navigator.serviceWorker.getRegistration();
+    const worker = registration?.active ?? navigator.serviceWorker.controller;
+    if (!worker) {
+      setSyncDisponible(false);
+      toast.info("Service Worker non actif pour le moment");
+      return;
+    }
+    setSyncDisponible(true);
+    setSyncEnCours(true);
+    worker.postMessage({ type: "REPLAY_SYNC_QUEUE" });
+    toast.success("Synchronisation relancée");
+  };
+
   const viderCache = () => {
     invalider([]);
     setConfirmation(true);
@@ -52,6 +126,41 @@ export function OngletDonnees() {
         <CardDescription>Gestion du cache et des données</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="space-y-3 rounded-xl border bg-muted/30 p-4">
+          <Label className="flex items-center gap-2">Synchronisation hors ligne</Label>
+          <p className="text-sm text-muted-foreground">
+            Les actions réalisées sans connexion sont stockées puis rejouées automatiquement dès le retour en ligne.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant={estEnLigne ? "default" : "destructive"}>
+              {estEnLigne ? (
+                <span className="inline-flex items-center gap-1"><Wifi className="h-3 w-3" /> En ligne</span>
+              ) : (
+                <span className="inline-flex items-center gap-1"><WifiOff className="h-3 w-3" /> Hors ligne</span>
+              )}
+            </Badge>
+            <Badge variant="outline">{fileSyncEnAttente} action(s) en attente</Badge>
+            {!syncDisponible ? <Badge variant="secondary">Service Worker indisponible</Badge> : null}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => void demanderEtatSync()} disabled={!syncDisponible}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Actualiser l'état
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => void relancerSynchronisation()}
+              disabled={!syncDisponible || syncEnCours || fileSyncEnAttente === 0}
+            >
+              {syncEnCours ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Resynchronisation...</>
+              ) : (
+                <><RefreshCw className="mr-2 h-4 w-4" />Relancer la synchronisation</>
+              )}
+            </Button>
+          </div>
+        </div>
+
         <div className="space-y-2">
           <Label>Cache local</Label>
           <p className="text-sm text-muted-foreground">

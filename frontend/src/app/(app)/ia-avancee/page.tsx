@@ -14,6 +14,7 @@ import {
 
 const OUTILS = [
   { titre: 'Suggestions achats', description: 'Historique de consommation et réapprovisionnement.', chemin: '/ia-avancee/suggestions-achats', icone: '🛒' },
+  { titre: 'Préférences apprises', description: 'Voir ce que l’IA retient des goûts et habitudes.', chemin: '/outils/preferences-apprises', icone: '🧠' },
   { titre: 'Planning adaptatif', description: 'Repas et activités adaptés à la météo et au budget.', chemin: '/ia-avancee/planning-adaptatif', icone: '📅' },
   { titre: 'Diagnostic plante', description: 'Analyse photo et recommandations de soin.', chemin: '/ia-avancee/diagnostic-plante', icone: '🌱' },
   { titre: 'Prévision dépenses', description: 'Projection des dépenses de fin de mois.', chemin: '/ia-avancee/prevision-depenses', icone: '💶' },

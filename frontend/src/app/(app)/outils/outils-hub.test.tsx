@@ -40,13 +40,14 @@ describe("PageOutils (Hub)", () => {
     expect(screen.getByText(/Outils/)).toBeInTheDocument();
   });
 
-  it("affiche les 5 sections", () => {
+  it("affiche les sections clés du hub", () => {
     renderWithQuery(<PageOutils />);
     expect(screen.getByText("Chat IA")).toBeInTheDocument();
     expect(screen.getByText("Notes")).toBeInTheDocument();
     expect(screen.getByText("Météo")).toBeInTheDocument();
     expect(screen.getByText("Minuteur")).toBeInTheDocument();
     expect(screen.getByText("Convertisseur")).toBeInTheDocument();
+    expect(screen.getByText("Préférences IA")).toBeInTheDocument();
   });
 
   it("rend les liens corrects", () => {
@@ -58,5 +59,6 @@ describe("PageOutils (Hub)", () => {
     expect(hrefs).toContain("/outils/meteo");
     expect(hrefs).toContain("/outils/minuteur");
     expect(hrefs).toContain("/outils/convertisseur");
+    expect(hrefs).toContain("/outils/preferences-apprises");
   });
 });

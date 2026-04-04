@@ -1,19 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Save } from "lucide-react";
+import { BrainCircuit, Loader2, Save, Sparkles } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Label } from "@/composants/ui/label";
 import { Input } from "@/composants/ui/input";
+import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { utiliserInvalidation, utiliserMutation, utiliserRequete } from "@/crochets/utiliser-api";
 import { obtenirPreferences, sauvegarderPreferences } from "@/bibliotheque/api/preferences";
+import { obtenirApprentissageHabitudes, obtenirPreferencesApprises } from "@/bibliotheque/api/avance";
 import { toast } from "sonner";
 
 export function OngletCuisine() {
   const { data: prefs, isLoading } = utiliserRequete(
     ["preferences"],
     obtenirPreferences
+  );
+  const { data: habitudes } = utiliserRequete(
+    ["preferences", "apprentissage-habitudes"],
+    obtenirApprentissageHabitudes,
+    { staleTime: 30 * 60 * 1000 }
+  );
+  const { data: preferencesApprises } = utiliserRequete(
+    ["preferences", "apprises"],
+    obtenirPreferencesApprises,
+    { staleTime: 30 * 60 * 1000 }
   );
   const invalider = utiliserInvalidation();
 
@@ -82,6 +94,11 @@ export function OngletCuisine() {
     );
   }
 
+  const habitudesDetectees = habitudes?.habitudes_detectees ?? [];
+  const ajustementsSysteme = habitudes?.ajustements_systeme ?? [];
+  const preferencesFavorites = preferencesApprises?.preferences_favorites ?? [];
+  const preferencesAEviter = preferencesApprises?.preferences_a_eviter ?? [];
+
   return (
     <Card>
       <CardHeader>
@@ -147,6 +164,64 @@ export function OngletCuisine() {
           <Label>Magasins préférés</Label>
           <Input placeholder="ex: Leclerc, Carrefour" value={form.magasins_preferes} onChange={(e) => setForm({ ...form, magasins_preferes: e.target.value })} />
         </div>
+
+        <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold flex items-center gap-2">
+                <BrainCircuit className="h-4 w-4 text-primary" />
+                Préférences apprises par l&apos;IA
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Les habitudes repas stables sont maintenant analysées automatiquement sur plusieurs semaines.
+              </p>
+            </div>
+            <Badge variant={preferencesApprises?.influence_active ? "default" : "secondary"}>
+              {preferencesApprises?.influence_active ? "Actif" : "En observation"}
+            </Badge>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-lg border bg-background p-3 space-y-2">
+              <p className="text-sm font-medium">Habitudes détectées</p>
+              {habitudesDetectees.length > 0 ? (
+                <ul className="space-y-1 text-xs text-muted-foreground">
+                  {habitudesDetectees.slice(0, 3).map((habitude) => (
+                    <li key={habitude}>• {habitude}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-muted-foreground">L&apos;IA continue d&apos;apprendre vos routines.</p>
+              )}
+              <p className="text-[11px] text-muted-foreground">
+                Confiance : {Math.round((habitudes?.niveau_confiance ?? 0) * 100)}%
+              </p>
+            </div>
+
+            <div className="rounded-lg border bg-background p-3 space-y-2">
+              <p className="text-sm font-medium flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                Ajustements proposés
+              </p>
+              {(preferencesFavorites.length > 0 || preferencesAEviter.length > 0 || ajustementsSysteme.length > 0 || (preferencesApprises?.ajustements_suggestions?.length ?? 0) > 0) ? (
+                <div className="space-y-2 text-xs text-muted-foreground">
+                  {preferencesFavorites.length > 0 && (
+                    <p>Favoris récurrents : {preferencesFavorites.slice(0, 2).map((item) => item.valeur).join(", ")}</p>
+                  )}
+                  {preferencesAEviter.length > 0 && (
+                    <p>À limiter : {preferencesAEviter.slice(0, 2).map((item) => item.valeur).join(", ")}</p>
+                  )}
+                  {[...ajustementsSysteme, ...(preferencesApprises?.ajustements_suggestions ?? [])].slice(0, 2).map((ajustement) => (
+                    <p key={ajustement}>• {ajustement}</p>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Les recommandations personnalisées apparaîtront après plus d&apos;historique.</p>
+              )}
+            </div>
+          </div>
+        </div>
+
         <Button onClick={() => sauvegarder(undefined)} disabled={isPending}>
           {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
           Enregistrer

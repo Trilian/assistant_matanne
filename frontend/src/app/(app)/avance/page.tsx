@@ -189,7 +189,7 @@ export default function PageAvance() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Rapport Mensuel Unifié (PDF)</CardTitle>
-          <CardDescription>Téléchargement immédiat du rapport consolidé.</CardDescription>
+          <CardDescription>Téléchargement immédiat du rapport consolidé, avec envoi automatique par email en début de mois.</CardDescription>
         </CardHeader>
         <CardContent>
           <Button

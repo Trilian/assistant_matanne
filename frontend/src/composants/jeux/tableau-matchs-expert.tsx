@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { utiliserRequete } from "@/crochets/utiliser-api";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { ZoneTableauResponsive } from "@/composants/ui/zone-tableau-responsive";
 import { CSVLink } from "react-csv";
 
 export interface MatchExpert {
@@ -335,25 +336,24 @@ export function TableauMatchsExpert({
           </Button>
         </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Match</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Date</th>
-                  <th className="px-4 py-3 text-center text-sm font-medium">Cotes</th>
-                  <th className="px-4 py-3 text-center text-sm font-medium">EV</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Prédiction IA</th>
-                  <th className="px-4 py-3 text-center text-sm font-medium">Confiance</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium">Pattern</th>
-                  <th className="px-4 py-3 text-center text-sm font-medium">Forme</th>
-                  <th className="px-4 py-3 text-center text-sm font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {matchs.map((match) => (
-                  <tr key={match.id} className="hover:bg-muted/50">
+        <ZoneTableauResponsive containerClassName="border rounded-lg overflow-auto">
+          <table className="w-full min-w-[900px]">
+            <thead className="bg-muted">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium">Match</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">Date</th>
+                <th className="px-4 py-3 text-center text-sm font-medium">Cotes</th>
+                <th className="px-4 py-3 text-center text-sm font-medium">EV</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">Prédiction IA</th>
+                <th className="px-4 py-3 text-center text-sm font-medium">Confiance</th>
+                <th className="px-4 py-3 text-left text-sm font-medium">Pattern</th>
+                <th className="px-4 py-3 text-center text-sm font-medium">Forme</th>
+                <th className="px-4 py-3 text-center text-sm font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {matchs.map((match) => (
+                <tr key={match.id} className="hover:bg-muted/50">
                     <td className="px-4 py-3">
                       <div>
                         <p className="font-medium text-sm">{match.equipe_domicile}</p>
@@ -477,11 +477,10 @@ export function TableauMatchsExpert({
                       </DropdownMenu>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              ))}
+            </tbody>
+          </table>
+        </ZoneTableauResponsive>
       )}
     </div>
   );
