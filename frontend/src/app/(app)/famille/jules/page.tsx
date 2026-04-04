@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Baby,
@@ -86,6 +86,22 @@ const CATEGORIES_JALONS = [
 function iconeCategorie(cat: string) {
   const found = CATEGORIES_JALONS.find((c) => c.valeur === cat);
   return found ? found.Icone : Star;
+}
+
+function classeStoryJules(categorie: string) {
+  if (categorie === "motricite") {
+    return "border-blue-200 bg-gradient-to-br from-blue-50 to-white dark:border-blue-900/50 dark:from-blue-950/20 dark:to-slate-950";
+  }
+  if (categorie === "langage") {
+    return "border-violet-200 bg-gradient-to-br from-violet-50 to-white dark:border-violet-900/50 dark:from-violet-950/20 dark:to-slate-950";
+  }
+  if (categorie === "cognitif") {
+    return "border-amber-200 bg-gradient-to-br from-amber-50 to-white dark:border-amber-900/50 dark:from-amber-950/20 dark:to-slate-950";
+  }
+  if (categorie === "social") {
+    return "border-emerald-200 bg-gradient-to-br from-emerald-50 to-white dark:border-emerald-900/50 dark:from-emerald-950/20 dark:to-slate-950";
+  }
+  return "border-slate-200 bg-gradient-to-br from-slate-50 to-white dark:border-slate-800 dark:from-slate-900 dark:to-slate-950";
 }
 
 export default function PageJules() {
@@ -222,6 +238,18 @@ export default function PageJules() {
     new Set((jalons ?? []).map((j) => j.description).filter(Boolean))
   ).slice(0, 20) as string[];
 
+  const jalonsStory = useMemo(
+    () =>
+      [...(jalons ?? [])]
+        .sort((a, b) => {
+          const dateA = a.date_observation ? new Date(a.date_observation).getTime() : 0;
+          const dateB = b.date_observation ? new Date(b.date_observation).getTime() : 0;
+          return dateB - dateA || (b.age_mois ?? 0) - (a.age_mois ?? 0);
+        })
+        .slice(0, 5),
+    [jalons]
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -267,6 +295,54 @@ export default function PageJules() {
           );
         })}
       </div>
+
+      {jalonsStory.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className="text-base">Moments marquants</CardTitle>
+                <CardDescription>Frise style story pour retrouver rapidement les derniers jalons de Jules.</CardDescription>
+              </div>
+              <Link href="/famille/timeline">
+                <Button variant="outline" size="sm">Voir la timeline complète</Button>
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {jalonsStory.map((jalon) => {
+                const Icone = iconeCategorie(jalon.categorie);
+                return (
+                  <article
+                    key={`story-${jalon.id}`}
+                    className={`min-w-[220px] rounded-2xl border p-4 shadow-sm ${classeStoryJules(jalon.categorie)}`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <Badge variant="secondary" className="capitalize">{jalon.categorie}</Badge>
+                      {jalon.age_mois != null && (
+                        <span className="text-xs text-muted-foreground">{jalon.age_mois} mois</span>
+                      )}
+                    </div>
+                    <div className="mt-3 flex h-24 items-center justify-center rounded-xl bg-white/70 dark:bg-slate-950/40">
+                      <Icone className="h-9 w-9 text-primary" />
+                    </div>
+                    <p className="mt-3 text-sm font-semibold">{jalon.titre}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {jalon.date_observation
+                        ? new Date(jalon.date_observation).toLocaleDateString("fr-FR")
+                        : "Observation enregistrée"}
+                    </p>
+                    <p className="mt-2 overflow-hidden text-sm text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
+                      {jalon.description || "Jalon enregistré dans le journal de développement de Jules."}
+                    </p>
+                  </article>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Hub Jules unifié */}
       <div className="grid gap-6 lg:grid-cols-3">

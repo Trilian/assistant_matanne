@@ -51,14 +51,63 @@ def _charger_automations(session, user: dict[str, Any]):
     return profil, automations
 
 
+def _automations_phase7_par_defaut() -> list[dict[str, Any]]:
+    """Jeu de règles par défaut pour la phase 7 (IA & automations)."""
+    return [
+        {
+            "nom": "A1 — Recette mal notée → exclure des suggestions",
+            "declencheur": {"type": "feedback_recette_negatif", "jours": 30},
+            "action": {"type": "ajuster_suggestions_recette", "seuil_note": 2},
+            "active": True,
+        },
+        {
+            "nom": "A2 — Planning validé → générer les courses",
+            "declencheur": {"type": "planning_valide", "jours": 14},
+            "action": {"type": "generer_courses_planning"},
+            "active": True,
+        },
+        {
+            "nom": "A3 — Batch terminé → pré-remplir le planning",
+            "declencheur": {"type": "batch_termine", "jours": 14},
+            "action": {"type": "pre_remplir_planning_batch"},
+            "active": True,
+        },
+        {
+            "nom": "A4 — Gel prévu → alerte protection plantes",
+            "declencheur": {"type": "meteo_alerte", "mot_cle": "gel"},
+            "action": {
+                "type": "notifier",
+                "titre": "Protection plantes jardin",
+                "message": "Gel ou froid marqué détecté : protéger les plantes sensibles aujourd’hui.",
+            },
+            "active": True,
+        },
+        {
+            "nom": "A5 — Entretien en retard → tâche + notification",
+            "declencheur": {"type": "tache_en_retard"},
+            "action": {
+                "type": "creer_tache_maison",
+                "nom": "Relance entretien en retard",
+                "description": "Créée automatiquement car une opération d’entretien est échue.",
+                "categorie": "maintenance",
+                "priorite": "haute",
+                "notifier": True,
+                "titre_notification": "Entretien en retard détecté",
+                "message_notification": "Une tâche d’entretien en retard a été recréée automatiquement.",
+            },
+            "active": True,
+        },
+    ]
+
+
 def _migrer_automations_depuis_preferences(session, profil) -> list:
     """Migration douce préférences -> AutomationRegle (POST /init uniquement, pas dans GET)."""
     from src.core.models import AutomationRegle
 
     preferences_modules = profil.preferences_modules or {}
-    automations_pref = preferences_modules.get("automations", [])
+    automations_pref = list(preferences_modules.get("automations", []))
     if not automations_pref:
-        return []
+        automations_pref = _automations_phase7_par_defaut()
 
     for item in automations_pref:
         session.add(

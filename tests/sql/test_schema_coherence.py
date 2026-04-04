@@ -84,6 +84,7 @@ _TABLES_SQL_SANS_ORM: dict[str, str] = {
     "depenses_home": "legacy — remplacé par depenses_maison (ORM DepenseMaison)",
     "job_executions": "infrastructure — journal d'exécution des jobs admin/cron",
     "objectifs_autonomie": "reference — objectifs autonomie Jules, accès direct via service",
+    "normes_oms": "legacy/reference — reliquat historique des courbes OMS, fonctionnalité croissance non active",
     "plantes_catalogue": "reference — catalogue plantes jardin (ref JSON), pas d'ORM requis",
     "preferences_home": "legacy — remplacé par preferences_utilisateurs",
     "recoltes": "reference — récoltes jardin, accès direct via service",

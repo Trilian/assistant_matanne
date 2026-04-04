@@ -95,6 +95,16 @@ export default function PageCourses() {
     arreterEcoute,
   } = utiliserPageCourses();
 
+  const messageTempsReel = !listeSelectionnee
+    ? "Sélectionnez une liste pour activer le suivi et les annonces en temps réel."
+    : chargementDetail
+      ? "Synchronisation de la liste en cours…"
+      : enEcoute
+        ? "Ajout vocal actif : vos nouveaux articles sont annoncés automatiquement."
+        : detailListe?.etat === "brouillon"
+          ? `La liste ${detailListe.nom} est encore en brouillon : confirmez-la pour partager les changements.`
+          : `${articlesNonCoches.length} article(s) restant(s) sur ${detailListe?.nom ?? "la liste active"}.`;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -190,6 +200,20 @@ export default function PageCourses() {
             </Button>
           </div>
         )}
+      </div>
+
+      <div className="rounded-lg border border-dashed bg-muted/30 px-4 py-3">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-medium">Suivi temps réel</p>
+          {listeSelectionnee ? (
+            <span className="text-xs text-muted-foreground">
+              {detailListe?.nom ?? `Liste #${listeSelectionnee}`}
+            </span>
+          ) : null}
+        </div>
+        <p className="text-sm text-muted-foreground" role="status" aria-live="polite" aria-atomic="true">
+          {messageTempsReel}
+        </p>
       </div>
 
       <CarteModeInvites

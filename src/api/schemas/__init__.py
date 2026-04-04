@@ -112,9 +112,11 @@ from .recettes import (
 
 # Suggestions IA
 from .suggestions import (
+    AdaptationRecetteResponse,
     SuggestionRecetteItem,
     SuggestionsPlanningResponse,
     SuggestionsRecettesResponse,
+    SubstitutionIngredientResponse,
 )
 
 # Anti-Gaspillage

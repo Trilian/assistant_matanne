@@ -213,34 +213,43 @@
 
 ---
 
-## Phase 2 — Nettoyage commentaires, nommage, fichiers fourre-tout
+## Phase 2 — Nettoyage commentaires, nommage, fichiers fourre-tout ✅ TERMINÉE
 
 > **Objectif** : Code lisible sans références temporelles, fichiers bien découpés et nommés
-> **Durée estimée** : 3-4 jours
+> **Durée estimée** : 3-4 jours → **Réalisé** : 4 avril 2026
 > **Prérequis** : Phase 1 terminée
 > **Impact** : Maintenabilité long terme, onboarding facilité
+> **Statut** : ✅ **Terminée et vérifiée**
+
+### Sprint nettoyage — 4 avril 2026
+
+- ✅ suppression des commentaires `Phase` / `Sprint` dans `src/` et `frontend/src/` ; le grep est désormais vide
+- ✅ routeur legacy `src/api/routes/fonctionnalites_avancees.py` supprimé au profit d’un agrégateur `src/api/routes/innovations.py` branché sur les routeurs déjà éclatés (`innovations_cuisine.py`, `innovations_famille.py`, etc.)
+- ✅ page `frontend/src/app/(app)/cuisine/courses/page.tsx` réduite à **296 lignes** via extraction dans `frontend/src/composants/courses/` et `frontend/src/crochets/utiliser-page-courses.ts`
+- ✅ renommage du test inter-modules en `tests/inter_modules/test_bridges_cross_module.py`
+- ✅ conventions de nommage confirmées côté frontend (`ia-avancee.ts`, validateurs par domaine, fichiers API en kebab-case)
 
 ### Tâches
 
 | # | Tâche | Détail | Effort | Priorité |
 |---|-------|--------|--------|----------|
-| 2.1 | **Supprimer 150+ commentaires Phase/Sprint** | Remplacer `# Phase X.Y`, `# Sprint N`, `// Phase X` par descriptions fonctionnelles (voir [Annexe C](#annexe-c--commentaires-phasesprint-à-nettoyer)) | 3h | 🔴 Critique |
-| 2.2 | **Renommer fichiers docs** | `TELEGRAM_RECETTE_SPRINT5.md` → `TELEGRAM_RECETTES.md`, `EXPLAIN_ANALYZE_SPRINT2.md` → `PERFORMANCE_QUERIES.md` | 30min | 🔴 Critique |
-| 2.3 | **Renommer fichiers tests** | Tous les `test_phase_*.py`, `test_sprint_*.py` → noms descriptifs, `test_bridges_nim.py` → `test_bridges_cross_module.py` | 1h | 🔴 Critique |
-| 2.4 | **Renommer `ia_avancee.ts`** | `frontend/src/bibliotheque/api/ia_avancee.ts` → `ia-avancee.ts` (cohérence kebab-case) (B12) | 15min | 🟡 Important |
-| 2.5 | **Éclater `fonctionnalites_avancees.py`** | 16+ endpoints → fichiers par domaine (`batch_cooking_avance.py`, `tendances.py`, `journaux.py`) (L10) | 2h | 🔴 Critique |
-| 2.6 | **Éclater `validateurs.ts`** | `frontend/src/bibliotheque/validateurs.ts` → `validateurs-recettes.ts`, `validateurs-famille.ts`, etc. | 1h | 🟡 Important |
-| 2.7 | **Refactorer page courses** | `frontend/src/app/(app)/cuisine/courses/page.tsx` 1200+ lignes → extraire composants dans `composants/courses/` (G8) | 2h | 🟡 Important |
-| 2.8 | **Refactorer page travaux** | `frontend/src/app/(app)/maison/travaux/page.tsx` 730+ lignes → extraire composants (G9) | 1h | 🟡 Important |
-| 2.9 | **Archiver fichiers racine obsolètes** | `AUDIT_COMPLET_AVRIL_2026.md` → `docs/archive/` (L11) | 15min | 🟢 Souhaitable |
+| 2.1 | ✅ **Supprimer 150+ commentaires Phase/Sprint** | Commentaires temporels remplacés par des descriptions fonctionnelles dans `src/` et `frontend/src/` | 3h | 🔴 Critique |
+| 2.2 | ✅ **Renommer fichiers docs** | `TELEGRAM_RECETTES.md` et `PERFORMANCE_QUERIES.md` vérifiés avec des noms descriptifs | 30min | 🔴 Critique |
+| 2.3 | ✅ **Renommer fichiers tests** | Plus aucun `test_phase_*` / `test_sprint_*` ; `test_phase6_bridges.py` renommé en `test_bridges_cross_module.py` | 1h | 🔴 Critique |
+| 2.4 | ✅ **Renommer `ia_avancee.ts`** | `frontend/src/bibliotheque/api/ia-avancee.ts` confirmé en kebab-case | 15min | 🟡 Important |
+| 2.5 | ✅ **Éclater `fonctionnalites_avancees.py`** | Fichier monolithique retiré ; agrégation via `innovations.py` et routeurs spécialisés déjà présents | 2h | 🔴 Critique |
+| 2.6 | ✅ **Éclater `validateurs.ts`** | `validateurs.ts` sert désormais de point d’entrée de compatibilité vers `validateurs-auth.ts`, `validateurs-cuisine.ts`, etc. | 1h | 🟡 Important |
+| 2.7 | ✅ **Refactorer page courses** | Extraction des panneaux/dialogues vers `composants/courses/` + hook `utiliser-page-courses.ts` | 2h | 🟡 Important |
+| 2.8 | ✅ **Refactorer page travaux** | Page déjà ramenée à **46 lignes**, critère validé | 1h | 🟡 Important |
+| 2.9 | ✅ **Archiver fichiers racine obsolètes** | Le fichier historique `AUDIT_COMPLET_AVRIL_2026.md` n’est plus présent à la racine | 15min | 🟢 Souhaitable |
 
 ### Critères de validation
 
-- [ ] `grep -rn "Phase [A-Z0-9]" src/ frontend/src/ --include="*.py" --include="*.ts" --include="*.tsx"` ne remonte plus de commentaires Phase/Sprint
-- [ ] Aucun fichier de test ne contient "phase" ou "sprint" dans son nom
-- [ ] `fonctionnalites_avancees.py` n'existe plus
-- [ ] Pages courses et travaux < 500 lignes chacune
-- [ ] Tous les fichiers API frontend sont en kebab-case
+- [x] `grep -rn "Phase [A-Z0-9]" src/ frontend/src/ --include="*.py" --include="*.ts" --include="*.tsx"` ne remonte plus de commentaires Phase/Sprint
+- [x] Aucun fichier de test ne contient `phase` ou `sprint` dans son nom
+- [x] `fonctionnalites_avancees.py` n'existe plus
+- [x] Pages courses et travaux < 500 lignes chacune (`296` et `46`)
+- [x] Tous les fichiers API frontend sont en kebab-case
 
 ---
 

@@ -121,3 +121,57 @@ class PhotoFrigoResponse(BaseModel):
             }
         }
     }
+
+
+class SubstitutionIngredientResponse(BaseModel):
+    """Une alternative proposée pour remplacer un ingrédient manquant."""
+
+    ingredient_original: str = Field(description="Ingrédient initialement prévu")
+    ingredient_substitut: str = Field(description="Alternative recommandée")
+    ratio: float = Field(default=1.0, description="Ratio d'équivalence à appliquer")
+    impact_gout: str = Field(default="leger", description="neutre|leger|notable")
+    tags: list[str] = Field(default_factory=list)
+    note: str = Field(default="")
+    disponible_en_stock: bool = Field(default=False)
+
+
+class AdaptationRecetteResponse(BaseModel):
+    """Réponse d'adaptation d'une recette quand il manque un ingrédient."""
+
+    ingredient_manquant: str = Field(description="Ingrédient à remplacer")
+    quantite_requise: float = Field(default=1.0)
+    unite: str = Field(default="")
+    substitutions: list[SubstitutionIngredientResponse] = Field(default_factory=list)
+    meilleure_en_stock: SubstitutionIngredientResponse | None = Field(default=None)
+    message: str = Field(default="")
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "ingredient_manquant": "crème fraîche",
+                "quantite_requise": 20,
+                "unite": "cl",
+                "substitutions": [
+                    {
+                        "ingredient_original": "crème fraîche",
+                        "ingredient_substitut": "yaourt nature",
+                        "ratio": 1.0,
+                        "impact_gout": "leger",
+                        "tags": ["sans_lactose_possible"],
+                        "note": "",
+                        "disponible_en_stock": True,
+                    }
+                ],
+                "meilleure_en_stock": {
+                    "ingredient_original": "crème fraîche",
+                    "ingredient_substitut": "yaourt nature",
+                    "ratio": 1.0,
+                    "impact_gout": "leger",
+                    "tags": ["sans_lactose_possible"],
+                    "note": "",
+                    "disponible_en_stock": True,
+                },
+                "message": "Utilise yaourt nature à la même quantité pour conserver une sauce douce.",
+            }
+        }
+    }

@@ -179,6 +179,55 @@ class MoteurAutomationsService:
             .all()
         )
 
+    def _declenche_feedback_recette_negatif(
+        self,
+        declencheur: dict[str, Any],
+        db: Session,
+    ) -> list[Any]:
+        from src.core.models.user_preferences import RetourRecette
+
+        jours = int(declencheur.get("jours", 30) or 30)
+        limite = datetime.now(UTC) - timedelta(days=max(1, jours))
+        return (
+            db.query(RetourRecette)
+            .filter(
+                RetourRecette.feedback == "dislike",
+                RetourRecette.created_at >= limite,
+            )
+            .limit(20)
+            .all()
+        )
+
+    def _declenche_planning_valide(self, declencheur: dict[str, Any], db: Session) -> list[Any]:
+        from src.core.models.planning import Planning
+
+        jours = int(declencheur.get("jours", 14) or 14)
+        limite = datetime.now(UTC).date() - timedelta(days=max(1, jours))
+        return (
+            db.query(Planning)
+            .filter(
+                Planning.etat.in_(["valide", "actif"]),
+                Planning.semaine_debut >= limite,
+            )
+            .limit(10)
+            .all()
+        )
+
+    def _declenche_batch_termine(self, declencheur: dict[str, Any], db: Session) -> list[Any]:
+        from src.core.models import SessionBatchCooking
+
+        jours = int(declencheur.get("jours", 14) or 14)
+        limite = datetime.now(UTC).date() - timedelta(days=max(1, jours))
+        return (
+            db.query(SessionBatchCooking)
+            .filter(
+                SessionBatchCooking.statut.in_(["terminee", "terminée", "termine"]),
+                SessionBatchCooking.date_session >= limite,
+            )
+            .limit(10)
+            .all()
+        )
+
     def _executer_action_ajouter_courses(
         self,
         action: dict[str, Any],
@@ -287,7 +336,7 @@ class MoteurAutomationsService:
         )
         return 1
 
-    def _executer_action_creer_tache_maison(self, action: dict[str, Any], db: Session) -> int:
+    def _executer_action_creer_tache_maison(self, action: dict[str, Any], db: Session, user_id: int) -> int:
         db.add(
             TacheEntretien(
                 nom=str(action.get("nom", "Tâche automation")),
@@ -298,7 +347,101 @@ class MoteurAutomationsService:
                 fait=False,
             )
         )
+        if bool(action.get("notifier", False)):
+            self._executer_action_notifier(
+                {
+                    "titre": str(action.get("titre_notification", "Nouvelle tâche entretien")),
+                    "message": str(
+                        action.get(
+                            "message_notification",
+                            "Une nouvelle tâche d’entretien a été créée automatiquement.",
+                        )
+                    ),
+                },
+                [],
+                user_id,
+            )
         return 1
+
+    def _executer_action_generer_courses_planning(
+        self,
+        _action: dict[str, Any],
+        items: list[Any],
+        db: Session,
+    ) -> int:
+        from src.services.ia.bridges import obtenir_service_bridges
+
+        service = obtenir_service_bridges()
+        executions = 0
+        for item in items:
+            planning_id = getattr(item, "id", None)
+            semaine_debut = getattr(item, "semaine_debut", None)
+            if planning_id is None and isinstance(item, dict):
+                planning_id = item.get("planning_id") or item.get("id")
+                semaine_debut = item.get("semaine_debut")
+            if not planning_id:
+                continue
+            resultat = service.generer_courses_auto_depuis_planning(
+                int(planning_id),
+                semaine_debut=semaine_debut,
+                db=db,
+            )
+            if resultat.get("nb_articles", 0) > 0 or resultat.get("liste_id"):
+                executions += 1
+        return executions
+
+    def _executer_action_pre_remplir_planning_batch(
+        self,
+        _action: dict[str, Any],
+        items: list[Any],
+        db: Session,
+    ) -> int:
+        from src.services.ia.bridges import obtenir_service_bridges
+
+        service = obtenir_service_bridges()
+        executions = 0
+        for item in items:
+            session_id = getattr(item, "id", None)
+            if session_id is None and isinstance(item, dict):
+                session_id = item.get("session_id") or item.get("id")
+            if not session_id:
+                continue
+            resultat = service.pre_remplir_planning_depuis_batch(int(session_id), db=db)
+            if resultat.get("nb_repas_mis_a_jour", 0) > 0 or resultat.get("planning_id"):
+                executions += 1
+        return executions
+
+    def _executer_action_ajuster_suggestions_recette(
+        self,
+        action: dict[str, Any],
+        items: list[Any],
+        db: Session,
+    ) -> int:
+        from src.services.ia.bridges import obtenir_service_bridges
+
+        service = obtenir_service_bridges()
+        executions = 0
+        note_defaut = action.get("seuil_note")
+        for item in items:
+            recette_id = getattr(item, "recette_id", None)
+            feedback = getattr(item, "feedback", None)
+            user_id = getattr(item, "user_id", None)
+            if isinstance(item, dict):
+                recette_id = recette_id or item.get("recette_id")
+                feedback = feedback or item.get("feedback")
+                user_id = user_id or item.get("user_id")
+            if not recette_id:
+                continue
+            resultat = service.appliquer_feedback_recette_sur_suggestions(
+                int(recette_id),
+                note=int(note_defaut) if note_defaut is not None else None,
+                feedback=str(feedback or "dislike"),
+                user_id=str(user_id or "system"),
+                db=db,
+            )
+            if resultat.get("recette_id"):
+                executions += 1
+        return executions
 
     def _executer_action_generer_rapport_pdf(self, action: dict[str, Any], user_id: int) -> int:
         dispatcher = get_dispatcher_notifications()
@@ -350,6 +493,12 @@ class MoteurAutomationsService:
             return self._declenche_document_expiration(declencheur, db)
         if type_declencheur == "recette_sans_photo":
             return self._declenche_recette_sans_photo(db)
+        if type_declencheur == "feedback_recette_negatif":
+            return self._declenche_feedback_recette_negatif(declencheur, db)
+        if type_declencheur == "planning_valide":
+            return self._declenche_planning_valide(declencheur, db)
+        if type_declencheur == "batch_termine":
+            return self._declenche_batch_termine(declencheur, db)
         raise ValueError(f"Déclencheur non supporté: {type_declencheur}")
 
     def _executer_une_regle(self, regle: AutomationRegle, db: Session, *, dry_run: bool = False) -> dict[str, Any]:
@@ -388,7 +537,7 @@ class MoteurAutomationsService:
                 regle.user_id,
             )
         elif type_action == "creer_tache_maison":
-            executed = self._executer_action_creer_tache_maison(action, db)
+            executed = self._executer_action_creer_tache_maison(action, db, regle.user_id)
         elif type_action == "ajouter_au_planning":
             executed = self._executer_action_ajouter_au_planning(action, db)
         elif type_action == "mettre_a_jour_budget":
@@ -403,6 +552,12 @@ class MoteurAutomationsService:
             executed = self._executer_action_envoyer_telegram(action, regle.user_id)
         elif type_action == "envoyer_email":
             executed = self._executer_action_envoyer_email(action, regle.user_id)
+        elif type_action == "generer_courses_planning":
+            executed = self._executer_action_generer_courses_planning(action, items, db)
+        elif type_action == "pre_remplir_planning_batch":
+            executed = self._executer_action_pre_remplir_planning_batch(action, items, db)
+        elif type_action == "ajuster_suggestions_recette":
+            executed = self._executer_action_ajuster_suggestions_recette(action, items, db)
         else:
             return {
                 "success": False,

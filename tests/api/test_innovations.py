@@ -19,8 +19,8 @@ from fastapi.testclient import TestClient
 
 @pytest.fixture
 def mock_innovations_service():
-    """Mock du service InnovationsService."""
-    with patch("src.api.routes.fonctionnalites_avancees._get_service") as mock:
+    """Mock du service InnovationsService via la factory actuelle."""
+    with patch("src.services.experimental.get_innovations_service") as mock:
         service = MagicMock()
         mock.return_value = service
         yield service

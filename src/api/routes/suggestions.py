@@ -8,16 +8,27 @@ avec limitation de dÃ©bit intÃ©grÃ©e et cache sÃ©mantique.
 import logging
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from pydantic import BaseModel, Field
 
 from src.api.dependencies import require_auth
 from src.api.rate_limiting import verifier_limite_debit_ia
-from src.api.schemas import SuggestionsPlanningResponse, SuggestionsRecettesResponse
+from src.api.schemas import AdaptationRecetteResponse, SuggestionsPlanningResponse, SuggestionsRecettesResponse
 from src.api.schemas.errors import REPONSES_IA
 from src.api.utils import gerer_exception_api
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1/suggestions", tags=["IA"])
+
+
+class AdaptationRecetteRequest(BaseModel):
+    """Payload pour demander une adaptation rapide d'ingrédient."""
+
+    ingredient_manquant: str = Field(..., min_length=2, max_length=120)
+    quantite: float = Field(default=1.0, ge=0)
+    unite: str = Field(default="", max_length=30)
+    stock_disponible: list[str] = Field(default_factory=list)
+    tags_requis: list[str] = Field(default_factory=list)
 
 
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -259,6 +270,93 @@ async def menu_du_jour(
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # PRÃ‰DICTIONS ML
 # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
+
+@router.post("/adaptation-recette", response_model=AdaptationRecetteResponse, responses=REPONSES_IA)
+@gerer_exception_api
+async def adaptation_recette(
+    body: AdaptationRecetteRequest,
+    user: dict = Depends(require_auth),
+    _rate_check: dict = Depends(verifier_limite_debit_ia),
+):
+    """IA4 — Propose des alternatives quand il manque un ingrédient dans une recette."""
+    from src.core.db import obtenir_contexte_db
+    from src.core.models import ArticleInventaire
+    from src.services.cuisine.suggestions.substitutions import suggerer_substitutions_recette
+
+    stock_disponible = list(body.stock_disponible)
+    if not stock_disponible:
+        try:
+            with obtenir_contexte_db() as session:
+                stock_disponible = [
+                    article.nom
+                    for article in session.query(ArticleInventaire)
+                    .filter(ArticleInventaire.quantite > 0)
+                    .order_by(ArticleInventaire.nom.asc())
+                    .limit(80)
+                    .all()
+                    if article.nom
+                ]
+        except Exception:
+            stock_disponible = []
+
+    resultats = suggérer_substitutions_recette(
+        [
+            {
+                "nom": body.ingredient_manquant,
+                "quantite": body.quantite,
+                "unite": body.unite,
+            }
+        ],
+        stock_disponible=stock_disponible,
+        tags_requis=body.tags_requis,
+    )
+
+    adaptation = resultats[0] if resultats else None
+    substitutions = []
+    meilleure_en_stock = None
+    if adaptation is not None:
+        substitutions = [
+            {
+                "ingredient_original": sub.ingredient_original,
+                "ingredient_substitut": sub.ingredient_substitut,
+                "ratio": sub.ratio,
+                "impact_gout": sub.impact_gout,
+                "tags": list(sub.tags),
+                "note": sub.note,
+                "disponible_en_stock": any(
+                    sub.ingredient_substitut.lower() in stock.lower() or stock.lower() in sub.ingredient_substitut.lower()
+                    for stock in stock_disponible
+                ),
+            }
+            for sub in adaptation.substitutions
+        ]
+        if adaptation.meilleure_en_stock is not None:
+            sub = adaptation.meilleure_en_stock
+            meilleure_en_stock = {
+                "ingredient_original": sub.ingredient_original,
+                "ingredient_substitut": sub.ingredient_substitut,
+                "ratio": sub.ratio,
+                "impact_gout": sub.impact_gout,
+                "tags": list(sub.tags),
+                "note": sub.note,
+                "disponible_en_stock": True,
+            }
+
+    message = (
+        f"Utilise {meilleure_en_stock['ingredient_substitut']} à environ {meilleure_en_stock['ratio']}x la quantité habituelle."
+        if meilleure_en_stock
+        else "Aucune substitution évidente en stock, consulte les alternatives proposées."
+    )
+
+    return {
+        "ingredient_manquant": body.ingredient_manquant,
+        "quantite_requise": body.quantite,
+        "unite": body.unite,
+        "substitutions": substitutions,
+        "meilleure_en_stock": meilleure_en_stock,
+        "message": message,
+    }
 
 
 @router.get("/predictions/courses")
