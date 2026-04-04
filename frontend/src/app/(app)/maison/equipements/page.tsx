@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { SkeletonPage } from "@/composants/ui/skeleton-page";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/composants/ui/collapsible";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
@@ -254,11 +255,11 @@ function OngletInventaire() {
       )}
 
       {!pieces.length ? (
-        <Card><CardContent className="py-10 text-center text-muted-foreground">
-          <Boxes className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p className="font-medium">Aucun équipement inventorié</p>
-          <p className="text-xs mt-1">Ajoutez vos équipements depuis la visualisation ou via l'API</p>
-        </CardContent></Card>
+        <EtatVide
+          Icone={Boxes}
+          titre="Aucun équipement inventorié"
+          description="Ajoutez vos équipements depuis la visualisation ou via l’API pour suivre l’inventaire et les garanties."
+        />
       ) : (
         <div className="space-y-4">
           {pieces.map(({ piece, objets }) => (
@@ -336,7 +337,11 @@ function OngletDomotique() {
   return (
     <div className="space-y-3">
       {!categories.length ? (
-        <Card><CardContent className="py-10 text-center text-muted-foreground"><Wifi className="h-8 w-8 mx-auto mb-2 opacity-50" />Aucune astuce domotique</CardContent></Card>
+        <EtatVide
+          Icone={Wifi}
+          titre="Aucune astuce domotique"
+          description="Les recommandations apparaîtront ici dès qu’un premier catalogue ou conseil sera disponible."
+        />
       ) : (
         categories.map((cat) => (
           <Collapsible key={cat.id} open={expanded === cat.id} onOpenChange={(o) => setExpanded(o ? cat.id : null)}>

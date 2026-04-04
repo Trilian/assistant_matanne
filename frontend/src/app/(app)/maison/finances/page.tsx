@@ -18,6 +18,7 @@ import {
 import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
 import { SkeletonPage } from "@/composants/ui/skeleton-page";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Progress } from "@/composants/ui/progress";
@@ -87,7 +88,11 @@ function OngletCharges() {
       {isLoading ? (
         <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-14" />)}</div>
       ) : !charges?.length ? (
-        <Card><CardContent className="py-10 text-center text-muted-foreground"><Receipt className="h-8 w-8 mx-auto mb-2 opacity-50" />Aucune charge pour {annee}</CardContent></Card>
+        <EtatVide
+          Icone={Receipt}
+          titre={`Aucune charge pour ${annee}`}
+          description="Ajoutez vos contrats et charges fixes pour suivre le coût annuel de la maison."
+        />
       ) : (
         <div className="space-y-3">
           {Object.entries(parType).map(([type, montant]) => (
@@ -200,7 +205,12 @@ function OngletDepenses() {
       {isLoading ? (
         <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-14" />)}</div>
       ) : !depenses?.length ? (
-        <Card><CardContent className="py-10 text-center text-muted-foreground"><Banknote className="h-8 w-8 mx-auto mb-2 opacity-50" />Aucune dépense enregistrée</CardContent></Card>
+        <EtatVide
+          Icone={Banknote}
+          titre="Aucune dépense enregistrée"
+          description="Commencez par saisir une première dépense pour alimenter les graphiques et les comparaisons."
+          action={<Button size="sm" onClick={ouvrirCreation}><Plus className="mr-2 h-4 w-4" />Ajouter une dépense</Button>}
+        />
       ) : (
         <div className="space-y-2">
           {depenses.map((d: DepenseMaison) => {
@@ -338,7 +348,11 @@ function OngletEnergie() {
           </CardContent>
         </Card>
       ) : (
-        <Card><CardContent className="py-10 text-center text-muted-foreground"><Zap className="h-8 w-8 mx-auto mb-2 opacity-50" />Aucun historique</CardContent></Card>
+        <EtatVide
+          Icone={Zap}
+          titre="Aucun historique"
+          description="Ajoutez quelques relevés pour visualiser l'évolution de la consommation énergétique."
+        />
       )}
 
       {!!releves?.length && (

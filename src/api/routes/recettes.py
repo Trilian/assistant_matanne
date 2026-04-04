@@ -6,6 +6,7 @@ recherche par nom et documentation OpenAPI enrichie.
 """
 
 from datetime import date
+from difflib import SequenceMatcher
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
@@ -96,6 +97,80 @@ async def obtenir_repas_adaptatif_garmin(
     user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
     result = service.proposer_repas_adapte_garmin(user_id=user_id)
     return result or SuggestionRepasSoirResponse()
+
+
+@router.get("/doublons", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def detecter_doublons_recettes(
+    seuil: float = Query(0.72, ge=0.3, le=1.0),
+    limite: int = Query(12, ge=1, le=50),
+    user: dict[str, Any] = Depends(require_auth),
+) -> dict[str, Any]:
+    """Détecte les recettes potentiellement très proches pour éviter les doublons dans la collection."""
+    from src.core.models import Recette
+
+    def _normaliser(valeur: str | None) -> str:
+        return " ".join((valeur or "").strip().lower().replace("-", " ").split())
+
+    def _query() -> dict[str, Any]:
+        with executer_avec_session() as session:
+            recettes = session.query(Recette).all()
+            doublons: list[dict[str, Any]] = []
+
+            for index, recette_source in enumerate(recettes):
+                ingredients_source = {
+                    _normaliser(getattr(item.ingredient, "nom", None))
+                    for item in (recette_source.ingredients or [])
+                    if getattr(item, "ingredient", None) and _normaliser(getattr(item.ingredient, "nom", None))
+                }
+                nom_source = _normaliser(recette_source.nom)
+
+                for recette_proche in recettes[index + 1 :]:
+                    nom_proche = _normaliser(recette_proche.nom)
+                    ingredients_proches = {
+                        _normaliser(getattr(item.ingredient, "nom", None))
+                        for item in (recette_proche.ingredients or [])
+                        if getattr(item, "ingredient", None) and _normaliser(getattr(item.ingredient, "nom", None))
+                    }
+
+                    score_nom = SequenceMatcher(None, nom_source, nom_proche).ratio()
+                    union = ingredients_source | ingredients_proches
+                    intersection = ingredients_source & ingredients_proches
+                    score_ingredients = (len(intersection) / len(union)) if union else 0.0
+                    score = round((score_nom * 0.68) + (score_ingredients * 0.32), 2)
+
+                    if score < seuil:
+                        continue
+
+                    raisons: list[str] = []
+                    if score_nom >= 0.78:
+                        raisons.append("Nom très proche")
+                    if len(intersection) >= 2 or score_ingredients >= 0.45:
+                        raisons.append("Base d'ingrédients similaire")
+                    if not raisons:
+                        raisons.append("Structure globale voisine")
+
+                    doublons.append(
+                        {
+                            "recette_source": {"id": recette_source.id, "nom": recette_source.nom},
+                            "recette_proche": {"id": recette_proche.id, "nom": recette_proche.nom},
+                            "score_similarite": score,
+                            "raisons": raisons,
+                            "ingredients_communs": sorted(intersection)[:5],
+                        }
+                    )
+
+            doublons = sorted(
+                doublons,
+                key=lambda item: (
+                    item.get("score_similarite", 0),
+                    item.get("recette_source", {}).get("nom", ""),
+                ),
+                reverse=True,
+            )
+            return {"items": doublons[:limite], "total": len(doublons), "seuil": seuil}
+
+    return await executer_async(_query)
 
 
 @router.post("/{recette_id}/partager", responses=REPONSES_CRUD_CREATION)

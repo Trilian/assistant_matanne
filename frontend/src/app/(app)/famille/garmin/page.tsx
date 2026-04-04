@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Activity, RefreshCw, Link as LinkIcon, Unplug } from "lucide-react";
+import { Activity, RefreshCw, Link as LinkIcon, Unplug, Sparkles, CloudSun } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Input } from "@/composants/ui/input";
+import { Badge } from "@/composants/ui/badge";
+import { SkeletonPage } from "@/composants/ui/skeleton-page";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import { utiliserMutation, utiliserRequete, utiliserInvalidation } from "@/crochets/utiliser-api";
 import { clientApi } from "@/bibliotheque/api/client";
+import { obtenirSuggestionActiviteSoir } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 
 type StatutGarmin = {
@@ -31,15 +35,21 @@ export default function PageGarmin() {
   const [verifier, setVerifier] = useState("");
   const invalider = utiliserInvalidation();
 
-  const { data: statut } = utiliserRequete(["garmin", "status"], async () => {
+  const { data: statut, isLoading: chargementStatut } = utiliserRequete(["garmin", "status"], async () => {
     const { data } = await clientApi.get<StatutGarmin>("/garmin/status");
     return data;
   });
 
-  const { data: stats } = utiliserRequete(["garmin", "stats"], async () => {
+  const { data: stats, isLoading: chargementStats } = utiliserRequete(["garmin", "stats"], async () => {
     const { data } = await clientApi.get<StatsGarmin>("/garmin/stats");
     return data;
   });
+
+  const { data: suggestionSoir, isLoading: chargementSuggestion } = utiliserRequete(
+    ["famille", "activites", "suggestion-soir"],
+    obtenirSuggestionActiviteSoir,
+    { enabled: Boolean(statut?.connected) }
+  );
 
   const { mutate: connecter, isPending: enConnexion } = utiliserMutation(
     async () => {
@@ -96,6 +106,18 @@ export default function PageGarmin() {
       onError: () => toast.error("Déconnexion Garmin impossible"),
     }
   );
+
+  if (chargementStatut || chargementStats) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Garmin santé & sport</h1>
+          <p className="text-muted-foreground">Connexion, synchronisation et statistiques d'activité.</p>
+        </div>
+        <SkeletonPage ariaLabel="Chargement de l'espace Garmin" lignes={["h-28 w-full", "h-48 w-full"]} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -182,6 +204,61 @@ export default function PageGarmin() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Activité du soir recommandée
+          </CardTitle>
+          <CardDescription>
+            Proposition contextualisée avec la météo du jour et votre rythme Garmin récent.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!statut?.connected ? (
+            <EtatVide
+              Icone={Activity}
+              titre="Connectez Garmin pour personnaliser la soirée"
+              description="Une fois la synchronisation activée, l'app proposera automatiquement un créneau doux, modéré ou plus dynamique selon votre semaine."
+              action={<Button size="sm" onClick={() => connecter()}>Connecter Garmin</Button>}
+            />
+          ) : chargementSuggestion ? (
+            <SkeletonPage ariaLabel="Chargement de la suggestion du soir" lignes={["h-6 w-40", "h-4 w-full", "h-4 w-3/4"]} />
+          ) : suggestionSoir ? (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary">Énergie {suggestionSoir.niveau_energie}</Badge>
+                <Badge variant="outline" className="gap-1">
+                  <CloudSun className="h-3 w-3" />
+                  {suggestionSoir.meteo}
+                  {suggestionSoir.temperature_c != null ? ` · ${suggestionSoir.temperature_c}°C` : ""}
+                </Badge>
+              </div>
+              <div className="rounded-lg border bg-muted/30 p-3">
+                <p className="font-medium">{suggestionSoir.recommandation}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{suggestionSoir.raison}</p>
+              </div>
+              {!!suggestionSoir.alternatives?.length && (
+                <div>
+                  <p className="text-xs font-medium uppercase text-muted-foreground">Alternatives rapides</p>
+                  <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                    {suggestionSoir.alternatives.map((alternative) => (
+                      <li key={alternative}>• {alternative}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            <EtatVide
+              Icone={Sparkles}
+              titre="Suggestion indisponible pour le moment"
+              description="Réessayez après une synchronisation Garmin ou plus tard dans la journée."
+            />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

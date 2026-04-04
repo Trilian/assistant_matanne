@@ -20,6 +20,7 @@ import {
   Wind,
   Star,
   Leaf,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/composants/ui/button";
@@ -27,6 +28,7 @@ import { Input } from "@/composants/ui/input";
 import { Card, CardContent } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import {
   Select,
   SelectContent,
@@ -42,6 +44,7 @@ import {
   listerRecettesSaisonnieres,
   planifierRecetteSemaine,
   deplanifierRecetteSemaine,
+  obtenirDoublonsRecettes,
 } from "@/bibliotheque/api/recettes";
 import { DialogueImportRecette } from "@/composants/cuisine/dialogue-import-recette";
 import { SwipeableItem } from "@/composants/swipeable-item";
@@ -122,6 +125,11 @@ export default function PageRecettes() {
   const { data: planifiees } = utiliserRequete(
     ["recettes", "semaine"],
     listerRecettesSemaine
+  );
+  const { data: doublonsRecettes } = utiliserRequete(
+    ["recettes", "doublons"],
+    () => obtenirDoublonsRecettes(0.75),
+    { staleTime: 30 * 60 * 1000 }
   );
   const idsPlanifies = useMemo(
     () => new Set((planifiees ?? []).map((r) => r.id)),
@@ -281,6 +289,43 @@ export default function PageRecettes() {
       </div>
 
 
+      {doublonsRecettes?.items?.length ? (
+        <Card className="border-amber-200 bg-amber-50/60 dark:border-amber-900 dark:bg-amber-950/20">
+          <CardContent className="py-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-amber-100 p-2 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
+                <Copy className="h-4 w-4" />
+              </div>
+              <div className="space-y-1">
+                <p className="font-medium">Doublons potentiels</p>
+                <p className="text-sm text-muted-foreground">
+                  Quelques recettes se ressemblent assez pour mériter une fusion ou une clarification.
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-2 md:grid-cols-2">
+              {doublonsRecettes.items.slice(0, 4).map((doublon) => (
+                <div key={`${doublon.recette_source.id}-${doublon.recette_proche.id}`} className="rounded-lg border bg-background/80 p-3">
+                  <p className="text-sm font-medium">
+                    {doublon.recette_source.nom} ↔ {doublon.recette_proche.nom}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Similarité {(doublon.score_similarite * 100).toFixed(0)}%
+                  </p>
+                  {doublon.raisons?.length ? (
+                    <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      {doublon.raisons.slice(0, 2).map((raison) => (
+                        <li key={raison}>• {raison}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
       {/* Grille de recettes */}
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -295,27 +340,25 @@ export default function PageRecettes() {
           ))}
         </div>
       ) : recettesFiltrees.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12">
-            <ChefHat className="h-12 w-12 text-muted-foreground" />
-            <div className="text-center">
-              <p className="font-medium">Aucune recette trouvée</p>
-              <p className="text-sm text-muted-foreground">
-                {recherche
-                  ? "Essayez avec d'autres termes de recherche"
-                  : "Commencez par ajouter votre première recette"}
-              </p>
-            </div>
-            {!recherche && (
+        <EtatVide
+          Icone={ChefHat}
+          titre="Aucune recette trouvée"
+          description={
+            recherche
+              ? "Essayez avec d'autres termes de recherche."
+              : "Commencez par ajouter votre première recette."
+          }
+          action={
+            !recherche ? (
               <Button asChild>
                 <Link href="/cuisine/recettes/nouveau">
                   <Plus className="mr-2 h-4 w-4" />
                   Créer une recette
                 </Link>
               </Button>
-            )}
-          </CardContent>
-        </Card>
+            ) : undefined
+          }
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {recettesFiltrees.map((recette) => (

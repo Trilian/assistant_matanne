@@ -4,7 +4,7 @@ Routes API Famille — Activités familiales et suggestions IA.
 Sous-routeur inclus dans famille.py.
 """
 
-from datetime import date
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -50,6 +50,18 @@ class ParamsSuggestionsActivites(BaseModel):
     nb_suggestions: int = Field(
         default=5, ge=1, le=10, description="Nombre de suggestions souhaitées"
     )
+
+
+class SuggestionActiviteSoirResponse(BaseModel):
+    """Suggestion contextualisée pour le soir à partir de Garmin et de la météo."""
+
+    meteo: str = Field(default="Variable")
+    temperature_c: float | None = Field(default=None)
+    niveau_energie: str = Field(default="moderee", description="douce | moderee | dynamique")
+    recommandation: str = Field(default="Balade calme de 20 minutes puis étirements en intérieur")
+    raison: str = Field(default="Suggestion générée à partir de la météo et de l'activité récente.")
+    alternatives: list[str] = Field(default_factory=list)
+    source: list[str] = Field(default_factory=lambda: ["météo", "activité Garmin récente"])
 
 # ═══════════════════════════════════════════════════════════
 
@@ -317,6 +329,114 @@ async def supprimer_activite(
 # ═══════════════════════════════════════════════════════════
 # SUGGESTIONS IA 
 # ═══════════════════════════════════════════════════════════
+
+
+@router.get("/activites/suggestion-soir", responses=REPONSES_LISTE)
+@gerer_exception_api
+async def suggerer_activite_soir(
+    user: dict[str, Any] = Depends(require_auth),
+) -> SuggestionActiviteSoirResponse:
+    """Propose une activité du soir adaptée à la météo et au rythme Garmin récent."""
+    from src.core.models.users import ActiviteGarmin
+    from src.services.integrations.weather.service import obtenir_service_meteo
+
+    def _query() -> SuggestionActiviteSoirResponse:
+        condition = "Météo variable"
+        temperature: float | None = None
+        pluie = 0.0
+
+        try:
+            meteo_service = obtenir_service_meteo()
+            previsions = meteo_service.get_previsions(nb_jours=1) or []
+            if previsions:
+                prevision = previsions[0]
+                condition = prevision.condition or condition
+                temperature = float(prevision.temperature_max)
+                pluie = float(prevision.precipitation_mm or 0.0)
+        except Exception as exc:
+            logger.debug("Suggestion soir: météo indisponible (%s)", exc)
+
+        user_id_raw = user.get("id")
+        user_id = int(user_id_raw) if isinstance(user_id_raw, (int, str)) and str(user_id_raw).isdigit() else None
+
+        nb_activites = 0
+        duree_minutes = 0.0
+        if user_id is not None:
+            with executer_avec_session() as session:
+                date_limite = datetime.utcnow() - timedelta(days=7)
+                activites = (
+                    session.query(ActiviteGarmin)
+                    .filter(
+                        ActiviteGarmin.user_id == user_id,
+                        ActiviteGarmin.date_debut >= date_limite,
+                    )
+                    .all()
+                )
+                nb_activites = len(activites)
+                duree_minutes = sum(float(a.duree_secondes or 0) for a in activites) / 60
+
+        if duree_minutes >= 180 or nb_activites >= 4:
+            niveau = "douce"
+            if pluie >= 4:
+                recommandation = "Séance récupération à la maison : mobilité douce, étirements et jeu calme avec Jules."
+                alternatives = [
+                    "Yoga doux de 10 minutes",
+                    "Parcours motricité indoor",
+                    "Respiration + lecture imagier",
+                ]
+            else:
+                recommandation = "Marche récupération très légère de 15 à 20 minutes puis retour au calme."
+                alternatives = [
+                    "Étirements dehors sur la terrasse",
+                    "Balade poussette courte",
+                    "Jeu calme au parc si besoin",
+                ]
+            raison = "La charge Garmin récente est déjà soutenue : mieux vaut récupérer ce soir sans ajouter trop d'intensité."
+        elif duree_minutes < 60 and nb_activites <= 1:
+            niveau = "dynamique" if pluie < 4 and (temperature is None or temperature >= 12) else "moderee"
+            if pluie >= 4 or (temperature is not None and temperature < 10):
+                recommandation = "Mini circuit cardio ou danse en intérieur pendant 15 minutes avant la routine du soir."
+                alternatives = [
+                    "Jeu moteur dans le salon",
+                    "Renfo léger sans matériel",
+                    "Parcours coussins + musique",
+                ]
+            else:
+                recommandation = "Balade familiale de 25 à 30 minutes avant le dîner pour relancer l'énergie."
+                alternatives = [
+                    "Petit tour vélo ou draisienne",
+                    "Parc de proximité",
+                    "Marche active avec mission photo",
+                ]
+            raison = "Peu d'activité récente détectée : une séance courte ce soir aidera à relancer l'énergie sans alourdir la journée."
+        else:
+            niveau = "moderee"
+            if pluie >= 4:
+                recommandation = "Balade calme de 20 minutes puis étirements en intérieur"
+                alternatives = [
+                    "Jeu moteur à la maison",
+                    "Petite marche après le dîner",
+                    "Étirements famille 10 minutes",
+                ]
+            else:
+                recommandation = "Sortie douce en extérieur puis temps calme à la maison pour garder le rythme."
+                alternatives = [
+                    "Marche digestive",
+                    "Jeu de ballon léger",
+                    "Routine mobilité + histoire",
+                ]
+            raison = "Le niveau d'activité récent est équilibré : privilégier une sortie courte, simple à tenir et compatible avec la météo."
+
+        return SuggestionActiviteSoirResponse(
+            meteo=condition,
+            temperature_c=temperature,
+            niveau_energie=niveau,
+            recommandation=recommandation,
+            raison=raison,
+            alternatives=alternatives,
+        )
+
+    return await executer_async(_query)
 
 
 @router.post("/weekend/suggestions-ia", responses=REPONSES_LISTE)

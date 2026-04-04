@@ -17,7 +17,9 @@ import {
   DialogFooter,
 } from '@/composants/ui/dialog'
 import { Button } from '@/composants/ui/button'
+import { Badge } from '@/composants/ui/badge'
 import { Card, CardContent } from '@/composants/ui/card'
+import { Progress } from '@/composants/ui/progress'
 import {
   ChefHat,
   ShoppingCart,
@@ -84,6 +86,7 @@ const ETAPES_TOUR = [
     description: 'Votre hub de gestion familiale tout-en-un',
     icone: Home,
     lien: undefined,
+    ctaLabel: undefined,
     contenu: (
       <div className="space-y-3">
         <p className="text-sm">
@@ -99,6 +102,7 @@ const ETAPES_TOUR = [
     description: 'Recettes, planning des repas et courses',
     icone: ChefHat,
     lien: '/cuisine',
+    ctaLabel: 'Ouvrir la cuisine',
     contenu: (
       <div className="space-y-2">
         <div className="flex items-start gap-3">
@@ -136,6 +140,7 @@ const ETAPES_TOUR = [
     description: 'Suivi enfant, budget et activités',
     icone: Users,
     lien: '/famille',
+    ctaLabel: 'Ouvrir la famille',
     contenu: (
       <div className="space-y-2">
         <div className="flex items-start gap-3">
@@ -164,6 +169,7 @@ const ETAPES_TOUR = [
     description: 'Projets, entretien et énergie',
     icone: Home,
     lien: '/maison',
+    ctaLabel: 'Ouvrir la maison',
     contenu: (
       <div className="space-y-2">
         <div className="flex items-start gap-3">
@@ -192,6 +198,7 @@ const ETAPES_TOUR = [
     description: 'Paris sportifs, loto et utilitaires',
     icone: Gamepad2,
     lien: '/jeux',
+    ctaLabel: 'Ouvrir les jeux',
     contenu: (
       <div className="space-y-2">
         <div className="flex items-start gap-3">
@@ -220,6 +227,7 @@ const ETAPES_TOUR = [
     description: 'Les 3 actions qui donnent le plus de valeur dès le départ',
     icone: Rocket,
     lien: '/parametres/preferences-notifications',
+    ctaLabel: 'Configurer maintenant',
     contenu: (
       <div className="space-y-3">
         {[
@@ -246,6 +254,7 @@ const ETAPES_TOUR = [
     description: 'Gagnez du temps avec ces raccourcis',
     icone: ArrowRight,
     lien: undefined,
+    ctaLabel: undefined,
     contenu: (
       <div className="space-y-3">
         <div className="rounded-lg bg-muted p-3 space-y-2">
@@ -301,6 +310,7 @@ export function TourOnboarding({ forcer = false, onTerminer }: TourOnboardingPro
   const etape = ETAPES_TOUR[etapeActuelle]
   const estDerniereEtape = etapeActuelle === ETAPES_TOUR.length - 1
   const Icone = etape.icone
+  const progression = ((etapeActuelle + 1) / ETAPES_TOUR.length) * 100
 
   /**
    * Initialise le tour au premier chargement
@@ -385,7 +395,7 @@ export function TourOnboarding({ forcer = false, onTerminer }: TourOnboardingPro
 
   return (
     <Dialog open={ouvert} onOpenChange={(open) => !open && fermer()}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2">
@@ -398,33 +408,53 @@ export function TourOnboarding({ forcer = false, onTerminer }: TourOnboardingPro
           </div>
         </DialogHeader>
 
-        <div className="py-4">
-          <Card className="border-none shadow-none">
-            <CardContent className="pt-0">{etape.contenu}</CardContent>
-          </Card>
-        </div>
-
-        <DialogFooter className="flex-col gap-3 sm:flex-row sm:justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">
-              Étape {etapeActuelle + 1} / {ETAPES_TOUR.length}
-            </span>
-            <div className="flex gap-1">
-              {ETAPES_TOUR.map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    index === etapeActuelle ? 'bg-primary' : 'bg-muted'
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>Étape {etapeActuelle + 1} / {ETAPES_TOUR.length}</span>
+              <span>{Math.round(progression)}% du tour parcouru</span>
+            </div>
+            <Progress value={progression} className="h-2" />
+            <div className="flex flex-wrap gap-2">
+              {ETAPES_TOUR.map((item, index) => (
+                <button
+                  key={item.titre}
+                  type="button"
+                  onClick={() => setEtapeActuelle(index)}
+                  className={`rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                    index === etapeActuelle
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border text-muted-foreground hover:bg-muted'
                   }`}
-                />
+                >
+                  {index + 1}. {item.description}
+                </button>
               ))}
             </div>
           </div>
 
+          <Card className="border-none bg-muted/20 shadow-none">
+            <CardContent className="space-y-4 pt-4">
+              {etape.lien ? (
+                <div className="flex items-center gap-2 rounded-lg border border-dashed bg-background/80 px-3 py-2 text-xs text-muted-foreground">
+                  <Badge variant="secondary">Action rapide</Badge>
+                  <span>Ouvrez ce module pour tester immédiatement cette partie de l&apos;app.</span>
+                </div>
+              ) : null}
+              {etape.contenu}
+            </CardContent>
+          </Card>
+        </div>
+
+        <DialogFooter className="flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-muted-foreground">
+            Le tour peut être rejoué depuis les paramètres d&apos;affichage ou la recherche globale.
+          </p>
+
           <div className="flex gap-2 justify-end">
             <Button variant="ghost" size="sm" onClick={fermer}>
               <X className="size-4 mr-1" />
-              Passer
+              Plus tard
             </Button>
             {etapeActuelle > 0 && (
               <Button variant="outline" size="sm" onClick={etapePrecedente}>
@@ -434,7 +464,7 @@ export function TourOnboarding({ forcer = false, onTerminer }: TourOnboardingPro
             )}
             {etape.lien ? (
               <Button size="sm" onClick={visiterModule}>
-                Visiter
+                {etape.ctaLabel ?? 'Ouvrir le module'}
                 <ArrowRight className="size-4 ml-1" />
               </Button>
             ) : (

@@ -39,11 +39,13 @@ import {
   modifierEcoTip,
   supprimerEcoTip,
 } from "@/bibliotheque/api/maison";
+import { obtenirCalendrierSemisPersonnalise } from "@/bibliotheque/api/ia-modules";
 import { listerZonesJardinHabitat, obtenirResumeJardinHabitat } from "@/bibliotheque/api/habitat";
 import type { ActionEcologique } from "@/types/maison";
 import { toast } from "sonner";
 import { BoutonAchat } from "@/composants/bouton-achat";
 import { VueJardinInteractive } from "@/composants/maison/vue-jardin-interactive";
+import { EtatVide } from "@/composants/ui/etat-vide";
 
 const NOMS_MOIS = [
   "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
@@ -145,12 +147,11 @@ function OngletEco() {
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20" />)}
         </div>
       ) : !ecoTips?.length ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            <Recycle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            Aucune action éco enregistrée
-          </CardContent>
-        </Card>
+        <EtatVide
+          Icone={Recycle}
+          titre="Aucune action éco enregistrée"
+          description="Ajoute un premier geste utile pour suivre tes économies et ton impact au quotidien."
+        />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {ecoTips.map((tip) => (
@@ -300,6 +301,11 @@ function ContenuJardin() {
     ["habitat", "jardin", "resume", "maison"],
     () => obtenirResumeJardinHabitat()
   );
+  const { data: calendrierIA, isLoading: chargementCalendrierIA } = utiliserRequete(
+    ["ia", "jardin", "calendrier-personnalise", moisSemis],
+    () => obtenirCalendrierSemisPersonnalise({ mois: Number(moisSemis), region: "Maison" }),
+    { staleTime: 15 * 60 * 1000 }
+  );
 
   const [chargerIA, setChargerIA] = useState(false);
   const { data: suggestionsIA, isLoading: chargementIA } = utiliserRequete(
@@ -359,6 +365,53 @@ function ContenuJardin() {
         </CardContent>
       </Card>
 
+      {calendrierIA ? (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-sky-500" />
+              Vision IA locale
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Semis et récoltes ajustés selon la météo prévue sur les 7 prochains jours.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {chargementCalendrierIA ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            ) : (
+              <>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="rounded-lg border p-3 text-sm">
+                    <p className="text-xs text-muted-foreground">Températures</p>
+                    <p className="font-medium">{calendrierIA.meteo_resume.temp_moy_min}° / {calendrierIA.meteo_resume.temp_moy_max}°</p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-sm">
+                    <p className="text-xs text-muted-foreground">Pluie 7j</p>
+                    <p className="font-medium">{calendrierIA.meteo_resume.pluie_7j_mm} mm</p>
+                  </div>
+                  <div className="rounded-lg border p-3 text-sm">
+                    <p className="text-xs text-muted-foreground">Focus du mois</p>
+                    <p className="font-medium">{calendrierIA.a_semer.length} semis · {calendrierIA.a_recolter.length} récolte(s)</p>
+                  </div>
+                </div>
+                <div className="rounded-lg border bg-muted/30 p-3">
+                  <p className="text-xs font-medium uppercase text-muted-foreground">Conseils personnalisés</p>
+                  <ul className="mt-2 space-y-1 text-sm">
+                    {calendrierIA.conseils_personnalises.map((conseil) => (
+                      <li key={conseil}>• {conseil}</li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
+
       {zonesJardin.length > 0 ? (
         <VueJardinInteractive zones={zonesJardin} resume={resumeZones} />
       ) : null}
@@ -389,12 +442,11 @@ function ContenuJardin() {
               ))}
             </div>
           ) : !elements?.length ? (
-            <Card>
-              <CardContent className="py-10 text-center text-muted-foreground">
-                <Flower2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                Aucune plante enregistrée
-              </CardContent>
-            </Card>
+            <EtatVide
+              Icone={Flower2}
+              titre="Aucune plante enregistrée"
+              description="Ajoute quelques plantations pour suivre les semis, récoltes et rappels saisonniers."
+            />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {elements.map((el) => (
@@ -479,9 +531,12 @@ function ContenuJardin() {
                 </CardHeader>
                 <CardContent>
                   {calendrier.a_semer.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">
-                      Rien à semer ce mois
-                    </p>
+                    <EtatVide
+                      Icone={Sprout}
+                      titre="Rien à semer ce mois"
+                      description="Le calendrier ne signale aucun semis prioritaire pour cette période."
+                      className="p-4"
+                    />
                   ) : (
                     <ul className="space-y-1">
                       {calendrier.a_semer.map((p) => (
@@ -508,9 +563,12 @@ function ContenuJardin() {
                 </CardHeader>
                 <CardContent>
                   {calendrier.a_planter.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">
-                      Rien à planter ce mois
-                    </p>
+                    <EtatVide
+                      Icone={Leaf}
+                      titre="Rien à planter ce mois"
+                      description="Les plantations peuvent attendre la prochaine fenêtre météo utile."
+                      className="p-4"
+                    />
                   ) : (
                     <ul className="space-y-1">
                       {calendrier.a_planter.map((p) => (
@@ -537,9 +595,12 @@ function ContenuJardin() {
                 </CardHeader>
                 <CardContent>
                   {calendrier.a_recolter.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">
-                      Rien à récolter ce mois
-                    </p>
+                    <EtatVide
+                      Icone={Flower2}
+                      titre="Rien à récolter ce mois"
+                      description="Aucune récolte urgente repérée sur la période en cours."
+                      className="p-4"
+                    />
                   ) : (
                     <ul className="space-y-1">
                       {calendrier.a_recolter.map((p) => (

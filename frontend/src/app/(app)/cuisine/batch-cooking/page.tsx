@@ -32,6 +32,8 @@ import {
 } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { SkeletonPage } from "@/composants/ui/skeleton-page";
+import { EtatVide } from "@/composants/ui/etat-vide";
 import {
   Dialog,
   DialogContent,
@@ -159,6 +161,15 @@ export default function PageBatchCooking() {
       ? preparations
       : preparations.filter((p) => p.localisation === filtreLocalisation);
 
+  if (isLoading && !donnees) {
+    return (
+      <SkeletonPage
+        ariaLabel="Chargement du batch cooking"
+        lignes={["h-8 w-44", "h-10 w-64", "h-52 w-full"]}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -220,21 +231,17 @@ export default function PageBatchCooking() {
           ))}
         </div>
       ) : sessions.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12">
-            <CookingPot className="h-12 w-12 text-muted-foreground" />
-            <p className="text-muted-foreground">
-              Aucune session de batch cooking
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => setDialogueCreation(true)}
-            >
+        <EtatVide
+          Icone={CookingPot}
+          titre="Aucune session de batch cooking"
+          description="Créez une première session pour préparer plusieurs repas d’avance et gagner du temps dans la semaine."
+          action={
+            <Button variant="outline" onClick={() => setDialogueCreation(true)}>
               <Plus className="mr-1 h-4 w-4" />
               Créer une session
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {sessions.map((s) => (
@@ -321,22 +328,21 @@ export default function PageBatchCooking() {
               </Card>
             ))}
             {preparationsFiltrees.length === 0 && (
-              <p className="text-sm text-muted-foreground col-span-full py-4 text-center">
-                Aucune préparation dans cette catégorie.
-              </p>
+              <EtatVide
+                Icone={Snowflake}
+                titre="Aucune préparation dans cette catégorie"
+                description="Changez le filtre ou terminez une session pour remplir ce stock."
+                className="col-span-full p-6"
+              />
             )}
           </div>
         </div>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12">
-            <Snowflake className="h-12 w-12 text-muted-foreground" />
-            <p className="text-muted-foreground">Aucune préparation en stock</p>
-            <p className="text-xs text-muted-foreground">
-              Terminez une session batch cooking pour avoir des préparations disponibles.
-            </p>
-          </CardContent>
-        </Card>
+        <EtatVide
+          Icone={Snowflake}
+          titre="Aucune préparation en stock"
+          description="Terminez une session batch cooking pour avoir des portions disponibles au frigo ou au congélateur."
+        />
       )}
         </TabsContent>
 
@@ -385,15 +391,11 @@ export default function PageBatchCooking() {
           </div>
         </div>
       ) : (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12">
-            <CalendarPlus className="h-12 w-12 text-muted-foreground" />
-            <p className="text-muted-foreground">Aucune préparation disponible</p>
-            <p className="text-xs text-muted-foreground">
-              Il faut des préparations avec des portions restantes pour planifier des repas.
-            </p>
-          </CardContent>
-        </Card>
+        <EtatVide
+          Icone={CalendarPlus}
+          titre="Aucune préparation disponible"
+          description="Il faut des portions restantes pour injecter un plat batch cooking dans le planning de la semaine."
+        />
       )}
         </TabsContent>
       </Tabs>
