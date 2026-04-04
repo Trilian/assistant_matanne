@@ -38,9 +38,11 @@ export function DialogueArticleCourses({
         <DialogHeader>
           <DialogTitle>Ajouter un article</DialogTitle>
         </DialogHeader>
-        <form
+        <motion.form
           onSubmit={submitArticle((data) => onAjouterArticle(data))}
           className="space-y-4"
+          animate={erreursArticle.nom ? { x: [0, -6, 6, -4, 4, 0] } : { x: 0 }}
+          transition={{ duration: 0.35 }}
         >
           <div className="space-y-2">
             <Label htmlFor="nom-article">Nom *</Label>
