@@ -49,7 +49,7 @@ export function OngletArtisans() {
   const invalider = () => queryClient.invalidateQueries({ queryKey: ["maison", "artisans"] });
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
-    (data: Record<string, unknown>) => creerArtisan(data as Omit<Artisan, "id">),
+    (data: Parameters<typeof creerArtisan>[0]) => creerArtisan(data),
     { onSuccess: () => { invalider(); fermerDialog(); toast.success("Artisan ajouté"); } }
   );
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
@@ -73,7 +73,7 @@ export function OngletArtisans() {
     if (enEdition) {
       modifier({ id: enEdition.id, data: payload });
     } else {
-      creer(payload as Record<string, unknown>);
+      creer(payload);
     }
   };
 

@@ -37,6 +37,7 @@ import { DrawerFicheTache } from "@/composants/maison/drawer-fiche-tache";
 import { DialogueFormulaire } from "@/composants/disposition/dialogue-formulaire";
 import { utiliserDialogCrud } from "@/crochets/utiliser-dialog-crud";
 import { toast } from "sonner";
+import type { ObjetDonnees } from "@/types/commun";
 
 const JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"] as const;
 type JourSemaine = (typeof JOURS)[number];
@@ -263,30 +264,42 @@ function GuideLessive() {
         <Card>
           <CardContent className="pt-4 space-y-4">
             {/* �?tapes */}
-            {Array.isArray((data as Record<string, unknown>).etapes) && (
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">�?tapes</p>
-                <ol className="space-y-2">
-                  {((data as Record<string, unknown>).etapes as string[]).map((e: string, i: number) => (
-                    <li key={i} className="flex gap-2 text-sm">
-                      <span className="font-bold text-primary">{i + 1}.</span>
-                      {e}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )}
-            {/* Produits */}
-            {Array.isArray((data as Record<string, unknown>).produits) && (
-              <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Produits</p>
-                <div className="flex flex-wrap gap-2">
-                  {((data as Record<string, unknown>).produits as string[]).map((p: string) => (
-                    <Badge key={p} variant="secondary">�Y�� {p}</Badge>
-                  ))}
+            {(() => {
+              const etapes = Array.isArray(data.etapes)
+                ? data.etapes.filter((etape): etape is string => typeof etape === "string")
+                : [];
+
+              return etapes.length > 0 ? (
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">�?tapes</p>
+                  <ol className="space-y-2">
+                    {etapes.map((e, i) => (
+                      <li key={i} className="flex gap-2 text-sm">
+                        <span className="font-bold text-primary">{i + 1}.</span>
+                        {e}
+                      </li>
+                    ))}
+                  </ol>
                 </div>
-              </div>
-            )}
+              ) : null;
+            })()}
+            {/* Produits */}
+            {(() => {
+              const produits = Array.isArray(data.produits)
+                ? data.produits.filter((produit): produit is string => typeof produit === "string")
+                : [];
+
+              return produits.length > 0 ? (
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Produits</p>
+                  <div className="flex flex-wrap gap-2">
+                    {produits.map((p) => (
+                      <Badge key={p} variant="secondary">�Y�� {p}</Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
           </CardContent>
         </Card>
       )}
@@ -389,7 +402,7 @@ function OngletRoutines() {
     },
   ];
 
-  const handleSubmit = (vals: Record<string, unknown>) => {
+  const handleSubmit = (vals: ObjetDonnees) => {
     if (dialog.elementEnEdition) {
       modifier.mutate({ id: dialog.elementEnEdition.id, ...vals });
     } else {

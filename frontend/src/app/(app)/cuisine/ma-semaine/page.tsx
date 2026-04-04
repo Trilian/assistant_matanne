@@ -28,6 +28,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/composants/ui/badge";
 import { Progress } from "@/composants/ui/progress";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { FriseFluxCuisine } from "@/composants/cuisine/frise-flux-cuisine";
 import {
   utiliserRequete,
   utiliserMutation,
@@ -239,6 +240,51 @@ export default function MaSemainePage() {
     return true;
   }, [etapeActuelle, nbRepas]);
 
+  const etapesFrise = useMemo(
+    () => [
+      {
+        ...ETAPES[0],
+        resume: nbRepas > 0 ? `${nbRepas} repas planifiés` : "Planning à générer",
+        meta: planning?.planning_id
+          ? `Semaine du ${new Date(dateDebut).toLocaleDateString("fr-FR")}`
+          : "L'IA peut proposer une semaine complète en un clic",
+      },
+      {
+        ...ETAPES[1],
+        resume: `${articlesEnStock} articles disponibles`,
+        meta:
+          alertesCount > 0
+            ? `${alertesCount} alerte${alertesCount > 1 ? "s" : ""} stock à vérifier`
+            : "Stock stable, pas de rupture signalée",
+        alerte: alertesCount > 0,
+      },
+      {
+        ...ETAPES[2],
+        resume: coursesGenereesId ? `Liste #${coursesGenereesId} prête` : "Liste de courses à générer",
+        meta: coursesGenereesId
+          ? "Les achats peuvent être cochés au fil de l'eau"
+          : "Les articles seront calculés directement depuis les repas",
+      },
+      {
+        ...ETAPES[3],
+        resume: batchSessionId ? `Batch #${batchSessionId} créé` : "Récapitulatif et préparation",
+        meta: nutrition
+          ? `≈ ${Math.round(nutrition.moyenne_calories_par_jour)} kcal / jour`
+          : "Synthèse nutritionnelle disponible en fin de parcours",
+      },
+    ],
+    [
+      alertesCount,
+      articlesEnStock,
+      batchSessionId,
+      coursesGenereesId,
+      dateDebut,
+      nbRepas,
+      nutrition,
+      planning?.planning_id,
+    ]
+  );
+
   const allerEtapeSuivante = () => {
     if (etapeActuelle < ETAPES.length - 1 && peutAvancer) {
       setEtapeActuelle(etapeActuelle + 1);
@@ -265,6 +311,13 @@ export default function MaSemainePage() {
           Planifiez votre semaine en 4 étapes simples
         </p>
       </div>
+
+      <FriseFluxCuisine
+        etapes={etapesFrise}
+        etapeActive={etapeActuelle}
+        progression={progression}
+        onSelectionEtape={setEtapeActuelle}
+      />
 
       {/* Progress Bar */}
       <div className="space-y-2">

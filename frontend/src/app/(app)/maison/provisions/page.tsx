@@ -60,7 +60,7 @@ function OngletStocks() {
   const invalider = () => queryClient.invalidateQueries({ queryKey: ["maison", "stocks"] });
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
-    (data: Record<string, unknown>) => creerStock(data as Omit<StockMaison, "id" | "en_alerte">),
+    (data: Parameters<typeof creerStock>[0]) => creerStock(data),
     { onSuccess: () => { invalider(); fermerDialog(); toast.success("Stock créé"); } }
   );
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
@@ -70,15 +70,16 @@ function OngletStocks() {
   const { mutate: supprimer } = utiliserMutation(supprimerStock, { onSuccess: () => { invalider(); toast.success("Stock supprimé"); } });
 
   const soumettre = () => {
-    const payload = {
+    const payload: Parameters<typeof creerStock>[0] = {
       nom: form.nom,
       categorie: form.categorie || undefined,
       quantite: form.quantite ? Number(form.quantite) : 0,
       seuil_alerte: form.seuil_alerte ? Number(form.seuil_alerte) : undefined,
       emplacement: form.emplacement || undefined,
+      unite: form.unite || undefined,
     };
     if (enEdition) modifier({ id: enEdition.id, data: payload });
-    else creer(payload as Record<string, unknown>);
+    else creer(payload);
   };
 
   const champs = [
@@ -174,7 +175,7 @@ function OngletCellier() {
   const invalider = () => queryClient.invalidateQueries({ queryKey: ["maison", "cellier"] });
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
-    (data: Record<string, unknown>) => creerArticleCellier(data as Omit<ArticleCellier, "id">),
+    (data: Parameters<typeof creerArticleCellier>[0]) => creerArticleCellier(data),
     { onSuccess: () => { invalider(); fermerDialog(); toast.success("Article créé"); } }
   );
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
@@ -184,9 +185,9 @@ function OngletCellier() {
   const { mutate: supprimer } = utiliserMutation(supprimerArticleCellier, { onSuccess: () => { invalider(); toast.success("Article supprimé"); } });
 
   const soumettre = () => {
-    const payload = { nom: form.nom, categorie: form.categorie || undefined, quantite: form.quantite ? Number(form.quantite) : undefined, date_achat: form.date_achat || undefined, date_peremption: form.date_peremption || undefined, emplacement: form.emplacement || undefined, prix_unitaire: form.prix_unitaire ? Number(form.prix_unitaire) : undefined, notes: form.notes || undefined };
+    const payload: Parameters<typeof creerArticleCellier>[0] = { nom: form.nom, categorie: form.categorie || undefined, quantite: form.quantite ? Number(form.quantite) : undefined, date_achat: form.date_achat || undefined, date_peremption: form.date_peremption || undefined, emplacement: form.emplacement || undefined, prix_unitaire: form.prix_unitaire ? Number(form.prix_unitaire) : undefined, notes: form.notes || undefined };
     if (enEdition) modifier({ id: enEdition.id, data: payload });
-    else creer(payload as Record<string, unknown>);
+    else creer(payload);
   };
 
   const champs = [

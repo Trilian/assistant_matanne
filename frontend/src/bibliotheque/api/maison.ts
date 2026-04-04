@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";
+import type { ObjetDonnees } from "@/types/commun";
 import type {
   ProjetMaison,
   TacheEntretien,
@@ -839,8 +840,8 @@ export async function listerEtages(): Promise<number[]> {
 
 export async function historiquePiece(
   pieceId: number
-): Promise<Record<string, unknown>> {
-  const { data } = await clientApi.get(`/maison/visualisation/pieces/${pieceId}/historique`);
+): Promise<ObjetDonnees> {
+  const { data } = await clientApi.get<ObjetDonnees>(`/maison/visualisation/pieces/${pieceId}/historique`);
   return data;
 }
 
@@ -936,8 +937,8 @@ export async function consulterGuide(params: {
   tissu?: string;
   appareil?: string;
   probleme?: string;
-}): Promise<Record<string, unknown>> {
-  const { data } = await clientApi.get<Record<string, unknown>>("/maison/guide", { params });
+}): Promise<ObjetDonnees> {
+  const { data } = await clientApi.get<ObjetDonnees>("/maison/guide", { params });
   return data;
 }
 

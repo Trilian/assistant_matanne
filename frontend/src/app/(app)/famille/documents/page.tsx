@@ -42,6 +42,7 @@ import {
 } from "@/bibliotheque/api/documents";
 import { DialogueFormulaire } from "@/composants/dialogue-formulaire";
 import { toast } from "sonner";
+import type { ObjetDonnees } from "@/types/commun";
 
 const CATEGORIES = [
   { value: "administratif", label: "Administratif", icone: Shield },
@@ -65,7 +66,7 @@ export default function PageDocuments() {
   const [enEdition, setEnEdition] = useState<DocumentFamille | null>(null);
   const [form, setForm] = useState<CreerDocumentDTO>(FORM_INITIAL);
   const [scanEnCours, setScanEnCours] = useState(false);
-  const [resultatsOCR, setResultatsOCR] = useState<Record<string, unknown> | null>(null);
+  const [resultatsOCR, setResultatsOCR] = useState<ObjetDonnees | null>(null);
 
   const invalider = utiliserInvalidation();
 

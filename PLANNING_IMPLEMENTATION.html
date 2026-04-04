@@ -824,7 +824,7 @@
 
       <div class="card" style="border-color:rgba(34,197,94,.35);background:rgba(15,23,42,.45)">
         <h3>Statut d'exécution — Mise à jour du 4 avril 2026</h3>
-        <p style="margin-bottom:12px;"><span class="badge b-warn">Phase 1 en cours</span> Les sprints backend <strong>S1</strong> et <strong>S2</strong> sont désormais livrés et vérifiés ; le reliquat Phase 1 concerne surtout le typage frontend et la déduplication UI.</p>
+        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 1 livrée</span> Les sprints <strong>S1</strong>, <strong>S2</strong> et <strong>S3</strong> sont désormais exécutés et vérifiés ; le reliquat restant dans le frontend relève uniquement de warnings ESLint historiques hors périmètre bloquant.</p>
         <table>
           <tr><th>Sprint</th><th>Statut</th><th>Livré</th><th>Reste à faire</th></tr>
           <tr>
@@ -841,9 +841,9 @@
           </tr>
           <tr>
             <td>S3 — Typage frontend</td>
-            <td><span class="badge b-info">En cours avancé</span></td>
-            <td>Ajout d'un socle commun <code>frontend/src/types/commun.ts</code>, typage resserré sur les hooks WebSocket, les pages invité, les types IA/planning/habitat et plusieurs clients API ; les occurrences de <code>Record&lt;string, unknown&gt;</code> sont passées de <code>131</code> à <code>64</code>.</td>
-            <td>Traiter le reliquat surtout sur les écrans admin/maison pour clôturer totalement la phase 1.</td>
+            <td><span class="badge b-ok">Terminé</span></td>
+            <td>Socle commun <code>frontend/src/types/commun.ts</code> finalisé, écrans admin/maison/famille nettoyés, payloads formulaires typés et doublons UI déjà consolidés ; les occurrences de <code>Record&lt;string, unknown&gt;</code> dans <code>frontend/src</code> sont passées de <code>131</code> à <code>0</code>.</td>
+            <td>Aucun blocant Phase 1 ; simple suivi futur des warnings ESLint historiques globaux.</td>
           </tr>
         </table>
 
@@ -860,7 +860,8 @@
           <li>✅ Vérification ciblée backend effectuée : <code>66 tests passés en 4.74s</code>.</li>
           <li>✅ Socle de types frontend commun ajouté et nettoyage ciblé des clients API / hooks / pages invité.</li>
           <li>✅ Doublons de composants Courses consolidés autour des composants canoniques.</li>
-          <li>⏳ Reliquat frontend ramené à <code>64</code> occurrences génériques, principalement sur admin et maison.</li>
+          <li>✅ Reliquat frontend éliminé : <code>Record&lt;string, unknown&gt;</code> ramené de <code>131</code> à <code>0</code> dans <code>frontend/src</code>.</li>
+          <li>✅ Vérification finale effectuée : lint ciblé du lot modifié propre, et <code>npm run lint</code> global frontend valide avec <code>0 erreur</code> / <code>70 warnings</code> historiques.</li>
         </ul>
       </div>
 
@@ -1084,19 +1085,46 @@
     </div>
     <div class="phase-body">
 
-      <h4 style="color:var(--yellow);margin-bottom:12px;">3.1 — Standardiser Loading States (Impact: UI +0.5)</h4>
+      <div class="card" style="border-color:rgba(245,158,11,.35);background:rgba(15,23,42,.45)">
+        <h3>Statut d'exécution — Mise à jour du 4 avril 2026</h3>
+        <p style="margin-bottom:12px;"><span class="badge b-ok">Phase 3 démarrée</span> Première vague UI/UX livrée : frise interactive <code>repas → inventaire → courses</code> sur <code>Ma Semaine</code> et composant <code>SkeletonPage</code> factorisé pour homogénéiser les écrans de chargement des vues Maison.</p>
+        <table>
+          <tr><th>Sprint</th><th>Statut</th><th>Livré</th><th>Suite</th></tr>
+          <tr>
+            <td>S4 — Loading states</td>
+            <td><span class="badge b-ok">Terminé</span></td>
+            <td><code>frontend/src/composants/ui/skeleton-page.tsx</code> ajouté puis branché sur <code>travaux</code>, <code>équipements</code>, <code>documents</code> et <code>finances</code>.</td>
+            <td>Étendre le pattern aux autres pages lourdes au fil des itérations.</td>
+          </tr>
+          <tr>
+            <td>S5 — Flux cuisine interactif</td>
+            <td><span class="badge b-ok">Terminé</span></td>
+            <td><code>frontend/src/composants/cuisine/frise-flux-cuisine.tsx</code> expose désormais le parcours planning → inventaire → courses → récap avec métriques hebdo.</td>
+            <td>Poursuivre avec la palette module et la cohérence visuelle cross-module.</td>
+          </tr>
+        </table>
+
+        <h4 style="margin-top:16px;">Checklist réelle</h4>
+        <ul style="margin-left:18px;color:var(--text-muted);display:grid;gap:6px;">
+          <li>✅ La frise interactive <code>repas → inventaire → courses</code> est maintenant visible sur <code>frontend/src/app/(app)/cuisine/ma-semaine/page.tsx</code>.</li>
+          <li>✅ Les métriques de semaine (repas planifiés, stock, alertes, liste générée, synthèse nutritionnelle) sont regroupées dans un composant réutilisable.</li>
+          <li>✅ Le pattern <code>SkeletonPage</code> remplace les placeholders dupliqués sur plusieurs pages Maison pour un rendu homogène.</li>
+        </ul>
+      </div>
+
+      <h4 style="color:var(--yellow);margin-bottom:12px;">3.1 — Standardiser Loading States (Impact: UI +0.5) <span class="badge b-ok">Lancé</span></h4>
       <table>
         <tr><th>Tâche</th><th>Détails</th></tr>
-        <tr><td>Pattern unifié skeleton</td><td>Définir composant SkeletonPage réutilisable, remplacer tous les spinners</td></tr>
+        <tr><td>Pattern unifié skeleton</td><td><code>SkeletonPage</code> réutilisable livré et branché sur les vues Maison prioritaires ; extension progressive au reste du front</td></tr>
         <tr><td>Error boundaries cohérents</td><td>Standardiser les pages d'erreur par module</td></tr>
         <tr><td>Empty states</td><td>Design cohérent pour les états vides (pas de données)</td></tr>
       </table>
 
-      <h4 style="color:var(--yellow);margin-top:24px;margin-bottom:12px;">3.2 — Nouvelles Visualisations (Impact: UI +1)</h4>
+      <h4 style="color:var(--yellow);margin-top:24px;margin-bottom:12px;">3.2 — Nouvelles Visualisations (Impact: UI +1) <span class="badge b-ok">Renforcé</span></h4>
       <table>
         <tr><th>Composant</th><th>Module</th><th>Type</th><th>Priorité</th></tr>
         <tr><td>Graphique radar nutrition familiale interactif</td><td>Cuisine</td><td><span class="tag tag-ui">Dataviz</span></td><td>🟡 P2</td></tr>
-        <tr><td>Timeline interactive repas→courses→inventaire</td><td>Cuisine</td><td><span class="tag tag-ui">Flow</span></td><td>🟡 P2</td></tr>
+        <tr><td>Timeline interactive repas→courses→inventaire</td><td>Cuisine</td><td><span class="tag tag-ui">Flow</span></td><td><span class="badge b-ok">✅ Livré</span></td></tr>
         <tr><td>Vue jardin 2D interactive drag-and-drop plantes</td><td>Maison</td><td><span class="tag tag-ui">2D</span></td><td>🟡 P2</td></tr>
         <tr><td>Graphique Sankey flux financiers animé</td><td>Famille</td><td><span class="tag tag-ui">Dataviz</span></td><td>🟡 P2</td></tr>
         <tr><td>Treemap budget interactif zoom in/out</td><td>Famille</td><td><span class="tag tag-ui">Dataviz</span></td><td>🟡 P2</td></tr>

@@ -4,7 +4,7 @@
 
 import { Suspense, useState } from "react";
 import { Plus, Trash2, Pencil, Receipt, TrendingDown } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
+import { Card, CardContent } from "@/composants/ui/card";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
@@ -56,7 +56,7 @@ function ContenuAbonnements() {
   const invalider = () => queryClient.invalidateQueries({ queryKey: ["maison", "abonnements"] });
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
-    (data: Record<string, unknown>) => creerAbonnement(data as Omit<Abonnement, "id">),
+    (data: Parameters<typeof creerAbonnement>[0]) => creerAbonnement(data),
     { onSuccess: () => { invalider(); fermerDialog(); toast.success("Abonnement ajouté"); } }
   );
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
@@ -75,7 +75,7 @@ function ContenuAbonnements() {
   };
 
   const soumettre = () => {
-    const payload = {
+    const payload: Parameters<typeof creerAbonnement>[0] = {
       type_abonnement: form.type_abonnement,
       fournisseur: form.fournisseur,
       prix_mensuel: form.prix_mensuel ? parseFloat(form.prix_mensuel) : undefined,
@@ -84,7 +84,7 @@ function ContenuAbonnements() {
       notes: form.notes || undefined,
     };
     if (enEdition) modifier({ id: enEdition.id, data: payload });
-    else creer(payload as Record<string, unknown>);
+    else creer(payload);
   };
 
   const CHAMPS = [

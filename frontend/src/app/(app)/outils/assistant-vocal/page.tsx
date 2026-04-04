@@ -6,6 +6,7 @@ import { Button } from '@/composants/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Badge } from '@/composants/ui/badge'
 import { clientApi } from '@/bibliotheque/api/client'
+import type { ObjetDonnees } from '@/types/commun'
 
 type RecognitionResultEvent = {
   results: ArrayLike<ArrayLike<{ transcript: string }>>
@@ -31,7 +32,7 @@ type ReconnaissanceVocaleCtor = new () => ReconnaissanceVocale
 interface ResultatCommande {
   action: string
   message: string
-  details?: Record<string, unknown>
+  details?: ObjetDonnees
 }
 
 interface EntreeHistorique {

@@ -26,6 +26,7 @@ import {
   obtenirBudgetMeubles,
 } from "@/bibliotheque/api/maison";
 import type { Meuble } from "@/types/maison";
+import type { ObjetDonnees } from "@/types/commun";
 import { toast } from "sonner";
 import { BoutonAchat } from "@/composants/maison/bouton-achat";
 
@@ -342,7 +343,7 @@ function ContenuMeubles() {
     ouvert, mode, elementEnCours, ouvrir, fermer,
   } = utiliserDialogCrud<Meuble>();
 
-  const onSoumettre = (donnees: Record<string, unknown>) => {
+  const onSoumettre = (donnees: ObjetDonnees) => {
     const payload = {
       nom: donnees.nom as string,
       piece: donnees.piece as string | undefined,

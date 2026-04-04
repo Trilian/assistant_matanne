@@ -74,6 +74,7 @@ import {
   testerConsoleIA,
   viderCache,
 } from "@/bibliotheque/api/admin";
+import type { ObjetDonnees } from "@/types/commun";
 
 interface StatsCache {
   l1_hits?: number;
@@ -119,7 +120,7 @@ export default function PageAdminServices() {
   const [simulationMessage, setSimulationMessage] = useState("");
   const [dateSimulationReference, setDateSimulationReference] = useState(() => new Date().toISOString().slice(0, 16));
   const [simulationLoading, setSimulationLoading] = useState(false);
-  const [simulationResultat, setSimulationResultat] = useState<Record<string, unknown> | null>(null);
+  const [simulationResultat, setSimulationResultat] = useState<ObjetDonnees | null>(null);
   const [iaPrompt, setIaPrompt] = useState("");
   const [iaResponse, setIaResponse] = useState("");
   const [iaLoading, setIaLoading] = useState(false);
@@ -261,7 +262,7 @@ export default function PageAdminServices() {
     try {
       const parsed = JSON.parse(importText) as {
         feature_flags?: Record<string, boolean>
-        runtime_config?: Record<string, unknown>
+        runtime_config?: ObjetDonnees
       };
       await importerConfigAdmin({
         feature_flags: parsed.feature_flags,
@@ -344,7 +345,7 @@ export default function PageAdminServices() {
     setConfigSaving(true);
     setConfigResultat(null);
     try {
-      const parsed = JSON.parse(configText) as Record<string, unknown>;
+      const parsed = JSON.parse(configText) as ObjetDonnees;
       await sauvegarderRuntimeConfig(parsed);
       setConfigResultat("OK: configuration runtime sauvegardée.");
       actualiserConfig();
@@ -391,7 +392,7 @@ export default function PageAdminServices() {
         message: simulationMessage || undefined,
         dry_run: true,
       });
-      setSimulationResultat(data as Record<string, unknown>);
+      setSimulationResultat(data as ObjetDonnees);
     } catch {
       setSimulationResultat(null);
     } finally {
@@ -407,7 +408,7 @@ export default function PageAdminServices() {
         continuer_sur_erreur: true,
         date_reference: dateSimulationReference ? new Date(dateSimulationReference).toISOString() : undefined,
       });
-      setSimulationResultat(data as Record<string, unknown>);
+      setSimulationResultat(data as ObjetDonnees);
     } catch {
       setSimulationResultat(null);
     } finally {
@@ -455,7 +456,7 @@ export default function PageAdminServices() {
     setDbLoading(true);
     setDbResultat(null);
     try {
-      const parsed = JSON.parse(dbImportText) as { tables: Record<string, Array<Record<string, unknown>>> };
+      const parsed = JSON.parse(dbImportText) as { tables: Record<string, ObjetDonnees[]> };
       if (!parsed.tables || typeof parsed.tables !== "object") {
         throw new Error("invalid");
       }
@@ -478,9 +479,10 @@ export default function PageAdminServices() {
     return <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3" />{statut}</Badge>;
   };
 
-  const aiRequests = Number((liveSnapshot?.api.ai as Record<string, unknown> | undefined)?.requests_total ?? 0);
-  const aiTokens = Number((liveSnapshot?.api.ai as Record<string, unknown> | undefined)?.tokens_used ?? 0);
-  const aiCost = Number((liveSnapshot?.api.ai as Record<string, unknown> | undefined)?.estimated_cost_eur ?? 0);
+  const aiMetrics = liveSnapshot?.api.ai ?? {};
+  const aiRequests = Number(aiMetrics.requests_total ?? 0);
+  const aiTokens = Number(aiMetrics.tokens_used ?? 0);
+  const aiCost = Number(aiMetrics.estimated_cost_eur ?? 0);
 
   return (
     <div className="space-y-6">

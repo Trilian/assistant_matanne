@@ -17,6 +17,7 @@ import {
 } from "@/composants/ui/card";
 import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { SkeletonPage } from "@/composants/ui/skeleton-page";
 import { Input } from "@/composants/ui/input";
 import { Label } from "@/composants/ui/label";
 import { Progress } from "@/composants/ui/progress";
@@ -130,7 +131,7 @@ function OngletDepenses() {
   const suggestionsCategories = Array.from(new Set((depenses ?? []).map((d) => d.categorie).filter(Boolean))).slice(0, 12) as string[];
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
-    (data: Record<string, unknown>) => creerDepenseMaison(data as Omit<DepenseMaison, "id">),
+    (data: Parameters<typeof creerDepenseMaison>[0]) => creerDepenseMaison(data),
     { onSuccess: () => { invalider(); fermerDialog(); toast.success("Dépense créée"); } }
   );
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
@@ -149,9 +150,9 @@ function OngletDepenses() {
   };
 
   const soumettre = () => {
-    const payload = { libelle: form.libelle, montant: Number(form.montant), categorie: form.categorie || undefined, date: form.date || undefined, fournisseur: form.fournisseur || undefined, recurrence: form.recurrence || undefined, notes: form.notes || undefined };
+    const payload: Parameters<typeof creerDepenseMaison>[0] = { libelle: form.libelle, montant: Number(form.montant), categorie: form.categorie || undefined, date: form.date || undefined, fournisseur: form.fournisseur || undefined, recurrence: form.recurrence || undefined, notes: form.notes || undefined };
     if (enEdition) modifier({ id: enEdition.id, data: payload });
-    else creer(payload as Record<string, unknown>);
+    else creer(payload);
   };
 
   const champs = [
@@ -413,7 +414,7 @@ function ContenuFinances() {
 
 export default function PageFinances() {
   return (
-    <Suspense fallback={<div className="space-y-4"><Skeleton className="h-8 w-40" /><Skeleton className="h-10 w-64" /><Skeleton className="h-64" /></div>}>
+    <Suspense fallback={<SkeletonPage ariaLabel="Chargement des finances" lignes={["h-8 w-40", "h-10 w-64", "h-64 w-full"]} />}>
       <ContenuFinances />
     </Suspense>
   );

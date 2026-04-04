@@ -36,6 +36,7 @@ import { Badge } from "@/composants/ui/badge";
 import { lireConfigGarde, sauvegarderConfigGarde, lirePreferencesFamille, sauvegarderPreferencesFamille } from "@/bibliotheque/api/famille";
 import { toast } from "sonner";
 import Link from "next/link";
+import type { ObjetDonnees } from "@/types/commun";
 
 // ─────────────────────────────────────────────
 // Types locaux
@@ -372,6 +373,8 @@ function TagInput({
               type="button"
               onClick={() => onChange(values.filter((x) => x !== v))}
               className="hover:text-destructive"
+              aria-label={`Retirer ${v}`}
+              title={`Retirer ${v}`}
             >
               <X className="h-3 w-3" />
             </button>
@@ -385,8 +388,8 @@ function TagInput({
 function TabPreferences() {
   const [anne, setAnne] = useState<Record<string, string>>({});
   const [mathieu, setMathieu] = useState<Record<string, string>>({});
-  const [styleAnne, setStyleAnne] = useState<Record<string, unknown>>({});
-  const [styleMathieu, setStyleMathieu] = useState<Record<string, unknown>>({});
+  const [styleAnne, setStyleAnne] = useState<ObjetDonnees>({});
+  const [styleMathieu, setStyleMathieu] = useState<ObjetDonnees>({});
   const [gaming, setGaming] = useState<string[]>([]);
   const [culture, setCulture] = useState<string[]>([]);
   const [sauvegarde, setSauvegarde] = useState(false);

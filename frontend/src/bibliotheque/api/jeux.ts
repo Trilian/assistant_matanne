@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";
+import type { ObjetDonnees } from "@/types/commun";
 import type {
   PariSportif,
   MatchJeu,
@@ -97,8 +98,8 @@ export async function obtenirValueBets(seuilEv = 5.0): Promise<ValueBet[]> {
   return data.items ?? data;
 }
 
-export async function obtenirAnalysePatterns(userId: number): Promise<Record<string, unknown>> {
-  const { data } = await clientApi.get<Record<string, unknown>>(`/jeux/paris/analyse-patterns/${userId}`);
+export async function obtenirAnalysePatterns(userId: number): Promise<ObjetDonnees> {
+  const { data } = await clientApi.get<ObjetDonnees>(`/jeux/paris/analyse-patterns/${userId}`);
   return data;
 }
 
@@ -268,7 +269,7 @@ export async function obtenirPerformanceConfiance(mois?: number): Promise<{ tran
 
 export async function obtenirAnalyseIA(
   type: "paris" | "loto",
-  donnees: Record<string, unknown> = {}
+  donnees: ObjetDonnees = {}
 ): Promise<AnalyseIA> {
   const { data } = await clientApi.post<AnalyseIA>("/jeux/analyse-ia", {
     type,

@@ -13,7 +13,7 @@ import { BandeauIA } from "@/composants/maison/bandeau-ia";
 import { OngletArtisans } from "@/composants/maison/travaux/onglet-artisans";
 import { OngletEntretien } from "@/composants/maison/travaux/onglet-entretien";
 import { OngletProjets } from "@/composants/maison/travaux/onglet-projets";
-import { Skeleton } from "@/composants/ui/skeleton";
+import { SkeletonPage } from "@/composants/ui/skeleton-page";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 
 // ─── Page principale ──────────────────────────────────────────
@@ -47,7 +47,7 @@ function ContenuTravaux() {
 
 export default function PageTravaux() {
   return (
-    <Suspense fallback={<div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-10 w-64" /><Skeleton className="h-64" /></div>}>
+    <Suspense fallback={<SkeletonPage ariaLabel="Chargement des travaux" lignes={["h-8 w-48", "h-10 w-64", "h-64 w-full"]} />}>
       <ContenuTravaux />
     </Suspense>
   );

@@ -16,12 +16,13 @@ import { Label } from '@/composants/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/composants/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/composants/ui/card'
 import { Flame, Dice1, TrendingDown, AlertTriangle, Info, X } from 'lucide-react'
+import type { ObjetDonnees } from '@/types/commun'
 
 interface ResultatTest {
   alerte: boolean
   severite: 'faible' | 'moyenne' | 'forte'
   message: string
-  details: Record<string, unknown>
+  details: ObjetDonnees
   type_pattern: string
 }
 

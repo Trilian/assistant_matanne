@@ -15,6 +15,7 @@ import {
   rejouerEvenementAdmin,
 } from "@/bibliotheque/api/admin";
 import { utiliserRequete } from "@/crochets/utiliser-api";
+import type { ObjetDonnees } from "@/types/commun";
 
 export default function PageAdminEvents() {
   const [typeEvenement, setTypeEvenement] = useState("");
@@ -33,7 +34,7 @@ export default function PageAdminEvents() {
     setRetour(null);
     setEnvoiEnCours(true);
     try {
-      const payload = payloadTexte.trim() ? (JSON.parse(payloadTexte) as Record<string, unknown>) : {};
+      const payload = payloadTexte.trim() ? (JSON.parse(payloadTexte) as ObjetDonnees) : {};
       const result = await declencherEvenementAdmin({
         type_evenement: typeEvenement,
         source,

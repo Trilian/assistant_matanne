@@ -69,6 +69,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { GrapheReseauModules } from "@/composants/admin/graphe-reseau-modules";
+import type { ObjetDonnees } from "@/types/commun";
 
 interface LogAudit {
   id: number | null;
@@ -78,7 +79,7 @@ interface LogAudit {
   utilisateur_id: string | null;
   entite_type: string;
   entite_id: string | number | null;
-  details: Record<string, unknown>;
+  details: ObjetDonnees;
 }
 
 interface ReponseAuditLogs {

@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";
+import type { ObjetDonnees } from "@/types/commun";
 import type {
   ProfilEnfant,
   JalonJules,
@@ -488,7 +489,7 @@ export async function mettreAJourItemChecklist(
   fait: boolean,
   prixReel?: number
 ): Promise<ItemChecklistAnniversaire> {
-  const payload: Record<string, unknown> = { fait };
+  const payload: ObjetDonnees = { fait };
   if (prixReel !== undefined) payload.prix_reel = prixReel;
   const { data } = await clientApi.patch<ItemChecklistAnniversaire>(
     `/famille/checklists-anniversaire/${checklistId}/items/${itemId}`,
@@ -745,11 +746,11 @@ export async function sauvegarderConfigGarde(payload: {
 export async function lirePreferencesFamille(): Promise<{
   taille_vetements_anne: Record<string, string>;
   taille_vetements_mathieu: Record<string, string>;
-  style_achats_anne: Record<string, unknown>;
-  style_achats_mathieu: Record<string, unknown>;
+  style_achats_anne: ObjetDonnees;
+  style_achats_mathieu: ObjetDonnees;
   interets_gaming: string[];
   interets_culture: string[];
-  equipement_activites: Record<string, unknown>;
+  equipement_activites: ObjetDonnees;
 }> {
   const { data } = await clientApi.get("/famille/config/preferences");
   return data;
@@ -759,11 +760,11 @@ export async function lirePreferencesFamille(): Promise<{
 export async function sauvegarderPreferencesFamille(payload: {
   taille_vetements_anne: Record<string, string>;
   taille_vetements_mathieu: Record<string, string>;
-  style_achats_anne: Record<string, unknown>;
-  style_achats_mathieu: Record<string, unknown>;
+  style_achats_anne: ObjetDonnees;
+  style_achats_mathieu: ObjetDonnees;
   interets_gaming: string[];
   interets_culture: string[];
-  equipement_activites: Record<string, unknown>;
+  equipement_activites: ObjetDonnees;
 }): Promise<void> {
   await clientApi.put("/famille/config/preferences", payload);
 }

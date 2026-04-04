@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { clientApi } from "./client";
+import type { ObjetDonnees } from "@/types/commun";
 import type { ArticleInventaire, CreerArticleInventaireDTO } from "@/types/inventaire";
 
 /** Lister les articles de l'inventaire */
@@ -29,7 +30,7 @@ export interface ArticleConsolide {
   categories: string[];
   emplacements: string[];
   sources: string[];  // "cuisine" | "cellier"
-  details_sources: Record<string, unknown>[];
+  details_sources: ObjetDonnees[];
 }
 
 /** Retourne la vue unifiée des stocks cuisine + cellier (évite les doublons dans les courses) */

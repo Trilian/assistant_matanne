@@ -9,6 +9,7 @@ import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/composants/ui/card";
 import { utiliserRequete } from "@/crochets/utiliser-api";
+import type { ObjetDonnees } from "@/types/commun";
 
 interface ItemTimeline {
   id: string;
@@ -16,7 +17,7 @@ interface ItemTimeline {
   date: string;
   titre: string;
   description?: string | null;
-  meta?: Record<string, unknown>;
+  meta?: ObjetDonnees;
 }
 
 const CATEGORIES = ["toutes", "jules", "maison", "famille", "jeux"] as const;

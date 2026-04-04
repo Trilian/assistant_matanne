@@ -11,6 +11,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/composants/ui/card";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { SkeletonPage } from "@/composants/ui/skeleton-page";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/composants/ui/collapsible";
 import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
@@ -376,7 +377,7 @@ function ContenuEquipements() {
 
 export default function PageEquipements() {
   return (
-    <Suspense fallback={<div className="space-y-4"><Skeleton className="h-8 w-40" /><Skeleton className="h-10 w-64" /><Skeleton className="h-48" /></div>}>
+    <Suspense fallback={<SkeletonPage ariaLabel="Chargement des équipements" lignes={["h-8 w-40", "h-10 w-64", "h-48 w-full"]} />}>
       <ContenuEquipements />
     </Suspense>
   );

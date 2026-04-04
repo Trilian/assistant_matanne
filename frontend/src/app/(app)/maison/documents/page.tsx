@@ -8,14 +8,14 @@
 import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
-  FileText, ClipboardCheck, Plus, Trash2, Pencil, AlertTriangle, Home,
+  ClipboardCheck, Plus, Trash2, Pencil, AlertTriangle, Home,
 } from "lucide-react";
 import {
   Card, CardContent,
 } from "@/composants/ui/card";
-import { Badge } from "@/composants/ui/badge";
 import { Button } from "@/composants/ui/button";
 import { Skeleton } from "@/composants/ui/skeleton";
+import { SkeletonPage } from "@/composants/ui/skeleton-page";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/composants/ui/tabs";
 import { utiliserRequete, utiliserMutation } from "@/crochets/utiliser-api";
 import { utiliserSuppressionAnnulable } from "@/crochets/utiliser-suppression-annulable";
@@ -49,7 +49,7 @@ function OngletDiagnostics() {
   const invalider = () => queryClient.invalidateQueries({ queryKey: ["maison", "diagnostics"] });
 
   const { mutate: creer, isPending: enCreation } = utiliserMutation(
-    (data: Record<string, unknown>) => creerDiagnostic(data as Omit<DiagnosticImmobilier, "id">),
+    (data: Parameters<typeof creerDiagnostic>[0]) => creerDiagnostic(data),
     { onSuccess: () => { invalider(); fermerDialog(); toast.success("Diagnostic ajouté"); } }
   );
   const { mutate: modifier, isPending: enModif } = utiliserMutation(
@@ -68,9 +68,9 @@ function OngletDiagnostics() {
   };
 
   const soumettre = () => {
-    const payload = { type_diagnostic: form.type_diagnostic, date_realisation: form.date_realisation || undefined, date_expiration: form.date_expiration || undefined, resultat: form.resultat || undefined, diagnostiqueur: form.diagnostiqueur || undefined };
+    const payload: Parameters<typeof creerDiagnostic>[0] = { type_diagnostic: form.type_diagnostic, date_realisation: form.date_realisation || undefined, date_expiration: form.date_expiration || undefined, resultat: form.resultat || undefined, diagnostiqueur: form.diagnostiqueur || undefined };
     if (enEdition) modifier({ id: enEdition.id, data: payload });
-    else creer(payload as Record<string, unknown>);
+    else creer(payload);
   };
 
   const CHAMPS = [
@@ -186,7 +186,7 @@ function ContenuDocuments() {
 
 export default function PageDocuments() {
   return (
-    <Suspense fallback={<div className="space-y-4"><Skeleton className="h-8 w-40" /><Skeleton className="h-10 w-48" /><Skeleton className="h-64" /></div>}>
+    <Suspense fallback={<SkeletonPage ariaLabel="Chargement des documents" lignes={["h-8 w-40", "h-10 w-48", "h-64 w-full"]} />}>
       <ContenuDocuments />
     </Suspense>
   );

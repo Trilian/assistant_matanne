@@ -138,7 +138,7 @@ export interface SecurityLogEntry {
   ip: string | null
   user_agent: string | null
   source: string
-  details: Record<string, unknown>
+  details: ObjetDonnees
 }
 
 export interface SecurityLogsResponse {
@@ -266,7 +266,7 @@ export interface NotificationSimulationPayload {
   canal: 'ntfy' | 'push' | 'email' | 'telegram'
   template_id: string
   dry_run?: boolean
-  payload?: Record<string, unknown>
+  payload?: ObjetDonnees
 }
 
 export interface NotificationSimulationResponse {
@@ -275,14 +275,14 @@ export interface NotificationSimulationResponse {
   template: NotificationTemplateInfo
   message?: string
   resultats?: Record<string, boolean>
-  payload: Record<string, unknown>
+  payload: ObjetDonnees
 }
 
 export interface NotificationHistoryItem {
   id: number
   created_at: string | null
   action: string
-  details: Record<string, unknown>
+  details: ObjetDonnees
 }
 
 export interface NotificationHistoryResponse {
@@ -350,7 +350,7 @@ export interface FlowSimulationPayload {
   user_id?: string
   message?: string
   dry_run?: boolean
-  payload?: Record<string, unknown>
+  payload?: ObjetDonnees
 }
 
 export interface FlowSimulationResponse {
@@ -358,7 +358,7 @@ export interface FlowSimulationResponse {
   user_id: string
   dry_run: boolean
   actions: ListeObjetsDonnees
-  payload: Record<string, unknown>
+  payload: ObjetDonnees
 }
 
 export interface EventBusItem {
@@ -366,11 +366,11 @@ export interface EventBusItem {
   type: string
   source: string
   timestamp: string | null
-  data: Record<string, unknown>
+  data: ObjetDonnees
 }
 
 export interface EventBusResponse {
-  metriques: Record<string, unknown>
+  metriques: ObjetDonnees
   items: EventBusItem[]
   total: number
 }
@@ -378,7 +378,7 @@ export interface EventBusResponse {
 export interface EventBusTriggerPayload {
   type_evenement: string
   source?: string
-  payload?: Record<string, unknown>
+  payload?: ObjetDonnees
 }
 
 export interface EventBusTriggerResponse {
@@ -459,7 +459,7 @@ export interface LiveSnapshotResponse {
     rate_limiting: ObjetDonnees
     ai: ObjetDonnees
   }
-  cache: Record<string, unknown>
+  cache: ObjetDonnees
   jobs: {
     last_24h: Record<string, number>
   }
@@ -807,7 +807,7 @@ export async function listerResyncTargets(): Promise<ResyncTargetsResponse> {
 export async function forcerResync(
   targetId: string,
   dryRun = false,
-): Promise<Record<string, unknown>> {
+): Promise<ObjetDonnees> {
   const { data } = await clientApi.post(
     `/api/v1/admin/resync/${targetId}`,
     null,
@@ -819,7 +819,7 @@ export async function forcerResync(
 export async function lancerSeedDev(
   scope: 'recettes_standard' | 'demo_complet' = 'recettes_standard',
   dryRun = false,
-): Promise<Record<string, unknown>> {
+): Promise<ObjetDonnees> {
   const { data } = await clientApi.post(
     '/api/v1/admin/seed/dev',
     { scope },
